@@ -5,6 +5,24 @@ import createMDX from '@next/mdx'
 const withNextIntl = createNextIntlPlugin()
 const withMDX = createMDX()
 
+const normalizeBaseUrl = (url?: string) => (url ? url.replace(/\/+$/, '') : undefined)
+
+const internalApiBaseUrl =
+  normalizeBaseUrl(process.env.INTERNAL_API_BASE_URL) ||
+  (process.env.INTERNAL_API_PORT
+    ? normalizeBaseUrl(`http://localhost:${process.env.INTERNAL_API_PORT}`)
+    : undefined) ||
+  // backward compatibility for existing envs
+  (process.env.NEXT_PUBLIC_API_PORT
+    ? normalizeBaseUrl(`http://localhost:${process.env.NEXT_PUBLIC_API_PORT}`)
+    : undefined)
+
+if (!internalApiBaseUrl) {
+  throw new Error(
+    'Missing internal API target: set INTERNAL_API_BASE_URL or INTERNAL_API_PORT (NEXT_PUBLIC_API_PORT is deprecated fallback).',
+  )
+}
+
 const nextConfig: NextConfig = {
   pageExtensions: ['ts', 'tsx', 'mdx'],
   images: {
@@ -57,7 +75,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: `http://localhost:${process.env.NEXT_PUBLIC_API_PORT}/:path*`,
+        destination: `${internalApiBaseUrl}/:path*`,
       },
       {
         source: '/:locale/:vn([crsvpo]\\d+)',
@@ -69,7 +87,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/:sitemap(sitemap.*)',
-        destination: `http://localhost:${process.env.NEXT_PUBLIC_API_PORT}/:sitemap`,
+        destination: `${internalApiBaseUrl}/:sitemap`,
       },
     ]
   },
