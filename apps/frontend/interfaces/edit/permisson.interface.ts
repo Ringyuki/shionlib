@@ -7,12 +7,21 @@ export interface Permission<F, S, R> {
   relationFields: R[]
 }
 
-export interface GamePermission
-  extends Permission<GameFields, GameScalarFields, GameRelationFields> {}
-export interface DeveloperPermission
-  extends Permission<DeveloperFields, DeveloperScalarFields, DeveloperRelationFields> {}
-export interface CharacterPermission
-  extends Permission<CharacterFields, CharacterScalarFields, CharacterRelationFields> {}
+export interface GamePermission extends Permission<
+  GameFields,
+  GameScalarFields,
+  GameRelationFields
+> {}
+export interface DeveloperPermission extends Permission<
+  DeveloperFields,
+  DeveloperScalarFields,
+  DeveloperRelationFields
+> {}
+export interface CharacterPermission extends Permission<
+  CharacterFields,
+  CharacterScalarFields,
+  CharacterRelationFields
+> {}
 
 export type GamePermissionFields =
   | 'v_id'

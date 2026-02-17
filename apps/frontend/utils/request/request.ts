@@ -30,9 +30,16 @@ const isFatalAuthByCode = (code: number) => {
   return IS_FATAL_AUTH_BY_CODES.includes(code)
 }
 
-const baseUrl = isBrowser
-  ? process.env.NEXT_PUBLIC_PROD_API_PATH
-  : `http://localhost:${process.env.INTERNAL_API_PORT}`
+const normalizeBaseUrl = (url?: string) => (url ? url.replace(/\/+$/, '') : undefined)
+
+const browserBaseUrl = normalizeBaseUrl(process.env.NEXT_PUBLIC_PROD_API_PATH)
+const serverBaseUrl =
+  normalizeBaseUrl(process.env.INTERNAL_API_BASE_URL) ||
+  (process.env.INTERNAL_API_PORT
+    ? normalizeBaseUrl(`http://localhost:${process.env.INTERNAL_API_PORT}`)
+    : undefined)
+
+const baseUrl = isBrowser ? browserBaseUrl : serverBaseUrl
 const SSR_PRE_REFRESH_LEEWAY_MS = 10 * 1000
 
 export const ensureFreshToken = async ({
@@ -67,6 +74,10 @@ export const shionlibRequest = ({
     options: RequestInit,
     params?: Record<string, any>,
   ): Promise<BasicResponse<T>> => {
+    if (!baseUrl) {
+      throw new Error('API base URL is not configured')
+    }
+
     const serverContext = await getServerRequestContext()
     let serverCookieHeader = serverContext?.cookieHeader || ''
 

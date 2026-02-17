@@ -277,8 +277,10 @@ function useFileUploadContext(consumerName: string) {
   return context
 }
 
-interface FileUploadRootProps
-  extends Omit<React.ComponentProps<'div'>, 'defaultValue' | 'onChange'> {
+interface FileUploadRootProps extends Omit<
+  React.ComponentProps<'div'>,
+  'defaultValue' | 'onChange'
+> {
   value?: File[]
   defaultValue?: File[]
   onValueChange?: (files: File[]) => void

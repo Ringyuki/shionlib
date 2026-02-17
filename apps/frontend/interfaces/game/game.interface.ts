@@ -220,39 +220,37 @@ export interface GameData {
   content_limit: ContentLimit
 }
 
-export interface GameHeader
-  extends Pick<
-    GameData,
-    | 'v_id'
-    | 'id'
-    | 'title_jp'
-    | 'title_zh'
-    | 'title_en'
-    | 'aliases'
-    | 'type'
-    | 'platform'
-    | 'covers'
-    | 'developers'
-    | 'release_date'
-    | 'release_date_tba'
-    | 'content_limit'
-  > {}
+export interface GameHeader extends Pick<
+  GameData,
+  | 'v_id'
+  | 'id'
+  | 'title_jp'
+  | 'title_zh'
+  | 'title_en'
+  | 'aliases'
+  | 'type'
+  | 'platform'
+  | 'covers'
+  | 'developers'
+  | 'release_date'
+  | 'release_date_tba'
+  | 'content_limit'
+> {}
 
-export interface GameDetail
-  extends Pick<
-    GameData,
-    | 'id'
-    | 'intro_jp'
-    | 'intro_zh'
-    | 'intro_en'
-    | 'images'
-    | 'tags'
-    | 'staffs'
-    | 'extra_info'
-    | 'link'
-    | 'nsfw'
-    | 'content_limit'
-  > {}
+export interface GameDetail extends Pick<
+  GameData,
+  | 'id'
+  | 'intro_jp'
+  | 'intro_zh'
+  | 'intro_en'
+  | 'images'
+  | 'tags'
+  | 'staffs'
+  | 'extra_info'
+  | 'link'
+  | 'nsfw'
+  | 'content_limit'
+> {}
 
 export interface GameStaff {
   name: string

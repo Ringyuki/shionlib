@@ -49,10 +49,9 @@ export type PaginatedResponse<
   E extends Record<string, unknown> = Record<string, string | number | boolean | undefined>,
 > = PaginatedRes<T, E>
 
-export interface ErrorResponse
-  extends ShionlibApiRes<{
-    errors: FieldError[] | Record<string, string>
-  }> {
+export interface ErrorResponse extends ShionlibApiRes<{
+  errors: FieldError[] | Record<string, string>
+}> {
   data: {
     errors: FieldError[] | Record<string, string>
   }

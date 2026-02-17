@@ -28,7 +28,7 @@
     "lint:backend": "pnpm --filter shionlib-backend lint:check",
     "typecheck": "pnpm typecheck:backend && pnpm typecheck:frontend",
     "typecheck:frontend": "pnpm --filter shionlib-frontend typecheck",
-    "typecheck:backend": "pnpm prisma:generate:backend && pnpm --filter shionlib-backend typecheck",
+    "typecheck:backend": "pnpm prisma:generate && pnpm --filter shionlib-backend typecheck",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck",
     "test": "pnpm test:backend",
     "test:frontend:e2e": "pnpm --filter shionlib-frontend test:e2e",

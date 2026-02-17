@@ -15,8 +15,7 @@ export interface AdminDownloadResourceReportUserSummary {
   avatar: string | null
 }
 
-export interface AdminDownloadResourceReportUserDetail
-  extends AdminDownloadResourceReportUserSummary {
+export interface AdminDownloadResourceReportUserDetail extends AdminDownloadResourceReportUserSummary {
   role: number
   status: number
 }
@@ -33,8 +32,7 @@ export interface AdminDownloadResourceReportFileSummary {
   file_name: string
 }
 
-export interface AdminDownloadResourceReportFileDetail
-  extends AdminDownloadResourceReportFileSummary {
+export interface AdminDownloadResourceReportFileDetail extends AdminDownloadResourceReportFileSummary {
   file_size: number
   file_status: number
   file_check_status: number

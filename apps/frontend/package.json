@@ -19,7 +19,7 @@
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:install": "playwright install chromium",
     "test:e2e:install:ci": "playwright install --with-deps chromium",
-    "prepare": "husky"
+    "prepare": "[ -d .git ] && husky || true"
   },
   "dependencies": {
     "@base-ui-components/react": "1.0.0-beta.4",
@@ -156,14 +156,5 @@
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39",
-  "pnpm": {
-    "overrides": {
-      "@types/react": "19.2.2",
-      "@types/react-dom": "19.2.2"
-    },
-    "patchedDependencies": {
-      "sileo@0.0.7": "patches/sileo@0.0.7.patch"
-    }
-  }
+  "packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39"
 }
