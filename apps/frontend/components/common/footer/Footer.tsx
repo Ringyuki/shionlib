@@ -32,7 +32,7 @@ export const ShionlibFooter = async () => {
           <Separator orientation="vertical" className="h-4! bg-foreground hidden md:block" />
           <div className="flex items-center gap-6 text-sm">
             <Link
-              href="https://github.com/Ringyuki/shionlib-frontend"
+              href="https://github.com/Ringyuki/shionlib"
               target="_blank"
               className="flex items-center gap-1 hover:opacity-80 transition-opacity"
             >

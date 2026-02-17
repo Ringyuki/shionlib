@@ -5,7 +5,7 @@ import { getDocBySlug } from '@/libs/docs/getDocs'
 import { useLocale } from 'next-intl'
 import { useTranslations } from 'next-intl'
 
-const EDIT_BASE_URL = 'https://github.com/Ringyuki/shionlib-frontend/edit/main/contents'
+const EDIT_BASE_URL = 'https://github.com/Ringyuki/shionlib/edit/main/apps/frontend/contents'
 
 export const DocFooter = ({ slug }: { slug: string }) => {
   const locale = useLocale()
