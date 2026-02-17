@@ -1,62 +1,33 @@
-# shionlib monorepo
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./apps/frontend/public/assets/images/readme/shionlib-dark.webp">
+  <source media="(prefers-color-scheme: light)" srcset="./apps/frontend/public/assets/images/readme/shionlib-light.webp">
+  <img alt="shionlib" src="./apps/frontend/public/assets/images/readme/shionlib-light.webp">
+</picture>
 
-This repository contains both apps in one pnpm workspace:
+## Introduction
 
-- `apps/frontend`: Next.js frontend (`shionlib-frontend`)
-- `apps/backend`: NestJS backend (`shionlib-backend`)
+👋 Hi, welcome to Shionlib!
 
-## Requirements
+As you can see, this is a resource site for visual novels/Galgame. We provide downloads for **game releases** and **translation patches**—free, barrier-free, and without speed limits.
 
-- Node.js 20+
-- pnpm 10+
+Shionlib is **free** and **open source**. You can find our source code on [our GitHub repository](https://github.com/Ringyuki/shionlib). If you have questions or suggestions, feel free to open an [Issue](https://github.com/Ringyuki/shionlib/issues) or a [Pull Request](https://github.com/Ringyuki/shionlib/pulls).
 
-## Install
+## Principles & Site Definition
 
-```bash
-pnpm install
-```
+Shionlib will always be **free** and **open source**; we do not charge users any fees. All resources on Shionlib are uploaded by users, and we cannot guarantee their completeness or safety.
 
-## Run
+If there are lawful purchase channels in your country/region, you can find store or official website links under **Related Links** on a game’s page. If something is missing, you can add it via the **Edit** function.
 
-```bash
-# run both apps (parallel)
-pnpm dev
+As mentioned above, in many countries and regions there is often a lack of compliant channels for purchasing legitimate visual novels/Galgame. Many excellent developers have also disappeared for various reasons, and their works can be hard to find across the internet.
 
-# or run separately
-pnpm dev:backend
-pnpm dev:frontend
-```
+Therefore, one of the original aims of Shionlib is to build a complete, curated archive of visual novels/Galgame across all eras, while giving more people the chance to experience this **wonderful art form**.
 
-## Quality checks
+If you are able to, we **highly recommend** purchasing official copies to support the works and creators you love, so that the culture we care about can continue.
 
-```bash
-pnpm format
-pnpm format:check
-pnpm lint
-pnpm typecheck
-pnpm test
-```
+## Community Groups
 
-## Frontend E2E (against deployed backend)
+You can find the link to our Telegram group at the bottom of the website.
 
-Set these env vars before running frontend e2e locally:
+## Infringement Reports
 
-- `NEXT_PUBLIC_PROD_API_PATH`
-- `INTERNAL_API_BASE_URL`
-
-Example:
-
-```bash
-NEXT_PUBLIC_PROD_API_PATH=https://api.example.com \
-INTERNAL_API_BASE_URL=https://api.example.com \
-pnpm --filter shionlib-frontend test:e2e
-```
-
-In GitHub Actions, configure repository variable `E2E_BACKEND_BASE_URL` to enable
-`.github/workflows/e2e.yml`.
-
-## Build
-
-```bash
-pnpm build
-```
+If any content on the site infringes your rights, please contact us via the **Contact** button at the bottom of the site. After verification, we will remove the relevant content immediately.

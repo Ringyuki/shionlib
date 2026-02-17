@@ -14,7 +14,7 @@ Thank you for considering contributing to this project! This guide explains how 
 
 1. Fork the repository and clone your fork:
    - `git clone <your-fork-url>`
-   - `cd shionlib-frontend`
+   - `cd shionlib`
 2. Install dependencies:
    - `pnpm install`
 3. Run the app:

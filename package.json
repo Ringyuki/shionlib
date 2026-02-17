@@ -24,6 +24,9 @@
     "format": "pnpm -r --if-present run format",
     "format:check": "pnpm -r --if-present run format:check",
     "lint": "pnpm lint:backend && pnpm lint:frontend",
+    "lint:fix": "pnpm lint:backend:fix && pnpm lint:frontend:fix",
+    "lint:backend:fix": "pnpm --filter shionlib-backend lint",
+    "lint:frontend:fix": "pnpm --filter shionlib-frontend lint:fix",
     "lint:frontend": "pnpm --filter shionlib-frontend lint",
     "lint:backend": "pnpm --filter shionlib-backend lint:check",
     "typecheck": "pnpm typecheck:backend && pnpm typecheck:frontend",
@@ -32,7 +35,10 @@
     "check": "pnpm format:check && pnpm lint && pnpm typecheck",
     "test": "pnpm test:backend",
     "test:frontend:e2e": "pnpm --filter shionlib-frontend test:e2e",
-    "test:backend": "pnpm --filter shionlib-backend test"
+    "test:backend": "pnpm --filter shionlib-backend test",
+    "start": "pnpm -r --parallel --stream --filter shionlib-backend --filter shionlib-frontend run start",
+    "start:frontend": "pnpm --filter shionlib-frontend start",
+    "start:backend": "pnpm --filter shionlib-backend start"
   },
   "pnpm": {
     "overrides": {
