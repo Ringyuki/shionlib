@@ -1,0 +1,54 @@
+---
+title: 'Shionlib 开发概述'
+banner: 'https://images.yurari.moe/admin/6740325e87e2312f66fa3f58/ny9s2fu6_2.webp'
+description: 'Shionlib 的开发概述：前端 Next.js/React，后端 NestJS/Prisma/PostgreSQL，配合 Redis 队列、Meilisearch 搜索、S3 兼容存储与 i18n。'
+date: 2025-10-28
+author_uid: 1
+author_name: 'ringyuki'
+author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
+---
+
+## 仓库
+
+前端: [shionlib-frontend](https://github.com/Ringyuki/shionlib-frontend)
+
+后端: [shionlib-backend](https://github.com/Ringyuki/shionlib-backend)
+
+## 技术栈
+
+### 前端
+
+**核心技术栈** Next.js 15, React 19, Tailwind CSS, Radix UI, next-intl, MDX (@next/mdx, @mdx-js), Lexical, Zustand, pnpm, PM2
+
+- 框架：`Next.js 15`（App Router）
+- 语言与运行时：`React 19` + `TypeScript`
+- 样式与 UI：`Tailwind CSS`、`Shadcn UI`、`Radix UI`、`Lucide`、`Motion`
+- 国际化: `next-intl`（基于路由的多语言与 locale 协商）
+- 内容/文档：MDX（`@next/mdx`、`@mdx-js/*`），`gray-matter` 解析 Frontmatter，`next-mdx-remote` 实现渲染
+- 状态管理：`zustand`
+- 日期与日历：`date-fns`、`react-day-picker`
+- 媒体与图片：`Next Image` 远程源；`react-image-crop`、`react-medium-image-zoom` 等
+- 交互与反馈：`react-hot-toast`、`sileo`、`spoiled`、`@base-ui-components/react`、`@stepperize/react` 等
+- 工具: `lodash`、`qs`、`sanitize-html`、`react-use` 等
+- 主题：`next-themes`
+- 部署：PM2
+
+### 后端
+
+**核心技术栈** NestJS, Prisma, PostgreSQL, Redis, Bull, Meilisearch, AWS S3 SDK, Backblaze B2 and Cloudflare R2 (S3-compatible), nestjs-i18n, pnpm, PM2
+
+- 框架: `NestJS` (HTTP 服务器框架`Express 5`)
+- 数据层: `Prisma`、`PostgreSQL`
+- 缓存: `Redis`
+- 队列: `bull`
+- 搜索: `Meilisearch`
+- 存储与上传: `AWS S3 SDK`、`Backblaze B2` (大文件)、`Cloudflare R2` (小文件)
+- 鉴权: `JWT` (Passport)
+- 国际化: `nestjs-i18n` (Cookie/Query/Accept-Language 解析)
+- 部署: PM2
+
+## 贡献
+
+如果你有能力，欢迎和我们一起开发 Shionlib!👏
+
+请在阅读 [贡献指南](https://github.com/Ringyuki/shionlib-frontend/blob/main/CONTRIBUTING.md) 后，提交你的 Pull Request。如果有任何问题，请提Issue/Discussion，或者在PR中ping maintainers。

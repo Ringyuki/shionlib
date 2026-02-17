@@ -1,0 +1,367 @@
+:root {
+  --radius: 0.625rem;
+  --primary-50: #f2fbff;
+  --primary-100: #e6f7fe;
+  --primary-200: #c5ebfb;
+  --primary-300: #a3def7;
+  --primary-400: #7ed0f2;
+  --primary-500: #4cb8ea;
+  --primary-600: #34a2d5;
+  --primary-700: #2784b0;
+  --primary-800: #206a8e;
+  --primary-900: #1c5774;
+  --primary-950: #0e2f40;
+
+  --success-50: #f0fdf4;
+  --success-100: #dcfce7;
+  --success-200: #bbf7d0;
+  --success-300: #86efac;
+  --success-400: #4ade80;
+  --success-500: #22c55e;
+  --success-600: #16a34a;
+  --success-700: #15803d;
+  --success-800: #166534;
+  --success-900: #14532d;
+  --success-950: #052e16;
+
+  --warning-50: #fffbeb;
+  --warning-100: #fef3c7;
+  --warning-200: #fde68a;
+  --warning-300: #fcd34d;
+  --warning-400: #fbbf24;
+  --warning-500: #f59e0b;
+  --warning-600: #d97706;
+  --warning-700: #b45309;
+  --warning-800: #92400e;
+  --warning-900: #78350f;
+  --warning-950: #451a03;
+
+  --info-50: #ecfeff;
+  --info-100: #cffafe;
+  --info-200: #a5f3fc;
+  --info-300: #67e8f9;
+  --info-400: #22d3ee;
+  --info-500: #06b6d4;
+  --info-600: #0891b2;
+  --info-700: #0e7490;
+  --info-800: #155e75;
+  --info-900: #164e63;
+  --info-950: #083344;
+
+  --danger-50: #fef2f2;
+  --danger-100: #fee2e2;
+  --danger-200: #fecaca;
+  --danger-300: #fca5a5;
+  --danger-400: #f87171;
+  --danger-500: #ef4444;
+  --danger-600: #dc2626;
+  --danger-700: #b91c1c;
+  --danger-800: #991b1b;
+  --danger-900: #7f1d1d;
+  --danger-950: #450a0a;
+
+  --neutral-50: #f9fafb;
+  --neutral-100: #f3f4f6;
+  --neutral-200: #e5e7eb;
+  --neutral-300: #d1d5db;
+  --neutral-400: #9ca3af;
+  --neutral-500: #6b7280;
+  --neutral-600: #4b5563;
+  --neutral-700: #374151;
+  --neutral-800: #1f2937;
+  --neutral-900: #111827;
+  --neutral-950: #0a0f1a;
+
+  --purple-50: #faf5ff;
+  --purple-100: #f3e8ff;
+  --purple-200: #e9d5ff;
+  --purple-300: #d8b4fe;
+  --purple-400: #c084fc;
+  --purple-500: #a855f7;
+  --purple-600: #9333ea;
+  --purple-700: #7e22ce;
+  --purple-800: #6b21a8;
+  --purple-900: #581c87;
+  --purple-950: #3b0764;
+
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+
+  --card-soft: oklch(0.99 0 0);
+  --card-soft-foreground: var(--card-foreground);
+  --card-muted: var(--neutral-100);
+  --card-muted-foreground: var(--muted-foreground);
+  --card-elevated: oklch(1 0 0);
+  --card-elevated-foreground: var(--card-foreground);
+  --card-accent: var(--primary-50);
+  --card-accent-foreground: var(--primary-800);
+  --card-hover: var(--neutral-50);
+  --card-active: var(--neutral-100);
+  --card-border: var(--border);
+  --card-ring: var(--ring);
+
+  --primary: var(--primary-600);
+  --primary-foreground: #ffffff;
+  --secondary: var(--neutral-100);
+  --secondary-foreground: var(--neutral-900);
+  --muted: var(--neutral-100);
+  --muted-foreground: var(--neutral-400);
+  --accent: var(--primary-50);
+  --accent-foreground: var(--primary-800);
+  --success: var(--success-600);
+  --success-foreground: #ffffff;
+  --warning: var(--warning-600);
+  --warning-foreground: #ffffff;
+  --info: var(--info-600);
+  --info-foreground: #ffffff;
+  --destructive: var(--danger-600);
+  --destructive-foreground: #ffffff;
+  --border: var(--neutral-200);
+  --input: var(--neutral-200);
+  --ring: var(--primary-500);
+
+  --chart-1: #34a2d5;
+  --chart-2: #2563eb;
+  --chart-3: #f59e0b;
+  --chart-4: #10b981;
+  --chart-5: #ef4444;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: var(--primary-600);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--neutral-100);
+  --sidebar-accent-foreground: var(--neutral-900);
+  --sidebar-border: var(--neutral-200);
+  --sidebar-ring: var(--primary-500);
+
+  --toast-text-success: var(--success-600);
+  --toast-text-destructive: var(--danger-600);
+  --toast-bg-success: var(--success-100);
+  --toast-bg-destructive: var(--danger-100);
+
+  --skeleton-bg: var(--neutral-300);
+  --skeleton-track: var(--neutral-200);
+  --skeleton-sheen: rgba(255, 255, 255, 0.6);
+  --skeleton-angle: 100deg;
+
+  --platform-win: #0078d7;
+  --platform-win-fg: #ffffff;
+  --platform-ios: #1d1d1f;
+  --platform-ios-fg: #ffffff;
+  --platform-and: #3ddc84;
+  --platform-and-fg: #0a1b12;
+  --platform-lin: #f5f5f5;
+  --platform-lin-fg: #111111;
+  --platform-mac: #111111;
+  --platform-mac-fg: #ffffff;
+  --platform-ps2: #003791;
+  --platform-ps2-fg: #ffffff;
+  --platform-ps3: #003791;
+  --platform-ps3-fg: #ffffff;
+  --platform-ps4: #00439c;
+  --platform-ps4-fg: #ffffff;
+  --platform-psv: #1e4aa8;
+  --platform-psv-fg: #ffffff;
+  --platform-psp: #111111;
+  --platform-psp-fg: #ffffff;
+  --platform-swi: #e60012;
+  --platform-swi-fg: #ffffff;
+  --platform-dvd: var(--neutral-500);
+  --platform-dvd-fg: #ffffff;
+  --platform-mob: #f5f5f5;
+  --platform-mob-fg: #111111;
+  --platform-web: #f5f5f5;
+  --platform-web-fg: #111111;
+  --platform-vnd: #f5f5f5;
+  --platform-vnd-fg: #111111;
+  --platform-drc: #f5f5f5;
+  --platform-drc-fg: #111111;
+  --platform-gba: #f5f5f5;
+  --platform-gba-fg: #111111;
+  --platform-nds: #f5f5f5;
+  --platform-nds-fg: #111111;
+  --platform-other: #f5f5f5;
+  --platform-other-fg: #111111;
+
+  --type-manual: #5a3bff;
+  --type-manual-bg: color-mix(in oklab, var(--type-manual) 18%, transparent);
+  --type-ai: #0fb5a0;
+  --type-ai-bg: color-mix(in oklab, var(--type-ai) 18%, transparent);
+  --type-machine_polishing: #f6a13b;
+  --type-machine_polishing-bg: color-mix(in oklab, var(--type-machine_polishing) 18%, transparent);
+  --type-machine: #a855f7;
+  --type-machine-bg: color-mix(in oklab, var(--type-machine) 18%, transparent);
+  --type-save: #22c376;
+  --type-save-bg: color-mix(in oklab, var(--type-save) 18%, transparent);
+  --type-crack: #ef4865;
+  --type-crack-bg: color-mix(in oklab, var(--type-crack) 18%, transparent);
+  --type-fix: #19b4e6;
+  --type-fix-bg: color-mix(in oklab, var(--type-fix) 18%, transparent);
+  --type-mod: #f07ab5;
+  --type-mod-bg: color-mix(in oklab, var(--type-mod) 18%, transparent);
+  --type-other: #6b7280;
+  --type-other-bg: color-mix(in oklab, var(--type-other) 18%, transparent);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+
+  --card-soft: oklch(0.23 0 0);
+  --card-soft-foreground: var(--card-foreground);
+  --card-muted: oklch(0.269 0 0);
+  --card-muted-foreground: var(--muted-foreground);
+  --card-elevated: oklch(0.25 0 0);
+  --card-elevated-foreground: var(--card-foreground);
+  --card-accent: var(--primary-900);
+  --card-accent-foreground: var(--primary-100);
+  --card-hover: oklch(0.24 0 0);
+  --card-active: oklch(0.22 0 0);
+  --card-border: var(--border);
+  --card-ring: var(--ring);
+  --primary: var(--primary-600);
+  --primary-foreground: #ffffff;
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --success: var(--success-600);
+  --success-foreground: #ffffff;
+  --warning: var(--warning-600);
+  --warning-foreground: #ffffff;
+  --info: var(--info-600);
+  --info-foreground: #ffffff;
+  --accent: var(--primary-900);
+  --accent-foreground: var(--primary-100);
+  --destructive: var(--danger-600);
+  --destructive-foreground: #ffffff;
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: var(--primary-600);
+  --chart-1: #4cb8ea;
+  --chart-2: #a78bfa;
+  --chart-3: #fbbf24;
+  --chart-4: #34d399;
+  --chart-5: #f472b6;
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: var(--primary-600);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: var(--primary-600);
+
+  --toast-text-success: var(--success-100);
+  --toast-text-destructive: var(--danger-100);
+  --toast-bg-success: var(--success-950);
+  --toast-bg-destructive: var(--danger-950);
+
+  --skeleton-bg: var(--neutral-300);
+  --skeleton-track: var(--neutral-800);
+  --skeleton-sheen: rgba(255, 255, 255, 0.18);
+
+  --platform-win: #0a6cc3;
+  --platform-win-fg: #ffffff;
+  --platform-ios: #f5f5f7;
+  --platform-ios-fg: #111111;
+  --platform-and: #3ddc84;
+  --platform-and-fg: #0a1b12;
+  --platform-lin: #f5f5f5;
+  --platform-lin-fg: #111111;
+  --platform-mac: #111111;
+  --platform-mac-fg: #ffffff;
+  --platform-ps2: #003791;
+  --platform-ps2-fg: #ffffff;
+  --platform-ps3: #0a3f9c;
+  --platform-ps3-fg: #ffffff;
+  --platform-ps4: #0d4aac;
+  --platform-ps4-fg: #ffffff;
+  --platform-psv: #2656b5;
+  --platform-psv-fg: #ffffff;
+  --platform-psp: #e5e7eb;
+  --platform-psp-fg: #111111;
+  --platform-swi: #ff3042;
+  --platform-swi-fg: #ffffff;
+  --platform-dvd: var(--neutral-500);
+  --platform-dvd-fg: #111827;
+  --platform-mob: #f5f5f5;
+  --platform-mob-fg: #111111;
+  --platform-web: #f5f5f5;
+  --platform-web-fg: #111111;
+  --platform-vnd: #f5f5f5;
+  --platform-vnd-fg: #111111;
+  --platform-drc: #f5f5f5;
+  --platform-drc-fg: #111111;
+  --platform-gba: #f5f5f5;
+  --platform-gba-fg: #111111;
+  --platform-nds: #f5f5f5;
+  --platform-nds-fg: #111111;
+  --platform-other: #f5f5f5;
+  --platform-other-fg: #111111;
+
+  --type-manual: #8c89ff;
+  --type-manual-bg: color-mix(in oklab, var(--type-manual) 32%, transparent);
+  --type-ai: #4fe0c2;
+  --type-ai-bg: color-mix(in oklab, var(--type-ai) 32%, transparent);
+  --type-machine_polishing: #ffd35c;
+  --type-machine_polishing-bg: color-mix(in oklab, var(--type-machine_polishing) 32%, transparent);
+  --type-machine: #c4a5ff;
+  --type-machine-bg: color-mix(in oklab, var(--type-machine) 32%, transparent);
+  --type-save: #59e28f;
+  --type-save-bg: color-mix(in oklab, var(--type-save) 32%, transparent);
+  --type-crack: #ff8fa3;
+  --type-crack-bg: color-mix(in oklab, var(--type-crack) 32%, transparent);
+  --type-fix: #5ed1ff;
+  --type-fix-bg: color-mix(in oklab, var(--type-fix) 32%, transparent);
+  --type-mod: #ff9bcb;
+  --type-mod-bg: color-mix(in oklab, var(--type-mod) 32%, transparent);
+  --type-other: #9ca5b8;
+  --type-other-bg: color-mix(in oklab, var(--type-other) 32%, transparent);
+}
+
+.skeleton-primary {
+  --skeleton-track: color-mix(in oklab, var(--primary-600) 10%, var(--neutral-200));
+}
+.dark .skeleton-primary {
+  --skeleton-track: color-mix(in oklab, var(--primary-600) 12%, var(--neutral-800));
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--skeleton-track);
+  border-radius: var(--radius, 0.625rem);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  isolation: isolate;
+}
+.skeleton::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    var(--skeleton-angle, 100deg),
+    transparent 0%,
+    transparent 35%,
+    var(--skeleton-sheen) 50%,
+    transparent 65%,
+    transparent 100%
+  );
+  transform: translateX(-150%);
+  animation: skeleton-shimmer var(--skeleton-duration, 1400ms) cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+@keyframes skeleton-shimmer {
+  to {
+    transform: translateX(150%);
+  }
+}

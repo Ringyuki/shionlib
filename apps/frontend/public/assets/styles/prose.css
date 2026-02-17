@@ -1,0 +1,224 @@
+.shionlib-prose {
+  color: var(--foreground);
+  line-height: 1.75;
+  letter-spacing: 0.01em;
+  word-break: break-word;
+}
+
+.shionlib-prose :where(p, ul, ol, pre, table, blockquote, figure, details) {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.shionlib-prose :where(h1, h2, h3, h4, h5, h6) {
+  color: var(--foreground);
+  font-weight: 700;
+  line-height: 1.25;
+  margin-top: 1.5em;
+  margin-bottom: 0.6em;
+  scroll-margin-top: 96px;
+}
+.shionlib-prose h1 {
+  font-size: 2rem;
+}
+.shionlib-prose h2 {
+  font-size: 1.5rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.35em;
+}
+.shionlib-prose h3 {
+  font-size: 1.25rem;
+}
+.shionlib-prose h4 {
+  font-size: 1.125rem;
+}
+.shionlib-prose h5 {
+  font-size: 1rem;
+}
+.shionlib-prose h6 {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.shionlib-prose p {
+  color: var(--foreground);
+}
+
+.shionlib-prose hr {
+  border: 0;
+  border-top: 1px dashed var(--border);
+  margin: 2rem 0;
+}
+
+.shionlib-prose blockquote {
+  color: var(--primary-foreground);
+  background: color-mix(in oklab, var(--primary) 10%, transparent);
+  border-left: 3px solid var(--primary);
+  padding: 0.75rem 1rem;
+}
+.shionlib-prose blockquote > :first-child {
+  margin-top: 0;
+}
+.shionlib-prose blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.shionlib-prose ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+}
+.shionlib-prose ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+}
+.shionlib-prose li {
+  margin: 0.35em 0;
+}
+.shionlib-prose li::marker {
+  color: var(--muted-foreground);
+}
+.shionlib-prose li > ul,
+.shionlib-prose li > ol {
+  margin-top: 0.35em;
+  margin-bottom: 0.35em;
+}
+
+.shionlib-prose a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 2px;
+  transition: color 160ms ease;
+}
+.shionlib-prose a:hover {
+  color: color-mix(in oklab, var(--primary) 86%, var(--foreground));
+}
+
+.shionlib-prose :where(p, li, h1, h2, h3, h4, h5, h6) code:not(pre code) {
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--muted) 45%, transparent);
+  border: 1px solid var(--border);
+  padding: 0.2em 0.45em;
+  border-radius: var(--radius-sm);
+  font-size: 0.92em;
+}
+
+.shionlib-prose pre {
+  background: var(--card);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  overflow: auto;
+}
+.shionlib-prose pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font-size: 0.95em;
+}
+
+.shionlib-prose table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.shionlib-prose thead th {
+  background: color-mix(in oklab, var(--muted) 35%, transparent);
+  color: var(--foreground);
+}
+.shionlib-prose th,
+.shionlib-prose td {
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+}
+.shionlib-prose tbody tr:nth-child(2n) td {
+  background: color-mix(in oklab, var(--muted) 20%, transparent);
+}
+.shionlib-prose tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.shionlib-prose img,
+.shionlib-prose video,
+.shionlib-prose canvas,
+.shionlib-prose iframe {
+  display: block;
+  max-width: 100%;
+  border-radius: var(--radius-md);
+}
+
+.shionlib-prose details {
+  background: color-mix(in oklab, var(--muted) 22%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+}
+.shionlib-prose details > summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--foreground);
+}
+.shionlib-prose details[open] > summary {
+  margin-bottom: 0.4rem;
+}
+
+.shionlib-prose strong {
+  color: var(--foreground);
+  font-weight: 700;
+}
+.shionlib-prose em {
+  color: var(--foreground);
+}
+.shionlib-prose kbd {
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--muted) 40%, transparent);
+  border: 1px solid var(--border);
+  padding: 0.15rem 0.35rem;
+  border-radius: calc(var(--radius-sm) + 2px);
+  font-size: 0.85em;
+}
+
+.shionlib-prose sup,
+.shionlib-prose sub {
+  font-size: 0.8em;
+}
+.shionlib-prose sup {
+  vertical-align: super;
+}
+.shionlib-prose sub {
+  vertical-align: sub;
+}
+
+.shionlib-prose .line {
+  display: block;
+}
+.shionlib-prose .line.highlighted {
+  background: color-mix(in oklab, var(--muted) 28%, transparent);
+}
+
+.shionlib-prose .callout {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  background: color-mix(in oklab, var(--info) 18%, var(--muted));
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+}
+.shionlib-prose .callout .icon {
+  line-height: 1;
+}
+.shionlib-prose .callout.note {
+  background: color-mix(in oklab, var(--primary) 14%, var(--muted));
+}
+.shionlib-prose .callout.warn {
+  background: color-mix(in oklab, var(--warning) 14%, var(--muted));
+}
+.shionlib-prose .callout.danger {
+  background: color-mix(in oklab, var(--destructive) 14%, var(--muted));
+}

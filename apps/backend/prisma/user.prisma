@@ -1,0 +1,112 @@
+// user roles: 1 -> user, 2 -> admin, 3 -> super_admin
+// user status: 1 -> active, 2 -> banned
+// user lang: en -> English, zh -> Chinese(Simplified), ja -> Japanese
+// user content limit: 1 -> never show nsfw content, 2 -> show with spoiler, 3 -> just show
+model User {
+  id       Int     @id @default(autoincrement())
+  name     String  @unique @db.VarChar(20)
+  email    String  @unique @db.VarChar(255)
+  password String  @db.VarChar(255)
+  avatar   String?
+  cover    String?
+
+  games                                 Game[]                            @relation("user_create_game")
+  game_download_resources               GameDownloadResource[]            @relation("user_create_game_download_resource")
+  game_download_resource_files          GameDownloadResourceFile[]        @relation("user_create_game_download_resource_file")
+  game_download_resource_file_histories GameDownloadResourceFileHistory[] @relation("user_reupload_game_download_resource_file")
+  game_download_resource_reports        GameDownloadResourceReport[]      @relation("user_report_download_resource")
+  game_download_resource_reported       GameDownloadResourceReport[]      @relation("user_reported_download_resource")
+  game_download_resource_report_process GameDownloadResourceReport[]      @relation("user_process_download_resource_report")
+  malware_scan_cases                    MalwareScanCase[]                 @relation("user_malware_scan_case_uploader")
+  malware_scan_case_reviews             MalwareScanCase[]                 @relation("user_malware_scan_case_reviewer")
+  comments                              Comment[]                         @relation("user_create_comment")
+
+  favorites Favorite[] @relation("user_favorite")
+
+  lang          UserLang @default(en)
+  content_limit Int      @default(2)
+  role          Int      @default(1)
+  status        Int      @default(1)
+
+  upload_injected_file_times Int                @default(0)
+  banned_records             UserBannedRecord[] @relation("user_banned")
+  banned_by_records          UserBannedRecord[] @relation("user_banned_by")
+
+  email_verified_at  DateTime?
+  last_login_at      DateTime?
+  two_factor_enabled Boolean   @default(false)
+
+  created              DateTime              @default(now())
+  updated              DateTime              @updatedAt
+  sessions             UserLoginSession[]    @relation("user_login_session")
+  game_upload_sessions GameUploadSession[]   @relation("user_create_game_upload_session")
+  upload_quota         UserUploadQuota?      @relation("user_upload_quota")
+  field_permissions    UserFieldPermission[] @relation("user_field_permissions")
+  edit_records         EditRecord[]          @relation("user_edit_record")
+  activities           Activity[]            @relation("user_activity")
+  liked_comments       Comment[]             @relation("user_like_comment")
+  messages             Message[]             @relation("user_message_receiver")
+  messages_sent        Message[]             @relation("user_message_sender")
+
+  @@index([email])
+  @@index([name])
+  @@index([created])
+  @@index([role])
+  @@map("users")
+}
+
+// user login session status: 1 -> active, 2 -> rotated, 3 -> reused, 4 -> blocked
+model UserLoginSession {
+  id Int @id @default(autoincrement())
+
+  user_id              Int
+  user                 User   @relation("user_login_session", fields: [user_id], references: [id])
+  refresh_token_hash   String @db.VarChar(255)
+  refresh_token_prefix String @db.VarChar(32)
+  status               Int    @default(1)
+
+  // Rotation chain / family for bulk revoke
+  family_id         String             @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  replaced_by_id    Int?
+  replaced_by       UserLoginSession?  @relation("session_replacement", fields: [replaced_by_id], references: [id])
+  replaced_sessions UserLoginSession[] @relation("session_replacement")
+
+  expires_at     DateTime
+  last_used_at   DateTime?
+  rotated_at     DateTime?
+  reused_at      DateTime?
+  blocked_at     DateTime?
+  blocked_reason String?   @db.VarChar(255)
+
+  ip          String?
+  user_agent  String?
+  device_info String?
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@unique([refresh_token_prefix])
+  @@index([family_id])
+  @@index([user_id, status])
+  @@map("user_login_sessions")
+}
+
+model UserBannedRecord {
+  id Int @id @default(autoincrement())
+
+  user_id        Int
+  user           User     @relation("user_banned", fields: [user_id], references: [id])
+  banned_at      DateTime @default(now())
+  banned_reason  String?  @db.VarChar(255)
+  banned_by      Int?
+  banned_by_user User?    @relation("user_banned_by", fields: [banned_by], references: [id], onDelete: SetNull)
+
+  banned_duration_days Int?
+  is_permanent         Boolean @default(false)
+
+  unbanned_at DateTime?
+
+  @@index([user_id, banned_at])
+  @@index([user_id, unbanned_at])
+  @@map("user_banned_records")
+}

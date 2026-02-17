@@ -1,0 +1,110 @@
+// game status: 1 -> visible, 2 -> hide
+// game staffs: Array<Record<name, role>>
+// extra_info: Array<Record<key, value>>
+model Game {
+  id           Int         @id @default(autoincrement())
+  v_id         String?
+  b_id         String?
+  title_jp     String      @default("") @db.VarChar(255)
+  title_zh     String      @default("") @db.VarChar(255)
+  title_en     String      @default("") @db.VarChar(255)
+  aliases      String[]    @default([])
+  intro_jp     String      @default("") @db.VarChar(20000)
+  intro_zh     String      @default("") @db.VarChar(20000)
+  intro_en     String      @default("") @db.VarChar(20000)
+  covers       GameCover[] @relation("game_cover")
+  images       GameImage[] @relation("game_image")
+  release_date DateTime?
+  release_date_tba Boolean   @default(false)
+  extra_info   Json?       @default(dbgenerated("'[]'::jsonb")) @db.JsonB
+
+  tags       String[]                @default([])
+  developers GameDeveloperRelation[] @relation("game_developer")
+  characters GameCharacterRelation[] @relation("game_character")
+  staffs     Json?                   @default(dbgenerated("'[]'::jsonb")) @db.JsonB
+  link       GameLink[]              @relation("game_link")
+
+  nsfw     Boolean  @default(false)
+  type     String?
+  platform String[] @default([])
+
+  download_resources GameDownloadResource[] @relation("game_download_resource")
+  malware_scan_cases MalwareScanCase[]      @relation("game_malware_scan_case")
+  downloads          Int                    @default(0)
+
+  views Int @default(0)
+  hot_score Float @default(0)
+
+  creator_id Int
+  creator    User @relation("user_create_game", fields: [creator_id], references: [id])
+
+  favorite_items FavoriteItem[] @relation("favorite_game_item")
+  activities     Activity[]             @relation("game_activity")
+
+  comments Comment[] @relation("game_comment")
+
+  messages Message[] @relation("game_message")
+
+  status  Int      @default(1)
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@unique([b_id, v_id])
+  @@index([b_id, v_id])
+  @@index([b_id])
+  @@index([v_id])
+  @@index([hot_score])
+  @@index([downloads])
+  @@map("games")
+}
+
+model GameLink {
+  id    Int    @id @default(autoincrement())
+  url   String
+  label String
+  name  String
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  game_id Int
+  game    Game @relation("game_link", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("game_links")
+}
+
+model GameCover {
+  id Int @id @default(autoincrement())
+
+  language String
+  url      String
+  type     String
+  dims     Int[]
+  sexual   Int
+  violence Int
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  game_id Int
+  game    Game @relation("game_cover", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("game_covers")
+}
+
+model GameImage {
+  id Int @id @default(autoincrement())
+
+  url      String
+  dims     Int[]
+  sexual   Int
+  violence Int
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  game_id Int
+  game    Game @relation("game_image", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("game_images")
+}

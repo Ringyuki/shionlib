@@ -1,0 +1,2192 @@
+{
+  "Meta": {
+    "title": "Shionlib - ビジュアルノベル／ギャルゲー アーカイブ",
+    "titleShort": "Shionlib",
+    "template": "%s - Shionlib",
+    "description": "Shionlib - 無料・オープンソース・気軽に使える ビジュアルノベル／ギャルゲー アーカイブ",
+    "keywords": ["Shionlib", "ギャルゲー", "リソースサイト", "無料", "オープンソース", "気軽"],
+    "og": {
+      "title": "Shionlib - ビジュアルノベル／ギャルゲー アーカイブ",
+      "description": "Shionlib - 無料・オープンソース・気軽に使える ビジュアルノベル／ギャルゲー アーカイブ"
+    }
+  },
+  "Pages": {
+    "GlobalError": {
+      "title": "エラー",
+      "details": "エラーが発生しました。後でもう一度お試しください。",
+      "back": "戻る",
+      "reset": "再読み込み"
+    },
+    "GlobalNotFound": {
+      "title": "ページが見つかりません",
+      "details": "お探しのページは存在しないか、移動された可能性があります。",
+      "back": "戻る",
+      "reset": "再読み込み"
+    },
+    "NotFound": {
+      "title": "ページが見つかりません",
+      "details": "お探しのページは存在しないか、移動された可能性があります。"
+    },
+    "User": {
+      "Settings": {
+        "title": "設定を編集",
+        "description": "このページではあなたの個人情報とサイト設定を管理できます。",
+        "loginRequired": {
+          "title": "ログインが必要です",
+          "description": "設定ページにアクセスするにはログインが必要です。",
+          "login": "ログイン"
+        }
+      }
+    },
+    "Game": {
+      "Edit": {
+        "EditLayout": {
+          "title": "ゲーム情報を編集"
+        }
+      }
+    },
+    "Developer": {
+      "Edit": {
+        "EditLayout": {
+          "title": "会社情報を編集"
+        }
+      }
+    },
+    "Character": {
+      "Edit": {
+        "EditLayout": {
+          "title": "キャラクター情報を編集"
+        }
+      },
+      "Intros": {
+        "BasicInfos": {
+          "age": "年齢",
+          "birthday": "誕生日",
+          "blood_type": "血液型",
+          "height": "身長",
+          "weight": "体重",
+          "male": "男性",
+          "female": "女性",
+          "non_binary": "ノンバイナリー",
+          "ambiguous": "不明"
+        },
+        "Details": {
+          "no_intro": "紹介なし"
+        }
+      }
+    },
+    "Search": {
+      "Game": {
+        "title": "検索結果 {q}"
+      }
+    }
+  },
+  "Docs": {
+    "Head": {
+      "title": "すべてのドキュメント"
+    },
+    "categories": {
+      "about": "紹介",
+      "dev": "開発",
+      "faq": "よくある質問",
+      "guides": "ガイド"
+    },
+    "about": {
+      "about-shionlib": "Shionlib について"
+    },
+    "dev": {
+      "dev-overview": "Shionlib 開発概要"
+    },
+    "faq": {
+      "1": "title1"
+    },
+    "guides": {
+      "upload-game-files": "ゲームファイルをアップロード"
+    }
+  },
+  "Components": {
+    "ShionUI": {
+      "Spoiler": {
+        "hintText": "クリックして表示"
+      },
+      "DatePicker": {
+        "pickADate": "日付を選択"
+      },
+      "TagsInput": {
+        "placeholder": "入力して Enter を押してください"
+      },
+      "AsyncMultiSelect": {
+        "placeholder": "検索...",
+        "emptyMessage": "結果が見つかりません"
+      },
+      "ImageLightbox": {
+        "loadingHD": "原画読み込み中..."
+      }
+    },
+    "Editor": {
+      "Plugins": {
+        "placeholderPrefix": "押す",
+        "placeholderSuffix": "コマンドを入力..."
+      },
+      "Images": {
+        "imageUrl": "画像URL",
+        "imageUrlPlaceholder": "例: https://source.unsplash.com/random",
+        "altText": "代替テキスト",
+        "altTextPlaceholder": "ランダムな Unsplash 画像",
+        "altTextUploadedPlaceholder": "説明的な代替テキスト",
+        "imageUpload": "画像アップロード",
+        "confirm": "確認",
+        "tabUrl": "リンク",
+        "tabFile": "ファイル"
+      },
+      "Embeds": {
+        "embed": "埋め込み",
+        "embedWithName": "{name} を埋め込む",
+        "dismiss": "閉じる"
+      },
+      "Picker": {
+        "paragraph": "段落",
+        "headingN": "見出し {n}",
+        "bulletedList": "箇条書き",
+        "numberedList": "番号付きリスト",
+        "quote": "引用",
+        "code": "コード",
+        "columnsLayout": "カラムレイアウト",
+        "insertColumnsLayout": "カラムレイアウトを挿入",
+        "table": "表",
+        "insertTable": "表を挿入",
+        "tableNxM": "{rows}×{columns} の表",
+        "image": "画像",
+        "insertImage": "画像を挿入",
+        "checkList": "チェックリスト"
+      },
+      "Toolbar": {
+        "undo": "元に戻す",
+        "redo": "やり直し",
+        "undoMac": "元に戻す (⌘Z)",
+        "undoWin": "元に戻す (Ctrl+Z)",
+        "redoMac": "やり直し (⇧⌘Z)",
+        "redoWin": "やり直し (Ctrl+Y)",
+        "toggleLink": "リンクを切り替え",
+        "textBackgroundColor": "文字の背景色",
+        "textColor": "文字色",
+        "toggleSubscript": "下付き文字を切り替え",
+        "toggleSuperscript": "上付き文字を切り替え",
+        "copy": "コピー"
+      },
+      "Actions": {
+        "clearEditor": "エディターをクリア",
+        "clearEditorConfirm": "エディターをクリアしてもよろしいですか？",
+        "cancel": "キャンセル",
+        "clear": "クリア",
+        "importContent": "インポート",
+        "exportContent": "エクスポート",
+        "exportFilePrefix": "Playground",
+        "exportSource": "Playground",
+        "markdown": "Markdown",
+        "viewOnlyMode": "閲覧モード",
+        "editMode": "編集モード",
+        "treeView": "ツリービュー",
+        "submit": "送信"
+      }
+    },
+    "Common": {
+      "Error": {
+        "ErrorView": {
+          "defaultTitle": "エラー",
+          "defaultDetails": "エラーが発生しました。後でもう一度お試しください。",
+          "back": "戻る",
+          "reset": "再読み込み"
+        }
+      },
+      "Site": {
+        "Ad": {
+          "ad": "広告"
+        }
+      },
+      "TopBar": {
+        "RandomGame": {
+          "random": "ランダム",
+          "loading": "読み込み中...",
+          "retry": "何も見つかりませんでした。もう一度お試しください"
+        },
+        "SearchTrigger": {
+          "search": "検索..."
+        },
+        "ThemeSwitcher": {
+          "label": "テーマ",
+          "system": "システムに合わせる",
+          "light": "ライト",
+          "dark": "ダーク"
+        },
+        "Settings": {
+          "personalSettings": "個人情報設定",
+          "siteSettings": "サイト設定",
+          "settings": "情報とサイト設定"
+        },
+        "Profile": {
+          "profile": "プロフィール"
+        },
+        "Admin": {
+          "admin": "管理サイト"
+        },
+        "NavBar": {
+          "menu": "メニュー",
+          "home": "ホーム",
+          "games": "ゲーム",
+          "producers": "会社",
+          "docs": "ドキュメント",
+          "releases": "アップロード",
+          "about": "紹介",
+          "aiGirlFriend": "AI 女友",
+          "create": "作成"
+        }
+      },
+      "Footer": {
+        "ShionlibFooter": {
+          "contact": "お問い合わせ",
+          "friendLink": "友情リンク"
+        }
+      },
+      "User": {
+        "LoginOrRegisteDialog": {
+          "button": "ログイン",
+          "loginTitle": "Shionlib にログイン",
+          "registerTitle": "新規登録",
+          "loginDescription": "アカウントをお持ちでない方は",
+          "loginDescriptionLinkText": "今すぐ登録",
+          "registerDescription": "すでに Shionlib のアカウントをお持ちの方は",
+          "registerDescriptionLinkText": "今すぐログイン"
+        },
+        "LogoutDialog": {
+          "button": "ログアウト",
+          "title": "ログアウト",
+          "description": "ログアウトしてもよろしいですか？",
+          "logout": "ログアウト",
+          "cancel": "キャンセル"
+        },
+        "Login": {
+          "title": "ログイン",
+          "description": "ログイン",
+          "identifier": "メールアドレスまたはユーザー名",
+          "password": "パスワード",
+          "forgetPassword": "パスワードを忘れた？",
+          "login": "ログイン",
+          "success": "ログインしました",
+          "validation": {
+            "identifier": "ユーザー名またはメールアドレスは必須です",
+            "password": "パスワードは8文字以上が必要です"
+          }
+        },
+        "Register": {
+          "title": "新規登録",
+          "description": "新規登録",
+          "username": "ユーザー名",
+          "email": "メールアドレス",
+          "password": "パスワード",
+          "passwordConfirm": "パスワード（確認）",
+          "verifyUuid": "認証UUID",
+          "verifyCode": "認証コード",
+          "getVerifyCode": "認証コードを送信",
+          "register": "登録",
+          "verifyCodeSent": "認証コードを送信しました",
+          "verifyCodeSentError": "認証コードの送信に失敗しました",
+          "success": "登録が完了しました",
+          "validation": {
+            "username": "ユーザー名は必須です",
+            "email": "有効なメールアドレスを入力してください",
+            "password": "パスワードは8文字以上が必要です",
+            "passwordConfirm": "確認用パスワードは8文字以上が必要です",
+            "passwordRegex": "パスワードは8文字以上で、英字・数字・大文字をそれぞれ少なくとも1文字含めてください",
+            "passwordDiff": "パスワードと確認用パスワードが一致しません",
+            "verifyUuid": "認証UUIDは必須です",
+            "verifyCode": "認証コードは必須です"
+          }
+        }
+      },
+      "Uploader": {
+        "FileUploader": {
+          "dropzone": "ここにドラッグ＆ドロップするか、クリックしてファイルを選択",
+          "dropzoneSupportFileFormat": "対応形式：zip/rar/7z/tar/gzip",
+          "status": "ステータス",
+          "Idle": "待機",
+          "Hashing": "ハッシュ計算中",
+          "Initializing": "初期化中",
+          "Uploading": "アップロード中",
+          "Paused": "一時停止中",
+          "Completing": "最終処理",
+          "Completed": "完了",
+          "Aborted": "中止",
+          "Error": "エラー",
+          "invalidFileFormat": "非対応のファイル形式です",
+          "fileTooSmall": "ファイルサイズは少なくとも {size}MB でなければなりません",
+          "fileMismatch": "同じファイルから続ける"
+        },
+        "UploadTuning": {
+          "concurrencyLabel": "同時アップロード数",
+          "concurrencyDescription": "同時に送信するチャンク数。高すぎるとネットワークが不安定になる場合があります。",
+          "concurrencyRange": "{min}-{max} スレッド",
+          "chunkSizeLabel": "チャンクサイズ",
+          "chunkSizeDescription": "チャンクが大きいほどリクエストは減りますが、失敗時は多くのデータを再送する必要があります。",
+          "chunkSizeRange": "{min}-{max} MB",
+          "unitThreads": "スレッド",
+          "unitMB": "MB"
+        },
+        "UploadController": {
+          "start": "開始",
+          "pause": "一時停止",
+          "resume": "再開",
+          "cancel": "キャンセル"
+        },
+        "UploadProgress": {
+          "speed": "速度",
+          "eta": "残り時間"
+        }
+      },
+      "Comment": {
+        "CommentContent": {
+          "comments": "コメント",
+          "description": "耳を澄まして。"
+        },
+        "CommentBox": {
+          "success": "コメント成功"
+        },
+        "CommentItem": {
+          "edited": "編集于",
+          "source": "コメントした",
+          "hidden": "自分のみ可視",
+          "pending": "審査中"
+        },
+        "CommentParent": {
+          "parent": "返信"
+        },
+        "Actions": {
+          "MoreActions": {
+            "edit": "編集",
+            "delete": "削除"
+          },
+          "Edit": {
+            "edit": "編集",
+            "title": "コメントを編集",
+            "cancel": "キャンセル",
+            "confirm": "保存",
+            "success": "編集成功"
+          },
+          "Delete": {
+            "delete": "削除",
+            "title": "コメントを削除",
+            "description": "コメントを削除してよろしいですか？",
+            "cancel": "キャンセル",
+            "confirm": "削除",
+            "success": "削除成功"
+          }
+        }
+      },
+      "Content": {
+        "Hidden": {
+          "hidden": "非表示コンテンツ"
+        },
+        "Empty": {
+          "title": "何もありません..."
+        },
+        "BBCodeSupported": {
+          "title": "BBCode サポート",
+          "exampleTitle": "例",
+          "example": "[b]Bold[/b]\n[i]Italic[/i]\n[u]Underline[/u]\n[s]Strikethrough[/s]\n[quote]Quote[/quote]\n[spoiler]Spoiler[/spoiler]\n[mask]Mask[/mask]\n[url=https://shionlib.com]Shionlib[/url]"
+        }
+      },
+      "Search": {
+        "Command": {
+          "SearchCommand": {
+            "placeholder": "内容を検索...",
+            "press_enter_to_search": "Enter キーで検索"
+          },
+          "History": {
+            "history": "履歴",
+            "delete_all": "履歴をクリア"
+          },
+          "Trending": {
+            "trending": "人気の検索"
+          },
+          "Suggest": {
+            "suggest": "検索候補",
+            "search_directly": "「{query}」を検索"
+          }
+        },
+        "Game": {
+          "Results": {
+            "result_prefix": "検索",
+            "result_suffix": "{total} 件の結果"
+          }
+        },
+        "AnimeTrace": {
+          "Trigger": {
+            "trace": "画像から検索"
+          },
+          "Dialog": {
+            "title": "画像から検索",
+            "description": "AnimeTrace によって提供されています。"
+          },
+          "Result": {
+            "candidates": "{count} 件の候補",
+            "lowConfidence": "低い信頼度",
+            "unknownCharacter": "不明なキャラクター",
+            "unknownWork": "不明な作品"
+          },
+          "Search": {
+            "dropzone": "画像を貼り付け、またはクリック、ドラッグ、ドロップしてここに画像を追加",
+            "dropzoneSupportFileFormat": "対応形式：jpg/jpeg/png/gif/webp",
+            "loading": "読み込み中...",
+            "noResult": "結果が見つかりませんでした",
+            "invalidFileFormat": "対応していない画像形式です"
+          }
+        }
+      },
+      "Auth": {
+        "Password": {
+          "Forget": {
+            "title": "パスワードを忘れた場合",
+            "signSent": "パスワードリセットリンクを送信しました",
+            "resetSuccess": "パスワードをリセットしました",
+            "GetEmail": {
+              "title": "パスワードを忘れた場合",
+              "description": "パスワードを忘れた場合は、メールアドレスを入力してください。",
+              "email": "メールアドレス",
+              "submit": "パスワードをリセットするメールを送信",
+              "validation": {
+                "email": "有効なメールアドレスを入力してください"
+              }
+            },
+            "Reset": {
+              "title": "パスワードをリセット",
+              "description": "新しいパスワードを入力してください。送信後、ログアウトされます。",
+              "password": "新しいパスワード",
+              "passwordConfirm": "確認用パスワード",
+              "submit": "パスワードをリセット",
+              "validation": {
+                "password": "パスワードは8文字以上が必要です",
+                "passwordConfirm": "確認用パスワードは8文字以上が必要です",
+                "passwordRegex": "パスワードは8文字以上で、英字・数字・大文字をそれぞれ少なくとも1文字含めてください",
+                "passwordDiff": "パスワードと確認用パスワードが一致しません"
+              }
+            }
+          }
+        },
+        "Turnstile": {
+          "error": "検証に失敗しました、再度お試しください",
+          "timeout": "検証がタイムアウトしました、再度お試しください",
+          "siteKeyNotSet": "サイトキーが設定されていません",
+          "turnstileTitle": "リクエストを検証中",
+          "turnstileDescription": "検証コードが読み込まれないか、長時間応答しない場合は、ページをリフレッシュするか、ネットワーク接続を確認してください。"
+        }
+      }
+    },
+    "Game": {
+      "TabsNav": {
+        "description": "ゲーム詳細",
+        "characters": "キャラクター",
+        "comments": "ゲームコメント"
+      },
+      "Actions": {
+        "download": "ダウンロード",
+        "Patch": {
+          "patch": "パッチ",
+          "error": "パッチを取得できませんでした"
+        },
+        "upload": "アップロード",
+        "edit": "このゲームを編集",
+        "history": {
+          "history": "編集履歴",
+          "noHistory": "編集履歴がありません"
+        },
+        "goToDiscussion": "ディスカッションへ",
+        "More": {
+          "MoreActions": {
+            "more": "その他",
+            "addToRecentUpdate": "最近の更新に追加",
+            "removeFromRecentUpdate": "最近の更新から削除"
+          },
+          "AddToRecentUpdate": {
+            "addToRecentUpdate": "最近の更新に追加",
+            "description": "最近の更新に追加してよろしいですか？",
+            "cancel": "キャンセル",
+            "confirm": "追加",
+            "success": "追加成功"
+          },
+          "RemoveFromRecentUpdate": {
+            "removeFromRecentUpdate": "最近の更新から削除",
+            "description": "最近の更新から削除してよろしいですか？",
+            "cancel": "キャンセル",
+            "confirm": "削除",
+            "success": "削除成功"
+          }
+        }
+      },
+      "Description": {
+        "GameCharacter": {
+          "noCharacters": "キャラクター情報がありません"
+        },
+        "GameCharacterItem": {
+          "noImage": "画像なし",
+          "viewDetails": "詳細を見る",
+          "gender": "性別",
+          "roleMain": "主人公",
+          "rolePrimary": "主要キャラクター",
+          "roleSide": "サブキャラクター",
+          "roleAppears": "カメオ",
+          "blood_type": "血液型",
+          "height": "身長（cm）",
+          "weight": "体重（kg）",
+          "bust": "バスト（cm）",
+          "waist": "ウエスト（cm）",
+          "hips": "ヒップ（cm）",
+          "cup": "カップ",
+          "age": "年齢（歳）",
+          "birthday": "誕生日（月/日）",
+          "female": "女性",
+          "male": "男性",
+          "non_binary": "ノンバイナリー",
+          "ambiguous": "不明／中性的",
+          "characterDetailDialogTitle": "キャラクター詳細"
+        },
+        "GameLinks": {
+          "links": "関連リンク"
+        },
+        "GameDetail": {
+          "tags": "タグ",
+          "introduction": "紹介",
+          "chooseLanguage": "言語を選択",
+          "images": "スクリーンショット",
+          "staff": "スタッフ",
+          "extraInfo": "その他の情報"
+        },
+        "BangumiExtraInfoKeyMap": {
+          "birthday": "誕生日",
+          "source": "出典",
+          "twitter": "ツイッター",
+          "homepage": "ホームページ",
+          "official_website": "公式サイト",
+          "parent_company": "親会社",
+          "script": "脚本",
+          "original_work": "原作",
+          "original_art": "原画",
+          "sd_original_art": "SD原画",
+          "cg_artists": "CG",
+          "logo_design": "ロゴデザイン",
+          "ui_design": "UIデザイン",
+          "design": "デザイン",
+          "character_design": "キャラクターデザイン",
+          "setting_cooperation": "設定協力",
+          "project": "企画",
+          "project_cooperation": "企画協力",
+          "director": "監督",
+          "producer": "プロデューサー",
+          "background": "背景",
+          "cooperation": "協力",
+          "publish": "発売",
+          "music": "音楽",
+          "theme_song_lyrics": "主題歌作詞",
+          "theme_song_composition": "主題歌作曲",
+          "theme_song_performance": "主題歌歌唱",
+          "sound_director": "音響監督",
+          "animation_production": "アニメーション制作",
+          "programming": "プログラミング"
+        }
+      },
+      "Upload": {
+        "GameUploadDialog": {
+          "title": "ゲームをアップロード",
+          "alert1Title": "注意",
+          "alert1Description": "ここでゲームパッケージをアップロードできます。アップロードしたファイルは Shionlib のサーバーに保存され、すべてのユーザーがダウンロードできるようになります。アップロードが正常に完了すると取り消すことはできず、保存されたファイルを削除することもできません。",
+          "alert2Title": "アップロードの注意事項",
+          "alert2Description": "ファイルのアップロードは「アップロードクォータ」を消費します。アップロード開始時に、ファイルサイズに相当するクォータが先に確保されます。アップロードが最後まで完了しなかった場合は、確認後にクォータが返還されます。\nゲームファイルは[b]1つの[/b] zip/rar/7z/tar/gzip ファイルにまとめ、[b]パスワードは設定しないでください[/b]。\nアップロード完了後、システムがファイルを検査して S3 に転送します。すべての処理が完了するとダウンロード情報が更新されます。\nアップロード中はページを再読み込みしたり閉じたりしないでください。",
+          "fileName": "ファイル名",
+          "fileNamePlaceholder": "ファイル名を入力",
+          "platform": "プラットフォーム",
+          "platformPlaceholder": "対象プラットフォームを選択",
+          "language": "言語",
+          "languagePlaceholder": "ゲームの言語を選択",
+          "note": "備考",
+          "notePlaceholder": "備考（任意）を入力",
+          "autoSubmitLabel": "アップロード完了時に送信",
+          "autoSubmitDescription": "プラットフォームと言語を入力したら、アップロード完了時に自動で送信します。",
+          "submit": "送信",
+          "waitForUploadCompleted": "アップロードの完了を待機中",
+          "success": "送信しました",
+          "validation": {
+            "fileNameRequired": "ファイル名は必須です",
+            "fileNameLength": "ファイル名は {length} 文字以内で入力してください",
+            "platform": "プラットフォームは必須です",
+            "language": "言語は必須です",
+            "note": "備考は255文字以内で入力してください"
+          }
+        },
+        "UploadQuota": {
+          "title": "アップロードクォータ",
+          "size": "総サイズ",
+          "used": "使用済み",
+          "remaining": "残り"
+        },
+        "OnGoingSession": {
+          "title": "進行中のアップロード",
+          "expires": "期限",
+          "resume": "同じファイルから続ける",
+          "cancel": "キャンセル"
+        }
+      },
+      "Download": {
+        "GameDownloadDialog": {
+          "title": "ダウンロード"
+        },
+        "GameDownloadDrawer": {
+          "title": "ダウンロード"
+        },
+        "GameDownloadContent": {
+          "alertTitle": "注意",
+          "alertDescription": "以下のリソースはすべて Shionlib ユーザーによってアップロードされたものです。ファイルの安全性はご自身で確認してください。\n10 GB 未満のファイルのダウンロードリンクの有効期間は {duration} 分；10 GB 以上 20 GB 未満のファイルのダウンロードリンクの有効期間は {duration1} 分；20 GB 以上のファイルのダウンロードリンクの有効期間は {duration2} 分です。有効期間内にダウンロードを完了してください。"
+        },
+        "GameDownload": {
+          "noDownloadSource": "ダウンロードリソースがありません"
+        },
+        "GameDownloadResourceItem": {
+          "created": "アップロードされた"
+        },
+        "GameDownloadFileItem": {
+          "onlyVisibleForYourself": "自分のみ可視",
+          "processing": "処理中",
+          "pending": "待機中",
+          "downloadStarted": "ダウンロードが開始されました",
+          "pushToAria2": "Aria2 に送信",
+          "normalDownload": "通常ダウンロード",
+          "aria2NotReady": "Aria2 に接続できません、設定を確認してください",
+          "aria2Unauthorized": "未認証、設定を確認してください",
+          "aria2FailedToFetch": "Aria2 に接続できません、設定を確認してください",
+          "aria2UnknownError": "未知のエラー",
+          "goToSettings": "設定へ",
+          "goToSettingsDescription": "設定ページに移動し、Aria2 の設定を確認してください。",
+          "virusFalsePositiveFlag": "ウイルスが検出された可能性があります",
+          "virusFalsePositiveFlagDescription": "ウイルス検査でこのファイルが検出されましたが、管理者によって許可されました。検出されたウイルス: {detected_viruses}。"
+        },
+        "Actions": {
+          "report": "違反を報告",
+          "edit": "編集",
+          "delete": "削除",
+          "reupload": "再アップロード",
+          "history": "更新履歴"
+        },
+        "Reupload": {
+          "title": "ファイルを再アップロード",
+          "currentFile": "現在のファイル",
+          "warningTitle": "注意",
+          "warningDescription": "再アップロードすると現在のファイルが置き換えられます。古いファイルは削除され、この操作は取り消すことができません。アップロード後、新しいファイルはダウンロード可能になる前にセキュリティ審査を通過する必要があります。このゲームをお気に入りに登録したユーザーには通知が送信されます。",
+          "reason": "更新理由（任意）",
+          "reasonPlaceholder": "例：バージョンアップデート、バグ修正、パッチ統合など",
+          "reasonHint": "更新理由を記載すると、他のユーザーが変更内容を理解しやすくなり、通知にも表示されます。",
+          "success": "再アップロードが完了しました。審査待ちです",
+          "error": "再アップロードに失敗しました",
+          "submitting": "送信中..."
+        },
+        "Edit": {
+          "title": "このダウンロードリソースを編集",
+          "submit": "変更を確認",
+          "success": "変更が保存されました"
+        },
+        "History": {
+          "title": "ファイル更新履歴",
+          "loading": "読み込み中...",
+          "noHistory": "更新履歴がありません",
+          "version": "バージョン",
+          "current": "現在",
+          "fileInfo": "ファイル情報",
+          "fileSize": "ファイルサイズ",
+          "hash": "ハッシュ値",
+          "s3Key": "S3 キー",
+          "operator": "操作者",
+          "reason": "更新理由",
+          "loadError": "履歴の読み込みに失敗しました"
+        },
+        "Delete": {
+          "title": "このダウンロードリソースを削除",
+          "description": "このダウンロードリソースを削除してよろしいですか？この操作は元に戻せません。",
+          "cancel": "キャンセル",
+          "delete": "削除",
+          "success": "削除成功"
+        },
+        "Report": {
+          "title": "違反を報告",
+          "description": "できるだけ具体的な理由を記載してください。悪意のある通報には制限やペナルティが適用されます。",
+          "reason": "通報理由",
+          "reasonPlaceholder": "通報理由を選択",
+          "detail": "詳細（任意）",
+          "detailPlaceholder": "ファイル名、症状、食い違いなどの詳細を補足できます",
+          "cancel": "キャンセル",
+          "submit": "通報を送信",
+          "success": "通報を送信しました。ご協力ありがとうございます。",
+          "validation": {
+            "reason": "通報理由を選択してください",
+            "detailMaxLength": "詳細は {length} 文字以内で入力してください"
+          },
+          "reasons": {
+            "MALWARE": "ウイルス/マルウェアを含む",
+            "IRRELEVANT": "このゲームと無関係なリソース",
+            "BROKEN_LINK": "リンク切れ・ファイル利用不可",
+            "MISLEADING_CONTENT": "タイトル/説明と内容が一致しない",
+            "OTHER": "その他の違反"
+          }
+        }
+      },
+      "Cover": {
+        "GameCover": {
+          "viewAllCovers": "すべて表示"
+        },
+        "GameCoverDialog": {
+          "title": "すべてのカバー"
+        },
+        "GameCoverDrawer": {
+          "title": "すべてのカバー"
+        }
+      },
+      "Edit": {
+        "EditLayout": {
+          "edit": "ゲーム情報を編集",
+          "description": "このページでゲーム情報を編集できます。編集可能なフィールドのみが表示されます。管理権限を取得するために管理者に申請できます。編集内容は記録され、誰でも閲覧できます。",
+          "backToGame": "ゲームページに戻る"
+        },
+        "EditTabsNav": {
+          "scalar": "基本情報",
+          "cover": "カバー",
+          "image": "画像",
+          "link": "リンク",
+          "developer": "開発者",
+          "character": "キャラクター"
+        },
+        "Scalar": {
+          "title_zh": "タイトル（中国語）",
+          "title_en": "タイトル（英語）",
+          "title_jp": "タイトル（日本語）",
+          "type": "タイプ",
+          "platform": "プラットフォーム",
+          "platformPlaceholder": "対象プラットフォームを選択",
+          "aliases": "別名",
+          "tags": "タグ",
+          "intro_info_description": "以下のフィールド [b]紹介（中国語）[/b]、[b]紹介（英語）[/b]、[b]紹介（日本語）[/b] は BBCode をサポートしています。",
+          "intro_zh": "紹介（中国語）",
+          "intro_en": "紹介（英語）",
+          "intro_jp": "紹介（日本語）",
+          "release_date": "発売日",
+          "release_date_tba": "発売日期待定",
+          "extra_info": "その他の情報",
+          "extra_info_key": "キー",
+          "extra_info_key_placeholder": "キーを入力",
+          "extra_info_value": "値",
+          "extra_info_value_placeholder": "値を入力",
+          "add_extra_info": "その他の情報を追加",
+          "staffs": "スタッフ",
+          "staff_name": "名前",
+          "staff_name_placeholder": "名前を入力",
+          "staff_role": "役割",
+          "staff_role_placeholder": "役割を入力",
+          "add_staff": "スタッフを追加",
+          "nsfw": "NSFWかどうか",
+          "submit": "送信",
+          "success": "送信成功",
+          "Comfirm": {
+            "title": "変更を確認",
+            "cancel": "キャンセル",
+            "submit": "送信"
+          },
+          "Changes": {
+            "fieldChanges": "変更されたフィールド"
+          }
+        },
+        "Cover": {
+          "noPermission": "カバーを編集する権限がありません",
+          "success": "変更が保存されました",
+          "Edit": {
+            "title": "カバーを編集"
+          },
+          "Create": {
+            "create": "カバーを作成",
+            "success": "作成成功"
+          },
+          "Delete": {
+            "title": "カバーを削除",
+            "description": "カバーを削除してよろしいですか？この操作は元に戻せません。",
+            "cancel": "キャンセル",
+            "delete": "削除",
+            "success": "削除成功"
+          },
+          "EditContent": {
+            "url": "画像",
+            "dims": "サイズ",
+            "language": "言語",
+            "selectLanguage": "言語を選択",
+            "type": "タイプ",
+            "selectType": "タイプを選択",
+            "sexual": "性描写レベル",
+            "violence": "暴力描写レベル",
+            "submit": "変更を確認",
+            "validation": {
+              "url": "画像を選択してください",
+              "dims": "画像を選択してください",
+              "language": "カバー言語を選択してください",
+              "type": "カバータイプを選択してください",
+              "sexual": "性描写レベルは0-2の間である必要があります",
+              "violence": "暴力描写レベルは0-2の間である必要があります"
+            }
+          },
+          "Image": {
+            "Upload": {
+              "select": "画像を選択",
+              "upload": "画像をアップロード",
+              "success": "アップロード成功"
+            }
+          }
+        },
+        "Image": {
+          "noPermission": "画像を編集する権限がありません",
+          "success": "変更が保存されました",
+          "Edit": {
+            "title": "画像を編集"
+          },
+          "Create": {
+            "create": "画像を作成",
+            "success": "作成成功"
+          },
+          "Delete": {
+            "title": "画像を削除",
+            "description": "画像を削除してよろしいですか？この操作は元に戻せません。",
+            "cancel": "キャンセル",
+            "delete": "削除",
+            "success": "削除成功"
+          },
+          "EditContent": {
+            "url": "画像",
+            "dims": "サイズ",
+            "sexual": "性描写レベル",
+            "violence": "暴力描写レベル",
+            "submit": "変更を確認",
+            "validation": {
+              "url": "画像を選択してください",
+              "dims": "画像を選択してください",
+              "sexual": "性描写レベルは0-2の間である必要があります",
+              "violence": "暴力描写レベルは0-2の間である必要があります"
+            }
+          },
+          "Image": {
+            "Upload": {
+              "select": "画像を選択",
+              "upload": "画像をアップロード",
+              "success": "アップロード成功"
+            }
+          }
+        },
+        "Developer": {
+          "noPermission": "開発者を編集する権限がありません",
+          "removed": "削除成功",
+          "updated": "更新成功",
+          "added": "追加成功",
+          "Item": {
+            "no_developers": "開発者なし",
+            "role_placeholder": "役割",
+            "no_role": "役割なし"
+          },
+          "Form": {
+            "role": "役割",
+            "role_placeholder": "例：発行、開発など",
+            "submit": "変更を確認"
+          },
+          "Edit": {
+            "title": "開発者関連を編集",
+            "view_developer": "開発者を見る"
+          },
+          "Delete": {
+            "delete": "開発者を削除",
+            "title": "削除の確認",
+            "description": "この開発者関連をゲームから削除してもよろしいですか？",
+            "cancel": "キャンセル",
+            "success": "削除成功"
+          },
+          "Search": {
+            "title": "開発者を追加",
+            "placeholder": "開発者名を検索...",
+            "search": "検索",
+            "add": "追加",
+            "already_added": "追加済み"
+          }
+        },
+        "Character": {
+          "noPermission": "キャラクターを編集する権限がありません",
+          "removed": "削除成功",
+          "updated": "更新成功",
+          "added": "追加成功",
+          "Item": {
+            "no_characters": "キャラクターなし",
+            "role_placeholder": "役割タイプを選択",
+            "actor_placeholder": "声優",
+            "no_role": "役割なし",
+            "role_main": "主人公",
+            "role_primary": "主要キャラクター",
+            "role_side": "サブキャラクター",
+            "role_appears": "カメオ"
+          },
+          "Form": {
+            "image": "キャラクター画像",
+            "role": "役割タイプ",
+            "role_placeholder": "役割タイプを選択",
+            "role_main": "主人公",
+            "role_primary": "主要キャラクター",
+            "role_side": "サブキャラクター",
+            "role_appears": "カメオ",
+            "actor": "声優",
+            "actor_placeholder": "声優名を入力",
+            "submit": "保存"
+          },
+          "Edit": {
+            "title": "キャラクター関連を編集",
+            "view_character": "キャラクターを見る"
+          },
+          "Delete": {
+            "delete": "キャラクターを削除",
+            "title": "削除の確認",
+            "description": "このキャラクター関連をゲームから削除してもよろしいですか？",
+            "cancel": "キャンセル",
+            "success": "削除成功"
+          },
+          "Image": {
+            "Upload": {
+              "select": "画像を選択",
+              "upload": "画像をアップロード",
+              "success": "画像をアップロードしました",
+              "error": "画像のアップロードに失敗しました"
+            },
+            "Image": {
+              "image": "キャラクター画像",
+              "image_question": "現在のゲーム条目にのみ有効"
+            }
+          },
+          "Search": {
+            "title": "キャラクターを追加",
+            "placeholder": "キャラクター名を検索...",
+            "search": "検索",
+            "add": "追加",
+            "already_added": "追加済み",
+            "role_placeholder": "役割タイプ",
+            "role_main": "主人公",
+            "role_primary": "メインキャラ",
+            "role_side": "サブキャラ",
+            "role_appears": "登場キャラ"
+          }
+        },
+        "EditNote": {
+          "title": "編集備考",
+          "placeholder": "編集理由, 編集内容等(任意, e.g. 発売日を2025年11月10日に変更, 理由：発売延期)"
+        }
+      },
+      "EditHistory": {
+        "title": "編集履歴",
+        "fieldChanges": "変更されたフィールド",
+        "undone": "元に戻しました",
+        "undoneOf": "元に戻しました",
+        "undo": "この編集を元に戻す",
+        "undoDescription": "この編集を元に戻しますか？この編集は元に戻され、元に戻すことはできません。",
+        "confirm": "確認",
+        "cancel": "キャンセル",
+        "success": "元に戻しました",
+        "UndoOptions": {
+          "force": "強制的に元に戻す",
+          "mode": "元に戻すモード",
+          "strict": "厳密モード",
+          "cascade": "級連モード"
+        }
+      },
+      "Filter": {
+        "Header": {
+          "title": "すべてのゲーム",
+          "description": "Shionlib データベース内のすべてのゲームを表示します。",
+          "subDescription": "ここでは、さまざまなパラメーターを使用してゲームをフィルタリング、フィルタリング、並べ替えることができます。"
+        },
+        "GameFilter": {
+          "tags": "タグをフィルター"
+        },
+        "Tags": {
+          "tags": "タグをフィルター",
+          "searchPlaceholder": "タグを検索"
+        },
+        "Date": {
+          "date": "年と月をフィルター",
+          "selectYear": "全部年",
+          "selectMonth": "全部月"
+        },
+        "Sort": {
+          "sort": "並び替え",
+          "selectSort": "並び替え方式を選択",
+          "selectOrder": "並び替え順序を選択",
+          "release_date": "発売日",
+          "views": "閲覧数",
+          "downloads": "ダウンロード数",
+          "asc": "昇順",
+          "desc": "降順"
+        }
+      },
+      "Patch": {
+        "PatchContent": {
+          "datafrom": "データソース",
+          "moyu": "鲲 Galgame"
+        },
+        "PatchDialog": {
+          "title": "補丁"
+        },
+        "PatchDrawer": {
+          "title": "補丁"
+        },
+        "PatchItem": {
+          "created": "アップロードされた",
+          "type": {
+            "all": "全部タイプ",
+            "manual": "人工翻訳補丁",
+            "ai": "AI 翻訳補丁",
+            "machine_polishing": "機械翻訳潤色",
+            "machine": "機械翻訳補丁",
+            "save": "全 CG 保存",
+            "crack": "破解補丁",
+            "fix": "修正補丁",
+            "mod": "魔改補丁",
+            "other": "その他"
+          }
+        },
+        "PatchResourceItem": {
+          "viewOnMoyu": "Kun Galgame Patch で表示"
+        }
+      },
+      "Score": {
+        "Bangumi": {
+          "rank": "ランキング",
+          "votes": "人が評価"
+        },
+        "VNDB": {
+          "votes": "人が評価"
+        }
+      }
+    },
+    "User": {
+      "Settings": {
+        "TabsNav": {
+          "personal": "個人情報",
+          "site": "サイト設定",
+          "download": "ダウンロード設定"
+        },
+        "Avatar": {
+          "title": "アバター",
+          "description": "このページではあなたのアバターを設定できます。",
+          "help": "右側のアバターをクリックして画像を選択してください。",
+          "tips": "この設定は任意ですが、アバターを設定することをお勧めします。",
+          "update": "アバターを更新",
+          "success": "更新成功"
+        },
+        "AvatarResize": {
+          "title": "アバターのサイズを調整",
+          "crop": "裁剪"
+        },
+        "Name": {
+          "title": "ユーザー名",
+          "description": "このページではあなたのユーザー名を設定できます。ユーザー名はあなたの唯一の識別子であり、他のユーザーと同じにすることはできません。",
+          "update": "ユーザー名を更新",
+          "success": "更新成功"
+        },
+        "Password": {
+          "title": "パスワード",
+          "description": "このページではあなたのパスワードを設定できます。パスワードは8文字以上で、英字・数字・大文字をそれぞれ少なくとも1文字含めてください。",
+          "note": "保存後、再ログインが必要です。",
+          "update": "パスワードを更新",
+          "forget": "パスワードを忘れた？",
+          "success": "更新成功, 再ログインしてください"
+        },
+        "PasswordForm": {
+          "validation": {
+            "currentPassword": "現在のパスワードは8文字以上が必要です",
+            "password": "パスワードは8文字以上が必要です",
+            "passwordConfirm": "確認用パスワードは8文字以上が必要です",
+            "passwordRegex": "パスワードは8文字以上で、英字・数字・大文字をそれぞれ少なくとも1文字含めてください",
+            "passwordDiff": "パスワードと確認用パスワードが一致しません"
+          },
+          "currentPassword": "現在のパスワード",
+          "password": "パスワード",
+          "passwordConfirm": "確認用パスワード"
+        },
+        "Email": {
+          "title": "メールアドレス",
+          "description": "このページではあなたのメールアドレスを設定できます。現在のメールアドレスに検証コードを送信し、新しいメールアドレスを入力して検証できます。",
+          "currentEmail": "現在のメールアドレス",
+          "help": "現在のメールアドレスが利用できない場合は、管理者に連絡してください。",
+          "update": "検証コードを送信",
+          "success": "更新成功, 再ログインしてください"
+        },
+        "EmailFlow": {
+          "title": "メールアドレスを更新",
+          "step1": {
+            "title": "現在のメールアドレスを検証",
+            "description": "検証コードは現在のメールアドレスに送信されました。受信しない場合は、迷惑メールフォルダを確認してください。",
+            "currentEmail": "現在のメールアドレス",
+            "verifyCode": "検証コード",
+            "validation": {
+              "verifyCode": "検証コードは必須です"
+            }
+          },
+          "step2": {
+            "title": "新しいメールアドレスを検証",
+            "description": "新しいメールアドレスを入力して検証してください。",
+            "newEmail": "新しいメールアドレス",
+            "getVerifyCode": "検証コードを送信",
+            "verifyCodeSent": "検証コードを送信しました",
+            "verifyCode": "検証コード",
+            "validation": {
+              "email": "有効なメールアドレスを入力してください",
+              "verifyCode": "検証コードは必須です"
+            }
+          },
+          "previous": "前へ",
+          "next": "次へ",
+          "done": "完了"
+        },
+        "Language": {
+          "title": "言語",
+          "description": "このページではあなたの言語偏好を設定できます。",
+          "selectLanguage": "言語を選択",
+          "chooseLanguage": "言語を選択",
+          "update": "言語を更新",
+          "success": "更新成功"
+        },
+        "ContentLimit": {
+          "title": "内容限制",
+          "description": "このページではあなたの内容表示偏好を設定できます。",
+          "selectContentLimit": "内容限制を選択",
+          "chooseContentLimit": "内容限制を選択",
+          "showWithSpoiler": "表示Spoiler包裹の NSFW 内容",
+          "justShow": "表示すべての NSFW 内容",
+          "neverShowNsfwContent": "NSFW 内容を表示しない",
+          "tipsTitle": "提示",
+          "tipsDescription": "この設定は30分後に有効になります。変更を即時に反映させるには再ログインしてください。",
+          "relogin": "再ログイン",
+          "update": "内容限制を更新",
+          "success": "更新成功"
+        },
+        "ToastPosition": {
+          "title": "Toast の表示位置",
+          "description": "グローバル Toast 通知の表示位置を設定できます。",
+          "selectPosition": "Toast の位置を選択",
+          "choosePosition": "Toast の位置を選択",
+          "top-left": "左上",
+          "top-center": "上中央",
+          "top-right": "右上",
+          "bottom-left": "左下",
+          "bottom-center": "下中央",
+          "bottom-right": "右下",
+          "tipsTitle": "ヒント",
+          "tipsDescription": "この設定はローカルブラウザにのみ保存され、Shionlib サーバーにはアップロードされません。",
+          "update": "Toast の位置を更新",
+          "reset": "デフォルトに戻す",
+          "success": "更新成功",
+          "resetSuccess": "デフォルトに戻しました"
+        },
+        "Aria2": {
+          "title": "Aria2",
+          "description": "このページではあなたの Aria2 設定を更新できます。",
+          "tipsTitle": "ヒント",
+          "tipsDescription": "この設定はローカルブラウザにのみ保存され、Shionlib サーバーにはアップロードされません。",
+          "protocol": "プロトコル",
+          "protocolPlaceholder": "プロトコルを選択",
+          "host": "ホスト",
+          "hostPlaceholder": "例：localhost または 127.0.0.1",
+          "port": "ポート",
+          "path": "パス",
+          "pathPlaceholder": "例：/jsonrpc",
+          "authSecret": "認証シークレット",
+          "downloadPath": "ダウンロードパス",
+          "downloadPathPlaceholder": "空欄にすると Aria2 のデフォルトパスを使用",
+          "save": "保存",
+          "success": "保存成功",
+          "Test": {
+            "title": "接続テスト",
+            "success": "接続成功！",
+            "failed": "接続失敗",
+            "failedToConnect": "Aria2 サーバーに接続できません",
+            "unauthorized": "認証失敗、シークレットを確認してください"
+          },
+          "Reset": {
+            "title": "リセット",
+            "reset": "リセット",
+            "success": "デフォルト設定にリセットしました"
+          }
+        }
+      },
+      "Home": {
+        "Profile": {
+          "UserProfile": {
+            "role": {
+              "user": "ユーザー",
+              "admin": "管理者",
+              "super_admin": "スーパー管理者"
+            },
+            "joined": "参加于",
+            "banned": "封禁中"
+          },
+          "Datas": {
+            "upload": "アップロード",
+            "comment": "コメント",
+            "favorite": "お気に入り",
+            "edit": "編集"
+          }
+        },
+        "Uploads": {
+          "ResourceItem": {
+            "created": "アップロードされた",
+            "moreThanOneFilePrefix": "等",
+            "moreThanOneFileSuffix": "ファイル"
+          }
+        },
+        "HomeTabsNav": {
+          "upload": "アップロード",
+          "comment": "コメント",
+          "favorite": "お気に入り",
+          "edit": "編集"
+        },
+        "Edits": {
+          "EditRecordItem": {
+            "edited": "編集しました",
+            "actionType": {
+              "UPDATE_SCALAR": "基本情報を更新",
+              "ADD_RELATION": "関連を追加",
+              "REMOVE_RELATION": "関連を削除",
+              "SET_RELATION": "関連を設定",
+              "UPDATE_RELATION": "関連を更新"
+            },
+            "relationType": {
+              "cover": "カバー",
+              "image": "画像",
+              "link": "関連リンク",
+              "developer": "制作スタッフ",
+              "character": "登場キャラクター"
+            },
+            "entity": {
+              "game": "ゲーム",
+              "character": "キャラクター",
+              "developer": "制作スタッフ"
+            },
+            "fieldChanges": "変更されたフィールド"
+          },
+          "EditChanges": {
+            "changes": "変更の詳細",
+            "added": "追加",
+            "removed": "削除",
+            "updated": "更新",
+            "before": "変更前",
+            "after": "変更後",
+            "path": "パス",
+            "root": "（ルート）",
+            "noDifferences": "差分はありません",
+            "empty": "（空）"
+          }
+        },
+        "Favorites": {
+          "FavoriteListItem": {
+            "default": "デフォルトお気に入り"
+          },
+          "FavoriteItemsHeader": {
+            "default": "デフォルトお気に入り",
+            "private": "私有"
+          },
+          "Action": {
+            "Delete": {
+              "title": "お気に入りを削除",
+              "description": "このお気に入りを削除してもよろしいですか？このお気に入りに含まれるすべてのゲームが削除されます。この操作は元に戻せません。",
+              "cancel": "キャンセル",
+              "delete": "削除",
+              "success": "削除成功"
+            },
+            "Edit": {
+              "edit": "お気に入りを編集",
+              "title": "お気に入りを編集",
+              "description": "お気に入り情報を更新します。",
+              "Content": {
+                "name": "お気に入り名称",
+                "description": "お気に入り説明",
+                "is_private": "私有お気に入り",
+                "submit": "保存",
+                "success": "保存成功",
+                "validation": {
+                  "nameMinLength": "お気に入り名称は少なくとも {length} 文字以上必要です",
+                  "nameMaxLength": "お気に入り名称は最大 {length} 文字まで許可されています",
+                  "descriptionMaxLength": "お気に入り説明は最大 {length} 文字まで許可されています"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Developer": {
+      "Intros": {
+        "BasicInfos": {
+          "unknown": "リンクがありません",
+          "works_count": "合計 {count} 作品",
+          "parent_developer": "親会社"
+        },
+        "Details": {
+          "no_intro": "紹介がありません"
+        }
+      },
+      "Actions": {
+        "edit": "編集",
+        "history": {
+          "history": "編集履歴",
+          "noHistory": "編集履歴がありません"
+        }
+      },
+      "Edit": {
+        "EditLayout": {
+          "edit": "会社情報を編集",
+          "description": "このページで会社情報を編集できます。編集可能なフィールドのみが表示されます。",
+          "backToDeveloper": "会社ページに戻る"
+        },
+        "Scalar": {
+          "name": "名前",
+          "aliases": "別名",
+          "intro_info_description": "以下のフィールド [b]紹介（中国語）[/b]、[b]紹介（英語）[/b]、[b]紹介（日本語）[/b] は BBCode をサポートしています。",
+          "intro_zh": "紹介（中国語）",
+          "intro_en": "紹介（英語）",
+          "intro_jp": "紹介（日本語）",
+          "extra_info": "その他の情報",
+          "extra_info_key": "キー",
+          "extra_info_value": "値",
+          "add_extra_info": "その他の情報を追加",
+          "logo": "ロゴ",
+          "select_file": "ファイルを選択",
+          "upload": "アップロード",
+          "upload_success": "アップロード成功",
+          "website": "ウェブサイト",
+          "submit": "変更を送信",
+          "success": "送信成功",
+          "Confirm": {
+            "title": "変更を確認",
+            "cancel": "キャンセル",
+            "submit": "送信"
+          }
+        },
+        "EditNote": {
+          "title": "備考",
+          "placeholder": "変更理由（任意）"
+        }
+      },
+      "List": {
+        "Header": {
+          "title": "すべての会社",
+          "description": "Shionlib データベース内のすべての会社/開発者を表示します。"
+        },
+        "Search": {
+          "placeholder": "会社/開発者を検索"
+        },
+        "DeveloperItem": {
+          "works_count": "合計 {count} 作品"
+        }
+      }
+    },
+    "Character": {
+      "Actions": {
+        "edit": "編集",
+        "history": "編集履歴",
+        "history_title": "編集履歴",
+        "history_description": "このキャラクターの編集履歴を表示",
+        "no_history": "編集履歴なし"
+      },
+      "Edit": {
+        "EditLayout": {
+          "edit": "キャラクター編集",
+          "description": "このページでキャラクター情報を編集できます。編集可能なフィールドのみが表示されます。",
+          "backToCharacter": "キャラクターページに戻る"
+        },
+        "Scalar": {
+          "name_jp": "日本語名",
+          "name_zh": "中国語名",
+          "name_en": "英語名",
+          "aliases": "別名",
+          "intro_info_description": "以下のフィールド [b]紹介（中国語）[/b]、[b]紹介（英語）[/b]、[b]紹介（日本語）[/b] は BBCode をサポートしています。",
+          "intro_zh": "紹介（中国語）",
+          "intro_en": "紹介（英語）",
+          "intro_jp": "紹介（日本語）",
+          "image": "キャラクター画像",
+          "select_file": "ファイルを選択",
+          "upload": "アップロード",
+          "upload_success": "アップロード成功",
+          "body_metrics": "身体データ",
+          "height": "身長 (cm)",
+          "weight": "体重 (kg)",
+          "bust": "バスト (cm)",
+          "waist": "ウエスト (cm)",
+          "hips": "ヒップ (cm)",
+          "cup": "カップ",
+          "age": "年齢",
+          "birthday": "誕生日",
+          "birthday_month": "月",
+          "birthday_day": "日",
+          "gender": "性別",
+          "non-spoiler-gender": "非劇透性別",
+          "actual-gender": "実際の性別",
+          "gender_m": "男性",
+          "gender_f": "女性",
+          "gender_o": "その他",
+          "gender_a": "無性別",
+          "blood_type": "血液型",
+          "blood_type_placeholder": "血液型を選択",
+          "blood_type_a": "A型",
+          "blood_type_b": "B型",
+          "blood_type_ab": "AB型",
+          "blood_type_o": "O型",
+          "submit": "変更を送信",
+          "success": "送信成功",
+          "Confirm": {
+            "title": "変更を確認",
+            "cancel": "キャンセル",
+            "submit": "送信"
+          }
+        },
+        "EditNote": {
+          "title": "備考",
+          "placeholder": "変更理由（任意）"
+        }
+      },
+      "Intros": {
+        "BasicInfos": {
+          "appearances_count": "{count} 登場作品",
+          "age": "年齢",
+          "birthday": "誕生日",
+          "blood_type": "血液型",
+          "height": "身長",
+          "weight": "体重",
+          "male": "男性",
+          "female": "女性",
+          "non_binary": "ノンバイナリー",
+          "ambiguous": "不明"
+        },
+        "Details": {
+          "no_intro": "紹介なし"
+        }
+      }
+    },
+    "Docs": {
+      "SideBar": {
+        "title": "ドキュメントディレクトリ"
+      },
+      "Content": {
+        "DocTOC": {
+          "title": "ページインデックス"
+        },
+        "DocNav": {
+          "prev": "前のページ",
+          "next": "次のページ"
+        },
+        "DocFooter": {
+          "edit": "このページを GitHub で編集"
+        }
+      }
+    },
+    "Release": {
+      "List": {
+        "Header": {
+          "title": "最新アップロード",
+          "description": "Shionlib ユーザーがアップロードした最新のゲームファイル、アップロード時間順に並べ替えられています。",
+          "subDescriptionPrefix": "すべてのユーザーは Shionlib サーバーにゲームファイルをアップロードできます。あなたはこの",
+          "subDescriptionLink": "ガイド",
+          "subDescriptionSuffix": "を読むことで、ゲームファイルをアップロードする方法を学ぶことができます。"
+        }
+      },
+      "ReleaseCard": {
+        "uploaded_at": "アップロードされた",
+        "more_than_one_file": "等 {count} 個のファイル"
+      }
+    },
+    "Home": {
+      "Activity": {
+        "Head": {
+          "title": "最新動態",
+          "description": "Shionlib 活動ログ、ユーザーとシステム活動はここに記録されます。"
+        },
+        "ActivityCard": {
+          "system": "システム"
+        },
+        "LoadMore": {
+          "button": "さらに読み込む",
+          "noMore": "これ以上の更新はありません",
+          "error": "読み込みに失敗しました。もう一度お試しください。"
+        },
+        "Activities": {
+          "Comment": {
+            "commentedPrefix": "コメントしました",
+            "game": "ゲーム",
+            "commentedSuffix": ""
+          },
+          "FileUploaded": {
+            "uploadedToServerPrefix": "ファイルをアップロードしました",
+            "uploadedToServerSuffix": "サーバーに",
+            "pending": "待機中",
+            "uploadedToS3Prefix": "ファイル",
+            "uploadedToS3Suffix": "Shionlib ストレージシステムにアップロードされました",
+            "processCompleted": "アップロードプロセス完了"
+          },
+          "FileScaned": {
+            "scannedPrefix": "ファイル",
+            "scannedSuffix": "スキャン完了",
+            "pass": "パス",
+            "brokenOrTruncated": "破損または不完全",
+            "brokenOrUnsupported": "破損または非対応",
+            "encrypted": "暗号化",
+            "harmfulContent": "有害な内容",
+            "processAborted": "アップロードプロセス中断"
+          },
+          "FileProgress": {
+            "unknownFile": "ファイル名未設定",
+            "stages": {
+              "uploadServer": "サーバーへアップロード",
+              "uploadS3": "ストレージへアップロード",
+              "scan": "ファイルスキャン"
+            },
+            "status": {
+              "completed": "完了",
+              "inProgress": "進行中",
+              "failed": "失敗",
+              "waiting": "待機中",
+              "pending": "未開始"
+            },
+            "timeline": {
+              "title": "タイムライン",
+              "empty": "まだ更新はありません"
+            },
+            "events": {
+              "FILE_UPLOAD_TO_SERVER": "サーバーにアップロードしました",
+              "FILE_UPLOAD_TO_S3": "ストレージにアップロードしました",
+              "FILE_CHECK_OK": "スキャンを通過しました",
+              "FILE_CHECK_BROKEN_OR_TRUNCATED": "スキャン失敗：破損または欠損",
+              "FILE_CHECK_BROKEN_OR_UNSUPPORTED": "スキャン失敗：破損または非対応形式",
+              "FILE_CHECK_ENCRYPTED": "スキャン失敗：暗号化ファイル",
+              "FILE_CHECK_HARMFUL": "スキャン失敗：危険なコンテンツ",
+              "FILE_REUPLOAD": "再アップロード"
+            }
+          },
+          "Edit": {
+            "editedPrefix": "編集しました",
+            "game": "ゲーム",
+            "developer": "開発者",
+            "character": "キャラクター"
+          },
+          "Create": {
+            "createdPrefix": "作成しました",
+            "game": "ゲーム"
+          }
+        }
+      },
+      "Games": {
+        "Head": {
+          "title": "最近人気のゲーム一覧",
+          "description": "最近人気のゲーム一覧，閲覧数、ダウンロード数、登録時間、発売時間を総合的に並べ替えたゲーム一覧です。1時間ごとに更新されます。"
+        }
+      },
+      "RecentUpdate": {
+        "Head": {
+          "title": "最近の更新",
+          "description": "最近更新のゲーム，新しい民間翻訳、公式翻訳バージョン、新しいパッチ、新しい DLC などが含まれています。"
+        }
+      },
+      "NewWorks": {
+        "Head": {
+          "title": "本月新作",
+          "description": "発売日が前月の最終金曜日と今月の最終金曜日の間にある作品。現在の日付が今月の最終金曜日以降の場合は、今月の最終金曜日と来月の最終金曜日の間にある作品が表示されます。発売日で並べ替えます。",
+          "release": "{yearName} {monthName} 発売の作品。"
+        }
+      },
+      "Hero": {
+        "Shionlib": {
+          "description": "無料・オープンソース・気軽に使える ビジュアルノベル／ギャルゲー アーカイブ"
+        },
+        "Overview": {
+          "games": "ゲーム",
+          "files": "ファイル",
+          "storage": "ストレージ",
+          "24-hour-traffic": "24時間流量"
+        }
+      }
+    },
+    "FriendLink": {
+      "Head": {
+        "title": "友情リンク",
+        "description": "Shionlib の友情リンク、他の 視覚小説/ガルゲーム 関連サイトを友情リンクに参加させてください。興味がある場合は、ウェブサイトの下部の 連絡 ボタンを介してあなたのウェブサイト情報を提供してください。"
+      }
+    },
+    "Create": {
+      "Header": {
+        "title": "ゲーム条目を作成",
+        "descriptionPrefix": "Shionlib のデータベースに新しいゲーム条目を追加し、",
+        "vndb": "Visual Novel Database (VNDB)",
+        "descriptionMiddle": " と ",
+        "bangumi": "Bangumi",
+        "descriptionSuffix": " を使用して基本的な権威情報を取得します。",
+        "guidePrefix": "VNDB でゲームを検索する方法を知りたい場合は、",
+        "guideLink": "このガイド",
+        "guideSuffix": "を参照してください。"
+      },
+      "Form": {
+        "vndbIdLabel": "VNDB ID",
+        "vndbIdDescription": "VNDB ID は英字 v と数字の組み合わせで、例：v14018。",
+        "vndbIdPlaceholder": "v14018",
+        "bangumiIdLabel": "Bangumi ID",
+        "bangumiIdDescription": "Bangumi ID は数字のみの組み合わせで、例：88765。",
+        "bangumiIdPlaceholder": "88765",
+        "skipConsistencyCheckLabel": "一致性チェックをスキップ",
+        "skipConsistencyCheckDescription": "一致性チェックをスキップすると、VNDB と Bangumi のデータが一致しているかどうかをチェックしません。",
+        "validation": {
+          "vndbId": "有効な VNDB ID を入力してください",
+          "bangumiId": "有効な Bangumi ID を入力してください"
+        },
+        "submit": "ゲーム条目を作成"
+      },
+      "Create": {
+        "invalidId": "無効な VNDB ID または Bangumi ID",
+        "success": "作成成功, ゲーム条目 ID は {id} です",
+        "successDescription": "下のボタンをクリックすると、新しいウィンドウでゲーム条目ページを開きます。",
+        "view": "ゲーム条目を表示"
+      },
+      "Alert": {
+        "info": "情報",
+        "infoDescription": "VNDB ID と Bangumi ID が対応していないゲーム条目を作成したい場合は、管理者に連絡して手動で追加してください。",
+        "warning": "エラー処理",
+        "warningDescription": "可能なエラーコードと原因：",
+        "errorCodes": {
+          "400103": "Bangumi リクエストが失敗しました。Bangumi ID が存在しないか、Bangumi にアクセスできない可能性があります。",
+          "400104": "VNDB リクエストが失敗しました。VNDB ID が存在しないか、VNDB にアクセスできない可能性があります。",
+          "400105": "ゲーム条目は Shionlib のデータベースに既に存在しています。",
+          "400106": "VNDB と Bangumi から取得したゲームデータが一致性チェックに失敗しました。入力した ID が正しいか確認してください。"
+        }
+      }
+    },
+    "Message": {
+      "Sidebar": {
+        "Sidebar": {
+          "title": "メッセージ"
+        },
+        "Item": {
+          "all": "すべてのメッセージ",
+          "system": "システムメッセージ",
+          "reply": "コメント返信",
+          "like": "コメントいいね"
+        }
+      },
+      "Message": {
+        "Box": {
+          "title": "メッセージ"
+        },
+        "Switch": {
+          "all": "すべて",
+          "read": "既読",
+          "unread": "未読"
+        },
+        "ReadAll": {
+          "markAllRead": "すべて既読にする"
+        },
+        "Item": {
+          "system": "システムメッセージ"
+        }
+      },
+      "Detail": {
+        "DetailDrawer": {
+          "title": "メッセージ詳細"
+        },
+        "DetailDialog": {
+          "title": "メッセージ詳細"
+        },
+        "Detail": {
+          "relatedGame": "ゲームから"
+        }
+      }
+    },
+    "Favorite": {
+      "Action": {
+        "addToFavorites": "お気に入りに追加",
+        "favorited": "お気に入りに追加済み",
+        "removeFromFavorites": "お気に入りから削除",
+        "title": "お気に入りに追加",
+        "description": "このゲームをお気に入りに追加します。お気に入りは個人用に作成され、他のユーザーは表示できません。",
+        "Content": {
+          "Item": {
+            "gameCount": "合計 {count} 作品",
+            "favorited": "お気に入りに追加済み",
+            "default": "デフォルトお気に入り",
+            "added": "追加成功",
+            "removed": "削除成功"
+          }
+        }
+      },
+      "Create": {
+        "create": "お気に入りを作成",
+        "title": "お気に入りを作成",
+        "description": "お気に入りを作成します。お気に入りは個人用に作成され、他のユーザーは表示できません。",
+        "Content": {
+          "name": "お気に入り名称",
+          "description": "お気に入り説明",
+          "is_private": "私有お気に入り",
+          "submit": "作成",
+          "success": "作成成功",
+          "validation": {
+            "nameMinLength": "お気に入り名称は少なくとも {length} 文字以上必要です",
+            "nameMaxLength": "お気に入り名称は最大 {length} 文字まで許可されています",
+            "descriptionMaxLength": "お気に入り説明は最大 {length} 文字まで許可されています"
+          }
+        }
+      }
+    }
+  },
+  "Messages": {
+    "Comment": {
+      "Reply": {
+        "Title": "新しいコメント返信",
+        "Content": "あなたに新しいコメント返信があります。"
+      },
+      "Like": {
+        "Title": "新しいコメントいいね",
+        "Content": "あなたは新しいコメントいいねを受け取りました。"
+      }
+    },
+    "System": {
+      "File": {
+        "Upload": {
+          "FileUploadSuccessTitle": "ファイルアップロード完了",
+          "FileUploadSuccessContent": "あなたがアップロードしたファイル {file_name} は Shionlib ストレージシステムに成功しました。ありがとうございます。",
+          "FileUploadFailedTitle": "ファイルアップロード失敗",
+          "FileCheckFailedContent": "あなたがアップロードしたファイル {file_name} はスキャンに失敗しました。原因：{reason} (ファイルスキャン状態：{file_check_status})。確認してから再度お試しください。",
+          "FileVirusReviewPendingTitle": "ファイルがマルウェア審査待ちです",
+          "FileVirusReviewPendingContent": "アップロードしたファイル {file_name} がウイルス検査で検出され、管理者審査に入りました（ケース #{malware_case_id}）。審査期限: {review_deadline}。",
+          "FileVirusReviewRequiredTitle": "新しいマルウェア審査があります",
+          "FileVirusReviewRequiredContent": "ユーザー {uploader_name} のファイル {file_name} がウイルス検査で検出されました（ケース #{malware_case_id}）。検出: {detected_viruses}。{review_deadline} までに対応してください。",
+          "FileVirusReviewRequiredLinkText": "マルウェアケースを審査",
+          "FileVirusFalsePositiveReleasedTitle": "誤検知として許可されました",
+          "FileVirusFalsePositiveReleasedContent": "あなたのファイル {file_name}（ケース #{malware_case_id}）は誤検知として許可されました。{review_note, select, null {} other {メモ: {review_note}}}",
+          "FileVirusConfirmedDeletedTitle": "マルウェア審査後にファイルを削除しました",
+          "FileVirusConfirmedDeletedContent": "あなたのファイル {file_name}（ケース #{malware_case_id}）は有害と判定され削除されました。現在の有害ファイルアップロード回数: {upload_injected_file_times}。{review_note, select, null {} other {メモ: {review_note}}}"
+        },
+        "Reupload": {
+          "FileReuploadedTitle": "お気に入りのゲームのファイルが更新されました",
+          "FileReuploadedContent": "お気に入りのゲーム {game_title_jp, select, other {{game_title_jp}} undefined {{game_title_en, select, other {{game_title_en}} undefined {{game_title_zh}}}}} のファイル {file_name} が更新されました。{reason, select, undefined {} other {理由：{reason}}}"
+        }
+      },
+      "Moderation": {
+        "Comment": {
+          "Block": {
+            "Title": "コメント未通過審査",
+            "Content": "あなたのコメントは審査に不合格でした。原因：{top_category}。コメント内容を修正してから再度お試しください。",
+            "ReviewContent": "あなたのコメントは審査に不合格でした。原因：{top_category}, {reason}, 重要な部分：{evidence}。コメント内容を修正してから再度お試しください。"
+          }
+        }
+      },
+      "Report": {
+        "Valid": {
+          "Title": "通報が承認されました",
+          "Content": "あなたの通報は承認されました。理由：{reason}、悪質度：{malicious_level}。{process_note, select, null {} other {備考：{process_note}}}"
+        },
+        "Invalid": {
+          "Title": "通報が却下されました",
+          "Content": "あなたの通報は却下されました。直近30日間の無効通報回数：{false_report_count}。{quota_sub_gb, select, 0 {} other {アップロード枠を {quota_sub_gb} GB 減算しました。}}{ban_days, select, 0 {} other {アカウントを {ban_days} 日間停止しました。}}{process_note, select, undefined {} other {備考：{process_note}}}"
+        },
+        "Penalty": {
+          "Title": "リソース違反処理のお知らせ",
+          "Content": "あなたがアップロードしたリソースは違反と判定されました。理由：{reason}、悪質度：{malicious_level}。{quota_sub_gb, select, 0 {} other {アップロード枠を {quota_sub_gb} GB 減算しました。}}{ban_days, select, 0 {} other {アカウントを {ban_days} 日間停止しました。}}{process_note, select, undefined {} other {備考：{process_note}}}"
+        },
+        "NewReport": {
+          "Title": "新しいリソース通報",
+          "Content": "ユーザー {reporter_name} が {reported_user_name} のアップロードしたリソースを通報しました。理由：{reason}、悪質度：{malicious_level}。",
+          "LinkText": "通報を確認"
+        }
+      }
+    }
+  },
+  "Admin": {
+    "Sidebar": {
+      "dashboard": "ダッシュボード",
+      "users": "ユーザー管理",
+      "comments": "コメント管理",
+      "reports": "通報管理",
+      "games": "ゲーム",
+      "characters": "キャラクター",
+      "developers": "開発者",
+      "settings": "設定",
+      "backToSite": "サイトに戻る",
+      "malwareScans": "マルウェア審査"
+    },
+    "Dashboard": {
+      "activityTrends": "活動トレンド",
+      "noTrendData": "トレンドデータがありません",
+      "views": "閲覧数",
+      "downloads": "ダウンロード数",
+      "score": "評価",
+      "totalGames": "ゲーム総数",
+      "totalUsers": "ユーザー総数",
+      "totalDownloads": "ダウンロード総数",
+      "totalViews": "閲覧総数",
+      "totalCharacters": "キャラクター総数",
+      "totalDevelopers": "開発者総数",
+      "totalComments": "コメント総数",
+      "newGamesToday": "今日の新作ゲーム",
+      "newUsersToday": "今日の新規ユーザー"
+    },
+    "Games": {
+      "searchPlaceholder": "ゲームタイトルで検索",
+      "status": "状態",
+      "allStatus": "すべての状態",
+      "visible": "公開",
+      "hidden": "非公開",
+      "sortBy": "並び替え",
+      "asc": "昇順",
+      "desc": "降順",
+      "gameTitle": "タイトル",
+      "creator": "作成者",
+      "views": "閲覧数",
+      "downloads": "ダウンロード数",
+      "created": "作成日",
+      "updated": "更新日",
+      "noGames": "ゲームがありません",
+      "refresh": "更新",
+      "edit": "編集",
+      "editTitle": "ゲームを編集",
+      "editDescription": "ゲームの基本情報をデータベースへ直接更新します。",
+      "rawEditDescription": "ゲームの JSON ペイロードを直接編集して送信します。",
+      "backToList": "一覧へ戻る",
+      "save": "保存",
+      "formatJson": "JSON整形",
+      "jsonInvalid": "JSONが不正です",
+      "jsonFormatted": "JSONを整形しました",
+      "jsonObjectOnly": "JSON のルートはオブジェクトである必要があります",
+      "hide": "非公開にする",
+      "show": "公開する",
+      "addRecentUpdate": "最近更新に追加",
+      "removeRecentUpdate": "最近更新から削除",
+      "delete": "削除",
+      "deleteTitle": "ゲームを削除",
+      "deleteDescription": "この操作は元に戻せません。ゲームと関連データが削除されます。",
+      "confirmDelete": "削除する",
+      "cancel": "キャンセル",
+      "statusUpdated": "状態を更新しました",
+      "statusUpdateFailed": "状態の更新に失敗しました",
+      "editSaved": "ゲームを更新しました",
+      "editFailed": "ゲームの更新に失敗しました",
+      "deleted": "ゲームを削除しました",
+      "deleteFailed": "ゲームの削除に失敗しました",
+      "recentUpdateAdded": "最近更新に追加しました",
+      "recentUpdateRemoved": "最近更新から削除しました",
+      "recentUpdateUpdateFailed": "最近更新の変更に失敗しました"
+    },
+    "Users": {
+      "searchPlaceholder": "ユーザー名またはメールで検索",
+      "role": "ロール",
+      "allRoles": "すべてのロール",
+      "roleUser": "ユーザー",
+      "roleAdmin": "管理者",
+      "roleSuperAdmin": "スーパー管理者",
+      "status": "状態",
+      "allStatus": "すべての状態",
+      "active": "有効",
+      "banned": "禁止",
+      "sortBy": "並び替え",
+      "asc": "昇順",
+      "desc": "降順",
+      "name": "名前",
+      "email": "メール",
+      "created": "作成日",
+      "updated": "更新日",
+      "lastLogin": "最終ログイン",
+      "noUsers": "ユーザーがありません",
+      "refresh": "更新",
+      "viewDetail": "詳細",
+      "editPermissions": "権限編集",
+      "manageQuota": "アップロード枠管理",
+      "editProfile": "プロフィール編集",
+      "editProfileDesc": "基本プロフィールを更新します。",
+      "permissionsTitle": "権限編集",
+      "permissionsDescription": "エンティティごとの編集権限を細かく管理します。",
+      "permissionsUpdated": "権限を更新しました",
+      "quotaTitle": "アップロード枠",
+      "quotaDescription": "アップロード枠と使用量を調整します。",
+      "quotaCurrentSize": "現在の枠",
+      "quotaCurrentUsed": "使用済み",
+      "quotaAdjustSize": "枠を調整",
+      "quotaAdjustUsed": "使用量を調整",
+      "quotaAmountGb": "量（GB）",
+      "quotaAdd": "追加",
+      "quotaSub": "減らす",
+      "quotaUse": "使用量を増やす",
+      "quotaRestore": "使用量を減らす",
+      "quotaResetUsed": "使用量をリセット",
+      "quotaReason": "理由（任意）",
+      "quotaUpdated": "枠を更新しました",
+      "entityGame": "ゲーム",
+      "entityCharacter": "キャラクター",
+      "entityDeveloper": "開発者",
+      "permissionRole": "ロール",
+      "permissionUser": "ユーザー上書き",
+      "permissionHint": "ロール権限は固定、追加のみ可能です。",
+      "noPermissions": "権限マッピングがありません。",
+      "permissions": {
+        "groups": {
+          "IDS": "ID",
+          "TITLES": "タイトル",
+          "INTROS": "イントロ",
+          "ALIASES": "別名",
+          "RELEASE": "発売日",
+          "TYPE": "種別",
+          "PLATFORMS": "プラットフォーム",
+          "EXTRA": "追加情報",
+          "TAGS": "タグ",
+          "STAFFS": "スタッフ",
+          "MANAGE_LINKS": "リンク",
+          "MANAGE_COVERS": "カバー",
+          "MANAGE_IMAGES": "画像",
+          "MANAGE_DEVELOPERS": "開発者",
+          "MANAGE_CHARACTERS": "キャラクター",
+          "STATUS": "状態",
+          "NSFW": "NSFW",
+          "VIEWS": "閲覧数",
+          "NAMES": "名称",
+          "IMAGE": "画像",
+          "BODY_METRICS": "身体情報",
+          "AGE_BIRTHDAY": "年齢・誕生日",
+          "BLOOD_TYPE": "血液型",
+          "GENDER": "性別",
+          "NAME": "名称",
+          "LOGO": "ロゴ",
+          "WEBSITE": "公式サイト"
+        }
+      },
+      "changeRole": "ロール変更",
+      "changeRoleDesc": "ユーザーのロールを更新します。",
+      "banUser": "ユーザーをBAN",
+      "banUserDesc": "アクセスを無効化し、コメント削除も可能です。",
+      "banReason": "BAN理由（任意）",
+      "permanentBan": "永久BAN",
+      "banDuration": "BAN期間",
+      "deleteComments": "コメントを削除",
+      "confirmBan": "BANする",
+      "unbanUser": "BAN解除",
+      "unbanConfirm": "このユーザーのBANを解除しますか？",
+      "forceLogout": "強制ログアウト",
+      "forceLogoutDesc": "全セッションを無効化します。",
+      "resetPassword": "パスワードリセット",
+      "resetPasswordDesc": "新しいパスワードを設定します。",
+      "newPassword": "新しいパスワード",
+      "confirmPassword": "パスワード確認",
+      "passwordMismatch": "パスワードが一致しません。",
+      "confirm": "確認",
+      "cancel": "キャンセル",
+      "save": "保存",
+      "updatedSuccess": "更新しました",
+      "bannedSuccess": "BANしました",
+      "unbannedSuccess": "BAN解除しました",
+      "passwordResetSuccess": "パスワードをリセットしました",
+      "forceLogoutSuccess": "セッションを無効化しました",
+      "detailTitle": "ユーザー詳細",
+      "detailDescription": "アカウント概要、活動数、セッション。",
+      "close": "閉じる",
+      "userId": "ユーザーID",
+      "language": "言語",
+      "contentLimit": "コンテンツ制限",
+      "countResources": "リソース",
+      "countComments": "コメント",
+      "countFavorites": "お気に入り",
+      "countEdits": "編集",
+      "uploadQuota": "アップロード枠",
+      "quotaSize": "枠サイズ",
+      "quotaUsed": "使用量",
+      "quotaFirstGrant": "初回付与",
+      "latestBan": "最新のBAN",
+      "bannedAt": "BAN日時",
+      "bannedReason": "理由",
+      "permanent": "永久",
+      "unbannedAt": "解除日時",
+      "bannedBy": "実行者",
+      "sessionsTitle": "セッション",
+      "noSessions": "セッションなし",
+      "sessionId": "セッション",
+      "sessionStatus": "状態",
+      "sessionFamily": "ファミリー",
+      "sessionIp": "IP",
+      "sessionUserAgent": "ユーザーエージェント",
+      "sessionUpdated": "更新",
+      "sessionExpires": "期限",
+      "sessionBlockedReason": "ブロック理由",
+      "twoFactorOn": "2FA有効",
+      "twoFactorOff": "2FA無効",
+      "yes": "はい",
+      "no": "いいえ"
+    },
+    "Comments": {
+      "searchPlaceholder": "コメント内容・ユーザー・ゲーム・IDで検索",
+      "creatorId": "ユーザーID",
+      "gameId": "ゲームID",
+      "status": "状態",
+      "allStatus": "すべての状態",
+      "visible": "表示",
+      "pending": "保留",
+      "deleted": "削除",
+      "sortBy": "並び替え",
+      "asc": "昇順",
+      "desc": "降順",
+      "created": "作成日",
+      "updated": "更新日",
+      "refresh": "更新",
+      "noComments": "コメントがありません",
+      "viewDetail": "詳細",
+      "approve": "承認",
+      "hide": "非表示",
+      "delete": "削除",
+      "restore": "復元",
+      "rescan": "再審査",
+      "rescanQueued": "審査キューに追加しました",
+      "statusUpdated": "状態を更新しました",
+      "commentId": "コメントID",
+      "replyCount": "返信数",
+      "likeCount": "いいね数",
+      "edited": "編集済み",
+      "detailTitle": "コメント詳細",
+      "detailDescription": "コメント内容と審査履歴を確認します。",
+      "commentContent": "コメント内容",
+      "rawContent": "原文",
+      "empty": "空",
+      "moderationTitle": "審査履歴",
+      "noModeration": "審査履歴がありません。",
+      "decisionAllow": "許可",
+      "decisionBlock": "ブロック",
+      "decisionReview": "再審査",
+      "moderationAuditBy": "審査元",
+      "moderationTime": "時間",
+      "moderationMaxScore": "最大スコア",
+      "moderationReason": "理由",
+      "moderationEvidence": "証拠",
+      "parentComment": "親コメント",
+      "game": "ゲーム",
+      "confirmDeleteTitle": "コメントを削除しますか？",
+      "confirmDeleteDesc": "コメントを削除済みにします。後で復元できます。",
+      "confirm": "確認",
+      "cancel": "キャンセル"
+    },
+    "Reports": {
+      "status": "状態",
+      "allStatus": "すべての状態",
+      "statuses": {
+        "PENDING": "未処理",
+        "VALID": "有効通報",
+        "INVALID": "無効通報"
+      },
+      "reason": "通報理由",
+      "allReasons": "すべての理由",
+      "reasons": {
+        "MALWARE": "ウイルス/マルウェアを含む",
+        "IRRELEVANT": "このゲームと無関係なリソース",
+        "BROKEN_LINK": "リンク切れ・ファイル利用不可",
+        "MISLEADING_CONTENT": "タイトル/説明と内容が一致しない",
+        "OTHER": "その他の違反"
+      },
+      "maliciousLevel": "悪質度",
+      "allLevels": "すべての悪質度",
+      "levels": {
+        "LOW": "低",
+        "MEDIUM": "中",
+        "HIGH": "高",
+        "CRITICAL": "重大"
+      },
+      "resourceId": "リソースID",
+      "reporterId": "通報者ID",
+      "reportedUserId": "被通報ユーザーID",
+      "sortBy": "並び替え",
+      "asc": "昇順",
+      "desc": "降順",
+      "created": "作成日",
+      "updated": "更新日",
+      "processedAt": "処理日時",
+      "refresh": "更新",
+      "noReports": "通報はありません",
+      "reportId": "通報ID",
+      "reporter": "通報者",
+      "reportedUser": "被通報ユーザー",
+      "processedBy": "処理者",
+      "viewDetail": "詳細",
+      "gameId": "ゲームID",
+      "game": "ゲーム",
+      "noDetail": "補足説明なし",
+      "detailTitle": "通報詳細",
+      "detailDescription": "通報内容を確認し、審査を実行します。",
+      "reportedPenaltyApplied": "アップロード者に処分適用済み",
+      "reporterPenaltyApplied": "通報者に処分適用済み",
+      "reportDetail": "通報内容",
+      "resourceNote": "リソースメモ",
+      "filesTitle": "リソースファイル",
+      "noFiles": "ファイル情報がありません",
+      "fileSize": "ファイルサイズ",
+      "processNote": "処理メモ",
+      "reviewTitle": "審査処理",
+      "verdict": "審査結果",
+      "verdictValid": "有効にする",
+      "verdictInvalid": "無効にする",
+      "processNotePlaceholder": "審査メモを入力（任意）",
+      "notifyUser": "システム通知を送信",
+      "submitReview": "審査を保存",
+      "reviewSaved": "審査結果を保存しました"
+    },
+    "MalwareScans": {
+      "status": "状態",
+      "allStatus": "すべての状態",
+      "statuses": {
+        "PENDING": "審査待ち",
+        "RELEASED_FALSE_POSITIVE": "許可済み（誤検知）",
+        "DELETED": "削除済み"
+      },
+      "decisionSource": "処理元",
+      "allDecisionSources": "すべての処理元",
+      "decisionSources": {
+        "ADMIN_ALLOW": "管理者が許可",
+        "ADMIN_DELETE": "管理者が削除",
+        "TIMEOUT_AUTO_DELETE": "タイムアウト自動削除"
+      },
+      "fileId": "ファイル ID",
+      "resourceId": "リソース ID",
+      "uploaderId": "アップロード者 ID",
+      "reviewerId": "審査者 ID",
+      "sortBy": "並び替え",
+      "asc": "昇順",
+      "desc": "降順",
+      "created": "作成日時",
+      "updated": "更新日時",
+      "reviewedAt": "審査日時",
+      "reviewDeadline": "審査期限",
+      "refresh": "更新",
+      "noCases": "マルウェアケースはありません",
+      "caseId": "ケース ID",
+      "uploader": "アップロード者",
+      "reviewer": "審査者",
+      "gameId": "ゲーム ID",
+      "game": "ゲーム",
+      "viewDetail": "詳細を見る",
+      "fileName": "ファイル名",
+      "fileSize": "ファイルサイズ",
+      "detectedViruses": "検出されたウイルス",
+      "noDetectedViruses": "ウイルス名は取得されていません",
+      "detailTitle": "マルウェアケース詳細",
+      "detailDescription": "スキャン結果を確認して、許可または削除を選択してください。",
+      "falsePositiveBadge": "誤検知で許可済み",
+      "scanLogExcerpt": "スキャンログ抜粋",
+      "reviewNote": "審査メモ",
+      "reviewTitle": "ケース審査",
+      "decision": "判定",
+      "decisionAllow": "許可してアップロード継続",
+      "decisionDelete": "ファイルとリソースを削除",
+      "reviewNotePlaceholder": "審査メモを入力（任意）",
+      "notifyUploader": "アップロード者へシステム通知を送信",
+      "submitReview": "審査を確定",
+      "reviewSaved": "審査結果を保存しました"
+    }
+  }
+}

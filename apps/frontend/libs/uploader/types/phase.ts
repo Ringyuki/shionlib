@@ -1,0 +1,10 @@
+export type Phase =
+  | 'idle'
+  | 'hashing'
+  | 'initializing'
+  | 'uploading'
+  | 'paused'
+  | 'completing'
+  | 'completed'
+  | 'aborted'
+  | 'error'

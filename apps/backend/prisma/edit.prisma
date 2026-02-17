@@ -1,0 +1,126 @@
+/**
+ * edit
+ */
+
+// enum GameFieldGroupBit {
+//   IDS = 0,   // v_id. b_id
+//   TITLES = 1,  // title_jp, title_zh, title_en
+//   INTROS = 2,  // intro_jp, intro_zh, intro_en
+//   ALIASES = 3,
+//   RELEASE = 4,
+//   TYPE = 5,
+//   PLATFORMS = 6,
+//   EXTRA = 7,  // extra_info
+//   TAGS = 8,
+//   STAFFS = 9,
+//   MANAGE_LINKS = 10,
+//   MANAGE_COVERS = 11,
+//   MANAGE_IMAGES = 12,
+//   MANAGE_DEVELOPERS = 13,
+//   MANAGE_CHARACTERS = 14,
+//   STATUS = 15,
+//   NSFW = 16,
+//   VIEWS = 17,
+// }
+
+// enum GameCharacterFieldGroupBit {
+//   IDS = 0,  // b_id, v_id
+//   NAMES = 1,  // name_jp, name_zh, name_en
+//   INTROS = 2,  // intro_jp, intro_zh, intro_en
+//   ALIASES = 3,
+//   IMAGE = 4,
+//   BODY_METRICS = 5,  // height, weight, bust, waist, hips, cup
+//   AGE_BIRTHDAY = 6,
+//   BLOOD_TYPE = 7,
+//   GENDER = 8,
+// }
+
+// enum GameDeveloperFieldGroupBit {
+//   IDS = 0,  // b_id, v_id
+//   NAME = 1,
+//   ALIASES = 2,
+//   INTROS = 3,  // intro_jp, intro_zh, intro_en
+//   EXTRA = 4,
+//   LOGO = 5,
+// }
+
+model FieldPermissionMapping {
+  id         Int              @id @default(autoincrement())
+  entity     PermissionEntity
+  field      String
+  bitIndex   Int
+  isRelation Boolean          @default(false)
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@unique([entity, field])
+  @@unique([entity, bitIndex])
+  @@index([entity])
+  @@map("field_permission_mappings")
+}
+
+model RoleFieldPermission {
+  id     Int              @id @default(autoincrement())
+  role   Int // 1 user, 2 admin, 3 super_admin
+  entity PermissionEntity
+
+  allowMask BigInt @default(0)
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@unique([role, entity])
+  @@index([role, entity])
+  @@map("role_field_permissions")
+}
+
+model UserFieldPermission {
+  id      Int              @id @default(autoincrement())
+  user_id Int
+  user    User             @relation("user_field_permissions", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  entity  PermissionEntity
+
+  allowMask BigInt @default(0)
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@unique([user_id, entity])
+  @@index([user_id, entity])
+  @@map("user_field_permissions")
+}
+
+// changes: { before: Record<string, any>, after: Record<string, any> }
+// for relation actions, changes: { relation: 'covers', added: [...], removed: [...] }
+model EditRecord {
+  id Int @id @default(autoincrement())
+
+  entity    PermissionEntity
+  target_id Int
+  action    EditActionType
+
+  actor_id   Int
+  actor      User @relation("user_edit_record", fields: [actor_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  actor_role Int
+
+  field_mask    BigInt   @default(0)
+  field_changes String[]
+
+  changes       Json?
+  relation_type EditRelationType?
+
+  note String? @db.VarChar(255)
+
+  undo          Boolean   @default(false)
+  undo_of_id    Int?      @unique
+  undo_of       EditRecord? @relation("edit_record_undo", fields: [undo_of_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  undone_by     EditRecord? @relation("edit_record_undo")
+
+  activities Activity[] @relation("edit_record_activity")
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@map("edit_records")
+}

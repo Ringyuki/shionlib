@@ -1,0 +1,175 @@
+model GameDownloadResource {
+  status    Int @default(1) // 1 -> active, 2 -> soft deleted
+
+  id      Int                        @id @default(autoincrement())
+  game_id Int
+  game    Game                       @relation("game_download_resource", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  files   GameDownloadResourceFile[]   @relation("game_download_resource_files")
+  reports GameDownloadResourceReport[] @relation("game_download_resource_reports")
+  malware_scan_cases MalwareScanCase[] @relation("game_download_resource_malware_scan_case")
+
+  platform String[] @default([])
+  language String[] @default([])
+  note     String?  @db.VarChar(255)
+
+  downloads Int @default(0)
+
+  upload_session_id Int?
+  upload_session    GameUploadSession? @relation("game_download_resource_upload_session", fields: [upload_session_id], references: [id])
+
+  creator_id Int
+  creator    User @relation("user_create_game_download_resource", fields: [creator_id], references: [id])
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@index([game_id, status])
+  @@map("game_download_resources")
+}
+
+model GameDownloadResourceReport {
+  id Int @id @default(autoincrement())
+
+  resource_id Int
+  resource    GameDownloadResource @relation("game_download_resource_reports", fields: [resource_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  reporter_id Int
+  reporter    User @relation("user_report_download_resource", fields: [reporter_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  reported_user_id Int
+  reported_user    User @relation("user_reported_download_resource", fields: [reported_user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  reason          GameDownloadResourceReportReason
+  detail          String?                       @db.VarChar(500)
+  status          GameDownloadResourceReportStatus @default(PENDING)
+  malicious_level ReportMaliciousLevel
+
+  processed_by Int?
+  processor    User? @relation("user_process_download_resource_report", fields: [processed_by], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  processed_at DateTime?
+  process_note String? @db.VarChar(500)
+
+  reporter_penalty_applied Boolean @default(false)
+  reported_penalty_applied Boolean @default(false)
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@index([resource_id, status])
+  @@index([reporter_id, status, created])
+  @@index([reported_user_id, status, created])
+  @@index([status, created])
+  @@map("game_download_resource_reports")
+}
+
+model MalwareScanCase {
+  id Int @id @default(autoincrement())
+
+  file_id Int?
+  file    GameDownloadResourceFile? @relation("game_download_resource_file_malware_scan_case", fields: [file_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  resource_id Int?
+  resource    GameDownloadResource? @relation("game_download_resource_malware_scan_case", fields: [resource_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  game_id Int?
+  game    Game? @relation("game_malware_scan_case", fields: [game_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  uploader_id Int
+  uploader    User @relation("user_malware_scan_case_uploader", fields: [uploader_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  reviewed_by Int?
+  reviewer    User? @relation("user_malware_scan_case_reviewer", fields: [reviewed_by], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  status          MalwareScanCaseStatus @default(PENDING)
+  decision_source MalwareScanDecisionSource?
+  review_note     String? @db.VarChar(500)
+  review_deadline DateTime
+  reviewed_at     DateTime?
+
+  detector        String   @db.VarChar(64)
+  detected_viruses String[] @default([])
+  scan_result      Json?
+  scan_log_path    String? @db.VarChar(255)
+  scan_log_excerpt String?
+
+  notify_uploader_on_allow Boolean  @default(true)
+  uploader_notified_at     DateTime?
+
+  file_name      String
+  file_size      BigInt
+  hash_algorithm HashAlgorithm?
+  file_hash      String
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@index([status, review_deadline])
+  @@index([uploader_id, created])
+  @@index([resource_id, created])
+  @@index([game_id, created])
+  @@index([file_id, created])
+  @@map("malware_scan_cases")
+}
+
+// file type: 1 -> s3 native, 2 -> direct link, 3 -> third party link
+// file status(effective when file type is 1): 1 -> pending, 2 -> uploaded to server, 3 -> uploaded to s3
+// file check status: 0 -> pending, 1 -> ok, 2 -> broken or truncated, 3 -> broken or unsupported, 4 -> encrypted, 5 -> harmful, 6 -> pending admin review after malware detected
+model GameDownloadResourceFile {
+  id                Int           @id @default(autoincrement())
+  type              Int
+  file_name         String
+  file_path         String? // for file type 1, local file path
+  file_size         BigInt
+  file_url          String? // for file type 2 and 3
+  s3_file_key       String? // for file type 1
+  file_content_type String? // for file type 1
+  hash_algorithm    HashAlgorithm @default(sha256)
+  file_hash         String
+
+  upload_session_id Int?
+  upload_session    GameUploadSession? @relation("game_download_resource_files_upload_session", fields: [upload_session_id], references: [id])
+  file_status       Int                @default(1)
+  file_check_status Int                @default(0)
+  is_virus_false_positive Boolean      @default(false)
+
+  game_download_resource_id Int
+  game_download_resource    GameDownloadResource @relation("game_download_resource_files", fields: [game_download_resource_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  creator_id Int
+  creator    User @relation("user_create_game_download_resource_file", fields: [creator_id], references: [id])
+
+  activities Activity[]                        @relation("game_download_resource_file_activity")
+  histories  GameDownloadResourceFileHistory[] @relation("game_download_resource_file_history")
+  malware_scan_cases MalwareScanCase[]         @relation("game_download_resource_file_malware_scan_case")
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@unique([upload_session_id])
+  @@unique([file_path])
+  @@index([file_path])
+  @@map("game_download_resource_files")
+}
+
+model GameDownloadResourceFileHistory {
+  id Int @id @default(autoincrement())
+
+  file_id Int
+  file    GameDownloadResourceFile @relation("game_download_resource_file_history", fields: [file_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  file_size      BigInt
+  hash_algorithm HashAlgorithm
+  file_hash      String
+  s3_file_key    String?
+
+  reason            String? @db.VarChar(500) // reason for reupload
+  upload_session_id Int?
+
+  operator_id Int
+  operator    User @relation("user_reupload_game_download_resource_file", fields: [operator_id], references: [id])
+
+  created DateTime @default(now())
+
+  @@index([file_id])
+  @@map("game_download_resource_file_histories")
+}

@@ -1,0 +1,47 @@
+// audit_by: 1 -> omni, 2 -> llm
+model moderation_events {
+  id Int @id @default(autoincrement())
+
+  audit_by Int @default(1)
+  model String @default("omni-moderation-latest") // "omni-moderation-latest" / "gpt-5-mini"
+  decision ModerationDecision @default(REVIEW)
+
+  top_category ModerateCategoryKey
+  categories_json Json
+  // for omni only
+  max_score    Decimal? @db.Decimal(6,5)
+  scores_json     Json?
+  // for llm only
+  reason String? @db.VarChar(2550)
+  evidence     String? @db.VarChar(1000)  // key fragments that support the decision
+
+  comment_id Int
+  comment Comment @relation("comment_moderate", fields: [comment_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([comment_id, created_at])
+}
+
+enum ModerationDecision {
+  ALLOW
+  BLOCK
+  REVIEW
+}
+
+enum ModerateCategoryKey {
+  HARASSMENT
+  HARASSMENT_THREATENING
+  SEXUAL
+  SEXUAL_MINORS
+  HATE
+  HATE_THREATENING
+  ILLICIT
+  ILLICIT_VIOLENT
+  SELF_HARM
+  SELF_HARM_INTENT
+  SELF_HARM_INSTRUCTIONS
+  VIOLENCE
+  VIOLENCE_GRAPHIC
+}
