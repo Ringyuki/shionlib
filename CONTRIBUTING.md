@@ -56,6 +56,7 @@ Keep commits small and focused. Write in imperative mood.
 - Accessibility: Use semantic elements and ARIA where appropriate.
 - Linting/Formatting: ESLint 9 + Prettier 3 are enforced. Run `pnpm lint` and `pnpm format` before committing.
 - Husky + lint-staged will auto-run checks on staged files.
+- If hooks are not installed locally, run `pnpm run prepare` once at repo root.
 
 ### Project Conventions
 
