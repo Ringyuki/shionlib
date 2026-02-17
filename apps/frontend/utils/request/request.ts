@@ -33,11 +33,7 @@ const isFatalAuthByCode = (code: number) => {
 const normalizeBaseUrl = (url?: string) => (url ? url.replace(/\/+$/, '') : undefined)
 
 const browserBaseUrl = normalizeBaseUrl(process.env.NEXT_PUBLIC_PROD_API_PATH)
-const serverBaseUrl =
-  normalizeBaseUrl(process.env.INTERNAL_API_BASE_URL) ||
-  (process.env.INTERNAL_API_PORT
-    ? normalizeBaseUrl(`http://localhost:${process.env.INTERNAL_API_PORT}`)
-    : undefined)
+const serverBaseUrl = `http://localhost:${process.env.INTERNAL_API_PORT}`
 
 const baseUrl = isBrowser ? browserBaseUrl : serverBaseUrl
 const SSR_PRE_REFRESH_LEEWAY_MS = 10 * 1000
