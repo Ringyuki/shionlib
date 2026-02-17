@@ -242,9 +242,19 @@ jobs:
           pnpm install --prod --no-frozen-lockfile
           pnpm prisma generate
 
-          set -a
-          [ -f "$RELEASE_DIR/.env" ] && . "$RELEASE_DIR/.env"
-          set +a
+          DATABASE_URL=""
+          if [ -f "$RELEASE_DIR/.env" ]; then
+            DATABASE_URL=$(grep -E '^(export[[:space:]]+)?DATABASE_URL=' "$RELEASE_DIR/.env" | tail -n 1 | sed -E 's/^(export[[:space:]]+)?DATABASE_URL=//')
+            DATABASE_URL="${DATABASE_URL%\"}"
+            DATABASE_URL="${DATABASE_URL#\"}"
+            DATABASE_URL="${DATABASE_URL%\'}"
+            DATABASE_URL="${DATABASE_URL#\'}"
+          fi
+
+          if [ -z "${DATABASE_URL:-}" ]; then
+            echo "DATABASE_URL is missing in $RELEASE_DIR/.env"
+            exit 1
+          fi
 
           if command -v psql >/dev/null 2>&1; then
             HAS_TABLES=$(psql "$DATABASE_URL" -tAc "select count(*) from information_schema.tables where table_schema='public' and table_name <> '_prisma_migrations'")
@@ -266,7 +276,7 @@ jobs:
 
           if [ -d "prisma/migrations" ] && [ "$(ls -A prisma/migrations 2>/dev/null)" ]; then
             echo "Applying Prisma migrations..."
-            pnpm prisma migrate deploy
+            DATABASE_URL="$DATABASE_URL" pnpm prisma migrate deploy
           else
             echo "No Prisma migrations directory or it's empty. Skipping migrate deploy."
           fi
@@ -287,8 +297,9 @@ jobs:
           ls -1dt */ | tail -n +$((KEEP_RELEASES+1)) | xargs -r rm -rf
           EOF_REMOTE
 
-      - name: Health check
+      - name: Health check on target host
         env:
+          SSH_PROXY_COMMAND: '/tmp/cloudflared/cloudflared access ssh --id ${{ secrets.SSH_CLOUDFLARED_ID }} --secret ${{ secrets.SSH_CLOUDFLARED_SECRET }} --hostname %h'
           HEALTHCHECK_URL: ${{ vars.HEALTHCHECK_URL }}
         run: |
           if [ -z "${HEALTHCHECK_URL:-}" ]; then
@@ -296,6 +307,14 @@ jobs:
             exit 1
           fi
 
+          ssh \
+            -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=no \
+            -o ProxyCommand="$SSH_PROXY_COMMAND" \
+            -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "HEALTHCHECK_URL='${HEALTHCHECK_URL}' bash -s" << 'EOF_REMOTE'
+          set -euo pipefail
           for i in $(seq 1 30); do
             if curl -fsS --max-time 8 "$HEALTHCHECK_URL" >/dev/null; then
               echo "health check passed"
@@ -303,6 +322,7 @@ jobs:
             fi
             sleep 5
           done
-
-          echo "health check failed"
+          echo "health check failed: $HEALTHCHECK_URL"
+          curl -iS --max-time 8 "$HEALTHCHECK_URL" || true
           exit 1
+          EOF_REMOTE

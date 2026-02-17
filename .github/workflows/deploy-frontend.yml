@@ -237,8 +237,9 @@ jobs:
           ls -1dt */ | tail -n +$((KEEP_RELEASES+1)) | xargs -r rm -rf
           EOF_REMOTE
 
-      - name: Health check
+      - name: Health check on target host
         env:
+          SSH_PROXY_COMMAND: '/tmp/cloudflared/cloudflared access ssh --id ${{ secrets.SSH_CLOUDFLARED_ID }} --secret ${{ secrets.SSH_CLOUDFLARED_SECRET }} --hostname %h'
           HEALTHCHECK_URL: ${{ vars.HEALTHCHECK_URL }}
         run: |
           if [ -z "${HEALTHCHECK_URL:-}" ]; then
@@ -246,6 +247,14 @@ jobs:
             exit 1
           fi
 
+          ssh \
+            -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=no \
+            -o ProxyCommand="$SSH_PROXY_COMMAND" \
+            -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "HEALTHCHECK_URL='${HEALTHCHECK_URL}' bash -s" << 'EOF_REMOTE'
+          set -euo pipefail
           for i in $(seq 1 30); do
             if curl -fsS --max-time 8 "$HEALTHCHECK_URL" >/dev/null; then
               echo "health check passed"
@@ -253,6 +262,7 @@ jobs:
             fi
             sleep 5
           done
-
-          echo "health check failed"
+          echo "health check failed: $HEALTHCHECK_URL"
+          curl -iS --max-time 8 "$HEALTHCHECK_URL" || true
           exit 1
+          EOF_REMOTE
