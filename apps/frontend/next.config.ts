@@ -11,17 +11,9 @@ const internalApiBaseUrl =
   normalizeBaseUrl(process.env.INTERNAL_API_BASE_URL) ||
   (process.env.INTERNAL_API_PORT
     ? normalizeBaseUrl(`http://localhost:${process.env.INTERNAL_API_PORT}`)
-    : undefined) ||
-  // backward compatibility for existing envs
-  (process.env.NEXT_PUBLIC_API_PORT
-    ? normalizeBaseUrl(`http://localhost:${process.env.NEXT_PUBLIC_API_PORT}`)
     : undefined)
-
-if (!internalApiBaseUrl) {
-  throw new Error(
-    'Missing internal API target: set INTERNAL_API_BASE_URL or INTERNAL_API_PORT (NEXT_PUBLIC_API_PORT is deprecated fallback).',
-  )
-}
+if (!internalApiBaseUrl)
+  throw new Error('Missing internal API target: set INTERNAL_API_BASE_URL or INTERNAL_API_PORT.')
 
 const nextConfig: NextConfig = {
   pageExtensions: ['ts', 'tsx', 'mdx'],

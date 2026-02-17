@@ -40,7 +40,6 @@ This monorepo uses root workflows only:
 - `NEXT_PUBLIC_PROD_API_PATH`
 - `INTERNAL_API_BASE_URL` (preferred for Next.js rewrites in SSR/server runtime)
 - `INTERNAL_API_PORT` (fallback when `INTERNAL_API_BASE_URL` is not set)
-- `NEXT_PUBLIC_API_PORT` (deprecated compatibility fallback, safe to remove after migration)
 - `NEXT_PUBLIC_SHIONLIB_IMAGE_BED_HOST`
 - `NEXT_PUBLIC_SHIONLIB_IMAGE_BED_URL`
 - `NEXT_PUBLIC_UMAMI_SCRIPT_URL`
