@@ -1,8 +1,58 @@
 import { ServerRequestContext } from './types'
-import { BasicResponse } from '@/interfaces/api/shionlib-api-res.interface'
+import { resolvePreferredLocale } from '@/utils/language-preference'
+import {
+  BasicResponse,
+  ErrorResponse,
+  FieldError,
+} from '@/interfaces/api/shionlib-api-res.interface'
 
 export const isBrowser = typeof window !== 'undefined'
 const JWT_SECTION_REGEX = /^[A-Za-z0-9\-_]+$/
+
+export const buildHeaders = async (options?: RequestInit): Promise<HeadersInit> => {
+  const preferred = await resolvePreferredLocale()
+  const existing = options?.headers
+
+  if (existing instanceof Headers) {
+    const h = new Headers(existing)
+    if (!h.has('Content-Type')) h.set('Content-Type', 'application/json')
+    if (!h.has('Accept-Language')) h.set('Accept-Language', preferred)
+    return h
+  }
+
+  if (Array.isArray(existing)) {
+    const h = new Headers(existing)
+    if (!h.has('Content-Type')) h.set('Content-Type', 'application/json')
+    if (!h.has('Accept-Language')) h.set('Accept-Language', preferred)
+    return h
+  }
+
+  const record: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Accept-Language': preferred,
+    ...(existing as Record<string, string> | undefined),
+  }
+  return record
+}
+
+export const formatErrors = (data: ErrorResponse, retryAfter?: string) => {
+  if (!data.message) return 'Network error'
+  const msg = `${data.message}${retryAfter ? ` Retry after ${retryAfter} seconds` : ''}${
+    (data as ErrorResponse).data?.errors
+      ? Array.isArray((data as ErrorResponse).data.errors)
+        ? `: ${((data as ErrorResponse).data.errors as FieldError[])
+            .flatMap(error => error.messages)
+            .map(message => `${message}`)
+            .join('\n')}`
+        : `: ${Object.entries((data as ErrorResponse).data.errors)
+            .flatMap(([key, value]) => `${key}: ${value}`)
+            .map(message => `${message}`)
+            .join('\n')}`
+      : ''
+  }`
+  const code = `${data.code}`
+  return `${msg} ${code ? `(${code})` : ''}`
+}
 
 export const getCookieValueFromHeader = (cookieHeader: string, name: string) => {
   if (!cookieHeader) return undefined
@@ -128,20 +178,4 @@ export const shouldPreRefreshServerCookie = (
   const exp = decoded.payload.exp
   if (typeof exp !== 'number') return true
   return exp * 1000 - Date.now() <= leewayMs
-}
-
-const E2E_CF_BYPASS_HEADER = 'x-shionlib-e2e-bypass'
-const getE2eCfBypassKey = () => process.env.E2E_CF_BYPASS_KEY?.trim()
-export const applyE2eCfBypassHeader = (headers: Headers | Record<string, string>) => {
-  const key = getE2eCfBypassKey()
-  if (!key) return
-  if (headers instanceof Headers) {
-    if (!headers.has(E2E_CF_BYPASS_HEADER)) {
-      headers.set(E2E_CF_BYPASS_HEADER, key)
-    }
-    return
-  }
-  if (!headers[E2E_CF_BYPASS_HEADER]) {
-    headers[E2E_CF_BYPASS_HEADER] = key
-  }
 }

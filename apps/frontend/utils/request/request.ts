@@ -1,9 +1,4 @@
-import {
-  BasicResponse,
-  ErrorResponse,
-  FieldError,
-} from '@/interfaces/api/shionlib-api-res.interface'
-import { resolvePreferredLocale } from '@/utils/language-preference'
+import { BasicResponse, ErrorResponse } from '@/interfaces/api/shionlib-api-res.interface'
 import { ShionlibBizError } from '@/libs/errors'
 import { SHOULD_REFRESH_CODES, IS_FATAL_AUTH_BY_CODES } from '@/constants/auth/auth-status-codes'
 import { NOT_FOUND_CODES } from '@/constants/not-found-codes'
@@ -17,12 +12,11 @@ import {
   resolveRefreshLockKey,
   extractSetCookies,
   shouldPreRefreshServerCookie,
-  applyE2eCfBypassHeader,
+  buildHeaders,
+  formatErrors,
 } from './helpers'
 
 let refreshPromises = new Map<string, Promise<RefreshResult>>()
-let ensureFreshPromise: Promise<boolean> | null = null
-let lastEnsureFreshAt = 0
 
 const shouldRefresh = (code: number) => {
   return SHOULD_REFRESH_CODES.includes(code)
@@ -32,7 +26,6 @@ const isFatalAuthByCode = (code: number) => {
 }
 
 const normalizeBaseUrl = (url?: string) => (url ? url.replace(/\/+$/, '') : undefined)
-
 const browserBaseUrl = normalizeBaseUrl(process.env.NEXT_PUBLIC_PROD_API_PATH)
 const serverBaseUrl =
   normalizeBaseUrl(process.env.INTERNAL_API_BASE_URL) ||
@@ -42,29 +35,6 @@ const serverBaseUrl =
 
 const baseUrl = isBrowser ? browserBaseUrl : serverBaseUrl
 const SSR_PRE_REFRESH_LEEWAY_MS = 10 * 1000
-
-export const ensureFreshToken = async ({
-  force = false,
-  minIntervalMs = 30 * 1000,
-}: { force?: boolean; minIntervalMs?: number } = {}) => {
-  if (!isBrowser) return true
-  if (!baseUrl) return false
-  const now = Date.now()
-  if (!force && now - lastEnsureFreshAt < minIntervalMs) return true
-
-  if (!ensureFreshPromise) {
-    ensureFreshPromise = doRefresh(baseUrl)
-      .then(() => {
-        lastEnsureFreshAt = Date.now()
-        return true
-      })
-      .catch(() => false)
-      .finally(() => {
-        ensureFreshPromise = null
-      })
-  }
-  return ensureFreshPromise
-}
 
 export const shionlibRequest = ({
   forceThrowError = false,
@@ -335,35 +305,6 @@ export const shionlibRequest = ({
   }
 }
 
-const buildHeaders = async (options?: RequestInit): Promise<HeadersInit> => {
-  const preferred = await resolvePreferredLocale()
-  const existing = options?.headers
-
-  if (existing instanceof Headers) {
-    const h = new Headers(existing)
-    if (!h.has('Content-Type')) h.set('Content-Type', 'application/json')
-    if (!h.has('Accept-Language')) h.set('Accept-Language', preferred)
-    applyE2eCfBypassHeader(h)
-    return h
-  }
-
-  if (Array.isArray(existing)) {
-    const h = new Headers(existing)
-    if (!h.has('Content-Type')) h.set('Content-Type', 'application/json')
-    if (!h.has('Accept-Language')) h.set('Accept-Language', preferred)
-    applyE2eCfBypassHeader(h)
-    return h
-  }
-
-  const record: Record<string, string> = {
-    'Content-Type': 'application/json',
-    'Accept-Language': preferred,
-    ...(existing as Record<string, string> | undefined),
-  }
-  applyE2eCfBypassHeader(record)
-  return record
-}
-
 const doRefresh = async (
   baseUrl: string,
   context?: ServerRequestContext,
@@ -373,7 +314,6 @@ const doRefresh = async (
   if (existing) return existing
 
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  applyE2eCfBypassHeader(headers)
   if (!isBrowser) {
     if (context?.cookieHeader) headers.cookie = context.cookieHeader
     if (context?.realIp) headers['x-real-ip'] = context.realIp
@@ -408,7 +348,6 @@ const doRefresh = async (
 
 const doLogout = async (baseUrl: string, context?: ServerRequestContext) => {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  applyE2eCfBypassHeader(headers)
   if (!isBrowser) {
     if (context?.cookieHeader) headers.cookie = context.cookieHeader
     if (context?.realIp) headers['x-real-ip'] = context.realIp
@@ -421,28 +360,8 @@ const doLogout = async (baseUrl: string, context?: ServerRequestContext) => {
     headers,
   }).finally(async () => {
     refreshPromises = new Map<string, Promise<RefreshResult>>()
-    ensureFreshPromise = null
     if (isBrowser) {
       useShionlibUserStore.getState().logout(false)
     }
   })
-}
-
-const formatErrors = (data: ErrorResponse, retryAfter?: string) => {
-  if (!data.message) return 'Network error'
-  const msg = `${data.message}${retryAfter ? ` Retry after ${retryAfter} seconds` : ''}${
-    (data as ErrorResponse).data?.errors
-      ? Array.isArray((data as ErrorResponse).data.errors)
-        ? `: ${((data as ErrorResponse).data.errors as FieldError[])
-            .flatMap(error => error.messages)
-            .map(message => `${message}`)
-            .join('\n')}`
-        : `: ${Object.entries((data as ErrorResponse).data.errors)
-            .flatMap(([key, value]) => `${key}: ${value}`)
-            .map(message => `${message}`)
-            .join('\n')}`
-      : ''
-  }`
-  const code = `${data.code}`
-  return `${msg} ${code ? `(${code})` : ''}`
 }

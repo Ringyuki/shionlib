@@ -11,9 +11,11 @@ export const AuthSessionCheck = () => {
 
   useEffect(() => {
     if (!isLogin) return
-    void shionlibRequest({ forceNotThrowError: true })
-      .get('/user/me')
-      .catch(() => {})
+    setTimeout(async () => {
+      void shionlibRequest({ forceNotThrowError: true })
+        .get('/user/me')
+        .catch(() => {})
+    }, 3000)
   }, [pathname, isLogin])
 
   return null
