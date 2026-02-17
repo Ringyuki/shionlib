@@ -239,7 +239,7 @@ jobs:
           fi
 
           cd "$RELEASE_DIR"
-          pnpm install --prod --frozen-lockfile
+          pnpm install --prod --no-frozen-lockfile
           pnpm prisma generate
 
           set -a

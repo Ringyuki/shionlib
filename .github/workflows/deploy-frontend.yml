@@ -115,9 +115,25 @@ jobs:
       - name: Compose standalone bundle
         working-directory: apps/frontend
         run: |
-          cp -r public .next/standalone/
-          mkdir -p .next/standalone/.next
-          cp -r .next/static .next/standalone/.next/
+          set -euo pipefail
+
+          APP_SERVER_PATH="$(find .next/standalone -type f -path '*/apps/frontend/server.js' | head -n 1)"
+          if [ -z "${APP_SERVER_PATH:-}" ]; then
+            echo "unable to locate standalone server.js for frontend"
+            find .next/standalone -maxdepth 6 -type f | sed -n '1,120p'
+            exit 1
+          fi
+
+          APP_STANDALONE_DIR="$(dirname "$APP_SERVER_PATH")"
+          APP_SERVER_REL_PATH="${APP_SERVER_PATH#.next/standalone/}"
+
+          cp -r public "$APP_STANDALONE_DIR/"
+          mkdir -p "$APP_STANDALONE_DIR/.next"
+          cp -r .next/static "$APP_STANDALONE_DIR/.next/"
+
+          cat > .next/standalone/server.js <<EOF_STANDALONE_SERVER
+          require('./${APP_SERVER_REL_PATH}')
+          EOF_STANDALONE_SERVER
 
       - name: Archive artifact
         working-directory: apps/frontend
