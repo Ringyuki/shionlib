@@ -1,0 +1,62 @@
+name: frontend e2e
+
+on:
+  pull_request:
+    branches: ['main']
+  push:
+    branches: ['main']
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * *'
+
+concurrency:
+  group: shionlib-frontend-e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false) && vars.E2E_BACKEND_BASE_URL != '' }}
+    env:
+      CI: 'true'
+      E2E_PORT: '3100'
+      NEXT_PUBLIC_PROD_API_PATH: ${{ vars.E2E_BACKEND_BASE_URL }}
+      INTERNAL_API_BASE_URL: ${{ vars.E2E_BACKEND_BASE_URL }}
+      NEXT_PUBLIC_API_PORT: '65535'
+      INTERNAL_API_PORT: '65535'
+      NEXT_PUBLIC_SHIONLIB_IMAGE_BED_HOST: ${{ vars.NEXT_PUBLIC_SHIONLIB_IMAGE_BED_HOST || 't.shionlib.com' }}
+      NEXT_PUBLIC_SHIONLIB_IMAGE_BED_URL: ${{ vars.NEXT_PUBLIC_SHIONLIB_IMAGE_BED_URL || 'https://t.shionlib.com/' }}
+      NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'http://127.0.0.1:3100' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browser
+        run: pnpm test:e2e:install:ci
+
+      - name: Run E2E smoke
+        run: pnpm test:e2e tests/e2e/smoke/home.spec.mjs --project=chromium --workers=1
+
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore

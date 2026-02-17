@@ -1,0 +1,161 @@
+name: deploy frontend
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['main']
+  workflow_dispatch:
+
+concurrency:
+  group: shionlib-frontend-deploy
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: ESLint
+        run: pnpm lint
+
+      - name: Type check
+        run: pnpm exec tsc -p tsconfig.json --noEmit
+
+  build-and-deploy:
+    name: Build and Deploy
+    needs: checks
+    environment: deploy
+    runs-on: ubuntu-latest
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'Ringyuki/shionlib-frontend'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        env:
+          NEXT_PUBLIC_PROD_API_PATH: ${{ vars.NEXT_PUBLIC_PROD_API_PATH }}
+          NEXT_PUBLIC_API_PORT: ${{ vars.NEXT_PUBLIC_API_PORT }}
+          NEXT_PUBLIC_SHIONLIB_IMAGE_BED_HOST: ${{ vars.NEXT_PUBLIC_SHIONLIB_IMAGE_BED_HOST }}
+          NEXT_PUBLIC_SHIONLIB_IMAGE_BED_URL: ${{ vars.NEXT_PUBLIC_SHIONLIB_IMAGE_BED_URL }}
+          NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${{ vars.NEXT_PUBLIC_UMAMI_SCRIPT_URL }}
+          NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${{ vars.NEXT_PUBLIC_UMAMI_WEBSITE_ID }}
+          NEXT_PUBLIC_OPENPANEL_CLIENT_ID: ${{ vars.NEXT_PUBLIC_OPENPANEL_CLIENT_ID }}
+          NEXT_PUBLIC_OPENPANEL_API_URL: ${{ vars.NEXT_PUBLIC_OPENPANEL_API_URL }}
+          NEXT_PUBLIC_RYBBIT_SCRIPT_URL: ${{ vars.NEXT_PUBLIC_RYBBIT_SCRIPT_URL }}
+          NEXT_PUBLIC_RYBBIT_SITE_ID: ${{ vars.NEXT_PUBLIC_RYBBIT_SITE_ID }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+        run: pnpm build
+
+      - name: Compose standalone bundle
+        run: |
+          cp -r public .next/standalone/
+          mkdir -p .next/standalone/.next
+          cp -r .next/static .next/standalone/.next/
+
+      - name: Archive artifact
+        run: |
+          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          TAR_NAME="release-${SHORT_SHA}.tgz"
+          echo "TAR_NAME=$TAR_NAME" >> $GITHUB_ENV
+          tar -czf "$TAR_NAME" -C . .next
+
+      - name: Install cloudflared
+        run: |
+          set -e
+          mkdir -p /tmp/cloudflared
+          curl -sL -o /tmp/cloudflared/cloudflared \
+            https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
+          chmod +x /tmp/cloudflared/cloudflared
+          /tmp/cloudflared/cloudflared --version
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+      - name: Upload to server
+        env:
+          SSH_PROXY_COMMAND: '/tmp/cloudflared/cloudflared access ssh --id ${{ secrets.SSH_CLOUDFLARED_ID }} --secret ${{ secrets.SSH_CLOUDFLARED_SECRET }} --hostname %h'
+        run: |
+          scp \
+            -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=no \
+            -o ProxyCommand="$SSH_PROXY_COMMAND" \
+            -P ${{ secrets.SSH_PORT }} \
+            "${TAR_NAME}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/${TAR_NAME}"
+
+      - name: Deploy on server
+        env:
+          SSH_PROXY_COMMAND: '/tmp/cloudflared/cloudflared access ssh --id ${{ secrets.SSH_CLOUDFLARED_ID }} --secret ${{ secrets.SSH_CLOUDFLARED_SECRET }} --hostname %h'
+        run: |
+          ssh \
+            -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=no \
+            -o ProxyCommand="$SSH_PROXY_COMMAND" \
+            -p ${{ secrets.SSH_PORT }} \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "DEPLOY_DIR='${{ secrets.DEPLOY_DIR }}' GITHUB_SHA='${{ github.sha }}' bash -s" << 'EOF'
+          [ -f ~/.bashrc ] && . ~/.bashrc
+          [ -f ~/.profile ] && . ~/.profile
+          set -euo pipefail
+
+          export PATH="/root/.nvm/versions/node/v24.11.1/bin:$PATH"
+          KEEP_RELEASES=5
+
+          mkdir -p "$DEPLOY_DIR/releases"
+
+          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          TS_UTC=$(date -u +%Y%m%d%H%M%S)
+          RELEASE_NAME="${TS_UTC}-${SHORT_SHA}"
+          RELEASE_DIR="$DEPLOY_DIR/releases/$RELEASE_NAME"
+          SHARED_DIR="$DEPLOY_DIR/shared"
+
+          TAR_NAME="release-${SHORT_SHA}.tgz"
+          mkdir -p "$RELEASE_DIR"
+          tar -xzf "/tmp/$TAR_NAME" -C "$RELEASE_DIR"
+          rm -f "/tmp/$TAR_NAME"
+
+          ln -sfn "$SHARED_DIR/.env" "$RELEASE_DIR/.env"
+          ln -sfn "$SHARED_DIR/.env" "$RELEASE_DIR/.next/standalone/.env"
+          ln -sfn "$SHARED_DIR/ecosystem.config.cjs" "$RELEASE_DIR/ecosystem.config.cjs"
+          rm -rf "$DEPLOY_DIR/current"
+          ln -sfn "$RELEASE_DIR" "$DEPLOY_DIR/current"
+
+          cd "$DEPLOY_DIR/current"
+          pm2 restart shionlib-frontend || pm2 start "ecosystem.config.cjs" --env production
+
+          cd "$DEPLOY_DIR/releases"
+          ls -1dt */ | tail -n +$((KEEP_RELEASES+1)) | xargs -r rm -rf
+          EOF

@@ -1,0 +1,54 @@
+---
+title: 'Shionlib 開発概要'
+banner: 'https://images.yurari.moe/admin/6740325e87e2312f66fa3f58/ny9s2fu6_2.webp'
+description: 'Shionlib の開発概要：フロントエンドは Next.js/React、バックエンドは NestJS/Prisma/PostgreSQL。Redis キュー、Meilisearch 検索、S3 互換ストレージ、i18n に対応。オープンソースで、貢献を歓迎します。'
+date: 2025-10-28
+author_uid: 1
+author_name: 'ringyuki'
+author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
+---
+
+## リポジトリ
+
+フロントエンド: [shionlib-frontend](https://github.com/Ringyuki/shionlib-frontend)
+
+バックエンド: [shionlib-backend](https://github.com/Ringyuki/shionlib-backend)
+
+## 技術スタック
+
+### フロントエンド
+
+**コアスタック**: Next.js 15, React 19, Tailwind CSS, Radix UI, next-intl, MDX (@next/mdx, @mdx-js), Lexical, Zustand, pnpm, PM2
+
+- フレームワーク: `Next.js 15`（App Router）
+- 言語・ランタイム: `React 19` + `TypeScript`
+- スタイル & UI: `Tailwind CSS`, `Shadcn UI`, `Radix UI`, `Lucide`, `Motion`
+- 国際化: `next-intl`（ルーティングベースの多言語・ロケール交渉）
+- コンテンツ/ドキュメント: MDX（`@next/mdx`, `@mdx-js/*`）、`gray-matter` で Frontmatter を解析、`next-mdx-remote` でレンダリング
+- 状態管理: `zustand`
+- 日付 & カレンダー: `date-fns`, `react-day-picker`
+- メディア & 画像: リモートソースの `Next Image`；`react-image-crop`, `react-medium-image-zoom` など
+- インタラクション & フィードバック: `react-hot-toast`, `sileo`, `spoiled`, `@base-ui-components/react`, `@stepperize/react` など
+- ユーティリティ: `lodash`, `qs`, `sanitize-html`, `react-use` など
+- テーマ: `next-themes`
+- デプロイ: PM2
+
+### バックエンド
+
+**コアスタック**: NestJS, Prisma, PostgreSQL, Redis, Bull, Meilisearch, AWS S3 SDK, Backblaze B2 と Cloudflare R2（S3 互換）, nestjs-i18n, pnpm, PM2
+
+- フレームワーク: `NestJS`（HTTP サーバーフレームワーク: `Express 5`）
+- データレイヤー: `Prisma`, `PostgreSQL`
+- キャッシュ: `Redis`
+- キュー: `bull`
+- 検索: `Meilisearch`
+- ストレージ & アップロード: `AWS S3 SDK`, `Backblaze B2`（大容量ファイル）, `Cloudflare R2`（小容量ファイル）
+- 認証: `JWT`（Passport）
+- 国際化: `nestjs-i18n`（Cookie/Query/Accept-Language の解析）
+- デプロイ: PM2
+
+## 貢献
+
+Shionlib の開発にぜひご参加ください！👏
+
+[貢献ガイド](https://github.com/Ringyuki/shionlib-frontend/blob/main/CONTRIBUTING.md) を読んでから Pull Request を送ってください。質問があれば Issue/Discussion を作成するか、PR でメンテナーに ping してください。

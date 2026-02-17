@@ -1,0 +1,56 @@
+diff --git a/dist/index.js b/dist/index.js
+index 8183c19ab94a2141175aac31e20581e06f15f1f5..e834e2f3b3333a38b91d38a174101230a41cc3cd 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -537,6 +537,9 @@ const HEADER_EXIT_MS = 150;
+     }, []);
+     const handlePointerDown = react.useCallback((e)=>{
+         if (exiting || !onDismiss) return;
++        if (e.pointerType === "mouse") return;
++        const target = e.target;
++        if (target instanceof Element && target.closest("[data-sileo-button]")) return;
+         pointerStartRef.current = e.clientY;
+         e.currentTarget.setPointerCapture(e.pointerId);
+     }, [
+@@ -717,10 +720,11 @@ const timeoutKey = (t)=>`${t.id}:${t.instanceId}`;
+ /* ------------------------------- Toast API -------------------------------- */ const dismissToast = (id)=>{
+     const item = store.toasts.find((t)=>t.id === id);
+     if (!item || item.exiting) return;
+-    store.update((prev)=>prev.map((t)=>t.id === id ? cc._extends({}, t, {
++    const instanceId = item.instanceId;
++    store.update((prev)=>prev.map((t)=>t.id === id && t.instanceId === instanceId ? cc._extends({}, t, {
+                 exiting: true
+             }) : t));
+-    setTimeout(()=>store.update((prev)=>prev.filter((t)=>t.id !== id)), EXIT_DURATION);
++    setTimeout(()=>store.update((prev)=>prev.filter((t)=>!(t.id === id && t.instanceId === instanceId))), EXIT_DURATION);
+ };
+ const resolveAutopilot = (opts, duration)=>{
+     var _ref, _ref1;
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 942e5dbe138bdd2ea31ee98ea2fcd7593af5319b..553624251e911e3a593c7ec0f2be1cde71e2a135 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -535,6 +535,9 @@ const HEADER_EXIT_MS = 150;
+     }, []);
+     const handlePointerDown = useCallback((e)=>{
+         if (exiting || !onDismiss) return;
++        if (e.pointerType === "mouse") return;
++        const target = e.target;
++        if (target instanceof Element && target.closest("[data-sileo-button]")) return;
+         pointerStartRef.current = e.clientY;
+         e.currentTarget.setPointerCapture(e.pointerId);
+     }, [
+@@ -715,10 +718,11 @@ const timeoutKey = (t)=>`${t.id}:${t.instanceId}`;
+ /* ------------------------------- Toast API -------------------------------- */ const dismissToast = (id)=>{
+     const item = store.toasts.find((t)=>t.id === id);
+     if (!item || item.exiting) return;
+-    store.update((prev)=>prev.map((t)=>t.id === id ? _extends({}, t, {
++    const instanceId = item.instanceId;
++    store.update((prev)=>prev.map((t)=>t.id === id && t.instanceId === instanceId ? _extends({}, t, {
+                 exiting: true
+             }) : t));
+-    setTimeout(()=>store.update((prev)=>prev.filter((t)=>t.id !== id)), EXIT_DURATION);
++    setTimeout(()=>store.update((prev)=>prev.filter((t)=>!(t.id === id && t.instanceId === instanceId))), EXIT_DURATION);
+ };
+ const resolveAutopilot = (opts, duration)=>{
+     var _ref, _ref1;
