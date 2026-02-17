@@ -1,0 +1,46 @@
+{
+  "name": "shionlib",
+  "private": true,
+  "version": "1.0.0",
+  "author": {
+    "name": "Hoshimi Shion",
+    "email": "hoshimishion@ringyuki.moe"
+  },
+  "description": "Free, open-source Visual Novel/Galgame archive",
+  "packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39",
+  "scripts": {
+    "install:all": "pnpm install -r",
+    "dev": "pnpm -r --parallel --stream --filter shionlib-backend --filter shionlib-frontend run dev",
+    "dev:frontend": "pnpm --filter shionlib-frontend dev",
+    "dev:backend": "pnpm --filter shionlib-backend start:dev",
+    "prisma:validate": "pnpm --filter shionlib-backend prisma:validate",
+    "prisma:generate": "DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@localhost:5432/postgres?schema=public} pnpm --filter shionlib-backend prisma:generate",
+    "prisma:push": "pnpm --filter shionlib-backend prisma:push",
+    "prisma:migrate": "pnpm --filter shionlib-backend prisma:migrate",
+    "prisma:migrate-deploy": "pnpm --filter shionlib-backend prisma:migrate-deploy",
+    "build": "pnpm build:backend && pnpm build:frontend",
+    "build:frontend": "pnpm --filter shionlib-frontend build",
+    "build:backend": "pnpm --filter shionlib-backend build",
+    "format": "pnpm -r --if-present run format",
+    "format:check": "pnpm -r --if-present run format:check",
+    "lint": "pnpm lint:backend && pnpm lint:frontend",
+    "lint:frontend": "pnpm --filter shionlib-frontend lint",
+    "lint:backend": "pnpm --filter shionlib-backend lint:check",
+    "typecheck": "pnpm typecheck:backend && pnpm typecheck:frontend",
+    "typecheck:frontend": "pnpm --filter shionlib-frontend typecheck",
+    "typecheck:backend": "pnpm prisma:generate:backend && pnpm --filter shionlib-backend typecheck",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck",
+    "test": "pnpm test:backend",
+    "test:frontend:e2e": "pnpm --filter shionlib-frontend test:e2e",
+    "test:backend": "pnpm --filter shionlib-backend test"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "19.2.2",
+      "@types/react-dom": "19.2.2"
+    },
+    "patchedDependencies": {
+      "sileo@0.0.7": "apps/frontend/patches/sileo@0.0.7.patch"
+    }
+  }
+}
