@@ -1,0 +1,308 @@
+name: deploy backend
+
+on:
+  push:
+    branches: ['main']
+    paths:
+      - 'apps/backend/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: 'Deploy target environment'
+        type: choice
+        options:
+          - staging
+          - production
+        default: staging
+        required: true
+      release_ref:
+        description: 'Git ref to deploy (branch, tag, or SHA). Leave empty to use current SHA.'
+        type: string
+        required: false
+
+run-name: backend deploy to ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'staging' }}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: shionlib-backend-deploy-${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'staging' }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Backend Checks
+    runs-on: ubuntu-latest
+    if: github.repository == 'Ringyuki/shionlib' && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch')
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: shionlib_ci
+          POSTGRES_USER: shionlib
+          POSTGRES_PASSWORD: shionlib
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U shionlib -d shionlib_ci"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      DATABASE_URL: postgresql://shionlib:shionlib@localhost:5432/shionlib_ci?schema=public
+    steps:
+      - name: Validate dispatch inputs
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [ "${{ inputs.target_environment }}" = "production" ] && [ -z "${{ inputs.release_ref }}" ]; then
+            echo "release_ref is required when deploying production"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.sha }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres?schema=public
+        run: pnpm --filter shionlib-backend prisma:generate
+
+      - name: ESLint
+        run: pnpm --filter shionlib-backend lint:check
+
+      - name: Prettier
+        run: pnpm --filter shionlib-backend format:check
+
+      - name: Type check
+        run: pnpm --filter shionlib-backend typecheck
+
+      - name: Prisma validate
+        run: pnpm --filter shionlib-backend prisma:validate
+
+      - name: Prepare test DB schema
+        run: pnpm --filter shionlib-backend prisma:push
+
+      - name: Unit tests
+        run: pnpm --filter shionlib-backend test -- --passWithNoTests
+
+      - name: E2E tests
+        run: pnpm --filter shionlib-backend test:e2e -- --passWithNoTests
+
+  build-and-deploy:
+    name: Build and Deploy Backend
+    needs: checks
+    runs-on: ubuntu-latest
+    if: github.repository == 'Ringyuki/shionlib' && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch')
+    environment: ${{ (github.event_name == 'workflow_dispatch' && inputs.target_environment == 'production') && 'production-backend' || 'staging-backend' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.sha }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres?schema=public
+        run: pnpm --filter shionlib-backend prisma:generate
+
+      - name: Build backend
+        run: pnpm --filter shionlib-backend build
+
+      - name: Archive artifact
+        working-directory: apps/backend
+        run: |
+          DEPLOY_SHA=$(git rev-parse --short=7 HEAD)
+          TAR_NAME="backend-release-${DEPLOY_SHA}.tgz"
+          echo "DEPLOY_SHA=$DEPLOY_SHA" >> "$GITHUB_ENV"
+          echo "TAR_NAME=$TAR_NAME" >> "$GITHUB_ENV"
+          tar -czf "$TAR_NAME" \
+            dist \
+            i18n \
+            package.json \
+            pnpm-lock.yaml \
+            prisma \
+            prisma.config.ts
+
+      - name: Install cloudflared
+        run: |
+          set -e
+          mkdir -p /tmp/cloudflared
+          curl -sL -o /tmp/cloudflared/cloudflared \
+            https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
+          chmod +x /tmp/cloudflared/cloudflared
+          /tmp/cloudflared/cloudflared --version
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+      - name: Upload to server
+        env:
+          SSH_PROXY_COMMAND: '/tmp/cloudflared/cloudflared access ssh --id ${{ secrets.SSH_CLOUDFLARED_ID }} --secret ${{ secrets.SSH_CLOUDFLARED_SECRET }} --hostname %h'
+        run: |
+          scp \
+            -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=no \
+            -o ProxyCommand="$SSH_PROXY_COMMAND" \
+            -P "${{ secrets.SSH_PORT }}" \
+            "apps/backend/${TAR_NAME}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/${TAR_NAME}"
+
+      - name: Deploy on server
+        env:
+          SSH_PROXY_COMMAND: '/tmp/cloudflared/cloudflared access ssh --id ${{ secrets.SSH_CLOUDFLARED_ID }} --secret ${{ secrets.SSH_CLOUDFLARED_SECRET }} --hostname %h'
+          PM2_ENV: ${{ vars.PM2_ENV }}
+        run: |
+          ssh \
+            -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=no \
+            -o ProxyCommand="$SSH_PROXY_COMMAND" \
+            -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "DEPLOY_DIR='${{ secrets.DEPLOY_DIR }}' DEPLOY_SHA='${DEPLOY_SHA}' PM2_ENV='${PM2_ENV}' bash -s" << 'EOF_REMOTE'
+          [ -f ~/.bashrc ] && . ~/.bashrc
+          [ -f ~/.profile ] && . ~/.profile
+
+          set -euo pipefail
+
+          export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+          if [ -s "$NVM_DIR/nvm.sh" ]; then
+            . "$NVM_DIR/nvm.sh"
+            nvm use 24 >/dev/null || true
+          fi
+          KEEP_RELEASES=5
+          PM2_ENV="${PM2_ENV:-production}"
+
+          if ! command -v node >/dev/null 2>&1; then
+            echo "node is not available in PATH"
+            exit 1
+          fi
+          if ! command -v pm2 >/dev/null 2>&1; then
+            echo "pm2 is not available in PATH"
+            exit 1
+          fi
+          if ! command -v pnpm >/dev/null 2>&1; then
+            echo "pnpm is not available in PATH"
+            exit 1
+          fi
+
+          mkdir -p "$DEPLOY_DIR/releases"
+
+          TS_UTC=$(date -u +%Y%m%d%H%M%S)
+          RELEASE_NAME="${TS_UTC}-${DEPLOY_SHA}"
+          RELEASE_DIR="$DEPLOY_DIR/releases/$RELEASE_NAME"
+          SHARED_DIR="$DEPLOY_DIR/shared"
+
+          TAR_NAME="backend-release-${DEPLOY_SHA}.tgz"
+          mkdir -p "$RELEASE_DIR"
+          tar -xzf "/tmp/${TAR_NAME}" -C "$RELEASE_DIR"
+          rm -f "/tmp/${TAR_NAME}"
+
+          if [ -f "$SHARED_DIR/.env" ]; then
+            ln -sfn "$SHARED_DIR/.env" "$RELEASE_DIR/.env"
+          fi
+          if [ -f "$SHARED_DIR/config/bangumi-tokens.json" ]; then
+            mkdir -p "$RELEASE_DIR/config"
+            ln -sfn "$SHARED_DIR/config/bangumi-tokens.json" "$RELEASE_DIR/config/bangumi-tokens.json"
+          fi
+
+          cd "$RELEASE_DIR"
+          pnpm install --prod --frozen-lockfile
+          pnpm prisma generate
+
+          set -a
+          [ -f "$RELEASE_DIR/.env" ] && . "$RELEASE_DIR/.env"
+          set +a
+
+          if command -v psql >/dev/null 2>&1; then
+            HAS_TABLES=$(psql "$DATABASE_URL" -tAc "select count(*) from information_schema.tables where table_schema='public' and table_name <> '_prisma_migrations'")
+            HAS_PRISMA_TABLE=$(psql "$DATABASE_URL" -tAc "select to_regclass('_prisma_migrations') is not null")
+            MIG_CNT=0
+            if [ "$HAS_PRISMA_TABLE" = "t" ]; then
+              MIG_CNT=$(psql "$DATABASE_URL" -tAc "select count(*) from _prisma_migrations")
+            fi
+
+            if [ "$HAS_TABLES" -gt 0 ] && { [ "$HAS_PRISMA_TABLE" = "f" ] || [ "$MIG_CNT" -eq 0 ]; }; then
+              echo "Detected existing DB without Prisma migration history."
+              echo "Run once in this release dir:"
+              echo "pnpm prisma migrate resolve --applied 0000_initial_baseline && pnpm prisma migrate deploy"
+              exit 1
+            fi
+          else
+            echo "psql not found; cannot run safety check. Ensure baseline is resolved if DB is non-empty."
+          fi
+
+          if [ -d "prisma/migrations" ] && [ "$(ls -A prisma/migrations 2>/dev/null)" ]; then
+            echo "Applying Prisma migrations..."
+            pnpm prisma migrate deploy
+          else
+            echo "No Prisma migrations directory or it's empty. Skipping migrate deploy."
+          fi
+
+          if [ -f "$SHARED_DIR/ecosystem.config.cjs" ]; then
+            ln -sfn "$SHARED_DIR/ecosystem.config.cjs" "$RELEASE_DIR/ecosystem.config.cjs"
+          else
+            echo "missing pm2 ecosystem file: $SHARED_DIR/ecosystem.config.cjs"
+            exit 1
+          fi
+
+          ln -sfn "$RELEASE_DIR" "$DEPLOY_DIR/current"
+
+          cd "$DEPLOY_DIR/current"
+          pm2 restart shionlib-backend || pm2 start ecosystem.config.cjs --env "$PM2_ENV" --name shionlib-backend
+
+          cd "$DEPLOY_DIR/releases"
+          ls -1dt */ | tail -n +$((KEEP_RELEASES+1)) | xargs -r rm -rf
+          EOF_REMOTE
+
+      - name: Health check
+        env:
+          HEALTHCHECK_URL: ${{ vars.HEALTHCHECK_URL }}
+        run: |
+          if [ -z "${HEALTHCHECK_URL:-}" ]; then
+            echo "HEALTHCHECK_URL is not set"
+            exit 1
+          fi
+
+          for i in $(seq 1 30); do
+            if curl -fsS --max-time 8 "$HEALTHCHECK_URL" >/dev/null; then
+              echo "health check passed"
+              exit 0
+            fi
+            sleep 5
+          done
+
+          echo "health check failed"
+          exit 1

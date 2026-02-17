@@ -3,8 +3,20 @@ name: frontend e2e
 on:
   pull_request:
     branches: ['main']
+    paths:
+      - 'apps/frontend/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/e2e.yml'
   push:
     branches: ['main']
+    paths:
+      - 'apps/frontend/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/e2e.yml'
   workflow_dispatch:
   schedule:
     - cron: '0 4 * * *'
