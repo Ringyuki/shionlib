@@ -17,7 +17,9 @@ Thank you for considering contributing to this project! This guide explains how 
    - `cd shionlib`
 2. Install dependencies:
    - `pnpm install`
-3. Run the app:
+3. Generate Prisma Client:
+   - `pnpm prisma:generate`
+4. Run the app:
    - Dev: `pnpm dev`
    - Typecheck: `pnpm typecheck`
    - Lint: `pnpm lint` (auto-fix: `pnpm lint:fix`)
