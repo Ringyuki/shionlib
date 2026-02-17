@@ -3,15 +3,19 @@
 This monorepo uses root workflows only:
 
 - `.github/workflows/ci.yml`
-- `.github/workflows/e2e.yml`
 - `.github/workflows/deploy-frontend.yml`
 - `.github/workflows/deploy-backend.yml`
+- `.github/workflows/promote-frontend-production.yml`
+- `.github/workflows/promote-backend-production.yml`
 
 ## Deployment Flow
 
 1. `push` to `main` deploys to staging automatically.
-2. `workflow_dispatch` supports manual deploy to `staging` or `production`.
-3. Production should be protected by GitHub Environment reviewers.
+2. On successful staging deploy, production promotion runs automatically:
+   - frontend: creates `frontend-prod-<sha7>` tag and triggers production deploy.
+   - backend: creates `backend-prod-<sha7>` tag and triggers production deploy.
+3. `workflow_dispatch` still supports manual deploy to `staging` or `production`.
+4. Production should be protected by GitHub Environment reviewers.
 
 ## Manual Production Release Flow
 
@@ -22,16 +26,18 @@ This monorepo uses root workflows only:
 5. Wait for Environment approval and verify health check result.
 6. If rollback is needed, rerun `workflow_dispatch` with a previous known-good `release_ref`.
 
+## Auto Promotion Details
+
+- Auto promotion only runs when staging deploy workflows are triggered by `push` on `main` and finish with `success`.
+- If the auto-generated tag already exists at the same commit, auto promotion is skipped to avoid duplicate production runs.
+- If the tag exists but points to a different commit, promotion fails and requires manual intervention.
+
 ## Recommended GitHub Environments
 
 - `staging-frontend`
 - `production-frontend`
 - `staging-backend`
 - `production-backend`
-
-## Required Repository Variables
-
-- `E2E_BACKEND_BASE_URL` (for `.github/workflows/e2e.yml`)
 
 ## Required Environment Variables
 
