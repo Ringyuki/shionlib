@@ -1,0 +1,94 @@
+/**
+ * large file upload
+ */
+
+model GameUploadSession {
+  id Int @id @default(autoincrement())
+
+  file_name    String
+  mime_type    String?
+  total_size   BigInt
+  chunk_size   Int
+  total_chunks Int
+
+  uploaded_chunks Int[] @default([])
+
+  hash_algorithm HashAlgorithm @default(sha256)
+  file_sha256  String
+  status       GameUploadSessionStatus
+  storage_path String
+
+  expires_at DateTime
+
+  game_download_resources     GameDownloadResource[]    @relation("game_download_resource_upload_session")
+  game_download_resource_file GameDownloadResourceFile? @relation("game_download_resource_files_upload_session")
+  game_upload_chunks          GameUploadChunk[]         @relation("game_upload_session_chunks")
+  user_upload_quota_record    UserUploadQuotaRecord?    @relation("user_upload_quota_records_upload_session")
+
+  creator_id Int
+  creator    User @relation("user_create_game_upload_session", fields: [creator_id], references: [id])
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@index([expires_at])
+  @@index([status])
+  @@map("game_upload_sessions")
+}
+
+model GameUploadChunk {
+  id Int @id @default(autoincrement())
+
+  game_upload_session_id Int
+  game_upload_session    GameUploadSession @relation("game_upload_session_chunks", fields: [game_upload_session_id], references: [id])
+
+  index  Int
+  size   Int
+  sha256 String
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@unique([game_upload_session_id, index])
+  @@index([game_upload_session_id, index])
+  @@index([game_upload_session_id])
+  @@map("game_upload_chunks")
+}
+
+model UserUploadQuota {
+  id Int @id @default(autoincrement())
+
+  size    BigInt
+  used    BigInt
+  records UserUploadQuotaRecord[] @relation("user_upload_quota_records")
+
+  user_id Int  @unique
+  user    User @relation("user_upload_quota", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  is_first_grant Boolean @default(false)
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@map("user_upload_quotas")
+}
+
+model UserUploadQuotaRecord {
+  id Int @id @default(autoincrement())
+
+  field         UserUploadQuotaRecordField
+  amount        BigInt
+  action        UserUploadQuotaRecordAction
+  action_reason String?                     @db.VarChar(255)
+  status        UserUploadQuotaRecordStatus @default(COMPLETED)
+
+  upload_session_id Int?               @unique
+  upload_session    GameUploadSession? @relation("user_upload_quota_records_upload_session", fields: [upload_session_id], references: [id])
+
+  user_upload_quota_id Int
+  user_upload_quota    UserUploadQuota @relation("user_upload_quota_records", fields: [user_upload_quota_id], references: [id])
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@map("user_upload_quota_records")
+}

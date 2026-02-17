@@ -1,0 +1,10 @@
+{
+  "400": "invalid request",
+  "401": "unauthorized",
+  "403": "forbidden",
+  "404": "not found",
+  "409": "conflict",
+  "413": "payload too large",
+  "429": "too many requests",
+  "500": "server error"
+}

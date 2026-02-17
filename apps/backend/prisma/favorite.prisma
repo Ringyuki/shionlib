@@ -1,0 +1,39 @@
+model Favorite {
+  id Int @id @default(autoincrement())
+
+  user_id Int
+  user User @relation("user_favorite", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  name String @db.VarChar(255)
+  description String? @db.VarChar(2000)
+
+  is_private Boolean @default(false)
+  default Boolean @default(false)
+
+  items FavoriteItem[] @relation("favorite_item")
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@index([user_id])
+  @@unique([user_id, name])
+  @@map("favorites")
+}
+
+model FavoriteItem {
+  id Int @id @default(autoincrement())
+
+  favorite_id Int
+  favorite Favorite @relation("favorite_item", fields: [favorite_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  game_id Int
+  game Game @relation("favorite_game_item", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  note String? @db.VarChar(2000)
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@unique([favorite_id, game_id])
+  @@map("favorite_items")
+}

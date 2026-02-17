@@ -1,0 +1,45 @@
+enum ActivityType {
+  COMMENT
+  FILE_UPLOAD_TO_SERVER
+  FILE_UPLOAD_TO_S3
+  FILE_REUPLOAD
+  FILE_CHECK_OK
+  FILE_CHECK_BROKEN_OR_TRUNCATED
+  FILE_CHECK_BROKEN_OR_UNSUPPORTED
+  FILE_CHECK_ENCRYPTED
+  FILE_CHECK_HARMFUL
+  GAME_CREATE
+  GAME_EDIT
+  DEVELOPER_EDIT
+  CHARACTER_EDIT
+}
+
+// file status(effective when file type is 1): 1 -> pending, 2 -> uploaded to server, 3 -> uploaded to s3
+// file check status: 0 -> pending, 1 -> ok, 2 -> broken or truncated, 3 -> broken or unsupported, 4 -> encrypted, 5 -> harmful
+model Activity {
+  id                Int                       @id @default(autoincrement())
+  type              ActivityType
+  user_id           Int
+  user              User                      @relation("user_activity", fields: [user_id], references: [id])
+  game_id           Int?
+  game              Game?                     @relation("game_activity", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  edit_record_id    Int?
+  edit_record       EditRecord?               @relation("edit_record_activity", fields: [edit_record_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  comment_id        Int?
+  comment           Comment?                  @relation("comment_activity", fields: [comment_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  developer_id      Int?
+  developer         GameDeveloper?            @relation("developer_activity", fields: [developer_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  character_id      Int?
+  character         GameCharacter?            @relation("character_activity", fields: [character_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  file_id           Int?
+  file              GameDownloadResourceFile? @relation("game_download_resource_file_activity", fields: [file_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  file_status       Int?                      @default(1)
+  file_check_status Int?                      @default(0)
+  file_size         BigInt?
+  file_name         String?
+  created           DateTime                  @default(now())
+  updated           DateTime                  @updatedAt
+
+  @@index([created])
+  @@map("activities")
+}

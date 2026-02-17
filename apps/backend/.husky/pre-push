@@ -1,0 +1,8 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+set -e
+pnpm prisma:generate
+pnpm lint:check
+pnpm format:check
+pnpm typecheck
+pnpm test -- --passWithNoTests
