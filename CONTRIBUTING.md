@@ -16,7 +16,7 @@ Thank you for considering contributing to this project! This guide explains how 
    - `git clone <your-fork-url>`
    - `cd shionlib`
 2. Install dependencies:
-   - `pnpm install`
+   - `pnpm install:all`
 3. Generate Prisma Client:
    - `pnpm prisma:generate`
 4. Run the app:
