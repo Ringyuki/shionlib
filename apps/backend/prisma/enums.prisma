@@ -1,0 +1,115 @@
+// user enums
+enum UserLang {
+  en
+  zh
+  ja
+}
+
+// game character enums
+enum GameCharacterBloodType {
+  a
+  b
+  ab
+  o
+}
+
+enum GameCharacterGender {
+  m
+  f
+  o
+  a
+}
+
+enum GameCharacterRole {
+  main
+  primary
+  side
+  appears
+}
+
+// edit enums
+enum EditActionType {
+  UPDATE_SCALAR // only scalar/JSON fields
+  ADD_RELATION // relation add
+  REMOVE_RELATION // relation remove
+  SET_RELATION // relation set (delete all old and add new)
+  UPDATE_RELATION // relation update
+}
+
+enum EditRelationType {
+  cover
+  image
+  link
+  developer
+  character
+}
+
+// permission enums
+enum PermissionEntity {
+  game
+  character
+  developer
+}
+
+// user upload enums
+enum UserUploadQuotaRecordAction {
+  ADD
+  SUB // for field "size" only
+  USE // for field "used" only
+}
+
+enum UserUploadQuotaRecordField {
+  SIZE
+  USED
+}
+
+enum UserUploadQuotaRecordStatus {
+  COMPLETED
+  WITHDRAWN
+}
+
+enum GameUploadSessionStatus {
+  INITIATED
+  UPLOADING
+  COMPLETED
+  ABORTED
+  EXPIRED
+}
+
+enum HashAlgorithm {
+  sha256
+  blake3
+}
+
+enum GameDownloadResourceReportReason {
+  MALWARE
+  IRRELEVANT
+  BROKEN_LINK
+  MISLEADING_CONTENT
+  OTHER
+}
+
+enum GameDownloadResourceReportStatus {
+  PENDING
+  VALID
+  INVALID
+}
+
+enum ReportMaliciousLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum MalwareScanCaseStatus {
+  PENDING
+  RELEASED_FALSE_POSITIVE
+  DELETED
+}
+
+enum MalwareScanDecisionSource {
+  ADMIN_ALLOW
+  ADMIN_DELETE
+  TIMEOUT_AUTO_DELETE
+}

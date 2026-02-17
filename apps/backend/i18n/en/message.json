@@ -1,0 +1,49 @@
+{
+  "email": {
+    "VERIFICATION_CODE_SUBJECT": "Shionlib Verification Code",
+    "VERIFICATION_CODE_PREFIX": "Your verification code is: ",
+    "VERIFICATION_CODE_SUFFIX": "please use it within {exp} minutes.",
+    "VERIFICATION_CODE_IGNORE": "If you did not request this verification code, please ignore this email.",
+    "PASSWORD_RESET_SUBJECT": "Reset your Shionlib password",
+    "PASSWORD_RESET_GREETING": "We received a request to reset your Shionlib password.",
+    "PASSWORD_RESET_INSTRUCTION": "Click the button below to set a new password.",
+    "PASSWORD_RESET_BUTTON": "Reset password",
+    "PASSWORD_RESET_LINK_EXPIRES": "This link expires in {exp} minutes.",
+    "PASSWORD_RESET_COPY_LINK": "If the button doesn't work, copy and paste this link into your browser:",
+    "PASSWORD_RESET_IGNORE": "If you didn't request a password reset, you can safely ignore this email.",
+    "REPORT_NOTIFICATION_SUBJECT": "Shionlib Download Resource Report Notification",
+    "REPORT_NOTIFICATION_INTRO": "A new download resource report needs your review:",
+    "REPORT_ID": "Report ID",
+    "MALWARE_CASE_ID": "Malware Case ID",
+    "REPORTER": "Reporter",
+    "REPORTED_USER": "Reported User",
+    "UPLOADER": "Uploader",
+    "FILE_NAME": "File Name",
+    "GAME": "Game",
+    "REASON": "Reason",
+    "MALICIOUS_LEVEL": "Malicious Level",
+    "DETAIL": "Detail",
+    "DETECTED_VIRUSES": "Detected Viruses",
+    "REVIEW_DEADLINE": "Review Deadline",
+    "REVIEW_REPORT": "Review Report",
+    "REVIEW_MALWARE_CASE": "Review Malware Case",
+    "MALWARE_SCAN_NOTIFICATION_SUBJECT": "Shionlib Malware Scan Review Required",
+    "MALWARE_SCAN_NOTIFICATION_INTRO": "A file was flagged by malware scan and is waiting for your review:",
+    "REPORT_NOTIFICATION_FOOTER": "This email was sent automatically by the system. Please do not reply directly."
+  },
+  "report": {
+    "reason": {
+      "MALWARE": "Malware",
+      "IRRELEVANT": "Irrelevant Content",
+      "BROKEN_LINK": "Broken Link",
+      "MISLEADING_CONTENT": "Misleading Content",
+      "OTHER": "Other"
+    },
+    "level": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "CRITICAL": "Critical"
+    }
+  }
+}

@@ -1,0 +1,46 @@
+enum MessageType {
+  COMMENT_REPLY
+  COMMENT_LIKE
+  SYSTEM
+}
+
+enum MessageTone {
+  PRIMARY
+  SECONDARY
+  SUCCESS
+  WARNING
+  INFO
+  DESTRUCTIVE
+  NEUTRAL
+}
+
+model Message {
+  id Int @id @default(autoincrement())
+
+  type MessageType
+  tone MessageTone @default(INFO)
+  title String @db.VarChar(255)
+  content String @db.VarChar(10240)
+  link_text String? @db.VarChar(255)
+  link_url String? @db.VarChar(255)
+  external_link Boolean @default(false)
+  meta Json?
+
+  comment_id Int?
+  comment Comment? @relation("comment_message", fields: [comment_id], references: [id], onDelete: Cascade)
+  game_id Int?
+  game Game? @relation("game_message", fields: [game_id], references: [id], onDelete: Cascade)
+  sender_id Int?
+  sender User? @relation("user_message_sender", fields: [sender_id], references: [id], onDelete: Cascade)
+
+  receiver_id Int
+  receiver User @relation("user_message_receiver", fields: [receiver_id], references: [id])
+
+  read Boolean @default(false)
+  read_at DateTime?
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@map("messages")
+}

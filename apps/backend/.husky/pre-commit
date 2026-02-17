@@ -1,0 +1,7 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+set -e
+pnpm prisma:validate
+pnpm exec lint-staged
+pnpm typecheck
+node scripts/pre-commit-prisma-migrate.mjs

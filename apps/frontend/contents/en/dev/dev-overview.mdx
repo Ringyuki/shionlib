@@ -1,0 +1,54 @@
+---
+title: 'Shionlib Development Overview'
+banner: 'https://images.yurari.moe/admin/6740325e87e2312f66fa3f58/ny9s2fu6_2.webp'
+description: 'Shionlib development overview: Next.js/React frontend and NestJS/Prisma/PostgreSQL backend, with Redis queues, Meilisearch search, S3-compatible storage, and i18n; open source—contributions welcome.'
+date: 2025-10-28
+author_uid: 1
+author_name: 'ringyuki'
+author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
+---
+
+## Repositories
+
+Frontend: [shionlib-frontend](https://github.com/Ringyuki/shionlib-frontend)
+
+Backend: [shionlib-backend](https://github.com/Ringyuki/shionlib-backend)
+
+## Tech Stack
+
+### Frontend
+
+**Core stack**: Next.js 15, React 19, Tailwind CSS, Radix UI, next-intl, MDX (@next/mdx, @mdx-js), Lexical, Zustand, pnpm, PM2
+
+- Framework: `Next.js 15` (App Router)
+- Language & runtime: `React 19` + `TypeScript`
+- Styles & UI: `Tailwind CSS`, `Shadcn UI`, `Radix UI`, `Lucide`, `Motion`
+- i18n: `next-intl` (route-based multilingual support with locale negotiation)
+- Content/Docs: MDX (`@next/mdx`, `@mdx-js/*`), `gray-matter` for frontmatter parsing, `next-mdx-remote` for rendering
+- State management: `zustand`
+- Dates & calendar: `date-fns`, `react-day-picker`
+- Media & images: `Next Image` with remote sources; `react-image-crop`, `react-medium-image-zoom`, etc.
+- Interactions & feedback: `react-hot-toast`, `sileo`, `spoiled`, `@base-ui-components/react`, `@stepperize/react`, etc.
+- Utilities: `lodash`, `qs`, `sanitize-html`, `react-use`, etc.
+- Theming: `next-themes`
+- Deployment: PM2
+
+### Backend
+
+**Core stack**: NestJS, Prisma, PostgreSQL, Redis, Bull, Meilisearch, AWS S3 SDK, Backblaze B2 and Cloudflare R2 (S3-compatible), nestjs-i18n, pnpm, PM2
+
+- Framework: `NestJS` (HTTP server framework: `Express 5`)
+- Data layer: `Prisma`, `PostgreSQL`
+- Cache: `Redis`
+- Queue: `bull`
+- Search: `Meilisearch`
+- Storage & uploads: `AWS S3 SDK`, `Backblaze B2` (large files), `Cloudflare R2` (small files)
+- Auth: `JWT` (Passport)
+- i18n: `nestjs-i18n` (Cookie/Query/Accept-Language parsing)
+- Deployment: PM2
+
+## Contributing
+
+If you’re able, come build Shionlib with us! 👏
+
+Please read the [Contributing Guide](https://github.com/Ringyuki/shionlib-frontend/blob/main/CONTRIBUTING.md) before submitting your Pull Request. If you have any questions, open an Issue/Discussion, or ping the maintainers in your PR.

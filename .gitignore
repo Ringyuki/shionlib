@@ -1,0 +1,14 @@
+node_modules/
+.pnpm-store/
+
+apps/*/node_modules/
+apps/*/.next/
+apps/*/dist/
+apps/*/playwright-report/
+apps/*/test-results/
+apps/*/logs/
+apps/*/.pnpm-store/
+apps/*/tsconfig.tsbuildinfo
+
+.DS_Store
+.env*

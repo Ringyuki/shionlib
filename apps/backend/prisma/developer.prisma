@@ -1,0 +1,47 @@
+// extra_info: Array<Record<key, value>>
+model GameDeveloper {
+  id         Int      @id @default(autoincrement())
+  b_id       String?
+  v_id       String?
+  name       String   @default("") @db.VarChar(255)
+  aliases    String[] @default([])
+  logo       String?
+  intro_jp   String   @default("") @db.VarChar(20000)
+  intro_zh   String   @default("") @db.VarChar(20000)
+  intro_en   String   @default("") @db.VarChar(20000)
+  website    String?
+  extra_info Json?    @default(dbgenerated("'[]'::jsonb")) @db.JsonB
+
+  games GameDeveloperRelation[] @relation("game_produce")
+
+  parent_developer_id Int?
+  parent_developer    GameDeveloper?  @relation("game_developer_parent", fields: [parent_developer_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  child_developers    GameDeveloper[] @relation("game_developer_parent")
+
+  activities Activity[] @relation("developer_activity")
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@unique([b_id, v_id])
+  @@index([b_id, v_id])
+  @@index([b_id])
+  @@index([v_id])
+  @@map("game_developers")
+}
+
+model GameDeveloperRelation {
+  id           Int     @id @default(autoincrement())
+  role         String?
+  game_id      Int
+  developer_id Int
+
+  game      Game          @relation("game_developer", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  developer GameDeveloper @relation("game_produce", fields: [developer_id], references: [id])
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@unique([game_id, developer_id])
+  @@map("game_developer_relations")
+}

@@ -1,0 +1,82 @@
+---
+title: How to Upload Game Files
+banner: 'https://images.yurari.moe/galgame/11201/ffah7shi_2.webp'
+description: "Guide to Shionlib's large-file upload system: supports resumable uploads, hash verification, and security scanning; an upload quota mechanism ensures sustainable and secure operation."
+date: 2025-10-30
+author_uid: 1
+author_name: 'ringyuki'
+author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
+---
+
+## Introduction to Shionlib's Large-File Upload System
+
+### Why design a large-file upload system?
+
+One of Shionlib’s goals is to build and maintain a complete, controllable archive of visual novels/galgames across all eras. Achieving this is anything but easy. From our experience, only a **community-driven** model can make it possible.
+
+Therefore, we designed an upload system that grants all users large-file upload permissions.
+
+### Upload workflow
+
+After you select a local file, the system slices it into chunks (each no larger than 5 MB) and computes the file’s BLAKE3 hash.
+
+Once the upload starts, the browser sends all chunks and the hash to Shionlib’s servers. The server merges the finished chunks, recomputes the BLAKE3 hash, and compares it with the hash calculated by the browser. If they match, the upload is marked as successful.
+
+Next, Shionlib’s servers scan the uploaded file to check whether it meets requirements (including file integrity, corruption, encryption, and potential malware). If the scan passes, the file enters a waiting queue to be uploaded to Shionlib’s S3 bucket.
+
+Finally, the file is uploaded to Shionlib’s S3 bucket and a download link is generated. The upload process is then marked as successfully completed.
+
+### Challenges
+
+It’s obvious we must design the entire system with great care. If anyone attempts to disrupt it in any way, the consequences would be unacceptable.
+
+- Maliciously uploading a large number of huge files. This would occupy far more storage than planned, potentially forcing us to pay excessive storage fees.
+- Maliciously uploading files that contain malware. Although we never attempt to extract or execute files at any point, such files could still pose risks to users who download them.
+
+To ensure the system can operate normally and sustainably, we designed an **upload quota** system.
+
+Each user receives a 5 GB upload quota fifteen days after registration, which resets on the first day of each month. If you consume your quota in a given month by uploading compliant files to Shionlib, the system will dynamically increase your quota, up to a maximum of 20 GB.
+
+If you need to upload larger files, you can request a quota increase from an administrator.
+
+**Note that the system may clear/deduct your upload quota, or even ban your account, under any of the following circumstances:**
+
+- The files you upload are determined to contain malware.
+- The files you upload are meaningless junk.
+- Your account remains inactive for an extended period.
+- Other users report your uploads as violating content.
+
+## Uploading Files
+
+### Format and file-naming guidelines
+
+Your upload must be packaged as a **single** zip/rar/7z/tar/gzip file, and **must not be password-protected**.
+
+When naming the file, you can refer to the following format:
+
+- `[Developer] [Game Name] [Translated Name (optional)]`
+
+For example:
+
+- `[SAGA PLANETS] AMBITIOUS MISSION`
+- `[MAGES. & ニトロプラス] STEINS;GATE 命运石之门`
+
+For other information, such as language, translation group/translator, version number, etc., you can add it to the metadata of the resource you are about to create (explained below).
+
+### Start the upload
+
+On the game entry page, click **Upload** to open the upload dialog. Then select the file you want to upload and click **Start** to begin.
+
+During the upload, you can track progress via the progress bar in the upload dialog. Please keep your browser and the current tab in the foreground until the upload completes.
+
+You can click **Pause** at any time to pause the upload. We’ll preserve the upload session; later, click **Resume** to continue.
+
+We designed for possible interruptions and support resumable uploads. If an upload is interrupted, reopen the upload dialog. You should see **Ongoing Uploads**; click **Continue** for the corresponding session and select the same file to resume.
+
+![Resume upload](/assets/images/upload-game-files/resume-upload.png)
+
+After the file finishes uploading, fill in the file’s metadata below, including platform, languages, and notes. When you’re done, click **Submit** to finalize the upload.
+
+![Fill metadata](/assets/images/upload-game-files/fill-metadata.png)
+
+After submission, the system will process the file: scanning, uploading to S3, and more. You can track the processing progress in the **Latest Activity** section on the home page.

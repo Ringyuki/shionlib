@@ -1,0 +1,52 @@
+html {
+  font-family:
+    var(--font-latin),
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Helvetica Neue',
+    Arial,
+    sans-serif,
+    'Apple Color Emoji',
+    'Segoe UI Emoji',
+    'Segoe UI Symbol';
+}
+
+:lang(en),
+:lang(en-US) {
+  font-family:
+    var(--font-latin),
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+}
+
+:lang(zh),
+:lang(zh-CN),
+:lang(zh-Hans) {
+  font-family:
+    var(--font-sc, var(--font-latin)),
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'PingFang SC',
+    'Microsoft YaHei',
+    sans-serif;
+}
+:lang(ja),
+:lang(ja-JP),
+:lang(ja-JP-x-lvariant-JIS) {
+  font-family:
+    var(--font-jp, var(--font-latin)),
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Hiragino Sans',
+    'Hiragino Kaku Gothic ProN',
+    sans-serif;
+}

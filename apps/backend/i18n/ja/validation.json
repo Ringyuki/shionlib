@@ -1,0 +1,29 @@
+{
+  "common": {
+    "IS_NOT_EMPTY": "{property} は必須です",
+    "MIN_LENGTH": "{property} は {min} 文字以上である必要があります",
+    "MAX_LENGTH": "{property} は {max} 文字以下である必要があります",
+    "MIN": "{property} は {min} 以上である必要があります",
+    "MAX": "{property} は {max} 以下である必要があります",
+    "PROPERTY_SHOULD_NOT_EXIST": "{property} は存在してはいけません",
+    "CANNOT_ALL_BE_EMPTY": "{property} は全部空ではいけません",
+
+    "IS_STRING": "{property} は文字列である必要があります",
+    "IS_EMAIL": "{property} は有効なメールアドレスである必要があります",
+    "IS_NUMBER": "{property} は数字である必要があります",
+    "IS_INT": "{property} は整数である必要があります",
+    "IS_BOOLEAN": "{property} は真偽値である必要があります",
+    "IS_ARRAY": "{property} は配列である必要があります",
+    "ARRAY_MAX_SIZE": "{property} は {max} 個を超えてはいけません",
+    "ARRAY_MIN_SIZE": "{property} は {min} 個未満ではいけません",
+    "IS_OBJECT": "{property} はオブジェクトである必要があります",
+    "IS_DATE": "{property} は日付である必要があります",
+    "IS_URL": "{property} は有効なURLである必要があります",
+    "IS_ENUM": "{property} は以下の値のいずれかである必要があります: {allowed}",
+    "IS_UUID": "{property} は有効なUUIDである必要があります",
+    "IS_JSON": "{property} は有効なJSONである必要があります"
+  },
+  "user": {
+    "PASSWORD_MATCHES": "パスワードには少なくとも1つの大文字、1つの小文字、そして1つの数字が含まれている必要があります"
+  }
+}

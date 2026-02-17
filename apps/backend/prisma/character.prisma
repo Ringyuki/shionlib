@@ -1,0 +1,56 @@
+model GameCharacter {
+  id         Int                     @id @default(autoincrement())
+  b_id       String?
+  v_id       String?
+  image      String?
+  name_jp    String                  @default("")
+  name_zh    String?
+  name_en    String?
+  aliases    String[]                @default([])
+  intro_jp   String                  @default("") @db.VarChar(20000)
+  intro_zh   String                  @default("") @db.VarChar(20000)
+  intro_en   String                  @default("") @db.VarChar(20000)
+  blood_type GameCharacterBloodType?
+  height     Int?
+  weight     Int?
+  bust       Int?
+  waist      Int?
+  hips       Int?
+  cup        String?
+  age        Int?
+  birthday   Int[] // [month, day]
+  gender     GameCharacterGender[]   @default([])
+
+  games GameCharacterRelation[] @relation("game_appear_on")
+
+  activities Activity[] @relation("character_activity")
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@unique([b_id, v_id])
+  @@index([b_id, v_id])
+  @@index([b_id])
+  @@index([v_id])
+  @@map("game_characters")
+}
+
+// extra_info: Array<Record<key, value>>
+model GameCharacterRelation {
+  id    Int                @id @default(autoincrement())
+  image String?
+  actor String?
+  role  GameCharacterRole?
+
+  game_id      Int
+  character_id Int
+
+  game      Game          @relation("game_character", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  character GameCharacter @relation("game_appear_on", fields: [character_id], references: [id])
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@unique([game_id, character_id])
+  @@map("game_character_relations")
+}
