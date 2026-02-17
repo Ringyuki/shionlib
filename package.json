@@ -49,5 +49,8 @@
     "patchedDependencies": {
       "sileo@0.0.7": "apps/frontend/patches/sileo@0.0.7.patch"
     }
+  },
+  "dependencies": {
+    "husky": "^9.1.7"
   }
 }
