@@ -40,6 +40,7 @@ import { ModerateModule } from './modules/moderate/moderate.module'
 import { AdminModule } from './modules/admin/admin.module'
 import { FavoriteModule } from './modules/favorite/favorite.module'
 import { AnalysisModule } from './modules/analysis/analysis.module'
+import { HealthModule } from './modules/health/health.module'
 
 @Module({
   imports: [
@@ -107,6 +108,7 @@ import { AnalysisModule } from './modules/analysis/analysis.module'
     SearchModule,
     ActivityModule,
     SiteModule,
+    HealthModule,
     MessageModule,
     DatabaseModule,
     AdminModule,
