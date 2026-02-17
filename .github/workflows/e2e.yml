@@ -34,6 +34,7 @@ jobs:
     env:
       CI: 'true'
       E2E_PORT: '3100'
+      E2E_BACKEND_BASE_URL: ${{ vars.E2E_BACKEND_BASE_URL }}
       NEXT_PUBLIC_PROD_API_PATH: ${{ vars.E2E_BACKEND_BASE_URL }}
       INTERNAL_API_BASE_URL: ${{ vars.E2E_BACKEND_BASE_URL }}
       INTERNAL_API_PORT: '65535'
@@ -58,6 +59,19 @@ jobs:
 
       - name: Install Playwright browser
         run: pnpm --filter shionlib-frontend test:e2e:install:ci
+
+      - name: Validate E2E backend base URL
+        run: |
+          set -euo pipefail
+          BASE="${E2E_BACKEND_BASE_URL:-}"
+          if [ -z "$BASE" ]; then
+            echo "E2E_BACKEND_BASE_URL is empty"
+            exit 1
+          fi
+          if echo "$BASE" | grep -Eq '/health/?$'; then
+            echo "E2E_BACKEND_BASE_URL must be API base origin, not health endpoint: $BASE"
+            exit 1
+          fi
 
       - name: Run E2E smoke
         run: pnpm --filter shionlib-frontend test:e2e tests/e2e/smoke/home.spec.mjs --project=chromium --workers=1

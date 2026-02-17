@@ -31,15 +31,21 @@ const isFatalAuthByCode = (code: number) => {
 }
 
 const normalizeBaseUrl = (url?: string) => (url ? url.replace(/\/+$/, '') : undefined)
+const isAbsoluteHttpUrl = (url?: string) => Boolean(url && /^https?:\/\//i.test(url))
 
-const browserBaseUrl = normalizeBaseUrl(process.env.NEXT_PUBLIC_PROD_API_PATH)
-const serverBaseUrl =
-  normalizeBaseUrl(process.env.INTERNAL_API_BASE_URL) ||
-  (process.env.INTERNAL_API_PORT
-    ? normalizeBaseUrl(`http://localhost:${process.env.INTERNAL_API_PORT}`)
-    : undefined)
+const resolveBaseUrl = () => {
+  const browserBaseUrl = normalizeBaseUrl(process.env.NEXT_PUBLIC_PROD_API_PATH)
+  const serverBaseUrl =
+    normalizeBaseUrl(process.env.INTERNAL_API_BASE_URL) ||
+    (process.env.INTERNAL_API_PORT
+      ? normalizeBaseUrl(`http://localhost:${process.env.INTERNAL_API_PORT}`)
+      : undefined) ||
+    (isAbsoluteHttpUrl(process.env.NEXT_PUBLIC_PROD_API_PATH)
+      ? normalizeBaseUrl(process.env.NEXT_PUBLIC_PROD_API_PATH)
+      : undefined)
 
-const baseUrl = isBrowser ? browserBaseUrl : serverBaseUrl
+  return isBrowser ? browserBaseUrl : serverBaseUrl
+}
 const SSR_PRE_REFRESH_LEEWAY_MS = 10 * 1000
 
 export const ensureFreshToken = async ({
@@ -47,6 +53,7 @@ export const ensureFreshToken = async ({
   minIntervalMs = 30 * 1000,
 }: { force?: boolean; minIntervalMs?: number } = {}) => {
   if (!isBrowser) return true
+  const baseUrl = resolveBaseUrl()
   if (!baseUrl) return false
   const now = Date.now()
   if (!force && now - lastEnsureFreshAt < minIntervalMs) return true
@@ -74,8 +81,11 @@ export const shionlibRequest = ({
     options: RequestInit,
     params?: Record<string, any>,
   ): Promise<BasicResponse<T>> => {
+    const baseUrl = resolveBaseUrl()
     if (!baseUrl) {
-      throw new Error('API base URL is not configured')
+      throw new Error(
+        `API base URL is not configured (isBrowser=${isBrowser}, INTERNAL_API_BASE_URL=${Boolean(process.env.INTERNAL_API_BASE_URL)}, INTERNAL_API_PORT=${Boolean(process.env.INTERNAL_API_PORT)}, NEXT_PUBLIC_PROD_API_PATH=${Boolean(process.env.NEXT_PUBLIC_PROD_API_PATH)})`,
+      )
     }
 
     const serverContext = await getServerRequestContext()
@@ -111,7 +121,27 @@ export const shionlibRequest = ({
     const requestOnce = async (): Promise<{ data: BasicResponse<T>; headers: Headers }> => {
       const opt = await init()
       const res = await fetch(reqUrl(), opt)
-      const data = (await res.json().catch(() => ({}))) as BasicResponse<T>
+      const raw = await res.text()
+      let data: BasicResponse<T> = {} as BasicResponse<T>
+
+      if (raw) {
+        try {
+          data = JSON.parse(raw) as BasicResponse<T>
+        } catch {
+          const preview = raw.slice(0, 256).replace(/\s+/g, ' ').trim()
+          throw new Error(
+            `Invalid JSON response (${res.status}) from ${reqUrl()}: ${preview || '<empty body>'}`,
+          )
+        }
+      }
+
+      if (typeof data?.code !== 'number') {
+        const preview = raw.slice(0, 256).replace(/\s+/g, ' ').trim()
+        throw new Error(
+          `Unexpected API response (${res.status}) from ${reqUrl()}: ${preview || '<empty body>'}`,
+        )
+      }
+
       const headers = res.headers
       return { data, headers }
     }
