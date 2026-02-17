@@ -3,8 +3,32 @@ name: ci
 on:
   pull_request:
     branches: ['main']
+    paths:
+      - 'apps/frontend/**'
+      - 'apps/backend/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.prettierignore'
+      - '.prettierrc'
+      - '.github/workflows/ci.yml'
+      - '.github/workflows/e2e.yml'
+      - '.github/workflows/deploy-frontend.yml'
+      - '.github/workflows/deploy-backend.yml'
   push:
     branches: ['main']
+    paths:
+      - 'apps/frontend/**'
+      - 'apps/backend/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.prettierignore'
+      - '.prettierrc'
+      - '.github/workflows/ci.yml'
+      - '.github/workflows/e2e.yml'
+      - '.github/workflows/deploy-frontend.yml'
+      - '.github/workflows/deploy-backend.yml'
   workflow_dispatch:
 
 concurrency:
@@ -43,8 +67,22 @@ jobs:
   backend-checks:
     name: Backend Checks
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: shionlib_ci
+          POSTGRES_USER: shionlib
+          POSTGRES_PASSWORD: shionlib
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U shionlib -d shionlib_ci"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres?schema=public
+      DATABASE_URL: postgresql://shionlib:shionlib@localhost:5432/shionlib_ci?schema=public
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -62,6 +100,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma Client
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres?schema=public
         run: pnpm --filter shionlib-backend prisma:generate
 
       - name: Prettier
@@ -75,3 +115,12 @@ jobs:
 
       - name: Prisma validate
         run: pnpm --filter shionlib-backend prisma:validate
+
+      - name: Prepare test DB schema
+        run: pnpm --filter shionlib-backend prisma:push
+
+      - name: Unit tests
+        run: pnpm --filter shionlib-backend test -- --passWithNoTests
+
+      - name: E2E tests
+        run: pnpm --filter shionlib-backend test:e2e -- --passWithNoTests
