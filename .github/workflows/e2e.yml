@@ -35,6 +35,7 @@ jobs:
       CI: 'true'
       E2E_PORT: '3100'
       E2E_BACKEND_BASE_URL: ${{ vars.E2E_BACKEND_BASE_URL }}
+      E2E_CF_BYPASS_KEY: ${{ secrets.E2E_CF_BYPASS_KEY }}
       NEXT_PUBLIC_PROD_API_PATH: ${{ vars.E2E_BACKEND_BASE_URL }}
       INTERNAL_API_BASE_URL: ${{ vars.E2E_BACKEND_BASE_URL }}
       INTERNAL_API_PORT: '65535'

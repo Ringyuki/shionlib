@@ -129,3 +129,19 @@ export const shouldPreRefreshServerCookie = (
   if (typeof exp !== 'number') return true
   return exp * 1000 - Date.now() <= leewayMs
 }
+
+const E2E_CF_BYPASS_HEADER = 'x-shionlib-e2e-bypass'
+const getE2eCfBypassKey = () => process.env.E2E_CF_BYPASS_KEY?.trim()
+export const applyE2eCfBypassHeader = (headers: Headers | Record<string, string>) => {
+  const key = getE2eCfBypassKey()
+  if (!key) return
+  if (headers instanceof Headers) {
+    if (!headers.has(E2E_CF_BYPASS_HEADER)) {
+      headers.set(E2E_CF_BYPASS_HEADER, key)
+    }
+    return
+  }
+  if (!headers[E2E_CF_BYPASS_HEADER]) {
+    headers[E2E_CF_BYPASS_HEADER] = key
+  }
+}

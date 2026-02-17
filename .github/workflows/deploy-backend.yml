@@ -293,7 +293,7 @@ jobs:
           ln -sfn "$RELEASE_DIR" "$DEPLOY_DIR/current"
 
           cd "$DEPLOY_DIR/current"
-          pm2 startOrRestart ecosystem.config.cjs --only shionlib-backend --env "$PM2_ENV" --update-env
+          pm2 restart shionlib-backend || pm2 start "ecosystem.config.cjs" --env "$PM2_ENV"
 
           cd "$DEPLOY_DIR/releases"
           ls -1dt */ | tail -n +$((KEEP_RELEASES+1)) | xargs -r rm -rf

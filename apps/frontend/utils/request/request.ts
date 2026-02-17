@@ -17,6 +17,7 @@ import {
   resolveRefreshLockKey,
   extractSetCookies,
   shouldPreRefreshServerCookie,
+  applyE2eCfBypassHeader,
 } from './helpers'
 
 let refreshPromises = new Map<string, Promise<RefreshResult>>()
@@ -31,21 +32,15 @@ const isFatalAuthByCode = (code: number) => {
 }
 
 const normalizeBaseUrl = (url?: string) => (url ? url.replace(/\/+$/, '') : undefined)
-const isAbsoluteHttpUrl = (url?: string) => Boolean(url && /^https?:\/\//i.test(url))
 
-const resolveBaseUrl = () => {
-  const browserBaseUrl = normalizeBaseUrl(process.env.NEXT_PUBLIC_PROD_API_PATH)
-  const serverBaseUrl =
-    normalizeBaseUrl(process.env.INTERNAL_API_BASE_URL) ||
-    (process.env.INTERNAL_API_PORT
-      ? normalizeBaseUrl(`http://localhost:${process.env.INTERNAL_API_PORT}`)
-      : undefined) ||
-    (isAbsoluteHttpUrl(process.env.NEXT_PUBLIC_PROD_API_PATH)
-      ? normalizeBaseUrl(process.env.NEXT_PUBLIC_PROD_API_PATH)
-      : undefined)
+const browserBaseUrl = normalizeBaseUrl(process.env.NEXT_PUBLIC_PROD_API_PATH)
+const serverBaseUrl =
+  normalizeBaseUrl(process.env.INTERNAL_API_BASE_URL) ||
+  (process.env.INTERNAL_API_PORT
+    ? normalizeBaseUrl(`http://localhost:${process.env.INTERNAL_API_PORT}`)
+    : undefined)
 
-  return isBrowser ? browserBaseUrl : serverBaseUrl
-}
+const baseUrl = isBrowser ? browserBaseUrl : serverBaseUrl
 const SSR_PRE_REFRESH_LEEWAY_MS = 10 * 1000
 
 export const ensureFreshToken = async ({
@@ -53,7 +48,6 @@ export const ensureFreshToken = async ({
   minIntervalMs = 30 * 1000,
 }: { force?: boolean; minIntervalMs?: number } = {}) => {
   if (!isBrowser) return true
-  const baseUrl = resolveBaseUrl()
   if (!baseUrl) return false
   const now = Date.now()
   if (!force && now - lastEnsureFreshAt < minIntervalMs) return true
@@ -81,11 +75,8 @@ export const shionlibRequest = ({
     options: RequestInit,
     params?: Record<string, any>,
   ): Promise<BasicResponse<T>> => {
-    const baseUrl = resolveBaseUrl()
     if (!baseUrl) {
-      throw new Error(
-        `API base URL is not configured (isBrowser=${isBrowser}, INTERNAL_API_BASE_URL=${Boolean(process.env.INTERNAL_API_BASE_URL)}, INTERNAL_API_PORT=${Boolean(process.env.INTERNAL_API_PORT)}, NEXT_PUBLIC_PROD_API_PATH=${Boolean(process.env.NEXT_PUBLIC_PROD_API_PATH)})`,
-      )
+      throw new Error('API base URL is not configured')
     }
 
     const serverContext = await getServerRequestContext()
@@ -123,7 +114,6 @@ export const shionlibRequest = ({
       const res = await fetch(reqUrl(), opt)
       const raw = await res.text()
       let data: BasicResponse<T> = {} as BasicResponse<T>
-
       if (raw) {
         try {
           data = JSON.parse(raw) as BasicResponse<T>
@@ -134,7 +124,6 @@ export const shionlibRequest = ({
           )
         }
       }
-
       if (typeof data?.code !== 'number') {
         const preview = raw.slice(0, 256).replace(/\s+/g, ' ').trim()
         throw new Error(
@@ -354,6 +343,7 @@ const buildHeaders = async (options?: RequestInit): Promise<HeadersInit> => {
     const h = new Headers(existing)
     if (!h.has('Content-Type')) h.set('Content-Type', 'application/json')
     if (!h.has('Accept-Language')) h.set('Accept-Language', preferred)
+    applyE2eCfBypassHeader(h)
     return h
   }
 
@@ -361,6 +351,7 @@ const buildHeaders = async (options?: RequestInit): Promise<HeadersInit> => {
     const h = new Headers(existing)
     if (!h.has('Content-Type')) h.set('Content-Type', 'application/json')
     if (!h.has('Accept-Language')) h.set('Accept-Language', preferred)
+    applyE2eCfBypassHeader(h)
     return h
   }
 
@@ -369,6 +360,7 @@ const buildHeaders = async (options?: RequestInit): Promise<HeadersInit> => {
     'Accept-Language': preferred,
     ...(existing as Record<string, string> | undefined),
   }
+  applyE2eCfBypassHeader(record)
   return record
 }
 
@@ -381,6 +373,7 @@ const doRefresh = async (
   if (existing) return existing
 
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  applyE2eCfBypassHeader(headers)
   if (!isBrowser) {
     if (context?.cookieHeader) headers.cookie = context.cookieHeader
     if (context?.realIp) headers['x-real-ip'] = context.realIp
@@ -415,6 +408,7 @@ const doRefresh = async (
 
 const doLogout = async (baseUrl: string, context?: ServerRequestContext) => {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  applyE2eCfBypassHeader(headers)
   if (!isBrowser) {
     if (context?.cookieHeader) headers.cookie = context.cookieHeader
     if (context?.realIp) headers['x-real-ip'] = context.realIp
