@@ -242,33 +242,35 @@ jobs:
           pnpm install --prod --no-frozen-lockfile
           pnpm prisma generate
 
-          DATABASE_URL=""
-          if [ -f "$RELEASE_DIR/.env" ]; then
-            DATABASE_URL=$(grep -E '^(export[[:space:]]+)?DATABASE_URL=' "$RELEASE_DIR/.env" | tail -n 1 | sed -E 's/^(export[[:space:]]+)?DATABASE_URL=//')
-            DATABASE_URL="${DATABASE_URL%\"}"
-            DATABASE_URL="${DATABASE_URL#\"}"
-            DATABASE_URL="${DATABASE_URL%\'}"
-            DATABASE_URL="${DATABASE_URL#\'}"
-          fi
+          set -a
+          [ -f "$RELEASE_DIR/.env" ] && . "$RELEASE_DIR/.env"
+          set +a
 
           if [ -z "${DATABASE_URL:-}" ]; then
-            echo "DATABASE_URL is missing in $RELEASE_DIR/.env"
+            echo "DATABASE_URL is missing after loading $RELEASE_DIR/.env"
             exit 1
           fi
 
           if command -v psql >/dev/null 2>&1; then
-            HAS_TABLES=$(psql "$DATABASE_URL" -tAc "select count(*) from information_schema.tables where table_schema='public' and table_name <> '_prisma_migrations'")
-            HAS_PRISMA_TABLE=$(psql "$DATABASE_URL" -tAc "select to_regclass('_prisma_migrations') is not null")
-            MIG_CNT=0
-            if [ "$HAS_PRISMA_TABLE" = "t" ]; then
-              MIG_CNT=$(psql "$DATABASE_URL" -tAc "select count(*) from _prisma_migrations")
-            fi
+            if HAS_TABLES=$(psql "$DATABASE_URL" -tAc "select count(*) from information_schema.tables where table_schema='public' and table_name <> '_prisma_migrations'" 2>/dev/null) && \
+              HAS_PRISMA_TABLE=$(psql "$DATABASE_URL" -tAc "select to_regclass('_prisma_migrations') is not null" 2>/dev/null); then
+              HAS_TABLES="$(echo "$HAS_TABLES" | tr -d '[:space:]')"
+              HAS_PRISMA_TABLE="$(echo "$HAS_PRISMA_TABLE" | tr -d '[:space:]')"
+              MIG_CNT=0
+              if [ "$HAS_PRISMA_TABLE" = "t" ]; then
+                MIG_CNT=$(psql "$DATABASE_URL" -tAc "select count(*) from _prisma_migrations" 2>/dev/null || echo "")
+                MIG_CNT="$(echo "$MIG_CNT" | tr -d '[:space:]')"
+                [ -z "$MIG_CNT" ] && MIG_CNT=0
+              fi
 
-            if [ "$HAS_TABLES" -gt 0 ] && { [ "$HAS_PRISMA_TABLE" = "f" ] || [ "$MIG_CNT" -eq 0 ]; }; then
-              echo "Detected existing DB without Prisma migration history."
-              echo "Run once in this release dir:"
-              echo "pnpm prisma migrate resolve --applied 0000_initial_baseline && pnpm prisma migrate deploy"
-              exit 1
+              if [ "$HAS_TABLES" -gt 0 ] && { [ "$HAS_PRISMA_TABLE" = "f" ] || [ "$MIG_CNT" -eq 0 ]; }; then
+                echo "Detected existing DB without Prisma migration history."
+                echo "Run once in this release dir:"
+                echo "pnpm prisma migrate resolve --applied 0000_initial_baseline && pnpm prisma migrate deploy"
+                exit 1
+              fi
+            else
+              echo "psql exists but is not usable in this host image. Skipping baseline safety check."
             fi
           else
             echo "psql not found; cannot run safety check. Ensure baseline is resolved if DB is non-empty."
@@ -297,7 +299,7 @@ jobs:
           ls -1dt */ | tail -n +$((KEEP_RELEASES+1)) | xargs -r rm -rf
           EOF_REMOTE
 
-      - name: Health check on target host
+      - name: Health check
         env:
           SSH_PROXY_COMMAND: '/tmp/cloudflared/cloudflared access ssh --id ${{ secrets.SSH_CLOUDFLARED_ID }} --secret ${{ secrets.SSH_CLOUDFLARED_SECRET }} --hostname %h'
           HEALTHCHECK_URL: ${{ vars.HEALTHCHECK_URL }}

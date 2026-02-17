@@ -237,7 +237,7 @@ jobs:
           ls -1dt */ | tail -n +$((KEEP_RELEASES+1)) | xargs -r rm -rf
           EOF_REMOTE
 
-      - name: Health check on target host
+      - name: Health check
         env:
           SSH_PROXY_COMMAND: '/tmp/cloudflared/cloudflared access ssh --id ${{ secrets.SSH_CLOUDFLARED_ID }} --secret ${{ secrets.SSH_CLOUDFLARED_SECRET }} --hostname %h'
           HEALTHCHECK_URL: ${{ vars.HEALTHCHECK_URL }}
