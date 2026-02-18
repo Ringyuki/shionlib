@@ -13,7 +13,7 @@ module.exports = {
       max_memory_restart: '1G',
       node_args: '--env-file=.env',
       env_staging: {
-        NODE_ENV: 'staging' 
+        NODE_ENV: 'staging',
       },
       env_production: {
         NODE_ENV: 'production',

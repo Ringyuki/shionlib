@@ -152,7 +152,7 @@
     "*.{ts,tsx,js,jsx}": [
       "eslint --fix"
     ],
-    "*.{json,css,scss,md,mdx}": [
+    "*.{json,css,scss,md,mdx,cjs}": [
       "prettier --write"
     ]
   },

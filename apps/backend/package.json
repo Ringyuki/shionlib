@@ -135,7 +135,7 @@
     "src/**/*.ts": [
       "eslint --fix"
     ],
-    "*.{js,ts,json,md}": [
+    "*.{js,ts,json,md,cjs}": [
       "prettier --write"
     ]
   },

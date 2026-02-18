@@ -7,6 +7,7 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   prettier,
   {
+    files: ['**/*.{ts,tsx,js,jsx}'],
     plugins: {
       prettier: pluginPrettier,
     },
@@ -23,14 +24,16 @@ const eslintConfig = defineConfig([
       'react-hooks/purity': 'warn',
     },
   },
-  globalIgnores([
-    'node_modules/**',
-    '.next/**',
-    'out/**',
-    'build/**',
-    'next-env.d.ts',
-    'ecosystem.config.cjs',
-  ]),
+  {
+    files: ['**/*.cjs'],
+    plugins: {
+      prettier: pluginPrettier,
+    },
+    rules: {
+      'prettier/prettier': 'error',
+    },
+  },
+  globalIgnores(['node_modules/**', '.next/**', 'out/**', 'build/**', 'next-env.d.ts']),
 ])
 
 export default eslintConfig
