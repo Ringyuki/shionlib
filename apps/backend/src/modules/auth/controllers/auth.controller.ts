@@ -29,8 +29,8 @@ export class AuthController {
     )
 
     response.setHeader('Set-Cookie', [
-      `shionlib_access_token=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${this.configService.get('token.expiresIn')}`,
-      `shionlib_refresh_token=${refresh_token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${this.configService.get('refresh_token.shortWindowSec')}`,
+      `shionlib_access_token=${token}; HttpOnly; Secure ; SameSite=Lax; Path=/; Max-Age=${this.configService.get('token.expiresIn')}`,
+      `shionlib_refresh_token=${refresh_token}; HttpOnly; Secure ; SameSite=Lax; Path=/; Max-Age=${this.configService.get('refresh_token.shortWindowSec')}`,
     ])
   }
 
@@ -40,8 +40,8 @@ export class AuthController {
     await this.loginSessionService.logout(request.cookies['shionlib_refresh_token'])
 
     response.setHeader('Set-Cookie', [
-      'shionlib_access_token=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0',
-      'shionlib_refresh_token=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0',
+      'shionlib_access_token=; HttpOnly; Secure ; SameSite=Lax; Path=/; Max-Age=0',
+      'shionlib_refresh_token=; HttpOnly; Secure ; SameSite=Lax; Path=/; Max-Age=0',
     ])
   }
 

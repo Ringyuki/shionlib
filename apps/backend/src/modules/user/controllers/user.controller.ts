@@ -16,6 +16,7 @@ import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-us
 import { LoginDto } from '../dto/req/Login.req.dto'
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
 import { Roles } from '../../auth/decorators/roles.decorator'
+import { RolesGuard } from '../../auth/guards/roles.guard'
 import { ShionConfigService } from '../../../common/config/services/config.service'
 import { BanUserReqDto } from '../dto/req/ban-user.req.dto'
 import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
@@ -41,8 +42,8 @@ export class UserController {
     const { token, refresh_token } = await this.userService.login(loginDto, request)
 
     response.setHeader('Set-Cookie', [
-      `shionlib_access_token=${token}; HttpOnly; ${this.configService.get('environment') === 'production' && loginDto.identifier !== 'ringyuki' ? 'Secure' : ''} ; SameSite=Lax; Path=/; Max-Age=${this.configService.get('token.expiresIn')}`,
-      `shionlib_refresh_token=${refresh_token}; HttpOnly; ${this.configService.get('environment') === 'production' && loginDto.identifier !== 'ringyuki' ? 'Secure' : ''}; SameSite=Lax; Path=/; Max-Age=${this.configService.get('refresh_token.shortWindowSec')}`,
+      `shionlib_access_token=${token}; HttpOnly; Secure ; SameSite=Lax; Path=/; Max-Age=${this.configService.get('token.expiresIn')}`,
+      `shionlib_refresh_token=${refresh_token}; HttpOnly; Secure ; SameSite=Lax; Path=/; Max-Age=${this.configService.get('refresh_token.shortWindowSec')}`,
     ])
   }
 
@@ -62,14 +63,14 @@ export class UserController {
     return await this.userService.checkName(body.name)
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ShionlibUserRoles.ADMIN)
   @Post(':id/ban')
   async ban(@Body() dto: BanUserReqDto, @Param('id', ParseIntPipe) id: number) {
     return await this.userService.ban(id, dto)
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ShionlibUserRoles.ADMIN)
   @Post(':id/unban')
   async unban(@Param('id', ParseIntPipe) id: number) {

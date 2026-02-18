@@ -20,7 +20,7 @@ import { PasswordService } from './services/password.service'
       inject: [ShionConfigService],
       useFactory: (configService: ShionConfigService) => ({
         secret: configService.get('token.secret'),
-        signOptions: { expiresIn: Number(configService.get('token.expiresIn')) * 1000 },
+        signOptions: { expiresIn: Number(configService.get('token.expiresIn')) },
       }),
     }),
     PassportModule.register({
