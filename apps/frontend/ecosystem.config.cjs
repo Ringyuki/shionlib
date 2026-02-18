@@ -1,5 +1,8 @@
 const path = require('path')
 
+const cwd = __dirname
+const envPath = path.join(cwd, '.env')
+
 module.exports = {
   apps: [
     {
@@ -10,7 +13,7 @@ module.exports = {
       autorestart: true,
       watch: false,
       max_memory_restart: '1G',
-      node_args: '--env-file=.env',
+      node_args: `--env-file=${envPath}`,
       env_staging: {
         NODE_ENV: 'staging',
       },
