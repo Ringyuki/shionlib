@@ -157,7 +157,7 @@ jobs:
           TAR_NAME="frontend-release-${DEPLOY_SHA}.tgz"
           echo "DEPLOY_SHA=$DEPLOY_SHA" >> "$GITHUB_ENV"
           echo "TAR_NAME=$TAR_NAME" >> "$GITHUB_ENV"
-          tar -czf "$TAR_NAME" -C . .next
+          tar -czf "$TAR_NAME" -C . .next ecosystem.config.cjs
 
       - name: Install cloudflared
         run: |
@@ -235,14 +235,17 @@ jobs:
             echo "missing shared env file: $SHARED_DIR/.env"
             exit 1
           fi
-          if [ ! -f "$SHARED_DIR/ecosystem.config.cjs" ]; then
-            echo "missing pm2 ecosystem file: $SHARED_DIR/ecosystem.config.cjs"
-            exit 1
+          if [ ! -f "$RELEASE_DIR/ecosystem.config.cjs" ]; then
+            if [ -f "$SHARED_DIR/ecosystem.config.cjs" ]; then
+              ln -sfn "$SHARED_DIR/ecosystem.config.cjs" "$RELEASE_DIR/ecosystem.config.cjs"
+            else
+              echo "missing pm2 ecosystem file in release and shared paths"
+              exit 1
+            fi
           fi
 
           ln -sfn "$SHARED_DIR/.env" "$RELEASE_DIR/.env"
           ln -sfn "$SHARED_DIR/.env" "$RELEASE_DIR/.next/standalone/.env"
-          ln -sfn "$SHARED_DIR/ecosystem.config.cjs" "$RELEASE_DIR/ecosystem.config.cjs"
           ln -sfn "$RELEASE_DIR" "$DEPLOY_DIR/current"
 
           cd "$DEPLOY_DIR/current"

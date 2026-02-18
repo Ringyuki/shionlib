@@ -131,6 +131,7 @@ jobs:
             i18n \
             package.json \
             pnpm-lock.yaml \
+            ecosystem.config.cjs \
             prisma \
             prisma.config.ts
 
@@ -264,17 +265,19 @@ jobs:
             echo "No Prisma migrations directory or it's empty. Skipping migrate deploy."
           fi
 
-          if [ -f "$SHARED_DIR/ecosystem.config.cjs" ]; then
-            ln -sfn "$SHARED_DIR/ecosystem.config.cjs" "$RELEASE_DIR/ecosystem.config.cjs"
-          else
-            echo "missing pm2 ecosystem file: $SHARED_DIR/ecosystem.config.cjs"
-            exit 1
+          if [ ! -f "$RELEASE_DIR/ecosystem.config.cjs" ]; then
+            if [ -f "$SHARED_DIR/ecosystem.config.cjs" ]; then
+              ln -sfn "$SHARED_DIR/ecosystem.config.cjs" "$RELEASE_DIR/ecosystem.config.cjs"
+            else
+              echo "missing pm2 ecosystem file in release and shared paths"
+              exit 1
+            fi
           fi
 
           ln -sfn "$RELEASE_DIR" "$DEPLOY_DIR/current"
 
           cd "$DEPLOY_DIR/current"
-          pm2 restart shionlib-backend || pm2 start "ecosystem.config.cjs" --env "$PM2_ENV"
+          pm2 startOrReload ecosystem.config.cjs --only shionlib-backend --env "$PM2_ENV" --update-env
 
           cd "$DEPLOY_DIR/releases"
           ls -1dt */ | tail -n +$((KEEP_RELEASES+1)) | xargs -r rm -rf
