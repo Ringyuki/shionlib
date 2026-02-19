@@ -11,7 +11,9 @@ test.describe('Game detail page', () => {
     const firstCharacterName = await findFirstCharacterNameByGameId(request, primaryGameId)
 
     await page.goto(`/en/game/${primaryGameId}`)
-    await expect(page.getByRole('heading', { name: E2E_FIXTURES.games.primary.title })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: E2E_FIXTURES.games.primary.title }),
+    ).toBeVisible()
 
     await page.goto(`/en/game/${primaryGameId}/comments`)
     await expect(page.getByText(E2E_FIXTURES.comments.root).first()).toBeVisible()

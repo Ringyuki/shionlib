@@ -158,10 +158,10 @@
     "vitest": "^4.0.18"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
+    "*.{ts,tsx,js,jsx,mjs}": [
       "eslint --fix"
     ],
-    "*.{json,css,scss,md,mdx,cjs}": [
+    "*.{json,css,scss,md,mdx,cjs,mjs}": [
       "prettier --write"
     ]
   },

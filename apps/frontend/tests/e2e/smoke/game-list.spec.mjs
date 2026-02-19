@@ -9,10 +9,14 @@ test.describe('Game list page', () => {
     expect(response).not.toBeNull()
     expect(response.ok()).toBeTruthy()
 
-    await expect(page.getByRole('heading', { name: E2E_FIXTURES.games.primary.title })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: E2E_FIXTURES.games.primary.title }),
+    ).toBeVisible()
 
     await page.getByRole('link', { name: E2E_FIXTURES.games.primary.title }).first().click()
     await expect(page).toHaveURL(new RegExp(`/en/game/${primaryGameId}$`))
-    await expect(page.getByRole('heading', { name: E2E_FIXTURES.games.primary.title })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: E2E_FIXTURES.games.primary.title }),
+    ).toBeVisible()
   })
 })
