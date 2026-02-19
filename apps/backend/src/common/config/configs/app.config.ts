@@ -99,6 +99,7 @@ export default (): AppConfig => ({
   },
 
   file_scan: {
+    enabled: withDefault('FILE_SCAN_ENABLED', true),
     clamscan_binary_path: withDefault(
       'CLAMSCAN_BINARY_PATH',
       '/opt/homebrew/opt/clamav/bin/clamscan',

@@ -75,6 +75,7 @@ export interface AppConfig {
     }
   }
   file_scan: {
+    enabled: boolean
     clamscan_binary_path: string
     clamscan_db_path: string
     clamscan_scan_log_path: string

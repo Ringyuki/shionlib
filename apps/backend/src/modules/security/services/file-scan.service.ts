@@ -38,6 +38,11 @@ export class FileScanService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
+    if (!this.configService.get('file_scan.enabled')) {
+      this.logger.warn('File scanning is disabled by configuration')
+      return
+    }
+
     if (
       !this.configService.get('file_scan.clamscan_binary_path') ||
       !this.configService.get('file_scan.clamscan_db_path')
@@ -68,6 +73,10 @@ export class FileScanService implements OnModuleInit {
   }
 
   async scanFiles() {
+    if (!this.configService.get('file_scan.enabled')) {
+      return 0
+    }
+
     const allFiles = await this.prismaService.gameDownloadResourceFile.findMany({
       where: {
         type: 1,

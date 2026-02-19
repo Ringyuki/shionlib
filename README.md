@@ -31,3 +31,15 @@ You can find the link to our Telegram group at the bottom of the website.
 ## Infringement Reports
 
 If any content on the site infringes your rights, please contact us via the **Contact** button at the bottom of the site. After verification, we will remove the relevant content immediately.
+
+## Local Container Runtime
+
+You can run the full stack with Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+Detailed container setup and env references are documented at:
+
+- `docker/README.md`
