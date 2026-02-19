@@ -8,8 +8,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-shionlib}
       POSTGRES_USER: ${POSTGRES_USER:-shionlib}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-shionlib}
-    ports:
-      - '${POSTGRES_PORT:-5432}:5432'
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -26,8 +24,6 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    ports:
-      - '${REDIS_PORT:-6379}:6379'
     volumes:
       - redis-data:/data
     healthcheck:
@@ -36,6 +32,20 @@ services:
       timeout: 5s
       retries: 20
       start_period: 5s
+
+  clamav:
+    build:
+      context: .
+      dockerfile: docker/clamav/Dockerfile
+    restart: unless-stopped
+    volumes:
+      - clamav-db:/var/lib/clamav
+    healthcheck:
+      test: ['CMD-SHELL', "printf 'PING\\n' | nc -w 2 127.0.0.1 3310 | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 90s
 
   backend:
     build:
@@ -46,13 +56,12 @@ services:
       - ./docker/env/backend.env
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-shionlib}:${POSTGRES_PASSWORD:-shionlib}@postgres:5432/${POSTGRES_DB:-shionlib}?schema=public
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      PORT: 5000
     depends_on:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      clamav:
         condition: service_healthy
     ports:
       - '${BACKEND_PORT:-5001}:5000'
@@ -86,8 +95,6 @@ services:
     env_file:
       - ./docker/env/frontend.env
     environment:
-      PORT: 3000
-      HOSTNAME: 0.0.0.0
       NEXT_PUBLIC_SOCKETIO_URL: http://localhost:${BACKEND_PORT:-5001}
     depends_on:
       backend:
@@ -110,4 +117,5 @@ services:
 volumes:
   postgres-data:
   redis-data:
+  clamav-db:
   uploads-data:
