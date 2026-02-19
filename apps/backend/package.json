@@ -157,13 +157,25 @@
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.(t|j)s$": [
+        "ts-jest",
+        {
+          "diagnostics": {
+            "ignoreCodes": [
+              151002
+            ]
+          }
+        }
+      ]
     },
     "moduleNameMapper": {
       "^src/(.*)$": "<rootDir>/$1"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
+    ],
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/scripts/"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
