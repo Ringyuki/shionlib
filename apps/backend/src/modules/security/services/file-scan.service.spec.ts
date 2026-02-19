@@ -50,6 +50,10 @@ describe('FileScanService', () => {
     }
 
     const configValues = new Map<string, any>([
+      ['file_scan.enabled', true],
+      ['file_scan.clamd_host', ''],
+      ['file_scan.clamd_port', 3310],
+      ['file_scan.clamd_timeout', 60000],
       ['file_scan.clamscan_binary_path', '/usr/bin/clamscan'],
       ['file_scan.clamscan_db_path', '/var/lib/clamav'],
       ['file_scan.clamscan_scan_log_path', '/var/log/shionlib/clamav/scan.log'],
@@ -128,6 +132,9 @@ describe('FileScanService', () => {
   it('onModuleInit validates required config', async () => {
     const { service, configService } = createService()
     configService.get.mockImplementation((key: string) => {
+      if (key === 'file_scan.clamd_host') return ''
+      if (key === 'file_scan.clamd_port') return 3310
+      if (key === 'file_scan.clamd_timeout') return 60000
       if (key === 'file_scan.clamscan_binary_path') return ''
       if (key === 'file_scan.clamscan_db_path') return '/db'
       return '/log'
@@ -159,6 +166,54 @@ describe('FileScanService', () => {
       preference: 'clamscan',
     })
     expect((service as any).clam).toBe(clam)
+  })
+
+  it('onModuleInit initializes clamd successfully when host is configured', async () => {
+    const { service, configService } = createService()
+    configService.get.mockImplementation((key: string) => {
+      if (key === 'file_scan.enabled') return true
+      if (key === 'file_scan.clamd_host') return 'clamav'
+      if (key === 'file_scan.clamd_port') return 3310
+      if (key === 'file_scan.clamd_timeout') return 120000
+      if (key === 'file_scan.clamscan_scan_log_path') return '/var/log/shionlib/clamav/scan.log'
+      return undefined
+    })
+    const clam = { scanFile: jest.fn() }
+    mockNodeClamInit.mockResolvedValueOnce(clam)
+    jest.spyOn(service as any, 'ensureDir').mockResolvedValueOnce('/tmp/scan.log')
+
+    await service.onModuleInit()
+
+    expect(mockNodeClamInit).toHaveBeenCalledWith({
+      scanLog: '/tmp/scan.log',
+      clamdscan: {
+        active: true,
+        host: 'clamav',
+        port: 3310,
+        timeout: 120000,
+        localFallback: false,
+      },
+      clamscan: { active: false },
+      preference: 'clamdscan',
+    })
+    expect((service as any).logger.log).toHaveBeenCalledWith(
+      'Clam initialized successfully via clamd (clamav:3310)',
+    )
+  })
+
+  it('onModuleInit validates clamd port when clamd host is configured', async () => {
+    const { service, configService } = createService()
+    configService.get.mockImplementation((key: string) => {
+      if (key === 'file_scan.enabled') return true
+      if (key === 'file_scan.clamd_host') return 'clamav'
+      if (key === 'file_scan.clamd_port') return 0
+      if (key === 'file_scan.clamd_timeout') return 60000
+      if (key === 'file_scan.clamscan_scan_log_path') return '/var/log/shionlib/clamav/scan.log'
+      return undefined
+    })
+    jest.spyOn(service as any, 'ensureDir').mockResolvedValueOnce('/tmp/scan.log')
+
+    await expect(service.onModuleInit()).rejects.toThrow('Clamd port is not set or invalid')
   })
 
   it('onModuleInit logs and rethrows init errors', async () => {
@@ -421,6 +476,46 @@ describe('FileScanService', () => {
       .mockRejectedValueOnce({ stdout: '', stderr: '', message: 'mystery fail', code: 2 })
     await expect((service as any).inspectArchive('/tmp/mystery.7z')).resolves.toBe(
       ArchiveStatus.BROKEN_OR_UNSUPPORTED,
+    )
+  })
+
+  it('inspectArchive falls back to 7z when 7zz is unavailable', async () => {
+    const { service } = createService()
+
+    mockExecFileAsync
+      .mockRejectedValueOnce({
+        code: 'ENOENT',
+        message: 'spawn 7zz ENOENT',
+        stdout: '',
+        stderr: '',
+      })
+      .mockResolvedValueOnce({ stdout: 'Type = 7z', stderr: '' })
+      .mockResolvedValueOnce({ stdout: 'Everything is Ok', stderr: '' })
+
+    await expect((service as any).inspectArchive('/tmp/fallback.7z')).resolves.toBe(
+      ArchiveStatus.OK,
+    )
+
+    expect(mockExecFileAsync).toHaveBeenNthCalledWith(
+      1,
+      '7zz',
+      ['l', '-slt', '-p-', '/tmp/fallback.7z'],
+      expect.any(Object),
+    )
+    expect(mockExecFileAsync).toHaveBeenNthCalledWith(
+      2,
+      '7z',
+      ['l', '-slt', '-p-', '/tmp/fallback.7z'],
+      expect.any(Object),
+    )
+    expect(mockExecFileAsync).toHaveBeenNthCalledWith(
+      3,
+      '7z',
+      ['t', '-bb0', '-bd', '-y', '-p-', '/tmp/fallback.7z'],
+      expect.any(Object),
+    )
+    expect((service as any).logger.warn).toHaveBeenCalledWith(
+      '7zz binary not found, falling back to 7z',
     )
   })
 
