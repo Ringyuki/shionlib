@@ -4,7 +4,7 @@ This setup provides a local full-stack runtime for Shionlib:
 
 - frontend on `http://localhost:3100` (container port `3000`)
 - backend on `http://localhost:5001` (container port `5000`)
-- clamav (`clamd`) on internal port (`clamd:3310`)
+- clamav (`clamd`) on internal network (`clamd:3310`)
 - postgres on internal network (`postgres:5432`)
 - redis on internal network (`redis:6379`)
 
