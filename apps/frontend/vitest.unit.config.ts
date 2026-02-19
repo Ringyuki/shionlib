@@ -17,5 +17,16 @@ export default defineConfig({
     environment: 'node',
     globals: true,
     css: false,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary', 'lcov'],
+      exclude: ['coverage/**', 'tests/**', '**/*.spec.ts', 'node_modules/**'],
+      thresholds: {
+        statements: 70,
+        branches: 50,
+        functions: 75,
+        lines: 72,
+      },
+    },
   },
 })

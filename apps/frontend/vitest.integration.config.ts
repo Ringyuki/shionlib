@@ -13,5 +13,16 @@ export default defineConfig({
     include: ['tests/integration/**/*.spec.ts'],
     environment: 'node',
     globals: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary', 'lcov'],
+      exclude: ['coverage/**', 'tests/**', '**/*.spec.ts', 'node_modules/**'],
+      thresholds: {
+        statements: 50,
+        branches: 35,
+        functions: 50,
+        lines: 55,
+      },
+    },
   },
 })

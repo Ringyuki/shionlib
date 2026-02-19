@@ -12,7 +12,6 @@ on:
       - '.prettierignore'
       - '.prettierrc'
       - '.github/workflows/ci.yml'
-      - '.github/workflows/e2e.yml'
       - '.github/workflows/deploy-frontend.yml'
       - '.github/workflows/deploy-backend.yml'
       - '.github/workflows/promote-frontend-production.yml'
@@ -28,7 +27,6 @@ on:
       - '.prettierignore'
       - '.prettierrc'
       - '.github/workflows/ci.yml'
-      - '.github/workflows/e2e.yml'
       - '.github/workflows/deploy-frontend.yml'
       - '.github/workflows/deploy-backend.yml'
       - '.github/workflows/promote-frontend-production.yml'
@@ -67,6 +65,17 @@ jobs:
 
       - name: Type check
         run: pnpm --filter shionlib-frontend typecheck
+
+      - name: Coverage (unit + integration)
+        run: pnpm --filter shionlib-frontend test:cov
+
+      - name: Upload frontend coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: apps/frontend/coverage
+          if-no-files-found: warn
 
   backend-checks:
     name: Backend Checks
@@ -123,8 +132,19 @@ jobs:
       - name: Prepare test DB schema
         run: pnpm --filter shionlib-backend prisma:push
 
-      - name: Unit tests
-        run: pnpm --filter shionlib-backend test -- --passWithNoTests
+      - name: Unit coverage
+        run: pnpm --filter shionlib-backend test:cov
+
+      - name: Integration tests
+        run: pnpm --filter shionlib-backend test:integration -- --passWithNoTests
 
       - name: E2E tests
         run: pnpm --filter shionlib-backend test:e2e -- --passWithNoTests
+
+      - name: Upload backend coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: apps/backend/coverage
+          if-no-files-found: warn
