@@ -9,6 +9,8 @@ on:
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
+      - 'docker/**'
+      - 'docker-compose.yml'
       - '.prettierignore'
       - '.prettierrc'
       - '.github/workflows/ci.yml'
@@ -24,6 +26,8 @@ on:
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
+      - 'docker/**'
+      - 'docker-compose.yml'
       - '.prettierignore'
       - '.prettierrc'
       - '.github/workflows/ci.yml'
@@ -138,8 +142,8 @@ jobs:
       - name: Integration tests
         run: pnpm --filter shionlib-backend test:integration -- --passWithNoTests
 
-      - name: E2E tests
-        run: pnpm --filter shionlib-backend test:e2e -- --passWithNoTests
+      - name: API E2E tests
+        run: pnpm --filter shionlib-backend test:api:e2e -- --passWithNoTests
 
       - name: Upload backend coverage artifact
         if: always()
@@ -147,4 +151,56 @@ jobs:
         with:
           name: backend-coverage
           path: apps/backend/coverage
+          if-no-files-found: warn
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [frontend-checks, backend-checks]
+    timeout-minutes: 60
+    env:
+      CI: true
+      E2E_COMPOSE_RETRIES: 3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright
+        run: pnpm --filter shionlib-frontend test:e2e:install:ci
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
+
+      - name: Capture docker compose logs
+        if: failure()
+        run: docker compose logs --no-color > docker-compose.log
+
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            apps/frontend/playwright-report
+            apps/frontend/test-results
+          if-no-files-found: warn
+
+      - name: Upload docker compose logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-docker-logs
+          path: docker-compose.log
           if-no-files-found: warn

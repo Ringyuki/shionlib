@@ -13,7 +13,7 @@
 ## E2E
 
 - Location: `test/**/*.e2e-spec.ts`
-- Run: `pnpm test:e2e`
+- Run: `pnpm test:api:e2e`
 
 ## Run all layers
 

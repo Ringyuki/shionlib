@@ -1,0 +1,8 @@
+export { games } from './games'
+export { game_covers } from './game_covers'
+export { game_images } from './game_images'
+export { game_links } from './game_links'
+export { game_developers } from './game_developers'
+export { game_developer_relations } from './game_developer_relations'
+export { game_characters } from './game_characters'
+export { game_character_relations } from './game_character_relations'

@@ -29,7 +29,7 @@ pnpm build         # Build project
 pnpm lint:check    # Run ESLint checks
 pnpm typecheck     # Run TypeScript checks
 pnpm test          # Run unit tests
-pnpm test:e2e      # Run e2e tests
+pnpm test:api:e2e  # Run API e2e tests
 ```
 
 ## License
