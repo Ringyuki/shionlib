@@ -9,6 +9,7 @@ import { supportedLocales, SupportedLocales } from '@/config/i18n/supported'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/shionui/Card'
 import { Button } from '@/components/shionui/Button'
 import { useRouter } from 'next/navigation'
+import { parsePublicErrorDigest } from '@/libs/errors'
 import '@/public/assets/styles/globals.css'
 
 const MESSAGES: Record<SupportedLocales, Record<string, string>> = {
@@ -25,6 +26,7 @@ export default function GlobalError({
   reset: () => void
 }) {
   const router = useRouter()
+  const publicError = parsePublicErrorDigest(error?.digest)
   const pathname = usePathname() || '/'
   const maybeLocale = pathname.split('/')[1]
   const locale = maybeLocale && supportedLocales.includes(maybeLocale) ? maybeLocale : 'en'
@@ -40,8 +42,8 @@ export default function GlobalError({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="mb-4 whitespace-pre-wrap break-words text-sm text-muted-foreground font-mono!">
-                  {error.message}
+                <p className="mb-4 whitespace-pre-wrap wrap-break-word text-sm text-muted-foreground font-mono!">
+                  {publicError?.message || error.message}
                 </p>
               </CardContent>
               <CardFooter className="flex-col gap-2">

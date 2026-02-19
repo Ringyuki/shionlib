@@ -90,7 +90,7 @@ describe('GameController', () => {
     const { controller, cacheService, gameService } = createController()
     cacheService.get.mockResolvedValue({ id: 88 })
 
-    const result = await controller.getGame({ id: 88 } as any, req as any)
+    const result = await controller.getGame(88, req as any)
 
     expect(cacheService.get).toHaveBeenCalledWith('game:88:auth:u1:cl:2')
     expect(gameService.getById).not.toHaveBeenCalled()

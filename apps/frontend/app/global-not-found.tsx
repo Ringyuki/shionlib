@@ -26,7 +26,7 @@ export default function GlobalNotFound() {
     <html>
       <body>
         <NextIntlClientProvider locale={locale} messages={MESSAGES[locale as SupportedLocales]}>
-          <div className="w-[100dvw] h-[100dvh] flex items-center justify-center">
+          <div className="w-dvw h-dvh flex items-center justify-center">
             <Card className="w-fit max-w-sm gap-2">
               <CardHeader>
                 <CardTitle className="text-xl font-mono! break-all">
@@ -34,7 +34,7 @@ export default function GlobalNotFound() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="mb-4 whitespace-pre-wrap break-words text-sm text-muted-foreground font-mono!">
+                <p className="mb-4 whitespace-pre-wrap wrap-break-word text-sm text-muted-foreground font-mono!">
                   {MESSAGES[locale as SupportedLocales].details}
                 </p>
               </CardContent>

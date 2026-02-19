@@ -188,6 +188,8 @@ export const shionlibRequest = ({
             sileo.sileo.error({
               title: formatErrors(data as ErrorResponse, retryAfter || undefined),
             })
+        } else if (data.code === 400) {
+          throw new ShionlibBizError(data.code, data.message)
         } else {
           rht && rht.toast.error(formatErrors(data as ErrorResponse))
           sileo && sileo.sileo.error({ title: formatErrors(data as ErrorResponse) })

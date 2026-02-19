@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { GameService } from '../services/game.service'
-import { GetGameReqDto } from '../dto/req/get-game.req.dto'
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
 import { GameDownloadSourceService } from '../services/game-download-resource.service'
 import { CreateGameDownloadSourceReqDto } from '../dto/req/create-game-download-source.req.dto'
@@ -73,13 +72,13 @@ export class GameController {
   }
 
   @Get(':id')
-  async getGame(@Param() getGameReqDto: GetGameReqDto, @Req() req: RequestWithUser) {
-    const cacheKey = `game:${getGameReqDto.id}:auth:${req.user.sub}:cl:${req.user.content_limit}`
+  async getGame(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
+    const cacheKey = `game:${id}:auth:${req.user.sub}:cl:${req.user.content_limit}`
     const cached = await this.cacheService.get<GetGameResDto>(cacheKey)
     if (cached) {
       return cached
     }
-    const result = await this.gameService.getById(getGameReqDto.id, req.user?.content_limit)
+    const result = await this.gameService.getById(id, req.user?.content_limit)
     await this.cacheService.set(cacheKey, result, 30 * 60 * 1000) // 30 minutes
     return result
   }
