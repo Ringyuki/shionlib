@@ -17,11 +17,14 @@
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "lint:check": "eslint \"{src,apps,libs,test}/**/*.ts\" --max-warnings=0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "jest",
+    "test": "pnpm test:unit",
+    "test:unit": "jest",
+    "test:integration": "jest --config ./test/jest-integration.json",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:all": "pnpm test:unit && pnpm test:integration && pnpm test:e2e",
     "prisma:validate": "prisma validate",
     "prisma:push": "prisma db push",
     "prisma:generate": "prisma generate",
@@ -150,12 +153,23 @@
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1"
+    },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
-    "passWithNoTests": true
+    "passWithNoTests": true,
+    "coverageThreshold": {
+      "global": {
+        "statements": 85,
+        "branches": 74,
+        "functions": 85,
+        "lines": 86
+      }
+    }
   },
   "packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39"
 }

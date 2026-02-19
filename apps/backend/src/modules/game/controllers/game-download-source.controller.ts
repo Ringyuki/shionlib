@@ -56,10 +56,10 @@ export class GameDownloadSourceController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ShionlibUserRoles.SUPER_ADMIN)
-  @Post('migrate/:game-id')
+  @Post('migrate/:gameId')
   async createDownloadResource(
     @Body() migrateCreateDownloadResourceReqDto: MigrateCreateGameDownloadSourceReqDto,
-    @Param('game-id', ParseIntPipe) game_id: number,
+    @Param('gameId', ParseIntPipe) game_id: number,
   ) {
     return await this.gameDownloadSourceService.migrateCreate(
       migrateCreateDownloadResourceReqDto,
@@ -69,10 +69,10 @@ export class GameDownloadSourceController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ShionlibUserRoles.SUPER_ADMIN)
-  @Post('migrate/file/:download-source-id')
+  @Post('migrate/file/:downloadSourceId')
   async createDownloadResourceFile(
     @Body() createDownloadResourceFileReqDto: CreateGameDownloadSourceFileReqDto,
-    @Param('download-source-id', ParseIntPipe) download_source_id: number,
+    @Param('downloadSourceId', ParseIntPipe) download_source_id: number,
   ) {
     return await this.gameDownloadSourceService.migrateCreateFile(
       createDownloadResourceFileReqDto,

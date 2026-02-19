@@ -13,10 +13,16 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:unit": "vitest run --config vitest.unit.config.ts",
+    "test:unit:cov": "vitest run --config vitest.unit.config.ts --coverage --coverage.reportsDirectory coverage/unit",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:integration:cov": "vitest run --config vitest.integration.config.ts --coverage --coverage.reportsDirectory coverage/integration",
+    "test:cov": "pnpm test:unit:cov && pnpm test:integration:cov",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
+    "test:all": "pnpm test:unit && pnpm test:integration && pnpm test:e2e",
     "test:e2e:install": "playwright install chromium",
     "test:e2e:install:ci": "playwright install --with-deps chromium",
     "prepare": "[ -d .git ] && husky || true"
@@ -127,7 +133,9 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.51.1",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/react": "^16.3.2",
     "@types/jsdom": "^27.0.0",
     "@types/lodash": "^4.17.20",
     "@types/node": "^20",
@@ -135,18 +143,19 @@
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
     "@types/sanitize-html": "^2.16.0",
+    "@vitest/coverage-v8": "^4.0.18",
     "eslint": "^9",
     "eslint-config-next": "16.0.10",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.3",
-    "@playwright/test": "^1.51.1",
     "prettier": "^3.6.2",
     "sass": "^1.92.1",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.8",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.0.18"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
