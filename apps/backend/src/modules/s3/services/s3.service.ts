@@ -26,9 +26,10 @@ export class S3Service implements OnModuleInit {
       const command = new ListObjectsV2Command({
         Bucket: this.bucket,
       })
-      this.s3Client.send(command)
+      await this.s3Client.send(command)
       this.logger.log(`S3 client initialized successfully for bucket ${this.bucket}`)
     } catch (error) {
+      this.logger.warn(`S3 connectivity check failed for bucket ${this.bucket}`)
       this.logger.error(error)
     }
   }

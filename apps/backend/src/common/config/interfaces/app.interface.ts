@@ -75,6 +75,10 @@ export interface AppConfig {
     }
   }
   file_scan: {
+    enabled: boolean
+    clamd_host: string
+    clamd_port: number
+    clamd_timeout: number
     clamscan_binary_path: string
     clamscan_db_path: string
     clamscan_scan_log_path: string

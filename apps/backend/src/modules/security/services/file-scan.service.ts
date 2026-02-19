@@ -27,6 +27,7 @@ import { MalwareScanCaseService } from './malware-scan-case.service'
 export class FileScanService implements OnModuleInit {
   private clam: NodeClam
   private readonly logger = new Logger(FileScanService.name)
+  private sevenZipBinary = '7zz'
   constructor(
     private readonly prismaService: PrismaService,
     private readonly configService: ShionConfigService,
@@ -38,14 +39,46 @@ export class FileScanService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    if (
-      !this.configService.get('file_scan.clamscan_binary_path') ||
-      !this.configService.get('file_scan.clamscan_db_path')
-    ) {
-      throw new Error('Clamscan binary path or database path is not set')
+    if (!this.configService.get('file_scan.enabled')) {
+      this.logger.warn('File scanning is disabled by configuration')
+      return
     }
 
     try {
+      const clamdHost = this.configService.get('file_scan.clamd_host')
+      const clamdPort = this.configService.get('file_scan.clamd_port')
+      const clamdTimeout = this.configService.get('file_scan.clamd_timeout')
+
+      if (clamdHost) {
+        if (!clamdPort || clamdPort <= 0) {
+          throw new Error('Clamd port is not set or invalid')
+        }
+        const scanLog = await this.ensureDir(
+          this.configService.get('file_scan.clamscan_scan_log_path'),
+        )
+        this.clam = await new NodeClam().init({
+          scanLog,
+          clamdscan: {
+            active: true,
+            host: clamdHost,
+            port: clamdPort,
+            timeout: clamdTimeout,
+            localFallback: false,
+          },
+          clamscan: { active: false },
+          preference: 'clamdscan',
+        })
+        this.logger.log(`Clam initialized successfully via clamd (${clamdHost}:${clamdPort})`)
+        return
+      }
+
+      if (
+        !this.configService.get('file_scan.clamscan_binary_path') ||
+        !this.configService.get('file_scan.clamscan_db_path')
+      ) {
+        throw new Error('Clamscan binary path or database path is not set')
+      }
+
       const scanLog = await this.ensureDir(
         this.configService.get('file_scan.clamscan_scan_log_path'),
       )
@@ -60,7 +93,7 @@ export class FileScanService implements OnModuleInit {
         },
         preference: 'clamscan',
       })
-      this.logger.log('Clam initialized successfully')
+      this.logger.log('Clam initialized successfully via clamscan')
     } catch (error) {
       this.logger.error(error)
       throw error
@@ -68,6 +101,10 @@ export class FileScanService implements OnModuleInit {
   }
 
   async scanFiles() {
+    if (!this.configService.get('file_scan.enabled')) {
+      return 0
+    }
+
     const allFiles = await this.prismaService.gameDownloadResourceFile.findMany({
       where: {
         type: 1,
@@ -220,8 +257,8 @@ export class FileScanService implements OnModuleInit {
     let status = ArchiveStatus.OK
 
     try {
-      const { stdout, stderr } = await execFileAsync(
-        '7zz',
+      const { stdout, stderr } = await this.execSevenZip(
+        execFileAsync,
         ['l', '-slt', '-p-', filePath],
         execOptsList,
       )
@@ -270,8 +307,8 @@ export class FileScanService implements OnModuleInit {
 
     // t stage (don't pass -p-; reduce noise)
     try {
-      const { stdout: testOut } = await execFileAsync(
-        '7zz',
+      const { stdout: testOut } = await this.execSevenZip(
+        execFileAsync,
         ['t', '-bb0', '-bd', '-y', '-p-', filePath],
         execOptsTest,
       )
@@ -321,6 +358,32 @@ export class FileScanService implements OnModuleInit {
     }
 
     return status
+  }
+
+  private async execSevenZip(
+    execFileAsync: (
+      file: string,
+      args: ReadonlyArray<string>,
+      options: { timeout: number; maxBuffer: number },
+    ) => Promise<{ stdout: string; stderr: string }>,
+    args: ReadonlyArray<string>,
+    options: { timeout: number; maxBuffer: number },
+  ) {
+    try {
+      return await execFileAsync(this.sevenZipBinary, args, options)
+    } catch (error: any) {
+      const shouldFallback =
+        this.sevenZipBinary === '7zz' &&
+        error?.code === 'ENOENT' &&
+        typeof error?.message === 'string' &&
+        error.message.includes('7zz')
+      if (!shouldFallback) {
+        throw error
+      }
+      this.sevenZipBinary = '7z'
+      this.logger.warn('7zz binary not found, falling back to 7z')
+      return execFileAsync(this.sevenZipBinary, args, options)
+    }
   }
 
   private async ensureDir(_dir: string) {

@@ -1,0 +1,121 @@
+name: shionlib
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-shionlib}
+      POSTGRES_USER: ${POSTGRES_USER:-shionlib}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-shionlib}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_USER:-shionlib} -d ${POSTGRES_DB:-shionlib}',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+
+  clamav:
+    build:
+      context: .
+      dockerfile: docker/clamav/Dockerfile
+    restart: unless-stopped
+    volumes:
+      - clamav-db:/var/lib/clamav
+    healthcheck:
+      test: ['CMD-SHELL', "printf 'PING\\n' | nc -w 2 127.0.0.1 3310 | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 90s
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./docker/env/backend.env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-shionlib}:${POSTGRES_PASSWORD:-shionlib}@postgres:5432/${POSTGRES_DB:-shionlib}?schema=public
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      clamav:
+        condition: service_healthy
+    ports:
+      - '${BACKEND_PORT:-5001}:5000'
+    volumes:
+      - uploads-data:/tmp/shionlib-upload
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:5000/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      args:
+        INTERNAL_API_BASE_URL: http://backend:5000
+        NEXT_PUBLIC_PROD_API_PATH: /api
+        NEXT_PUBLIC_SITE_URL: http://localhost:${FRONTEND_PORT:-3100}
+        NEXT_PUBLIC_SOCKETIO_URL: http://localhost:${BACKEND_PORT:-5001}
+        NEXT_PUBLIC_SHIONLIB_IMAGE_BED_HOST: images.yurari.moe
+        NEXT_PUBLIC_SHIONLIB_IMAGE_BED_URL: https://images.yurari.moe
+    restart: unless-stopped
+    env_file:
+      - ./docker/env/frontend.env
+    environment:
+      NEXT_PUBLIC_SOCKETIO_URL: http://localhost:${BACKEND_PORT:-5001}
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - '${FRONTEND_PORT:-3100}:3000'
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000').then((r) => process.exit(r.status < 500 ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+volumes:
+  postgres-data:
+  redis-data:
+  clamav-db:
+  uploads-data:

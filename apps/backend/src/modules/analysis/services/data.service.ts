@@ -1,12 +1,18 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { PrismaService } from '../../../prisma.service'
 import { HttpService } from '@nestjs/axios'
 import { firstValueFrom } from 'rxjs'
 import { ShionConfigService } from '../../../common/config/services/config.service'
-import { CloudflareAnalyticsData, CloudflareGraphQLResponse } from '../interfaces/cf.interface'
+import {
+  CloudflareAnalyticsData,
+  CloudflareAnalyticsResult,
+  CloudflareGraphQLResponse,
+} from '../interfaces/cf.interface'
 
 @Injectable()
 export class DataService {
+  private readonly logger = new Logger(DataService.name)
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly httpService: HttpService,
@@ -61,9 +67,30 @@ export class DataService {
     }
   }
 
-  private async getCloudflareAnalytics() {
+  private buildEmptyCloudflareAnalyticsResult(): CloudflareAnalyticsResult {
+    return {
+      viewer: {
+        zones: [],
+      },
+      summary: {
+        totalRequests: 0,
+        totalVisits: 0,
+        totalEdgeResponseBytes: 0,
+      },
+    }
+  }
+
+  private async getCloudflareAnalytics(): Promise<CloudflareAnalyticsResult> {
     const zoneId = this.configService.get('cloudflare.analytics.zone_id')
     const secret = this.configService.get('cloudflare.analytics.secret')
+
+    if (!zoneId || !secret) {
+      this.logger.warn(
+        'Cloudflare analytics config missing (CLOUDFLARE_ANALYTICS_ZONE_ID/CLOUDFLARE_ANALYTICS_SECRET), fallback to zero bytes',
+      )
+      return this.buildEmptyCloudflareAnalyticsResult()
+    }
+
     const endpoint = 'https://api.cloudflare.com/client/v4/graphql'
     const until = new Date()
     const since = new Date(until.getTime() - 24 * 60 * 60 * 1000)
@@ -111,12 +138,17 @@ export class DataService {
     if (payload?.errors?.length) {
       throw new Error(`Cloudflare GraphQL error: ${payload.errors.map(e => e.message).join('; ')}`)
     }
+    const data = payload.data ?? {
+      viewer: {
+        zones: [],
+      },
+    }
 
     let totalRequests = 0
     let totalVisits = 0
     let totalEdgeResponseBytes = 0
 
-    for (const z of payload.data?.viewer.zones ?? []) {
+    for (const z of data.viewer.zones ?? []) {
       for (const g of z.httpRequestsAdaptiveGroups ?? []) {
         totalRequests += g.count ?? 0
         totalVisits += g.sum?.visits ?? 0
@@ -125,7 +157,7 @@ export class DataService {
     }
 
     return {
-      ...payload.data,
+      ...data,
       summary: {
         totalRequests,
         totalVisits,

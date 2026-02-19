@@ -99,6 +99,10 @@ export default (): AppConfig => ({
   },
 
   file_scan: {
+    enabled: withDefault('FILE_SCAN_ENABLED', true),
+    clamd_host: withDefault('CLAMDSCAN_HOST', ''),
+    clamd_port: withDefault('CLAMDSCAN_PORT', 3310),
+    clamd_timeout: withDefault('CLAMDSCAN_TIMEOUT', 60000),
     clamscan_binary_path: withDefault(
       'CLAMSCAN_BINARY_PATH',
       '/opt/homebrew/opt/clamav/bin/clamscan',

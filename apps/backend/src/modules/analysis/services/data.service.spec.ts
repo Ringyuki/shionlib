@@ -8,6 +8,8 @@ describe('DataService', () => {
     aggregateFileSize?: number | null
     cloudflareData?: any
     cloudflareErrors?: Array<{ message: string }>
+    cloudflareZoneId?: string
+    cloudflareSecret?: string
   }) {
     const prisma = {
       game: {
@@ -60,8 +62,12 @@ describe('DataService', () => {
 
     const config = {
       get: jest.fn((key: string) => {
-        if (key === 'cloudflare.analytics.zone_id') return 'zone-id'
-        if (key === 'cloudflare.analytics.secret') return 'secret-token'
+        if (key === 'cloudflare.analytics.zone_id') {
+          return options?.cloudflareZoneId ?? 'zone-id'
+        }
+        if (key === 'cloudflare.analytics.secret') {
+          return options?.cloudflareSecret ?? 'secret-token'
+        }
         return undefined
       }),
     } as unknown as ShionConfigService
@@ -141,6 +147,22 @@ describe('DataService', () => {
     const result = await service.getOverview()
 
     expect(result.storage).toBe(0)
+    expect(result.bytes_gotten).toBe(0)
+  })
+
+  it('falls back to 0 and logs warning when cloudflare config is missing', async () => {
+    const { service, post } = createService({
+      cloudflareZoneId: '',
+      cloudflareSecret: '',
+    })
+    const warnSpy = jest.spyOn((service as any).logger, 'warn').mockImplementation()
+
+    const result = await service.getOverview()
+
+    expect(post).not.toHaveBeenCalled()
+    expect(warnSpy).toHaveBeenCalledWith(
+      'Cloudflare analytics config missing (CLOUDFLARE_ANALYTICS_ZONE_ID/CLOUDFLARE_ANALYTICS_SECRET), fallback to zero bytes',
+    )
     expect(result.bytes_gotten).toBe(0)
   })
 

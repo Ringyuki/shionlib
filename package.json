@@ -47,7 +47,11 @@
     "test:backend": "pnpm --filter shionlib-backend test:all",
     "start": "pnpm -r --parallel --stream --filter shionlib-backend --filter shionlib-frontend run start",
     "start:frontend": "pnpm --filter shionlib-frontend start",
-    "start:backend": "pnpm --filter shionlib-backend start"
+    "start:backend": "pnpm --filter shionlib-backend start",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
+    "docker:down:volumes": "docker compose down -v",
+    "docker:logs": "docker compose logs -f"
   },
   "pnpm": {
     "overrides": {
