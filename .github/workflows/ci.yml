@@ -6,6 +6,7 @@ on:
     paths:
       - 'apps/frontend/**'
       - 'apps/backend/**'
+      - 'apps/og/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
@@ -16,13 +17,16 @@ on:
       - '.github/workflows/ci.yml'
       - '.github/workflows/deploy-frontend.yml'
       - '.github/workflows/deploy-backend.yml'
+      - '.github/workflows/deploy-og.yml'
       - '.github/workflows/promote-frontend-production.yml'
       - '.github/workflows/promote-backend-production.yml'
+      - '.github/workflows/promote-og-production.yml'
   push:
     branches: ['main']
     paths:
       - 'apps/frontend/**'
       - 'apps/backend/**'
+      - 'apps/og/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
@@ -33,8 +37,10 @@ on:
       - '.github/workflows/ci.yml'
       - '.github/workflows/deploy-frontend.yml'
       - '.github/workflows/deploy-backend.yml'
+      - '.github/workflows/deploy-og.yml'
       - '.github/workflows/promote-frontend-production.yml'
       - '.github/workflows/promote-backend-production.yml'
+      - '.github/workflows/promote-og-production.yml'
   workflow_dispatch:
 
 concurrency:
@@ -153,10 +159,40 @@ jobs:
           path: apps/backend/coverage
           if-no-files-found: warn
 
+  og-checks:
+    name: OG Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.2.21'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm --filter shionlib-og typecheck
+
+      - name: Unit tests
+        run: pnpm --filter shionlib-og test
+
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
-    needs: [frontend-checks, backend-checks]
+    needs: [frontend-checks, backend-checks, og-checks]
     timeout-minutes: 60
     env:
       CI: true

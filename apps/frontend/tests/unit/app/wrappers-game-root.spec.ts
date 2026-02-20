@@ -129,12 +129,7 @@ describe('game route wrappers (unit)', () => {
       title: 'zh-title',
       description: 'line-1 line-2...',
       path: '/game/8',
-      og: {
-        title: 'zh-title',
-        description: 'line-1 line-2...',
-        image: 'zh-cover-url',
-        aspect: '2:3',
-      },
+      og: { resourceType: 'game', id: '8' },
     })
     expect(hoisted.get).toHaveBeenCalledWith('/game/8')
   })

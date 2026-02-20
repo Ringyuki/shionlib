@@ -55,22 +55,16 @@ export const generateMetadata = createGenerateMetadata(
     const langMap = { en: 'en', ja: 'jp', zh: 'zh' } as const
     const lang = langMap[locale as keyof typeof langMap] ?? 'jp'
     const { title } = getPreferredContent(game.data!, 'title', lang)
-    const { cover, aspect } = getPreferredContent(game.data!, 'cover', lang)
     const intro =
       getPreferredContent(game.data!, 'intro', lang)
         .intro.replace(/[\r\n]+/g, ' ')
         .trim()
         .slice(0, 100) + '...'
     return {
-      title: title,
+      title,
       description: intro,
       path: `/game/${id}`,
-      og: {
-        title: title,
-        description: intro,
-        image: cover?.url ?? '',
-        aspect: aspect === '1 / 1.5' ? '2:3' : aspect === '1.5 / 1' ? '3:2' : '1:1',
-      },
+      og: { resourceType: 'game' as const, id },
     }
   },
 )

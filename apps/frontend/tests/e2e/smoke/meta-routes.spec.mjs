@@ -25,15 +25,13 @@ test.describe('Meta routes', () => {
     expect(stylesheet).toContain('<xsl:stylesheet')
   })
 
-  test('og route should return image', async () => {
-    test.skip(
-      true,
-      'Current /og implementation is unstable in Dockerized e2e and should be fixed in business logic later.',
-    )
-  })
+  test('legacy frontend og routes should return 404', async ({ request }) => {
+    const [ogResponse, toPngResponse] = await Promise.all([
+      request.get('/og'),
+      request.get('/og/to-png'),
+    ])
 
-  test('og to-png route should validate params', async ({ request }) => {
-    const invalidToPngResponse = await request.get('/og/to-png')
-    expect(invalidToPngResponse.status()).toBe(400)
+    expect(ogResponse.status()).toBe(404)
+    expect(toPngResponse.status()).toBe(404)
   })
 })

@@ -1,0 +1,72 @@
+name: promote og to production
+
+on:
+  workflow_run:
+    workflows: ['deploy og']
+    types: [completed]
+    branches: ['main']
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: shionlib-og-promote-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    name: Auto Promote OG
+    if: >
+      github.repository == 'Ringyuki/shionlib' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release tag and trigger production deploy
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner
+            const repo = context.repo.repo
+            const headSha = context.payload.workflow_run.head_sha
+            const tag = `og-prod-${headSha.slice(0, 7)}`
+            let createdTag = false
+
+            try {
+              const existing = await github.rest.git.getRef({
+                owner,
+                repo,
+                ref: `tags/${tag}`,
+              })
+              const existingSha = existing.data.object.sha
+              if (existingSha !== headSha) {
+                core.setFailed(`Tag ${tag} already exists at ${existingSha}, expected ${headSha}`)
+                return
+              }
+              core.info(`Tag ${tag} already exists, skip auto promotion.`)
+            } catch (error) {
+              if (error.status !== 404) throw error
+              await github.rest.git.createRef({
+                owner,
+                repo,
+                ref: `refs/tags/${tag}`,
+                sha: headSha,
+              })
+              createdTag = true
+              core.info(`Created tag ${tag}`)
+            }
+
+            if (!createdTag) return
+
+            await github.rest.actions.createWorkflowDispatch({
+              owner,
+              repo,
+              workflow_id: 'deploy-og.yml',
+              ref: 'main',
+              inputs: {
+                target_environment: 'production',
+                release_ref: tag,
+              },
+            })
+            core.info(`Triggered deploy og for production with release_ref=${tag}`)

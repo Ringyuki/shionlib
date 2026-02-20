@@ -42,7 +42,6 @@ export const generateMetadata = createGenerateMetadata(
       path: `/docs/${realSlug}`,
       title,
       description: frontmatter.description || '',
-      images: [`/og?l=${locale}&t=${encodeURIComponent(title)}`],
     }
   },
 )
