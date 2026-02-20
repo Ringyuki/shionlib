@@ -69,6 +69,7 @@ export function DeveloperOgTemplate({ name, intro, logoUrl, locale }: DeveloperO
               textShadow: '0 2px 12px rgba(0,0,0,0.4)',
               textOverflow: 'ellipsis',
               overflow: 'hidden',
+              lineClamp: 2,
               wordBreak: 'break-word',
               flexShrink: 0,
             }}

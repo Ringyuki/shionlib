@@ -73,6 +73,7 @@ export function CharacterOgTemplate({ name, intro, imageUrl, locale }: Character
               textShadow: '0 2px 12px rgba(0,0,0,0.4)',
               textOverflow: 'ellipsis',
               overflow: 'hidden',
+              lineClamp: 2,
               wordBreak: 'break-word',
               flexShrink: 0,
             }}

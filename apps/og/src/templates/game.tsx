@@ -55,6 +55,7 @@ export function GameOgTemplate({ title, intro, coverUrl, aspectRatio, locale }: 
               textShadow: '0 2px 12px rgba(0,0,0,0.4)',
               textOverflow: 'ellipsis',
               overflow: 'hidden',
+              lineClamp: 2,
               wordBreak: 'break-word',
               flexShrink: 0,
             }}

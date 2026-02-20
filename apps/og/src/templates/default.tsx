@@ -61,6 +61,8 @@ export function DefaultOgTemplate({ locale, title, description }: DefaultOgTempl
               textShadow: '0 2px 16px rgba(0,0,0,0.5)',
               textOverflow: 'ellipsis',
               overflow: 'hidden',
+              lineClamp: 2,
+              wordBreak: 'break-word',
               flexShrink: 0,
             }}
           >
