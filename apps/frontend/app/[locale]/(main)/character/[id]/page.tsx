@@ -76,12 +76,7 @@ export const generateMetadata = createGenerateMetadata(
             .slice(0, 100) + '...'
         : undefined,
       path: `/character/${id}`,
-      og: {
-        title: name,
-        description: intro,
-        image: character.data!.image,
-        aspect: '2:3' as const,
-      },
+      og: { resourceType: 'character' as const, id },
     }
   },
 )

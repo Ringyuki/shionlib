@@ -80,6 +80,33 @@ services:
       retries: 20
       start_period: 20s
 
+  og:
+    build:
+      context: .
+      dockerfile: apps/og/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./docker/env/og.env
+    depends_on:
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    ports:
+      - '${OG_PORT:-4000}:4000'
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'bun',
+          '-e',
+          "fetch('http://127.0.0.1:4000/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+
   frontend:
     build:
       context: .
@@ -91,6 +118,7 @@ services:
         NEXT_PUBLIC_SOCKETIO_URL: http://localhost:${BACKEND_PORT:-5001}
         NEXT_PUBLIC_SHIONLIB_IMAGE_BED_HOST: images.yurari.moe
         NEXT_PUBLIC_SHIONLIB_IMAGE_BED_URL: https://images.yurari.moe
+        NEXT_PUBLIC_OG_SERVICE_URL: http://localhost:${OG_PORT:-4000}
     restart: unless-stopped
     env_file:
       - ./docker/env/frontend.env
@@ -98,6 +126,8 @@ services:
       NEXT_PUBLIC_SOCKETIO_URL: http://localhost:${BACKEND_PORT:-5001}
     depends_on:
       backend:
+        condition: service_healthy
+      og:
         condition: service_healthy
     ports:
       - '${FRONTEND_PORT:-3100}:3000'

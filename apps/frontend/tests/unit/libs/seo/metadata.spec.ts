@@ -2,33 +2,48 @@ import { describe, expect, it, vi } from 'vitest'
 import { buildPageMetadata, createGenerateMetadata } from '../../../../libs/seo/metadata'
 
 describe('libs/seo/metadata (unit)', () => {
-  it('builds metadata with locale alternates and encoded OG image URL', async () => {
+  it('builds resource OG URL pointing to og-service', async () => {
     const metadata = await buildPageMetadata('en', {
-      path: '/game',
-      title: 'Game & Demo',
-      description: 'desc text',
-      og: {
-        title: 'OG Title',
-        description: 'OG Desc',
-        image: 'https://img.example.com/test a.webp',
-        aspect: '1:1',
-      },
+      path: '/game/42',
+      title: 'Some Game',
+      description: 'A great game',
+      og: { resourceType: 'game', id: '42' },
     })
 
-    expect(metadata.alternates?.canonical).toBe('/en/game')
+    expect(metadata.alternates?.canonical).toBe('/en/game/42')
     expect(metadata.alternates?.languages).toMatchObject({
-      en: '/en/game',
-      zh: '/zh/game',
-      ja: '/ja/game',
-      'x-default': '/game',
+      en: '/en/game/42',
+      zh: '/zh/game/42',
+      ja: '/ja/game/42',
+      'x-default': '/game/42',
     })
 
     const ogImage = String(metadata.openGraph?.images)
-    expect(ogImage).toContain('/og?')
-    expect(ogImage).toContain('l=en')
-    expect(ogImage).toContain('t=OG%20Title')
-    expect(ogImage).toContain('ar=1%3A1')
+    expect(ogImage).toContain('/game/42')
+    expect(ogImage).toContain('locale=en')
     expect(metadata.twitter).toMatchObject({ card: 'summary_large_image' })
+  })
+
+  it('builds default OG URL for static pages when og is omitted', async () => {
+    const metadata = await buildPageMetadata('ja', {
+      path: '/game',
+      title: 'Games',
+    })
+
+    const ogImage = String(metadata.openGraph?.images)
+    expect(ogImage).toContain('/default')
+    expect(ogImage).toContain('locale=ja')
+  })
+
+  it('falls back to default OG when og is omitted', async () => {
+    const metadata = await buildPageMetadata('zh', {
+      path: '/release',
+      title: 'Releases',
+    })
+
+    const ogImage = String(metadata.openGraph?.images)
+    expect(ogImage).toContain('/default')
+    expect(ogImage).toContain('locale=zh')
   })
 
   it('createGenerateMetadata awaits params/searchParams and delegates to resolver', async () => {

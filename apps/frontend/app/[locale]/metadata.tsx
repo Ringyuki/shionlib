@@ -47,7 +47,7 @@ export async function generateMetadata({
       title: t('og.title'),
       description: t('og.description'),
       url: `/${locale}`,
-      images: [{ url: `/og?l=${locale}` }],
+      images: [{ url: `${process.env.NEXT_PUBLIC_OG_SERVICE_URL}/default?locale=${locale}` }],
       locale: langMap[locale as SupportedLocales],
       alternateLocale: supportedLocales
         .filter(l => l !== locale)
@@ -58,7 +58,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title: t('og.title'),
       description: t('og.description'),
-      images: [`/og?l=${locale}`],
+      images: [`${process.env.NEXT_PUBLIC_OG_SERVICE_URL}/default?locale=${locale}`],
     },
     robots: {
       index: shionlibSiteConfig.robots.index,

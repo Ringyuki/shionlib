@@ -1,20 +1,26 @@
 import type { Metadata } from 'next'
 import { supportedLocales, SupportedLocales } from '@/config/i18n/supported'
-import { shionlibSiteConfig } from '@/config/site/shionlib'
+
+export type OgImageInput = {
+  resourceType: 'game' | 'character' | 'developer'
+  id: string
+}
 
 export interface PageSeoInput {
   path: string
   title: string
   description?: string
-  og?: OgImageObject
+  og?: OgImageInput
   robots?: Metadata['robots']
   xDefaultPath?: string
 }
-export interface OgImageObject {
-  title?: string
-  description?: string
-  image?: string
-  aspect?: '2:3' | '3:2' | '1:1'
+
+const ogServiceUrl = process.env.NEXT_PUBLIC_OG_SERVICE_URL ?? ''
+
+function buildOgUrl(og: OgImageInput | undefined, locale: string): string {
+  const base = ogServiceUrl.replace(/\/$/, '')
+  if (!og) return `${base}/default?${new URLSearchParams({ locale })}`
+  return `${base}/${og.resourceType}/${og.id}?${new URLSearchParams({ locale })}`
 }
 
 export async function buildPageMetadata(
@@ -31,10 +37,7 @@ export async function buildPageMetadata(
     languages: { ...languages, 'x-default': input.xDefaultPath || input.path },
   }
 
-  const ogUrl = new URL(
-    `/og?l=${encodeURIComponent(String(locale))}&t=${encodeURIComponent(input.og?.title || input.title)}&d=${encodeURIComponent(input.og?.description || input.description || '')}&i=${encodeURIComponent(input.og?.image || '')}&ar=${encodeURIComponent(input.og?.aspect || '3:2')}`,
-    new URL(shionlibSiteConfig.canonical).origin,
-  ).toString()
+  const ogUrl = buildOgUrl(input.og, locale)
 
   return {
     title: input.title,
