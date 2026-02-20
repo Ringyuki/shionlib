@@ -10,9 +10,9 @@ module.exports = {
     {
       name: 'shionlib-og',
       cwd: CWD,
-      script: path.join(CWD, 'src', 'server.ts'),
-      interpreter: 'bun',
-      interpreter_args: `--env-file=${ENV_FILE}`,
+      script: 'bun',
+      args: `run --env-file=${ENV_FILE} ${path.join('src', 'server.ts')}`,
+      interpreter: 'none',
       autorestart: true,
       watch: false,
       max_memory_restart: '1G',
