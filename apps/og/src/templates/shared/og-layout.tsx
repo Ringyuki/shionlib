@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { BrandHeader } from './brand-header'
+import { Header } from './header'
 import { Footer } from './footer'
 
 const OG_W = 1200
@@ -38,7 +38,7 @@ export function OgLayout({ children }: OgLayoutProps) {
           overflow: 'hidden',
         }}
       >
-        <BrandHeader />
+        <Header />
       </div>
 
       <div

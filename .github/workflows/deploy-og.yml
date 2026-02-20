@@ -1,0 +1,269 @@
+name: deploy og
+
+on:
+  push:
+    branches: ['main']
+    paths:
+      - 'apps/og/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.npmrc'
+      - '.github/workflows/deploy-og.yml'
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: 'Deploy target environment'
+        type: choice
+        options:
+          - staging
+          - production
+        default: staging
+        required: true
+      release_ref:
+        description: 'Git ref to deploy (branch, tag, or SHA). Leave empty to use current SHA.'
+        type: string
+        required: false
+
+run-name: og deploy to ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'staging' }}
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: shionlib-og-deploy-${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'staging' }}
+  cancel-in-progress: true
+
+jobs:
+  wait-for-ci:
+    name: Wait For CI
+    runs-on: ubuntu-latest
+    if: github.repository == 'Ringyuki/shionlib' && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch')
+    steps:
+      - name: Validate dispatch inputs
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [ "${{ inputs.target_environment }}" = "production" ] && [ -z "${{ inputs.release_ref }}" ]; then
+            echo "release_ref is required when deploying production"
+            exit 1
+          fi
+
+      - name: Wait for CI workflow success
+        if: github.event_name == 'push'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner
+            const repo = context.repo.repo
+            const sha = context.sha
+            const maxAttempts = 40
+            const delayMs = 15000
+
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+              const resp = await github.rest.actions.listWorkflowRuns({
+                owner,
+                repo,
+                workflow_id: 'ci.yml',
+                event: 'push',
+                head_sha: sha,
+                per_page: 10,
+              })
+
+              const run = resp.data.workflow_runs[0]
+              if (!run) {
+                core.info(`Attempt ${attempt}/${maxAttempts}: CI run not found for ${sha}, waiting...`)
+              } else if (run.status !== 'completed') {
+                core.info(`Attempt ${attempt}/${maxAttempts}: CI status=${run.status}, waiting... ${run.html_url}`)
+              } else if (run.conclusion === 'success') {
+                core.info(`CI succeeded: ${run.html_url}`)
+                return
+              } else {
+                core.setFailed(`CI conclusion=${run.conclusion}. ${run.html_url}`)
+                return
+              }
+
+              await new Promise(resolve => setTimeout(resolve, delayMs))
+            }
+
+            core.setFailed(`Timed out waiting for CI success for ${sha}`)
+
+  build-and-deploy:
+    name: Build and Deploy OG
+    needs: wait-for-ci
+    runs-on: ubuntu-latest
+    if: github.repository == 'Ringyuki/shionlib' && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch')
+    environment: ${{ (github.event_name == 'workflow_dispatch' && inputs.target_environment == 'production') && 'production-og' || 'staging-og' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.sha }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check OG
+        run: pnpm --filter shionlib-og typecheck
+
+      - name: Archive artifact
+        working-directory: apps/og
+        run: |
+          DEPLOY_SHA=$(git rev-parse --short=7 HEAD)
+          TAR_NAME="og-release-${DEPLOY_SHA}.tgz"
+          echo "DEPLOY_SHA=$DEPLOY_SHA" >> "$GITHUB_ENV"
+          echo "TAR_NAME=$TAR_NAME" >> "$GITHUB_ENV"
+          tar -czf "$TAR_NAME" \
+            src \
+            assets \
+            package.json \
+            ecosystem.config.cjs
+
+      - name: Install cloudflared
+        run: |
+          set -e
+          mkdir -p /tmp/cloudflared
+          curl -sL -o /tmp/cloudflared/cloudflared \
+            https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
+          chmod +x /tmp/cloudflared/cloudflared
+          /tmp/cloudflared/cloudflared --version
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+      - name: Upload to server
+        env:
+          SSH_PROXY_COMMAND: '/tmp/cloudflared/cloudflared access ssh --id ${{ secrets.SSH_CLOUDFLARED_ID }} --secret ${{ secrets.SSH_CLOUDFLARED_SECRET }} --hostname %h'
+        run: |
+          scp \
+            -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=no \
+            -o ProxyCommand="$SSH_PROXY_COMMAND" \
+            -P "${{ secrets.SSH_PORT }}" \
+            "apps/og/${TAR_NAME}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/${TAR_NAME}"
+
+      - name: Deploy on server
+        env:
+          SSH_PROXY_COMMAND: '/tmp/cloudflared/cloudflared access ssh --id ${{ secrets.SSH_CLOUDFLARED_ID }} --secret ${{ secrets.SSH_CLOUDFLARED_SECRET }} --hostname %h'
+          PM2_ENV: ${{ vars.PM2_ENV }}
+        run: |
+          ssh \
+            -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=no \
+            -o ProxyCommand="$SSH_PROXY_COMMAND" \
+            -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "DEPLOY_DIR='${{ secrets.DEPLOY_DIR }}' DEPLOY_SHA='${DEPLOY_SHA}' PM2_ENV='${PM2_ENV}' bash -s" << 'EOF_REMOTE'
+          [ -f ~/.bashrc ] && . ~/.bashrc
+          [ -f ~/.profile ] && . ~/.profile
+          set -euo pipefail
+
+          export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+          if [ -s "$NVM_DIR/nvm.sh" ]; then
+            . "$NVM_DIR/nvm.sh"
+            nvm use 24 >/dev/null || true
+          fi
+          KEEP_RELEASES=5
+          PM2_ENV="${PM2_ENV:-production}"
+
+          if ! command -v node >/dev/null 2>&1; then
+            echo "node is not available in PATH"
+            exit 1
+          fi
+          if ! command -v bun >/dev/null 2>&1; then
+            echo "bun is not available in PATH"
+            exit 1
+          fi
+          if ! command -v pm2 >/dev/null 2>&1; then
+            echo "pm2 is not available in PATH"
+            exit 1
+          fi
+          if ! command -v pnpm >/dev/null 2>&1; then
+            echo "pnpm is not available in PATH"
+            exit 1
+          fi
+
+          mkdir -p "$DEPLOY_DIR/releases"
+
+          TS_UTC=$(date -u +%Y%m%d%H%M%S)
+          RELEASE_NAME="${TS_UTC}-${DEPLOY_SHA}"
+          RELEASE_DIR="$DEPLOY_DIR/releases/$RELEASE_NAME"
+          SHARED_DIR="$DEPLOY_DIR/shared"
+
+          TAR_NAME="og-release-${DEPLOY_SHA}.tgz"
+          mkdir -p "$RELEASE_DIR"
+          tar -xzf "/tmp/${TAR_NAME}" -C "$RELEASE_DIR"
+          rm -f "/tmp/${TAR_NAME}"
+
+          if [ ! -f "$SHARED_DIR/.env" ]; then
+            echo "missing shared env file: $SHARED_DIR/.env"
+            exit 1
+          fi
+          if [ ! -f "$RELEASE_DIR/ecosystem.config.cjs" ]; then
+            if [ -f "$SHARED_DIR/ecosystem.config.cjs" ]; then
+              ln -sfn "$SHARED_DIR/ecosystem.config.cjs" "$RELEASE_DIR/ecosystem.config.cjs"
+            else
+              echo "missing pm2 ecosystem file in release and shared paths"
+              exit 1
+            fi
+          fi
+
+          ln -sfn "$SHARED_DIR/.env" "$RELEASE_DIR/.env"
+
+          cd "$RELEASE_DIR"
+          pnpm install --prod --no-frozen-lockfile
+
+          ln -sfn "$RELEASE_DIR" "$DEPLOY_DIR/current"
+
+          cd "$DEPLOY_DIR/current"
+          set -a
+          . "$RELEASE_DIR/.env"
+          set +a
+          pm2 startOrRestart ecosystem.config.cjs --only shionlib-og --env "$PM2_ENV" --update-env
+
+          cd "$DEPLOY_DIR/releases"
+          ls -1dt */ | tail -n +$((KEEP_RELEASES+1)) | xargs -r rm -rf
+          EOF_REMOTE
+
+      - name: Health check
+        env:
+          SSH_PROXY_COMMAND: '/tmp/cloudflared/cloudflared access ssh --id ${{ secrets.SSH_CLOUDFLARED_ID }} --secret ${{ secrets.SSH_CLOUDFLARED_SECRET }} --hostname %h'
+          HEALTHCHECK_URL: ${{ vars.HEALTHCHECK_URL }}
+        run: |
+          if [ -z "${HEALTHCHECK_URL:-}" ]; then
+            echo "HEALTHCHECK_URL is not set"
+            exit 1
+          fi
+
+          ssh \
+            -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=no \
+            -o ProxyCommand="$SSH_PROXY_COMMAND" \
+            -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "HEALTHCHECK_URL='${HEALTHCHECK_URL}' bash -s" << 'EOF_REMOTE'
+          set -euo pipefail
+          for i in $(seq 1 30); do
+            if curl -fsS --max-time 8 "$HEALTHCHECK_URL" >/dev/null; then
+              echo "health check passed"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "health check failed: $HEALTHCHECK_URL"
+          curl -iS --max-time 8 "$HEALTHCHECK_URL" || true
+          exit 1
+          EOF_REMOTE

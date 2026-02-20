@@ -1,4 +1,4 @@
-export function BrandHeader() {
+export function Header() {
   return (
     <div
       style={{
