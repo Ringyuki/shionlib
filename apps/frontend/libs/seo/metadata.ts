@@ -15,10 +15,8 @@ export interface PageSeoInput {
   xDefaultPath?: string
 }
 
-const ogServiceUrl = process.env.NEXT_PUBLIC_OG_SERVICE_URL ?? ''
-
 function buildOgUrl(og: OgImageInput | undefined, locale: string): string {
-  const base = ogServiceUrl.replace(/\/$/, '')
+  const base = process.env.NEXT_PUBLIC_OG_SERVICE_URL?.replace(/\/$/, '')
   if (!og) return `${base}/default?${new URLSearchParams({ locale })}`
   return `${base}/${og.resourceType}/${og.id}?${new URLSearchParams({ locale })}`
 }

@@ -125,6 +125,7 @@ jobs:
           NEXT_PUBLIC_RYBBIT_SCRIPT_URL: ${{ vars.NEXT_PUBLIC_RYBBIT_SCRIPT_URL }}
           NEXT_PUBLIC_RYBBIT_SITE_ID: ${{ vars.NEXT_PUBLIC_RYBBIT_SITE_ID }}
           NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+          NEXT_PUBLIC_OG_SERVICE_URL: ${{ vars.NEXT_PUBLIC_OG_SERVICE_URL }}
         run: pnpm --filter shionlib-frontend build
 
       - name: Compose standalone bundle
