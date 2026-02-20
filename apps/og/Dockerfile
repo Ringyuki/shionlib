@@ -4,6 +4,7 @@ WORKDIR /app
 
 # Install dependencies first (layer cache)
 COPY apps/og/package.json ./
+COPY apps/og/tsconfig.json ./
 RUN bun install --frozen-lockfile
 
 # Copy source and assets
@@ -18,6 +19,7 @@ WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src ./src
 COPY --from=builder /app/assets ./assets
+COPY --from=builder /app/tsconfig.json ./tsconfig.json
 
 ENV NODE_ENV=production
 
