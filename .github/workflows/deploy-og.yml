@@ -126,6 +126,7 @@ jobs:
             src \
             assets \
             package.json \
+            tsconfig.json \
             ecosystem.config.cjs
 
       - name: Install cloudflared

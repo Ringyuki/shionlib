@@ -4,11 +4,11 @@ Last updated: 2026-02-20
 
 This file records E2E cases that are currently **not suitable to finish now** and what is needed to unblock them.
 
-## 1. OG `/og` happy-path
+## 1. Legacy frontend OG routes
 
-- Status: blocked
-- Reason: current `/og` implementation is unstable in dockerized E2E runtime.
-- Unblock condition: stabilize `/og` runtime behavior, then re-enable full E2E assertion.
+- Status: resolved
+- Note: frontend no longer serves `/og` or `/og/to-png`; OG image generation moved to the standalone `apps/og` service.
+- E2E now asserts legacy frontend OG routes return `404`.
 
 ## 2. Register full flow / Forget-password full flow
 

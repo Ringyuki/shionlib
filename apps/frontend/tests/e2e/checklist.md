@@ -86,7 +86,7 @@ Last updated: 2026-02-20
 - [x] Friend links `/[locale]/friend-link`
 - [x] Release page `/[locale]/release`
 - [x] Sitemap routes (`/sitemap.xml`, `/sitemap-:type-:page.xml`)
-- [ ] OG routes (`/og` happy-path blocked by current implementation, `/og/to-png` validated)
+- [x] Legacy frontend OG routes removed (`/og` and `/og/to-png` return `404`; OG served by standalone `apps/og` service)
 
 ## B. Auth & Account
 
