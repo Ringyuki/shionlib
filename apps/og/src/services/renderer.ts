@@ -12,10 +12,10 @@ export async function loadRenderer(): Promise<Renderer> {
   if (_renderer) return _renderer
 
   const [cinzelBold, notoSans, notoSansSC, notoSansJP, fallbackPng] = await Promise.all([
-    readFile(join(ASSETS_DIR, 'fonts/Cinzel-Bold.ttf')),
-    readFile(join(ASSETS_DIR, 'fonts/NotoSans-Regular.ttf')),
-    readFile(join(ASSETS_DIR, 'fonts/NotoSansSC-Regular.ttf')),
-    readFile(join(ASSETS_DIR, 'fonts/NotoSansJP-Regular.ttf')),
+    readFile(join(ASSETS_DIR, 'fonts/Cinzel-VariableFont_wght.ttf')),
+    readFile(join(ASSETS_DIR, 'fonts/NotoSans-VariableFont_wdth,wght.ttf')),
+    readFile(join(ASSETS_DIR, 'fonts/NotoSansSC-VariableFont_wght.ttf')),
+    readFile(join(ASSETS_DIR, 'fonts/NotoSansJP-VariableFont_wght.ttf')),
     readFile(join(ASSETS_DIR, 'images/fallback.png')),
   ])
 

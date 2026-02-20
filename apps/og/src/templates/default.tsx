@@ -54,7 +54,7 @@ export function DefaultOgTemplate({ locale, title, description }: DefaultOgTempl
         >
           <div
             style={{
-              fontSize: 72,
+              fontSize: 76,
               fontWeight: 700,
               color: '#f9fafb',
               fontFamily: `Cinzel, ${textFontFamily}`,
@@ -69,7 +69,7 @@ export function DefaultOgTemplate({ locale, title, description }: DefaultOgTempl
 
           <div
             style={{
-              fontSize: 28,
+              fontSize: 34,
               lineHeight: 1.5,
               color: '#9ca3af',
               fontFamily: textFontFamily,
