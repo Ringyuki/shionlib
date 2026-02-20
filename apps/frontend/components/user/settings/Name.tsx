@@ -48,7 +48,7 @@ export const NameSettings = ({ name }: NameSettingsProps) => {
   }
 
   return (
-    <Card>
+    <Card data-testid="settings-name-card">
       <CardHeader>
         <CardTitle className="text-xl">{t('title')}</CardTitle>
         <CardDescription className="text-card-foreground">{t('description')}</CardDescription>
@@ -58,6 +58,7 @@ export const NameSettings = ({ name }: NameSettingsProps) => {
       </CardHeader>
       <CardContent>
         <Input
+          data-testid="settings-name-input"
           value={inputName ?? ''}
           onChange={e => setInputName(e.target.value.trim())}
           maxLength={20}
@@ -66,6 +67,7 @@ export const NameSettings = ({ name }: NameSettingsProps) => {
       </CardContent>
       <CardFooter>
         <Button
+          data-testid="settings-name-update"
           loginRequired
           intent="primary"
           onClick={handleUpdate}

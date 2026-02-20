@@ -80,7 +80,11 @@ export const FavoriteEditContent = ({
   }
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className={cn('space-y-4', className)}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className={cn('space-y-4', className)}
+        data-testid={`favorite-edit-form-${favorite.id}`}
+      >
         {!favorite.default && (
           <FormField
             control={form.control as Control<z.infer<typeof favoriteEditFormSchema>>}
@@ -90,7 +94,11 @@ export const FavoriteEditContent = ({
                 <FormItem>
                   <FormLabel>{t('name')}</FormLabel>
                   <FormControl>
-                    <Input {...field} maxLength={12} />
+                    <Input
+                      {...field}
+                      maxLength={12}
+                      data-testid={`favorite-edit-name-input-${favorite.id}`}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -106,7 +114,11 @@ export const FavoriteEditContent = ({
               <FormItem>
                 <FormLabel>{t('description')}</FormLabel>
                 <FormControl>
-                  <Textarea {...field} maxLength={200} />
+                  <Textarea
+                    {...field}
+                    maxLength={200}
+                    data-testid={`favorite-edit-description-input-${favorite.id}`}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -121,14 +133,23 @@ export const FavoriteEditContent = ({
               <FormItem className="flex items-center gap-2">
                 <FormLabel>{t('is_private')}</FormLabel>
                 <FormControl>
-                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    data-testid={`favorite-edit-private-checkbox-${favorite.id}`}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )
           }}
         />
-        <Button type="submit" className="w-full" loading={loading}>
+        <Button
+          type="submit"
+          className="w-full"
+          loading={loading}
+          data-testid={`favorite-edit-submit-${favorite.id}`}
+        >
           {t('submit')}
         </Button>
       </form>

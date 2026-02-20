@@ -46,6 +46,7 @@ export const Like = ({ is_liked, like_count, comment_id, likeable = true }: Like
       onClick={handleLike}
       loading={isLikedLoading}
       disabled={!likeable}
+      data-testid={`comment-like-${comment_id}`}
       loginRequired
     >
       <span className="font-light">{like_count || 0}</span>

@@ -74,7 +74,12 @@ export const PasswordForm = forwardRef(({ onSubmit }: PasswordFormProps, ref) =>
             <FormItem>
               <FormLabel>{t('currentPassword')}</FormLabel>
               <FormControl>
-                <Input {...field} type="password" maxLength={50} />
+                <Input
+                  {...field}
+                  type="password"
+                  maxLength={50}
+                  data-testid="settings-password-current-input"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -87,7 +92,12 @@ export const PasswordForm = forwardRef(({ onSubmit }: PasswordFormProps, ref) =>
             <FormItem>
               <FormLabel>{t('password')}</FormLabel>
               <FormControl>
-                <Input {...field} type="password" maxLength={50} />
+                <Input
+                  {...field}
+                  type="password"
+                  maxLength={50}
+                  data-testid="settings-password-new-input"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -100,7 +110,12 @@ export const PasswordForm = forwardRef(({ onSubmit }: PasswordFormProps, ref) =>
             <FormItem>
               <FormLabel>{t('passwordConfirm')}</FormLabel>
               <FormControl>
-                <Input {...field} type="password" maxLength={50} />
+                <Input
+                  {...field}
+                  type="password"
+                  maxLength={50}
+                  data-testid="settings-password-confirm-input"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

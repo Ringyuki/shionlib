@@ -25,7 +25,7 @@ export const FavoriteEditDialog = ({
   const t = useTranslations('Components.User.Home.Favorites.Action.Edit')
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent data-testid={`favorite-edit-dialog-${favorite.id}`}>
         <DialogHeader>
           <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>{t('description')}</DialogDescription>

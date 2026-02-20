@@ -58,6 +58,7 @@ export const FavoriteContentItem = ({ game_id, favorite }: FavoriteContentItemPr
       intent={isFavorite ? 'primary' : 'neutral'}
       innerClassName="w-full"
       className="h-10"
+      data-testid={`game-favorite-item-toggle-${favorite.id}`}
       renderIcon={isFavorite ? <FolderCheck className="size-5" /> : <Folder className="size-5" />}
     >
       <div className="flex items-center justify-between gap-2 w-full">

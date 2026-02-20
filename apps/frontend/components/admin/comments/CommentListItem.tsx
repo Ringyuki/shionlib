@@ -112,6 +112,7 @@ export function CommentListItem({ comment, onRefresh }: CommentListItemProps) {
 
   return (
     <div
+      data-testid={`admin-comment-row-${comment.id}`}
       className={cn(
         'rounded-lg border p-4 transition-colors',
         'bg-white/50 dark:bg-gray-900/50',
@@ -162,30 +163,55 @@ export function CommentListItem({ comment, onRefresh }: CommentListItemProps) {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button intent="neutral" appearance="ghost" className="h-8 w-8 p-0" disabled={isBusy}>
+            <Button
+              intent="neutral"
+              appearance="ghost"
+              className="h-8 w-8 p-0"
+              disabled={isBusy}
+              data-testid={`admin-comment-actions-trigger-${comment.id}`}
+            >
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setDetailOpen(true)}>
+          <DropdownMenuContent align="end" data-testid={`admin-comment-actions-menu-${comment.id}`}>
+            <DropdownMenuItem
+              onClick={() => setDetailOpen(true)}
+              data-testid={`admin-comment-action-view-detail-${comment.id}`}
+            >
               {t('viewDetail')}
             </DropdownMenuItem>
             {comment.status !== 1 && (
-              <DropdownMenuItem onClick={() => handleUpdateStatus(1)} disabled={isBusy}>
+              <DropdownMenuItem
+                onClick={() => handleUpdateStatus(1)}
+                disabled={isBusy}
+                data-testid={`admin-comment-action-approve-${comment.id}`}
+              >
                 {comment.status === 3 ? t('restore') : t('approve')}
               </DropdownMenuItem>
             )}
             {comment.status !== 2 && (
-              <DropdownMenuItem onClick={() => handleUpdateStatus(2)} disabled={isBusy}>
+              <DropdownMenuItem
+                onClick={() => handleUpdateStatus(2)}
+                disabled={isBusy}
+                data-testid={`admin-comment-action-hide-${comment.id}`}
+              >
                 {t('hide')}
               </DropdownMenuItem>
             )}
             {comment.status !== 3 && (
-              <DropdownMenuItem onClick={() => setDeleteOpen(true)} disabled={isBusy}>
+              <DropdownMenuItem
+                onClick={() => setDeleteOpen(true)}
+                disabled={isBusy}
+                data-testid={`admin-comment-action-delete-${comment.id}`}
+              >
                 {t('delete')}
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem onClick={handleRescan} disabled={isBusy}>
+            <DropdownMenuItem
+              onClick={handleRescan}
+              disabled={isBusy}
+              data-testid={`admin-comment-action-rescan-${comment.id}`}
+            >
               {t('rescan')}
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -231,14 +257,17 @@ export function CommentListItem({ comment, onRefresh }: CommentListItemProps) {
       />
 
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent data-testid={`admin-comment-delete-dialog-${comment.id}`}>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('confirmDeleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>{t('confirmDeleteDesc')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleUpdateStatus(3)}>
+            <AlertDialogAction
+              onClick={() => handleUpdateStatus(3)}
+              data-testid={`admin-comment-delete-confirm-${comment.id}`}
+            >
               {t('confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>

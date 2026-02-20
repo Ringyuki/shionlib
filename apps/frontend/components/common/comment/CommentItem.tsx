@@ -69,6 +69,7 @@ export const CommentItem = ({
       <CardContent
         className="flex flex-col gap-4 p-4 transition-colors duration-200 scroll-mt-20"
         id={`data-comment-id-${comment.id}`}
+        data-testid={`comment-item-${comment.id}`}
       >
         <div className="flex items-center gap-2">
           <Avatar user={comment.creator} className="size-8" />
@@ -106,6 +107,7 @@ export const CommentItem = ({
           <CommentParent parent={comment.parent} canScrollToParent={canScrollToParent} />
         )}
         <div
+          data-testid={`comment-body-${comment.id}`}
           className="[&_a]:text-primary [&_a]:hover:text-primary/80 [&_a]:transition-colors [&_a]:duration-200 [&_a]:hover:underline [&_a]:underline-offset-2 [&_a]:decoration-2 [&_a]:decoration-primary"
           dangerouslySetInnerHTML={{ __html: comment.html || '' }}
         />

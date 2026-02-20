@@ -14,6 +14,15 @@ test.describe('Game detail page', () => {
     await expect(
       page.getByRole('heading', { name: E2E_FIXTURES.games.primary.title }),
     ).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Download' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Patch' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Upload' })).toBeVisible()
+
+    const downloadSourceResponse = await request.get(`/api/game/${primaryGameId}/download-source`)
+    expect(downloadSourceResponse.ok()).toBeTruthy()
+    const downloadSourcePayload = await downloadSourceResponse.json()
+    expect(downloadSourcePayload?.code).toBe(0)
+    expect(Array.isArray(downloadSourcePayload?.data)).toBeTruthy()
 
     await page.goto(`/en/game/${primaryGameId}/comments`)
     await expect(page.getByText(E2E_FIXTURES.comments.root).first()).toBeVisible()

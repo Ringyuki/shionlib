@@ -29,7 +29,7 @@ export const FavoriteActionDialog = ({
   const t = useTranslations('Components.Favorite.Action')
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent data-testid={`game-favorite-dialog-${game_id}`}>
         <DialogHeader>
           <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>{t('description')}</DialogDescription>

@@ -48,9 +48,10 @@ export const FavoriteDelete = ({ id, onSuccess }: FavoriteDeleteProps) => {
         size="icon"
         appearance="ghost"
         loading={loading}
+        data-testid={`favorite-delete-trigger-${id}`}
       />
       <AlertDialog open={open} onOpenChange={setOpen}>
-        <AlertDialogContent tone="destructive">
+        <AlertDialogContent tone="destructive" data-testid={`favorite-delete-dialog-${id}`}>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('title')}</AlertDialogTitle>
             <AlertDialogDescription>{t('description')}</AlertDialogDescription>
@@ -60,6 +61,7 @@ export const FavoriteDelete = ({ id, onSuccess }: FavoriteDeleteProps) => {
             <AlertDialogAction
               tone="destructive"
               loading={loading}
+              data-testid={`favorite-delete-confirm-${id}`}
               onClick={e => {
                 handleDelete()
                 e.preventDefault()

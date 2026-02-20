@@ -144,7 +144,7 @@ describe('Game (integration)', () => {
     )
 
     await request(app.getHttpServer()).get('/game/88').expect(200)
-    expect(gameService.getById).toHaveBeenCalledWith('88', 2)
+    expect(gameService.getById).toHaveBeenCalledWith(88, 2)
     expect(cacheService.set).toHaveBeenCalledWith(
       'game:88:auth:9001:cl:2',
       { id: 88 },

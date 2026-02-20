@@ -26,6 +26,7 @@ export const FavoriteCreate = ({ onSuccess }: FavoriteCreateProps) => {
         intent="primary"
         appearance="outline"
         renderIcon={<PlusIcon className="size-4" />}
+        data-testid="favorite-create-trigger"
         onClick={() => setOpen(true)}
       >
         {t('create')}

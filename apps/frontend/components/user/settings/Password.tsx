@@ -53,7 +53,7 @@ export const PasswordSettings = () => {
   }
 
   return (
-    <Card>
+    <Card data-testid="settings-password-card">
       <CardHeader>
         <CardTitle className="text-xl">{t('title')}</CardTitle>
         <CardDescription className="text-card-foreground">{t('description')}</CardDescription>
@@ -66,13 +66,20 @@ export const PasswordSettings = () => {
         <PasswordForm onSubmit={handleUpdate} ref={passwordFormRef} />
       </CardContent>
       <CardFooter className="flex flex-row gap-2">
-        <Button intent="primary" onClick={submitForm} loading={isUpdating} loginRequired>
+        <Button
+          intent="primary"
+          onClick={submitForm}
+          loading={isUpdating}
+          loginRequired
+          data-testid="settings-password-update"
+        >
           {t('update')}
         </Button>
         <Button
           appearance="ghost"
           intent="secondary"
           onClick={() => router.push('/user/password/forget')}
+          data-testid="settings-password-forget"
         >
           {t('forget')}
         </Button>

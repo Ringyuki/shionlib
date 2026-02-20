@@ -31,6 +31,7 @@ export const FavoriteEdit = ({ favorite, onSuccess }: FavoriteEditProps) => {
         appearance="ghost"
         renderIcon={<Pencil className="size-4" />}
         aria-label={t('edit')}
+        data-testid={`favorite-edit-trigger-${favorite.id}`}
         onClick={() => setOpen(true)}
       />
       {isMobile ? (

@@ -124,7 +124,9 @@ export function UserQuotaDialog({ userId, open, onOpenChange, onUpdated }: UserQ
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent
+        data-testid={userId ? `admin-user-quota-dialog-${userId}` : 'admin-user-quota-dialog'}
+      >
         <DialogHeader>
           <DialogTitle>{t('quotaTitle')}</DialogTitle>
           <DialogDescription>{t('quotaDescription')}</DialogDescription>
@@ -150,6 +152,7 @@ export function UserQuotaDialog({ userId, open, onOpenChange, onUpdated }: UserQ
               <div className="font-medium">{t('quotaAdjustSize')}</div>
               <div className="flex flex-wrap items-center gap-3">
                 <InputNumber
+                  data-testid="admin-user-quota-size-amount-input"
                   value={sizeDelta}
                   onChange={value => setSizeDelta(value)}
                   min={0.1}
@@ -157,10 +160,20 @@ export function UserQuotaDialog({ userId, open, onOpenChange, onUpdated }: UserQ
                   precision={2}
                   placeholder={t('quotaAmountGb')}
                 />
-                <Button intent="primary" onClick={() => applySize('ADD')} loading={saving}>
+                <Button
+                  intent="primary"
+                  onClick={() => applySize('ADD')}
+                  loading={saving}
+                  data-testid="admin-user-quota-size-add"
+                >
                   {t('quotaAdd')}
                 </Button>
-                <Button intent="warning" onClick={() => applySize('SUB')} loading={saving}>
+                <Button
+                  intent="warning"
+                  onClick={() => applySize('SUB')}
+                  loading={saving}
+                  data-testid="admin-user-quota-size-sub"
+                >
                   {t('quotaSub')}
                 </Button>
               </div>
@@ -170,6 +183,7 @@ export function UserQuotaDialog({ userId, open, onOpenChange, onUpdated }: UserQ
               <div className="font-medium">{t('quotaAdjustUsed')}</div>
               <div className="flex flex-wrap items-center gap-3">
                 <InputNumber
+                  data-testid="admin-user-quota-used-amount-input"
                   value={usedDelta}
                   onChange={value => setUsedDelta(value)}
                   min={0.1}
@@ -177,19 +191,36 @@ export function UserQuotaDialog({ userId, open, onOpenChange, onUpdated }: UserQ
                   precision={2}
                   placeholder={t('quotaAmountGb')}
                 />
-                <Button intent="primary" onClick={() => applyUsed('USE')} loading={saving}>
+                <Button
+                  intent="primary"
+                  onClick={() => applyUsed('USE')}
+                  loading={saving}
+                  data-testid="admin-user-quota-used-use"
+                >
                   {t('quotaUse')}
                 </Button>
-                <Button intent="warning" onClick={() => applyUsed('ADD')} loading={saving}>
+                <Button
+                  intent="warning"
+                  onClick={() => applyUsed('ADD')}
+                  loading={saving}
+                  data-testid="admin-user-quota-used-restore"
+                >
                   {t('quotaRestore')}
                 </Button>
-                <Button intent="neutral" appearance="ghost" onClick={resetUsed} loading={saving}>
+                <Button
+                  intent="neutral"
+                  appearance="ghost"
+                  onClick={resetUsed}
+                  loading={saving}
+                  data-testid="admin-user-quota-used-reset"
+                >
                   {t('quotaResetUsed')}
                 </Button>
               </div>
             </div>
 
             <Input
+              data-testid="admin-user-quota-reason-input"
               value={reason}
               onChange={e => setReason(e.target.value)}
               placeholder={t('quotaReason')}

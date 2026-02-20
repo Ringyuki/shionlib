@@ -22,6 +22,7 @@ export const FavoriteListItem = ({ favorite, selected = false, userId }: Favorit
   return (
     <Link
       href={href}
+      data-testid={`favorite-sidebar-item-${favorite.id}`}
       onClick={event => {
         event.preventDefault()
         router.push(href, { showProgress: true })

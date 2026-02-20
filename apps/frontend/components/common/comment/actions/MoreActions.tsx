@@ -28,7 +28,13 @@ export const MoreActions = ({
       <DropdownMenu>
         <DropdownMenuTrigger suppressHydrationWarning asChild>
           <span>
-            <Button intent="secondary" size="icon" appearance="ghost" renderIcon={<Ellipsis />} />
+            <Button
+              intent="secondary"
+              size="icon"
+              appearance="ghost"
+              renderIcon={<Ellipsis />}
+              data-testid={`comment-more-actions-${comment_id}`}
+            />
           </span>
         </DropdownMenuTrigger>
         <DropdownMenuContent onClick={e => e.stopPropagation()}>

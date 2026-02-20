@@ -52,6 +52,7 @@ export const Favorite = ({ isFavorite, gameId, className }: FavoriteProps) => {
             onClick={getData}
             loading={loading}
             loginRequired
+            data-testid={`game-favorite-trigger-${gameId}`}
             renderIcon={() => <Heart className={cn(isFavorite && 'fill-destructive')} />}
           />
         </TooltipTrigger>

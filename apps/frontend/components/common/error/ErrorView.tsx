@@ -29,7 +29,7 @@ export default function ErrorView({
         <CardTitle className="text-xl font-mono! break-all">{title || t('defaultTitle')}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="mb-4 whitespace-pre-wrap break-words text-sm text-muted-foreground font-mono!">
+        <p className="mb-4 whitespace-pre-wrap wrap-break-word text-sm text-muted-foreground font-mono!">
           {details || t('defaultDetails')}
         </p>
       </CardContent>

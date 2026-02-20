@@ -32,7 +32,13 @@ export const Aria2Reset = ({ form }: Aria2ResetProps) => {
   }
 
   return (
-    <Button intent="neutral" appearance="soft" onClick={onReset} renderIcon={<RotateCcw />}>
+    <Button
+      intent="neutral"
+      appearance="soft"
+      onClick={onReset}
+      renderIcon={<RotateCcw />}
+      data-testid="settings-aria2-reset"
+    >
       {t('reset')}
     </Button>
   )

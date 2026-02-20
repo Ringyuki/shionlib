@@ -11,6 +11,7 @@ import { cn } from '@/utils/cn'
 const MessageButton = () => {
   return (
     <Button
+      data-testid="topbar-message-button"
       size="icon"
       intent="neutral"
       appearance="ghost"
@@ -41,14 +42,15 @@ export const Message = () => {
   useSocketEvent(socket, 'message:unread', handleMessageUnread)
 
   return (
-    <Link href="/message">
+    <Link href="/message" data-testid="topbar-message-link">
       {unreadCount > 0 ? (
         <Badge
+          data-testid="topbar-message-badge"
           content={unreadCount > 99 ? '99+' : unreadCount.toString()}
           shape="circular"
           className={cn(
             'text-[0.75rem] z-10 pointer-events-none',
-            unreadCount > 9 && 'text-[0.625rem] px-[2px] py-[1px]',
+            unreadCount > 9 && 'text-[0.625rem] px-[2px] py-px',
           )}
           offsetClassName="top-[10px] right-[10px]"
         >

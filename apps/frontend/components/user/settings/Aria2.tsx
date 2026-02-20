@@ -69,7 +69,7 @@ export const Aria2 = () => {
   }
 
   return (
-    <Card>
+    <Card data-testid="settings-aria2-card">
       <CardHeader>
         <CardTitle className="text-xl">{t('title')}</CardTitle>
         <CardDescription className="text-card-foreground">{t('description')}</CardDescription>
@@ -88,12 +88,22 @@ export const Aria2 = () => {
                   control={form.control}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger
+                        className="w-full"
+                        data-testid="settings-aria2-protocol-trigger"
+                      >
                         <SelectValue placeholder={t('protocolPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="http">HTTP</SelectItem>
-                        <SelectItem value="https">HTTPS</SelectItem>
+                        <SelectItem value="http" data-testid="settings-aria2-protocol-option-http">
+                          HTTP
+                        </SelectItem>
+                        <SelectItem
+                          value="https"
+                          data-testid="settings-aria2-protocol-option-https"
+                        >
+                          HTTPS
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   )}
@@ -107,7 +117,12 @@ export const Aria2 = () => {
                   name="host"
                   control={form.control}
                   render={({ field }) => (
-                    <Input {...field} clearable placeholder={t('hostPlaceholder')} />
+                    <Input
+                      {...field}
+                      clearable
+                      placeholder={t('hostPlaceholder')}
+                      data-testid="settings-aria2-host-input"
+                    />
                   )}
                 />
               </FormControl>
@@ -118,7 +133,14 @@ export const Aria2 = () => {
                 <Controller
                   name="port"
                   control={form.control}
-                  render={({ field }) => <InputNumber {...field} min={1} max={65535} />}
+                  render={({ field }) => (
+                    <InputNumber
+                      {...field}
+                      min={1}
+                      max={65535}
+                      data-testid="settings-aria2-port-input"
+                    />
+                  )}
                 />
               </FormControl>
             </FormItem>
@@ -129,7 +151,12 @@ export const Aria2 = () => {
                   name="path"
                   control={form.control}
                   render={({ field }) => (
-                    <Input {...field} clearable placeholder={t('pathPlaceholder')} />
+                    <Input
+                      {...field}
+                      clearable
+                      placeholder={t('pathPlaceholder')}
+                      data-testid="settings-aria2-path-input"
+                    />
                   )}
                 />
               </FormControl>
@@ -140,7 +167,14 @@ export const Aria2 = () => {
                 <Controller
                   name="auth_secret"
                   control={form.control}
-                  render={({ field }) => <Input {...field} clearable type="password" />}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      clearable
+                      type="password"
+                      data-testid="settings-aria2-auth-secret-input"
+                    />
+                  )}
                 />
               </FormControl>
             </FormItem>
@@ -151,7 +185,12 @@ export const Aria2 = () => {
                   name="downloadPath"
                   control={form.control}
                   render={({ field }) => (
-                    <Input {...field} clearable placeholder={t('downloadPathPlaceholder')} />
+                    <Input
+                      {...field}
+                      clearable
+                      placeholder={t('downloadPathPlaceholder')}
+                      data-testid="settings-aria2-download-path-input"
+                    />
                   )}
                 />
               </FormControl>
@@ -167,7 +206,7 @@ export const Aria2 = () => {
         <div className="flex flex-col gap-3 w-full">
           <div className="flex flex-col items-start md:flex-row gap-2">
             <div className="flex gap-2 flex-wrap">
-              <Button intent="primary" onClick={onSave}>
+              <Button intent="primary" onClick={onSave} data-testid="settings-aria2-save">
                 {t('save')}
               </Button>
               <Aria2Reset form={form} />

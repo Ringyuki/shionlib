@@ -54,6 +54,7 @@ export const Delete = ({ comment_id, creator_id }: DeleteProps) => {
         }}
         disabled={creator_id !== user.id && user.role !== 3}
         variant="destructive"
+        data-testid={`comment-delete-${comment_id}`}
       >
         <Trash />
         {t('delete')}
@@ -71,6 +72,7 @@ export const Delete = ({ comment_id, creator_id }: DeleteProps) => {
             <AlertDialogAction
               tone="destructive"
               loading={loading}
+              data-testid={`comment-delete-confirm-${comment_id}`}
               onClick={e => {
                 handleDelete()
                 e.preventDefault()

@@ -70,6 +70,7 @@ export const Edit = ({ creator_id, comment_id, onEdited }: EditProps) => {
         className="cursor-pointer duration-200"
         onClick={handleOpen}
         disabled={(creator_id !== user.id && user.role !== 3) || getLoading}
+        data-testid={`comment-edit-${comment_id}`}
       >
         <Pencil />
         {t('edit')}

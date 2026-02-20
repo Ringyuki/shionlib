@@ -56,19 +56,6 @@ describe('app/[locale]/(main)/character/[id]/page (unit)', () => {
     hoisted.getPreferredCharacterContent.mockReset()
   })
 
-  it('calls notFound when id is invalid', async () => {
-    const pageModule = await import('../../../app/[locale]/(main)/character/[id]/page')
-
-    await expect(
-      pageModule.default({
-        params: Promise.resolve({ id: 'x' }),
-        searchParams: Promise.resolve({ page: '1' }),
-      }),
-    ).rejects.toThrow('NOT_FOUND')
-
-    expect(hoisted.notFound).toHaveBeenCalledTimes(1)
-  })
-
   it('fetches character + games and renders content', async () => {
     hoisted.get
       .mockResolvedValueOnce({

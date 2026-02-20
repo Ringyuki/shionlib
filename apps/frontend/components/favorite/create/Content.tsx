@@ -72,7 +72,11 @@ export const FavoriteCreateContent = ({ onSuccess, className }: FavoriteCreateCo
   }
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className={cn('space-y-4', className)}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className={cn('space-y-4', className)}
+        data-testid="favorite-create-form"
+      >
         <FormField
           control={form.control as Control<z.infer<typeof favoriteCreateFormSchema>>}
           name="name"
@@ -81,7 +85,7 @@ export const FavoriteCreateContent = ({ onSuccess, className }: FavoriteCreateCo
               <FormItem>
                 <FormLabel>{t('name')}</FormLabel>
                 <FormControl>
-                  <Input {...field} maxLength={12} />
+                  <Input {...field} maxLength={12} data-testid="favorite-create-name-input" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -96,7 +100,11 @@ export const FavoriteCreateContent = ({ onSuccess, className }: FavoriteCreateCo
               <FormItem>
                 <FormLabel>{t('description')}</FormLabel>
                 <FormControl>
-                  <Textarea {...field} maxLength={200} />
+                  <Textarea
+                    {...field}
+                    maxLength={200}
+                    data-testid="favorite-create-description-input"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -111,14 +119,23 @@ export const FavoriteCreateContent = ({ onSuccess, className }: FavoriteCreateCo
               <FormItem className="flex items-center gap-2">
                 <FormLabel>{t('is_private')}</FormLabel>
                 <FormControl>
-                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    data-testid="favorite-create-private-checkbox"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )
           }}
         />
-        <Button type="submit" className="w-full" loading={loading}>
+        <Button
+          type="submit"
+          className="w-full"
+          loading={loading}
+          data-testid="favorite-create-submit"
+        >
           {t('submit')}
         </Button>
       </form>

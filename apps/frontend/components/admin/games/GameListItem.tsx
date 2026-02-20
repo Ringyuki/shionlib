@@ -102,6 +102,7 @@ export function GameListItem({
           'border-gray-200 dark:border-gray-800',
           'hover:bg-gray-50 dark:hover:bg-gray-800/50',
         )}
+        data-testid={`admin-game-row-${game.id}`}
       >
         <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded-md bg-gray-200 dark:bg-gray-700">
           {game.cover ? (
@@ -158,10 +159,15 @@ export function GameListItem({
                 size="icon"
                 disabled={isBusy}
                 renderIcon={<MoreHorizontal className="size-4" />}
+                data-testid={`admin-game-actions-trigger-${game.id}`}
               />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild disabled={isBusy}>
+            <DropdownMenuContent align="end" data-testid={`admin-game-actions-menu-${game.id}`}>
+              <DropdownMenuItem
+                asChild
+                disabled={isBusy}
+                data-testid={`admin-game-action-edit-${game.id}`}
+              >
                 <Link href={`/admin/games/${game.id}/edit`}>
                   <Pencil className="mr-2 size-4" />
                   {t('edit')}
@@ -170,6 +176,7 @@ export function GameListItem({
               <DropdownMenuItem
                 onClick={() => onStatusChange?.(game.id, game.status === 1 ? 2 : 1)}
                 disabled={isBusy}
+                data-testid={`admin-game-action-toggle-status-${game.id}`}
               >
                 {game.status === 1 ? (
                   <>
@@ -183,15 +190,27 @@ export function GameListItem({
                   </>
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleAddRecentUpdate} disabled={isBusy}>
+              <DropdownMenuItem
+                onClick={handleAddRecentUpdate}
+                disabled={isBusy}
+                data-testid={`admin-game-action-add-recent-update-${game.id}`}
+              >
                 <CalendarPlus className="mr-2 size-4" />
                 {t('addRecentUpdate')}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleRemoveRecentUpdate} disabled={isBusy}>
+              <DropdownMenuItem
+                onClick={handleRemoveRecentUpdate}
+                disabled={isBusy}
+                data-testid={`admin-game-action-remove-recent-update-${game.id}`}
+              >
                 <CalendarX2 className="mr-2 size-4" />
                 {t('removeRecentUpdate')}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setDeleteOpen(true)} disabled={isBusy}>
+              <DropdownMenuItem
+                onClick={() => setDeleteOpen(true)}
+                disabled={isBusy}
+                data-testid={`admin-game-action-delete-${game.id}`}
+              >
                 <Trash2 className="mr-2 size-4 text-destructive" />
                 <span className="text-destructive">{t('delete')}</span>
               </DropdownMenuItem>
@@ -200,14 +219,19 @@ export function GameListItem({
         </div>
       </div>
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <AlertDialogContent tone="destructive">
+        <AlertDialogContent tone="destructive" data-testid={`admin-game-delete-dialog-${game.id}`}>
           <AlertDialogHeader>
             <AlertDialogTitle tone="destructive">{t('deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>{t('deleteDescription')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isBusy}>{t('cancel')}</AlertDialogCancel>
-            <AlertDialogAction tone="destructive" onClick={handleDelete} loading={isBusy}>
+            <AlertDialogAction
+              tone="destructive"
+              onClick={handleDelete}
+              loading={isBusy}
+              data-testid={`admin-game-delete-confirm-${game.id}`}
+            >
               {t('confirmDelete')}
             </AlertDialogAction>
           </AlertDialogFooter>

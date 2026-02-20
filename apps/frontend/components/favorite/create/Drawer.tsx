@@ -23,7 +23,7 @@ export const FavoriteCreateDrawer = ({
   const t = useTranslations('Components.Favorite.Create')
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent>
+      <DrawerContent data-testid="favorite-create-drawer">
         <DrawerHeader>
           <DrawerTitle>{t('title')}</DrawerTitle>
           <DrawerDescription>{t('description')}</DrawerDescription>

@@ -25,7 +25,7 @@ export const FavoriteEditDrawer = ({
   const t = useTranslations('Components.User.Home.Favorites.Action.Edit')
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent>
+      <DrawerContent data-testid={`favorite-edit-drawer-${favorite.id}`}>
         <DrawerHeader>
           <DrawerTitle>{t('title')}</DrawerTitle>
           <DrawerDescription>{t('description')}</DrawerDescription>

@@ -36,7 +36,7 @@ export const CommentActions = ({
           comment_id={comment_id}
           likeable={likeable}
         />
-        {showReplyBtn && <Reply onReplyClick={onReplyClick} />}
+        {showReplyBtn && <Reply comment_id={comment_id} onReplyClick={onReplyClick} />}
       </div>
       <MoreActions
         creator_id={creator_id}

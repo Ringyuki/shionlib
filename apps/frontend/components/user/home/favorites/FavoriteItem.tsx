@@ -27,6 +27,7 @@ export const FavoriteItem = async ({ favorite, content_limit }: FavoriteItemProp
     <Link
       href={`/game/${favorite.game.id}`}
       className="hover:opacity-85 transition-all duration-200"
+      data-testid={`favorite-game-item-${favorite.id}`}
     >
       <Card className="py-0 overflow-hidden">
         <CardContent className="px-0">

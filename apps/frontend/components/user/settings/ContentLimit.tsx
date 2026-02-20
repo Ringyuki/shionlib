@@ -67,7 +67,7 @@ export const ContentLimit = ({ initialContentLimit }: ContentLimitProps) => {
   }
 
   return (
-    <Card>
+    <Card data-testid="settings-content-limit-card">
       <CardHeader>
         <CardTitle className="text-xl">{t('title')}</CardTitle>
         <CardDescription className="text-card-foreground">{t('description')}</CardDescription>
@@ -80,17 +80,28 @@ export const ContentLimit = ({ initialContentLimit }: ContentLimitProps) => {
           value={contentLimit.toString()}
           onValueChange={value => setContentLimit(value as unknown as ContentLimitEnum)}
         >
-          <SelectTrigger>
+          <SelectTrigger data-testid="settings-content-limit-select-trigger">
             <SelectValue placeholder={t('selectContentLimit')} />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
               <SelectLabel>{t('chooseContentLimit')}</SelectLabel>
-              <SelectItem value={ContentLimitEnum.SHOW_WITH_SPOILER.toString()}>
+              <SelectItem
+                value={ContentLimitEnum.SHOW_WITH_SPOILER.toString()}
+                data-testid="settings-content-limit-option-2"
+              >
                 {t('showWithSpoiler')}
               </SelectItem>
-              <SelectItem value={ContentLimitEnum.JUST_SHOW.toString()}>{t('justShow')}</SelectItem>
-              <SelectItem value={ContentLimitEnum.NEVER_SHOW_NSFW_CONTENT.toString()}>
+              <SelectItem
+                value={ContentLimitEnum.JUST_SHOW.toString()}
+                data-testid="settings-content-limit-option-3"
+              >
+                {t('justShow')}
+              </SelectItem>
+              <SelectItem
+                value={ContentLimitEnum.NEVER_SHOW_NSFW_CONTENT.toString()}
+                data-testid="settings-content-limit-option-1"
+              >
                 {t('neverShowNsfwContent')}
               </SelectItem>
             </SelectGroup>
@@ -102,7 +113,12 @@ export const ContentLimit = ({ initialContentLimit }: ContentLimitProps) => {
         </Alert>
       </CardContent>
       <CardFooter>
-        <Button intent="primary" onClick={handleUpdate} loading={isUpdating}>
+        <Button
+          data-testid="settings-content-limit-update"
+          intent="primary"
+          onClick={handleUpdate}
+          loading={isUpdating}
+        >
           {t('update')}
         </Button>
       </CardFooter>

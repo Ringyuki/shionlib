@@ -42,6 +42,7 @@ export function UserListFilters({
     <div className="flex flex-wrap items-center gap-3">
       <div className="relative flex-1 min-w-[200px]">
         <Input
+          data-testid="admin-users-search-input"
           value={search}
           onChange={e => onSearchChange(e.target.value)}
           placeholder={t('searchPlaceholder')}
@@ -54,7 +55,7 @@ export function UserListFilters({
         value={role?.toString() ?? 'all'}
         onValueChange={v => onRoleChange(v === 'all' ? undefined : parseInt(v))}
       >
-        <SelectTrigger className="w-[140px]">
+        <SelectTrigger className="w-[140px]" data-testid="admin-users-role-filter-trigger">
           <SelectValue placeholder={t('role')} />
         </SelectTrigger>
         <SelectContent>
@@ -69,7 +70,7 @@ export function UserListFilters({
         value={status?.toString() ?? 'all'}
         onValueChange={v => onStatusChange(v === 'all' ? undefined : parseInt(v))}
       >
-        <SelectTrigger className="w-[140px]">
+        <SelectTrigger className="w-[140px]" data-testid="admin-users-status-filter-trigger">
           <SelectValue placeholder={t('status')} />
         </SelectTrigger>
         <SelectContent>
@@ -80,7 +81,7 @@ export function UserListFilters({
       </Select>
 
       <Select value={sortBy} onValueChange={onSortByChange}>
-        <SelectTrigger className="w-[160px]">
+        <SelectTrigger className="w-[160px]" data-testid="admin-users-sort-by-trigger">
           <SelectValue placeholder={t('sortBy')} />
         </SelectTrigger>
         <SelectContent>
@@ -96,7 +97,7 @@ export function UserListFilters({
       </Select>
 
       <Select value={sortOrder} onValueChange={v => onSortOrderChange(v as 'asc' | 'desc')}>
-        <SelectTrigger className="w-[100px]">
+        <SelectTrigger className="w-[100px]" data-testid="admin-users-sort-order-trigger">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

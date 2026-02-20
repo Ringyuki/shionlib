@@ -36,7 +36,7 @@ const getData = async (id: string, page: string) => {
 
 export default async function DeveloperPage({ params, searchParams }: DeveloperPageProps) {
   const { id } = await params
-  if (!id || isNaN(Number(id))) {
+  if (!id) {
     notFound()
   }
   const { page } = await searchParams

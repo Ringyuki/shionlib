@@ -113,7 +113,13 @@ export function UserPermissionsDialog({ userId, open, onOpenChange }: UserPermis
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent fitContent className="min-w-full sm:min-w-2xl">
+      <DialogContent
+        fitContent
+        className="min-w-full sm:min-w-2xl"
+        data-testid={
+          userId ? `admin-user-permissions-dialog-${userId}` : 'admin-user-permissions-dialog'
+        }
+      >
         <DialogHeader>
           <DialogTitle>{t('permissionsTitle')}</DialogTitle>
           <DialogDescription>{t('permissionsDescription')}</DialogDescription>
@@ -131,7 +137,11 @@ export function UserPermissionsDialog({ userId, open, onOpenChange }: UserPermis
           >
             <TabsList>
               {entityList.map(entity => (
-                <TabsTrigger key={entity.key} value={entity.key}>
+                <TabsTrigger
+                  key={entity.key}
+                  value={entity.key}
+                  data-testid={`admin-user-permissions-tab-${entity.key}`}
+                >
                   {t(entity.labelKey)}
                 </TabsTrigger>
               ))}
@@ -155,6 +165,7 @@ export function UserPermissionsDialog({ userId, open, onOpenChange }: UserPermis
                           {detail.groups.map(group => (
                             <div
                               key={`${entity.key}-${group.bitIndex}`}
+                              data-testid={`admin-user-permissions-group-${entity.key}-${group.bitIndex}`}
                               className={cn(
                                 'rounded-lg border p-3',
                                 group.enabled ? 'bg-card/50' : '',
@@ -162,6 +173,7 @@ export function UserPermissionsDialog({ userId, open, onOpenChange }: UserPermis
                             >
                               <div className="flex flex-wrap items-center gap-3">
                                 <Checkbox
+                                  data-testid={`admin-user-permissions-checkbox-${entity.key}-${group.bitIndex}`}
                                   checked={group.enabled}
                                   disabled={!group.mutable}
                                   onCheckedChange={checked =>
@@ -206,6 +218,7 @@ export function UserPermissionsDialog({ userId, open, onOpenChange }: UserPermis
             intent="primary"
             onClick={() => saveEntity(activeEntity)}
             loading={savingEntity === activeEntity || loading}
+            data-testid="admin-user-permissions-save"
           >
             {t('save')}
           </Button>

@@ -53,6 +53,7 @@ export const Aria2Test = ({ form }: Aria2TestProps) => {
         onClick={onTest}
         loading={testStatus === 'testing'}
         renderIcon={<FlaskConical />}
+        data-testid="settings-aria2-test"
       >
         {t('title')}
       </Button>

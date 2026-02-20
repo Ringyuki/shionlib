@@ -22,6 +22,7 @@ export const Item = ({ message, onClick }: ItemProps) => {
 
   return (
     <Card
+      data-testid={`message-item-${message.id}`}
       className={cn(
         'py-0 transition-colors duration-200 cursor-pointer group',
         'hover:bg-primary/10 active:bg-primary/20',
@@ -37,7 +38,7 @@ export const Item = ({ message, onClick }: ItemProps) => {
             ) : (
               <div
                 className={cn(
-                  'size-10 rounded-full flex items-center justify-center bg-gradient-to-br',
+                  'size-10 rounded-full flex items-center justify-center bg-linear-to-br',
                   tone.iconBg,
                 )}
               >

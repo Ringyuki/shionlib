@@ -59,7 +59,7 @@ export const LanguageSettings = ({ initialLanguage }: LanguageSettingsProps) => 
     }
   }
   return (
-    <Card>
+    <Card data-testid="settings-language-card">
       <CardHeader>
         <CardTitle className="text-xl">{t('title')}</CardTitle>
         <CardDescription className="text-card-foreground">{t('description')}</CardDescription>
@@ -69,21 +69,32 @@ export const LanguageSettings = ({ initialLanguage }: LanguageSettingsProps) => 
       </CardHeader>
       <CardContent>
         <Select value={language} onValueChange={value => setLanguage(value as SupportedLocales)}>
-          <SelectTrigger>
+          <SelectTrigger data-testid="settings-language-select-trigger">
             <SelectValue placeholder={t('selectLanguage')} />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
               <SelectLabel>{t('chooseLanguage')}</SelectLabel>
-              <SelectItem value="ja">日本語</SelectItem>
-              <SelectItem value="zh">简体中文</SelectItem>
-              <SelectItem value="en">English</SelectItem>
+              <SelectItem value="ja" data-testid="settings-language-option-ja">
+                日本語
+              </SelectItem>
+              <SelectItem value="zh" data-testid="settings-language-option-zh">
+                简体中文
+              </SelectItem>
+              <SelectItem value="en" data-testid="settings-language-option-en">
+                English
+              </SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>
       </CardContent>
       <CardFooter>
-        <Button intent="primary" onClick={handleUpdate} loading={isUpdating}>
+        <Button
+          data-testid="settings-language-update"
+          intent="primary"
+          onClick={handleUpdate}
+          loading={isUpdating}
+        >
           {t('update')}
         </Button>
       </CardFooter>

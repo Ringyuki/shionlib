@@ -241,6 +241,7 @@ export function UserListItem({ user, currentRole, currentUserId, onRefresh }: Us
 
   return (
     <div
+      data-testid={`admin-user-row-${user.id}`}
       className={cn(
         'flex items-center gap-4 rounded-lg border p-4 transition-colors',
         'bg-white/50 dark:bg-gray-900/50',
@@ -295,37 +296,80 @@ export function UserListItem({ user, currentRole, currentUserId, onRefresh }: Us
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button intent="neutral" appearance="ghost" className="h-8 w-8 p-0">
+          <Button
+            intent="neutral"
+            appearance="ghost"
+            className="h-8 w-8 p-0"
+            data-testid={`admin-user-actions-trigger-${user.id}`}
+          >
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setDetailOpen(true)}>{t('viewDetail')}</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setPermissionsOpen(true)} disabled={!canManageUser}>
+        <DropdownMenuContent align="end" data-testid={`admin-user-actions-menu-${user.id}`}>
+          <DropdownMenuItem
+            onClick={() => setDetailOpen(true)}
+            data-testid={`admin-user-action-view-detail-${user.id}`}
+          >
+            {t('viewDetail')}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => setPermissionsOpen(true)}
+            disabled={!canManageUser}
+            data-testid={`admin-user-action-edit-permissions-${user.id}`}
+          >
             {t('editPermissions')}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setQuotaOpen(true)} disabled={!canManageUser}>
+          <DropdownMenuItem
+            onClick={() => setQuotaOpen(true)}
+            disabled={!canManageUser}
+            data-testid={`admin-user-action-manage-quota-${user.id}`}
+          >
             {t('manageQuota')}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setEditOpen(true)} disabled={!canManageUser}>
+          <DropdownMenuItem
+            onClick={() => setEditOpen(true)}
+            disabled={!canManageUser}
+            data-testid={`admin-user-action-edit-profile-${user.id}`}
+          >
             {t('editProfile')}
           </DropdownMenuItem>
           {canManageRole && (
-            <DropdownMenuItem onClick={() => setRoleOpen(true)}>{t('changeRole')}</DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => setRoleOpen(true)}
+              data-testid={`admin-user-action-change-role-${user.id}`}
+            >
+              {t('changeRole')}
+            </DropdownMenuItem>
           )}
           {user.status === 2 ? (
-            <DropdownMenuItem onClick={() => setUnbanOpen(true)} disabled={!canManageUser}>
+            <DropdownMenuItem
+              onClick={() => setUnbanOpen(true)}
+              disabled={!canManageUser}
+              data-testid={`admin-user-action-unban-${user.id}`}
+            >
               {t('unbanUser')}
             </DropdownMenuItem>
           ) : (
-            <DropdownMenuItem onClick={() => setBanOpen(true)} disabled={!canManageUser}>
+            <DropdownMenuItem
+              onClick={() => setBanOpen(true)}
+              disabled={!canManageUser}
+              data-testid={`admin-user-action-ban-${user.id}`}
+            >
               {t('banUser')}
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem onClick={() => setForceLogoutOpen(true)} disabled={!canManageUser}>
+          <DropdownMenuItem
+            onClick={() => setForceLogoutOpen(true)}
+            disabled={!canManageUser}
+            data-testid={`admin-user-action-force-logout-${user.id}`}
+          >
             {t('forceLogout')}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setResetOpen(true)} disabled={!canManageUser}>
+          <DropdownMenuItem
+            onClick={() => setResetOpen(true)}
+            disabled={!canManageUser}
+            data-testid={`admin-user-action-reset-password-${user.id}`}
+          >
             {t('resetPassword')}
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -349,7 +393,7 @@ export function UserListItem({ user, currentRole, currentUserId, onRefresh }: Us
       />
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent>
+        <DialogContent data-testid={`admin-user-edit-profile-dialog-${user.id}`}>
           <DialogHeader>
             <DialogTitle>{t('editProfile')}</DialogTitle>
             <DialogDescription>{t('editProfileDesc')}</DialogDescription>
@@ -395,13 +439,13 @@ export function UserListItem({ user, currentRole, currentUserId, onRefresh }: Us
       </Dialog>
 
       <Dialog open={roleOpen} onOpenChange={setRoleOpen}>
-        <DialogContent>
+        <DialogContent data-testid={`admin-user-change-role-dialog-${user.id}`}>
           <DialogHeader>
             <DialogTitle>{t('changeRole')}</DialogTitle>
             <DialogDescription>{t('changeRoleDesc')}</DialogDescription>
           </DialogHeader>
           <Select value={String(nextRole)} onValueChange={value => setNextRole(parseInt(value))}>
-            <SelectTrigger>
+            <SelectTrigger data-testid={`admin-user-change-role-select-trigger-${user.id}`}>
               <SelectValue placeholder={t('role')} />
             </SelectTrigger>
             <SelectContent>
@@ -414,7 +458,12 @@ export function UserListItem({ user, currentRole, currentUserId, onRefresh }: Us
             <Button intent="neutral" appearance="ghost" onClick={() => setRoleOpen(false)}>
               {t('cancel')}
             </Button>
-            <Button intent="primary" onClick={handleChangeRole} loading={isBusy}>
+            <Button
+              intent="primary"
+              onClick={handleChangeRole}
+              loading={isBusy}
+              data-testid={`admin-user-change-role-confirm-${user.id}`}
+            >
               {t('save')}
             </Button>
           </DialogFooter>
@@ -422,13 +471,14 @@ export function UserListItem({ user, currentRole, currentUserId, onRefresh }: Us
       </Dialog>
 
       <Dialog open={banOpen} onOpenChange={setBanOpen}>
-        <DialogContent>
+        <DialogContent data-testid={`admin-user-ban-dialog-${user.id}`}>
           <DialogHeader>
             <DialogTitle>{t('banUser')}</DialogTitle>
             <DialogDescription>{t('banUserDesc')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <Textarea
+              data-testid={`admin-user-ban-reason-input-${user.id}`}
               value={banReason}
               onChange={e => setBanReason(e.target.value)}
               placeholder={t('banReason')}
@@ -441,6 +491,7 @@ export function UserListItem({ user, currentRole, currentUserId, onRefresh }: Us
               <span className="text-sm">{t('permanentBan')}</span>
             </div>
             <InputNumber
+              data-testid={`admin-user-ban-duration-input-${user.id}`}
               value={banDuration}
               onChange={value => setBanDuration(value)}
               min={1}
@@ -465,6 +516,7 @@ export function UserListItem({ user, currentRole, currentUserId, onRefresh }: Us
               onClick={handleBan}
               loading={isBusy}
               disabled={!banPermanent && (!banDuration || banDuration <= 0)}
+              data-testid={`admin-user-ban-confirm-${user.id}`}
             >
               {t('confirmBan')}
             </Button>
@@ -473,14 +525,19 @@ export function UserListItem({ user, currentRole, currentUserId, onRefresh }: Us
       </Dialog>
 
       <AlertDialog open={unbanOpen} onOpenChange={setUnbanOpen}>
-        <AlertDialogContent tone="warning">
+        <AlertDialogContent tone="warning" data-testid={`admin-user-unban-dialog-${user.id}`}>
           <AlertDialogHeader>
             <AlertDialogTitle tone="warning">{t('unbanUser')}</AlertDialogTitle>
             <AlertDialogDescription>{t('unbanConfirm')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-            <AlertDialogAction tone="warning" onClick={handleUnban} loading={isBusy}>
+            <AlertDialogAction
+              tone="warning"
+              onClick={handleUnban}
+              loading={isBusy}
+              data-testid={`admin-user-unban-confirm-${user.id}`}
+            >
               {t('confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -488,7 +545,7 @@ export function UserListItem({ user, currentRole, currentUserId, onRefresh }: Us
       </AlertDialog>
 
       <Dialog open={resetOpen} onOpenChange={setResetOpen}>
-        <DialogContent>
+        <DialogContent data-testid={`admin-user-reset-password-dialog-${user.id}`}>
           <DialogHeader>
             <DialogTitle>{t('resetPassword')}</DialogTitle>
             <DialogDescription>{t('resetPasswordDesc')}</DialogDescription>
@@ -521,6 +578,7 @@ export function UserListItem({ user, currentRole, currentUserId, onRefresh }: Us
               onClick={handleResetPassword}
               loading={isBusy}
               disabled={!newPassword || newPassword !== newPasswordConfirm}
+              data-testid={`admin-user-reset-password-confirm-${user.id}`}
             >
               {t('confirm')}
             </Button>
@@ -529,14 +587,22 @@ export function UserListItem({ user, currentRole, currentUserId, onRefresh }: Us
       </Dialog>
 
       <AlertDialog open={forceLogoutOpen} onOpenChange={setForceLogoutOpen}>
-        <AlertDialogContent tone="warning">
+        <AlertDialogContent
+          tone="warning"
+          data-testid={`admin-user-force-logout-dialog-${user.id}`}
+        >
           <AlertDialogHeader>
             <AlertDialogTitle tone="warning">{t('forceLogout')}</AlertDialogTitle>
             <AlertDialogDescription>{t('forceLogoutDesc')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-            <AlertDialogAction tone="warning" onClick={handleForceLogout} loading={isBusy}>
+            <AlertDialogAction
+              tone="warning"
+              onClick={handleForceLogout}
+              loading={isBusy}
+              data-testid={`admin-user-force-logout-confirm-${user.id}`}
+            >
               {t('confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>

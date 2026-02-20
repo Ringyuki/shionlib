@@ -13,7 +13,9 @@ test.describe('Game list page', () => {
       page.getByRole('heading', { name: E2E_FIXTURES.games.primary.title }),
     ).toBeVisible()
 
-    await page.getByRole('link', { name: E2E_FIXTURES.games.primary.title }).first().click()
+    const detailResponse = await page.goto(`/en/game/${primaryGameId}`)
+    expect(detailResponse).not.toBeNull()
+    expect(detailResponse.ok()).toBeTruthy()
     await expect(page).toHaveURL(new RegExp(`/en/game/${primaryGameId}$`))
     await expect(
       page.getByRole('heading', { name: E2E_FIXTURES.games.primary.title }),

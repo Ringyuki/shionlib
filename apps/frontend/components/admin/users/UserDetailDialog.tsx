@@ -99,7 +99,11 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent fitContent className="min-w-full sm:min-w-2xl">
+      <DialogContent
+        fitContent
+        className="min-w-full sm:min-w-2xl"
+        data-testid={userId ? `admin-user-detail-dialog-${userId}` : 'admin-user-detail-dialog'}
+      >
         <DialogHeader>
           <DialogTitle>{t('detailTitle')}</DialogTitle>
           <DialogDescription>{t('detailDescription')}</DialogDescription>

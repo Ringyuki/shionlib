@@ -23,7 +23,7 @@ export const FavoriteCreateDialog = ({
   const t = useTranslations('Components.Favorite.Create')
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent data-testid="favorite-create-dialog">
         <DialogHeader>
           <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>{t('description')}</DialogDescription>
