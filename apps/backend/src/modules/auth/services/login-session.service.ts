@@ -362,7 +362,7 @@ export class LoginSessionService {
 
   private async idempWaitAndLoad(old_session_id: number): Promise<SignResInterface | null> {
     const ttlMs = Number(this.configService.get('refresh_token.rotationGraceSec')) * 1000
-    const spinLimit = Math.min(ttlMs, 150) // max 150ms to avoid long blocking
+    const spinLimit = Math.min(Math.max(ttlMs, 20), 1200)
     let left = spinLimit
     while (left > 0) {
       const hit = await this.idempLoad(old_session_id)
