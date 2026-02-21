@@ -5,8 +5,10 @@ This monorepo uses root workflows only:
 - `.github/workflows/ci.yml`
 - `.github/workflows/deploy-frontend.yml`
 - `.github/workflows/deploy-backend.yml`
+- `.github/workflows/deploy-og.yml`
 - `.github/workflows/promote-frontend-production.yml`
 - `.github/workflows/promote-backend-production.yml`
+- `.github/workflows/promote-og-production.yml`
 
 ## Deployment Flow
 
@@ -14,13 +16,14 @@ This monorepo uses root workflows only:
 2. On successful staging deploy, production promotion runs automatically:
    - frontend: creates `frontend-prod-<sha7>` tag and triggers production deploy.
    - backend: creates `backend-prod-<sha7>` tag and triggers production deploy.
+   - og: creates `og-prod-<sha7>` tag and triggers production deploy.
 3. `workflow_dispatch` still supports manual deploy to `staging` or `production`.
 4. Production should be protected by GitHub Environment reviewers.
 
 ## Manual Production Release Flow
 
-1. Create and push a release tag (for example `frontend-v0.2.0` or `backend-v0.2.0`).
-2. Open Actions and run `deploy frontend` or `deploy backend`.
+1. Create and push a release tag (for example `frontend-v0.2.0`, `backend-v0.2.0`, or `og-v0.2.0`).
+2. Open Actions and run `deploy frontend`, `deploy backend`, or `deploy og`.
 3. Select `target_environment=production`.
 4. Fill `release_ref` with the tag or commit SHA (required for production).
 5. Wait for Environment approval and verify health check result.
@@ -38,9 +41,12 @@ This monorepo uses root workflows only:
 - `production-frontend`
 - `staging-backend`
 - `production-backend`
+- `staging-og`
+- `production-og`
 
 ## Required Environment Variables
 
+- For OG environments (`staging-og` / `production-og`), `HEALTHCHECK_URL` and `PM2_ENV` are required.
 - `HEALTHCHECK_URL`
 - `PM2_ENV`
 - `NEXT_PUBLIC_PROD_API_PATH`

@@ -7,6 +7,11 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   prettier,
   {
+    languageOptions: {
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
     files: ['**/*.{ts,tsx,js,jsx}'],
     plugins: {
       prettier: pluginPrettier,

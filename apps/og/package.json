@@ -13,7 +13,8 @@
     "lint:check": "eslint \"{src,tests}/**/*.{ts,tsx}\" --max-warnings=0",
     "start": "bun src/server.ts",
     "typecheck": "tsc --noEmit",
-    "test": "bun test"
+    "test": "bun test",
+    "prepare": "[ -d .git ] && husky || true"
   },
   "dependencies": {
     "@takumi-rs/core": "^0.68.12",
@@ -32,9 +33,22 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "globals": "^16.5.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.56.0"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": [
+      "eslint --fix"
+    ],
+    "tests/**/*.ts": [
+      "eslint --fix"
+    ],
+    "*.{js,ts,tsx,json,md,cjs,mjs}": [
+      "prettier --write"
+    ]
   },
   "packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39"
 }

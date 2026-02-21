@@ -12,6 +12,9 @@ export default [
       globals: {
         ...globals.node,
       },
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
+      },
     },
   },
   prettier,

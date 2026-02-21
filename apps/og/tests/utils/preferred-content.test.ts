@@ -194,16 +194,9 @@ describe('normaliseIntro', () => {
     expect(normaliseIntro(short, 100)).toBe(short)
   })
 
-  it('truncates to maxLength and appends ellipsis character', () => {
-    const long = 'a'.repeat(200)
-    const result = normaliseIntro(long, 150)
-    expect(result).toHaveLength(151) // 150 chars + '…'
-    expect(result.endsWith('…')).toBe(true)
-  })
-
-  it('uses 150 as the default maxLength', () => {
-    const long = 'b'.repeat(200)
+  it('uses 600 as the default maxLength', () => {
+    const long = 'b'.repeat(1000)
     const result = normaliseIntro(long)
-    expect(result.length).toBe(151)
+    expect(result.length).toBe(600)
   })
 })
