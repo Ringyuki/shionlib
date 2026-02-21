@@ -248,8 +248,8 @@ export const markdownRender = (input: unknown, options: MarkdownOptions = {}): R
                 alt={alt}
                 aspectRatio="16 / 9"
                 autoAspectRatio={true}
-                className="max-w-64 max-h-64 rounded-md overflow-hidden"
-                imageClassName="max-w-64 max-h-64 rounded-md overflow-hidden"
+                className="rounded-md overflow-hidden"
+                imageClassName="rounded-md overflow-hidden"
               />
             </span>,
           )

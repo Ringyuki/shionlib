@@ -9,6 +9,7 @@ import { Ad } from '@/components/common/site/Ad'
 import { GameTabsNav } from '@/components/game/TabsNav'
 import { createGenerateMetadata } from '@/libs/seo/metadata'
 import { getPreferredContent } from '@/components/game/description/helpers/getPreferredContent'
+import { ForceScrollTop } from '@/components/game/ScrollTop'
 
 interface GameLayoutProps {
   children: React.ReactNode
@@ -29,6 +30,7 @@ export default async function GameLayout({ children, params }: GameLayoutProps) 
     <div className="my-4 w-full">
       <>
         <ViewPing />
+        <ForceScrollTop />
         <div className="flex flex-col gap-8">
           <GameHeader game={header.data} />
           <div

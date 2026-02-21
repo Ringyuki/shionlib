@@ -76,7 +76,7 @@ const GameCardContent = ({
       <Card
         className={cn(
           'relative overflow-hidden p-0 border-0',
-          'aspect-[3/4]',
+          'aspect-3/4',
           'bg-muted',
           'transition-all duration-200',
           'hover:opacity-85',
@@ -114,7 +114,7 @@ const GameCardContent = ({
         <div
           className={cn(
             'absolute inset-x-0 bottom-0 h-24',
-            'bg-gradient-to-t from-black/20 via-black/10 dark:via-black/20 to-transparent',
+            'bg-linear-to-t from-black/20 via-black/10 dark:via-black/20 to-transparent',
             'pointer-events-none',
           )}
         />
