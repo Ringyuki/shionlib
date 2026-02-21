@@ -5,7 +5,7 @@ import { Links } from '@/components/friend-link/Links'
 
 export default function FriendLinkPage() {
   return (
-    <div className="mx-auto my-4">
+    <div className="w-full mx-auto my-4">
       <Header />
       <Links />
     </div>
