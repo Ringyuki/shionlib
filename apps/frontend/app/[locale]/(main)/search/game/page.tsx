@@ -32,7 +32,7 @@ export default async function SearchGamePage({ searchParams }: SearchGamePagePro
   if (!q) return notFound()
   const data = await getData(page, q)
   return (
-    <div className="container mx-auto my-4 space-y-6">
+    <div className="mx-auto my-4 space-y-6">
       <Results
         games={data.data?.items ?? []}
         pagination={data.data?.meta as PaginatedMeta}

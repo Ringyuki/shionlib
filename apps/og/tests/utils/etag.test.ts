@@ -42,7 +42,6 @@ describe('utils/etag', () => {
       // Reset
       process.env.OG_DESIGN_VERSION = '1'
 
-      const v1 = await makeETag('game', '42', 'en')
       const v2 = await makeETagV2('game', '42', 'en')
       // Both modules share the same import due to module caching — the version
       // difference test is structural: the input string changes, producing a

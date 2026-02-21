@@ -44,14 +44,11 @@ function getAspectRatio(dims: number[]): OgAspectRatio {
 }
 
 export function getGameOgData(game: GameOgSource, lang: DataLang): GameOgData {
-  const title =
-    game[`title_${lang}`] || game.title_jp || game.title_en || game.title_zh || ''
+  const title = game[`title_${lang}`] || game.title_jp || game.title_en || game.title_zh || ''
 
-  const intro =
-    game[`intro_${lang}`] || game.intro_jp || game.intro_en || game.intro_zh || ''
+  const intro = game[`intro_${lang}`] || game.intro_jp || game.intro_en || game.intro_zh || ''
 
-  const cover =
-    game.covers?.find(c => c.language === lang) ?? game.covers?.[0] ?? null
+  const cover = game.covers?.find(c => c.language === lang) ?? game.covers?.[0] ?? null
 
   return {
     title,
@@ -79,16 +76,9 @@ export interface CharacterOgData {
   imageUrl: string | null
 }
 
-export function getCharacterOgData(
-  character: CharacterOgSource,
-  lang: DataLang,
-): CharacterOgData {
+export function getCharacterOgData(character: CharacterOgSource, lang: DataLang): CharacterOgData {
   const name =
-    character[`name_${lang}`] ||
-    character.name_jp ||
-    character.name_en ||
-    character.name_zh ||
-    ''
+    character[`name_${lang}`] || character.name_jp || character.name_en || character.name_zh || ''
 
   const intro =
     character[`intro_${lang}`] ||
@@ -121,10 +111,7 @@ export interface DeveloperOgData {
   logoUrl: string | null
 }
 
-export function getDeveloperOgData(
-  developer: DeveloperOgSource,
-  lang: DataLang,
-): DeveloperOgData {
+export function getDeveloperOgData(developer: DeveloperOgSource, lang: DataLang): DeveloperOgData {
   const intro =
     developer[`intro_${lang}`] ||
     developer.intro_jp ||
@@ -142,8 +129,8 @@ export function getDeveloperOgData(
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /** Normalise intro text for use as OG description: strip newlines, truncate. */
-export function normaliseIntro(intro: string, maxLength = 150): string {
+export function normaliseIntro(intro: string, maxLength = 600): string {
   const cleaned = intro.replace(/[\r\n]+/g, ' ').trim()
   if (cleaned.length <= maxLength) return cleaned
-  return cleaned.slice(0, maxLength) + '…'
+  return cleaned.slice(0, maxLength)
 }

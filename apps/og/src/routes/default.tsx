@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { ImageResponse } from '@takumi-rs/image-response'
 import { getRenderer } from '@/services/renderer'
 import { DefaultOgTemplate } from '@/templates/default'
-import { OG_W, OG_H, SUPPORTED_LOCALES, type SupportedLocale } from '@/config'
+import { OG_W, OG_H, SupportedLocale } from '@/config'
 import { serveOgImage, localeSchema } from './_shared'
 import { z } from 'zod'
 
@@ -25,7 +25,11 @@ router.get('/default', async c => {
     locale,
     render: async () => {
       const res = new ImageResponse(
-        <DefaultOgTemplate locale={locale as SupportedLocale} title={title} description={description} />,
+        <DefaultOgTemplate
+          locale={locale as SupportedLocale}
+          title={title}
+          description={description}
+        />,
         {
           renderer: getRenderer(),
           width: OG_W,

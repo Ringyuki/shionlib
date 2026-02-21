@@ -54,9 +54,10 @@ export const generateMetadata = createGenerateMetadata(
     const game = await shionlibRequest().get<GameData>(`/game/${id}`)
     const langMap = { en: 'en', ja: 'jp', zh: 'zh' } as const
     const lang = langMap[locale as keyof typeof langMap] ?? 'jp'
-    const { title } = getPreferredContent(game.data!, 'title', lang)
+    if (!game.data) notFound()
+    const { title } = getPreferredContent(game.data, 'title', lang)
     const intro =
-      getPreferredContent(game.data!, 'intro', lang)
+      getPreferredContent(game.data, 'intro', lang)
         .intro.replace(/[\r\n]+/g, ' ')
         .trim()
         .slice(0, 100) + '...'

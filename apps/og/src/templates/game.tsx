@@ -15,7 +15,13 @@ interface GameOgTemplateProps extends GameOgData {
   locale: SupportedLocale
 }
 
-export function GameOgTemplate({ title, intro, coverUrl, aspectRatio, locale }: GameOgTemplateProps) {
+export function GameOgTemplate({
+  title,
+  intro,
+  coverUrl,
+  aspectRatio,
+  locale,
+}: GameOgTemplateProps) {
   const cover = COVER[aspectRatio]
   const coverH = OG_LAYOUT_MAIN_H
   const coverW = Math.round((cover.w / cover.h) * coverH)

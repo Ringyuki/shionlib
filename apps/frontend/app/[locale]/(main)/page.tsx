@@ -66,7 +66,7 @@ export default async function HomePage() {
   const { activities, activitiesMeta, hotGames, content_limit, newWorks, recentUpdates } =
     await getData()
   return (
-    <div className="container mx-auto my-4">
+    <div className="mx-auto my-4">
       <Container
         activities={activities}
         activitiesMeta={activitiesMeta}

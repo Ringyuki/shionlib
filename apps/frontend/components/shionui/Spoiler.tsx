@@ -80,7 +80,7 @@ function Spoiler({
                   <Hidden
                     vertical={true}
                     className="w-fit h-fit"
-                    iconClassName="size-6"
+                    iconClassName="size-6 text-background"
                     showText={false}
                   />
                 )}

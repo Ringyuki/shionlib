@@ -13,7 +13,7 @@ const { config } = await import('../../src/config')
 // ─── Fetch mock ───────────────────────────────────────────────────────────────
 
 const mockFetch = mock()
-// @ts-ignore — replace global fetch with mock
+// @ts-expect-error — replace global fetch with mock
 global.fetch = mockFetch
 
 function okResponse(data: unknown): Response {
