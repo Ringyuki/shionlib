@@ -30,7 +30,7 @@ export default async function ReleasesPage({ searchParams }: ReleasesPageProps) 
   const data = await getData(page)
 
   return (
-    <div className="container mx-auto my-4">
+    <div className="w-full mx-auto my-4">
       <ReleaseListHeader />
       <Releases releases={data.data?.items || []} meta={data.data?.meta!} />
     </div>

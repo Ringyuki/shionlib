@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { ActivityType } from '../../../../interfaces/activity/activity.interface'
-import { buildActivityFeed } from '../../../../components/home/activity/activities/helpers/activity-feed.helper'
+import { buildActivityFeed } from '../../../../components/activity/activities/helpers/activity-feed.helper'
 
 const activity = (type: ActivityType, created: string, file?: { id: number; file_name: string }) =>
   ({

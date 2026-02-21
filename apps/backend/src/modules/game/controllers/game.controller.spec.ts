@@ -43,7 +43,6 @@ describe('GameController', () => {
     cacheService.get.mockResolvedValue(cached)
 
     const result = await controller.getList(query as any, req as any)
-
     expect(result).toBe(cached)
     expect(gameService.getList).not.toHaveBeenCalled()
     expect(cacheService.set).not.toHaveBeenCalled()
@@ -57,8 +56,10 @@ describe('GameController', () => {
     gameService.getList.mockResolvedValue(resultData)
 
     const result = await controller.getList(query as any, req as any)
-
-    expect(gameService.getList).toHaveBeenCalledWith({ page: 1, pageSize: 10 }, 2, 3, 4, 'new')
+    expect(gameService.getList).toHaveBeenCalledWith(
+      { page: 1, pageSize: 10, developer_id: 3, character_id: 4, filter: 'new' },
+      2,
+    )
     expect(cacheService.set).toHaveBeenCalledWith(
       `game:list:auth:u1:cl:2:query:${JSON.stringify(query)}`,
       resultData,

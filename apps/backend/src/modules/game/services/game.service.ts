@@ -4,11 +4,11 @@ import { ShionBizException } from '../../../common/exceptions/shion-business.exc
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
 import { GetGameListResDto } from '../dto/res/get-game-list.res.dto'
+import { GetGameListReqDto } from '../dto/req/get-game-list.req.dto'
 import { GetGameResDto } from '../dto/res/get-game.res.dto'
 import { Prisma } from '@prisma/client'
 import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { UserContentLimit } from '../../user/interfaces/user.interface'
-import { GetGameListFilterReqDto } from '../dto/req/get-game-list.req.dto'
 import { applyDate } from '../helpers/date-filters'
 import { CacheService } from '../../cache/services/cache.service'
 import { RECENT_UPDATE_KEY, RECENT_UPDATE_TTL_MS } from '../constants/recent-update.constant'
@@ -263,14 +263,12 @@ export class GameService {
   }
 
   async getList(
-    getGameListReqDto: PaginationReqDto,
+    getGameListReqDto: GetGameListReqDto,
     content_limit?: number,
-    producer_id?: number,
-    character_id?: number,
-    filter?: GetGameListFilterReqDto,
   ): Promise<PaginatedResult<GetGameListResDto>> {
-    const { page = 1, pageSize = 10 } = getGameListReqDto
-    const { tags, years, months, sort_by, sort_order, start_date, end_date } = filter ?? {}
+    const { page = 1, pageSize = 10, developer_id: producer_id, character_id } = getGameListReqDto
+    const { tags, years, months, sort_by, sort_order, start_date, end_date } =
+      getGameListReqDto.filter ?? {}
 
     let where: Prisma.GameWhereInput = {
       status: 1,

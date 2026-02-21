@@ -95,4 +95,14 @@ export class GetGameListReqDto extends PaginationReqDto {
   @ValidateNested()
   @Type(() => GetGameListFilterReqDto)
   filter?: GetGameListFilterReqDto
+
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: ivm('validation.common.IS_NUMBER', { property: 'pageSize' }) },
+  )
+  @IsOptional()
+  @Type(() => Number)
+  @Min(1)
+  @Max(100)
+  pageSize: number = 10
 }

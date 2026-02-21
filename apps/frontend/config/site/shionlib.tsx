@@ -1,5 +1,6 @@
 import { ShionlibSiteConfig, NavBarConfig } from '@/interfaces/site/shion-lib-site-config.interface'
 import { SparklesIcon } from 'lucide-react'
+import { supportedLocalesEnum } from '../i18n/supported'
 
 export const shionlibSiteConfig: ShionlibSiteConfig = {
   canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://shionlib.com',
@@ -28,6 +29,10 @@ export const navBarConfig: NavBarConfig = {
       href: '/release',
     },
     {
+      label: 'activities',
+      href: '/activity',
+    },
+    {
       label: 'docs',
       href: '/docs',
     },
@@ -37,6 +42,7 @@ export const navBarConfig: NavBarConfig = {
       external: true,
       icon: <SparklesIcon className="w-4 h-4" />,
       gradientText: true,
+      excludeLocales: [supportedLocalesEnum.JA, supportedLocalesEnum.EN],
     },
   ],
 }

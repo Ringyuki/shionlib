@@ -29,7 +29,7 @@ export default async function DeveloperPage({ searchParams }: DeveloperPageProps
   const { page, q } = await searchParams
   const data = await getData(page, q)
   return (
-    <div className="container mx-auto my-4">
+    <div className="w-full mx-auto my-4">
       <Header />
       <div className="flex flex-col gap-6">
         <Search initialQ={q} />

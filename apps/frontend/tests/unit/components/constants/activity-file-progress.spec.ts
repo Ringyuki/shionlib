@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { ActivityType } from '../../../../interfaces/activity/activity.interface'
-import { fileActivityTypes } from '../../../../components/home/activity/activities/constants/activity-feed'
+import { fileActivityTypes } from '../../../../components/activity/activities/constants/activity-feed'
 import {
   eventBadgeVariantMap,
   stageDefinitions,
   systemFileActivityTypes,
-} from '../../../../components/home/activity/activities/constants/file-progress'
+} from '../../../../components/activity/activities/constants/file-progress'
 
 describe('components/home/activity/constants (unit)', () => {
   it('defines file activity type set', () => {

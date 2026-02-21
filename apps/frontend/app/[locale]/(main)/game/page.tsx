@@ -46,7 +46,7 @@ export default async function GamePage({ searchParams }: GamePageProps) {
   const data = await getData(tags, years, months, sort_by, sort_order, page)
 
   return (
-    <div className="container mx-auto my-4">
+    <div className="w-full mx-auto my-4">
       <Header />
       <div className="flex flex-col gap-6">
         <GameFilter

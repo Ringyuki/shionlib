@@ -8,6 +8,8 @@ import { GradientText } from '@/components/shionui/GradientText'
 import { GradientIcon } from '@/components/shionui/GradientIcon'
 import { NavBarConfig } from '@/interfaces/site/shion-lib-site-config.interface'
 import { RandomGame } from './Random'
+import { useLocale } from 'next-intl'
+import { SupportedLocales } from '@/config/i18n/supported'
 
 interface NavProps {
   items: NavBarConfig['links']
@@ -16,13 +18,14 @@ interface NavProps {
 export const Nav = ({ items }: NavProps) => {
   const t = useTranslations('Components.Common.TopBar.NavBar')
   const segment = useSelectedLayoutSegment()
-
+  const locale = useLocale() as SupportedLocales
   return (
     <div className="flex items-center gap-0.5">
       <RandomGame />
       {items.map(link => {
         const isActive = segment === link.href.replace(/^\//, '')
         const gradientId = `nav-gradient-${link.href.replace(/[^a-zA-Z0-9_-]/g, '-')}`
+        if (link.excludeLocales?.includes(locale)) return null
         return (
           <Link
             key={link.href}

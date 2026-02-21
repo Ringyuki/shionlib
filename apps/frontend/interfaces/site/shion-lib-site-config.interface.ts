@@ -1,3 +1,5 @@
+import { SupportedLocales } from '@/config/i18n/supported'
+
 export interface ShionlibSeoConfig {
   title: string
   titleShort: string
@@ -40,5 +42,6 @@ export interface NavBarConfig {
     icon?: React.ReactNode
     gradientText?: boolean
     gradientTextColor?: string
+    excludeLocales?: SupportedLocales[]
   }[]
 }

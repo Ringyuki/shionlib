@@ -27,7 +27,8 @@ samp {
 }
 
 @theme inline {
-  --breakpoint-topbar: 870px;
+  --container-8xl: 90rem;
+  --breakpoint-topbar: 950px;
   --breakpoint-search-trigger: 1218px;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

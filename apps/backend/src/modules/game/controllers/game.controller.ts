@@ -37,13 +37,7 @@ export class GameController {
     if (cached) {
       return cached
     }
-    const result = await this.gameService.getList(
-      { page: getGameListReqDto.page, pageSize: getGameListReqDto.pageSize },
-      req.user?.content_limit,
-      getGameListReqDto.developer_id,
-      getGameListReqDto.character_id,
-      getGameListReqDto.filter,
-    )
+    const result = await this.gameService.getList(getGameListReqDto, req.user?.content_limit)
     await this.cacheService.set(cacheKey, result, 30 * 60 * 1000) // 30 minutes
     return result
   }

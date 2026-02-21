@@ -164,17 +164,20 @@ describe('GameService', () => {
     prisma.game.findMany.mockResolvedValueOnce([{ id: 10 }])
 
     await service.getList(
-      { page: 1, pageSize: 5 } as any,
-      UserContentLimit.SHOW_WITH_SPOILER,
-      11,
-      22,
       {
-        tags: ['avg', 'gal'],
-        start_date: '2026-12-31',
-        end_date: '2026-01-01',
-        sort_by: 'views',
-        sort_order: 'asc',
+        page: 1,
+        pageSize: 5,
+        developer_id: 11,
+        character_id: 22,
+        filter: {
+          tags: ['avg', 'gal'],
+          start_date: '2026-12-31',
+          end_date: '2026-01-01',
+          sort_by: 'views',
+          sort_order: 'asc',
+        },
       } as any,
+      UserContentLimit.SHOW_WITH_SPOILER,
     )
 
     const where = prisma.game.count.mock.calls[0][0].where
@@ -199,11 +202,8 @@ describe('GameService', () => {
     prisma.game.findMany.mockResolvedValueOnce([])
 
     await service.getList(
-      { page: 1, pageSize: 10 } as any,
+      { page: 1, pageSize: 10, filter: { years: [2025], months: [2] } } as any,
       UserContentLimit.SHOW_WITH_SPOILER,
-      undefined,
-      undefined,
-      { years: [2025], months: [2] } as any,
     )
 
     const where = prisma.game.count.mock.calls[0][0].where

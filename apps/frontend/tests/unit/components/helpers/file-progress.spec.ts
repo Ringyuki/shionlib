@@ -3,7 +3,7 @@ import { ActivityType } from '../../../../interfaces/activity/activity.interface
 import {
   buildStageStates,
   getPrimaryStatus,
-} from '../../../../components/home/activity/activities/helpers/file-progress.interface'
+} from '../../../../components/activity/activities/helpers/file-progress.interface'
 
 const activity = (type: ActivityType, created: string) =>
   ({

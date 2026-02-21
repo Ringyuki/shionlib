@@ -12,7 +12,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <ShionlibTopBar />
       <div
         data-vaul-drawer-wrapper
-        className="flex min-h-[calc(100dvh-24rem)] w-full max-w-7xl grow px-3 pt-16 topbar:pt-20"
+        className="flex min-h-[calc(100dvh-24rem)] w-full max-w-8xl grow px-3 pt-16 topbar:pt-20"
       >
         {children}
       </div>

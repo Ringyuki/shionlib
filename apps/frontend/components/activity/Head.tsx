@@ -9,7 +9,7 @@ export const Head = async () => {
   const t = await getTranslations('Components.Home.Activity.Head')
   return (
     <PageHeader showSeparator={false}>
-      <PageHeaderTitle title={t('title')} className="text-xl" />
+      <PageHeaderTitle title={t('title')} />
       <PageHeaderDescription description={t('description')} />
     </PageHeader>
   )

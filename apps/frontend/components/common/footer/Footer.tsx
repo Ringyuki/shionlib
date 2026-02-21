@@ -10,7 +10,7 @@ import { Separator } from '@/components/shionui/Separator'
 export const ShionlibFooter = async () => {
   const t = await getTranslations('Components.Common.Footer.ShionlibFooter')
   return (
-    <div className="mx-auto w-full py-6 px-3 max-w-7xl">
+    <div className="mx-auto w-full py-6 px-3 max-w-8xl">
       <div className="flex md:flex-row flex-col gap-4 md:gap-0 items-center justify-between">
         <div className="flex items-center gap-2">
           <Image src="/favicon.ico" alt="Shionlib Logo" width={32} height={32} className="size-8" />
