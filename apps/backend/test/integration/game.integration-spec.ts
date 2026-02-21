@@ -87,11 +87,13 @@ describe('Game (integration)', () => {
       .expect(200)
     expect(cacheMissRes.body).toEqual({ items: [{ id: 1 }], meta: { totalItems: 1 } })
     expect(gameService.getList).toHaveBeenCalledWith(
-      expect.objectContaining({ page: '2', pageSize: '8' }),
+      expect.objectContaining({
+        page: '2',
+        pageSize: '8',
+        developer_id: '21',
+        character_id: '22',
+      }),
       2,
-      '21',
-      '22',
-      undefined,
     )
     expect(cacheService.set).toHaveBeenCalledWith(
       expect.stringContaining('game:list:auth:9001:cl:2:query:'),

@@ -7,6 +7,7 @@ const hoisted = vi.hoisted(() => {
   const notFound = vi.fn(() => {
     throw new Error('NOT_FOUND')
   })
+  const useParams = vi.fn(() => ({ id: '8' }))
   const get = vi.fn()
   const requestFactory = vi.fn(() => ({ get }))
   const createGenerateMetadata = vi.fn((resolver: (args: any) => Promise<any> | any) => {
@@ -34,6 +35,7 @@ const hoisted = vi.hoisted(() => {
   return {
     hasLocale,
     notFound,
+    useParams,
     get,
     requestFactory,
     createGenerateMetadata,
@@ -50,6 +52,7 @@ vi.mock('next-intl', () => ({
 }))
 vi.mock('next/navigation', () => ({
   notFound: hoisted.notFound,
+  useParams: hoisted.useParams,
 }))
 vi.mock('@/utils/request', () => ({
   shionlibRequest: hoisted.requestFactory,
@@ -81,6 +84,8 @@ describe('game route wrappers (unit)', () => {
     hoisted.hasLocale.mockReset()
     hoisted.hasLocale.mockReturnValue(true)
     hoisted.notFound.mockClear()
+    hoisted.useParams.mockReset()
+    hoisted.useParams.mockReturnValue({ id: '8' })
     hoisted.get.mockReset()
     hoisted.requestFactory.mockClear()
     hoisted.createGenerateMetadata.mockClear()
