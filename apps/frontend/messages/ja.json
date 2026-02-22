@@ -553,6 +553,9 @@
         "GameLinks": {
           "links": "関連リンク"
         },
+        "GameTags": {
+          "tags": "タグ"
+        },
         "GameDetail": {
           "tags": "タグ",
           "introduction": "紹介",
@@ -1075,7 +1078,8 @@
         "TabsNav": {
           "personal": "個人情報",
           "site": "サイト設定",
-          "download": "ダウンロード設定"
+          "download": "ダウンロード設定",
+          "connections": "アカウント連携"
         },
         "Avatar": {
           "title": "アバター",
@@ -1218,6 +1222,42 @@
             "title": "リセット",
             "reset": "リセット",
             "success": "デフォルト設定にリセットしました"
+          }
+        },
+        "Connections": {
+          "PotatoVN": {
+            "title": "PotatoVN",
+            "description": "PotatoVN アカウントを連携します.",
+            "connected": "連携済み",
+            "notConnected": "未連携",
+            "connectedAs": "連携アカウント",
+            "connect": "連携する",
+            "disconnect": "連携解除",
+            "connectSuccess": "PotatoVN アカウントを連携しました",
+            "disconnectSuccess": "PotatoVN との連携を解除しました",
+            "BindModal": {
+              "title": "PotatoVN を連携する",
+              "description": "PotatoVN のアカウント情報を入力してください。パスワードはアクセストークンの取得にのみ使用され、保存されません。",
+              "username": "ユーザー名",
+              "usernamePlaceholder": "PotatoVN ユーザー名",
+              "password": "パスワード",
+              "passwordPlaceholder": "PotatoVN パスワード",
+              "cancel": "キャンセル",
+              "connect": "連携",
+              "validation": {
+                "usernameRequired": "ユーザー名を入力してください",
+                "passwordRequired": "パスワードを入力してください"
+              }
+            },
+            "UnbindConfirm": {
+              "title": "PotatoVN の連携を解除",
+              "description": "アカウントと PotatoVN の連携を解除します。PotatoVN 上のデータは削除されません。",
+              "cancel": "キャンセル",
+              "confirm": "連携解除"
+            },
+            "tokenExpires": "トークン有効期限",
+            "tokenExpiresSoon": "まもなく期限切れ",
+            "tokenExpired": "トークンが期限切れです"
           }
         }
       },

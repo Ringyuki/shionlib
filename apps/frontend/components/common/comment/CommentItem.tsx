@@ -95,8 +95,10 @@ export const CommentItem = ({
           </div>
           {comment.status === CommentStatus.HIDDEN && (
             <div className="flex items-center gap-2">
-              <Badge variant="warning">{t('pending')}</Badge>
-              <Badge variant="neutral">
+              <Badge intent="warning" appearance="solid">
+                {t('pending')}
+              </Badge>
+              <Badge intent="neutral" appearance="outline">
                 <EyeOff className="size-4" />
                 {t('hidden')}
               </Badge>

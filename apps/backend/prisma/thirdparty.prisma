@@ -1,0 +1,20 @@
+model UserPotatoVNBinding {
+  id Int @id @default(autoincrement())
+
+  user_id Int @unique
+
+  pvn_user_id Int
+  pvn_user_name String @db.VarChar(255)
+  pvn_user_avatar String? @db.VarChar(255)
+
+  pvn_token String @db.Text
+  pvn_token_expires DateTime
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  user User @relation("user_potato_vn_binding", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("user_potato_vn_bindings")
+  @@index([pvn_user_id])
+}

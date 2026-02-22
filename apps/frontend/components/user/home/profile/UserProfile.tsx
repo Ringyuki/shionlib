@@ -53,7 +53,7 @@ export const UserProfile = async ({ user }: UserProfileProps) => {
                   <span className="font-bold">{t(`role.${role}`)}</span>
                 </Badge>
                 {user.status === UserStatus.BANNED && (
-                  <Badge variant="neutral">
+                  <Badge intent="neutral" appearance="outline">
                     <Ban className="size-4" />
                     <span className="font-bold">{t('banned')}</span>
                   </Badge>

@@ -84,13 +84,18 @@ export function CommentDetailDialog({ commentId, open, onOpenChange }: CommentDe
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
               <Badge
-                variant={
+                intent={
                   detail.status === 1 ? 'success' : detail.status === 2 ? 'warning' : 'destructive'
                 }
+                appearance="solid"
               >
                 {statusLabel}
               </Badge>
-              {detail.edited && <Badge variant="neutral">{t('edited')}</Badge>}
+              {detail.edited && (
+                <Badge intent="neutral" appearance="outline">
+                  {t('edited')}
+                </Badge>
+              )}
             </div>
 
             <div className="grid gap-2 text-sm text-muted-foreground">
@@ -156,15 +161,18 @@ export function CommentDetailDialog({ commentId, open, onOpenChange }: CommentDe
                   {detail.moderations.map(event => (
                     <div key={event.id} className="rounded-lg border p-3 text-sm">
                       <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="neutral">{event.model}</Badge>
+                        <Badge intent="neutral" appearance="outline">
+                          {event.model}
+                        </Badge>
                         <Badge
-                          variant={
+                          intent={
                             event.decision === 'ALLOW'
                               ? 'success'
                               : event.decision === 'BLOCK'
                                 ? 'destructive'
                                 : 'warning'
                           }
+                          appearance="solid"
                         >
                           {event.decision === 'ALLOW'
                             ? t('decisionAllow')
@@ -172,7 +180,9 @@ export function CommentDetailDialog({ commentId, open, onOpenChange }: CommentDe
                               ? t('decisionBlock')
                               : t('decisionReview')}
                         </Badge>
-                        <Badge variant="neutral">{event.top_category}</Badge>
+                        <Badge intent="neutral" appearance="outline">
+                          {event.top_category}
+                        </Badge>
                       </div>
                       <div className="mt-2 text-muted-foreground">
                         {t('moderationAuditBy')}: {event.audit_by}

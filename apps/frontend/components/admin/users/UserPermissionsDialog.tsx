@@ -156,8 +156,12 @@ export function UserPermissionsDialog({ userId, open, onOpenChange }: UserPermis
                     ) : (
                       <div className="space-y-4">
                         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                          <Badge variant="neutral">{t('permissionRole')}</Badge>
-                          <Badge variant="success">{t('permissionUser')}</Badge>
+                          <Badge intent="neutral" appearance="outline">
+                            {t('permissionRole')}
+                          </Badge>
+                          <Badge intent="success" appearance="solid">
+                            {t('permissionUser')}
+                          </Badge>
                           <span>{t('permissionHint')}</span>
                         </div>
 
@@ -192,10 +196,14 @@ export function UserPermissionsDialog({ userId, open, onOpenChange }: UserPermis
                                 </div>
                                 <div className="ml-auto flex items-center gap-2">
                                   {group.source === 'role' && (
-                                    <Badge variant="neutral">{t('permissionRole')}</Badge>
+                                    <Badge intent="neutral" appearance="outline">
+                                      {t('permissionRole')}
+                                    </Badge>
                                   )}
                                   {group.source === 'user' && (
-                                    <Badge variant="success">{t('permissionUser')}</Badge>
+                                    <Badge intent="success" appearance="solid">
+                                      {t('permissionUser')}
+                                    </Badge>
                                   )}
                                 </div>
                               </div>

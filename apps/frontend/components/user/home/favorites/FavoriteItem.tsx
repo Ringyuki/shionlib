@@ -64,7 +64,7 @@ export const FavoriteItem = async ({ favorite, content_limit }: FavoriteItemProp
                 </div>
                 <div className="flex flex-wrap gap-4 items-center">
                   {favorite.game.developers.map(d => (
-                    <Badge key={d.developer.id} variant="secondary">
+                    <Badge key={d.developer.id} intent="secondary" appearance="solid">
                       {d.developer.name || d.developer.aliases?.[0]}
                     </Badge>
                   ))}

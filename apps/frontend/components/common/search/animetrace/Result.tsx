@@ -35,11 +35,11 @@ export const AnimeTraceResult = ({ result, image }: AnimeTraceResultProps) => {
                     <span className="text-sm font-medium">{candidates[0].character}</span>
                     <span className="text-xs text-muted-foreground">#{index + 1}</span>
                   </span>
-                  <Badge variant="neutral" size="sm">
+                  <Badge intent="neutral" appearance="outline" size="sm">
                     {t('candidates', { count: candidates.length })}
                   </Badge>
                   {item.not_confident && (
-                    <Badge variant="warning" size="sm">
+                    <Badge intent="warning" appearance="solid" size="sm">
                       {t('lowConfidence')}
                     </Badge>
                   )}

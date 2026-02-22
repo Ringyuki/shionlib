@@ -21,7 +21,9 @@ export const Create = ({ activity }: CreateProps) => {
   return (
     <div className="flex flex-wrap gap-2 items-center">
       <span>{t('createdPrefix')}</span>
-      <Badge variant="default">{t('game')}</Badge>
+      <Badge intent="primary" appearance="solid">
+        {t('game')}
+      </Badge>
       <Link
         className="font-medium hover:opacity-85 transition-all duration-200"
         href={`/game/${activity.game?.id}`}

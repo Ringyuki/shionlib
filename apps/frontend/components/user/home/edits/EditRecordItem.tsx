@@ -70,7 +70,9 @@ export const EditRecordItem = async ({ record }: EditRecordItemProps) => {
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-medium">{t('edited')}</span>
-                  <Badge variant="secondary">{t(`entity.${record.entity}`)}</Badge>
+                  <Badge intent="secondary" appearance="solid">
+                    {t(`entity.${record.entity}`)}
+                  </Badge>
                   {entityLink ? (
                     <Link
                       href={entityLink}
@@ -82,12 +84,14 @@ export const EditRecordItem = async ({ record }: EditRecordItemProps) => {
                     <span className="font-bold">{entityTitle}</span>
                   )}
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline">{getActionDescription()}</Badge>
+                    <Badge intent="secondary" appearance="outline">
+                      {getActionDescription()}
+                    </Badge>
                   </div>
                 </div>
               </div>
             </div>
-            <Badge variant="neutral" className="flex items-center gap-1">
+            <Badge intent="neutral" appearance="outline" className="flex items-center gap-1">
               <Calendar className="size-3" />
               {timeFromNow(record.created, locale)}
             </Badge>
@@ -98,7 +102,12 @@ export const EditRecordItem = async ({ record }: EditRecordItemProps) => {
               <span className="text-sm text-muted-foreground">{t('fieldChanges')}</span>
               <div className="flex flex-wrap gap-2">
                 {record.field_changes.map((field, index) => (
-                  <Badge key={index} variant="neutral" className="font-mono! text-xs">
+                  <Badge
+                    key={index}
+                    intent="neutral"
+                    appearance="outline"
+                    className="font-mono! text-xs"
+                  >
                     {field}
                   </Badge>
                 ))}

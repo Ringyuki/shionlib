@@ -33,12 +33,14 @@ export const BasicInfos = async ({ developer, works_count }: BasicInfosProps) =>
         <div className="flex flex-col md:flex-row justify-between items-center w-full">
           <h2 className="text-2xl font-normal flex items-center gap-2 flex-wrap justify-center">
             {developer.name}
-            <Badge variant="secondary">{t('works_count', { count: works_count })}</Badge>
+            <Badge intent="secondary" appearance="solid">
+              {t('works_count', { count: works_count })}
+            </Badge>
           </h2>
           {developer.parent_developer && (
             <div className="flex items-center gap-2">
               <span>{t('parent_developer')}</span>
-              <Badge variant="info" asChild>
+              <Badge intent="info" appearance="solid" asChild>
                 <Link
                   href={`/developer/${developer.parent_developer.id}`}
                   className="flex items-center gap-2"

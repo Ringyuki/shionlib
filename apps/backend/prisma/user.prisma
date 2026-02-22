@@ -48,6 +48,8 @@ model User {
   messages             Message[]             @relation("user_message_receiver")
   messages_sent        Message[]             @relation("user_message_sender")
 
+  potatovn_binding     UserPotatoVNBinding?  @relation("user_potato_vn_binding")
+
   @@index([email])
   @@index([name])
   @@index([created])

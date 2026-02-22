@@ -1,7 +1,7 @@
 import { GameLink } from '@/interfaces/game/game.interface'
 import { Button } from '@/components/shionui/Button'
 import Link from 'next/link'
-import { ExternalLink, Link2 } from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 interface GameLinksProps {
@@ -13,8 +13,8 @@ export const GameLinks = ({ link }: GameLinksProps) => {
   const uniqueLink = link.filter((l, index, self) => index === self.findIndex(t => t.url === l.url))
   return (
     <>
-      <h2 className="flex items-center gap-2 text-lg font-bold">
-        <Link2 />
+      <h2 className="flex items-center gap-4 text-lg font-bold">
+        <div className="w-1 h-6 bg-primary rounded" />
         <span>{t('links')}</span>
       </h2>
       <div className="flex gap-6 flex-wrap">

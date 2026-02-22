@@ -72,9 +72,18 @@ export function ReportListItem({ report, onRefresh }: ReportListItemProps) {
             <span className="font-medium text-gray-900 dark:text-gray-100">
               {t('reportId')}: {report.id}
             </span>
-            <Badge variant={statusVariant}>{t(`statuses.${report.status}`)}</Badge>
-            <Badge variant="neutral">{t(`reasons.${report.reason}`)}</Badge>
-            <Badge variant={levelVariant}>{t(`levels.${report.malicious_level}`)}</Badge>
+            <Badge intent={statusVariant} appearance="solid">
+              {t(`statuses.${report.status}`)}
+            </Badge>
+            <Badge intent="neutral" appearance="outline">
+              {t(`reasons.${report.reason}`)}
+            </Badge>
+            <Badge
+              intent={levelVariant}
+              appearance={levelVariant === 'neutral' ? 'outline' : 'solid'}
+            >
+              {t(`levels.${report.malicious_level}`)}
+            </Badge>
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-300">

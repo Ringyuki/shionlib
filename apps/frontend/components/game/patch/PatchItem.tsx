@@ -34,7 +34,8 @@ export const PatchItem = ({ patch }: GameDownloadResourceItemProps) => {
               return (
                 <Badge
                   key={p}
-                  variant="neutral"
+                  intent="neutral"
+                  appearance="outline"
                   style={{
                     borderColor: TypeTokenMap[p].text,
                     color: TypeTokenMap[p].text,
@@ -48,22 +49,22 @@ export const PatchItem = ({ patch }: GameDownloadResourceItemProps) => {
             <GamePlatform platform={patch.platform.map(p => PlatformMap[p])} />
             {patch.language?.map(l => {
               return (
-                <Badge key={l} variant="neutral">
+                <Badge key={l} intent="neutral" appearance="outline">
                   {LanguageNameMap[LanguageMap[l]]}
                 </Badge>
               )
             })}
             {patch.model_name && (
-              <Badge size="sm" variant="secondary">
+              <Badge size="sm" intent="secondary" appearance="solid">
                 {patch.model_name}
               </Badge>
             )}
             {patch.localization_group_name && (
-              <Badge size="sm" variant="secondary">
+              <Badge size="sm" intent="secondary" appearance="solid">
                 {patch.localization_group_name}
               </Badge>
             )}
-            <Badge size="sm" variant="secondary">
+            <Badge size="sm" intent="secondary" appearance="solid">
               <DownloadIcon className="size-3" />
               {patch.download}
             </Badge>

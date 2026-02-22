@@ -107,5 +107,9 @@
   "EDIT_RECORD_CONFLICT": "編集レコードが競合しています",
 
   "MESSAGE_NOT_FOUND": "メッセージが見つかりません",
-  "MESSAGE_FORBIDDEN": "あなたはこのメッセージを表示する権限がありません"
+  "MESSAGE_FORBIDDEN": "あなたはこのメッセージを表示する権限がありません",
+
+  "PVN_BINDING_NOT_FOUND": "PotatoVN アカウントが連携されていません",
+  "PVN_BINDING_ALREADY_EXISTS": "PotatoVN アカウントはすでに連携されています",
+  "PVN_BINDING_AUTH_FAILED": "PotatoVN 認証に失敗しました。アカウント情報をご確認ください"
 }

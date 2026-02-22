@@ -118,12 +118,20 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
         ) : (
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant={detail.status === 2 ? 'warning' : 'success'}>{statusLabel}</Badge>
-              <Badge variant="neutral">{roleLabel}</Badge>
+              <Badge intent={detail.status === 2 ? 'warning' : 'success'} appearance="solid">
+                {statusLabel}
+              </Badge>
+              <Badge intent="neutral" appearance="outline">
+                {roleLabel}
+              </Badge>
               {detail.two_factor_enabled ? (
-                <Badge variant="success">{t('twoFactorOn')}</Badge>
+                <Badge intent="success" appearance="solid">
+                  {t('twoFactorOn')}
+                </Badge>
               ) : (
-                <Badge variant="neutral">{t('twoFactorOff')}</Badge>
+                <Badge intent="neutral" appearance="outline">
+                  {t('twoFactorOff')}
+                </Badge>
               )}
             </div>
 
@@ -227,10 +235,13 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
                   {sessions.map(session => (
                     <div key={session.id} className={cn('rounded-lg border p-3 text-sm')}>
                       <div className="flex flex-wrap gap-2">
-                        <Badge variant="neutral">
+                        <Badge intent="neutral" appearance="outline">
                           {t('sessionId')}: {session.id}
                         </Badge>
-                        <Badge variant={session.status === 1 ? 'success' : 'neutral'}>
+                        <Badge
+                          intent={session.status === 1 ? 'success' : 'neutral'}
+                          appearance={session.status === 1 ? 'solid' : 'outline'}
+                        >
                           {t('sessionStatus')}: {session.status}
                         </Badge>
                       </div>

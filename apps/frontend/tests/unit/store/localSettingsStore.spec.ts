@@ -43,8 +43,6 @@ describe('store/localSettingsStore (unit)', () => {
     expect(useToastPreferenceStore.getState().position).toBe('top-right')
 
     useAria2TestStore.getState().setTestStatus('success')
-    useAria2TestStore.getState().setTestMessage('ok')
     expect(useAria2TestStore.getState().testStatus).toBe('success')
-    expect(useAria2TestStore.getState().testMessage).toBe('ok')
   })
 })

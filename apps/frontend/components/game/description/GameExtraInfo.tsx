@@ -1,6 +1,5 @@
 import { useTranslations } from 'next-intl'
 import { ExtraInfo } from '@/interfaces/game/game.interface'
-import { Info } from 'lucide-react'
 import { BangumiExtraInfoKeyMap } from './constants/BangumiExtraInfoKeyMap'
 
 interface GameExtraInfoProps {
@@ -22,7 +21,7 @@ export const GameExtraInfo = ({ extra_info }: GameExtraInfoProps) => {
     extra_info.length > 0 && (
       <>
         <h2 className="flex items-center gap-2 text-lg font-bold">
-          <Info />
+          <div className="w-1 h-6 bg-primary rounded" />
           <span>{t('extraInfo')}</span>
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6">

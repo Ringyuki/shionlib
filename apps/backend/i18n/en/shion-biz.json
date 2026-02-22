@@ -108,5 +108,9 @@
   "EDIT_RECORD_CONFLICT": "edit record conflict",
 
   "MESSAGE_NOT_FOUND": "message not found",
-  "MESSAGE_FORBIDDEN": "you don't have permission to view this message"
+  "MESSAGE_FORBIDDEN": "you don't have permission to view this message",
+
+  "PVN_BINDING_NOT_FOUND": "PotatoVN binding not found",
+  "PVN_BINDING_ALREADY_EXISTS": "PotatoVN account is already bound",
+  "PVN_BINDING_AUTH_FAILED": "PotatoVN authentication failed, please check your credentials"
 }

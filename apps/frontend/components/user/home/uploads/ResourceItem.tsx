@@ -65,7 +65,7 @@ export const ResourceItem = async ({ resource, content_limit }: ResourceItemProp
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2 md:gap-0 md:justify-between">
                   <h3 className="text-lg font-bold">{title}</h3>
-                  <Badge variant="neutral">
+                  <Badge intent="neutral" appearance="outline">
                     <CalendarDays className="size-4" />
                     {timeFromNow(resource.created, locale)}
                   </Badge>
@@ -73,12 +73,12 @@ export const ResourceItem = async ({ resource, content_limit }: ResourceItemProp
                 <div className="flex flex-wrap gap-2 items-center">
                   <GamePlatform platform={resource.platform} />
                   {language.map(l => (
-                    <Badge key={l} variant="neutral">
+                    <Badge key={l} intent="neutral" appearance="outline">
                       {l}
                     </Badge>
                   ))}
                   {resource.game.developers.map(d => (
-                    <Badge key={d.developer.id} variant="secondary">
+                    <Badge key={d.developer.id} intent="secondary" appearance="solid">
                       {d.developer.name || d.developer.aliases?.[0]}
                     </Badge>
                   ))}

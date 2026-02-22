@@ -17,7 +17,7 @@ export const FileUploaded = async ({ activity }: FileUploadedProps) => {
         <span className="font-medium font-mono!">{activity.file?.file_name} </span>
       </span>
       {t('uploadedToServerSuffix') && <span>{t('uploadedToServerSuffix')}</span>}
-      <Badge variant="info" className="flex items-center gap-1">
+      <Badge intent="info" appearance="solid" className="flex items-center gap-1">
         <CircleDashed className="size-4" />
         {t('pending')}
       </Badge>

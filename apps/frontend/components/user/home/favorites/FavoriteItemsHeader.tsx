@@ -28,12 +28,12 @@ export const FavoriteItemsHeader = ({
             {favorite.default ? t('default') : favorite.name}
           </h2>
           {favorite.is_private && (
-            <Badge variant="neutral" size="sm" className="gap-1">
+            <Badge intent="neutral" appearance="outline" size="sm" className="gap-1">
               <Lock className="size-3" />
               {t('private')}
             </Badge>
           )}
-          <Badge variant="default" size="sm">
+          <Badge intent="primary" appearance="solid" size="sm">
             {favorite.game_count}
           </Badge>
         </div>

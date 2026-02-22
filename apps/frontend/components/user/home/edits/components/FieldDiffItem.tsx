@@ -38,10 +38,14 @@ export const FieldDiffItem = ({ entry, labels }: FieldDiffItemProps) => {
   return (
     <div className="rounded-md border border-border p-2 flex flex-col gap-2">
       <div className="flex items-center gap-2 flex-wrap">
-        <Badge variant="neutral" className="font-mono! text-xs">
+        <Badge intent="neutral" appearance="outline" className="font-mono! text-xs">
           {labels.path}: {path}
         </Badge>
-        <Badge variant="neutral" className={cn('font-mono! text-xs', badgeClass)}>
+        <Badge
+          intent="neutral"
+          appearance="outline"
+          className={cn('font-mono! text-xs', badgeClass)}
+        >
           {isCreate ? labels.added : isRemove ? labels.removed : labels.updated}
         </Badge>
       </div>

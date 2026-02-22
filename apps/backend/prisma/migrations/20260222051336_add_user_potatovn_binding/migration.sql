@@ -1,0 +1,30 @@
+-- AlterTable
+ALTER TABLE "game_developers" ALTER COLUMN "extra_info" SET DEFAULT '[]'::jsonb;
+
+-- AlterTable
+ALTER TABLE "games" ALTER COLUMN "extra_info" SET DEFAULT '[]'::jsonb,
+ALTER COLUMN "staffs" SET DEFAULT '[]'::jsonb;
+
+-- CreateTable
+CREATE TABLE "user_potato_vn_bindings" (
+    "id" SERIAL NOT NULL,
+    "user_id" INTEGER NOT NULL,
+    "pvn_user_id" INTEGER NOT NULL,
+    "pvn_user_name" VARCHAR(255) NOT NULL,
+    "pvn_user_avatar" VARCHAR(255),
+    "pvn_token" VARCHAR(255) NOT NULL,
+    "pvn_token_expires" TIMESTAMP(3) NOT NULL,
+    "created" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "user_potato_vn_bindings_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_potato_vn_bindings_user_id_key" ON "user_potato_vn_bindings"("user_id");
+
+-- CreateIndex
+CREATE INDEX "user_potato_vn_bindings_pvn_user_id_idx" ON "user_potato_vn_bindings"("pvn_user_id");
+
+-- AddForeignKey
+ALTER TABLE "user_potato_vn_bindings" ADD CONSTRAINT "user_potato_vn_bindings_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

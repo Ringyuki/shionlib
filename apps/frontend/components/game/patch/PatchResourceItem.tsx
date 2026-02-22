@@ -23,7 +23,7 @@ export const PatchResourceItem = ({ patch }: PatchResourceItemProps) => {
           </span>
           <span className="text-muted-foreground text-xs">{patch.size}</span>
           {patch.storage === 's3' && (
-            <Badge size="sm" variant="success">
+            <Badge size="sm" intent="success" appearance="solid">
               <CloudCheck className="size-3" />
               S3
             </Badge>

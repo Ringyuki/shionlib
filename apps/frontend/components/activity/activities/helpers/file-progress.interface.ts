@@ -64,16 +64,32 @@ export const buildStageStates = (activities: Activity[]): StageState[] => {
 export const getPrimaryStatus = (stages: StageState[]) => {
   const hasFailure = stages.some(stage => stage.failed)
   if (hasFailure) {
-    return { variant: 'destructive' as BadgeVariant, labelKey: 'status.failed' }
+    return {
+      intent: 'destructive' as BadgeVariant,
+      appearance: 'solid' as const,
+      labelKey: 'status.failed',
+    }
   }
 
   const allCompleted = stages.every(stage => stage.completed)
   if (allCompleted) {
-    return { variant: 'success' as BadgeVariant, labelKey: 'status.completed' }
+    return {
+      intent: 'success' as BadgeVariant,
+      appearance: 'solid' as const,
+      labelKey: 'status.completed',
+    }
   }
 
   const inProgress = stages.some(stage => stage.completed)
   return inProgress
-    ? { variant: 'info' as BadgeVariant, labelKey: 'status.inProgress' }
-    : { variant: 'neutral' as BadgeVariant, labelKey: 'status.waiting' }
+    ? {
+        intent: 'info' as BadgeVariant,
+        appearance: 'solid' as const,
+        labelKey: 'status.inProgress',
+      }
+    : {
+        intent: 'neutral' as BadgeVariant,
+        appearance: 'outline' as const,
+        labelKey: 'status.waiting',
+      }
 }

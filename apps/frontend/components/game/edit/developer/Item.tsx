@@ -29,7 +29,7 @@ export const DeveloperRelationItem = ({ relation, onClick }: DeveloperRelationIt
           </div>
         )}
         {relation.role && (
-          <Badge variant="secondary" className="absolute top-1 right-1 text-xs">
+          <Badge intent="secondary" appearance="solid" className="absolute top-1 right-1 text-xs">
             {relation.role}
           </Badge>
         )}

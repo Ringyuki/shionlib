@@ -62,14 +62,16 @@ export const FileProgress = ({ activities }: FileProgressProps) => {
         </div>
 
         <div className="flex items-center gap-2">
-          <Badge variant={primaryStatus.variant}>{t(primaryStatus.labelKey)}</Badge>
+          <Badge intent={primaryStatus.intent} appearance={primaryStatus.appearance}>
+            {t(primaryStatus.labelKey)}
+          </Badge>
           <div className="space-y-2 flex-1">
             <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden relative">
               <div
                 className={`h-full transition-all ${
-                  primaryStatus.variant === 'success'
+                  primaryStatus.intent === 'success'
                     ? 'bg-success'
-                    : primaryStatus.variant === 'destructive'
+                    : primaryStatus.intent === 'destructive'
                       ? 'bg-destructive'
                       : 'bg-primary'
                 }`}
@@ -124,7 +126,12 @@ export const FileProgress = ({ activities }: FileProgressProps) => {
                   )
                   return (
                     <li key={activity.id} className="flex items-center gap-3">
-                      <Badge variant={variant} className="shrink-0" size="sm">
+                      <Badge
+                        intent={variant}
+                        appearance={variant === 'neutral' ? 'outline' : 'solid'}
+                        className="shrink-0"
+                        size="sm"
+                      >
                         {eventLabel}
                       </Badge>
                       <div className="flex items-center gap-2">

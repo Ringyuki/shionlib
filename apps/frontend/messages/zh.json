@@ -498,9 +498,9 @@
     },
     "Game": {
       "TabsNav": {
-        "description": "游戏详情",
-        "characters": "出场角色",
-        "comments": "游戏评论"
+        "description": "详情",
+        "characters": "角色",
+        "comments": "讨论"
       },
       "Actions": {
         "download": "下载",
@@ -567,11 +567,14 @@
         "GameLinks": {
           "links": "相关链接"
         },
+        "GameTags": {
+          "tags": "标签"
+        },
         "GameDetail": {
-          "tags": "游戏标签",
-          "introduction": "游戏介绍",
+          "tags": "标签",
+          "introduction": "简介",
           "chooseLanguage": "选择语言",
-          "images": "游戏图片",
+          "images": "图片",
           "staff": "制作人员",
           "extraInfo": "其他信息"
         },
@@ -1089,7 +1092,8 @@
         "TabsNav": {
           "personal": "个人信息",
           "site": "站点设置",
-          "download": "下载设置"
+          "download": "下载设置",
+          "connections": "账号关联"
         },
         "Avatar": {
           "title": "头像",
@@ -1232,6 +1236,42 @@
             "title": "复位",
             "reset": "复位",
             "success": "已复位到默认设置"
+          }
+        },
+        "Connections": {
+          "PotatoVN": {
+            "title": "PotatoVN",
+            "description": "连接你的 PotatoVN 账号。",
+            "connected": "已连接",
+            "notConnected": "未连接",
+            "connectedAs": "当前账号",
+            "connect": "连接账号",
+            "disconnect": "断开连接",
+            "connectSuccess": "PotatoVN 账号已连接",
+            "disconnectSuccess": "PotatoVN 账号已断开",
+            "BindModal": {
+              "title": "连接 PotatoVN 账号",
+              "description": "输入你的 PotatoVN 账号信息。密码仅用于获取访问令牌，不会被存储。",
+              "username": "账号名",
+              "usernamePlaceholder": "PotatoVN 账号名",
+              "password": "密码",
+              "passwordPlaceholder": "PotatoVN 密码",
+              "cancel": "取消",
+              "connect": "连接",
+              "validation": {
+                "usernameRequired": "请输入账号名",
+                "passwordRequired": "请输入密码"
+              }
+            },
+            "UnbindConfirm": {
+              "title": "断开 PotatoVN 连接",
+              "description": "这将移除你的账号与 PotatoVN 的关联，PotatoVN 上的数据不会被删除。",
+              "cancel": "取消",
+              "confirm": "断开连接"
+            },
+            "tokenExpires": "令牌有效期至",
+            "tokenExpiresSoon": "即将过期",
+            "tokenExpired": "令牌已过期"
           }
         }
       },

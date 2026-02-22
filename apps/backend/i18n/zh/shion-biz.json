@@ -108,5 +108,9 @@
   "EDIT_RECORD_CONFLICT": "编辑记录冲突",
 
   "MESSAGE_NOT_FOUND": "消息不存在",
-  "MESSAGE_FORBIDDEN": "你没有权限查看该消息"
+  "MESSAGE_FORBIDDEN": "你没有权限查看该消息",
+
+  "PVN_BINDING_NOT_FOUND": "未绑定 PotatoVN 账户",
+  "PVN_BINDING_ALREADY_EXISTS": "已绑定 PotatoVN 账户",
+  "PVN_BINDING_AUTH_FAILED": "PotatoVN 认证失败，请检查账号或密码"
 }

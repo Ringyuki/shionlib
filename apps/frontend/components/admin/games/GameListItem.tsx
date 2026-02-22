@@ -116,11 +116,15 @@ export function GameListItem({
           <div className="flex items-center gap-2">
             <span className=" font-medium">{title}</span>
             {game.nsfw && (
-              <Badge variant="warning" className="shrink-0">
+              <Badge intent="warning" appearance="solid" className="shrink-0">
                 NSFW
               </Badge>
             )}
-            <Badge variant={game.status === 1 ? 'success' : 'neutral'} className="shrink-0">
+            <Badge
+              intent={game.status === 1 ? 'success' : 'neutral'}
+              appearance={game.status === 1 ? 'solid' : 'outline'}
+              className="shrink-0"
+            >
               {game.status === 1 ? t('visible') : t('hidden')}
             </Badge>
           </div>

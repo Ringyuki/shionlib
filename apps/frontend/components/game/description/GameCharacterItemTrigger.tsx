@@ -20,7 +20,7 @@ export const GameCharacterItemTrigger = ({ character, name }: GameCharacterItemT
   } as const
   return (
     <>
-      <div className="relative rounded-md border-2 border-muted overflow-hidden w-full aspect-[3/4] cursor-pointer bg-card hover:opacity-80 transition-all duration-200">
+      <div className="relative rounded-md border-2 border-muted overflow-hidden w-full aspect-3/4 cursor-pointer bg-card hover:opacity-80 transition-all duration-200">
         {character.character.image && (
           <FadeImage
             src={character.image || character.character.image}
@@ -32,7 +32,7 @@ export const GameCharacterItemTrigger = ({ character, name }: GameCharacterItemT
         <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
           {t('noImage')}
         </div>
-        <div className="absolute bottom-0 h-1/3 sm:h-1/4 left-0 w-full bg-gradient-to-t from-black/60 to-transparent">
+        <div className="absolute bottom-0 h-1/3 sm:h-1/4 left-0 w-full bg-linear-to-t from-black/60 to-transparent">
           <div className="w-full h-full flex flex-col gap-1 justify-end items-start p-2 text-white">
             <div className="font-bold">{name}</div>
             {character.actor && (

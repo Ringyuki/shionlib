@@ -145,12 +145,15 @@ export const GameDownloadFileItem = ({
             {file.type === 1 && (
               <Badge
                 size="sm"
-                variant={
+                intent={
                   file.file_status === 3
                     ? 'success'
                     : file.file_status === 2
                       ? 'warning'
                       : 'neutral'
+                }
+                appearance={
+                  file.file_status === 3 ? 'solid' : file.file_status === 2 ? 'solid' : 'outline'
                 }
               >
                 {file.file_status === 3 ? (
@@ -166,12 +169,12 @@ export const GameDownloadFileItem = ({
               </Badge>
             )}
             {file.file_status !== 3 && (
-              <Badge size="sm" variant="neutral">
+              <Badge size="sm" intent="neutral" appearance="outline">
                 {t('onlyVisibleForYourself')}
               </Badge>
             )}
             {file.is_virus_false_positive && (
-              <Badge size="sm" variant="destructive">
+              <Badge size="sm" intent="destructive" appearance="solid">
                 {t('virusFalsePositiveFlag')}
                 <Question
                   content={t('virusFalsePositiveFlagDescription', {

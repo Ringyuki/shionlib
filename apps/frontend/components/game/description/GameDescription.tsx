@@ -1,5 +1,4 @@
 import { GameDetail as GameDetailType } from '@/interfaces/game/game.interface'
-import { BookOpenText } from 'lucide-react'
 import { getPreferredContent } from './helpers/getPreferredContent'
 import { useTranslations, useLocale } from 'next-intl'
 import {
@@ -35,11 +34,11 @@ export const GameDescription = ({ game }: GameDescriptionProps) => {
 
   return (
     <>
-      <h2 className="flex items-center gap-2 text-lg font-bold">
-        <BookOpenText />
+      <h2 className="flex items-center gap-4 text-lg font-bold">
+        <div className="w-1 h-6 bg-primary rounded" />
         <span>{t('introduction')}</span>
         <Select onValueChange={setSelectedIntroLanguage} value={selectedIntroLanguage}>
-          <SelectTrigger className="font-normal font-mono! text-xs ml-2">
+          <SelectTrigger className="font-normal font-mono! text-xs">
             <SelectValue placeholder={t('introduction')} />
           </SelectTrigger>
           <SelectContent>
@@ -58,7 +57,7 @@ export const GameDescription = ({ game }: GameDescriptionProps) => {
           </SelectContent>
         </Select>
       </h2>
-      <BBCodeContent content={selectedIntro} className="text-sm break-words" />
+      <BBCodeContent content={selectedIntro} className="text-sm wrap-break-word" />
     </>
   )
 }

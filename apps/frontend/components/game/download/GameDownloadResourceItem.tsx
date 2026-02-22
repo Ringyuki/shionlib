@@ -39,12 +39,12 @@ export const GameDownloadResourceItem = ({
             <GamePlatform platform={resource.platform} />
             {resource.language?.map(l => {
               return (
-                <Badge key={l} variant="neutral">
+                <Badge key={l} intent="neutral" appearance="outline">
                   {LanguageNameMap[l]}
                 </Badge>
               )
             })}
-            <Badge size="sm" variant="secondary">
+            <Badge size="sm" intent="secondary" appearance="solid">
               <DownloadIcon className="size-3" />
               {resource.downloads}
             </Badge>

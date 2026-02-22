@@ -184,7 +184,8 @@ const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
               transition={{ duration: 0.15, ease: 'easeOut' }}
             >
               <Badge
-                variant="neutral"
+                intent="neutral"
+                appearance="soft"
                 size={size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'md'}
                 className={cn('group flex items-center gap-1 pr-1', sizeConfig.badge, tagClassName)}
               >

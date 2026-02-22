@@ -567,6 +567,9 @@
         "GameLinks": {
           "links": "Related links"
         },
+        "GameTags": {
+          "tags": "Tags"
+        },
         "GameDetail": {
           "tags": "Tags",
           "introduction": "Overview",
@@ -1089,7 +1092,8 @@
         "TabsNav": {
           "personal": "Personal information",
           "site": "Site settings",
-          "download": "Download settings"
+          "download": "Download settings",
+          "connections": "Connected accounts"
         },
         "Avatar": {
           "title": "Avatar",
@@ -1232,6 +1236,42 @@
             "title": "Reset",
             "reset": "Reset",
             "success": "Reset to default settings"
+          }
+        },
+        "Connections": {
+          "PotatoVN": {
+            "title": "PotatoVN",
+            "description": "Connect your PotatoVN account.",
+            "connected": "Connected",
+            "notConnected": "Not connected",
+            "connectedAs": "Connected as",
+            "connect": "Connect",
+            "disconnect": "Disconnect",
+            "connectSuccess": "PotatoVN account connected",
+            "disconnectSuccess": "PotatoVN account disconnected",
+            "BindModal": {
+              "title": "Connect PotatoVN",
+              "description": "Enter your PotatoVN credentials. Your password is only used to obtain an access token and will not be stored.",
+              "username": "Username",
+              "usernamePlaceholder": "PotatoVN username",
+              "password": "Password",
+              "passwordPlaceholder": "PotatoVN password",
+              "cancel": "Cancel",
+              "connect": "Connect",
+              "validation": {
+                "usernameRequired": "Username is required",
+                "passwordRequired": "Password is required"
+              }
+            },
+            "UnbindConfirm": {
+              "title": "Disconnect PotatoVN",
+              "description": "This will remove the connection between your account and PotatoVN. Your PotatoVN data will not be deleted.",
+              "cancel": "Cancel",
+              "confirm": "Disconnect"
+            },
+            "tokenExpires": "Token expires",
+            "tokenExpiresSoon": "Expiring soon",
+            "tokenExpired": "Token expired"
           }
         }
       },

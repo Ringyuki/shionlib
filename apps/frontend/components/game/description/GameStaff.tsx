@@ -1,5 +1,4 @@
 import { GameStaff as GameStaffType } from '@/interfaces/game/game.interface'
-import { Users } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { BangumiExtraInfoKeyMap } from './constants/BangumiExtraInfoKeyMap'
 
@@ -21,8 +20,8 @@ export const GameStaff = ({ staffs }: GameStaffProps) => {
   return (
     staffs.length > 0 && (
       <>
-        <h2 className="flex items-center gap-2 text-lg font-bold">
-          <Users />
+        <h2 className="flex items-center gap-4 text-lg font-bold">
+          <div className="w-1 h-6 bg-primary rounded" />
           <span>{t('staff')}</span>
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6">

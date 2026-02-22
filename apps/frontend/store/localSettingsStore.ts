@@ -43,18 +43,13 @@ const ensureAllFields = (settings: Partial<Aria2Settings>): Aria2Settings => ({
 
 export interface Aria2TestStore {
   testStatus: TestStatus
-  testMessage: string
   setTestStatus: (status: TestStatus) => void
-  setTestMessage: (message: string) => void
 }
 
 const initialTestStatus: TestStatus = 'idle'
-const initialTestMessage: string = ''
 export const useAria2TestStore = create<Aria2TestStore>(set => ({
   testStatus: initialTestStatus,
-  testMessage: initialTestMessage,
   setTestStatus: (status: TestStatus) => set({ testStatus: status }),
-  setTestMessage: (message: string) => set({ testMessage: message }),
 }))
 
 const useLocalSettingsStore = create<LocalSettingsStore>()(

@@ -39,7 +39,9 @@ export const Comment = ({ activity }: CommentProps) => {
     <>
       <div className="flex gap-2 items-center">
         <span>{t('commentedPrefix')}</span>
-        <Badge variant="default">{t('game')}</Badge>
+        <Badge intent="primary" appearance="solid">
+          {t('game')}
+        </Badge>
         <Link
           href={`/game/${activity.game?.id}`}
           className="font-medium hover:opacity-85 transition-all duration-200"

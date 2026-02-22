@@ -45,7 +45,12 @@ export const HistoryItem = ({ history, className }: HistoryItemProps) => {
                     </div>
                   ) : (
                     history.field_changes.map((field, index) => (
-                      <Badge key={index} variant="neutral" className="font-mono! text-xs">
+                      <Badge
+                        key={index}
+                        intent="neutral"
+                        appearance="outline"
+                        className="font-mono! text-xs"
+                      >
                         {field}
                       </Badge>
                     ))
@@ -53,7 +58,7 @@ export const HistoryItem = ({ history, className }: HistoryItemProps) => {
                 </div>
               </div>
               {history.undone_by && (
-                <Badge variant="destructive" className="flex items-center gap-1">
+                <Badge intent="destructive" appearance="solid" className="flex items-center gap-1">
                   {t('undone')}
                 </Badge>
               )}
@@ -63,7 +68,7 @@ export const HistoryItem = ({ history, className }: HistoryItemProps) => {
                 <Hash className="size-3" />
                 {history.id}
               </div>
-              <Badge variant="neutral" className="flex items-center gap-1">
+              <Badge intent="neutral" appearance="outline" className="flex items-center gap-1">
                 <Calendar className="size-3" />
                 {timeFromNow(history.created, locale)}
               </Badge>

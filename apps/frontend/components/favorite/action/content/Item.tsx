@@ -68,12 +68,14 @@ export const FavoriteContentItem = ({ game_id, favorite }: FavoriteContentItemPr
         </span>
         <div className="flex items-center gap-2">
           {isFavorite && (
-            <Badge variant="success" className="flex items-center gap-2">
+            <Badge intent="success" appearance="solid" className="flex items-center gap-2">
               <CheckCircle2 className="size-4" />
               {t('favorited')}
             </Badge>
           )}
-          <Badge variant="default">{t('gameCount', { count: gameCount })}</Badge>
+          <Badge intent="primary" appearance="solid">
+            {t('gameCount', { count: gameCount })}
+          </Badge>
         </div>
       </div>
     </Button>

@@ -74,7 +74,7 @@ export const GamePlatform = ({ platform, className, max, show_more_count }: Game
             )
           })}
         {show_more_count && more_count > 0 && (
-          <Badge variant="secondary" className="gap-[1px]">
+          <Badge intent="secondary" appearance="solid" className="gap-[1px]">
             <Plus />
             {more_count}
           </Badge>

@@ -41,6 +41,7 @@ import { AdminModule } from './modules/admin/admin.module'
 import { FavoriteModule } from './modules/favorite/favorite.module'
 import { AnalysisModule } from './modules/analysis/analysis.module'
 import { HealthModule } from './modules/health/health.module'
+import { PotatoVNModule } from './modules/potatovn/potatovn.module'
 
 @Module({
   imports: [
@@ -114,6 +115,7 @@ import { HealthModule } from './modules/health/health.module'
     AdminModule,
     FavoriteModule,
     AnalysisModule,
+    PotatoVNModule,
   ],
   controllers: [],
   providers: [

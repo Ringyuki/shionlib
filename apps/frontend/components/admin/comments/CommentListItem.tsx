@@ -137,18 +137,30 @@ export function CommentListItem({ comment, onRefresh }: CommentListItemProps) {
                 {comment.creator.name}
               </span>
               <Badge
-                variant={
+                intent={
                   comment.status === 1
                     ? 'success'
                     : comment.status === 2
                       ? 'warning'
                       : 'destructive'
                 }
+                appearance="solid"
               >
                 {statusLabel}
               </Badge>
-              {comment.edited && <Badge variant="neutral">{t('edited')}</Badge>}
-              {moderationLabel && <Badge variant={moderationVariant}>{moderationLabel}</Badge>}
+              {comment.edited && (
+                <Badge intent="neutral" appearance="outline">
+                  {t('edited')}
+                </Badge>
+              )}
+              {moderationLabel && (
+                <Badge
+                  intent={moderationVariant}
+                  appearance={moderationVariant === 'neutral' ? 'outline' : 'solid'}
+                >
+                  {moderationLabel}
+                </Badge>
+              )}
             </div>
             <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {t('commentId')}: {comment.id} · {t('creatorId')}: {comment.creator.id}

@@ -335,7 +335,8 @@ function AsyncMultiSelectTrigger({
               transition={{ duration: 0.15, ease: 'easeOut' }}
             >
               <Badge
-                variant="neutral"
+                intent="neutral"
+                appearance="soft"
                 size={size === 'sm' ? 'sm' : 'md'}
                 className="group flex items-center gap-1 pr-1"
               >

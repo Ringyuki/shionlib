@@ -42,11 +42,13 @@ export const BasicInfos = async ({ character, appearances_count }: BasicInfosPro
         <div className="flex flex-col md:flex-row justify-between items-center w-full">
           <h2 className="text-2xl font-normal flex items-center gap-2 flex-wrap justify-center">
             {name}
-            <Badge variant="secondary">
+            <Badge intent="secondary" appearance="solid">
               {t('appearances_count', { count: appearances_count })}
             </Badge>
             {character.gender && character.gender.length > 0 && (
-              <Badge variant="secondary">{t(GameCharacterGenderMap[character.gender[0]])}</Badge>
+              <Badge intent="secondary" appearance="solid">
+                {t(GameCharacterGenderMap[character.gender[0]])}
+              </Badge>
             )}
           </h2>
         </div>

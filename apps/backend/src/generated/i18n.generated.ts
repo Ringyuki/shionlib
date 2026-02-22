@@ -163,6 +163,9 @@ export type I18nTranslations = {
         "EDIT_RECORD_CONFLICT": string;
         "MESSAGE_NOT_FOUND": string;
         "MESSAGE_FORBIDDEN": string;
+        "PVN_BINDING_NOT_FOUND": string;
+        "PVN_BINDING_ALREADY_EXISTS": string;
+        "PVN_BINDING_AUTH_FAILED": string;
     };
     "validation": {
         "common": {

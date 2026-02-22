@@ -258,12 +258,20 @@ export function UserListItem({ user, currentRole, currentUserId, onRefresh }: Us
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <span className="truncate font-medium text-gray-900 dark:text-gray-100">{user.name}</span>
-          <Badge variant={user.status === 2 ? 'warning' : 'success'}>{statusLabel}</Badge>
-          <Badge variant="neutral">{roleLabel}</Badge>
+          <Badge intent={user.status === 2 ? 'warning' : 'success'} appearance="solid">
+            {statusLabel}
+          </Badge>
+          <Badge intent="neutral" appearance="outline">
+            {roleLabel}
+          </Badge>
           {user.two_factor_enabled ? (
-            <Badge variant="success">2FA</Badge>
+            <Badge intent="success" appearance="solid">
+              2FA
+            </Badge>
           ) : (
-            <Badge variant="neutral">2FA</Badge>
+            <Badge intent="neutral" appearance="outline">
+              2FA
+            </Badge>
           )}
         </div>
         <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">{user.email}</div>

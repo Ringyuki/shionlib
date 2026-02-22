@@ -2,8 +2,9 @@ import { AppConfig } from '../interfaces/app.interface'
 import { AuthConfig } from '../interfaces/auth.interface'
 import { DatabaseConfig } from '../interfaces/database.interface'
 import { LLMsConfig } from '../interfaces/llms.interface'
+import { PotatoVNConfig } from '../interfaces/potatovn.interface'
 
-export type ConfigType = AppConfig & AuthConfig & DatabaseConfig & LLMsConfig
+export type ConfigType = AppConfig & AuthConfig & DatabaseConfig & LLMsConfig & PotatoVNConfig
 
 type IsRecord<T> = T extends object
   ? T extends (...args: unknown[]) => unknown

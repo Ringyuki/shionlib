@@ -29,7 +29,9 @@ export const DeveloperItem = async ({ developer }: DeveloperItemProps) => {
           </div>
           <div className="flex flex-col gap-2">
             <h3 className="text-lg font-normal">{developer.name}</h3>
-            <Badge variant="secondary">{t('works_count', { count: developer.works_count })}</Badge>
+            <Badge intent="secondary" appearance="solid">
+              {t('works_count', { count: developer.works_count })}
+            </Badge>
           </div>
         </Link>
       </CardContent>

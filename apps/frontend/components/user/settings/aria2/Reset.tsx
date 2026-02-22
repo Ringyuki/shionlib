@@ -14,7 +14,7 @@ interface Aria2ResetProps {
 export const Aria2Reset = ({ form }: Aria2ResetProps) => {
   const t = useTranslations('Components.User.Settings.Aria2.Reset')
   const { setSettings } = useAria2Store()
-  const { setTestStatus, setTestMessage } = useAria2TestStore()
+  const { setTestStatus } = useAria2TestStore()
   const onReset = () => {
     form.reset(initialSettings)
     setSettings({
@@ -26,7 +26,6 @@ export const Aria2Reset = ({ form }: Aria2ResetProps) => {
       downloadPath: initialSettings.downloadPath,
     })
     setTestStatus('idle')
-    setTestMessage('')
     // toast.success(t('success'))
     sileo.success({ title: t('success') })
   }

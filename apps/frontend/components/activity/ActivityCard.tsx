@@ -51,12 +51,12 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
             </>
           )}
           {isSystemActivity && (
-            <Badge variant="secondary">
+            <Badge intent="secondary" appearance="solid">
               <Workflow className="size-4" />
               {t('system')}
             </Badge>
           )}
-          <Badge variant="neutral">
+          <Badge intent="neutral" appearance="outline">
             <CalendarDays className="size-4" />
             {timeFromNow(activity.created, locale)}
           </Badge>

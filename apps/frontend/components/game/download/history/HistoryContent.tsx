@@ -43,11 +43,11 @@ export const HistoryContent = ({ histories, className }: HistoryContentProps) =>
                     <Avatar user={history.operator} />
                     <span className="text-sm">{history.operator.name}</span>
                   </div>
-                  <Badge variant="neutral" size="sm">
+                  <Badge intent="neutral" appearance="outline" size="sm">
                     {t('version')} #{histories.length - index}
                   </Badge>
                   {index === 0 && (
-                    <Badge variant="success" size="sm">
+                    <Badge intent="success" appearance="solid" size="sm">
                       {t('current')}
                     </Badge>
                   )}

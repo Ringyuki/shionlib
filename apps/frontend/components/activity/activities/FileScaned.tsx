@@ -1,6 +1,6 @@
 import { Activity, ActivityFileCheckStatus } from '@/interfaces/activity/activity.interface'
 import { getTranslations } from 'next-intl/server'
-import { Badge, BadgeVariant } from '@/components/shionui/Badge'
+import { Badge, BadgeAppearance, BadgeVariant } from '@/components/shionui/Badge'
 import {
   CircleCheck,
   CircleDashed,
@@ -18,32 +18,42 @@ interface FileScanedProps {
 
 const fileScanStatusMap: Record<
   ActivityFileCheckStatus,
-  { icon: LucideIcon; badgeVariant: BadgeVariant; text: string }
+  { icon: LucideIcon; variant: BadgeVariant; appearance: BadgeAppearance; text: string }
 > = {
-  [ActivityFileCheckStatus.OK]: { icon: CircleCheck, badgeVariant: 'success', text: 'pass' },
+  [ActivityFileCheckStatus.OK]: {
+    icon: CircleCheck,
+    variant: 'success',
+    appearance: 'soft',
+    text: 'pass',
+  },
   [ActivityFileCheckStatus.BROKEN_OR_TRUNCATED]: {
     icon: CircleX,
-    badgeVariant: 'destructive',
+    variant: 'destructive',
+    appearance: 'soft',
     text: 'brokenOrTruncated',
   },
   [ActivityFileCheckStatus.BROKEN_OR_UNSUPPORTED]: {
     icon: CircleX,
-    badgeVariant: 'destructive',
+    variant: 'destructive',
+    appearance: 'soft',
     text: 'brokenOrUnsupported',
   },
   [ActivityFileCheckStatus.ENCRYPTED]: {
     icon: Lock,
-    badgeVariant: 'destructive',
+    variant: 'destructive',
+    appearance: 'soft',
     text: 'encrypted',
   },
   [ActivityFileCheckStatus.HARMFUL]: {
     icon: Shield,
-    badgeVariant: 'destructive',
+    variant: 'destructive',
+    appearance: 'soft',
     text: 'harmfulContent',
   },
   [ActivityFileCheckStatus.PENDING]: {
     icon: CircleDashed,
-    badgeVariant: 'info',
+    variant: 'info',
+    appearance: 'soft',
     text: 'pendingScan',
   },
 }
@@ -53,7 +63,8 @@ const FileScanStatusBadge = async ({ activity }: FileScanedProps) => {
   const FileScanStatusIconComponent = fileScanStatusMap[activity.file?.file_check_status!].icon
   return (
     <Badge
-      variant={fileScanStatusMap[activity.file?.file_check_status!].badgeVariant}
+      intent={fileScanStatusMap[activity.file?.file_check_status!].variant}
+      appearance={fileScanStatusMap[activity.file?.file_check_status!].appearance}
       className="flex items-center gap-1"
     >
       <FileScanStatusIconComponent className="size-4" />

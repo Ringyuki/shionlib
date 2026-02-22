@@ -1,4 +1,3 @@
-import { Image as ImageIcon } from 'lucide-react'
 import 'react-medium-image-zoom/dist/styles.css'
 import { useTranslations } from 'next-intl'
 import { GameImage } from '@/interfaces/game/game.interface'
@@ -33,8 +32,8 @@ export const GameImages = ({ images, content_limit }: GameImagesProps) => {
       <>
         {(!!content_limit ||
           images.filter(images => images.sexual === 0 && images.violence === 0).length > 0) && (
-          <h2 className="flex items-center gap-2 text-lg font-bold">
-            <ImageIcon />
+          <h2 className="flex items-center gap-4 text-lg font-bold">
+            <div className="w-1 h-6 bg-primary rounded" />
             <span>{t('images')}</span>
           </h2>
         )}

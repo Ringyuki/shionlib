@@ -53,6 +53,8 @@ export const Message = () => {
             unreadCount > 9 && 'text-[0.625rem] px-[2px] py-px',
           )}
           offsetClassName="top-[10px] right-[10px]"
+          intent="primary"
+          appearance="solid"
         >
           <MessageButton />
         </Badge>

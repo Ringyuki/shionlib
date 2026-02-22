@@ -24,7 +24,11 @@ const editTypeMap: Partial<Record<ActivityType, 'game' | 'developer' | 'characte
 const EditTypeBadge = ({ type }: { type: keyof typeof editTypeMap }) => {
   const t = useTranslations('Components.Home.Activity.Activities.Edit')
   const entity = editTypeMap[type]
-  return <Badge variant="default">{t(`${entity}`)}</Badge>
+  return (
+    <Badge intent="primary" appearance="solid">
+      {t(`${entity}`)}
+    </Badge>
+  )
 }
 
 const getEntityTitle = (

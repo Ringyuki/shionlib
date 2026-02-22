@@ -10,6 +10,7 @@ const tabs = [
   { name: 'personal', href: 'personal' },
   { name: 'site', href: 'site' },
   { name: 'download', href: 'download' },
+  { name: 'connections', href: 'connections' },
 ]
 
 export const UserSettingsTabsNav = () => {
@@ -22,7 +23,7 @@ export const UserSettingsTabsNav = () => {
 
   return (
     <Tabs value={active}>
-      <TabsList variant="light" intent="info">
+      <TabsList variant="light" intent="primary" scrollAreaClassName="bg-muted/40 w-fit">
         {tabs.map(tab => (
           <TabsTrigger key={tab.href} value={tab.href} className="py-1 px-8" asChild>
             <Link href={tab.href}>{t(tab.name)}</Link>

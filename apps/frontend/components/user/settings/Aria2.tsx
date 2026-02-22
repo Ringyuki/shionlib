@@ -204,13 +204,11 @@ export const Aria2 = () => {
       </CardContent>
       <CardFooter>
         <div className="flex flex-col gap-3 w-full">
-          <div className="flex flex-col items-start md:flex-row gap-2">
-            <div className="flex gap-2 flex-wrap">
-              <Button intent="primary" onClick={onSave} data-testid="settings-aria2-save">
-                {t('save')}
-              </Button>
-              <Aria2Reset form={form} />
-            </div>
+          <div className="flex gap-2 flex-wrap">
+            <Button intent="primary" onClick={onSave} data-testid="settings-aria2-save">
+              {t('save')}
+            </Button>
+            <Aria2Reset form={form} />
             <Aria2Test form={form} />
           </div>
         </div>

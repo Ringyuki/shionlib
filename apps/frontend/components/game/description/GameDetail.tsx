@@ -14,7 +14,7 @@ interface GameDetailProps {
 
 export const GameDetail = ({ game }: GameDetailProps) => {
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-4">
       <GameTags tags={game.tags} />
       <GameDescription game={game} />
       <GameImages images={game.images} content_limit={game.content_limit} />

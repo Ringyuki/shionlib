@@ -43,7 +43,7 @@ export const FavoriteListItem = ({ favorite, selected = false, userId }: Favorit
               </span>
               {favorite.is_private && <Lock className="size-3 text-muted-foreground shrink-0" />}
             </div>
-            <Badge variant="neutral" size="sm">
+            <Badge intent="neutral" appearance="outline" size="sm">
               {favorite.game_count}
             </Badge>
           </div>

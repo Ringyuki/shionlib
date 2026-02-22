@@ -32,7 +32,7 @@ export const ReleaseCard = async ({ release }: ReleaseCardProps) => {
               <span className="text-sm font-light flex items-center gap-1">{t('uploaded_at')}</span>
               <span className="text-sm hover:text-primary-500 transition-colors">{title}</span>
             </div>
-            <Badge variant="neutral">
+            <Badge intent="neutral" appearance="outline">
               <CalendarDays className="size-4" />
               {timeFromNow(release.created, locale)}
             </Badge>
@@ -42,7 +42,7 @@ export const ReleaseCard = async ({ release }: ReleaseCardProps) => {
               <FileArchive className="size-4 shrink-0" />
               <span className="text-lg">{release.files[0]}</span>
               {release.files_count > 1 && (
-                <Badge variant="secondary" className="ml-2">
+                <Badge intent="secondary" appearance="solid" className="ml-2">
                   {t('more_than_one_file', { count: release.files_count })}
                 </Badge>
               )}
@@ -55,13 +55,13 @@ export const ReleaseCard = async ({ release }: ReleaseCardProps) => {
             <div className="flex flex-wrap gap-2 items-center">
               <GamePlatform platform={release.platform} />
               {release.language.map(l => (
-                <Badge key={l} variant="neutral">
+                <Badge key={l} intent="neutral" appearance="outline">
                   {LanguageNameMap[l]}
                 </Badge>
               ))}
             </div>
             <div className="flex flex-wrap gap-2 items-center">
-              <Badge variant="neutral">
+              <Badge intent="neutral" appearance="outline">
                 <Download className="size-4" />
                 {release.downloads}
               </Badge>

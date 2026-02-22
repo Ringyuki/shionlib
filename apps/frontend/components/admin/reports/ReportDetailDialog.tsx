@@ -152,14 +152,27 @@ export function ReportDetailDialog({
         ) : (
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant={statusVariant}>{t(`statuses.${detail.status}`)}</Badge>
-              <Badge variant="neutral">{t(`reasons.${detail.reason}`)}</Badge>
-              <Badge variant={levelVariant}>{t(`levels.${detail.malicious_level}`)}</Badge>
+              <Badge intent={statusVariant} appearance="solid">
+                {t(`statuses.${detail.status}`)}
+              </Badge>
+              <Badge intent="neutral" appearance="outline">
+                {t(`reasons.${detail.reason}`)}
+              </Badge>
+              <Badge
+                intent={levelVariant}
+                appearance={levelVariant === 'neutral' ? 'outline' : 'solid'}
+              >
+                {t(`levels.${detail.malicious_level}`)}
+              </Badge>
               {detail.reported_penalty_applied && (
-                <Badge variant="warning">{t('reportedPenaltyApplied')}</Badge>
+                <Badge intent="warning" appearance="solid">
+                  {t('reportedPenaltyApplied')}
+                </Badge>
               )}
               {detail.reporter_penalty_applied && (
-                <Badge variant="destructive">{t('reporterPenaltyApplied')}</Badge>
+                <Badge intent="destructive" appearance="solid">
+                  {t('reporterPenaltyApplied')}
+                </Badge>
               )}
             </div>
 
