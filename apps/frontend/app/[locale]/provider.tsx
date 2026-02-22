@@ -8,6 +8,7 @@ import { Toaster as ReactHotToastToaster } from 'react-hot-toast'
 import { reactHotToastProps, sileoToastProps } from './toastOption'
 import { useToastPreferenceStore } from '@/store/localSettingsStore'
 import { AuthSessionCheck } from '@/components/common/auth/AuthSessionCheck'
+import { ScrollToTop } from '@/components/common/site/ScrollToTop'
 
 export default function ShionlibProvider({ children }: { children: React.ReactNode }) {
   const position = useToastPreferenceStore(state => state.position)
@@ -18,6 +19,7 @@ export default function ShionlibProvider({ children }: { children: React.ReactNo
         <SocketProvider>
           <AuthSessionCheck />
           {children}
+          <ScrollToTop />
           <SileoToaster {...sileoToastProps} position={position} />
           <ReactHotToastToaster {...reactHotToastProps} position={position} />
         </SocketProvider>
