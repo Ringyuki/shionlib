@@ -31,6 +31,11 @@ vi.mock('@/components/game/description/GameDetail', () => ({
   GameDetail: hoisted.GameDetail,
 }))
 
+vi.mock('@/components/game/pvn/GamePVNSection', () => ({
+  GamePVNSection: ({ gameId }: { gameId: number }) =>
+    React.createElement('aside', { 'data-testid': 'game-pvn', 'data-game-id': String(gameId) }),
+}))
+
 describe('app/[locale]/(main)/game/[id]/page (unit)', () => {
   beforeEach(() => {
     hoisted.get.mockReset()

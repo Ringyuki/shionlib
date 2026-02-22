@@ -638,6 +638,25 @@
           "cancel": "キャンセル"
         }
       },
+      "PVN": {
+        "title": "PotatoVN",
+        "description": "PotatoVN でプレイ時間を記録する",
+        "addToLibrary": "PotatoVN に追加",
+        "inLibrary": "ライブラリ登録済み",
+        "addSuccess": "ゲームを PotatoVN ライブラリに追加しました",
+        "totalPlayTime": "合計プレイ時間",
+        "lastPlayed": "最終プレイ",
+        "notPlayed": "未プレイ",
+        "playType": "ステータス",
+        "myRate": "マイレーティング",
+        "pvnPlayType0": "プレイしたい",
+        "pvnPlayType1": "プレイ済み",
+        "pvnPlayType2": "プレイ中",
+        "pvnPlayType3": "保留中",
+        "pvnPlayType4": "断念",
+        "syncedAt": "同期日時",
+        "syncedAtTooltip": "システムは1時間ごとに同期タスクを実行します。"
+      },
       "Download": {
         "GameDownloadDialog": {
           "title": "ダウンロード"

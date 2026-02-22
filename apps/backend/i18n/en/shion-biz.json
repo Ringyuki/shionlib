@@ -112,5 +112,7 @@
 
   "PVN_BINDING_NOT_FOUND": "PotatoVN binding not found",
   "PVN_BINDING_ALREADY_EXISTS": "PotatoVN account is already bound",
-  "PVN_BINDING_AUTH_FAILED": "PotatoVN authentication failed, please check your credentials"
+  "PVN_BINDING_AUTH_FAILED": "PotatoVN authentication failed, please check your credentials",
+
+  "PVN_GAME_MAPPING_NOT_FOUND": "this game is not in your PotatoVN library"
 }

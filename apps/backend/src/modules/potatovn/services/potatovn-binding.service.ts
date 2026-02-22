@@ -8,6 +8,7 @@ import { ShionConfigService } from '../../../common/config/services/config.servi
 import { BindPotatoVNReqDto } from '../dto/req/bind-potatovn.req.dto'
 import { PotatoVNBindingResDto } from '../dto/res/potatovn-binding.res.dto'
 import { PvnLoginResponse } from '../interfaces/pvn-login-response.interface'
+import { PotatoVNGameMappingService } from './potatovn-game-mapping.service'
 
 const PVN_BINDING_SELECT = {
   pvn_user_id: true,
@@ -27,12 +28,13 @@ export class PotatoVNBindingService {
     private readonly prisma: PrismaService,
     private readonly httpService: HttpService,
     private readonly configService: ShionConfigService,
+    private readonly potatovnGameMappingService: PotatoVNGameMappingService,
   ) {
     this.pvnBaseUrl = this.configService.get('potatovn.baseUrl')
   }
 
   async getBinding(userId: number): Promise<PotatoVNBindingResDto> {
-    const binding = await this.prisma.userPotatoVNBinding.findUnique({
+    const binding = await this.prisma.userPvnBinding.findUnique({
       where: { user_id: userId },
       select: PVN_BINDING_SELECT,
     })
@@ -50,7 +52,7 @@ export class PotatoVNBindingService {
   }
 
   async bind(userId: number, dto: BindPotatoVNReqDto): Promise<PotatoVNBindingResDto> {
-    const existing = await this.prisma.userPotatoVNBinding.findUnique({
+    const existing = await this.prisma.userPvnBinding.findUnique({
       where: { user_id: userId },
       select: { id: true },
     })
@@ -64,7 +66,7 @@ export class PotatoVNBindingService {
 
     const pvnRes = await this.loginPotatoVN(dto.pvn_user_name, dto.pvn_password)
 
-    return this.prisma.userPotatoVNBinding.create({
+    const result = await this.prisma.userPvnBinding.create({
       data: {
         user_id: userId,
         pvn_user_id: pvnRes.user.id,
@@ -74,10 +76,14 @@ export class PotatoVNBindingService {
       },
       select: PVN_BINDING_SELECT,
     })
+
+    void this.potatovnGameMappingService.syncLibrary(userId)
+
+    return result
   }
 
   async unbind(userId: number): Promise<void> {
-    const binding = await this.prisma.userPotatoVNBinding.findUnique({
+    const binding = await this.prisma.userPvnBinding.findUnique({
       where: { user_id: userId },
       select: { id: true },
     })
@@ -91,7 +97,8 @@ export class PotatoVNBindingService {
       )
     }
 
-    await this.prisma.userPotatoVNBinding.delete({ where: { user_id: userId } })
+    await this.prisma.userPvnBinding.delete({ where: { user_id: userId } })
+    await this.prisma.userGamePvnMapping.deleteMany({ where: { user_id: userId } })
   }
 
   /**
@@ -99,7 +106,7 @@ export class PotatoVNBindingService {
    * Call this before token expiry; PotatoVN provides GET /user/session/refresh.
    */
   async refreshToken(userId: number): Promise<void> {
-    const binding = await this.prisma.userPotatoVNBinding.findUnique({
+    const binding = await this.prisma.userPvnBinding.findUnique({
       where: { user_id: userId },
       select: { pvn_token: true },
     })
@@ -115,7 +122,7 @@ export class PotatoVNBindingService {
 
     const pvnRes = await this.callPvnRefresh(binding.pvn_token)
 
-    await this.prisma.userPotatoVNBinding.update({
+    await this.prisma.userPvnBinding.update({
       where: { user_id: userId },
       data: {
         pvn_token: pvnRes.token,

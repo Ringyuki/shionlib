@@ -22,7 +22,8 @@ describe('components/home/activity/helpers/file-progress (unit)', () => {
     expect(stages.every(stage => stage.completed)).toBe(true)
     expect(stages.some(stage => stage.failed)).toBe(false)
     expect(getPrimaryStatus(stages)).toEqual({
-      variant: 'success',
+      intent: 'success',
+      appearance: 'solid',
       labelKey: 'status.completed',
     })
   })
@@ -35,7 +36,8 @@ describe('components/home/activity/helpers/file-progress (unit)', () => {
 
     expect(stages.some(stage => stage.failed)).toBe(true)
     expect(getPrimaryStatus(stages)).toEqual({
-      variant: 'destructive',
+      intent: 'destructive',
+      appearance: 'solid',
       labelKey: 'status.failed',
     })
   })

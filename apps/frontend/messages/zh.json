@@ -652,6 +652,25 @@
           "cancel": "取消"
         }
       },
+      "PVN": {
+        "title": "PotatoVN",
+        "description": "通过 PotatoVN 追踪你的游戏时间",
+        "addToLibrary": "添加到 PotatoVN",
+        "inLibrary": "已在库中",
+        "addSuccess": "游戏已添加到 PotatoVN 库",
+        "totalPlayTime": "总游戏时间",
+        "lastPlayed": "最近游玩",
+        "notPlayed": "尚未游玩",
+        "playType": "状态",
+        "myRate": "我的评分",
+        "pvnPlayType0": "想玩",
+        "pvnPlayType1": "玩过",
+        "pvnPlayType2": "在玩",
+        "pvnPlayType3": "搁置",
+        "pvnPlayType4": "抛弃",
+        "syncedAt": "同步于",
+        "syncedAtTooltip": "系统会每小时执行一次同步任务。"
+      },
       "Download": {
         "GameDownloadDialog": {
           "title": "下载"

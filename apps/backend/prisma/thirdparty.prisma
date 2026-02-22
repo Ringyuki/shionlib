@@ -1,4 +1,26 @@
-model UserPotatoVNBinding {
+model UserGamePvnMapping {
+  id             Int       @id @default(autoincrement())
+  user_id        Int
+  game_id        Int
+  pvn_galgame_id Int
+  total_play_time Int      @default(0)
+  last_play_date DateTime?
+  play_type      Int       @default(0)
+  my_rate        Int       @default(0)
+  synced_at      DateTime  @default(now())
+  created        DateTime  @default(now())
+  updated        DateTime  @updatedAt
+
+  user User @relation("user_game_pvn_mapping", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  game Game @relation("game_pvn_mapping",      fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([user_id, game_id])
+  @@unique([user_id, pvn_galgame_id])
+  @@index([user_id])
+  @@map("user_game_pvn_mappings")
+}
+
+model UserPvnBinding {
   id Int @id @default(autoincrement())
 
   user_id Int @unique
@@ -13,8 +35,8 @@ model UserPotatoVNBinding {
   created DateTime @default(now())
   updated DateTime @updatedAt
 
-  user User @relation("user_potato_vn_binding", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user User @relation("user_pvn_binding", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-  @@map("user_potato_vn_bindings")
+  @@map("user_pvn_bindings")
   @@index([pvn_user_id])
 }

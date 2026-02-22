@@ -652,6 +652,25 @@
           "cancel": "Cancel"
         }
       },
+      "PVN": {
+        "title": "PotatoVN",
+        "description": "Track your play time with PotatoVN",
+        "addToLibrary": "Add to PotatoVN",
+        "inLibrary": "In Library",
+        "addSuccess": "Game added to PotatoVN library",
+        "totalPlayTime": "Total Play Time",
+        "lastPlayed": "Last Played",
+        "notPlayed": "Not yet played",
+        "playType": "Status",
+        "myRate": "My Rating",
+        "pvnPlayType0": "Want to Play",
+        "pvnPlayType1": "Played",
+        "pvnPlayType2": "Playing",
+        "pvnPlayType3": "On Hold",
+        "pvnPlayType4": "Dropped",
+        "syncedAt": "Synced",
+        "syncedAtTooltip": "The system will execute the synchronization task every hour."
+      },
       "Download": {
         "GameDownloadDialog": {
           "title": "Download"

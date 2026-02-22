@@ -136,4 +136,7 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
   [ShionBizCode.PVN_BINDING_NOT_FOUND]: HttpStatus.NOT_FOUND,
   [ShionBizCode.PVN_BINDING_ALREADY_EXISTS]: HttpStatus.CONFLICT,
   [ShionBizCode.PVN_BINDING_AUTH_FAILED]: HttpStatus.UNAUTHORIZED,
+
+  // 55
+  [ShionBizCode.PVN_GAME_MAPPING_NOT_FOUND]: HttpStatus.NOT_FOUND,
 } as const satisfies Record<ShionBizCode, HttpStatus>

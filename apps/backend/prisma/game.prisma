@@ -45,6 +45,8 @@ model Game {
 
   messages Message[] @relation("game_message")
 
+  pvn_mappings UserGamePvnMapping[] @relation("game_pvn_mapping")
+
   status  Int      @default(1)
   created DateTime @default(now())
   updated DateTime @updatedAt
