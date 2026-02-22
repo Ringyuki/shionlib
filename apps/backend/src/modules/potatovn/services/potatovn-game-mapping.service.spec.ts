@@ -27,6 +27,7 @@ describe('PotatoVNGameMappingService', () => {
         findUnique: jest.fn(),
         create: jest.fn(),
         upsert: jest.fn(),
+        delete: jest.fn(),
         deleteMany: jest.fn(),
       },
       userPvnBinding: {
@@ -40,6 +41,7 @@ describe('PotatoVNGameMappingService', () => {
     const httpService = {
       get: jest.fn(),
       patch: jest.fn(),
+      delete: jest.fn(),
     }
     const configService = {
       get: jest.fn().mockReturnValue('https://pvn.example'),
@@ -187,6 +189,44 @@ describe('PotatoVNGameMappingService', () => {
         select: expect.any(Object),
       })
       expect(result).toEqual(created)
+    })
+  })
+
+  describe('removeGameFromPvn', () => {
+    it('throws PVN_GAME_MAPPING_NOT_FOUND when mapping does not exist', async () => {
+      const { service, prisma } = createService()
+      prisma.userGamePvnMapping.findUnique.mockResolvedValue(null)
+
+      await expect(service.removeGameFromPvn(10, 20)).rejects.toMatchObject({
+        code: ShionBizCode.PVN_GAME_MAPPING_NOT_FOUND,
+      })
+    })
+
+    it('throws PVN_BINDING_NOT_FOUND when user has no PVN binding', async () => {
+      const { service, prisma } = createService()
+      prisma.userGamePvnMapping.findUnique.mockResolvedValue({ pvn_galgame_id: 99 })
+      prisma.userPvnBinding.findUnique.mockResolvedValue(null)
+
+      await expect(service.removeGameFromPvn(10, 20)).rejects.toMatchObject({
+        code: ShionBizCode.PVN_BINDING_NOT_FOUND,
+      })
+    })
+
+    it('calls PVN DELETE and removes local mapping on success', async () => {
+      const { service, prisma, httpService } = createService()
+      prisma.userGamePvnMapping.findUnique.mockResolvedValue({ pvn_galgame_id: 99 })
+      prisma.userPvnBinding.findUnique.mockResolvedValue({ pvn_token: 'pvn-token' })
+      httpService.delete.mockReturnValue(of({ data: undefined }))
+      prisma.userGamePvnMapping.delete.mockResolvedValue(undefined)
+
+      await service.removeGameFromPvn(10, 20)
+
+      expect(httpService.delete).toHaveBeenCalledWith('https://pvn.example/galgame/99', {
+        headers: { Authorization: 'Bearer pvn-token' },
+      })
+      expect(prisma.userGamePvnMapping.delete).toHaveBeenCalledWith({
+        where: { user_id_game_id: { user_id: 10, game_id: 20 } },
+      })
     })
   })
 

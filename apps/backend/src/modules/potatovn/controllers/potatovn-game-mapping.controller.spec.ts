@@ -5,6 +5,7 @@ describe('PotatoVNGameMappingController', () => {
     const potatovnGameMappingService = {
       getPvnGameData: jest.fn(),
       addGameToPvn: jest.fn(),
+      removeGameFromPvn: jest.fn(),
     }
     const controller = new PotatoVNGameMappingController(potatovnGameMappingService as any)
     return { controller, potatovnGameMappingService }
@@ -36,5 +37,16 @@ describe('PotatoVNGameMappingController', () => {
 
     expect(potatovnGameMappingService.addGameToPvn).toHaveBeenCalledWith(200, 88)
     expect(out).toEqual(result)
+  })
+
+  it('removeGameFromPvn delegates with req.user.sub and gameId', async () => {
+    const { controller, potatovnGameMappingService } = createController()
+    const req = { user: { sub: 300 } }
+    potatovnGameMappingService.removeGameFromPvn.mockResolvedValue(undefined)
+
+    const out = await controller.removeGameFromPvn(55, req as any)
+
+    expect(potatovnGameMappingService.removeGameFromPvn).toHaveBeenCalledWith(300, 55)
+    expect(out).toBeUndefined()
   })
 })

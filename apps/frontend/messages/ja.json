@@ -655,7 +655,13 @@
         "pvnPlayType3": "保留中",
         "pvnPlayType4": "断念",
         "syncedAt": "同期日時",
-        "syncedAtTooltip": "システムは1時間ごとに同期タスクを実行します。"
+        "syncedAtTooltip": "システムは1時間ごとに同期タスクを実行します。",
+        "remove": "PotatoVN から削除",
+        "removeTitle": "PotatoVN から削除",
+        "removeDescription": "この操作により、PotatoVN クラウド上のゲームデータ（プレイ時間の記録や評価を含む）が完全に削除されます。この操作は元に戻せません。",
+        "removeSuccess": "PotatoVN からゲームを削除しました",
+        "removeConfirm": "削除",
+        "removeCancel": "キャンセル"
       },
       "Download": {
         "GameDownloadDialog": {

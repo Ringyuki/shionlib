@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe, Post, Req, UseGuards } from '@nestjs/common'
+import { Controller, Delete, Get, Param, ParseIntPipe, Post, Req, UseGuards } from '@nestjs/common'
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { PotatoVNGameMappingService } from '../services/potatovn-game-mapping.service'
@@ -16,5 +16,13 @@ export class PotatoVNGameMappingController {
   @Post(':gameId')
   async addGameToPvn(@Param('gameId', ParseIntPipe) gameId: number, @Req() req: RequestWithUser) {
     return this.potatovnGameMappingService.addGameToPvn(req.user.sub, gameId)
+  }
+
+  @Delete(':gameId')
+  async removeGameFromPvn(
+    @Param('gameId', ParseIntPipe) gameId: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.potatovnGameMappingService.removeGameFromPvn(req.user.sub, gameId)
   }
 }

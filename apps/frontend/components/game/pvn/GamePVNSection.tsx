@@ -21,6 +21,7 @@ import { PLAY_TYPE_KEYS } from './constants/pvn'
 import { Question } from '@/components/common/content/Question'
 import { GameCover } from '@/interfaces/game/game.interface'
 import { cn } from '@/utils/cn'
+import { GamePVNMoreActions } from './actions/MoreActions'
 
 interface GamePVNSectionProps {
   gameId: number
@@ -96,10 +97,11 @@ export const GamePVNSection = ({ gameId, initialData, cover }: GamePVNSectionPro
           </CardTitle>
           <CardDescription className="text-card-foreground">{t('description')}</CardDescription>
           {inLibrary && (
-            <CardAction>
+            <CardAction className="flex items-center gap-2">
               <Badge intent="success" appearance="solid">
                 {t('inLibrary')}
               </Badge>
+              <GamePVNMoreActions gameId={gameId} onRemoved={() => setPvnData(null)} />
             </CardAction>
           )}
         </CardHeader>

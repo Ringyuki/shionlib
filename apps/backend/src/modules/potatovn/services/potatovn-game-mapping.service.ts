@@ -116,6 +116,31 @@ export class PotatoVNGameMappingService {
     })
   }
 
+  async removeGameFromPvn(userId: number, gameId: number): Promise<void> {
+    const mapping = await this.prisma.userGamePvnMapping.findUnique({
+      where: { user_id_game_id: { user_id: userId, game_id: gameId } },
+      select: { pvn_galgame_id: true },
+    })
+    if (!mapping) {
+      throw new ShionBizException(
+        ShionBizCode.PVN_GAME_MAPPING_NOT_FOUND,
+        'shion-biz.PVN_GAME_MAPPING_NOT_FOUND',
+        undefined,
+        HttpStatus.NOT_FOUND,
+      )
+    }
+
+    const token = await this.fetchPvnToken(userId)
+    await firstValueFrom(
+      this.httpService.delete(`${this.pvnBaseUrl}/galgame/${mapping.pvn_galgame_id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    )
+    await this.prisma.userGamePvnMapping.delete({
+      where: { user_id_game_id: { user_id: userId, game_id: gameId } },
+    })
+  }
+
   async syncLibrary(userId: number): Promise<void> {
     try {
       const token = await this.fetchPvnToken(userId)

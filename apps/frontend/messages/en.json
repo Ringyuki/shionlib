@@ -669,7 +669,13 @@
         "pvnPlayType3": "On Hold",
         "pvnPlayType4": "Dropped",
         "syncedAt": "Synced",
-        "syncedAtTooltip": "The system will execute the synchronization task every hour."
+        "syncedAtTooltip": "The system will execute the synchronization task every hour.",
+        "remove": "Remove from PotatoVN",
+        "removeTitle": "Remove from PotatoVN",
+        "removeDescription": "This will permanently delete your game data from the PotatoVN cloud, including play time records and ratings. This action cannot be undone.",
+        "removeSuccess": "Game removed from PotatoVN",
+        "removeConfirm": "Delete",
+        "removeCancel": "Cancel"
       },
       "Download": {
         "GameDownloadDialog": {

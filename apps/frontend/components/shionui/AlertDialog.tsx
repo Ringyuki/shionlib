@@ -9,6 +9,16 @@ import { useCountdown } from '@/hooks/useCountdown'
 
 type AlertDialogTone = 'neutral' | 'primary' | 'info' | 'success' | 'warning' | 'destructive'
 
+type AlertDialogContextValue = {
+  isCountingDown: boolean
+  countdown: number
+}
+
+const AlertDialogContext = React.createContext<AlertDialogContextValue>({
+  isCountingDown: false,
+  countdown: 0,
+})
+
 function toneBorderClass(tone: AlertDialogTone | undefined) {
   switch (tone) {
     case 'primary':
@@ -62,8 +72,56 @@ function toneToIntent(
   }
 }
 
-function AlertDialog({ ...props }: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
-  return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />
+function AlertDialog({
+  countdown: countdownDuration = 3,
+  onOpenChange,
+  open,
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Root> & { countdown?: number }) {
+  const durationInSeconds = countdownDuration > 0 ? countdownDuration : 0
+  const { countdown, isCountingDown, startCountdown, resetCountdown } = useCountdown({
+    duration: durationInSeconds,
+  })
+
+  // Controlled mode: watch `open` prop directly, since Radix's onOpenChange
+  // is NOT called when `open` changes programmatically from outside.
+  React.useEffect(() => {
+    if (open === true && durationInSeconds > 0) {
+      startCountdown()
+    } else if (open === false) {
+      // wait for the animation to complete
+      setTimeout(() => {
+        resetCountdown()
+      }, 200)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
+
+  const handleOpenChange = React.useCallback(
+    (nextOpen: boolean) => {
+      // Uncontrolled mode: `open` prop is undefined, Radix triggers this instead.
+      if (open === undefined) {
+        if (nextOpen && durationInSeconds > 0) {
+          startCountdown()
+        } else {
+          resetCountdown()
+        }
+      }
+      onOpenChange?.(nextOpen)
+    },
+    [open, durationInSeconds, startCountdown, resetCountdown, onOpenChange],
+  )
+
+  return (
+    <AlertDialogContext.Provider value={{ isCountingDown, countdown }}>
+      <AlertDialogPrimitive.Root
+        data-slot="alert-dialog"
+        open={open}
+        onOpenChange={handleOpenChange}
+        {...props}
+      />
+    </AlertDialogContext.Provider>
+  )
 }
 
 function AlertDialogTrigger({
@@ -170,11 +228,14 @@ function AlertDialogAction({
   className,
   tone,
   loading,
+  disabled,
+  children,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Action> & {
   tone?: AlertDialogTone
   loading?: boolean
 }) {
+  const { isCountingDown, countdown } = React.useContext(AlertDialogContext)
   const intent = toneToIntent(tone)
   return (
     <AlertDialogPrimitive.Action asChild>
@@ -183,8 +244,12 @@ function AlertDialogAction({
         appearance="solid"
         className={className}
         loading={loading}
+        disabled={isCountingDown || disabled}
         {...props}
-      />
+      >
+        {children}
+        {isCountingDown && <span className="ml-1">{countdown}s</span>}
+      </Button>
     </AlertDialogPrimitive.Action>
   )
 }

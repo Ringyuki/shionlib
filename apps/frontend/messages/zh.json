@@ -669,7 +669,13 @@
         "pvnPlayType3": "搁置",
         "pvnPlayType4": "抛弃",
         "syncedAt": "同步于",
-        "syncedAtTooltip": "系统会每小时执行一次同步任务。"
+        "syncedAtTooltip": "系统会每小时执行一次同步任务。",
+        "remove": "从 PotatoVN 移除",
+        "removeTitle": "从 PotatoVN 移除",
+        "removeDescription": "此操作将永久删除你在 PotatoVN 云端的游戏数据，包括游玩时长记录和评分，无法恢复。",
+        "removeSuccess": "游戏已从 PotatoVN 移除",
+        "removeConfirm": "删除",
+        "removeCancel": "取消"
       },
       "Download": {
         "GameDownloadDialog": {
