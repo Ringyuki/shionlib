@@ -176,7 +176,7 @@ export class PotatoVNGameMappingService {
     const playData = this.mapToPvnGameData(pvnGame)
 
     await this.prisma.userGamePvnMapping.upsert({
-      where: { user_id_game_id: { user_id: userId, game_id: game.id } },
+      where: { user_id_pvn_galgame_id: { user_id: userId, pvn_galgame_id: pvnGame.id } },
       create: {
         user_id: userId,
         game_id: game.id,
@@ -188,7 +188,6 @@ export class PotatoVNGameMappingService {
         synced_at: new Date(),
       },
       update: {
-        pvn_galgame_id: pvnGame.id,
         total_play_time: playData.total_play_time,
         last_play_date: playData.last_play_date,
         play_type: playData.play_type,

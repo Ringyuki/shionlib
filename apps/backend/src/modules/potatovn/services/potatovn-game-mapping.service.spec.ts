@@ -266,7 +266,7 @@ describe('PotatoVNGameMappingService', () => {
       expect(prisma.game.findFirst).toHaveBeenCalled()
       expect(prisma.userGamePvnMapping.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { user_id_game_id: { user_id: 1, game_id: 1 } },
+          where: { user_id_pvn_galgame_id: { user_id: 1, pvn_galgame_id: mockPvnGalgame.id } },
         }),
       )
     })
