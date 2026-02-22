@@ -26,4 +26,6 @@ export enum ModerateCategory {
   SEXUAL_MINORS = 'sexual/minors',
   VIOLENCE = 'violence',
   VIOLENCE_GRAPHIC = 'violence/graphic',
+  SPAM = 'spam',
+  MEANINGLESS = 'meaningless',
 }
