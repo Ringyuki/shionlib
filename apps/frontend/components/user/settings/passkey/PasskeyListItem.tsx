@@ -35,7 +35,7 @@ export const PasskeyListItem = ({ item, removingId, onRemove }: PasskeyListItemP
   const t = useTranslations('Components.User.Settings.Passkey')
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-border/60 p-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex gap-2 rounded-lg border border-border/60 p-3 items-center justify-between">
       <div className="min-w-0">
         <div className="truncate text-sm font-medium">{item.name?.trim() || t('unnamed')}</div>
         <div className="text-muted-foreground text-xs">

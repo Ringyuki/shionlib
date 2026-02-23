@@ -8,6 +8,7 @@ import {
   PasskeyCredentialItem,
   PasskeyCreationOptionsPayload,
 } from '@/interfaces/auth/passkey.interface'
+import { markDeviceHasPasskeyHint } from '@/components/common/user/passkey/helpers/device-passkey-hint'
 import { useTranslations } from 'next-intl'
 
 export const usePasskeyManager = () => {
@@ -71,6 +72,7 @@ export const usePasskeyManager = () => {
         },
       })
 
+      markDeviceHasPasskeyHint()
       sileo.success({ title: t('addSuccess') })
       setName('')
       await load()

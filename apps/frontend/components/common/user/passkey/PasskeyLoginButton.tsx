@@ -3,6 +3,11 @@
 import { useEffect, useRef } from 'react'
 import { Button } from '@/components/shionui/Button'
 import { usePasskeyLogin } from '@/components/common/user/passkey/usePasskeyLogin'
+import { hasDevicePasskeyHint } from '@/components/common/user/passkey/helpers/device-passkey-hint'
+import {
+  isAutoPasskeyAttemptSuppressedForSession,
+  suppressAutoPasskeyAttemptForSession,
+} from '@/components/common/user/passkey/helpers/auto-passkey-attempt-suppress'
 import { useIsAutomatingBrowser } from '@/hooks/useIsAutomatingBrowser'
 import { useTranslations } from 'next-intl'
 import { KeyRound } from 'lucide-react'
@@ -12,22 +17,6 @@ interface PasskeyLoginButtonProps {
   identifier?: string
   onSuccess?: () => Promise<void> | void
   autoAttempt?: boolean
-}
-
-const AUTO_PASSKEY_LOGIN_SUPPRESS_KEY = 'shionlib:passkey-login:auto-attempt-suppressed'
-
-const isAutoAttemptSuppressedForSession = () => {
-  try {
-    return sessionStorage.getItem(AUTO_PASSKEY_LOGIN_SUPPRESS_KEY) === '1'
-  } catch {
-    return false
-  }
-}
-
-const suppressAutoAttemptForSession = () => {
-  try {
-    sessionStorage.setItem(AUTO_PASSKEY_LOGIN_SUPPRESS_KEY, '1')
-  } catch {}
 }
 
 export const PasskeyLoginButton = ({
@@ -54,7 +43,11 @@ export const PasskeyLoginButton = ({
       attemptedRef.current = true
       return
     }
-    if (isAutoAttemptSuppressedForSession()) {
+    if (!hasDevicePasskeyHint()) {
+      attemptedRef.current = true
+      return
+    }
+    if (isAutoPasskeyAttemptSuppressedForSession()) {
       attemptedRef.current = true
       return
     }
@@ -62,7 +55,7 @@ export const PasskeyLoginButton = ({
     void (async () => {
       const result = await login({ silent: true })
       if (!result.ok && result.reason === 'cancelled') {
-        suppressAutoAttemptForSession()
+        suppressAutoPasskeyAttemptForSession()
       }
     })()
   }, [autoAttempt, disabled, loading, login, isAutomationBrowser])

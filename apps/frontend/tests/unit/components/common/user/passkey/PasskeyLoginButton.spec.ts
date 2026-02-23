@@ -7,6 +7,7 @@ const hoisted = vi.hoisted(() => ({
   loginMock: vi.fn(),
   usePasskeyLoginMock: vi.fn(),
   isAutomationBrowserMock: vi.fn(() => false),
+  hasDevicePasskeyHintMock: vi.fn(() => false),
 }))
 
 vi.mock('@/components/common/user/passkey/usePasskeyLogin', () => ({
@@ -15,6 +16,10 @@ vi.mock('@/components/common/user/passkey/usePasskeyLogin', () => ({
 
 vi.mock('@/hooks/useIsAutomatingBrowser', () => ({
   useIsAutomatingBrowser: () => hoisted.isAutomationBrowserMock,
+}))
+
+vi.mock('@/components/common/user/passkey/helpers/device-passkey-hint', () => ({
+  hasDevicePasskeyHint: hoisted.hasDevicePasskeyHintMock,
 }))
 
 vi.mock('@/components/shionui/Button', () => ({
@@ -38,7 +43,9 @@ describe('components/common/user/passkey/PasskeyLoginButton (unit)', () => {
     hoisted.loginMock.mockReset()
     hoisted.usePasskeyLoginMock.mockReset()
     hoisted.isAutomationBrowserMock.mockReset()
+    hoisted.hasDevicePasskeyHintMock.mockReset()
     hoisted.isAutomationBrowserMock.mockReturnValue(false)
+    hoisted.hasDevicePasskeyHintMock.mockReturnValue(false)
     hoisted.usePasskeyLoginMock.mockReturnValue({
       loading: false,
       login: hoisted.loginMock,
@@ -50,7 +57,17 @@ describe('components/common/user/passkey/PasskeyLoginButton (unit)', () => {
     vi.clearAllMocks()
   })
 
-  it('auto-attempts passkey login once when enabled', async () => {
+  it('does not auto-attempt passkey login when device has no local passkey hint', async () => {
+    hoisted.loginMock.mockResolvedValue({ ok: false, reason: 'unsupported' })
+
+    render(React.createElement(PasskeyLoginButton, { autoAttempt: true }))
+
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(hoisted.loginMock).not.toHaveBeenCalled()
+  })
+
+  it('auto-attempts passkey login when device has local passkey hint', async () => {
+    hoisted.hasDevicePasskeyHintMock.mockReturnValue(true)
     hoisted.loginMock.mockResolvedValue({ ok: false, reason: 'unsupported' })
 
     render(React.createElement(PasskeyLoginButton, { autoAttempt: true }))
@@ -62,6 +79,7 @@ describe('components/common/user/passkey/PasskeyLoginButton (unit)', () => {
   })
 
   it('suppresses future auto-attempts for this session after prompt cancellation', async () => {
+    hoisted.hasDevicePasskeyHintMock.mockReturnValue(true)
     hoisted.loginMock.mockResolvedValue({ ok: false, reason: 'cancelled' })
 
     const first = render(React.createElement(PasskeyLoginButton, { autoAttempt: true }))
@@ -78,6 +96,7 @@ describe('components/common/user/passkey/PasskeyLoginButton (unit)', () => {
 
   it('skips auto-attempt in automation browser', async () => {
     hoisted.isAutomationBrowserMock.mockReturnValue(true)
+    hoisted.hasDevicePasskeyHintMock.mockReturnValue(true)
     hoisted.loginMock.mockResolvedValue({ ok: false, reason: 'cancelled' })
 
     render(React.createElement(PasskeyLoginButton, { autoAttempt: true }))

@@ -5,6 +5,7 @@ import { browserSupportsWebAuthn, startAuthentication } from '@simplewebauthn/br
 import { shionlibRequest } from '@/utils/request'
 import { sileo } from 'sileo'
 import { PasskeyRequestOptionsPayload } from '@/interfaces/auth/passkey.interface'
+import { markDeviceHasPasskeyHint } from '@/components/common/user/passkey/helpers/device-passkey-hint'
 import { useTranslations } from 'next-intl'
 
 interface UsePasskeyLoginOptions {
@@ -104,6 +105,7 @@ export const usePasskeyLogin = ({ onSuccess, getIdentifier }: UsePasskeyLoginOpt
       })
       if (verifyRes.code !== 0) return { ok: false, reason: 'verify_failed' }
 
+      markDeviceHasPasskeyHint()
       await onSuccess?.()
       return { ok: true }
     } catch (error) {

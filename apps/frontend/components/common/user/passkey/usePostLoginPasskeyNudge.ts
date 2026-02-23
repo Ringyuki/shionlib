@@ -4,28 +4,22 @@ import { browserSupportsWebAuthn } from '@simplewebauthn/browser'
 import { shionlibRequest } from '@/utils/request'
 import { useAuthDialogStore } from '@/store/authDialogStore'
 import { PasskeyCredentialItem } from '@/interfaces/auth/passkey.interface'
+import {
+  dismissPasskeyBindNudgeForSession,
+  isPasskeyBindNudgeDismissedForSession,
+} from '@/components/common/user/passkey/helpers/passkey-bind-nudge-session'
 import { useIsAutomatingBrowser } from '@/hooks/useIsAutomatingBrowser'
-
-const getSessionDismissKey = (userId: number) => `shionlib:passkey-bind-nudge:dismissed:${userId}`
 
 export const usePostLoginPasskeyNudge = () => {
   const { openPasskeyBindNudgeDialog } = useAuthDialogStore()
   const isAutomationBrowser = useIsAutomatingBrowser()
 
   const dismissForSession = (userId: number) => {
-    if (userId <= 0) return
-    try {
-      sessionStorage.setItem(getSessionDismissKey(userId), '1')
-    } catch {}
+    dismissPasskeyBindNudgeForSession(userId)
   }
 
   const isDismissedForSession = (userId: number) => {
-    if (userId <= 0) return false
-    try {
-      return sessionStorage.getItem(getSessionDismissKey(userId)) === '1'
-    } catch {
-      return false
-    }
+    return isPasskeyBindNudgeDismissedForSession(userId)
   }
 
   const maybeOpen = async (userId?: number) => {
