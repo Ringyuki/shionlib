@@ -29,10 +29,7 @@ interface GamePVNSectionProps {
   cover?: GameCover
 }
 
-function formatPlayTime(
-  minutes: number,
-  t: (key: string, values?: Record<string, number>) => string,
-): string {
+function formatPlayTime(minutes: number): string {
   if (minutes <= 0) return '0m'
   const hours = Math.floor(minutes / 60)
   const mins = minutes % 60
@@ -109,7 +106,7 @@ export const GamePVNSection = ({ gameId, initialData, cover }: GamePVNSectionPro
           <div className="px-6 pb-2 grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
             <div>
               <span className="text-muted-foreground">{t('totalPlayTime')}</span>
-              <p className="font-medium">{formatPlayTime(pvnData.total_play_time, t)}</p>
+              <p className="font-medium">{formatPlayTime(pvnData.total_play_time)}</p>
             </div>
             <div>
               <span className="text-muted-foreground">{t('lastPlayed')}</span>

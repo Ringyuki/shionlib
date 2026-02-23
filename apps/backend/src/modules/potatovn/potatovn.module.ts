@@ -4,6 +4,7 @@ import { PotatoVNBindingController } from './controllers/potatovn-binding.contro
 import { PotatoVNGameMappingController } from './controllers/potatovn-game-mapping.controller'
 import { PotatoVNBindingService } from './services/potatovn-binding.service'
 import { PotatoVNGameMappingService } from './services/potatovn-game-mapping.service'
+import { PvnApiService } from './services/pvn-api.service'
 import { PvnTokenRefreshTask } from './tasks/pvn-token-refresh.task'
 import { PvnDataSyncTask } from './tasks/pvn-data-sync.task'
 import { CleanExpiresTask } from './tasks/clean-expires.task'
@@ -12,6 +13,7 @@ import { CleanExpiresTask } from './tasks/clean-expires.task'
   imports: [HttpModule],
   controllers: [PotatoVNBindingController, PotatoVNGameMappingController],
   providers: [
+    PvnApiService,
     PotatoVNBindingService,
     PotatoVNGameMappingService,
     PvnTokenRefreshTask,

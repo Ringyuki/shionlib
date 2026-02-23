@@ -20,6 +20,26 @@ export interface PvnGalgame {
   myRate: number
 }
 
+/** Payload for PATCH /galgame (create or update). Mirrors GalgameUpdateDto. */
+export interface PvnGalgameUpdatePayload {
+  id?: number
+  bgmId?: string | null
+  vndbId?: string | null
+  name?: string
+  cnName?: string
+  description?: string
+  tags?: string[]
+  releasedDateTimeStamp?: number | null
+  playType?: number
+  myRate?: number
+  comment?: string
+  headerImageOssLoc?: string
+  headerImageExternalUrl?: string
+  imageLoc?: string
+  imageUrl?: string
+  playCount?: number
+}
+
 export interface PvnGalgameListResponse {
   cnt: number
   pageCnt: number

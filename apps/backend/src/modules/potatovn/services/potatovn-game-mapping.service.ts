@@ -1,12 +1,17 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common'
-import { HttpService } from '@nestjs/axios'
-import { firstValueFrom } from 'rxjs'
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common'
 import { PrismaService } from '../../../prisma.service'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
-import { ShionConfigService } from '../../../common/config/services/config.service'
+import { S3Service } from '../../s3/services/s3.service'
+import { IMAGE_STORAGE } from '../../s3/constants/s3.constants'
 import { PvnGameDataResDto } from '../dto/res/pvn-game-data.res.dto'
-import { PvnGalgame, PvnGalgameListResponse } from '../interfaces/pvn-galgame.interface'
+import {
+  PvnGalgame,
+  PvnGalgameListResponse,
+  PvnGalgameUpdatePayload,
+} from '../interfaces/pvn-galgame.interface'
+import { PvnApiService } from './pvn-api.service'
+import { randomUUID as nodeRandomUUID } from 'node:crypto'
 
 const PVN_GAME_DATA_SELECT = {
   pvn_galgame_id: true,
@@ -20,15 +25,12 @@ const PVN_GAME_DATA_SELECT = {
 @Injectable()
 export class PotatoVNGameMappingService {
   private readonly logger = new Logger(PotatoVNGameMappingService.name)
-  private readonly pvnBaseUrl: string
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly httpService: HttpService,
-    private readonly configService: ShionConfigService,
-  ) {
-    this.pvnBaseUrl = this.configService.get('potatovn.baseUrl')
-  }
+    private readonly pvnApi: PvnApiService,
+    @Inject(IMAGE_STORAGE) private readonly imageStorage: S3Service,
+  ) {}
 
   async getPvnGameData(userId: number, gameId: number): Promise<PvnGameDataResDto> {
     const mapping = await this.prisma.userGamePvnMapping.findUnique({
@@ -57,7 +59,6 @@ export class PotatoVNGameMappingService {
       return existing
     }
 
-    const token = await this.fetchPvnToken(userId)
     const game = await this.prisma.game.findUnique({
       where: { id: gameId },
       select: {
@@ -67,8 +68,8 @@ export class PotatoVNGameMappingService {
         title_zh: true,
         title_en: true,
         tags: true,
-        covers: { select: { url: true, sexual: true, violence: true }, orderBy: { id: 'asc' } },
         images: { select: { url: true, sexual: true, violence: true }, orderBy: { id: 'asc' } },
+        covers: { select: { url: true, sexual: true, violence: true }, orderBy: { id: 'asc' } },
         intro_jp: true,
         intro_zh: true,
         intro_en: true,
@@ -84,21 +85,24 @@ export class PotatoVNGameMappingService {
       )
     }
 
-    const gameInfo = {
+    const imageKey =
+      game.covers.filter(cover => cover.sexual === 0 && cover.violence === 0)[0]?.url ?? null
+    const imageOssLoc = imageKey ? await this.uploadImageToPvnOss(userId, gameId, imageKey) : null
+
+    const gameInfo: PvnGalgameUpdatePayload = {
       bgmId: game.b_id,
       vndbId: game.v_id,
       name: game.title_jp || game.title_zh || game.title_en,
       cnName: game.title_zh,
-      imageUrl:
-        game.covers.filter(cover => cover.sexual === 0 && cover.violence === 0)[0]?.url ?? null,
-      headerImageUrl:
-        game.images.filter(image => image.sexual === 0 && image.violence === 0)[0]?.url ?? null,
       description: game.intro_zh || game.intro_jp || game.intro_en,
       tags: game.tags,
-      releasedDateTimeStamp: game.release_date ? new Date(game.release_date).getTime() : null,
+      releasedDateTimeStamp: game.release_date
+        ? new Date(game.release_date).getTime() / 1000
+        : null,
       playType: 0,
+      ...(imageOssLoc ? { imageLoc: imageOssLoc } : {}),
     }
-    const pvnGalgame = await this.callCreatePvnGalgame(token, gameInfo)
+    const pvnGalgame = await this.pvnApi.patch<PvnGalgame>(userId, '/galgame', gameInfo)
     const playData = this.mapToPvnGameData(pvnGalgame)
 
     return this.prisma.userGamePvnMapping.create({
@@ -130,12 +134,7 @@ export class PotatoVNGameMappingService {
       )
     }
 
-    const token = await this.fetchPvnToken(userId)
-    await firstValueFrom(
-      this.httpService.delete(`${this.pvnBaseUrl}/galgame/${mapping.pvn_galgame_id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }),
-    )
+    await this.pvnApi.delete(userId, `/galgame/${mapping.pvn_galgame_id}`)
     await this.prisma.userGamePvnMapping.delete({
       where: { user_id_game_id: { user_id: userId, game_id: gameId } },
     })
@@ -143,8 +142,7 @@ export class PotatoVNGameMappingService {
 
   async syncLibrary(userId: number): Promise<void> {
     try {
-      const token = await this.fetchPvnToken(userId)
-      const pvnGalgames = await this.fetchAllPvnGalgames(token)
+      const pvnGalgames = await this.fetchAllPvnGalgames(userId)
 
       for (const pvnGame of pvnGalgames) {
         try {
@@ -197,36 +195,17 @@ export class PotatoVNGameMappingService {
     })
   }
 
-  private async fetchPvnToken(userId: number): Promise<string> {
-    const binding = await this.prisma.userPvnBinding.findUnique({
-      where: { user_id: userId },
-      select: { pvn_token: true },
-    })
-
-    if (!binding) {
-      throw new ShionBizException(
-        ShionBizCode.PVN_BINDING_NOT_FOUND,
-        'shion-biz.PVN_BINDING_NOT_FOUND',
-        undefined,
-        HttpStatus.NOT_FOUND,
-      )
-    }
-
-    return binding.pvn_token
-  }
-
-  private async fetchAllPvnGalgames(token: string): Promise<PvnGalgame[]> {
+  private async fetchAllPvnGalgames(userId: number): Promise<PvnGalgame[]> {
     const results: PvnGalgame[] = []
     let pageIndex = 0
     const pageSize = 50
 
     while (true) {
-      const { data } = await firstValueFrom(
-        this.httpService.get<PvnGalgameListResponse>(`${this.pvnBaseUrl}/galgame`, {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { timestamp: 0, pageSize, pageIndex },
-        }),
-      )
+      const data = await this.pvnApi.get<PvnGalgameListResponse>(userId, '/galgame', {
+        timestamp: 0,
+        pageSize,
+        pageIndex,
+      })
 
       results.push(...data.items)
 
@@ -237,16 +216,49 @@ export class PotatoVNGameMappingService {
     return results
   }
 
-  private async callCreatePvnGalgame(
-    token: string,
-    gameInfo: Partial<PvnGalgame>,
-  ): Promise<PvnGalgame> {
-    const { data } = await firstValueFrom(
-      this.httpService.patch<PvnGalgame>(`${this.pvnBaseUrl}/galgame`, gameInfo, {
-        headers: { Authorization: `Bearer ${token}` },
-      }),
-    )
-    return data
+  /**
+   * Downloads an image from our S3, uploads it to PVN's OSS via pre-signed URL,
+   * and returns the objectFullName (imageLoc) on success, or null on failure.
+   * Always calls PUT /oss/update to release pre-occupied space, even on upload failure.
+   */
+  private async uploadImageToPvnOss(
+    userId: number,
+    shionGameId: number,
+    imageKey: string,
+  ): Promise<string | null> {
+    const uuid = nodeRandomUUID()
+    const objectFullName = `shionlib/game/${shionGameId}/${uuid}.webp`
+
+    try {
+      const s3Result = await this.imageStorage.getFile(imageKey)
+      if (!s3Result.Body) return null
+
+      const buffer = Buffer.from(await s3Result.Body.transformToByteArray())
+      const contentType = s3Result.ContentType ?? 'image/webp'
+
+      const putUrl = await this.pvnApi.get<string>(userId, '/oss/put', {
+        objectFullName,
+        requireSpace: buffer.byteLength,
+      })
+
+      try {
+        await this.pvnApi.putRaw(putUrl, buffer, contentType)
+      } finally {
+        await this.pvnApi
+          .put(userId, '/oss/update', { objectFullName })
+          .catch(err =>
+            this.logger.warn(
+              `Failed to update PVN OSS space for ${objectFullName}: ${err?.message}`,
+            ),
+          )
+      }
+      return objectFullName
+    } catch (err) {
+      this.logger.warn(
+        `Failed to upload header image to PVN OSS for game ${shionGameId}: ${err?.message}`,
+      )
+      return null
+    }
   }
 
   private mapToPvnGameData(

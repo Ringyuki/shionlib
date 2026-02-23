@@ -1,14 +1,12 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common'
-import { HttpService } from '@nestjs/axios'
-import { firstValueFrom } from 'rxjs'
 import { PrismaService } from '../../../prisma.service'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
-import { ShionConfigService } from '../../../common/config/services/config.service'
 import { BindPotatoVNReqDto } from '../dto/req/bind-potatovn.req.dto'
 import { PotatoVNBindingResDto } from '../dto/res/potatovn-binding.res.dto'
 import { PvnLoginResponse } from '../interfaces/pvn-login-response.interface'
 import { PotatoVNGameMappingService } from './potatovn-game-mapping.service'
+import { PvnApiService } from './pvn-api.service'
 
 const PVN_BINDING_SELECT = {
   pvn_user_id: true,
@@ -22,16 +20,12 @@ const PVN_BINDING_SELECT = {
 @Injectable()
 export class PotatoVNBindingService {
   private readonly logger = new Logger(PotatoVNBindingService.name)
-  private readonly pvnBaseUrl: string
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly httpService: HttpService,
-    private readonly configService: ShionConfigService,
+    private readonly pvnApi: PvnApiService,
     private readonly potatovnGameMappingService: PotatoVNGameMappingService,
-  ) {
-    this.pvnBaseUrl = this.configService.get('potatovn.baseUrl')
-  }
+  ) {}
 
   async getBinding(userId: number): Promise<PotatoVNBindingResDto> {
     const binding = await this.prisma.userPvnBinding.findUnique({
@@ -101,47 +95,18 @@ export class PotatoVNBindingService {
     await this.prisma.userGamePvnMapping.deleteMany({ where: { user_id: userId } })
   }
 
-  /**
-   * Refresh the PotatoVN token using the current stored token.
-   * Call this before token expiry; PotatoVN provides GET /user/session/refresh.
-   */
   async refreshToken(userId: number): Promise<void> {
-    const binding = await this.prisma.userPvnBinding.findUnique({
-      where: { user_id: userId },
-      select: { pvn_token: true },
-    })
-
-    if (!binding) {
-      throw new ShionBizException(
-        ShionBizCode.PVN_BINDING_NOT_FOUND,
-        'shion-biz.PVN_BINDING_NOT_FOUND',
-        undefined,
-        HttpStatus.NOT_FOUND,
-      )
-    }
-
-    const pvnRes = await this.callPvnRefresh(binding.pvn_token)
-
-    await this.prisma.userPvnBinding.update({
-      where: { user_id: userId },
-      data: {
-        pvn_token: pvnRes.token,
-        pvn_token_expires: new Date(pvnRes.expire * 1000),
-      },
-    })
-  }
-
-  private async loginPotatoVN(userName: string, password: string): Promise<PvnLoginResponse> {
     try {
-      const { data } = await firstValueFrom(
-        this.httpService.post<PvnLoginResponse>(`${this.pvnBaseUrl}/user/session`, {
-          userName,
-          password,
-        }),
-      )
-      return data
+      const pvnRes = await this.pvnApi.get<PvnLoginResponse>(userId, '/user/session/refresh')
+      await this.prisma.userPvnBinding.update({
+        where: { user_id: userId },
+        data: {
+          pvn_token: pvnRes.token,
+          pvn_token_expires: new Date(pvnRes.expire * 1000),
+        },
+      })
     } catch (err) {
-      this.logger.warn(`PotatoVN login failed for user "${userName}": ${err?.message}`)
+      this.logger.warn(`PotatoVN token refresh failed for userId=${userId}: ${err?.message}`)
       throw new ShionBizException(
         ShionBizCode.PVN_BINDING_AUTH_FAILED,
         'shion-biz.PVN_BINDING_AUTH_FAILED',
@@ -151,16 +116,11 @@ export class PotatoVNBindingService {
     }
   }
 
-  private async callPvnRefresh(currentToken: string): Promise<PvnLoginResponse> {
+  private async loginPotatoVN(userName: string, password: string): Promise<PvnLoginResponse> {
     try {
-      const { data } = await firstValueFrom(
-        this.httpService.get<PvnLoginResponse>(`${this.pvnBaseUrl}/user/session/refresh`, {
-          headers: { Authorization: currentToken },
-        }),
-      )
-      return data
+      return await this.pvnApi.postPublic<PvnLoginResponse>('/user/session', { userName, password })
     } catch (err) {
-      this.logger.warn(`PotatoVN token refresh failed: ${err?.message}`)
+      this.logger.warn(`PotatoVN login failed for user "${userName}": ${err?.message}`)
       throw new ShionBizException(
         ShionBizCode.PVN_BINDING_AUTH_FAILED,
         'shion-biz.PVN_BINDING_AUTH_FAILED',

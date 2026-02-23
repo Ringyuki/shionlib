@@ -2,7 +2,6 @@
 
 import { CommentBox } from './CommentBox'
 import { CommentList } from './CommentList'
-import { MessageSquareMore } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Comment } from '@/interfaces/comment/comment.interface'
 import { Empty } from '@/components/common/content/Empty'
@@ -21,8 +20,8 @@ export const CommentContent = ({ game_id, comments }: CommentContentProps) => {
   return (
     <div className="flex flex-col gap-4 w-full" id="comment-content">
       <div className="flex flex-col gap-2">
-        <h2 className="flex items-center gap-2 text-lg font-bold">
-          <MessageSquareMore />
+        <h2 className="flex items-center gap-4 text-lg font-bold">
+          <div className="w-1 h-6 bg-primary rounded" />
           {t('comments')}
         </h2>
         <p className="text-sm text-muted-foreground">{t('description')}</p>
