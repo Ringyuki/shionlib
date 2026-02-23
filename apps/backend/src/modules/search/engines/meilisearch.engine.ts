@@ -33,6 +33,10 @@ export class MeilisearchEngine implements SearchEngine {
       .trim()
   }
 
+  private escapeFilterString(value: string): string {
+    return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+  }
+
   private async getIndex(
     createIfNotExists: boolean = false,
   ): Promise<MeiliIndex<IndexedGame> | null> {
@@ -74,7 +78,10 @@ export class MeilisearchEngine implements SearchEngine {
     content_limit?: UserContentLimit,
   ): Promise<PaginatedResult<GameItemResDto>> {
     const index = await this.getIndex()
-    if (!index || !query.q) {
+    const rawQ = query.q
+    const q = rawQ?.trim()
+    const tag = query.tag?.trim()
+    if (!index || (!q && !tag)) {
       return {
         items: [],
         meta: {
@@ -87,14 +94,17 @@ export class MeilisearchEngine implements SearchEngine {
       }
     }
 
-    const { page, pageSize, q } = query
+    const { page, pageSize } = query
     const filter: string[] = []
     if (content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT || !content_limit) {
       filter.push('nsfw = false')
       filter.push('max_cover_sexual = 0')
     }
+    if (tag) {
+      filter.push(`tags = "${this.escapeFilterString(tag)}"`)
+    }
 
-    const res = await index.search(this.sanitizeQuery(q), {
+    const res = await index.search(this.sanitizeQuery(rawQ ?? ''), {
       page,
       hitsPerPage: pageSize,
       filter: filter.length ? filter : undefined,

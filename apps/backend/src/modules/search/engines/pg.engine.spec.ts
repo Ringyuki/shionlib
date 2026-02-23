@@ -109,6 +109,22 @@ describe('PgSearchEngine', () => {
     expect(countArg.where.OR).toHaveLength(11)
   })
 
+  it('searchGames supports tag-only filtering', async () => {
+    const { engine, prisma } = createEngine()
+    ;(prisma.game.count as jest.Mock).mockResolvedValue(1)
+    ;(prisma.game.findMany as jest.Mock).mockResolvedValue([{ id: 12 }])
+
+    await engine.searchGames({
+      tag: 'otome',
+      page: 1,
+      pageSize: 10,
+    } as any)
+
+    const countArg = (prisma.game.count as jest.Mock).mock.calls[0][0]
+    expect(countArg.where.tags).toEqual({ has: 'otome' })
+    expect(countArg.where.OR).toBeUndefined()
+  })
+
   it('no-op mutation methods and tags search return defaults', async () => {
     const { engine } = createEngine()
 

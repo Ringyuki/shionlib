@@ -23,9 +23,16 @@ export class PgSearchEngine implements SearchEngine {
 
   async deleteAllGames() {}
 
-  async searchGames(q: SearchQuery): Promise<PaginatedResult<GameItemResDto>> {
-    const { page, pageSize, content_limit } = q
-    if (!q.q) {
+  async searchGames(
+    query: SearchQuery,
+    contentLimitArg?: UserContentLimit,
+  ): Promise<PaginatedResult<GameItemResDto>> {
+    const { page, pageSize } = query
+    const q = query.q?.trim()
+    const tag = query.tag?.trim()
+    const content_limit = contentLimitArg ?? query.content_limit
+
+    if (!q && !tag) {
       return {
         items: [],
         meta: {
@@ -44,20 +51,24 @@ export class PgSearchEngine implements SearchEngine {
       where.covers = { every: { sexual: { in: [0] } } }
     }
 
-    if (q.q) {
+    if (tag) {
+      where.tags = { has: tag }
+    }
+
+    if (q) {
       where.OR = [
-        { title_jp: { contains: q.q, mode: 'insensitive' } },
-        { title_zh: { contains: q.q, mode: 'insensitive' } },
-        { title_en: { contains: q.q, mode: 'insensitive' } },
-        { aliases: { has: q.q } },
-        { intro_jp: { contains: q.q, mode: 'insensitive' } },
-        { intro_zh: { contains: q.q, mode: 'insensitive' } },
-        { intro_en: { contains: q.q, mode: 'insensitive' } },
-        { tags: { has: q.q } },
+        { title_jp: { contains: q, mode: 'insensitive' } },
+        { title_zh: { contains: q, mode: 'insensitive' } },
+        { title_en: { contains: q, mode: 'insensitive' } },
+        { aliases: { has: q } },
+        { intro_jp: { contains: q, mode: 'insensitive' } },
+        { intro_zh: { contains: q, mode: 'insensitive' } },
+        { intro_en: { contains: q, mode: 'insensitive' } },
+        { tags: { has: q } },
         {
           developers: {
             some: {
-              developer: { name: { contains: q.q, mode: 'insensitive' }, aliases: { has: q.q } },
+              developer: { name: { contains: q, mode: 'insensitive' }, aliases: { has: q } },
             },
           },
         },
@@ -65,18 +76,18 @@ export class PgSearchEngine implements SearchEngine {
           characters: {
             some: {
               character: {
-                name_jp: { contains: q.q, mode: 'insensitive' },
-                name_en: { contains: q.q, mode: 'insensitive' },
-                name_zh: { contains: q.q, mode: 'insensitive' },
-                aliases: { has: q.q },
-                intro_jp: { contains: q.q, mode: 'insensitive' },
-                intro_en: { contains: q.q, mode: 'insensitive' },
-                intro_zh: { contains: q.q, mode: 'insensitive' },
+                name_jp: { contains: q, mode: 'insensitive' },
+                name_en: { contains: q, mode: 'insensitive' },
+                name_zh: { contains: q, mode: 'insensitive' },
+                aliases: { has: q },
+                intro_jp: { contains: q, mode: 'insensitive' },
+                intro_en: { contains: q, mode: 'insensitive' },
+                intro_zh: { contains: q, mode: 'insensitive' },
               },
             },
           },
         },
-        { staffs: { array_contains: q.q } },
+        { staffs: { array_contains: q } },
       ]
     }
 

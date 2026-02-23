@@ -199,6 +199,26 @@ describe('MeilisearchEngine', () => {
     )
   })
 
+  it('searchGames supports tag-only filtering and escapes filter value', async () => {
+    const { engine, meilisearchService } = createEngine()
+    const index = createIndexMock()
+    ;(meilisearchService.getClient as jest.Mock).mockReturnValue({})
+    ;(meilisearchService.ensureIndex as jest.Mock).mockResolvedValue(index)
+    ;(index.search as jest.Mock).mockResolvedValue({ hits: [], totalHits: 0, totalPages: 0 })
+
+    await engine.searchGames(
+      { tag: 'a"b\\c', page: 1, pageSize: 10 } as any,
+      UserContentLimit.JUST_SHOW,
+    )
+
+    expect(index.search).toHaveBeenCalledWith(
+      '',
+      expect.objectContaining({
+        filter: ['tags = "a\\"b\\\\c"'],
+      }),
+    )
+  })
+
   it('searchGameTags ranks exact > prefix > count > shorter value', async () => {
     const { engine, meilisearchService } = createEngine()
     const index = createIndexMock()

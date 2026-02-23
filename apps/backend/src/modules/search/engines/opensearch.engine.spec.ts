@@ -185,7 +185,7 @@ describe('OpenSearchEngine', () => {
     ;(opensearchService.getClient as jest.Mock).mockReturnValue(client)
 
     const result = await engine.searchGames(
-      { q: 'query', page: 2, pageSize: 2 } as any,
+      { q: 'query', tag: 'otome', page: 2, pageSize: 2 } as any,
       UserContentLimit.NEVER_SHOW_NSFW_CONTENT,
     )
 
@@ -198,7 +198,11 @@ describe('OpenSearchEngine', () => {
         body: expect.objectContaining({
           query: expect.objectContaining({
             bool: expect.objectContaining({
-              filter: [{ term: { nsfw: false } }, { term: { max_cover_sexual: 0 } }],
+              filter: [
+                { term: { nsfw: false } },
+                { term: { max_cover_sexual: 0 } },
+                { term: { tags: 'otome' } },
+              ],
             }),
           }),
         }),
@@ -224,6 +228,39 @@ describe('OpenSearchEngine', () => {
         currentPage: 2,
       },
     })
+  })
+
+  it('searchGames supports tag-only filtering without multi_match must clause', async () => {
+    const { engine, opensearchService } = createEngine()
+    const client = {
+      search: jest.fn().mockResolvedValue({
+        body: {
+          hits: {
+            total: { value: 0 },
+            hits: [],
+          },
+        },
+      }),
+    }
+    ;(opensearchService.getClient as jest.Mock).mockReturnValue(client)
+
+    await engine.searchGames(
+      { tag: 'otome', page: 1, pageSize: 10 } as any,
+      UserContentLimit.JUST_SHOW,
+    )
+
+    expect(client.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              must: [],
+              filter: [{ term: { tags: 'otome' } }],
+            }),
+          }),
+        }),
+      }),
+    )
   })
 
   it('searchGameTags returns empty array when client is missing', async () => {

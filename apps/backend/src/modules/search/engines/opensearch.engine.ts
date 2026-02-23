@@ -103,7 +103,9 @@ export class OpenSearchEngine implements SearchEngine {
     content_limit?: UserContentLimit,
   ): Promise<PaginatedResult<GameItemResDto>> {
     const client = this.opensearchService.getClient()
-    if (!client || !query.q) {
+    const q = query.q?.trim()
+    const tag = query.tag?.trim()
+    if (!client || (!q && !tag)) {
       return {
         items: [],
         meta: {
@@ -118,13 +120,47 @@ export class OpenSearchEngine implements SearchEngine {
 
     await this.opensearchService.ensureIndex(this.indexName, false)
 
-    const { page, pageSize, q } = query
+    const { page, pageSize } = query
     const from = Math.max(0, (page - 1) * pageSize)
 
     const filters: any[] = []
     if (content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT || !content_limit) {
       filters.push({ term: { nsfw: false } })
       filters.push({ term: { max_cover_sexual: 0 } })
+    }
+    if (tag) {
+      filters.push({ term: { tags: tag } })
+    }
+
+    const must: any[] = []
+    if (q) {
+      must.push({
+        multi_match: {
+          query: q,
+          fields: [
+            'title_jp^5',
+            'title_zh^5',
+            'title_en^5',
+            'aliases^5',
+            'intro_jp',
+            'intro_zh',
+            'intro_en',
+            'tags^2',
+            'developers.name^3',
+            'character_names_jp',
+            'character_names_en',
+            'character_names_zh',
+            'character_aliases',
+            'character_intros_jp',
+            'character_intros_en',
+            'character_intros_zh',
+            'staffs',
+          ],
+          type: 'best_fields' as const,
+          fuzziness: 'AUTO' as const,
+          operator: 'OR' as const,
+        },
+      })
     }
 
     const sQuery = {
@@ -141,33 +177,7 @@ export class OpenSearchEngine implements SearchEngine {
       query: {
         bool: {
           must: [
-            {
-              multi_match: {
-                query: q,
-                fields: [
-                  'title_jp^5',
-                  'title_zh^5',
-                  'title_en^5',
-                  'aliases^5',
-                  'intro_jp',
-                  'intro_zh',
-                  'intro_en',
-                  'tags^2',
-                  'developers.name^3',
-                  'character_names_jp',
-                  'character_names_en',
-                  'character_names_zh',
-                  'character_aliases',
-                  'character_intros_jp',
-                  'character_intros_en',
-                  'character_intros_zh',
-                  'staffs',
-                ],
-                type: 'best_fields' as const,
-                fuzziness: 'AUTO' as const,
-                operator: 'OR' as const,
-              },
-            },
+            ...must,
             // {
             //   nested: {
             //     path: 'staffs',

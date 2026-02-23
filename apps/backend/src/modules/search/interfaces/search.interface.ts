@@ -4,7 +4,8 @@ import { IndexedGame } from './index.interface'
 import { UserContentLimit } from '../../user/interfaces/user.interface'
 
 export interface SearchQuery extends PaginationReqDto {
-  q: string
+  q?: string
+  tag?: string
   content_limit?: number
 }
 

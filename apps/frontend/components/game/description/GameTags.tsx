@@ -22,7 +22,7 @@ export const GameTags = ({ tags }: GameTagsProps) => {
         <div className="flex flex-wrap gap-2">
           {tags.map((tag, index) => (
             <Link
-              href={`/search/game?q=${tag}`}
+              href={`/search/game?tag=${encodeURIComponent(tag)}`}
               key={index}
               className="hover:opacity-80 transition-all duration-200"
             >

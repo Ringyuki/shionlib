@@ -15,10 +15,12 @@ const hoisted = vi.hoisted(() => {
     ({
       games,
       q,
+      tag,
       content_limit,
     }: {
       games: Array<{ id: number }>
-      q: string
+      q?: string
+      tag?: string
       content_limit: any
     }) =>
       React.createElement(
@@ -26,7 +28,8 @@ const hoisted = vi.hoisted(() => {
         {
           'data-testid': 'search-results',
           'data-count': String(games.length),
-          'data-q': q,
+          'data-q': q ?? '',
+          'data-tag': tag ?? '',
           'data-limit': String(content_limit),
         },
         'results',
@@ -120,7 +123,54 @@ describe('app/[locale]/(main)/search/page and /search/game/page (unit)', () => {
     expect(html).toContain('data-testid="search-results"')
     expect(html).toContain('data-count="2"')
     expect(html).toContain('data-q="fate"')
+    expect(html).toContain('data-tag=""')
     expect(html).toContain('data-limit="3"')
+  })
+
+  it('search game supports tag-only filtering', async () => {
+    hoisted.get.mockResolvedValue({
+      data: {
+        items: [{ id: 20 }],
+        meta: {
+          page: 1,
+          pageSize: 20,
+          total: 1,
+          content_limit: 2,
+        },
+      },
+    })
+
+    const pageModule = await import('../../../app/[locale]/(main)/search/game/page')
+    const element = await pageModule.default({
+      searchParams: Promise.resolve({ page: '1', tag: 'otome' }),
+    })
+
+    expect(hoisted.get).toHaveBeenCalledWith('/search/games', {
+      params: {
+        page: '1',
+        pageSize: 20,
+        tag: 'otome',
+      },
+    })
+
+    const html = renderToStaticMarkup(element)
+    expect(html).toContain('data-q=""')
+    expect(html).toContain('data-tag="otome"')
+  })
+
+  it('search game metadata supports tag-only canonical url', async () => {
+    hoisted.getTranslations.mockResolvedValue(
+      (key: string, params: { q: string }) => `${key}:${params.q}`,
+    )
+
+    const pageModule = await import('../../../app/[locale]/(main)/search/game/page')
+    const metadata = await pageModule.generateMetadata({
+      params: Promise.resolve({ locale: 'en' }),
+      searchParams: Promise.resolve({ tag: 'otome', page: '2' }),
+    } as any)
+
+    expect(metadata.title).toBe('title:otome')
+    expect(metadata.alternates?.canonical).toBe('/en/search/game?tag=otome&page=2')
   })
 
   it('search game metadata uses localized title and noindex robots', async () => {

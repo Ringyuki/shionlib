@@ -4,8 +4,13 @@ import { ivm } from '../../../../common/validation/i18n'
 import { Type } from 'class-transformer'
 
 export class SearchGamesReqDto extends PaginationReqDto {
+  @IsOptional()
   @IsString({ message: ivm('validation.common.IS_STRING', { property: 'q' }) })
-  q: string
+  q?: string
+
+  @IsOptional()
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'tag' }) })
+  tag?: string
 
   @IsNumber(
     { allowNaN: false, allowInfinity: false },
