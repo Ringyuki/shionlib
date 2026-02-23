@@ -69,6 +69,7 @@
     "@opensearch-project/opensearch": "^3.5.1",
     "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^7.0.0",
+    "@simplewebauthn/server": "^13.2.3",
     "@socket.io/redis-adapter": "^8.3.0",
     "argon2": "^0.44.0",
     "bull": "^4.16.5",

@@ -6,7 +6,7 @@ import {
 } from '../_helpers/fixtures.mjs'
 
 test.describe('User settings and password-forget pages', () => {
-  test('logged-in user should access personal/site/download settings routes', async ({
+  test('logged-in user should access personal/security/site/download settings routes', async ({
     page,
     request,
   }) => {
@@ -36,6 +36,12 @@ test.describe('User settings and password-forget pages', () => {
     expect(downloadResponse.ok()).toBeTruthy()
     await expect(page).toHaveURL(/\/en\/user\/settings\/download$/)
     await expect(page.locator('input[value="localhost"]').first()).toBeVisible()
+
+    const securityResponse = await page.goto('/en/user/settings/security')
+    expect(securityResponse).not.toBeNull()
+    expect(securityResponse.ok()).toBeTruthy()
+    await expect(page).toHaveURL(/\/en\/user\/settings\/security$/)
+    await expect(page.getByTestId('settings-password-card')).toBeVisible()
   })
 
   test('forget password page should render request form', async ({ page }) => {

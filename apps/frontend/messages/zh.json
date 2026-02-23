@@ -280,6 +280,13 @@
           "logout": "登出",
           "cancel": "取消"
         },
+        "PasskeyBindNudgeDialog": {
+          "title": "启用通行密钥登录",
+          "description": "当前设备支持通行密钥登录。添加后可更快登录，无需输入密码。",
+          "hint": "你也可以稍后前往 设置页 > 安全设置 添加通行密钥。",
+          "later": "稍后再说",
+          "goToSettings": "前往安全设置"
+        },
         "Login": {
           "title": "登录",
           "description": "登录",
@@ -287,6 +294,8 @@
           "password": "密码",
           "forgetPassword": "忘记密码？",
           "login": "登录",
+          "usePasskey": "使用 通行密钥 登录",
+          "passkeyUnsupported": "当前设备或浏览器不支持通行密钥",
           "success": "登录成功",
           "validation": {
             "identifier": "用户名或邮箱不能为空",
@@ -1116,6 +1125,7 @@
       "Settings": {
         "TabsNav": {
           "personal": "个人信息",
+          "security": "安全设置",
           "site": "站点设置",
           "download": "下载设置",
           "connections": "账号关联"
@@ -1145,6 +1155,37 @@
           "update": "更新密码",
           "forget": "忘记密码？",
           "success": "更新成功，请重新登录"
+        },
+        "Passkey": {
+          "title": "通行密钥",
+          "description": "在支持的设备上添加通行密钥，实现免密码登录。",
+          "unsupported": "当前浏览器或设备不支持 WebAuthn Passkey。",
+          "namePlaceholder": "通行密钥名称（可选）",
+          "add": "添加通行密钥",
+          "addSuccess": "通行密钥添加成功",
+          "remove": "移除",
+          "removeSuccess": "通行密钥已移除",
+          "loading": "正在加载...",
+          "empty": "暂未添加通行密钥",
+          "unnamed": "未命名通行密钥",
+          "backedUp": "已备份",
+          "lastUsedLabel": "上次使用",
+          "count": "{count} 个通行密钥",
+          "deviceType": {
+            "unknown": "未知设备",
+            "multiDevice": "可同步通行密钥",
+            "singleDevice": "单设备通行密钥"
+          },
+          "removeDialog": {
+            "title": "移除通行密钥",
+            "description": "确定要移除“{name}”吗？移除后你可能无法再使用该通行密钥登录。",
+            "cancel": "取消",
+            "confirm": "移除"
+          },
+          "time": {
+            "never": "从未",
+            "unknown": "未知"
+          }
         },
         "PasswordForm": {
           "validation": {

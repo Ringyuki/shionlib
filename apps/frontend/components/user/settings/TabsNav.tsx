@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 
 const tabs = [
   { name: 'personal', href: 'personal' },
+  { name: 'security', href: 'security' },
   { name: 'site', href: 'site' },
   { name: 'download', href: 'download' },
   { name: 'connections', href: 'connections' },

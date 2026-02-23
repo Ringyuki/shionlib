@@ -12,6 +12,8 @@ import { UserService } from '../user/services/user.service'
 import { VerificationCodeService } from './services/vrification-code.service'
 import { VerificationCodeController } from './controllers/verification-code.controller'
 import { PasswordService } from './services/password.service'
+import { PasskeyService } from './services/passkey.service'
+import { PasskeyController } from './controllers/passkey.controller'
 
 @Global()
 @Module({
@@ -36,8 +38,9 @@ import { PasswordService } from './services/password.service'
     UserService,
     VerificationCodeService,
     PasswordService,
+    PasskeyService,
   ],
-  controllers: [AuthController, VerificationCodeController],
+  controllers: [AuthController, VerificationCodeController, PasskeyController],
   exports: [JwtModule, PassportModule, LoginSessionService, UserService],
 })
 export class AuthModule {}

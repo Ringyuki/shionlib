@@ -78,6 +78,7 @@
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@remixicon/react": "^4.8.0",
+    "@simplewebauthn/browser": "^13.2.2",
     "@stepperize/react": "^5.1.9",
     "@types/mdx": "^2.0.13",
     "@uiw/react-codemirror": "^4.25.4",

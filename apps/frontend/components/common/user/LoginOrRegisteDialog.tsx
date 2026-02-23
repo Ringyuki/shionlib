@@ -75,7 +75,7 @@ export const LoginOrRegisteDialog = ({
           </Button>
         </DialogDescription>
         {dialogTypeInner === 'login' ? (
-          <Login onSuccess={() => setOpen(false)} />
+          <Login onSuccess={() => setOpen(false)} active={open && dialogTypeInner === 'login'} />
         ) : (
           <Register onSuccess={() => setDialogTypeInner('login')} />
         )}

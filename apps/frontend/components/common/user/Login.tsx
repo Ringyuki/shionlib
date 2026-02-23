@@ -22,14 +22,18 @@ import { shionlibRequest } from '@/utils/request'
 import { User } from '@/interfaces/user/user.interface'
 import { Link, usePathname, useRouter } from '@/i18n/navigation.client'
 import { useLocale } from 'next-intl'
+import { PasskeyLoginButton } from '@/components/common/user/passkey/PasskeyLoginButton'
+import { useAuthDialogStore } from '@/store/authDialogStore'
 
 interface LoginProps {
   onSuccess?: () => void
+  active?: boolean
 }
 
-export const Login = ({ onSuccess }: LoginProps) => {
+export const Login = ({ onSuccess, active = false }: LoginProps) => {
   const t = useTranslations('Components.Common.User.Login')
   const { setUser } = useShionlibUserStore()
+  const { markLoginSuccess } = useAuthDialogStore()
   const router = useRouter()
   const pathname = usePathname()
   const locale = useLocale()
@@ -46,21 +50,25 @@ export const Login = ({ onSuccess }: LoginProps) => {
     },
   })
 
+  const handleLoginSuccess = async () => {
+    try {
+      const data = await shionlibRequest().get<User>('/user/me')
+      setUser(data.data!)
+      markLoginSuccess()
+      router.refresh()
+      onSuccess?.()
+      sileo.success({ title: t('success') })
+      const targetLocale = data.data?.lang || 'en'
+      if (targetLocale === locale) return
+      router.replace(pathname, { locale: targetLocale })
+    } catch {}
+  }
+
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     try {
       setLoading(true)
       await shionlibRequest({ forceThrowError: true }).post('/user/login', { data })
-      try {
-        const data = await shionlibRequest().get<User>('/user/me')
-        setUser(data.data!)
-        router.refresh()
-        onSuccess?.()
-        // toast.success(t('success'))
-        sileo.success({ title: t('success') })
-        const targetLocale = data.data?.lang || 'en'
-        if (targetLocale === locale) return
-        router.replace(pathname, { locale: targetLocale })
-      } catch {}
+      await handleLoginSuccess()
     } catch {
     } finally {
       setLoading(false)
@@ -110,6 +118,12 @@ export const Login = ({ onSuccess }: LoginProps) => {
         <Button type="submit" loading={loading} className="w-full">
           {t('login')}
         </Button>
+        <PasskeyLoginButton
+          disabled={loading}
+          identifier={form.watch('identifier')}
+          onSuccess={handleLoginSuccess}
+          autoAttempt={active}
+        />
       </form>
     </Form>
   )

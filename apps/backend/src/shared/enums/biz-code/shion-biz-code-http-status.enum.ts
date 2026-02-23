@@ -10,6 +10,7 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
 
   // 20
   [ShionBizCode.AUTH_UNAUTHORIZED]: HttpStatus.UNAUTHORIZED,
+  [ShionBizCode.AUTH_FORBIDDEN]: HttpStatus.FORBIDDEN,
   [ShionBizCode.AUTH_INVALID_TOKEN]: HttpStatus.UNAUTHORIZED,
   [ShionBizCode.AUTH_INVALID_REFRESH_TOKEN]: HttpStatus.UNAUTHORIZED,
   [ShionBizCode.AUTH_REFRESH_TOKEN_EXPIRED]: HttpStatus.UNAUTHORIZED,

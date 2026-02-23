@@ -3,6 +3,7 @@
   "COMMON_NOT_IMPLEMENTED": "接口未实现",
 
   "AUTH_UNAUTHORIZED": "未认证",
+  "AUTH_FORBIDDEN": "禁止访问",
   "AUTH_INVALID_TOKEN": "无效的令牌",
   "AUTH_INVALID_REFRESH_TOKEN": "无效的刷新令牌",
   "AUTH_REFRESH_TOKEN_EXPIRED": "刷新令牌已过期",

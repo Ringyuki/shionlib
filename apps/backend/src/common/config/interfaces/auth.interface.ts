@@ -10,4 +10,11 @@ export interface AuthConfig {
     rotationGraceSec: number
     algorithmVersion: string
   }
+  webauthn: {
+    rpId: string
+    rpName: string
+    origins: string[]
+    timeoutMs: number
+    challengeTtlSec: number
+  }
 }

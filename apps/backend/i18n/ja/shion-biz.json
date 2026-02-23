@@ -3,6 +3,7 @@
   "COMMON_NOT_IMPLEMENTED": "未実装",
 
   "AUTH_UNAUTHORIZED": "認証されていません",
+  "AUTH_FORBIDDEN": "アクセスが禁止されています",
   "AUTH_INVALID_TOKEN": "無効なトークン",
   "AUTH_INVALID_REFRESH_TOKEN": "無効なリフレッシュトークン",
   "AUTH_REFRESH_TOKEN_EXPIRED": "リフレッシュトークンが期限切れです",

@@ -3,6 +3,7 @@
   "COMMON_NOT_IMPLEMENTED": "not implemented",
 
   "AUTH_UNAUTHORIZED": "unauthorized",
+  "AUTH_FORBIDDEN": "forbidden",
   "AUTH_INVALID_TOKEN": "invalid token",
   "AUTH_INVALID_REFRESH_TOKEN": "invalid refresh token",
   "AUTH_REFRESH_TOKEN_EXPIRED": "refresh token expired",

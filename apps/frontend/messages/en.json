@@ -280,6 +280,13 @@
           "logout": "Log out",
           "cancel": "Cancel"
         },
+        "PasskeyBindNudgeDialog": {
+          "title": "Enable Passkey Sign-in",
+          "description": "This device supports Passkey sign-in. Add one to sign in faster without a password.",
+          "hint": "You can add a Passkey later in Settings > Security.",
+          "later": "Maybe later",
+          "goToSettings": "Open Security Settings"
+        },
         "Login": {
           "title": "Log in",
           "description": "Log in",
@@ -287,6 +294,8 @@
           "password": "Password",
           "forgetPassword": "Forgot password?",
           "login": "Log in",
+          "usePasskey": "Use Passkey",
+          "passkeyUnsupported": "Passkey is not supported on this device/browser",
           "success": "Logged in successfully",
           "validation": {
             "identifier": "Email or username is required",
@@ -1116,6 +1125,7 @@
       "Settings": {
         "TabsNav": {
           "personal": "Personal information",
+          "security": "Security",
           "site": "Site settings",
           "download": "Download settings",
           "connections": "Connected accounts"
@@ -1145,6 +1155,37 @@
           "update": "Update password",
           "forget": "Forgot password?",
           "success": "Updated successfully, please log in again"
+        },
+        "Passkey": {
+          "title": "Passkeys",
+          "description": "Add a passkey for passwordless sign-in on supported devices.",
+          "unsupported": "This browser/device does not support WebAuthn passkeys.",
+          "namePlaceholder": "Passkey name (optional)",
+          "add": "Add Passkey",
+          "addSuccess": "Passkey added",
+          "remove": "Remove",
+          "removeSuccess": "Passkey removed",
+          "loading": "Loading passkeys...",
+          "empty": "No passkeys added yet.",
+          "unnamed": "Unnamed passkey",
+          "backedUp": "Backed up",
+          "lastUsedLabel": "Last used",
+          "count": "{count, plural, =0 {0 passkeys} one {# passkey} other {# passkeys}}",
+          "deviceType": {
+            "unknown": "Unknown device",
+            "multiDevice": "Synced passkey",
+            "singleDevice": "Single-device passkey"
+          },
+          "removeDialog": {
+            "title": "Remove passkey",
+            "description": "Are you sure you want to remove \"{name}\"? You may no longer be able to sign in with this passkey.",
+            "cancel": "Cancel",
+            "confirm": "Remove"
+          },
+          "time": {
+            "never": "Never",
+            "unknown": "Unknown"
+          }
         },
         "PasswordForm": {
           "validation": {

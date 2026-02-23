@@ -29,4 +29,16 @@ describe('store/authDialogStore (unit)', () => {
     useAuthDialogStore.getState().closeLogoutDialog()
     expect(useAuthDialogStore.getState().logoutDialogOpen).toBe(false)
   })
+
+  it('tracks login success event and passkey bind nudge dialog state', () => {
+    const before = useAuthDialogStore.getState().loginSuccessNonce
+    useAuthDialogStore.getState().markLoginSuccess()
+    expect(useAuthDialogStore.getState().loginSuccessNonce).toBeGreaterThanOrEqual(before)
+
+    useAuthDialogStore.getState().openPasskeyBindNudgeDialog()
+    expect(useAuthDialogStore.getState().passkeyBindNudgeDialogOpen).toBe(true)
+
+    useAuthDialogStore.getState().closePasskeyBindNudgeDialog()
+    expect(useAuthDialogStore.getState().passkeyBindNudgeDialogOpen).toBe(false)
+  })
 })

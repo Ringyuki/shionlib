@@ -26,6 +26,13 @@ const hoisted = vi.hoisted(() => {
   const DownloadSettings = vi.fn(() =>
     React.createElement('section', { 'data-testid': 'download-settings' }, 'download'),
   )
+  const SecuritySettings = vi.fn(({ user }: { user: { id: number } }) =>
+    React.createElement(
+      'section',
+      { 'data-testid': 'security-settings', 'data-id': String(user.id) },
+      'sec',
+    ),
+  )
 
   return {
     get,
@@ -34,6 +41,7 @@ const hoisted = vi.hoisted(() => {
     SiteSettings,
     LoginRequired,
     DownloadSettings,
+    SecuritySettings,
   }
 })
 
@@ -52,6 +60,9 @@ vi.mock('@/components/user/settings/LoginRequired', () => ({
 }))
 vi.mock('@/components/user/settings/DownloadSettings', () => ({
   DownloadSettings: hoisted.DownloadSettings,
+}))
+vi.mock('@/components/user/settings/SecuritySettings', () => ({
+  SecuritySettings: hoisted.SecuritySettings,
 }))
 
 describe('app/[locale]/(main)/user/settings/* pages (unit)', () => {
@@ -100,5 +111,17 @@ describe('app/[locale]/(main)/user/settings/* pages (unit)', () => {
 
     const html = renderToStaticMarkup(element)
     expect(html).toContain('data-testid="download-settings"')
+  })
+
+  it('renders security settings when user exists', async () => {
+    hoisted.get.mockResolvedValue({ data: { id: 9 } })
+
+    const pageModule = await import('../../../app/[locale]/(main)/user/settings/security/page')
+    const element = await pageModule.default()
+
+    expect(hoisted.get).toHaveBeenCalledWith('/user/me')
+    const html = renderToStaticMarkup(element)
+    expect(html).toContain('data-testid="security-settings"')
+    expect(html).toContain('data-id="9"')
   })
 })

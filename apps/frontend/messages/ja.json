@@ -266,6 +266,13 @@
           "logout": "ログアウト",
           "cancel": "キャンセル"
         },
+        "PasskeyBindNudgeDialog": {
+          "title": "Passkey ログインを有効化",
+          "description": "この端末は Passkey ログインに対応しています。追加すると、次回からパスワードなしで素早くログインできます。",
+          "hint": "あとで 設定 > セキュリティ から Passkey を追加することもできます。",
+          "later": "あとで",
+          "goToSettings": "セキュリティ設定を開く"
+        },
         "Login": {
           "title": "ログイン",
           "description": "ログイン",
@@ -273,6 +280,8 @@
           "password": "パスワード",
           "forgetPassword": "パスワードを忘れた？",
           "login": "ログイン",
+          "usePasskey": "Passkey でログイン",
+          "passkeyUnsupported": "この端末またはブラウザは Passkey に対応していません",
           "success": "ログインしました",
           "validation": {
             "identifier": "ユーザー名またはメールアドレスは必須です",
@@ -1102,6 +1111,7 @@
       "Settings": {
         "TabsNav": {
           "personal": "個人情報",
+          "security": "セキュリティ",
           "site": "サイト設定",
           "download": "ダウンロード設定",
           "connections": "アカウント連携"
@@ -1131,6 +1141,37 @@
           "update": "パスワードを更新",
           "forget": "パスワードを忘れた？",
           "success": "更新成功, 再ログインしてください"
+        },
+        "Passkey": {
+          "title": "Passkey",
+          "description": "対応端末で Passkey を追加して、パスワードなしでログインできます。",
+          "unsupported": "このブラウザまたは端末は WebAuthn Passkey に対応していません。",
+          "namePlaceholder": "Passkey 名（任意）",
+          "add": "Passkey を追加",
+          "addSuccess": "Passkey を追加しました",
+          "remove": "削除",
+          "removeSuccess": "Passkey を削除しました",
+          "loading": "Passkey を読み込み中...",
+          "empty": "Passkey はまだ追加されていません。",
+          "unnamed": "名称未設定の Passkey",
+          "backedUp": "バックアップ済み",
+          "lastUsedLabel": "最終使用",
+          "count": "Passkey {count} 件",
+          "deviceType": {
+            "unknown": "不明な端末",
+            "multiDevice": "同期型 Passkey",
+            "singleDevice": "単一端末 Passkey"
+          },
+          "removeDialog": {
+            "title": "Passkey を削除",
+            "description": "「{name}」を削除してもよろしいですか？この Passkey ではログインできなくなる可能性があります。",
+            "cancel": "キャンセル",
+            "confirm": "削除"
+          },
+          "time": {
+            "never": "未使用",
+            "unknown": "不明"
+          }
         },
         "PasswordForm": {
           "validation": {

@@ -98,8 +98,8 @@ export const EmailSettings = ({ email }: EmailSettingsProps) => {
             onClick={handleGetCode}
             disabled={isCountingDown}
             loading={isGettingCode}
+            loginRequired
           >
-            {/* {isCountingDown ? `${countdown}s` : t('update')} */}
             {t('update') + (isCountingDown ? ` (${countdown}s)` : '')}
           </Button>
         </CardFooter>

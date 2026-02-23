@@ -72,6 +72,7 @@ export type I18nTranslations = {
         "COMMON_VALIDATION_FAILED": string;
         "COMMON_NOT_IMPLEMENTED": string;
         "AUTH_UNAUTHORIZED": string;
+        "AUTH_FORBIDDEN": string;
         "AUTH_INVALID_TOKEN": string;
         "AUTH_INVALID_REFRESH_TOKEN": string;
         "AUTH_REFRESH_TOKEN_EXPIRED": string;

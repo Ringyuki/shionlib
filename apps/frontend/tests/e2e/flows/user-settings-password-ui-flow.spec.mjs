@@ -69,11 +69,12 @@ test.describe('User settings password UI flow', () => {
     await applyAuthCookiesToPageContext(page, mutableAuth)
 
     try {
-      const response = await page.goto('/en/user/settings/personal')
+      const response = await page.goto('/en/user/settings/security')
       expect(response).not.toBeNull()
       expect(response.ok()).toBeTruthy()
 
       await ensureUiLoggedIn(page, mutableIdentifier, originalPassword)
+      await expect(page).toHaveURL(/\/en\/user\/settings\/security$/)
       await expect(page.getByTestId('settings-password-card')).toBeVisible()
 
       await page.getByTestId('settings-password-current-input').fill(originalPassword)

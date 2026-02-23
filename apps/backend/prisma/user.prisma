@@ -39,6 +39,7 @@ model User {
   created              DateTime              @default(now())
   updated              DateTime              @updatedAt
   sessions             UserLoginSession[]    @relation("user_login_session")
+  passkeys             UserPasskeyCredential[] @relation("user_passkey_credential")
   game_upload_sessions GameUploadSession[]   @relation("user_create_game_upload_session")
   upload_quota         UserUploadQuota?      @relation("user_upload_quota")
   field_permissions    UserFieldPermission[] @relation("user_field_permissions")
@@ -92,6 +93,34 @@ model UserLoginSession {
   @@index([family_id])
   @@index([user_id, status])
   @@map("user_login_sessions")
+}
+
+model UserPasskeyCredential {
+  id Int @id @default(autoincrement())
+
+  user_id Int
+  user    User @relation("user_passkey_credential", fields: [user_id], references: [id])
+
+  credential_id String @unique @db.VarChar(512)
+  public_key    String @db.Text
+  counter       Int    @default(0)
+
+  transports String[] @default([])
+
+  aaguid              String?  @db.VarChar(64)
+  device_type         String?  @db.VarChar(32)
+  credential_backed_up Boolean @default(false)
+  name                String?  @db.VarChar(128)
+
+  last_used_at DateTime?
+  revoked_at   DateTime?
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@index([user_id, revoked_at])
+  @@index([last_used_at])
+  @@map("user_passkey_credentials")
 }
 
 model UserBannedRecord {
