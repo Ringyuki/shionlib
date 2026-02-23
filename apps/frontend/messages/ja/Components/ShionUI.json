@@ -1,0 +1,18 @@
+{
+  "Spoiler": {
+    "hintText": "クリックして表示"
+  },
+  "DatePicker": {
+    "pickADate": "日付を選択"
+  },
+  "TagsInput": {
+    "placeholder": "入力して Enter を押してください"
+  },
+  "AsyncMultiSelect": {
+    "placeholder": "検索...",
+    "emptyMessage": "結果が見つかりません"
+  },
+  "ImageLightbox": {
+    "loadingHD": "原画読み込み中..."
+  }
+}

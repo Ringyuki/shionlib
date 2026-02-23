@@ -317,7 +317,7 @@ function AsyncMultiSelectTrigger({
         data-slot="async-select-trigger"
         data-size={size}
         className={cn(
-          'bg-input/30 border-input data-[placeholder]:text-muted-foreground focus-within:border-ring focus-within:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-input/50 flex w-full flex-wrap items-center gap-1.5 rounded-md border px-3 py-1 shadow-xs transition-all outline-none focus-within:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 duration-200',
+          'bg-input/30 border-input data-placeholder:text-muted-foreground focus-within:border-ring focus-within:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-input/50 flex w-full flex-wrap items-center gap-1.5 rounded-md border px-3 py-1 shadow-xs transition-all outline-none focus-within:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 duration-200',
           size === 'default' && 'h-9',
           size === 'sm' && 'h-8',
           disabled && 'pointer-events-none',
@@ -376,7 +376,7 @@ function AsyncMultiSelectTrigger({
             disabled={disabled}
             className="placeholder:text-muted-foreground flex-1 leading-5 outline-none"
           />
-          <span className="inline-flex w-4 h-4 flex-shrink-0">
+          <span className="inline-flex w-4 h-4 shrink-0">
             <motion.span
               key="loader"
               initial={false}
@@ -436,7 +436,7 @@ function AsyncMultiSelectContent({
         sideOffset={sideOffset}
         data-slot="async-select-content"
         className={cn(
-          'bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-(--radix-popover-content-available-height) min-w-[8rem] origin-(--radix-popover-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border shadow-md w-[var(--radix-popper-anchor-width)]',
+          'bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-(--radix-popover-content-available-height) min-w-32 origin-(--radix-popover-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border shadow-md w-(--radix-popper-anchor-width)',
           className,
         )}
         onOpenAutoFocus={e => {
@@ -480,7 +480,7 @@ function AsyncMultiSelectItem({
 
   React.useEffect(() => {
     registerItem(value, children)
-  }, [value, registerItem])
+  }, [value, registerItem, children])
 
   React.useEffect(() => {
     return () => unregisterItem(value)
@@ -507,7 +507,7 @@ function AsyncMultiSelectItem({
       data-value={value}
       data-highlighted={highlighted}
       className={cn(
-        "transition-all duration-200 [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "transition-all duration-200 [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         highlighted && !selected && 'bg-primary/10 text-primary',
         selected && 'bg-primary text-primary-foreground',
         className,

@@ -1,0 +1,18 @@
+{
+  "Spoiler": {
+    "hintText": "Click to view"
+  },
+  "DatePicker": {
+    "pickADate": "Pick a date"
+  },
+  "TagsInput": {
+    "placeholder": "Type and press Enter..."
+  },
+  "AsyncMultiSelect": {
+    "placeholder": "Search...",
+    "emptyMessage": "No results found"
+  },
+  "ImageLightbox": {
+    "loadingHD": "Loading HD..."
+  }
+}

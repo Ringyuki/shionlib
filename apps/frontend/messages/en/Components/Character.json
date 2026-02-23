@@ -1,0 +1,82 @@
+{
+  "Actions": {
+    "edit": "Edit",
+    "history": "Edit History",
+    "history_title": "Edit History",
+    "history_description": "View the edit history of this character",
+    "no_history": "No edit history"
+  },
+  "Edit": {
+    "EditLayout": {
+      "edit": "Edit Character",
+      "description": "You can edit character information on this page. Only editable fields are shown.",
+      "backToCharacter": "Back to character page"
+    },
+    "Scalar": {
+      "name_jp": "Japanese Name",
+      "name_zh": "Chinese Name",
+      "name_en": "English Name",
+      "aliases": "Aliases",
+      "intro_info_description": "The following fields [b]Introduction (Chinese)[/b], [b]Introduction (English)[/b], [b]Introduction (Japanese)[/b] support BBCode.",
+      "intro_zh": "Introduction (Chinese)",
+      "intro_en": "Introduction (English)",
+      "intro_jp": "Introduction (Japanese)",
+      "image": "Character Image",
+      "select_file": "Select File",
+      "upload": "Upload",
+      "upload_success": "Upload successful",
+      "body_metrics": "Body Metrics",
+      "height": "Height (cm)",
+      "weight": "Weight (kg)",
+      "bust": "Bust (cm)",
+      "waist": "Waist (cm)",
+      "hips": "Hips (cm)",
+      "cup": "Cup",
+      "age": "Age",
+      "birthday": "Birthday",
+      "birthday_month": "Month",
+      "birthday_day": "Day",
+      "gender": "Gender",
+      "non-spoiler-gender": "Non-spoiler gender",
+      "actual-gender": "Actual gender",
+      "gender_m": "Male",
+      "gender_f": "Female",
+      "gender_o": "Other",
+      "gender_a": "Asexual",
+      "blood_type": "Blood Type",
+      "blood_type_placeholder": "Select blood type",
+      "blood_type_a": "Type A",
+      "blood_type_b": "Type B",
+      "blood_type_ab": "Type AB",
+      "blood_type_o": "Type O",
+      "submit": "Submit Changes",
+      "success": "Submitted successfully",
+      "Confirm": {
+        "title": "Confirm Changes",
+        "cancel": "Cancel",
+        "submit": "Submit"
+      }
+    },
+    "EditNote": {
+      "title": "Notes",
+      "placeholder": "Reason for changes (optional)"
+    }
+  },
+  "Intros": {
+    "BasicInfos": {
+      "appearances_count": "{count} Appearances",
+      "age": "Age",
+      "birthday": "Birthday",
+      "blood_type": "Blood Type",
+      "height": "Height",
+      "weight": "Weight",
+      "male": "Male",
+      "female": "Female",
+      "non_binary": "Non-binary",
+      "ambiguous": "Ambiguous"
+    },
+    "Details": {
+      "no_intro": "No introduction"
+    }
+  }
+}

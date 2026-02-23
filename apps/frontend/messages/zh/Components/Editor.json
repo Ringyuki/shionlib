@@ -1,0 +1,67 @@
+{
+  "Plugins": {
+    "placeholderPrefix": "按下",
+    "placeholderSuffix": "输入命令..."
+  },
+  "Images": {
+    "imageUrl": "图片地址",
+    "imageUrlPlaceholder": "例如：https://source.unsplash.com/random",
+    "altText": "替代文本",
+    "altTextPlaceholder": "随机 Unsplash 图片",
+    "altTextUploadedPlaceholder": "描述性的替代文本",
+    "imageUpload": "图片上传",
+    "confirm": "确认",
+    "tabUrl": "链接",
+    "tabFile": "文件"
+  },
+  "Embeds": {
+    "embed": "嵌入",
+    "embedWithName": "嵌入 {name}",
+    "dismiss": "取消"
+  },
+  "Picker": {
+    "paragraph": "段落",
+    "headingN": "标题 {n}",
+    "bulletedList": "无序列表",
+    "numberedList": "有序列表",
+    "quote": "引用",
+    "code": "代码",
+    "columnsLayout": "多列布局",
+    "insertColumnsLayout": "插入多列布局",
+    "table": "表格",
+    "insertTable": "插入表格",
+    "tableNxM": "{rows}×{columns} 表格",
+    "image": "图片",
+    "insertImage": "插入图片",
+    "checkList": "检查列表"
+  },
+  "Toolbar": {
+    "undo": "撤销",
+    "redo": "重做",
+    "undoMac": "撤销 (⌘Z)",
+    "undoWin": "撤销 (Ctrl+Z)",
+    "redoMac": "重做 (⇧⌘Z)",
+    "redoWin": "重做 (Ctrl+Y)",
+    "toggleLink": "切换链接",
+    "textBackgroundColor": "文字背景颜色",
+    "textColor": "文字颜色",
+    "toggleSubscript": "切换下标",
+    "toggleSuperscript": "切换上标",
+    "copy": "复制"
+  },
+  "Actions": {
+    "clearEditor": "清空编辑器",
+    "clearEditorConfirm": "确定要清空编辑器内容吗？",
+    "cancel": "取消",
+    "clear": "清空",
+    "importContent": "导入内容",
+    "exportContent": "导出内容",
+    "exportFilePrefix": "Playground",
+    "exportSource": "Playground",
+    "markdown": "Markdown",
+    "viewOnlyMode": "仅查看模式",
+    "editMode": "编辑模式",
+    "treeView": "树形视图",
+    "submit": "提交"
+  }
+}

@@ -12,6 +12,7 @@
     "lint:fix": "eslint --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "i18n:check": "node scripts/check-i18n-keys.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:unit": "vitest run --config vitest.unit.config.ts",
     "test:unit:cov": "vitest run --config vitest.unit.config.ts --coverage --coverage.reportsDirectory coverage/unit",
@@ -164,6 +165,9 @@
     ],
     "*.{json,css,scss,md,mdx,cjs,mjs}": [
       "prettier --write"
+    ],
+    "apps/frontend/messages/**/*.json": [
+      "i18n:check"
     ]
   },
   "packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39"

@@ -1,0 +1,616 @@
+{
+  "TabsNav": {
+    "description": "详情",
+    "characters": "角色",
+    "comments": "讨论"
+  },
+  "Actions": {
+    "download": "下载",
+    "Patch": {
+      "patch": "补丁",
+      "error": "获取补丁失败"
+    },
+    "upload": "上传",
+    "edit": "编辑此游戏",
+    "history": {
+      "history": "编辑历史",
+      "noHistory": "暂无编辑历史"
+    },
+    "goToDiscussion": "前往讨论",
+    "More": {
+      "MoreActions": {
+        "more": "更多",
+        "addToRecentUpdate": "添加到最近更新",
+        "removeFromRecentUpdate": "从最近更新中移除"
+      },
+      "AddToRecentUpdate": {
+        "addToRecentUpdate": "添加到最近更新",
+        "description": "确定要添加到最近更新吗？",
+        "cancel": "取消",
+        "confirm": "添加",
+        "success": "添加成功"
+      },
+      "RemoveFromRecentUpdate": {
+        "removeFromRecentUpdate": "从最近更新中移除",
+        "description": "确定要从最近更新中移除吗？",
+        "cancel": "取消",
+        "confirm": "移除",
+        "success": "移除成功"
+      }
+    }
+  },
+  "Description": {
+    "GameCharacter": {
+      "noCharacters": "暂时没有角色信息"
+    },
+    "GameCharacterItem": {
+      "noImage": "无图片",
+      "viewDetails": "查看详情",
+      "gender": "性别",
+      "roleMain": "主角",
+      "rolePrimary": "主要角色",
+      "roleSide": "配角",
+      "roleAppears": "客串",
+      "blood_type": "血型",
+      "height": "身高(cm)",
+      "weight": "体重(kg)",
+      "bust": "胸围(cm)",
+      "waist": "腰围(cm)",
+      "hips": "臀围(cm)",
+      "cup": "罩杯",
+      "age": "年龄(岁)",
+      "birthday": "生日(月/日)",
+      "female": "女",
+      "male": "男",
+      "non_binary": "非二元性别",
+      "ambiguous": "中性/未知",
+      "characterDetailDialogTitle": "角色详情"
+    },
+    "GameLinks": {
+      "links": "相关链接"
+    },
+    "GameTags": {
+      "tags": "标签"
+    },
+    "GameDetail": {
+      "tags": "标签",
+      "introduction": "简介",
+      "chooseLanguage": "选择语言",
+      "images": "图片",
+      "staff": "制作人员",
+      "extraInfo": "其他信息"
+    },
+    "BangumiExtraInfoKeyMap": {
+      "birthday": "生日",
+      "source": "引用来源",
+      "twitter": "推特",
+      "homepage": "主页",
+      "official_website": "官方网站",
+      "parent_company": "母公司",
+      "script": "脚本",
+      "original_work": "原作",
+      "original_art": "原画",
+      "sd_original_art": "SD原画",
+      "cg_artists": "CG",
+      "logo_design": "Logo 设计",
+      "ui_design": "UI 设计",
+      "design": "设计",
+      "character_design": "人物设定",
+      "setting_cooperation": "设定协力",
+      "project": "企划",
+      "project_cooperation": "企划协力",
+      "director": "导演",
+      "producer": "制作人",
+      "background": "背景",
+      "cooperation": "协力",
+      "publish": "发行",
+      "music": "音乐",
+      "theme_song_lyrics": "主题歌作词",
+      "theme_song_composition": "主题歌作曲",
+      "theme_song_performance": "主题歌演出",
+      "sound_director": "音响监督",
+      "animation_production": "动画制作",
+      "programming": "程序"
+    }
+  },
+  "Upload": {
+    "GameUploadDialog": {
+      "title": "上传游戏",
+      "alert1Title": "注意",
+      "alert1Description": "你可以在此上传游戏本体，你上传的文件将会储存到Shionlib服务器中，并提供给所有用户下载。\n一旦上传流程成功完成，你将无法撤销此次上传，也无法删除储存在Shionlib服务器中的文件。",
+      "alert2Title": "上传须知",
+      "alert2Description": "上传文件会消耗你的 “上传额度”，上传开始后，对应文件大小的额度会被预先扣除。如果上传流程没有成功完成，系统会在确认后退还额度。\n游戏文件需要被打包在[b]单个[/b] zip/rar/7z/tar/gzip 文件中，并且[b]不能设置密码[/b] 。\n上传完成后，系统将会对文件进行检查并最终上传至S3，下载信息会在所有流程完成后更新。\n上传进行过程中，请勿刷新或关闭页面。",
+      "fileName": "文件名",
+      "fileNamePlaceholder": "输入文件名",
+      "platform": "平台",
+      "platformPlaceholder": "选择该资源的运行平台",
+      "language": "语言",
+      "languagePlaceholder": "选择该资源的游戏语言",
+      "note": "备注",
+      "notePlaceholder": "输入备注信息(如果有)",
+      "autoSubmitLabel": "上传完成时提交",
+      "autoSubmitDescription": "填写平台和语言后，可在上传完成时自动提交。",
+      "submit": "确认提交",
+      "waitForUploadCompleted": "等待文件上传完成",
+      "success": "提交成功",
+      "validation": {
+        "fileNameRequired": "文件名不能为空",
+        "fileNameLength": "文件名不能超过 {length} 个字符",
+        "platform": "平台不能为空",
+        "language": "语言不能为空",
+        "note": "备注不能超过255个字符"
+      }
+    },
+    "UploadQuota": {
+      "title": "上传额度",
+      "size": "总大小",
+      "used": "已使用",
+      "remaining": "剩余"
+    },
+    "OnGoingSession": {
+      "title": "进行中的上传",
+      "expires": "过期",
+      "resume": "选择相同文件继续",
+      "cancel": "取消"
+    }
+  },
+  "PVN": {
+    "title": "PotatoVN",
+    "description": "通过 PotatoVN 追踪你的游戏时间",
+    "addToLibrary": "添加到 PotatoVN",
+    "inLibrary": "已在库中",
+    "addSuccess": "游戏已添加到 PotatoVN 库",
+    "totalPlayTime": "总游戏时间",
+    "lastPlayed": "最近游玩",
+    "notPlayed": "尚未游玩",
+    "playType": "状态",
+    "myRate": "我的评分",
+    "pvnPlayType0": "想玩",
+    "pvnPlayType1": "玩过",
+    "pvnPlayType2": "在玩",
+    "pvnPlayType3": "搁置",
+    "pvnPlayType4": "抛弃",
+    "syncedAt": "同步于",
+    "syncedAtTooltip": "系统会每小时执行一次同步任务。",
+    "remove": "从 PotatoVN 移除",
+    "removeTitle": "从 PotatoVN 移除",
+    "removeDescription": "此操作将永久删除你在 PotatoVN 云端的游戏数据，包括游玩时长记录和评分，无法恢复。",
+    "removeSuccess": "游戏已从 PotatoVN 移除",
+    "removeConfirm": "删除",
+    "removeCancel": "取消"
+  },
+  "Download": {
+    "GameDownloadDialog": {
+      "title": "下载"
+    },
+    "GameDownloadDrawer": {
+      "title": "下载"
+    },
+    "GameDownloadContent": {
+      "alertTitle": "注意",
+      "alertDescription": "以下资源均由 Shionlib 用户上传，请自行鉴别文件安全性。\n对于大小不超过 10 GB 的文件，下载链接有效期为 {duration} 分钟；对于大小超过 10 GB 和 20 GB 的文件，下载链接有效期分别为 {duration1} 分钟和 {duration2} 分钟，请确保在有效期内完成下载。"
+    },
+    "GameDownload": {
+      "noDownloadSource": "暂无下载资源"
+    },
+    "GameDownloadResourceItem": {
+      "created": "上传于"
+    },
+    "GameDownloadFileItem": {
+      "onlyVisibleForYourself": "仅自己可见",
+      "processing": "处理中",
+      "pending": "等待上传",
+      "downloadStarted": "下载已开始",
+      "pushToAria2": "推送到 Aria2",
+      "normalDownload": "普通下载",
+      "aria2NotReady": "无法连接到 Aria2，请检查设置是否正确",
+      "aria2Unauthorized": "未授权，请检查设置是否正确",
+      "aria2FailedToFetch": "无法连接到 Aria2，请检查设置是否正确",
+      "aria2UnknownError": "未知错误",
+      "goToSettings": "前往设置",
+      "goToSettingsDescription": "前往设置页面，检查 Aria2 设置是否正确。",
+      "virusFalsePositiveFlag": "可能存在病毒",
+      "virusFalsePositiveFlagDescription": "病毒扫描流程曾标记此文件，但管理员已放行。检测到的病毒名：{detected_viruses}。"
+    },
+    "Actions": {
+      "report": "报告违规",
+      "edit": "编辑",
+      "delete": "删除",
+      "reupload": "重新上传",
+      "history": "更新历史"
+    },
+    "Reupload": {
+      "title": "重新上传文件",
+      "currentFile": "当前文件",
+      "warningTitle": "注意",
+      "warningDescription": "重新上传将替换当前文件，替换后旧文件将被删除，此操作无法撤销。上传完成后，收藏了此游戏的用户将收到更新通知。",
+      "reason": "更新原因（可选）",
+      "reasonPlaceholder": "例如：版本更新、修复bug、合并补丁等",
+      "reasonHint": "填写更新原因来帮助其他用户了解此次更新的内容，更新原因会在通知中显示。",
+      "success": "重新上传成功，等待审核",
+      "error": "重新上传失败",
+      "submitting": "正在提交..."
+    },
+    "Edit": {
+      "title": "编辑此下载资源",
+      "submit": "确认更改",
+      "success": "更改成功"
+    },
+    "History": {
+      "title": "文件更新历史",
+      "loading": "加载中...",
+      "noHistory": "暂无更新历史",
+      "version": "版本",
+      "current": "当前",
+      "fileInfo": "文件信息",
+      "fileSize": "文件大小",
+      "hash": "哈希值",
+      "s3Key": "S3 键",
+      "operator": "操作者",
+      "reason": "更新原因",
+      "loadError": "加载历史记录失败"
+    },
+    "Delete": {
+      "title": "删除此下载资源",
+      "description": "确定要删除此下载资源吗？此操作无法撤销。",
+      "cancel": "取消",
+      "delete": "删除",
+      "success": "删除成功"
+    },
+    "Report": {
+      "title": "报告违规",
+      "description": "请尽量提供清晰的举报理由，恶意举报会受到限制或处罚。",
+      "reason": "举报理由",
+      "reasonPlaceholder": "请选择举报理由",
+      "detail": "补充说明（可选）",
+      "detailPlaceholder": "你可以补充更多细节，例如文件名、问题现象等",
+      "cancel": "取消",
+      "submit": "提交举报",
+      "success": "举报已提交，感谢你的反馈",
+      "validation": {
+        "reason": "请选择举报理由",
+        "detailMaxLength": "补充说明不能超过 {length} 个字符"
+      },
+      "reasons": {
+        "MALWARE": "资源包含病毒/木马",
+        "IRRELEVANT": "资源与当前游戏无关",
+        "BROKEN_LINK": "链接失效或文件不可用",
+        "MISLEADING_CONTENT": "标题/描述与内容严重不符",
+        "OTHER": "其他违规问题"
+      }
+    }
+  },
+  "Cover": {
+    "GameCover": {
+      "viewAllCovers": "查看全部"
+    },
+    "GameCoverDialog": {
+      "title": "全部封面"
+    },
+    "GameCoverDrawer": {
+      "title": "全部封面"
+    }
+  },
+  "Edit": {
+    "EditLayout": {
+      "edit": "编辑游戏信息",
+      "description": "你可以在此页面编辑游戏信息，仅展示你有权限编辑的字段。你可以通过向管理员申请来获得更多字段的编辑权限。你的编辑会被记录，所有人都可以查看。",
+      "backToGame": "返回游戏页面"
+    },
+    "EditTabsNav": {
+      "scalar": "基本信息",
+      "cover": "封面",
+      "image": "图片",
+      "link": "相关链接",
+      "developer": "会社/开发商",
+      "character": "出场角色"
+    },
+    "Scalar": {
+      "title_zh": "标题（中文）",
+      "title_en": "标题（英语）",
+      "title_jp": "标题（日语）",
+      "type": "类型",
+      "platform": "平台",
+      "platformPlaceholder": "选择游戏的运行平台",
+      "aliases": "别名",
+      "tags": "标签",
+      "intro_info_description": "以下字段 [b]介绍（中文）[/b]、[b]介绍（英语）[/b]、[b]介绍（日语）[/b] 支持 BBCode。",
+      "intro_zh": "介绍（中文）",
+      "intro_en": "介绍（英语）",
+      "intro_jp": "介绍（日语）",
+      "release_date": "发行日期",
+      "release_date_tba": "发行日期待定",
+      "extra_info": "其他信息",
+      "extra_info_key": "键",
+      "extra_info_key_placeholder": "输入键",
+      "extra_info_value": "值",
+      "extra_info_value_placeholder": "输入值",
+      "add_extra_info": "添加其他信息",
+      "staffs": "制作人员",
+      "staff_name": "名称",
+      "staff_name_placeholder": "输入名称",
+      "staff_role": "角色",
+      "staff_role_placeholder": "输入角色",
+      "add_staff": "添加制作人员",
+      "nsfw": "是否NSFW",
+      "submit": "提交更改",
+      "success": "提交成功",
+      "Comfirm": {
+        "title": "确认更改",
+        "cancel": "取消",
+        "submit": "提交"
+      },
+      "Changes": {
+        "fieldChanges": "修改字段"
+      }
+    },
+    "Cover": {
+      "noPermission": "你没有编辑封面的权限",
+      "success": "更改成功",
+      "Edit": {
+        "title": "编辑封面"
+      },
+      "Create": {
+        "create": "创建封面",
+        "success": "创建成功"
+      },
+      "Delete": {
+        "title": "删除封面",
+        "description": "确定要删除此封面吗？此操作无法撤销。",
+        "cancel": "取消",
+        "delete": "删除",
+        "success": "删除成功"
+      },
+      "EditContent": {
+        "url": "图片",
+        "dims": "尺寸",
+        "language": "语言",
+        "selectLanguage": "选择语言",
+        "type": "类型",
+        "selectType": "选择类型",
+        "sexual": "性描写等级",
+        "violence": "暴力描写等级",
+        "submit": "确认更改",
+        "validation": {
+          "url": "请选择并上传图片",
+          "dims": "请选择并上传图片",
+          "language": "请选择封面语言",
+          "type": "请选择封面类型",
+          "sexual": "性描写等级必须在0-2之间",
+          "violence": "暴力描写等级必须在0-2之间"
+        }
+      },
+      "Image": {
+        "Upload": {
+          "select": "选择图片",
+          "upload": "上传图片",
+          "success": "上传成功"
+        }
+      }
+    },
+    "Image": {
+      "noPermission": "你没有编辑图片的权限",
+      "success": "更改成功",
+      "Edit": {
+        "title": "编辑图片"
+      },
+      "Create": {
+        "create": "创建图片",
+        "success": "创建成功"
+      },
+      "Delete": {
+        "title": "删除图片",
+        "description": "确定要删除此图片吗？此操作无法撤销。",
+        "cancel": "取消",
+        "delete": "删除",
+        "success": "删除成功"
+      },
+      "EditContent": {
+        "url": "图片",
+        "dims": "尺寸",
+        "sexual": "性描写等级",
+        "violence": "暴力描写等级",
+        "submit": "确认更改",
+        "validation": {
+          "url": "请选择并上传图片",
+          "dims": "请选择并上传图片",
+          "sexual": "性描写等级必须在0-2之间",
+          "violence": "暴力描写等级必须在0-2之间"
+        }
+      },
+      "Image": {
+        "Upload": {
+          "select": "选择图片",
+          "upload": "上传图片",
+          "success": "上传成功"
+        }
+      }
+    },
+    "Developer": {
+      "noPermission": "你没有编辑会社的权限",
+      "removed": "移除成功",
+      "updated": "更新成功",
+      "added": "添加成功",
+      "Item": {
+        "no_developers": "暂无关联会社",
+        "role_placeholder": "角色/职责",
+        "no_role": "未设定角色"
+      },
+      "Form": {
+        "role": "角色/职责",
+        "role_placeholder": "例如：发行、开发等",
+        "submit": "确认更改"
+      },
+      "Edit": {
+        "title": "编辑会社关联",
+        "view_developer": "查看会社"
+      },
+      "Delete": {
+        "delete": "移除会社",
+        "title": "确认移除",
+        "description": "确定要从游戏中移除此会社关联吗？",
+        "cancel": "取消",
+        "success": "移除成功"
+      },
+      "Search": {
+        "title": "添加会社",
+        "placeholder": "搜索会社名称...",
+        "search": "搜索",
+        "add": "添加",
+        "already_added": "已添加"
+      }
+    },
+    "Character": {
+      "noPermission": "你没有编辑角色的权限",
+      "removed": "移除成功",
+      "updated": "更新成功",
+      "added": "添加成功",
+      "Item": {
+        "no_characters": "暂无关联角色",
+        "role_placeholder": "选择角色类型",
+        "actor_placeholder": "输入CV名称",
+        "no_role": "未设定类型",
+        "role_main": "主角",
+        "role_primary": "主要角色",
+        "role_side": "配角",
+        "role_appears": "客串"
+      },
+      "Form": {
+        "image": "角色图片",
+        "role": "角色类型",
+        "role_placeholder": "选择角色类型",
+        "role_main": "主角",
+        "role_primary": "主要角色",
+        "role_side": "配角",
+        "role_appears": "客串",
+        "actor": "CV",
+        "actor_placeholder": "输入CV名称",
+        "submit": "确认更改"
+      },
+      "Edit": {
+        "title": "编辑角色关联",
+        "view_character": "查看角色"
+      },
+      "Delete": {
+        "delete": "移除角色",
+        "title": "确认移除",
+        "description": "确定要从游戏中移除此角色关联吗？",
+        "cancel": "取消",
+        "success": "移除成功"
+      },
+      "Image": {
+        "Upload": {
+          "select": "选择图片",
+          "upload": "上传",
+          "success": "图片上传成功",
+          "error": "图片上传失败"
+        },
+        "Image": {
+          "image": "角色图片",
+          "image_question": "仅在当前游戏条目中生效"
+        }
+      },
+      "Search": {
+        "title": "添加角色",
+        "placeholder": "搜索角色名称...",
+        "search": "搜索",
+        "add": "添加",
+        "already_added": "已添加",
+        "role_placeholder": "角色类型",
+        "role_main": "主角",
+        "role_primary": "主要角色",
+        "role_side": "次要角色",
+        "role_appears": "登场角色"
+      }
+    },
+    "EditNote": {
+      "title": "备注",
+      "placeholder": "修改原因, 修改内容等(可选, e.g. 修改发售日期为2025年11月10日，原因：发售延期)"
+    }
+  },
+  "EditHistory": {
+    "title": "编辑历史",
+    "fieldChanges": "修改字段",
+    "undone": "已撤销",
+    "undoneOf": "撤销了",
+    "undo": "撤销此编辑",
+    "undoDescription": "确定要撤销此编辑吗？撤销后，此编辑将会被撤回，并且无法恢复。",
+    "confirm": "确认",
+    "cancel": "取消",
+    "success": "撤销成功",
+    "UndoOptions": {
+      "force": "强制撤销",
+      "mode": "撤销模式",
+      "strict": "严格模式",
+      "cascade": "级联模式"
+    }
+  },
+  "Filter": {
+    "Header": {
+      "title": "所有游戏",
+      "description": "浏览 Shionlib 数据库中的所有游戏。",
+      "subDescription": "你可以通过不同的参数来筛选、过滤和排序游戏。"
+    },
+    "GameFilter": {
+      "tags": "过滤标签"
+    },
+    "Tags": {
+      "tags": "过滤标签",
+      "searchPlaceholder": "搜索标签"
+    },
+    "Date": {
+      "date": "过滤年份和月份",
+      "selectYear": "全部年份",
+      "selectMonth": "全部月份"
+    },
+    "Sort": {
+      "sort": "排序方式",
+      "selectSort": "选择排序方式",
+      "selectOrder": "选择排序顺序",
+      "release_date": "发行日期",
+      "views": "浏览量",
+      "downloads": "下载量",
+      "asc": "升序",
+      "desc": "降序"
+    }
+  },
+  "Patch": {
+    "PatchContent": {
+      "datafrom": "数据来源",
+      "moyu": "鲲 Galgame"
+    },
+    "PatchDialog": {
+      "title": "补丁"
+    },
+    "PatchDrawer": {
+      "title": "补丁"
+    },
+    "PatchItem": {
+      "created": "上传于",
+      "type": {
+        "all": "全部类型",
+        "manual": "人工翻译补丁",
+        "ai": "AI 翻译补丁",
+        "machine_polishing": "机翻润色",
+        "machine": "机翻补丁",
+        "save": "全 CG 存档",
+        "crack": "破解补丁",
+        "fix": "修正补丁",
+        "mod": "魔改补丁",
+        "other": "其它"
+      }
+    },
+    "PatchResourceItem": {
+      "viewOnMoyu": "在鲲 Galgame 补丁中查看"
+    }
+  },
+  "Score": {
+    "Bangumi": {
+      "rank": "排名",
+      "votes": "人评分"
+    },
+    "VNDB": {
+      "votes": "人评分"
+    }
+  }
+}

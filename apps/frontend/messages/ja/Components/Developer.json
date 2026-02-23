@@ -1,0 +1,66 @@
+{
+  "Intros": {
+    "BasicInfos": {
+      "unknown": "リンクがありません",
+      "works_count": "合計 {count} 作品",
+      "parent_developer": "親会社"
+    },
+    "Details": {
+      "no_intro": "紹介がありません"
+    }
+  },
+  "Actions": {
+    "edit": "編集",
+    "history": {
+      "history": "編集履歴",
+      "noHistory": "編集履歴がありません"
+    }
+  },
+  "Edit": {
+    "EditLayout": {
+      "edit": "会社情報を編集",
+      "description": "このページで会社情報を編集できます。編集可能なフィールドのみが表示されます。",
+      "backToDeveloper": "会社ページに戻る"
+    },
+    "Scalar": {
+      "name": "名前",
+      "aliases": "別名",
+      "intro_info_description": "以下のフィールド [b]紹介（中国語）[/b]、[b]紹介（英語）[/b]、[b]紹介（日本語）[/b] は BBCode をサポートしています。",
+      "intro_zh": "紹介（中国語）",
+      "intro_en": "紹介（英語）",
+      "intro_jp": "紹介（日本語）",
+      "extra_info": "その他の情報",
+      "extra_info_key": "キー",
+      "extra_info_value": "値",
+      "add_extra_info": "その他の情報を追加",
+      "logo": "ロゴ",
+      "select_file": "ファイルを選択",
+      "upload": "アップロード",
+      "upload_success": "アップロード成功",
+      "website": "ウェブサイト",
+      "submit": "変更を送信",
+      "success": "送信成功",
+      "Confirm": {
+        "title": "変更を確認",
+        "cancel": "キャンセル",
+        "submit": "送信"
+      }
+    },
+    "EditNote": {
+      "title": "備考",
+      "placeholder": "変更理由（任意）"
+    }
+  },
+  "List": {
+    "Header": {
+      "title": "すべての会社",
+      "description": "Shionlib データベース内のすべての会社/開発者を表示します。"
+    },
+    "Search": {
+      "placeholder": "会社/開発者を検索"
+    },
+    "DeveloperItem": {
+      "works_count": "合計 {count} 作品"
+    }
+  }
+}

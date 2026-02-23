@@ -1,0 +1,9 @@
+{
+  "Comment": {
+    "Block": {
+      "Title": "コメント未通過審査",
+      "Content": "あなたのコメントは審査に不合格でした。原因：{top_category}。コメント内容を修正してから再度お試しください。",
+      "ReviewContent": "あなたのコメントは審査に不合格でした。原因：{top_category}, {reason}, 重要な部分：{evidence}。コメント内容を修正してから再度お試しください。"
+    }
+  }
+}

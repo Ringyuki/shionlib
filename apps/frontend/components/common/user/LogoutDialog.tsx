@@ -37,7 +37,7 @@ export const LogoutDialog = ({ open, onOpenChange }: LogoutDialogProps) => {
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog open={open} onOpenChange={onOpenChange} countdown={0}>
       <AlertDialogContent tone="destructive">
         <AlertDialogHeader>
           <AlertDialogTitle>{t('title')}</AlertDialogTitle>

@@ -1,0 +1,71 @@
+{
+  "GlobalError": {
+    "title": "エラー",
+    "details": "エラーが発生しました。後でもう一度お試しください。",
+    "back": "戻る",
+    "reset": "再読み込み"
+  },
+  "GlobalNotFound": {
+    "title": "ページが見つかりません",
+    "details": "お探しのページは存在しないか、移動された可能性があります。",
+    "back": "戻る",
+    "reset": "再読み込み"
+  },
+  "NotFound": {
+    "title": "ページが見つかりません",
+    "details": "お探しのページは存在しないか、移動された可能性があります。"
+  },
+  "User": {
+    "Settings": {
+      "title": "設定を編集",
+      "description": "このページではあなたの個人情報とサイト設定を管理できます。",
+      "loginRequired": {
+        "title": "ログインが必要です",
+        "description": "設定ページにアクセスするにはログインが必要です。",
+        "login": "ログイン"
+      }
+    }
+  },
+  "Game": {
+    "Edit": {
+      "EditLayout": {
+        "title": "ゲーム情報を編集"
+      }
+    }
+  },
+  "Developer": {
+    "Edit": {
+      "EditLayout": {
+        "title": "会社情報を編集"
+      }
+    }
+  },
+  "Character": {
+    "Edit": {
+      "EditLayout": {
+        "title": "キャラクター情報を編集"
+      }
+    },
+    "Intros": {
+      "BasicInfos": {
+        "age": "年齢",
+        "birthday": "誕生日",
+        "blood_type": "血液型",
+        "height": "身長",
+        "weight": "体重",
+        "male": "男性",
+        "female": "女性",
+        "non_binary": "ノンバイナリー",
+        "ambiguous": "不明"
+      },
+      "Details": {
+        "no_intro": "紹介なし"
+      }
+    }
+  },
+  "Search": {
+    "Game": {
+      "title": "検索結果 {q}"
+    }
+  }
+}

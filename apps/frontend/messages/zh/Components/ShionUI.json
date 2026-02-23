@@ -1,0 +1,18 @@
+{
+  "Spoiler": {
+    "hintText": "点击以查看"
+  },
+  "DatePicker": {
+    "pickADate": "选择日期"
+  },
+  "TagsInput": {
+    "placeholder": "输入内容并按下回车确认"
+  },
+  "AsyncMultiSelect": {
+    "placeholder": "搜索...",
+    "emptyMessage": "没有找到结果"
+  },
+  "ImageLightbox": {
+    "loadingHD": "加载原图..."
+  }
+}

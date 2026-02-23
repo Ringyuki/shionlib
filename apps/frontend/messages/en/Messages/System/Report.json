@@ -1,0 +1,19 @@
+{
+  "Valid": {
+    "Title": "Report confirmed",
+    "Content": "Your report has been accepted. Reason: {reason}, malicious level: {malicious_level}.{process_note, select, null {} other { Note: {process_note}}}"
+  },
+  "Invalid": {
+    "Title": "Report rejected",
+    "Content": "Your report was rejected. Invalid report count in the last 30 days: {false_report_count}.{quota_sub_gb, select, 0 {} other { Upload quota reduced: {quota_sub_gb} GB.}}{ban_days, select, 0 {} other { Account banned for {ban_days} day(s).}}{process_note, select, undefined {} other { Note: {process_note}}}"
+  },
+  "Penalty": {
+    "Title": "Resource violation notice",
+    "Content": "Your uploaded resource was confirmed as violating policy. Reason: {reason}, malicious level: {malicious_level}.{quota_sub_gb, select, 0 {} other { Upload quota reduced: {quota_sub_gb} GB.}}{ban_days, select, 0 {} other { Account banned for {ban_days} day(s).}}{process_note, select, undefined {} other { Note: {process_note}}}"
+  },
+  "NewReport": {
+    "Title": "New resource report",
+    "Content": "User {reporter_name} reported a resource uploaded by {reported_user_name}. Reason: {reason}, malicious level: {malicious_level}.",
+    "LinkText": "Review report"
+  }
+}

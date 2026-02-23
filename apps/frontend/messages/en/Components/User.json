@@ -1,0 +1,325 @@
+{
+  "Settings": {
+    "TabsNav": {
+      "personal": "Personal information",
+      "security": "Security",
+      "site": "Site settings",
+      "download": "Download settings",
+      "connections": "Connected accounts"
+    },
+    "Avatar": {
+      "title": "Avatar",
+      "description": "You can manage your avatar here.",
+      "help": "Click the avatar on the right to select an image.",
+      "tips": "Although this setting is optional, we still recommend you to set an avatar.",
+      "update": "Update avatar",
+      "success": "Updated successfully"
+    },
+    "AvatarResize": {
+      "title": "Resize avatar",
+      "crop": "Crop"
+    },
+    "Name": {
+      "title": "Username",
+      "description": "You can manage your username here. Username is your unique identifier (one of them), so your username cannot be the same as others.",
+      "update": "Update username",
+      "success": "Updated successfully"
+    },
+    "Password": {
+      "title": "Password",
+      "description": "You can manage your password here. Password must be at least 8 characters and include at least one letter, one number, and one uppercase letter.",
+      "note": "After saving, you will be logged out.",
+      "update": "Update password",
+      "forget": "Forgot password?",
+      "success": "Updated successfully, please log in again"
+    },
+    "Passkey": {
+      "title": "Passkeys",
+      "description": "Add a passkey for passwordless sign-in on supported devices.",
+      "unsupported": "This browser/device does not support WebAuthn passkeys.",
+      "namePlaceholder": "Passkey name (optional)",
+      "add": "Add Passkey",
+      "addSuccess": "Passkey added",
+      "remove": "Remove",
+      "removeSuccess": "Passkey removed",
+      "loading": "Loading passkeys...",
+      "empty": "No passkeys added yet.",
+      "unnamed": "Unnamed passkey",
+      "backedUp": "Backed up",
+      "lastUsedLabel": "Last used",
+      "count": "{count, plural, =0 {0 passkeys} one {# passkey} other {# passkeys}}",
+      "deviceType": {
+        "unknown": "Unknown device",
+        "multiDevice": "Synced passkey",
+        "singleDevice": "Single-device passkey"
+      },
+      "removeDialog": {
+        "title": "Remove passkey",
+        "description": "Are you sure you want to remove \"{name}\"? You may no longer be able to sign in with this passkey.",
+        "cancel": "Cancel",
+        "confirm": "Remove"
+      },
+      "time": {
+        "never": "Never",
+        "unknown": "Unknown"
+      }
+    },
+    "PasswordForm": {
+      "validation": {
+        "currentPassword": "Current password must be at least 8 characters",
+        "password": "Password must be at least 8 characters",
+        "passwordConfirm": "Confirm password must be at least 8 characters",
+        "passwordRegex": "Password must be at least 8 characters and include at least one letter, one number, and one uppercase letter",
+        "passwordDiff": "Password and confirm password do not match"
+      },
+      "currentPassword": "Current password",
+      "password": "Password",
+      "passwordConfirm": "Confirm password"
+    },
+    "Email": {
+      "title": "Email",
+      "description": "You can manage your email here. We will send a verification code to your existing email, then you can fill in the new email and complete the verification.",
+      "currentEmail": "Current email",
+      "help": "Existing email not available? Please contact the administrator for the next step.",
+      "update": "Send verification code",
+      "success": "Updated successfully, please log in again"
+    },
+    "EmailFlow": {
+      "title": "Update email",
+      "step1": {
+        "title": "Verify current email",
+        "description": "Verification code has been sent to your current email, if you don't receive it, please check your spam folder.",
+        "currentEmail": "Current email",
+        "verifyCode": "Verification code",
+        "validation": {
+          "verifyCode": "Verification code is required"
+        }
+      },
+      "step2": {
+        "title": "Verify new email",
+        "description": "Fill in the new email and complete the verification.",
+        "newEmail": "New email",
+        "getVerifyCode": "Get verification code",
+        "verifyCodeSent": "Verification code sent",
+        "verifyCode": "Verification code",
+        "validation": {
+          "email": "Please enter a valid email address",
+          "verifyCode": "Verification code is required"
+        }
+      },
+      "previous": "Previous",
+      "next": "Next",
+      "done": "Done"
+    },
+    "Language": {
+      "title": "Language",
+      "description": "You can update your language preference here.",
+      "selectLanguage": "Select language",
+      "chooseLanguage": "Select language",
+      "update": "Update language",
+      "success": "Updated successfully"
+    },
+    "ContentLimit": {
+      "title": "Content limit",
+      "description": "You can update your content display preferences here.",
+      "selectContentLimit": "Select content limit",
+      "chooseContentLimit": "Select content limit",
+      "showWithSpoiler": "Show with spoiler",
+      "justShow": "Just show",
+      "neverShowNsfwContent": "Never show NSFW content",
+      "tipsTitle": "Tips",
+      "tipsDescription": "This setting will take effect in 30 minutes. You can also log in again to make the changes take effect immediately.",
+      "relogin": "Relogin",
+      "update": "Update content limit",
+      "success": "Updated successfully"
+    },
+    "ToastPosition": {
+      "title": "Toast position",
+      "description": "You can set where global toast notifications appear.",
+      "selectPosition": "Select toast position",
+      "choosePosition": "Select toast position",
+      "top-left": "Top left",
+      "top-center": "Top center",
+      "top-right": "Top right",
+      "bottom-left": "Bottom left",
+      "bottom-center": "Bottom center",
+      "bottom-right": "Bottom right",
+      "tipsTitle": "Tips",
+      "tipsDescription": "This setting will only be saved to your local browser and will not be uploaded to Shionlib servers.",
+      "update": "Update toast position",
+      "reset": "Reset default",
+      "success": "Updated successfully",
+      "resetSuccess": "Reset to default"
+    },
+    "Aria2": {
+      "title": "Aria2",
+      "description": "You can update your Aria2 settings here.",
+      "tipsTitle": "Tips",
+      "tipsDescription": "This setting will only be saved to your local browser and will not be uploaded to Shionlib servers.",
+      "protocol": "Protocol",
+      "protocolPlaceholder": "Select protocol",
+      "host": "Host",
+      "hostPlaceholder": "e.g., localhost or 127.0.0.1",
+      "port": "Port",
+      "path": "Path",
+      "pathPlaceholder": "e.g., /jsonrpc",
+      "authSecret": "Auth secret",
+      "downloadPath": "Download path",
+      "downloadPathPlaceholder": "Leave empty to use Aria2 default path",
+      "save": "Save",
+      "success": "Saved successfully",
+      "Test": {
+        "title": "Test Connection",
+        "success": "Connection successful!",
+        "failed": "Connection failed",
+        "failedToConnect": "Cannot connect to Aria2 server",
+        "unauthorized": "Authentication failed, please check your secret"
+      },
+      "Reset": {
+        "title": "Reset",
+        "reset": "Reset",
+        "success": "Reset to default settings"
+      }
+    },
+    "Connections": {
+      "PotatoVN": {
+        "title": "PotatoVN",
+        "description": "Connect your PotatoVN account.",
+        "connected": "Connected",
+        "notConnected": "Not connected",
+        "connectedAs": "Connected as",
+        "connect": "Connect",
+        "disconnect": "Disconnect",
+        "connectSuccess": "PotatoVN account connected",
+        "disconnectSuccess": "PotatoVN account disconnected",
+        "BindModal": {
+          "title": "Connect PotatoVN",
+          "description": "Enter your PotatoVN credentials. Your password is only used to obtain an access token and will not be stored.",
+          "username": "Username",
+          "usernamePlaceholder": "PotatoVN username",
+          "password": "Password",
+          "passwordPlaceholder": "PotatoVN password",
+          "cancel": "Cancel",
+          "connect": "Connect",
+          "validation": {
+            "usernameRequired": "Username is required",
+            "passwordRequired": "Password is required"
+          }
+        },
+        "UnbindConfirm": {
+          "title": "Disconnect PotatoVN",
+          "description": "This will remove the connection between your account and PotatoVN. Your PotatoVN data will not be deleted.",
+          "cancel": "Cancel",
+          "confirm": "Disconnect"
+        },
+        "tokenExpires": "Token expires",
+        "tokenExpiresSoon": "Expiring soon",
+        "tokenExpired": "Token expired"
+      }
+    }
+  },
+  "Home": {
+    "Profile": {
+      "UserProfile": {
+        "role": {
+          "user": "User",
+          "admin": "Admin",
+          "super_admin": "Super Admin"
+        },
+        "joined": "Joined at",
+        "banned": "Banned"
+      },
+      "Datas": {
+        "upload": "Uploads",
+        "comment": "Comments",
+        "favorite": "Favorites",
+        "edit": "Edits"
+      }
+    },
+    "Uploads": {
+      "ResourceItem": {
+        "created": "Uploaded at",
+        "moreThanOneFilePrefix": "etc.",
+        "moreThanOneFileSuffix": "files"
+      }
+    },
+    "HomeTabsNav": {
+      "upload": "Uploads",
+      "comment": "Comments",
+      "favorite": "Favorites",
+      "edit": "Edits"
+    },
+    "Edits": {
+      "EditRecordItem": {
+        "edited": "Edited",
+        "actionType": {
+          "UPDATE_SCALAR": "Updated basic information",
+          "ADD_RELATION": "Added relation",
+          "REMOVE_RELATION": "Removed relation",
+          "SET_RELATION": "Set relation",
+          "UPDATE_RELATION": "Updated relation"
+        },
+        "relationType": {
+          "cover": "Cover",
+          "image": "Image",
+          "link": "Link",
+          "developer": "Developer",
+          "character": "Character"
+        },
+        "entity": {
+          "game": "Game",
+          "character": "Character",
+          "developer": "Developer"
+        },
+        "fieldChanges": "Field changes"
+      },
+      "EditChanges": {
+        "changes": "Changes",
+        "added": "Added",
+        "removed": "Removed",
+        "updated": "Updated",
+        "before": "Before",
+        "after": "After",
+        "path": "Path",
+        "root": "(Root)",
+        "noDifferences": "No differences",
+        "empty": "(Empty)"
+      }
+    },
+    "Favorites": {
+      "FavoriteListItem": {
+        "default": "Default favorites"
+      },
+      "FavoriteItemsHeader": {
+        "default": "Default favorites",
+        "private": "Private"
+      },
+      "Action": {
+        "Delete": {
+          "title": "Delete favorites",
+          "description": "Are you sure you want to delete this favorites? This will delete all games in this favorites. This action cannot be undone.",
+          "cancel": "Cancel",
+          "delete": "Delete",
+          "success": "Delete successfully"
+        },
+        "Edit": {
+          "edit": "Edit favorites",
+          "title": "Edit favorites",
+          "description": "Update favorites info.",
+          "Content": {
+            "name": "Favorites name",
+            "description": "Favorites description",
+            "is_private": "Private favorites",
+            "submit": "Save",
+            "success": "Saved successfully",
+            "validation": {
+              "nameMinLength": "Favorites name must be at least {length} characters",
+              "nameMaxLength": "Favorites name must be at most {length} characters",
+              "descriptionMaxLength": "Favorites description must be at most {length} characters"
+            }
+          }
+        }
+      }
+    }
+  }
+}

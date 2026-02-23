@@ -1,0 +1,301 @@
+{
+  "Error": {
+    "ErrorView": {
+      "defaultTitle": "エラー",
+      "defaultDetails": "エラーが発生しました。後でもう一度お試しください。",
+      "back": "戻る",
+      "reset": "再読み込み"
+    }
+  },
+  "Site": {
+    "Ad": {
+      "ad": "広告"
+    }
+  },
+  "TopBar": {
+    "RandomGame": {
+      "random": "ランダム",
+      "loading": "読み込み中...",
+      "retry": "何も見つかりませんでした。もう一度お試しください"
+    },
+    "SearchTrigger": {
+      "search": "検索..."
+    },
+    "ThemeSwitcher": {
+      "label": "テーマ",
+      "system": "システムに合わせる",
+      "light": "ライト",
+      "dark": "ダーク"
+    },
+    "Settings": {
+      "personalSettings": "個人情報設定",
+      "siteSettings": "サイト設定",
+      "settings": "情報とサイト設定"
+    },
+    "Profile": {
+      "profile": "プロフィール"
+    },
+    "Admin": {
+      "admin": "管理サイト"
+    },
+    "NavBar": {
+      "menu": "メニュー",
+      "home": "ホーム",
+      "games": "ゲーム",
+      "producers": "会社",
+      "docs": "ドキュメント",
+      "releases": "アップロード",
+      "activities": "活動",
+      "about": "紹介",
+      "aiGirlFriend": "AI 女友",
+      "create": "作成"
+    }
+  },
+  "Footer": {
+    "ShionlibFooter": {
+      "contact": "お問い合わせ",
+      "friendLink": "友情リンク"
+    }
+  },
+  "User": {
+    "LoginOrRegisteDialog": {
+      "button": "ログイン",
+      "loginTitle": "Shionlib にログイン",
+      "registerTitle": "新規登録",
+      "loginDescription": "アカウントをお持ちでない方は",
+      "loginDescriptionLinkText": "今すぐ登録",
+      "registerDescription": "すでに Shionlib のアカウントをお持ちの方は",
+      "registerDescriptionLinkText": "今すぐログイン"
+    },
+    "LogoutDialog": {
+      "button": "ログアウト",
+      "title": "ログアウト",
+      "description": "ログアウトしてもよろしいですか？",
+      "logout": "ログアウト",
+      "cancel": "キャンセル"
+    },
+    "PasskeyBindNudgeDialog": {
+      "title": "Passkey ログインを有効化",
+      "description": "この端末は Passkey ログインに対応しています。追加すると、次回からパスワードなしで素早くログインできます。",
+      "hint": "あとで 設定 > セキュリティ から Passkey を追加することもできます。",
+      "later": "あとで",
+      "goToSettings": "セキュリティ設定を開く"
+    },
+    "Login": {
+      "title": "ログイン",
+      "description": "ログイン",
+      "identifier": "メールアドレスまたはユーザー名",
+      "password": "パスワード",
+      "forgetPassword": "パスワードを忘れた？",
+      "login": "ログイン",
+      "usePasskey": "Passkey でログイン",
+      "passkeyUnsupported": "この端末またはブラウザは Passkey に対応していません",
+      "success": "ログインしました",
+      "validation": {
+        "identifier": "ユーザー名またはメールアドレスは必須です",
+        "password": "パスワードは8文字以上が必要です"
+      }
+    },
+    "Register": {
+      "title": "新規登録",
+      "description": "新規登録",
+      "username": "ユーザー名",
+      "email": "メールアドレス",
+      "password": "パスワード",
+      "passwordConfirm": "パスワード（確認）",
+      "verifyUuid": "認証UUID",
+      "verifyCode": "認証コード",
+      "getVerifyCode": "認証コードを送信",
+      "register": "登録",
+      "verifyCodeSent": "認証コードを送信しました",
+      "verifyCodeSentError": "認証コードの送信に失敗しました",
+      "success": "登録が完了しました",
+      "validation": {
+        "username": "ユーザー名は必須です",
+        "email": "有効なメールアドレスを入力してください",
+        "password": "パスワードは8文字以上が必要です",
+        "passwordConfirm": "確認用パスワードは8文字以上が必要です",
+        "passwordRegex": "パスワードは8文字以上で、英字・数字・大文字をそれぞれ少なくとも1文字含めてください",
+        "passwordDiff": "パスワードと確認用パスワードが一致しません",
+        "verifyUuid": "認証UUIDは必須です",
+        "verifyCode": "認証コードは必須です"
+      }
+    }
+  },
+  "Uploader": {
+    "FileUploader": {
+      "dropzone": "ここにドラッグ＆ドロップするか、クリックしてファイルを選択",
+      "dropzoneSupportFileFormat": "対応形式：zip/rar/7z/tar/gzip",
+      "status": "ステータス",
+      "Idle": "待機",
+      "Hashing": "ハッシュ計算中",
+      "Initializing": "初期化中",
+      "Uploading": "アップロード中",
+      "Paused": "一時停止中",
+      "Completing": "最終処理",
+      "Completed": "完了",
+      "Aborted": "中止",
+      "Error": "エラー",
+      "invalidFileFormat": "非対応のファイル形式です",
+      "fileTooSmall": "ファイルサイズは少なくとも {size}MB でなければなりません",
+      "fileMismatch": "同じファイルから続ける"
+    },
+    "UploadTuning": {
+      "concurrencyLabel": "同時アップロード数",
+      "concurrencyDescription": "同時に送信するチャンク数。高すぎるとネットワークが不安定になる場合があります。",
+      "concurrencyRange": "{min}-{max} スレッド",
+      "chunkSizeLabel": "チャンクサイズ",
+      "chunkSizeDescription": "チャンクが大きいほどリクエストは減りますが、失敗時は多くのデータを再送する必要があります。",
+      "chunkSizeRange": "{min}-{max} MB",
+      "unitThreads": "スレッド",
+      "unitMB": "MB"
+    },
+    "UploadController": {
+      "start": "開始",
+      "pause": "一時停止",
+      "resume": "再開",
+      "cancel": "キャンセル"
+    },
+    "UploadProgress": {
+      "speed": "速度",
+      "eta": "残り時間"
+    }
+  },
+  "Comment": {
+    "CommentContent": {
+      "comments": "コメント",
+      "description": "耳を澄まして。"
+    },
+    "CommentBox": {
+      "success": "コメント成功"
+    },
+    "CommentItem": {
+      "edited": "編集于",
+      "source": "コメントした",
+      "hidden": "自分のみ可視",
+      "pending": "審査中"
+    },
+    "CommentParent": {
+      "parent": "返信"
+    },
+    "Actions": {
+      "MoreActions": {
+        "edit": "編集",
+        "delete": "削除"
+      },
+      "Edit": {
+        "edit": "編集",
+        "title": "コメントを編集",
+        "cancel": "キャンセル",
+        "confirm": "保存",
+        "success": "編集成功"
+      },
+      "Delete": {
+        "delete": "削除",
+        "title": "コメントを削除",
+        "description": "コメントを削除してよろしいですか？",
+        "cancel": "キャンセル",
+        "confirm": "削除",
+        "success": "削除成功"
+      }
+    }
+  },
+  "Content": {
+    "Hidden": {
+      "hidden": "非表示コンテンツ"
+    },
+    "Empty": {
+      "title": "何もありません..."
+    },
+    "BBCodeSupported": {
+      "title": "BBCode サポート",
+      "exampleTitle": "例",
+      "example": "[b]Bold[/b]\n[i]Italic[/i]\n[u]Underline[/u]\n[s]Strikethrough[/s]\n[quote]Quote[/quote]\n[spoiler]Spoiler[/spoiler]\n[mask]Mask[/mask]\n[url=https://shionlib.com]Shionlib[/url]"
+    }
+  },
+  "Search": {
+    "Command": {
+      "SearchCommand": {
+        "placeholder": "内容を検索...",
+        "press_enter_to_search": "Enter キーで検索"
+      },
+      "History": {
+        "history": "履歴",
+        "delete_all": "履歴をクリア"
+      },
+      "Trending": {
+        "trending": "人気の検索"
+      },
+      "Suggest": {
+        "suggest": "検索候補",
+        "search_directly": "「{query}」を検索"
+      }
+    },
+    "Game": {
+      "Results": {
+        "result_prefix": "検索",
+        "result_suffix": "{total} 件の結果"
+      }
+    },
+    "AnimeTrace": {
+      "Trigger": {
+        "trace": "画像から検索"
+      },
+      "Dialog": {
+        "title": "画像から検索",
+        "description": "AnimeTrace によって提供されています。"
+      },
+      "Result": {
+        "candidates": "{count} 件の候補",
+        "lowConfidence": "低い信頼度",
+        "unknownCharacter": "不明なキャラクター",
+        "unknownWork": "不明な作品"
+      },
+      "Search": {
+        "dropzone": "画像を貼り付け、またはクリック、ドラッグ、ドロップしてここに画像を追加",
+        "dropzoneSupportFileFormat": "対応形式：jpg/jpeg/png/gif/webp",
+        "loading": "読み込み中...",
+        "noResult": "結果が見つかりませんでした",
+        "invalidFileFormat": "対応していない画像形式です"
+      }
+    }
+  },
+  "Auth": {
+    "Password": {
+      "Forget": {
+        "title": "パスワードを忘れた場合",
+        "signSent": "パスワードリセットリンクを送信しました",
+        "resetSuccess": "パスワードをリセットしました",
+        "GetEmail": {
+          "title": "パスワードを忘れた場合",
+          "description": "パスワードを忘れた場合は、メールアドレスを入力してください。",
+          "email": "メールアドレス",
+          "submit": "パスワードをリセットするメールを送信",
+          "validation": {
+            "email": "有効なメールアドレスを入力してください"
+          }
+        },
+        "Reset": {
+          "title": "パスワードをリセット",
+          "description": "新しいパスワードを入力してください。送信後、ログアウトされます。",
+          "password": "新しいパスワード",
+          "passwordConfirm": "確認用パスワード",
+          "submit": "パスワードをリセット",
+          "validation": {
+            "password": "パスワードは8文字以上が必要です",
+            "passwordConfirm": "確認用パスワードは8文字以上が必要です",
+            "passwordRegex": "パスワードは8文字以上で、英字・数字・大文字をそれぞれ少なくとも1文字含めてください",
+            "passwordDiff": "パスワードと確認用パスワードが一致しません"
+          }
+        }
+      }
+    },
+    "Turnstile": {
+      "error": "検証に失敗しました、再度お試しください",
+      "timeout": "検証がタイムアウトしました、再度お試しください",
+      "siteKeyNotSet": "サイトキーが設定されていません",
+      "turnstileTitle": "リクエストを検証中",
+      "turnstileDescription": "検証コードが読み込まれないか、長時間応答しない場合は、ページをリフレッシュするか、ネットワーク接続を確認してください。"
+    }
+  }
+}

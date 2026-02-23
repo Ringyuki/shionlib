@@ -1,0 +1,35 @@
+{
+  "Action": {
+    "addToFavorites": "添加到收藏",
+    "favorited": "已收藏",
+    "removeFromFavorites": "取消收藏",
+    "title": "添加到收藏",
+    "description": "将此游戏添加到你的收藏夹中，方便你快速查找。点击对应收藏夹即可收藏或取消收藏。",
+    "Content": {
+      "Item": {
+        "gameCount": "共 {count} 部作品",
+        "favorited": "已收藏",
+        "default": "默认收藏夹",
+        "added": "添加成功",
+        "removed": "取消成功"
+      }
+    }
+  },
+  "Create": {
+    "create": "创建收藏夹",
+    "title": "创建收藏夹",
+    "description": "创建一个收藏夹。你可以在个人中心查看和管理你的收藏夹。",
+    "Content": {
+      "name": "收藏夹名称",
+      "description": "收藏夹描述",
+      "is_private": "私有收藏夹",
+      "submit": "创建",
+      "success": "创建成功",
+      "validation": {
+        "nameMinLength": "收藏夹名称至少需要 {length} 个字符",
+        "nameMaxLength": "收藏夹名称最多只能 {length} 个字符",
+        "descriptionMaxLength": "收藏夹描述最多只能 {length} 个字符"
+      }
+    }
+  }
+}

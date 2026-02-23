@@ -1,0 +1,71 @@
+{
+  "GlobalError": {
+    "title": "出错了",
+    "details": "我们遇到一些错误，请稍后重试。",
+    "back": "返回",
+    "reset": "重新加载"
+  },
+  "GlobalNotFound": {
+    "title": "页面未找到",
+    "details": "您访问的页面不存在或已被移动。",
+    "back": "返回",
+    "reset": "重新加载"
+  },
+  "NotFound": {
+    "title": "页面未找到",
+    "details": "您访问的页面不存在或已被移动。"
+  },
+  "User": {
+    "Settings": {
+      "title": "编辑设置",
+      "description": "你可以在此页面管理你的个人信息和站点设置。",
+      "loginRequired": {
+        "title": "请先登录",
+        "description": "你需要登录后才能访问此设置页面。",
+        "login": "登录"
+      }
+    }
+  },
+  "Game": {
+    "Edit": {
+      "EditLayout": {
+        "title": "编辑游戏信息"
+      }
+    }
+  },
+  "Developer": {
+    "Edit": {
+      "EditLayout": {
+        "title": "编辑会社信息"
+      }
+    }
+  },
+  "Character": {
+    "Edit": {
+      "EditLayout": {
+        "title": "编辑角色信息"
+      }
+    },
+    "Intros": {
+      "BasicInfos": {
+        "age": "年龄",
+        "birthday": "生日",
+        "blood_type": "血型",
+        "height": "身高",
+        "weight": "体重",
+        "male": "男性",
+        "female": "女性",
+        "non_binary": "非二元",
+        "ambiguous": "不明"
+      },
+      "Details": {
+        "no_intro": "暂无介绍"
+      }
+    }
+  },
+  "Search": {
+    "Game": {
+      "title": "搜索结果 {q}"
+    }
+  }
+}

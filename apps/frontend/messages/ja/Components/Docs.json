@@ -1,0 +1,17 @@
+{
+  "SideBar": {
+    "title": "ドキュメントディレクトリ"
+  },
+  "Content": {
+    "DocTOC": {
+      "title": "ページインデックス"
+    },
+    "DocNav": {
+      "prev": "前のページ",
+      "next": "次のページ"
+    },
+    "DocFooter": {
+      "edit": "このページを GitHub で編集"
+    }
+  }
+}

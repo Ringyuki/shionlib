@@ -1,0 +1,21 @@
+{
+  "Upload": {
+    "FileUploadSuccessTitle": "ファイルアップロード完了",
+    "FileUploadSuccessContent": "あなたがアップロードしたファイル {file_name} は Shionlib ストレージシステムに成功しました。ありがとうございます。",
+    "FileUploadFailedTitle": "ファイルアップロード失敗",
+    "FileCheckFailedContent": "あなたがアップロードしたファイル {file_name} はスキャンに失敗しました。原因：{reason} (ファイルスキャン状態：{file_check_status})。確認してから再度お試しください。",
+    "FileVirusReviewPendingTitle": "ファイルがマルウェア審査待ちです",
+    "FileVirusReviewPendingContent": "アップロードしたファイル {file_name} がウイルス検査で検出され、管理者審査に入りました（ケース #{malware_case_id}）。審査期限: {review_deadline}。",
+    "FileVirusReviewRequiredTitle": "新しいマルウェア審査があります",
+    "FileVirusReviewRequiredContent": "ユーザー {uploader_name} のファイル {file_name} がウイルス検査で検出されました（ケース #{malware_case_id}）。検出: {detected_viruses}。{review_deadline} までに対応してください。",
+    "FileVirusReviewRequiredLinkText": "マルウェアケースを審査",
+    "FileVirusFalsePositiveReleasedTitle": "誤検知として許可されました",
+    "FileVirusFalsePositiveReleasedContent": "あなたのファイル {file_name}（ケース #{malware_case_id}）は誤検知として許可されました。{review_note, select, null {} other {メモ: {review_note}}}",
+    "FileVirusConfirmedDeletedTitle": "マルウェア審査後にファイルを削除しました",
+    "FileVirusConfirmedDeletedContent": "あなたのファイル {file_name}（ケース #{malware_case_id}）は有害と判定され削除されました。現在の有害ファイルアップロード回数: {upload_injected_file_times}。ご注意ください：システムがあなたのアップロードに有害な内容を {malware_auto_ban_threshold} 回連続で検出した場合、アカウントは停止されます。{review_note, select, null {} other {メモ: {review_note}}}"
+  },
+  "Reupload": {
+    "FileReuploadedTitle": "お気に入りのゲームのファイルが更新されました",
+    "FileReuploadedContent": "お気に入りのゲーム {game_title_jp, select, other {{game_title_jp}} undefined {{game_title_en, select, other {{game_title_en}} undefined {{game_title_zh}}}}} のファイル {file_name} が更新されました。{reason, select, undefined {} other {理由：{reason}}}"
+  }
+}

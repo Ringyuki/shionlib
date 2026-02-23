@@ -1,0 +1,82 @@
+{
+  "Actions": {
+    "edit": "编辑",
+    "history": "编辑历史",
+    "history_title": "编辑历史",
+    "history_description": "查看此角色的编辑历史记录",
+    "no_history": "暂无编辑历史"
+  },
+  "Edit": {
+    "EditLayout": {
+      "edit": "编辑角色信息",
+      "description": "你可以在此页面编辑角色信息，仅展示你有权限编辑的字段。",
+      "backToCharacter": "返回角色页面"
+    },
+    "Scalar": {
+      "name_jp": "日文名",
+      "name_zh": "中文名",
+      "name_en": "英文名",
+      "aliases": "别名",
+      "intro_info_description": "以下字段 [b]介绍（中文）[/b]、[b]介绍（英语）[/b]、[b]介绍（日语）[/b] 支持 BBCode。",
+      "intro_zh": "介绍（中文）",
+      "intro_en": "介绍（英语）",
+      "intro_jp": "介绍（日语）",
+      "image": "角色图片",
+      "select_file": "选择文件",
+      "upload": "上传",
+      "upload_success": "上传成功",
+      "body_metrics": "身体数据",
+      "height": "身高 (cm)",
+      "weight": "体重 (kg)",
+      "bust": "胸围 (cm)",
+      "waist": "腰围 (cm)",
+      "hips": "臀围 (cm)",
+      "cup": "罩杯",
+      "age": "年龄",
+      "birthday": "生日",
+      "birthday_month": "月",
+      "birthday_day": "日",
+      "gender": "性别",
+      "non-spoiler-gender": "无剧透性别",
+      "actual-gender": "真实性别",
+      "gender_m": "男性",
+      "gender_f": "女性",
+      "gender_o": "其他",
+      "gender_a": "无性别",
+      "blood_type": "血型",
+      "blood_type_placeholder": "选择血型",
+      "blood_type_a": "A型",
+      "blood_type_b": "B型",
+      "blood_type_ab": "AB型",
+      "blood_type_o": "O型",
+      "submit": "提交更改",
+      "success": "提交成功",
+      "Confirm": {
+        "title": "确认更改",
+        "cancel": "取消",
+        "submit": "提交"
+      }
+    },
+    "EditNote": {
+      "title": "备注",
+      "placeholder": "修改原因, 修改内容等(可选)"
+    }
+  },
+  "Intros": {
+    "BasicInfos": {
+      "appearances_count": "{count} 出场作品",
+      "age": "年龄",
+      "birthday": "生日",
+      "blood_type": "血型",
+      "height": "身高",
+      "weight": "体重",
+      "male": "男性",
+      "female": "女性",
+      "non_binary": "非二元",
+      "ambiguous": "不明"
+    },
+    "Details": {
+      "no_intro": "暂无介绍"
+    }
+  }
+}

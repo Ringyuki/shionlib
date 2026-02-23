@@ -1,0 +1,17 @@
+{
+  "SideBar": {
+    "title": "Documents Directory"
+  },
+  "Content": {
+    "DocTOC": {
+      "title": "Page Index"
+    },
+    "DocNav": {
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "DocFooter": {
+      "edit": "Edit this page on GitHub"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "Sidebar": {
+    "Sidebar": {
+      "title": "消息中心"
+    },
+    "Item": {
+      "all": "全部消息",
+      "system": "系统消息",
+      "reply": "评论回复",
+      "like": "评论点赞"
+    }
+  },
+  "Message": {
+    "Box": {
+      "title": "消息"
+    },
+    "Switch": {
+      "all": "全部",
+      "read": "已读",
+      "unread": "未读"
+    },
+    "ReadAll": {
+      "markAllRead": "全部已读"
+    },
+    "Item": {
+      "system": "系统消息"
+    }
+  },
+  "Detail": {
+    "DetailDrawer": {
+      "title": "消息详情"
+    },
+    "DetailDialog": {
+      "title": "消息详情"
+    },
+    "Detail": {
+      "relatedGame": "来自游戏"
+    }
+  }
+}

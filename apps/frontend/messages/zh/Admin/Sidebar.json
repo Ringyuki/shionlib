@@ -1,0 +1,12 @@
+{
+  "dashboard": "数据看板",
+  "users": "用户管理",
+  "comments": "评论管理",
+  "reports": "举报管理",
+  "games": "游戏管理",
+  "characters": "角色管理",
+  "developers": "开发商管理",
+  "settings": "设置",
+  "backToSite": "返回站点",
+  "malwareScans": "报毒审核"
+}

@@ -1,0 +1,66 @@
+{
+  "Intros": {
+    "BasicInfos": {
+      "unknown": "暂无链接",
+      "works_count": "共 {count} 部作品",
+      "parent_developer": "母公司"
+    },
+    "Details": {
+      "no_intro": "暂无介绍"
+    }
+  },
+  "Actions": {
+    "edit": "编辑",
+    "history": {
+      "history": "编辑历史",
+      "noHistory": "暂无编辑历史"
+    }
+  },
+  "Edit": {
+    "EditLayout": {
+      "edit": "编辑会社信息",
+      "description": "你可以在此页面编辑会社信息，仅展示你有权限编辑的字段。",
+      "backToDeveloper": "返回会社页面"
+    },
+    "Scalar": {
+      "name": "名称",
+      "aliases": "别名",
+      "intro_info_description": "以下字段 [b]介绍（中文）[/b]、[b]介绍（英语）[/b]、[b]介绍（日语）[/b] 支持 BBCode。",
+      "intro_zh": "介绍（中文）",
+      "intro_en": "介绍（英语）",
+      "intro_jp": "介绍（日语）",
+      "extra_info": "其他信息",
+      "extra_info_key": "键",
+      "extra_info_value": "值",
+      "add_extra_info": "添加其他信息",
+      "logo": "Logo 图片",
+      "select_file": "选择文件",
+      "upload": "上传",
+      "upload_success": "上传成功",
+      "website": "官方网站",
+      "submit": "提交更改",
+      "success": "提交成功",
+      "Confirm": {
+        "title": "确认更改",
+        "cancel": "取消",
+        "submit": "提交"
+      }
+    },
+    "EditNote": {
+      "title": "备注",
+      "placeholder": "修改原因, 修改内容等(可选)"
+    }
+  },
+  "List": {
+    "Header": {
+      "title": "全部会社",
+      "description": "浏览 Shionlib 数据库中的所有会社/开发商。"
+    },
+    "Search": {
+      "placeholder": "搜索会社/开发商"
+    },
+    "DeveloperItem": {
+      "works_count": "共 {count} 部作品"
+    }
+  }
+}

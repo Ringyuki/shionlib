@@ -1,0 +1,19 @@
+{
+  "Valid": {
+    "Title": "通報が承認されました",
+    "Content": "あなたの通報は承認されました。理由：{reason}、悪質度：{malicious_level}。{process_note, select, null {} other {備考：{process_note}}}"
+  },
+  "Invalid": {
+    "Title": "通報が却下されました",
+    "Content": "あなたの通報は却下されました。直近30日間の無効通報回数：{false_report_count}。{quota_sub_gb, select, 0 {} other {アップロード枠を {quota_sub_gb} GB 減算しました。}}{ban_days, select, 0 {} other {アカウントを {ban_days} 日間停止しました。}}{process_note, select, undefined {} other {備考：{process_note}}}"
+  },
+  "Penalty": {
+    "Title": "リソース違反処理のお知らせ",
+    "Content": "あなたがアップロードしたリソースは違反と判定されました。理由：{reason}、悪質度：{malicious_level}。{quota_sub_gb, select, 0 {} other {アップロード枠を {quota_sub_gb} GB 減算しました。}}{ban_days, select, 0 {} other {アカウントを {ban_days} 日間停止しました。}}{process_note, select, undefined {} other {備考：{process_note}}}"
+  },
+  "NewReport": {
+    "Title": "新しいリソース通報",
+    "Content": "ユーザー {reporter_name} が {reported_user_name} のアップロードしたリソースを通報しました。理由：{reason}、悪質度：{malicious_level}。",
+    "LinkText": "通報を確認"
+  }
+}

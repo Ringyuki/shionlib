@@ -1,0 +1,21 @@
+{
+  "Upload": {
+    "FileUploadSuccessTitle": "文件上传完成",
+    "FileUploadSuccessContent": "你上传的文件 {file_name} 已成功储存至 Shionlib 储存桶，感谢你的分享。",
+    "FileUploadFailedTitle": "文件上传失败",
+    "FileCheckFailedContent": "你上传的文件 {file_name} 未通过扫描，原因：{reason} (文件状态代号：{file_check_status})。请检查后重试。",
+    "FileVirusReviewPendingTitle": "文件进入报毒复核流程",
+    "FileVirusReviewPendingContent": "你上传的文件 {file_name} 被病毒扫描流程标记，已进入复核流程（#{malware_case_id}）。审核截止时间：{review_deadline}。",
+    "FileVirusReviewRequiredTitle": "有新的报毒待审核",
+    "FileVirusReviewRequiredContent": "用户 {uploader_name} 上传的文件 {file_name} 被病毒扫描流程标记（#{malware_case_id}），检测结果：{detected_viruses}，请在 {review_deadline} 前处理。",
+    "FileVirusReviewRequiredLinkText": "处理报毒案例",
+    "FileVirusFalsePositiveReleasedTitle": "误报已放行",
+    "FileVirusFalsePositiveReleasedContent": "你的文件 {file_name}（#{malware_case_id}）已判定为误报并放行。{review_note, select, null {} other {备注：{review_note}}}",
+    "FileVirusConfirmedDeletedTitle": "文件已在报毒审核后删除",
+    "FileVirusConfirmedDeletedContent": "你的文件 {file_name}（#{malware_case_id}）已被判定为有害并删除。当前有害文件上传次数：{upload_injected_file_times}，请注意：如果系统连续 {malware_auto_ban_threshold} 次检测到你上传的文件中包含有害内容，你的账号将会被封禁。{review_note, select, null {} other {备注：{review_note}}}"
+  },
+  "Reupload": {
+    "FileReuploadedTitle": "你收藏的游戏有文件更新",
+    "FileReuploadedContent": "你收藏的游戏 {game_title_zh, select, other {{game_title_zh}} undefined {{game_title_jp, select, other {{game_title_jp}} undefined {{game_title_en}}}}} 的文件 {file_name} 已更新。{reason, select, undefined {} other {更新原因：{reason}}}"
+  }
+}

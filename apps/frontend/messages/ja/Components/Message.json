@@ -1,0 +1,40 @@
+{
+  "Sidebar": {
+    "Sidebar": {
+      "title": "メッセージ"
+    },
+    "Item": {
+      "all": "すべてのメッセージ",
+      "system": "システムメッセージ",
+      "reply": "コメント返信",
+      "like": "コメントいいね"
+    }
+  },
+  "Message": {
+    "Box": {
+      "title": "メッセージ"
+    },
+    "Switch": {
+      "all": "すべて",
+      "read": "既読",
+      "unread": "未読"
+    },
+    "ReadAll": {
+      "markAllRead": "すべて既読にする"
+    },
+    "Item": {
+      "system": "システムメッセージ"
+    }
+  },
+  "Detail": {
+    "DetailDrawer": {
+      "title": "メッセージ詳細"
+    },
+    "DetailDialog": {
+      "title": "メッセージ詳細"
+    },
+    "Detail": {
+      "relatedGame": "ゲームから"
+    }
+  }
+}

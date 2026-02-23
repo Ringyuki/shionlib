@@ -1,9 +1,9 @@
 'use client'
 
 import { NextIntlClientProvider } from 'next-intl'
-import en from '@/messages/en.json'
-import zh from '@/messages/zh.json'
-import ja from '@/messages/ja.json'
+import enPages from '@/messages/en/Pages.json'
+import zhPages from '@/messages/zh/Pages.json'
+import jaPages from '@/messages/ja/Pages.json'
 import { usePathname } from 'next/navigation'
 import { supportedLocales, SupportedLocales } from '@/config/i18n/supported'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/shionui/Card'
@@ -12,9 +12,9 @@ import { useRouter } from 'next/navigation'
 import '@/public/assets/styles/globals.css'
 
 const MESSAGES: Record<SupportedLocales, Record<string, string>> = {
-  en: en.Pages.GlobalNotFound,
-  zh: zh.Pages.GlobalNotFound,
-  ja: ja.Pages.GlobalNotFound,
+  en: enPages.GlobalNotFound,
+  zh: zhPages.GlobalNotFound,
+  ja: jaPages.GlobalNotFound,
 }
 
 export default function GlobalNotFound() {

@@ -1,0 +1,35 @@
+{
+  "Action": {
+    "addToFavorites": "お気に入りに追加",
+    "favorited": "お気に入りに追加済み",
+    "removeFromFavorites": "お気に入りから削除",
+    "title": "お気に入りに追加",
+    "description": "このゲームをお気に入りに追加します。お気に入りは個人用に作成され、他のユーザーは表示できません。",
+    "Content": {
+      "Item": {
+        "gameCount": "合計 {count} 作品",
+        "favorited": "お気に入りに追加済み",
+        "default": "デフォルトお気に入り",
+        "added": "追加成功",
+        "removed": "削除成功"
+      }
+    }
+  },
+  "Create": {
+    "create": "お気に入りを作成",
+    "title": "お気に入りを作成",
+    "description": "お気に入りを作成します。お気に入りは個人用に作成され、他のユーザーは表示できません。",
+    "Content": {
+      "name": "お気に入り名称",
+      "description": "お気に入り説明",
+      "is_private": "私有お気に入り",
+      "submit": "作成",
+      "success": "作成成功",
+      "validation": {
+        "nameMinLength": "お気に入り名称は少なくとも {length} 文字以上必要です",
+        "nameMaxLength": "お気に入り名称は最大 {length} 文字まで許可されています",
+        "descriptionMaxLength": "お気に入り説明は最大 {length} 文字まで許可されています"
+      }
+    }
+  }
+}

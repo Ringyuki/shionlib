@@ -1,0 +1,11 @@
+{
+  "title": "Shionlib - ビジュアルノベル／ギャルゲー アーカイブ",
+  "titleShort": "Shionlib",
+  "template": "%s - Shionlib",
+  "description": "Shionlib - 無料・オープンソース・気軽に使える ビジュアルノベル／ギャルゲー アーカイブ",
+  "keywords": ["Shionlib", "ギャルゲー", "リソースサイト", "無料", "オープンソース", "気軽"],
+  "og": {
+    "title": "Shionlib - ビジュアルノベル／ギャルゲー アーカイブ",
+    "description": "Shionlib - 無料・オープンソース・気軽に使える ビジュアルノベル／ギャルゲー アーカイブ"
+  }
+}

@@ -73,6 +73,9 @@ jobs:
       - name: ESLint
         run: pnpm --filter shionlib-frontend lint
 
+      - name: i18n check
+        run: pnpm --filter shionlib-frontend i18n:check
+
       - name: Type check
         run: pnpm --filter shionlib-frontend typecheck
 

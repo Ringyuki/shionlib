@@ -1,0 +1,9 @@
+{
+  "Comment": {
+    "Block": {
+      "Title": "评论未通过审核",
+      "Content": "你发布的评论未通过审核，原因：{top_category}。请修改评论内容后重试。",
+      "ReviewContent": "你发布的评论未通过审核，原因：{top_category}, {reason}, 关键片段：{evidence}。请修改评论内容后重试。"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "Reply": {
+    "Title": "New comment reply",
+    "Content": "You have a new comment reply."
+  },
+  "Like": {
+    "Title": "New comment like",
+    "Content": "You have a new comment like."
+  }
+}

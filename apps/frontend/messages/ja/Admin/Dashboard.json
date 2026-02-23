@@ -1,0 +1,16 @@
+{
+  "activityTrends": "活動トレンド",
+  "noTrendData": "トレンドデータがありません",
+  "views": "閲覧数",
+  "downloads": "ダウンロード数",
+  "score": "評価",
+  "totalGames": "ゲーム総数",
+  "totalUsers": "ユーザー総数",
+  "totalDownloads": "ダウンロード総数",
+  "totalViews": "閲覧総数",
+  "totalCharacters": "キャラクター総数",
+  "totalDevelopers": "開発者総数",
+  "totalComments": "コメント総数",
+  "newGamesToday": "今日の新作ゲーム",
+  "newUsersToday": "今日の新規ユーザー"
+}

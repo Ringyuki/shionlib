@@ -1,0 +1,47 @@
+{
+  "Header": {
+    "title": "ゲーム条目を作成",
+    "description": "Shionlib のデータベースに新しいゲーム条目を追加し、Visual Novel Database (VNDB) と Bangumi を使用して基本的な権威情報を取得します。",
+    "descriptionPrefix": "Shionlib のデータベースに新しいゲーム条目を追加し、",
+    "vndb": "Visual Novel Database (VNDB)",
+    "descriptionMiddle": " と ",
+    "bangumi": "Bangumi",
+    "descriptionSuffix": " を使用して基本的な権威情報を取得します。",
+    "guidePrefix": "VNDB でゲームを検索する方法を知りたい場合は、",
+    "guideLink": "このガイド",
+    "guideSuffix": "を参照してください。"
+  },
+  "Form": {
+    "vndbIdLabel": "VNDB ID",
+    "vndbIdDescription": "VNDB ID は英字 v と数字の組み合わせで、例：v14018。",
+    "vndbIdPlaceholder": "v14018",
+    "bangumiIdLabel": "Bangumi ID",
+    "bangumiIdDescription": "Bangumi ID は数字のみの組み合わせで、例：88765。",
+    "bangumiIdPlaceholder": "88765",
+    "skipConsistencyCheckLabel": "一致性チェックをスキップ",
+    "skipConsistencyCheckDescription": "一致性チェックをスキップすると、VNDB と Bangumi のデータが一致しているかどうかをチェックしません。",
+    "validation": {
+      "vndbId": "有効な VNDB ID を入力してください",
+      "bangumiId": "有効な Bangumi ID を入力してください"
+    },
+    "submit": "ゲーム条目を作成"
+  },
+  "Create": {
+    "invalidId": "無効な VNDB ID または Bangumi ID",
+    "success": "作成成功, ゲーム条目 ID は {id} です",
+    "successDescription": "下のボタンをクリックすると、新しいウィンドウでゲーム条目ページを開きます。",
+    "view": "ゲーム条目を表示"
+  },
+  "Alert": {
+    "info": "情報",
+    "infoDescription": "VNDB ID と Bangumi ID が対応していないゲーム条目を作成したい場合は、管理者に連絡して手動で追加してください。",
+    "warning": "エラー処理",
+    "warningDescription": "可能なエラーコードと原因：",
+    "errorCodes": {
+      "400103": "Bangumi リクエストが失敗しました。Bangumi ID が存在しないか、Bangumi にアクセスできない可能性があります。",
+      "400104": "VNDB リクエストが失敗しました。VNDB ID が存在しないか、VNDB にアクセスできない可能性があります。",
+      "400105": "ゲーム条目は Shionlib のデータベースに既に存在しています。",
+      "400106": "VNDB と Bangumi から取得したゲームデータが一致性チェックに失敗しました。入力した ID が正しいか確認してください。"
+    }
+  }
+}

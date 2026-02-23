@@ -1,0 +1,67 @@
+{
+  "Plugins": {
+    "placeholderPrefix": "Press",
+    "placeholderSuffix": "for commands..."
+  },
+  "Images": {
+    "imageUrl": "Image URL",
+    "imageUrlPlaceholder": "e.g. https://source.unsplash.com/random",
+    "altText": "Alt Text",
+    "altTextPlaceholder": "Random unsplash image",
+    "altTextUploadedPlaceholder": "Descriptive alternative text",
+    "imageUpload": "Image Upload",
+    "confirm": "Confirm",
+    "tabUrl": "URL",
+    "tabFile": "File"
+  },
+  "Embeds": {
+    "embed": "Embed",
+    "embedWithName": "Embed {name}",
+    "dismiss": "Dismiss"
+  },
+  "Picker": {
+    "paragraph": "Paragraph",
+    "headingN": "Heading {n}",
+    "bulletedList": "Bulleted List",
+    "numberedList": "Numbered List",
+    "quote": "Quote",
+    "code": "Code",
+    "columnsLayout": "Columns Layout",
+    "insertColumnsLayout": "Insert Columns Layout",
+    "table": "Table",
+    "insertTable": "Insert Table",
+    "tableNxM": "{rows}x{columns} Table",
+    "image": "Image",
+    "insertImage": "Insert Image",
+    "checkList": "Check List"
+  },
+  "Toolbar": {
+    "undo": "Undo",
+    "redo": "Redo",
+    "undoMac": "Undo (⌘Z)",
+    "undoWin": "Undo (Ctrl+Z)",
+    "redoMac": "Redo (⇧⌘Z)",
+    "redoWin": "Redo (Ctrl+Y)",
+    "toggleLink": "Toggle link",
+    "textBackgroundColor": "Text background color",
+    "textColor": "Text color",
+    "toggleSubscript": "Toggle subscript",
+    "toggleSuperscript": "Toggle superscript",
+    "copy": "Copy"
+  },
+  "Actions": {
+    "clearEditor": "Clear Editor",
+    "clearEditorConfirm": "Are you sure you want to clear the editor?",
+    "cancel": "Cancel",
+    "clear": "Clear",
+    "importContent": "Import Content",
+    "exportContent": "Export Content",
+    "exportFilePrefix": "Playground",
+    "exportSource": "Playground",
+    "markdown": "Markdown",
+    "viewOnlyMode": "View Only Mode",
+    "editMode": "Edit Mode",
+    "treeView": "Tree View",
+    "submit": "Submit"
+  }
+}

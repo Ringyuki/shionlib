@@ -1,0 +1,9 @@
+{
+  "Comment": {
+    "Block": {
+      "Title": "Comment not passed moderation",
+      "Content": "Your comment was not passed moderation, reason: {top_category}. Please modify the comment content and try again.",
+      "ReviewContent": "Your comment was not passed moderation, reason: {top_category}, {reason}, key fragment: {evidence}. Please modify the comment content and try again."
+    }
+  }
+}

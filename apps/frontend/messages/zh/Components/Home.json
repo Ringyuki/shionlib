@@ -1,0 +1,110 @@
+{
+  "Activity": {
+    "Head": {
+      "title": "最新动态",
+      "description": "Shionlib 活动日志，用户和系统活动将会被记录在此。"
+    },
+    "ActivityCard": {
+      "system": "系统"
+    },
+    "LoadMore": {
+      "button": "加载更多",
+      "noMore": "没有更多动态",
+      "error": "加载失败，请稍后重试"
+    },
+    "Activities": {
+      "Comment": {
+        "commentedPrefix": "在",
+        "game": "游戏",
+        "commentedSuffix": "下发表了评论"
+      },
+      "FileUploaded": {
+        "uploadedToServerPrefix": "上传了文件",
+        "uploadedToServerSuffix": "",
+        "pending": "等待扫描",
+        "uploadedToS3Prefix": "文件",
+        "uploadedToS3Suffix": "已上传至 Shionlib 储存桶",
+        "processCompleted": "上传流程结束"
+      },
+      "FileScaned": {
+        "scannedPrefix": "文件",
+        "scannedSuffix": "扫描完成",
+        "pass": "通过",
+        "brokenOrTruncated": "损坏或不完整",
+        "brokenOrUnsupported": "损坏或不支持",
+        "encrypted": "加密",
+        "harmfulContent": "有害内容",
+        "processAborted": "上传流程终止"
+      },
+      "FileProgress": {
+        "unknownFile": "未命名文件",
+        "stages": {
+          "uploadServer": "上传到服务器",
+          "uploadS3": "上传到 Shionlib 储存桶",
+          "scan": "文件扫描"
+        },
+        "status": {
+          "completed": "已完成",
+          "inProgress": "进行中",
+          "failed": "失败",
+          "waiting": "待开始",
+          "pending": "未开始"
+        },
+        "timeline": {
+          "title": "时间线",
+          "empty": "暂无记录"
+        },
+        "events": {
+          "FILE_UPLOAD_TO_SERVER": "上传至服务器",
+          "FILE_UPLOAD_TO_S3": "上传完成",
+          "FILE_CHECK_OK": "扫描通过",
+          "FILE_CHECK_BROKEN_OR_TRUNCATED": "扫描失败：损坏或缺失",
+          "FILE_CHECK_BROKEN_OR_UNSUPPORTED": "扫描失败：损坏或不支持",
+          "FILE_CHECK_ENCRYPTED": "扫描失败：加密文件",
+          "FILE_CHECK_HARMFUL": "扫描失败：有害内容",
+          "FILE_REUPLOAD": "重新上传"
+        }
+      },
+      "Edit": {
+        "editedPrefix": "编辑了",
+        "game": "游戏",
+        "developer": "会社/开发商",
+        "character": "角色"
+      },
+      "Create": {
+        "createdPrefix": "创建了",
+        "game": "游戏"
+      }
+    }
+  },
+  "Games": {
+    "Head": {
+      "title": "近期热门",
+      "description": "近期热门的游戏，按照浏览量、下载量、条目创建时间和游戏发售时间综合排序。每小时更新一次。"
+    }
+  },
+  "RecentUpdate": {
+    "Head": {
+      "title": "最近更新",
+      "description": "最近更新的游戏，包括新的民间翻译、官方翻译版本、新的补丁、新的 DLC 等。"
+    }
+  },
+  "NewWorks": {
+    "Head": {
+      "title": "本月新作",
+      "description": "发售日期在上一个月的最后一个星期五和本月的最后一个星期五之间的作品。如果当前日期晚于本月的最后一个星期五，则显示发售日期在本月的最后一个星期五和下一个月的最后一个星期五之间的作品。按照发售日期排序。",
+      "release": "于 {yearName} {monthName} 发售的作品。"
+    }
+  },
+  "Hero": {
+    "Shionlib": {
+      "description": "免费、开源、零门槛的 视觉小说/Galgame 档案库"
+    },
+    "Overview": {
+      "games": "条目",
+      "files": "文件",
+      "storage": "储存",
+      "24-hour-traffic": "24小时流量"
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "Header": {
+    "title": "Create Game Entry",
+    "description": "Add a new game entry to Shionlib's database, using Visual Novel Database (VNDB) and Bangumi for basic authoritative information.",
+    "descriptionPrefix": "Add a new game entry to Shionlib's database, using ",
+    "vndb": "Visual Novel Database (VNDB)",
+    "descriptionMiddle": " and ",
+    "bangumi": "Bangumi",
+    "descriptionSuffix": " for basic authoritative information.",
+    "guidePrefix": "If you want to know how to search for games using VNDB, please refer to ",
+    "guideLink": "this guide",
+    "guideSuffix": "."
+  },
+  "Form": {
+    "vndbIdLabel": "VNDB ID",
+    "vndbIdDescription": "The VNDB ID is a combination of letter v and digits, for example: v14018.",
+    "vndbIdPlaceholder": "v14018",
+    "bangumiIdLabel": "Bangumi ID",
+    "bangumiIdDescription": "The Bangumi ID is a combination of digits, for example: 88765.",
+    "bangumiIdPlaceholder": "88765",
+    "skipConsistencyCheckLabel": "Skip Consistency Check",
+    "skipConsistencyCheckDescription": "Skip consistency check, if skipped, will not check if the data from VNDB and Bangumi is consistent.",
+    "validation": {
+      "vndbId": "Please enter a valid VNDB ID",
+      "bangumiId": "Please enter a valid Bangumi ID"
+    },
+    "submit": "Create Game Entry"
+  },
+  "Create": {
+    "invalidId": "Invalid VNDB ID or Bangumi ID",
+    "success": "Created successfully, game entry ID is {id}",
+    "successDescription": "Click the button below to open the game entry page in a new window.",
+    "view": "View Game Entry"
+  },
+  "Alert": {
+    "info": "Info",
+    "infoDescription": "If you want to create a game entry that does not have a corresponding VNDB ID and Bangumi ID, please contact the administrator to manually add it.",
+    "warning": "Error Handling",
+    "warningDescription": "Possible error codes and reasons:",
+    "errorCodes": {
+      "400103": "Bangumi request failed, possibly because the Bangumi ID does not exist or Bangumi is not accessible.",
+      "400104": "VNDB request failed, possibly because the VNDB ID does not exist or VNDB is not accessible.",
+      "400105": "The game entry already exists in Shionlib's database.",
+      "400106": "The game data obtained from VNDB and Bangumi did not pass the consistency check, please check if the ID you filled is correct."
+    }
+  }
+}

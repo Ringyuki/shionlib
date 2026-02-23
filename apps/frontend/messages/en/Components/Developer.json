@@ -1,0 +1,66 @@
+{
+  "Intros": {
+    "BasicInfos": {
+      "unknown": "No link",
+      "works_count": "{count} works in total",
+      "parent_developer": "Parent company"
+    },
+    "Details": {
+      "no_intro": "No introduction"
+    }
+  },
+  "Actions": {
+    "edit": "Edit",
+    "history": {
+      "history": "Edit History",
+      "noHistory": "No edit history"
+    }
+  },
+  "Edit": {
+    "EditLayout": {
+      "edit": "Edit Developer Information",
+      "description": "You can edit developer information on this page. Only fields you have permission to edit are shown.",
+      "backToDeveloper": "Back to developer page"
+    },
+    "Scalar": {
+      "name": "Name",
+      "aliases": "Aliases",
+      "intro_info_description": "The following fields [b]Introduction (Chinese)[/b], [b]Introduction (English)[/b], [b]Introduction (Japanese)[/b] support BBCode.",
+      "intro_zh": "Introduction (Chinese)",
+      "intro_en": "Introduction (English)",
+      "intro_jp": "Introduction (Japanese)",
+      "extra_info": "Extra Info",
+      "extra_info_key": "Key",
+      "extra_info_value": "Value",
+      "add_extra_info": "Add Extra Info",
+      "logo": "Logo",
+      "select_file": "Select File",
+      "upload": "Upload",
+      "upload_success": "Upload successful",
+      "website": "Website",
+      "submit": "Submit Changes",
+      "success": "Submitted successfully",
+      "Confirm": {
+        "title": "Confirm Changes",
+        "cancel": "Cancel",
+        "submit": "Submit"
+      }
+    },
+    "EditNote": {
+      "title": "Notes",
+      "placeholder": "Reason for changes (optional)"
+    }
+  },
+  "List": {
+    "Header": {
+      "title": "All Developers",
+      "description": "Browse our collection of developers and their games."
+    },
+    "Search": {
+      "placeholder": "Search developers"
+    },
+    "DeveloperItem": {
+      "works_count": "{count} works in total"
+    }
+  }
+}

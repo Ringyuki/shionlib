@@ -1,0 +1,110 @@
+{
+  "Activity": {
+    "Head": {
+      "title": "最新動態",
+      "description": "Shionlib 活動ログ、ユーザーとシステム活動はここに記録されます。"
+    },
+    "ActivityCard": {
+      "system": "システム"
+    },
+    "LoadMore": {
+      "button": "さらに読み込む",
+      "noMore": "これ以上の更新はありません",
+      "error": "読み込みに失敗しました。もう一度お試しください。"
+    },
+    "Activities": {
+      "Comment": {
+        "commentedPrefix": "コメントしました",
+        "game": "ゲーム",
+        "commentedSuffix": ""
+      },
+      "FileUploaded": {
+        "uploadedToServerPrefix": "ファイルをアップロードしました",
+        "uploadedToServerSuffix": "サーバーに",
+        "pending": "待機中",
+        "uploadedToS3Prefix": "ファイル",
+        "uploadedToS3Suffix": "Shionlib ストレージシステムにアップロードされました",
+        "processCompleted": "アップロードプロセス完了"
+      },
+      "FileScaned": {
+        "scannedPrefix": "ファイル",
+        "scannedSuffix": "スキャン完了",
+        "pass": "パス",
+        "brokenOrTruncated": "破損または不完全",
+        "brokenOrUnsupported": "破損または非対応",
+        "encrypted": "暗号化",
+        "harmfulContent": "有害な内容",
+        "processAborted": "アップロードプロセス中断"
+      },
+      "FileProgress": {
+        "unknownFile": "ファイル名未設定",
+        "stages": {
+          "uploadServer": "サーバーへアップロード",
+          "uploadS3": "ストレージへアップロード",
+          "scan": "ファイルスキャン"
+        },
+        "status": {
+          "completed": "完了",
+          "inProgress": "進行中",
+          "failed": "失敗",
+          "waiting": "待機中",
+          "pending": "未開始"
+        },
+        "timeline": {
+          "title": "タイムライン",
+          "empty": "まだ更新はありません"
+        },
+        "events": {
+          "FILE_UPLOAD_TO_SERVER": "サーバーにアップロードしました",
+          "FILE_UPLOAD_TO_S3": "ストレージにアップロードしました",
+          "FILE_CHECK_OK": "スキャンを通過しました",
+          "FILE_CHECK_BROKEN_OR_TRUNCATED": "スキャン失敗：破損または欠損",
+          "FILE_CHECK_BROKEN_OR_UNSUPPORTED": "スキャン失敗：破損または非対応形式",
+          "FILE_CHECK_ENCRYPTED": "スキャン失敗：暗号化ファイル",
+          "FILE_CHECK_HARMFUL": "スキャン失敗：危険なコンテンツ",
+          "FILE_REUPLOAD": "再アップロード"
+        }
+      },
+      "Edit": {
+        "editedPrefix": "編集しました",
+        "game": "ゲーム",
+        "developer": "開発者",
+        "character": "キャラクター"
+      },
+      "Create": {
+        "createdPrefix": "作成しました",
+        "game": "ゲーム"
+      }
+    }
+  },
+  "Games": {
+    "Head": {
+      "title": "最近人気のゲーム一覧",
+      "description": "最近人気のゲーム一覧，閲覧数、ダウンロード数、登録時間、発売時間を総合的に並べ替えたゲーム一覧です。1時間ごとに更新されます。"
+    }
+  },
+  "RecentUpdate": {
+    "Head": {
+      "title": "最近の更新",
+      "description": "最近更新のゲーム，新しい民間翻訳、公式翻訳バージョン、新しいパッチ、新しい DLC などが含まれています。"
+    }
+  },
+  "NewWorks": {
+    "Head": {
+      "title": "本月新作",
+      "description": "発売日が前月の最終金曜日と今月の最終金曜日の間にある作品。現在の日付が今月の最終金曜日以降の場合は、今月の最終金曜日と来月の最終金曜日の間にある作品が表示されます。発売日で並べ替えます。",
+      "release": "{yearName} {monthName} 発売の作品。"
+    }
+  },
+  "Hero": {
+    "Shionlib": {
+      "description": "無料・オープンソース・気軽に使える ビジュアルノベル／ギャルゲー アーカイブ"
+    },
+    "Overview": {
+      "games": "ゲーム",
+      "files": "ファイル",
+      "storage": "ストレージ",
+      "24-hour-traffic": "24時間流量"
+    }
+  }
+}

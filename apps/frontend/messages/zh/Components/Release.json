@@ -1,0 +1,15 @@
+{
+  "List": {
+    "Header": {
+      "title": "最新上传",
+      "description": "由 Shionlib 用户上传的游戏文件，按照上传时间降序排列。",
+      "subDescriptionPrefix": "所有用户都可以上传游戏文件到 Shionlib 服务器，你可以通过这篇",
+      "subDescriptionLink": "指南",
+      "subDescriptionSuffix": "来了解如何上传游戏文件。"
+    }
+  },
+  "ReleaseCard": {
+    "uploaded_at": "上传在",
+    "more_than_one_file": "等 {count} 个文件"
+  }
+}

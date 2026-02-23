@@ -1,0 +1,67 @@
+{
+  "Plugins": {
+    "placeholderPrefix": "押す",
+    "placeholderSuffix": "コマンドを入力..."
+  },
+  "Images": {
+    "imageUrl": "画像URL",
+    "imageUrlPlaceholder": "例: https://source.unsplash.com/random",
+    "altText": "代替テキスト",
+    "altTextPlaceholder": "ランダムな Unsplash 画像",
+    "altTextUploadedPlaceholder": "説明的な代替テキスト",
+    "imageUpload": "画像アップロード",
+    "confirm": "確認",
+    "tabUrl": "リンク",
+    "tabFile": "ファイル"
+  },
+  "Embeds": {
+    "embed": "埋め込み",
+    "embedWithName": "{name} を埋め込む",
+    "dismiss": "閉じる"
+  },
+  "Picker": {
+    "paragraph": "段落",
+    "headingN": "見出し {n}",
+    "bulletedList": "箇条書き",
+    "numberedList": "番号付きリスト",
+    "quote": "引用",
+    "code": "コード",
+    "columnsLayout": "カラムレイアウト",
+    "insertColumnsLayout": "カラムレイアウトを挿入",
+    "table": "表",
+    "insertTable": "表を挿入",
+    "tableNxM": "{rows}×{columns} の表",
+    "image": "画像",
+    "insertImage": "画像を挿入",
+    "checkList": "チェックリスト"
+  },
+  "Toolbar": {
+    "undo": "元に戻す",
+    "redo": "やり直し",
+    "undoMac": "元に戻す (⌘Z)",
+    "undoWin": "元に戻す (Ctrl+Z)",
+    "redoMac": "やり直し (⇧⌘Z)",
+    "redoWin": "やり直し (Ctrl+Y)",
+    "toggleLink": "リンクを切り替え",
+    "textBackgroundColor": "文字の背景色",
+    "textColor": "文字色",
+    "toggleSubscript": "下付き文字を切り替え",
+    "toggleSuperscript": "上付き文字を切り替え",
+    "copy": "コピー"
+  },
+  "Actions": {
+    "clearEditor": "エディターをクリア",
+    "clearEditorConfirm": "エディターをクリアしてもよろしいですか？",
+    "cancel": "キャンセル",
+    "clear": "クリア",
+    "importContent": "インポート",
+    "exportContent": "エクスポート",
+    "exportFilePrefix": "Playground",
+    "exportSource": "Playground",
+    "markdown": "Markdown",
+    "viewOnlyMode": "閲覧モード",
+    "editMode": "編集モード",
+    "treeView": "ツリービュー",
+    "submit": "送信"
+  }
+}

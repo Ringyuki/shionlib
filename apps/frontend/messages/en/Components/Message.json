@@ -1,0 +1,40 @@
+{
+  "Sidebar": {
+    "Sidebar": {
+      "title": "Messages"
+    },
+    "Item": {
+      "all": "All messages",
+      "system": "System messages",
+      "reply": "Comment replies",
+      "like": "Comment likes"
+    }
+  },
+  "Message": {
+    "Box": {
+      "title": "Messages"
+    },
+    "Switch": {
+      "all": "All",
+      "read": "Read",
+      "unread": "Unread"
+    },
+    "ReadAll": {
+      "markAllRead": "Mark all as read"
+    },
+    "Item": {
+      "system": "System messages"
+    }
+  },
+  "Detail": {
+    "DetailDrawer": {
+      "title": "Message Details"
+    },
+    "DetailDialog": {
+      "title": "Message Details"
+    },
+    "Detail": {
+      "relatedGame": "From Game"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "Head": {
+    "title": "すべてのドキュメント"
+  },
+  "categories": {
+    "about": "紹介",
+    "dev": "開発",
+    "faq": "よくある質問",
+    "guides": "ガイド"
+  },
+  "about": {
+    "about-shionlib": "Shionlib について"
+  },
+  "dev": {
+    "dev-overview": "Shionlib 開発概要"
+  },
+  "faq": {
+    "1": "title1"
+  },
+  "guides": {
+    "upload-game-files": "ゲームファイルをアップロード"
+  }
+}

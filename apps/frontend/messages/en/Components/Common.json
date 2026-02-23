@@ -1,0 +1,301 @@
+{
+  "Error": {
+    "ErrorView": {
+      "defaultTitle": "Error",
+      "defaultDetails": "We ran into an error. Please try again later.",
+      "back": "Back",
+      "reset": "Reload"
+    }
+  },
+  "Site": {
+    "Ad": {
+      "ad": "AD"
+    }
+  },
+  "TopBar": {
+    "RandomGame": {
+      "random": "Random",
+      "loading": "Now loading...",
+      "retry": "No results found, try again!"
+    },
+    "SearchTrigger": {
+      "search": "Search..."
+    },
+    "ThemeSwitcher": {
+      "label": "Theme",
+      "system": "Match system",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "Settings": {
+      "personalSettings": "Personal settings",
+      "siteSettings": "Site settings",
+      "settings": "settings"
+    },
+    "Profile": {
+      "profile": "Profile"
+    },
+    "Admin": {
+      "admin": "Admin"
+    },
+    "NavBar": {
+      "menu": "Menu",
+      "home": "Home",
+      "games": "Games",
+      "producers": "Producers",
+      "docs": "Docs",
+      "releases": "Releases",
+      "activities": "Activities",
+      "about": "About",
+      "aiGirlFriend": "AI Girlfriend",
+      "create": "Create"
+    }
+  },
+  "Footer": {
+    "ShionlibFooter": {
+      "contact": "Contact",
+      "friendLink": "Friend Links"
+    }
+  },
+  "User": {
+    "LoginOrRegisteDialog": {
+      "button": "Log in",
+      "loginTitle": "Log in to Shionlib",
+      "registerTitle": "Register",
+      "loginDescription": "Don't have an account?",
+      "loginDescriptionLinkText": "Register now",
+      "registerDescription": "Already have a Shionlib account?",
+      "registerDescriptionLinkText": "Log in now"
+    },
+    "LogoutDialog": {
+      "button": "Log out",
+      "title": "Log out",
+      "description": "Are you sure you want to log out?",
+      "logout": "Log out",
+      "cancel": "Cancel"
+    },
+    "PasskeyBindNudgeDialog": {
+      "title": "Enable Passkey Sign-in",
+      "description": "This device supports Passkey sign-in. Add one to sign in faster without a password.",
+      "hint": "You can add a Passkey later in Settings > Security.",
+      "later": "Maybe later",
+      "goToSettings": "Open Security Settings"
+    },
+    "Login": {
+      "title": "Log in",
+      "description": "Log in",
+      "identifier": "Email or username",
+      "password": "Password",
+      "forgetPassword": "Forgot password?",
+      "login": "Log in",
+      "usePasskey": "Use Passkey",
+      "passkeyUnsupported": "Passkey is not supported on this device/browser",
+      "success": "Logged in successfully",
+      "validation": {
+        "identifier": "Email or username is required",
+        "password": "Password must be at least 8 characters"
+      }
+    },
+    "Register": {
+      "title": "Register",
+      "description": "Register",
+      "username": "Username",
+      "email": "Email",
+      "password": "Password",
+      "passwordConfirm": "Confirm password",
+      "verifyUuid": "Verification UUID",
+      "verifyCode": "Verification code",
+      "getVerifyCode": "Get code",
+      "register": "Register",
+      "verifyCodeSent": "Verification code sent",
+      "verifyCodeSentError": "Failed to send verification code",
+      "success": "Registered successfully",
+      "validation": {
+        "username": "Username is required",
+        "email": "Please enter a valid email address",
+        "password": "Password must be at least 8 characters",
+        "passwordConfirm": "Confirm password must be at least 8 characters",
+        "passwordRegex": "Password must be at least 8 characters and include at least one letter, one number, and one uppercase letter",
+        "passwordDiff": "Password and confirm password do not match",
+        "verifyUuid": "Verification UUID is required",
+        "verifyCode": "Verification code is required"
+      }
+    }
+  },
+  "Uploader": {
+    "FileUploader": {
+      "dropzone": "Click or drag files here to upload",
+      "dropzoneSupportFileFormat": "Supported formats: zip/rar/7z/tar/gzip",
+      "status": "Status",
+      "Idle": "Idle",
+      "Hashing": "Hashing",
+      "Initializing": "Initializing",
+      "Uploading": "Uploading",
+      "Paused": "Paused",
+      "Completing": "Finalizing",
+      "Completed": "Completed",
+      "Aborted": "Canceled",
+      "Error": "Error",
+      "invalidFileFormat": "Unsupported file format",
+      "fileTooSmall": "File size must be at least {size}MB",
+      "fileMismatch": "Please select the same file to continue"
+    },
+    "UploadTuning": {
+      "concurrencyLabel": "Parallel chunks",
+      "concurrencyDescription": "Higher values use more connections but can saturate unstable networks.",
+      "concurrencyRange": "{min}-{max} threads",
+      "chunkSizeLabel": "Chunk size",
+      "chunkSizeDescription": "Larger chunks reduce requests but make retries resend more data.",
+      "chunkSizeRange": "{min}-{max} MB",
+      "unitThreads": "threads",
+      "unitMB": "MB"
+    },
+    "UploadController": {
+      "start": "Start",
+      "pause": "Pause",
+      "resume": "Resume",
+      "cancel": "Cancel"
+    },
+    "UploadProgress": {
+      "speed": "Speed",
+      "eta": "Time remaining"
+    }
+  },
+  "Comment": {
+    "CommentContent": {
+      "comments": "Comments",
+      "description": "耳を澄まして。"
+    },
+    "CommentBox": {
+      "success": "Comment successfully"
+    },
+    "CommentItem": {
+      "edited": "edited at",
+      "source": "commented on",
+      "hidden": "Only visible to you",
+      "pending": "Pending review"
+    },
+    "CommentParent": {
+      "parent": "Reply to"
+    },
+    "Actions": {
+      "MoreActions": {
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "Edit": {
+        "edit": "Edit",
+        "title": "Edit comment",
+        "cancel": "Cancel",
+        "confirm": "Save",
+        "success": "Edited successfully"
+      },
+      "Delete": {
+        "delete": "Delete",
+        "title": "Delete comment",
+        "description": "Are you sure you want to delete this comment?",
+        "cancel": "Cancel",
+        "confirm": "Delete",
+        "success": "Deleted successfully"
+      }
+    }
+  },
+  "Content": {
+    "Hidden": {
+      "hidden": "Hidden content"
+    },
+    "Empty": {
+      "title": "Nothing here..."
+    },
+    "BBCodeSupported": {
+      "title": "BBCode Supported",
+      "exampleTitle": "Example",
+      "example": "[b]Bold[/b]\n[i]Italic[/i]\n[u]Underline[/u]\n[s]Strikethrough[/s]\n[quote]Quote[/quote]\n[spoiler]Spoiler[/spoiler]\n[mask]Mask[/mask]\n[url=https://shionlib.com]Shionlib[/url]"
+    }
+  },
+  "Search": {
+    "Command": {
+      "SearchCommand": {
+        "placeholder": "Enter content...",
+        "press_enter_to_search": "Press Enter to search"
+      },
+      "History": {
+        "history": "History",
+        "delete_all": "Delete all"
+      },
+      "Trending": {
+        "trending": "Trending"
+      },
+      "Suggest": {
+        "suggest": "Suggestions",
+        "search_directly": "Search \"{query}\""
+      }
+    },
+    "Game": {
+      "Results": {
+        "result_prefix": "Search for",
+        "result_suffix": "{total} results found"
+      }
+    },
+    "AnimeTrace": {
+      "Trigger": {
+        "trace": "Search by image"
+      },
+      "Dialog": {
+        "title": "Search by image",
+        "description": "Powered by AnimeTrace."
+      },
+      "Result": {
+        "candidates": "{count} candidates",
+        "lowConfidence": "Low confidence",
+        "unknownCharacter": "Unknown character",
+        "unknownWork": "Unknown work"
+      },
+      "Search": {
+        "dropzone": "Paste image, or click, drag, and drop image here",
+        "dropzoneSupportFileFormat": "Supported file formats: jpg/jpeg/png/gif/webp",
+        "loading": "Now loading...",
+        "noResult": "No results found",
+        "invalidFileFormat": "Invalid image format"
+      }
+    }
+  },
+  "Auth": {
+    "Password": {
+      "Forget": {
+        "title": "Forget Password",
+        "signSent": "Reset link sent",
+        "resetSuccess": "Password reset successfully",
+        "GetEmail": {
+          "title": "Forget Password",
+          "description": "Please enter your email to get a password reset link.",
+          "email": "Email",
+          "submit": "Send reset email",
+          "validation": {
+            "email": "Please enter a valid email address"
+          }
+        },
+        "Reset": {
+          "title": "Reset Password",
+          "description": "Please enter your new password. After submitting, you will be logged out.",
+          "password": "New password",
+          "passwordConfirm": "Confirm password",
+          "submit": "Reset password",
+          "validation": {
+            "password": "Password must be at least 8 characters",
+            "passwordConfirm": "Confirm password must be at least 8 characters",
+            "passwordRegex": "Password must be at least 8 characters and include at least one letter, one number, and one uppercase letter",
+            "passwordDiff": "Password and confirm password do not match"
+          }
+        }
+      }
+    },
+    "Turnstile": {
+      "error": "Verification failed, please try again",
+      "timeout": "Verification timed out, please try again",
+      "siteKeyNotSet": "Site key not set",
+      "turnstileTitle": "Verifying your request",
+      "turnstileDescription": "If the verification code cannot be loaded or does not respond for a long time, please refresh the page or check your network connection."
+    }
+  }
+}

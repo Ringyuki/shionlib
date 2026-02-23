@@ -1,0 +1,21 @@
+{
+  "Upload": {
+    "FileUploadSuccessTitle": "File uploaded successfully",
+    "FileUploadSuccessContent": "You uploaded the file {file_name} successfully, thank you for your sharing.",
+    "FileUploadFailedTitle": "File upload failed",
+    "FileCheckFailedContent": "You uploaded the file {file_name} failed to scan, reason: {reason} (file check status: {file_check_status}). Please check and try again.",
+    "FileVirusReviewPendingTitle": "File is pending malware review",
+    "FileVirusReviewPendingContent": "Your file {file_name} was flagged by malware scan and has entered admin review (Case #{malware_case_id}). Review deadline: {review_deadline}.",
+    "FileVirusReviewRequiredTitle": "Malware review required",
+    "FileVirusReviewRequiredContent": "File {file_name} uploaded by {uploader_name} was flagged by malware scan (Case #{malware_case_id}). Detected: {detected_viruses}. Review before {review_deadline}.",
+    "FileVirusReviewRequiredLinkText": "Review malware case",
+    "FileVirusFalsePositiveReleasedTitle": "False positive released",
+    "FileVirusFalsePositiveReleasedContent": "Your file {file_name} (Case #{malware_case_id}) was reviewed as false positive and has been released.{review_note, select, null {} other { Note: {review_note}}}",
+    "FileVirusConfirmedDeletedTitle": "File removed after malware review",
+    "FileVirusConfirmedDeletedContent": "Your file {file_name} (Case #{malware_case_id}) was confirmed as harmful and removed. Current harmful upload count: {upload_injected_file_times}. Please note: if the system detects harmful content in your uploads for {malware_auto_ban_threshold} consecutive times, your account will be banned.{review_note, select, null {} other { Note: {review_note}}}"
+  },
+  "Reupload": {
+    "FileReuploadedTitle": "A file in your favorited game has been updated",
+    "FileReuploadedContent": "The file {file_name} in your favorited game {game_title_en, select, other {{game_title_en}} undefined {{game_title_jp, select, other {{game_title_jp}} undefined {{game_title_zh}}}}} has been updated.{reason, select, undefined {} other { Reason: {reason}}}"
+  }
+}

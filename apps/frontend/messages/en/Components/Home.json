@@ -1,0 +1,110 @@
+{
+  "Activity": {
+    "Head": {
+      "title": "Latest Activities",
+      "description": "Shionlib activity log, user and system activities will be recorded here."
+    },
+    "ActivityCard": {
+      "system": "System"
+    },
+    "LoadMore": {
+      "button": "Load more",
+      "noMore": "No more activities",
+      "error": "Failed to load more. Please try again."
+    },
+    "Activities": {
+      "Comment": {
+        "commentedPrefix": "Commented on",
+        "game": "Game",
+        "commentedSuffix": ""
+      },
+      "FileUploaded": {
+        "uploadedToServerPrefix": "Uploaded file",
+        "uploadedToServerSuffix": "to server",
+        "pending": "Pending scan",
+        "uploadedToS3Prefix": "File",
+        "uploadedToS3Suffix": "uploaded to Shionlib storage system",
+        "processCompleted": "Upload process completed"
+      },
+      "FileScaned": {
+        "scannedPrefix": "File",
+        "scannedSuffix": "scan completed",
+        "pass": "Pass",
+        "brokenOrTruncated": "Broken or incomplete",
+        "brokenOrUnsupported": "Broken or unsupported",
+        "encrypted": "Encrypted",
+        "harmfulContent": "Harmful content",
+        "processAborted": "Upload process aborted"
+      },
+      "FileProgress": {
+        "unknownFile": "Unnamed file",
+        "stages": {
+          "uploadServer": "Upload to server",
+          "uploadS3": "Upload to S3",
+          "scan": "Security scan"
+        },
+        "status": {
+          "completed": "Completed",
+          "inProgress": "In progress",
+          "failed": "Failed",
+          "waiting": "Waiting",
+          "pending": "Pending"
+        },
+        "timeline": {
+          "title": "Timeline",
+          "empty": "No updates recorded yet"
+        },
+        "events": {
+          "FILE_UPLOAD_TO_SERVER": "Uploaded to server",
+          "FILE_UPLOAD_TO_S3": "Uploaded to S3",
+          "FILE_CHECK_OK": "Scan passed",
+          "FILE_CHECK_BROKEN_OR_TRUNCATED": "Scan failed: broken or truncated",
+          "FILE_CHECK_BROKEN_OR_UNSUPPORTED": "Scan failed: broken or unsupported",
+          "FILE_CHECK_ENCRYPTED": "Scan failed: encrypted file",
+          "FILE_CHECK_HARMFUL": "Scan failed: harmful content",
+          "FILE_REUPLOAD": "Reuploaded"
+        }
+      },
+      "Edit": {
+        "editedPrefix": "Edited",
+        "game": "Game",
+        "developer": "Developer",
+        "character": "Character"
+      },
+      "Create": {
+        "createdPrefix": "Created",
+        "game": "Game"
+      }
+    }
+  },
+  "Games": {
+    "Head": {
+      "title": "Recent Hot Games",
+      "description": "Recent hot games, sorted by views, downloads, creation time and release time. Updated every hour."
+    }
+  },
+  "RecentUpdate": {
+    "Head": {
+      "title": "Recent Updates",
+      "description": "Recent updates, including new fan translations, official translations, new patches, new DLCs, etc."
+    }
+  },
+  "NewWorks": {
+    "Head": {
+      "title": "New Works",
+      "description": "New works released between the last Friday of the previous month and the last Friday of the current month. If the current date is later than the last Friday of the current month, the works released between the last Friday of the current month and the last Friday of the next month will be displayed. Sorted by release date.",
+      "release": "New works released in {monthName} {yearName}."
+    }
+  },
+  "Hero": {
+    "Shionlib": {
+      "description": "Free, open-source, zero-threshold visual novel/Galgame archive"
+    },
+    "Overview": {
+      "games": "Games",
+      "files": "Files",
+      "storage": "Storage",
+      "24-hour-traffic": "24-hour traffic"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "title": "Shionlib - A Visual Novel/Galgame Archive",
+  "titleShort": "Shionlib",
+  "template": "%s - Shionlib",
+  "description": "Shionlib - Free, open-source, easy-access Visual Novel/Galgame archive",
+  "keywords": [
+    "Shionlib",
+    "Visual Novel",
+    "Galgame",
+    "Galgame Download",
+    "Galgame Resource",
+    "Galgame Wiki",
+    "Galgame Review",
+    "Galgame New Works",
+    "Galgame Translation",
+    "Resource Site",
+    "Free",
+    "Open Source",
+    "Easy Access"
+  ],
+  "og": {
+    "title": "Shionlib - A Visual Novel/Galgame Archive",
+    "description": "Shionlib - Free, open-source, easy-access Visual Novel/Galgame archive"
+  }
+}

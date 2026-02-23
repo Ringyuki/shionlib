@@ -1,0 +1,301 @@
+{
+  "Error": {
+    "ErrorView": {
+      "defaultTitle": "出错了",
+      "defaultDetails": "我们遇到一些错误，请稍后重试。",
+      "back": "返回",
+      "reset": "重新加载"
+    }
+  },
+  "Site": {
+    "Ad": {
+      "ad": "广告"
+    }
+  },
+  "TopBar": {
+    "RandomGame": {
+      "random": "随机",
+      "loading": "Shion 祈祷中...",
+      "retry": "没有任何结果呢，再试一次吧"
+    },
+    "SearchTrigger": {
+      "search": "搜索..."
+    },
+    "ThemeSwitcher": {
+      "label": "主题设置",
+      "system": "跟随系统",
+      "light": "亮色",
+      "dark": "暗色"
+    },
+    "Settings": {
+      "personalSettings": "个人设置",
+      "siteSettings": "站点设置",
+      "settings": "编辑设置"
+    },
+    "Profile": {
+      "profile": "个人资料"
+    },
+    "Admin": {
+      "admin": "管理后台"
+    },
+    "NavBar": {
+      "menu": "菜单",
+      "home": "首页",
+      "games": "游戏",
+      "producers": "会社",
+      "docs": "文档",
+      "releases": "上传",
+      "activities": "动态",
+      "about": "关于",
+      "aiGirlFriend": "AI 女友",
+      "create": "创建"
+    }
+  },
+  "Footer": {
+    "ShionlibFooter": {
+      "contact": "联系我们",
+      "friendLink": "友情链接"
+    }
+  },
+  "User": {
+    "LoginOrRegisteDialog": {
+      "button": "登录",
+      "loginTitle": "登录到 Shionlib",
+      "registerTitle": "注册",
+      "loginDescription": "还没有账号？",
+      "loginDescriptionLinkText": "立即注册",
+      "registerDescription": "已有 Shionlib 账号？",
+      "registerDescriptionLinkText": "立即登录"
+    },
+    "LogoutDialog": {
+      "button": "登出",
+      "title": "登出",
+      "description": "确定要登出吗？",
+      "logout": "登出",
+      "cancel": "取消"
+    },
+    "PasskeyBindNudgeDialog": {
+      "title": "启用通行密钥登录",
+      "description": "当前设备支持 WebAuthn Passkey。立即添加通行密钥，实现快捷安全登录。",
+      "hint": "你也可以稍后前往 设置 > 安全设置 添加通行密钥。",
+      "later": "稍后再说",
+      "goToSettings": "前往安全设置"
+    },
+    "Login": {
+      "title": "登录",
+      "description": "登录",
+      "identifier": "邮箱或用户名",
+      "password": "密码",
+      "forgetPassword": "忘记密码？",
+      "login": "登录",
+      "usePasskey": "使用 通行密钥 登录",
+      "passkeyUnsupported": "当前设备或浏览器不支持通行密钥",
+      "success": "登录成功",
+      "validation": {
+        "identifier": "用户名或邮箱不能为空",
+        "password": "密码至少需要8个字符"
+      }
+    },
+    "Register": {
+      "title": "注册",
+      "description": "注册",
+      "username": "用户名",
+      "email": "邮箱",
+      "password": "密码",
+      "passwordConfirm": "确认密码",
+      "verifyUuid": "验证码UUID",
+      "verifyCode": "验证码",
+      "getVerifyCode": "获取验证码",
+      "register": "注册",
+      "verifyCodeSent": "验证码已发送",
+      "verifyCodeSentError": "验证码发送失败",
+      "success": "注册成功",
+      "validation": {
+        "username": "用户名不能为空",
+        "email": "请输入有效的邮箱地址",
+        "password": "密码至少需要8个字符",
+        "passwordConfirm": "确认密码至少需要8个字符",
+        "passwordRegex": "密码至少需要8个字符，并且包含至少一个字母、一个数字和一个大写字母",
+        "passwordDiff": "密码和确认密码不一致",
+        "verifyUuid": "验证码UUID不能为空",
+        "verifyCode": "验证码不能为空"
+      }
+    }
+  },
+  "Uploader": {
+    "FileUploader": {
+      "dropzone": "点击或拖拽文件到此处",
+      "dropzoneSupportFileFormat": "支持的文件格式：zip/rar/7z/tar/gzip",
+      "status": "状态",
+      "Idle": "空闲",
+      "Hashing": "计算哈希",
+      "Initializing": "初始化",
+      "Uploading": "上传中",
+      "Paused": "暂停",
+      "Completing": "合并分片",
+      "Completed": "完成",
+      "Aborted": "取消",
+      "Error": "错误",
+      "invalidFileFormat": "文件格式不支持",
+      "fileTooSmall": "文件大小不能小于 {size}MB",
+      "fileMismatch": "请选择相同文件继续"
+    },
+    "UploadTuning": {
+      "concurrencyLabel": "上传并发",
+      "concurrencyDescription": "决定同时上传的分片数量，过高可能导致网络拥塞。",
+      "concurrencyRange": "{min}-{max} 线程",
+      "chunkSizeLabel": "分片大小",
+      "chunkSizeDescription": "更大的分片可以减少请求次数，但失败时需要重新上传更多数据。",
+      "chunkSizeRange": "{min}-{max} MB",
+      "unitThreads": "线程",
+      "unitMB": "MB"
+    },
+    "UploadController": {
+      "start": "开始",
+      "pause": "暂停",
+      "resume": "继续",
+      "cancel": "取消"
+    },
+    "UploadProgress": {
+      "speed": "速度",
+      "eta": "剩余"
+    }
+  },
+  "Comment": {
+    "CommentContent": {
+      "comments": "评论",
+      "description": "耳を澄まして。"
+    },
+    "CommentBox": {
+      "success": "评论成功"
+    },
+    "CommentItem": {
+      "edited": "编辑于",
+      "source": "评论在",
+      "hidden": "仅自己可见",
+      "pending": "审核中"
+    },
+    "CommentParent": {
+      "parent": "回复给"
+    },
+    "Actions": {
+      "MoreActions": {
+        "edit": "编辑",
+        "delete": "删除"
+      },
+      "Edit": {
+        "edit": "编辑",
+        "title": "编辑评论",
+        "cancel": "取消",
+        "confirm": "保存",
+        "success": "编辑成功"
+      },
+      "Delete": {
+        "delete": "删除",
+        "title": "删除评论",
+        "description": "确定要删除此评论吗？",
+        "cancel": "取消",
+        "confirm": "删除",
+        "success": "删除成功"
+      }
+    }
+  },
+  "Content": {
+    "Hidden": {
+      "hidden": "隐藏内容"
+    },
+    "Empty": {
+      "title": "什么都没有..."
+    },
+    "BBCodeSupported": {
+      "title": "支持 BBCode",
+      "exampleTitle": "示例",
+      "example": "[b]Bold[/b]\n[i]Italic[/i]\n[u]Underline[/u]\n[s]Strikethrough[/s]\n[quote]Quote[/quote]\n[spoiler]Spoiler[/spoiler]\n[mask]Mask[/mask]\n[url=https://shionlib.com]Shionlib[/url]"
+    }
+  },
+  "Search": {
+    "Command": {
+      "SearchCommand": {
+        "placeholder": "输入内容...",
+        "press_enter_to_search": "按下回车键搜索"
+      },
+      "History": {
+        "history": "历史记录",
+        "delete_all": "清空历史记录"
+      },
+      "Trending": {
+        "trending": "热门搜索"
+      },
+      "Suggest": {
+        "suggest": "搜索建议",
+        "search_directly": "搜索 “{query}”"
+      }
+    },
+    "Game": {
+      "Results": {
+        "result_prefix": "搜索",
+        "result_suffix": "共 {total} 个结果"
+      }
+    },
+    "AnimeTrace": {
+      "Trigger": {
+        "trace": "以图搜Gal"
+      },
+      "Dialog": {
+        "title": "以图搜Gal",
+        "description": "由 AnimeTrace 提供支持"
+      },
+      "Result": {
+        "candidates": "{count} 个结果",
+        "lowConfidence": "置信度较低",
+        "unknownCharacter": "未知角色",
+        "unknownWork": "未知作品"
+      },
+      "Search": {
+        "dropzone": "粘贴图片，或点击、拖拽图片到此处",
+        "dropzoneSupportFileFormat": "支持的文件格式：jpg/jpeg/png/gif/webp",
+        "loading": "Shion 祈祷中...",
+        "noResult": "没有找到结果",
+        "invalidFileFormat": "图片格式不支持"
+      }
+    }
+  },
+  "Auth": {
+    "Password": {
+      "Forget": {
+        "title": "忘记密码",
+        "signSent": "重置链接已发送",
+        "resetSuccess": "密码重置成功",
+        "GetEmail": {
+          "title": "忘记密码",
+          "description": "请输入你的邮箱来获取密码重置链接。",
+          "email": "邮箱",
+          "submit": "发送重置邮件",
+          "validation": {
+            "email": "请输入有效的邮箱地址"
+          }
+        },
+        "Reset": {
+          "title": "重置密码",
+          "description": "请输入新密码。提交后，你将会被登出。",
+          "password": "新密码",
+          "passwordConfirm": "确认密码",
+          "submit": "重置密码",
+          "validation": {
+            "password": "密码至少需要8个字符",
+            "passwordConfirm": "确认密码至少需要8个字符",
+            "passwordRegex": "密码至少需要8个字符，并且包含至少一个字母、一个数字和一个大写字母",
+            "passwordDiff": "密码和确认密码不一致"
+          }
+        }
+      }
+    },
+    "Turnstile": {
+      "error": "验证失败，请重试",
+      "timeout": "验证超时，请重试",
+      "siteKeyNotSet": "站点密钥未设置",
+      "turnstileTitle": "正在验证你的请求",
+      "turnstileDescription": "如果验证码无法加载或长时间未响应，请刷新页面重试，或者检查你的网络连接。"
+    }
+  }
+}

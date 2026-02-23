@@ -1,0 +1,15 @@
+{
+  "List": {
+    "Header": {
+      "title": "最新アップロード",
+      "description": "Shionlib ユーザーがアップロードした最新のゲームファイル、アップロード時間順に並べ替えられています。",
+      "subDescriptionPrefix": "すべてのユーザーは Shionlib サーバーにゲームファイルをアップロードできます。あなたはこの",
+      "subDescriptionLink": "ガイド",
+      "subDescriptionSuffix": "を読むことで、ゲームファイルをアップロードする方法を学ぶことができます。"
+    }
+  },
+  "ReleaseCard": {
+    "uploaded_at": "アップロードされた",
+    "more_than_one_file": "等 {count} 個のファイル"
+  }
+}

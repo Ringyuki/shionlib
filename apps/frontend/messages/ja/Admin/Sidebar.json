@@ -1,0 +1,12 @@
+{
+  "dashboard": "ダッシュボード",
+  "users": "ユーザー管理",
+  "comments": "コメント管理",
+  "reports": "通報管理",
+  "games": "ゲーム",
+  "characters": "キャラクター",
+  "developers": "開発者",
+  "settings": "設定",
+  "backToSite": "サイトに戻る",
+  "malwareScans": "マルウェア審査"
+}

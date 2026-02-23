@@ -1,0 +1,15 @@
+{
+  "List": {
+    "Header": {
+      "title": "Latest Uploads",
+      "description": "Latest game files uploaded by Shionlib users.",
+      "subDescriptionPrefix": "Every user can upload game files to Shionlib servers. You can follow ",
+      "subDescriptionLink": "this guide",
+      "subDescriptionSuffix": "to learn how to upload game files."
+    }
+  },
+  "ReleaseCard": {
+    "uploaded_at": "Uploaded at",
+    "more_than_one_file": "and {count} more files"
+  }
+}

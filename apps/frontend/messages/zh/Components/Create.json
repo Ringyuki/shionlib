@@ -1,0 +1,47 @@
+{
+  "Header": {
+    "title": "创建游戏条目",
+    "description": "在 Shionlib 的数据库中新增游戏条目，通过 Visual Novel Database (VNDB) 和 Bangumi 获取基础权威信息。",
+    "descriptionPrefix": "在 Shionlib 的数据库中新增游戏条目，通过 ",
+    "vndb": "Visual Novel Database (VNDB)",
+    "descriptionMiddle": " 和 ",
+    "bangumi": "Bangumi",
+    "descriptionSuffix": " 获取基础权威信息。",
+    "guidePrefix": "如果想要了解如何通过 VNDB 检索游戏，",
+    "guideLink": "请参考这篇指南",
+    "guideSuffix": "。"
+  },
+  "Form": {
+    "vndbIdLabel": "VNDB ID",
+    "vndbIdDescription": "以字母 v 和数字组成的 ID，例如：v14018。",
+    "vndbIdPlaceholder": "v14018",
+    "bangumiIdLabel": "Bangumi ID",
+    "bangumiIdDescription": "纯数字 ID，例如：88765。",
+    "bangumiIdPlaceholder": "88765",
+    "skipConsistencyCheckLabel": "跳过一致性检查",
+    "skipConsistencyCheckDescription": "跳过一致性检查，如果跳过，则不会检查 VNDB 和 Bangumi 的数据是否一致。",
+    "validation": {
+      "vndbId": "请输入有效的 VNDB ID",
+      "bangumiId": "请输入有效的 Bangumi ID"
+    },
+    "submit": "创建游戏条目"
+  },
+  "Create": {
+    "invalidId": "无效的 VNDB ID 或 Bangumi ID",
+    "success": "创建成功, 游戏条目 ID 为 {id}",
+    "successDescription": "点击下方按钮可在新窗口打开游戏详情页。",
+    "view": "查看游戏条目"
+  },
+  "Alert": {
+    "info": "提示",
+    "infoDescription": "如果你想要创建的游戏条目没有对应的 VNDB ID 和 Bangumi ID，请联系管理员手动添加。",
+    "warning": "错误处理",
+    "warningDescription": "可能出现的错误码及原因：",
+    "errorCodes": {
+      "400103": "Bangumi 请求失败，可能是因为 Bangumi ID 不存在或者 Bangumi 无法访问。",
+      "400104": "VNDB 请求失败，可能是因为 VNDB ID 不存在或者 VNDB 无法访问。",
+      "400105": "Shionlib 数据库中已存在该游戏条目。",
+      "400106": "从 VNDB 和 Bangumi 获取的游戏数据未通过一致性检查，请检查你填写的 ID 否正确。"
+    }
+  }
+}

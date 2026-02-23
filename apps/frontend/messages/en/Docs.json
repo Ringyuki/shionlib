@@ -1,0 +1,23 @@
+{
+  "Head": {
+    "title": "All Documents"
+  },
+  "categories": {
+    "about": "About",
+    "dev": "Development",
+    "faq": "FAQ",
+    "guides": "Guide"
+  },
+  "about": {
+    "about-shionlib": "About Shionlib"
+  },
+  "dev": {
+    "dev-overview": "Shionlib Development Overview"
+  },
+  "faq": {
+    "1": "title1"
+  },
+  "guides": {
+    "upload-game-files": "Upload game files"
+  }
+}

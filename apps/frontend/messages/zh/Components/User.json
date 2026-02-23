@@ -1,0 +1,325 @@
+{
+  "Settings": {
+    "TabsNav": {
+      "personal": "个人信息",
+      "security": "安全设置",
+      "site": "站点设置",
+      "download": "下载设置",
+      "connections": "账号关联"
+    },
+    "Avatar": {
+      "title": "头像",
+      "description": "你可以在此更新你的头像。",
+      "help": "请单击右侧头像来选择图片。",
+      "tips": "此项设置是可选的，但我们仍然推荐你设置一个头像。",
+      "update": "更新头像",
+      "success": "更新成功"
+    },
+    "AvatarResize": {
+      "title": "调整头像尺寸",
+      "crop": "裁剪"
+    },
+    "Name": {
+      "title": "用户名",
+      "description": "你可以在此更新你的用户名。用户名是你的唯一标识符(之一)，即你的用户名不可与他人重复。",
+      "update": "更新用户名",
+      "success": "更新成功"
+    },
+    "Password": {
+      "title": "密码",
+      "description": "你可以在此更新你的密码。密码至少需要8个字符，并且包含至少一个字母、一个数字和一个大写字母。",
+      "note": "保存后，你将会被登出。",
+      "update": "更新密码",
+      "forget": "忘记密码？",
+      "success": "更新成功，请重新登录"
+    },
+    "Passkey": {
+      "title": "通行密钥",
+      "description": "在支持的设备上添加通行密钥，实现免密码登录。",
+      "unsupported": "当前浏览器或设备不支持 WebAuthn Passkey。",
+      "namePlaceholder": "通行密钥名称（可选）",
+      "add": "添加通行密钥",
+      "addSuccess": "通行密钥添加成功",
+      "remove": "移除",
+      "removeSuccess": "通行密钥已移除",
+      "loading": "正在加载...",
+      "empty": "暂未添加通行密钥",
+      "unnamed": "未命名通行密钥",
+      "backedUp": "已备份",
+      "lastUsedLabel": "上次使用",
+      "count": "{count} 个通行密钥",
+      "deviceType": {
+        "unknown": "未知设备",
+        "multiDevice": "可同步通行密钥",
+        "singleDevice": "单设备通行密钥"
+      },
+      "removeDialog": {
+        "title": "移除通行密钥",
+        "description": "确定要移除“{name}”吗？移除后你可能无法再使用该通行密钥登录。",
+        "cancel": "取消",
+        "confirm": "移除"
+      },
+      "time": {
+        "never": "从未",
+        "unknown": "未知"
+      }
+    },
+    "PasswordForm": {
+      "validation": {
+        "currentPassword": "当前密码至少需要8个字符",
+        "password": "密码至少需要8个字符",
+        "passwordConfirm": "确认密码至少需要8个字符",
+        "passwordRegex": "密码至少需要8个字符，并且包含至少一个字母、一个数字和一个大写字母",
+        "passwordDiff": "密码和确认密码不一致"
+      },
+      "currentPassword": "当前密码",
+      "password": "密码",
+      "passwordConfirm": "确认密码"
+    },
+    "Email": {
+      "title": "邮箱",
+      "description": "你可以在此更新你的邮箱。我们将发送验证码到你的现有邮箱，随后你可以填写新邮箱并完成验证。",
+      "currentEmail": "当前邮箱",
+      "help": "现有邮箱不可用？请联系管理员进行下一步操作。",
+      "update": "发送验证码",
+      "success": "更新成功，请重新登录"
+    },
+    "EmailFlow": {
+      "title": "更新邮箱",
+      "step1": {
+        "title": "验证当前邮箱",
+        "description": "验证码已发送至你的当前邮箱，如未收到请检查垃圾邮件。",
+        "currentEmail": "当前邮箱",
+        "verifyCode": "验证码",
+        "validation": {
+          "verifyCode": "验证码不能为空"
+        }
+      },
+      "step2": {
+        "title": "验证新邮箱",
+        "description": "填写新邮箱并完成验证。",
+        "newEmail": "新邮箱",
+        "getVerifyCode": "获取验证码",
+        "verifyCodeSent": "验证码已发送",
+        "verifyCode": "验证码",
+        "validation": {
+          "email": "请输入有效的邮箱地址",
+          "verifyCode": "验证码不能为空"
+        }
+      },
+      "previous": "上一步",
+      "next": "下一步",
+      "done": "完成"
+    },
+    "Language": {
+      "title": "语言",
+      "description": "你可以在此更新你的语言偏好。",
+      "selectLanguage": "选择语言",
+      "chooseLanguage": "选择语言",
+      "update": "更新语言",
+      "success": "更新成功"
+    },
+    "ContentLimit": {
+      "title": "内容限制",
+      "description": "你可以在此更新你的内容显示偏好。",
+      "selectContentLimit": "选择内容限制",
+      "chooseContentLimit": "选择内容限制",
+      "showWithSpoiler": "显示Spoiler包裹的 NSFW 内容",
+      "justShow": "直接显示所有 NSFW 内容",
+      "neverShowNsfwContent": "不显示 NSFW 内容",
+      "tipsTitle": "提示",
+      "tipsDescription": "此项设置会在变更后的30分钟内生效。你也可以重新登录来使变更立即生效。",
+      "relogin": "重新登录",
+      "update": "更新内容限制",
+      "success": "更新成功"
+    },
+    "ToastPosition": {
+      "title": "Toast 位置",
+      "description": "你可以在此设置全局 Toast 通知出现的位置。",
+      "selectPosition": "选择 Toast 位置",
+      "choosePosition": "选择 Toast 位置",
+      "top-left": "左上",
+      "top-center": "上方居中",
+      "top-right": "右上",
+      "bottom-left": "左下",
+      "bottom-center": "下方居中",
+      "bottom-right": "右下",
+      "tipsTitle": "提示",
+      "tipsDescription": "此项设置仅会保存到你的本地浏览器中，不会上传到 Shionlib 服务器。",
+      "update": "更新 Toast 位置",
+      "reset": "恢复默认",
+      "success": "更新成功",
+      "resetSuccess": "已恢复默认"
+    },
+    "Aria2": {
+      "title": "Aria2",
+      "description": "你可以在此更新你的 Aria2 设置。",
+      "tipsTitle": "提示",
+      "tipsDescription": "此项设置仅会保存到你的本地浏览器中，不会上传到 Shionlib 服务器。",
+      "protocol": "协议",
+      "protocolPlaceholder": "选择协议",
+      "host": "地址",
+      "hostPlaceholder": "例如：localhost 或 127.0.0.1",
+      "port": "端口",
+      "path": "路径",
+      "pathPlaceholder": "例如：/jsonrpc",
+      "authSecret": "认证密钥",
+      "downloadPath": "下载路径",
+      "downloadPathPlaceholder": "留空使用 Aria2 默认路径",
+      "save": "保存",
+      "success": "已保存",
+      "Test": {
+        "title": "测试连接",
+        "success": "连接成功！",
+        "failed": "连接失败",
+        "failedToConnect": "无法连接到 Aria2 服务器",
+        "unauthorized": "认证失败，请检查密钥"
+      },
+      "Reset": {
+        "title": "复位",
+        "reset": "复位",
+        "success": "已复位到默认设置"
+      }
+    },
+    "Connections": {
+      "PotatoVN": {
+        "title": "PotatoVN",
+        "description": "连接你的 PotatoVN 账号。",
+        "connected": "已连接",
+        "notConnected": "未连接",
+        "connectedAs": "当前账号",
+        "connect": "连接账号",
+        "disconnect": "断开连接",
+        "connectSuccess": "PotatoVN 账号已连接",
+        "disconnectSuccess": "PotatoVN 账号已断开",
+        "BindModal": {
+          "title": "连接 PotatoVN 账号",
+          "description": "输入你的 PotatoVN 账号信息。密码仅用于获取访问令牌，不会被存储。",
+          "username": "账号名",
+          "usernamePlaceholder": "PotatoVN 账号名",
+          "password": "密码",
+          "passwordPlaceholder": "PotatoVN 密码",
+          "cancel": "取消",
+          "connect": "连接",
+          "validation": {
+            "usernameRequired": "请输入账号名",
+            "passwordRequired": "请输入密码"
+          }
+        },
+        "UnbindConfirm": {
+          "title": "断开 PotatoVN 连接",
+          "description": "这将移除你的账号与 PotatoVN 的关联，PotatoVN 上的数据不会被删除。",
+          "cancel": "取消",
+          "confirm": "断开连接"
+        },
+        "tokenExpires": "令牌有效期至",
+        "tokenExpiresSoon": "即将过期",
+        "tokenExpired": "令牌已过期"
+      }
+    }
+  },
+  "Home": {
+    "Profile": {
+      "UserProfile": {
+        "role": {
+          "user": "用户",
+          "admin": "管理员",
+          "super_admin": "超级管理员"
+        },
+        "joined": "加入于",
+        "banned": "封禁中"
+      },
+      "Datas": {
+        "upload": "上传的游戏",
+        "comment": "评论",
+        "favorite": "收藏",
+        "edit": "编辑"
+      }
+    },
+    "Uploads": {
+      "ResourceItem": {
+        "created": "上传于",
+        "moreThanOneFilePrefix": "等",
+        "moreThanOneFileSuffix": "个文件"
+      }
+    },
+    "HomeTabsNav": {
+      "upload": "上传",
+      "comment": "评论",
+      "favorite": "收藏",
+      "edit": "编辑"
+    },
+    "Edits": {
+      "EditRecordItem": {
+        "edited": "编辑了",
+        "actionType": {
+          "UPDATE_SCALAR": "更新了基本信息",
+          "ADD_RELATION": "添加了关联",
+          "REMOVE_RELATION": "移除了关联",
+          "SET_RELATION": "设置了关联",
+          "UPDATE_RELATION": "更新了关联"
+        },
+        "relationType": {
+          "cover": "封面",
+          "image": "图片",
+          "link": "相关链接",
+          "developer": "制作人员",
+          "character": "出场角色"
+        },
+        "entity": {
+          "game": "游戏",
+          "character": "角色",
+          "developer": "制作人员"
+        },
+        "fieldChanges": "修改字段"
+      },
+      "EditChanges": {
+        "changes": "变更详情",
+        "added": "添加",
+        "removed": "移除",
+        "updated": "更新",
+        "before": "变更前",
+        "after": "变更后",
+        "path": "位置",
+        "root": "（根）",
+        "noDifferences": "无差异",
+        "empty": "（空）"
+      }
+    },
+    "Favorites": {
+      "FavoriteListItem": {
+        "default": "默认收藏夹"
+      },
+      "FavoriteItemsHeader": {
+        "default": "默认收藏夹",
+        "private": "私有"
+      },
+      "Action": {
+        "Delete": {
+          "title": "删除收藏夹",
+          "description": "确定要删除这个收藏夹吗？这将会删除此收藏夹中的所有游戏，此操作不可撤销。",
+          "cancel": "取消",
+          "delete": "删除",
+          "success": "删除成功"
+        },
+        "Edit": {
+          "edit": "编辑收藏夹",
+          "title": "编辑收藏夹",
+          "description": "修改收藏夹信息。",
+          "Content": {
+            "name": "收藏夹名称",
+            "description": "收藏夹描述",
+            "is_private": "私有收藏夹",
+            "submit": "保存",
+            "success": "保存成功",
+            "validation": {
+              "nameMinLength": "收藏夹名称至少需要 {length} 个字符",
+              "nameMaxLength": "收藏夹名称最多只能 {length} 个字符",
+              "descriptionMaxLength": "收藏夹描述最多只能 {length} 个字符"
+            }
+          }
+        }
+      }
+    }
+  }
+}

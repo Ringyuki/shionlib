@@ -1,0 +1,71 @@
+{
+  "GlobalError": {
+    "title": "Error",
+    "details": "We ran into an error. Please try again later.",
+    "back": "Back",
+    "reset": "Reload"
+  },
+  "GlobalNotFound": {
+    "title": "Page Not Found",
+    "details": "The page you are looking for does not exist or may have been moved.",
+    "back": "Back",
+    "reset": "Reload"
+  },
+  "NotFound": {
+    "title": "Page Not Found",
+    "details": "The page you are looking for does not exist or may have been moved."
+  },
+  "User": {
+    "Settings": {
+      "title": "Edit settings",
+      "description": "You can manage your personal information and site settings on this page.",
+      "loginRequired": {
+        "title": "Login Required",
+        "description": "You need to log in to access the settings page.",
+        "login": "Log in"
+      }
+    }
+  },
+  "Game": {
+    "Edit": {
+      "EditLayout": {
+        "title": "Edit game information"
+      }
+    }
+  },
+  "Developer": {
+    "Edit": {
+      "EditLayout": {
+        "title": "Edit developer information"
+      }
+    }
+  },
+  "Character": {
+    "Edit": {
+      "EditLayout": {
+        "title": "Edit character information"
+      }
+    },
+    "Intros": {
+      "BasicInfos": {
+        "age": "Age",
+        "birthday": "Birthday",
+        "blood_type": "Blood Type",
+        "height": "Height",
+        "weight": "Weight",
+        "male": "Male",
+        "female": "Female",
+        "non_binary": "Non-binary",
+        "ambiguous": "Ambiguous"
+      },
+      "Details": {
+        "no_intro": "No introduction"
+      }
+    }
+  },
+  "Search": {
+    "Game": {
+      "title": "Search results {q}"
+    }
+  }
+}

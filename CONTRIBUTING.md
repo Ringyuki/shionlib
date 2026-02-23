@@ -63,7 +63,7 @@ Keep commits small and focused. Write in imperative mood.
 - Styling: Use Tailwind utility classes; keep design tokens via CSS variables consistent.
 - State: Prefer `zustand` for global state; avoid prop drilling when a store is appropriate.
 - Forms: Use `react-hook-form` with `zod` schemas for validation.
-- i18n: Use `next-intl`; add strings in `messages/*.json` for all supported locales. Keep keys consistent.
+- i18n: Use `next-intl`; add strings in `messages/<locale>/**/*.json` for all supported locales. Keep keys consistent.
 - Content: MDX content in `contents/<locale>/**`. Preserve frontmatter and headings structure.
 - Editor: Lexical editor code is in `components/editor/**`—follow existing node/plugin patterns.
 - API calls: Use existing request utils in `utils/request` when applicable.

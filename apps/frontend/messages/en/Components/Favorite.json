@@ -1,0 +1,35 @@
+{
+  "Action": {
+    "addToFavorites": "Add to favorites",
+    "favorited": "Added to favorites",
+    "removeFromFavorites": "Remove from favorites",
+    "title": "Add to favorites",
+    "description": "Add this game to your favorites. Favorites are created for personal use and other users cannot view them.",
+    "Content": {
+      "Item": {
+        "gameCount": "Total {count} games",
+        "favorited": "Added to favorites",
+        "default": "Default favorites",
+        "added": "Added successfully",
+        "removed": "Removed successfully"
+      }
+    }
+  },
+  "Create": {
+    "create": "Create favorites",
+    "title": "Create favorites",
+    "description": "Create a favorites. You can view and manage your favorites in your personal center.",
+    "Content": {
+      "name": "Favorites name",
+      "description": "Favorites description",
+      "is_private": "Private favorites",
+      "submit": "Create",
+      "success": "Created successfully",
+      "validation": {
+        "nameMinLength": "Favorites name must be at least {length} characters",
+        "nameMaxLength": "Favorites name must be at most {length} characters",
+        "descriptionMaxLength": "Favorites description must be at most {length} characters"
+      }
+    }
+  }
+}

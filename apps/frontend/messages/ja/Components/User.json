@@ -1,0 +1,325 @@
+{
+  "Settings": {
+    "TabsNav": {
+      "personal": "個人情報",
+      "security": "セキュリティ",
+      "site": "サイト設定",
+      "download": "ダウンロード設定",
+      "connections": "アカウント連携"
+    },
+    "Avatar": {
+      "title": "アバター",
+      "description": "このページではあなたのアバターを設定できます。",
+      "help": "右側のアバターをクリックして画像を選択してください。",
+      "tips": "この設定は任意ですが、アバターを設定することをお勧めします。",
+      "update": "アバターを更新",
+      "success": "更新成功"
+    },
+    "AvatarResize": {
+      "title": "アバターのサイズを調整",
+      "crop": "裁剪"
+    },
+    "Name": {
+      "title": "ユーザー名",
+      "description": "このページではあなたのユーザー名を設定できます。ユーザー名はあなたの唯一の識別子であり、他のユーザーと同じにすることはできません。",
+      "update": "ユーザー名を更新",
+      "success": "更新成功"
+    },
+    "Password": {
+      "title": "パスワード",
+      "description": "このページではあなたのパスワードを設定できます。パスワードは8文字以上で、英字・数字・大文字をそれぞれ少なくとも1文字含めてください。",
+      "note": "保存後、再ログインが必要です。",
+      "update": "パスワードを更新",
+      "forget": "パスワードを忘れた？",
+      "success": "更新成功, 再ログインしてください"
+    },
+    "Passkey": {
+      "title": "Passkey",
+      "description": "対応端末で Passkey を追加して、パスワードなしでログインできます。",
+      "unsupported": "このブラウザまたは端末は WebAuthn Passkey に対応していません。",
+      "namePlaceholder": "Passkey 名（任意）",
+      "add": "Passkey を追加",
+      "addSuccess": "Passkey を追加しました",
+      "remove": "削除",
+      "removeSuccess": "Passkey を削除しました",
+      "loading": "Passkey を読み込み中...",
+      "empty": "Passkey はまだ追加されていません。",
+      "unnamed": "名称未設定の Passkey",
+      "backedUp": "バックアップ済み",
+      "lastUsedLabel": "最終使用",
+      "count": "Passkey {count} 件",
+      "deviceType": {
+        "unknown": "不明な端末",
+        "multiDevice": "同期型 Passkey",
+        "singleDevice": "単一端末 Passkey"
+      },
+      "removeDialog": {
+        "title": "Passkey を削除",
+        "description": "「{name}」を削除してもよろしいですか？この Passkey ではログインできなくなる可能性があります。",
+        "cancel": "キャンセル",
+        "confirm": "削除"
+      },
+      "time": {
+        "never": "未使用",
+        "unknown": "不明"
+      }
+    },
+    "PasswordForm": {
+      "validation": {
+        "currentPassword": "現在のパスワードは8文字以上が必要です",
+        "password": "パスワードは8文字以上が必要です",
+        "passwordConfirm": "確認用パスワードは8文字以上が必要です",
+        "passwordRegex": "パスワードは8文字以上で、英字・数字・大文字をそれぞれ少なくとも1文字含めてください",
+        "passwordDiff": "パスワードと確認用パスワードが一致しません"
+      },
+      "currentPassword": "現在のパスワード",
+      "password": "パスワード",
+      "passwordConfirm": "確認用パスワード"
+    },
+    "Email": {
+      "title": "メールアドレス",
+      "description": "このページではあなたのメールアドレスを設定できます。現在のメールアドレスに検証コードを送信し、新しいメールアドレスを入力して検証できます。",
+      "currentEmail": "現在のメールアドレス",
+      "help": "現在のメールアドレスが利用できない場合は、管理者に連絡してください。",
+      "update": "検証コードを送信",
+      "success": "更新成功, 再ログインしてください"
+    },
+    "EmailFlow": {
+      "title": "メールアドレスを更新",
+      "step1": {
+        "title": "現在のメールアドレスを検証",
+        "description": "検証コードは現在のメールアドレスに送信されました。受信しない場合は、迷惑メールフォルダを確認してください。",
+        "currentEmail": "現在のメールアドレス",
+        "verifyCode": "検証コード",
+        "validation": {
+          "verifyCode": "検証コードは必須です"
+        }
+      },
+      "step2": {
+        "title": "新しいメールアドレスを検証",
+        "description": "新しいメールアドレスを入力して検証してください。",
+        "newEmail": "新しいメールアドレス",
+        "getVerifyCode": "検証コードを送信",
+        "verifyCodeSent": "検証コードを送信しました",
+        "verifyCode": "検証コード",
+        "validation": {
+          "email": "有効なメールアドレスを入力してください",
+          "verifyCode": "検証コードは必須です"
+        }
+      },
+      "previous": "前へ",
+      "next": "次へ",
+      "done": "完了"
+    },
+    "Language": {
+      "title": "言語",
+      "description": "このページではあなたの言語偏好を設定できます。",
+      "selectLanguage": "言語を選択",
+      "chooseLanguage": "言語を選択",
+      "update": "言語を更新",
+      "success": "更新成功"
+    },
+    "ContentLimit": {
+      "title": "内容限制",
+      "description": "このページではあなたの内容表示偏好を設定できます。",
+      "selectContentLimit": "内容限制を選択",
+      "chooseContentLimit": "内容限制を選択",
+      "showWithSpoiler": "表示Spoiler包裹の NSFW 内容",
+      "justShow": "表示すべての NSFW 内容",
+      "neverShowNsfwContent": "NSFW 内容を表示しない",
+      "tipsTitle": "提示",
+      "tipsDescription": "この設定は30分後に有効になります。変更を即時に反映させるには再ログインしてください。",
+      "relogin": "再ログイン",
+      "update": "内容限制を更新",
+      "success": "更新成功"
+    },
+    "ToastPosition": {
+      "title": "Toast の表示位置",
+      "description": "グローバル Toast 通知の表示位置を設定できます。",
+      "selectPosition": "Toast の位置を選択",
+      "choosePosition": "Toast の位置を選択",
+      "top-left": "左上",
+      "top-center": "上中央",
+      "top-right": "右上",
+      "bottom-left": "左下",
+      "bottom-center": "下中央",
+      "bottom-right": "右下",
+      "tipsTitle": "ヒント",
+      "tipsDescription": "この設定はローカルブラウザにのみ保存され、Shionlib サーバーにはアップロードされません。",
+      "update": "Toast の位置を更新",
+      "reset": "デフォルトに戻す",
+      "success": "更新成功",
+      "resetSuccess": "デフォルトに戻しました"
+    },
+    "Aria2": {
+      "title": "Aria2",
+      "description": "このページではあなたの Aria2 設定を更新できます。",
+      "tipsTitle": "ヒント",
+      "tipsDescription": "この設定はローカルブラウザにのみ保存され、Shionlib サーバーにはアップロードされません。",
+      "protocol": "プロトコル",
+      "protocolPlaceholder": "プロトコルを選択",
+      "host": "ホスト",
+      "hostPlaceholder": "例：localhost または 127.0.0.1",
+      "port": "ポート",
+      "path": "パス",
+      "pathPlaceholder": "例：/jsonrpc",
+      "authSecret": "認証シークレット",
+      "downloadPath": "ダウンロードパス",
+      "downloadPathPlaceholder": "空欄にすると Aria2 のデフォルトパスを使用",
+      "save": "保存",
+      "success": "保存成功",
+      "Test": {
+        "title": "接続テスト",
+        "success": "接続成功！",
+        "failed": "接続失敗",
+        "failedToConnect": "Aria2 サーバーに接続できません",
+        "unauthorized": "認証失敗、シークレットを確認してください"
+      },
+      "Reset": {
+        "title": "リセット",
+        "reset": "リセット",
+        "success": "デフォルト設定にリセットしました"
+      }
+    },
+    "Connections": {
+      "PotatoVN": {
+        "title": "PotatoVN",
+        "description": "PotatoVN アカウントを連携します.",
+        "connected": "連携済み",
+        "notConnected": "未連携",
+        "connectedAs": "連携アカウント",
+        "connect": "連携する",
+        "disconnect": "連携解除",
+        "connectSuccess": "PotatoVN アカウントを連携しました",
+        "disconnectSuccess": "PotatoVN との連携を解除しました",
+        "BindModal": {
+          "title": "PotatoVN を連携する",
+          "description": "PotatoVN のアカウント情報を入力してください。パスワードはアクセストークンの取得にのみ使用され、保存されません。",
+          "username": "ユーザー名",
+          "usernamePlaceholder": "PotatoVN ユーザー名",
+          "password": "パスワード",
+          "passwordPlaceholder": "PotatoVN パスワード",
+          "cancel": "キャンセル",
+          "connect": "連携",
+          "validation": {
+            "usernameRequired": "ユーザー名を入力してください",
+            "passwordRequired": "パスワードを入力してください"
+          }
+        },
+        "UnbindConfirm": {
+          "title": "PotatoVN の連携を解除",
+          "description": "アカウントと PotatoVN の連携を解除します。PotatoVN 上のデータは削除されません。",
+          "cancel": "キャンセル",
+          "confirm": "連携解除"
+        },
+        "tokenExpires": "トークン有効期限",
+        "tokenExpiresSoon": "まもなく期限切れ",
+        "tokenExpired": "トークンが期限切れです"
+      }
+    }
+  },
+  "Home": {
+    "Profile": {
+      "UserProfile": {
+        "role": {
+          "user": "ユーザー",
+          "admin": "管理者",
+          "super_admin": "スーパー管理者"
+        },
+        "joined": "参加于",
+        "banned": "封禁中"
+      },
+      "Datas": {
+        "upload": "アップロード",
+        "comment": "コメント",
+        "favorite": "お気に入り",
+        "edit": "編集"
+      }
+    },
+    "Uploads": {
+      "ResourceItem": {
+        "created": "アップロードされた",
+        "moreThanOneFilePrefix": "等",
+        "moreThanOneFileSuffix": "ファイル"
+      }
+    },
+    "HomeTabsNav": {
+      "upload": "アップロード",
+      "comment": "コメント",
+      "favorite": "お気に入り",
+      "edit": "編集"
+    },
+    "Edits": {
+      "EditRecordItem": {
+        "edited": "編集しました",
+        "actionType": {
+          "UPDATE_SCALAR": "基本情報を更新",
+          "ADD_RELATION": "関連を追加",
+          "REMOVE_RELATION": "関連を削除",
+          "SET_RELATION": "関連を設定",
+          "UPDATE_RELATION": "関連を更新"
+        },
+        "relationType": {
+          "cover": "カバー",
+          "image": "画像",
+          "link": "関連リンク",
+          "developer": "制作スタッフ",
+          "character": "登場キャラクター"
+        },
+        "entity": {
+          "game": "ゲーム",
+          "character": "キャラクター",
+          "developer": "制作スタッフ"
+        },
+        "fieldChanges": "変更されたフィールド"
+      },
+      "EditChanges": {
+        "changes": "変更の詳細",
+        "added": "追加",
+        "removed": "削除",
+        "updated": "更新",
+        "before": "変更前",
+        "after": "変更後",
+        "path": "パス",
+        "root": "（ルート）",
+        "noDifferences": "差分はありません",
+        "empty": "（空）"
+      }
+    },
+    "Favorites": {
+      "FavoriteListItem": {
+        "default": "デフォルトお気に入り"
+      },
+      "FavoriteItemsHeader": {
+        "default": "デフォルトお気に入り",
+        "private": "私有"
+      },
+      "Action": {
+        "Delete": {
+          "title": "お気に入りを削除",
+          "description": "このお気に入りを削除してもよろしいですか？このお気に入りに含まれるすべてのゲームが削除されます。この操作は元に戻せません。",
+          "cancel": "キャンセル",
+          "delete": "削除",
+          "success": "削除成功"
+        },
+        "Edit": {
+          "edit": "お気に入りを編集",
+          "title": "お気に入りを編集",
+          "description": "お気に入り情報を更新します。",
+          "Content": {
+            "name": "お気に入り名称",
+            "description": "お気に入り説明",
+            "is_private": "私有お気に入り",
+            "submit": "保存",
+            "success": "保存成功",
+            "validation": {
+              "nameMinLength": "お気に入り名称は少なくとも {length} 文字以上必要です",
+              "nameMaxLength": "お気に入り名称は最大 {length} 文字まで許可されています",
+              "descriptionMaxLength": "お気に入り説明は最大 {length} 文字まで許可されています"
+            }
+          }
+        }
+      }
+    }
+  }
+}

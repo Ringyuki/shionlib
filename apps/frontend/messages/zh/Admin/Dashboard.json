@@ -1,0 +1,16 @@
+{
+  "activityTrends": "活动趋势",
+  "noTrendData": "暂无趋势数据",
+  "views": "浏览量",
+  "downloads": "下载量",
+  "score": "评分",
+  "totalGames": "游戏总数",
+  "totalUsers": "用户总数",
+  "totalDownloads": "下载总数",
+  "totalViews": "浏览总量",
+  "totalCharacters": "角色总数",
+  "totalDevelopers": "开发商总数",
+  "totalComments": "评论总数",
+  "newGamesToday": "今日新增游戏",
+  "newUsersToday": "今日新增用户"
+}

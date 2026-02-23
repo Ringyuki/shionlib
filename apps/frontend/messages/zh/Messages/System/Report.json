@@ -1,0 +1,19 @@
+{
+  "Valid": {
+    "Title": "举报已处理",
+    "Content": "你提交的举报已完成处理。违规类型：{reason}。恶意等级：{malicious_level}。{process_note, select, null {} other {处理说明：{process_note}}}"
+  },
+  "Invalid": {
+    "Title": "举报未通过",
+    "Content": "你提交的举报未通过审核。当前30天内无效举报次数：{false_report_count}。请注意，如果你多次发起无效举报，系统将对你进行处罚。{quota_sub_gb, select, 0 {} other {由于你多次发起无效举报，系统已扣减你的上传额度：{quota_sub_gb} GB。}}{ban_days, select, 0 {} other {由于你多次发起无效举报，系统已封禁你的账号：{ban_days} 天。}}{process_note, select, null {} other {处理说明：{process_note}}}"
+  },
+  "Penalty": {
+    "Title": "资源违规处理通知",
+    "Content": "你上传的资源被判定违规。违规类型：{reason}。恶意等级：{malicious_level}。{quota_sub_gb, select, 0 {} other {由于你上传的资源被判定违规，系统已扣减你的上传额度：{quota_sub_gb} GB。}}{ban_days, select, 0 {} other {由于你上传的资源被判定违规，系统已封禁你的账号：{ban_days} 天。}}{process_note, select, undefined {} other {处理说明：{process_note}}}"
+  },
+  "NewReport": {
+    "Title": "新的资源举报",
+    "Content": "用户 {reporter_name} 举报了 {reported_user_name} 上传的资源。举报原因：{reason}，恶意等级：{malicious_level}。",
+    "LinkText": "前往审核"
+  }
+}
