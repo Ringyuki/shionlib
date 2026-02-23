@@ -31,4 +31,12 @@ export const friendLinks: FriendLink[] = [
     logo: 'https://www.uuznav.com/favicon.ico',
     description: '一个简约美观实用的导航网站，这里收录着超100个优秀优质的网站！',
   },
+  {
+    id: 5,
+    name: 'Singureo',
+    url: 'https://www.singureo.com/',
+    logo: 'https://www.singureo.com/favicon.ico',
+    description:
+      '本站自2025年1月25日正式上线以来,始终以简洁美观人性化的理念运营,以用户的体验为主,希望能够给广大用户带来优质的体验',
+  },
 ]
