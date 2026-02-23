@@ -14,9 +14,9 @@ export default (): AuthConfig => ({
     algorithmVersion: withDefault('REFRESH_TOKEN_ALOGRITHM_VERSION', 'slrt1'),
   },
   webauthn: {
-    rpId: withDefault('WEBAUTHN_RP_ID', 'localhost'),
+    rpId: withDefault('WEBAUTHN_RP_ID', 'shionlib.com'),
     rpName: withDefault('WEBAUTHN_RP_NAME', 'Shionlib'),
-    origins: withDefault('WEBAUTHN_ORIGINS', ['http://localhost:3000'], raw =>
+    origins: withDefault('WEBAUTHN_ORIGINS', ['https://shionlib.com'], raw =>
       raw
         .split(',')
         .map(item => item.trim())

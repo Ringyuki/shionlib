@@ -65,6 +65,7 @@ export const usePasskeyLogin = ({ onSuccess, getIdentifier }: UsePasskeyLoginOpt
       return { ok: false, reason: 'unsupported' }
     }
 
+    let optionsData: PasskeyRequestOptionsPayload | null | undefined
     try {
       setLoading(true)
       const identifier = getIdentifier?.().trim()
@@ -75,7 +76,7 @@ export const usePasskeyLogin = ({ onSuccess, getIdentifier }: UsePasskeyLoginOpt
       })
       if (optionsRes.code !== 0) return { ok: false, reason: 'options_failed' }
 
-      const optionsData = optionsRes.data
+      optionsData = optionsRes.data
       if (!optionsData) return { ok: false, reason: 'no_options' }
       if (identifier && (optionsData.options.allowCredentials?.length ?? 0) === 0) {
         return { ok: false, reason: 'no_credentials' }
@@ -105,8 +106,14 @@ export const usePasskeyLogin = ({ onSuccess, getIdentifier }: UsePasskeyLoginOpt
 
       await onSuccess?.()
       return { ok: true }
-    } catch {
-      // errors are handled by request layer / browser webauthn flow
+    } catch (error) {
+      console.warn('[passkey] login failed', {
+        error,
+        silent,
+        origin: typeof location !== 'undefined' ? location.origin : undefined,
+        identifierSupplied: Boolean(getIdentifier?.().trim()),
+        rpId: optionsData?.options?.rpId,
+      })
       return { ok: false, reason: 'error' }
     } finally {
       setLoading(false)

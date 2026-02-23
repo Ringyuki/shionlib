@@ -47,6 +47,7 @@ export const usePasskeyManager = () => {
       return
     }
 
+    let optionsData: PasskeyCreationOptionsPayload | null | undefined
     try {
       setRegistering(true)
       const trimmedName = name.trim()
@@ -55,7 +56,7 @@ export const usePasskeyManager = () => {
       }).post<PasskeyCreationOptionsPayload>('/auth/passkey/register/options', {
         data: trimmedName ? { name: trimmedName } : {},
       })
-      const optionsData = optionsRes.data
+      optionsData = optionsRes.data
       if (!optionsData) return
 
       const credential = await startRegistration({
@@ -73,7 +74,12 @@ export const usePasskeyManager = () => {
       sileo.success({ title: t('addSuccess') })
       setName('')
       await load()
-    } catch {
+    } catch (error) {
+      console.warn('[passkey] registration failed', {
+        error,
+        origin: typeof location !== 'undefined' ? location.origin : undefined,
+        rpId: optionsData?.options?.rp?.id,
+      })
     } finally {
       setRegistering(false)
     }
