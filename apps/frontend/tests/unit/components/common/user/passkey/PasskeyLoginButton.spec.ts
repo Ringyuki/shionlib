@@ -6,10 +6,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 const hoisted = vi.hoisted(() => ({
   loginMock: vi.fn(),
   usePasskeyLoginMock: vi.fn(),
+  isAutomationBrowserMock: vi.fn(() => false),
 }))
 
 vi.mock('@/components/common/user/passkey/usePasskeyLogin', () => ({
   usePasskeyLogin: hoisted.usePasskeyLoginMock,
+}))
+
+vi.mock('@/hooks/useIsAutomatingBrowser', () => ({
+  useIsAutomatingBrowser: () => hoisted.isAutomationBrowserMock,
 }))
 
 vi.mock('@/components/shionui/Button', () => ({
@@ -32,6 +37,8 @@ describe('components/common/user/passkey/PasskeyLoginButton (unit)', () => {
     sessionStorage.clear()
     hoisted.loginMock.mockReset()
     hoisted.usePasskeyLoginMock.mockReset()
+    hoisted.isAutomationBrowserMock.mockReset()
+    hoisted.isAutomationBrowserMock.mockReturnValue(false)
     hoisted.usePasskeyLoginMock.mockReturnValue({
       loading: false,
       login: hoisted.loginMock,
@@ -67,6 +74,16 @@ describe('components/common/user/passkey/PasskeyLoginButton (unit)', () => {
 
     await new Promise(resolve => setTimeout(resolve, 0))
     expect(hoisted.loginMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('skips auto-attempt in automation browser', async () => {
+    hoisted.isAutomationBrowserMock.mockReturnValue(true)
+    hoisted.loginMock.mockResolvedValue({ ok: false, reason: 'cancelled' })
+
+    render(React.createElement(PasskeyLoginButton, { autoAttempt: true }))
+
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(hoisted.loginMock).not.toHaveBeenCalled()
   })
 
   it('still allows manual passkey login after auto-attempt is suppressed', async () => {

@@ -282,8 +282,8 @@
         },
         "PasskeyBindNudgeDialog": {
           "title": "启用通行密钥登录",
-          "description": "当前设备支持通行密钥登录。添加后可更快登录，无需输入密码。",
-          "hint": "你也可以稍后前往 设置页 > 安全设置 添加通行密钥。",
+          "description": "当前设备支持 WebAuthn Passkey。立即添加通行密钥，实现快捷安全登录。",
+          "hint": "你也可以稍后前往 设置 > 安全设置 添加通行密钥。",
           "later": "稍后再说",
           "goToSettings": "前往安全设置"
         },

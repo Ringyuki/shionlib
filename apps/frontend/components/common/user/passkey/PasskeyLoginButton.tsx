@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { Button } from '@/components/shionui/Button'
 import { usePasskeyLogin } from '@/components/common/user/passkey/usePasskeyLogin'
+import { useIsAutomatingBrowser } from '@/hooks/useIsAutomatingBrowser'
 import { useTranslations } from 'next-intl'
 import { KeyRound } from 'lucide-react'
 
@@ -36,6 +37,7 @@ export const PasskeyLoginButton = ({
   autoAttempt = false,
 }: PasskeyLoginButtonProps) => {
   const t = useTranslations('Components.Common.User.Login')
+  const isAutomationBrowser = useIsAutomatingBrowser()
   const { loading, login } = usePasskeyLogin({
     onSuccess,
     getIdentifier: () => identifier || '',
@@ -48,6 +50,10 @@ export const PasskeyLoginButton = ({
       return
     }
     if (attemptedRef.current || disabled || loading) return
+    if (isAutomationBrowser()) {
+      attemptedRef.current = true
+      return
+    }
     if (isAutoAttemptSuppressedForSession()) {
       attemptedRef.current = true
       return
@@ -59,7 +65,7 @@ export const PasskeyLoginButton = ({
         suppressAutoAttemptForSession()
       }
     })()
-  }, [autoAttempt, disabled, loading, login])
+  }, [autoAttempt, disabled, loading, login, isAutomationBrowser])
 
   return (
     <Button
