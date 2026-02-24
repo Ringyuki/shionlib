@@ -9,7 +9,7 @@ import { cn } from '@/utils/cn'
 const SelectTransitionContext = React.createContext<{ isClosing: boolean }>({ isClosing: false })
 
 function Select({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
-  const { open: controlledOpen, defaultOpen, onOpenChange, children, ...rest } = props
+  const { open: controlledOpen, defaultOpen, onOpenChange, children, value, ...rest } = props
   const isOpenControlled = controlledOpen !== undefined
   const [open, setOpen] = React.useState<boolean>(defaultOpen ?? false)
   const [isClosing, setIsClosing] = React.useState(false)
@@ -39,6 +39,7 @@ function Select({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>)
         data-slot="select"
         open={currentOpen}
         onOpenChange={handleOpenChange}
+        value={value ?? ''}
         {...rest}
       >
         {children}

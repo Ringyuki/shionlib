@@ -11,7 +11,7 @@ import {
 } from '@/components/shionui/Card'
 import { Button } from '@/components/shionui/Button'
 import { Input } from '@/components/shionui/Input'
-import { KeyRound } from 'lucide-react'
+import { UserRoundKey } from 'lucide-react'
 import { usePasskeyManager } from '@/components/user/settings/passkey/usePasskeyManager'
 import { PasskeyList } from '@/components/user/settings/passkey/PasskeyList'
 import { useTranslations } from 'next-intl'
@@ -39,7 +39,7 @@ export const PasskeySettings = () => {
           <CardDescription className="text-warning">{t('unsupported')}</CardDescription>
         ) : null}
         <CardAction>
-          <KeyRound className="size-12 text-primary" />
+          <UserRoundKey className="size-12 text-primary" />
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">

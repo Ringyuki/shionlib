@@ -124,6 +124,9 @@
       "fileNamePlaceholder": "ファイル名を入力",
       "platform": "プラットフォーム",
       "platformPlaceholder": "対象プラットフォームを選択",
+      "simulator": "シミュレーターエンジン",
+      "simulatorPlaceholder": "シミュレーターエンジンを選択",
+      "other": "その他",
       "language": "言語",
       "languagePlaceholder": "ゲームの言語を選択",
       "note": "備考",
@@ -137,6 +140,7 @@
         "fileNameRequired": "ファイル名は必須です",
         "fileNameLength": "ファイル名は {length} 文字以内で入力してください",
         "platform": "プラットフォームは必須です",
+        "simulator": "Android / iOS を選択した場合、シミュレーターエンジンは必須です",
         "language": "言語は必須です",
         "note": "備考は255文字以内で入力してください"
       }
@@ -194,7 +198,8 @@
       "noDownloadSource": "ダウンロードリソースがありません"
     },
     "GameDownloadResourceItem": {
-      "created": "アップロードされた"
+      "created": "アップロードされた",
+      "other": "その他のエンジン"
     },
     "GameDownloadFileItem": {
       "onlyVisibleForYourself": "自分のみ可視",

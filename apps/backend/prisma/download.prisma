@@ -9,6 +9,7 @@ model GameDownloadResource {
   malware_scan_cases MalwareScanCase[] @relation("game_download_resource_malware_scan_case")
 
   platform String[] @default([])
+  simulator GameDownloadResourceSimulator?
   language String[] @default([])
   note     String?  @db.VarChar(255)
 

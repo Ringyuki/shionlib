@@ -2,7 +2,7 @@ import { GameDownloadResource } from '@/interfaces/game/game-download-resource'
 import { Badge } from '@/components/shionui/Badge'
 import { Avatar } from '@/components/common/user/Avatar'
 import { GamePlatform } from '@/components/game/description/GamePlatform'
-import { LanguageNameMap } from '@/interfaces/game/game.interface'
+import { LanguageNameMap, SimulatorOptions } from '@/interfaces/game/game.interface'
 import { GameDownloadFileItem } from './GameDownloadFileItem'
 import { timeFromNow } from '@/utils/time-format'
 import { useLocale } from 'next-intl'
@@ -10,6 +10,7 @@ import { useTranslations } from 'next-intl'
 import { Actions } from './Actions'
 import { DownloadIcon } from 'lucide-react'
 import { BBCodeContent } from '@/components/common/content/BBCode'
+import { FadeImage } from '@/components/common/shared/FadeImage'
 
 interface GameDownloadResourceItemProps {
   resource: GameDownloadResource
@@ -31,12 +32,30 @@ export const GameDownloadResourceItem = ({
   return (
     <div
       key={resource.id}
-      className="flex flex-col gap-2 rounded-lg border border-accent p-4 break-words break-all"
+      className="flex flex-col gap-2 rounded-lg border border-accent p-4 wrap-break-word break-all"
     >
       <div className="flex flex-col gap-2 w-full">
         <div className="flex justify-between items-center gap-2">
           <div className="flex flex-wrap gap-2">
             <GamePlatform platform={resource.platform} />
+            {resource.simulator &&
+              (resource.platform.includes('and') || resource.platform.includes('ios')) &&
+              (() => {
+                const opt = SimulatorOptions.find(o => o.value === resource.simulator)
+                return opt ? (
+                  <Badge key="simulator" intent="neutral" appearance="outline">
+                    {opt.icon && (
+                      <FadeImage
+                        src={opt.icon}
+                        alt={opt.label}
+                        aspectRatio="1 / 1"
+                        className="size-3.5 object-contain rounded-sm"
+                      />
+                    )}
+                    {opt.label.toLowerCase() === 'other' ? t('other') : opt.label}
+                  </Badge>
+                ) : null
+              })()}
             {resource.language?.map(l => {
               return (
                 <Badge key={l} intent="neutral" appearance="outline">

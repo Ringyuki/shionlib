@@ -95,6 +95,13 @@ enum GameDownloadResourceReportStatus {
   INVALID
 }
 
+enum GameDownloadResourceSimulator {
+  KRKR
+  ONS
+  ARTEMIS
+  OTHER
+}
+
 enum ReportMaliciousLevel {
   LOW
   MEDIUM

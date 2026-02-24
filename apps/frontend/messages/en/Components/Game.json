@@ -124,6 +124,9 @@
       "fileNamePlaceholder": "Enter file name",
       "platform": "Platform",
       "platformPlaceholder": "Select the target platform for this resource",
+      "simulator": "Simulator Engine",
+      "simulatorPlaceholder": "Select the simulator engine",
+      "other": "Other",
       "language": "Language",
       "languagePlaceholder": "Select the game's language",
       "note": "Notes",
@@ -137,6 +140,7 @@
         "fileNameRequired": "File name is required",
         "fileNameLength": "File name must be at most {length} characters",
         "platform": "Platform is required",
+        "simulator": "Simulator engine is required for Android / iOS",
         "language": "Language is required",
         "note": "Notes must be at most 255 characters"
       }
@@ -194,7 +198,8 @@
       "noDownloadSource": "No download source available"
     },
     "GameDownloadResourceItem": {
-      "created": "Uploaded at"
+      "created": "Uploaded at",
+      "other": "Other Engine"
     },
     "GameDownloadFileItem": {
       "onlyVisibleForYourself": "Only visible for yourself",

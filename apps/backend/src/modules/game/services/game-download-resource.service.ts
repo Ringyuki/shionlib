@@ -62,6 +62,7 @@ export class GameDownloadSourceService {
             id: true,
             platform: true,
             language: true,
+            simulator: true,
             note: true,
             downloads: true,
             creator: {
@@ -185,6 +186,7 @@ export class GameDownloadSourceService {
           game_id,
           platform: dto.platform,
           language: dto.language,
+          simulator: dto.simulator ?? null,
           note: dto.note,
           creator_id,
           upload_session_id: dto.upload_session_id,
@@ -261,6 +263,7 @@ export class GameDownloadSourceService {
         data: {
           platform: dto.platform,
           language: dto.language,
+          simulator: dto.simulator ?? null,
           note: dto.note,
           // in most situations, if we use this endpoint to edit a download resource, there should be only one file in it
           // so we update the file name for all files in the download resource
@@ -507,6 +510,7 @@ export class GameDownloadSourceService {
           game_id,
           platform: dto.platform,
           language: dto.language,
+          simulator: dto.simulator,
           note: dto.note,
           creator_id: 1,
         },

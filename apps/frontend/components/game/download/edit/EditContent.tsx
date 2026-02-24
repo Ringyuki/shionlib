@@ -18,6 +18,7 @@ export const EditContent = ({ downloadResource, onSubmit, isSubmitting }: EditCo
         file_name: downloadResource.files[0].file_name,
         platform: downloadResource.platform,
         language: downloadResource.language,
+        simulator: downloadResource.simulator,
         note: downloadResource.note ?? '',
       }}
     />

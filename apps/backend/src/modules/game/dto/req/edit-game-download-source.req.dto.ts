@@ -1,9 +1,20 @@
-import { IsArray, IsEnum, IsString, IsOptional, IsNotEmpty, MaxLength } from 'class-validator'
+import {
+  IsArray,
+  IsEnum,
+  IsString,
+  IsOptional,
+  IsNotEmpty,
+  MaxLength,
+  ValidateIf,
+} from 'class-validator'
 import { ivm, ivmEnum } from '../../../../common/validation/i18n'
 import {
   GameDownloadSourcePlatform,
   GameDownloadSourceLanguage,
+  GameDownloadSourceSimulator,
 } from './create-game-download-source.req.dto'
+
+const MOBILE_PLATFORMS = [GameDownloadSourcePlatform.ANDROID, GameDownloadSourcePlatform.IOS]
 
 export class EditGameDownloadSourceReqDto {
   @IsString({ message: ivm('validation.common.IS_STRING', { property: 'file_name' }) })
@@ -32,6 +43,19 @@ export class EditGameDownloadSourceReqDto {
     }),
   })
   language: GameDownloadSourceLanguage[]
+
+  @ValidateIf(
+    o =>
+      Array.isArray(o.platform) &&
+      o.platform.some((p: string) => MOBILE_PLATFORMS.includes(p as GameDownloadSourcePlatform)),
+  )
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'simulator' }) })
+  @IsEnum(GameDownloadSourceSimulator, {
+    message: ivmEnum('validation.common.IS_ENUM', GameDownloadSourceSimulator, {
+      property: 'simulator',
+    }),
+  })
+  simulator?: GameDownloadSourceSimulator
 
   @IsString({ message: ivm('validation.common.IS_STRING', { property: 'note' }) })
   @IsOptional()

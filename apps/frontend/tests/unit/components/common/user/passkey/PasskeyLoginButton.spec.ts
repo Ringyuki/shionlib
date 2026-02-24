@@ -32,7 +32,7 @@ vi.mock('next-intl', () => ({
 }))
 
 vi.mock('lucide-react', () => ({
-  KeyRound: () => null,
+  UserRoundKey: () => null,
 }))
 
 import { PasskeyLoginButton } from '@/components/common/user/passkey/PasskeyLoginButton'

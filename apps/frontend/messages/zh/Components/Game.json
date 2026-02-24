@@ -124,6 +124,9 @@
       "fileNamePlaceholder": "输入文件名",
       "platform": "平台",
       "platformPlaceholder": "选择该资源的运行平台",
+      "simulator": "模拟器引擎",
+      "simulatorPlaceholder": "选择模拟器引擎",
+      "other": "其他",
       "language": "语言",
       "languagePlaceholder": "选择该资源的游戏语言",
       "note": "备注",
@@ -137,6 +140,7 @@
         "fileNameRequired": "文件名不能为空",
         "fileNameLength": "文件名不能超过 {length} 个字符",
         "platform": "平台不能为空",
+        "simulator": "选择 Android / iOS 平台时，模拟器引擎不能为空",
         "language": "语言不能为空",
         "note": "备注不能超过255个字符"
       }
@@ -194,7 +198,8 @@
       "noDownloadSource": "暂无下载资源"
     },
     "GameDownloadResourceItem": {
-      "created": "上传于"
+      "created": "上传于",
+      "other": "其他引擎"
     },
     "GameDownloadFileItem": {
       "onlyVisibleForYourself": "仅自己可见",

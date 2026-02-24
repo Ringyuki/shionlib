@@ -4,6 +4,7 @@ export class GetGameDownloadResourceResDto {
   id: number
   platform: GamePlatform[]
   language: ('zh' | 'en' | 'jp')[]
+  simulator?: string
   note?: string
   downloads: number
   creator: Creator

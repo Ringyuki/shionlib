@@ -10,7 +10,7 @@ import {
 } from '@/components/common/user/passkey/helpers/auto-passkey-attempt-suppress'
 import { useIsAutomatingBrowser } from '@/hooks/useIsAutomatingBrowser'
 import { useTranslations } from 'next-intl'
-import { KeyRound } from 'lucide-react'
+import { UserRoundKey } from 'lucide-react'
 
 interface PasskeyLoginButtonProps {
   disabled?: boolean
@@ -69,7 +69,7 @@ export const PasskeyLoginButton = ({
       disabled={disabled || loading}
       className="w-full"
       onClick={() => void login()}
-      renderIcon={<KeyRound />}
+      renderIcon={<UserRoundKey />}
     >
       {t('usePasskey')}
     </Button>

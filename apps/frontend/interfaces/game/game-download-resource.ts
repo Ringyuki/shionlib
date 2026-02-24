@@ -1,10 +1,11 @@
-import { Platform } from './game.interface'
+import { Platform, Simulator } from './game.interface'
 import { Language } from './game.interface'
 
 export interface GameDownloadResource {
   id: number
   platform: Platform[]
   language: Language[]
+  simulator?: Simulator
   note?: string
   downloads: number
   creator: Creator

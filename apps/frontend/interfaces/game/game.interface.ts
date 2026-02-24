@@ -173,6 +173,20 @@ export const LanguageNameMap: Record<Language, string> = {
   other: '其它',
 }
 
+export type Simulator = 'KRKR' | 'ONS' | 'ARTEMIS' | 'OTHER'
+export const SimulatorOptions: Array<{ label: string; value: Simulator; icon?: string }> = [
+  { value: 'KRKR', label: 'KiriKiri (KRKR)', icon: '/assets/images/simulator/krkrz.png' },
+  { value: 'ONS', label: 'ONScripter', icon: '/assets/images/simulator/ons.webp' },
+  { value: 'ARTEMIS', label: 'Artemis', icon: '/assets/images/simulator/artemis1.png' },
+  { value: 'OTHER', label: 'Other' },
+]
+export const SimulatorNameMap: Record<Simulator, string> = {
+  KRKR: 'KiriKiri',
+  ONS: 'ONScripter',
+  ARTEMIS: 'Artemis',
+  OTHER: 'Other',
+}
+
 export type CoverType = 'dig' | 'pkgfront'
 export enum CoverTypeEnum {
   dig = 'Digital',

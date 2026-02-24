@@ -14,6 +14,13 @@ import {
   MultiSelectItem,
   MultiSelectValue,
 } from '@/components/shionui/MultiSelect'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/shionui/Select'
 import { useTranslations } from 'next-intl'
 import { Control, useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
@@ -21,8 +28,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Platform,
   Language,
+  Simulator,
   PlatformOptions,
   LanguageOptions,
+  SimulatorOptions,
 } from '@/interfaces/game/game.interface'
 import { Button } from '@/components/shionui/Button'
 import { cn } from '@/utils/cn'
@@ -33,11 +42,13 @@ import isEqual from 'lodash/isEqual'
 
 const platformValues = PlatformOptions.map(option => option.value) as [Platform, ...Platform[]]
 const languageValues = LanguageOptions.map(option => option.value) as [Language, ...Language[]]
+const simulatorValues = SimulatorOptions.map(option => option.value) as [Simulator, ...Simulator[]]
 
 interface GameDownloadSourceFormValues {
   file_name: string
   platform: Platform[]
   language: Language[]
+  simulator?: Simulator
   note: string
 }
 const normalizeInitialValues = (
@@ -46,6 +57,7 @@ const normalizeInitialValues = (
   file_name: values?.file_name ?? '',
   platform: values?.platform ?? [],
   language: values?.language ?? [],
+  simulator: values?.simulator,
   note: values?.note ?? '',
 })
 
@@ -53,6 +65,7 @@ export const gameDownloadSourceSchemaType = z.object({
   file_name: z.string().nonempty().max(255),
   platform: z.enum(platformValues).array().min(1),
   language: z.enum(languageValues).array().min(1),
+  simulator: z.enum(simulatorValues).optional(),
   note: z.string().optional(),
 })
 
@@ -73,15 +86,27 @@ export const GameDownloadSourceInfoForm = ({
 }: GameDownloadSourceInfoFormProps) => {
   const t = useTranslations('Components.Game.Upload.GameUploadDialog')
 
-  const gameDownloadSourceSchema = z.object({
-    file_name: z
-      .string()
-      .nonempty({ message: t('validation.fileNameRequired') })
-      .max(255, { message: t('validation.fileNameLength', { length: 255 }) }),
-    platform: z.enum(platformValues).array().min(1, t('validation.platform')),
-    language: z.enum(languageValues).array().min(1, t('validation.language')),
-    note: z.string().max(255, t('validation.note')),
-  })
+  const gameDownloadSourceSchema = z
+    .object({
+      file_name: z
+        .string()
+        .nonempty({ message: t('validation.fileNameRequired') })
+        .max(255, { message: t('validation.fileNameLength', { length: 255 }) }),
+      platform: z.enum(platformValues).array().min(1, t('validation.platform')),
+      language: z.enum(languageValues).array().min(1, t('validation.language')),
+      simulator: z.enum(simulatorValues).optional(),
+      note: z.string().max(255, t('validation.note')),
+    })
+    .superRefine((data, ctx) => {
+      const needsSimulator = data.platform.includes('and') || data.platform.includes('ios')
+      if (needsSimulator && !data.simulator) {
+        ctx.addIssue({
+          code: 'custom',
+          message: t('validation.simulator'),
+          path: ['simulator'],
+        })
+      }
+    })
   const form = useForm<z.infer<typeof gameDownloadSourceSchema>>({
     resolver: zodResolver(gameDownloadSourceSchema),
     defaultValues: normalizeInitialValues(initialValues),
@@ -105,14 +130,19 @@ export const GameDownloadSourceInfoForm = ({
     syncField('file_name')
     syncField('platform')
     syncField('language')
+    syncField('simulator')
     syncField('note')
   }, [initialValues, form])
   const platform = useWatch({ control: form.control, name: 'platform' })
   const language = useWatch({ control: form.control, name: 'language' })
+  const simulator = useWatch({ control: form.control, name: 'simulator' })
+
+  const needsSimulator = platform.includes('and') || platform.includes('ios')
 
   const [autoSubmitTouched, setAutoSubmitTouched] = useState(false)
   const [autoSubmitEnabled, setAutoSubmitEnabled] = useState(false)
-  const canToggleAutoSubmit = platform.length > 0 && language.length > 0
+  const canToggleAutoSubmit =
+    platform.length > 0 && language.length > 0 && (!needsSimulator || !!simulator)
 
   useEffect(() => {
     if (!canToggleAutoSubmit) {
@@ -211,6 +241,35 @@ export const GameDownloadSourceInfoForm = ({
               </FormItem>
             )}
           ></FormField>
+          {needsSimulator && (
+            <FormField
+              control={form.control as Control<z.infer<typeof gameDownloadSourceSchema>>}
+              name="simulator"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('simulator')}</FormLabel>
+                  <FormControl>
+                    <Select
+                      value={field.value}
+                      onValueChange={val => field.onChange(val as Simulator)}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder={t('simulatorPlaceholder')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SimulatorOptions.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label.toLowerCase() === 'other' ? t('other') : option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
           <FormField
             control={form.control as Control<z.infer<typeof gameDownloadSourceSchema>>}
             name="language"

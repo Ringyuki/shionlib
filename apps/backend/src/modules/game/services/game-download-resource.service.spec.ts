@@ -276,6 +276,90 @@ describe('GameDownloadSourceService', () => {
     )
   })
 
+  it('create passes simulator to resource data for mobile platform', async () => {
+    const { service, prismaService, activityService } = createService()
+    const session = {
+      id: 99,
+      status: 'COMPLETED',
+      creator_id: 100,
+      file_name: 'origin.7z',
+      storage_path: '/tmp/origin.7z',
+      total_size: 1024,
+      hash_algorithm: 'blake3',
+      file_sha256: 'hash',
+      mime_type: 'application/x-7z-compressed',
+    }
+    const tx = {
+      gameDownloadResource: { create: jest.fn().mockResolvedValue({ id: 501 }) },
+      gameDownloadResourceFile: { create: jest.fn().mockResolvedValue({ id: 601 }) },
+    }
+    prismaService.$transaction.mockImplementation(async (cb: any) => cb(tx))
+    prismaService.game.findUnique.mockResolvedValue({ id: 1 })
+    prismaService.gameUploadSession.findUnique.mockResolvedValue(session)
+    prismaService.gameDownloadResource.findFirst.mockResolvedValue(null)
+
+    await service.create(
+      {
+        upload_session_id: 99,
+        file_name: 'f.7z',
+        platform: ['and'],
+        language: ['jp'],
+        note: '',
+        simulator: 'KRKR',
+      } as any,
+      1,
+      100,
+    )
+
+    expect(tx.gameDownloadResource.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ simulator: 'KRKR' }),
+      }),
+    )
+    expect(activityService.create).toHaveBeenCalled()
+  })
+
+  it('create sets simulator to null for non-mobile platform', async () => {
+    const { service, prismaService } = createService()
+    const session = {
+      id: 88,
+      status: 'COMPLETED',
+      creator_id: 100,
+      file_name: 'win.7z',
+      storage_path: '/tmp/win.7z',
+      total_size: 512,
+      hash_algorithm: 'blake3',
+      file_sha256: 'hash2',
+      mime_type: 'application/x-7z-compressed',
+    }
+    const tx = {
+      gameDownloadResource: { create: jest.fn().mockResolvedValue({ id: 502 }) },
+      gameDownloadResourceFile: { create: jest.fn().mockResolvedValue({ id: 602 }) },
+    }
+    prismaService.$transaction.mockImplementation(async (cb: any) => cb(tx))
+    prismaService.game.findUnique.mockResolvedValue({ id: 1 })
+    prismaService.gameUploadSession.findUnique.mockResolvedValue(session)
+    prismaService.gameDownloadResource.findFirst.mockResolvedValue(null)
+
+    await service.create(
+      {
+        upload_session_id: 88,
+        file_name: 'win.7z',
+        platform: ['win'],
+        language: ['jp'],
+        note: '',
+      } as any,
+      1,
+      100,
+    )
+
+    expect(tx.gameDownloadResource.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ simulator: null }),
+      }),
+    )
+  })
+
   it('edit validates existence/ownership and updates fields', async () => {
     const { service, prismaService } = createService()
     prismaService.gameDownloadResource.findUnique.mockResolvedValueOnce(null)
@@ -316,6 +400,54 @@ describe('GameDownloadSourceService', () => {
             },
           },
         }),
+      }),
+    )
+  })
+
+  it('edit passes simulator to resource update for mobile platform', async () => {
+    const { service, prismaService } = createService()
+    const tx = {
+      gameDownloadResource: {
+        findUnique: jest.fn().mockResolvedValue({ updated: new Date() }),
+        update: jest.fn(),
+      },
+    }
+    prismaService.$transaction.mockImplementation(async (cb: any) => cb(tx))
+    prismaService.gameDownloadResource.findUnique.mockResolvedValueOnce({ id: 1, creator_id: 100 })
+
+    await service.edit(
+      1,
+      { platform: ['and'], language: ['jp'], note: '', file_name: 'f.7z', simulator: 'ONS' } as any,
+      ownerReq as any,
+    )
+
+    expect(tx.gameDownloadResource.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ simulator: 'ONS' }),
+      }),
+    )
+  })
+
+  it('edit sets simulator to null when platform changes to non-mobile', async () => {
+    const { service, prismaService } = createService()
+    const tx = {
+      gameDownloadResource: {
+        findUnique: jest.fn().mockResolvedValue({ updated: new Date() }),
+        update: jest.fn(),
+      },
+    }
+    prismaService.$transaction.mockImplementation(async (cb: any) => cb(tx))
+    prismaService.gameDownloadResource.findUnique.mockResolvedValueOnce({ id: 1, creator_id: 100 })
+
+    await service.edit(
+      1,
+      { platform: ['win'], language: ['jp'], note: '', file_name: 'f.7z' } as any,
+      ownerReq as any,
+    )
+
+    expect(tx.gameDownloadResource.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ simulator: null }),
       }),
     )
   })
