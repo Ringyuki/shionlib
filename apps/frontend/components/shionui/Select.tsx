@@ -9,8 +9,13 @@ import { cn } from '@/utils/cn'
 const SelectTransitionContext = React.createContext<{ isClosing: boolean }>({ isClosing: false })
 
 function Select({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
+  const isValueControlled = 'value' in props
   const { open: controlledOpen, defaultOpen, onOpenChange, children, value, ...rest } = props
   const isOpenControlled = controlledOpen !== undefined
+  // In controlled mode (value prop explicitly provided), convert undefined → ''
+  // so Radix UI shows the placeholder instead of going blank.
+  // Uncontrolled usage (no value prop at all) is left untouched.
+  const resolvedValue = isValueControlled ? (value ?? '') : undefined
   const [open, setOpen] = React.useState<boolean>(defaultOpen ?? false)
   const [isClosing, setIsClosing] = React.useState(false)
 
@@ -39,7 +44,7 @@ function Select({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>)
         data-slot="select"
         open={currentOpen}
         onOpenChange={handleOpenChange}
-        value={value ?? ''}
+        value={resolvedValue}
         {...rest}
       >
         {children}
