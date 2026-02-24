@@ -32,21 +32,23 @@ export const CommentEditor = forwardRef(
     }, [_initialValue])
     return (
       <div className="flex flex-col w-full min-w-0">
-        <Editor
-          key={editorKey}
-          CustomPlugins={Plugins}
-          editorSerializedState={serialized}
-          onSerializedChange={value => setSerialized(value)}
-          autoFocus={false}
-          onChange={state => {
-            const count = state.read(() => $getRoot().getTextContentSize())
-            setWordsCount(count)
-          }}
-          onSubmit={() => onSubmit(serialized)}
-          isSubmitting={isSubmitting}
-          isSubmitDisabled={wordsCount === 0}
-          clearSignal={clearSignal}
-        />
+        <div className="w-full min-w-0 bg-background overflow-hidden rounded-lg border shadow">
+          <Editor
+            key={editorKey}
+            CustomPlugins={Plugins}
+            editorSerializedState={serialized}
+            onSerializedChange={value => setSerialized(value)}
+            autoFocus={false}
+            onChange={state => {
+              const count = state.read(() => $getRoot().getTextContentSize())
+              setWordsCount(count)
+            }}
+            onSubmit={() => onSubmit(serialized)}
+            isSubmitting={isSubmitting}
+            isSubmitDisabled={wordsCount === 0}
+            clearSignal={clearSignal}
+          />
+        </div>
       </div>
     )
   },

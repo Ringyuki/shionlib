@@ -2,7 +2,8 @@
   "TabsNav": {
     "description": "ゲーム詳細",
     "characters": "キャラクター",
-    "comments": "ゲームコメント"
+    "comments": "ゲームコメント",
+    "walkthrough": "攻略"
   },
   "Actions": {
     "download": "ダウンロード",

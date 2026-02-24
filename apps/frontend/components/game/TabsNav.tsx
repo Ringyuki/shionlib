@@ -11,6 +11,7 @@ const tabs = [
   { name: 'description', href: '/' },
   { name: 'characters', href: 'characters' },
   { name: 'comments', href: 'comments' },
+  { name: 'walkthrough', href: 'walkthrough' },
 ]
 
 export const GameTabsNav = () => {

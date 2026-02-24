@@ -2,7 +2,8 @@
   "TabsNav": {
     "description": "Game details",
     "characters": "Characters",
-    "comments": "Game comments"
+    "comments": "Game comments",
+    "walkthrough": "Walkthrough"
   },
   "Actions": {
     "download": "Download",

@@ -2,7 +2,8 @@
   "TabsNav": {
     "description": "详情",
     "characters": "角色",
-    "comments": "讨论"
+    "comments": "讨论",
+    "walkthrough": "攻略"
   },
   "Actions": {
     "download": "下载",
