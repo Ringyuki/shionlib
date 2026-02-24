@@ -57,7 +57,7 @@ const normalizeInitialValues = (
   file_name: values?.file_name ?? '',
   platform: values?.platform ?? [],
   language: values?.language ?? [],
-  simulator: values?.simulator,
+  simulator: values?.simulator ?? undefined,
   note: values?.note ?? '',
 })
 
@@ -86,27 +86,16 @@ export const GameDownloadSourceInfoForm = ({
 }: GameDownloadSourceInfoFormProps) => {
   const t = useTranslations('Components.Game.Upload.GameUploadDialog')
 
-  const gameDownloadSourceSchema = z
-    .object({
-      file_name: z
-        .string()
-        .nonempty({ message: t('validation.fileNameRequired') })
-        .max(255, { message: t('validation.fileNameLength', { length: 255 }) }),
-      platform: z.enum(platformValues).array().min(1, t('validation.platform')),
-      language: z.enum(languageValues).array().min(1, t('validation.language')),
-      simulator: z.enum(simulatorValues).optional(),
-      note: z.string().max(255, t('validation.note')),
-    })
-    .superRefine((data, ctx) => {
-      const needsSimulator = data.platform.includes('and') || data.platform.includes('ios')
-      if (needsSimulator && !data.simulator) {
-        ctx.addIssue({
-          code: 'custom',
-          message: t('validation.simulator'),
-          path: ['simulator'],
-        })
-      }
-    })
+  const gameDownloadSourceSchema = z.object({
+    file_name: z
+      .string()
+      .nonempty({ message: t('validation.fileNameRequired') })
+      .max(255, { message: t('validation.fileNameLength', { length: 255 }) }),
+    platform: z.enum(platformValues).array().min(1, t('validation.platform')),
+    language: z.enum(languageValues).array().min(1, t('validation.language')),
+    simulator: z.enum(simulatorValues).optional(),
+    note: z.string().max(255, t('validation.note')),
+  })
   const form = useForm<z.infer<typeof gameDownloadSourceSchema>>({
     resolver: zodResolver(gameDownloadSourceSchema),
     defaultValues: normalizeInitialValues(initialValues),
@@ -118,7 +107,7 @@ export const GameDownloadSourceInfoForm = ({
     const syncField = <K extends keyof GameDownloadSourceFormValues>(key: K) => {
       if (!Object.prototype.hasOwnProperty.call(partialInitialValues, key)) return
       const nextValue = partialInitialValues[key]
-      if (nextValue === undefined) return
+      if (nextValue == null) return
       const castNextValue = nextValue as GameDownloadSourceFormValues[K]
       if (isEqual(syncedInitialValuesRef.current[key], castNextValue)) return
       syncedInitialValuesRef.current[key] = castNextValue
@@ -161,9 +150,13 @@ export const GameDownloadSourceInfoForm = ({
   }
   const handleSubmit = useCallback(
     async (data: z.infer<typeof gameDownloadSourceSchema>) => {
+      if ((data.platform.includes('and') || data.platform.includes('ios')) && !data.simulator) {
+        form.setError('simulator', { type: 'custom', message: t('validation.simulator') })
+        return
+      }
       onSubmit(data)
     },
-    [onSubmit],
+    [onSubmit, form, t],
   )
 
   const lastAutoSubmitTriggerRef = useRef<number | undefined>(autoSubmitTrigger)
