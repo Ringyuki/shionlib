@@ -6,6 +6,7 @@ import { ModerationProcessor } from './moderation.processor'
 import { ModerationDecision } from '../enums/decisions.enum'
 import { LLM_COMMENT_MODERATION_JOB, LLM_MODERATION_MODEL } from '../constants/moderation.constants'
 import { MessageTone, MessageType } from '../../message/dto/req/send-message.req.dto'
+import { WalkthroughStatus } from '@prisma/client'
 
 const CATEGORY_KEYS = [
   'harassment',
@@ -46,9 +47,11 @@ describe('ModerationProcessor', () => {
     const tx = {
       moderation_events: { create: jest.fn().mockResolvedValue(undefined) },
       comment: { update: jest.fn().mockResolvedValue(undefined) },
+      walkthrough: { updateMany: jest.fn().mockResolvedValue(undefined) },
     }
     const prismaService = {
       comment: { findUnique: jest.fn() },
+      walkthrough: { findUnique: jest.fn() },
       $transaction: jest.fn(async (cb: (arg: any) => Promise<unknown>) => cb(tx)),
     }
     const openaiService = {
@@ -335,6 +338,112 @@ describe('ModerationProcessor', () => {
         meta: expect.objectContaining({
           top_category: 'VIOLENCE',
           reason: 'threat',
+        }),
+      }),
+      expect.any(Object),
+    )
+  })
+
+  it('applies walkthrough llm allow decision and republishes pending walkthrough', async () => {
+    const { processor, prismaService, openaiService, tx, messageService } = makeProcessor()
+    prismaService.walkthrough.findUnique.mockResolvedValue({
+      id: 61,
+      creator_id: 18,
+      game_id: 80,
+      title: 'Route A',
+      html: '<p>step 1</p>',
+      status: WalkthroughStatus.HIDDEN,
+      game: { title_zh: 'A', title_en: 'B', title_jp: 'C' },
+    })
+    openaiService.parseResponse.mockResolvedValue({
+      output_parsed: {
+        decision: 'ALLOW',
+        reason: 'acceptable guide content',
+        evidence: 'fictional game walkthrough',
+        top_category: 'HARASSMENT',
+        categories_json: { harassment: false },
+      },
+    })
+
+    const result = await processor.processWalkthroughLlmModeration({
+      data: { walkthroughId: 61 },
+    } as any)
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        decision: 'ALLOW',
+        top_category: 'HARASSMENT',
+      }),
+    )
+    expect(tx.moderation_events.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          walkthrough_id: 61,
+          audit_by: 2,
+          decision: 'ALLOW',
+        }),
+      }),
+    )
+    expect(tx.walkthrough.updateMany).toHaveBeenCalledWith({
+      where: {
+        id: 61,
+        status: { in: [WalkthroughStatus.PUBLISHED, WalkthroughStatus.HIDDEN] },
+      },
+      data: { status: WalkthroughStatus.PUBLISHED },
+    })
+    expect(messageService.send).not.toHaveBeenCalled()
+  })
+
+  it('applies walkthrough llm block decision, keeps hidden and sends system notice', async () => {
+    const { processor, prismaService, openaiService, tx, messageService } = makeProcessor()
+    prismaService.walkthrough.findUnique.mockResolvedValue({
+      id: 62,
+      creator_id: 19,
+      game_id: 81,
+      title: 'Route B',
+      html: '<p>unsafe real-world content</p>',
+      status: WalkthroughStatus.HIDDEN,
+      game: { title_zh: 'A', title_en: 'B', title_jp: 'C' },
+    })
+    openaiService.parseResponse.mockResolvedValue({
+      output_parsed: {
+        decision: 'BLOCK',
+        reason: 'real-world illegal instruction',
+        evidence: 'explicit real-world instruction text',
+        top_category: 'ILLICIT',
+        categories_json: { illicit: true },
+      },
+    })
+
+    await processor.processWalkthroughLlmModeration({
+      data: { walkthroughId: 62 },
+    } as any)
+
+    expect(tx.moderation_events.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          walkthrough_id: 62,
+          decision: 'BLOCK',
+          top_category: 'ILLICIT',
+        }),
+      }),
+    )
+    expect(tx.walkthrough.updateMany).toHaveBeenCalledWith({
+      where: { id: 62, status: { not: WalkthroughStatus.DELETED } },
+      data: { status: WalkthroughStatus.HIDDEN },
+    })
+    expect(messageService.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: MessageType.SYSTEM,
+        tone: MessageTone.DESTRUCTIVE,
+        receiver_id: 19,
+        game_id: 81,
+        link_url: '/game/81/walkthrough/62',
+        meta: expect.objectContaining({
+          reason: 'real-world illegal instruction',
+          evidence: 'explicit real-world instruction text',
+          walkthrough_title: 'Route B',
+          walkthrough_id: 62,
         }),
       }),
       expect.any(Object),

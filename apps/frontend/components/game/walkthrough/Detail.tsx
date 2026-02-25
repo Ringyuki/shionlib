@@ -4,13 +4,14 @@ import { useEffect } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation.client'
 import { Walkthrough, WalkthroughStatus } from '@/interfaces/walkthrough/walkthrough.interface'
+import { LanguageNameMap } from '@/interfaces/game/game.interface'
 import { Avatar } from '@/components/common/user/Avatar'
 import { Badge } from '@/components/shionui/Badge'
 import { Button } from '@/components/shionui/Button'
 import { timeFromNow } from '@/utils/time-format'
 import { useShionlibUserStore } from '@/store/userStore'
 import { useScrollToElem } from '@/hooks/useScrollToElem'
-import { Pencil, Undo2 } from 'lucide-react'
+import { Pencil, Undo2, Languages } from 'lucide-react'
 
 interface WalkthroughDetailProps {
   walkthrough: Walkthrough
@@ -72,6 +73,12 @@ export const WalkthroughDetail = ({ walkthrough, gameId }: WalkthroughDetailProp
               {t('editedAt')} {timeFromNow(walkthrough.updated, locale)}
             </span>
           )}
+          {walkthrough.lang && (
+            <Badge intent="neutral" className="flex items-center gap-1">
+              <Languages />
+              {LanguageNameMap[walkthrough.lang]}
+            </Badge>
+          )}
           {walkthrough.status === WalkthroughStatus.DRAFT && (
             <Badge intent="secondary" appearance="solid">
               {t('draft')}
@@ -83,14 +90,12 @@ export const WalkthroughDetail = ({ walkthrough, gameId }: WalkthroughDetailProp
             </Badge>
           )}
         </div>
-
         {walkthrough.status === WalkthroughStatus.DRAFT && (
           <div className="rounded-md border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
             {t('draft_notice')}
           </div>
         )}
       </div>
-
       <div
         className="prose prose-sm dark:prose-invert max-w-none [&_a]:text-primary [&_a]:hover:text-primary/80 [&_a]:transition-colors"
         dangerouslySetInnerHTML={{ __html: walkthrough.html }}

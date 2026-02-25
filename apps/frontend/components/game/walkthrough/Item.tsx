@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation.client'
 import { Link } from '@/i18n/navigation.client'
 import { Walkthrough, WalkthroughStatus } from '@/interfaces/walkthrough/walkthrough.interface'
+import { LanguageNameMap } from '@/interfaces/game/game.interface'
 import { Card, CardContent } from '@/components/shionui/Card'
 import { Badge } from '@/components/shionui/Badge'
 import { Button } from '@/components/shionui/Button'
@@ -25,7 +26,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from '@/components/shionui/AlertDialog'
-import { Ellipsis, Pencil, Trash } from 'lucide-react'
+import { Ellipsis, Pencil, Trash, Languages } from 'lucide-react'
 import { timeFromNow } from '@/utils/time-format'
 import { shionlibRequest } from '@/utils/request'
 import { useShionlibUserStore } from '@/store/userStore'
@@ -116,6 +117,12 @@ export const GameWalkthroughItem = ({ walkthrough, gameId }: GameWalkthroughItem
                 <span className="text-xs text-muted-foreground">
                   {t('editedAt')} {timeFromNow(walkthrough.updated, locale)}
                 </span>
+              )}
+              {walkthrough.lang && (
+                <Badge intent="neutral" className="flex items-center gap-1">
+                  <Languages />
+                  {LanguageNameMap[walkthrough.lang]}
+                </Badge>
               )}
               {walkthrough.status === WalkthroughStatus.DRAFT && (
                 <Badge intent="secondary" appearance="solid">

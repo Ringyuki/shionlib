@@ -15,6 +15,7 @@ export class AdminWalkthroughItemResDto {
   id: number
   title: string
   html: string
+  lang?: string | null
   edited: boolean
   status: WalkthroughStatus
   created: Date

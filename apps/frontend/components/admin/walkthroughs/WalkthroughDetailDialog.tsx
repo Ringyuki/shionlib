@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/shionui/Skeleton'
 import { Separator } from '@/components/shionui/Separator'
 import { cn } from '@/utils/cn'
 import { AdminWalkthroughDetail } from '@/interfaces/admin/walkthrough.interface'
+import { LanguageNameMap } from '@/interfaces/game/game.interface'
 import { getAdminWalkthroughDetail } from '@/components/admin/hooks/useAdminWalkthroughs'
 
 interface WalkthroughDetailDialogProps {
@@ -100,6 +101,11 @@ export function WalkthroughDetailDialog({
               {detail.edited && (
                 <Badge intent="neutral" appearance="outline">
                   {t('edited')}
+                </Badge>
+              )}
+              {detail.lang && (
+                <Badge intent="neutral" appearance="outline">
+                  {LanguageNameMap[detail.lang]}
                 </Badge>
               )}
             </div>

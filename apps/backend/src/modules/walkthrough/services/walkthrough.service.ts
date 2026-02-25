@@ -18,6 +18,7 @@ import {
   LLM_WALKTHROUGH_MODERATION_JOB,
   MODERATION_QUEUE,
 } from '../../moderate/constants/moderation.constants'
+import { detectWalkthroughLanguageFromEditorState } from '../utils/language-detector.util'
 
 const WALKTHROUGH_SELECT = {
   id: true,
@@ -31,6 +32,7 @@ const WALKTHROUGH_SELECT = {
   },
   title: true,
   html: true,
+  lang: true,
   created: true,
   updated: true,
   edited: true,
@@ -64,6 +66,10 @@ export class WalkthroughService {
     const html = await this.renderService.toHtml(dto.content as SerializedEditorState)
     const status =
       dto.status === WalkthroughStatus.PUBLISHED ? WalkthroughStatus.HIDDEN : dto.status
+    const lang = await detectWalkthroughLanguageFromEditorState(
+      dto.content as SerializedEditorState,
+      dto.title,
+    )
     const walkthrough = await this.prisma.walkthrough.create({
       data: {
         game_id: dto.game_id,
@@ -72,6 +78,7 @@ export class WalkthroughService {
         status,
         creator_id: req.user.sub,
         html,
+        lang: lang === 'unknown' ? null : lang,
       },
       select: WALKTHROUGH_SELECT,
     })
@@ -95,6 +102,10 @@ export class WalkthroughService {
     const html = await this.renderService.toHtml(dto.content as SerializedEditorState)
     const status =
       dto.status === WalkthroughStatus.PUBLISHED ? WalkthroughStatus.HIDDEN : dto.status
+    const lang = await detectWalkthroughLanguageFromEditorState(
+      dto.content as SerializedEditorState,
+      dto.title,
+    )
     const updated = await this.prisma.walkthrough.update({
       where: { id },
       data: {
@@ -102,6 +113,7 @@ export class WalkthroughService {
         content: dto.content,
         status,
         html,
+        lang: lang === 'unknown' ? null : lang,
         edited: true,
       },
       select: WALKTHROUGH_SELECT,
@@ -187,6 +199,7 @@ export class WalkthroughService {
       select: {
         id: true,
         title: true,
+        lang: true,
         created: true,
         updated: true,
         edited: true,

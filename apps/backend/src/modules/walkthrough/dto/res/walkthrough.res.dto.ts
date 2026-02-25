@@ -10,6 +10,7 @@ export class WalkthroughResDto {
   }
   title: string
   html: string
+  lang?: string | null
   created: Date
   updated: Date
   edited: boolean

@@ -24,6 +24,7 @@ import {
 import { MoreHorizontal } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { cn } from '@/utils/cn'
+import { LanguageNameMap } from '@/interfaces/game/game.interface'
 import {
   AdminWalkthroughItem,
   AdminWalkthroughStatus,
@@ -148,6 +149,11 @@ export function WalkthroughListItem({ walkthrough, onRefresh }: WalkthroughListI
               {walkthrough.edited && (
                 <Badge intent="neutral" appearance="outline">
                   {t('edited')}
+                </Badge>
+              )}
+              {walkthrough.lang && (
+                <Badge intent="neutral" appearance="outline">
+                  {LanguageNameMap[walkthrough.lang]}
                 </Badge>
               )}
               {moderationLabel && (

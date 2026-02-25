@@ -1,3 +1,5 @@
+import { WalkthroughLang } from '@/interfaces/walkthrough/walkthrough.interface'
+
 export type AdminModerationDecision = 'ALLOW' | 'BLOCK' | 'REVIEW'
 export type AdminWalkthroughStatus = 'DRAFT' | 'PUBLISHED' | 'HIDDEN' | 'DELETED'
 
@@ -22,6 +24,7 @@ export interface AdminWalkthroughItem {
   id: number
   title: string
   html: string
+  lang?: WalkthroughLang | null
   edited: boolean
   status: AdminWalkthroughStatus
   created: string

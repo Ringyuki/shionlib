@@ -7,6 +7,7 @@ model Walkthrough {
   title String @db.VarChar(255)
   content Json @db.JsonB
   html String @db.VarChar(100000)
+  lang String? @db.VarChar(16)
 
   created DateTime @default(now())
   updated DateTime @updatedAt

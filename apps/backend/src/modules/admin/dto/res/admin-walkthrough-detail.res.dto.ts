@@ -19,6 +19,7 @@ export class AdminWalkthroughDetailResDto {
   title: string
   html: string
   content: Prisma.JsonValue
+  lang?: string | null
   edited: boolean
   status: WalkthroughStatus
   created: Date
