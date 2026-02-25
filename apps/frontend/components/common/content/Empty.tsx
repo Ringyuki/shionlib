@@ -4,6 +4,7 @@ import {
   EmptyTitle,
   EmptyDescription,
   EmptyMedia,
+  EmptyAction,
 } from '@/components/shionui/Empty'
 import { FadeImage } from '../shared/FadeImage'
 import { useTranslations } from 'next-intl'
@@ -11,9 +12,10 @@ import { useTranslations } from 'next-intl'
 interface EmptyProps {
   title?: string
   description?: string
+  action?: React.ReactNode
 }
 
-export const Empty = ({ title, description }: EmptyProps) => {
+export const Empty = ({ title, description, action }: EmptyProps) => {
   const t = useTranslations('Components.Common.Content.Empty')
   return (
     <EmptyComponent>
@@ -31,6 +33,7 @@ export const Empty = ({ title, description }: EmptyProps) => {
         </EmptyMedia>
         <EmptyTitle className="text-muted-foreground">{title || t('title')}</EmptyTitle>
         {description && <EmptyDescription>{description}</EmptyDescription>}
+        {action && <EmptyAction className="mt-4">{action}</EmptyAction>}
       </EmptyHeader>
     </EmptyComponent>
   )

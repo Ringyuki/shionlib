@@ -21,8 +21,6 @@ import { AutoLinkPlugin } from '@/components/editor/libs/plugins/auto-link-plugi
 import { CodeActionMenuPlugin } from '@/components/editor/libs/plugins/code-action-menu-plugin'
 import { CodeHighlightPlugin } from '@/components/editor/libs/plugins/code-highlight-plugin'
 import { ComponentPickerMenuPlugin } from '@/components/editor/libs/plugins/component-picker-menu-plugin'
-import { ContextMenuPlugin } from '@/components/editor/libs/plugins/context-menu-plugin'
-import { DragDropPastePlugin } from '@/components/editor/libs/plugins/drag-drop-paste-plugin'
 import { DraggableBlockPlugin } from '@/components/editor/libs/plugins/draggable-block-plugin'
 import { AutoEmbedPlugin } from '@/components/editor/libs/plugins/embeds/auto-embed-plugin'
 import { FloatingLinkEditorPlugin } from '@/components/editor/libs/plugins/floating-link-editor-plugin'
@@ -64,7 +62,7 @@ import { Separator } from '@/components/shionui/Separator'
 import { Kbd } from '@/components/shionui/Kbd'
 import { useTranslations } from 'next-intl'
 import { Plugin } from '@/components/editor/interfaces/plugin'
-import { ScrollArea, ScrollBar } from '@/components/shionui/ScrollArea'
+import { ScrollArea } from '@/components/shionui/ScrollArea'
 
 const maxLength = 500
 
@@ -112,7 +110,7 @@ export const Plugins: Plugin<PluginsProps> = ({
           >
             <div className="flex w-max gap-2 py-1 px-1 overflow-visible">
               <HistoryToolbarPlugin />
-              <Separator orientation="vertical" className="!h-7" />
+              <Separator orientation="vertical" className="h-7!" />
               <BlockFormatDropDown>
                 <FormatParagraph />
                 <FormatHeading levels={['h1', 'h2', 'h3']} />
@@ -127,22 +125,22 @@ export const Plugins: Plugin<PluginsProps> = ({
               ) : (
                 <>
                   <FontSizeToolbarPlugin />
-                  <Separator orientation="vertical" className="!h-7" />
+                  <Separator orientation="vertical" className="h-7!" />
                   <FontFormatToolbarPlugin format="bold" />
                   <FontFormatToolbarPlugin format="italic" />
                   <FontFormatToolbarPlugin format="underline" />
                   <FontFormatToolbarPlugin format="strikethrough" />
-                  <Separator orientation="vertical" className="!h-7" />
+                  <Separator orientation="vertical" className="h-7!" />
                   <SubSuperToolbarPlugin />
                   <LinkToolbarPlugin setIsLinkEditMode={setIsLinkEditMode} />
-                  <Separator orientation="vertical" className="!h-7" />
+                  <Separator orientation="vertical" className="h-7!" />
                   <ClearFormattingToolbarPlugin />
-                  <Separator orientation="vertical" className="!h-7" />
+                  <Separator orientation="vertical" className="h-7!" />
                   <FontColorToolbarPlugin />
                   <FontBackgroundToolbarPlugin />
-                  <Separator orientation="vertical" className="!h-7" />
+                  <Separator orientation="vertical" className="h-7!" />
                   <ElementFormatToolbarPlugin />
-                  <Separator orientation="vertical" className="!h-7" />
+                  <Separator orientation="vertical" className="h-7!" />
                 </>
               )}
             </div>
@@ -205,10 +203,6 @@ export const Plugins: Plugin<PluginsProps> = ({
             AlignmentPickerPlugin({ alignment: 'justify' }),
           ]}
         />
-
-        <ContextMenuPlugin />
-        <DragDropPastePlugin />
-
         <FloatingLinkEditorPlugin
           anchorElem={floatingAnchorElem}
           isLinkEditMode={isLinkEditMode}

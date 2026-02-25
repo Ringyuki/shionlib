@@ -128,7 +128,7 @@ export const Plugins: Plugin<PluginsProps> = ({
         {({ blockType }) => (
           <div className="vertical-align-middle sticky top-0 z-10 flex items-center gap-2 overflow-auto border-b p-1">
             <HistoryToolbarPlugin />
-            <Separator orientation="vertical" className="!h-7" />
+            <Separator orientation="vertical" className="h-7!" />
             <BlockFormatDropDown>
               <FormatParagraph />
               <FormatHeading levels={['h1', 'h2', 'h3']} />
@@ -143,22 +143,22 @@ export const Plugins: Plugin<PluginsProps> = ({
             ) : (
               <>
                 <FontSizeToolbarPlugin />
-                <Separator orientation="vertical" className="!h-7" />
+                <Separator orientation="vertical" className="h-7!" />
                 <FontFormatToolbarPlugin format="bold" />
                 <FontFormatToolbarPlugin format="italic" />
                 <FontFormatToolbarPlugin format="underline" />
                 <FontFormatToolbarPlugin format="strikethrough" />
-                <Separator orientation="vertical" className="!h-7" />
+                <Separator orientation="vertical" className="h-7!" />
                 <SubSuperToolbarPlugin />
                 <LinkToolbarPlugin setIsLinkEditMode={setIsLinkEditMode} />
-                <Separator orientation="vertical" className="!h-7" />
+                <Separator orientation="vertical" className="h-7!" />
                 <ClearFormattingToolbarPlugin />
-                <Separator orientation="vertical" className="!h-7" />
+                <Separator orientation="vertical" className="h-7!" />
                 <FontColorToolbarPlugin />
                 <FontBackgroundToolbarPlugin />
-                <Separator orientation="vertical" className="!h-7" />
+                <Separator orientation="vertical" className="h-7!" />
                 <ElementFormatToolbarPlugin />
-                <Separator orientation="vertical" className="!h-7" />
+                <Separator orientation="vertical" className="h-7!" />
               </>
             )}
           </div>

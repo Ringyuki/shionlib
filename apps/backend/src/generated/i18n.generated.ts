@@ -168,6 +168,8 @@ export type I18nTranslations = {
         "PVN_BINDING_ALREADY_EXISTS": string;
         "PVN_BINDING_AUTH_FAILED": string;
         "PVN_GAME_MAPPING_NOT_FOUND": string;
+        "WALKTHROUGH_NOT_FOUND": string;
+        "WALKTHROUGH_NOT_OWNER": string;
     };
     "validation": {
         "common": {

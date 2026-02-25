@@ -5,5 +5,12 @@
       "Content": "あなたのコメントは審査に不合格でした。原因：{top_category}。コメント内容を修正してから再度お試しください。",
       "ReviewContent": "あなたのコメントは審査に不合格でした。原因：{top_category}, {reason}, 重要な部分：{evidence}。コメント内容を修正してから再度お試しください。"
     }
+  },
+  "Walkthrough": {
+    "Block": {
+      "Title": "攻略が審査に不合格でした",
+      "ReviewContent": "あなたの攻略「{walkthrough_title}」は審査に不合格でした。理由：{top_category}, {reason}, 該当箇所：{evidence}。内容を修正して再度公開してください。",
+      "LinkText": "攻略を開く"
+    }
   }
 }

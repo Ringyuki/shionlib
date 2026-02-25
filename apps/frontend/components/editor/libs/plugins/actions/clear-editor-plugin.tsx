@@ -24,7 +24,7 @@ export function ClearEditorActionPlugin() {
   const [editor] = useLexicalComposerContext()
 
   return (
-    <AlertDialog>
+    <AlertDialog countdown={0}>
       <Tooltip>
         <TooltipTrigger asChild>
           <AlertDialogTrigger asChild>

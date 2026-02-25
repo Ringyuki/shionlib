@@ -20,6 +20,7 @@ model User {
   malware_scan_cases                    MalwareScanCase[]                 @relation("user_malware_scan_case_uploader")
   malware_scan_case_reviews             MalwareScanCase[]                 @relation("user_malware_scan_case_reviewer")
   comments                              Comment[]                         @relation("user_create_comment")
+  walkthroughs                          Walkthrough[]                     @relation("user_walkthrough")
 
   favorites Favorite[] @relation("user_favorite")
 

@@ -22,7 +22,7 @@ const editorConfig: InitialConfigType = {
 
 interface EditorProps {
   CustomPlugins?: Plugin
-  CustomPluginProps?: PluginProps
+  CustomPluginProps?: PluginProps & Record<string, unknown>
   editorState?: EditorState
   editorSerializedState?: SerializedEditorState
   onChange?: (editorState: EditorState) => void
@@ -48,43 +48,40 @@ export const Editor = ({
   clearSignal,
 }: EditorProps) => {
   return (
-    <div className="w-full min-w-0 bg-background overflow-hidden rounded-lg border shadow">
-      <LexicalComposer
-        initialConfig={{
-          ...editorConfig,
-          ...(editorState ? { editorState } : {}),
-          ...(editorSerializedState ? { editorState: JSON.stringify(editorSerializedState) } : {}),
-        }}
-      >
-        <TooltipProvider>
-          {CustomPlugins ? (
-            <CustomPlugins
-              autoFocus={autoFocus}
-              onSubmit={onSubmit}
-              isSubmitting={isSubmitting}
-              isSubmitDisabled={isSubmitDisabled}
-              clearSignal={clearSignal}
-              {...CustomPluginProps}
-            />
-          ) : (
-            <Plugins
-              autoFocus={autoFocus}
-              onSubmit={onSubmit}
-              isSubmitting={isSubmitting}
-              isSubmitDisabled={isSubmitDisabled}
-              clearSignal={clearSignal}
-            />
-          )}
-
-          <OnChangePlugin
-            ignoreSelectionChange={true}
-            onChange={editorState => {
-              onChange?.(editorState)
-              onSerializedChange?.(editorState.toJSON())
-            }}
+    <LexicalComposer
+      initialConfig={{
+        ...editorConfig,
+        ...(editorState ? { editorState } : {}),
+        ...(editorSerializedState ? { editorState: JSON.stringify(editorSerializedState) } : {}),
+      }}
+    >
+      <TooltipProvider>
+        {CustomPlugins ? (
+          <CustomPlugins
+            autoFocus={autoFocus}
+            onSubmit={onSubmit}
+            isSubmitting={isSubmitting}
+            isSubmitDisabled={isSubmitDisabled}
+            clearSignal={clearSignal}
+            {...CustomPluginProps}
           />
-        </TooltipProvider>
-      </LexicalComposer>
-    </div>
+        ) : (
+          <Plugins
+            autoFocus={autoFocus}
+            onSubmit={onSubmit}
+            isSubmitting={isSubmitting}
+            isSubmitDisabled={isSubmitDisabled}
+            clearSignal={clearSignal}
+          />
+        )}
+        <OnChangePlugin
+          ignoreSelectionChange={true}
+          onChange={editorState => {
+            onChange?.(editorState)
+            onSerializedChange?.(editorState.toJSON())
+          }}
+        />
+      </TooltipProvider>
+    </LexicalComposer>
   )
 }

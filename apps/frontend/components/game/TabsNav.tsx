@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import { useSelectedLayoutSegment } from 'next/navigation'
 import { Tabs, TabsList, TabsTrigger } from '@/components/shionui/animated/Tabs'
 import { Link } from '@/i18n/navigation.client'
@@ -11,6 +11,7 @@ const tabs = [
   { name: 'description', href: '/' },
   { name: 'characters', href: 'characters' },
   { name: 'comments', href: 'comments' },
+  { name: 'walkthrough', href: 'walkthrough' },
 ]
 
 export const GameTabsNav = () => {
@@ -23,11 +24,7 @@ export const GameTabsNav = () => {
     [segment, id],
   )
 
-  const [isEdit, setIsEdit] = useState(false)
-  useEffect(() => {
-    setIsEdit(pathname.includes('/edit'))
-  }, [pathname])
-  if (isEdit) return null
+  if (pathname.includes('/edit')) return null
 
   return (
     <Tabs value={active}>

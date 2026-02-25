@@ -2,7 +2,8 @@
   "TabsNav": {
     "description": "详情",
     "characters": "角色",
-    "comments": "讨论"
+    "comments": "讨论",
+    "walkthrough": "攻略"
   },
   "Actions": {
     "download": "下载",
@@ -41,6 +42,7 @@
   },
   "Description": {
     "GameCharacter": {
+      "introduction": "登场角色",
       "noCharacters": "暂时没有角色信息"
     },
     "GameCharacterItem": {
@@ -111,6 +113,41 @@
       "sound_director": "音响监督",
       "animation_production": "动画制作",
       "programming": "程序"
+    }
+  },
+  "Walkthrough": {
+    "walkthroughs": "攻略",
+    "no_walkthroughs": "暂无攻略",
+    "create": "创建攻略",
+    "title_placeholder": "请输入攻略标题...",
+    "save_draft": "保存草稿",
+    "publish": "发布",
+    "save_success": "保存成功",
+    "title_required": "请输入攻略标题",
+    "EditLayout": {
+      "create": "创建攻略",
+      "edit": "编辑攻略",
+      "backToWalkthrough": "返回攻略页面"
+    },
+    "Item": {
+      "edit": "编辑",
+      "delete": "删除",
+      "delete_title": "删除攻略",
+      "delete_description": "确定要删除这篇攻略吗？此操作无法撤销。",
+      "cancel": "取消",
+      "delete_confirm": "删除",
+      "delete_success": "删除成功",
+      "draft": "草稿",
+      "hidden": "待审核",
+      "editedAt": "编辑于"
+    },
+    "Detail": {
+      "back": "返回",
+      "edit": "编辑",
+      "editedAt": "编辑于",
+      "draft": "草稿",
+      "hidden": "待审核",
+      "draft_notice": "这篇攻略是草稿，仅对你可见。"
     }
   },
   "Upload": {

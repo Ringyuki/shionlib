@@ -1,0 +1,33 @@
+model Walkthrough {
+  id Int @id @default(autoincrement())
+
+  game_id Int
+  game Game @relation("game_walkthrough", fields: [game_id], references: [id], onDelete: Cascade)
+
+  title String @db.VarChar(255)
+  content Json @db.JsonB
+  html String @db.VarChar(100000)
+  lang String? @db.VarChar(16)
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  edited Boolean @default(false)
+  status WalkthroughStatus @default(DRAFT)
+
+  moderates moderation_events[] @relation("walkthrough_moderate")
+
+  creator_id Int
+  creator User @relation("user_walkthrough", fields: [creator_id], references: [id], onDelete: Cascade)
+
+  @@index([game_id, created])
+  @@index([creator_id, created])
+  @@map("walkthroughs")
+}
+
+enum WalkthroughStatus {
+  DRAFT
+  PUBLISHED
+  HIDDEN
+  DELETED
+}

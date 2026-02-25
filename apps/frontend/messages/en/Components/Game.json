@@ -2,7 +2,8 @@
   "TabsNav": {
     "description": "Game details",
     "characters": "Characters",
-    "comments": "Game comments"
+    "comments": "Game comments",
+    "walkthrough": "Walkthrough"
   },
   "Actions": {
     "download": "Download",
@@ -41,6 +42,7 @@
   },
   "Description": {
     "GameCharacter": {
+      "introduction": "Characters",
       "noCharacters": "No characters found"
     },
     "GameCharacterItem": {
@@ -111,6 +113,41 @@
       "sound_director": "Sound Director",
       "animation_production": "Animation Production",
       "programming": "Programming"
+    }
+  },
+  "Walkthrough": {
+    "walkthroughs": "Walkthroughs",
+    "no_walkthroughs": "No walkthroughs",
+    "create": "Create walkthrough",
+    "title_placeholder": "Enter walkthrough title...",
+    "save_draft": "Save as draft",
+    "publish": "Publish",
+    "save_success": "Saved successfully",
+    "title_required": "Please enter a title",
+    "EditLayout": {
+      "create": "Create walkthrough",
+      "edit": "Edit walkthrough",
+      "backToWalkthrough": "Back to walkthrough"
+    },
+    "Item": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "delete_title": "Delete walkthrough",
+      "delete_description": "Are you sure you want to delete this walkthrough? This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete_confirm": "Delete",
+      "delete_success": "Deleted successfully",
+      "draft": "Draft",
+      "hidden": "Pending review",
+      "editedAt": "Edited at"
+    },
+    "Detail": {
+      "back": "Back",
+      "edit": "Edit",
+      "editedAt": "Edited at",
+      "draft": "Draft",
+      "hidden": "Pending review",
+      "draft_notice": "This walkthrough is a draft and is only visible to you."
     }
   },
   "Upload": {

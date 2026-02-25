@@ -78,6 +78,12 @@ function EmptyDescription({ className, ...props }: React.ComponentProps<'p'>) {
   )
 }
 
+function EmptyAction({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div data-slot="empty-action" className={cn('flex items-center gap-2', className)} {...props} />
+  )
+}
+
 function EmptyContent({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -91,4 +97,4 @@ function EmptyContent({ className, ...props }: React.ComponentProps<'div'>) {
   )
 }
 
-export { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyContent, EmptyMedia }
+export { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyContent, EmptyMedia, EmptyAction }
