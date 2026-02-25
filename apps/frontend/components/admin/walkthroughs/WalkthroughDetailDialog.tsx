@@ -1,0 +1,217 @@
+'use client'
+
+import { useEffect, useMemo, useState } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/shionui/Dialog'
+import { Badge } from '@/components/shionui/Badge'
+import { Skeleton } from '@/components/shionui/Skeleton'
+import { Separator } from '@/components/shionui/Separator'
+import { cn } from '@/utils/cn'
+import { AdminWalkthroughDetail } from '@/interfaces/admin/walkthrough.interface'
+import { getAdminWalkthroughDetail } from '@/components/admin/hooks/useAdminWalkthroughs'
+
+interface WalkthroughDetailDialogProps {
+  walkthroughId: number | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+const formatDate = (value: string | null | undefined, locale: string) => {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '-'
+  return date.toLocaleString(locale)
+}
+
+const getGameTitle = (detail: AdminWalkthroughDetail | null) => {
+  if (!detail?.game) return null
+  return detail.game.title_zh || detail.game.title_en || detail.game.title_jp || null
+}
+
+function getStatusBadgeIntent(status: AdminWalkthroughDetail['status']) {
+  if (status === 'PUBLISHED') return 'success' as const
+  if (status === 'DELETED') return 'destructive' as const
+  return 'warning' as const
+}
+
+export function WalkthroughDetailDialog({
+  walkthroughId,
+  open,
+  onOpenChange,
+}: WalkthroughDetailDialogProps) {
+  const t = useTranslations('Admin.Walkthroughs')
+  const locale = useLocale()
+  const [detail, setDetail] = useState<AdminWalkthroughDetail | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  const statusLabel = useMemo(() => {
+    if (!detail) return ''
+    if (detail.status === 'PUBLISHED') return t('published')
+    if (detail.status === 'DRAFT') return t('draft')
+    if (detail.status === 'HIDDEN') return t('hidden')
+    return t('deleted')
+  }, [detail, t])
+
+  const loadDetail = async (id: number) => {
+    setLoading(true)
+    try {
+      const data = await getAdminWalkthroughDetail(id)
+      setDetail(data)
+    } catch {
+      setDetail(null)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!open || !walkthroughId) return
+    loadDetail(walkthroughId)
+  }, [open, walkthroughId])
+
+  const gameTitle = getGameTitle(detail)
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent fitContent className="min-w-full sm:min-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{t('detailTitle')}</DialogTitle>
+          <DialogDescription>{t('detailDescription')}</DialogDescription>
+        </DialogHeader>
+
+        {loading || !detail ? (
+          <div className="space-y-3">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-6 w-80" />
+            <Skeleton className="h-24 w-full" />
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge intent={getStatusBadgeIntent(detail.status)} appearance="solid">
+                {statusLabel}
+              </Badge>
+              {detail.edited && (
+                <Badge intent="neutral" appearance="outline">
+                  {t('edited')}
+                </Badge>
+              )}
+            </div>
+
+            <div className="grid gap-2 text-sm text-muted-foreground">
+              <div>
+                {t('walkthroughId')}: {detail.id}
+              </div>
+              <div>
+                {t('title')}: {detail.title}
+              </div>
+              <div>
+                {t('creatorId')}: {detail.creator.id} · {detail.creator.name}
+              </div>
+              {gameTitle ? (
+                <div>
+                  {t('game')}: {gameTitle} · {t('gameId')}: {detail.game.id}
+                </div>
+              ) : null}
+              <div>
+                {t('created')}: {formatDate(detail.created, locale)}
+              </div>
+              <div>
+                {t('updated')}: {formatDate(detail.updated, locale)}
+              </div>
+            </div>
+
+            <div className="rounded-lg border p-3">
+              <div className="font-medium">{t('walkthroughContent')}</div>
+              <div className="mt-2 text-sm prose prose-sm dark:prose-invert max-w-none">
+                <h1 className="mt-0!">{detail.title}</h1>
+                <div dangerouslySetInnerHTML={{ __html: detail.html || '' }} />
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <div className="font-medium">{t('rawContent')}</div>
+              <pre
+                className={cn(
+                  'rounded-md border bg-gray-50/70 dark:bg-gray-900/40 p-3 text-xs',
+                  'max-h-64 overflow-auto',
+                )}
+              >
+                {detail.content ? JSON.stringify(detail.content, null, 2) : t('empty')}
+              </pre>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <div className="font-medium">{t('moderationTitle')}</div>
+              {detail.moderations.length === 0 ? (
+                <div className="text-sm text-muted-foreground">{t('noModeration')}</div>
+              ) : (
+                <div className="space-y-2">
+                  {detail.moderations.map(event => (
+                    <div key={event.id} className="rounded-lg border p-3 text-sm">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge intent="neutral" appearance="outline">
+                          {event.model}
+                        </Badge>
+                        <Badge
+                          intent={
+                            event.decision === 'ALLOW'
+                              ? 'success'
+                              : event.decision === 'BLOCK'
+                                ? 'destructive'
+                                : 'warning'
+                          }
+                          appearance="solid"
+                        >
+                          {event.decision === 'ALLOW'
+                            ? t('decisionAllow')
+                            : event.decision === 'BLOCK'
+                              ? t('decisionBlock')
+                              : t('decisionReview')}
+                        </Badge>
+                        <Badge intent="neutral" appearance="outline">
+                          {event.top_category}
+                        </Badge>
+                      </div>
+                      <div className="mt-2 text-muted-foreground">
+                        {t('moderationAuditBy')}: {event.audit_by}
+                      </div>
+                      <div className="text-muted-foreground">
+                        {t('moderationTime')}: {formatDate(event.created_at, locale)}
+                      </div>
+                      {event.max_score != null ? (
+                        <div className="text-muted-foreground">
+                          {t('moderationMaxScore')}: {event.max_score}
+                        </div>
+                      ) : null}
+                      {event.reason ? (
+                        <div className="text-muted-foreground">
+                          {t('moderationReason')}: {event.reason}
+                        </div>
+                      ) : null}
+                      {event.evidence ? (
+                        <div className="text-muted-foreground">
+                          {t('moderationEvidence')}: {event.evidence}
+                        </div>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+}

@@ -5,10 +5,12 @@ import { AdminStatsController } from './controllers/admin-stats.controller'
 import { AdminContentController } from './controllers/admin-content.controller'
 import { AdminUserController } from './controllers/admin-user.controller'
 import { AdminCommentController } from './controllers/admin-comment.controller'
+import { AdminWalkthroughController } from './controllers/admin-walkthrough.controller'
 import { AdminStatsService } from './services/admin-stats.service'
 import { AdminContentService } from './services/admin-content.service'
 import { AdminUserService } from './services/admin-user.service'
 import { AdminCommentService } from './services/admin-comment.service'
+import { AdminWalkthroughService } from './services/admin-walkthrough.service'
 import { AdminGameService } from './services/admin-game.service'
 import { GameModule } from '../game/game.module'
 import { SecurityModule } from '../security/security.module'
@@ -20,12 +22,14 @@ import { SecurityModule } from '../security/security.module'
     AdminContentController,
     AdminUserController,
     AdminCommentController,
+    AdminWalkthroughController,
   ],
   providers: [
     AdminStatsService,
     AdminContentService,
     AdminUserService,
     AdminCommentService,
+    AdminWalkthroughService,
     AdminGameService,
   ],
   exports: [
@@ -33,6 +37,7 @@ import { SecurityModule } from '../security/security.module'
     AdminContentService,
     AdminUserService,
     AdminCommentService,
+    AdminWalkthroughService,
     AdminGameService,
   ],
 })

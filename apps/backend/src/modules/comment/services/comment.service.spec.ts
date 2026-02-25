@@ -1,7 +1,7 @@
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 import { MessageTone, MessageType } from '../../message/dto/req/send-message.req.dto'
-import { OMNI_MODERATION_JOB } from '../../moderate/constants/moderation.constants'
+import { OMNI_COMMENT_MODERATION_JOB } from '../../moderate/constants/moderation.constants'
 import { CommentServices } from './comment.service'
 
 describe('CommentServices', () => {
@@ -106,7 +106,7 @@ describe('CommentServices', () => {
       }),
     )
     expect(tx.comment.update).toHaveBeenCalledWith({ where: { id: 10 }, data: { root_id: 10 } })
-    expect(moderationQueue.add).toHaveBeenCalledWith(OMNI_MODERATION_JOB, { commentId: 10 })
+    expect(moderationQueue.add).toHaveBeenCalledWith(OMNI_COMMENT_MODERATION_JOB, { commentId: 10 })
     expect(result).toMatchObject({ id: 10, root_id: 10, like_count: 0 })
   })
 
@@ -152,7 +152,7 @@ describe('CommentServices', () => {
         data: { content: { root: {} }, html: '<p>edited</p>', edited: true, status: 2 },
       }),
     )
-    expect(moderationQueue.add).toHaveBeenCalledWith(OMNI_MODERATION_JOB, { commentId: 1 })
+    expect(moderationQueue.add).toHaveBeenCalledWith(OMNI_COMMENT_MODERATION_JOB, { commentId: 1 })
     expect(result).toEqual({ id: 1, html: '<p>edited</p>' })
   })
 

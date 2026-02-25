@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { SerializedEditorState } from 'lexical'
 import { Walkthrough, WalkthroughStatus } from '@/interfaces/walkthrough/walkthrough.interface'
 import { WalkthroughEditor } from '@/components/common/walkthrough/Editor'
@@ -20,8 +20,9 @@ export const GameWalkthroughEdit = ({ walkthrough, gameId }: GameWalkthroughEdit
   const t = useTranslations('Components.Game.Walkthrough')
   const router = useRouter()
   const scrollTo = useScrollToElem({ updateHash: false })
-
+  const titleRef = useRef<HTMLInputElement>(null)
   const [title, setTitle] = useState(walkthrough?.title ?? '')
+  const [titleError, setTitleError] = useState(false)
   const [editorState, setEditorState] = useState<SerializedEditorState | undefined>(
     walkthrough?.content,
   )
@@ -33,14 +34,17 @@ export const GameWalkthroughEdit = ({ walkthrough, gameId }: GameWalkthroughEdit
   }, [scrollTo])
 
   const isSubmitDisabled =
-    !title.trim() ||
-    (!editorState && !walkthrough?.content) ||
-    isDraftSubmitting ||
-    isPublishSubmitting
+    (!editorState && !walkthrough?.content) || isDraftSubmitting || isPublishSubmitting
 
   const handleSubmit = async (status: WalkthroughStatus.DRAFT | WalkthroughStatus.PUBLISHED) => {
     const content = editorState ?? walkthrough?.content
     if (!content) return
+    if (!title.trim()) {
+      setTitleError(true)
+      titleRef.current?.focus()
+      sileo.error({ title: t('title_required') })
+      return
+    }
 
     const setLoading =
       status === WalkthroughStatus.DRAFT ? setIsDraftSubmitting : setIsPublishSubmitting
@@ -71,10 +75,15 @@ export const GameWalkthroughEdit = ({ walkthrough, gameId }: GameWalkthroughEdit
     <div className="flex flex-col gap-4">
       <Input
         value={title}
-        onChange={e => setTitle(e.target.value)}
+        onChange={e => {
+          setTitle(e.target.value)
+          if (titleError) setTitleError(false)
+        }}
         placeholder={t('title_placeholder')}
         size="lg"
         maxLength={50}
+        aria-invalid={titleError}
+        ref={titleRef}
       />
       <WalkthroughEditor
         walkthrough={walkthrough}

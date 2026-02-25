@@ -123,6 +123,7 @@
     "save_draft": "保存草稿",
     "publish": "发布",
     "save_success": "保存成功",
+    "title_required": "请输入攻略标题",
     "EditLayout": {
       "create": "创建攻略",
       "edit": "编辑攻略",
@@ -137,15 +138,15 @@
       "delete_confirm": "删除",
       "delete_success": "删除成功",
       "draft": "草稿",
-      "hidden": "已隐藏",
-      "edited": "已编辑"
+      "hidden": "待审核",
+      "editedAt": "编辑于"
     },
     "Detail": {
       "back": "返回",
       "edit": "编辑",
-      "edited": "已编辑",
+      "editedAt": "编辑于",
       "draft": "草稿",
-      "hidden": "已隐藏",
+      "hidden": "待审核",
       "draft_notice": "这篇攻略是草稿，仅对你可见。"
     }
   },

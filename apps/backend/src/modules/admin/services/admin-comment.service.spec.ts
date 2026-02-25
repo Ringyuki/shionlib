@@ -1,7 +1,7 @@
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { ActivityType } from '../../activity/dto/create-activity.dto'
 import { MessageTone, MessageType } from '../../message/dto/req/send-message.req.dto'
-import { OMNI_MODERATION_JOB } from '../../moderate/constants/moderation.constants'
+import { OMNI_COMMENT_MODERATION_JOB } from '../../moderate/constants/moderation.constants'
 import { AdminCommentService } from './admin-comment.service'
 
 describe('AdminCommentService', () => {
@@ -380,6 +380,6 @@ describe('AdminCommentService', () => {
     await service.rescanComment(1)
 
     expect(prisma.comment.update).toHaveBeenCalledWith({ where: { id: 1 }, data: { status: 2 } })
-    expect(moderationQueue.add).toHaveBeenCalledWith(OMNI_MODERATION_JOB, { commentId: 1 })
+    expect(moderationQueue.add).toHaveBeenCalledWith(OMNI_COMMENT_MODERATION_JOB, { commentId: 1 })
   })
 })

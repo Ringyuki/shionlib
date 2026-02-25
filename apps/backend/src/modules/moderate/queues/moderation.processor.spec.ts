@@ -4,7 +4,7 @@ jest.mock('openai/helpers/zod', () => ({
 
 import { ModerationProcessor } from './moderation.processor'
 import { ModerationDecision } from '../enums/decisions.enum'
-import { LLM_MODERATION_JOB, LLM_MODERATION_MODEL } from '../constants/moderation.constants'
+import { LLM_COMMENT_MODERATION_JOB, LLM_MODERATION_MODEL } from '../constants/moderation.constants'
 import { MessageTone, MessageType } from '../../message/dto/req/send-message.req.dto'
 
 const CATEGORY_KEYS = [
@@ -84,9 +84,9 @@ describe('ModerationProcessor', () => {
     const { processor, prismaService, logger, openaiService } = makeProcessor()
     prismaService.comment.findUnique.mockResolvedValue(null)
 
-    await expect(processor.processOmniModeration({ data: { commentId: 42 } } as any)).resolves.toBe(
-      undefined,
-    )
+    await expect(
+      processor.processCommentOmniModeration({ data: { commentId: 42 } } as any),
+    ).resolves.toBe(undefined)
 
     expect(logger.warn).toHaveBeenCalledWith('comment 42 not found, skip')
     expect(openaiService.moderate).not.toHaveBeenCalled()
@@ -113,7 +113,7 @@ describe('ModerationProcessor', () => {
     const moderation = createModeration('harassment', 0.01)
     openaiService.moderate.mockResolvedValue({ results: [moderation] })
 
-    const result = await processor.processOmniModeration({ data: { commentId: 11 } } as any)
+    const result = await processor.processCommentOmniModeration({ data: { commentId: 11 } } as any)
 
     expect(result).toBe(moderation)
     expect(openaiService.moderate).toHaveBeenCalledWith('omni-moderation-latest', 'Hello World')
@@ -160,7 +160,7 @@ describe('ModerationProcessor', () => {
     const moderation = createModeration('hate', 0.2)
     openaiService.moderate.mockResolvedValue({ results: [moderation] })
 
-    await processor.processOmniModeration({ data: { commentId: 15 } } as any)
+    await processor.processCommentOmniModeration({ data: { commentId: 15 } } as any)
 
     expect(tx.moderation_events.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -173,7 +173,7 @@ describe('ModerationProcessor', () => {
     expect(tx.comment.update).not.toHaveBeenCalled()
     expect(activityService.create).not.toHaveBeenCalled()
     expect(messageService.send).not.toHaveBeenCalled()
-    expect(moderationQueue.add).toHaveBeenCalledWith(LLM_MODERATION_JOB, { commentId: 15 })
+    expect(moderationQueue.add).toHaveBeenCalledWith(LLM_COMMENT_MODERATION_JOB, { commentId: 15 })
   })
 
   it('blocks comment in omni moderation and sends system notice', async () => {
@@ -190,7 +190,7 @@ describe('ModerationProcessor', () => {
     const moderation = createModeration('violence', 0.95)
     openaiService.moderate.mockResolvedValue({ results: [moderation] })
 
-    await processor.processOmniModeration({ data: { commentId: 21 } } as any)
+    await processor.processCommentOmniModeration({ data: { commentId: 21 } } as any)
 
     expect(tx.moderation_events.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -216,9 +216,9 @@ describe('ModerationProcessor', () => {
     const { processor, prismaService, logger, openaiService } = makeProcessor()
     prismaService.comment.findUnique.mockResolvedValue(null)
 
-    await expect(processor.processLlmModeration({ data: { commentId: 33 } } as any)).resolves.toBe(
-      undefined,
-    )
+    await expect(
+      processor.processCommentLlmModeration({ data: { commentId: 33 } } as any),
+    ).resolves.toBe(undefined)
 
     expect(logger.warn).toHaveBeenCalledWith('comment 33 not found, skip')
     expect(openaiService.parseResponse).not.toHaveBeenCalled()
@@ -237,9 +237,9 @@ describe('ModerationProcessor', () => {
     })
     openaiService.parseResponse.mockResolvedValue({ output_parsed: null })
 
-    await expect(processor.processLlmModeration({ data: { commentId: 40 } } as any)).resolves.toBe(
-      undefined,
-    )
+    await expect(
+      processor.processCommentLlmModeration({ data: { commentId: 40 } } as any),
+    ).resolves.toBe(undefined)
 
     expect(logger.warn).toHaveBeenCalledWith('moderation event for comment 40 not found, skip')
   })
@@ -266,7 +266,7 @@ describe('ModerationProcessor', () => {
       },
     })
 
-    const result = await processor.processLlmModeration({ data: { commentId: 50 } } as any)
+    const result = await processor.processCommentLlmModeration({ data: { commentId: 50 } } as any)
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -325,7 +325,7 @@ describe('ModerationProcessor', () => {
       },
     })
 
-    await processor.processLlmModeration({ data: { commentId: 51 } } as any)
+    await processor.processCommentLlmModeration({ data: { commentId: 51 } } as any)
 
     expect(tx.comment.update).toHaveBeenCalledWith({ where: { id: 51 }, data: { status: 3 } })
     expect(messageService.send).toHaveBeenCalledWith(

@@ -123,6 +123,7 @@
     "save_draft": "下書きを保存",
     "publish": "公開する",
     "save_success": "保存しました",
+    "title_required": "タイトルを入力してください",
     "EditLayout": {
       "create": "攻略を作成",
       "edit": "攻略を編集",
@@ -137,15 +138,15 @@
       "delete_confirm": "削除",
       "delete_success": "削除しました",
       "draft": "下書き",
-      "hidden": "非表示",
-      "edited": "編集済み"
+      "hidden": "審査待ち",
+      "editedAt": "編集日時"
     },
     "Detail": {
       "back": "戻る",
       "edit": "編集",
-      "edited": "編集済み",
+      "editedAt": "編集日時",
       "draft": "下書き",
-      "hidden": "非表示",
+      "hidden": "審査待ち",
       "draft_notice": "この攻略は下書きです。あなただけに表示されています。"
     }
   },

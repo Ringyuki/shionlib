@@ -5,5 +5,12 @@
       "Content": "你发布的评论未通过审核，原因：{top_category}。请修改评论内容后重试。",
       "ReviewContent": "你发布的评论未通过审核，原因：{top_category}, {reason}, 关键片段：{evidence}。请修改评论内容后重试。"
     }
+  },
+  "Walkthrough": {
+    "Block": {
+      "Title": "攻略未通过审核",
+      "ReviewContent": "你发布的攻略《{walkthrough_title}》未通过审核，原因：{top_category}, {reason}, 关键片段：{evidence}。请修改攻略内容后重新发布。",
+      "LinkText": "查看攻略"
+    }
   }
 }

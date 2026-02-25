@@ -28,13 +28,14 @@ export const WalkthroughEditor = ({
   isSubmitDisabled,
 }: WalkthroughEditorProps) => {
   const t = useTranslations('Components.Game.Walkthrough')
-  const { hide } = useScrollToTopControl()
+  const { setDisplayMode } = useScrollToTopControl()
   useEffect(() => {
-    hide()
-  }, [hide])
+    setDisplayMode('hide')
+    return () => setDisplayMode('auto')
+  }, [setDisplayMode])
 
   return (
-    <div className="w-full min-w-0 bg-background border rounded-md">
+    <div className="w-full min-w-0 bg-background rounded-md">
       <Editor
         CustomPlugins={Plugins}
         editorSerializedState={walkthrough?.content}

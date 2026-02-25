@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common'
+import { InjectQueue } from '@nestjs/bull'
+import { Queue } from 'bull'
 import { PrismaService } from '../../../prisma.service'
 import { LexicalRendererService } from '../../render/services/lexical-renderer.service'
 import { CreateWalkthroughReqDto } from '../dto/req/create-walkthrough.req.dto'
@@ -12,6 +14,10 @@ import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { Prisma, WalkthroughStatus } from '@prisma/client'
 import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
 import { WalkthroughListItemResDto } from '../dto/res/walkthrough-list.res.dto'
+import {
+  LLM_WALKTHROUGH_MODERATION_JOB,
+  MODERATION_QUEUE,
+} from '../../moderate/constants/moderation.constants'
 
 const WALKTHROUGH_SELECT = {
   id: true,
@@ -43,6 +49,7 @@ export class WalkthroughService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly renderService: LexicalRendererService,
+    @InjectQueue(MODERATION_QUEUE) private readonly moderationQueue: Queue,
   ) {}
 
   async create(dto: CreateWalkthroughReqDto, req: RequestWithUser) {
@@ -55,17 +62,21 @@ export class WalkthroughService {
     }
 
     const html = await this.renderService.toHtml(dto.content as SerializedEditorState)
+    const status =
+      dto.status === WalkthroughStatus.PUBLISHED ? WalkthroughStatus.HIDDEN : dto.status
     const walkthrough = await this.prisma.walkthrough.create({
       data: {
         game_id: dto.game_id,
         title: dto.title,
         content: dto.content,
-        status: dto.status,
+        status,
         creator_id: req.user.sub,
         html,
       },
       select: WALKTHROUGH_SELECT,
     })
+
+    await this.enqueueModerationIfPublished(walkthrough.id, dto.status)
 
     return walkthrough
   }
@@ -82,16 +93,21 @@ export class WalkthroughService {
     }
 
     const html = await this.renderService.toHtml(dto.content as SerializedEditorState)
+    const status =
+      dto.status === WalkthroughStatus.PUBLISHED ? WalkthroughStatus.HIDDEN : dto.status
     const updated = await this.prisma.walkthrough.update({
       where: { id },
       data: {
         title: dto.title,
         content: dto.content,
-        status: dto.status,
+        status,
         html,
+        edited: true,
       },
       select: WALKTHROUGH_SELECT,
     })
+
+    await this.enqueueModerationIfPublished(updated.id, dto.status)
 
     return updated
   }
@@ -144,18 +160,19 @@ export class WalkthroughService {
       AND: [],
     }
 
-    if (req.user.role > ShionlibUserRoles.USER) {
-      where.AND!.push({
-        status: { in: [WalkthroughStatus.PUBLISHED, WalkthroughStatus.DRAFT] },
-      })
-    } else if (req.user.sub) {
-      where.AND!.push({
-        status: { not: WalkthroughStatus.DELETED },
-        OR: [{ status: WalkthroughStatus.PUBLISHED }, { creator_id: req.user.sub }],
-      })
-    } else {
+    if (!req.user.sub) {
       where.AND!.push({
         status: WalkthroughStatus.PUBLISHED,
+      })
+    } else {
+      const publicVisibleStatuses =
+        req.user.role > ShionlibUserRoles.USER
+          ? [WalkthroughStatus.PUBLISHED, WalkthroughStatus.DRAFT]
+          : [WalkthroughStatus.PUBLISHED]
+
+      where.AND!.push({
+        status: { not: WalkthroughStatus.DELETED },
+        OR: [{ status: { in: publicVisibleStatuses } }, { creator_id: req.user.sub }],
       })
     }
 
@@ -194,5 +211,13 @@ export class WalkthroughService {
         currentPage: page,
       },
     }
+  }
+
+  private async enqueueModerationIfPublished(id: number, status: WalkthroughStatus) {
+    if (status !== WalkthroughStatus.PUBLISHED) return
+
+    await this.moderationQueue.add(LLM_WALKTHROUGH_MODERATION_JOB, {
+      walkthroughId: id,
+    })
   }
 }

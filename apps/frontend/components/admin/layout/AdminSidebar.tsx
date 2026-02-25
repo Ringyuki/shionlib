@@ -11,6 +11,7 @@ import {
   ShieldAlert,
   Biohazard,
   Gamepad2,
+  ScrollText,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -35,6 +36,7 @@ const sidebarItems: SidebarItem[] = [
   { key: 'users', icon: Users, href: '/admin/users' },
   { key: 'games', icon: Gamepad2, href: '/admin/games' },
   { key: 'comments', icon: MessageSquare, href: '/admin/comments' },
+  { key: 'walkthroughs', icon: ScrollText, href: '/admin/walkthroughs' },
   { key: 'reports', icon: ShieldAlert, href: '/admin/reports' },
   { key: 'malwareScans', icon: Biohazard, href: '/admin/malware-scans' },
   // { key: 'characters', icon: Users, href: '/admin/characters' },

@@ -18,7 +18,7 @@ import { MessageService } from '../../message/services/message.service'
 import { MessageTone, MessageType } from '../../message/dto/req/send-message.req.dto'
 import {
   MODERATION_QUEUE,
-  OMNI_MODERATION_JOB,
+  OMNI_COMMENT_MODERATION_JOB,
 } from '../../moderate/constants/moderation.constants'
 
 @Injectable()
@@ -114,7 +114,7 @@ export class CommentServices {
       }
     })
 
-    await this.moderationQueue.add(OMNI_MODERATION_JOB, { commentId: result.id })
+    await this.moderationQueue.add(OMNI_COMMENT_MODERATION_JOB, { commentId: result.id })
     return result
   }
 
@@ -163,7 +163,7 @@ export class CommentServices {
       },
     })
 
-    await this.moderationQueue.add(OMNI_MODERATION_JOB, { commentId: id })
+    await this.moderationQueue.add(OMNI_COMMENT_MODERATION_JOB, { commentId: id })
     return comment
   }
 

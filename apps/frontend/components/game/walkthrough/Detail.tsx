@@ -67,7 +67,11 @@ export const WalkthroughDetail = ({ walkthrough, gameId }: WalkthroughDetailProp
             <span>{walkthrough.creator.name}</span>
           </div>
           <span>{timeFromNow(walkthrough.created, locale)}</span>
-          {walkthrough.edited && <span className="text-muted-foreground/60">{t('edited')}</span>}
+          {walkthrough.edited && (
+            <span className="text-muted-foreground">
+              {t('editedAt')} {timeFromNow(walkthrough.updated, locale)}
+            </span>
+          )}
           {walkthrough.status === WalkthroughStatus.DRAFT && (
             <Badge intent="secondary" appearance="solid">
               {t('draft')}

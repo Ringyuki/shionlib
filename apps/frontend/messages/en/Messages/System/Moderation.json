@@ -5,5 +5,12 @@
       "Content": "Your comment was not passed moderation, reason: {top_category}. Please modify the comment content and try again.",
       "ReviewContent": "Your comment was not passed moderation, reason: {top_category}, {reason}, key fragment: {evidence}. Please modify the comment content and try again."
     }
+  },
+  "Walkthrough": {
+    "Block": {
+      "Title": "Walkthrough not passed moderation",
+      "ReviewContent": "Your walkthrough \"{walkthrough_title}\" was not passed moderation, reason: {top_category}, {reason}, key fragment: {evidence}. Please revise the walkthrough and publish again.",
+      "LinkText": "Open walkthrough"
+    }
   }
 }

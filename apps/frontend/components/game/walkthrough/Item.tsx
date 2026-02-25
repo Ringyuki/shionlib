@@ -113,7 +113,9 @@ export const GameWalkthroughItem = ({ walkthrough, gameId }: GameWalkthroughItem
                 {timeFromNow(walkthrough.created, locale)}
               </span>
               {walkthrough.edited && (
-                <span className="text-xs text-muted-foreground/60">{t('edited')}</span>
+                <span className="text-xs text-muted-foreground">
+                  {t('editedAt')} {timeFromNow(walkthrough.updated, locale)}
+                </span>
               )}
               {walkthrough.status === WalkthroughStatus.DRAFT && (
                 <Badge intent="secondary" appearance="solid">
