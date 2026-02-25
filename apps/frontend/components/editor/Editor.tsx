@@ -22,7 +22,7 @@ const editorConfig: InitialConfigType = {
 
 interface EditorProps {
   CustomPlugins?: Plugin
-  CustomPluginProps?: PluginProps
+  CustomPluginProps?: PluginProps & Record<string, unknown>
   editorState?: EditorState
   editorSerializedState?: SerializedEditorState
   onChange?: (editorState: EditorState) => void

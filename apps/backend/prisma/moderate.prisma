@@ -15,8 +15,11 @@ model moderation_events {
   reason String? @db.VarChar(2550)
   evidence     String? @db.VarChar(1000)  // key fragments that support the decision
 
-  comment_id Int
-  comment Comment @relation("comment_moderate", fields: [comment_id], references: [id], onDelete: Cascade)
+  comment_id Int?
+  comment Comment? @relation("comment_moderate", fields: [comment_id], references: [id], onDelete: Cascade)
+
+  walkthrough_id Int?
+  walkthrough Walkthrough? @relation("walkthrough_moderate", fields: [walkthrough_id], references: [id], onDelete: Cascade)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

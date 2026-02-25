@@ -96,9 +96,7 @@ export class PotatoVNGameMappingService {
       cnName: game.title_zh,
       description: game.intro_zh || game.intro_jp || game.intro_en,
       tags: game.tags,
-      releasedDateTimeStamp: game.release_date
-        ? new Date(game.release_date).getTime() / 1000
-        : null,
+      releaseDateTimeStamp: game.release_date ? new Date(game.release_date).getTime() / 1000 : null,
       playType: 0,
       ...(imageOssLoc ? { imageLoc: imageOssLoc } : {}),
     }

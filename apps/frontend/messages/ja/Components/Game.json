@@ -42,6 +42,7 @@
   },
   "Description": {
     "GameCharacter": {
+      "introduction": "キャラクター",
       "noCharacters": "キャラクター情報がありません"
     },
     "GameCharacterItem": {
@@ -112,6 +113,40 @@
       "sound_director": "音響監督",
       "animation_production": "アニメーション制作",
       "programming": "プログラミング"
+    }
+  },
+  "Walkthrough": {
+    "walkthroughs": "攻略",
+    "no_walkthroughs": "攻略なし",
+    "create": "攻略を作成",
+    "title_placeholder": "攻略のタイトルを入力...",
+    "save_draft": "下書きを保存",
+    "publish": "公開する",
+    "save_success": "保存しました",
+    "EditLayout": {
+      "create": "攻略を作成",
+      "edit": "攻略を編集",
+      "backToWalkthrough": "攻略ページに戻る"
+    },
+    "Item": {
+      "edit": "編集",
+      "delete": "削除",
+      "delete_title": "攻略を削除",
+      "delete_description": "この攻略を削除してもよろしいですか？この操作は取り消せません。",
+      "cancel": "キャンセル",
+      "delete_confirm": "削除",
+      "delete_success": "削除しました",
+      "draft": "下書き",
+      "hidden": "非表示",
+      "edited": "編集済み"
+    },
+    "Detail": {
+      "back": "戻る",
+      "edit": "編集",
+      "edited": "編集済み",
+      "draft": "下書き",
+      "hidden": "非表示",
+      "draft_notice": "この攻略は下書きです。あなただけに表示されています。"
     }
   },
   "Upload": {

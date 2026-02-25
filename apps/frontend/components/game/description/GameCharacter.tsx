@@ -24,6 +24,10 @@ export const GameCharacter = ({ characters }: GameCharacterProps) => {
 
   return (
     <div className="flex flex-col gap-4 w-full">
+      <h2 className="flex items-center gap-4 text-lg font-bold">
+        <div className="w-1 h-6 bg-primary rounded" />
+        <span>{t('introduction')}</span>
+      </h2>
       {sorted.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-4">
           {sorted.map(character => (

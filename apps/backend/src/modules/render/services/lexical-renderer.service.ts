@@ -37,11 +37,11 @@ export class LexicalRendererService {
           'code',
         ]),
         allowedAttributes: {
+          '*': ['class', 'style'],
           a: ['href', 'name', 'target', 'rel'],
           img: ['src', 'alt', 'title', 'width', 'height', 'loading'],
           code: ['class', 'data-gutter', 'data-highlight-language', 'data-language', 'spellcheck'],
           pre: ['class', 'spellcheck', 'data-language', 'data-gutter', 'data-highlight-language'],
-          span: ['class', 'style'],
         },
         allowedStyles: {
           '*': {

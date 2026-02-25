@@ -140,4 +140,8 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
 
   // 55
   [ShionBizCode.PVN_GAME_MAPPING_NOT_FOUND]: HttpStatus.NOT_FOUND,
+
+  // 56
+  [ShionBizCode.WALKTHROUGH_NOT_FOUND]: HttpStatus.NOT_FOUND,
+  [ShionBizCode.WALKTHROUGH_NOT_OWNER]: HttpStatus.FORBIDDEN,
 } as const satisfies Record<ShionBizCode, HttpStatus>

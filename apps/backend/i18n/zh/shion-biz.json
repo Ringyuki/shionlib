@@ -115,5 +115,8 @@
   "PVN_BINDING_ALREADY_EXISTS": "已绑定 PotatoVN 账户",
   "PVN_BINDING_AUTH_FAILED": "PotatoVN 认证失败，请检查账号或密码",
 
-  "PVN_GAME_MAPPING_NOT_FOUND": "该游戏不在你的 PotatoVN 库中"
+  "PVN_GAME_MAPPING_NOT_FOUND": "该游戏不在你的 PotatoVN 库中",
+
+  "WALKTHROUGH_NOT_FOUND": "攻略不存在",
+  "WALKTHROUGH_NOT_OWNER": "你没有权限修改该攻略"
 }

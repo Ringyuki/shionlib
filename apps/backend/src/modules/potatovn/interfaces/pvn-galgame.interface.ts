@@ -13,7 +13,7 @@ export interface PvnGalgame {
   imageUrl: string | null
   headerImageUrl: string | null
   tags: string[]
-  releasedDateTimeStamp: number | null
+  releaseDateTimeStamp: number | null
   totalPlayTime: number
   playTime: PvnPlayTime[]
   playType: number
@@ -29,7 +29,7 @@ export interface PvnGalgameUpdatePayload {
   cnName?: string
   description?: string
   tags?: string[]
-  releasedDateTimeStamp?: number | null
+  releaseDateTimeStamp?: number | null
   playType?: number
   myRate?: number
   comment?: string

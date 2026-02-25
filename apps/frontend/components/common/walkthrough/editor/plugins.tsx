@@ -26,9 +26,7 @@ import { SubmitPlugin } from '@/components/editor/libs/plugins/actions/submit-pl
 import { CharacterLimitPlugin } from '@/components/editor/libs/plugins/actions/character-limit-plugin'
 import { ClearEditorActionPlugin } from '@/components/editor/libs/plugins/actions/clear-editor-plugin'
 import { EditModeTogglePlugin } from '@/components/editor/libs/plugins/actions/edit-mode-toggle-plugin'
-import { MarkdownTogglePlugin } from '@/components/editor/libs/plugins/actions/markdown-toggle-plugin'
 import { MaxLengthPlugin } from '@/components/editor/libs/plugins/actions/max-length-plugin'
-import { TreeViewPlugin } from '@/components/editor/libs/plugins/actions/tree-view-plugin'
 import { AutoLinkPlugin } from '@/components/editor/libs/plugins/auto-link-plugin'
 import { CodeActionMenuPlugin } from '@/components/editor/libs/plugins/code-action-menu-plugin'
 import { CodeHighlightPlugin } from '@/components/editor/libs/plugins/code-highlight-plugin'
@@ -80,8 +78,10 @@ import { IMAGE } from '@/components/editor/libs/transformers/markdown-image-tran
 import { TABLE } from '@/components/editor/libs/transformers/markdown-table-transformer'
 import { Separator } from '@/components/shionui/Separator'
 import { Kbd } from '@/components/shionui/Kbd'
+import { Button } from '@/components/shionui/Button'
 import { useTranslations } from 'next-intl'
 import { Plugin } from '@/components/editor/interfaces/plugin'
+import { ScrollArea } from '@/components/shionui/ScrollArea'
 
 const maxLength = 50000
 
@@ -93,6 +93,9 @@ interface PluginsProps {
   isSubmitDisabled?: boolean
   submitLabel?: string | React.ReactNode
   clearSignal?: number
+  onDraft?: () => void
+  isDraftSubmitting?: boolean
+  draftLabel?: string | React.ReactNode
 }
 
 export const Plugins: Plugin<PluginsProps> = ({
@@ -103,6 +106,9 @@ export const Plugins: Plugin<PluginsProps> = ({
   isSubmitting,
   isSubmitDisabled,
   clearSignal,
+  onDraft,
+  isDraftSubmitting,
+  draftLabel,
 }: PluginsProps) => {
   const t = useTranslations('Components.Editor.Plugins')
   const tPicker = useTranslations('Components.Editor.Picker')
@@ -125,7 +131,7 @@ export const Plugins: Plugin<PluginsProps> = ({
     <div className="relative">
       <ToolbarPlugin>
         {({ blockType }) => (
-          <div className="vertical-align-middle sticky top-18 topbar:top-22 z-10 flex items-center gap-2 overflow-auto border-b p-1 bg-background">
+          <div className="vertical-align-middle sticky top-18 topbar:top-22 z-10 flex items-center gap-2 overflow-auto border-b p-1 bg-background rounded-t-md">
             <HistoryToolbarPlugin />
             <Separator orientation="vertical" className="h-7!" />
             <BlockFormatDropDown>
@@ -172,7 +178,7 @@ export const Plugins: Plugin<PluginsProps> = ({
               <div className="" ref={onRef}>
                 <ContentEditable
                   placeholder={placeholder || initialPlaceholder}
-                  className="ContentEditable__root relative block min-h-64 px-8 py-4 text-base focus:outline-none"
+                  className="ContentEditable__root relative block min-h-128 px-8 py-4 text-base bg-background focus:outline-none"
                 />
               </div>
             </div>
@@ -252,21 +258,33 @@ export const Plugins: Plugin<PluginsProps> = ({
         <ListMaxIndentLevelPlugin />
       </div>
       <ActionsPlugin>
-        <div className="clear-both flex items-center justify-between gap-2 overflow-auto border-t p-1 sticky bottom-0 bg-background">
+        <div className="clear-both flex items-center justify-between gap-2 overflow-auto border-t p-1 sticky bottom-0 bg-background rounded-b-md">
           <div className="flex flex-1 justify-start">
             <MaxLengthPlugin maxLength={maxLength} />
             <CharacterLimitPlugin maxLength={maxLength} charset="UTF-16" />
           </div>
-          <div className="flex flex-1 justify-end">
+          <div className="flex flex-1 justify-end gap-1">
             <EditModeTogglePlugin />
             <ClearEditorActionPlugin />
             <ClearEditorPlugin />
+            {onDraft && (
+              <Button
+                size="sm"
+                intent="secondary"
+                appearance="outline"
+                onClick={onDraft}
+                loading={isDraftSubmitting}
+                disabled={isSubmitDisabled || isSubmitting}
+              >
+                {draftLabel}
+              </Button>
+            )}
             {onSubmit && (
               <SubmitPlugin
                 onSubmit={onSubmit}
                 label={submitLabel}
                 isLoading={isSubmitting}
-                disabled={isSubmitDisabled}
+                disabled={isSubmitDisabled || isDraftSubmitting}
               />
             )}
           </div>

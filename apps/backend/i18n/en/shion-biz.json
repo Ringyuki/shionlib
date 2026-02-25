@@ -115,5 +115,8 @@
   "PVN_BINDING_ALREADY_EXISTS": "PotatoVN account is already bound",
   "PVN_BINDING_AUTH_FAILED": "PotatoVN authentication failed, please check your credentials",
 
-  "PVN_GAME_MAPPING_NOT_FOUND": "this game is not in your PotatoVN library"
+  "PVN_GAME_MAPPING_NOT_FOUND": "this game is not in your PotatoVN library",
+
+  "WALKTHROUGH_NOT_FOUND": "walkthrough not found",
+  "WALKTHROUGH_NOT_OWNER": "you don't have permission to modify this walkthrough"
 }
