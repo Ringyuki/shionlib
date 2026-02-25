@@ -3,6 +3,8 @@ import { InjectQueue } from '@nestjs/bull'
 import { Queue } from 'bull'
 import { PrismaService } from '../../../prisma.service'
 import { LexicalRendererService } from '../../render/services/lexical-renderer.service'
+import { ActivityService } from '../../activity/services/activity.service'
+import { ActivityType } from '../../activity/dto/create-activity.dto'
 import { CreateWalkthroughReqDto } from '../dto/req/create-walkthrough.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { SerializedEditorState } from 'lexical'
@@ -51,6 +53,7 @@ export class WalkthroughService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly renderService: LexicalRendererService,
+    private readonly activityService: ActivityService,
     @InjectQueue(MODERATION_QUEUE) private readonly moderationQueue: Queue,
   ) {}
 
@@ -81,6 +84,13 @@ export class WalkthroughService {
         lang: lang === 'unknown' ? null : lang,
       },
       select: WALKTHROUGH_SELECT,
+    })
+
+    await this.activityService.create({
+      type: ActivityType.WALKTHROUGH_CREATE,
+      user_id: req.user.sub,
+      game_id: dto.game_id,
+      walkthrough_id: walkthrough.id,
     })
 
     await this.enqueueModerationIfPublished(walkthrough.id, dto.status)

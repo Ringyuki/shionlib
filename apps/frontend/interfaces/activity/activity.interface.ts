@@ -9,6 +9,7 @@ export enum ActivityType {
   FILE_CHECK_ENCRYPTED = 'FILE_CHECK_ENCRYPTED',
   FILE_CHECK_HARMFUL = 'FILE_CHECK_HARMFUL',
   GAME_CREATE = 'GAME_CREATE',
+  WALKTHROUGH_CREATE = 'WALKTHROUGH_CREATE',
   GAME_EDIT = 'GAME_EDIT',
   DEVELOPER_EDIT = 'DEVELOPER_EDIT',
   CHARACTER_EDIT = 'CHARACTER_EDIT',
@@ -42,6 +43,10 @@ export interface Activity {
     title_jp: string
     title_zh: string
     title_en: string
+  }
+  walkthrough?: {
+    id: number
+    title: string
   }
   comment?: {
     id: number

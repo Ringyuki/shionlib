@@ -74,6 +74,11 @@
       "Create": {
         "createdPrefix": "作成しました",
         "game": "ゲーム"
+      },
+      "WalkthroughCreate": {
+        "prefix": "",
+        "game": "ゲーム",
+        "suffix": "で攻略を作成"
       }
     }
   },

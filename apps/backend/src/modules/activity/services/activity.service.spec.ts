@@ -27,6 +27,7 @@ describe('ActivityService', () => {
       user_id: 2,
       comment_id: 3,
       game_id: 4,
+      walkthrough_id: 44,
       edit_record_id: 5,
       developer_id: 6,
       character_id: 7,
@@ -43,6 +44,7 @@ describe('ActivityService', () => {
         user_id: 2,
         comment_id: 3,
         game_id: 4,
+        walkthrough_id: 44,
         edit_record_id: 5,
         developer_id: 6,
         character_id: 7,
@@ -88,6 +90,7 @@ describe('ActivityService', () => {
         type: 11,
         user: { id: 101, name: 'u1', avatar: 'a1' },
         game: { id: 201, title_jp: 'jp1', title_zh: 'zh1', title_en: 'en1' },
+        walkthrough: { id: 211, title: 'guide-1' },
         comment: { id: 301, html: '<p>1</p>' },
         developer: { id: 401, name: 'dev1' },
         character: { id: 501, name_jp: 'cjp1', name_zh: 'czh1', name_en: 'cen1' },
@@ -104,6 +107,7 @@ describe('ActivityService', () => {
         type: 12,
         user: { id: 102, name: 'u2', avatar: 'a2' },
         game: null,
+        walkthrough: null,
         comment: null,
         developer: null,
         character: null,
@@ -120,6 +124,7 @@ describe('ActivityService', () => {
         type: 13,
         user: { id: 103, name: 'u3', avatar: 'a3' },
         game: null,
+        walkthrough: null,
         comment: null,
         developer: null,
         character: null,
@@ -157,6 +162,11 @@ describe('ActivityService', () => {
       file_size: 22,
       file_status: 3,
       file_check_status: 2,
+    })
+
+    expect(result.items[0].walkthrough).toEqual({
+      id: 211,
+      title: 'guide-1',
     })
 
     expect(result.items[1].file).toEqual({

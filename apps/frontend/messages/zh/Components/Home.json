@@ -74,6 +74,11 @@
       "Create": {
         "createdPrefix": "创建了",
         "game": "游戏"
+      },
+      "WalkthroughCreate": {
+        "prefix": "在",
+        "game": "游戏",
+        "suffix": "下创建了攻略"
       }
     }
   },

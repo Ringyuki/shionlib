@@ -16,6 +16,7 @@ model Walkthrough {
   status WalkthroughStatus @default(DRAFT)
 
   moderates moderation_events[] @relation("walkthrough_moderate")
+  activities Activity[] @relation("walkthrough_activity")
 
   creator_id Int
   creator User @relation("user_walkthrough", fields: [creator_id], references: [id], onDelete: Cascade)

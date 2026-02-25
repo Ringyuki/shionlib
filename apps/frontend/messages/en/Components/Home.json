@@ -74,6 +74,11 @@
       "Create": {
         "createdPrefix": "Created",
         "game": "Game"
+      },
+      "WalkthroughCreate": {
+        "prefix": "In",
+        "game": "Game",
+        "suffix": "created walkthrough"
       }
     }
   },

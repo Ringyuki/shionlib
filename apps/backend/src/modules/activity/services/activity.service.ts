@@ -16,6 +16,7 @@ export class ActivityService {
       user_id,
       comment_id,
       game_id,
+      walkthrough_id,
       edit_record_id,
       developer_id,
       character_id,
@@ -31,6 +32,7 @@ export class ActivityService {
         type,
         user_id,
         game_id,
+        walkthrough_id,
         edit_record_id,
         comment_id,
         developer_id,
@@ -62,6 +64,12 @@ export class ActivityService {
             title_jp: true,
             title_zh: true,
             title_en: true,
+          },
+        },
+        walkthrough: {
+          select: {
+            id: true,
+            title: true,
           },
         },
         comment: {
@@ -113,6 +121,7 @@ export class ActivityService {
         type: a.type,
         user: a.user,
         game: a.game,
+        walkthrough: a.walkthrough,
         comment: a.comment,
         developer: a.developer,
         character: a.character,

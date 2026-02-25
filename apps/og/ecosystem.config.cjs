@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const path = require('path')
 
 const DEPLOY_DIR = process.env.DEPLOY_DIR

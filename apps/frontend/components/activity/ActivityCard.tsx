@@ -10,6 +10,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { Comment } from './activities/Comment'
 import { Edit } from './activities/Edit'
 import { Create } from './activities/Create'
+import { WalkthroughCreate } from './activities/WalkthroughCreate'
 import { fileActivityTypes } from './activities/constants/activity-feed'
 
 interface ActivityCardProps {
@@ -24,6 +25,7 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
     activity.type === ActivityType.COMMENT ||
     activity.type === ActivityType.FILE_UPLOAD_TO_SERVER ||
     activity.type === ActivityType.GAME_CREATE ||
+    activity.type === ActivityType.WALKTHROUGH_CREATE ||
     activity.type === ActivityType.GAME_EDIT ||
     activity.type === ActivityType.DEVELOPER_EDIT ||
     activity.type === ActivityType.CHARACTER_EDIT
@@ -71,6 +73,8 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
               return <Edit activity={activity} />
             case ActivityType.GAME_CREATE:
               return <Create activity={activity} />
+            case ActivityType.WALKTHROUGH_CREATE:
+              return <WalkthroughCreate activity={activity} />
           }
         })()}
       </CardContent>

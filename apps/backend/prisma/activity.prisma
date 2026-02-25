@@ -9,6 +9,7 @@ enum ActivityType {
   FILE_CHECK_ENCRYPTED
   FILE_CHECK_HARMFUL
   GAME_CREATE
+  WALKTHROUGH_CREATE
   GAME_EDIT
   DEVELOPER_EDIT
   CHARACTER_EDIT
@@ -23,6 +24,8 @@ model Activity {
   user              User                      @relation("user_activity", fields: [user_id], references: [id])
   game_id           Int?
   game              Game?                     @relation("game_activity", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  walkthrough_id    Int?
+  walkthrough       Walkthrough?              @relation("walkthrough_activity", fields: [walkthrough_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   edit_record_id    Int?
   edit_record       EditRecord?               @relation("edit_record_activity", fields: [edit_record_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   comment_id        Int?
@@ -41,5 +44,6 @@ model Activity {
   updated           DateTime                  @updatedAt
 
   @@index([created])
+  @@index([walkthrough_id, created])
   @@map("activities")
 }

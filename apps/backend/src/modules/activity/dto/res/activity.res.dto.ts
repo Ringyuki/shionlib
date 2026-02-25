@@ -14,6 +14,10 @@ export class ActivityResDto {
     title_zh: string
     title_en: string
   }
+  walkthrough?: {
+    id: number
+    title: string
+  }
   comment?: {
     id: number
     html: string

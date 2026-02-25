@@ -12,6 +12,7 @@ export enum ActivityType {
   FILE_CHECK_ENCRYPTED = 'FILE_CHECK_ENCRYPTED',
   FILE_CHECK_HARMFUL = 'FILE_CHECK_HARMFUL',
   GAME_CREATE = 'GAME_CREATE',
+  WALKTHROUGH_CREATE = 'WALKTHROUGH_CREATE',
   GAME_EDIT = 'GAME_EDIT',
   DEVELOPER_EDIT = 'DEVELOPER_EDIT',
   CHARACTER_EDIT = 'CHARACTER_EDIT',
@@ -48,6 +49,10 @@ export class CreateActivityReqDto {
   @IsOptional()
   @IsNumber({}, { message: ivm('validation.common.IS_NUMBER', { property: 'game_id' }) })
   game_id?: number
+
+  @IsOptional()
+  @IsNumber({}, { message: ivm('validation.common.IS_NUMBER', { property: 'walkthrough_id' }) })
+  walkthrough_id?: number
 
   @IsOptional()
   @IsNumber({}, { message: ivm('validation.common.IS_NUMBER', { property: 'edit_record_id' }) })

@@ -6,6 +6,7 @@ import { WalkthroughStatus } from '@prisma/client'
 import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { LLM_WALKTHROUGH_MODERATION_JOB } from '../../moderate/constants/moderation.constants'
+import { ActivityType } from '../../activity/dto/create-activity.dto'
 import { detectWalkthroughLanguageFromEditorState } from '../utils/language-detector.util'
 import { WalkthroughService } from './walkthrough.service'
 
@@ -28,6 +29,10 @@ describe('WalkthroughService', () => {
       toHtml: jest.fn(),
     }
 
+    const activityService = {
+      create: jest.fn().mockResolvedValue(undefined),
+    }
+
     const moderationQueue = {
       add: jest.fn().mockResolvedValue(undefined),
     }
@@ -35,6 +40,7 @@ describe('WalkthroughService', () => {
     const service = new WalkthroughService(
       prisma as any,
       renderService as any,
+      activityService as any,
       moderationQueue as any,
     )
 
@@ -42,6 +48,7 @@ describe('WalkthroughService', () => {
       service,
       prisma,
       renderService,
+      activityService,
       moderationQueue,
     }
   }
@@ -54,7 +61,7 @@ describe('WalkthroughService', () => {
   })
 
   it('create stores published walkthrough as hidden and enqueues llm moderation', async () => {
-    const { service, prisma, renderService, moderationQueue } = createService()
+    const { service, prisma, renderService, activityService, moderationQueue } = createService()
     prisma.game.findUnique.mockResolvedValue({ id: 9 })
     renderService.toHtml.mockResolvedValue('<p>guide</p>')
     prisma.walkthrough.create.mockResolvedValue({ id: 101, lang: 'zh' })
@@ -80,13 +87,19 @@ describe('WalkthroughService', () => {
         }),
       }),
     )
+    expect(activityService.create).toHaveBeenCalledWith({
+      type: ActivityType.WALKTHROUGH_CREATE,
+      user_id: 7,
+      game_id: 9,
+      walkthrough_id: 101,
+    })
     expect(moderationQueue.add).toHaveBeenCalledWith(LLM_WALKTHROUGH_MODERATION_JOB, {
       walkthroughId: 101,
     })
   })
 
   it('create throws when game does not exist', async () => {
-    const { service, prisma } = createService()
+    const { service, prisma, activityService } = createService()
     prisma.game.findUnique.mockResolvedValue(null)
 
     await expect(
@@ -102,6 +115,7 @@ describe('WalkthroughService', () => {
     ).rejects.toMatchObject({
       code: ShionBizCode.GAME_NOT_FOUND,
     })
+    expect(activityService.create).not.toHaveBeenCalled()
   })
 
   it('update stores published walkthrough as hidden and enqueues llm moderation', async () => {
@@ -177,7 +191,7 @@ describe('WalkthroughService', () => {
   })
 
   it('does not enqueue moderation for draft create', async () => {
-    const { service, prisma, renderService, moderationQueue } = createService()
+    const { service, prisma, renderService, activityService, moderationQueue } = createService()
     prisma.game.findUnique.mockResolvedValue({ id: 5 })
     renderService.toHtml.mockResolvedValue('<p>draft</p>')
     mockDetectLanguage.mockResolvedValueOnce('unknown')
@@ -201,6 +215,12 @@ describe('WalkthroughService', () => {
         }),
       }),
     )
+    expect(activityService.create).toHaveBeenCalledWith({
+      type: ActivityType.WALKTHROUGH_CREATE,
+      user_id: 3,
+      game_id: 5,
+      walkthrough_id: 88,
+    })
     expect(moderationQueue.add).not.toHaveBeenCalled()
   })
 
