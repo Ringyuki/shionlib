@@ -35,7 +35,7 @@ export const WalkthroughEditor = ({
   }, [setDisplayMode])
 
   return (
-    <div className="w-full min-w-0 bg-background rounded-md">
+    <div className="w-full min-w-0 rounded-md">
       <Editor
         CustomPlugins={Plugins}
         editorSerializedState={walkthrough?.content}

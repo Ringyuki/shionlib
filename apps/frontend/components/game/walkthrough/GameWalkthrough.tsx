@@ -5,7 +5,7 @@ import { GameWalkthroughList } from './List'
 import { useTranslations } from 'next-intl'
 import { Empty } from '@/components/common/content/Empty'
 import { Button } from '@/components/shionui/Button'
-import { Sparkles } from 'lucide-react'
+import { Footprints } from 'lucide-react'
 import { useRouter } from '@/i18n/navigation.client'
 
 interface GameWalkthroughProps {
@@ -28,7 +28,7 @@ export const GameWalkthrough = ({ walkthroughs, gameId }: GameWalkthroughProps) 
           <Button
             appearance="outline"
             onClick={() => router.push(`/game/${gameId}/walkthrough/edit`)}
-            renderIcon={<Sparkles />}
+            renderIcon={<Footprints />}
             loginRequired
           >
             {t('create')}
@@ -44,7 +44,7 @@ export const GameWalkthrough = ({ walkthroughs, gameId }: GameWalkthroughProps) 
             <Button
               loginRequired
               onClick={() => router.push(`/game/${gameId}/walkthrough/edit`)}
-              renderIcon={<Sparkles />}
+              renderIcon={<Footprints />}
             >
               {t('create')}
             </Button>

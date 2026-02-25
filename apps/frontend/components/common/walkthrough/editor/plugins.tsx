@@ -131,7 +131,7 @@ export const Plugins: Plugin<PluginsProps> = ({
     <div className="relative">
       <ToolbarPlugin>
         {({ blockType }) => (
-          <div className="vertical-align-middle sticky top-18 topbar:top-22 z-10 flex items-center gap-2 overflow-auto border-b p-1 bg-background rounded-t-md">
+          <div className="vertical-align-middle sticky top-18 topbar:top-22 z-10 flex items-center gap-2 overflow-auto border-b p-1 bg-card-soft rounded-t-md">
             <HistoryToolbarPlugin />
             <Separator orientation="vertical" className="h-7!" />
             <BlockFormatDropDown>
@@ -178,7 +178,7 @@ export const Plugins: Plugin<PluginsProps> = ({
               <div className="" ref={onRef}>
                 <ContentEditable
                   placeholder={placeholder || initialPlaceholder}
-                  className="ContentEditable__root relative block min-h-128 px-8 py-4 text-base bg-background focus:outline-none"
+                  className="ContentEditable__root relative block min-h-screen px-8 py-4 text-base bg-card-soft focus:outline-none"
                 />
               </div>
             </div>
@@ -258,7 +258,7 @@ export const Plugins: Plugin<PluginsProps> = ({
         <ListMaxIndentLevelPlugin />
       </div>
       <ActionsPlugin>
-        <div className="clear-both flex items-center justify-between gap-2 overflow-auto border-t p-1 sticky bottom-0 bg-background rounded-b-md">
+        <div className="clear-both flex items-center justify-between gap-2 overflow-auto border-t p-1 sticky bottom-0 bg-card-soft rounded-b-md">
           <div className="flex flex-1 justify-start">
             <MaxLengthPlugin maxLength={maxLength} />
             <CharacterLimitPlugin maxLength={maxLength} charset="UTF-16" />
@@ -269,7 +269,6 @@ export const Plugins: Plugin<PluginsProps> = ({
             <ClearEditorPlugin />
             {onDraft && (
               <Button
-                size="sm"
                 intent="secondary"
                 appearance="outline"
                 onClick={onDraft}

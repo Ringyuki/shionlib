@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { Heading } from 'lucide-react'
 import { SerializedEditorState } from 'lexical'
 import { Walkthrough, WalkthroughStatus } from '@/interfaces/walkthrough/walkthrough.interface'
 import { WalkthroughEditor } from '@/components/common/walkthrough/Editor'
@@ -80,10 +81,10 @@ export const GameWalkthroughEdit = ({ walkthrough, gameId }: GameWalkthroughEdit
           if (titleError) setTitleError(false)
         }}
         placeholder={t('title_placeholder')}
-        size="lg"
         maxLength={50}
         aria-invalid={titleError}
         ref={titleRef}
+        prefix={<Heading className="size-4.5 text-foreground" />}
       />
       <WalkthroughEditor
         walkthrough={walkthrough}

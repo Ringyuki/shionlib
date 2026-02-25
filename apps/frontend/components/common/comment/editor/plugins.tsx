@@ -104,7 +104,7 @@ export const Plugins: Plugin<PluginsProps> = ({
       <ToolbarPlugin>
         {({ blockType }) => (
           <ScrollArea
-            className="vertical-align-middle sticky top-0 z-10 flex items-center gap-2 border-b "
+            className="vertical-align-middle sticky top-0 z-10 flex items-center gap-2 border-b"
             scrollbarOrientation="horizontal"
             showScrollbar={false}
           >
