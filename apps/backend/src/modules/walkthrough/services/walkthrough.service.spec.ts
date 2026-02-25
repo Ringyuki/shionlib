@@ -4,6 +4,7 @@ jest.mock('../utils/language-detector.util', () => ({
 
 import { WalkthroughStatus } from '@prisma/client'
 import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
+import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { LLM_WALKTHROUGH_MODERATION_JOB } from '../../moderate/constants/moderation.constants'
 import { detectWalkthroughLanguageFromEditorState } from '../utils/language-detector.util'
 import { WalkthroughService } from './walkthrough.service'
@@ -84,6 +85,25 @@ describe('WalkthroughService', () => {
     })
   })
 
+  it('create throws when game does not exist', async () => {
+    const { service, prisma } = createService()
+    prisma.game.findUnique.mockResolvedValue(null)
+
+    await expect(
+      service.create(
+        {
+          game_id: 999,
+          title: 'No game',
+          content: { root: {} },
+          status: WalkthroughStatus.DRAFT,
+        } as any,
+        { user: { sub: 7 } } as any,
+      ),
+    ).rejects.toMatchObject({
+      code: ShionBizCode.GAME_NOT_FOUND,
+    })
+  })
+
   it('update stores published walkthrough as hidden and enqueues llm moderation', async () => {
     const { service, prisma, renderService, moderationQueue } = createService()
     prisma.walkthrough.findFirst.mockResolvedValue({
@@ -122,6 +142,40 @@ describe('WalkthroughService', () => {
     })
   })
 
+  it('update throws when walkthrough does not exist', async () => {
+    const { service, prisma } = createService()
+    prisma.walkthrough.findFirst.mockResolvedValue(null)
+
+    await expect(
+      service.update(
+        404,
+        { title: 'x', content: { root: {} }, status: WalkthroughStatus.DRAFT } as any,
+        { user: { sub: 1, role: ShionlibUserRoles.USER } } as any,
+      ),
+    ).rejects.toMatchObject({
+      code: ShionBizCode.WALKTHROUGH_NOT_FOUND,
+    })
+  })
+
+  it('update throws when user is not owner and not admin', async () => {
+    const { service, prisma } = createService()
+    prisma.walkthrough.findFirst.mockResolvedValue({
+      id: 22,
+      creator_id: 99,
+      status: WalkthroughStatus.DRAFT,
+    })
+
+    await expect(
+      service.update(
+        22,
+        { title: 'x', content: { root: {} }, status: WalkthroughStatus.DRAFT } as any,
+        { user: { sub: 1, role: ShionlibUserRoles.USER } } as any,
+      ),
+    ).rejects.toMatchObject({
+      code: ShionBizCode.WALKTHROUGH_NOT_OWNER,
+    })
+  })
+
   it('does not enqueue moderation for draft create', async () => {
     const { service, prisma, renderService, moderationQueue } = createService()
     prisma.game.findUnique.mockResolvedValue({ id: 5 })
@@ -148,6 +202,123 @@ describe('WalkthroughService', () => {
       }),
     )
     expect(moderationQueue.add).not.toHaveBeenCalled()
+  })
+
+  it('getById throws when walkthrough does not exist', async () => {
+    const { service, prisma } = createService()
+    prisma.walkthrough.findFirst.mockResolvedValue(null)
+
+    await expect(
+      service.getById(1, false, { user: { sub: 1, role: ShionlibUserRoles.USER } } as any),
+    ).rejects.toMatchObject({
+      code: ShionBizCode.WALKTHROUGH_NOT_FOUND,
+    })
+  })
+
+  it('getById rejects hidden walkthrough for non-owner non-admin', async () => {
+    const { service, prisma } = createService()
+    prisma.walkthrough.findFirst.mockResolvedValue({
+      id: 1,
+      status: WalkthroughStatus.HIDDEN,
+      creator: { id: 99 },
+    })
+
+    await expect(
+      service.getById(1, false, { user: { sub: 1, role: ShionlibUserRoles.USER } } as any),
+    ).rejects.toMatchObject({
+      code: ShionBizCode.WALKTHROUGH_NOT_OWNER,
+    })
+  })
+
+  it('getById returns hidden walkthrough for owner and passes withContent=true to select', async () => {
+    const { service, prisma } = createService()
+    const walkthrough = {
+      id: 1,
+      title: 'Route',
+      status: WalkthroughStatus.HIDDEN,
+      creator: { id: 7 },
+      content: { root: {} },
+    }
+    prisma.walkthrough.findFirst.mockResolvedValue(walkthrough)
+
+    await expect(
+      service.getById(1, true, { user: { sub: 7, role: ShionlibUserRoles.USER } } as any),
+    ).resolves.toBe(walkthrough)
+
+    expect(prisma.walkthrough.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 1, status: { not: WalkthroughStatus.DELETED } },
+        select: expect.objectContaining({
+          content: true,
+        }),
+      }),
+    )
+  })
+
+  it('getById returns published walkthrough for guest-like request and passes withContent=false', async () => {
+    const { service, prisma } = createService()
+    const walkthrough = {
+      id: 2,
+      status: WalkthroughStatus.PUBLISHED,
+      creator: { id: 99 },
+      content: false,
+    }
+    prisma.walkthrough.findFirst.mockResolvedValue(walkthrough)
+
+    await expect(
+      service.getById(2, false, { user: { sub: undefined, role: 0 } } as any),
+    ).resolves.toBe(walkthrough)
+
+    expect(prisma.walkthrough.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        select: expect.objectContaining({
+          content: false,
+        }),
+      }),
+    )
+  })
+
+  it('delete throws when walkthrough does not exist', async () => {
+    const { service, prisma } = createService()
+    prisma.walkthrough.findFirst.mockResolvedValue(null)
+
+    await expect(
+      service.delete(1, { user: { sub: 1, role: ShionlibUserRoles.USER } } as any),
+    ).rejects.toMatchObject({
+      code: ShionBizCode.WALKTHROUGH_NOT_FOUND,
+    })
+  })
+
+  it('delete throws when user is not owner and not admin', async () => {
+    const { service, prisma } = createService()
+    prisma.walkthrough.findFirst.mockResolvedValue({
+      id: 1,
+      creator_id: 9,
+      status: WalkthroughStatus.DRAFT,
+    })
+
+    await expect(
+      service.delete(1, { user: { sub: 1, role: ShionlibUserRoles.USER } } as any),
+    ).rejects.toMatchObject({
+      code: ShionBizCode.WALKTHROUGH_NOT_OWNER,
+    })
+  })
+
+  it('delete soft-deletes walkthrough for owner', async () => {
+    const { service, prisma } = createService()
+    prisma.walkthrough.findFirst.mockResolvedValue({
+      id: 1,
+      creator_id: 7,
+      status: WalkthroughStatus.DRAFT,
+    })
+    prisma.walkthrough.update.mockResolvedValue({ id: 1 })
+
+    await service.delete(1, { user: { sub: 7, role: ShionlibUserRoles.USER } } as any)
+
+    expect(prisma.walkthrough.update).toHaveBeenCalledWith({
+      where: { id: 1 },
+      data: { status: WalkthroughStatus.DELETED },
+    })
   })
 
   it('getListByGameId only shows published walkthroughs for guests', async () => {
