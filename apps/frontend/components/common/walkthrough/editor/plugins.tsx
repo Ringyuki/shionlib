@@ -263,7 +263,7 @@ export const Plugins: Plugin<PluginsProps> = ({
             <MaxLengthPlugin maxLength={maxLength} />
             <CharacterLimitPlugin maxLength={maxLength} charset="UTF-16" />
           </div>
-          <div className="flex flex-1 justify-end gap-1">
+          <div className="flex flex-1 justify-end items-center gap-1">
             <EditModeTogglePlugin />
             <ClearEditorActionPlugin />
             <ClearEditorPlugin />

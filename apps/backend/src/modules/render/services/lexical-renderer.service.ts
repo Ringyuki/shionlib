@@ -23,6 +23,7 @@ export class LexicalRendererService {
         html = $generateHtmlFromNodes(editor)
       })
       html = this.handleCodeBlocks(html, doc)
+      html = this.preserveNewlines(html)
 
       return sanitizeHtml(html, {
         allowedTags: sanitizeHtml.defaults.allowedTags.concat([
@@ -112,5 +113,19 @@ export class LexicalRendererService {
     })
 
     return container.innerHTML
+  }
+
+  // Converts \n in text content to <br> (pure string manipulation, no DOM dependency),
+  // and ensures empty <p> elements have a <br> so they take up visible height.
+  // pre/code blocks are skipped so their meaningful whitespace is untouched.
+  private preserveNewlines(rawHtml: string): string {
+    // Give empty paragraphs a <br> so they have height and don't collapse
+    let html = rawHtml.replace(/<p([^>]*)>\s*<\/p>/gi, '<p$1><br></p>')
+
+    // Split on pre/code blocks to skip them, then convert \n → <br> in the rest
+    const parts = html.split(/(<(?:pre|code)[\s\S]*?<\/(?:pre|code)>)/gi)
+    html = parts.map((chunk, i) => (i % 2 === 0 ? chunk.replace(/\n/g, '<br>') : chunk)).join('')
+
+    return html
   }
 }
