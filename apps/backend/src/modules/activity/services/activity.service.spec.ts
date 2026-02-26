@@ -83,13 +83,23 @@ describe('ActivityService', () => {
 
   it('getList returns mapped items with file fallback and pagination meta', async () => {
     const { service, prisma } = createService()
+    const req = { user: { content_limit: 2 } }
     ;(prisma.activity.count as jest.Mock).mockResolvedValue(5)
     ;(prisma.activity.findMany as jest.Mock).mockResolvedValue([
       {
         id: 1,
         type: 11,
         user: { id: 101, name: 'u1', avatar: 'a1' },
-        game: { id: 201, title_jp: 'jp1', title_zh: 'zh1', title_en: 'en1' },
+        game: {
+          id: 201,
+          title_jp: 'jp1',
+          title_zh: 'zh1',
+          title_en: 'en1',
+          intro_jp: 'ij1',
+          intro_zh: 'iz1',
+          intro_en: 'ie1',
+          covers: [],
+        },
         walkthrough: { id: 211, title: 'guide-1' },
         comment: { id: 301, html: '<p>1</p>' },
         developer: { id: 401, name: 'dev1' },
@@ -138,7 +148,7 @@ describe('ActivityService', () => {
       },
     ])
 
-    const result = await service.getList({ page: 2, pageSize: 2 } as any)
+    const result = await service.getList({ page: 2, pageSize: 2 } as any, req as any)
 
     expect(prisma.activity.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -154,6 +164,7 @@ describe('ActivityService', () => {
       itemsPerPage: 2,
       totalPages: 3,
       currentPage: 2,
+      content_limit: 2,
     })
 
     expect(result.items[0].file).toEqual({

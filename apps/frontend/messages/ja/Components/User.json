@@ -245,9 +245,22 @@
     },
     "HomeTabsNav": {
       "upload": "アップロード",
+      "walkthrough": "攻略",
       "comment": "コメント",
       "favorite": "お気に入り",
       "edit": "編集"
+    },
+    "Walkthroughs": {
+      "WalkthroughContent": {
+        "sourcePrefix": "ゲーム",
+        "empty": "攻略はまだありません",
+        "status": {
+          "all": "すべて",
+          "published": "公開済み",
+          "draft": "下書き",
+          "hidden": "審査待ち"
+        }
+      }
     },
     "Edits": {
       "EditRecordItem": {

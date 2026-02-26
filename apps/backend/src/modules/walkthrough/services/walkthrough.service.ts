@@ -12,10 +12,10 @@ import { ShionBizException } from '../../../common/exceptions/shion-business.exc
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { UpdateWalkthroughReqDto } from '../dto/req/update-walkthrough.req.dto'
 import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
-import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { Prisma, WalkthroughStatus } from '@prisma/client'
 import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
 import { WalkthroughListItemResDto } from '../dto/res/walkthrough-list.res.dto'
+import { GetWalkthroughListReqDto } from '../dto/req/get-walkthrough-list.req.dto'
 import {
   LLM_WALKTHROUGH_MODERATION_JOB,
   MODERATION_QUEUE,
@@ -71,7 +71,6 @@ export class WalkthroughService {
       dto.status === WalkthroughStatus.PUBLISHED ? WalkthroughStatus.HIDDEN : dto.status
     const lang = await detectWalkthroughLanguageFromEditorState(
       dto.content as SerializedEditorState,
-      dto.title,
     )
     const walkthrough = await this.prisma.walkthrough.create({
       data: {
@@ -173,12 +172,13 @@ export class WalkthroughService {
 
   async getListByGameId(
     gameId: number,
-    paginationReqDto: PaginationReqDto,
+    paginationReqDto: GetWalkthroughListReqDto,
     req: RequestWithUser,
   ): Promise<PaginatedResult<WalkthroughListItemResDto>> {
-    const { page, pageSize } = paginationReqDto
+    const { page, pageSize, status } = paginationReqDto
     const where: Prisma.WalkthroughWhereInput & { AND?: Prisma.WalkthroughWhereInput[] } = {
       game_id: gameId,
+      status: status ? status : undefined,
       AND: [],
     }
 
@@ -232,6 +232,7 @@ export class WalkthroughService {
         itemsPerPage: pageSize,
         totalPages: Math.ceil(total / pageSize),
         currentPage: page,
+        content_limit: req.user.content_limit,
       },
     }
   }

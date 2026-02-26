@@ -5,6 +5,7 @@ import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
 import { ActivityResDto } from '../dto/res/activity.res.dto'
 import { Prisma } from '@prisma/client'
+import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 
 @Injectable()
 export class ActivityService {
@@ -46,7 +47,10 @@ export class ActivityService {
     })
   }
 
-  async getList(paginationReqDto: PaginationReqDto): Promise<PaginatedResult<ActivityResDto>> {
+  async getList(
+    paginationReqDto: PaginationReqDto,
+    req: RequestWithUser,
+  ): Promise<PaginatedResult<ActivityResDto>> {
     const { page, pageSize } = paginationReqDto
     const total = await this.prismaService.activity.count()
     const activities = await this.prismaService.activity.findMany({
@@ -64,6 +68,19 @@ export class ActivityService {
             title_jp: true,
             title_zh: true,
             title_en: true,
+            intro_jp: true,
+            intro_zh: true,
+            intro_en: true,
+            covers: {
+              select: {
+                language: true,
+                url: true,
+                type: true,
+                dims: true,
+                sexual: true,
+                violence: true,
+              },
+            },
           },
         },
         walkthrough: {
@@ -144,6 +161,7 @@ export class ActivityService {
         itemsPerPage: pageSize,
         totalPages: Math.ceil(total / pageSize),
         currentPage: page,
+        content_limit: req.user.content_limit,
       },
     }
   }

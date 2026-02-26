@@ -49,6 +49,10 @@ describe('Activity (integration)', () => {
     expect(activityService.getList).toHaveBeenCalledTimes(1)
     expect(activityService.getList).toHaveBeenCalledWith(
       expect.objectContaining({ page: '2', pageSize: '20' }),
+      expect.objectContaining({
+        method: 'GET',
+        url: '/activity/list?page=2&pageSize=20',
+      }),
     )
   })
 

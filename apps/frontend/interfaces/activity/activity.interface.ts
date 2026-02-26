@@ -1,3 +1,5 @@
+import { GameCover } from '@/interfaces/game/game.interface'
+
 export enum ActivityType {
   COMMENT = 'COMMENT',
   FILE_UPLOAD_TO_SERVER = 'FILE_UPLOAD_TO_SERVER',
@@ -43,6 +45,10 @@ export interface Activity {
     title_jp: string
     title_zh: string
     title_en: string
+    intro_jp: string
+    intro_zh: string
+    intro_en: string
+    covers: GameCover[]
   }
   walkthrough?: {
     id: number

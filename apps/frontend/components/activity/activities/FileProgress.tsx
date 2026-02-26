@@ -12,12 +12,15 @@ import { buildStageStates, getPrimaryStatus } from './helpers/file-progress.inte
 import { StageState } from './interfaces/file-progress.interface'
 import { useLocale, useTranslations } from 'next-intl'
 import { ScrollBar } from '@/components/shionui/ScrollBar'
+import { GameEmbeddedCard } from '@/components/game/GameEmbeddedCard'
+import { ContentLimit } from '@/interfaces/user/user.interface'
 
 interface FileProgressProps {
   activities: Activity[]
+  content_limit?: ContentLimit
 }
 
-export const FileProgress = ({ activities }: FileProgressProps) => {
+export const FileProgress = ({ activities, content_limit }: FileProgressProps) => {
   const locale = useLocale()
   const t = useTranslations('Components.Home.Activity.Activities.FileProgress')
   const tCard = useTranslations('Components.Home.Activity.ActivityCard')
@@ -26,6 +29,7 @@ export const FileProgress = ({ activities }: FileProgressProps) => {
     (a, b) => new Date(a.created).getTime() - new Date(b.created).getTime(),
   )
   const fileInfo = sortedActivities.find(activity => activity.file)?.file
+  const game = sortedActivities.find(activity => activity.game)?.game
   const stageStates = buildStageStates(sortedActivities)
   const completedStages = stageStates.filter(stage => stage.completed).length
   const progressValue = stageStates.length
@@ -45,6 +49,7 @@ export const FileProgress = ({ activities }: FileProgressProps) => {
   return (
     <Card className="py-0">
       <CardContent className="p-4 flex flex-col gap-4">
+        {game && <GameEmbeddedCard game={game} content_limit={content_limit} />}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <FileArchive className="size-4 shrink-0" />

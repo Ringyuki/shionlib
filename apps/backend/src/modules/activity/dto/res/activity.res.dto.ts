@@ -13,6 +13,17 @@ export class ActivityResDto {
     title_jp: string
     title_zh: string
     title_en: string
+    intro_jp: string
+    intro_zh: string
+    intro_en: string
+    covers: {
+      language: string
+      url: string
+      type: string
+      dims: number[]
+      sexual: number
+      violence: number
+    }[]
   }
   walkthrough?: {
     id: number

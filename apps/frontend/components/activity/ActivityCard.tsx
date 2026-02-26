@@ -12,12 +12,15 @@ import { Edit } from './activities/Edit'
 import { Create } from './activities/Create'
 import { WalkthroughCreate } from './activities/WalkthroughCreate'
 import { fileActivityTypes } from './activities/constants/activity-feed'
+import { GameEmbeddedCard } from '../game/GameEmbeddedCard'
+import { ContentLimit } from '@/interfaces/user/user.interface'
 
 interface ActivityCardProps {
   activity: Activity
+  content_limit?: ContentLimit
 }
 
-export const ActivityCard = ({ activity }: ActivityCardProps) => {
+export const ActivityCard = ({ activity, content_limit }: ActivityCardProps) => {
   const locale = useLocale()
   const t = useTranslations('Components.Home.Activity.ActivityCard')
 
@@ -77,6 +80,7 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
               return <WalkthroughCreate activity={activity} />
           }
         })()}
+        {activity.game && <GameEmbeddedCard game={activity.game} content_limit={content_limit} />}
       </CardContent>
     </Card>
   )

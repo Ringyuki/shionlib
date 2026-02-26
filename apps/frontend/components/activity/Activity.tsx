@@ -9,17 +9,16 @@ import { FileProgress } from './activities/FileProgress'
 import { buildActivityFeed } from './activities/helpers/activity-feed.helper'
 import { shionlibRequest } from '@/utils/request'
 import { ActivityLoadMore } from './LoadMore'
-import { useTranslations } from 'next-intl'
+import { ContentLimit } from '@/interfaces/user/user.interface'
 
 interface ActivityProps {
   activities: ActivityInterface[]
-  meta: PaginatedMeta
+  meta: PaginatedMeta & { content_limit: ContentLimit }
 }
 
 export const Activity = ({ activities: initialActivities, meta: initialMeta }: ActivityProps) => {
-  const t = useTranslations('Components.Home.Activity.LoadMore')
   const [activities, setActivities] = useState<ActivityInterface[]>(initialActivities)
-  const [pageMeta, setPageMeta] = useState<PaginatedMeta>(initialMeta)
+  const [pageMeta, setPageMeta] = useState(initialMeta)
   const [loading, setLoading] = useState(false)
 
   const hasMore = pageMeta.currentPage < pageMeta.totalPages
@@ -32,15 +31,14 @@ export const Activity = ({ activities: initialActivities, meta: initialMeta }: A
     setLoading(true)
     try {
       const nextPage = pageMeta.currentPage + 1
-      const res = await shionlibRequest().get<PaginatedResponse<ActivityInterface>>(
-        '/activity/list',
-        {
-          params: {
-            page: nextPage,
-            pageSize,
-          },
+      const res = await shionlibRequest().get<
+        PaginatedResponse<ActivityInterface, { content_limit: ContentLimit }>
+      >('/activity/list', {
+        params: {
+          page: nextPage,
+          pageSize,
         },
-      )
+      })
       const nextItems = res.data?.items ?? []
 
       if (nextItems.length === 0) {
@@ -67,7 +65,7 @@ export const Activity = ({ activities: initialActivities, meta: initialMeta }: A
     } finally {
       setLoading(false)
     }
-  }, [hasMore, loading, pageMeta.currentPage, pageSize, t])
+  }, [hasMore, loading, pageMeta.currentPage, pageSize])
 
   return (
     <div className="flex flex-col gap-4">
@@ -77,9 +75,9 @@ export const Activity = ({ activities: initialActivities, meta: initialMeta }: A
           return (
             <div key={key} className="break-inside-avoid">
               {item.kind === 'file' ? (
-                <FileProgress activities={item.activities} />
+                <FileProgress activities={item.activities} content_limit={pageMeta.content_limit} />
               ) : (
-                <ActivityCard activity={item.activity} />
+                <ActivityCard activity={item.activity} content_limit={pageMeta.content_limit} />
               )}
             </div>
           )

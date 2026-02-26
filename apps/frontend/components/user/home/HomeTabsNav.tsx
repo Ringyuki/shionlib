@@ -17,6 +17,7 @@ export const HomeTabsNav = ({ user }: HomeTabsNavProps) => {
 
   const tabs = [
     { name: 'upload', href: 'uploads' },
+    { name: 'walkthrough', href: 'walkthroughs' },
     { name: 'comment', href: 'comments' },
     { name: 'favorite', href: 'favorites' },
     { name: 'edit', href: 'edits' },

@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../../../prisma.service'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
-import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
+import { GetWalkthroughListReqDto } from '../../walkthrough/dto/req/get-walkthrough-list.req.dto'
 import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
 import { GameResourcesResDto } from '../dto/res/game-resources.res.dto'
-import { Prisma } from '@prisma/client'
+import { Prisma, WalkthroughStatus } from '@prisma/client'
+import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { UserContentLimit } from '../interfaces/user.interface'
 import { CommentResDto } from '../../comment/dto/res/comment.res.dto'
 import { EditRecordItem } from '../dto/res/edit-records.res.dto'
+import { WalkthroughItemResDto } from '../dto/res/walkthrough.res.dto'
 
 @Injectable()
 export class UserDataService {
@@ -197,6 +199,87 @@ export class UserDataService {
         totalPages: Math.ceil(total / pageSize),
         currentPage: page,
         is_current_user: isCurrentUser,
+      },
+    }
+  }
+
+  async getWalkthroughs(
+    user_id: number,
+    req: RequestWithUser,
+    dto: GetWalkthroughListReqDto,
+  ): Promise<PaginatedResult<WalkthroughItemResDto>> {
+    const { page, pageSize, status } = dto
+    const isCurrentUser = user_id === req.user?.sub
+    const visibleStatuses: WalkthroughStatus[] = isCurrentUser
+      ? [WalkthroughStatus.PUBLISHED, WalkthroughStatus.DRAFT, WalkthroughStatus.HIDDEN]
+      : [WalkthroughStatus.PUBLISHED]
+
+    const where: Prisma.WalkthroughWhereInput = {
+      creator_id: user_id,
+      status: { in: visibleStatuses },
+    }
+
+    if (status && visibleStatuses.includes(status) && status !== WalkthroughStatus.DELETED) {
+      where.status = status
+    }
+
+    const total = await this.prismaService.walkthrough.count({ where })
+    const walkthroughs = await this.prismaService.walkthrough.findMany({
+      where,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      orderBy: {
+        created: 'desc',
+      },
+      select: {
+        id: true,
+        title: true,
+        lang: true,
+        created: true,
+        updated: true,
+        edited: true,
+        status: true,
+        game: {
+          select: {
+            id: true,
+            title_jp: true,
+            title_zh: true,
+            title_en: true,
+            intro_jp: true,
+            intro_zh: true,
+            intro_en: true,
+            covers: {
+              select: {
+                language: true,
+                url: true,
+                type: true,
+                dims: true,
+                sexual: true,
+                violence: true,
+              },
+            },
+          },
+        },
+        creator: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+      },
+    })
+
+    return {
+      items: walkthroughs as unknown as WalkthroughItemResDto[],
+      meta: {
+        totalItems: total,
+        itemCount: walkthroughs.length,
+        itemsPerPage: pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        currentPage: page,
+        is_current_user: isCurrentUser,
+        content_limit: req.user?.content_limit,
       },
     }
   }

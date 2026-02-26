@@ -6,6 +6,7 @@ describe('UserDataController', () => {
       getGameResources: jest.fn(),
       getComments: jest.fn(),
       getEditRecords: jest.fn(),
+      getWalkthroughs: jest.fn(),
     }
 
     return {
@@ -41,5 +42,15 @@ describe('UserDataController', () => {
     await controller.getEditRecords(dto as any, 56)
 
     expect(userDataService.getEditRecords).toHaveBeenCalledWith(56, dto)
+  })
+
+  it('delegates getWalkthroughs', async () => {
+    const { controller, userDataService } = createController()
+    const req = { user: { sub: 3 } }
+    const dto = { page: 1, pageSize: 10, status: 'HIDDEN' }
+
+    await controller.getWalkthroughs(req as any, dto as any, 78)
+
+    expect(userDataService.getWalkthroughs).toHaveBeenCalledWith(78, req, dto)
   })
 })

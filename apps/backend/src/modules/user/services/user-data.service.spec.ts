@@ -1,4 +1,5 @@
 import { PrismaService } from '../../../prisma.service'
+import { WalkthroughStatus } from '@prisma/client'
 import { UserContentLimit } from '../interfaces/user.interface'
 import { UserDataService } from './user-data.service'
 
@@ -13,6 +14,10 @@ describe('UserDataService', () => {
         findMany: jest.fn(),
       },
       comment: {
+        count: jest.fn(),
+        findMany: jest.fn(),
+      },
+      walkthrough: {
         count: jest.fn(),
         findMany: jest.fn(),
       },
@@ -181,6 +186,94 @@ describe('UserDataService', () => {
     expect(result.items[0]).toMatchObject({ is_liked: true, like_count: 3 })
     expect(result.items[1]).toMatchObject({ is_liked: false, like_count: 0 })
     expect(result.meta).toMatchObject({ is_current_user: true, totalItems: 2 })
+  })
+
+  it('getWalkthroughs allows current user to filter by hidden status', async () => {
+    const { service, prisma } = createService()
+    const now = new Date('2026-02-26T00:00:00Z')
+    ;(prisma.walkthrough.count as jest.Mock).mockResolvedValue(1)
+    ;(prisma.walkthrough.findMany as jest.Mock).mockResolvedValue([
+      {
+        id: 1,
+        title: 'Route A',
+        lang: 'zh',
+        created: now,
+        updated: now,
+        edited: true,
+        status: WalkthroughStatus.HIDDEN,
+        game: {
+          id: 10,
+          title_jp: 'jp',
+          title_zh: 'zh',
+          title_en: 'en',
+          intro_jp: 'intro-jp',
+          intro_zh: 'intro-zh',
+          intro_en: 'intro-en',
+          covers: [],
+        },
+        creator: { id: 7, name: 'u1', avatar: 'a1' },
+      },
+    ])
+
+    const req = { user: { sub: 7 } } as any
+    const result = await service.getWalkthroughs(7, req, {
+      page: 1,
+      pageSize: 10,
+      status: WalkthroughStatus.HIDDEN,
+    } as any)
+
+    expect(prisma.walkthrough.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          creator_id: 7,
+          status: WalkthroughStatus.HIDDEN,
+        },
+        skip: 0,
+        take: 10,
+        orderBy: { created: 'desc' },
+      }),
+    )
+    expect(result.items[0]).toMatchObject({ id: 1, status: WalkthroughStatus.HIDDEN })
+    expect(result.meta).toMatchObject({
+      is_current_user: true,
+      totalItems: 1,
+      content_limit: undefined,
+    })
+  })
+
+  it('getWalkthroughs restricts other users to published and ignores hidden filter', async () => {
+    const { service, prisma } = createService()
+    ;(prisma.walkthrough.count as jest.Mock).mockResolvedValue(0)
+    ;(prisma.walkthrough.findMany as jest.Mock).mockResolvedValue([])
+
+    const req = { user: { sub: 99 } } as any
+    const result = await service.getWalkthroughs(7, req, {
+      page: 2,
+      pageSize: 5,
+      status: WalkthroughStatus.HIDDEN,
+    } as any)
+
+    expect(prisma.walkthrough.count).toHaveBeenCalledWith({
+      where: {
+        creator_id: 7,
+        status: { in: [WalkthroughStatus.PUBLISHED] },
+      },
+    })
+    expect(prisma.walkthrough.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          creator_id: 7,
+          status: { in: [WalkthroughStatus.PUBLISHED] },
+        },
+        skip: 5,
+        take: 5,
+      }),
+    )
+    expect(result.meta).toMatchObject({
+      is_current_user: false,
+      currentPage: 2,
+      content_limit: undefined,
+    })
   })
 
   it('getEditRecords maps entity info for game/character/developer', async () => {

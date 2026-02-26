@@ -245,9 +245,22 @@
     },
     "HomeTabsNav": {
       "upload": "Uploads",
+      "walkthrough": "Walkthroughs",
       "comment": "Comments",
       "favorite": "Favorites",
       "edit": "Edits"
+    },
+    "Walkthroughs": {
+      "WalkthroughContent": {
+        "sourcePrefix": "Game",
+        "empty": "No walkthroughs yet",
+        "status": {
+          "all": "All",
+          "published": "Published",
+          "draft": "Draft",
+          "hidden": "Pending Review"
+        }
+      }
     },
     "Edits": {
       "EditRecordItem": {

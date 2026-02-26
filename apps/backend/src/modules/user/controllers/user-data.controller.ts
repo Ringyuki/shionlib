@@ -2,6 +2,7 @@ import { Controller, Get, Param, ParseIntPipe, Query, Req } from '@nestjs/common
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { UserDataService } from '../services/user-data.service'
+import { GetWalkthroughListReqDto } from '../../walkthrough/dto/req/get-walkthrough-list.req.dto'
 
 @Controller('user/datas')
 export class UserDataController {
@@ -28,5 +29,14 @@ export class UserDataController {
   @Get(':id/edit-records')
   async getEditRecords(@Query() dto: PaginationReqDto, @Param('id', ParseIntPipe) id: number) {
     return await this.userDataService.getEditRecords(id, dto)
+  }
+
+  @Get(':id/walkthroughs')
+  async getWalkthroughs(
+    @Req() req: RequestWithUser,
+    @Query() dto: GetWalkthroughListReqDto,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return await this.userDataService.getWalkthroughs(id, req, dto)
   }
 }

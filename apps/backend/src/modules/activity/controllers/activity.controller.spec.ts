@@ -7,9 +7,10 @@ describe('ActivityController', () => {
     }
     const controller = new ActivityController(activityService as any)
     const dto = { page: 1, page_size: 20 }
+    const req = { user: { sub: 1, content_limit: 2 } }
 
-    await controller.getList(dto as any)
+    await controller.getList(dto as any, req as any)
 
-    expect(activityService.getList).toHaveBeenCalledWith(dto)
+    expect(activityService.getList).toHaveBeenCalledWith(dto, req)
   })
 })

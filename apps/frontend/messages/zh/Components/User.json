@@ -245,9 +245,22 @@
     },
     "HomeTabsNav": {
       "upload": "上传",
+      "walkthrough": "攻略",
       "comment": "评论",
       "favorite": "收藏",
       "edit": "编辑"
+    },
+    "Walkthroughs": {
+      "WalkthroughContent": {
+        "sourcePrefix": "游戏",
+        "empty": "暂无攻略",
+        "status": {
+          "all": "全部",
+          "published": "已发布",
+          "draft": "草稿",
+          "hidden": "待审核"
+        }
+      }
     },
     "Edits": {
       "EditRecordItem": {

@@ -33,7 +33,7 @@ export const WalkthroughCreate = ({ activity }: WalkthroughCreateProps) => {
       <span>{t('suffix')}</span>
       <Link
         className="font-medium hover:opacity-85 transition-all duration-200"
-        href={`/game/${activity.game?.id}/walkthrough`}
+        href={`/game/${activity.game?.id}/walkthrough/${activity.walkthrough?.id}`}
       >
         {activity.walkthrough?.title}
       </Link>

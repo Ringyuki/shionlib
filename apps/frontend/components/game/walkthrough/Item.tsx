@@ -33,7 +33,10 @@ import { useShionlibUserStore } from '@/store/userStore'
 import { sileo } from 'sileo'
 
 interface GameWalkthroughItemProps {
-  walkthrough: Walkthrough
+  walkthrough: Pick<
+    Walkthrough,
+    'id' | 'title' | 'lang' | 'created' | 'updated' | 'edited' | 'status' | 'creator'
+  >
   gameId: string
 }
 
@@ -138,7 +141,6 @@ export const GameWalkthroughItem = ({ walkthrough, gameId }: GameWalkthroughItem
           </CardContent>
         </Card>
       </Link>
-
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent tone="destructive">
           <AlertDialogHeader>

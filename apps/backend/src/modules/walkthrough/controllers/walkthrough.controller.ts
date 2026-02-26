@@ -16,8 +16,8 @@ import { Body } from '@nestjs/common'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
 import { UpdateWalkthroughReqDto } from '../dto/req/update-walkthrough.req.dto'
-import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { Public } from '../../auth/decorators/public.decorator'
+import { GetWalkthroughListReqDto } from '../dto/req/get-walkthrough-list.req.dto'
 
 @UseGuards(JwtAuthGuard)
 @Controller('walkthrough')
@@ -57,7 +57,7 @@ export class WalkthroughController {
   @Get('game/:id')
   async getListByGameId(
     @Param('id', ParseIntPipe) id: number,
-    @Query() paginationReqDto: PaginationReqDto,
+    @Query() paginationReqDto: GetWalkthroughListReqDto,
     @Req() req: RequestWithUser,
   ) {
     return this.walkthroughService.getListByGameId(id, paginationReqDto, req)
