@@ -20,6 +20,14 @@
   "guides": {
     "upload-game-files": "Upload game files",
     "decompress-zstd-files": "File Decompression Guide",
-    "common-vn-engines-and-emulators": "Common Engines and Emulator Mapping"
+    "common-vn-engines-and-emulators": "Common Engines and Emulator Mapping",
+    "download-games": "How to Download Games",
+    "edit-info": "How to Edit Game, Character & Developer Info",
+    "resource-maintenance": "Resource Maintenance Guide",
+    "favorites": "Favorites & Privacy Guide",
+    "potatovn-sync": "PotatoVN Account Binding & Sync",
+    "walkthrough": "How to Contribute & Use Walkthroughs",
+    "account-settings": "Account Settings Guide",
+    "edit-history-and-undo": "Edit History & Undo"
   }
 }

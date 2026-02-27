@@ -1,0 +1,67 @@
+---
+title: PotatoVN Account Binding & Sync
+banner: 'https://images.yurari.moe/galgame/11196/bvwn0x03_2.webp'
+description: 'Learn how to link your PotatoVN account with Shionlib, view play data on game pages, and handle token expiry and unlinking.'
+date: 2026-02-27
+author_uid: 1
+author_name: 'ringyuki'
+author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
+---
+
+## What is PotatoVN
+
+[PotatoVN](https://potatovn.net) is an open-source Windows visual novel / galgame management tool. It supports automatic local game detection, fetching game information from Bangumi/VNDB, tracking play time and status, and cloud save sync.
+
+After linking your PotatoVN account with Shionlib, you can view PotatoVN play data directly on game pages in Shionlib, and add games to your PotatoVN library from Shionlib.
+
+## Linking Your Account
+
+Go to **Account Settings → Connected Accounts**, click **Connect Account**, and enter your PotatoVN username and password in the dialog.
+
+> Your password is used only to request an access token from the PotatoVN server. It is not stored by Shionlib.
+
+After a successful link, the page will display the connected account name and the token expiration date.
+
+## Using It on Game Pages
+
+Once your account is linked, a **PotatoVN** card appears on game entry pages with the following features:
+
+### Add to Library
+
+If the game has not been added to your PotatoVN library yet, click **Add to PotatoVN** to create a record directly.
+
+### View Play Data
+
+Games already in your library will display the following synced data:
+
+| Field           | Description                                           |
+| --------------- | ----------------------------------------------------- |
+| Total Play Time | Cumulative play time                                  |
+| Last Played     | Time of the last play session                         |
+| Play Status     | Wish / Played / Playing / On Hold / Dropped           |
+| My Rating       | Rating given in PotatoVN (shown when a rating exists) |
+
+Data is synced from PotatoVN. The system runs a sync task every hour, and the last sync time is shown at the bottom of the card.
+
+### Remove from Library
+
+Click the **···** menu in the top-right corner of the card and select **Remove from PotatoVN** to delete all of the game's data from PotatoVN cloud, including play time and rating.
+
+> This action permanently deletes game data from PotatoVN and cannot be undone. Please proceed with caution.
+
+## Automatic Token Renewal
+
+PotatoVN access tokens have an expiration date. The Shionlib backend automatically checks every 6 hours and **renews tokens with less than 3 days remaining**. In normal circumstances, no manual action is needed.
+
+You can check the current token expiration date on the **Account Settings → Connected Accounts** page:
+
+- When the date is shown in **orange**, the token will expire within 7 days (auto-renewal triggers when fewer than 3 days remain)
+- When the date is shown in **red** with a "Token expired" label, auto-renewal has failed or the token has become fully invalid
+
+If the token shows as expired, click **Disconnect** and re-link your account to restore it manually.
+
+## Unlinking Your Account
+
+Go to **Account Settings → Connected Accounts** and click **Disconnect** to remove the link between Shionlib and PotatoVN.
+
+Unlinking only removes the account association — it does not delete any of your data in PotatoVN.

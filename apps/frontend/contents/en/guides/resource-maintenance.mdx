@@ -1,0 +1,80 @@
+---
+title: Resource Maintenance Guide
+banner: 'https://images.yurari.moe/galgame/10703/oj9cfsty_2.jpg'
+description: 'Learn how to maintain game download resources on Shionlib: editing resource metadata, reuploading files, viewing update history, and recommended update reason conventions.'
+date: 2026-02-27
+author_uid: 1
+author_name: 'ringyuki'
+author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
+---
+
+## Who Can Maintain Resources
+
+The **···** menu on a resource card contains maintenance options. The actions visible to you depend on your permissions:
+
+- **Edit**, **Re-upload** — Only the original uploader or an administrator
+- **Update History** — Visible to everyone
+- **Report Violation** — Visible to non-uploaders
+
+## Editing Resource Metadata
+
+Click **···** → **Edit** to modify the descriptive metadata of a resource without touching the file itself:
+
+- **File Name** — The display name of the resource (required, max 255 characters)
+- **Platform** — Applicable platforms (at least one required), multi-select
+- **Language** — Resource language (at least one required), multi-select
+- **Emulator Engine** — Required when the platform includes Android or iOS; indicates which type of emulator is needed to run the resource
+- **Notes** — Optional supplementary description (max 255 characters), such as version number, included content, or special requirements
+
+Changes take effect immediately after saving.
+
+## Re-uploading a File
+
+When the original file needs to be updated, use the re-upload feature to replace the current file.
+
+Click **···** → **Re-upload** to open the re-upload panel.
+
+> Re-uploading replaces the current file. The old file will be deleted. This action cannot be undone.
+
+**Steps:**
+
+1. Confirm the current file information in the panel (file name, size, hash)
+2. Enter the reason for this update in the **Update Reason** field
+3. Select the new file and start the upload
+4. After the upload completes, the system automatically submits the file for processing
+
+After the update is complete, users who have favorited the game will receive an update notification containing the reason you entered.
+
+### Re-upload Restrictions
+
+The **Re-upload** option only appears when both of the following conditions are met:
+
+- The resource has only one file
+- The operator is the original uploader or an administrator
+
+If you need to add additional files rather than replacing an existing one, use the **Upload** button on the game page to create a new resource entry.
+
+### Update Reason Conventions
+
+Write a concise description to help downloaders understand the nature of the update. Recommended formats:
+
+- `Version update: v1.0 → v1.1`
+- `Localization patch update: fixed several translation issues`
+- `Merged localization patch, no separate installation needed`
+- `Fixed corrupted file, re-download recommended`
+
+The update reason appears in the update history and is included in notifications sent to users who favorited the game. Please fill it in carefully.
+
+## Update History
+
+Click **···** → **Update History** to view all historical versions of the resource.
+
+Each entry includes:
+
+- Version number
+- File size
+- Hash value and algorithm
+- Update reason (if provided)
+- Operator and update time
+
+The version currently in use is marked with a **Current** badge.

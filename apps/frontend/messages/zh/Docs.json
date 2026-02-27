@@ -20,6 +20,14 @@
   "guides": {
     "upload-game-files": "上传游戏文件",
     "decompress-zstd-files": "文件解压指南",
-    "common-vn-engines-and-emulators": "常见引擎与模拟器对照"
+    "common-vn-engines-and-emulators": "常见引擎与模拟器对照",
+    "download-games": "如何下载游戏",
+    "edit-info": "如何编辑游戏、角色与开发商信息",
+    "resource-maintenance": "资源维护指南",
+    "favorites": "收藏夹与隐私指南",
+    "potatovn-sync": "PotatoVN 绑定与同步说明",
+    "walkthrough": "如何贡献与使用攻略",
+    "account-settings": "账号设置指南",
+    "edit-history-and-undo": "编辑历史与撤销"
   }
 }

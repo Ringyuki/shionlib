@@ -2,6 +2,7 @@ import { MDXRemote, MDXRemoteProps } from 'next-mdx-remote/rsc'
 import { H } from './elements/H'
 import { A } from './elements/A'
 import { Img } from './elements/Img'
+import remarkGfm from 'remark-gfm'
 
 const components = {
   h1: H(1),
@@ -15,5 +16,15 @@ const components = {
 }
 
 export const Mdx = (props: MDXRemoteProps) => {
-  return <MDXRemote {...props} components={{ ...components, ...(props.components || {}) }} />
+  return (
+    <MDXRemote
+      {...props}
+      components={{ ...components, ...(props.components || {}) }}
+      options={{
+        mdxOptions: {
+          remarkPlugins: [remarkGfm],
+        },
+      }}
+    />
+  )
 }

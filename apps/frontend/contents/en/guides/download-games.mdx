@@ -1,0 +1,117 @@
+---
+title: How to Download Games
+banner: 'https://images.yurari.moe/galgame/10702/8hxs6nc5_2.jpg'
+description: "Learn about Shionlib's download system: understanding platform/language/engine tags, passing Turnstile to get download links, using browser download or Aria2 push, verifying file hashes, and handling common issues."
+date: 2026-02-27
+author_uid: 1
+author_name: 'ringyuki'
+author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
+---
+
+## Opening the Download Panel
+
+On any game entry page, click the **Download** button near the top to open the download panel.
+
+The panel lists all available resources for that game, sorted by download count from highest to lowest.
+
+> All resources are uploaded by community members. Please verify file safety on your own.
+
+## Reading the Resource Card Tags
+
+Each resource card displays a set of tags at the top describing the scope of that resource.
+
+### Platform
+
+Indicates the platform(s) the resource runs on, such as **Windows**, **Android**, **iOS**, **PlayStation Vita**, etc.
+
+A card may show multiple platforms, meaning the archive contains builds for multiple platforms or the resource runs cross-platform.
+
+### Language
+
+Indicates the language of the game or patch:
+
+| Tag      | Meaning                                 |
+| -------- | --------------------------------------- |
+| 日本語   | Japanese (original or Japanese patch)   |
+| 简体中文 | Simplified Chinese localization         |
+| 繁體中文 | Traditional Chinese localization        |
+| English  | English version or English localization |
+| Other    | Other languages                         |
+
+### Emulator Engine (Android / iOS only)
+
+Shown only when the platform is Android or iOS. Indicates the game engine the resource uses, helping you choose the right emulator:
+
+| Tag             | Engine                                      |
+| --------------- | ------------------------------------------- |
+| KiriKiri (KRKR) | KiriKiri / KRKRZ engine                     |
+| ONScripter      | ONScripter engine                           |
+| Artemis         | Artemis Engine                              |
+| Other Engine    | Other engines — refer to the resource notes |
+
+For emulator recommendations per engine, see [Common Engines and Emulator Mapping](/en/docs/guides/common-vn-engines-and-emulators).
+
+### Notes
+
+Some resources include uploader-provided notes (shown below the file entry) describing the version, contents, or special requirements. It is recommended to read these before downloading.
+
+## File Entry Details
+
+Each resource card may contain one or more file entries, each showing:
+
+- **File name and size** — confirm you are downloading the correct file
+- **File status** — see below
+- **Hash value** — used to verify file integrity after download
+
+### File Status
+
+| Status                   | Meaning                                                              |
+| ------------------------ | -------------------------------------------------------------------- |
+| S3 (green)               | File is ready to download                                            |
+| Processing (yellow)      | File is being scanned and uploaded — refresh shortly                 |
+| Awaiting Upload          | File is queued for processing                                        |
+| Visible to uploader only | File has not finished processing and is only visible to the uploader |
+
+Only files with **S3** status can be downloaded.
+
+## Downloading a File
+
+Click the button on the right side of the file entry to start downloading. Before the link is generated, a **Cloudflare Turnstile** challenge (bot verification) will appear. The link is generated after you pass it.
+
+> Download links have a time limit: files under 10 GB expire in **120 minutes**, files between 10–20 GB expire in **240 minutes**, and files over 20 GB expire in **360 minutes**. Complete your download before the link expires.
+
+### Browser Download
+
+Click the **globe icon** button to download directly through your browser. This works for most users.
+
+### Push to Aria2
+
+Click the **lightning icon** button to push the download link to a locally or remotely running Aria2 download manager.
+
+Before using this, configure Aria2 connection details (protocol, host, port, secret, download path) in **Account Settings → Download Settings**. If the connection fails, an error will appear and you will be directed to the settings page.
+
+## Verifying File Hash
+
+After downloading, it is recommended to compare the hash to verify file integrity:
+
+1. Copy the hash value shown in the file entry (click the copy button)
+2. Calculate the hash of your downloaded file using a system tool or third-party software
+3. Compare the two values — an exact match means the file is intact
+
+Shionlib currently supports **BLAKE3** and **SHA-256** hash algorithms. The algorithm used is shown in the file entry.
+
+## False Positive Virus Flag
+
+If a file entry shows a red **"Possible virus"** tag, it means the automated scan previously detected a suspected virus signature, but an administrator reviewed it and confirmed it as a **false positive**, manually releasing the file.
+
+The hover tooltip on the tag shows the detected virus name for your reference.
+
+> Visual novel games (especially those using engines like KiriKiri) are **highly prone to antivirus false positives** due to their packaging methods. If the source is trustworthy, it is safe to proceed with the download.
+
+## Update History
+
+Click the **···** menu in the bottom-right of a resource card and select **Update History** to view all historical versions of that resource, including file size, hash, update time, and the uploader's update reason.
+
+## Reporting a Resource
+
+If you find a resource that violates rules (e.g., malware, copyright issues), click the **···** menu and select **Report Violation**, then fill in the reason. Malicious reports will be handled accordingly.
