@@ -228,11 +228,7 @@ export class UserDataService {
     ) {
       where.game = {
         nsfw: { not: true },
-      }
-      where.game.covers = {
-        every: {
-          sexual: { in: [0] },
-        },
+        covers: { every: { sexual: { in: [0] } } },
       }
     }
 

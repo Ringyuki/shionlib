@@ -227,6 +227,10 @@ describe('UserDataService', () => {
         where: {
           creator_id: 7,
           status: WalkthroughStatus.HIDDEN,
+          game: {
+            nsfw: { not: true },
+            covers: { every: { sexual: { in: [0] } } },
+          },
         },
         skip: 0,
         take: 10,
@@ -257,6 +261,10 @@ describe('UserDataService', () => {
       where: {
         creator_id: 7,
         status: { in: [WalkthroughStatus.PUBLISHED] },
+        game: {
+          nsfw: { not: true },
+          covers: { every: { sexual: { in: [0] } } },
+        },
       },
     })
     expect(prisma.walkthrough.findMany).toHaveBeenCalledWith(
@@ -264,6 +272,10 @@ describe('UserDataService', () => {
         where: {
           creator_id: 7,
           status: { in: [WalkthroughStatus.PUBLISHED] },
+          game: {
+            nsfw: { not: true },
+            covers: { every: { sexual: { in: [0] } } },
+          },
         },
         skip: 5,
         take: 5,
