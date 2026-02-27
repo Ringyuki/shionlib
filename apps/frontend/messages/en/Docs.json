@@ -18,6 +18,8 @@
     "1": "title1"
   },
   "guides": {
-    "upload-game-files": "Upload game files"
+    "upload-game-files": "Upload game files",
+    "decompress-zstd-files": "File Decompression Guide",
+    "common-vn-engines-and-emulators": "Common Engines and Emulator Mapping"
   }
 }

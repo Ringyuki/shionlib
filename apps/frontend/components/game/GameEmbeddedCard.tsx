@@ -61,7 +61,7 @@ export const GameEmbeddedCard = ({ game, className, content_limit }: GameEmbedde
                         alt={title}
                         className="absolute inset-0"
                         imageClassName="object-cover"
-                        sizes="96px"
+                        sizes="10vw"
                       />
                     </Spoiler>
                   ) : (
@@ -70,7 +70,7 @@ export const GameEmbeddedCard = ({ game, className, content_limit }: GameEmbedde
                       alt={title}
                       className="absolute inset-0"
                       imageClassName="object-cover"
-                      sizes="96px"
+                      sizes="10vw"
                     />
                   ))}
               </div>

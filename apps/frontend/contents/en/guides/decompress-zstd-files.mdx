@@ -1,0 +1,45 @@
+---
+title: File Decompression Guide
+banner: 'https://t.shionlib.com/game/1876/image/a757bf6a-77c6-459b-a418-8c0939b5d0d2.webp'
+description: 'Shionlib downloads will progressively use zstd compression. This guide explains what to use, what to check first, and recommended PC/mobile tools with official download links.'
+date: 2026-02-27
+author_uid: 1
+author_name: 'ringyuki'
+author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
+---
+
+## Why we use zstd compression
+
+To better balance download speed, file size, and server cost, Shionlib resources will progressively use zstd (Zstandard) compression.
+
+In most cases, zstd provides better compression than traditional formats while still keeping decompression fast.
+
+## Before extracting, check these points
+
+- Use an extractor that supports `zstd`, or you may see errors like “unknown format” or “corrupted file”.
+- We do not use `.zst` as the download file extension. Even when a file has another common archive extension, make sure your extractor supports the `zstd` algorithm.
+- Download extraction software from official sources whenever possible, and avoid unknown repackaged builds.
+
+## Recommended extraction tools
+
+### PC
+
+- [7-Zip (Windows)](https://www.7-zip.org/)
+- [Bandizip (Windows / macOS)](https://www.bandisoft.com/bandizip/)
+
+### Mobile
+
+- [ZArchiver (Android)](https://play.google.com/store/apps/details?id=ru.zdevs.zarchiver)
+- [Keka (iOS / iPadOS)](https://ios.keka.io/)
+
+> Supported formats may vary by version. If your current app cannot open `zstd`-compressed files, update to the latest version and try again.
+
+## FAQ
+
+### What if the file is reported as corrupted?
+
+First verify the download completed fully, then re-download once. If it still fails, try the latest 7-Zip or Bandizip build.
+
+### What if extraction fails on mobile?
+
+Update the app to a recent version first. If it still fails, extract on PC and transfer the extracted files back to your phone.

@@ -18,6 +18,8 @@
     "1": "title1"
   },
   "guides": {
-    "upload-game-files": "上传游戏文件"
+    "upload-game-files": "上传游戏文件",
+    "decompress-zstd-files": "文件解压指南",
+    "common-vn-engines-and-emulators": "常见引擎与模拟器对照"
   }
 }

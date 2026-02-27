@@ -18,6 +18,8 @@
     "1": "title1"
   },
   "guides": {
-    "upload-game-files": "ゲームファイルをアップロード"
+    "upload-game-files": "ゲームファイルをアップロード",
+    "decompress-zstd-files": "ファイル解凍ガイド",
+    "common-vn-engines-and-emulators": "主要エンジンとエミュレーター対応表"
   }
 }

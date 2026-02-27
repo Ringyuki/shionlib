@@ -66,7 +66,7 @@ export const GameCoverContent = ({
                   !content_limit
                 )
                   return (
-                    <Spoiler showHint={true} blur={32} className="!rounded-none !h-full">
+                    <Spoiler showHint={true} blur={32} className="rounded-none! h-full!">
                       <_GameCover cover={url} title={title} sizes={sizes} />
                     </Spoiler>
                   )
