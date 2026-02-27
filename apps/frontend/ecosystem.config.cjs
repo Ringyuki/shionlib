@@ -12,6 +12,8 @@ module.exports = {
       port: 2948,
       cwd: CWD,
       script: path.join(CWD, '.next', 'standalone', 'server.js'),
+      instances: 1,
+      exec_mode: 'cluster',
       autorestart: true,
       watch: false,
       max_memory_restart: '1G',

@@ -279,6 +279,7 @@ jobs:
           cd "$DEPLOY_DIR/current"
           pm2 reload ecosystem.config.cjs --only shionlib-backend --update-env || \
           pm2 start ecosystem.config.cjs --only shionlib-backend --env "$PM2_ENV" --update-env
+          pm2 save
 
           cd "$DEPLOY_DIR/releases"
           ls -1dt */ | tail -n +$((KEEP_RELEASES+1)) | xargs -r rm -rf
