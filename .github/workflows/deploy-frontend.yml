@@ -253,7 +253,8 @@ jobs:
           set -a
           . "$RELEASE_DIR/.env"
           set +a
-          pm2 startOrRestart ecosystem.config.cjs --only shionlib-frontend --env "$PM2_ENV" --update-env
+          pm2 reload ecosystem.config.cjs --only shionlib-frontend --update-env || \
+          pm2 start ecosystem.config.cjs --only shionlib-frontend --env "$PM2_ENV" --update-env
 
           cd "$DEPLOY_DIR/releases"
           ls -1dt */ | tail -n +$((KEEP_RELEASES+1)) | xargs -r rm -rf
