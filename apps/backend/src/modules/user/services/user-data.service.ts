@@ -222,6 +222,19 @@ export class UserDataService {
     if (status && visibleStatuses.includes(status) && status !== WalkthroughStatus.DELETED) {
       where.status = status
     }
+    if (
+      req.user?.content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT ||
+      !req.user?.content_limit
+    ) {
+      where.game = {
+        nsfw: { not: true },
+      }
+      where.game.covers = {
+        every: {
+          sexual: { in: [0] },
+        },
+      }
+    }
 
     const total = await this.prismaService.walkthrough.count({ where })
     const walkthroughs = await this.prismaService.walkthrough.findMany({

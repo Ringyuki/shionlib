@@ -6,6 +6,7 @@ import { PaginatedResult } from '../../../shared/interfaces/response/response.in
 import { ActivityResDto } from '../dto/res/activity.res.dto'
 import { Prisma } from '@prisma/client'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
+import { UserContentLimit } from '../../user/interfaces/user.interface'
 
 @Injectable()
 export class ActivityService {
@@ -52,10 +53,29 @@ export class ActivityService {
     req: RequestWithUser,
   ): Promise<PaginatedResult<ActivityResDto>> {
     const { page, pageSize } = paginationReqDto
-    const total = await this.prismaService.activity.count()
+    const where: Prisma.ActivityWhereInput = {}
+    if (
+      req.user.content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT ||
+      !req.user.content_limit
+    ) {
+      where.game = {
+        nsfw: {
+          not: true,
+        },
+        covers: {
+          every: {
+            sexual: { in: [0] },
+          },
+        },
+      }
+    }
+    const total = await this.prismaService.activity.count({
+      where,
+    })
     const activities = await this.prismaService.activity.findMany({
       skip: (page - 1) * pageSize,
       take: pageSize,
+      where,
       orderBy: {
         created: 'desc',
       },
