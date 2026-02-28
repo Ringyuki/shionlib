@@ -61,12 +61,14 @@ describe('PasskeyController', () => {
     passkeyService.verifyLogin.mockResolvedValue({
       token: 'access-token',
       refresh_token: 'refresh-token',
+      tokenExp: new Date('2026-02-28T10:00:00.000Z'),
+      refreshTokenExp: new Date('2026-03-07T10:00:00.000Z'),
     })
     const req = { user: { sub: 1 } }
     const dto = { flow_id: 'flow-2', response: { id: 'assertion-1' } }
     const response = { setHeader: jest.fn() }
 
-    await controller.verifyLogin(req as any, dto as any, response as any)
+    const result = await controller.verifyLogin(req as any, dto as any, response as any)
 
     expect(passkeyService.verifyLogin).toHaveBeenCalledWith('flow-2', dto.response, req)
     expect(response.setHeader).toHaveBeenCalledTimes(1)
@@ -80,6 +82,10 @@ describe('PasskeyController', () => {
         expect.stringContaining('Max-Age=604800'),
       ]),
     )
+    expect(result).toEqual({
+      accessTokenExpiresAt: '2026-02-28T10:00:00.000Z',
+      refreshTokenExpiresAt: '2026-03-07T10:00:00.000Z',
+    })
   })
 
   it('lists current user passkeys', async () => {

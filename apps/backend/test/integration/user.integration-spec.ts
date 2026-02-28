@@ -68,6 +68,8 @@ describe('User (integration)', () => {
     userService.login.mockResolvedValueOnce({
       token: 'access-token',
       refresh_token: 'refresh-token',
+      tokenExp: new Date('2026-02-28T10:00:00.000Z'),
+      refreshTokenExp: new Date('2026-03-07T10:00:00.000Z'),
     })
     userService.getById.mockResolvedValueOnce({ id: 2 })
     userService.checkName.mockResolvedValueOnce({ ok: true })
@@ -98,6 +100,10 @@ describe('User (integration)', () => {
         expect.stringContaining('Max-Age=604800'),
       ]),
     )
+    expect(loginRes.body).toEqual({
+      accessTokenExpiresAt: '2026-02-28T10:00:00.000Z',
+      refreshTokenExpiresAt: '2026-03-07T10:00:00.000Z',
+    })
 
     const userRes = await request(app.getHttpServer()).get('/user/2').expect(200)
     expect(userRes.body).toEqual({ id: 2 })

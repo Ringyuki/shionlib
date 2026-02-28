@@ -251,7 +251,12 @@ export class PasskeyService {
     flowId: string,
     response: AuthenticationResponseJSON,
     req: RequestWithUser,
-  ): Promise<{ token: string; refresh_token: string }> {
+  ): Promise<{
+    token: string
+    refresh_token: string
+    tokenExp: Date | null
+    refreshTokenExp: Date
+  }> {
     let state: Extract<ChallengeState, { kind: 'login' }>
     try {
       state = await this.consumeChallenge(flowId, 'login')
@@ -344,7 +349,12 @@ export class PasskeyService {
     })
 
     const device = this.getDeviceSignals(req)
-    const { token, refreshToken: refresh_token } = await this.loginSessionService.issueOnLogin(
+    const {
+      token,
+      tokenExp,
+      refreshToken: refresh_token,
+      refreshTokenExp,
+    } = await this.loginSessionService.issueOnLogin(
       credential.user.id,
       device,
       credential.user.role,
@@ -355,7 +365,7 @@ export class PasskeyService {
       data: { last_login_at: new Date() },
     })
 
-    return { token, refresh_token }
+    return { token, refresh_token, tokenExp, refreshTokenExp }
   }
 
   async listMyPasskeys(userId: number) {

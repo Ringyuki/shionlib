@@ -19,6 +19,8 @@ import { PasskeyRegisterVerifyReqDto } from '../dto/req/passkey-register-verify.
 import { PasskeyLoginOptionsReqDto } from '../dto/req/passkey-login-options.req.dto'
 import { PasskeyLoginVerifyReqDto } from '../dto/req/passkey-login-verify.req.dto'
 import { ShionConfigService } from '../../../common/config/services/config.service'
+import { AuthSessionResDto } from '../dto/res/auth-session.res.dto'
+import { buildAuthSessionResponse, setAuthCookies } from '../helpers/auth-session-response.helper'
 
 @Controller('auth/passkey')
 export class PasskeyController {
@@ -52,16 +54,10 @@ export class PasskeyController {
     @Req() req: RequestWithUser,
     @Body() dto: PasskeyLoginVerifyReqDto,
     @Res({ passthrough: true }) response: Response,
-  ) {
-    const { token, refresh_token } = await this.passkeyService.verifyLogin(
-      dto.flow_id,
-      dto.response as any,
-      req,
-    )
-    response.setHeader('Set-Cookie', [
-      `shionlib_access_token=${token}; HttpOnly; Secure ; SameSite=Lax; Path=/; Max-Age=${this.configService.get('token.expiresIn')}`,
-      `shionlib_refresh_token=${refresh_token}; HttpOnly; Secure ; SameSite=Lax; Path=/; Max-Age=${this.configService.get('refresh_token.shortWindowSec')}`,
-    ])
+  ): Promise<AuthSessionResDto> {
+    const authSession = await this.passkeyService.verifyLogin(dto.flow_id, dto.response as any, req)
+    setAuthCookies(response, this.configService, authSession)
+    return buildAuthSessionResponse(authSession)
   }
 
   @UseGuards(JwtAuthGuard)

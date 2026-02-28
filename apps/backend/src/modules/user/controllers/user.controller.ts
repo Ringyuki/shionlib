@@ -20,6 +20,11 @@ import { RolesGuard } from '../../auth/guards/roles.guard'
 import { ShionConfigService } from '../../../common/config/services/config.service'
 import { BanUserReqDto } from '../dto/req/ban-user.req.dto'
 import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
+import { AuthSessionResDto } from '../../auth/dto/res/auth-session.res.dto'
+import {
+  buildAuthSessionResponse,
+  setAuthCookies,
+} from '../../auth/helpers/auth-session-response.helper'
 
 @Controller('user')
 export class UserController {
@@ -38,13 +43,11 @@ export class UserController {
     @Body() loginDto: LoginDto,
     @Req() request: RequestWithUser,
     @Res({ passthrough: true }) response: Response,
-  ) {
-    const { token, refresh_token } = await this.userService.login(loginDto, request)
+  ): Promise<AuthSessionResDto> {
+    const authSession = await this.userService.login(loginDto, request)
 
-    response.setHeader('Set-Cookie', [
-      `shionlib_access_token=${token}; HttpOnly; Secure ; SameSite=Lax; Path=/; Max-Age=${this.configService.get('token.expiresIn')}`,
-      `shionlib_refresh_token=${refresh_token}; HttpOnly; Secure ; SameSite=Lax; Path=/; Max-Age=${this.configService.get('refresh_token.shortWindowSec')}`,
-    ])
+    setAuthCookies(response, this.configService, authSession)
+    return buildAuthSessionResponse(authSession)
   }
 
   @UseGuards(JwtAuthGuard)

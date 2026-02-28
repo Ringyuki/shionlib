@@ -5,6 +5,10 @@ describe('utils/request/types (unit)', () => {
   it('keeps RefreshResult and ServerRequestContext runtime-compatible shapes', () => {
     const refresh: RefreshResult = {
       setCookies: ['token=abc; Path=/; HttpOnly'],
+      session: {
+        accessTokenExpiresAt: '2026-02-28T10:00:00.000Z',
+        refreshTokenExpiresAt: '2026-03-07T10:00:00.000Z',
+      },
     }
 
     const context: ServerRequestContext = {
@@ -14,6 +18,7 @@ describe('utils/request/types (unit)', () => {
     }
 
     expect(refresh.setCookies[0]).toContain('token=abc')
+    expect(refresh.session?.accessTokenExpiresAt).toBe('2026-02-28T10:00:00.000Z')
     expect(context.cookieHeader).toBe('token=abc')
   })
 })

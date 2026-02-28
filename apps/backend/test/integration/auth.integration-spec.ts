@@ -67,6 +67,8 @@ describe('Auth (integration)', () => {
     userService.refreshToken.mockResolvedValueOnce({
       token: 'access-token',
       refresh_token: 'refresh-token',
+      tokenExp: new Date('2026-02-28T10:00:00.000Z'),
+      refreshTokenExp: new Date('2026-03-07T10:00:00.000Z'),
     })
 
     const res = await request(app.getHttpServer())
@@ -89,6 +91,10 @@ describe('Auth (integration)', () => {
         expect.stringContaining('Max-Age=604800'),
       ]),
     )
+    expect(res.body).toEqual({
+      accessTokenExpiresAt: '2026-02-28T10:00:00.000Z',
+      refreshTokenExpiresAt: '2026-03-07T10:00:00.000Z',
+    })
   })
 
   it('POST /auth/logout revokes session and clears auth cookies', async () => {

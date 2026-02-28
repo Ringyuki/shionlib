@@ -130,28 +130,28 @@ function ScrollArea({
       <div
         data-slot="scroll-area-shadow-top"
         className={cn(
-          'pointer-events-none absolute inset-x-0 top-0 z-10 h-3 bg-gradient-to-b from-foreground/15 to-transparent transition-opacity',
+          'pointer-events-none absolute inset-x-0 top-0 z-10 h-3 bg-linear-to-b from-foreground/15 to-transparent transition-opacity',
           canScrollUp && showScrollHint ? 'opacity-100' : 'opacity-0',
         )}
       />
       <div
         data-slot="scroll-area-shadow-bottom"
         className={cn(
-          'pointer-events-none absolute inset-x-0 bottom-0 z-10 h-3 bg-gradient-to-t from-foreground/15 to-transparent transition-opacity',
+          'pointer-events-none absolute inset-x-0 bottom-0 z-10 h-3 bg-linear-to-t from-foreground/15 to-transparent transition-opacity',
           canScrollDown && showScrollHint ? 'opacity-100' : 'opacity-0',
         )}
       />
       <div
         data-slot="scroll-area-shadow-left"
         className={cn(
-          'pointer-events-none absolute inset-y-0 left-0 z-10 w-3 bg-gradient-to-r from-foreground/15 to-transparent transition-opacity',
+          'pointer-events-none absolute inset-y-0 left-0 z-10 w-3 bg-linear-to-r from-foreground/15 to-transparent transition-opacity',
           canScrollLeft && showScrollHint ? 'opacity-100' : 'opacity-0',
         )}
       />
       <div
         data-slot="scroll-area-shadow-right"
         className={cn(
-          'pointer-events-none absolute inset-y-0 right-0 z-10 w-3 bg-gradient-to-l from-foreground/15 to-transparent transition-opacity',
+          'pointer-events-none absolute inset-y-0 right-0 z-10 w-3 bg-linear-to-l from-foreground/15 to-transparent transition-opacity',
           canScrollRight && showScrollHint ? 'opacity-100' : 'opacity-0',
         )}
       />
@@ -198,7 +198,7 @@ function ScrollBar({
         data-slot="scroll-area-thumb"
         className={cn(
           'relative flex-1 rounded-full bg-[rgba(0,0,0,0.44)] transition-[background-color,opacity,height,width] before:absolute before:inset-[-6px] before:rounded-full before:bg-transparent group-hover/scrollbar:bg-[rgba(0,0,0,0.55)] group-active/scrollbar:bg-[rgba(0,0,0,0.66)]',
-          !show && '!opacity-0',
+          !show && 'opacity-0!',
         )}
       />
     </ScrollAreaPrimitive.ScrollAreaScrollbar>
