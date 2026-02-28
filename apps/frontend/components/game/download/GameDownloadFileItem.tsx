@@ -175,9 +175,9 @@ export const GameDownloadFileItem = ({
               </Badge>
             )}
           </div>
-          <div className="text-muted-foreground text-xs flex items-center gap-1 wrap-break-word break-all">
+          <div className="text-muted-foreground text-xs flex items-center gap-1 break-words break-all">
             <Hash className="size-3 shrink-0" />
-            <span className="wrap-break-word break-all">
+            <span className="break-words break-all">
               {file.hash_algorithm === 'blake3' ? 'BLAKE3' : 'SHA-256'} {file.file_hash}
             </span>
             <CopyButton content={file.file_hash} size="xs" variant="ghost" />
@@ -221,7 +221,7 @@ export const GameDownloadFileItem = ({
                 </Tooltip>
               </div>
             </PopoverTrigger>
-            <PopoverContent forceMount className="w-[320px] h-[170px] z-70" sideOffset={8}>
+            <PopoverContent forceMount className="w-[320px] h-[170px] z-[70]" sideOffset={8}>
               <GetDownloadLink
                 fileId={file.id}
                 ref={downloadLinkRef}

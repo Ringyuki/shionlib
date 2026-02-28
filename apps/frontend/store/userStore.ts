@@ -3,7 +3,6 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import { SupportedLocales, supportedLocalesEnum } from '@/config/i18n/supported'
 import { UserRole } from '@/interfaces/user/user.interface'
 import { shionlibRequest } from '@/utils/request'
-import { clearAuthSessionExpiry } from '@/utils/auth/session-expiry'
 
 interface ShionlibUserInfo {
   id: number
@@ -48,7 +47,6 @@ export const useShionlibUserStore = create<ShionlibUserStore>()(
         })),
       logout: async (needRequest = true) => {
         needRequest && (await shionlibRequest().post('/auth/logout'))
-        clearAuthSessionExpiry()
         set(() => ({
           user: initialUser,
         }))

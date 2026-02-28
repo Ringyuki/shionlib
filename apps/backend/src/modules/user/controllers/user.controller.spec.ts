@@ -38,18 +38,13 @@ describe('UserController', () => {
 
   it('login sets access and refresh cookies', async () => {
     const { controller, userService } = createController()
-    userService.login.mockResolvedValue({
-      token: 'access-token',
-      refresh_token: 'refresh-token',
-      tokenExp: new Date('2026-02-28T10:00:00.000Z'),
-      refreshTokenExp: new Date('2026-03-07T10:00:00.000Z'),
-    })
+    userService.login.mockResolvedValue({ token: 'access-token', refresh_token: 'refresh-token' })
 
     const response = { setHeader: jest.fn() }
     const loginDto = { identifier: 'a', password: 'b' }
     const request = { ip: '127.0.0.1' }
 
-    const result = await controller.login(loginDto as any, request as any, response as any)
+    await controller.login(loginDto as any, request as any, response as any)
 
     expect(userService.login).toHaveBeenCalledWith(loginDto, request)
     expect(response.setHeader).toHaveBeenCalledTimes(1)
@@ -63,10 +58,6 @@ describe('UserController', () => {
         expect.stringContaining('Max-Age=604800'),
       ]),
     )
-    expect(result).toEqual({
-      accessTokenExpiresAt: '2026-02-28T10:00:00.000Z',
-      refreshTokenExpiresAt: '2026-03-07T10:00:00.000Z',
-    })
   })
 
   it('delegates getProfile', async () => {

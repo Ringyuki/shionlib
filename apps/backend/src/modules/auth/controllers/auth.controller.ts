@@ -8,12 +8,6 @@ import { ForgetPasswordReqDto } from '../dto/req/forget-password.req.dto'
 import { PasswordService } from '../services/password.service'
 import { CheckForgetPasswordReqDto } from '../dto/req/check.req.dto'
 import { ResetPasswordReqDto } from '../dto/req/reset-password.req.dto'
-import { AuthSessionResDto } from '../dto/res/auth-session.res.dto'
-import {
-  buildAuthSessionResponse,
-  clearAuthCookies,
-  setAuthCookies,
-} from '../helpers/auth-session-response.helper'
 
 @Controller('auth')
 export class AuthController {
@@ -28,14 +22,16 @@ export class AuthController {
   async refreshToken(
     @Req() request: RequestWithUser,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<AuthSessionResDto> {
-    const authSession = await this.userService.refreshToken(
+  ) {
+    const { token, refresh_token } = await this.userService.refreshToken(
       request.cookies['shionlib_refresh_token'],
       request,
     )
 
-    setAuthCookies(response, this.configService, authSession)
-    return buildAuthSessionResponse(authSession)
+    response.setHeader('Set-Cookie', [
+      `shionlib_access_token=${token}; HttpOnly; Secure ; SameSite=Lax; Path=/; Max-Age=${this.configService.get('token.expiresIn')}`,
+      `shionlib_refresh_token=${refresh_token}; HttpOnly; Secure ; SameSite=Lax; Path=/; Max-Age=${this.configService.get('refresh_token.shortWindowSec')}`,
+    ])
   }
 
   @Post('logout')
@@ -43,7 +39,10 @@ export class AuthController {
   async logout(@Req() request: RequestWithUser, @Res({ passthrough: true }) response: Response) {
     await this.loginSessionService.logout(request.cookies['shionlib_refresh_token'])
 
-    clearAuthCookies(response)
+    response.setHeader('Set-Cookie', [
+      'shionlib_access_token=; HttpOnly; Secure ; SameSite=Lax; Path=/; Max-Age=0',
+      'shionlib_refresh_token=; HttpOnly; Secure ; SameSite=Lax; Path=/; Max-Age=0',
+    ])
   }
 
   @Post('password/forget')

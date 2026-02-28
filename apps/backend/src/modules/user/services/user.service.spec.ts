@@ -266,12 +266,7 @@ describe('UserService', () => {
       status: UserStatus.ACTIVE,
     })
     verifyPasswordMock.mockResolvedValue(true)
-    loginSessionService.issueOnLogin.mockResolvedValue({
-      token: 't1',
-      tokenExp: new Date('2026-02-28T10:00:00.000Z'),
-      refreshToken: 'r1',
-      refreshTokenExp: new Date('2026-03-07T10:00:00.000Z'),
-    })
+    loginSessionService.issueOnLogin.mockResolvedValue({ token: 't1', refreshToken: 'r1' })
 
     const result = await service.login(
       { identifier: 'alice', password: 'pass' } as any,
@@ -288,12 +283,7 @@ describe('UserService', () => {
       where: { id: 1 },
       data: { last_login_at: expect.any(Date) },
     })
-    expect(result).toEqual({
-      token: 't1',
-      refresh_token: 'r1',
-      tokenExp: new Date('2026-02-28T10:00:00.000Z'),
-      refreshTokenExp: new Date('2026-03-07T10:00:00.000Z'),
-    })
+    expect(result).toEqual({ token: 't1', refresh_token: 'r1' })
   })
 
   it('refreshToken validates input and delegates to loginSessionService', async () => {
@@ -304,12 +294,7 @@ describe('UserService', () => {
       status: HttpStatus.UNAUTHORIZED,
     })
 
-    loginSessionService.refresh.mockResolvedValue({
-      token: 'new-t',
-      tokenExp: new Date('2026-02-28T11:00:00.000Z'),
-      refreshToken: 'new-r',
-      refreshTokenExp: new Date('2026-03-07T11:00:00.000Z'),
-    })
+    loginSessionService.refresh.mockResolvedValue({ token: 'new-t', refreshToken: 'new-r' })
     const result = await service.refreshToken('old-r', {
       headers: { 'cf-connecting-ip': '2.2.2.2', 'user-agent': 'ua-2' },
     } as any)
@@ -318,12 +303,7 @@ describe('UserService', () => {
       ip: '2.2.2.2',
       user_agent: 'ua-2',
     })
-    expect(result).toEqual({
-      token: 'new-t',
-      refresh_token: 'new-r',
-      tokenExp: new Date('2026-02-28T11:00:00.000Z'),
-      refreshTokenExp: new Date('2026-03-07T11:00:00.000Z'),
-    })
+    expect(result).toEqual({ token: 'new-t', refresh_token: 'new-r' })
   })
 
   it('getMe, checkName and getById work with expected mappings', async () => {

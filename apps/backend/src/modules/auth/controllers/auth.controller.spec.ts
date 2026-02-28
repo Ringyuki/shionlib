@@ -40,13 +40,11 @@ describe('AuthController', () => {
     userService.refreshToken.mockResolvedValue({
       token: 'access-token',
       refresh_token: 'refresh-token',
-      tokenExp: new Date('2026-02-28T10:00:00.000Z'),
-      refreshTokenExp: new Date('2026-03-07T10:00:00.000Z'),
     })
     const request = { cookies: { shionlib_refresh_token: 'old-refresh' } }
     const response = { setHeader: jest.fn() }
 
-    const result = await controller.refreshToken(request as any, response as any)
+    await controller.refreshToken(request as any, response as any)
 
     expect(userService.refreshToken).toHaveBeenCalledWith('old-refresh', request)
     expect(response.setHeader).toHaveBeenCalledTimes(1)
@@ -60,10 +58,6 @@ describe('AuthController', () => {
         expect.stringContaining('Max-Age=604800'),
       ]),
     )
-    expect(result).toEqual({
-      accessTokenExpiresAt: '2026-02-28T10:00:00.000Z',
-      refreshTokenExpiresAt: '2026-03-07T10:00:00.000Z',
-    })
   })
 
   it('logout revokes session and clears cookies', async () => {
