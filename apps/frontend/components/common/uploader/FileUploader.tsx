@@ -17,7 +17,6 @@ import { FileList } from './FileList'
 import { UploadStatus } from './UploadStatus'
 import { useTranslations } from 'next-intl'
 import { AllowedLargeArchiveFileExtensions } from '@/enums/upload/allowed-large-file.enum'
-// import { toast } from 'react-hot-toast'
 import { sileo } from 'sileo'
 import { Upload as UploadIcon } from 'lucide-react'
 import { OnGoingSession } from '@/components/game/upload/OnGoingSession'
@@ -70,36 +69,38 @@ export function FileUploader({
     setEtaSec(null)
   }
 
-  const attachListeners = React.useCallback((uploader: ShionlibLargeFileUploader) => {
-    const unsubs: Array<() => void> = []
-    const unsub = uploader.on((e: UploaderEvents) => {
-      if (e.type === 'status') {
-        console.log('set phase', e.phase)
-        setPhase(e.phase)
-      }
-      if (e.type === 'hash-progress') {
-        setBytesHashed(e.bytesHashed)
-        setTotalBytes(e.totalBytes)
-      }
-      if (e.type === 'progress') {
-        setBytesUploaded(e.bytesUploaded)
-        setTotalBytes(e.totalBytes)
-        setSpeedBps(e.speedBps)
-        setEtaSec(e.etaSec)
-      }
-      if (e.type === 'done') handleComplete()
-      if (e.type === 'file-mismatch') {
-        // toast.error(t('fileMismatch'))
-        sileo.error({ title: t('fileMismatch') })
-        setPhase('idle')
-        resetProgress(null)
-        setFile(null)
-        setPendingSessionId(null)
-      }
-    })
-    unsubs.push(unsub)
-    return () => unsubs.forEach(fn => fn())
-  }, [])
+  const attachListeners = React.useCallback(
+    (uploader: ShionlibLargeFileUploader) => {
+      const unsubs: Array<() => void> = []
+      const unsub = uploader.on((e: UploaderEvents) => {
+        if (e.type === 'status') {
+          console.log('set phase', e.phase)
+          setPhase(e.phase)
+        }
+        if (e.type === 'hash-progress') {
+          setBytesHashed(e.bytesHashed)
+          setTotalBytes(e.totalBytes)
+        }
+        if (e.type === 'progress') {
+          setBytesUploaded(e.bytesUploaded)
+          setTotalBytes(e.totalBytes)
+          setSpeedBps(e.speedBps)
+          setEtaSec(e.etaSec)
+        }
+        if (e.type === 'done') handleComplete()
+        if (e.type === 'file-mismatch') {
+          sileo.error({ title: t('fileMismatch') })
+          setPhase('idle')
+          resetProgress(null)
+          setFile(null)
+          setPendingSessionId(null)
+        }
+      })
+      unsubs.push(unsub)
+      return () => unsubs.forEach(fn => fn())
+    },
+    [t],
+  )
 
   const createUploader = React.useCallback(() => {
     if (!file) return null
@@ -148,11 +149,9 @@ export function FileUploader({
     console.log('file reject', message)
     console.log('file mime type', f.type)
     if (message === 'File too small') {
-      // toast.error(t('fileTooSmall', { size: 200 }))
       sileo.error({ title: t('fileTooSmall', { size: 200 }) })
       return
     }
-    // toast.error(t('invalidFileFormat'))
     sileo.error({ title: t('invalidFileFormat') })
   }
   React.useEffect(() => {

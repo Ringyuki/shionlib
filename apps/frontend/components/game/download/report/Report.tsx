@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { shionlibRequest } from '@/utils/request'
-// import toast from 'react-hot-toast'
 import { sileo } from 'sileo'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -55,7 +54,6 @@ export const Report = ({ id, onSuccess, open, onOpenChange, onLoadingChange }: R
           detail: data.detail?.trim() || undefined,
         },
       })
-      // toast.success(t('success'))
       sileo.success({ title: t('success') })
       onOpenChange(false)
       onSuccess(id)

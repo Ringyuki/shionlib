@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useCallback } from 'react'
 import { TurnstileProps, TURNSTILE_CONSTANTS } from './types/types'
-// import { toast } from 'react-hot-toast'
 import { sileo } from 'sileo'
 import { useTranslations } from 'next-intl'
 import { useTheme } from 'next-themes'
@@ -53,7 +52,6 @@ export const Turnstile: React.FC<TurnstileProps> = ({
   const lang = locale === 'zh' ? 'zh-CN' : locale
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
   if (!siteKey) {
-    // toast.error(t('siteKeyNotSet'))
     sileo.error({ title: t('siteKeyNotSet') })
     onError?.('Site key not set')
   }
@@ -116,12 +114,10 @@ export const Turnstile: React.FC<TurnstileProps> = ({
       callback: onVerify,
       'error-callback': (error: unknown) => {
         onError?.(error)
-        // toast.error(t('error'))
         sileo.error({ title: t('error') })
       },
       'expired-callback': () => {
         onExpire?.()
-        // toast.error(t('error'))
         sileo.error({ title: t('error') })
       },
       'before-interactive-callback': onBeforeInteractive,
@@ -129,7 +125,6 @@ export const Turnstile: React.FC<TurnstileProps> = ({
       'unsupported-callback': onUnsupported,
       'timeout-callback': () => {
         onTimeout?.()
-        // toast.error(t('timeout'))
         sileo.error({ title: t('timeout') })
       },
       theme: resolvedTheme === 'dark' ? 'dark' : 'light',

@@ -7,7 +7,6 @@ import {
   HikariResponse,
   KunResponseError,
 } from '@/interfaces/patch/patch.interface'
-// import { toast } from 'react-hot-toast'
 import { sileo } from 'sileo'
 import { Patch as PatchComponent } from '../patch/Patch'
 
@@ -41,10 +40,8 @@ export const Patch = ({ v_id }: PatchProps) => {
       setOpen(true)
     } catch (error: any) {
       if (error instanceof KunResponseError) {
-        // toast.error(error.message)
         sileo.error({ title: error.message })
       } else {
-        // toast.error(t('error'))
         sileo.error({ title: t('error') })
       }
     } finally {

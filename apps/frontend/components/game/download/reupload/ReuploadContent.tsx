@@ -5,7 +5,6 @@ import { Phase } from '@/libs/uploader/types'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { shionlibRequest } from '@/utils/request'
-// import toast from 'react-hot-toast'
 import { sileo } from 'sileo'
 import { cn } from '@/utils/cn'
 import { UploadTuning } from '@/components/common/uploader/UploadTuning'
@@ -66,10 +65,8 @@ export const ReuploadContent = ({
   }
 
   const handleUploadComplete = async (sessionId: number) => {
-    // let toastId: string | undefined
     try {
       setSubmitting(true)
-      // toastId = toast.loading(t('submitting'))
       await sileo.promise(
         shionlibRequest().put(`/game/download-source/file/${file.id}/reupload`, {
           data: {
@@ -89,13 +86,10 @@ export const ReuploadContent = ({
           },
         },
       )
-      // toast.success(t('success'))
       onReuploadComplete()
     } catch {
-      // toast.error(t('error'))
     } finally {
       setSubmitting(false)
-      // toastId && toast.dismiss(toastId)
     }
   }
 

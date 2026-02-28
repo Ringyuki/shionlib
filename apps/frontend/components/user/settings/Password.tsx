@@ -14,7 +14,6 @@ import { useTranslations } from 'next-intl'
 import { useState, useRef } from 'react'
 import { shionlibRequest } from '@/utils/request'
 import { useShionlibUserStore } from '@/store/userStore'
-// import { toast } from 'react-hot-toast'
 import { sileo } from 'sileo'
 import { Lock } from 'lucide-react'
 import { useRouter } from '@/i18n/navigation.client'
@@ -43,7 +42,6 @@ export const PasswordSettings = () => {
           password: data.password,
         },
       })
-      // toast.success(t('success'))
       sileo.success({ title: t('success') })
       await logout()
     } catch {

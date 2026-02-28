@@ -1,7 +1,6 @@
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { shionlibRequest } from '@/utils/request'
-// import { toast } from 'react-hot-toast'
 import { sileo } from 'sileo'
 import { Minus } from 'lucide-react'
 import {
@@ -33,7 +32,6 @@ export const RemoveFromRecentUpdate = ({ game_id }: RemoveFromRecentUpdateProps)
     try {
       setLoading(true)
       await shionlibRequest().delete(`/admin/content/games/${game_id}/recent-update`)
-      // toast.success(t('success'))
       sileo.success({ title: t('success') })
       setOpen(false)
     } catch {

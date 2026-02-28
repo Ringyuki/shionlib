@@ -19,7 +19,6 @@ import { Button } from '@/components/shionui/Button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/shionui/Alert'
 import { useTranslations } from 'next-intl'
 import { useEffect } from 'react'
-// import { toast } from 'react-hot-toast'
 import { sileo } from 'sileo'
 import {
   Select,
@@ -60,7 +59,6 @@ export const Aria2 = () => {
       auth_secret: data.auth_secret,
       downloadPath: data.downloadPath,
     })
-    // toast.success(t('success'))
     sileo.success({ title: t('success') })
   }
 

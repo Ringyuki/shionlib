@@ -9,7 +9,6 @@ import { PaginatedResponse } from '@/interfaces/api/shionlib-api-res.interface'
 import { EditRecordItem } from '@/interfaces/user/edits.interface'
 import { HistoryContent } from '@/components/game/edit-history/HistoryContent'
 import { PaginatedMeta } from '@/interfaces/api/shionlib-api-res.interface'
-// import { toast } from 'react-hot-toast'
 import { sileo } from 'sileo'
 
 interface HistoryProps {
@@ -47,7 +46,6 @@ export const History = ({ character_id }: HistoryProps) => {
       setLoading(true)
       const res = await getHistories(character_id, page)
       if (!res?.items.length) {
-        // toast.error(t('no_history'))
         sileo.error({ title: t('no_history') })
         return
       }

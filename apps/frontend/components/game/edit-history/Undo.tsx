@@ -14,7 +14,6 @@ import {
   AlertDialogTrigger,
 } from '@/components/shionui/AlertDialog'
 import { useState } from 'react'
-// import { toast } from 'react-hot-toast'
 import { sileo } from 'sileo'
 import { UndoOption, UndoOptionComponent } from './UndoOptions'
 
@@ -41,7 +40,6 @@ export const Undo = ({ edit_id }: UndoProps) => {
         },
       })
       setOpen(false)
-      // toast.success(t('success'))
       sileo.success({ title: t('success') })
     } catch {
     } finally {

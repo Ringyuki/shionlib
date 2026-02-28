@@ -3,7 +3,6 @@
 import { useState, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { shionlibRequest } from '@/utils/request'
-// import { toast } from 'react-hot-toast'
 import { sileo } from 'sileo'
 import { DeveloperRelation } from '@/interfaces/game/game.interface'
 import { SearchDeveloper } from './developer/Search'
@@ -33,7 +32,6 @@ export const Developer = ({ initRelations, id }: DeveloperEditProps) => {
   }
 
   const handleAdd = async () => {
-    // toast.success(t('added'))
     sileo.success({ title: t('added') })
     await fetchRelations()
   }

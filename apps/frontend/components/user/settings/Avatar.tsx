@@ -16,7 +16,6 @@ import { AvatarSelector } from './AvatarSelector'
 import { useState } from 'react'
 import { shionlibRequest } from '@/utils/request'
 import { useShionlibUserStore } from '@/store/userStore'
-// import { toast } from 'react-hot-toast'
 import { sileo } from 'sileo'
 
 interface AvatarSettingsProps {
@@ -44,8 +43,8 @@ export const AvatarSettings = ({ avatar, name }: AvatarSettingsProps) => {
         data: formData,
       })
       updateUser({ avatar: data.data?.key ?? '' })
-      // toast.success(t('success'))
       sileo.success({ title: t('success') })
+      setInputAvatar(null)
     } catch {
     } finally {
       setIsUpdating(false)

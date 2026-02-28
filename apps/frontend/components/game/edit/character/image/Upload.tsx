@@ -2,7 +2,6 @@ import { Button } from '@/components/shionui/Button'
 import { Upload as UploadIcon } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { shionlibRequest } from '@/utils/request'
-// import { toast } from 'react-hot-toast'
 import { sileo } from 'sileo'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
@@ -44,7 +43,6 @@ export const ImageUpload = ({ onUpload, onTempUrl }: ImageUploadProps) => {
       if (response.data?.key) {
         onUpload(response.data.key)
         setFile(null)
-        // toast.success(t('success'))
         sileo.success({ title: t('success') })
       }
     } catch {

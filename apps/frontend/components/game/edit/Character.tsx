@@ -3,7 +3,6 @@
 import { useState, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { shionlibRequest } from '@/utils/request'
-// import { toast } from 'react-hot-toast'
 import { sileo } from 'sileo'
 import { GameCharacterRelation, GameCharacterRole } from '@/interfaces/game/game.interface'
 import { SearchCharacter } from './character/Search'
@@ -35,7 +34,6 @@ export const Character = ({ initRelations, id }: CharacterEditProps) => {
   }
 
   const handleAdd = async () => {
-    // toast.success(t('added'))
     sileo.success({ title: t('added') })
     await fetchRelations()
   }

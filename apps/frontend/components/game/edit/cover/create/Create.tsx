@@ -9,7 +9,6 @@ import { gameCoverSchemaType } from '../Form'
 import { GameCover } from '@/interfaces/game/game.interface'
 import { useParams } from 'next/navigation'
 import { shionlibRequest } from '@/utils/request'
-// import { toast } from 'react-hot-toast'
 import { sileo } from 'sileo'
 
 interface CreateProps {
@@ -40,7 +39,6 @@ export const Create = ({ onSuccess }: CreateProps) => {
           covers,
         },
       })
-      // toast.success(t('success'))
       sileo.success({ title: t('success') })
       onSuccess?.(data)
       editRef.current?.close()

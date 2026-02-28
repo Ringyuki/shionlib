@@ -7,7 +7,6 @@ import { CoverItem } from './Item'
 import { z } from 'zod'
 import { gameCoverSchemaType } from './Form'
 import { shionlibRequest } from '@/utils/request'
-// import toast from 'react-hot-toast'
 import { sileo } from 'sileo'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
@@ -64,7 +63,6 @@ export const Edit = forwardRef<EditRef, EditProps>(
             ...data,
           },
         })
-        // toast.success(t('success'))
         sileo.success({ title: t('success') })
         onSuccess?.(data, cover.id!)
         setOpen(false)

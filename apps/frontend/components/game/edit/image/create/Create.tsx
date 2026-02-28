@@ -9,7 +9,6 @@ import { gameImageSchemaType } from '../Form'
 import { GameImage } from '@/interfaces/game/game.interface'
 import { useParams } from 'next/navigation'
 import { shionlibRequest } from '@/utils/request'
-// import { toast } from 'react-hot-toast'
 import { sileo } from 'sileo'
 
 interface CreateProps {
@@ -38,7 +37,6 @@ export const Create = ({ onSuccess }: CreateProps) => {
           images,
         },
       })
-      // toast.success(t('success'))
       sileo.success({ title: t('success') })
       onSuccess?.(data)
       editRef.current?.close()

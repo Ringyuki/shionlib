@@ -20,7 +20,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, Control } from 'react-hook-form'
 import { useTranslations } from 'next-intl'
 import { forwardRef, useImperativeHandle, useState } from 'react'
-// import { toast } from 'react-hot-toast'
 import { sileo } from 'sileo'
 import { verficationCodeUtil } from '@/utils/verification-code'
 import { useCountdown } from '@/hooks/useCountdown'
@@ -57,7 +56,6 @@ export const VerifyNew = forwardRef(({ onSubmit }: VerifyNewProps, ref) => {
   const getVerifyCode = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     if (!form.getValues('new_email') || form.formState.errors.new_email) {
-      // toast.error(t('validation.email'))
       sileo.error({ title: t('validation.email') })
       form.setFocus('new_email')
       return
@@ -67,7 +65,6 @@ export const VerifyNew = forwardRef(({ onSubmit }: VerifyNewProps, ref) => {
       const data = await verficationCodeUtil().get(form.getValues('new_email'))
       if (data.data?.uuid) {
         setNewEmailCodeUuid(data.data.uuid)
-        // toast.success(t('verifyCodeSent'))
         sileo.success({ title: t('verifyCodeSent') })
         startCountdown()
       }

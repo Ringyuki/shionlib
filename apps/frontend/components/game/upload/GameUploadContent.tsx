@@ -7,7 +7,6 @@ import { gameDownloadSourceSchemaType } from '@/components/game/upload/GameDownl
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { shionlibRequest } from '@/utils/request'
-// import toast from 'react-hot-toast'
 import { sileo } from 'sileo'
 import { cn } from '@/utils/cn'
 import { UploadTuning } from '@/components/common/uploader/UploadTuning'
@@ -68,7 +67,6 @@ export const GameUploadContent = ({
   const [loading, setLoading] = useState(false)
   const handleSubmit = async (data: z.infer<typeof gameDownloadSourceSchemaType>) => {
     if (phase !== 'completed') {
-      // toast.error(t('waitForUploadCompleted'))
       sileo.error({ title: t('waitForUploadCompleted') })
       return
     }
@@ -81,7 +79,6 @@ export const GameUploadContent = ({
         },
       })
       onUploadComplete()
-      // toast.success(t('success'))
       sileo.success({ title: t('success') })
     } catch {
     } finally {

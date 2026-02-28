@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation'
 import { GetEmail, getEmailSchema } from './GetEmail'
 import { z } from 'zod'
 import { shionlibRequest } from '@/utils/request'
-// import { toast } from 'react-hot-toast'
 import { sileo } from 'sileo'
 import { useState } from 'react'
 import { useCountdown } from '@/hooks/useCountdown'
@@ -30,7 +29,6 @@ export const Forget = () => {
           email: data.email,
         },
       })
-      // toast.success(t('signSent'))
       sileo.success({ title: t('signSent') })
       startCountdown()
     } catch {
@@ -61,7 +59,6 @@ export const Forget = () => {
           password: data.password,
         },
       })
-      // toast.success(t('resetSuccess'))
       sileo.success({ title: t('resetSuccess') })
       await logout()
       router.push('/')

@@ -8,13 +8,12 @@ import { Badge } from '@/components/shionui/Badge'
 import { formatBytes } from '@/utils/format'
 import { useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-// import { toast } from 'react-hot-toast'
 import { sileo } from 'sileo'
 import { addUrl } from './helpers/aria2'
 import { useAria2Store } from '@/store/localSettingsStore'
 import { CopyButton } from '@/components/shionui/animated/CopyButton'
 import { GetDownloadLink, GetDownloadLinkHandle } from './libs/get-download-link'
-import { Link, useRouter } from '@/i18n/navigation.client'
+import { useRouter } from '@/i18n/navigation.client'
 import { Question } from '@/components/common/content/Question'
 
 interface GameDownloadFileItemProps {
@@ -66,14 +65,6 @@ export const GameDownloadFileItem = ({
       downloadPath,
     )
     if (!res.success) {
-      // toast.error(
-      //   <div className="flex flex-col gap-1">
-      //     <span>{t(res.message ?? 'aria2UnknownError')}</span>
-      //     <Link href="/user/settings/site" className="text-primary underline text-sm">
-      //       {t('goToSettings')}
-      //     </Link>
-      //   </div>,
-      // )
       sileo.error({
         title: t(res.message ?? 'aria2UnknownError'),
         description: t('goToSettingsDescription'),
@@ -89,7 +80,6 @@ export const GameDownloadFileItem = ({
       return
     }
 
-    // toast.success(t('downloadStarted'))
     sileo.success({ title: t('downloadStarted') })
     setPushToAria2Loading(false)
   }
@@ -106,12 +96,10 @@ export const GameDownloadFileItem = ({
     a.click()
     document.body.removeChild(a)
 
-    // toast.success(t('downloadStarted'))
     sileo.success({ title: t('downloadStarted') })
   }
 
   const handleTurnstileCancel = () => {
-    console.log('handleTurnstileCancel')
     downloadLinkRef.current?.cancelRequest?.()
     setTurnstileOpen(false)
     onTurnstileOpenChange(false)

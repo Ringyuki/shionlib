@@ -19,7 +19,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/shionui/Form'
-// import { toast } from 'react-hot-toast'
 import { sileo } from 'sileo'
 import { useState } from 'react'
 import { shionlibRequest } from '@/utils/request'
@@ -75,7 +74,6 @@ export const Register = ({ onSuccess }: RegisterProps) => {
   const getVerifyCode = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     if (!form.getValues('email') || form.formState.errors.email) {
-      // toast.error(t('validation.email'))
       sileo.error({ title: t('validation.email') })
       form.setFocus('email')
       return
@@ -85,11 +83,9 @@ export const Register = ({ onSuccess }: RegisterProps) => {
       const data = await verficationCodeUtil().get(form.getValues('email'))
       if (data.data?.uuid) {
         setVerifyCodeUuid(data.data.uuid)
-        // toast.success(t('verifyCodeSent'))
         sileo.success({ title: t('verifyCodeSent') })
         startCountdown()
       } else {
-        // toast.error(t('verifyCodeSentError'))
         sileo.error({ title: t('verifyCodeSentError') })
       }
     } catch {
@@ -113,7 +109,6 @@ export const Register = ({ onSuccess }: RegisterProps) => {
         },
       })
       onSuccess?.()
-      // toast.success(t('success'))
       sileo.success({ title: t('success') })
     } catch {
     } finally {

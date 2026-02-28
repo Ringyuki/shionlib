@@ -24,7 +24,6 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/shionui/Alert'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { shionlibRequest } from '@/utils/request'
-// import { toast } from 'react-hot-toast'
 import { sileo } from 'sileo'
 import { VenusAndMars } from 'lucide-react'
 import { useShionlibUserStore } from '@/store/userStore'
@@ -51,7 +50,6 @@ export const ContentLimit = ({ initialContentLimit }: ContentLimitProps) => {
       await shionlibRequest().post('/user/info/content-limit', {
         data: { content_limit: Number(contentLimit) },
       })
-      // toast.success(t('success'))
       sileo.success({
         title: t('success'),
         description: t('tipsDescription'),
