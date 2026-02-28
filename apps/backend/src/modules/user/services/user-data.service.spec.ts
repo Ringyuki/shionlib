@@ -341,7 +341,18 @@ describe('UserDataService', () => {
     expect(prisma.editRecord.count).toHaveBeenCalledWith({ where: { actor_id: 7 } })
     expect(prisma.game.findMany).toHaveBeenCalledWith({
       where: { id: { in: [101] } },
-      select: { id: true, title_jp: true, title_zh: true, title_en: true },
+      select: {
+        id: true,
+        title_jp: true,
+        title_zh: true,
+        title_en: true,
+        intro_jp: true,
+        intro_zh: true,
+        intro_en: true,
+        covers: {
+          select: { url: true, language: true, dims: true, sexual: true, violence: true },
+        },
+      },
     })
     expect(prisma.gameCharacter.findMany).toHaveBeenCalledWith({
       where: { id: { in: [201] } },

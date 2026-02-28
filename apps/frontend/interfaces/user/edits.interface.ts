@@ -1,4 +1,6 @@
-type EditActionType =
+import { GameCover } from '../game/game.interface'
+
+export type EditActionType =
   | 'UPDATE_SCALAR'
   | 'ADD_RELATION'
   | 'REMOVE_RELATION'
@@ -12,6 +14,10 @@ export interface GameEntityInfo {
   title_jp: string
   title_zh: string
   title_en: string
+  intro_jp: string
+  intro_zh: string
+  intro_en: string
+  covers: GameCover[]
 }
 
 export interface CharacterEntityInfo {

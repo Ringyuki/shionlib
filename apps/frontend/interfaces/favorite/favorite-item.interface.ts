@@ -8,6 +8,9 @@ export interface FavoriteItem {
     title_jp: string
     title_zh: string
     title_en: string
+    intro_jp: string
+    intro_zh: string
+    intro_en: string
     platform: Platform[]
     type: string
     tags: string[]

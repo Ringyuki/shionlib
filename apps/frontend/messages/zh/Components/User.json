@@ -238,9 +238,8 @@
     },
     "Uploads": {
       "ResourceItem": {
-        "created": "上传于",
-        "moreThanOneFilePrefix": "等",
-        "moreThanOneFileSuffix": "个文件"
+        "uploaded_at": "上传于",
+        "more_than_one_file": "等 {count} 个文件"
       }
     },
     "HomeTabsNav": {
@@ -332,6 +331,11 @@
             }
           }
         }
+      }
+    },
+    "Comments": {
+      "CommentContent": {
+        "comment_at": "评论在"
       }
     }
   }

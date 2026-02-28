@@ -120,8 +120,8 @@ export const UserWalkthroughItem = ({ walkthrough, content_limit }: UserWalkthro
 
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex items-center gap-2">
-              <Avatar user={walkthrough.creator} className="size-5" />
-              <span className="text-sm text-muted-foreground">{walkthrough.creator.name}</span>
+              <Avatar user={walkthrough.creator} className="size-6" />
+              <span className="text-sm">{walkthrough.creator.name}</span>
             </div>
             <span className="text-xs text-muted-foreground">
               {timeFromNow(walkthrough.created, locale)}

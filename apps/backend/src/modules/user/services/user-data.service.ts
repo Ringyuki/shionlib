@@ -36,6 +36,9 @@ export class UserDataService {
     const resources = await this.prismaService.gameDownloadResource.findMany({
       skip: (page - 1) * pageSize,
       take: pageSize,
+      orderBy: {
+        created: 'desc',
+      },
       where: {
         creator_id: user_id,
         ...where,
@@ -53,24 +56,22 @@ export class UserDataService {
         },
         created: true,
         updated: true,
+        creator: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
         game: {
           select: {
             id: true,
             title_jp: true,
             title_zh: true,
             title_en: true,
-            developers: {
-              select: {
-                role: true,
-                developer: {
-                  select: {
-                    id: true,
-                    name: true,
-                    aliases: true,
-                  },
-                },
-              },
-            },
+            intro_jp: true,
+            intro_zh: true,
+            intro_en: true,
             covers: {
               select: {
                 url: true,
@@ -115,6 +116,7 @@ export class UserDataService {
         more_than_one_file: r.files.length > 1,
         files_count: r.files.length,
         game: r.game,
+        creator: r.creator,
         created: r.created,
         updated: r.updated,
       })) as unknown as GameResourcesResDto[],
@@ -163,7 +165,20 @@ export class UserDataService {
         },
         liked_users: { where: { id: req.user?.sub || 0 }, select: { id: true }, take: 1 },
         _count: { select: { liked_users: true } },
-        game: { select: { id: true, title_jp: true, title_zh: true, title_en: true } },
+        game: {
+          select: {
+            id: true,
+            title_jp: true,
+            title_zh: true,
+            title_en: true,
+            intro_jp: true,
+            intro_zh: true,
+            intro_en: true,
+            covers: {
+              select: { url: true, language: true, dims: true, sexual: true, violence: true },
+            },
+          },
+        },
         creator: {
           select: {
             id: true,
@@ -347,7 +362,18 @@ export class UserDataService {
       gameIds.size > 0
         ? this.prismaService.game.findMany({
             where: { id: { in: Array.from(gameIds) } },
-            select: { id: true, title_jp: true, title_zh: true, title_en: true },
+            select: {
+              id: true,
+              title_jp: true,
+              title_zh: true,
+              title_en: true,
+              intro_jp: true,
+              intro_zh: true,
+              intro_en: true,
+              covers: {
+                select: { url: true, language: true, dims: true, sexual: true, violence: true },
+              },
+            },
           })
         : [],
       characterIds.size > 0

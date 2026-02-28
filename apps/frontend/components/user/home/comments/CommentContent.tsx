@@ -1,44 +1,58 @@
 'use client'
 
 import { Comment } from '@/interfaces/comment/comment.interface'
-import { CommentItem } from '@/components/common/comment/CommentItem'
-import { useRouter, Link } from '@/i18n/navigation.client'
-import { getPreferredContent } from '@/components/game/description/helpers/getPreferredContent'
-import { GameData } from '@/interfaces/game/game.interface'
+import { Link } from '@/i18n/navigation.client'
+import { GameEmbeddedCard, EmbeddedGame } from '@/components/game/GameEmbeddedCard'
+import { Card, CardContent } from '@/components/shionui/Card'
+import { Avatar } from '@/components/common/user/Avatar'
+import { timeFromNow } from '@/utils/time-format'
 import { useLocale } from 'next-intl'
+import { getPreferredContent } from '@/components/game/description/helpers/getPreferredContent'
+import { useTranslations } from 'next-intl'
 
 interface CommentContentProps {
   comments: Comment[]
   is_current_user: boolean
 }
 
-export const CommentContent = ({ comments, is_current_user }: CommentContentProps) => {
-  const router = useRouter()
+export const CommentContent = ({ comments }: CommentContentProps) => {
   const locale = useLocale()
-  const langMap = { en: 'en', ja: 'jp', zh: 'zh' } as const
-  const lang = langMap[locale as keyof typeof langMap] ?? 'jp'
+  const t = useTranslations('Components.User.Home.Comments.CommentContent')
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       {comments.map(comment => {
-        const { title } = getPreferredContent(comment.game as unknown as GameData, 'title', lang)
+        const langMap = { en: 'en', ja: 'jp', zh: 'zh' } as const
+        const lang = langMap[locale as keyof typeof langMap] ?? 'jp'
+        const { title } = getPreferredContent(comment.game!, 'title', lang)
         return (
-          <Link
-            href={`/game/${comment.game?.id}/comments#data-comment-id-${comment.id}`}
-            key={comment.id}
-            className="hover:opacity-85 transition-all duration-200"
-          >
-            <CommentItem
-              comment={comment}
-              likeable={false}
-              showReplyBtn={false}
-              showDeleteBtn={false}
-              showEditBtn={is_current_user}
-              canScrollToParent={false}
-              onEdited={() => router.refresh()}
-              showSource={true}
-              sourceTitle={title}
-            />
-          </Link>
+          <Card key={comment.id} className="py-0">
+            <CardContent className="p-4 flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <Avatar user={comment.creator} className="size-8 text-xs" />
+                <div className="flex flex-col">
+                  <span className="flex items-center gap-2">
+                    <span className="text-sm font-medium">{comment.creator.name}</span>
+                    <span className="text-xs font-light">
+                      {t('comment_at')} {title}
+                    </span>
+                  </span>
+                  <span className="text-xs font-light">{timeFromNow(comment.created, locale)}</span>
+                </div>
+              </div>
+
+              <Link
+                href={`/game/${comment.game?.id}/comments#data-comment-id-${comment.id}`}
+                className="block hover:opacity-85 transition-opacity duration-200"
+              >
+                <div
+                  className="text-sm prose prose-sm dark:prose-invert max-w-none line-clamp-4"
+                  dangerouslySetInnerHTML={{ __html: comment.html }}
+                />
+              </Link>
+
+              {comment.game && <GameEmbeddedCard game={comment.game as EmbeddedGame} />}
+            </CardContent>
+          </Card>
         )
       })}
     </div>

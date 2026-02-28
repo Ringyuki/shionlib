@@ -1,3 +1,5 @@
+import { GameCover } from '../game/game.interface'
+
 export enum CommentStatus {
   VISIBLE = 1,
   HIDDEN = 2,
@@ -22,10 +24,14 @@ export interface Comment {
   like_count: number
   is_liked: boolean
   game?: {
+    id: number
     title_zh: string
     title_jp: string
     title_en: string
-    id: number
+    intro_jp: string
+    intro_zh: string
+    intro_en: string
+    covers: GameCover[]
   }
   creator: {
     id: number

@@ -14,6 +14,12 @@ export interface GameResourcesItem {
   created: string
   updated: string
 
+  creator: {
+    id: number
+    name: string
+    avatar: string
+  }
+
   game: GameResourcesGame
 }
 
@@ -22,6 +28,8 @@ export interface GameResourcesGame {
   title_jp: string
   title_zh: string
   title_en: string
-  developers: DeveloperRelation[]
+  intro_jp: string
+  intro_zh: string
+  intro_en: string
   covers: GameCover[]
 }

@@ -1,3 +1,5 @@
+import { GameCover } from '@/interfaces/game/game.interface'
+
 export enum MessageType {
   COMMENT_REPLY = 'COMMENT_REPLY',
   COMMENT_LIKE = 'COMMENT_LIKE',
@@ -39,6 +41,10 @@ export interface Message {
     title_zh: string
     title_en: string
     title_jp: string
+    intro_jp: string
+    intro_zh: string
+    intro_en: string
+    covers: GameCover[]
   } | null
   sender?: {
     id: number

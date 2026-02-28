@@ -238,9 +238,8 @@
     },
     "Uploads": {
       "ResourceItem": {
-        "created": "Uploaded at",
-        "moreThanOneFilePrefix": "etc.",
-        "moreThanOneFileSuffix": "files"
+        "uploaded_at": "Uploaded at",
+        "more_than_one_file": "etc. {count} files"
       }
     },
     "HomeTabsNav": {
@@ -332,6 +331,11 @@
             }
           }
         }
+      }
+    },
+    "Comments": {
+      "CommentContent": {
+        "comment_at": "Commented at"
       }
     }
   }

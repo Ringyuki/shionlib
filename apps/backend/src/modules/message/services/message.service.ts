@@ -164,6 +164,19 @@ export class MessageService {
               title_zh: true,
               title_en: true,
               title_jp: true,
+              intro_jp: true,
+              intro_zh: true,
+              intro_en: true,
+              covers: {
+                select: {
+                  language: true,
+                  url: true,
+                  type: true,
+                  dims: true,
+                  sexual: true,
+                  violence: true,
+                },
+              },
             },
           },
           sender: {

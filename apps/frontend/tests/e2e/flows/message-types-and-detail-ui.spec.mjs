@@ -133,6 +133,6 @@ test.describe('Message type switch and detail UI', () => {
     await messageCard.click()
 
     await expect(page.getByRole('heading', { name: 'Message Details' })).toBeVisible()
-    await expect(page.getByText('From Game')).toBeVisible()
+    await expect(page.locator('a[href*="/game/"]').last()).toBeVisible()
   })
 })

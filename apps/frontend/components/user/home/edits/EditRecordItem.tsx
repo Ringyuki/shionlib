@@ -12,6 +12,7 @@ import {
 import { GameData, GameCharacter } from '@/interfaces/game/game.interface'
 import { EditChanges } from './EditChanges'
 import { Separator } from '@/components/shionui/Separator'
+import { GameEmbeddedCard } from '@/components/game/GameEmbeddedCard'
 
 interface EditRecordItemProps {
   record: EditRecordItemInterface
@@ -116,6 +117,9 @@ export const EditRecordItem = async ({ record }: EditRecordItemProps) => {
           )}
           <Separator />
           {record.changes && <EditChanges changes={record.changes} />}
+          {record.entity === 'game' && record.entity_info && (
+            <GameEmbeddedCard game={record.entity_info as GameData} />
+          )}
         </div>
       </CardContent>
     </Card>
