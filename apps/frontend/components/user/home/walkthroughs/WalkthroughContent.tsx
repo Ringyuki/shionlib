@@ -30,14 +30,14 @@ export const WalkthroughContent = ({
     <div className="flex flex-col gap-4">
       {is_current_user && <WalkthroughsNav userId={userId} activeStatus={activeStatus} />}
       {walkthroughs.length > 0 ? (
-        <div className="flex flex-col gap-6">
-          {walkthroughs.map(walkthrough => {
-            return (
-              <div key={walkthrough.id} className="flex flex-col gap-2">
-                <UserWalkthroughItem walkthrough={walkthrough} content_limit={content_limit} />
-              </div>
-            )
-          })}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {walkthroughs.map(walkthrough => (
+            <UserWalkthroughItem
+              key={walkthrough.id}
+              walkthrough={walkthrough}
+              content_limit={content_limit}
+            />
+          ))}
         </div>
       ) : (
         <Empty title={t('empty')} />

@@ -14,7 +14,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { UpdateEmailReqDto } from '../dto/req/update-email.req.dto'
 import { UpdateNameReqDto } from '../dto/req/update-name.req.dto'
-import { UpdateCoverReqDto } from '../dto/req/update-cover.req.dto'
+import { UpdateBioReqDto } from '../dto/req/update-bio.req.dto'
 import { UpdatePasswordReqDto } from '../dto/req/update-password.req.dto'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
@@ -48,8 +48,31 @@ export class UserInfoController {
   }
 
   @Post('cover')
-  async updateCover(@Body() dto: UpdateCoverReqDto, @Req() request: RequestWithUser) {
-    return await this.userInfoService.updateCover(dto.cover, request.user.sub)
+  @UseInterceptors(
+    FileInterceptor('cover', {
+      storage: memoryStorage(),
+      limits: { fileSize: 5 * 1024 * 1024 },
+      fileFilter: (_req, file, cb) => {
+        const ok = /^image\/(jpeg|png|webp|avif)$/.test(file.mimetype)
+        cb(
+          ok
+            ? null
+            : new ShionBizException(
+                ShionBizCode.SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE,
+                'shion-biz.SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE',
+              ),
+          ok,
+        )
+      },
+    }),
+  )
+  async updateCover(@UploadedFile() file: Express.Multer.File, @Req() request: RequestWithUser) {
+    return await this.userInfoService.updateCover(file, request.user.sub)
+  }
+
+  @Post('bio')
+  async updateBio(@Body() dto: UpdateBioReqDto, @Req() request: RequestWithUser) {
+    return await this.userInfoService.updateBio(dto.bio, request.user.sub)
   }
 
   @Post('name')

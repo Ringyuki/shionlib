@@ -1,5 +1,6 @@
 import { FavoriteContent } from '@/components/user/home/favorites/FavoriteContent'
 import { FavoriteItemsHeader } from '@/components/user/home/favorites/FavoriteItemsHeader'
+import { FavoriteSidebar } from '@/components/user/home/favorites/FavoriteSidebar'
 import { Empty } from '@/components/common/content/Empty'
 import { shionlibRequest } from '@/utils/request'
 import { PaginatedResponse } from '@/interfaces/api/shionlib-api-res.interface'
@@ -55,24 +56,29 @@ export default async function UserFavoritesPage({ params, searchParams }: UserFa
 
   const itemsData = await getFavoriteItems(selectedFavorite.id, { page })
   return (
-    <div className="flex flex-col gap-6">
-      <FavoriteItemsHeader favorite={selectedFavorite} currentUser={currentUser} userId={id} />
-      {itemsData.data?.items?.length ? (
-        <>
-          <FavoriteContent
-            favorites={itemsData.data?.items ?? []}
-            content_limit={itemsData.data?.meta?.content_limit}
-          />
-          <Pagination
-            className="mt-4"
-            currentPage={itemsData.data?.meta?.currentPage ?? 1}
-            totalPages={itemsData.data?.meta?.totalPages ?? 1}
-            extraQuery={{ folder: selectedFavorite.id }}
-          />
-        </>
-      ) : (
-        <Empty />
-      )}
+    <div className="flex flex-col md:flex-row gap-6 items-start">
+      <div className="w-full md:w-56 md:shrink-0 md:sticky md:top-36">
+        <FavoriteSidebar userId={id} currentUser={currentUser} favorites={favorites ?? []} />
+      </div>
+      <div className="flex-1 flex flex-col gap-4">
+        <FavoriteItemsHeader favorite={selectedFavorite} currentUser={currentUser} userId={id} />
+        {itemsData.data?.items?.length ? (
+          <>
+            <FavoriteContent
+              favorites={itemsData.data?.items ?? []}
+              content_limit={itemsData.data?.meta?.content_limit}
+            />
+            <Pagination
+              className="mt-4"
+              currentPage={itemsData.data?.meta?.currentPage ?? 1}
+              totalPages={itemsData.data?.meta?.totalPages ?? 1}
+              extraQuery={{ folder: selectedFavorite.id }}
+            />
+          </>
+        ) : (
+          <Empty />
+        )}
+      </div>
     </div>
   )
 }

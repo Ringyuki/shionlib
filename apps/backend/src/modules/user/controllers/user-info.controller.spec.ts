@@ -31,10 +31,11 @@ describe('UserInfoController', () => {
 
   it('delegates updateCover', async () => {
     const { controller, userInfoService } = createController()
+    const file = { mimetype: 'image/png', buffer: Buffer.from(''), size: 100 }
 
-    await controller.updateCover({ cover: 'https://img' } as any, { user: { sub: 'u2' } } as any)
+    await controller.updateCover(file as any, { user: { sub: 'u2' } } as any)
 
-    expect(userInfoService.updateCover).toHaveBeenCalledWith('https://img', 'u2')
+    expect(userInfoService.updateCover).toHaveBeenCalledWith(file, 'u2')
   })
 
   it('delegates updateName', async () => {

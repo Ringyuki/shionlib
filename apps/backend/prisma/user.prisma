@@ -9,6 +9,7 @@ model User {
   password String  @db.VarChar(255)
   avatar   String?
   cover    String?
+  bio      String? @db.Text
 
   games                                 Game[]                            @relation("user_create_game")
   game_download_resources               GameDownloadResource[]            @relation("user_create_game_download_resource")

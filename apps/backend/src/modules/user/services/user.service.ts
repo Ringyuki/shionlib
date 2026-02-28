@@ -195,6 +195,7 @@ export class UserService {
         email: true,
         avatar: true,
         cover: true,
+        bio: true,
         role: true,
         lang: true,
         content_limit: true,
@@ -223,6 +224,8 @@ export class UserService {
         name: true,
         avatar: true,
         role: true,
+        bio: true,
+        cover: true,
         created: true,
         status: true,
       },
@@ -252,12 +255,18 @@ export class UserService {
         actor_id: id,
       },
     })
+    const walkthrough = await this.prisma.walkthrough.count({
+      where: {
+        creator_id: id,
+      },
+    })
     return {
       ...user,
       resource_count: resource,
       comment_count: comment,
       favorite_count: favorite,
       edit_count: edit,
+      walkthrough_count: walkthrough,
     }
   }
 

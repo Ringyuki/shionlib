@@ -17,8 +17,12 @@ export const UploadsContent = ({
   has_on_going_session,
 }: UploadsContentProps) => {
   return (
-    <div className="flex flex-col gap-6">
-      {is_current_user && has_on_going_session && <OnGoing />}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {is_current_user && has_on_going_session && (
+        <div className="md:col-span-2">
+          <OnGoing />
+        </div>
+      )}
       {resources.map(resource => (
         <ResourceItem key={resource.id} resource={resource} content_limit={content_limit} />
       ))}

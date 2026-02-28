@@ -39,8 +39,27 @@ export class UserInfoService {
     }
   }
 
-  async updateCover(cover: string, user_id: number) {
-    await this.updateUserInfo('cover', cover, user_id)
+  async updateCover(cover: Express.Multer.File, user_id: number) {
+    if (!cover) {
+      throw new ShionBizException(
+        ShionBizCode.SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED,
+        'shion-biz.SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED',
+      )
+    }
+    if (cover.size > 5 * 1024 * 1024) {
+      throw new ShionBizException(
+        ShionBizCode.SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT,
+        'shion-biz.SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT',
+      )
+    }
+    const { key } = await this.smallFileUploadService._uploadUserCover(user_id, cover)
+    await this.updateUserInfo('cover', key, user_id)
+    return { key }
+  }
+
+  async updateBio(bio: string, user_id: number) {
+    await this.updateUserInfo('bio', bio, user_id)
+    return { bio }
   }
 
   async updateName(name: string, user_id: number) {

@@ -85,6 +85,23 @@ const hoisted = vi.hoisted(() => {
       ),
   )
   const Empty = vi.fn(() => React.createElement('section', { 'data-testid': 'empty' }, 'empty'))
+  const FavoriteSidebar = vi.fn(
+    ({
+      userId,
+      currentUser,
+      favorites,
+    }: {
+      userId: string
+      currentUser: { id: number } | null
+      favorites: unknown[]
+    }) =>
+      React.createElement('section', {
+        'data-testid': 'favorite-sidebar',
+        'data-user-id': userId,
+        'data-current-id': String(currentUser?.id ?? 0),
+        'data-fcount': String(favorites.length),
+      }),
+  )
 
   return {
     get,
@@ -95,6 +112,7 @@ const hoisted = vi.hoisted(() => {
     EditsContent,
     FavoriteItemsHeader,
     FavoriteContent,
+    FavoriteSidebar,
     Pagination,
     Empty,
   }
@@ -128,6 +146,9 @@ vi.mock('@/components/common/content/Pagination', () => ({
 }))
 vi.mock('@/components/common/content/Empty', () => ({
   Empty: hoisted.Empty,
+}))
+vi.mock('@/components/user/home/favorites/FavoriteSidebar', () => ({
+  FavoriteSidebar: hoisted.FavoriteSidebar,
 }))
 
 describe('app/[locale]/(main)/user/[id]* pages (unit)', () => {
@@ -283,6 +304,9 @@ describe('app/[locale]/(main)/user/[id]* pages (unit)', () => {
     })
 
     const html = renderToStaticMarkup(element)
+    expect(html).toContain('data-testid="favorite-sidebar"')
+    expect(html).toContain('data-current-id="88"')
+    expect(html).toContain('data-fcount="2"')
     expect(html).toContain('data-testid="user-fav-header"')
     expect(html).toContain('data-folder="9"')
     expect(html).toContain('data-current-user="88"')

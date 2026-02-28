@@ -5,7 +5,6 @@ import { ContentLimit } from '@/interfaces/user/user.interface'
 import { Spoiler } from '@/components/shionui/Spoiler'
 import { FadeImage } from '@/components/common/shared/FadeImage'
 import { Badge } from '@/components/shionui/Badge'
-import { GamePlatform } from '@/components/game/description/GamePlatform'
 import { getLocale } from 'next-intl/server'
 import { getPreferredContent } from '@/components/game/description/helpers/getPreferredContent'
 import { GameData } from '@/interfaces/game/game.interface'
@@ -89,7 +88,6 @@ export const FavoriteItem = async ({ favorite, content_limit }: FavoriteItemProp
               </div>
 
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                <GamePlatform platform={favorite.game.platform} max={3} />
                 {favorite.game.developers.slice(0, 2).map(d => (
                   <Badge key={d.developer.id} intent="secondary" appearance="solid">
                     {d.developer.name || d.developer.aliases?.[0]}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { useSearchParams, useSelectedLayoutSegment } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { Favorite } from '@/interfaces/favorite/favorite.interface'
 import { FavoriteList } from './FavoriteList'
 import { UserProfile } from '@/interfaces/user/user.interface'
@@ -13,7 +13,6 @@ interface FavoriteSidebarProps {
 }
 
 export const FavoriteSidebar = ({ userId, currentUser, favorites }: FavoriteSidebarProps) => {
-  const segment = useSelectedLayoutSegment()
   const searchParams = useSearchParams()
   const [favoritesList, setFavoritesList] = useState(favorites)
 
@@ -31,8 +30,6 @@ export const FavoriteSidebar = ({ userId, currentUser, favorites }: FavoriteSide
   const sortedFavorites = useMemo(() => {
     return [...favoritesList].sort((a, b) => Number(b.default) - Number(a.default))
   }, [favoritesList])
-
-  if (segment !== 'favorites') return null
 
   const handleCreateSuccess = (favorite: Favorite) => {
     setFavoritesList(prev => [...prev, favorite])

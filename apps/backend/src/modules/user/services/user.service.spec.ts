@@ -42,6 +42,9 @@ describe('UserService', () => {
       editRecord: {
         count: jest.fn(),
       },
+      walkthrough: {
+        count: jest.fn(),
+      },
       $transaction: jest.fn(),
     }
 
@@ -332,6 +335,7 @@ describe('UserService', () => {
     prisma.comment.count.mockResolvedValue(5)
     prisma.favoriteItem.count.mockResolvedValue(6)
     prisma.editRecord.count.mockResolvedValue(7)
+    prisma.walkthrough.count.mockResolvedValue(3)
 
     const profile = await service.getById(3)
     expect(profile).toMatchObject({
@@ -340,6 +344,7 @@ describe('UserService', () => {
       comment_count: 5,
       favorite_count: 6,
       edit_count: 7,
+      walkthrough_count: 3,
     })
   })
 

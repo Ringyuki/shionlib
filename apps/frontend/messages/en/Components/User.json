@@ -19,6 +19,24 @@
       "title": "Resize avatar",
       "crop": "Crop"
     },
+    "Cover": {
+      "title": "Profile Cover",
+      "description": "You can manage your profile cover image here.",
+      "help": "Click the cover image on the right to select an image.",
+      "tips": "Cover image is displayed as a blurred banner on your profile page.",
+      "update": "Update cover",
+      "success": "Updated successfully"
+    },
+    "CoverResize": {
+      "title": "Resize cover",
+      "crop": "Crop"
+    },
+    "Bio": {
+      "title": "Bio",
+      "description": "You can manage your bio here. It will be displayed on your profile page.",
+      "update": "Update bio",
+      "success": "Updated successfully"
+    },
     "Name": {
       "title": "Username",
       "description": "You can manage your username here. Username is your unique identifier (one of them), so your username cannot be the same as others.",
@@ -233,7 +251,8 @@
         "upload": "Uploads",
         "comment": "Comments",
         "favorite": "Favorites",
-        "edit": "Edits"
+        "edit": "Edits",
+        "walkthrough": "Walkthroughs"
       }
     },
     "Uploads": {

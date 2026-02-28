@@ -90,9 +90,15 @@ describe('UserInfo (integration)', () => {
 
     await request(app.getHttpServer())
       .post('/user/info/cover')
-      .send({ cover: 'https://img' })
+      .attach('cover', Buffer.from('fake-image'), {
+        filename: 'cover.png',
+        contentType: 'image/png',
+      })
       .expect(201)
-    expect(userInfoService.updateCover).toHaveBeenCalledWith('https://img', 9001)
+    expect(userInfoService.updateCover).toHaveBeenCalledWith(
+      expect.objectContaining({ mimetype: 'image/png', originalname: 'cover.png' }),
+      9001,
+    )
 
     await request(app.getHttpServer()).post('/user/info/name').send({ name: 'alice' }).expect(201)
     expect(userInfoService.updateName).toHaveBeenCalledWith('alice', 9001)

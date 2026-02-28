@@ -19,7 +19,7 @@ export const FavoriteItemsHeader = ({
   const t = useTranslations('Components.User.Home.Favorites.FavoriteItemsHeader')
   return (
     <div
-      className="sticky top-30 md:top-39.5 rounded-md px-4 py-2 shadow-card z-10 flex items-center justify-between border dark:bg-[rgba(0,0,0,0.5)] bg-[rgba(255,255,255,0.7)] backdrop-blur-xl backdrop-saturate-[3.5]"
+      className="rounded-md px-4 py-2 flex items-center justify-between border"
       data-testid={`favorite-items-header-${favorite.id}`}
     >
       <div className="flex flex-col gap-1">

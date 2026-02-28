@@ -19,7 +19,7 @@ export const CommentContent = ({ comments }: CommentContentProps) => {
   const locale = useLocale()
   const t = useTranslations('Components.User.Home.Comments.CommentContent')
   return (
-    <div className="flex flex-col gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {comments.map(comment => {
         const langMap = { en: 'en', ja: 'jp', zh: 'zh' } as const
         const lang = langMap[locale as keyof typeof langMap] ?? 'jp'

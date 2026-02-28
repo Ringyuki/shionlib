@@ -284,4 +284,14 @@ export class SmallFileUploadService {
       key,
     }
   }
+
+  async _uploadUserCover(user_id: number, file: Express.Multer.File) {
+    const data = await this.imageProcessService.process(Buffer.from(file.buffer), {
+      format: TargetFormatEnum.WEBP,
+      maxWidth: 1500,
+    })
+    const key = `user/${user_id}/cover/${nodeRandomUUID()}${data.filenameSuffix}`
+    await this._upload(data, key, { user_id: user_id.toString() })
+    return { key }
+  }
 }

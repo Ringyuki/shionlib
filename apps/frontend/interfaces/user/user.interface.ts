@@ -25,6 +25,7 @@ export interface UserProfile {
   comment_count: number
   favorite_count: number
   edit_count: number
+  walkthrough_count: number
   status: UserStatus
 }
 

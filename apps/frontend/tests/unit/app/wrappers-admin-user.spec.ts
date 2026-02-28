@@ -38,25 +38,8 @@ const hoisted = vi.hoisted(() => {
     React.createElement('button', { 'data-testid': 'sidebar-trigger' }, 'toggle'),
   )
 
-  const UserProfile = vi.fn(({ user }: { user: { id: number } }) =>
-    React.createElement('section', { 'data-testid': 'user-profile', 'data-id': String(user.id) }),
-  )
-  const FavoriteSidebar = vi.fn(
-    ({
-      userId,
-      currentUser,
-      favorites,
-    }: {
-      userId: string
-      currentUser: { id: number } | null
-      favorites: unknown[]
-    }) =>
-      React.createElement('section', {
-        'data-testid': 'favorite-sidebar',
-        'data-user-id': userId,
-        'data-current-id': String(currentUser?.id ?? 0),
-        'data-fcount': String(favorites.length),
-      }),
+  const ProfileBanner = vi.fn(({ user }: { user: { id: number } }) =>
+    React.createElement('section', { 'data-testid': 'profile-banner', 'data-id': String(user.id) }),
   )
   const HomeTabsNav = vi.fn(({ user }: { user: { id: number } }) =>
     React.createElement('section', { 'data-testid': 'home-tabs', 'data-id': String(user.id) }),
@@ -77,8 +60,7 @@ const hoisted = vi.hoisted(() => {
     SidebarProvider,
     SidebarInset,
     SidebarTrigger,
-    UserProfile,
-    FavoriteSidebar,
+    ProfileBanner,
     HomeTabsNav,
     UserSettingsTabsNav,
   }
@@ -112,11 +94,8 @@ vi.mock('@/components/shionui/Sidebar', () => ({
   SidebarInset: hoisted.SidebarInset,
   SidebarTrigger: hoisted.SidebarTrigger,
 }))
-vi.mock('@/components/user/home/profile/UserProfile', () => ({
-  UserProfile: hoisted.UserProfile,
-}))
-vi.mock('@/components/user/home/favorites/FavoriteSidebar', () => ({
-  FavoriteSidebar: hoisted.FavoriteSidebar,
+vi.mock('@/components/user/home/profile/ProfileBanner', () => ({
+  ProfileBanner: hoisted.ProfileBanner,
 }))
 vi.mock('@/components/user/home/HomeTabsNav', () => ({
   HomeTabsNav: hoisted.HomeTabsNav,
@@ -170,10 +149,7 @@ describe('admin/user route wrappers (unit)', () => {
   })
 
   it('renders user profile layout with profile/favorites/tabs', async () => {
-    hoisted.get
-      .mockResolvedValueOnce({ data: { id: 9, name: 'user-9' } })
-      .mockResolvedValueOnce({ data: { id: 88, name: 'me' } })
-      .mockResolvedValueOnce({ data: [{ id: 1 }, { id: 2 }] })
+    hoisted.get.mockResolvedValueOnce({ data: { id: 9, name: 'user-9' } })
 
     const layoutModule = await import('../../../app/[locale]/(main)/user/[id]/layout')
     const element = await layoutModule.default({
@@ -184,23 +160,14 @@ describe('admin/user route wrappers (unit)', () => {
 
     expect(hoisted.hasLocale).toHaveBeenCalledWith(['en', 'zh', 'ja'], 'ja')
     expect(hoisted.get).toHaveBeenNthCalledWith(1, '/user/9')
-    expect(hoisted.get).toHaveBeenNthCalledWith(2, '/user/me')
-    expect(hoisted.get).toHaveBeenNthCalledWith(3, '/favorites', { params: { user_id: '9' } })
-    expect(html).toContain('data-testid="user-profile"')
+    expect(html).toContain('data-testid="profile-banner"')
     expect(html).toContain('data-id="9"')
-    expect(html).toContain('data-testid="favorite-sidebar"')
-    expect(html).toContain('data-user-id="9"')
-    expect(html).toContain('data-current-id="88"')
-    expect(html).toContain('data-fcount="2"')
     expect(html).toContain('data-testid="home-tabs"')
     expect(html).toContain('id="user-layout-child"')
   })
 
   it('throws notFound when user profile data is missing', async () => {
-    hoisted.get
-      .mockResolvedValueOnce({ data: null })
-      .mockResolvedValueOnce({ data: { id: 88 } })
-      .mockResolvedValueOnce({ data: [] })
+    hoisted.get.mockResolvedValueOnce({ data: null })
 
     const layoutModule = await import('../../../app/[locale]/(main)/user/[id]/layout')
     await expect(
