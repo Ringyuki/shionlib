@@ -58,7 +58,7 @@ vi.mock('@/i18n/routing', () => ({
   routing: { locales: ['en', 'zh', 'ja'] },
 }))
 vi.mock('../../../app/[locale]/metadata', () => ({
-  langMap: { en: 'en', zh: 'zh_Hans', ja: 'ja' },
+  langMap: { en: 'en', zh: 'zh-Hans', ja: 'ja' },
   generateMetadata: vi.fn(async () => ({})),
 }))
 vi.mock('../../../app/[locale]/provider', () => ({
@@ -98,7 +98,7 @@ describe('app/[locale]/layout wrapper (unit)', () => {
     })
     const html = renderToStaticMarkup(element)
 
-    expect(html).toContain('lang="zh_Hans"')
+    expect(html).toContain('lang="zh-Hans"')
     expect(html).toContain('--font-latin')
     expect(html).toContain('--font-sc')
     expect(html).toContain('--font-jp')

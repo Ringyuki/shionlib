@@ -5,7 +5,7 @@ import { shionlibSiteConfig } from '@/config/site/shionlib'
 
 export const langMap: Record<SupportedLocales, string> = {
   en: 'en',
-  zh: 'zh_Hans',
+  zh: 'zh-Hans',
   ja: 'ja',
 } as const
 

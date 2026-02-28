@@ -36,6 +36,7 @@ export default function ThemeSwitcher() {
           intent="secondary"
           size="icon"
           renderIcon={<Palette className="size-4.5" />}
+          aria-label={t('label')}
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent>

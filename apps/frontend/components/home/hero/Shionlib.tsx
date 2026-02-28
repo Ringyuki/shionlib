@@ -18,6 +18,7 @@ export const Shionlib = () => {
           preload
           showSkeleton={false}
           imageClassName="event-none drag-none"
+          fetchPriority="high"
         />
         <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-black/50 via-black/20 to-transparent pointer-events-none" />
         <div className="absolute bottom-0 right-0 p-4 z-10 flex flex-col gap-2 items-end justify-end">
