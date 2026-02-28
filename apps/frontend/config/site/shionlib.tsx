@@ -5,8 +5,8 @@ import { supportedLocalesEnum } from '../i18n/supported'
 export const shionlibSiteConfig: ShionlibSiteConfig = {
   canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://shionlib.com',
   robots: {
-    index: process.env.NEXT_PUBLIC_ROBOTS_INDEX === 'true',
-    follow: process.env.NEXT_PUBLIC_ROBOTS_FOLLOW === 'true',
+    index: process.env.NEXT_PUBLIC_ROBOTS_INDEX !== 'false',
+    follow: process.env.NEXT_PUBLIC_ROBOTS_FOLLOW !== 'false',
   },
 }
 
