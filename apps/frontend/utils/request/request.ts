@@ -5,11 +5,6 @@ import { NOT_FOUND_CODES } from '@/constants/not-found-codes'
 import { useShionlibUserStore } from '@/store/userStore'
 import { RefreshResult, ServerRequestContext } from './types'
 import {
-  clearAuthSessionExpiry,
-  isAuthSessionPayload,
-  persistAuthSessionExpiry,
-} from '@/utils/auth/session-expiry'
-import {
   isBrowser,
   getServerRequestContext,
   applySetCookiesToCookieHeader,
@@ -149,23 +144,16 @@ export const shionlibRequest = ({
     await tryPreRefreshForServerRequest()
 
     let { data, headers } = await requestOnce()
-
-    if (data && data.code === 0) {
-      isBrowser && isAuthSessionPayload(data.data) && persistAuthSessionExpiry(data.data)
-      if (hasOptionalTokenStaleSignal(data, headers)) {
-        try {
-          const retried = await refreshAndRetry()
-          if (retried?.data?.code === 0) {
-            isBrowser &&
-              isAuthSessionPayload(retried.data.data) &&
-              persistAuthSessionExpiry(retried.data.data)
-            return retried.data
-          }
-        } catch {
-          return data
+    if (data && data.code === 0 && hasOptionalTokenStaleSignal(data, headers)) {
+      try {
+        const retried = await refreshAndRetry()
+        if (retried?.data?.code === 0) {
+          return retried.data
         }
+      } catch {
         return data
       }
+      return data
     }
 
     if (data && data.code === 0) return data
@@ -349,11 +337,8 @@ const doRefresh = async (
         }
         throw new Error((data && data.message) || 'Token refresh failed')
       }
-      const session = isAuthSessionPayload(data.data) ? data.data : null
-      isBrowser && session && persistAuthSessionExpiry(session)
       return {
         setCookies: extractSetCookies(res.headers),
-        session,
       }
     })
     .finally(() => {
@@ -378,14 +363,8 @@ const doLogout = async (baseUrl: string, context?: ServerRequestContext) => {
     headers,
   }).finally(async () => {
     refreshPromises = new Map<string, Promise<RefreshResult>>()
-    clearAuthSessionExpiry()
     if (isBrowser) {
       useShionlibUserStore.getState().logout(false)
     }
   })
-}
-
-export const refreshAuthSession = async (): Promise<RefreshResult> => {
-  if (!baseUrl) throw new Error('API base URL is not configured')
-  return doRefresh(baseUrl)
 }

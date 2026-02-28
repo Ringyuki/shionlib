@@ -216,8 +216,6 @@ describe('PasskeyService', () => {
     ;(loginSessionService.issueOnLogin as jest.Mock).mockResolvedValue({
       token: 'access-token',
       refreshToken: 'refresh-token',
-      tokenExp: new Date('2026-02-28T10:00:00.000Z'),
-      refreshTokenExp: new Date('2026-03-07T10:00:00.000Z'),
     })
 
     const result = await service.verifyLogin(
@@ -261,8 +259,6 @@ describe('PasskeyService', () => {
     expect(result).toEqual({
       token: 'access-token',
       refresh_token: 'refresh-token',
-      tokenExp: new Date('2026-02-28T10:00:00.000Z'),
-      refreshTokenExp: new Date('2026-03-07T10:00:00.000Z'),
     })
   })
 
