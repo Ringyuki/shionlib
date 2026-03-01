@@ -5,6 +5,7 @@ describe('utils/request/types (unit)', () => {
   it('keeps RefreshResult and ServerRequestContext runtime-compatible shapes', () => {
     const refresh: RefreshResult = {
       setCookies: ['token=abc; Path=/; HttpOnly'],
+      accessTokenExp: 1714435200000,
     }
 
     const context: ServerRequestContext = {
