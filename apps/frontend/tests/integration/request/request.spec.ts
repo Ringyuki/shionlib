@@ -131,6 +131,32 @@ describe('utils/request/request (integration)', () => {
     expect(res.message).toBe('Too many requests')
   })
 
+  it('returns response data containing accessTokenExp without error', async () => {
+    const expMs = new Date('2026-06-01T00:00:00.000Z').getTime()
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        jsonResponse({
+          code: 0,
+          message: 'ok',
+          data: { accessTokenExp: expMs },
+          requestId: 'r-exp',
+          timestamp: new Date().toISOString(),
+        }),
+      ),
+    )
+
+    const { shionlibRequest } = await loadRequestModule({
+      INTERNAL_API_BASE_URL: 'http://localhost:3000',
+    })
+
+    const res = await shionlibRequest().post('/user/login', {
+      data: { identifier: 'alice', password: 'pw' },
+    })
+    expect(res.code).toBe(0)
+    expect((res.data as any).accessTokenExp).toBe(expMs)
+  })
+
   it('throws fatal auth error and triggers logout flow', async () => {
     const fetchMock = vi
       .fn()

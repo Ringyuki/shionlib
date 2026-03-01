@@ -56,17 +56,19 @@ describe('PasskeyController', () => {
     expect(passkeyService.createLoginOptions).toHaveBeenCalledWith('alice@example.com')
   })
 
-  it('verifies login and sets auth cookies', async () => {
+  it('verifies login, sets auth cookies, and returns accessTokenExp', async () => {
     const { controller, passkeyService } = createController()
+    const expDate = new Date('2026-06-01T00:00:00.000Z')
     passkeyService.verifyLogin.mockResolvedValue({
       token: 'access-token',
       refresh_token: 'refresh-token',
+      tokenExp: expDate,
     })
     const req = { user: { sub: 1 } }
     const dto = { flow_id: 'flow-2', response: { id: 'assertion-1' } }
     const response = { setHeader: jest.fn() }
 
-    await controller.verifyLogin(req as any, dto as any, response as any)
+    const result = await controller.verifyLogin(req as any, dto as any, response as any)
 
     expect(passkeyService.verifyLogin).toHaveBeenCalledWith('flow-2', dto.response, req)
     expect(response.setHeader).toHaveBeenCalledTimes(1)
@@ -80,6 +82,24 @@ describe('PasskeyController', () => {
         expect.stringContaining('Max-Age=604800'),
       ]),
     )
+    expect(result).toEqual({ accessTokenExp: expDate.getTime() })
+  })
+
+  it('verifies login returns accessTokenExp when tokenExp is a serialized string (Redis deserialization)', async () => {
+    const { controller, passkeyService } = createController()
+    const expIso = '2026-06-01T00:00:00.000Z'
+    passkeyService.verifyLogin.mockResolvedValue({
+      token: 'access-token',
+      refresh_token: 'refresh-token',
+      tokenExp: expIso,
+    })
+    const req = { user: { sub: 1 } }
+    const dto = { flow_id: 'flow-2', response: { id: 'assertion-1' } }
+    const response = { setHeader: jest.fn() }
+
+    const result = await controller.verifyLogin(req as any, dto as any, response as any)
+
+    expect(result).toEqual({ accessTokenExp: new Date(expIso).getTime() })
   })
 
   it('lists current user passkeys', async () => {

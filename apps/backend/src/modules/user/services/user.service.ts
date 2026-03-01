@@ -146,7 +146,11 @@ export class UserService {
       )
     }
 
-    const { token, refreshToken: refresh_token } = await this.loginSessionService.issueOnLogin(
+    const {
+      token,
+      tokenExp,
+      refreshToken: refresh_token,
+    } = await this.loginSessionService.issueOnLogin(
       foundUser.id,
       device,
       foundUser.role,
@@ -161,6 +165,7 @@ export class UserService {
     return {
       token,
       refresh_token,
+      tokenExp,
     }
   }
 
@@ -177,12 +182,16 @@ export class UserService {
     const user_agent = req.headers['user-agent']
     const device = { ip, user_agent }
 
-    const { token: new_token, refreshToken: new_refresh_token } =
-      await this.loginSessionService.refresh(refresh_token, device)
+    const {
+      token: new_token,
+      tokenExp,
+      refreshToken: new_refresh_token,
+    } = await this.loginSessionService.refresh(refresh_token, device)
 
     return {
       token: new_token,
       refresh_token: new_refresh_token,
+      tokenExp,
     }
   }
 

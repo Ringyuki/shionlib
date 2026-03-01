@@ -26,9 +26,11 @@ const initialUser: ShionlibUserInfo = {
 
 export interface ShionlibUserStore {
   user: ShionlibUserInfo
+  accessTokenExp: number | null
   setUser: (user: ShionlibUserInfo) => void
   getUser: () => ShionlibUserInfo
   updateUser: (user: Partial<ShionlibUserInfo>) => void
+  setAccessTokenExp: (exp: number | null) => void
   logout: (needRequest?: boolean) => Promise<void>
 }
 
@@ -36,6 +38,7 @@ export const useShionlibUserStore = create<ShionlibUserStore>()(
   persist(
     (set, get) => ({
       user: initialUser,
+      accessTokenExp: null,
       setUser: (user: ShionlibUserInfo) =>
         set(() => ({
           user,
@@ -45,10 +48,12 @@ export const useShionlibUserStore = create<ShionlibUserStore>()(
         set(() => ({
           user: { ...get().user, ...updates },
         })),
+      setAccessTokenExp: (exp: number | null) => set(() => ({ accessTokenExp: exp })),
       logout: async (needRequest = true) => {
         needRequest && (await shionlibRequest().post('/auth/logout'))
         set(() => ({
           user: initialUser,
+          accessTokenExp: null,
         }))
       },
     }),

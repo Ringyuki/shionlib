@@ -35,16 +35,18 @@ describe('AuthController', () => {
     }
   }
 
-  it('refreshToken refreshes token pair and sets cookies', async () => {
+  it('refreshToken refreshes token pair, sets cookies, and returns accessTokenExp', async () => {
     const { controller, userService } = createController()
+    const expDate = new Date('2026-06-01T00:00:00.000Z')
     userService.refreshToken.mockResolvedValue({
       token: 'access-token',
       refresh_token: 'refresh-token',
+      tokenExp: expDate,
     })
     const request = { cookies: { shionlib_refresh_token: 'old-refresh' } }
     const response = { setHeader: jest.fn() }
 
-    await controller.refreshToken(request as any, response as any)
+    const result = await controller.refreshToken(request as any, response as any)
 
     expect(userService.refreshToken).toHaveBeenCalledWith('old-refresh', request)
     expect(response.setHeader).toHaveBeenCalledTimes(1)
@@ -58,6 +60,38 @@ describe('AuthController', () => {
         expect.stringContaining('Max-Age=604800'),
       ]),
     )
+    expect(result).toEqual({ accessTokenExp: expDate.getTime() })
+  })
+
+  it('refreshToken returns accessTokenExp when tokenExp is a serialized string (Redis deserialization)', async () => {
+    const { controller, userService } = createController()
+    const expIso = '2026-06-01T00:00:00.000Z'
+    userService.refreshToken.mockResolvedValue({
+      token: 'access-token',
+      refresh_token: 'refresh-token',
+      tokenExp: expIso,
+    })
+    const request = { cookies: { shionlib_refresh_token: 'old-refresh' } }
+    const response = { setHeader: jest.fn() }
+
+    const result = await controller.refreshToken(request as any, response as any)
+
+    expect(result).toEqual({ accessTokenExp: new Date(expIso).getTime() })
+  })
+
+  it('refreshToken returns accessTokenExp null when tokenExp is null', async () => {
+    const { controller, userService } = createController()
+    userService.refreshToken.mockResolvedValue({
+      token: 'access-token',
+      refresh_token: 'refresh-token',
+      tokenExp: null,
+    })
+    const request = { cookies: { shionlib_refresh_token: 'old-refresh' } }
+    const response = { setHeader: jest.fn() }
+
+    const result = await controller.refreshToken(request as any, response as any)
+
+    expect(result).toEqual({ accessTokenExp: null })
   })
 
   it('logout revokes session and clears cookies', async () => {

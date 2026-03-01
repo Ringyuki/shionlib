@@ -156,7 +156,15 @@ export const shionlibRequest = ({
       return data
     }
 
-    if (data && data.code === 0) return data
+    if (data && data.code === 0) {
+      if (isBrowser) {
+        const exp = (data.data as any)?.accessTokenExp
+        if (typeof exp === 'number') {
+          useShionlibUserStore.getState().setAccessTokenExp(exp)
+        }
+      }
+      return data
+    }
 
     if (isFatalAuthByCode(data.code)) {
       if (rht) rht.toast.error(data.message)
@@ -337,8 +345,14 @@ const doRefresh = async (
         }
         throw new Error((data && data.message) || 'Token refresh failed')
       }
+      const accessTokenExp: number | null =
+        typeof data.data?.accessTokenExp === 'number' ? data.data.accessTokenExp : null
+      if (isBrowser && accessTokenExp !== null) {
+        useShionlibUserStore.getState().setAccessTokenExp(accessTokenExp)
+      }
       return {
         setCookies: extractSetCookies(res.headers),
+        accessTokenExp,
       }
     })
     .finally(() => {
@@ -347,6 +361,15 @@ const doRefresh = async (
 
   refreshPromises.set(refreshKey, promise)
   return promise
+}
+
+export const triggerProactiveRefresh = async (): Promise<void> => {
+  if (!baseUrl || !isBrowser) return
+  try {
+    await doRefresh(baseUrl, undefined)
+  } catch {
+    // silently ignore — the reactive mechanism (200101) handles failures
+  }
 }
 
 const doLogout = async (baseUrl: string, context?: ServerRequestContext) => {

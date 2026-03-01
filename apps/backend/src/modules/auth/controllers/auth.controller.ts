@@ -23,7 +23,7 @@ export class AuthController {
     @Req() request: RequestWithUser,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const { token, refresh_token } = await this.userService.refreshToken(
+    const { token, refresh_token, tokenExp } = await this.userService.refreshToken(
       request.cookies['shionlib_refresh_token'],
       request,
     )
@@ -32,6 +32,8 @@ export class AuthController {
       `shionlib_access_token=${token}; HttpOnly; Secure ; SameSite=Lax; Path=/; Max-Age=${this.configService.get('token.expiresIn')}`,
       `shionlib_refresh_token=${refresh_token}; HttpOnly; Secure ; SameSite=Lax; Path=/; Max-Age=${this.configService.get('refresh_token.shortWindowSec')}`,
     ])
+
+    return { accessTokenExp: tokenExp ? new Date(tokenExp).getTime() : null }
   }
 
   @Post('logout')

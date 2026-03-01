@@ -36,15 +36,20 @@ describe('UserController', () => {
     expect(userService.create).toHaveBeenCalledWith(dto, request)
   })
 
-  it('login sets access and refresh cookies', async () => {
+  it('login sets access and refresh cookies and returns accessTokenExp', async () => {
     const { controller, userService } = createController()
-    userService.login.mockResolvedValue({ token: 'access-token', refresh_token: 'refresh-token' })
+    const expDate = new Date('2026-06-01T00:00:00.000Z')
+    userService.login.mockResolvedValue({
+      token: 'access-token',
+      refresh_token: 'refresh-token',
+      tokenExp: expDate,
+    })
 
     const response = { setHeader: jest.fn() }
     const loginDto = { identifier: 'a', password: 'b' }
     const request = { ip: '127.0.0.1' }
 
-    await controller.login(loginDto as any, request as any, response as any)
+    const result = await controller.login(loginDto as any, request as any, response as any)
 
     expect(userService.login).toHaveBeenCalledWith(loginDto, request)
     expect(response.setHeader).toHaveBeenCalledTimes(1)
@@ -58,6 +63,26 @@ describe('UserController', () => {
         expect.stringContaining('Max-Age=604800'),
       ]),
     )
+    expect(result).toEqual({ accessTokenExp: expDate.getTime() })
+  })
+
+  it('login returns accessTokenExp when tokenExp is a serialized string (Redis deserialization)', async () => {
+    const { controller, userService } = createController()
+    const expIso = '2026-06-01T00:00:00.000Z'
+    userService.login.mockResolvedValue({
+      token: 'access-token',
+      refresh_token: 'refresh-token',
+      tokenExp: expIso,
+    })
+    const response = { setHeader: jest.fn() }
+
+    const result = await controller.login(
+      { identifier: 'a', password: 'b' } as any,
+      { ip: '127.0.0.1' } as any,
+      response as any,
+    )
+
+    expect(result).toEqual({ accessTokenExp: new Date(expIso).getTime() })
   })
 
   it('delegates getProfile', async () => {

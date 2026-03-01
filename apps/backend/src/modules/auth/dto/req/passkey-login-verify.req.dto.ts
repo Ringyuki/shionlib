@@ -1,5 +1,6 @@
 import { IsNotEmpty, IsObject, IsString } from 'class-validator'
 import { ivm } from '../../../../common/validation/i18n'
+import type { AuthenticationResponseJSON } from '@simplewebauthn/server'
 
 export class PasskeyLoginVerifyReqDto {
   @IsString({ message: ivm('validation.common.IS_STRING', { property: 'flow_id' }) })
@@ -7,5 +8,5 @@ export class PasskeyLoginVerifyReqDto {
   flow_id: string
 
   @IsObject({ message: ivm('validation.common.IS_OBJECT', { property: 'response' }) })
-  response: Record<string, unknown>
+  response: AuthenticationResponseJSON
 }
