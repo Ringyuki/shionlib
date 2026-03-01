@@ -24,6 +24,7 @@ export const Container = ({ games, content_limit, newWorks, recentUpdates }: Con
         <NewWorksHead />
         <NewWorks newWorks={newWorks} content_limit={content_limit} />
       </div>
+      <Ad id={4} />
       {recentUpdates.length > 0 && (
         <div className="flex flex-col gap-6">
           <RecentUpdateHead />
