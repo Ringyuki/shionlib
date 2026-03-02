@@ -13,6 +13,7 @@ import { Report } from './report/Report'
 import { Reupload } from './reupload/Reupload'
 import { History } from './history/History'
 import { useShionlibUserStore } from '@/store/userStore'
+import { UserRole } from '@/interfaces/user/user.interface'
 import {
   Ellipsis,
   Pencil,
@@ -43,13 +44,13 @@ export const Actions = ({
   const t = useTranslations('Components.Game.Download.Actions')
   const { user } = useShionlibUserStore()
 
-  const showEdit = user.id === downloadResource.creator.id || user.role !== 1
-  const showDelete = user.role !== 1 || user.id === downloadResource.creator.id
+  const showEdit = user.id === downloadResource.creator.id || user.role >= UserRole.ADMIN
+  const showDelete = user.role >= UserRole.ADMIN
   const showReport = user.id !== downloadResource.creator.id
   const showReupload =
     downloadResource.files.length === 1 &&
     downloadResource.files[0].type === 1 &&
-    (user.id === downloadResource.creator.id || user.role !== 1)
+    (user.id === downloadResource.creator.id || user.role >= UserRole.ADMIN)
 
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
