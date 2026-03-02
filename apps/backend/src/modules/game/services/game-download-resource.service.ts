@@ -295,10 +295,7 @@ export class GameDownloadSourceService {
         'shion-biz.GAME_DOWNLOAD_RESOURCE_NOT_FOUND',
       )
     }
-    if (
-      resource.creator_id !== req.user?.sub &&
-      ![ShionlibUserRoles.ADMIN, ShionlibUserRoles.SUPER_ADMIN].includes(req.user?.role)
-    ) {
+    if (req.user?.role !== ShionlibUserRoles.SUPER_ADMIN) {
       throw new ShionBizException(
         ShionBizCode.GAME_DOWNLOAD_RESOURCE_NOT_OWNER,
         'shion-biz.GAME_DOWNLOAD_RESOURCE_NOT_OWNER',

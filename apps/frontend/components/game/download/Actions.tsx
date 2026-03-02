@@ -45,7 +45,7 @@ export const Actions = ({
   const { user } = useShionlibUserStore()
 
   const showEdit = user.id === downloadResource.creator.id || user.role >= UserRole.ADMIN
-  const showDelete = user.role >= UserRole.ADMIN
+  const showDelete = user.role >= UserRole.SUPER_ADMIN
   const showReport = user.id !== downloadResource.creator.id
   const showReupload =
     downloadResource.files.length === 1 &&

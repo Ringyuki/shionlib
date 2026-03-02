@@ -100,6 +100,7 @@ describe('GameDownloadSourceService', () => {
   const ownerReq = { user: { sub: 100, role: ShionlibUserRoles.USER } }
   const otherUserReq = { user: { sub: 200, role: ShionlibUserRoles.USER } }
   const adminReq = { user: { sub: 300, role: ShionlibUserRoles.ADMIN } }
+  const superAdminReq = { user: { sub: 400, role: ShionlibUserRoles.SUPER_ADMIN } }
 
   const makeUploadedFile = () => ({
     id: 10,
@@ -465,24 +466,38 @@ describe('GameDownloadSourceService', () => {
       code: ShionBizCode.GAME_DOWNLOAD_RESOURCE_NOT_OWNER,
     })
 
+    // owner (USER role) can no longer delete
     prismaService.gameDownloadResource.findUnique.mockResolvedValueOnce({ id: 3, creator_id: 100 })
+    await expect(service.delete(3, ownerReq as any)).rejects.toMatchObject({
+      code: ShionBizCode.GAME_DOWNLOAD_RESOURCE_NOT_OWNER,
+    })
+
+    // admin role can no longer delete
+    prismaService.gameDownloadResource.findUnique.mockResolvedValueOnce({ id: 4, creator_id: 999 })
+    await expect(service.delete(4, adminReq as any)).rejects.toMatchObject({
+      code: ShionBizCode.GAME_DOWNLOAD_RESOURCE_NOT_OWNER,
+    })
+
+    // super admin soft delete
+    prismaService.gameDownloadResource.findUnique.mockResolvedValueOnce({ id: 5, creator_id: 999 })
     prismaService.gameDownloadResourceFile.findMany.mockResolvedValueOnce([
       { s3_file_key: 'file/a' },
       { s3_file_key: null },
     ])
-    await service.delete(3, ownerReq as any, true)
+    await service.delete(5, superAdminReq as any, true)
     expect(s3Service.deleteFile).toHaveBeenCalledWith('file/a')
     expect(prismaService.gameDownloadResource.update).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: 3 },
+        where: { id: 5 },
         data: expect.objectContaining({ status: 2 }),
       }),
     )
 
-    prismaService.gameDownloadResource.findUnique.mockResolvedValueOnce({ id: 4, creator_id: 999 })
+    // super admin hard delete
+    prismaService.gameDownloadResource.findUnique.mockResolvedValueOnce({ id: 6, creator_id: 999 })
     prismaService.gameDownloadResourceFile.findMany.mockResolvedValueOnce([])
-    await service.delete(4, adminReq as any, false)
-    expect(prismaService.gameDownloadResource.delete).toHaveBeenCalledWith({ where: { id: 4 } })
+    await service.delete(6, superAdminReq as any, false)
+    expect(prismaService.gameDownloadResource.delete).toHaveBeenCalledWith({ where: { id: 6 } })
   })
 
   it('getDownloadLink validates token and file existence', async () => {

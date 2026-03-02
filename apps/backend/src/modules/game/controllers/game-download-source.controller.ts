@@ -39,6 +39,7 @@ export class GameDownloadSourceController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ShionlibUserRoles.SUPER_ADMIN)
   @Delete(':id')
   async deleteDownloadResource(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
     return await this.gameDownloadSourceService.delete(id, req)
