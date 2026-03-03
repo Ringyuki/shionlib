@@ -64,7 +64,7 @@ const EndContent = () => {
 
 const ShionlibTopBar = () => {
   return (
-    <div className="fixed inset-x-0 top-0 topbar:top-4 z-50 [body[data-scroll-locked]_&]:pr-(--removed-body-scroll-bar-size,0px)">
+    <header className="fixed inset-x-0 top-0 topbar:top-4 z-50 [body[data-scroll-locked]_&]:pr-(--removed-body-scroll-bar-size,0px)">
       <div
         className="
         mx-auto w-full max-w-8xl px-6 h-16
@@ -75,7 +75,7 @@ const ShionlibTopBar = () => {
         <StartContent />
         <EndContent />
       </div>
-    </div>
+    </header>
   )
 }
 export default ShionlibTopBar

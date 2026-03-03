@@ -20,7 +20,7 @@ export const Nav = ({ items }: NavProps) => {
   const segment = useSelectedLayoutSegment()
   const locale = useLocale() as SupportedLocales
   return (
-    <div className="flex items-center gap-0.5">
+    <nav className="flex items-center gap-0.5">
       <RandomGame />
       {items.map(link => {
         const isActive = segment === link.href.replace(/^\//, '')
@@ -60,6 +60,6 @@ export const Nav = ({ items }: NavProps) => {
           </Link>
         )
       })}
-    </div>
+    </nav>
   )
 }
