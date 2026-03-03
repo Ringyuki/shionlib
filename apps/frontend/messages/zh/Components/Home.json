@@ -7,11 +7,6 @@
     "ActivityCard": {
       "system": "系统"
     },
-    "LoadMore": {
-      "button": "加载更多",
-      "noMore": "没有更多动态",
-      "error": "加载失败，请稍后重试"
-    },
     "Activities": {
       "Comment": {
         "commentedPrefix": "在",

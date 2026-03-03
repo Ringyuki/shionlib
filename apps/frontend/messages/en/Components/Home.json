@@ -7,11 +7,6 @@
     "ActivityCard": {
       "system": "System"
     },
-    "LoadMore": {
-      "button": "Load more",
-      "noMore": "No more activities",
-      "error": "Failed to load more. Please try again."
-    },
     "Activities": {
       "Comment": {
         "commentedPrefix": "Commented on",

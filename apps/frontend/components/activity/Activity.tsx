@@ -8,8 +8,8 @@ import { Masonry } from '@/components/common/shared/Masonry'
 import { FileProgress } from './activities/FileProgress'
 import { buildActivityFeed } from './activities/helpers/activity-feed.helper'
 import { shionlibRequest } from '@/utils/request'
-import { ActivityLoadMore } from './LoadMore'
 import { ContentLimit } from '@/interfaces/user/user.interface'
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 
 interface ActivityProps {
   activities: ActivityInterface[]
@@ -67,13 +67,23 @@ export const Activity = ({ activities: initialActivities, meta: initialMeta }: A
     }
   }, [hasMore, loading, pageMeta.currentPage, pageSize])
 
+  const setLastItemRef = useInfiniteScroll({
+    hasMore,
+    onLoadMore: handleLoadMore,
+    rootMargin: '0px 0px 320px 0px',
+  })
+
   return (
     <div className="flex flex-col gap-4">
       <Masonry columnCountBreakpoints={{ default: 1, sm: 2, md: 2, lg: 2 }}>
-        {feedItems.map(item => {
+        {feedItems.map((item, index) => {
           const key = item.kind === 'file' ? `file-${item.fileKey}` : `activity-${item.activity.id}`
           return (
-            <div key={key} className="break-inside-avoid">
+            <div
+              key={key}
+              ref={index === feedItems.length - 1 && hasMore ? setLastItemRef : undefined}
+              className="break-inside-avoid"
+            >
               {item.kind === 'file' ? (
                 <FileProgress activities={item.activities} content_limit={pageMeta.content_limit} />
               ) : (
@@ -83,7 +93,6 @@ export const Activity = ({ activities: initialActivities, meta: initialMeta }: A
           )
         })}
       </Masonry>
-      <ActivityLoadMore hasMore={hasMore} loading={loading} onLoadMore={handleLoadMore} />
     </div>
   )
 }
