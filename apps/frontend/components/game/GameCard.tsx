@@ -2,7 +2,7 @@ import { Card } from '@/components/shionui/Card'
 import { GameCover, GameData, GameItem } from '@/interfaces/game/game.interface'
 import { Link } from '@/i18n/navigation'
 import { getPreferredContent } from '@/components/game/description/helpers/getPreferredContent'
-import { getLocale } from 'next-intl/server'
+import { useLocale } from 'next-intl'
 import { ContentLimit } from '@/interfaces/user/user.interface'
 import { FadeImage } from '@/components/common/shared/FadeImage'
 import { cn } from '@/utils/cn'
@@ -14,8 +14,8 @@ interface GameCardProps {
   content_limit?: ContentLimit
 }
 
-export const GameCard = async ({ game, content_limit }: GameCardProps) => {
-  const locale = await getLocale()
+export const GameCard = ({ game, content_limit }: GameCardProps) => {
+  const locale = useLocale()
   const langMap = { en: 'en', ja: 'jp', zh: 'zh' } as const
   const lang = langMap[locale as keyof typeof langMap] ?? 'jp'
 

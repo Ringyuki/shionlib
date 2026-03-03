@@ -14,7 +14,7 @@ const getData = async () => {
         params: {
           'filter[sort_by]': 'hot_score',
           page: 1,
-          pageSize: 100,
+          pageSize: 40,
         },
       },
     ),
@@ -44,6 +44,7 @@ const getData = async () => {
 
   return {
     hotGames: hotGames.data?.items!,
+    hotMeta: hotGames.data?.meta!,
     content_limit: hotGames.data?.meta.content_limit ?? 0,
     newWorks: newWorks.data?.items!,
     recentUpdates: recentUpdates.data?.items!,
@@ -51,11 +52,12 @@ const getData = async () => {
 }
 
 export default async function HomePage() {
-  const { hotGames, content_limit, newWorks, recentUpdates } = await getData()
+  const { hotGames, hotMeta, content_limit, newWorks, recentUpdates } = await getData()
   return (
     <div className="w-full mx-auto my-4">
       <Container
-        games={hotGames}
+        hotGames={hotGames}
+        hotMeta={hotMeta}
         content_limit={content_limit}
         newWorks={newWorks}
         recentUpdates={recentUpdates}
