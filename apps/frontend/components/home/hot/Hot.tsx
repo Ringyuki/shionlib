@@ -8,6 +8,7 @@ import { Games } from '@/components/home/games/Games'
 import { useCallback, useState } from 'react'
 import { shionlibRequest } from '@/utils/request'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
+import { useScrollRestoration } from '@/hooks/useScrollRestoration'
 
 interface HotProps {
   hotGames: GameItem[]
@@ -38,8 +39,16 @@ const getData = async (page: number, pageSize: number) => {
 }
 
 export const Hot = ({ hotGames, content_limit, initialMeta }: HotProps) => {
-  const [games, setGames] = useState<GameItem[]>(hotGames)
-  const [pageMeta, setPageMeta] = useState<PaginatedMeta>(initialMeta)
+  const {
+    items: games,
+    setItems: setGames,
+    meta: pageMeta,
+    setMeta: setPageMeta,
+  } = useScrollRestoration<GameItem, PaginatedMeta>({
+    key: 'hot-games',
+    initialItems: hotGames,
+    initialMeta,
+  })
   const [loading, setLoading] = useState(false)
   const hasMore = pageMeta.currentPage < pageMeta.totalPages
   const pageSize = pageMeta.itemsPerPage
@@ -57,7 +66,7 @@ export const Hot = ({ hotGames, content_limit, initialMeta }: HotProps) => {
     } finally {
       setLoading(false)
     }
-  }, [hasMore, loading, pageMeta.currentPage, pageSize])
+  }, [hasMore, loading, pageMeta.currentPage, pageSize, setGames, setPageMeta])
 
   const setLastItemRef = useInfiniteScroll({
     hasMore,

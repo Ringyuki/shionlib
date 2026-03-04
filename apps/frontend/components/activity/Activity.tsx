@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
+import { useScrollRestoration } from '@/hooks/useScrollRestoration'
 import { Activity as ActivityInterface } from '@/interfaces/activity/activity.interface'
 import { PaginatedMeta, PaginatedResponse } from '@/interfaces/api/shionlib-api-res.interface'
 import { ActivityCard } from './ActivityCard'
@@ -16,9 +17,39 @@ interface ActivityProps {
   meta: PaginatedMeta & { content_limit: ContentLimit }
 }
 
+const getData = async (page: number, pageSize: number) => {
+  const { data } = await shionlibRequest().get<
+    PaginatedResponse<ActivityInterface, { content_limit: ContentLimit }>
+  >('/activity/list', {
+    params: {
+      page,
+      pageSize,
+    },
+  })
+  return {
+    items: data?.items ?? [],
+    meta: data?.meta ?? {
+      totalItems: 0,
+      itemCount: 0,
+      itemsPerPage: pageSize,
+      totalPages: page,
+      currentPage: page,
+      content_limit: ContentLimit.NEVER_SHOW_NSFW_CONTENT,
+    },
+  }
+}
+
 export const Activity = ({ activities: initialActivities, meta: initialMeta }: ActivityProps) => {
-  const [activities, setActivities] = useState<ActivityInterface[]>(initialActivities)
-  const [pageMeta, setPageMeta] = useState(initialMeta)
+  const {
+    items: activities,
+    setItems: setActivities,
+    meta: pageMeta,
+    setMeta: setPageMeta,
+  } = useScrollRestoration<ActivityInterface, PaginatedMeta & { content_limit: ContentLimit }>({
+    key: 'activity',
+    initialItems: initialActivities,
+    initialMeta,
+  })
   const [loading, setLoading] = useState(false)
 
   const hasMore = pageMeta.currentPage < pageMeta.totalPages
@@ -31,41 +62,15 @@ export const Activity = ({ activities: initialActivities, meta: initialMeta }: A
     setLoading(true)
     try {
       const nextPage = pageMeta.currentPage + 1
-      const res = await shionlibRequest().get<
-        PaginatedResponse<ActivityInterface, { content_limit: ContentLimit }>
-      >('/activity/list', {
-        params: {
-          page: nextPage,
-          pageSize,
-        },
-      })
-      const nextItems = res.data?.items ?? []
+      const { items, meta } = await getData(nextPage, pageSize)
 
-      if (nextItems.length === 0) {
-        setPageMeta(prev => ({
-          ...prev,
-          totalPages: prev.currentPage,
-        }))
-        return
-      }
-
-      setActivities(prev => [...prev, ...nextItems])
-
-      if (res.data?.meta) {
-        setPageMeta(res.data.meta)
-      } else {
-        setPageMeta(prev => ({
-          ...prev,
-          currentPage: nextPage,
-          totalItems: prev.totalItems + nextItems.length,
-          itemCount: prev.itemCount + nextItems.length,
-        }))
-      }
+      setActivities(prev => [...prev, ...items])
+      setPageMeta(meta)
     } catch {
     } finally {
       setLoading(false)
     }
-  }, [hasMore, loading, pageMeta.currentPage, pageSize])
+  }, [hasMore, loading, pageMeta.currentPage, pageSize, setActivities, setPageMeta])
 
   const setLastItemRef = useInfiniteScroll({
     hasMore,
