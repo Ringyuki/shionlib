@@ -1,6 +1,8 @@
 import { GameDownloadResourceFile } from '@/interfaces/game/game-download-resource'
 import { useTranslations } from 'next-intl'
-import { FileArchive, CloudCheck, Hash, Zap, Globe, CloudUpload } from 'lucide-react'
+import { useLocale } from 'next-intl'
+import { FileArchive, CloudCheck, Hash, Zap, Globe, CloudUpload, RefreshCw } from 'lucide-react'
+import { timeFromNow } from '@/utils/time-format'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shionui/Tooltip'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/shionui/Popover'
 import { Button } from '@/components/shionui/Button'
@@ -15,6 +17,7 @@ import { CopyButton } from '@/components/shionui/animated/CopyButton'
 import { GetDownloadLink, GetDownloadLinkHandle } from './libs/get-download-link'
 import { useRouter } from '@/i18n/navigation.client'
 import { Question } from '@/components/common/content/Question'
+import { BBCodeContent } from '@/components/common/content/BBCode'
 
 interface GameDownloadFileItemProps {
   file: GameDownloadResourceFile
@@ -26,6 +29,7 @@ export const GameDownloadFileItem = ({
   onTurnstileOpenChange,
 }: GameDownloadFileItemProps) => {
   const t = useTranslations('Components.Game.Download.GameDownloadFileItem')
+  const locale = useLocale()
   const [pushToAria2Loading, setPushToAria2Loading] = useState(false)
   const [normalDownloadLoading, setNormalDownloadLoading] = useState(false)
   const [downloadLink, setDownloadLink] = useState<string | null>(null)
@@ -175,13 +179,24 @@ export const GameDownloadFileItem = ({
               </Badge>
             )}
           </div>
-          <div className="text-muted-foreground text-xs flex items-center gap-1 break-words break-all">
+          <div className="text-muted-foreground text-xs flex items-center gap-1 wrap-break-word break-all">
             <Hash className="size-3 shrink-0" />
-            <span className="break-words break-all">
+            <span className="wrap-break-word break-all">
               {file.hash_algorithm === 'blake3' ? 'BLAKE3' : 'SHA-256'} {file.file_hash}
             </span>
             <CopyButton content={file.file_hash} size="xs" variant="ghost" />
           </div>
+          {file.latest_history && (
+            <div className="text-muted-foreground text-xs flex items-start gap-1">
+              <RefreshCw className="size-3 shrink-0 mt-0.5" />
+              <span className="flex flex-col gap-1">
+                {t('lastUpdated', { time: timeFromNow(file.latest_history.created, locale) })}
+                {file.latest_history.reason && (
+                  <BBCodeContent content={file.latest_history.reason} className="text-xs" />
+                )}
+              </span>
+            </div>
+          )}
         </div>
         {file.file_status === 3 && (
           <Popover open={turnstileOpen}>
@@ -221,7 +236,7 @@ export const GameDownloadFileItem = ({
                 </Tooltip>
               </div>
             </PopoverTrigger>
-            <PopoverContent forceMount className="w-[320px] h-[170px] z-[70]" sideOffset={8}>
+            <PopoverContent forceMount className="w-[320px] h-[170px] z-70" sideOffset={8}>
               <GetDownloadLink
                 fileId={file.id}
                 ref={downloadLinkRef}

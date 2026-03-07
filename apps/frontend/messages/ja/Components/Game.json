@@ -252,7 +252,8 @@
       "goToSettings": "設定へ",
       "goToSettingsDescription": "設定ページに移動し、Aria2 の設定を確認してください。",
       "virusFalsePositiveFlag": "ウイルスが検出された可能性があります",
-      "virusFalsePositiveFlagDescription": "ウイルス検査でこのファイルが検出されましたが、管理者によって許可されました。検出されたウイルス: {detected_viruses}。"
+      "virusFalsePositiveFlagDescription": "ウイルス検査でこのファイルが検出されましたが、管理者によって許可されました。検出されたウイルス: {detected_viruses}。",
+      "lastUpdated": "{time}に更新"
     },
     "Actions": {
       "report": "違反を報告",
@@ -290,7 +291,14 @@
       "s3Key": "S3 キー",
       "operator": "操作者",
       "reason": "更新理由",
-      "loadError": "履歴の読み込みに失敗しました"
+      "loadError": "履歴の読み込みに失敗しました",
+      "editReason": "編集",
+      "addReason": "理由を追加",
+      "editReasonPlaceholder": "更新理由を入力…",
+      "saveReason": "保存",
+      "cancelEdit": "キャンセル",
+      "editReasonSuccess": "更新理由を保存しました",
+      "editReasonError": "保存に失敗しました"
     },
     "Delete": {
       "title": "このダウンロードリソースを削除",

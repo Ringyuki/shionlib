@@ -6,12 +6,13 @@ import { formatBytes } from '@/utils/format'
 import { timeFromNow } from '@/utils/time-format'
 import { useLocale } from 'next-intl'
 import { Avatar } from '@/components/common/user/Avatar'
-import { FileArchive, Calendar, MessageSquare } from 'lucide-react'
+import { FileArchive, Calendar } from 'lucide-react'
 import { Badge } from '@/components/shionui/Badge'
 import { CopyButton } from '@/components/shionui/animated/CopyButton'
 import { Card, CardContent } from '@/components/shionui/Card'
 import { Separator } from '@/components/shionui/Separator'
 import { cn } from '@/utils/cn'
+import { HistoryItemReason } from './HistoryItemReason'
 
 interface HistoryContentProps {
   histories: GameDownloadResourceFileHistory[]
@@ -83,22 +84,11 @@ export const HistoryContent = ({ histories, className }: HistoryContentProps) =>
                   )}
                 </div>
               </div>
-              {history.reason && (
-                <>
-                  <Separator />
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <MessageSquare className="size-4 shrink-0 text-muted-foreground" />
-                      <span className="font-medium">{t('reason')}</span>
-                    </div>
-                    <div className="pl-6">
-                      <p className="text-sm text-muted-foreground whitespace-pre-wrap break-words">
-                        {history.reason}
-                      </p>
-                    </div>
-                  </div>
-                </>
-              )}
+              <HistoryItemReason
+                historyId={history.id}
+                initialReason={history.reason}
+                operatorId={history.operator.id}
+              />
             </CardContent>
           </Card>
         ))}

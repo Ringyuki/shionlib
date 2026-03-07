@@ -252,7 +252,8 @@
       "goToSettings": "前往设置",
       "goToSettingsDescription": "前往设置页面，检查 Aria2 设置是否正确。",
       "virusFalsePositiveFlag": "可能存在病毒",
-      "virusFalsePositiveFlagDescription": "病毒扫描流程曾标记此文件，但管理员已放行。检测到的病毒名：{detected_viruses}。"
+      "virusFalsePositiveFlagDescription": "病毒扫描流程曾标记此文件，但管理员已放行。检测到的病毒名：{detected_viruses}。",
+      "lastUpdated": "上次更新于 {time}"
     },
     "Actions": {
       "report": "报告违规",
@@ -290,7 +291,14 @@
       "s3Key": "S3 键",
       "operator": "操作者",
       "reason": "更新原因",
-      "loadError": "加载历史记录失败"
+      "loadError": "加载历史记录失败",
+      "editReason": "编辑",
+      "addReason": "添加原因",
+      "editReasonPlaceholder": "输入更新原因…",
+      "saveReason": "保存",
+      "cancelEdit": "取消",
+      "editReasonSuccess": "更新原因已保存",
+      "editReasonError": "保存失败"
     },
     "Delete": {
       "title": "删除此下载资源",

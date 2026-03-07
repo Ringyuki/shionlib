@@ -26,6 +26,7 @@ import {
 import { CreateGameDownloadSourceFileReqDto } from '../dto/req/create-game-download-source-file.req.dto'
 import { EditGameDownloadSourceReqDto } from '../dto/req/edit-game-download-source.req.dto'
 import { ReuploadFileReqDto } from '../dto/req/reupload-file.req.dto'
+import { EditFileHistoryReasonReqDto } from '../dto/req/edit-file-history-reason.req.dto'
 import { GetFileHistoryResDto } from '../dto/res/get-file-history.res.dto'
 import { HttpService } from '@nestjs/axios'
 import { firstValueFrom } from 'rxjs'
@@ -99,6 +100,16 @@ export class GameDownloadSourceService {
                     avatar: true,
                   },
                 },
+                histories: {
+                  orderBy: { created: 'desc' },
+                  take: 1,
+                  select: {
+                    id: true,
+                    reason: true,
+                    created: true,
+                    operator_id: true,
+                  },
+                },
               },
             },
           },
@@ -111,10 +122,19 @@ export class GameDownloadSourceService {
 
     game.download_resources.forEach(r => {
       r.files = r.files.map(f => {
+        const { histories, ...rest } = f as any
         return {
-          ...f,
+          ...rest,
           file_size: Number(f.file_size),
-        } as any
+          latest_history: histories?.[0]
+            ? {
+                id: histories[0].id,
+                reason: histories[0].reason,
+                created: (histories[0].created as Date).toISOString(),
+                operator_id: histories[0].operator_id,
+              }
+            : null,
+        }
       })
     })
 
@@ -737,6 +757,39 @@ export class GameDownloadSourceService {
       ...h,
       file_size: Number(h.file_size),
     }))
+  }
+
+  async editFileHistoryReason(
+    historyId: number,
+    dto: EditFileHistoryReasonReqDto,
+    req: RequestWithUser,
+  ) {
+    const history = await this.prismaService.gameDownloadResourceFileHistory.findUnique({
+      where: { id: historyId },
+      select: { id: true, operator_id: true },
+    })
+
+    if (!history) {
+      throw new ShionBizException(
+        ShionBizCode.GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND,
+        'shion-biz.GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND',
+      )
+    }
+
+    if (
+      history.operator_id !== req.user.sub &&
+      ![ShionlibUserRoles.ADMIN, ShionlibUserRoles.SUPER_ADMIN].includes(req.user.role)
+    ) {
+      throw new ShionBizException(
+        ShionBizCode.GAME_DOWNLOAD_RESOURCE_FILE_NOT_OWNER,
+        'shion-biz.GAME_DOWNLOAD_RESOURCE_FILE_NOT_OWNER',
+      )
+    }
+
+    await this.prismaService.gameDownloadResourceFileHistory.update({
+      where: { id: historyId },
+      data: { reason: dto.reason || null },
+    })
   }
 
   private async notifyFavoriteUsers(

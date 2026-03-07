@@ -252,7 +252,8 @@
       "goToSettings": "Go to settings",
       "goToSettingsDescription": "Go to settings page, check if Aria2 settings are correct.",
       "virusFalsePositiveFlag": "Possible virus detected",
-      "virusFalsePositiveFlagDescription": "Virus scanning process flagged this file, but the administrator has allowed it. Detected viruses: {detected_viruses}."
+      "virusFalsePositiveFlagDescription": "Virus scanning process flagged this file, but the administrator has allowed it. Detected viruses: {detected_viruses}.",
+      "lastUpdated": "Last updated {time}"
     },
     "Actions": {
       "report": "Report violation",
@@ -290,7 +291,14 @@
       "s3Key": "S3 Key",
       "operator": "Operator",
       "reason": "Update Reason",
-      "loadError": "Failed to load history"
+      "loadError": "Failed to load history",
+      "editReason": "Edit",
+      "addReason": "Add reason",
+      "editReasonPlaceholder": "Enter update reason…",
+      "saveReason": "Save",
+      "cancelEdit": "Cancel",
+      "editReasonSuccess": "Reason saved",
+      "editReasonError": "Failed to save"
     },
     "Delete": {
       "title": "Delete this download resource",

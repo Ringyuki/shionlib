@@ -24,6 +24,12 @@ export class GameDownloadResourceFile {
   is_virus_false_positive: boolean
   malware_scan_cases: MalwareScanCase[]
   creator: Creator
+  latest_history?: {
+    id: number
+    reason: string | null
+    created: string
+    operator_id: number
+  } | null
 }
 
 class Creator {

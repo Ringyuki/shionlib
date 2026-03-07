@@ -30,6 +30,12 @@ export interface GameDownloadResourceFile {
     detected_viruses: string[]
   }[]
   creator: Creator
+  latest_history?: {
+    id: number
+    reason: string | null
+    created: string
+    operator_id: number
+  } | null
 }
 
 export interface GameDownloadResourceFileHistory {

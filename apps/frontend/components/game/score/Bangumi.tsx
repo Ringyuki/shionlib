@@ -59,8 +59,8 @@ export const BangumiScoreCard = ({ variant = 'default' }: BangumiScoreCardProps)
           alt=""
           className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-300"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-500/80 via-pink-400/70 to-rose-300/60" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-br from-pink-500/80 via-pink-400/70 to-rose-300/60" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent" />
 
         <div className="relative z-10 h-full p-3 flex flex-col justify-between">
           <div className="flex items-center justify-between">

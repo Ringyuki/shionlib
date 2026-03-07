@@ -21,6 +21,7 @@ import { MigrateCreateGameDownloadSourceReqDto } from '../dto/req/create-game-do
 import { CreateGameDownloadSourceFileReqDto } from '../dto/req/create-game-download-source-file.req.dto'
 import { EditGameDownloadSourceReqDto } from '../dto/req/edit-game-download-source.req.dto'
 import { ReuploadFileReqDto } from '../dto/req/reupload-file.req.dto'
+import { EditFileHistoryReasonReqDto } from '../dto/req/edit-file-history-reason.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { CreateGameDownloadSourceReportReqDto } from '../dto/req/create-game-download-source-report.req.dto'
@@ -94,6 +95,16 @@ export class GameDownloadSourceController {
   @Get('file/:fileId/history')
   async getFileHistory(@Param('fileId', ParseIntPipe) fileId: number) {
     return await this.gameDownloadSourceService.getFileHistory(fileId)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('file-history/:historyId/reason')
+  async editFileHistoryReason(
+    @Param('historyId', ParseIntPipe) historyId: number,
+    @Body() dto: EditFileHistoryReasonReqDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.gameDownloadSourceService.editFileHistoryReason(historyId, dto, req)
   }
 
   @UseGuards(JwtAuthGuard)
