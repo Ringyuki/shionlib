@@ -11,7 +11,7 @@ import {
   SelectLabel,
 } from '@/components/shionui/Select'
 import { useEffect, useState } from 'react'
-import { BBCodeContent } from '@/components/common/content/BBCode'
+import { BBCodeContent } from '@/components/common/content/bbcode/BBCode'
 
 interface GameDescriptionProps {
   game: GameDetailType

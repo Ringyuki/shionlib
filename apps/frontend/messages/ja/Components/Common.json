@@ -211,6 +211,19 @@
       "title": "BBCode サポート",
       "exampleTitle": "例",
       "example": "[b]Bold[/b]\n[i]Italic[/i]\n[u]Underline[/u]\n[s]Strikethrough[/s]\n[quote]Quote[/quote]\n[spoiler]Spoiler[/spoiler]\n[mask]Mask[/mask]\n[url=https://shionlib.com]Shionlib[/url]"
+    },
+    "BBCodeEditor": {
+      "write": "編集",
+      "preview": "プレビュー",
+      "previewEmpty": "プレビューなし",
+      "bold": "太字",
+      "italic": "斜体",
+      "underline": "下線",
+      "strikethrough": "取り消し線",
+      "quote": "引用",
+      "spoiler": "ネタバレ",
+      "mask": "黒塗り",
+      "url": "リンク"
     }
   },
   "Search": {

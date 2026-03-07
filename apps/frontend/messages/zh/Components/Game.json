@@ -253,7 +253,7 @@
       "goToSettingsDescription": "前往设置页面，检查 Aria2 设置是否正确。",
       "virusFalsePositiveFlag": "可能存在病毒",
       "virusFalsePositiveFlagDescription": "病毒扫描流程曾标记此文件，但管理员已放行。检测到的病毒名：{detected_viruses}。",
-      "lastUpdated": "上次更新于 {time}"
+      "lastUpdated": "最后更新于 {time}"
     },
     "Actions": {
       "report": "报告违规",

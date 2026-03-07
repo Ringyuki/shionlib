@@ -1,7 +1,7 @@
 import { Developer } from '@/interfaces/developer/developer.interface'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { getPreferredDeveloperContent } from '@/components/game/description/helpers/getPreferredContent'
-import { BBCodeContent } from '@/components/common/content/BBCode'
+import { BBCodeContent } from '@/components/common/content/bbcode/BBCode'
 import Link from 'next/link'
 import { ExternalLink } from 'lucide-react'
 import { BangumiExtraInfoKeyMap } from '@/components/game/description/constants/BangumiExtraInfoKeyMap'

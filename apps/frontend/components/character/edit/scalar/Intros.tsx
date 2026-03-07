@@ -3,7 +3,7 @@ import { Textarea } from '@/components/shionui/Textarea'
 import { useTranslations } from 'next-intl'
 import { UseFormReturn } from 'react-hook-form'
 import { CharacterScalar } from '@/interfaces/character/character-scalar.interface'
-import { BBCodeSupported } from '@/components/common/content/BBCodeSupported'
+import { BBCodeSupported } from '@/components/common/content/bbcode/BBCodeSupported'
 
 interface IntrosProps {
   form: UseFormReturn<CharacterScalar>

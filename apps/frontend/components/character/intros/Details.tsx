@@ -1,7 +1,7 @@
 import { GameCharacter } from '@/interfaces/game/game.interface'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { getPreferredCharacterContent } from '@/components/game/description/helpers/getPreferredContent'
-import { BBCodeContent } from '@/components/common/content/BBCode'
+import { BBCodeContent } from '@/components/common/content/bbcode/BBCode'
 
 interface DetailsProps {
   character: GameCharacter
@@ -16,7 +16,7 @@ export const Details = async ({ character }: DetailsProps) => {
 
   return (
     <div className="flex flex-col gap-2">
-      <BBCodeContent content={intro || t('no_intro')} className="text-sm break-words" />
+      <BBCodeContent content={intro || t('no_intro')} className="text-sm wrap-break-word" />
     </div>
   )
 }

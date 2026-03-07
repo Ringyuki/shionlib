@@ -34,7 +34,6 @@ import { TurnstileResInterface } from '../interfaces/turnstile/turnstile-res.int
 import { UploadQuotaService } from '../../upload/services/upload-quota.service'
 import { MessageService } from '../../message/services/message.service'
 import { MessageTone, MessageType } from '../../message/dto/req/send-message.req.dto'
-
 @Injectable()
 export class GameDownloadSourceService {
   constructor(
@@ -102,7 +101,7 @@ export class GameDownloadSourceService {
                 },
                 histories: {
                   orderBy: { created: 'desc' },
-                  take: 1,
+                  take: 2,
                   select: {
                     id: true,
                     reason: true,
@@ -122,20 +121,21 @@ export class GameDownloadSourceService {
 
     game.download_resources.forEach(r => {
       r.files = r.files.map(f => {
-        const { histories, ...rest } = f as any
+        const { histories, ...rest } = f
         return {
           ...rest,
           file_size: Number(f.file_size),
-          latest_history: histories?.[0]
-            ? {
-                id: histories[0].id,
-                reason: histories[0].reason,
-                created: (histories[0].created as Date).toISOString(),
-                operator_id: histories[0].operator_id,
-              }
-            : null,
+          latest_history:
+            histories.length > 1
+              ? {
+                  id: histories[0].id,
+                  reason: histories[0].reason,
+                  created: (histories[0].created as Date).toISOString(),
+                  operator_id: histories[0].operator_id,
+                }
+              : null,
         }
-      })
+      }) as unknown as typeof r.files
     })
 
     game.download_resources.forEach(r => {

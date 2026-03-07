@@ -17,7 +17,7 @@ import { CopyButton } from '@/components/shionui/animated/CopyButton'
 import { GetDownloadLink, GetDownloadLinkHandle } from './libs/get-download-link'
 import { useRouter } from '@/i18n/navigation.client'
 import { Question } from '@/components/common/content/Question'
-import { BBCodeContent } from '@/components/common/content/BBCode'
+import { BBCodeContent } from '@/components/common/content/bbcode/BBCode'
 
 interface GameDownloadFileItemProps {
   file: GameDownloadResourceFile

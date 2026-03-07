@@ -4,7 +4,7 @@ import { GameDownloadResourceItem } from './GameDownloadResourceItem'
 import { Alert, AlertDescription, AlertTitle } from '@/components/shionui/Alert'
 import { useTranslations } from 'next-intl'
 import { AlertCircle } from 'lucide-react'
-import { BBCodeContent } from '@/components/common/content/BBCode'
+import { BBCodeContent } from '@/components/common/content/bbcode/BBCode'
 import { Ad } from '@/components/common/site/Ad'
 
 interface GameDownloadContentProps {

@@ -9,7 +9,7 @@ import { useLocale } from 'next-intl'
 import { useTranslations } from 'next-intl'
 import { Actions } from './Actions'
 import { DownloadIcon } from 'lucide-react'
-import { BBCodeContent } from '@/components/common/content/BBCode'
+import { BBCodeContent } from '@/components/common/content/bbcode/BBCode'
 import { FadeImage } from '@/components/common/shared/FadeImage'
 
 interface GameDownloadResourceItemProps {

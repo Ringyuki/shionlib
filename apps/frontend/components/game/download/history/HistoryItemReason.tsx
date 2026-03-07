@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl'
 import { MessageSquare, Pencil } from 'lucide-react'
 import { Separator } from '@/components/shionui/Separator'
 import { Button } from '@/components/shionui/Button'
-import { Textarea } from '@/components/shionui/Textarea'
-import { BBCodeContent } from '@/components/common/content/BBCode'
+import { BBCodeEditor } from '@/components/common/content/bbcode/BBCodeEditor'
+import { BBCodeContent } from '@/components/common/content/bbcode/BBCode'
 import { shionlibRequest } from '@/utils/request'
 import { sileo } from 'sileo'
 import { useShionlibUserStore } from '@/store/userStore'
@@ -80,9 +80,9 @@ export const HistoryItemReason = ({
         </div>
         {isEditing ? (
           <div className="pl-6 flex flex-col gap-2">
-            <Textarea
+            <BBCodeEditor
               value={draft}
-              onChange={e => setDraft(e.target.value)}
+              onValueChange={setDraft}
               placeholder={t('editReasonPlaceholder')}
               maxLength={500}
               rows={2}

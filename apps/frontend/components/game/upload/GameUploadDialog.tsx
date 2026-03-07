@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl'
 import { Alert, AlertDescription, AlertTitle } from '@/components/shionui/Alert'
 import { AlertCircle, Info } from 'lucide-react'
 import { useState } from 'react'
-import { BBCodeContent } from '@/components/common/content/BBCode'
+import { BBCodeContent } from '@/components/common/content/bbcode/BBCode'
 import { GameUploadContent } from './GameUploadContent'
 
 interface GameUploadDialogProps {
