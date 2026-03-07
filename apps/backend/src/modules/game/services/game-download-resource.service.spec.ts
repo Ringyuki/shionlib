@@ -140,20 +140,38 @@ describe('GameDownloadSourceService', () => {
 
   it('getByGameId maps file_size and filters by visibility/owner', async () => {
     const { service, prismaService } = createService()
+    const historyEntry = {
+      id: 99,
+      reason: 'fix',
+      created: new Date('2026-01-01T00:00:00.000Z'),
+      operator_id: 9,
+    }
     prismaService.game.findUnique.mockResolvedValue({
       id: 1,
       download_resources: [
         {
           id: 11,
           files: [
-            { id: 1, file_size: 1n, file_status: 3, creator: { id: 9 } },
-            { id: 2, file_size: 2n, file_status: 2, creator: { id: 100 } },
-            { id: 3, file_size: 3n, file_status: 2, creator: { id: 999 } },
+            {
+              id: 1,
+              file_size: 1n,
+              file_status: 3,
+              creator: { id: 9 },
+              histories: [historyEntry, { ...historyEntry, id: 98 }],
+            },
+            {
+              id: 2,
+              file_size: 2n,
+              file_status: 2,
+              creator: { id: 100 },
+              histories: [historyEntry],
+            },
+            { id: 3, file_size: 3n, file_status: 2, creator: { id: 999 }, histories: [] },
           ],
         },
         {
           id: 12,
-          files: [{ id: 4, file_size: 4n, file_status: 2, creator: { id: 999 } }],
+          files: [{ id: 4, file_size: 4n, file_status: 2, creator: { id: 999 }, histories: [] }],
         },
       ],
     })
