@@ -17,15 +17,14 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shionui/To
 import { BBCodeContent } from './BBCode'
 import { cn } from '@/utils/cn'
 
-type Mode = 'write' | 'preview'
-
 interface ToolbarItem {
   open: string
   close: string
   icon: React.ReactNode
   labelKey: string
 }
-
+const MODE = ['write', 'preview'] as const
+type Mode = (typeof MODE)[number]
 const TOOLBAR: ToolbarItem[] = [
   { open: '[b]', close: '[/b]', icon: <Bold className="size-3.5" />, labelKey: 'bold' },
   { open: '[i]', close: '[/i]', icon: <Italic className="size-3.5" />, labelKey: 'italic' },
@@ -48,13 +47,13 @@ const TOOLBAR: ToolbarItem[] = [
     icon: <EyeOff className="size-3.5" />,
     labelKey: 'spoiler',
   },
-  {
-    open: '[mask]',
-    close: '[/mask]',
-    icon: <ShieldCheck className="size-3.5" />,
-    labelKey: 'mask',
-  },
-  { open: '[url=]', close: '[/url]', icon: <Link className="size-3.5" />, labelKey: 'url' },
+  // {
+  //   open: '[mask]',
+  //   close: '[/mask]',
+  //   icon: <ShieldCheck className="size-3.5" />,
+  //   labelKey: 'mask',
+  // },
+  { open: '[url]', close: '[/url]', icon: <Link className="size-3.5" />, labelKey: 'url' },
 ]
 
 export interface BBCodeEditorProps {
@@ -113,10 +112,9 @@ export function BBCodeEditor({
 
   return (
     <div className={cn('flex flex-col', className)}>
-      {/* Tab bar + toolbar */}
       <div className="flex items-center justify-between border border-b-0 rounded-t-md px-1.5 py-1 bg-muted/30">
         <div className="flex gap-0.5">
-          {(['write', 'preview'] as const).map(m => (
+          {MODE.map(m => (
             <button
               key={m}
               type="button"
@@ -156,7 +154,6 @@ export function BBCodeEditor({
         )}
       </div>
 
-      {/* Content area */}
       {mode === 'write' ? (
         <div className="relative">
           <Textarea

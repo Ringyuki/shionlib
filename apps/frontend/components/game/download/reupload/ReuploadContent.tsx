@@ -15,7 +15,7 @@ import { AlertCircle, FileArchive } from 'lucide-react'
 import { formatBytes } from '@/utils/format'
 import { GameDownloadResourceFile } from '@/interfaces/game/game-download-resource'
 import { Label } from '@/components/shionui/Label'
-import { Textarea } from '@/components/shionui/Textarea'
+import { BBCodeEditor } from '@/components/common/content/bbcode/BBCodeEditor'
 
 interface ReuploadContentProps {
   file: GameDownloadResourceFile
@@ -114,10 +114,9 @@ export const ReuploadContent = ({
       </Alert>
       <div className="flex flex-col gap-2">
         <Label htmlFor="reason">{t('reason')}</Label>
-        <Textarea
-          id="reason"
+        <BBCodeEditor
           value={reason}
-          onChange={e => setReason(e.target.value)}
+          onValueChange={setReason}
           placeholder={t('reasonPlaceholder')}
           maxLength={500}
           rows={2}

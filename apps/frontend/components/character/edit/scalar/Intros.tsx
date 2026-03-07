@@ -1,5 +1,5 @@
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/shionui/Form'
-import { Textarea } from '@/components/shionui/Textarea'
+import { FormField, FormItem, FormLabel, FormMessage } from '@/components/shionui/Form'
+import { BBCodeEditor } from '@/components/common/content/bbcode/BBCodeEditor'
 import { useTranslations } from 'next-intl'
 import { UseFormReturn } from 'react-hook-form'
 import { CharacterScalar } from '@/interfaces/character/character-scalar.interface'
@@ -20,9 +20,7 @@ export const Intros = ({ form }: IntrosProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t('intro_zh')}</FormLabel>
-            <FormControl className="break-all">
-              <Textarea {...field} />
-            </FormControl>
+            <BBCodeEditor value={field.value} onValueChange={field.onChange} />
             <FormMessage />
           </FormItem>
         )}
@@ -33,9 +31,7 @@ export const Intros = ({ form }: IntrosProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t('intro_en')}</FormLabel>
-            <FormControl className="break-all">
-              <Textarea {...field} />
-            </FormControl>
+            <BBCodeEditor value={field.value} onValueChange={field.onChange} />
             <FormMessage />
           </FormItem>
         )}
@@ -46,9 +42,7 @@ export const Intros = ({ form }: IntrosProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t('intro_jp')}</FormLabel>
-            <FormControl className="break-all">
-              <Textarea {...field} />
-            </FormControl>
+            <BBCodeEditor value={field.value} onValueChange={field.onChange} />
             <FormMessage />
           </FormItem>
         )}

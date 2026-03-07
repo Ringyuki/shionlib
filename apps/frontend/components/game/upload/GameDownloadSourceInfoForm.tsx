@@ -6,7 +6,7 @@ import {
   FormMessage,
   FormField,
 } from '@/components/shionui/Form'
-import { Textarea } from '@/components/shionui/Textarea'
+import { BBCodeEditor } from '@/components/common/content/bbcode/BBCodeEditor'
 import {
   MultiSelect,
   MultiSelectTrigger,
@@ -302,12 +302,14 @@ export const GameDownloadSourceInfoForm = ({
           <FormField
             control={form.control as Control<z.infer<typeof gameDownloadSourceSchema>>}
             name="note"
-            render={() => (
+            render={({ field }) => (
               <FormItem>
                 <FormLabel>{t('note')}</FormLabel>
-                <FormControl>
-                  <Textarea {...form.register('note')} placeholder={t('notePlaceholder')} />
-                </FormControl>
+                <BBCodeEditor
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  placeholder={t('notePlaceholder')}
+                />
                 <FormMessage />
               </FormItem>
             )}
