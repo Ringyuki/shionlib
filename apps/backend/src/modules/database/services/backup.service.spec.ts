@@ -38,7 +38,8 @@ describe('BackupService', () => {
         if (key === 'database.enable_backup') return options?.enableBackup ?? true
         if (key === 'database.url')
           return options?.databaseUrl ?? 'postgres://user:pw@localhost:5432/db'
-        if (key === 'database.backup_retention') return options?.retention ?? 2
+        if (key === 'database.backup_retention_daily') return options?.retention ?? 2
+        if (key === 'database.backup_retention_weekly') return options?.retention ?? 2
         return undefined
       }),
     } as unknown as ShionConfigService
@@ -155,114 +156,136 @@ describe('BackupService', () => {
     await expect(service.backupToS3()).rejects.toBeInstanceOf(InternalServerErrorException)
   })
 
-  it('backupToS3 uploads backup and triggers cleanup', async () => {
+  it('backupToS3 uploads daily backup and triggers cleanup', async () => {
     const { service, backupStorage } = createService()
     jest.spyOn(service, 'dumpDatabase').mockResolvedValue(Buffer.from('backup-data'))
     ;(backupStorage!.uploadFileStream as jest.Mock).mockResolvedValue({ etag: 'e1' })
     const cleanupSpy = jest.spyOn(service as any, 'cleanupOldBackups').mockResolvedValue(undefined)
 
-    const result = await service.backupToS3()
+    const result = await service.backupToS3('daily')
 
     expect(backupStorage!.uploadFileStream).toHaveBeenCalledWith(
-      expect.stringMatching(/^backup\/database\/.*\.shionlibbackup$/),
+      expect.stringMatching(/^backup\/database\/daily\/.*\.shionlibbackup$/),
       expect.any(Readable),
       'application/octet-stream',
     )
     const uploadedKey = (backupStorage!.uploadFileStream as jest.Mock).mock.calls[0][0]
-    expect(cleanupSpy).toHaveBeenCalledWith(uploadedKey)
+    expect(cleanupSpy).toHaveBeenCalledWith(uploadedKey, 'backup/database/daily/', 2)
     expect(result).toEqual({ etag: 'e1' })
+  })
+
+  it('backupToS3 uploads weekly backup to weekly prefix', async () => {
+    const { service, backupStorage } = createService()
+    jest.spyOn(service, 'dumpDatabase').mockResolvedValue(Buffer.from('backup-data'))
+    ;(backupStorage!.uploadFileStream as jest.Mock).mockResolvedValue({ etag: 'e2' })
+    jest.spyOn(service as any, 'cleanupOldBackups').mockResolvedValue(undefined)
+
+    await service.backupToS3('weekly')
+
+    expect(backupStorage!.uploadFileStream).toHaveBeenCalledWith(
+      expect.stringMatching(/^backup\/database\/weekly\/.*\.shionlibbackup$/),
+      expect.any(Readable),
+      'application/octet-stream',
+    )
   })
 
   it('cleanupOldBackups exits when retention <= 0', async () => {
     const { service } = createService({ retention: 0 })
-    const listSpy = jest.spyOn(service as any, 'listAllBackupObjects')
+    const listSpy = jest.spyOn(service as any, 'listBackupObjects')
 
-    await (service as any).cleanupOldBackups('backup/database/latest.shionlibbackup')
+    await (service as any).cleanupOldBackups(
+      'backup/database/daily/latest.shionlibbackup',
+      'backup/database/daily/',
+      0,
+    )
 
     expect(listSpy).not.toHaveBeenCalled()
   })
 
   it('cleanupOldBackups deletes overflow backups except latest key', async () => {
     const { service, backupStorage } = createService({ retention: 2 })
-    jest.spyOn(service as any, 'listAllBackupObjects').mockResolvedValue([
+    const prefix = 'backup/database/daily/'
+    jest.spyOn(service as any, 'listBackupObjects').mockResolvedValue([
       {
-        Key: 'backup/database/newest.shionlibbackup',
+        Key: `${prefix}newest.shionlibbackup`,
         LastModified: new Date('2026-02-18T03:00:00Z'),
       },
       {
-        Key: 'backup/database/latest.shionlibbackup',
+        Key: `${prefix}latest.shionlibbackup`,
         LastModified: new Date('2026-02-18T02:00:00Z'),
       },
       {
-        Key: 'backup/database/old-1.shionlibbackup',
+        Key: `${prefix}old-1.shionlibbackup`,
         LastModified: new Date('2026-02-18T01:00:00Z'),
       },
       {
-        Key: 'backup/database/old-2.shionlibbackup',
+        Key: `${prefix}old-2.shionlibbackup`,
         LastModified: new Date('2026-02-18T00:00:00Z'),
       },
     ])
     const logSpy = jest.spyOn((service as any).logger, 'log').mockImplementation()
 
-    await (service as any).cleanupOldBackups('backup/database/latest.shionlibbackup')
+    await (service as any).cleanupOldBackups(`${prefix}latest.shionlibbackup`, prefix, 2)
 
     expect(backupStorage!.deleteFile).toHaveBeenCalledTimes(2)
     expect(backupStorage!.deleteFile).toHaveBeenNthCalledWith(
       1,
-      'backup/database/old-1.shionlibbackup',
+      `${prefix}old-1.shionlibbackup`,
       false,
     )
     expect(backupStorage!.deleteFile).toHaveBeenNthCalledWith(
       2,
-      'backup/database/old-2.shionlibbackup',
+      `${prefix}old-2.shionlibbackup`,
       false,
     )
-    expect(logSpy).toHaveBeenCalledWith('Deleted old backup backup/database/old-1.shionlibbackup')
-    expect(logSpy).toHaveBeenCalledWith('Deleted old backup backup/database/old-2.shionlibbackup')
+    expect(logSpy).toHaveBeenCalledWith(`Deleted old backup ${prefix}old-1.shionlibbackup`)
+    expect(logSpy).toHaveBeenCalledWith(`Deleted old backup ${prefix}old-2.shionlibbackup`)
   })
 
   it('cleanupOldBackups logs and swallows prune errors', async () => {
     const { service } = createService({ retention: 2 })
     const pruneError = new Error('list failed')
-    jest.spyOn(service as any, 'listAllBackupObjects').mockRejectedValue(pruneError)
+    jest.spyOn(service as any, 'listBackupObjects').mockRejectedValue(pruneError)
     const errorSpy = jest.spyOn((service as any).logger, 'error').mockImplementation()
 
     await expect(
-      (service as any).cleanupOldBackups('backup/database/latest.shionlibbackup'),
+      (service as any).cleanupOldBackups(
+        'backup/database/daily/latest.shionlibbackup',
+        'backup/database/daily/',
+        2,
+      ),
     ).resolves.toBeUndefined()
 
     expect(errorSpy).toHaveBeenCalledWith('Failed to prune old backups', pruneError)
   })
 
-  it('listAllBackupObjects iterates pages and filters by backup prefix', async () => {
+  it('listBackupObjects iterates pages and filters by prefix', async () => {
     const { service, backupStorage } = createService()
+    const prefix = 'backup/database/daily/'
     ;(backupStorage!.getFileList as jest.Mock)
       .mockResolvedValueOnce({
-        Contents: [
-          { Key: 'backup/database/a.shionlibbackup' },
-          { Key: 'other/prefix/not-included' },
-        ],
+        Contents: [{ Key: `${prefix}a.shionlibbackup` }, { Key: 'other/prefix/not-included' }],
         IsTruncated: true,
         NextContinuationToken: 'token-1',
       })
       .mockResolvedValueOnce({
-        Contents: [{ Key: 'backup/database/b.shionlibbackup' }],
+        Contents: [{ Key: `${prefix}b.shionlibbackup` }],
         IsTruncated: false,
       })
 
-    const objects = await (service as any).listAllBackupObjects()
+    const objects = await (service as any).listBackupObjects(prefix)
 
     expect(backupStorage!.getFileList).toHaveBeenNthCalledWith(1, {
-      prefix: 'backup/database/',
+      prefix,
       continuationToken: undefined,
     })
     expect(backupStorage!.getFileList).toHaveBeenNthCalledWith(2, {
-      prefix: 'backup/database/',
+      prefix,
       continuationToken: 'token-1',
     })
     expect(objects).toEqual([
-      { Key: 'backup/database/a.shionlibbackup' },
-      { Key: 'backup/database/b.shionlibbackup' },
+      { Key: `${prefix}a.shionlibbackup` },
+      { Key: `${prefix}b.shionlibbackup` },
     ])
   })
 })

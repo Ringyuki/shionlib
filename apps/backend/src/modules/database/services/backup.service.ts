@@ -6,11 +6,14 @@ import { Inject } from '@nestjs/common'
 import { ShionConfigService } from '../../../common/config/services/config.service'
 import { Readable } from 'stream'
 import type { _Object } from '@aws-sdk/client-s3'
+import type { BackupTier } from '../types/backup'
 
 @Injectable()
 export class BackupService {
   private readonly logger: Logger
-  private readonly backupPrefix = 'backup/database/'
+  private readonly dailyPrefix = 'backup/database/daily/'
+  private readonly weeklyPrefix = 'backup/database/weekly/'
+
   constructor(
     @Inject(BACKUP_STORAGE) private readonly backupStorage: S3Service,
     private readonly configService: ShionConfigService,
@@ -24,8 +27,11 @@ export class BackupService {
   private get enableBackup() {
     return this.configService.get('database.enable_backup')
   }
-  private get backupRetentionLimit() {
-    return this.configService.get('database.backup_retention') ?? 0
+  private get retentionDaily() {
+    return this.configService.get('database.backup_retention_daily') ?? 7
+  }
+  private get retentionWeekly() {
+    return this.configService.get('database.backup_retention_weekly') ?? 4
   }
 
   async dumpDatabase() {
@@ -73,7 +79,7 @@ export class BackupService {
     })
   }
 
-  async backupToS3() {
+  async backupToS3(tier: BackupTier = 'daily') {
     if (!this.enableBackup) {
       this.logger.log('Database backup is disabled')
       return
@@ -89,8 +95,10 @@ export class BackupService {
       throw new InternalServerErrorException('Failed to dump database')
     }
 
+    const prefix = tier === 'weekly' ? this.weeklyPrefix : this.dailyPrefix
+    const retention = tier === 'weekly' ? this.retentionWeekly : this.retentionDaily
     const date = new Date().toISOString().replace(/:/g, '-')
-    const key = `${this.backupPrefix}${date}.shionlibbackup`
+    const key = `${prefix}${date}.shionlibbackup`
 
     const uploadResult = await this.backupStorage.uploadFileStream(
       key,
@@ -98,17 +106,16 @@ export class BackupService {
       'application/octet-stream',
     )
 
-    await this.cleanupOldBackups(key)
+    await this.cleanupOldBackups(key, prefix, retention)
 
     return uploadResult
   }
 
-  private async cleanupOldBackups(latestKey: string) {
-    const retention = this.backupRetentionLimit
+  private async cleanupOldBackups(latestKey: string, prefix: string, retention: number) {
     if (!retention || retention <= 0) return
 
     try {
-      const backups = await this.listAllBackupObjects()
+      const backups = await this.listBackupObjects(prefix)
       if (backups.length <= retention) return
 
       const sorted = backups.sort((a, b) => {
@@ -128,17 +135,17 @@ export class BackupService {
     }
   }
 
-  private async listAllBackupObjects() {
+  private async listBackupObjects(prefix: string) {
     const objects: _Object[] = []
     let continuationToken: string | undefined
 
     do {
       const result = await this.backupStorage.getFileList({
-        prefix: this.backupPrefix,
+        prefix,
         continuationToken,
       })
       if (result.Contents?.length)
-        objects.push(...result.Contents.filter(item => item.Key?.startsWith(this.backupPrefix)))
+        objects.push(...result.Contents.filter(item => item.Key?.startsWith(prefix)))
       continuationToken = result.IsTruncated ? result.NextContinuationToken : undefined
     } while (continuationToken)
 

@@ -2,7 +2,8 @@ export interface DatabaseConfig {
   database: {
     url: string
     enable_backup: boolean
-    backup_retention: number
+    backup_retention_daily: number
+    backup_retention_weekly: number
   }
   redis: {
     host: string
