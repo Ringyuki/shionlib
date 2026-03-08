@@ -7,11 +7,13 @@ import { motion, AnimatePresence } from 'motion/react'
 import { cn } from '@/utils/cn'
 
 type TextareaSize = 'sm' | 'md' | 'lg'
+type AutosizeOption = boolean | { minRows?: number; maxRows?: number }
 
 type TextareaProps = React.ComponentProps<'textarea'> & {
   size?: TextareaSize
   clearable?: boolean
   onClear?: () => void
+  autosize?: AutosizeOption
 }
 
 const sizeClasses: Record<TextareaSize, string> = {
@@ -20,8 +22,20 @@ const sizeClasses: Record<TextareaSize, string> = {
   lg: 'text-base px-4 py-3',
 }
 
+const verticalPadding: Record<TextareaSize, string> = {
+  sm: '1rem',
+  md: '1rem',
+  lg: '1.5rem',
+}
+
+const resolveAutosize = (autosize: AutosizeOption) => {
+  if (autosize === false) return { enabled: false, minRows: undefined, maxRows: undefined }
+  if (autosize === true) return { enabled: true, minRows: 4, maxRows: 12 }
+  return { enabled: true, minRows: autosize.minRows ?? 4, maxRows: autosize.maxRows ?? 12 }
+}
+
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, size = 'md', clearable, onClear, ...props }, ref) => {
+  ({ className, size = 'md', clearable, onClear, autosize = true, ...props }, ref) => {
     const innerRef = React.useRef<HTMLTextAreaElement>(null)
     React.useImperativeHandle(ref, () => innerRef.current as HTMLTextAreaElement)
 
@@ -59,16 +73,28 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       props.onInput?.(e)
     }
 
+    const { enabled, minRows, maxRows } = resolveAutosize(autosize)
+    const vp = verticalPadding[size]
+    const autosizeStyle: React.CSSProperties = enabled
+      ? {
+          minHeight: `calc(${minRows} * 1lh + ${vp})`,
+          ...(maxRows !== undefined && { maxHeight: `calc(${maxRows} * 1lh + ${vp})` }),
+        }
+      : {}
+
     return (
       <div data-slot="textarea-wrapper" className={cn('relative w-full')}>
         <textarea
           ref={innerRef}
           data-slot="textarea"
           className={cn(
-            'border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
+            'border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex w-full rounded-md border bg-transparent text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
+            enabled && 'field-sizing-content resize-none',
+            enabled && maxRows !== undefined && 'overflow-y-auto',
             sizeClasses[size],
             className,
           )}
+          style={{ ...autosizeStyle, ...props.style }}
           onInput={handleInput}
           {...props}
         />
