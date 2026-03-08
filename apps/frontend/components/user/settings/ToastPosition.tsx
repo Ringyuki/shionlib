@@ -24,7 +24,7 @@ import { Button } from '@/components/shionui/Button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/shionui/Alert'
 import { BellRing } from 'lucide-react'
 import {
-  defaultToastPosition,
+  useDefaultToastPosition,
   toastPositions,
   ToastPosition,
   useToastPreferenceStore,
@@ -35,11 +35,12 @@ export const ToastPositionSettings = () => {
   const t = useTranslations('Components.User.Settings.ToastPosition')
   const savedPosition = useToastPreferenceStore(state => state.position)
   const setSavedPosition = useToastPreferenceStore(state => state.setPosition)
-  const [position, setPosition] = useState<ToastPosition>(savedPosition)
+  const defaultPosition = useDefaultToastPosition()
+  const [position, setPosition] = useState<ToastPosition>(savedPosition ?? defaultPosition)
 
   useEffect(() => {
-    setPosition(savedPosition)
-  }, [savedPosition])
+    setPosition(savedPosition ?? defaultPosition)
+  }, [savedPosition, defaultPosition])
 
   const canUpdate = useMemo(() => position !== savedPosition, [position, savedPosition])
 
@@ -48,6 +49,7 @@ export const ToastPositionSettings = () => {
     sileo.success({ title: t('success'), position })
   }
 
+  const defaultToastPosition = useDefaultToastPosition()
   const handleReset = () => {
     setPosition(defaultToastPosition)
     setSavedPosition(defaultToastPosition)

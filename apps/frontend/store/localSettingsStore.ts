@@ -1,12 +1,13 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { Aria2Settings, TestStatus } from '@/interfaces/aria2/aria2.interface'
+import { useMedia } from 'react-use'
 
 interface LocalSettingsStore {
   settings: Aria2Settings
   getSettings: () => Aria2Settings
   setSettings: (settings: Partial<Aria2Settings>) => void
-  position: ToastPosition
+  position: ToastPosition | null
   setPosition: (position: ToastPosition) => void
 }
 
@@ -22,6 +23,10 @@ export const toastPositions = [
 export type ToastPosition = (typeof toastPositions)[number]
 
 export const defaultToastPosition: ToastPosition = 'bottom-center'
+export const useDefaultToastPosition = () => {
+  const isMobile = useMedia('(max-width: 768px)')
+  return isMobile ? 'bottom-center' : 'top-center'
+}
 
 export const initialSettings: Aria2Settings = {
   protocol: 'http',
@@ -59,7 +64,7 @@ const useLocalSettingsStore = create<LocalSettingsStore>()(
       getSettings: () => ensureAllFields(get().settings),
       setSettings: (settings: Partial<Aria2Settings>) =>
         set({ settings: ensureAllFields(settings) }),
-      position: defaultToastPosition,
+      position: null,
       setPosition: (position: ToastPosition) => set({ position }),
     }),
     {

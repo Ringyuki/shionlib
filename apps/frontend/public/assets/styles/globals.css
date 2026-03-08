@@ -302,9 +302,9 @@ samp {
     transform: translateX(-50%) !important;
   }
   html {
-    --topbar-top-offset: 0px;
-    @media (min-width: 870px) {
-      --topbar-top-offset: 1rem;
+    --toast-offset: 0rem;
+    @media (min-width: 950px) {
+      --toast-offset: 1rem;
     }
   }
 }
