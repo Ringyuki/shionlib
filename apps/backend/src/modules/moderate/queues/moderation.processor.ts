@@ -389,14 +389,19 @@ export class ModerationProcessor {
       },
     ]
 
-    const { output_parsed } = await this.openaiService.parseResponse({
-      model: LLM_MODERATION_MODEL,
-      input,
-      text: { format: zodTextFormat(moderationEvent, 'moderationEvent') },
-      reasoning: { effort: 'medium' },
-    })
+    try {
+      const { output_parsed } = await this.openaiService.parseResponse({
+        model: LLM_MODERATION_MODEL,
+        input,
+        text: { format: zodTextFormat(moderationEvent, 'moderationEvent') },
+        reasoning: { effort: 'medium' },
+      })
 
-    return (output_parsed as ParsedLlmModerationEvent | null) ?? null
+      return (output_parsed as ParsedLlmModerationEvent | null) ?? null
+    } catch (error) {
+      this.logger.error(`error parsing moderation event for ${contentType}: ${error}`)
+      return null
+    }
   }
 
   private getLlmModerationSchema() {

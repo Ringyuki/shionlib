@@ -237,6 +237,7 @@ export interface GameData {
 export interface GameHeader extends Pick<
   GameData,
   | 'v_id'
+  | 'b_id'
   | 'id'
   | 'title_jp'
   | 'title_zh'

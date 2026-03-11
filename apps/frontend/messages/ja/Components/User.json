@@ -169,6 +169,12 @@
       "success": "更新成功",
       "resetSuccess": "デフォルトに戻しました"
     },
+    "LunaBox": {
+      "title": "LunaBox",
+      "description": "LunaBox は高速・美麗・多機能な軽量ビジュアルノベル管理ツールです。下のボタンを有効にすると、ダウンロードタスクを直接 LunaBox に送信できます。",
+      "learnMore": "詳しく見る",
+      "showButton": "LunaBox ダウンロードボタンを表示"
+    },
     "Aria2": {
       "title": "Aria2",
       "description": "このページではあなたの Aria2 設定を更新できます。",

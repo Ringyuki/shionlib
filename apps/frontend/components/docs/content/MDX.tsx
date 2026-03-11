@@ -1,4 +1,5 @@
 import { MDXRemote, MDXRemoteProps } from 'next-mdx-remote/rsc'
+import { Ellipsis } from 'lucide-react'
 import { H } from './elements/H'
 import { A } from './elements/A'
 import { Img } from './elements/Img'
@@ -13,6 +14,7 @@ const components = {
   h6: H(6),
   a: A,
   img: Img,
+  Ellipsis: () => <Ellipsis className="inline" />,
 }
 
 export const Mdx = (props: MDXRemoteProps) => {

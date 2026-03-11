@@ -71,21 +71,17 @@ export const PVNBinding = ({ initialBinding }: PVNBindingProps) => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
-            <FadeImage
-              src="/assets/images/pvn/pvn-logo.png"
-              alt="PotatoVN"
-              className="size-6 rounded-sm object-contain"
-            />
             {t('title')}
-          </CardTitle>
-          <CardDescription className="text-card-foreground">{t('description')}</CardDescription>
-          <CardAction>
             <Badge
               intent={isConnected ? 'success' : 'neutral'}
               appearance={isConnected ? 'solid' : 'outline'}
             >
               {isConnected ? t('connected') : t('notConnected')}
             </Badge>
+          </CardTitle>
+          <CardDescription className="text-card-foreground">{t('description')}</CardDescription>
+          <CardAction>
+            <FadeImage src="/assets/images/pvn/pvn-logo.png" alt="PotatoVN" className="size-12" />
           </CardAction>
         </CardHeader>
 

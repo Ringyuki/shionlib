@@ -113,8 +113,10 @@ export const Turnstile: React.FC<TurnstileProps> = ({
       action,
       callback: onVerify,
       'error-callback': (error: unknown) => {
-        onError?.(error)
         sileo.error({ title: t('error') })
+        setTimeout(() => {
+          onError?.(error)
+        }, 3000)
       },
       'expired-callback': () => {
         onExpire?.()

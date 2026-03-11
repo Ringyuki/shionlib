@@ -3,12 +3,15 @@ import { shionlibRequest } from '@/utils/request'
 import { GameDownloadResource } from '@/interfaces/game/game-download-resource'
 import { GameDownloadDrawer } from './GameDownloadDrawer'
 import { GameDownloadDialog } from './GameDownloadDialog'
+import { GameDownloadMetaContext } from './GameDownloadContext'
 import { useMedia } from 'react-use'
 import { sileo } from 'sileo'
 import { useTranslations } from 'next-intl'
 
 interface GameDownloadDrawerProps {
   game_id: number
+  game_title?: string
+  bangumi_id?: string
   open: boolean
   onLoadingChange: (loading: boolean) => void
   onOpenChange: (open: boolean) => void
@@ -16,6 +19,8 @@ interface GameDownloadDrawerProps {
 
 export const GameDownload = ({
   game_id,
+  game_title,
+  bangumi_id,
   open,
   onLoadingChange,
   onOpenChange,
@@ -80,24 +85,26 @@ export const GameDownload = ({
   const handleDelete = (id: number) =>
     setDownloadResources(prev => prev.filter(resource => resource.id !== id))
   return (
-    <div className="hidden">
-      {isMobile ? (
-        <GameDownloadDrawer
-          downloadResources={downloadResources}
-          open={open && isReady}
-          onOpenChange={onOpenChange}
-          onUpdate={handleUpdate}
-          onDelete={handleDelete}
-        />
-      ) : (
-        <GameDownloadDialog
-          downloadResources={downloadResources}
-          open={open && isReady}
-          onOpenChange={onOpenChange}
-          onUpdate={handleUpdate}
-          onDelete={handleDelete}
-        />
-      )}
-    </div>
+    <GameDownloadMetaContext.Provider value={{ game_title, bangumi_id }}>
+      <div className="hidden">
+        {isMobile ? (
+          <GameDownloadDrawer
+            downloadResources={downloadResources}
+            open={open && isReady}
+            onOpenChange={onOpenChange}
+            onUpdate={handleUpdate}
+            onDelete={handleDelete}
+          />
+        ) : (
+          <GameDownloadDialog
+            downloadResources={downloadResources}
+            open={open && isReady}
+            onOpenChange={onOpenChange}
+            onUpdate={handleUpdate}
+            onDelete={handleDelete}
+          />
+        )}
+      </div>
+    </GameDownloadMetaContext.Provider>
   )
 }

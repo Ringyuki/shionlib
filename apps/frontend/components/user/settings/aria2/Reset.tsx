@@ -30,7 +30,7 @@ export const Aria2Reset = ({ form }: Aria2ResetProps) => {
 
   return (
     <Button
-      intent="neutral"
+      intent="warning"
       appearance="soft"
       onClick={onReset}
       renderIcon={<RotateCcw />}

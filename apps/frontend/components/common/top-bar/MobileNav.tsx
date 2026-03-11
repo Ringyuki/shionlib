@@ -54,13 +54,13 @@ export const MobileNav = ({ items }: MobileNavProps) => {
             <div className="relative size-4">
               <span
                 className={cn(
-                  'bg-foreground absolute left-0 block h-0.5 w-4 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
+                  'bg-foreground absolute left-0 block h-0.5 w-4 transition-all duration-300 ease-in-out',
                   open ? 'top-[0.4rem] -rotate-45' : 'top-1',
                 )}
               />
               <span
                 className={cn(
-                  'bg-foreground absolute left-0 block h-0.5 w-4 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
+                  'bg-foreground absolute left-0 block h-0.5 w-4 transition-all duration-300 ease-in-out',
                   open ? 'top-[0.4rem] rotate-45' : 'top-2.5',
                 )}
               />

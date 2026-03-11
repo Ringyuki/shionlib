@@ -12,6 +12,8 @@ import { Patch } from './Patch'
 import { MoreActions } from './more/MoreActions'
 import { useShionlibUserStore } from '@/store/userStore'
 import { UserRole } from '@/interfaces/user/user.interface'
+import { getPreferredContent } from '../description/helpers/getPreferredContent'
+import { useLocale } from 'next-intl'
 
 interface GameActionsProps {
   game: GameHeader
@@ -21,13 +23,17 @@ interface GameActionsProps {
 export const GameActions = ({ game, is_favorite }: GameActionsProps) => {
   const user = useShionlibUserStore(state => state.user)
   const isAdmin = user.role >= UserRole.ADMIN
+  const locale = useLocale()
+  const langMap = { en: 'en', ja: 'jp', zh: 'zh' } as const
+  const lang = langMap[locale as keyof typeof langMap] ?? 'jp'
+  const { title } = getPreferredContent(game, 'title', lang)
   return (
     <>
       <div className="flex gap-2 items-center flex-wrap">
         <div className="flex gap-2 md:items-center flex-col md:flex-row items-start">
           <div className="flex gap-2 items-center flex-wrap">
             <div className="flex gap-2 items-center">
-              <Download game_id={game.id} />
+              <Download game_id={game.id} game_title={title} bangumi_id={game.b_id} />
               <Patch game_id={game.id} v_id={game.v_id!} />
               <Upload game_id={game.id} />
             </div>

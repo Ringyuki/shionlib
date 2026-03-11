@@ -169,6 +169,12 @@
       "success": "更新成功",
       "resetSuccess": "已恢复默认"
     },
+    "LunaBox": {
+      "title": "LunaBox",
+      "description": "LunaBox 是一款快速、美观、功能丰富的轻量视觉小说管理工具。启用下方按钮后，可将下载任务直接推送到 LunaBox。",
+      "learnMore": "了解更多",
+      "showButton": "显示 LunaBox 下载按钮"
+    },
     "Aria2": {
       "title": "Aria2",
       "description": "你可以在此更新你的 Aria2 设置。",

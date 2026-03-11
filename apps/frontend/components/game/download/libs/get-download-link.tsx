@@ -5,7 +5,7 @@ import { shionlibRequest } from '@/utils/request'
 
 interface GetDownloadLinkProps {
   fileId: number
-  onLink?: (url: string | null) => void
+  onLink?: (url: string | null, expiresAt: number) => void
 }
 
 export interface GetDownloadLinkHandle {
@@ -25,11 +25,12 @@ export const GetDownloadLink = forwardRef<GetDownloadLinkHandle, GetDownloadLink
           `/game/download/${fileId}/link?token=${token}`,
         )
         const url = res.data?.file_url ?? null
+        const expiresAt = Math.floor(Date.now() / 1000) + Number(res.data?.expires_in ?? 3600)
         setDownloadLink(url)
-        onLink?.(url)
+        onLink?.(url, expiresAt)
         return url
       } catch (error) {
-        onLink?.(null)
+        onLink?.(null, 0)
         return null
       }
     }

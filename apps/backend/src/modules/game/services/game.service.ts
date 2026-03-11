@@ -114,6 +114,7 @@ export class GameService {
 
     const select: Prisma.GameSelect = {
       v_id: true,
+      b_id: true,
       id: true,
       title_jp: true,
       title_zh: true,

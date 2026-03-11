@@ -9,6 +9,8 @@ interface LocalSettingsStore {
   setSettings: (settings: Partial<Aria2Settings>) => void
   position: ToastPosition | null
   setPosition: (position: ToastPosition) => void
+  showLunaBox: boolean
+  setShowLunaBox: (show: boolean) => void
 }
 
 export const toastPositions = [
@@ -24,7 +26,7 @@ export type ToastPosition = (typeof toastPositions)[number]
 
 export const defaultToastPosition: ToastPosition = 'bottom-center'
 export const useDefaultToastPosition = () => {
-  const isMobile = useMedia('(max-width: 768px)')
+  const isMobile = useMedia('(max-width: 768px)', false)
   return isMobile ? 'bottom-center' : 'top-center'
 }
 
@@ -66,6 +68,8 @@ const useLocalSettingsStore = create<LocalSettingsStore>()(
         set({ settings: ensureAllFields(settings) }),
       position: null,
       setPosition: (position: ToastPosition) => set({ position }),
+      showLunaBox: true,
+      setShowLunaBox: (show: boolean) => set({ showLunaBox: show }),
     }),
     {
       name: 'shionlib-local-settings-store',
@@ -76,3 +80,4 @@ const useLocalSettingsStore = create<LocalSettingsStore>()(
 
 export const useAria2Store = useLocalSettingsStore
 export const useToastPreferenceStore = useLocalSettingsStore
+export const useLunaBoxStore = useLocalSettingsStore

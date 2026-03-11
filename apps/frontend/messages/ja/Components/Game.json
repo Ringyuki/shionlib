@@ -243,6 +243,7 @@
       "processing": "処理中",
       "pending": "待機中",
       "downloadStarted": "ダウンロードが開始されました",
+      "pushToLunaBox": "LunaBox でダウンロード",
       "pushToAria2": "Aria2 に送信",
       "normalDownload": "通常ダウンロード",
       "aria2NotReady": "Aria2 に接続できません、設定を確認してください",

@@ -243,6 +243,7 @@
       "processing": "处理中",
       "pending": "等待上传",
       "downloadStarted": "下载已开始",
+      "pushToLunaBox": "使用 LunaBox 下载",
       "pushToAria2": "推送到 Aria2",
       "normalDownload": "普通下载",
       "aria2NotReady": "无法连接到 Aria2，请检查设置是否正确",
@@ -270,7 +271,7 @@
       "reason": "更新原因（可选）",
       "reasonPlaceholder": "例如：版本更新、修复bug、合并补丁等",
       "reasonHint": "填写更新原因来帮助其他用户了解此次更新的内容，更新原因会在通知中显示。",
-      "success": "重新上传成功，等待审核",
+      "success": "重新上传成功",
       "error": "重新上传失败",
       "submitting": "正在提交..."
     },

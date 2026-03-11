@@ -169,6 +169,12 @@
       "success": "Updated successfully",
       "resetSuccess": "Reset to default"
     },
+    "LunaBox": {
+      "title": "LunaBox",
+      "description": "LunaBox is a lightweight visual novel management tool — fast, beautiful, and feature-rich. Enable the button below to push downloads directly to LunaBox.",
+      "learnMore": "Learn more",
+      "showButton": "Show LunaBox download button"
+    },
     "Aria2": {
       "title": "Aria2",
       "description": "You can update your Aria2 settings here.",

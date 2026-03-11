@@ -1,0 +1,73 @@
+---
+title: Downloading with LunaBox
+banner: 'https://images.yurari.moe/galgame/10568/hak8bxrz_2.png'
+description: 'Learn how to enable the LunaBox download button in Shionlib and push game downloads directly to the LunaBox desktop app.'
+date: 2026-03-11
+author_uid: 1
+author_name: 'ringyuki'
+author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
+---
+
+## What is LunaBox
+
+[LunaBox](https://box.lunarain.site) is a fast, beautiful, and feature-rich lightweight visual novel management tool. Beyond downloading, it helps you organize your game library, track playtime, and even analyse your habits with a built-in AI assistant.
+
+Key features:
+
+- **Game management** — Custom categorization and flexible metadata for your library
+- **Playtime tracking** — Automatic session recording with multi-dimensional statistics and charts
+- **AI analysis** — Built-in assistant that analyses your play habits and generates reports
+- **Cloud backup** — S3 and OneDrive support for secure data sync
+- **Download integration** — Handles archive downloads with automatic decompression, checksum verification, and resume support
+
+## Installing LunaBox
+
+Download and install LunaBox from the official site: **https://box.lunarain.site**
+
+LunaBox registers a custom protocol handler (`lunabox://`) during installation. Shionlib uses this protocol to send download tasks directly to the app.
+
+> LunaBox currently supports **Windows** only. The LunaBox button will not appear on mobile devices.
+
+## Enabling the LunaBox Button in Shionlib
+
+The LunaBox download button is hidden by default. To enable it:
+
+1. Open **Settings** → **Download** (or go to `/user/settings/download`)
+2. Find the **LunaBox** section
+3. Check **Show LunaBox download button**
+
+Once enabled, a moon icon button will appear next to the Aria2 and normal download buttons on every file row in the download panel.
+
+## Using LunaBox to Download
+
+1. On any game page, click **Download** to open the download panel
+2. Find the resource and file you want
+3. Click the **moon icon** button to push the download to LunaBox
+4. If a Turnstile verification is required, complete it in the popup — LunaBox will receive the task automatically once verified
+5. Switch to LunaBox — the download will have started
+
+LunaBox receives the following information with each push:
+
+| Field           | Value                                      |
+| --------------- | ------------------------------------------ |
+| Download URL    | Signed, time-limited direct link           |
+| File name       | Original file name from Shionlib           |
+| Archive format  | Auto-detected from the file extension      |
+| File size       | Exact byte count for validation            |
+| Checksum        | SHA-256 or BLAKE3 hash for integrity check |
+| Game title      | Japanese title of the game                 |
+| Metadata source | Bangumi (for library matching)             |
+
+## Troubleshooting
+
+**The LunaBox button does nothing when clicked**
+
+Make sure LunaBox is installed and running. The `lunabox://` protocol handler must be registered by the installer. Try restarting LunaBox if it was open before installation completed.
+
+**The download does not appear in LunaBox**
+
+Check that LunaBox is not blocked by your browser or OS security settings. On some systems you may see a confirmation dialog asking whether to open the `lunabox://` link — click **Open** or **Allow** to proceed.
+
+**Turnstile verification does not complete**
+
+The Turnstile popup closes automatically after you solve it. If the download still does not start, click the moon icon again — the signed link is cached for your session so you will not need to verify again.

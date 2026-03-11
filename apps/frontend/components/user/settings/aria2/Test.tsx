@@ -48,7 +48,7 @@ export const Aria2Test = ({ form }: Aria2TestProps) => {
     <div className="flex gap-2 items-center flex-wrap">
       <Button
         intent="secondary"
-        appearance="outline"
+        appearance="ghost"
         onClick={onTest}
         loading={testStatus === 'testing'}
         renderIcon={<FlaskConical />}
