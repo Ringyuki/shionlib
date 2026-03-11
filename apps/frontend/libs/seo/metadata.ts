@@ -1,10 +1,20 @@
 import type { Metadata } from 'next'
 import { supportedLocales, SupportedLocales } from '@/config/i18n/supported'
 
-export type OgImageInput = {
-  resourceType: 'game' | 'character' | 'developer'
-  id: string
-}
+export type OgImageInput =
+  | {
+      resourceType: 'game' | 'character' | 'developer'
+      id: string
+    }
+  | {
+      resourceType: 'docs'
+      slug: string
+      title: string
+      description?: string
+      banner?: string
+      author_name?: string
+      author_avatar?: string
+    }
 
 export interface PageSeoInput {
   path: string
@@ -18,6 +28,14 @@ export interface PageSeoInput {
 function buildOgUrl(og: OgImageInput | undefined, locale: string): string {
   const base = process.env.NEXT_PUBLIC_OG_SERVICE_URL?.replace(/\/$/, '')
   if (!og) return `${base}/default?${new URLSearchParams({ locale })}`
+  if (og.resourceType === 'docs') {
+    const params: Record<string, string> = { locale, slug: og.slug, title: og.title }
+    if (og.description) params.description = og.description
+    if (og.banner) params.banner = og.banner
+    if (og.author_name) params.author_name = og.author_name
+    if (og.author_avatar) params.author_avatar = og.author_avatar
+    return `${base}/docs?${new URLSearchParams(params)}`
+  }
   return `${base}/${og.resourceType}/${og.id}?${new URLSearchParams({ locale })}`
 }
 

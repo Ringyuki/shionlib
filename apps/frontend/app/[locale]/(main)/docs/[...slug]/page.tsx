@@ -55,6 +55,15 @@ export const generateMetadata = createGenerateMetadata(
       path: `/docs/${realSlug}`,
       title,
       description: frontmatter.description || '',
+      og: {
+        resourceType: 'docs' as const,
+        slug: realSlug,
+        title,
+        description: frontmatter.description || undefined,
+        banner: frontmatter.banner || undefined,
+        author_name: frontmatter.author_name || undefined,
+        author_avatar: frontmatter.author_avatar || undefined,
+      },
     }
   },
 )

@@ -5,6 +5,7 @@ import gameRouter from '@/routes/game'
 import characterRouter from '@/routes/character'
 import developerRouter from '@/routes/developer'
 import defaultRouter from '@/routes/default'
+import docsRouter from '@/routes/docs'
 
 const app = new Hono()
 
@@ -12,6 +13,7 @@ app.get('/health', c => c.json({ status: 'ok' }))
 app.route('/game', gameRouter)
 app.route('/character', characterRouter)
 app.route('/developer', developerRouter)
+app.route('/', docsRouter)
 app.route('/', defaultRouter)
 
 app.onError((err, c) => {
