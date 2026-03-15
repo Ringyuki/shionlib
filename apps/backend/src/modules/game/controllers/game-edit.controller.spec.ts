@@ -21,6 +21,10 @@ describe('GameEditController', () => {
       addCharacters: jest.fn(),
       removeCharacters: jest.fn(),
       editCharacters: jest.fn(),
+      addGameRelations: jest.fn(),
+      removeGameRelations: jest.fn(),
+      editGameRelations: jest.fn(),
+      syncRelationsFromBangumi: jest.fn(),
     }
     return {
       gameEditService,
@@ -79,5 +83,36 @@ describe('GameEditController', () => {
     expect(gameEditService.addCharacters).toHaveBeenCalledWith(2, [{ id: 3 }], req)
     expect(gameEditService.removeCharacters).toHaveBeenCalledWith(2, [3], req)
     expect(gameEditService.editCharacters).toHaveBeenCalledWith(2, [{ id: 4 }], req)
+  })
+
+  it('delegates game relation endpoints', async () => {
+    const { controller, gameEditService } = createController()
+    const req = { user: { sub: 3 } }
+
+    await controller.addGameRelations(
+      { relations: [{ to_game_id: 10, relation: 'SEQUEL' }] } as any,
+      5,
+      req as any,
+    )
+    await controller.removeGameRelations({ ids: [1] } as any, 5, req as any)
+    await controller.editGameRelations(
+      { relations: [{ id: 1, relation: 'PREQUEL' }] } as any,
+      5,
+      req as any,
+    )
+    await controller.syncRelationsFromBangumi(5, req as any)
+
+    expect(gameEditService.addGameRelations).toHaveBeenCalledWith(
+      5,
+      [{ to_game_id: 10, relation: 'SEQUEL' }],
+      req,
+    )
+    expect(gameEditService.removeGameRelations).toHaveBeenCalledWith(5, [1], req)
+    expect(gameEditService.editGameRelations).toHaveBeenCalledWith(
+      5,
+      [{ id: 1, relation: 'PREQUEL' }],
+      req,
+    )
+    expect(gameEditService.syncRelationsFromBangumi).toHaveBeenCalledWith(5, req)
   })
 })

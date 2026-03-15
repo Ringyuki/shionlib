@@ -26,6 +26,7 @@ describe('GameEditService', () => {
     const prisma = {
       game: {
         findUnique: jest.fn(),
+        findMany: jest.fn(),
       },
       gameLink: {
         findMany: jest.fn(),
@@ -51,6 +52,10 @@ describe('GameEditService', () => {
       },
       gameCharacter: {
         findUnique: jest.fn(),
+      },
+      gameRelation: {
+        findMany: jest.fn(),
+        findFirst: jest.fn(),
       },
       $transaction: jest.fn(),
     }
@@ -83,6 +88,12 @@ describe('GameEditService', () => {
         createMany: jest.fn(),
         deleteMany: jest.fn(),
         update: jest.fn(),
+      },
+      gameRelation: {
+        createMany: jest.fn(),
+        deleteMany: jest.fn(),
+        update: jest.fn(),
+        updateMany: jest.fn(),
       },
       editRecord: {
         create: jest.fn().mockResolvedValue({ id: 900 }),
@@ -561,5 +572,164 @@ describe('GameEditService', () => {
     await service.editCharacters(1, [{ id: 1 }, { id: 2 }] as any, req as any)
     expect(editCharacterSpy).toHaveBeenCalledTimes(2)
     expect(searchEngine.upsertGame).toHaveBeenCalled()
+  })
+
+  it('addGameRelations handles not-found, no-op, and success path', async () => {
+    const { service, prisma, tx, activityService } = createService()
+
+    prisma.game.findUnique.mockResolvedValueOnce(null)
+    await expect(
+      service.addGameRelations(1, [{ to_game_id: 2, relation: 'SEQUEL' }] as any, req as any),
+    ).rejects.toMatchObject({ code: ShionBizCode.GAME_NOT_FOUND })
+
+    // all already existing → no-op
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1 })
+    prisma.gameRelation.findMany.mockResolvedValueOnce([{ to_game_id: 2 }])
+    await service.addGameRelations(1, [{ to_game_id: 2, relation: 'SEQUEL' }] as any, req as any)
+    expect(prisma.$transaction).not.toHaveBeenCalled()
+
+    // to_game doesn't exist in DB → validRelations empty
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1 })
+    prisma.gameRelation.findMany.mockResolvedValueOnce([])
+    prisma.game.findMany.mockResolvedValueOnce([]) // no games found for bIds
+    await service.addGameRelations(1, [{ to_game_id: 99, relation: 'SEQUEL' }] as any, req as any)
+    expect(prisma.$transaction).not.toHaveBeenCalled()
+
+    // success
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1 })
+    prisma.gameRelation.findMany.mockResolvedValueOnce([])
+    prisma.game.findMany.mockResolvedValueOnce([
+      { id: 2, title_jp: 'GameB', title_zh: null, title_en: null },
+    ])
+    await service.addGameRelations(1, [{ to_game_id: 2, relation: 'SEQUEL' }] as any, req as any)
+    expect(tx.gameRelation.createMany).toHaveBeenCalledTimes(2) // forward + reverse
+    expect(activityService.create).toHaveBeenCalled()
+  })
+
+  it('removeGameRelations handles no-op and success path', async () => {
+    const { service, prisma, tx, activityService } = createService()
+
+    // no matching relations → no-op
+    prisma.gameRelation.findMany.mockResolvedValueOnce([])
+    await service.removeGameRelations(1, [5], req as any)
+    expect(prisma.$transaction).not.toHaveBeenCalled()
+
+    // success
+    prisma.gameRelation.findMany.mockResolvedValueOnce([
+      {
+        id: 5,
+        to_game_id: 2,
+        relation: 'SEQUEL',
+        to_game: { title_jp: 'B', title_zh: null, title_en: null },
+      },
+    ])
+    await service.removeGameRelations(1, [5], req as any)
+    expect(tx.gameRelation.deleteMany).toHaveBeenCalledTimes(2) // forward + reverse
+    expect(activityService.create).toHaveBeenCalled()
+  })
+
+  it('editGameRelations handles not-found, no-op, and success path', async () => {
+    const { service, prisma, tx, activityService } = createService()
+
+    prisma.game.findUnique.mockResolvedValueOnce(null)
+    await expect(
+      service.editGameRelations(1, [{ id: 1, relation: 'PREQUEL' }] as any, req as any),
+    ).rejects.toMatchObject({ code: ShionBizCode.GAME_NOT_FOUND })
+
+    // relation not found → no-op
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1 })
+    prisma.gameRelation.findFirst.mockResolvedValueOnce(null)
+    await service.editGameRelations(1, [{ id: 1, relation: 'PREQUEL' }] as any, req as any)
+    expect(prisma.$transaction).not.toHaveBeenCalled()
+
+    // same relation type → no-op
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1 })
+    prisma.gameRelation.findFirst.mockResolvedValueOnce({
+      id: 1,
+      to_game_id: 2,
+      relation: 'PREQUEL',
+      to_game: { title_jp: 'B', title_zh: null, title_en: null },
+    })
+    await service.editGameRelations(1, [{ id: 1, relation: 'PREQUEL' }] as any, req as any)
+    expect(prisma.$transaction).not.toHaveBeenCalled()
+
+    // success
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1 })
+    prisma.gameRelation.findFirst.mockResolvedValueOnce({
+      id: 1,
+      to_game_id: 2,
+      relation: 'SEQUEL',
+      to_game: { title_jp: 'B', title_zh: null, title_en: null },
+    })
+    await service.editGameRelations(1, [{ id: 1, relation: 'PREQUEL' }] as any, req as any)
+    expect(tx.gameRelation.update).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 1 }, data: { relation: 'PREQUEL' } }),
+    )
+    expect(tx.gameRelation.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { from_game_id: 2, to_game_id: 1 },
+        data: { relation: 'SEQUEL' },
+      }),
+    )
+    expect(activityService.create).toHaveBeenCalled()
+  })
+
+  it('syncRelationsFromBangumi handles guards, bangumi errors, and success path', async () => {
+    const { service, prisma, tx, searchEngine } = createService()
+    const bangumiAuthService = (service as any).bangumiAuthService
+
+    // game not found
+    prisma.game.findUnique.mockResolvedValueOnce(null)
+    await expect(service.syncRelationsFromBangumi(1, req as any)).rejects.toMatchObject({
+      code: ShionBizCode.GAME_NOT_FOUND,
+    })
+
+    // no b_id
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1, b_id: null })
+    await expect(service.syncRelationsFromBangumi(1, req as any)).rejects.toMatchObject({
+      code: ShionBizCode.COMMON_VALIDATION_FAILED,
+    })
+
+    // bangumi request fails
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1, b_id: '42' })
+    bangumiAuthService.bangumiRequest.mockRejectedValueOnce(new Error('network error'))
+    await expect(service.syncRelationsFromBangumi(1, req as any)).rejects.toMatchObject({
+      code: ShionBizCode.COMMON_VALIDATION_FAILED,
+    })
+
+    // no mappable relations
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1, b_id: '42' })
+    bangumiAuthService.bangumiRequest.mockResolvedValueOnce([{ id: 99, relation: 'UNKNOWN_TYPE' }])
+    const r1 = await service.syncRelationsFromBangumi(1, req as any)
+    expect(r1).toEqual({ synced: 0 })
+
+    // mappable but no matching games in DB
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1, b_id: '42' })
+    bangumiAuthService.bangumiRequest.mockResolvedValueOnce([{ id: 99, relation: '续集' }])
+    prisma.game.findMany.mockResolvedValueOnce([]) // bIdToGame lookup
+    const r2 = await service.syncRelationsFromBangumi(1, req as any)
+    expect(r2).toEqual({ synced: 0 })
+
+    // all already existing
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1, b_id: '42' })
+    bangumiAuthService.bangumiRequest.mockResolvedValueOnce([{ id: 99, relation: '续集' }])
+    prisma.game.findMany.mockResolvedValueOnce([
+      { id: 2, b_id: '99', title_jp: 'B', title_zh: null, title_en: null },
+    ])
+    prisma.gameRelation.findMany.mockResolvedValueOnce([{ to_game_id: 2 }])
+    const r3 = await service.syncRelationsFromBangumi(1, req as any)
+    expect(r3).toEqual({ synced: 0 })
+
+    // success: creates relations and updates search index for all involved games
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1, b_id: '42' })
+    bangumiAuthService.bangumiRequest.mockResolvedValueOnce([{ id: 99, relation: '续集' }])
+    prisma.game.findMany
+      .mockResolvedValueOnce([{ id: 2, b_id: '99', title_jp: 'B', title_zh: null, title_en: null }])
+      .mockResolvedValueOnce([{ id: 1 }, { id: 2 }]) // post-sync search reindex
+    prisma.gameRelation.findMany.mockResolvedValueOnce([])
+    const r4 = await service.syncRelationsFromBangumi(1, req as any)
+    expect(r4).toEqual({ synced: 1 })
+    expect(tx.gameRelation.createMany).toHaveBeenCalledTimes(2) // forward + reverse
+    expect(searchEngine.upsertGame).toHaveBeenCalledTimes(2) // game 1 and game 2
   })
 })
