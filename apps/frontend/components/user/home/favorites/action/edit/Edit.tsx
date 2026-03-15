@@ -38,6 +38,7 @@ export const FavoriteEdit = ({ favorite, onSuccess }: FavoriteEditProps) => {
         open={open}
         onOpenChange={setOpen}
         breakpoint={768}
+        data-testid={`favorite-edit-dialog-${favorite.id}`}
       >
         <FavoriteEditContent favorite={favorite} onSuccess={handleEdit} className="px-4 pb-4" />
       </Modal>

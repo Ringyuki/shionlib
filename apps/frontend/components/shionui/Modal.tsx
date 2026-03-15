@@ -49,6 +49,8 @@ interface ShionlibModalProps {
   dialogClassName?: string
   /** Extra className forwarded to DrawerContent */
   drawerClassName?: string
+  /** data-testid forwarded to DialogContent / DrawerContent */
+  'data-testid'?: string
 }
 
 function ShionlibModal({
@@ -64,13 +66,14 @@ function ShionlibModal({
   fitContent,
   dialogClassName,
   drawerClassName,
+  'data-testid': testId,
 }: ShionlibModalProps) {
   const isMobile = useMedia(`(max-width: ${breakpoint}px)`, false)
 
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange} dismissible={closable}>
-        <DrawerContent aria-describedby={!description ? undefined : undefined}>
+        <DrawerContent aria-describedby={!description ? undefined : undefined} data-testid={testId}>
           {title && (
             <DrawerHeader>
               <DrawerTitle>{title}</DrawerTitle>
@@ -91,6 +94,7 @@ function ShionlibModal({
         tone={tone}
         fitContent={fitContent}
         className={dialogClassName}
+        data-testid={testId}
       >
         {title && (
           <DialogHeader>

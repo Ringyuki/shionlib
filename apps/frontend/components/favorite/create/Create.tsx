@@ -35,6 +35,7 @@ export const FavoriteCreate = ({ onSuccess }: FavoriteCreateProps) => {
         open={open}
         onOpenChange={setOpen}
         breakpoint={768}
+        data-testid="favorite-create-dialog"
       >
         <FavoriteCreateContent onSuccess={handleCreate} className="px-4 pb-4" />
       </Modal>
