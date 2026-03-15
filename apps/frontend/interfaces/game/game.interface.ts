@@ -265,7 +265,9 @@ export interface GameDetail extends Pick<
   | 'link'
   | 'nsfw'
   | 'content_limit'
-> {}
+> {
+  relations_from?: GameRelation[]
+}
 
 export interface GameStaff {
   name: string
@@ -339,4 +341,41 @@ export interface GameLink {
   url: string
   label: string
   name: string
+}
+
+export type GameRelationType =
+  | 'SEQUEL'
+  | 'PREQUEL'
+  | 'SIDE_STORY'
+  | 'MAIN_STORY'
+  | 'VARIANT'
+  | 'MAIN_VERSION'
+  | 'COLLECTION'
+  | 'COLLECTED_WORK'
+  | 'SAME_UNIVERSE'
+  | 'DIFFERENT_ADAPTATION'
+  | 'EXPANSION'
+
+export const GameRelationTypeOptions: Array<{ value: GameRelationType; labelKey: string }> = [
+  { value: 'SEQUEL', labelKey: 'SEQUEL' },
+  { value: 'PREQUEL', labelKey: 'PREQUEL' },
+  { value: 'SIDE_STORY', labelKey: 'SIDE_STORY' },
+  { value: 'MAIN_STORY', labelKey: 'MAIN_STORY' },
+  { value: 'VARIANT', labelKey: 'VARIANT' },
+  { value: 'MAIN_VERSION', labelKey: 'MAIN_VERSION' },
+  { value: 'COLLECTION', labelKey: 'COLLECTION' },
+  { value: 'COLLECTED_WORK', labelKey: 'COLLECTED_WORK' },
+  { value: 'SAME_UNIVERSE', labelKey: 'SAME_UNIVERSE' },
+  { value: 'DIFFERENT_ADAPTATION', labelKey: 'DIFFERENT_ADAPTATION' },
+  { value: 'EXPANSION', labelKey: 'EXPANSION' },
+]
+
+export interface GameRelation {
+  id: number
+  relation: GameRelationType
+  to_game_id: number
+  to_game: Pick<
+    GameData,
+    'id' | 'title_jp' | 'title_zh' | 'title_en' | 'intro_jp' | 'intro_zh' | 'intro_en' | 'covers'
+  >
 }

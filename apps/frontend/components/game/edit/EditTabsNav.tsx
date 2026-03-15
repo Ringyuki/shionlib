@@ -16,6 +16,7 @@ const tabs = [
   { name: 'image', href: 'image' },
   { name: 'developer', href: 'developer' },
   { name: 'character', href: 'character' },
+  { name: 'relation', href: 'relation' },
 ]
 
 export const EditTabsNav = () => {

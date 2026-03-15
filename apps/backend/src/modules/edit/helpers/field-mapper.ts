@@ -21,6 +21,7 @@ export const GameFieldGroupToFields: Record<GameFieldGroupBit, string[]> = {
   [GameFieldGroupBit.MANAGE_IMAGES]: ['images'],
   [GameFieldGroupBit.MANAGE_DEVELOPERS]: ['developers'],
   [GameFieldGroupBit.MANAGE_CHARACTERS]: ['characters'],
+  [GameFieldGroupBit.MANAGE_RELATIONS]: ['relations'],
   [GameFieldGroupBit.STATUS]: ['status'],
   [GameFieldGroupBit.NSFW]: ['nsfw'],
   [GameFieldGroupBit.VIEWS]: ['views'],

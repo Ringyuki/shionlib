@@ -17,6 +17,7 @@ export enum GameFieldGroupBit {
   STATUS = 15,
   NSFW = 16,
   VIEWS = 17,
+  MANAGE_RELATIONS = 18,
 }
 
 export enum GameCharacterFieldGroupBit {

@@ -37,6 +37,12 @@ export class EditController {
     return this.dataService.getGameCharacters(id)
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('/game/:id/relations')
+  async getGameRelations(@Param('id', ParseIntPipe) id: number) {
+    return this.dataService.getGameRelations(id)
+  }
+
   @Get('/game/:id/history')
   async getGameEditHistory(@Param('id', ParseIntPipe) id: number, @Query() dto: PaginationReqDto) {
     return this.dataService.getGameEditHistory(id, dto)

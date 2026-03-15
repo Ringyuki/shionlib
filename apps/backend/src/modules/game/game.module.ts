@@ -12,6 +12,7 @@ import { GameHotScoreService } from './services/game-hot-score.service'
 import { GameHotScoreCalcTask } from './tasks/game-hot-score-calc.task'
 import { GameDownloadSourceController } from './controllers/game-download-source.controller'
 import { HttpModule } from '@nestjs/axios'
+import { BangumiModule } from '../bangumi/bangumi.module'
 import { GameScoreService } from './services/game-score.service'
 import { GameScoreController } from './controllers/game-score.controller'
 import { GameDownloadResourceReportService } from './services/game-download-resource-report.service'
@@ -24,7 +25,7 @@ import { GameDownloadResourceReportService } from './services/game-download-reso
     GameDownloadSourceController,
     GameScoreController,
   ],
-  imports: [B2Module, HttpModule],
+  imports: [B2Module, HttpModule, BangumiModule],
   providers: [
     GameDataFetcherService,
     GameService,

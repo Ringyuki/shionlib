@@ -7,6 +7,7 @@ import { GameTags } from './GameTags'
 import { GameStaff } from './GameStaff'
 import { GameExtraInfo } from './GameExtraInfo'
 import { GameLinks } from './GameLinks'
+import { GameRelations } from './GameRelations'
 
 interface GameDetailProps {
   game: GameDetailType
@@ -15,6 +16,7 @@ interface GameDetailProps {
 export const GameDetail = ({ game }: GameDetailProps) => {
   return (
     <div className="flex flex-col gap-4">
+      <GameRelations relations={game.relations_from ?? []} content_limit={game.content_limit} />
       <GameTags tags={game.tags} />
       <GameDescription game={game} />
       <GameImages images={game.images} content_limit={game.content_limit} />

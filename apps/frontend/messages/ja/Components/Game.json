@@ -82,6 +82,22 @@
       "staff": "スタッフ",
       "extraInfo": "その他の情報"
     },
+    "GameRelations": {
+      "title": "関連作品",
+      "relationType": {
+        "SEQUEL": "続編",
+        "PREQUEL": "前作",
+        "SIDE_STORY": "外伝",
+        "MAIN_STORY": "本編",
+        "VARIANT": "別バージョン",
+        "MAIN_VERSION": "メインバージョン",
+        "COLLECTION": "コレクション",
+        "COLLECTED_WORK": "収録作品",
+        "SAME_UNIVERSE": "同一世界観",
+        "DIFFERENT_ADAPTATION": "別解釈",
+        "EXPANSION": "拡張パック"
+      }
+    },
     "BangumiExtraInfoKeyMap": {
       "birthday": "誕生日",
       "source": "出典",
@@ -357,7 +373,8 @@
       "image": "画像",
       "link": "リンク",
       "developer": "開発者",
-      "character": "キャラクター"
+      "character": "キャラクター",
+      "relation": "関連作品"
     },
     "Scalar": {
       "title_zh": "タイトル（中国語）",
@@ -575,6 +592,50 @@
         "role_primary": "メインキャラ",
         "role_side": "サブキャラ",
         "role_appears": "登場キャラ"
+      }
+    },
+    "Relation": {
+      "noPermission": "関連作品を編集する権限がありません",
+      "noRelations": "関連作品はまだありません",
+      "syncFromBangumi": "Bangumi から同期",
+      "syncSuccess": "{count} 件の関連を同期しました",
+      "syncFailed": "同期に失敗しました。ゲームに Bangumi ID があることを確認してください",
+      "updated": "更新しました",
+      "relationType": {
+        "SEQUEL": "続編",
+        "PREQUEL": "前作",
+        "SIDE_STORY": "外伝",
+        "MAIN_STORY": "本編",
+        "VARIANT": "別バージョン",
+        "MAIN_VERSION": "メインバージョン",
+        "COLLECTION": "コレクション",
+        "COLLECTED_WORK": "収録作品",
+        "SAME_UNIVERSE": "同一世界観",
+        "DIFFERENT_ADAPTATION": "別解釈",
+        "EXPANSION": "拡張パック"
+      },
+      "Edit": {
+        "title": "関連を編集",
+        "view_game": "ゲームを見る"
+      },
+      "Form": {
+        "relationType": "関係タイプ",
+        "submit": "保存"
+      },
+      "Delete": {
+        "delete": "削除",
+        "title": "この関連を削除しますか？",
+        "description": "リンク先ゲームの逆方向の関連も削除されます。",
+        "cancel": "キャンセル",
+        "success": "削除しました"
+      },
+      "Search": {
+        "title": "関連作品を追加",
+        "placeholder": "ゲームタイトルを検索...",
+        "search": "検索",
+        "add": "追加",
+        "already_added": "追加済み",
+        "added": "追加しました"
       }
     },
     "EditNote": {

@@ -5,7 +5,7 @@ type EditActionType =
   | 'SET_RELATION'
   | 'UPDATE_RELATION'
 
-type EditRelationType = 'cover' | 'image' | 'link' | 'developer' | 'character'
+type EditRelationType = 'cover' | 'image' | 'link' | 'developer' | 'character' | 'game_relation'
 
 export interface GameEntityInfo {
   id: number

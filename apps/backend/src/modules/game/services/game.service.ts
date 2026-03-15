@@ -193,6 +193,36 @@ export class GameService {
           name: true,
         },
       },
+      relations_from: {
+        select: {
+          id: true,
+          relation: true,
+          to_game_id: true,
+          to_game: {
+            select: {
+              id: true,
+              title_jp: true,
+              title_zh: true,
+              title_en: true,
+              intro_jp: true,
+              intro_zh: true,
+              intro_en: true,
+              covers: {
+                select: {
+                  language: true,
+                  type: true,
+                  url: true,
+                  dims: true,
+                  sexual: true,
+                  violence: true,
+                },
+                take: 3,
+              },
+            },
+          },
+        },
+        orderBy: { relation: 'asc' },
+      },
     }
     if (content_limit !== UserContentLimit.NEVER_SHOW_NSFW_CONTENT) {
       select.images = {

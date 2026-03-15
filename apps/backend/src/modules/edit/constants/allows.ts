@@ -26,6 +26,7 @@ export const gameAdminAllow = mask(
   GameFieldGroupBit.MANAGE_LINKS,
   GameFieldGroupBit.MANAGE_COVERS,
   GameFieldGroupBit.MANAGE_IMAGES,
+  GameFieldGroupBit.MANAGE_RELATIONS,
 )
 export const gameRootAllow = mask(
   GameFieldGroupBit.IDS,
@@ -43,6 +44,7 @@ export const gameRootAllow = mask(
   GameFieldGroupBit.MANAGE_IMAGES,
   GameFieldGroupBit.MANAGE_DEVELOPERS,
   GameFieldGroupBit.MANAGE_CHARACTERS,
+  GameFieldGroupBit.MANAGE_RELATIONS,
   GameFieldGroupBit.STATUS,
   GameFieldGroupBit.NSFW,
   GameFieldGroupBit.VIEWS,

@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common'
+import { Injectable, Inject, Logger } from '@nestjs/common'
 import { PrismaService } from '../../../prisma.service'
 import {
   EditGameReqDto,
@@ -12,7 +12,10 @@ import {
   EditGameDeveloperDto,
   GameCharacterRelationDto,
   EditGameCharacterDto,
+  GameRelationDto,
+  EditGameRelationItemDto,
 } from '../dto/req/edit-game.req.dto'
+import { GameRelationType } from '@prisma/client'
 import { PermissionEntity } from '../../edit/enums/permission-entity.enum'
 import { EditActionType } from '../../edit/enums/edit-action-type.enum'
 import { EditRelationType } from '../../edit/enums/edit-relation-type.enum'
@@ -28,14 +31,20 @@ import { ActivityService } from '../../activity/services/activity.service'
 import { ActivityType } from '../../activity/dto/create-activity.dto'
 import { S3Service } from '../../s3/services/s3.service'
 import { IMAGE_STORAGE } from '../../s3/constants/s3.constants'
+import { BangumiAuthService } from '../../bangumi/services/bangumi-auth.service'
+import { REVERSE_RELATION_MAP, BANGUMI_RELATION_MAP } from '../constants/game-relation.constant'
+import { BangumiSubjectRelation } from '../interfaces/bangumi/subject-relation.res.interface'
 
 @Injectable()
 export class GameEditService {
+  private readonly logger = new Logger(GameEditService.name)
+
   constructor(
     private readonly prisma: PrismaService,
     @Inject(SEARCH_ENGINE) private readonly searchEngine: SearchEngine,
     private readonly activityService: ActivityService,
     @Inject(IMAGE_STORAGE) private readonly imageStorage: S3Service,
+    private readonly bangumiAuthService: BangumiAuthService,
   ) {}
 
   async editGameScalar(id: number, dto: EditGameReqDto, req: RequestWithUser) {
@@ -1002,5 +1011,340 @@ export class GameEditService {
         tx,
       )
     })
+  }
+
+  async addGameRelations(id: number, relations: GameRelationDto[], req: RequestWithUser) {
+    const game = await this.prisma.game.findUnique({ where: { id }, select: { id: true } })
+    if (!game) throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
+
+    const existing = await this.prisma.gameRelation.findMany({
+      where: { from_game_id: id },
+      select: { to_game_id: true },
+    })
+    const existingToIds = new Set(existing.map(e => e.to_game_id))
+
+    const toAdd = relations.filter(r => !existingToIds.has(r.to_game_id) && r.to_game_id !== id)
+    if (toAdd.length === 0) return
+
+    const toGames = await this.prisma.game.findMany({
+      where: { id: { in: toAdd.map(r => r.to_game_id) } },
+      select: { id: true, title_jp: true, title_zh: true, title_en: true },
+    })
+    const toGameMap = new Map(toGames.map(g => [g.id, g]))
+
+    const validRelations = toAdd.filter(r => toGameMap.has(r.to_game_id))
+    if (validRelations.length === 0) return
+
+    await this.prisma.$transaction(async tx => {
+      // Create forward relations
+      await tx.gameRelation.createMany({
+        data: validRelations.map(r => ({
+          from_game_id: id,
+          to_game_id: r.to_game_id,
+          relation: r.relation as GameRelationType,
+        })),
+        skipDuplicates: true,
+      })
+
+      // Create reverse relations
+      const reverseData = validRelations.map(r => ({
+        from_game_id: r.to_game_id,
+        to_game_id: id,
+        relation: REVERSE_RELATION_MAP[r.relation as GameRelationType],
+      }))
+
+      await tx.gameRelation.createMany({
+        data: reverseData,
+        skipDuplicates: true,
+      })
+
+      const editRecord = await tx.editRecord.create({
+        data: {
+          entity: PermissionEntity.GAME,
+          target_id: id,
+          action: EditActionType.ADD_RELATION,
+          actor_id: req.user.sub,
+          actor_role: req.user.role,
+          relation_type: EditRelationType.GAME_RELATION,
+          field_changes: ['relations'],
+          changes: {
+            relation: 'relations',
+            added: validRelations.map(r => ({
+              to_game_id: r.to_game_id,
+              relation: r.relation,
+              to_game: {
+                title_jp: toGameMap.get(r.to_game_id)?.title_jp,
+                title_zh: toGameMap.get(r.to_game_id)?.title_zh,
+                title_en: toGameMap.get(r.to_game_id)?.title_en,
+              },
+            })),
+          } as any,
+        },
+        select: { id: true },
+      })
+
+      await this.activityService.create(
+        {
+          type: ActivityType.GAME_EDIT,
+          user_id: req.user.sub,
+          game_id: id,
+          edit_record_id: editRecord.id,
+        },
+        tx,
+      )
+    })
+  }
+
+  async removeGameRelations(id: number, relationIds: number[], req: RequestWithUser) {
+    const relationsToRemove = await this.prisma.gameRelation.findMany({
+      where: { from_game_id: id, id: { in: relationIds } },
+      select: {
+        id: true,
+        to_game_id: true,
+        relation: true,
+        to_game: { select: { title_jp: true, title_zh: true, title_en: true } },
+      },
+    })
+    if (relationsToRemove.length === 0) return
+
+    await this.prisma.$transaction(async tx => {
+      // Remove forward relations
+      await tx.gameRelation.deleteMany({ where: { from_game_id: id, id: { in: relationIds } } })
+
+      // Remove corresponding reverse relations
+      await tx.gameRelation.deleteMany({
+        where: {
+          OR: relationsToRemove.map(r => ({
+            from_game_id: r.to_game_id,
+            to_game_id: id,
+            relation: REVERSE_RELATION_MAP[r.relation],
+          })),
+        },
+      })
+
+      const editRecord = await tx.editRecord.create({
+        data: {
+          entity: PermissionEntity.GAME,
+          target_id: id,
+          action: EditActionType.REMOVE_RELATION,
+          actor_id: req.user.sub,
+          actor_role: req.user.role,
+          relation_type: EditRelationType.GAME_RELATION,
+          field_changes: ['relations'],
+          changes: {
+            relation: 'relations',
+            removed: relationsToRemove.map(r => ({
+              to_game_id: r.to_game_id,
+              relation: r.relation,
+              to_game: {
+                title_jp: r.to_game.title_jp,
+                title_zh: r.to_game.title_zh,
+                title_en: r.to_game.title_en,
+              },
+            })),
+          } as any,
+        },
+        select: { id: true },
+      })
+
+      await this.activityService.create(
+        {
+          type: ActivityType.GAME_EDIT,
+          user_id: req.user.sub,
+          game_id: id,
+          edit_record_id: editRecord.id,
+        },
+        tx,
+      )
+    })
+  }
+
+  async editGameRelations(id: number, relations: EditGameRelationItemDto[], req: RequestWithUser) {
+    const game = await this.prisma.game.findUnique({ where: { id }, select: { id: true } })
+    if (!game) throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
+
+    for (const item of relations) {
+      const existing = await this.prisma.gameRelation.findFirst({
+        where: { id: item.id, from_game_id: id },
+        select: {
+          id: true,
+          to_game_id: true,
+          relation: true,
+          to_game: { select: { title_jp: true, title_zh: true, title_en: true } },
+        },
+      })
+      if (!existing || existing.relation === (item.relation as unknown as GameRelationType))
+        continue
+
+      const newRelation = item.relation as unknown as GameRelationType
+      const reverseRelation = REVERSE_RELATION_MAP[newRelation]
+
+      await this.prisma.$transaction(async tx => {
+        await tx.gameRelation.update({
+          where: { id: item.id },
+          data: { relation: newRelation },
+        })
+
+        await tx.gameRelation.updateMany({
+          where: { from_game_id: existing.to_game_id, to_game_id: id },
+          data: { relation: reverseRelation },
+        })
+
+        const editRecord = await tx.editRecord.create({
+          data: {
+            entity: PermissionEntity.GAME,
+            target_id: id,
+            action: EditActionType.UPDATE_RELATION,
+            actor_id: req.user.sub,
+            actor_role: req.user.role,
+            relation_type: EditRelationType.GAME_RELATION,
+            field_changes: ['relations'],
+            changes: {
+              relation: 'relations',
+              before: [
+                {
+                  to_game_id: existing.to_game_id,
+                  relation: existing.relation,
+                  to_game: existing.to_game,
+                },
+              ],
+              after: [
+                {
+                  to_game_id: existing.to_game_id,
+                  relation: newRelation,
+                  to_game: existing.to_game,
+                },
+              ],
+            },
+          },
+          select: { id: true },
+        })
+
+        await this.activityService.create(
+          {
+            type: ActivityType.GAME_EDIT,
+            user_id: req.user.sub,
+            game_id: id,
+            edit_record_id: editRecord.id,
+          },
+          tx,
+        )
+      })
+    }
+  }
+
+  async syncRelationsFromBangumi(id: number, req: RequestWithUser) {
+    const game = await this.prisma.game.findUnique({
+      where: { id },
+      select: { id: true, b_id: true },
+    })
+    if (!game) throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
+    if (!game.b_id) throw new ShionBizException(ShionBizCode.COMMON_VALIDATION_FAILED)
+
+    let bangumiRelations: BangumiSubjectRelation[] = []
+    try {
+      bangumiRelations = await this.bangumiAuthService.bangumiRequest<BangumiSubjectRelation[]>(
+        `https://api.bgm.tv/v0/subjects/${game.b_id}/subjects`,
+      )
+    } catch (err) {
+      this.logger.warn(`Failed to fetch Bangumi relations for game ${id}: ${err.message}`)
+      throw new ShionBizException(ShionBizCode.COMMON_VALIDATION_FAILED)
+    }
+
+    const mappable = bangumiRelations.filter(r => BANGUMI_RELATION_MAP[r.relation])
+    if (mappable.length === 0) return { synced: 0 }
+
+    const bIds = mappable.map(r => String(r.id))
+    const existingGames = await this.prisma.game.findMany({
+      where: { b_id: { in: bIds } },
+      select: { id: true, b_id: true, title_jp: true, title_zh: true, title_en: true },
+    })
+    const bIdToGame = new Map(existingGames.map(g => [g.b_id!, g]))
+
+    const toAdd = mappable
+      .filter(r => bIdToGame.has(String(r.id)))
+      .map(r => ({
+        to_game_id: bIdToGame.get(String(r.id))!.id,
+        relation: BANGUMI_RELATION_MAP[r.relation],
+        to_game: bIdToGame.get(String(r.id))!,
+      }))
+
+    if (toAdd.length === 0) return { synced: 0 }
+
+    const existing = await this.prisma.gameRelation.findMany({
+      where: { from_game_id: id },
+      select: { to_game_id: true },
+    })
+    const existingToIds = new Set(existing.map(e => e.to_game_id))
+    const newRelations = toAdd.filter(r => !existingToIds.has(r.to_game_id))
+
+    if (newRelations.length === 0) return { synced: 0 }
+
+    await this.prisma.$transaction(async tx => {
+      await tx.gameRelation.createMany({
+        data: newRelations.map(r => ({
+          from_game_id: id,
+          to_game_id: r.to_game_id,
+          relation: r.relation,
+        })),
+        skipDuplicates: true,
+      })
+
+      await tx.gameRelation.createMany({
+        data: newRelations.map(r => ({
+          from_game_id: r.to_game_id,
+          to_game_id: id,
+          relation: REVERSE_RELATION_MAP[r.relation],
+        })),
+        skipDuplicates: true,
+      })
+
+      const editRecord = await tx.editRecord.create({
+        data: {
+          entity: PermissionEntity.GAME,
+          target_id: id,
+          action: EditActionType.ADD_RELATION,
+          actor_id: req.user.sub,
+          actor_role: req.user.role,
+          relation_type: EditRelationType.GAME_RELATION,
+          field_changes: ['relations'],
+          changes: {
+            relation: 'relations',
+            source: 'bangumi',
+            added: newRelations.map(r => ({
+              to_game_id: r.to_game_id,
+              relation: r.relation,
+              to_game: {
+                title_jp: r.to_game.title_jp,
+                title_zh: r.to_game.title_zh,
+                title_en: r.to_game.title_en,
+              },
+            })),
+          },
+        },
+        select: { id: true },
+      })
+
+      await this.activityService.create(
+        {
+          type: ActivityType.GAME_EDIT,
+          user_id: req.user.sub,
+          game_id: id,
+          edit_record_id: editRecord.id,
+        },
+        tx,
+      )
+    })
+
+    const allGameIds = [id, ...newRelations.map(r => r.to_game_id)]
+    const updatedGames = await this.prisma.game.findMany({
+      where: { id: { in: allGameIds } },
+      select: rawDataQuery,
+    })
+    await Promise.all(
+      updatedGames.map(g => this.searchEngine.upsertGame(formatDoc(g as unknown as GameData))),
+    )
+
+    return { synced: newRelations.length }
   }
 }

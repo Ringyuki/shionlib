@@ -3,7 +3,7 @@
 import { Card, CardContent } from '@/components/shionui/Card'
 import { FadeImage } from '@/components/common/shared/FadeImage'
 import { getPreferredContent } from '@/components/game/description/helpers/getPreferredContent'
-import { GameData } from '@/interfaces/game/game.interface'
+import { GameData, GameCover } from '@/interfaces/game/game.interface'
 import { Link } from '@/i18n/navigation.client'
 import { cn } from '@/utils/cn'
 import { useLocale } from 'next-intl'
@@ -19,9 +19,15 @@ interface GameEmbeddedCardProps {
   game: EmbeddedGame
   content_limit?: ContentLimit
   className?: string
+  asLink?: boolean
 }
 
-export const GameEmbeddedCard = ({ game, className, content_limit }: GameEmbeddedCardProps) => {
+export const GameEmbeddedCard = ({
+  game,
+  className,
+  content_limit,
+  asLink = true,
+}: GameEmbeddedCardProps) => {
   const locale = useLocale()
   const langMap = { en: 'en', ja: 'jp', zh: 'zh' } as const
   const lang = langMap[locale as keyof typeof langMap] ?? 'jp'
@@ -39,32 +45,64 @@ export const GameEmbeddedCard = ({ game, className, content_limit }: GameEmbedde
       content_limit === ContentLimit.NEVER_SHOW_NSFW_CONTENT ||
       !content_limit)
 
-  return (
+  return asLink ? (
     <Link href={`/game/${game.id}`} className={cn('group block', className)}>
-      <Card
-        className={cn(
-          'relative overflow-hidden p-0',
-          'border-border/60 bg-linear-to-br from-background/95 via-background/85 to-muted/40',
-          'transition-colors duration-200 hover:border-primary/45',
-        )}
-      >
-        <div className="pointer-events-none absolute -right-8 -top-8 size-24 rounded-full bg-primary/30 blur-2xl" />
-        <CardContent className="relative p-3">
-          <div className="flex items-start gap-3">
-            <div className="w-16 shrink-0 sm:w-18">
-              <div className="relative overflow-hidden rounded-md border border-border/50 bg-muted aspect-3/4">
-                {cover &&
-                  (shouldBlur ? (
-                    <Spoiler blur={32} className="absolute inset-0" showHidden={false} open={false}>
-                      <FadeImage
-                        src={cover.url}
-                        alt={title}
-                        className="absolute inset-0"
-                        imageClassName="object-cover"
-                        sizes="10vw"
-                      />
-                    </Spoiler>
-                  ) : (
+      <GameEmbeddedCardContent
+        game={game}
+        cover={cover}
+        title={title}
+        shouldBlur={shouldBlur}
+        introText={introText}
+        className={className}
+      />
+    </Link>
+  ) : (
+    <GameEmbeddedCardContent
+      game={game}
+      cover={cover}
+      title={title}
+      shouldBlur={shouldBlur}
+      introText={introText}
+      className={className}
+    />
+  )
+}
+
+interface GameEmbeddedCardContentProps {
+  game: EmbeddedGame
+  cover?: GameCover
+  title: string
+  content_limit?: ContentLimit
+  className?: string
+  shouldBlur?: boolean
+  introText?: string
+}
+
+const GameEmbeddedCardContent = ({
+  game,
+  cover,
+  title,
+  className,
+  shouldBlur,
+  introText,
+}: GameEmbeddedCardContentProps) => {
+  return (
+    <Card
+      className={cn(
+        'relative overflow-hidden p-0',
+        'border-border/60 bg-linear-to-br from-background/95 via-background/85 to-muted/40',
+        'transition-colors duration-200 hover:border-primary/45',
+        className,
+      )}
+    >
+      <div className="pointer-events-none absolute -right-8 -top-8 size-24 rounded-full bg-primary/30 blur-2xl" />
+      <CardContent className="relative p-3">
+        <div className="flex items-start gap-3">
+          <div className="w-16 shrink-0 sm:w-18">
+            <div className="relative overflow-hidden rounded-md border border-border/50 bg-muted aspect-3/4">
+              {cover &&
+                (shouldBlur ? (
+                  <Spoiler blur={32} className="absolute inset-0" showHidden={false} open={false}>
                     <FadeImage
                       src={cover.url}
                       alt={title}
@@ -72,32 +110,40 @@ export const GameEmbeddedCard = ({ game, className, content_limit }: GameEmbedde
                       imageClassName="object-cover"
                       sizes="10vw"
                     />
-                  ))}
-              </div>
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="text-[11px] leading-none text-muted-foreground/80">#{game.id}</p>
-                  <h4 className="mt-1 line-clamp-2 text-sm font-semibold leading-snug sm:text-base">
-                    {title}
-                  </h4>
-                </div>
-                <span className="pt-0.5 text-xs text-muted-foreground transition-colors group-hover:text-primary">
-                  ↗
-                </span>
-              </div>
-
-              {introText ? (
-                <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-                  {introText}
-                </p>
-              ) : null}
+                  </Spoiler>
+                ) : (
+                  <FadeImage
+                    src={cover.url}
+                    alt={title}
+                    className="absolute inset-0"
+                    imageClassName="object-cover"
+                    sizes="10vw"
+                  />
+                ))}
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </Link>
+
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-[11px] leading-none text-muted-foreground/80">#{game.id}</p>
+                <h4 className="mt-1 line-clamp-2 text-sm font-semibold leading-snug sm:text-base">
+                  {title}
+                </h4>
+              </div>
+              <span className="pt-0.5 text-xs text-muted-foreground transition-colors group-hover:text-primary">
+                ↗
+              </span>
+            </div>
+
+            {introText ? (
+              <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                {introText}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

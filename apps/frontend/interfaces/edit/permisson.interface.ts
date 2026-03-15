@@ -45,6 +45,7 @@ export type GamePermissionFields =
   | 'images'
   | 'developers'
   | 'characters'
+  | 'relations'
   | 'status'
   | 'nsfw'
   | 'views'
@@ -103,6 +104,7 @@ export const GamePermissionFieldsArray: Array<GamePermissionFields> = [
   'images',
   'developers',
   'characters',
+  'relations',
   'status',
   'nsfw',
   'views',
@@ -181,6 +183,7 @@ export type GameRelationFields =
   | 'MANAGE_IMAGES'
   | 'MANAGE_DEVELOPERS'
   | 'MANAGE_CHARACTERS'
+  | 'MANAGE_RELATIONS'
 export type DeveloperRelationFields = []
 export type CharacterRelationFields = []
 

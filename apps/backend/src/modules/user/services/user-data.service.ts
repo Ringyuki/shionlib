@@ -394,7 +394,7 @@ export class UserDataService {
     const characterMap = new Map(characters.map(c => [c.id, c] as const))
     const developerMap = new Map(developers.map(d => [d.id, d] as const))
 
-    const result: EditRecordItem[] = editRecords.map(r => {
+    const result = editRecords.map(r => {
       switch (r.entity) {
         case 'game':
           return {

@@ -49,6 +49,9 @@ model Game {
 
   walkthroughs Walkthrough[] @relation("game_walkthrough")
 
+  relations_from GameRelation[] @relation("GameRelationFrom")
+  relations_to   GameRelation[] @relation("GameRelationTo")
+
   status  Int      @default(1)
   created DateTime @default(now())
   updated DateTime @updatedAt
@@ -60,6 +63,24 @@ model Game {
   @@index([hot_score])
   @@index([downloads])
   @@map("games")
+}
+
+model GameRelation {
+  id           Int              @id @default(autoincrement())
+  from_game_id Int
+  to_game_id   Int
+  relation     GameRelationType
+
+  from_game Game @relation("GameRelationFrom", fields: [from_game_id], references: [id], onDelete: Cascade)
+  to_game   Game @relation("GameRelationTo", fields: [to_game_id], references: [id], onDelete: Cascade)
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@unique([from_game_id, to_game_id])
+  @@index([from_game_id])
+  @@index([to_game_id])
+  @@map("game_relations")
 }
 
 model GameLink {

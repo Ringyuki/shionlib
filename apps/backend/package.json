@@ -32,6 +32,7 @@
     "prisma:migrate-deploy": "prisma migrate deploy",
     "prepare": "[ -d .git ] && husky || true",
     "reindex:all": "ts-node -r tsconfig-paths/register src/scripts/reindex-all.ts",
+    "sync:bangumi-relations": "ts-node -r tsconfig-paths/register src/scripts/sync-bangumi-relations.ts",
     "e2e:data:reset": "ts-node -r tsconfig-paths/register src/scripts/e2e-dataset.ts reset",
     "e2e:data:seed": "ts-node -r tsconfig-paths/register src/scripts/e2e-dataset.ts seed",
     "e2e:data:prepare": "ts-node -r tsconfig-paths/register src/scripts/e2e-dataset.ts prepare",

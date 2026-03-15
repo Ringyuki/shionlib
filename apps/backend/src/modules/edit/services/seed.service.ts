@@ -47,6 +47,7 @@ export class SeedService implements OnModuleInit {
       ['STATUS', GameFieldGroupBit.STATUS, false],
       ['NSFW', GameFieldGroupBit.NSFW, false],
       ['VIEWS', GameFieldGroupBit.VIEWS, false],
+      ['MANAGE_RELATIONS', GameFieldGroupBit.MANAGE_RELATIONS, true],
     ] as const
 
     const gameCharacterMappings: GameCharacterFieldMapping[] = [

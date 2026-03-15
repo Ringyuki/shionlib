@@ -157,6 +157,46 @@ export class DataService {
     return characters
   }
 
+  async getGameRelations(game_id: number) {
+    const game = await this.prismaService.game.findUnique({
+      where: { id: game_id },
+      select: { id: true },
+    })
+    if (!game) throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
+
+    return this.prismaService.gameRelation.findMany({
+      where: { from_game_id: game_id },
+      select: {
+        id: true,
+        relation: true,
+        to_game_id: true,
+        to_game: {
+          select: {
+            id: true,
+            title_jp: true,
+            title_zh: true,
+            title_en: true,
+            intro_jp: true,
+            intro_zh: true,
+            intro_en: true,
+            covers: {
+              select: {
+                language: true,
+                type: true,
+                url: true,
+                dims: true,
+                sexual: true,
+                violence: true,
+              },
+              take: 3,
+            },
+          },
+        },
+      },
+      orderBy: { relation: 'asc' },
+    })
+  }
+
   async getGameEditHistory(
     game_id: number,
     dto: PaginationReqDto,

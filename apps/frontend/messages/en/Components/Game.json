@@ -82,6 +82,22 @@
       "staff": "Staff",
       "extraInfo": "Additional info"
     },
+    "GameRelations": {
+      "title": "Related Works",
+      "relationType": {
+        "SEQUEL": "Sequel",
+        "PREQUEL": "Prequel",
+        "SIDE_STORY": "Side Story",
+        "MAIN_STORY": "Main Story",
+        "VARIANT": "Different Version",
+        "MAIN_VERSION": "Main Version",
+        "COLLECTION": "Collection",
+        "COLLECTED_WORK": "Collected Work",
+        "SAME_UNIVERSE": "Same Universe",
+        "DIFFERENT_ADAPTATION": "Different Adaptation",
+        "EXPANSION": "Expansion"
+      }
+    },
     "BangumiExtraInfoKeyMap": {
       "birthday": "Birthday",
       "source": "Source",
@@ -357,7 +373,8 @@
       "image": "Images",
       "link": "Links",
       "developer": "Developers",
-      "character": "Characters"
+      "character": "Characters",
+      "relation": "Related Works"
     },
     "Scalar": {
       "title_zh": "Title (Chinese)",
@@ -575,6 +592,50 @@
         "role_primary": "Primary",
         "role_side": "Side",
         "role_appears": "Appears"
+      }
+    },
+    "Relation": {
+      "noPermission": "You don't have permission to edit related works",
+      "noRelations": "No related works yet",
+      "syncFromBangumi": "Sync from Bangumi",
+      "syncSuccess": "Synced {count} relation(s)",
+      "syncFailed": "Sync failed. Make sure the game has a Bangumi ID",
+      "updated": "Updated successfully",
+      "relationType": {
+        "SEQUEL": "Sequel",
+        "PREQUEL": "Prequel",
+        "SIDE_STORY": "Side Story",
+        "MAIN_STORY": "Main Story",
+        "VARIANT": "Different Version",
+        "MAIN_VERSION": "Main Version",
+        "COLLECTION": "Collection",
+        "COLLECTED_WORK": "Collected Work",
+        "SAME_UNIVERSE": "Same Universe",
+        "DIFFERENT_ADAPTATION": "Different Adaptation",
+        "EXPANSION": "Expansion"
+      },
+      "Edit": {
+        "title": "Edit Relation",
+        "view_game": "View Game"
+      },
+      "Form": {
+        "relationType": "Relation type",
+        "submit": "Save"
+      },
+      "Delete": {
+        "delete": "Remove",
+        "title": "Remove this relation?",
+        "description": "The reverse relation on the linked game will also be removed.",
+        "cancel": "Cancel",
+        "success": "Removed successfully"
+      },
+      "Search": {
+        "title": "Add Related Work",
+        "placeholder": "Search game title...",
+        "search": "Search",
+        "add": "Add",
+        "already_added": "Already added",
+        "added": "Added successfully"
       }
     },
     "EditNote": {

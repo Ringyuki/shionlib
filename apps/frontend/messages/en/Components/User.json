@@ -301,7 +301,8 @@
           "image": "Image",
           "link": "Link",
           "developer": "Developer",
-          "character": "Character"
+          "character": "Character",
+          "game_relation": "Game relation"
         },
         "entity": {
           "game": "Game",

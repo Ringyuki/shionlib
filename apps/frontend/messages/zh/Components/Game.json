@@ -82,6 +82,22 @@
       "staff": "制作人员",
       "extraInfo": "其他信息"
     },
+    "GameRelations": {
+      "title": "相关作品",
+      "relationType": {
+        "SEQUEL": "续集",
+        "PREQUEL": "前传",
+        "SIDE_STORY": "外传",
+        "MAIN_STORY": "主线故事",
+        "VARIANT": "不同版本",
+        "MAIN_VERSION": "主版本",
+        "COLLECTION": "合集",
+        "COLLECTED_WORK": "收录作品",
+        "SAME_UNIVERSE": "相同世界观",
+        "DIFFERENT_ADAPTATION": "不同演绎",
+        "EXPANSION": "扩展包"
+      }
+    },
     "BangumiExtraInfoKeyMap": {
       "birthday": "生日",
       "source": "引用来源",
@@ -357,7 +373,8 @@
       "image": "图片",
       "link": "相关链接",
       "developer": "会社/开发商",
-      "character": "出场角色"
+      "character": "出场角色",
+      "relation": "相关作品"
     },
     "Scalar": {
       "title_zh": "标题（中文）",
@@ -575,6 +592,50 @@
         "role_primary": "主要角色",
         "role_side": "次要角色",
         "role_appears": "登场角色"
+      }
+    },
+    "Relation": {
+      "noPermission": "你没有编辑相关作品的权限",
+      "noRelations": "暂无相关作品",
+      "syncFromBangumi": "从 Bangumi 同步",
+      "syncSuccess": "成功同步 {count} 条关联",
+      "syncFailed": "同步失败，请确认游戏有 Bangumi ID",
+      "updated": "更新成功",
+      "relationType": {
+        "SEQUEL": "续集",
+        "PREQUEL": "前传",
+        "SIDE_STORY": "外传",
+        "MAIN_STORY": "主线故事",
+        "VARIANT": "不同版本",
+        "MAIN_VERSION": "主版本",
+        "COLLECTION": "合集",
+        "COLLECTED_WORK": "收录作品",
+        "SAME_UNIVERSE": "相同世界观",
+        "DIFFERENT_ADAPTATION": "不同演绎",
+        "EXPANSION": "扩展包"
+      },
+      "Edit": {
+        "title": "编辑关联",
+        "view_game": "查看游戏"
+      },
+      "Form": {
+        "relationType": "关联类型",
+        "submit": "保存"
+      },
+      "Delete": {
+        "delete": "移除",
+        "title": "移除此关联？",
+        "description": "被关联游戏上的反向关联也会一并移除。",
+        "cancel": "取消",
+        "success": "移除成功"
+      },
+      "Search": {
+        "title": "添加相关作品",
+        "placeholder": "搜索游戏名称...",
+        "search": "搜索",
+        "add": "添加",
+        "already_added": "已添加",
+        "added": "添加成功"
       }
     },
     "EditNote": {

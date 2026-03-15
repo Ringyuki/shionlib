@@ -301,7 +301,8 @@
           "image": "图片",
           "link": "相关链接",
           "developer": "制作人员",
-          "character": "出场角色"
+          "character": "出场角色",
+          "game_relation": "关联作品"
         },
         "entity": {
           "game": "游戏",

@@ -4,4 +4,5 @@ export enum EditRelationType {
   IMAGE = 'image',
   DEVELOPER = 'developer',
   CHARACTER = 'character',
+  GAME_RELATION = 'game_relation',
 }

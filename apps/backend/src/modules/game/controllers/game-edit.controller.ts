@@ -8,6 +8,7 @@ import {
   UseGuards,
   Put,
   Delete,
+  Post,
 } from '@nestjs/common'
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
 import { GameEditService } from '../services/game-edit.service'
@@ -30,6 +31,9 @@ import {
   AddGameCharacterReqDto,
   RemoveGameCharacterReqDto,
   EditGameCharacterReqDto,
+  AddGameRelationReqDto,
+  RemoveGameRelationReqDto,
+  EditGameRelationsReqDto,
 } from '../dto/req/edit-game.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { EditAuthGuard } from '../../edit/guards/edit-auth.guard'
@@ -341,5 +345,73 @@ export class GameEditController {
     @Req() req: RequestWithUser,
   ) {
     return this.gameEditService.editCharacters(id, dto.characters, req)
+  }
+
+  // Game relation endpoints
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_RELATIONS],
+      undefined,
+      'relations',
+    ),
+  )
+  @Put(':id/edit/relations')
+  async addGameRelations(
+    @Body() dto: AddGameRelationReqDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameEditService.addGameRelations(id, dto.relations, req)
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_RELATIONS],
+      undefined,
+      'relations',
+    ),
+  )
+  @Delete(':id/edit/relations')
+  async removeGameRelations(
+    @Body() dto: RemoveGameRelationReqDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameEditService.removeGameRelations(id, dto.ids, req)
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_RELATIONS],
+      undefined,
+      'relations',
+    ),
+  )
+  @Patch(':id/edit/relations')
+  async editGameRelations(
+    @Body() dto: EditGameRelationsReqDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameEditService.editGameRelations(id, dto.relations, req)
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_RELATIONS],
+      undefined,
+      'relations',
+    ),
+  )
+  @Post(':id/edit/relations/sync-from-bangumi')
+  async syncRelationsFromBangumi(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameEditService.syncRelationsFromBangumi(id, req)
   }
 }

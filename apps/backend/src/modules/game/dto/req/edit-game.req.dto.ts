@@ -457,3 +457,74 @@ export class RemoveGameCharacterReqDto {
   @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'ids' }) })
   ids: number[]
 }
+
+export enum GameRelationTypeEnum {
+  SEQUEL = 'SEQUEL',
+  PREQUEL = 'PREQUEL',
+  SIDE_STORY = 'SIDE_STORY',
+  MAIN_STORY = 'MAIN_STORY',
+  VARIANT = 'VARIANT',
+  MAIN_VERSION = 'MAIN_VERSION',
+  COLLECTION = 'COLLECTION',
+  COLLECTED_WORK = 'COLLECTED_WORK',
+  SAME_UNIVERSE = 'SAME_UNIVERSE',
+  DIFFERENT_ADAPTATION = 'DIFFERENT_ADAPTATION',
+  EXPANSION = 'EXPANSION',
+}
+
+export class GameRelationDto {
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: ivm('validation.common.IS_NUMBER', { property: 'to_game_id' }) },
+  )
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'to_game_id' }) })
+  to_game_id: number
+
+  @IsEnum(GameRelationTypeEnum, {
+    message: ivmEnum('validation.common.IS_ENUM', GameRelationTypeEnum, { property: 'relation' }),
+  })
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'relation' }) })
+  relation: GameRelationTypeEnum
+}
+
+export class AddGameRelationReqDto {
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'relations' }) })
+  @ValidateNested({ each: true })
+  @Type(() => GameRelationDto)
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'relations' }) })
+  relations: GameRelationDto[]
+}
+
+export class RemoveGameRelationReqDto {
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'ids' }) })
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: ivm('validation.common.IS_NUMBER', { property: 'ids' }), each: true },
+  )
+  @Type(() => Number)
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'ids' }) })
+  ids: number[]
+}
+
+export class EditGameRelationItemDto {
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: ivm('validation.common.IS_NUMBER', { property: 'id' }) },
+  )
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'id' }) })
+  id: number
+
+  @IsEnum(GameRelationTypeEnum, {
+    message: ivmEnum('validation.common.IS_ENUM', GameRelationTypeEnum, { property: 'relation' }),
+  })
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'relation' }) })
+  relation: GameRelationTypeEnum
+}
+
+export class EditGameRelationsReqDto {
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'relations' }) })
+  @ValidateNested({ each: true })
+  @Type(() => EditGameRelationItemDto)
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'relations' }) })
+  relations: EditGameRelationItemDto[]
+}

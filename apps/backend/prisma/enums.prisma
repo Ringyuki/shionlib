@@ -42,6 +42,7 @@ enum EditRelationType {
   link
   developer
   character
+  game_relation
 }
 
 // permission enums
@@ -49,6 +50,21 @@ enum PermissionEntity {
   game
   character
   developer
+}
+
+// game relation enums
+enum GameRelationType {
+  SEQUEL
+  PREQUEL
+  SIDE_STORY
+  MAIN_STORY
+  VARIANT
+  MAIN_VERSION
+  COLLECTION
+  COLLECTED_WORK
+  SAME_UNIVERSE
+  DIFFERENT_ADAPTATION
+  EXPANSION
 }
 
 // user upload enums

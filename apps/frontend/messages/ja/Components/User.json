@@ -301,7 +301,8 @@
           "image": "画像",
           "link": "関連リンク",
           "developer": "制作スタッフ",
-          "character": "登場キャラクター"
+          "character": "登場キャラクター",
+          "game_relation": "関連作品"
         },
         "entity": {
           "game": "ゲーム",

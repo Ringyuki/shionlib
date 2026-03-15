@@ -101,11 +101,13 @@ describe('GameEditService', () => {
       deleteFile: jest.fn(),
     }
 
+    const bangumiAuthService = { bangumiRequest: jest.fn() }
     const service = new GameEditService(
       prisma as any,
       searchEngine as any,
       activityService as any,
       imageStorage as any,
+      bangumiAuthService as any,
     )
 
     return {
