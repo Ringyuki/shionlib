@@ -62,12 +62,16 @@ describe('GameCreateService', () => {
     const activityService = {
       create: jest.fn(),
     }
+    const gameEditService = {
+      syncRelationsFromBangumi: jest.fn().mockResolvedValue(undefined),
+    }
 
     const service = new GameCreateService(
       gameDataFetcherService as any,
       prisma as any,
       searchEngine as any,
       activityService as any,
+      gameEditService as any,
     )
 
     return {

@@ -25,6 +25,7 @@ import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-us
 import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 import { ActivityService } from '../../activity/services/activity.service'
 import { ActivityType } from '../../activity/dto/create-activity.dto'
+import { GameEditService } from './game-edit.service'
 
 @Injectable()
 export class GameCreateService {
@@ -33,6 +34,7 @@ export class GameCreateService {
     private readonly prisma: PrismaService,
     @Inject(SEARCH_ENGINE) private readonly searchEngine: SearchEngine,
     private readonly activityService: ActivityService,
+    private readonly gameEditService: GameEditService,
   ) {}
 
   async createFromBangumiAndVNDB(
@@ -133,6 +135,7 @@ export class GameCreateService {
         select: rawDataQuery,
       })
       await this.searchEngine.upsertGame(formatDoc(game as unknown as GameData))
+      this.gameEditService.syncRelationsFromBangumi(gameId, req).catch(() => {})
     } catch (e) {
       console.error(e)
       throw e
