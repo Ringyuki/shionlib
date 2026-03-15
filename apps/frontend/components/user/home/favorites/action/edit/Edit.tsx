@@ -3,11 +3,10 @@
 import { Button } from '@/components/shionui/Button'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
-import { useMedia } from 'react-use'
 import { Favorite } from '@/interfaces/favorite/favorite.interface'
-import { FavoriteEditDialog } from './Dialog'
-import { FavoriteEditDrawer } from './Drawer'
+import { Modal } from '@/components/shionui/Modal'
 import { Pencil } from 'lucide-react'
+import { FavoriteEditContent } from './Content'
 
 interface FavoriteEditProps {
   favorite: Favorite
@@ -17,7 +16,6 @@ interface FavoriteEditProps {
 export const FavoriteEdit = ({ favorite, onSuccess }: FavoriteEditProps) => {
   const t = useTranslations('Components.User.Home.Favorites.Action.Edit')
   const [open, setOpen] = useState(false)
-  const isMobile = useMedia('(max-width: 768px)', false)
 
   const handleEdit = (updated: Favorite) => {
     setOpen(false)
@@ -34,21 +32,15 @@ export const FavoriteEdit = ({ favorite, onSuccess }: FavoriteEditProps) => {
         data-testid={`favorite-edit-trigger-${favorite.id}`}
         onClick={() => setOpen(true)}
       />
-      {isMobile ? (
-        <FavoriteEditDrawer
-          open={open}
-          onOpenChange={setOpen}
-          onSuccess={handleEdit}
-          favorite={favorite}
-        />
-      ) : (
-        <FavoriteEditDialog
-          open={open}
-          onOpenChange={setOpen}
-          onSuccess={handleEdit}
-          favorite={favorite}
-        />
-      )}
+      <Modal
+        title={t('title')}
+        description={t('description')}
+        open={open}
+        onOpenChange={setOpen}
+        breakpoint={768}
+      >
+        <FavoriteEditContent favorite={favorite} onSuccess={handleEdit} className="px-4 pb-4" />
+      </Modal>
     </>
   )
 }

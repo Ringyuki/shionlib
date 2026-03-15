@@ -77,7 +77,7 @@ export const GameCharacterItemContent = ({
               </span>
             </div>
           )}
-          <BBCodeContent content={intro} className="text-sm break-words break-all" />
+          <BBCodeContent content={intro} className="text-sm wrap-break-word break-all" />
           {extra_info.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {extra_info.map(info => (

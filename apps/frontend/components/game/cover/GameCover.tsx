@@ -2,15 +2,14 @@
 
 import { GameCover as GameCoverInterface } from '@/interfaces/game/game.interface'
 import { FadeImage } from '@/components/common/shared/FadeImage'
-import { useMedia } from 'react-use'
 import { Button } from '@/components/shionui/Button'
 import { useTranslations } from 'next-intl'
-import { GameCoverDialog } from './GameCoverDialog'
-import { GameCoverDrawer } from './GameCoverDrawer'
 import { useState } from 'react'
 import { ContentLimit } from '@/interfaces/user/user.interface'
 import { Spoiler } from '@/components/shionui/Spoiler'
 import { PreferredCover } from '../description/helpers/getPreferredContent'
+import { Modal } from '@/components/shionui/Modal'
+import { GameCoverContent } from './GameCoverContent'
 
 interface GameCoverProps {
   covers: GameCoverInterface[]
@@ -34,8 +33,6 @@ const _GameCover = ({ cover, title, width }: { cover: string; title: string; wid
 
 export const GameCover = ({ covers, preferredCoverInfo, title, content_limit }: GameCoverProps) => {
   const t = useTranslations('Components.Game.Cover.GameCover')
-
-  const isMobile = useMedia('(max-width: 768px)', false)
   const [open, setOpen] = useState(false)
 
   if (!preferredCoverInfo.cover)
@@ -85,23 +82,16 @@ export const GameCover = ({ covers, preferredCoverInfo, title, content_limit }: 
           </div>
         )}
       </div>
-      {isMobile ? (
-        <GameCoverDrawer
-          covers={covers}
-          title={title}
-          open={open}
-          onOpenChange={setOpen}
-          content_limit={content_limit}
-        />
-      ) : (
-        <GameCoverDialog
-          covers={covers}
-          title={title}
-          open={open}
-          onOpenChange={setOpen}
-          content_limit={content_limit}
-        />
-      )}
+      <Modal
+        title={t('title')}
+        description={title}
+        open={open}
+        onOpenChange={setOpen}
+        dialogClassName="min-w-[720px]!"
+        breakpoint={768}
+      >
+        <GameCoverContent covers={covers} title={title} content_limit={content_limit} />
+      </Modal>
     </>
   )
 }

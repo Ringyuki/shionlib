@@ -1,8 +1,8 @@
-import { HistoryDialog } from './HistoryDialog'
-import { HistoryDrawer } from './HistoryDrawer'
-import { useMedia } from 'react-use'
+import { Modal } from '@/components/shionui/Modal'
+import { useTranslations } from 'next-intl'
 import { EditRecordItem as EditRecordItemInterface } from '@/interfaces/user/edits.interface'
 import { PaginatedMeta } from '@/interfaces/api/shionlib-api-res.interface'
+import { History } from './History'
 
 interface HistoryContentProps {
   open: boolean
@@ -21,28 +21,16 @@ export const HistoryContent = ({
   onPageChange,
   loading = false,
 }: HistoryContentProps) => {
-  const isMobile = useMedia('(max-width: 1024px)', false)
+  const t = useTranslations('Components.Game.EditHistory')
   return (
-    <div className="hidden">
-      {isMobile ? (
-        <HistoryDrawer
-          open={open}
-          onOpenChange={onOpenChange}
-          histories={histories}
-          pagination={pagination}
-          onPageChange={onPageChange}
-          loading={loading}
-        />
-      ) : (
-        <HistoryDialog
-          open={open}
-          onOpenChange={onOpenChange}
-          histories={histories}
-          pagination={pagination}
-          onPageChange={onPageChange}
-          loading={loading}
-        />
-      )}
-    </div>
+    <Modal title={t('title')} open={open} onOpenChange={onOpenChange} fitContent>
+      <History
+        histories={histories}
+        pagination={pagination}
+        onPageChange={onPageChange}
+        loading={loading}
+        className="max-w-7xl mx-auto"
+      />
+    </Modal>
   )
 }

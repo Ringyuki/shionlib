@@ -2,15 +2,14 @@
 
 import { GameCharacterRelation } from '@/interfaces/game/game.interface'
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
-import { useMedia } from 'react-use'
-import { EditDialog } from './EditDialog'
-import { EditDrawer } from './EditDrawer'
+import { Modal } from '@/components/shionui/Modal'
 import { CharacterRelationItem } from './Item'
 import { z } from 'zod'
 import { characterRelationSchemaType } from './Form'
 import { shionlibRequest } from '@/utils/request'
 import { sileo } from 'sileo'
 import { useTranslations } from 'next-intl'
+import { EditContent } from './EditContent'
 
 export interface EditRef {
   open: () => void
@@ -30,7 +29,6 @@ interface EditProps {
 
 export const Edit = forwardRef<EditRef, EditProps>(
   ({ relation, game_id, onSuccess, onDelete, onImageUpdate }, ref) => {
-    const isMobile = useMedia('(max-width: 1024px)', false)
     const [open, setOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [currentRelation, setCurrentRelation] = useState(relation)
@@ -90,20 +88,18 @@ export const Edit = forwardRef<EditRef, EditProps>(
       onDelete?.(id)
     }
 
-    const EditComponent = isMobile ? EditDrawer : EditDialog
-
     return (
       <>
         <CharacterRelationItem relation={currentRelation} onClick={() => setOpen(true)} />
-        <EditComponent
-          relation={currentRelation}
-          game_id={game_id}
-          open={open}
-          onOpenChange={setOpen}
-          onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-          onDelete={handleDelete}
-        />
+        <Modal title={t('Edit.title')} open={open} onOpenChange={setOpen}>
+          <EditContent
+            relation={currentRelation}
+            game_id={game_id}
+            onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+            onDelete={handleDelete}
+          />
+        </Modal>
       </>
     )
   },

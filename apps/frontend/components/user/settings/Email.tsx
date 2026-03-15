@@ -16,8 +16,8 @@ import { Mail } from 'lucide-react'
 import { Input } from '@/components/shionui/Input'
 import { User } from '@/interfaces/user/user.interface'
 import { shionlibRequest } from '@/utils/request'
-import { DialogFlow } from '@/components/user/settings/email/DialogFlow'
-import { DrawerFlow } from '@/components/user/settings/email/DrawerFlow'
+import { Modal } from '@/components/shionui/Modal'
+import { EmailFlow } from '@/components/user/settings/email/EmailFlow'
 import { useMedia } from 'react-use'
 import { sileo } from 'sileo'
 import { useShionlibUserStore } from '@/store/userStore'
@@ -29,6 +29,7 @@ interface EmailSettingsProps {
 
 export const EmailSettings = ({ email }: EmailSettingsProps) => {
   const t = useTranslations('Components.User.Settings.Email')
+  const tFlow = useTranslations('Components.User.Settings.EmailFlow')
   const [isGettingCode, setIsGettingCode] = useState(false)
   const [currentCodeUuid, setCurrentCodeUuid] = useState<string | null>(null)
   const { logout } = useShionlibUserStore()
@@ -102,23 +103,14 @@ export const EmailSettings = ({ email }: EmailSettingsProps) => {
           </Button>
         </CardFooter>
       </Card>
-      {isMobile ? (
-        <DrawerFlow
-          open={open}
-          onOpenChange={setOpen}
+      <Modal title={tFlow('title')} open={open} onOpenChange={setOpen} closable={false} fitContent>
+        <EmailFlow
           currentEmail={email!}
           onSubmit={onSubmit}
           isSubmitting={isUpdating}
+          {...(isMobile ? { className: 'overflow-auto px-1', variant: 'vertical' } : {})}
         />
-      ) : (
-        <DialogFlow
-          open={open}
-          onOpenChange={setOpen}
-          currentEmail={email!}
-          onSubmit={onSubmit}
-          isSubmitting={isUpdating}
-        />
-      )}
+      </Modal>
     </>
   )
 }

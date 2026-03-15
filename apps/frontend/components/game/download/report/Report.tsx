@@ -6,10 +6,9 @@ import { shionlibRequest } from '@/utils/request'
 import { sileo } from 'sileo'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { useMedia } from 'react-use'
-import { createReportFormSchema, ReportFormValues } from './ReportForm'
-import { ReportDialog } from './ReportDialog'
-import { ReportDrawer } from './ReportDrawer'
+import { createReportFormSchema, ReportFormValues, ReportForm } from './ReportForm'
+import { Modal } from '@/components/shionui/Modal'
+import { Button } from '@/components/shionui/Button'
 
 interface ReportProps {
   id: number
@@ -25,7 +24,6 @@ const reportFormDefaultValues: Partial<ReportFormValues> = {
 
 export const Report = ({ id, onSuccess, open, onOpenChange, onLoadingChange }: ReportProps) => {
   const t = useTranslations('Components.Game.Download.Report')
-  const isMobile = useMedia('(max-width: 1024px)', false)
   const [loading, setLoading] = useState(false)
   const reportFormSchema = createReportFormSchema(t)
   const form = useForm<ReportFormValues>({
@@ -71,21 +69,25 @@ export const Report = ({ id, onSuccess, open, onOpenChange, onLoadingChange }: R
     }
   }
 
-  return isMobile ? (
-    <ReportDrawer
+  return (
+    <Modal
+      title={t('title')}
+      description={t('description')}
+      tone="destructive"
       open={open}
       onOpenChange={handleOpenChange}
-      form={form}
-      loading={loading}
-      onSubmit={handleSubmit}
-    />
-  ) : (
-    <ReportDialog
-      open={open}
-      onOpenChange={handleOpenChange}
-      form={form}
-      loading={loading}
-      onSubmit={handleSubmit}
-    />
+      footer={
+        <Button
+          intent="destructive"
+          loading={loading}
+          onClick={form.handleSubmit(handleSubmit)}
+          loginRequired
+        >
+          {t('submit')}
+        </Button>
+      }
+    >
+      <ReportForm form={form} />
+    </Modal>
   )
 }

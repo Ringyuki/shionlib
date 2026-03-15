@@ -1,6 +1,10 @@
-import { GameUploadDialog } from './GameUploadDialog'
-import { GameUploadDrawer } from './GameUploadDrawer'
-import { useMedia } from 'react-use'
+import { Modal } from '@/components/shionui/Modal'
+import { useTranslations } from 'next-intl'
+import { Alert, AlertDescription, AlertTitle } from '@/components/shionui/Alert'
+import { AlertCircle, Info } from 'lucide-react'
+import { useState } from 'react'
+import { BBCodeContent } from '@/components/common/content/bbcode/BBCode'
+import { GameUploadContent } from './GameUploadContent'
 
 interface GameUploadProps {
   game_id: number
@@ -10,24 +14,37 @@ interface GameUploadProps {
 }
 
 export const GameUpload = ({ game_id, open, onOpenChange, onUploadComplete }: GameUploadProps) => {
-  const isMobile = useMedia('(max-width: 1024px)', false)
+  const t = useTranslations('Components.Game.Upload.GameUploadDialog')
+  const [closable, setClosable] = useState<boolean>(false)
+
   return (
-    <div className="hidden">
-      {isMobile ? (
-        <GameUploadDrawer
-          game_id={game_id}
-          open={open}
-          onOpenChange={onOpenChange}
-          onUploadComplete={onUploadComplete}
-        />
-      ) : (
-        <GameUploadDialog
-          game_id={game_id}
-          open={open}
-          onOpenChange={onOpenChange}
-          onUploadComplete={onUploadComplete}
-        />
-      )}
-    </div>
+    <Modal
+      title={t('title')}
+      open={open}
+      onOpenChange={onOpenChange}
+      closable={closable}
+      drawerClassName="min-h-[50vh] flex flex-col gap-4"
+      dialogClassName="lg:max-w-5xl!"
+    >
+      <Alert intent="info" appearance="solid">
+        <Info />
+        <AlertTitle>{t('alert1Title')}</AlertTitle>
+        <AlertDescription>
+          <BBCodeContent content={t('alert1Description')} />
+        </AlertDescription>
+      </Alert>
+      <Alert intent="warning" appearance="solid">
+        <AlertCircle />
+        <AlertTitle>{t('alert2Title')}</AlertTitle>
+        <AlertDescription>
+          <BBCodeContent content={t('alert2Description')} />
+        </AlertDescription>
+      </Alert>
+      <GameUploadContent
+        game_id={game_id}
+        onClosableChange={setClosable}
+        onUploadComplete={onUploadComplete}
+      />
+    </Modal>
   )
 }

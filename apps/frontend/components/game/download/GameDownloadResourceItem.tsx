@@ -30,10 +30,7 @@ export const GameDownloadResourceItem = ({
   const locale = useLocale()
   const t = useTranslations('Components.Game.Download.GameDownloadResourceItem')
   return (
-    <div
-      key={resource.id}
-      className="flex flex-col gap-2 rounded-lg border border-accent p-4 wrap-break-word break-all"
-    >
+    <div key={resource.id} className="flex flex-col gap-2 rounded-lg wrap-break-word break-all">
       <div className="flex flex-col gap-2 w-full">
         <div className="flex justify-between items-center gap-2">
           <div className="flex flex-wrap gap-2">

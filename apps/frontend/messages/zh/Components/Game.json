@@ -233,6 +233,7 @@
       "alertDescription": "以下资源均由 Shionlib 用户上传，请自行鉴别文件安全性。\n对于大小不超过 10 GB 的文件，下载链接有效期为 {duration} 分钟；对于大小超过 10 GB 和 20 GB 的文件，下载链接有效期分别为 {duration1} 分钟和 {duration2} 分钟，请确保在有效期内完成下载。"
     },
     "GameDownload": {
+      "title": "下载",
       "noDownloadSource": "暂无下载资源"
     },
     "GameDownloadResourceItem": {
@@ -334,7 +335,8 @@
   },
   "Cover": {
     "GameCover": {
-      "viewAllCovers": "查看全部"
+      "viewAllCovers": "查看全部",
+      "title": "全部封面"
     },
     "GameCoverDialog": {
       "title": "全部封面"
@@ -627,6 +629,7 @@
     }
   },
   "Patch": {
+    "title": "补丁",
     "PatchContent": {
       "datafrom": "数据来源",
       "moyu": "鲲 Galgame"

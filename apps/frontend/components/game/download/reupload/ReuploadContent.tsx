@@ -101,7 +101,7 @@ export const ReuploadContent = ({
         <AlertDescription>
           <div className="flex flex-col gap-1 text-sm">
             <span className="font-mono">{file.file_name}</span>
-            <span className="font-mono">
+            <span className="font-mono wrap-break-word break-all">
               {formatBytes(file.file_size)} | {file.hash_algorithm.toUpperCase()}: {file.file_hash}
             </span>
           </div>

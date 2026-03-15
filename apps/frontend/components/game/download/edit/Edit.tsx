@@ -1,6 +1,4 @@
-import { EditDialog } from './EditDialog'
-import { EditDrawer } from './EditDrawer'
-import { useMedia } from 'react-use'
+import { Modal } from '@/components/shionui/Modal'
 import { GameDownloadResource } from '@/interfaces/game/game-download-resource'
 import { gameDownloadSourceSchemaType } from '@/components/game/upload/GameDownloadSourceInfoForm'
 import { z } from 'zod'
@@ -8,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { shionlibRequest } from '@/utils/request'
 import { useTranslations } from 'next-intl'
 import { sileo } from 'sileo'
+import { EditContent } from './EditContent'
 
 interface EditProps {
   downloadResource: GameDownloadResource
@@ -24,7 +23,6 @@ export const Edit = ({
   onOpenChange,
   onLoadingChange,
 }: EditProps) => {
-  const isMobile = useMedia('(max-width: 1024px)', false)
   const t = useTranslations('Components.Game.Download.Edit')
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -49,25 +47,19 @@ export const Edit = ({
       setIsSubmitting(false)
     }
   }
+
   return (
-    <>
-      {isMobile ? (
-        <EditDrawer
-          downloadResource={downloadResource}
-          open={open}
-          onOpenChange={onOpenChange}
-          onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-        />
-      ) : (
-        <EditDialog
-          downloadResource={downloadResource}
-          open={open}
-          onOpenChange={onOpenChange}
-          onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-        />
-      )}
-    </>
+    <Modal
+      title={t('title')}
+      open={open}
+      onOpenChange={onOpenChange}
+      drawerClassName="min-h-[40vh] px-3 pb-4"
+    >
+      <EditContent
+        downloadResource={downloadResource}
+        onSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
+      />
+    </Modal>
   )
 }

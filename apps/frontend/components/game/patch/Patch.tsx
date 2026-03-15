@@ -1,7 +1,7 @@
-import { useMedia } from 'react-use'
-import { PatchDialog } from './PatchDialog'
-import { PatchDrawer } from './PatchDrawer'
+import { Modal } from '@/components/shionui/Modal'
+import { useTranslations } from 'next-intl'
 import { KunPatchResourceResponse } from '@/interfaces/patch/patch.interface'
+import { PatchContent } from './PatchContent'
 
 interface PatchProps {
   patches: KunPatchResourceResponse[]
@@ -10,14 +10,16 @@ interface PatchProps {
 }
 
 export const Patch = ({ patches, open, onOpenChange }: PatchProps) => {
-  const isMobile = useMedia('(max-width: 1024px)', false)
+  const t = useTranslations('Components.Game.Patch')
   return (
-    <>
-      {isMobile ? (
-        <PatchDrawer patches={patches} open={open} onOpenChange={onOpenChange} />
-      ) : (
-        <PatchDialog patches={patches} open={open} onOpenChange={onOpenChange} />
-      )}
-    </>
+    <Modal
+      title={t('title')}
+      open={open}
+      onOpenChange={onOpenChange}
+      fitContent
+      drawerClassName="min-h-[50vh]"
+    >
+      <PatchContent className="px-0 pb-4" patches={patches} />
+    </Modal>
   )
 }

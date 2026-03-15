@@ -233,6 +233,7 @@
       "alertDescription": "以下のリソースはすべて Shionlib ユーザーによってアップロードされたものです。ファイルの安全性はご自身で確認してください。\n10 GB 未満のファイルのダウンロードリンクの有効期間は {duration} 分；10 GB 以上 20 GB 未満のファイルのダウンロードリンクの有効期間は {duration1} 分；20 GB 以上のファイルのダウンロードリンクの有効期間は {duration2} 分です。有効期間内にダウンロードを完了してください。"
     },
     "GameDownload": {
+      "title": "ダウンロード",
       "noDownloadSource": "ダウンロードリソースがありません"
     },
     "GameDownloadResourceItem": {
@@ -334,7 +335,8 @@
   },
   "Cover": {
     "GameCover": {
-      "viewAllCovers": "すべて表示"
+      "viewAllCovers": "すべて表示",
+      "title": "すべてのカバー"
     },
     "GameCoverDialog": {
       "title": "すべてのカバー"
@@ -627,6 +629,7 @@
     }
   },
   "Patch": {
+    "title": "補丁",
     "PatchContent": {
       "datafrom": "データソース",
       "moyu": "鲲 Galgame"

@@ -26,12 +26,7 @@ export const GameDownloadContent = ({
 }: GameDownloadContentProps) => {
   const t = useTranslations('Components.Game.Download.GameDownloadContent')
   return (
-    <div
-      className={cn(
-        'flex flex-col gap-2 max-w-[-webkit-fill-available] md:w-184 px-3 mx-auto overflow-y-auto pb-4',
-        className,
-      )}
-    >
+    <div className={cn('flex flex-col gap-4 max-w-[-webkit-fill-available] md:w-184', className)}>
       <Alert intent="warning" appearance="solid" className="max-w-full">
         <AlertCircle />
         <AlertTitle>{t('alertTitle')}</AlertTitle>

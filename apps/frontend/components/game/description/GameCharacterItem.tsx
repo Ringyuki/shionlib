@@ -2,10 +2,11 @@
 
 import { GameCharacterRelation, GameCharacterGenderMap } from '@/interfaces/game/game.interface'
 import { getPreferredCharacterContent } from './helpers/getPreferredContent'
-import { useLocale } from 'next-intl'
-import { GameCharacterDialog } from './GameCharacterDialog'
-import { GameCharacterDrawer } from './GameCharacterDrawer'
-import { useMedia } from 'react-use'
+import { useLocale, useTranslations } from 'next-intl'
+import { Modal } from '@/components/shionui/Modal'
+import { GameCharacterItemTrigger } from './GameCharacterItemTrigger'
+import { GameCharacterItemContent } from './GameCharacterItemContent'
+import { useState } from 'react'
 
 interface GameCharacterItemProps {
   character: GameCharacterRelation
@@ -13,9 +14,10 @@ interface GameCharacterItemProps {
 
 export const GameCharacterItem = ({ character }: GameCharacterItemProps) => {
   const locale = useLocale()
+  const t = useTranslations('Components.Game.Description.GameCharacterItem')
   const langMap = { en: 'en', ja: 'jp', zh: 'zh' } as const
   const lang = langMap[locale as keyof typeof langMap] ?? 'jp'
-  const isMobile = useMedia('(max-width: 1024px)', false)
+  const [open, setOpen] = useState(false)
 
   const { name } = getPreferredCharacterContent(character.character, 'name', lang)
   const all_names = [
@@ -45,21 +47,25 @@ export const GameCharacterItem = ({ character }: GameCharacterItemProps) => {
     }))
     .filter(info => !!info.value)
 
-  return isMobile ? (
-    <GameCharacterDrawer
-      character={character}
-      name={name}
-      excess_names={excess_names as string[]}
-      intro={intro}
-      extra_info={extra_info as { key: string; value: string }[]}
-    />
-  ) : (
-    <GameCharacterDialog
-      character={character}
-      name={name}
-      excess_names={excess_names as string[]}
-      intro={intro}
-      extra_info={extra_info as { key: string; value: string }[]}
-    />
+  return (
+    <>
+      <div onClick={() => setOpen(true)}>
+        <GameCharacterItemTrigger character={character} name={name} />
+      </div>
+      <Modal
+        title={t('characterDetailDialogTitle')}
+        open={open}
+        onOpenChange={setOpen}
+        dialogClassName="sm:max-w-4xl"
+      >
+        <GameCharacterItemContent
+          character={character}
+          name={name}
+          excess_names={excess_names as string[]}
+          intro={intro}
+          extra_info={extra_info as { key: string; value: string }[]}
+        />
+      </Modal>
+    </>
   )
 }

@@ -27,6 +27,7 @@
     }
   },
   "Detail": {
+    "title": "Message Details",
     "DetailDrawer": {
       "title": "Message Details"
     },

@@ -23,10 +23,7 @@ export const PatchItem = ({ patch }: GameDownloadResourceItemProps) => {
   const t = useTranslations('Components.Game.Patch.PatchItem')
 
   return (
-    <div
-      key={patch.id}
-      className="flex flex-col gap-2 rounded-lg border border-accent p-4 break-words break-all"
-    >
+    <div key={patch.id} className="flex flex-col gap-2 rounded-lg wrap-break-word break-all">
       <div className="flex flex-col gap-2">
         <div className="flex justify-between items-center gap-2">
           <div className="flex flex-wrap gap-2">

@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { useMedia } from 'react-use'
 import { sileo } from 'sileo'
 import { Unlink } from 'lucide-react'
 import {
@@ -16,9 +15,8 @@ import {
 import { Button } from '@/components/shionui/Button'
 import { Badge } from '@/components/shionui/Badge'
 import { shionlibRequest } from '@/utils/request'
-import { BindDialog } from './pvn/BindDialog'
-import { BindDrawer } from './pvn/BindDrawer'
-import { type BindFormValues } from './pvn/BindForm'
+import { Modal } from '@/components/shionui/Modal'
+import { BindForm, type BindFormValues } from './pvn/BindForm'
 import { UnbindConfirm } from './pvn/UnbindConfirm'
 import { Status } from './pvn/Status'
 import { FadeImage } from '@/components/common/shared/FadeImage'
@@ -30,7 +28,6 @@ interface PVNBindingProps {
 
 export const PVNBinding = ({ initialBinding }: PVNBindingProps) => {
   const t = useTranslations('Components.User.Settings.Connections.PotatoVN')
-  const isMobile = useMedia('(max-width: 1024px)', false)
 
   const [binding, setBinding] = useState<PVNBindingInfo | null>(initialBinding)
   const [bindOpen, setBindOpen] = useState(false)
@@ -104,21 +101,19 @@ export const PVNBinding = ({ initialBinding }: PVNBindingProps) => {
         </CardFooter>
       </Card>
 
-      {isMobile ? (
-        <BindDrawer
-          open={bindOpen}
-          onOpenChange={setBindOpen}
+      <Modal
+        title={t('BindModal.title')}
+        open={bindOpen}
+        onOpenChange={setBindOpen}
+        closable={false}
+        fitContent
+      >
+        <BindForm
           onSubmit={handleBind}
+          onCancel={() => setBindOpen(false)}
           isSubmitting={isBinding}
         />
-      ) : (
-        <BindDialog
-          open={bindOpen}
-          onOpenChange={setBindOpen}
-          onSubmit={handleBind}
-          isSubmitting={isBinding}
-        />
-      )}
+      </Modal>
 
       <UnbindConfirm
         open={unbindOpen}

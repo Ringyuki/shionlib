@@ -12,7 +12,7 @@ interface PatchContentProps {
 export const PatchContent = ({ patches, className }: PatchContentProps) => {
   return (
     <div className="overflow-y-auto w-full md:max-w-[-webkit-fill-available] md:w-184 mx-auto">
-      <div className={cn('flex flex-col gap-2 w-full px-3', className)}>
+      <div className={cn('flex flex-col gap-4 w-full', className)}>
         {patches
           .filter(patch => patch.type.includes('manual'))
           .sort((a, b) => b.download - a.download)

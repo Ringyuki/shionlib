@@ -1,9 +1,9 @@
 'use client'
 
-import { HistoryDialog } from './HistoryDialog'
-import { HistoryDrawer } from './HistoryDrawer'
-import { useMedia } from 'react-use'
+import { Modal } from '@/components/shionui/Modal'
+import { useTranslations } from 'next-intl'
 import { GameDownloadResourceFileHistory } from '@/interfaces/game/game-download-resource'
+import { HistoryContent } from './HistoryContent'
 
 interface HistoryProps {
   open: boolean
@@ -12,15 +12,16 @@ interface HistoryProps {
 }
 
 export const History = ({ open, onOpenChange, histories }: HistoryProps) => {
-  const isMobile = useMedia('(max-width: 1024px)', false)
+  const t = useTranslations('Components.Game.Download.History')
 
   return (
-    <>
-      {isMobile ? (
-        <HistoryDrawer open={open} onOpenChange={onOpenChange} histories={histories} />
-      ) : (
-        <HistoryDialog open={open} onOpenChange={onOpenChange} histories={histories} />
-      )}
-    </>
+    <Modal
+      title={t('title')}
+      open={open}
+      onOpenChange={onOpenChange}
+      dialogClassName="lg:max-w-3xl"
+    >
+      <HistoryContent histories={histories} />
+    </Modal>
   )
 }

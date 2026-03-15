@@ -27,6 +27,7 @@
     }
   },
   "Detail": {
+    "title": "メッセージ詳細",
     "DetailDrawer": {
       "title": "メッセージ詳細"
     },

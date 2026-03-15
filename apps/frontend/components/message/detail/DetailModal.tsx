@@ -1,8 +1,8 @@
 'use client'
 
-import { useMedia } from 'react-use'
-import { DetailDialog } from './DetailDialog'
-import { DetailDrawer } from './DetailDrawer'
+import { Modal } from '@/components/shionui/Modal'
+import { useTranslations } from 'next-intl'
+import { DetailContent } from './DetailContent'
 
 interface DetailModalProps {
   messageId: number | null
@@ -12,24 +12,16 @@ interface DetailModalProps {
 }
 
 export const DetailModal = ({ messageId, open, onOpenChange, onRead }: DetailModalProps) => {
-  const isMobile = useMedia('(max-width: 1024px)', false)
+  const t = useTranslations('Components.Message.Detail')
   return (
-    <>
-      {isMobile ? (
-        <DetailDrawer
-          messageId={messageId}
-          open={open}
-          onOpenChange={onOpenChange}
-          onRead={onRead}
-        />
-      ) : (
-        <DetailDialog
-          messageId={messageId}
-          open={open}
-          onOpenChange={onOpenChange}
-          onRead={onRead}
-        />
-      )}
-    </>
+    <Modal
+      title={t('title')}
+      open={open}
+      onOpenChange={onOpenChange}
+      dialogClassName="sm:max-w-2xl"
+      drawerClassName="min-h-[50vh]"
+    >
+      <DetailContent messageId={messageId} open={open} onRead={onRead} className="px-0 pb-4" />
+    </Modal>
   )
 }

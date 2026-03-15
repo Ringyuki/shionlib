@@ -27,6 +27,7 @@
     }
   },
   "Detail": {
+    "title": "消息详情",
     "DetailDrawer": {
       "title": "消息详情"
     },

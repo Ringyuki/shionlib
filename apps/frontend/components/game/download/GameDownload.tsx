@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react'
 import { shionlibRequest } from '@/utils/request'
 import { GameDownloadResource } from '@/interfaces/game/game-download-resource'
-import { GameDownloadDrawer } from './GameDownloadDrawer'
-import { GameDownloadDialog } from './GameDownloadDialog'
 import { GameDownloadMetaContext } from './GameDownloadContext'
-import { useMedia } from 'react-use'
 import { sileo } from 'sileo'
 import { useTranslations } from 'next-intl'
+import { Modal } from '@/components/shionui/Modal'
+import { GameDownloadContent } from './GameDownloadContent'
 
-interface GameDownloadDrawerProps {
+interface GameDownloadProps {
   game_id: number
   game_title?: string
   bangumi_id?: string
@@ -24,12 +23,13 @@ export const GameDownload = ({
   open,
   onLoadingChange,
   onOpenChange,
-}: GameDownloadDrawerProps) => {
-  const isMobile = useMedia('(max-width: 1024px)', false)
+}: GameDownloadProps) => {
   const t = useTranslations('Components.Game.Download.GameDownload')
 
   const [downloadResources, setDownloadResources] = useState<GameDownloadResource[]>([])
   const [isReady, setIsReady] = useState(false)
+  const [turnstileOpen, setTurnstileOpen] = useState(false)
+
   useEffect(() => {
     if (!open) {
       setIsReady(false)
@@ -84,27 +84,24 @@ export const GameDownload = ({
     )
   const handleDelete = (id: number) =>
     setDownloadResources(prev => prev.filter(resource => resource.id !== id))
+
   return (
     <GameDownloadMetaContext.Provider value={{ game_title, bangumi_id }}>
-      <div className="hidden">
-        {isMobile ? (
-          <GameDownloadDrawer
-            downloadResources={downloadResources}
-            open={open && isReady}
-            onOpenChange={onOpenChange}
-            onUpdate={handleUpdate}
-            onDelete={handleDelete}
-          />
-        ) : (
-          <GameDownloadDialog
-            downloadResources={downloadResources}
-            open={open && isReady}
-            onOpenChange={onOpenChange}
-            onUpdate={handleUpdate}
-            onDelete={handleDelete}
-          />
-        )}
-      </div>
+      <Modal
+        title={t('title')}
+        open={open && isReady}
+        onOpenChange={onOpenChange}
+        closable={!turnstileOpen}
+        fitContent
+        drawerClassName="min-h-[50vh]"
+      >
+        <GameDownloadContent
+          downloadResources={downloadResources}
+          onUpdate={handleUpdate}
+          onDelete={handleDelete}
+          onTurnstileOpenChange={setTurnstileOpen}
+        />
+      </Modal>
     </GameDownloadMetaContext.Provider>
   )
 }

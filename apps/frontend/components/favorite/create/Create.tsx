@@ -1,11 +1,10 @@
 import { Button } from '@/components/shionui/Button'
 import { PlusIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { FavoriteCreateDialog } from './Dialog'
-import { FavoriteCreateDrawer } from './Drawer'
+import { Modal } from '@/components/shionui/Modal'
 import { useState } from 'react'
-import { useMedia } from 'react-use'
 import { Favorite } from '@/interfaces/favorite/favorite.interface'
+import { FavoriteCreateContent } from './Content'
 
 interface FavoriteCreateProps {
   onSuccess: (favorite: Favorite) => void
@@ -14,7 +13,6 @@ interface FavoriteCreateProps {
 export const FavoriteCreate = ({ onSuccess }: FavoriteCreateProps) => {
   const t = useTranslations('Components.Favorite.Create')
   const [open, setOpen] = useState(false)
-  const isMobile = useMedia('(max-width: 768px)', false)
 
   const handleCreate = (favorite: Favorite) => {
     setOpen(false)
@@ -31,11 +29,15 @@ export const FavoriteCreate = ({ onSuccess }: FavoriteCreateProps) => {
       >
         {t('create')}
       </Button>
-      {isMobile ? (
-        <FavoriteCreateDrawer open={open} onOpenChange={setOpen} onSuccess={handleCreate} />
-      ) : (
-        <FavoriteCreateDialog open={open} onOpenChange={setOpen} onSuccess={handleCreate} />
-      )}
+      <Modal
+        title={t('title')}
+        description={t('description')}
+        open={open}
+        onOpenChange={setOpen}
+        breakpoint={768}
+      >
+        <FavoriteCreateContent onSuccess={handleCreate} className="px-4 pb-4" />
+      </Modal>
     </>
   )
 }

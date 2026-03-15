@@ -6,9 +6,9 @@ import { shionlibRequest } from '@/utils/request'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Favorite as FavoriteInterface } from '@/interfaces/favorite/favorite.interface'
-import { FavoriteActionDialog } from './Dialog'
-import { FavoriteActionDrawer } from './Drawer'
-import { useMedia } from 'react-use'
+import { Modal } from '@/components/shionui/Modal'
+import { FavoriteContent } from './Content'
+import { FavoriteCreate } from '../create/Create'
 
 interface FavoriteProps {
   isFavorite: boolean
@@ -21,7 +21,6 @@ export const Favorite = ({ isFavorite, gameId, className }: FavoriteProps) => {
   const [loading, setLoading] = useState(false)
   const [favorites, setFavorites] = useState<FavoriteInterface[]>([])
   const [open, setOpen] = useState(false)
-  const isMobile = useMedia('(max-width: 768px)', false)
 
   const getData = async () => {
     try {
@@ -60,23 +59,20 @@ export const Favorite = ({ isFavorite, gameId, className }: FavoriteProps) => {
           <span>{isFavorite ? t('removeFromFavorites') : t('addToFavorites')}</span>
         </TooltipContent>
       </Tooltip>
-      {isMobile ? (
-        <FavoriteActionDrawer
+      <Modal
+        title={t('title')}
+        description={t('description')}
+        open={open}
+        onOpenChange={setOpen}
+        breakpoint={768}
+        footer={<FavoriteCreate onSuccess={handleFavoriteCreate} />}
+      >
+        <FavoriteContent
           favorites={favorites}
           game_id={gameId}
-          open={open}
-          onOpenChange={setOpen}
-          onFavoriteCreate={handleFavoriteCreate}
+          className="px-4 pb-4 overflow-y-auto"
         />
-      ) : (
-        <FavoriteActionDialog
-          favorites={favorites}
-          game_id={gameId}
-          open={open}
-          onOpenChange={setOpen}
-          onFavoriteCreate={handleFavoriteCreate}
-        />
-      )}
+      </Modal>
     </>
   )
 }

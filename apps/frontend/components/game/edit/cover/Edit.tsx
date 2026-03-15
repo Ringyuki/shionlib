@@ -1,8 +1,6 @@
 import { GameCover } from '@/interfaces/game/game.interface'
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
-import { useMedia } from 'react-use'
-import { EditDialog } from './EditDialog'
-import { EditDrawer } from './EditDrawer'
+import { Modal } from '@/components/shionui/Modal'
 import { CoverItem } from './Item'
 import { z } from 'zod'
 import { gameCoverSchemaType } from './Form'
@@ -10,6 +8,7 @@ import { shionlibRequest } from '@/utils/request'
 import { sileo } from 'sileo'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
+import { EditContent } from './EditContent'
 
 export interface EditRef {
   open: () => void
@@ -31,7 +30,6 @@ export const Edit = forwardRef<EditRef, EditProps>(
     { cover, onSuccess, trigger, onOpenChange, onSubmit, loading = false, onDelete }: EditProps,
     ref,
   ) => {
-    const isMobile = useMedia('(max-width: 1024px)', false)
     const [open, setOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const t = useTranslations('Components.Game.Edit.Cover')
@@ -79,28 +77,18 @@ export const Edit = forwardRef<EditRef, EditProps>(
       await new Promise(resolve => setTimeout(resolve, 500))
       onDelete?.(id)
     }
+
     return (
       <>
         {trigger ? trigger : <CoverItem cover={cover} onClick={() => setOpen(true)} />}
-        {isMobile ? (
-          <EditDrawer
+        <Modal title={t('Edit.title')} open={open} onOpenChange={setOpen}>
+          <EditContent
             cover={cover}
-            open={open}
-            onOpenChange={setOpen}
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting || loading}
             onDelete={handleDelete}
           />
-        ) : (
-          <EditDialog
-            cover={cover}
-            open={open}
-            onOpenChange={setOpen}
-            onSubmit={handleSubmit}
-            isSubmitting={isSubmitting || loading}
-            onDelete={handleDelete}
-          />
-        )}
+        </Modal>
       </>
     )
   },

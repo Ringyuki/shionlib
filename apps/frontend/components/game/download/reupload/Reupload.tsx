@@ -1,9 +1,10 @@
 'use client'
 
-import { ReuploadDialog } from './ReuploadDialog'
-import { ReuploadDrawer } from './ReuploadDrawer'
-import { useMedia } from 'react-use'
+import { Modal } from '@/components/shionui/Modal'
+import { useTranslations } from 'next-intl'
 import { GameDownloadResourceFile } from '@/interfaces/game/game-download-resource'
+import { ReuploadContent } from './ReuploadContent'
+import { useState } from 'react'
 
 interface ReuploadProps {
   file: GameDownloadResourceFile
@@ -13,7 +14,8 @@ interface ReuploadProps {
 }
 
 export const Reupload = ({ file, open, onOpenChange, onSuccess }: ReuploadProps) => {
-  const isMobile = useMedia('(max-width: 1024px)', false)
+  const t = useTranslations('Components.Game.Download.Reupload')
+  const [closable, setClosable] = useState(true)
 
   const handleReuploadComplete = () => {
     onOpenChange(false)
@@ -21,22 +23,18 @@ export const Reupload = ({ file, open, onOpenChange, onSuccess }: ReuploadProps)
   }
 
   return (
-    <>
-      {isMobile ? (
-        <ReuploadDrawer
-          file={file}
-          open={open}
-          onOpenChange={onOpenChange}
-          onReuploadComplete={handleReuploadComplete}
-        />
-      ) : (
-        <ReuploadDialog
-          file={file}
-          open={open}
-          onOpenChange={onOpenChange}
-          onReuploadComplete={handleReuploadComplete}
-        />
-      )}
-    </>
+    <Modal
+      title={t('title')}
+      open={open}
+      onOpenChange={onOpenChange}
+      closable={closable}
+      dialogClassName="lg:max-w-5xl!"
+    >
+      <ReuploadContent
+        file={file}
+        onClosableChange={setClosable}
+        onReuploadComplete={handleReuploadComplete}
+      />
+    </Modal>
   )
 }
