@@ -16,6 +16,7 @@ import { BangumiModule } from '../bangumi/bangumi.module'
 import { GameScoreService } from './services/game-score.service'
 import { GameScoreController } from './controllers/game-score.controller'
 import { GameDownloadResourceReportService } from './services/game-download-resource-report.service'
+import { GameTagService } from './services/game-tag.service'
 
 @Module({
   controllers: [
@@ -37,7 +38,8 @@ import { GameDownloadResourceReportService } from './services/game-download-reso
     GameHotScoreCalcTask,
     GameScoreService,
     GameDownloadResourceReportService,
+    GameTagService,
   ],
-  exports: [GameService, GameDownloadResourceReportService],
+  exports: [GameService, GameDownloadResourceReportService, GameTagService],
 })
 export class GameModule {}

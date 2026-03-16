@@ -30,6 +30,17 @@ export class GameService {
       intro_jp: true,
       intro_zh: true,
       intro_en: true,
+      tag_relations: {
+        select: {
+          tag_alias: true,
+          tag: {
+            select: {
+              name: true,
+              count: true,
+            },
+          },
+        },
+      },
       covers: {
         select: {
           language: true,
@@ -182,7 +193,10 @@ export class GameService {
         },
       },
       extra_info: true,
-      tags: true,
+      tag_relations: {
+        select: { tag_alias: true, tag: { select: { name: true, count: true } } },
+        orderBy: { tag: { count: 'desc' } },
+      },
       staffs: true,
       nsfw: true,
       link: {
@@ -241,8 +255,10 @@ export class GameService {
       select,
     })
 
+    const { tag_relations, ...rest } = game ?? {}
     return {
-      ...game,
+      ...rest,
+      tags: (tag_relations ?? []).map(r => (r as any).tag_alias ?? (r as any).tag.name),
       content_limit,
     }
   }
@@ -334,8 +350,8 @@ export class GameService {
       }
 
     if (tags)
-      where.tags = {
-        hasSome: tags,
+      where.tag_relations = {
+        some: { tag: { name: { in: tags.map(t => t.toLowerCase().trim()) } } },
       }
 
     if (start_date && end_date) {

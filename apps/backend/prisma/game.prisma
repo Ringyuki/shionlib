@@ -18,7 +18,8 @@ model Game {
   release_date_tba Boolean   @default(false)
   extra_info   Json?       @default(dbgenerated("'[]'::jsonb")) @db.JsonB
 
-  tags       String[]                @default([])
+  tags          String[]              @default([])
+  tag_relations GameTagRelation[]    @relation("game_tag")
   developers GameDeveloperRelation[] @relation("game_developer")
   characters GameCharacterRelation[] @relation("game_character")
   staffs     Json?                   @default(dbgenerated("'[]'::jsonb")) @db.JsonB
@@ -132,4 +133,30 @@ model GameImage {
   game    Game @relation("game_image", fields: [game_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("game_images")
+}
+
+model Tag {
+  id      Int              @id @default(autoincrement())
+  name    String           @unique
+  aliases String[]         @default([])
+  count   Int              @default(0)
+  games   GameTagRelation[] @relation("tag_game")
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@index([count])
+  @@map("tags")
+}
+
+model GameTagRelation {
+  game_id   Int
+  tag_id    Int
+  tag_alias String?
+  game      Game @relation("game_tag", fields: [game_id], references: [id], onDelete: Cascade)
+  tag       Tag  @relation("tag_game", fields: [tag_id], references: [id], onDelete: Cascade)
+
+  @@unique([game_id, tag_id])
+  @@index([tag_id])
+  @@map("game_tag_relations")
 }

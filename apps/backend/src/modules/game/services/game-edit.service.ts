@@ -34,6 +34,7 @@ import { IMAGE_STORAGE } from '../../s3/constants/s3.constants'
 import { BangumiAuthService } from '../../bangumi/services/bangumi-auth.service'
 import { REVERSE_RELATION_MAP, BANGUMI_RELATION_MAP } from '../constants/game-relation.constant'
 import { BangumiSubjectRelation } from '../interfaces/bangumi/subject-relation.res.interface'
+import { GameTagService } from './game-tag.service'
 
 @Injectable()
 export class GameEditService {
@@ -45,6 +46,7 @@ export class GameEditService {
     private readonly activityService: ActivityService,
     @Inject(IMAGE_STORAGE) private readonly imageStorage: S3Service,
     private readonly bangumiAuthService: BangumiAuthService,
+    private readonly gameTagService: GameTagService,
   ) {}
 
   async editGameScalar(id: number, dto: EditGameReqDto, req: RequestWithUser) {
@@ -55,48 +57,56 @@ export class GameEditService {
       throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
     }
 
-    const { note, ...rest } = dto
+    const { note, tags, ...rest } = dto
     const { before, after, field_changes } = pickChanges(rest, game)
-    if (field_changes.length === 0) return
+    const hasTagChange = tags !== undefined
+
+    if (field_changes.length === 0 && !hasTagChange) return
 
     const bits = gameRequiredBits(after)
     const field_mask = bits.reduce((m, b) => m | (1n << BigInt(b)), 0n)
 
-    await this.prisma.$transaction(async tx => {
-      await tx.game.update({
-        where: { id },
-        data: {
-          ...rest,
-          extra_info: dto.extra_info ? (dto.extra_info as any) : undefined,
-          staffs: dto.staffs ? (dto.staffs as any) : undefined,
-        },
-      })
+    if (field_changes.length > 0) {
+      await this.prisma.$transaction(async tx => {
+        await tx.game.update({
+          where: { id },
+          data: {
+            ...rest,
+            extra_info: dto.extra_info ? (dto.extra_info as any) : undefined,
+            staffs: dto.staffs ? (dto.staffs as any) : undefined,
+          },
+        })
 
-      const editRecord = await tx.editRecord.create({
-        data: {
-          entity: PermissionEntity.GAME,
-          target_id: id,
-          action: EditActionType.UPDATE_SCALAR,
-          actor_id: req.user.sub,
-          actor_role: req.user.role,
-          field_mask,
-          changes: { before, after } as any,
-          field_changes,
-          note,
-        },
-        select: { id: true },
-      })
+        const editRecord = await tx.editRecord.create({
+          data: {
+            entity: PermissionEntity.GAME,
+            target_id: id,
+            action: EditActionType.UPDATE_SCALAR,
+            actor_id: req.user.sub,
+            actor_role: req.user.role,
+            field_mask,
+            changes: { before, after } as any,
+            field_changes,
+            note,
+          },
+          select: { id: true },
+        })
 
-      await this.activityService.create(
-        {
-          type: ActivityType.GAME_EDIT,
-          user_id: req.user.sub,
-          game_id: id,
-          edit_record_id: editRecord.id,
-        },
-        tx,
-      )
-    })
+        await this.activityService.create(
+          {
+            type: ActivityType.GAME_EDIT,
+            user_id: req.user.sub,
+            game_id: id,
+            edit_record_id: editRecord.id,
+          },
+          tx,
+        )
+      })
+    }
+
+    if (hasTagChange) {
+      await this.gameTagService.setGameTags(id, tags!)
+    }
 
     const updated = await this.prisma.game.findUnique({
       where: { id: game.id },

@@ -65,6 +65,9 @@ describe('GameCreateService', () => {
     const gameEditService = {
       syncRelationsFromBangumi: jest.fn().mockResolvedValue(undefined),
     }
+    const gameTagService = {
+      setGameTags: jest.fn().mockResolvedValue(undefined),
+    }
 
     const service = new GameCreateService(
       gameDataFetcherService as any,
@@ -72,6 +75,7 @@ describe('GameCreateService', () => {
       searchEngine as any,
       activityService as any,
       gameEditService as any,
+      gameTagService as any,
     )
 
     return {

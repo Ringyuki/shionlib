@@ -113,12 +113,14 @@ describe('GameEditService', () => {
     }
 
     const bangumiAuthService = { bangumiRequest: jest.fn() }
+    const gameTagService = { setGameTags: jest.fn().mockResolvedValue(undefined) }
     const service = new GameEditService(
       prisma as any,
       searchEngine as any,
       activityService as any,
       imageStorage as any,
       bangumiAuthService as any,
+      gameTagService as any,
     )
 
     return {

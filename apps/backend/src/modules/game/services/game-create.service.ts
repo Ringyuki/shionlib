@@ -26,6 +26,7 @@ import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 import { ActivityService } from '../../activity/services/activity.service'
 import { ActivityType } from '../../activity/dto/create-activity.dto'
 import { GameEditService } from './game-edit.service'
+import { GameTagService } from './game-tag.service'
 
 @Injectable()
 export class GameCreateService {
@@ -35,6 +36,7 @@ export class GameCreateService {
     @Inject(SEARCH_ENGINE) private readonly searchEngine: SearchEngine,
     private readonly activityService: ActivityService,
     private readonly gameEditService: GameEditService,
+    private readonly gameTagService: GameTagService,
   ) {}
 
   async createFromBangumiAndVNDB(
@@ -135,6 +137,10 @@ export class GameCreateService {
         select: rawDataQuery,
       })
       await this.searchEngine.upsertGame(formatDoc(game as unknown as GameData))
+      const rawTags = finalGameData.tags ?? []
+      if (rawTags.length > 0) {
+        await this.gameTagService.setGameTags(gameId, rawTags)
+      }
       this.gameEditService.syncRelationsFromBangumi(gameId, req).catch(() => {})
     } catch (e) {
       console.error(e)
@@ -316,6 +322,10 @@ export class GameCreateService {
     })
 
     await this.searchEngine.upsertGame(formatDoc(game as unknown as GameData))
+    const rawTags = createGameReqDto.tags ?? []
+    if (rawTags.length > 0) {
+      await this.gameTagService.setGameTags(game.id, rawTags)
+    }
 
     return game.id
   }

@@ -184,7 +184,7 @@ describe('GameService', () => {
     expect(where.status).toBe(1)
     expect(where.developers).toEqual({ some: { developer: { id: 11 } } })
     expect(where.characters).toEqual({ some: { character: { id: 22 } } })
-    expect(where.tags).toEqual({ hasSome: ['avg', 'gal'] })
+    expect(where.tag_relations).toEqual({ some: { tag: { name: { in: ['avg', 'gal'] } } } })
     expect(where.release_date.gte.getTime()).toBe(new Date('2026-01-01').getTime())
     expect(where.release_date.lte.getTime()).toBe(new Date('2026-12-31').getTime())
     expect(where.release_date_tba).toEqual({ not: true })
