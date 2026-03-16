@@ -71,7 +71,7 @@ test.describe('Manual game create api flow', () => {
       expect(gameScalar?.title_en).toBe(title)
       expect(gameScalar?.intro_en).toBe('Created by e2e manual create flow.')
       expect(Array.isArray(gameScalar?.tags)).toBeTruthy()
-      expect(gameScalar.tags).toContain('manual-create')
+      expect(gameScalar.tags.map(r => r.tag.name)).toContain('manual-create')
     } finally {
       await deleteAdminGame(request, authHeaders, gameId)
       deleted = true
