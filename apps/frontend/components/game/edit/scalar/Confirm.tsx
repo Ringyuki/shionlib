@@ -24,7 +24,7 @@ export const Confirm = ({ open, setOpen, handleSubmit, changes }: ConfirmProps) 
   const t = useTranslations('Components.Game.Edit.Scalar.Comfirm')
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogContent tone="primary">
+      <AlertDialogContent tone="primary" className="w-full sm:max-w-2xl">
         <AlertDialogHeader>
           <AlertDialogTitle>{t('title')}</AlertDialogTitle>
         </AlertDialogHeader>

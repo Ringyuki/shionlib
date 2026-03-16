@@ -18,7 +18,7 @@ export class GetGameResDto {
   release_date: string
   release_date_tba: boolean
   extra_info: ExtraInfo[]
-  tags: string[]
+  tags: GameTag[]
   staffs: GameStaff[]
   nsfw: boolean
   type?: string
@@ -43,6 +43,11 @@ export class GameImage {
   dims: number[]
   sexual: number
   violence: number
+}
+
+export class GameTag {
+  tag_alias?: string | null
+  tag: { id: number; name: string; count: number }
 }
 
 export class GameStaff {

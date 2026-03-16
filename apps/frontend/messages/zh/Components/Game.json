@@ -385,6 +385,7 @@
       "platformPlaceholder": "选择游戏的运行平台",
       "aliases": "别名",
       "tags": "标签",
+      "createTag": "添加「{tag}」",
       "intro_info_description": "以下字段 [b]介绍（中文）[/b]、[b]介绍（英语）[/b]、[b]介绍（日语）[/b] 支持 BBCode。",
       "intro_zh": "介绍（中文）",
       "intro_en": "介绍（英语）",

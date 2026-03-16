@@ -101,7 +101,7 @@ export class GameDataFetcherService {
       else if ((await detectLanguage(rawGameData.summary)) === 'jp')
         finalGameData.intro_jp = rawGameData.summary
 
-      finalGameData.tags = rawGameData.tags.map(tag => tag.name)
+      finalGameData.tags = rawGameData.tags.map(tag => tag.name) as any
 
       const exludedKeys = new Set([
         '中文名',

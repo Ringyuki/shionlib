@@ -30,7 +30,7 @@ export class GameService {
       intro_jp: true,
       intro_zh: true,
       intro_en: true,
-      tag_relations: {
+      tags: {
         select: {
           tag_alias: true,
           tag: {
@@ -193,8 +193,8 @@ export class GameService {
         },
       },
       extra_info: true,
-      tag_relations: {
-        select: { tag_alias: true, tag: { select: { name: true, count: true } } },
+      tags: {
+        select: { tag_alias: true, tag: { select: { id: true, name: true, count: true } } },
         orderBy: { tag: { count: 'desc' } },
       },
       staffs: true,
@@ -255,10 +255,8 @@ export class GameService {
       select,
     })
 
-    const { tag_relations, ...rest } = game ?? {}
     return {
-      ...rest,
-      tags: (tag_relations ?? []).map(r => (r as any).tag_alias ?? (r as any).tag.name),
+      ...game,
       content_limit,
     }
   }
@@ -350,7 +348,7 @@ export class GameService {
       }
 
     if (tags)
-      where.tag_relations = {
+      where.tags = {
         some: { tag: { name: { in: tags.map(t => t.toLowerCase().trim()) } } },
       }
 

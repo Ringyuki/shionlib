@@ -27,7 +27,13 @@ export class DataService {
         release_date: true,
         release_date_tba: true,
         extra_info: true,
-        tags: true,
+        tags: {
+          select: {
+            tag_alias: true,
+            tag: { select: { id: true, name: true } },
+          },
+          orderBy: { tag: { count: 'desc' } },
+        },
         staffs: true,
         nsfw: true,
         type: true,

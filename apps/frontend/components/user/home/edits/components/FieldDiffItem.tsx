@@ -22,6 +22,42 @@ interface FieldDiffItemProps {
   labels: FieldDiffLabels
 }
 
+const ArrayDiffPanel = ({
+  oldValue,
+  value,
+  labels,
+}: {
+  oldValue: string[]
+  value: string[]
+  labels: FieldDiffLabels
+}) => {
+  const oldSet = new Set(oldValue)
+  const newSet = new Set(value)
+  const added = value.filter(v => !oldSet.has(v))
+  const removed = oldValue.filter(v => !newSet.has(v))
+  const unchanged = oldValue.filter(v => newSet.has(v))
+
+  return (
+    <div className="flex flex-wrap gap-1">
+      {unchanged.map(v => (
+        <Badge key={v} intent="neutral" appearance="soft" className="text-xs">
+          {v}
+        </Badge>
+      ))}
+      {removed.map(v => (
+        <Badge key={v} intent="destructive" appearance="soft" className="text-xs line-through">
+          {v}
+        </Badge>
+      ))}
+      {added.map(v => (
+        <Badge key={v} intent="success" appearance="soft" className="text-xs">
+          {v}
+        </Badge>
+      ))}
+    </div>
+  )
+}
+
 export const FieldDiffItem = ({ entry, labels }: FieldDiffItemProps) => {
   const path = formatPath(entry.path, labels.root)
   const isCreate = entry.type === 'CREATE'
@@ -29,6 +65,12 @@ export const FieldDiffItem = ({ entry, labels }: FieldDiffItemProps) => {
   const isChange = entry.type === 'CHANGE'
   const useStringDiff =
     isChange && typeof entry.oldValue === 'string' && typeof entry.value === 'string'
+  const useArrayDiff =
+    isChange &&
+    Array.isArray(entry.oldValue) &&
+    Array.isArray(entry.value) &&
+    (entry.oldValue as unknown[]).every(v => typeof v === 'string') &&
+    (entry.value as unknown[]).every(v => typeof v === 'string')
   const badgeClass = isCreate
     ? DIFF_BADGE_CLASSNAME.CREATE
     : isRemove
@@ -58,6 +100,12 @@ export const FieldDiffItem = ({ entry, labels }: FieldDiffItemProps) => {
             beforeLabel={labels.before}
             afterLabel={labels.after}
             emptyLabel={labels.empty}
+          />
+        ) : useArrayDiff ? (
+          <ArrayDiffPanel
+            oldValue={entry.oldValue as string[]}
+            value={entry.value as string[]}
+            labels={labels}
           />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-2 items-start">

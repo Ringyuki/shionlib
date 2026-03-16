@@ -78,7 +78,6 @@ export class GameCreateService {
           intro_zh: this.dataOrEmpty(finalGameData.intro_zh, ''),
           intro_en: this.dataOrEmpty(finalGameData.intro_en, ''),
           extra_info: this.dataOrEmpty(finalGameData.extra_info, []),
-          tags: this.dataOrEmpty(finalGameData.tags, []),
           staffs: this.dataOrEmpty(finalGameData.staffs, []),
           nsfw: this.dataOrEmpty(finalGameData.nsfw, false),
           type: finalGameData.type,
@@ -137,7 +136,7 @@ export class GameCreateService {
         select: rawDataQuery,
       })
       await this.searchEngine.upsertGame(formatDoc(game as unknown as GameData))
-      const rawTags = finalGameData.tags ?? []
+      const rawTags = (finalGameData.tags as unknown as string[]) ?? []
       if (rawTags.length > 0) {
         await this.gameTagService.setGameTags(gameId, rawTags)
       }
@@ -311,7 +310,6 @@ export class GameCreateService {
         intro_zh: this.dataOrEmpty(createGameReqDto.intro_zh, ''),
         intro_en: this.dataOrEmpty(createGameReqDto.intro_en, ''),
         extra_info: this.dataOrEmpty(createGameReqDto.extra_info, []),
-        tags: this.dataOrEmpty(createGameReqDto.tags, []),
         staffs: this.dataOrEmpty(createGameReqDto.staffs, []),
         nsfw: this.dataOrEmpty(createGameReqDto.nsfw, false),
         type: createGameReqDto.type,

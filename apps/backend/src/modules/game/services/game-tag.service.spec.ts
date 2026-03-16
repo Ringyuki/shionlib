@@ -137,32 +137,4 @@ describe('GameTagService', () => {
       expect(tx.gameTagRelation.deleteMany).not.toHaveBeenCalled()
     })
   })
-
-  describe('searchTags', () => {
-    it('queries tag table with normalized query ordered by count', async () => {
-      const { service, prisma } = createService()
-      prisma.tag.findMany.mockResolvedValue([{ name: 'galgame', count: 10 }])
-
-      const result = await service.searchTags('GalGame', 5)
-
-      expect(prisma.tag.findMany).toHaveBeenCalledWith({
-        where: { name: { contains: 'galgame' } },
-        orderBy: { count: 'desc' },
-        take: 5,
-        select: { name: true, count: true },
-      })
-      expect(result).toEqual([{ name: 'galgame', count: 10 }])
-    })
-
-    it('returns all tags when query is empty', async () => {
-      const { service, prisma } = createService()
-      prisma.tag.findMany.mockResolvedValue([])
-
-      await service.searchTags('', 10)
-
-      expect(prisma.tag.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ where: undefined }),
-      )
-    })
-  })
 })

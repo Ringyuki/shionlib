@@ -24,6 +24,7 @@ import { ShionBizException } from '../../../common/exceptions/shion-business.exc
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { pickChanges } from '../helpers/pick-changes'
 import { gameRequiredBits } from '../../edit/resolvers/permisson-resolver'
+import { GameFieldGroupBit } from '../../edit/enums/field-group.enum'
 import { formatDoc, rawDataQuery } from '../../search/helpers/format-doc'
 import { GameData } from '../interfaces/game.interface'
 import { SearchEngine, SEARCH_ENGINE } from '../../search/interfaces/search.interface'
@@ -105,7 +106,47 @@ export class GameEditService {
     }
 
     if (hasTagChange) {
-      await this.gameTagService.setGameTags(id, tags!)
+      const beforeTags = await this.prisma.gameTagRelation.findMany({
+        where: { game_id: id },
+        select: { tag: { select: { name: true } } },
+      })
+      const beforeTagNames = beforeTags.map(r => r.tag.name).sort()
+      const afterTagNames = [...(tags as string[])].sort()
+      const tagsActuallyChanged =
+        beforeTagNames.length !== afterTagNames.length ||
+        beforeTagNames.some((name, i) => name !== afterTagNames[i])
+
+      if (tagsActuallyChanged) {
+        await this.gameTagService.setGameTags(id, tags as string[])
+        await this.prisma.$transaction(async tx => {
+          const editRecord = await tx.editRecord.create({
+            data: {
+              entity: PermissionEntity.GAME,
+              target_id: id,
+              action: EditActionType.UPDATE_SCALAR,
+              actor_id: req.user.sub,
+              actor_role: req.user.role,
+              field_mask: 1n << BigInt(GameFieldGroupBit.TAGS),
+              changes: {
+                before: { tags: beforeTagNames },
+                after: { tags },
+              } as any,
+              field_changes: ['tags'],
+              note,
+            },
+            select: { id: true },
+          })
+          await this.activityService.create(
+            {
+              type: ActivityType.GAME_EDIT,
+              user_id: req.user.sub,
+              game_id: id,
+              edit_record_id: editRecord.id,
+            },
+            tx,
+          )
+        })
+      }
     }
 
     const updated = await this.prisma.game.findUnique({

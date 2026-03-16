@@ -385,6 +385,7 @@
       "platformPlaceholder": "対象プラットフォームを選択",
       "aliases": "別名",
       "tags": "タグ",
+      "createTag": "\"{tag}\" を追加",
       "intro_info_description": "以下のフィールド [b]紹介（中国語）[/b]、[b]紹介（英語）[/b]、[b]紹介（日本語）[/b] は BBCode をサポートしています。",
       "intro_zh": "紹介（中国語）",
       "intro_en": "紹介（英語）",

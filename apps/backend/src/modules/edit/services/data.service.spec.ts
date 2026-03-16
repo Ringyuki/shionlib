@@ -51,14 +51,15 @@ describe('Edit DataService', () => {
 
   it('getGameScalar returns selected game data', async () => {
     const { service, prisma } = createService()
+    const mockTags = [{ tag_alias: null, tag: { id: 1, name: 'tag1' } }]
     ;(prisma.game.findUnique as jest.Mock).mockResolvedValue({
       title_jp: 'jp',
-      tags: ['tag1'],
+      tags: mockTags,
     })
 
     await expect(service.getGameScalar(1)).resolves.toEqual({
       title_jp: 'jp',
-      tags: ['tag1'],
+      tags: mockTags,
     })
   })
 

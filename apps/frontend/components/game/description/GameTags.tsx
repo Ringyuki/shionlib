@@ -1,17 +1,20 @@
 import { Badge } from '@/components/shionui/Badge'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation.client'
+import { GameTagRelation } from '@/interfaces/game/game.interface'
 
 interface GameTagsProps {
-  tags: string[]
+  tags: GameTagRelation[]
 }
 
 export const GameTags = ({ tags }: GameTagsProps) => {
   const t = useTranslations('Components.Game.Description.GameTags')
 
-  const groupIntents = ['warning', 'success', 'secondary'] as const
-  const getIntent = (index: number) =>
-    groupIntents[Math.min(Math.floor(index / 10), groupIntents.length - 1)]
+  const getIntent = (count: number) => {
+    if (count >= 100) return 'warning'
+    if (count >= 10) return 'success'
+    return 'neutral'
+  }
   return (
     tags.length > 0 && (
       <>
@@ -20,17 +23,24 @@ export const GameTags = ({ tags }: GameTagsProps) => {
           <span>{t('tags')}</span>
         </h2>
         <div className="flex flex-wrap gap-2">
-          {tags.map((tag, index) => (
-            <Link
-              href={`/search/game?tag=${encodeURIComponent(tag)}`}
-              key={index}
-              className="hover:opacity-80 transition-all duration-200"
-            >
-              <Badge intent={getIntent(index)} appearance="soft" className="select-none">
-                {tag}
-              </Badge>
-            </Link>
-          ))}
+          {tags.map((relation, index) => {
+            const name = relation.tag_alias ?? relation.tag.name
+            return (
+              <Link
+                href={`/search/game?tag=${encodeURIComponent(relation.tag.name)}`}
+                key={index}
+                className="hover:opacity-80 transition-all duration-200"
+              >
+                <Badge
+                  intent={getIntent(relation.tag.count)}
+                  appearance="soft"
+                  className="select-none"
+                >
+                  {name}
+                </Badge>
+              </Link>
+            )
+          })}
         </div>
       </>
     )

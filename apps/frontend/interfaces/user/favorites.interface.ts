@@ -1,4 +1,4 @@
-import { Platform, DeveloperRelation, GameCover } from '../game/game.interface'
+import { Platform, DeveloperRelation, GameCover, GameTagRelation } from '../game/game.interface'
 
 export interface FavoriteItem {
   id: number
@@ -9,7 +9,7 @@ export interface FavoriteItem {
     title_en: string
     platform: Platform[]
     type: string
-    tags: string[]
+    tags: GameTagRelation[]
     developers: DeveloperRelation[]
     covers: GameCover[]
     release_date: string

@@ -14,12 +14,11 @@ async function main() {
   const prisma = app.get(PrismaService)
   const gameTagService = app.get(GameTagService)
 
-  const games = await prisma.game.findMany({
-    where: { tags: { isEmpty: false } },
-    select: { id: true, tags: true },
-    orderBy: { id: 'asc' },
-  })
+  // This script has already been run. The legacy `tags String[]` column has been dropped.
+  // Keeping this file for reference only.
+  logger.log('Backfill already completed. Legacy tags column has been dropped.')
 
+  const games: { id: number; tags: string[] }[] = []
   logger.log(`Found ${games.length} games with legacy tags`)
 
   let processed = 0

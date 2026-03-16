@@ -18,8 +18,7 @@ model Game {
   release_date_tba Boolean   @default(false)
   extra_info   Json?       @default(dbgenerated("'[]'::jsonb")) @db.JsonB
 
-  tags          String[]              @default([])
-  tag_relations GameTagRelation[]    @relation("game_tag")
+  tags          GameTagRelation[]    @relation("game_tag")
   developers GameDeveloperRelation[] @relation("game_developer")
   characters GameCharacterRelation[] @relation("game_character")
   staffs     Json?                   @default(dbgenerated("'[]'::jsonb")) @db.JsonB
@@ -153,7 +152,7 @@ model GameTagRelation {
   game_id   Int
   tag_id    Int
   tag_alias String?
-  game      Game @relation("game_tag", fields: [game_id], references: [id], onDelete: Cascade)
+  game      Game @relation("game_tag",  fields: [game_id], references: [id], onDelete: Cascade)
   tag       Tag  @relation("tag_game", fields: [tag_id], references: [id], onDelete: Cascade)
 
   @@unique([game_id, tag_id])

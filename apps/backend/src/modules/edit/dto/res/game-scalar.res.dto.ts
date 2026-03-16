@@ -1,3 +1,5 @@
+import { GameTag } from '../../../game/dto/res/get-game.res.dto'
+
 export class GameScalarResDto {
   b_id: string
   v_id: string
@@ -12,7 +14,7 @@ export class GameScalarResDto {
   release_date: string
   release_date_tba: boolean
   extra_info: ExtraInfo[]
-  tags: string[]
+  tags: GameTag[]
   staffs: Staff[]
   status: number
   nsfw: boolean

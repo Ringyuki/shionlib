@@ -4,7 +4,7 @@ import {
   AsyncMultiSelectItem,
 } from '@/components/shionui/AsyncMultiSelect'
 import { shionlibRequest } from '@/utils/request'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Hash } from 'lucide-react'
 
@@ -15,13 +15,15 @@ interface TagsProps {
 
 const getData = async (q: string) => {
   try {
-    const data = await shionlibRequest().get<string[]>('/search/tags', {
+    const data = await shionlibRequest().get<{ name: string; count: number }[]>('/search/tags', {
       params: {
         q,
       },
     })
-    return data.data!
-  } catch {}
+    return (data.data ?? []).map(t => t.name)
+  } catch {
+    return []
+  }
 }
 
 export const Tags = ({ onTagsChange, value }: TagsProps) => {
@@ -32,7 +34,7 @@ export const Tags = ({ onTagsChange, value }: TagsProps) => {
 
   const handleSearch = async (query: string) => {
     setLoading(true)
-    setTags((await getData(query)) ?? [])
+    setTags(await getData(query))
     setLoading(false)
   }
   const handleTagsChange = (tags: string[]) => {

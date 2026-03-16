@@ -247,7 +247,8 @@
     "Game": {
       "Results": {
         "result_prefix": "検索",
-        "result_suffix": "{total} 件の結果"
+        "result_suffix": "{total} 件の結果",
+        "tag_prefix": "タグを含む"
       }
     },
     "AnimeTrace": {

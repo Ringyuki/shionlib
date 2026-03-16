@@ -18,6 +18,7 @@ import { UndoMode } from '../enums/undo.enum'
 import { ScalarChanges, RelationChanges } from '../interfaces/undo.interface'
 import { S3Service } from '../../s3/services/s3.service'
 import { IMAGE_STORAGE } from '../../s3/constants/s3.constants'
+import { GameTagService } from '../../game/services/game-tag.service'
 
 @Injectable()
 export class UndoService {
@@ -26,6 +27,7 @@ export class UndoService {
     private readonly activityService: ActivityService,
     @Inject(SEARCH_ENGINE) private readonly searchEngine: SearchEngine,
     @Inject(IMAGE_STORAGE) private readonly imageStorage: S3Service,
+    private readonly gameTagService: GameTagService,
   ) {}
 
   async undo(editRecordId: number, req: RequestWithUser, dto: UndoReqDto) {
@@ -189,13 +191,18 @@ export class UndoService {
 
     if (action === EditActionType.UPDATE_SCALAR) {
       const before = (changes as ScalarChanges)?.before ?? {}
-      const data = before as Record<string, unknown>
+      const { tags: tagsToRestore, ...data } = before as Record<string, unknown>
 
       if (Object.keys(data).length > 0) {
         await tx.game.update({ where: { id }, data })
       }
 
-      const afterNow = Object.keys(data).length > 0 ? data : {}
+      if (Array.isArray(tagsToRestore)) {
+        await this.gameTagService.setGameTags(id, tagsToRestore as string[], tx)
+      }
+
+      const afterNow: Record<string, unknown> = { ...data }
+      if (Array.isArray(tagsToRestore)) afterNow.tags = tagsToRestore
       const undoRecord = await tx.editRecord.create({
         data: {
           entity: PermissionEntity.GAME,
@@ -203,7 +210,7 @@ export class UndoService {
           action: EditActionType.UPDATE_SCALAR,
           actor_id: req.user.sub,
           actor_role: req.user.role,
-          field_changes: Object.keys(data),
+          field_changes: Object.keys(afterNow),
           changes: { before: (changes as ScalarChanges)?.after ?? {}, after: afterNow } as any,
           note: `undo of #${rec.id}`,
           undo: true,

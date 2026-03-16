@@ -67,11 +67,7 @@ export const Favorite = ({ isFavorite, gameId, className }: FavoriteProps) => {
         breakpoint={768}
         footer={<FavoriteCreate onSuccess={handleFavoriteCreate} />}
       >
-        <FavoriteContent
-          favorites={favorites}
-          game_id={gameId}
-          className="px-4 pb-4 overflow-y-auto"
-        />
+        <FavoriteContent favorites={favorites} game_id={gameId} className="overflow-y-auto" />
       </Modal>
     </>
   )

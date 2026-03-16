@@ -247,7 +247,8 @@
     "Game": {
       "Results": {
         "result_prefix": "搜索",
-        "result_suffix": "共 {total} 个结果"
+        "result_suffix": "共 {total} 个结果",
+        "tag_prefix": "包含标签"
       }
     },
     "AnimeTrace": {

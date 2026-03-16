@@ -52,7 +52,7 @@ export class PgSearchEngine implements SearchEngine {
     }
 
     if (tag) {
-      where.tags = { has: tag }
+      where.tags = { some: { tag: { name: tag.toLowerCase().trim() } } }
     }
 
     if (q) {
@@ -64,7 +64,7 @@ export class PgSearchEngine implements SearchEngine {
         { intro_jp: { contains: q, mode: 'insensitive' } },
         { intro_zh: { contains: q, mode: 'insensitive' } },
         { intro_en: { contains: q, mode: 'insensitive' } },
-        { tags: { has: q } },
+        { tags: { some: { tag: { name: { contains: q, mode: 'insensitive' } } } } },
         {
           developers: {
             some: {

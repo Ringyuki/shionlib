@@ -121,7 +121,7 @@ describe('PgSearchEngine', () => {
     } as any)
 
     const countArg = (prisma.game.count as jest.Mock).mock.calls[0][0]
-    expect(countArg.where.tags).toEqual({ has: 'otome' })
+    expect(countArg.where.tags).toEqual({ some: { tag: { name: 'otome' } } })
     expect(countArg.where.OR).toBeUndefined()
   })
 

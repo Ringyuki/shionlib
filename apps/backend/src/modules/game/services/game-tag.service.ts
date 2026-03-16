@@ -38,8 +38,12 @@ export class GameTagService {
    * Replace the full tag set for a game.
    * Diffs existing relations, increments/decrements counts, updates relations.
    */
-  async setGameTags(gameId: number, rawTags: string[]): Promise<void> {
-    await this.prisma.$transaction(async tx => {
+  async setGameTags(
+    gameId: number,
+    rawTags: string[],
+    txClient?: Prisma.TransactionClient,
+  ): Promise<void> {
+    const execute = async (tx: Prisma.TransactionClient) => {
       const existing = await tx.gameTagRelation.findMany({ where: { game_id: gameId } })
       const existingIds = new Set(existing.map(r => r.tag_id))
 
@@ -72,15 +76,12 @@ export class GameTagService {
           data: { count: { increment: 1 } },
         })
       }
-    })
-  }
+    }
 
-  async searchTags(q: string, limit = 10): Promise<{ name: string; count: number }[]> {
-    return this.prisma.tag.findMany({
-      where: q ? { name: { contains: this.normalizeTag(q) } } : undefined,
-      orderBy: { count: 'desc' },
-      take: limit,
-      select: { name: true, count: true },
-    })
+    if (txClient) {
+      await execute(txClient)
+    } else {
+      await this.prisma.$transaction(execute)
+    }
   }
 }

@@ -13,7 +13,6 @@ export const ADMIN_EDITABLE_GAME_SCALAR_FIELDS: (keyof Partial<Game>)[] = [
   'release_date',
   'release_date_tba',
   'extra_info',
-  'tags',
   'staffs',
   'nsfw',
   'type',

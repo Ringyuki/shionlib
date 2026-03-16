@@ -12,7 +12,7 @@ describe('formatDoc', () => {
       intro_jp: '',
       intro_zh: '中文简介',
       intro_en: 'english intro',
-      tags: ['tag-a'],
+      tags: [{ tag_alias: 'Tag-A', tag: { name: 'tag-a' } }] as any,
       platform: ['win'],
       nsfw: false,
       covers: [

@@ -385,6 +385,7 @@
       "platformPlaceholder": "Select target platform",
       "aliases": "Aliases",
       "tags": "Tags",
+      "createTag": "Add \"{tag}\"",
       "intro_info_description": "The following fields [b]Introduction (Chinese)[/b], [b]Introduction (English)[/b], [b]Introduction (Japanese)[/b] support BBCode.",
       "intro_zh": "Introduction (Chinese)",
       "intro_en": "Introduction (English)",

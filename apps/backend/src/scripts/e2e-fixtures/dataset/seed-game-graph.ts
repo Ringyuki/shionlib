@@ -197,7 +197,6 @@ export const seedGameGraph = async ({
         release_date: game.release_date ? new Date(game.release_date) : null,
         release_date_tba: game.release_date_tba ?? false,
         extra_info: (game.extra_info ?? []) as Prisma.InputJsonValue,
-        tags: [...(game.tags ?? [])],
         staffs: (game.staffs ?? []) as Prisma.InputJsonValue,
         nsfw: Boolean(game.nsfw),
         type: game.type,
@@ -245,6 +244,23 @@ export const seedGameGraph = async ({
 
     gameIdMap.set(game.id, created.id)
     createdGameIds.push(created.id)
+
+    const seedTags = (game.tags ?? []).slice(0, 2)
+    if (seedTags.length > 0) {
+      await prisma.$transaction(async tx => {
+        for (const raw of seedTags) {
+          const normalized = raw.toLowerCase().trim().replace(/\s+/g, ' ')
+          let tag = await tx.tag.findUnique({ where: { name: normalized } })
+          if (!tag) {
+            tag = await tx.tag.create({ data: { name: normalized, aliases: [] } })
+          }
+          await tx.gameTagRelation.create({
+            data: { game_id: created.id, tag_id: tag.id, tag_alias: null },
+          })
+          await tx.tag.update({ where: { id: tag.id }, data: { count: { increment: 1 } } })
+        }
+      })
+    }
   }
 
   const primaryFixtureGame = fixture_games.find(game => game.id === 1) ?? fixture_games[0]

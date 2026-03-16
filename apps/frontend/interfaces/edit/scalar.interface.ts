@@ -1,4 +1,4 @@
-import { Platform } from '@/interfaces/game/game.interface'
+import { Platform, GameTagRelation } from '@/interfaces/game/game.interface'
 
 export interface GameScalar {
   id: number
@@ -15,7 +15,7 @@ export interface GameScalar {
   release_date: string
   release_date_tba: boolean
   extra_info: ExtraInfo[]
-  tags: string[]
+  tags: GameTagRelation[]
   staffs: Staff[]
   status: number
   nsfw: boolean

@@ -222,7 +222,7 @@ export interface GameData {
   extra_info: ExtraInfo[]
   link: GameLink[]
 
-  tags: string[]
+  tags: GameTagRelation[]
   staffs: GameStaff[]
   developers: DeveloperRelation[]
   characters: GameCharacterRelation[]
@@ -267,6 +267,17 @@ export interface GameDetail extends Pick<
   | 'content_limit'
 > {
   relations_from?: GameRelation[]
+}
+
+export interface GameTag {
+  id: number
+  name: string
+  count: number
+}
+
+export interface GameTagRelation {
+  tag_alias?: string | null
+  tag: GameTag
 }
 
 export interface GameStaff {

@@ -22,7 +22,7 @@ export class SearchService {
       where: q ? { name: { contains: q } } : undefined,
       orderBy: { count: 'desc' },
       take: limit,
-      select: { name: true, count: true },
+      select: { id: true, name: true, count: true },
     })
   }
 }

@@ -34,7 +34,7 @@ const sizeClasses: Record<TagsInputSize, { container: string; input: string; bad
     badge: 'text-[11px]',
   },
   md: {
-    container: 'min-h-9 gap-1.5 p-1.5',
+    container: 'min-h-9 gap-1.5 px-3 py-2',
     input: 'h-7 md:text-sm',
     badge: 'text-xs',
   },
@@ -185,11 +185,11 @@ const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
             >
               <Badge
                 intent="neutral"
-                appearance="soft"
+                appearance="outline"
                 size={size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'md'}
                 className={cn('group flex items-center gap-1 pr-1', sizeConfig.badge, tagClassName)}
               >
-                <span className="truncate max-w-[200px]">{tag}</span>
+                <span className="truncate max-w-[200px] md:text-sm text-base">{tag}</span>
                 <button
                   type="button"
                   aria-label={`Remove ${tag}`}

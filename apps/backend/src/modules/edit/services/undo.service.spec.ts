@@ -41,8 +41,15 @@ describe('UndoService', () => {
     } as unknown as SearchEngine
 
     const imageStorage = {} as S3Service
+    const gameTagService = { setGameTags: jest.fn() } as any
 
-    const service = new UndoService(prisma, activityService, searchEngine, imageStorage)
+    const service = new UndoService(
+      prisma,
+      activityService,
+      searchEngine,
+      imageStorage,
+      gameTagService,
+    )
 
     return {
       service,

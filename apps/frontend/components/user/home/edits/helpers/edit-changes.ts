@@ -50,14 +50,58 @@ export const formatPath = (path: Array<string | number>, rootLabel: string): str
   }, '')
 }
 
+const collapseStringArrayDiffs = (
+  entries: DiffEntry[],
+  before: unknown,
+  after: unknown,
+): DiffEntry[] => {
+  if (!isRecord(before) && !isRecord(after)) return entries
+  const beforeRecord = isRecord(before) ? before : {}
+  const afterRecord = isRecord(after) ? after : {}
+
+  const stringArrayFields = new Set<string>()
+  for (const entry of entries) {
+    const [field, idx] = entry.path
+    if (typeof field === 'string' && typeof idx === 'number') {
+      const bVal = beforeRecord[field]
+      const aVal = afterRecord[field]
+      if (
+        (Array.isArray(bVal) && bVal.every(v => typeof v === 'string')) ||
+        (Array.isArray(aVal) && aVal.every(v => typeof v === 'string'))
+      ) {
+        stringArrayFields.add(field)
+      }
+    }
+  }
+
+  if (stringArrayFields.size === 0) return entries
+
+  const result: DiffEntry[] = entries.filter(e => {
+    const [field, idx] = e.path
+    return !(typeof field === 'string' && typeof idx === 'number' && stringArrayFields.has(field))
+  })
+
+  for (const field of stringArrayFields) {
+    const oldValue = (beforeRecord[field] ?? []) as string[]
+    const value = (afterRecord[field] ?? []) as string[]
+    if (JSON.stringify([...oldValue].sort()) !== JSON.stringify([...value].sort())) {
+      result.push({ type: 'CHANGE', path: [field], oldValue, value } as DiffEntry)
+    }
+  }
+
+  return result
+}
+
 export const createDiffEntries = (before: unknown, after: unknown): DiffEntry[] => {
   const wrappedBefore = { [ROOT_PATH_KEY]: before ?? null }
   const wrappedAfter = { [ROOT_PATH_KEY]: after ?? null }
 
-  return diff(wrappedBefore, wrappedAfter).map(entry => ({
+  const entries = diff(wrappedBefore, wrappedAfter).map(entry => ({
     ...entry,
     path: entry.path.slice(1),
   }))
+
+  return collapseStringArrayDiffs(entries, before, after)
 }
 
 export const parseEditChanges = (changes: unknown): ParsedEditChanges => {

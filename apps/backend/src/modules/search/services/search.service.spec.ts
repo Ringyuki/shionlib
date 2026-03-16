@@ -23,8 +23,8 @@ describe('SearchService', () => {
 
   it('queries Tag table for searchGameTags ordered by count', async () => {
     const tags = [
-      { name: 'galgame', count: 50 },
-      { name: 'otome', count: 20 },
+      { id: 1, name: 'galgame', count: 50 },
+      { id: 2, name: 'otome', count: 20 },
     ]
     const prisma = { tag: { findMany: jest.fn().mockResolvedValue(tags) } }
     const { service } = createService({ prisma })
@@ -35,7 +35,7 @@ describe('SearchService', () => {
       where: { name: { contains: 'gal' } },
       orderBy: { count: 'desc' },
       take: 5,
-      select: { name: true, count: true },
+      select: { id: true, name: true, count: true },
     })
     expect(result).toEqual(tags)
   })

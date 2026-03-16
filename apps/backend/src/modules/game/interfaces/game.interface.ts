@@ -28,8 +28,10 @@ export interface GameData {
     character: GameCharacter
   }[]
 
-  tags?: string[]
-  tag_relations?: { tag_alias: string | null; tag: { name: string } }[]
+  tags?: {
+    tag_alias?: string | null
+    tag: GameTag
+  }[]
   staffs: GameStaff[]
 
   nsfw: boolean
@@ -144,4 +146,15 @@ export interface GameCharacterRelation {
 
   game_id: number
   character_id: number
+}
+
+export interface GameTag {
+  id: number
+  name: string
+  aliases: string[]
+}
+
+export interface GameTagRelation {
+  tag_alias?: string | null
+  tag: GameTag
 }

@@ -1,13 +1,14 @@
 'use client'
 
 import { GameScalar } from '@/interfaces/edit/scalar.interface'
+import { GameTagRelation } from '@/interfaces/game/game.interface'
 import { Form } from '@/components/shionui/Form'
 import { Titles } from './scalar/Titles'
 import { Aliases } from './scalar/Aliases'
 import { Platform } from './scalar/Platform'
 import { Type } from './scalar/Type'
 import { Intros } from './scalar/Intros'
-import { Tags } from '../actions/Tags'
+import { Tags } from './Tags'
 import { ExtraInfo } from './scalar/ExtraInfo'
 import { Staffs } from './scalar/Staffs'
 import { ReleaseDate } from './scalar/ReleaseDate'
@@ -41,12 +42,17 @@ export const Scalar = ({ data }: ScalarProps) => {
   const form = useForm<GameScalar>({
     defaultValues: data,
   })
+  const serialize = (d: GameScalar): GameScalar => ({
+    ...d,
+    tags: d.tags?.map((r: GameTagRelation) => r.tag.name) as any,
+  })
+
   const onSubmit = async (data: GameScalar) => {
     try {
       setLoading(true)
       await shionlibRequest().patch(`/game/${id}/edit/scalar`, {
         data: {
-          ...pick(data, permissions!.fields),
+          ...pick(serialize(data), permissions!.fields),
           note,
         },
       })
@@ -69,7 +75,7 @@ export const Scalar = ({ data }: ScalarProps) => {
     return () => subscription.unsubscribe()
   }, [form])
   useEffect(() => {
-    const { field_changes, before, after } = pickChanges(formValues, data)
+    const { field_changes, before, after } = pickChanges(serialize(formValues), serialize(data))
     setChanges({ field_changes, before, after })
   }, [formValues, data])
   const handleSubmit = () => {
