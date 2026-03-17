@@ -65,6 +65,7 @@ describe('GameEditService', () => {
         update: jest.fn(),
       },
       gameLink: {
+        update: jest.fn(),
         updateMany: jest.fn(),
         createMany: jest.fn(),
         deleteMany: jest.fn(),
@@ -222,7 +223,10 @@ describe('GameEditService', () => {
 
     prisma.gameLink.findMany.mockResolvedValueOnce([{ id: 1, url: 'u0', label: 'l0', name: 'n0' }])
     await service.editLinks(1, [{ id: 1, url: 'u1', label: 'l1', name: 'n1' }] as any, req as any)
-    expect(tx.gameLink.updateMany).toHaveBeenCalled()
+    expect(tx.gameLink.update).toHaveBeenCalledWith({
+      where: { id: 1 },
+      data: { url: 'u1', label: 'l1', name: 'n1' },
+    })
 
     prisma.gameLink.findMany
       .mockResolvedValueOnce([{ url: 'dup', label: 'l', name: 'n' }])
