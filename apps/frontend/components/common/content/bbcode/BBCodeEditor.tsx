@@ -175,7 +175,7 @@ export function BBCodeEditor({
       ) : (
         <div
           className={cn(
-            'border rounded-b-md min-h-24 px-3 py-2 bg-transparent text-sm',
+            'border rounded-b-md min-h-24 px-3 py-2 bg-transparent text-base md:text-sm',
             previewClassName,
           )}
         >

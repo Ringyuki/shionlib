@@ -52,6 +52,7 @@ type AsyncMultiSelectProps = Omit<
   open?: boolean
   onOpenChange?: (open: boolean) => void
   clearOnSelect?: boolean
+  triggerClassName?: string
 }
 
 function AsyncMultiSelect({
@@ -68,6 +69,7 @@ function AsyncMultiSelect({
   onOpenChange,
   clearOnSelect = false,
   children,
+  triggerClassName,
   ...props
 }: AsyncMultiSelectProps) {
   const isControlled = value !== undefined
@@ -154,6 +156,7 @@ function AsyncMultiSelect({
           open={currentOpen}
           clearOnSelect={clearOnSelect}
           clearSearchRef={clearSearchRef}
+          triggerClassName={triggerClassName}
         />
         {children}
       </AsyncMultiSelectContext.Provider>
@@ -172,6 +175,7 @@ type AsyncMultiSelectTriggerProps = {
   open: boolean
   clearOnSelect?: boolean
   clearSearchRef: React.MutableRefObject<(() => void) | undefined>
+  triggerClassName?: string
 }
 
 function AsyncMultiSelectTrigger({
@@ -185,6 +189,7 @@ function AsyncMultiSelectTrigger({
   open,
   clearOnSelect = false,
   clearSearchRef,
+  triggerClassName,
 }: AsyncMultiSelectTriggerProps) {
   const {
     selectedValues,
@@ -318,9 +323,10 @@ function AsyncMultiSelectTrigger({
         data-size={size}
         className={cn(
           'bg-input/30 border-input data-placeholder:text-muted-foreground focus-within:border-ring focus-within:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-input/50 flex w-full flex-wrap items-center gap-1.5 px-3 rounded-md border shadow-xs transition-all outline-none focus-within:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 duration-200',
-          size === 'default' && 'min-h-9 py-1.5',
-          size === 'sm' && 'min-h-8 py-1',
+          size === 'default' && (selectedValues.length > 0 ? 'min-h-9' : 'h-9'),
+          size === 'sm' && (selectedValues.length > 0 ? 'min-h-8' : 'h-8'),
           disabled && 'pointer-events-none',
+          triggerClassName,
         )}
         onClick={handleContainerClick}
       >

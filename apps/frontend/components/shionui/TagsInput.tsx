@@ -27,19 +27,34 @@ type TagsInputProps = Omit<React.ComponentProps<'div'>, 'onChange' | 'size'> & {
   inputClassName?: string
 }
 
-const sizeClasses: Record<TagsInputSize, { container: string; input: string; badge: string }> = {
+const sizeClasses: Record<
+  TagsInputSize,
+  {
+    containerBase: string
+    containerEmpty: string
+    containerFilled: string
+    input: string
+    badge: string
+  }
+> = {
   sm: {
-    container: 'min-h-8 gap-1 p-1',
+    containerBase: 'gap-1 px-1',
+    containerEmpty: 'h-8 py-1',
+    containerFilled: 'min-h-8',
     input: 'h-6 text-sm',
     badge: 'text-[11px]',
   },
   md: {
-    container: 'min-h-9 gap-1.5 px-3 py-2',
+    containerBase: 'gap-1.5 px-3',
+    containerEmpty: 'h-9',
+    containerFilled: 'min-h-9',
     input: 'h-7 md:text-sm',
     badge: 'text-xs',
   },
   lg: {
-    container: 'min-h-10 gap-2 p-2',
+    containerBase: 'gap-2 px-2',
+    containerEmpty: 'h-10',
+    containerFilled: 'min-h-10',
     input: 'h-8 text-base',
     badge: 'text-sm',
   },
@@ -164,7 +179,8 @@ const TagsInput = React.forwardRef<HTMLDivElement, TagsInputProps>(
         data-slot="tags-input-wrapper"
         className={cn(
           'border-input bg-input/30 hover:bg-input/50 flex w-full flex-wrap items-center rounded-md border shadow-xs transition-[color,box-shadow] outline-none',
-          sizeConfig.container,
+          sizeConfig.containerBase,
+          tags.length > 0 ? sizeConfig.containerFilled : sizeConfig.containerEmpty,
           'focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]',
           'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
           disabled && 'pointer-events-none cursor-not-allowed opacity-50',
