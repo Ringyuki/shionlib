@@ -71,6 +71,21 @@ export class DataService {
     return covers
   }
 
+  async getGameLinks(game_id: number) {
+    const game = await this.prismaService.game.findUnique({
+      where: { id: game_id },
+      select: { id: true },
+    })
+    if (!game) {
+      throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
+    }
+    return this.prismaService.gameLink.findMany({
+      where: { game_id },
+      select: { id: true, url: true, label: true, name: true },
+      orderBy: { id: 'asc' },
+    })
+  }
+
   async getGameImage(game_id: number) {
     const game = await this.prismaService.game.findUnique({
       where: { id: game_id },

@@ -498,6 +498,41 @@
         }
       }
     },
+    "Link": {
+      "noPermission": "You don't have permission to edit links",
+      "no_links": "No links associated",
+      "updated": "Updated successfully",
+      "Edit": {
+        "title": "Edit Link"
+      },
+      "Form": {
+        "url": "URL",
+        "url_placeholder": "https://example.com",
+        "label": "Label",
+        "label_placeholder": "e.g. Official, Steam, VNDB",
+        "name": "Display Name",
+        "name_placeholder": "e.g. Official Website",
+        "submit": "Confirm Changes",
+        "validation": {
+          "url": "URL is required",
+          "url_format": "Please enter a valid URL",
+          "label": "Label is required",
+          "name": "Display name is required"
+        }
+      },
+      "Delete": {
+        "delete": "Remove Link",
+        "title": "Confirm Removal",
+        "description": "Are you sure you want to remove this link?",
+        "cancel": "Cancel",
+        "success": "Removed successfully"
+      },
+      "Add": {
+        "title": "Add Link",
+        "submit": "Add Link",
+        "success": "Added successfully"
+      }
+    },
     "Developer": {
       "noPermission": "You don't have permission to edit developers",
       "removed": "Removed successfully",

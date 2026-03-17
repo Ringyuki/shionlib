@@ -13,7 +13,7 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, Control } from 'react-hook-form'
 import { Button } from '@/components/shionui/Button'
-import { Checkbox } from '@/components/shionui/Checkbox'
+import { Switch } from '@/components/shionui/animated/Switch'
 import { useState } from 'react'
 import { shionlibRequest } from '@/utils/request'
 import { Favorite } from '@/interfaces/favorite/favorite.interface'
@@ -116,7 +116,7 @@ export const FavoriteCreateContent = ({ onSuccess, className }: FavoriteCreateCo
               <FormItem className="flex items-center gap-2">
                 <FormLabel>{t('is_private')}</FormLabel>
                 <FormControl>
-                  <Checkbox
+                  <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
                     data-testid="favorite-create-private-checkbox"

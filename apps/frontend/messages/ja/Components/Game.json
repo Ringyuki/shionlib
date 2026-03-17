@@ -498,6 +498,41 @@
         }
       }
     },
+    "Link": {
+      "noPermission": "リンクを編集する権限がありません",
+      "no_links": "リンクなし",
+      "updated": "更新成功",
+      "Edit": {
+        "title": "リンクを編集"
+      },
+      "Form": {
+        "url": "URL",
+        "url_placeholder": "https://example.com",
+        "label": "ラベル",
+        "label_placeholder": "例：公式、Steam、VNDB",
+        "name": "表示名",
+        "name_placeholder": "例：公式サイト",
+        "submit": "変更を確認",
+        "validation": {
+          "url": "URLを入力してください",
+          "url_format": "有効なURLを入力してください",
+          "label": "ラベルを入力してください",
+          "name": "表示名を入力してください"
+        }
+      },
+      "Delete": {
+        "delete": "リンクを削除",
+        "title": "削除の確認",
+        "description": "このリンクを削除してよろしいですか？",
+        "cancel": "キャンセル",
+        "success": "削除成功"
+      },
+      "Add": {
+        "title": "リンクを追加",
+        "submit": "リンクを追加",
+        "success": "追加成功"
+      }
+    },
     "Developer": {
       "noPermission": "開発者を編集する権限がありません",
       "removed": "削除成功",

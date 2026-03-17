@@ -164,10 +164,12 @@ export class GameEditService {
     if (linksToEdit.length === 0) return
 
     await this.prisma.$transaction(async tx => {
-      await tx.gameLink.updateMany({
-        where: { game_id: id, id: { in: links.map(l => l.id) } },
-        data: links.map(l => ({ url: l.url, label: l.label, name: l.name })),
-      })
+      for (const link of links) {
+        await tx.gameLink.update({
+          where: { id: link.id },
+          data: { url: link.url, label: link.label, name: link.name },
+        })
+      }
       const editRecord = await tx.editRecord.create({
         data: {
           entity: PermissionEntity.GAME,
@@ -195,6 +197,12 @@ export class GameEditService {
         tx,
       )
     })
+
+    const updated = await this.prisma.game.findUnique({
+      where: { id },
+      select: rawDataQuery,
+    })
+    await this.searchEngine.upsertGame(formatDoc(updated as unknown as GameData))
   }
 
   async addLinks(id: number, links: GameLinkDto[], req: RequestWithUser) {
@@ -232,6 +240,12 @@ export class GameEditService {
         tx,
       )
     })
+
+    const updated = await this.prisma.game.findUnique({
+      where: { id },
+      select: rawDataQuery,
+    })
+    await this.searchEngine.upsertGame(formatDoc(updated as unknown as GameData))
   }
 
   async removeLinks(id: number, links: number[], req: RequestWithUser) {
@@ -266,6 +280,12 @@ export class GameEditService {
         tx,
       )
     })
+
+    const updated = await this.prisma.game.findUnique({
+      where: { id },
+      select: rawDataQuery,
+    })
+    await this.searchEngine.upsertGame(formatDoc(updated as unknown as GameData))
   }
 
   async editCovers(id: number, covers: EditGameCoverDto[], req: RequestWithUser) {

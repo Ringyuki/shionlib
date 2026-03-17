@@ -498,6 +498,41 @@
         }
       }
     },
+    "Link": {
+      "noPermission": "你没有编辑链接的权限",
+      "no_links": "暂无关联链接",
+      "updated": "更新成功",
+      "Edit": {
+        "title": "编辑链接"
+      },
+      "Form": {
+        "url": "URL",
+        "url_placeholder": "https://example.com",
+        "label": "分类标签",
+        "label_placeholder": "例如：官网、Steam、VNDB",
+        "name": "显示名称",
+        "name_placeholder": "例如：官方网站",
+        "submit": "确认更改",
+        "validation": {
+          "url": "请填写 URL",
+          "url_format": "请输入有效的 URL",
+          "label": "请填写标签",
+          "name": "请填写显示名称"
+        }
+      },
+      "Delete": {
+        "delete": "移除链接",
+        "title": "确认移除",
+        "description": "确定要移除此链接吗？",
+        "cancel": "取消",
+        "success": "移除成功"
+      },
+      "Add": {
+        "title": "添加链接",
+        "submit": "添加链接",
+        "success": "添加成功"
+      }
+    },
     "Developer": {
       "noPermission": "你没有编辑会社的权限",
       "removed": "移除成功",

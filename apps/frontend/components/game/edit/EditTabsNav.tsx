@@ -9,9 +9,14 @@ import { Link } from '@/i18n/navigation.client'
 import { useTranslations } from 'next-intl'
 import { useScrollToElem } from '@/hooks/useScrollToElem'
 
-const tabs = [
+interface Tab {
+  name: string
+  href: string
+  disabled?: boolean
+}
+const tabs: Tab[] = [
   { name: 'scalar', href: 'scalar' },
-  { name: 'link', href: 'link', disabled: true },
+  { name: 'link', href: 'link' },
   { name: 'cover', href: 'cover' },
   { name: 'image', href: 'image' },
   { name: 'developer', href: 'developer' },

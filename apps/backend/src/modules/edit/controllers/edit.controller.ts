@@ -14,6 +14,12 @@ export class EditController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('/game/:id/links')
+  async getGameLinks(@Param('id', ParseIntPipe) id: number) {
+    return this.dataService.getGameLinks(id)
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('/game/:id/cover')
   async getGameCover(@Param('id', ParseIntPipe) id: number) {
     return this.dataService.getGameCover(id)

@@ -323,8 +323,8 @@ function AsyncMultiSelectTrigger({
         data-size={size}
         className={cn(
           'bg-input/30 border-input data-placeholder:text-muted-foreground focus-within:border-ring focus-within:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-input/50 flex w-full flex-wrap items-center gap-1.5 px-3 rounded-md border shadow-xs transition-all outline-none focus-within:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 duration-200',
-          size === 'default' && (selectedValues.length > 0 ? 'min-h-9' : 'h-9'),
-          size === 'sm' && (selectedValues.length > 0 ? 'min-h-8' : 'h-8'),
+          size === 'default' && (selectedValues.length > 0 ? 'min-h-9 py-1' : 'h-9'),
+          size === 'sm' && (selectedValues.length > 0 ? 'min-h-8 py-0.5' : 'h-8'),
           disabled && 'pointer-events-none',
           triggerClassName,
         )}
@@ -442,9 +442,10 @@ function AsyncMultiSelectContent({
         sideOffset={sideOffset}
         data-slot="async-select-content"
         className={cn(
-          'bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-(--radix-popover-content-available-height) min-w-32 origin-(--radix-popover-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border shadow-md w-(--radix-popper-anchor-width)',
+          'bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-(--radix-popover-content-available-height) min-w-32 origin-(--radix-popover-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border shadow-md w-(--radix-popper-anchor-width) max-w-2xl',
           className,
         )}
+        align="start"
         onOpenAutoFocus={e => {
           e.preventDefault()
         }}
