@@ -32,6 +32,12 @@ export const extractRelationKey = (
         keys.push(
           `cover:${item?.url ?? ''}|${item?.type ?? ''}|${JSON.stringify(item?.dims ?? null)}`,
         )
+      } else if (c.relation === 'characters') {
+        if (typeof item?.character_id === 'number') {
+          keys.push(`character_id:${item.character_id}`)
+        } else {
+          keys.push(JSON.stringify(item ?? null))
+        }
       } else {
         keys.push(JSON.stringify(item ?? null))
       }

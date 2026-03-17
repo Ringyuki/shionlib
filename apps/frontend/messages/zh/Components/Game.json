@@ -591,8 +591,8 @@
         "role_placeholder": "角色类型",
         "role_main": "主角",
         "role_primary": "主要角色",
-        "role_side": "次要角色",
-        "role_appears": "登场角色"
+        "role_side": "配角",
+        "role_appears": "客串"
       }
     },
     "Relation": {

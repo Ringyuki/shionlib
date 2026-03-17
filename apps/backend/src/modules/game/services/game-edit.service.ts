@@ -912,10 +912,11 @@ export class GameEditService {
       where: { game_id: id, id: { in: relationIds } },
       select: {
         id: true,
+        character_id: true,
         role: true,
         image: true,
         actor: true,
-        character: { select: { id: true, name_jp: true, name_zh: true, name_en: true } },
+        character: { select: { name_jp: true, name_zh: true, name_en: true } },
       },
     })
     if (relationsToRemove.length === 0) return
@@ -939,17 +940,21 @@ export class GameEditService {
           actor_role: req.user.role,
           relation_type: EditRelationType.CHARACTER,
           field_changes: ['characters'],
-          changes: relationsToRemove.map(r => ({
-            id: r.id,
-            role: r.role,
-            image: r.image,
-            actor: r.actor,
-            character: {
-              name_jp: r.character.name_jp,
-              name_zh: r.character.name_zh,
-              name_en: r.character.name_en,
-            },
-          })),
+          changes: {
+            relation: 'characters',
+            removed: relationsToRemove.map(r => ({
+              id: r.id,
+              character_id: r.character_id,
+              role: r.role,
+              image: r.image,
+              actor: r.actor,
+              character: {
+                name_jp: r.character.name_jp,
+                name_zh: r.character.name_zh,
+                name_en: r.character.name_en,
+              },
+            })),
+          } as any,
         },
         select: { id: true },
       })
@@ -1026,6 +1031,8 @@ export class GameEditService {
             relation: 'characters',
             before: [
               {
+                id: relationToEdit.id,
+                character_id: relationToEdit.character.id,
                 role: relationToEdit.role,
                 image: relationToEdit.image,
                 actor: relationToEdit.actor,
@@ -1038,6 +1045,8 @@ export class GameEditService {
             ],
             after: [
               {
+                id: updated.id,
+                character_id: updated.character.id,
                 role: updated.role,
                 image: updated.image,
                 actor: updated.actor,

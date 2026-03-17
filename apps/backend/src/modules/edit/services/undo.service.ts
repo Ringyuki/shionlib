@@ -661,7 +661,140 @@ export class UndoService {
       }
     }
 
-    // TODO: later extend character
+    if (relation === EditRelationType.CHARACTER) {
+      if (action === EditActionType.ADD_RELATION) {
+        const added = (changes as RelationChanges)?.added ?? []
+        const characterIds = added
+          .map((a: any) => a.character_id)
+          .filter((v: any) => typeof v === 'number')
+        if (characterIds.length > 0) {
+          await tx.gameCharacterRelation.deleteMany({
+            where: { game_id: id, character_id: { in: characterIds } },
+          })
+        }
+        const undoRecord = await tx.editRecord.create({
+          data: {
+            entity: PermissionEntity.GAME,
+            target_id: id,
+            action: EditActionType.REMOVE_RELATION,
+            actor_id: req.user.sub,
+            actor_role: req.user.role,
+            relation_type: EditRelationType.CHARACTER,
+            field_changes: ['characters'],
+            changes: { relation: 'characters', removed: added },
+            note: `undo of #${rec.id}`,
+            undo: true,
+            undo_of_id: rec.id,
+          },
+          select: { id: true },
+        })
+        await this.activityService.create(
+          {
+            type: ActivityType.GAME_EDIT,
+            user_id: req.user.sub,
+            game_id: id,
+            edit_record_id: undoRecord.id,
+          },
+          tx,
+        )
+        return
+      }
+
+      if (action === EditActionType.REMOVE_RELATION) {
+        // support both new { relation, removed } format and legacy plain-array format
+        const removed: any[] = Array.isArray(changes)
+          ? (changes as any[])
+          : ((changes as RelationChanges)?.removed ?? [])
+        // legacy records did not store character_id — undo is not possible
+        if (removed.some((r: any) => r.character_id == null && r.character?.id == null)) {
+          throw new ShionBizException(ShionBizCode.COMMON_NOT_IMPLEMENTED)
+        }
+        if (removed.length > 0) {
+          await tx.gameCharacterRelation.createMany({
+            data: removed.map((r: any) => ({
+              game_id: id,
+              character_id: r.character_id ?? r.character?.id,
+              role: r.role ?? null,
+              image: r.image ?? null,
+              actor: r.actor ?? null,
+            })),
+            skipDuplicates: true,
+          })
+        }
+        const undoRecord = await tx.editRecord.create({
+          data: {
+            entity: PermissionEntity.GAME,
+            target_id: id,
+            action: EditActionType.ADD_RELATION,
+            actor_id: req.user.sub,
+            actor_role: req.user.role,
+            relation_type: EditRelationType.CHARACTER,
+            field_changes: ['characters'],
+            changes: { relation: 'characters', added: removed },
+            note: `undo of #${rec.id}`,
+            undo: true,
+            undo_of_id: rec.id,
+          },
+          select: { id: true },
+        })
+        await this.activityService.create(
+          {
+            type: ActivityType.GAME_EDIT,
+            user_id: req.user.sub,
+            game_id: id,
+            edit_record_id: undoRecord.id,
+          },
+          tx,
+        )
+        return
+      }
+
+      if (action === EditActionType.UPDATE_RELATION) {
+        const before = (changes as RelationChanges)?.before?.[0]
+        const after = (changes as RelationChanges)?.after?.[0]
+        // legacy records did not store relation id in before — undo is not possible
+        if (!before?.id) {
+          throw new ShionBizException(ShionBizCode.COMMON_NOT_IMPLEMENTED)
+        }
+        if (before?.id) {
+          await tx.gameCharacterRelation.update({
+            where: { id: before.id },
+            data: {
+              role: before.role ?? null,
+              image: before.image ?? null,
+              actor: before.actor ?? null,
+            },
+          })
+        }
+        const undoRecord = await tx.editRecord.create({
+          data: {
+            entity: PermissionEntity.GAME,
+            target_id: id,
+            action: EditActionType.UPDATE_RELATION,
+            actor_id: req.user.sub,
+            actor_role: req.user.role,
+            relation_type: EditRelationType.CHARACTER,
+            field_changes: ['characters'],
+            changes: { relation: 'characters', before: [after], after: [before] },
+            note: `undo of #${rec.id}`,
+            undo: true,
+            undo_of_id: rec.id,
+          },
+          select: { id: true },
+        })
+        await this.activityService.create(
+          {
+            type: ActivityType.GAME_EDIT,
+            user_id: req.user.sub,
+            game_id: id,
+            edit_record_id: undoRecord.id,
+          },
+          tx,
+        )
+        return
+      }
+    }
+
     throw new ShionBizException(ShionBizCode.COMMON_NOT_IMPLEMENTED)
   }
 
