@@ -29,10 +29,10 @@ export const resolveDownloadRequest = async (
     return reject(new Response('Not Found', { status: 404 }))
   }
 
-  const [, fileIdRaw, fileNameRaw] = routeMatch
+  const [, fileIdRaw, sessionIdRaw] = routeMatch
   const fileId = Number(fileIdRaw)
-  const fileName = decodeURIComponent(fileNameRaw)
-  if (fileId !== ticketPayload.fid || fileName !== ticketPayload.n) {
+  const sessionId = decodeURIComponent(sessionIdRaw)
+  if (fileId !== ticketPayload.fid || sessionId !== ticketPayload.sid) {
     return reject(new Response('Ticket mismatch', { status: 403 }))
   }
 

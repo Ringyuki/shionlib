@@ -40,7 +40,7 @@ describe('DownloadProxyTicketService', () => {
       expiresIn: 3600,
     })
 
-    expect(url).toMatch(/^https:\/\/dl\.example\.com\/dl\/42\/game\.7z\?ticket=/)
+    expect(url).toMatch(/^https:\/\/dl\.example\.com\/dl\/42\/[^/?]+\?ticket=/)
   })
 
   it('encrypts ticket payload that can be decrypted with the same secret', () => {
@@ -56,7 +56,7 @@ describe('DownloadProxyTicketService', () => {
     const ticket = decodeURIComponent(new URL(url).searchParams.get('ticket')!)
     const payload = decryptTicket(ticket, 'test-secret-key')
 
-    expect(payload.v).toBe(1)
+    expect(payload.v).toBe(2)
     expect(payload.fid).toBe(10)
     expect(payload.n).toBe('test.rar')
     expect(payload.mc).toBe(4)
@@ -65,7 +65,7 @@ describe('DownloadProxyTicketService', () => {
     expect(payload.sid).toBeDefined()
   })
 
-  it('encodes fileName in the URL path', () => {
+  it('uses sid instead of fileName in the URL path', () => {
     const { service } = createService()
 
     const url = service.issueDownloadUrl({
@@ -75,7 +75,13 @@ describe('DownloadProxyTicketService', () => {
       expiresIn: 3600,
     })
 
-    expect(url).toContain('/dl/1/%5BFrontwing%5D%20Corona%20Blossom.rar')
+    const pathnameParts = new URL(url).pathname.split('/')
+    expect(pathnameParts).toHaveLength(4)
+    expect(pathnameParts[1]).toBe('dl')
+    expect(pathnameParts[2]).toBe('1')
+    expect(pathnameParts[3]).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+    )
   })
 
   it('strips origin host and keeps only path + search in ticket', () => {
@@ -106,8 +112,26 @@ describe('DownloadProxyTicketService', () => {
       expiresIn: 3600,
     })
 
-    expect(url).toMatch(/^https:\/\/dl\.example\.com\/dl\/1\//)
+    expect(url).toMatch(/^https:\/\/dl\.example\.com\/dl\/1\/[^/?]+/)
     expect(url).not.toContain('//dl/')
+  })
+
+  it('keeps sid in URL path consistent with encrypted payload', () => {
+    const { service } = createService()
+
+    const url = service.issueDownloadUrl({
+      fileId: 7,
+      fileName: 'game.7z',
+      originUrl: 'https://cdn.example.com/file?Auth=x',
+      expiresIn: 3600,
+    })
+
+    const ticket = decodeURIComponent(new URL(url).searchParams.get('ticket')!)
+    const payload = decryptTicket(ticket, 'test-secret-key')
+    const [, , fileIdFromPath, sidFromPath] = new URL(url).pathname.split('/')
+
+    expect(fileIdFromPath).toBe('7')
+    expect(decodeURIComponent(sidFromPath)).toBe(payload.sid)
   })
 
   it('throws when proxy_worker_host is empty', () => {

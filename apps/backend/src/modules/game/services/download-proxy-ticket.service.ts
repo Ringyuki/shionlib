@@ -12,7 +12,7 @@ export class DownloadProxyTicketService {
 
   issueDownloadUrl(input: IssueDownloadProxyUrlInput) {
     const payload: DownloadProxyTicketPayload = {
-      v: 1,
+      v: 2,
       sid: globalThis.crypto?.randomUUID?.() ?? nodeRandomUUID(),
       fid: input.fileId,
       n: input.fileName,
@@ -22,16 +22,16 @@ export class DownloadProxyTicketService {
     }
 
     const ticket = this.encryptPayload(payload)
-    return this.buildProxyUrl(input.fileId, input.fileName, ticket)
+    return this.buildProxyUrl(input.fileId, payload.sid, ticket)
   }
 
-  private buildProxyUrl(fileId: number, fileName: string, ticket: string) {
+  private buildProxyUrl(fileId: number, sessionId: string, ticket: string) {
     const baseUrl = this.normalizeBaseUrl(this.configService.get('file_download.proxy_worker_host'))
     if (!baseUrl) {
       throw new Error('FILE_DOWNLOAD_PROXY_WORKER_HOST is required when FILE_DOWNLOAD_MODE=worker')
     }
 
-    return `${baseUrl}/dl/${fileId}/${encodeURIComponent(fileName)}?ticket=${encodeURIComponent(ticket)}`
+    return `${baseUrl}/dl/${fileId}/${encodeURIComponent(sessionId)}?ticket=${encodeURIComponent(ticket)}`
   }
 
   private toRelativeOriginPath(originUrl: string) {

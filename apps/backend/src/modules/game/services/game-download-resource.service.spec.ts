@@ -664,12 +664,13 @@ describe('GameDownloadSourceService', () => {
     prismaService.$transaction.mockImplementation(async (cb: any) => cb(tx))
     b2Service.getDownloadUrl.mockResolvedValue('https://ft.hikarifallback.uk/games/31/worker.7z')
     downloadProxyTicketService.issueDownloadUrl.mockReturnValue(
-      'https://dl.hikarifallback.uk/dl/2/worker.7z?ticket=opaque',
+      'https://dl.hikarifallback.uk/dl/2/123e4567-e89b-12d3-a456-426614174000?ticket=opaque',
     )
 
     const result = await service.getDownloadLink(2, 'ok-token')
     expect(result).toEqual({
-      file_url: 'https://dl.hikarifallback.uk/dl/2/worker.7z?ticket=opaque',
+      file_url:
+        'https://dl.hikarifallback.uk/dl/2/123e4567-e89b-12d3-a456-426614174000?ticket=opaque',
       expires_in: 1800,
     })
     expect(downloadProxyTicketService.issueDownloadUrl).toHaveBeenCalledWith({

@@ -1,5 +1,5 @@
 export type DownloadProxyTicketPayload = {
-  v: 1
+  v: 2
   sid: string
   fid: number
   n: string

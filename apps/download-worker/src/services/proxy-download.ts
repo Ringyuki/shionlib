@@ -9,6 +9,12 @@ type ProxyDownloadInput = DownloadRequestContext & {
   ctx: ExecutionContext
 }
 
+const buildDownloadHeaders = (originHeaders: Headers, fileName: string) => {
+  const headers = new Headers(originHeaders)
+  headers.set('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`)
+  return headers
+}
+
 export const proxyDownload = async ({
   request,
   env,
@@ -17,7 +23,12 @@ export const proxyDownload = async ({
   ticketPayload,
 }: ProxyDownloadInput) => {
   if (request.method === 'HEAD') {
-    return fetch(originRequest)
+    const originResponse = await fetch(originRequest)
+    return new Response(null, {
+      status: originResponse.status,
+      statusText: originResponse.statusText,
+      headers: buildDownloadHeaders(originResponse.headers, ticketPayload.n),
+    })
   }
 
   const limiterId = env.DOWNLOAD_LIMITER.idFromName(ticketPayload.sid)
@@ -79,7 +90,7 @@ export const proxyDownload = async ({
     return new Response(readable, {
       status: originResponse.status,
       statusText: originResponse.statusText,
-      headers: new Headers(originResponse.headers),
+      headers: buildDownloadHeaders(originResponse.headers, ticketPayload.n),
     })
   } catch (error) {
     await releaseLeaseOnce()
