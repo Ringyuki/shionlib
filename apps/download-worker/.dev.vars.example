@@ -1,0 +1,2 @@
+TICKET_SECRET=dev-download-ticket-secret
+DOWNLOAD_CDN_HOST=https://ft.hikarifallback.uk

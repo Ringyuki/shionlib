@@ -7,6 +7,7 @@ on:
       - 'apps/frontend/**'
       - 'apps/backend/**'
       - 'apps/og/**'
+      - 'apps/download-worker/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
@@ -18,6 +19,7 @@ on:
       - '.github/workflows/deploy-frontend.yml'
       - '.github/workflows/deploy-backend.yml'
       - '.github/workflows/deploy-og.yml'
+      - '.github/workflows/deploy-download-worker.yml'
       - '.github/workflows/promote-frontend-production.yml'
       - '.github/workflows/promote-backend-production.yml'
       - '.github/workflows/promote-og-production.yml'
@@ -27,6 +29,7 @@ on:
       - 'apps/frontend/**'
       - 'apps/backend/**'
       - 'apps/og/**'
+      - 'apps/download-worker/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
@@ -38,6 +41,7 @@ on:
       - '.github/workflows/deploy-frontend.yml'
       - '.github/workflows/deploy-backend.yml'
       - '.github/workflows/deploy-og.yml'
+      - '.github/workflows/deploy-download-worker.yml'
       - '.github/workflows/promote-frontend-production.yml'
       - '.github/workflows/promote-backend-production.yml'
       - '.github/workflows/promote-og-production.yml'
@@ -192,10 +196,32 @@ jobs:
       - name: Unit tests
         run: pnpm --filter shionlib-og test
 
+  download-worker-checks:
+    name: Download Worker Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm --filter shionlib-download-worker typecheck
+
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
-    needs: [frontend-checks, backend-checks, og-checks]
+    needs: [frontend-checks, backend-checks, og-checks, download-worker-checks]
     timeout-minutes: 60
     env:
       CI: true

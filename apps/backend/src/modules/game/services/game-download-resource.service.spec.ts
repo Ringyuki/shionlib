@@ -51,6 +51,10 @@ describe('GameDownloadSourceService', () => {
 
     const configValues = new Map<string, any>([
       ['cloudflare.turnstile.secret', 'turnstile-secret'],
+      ['file_download.mode', 'direct'],
+      ['file_download.proxy_worker_host', 'https://dl.hikarifallback.uk'],
+      ['file_download.ticket_secret', 'dev-download-ticket-secret'],
+      ['file_download.max_conns', 4],
       ['file_download.download_expires_in', 1800],
     ])
     const configService = {
@@ -73,6 +77,10 @@ describe('GameDownloadSourceService', () => {
       send: jest.fn(),
     }
 
+    const downloadProxyTicketService = {
+      issueDownloadUrl: jest.fn(),
+    }
+
     const service = new GameDownloadSourceService(
       prismaService as any,
       s3Service as any,
@@ -82,6 +90,7 @@ describe('GameDownloadSourceService', () => {
       httpService as any,
       uploadQuotaService as any,
       messageService as any,
+      downloadProxyTicketService as any,
     )
 
     return {
@@ -93,6 +102,8 @@ describe('GameDownloadSourceService', () => {
       httpService,
       uploadQuotaService,
       messageService,
+      downloadProxyTicketService,
+      configValues,
       service,
     }
   }
@@ -626,6 +637,47 @@ describe('GameDownloadSourceService', () => {
       expires_in: 1800,
     })
     expect(b2Service.getDownloadUrl).toHaveBeenCalledWith('s3/small.file', 1800)
+  })
+
+  it('getDownloadLink returns worker proxy url when worker mode is enabled', async () => {
+    const { service, prismaService, b2Service, downloadProxyTicketService, configValues } =
+      createService()
+    configValues.set('file_download.mode', 'worker')
+    jest
+      .spyOn(service as any, 'validateToken')
+      .mockResolvedValueOnce({ success: true, error_codes: [] })
+    prismaService.gameDownloadResourceFile.findUnique.mockResolvedValue({
+      game_download_resource_id: 21,
+      s3_file_key: 's3/worker.file',
+      file_size: 2 * 1024 * 1024 * 1024,
+      file_name: 'worker.7z',
+    })
+    const tx = {
+      gameDownloadResource: {
+        findUnique: jest.fn().mockResolvedValue({ updated: new Date('2026-02-18T00:00:00.000Z') }),
+        update: jest.fn().mockResolvedValue({ game_id: 31 }),
+      },
+      game: {
+        update: jest.fn(),
+      },
+    }
+    prismaService.$transaction.mockImplementation(async (cb: any) => cb(tx))
+    b2Service.getDownloadUrl.mockResolvedValue('https://ft.hikarifallback.uk/games/31/worker.7z')
+    downloadProxyTicketService.issueDownloadUrl.mockReturnValue(
+      'https://dl.hikarifallback.uk/dl/2/worker.7z?ticket=opaque',
+    )
+
+    const result = await service.getDownloadLink(2, 'ok-token')
+    expect(result).toEqual({
+      file_url: 'https://dl.hikarifallback.uk/dl/2/worker.7z?ticket=opaque',
+      expires_in: 1800,
+    })
+    expect(downloadProxyTicketService.issueDownloadUrl).toHaveBeenCalledWith({
+      fileId: 2,
+      fileName: 'worker.7z',
+      originUrl: 'https://ft.hikarifallback.uk/games/31/worker.7z',
+      expiresIn: 1800,
+    })
   })
 
   it('getList maps resources to paginated response', async () => {

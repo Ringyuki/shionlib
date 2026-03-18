@@ -43,7 +43,7 @@ export const Tags = ({ onTagsChange, value }: TagsProps) => {
   }
 
   return (
-    <div className="flex flex-col gap-2 max-w-full md:min-w-64">
+    <div className="flex flex-col gap-2 w-full">
       <div className="text-xs text-muted-foreground flex items-center gap-0.5">
         <Hash className="size-3.5" />
         {t('tags')}

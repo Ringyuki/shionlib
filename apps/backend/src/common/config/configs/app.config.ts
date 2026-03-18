@@ -122,7 +122,16 @@ export default (): AppConfig => ({
   },
 
   file_download: {
+    mode: withDefault('FILE_DOWNLOAD_MODE', 'direct', raw =>
+      raw.trim().toLowerCase() === 'worker' ? 'worker' : 'direct',
+    ),
     download_cdn_host: withDefault('FILE_DOWNLOAD_CDN_HOST', 'https://ft.hikarifallback.uk/'),
+    proxy_worker_host: withDefault(
+      'FILE_DOWNLOAD_PROXY_WORKER_HOST',
+      'https://dl.hikarifallback.uk/',
+    ),
+    ticket_secret: withDefault('FILE_DOWNLOAD_TICKET_SECRET', ''),
+    max_conns: withDefault('FILE_DOWNLOAD_MAX_CONNS', 8),
     download_expires_in: withDefault('FILE_DOWNLOAD_EXPIRES_IN', 3600), // 1 hour
   },
 

@@ -17,6 +17,7 @@ import { GameScoreService } from './services/game-score.service'
 import { GameScoreController } from './controllers/game-score.controller'
 import { GameDownloadResourceReportService } from './services/game-download-resource-report.service'
 import { GameTagService } from './services/game-tag.service'
+import { DownloadProxyTicketService } from './services/download-proxy-ticket.service'
 
 @Module({
   controllers: [
@@ -39,6 +40,7 @@ import { GameTagService } from './services/game-tag.service'
     GameScoreService,
     GameDownloadResourceReportService,
     GameTagService,
+    DownloadProxyTicketService,
   ],
   exports: [GameService, GameDownloadResourceReportService, GameTagService],
 })

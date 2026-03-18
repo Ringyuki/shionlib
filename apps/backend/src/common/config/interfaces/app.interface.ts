@@ -88,7 +88,11 @@ export interface AppConfig {
     malware_auto_delete_review_note: string
   }
   file_download: {
+    mode: 'direct' | 'worker'
     download_cdn_host: string
+    proxy_worker_host: string
+    ticket_secret: string
+    max_conns: number
     download_expires_in: number
   }
   tasks: {

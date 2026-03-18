@@ -34,6 +34,8 @@ import { TurnstileResInterface } from '../interfaces/turnstile/turnstile-res.int
 import { UploadQuotaService } from '../../upload/services/upload-quota.service'
 import { MessageService } from '../../message/services/message.service'
 import { MessageTone, MessageType } from '../../message/dto/req/send-message.req.dto'
+import { DownloadProxyTicketService } from './download-proxy-ticket.service'
+
 @Injectable()
 export class GameDownloadSourceService {
   constructor(
@@ -45,6 +47,7 @@ export class GameDownloadSourceService {
     private readonly httpService: HttpService,
     private readonly uploadQuotaService: UploadQuotaService,
     private readonly messageService: MessageService,
+    private readonly downloadProxyTicketService: DownloadProxyTicketService,
   ) {}
 
   async getByGameId(id: number, req: RequestWithUser): Promise<GetGameDownloadResourceResDto[]> {
@@ -394,6 +397,7 @@ export class GameDownloadSourceService {
         game_download_resource_id: true,
         s3_file_key: true,
         file_size: true,
+        file_name: true,
       },
     })
     if (!file) {
@@ -436,8 +440,19 @@ export class GameDownloadSourceService {
     if (file.file_size > 1024 * 1024 * 1024 * 10) expiresIn = 4 * 60 * 60 // 4 hours
     if (file.file_size > 1024 * 1024 * 1024 * 20) expiresIn = 6 * 60 * 60 // 6 hours
 
+    const directUrl = await this.b2Service.getDownloadUrl(file.s3_file_key!, expiresIn)
+    const file_url =
+      this.configService.get('file_download.mode') === 'worker'
+        ? this.downloadProxyTicketService.issueDownloadUrl({
+            fileId: id,
+            fileName: file.file_name,
+            originUrl: directUrl,
+            expiresIn,
+          })
+        : directUrl
+
     return {
-      file_url: await this.b2Service.getDownloadUrl(file.s3_file_key!, expiresIn),
+      file_url,
       expires_in: expiresIn,
     }
   }
