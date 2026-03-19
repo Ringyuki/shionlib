@@ -132,6 +132,7 @@ export interface AppConfig {
   }
 
   cloudflare: {
+    account_id: string
     analytics: {
       secret: string
       zone_id: string

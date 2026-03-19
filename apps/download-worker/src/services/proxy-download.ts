@@ -68,27 +68,34 @@ export const proxyDownload = async ({
     )
 
     const contentLength = originResponse.headers.get('content-length')
-    const bytes = contentLength ? parseInt(contentLength, 10) : 0
-    const { readable, writable } = contentLength
-      ? new FixedLengthStream(bytes)
+    let bytesTransferred = 0
+    const counter = new TransformStream<Uint8Array>({
+      transform(chunk, controller) {
+        bytesTransferred += chunk.byteLength
+        controller.enqueue(chunk)
+      },
+    })
+    const outputStream = contentLength
+      ? new FixedLengthStream(parseInt(contentLength, 10))
       : new TransformStream()
     ctx.waitUntil(
       originResponse.body
-        .pipeTo(writable)
+        .pipeThrough(counter)
+        .pipeTo(outputStream.writable)
         .catch(() => undefined)
-        .finally(() => {
-          releaseLeaseOnce()
-          if (bytes > 0) {
+        .finally(async () => {
+          await releaseLeaseOnce()
+          if (bytesTransferred > 0) {
             env.DOWNLOAD_ANALYTICS.writeDataPoint({
               indexes: [ticketPayload.fid.toString()],
               blobs: [ticketPayload.n],
-              doubles: [bytes],
+              doubles: [bytesTransferred],
             })
           }
         }),
     )
 
-    return new Response(readable, {
+    return new Response(outputStream.readable, {
       status: originResponse.status,
       statusText: originResponse.statusText,
       headers: buildDownloadHeaders(originResponse.headers, ticketPayload.n),

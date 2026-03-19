@@ -7,6 +7,7 @@ import {
   CloudflareAnalyticsData,
   CloudflareAnalyticsResult,
   CloudflareGraphQLResponse,
+  AnalyticsEngineSqlResponse,
 } from '../interfaces/cf.interface'
 
 @Injectable()
@@ -57,13 +58,61 @@ export class DataService {
         file_size: true,
       },
     })
-    const bytes_gotten = await this.getCloudflareAnalytics()
+    const bytes_gotten = await this.getDownloadBytes()
     return {
       games,
       files,
       resources,
       storage: Number(storage._sum.file_size) || 0,
-      bytes_gotten: Number(bytes_gotten.summary.totalEdgeResponseBytes) || 0,
+      bytes_gotten,
+    }
+  }
+
+  private async getDownloadBytes(): Promise<number> {
+    const mode = this.configService.get('file_download.mode')
+    if (mode === 'worker') {
+      return this.getDownloadBytesFromAnalyticsEngine()
+    }
+    const result = await this.getDownloadBytesFromZoneAnalytics()
+    return result.summary.totalEdgeResponseBytes
+  }
+
+  private async getDownloadBytesFromAnalyticsEngine(): Promise<number> {
+    const accountId = this.configService.get('cloudflare.account_id')
+    const secret = this.configService.get('cloudflare.analytics.secret')
+
+    if (!accountId || !secret) {
+      this.logger.warn(
+        'Cloudflare config missing (CLOUDFLARE_ACCOUNT_ID/CLOUDFLARE_ANALYTICS_SECRET), fallback to zero bytes',
+      )
+      return 0
+    }
+
+    try {
+      const endpoint = `https://api.cloudflare.com/client/v4/accounts/${accountId}/analytics_engine/sql`
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000)
+        .toISOString()
+        .replace('T', ' ')
+        .replace(/\.\d+Z$/, '') // the clickhouse requires the timestamp to be in the format YYYY-MM-DD HH:MM:SS
+      const query = `SELECT SUM(double1) AS totalBytes FROM shionlib_downloads WHERE timestamp >= toDateTime('${since}')`
+
+      const response = await firstValueFrom(
+        this.httpService.post<AnalyticsEngineSqlResponse>(endpoint, query, {
+          headers: {
+            Authorization: `Bearer ${secret}`,
+            'Content-Type': 'text/plain',
+          },
+          timeout: 15_000,
+        }),
+      )
+
+      return response.data?.data?.[0]?.totalBytes ?? 0
+    } catch (error) {
+      this.logger.warn(
+        `Failed to query download analytics: ${error instanceof Error ? error.message : 'unknown error'}`,
+      )
+      this.logger.error(error)
+      return 0
     }
   }
 
@@ -80,7 +129,7 @@ export class DataService {
     }
   }
 
-  private async getCloudflareAnalytics(): Promise<CloudflareAnalyticsResult> {
+  private async getDownloadBytesFromZoneAnalytics(): Promise<CloudflareAnalyticsResult> {
     const zoneId = this.configService.get('cloudflare.analytics.zone_id')
     const secret = this.configService.get('cloudflare.analytics.secret')
 

@@ -173,6 +173,7 @@ export default (): AppConfig => ({
   },
 
   cloudflare: {
+    account_id: withDefault('CLOUDFLARE_ACCOUNT_ID', ''),
     analytics: {
       secret: withDefault('CLOUDFLARE_ANALYTICS_SECRET', ''),
       zone_id: withDefault('CLOUDFLARE_ANALYTICS_ZONE_ID', ''),

@@ -39,3 +39,10 @@ export interface CloudflareAnalyticsSummary {
 export type CloudflareAnalyticsResult = CloudflareAnalyticsData & {
   summary: CloudflareAnalyticsSummary
 }
+
+export interface AnalyticsEngineSqlResponse {
+  data: Array<{ totalBytes: number }>
+  meta: Array<{ name: string; type: string }>
+  rows: number
+  rows_before_limit_at_least: number
+}

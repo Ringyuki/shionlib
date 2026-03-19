@@ -18,7 +18,7 @@ export class AnalysisDataController {
       return cached
     }
     const result = await this.dataService.getOverview()
-    await this.cacheService.set(cacheKey, result, 30 * 60 * 1000) // 30 minutes
+    await this.cacheService.set(cacheKey, result, 5 * 60 * 1000) // 5 minutes
     return result
   }
 }
