@@ -9,7 +9,7 @@ export const createErrorResponder =
         code: status,
         message,
         timestamp: env.CF_VERSION_METADATA.timestamp,
-        version: env.CF_VERSION_METADATA.tag || 'development',
+        version: env.CF_VERSION_METADATA.id,
       } satisfies ErrorResponseBody,
       { status },
     )
