@@ -6,5 +6,6 @@ export type Env = {
   DOWNLOAD_HEARTBEAT_MS?: string
   TICKET_SECRET: string
   DOWNLOAD_LIMITER: DurableObjectNamespace<DownloadLimiter>
+  DOWNLOAD_ANALYTICS: AnalyticsEngineDataset
   CF_VERSION_METADATA: WorkerVersionMetadata
 }

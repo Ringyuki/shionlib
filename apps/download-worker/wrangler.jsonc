@@ -18,6 +18,12 @@
     },
   ],
   "routes": [{ "pattern": "dl.hikarifallback.uk", "custom_domain": true }],
+  "analytics_engine_datasets": [
+    {
+      "binding": "DOWNLOAD_ANALYTICS",
+      "dataset": "shionlib_downloads"
+    }
+  ],
   "vars": {
     "DOWNLOAD_MAX_CONNS_CAP": "8",
     "DOWNLOAD_LEASE_TTL_MS": "45000",
