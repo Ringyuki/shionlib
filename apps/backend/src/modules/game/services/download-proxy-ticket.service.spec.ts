@@ -60,7 +60,7 @@ describe('DownloadProxyTicketService', () => {
     expect(payload.fid).toBe(10)
     expect(payload.n).toBe('test.rar')
     expect(payload.mc).toBe(4)
-    expect(payload.p).toBe('/bucket/test.rar?Authorization=abc')
+    expect(payload.p).toBe('https://cdn.example.com/bucket/test.rar?Authorization=abc')
     expect(payload.exp).toBeGreaterThan(Math.floor(Date.now() / 1000))
     expect(payload.sid).toBeDefined()
   })
@@ -84,7 +84,7 @@ describe('DownloadProxyTicketService', () => {
     )
   })
 
-  it('strips origin host and keeps only path + search in ticket', () => {
+  it('stores the full origin URL in the ticket payload', () => {
     const { service } = createService()
 
     const url = service.issueDownloadUrl({
@@ -97,7 +97,7 @@ describe('DownloadProxyTicketService', () => {
     const ticket = decodeURIComponent(new URL(url).searchParams.get('ticket')!)
     const payload = decryptTicket(ticket, 'test-secret-key')
 
-    expect(payload.p).toBe('/deep/path/file.zip?token=abc&extra=1')
+    expect(payload.p).toBe('https://cdn.example.com/deep/path/file.zip?token=abc&extra=1')
   })
 
   it('normalizes proxy_worker_host with trailing slash', () => {

@@ -1,13 +1,6 @@
 import { parsePositiveInt } from '../helpers/number'
 import { acquireLease, heartbeatLease, releaseLease } from './download-lease'
-import type { Env } from '../types/env'
-import type { DownloadRequestContext } from '../types/download-request-context'
-
-type ProxyDownloadInput = DownloadRequestContext & {
-  request: Request
-  env: Env
-  ctx: ExecutionContext
-}
+import type { ProxyDownloadInput } from '../types/proxy-download'
 
 const buildDownloadHeaders = (originHeaders: Headers, fileName: string) => {
   const headers = new Headers(originHeaders)
@@ -21,6 +14,7 @@ export const proxyDownload = async ({
   ctx,
   originRequest,
   ticketPayload,
+  errorResponse,
 }: ProxyDownloadInput) => {
   if (request.method === 'HEAD') {
     const originResponse = await fetch(originRequest)
@@ -39,12 +33,9 @@ export const proxyDownload = async ({
   const acquireResult = await acquireLease(limiter, maxConn)
 
   if (!acquireResult.ok) {
-    return new Response('Too Many Concurrent Download Connections', {
-      status: 429,
-      headers: {
-        'Retry-After': '1',
-      },
-    })
+    const res = errorResponse(429, 'Too Many Concurrent Download Connections')
+    res.headers.set('Retry-After', '1')
+    return res
   }
 
   let released = false
@@ -95,11 +86,9 @@ export const proxyDownload = async ({
   } catch (error) {
     await releaseLeaseOnce()
 
-    return new Response(
+    return errorResponse(
+      502,
       `Failed to proxy download: ${error instanceof Error ? error.message : 'unknown error'}`,
-      {
-        status: 502,
-      },
     )
   }
 }

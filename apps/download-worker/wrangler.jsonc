@@ -7,24 +7,23 @@
     "bindings": [
       {
         "name": "DOWNLOAD_LIMITER",
-        "class_name": "DownloadLimiter"
-      }
-    ]
+        "class_name": "DownloadLimiter",
+      },
+    ],
   },
   "migrations": [
     {
       "tag": "v1",
-      "new_sqlite_classes": [
-        "DownloadLimiter"
-      ]
-    }
+      "new_sqlite_classes": ["DownloadLimiter"],
+    },
   ],
-  "routes": [
-    { "pattern": "dl.hikarifallback.uk", "custom_domain": true }
-  ],
+  "routes": [{ "pattern": "dl.hikarifallback.uk", "custom_domain": true }],
   "vars": {
     "DOWNLOAD_MAX_CONNS_CAP": "8",
     "DOWNLOAD_LEASE_TTL_MS": "45000",
-    "DOWNLOAD_HEARTBEAT_MS": "15000"
-  }
+    "DOWNLOAD_HEARTBEAT_MS": "15000",
+  },
+  "version_metadata": {
+    "binding": "CF_VERSION_METADATA",
+  },
 }

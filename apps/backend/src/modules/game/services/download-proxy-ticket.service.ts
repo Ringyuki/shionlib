@@ -18,7 +18,7 @@ export class DownloadProxyTicketService {
       n: input.fileName,
       exp: Math.floor(Date.now() / 1000) + input.expiresIn,
       mc: Math.max(1, this.configService.get('file_download.max_conns')),
-      p: this.toRelativeOriginPath(input.originUrl),
+      p: input.originUrl,
     }
 
     const ticket = this.encryptPayload(payload)
@@ -32,11 +32,6 @@ export class DownloadProxyTicketService {
     }
 
     return `${baseUrl}/dl/${fileId}/${encodeURIComponent(sessionId)}?ticket=${encodeURIComponent(ticket)}`
-  }
-
-  private toRelativeOriginPath(originUrl: string) {
-    const url = new URL(originUrl)
-    return `${url.pathname}${url.search}`
   }
 
   private encryptPayload(payload: DownloadProxyTicketPayload) {

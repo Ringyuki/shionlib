@@ -1,7 +1,7 @@
 import { buildOriginHeaders } from '../helpers/request'
-import { normalizeBaseUrl } from '../helpers/url'
 import { decryptTicket } from './download-ticket'
 import type { Env } from '../types/env'
+import type { ErrorResponder } from '../types/response'
 import type { DownloadRequestResolution } from '../types/download-request-context'
 
 const DOWNLOAD_ROUTE = /^\/dl\/(\d+)\/([^/]+)$/
@@ -9,35 +9,35 @@ const DOWNLOAD_ROUTE = /^\/dl\/(\d+)\/([^/]+)$/
 export const resolveDownloadRequest = async (
   request: Request,
   env: Env,
+  errorResponse: ErrorResponder,
 ): Promise<DownloadRequestResolution> => {
   const url = new URL(request.url)
   const ticket = url.searchParams.get('ticket')
   if (!ticket) {
-    return reject(new Response('Missing ticket', { status: 400 }))
+    return reject(errorResponse(400, 'Missing ticket'))
   }
 
   const ticketPayload = await decryptTicket(ticket, env.TICKET_SECRET)
   if (!ticketPayload) {
-    return reject(new Response('Invalid ticket', { status: 403 }))
+    return reject(errorResponse(403, 'Invalid ticket'))
   }
   if (ticketPayload.exp <= Math.floor(Date.now() / 1000)) {
-    return reject(new Response('Expired ticket', { status: 410 }))
+    return reject(errorResponse(410, 'Expired ticket'))
   }
 
   const routeMatch = url.pathname.match(DOWNLOAD_ROUTE)
   if (!routeMatch) {
-    return reject(new Response('Not Found', { status: 404 }))
+    return reject(errorResponse(404, 'Not Found'))
   }
 
   const [, fileIdRaw, sessionIdRaw] = routeMatch
   const fileId = Number(fileIdRaw)
   const sessionId = decodeURIComponent(sessionIdRaw)
   if (fileId !== ticketPayload.fid || sessionId !== ticketPayload.sid) {
-    return reject(new Response('Ticket mismatch', { status: 403 }))
+    return reject(errorResponse(403, 'Ticket mismatch'))
   }
 
-  const originUrl = new URL(ticketPayload.p, normalizeBaseUrl(env.DOWNLOAD_CDN_HOST))
-  const originRequest = new Request(originUrl.toString(), {
+  const originRequest = new Request(ticketPayload.p, {
     method: request.method,
     headers: buildOriginHeaders(request),
     redirect: 'follow',

@@ -1,5 +1,4 @@
 import { DurableObject } from 'cloudflare:workers'
-import { jsonResponse } from '../helpers/http'
 import { parsePositiveInt } from '../helpers/number'
 import type { LeaseRecord, AcquireResponse } from '../types/download-limiter'
 import type { Env } from '../types/env'
@@ -7,54 +6,40 @@ import type { Env } from '../types/env'
 export class DownloadLimiter extends DurableObject<Env> {
   private leases = new Map<string, LeaseRecord>()
 
-  async fetch(request: Request): Promise<Response> {
-    const url = new URL(request.url)
+  async acquire(maxConn: number): Promise<AcquireResponse> {
     const now = Date.now()
     this.cleanupExpired(now)
 
-    if (request.method !== 'POST') {
-      return jsonResponse({ ok: false, reason: 'method_not_allowed' }, 405)
+    if (this.leases.size >= Math.max(1, maxConn)) {
+      return { ok: false, reason: 'max_conn_exceeded' }
     }
 
-    if (url.pathname === '/acquire') {
-      const body = (await request.json()) as { maxConn?: number }
-      const maxConn = Math.max(1, body.maxConn ?? 1)
+    const leaseId = crypto.randomUUID()
+    this.leases.set(leaseId, { lastSeenAt: now })
 
-      if (this.leases.size >= maxConn) {
-        return jsonResponse<AcquireResponse>({ ok: false, reason: 'max_conn_exceeded' }, 429)
-      }
+    return {
+      ok: true,
+      leaseId,
+      ttlMs: this.leaseTtlMs,
+      heartbeatMs: this.heartbeatMs,
+    }
+  }
 
-      const leaseId = crypto.randomUUID()
-      this.leases.set(leaseId, { lastSeenAt: now })
+  async heartbeat(leaseId: string) {
+    const now = Date.now()
+    this.cleanupExpired(now)
 
-      return jsonResponse<AcquireResponse>({
-        ok: true,
-        leaseId,
-        ttlMs: this.leaseTtlMs,
-        heartbeatMs: this.heartbeatMs,
-      })
+    if (!this.leases.has(leaseId)) {
+      return { ok: false, reason: 'lease_not_found' }
     }
 
-    if (url.pathname === '/heartbeat') {
-      const body = (await request.json()) as { leaseId?: string }
-      if (!body.leaseId || !this.leases.has(body.leaseId)) {
-        return jsonResponse({ ok: false, reason: 'lease_not_found' }, 404)
-      }
+    this.leases.set(leaseId, { lastSeenAt: now })
+    return { ok: true }
+  }
 
-      this.leases.set(body.leaseId, { lastSeenAt: now })
-      return jsonResponse({ ok: true })
-    }
-
-    if (url.pathname === '/release') {
-      const body = (await request.json()) as { leaseId?: string }
-      if (body.leaseId) {
-        this.leases.delete(body.leaseId)
-      }
-
-      return jsonResponse({ ok: true })
-    }
-
-    return jsonResponse({ ok: false, reason: 'not_found' }, 404)
+  async release(leaseId: string) {
+    this.leases.delete(leaseId)
+    return { ok: true }
   }
 
   private cleanupExpired(now: number) {
