@@ -39,7 +39,7 @@ describe('AnalysisDataController', () => {
     const result = await controller.getOverview()
 
     expect(dataService.getOverview).toHaveBeenCalledTimes(1)
-    expect(cacheService.set).toHaveBeenCalledWith('analysis:data:overview', fresh, 5 * 60 * 1000)
+    expect(cacheService.set).toHaveBeenCalledWith('analysis:data:overview', fresh, 30 * 60 * 1000)
     expect(result).toEqual(fresh)
   })
 })

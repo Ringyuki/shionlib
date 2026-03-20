@@ -58,6 +58,7 @@
   "verdictInvalid": "判定无效",
   "processNotePlaceholder": "填写审核备注（可选）",
   "notifyUser": "发送系统通知",
+  "removeResource": "判定有效后删除资源及文件",
   "submitReview": "提交审核",
   "reviewSaved": "审核结果已保存"
 }

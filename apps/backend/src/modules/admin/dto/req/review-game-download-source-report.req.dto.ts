@@ -24,4 +24,9 @@ export class ReviewGameDownloadSourceReportReqDto {
   @Type(() => Boolean)
   @IsBoolean()
   notify?: boolean
+
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  remove_resource?: boolean
 }

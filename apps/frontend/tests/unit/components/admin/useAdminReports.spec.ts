@@ -79,16 +79,19 @@ describe('components/admin/hooks/useAdminReports (unit)', () => {
     hoisted.patch.mockResolvedValue({ data: { id: 5, verdict: 'VALID' } })
 
     await expect(getAdminReportDetail(5)).resolves.toEqual({ id: 5 })
-    await expect(reviewAdminReport(5, { verdict: 'VALID' as any, notify: true })).resolves.toEqual({
-      id: 5,
-      verdict: 'VALID',
-    })
+    await expect(
+      reviewAdminReport(5, {
+        verdict: 'VALID' as any,
+        notify: true,
+        remove_resource: false,
+      }),
+    ).resolves.toEqual({ id: 5, verdict: 'VALID' })
 
     expect(hoisted.get).toHaveBeenCalledWith('/admin/content/download-resource-reports/5')
     expect(hoisted.patch).toHaveBeenCalledWith(
       '/admin/content/download-resource-reports/5/review',
       {
-        data: { verdict: 'VALID', notify: true },
+        data: { verdict: 'VALID', notify: true, remove_resource: false },
       },
     )
   })

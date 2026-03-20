@@ -204,7 +204,7 @@ test.describe('Admin reports UI', () => {
     await verdictSelectTrigger.click()
     await page.getByRole('option', { name: 'Mark as Invalid' }).click()
 
-    const notifyCheckbox = detailDialog.getByRole('checkbox')
+    const notifyCheckbox = detailDialog.getByLabel('Send system notification')
     await expect(notifyCheckbox).toHaveAttribute('aria-checked', 'true')
     await notifyCheckbox.click()
     await expect(notifyCheckbox).toHaveAttribute('aria-checked', 'false')

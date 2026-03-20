@@ -74,6 +74,7 @@ export function ReportDetailDialog({
   const [maliciousLevel, setMaliciousLevel] = useState<AdminReportMaliciousLevel>('MEDIUM')
   const [processNote, setProcessNote] = useState('')
   const [notify, setNotify] = useState(true)
+  const [removeResource, setRemoveResource] = useState(true)
 
   const loadDetail = async (id: number) => {
     setLoading(true)
@@ -93,6 +94,7 @@ export function ReportDetailDialog({
     if (!open || !reportId) return
     setVerdict('VALID')
     setNotify(true)
+    setRemoveResource(true)
     setProcessNote('')
     loadDetail(reportId)
   }, [open, reportId])
@@ -122,6 +124,7 @@ export function ReportDetailDialog({
         malicious_level: verdict === 'VALID' ? maliciousLevel : undefined,
         process_note: processNote.trim() || undefined,
         notify,
+        remove_resource: verdict === 'VALID' ? removeResource : undefined,
       })
       setDetail(reviewed)
       toast.success(t('reviewSaved'))
@@ -320,10 +323,25 @@ export function ReportDetailDialog({
 
                   <div className="flex items-center gap-2">
                     <Checkbox
+                      id="report-review-notify"
                       checked={notify}
                       onCheckedChange={checked => setNotify(Boolean(checked))}
                     />
-                    <span className="text-sm">{t('notifyUser')}</span>
+                    <Label htmlFor="report-review-notify" className="text-sm font-normal">
+                      {t('notifyUser')}
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="report-review-remove-resource"
+                      checked={removeResource}
+                      disabled={verdict !== 'VALID'}
+                      onCheckedChange={checked => setRemoveResource(Boolean(checked))}
+                    />
+                    <Label htmlFor="report-review-remove-resource" className="text-sm font-normal">
+                      {t('removeResource')}
+                    </Label>
                   </div>
                 </div>
 

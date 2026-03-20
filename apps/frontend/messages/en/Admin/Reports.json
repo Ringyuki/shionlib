@@ -58,6 +58,7 @@
   "verdictInvalid": "Mark as Invalid",
   "processNotePlaceholder": "Add moderation note (optional)",
   "notifyUser": "Send system notification",
+  "removeResource": "Remove resource and files after valid review",
   "submitReview": "Submit Review",
   "reviewSaved": "Review saved"
 }

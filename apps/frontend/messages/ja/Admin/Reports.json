@@ -58,6 +58,7 @@
   "verdictInvalid": "無効にする",
   "processNotePlaceholder": "審査メモを入力（任意）",
   "notifyUser": "システム通知を送信",
+  "removeResource": "有効判定後にリソースとファイルを削除する",
   "submitReview": "審査を保存",
   "reviewSaved": "審査結果を保存しました"
 }

@@ -76,6 +76,7 @@ export async function reviewAdminReport(
     malicious_level?: AdminReportMaliciousLevel
     process_note?: string
     notify?: boolean
+    remove_resource?: boolean
   },
 ) {
   const res = await shionlibRequest().patch<AdminDownloadResourceReportDetail>(

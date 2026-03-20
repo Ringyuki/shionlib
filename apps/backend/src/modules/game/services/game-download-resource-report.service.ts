@@ -357,6 +357,8 @@ export class GameDownloadResourceReportService {
     }
 
     const notify = dto.notify !== false
+    const shouldRemoveResource =
+      dto.verdict === GameDownloadSourceReportVerdict.VALID && dto.remove_resource !== false
     const now = new Date()
 
     const reportId = await this.prisma.$transaction(async tx => {
@@ -478,7 +480,7 @@ export class GameDownloadResourceReportService {
     })
 
     const reviewedSnapshot = await this.getById(reportId)
-    if (dto.verdict === GameDownloadSourceReportVerdict.VALID) {
+    if (shouldRemoveResource) {
       await this.gameDownloadSourceService.delete(
         report.resource_id,
         {

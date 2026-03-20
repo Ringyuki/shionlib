@@ -355,6 +355,58 @@ describe('GameDownloadResourceReportService', () => {
     expect(result).toEqual({ id: 2, status: 'snap' })
   })
 
+  it('review VALID can keep resource untouched when removal is disabled', async () => {
+    const { service, prisma, messageService, gameDownloadSourceService } = createService()
+    prisma.gameDownloadResourceReport.findUnique.mockResolvedValue({
+      id: 4,
+      status: GameDownloadResourceReportStatus.PENDING,
+      reason: GameDownloadResourceReportReason.BROKEN_LINK,
+      malicious_level: ReportMaliciousLevel.LOW,
+      reporter_id: 18,
+      reported_user_id: 29,
+      resource_id: 110,
+      resource: {
+        id: 110,
+        game_id: 1002,
+        game: { id: 1002, title_jp: 'jp', title_zh: 'zh', title_en: 'en' },
+      },
+    })
+    const tx = {
+      gameDownloadResourceReport: {
+        update: jest.fn(),
+      },
+    }
+    prisma.$transaction.mockImplementation(async (cb: any) => cb(tx))
+    jest.spyOn(service as any, 'applyReportedUserPenalty').mockResolvedValue({
+      banApplied: false,
+      banDays: 0,
+      quotaReducedBytes: 0,
+    })
+    jest.spyOn(service, 'getById').mockResolvedValue({ id: 4, status: 'snap' } as any)
+
+    const result = await service.review(
+      4,
+      {
+        verdict: GameDownloadSourceReportVerdict.VALID,
+        malicious_level: ReportMaliciousLevel.LOW,
+        notify: false,
+        remove_resource: false,
+      } as any,
+      { sub: 7, role: ShionlibUserRoles.ADMIN },
+    )
+
+    expect((service as any).applyReportedUserPenalty).toHaveBeenCalledWith(
+      tx,
+      29,
+      ReportMaliciousLevel.LOW,
+      GameDownloadResourceReportReason.BROKEN_LINK,
+      7,
+    )
+    expect(messageService.send).not.toHaveBeenCalled()
+    expect(gameDownloadSourceService.delete).not.toHaveBeenCalled()
+    expect(result).toEqual({ id: 4, status: 'snap' })
+  })
+
   it('review INVALID applies reporter penalty and can skip notify/delete', async () => {
     const { service, prisma, messageService, gameDownloadSourceService } = createService()
     prisma.gameDownloadResourceReport.findUnique.mockResolvedValue({
