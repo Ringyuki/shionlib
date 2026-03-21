@@ -8,7 +8,7 @@ export const createErrorResponder =
       {
         code: status,
         message,
-        timestamp: Date.now().toString(),
+        timestamp: new Date().toISOString(),
         version: env.CF_VERSION_METADATA.id,
       } satisfies ErrorResponseBody,
       { status },
