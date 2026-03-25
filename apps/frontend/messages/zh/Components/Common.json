@@ -54,7 +54,8 @@
   "Footer": {
     "ShionlibFooter": {
       "contact": "联系我们",
-      "friendLink": "友情链接"
+      "friendLink": "友情链接",
+      "sponsor": "赞助"
     }
   },
   "User": {

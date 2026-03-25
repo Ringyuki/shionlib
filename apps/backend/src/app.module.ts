@@ -43,6 +43,7 @@ import { AnalysisModule } from './modules/analysis/analysis.module'
 import { HealthModule } from './modules/health/health.module'
 import { PotatoVNModule } from './modules/potatovn/potatovn.module'
 import { WalkthroughModule } from './modules/walkthrough/walkthrough.module'
+import { SponsorModule } from './modules/sponsor/sponsor.module'
 
 @Module({
   imports: [
@@ -118,6 +119,7 @@ import { WalkthroughModule } from './modules/walkthrough/walkthrough.module'
     AnalysisModule,
     PotatoVNModule,
     WalkthroughModule,
+    SponsorModule,
   ],
   controllers: [],
   providers: [

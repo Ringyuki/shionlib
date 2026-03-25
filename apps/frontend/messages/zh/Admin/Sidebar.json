@@ -9,5 +9,6 @@
   "developers": "开发商管理",
   "settings": "设置",
   "backToSite": "返回站点",
-  "malwareScans": "报毒审核"
+  "malwareScans": "报毒审核",
+  "sponsors": "赞助管理"
 }

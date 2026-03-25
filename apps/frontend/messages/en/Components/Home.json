@@ -112,7 +112,9 @@
       "hourly-trend": "Hourly Traffic Trend",
       "top-files": "Top Files by Traffic",
       "traffic": "Traffic",
-      "no-data": "No download data available"
+      "no-data": "No download data available",
+      "country-distribution": "Region Distribution",
+      "top-games": "Top Games by Traffic"
     }
   }
 }

@@ -1,0 +1,22 @@
+{
+  "title": "赞助订单",
+  "status": "状态",
+  "allStatus": "全部状态",
+  "statusNew": "待支付",
+  "statusDone": "已支付",
+  "statusExpired": "已过期",
+  "statusRefund": "已退款",
+  "amount": "金额",
+  "sponsor": "赞助者",
+  "message": "留言",
+  "paymentMethod": "支付方式",
+  "private": "私密",
+  "paidAt": "支付时间",
+  "createdAt": "创建时间",
+  "anonymous": "匿名",
+  "noOrders": "暂无赞助订单",
+  "refresh": "刷新",
+  "totalSponsors": "赞助总数",
+  "totalAmount": "赞助总额",
+  "orderId": "订单号"
+}

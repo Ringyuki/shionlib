@@ -117,5 +117,12 @@
   "PVN_GAME_MAPPING_NOT_FOUND": "このゲームは PotatoVN ライブラリに登録されていません",
 
   "WALKTHROUGH_NOT_FOUND": "攻略が見つかりません",
-  "WALKTHROUGH_NOT_OWNER": "あなたはこの攻略を変更する権限がありません"
+  "WALKTHROUGH_NOT_OWNER": "あなたはこの攻略を変更する権限がありません",
+
+  "SPONSOR_ORDER_NOT_FOUND": "スポンサー注文が見つかりません",
+  "SPONSOR_ORDER_ALREADY_PAID": "この注文はすでに支払い済みです",
+  "SPONSOR_ORDER_EXPIRED": "この注文は期限切れです",
+  "SPONSOR_PROVIDER_REQUEST_FAILED": "決済サービスのリクエストに失敗しました。メッセージ: {message}",
+  "SPONSOR_PROVIDER_VERIFICATION_FAILED": "決済の検証に失敗しました",
+  "SPONSOR_MODULE_DISABLED": "スポンサーモジュールは現在無効です"
 }

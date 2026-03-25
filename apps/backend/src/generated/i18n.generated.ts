@@ -170,6 +170,12 @@ export type I18nTranslations = {
         "PVN_GAME_MAPPING_NOT_FOUND": string;
         "WALKTHROUGH_NOT_FOUND": string;
         "WALKTHROUGH_NOT_OWNER": string;
+        "SPONSOR_ORDER_NOT_FOUND": string;
+        "SPONSOR_ORDER_ALREADY_PAID": string;
+        "SPONSOR_ORDER_EXPIRED": string;
+        "SPONSOR_PROVIDER_REQUEST_FAILED": string;
+        "SPONSOR_PROVIDER_VERIFICATION_FAILED": string;
+        "SPONSOR_MODULE_DISABLED": string;
     };
     "validation": {
         "common": {

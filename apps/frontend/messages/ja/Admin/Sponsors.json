@@ -1,0 +1,22 @@
+{
+  "title": "スポンサー注文",
+  "status": "ステータス",
+  "allStatus": "すべて",
+  "statusNew": "未払い",
+  "statusDone": "支払い済み",
+  "statusExpired": "期限切れ",
+  "statusRefund": "返金済み",
+  "amount": "金額",
+  "sponsor": "スポンサー",
+  "message": "メッセージ",
+  "paymentMethod": "支払い方法",
+  "private": "非公開",
+  "paidAt": "支払い日時",
+  "createdAt": "作成日時",
+  "anonymous": "匿名",
+  "noOrders": "スポンサー注文はありません",
+  "refresh": "更新",
+  "totalSponsors": "スポンサー総数",
+  "totalAmount": "合計金額",
+  "orderId": "注文ID"
+}

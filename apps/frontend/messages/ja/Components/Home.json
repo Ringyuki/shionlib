@@ -112,7 +112,9 @@
       "hourly-trend": "時間別通信量の推移",
       "top-files": "通信量ランキング",
       "traffic": "通信量",
-      "no-data": "ダウンロードデータがありません"
+      "no-data": "ダウンロードデータがありません",
+      "country-distribution": "地域分布",
+      "top-games": "ゲーム別通信量ランキング"
     }
   }
 }

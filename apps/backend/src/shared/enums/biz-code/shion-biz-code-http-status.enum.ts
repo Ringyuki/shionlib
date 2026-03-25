@@ -144,4 +144,12 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
   // 56
   [ShionBizCode.WALKTHROUGH_NOT_FOUND]: HttpStatus.NOT_FOUND,
   [ShionBizCode.WALKTHROUGH_NOT_OWNER]: HttpStatus.FORBIDDEN,
+
+  // 57
+  [ShionBizCode.SPONSOR_ORDER_NOT_FOUND]: HttpStatus.NOT_FOUND,
+  [ShionBizCode.SPONSOR_ORDER_ALREADY_PAID]: HttpStatus.CONFLICT,
+  [ShionBizCode.SPONSOR_ORDER_EXPIRED]: HttpStatus.GONE,
+  [ShionBizCode.SPONSOR_PROVIDER_REQUEST_FAILED]: HttpStatus.BAD_GATEWAY,
+  [ShionBizCode.SPONSOR_PROVIDER_VERIFICATION_FAILED]: HttpStatus.BAD_GATEWAY,
+  [ShionBizCode.SPONSOR_MODULE_DISABLED]: HttpStatus.SERVICE_UNAVAILABLE,
 } as const satisfies Record<ShionBizCode, HttpStatus>

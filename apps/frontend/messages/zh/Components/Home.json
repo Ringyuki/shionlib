@@ -112,7 +112,9 @@
       "hourly-trend": "每小时流量趋势",
       "top-files": "流量排行",
       "traffic": "流量",
-      "no-data": "暂无下载数据"
+      "no-data": "暂无下载数据",
+      "country-distribution": "地区分布",
+      "top-games": "游戏排行"
     }
   }
 }

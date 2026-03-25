@@ -1,0 +1,37 @@
+enum SponsorOrderStatus {
+  NEW
+  DONE
+  EXPIRED
+  REFUND
+}
+
+model SponsorOrder {
+  id                Int                @id @default(autoincrement())
+  provider_order_id String             @unique @db.VarChar(255)
+  provider          String             @default("idatariver") @db.VarChar(50)
+
+  amount         Decimal            @db.Decimal(10, 2)
+  currency       String?            @db.VarChar(10)
+  payment_method String?            @db.VarChar(50)
+
+  status SponsorOrderStatus @default(NEW)
+
+  sponsor_name    String?  @db.VarChar(100)
+  sponsor_message String?  @db.Text
+  is_private      Boolean  @default(false)
+
+  user_id Int?
+  user    User? @relation("user_sponsor_orders", fields: [user_id], references: [id], onDelete: SetNull)
+
+  paid_at           DateTime?
+  callback_verified Boolean   @default(false)
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@index([status])
+  @@index([user_id])
+  @@index([created])
+  @@index([is_private, status, created])
+  @@map("sponsor_orders")
+}

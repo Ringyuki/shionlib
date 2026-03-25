@@ -1,0 +1,22 @@
+{
+  "title": "Sponsor Orders",
+  "status": "Status",
+  "allStatus": "All Status",
+  "statusNew": "Pending",
+  "statusDone": "Paid",
+  "statusExpired": "Expired",
+  "statusRefund": "Refunded",
+  "amount": "Amount",
+  "sponsor": "Sponsor",
+  "message": "Message",
+  "paymentMethod": "Payment",
+  "private": "Private",
+  "paidAt": "Paid At",
+  "createdAt": "Created",
+  "anonymous": "Anonymous",
+  "noOrders": "No sponsor orders found",
+  "refresh": "Refresh",
+  "totalSponsors": "Total Sponsors",
+  "totalAmount": "Total Amount",
+  "orderId": "Order ID"
+}

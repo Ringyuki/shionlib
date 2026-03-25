@@ -19,6 +19,19 @@ export interface TopFileTraffic {
   downloadCount: number
 }
 
+export interface CountryTraffic {
+  country: string
+  totalBytes: number
+  downloadCount: number
+}
+
+export interface GameTraffic {
+  gameId: number
+  gameName: { title_jp: string | null; title_zh: string | null; title_en: string | null }
+  totalBytes: number
+  downloadCount: number
+}
+
 export interface TrafficDetailData {
   totalDownloads: number
   totalBytes: number
@@ -28,4 +41,6 @@ export interface TrafficDetailData {
   prevAverageSize: number
   hourly: HourlyTrafficPoint[]
   topFiles: TopFileTraffic[]
+  countries: CountryTraffic[]
+  topGames: GameTraffic[]
 }

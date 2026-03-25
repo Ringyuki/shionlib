@@ -118,5 +118,12 @@
   "PVN_GAME_MAPPING_NOT_FOUND": "this game is not in your PotatoVN library",
 
   "WALKTHROUGH_NOT_FOUND": "walkthrough not found",
-  "WALKTHROUGH_NOT_OWNER": "you don't have permission to modify this walkthrough"
+  "WALKTHROUGH_NOT_OWNER": "you don't have permission to modify this walkthrough",
+
+  "SPONSOR_ORDER_NOT_FOUND": "sponsor order not found",
+  "SPONSOR_ORDER_ALREADY_PAID": "this order has already been paid",
+  "SPONSOR_ORDER_EXPIRED": "this order has expired",
+  "SPONSOR_PROVIDER_REQUEST_FAILED": "payment provider request failed, message: {message}",
+  "SPONSOR_PROVIDER_VERIFICATION_FAILED": "payment verification failed",
+  "SPONSOR_MODULE_DISABLED": "sponsor module is currently disabled"
 }

@@ -6,6 +6,7 @@ import { RiTelegram2Fill } from 'react-icons/ri'
 import Image from 'next/image'
 import { getTranslations } from 'next-intl/server'
 import { Separator } from '@/components/shionui/Separator'
+import { SponsorTrigger } from './SponsorTrigger'
 
 export const ShionlibFooter = async () => {
   const t = await getTranslations('Components.Common.Footer.ShionlibFooter')
@@ -20,7 +21,7 @@ export const ShionlibFooter = async () => {
           </div>
           <SiteLogo size={16} className="text-sm pt-0.5 text-card-foreground" />
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center flex-wrap justify-center gap-6">
           <div className="flex items-center gap-6 text-sm">
             <I18nLink
               href="/friend-link"
@@ -28,6 +29,7 @@ export const ShionlibFooter = async () => {
             >
               {t('friendLink')}
             </I18nLink>
+            <SponsorTrigger />
           </div>
           <Separator orientation="vertical" className="h-4! bg-foreground hidden md:block" />
           <div className="flex items-center gap-6 text-sm">

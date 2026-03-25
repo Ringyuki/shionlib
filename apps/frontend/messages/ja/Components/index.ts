@@ -12,6 +12,7 @@ import FriendLink from './FriendLink.json'
 import Create from './Create.json'
 import Message from './Message.json'
 import Favorite from './Favorite.json'
+import Sponsor from './Sponsor.json'
 
 const messages = {
   ShionUI,
@@ -28,6 +29,7 @@ const messages = {
   Create,
   Message,
   Favorite,
+  Sponsor,
 } as const
 
 export default messages

@@ -12,6 +12,7 @@ import {
   Biohazard,
   Gamepad2,
   ScrollText,
+  Heart,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -39,6 +40,7 @@ const sidebarItems: SidebarItem[] = [
   { key: 'walkthroughs', icon: ScrollText, href: '/admin/walkthroughs' },
   { key: 'reports', icon: ShieldAlert, href: '/admin/reports' },
   { key: 'malwareScans', icon: Biohazard, href: '/admin/malware-scans' },
+  { key: 'sponsors', icon: Heart, href: '/admin/sponsors' },
   // { key: 'characters', icon: Users, href: '/admin/characters' },
   // { key: 'developers', icon: Building2, href: '/admin/developers' },
   // { key: 'settings', icon: Settings, href: '/admin/settings' },

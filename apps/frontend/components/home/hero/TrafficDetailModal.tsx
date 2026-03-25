@@ -9,6 +9,8 @@ import { TrafficDetailSkeleton } from './traffic-detail/TrafficDetailSkeleton'
 import { SummaryCards } from './traffic-detail/SummaryCards'
 import { HourlyTrendChart } from './traffic-detail/HourlyTrendChart'
 import { TopFilesChart } from './traffic-detail/TopFilesChart'
+import { CountryChart } from './traffic-detail/CountryChart'
+import { TopGamesChart } from './traffic-detail/TopGamesChart'
 
 interface TrafficDetailModalProps {
   open: boolean
@@ -24,8 +26,13 @@ export const TrafficDetailModal = ({ open, onOpenChange }: TrafficDetailModalPro
     if (!open) return
     setLoading(true)
     const start = performance.now()
+    const controller = new AbortController()
     shionlibRequest()
-      .get<TrafficDetailData>('/analysis/data/traffic-detail')
+      .get<TrafficDetailData>('/analysis/data/traffic-detail', {
+        options: {
+          signal: controller.signal,
+        },
+      })
       .then(res => {
         const delay = Math.max(0, 500 - (performance.now() - start))
         setTimeout(() => {
@@ -37,6 +44,10 @@ export const TrafficDetailModal = ({ open, onOpenChange }: TrafficDetailModalPro
         setData(null)
         setLoading(false)
       })
+
+    return () => {
+      controller.abort()
+    }
   }, [open])
 
   return (
@@ -70,10 +81,27 @@ export const TrafficDetailModal = ({ open, onOpenChange }: TrafficDetailModalPro
             </div>
           )}
 
-          {data.topFiles.length > 0 && (
+          {(data.topFiles.length > 0 || data.countries.length > 0) && (
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+              {data.topFiles.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">{t('top-files')}</h4>
+                  <TopFilesChart data={data.topFiles} trafficLabel={t('traffic')} />
+                </div>
+              )}
+              {data.countries.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">{t('country-distribution')}</h4>
+                  <CountryChart data={data.countries} trafficLabel={t('traffic')} />
+                </div>
+              )}
+            </div>
+          )}
+
+          {data.topGames.length > 0 && (
             <div className="space-y-2">
-              <h4 className="text-sm font-medium">{t('top-files')}</h4>
-              <TopFilesChart data={data.topFiles} trafficLabel={t('traffic')} />
+              <h4 className="text-sm font-medium">{t('top-games')}</h4>
+              <TopGamesChart data={data.topGames} trafficLabel={t('traffic')} />
             </div>
           )}
         </div>
