@@ -354,7 +354,11 @@ describe('DataService', () => {
       expect(result.countries[0].country).toBe('CN')
       expect(result.topGames).toHaveLength(1)
       expect(result.topGames[0].gameId).toBe(42)
-      expect(result.topGames[0].gameName).toBe('テストゲーム')
+      expect(result.topGames[0].gameName).toEqual({
+        title_jp: 'テストゲーム',
+        title_zh: '',
+        title_en: '',
+      })
     })
 
     it('falls back to empty result when config is missing', async () => {
