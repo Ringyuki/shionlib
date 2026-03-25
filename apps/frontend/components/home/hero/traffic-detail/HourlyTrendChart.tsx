@@ -12,6 +12,17 @@ interface HourlyTrendChartProps {
   trafficLabel: string
 }
 
+const formatHourTick = (value: string) =>
+  new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+const formatHourTooltip = (value: string) =>
+  new Date(value).toLocaleString([], {
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+
 export const HourlyTrendChart = ({ data, trafficLabel }: HourlyTrendChartProps) => {
   const nivoTheme = useNivoTheme()
   const { resolvedTheme } = useTheme()
@@ -22,7 +33,7 @@ export const HourlyTrendChart = ({ data, trafficLabel }: HourlyTrendChartProps) 
       {
         id: trafficLabel,
         data: data.map(h => ({
-          x: new Date(h.hour).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          x: h.hour,
           y: h.totalBytes,
         })),
       },
@@ -38,11 +49,12 @@ export const HourlyTrendChart = ({ data, trafficLabel }: HourlyTrendChartProps) 
         margin={{ top: 8, right: 0, bottom: 32, left: 55 }}
         xScale={{ type: 'point' }}
         yScale={{ type: 'linear', min: 0, stacked: false }}
-        curve="catmullRom"
+        curve="linear"
         axisBottom={{
           tickSize: 0,
           tickPadding: 8,
           tickRotation: -45,
+          format: value => formatHourTick(String(value)),
         }}
         axisLeft={{
           tickSize: 0,
@@ -57,10 +69,12 @@ export const HourlyTrendChart = ({ data, trafficLabel }: HourlyTrendChartProps) 
         enableSlices="x"
         sliceTooltip={({ slice }) => (
           <div className="rounded-lg border bg-popover px-3 py-2 text-xs shadow-md min-w-40 w-fit">
-            <p className="font-medium">{slice.points[0]?.data.xFormatted}</p>
+            <p className="font-medium">
+              {slice.points[0]?.data.x ? formatHourTooltip(String(slice.points[0].data.x)) : ''}
+            </p>
             {slice.points.map(p => (
               <p key={p.id} className="text-muted-foreground">
-                {p.seriesId}: {formatBytes(Number(p.data.yFormatted))}
+                {p.seriesId}: {formatBytes(Number(p.data.y))}
               </p>
             ))}
           </div>

@@ -1,3 +1,4 @@
+/* eslint-disable quotes */
 import { of, throwError } from 'rxjs'
 import { PrismaService } from '../../../prisma.service'
 import { ShionConfigService } from '../../../common/config/services/config.service'
@@ -409,14 +410,61 @@ describe('DataService', () => {
       expect(result.prevAverageSize).toBe(0)
     })
 
+    it('queries the last 24 hourly buckets ending at the current hour', async () => {
+      const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-03-25T13:12:00Z'))
+      const { service, post } = createTrafficService({ hourlyData: [] })
+
+      await service.getTrafficDetail()
+
+      expect(post.mock.calls[2]?.[1]).toContain("timestamp >= toDateTime('2026-03-24 14:00:00')")
+
+      nowSpy.mockRestore()
+    })
+
     it('fills missing hours with zero-value entries', async () => {
+      const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-03-25T13:12:00Z'))
       const { service } = createTrafficService({ hourlyData: [] })
 
       const result = await service.getTrafficDetail()
 
-      expect(result.hourly.length).toBeGreaterThanOrEqual(24)
+      expect(result.hourly).toHaveLength(24)
+      expect(new Set(result.hourly.map(h => h.hour)).size).toBe(24)
+      expect(result.hourly[0]?.hour).toBe('2026-03-24T14:00:00.000Z')
+      expect(result.hourly[23]?.hour).toBe('2026-03-25T13:00:00.000Z')
       expect(result.hourly.every(h => h.totalBytes === 0)).toBe(true)
       expect(result.hourly.every(h => h.downloadCount === 0)).toBe(true)
+
+      nowSpy.mockRestore()
+    })
+
+    it('keeps hourly values aligned to the filled bucket range', async () => {
+      const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-03-25T13:12:00Z'))
+      const { service } = createTrafficService({
+        hourlyData: [
+          { hour: '2026-03-24 14:00:00', downloadCount: 1, totalBytes: 100 },
+          { hour: '2026-03-25 13:00:00', downloadCount: 2, totalBytes: 200 },
+        ],
+      })
+
+      const result = await service.getTrafficDetail()
+
+      expect(result.hourly[0]).toEqual({
+        hour: '2026-03-24T14:00:00.000Z',
+        totalBytes: 100,
+        downloadCount: 1,
+      })
+      expect(result.hourly[1]).toEqual({
+        hour: '2026-03-24T15:00:00.000Z',
+        totalBytes: 0,
+        downloadCount: 0,
+      })
+      expect(result.hourly[23]).toEqual({
+        hour: '2026-03-25T13:00:00.000Z',
+        totalBytes: 200,
+        downloadCount: 2,
+      })
+
+      nowSpy.mockRestore()
     })
   })
 })

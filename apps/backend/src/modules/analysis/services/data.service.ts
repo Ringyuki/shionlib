@@ -86,6 +86,12 @@ export class DataService {
       .replace(/\.\d+Z$/, '')
   }
 
+  private startOfHour(date: Date): Date {
+    const hour = new Date(date)
+    hour.setMinutes(0, 0, 0)
+    return hour
+  }
+
   private async getDownloadBytesFromAnalyticsEngine(): Promise<number> {
     const accountId = this.configService.get('cloudflare.account_id')
     const secret = this.configService.get('cloudflare.analytics.secret')
@@ -146,8 +152,11 @@ export class DataService {
 
     try {
       const now = Date.now()
+      const currentHour = this.startOfHour(new Date(now))
+      const hourlySince = new Date(currentHour.getTime() - 23 * 60 * 60 * 1000)
       const since24h = this.formatTimestampForClickhouse(new Date(now - 24 * 60 * 60 * 1000))
       const since48h = this.formatTimestampForClickhouse(new Date(now - 48 * 60 * 60 * 1000))
+      const since24HourlyBuckets = this.formatTimestampForClickhouse(hourlySince)
       const endpoint = `https://api.cloudflare.com/client/v4/accounts/${accountId}/analytics_engine/sql`
 
       const queryOptions = {
@@ -186,7 +195,7 @@ export class DataService {
             }>
           >(
             endpoint,
-            `SELECT toStartOfHour(timestamp) AS hour, COUNT(DISTINCT blob4) AS downloadCount, SUM(double1) AS totalBytes FROM shionlib_downloads WHERE timestamp >= toDateTime('${since24h}') GROUP BY hour ORDER BY hour ASC`,
+            `SELECT toStartOfHour(timestamp) AS hour, COUNT(DISTINCT blob4) AS downloadCount, SUM(double1) AS totalBytes FROM shionlib_downloads WHERE timestamp >= toDateTime('${since24HourlyBuckets}') GROUP BY hour ORDER BY hour ASC`,
             queryOptions,
           ),
         ),
@@ -240,11 +249,7 @@ export class DataService {
       const prevTotalDownloads = Number(prev.downloadCount) || 0
       const prevTotalBytes = Number(prev.totalBytes) || 0
 
-      const hourly = this.fillHourlyGaps(
-        hourlyRes.data?.data ?? [],
-        new Date(now - 24 * 60 * 60 * 1000),
-        new Date(now),
-      )
+      const hourly = this.fillHourlyGaps(hourlyRes.data?.data ?? [], hourlySince, currentHour)
 
       const rawGames = (gameRes.data?.data ?? []).filter(g => g.gameId)
       const gameIds = rawGames.map(g => Number(g.gameId)).filter(id => id > 0)
