@@ -35,6 +35,12 @@ export type DownloadProxyTicketPayload = {
    * @example 'https://cdn.example.com/files/game.7z?Authorization=token123'
    */
   p: string
+  /**
+   * Game ID
+   * @description The game ID associated with this download, used for analytics
+   * @example 42
+   */
+  gid: number
 }
 
 export type IssueDownloadProxyUrlInput = {
@@ -42,4 +48,5 @@ export type IssueDownloadProxyUrlInput = {
   fileName: string
   originUrl: string
   expiresIn: number
+  gameId: number
 }

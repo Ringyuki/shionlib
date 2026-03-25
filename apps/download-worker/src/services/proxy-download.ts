@@ -79,7 +79,12 @@ export const proxyDownload = async ({
           if (contentLengthBytes > 0) {
             env.DOWNLOAD_ANALYTICS.writeDataPoint({
               indexes: [ticketPayload.fid.toString()],
-              blobs: [ticketPayload.n],
+              blobs: [
+                ticketPayload.n,
+                ticketPayload.gid.toString(),
+                (request.cf?.country as string) ?? '',
+                ticketPayload.sid,
+              ],
               doubles: [contentLengthBytes],
             })
           }

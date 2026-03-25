@@ -139,6 +139,8 @@ export class DataService {
         prevAverageSize: 0,
         hourly: [],
         topFiles: [],
+        countries: [],
+        topGames: [],
       }
     }
 
@@ -156,13 +158,13 @@ export class DataService {
         timeout: 15_000,
       }
 
-      const [currentRes, prevRes, hourlyRes, topFilesRes] = await Promise.all([
+      const [currentRes, prevRes, hourlyRes, topFilesRes, countryRes, gameRes] = await Promise.all([
         firstValueFrom(
           this.httpService.post<
             AnalyticsEngineSqlGenericResponse<{ downloadCount: string; totalBytes: string }>
           >(
             endpoint,
-            `SELECT COUNT() AS downloadCount, SUM(double1) AS totalBytes FROM shionlib_downloads WHERE timestamp >= toDateTime('${since24h}')`,
+            `SELECT COUNT(DISTINCT blob4) AS downloadCount, SUM(double1) AS totalBytes FROM shionlib_downloads WHERE timestamp >= toDateTime('${since24h}')`,
             queryOptions,
           ),
         ),
@@ -171,7 +173,7 @@ export class DataService {
             AnalyticsEngineSqlGenericResponse<{ downloadCount: string; totalBytes: string }>
           >(
             endpoint,
-            `SELECT COUNT() AS downloadCount, SUM(double1) AS totalBytes FROM shionlib_downloads WHERE timestamp >= toDateTime('${since48h}') AND timestamp < toDateTime('${since24h}')`,
+            `SELECT COUNT(DISTINCT blob4) AS downloadCount, SUM(double1) AS totalBytes FROM shionlib_downloads WHERE timestamp >= toDateTime('${since48h}') AND timestamp < toDateTime('${since24h}')`,
             queryOptions,
           ),
         ),
@@ -179,12 +181,12 @@ export class DataService {
           this.httpService.post<
             AnalyticsEngineSqlGenericResponse<{
               hour: string
-              downloadCount: number
-              totalBytes: number
+              downloadCount: string
+              totalBytes: string
             }>
           >(
             endpoint,
-            `SELECT toStartOfHour(timestamp) AS hour, COUNT() AS downloadCount, SUM(double1) AS totalBytes FROM shionlib_downloads WHERE timestamp >= toDateTime('${since24h}') GROUP BY hour ORDER BY hour ASC`,
+            `SELECT toStartOfHour(timestamp) AS hour, COUNT(DISTINCT blob4) AS downloadCount, SUM(double1) AS totalBytes FROM shionlib_downloads WHERE timestamp >= toDateTime('${since24h}') GROUP BY hour ORDER BY hour ASC`,
             queryOptions,
           ),
         ),
@@ -193,12 +195,38 @@ export class DataService {
             AnalyticsEngineSqlGenericResponse<{
               fileId: string
               fileName: string
-              downloadCount: number
-              totalBytes: number
+              downloadCount: string
+              totalBytes: string
             }>
           >(
             endpoint,
-            `SELECT index1 AS fileId, blob1 AS fileName, COUNT() AS downloadCount, SUM(double1) AS totalBytes FROM shionlib_downloads WHERE timestamp >= toDateTime('${since24h}') GROUP BY fileId, fileName ORDER BY totalBytes DESC LIMIT 10`,
+            `SELECT index1 AS fileId, blob1 AS fileName, COUNT(DISTINCT blob4) AS downloadCount, SUM(double1) AS totalBytes FROM shionlib_downloads WHERE timestamp >= toDateTime('${since24h}') GROUP BY fileId, fileName ORDER BY totalBytes DESC LIMIT 10`,
+            queryOptions,
+          ),
+        ),
+        firstValueFrom(
+          this.httpService.post<
+            AnalyticsEngineSqlGenericResponse<{
+              country: string
+              downloadCount: string
+              totalBytes: string
+            }>
+          >(
+            endpoint,
+            `SELECT blob3 AS country, COUNT(DISTINCT blob4) AS downloadCount, SUM(double1) AS totalBytes FROM shionlib_downloads WHERE timestamp >= toDateTime('${since24h}') AND blob3 != '' GROUP BY country ORDER BY totalBytes DESC LIMIT 20`,
+            queryOptions,
+          ),
+        ),
+        firstValueFrom(
+          this.httpService.post<
+            AnalyticsEngineSqlGenericResponse<{
+              gameId: string
+              downloadCount: string
+              totalBytes: string
+            }>
+          >(
+            endpoint,
+            `SELECT blob2 AS gameId, COUNT(DISTINCT blob4) AS downloadCount, SUM(double1) AS totalBytes FROM shionlib_downloads WHERE timestamp >= toDateTime('${since24h}') AND blob2 != '' GROUP BY gameId ORDER BY totalBytes DESC LIMIT 10`,
             queryOptions,
           ),
         ),
@@ -218,6 +246,26 @@ export class DataService {
         new Date(now),
       )
 
+      const rawGames = (gameRes.data?.data ?? []).filter(g => g.gameId)
+      const gameIds = rawGames.map(g => Number(g.gameId)).filter(id => id > 0)
+      const gameNameMap = new Map<
+        number,
+        { title_jp: string | null; title_zh: string | null; title_en: string | null }
+      >()
+      if (gameIds.length > 0) {
+        const games = await this.prisma.game.findMany({
+          where: { id: { in: gameIds } },
+          select: { id: true, title_jp: true, title_zh: true, title_en: true },
+        })
+        for (const g of games) {
+          gameNameMap.set(g.id, {
+            title_jp: g.title_jp,
+            title_zh: g.title_zh,
+            title_en: g.title_en,
+          })
+        }
+      }
+
       return {
         totalDownloads,
         totalBytes,
@@ -233,6 +281,20 @@ export class DataService {
           totalBytes: Number(f.totalBytes) || 0,
           downloadCount: Number(f.downloadCount) || 0,
         })),
+        countries: (countryRes.data?.data ?? []).map(c => ({
+          country: c.country ?? '',
+          totalBytes: Number(c.totalBytes) || 0,
+          downloadCount: Number(c.downloadCount) || 0,
+        })),
+        topGames: rawGames.map(g => {
+          const id = Number(g.gameId)
+          return {
+            gameId: id,
+            gameName: gameNameMap.get(id) ?? { title_jp: null, title_zh: null, title_en: null },
+            totalBytes: Number(g.totalBytes) || 0,
+            downloadCount: Number(g.downloadCount) || 0,
+          }
+        }),
       }
     } catch (error) {
       this.logger.warn(
@@ -248,12 +310,14 @@ export class DataService {
         prevAverageSize: 0,
         hourly: [],
         topFiles: [],
+        countries: [],
+        topGames: [],
       }
     }
   }
 
   private fillHourlyGaps(
-    data: Array<{ hour: string; downloadCount: number; totalBytes: number }>,
+    data: Array<{ hour: string; downloadCount: string | number; totalBytes: string | number }>,
     since: Date,
     until: Date,
   ) {

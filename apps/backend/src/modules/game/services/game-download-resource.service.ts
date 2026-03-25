@@ -407,14 +407,14 @@ export class GameDownloadSourceService {
       )
     }
 
-    await this.prismaService.$transaction(async tx => {
+    const { game_id } = await this.prismaService.$transaction(async tx => {
       const row = await tx.gameDownloadResource.findUnique({
         where: { id: file.game_download_resource_id },
         select: {
           updated: true,
         },
       })
-      const { game_id } = await tx.gameDownloadResource.update({
+      const resource = await tx.gameDownloadResource.update({
         where: { id: file.game_download_resource_id },
         data: {
           downloads: {
@@ -427,13 +427,14 @@ export class GameDownloadSourceService {
         },
       })
       await tx.game.update({
-        where: { id: game_id },
+        where: { id: resource.game_id },
         data: {
           downloads: {
             increment: 1,
           },
         },
       })
+      return resource
     })
 
     let expiresIn = this.configService.get('file_download.download_expires_in')
@@ -448,6 +449,7 @@ export class GameDownloadSourceService {
             fileName: file.file_name,
             originUrl: directUrl,
             expiresIn,
+            gameId: game_id,
           })
         : directUrl
 

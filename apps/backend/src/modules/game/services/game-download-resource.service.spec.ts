@@ -678,6 +678,7 @@ describe('GameDownloadSourceService', () => {
       fileName: 'worker.7z',
       originUrl: 'https://ft.hikarifallback.uk/games/31/worker.7z',
       expiresIn: 1800,
+      gameId: 31,
     })
   })
 

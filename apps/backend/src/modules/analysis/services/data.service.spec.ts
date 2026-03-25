@@ -237,7 +237,12 @@ describe('DataService', () => {
       }>
     }) {
       const prisma = {
-        game: { count: jest.fn().mockResolvedValue(0) },
+        game: {
+          count: jest.fn().mockResolvedValue(0),
+          findMany: jest
+            .fn()
+            .mockResolvedValue([{ id: 42, title_jp: 'テストゲーム', title_zh: '', title_en: '' }]),
+        },
         gameDownloadResourceFile: {
           count: jest.fn().mockResolvedValue(0),
           aggregate: jest.fn().mockResolvedValue({ _sum: { file_size: 0 } }),
@@ -280,15 +285,39 @@ describe('DataService', () => {
                 },
               })
             }
+            if (index === 3) {
+              return of({
+                data: {
+                  data: options?.topFilesData ?? [
+                    { fileId: '1', fileName: 'game.zip', downloadCount: 50, totalBytes: 25000 },
+                    { fileId: '2', fileName: 'patch.zip', downloadCount: 30, totalBytes: 15000 },
+                  ],
+                  meta: [],
+                  rows: 2,
+                  rows_before_limit_at_least: 2,
+                },
+              })
+            }
+            if (index === 4) {
+              return of({
+                data: {
+                  data: [
+                    { country: 'CN', downloadCount: '60', totalBytes: 30000 },
+                    { country: 'JP', downloadCount: '20', totalBytes: 10000 },
+                  ],
+                  meta: [],
+                  rows: 2,
+                  rows_before_limit_at_least: 2,
+                },
+              })
+            }
+            // index === 5: game query
             return of({
               data: {
-                data: options?.topFilesData ?? [
-                  { fileId: '1', fileName: 'game.zip', downloadCount: 50, totalBytes: 25000 },
-                  { fileId: '2', fileName: 'patch.zip', downloadCount: 30, totalBytes: 15000 },
-                ],
+                data: [{ gameId: '42', downloadCount: '40', totalBytes: 20000 }],
                 meta: [],
-                rows: 2,
-                rows_before_limit_at_least: 2,
+                rows: 1,
+                rows_before_limit_at_least: 1,
               },
             })
           })
@@ -312,7 +341,7 @@ describe('DataService', () => {
 
       const result = await service.getTrafficDetail()
 
-      expect(post).toHaveBeenCalledTimes(4)
+      expect(post).toHaveBeenCalledTimes(6)
       expect(result.totalDownloads).toBe(100)
       expect(result.totalBytes).toBe(50000)
       expect(result.averageSize).toBe(500)
@@ -321,6 +350,11 @@ describe('DataService', () => {
       expect(result.prevAverageSize).toBe(500)
       expect(result.topFiles).toHaveLength(2)
       expect(result.topFiles[0].fileName).toBe('game.zip')
+      expect(result.countries).toHaveLength(2)
+      expect(result.countries[0].country).toBe('CN')
+      expect(result.topGames).toHaveLength(1)
+      expect(result.topGames[0].gameId).toBe(42)
+      expect(result.topGames[0].gameName).toBe('テストゲーム')
     })
 
     it('falls back to empty result when config is missing', async () => {
@@ -340,6 +374,8 @@ describe('DataService', () => {
       expect(result.totalBytes).toBe(0)
       expect(result.hourly).toEqual([])
       expect(result.topFiles).toEqual([])
+      expect(result.countries).toEqual([])
+      expect(result.topGames).toEqual([])
     })
 
     it('falls back to empty result when query fails', async () => {
@@ -353,6 +389,8 @@ describe('DataService', () => {
       )
       expect(result.totalDownloads).toBe(0)
       expect(result.topFiles).toEqual([])
+      expect(result.countries).toEqual([])
+      expect(result.topGames).toEqual([])
     })
 
     it('returns averageSize 0 when there are zero downloads', async () => {

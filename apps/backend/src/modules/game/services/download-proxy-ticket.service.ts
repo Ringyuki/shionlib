@@ -19,6 +19,7 @@ export class DownloadProxyTicketService {
       exp: Math.floor(Date.now() / 1000) + input.expiresIn,
       mc: Math.max(1, this.configService.get('file_download.max_conns')),
       p: input.originUrl,
+      gid: input.gameId,
     }
 
     const ticket = this.encryptPayload(payload)

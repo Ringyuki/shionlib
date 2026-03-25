@@ -38,6 +38,7 @@ describe('DownloadProxyTicketService', () => {
       fileName: 'game.7z',
       originUrl: 'https://cdn.example.com/files/game.7z?Authorization=token123',
       expiresIn: 3600,
+      gameId: 1,
     })
 
     expect(url).toMatch(/^https:\/\/dl\.example\.com\/dl\/42\/[^/?]+\?ticket=/)
@@ -51,6 +52,7 @@ describe('DownloadProxyTicketService', () => {
       fileName: 'test.rar',
       originUrl: 'https://cdn.example.com/bucket/test.rar?Authorization=abc',
       expiresIn: 1800,
+      gameId: 1,
     })
 
     const ticket = decodeURIComponent(new URL(url).searchParams.get('ticket')!)
@@ -73,6 +75,7 @@ describe('DownloadProxyTicketService', () => {
       fileName: '[Frontwing] Corona Blossom.rar',
       originUrl: 'https://cdn.example.com/files/game.rar?Auth=x',
       expiresIn: 3600,
+      gameId: 1,
     })
 
     const pathnameParts = new URL(url).pathname.split('/')
@@ -92,6 +95,7 @@ describe('DownloadProxyTicketService', () => {
       fileName: 'file.zip',
       originUrl: 'https://cdn.example.com/deep/path/file.zip?token=abc&extra=1',
       expiresIn: 3600,
+      gameId: 1,
     })
 
     const ticket = decodeURIComponent(new URL(url).searchParams.get('ticket')!)
@@ -110,6 +114,7 @@ describe('DownloadProxyTicketService', () => {
       fileName: 'game.7z',
       originUrl: 'https://cdn.example.com/file?Auth=x',
       expiresIn: 3600,
+      gameId: 1,
     })
 
     expect(url).toMatch(/^https:\/\/dl\.example\.com\/dl\/1\/[^/?]+/)
@@ -124,6 +129,7 @@ describe('DownloadProxyTicketService', () => {
       fileName: 'game.7z',
       originUrl: 'https://cdn.example.com/file?Auth=x',
       expiresIn: 3600,
+      gameId: 1,
     })
 
     const ticket = decodeURIComponent(new URL(url).searchParams.get('ticket')!)
@@ -145,6 +151,7 @@ describe('DownloadProxyTicketService', () => {
         fileName: 'game.7z',
         originUrl: 'https://cdn.example.com/file?Auth=x',
         expiresIn: 3600,
+        gameId: 1,
       }),
     ).toThrow('FILE_DOWNLOAD_PROXY_WORKER_HOST is required')
   })
@@ -160,6 +167,7 @@ describe('DownloadProxyTicketService', () => {
         fileName: 'game.7z',
         originUrl: 'https://cdn.example.com/file?Auth=x',
         expiresIn: 3600,
+        gameId: 1,
       }),
     ).toThrow('FILE_DOWNLOAD_TICKET_SECRET is required')
   })
@@ -174,6 +182,7 @@ describe('DownloadProxyTicketService', () => {
       fileName: 'game.7z',
       originUrl: 'https://cdn.example.com/file?Auth=x',
       expiresIn: 3600,
+      gameId: 1,
     })
 
     const ticket = decodeURIComponent(new URL(url).searchParams.get('ticket')!)
@@ -192,6 +201,7 @@ describe('DownloadProxyTicketService', () => {
       fileName: 'game.7z',
       originUrl: 'https://cdn.example.com/file?Auth=x',
       expiresIn: 3600,
+      gameId: 1,
     })
 
     const ticket = decodeURIComponent(new URL(url).searchParams.get('ticket')!)
