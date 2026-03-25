@@ -12,6 +12,7 @@ import { PaginatedResult } from '../../../shared/interfaces/response/response.in
 import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 import { CommentResDto } from '../dto/res/comment.res.dto'
 import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
+import { USER_AVATAR_SELECT, mapUserAvatar } from '../../../shared/constants/user-select.constant'
 import { LexicalRendererService } from '../../render/services/lexical-renderer.service'
 import { SerializedEditorState } from 'lexical'
 import { MessageService } from '../../message/services/message.service'
@@ -68,21 +69,13 @@ export class CommentServices {
               id: true,
               html: true,
               creator: {
-                select: {
-                  id: true,
-                  name: true,
-                  avatar: true,
-                },
+                select: USER_AVATAR_SELECT,
               },
             },
           },
           root_id: true,
           creator: {
-            select: {
-              id: true,
-              name: true,
-              avatar: true,
-            },
+            select: USER_AVATAR_SELECT,
           },
           status: true,
           created: true,
@@ -111,6 +104,13 @@ export class CommentServices {
         ...comment,
         root_id: root_id || comment.id,
         like_count: 0,
+        creator: mapUserAvatar(comment.creator),
+        parent: comment.parent
+          ? {
+              ...comment.parent,
+              creator: mapUserAvatar(comment.parent.creator),
+            }
+          : null,
       }
     })
 
@@ -150,11 +150,7 @@ export class CommentServices {
         parent_id: true,
         root_id: true,
         creator: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          },
+          select: USER_AVATAR_SELECT,
         },
         edited: true,
         status: true,
@@ -164,7 +160,10 @@ export class CommentServices {
     })
 
     await this.moderationQueue.add(OMNI_COMMENT_MODERATION_JOB, { commentId: id })
-    return comment
+    return {
+      ...comment,
+      creator: mapUserAvatar(comment.creator),
+    }
   }
 
   async getRaw(id: number, req: RequestWithUser) {
@@ -255,11 +254,7 @@ export class CommentServices {
             id: true,
             html: true,
             creator: {
-              select: {
-                id: true,
-                name: true,
-                avatar: true,
-              },
+              select: USER_AVATAR_SELECT,
             },
           },
         },
@@ -268,11 +263,7 @@ export class CommentServices {
         liked_users: { where: { id: req.user?.sub || 0 }, select: { id: true }, take: 1 },
         _count: { select: { liked_users: true } },
         creator: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          },
+          select: USER_AVATAR_SELECT,
         },
         edited: true,
         status: true,
@@ -291,11 +282,11 @@ export class CommentServices {
         parent: {
           id: comment.parent_id,
           html: comment.parent?.html,
-          creator: comment.parent?.creator,
+          creator: comment.parent?.creator ? mapUserAvatar(comment.parent.creator) : undefined,
         },
         is_liked: comment.liked_users.length > 0,
         like_count: comment._count.liked_users,
-        creator: comment.creator,
+        creator: mapUserAvatar(comment.creator),
         edited: comment.edited,
         status: comment.status,
         created: comment.created,

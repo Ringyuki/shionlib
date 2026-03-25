@@ -33,6 +33,7 @@ export interface UserAvatar {
   id: number
   name: string
   avatar: string
+  is_sponsor?: boolean
 }
 
 export enum ContentLimit {

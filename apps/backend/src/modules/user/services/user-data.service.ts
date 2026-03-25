@@ -10,6 +10,7 @@ import { UserContentLimit } from '../interfaces/user.interface'
 import { CommentResDto } from '../../comment/dto/res/comment.res.dto'
 import { EditRecordItem } from '../dto/res/edit-records.res.dto'
 import { WalkthroughItemResDto } from '../dto/res/walkthrough.res.dto'
+import { USER_AVATAR_SELECT, mapUserAvatar } from '../../../shared/constants/user-select.constant'
 
 @Injectable()
 export class UserDataService {
@@ -57,11 +58,7 @@ export class UserDataService {
         created: true,
         updated: true,
         creator: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          },
+          select: USER_AVATAR_SELECT,
         },
         game: {
           select: {
@@ -116,7 +113,7 @@ export class UserDataService {
         more_than_one_file: r.files.length > 1,
         files_count: r.files.length,
         game: r.game,
-        creator: r.creator,
+        creator: mapUserAvatar(r.creator),
         created: r.created,
         updated: r.updated,
       })) as unknown as GameResourcesResDto[],
@@ -160,7 +157,7 @@ export class UserDataService {
           select: {
             id: true,
             html: true,
-            creator: { select: { id: true, name: true, avatar: true } },
+            creator: { select: USER_AVATAR_SELECT },
           },
         },
         liked_users: { where: { id: req.user?.sub || 0 }, select: { id: true }, take: 1 },
@@ -180,11 +177,7 @@ export class UserDataService {
           },
         },
         creator: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          },
+          select: USER_AVATAR_SELECT,
         },
         created: true,
         updated: true,
@@ -199,11 +192,16 @@ export class UserDataService {
         parent_id: comment.parent_id,
         root_id: comment.root_id,
         reply_count: comment.reply_count,
-        parent: comment.parent,
+        parent: comment.parent
+          ? {
+              ...comment.parent,
+              creator: mapUserAvatar(comment.parent.creator),
+            }
+          : null,
         is_liked: comment.liked_users.length > 0,
         like_count: comment._count.liked_users,
         game: comment.game,
-        creator: comment.creator,
+        creator: mapUserAvatar(comment.creator),
         created: comment.created,
         updated: comment.updated,
       })) as unknown as CommentResDto[],
@@ -285,17 +283,16 @@ export class UserDataService {
           },
         },
         creator: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          },
+          select: USER_AVATAR_SELECT,
         },
       },
     })
 
     return {
-      items: walkthroughs as unknown as WalkthroughItemResDto[],
+      items: walkthroughs.map(w => ({
+        ...w,
+        creator: mapUserAvatar(w.creator),
+      })) as unknown as WalkthroughItemResDto[],
       meta: {
         totalItems: total,
         itemCount: walkthroughs.length,

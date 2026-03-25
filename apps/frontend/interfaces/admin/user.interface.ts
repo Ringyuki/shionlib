@@ -18,11 +18,13 @@ export interface AdminUserItem {
   updated: string
   last_login_at: string | null
   two_factor_enabled: boolean
+  sponsor_expires_at: string | null
   counts: AdminUserCounts
 }
 
 export interface AdminUserDetail extends AdminUserItem {
   cover: string | null
+  sponsor_expires_at: string | null
   upload_quota?: {
     size: string
     used: string

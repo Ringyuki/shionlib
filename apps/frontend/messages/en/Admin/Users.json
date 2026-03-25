@@ -138,5 +138,16 @@
   "twoFactorOn": "2FA enabled",
   "twoFactorOff": "2FA disabled",
   "yes": "Yes",
-  "no": "No"
+  "no": "No",
+  "sponsorStatus": "Sponsor",
+  "sponsorActive": "Sponsor (active)",
+  "sponsorExpired": "Sponsor (expired)",
+  "sponsorNone": "Not a sponsor",
+  "sponsorExpiresAt": "Sponsor expires at",
+  "manageSponsor": "Manage Sponsor",
+  "manageSponsorDesc": "Set or clear the sponsor expiry date for this user.",
+  "sponsorExpiryLabel": "Sponsor Expires At",
+  "clearSponsor": "Clear",
+  "sponsorUpdated": "Sponsor status updated",
+  "sponsorUpdateFailed": "Failed to update sponsor status"
 }

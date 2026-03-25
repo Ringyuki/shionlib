@@ -11,6 +11,7 @@ import { PaySponsorOrderResDto } from '../dto/res/pay-sponsor-order.res.dto'
 import { SponsorOrderInfoResDto } from '../dto/res/sponsor-order-info.res.dto'
 import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
 import { GetSponsorOrderListReqDto } from '../dto/req/get-sponsor-order-list.req.dto'
+import { USER_AVATAR_SELECT, mapUserAvatar } from '../../../shared/constants/user-select.constant'
 
 @Injectable()
 export class SponsorService {
@@ -118,7 +119,7 @@ export class SponsorService {
   async getOrderStatus(orderId: number): Promise<SponsorOrderInfoResDto> {
     const order = await this.prisma.sponsorOrder.findUnique({
       where: { id: orderId },
-      include: { user: { select: { id: true, name: true, avatar: true } } },
+      include: { user: { select: USER_AVATAR_SELECT } },
     })
     if (!order) {
       throw new ShionBizException(
@@ -156,7 +157,7 @@ export class SponsorService {
       amount: Number(order.amount),
       status: order.status,
       sponsorName: order.sponsor_name,
-      user: order.user,
+      user: order.user ? mapUserAvatar(order.user) : null,
       message: order.sponsor_message,
       isPrivate: order.is_private,
       paymentMethod: order.payment_method,
@@ -191,6 +192,12 @@ export class SponsorService {
           callback_verified: true,
         },
       })
+
+      // Extend sponsor badge duration for logged-in users
+      if (order.user_id) {
+        await this.extendSponsorExpiry(order.user_id, Number(order.amount))
+      }
+
       this.logger.log(`Order ${providerOrderId} confirmed as DONE`)
     } else if (verified.status === 'REFUND') {
       await this.prisma.sponsorOrder.update({
@@ -202,6 +209,32 @@ export class SponsorService {
       })
       this.logger.log(`Order ${providerOrderId} refunded`)
     }
+  }
+
+  private async extendSponsorExpiry(userId: number, amount: number): Promise<void> {
+    const DAYS_PER_DOLLAR = 6
+    const daysToAdd = Math.floor(amount * DAYS_PER_DOLLAR)
+    if (daysToAdd <= 0) return
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { sponsor_expires_at: true },
+    })
+    if (!user) return
+
+    const now = new Date()
+    const baseDate =
+      user.sponsor_expires_at && user.sponsor_expires_at > now ? user.sponsor_expires_at : now
+    const newExpiry = new Date(baseDate.getTime() + daysToAdd * 24 * 60 * 60 * 1000)
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { sponsor_expires_at: newExpiry },
+    })
+
+    this.logger.log(
+      `Extended sponsor expiry for user ${userId}: +${daysToAdd} days → ${newExpiry.toISOString()}`,
+    )
   }
 
   async getOrderList(
@@ -216,7 +249,7 @@ export class SponsorService {
         orderBy: { created: 'desc' },
         skip: (page - 1) * pageSize,
         take: pageSize,
-        include: { user: { select: { id: true, name: true, avatar: true } } },
+        include: { user: { select: USER_AVATAR_SELECT } },
       }),
       this.prisma.sponsorOrder.count({ where }),
     ])
@@ -228,7 +261,7 @@ export class SponsorService {
         amount: Number(order.amount),
         status: order.status,
         sponsorName: order.sponsor_name,
-        user: order.user,
+        user: order.user ? mapUserAvatar(order.user) : null,
         message: order.sponsor_message,
         isPrivate: order.is_private,
         paymentMethod: order.payment_method,
@@ -243,6 +276,42 @@ export class SponsorService {
         currentPage: page,
       },
     }
+  }
+
+  async adminUpdateOrderStatus(
+    orderId: number,
+    status: 'NEW' | 'DONE' | 'EXPIRED' | 'REFUND',
+  ): Promise<void> {
+    const order = await this.prisma.sponsorOrder.findUnique({ where: { id: orderId } })
+    if (!order) {
+      throw new ShionBizException(
+        ShionBizCode.SPONSOR_ORDER_NOT_FOUND,
+        'shion-biz.SPONSOR_ORDER_NOT_FOUND',
+      )
+    }
+
+    const data: Record<string, unknown> = { status }
+    if (status === 'DONE' && !order.paid_at) {
+      data.paid_at = new Date()
+    }
+
+    await this.prisma.sponsorOrder.update({ where: { id: orderId }, data })
+
+    // If marking as DONE and user is linked, extend sponsor expiry
+    if (status === 'DONE' && order.user_id && order.status !== 'DONE') {
+      await this.extendSponsorExpiry(order.user_id, Number(order.amount))
+    }
+  }
+
+  async adminDeleteOrder(orderId: number): Promise<void> {
+    const order = await this.prisma.sponsorOrder.findUnique({ where: { id: orderId } })
+    if (!order) {
+      throw new ShionBizException(
+        ShionBizCode.SPONSOR_ORDER_NOT_FOUND,
+        'shion-biz.SPONSOR_ORDER_NOT_FOUND',
+      )
+    }
+    await this.prisma.sponsorOrder.delete({ where: { id: orderId } })
   }
 
   async getPublicStats(): Promise<{ totalSponsors: number; totalAmount: number }> {

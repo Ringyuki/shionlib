@@ -34,9 +34,10 @@ model User {
   banned_records             UserBannedRecord[] @relation("user_banned")
   banned_by_records          UserBannedRecord[] @relation("user_banned_by")
 
-  email_verified_at  DateTime?
-  last_login_at      DateTime?
-  two_factor_enabled Boolean   @default(false)
+  email_verified_at    DateTime?
+  last_login_at        DateTime?
+  two_factor_enabled   Boolean   @default(false)
+  sponsor_expires_at   DateTime?
 
   created              DateTime              @default(now())
   updated              DateTime              @updatedAt

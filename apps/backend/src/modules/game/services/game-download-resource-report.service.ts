@@ -32,6 +32,7 @@ import {
   FALSE_REPORT_WINDOW_DAYS,
   FALSE_REPORT_SUSPEND_THRESHOLD,
 } from '../constants/download-resource-report.constant'
+import { USER_AVATAR_SELECT, mapUserAvatar } from '../../../shared/constants/user-select.constant'
 
 @Injectable()
 export class GameDownloadResourceReportService {
@@ -196,25 +197,13 @@ export class GameDownloadResourceReportService {
             },
           },
           reporter: {
-            select: {
-              id: true,
-              name: true,
-              avatar: true,
-            },
+            select: USER_AVATAR_SELECT,
           },
           reported_user: {
-            select: {
-              id: true,
-              name: true,
-              avatar: true,
-            },
+            select: USER_AVATAR_SELECT,
           },
           processor: {
-            select: {
-              id: true,
-              name: true,
-              avatar: true,
-            },
+            select: USER_AVATAR_SELECT,
           },
         },
       }),
@@ -222,7 +211,12 @@ export class GameDownloadResourceReportService {
     ])
 
     return {
-      items,
+      items: items.map(item => ({
+        ...item,
+        reporter: item.reporter ? mapUserAvatar(item.reporter) : item.reporter,
+        reported_user: item.reported_user ? mapUserAvatar(item.reported_user) : item.reported_user,
+        processor: item.processor ? mapUserAvatar(item.processor) : null,
+      })),
       meta: {
         totalItems: total,
         itemCount: items.length,
@@ -276,28 +270,20 @@ export class GameDownloadResourceReportService {
         },
         reporter: {
           select: {
-            id: true,
-            name: true,
-            avatar: true,
+            ...USER_AVATAR_SELECT,
             role: true,
             status: true,
           },
         },
         reported_user: {
           select: {
-            id: true,
-            name: true,
-            avatar: true,
+            ...USER_AVATAR_SELECT,
             role: true,
             status: true,
           },
         },
         processor: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          },
+          select: USER_AVATAR_SELECT,
         },
       },
     })
@@ -308,6 +294,21 @@ export class GameDownloadResourceReportService {
 
     return {
       ...report,
+      reporter: report.reporter
+        ? {
+            ...mapUserAvatar(report.reporter),
+            role: report.reporter.role,
+            status: report.reporter.status,
+          }
+        : report.reporter,
+      reported_user: report.reported_user
+        ? {
+            ...mapUserAvatar(report.reported_user),
+            role: report.reported_user.role,
+            status: report.reported_user.status,
+          }
+        : report.reported_user,
+      processor: report.processor ? mapUserAvatar(report.processor) : null,
       resource: {
         ...report.resource,
         files: report.resource.files.map(file => ({

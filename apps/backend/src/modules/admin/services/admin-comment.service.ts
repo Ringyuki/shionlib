@@ -22,6 +22,7 @@ import {
   MODERATION_QUEUE,
   OMNI_COMMENT_MODERATION_JOB,
 } from '../../moderate/constants/moderation.constants'
+import { USER_AVATAR_SELECT, mapUserAvatar } from '../../../shared/constants/user-select.constant'
 
 @Injectable()
 export class AdminCommentService {
@@ -81,11 +82,7 @@ export class AdminCommentService {
               id: true,
               html: true,
               creator: {
-                select: {
-                  id: true,
-                  name: true,
-                  avatar: true,
-                },
+                select: USER_AVATAR_SELECT,
               },
             },
           },
@@ -102,9 +99,7 @@ export class AdminCommentService {
           },
           creator: {
             select: {
-              id: true,
-              name: true,
-              avatar: true,
+              ...USER_AVATAR_SELECT,
               email: true,
             },
           },
@@ -158,12 +153,12 @@ export class AdminCommentService {
           root_id: item.root_id,
           reply_count: item.reply_count,
           like_count: item._count.liked_users,
-          creator: item.creator,
+          creator: { ...mapUserAvatar(item.creator), email: item.creator.email },
           parent: item.parent
             ? {
                 id: item.parent.id,
                 html: item.parent.html,
-                creator: item.parent.creator,
+                creator: mapUserAvatar(item.parent.creator),
               }
             : null,
           game: item.game,
@@ -197,11 +192,7 @@ export class AdminCommentService {
             id: true,
             html: true,
             creator: {
-              select: {
-                id: true,
-                name: true,
-                avatar: true,
-              },
+              select: USER_AVATAR_SELECT,
             },
           },
         },
@@ -218,9 +209,7 @@ export class AdminCommentService {
         },
         creator: {
           select: {
-            id: true,
-            name: true,
-            avatar: true,
+            ...USER_AVATAR_SELECT,
             email: true,
           },
         },
@@ -263,12 +252,12 @@ export class AdminCommentService {
       root_id: comment.root_id,
       reply_count: comment.reply_count,
       like_count: comment._count.liked_users,
-      creator: comment.creator,
+      creator: { ...mapUserAvatar(comment.creator), email: comment.creator.email },
       parent: comment.parent
         ? {
             id: comment.parent.id,
             html: comment.parent.html,
-            creator: comment.parent.creator,
+            creator: mapUserAvatar(comment.parent.creator),
           }
         : null,
       game: comment.game,

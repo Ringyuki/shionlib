@@ -6,6 +6,7 @@ import { User, UserAvatar } from '@/interfaces/user/user.interface'
 import { cn } from '@/utils/cn'
 import { isCJK } from './helpers/is-cjk'
 import { useRouter } from '@/i18n/navigation.client'
+import { SponsorBadge } from './SponsorBadge'
 
 type UserAvatarProps = {
   user: User | UserAvatar
@@ -21,28 +22,34 @@ export const Avatar = React.forwardRef<React.ComponentRef<typeof ShionlibAvatar>
       if (homeUrl) window.open(homeUrl, '_blank')
       else router.push(`/user/${user.id}`)
     }
+
+    const isSponsor = 'is_sponsor' in user && user.is_sponsor
+
     return (
-      <ShionlibAvatar
-        ref={ref}
-        className={cn('rounded-full select-none', clickable && 'cursor-pointer', className)}
-        {...props}
-        onClick={handleClick}
-      >
-        <AvatarImage
-          src={
-            user.avatar
-              ? user.avatar.startsWith('http')
-                ? user.avatar
-                : process.env.NEXT_PUBLIC_SHIONLIB_IMAGE_BED_URL + user.avatar
-              : ''
-          }
-        />
-        {!user.avatar && (
-          <AvatarFallback className="bg-primary/20">
-            {isCJK(user.name) ? user.name.slice(0, 1) : user.name.slice(0, 2).toUpperCase()}
-          </AvatarFallback>
-        )}
-      </ShionlibAvatar>
+      <span className="relative inline-flex shrink-0">
+        <ShionlibAvatar
+          ref={ref}
+          className={cn('rounded-full select-none', clickable && 'cursor-pointer', className)}
+          {...props}
+          onClick={handleClick}
+        >
+          <AvatarImage
+            src={
+              user.avatar
+                ? user.avatar.startsWith('http')
+                  ? user.avatar
+                  : process.env.NEXT_PUBLIC_SHIONLIB_IMAGE_BED_URL + user.avatar
+                : ''
+            }
+          />
+          {!user.avatar && (
+            <AvatarFallback className="bg-primary/20">
+              {isCJK(user.name) ? user.name.slice(0, 1) : user.name.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          )}
+        </ShionlibAvatar>
+        {isSponsor && <SponsorBadge />}
+      </span>
     )
   },
 )

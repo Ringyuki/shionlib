@@ -31,6 +31,7 @@ import {
   AdminAdjustQuotaSizeReqDto,
   AdminAdjustQuotaUsedReqDto,
 } from '../dto/req/user-quota.req.dto'
+import { AdminUpdateUserSponsorReqDto } from '../dto/req/user-sponsor.req.dto'
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(ShionlibUserRoles.ADMIN)
@@ -141,5 +142,13 @@ export class AdminUserController {
   @Post(':id/quota/reset-used')
   async resetQuotaUsed(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
     return this.adminUserService.resetUserUploadQuotaUsed(id, req.user)
+  }
+
+  @Patch(':id/sponsor')
+  async updateUserSponsor(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: AdminUpdateUserSponsorReqDto,
+  ) {
+    return this.adminUserService.updateUserSponsorExpiry(id, dto.sponsor_expires_at)
   }
 }

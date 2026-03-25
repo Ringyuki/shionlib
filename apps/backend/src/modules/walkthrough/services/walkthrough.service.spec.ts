@@ -256,14 +256,20 @@ describe('WalkthroughService', () => {
       id: 1,
       title: 'Route',
       status: WalkthroughStatus.HIDDEN,
-      creator: { id: 7 },
+      creator: { id: 7, name: 'alice', avatar: null, sponsor_expires_at: null },
       content: { root: {} },
     }
     prisma.walkthrough.findFirst.mockResolvedValue(walkthrough)
 
     await expect(
       service.getById(1, true, { user: { sub: 7, role: ShionlibUserRoles.USER } } as any),
-    ).resolves.toBe(walkthrough)
+    ).resolves.toEqual({
+      id: 1,
+      title: 'Route',
+      status: WalkthroughStatus.HIDDEN,
+      creator: { id: 7, name: 'alice', avatar: null, is_sponsor: false },
+      content: { root: {} },
+    })
 
     expect(prisma.walkthrough.findFirst).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -280,14 +286,19 @@ describe('WalkthroughService', () => {
     const walkthrough = {
       id: 2,
       status: WalkthroughStatus.PUBLISHED,
-      creator: { id: 99 },
+      creator: { id: 99, name: 'bob', avatar: null, sponsor_expires_at: null },
       content: false,
     }
     prisma.walkthrough.findFirst.mockResolvedValue(walkthrough)
 
     await expect(
       service.getById(2, false, { user: { sub: undefined, role: 0 } } as any),
-    ).resolves.toBe(walkthrough)
+    ).resolves.toEqual({
+      id: 2,
+      status: WalkthroughStatus.PUBLISHED,
+      creator: { id: 99, name: 'bob', avatar: null, is_sponsor: false },
+      content: false,
+    })
 
     expect(prisma.walkthrough.findFirst).toHaveBeenCalledWith(
       expect.objectContaining({

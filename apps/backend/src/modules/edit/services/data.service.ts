@@ -5,6 +5,7 @@ import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum
 import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
 import { EditRecordItem } from '../../user/dto/res/edit-records.res.dto'
+import { USER_AVATAR_SELECT, mapUserAvatar } from '../../../shared/constants/user-select.constant'
 
 @Injectable()
 export class DataService {
@@ -268,11 +269,7 @@ export class DataService {
           },
         },
         actor: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          },
+          select: USER_AVATAR_SELECT,
         },
         note: true,
         created: true,
@@ -280,7 +277,10 @@ export class DataService {
       },
     })
     return {
-      items: history as unknown as EditRecordItem[],
+      items: history.map(h => ({
+        ...h,
+        actor: mapUserAvatar(h.actor),
+      })) as unknown as EditRecordItem[],
       meta: {
         totalItems: total,
         itemCount: history.length,
@@ -351,11 +351,7 @@ export class DataService {
         undo_of: { select: { id: true } },
         undone_by: { select: { id: true } },
         actor: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          },
+          select: USER_AVATAR_SELECT,
         },
         note: true,
         created: true,
@@ -363,7 +359,10 @@ export class DataService {
       },
     })
     return {
-      items: history as unknown as EditRecordItem[],
+      items: history.map(h => ({
+        ...h,
+        actor: mapUserAvatar(h.actor),
+      })) as unknown as EditRecordItem[],
       meta: {
         totalItems: total,
         itemCount: history.length,
@@ -444,11 +443,7 @@ export class DataService {
         undo_of: { select: { id: true } },
         undone_by: { select: { id: true } },
         actor: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          },
+          select: USER_AVATAR_SELECT,
         },
         note: true,
         created: true,
@@ -456,7 +451,10 @@ export class DataService {
       },
     })
     return {
-      items: history as unknown as EditRecordItem[],
+      items: history.map(h => ({
+        ...h,
+        actor: mapUserAvatar(h.actor),
+      })) as unknown as EditRecordItem[],
       meta: {
         totalItems: total,
         itemCount: history.length,

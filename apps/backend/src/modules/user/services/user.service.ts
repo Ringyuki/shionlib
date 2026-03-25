@@ -19,6 +19,7 @@ import { UserLoginSessionStatus } from '../../../shared/enums/auth/user-login-se
 import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 import { BanUserReqDto } from '../dto/req/ban-user.req.dto'
 import { Prisma } from '@prisma/client'
+import { mapUserAvatar } from '../../../shared/constants/user-select.constant'
 
 @Injectable()
 export class UserService {
@@ -208,6 +209,7 @@ export class UserService {
         role: true,
         lang: true,
         content_limit: true,
+        sponsor_expires_at: true,
       },
     })
 
@@ -215,7 +217,10 @@ export class UserService {
       throw new ShionBizException(ShionBizCode.USER_NOT_FOUND, 'shion-biz.USER_NOT_FOUND')
     }
 
-    return user
+    return {
+      ...user,
+      is_sponsor: mapUserAvatar(user).is_sponsor,
+    }
   }
 
   async checkName(name: string) {
@@ -237,6 +242,7 @@ export class UserService {
         cover: true,
         created: true,
         status: true,
+        sponsor_expires_at: true,
       },
     })
     if (!user) {
@@ -271,6 +277,7 @@ export class UserService {
     })
     return {
       ...user,
+      is_sponsor: mapUserAvatar(user).is_sponsor,
       resource_count: resource,
       comment_count: comment,
       favorite_count: favorite,

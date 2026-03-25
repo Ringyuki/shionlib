@@ -138,5 +138,16 @@
   "twoFactorOn": "已启用2FA",
   "twoFactorOff": "未启用2FA",
   "yes": "是",
-  "no": "否"
+  "no": "否",
+  "sponsorStatus": "赞助者",
+  "sponsorActive": "赞助者（生效中）",
+  "sponsorExpired": "赞助者（已过期）",
+  "sponsorNone": "非赞助者",
+  "sponsorExpiresAt": "赞助到期时间",
+  "manageSponsor": "管理赞助",
+  "manageSponsorDesc": "设置或清除该用户的赞助到期时间。",
+  "sponsorExpiryLabel": "赞助到期时间",
+  "clearSponsor": "清除",
+  "sponsorUpdated": "赞助状态已更新",
+  "sponsorUpdateFailed": "更新赞助状态失败"
 }

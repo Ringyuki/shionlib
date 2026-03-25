@@ -28,7 +28,7 @@ describe('SponsorWallService', () => {
           id: 1,
           sponsor_name: 'Alice',
           sponsor_message: 'Thanks!',
-          user: { id: 10, name: 'alice', avatar: 'avatar.png' },
+          user: { id: 10, name: 'alice', avatar: 'avatar.png', sponsor_expires_at: null },
           amount: 10,
           paid_at: paidAt,
         },
@@ -42,7 +42,7 @@ describe('SponsorWallService', () => {
         id: 1,
         sponsorName: 'Alice',
         message: 'Thanks!',
-        user: { id: 10, name: 'alice', avatar: 'avatar.png' },
+        user: { id: 10, name: 'alice', avatar: 'avatar.png', is_sponsor: false },
         amount: 10,
         paidAt,
       })

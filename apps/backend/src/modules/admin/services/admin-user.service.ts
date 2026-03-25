@@ -81,6 +81,7 @@ export class AdminUserService {
           updated: true,
           last_login_at: true,
           two_factor_enabled: true,
+          sponsor_expires_at: true,
           _count: {
             select: {
               comments: true,
@@ -108,6 +109,7 @@ export class AdminUserService {
         updated: item.updated,
         last_login_at: item.last_login_at,
         two_factor_enabled: item.two_factor_enabled,
+        sponsor_expires_at: item.sponsor_expires_at,
         counts: {
           comments: item._count.comments,
           resources: item._count.game_download_resources,
@@ -142,6 +144,7 @@ export class AdminUserService {
         updated: true,
         last_login_at: true,
         two_factor_enabled: true,
+        sponsor_expires_at: true,
         upload_quota: {
           select: {
             size: true,
@@ -194,6 +197,7 @@ export class AdminUserService {
       updated: user.updated,
       last_login_at: user.last_login_at,
       two_factor_enabled: user.two_factor_enabled,
+      sponsor_expires_at: user.sponsor_expires_at,
       upload_quota: user.upload_quota
         ? {
             size: user.upload_quota.size.toString(),
@@ -781,6 +785,20 @@ export class AdminUserService {
           user_upload_quota_id: quota.id,
         },
       })
+    })
+  }
+
+  async updateUserSponsorExpiry(userId: number, sponsorExpiresAt: string | null): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } })
+    if (!user) {
+      throw new ShionBizException(ShionBizCode.USER_NOT_FOUND, 'shion-biz.USER_NOT_FOUND')
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        sponsor_expires_at: sponsorExpiresAt ? new Date(sponsorExpiresAt) : null,
+      },
     })
   }
 }

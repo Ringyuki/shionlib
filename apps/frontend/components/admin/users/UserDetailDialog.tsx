@@ -133,6 +133,17 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
                   {t('twoFactorOff')}
                 </Badge>
               )}
+              {detail.sponsor_expires_at ? (
+                new Date(detail.sponsor_expires_at) > new Date() ? (
+                  <Badge intent="success" appearance="soft">
+                    {t('sponsorActive')}
+                  </Badge>
+                ) : (
+                  <Badge intent="warning" appearance="soft">
+                    {t('sponsorExpired')}
+                  </Badge>
+                )
+              ) : null}
             </div>
 
             <div className="grid gap-2 text-sm text-muted-foreground">
@@ -160,6 +171,11 @@ export function UserDetailDialog({ userId, open, onOpenChange }: UserDetailDialo
               <div>
                 {t('lastLogin')}: {formatDate(detail.last_login_at, locale)}
               </div>
+              {detail.sponsor_expires_at && (
+                <div>
+                  {t('sponsorExpiresAt')}: {formatDate(detail.sponsor_expires_at, locale)}
+                </div>
+              )}
             </div>
 
             <Separator />

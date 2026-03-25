@@ -10,6 +10,7 @@ import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum
 import { Prisma } from '@prisma/client'
 import { MessageNotifier } from './message-notifier.service'
 import { MessageTone, MessageType } from '../dto/req/send-message.req.dto'
+import { USER_AVATAR_SELECT, mapUserAvatar } from '../../../shared/constants/user-select.constant'
 
 @Injectable()
 export class MessageService {
@@ -97,18 +98,10 @@ export class MessageService {
         tone: true,
         title: true,
         receiver: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          },
+          select: USER_AVATAR_SELECT,
         },
         sender: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          },
+          select: USER_AVATAR_SELECT,
         },
         read: true,
         read_at: true,
@@ -118,7 +111,11 @@ export class MessageService {
     })
 
     return {
-      items: messages as unknown as MessageListItemResDto[],
+      items: messages.map(m => ({
+        ...m,
+        receiver: mapUserAvatar(m.receiver),
+        sender: m.sender ? mapUserAvatar(m.sender) : null,
+      })) as unknown as MessageListItemResDto[],
       meta: {
         totalItems: total,
         itemCount: messages.length,
@@ -180,18 +177,10 @@ export class MessageService {
             },
           },
           sender: {
-            select: {
-              id: true,
-              name: true,
-              avatar: true,
-            },
+            select: USER_AVATAR_SELECT,
           },
           receiver: {
-            select: {
-              id: true,
-              name: true,
-              avatar: true,
-            },
+            select: USER_AVATAR_SELECT,
           },
           read: true,
           read_at: true,
@@ -206,7 +195,11 @@ export class MessageService {
         throw new ShionBizException(ShionBizCode.MESSAGE_FORBIDDEN, 'shion-biz.MESSAGE_FORBIDDEN')
       }
       await this.markAsRead(id, req, tx)
-      return message
+      return {
+        ...message,
+        sender: message.sender ? mapUserAvatar(message.sender) : null,
+        receiver: mapUserAvatar(message.receiver),
+      }
     })
     return message
   }

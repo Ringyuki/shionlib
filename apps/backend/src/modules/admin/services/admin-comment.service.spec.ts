@@ -54,7 +54,7 @@ describe('AdminCommentService', () => {
         parent: {
           id: 2,
           html: '<p>p</p>',
-          creator: { id: 3, name: 'parent', avatar: null },
+          creator: { id: 3, name: 'parent', avatar: null, sponsor_expires_at: null },
         },
         root_id: 2,
         reply_count: 4,
@@ -63,7 +63,13 @@ describe('AdminCommentService', () => {
         created: now,
         updated: now,
         _count: { liked_users: 9 },
-        creator: { id: 10, name: 'alice', avatar: null, email: 'a@example.com' },
+        creator: {
+          id: 10,
+          name: 'alice',
+          avatar: null,
+          email: 'a@example.com',
+          sponsor_expires_at: null,
+        },
         game: { id: 7, title_jp: 'jp', title_zh: 'zh', title_en: 'en' },
         moderates: [
           {
@@ -120,11 +126,17 @@ describe('AdminCommentService', () => {
           root_id: 2,
           reply_count: 4,
           like_count: 9,
-          creator: { id: 10, name: 'alice', avatar: null, email: 'a@example.com' },
+          creator: {
+            id: 10,
+            name: 'alice',
+            avatar: null,
+            is_sponsor: false,
+            email: 'a@example.com',
+          },
           parent: {
             id: 2,
             html: '<p>p</p>',
-            creator: { id: 3, name: 'parent', avatar: null },
+            creator: { id: 3, name: 'parent', avatar: null, is_sponsor: false },
           },
           game: { id: 7, title_jp: 'jp', title_zh: 'zh', title_en: 'en' },
           edited: false,
@@ -179,7 +191,13 @@ describe('AdminCommentService', () => {
       created: now,
       updated: now,
       _count: { liked_users: 3 },
-      creator: { id: 1, name: 'alice', avatar: null, email: 'a@example.com' },
+      creator: {
+        id: 1,
+        name: 'alice',
+        avatar: null,
+        email: 'a@example.com',
+        sponsor_expires_at: null,
+      },
       game: { id: 7, title_jp: 'jp', title_zh: 'zh', title_en: 'en' },
       moderates: [
         {

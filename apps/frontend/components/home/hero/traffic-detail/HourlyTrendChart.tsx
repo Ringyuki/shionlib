@@ -49,7 +49,7 @@ export const HourlyTrendChart = ({ data, trafficLabel }: HourlyTrendChartProps) 
         margin={{ top: 8, right: 0, bottom: 32, left: 55 }}
         xScale={{ type: 'point' }}
         yScale={{ type: 'linear', min: 0, stacked: false }}
-        curve="linear"
+        curve="catmullRom"
         axisBottom={{
           tickSize: 0,
           tickPadding: 8,

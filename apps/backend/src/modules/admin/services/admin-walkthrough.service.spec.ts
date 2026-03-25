@@ -39,7 +39,13 @@ describe('AdminWalkthroughService', () => {
         status: WalkthroughStatus.HIDDEN,
         created: now,
         updated: now,
-        creator: { id: 10, name: 'alice', avatar: null, email: 'a@example.com' },
+        creator: {
+          id: 10,
+          name: 'alice',
+          avatar: null,
+          email: 'a@example.com',
+          sponsor_expires_at: null,
+        },
         game: { id: 7, title_jp: 'jp', title_zh: 'zh', title_en: 'en' },
         moderates: [
           {
@@ -104,7 +110,13 @@ describe('AdminWalkthroughService', () => {
           status: WalkthroughStatus.HIDDEN,
           created: now,
           updated: now,
-          creator: { id: 10, name: 'alice', avatar: null, email: 'a@example.com' },
+          creator: {
+            id: 10,
+            name: 'alice',
+            avatar: null,
+            is_sponsor: false,
+            email: 'a@example.com',
+          },
           game: { id: 7, title_jp: 'jp', title_zh: 'zh', title_en: 'en' },
           moderation: {
             id: 100,
@@ -142,7 +154,7 @@ describe('AdminWalkthroughService', () => {
         status: WalkthroughStatus.PUBLISHED,
         created: now,
         updated: now,
-        creator: { id: 11, name: 'bob', avatar: null, email: null },
+        creator: { id: 11, name: 'bob', avatar: null, email: null, sponsor_expires_at: null },
         game: { id: 8, title_jp: null, title_zh: 'zh', title_en: null },
         moderates: [],
       },
@@ -196,7 +208,13 @@ describe('AdminWalkthroughService', () => {
       status: WalkthroughStatus.PUBLISHED,
       created: now,
       updated: now,
-      creator: { id: 1, name: 'alice', avatar: null, email: 'a@example.com' },
+      creator: {
+        id: 1,
+        name: 'alice',
+        avatar: null,
+        email: 'a@example.com',
+        sponsor_expires_at: null,
+      },
       game: { id: 9, title_jp: 'jp', title_zh: 'zh', title_en: 'en' },
       moderates: [
         {

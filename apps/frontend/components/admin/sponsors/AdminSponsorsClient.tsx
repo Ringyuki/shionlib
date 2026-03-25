@@ -73,7 +73,7 @@ export function AdminSponsorsClient({ initialPage }: AdminSponsorsClientProps) {
         </Button>
       </div>
 
-      <SponsorOrderList items={data?.items} isLoading={isLoading} />
+      <SponsorOrderList items={data?.items} isLoading={isLoading} onRefresh={refetch} />
 
       <Pagination
         currentPage={data?.meta.currentPage ?? 1}

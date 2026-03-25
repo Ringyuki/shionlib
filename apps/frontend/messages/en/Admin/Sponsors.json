@@ -18,5 +18,15 @@
   "refresh": "Refresh",
   "totalSponsors": "Total Sponsors",
   "totalAmount": "Total Amount",
-  "orderId": "Order ID"
+  "orderId": "Order ID",
+  "setStatus": "Set to {status}",
+  "deleteOrder": "Delete Order",
+  "deleteOrderTitle": "Delete Sponsor Order",
+  "deleteOrderDesc": "Are you sure you want to delete this sponsor order? This action cannot be undone.",
+  "cancel": "Cancel",
+  "confirmDelete": "Delete",
+  "statusUpdated": "Order status updated",
+  "statusUpdateFailed": "Failed to update order status",
+  "orderDeleted": "Order deleted",
+  "orderDeleteFailed": "Failed to delete order"
 }

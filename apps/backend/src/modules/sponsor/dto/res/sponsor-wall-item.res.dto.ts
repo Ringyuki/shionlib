@@ -4,7 +4,8 @@ export class SponsorWallItemResDto {
   user: {
     id: number
     name: string
-    avatar: string
+    avatar: string | null
+    is_sponsor: boolean
   } | null
   message: string | null
   amount: number

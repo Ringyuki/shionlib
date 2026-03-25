@@ -4,7 +4,7 @@ export interface AdminSponsorOrderItem {
   amount: number
   status: 'NEW' | 'DONE' | 'EXPIRED' | 'REFUND'
   sponsorName: string | null
-  user: { id: number; name: string; avatar: string | null } | null
+  user: { id: number; name: string; avatar: string | null; is_sponsor: boolean } | null
   message: string | null
   isPrivate: boolean
   paymentMethod: string | null

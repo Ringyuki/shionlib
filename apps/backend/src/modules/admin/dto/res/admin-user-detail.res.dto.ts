@@ -12,6 +12,7 @@ export class AdminUserDetailResDto {
   updated: Date
   last_login_at: Date | null
   two_factor_enabled: boolean
+  sponsor_expires_at: Date | null
   upload_quota?: {
     size: string
     used: string

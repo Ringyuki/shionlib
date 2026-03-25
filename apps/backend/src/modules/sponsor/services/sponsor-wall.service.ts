@@ -4,6 +4,7 @@ import { CacheService } from '../../cache/services/cache.service'
 import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
 import { SponsorWallItemResDto } from '../dto/res/sponsor-wall-item.res.dto'
 import { GetSponsorWallReqDto } from '../dto/req/get-sponsor-wall.req.dto'
+import { USER_AVATAR_SELECT, mapUserAvatar } from '../../../shared/constants/user-select.constant'
 
 @Injectable()
 export class SponsorWallService {
@@ -29,11 +30,7 @@ export class SponsorWallService {
           sponsor_name: true,
           sponsor_message: true,
           user: {
-            select: {
-              name: true,
-              avatar: true,
-              id: true,
-            },
+            select: USER_AVATAR_SELECT,
           },
           amount: true,
           paid_at: true,
@@ -47,7 +44,7 @@ export class SponsorWallService {
         id: item.id,
         sponsorName: item.sponsor_name,
         message: item.sponsor_message,
-        user: item.user as unknown as { id: number; name: string; avatar: string },
+        user: item.user ? mapUserAvatar(item.user) : null,
         amount: Number(item.amount),
         paidAt: item.paid_at!,
       })),

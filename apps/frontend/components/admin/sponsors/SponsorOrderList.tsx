@@ -8,9 +8,10 @@ import type { AdminSponsorOrderItem } from '@/interfaces/admin/sponsor.interface
 interface SponsorOrderListProps {
   items: AdminSponsorOrderItem[] | undefined
   isLoading: boolean
+  onRefresh?: () => void
 }
 
-export function SponsorOrderList({ items, isLoading }: SponsorOrderListProps) {
+export function SponsorOrderList({ items, isLoading, onRefresh }: SponsorOrderListProps) {
   const t = useTranslations('Admin.Sponsors')
 
   if (isLoading) {
@@ -34,7 +35,7 @@ export function SponsorOrderList({ items, isLoading }: SponsorOrderListProps) {
   return (
     <div className="space-y-3">
       {items.map(order => (
-        <SponsorOrderListItem key={order.id} order={order} />
+        <SponsorOrderListItem key={order.id} order={order} onRefresh={onRefresh} />
       ))}
     </div>
   )

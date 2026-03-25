@@ -7,6 +7,7 @@ import { ActivityResDto } from '../dto/res/activity.res.dto'
 import { Prisma } from '@prisma/client'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { UserContentLimit } from '../../user/interfaces/user.interface'
+import { USER_AVATAR_SELECT, mapUserAvatar } from '../../../shared/constants/user-select.constant'
 
 @Injectable()
 export class ActivityService {
@@ -141,11 +142,7 @@ export class ActivityService {
         file_size: true,
         file_name: true,
         user: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          },
+          select: USER_AVATAR_SELECT,
         },
         created: true,
         updated: true,
@@ -156,7 +153,7 @@ export class ActivityService {
       items: activities.map(a => ({
         id: a.id,
         type: a.type,
-        user: a.user,
+        user: mapUserAvatar(a.user),
         game: a.game,
         walkthrough: a.walkthrough,
         comment: a.comment,

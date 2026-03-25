@@ -18,5 +18,15 @@
   "refresh": "更新",
   "totalSponsors": "スポンサー総数",
   "totalAmount": "合計金額",
-  "orderId": "注文ID"
+  "orderId": "注文ID",
+  "setStatus": "{status}に変更",
+  "deleteOrder": "注文を削除",
+  "deleteOrderTitle": "スポンサー注文を削除",
+  "deleteOrderDesc": "このスポンサー注文を削除してもよろしいですか？この操作は元に戻せません。",
+  "cancel": "キャンセル",
+  "confirmDelete": "削除",
+  "statusUpdated": "注文ステータスを更新しました",
+  "statusUpdateFailed": "注文ステータスの更新に失敗しました",
+  "orderDeleted": "注文を削除しました",
+  "orderDeleteFailed": "注文の削除に失敗しました"
 }

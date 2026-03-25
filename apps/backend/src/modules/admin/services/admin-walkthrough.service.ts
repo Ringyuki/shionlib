@@ -17,6 +17,7 @@ import {
   LLM_WALKTHROUGH_MODERATION_JOB,
   MODERATION_QUEUE,
 } from '../../moderate/constants/moderation.constants'
+import { USER_AVATAR_SELECT, mapUserAvatar } from '../../../shared/constants/user-select.constant'
 
 @Injectable()
 export class AdminWalkthroughService {
@@ -86,9 +87,7 @@ export class AdminWalkthroughService {
           updated: true,
           creator: {
             select: {
-              id: true,
-              name: true,
-              avatar: true,
+              ...USER_AVATAR_SELECT,
               email: true,
             },
           },
@@ -144,7 +143,7 @@ export class AdminWalkthroughService {
           status: item.status,
           created: item.created,
           updated: item.updated,
-          creator: item.creator,
+          creator: { ...mapUserAvatar(item.creator), email: item.creator.email },
           game: item.game,
           moderation: moderationSummary,
         }
@@ -174,9 +173,7 @@ export class AdminWalkthroughService {
         updated: true,
         creator: {
           select: {
-            id: true,
-            name: true,
-            avatar: true,
+            ...USER_AVATAR_SELECT,
             email: true,
           },
         },
@@ -224,7 +221,7 @@ export class AdminWalkthroughService {
       status: walkthrough.status,
       created: walkthrough.created,
       updated: walkthrough.updated,
-      creator: walkthrough.creator,
+      creator: { ...mapUserAvatar(walkthrough.creator), email: walkthrough.creator.email },
       game: walkthrough.game,
       moderations: walkthrough.moderates.map(event => ({
         id: event.id,

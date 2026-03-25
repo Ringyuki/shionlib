@@ -18,5 +18,15 @@
   "refresh": "刷新",
   "totalSponsors": "赞助总数",
   "totalAmount": "赞助总额",
-  "orderId": "订单号"
+  "orderId": "订单号",
+  "setStatus": "设为{status}",
+  "deleteOrder": "删除订单",
+  "deleteOrderTitle": "删除赞助订单",
+  "deleteOrderDesc": "确定要删除此赞助订单吗？此操作不可撤销。",
+  "cancel": "取消",
+  "confirmDelete": "删除",
+  "statusUpdated": "订单状态已更新",
+  "statusUpdateFailed": "更新订单状态失败",
+  "orderDeleted": "订单已删除",
+  "orderDeleteFailed": "删除订单失败"
 }

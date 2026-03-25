@@ -35,6 +35,7 @@ import { UploadQuotaService } from '../../upload/services/upload-quota.service'
 import { MessageService } from '../../message/services/message.service'
 import { MessageTone, MessageType } from '../../message/dto/req/send-message.req.dto'
 import { DownloadProxyTicketService } from './download-proxy-ticket.service'
+import { USER_AVATAR_SELECT, mapUserAvatar } from '../../../shared/constants/user-select.constant'
 
 @Injectable()
 export class GameDownloadSourceService {
@@ -69,11 +70,7 @@ export class GameDownloadSourceService {
             note: true,
             downloads: true,
             creator: {
-              select: {
-                id: true,
-                name: true,
-                avatar: true,
-              },
+              select: USER_AVATAR_SELECT,
             },
             created: true,
             updated: true,
@@ -96,11 +93,7 @@ export class GameDownloadSourceService {
                   },
                 },
                 creator: {
-                  select: {
-                    id: true,
-                    name: true,
-                    avatar: true,
-                  },
+                  select: USER_AVATAR_SELECT,
                 },
                 histories: {
                   orderBy: { created: 'desc' },
@@ -146,7 +139,14 @@ export class GameDownloadSourceService {
     })
     game.download_resources = game.download_resources.filter(r => r.files.length > 0)
 
-    return game.download_resources as unknown as GetGameDownloadResourceResDto[]
+    return game.download_resources.map(r => ({
+      ...r,
+      creator: mapUserAvatar(r.creator),
+      files: r.files.map(f => ({
+        ...f,
+        creator: mapUserAvatar(f.creator),
+      })),
+    })) as unknown as GetGameDownloadResourceResDto[]
   }
 
   async create(dto: CreateGameDownloadSourceReqDto, game_id: number, creator_id: number) {
@@ -496,11 +496,7 @@ export class GameDownloadSourceService {
         },
         downloads: true,
         creator: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          },
+          select: USER_AVATAR_SELECT,
         },
         created: true,
       },
@@ -516,7 +512,7 @@ export class GameDownloadSourceService {
         game: r.game,
         files: r.files.map(f => f.file_name),
         files_count: r._count.files,
-        creator: r.creator,
+        creator: mapUserAvatar(r.creator),
         created: r.created,
       })) as unknown as GetDownloadResourcesListResDto[],
       meta: {
@@ -760,11 +756,7 @@ export class GameDownloadSourceService {
         s3_file_key: true,
         reason: true,
         operator: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          },
+          select: USER_AVATAR_SELECT,
         },
         created: true,
       },
@@ -773,6 +765,7 @@ export class GameDownloadSourceService {
     return histories.map(h => ({
       ...h,
       file_size: Number(h.file_size),
+      operator: mapUserAvatar(h.operator),
     }))
   }
 

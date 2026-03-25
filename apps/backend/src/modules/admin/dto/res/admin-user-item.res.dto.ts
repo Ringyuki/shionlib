@@ -11,6 +11,7 @@ export class AdminUserItemResDto {
   updated: Date
   last_login_at: Date | null
   two_factor_enabled: boolean
+  sponsor_expires_at: Date | null
   counts: {
     comments: number
     resources: number

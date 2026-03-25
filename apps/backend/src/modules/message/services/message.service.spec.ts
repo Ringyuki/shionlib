@@ -210,14 +210,19 @@ describe('MessageService', () => {
     const { service, prisma, tx } = createService()
     const msg = {
       id: 1,
-      receiver: { id: 7 },
+      receiver: { id: 7, name: 'user7', avatar: null, sponsor_expires_at: null },
+      sender: { id: 3, name: 'user3', avatar: null, sponsor_expires_at: null },
     }
     prisma.message.findUnique.mockResolvedValue(msg)
     const markAsReadSpy = jest.spyOn(service, 'markAsRead').mockResolvedValue(undefined)
 
     const result = await service.getById(1, req as any)
 
-    expect(result).toBe(msg)
+    expect(result).toEqual({
+      id: 1,
+      receiver: { id: 7, name: 'user7', avatar: null, is_sponsor: false },
+      sender: { id: 3, name: 'user3', avatar: null, is_sponsor: false },
+    })
     expect(markAsReadSpy).toHaveBeenCalledWith(1, req, tx)
   })
 

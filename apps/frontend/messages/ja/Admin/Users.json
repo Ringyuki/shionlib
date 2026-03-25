@@ -138,5 +138,16 @@
   "twoFactorOn": "2FA有効",
   "twoFactorOff": "2FA無効",
   "yes": "はい",
-  "no": "いいえ"
+  "no": "いいえ",
+  "sponsorStatus": "スポンサー",
+  "sponsorActive": "スポンサー（有効）",
+  "sponsorExpired": "スポンサー（期限切れ）",
+  "sponsorNone": "スポンサーではありません",
+  "sponsorExpiresAt": "スポンサー有効期限",
+  "manageSponsor": "スポンサー管理",
+  "manageSponsorDesc": "このユーザーのスポンサー有効期限を設定またはクリアします。",
+  "sponsorExpiryLabel": "スポンサー有効期限",
+  "clearSponsor": "クリア",
+  "sponsorUpdated": "スポンサーステータスを更新しました",
+  "sponsorUpdateFailed": "スポンサーステータスの更新に失敗しました"
 }

@@ -46,6 +46,9 @@ import {
 import { UserDetailDialog } from './UserDetailDialog'
 import { UserPermissionsDialog } from './UserPermissionsDialog'
 import { UserQuotaDialog } from './UserQuotaDialog'
+import { adminUpdateUserSponsor } from '@/components/admin/hooks/useAdminSponsors'
+import { DatePicker } from '@/components/shionui/DatePicker'
+import { Label } from '@/components/shionui/Label'
 import { toast } from 'react-hot-toast'
 import { MoreHorizontal } from 'lucide-react'
 import {
@@ -87,6 +90,8 @@ export function UserListItem({ user, currentRole, currentUserId, onRefresh }: Us
   const [roleOpen, setRoleOpen] = useState(false)
   const [forceLogoutOpen, setForceLogoutOpen] = useState(false)
   const [unbanOpen, setUnbanOpen] = useState(false)
+  const [sponsorOpen, setSponsorOpen] = useState(false)
+  const [sponsorExpiry, setSponsorExpiry] = useState<Date | null>(null)
 
   const [isBusy, setIsBusy] = useState(false)
 
@@ -333,6 +338,14 @@ export function UserListItem({ user, currentRole, currentUserId, onRefresh }: Us
             data-testid={`admin-user-action-manage-quota-${user.id}`}
           >
             {t('manageQuota')}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => {
+              setSponsorExpiry(user.sponsor_expires_at ? new Date(user.sponsor_expires_at) : null)
+              setSponsorOpen(true)
+            }}
+          >
+            {t('manageSponsor')}
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => setEditOpen(true)}
@@ -616,6 +629,66 @@ export function UserListItem({ user, currentRole, currentUserId, onRefresh }: Us
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={sponsorOpen} onOpenChange={setSponsorOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('manageSponsor')}</DialogTitle>
+            <DialogDescription>{t('manageSponsorDesc')}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="space-y-1.5">
+              <Label>{t('sponsorExpiryLabel')}</Label>
+              <DatePicker
+                value={sponsorExpiry}
+                onChange={date => setSponsorExpiry(date)}
+                clearable
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              appearance="outline"
+              onClick={async () => {
+                setIsBusy(true)
+                try {
+                  await adminUpdateUserSponsor(user.id, null)
+                  toast.success(t('sponsorUpdated'))
+                  onRefresh?.()
+                  setSponsorOpen(false)
+                } catch {
+                  toast.error(t('sponsorUpdateFailed'))
+                } finally {
+                  setIsBusy(false)
+                }
+              }}
+              loading={isBusy}
+            >
+              {t('clearSponsor')}
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!sponsorExpiry) return
+                setIsBusy(true)
+                try {
+                  await adminUpdateUserSponsor(user.id, sponsorExpiry.toISOString())
+                  toast.success(t('sponsorUpdated'))
+                  onRefresh?.()
+                  setSponsorOpen(false)
+                } catch {
+                  toast.error(t('sponsorUpdateFailed'))
+                } finally {
+                  setIsBusy(false)
+                }
+              }}
+              disabled={!sponsorExpiry}
+              loading={isBusy}
+            >
+              {t('save')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

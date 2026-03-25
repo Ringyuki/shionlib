@@ -696,7 +696,7 @@ describe('GameDownloadSourceService', () => {
         game: { id: 2, title_jp: 'jp', title_zh: 'zh', title_en: 'en' },
         _count: { files: 2 },
         files: [{ file_name: 'a.7z' }, { file_name: 'b.7z' }],
-        creator: { id: 100, name: 'alice', avatar: null },
+        creator: { id: 100, name: 'alice', avatar: null, sponsor_expires_at: null },
         created: now,
       },
     ])
@@ -711,7 +711,7 @@ describe('GameDownloadSourceService', () => {
       game: { id: 2, title_jp: 'jp', title_zh: 'zh', title_en: 'en' },
       files: ['a.7z', 'b.7z'],
       files_count: 2,
-      creator: { id: 100, name: 'alice', avatar: null },
+      creator: { id: 100, name: 'alice', avatar: null, is_sponsor: false },
       created: now,
     })
     expect(result.meta.totalItems).toBe(3)
@@ -932,7 +932,7 @@ describe('GameDownloadSourceService', () => {
         file_hash: 'h',
         s3_file_key: null,
         reason: 'r',
-        operator: { id: 100, name: 'alice', avatar: null },
+        operator: { id: 100, name: 'alice', avatar: null, sponsor_expires_at: null },
         created: new Date('2026-02-18T00:00:00.000Z'),
       },
     ])

@@ -21,6 +21,7 @@ import {
   MODERATION_QUEUE,
 } from '../../moderate/constants/moderation.constants'
 import { detectWalkthroughLanguageFromEditorState } from '../utils/language-detector.util'
+import { USER_AVATAR_SELECT, mapUserAvatar } from '../../../shared/constants/user-select.constant'
 
 const WALKTHROUGH_SELECT = {
   id: true,
@@ -40,11 +41,7 @@ const WALKTHROUGH_SELECT = {
   edited: true,
   status: true,
   creator: {
-    select: {
-      id: true,
-      name: true,
-      avatar: true,
-    },
+    select: USER_AVATAR_SELECT,
   },
 }
 
@@ -94,7 +91,10 @@ export class WalkthroughService {
 
     await this.enqueueModerationIfPublished(walkthrough.id, dto.status)
 
-    return walkthrough
+    return {
+      ...walkthrough,
+      creator: mapUserAvatar(walkthrough.creator),
+    }
   }
 
   async update(id: number, dto: UpdateWalkthroughReqDto, req: RequestWithUser) {
@@ -130,7 +130,10 @@ export class WalkthroughService {
 
     await this.enqueueModerationIfPublished(updated.id, dto.status)
 
-    return updated
+    return {
+      ...updated,
+      creator: mapUserAvatar(updated.creator),
+    }
   }
 
   async getById(id: number, withContent = false, req: RequestWithUser) {
@@ -151,7 +154,10 @@ export class WalkthroughService {
     ) {
       throw new ShionBizException(ShionBizCode.WALKTHROUGH_NOT_OWNER)
     }
-    return walkthrough
+    return {
+      ...walkthrough,
+      creator: mapUserAvatar(walkthrough.creator),
+    }
   }
 
   async delete(id: number, req: RequestWithUser) {
@@ -215,17 +221,16 @@ export class WalkthroughService {
         edited: true,
         status: true,
         creator: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          },
+          select: USER_AVATAR_SELECT,
         },
       },
     })
 
     return {
-      items: walkthroughs as unknown as WalkthroughListItemResDto[],
+      items: walkthroughs.map(w => ({
+        ...w,
+        creator: mapUserAvatar(w.creator),
+      })) as unknown as WalkthroughListItemResDto[],
       meta: {
         totalItems: total,
         itemCount: walkthroughs.length,
