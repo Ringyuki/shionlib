@@ -318,6 +318,7 @@ describe('UserService', () => {
     await expect(service.getMe({ user: { sub: 1 } } as any)).resolves.toEqual({
       id: 1,
       name: 'alice',
+      is_sponsor: false,
     })
 
     prisma.user.findUnique.mockResolvedValueOnce({ id: 2 })
