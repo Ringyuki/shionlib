@@ -220,4 +220,161 @@ describe('DataService', () => {
 
     expect(result.storage).toBe(0)
   })
+
+  describe('getTrafficDetail', () => {
+    function createTrafficService(options?: {
+      cloudflareAccountId?: string
+      cloudflareSecret?: string
+      analyticsError?: boolean
+      currentSummary?: { downloadCount: number; totalBytes: number }
+      prevSummary?: { downloadCount: number; totalBytes: number }
+      hourlyData?: Array<{ hour: string; downloadCount: number; totalBytes: number }>
+      topFilesData?: Array<{
+        fileId: string
+        fileName: string
+        downloadCount: number
+        totalBytes: number
+      }>
+    }) {
+      const prisma = {
+        game: { count: jest.fn().mockResolvedValue(0) },
+        gameDownloadResourceFile: {
+          count: jest.fn().mockResolvedValue(0),
+          aggregate: jest.fn().mockResolvedValue({ _sum: { file_size: 0 } }),
+        },
+        gameDownloadResource: { count: jest.fn().mockResolvedValue(0) },
+      } as unknown as PrismaService
+
+      let callIndex = 0
+      const post = options?.analyticsError
+        ? jest.fn().mockReturnValue(throwError(() => new Error('network error')))
+        : jest.fn().mockImplementation(() => {
+            const index = callIndex++
+            if (index === 0) {
+              return of({
+                data: {
+                  data: [options?.currentSummary ?? { downloadCount: 100, totalBytes: 50000 }],
+                  meta: [],
+                  rows: 1,
+                  rows_before_limit_at_least: 1,
+                },
+              })
+            }
+            if (index === 1) {
+              return of({
+                data: {
+                  data: [options?.prevSummary ?? { downloadCount: 80, totalBytes: 40000 }],
+                  meta: [],
+                  rows: 1,
+                  rows_before_limit_at_least: 1,
+                },
+              })
+            }
+            if (index === 2) {
+              return of({
+                data: {
+                  data: options?.hourlyData ?? [],
+                  meta: [],
+                  rows: options?.hourlyData?.length ?? 0,
+                  rows_before_limit_at_least: options?.hourlyData?.length ?? 0,
+                },
+              })
+            }
+            return of({
+              data: {
+                data: options?.topFilesData ?? [
+                  { fileId: '1', fileName: 'game.zip', downloadCount: 50, totalBytes: 25000 },
+                  { fileId: '2', fileName: 'patch.zip', downloadCount: 30, totalBytes: 15000 },
+                ],
+                meta: [],
+                rows: 2,
+                rows_before_limit_at_least: 2,
+              },
+            })
+          })
+
+      const config = {
+        get: jest.fn((key: string) => {
+          if (key === 'file_download.mode') return 'worker'
+          if (key === 'cloudflare.account_id') return options?.cloudflareAccountId ?? 'acc-123'
+          if (key === 'cloudflare.analytics.secret')
+            return options?.cloudflareSecret ?? 'secret-token'
+          return undefined
+        }),
+      } as unknown as ShionConfigService
+
+      const service = new DataService(prisma, { post } as any, config)
+      return { service, post }
+    }
+
+    it('returns full traffic detail with all sections', async () => {
+      const { service, post } = createTrafficService()
+
+      const result = await service.getTrafficDetail()
+
+      expect(post).toHaveBeenCalledTimes(4)
+      expect(result.totalDownloads).toBe(100)
+      expect(result.totalBytes).toBe(50000)
+      expect(result.averageSize).toBe(500)
+      expect(result.prevTotalDownloads).toBe(80)
+      expect(result.prevTotalBytes).toBe(40000)
+      expect(result.prevAverageSize).toBe(500)
+      expect(result.topFiles).toHaveLength(2)
+      expect(result.topFiles[0].fileName).toBe('game.zip')
+    })
+
+    it('falls back to empty result when config is missing', async () => {
+      const { service, post } = createTrafficService({
+        cloudflareAccountId: '',
+        cloudflareSecret: '',
+      })
+      const warnSpy = jest.spyOn((service as any).logger, 'warn').mockImplementation()
+
+      const result = await service.getTrafficDetail()
+
+      expect(post).not.toHaveBeenCalled()
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('fallback to empty traffic detail'),
+      )
+      expect(result.totalDownloads).toBe(0)
+      expect(result.totalBytes).toBe(0)
+      expect(result.hourly).toEqual([])
+      expect(result.topFiles).toEqual([])
+    })
+
+    it('falls back to empty result when query fails', async () => {
+      const { service } = createTrafficService({ analyticsError: true })
+      const warnSpy = jest.spyOn((service as any).logger, 'warn').mockImplementation()
+
+      const result = await service.getTrafficDetail()
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to query traffic detail'),
+      )
+      expect(result.totalDownloads).toBe(0)
+      expect(result.topFiles).toEqual([])
+    })
+
+    it('returns averageSize 0 when there are zero downloads', async () => {
+      const { service } = createTrafficService({
+        currentSummary: { downloadCount: 0, totalBytes: 0 },
+        prevSummary: { downloadCount: 0, totalBytes: 0 },
+      })
+
+      const result = await service.getTrafficDetail()
+
+      expect(result.averageSize).toBe(0)
+      expect(result.prevAverageSize).toBe(0)
+    })
+
+    it('fills missing hours with zero-value entries', async () => {
+      const { service } = createTrafficService({ hourlyData: [] })
+
+      const result = await service.getTrafficDetail()
+
+      expect(result.hourly.length).toBeGreaterThanOrEqual(24)
+      expect(result.hourly.every(h => h.totalBytes === 0)).toBe(true)
+      expect(result.hourly.every(h => h.downloadCount === 0)).toBe(true)
+    })
+  })
 })

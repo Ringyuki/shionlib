@@ -30,6 +30,11 @@
   },
   "dependencies": {
     "@base-ui-components/react": "1.0.0-beta.4",
+    "@nivo/bar": "^0.99.0",
+    "@nivo/core": "^0.99.0",
+    "@nivo/line": "^0.99.0",
+    "@nivo/theming": "^0.99.0",
+    "@react-spring/web": "^10.0.3",
     "@bprogress/next": "^3.2.12",
     "@codemirror/lang-json": "^6.0.2",
     "@codemirror/view": "^6.39.13",

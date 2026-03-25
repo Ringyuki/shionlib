@@ -46,3 +46,10 @@ export interface AnalyticsEngineSqlResponse {
   rows: number
   rows_before_limit_at_least: number
 }
+
+export interface AnalyticsEngineSqlGenericResponse<T = Record<string, unknown>> {
+  data: T[]
+  meta: Array<{ name: string; type: string }>
+  rows: number
+  rows_before_limit_at_least: number
+}

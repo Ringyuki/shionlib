@@ -104,7 +104,15 @@
       "games": "Games",
       "files": "Files",
       "storage": "Storage",
-      "24-hour-traffic": "24-hour traffic"
+      "24-hour-traffic": "24-hour traffic",
+      "modal-title": "Download Traffic Details",
+      "total-downloads": "Total Downloads",
+      "total-traffic": "Total Traffic",
+      "average-size": "Average Size",
+      "hourly-trend": "Hourly Traffic Trend",
+      "top-files": "Top Files by Traffic",
+      "traffic": "Traffic",
+      "no-data": "No download data available"
     }
   }
 }

@@ -8,7 +8,9 @@ import {
   CloudflareAnalyticsResult,
   CloudflareGraphQLResponse,
   AnalyticsEngineSqlResponse,
+  AnalyticsEngineSqlGenericResponse,
 } from '../interfaces/cf.interface'
+import { GetTrafficDetailResDto } from '../dto/get-traffic-detail.res.dto'
 
 @Injectable()
 export class DataService {
@@ -77,6 +79,13 @@ export class DataService {
     return result.summary.totalEdgeResponseBytes
   }
 
+  private formatTimestampForClickhouse(date: Date): string {
+    return date
+      .toISOString()
+      .replace('T', ' ')
+      .replace(/\.\d+Z$/, '')
+  }
+
   private async getDownloadBytesFromAnalyticsEngine(): Promise<number> {
     const accountId = this.configService.get('cloudflare.account_id')
     const secret = this.configService.get('cloudflare.analytics.secret')
@@ -90,10 +99,7 @@ export class DataService {
 
     try {
       const endpoint = `https://api.cloudflare.com/client/v4/accounts/${accountId}/analytics_engine/sql`
-      const since = new Date(Date.now() - 24 * 60 * 60 * 1000)
-        .toISOString()
-        .replace('T', ' ')
-        .replace(/\.\d+Z$/, '') // the clickhouse requires the timestamp to be in the format YYYY-MM-DD HH:MM:SS
+      const since = this.formatTimestampForClickhouse(new Date(Date.now() - 24 * 60 * 60 * 1000))
       const query = `SELECT SUM(double1) AS totalBytes FROM shionlib_downloads WHERE timestamp >= toDateTime('${since}')`
 
       const response = await firstValueFrom(
@@ -116,17 +122,162 @@ export class DataService {
     }
   }
 
-  private buildEmptyCloudflareAnalyticsResult(): CloudflareAnalyticsResult {
-    return {
-      viewer: {
-        zones: [],
-      },
-      summary: {
-        totalRequests: 0,
-        totalVisits: 0,
-        totalEdgeResponseBytes: 0,
-      },
+  async getTrafficDetail(): Promise<GetTrafficDetailResDto> {
+    const accountId = this.configService.get('cloudflare.account_id')
+    const secret = this.configService.get('cloudflare.analytics.secret')
+
+    if (!accountId || !secret) {
+      this.logger.warn(
+        'Cloudflare config missing (CLOUDFLARE_ACCOUNT_ID/CLOUDFLARE_ANALYTICS_SECRET), fallback to empty traffic detail',
+      )
+      return {
+        totalDownloads: 0,
+        totalBytes: 0,
+        averageSize: 0,
+        prevTotalDownloads: 0,
+        prevTotalBytes: 0,
+        prevAverageSize: 0,
+        hourly: [],
+        topFiles: [],
+      }
     }
+
+    try {
+      const now = Date.now()
+      const since24h = this.formatTimestampForClickhouse(new Date(now - 24 * 60 * 60 * 1000))
+      const since48h = this.formatTimestampForClickhouse(new Date(now - 48 * 60 * 60 * 1000))
+      const endpoint = `https://api.cloudflare.com/client/v4/accounts/${accountId}/analytics_engine/sql`
+
+      const queryOptions = {
+        headers: {
+          Authorization: `Bearer ${secret}`,
+          'Content-Type': 'text/plain',
+        },
+        timeout: 15_000,
+      }
+
+      const [currentRes, prevRes, hourlyRes, topFilesRes] = await Promise.all([
+        firstValueFrom(
+          this.httpService.post<
+            AnalyticsEngineSqlGenericResponse<{ downloadCount: string; totalBytes: string }>
+          >(
+            endpoint,
+            `SELECT COUNT() AS downloadCount, SUM(double1) AS totalBytes FROM shionlib_downloads WHERE timestamp >= toDateTime('${since24h}')`,
+            queryOptions,
+          ),
+        ),
+        firstValueFrom(
+          this.httpService.post<
+            AnalyticsEngineSqlGenericResponse<{ downloadCount: string; totalBytes: string }>
+          >(
+            endpoint,
+            `SELECT COUNT() AS downloadCount, SUM(double1) AS totalBytes FROM shionlib_downloads WHERE timestamp >= toDateTime('${since48h}') AND timestamp < toDateTime('${since24h}')`,
+            queryOptions,
+          ),
+        ),
+        firstValueFrom(
+          this.httpService.post<
+            AnalyticsEngineSqlGenericResponse<{
+              hour: string
+              downloadCount: number
+              totalBytes: number
+            }>
+          >(
+            endpoint,
+            `SELECT toStartOfHour(timestamp) AS hour, COUNT() AS downloadCount, SUM(double1) AS totalBytes FROM shionlib_downloads WHERE timestamp >= toDateTime('${since24h}') GROUP BY hour ORDER BY hour ASC`,
+            queryOptions,
+          ),
+        ),
+        firstValueFrom(
+          this.httpService.post<
+            AnalyticsEngineSqlGenericResponse<{
+              fileId: string
+              fileName: string
+              downloadCount: number
+              totalBytes: number
+            }>
+          >(
+            endpoint,
+            `SELECT index1 AS fileId, blob1 AS fileName, COUNT() AS downloadCount, SUM(double1) AS totalBytes FROM shionlib_downloads WHERE timestamp >= toDateTime('${since24h}') GROUP BY fileId, fileName ORDER BY totalBytes DESC LIMIT 10`,
+            queryOptions,
+          ),
+        ),
+      ])
+
+      const current = currentRes.data?.data?.[0] ?? { downloadCount: 0, totalBytes: 0 }
+      const prev = prevRes.data?.data?.[0] ?? { downloadCount: 0, totalBytes: 0 }
+
+      const totalDownloads = Number(current.downloadCount) || 0
+      const totalBytes = Number(current.totalBytes) || 0
+      const prevTotalDownloads = Number(prev.downloadCount) || 0
+      const prevTotalBytes = Number(prev.totalBytes) || 0
+
+      const hourly = this.fillHourlyGaps(
+        hourlyRes.data?.data ?? [],
+        new Date(now - 24 * 60 * 60 * 1000),
+        new Date(now),
+      )
+
+      return {
+        totalDownloads,
+        totalBytes,
+        averageSize: totalDownloads > 0 ? Math.round(totalBytes / totalDownloads) : 0,
+        prevTotalDownloads,
+        prevTotalBytes,
+        prevAverageSize:
+          prevTotalDownloads > 0 ? Math.round(prevTotalBytes / prevTotalDownloads) : 0,
+        hourly,
+        topFiles: (topFilesRes.data?.data ?? []).map(f => ({
+          fileId: f.fileId ?? '',
+          fileName: f.fileName ?? '',
+          totalBytes: Number(f.totalBytes) || 0,
+          downloadCount: Number(f.downloadCount) || 0,
+        })),
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Failed to query traffic detail: ${error instanceof Error ? error.message : 'unknown error'}`,
+      )
+      this.logger.error(error)
+      return {
+        totalDownloads: 0,
+        totalBytes: 0,
+        averageSize: 0,
+        prevTotalDownloads: 0,
+        prevTotalBytes: 0,
+        prevAverageSize: 0,
+        hourly: [],
+        topFiles: [],
+      }
+    }
+  }
+
+  private fillHourlyGaps(
+    data: Array<{ hour: string; downloadCount: number; totalBytes: number }>,
+    since: Date,
+    until: Date,
+  ) {
+    const map = new Map(data.map(d => [d.hour, d]))
+    const result: Array<{ hour: string; totalBytes: number; downloadCount: number }> = []
+
+    const current = new Date(since)
+    current.setMinutes(0, 0, 0)
+
+    while (current <= until) {
+      const key = current
+        .toISOString()
+        .replace('T', ' ')
+        .replace(/\.\d+Z$/, '')
+      const match = map.get(key)
+      result.push({
+        hour: current.toISOString(),
+        totalBytes: Number(match?.totalBytes) || 0,
+        downloadCount: Number(match?.downloadCount) || 0,
+      })
+      current.setHours(current.getHours() + 1)
+    }
+
+    return result
   }
 
   private async getDownloadBytesFromZoneAnalytics(): Promise<CloudflareAnalyticsResult> {
@@ -137,7 +288,16 @@ export class DataService {
       this.logger.warn(
         'Cloudflare analytics config missing (CLOUDFLARE_ANALYTICS_ZONE_ID/CLOUDFLARE_ANALYTICS_SECRET), fallback to zero bytes',
       )
-      return this.buildEmptyCloudflareAnalyticsResult()
+      return {
+        viewer: {
+          zones: [],
+        },
+        summary: {
+          totalRequests: 0,
+          totalVisits: 0,
+          totalEdgeResponseBytes: 0,
+        },
+      }
     }
 
     const endpoint = 'https://api.cloudflare.com/client/v4/graphql'

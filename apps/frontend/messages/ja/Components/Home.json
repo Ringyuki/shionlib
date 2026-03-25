@@ -104,7 +104,15 @@
       "games": "ゲーム",
       "files": "ファイル",
       "storage": "ストレージ",
-      "24-hour-traffic": "24時間流量"
+      "24-hour-traffic": "24時間流量",
+      "modal-title": "ダウンロード通信量の詳細",
+      "total-downloads": "ダウンロード回数",
+      "total-traffic": "合計通信量",
+      "average-size": "平均サイズ",
+      "hourly-trend": "時間別通信量の推移",
+      "top-files": "通信量ランキング",
+      "traffic": "通信量",
+      "no-data": "ダウンロードデータがありません"
     }
   }
 }

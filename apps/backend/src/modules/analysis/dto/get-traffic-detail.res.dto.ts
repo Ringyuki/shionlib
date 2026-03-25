@@ -1,25 +1,17 @@
-export interface OverviewData {
-  games: number
-  files: number
-  resources: number
-  storage: number
-  bytes_gotten: number
-}
-
-export interface HourlyTrafficPoint {
+export class HourlyTrafficPoint {
   hour: string
   totalBytes: number
   downloadCount: number
 }
 
-export interface TopFileTraffic {
+export class TopFileTraffic {
   fileId: string
   fileName: string
   totalBytes: number
   downloadCount: number
 }
 
-export interface TrafficDetailData {
+export class GetTrafficDetailResDto {
   totalDownloads: number
   totalBytes: number
   averageSize: number

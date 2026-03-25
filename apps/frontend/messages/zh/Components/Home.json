@@ -104,7 +104,15 @@
       "games": "条目",
       "files": "文件",
       "storage": "储存",
-      "24-hour-traffic": "24小时流量"
+      "24-hour-traffic": "24小时流量",
+      "modal-title": "下载流量详情",
+      "total-downloads": "下载次数",
+      "total-traffic": "总流量",
+      "average-size": "平均大小",
+      "hourly-trend": "每小时流量趋势",
+      "top-files": "流量排行",
+      "traffic": "流量",
+      "no-data": "暂无下载数据"
     }
   }
 }
