@@ -251,7 +251,8 @@
           "super_admin": "超级管理员"
         },
         "joined": "加入于",
-        "banned": "封禁中"
+        "banned": "封禁中",
+        "sponsor": "Shionlib的小伙伴"
       },
       "Datas": {
         "upload": "上传的游戏",

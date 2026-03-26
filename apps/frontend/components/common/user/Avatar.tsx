@@ -20,7 +20,7 @@ export const Avatar = React.forwardRef<React.ComponentRef<typeof ShionlibAvatar>
       if (!clickable) return
       e.preventDefault()
       if (homeUrl) window.open(homeUrl, '_blank')
-      else router.push(`/user/${user.id}`)
+      else router.push(`/user/${user.id}/uploads`)
     }
 
     const isSponsor = 'is_sponsor' in user && user.is_sponsor
@@ -48,7 +48,7 @@ export const Avatar = React.forwardRef<React.ComponentRef<typeof ShionlibAvatar>
             </AvatarFallback>
           )}
         </ShionlibAvatar>
-        {isSponsor && <SponsorBadge />}
+        {isSponsor && <SponsorBadge userId={user.id} />}
       </span>
     )
   },

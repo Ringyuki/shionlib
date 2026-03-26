@@ -59,6 +59,9 @@
     }
   },
   "User": {
+    "Sponsor": {
+      "tooltip": "Shionlib Supporter!"
+    },
     "LoginOrRegisteDialog": {
       "button": "Log in",
       "loginTitle": "Log in to Shionlib",

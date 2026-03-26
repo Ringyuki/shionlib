@@ -27,6 +27,7 @@ export interface UserProfile {
   edit_count: number
   walkthrough_count: number
   status: UserStatus
+  is_sponsor?: boolean
 }
 
 export interface UserAvatar {

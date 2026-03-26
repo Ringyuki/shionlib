@@ -12,6 +12,7 @@ import { cn } from '@/utils/cn'
 import { IdCard, CalendarDays, Ban } from 'lucide-react'
 import { timeFromNow } from '@/utils/time-format'
 import { Datas } from './Datas'
+import { Star } from 'lucide-react'
 
 interface ProfileBannerProps {
   user: UserProfileType
@@ -63,6 +64,14 @@ export const ProfileBanner = async ({ user }: ProfileBannerProps) => {
           <div className="flex flex-col justify-center gap-2">
             <h1 className="text-2xl font-bold">{user.name}</h1>
             <div className="flex gap-2 items-center flex-wrap">
+              {user.is_sponsor && (
+                <Badge intent="primary" appearance="solid">
+                  <span className="font-bold flex gap-1 items-center">
+                    <Star className="size-3" />
+                    {t('sponsor')}
+                  </span>
+                </Badge>
+              )}
               <Badge className={cn(badgeColor.bg, badgeColor.fg, badgeColor.border)}>
                 <span className="font-bold">{t(`role.${role}`)}</span>
               </Badge>

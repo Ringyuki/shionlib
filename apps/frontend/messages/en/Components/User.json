@@ -251,7 +251,8 @@
           "super_admin": "Super Admin"
         },
         "joined": "Joined at",
-        "banned": "Banned"
+        "banned": "Banned",
+        "sponsor": "Shionlib Supporter"
       },
       "Datas": {
         "upload": "Uploads",

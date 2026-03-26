@@ -251,7 +251,8 @@
           "super_admin": "スーパー管理者"
         },
         "joined": "参加于",
-        "banned": "封禁中"
+        "banned": "封禁中",
+        "sponsor": "Shionlibのサポーター"
       },
       "Datas": {
         "upload": "アップロード",

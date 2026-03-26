@@ -59,6 +59,9 @@
     }
   },
   "User": {
+    "Sponsor": {
+      "tooltip": "Shionlib的小伙伴！"
+    },
     "LoginOrRegisteDialog": {
       "button": "登录",
       "loginTitle": "登录到 Shionlib",
