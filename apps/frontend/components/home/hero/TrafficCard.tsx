@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Download } from 'lucide-react'
+import { Download, ChevronRight } from 'lucide-react'
 import { formatBytes } from '@/utils/format'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shionui/Tooltip'
 import { TrafficDetailModal } from './TrafficDetailModal'
@@ -19,11 +19,14 @@ export const TrafficCard = ({ bytesGotten, label }: TrafficCardProps) => {
       <Tooltip>
         <TooltipTrigger asChild>
           <div
-            className="flex cursor-pointer flex-col justify-around shadow-card border rounded-md p-4 bg-[radial-gradient(ellipse_at_top_right,var(--warning-200)_0%,transparent_50%)] dark:bg-[radial-gradient(ellipse_at_top_right,var(--warning-950)_0%,transparent_50%)]"
+            className="group flex cursor-pointer flex-col justify-around shadow-card border rounded-md p-4 bg-[radial-gradient(ellipse_at_top_right,var(--warning-200)_0%,transparent_50%)] dark:bg-[radial-gradient(ellipse_at_top_right,var(--warning-950)_0%,transparent_50%)]"
             onClick={() => setModalOpen(true)}
           >
             <div className="flex items-center gap-2">
-              <h3 className="text-base text-muted-foreground">{label}</h3>
+              <h3 className="text-base text-muted-foreground flex items-center gap-1">
+                {label}
+                <ChevronRight className="transition-transform size-4 group-hover:translate-x-0.5 group-hover:text-warning" />
+              </h3>
               <Download className="size-8 text-warning ml-auto" />
             </div>
             <span className="text-3xl font-bold">{formatBytes(bytesGotten)}</span>

@@ -6,7 +6,7 @@ import { ResponsiveBar } from '@nivo/bar'
 import { formatBytes } from '@/utils/format'
 import { useNivoTheme } from './useNivoTheme'
 import type { CountryTraffic } from '@/interfaces/analysis/data.interface'
-import { CN, US, JP, TW, HK, SG, MY, CA, GB } from 'country-flag-icons/react/3x2'
+import { CN, US, JP, TW, HK, SG, MY, CA, GB, AU, PH, KR, MO } from 'country-flag-icons/react/3x2'
 
 interface FlagMapProps {
   country: string
@@ -31,6 +31,14 @@ const FlagMap = ({ country }: FlagMapProps) => {
       return <CA className="w-4 h-4" />
     case 'GB':
       return <GB className="w-4 h-4" />
+    case 'AU':
+      return <AU className="w-4 h-4" />
+    case 'PH':
+      return <PH className="w-4 h-4" />
+    case 'KR':
+      return <KR className="w-4 h-4" />
+    case 'MO':
+      return <MO className="w-4 h-4" />
     default:
       return null
   }
@@ -48,15 +56,19 @@ export const CountryChart = ({ data, trafficLabel }: CountryChartProps) => {
 
   const barData = useMemo(
     () =>
-      [...data].reverse().map(c => ({
-        country: c.country,
-        [trafficLabel]: c.totalBytes,
-      })),
+      [...data]
+        .sort((a, b) => b.totalBytes - a.totalBytes)
+        .slice(0, 10)
+        .reverse()
+        .map(c => ({
+          country: c.country,
+          [trafficLabel]: c.totalBytes,
+        })),
     [data, trafficLabel],
   )
 
   return (
-    <div style={{ height: Math.max(barData.length * 28 + 40, 120) }}>
+    <div style={{ height: Math.max(barData.length * 32 + 40, 120) }}>
       <ResponsiveBar
         data={barData}
         theme={nivoTheme}
