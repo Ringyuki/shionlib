@@ -20,7 +20,7 @@ jobs:
     if: >
       github.repository == 'Ringyuki/shionlib' &&
       github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'push'
+      github.event.workflow_run.event == 'workflow_run'
     runs-on: ubuntu-latest
     steps:
       - name: Create release tag and trigger production deploy
