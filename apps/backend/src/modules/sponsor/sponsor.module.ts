@@ -8,6 +8,7 @@ import { SponsorService } from './services/sponsor.service'
 import { SponsorWallService } from './services/sponsor-wall.service'
 import { IDataRiverPaymentProvider } from './providers/idatariver-payment.provider'
 import { PAYMENT_PROVIDER } from './interfaces/payment-provider.interface'
+import { OrderExpireTask } from './tasks/order-expire.task'
 
 @Module({
   imports: [HttpModule],
@@ -15,6 +16,7 @@ import { PAYMENT_PROVIDER } from './interfaces/payment-provider.interface'
   providers: [
     SponsorService,
     SponsorWallService,
+    OrderExpireTask,
     {
       provide: PAYMENT_PROVIDER,
       inject: [HttpService, ShionConfigService],

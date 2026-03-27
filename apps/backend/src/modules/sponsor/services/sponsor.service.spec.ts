@@ -51,6 +51,7 @@ describe('SponsorService', () => {
         status: 'NEW',
         amount: 10,
         paymentMethods: ['alipay', 'wxpay'],
+        expiresAt: '2025-12-31T00:00:00Z',
       })
       prisma.sponsorOrder.create.mockResolvedValueOnce({ id: 1 })
 
@@ -63,6 +64,7 @@ describe('SponsorService', () => {
         orderId: 1,
         providerOrderId: 'idr-123',
         paymentMethods: ['alipay', 'wxpay'],
+        expiresAt: '2025-12-31T00:00:00Z',
       })
       expect(paymentProvider.createOrder).toHaveBeenCalledWith({
         amount: 10,
@@ -78,6 +80,7 @@ describe('SponsorService', () => {
           sponsor_message: 'Thanks!',
           is_private: false,
           user_id: 42,
+          expires_at: new Date('2025-12-31T00:00:00Z'),
         }),
       })
     })
@@ -90,6 +93,7 @@ describe('SponsorService', () => {
         status: 'NEW',
         amount: 5,
         paymentMethods: ['crypto'],
+        expiresAt: null,
       })
       prisma.sponsorOrder.create.mockResolvedValueOnce({ id: 2 })
 
@@ -97,7 +101,10 @@ describe('SponsorService', () => {
 
       expect(result.orderId).toBe(2)
       expect(prisma.sponsorOrder.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({ user_id: null }),
+        data: expect.objectContaining({
+          user_id: null,
+          expires_at: expect.any(Date),
+        }),
       })
     })
 

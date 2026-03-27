@@ -23,6 +23,7 @@ model SponsorOrder {
   user_id Int?
   user    User? @relation("user_sponsor_orders", fields: [user_id], references: [id], onDelete: SetNull)
 
+  expires_at        DateTime?
   paid_at           DateTime?
   callback_verified Boolean   @default(false)
 

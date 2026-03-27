@@ -57,6 +57,9 @@ export class SponsorService {
         sponsor_message: message || null,
         is_private: isPrivate,
         user_id: userId || null,
+        expires_at: orderInfo.expiresAt
+          ? new Date(orderInfo.expiresAt)
+          : new Date(Date.now() + 60 * 60 * 1000), // 1 hour if no expires_at
       },
     })
 
