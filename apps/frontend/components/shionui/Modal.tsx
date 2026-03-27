@@ -51,6 +51,8 @@ interface ShionlibModalProps {
   drawerClassName?: string
   /** data-testid forwarded to DialogContent / DrawerContent */
   'data-testid'?: string
+  /** Prevent auto focus on Dialog open */
+  preventAutoFocus?: boolean
 }
 
 function ShionlibModal({
@@ -67,6 +69,7 @@ function ShionlibModal({
   dialogClassName,
   drawerClassName,
   'data-testid': testId,
+  preventAutoFocus = false,
 }: ShionlibModalProps) {
   const isMobile = useMedia(`(max-width: ${breakpoint}px)`, false)
 
@@ -88,7 +91,12 @@ function ShionlibModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} maskClosable={closable}>
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+      maskClosable={closable}
+      preventAutoFocus={preventAutoFocus}
+    >
       <DialogContent
         aria-describedby={!description ? undefined : undefined}
         tone={tone}

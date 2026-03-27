@@ -94,6 +94,7 @@ export const GameDownload = ({
         closable={!turnstileOpen}
         fitContent
         drawerClassName="min-h-[50vh]"
+        preventAutoFocus
       >
         <GameDownloadContent
           downloadResources={downloadResources}

@@ -41,14 +41,18 @@ function toneTextClass(tone: DialogTone | undefined) {
 
 interface DialogProps extends React.ComponentProps<typeof DialogPrimitive.Root> {
   maskClosable?: boolean
+  preventAutoFocus?: boolean
 }
 
-const DialogOptionsContext = React.createContext<{ maskClosable: boolean }>({ maskClosable: true })
+const DialogOptionsContext = React.createContext<{
+  maskClosable: boolean
+  preventAutoFocus: boolean
+}>({ maskClosable: true, preventAutoFocus: false })
 
-function Dialog({ maskClosable = true, ...props }: DialogProps) {
+function Dialog({ maskClosable = true, preventAutoFocus = false, ...props }: DialogProps) {
   const { children, onOpenChange, ...rest } = props
   return (
-    <DialogOptionsContext.Provider value={{ maskClosable }}>
+    <DialogOptionsContext.Provider value={{ maskClosable, preventAutoFocus }}>
       <DialogPrimitive.Root data-slot="dialog" {...rest} onOpenChange={onOpenChange}>
         {children}
       </DialogPrimitive.Root>
@@ -96,7 +100,7 @@ function DialogContent({
   tone?: DialogTone
   fitContent?: boolean
 }) {
-  const { maskClosable } = React.useContext(DialogOptionsContext)
+  const { maskClosable, preventAutoFocus } = React.useContext(DialogOptionsContext)
 
   const handleInteractOutside = React.useCallback<
     NonNullable<React.ComponentProps<typeof DialogPrimitive.Content>['onInteractOutside']>
@@ -122,12 +126,28 @@ function DialogContent({
     [maskClosable, rest],
   )
 
+  const contentRef = React.useRef<HTMLDivElement>(null)
+
+  const handleOpenAutoFocus = React.useCallback<
+    NonNullable<React.ComponentProps<typeof DialogPrimitive.Content>['onOpenAutoFocus']>
+  >(
+    event => {
+      if (!preventAutoFocus) return
+      event.preventDefault()
+      contentRef.current?.focus()
+      rest.onOpenAutoFocus?.(event)
+    },
+    [rest, preventAutoFocus],
+  )
+
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
       <DialogPrimitive.Content
+        ref={contentRef}
         data-slot="dialog-content"
         {...rest}
+        onOpenAutoFocus={handleOpenAutoFocus}
         onInteractOutside={handleInteractOutside}
         onPointerDownOutside={handlePointerDownOutside}
         className={cn(
