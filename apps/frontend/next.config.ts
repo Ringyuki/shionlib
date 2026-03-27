@@ -89,6 +89,10 @@ const nextConfig: NextConfig = {
         source: '/:sitemap(sitemap.*)',
         destination: `${internalApiBaseUrl}/:sitemap`,
       },
+      {
+        source: '/steamapp/:appid',
+        destination: 'https://store.steampowered.com/widget/:appid',
+      },
     ]
   },
   output: 'standalone',
