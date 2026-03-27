@@ -38,7 +38,7 @@ export const Container = ({
           <RecentUpdates recentUpdates={recentUpdates} content_limit={content_limit} />
         </div>
       )}
-      <Ad id={1} />
+      <Ad id={3} />
       <Hot hotGames={hotGames} content_limit={content_limit} initialMeta={hotMeta} />
       <Ad id={1} />
     </div>

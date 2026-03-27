@@ -33,6 +33,7 @@ export default async function GameLayout({ children, params }: GameLayoutProps) 
         <ForceScrollTop />
         <div className="flex flex-col gap-4">
           <GameHeader game={header.data} />
+          {/* <Ad id={3} /> */}
           <div
             className="flex flex-col gap-4 shadow-content-strong bg-card-soft w-full rounded-md p-4"
             id="game-content"
