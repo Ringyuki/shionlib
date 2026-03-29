@@ -11,8 +11,10 @@ describe('libs/game/useGameList (unit)', () => {
     expect(page).toBe(2)
     expect(filter).toEqual({
       tags: ['tag-a'],
+      exclude_tags: [],
       years: [2024],
       months: [3],
+      platforms: [],
       sort_by: SortBy.VIEWS,
       sort_order: SortOrder.ASC,
     })
@@ -25,8 +27,10 @@ describe('libs/game/useGameList (unit)', () => {
     expect(filter.sort_by).toBe(SortBy.RELEASE_DATE)
     expect(filter.sort_order).toBe(SortOrder.DESC)
     expect(filter.tags).toEqual([])
+    expect(filter.exclude_tags).toEqual([])
     expect(filter.years).toEqual([])
     expect(filter.months).toEqual([])
+    expect(filter.platforms).toEqual([])
   })
 
   it('parses search params object with array values', () => {
