@@ -709,10 +709,18 @@
       "tags": "Filter tags",
       "searchPlaceholder": "Search tags"
     },
+    "ExcludeTags": {
+      "excludeTags": "Exclude tags",
+      "searchPlaceholder": "Search tags to exclude"
+    },
     "Date": {
       "date": "Filter year and month",
       "selectYear": "All years",
       "selectMonth": "All months"
+    },
+    "Platform": {
+      "platform": "Platform",
+      "selectPlatform": "All platforms"
     },
     "Sort": {
       "sort": "Sort by",
@@ -721,6 +729,7 @@
       "release_date": "Release date",
       "views": "Views",
       "downloads": "Downloads",
+      "hot_score": "Trending",
       "asc": "Ascending",
       "desc": "Descending"
     }

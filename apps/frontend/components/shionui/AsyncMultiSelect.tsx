@@ -108,6 +108,12 @@ function AsyncMultiSelect({
   const [highlightedValue, setHighlightedValue] = React.useState<string | null>(null)
   const clearSearchRef = React.useRef<(() => void) | undefined>(undefined)
 
+  React.useEffect(() => {
+    if (highlightedValue && !itemValues.includes(highlightedValue)) {
+      setHighlightedValue(null)
+    }
+  }, [itemValues, highlightedValue])
+
   const registerItem = React.useCallback((val: string, label: React.ReactNode) => {
     labelsRef.current.set(val, label)
     setItemValues(prev => {

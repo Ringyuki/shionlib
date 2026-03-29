@@ -31,6 +31,11 @@ export class GetGameListFilterReqDto {
   @IsString({ each: true })
   tags?: string[]
 
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'exclude_tags' }) })
+  @IsOptional()
+  @IsString({ each: true })
+  exclude_tags?: string[]
+
   @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'years' }) })
   @IsInt({ each: true, message: ivm('validation.common.IS_INT', { property: 'years' }) })
   @Type(() => Number)
@@ -62,6 +67,11 @@ export class GetGameListFilterReqDto {
     message: ivmEnum('validation.common.IS_ENUM', SortOrder, { property: 'sort_order' }),
   })
   sort_order: SortOrder = SortOrder.DESC
+
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'platforms' }) })
+  @IsOptional()
+  @IsString({ each: true })
+  platforms?: string[]
 
   @IsDate({ message: ivm('validation.common.IS_DATE', { property: 'start_date' }) })
   @IsOptional()

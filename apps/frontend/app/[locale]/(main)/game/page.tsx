@@ -18,8 +18,10 @@ interface GamePageProps {
 
 const getData = async (
   tags: string[],
+  excludeTags: string[],
   years: number[],
   months: number[],
+  platforms: string[],
   sortBy: SortBy,
   sortOrder: SortOrder,
   page: number,
@@ -27,8 +29,10 @@ const getData = async (
   const query = {
     filter: {
       tags,
+      exclude_tags: excludeTags,
       years,
       months,
+      platforms,
       sort_by: sortBy,
       sort_order: sortOrder,
     },
@@ -42,8 +46,17 @@ const getData = async (
 
 export default async function GamePage({ searchParams }: GamePageProps) {
   const { filter, page } = parseGameSearchParams(await searchParams)
-  const { tags, years, months, sort_by, sort_order } = filter
-  const data = await getData(tags, years, months, sort_by, sort_order, page)
+  const { tags, exclude_tags, years, months, platforms, sort_by, sort_order } = filter
+  const data = await getData(
+    tags,
+    exclude_tags,
+    years,
+    months,
+    platforms,
+    sort_by,
+    sort_order,
+    page,
+  )
 
   return (
     <div className="w-full mx-auto my-4">
@@ -51,8 +64,10 @@ export default async function GamePage({ searchParams }: GamePageProps) {
       <div className="flex flex-col gap-6">
         <GameFilter
           initialTags={tags}
+          initialExcludeTags={exclude_tags}
           initialYear={years}
           initialMonth={months}
+          initialPlatforms={platforms}
           initialSortBy={sort_by}
           initialSortOrder={sort_order}
         />

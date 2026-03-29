@@ -4,8 +4,10 @@ import { ExtraQuery } from '@/components/common/content/Pagination'
 
 export type GameFilter = {
   tags: string[]
+  exclude_tags: string[]
   years: number[]
   months: number[]
+  platforms: string[]
   sort_by: SortBy
   sort_order: SortOrder
 }
@@ -31,8 +33,10 @@ export const parseGameQueryString = (qsString: string): { filter: GameFilter; pa
   const parsed = qs.parse(qsString) as {
     filter?: {
       tags?: string[] | string
+      exclude_tags?: string[] | string
       years?: (string | number)[] | string
       months?: (string | number)[] | string
+      platforms?: string[] | string
       sort_by?: SortBy
       sort_order?: SortOrder
     }
@@ -42,8 +46,10 @@ export const parseGameQueryString = (qsString: string): { filter: GameFilter; pa
   const f = parsed.filter ?? {}
   const filter: GameFilter = {
     tags: toArray<string>(f.tags),
+    exclude_tags: toArray<string>(f.exclude_tags),
     years: toNumberArray(f.years),
     months: toNumberArray(f.months),
+    platforms: toArray<string>(f.platforms),
     sort_by: (f.sort_by ?? SortBy.RELEASE_DATE) as SortBy,
     sort_order: (f.sort_order ?? SortOrder.DESC) as SortOrder,
   }

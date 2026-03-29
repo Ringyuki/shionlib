@@ -709,10 +709,18 @@
       "tags": "过滤标签",
       "searchPlaceholder": "搜索标签"
     },
+    "ExcludeTags": {
+      "excludeTags": "排除标签",
+      "searchPlaceholder": "搜索要排除的标签"
+    },
     "Date": {
       "date": "过滤年份和月份",
       "selectYear": "全部年份",
       "selectMonth": "全部月份"
+    },
+    "Platform": {
+      "platform": "平台筛选",
+      "selectPlatform": "全部平台"
     },
     "Sort": {
       "sort": "排序方式",
@@ -721,6 +729,7 @@
       "release_date": "发行日期",
       "views": "浏览量",
       "downloads": "下载量",
+      "hot_score": "热度",
       "asc": "升序",
       "desc": "降序"
     }

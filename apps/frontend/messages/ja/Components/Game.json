@@ -709,10 +709,18 @@
       "tags": "タグをフィルター",
       "searchPlaceholder": "タグを検索"
     },
+    "ExcludeTags": {
+      "excludeTags": "タグを除外",
+      "searchPlaceholder": "除外するタグを検索"
+    },
     "Date": {
       "date": "年と月をフィルター",
       "selectYear": "全部年",
       "selectMonth": "全部月"
+    },
+    "Platform": {
+      "platform": "プラットフォーム",
+      "selectPlatform": "全プラットフォーム"
     },
     "Sort": {
       "sort": "並び替え",
@@ -721,6 +729,7 @@
       "release_date": "発売日",
       "views": "閲覧数",
       "downloads": "ダウンロード数",
+      "hot_score": "人気",
       "asc": "昇順",
       "desc": "降順"
     }

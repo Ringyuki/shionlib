@@ -312,8 +312,17 @@ export class GameService {
     content_limit?: number,
   ): Promise<PaginatedResult<GetGameListResDto>> {
     const { page = 1, pageSize = 10, developer_id: producer_id, character_id } = getGameListReqDto
-    const { tags, years, months, sort_by, sort_order, start_date, end_date } =
-      getGameListReqDto.filter ?? {}
+    const {
+      tags,
+      exclude_tags,
+      years,
+      months,
+      platforms,
+      sort_by,
+      sort_order,
+      start_date,
+      end_date,
+    } = getGameListReqDto.filter ?? {}
 
     let where: Prisma.GameWhereInput = {
       status: 1,
@@ -350,6 +359,20 @@ export class GameService {
     if (tags)
       where.tags = {
         some: { tag: { name: { in: tags.map(t => t.toLowerCase().trim()) } } },
+      }
+
+    if (exclude_tags && exclude_tags.length > 0) {
+      const excludeCondition: Prisma.GameWhereInput = {
+        tags: {
+          none: { tag: { name: { in: exclude_tags.map(t => t.toLowerCase().trim()) } } },
+        },
+      }
+      where.AND = [...((where.AND as Prisma.GameWhereInput[]) ?? []), excludeCondition]
+    }
+
+    if (platforms && platforms.length > 0)
+      where.platform = {
+        hasSome: platforms,
       }
 
     if (start_date && end_date) {
