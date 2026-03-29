@@ -5,6 +5,7 @@ import { PaginatedMeta, PaginatedResponse } from '@/interfaces/api/shionlib-api-
 import { ContentLimit } from '@/interfaces/user/user.interface'
 import { Head as GamesHead } from '@/components/home/games/Head'
 import { Games } from '@/components/home/games/Games'
+import { LoadMoreTrigger } from '@/components/common/shared/LoadMoreTrigger'
 import { useCallback, useState } from 'react'
 import { shionlibRequest } from '@/utils/request'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
@@ -68,10 +69,12 @@ export const Hot = ({ hotGames, content_limit, initialMeta }: HotProps) => {
     }
   }, [hasMore, loading, pageMeta.currentPage, pageSize, setGames, setPageMeta])
 
-  const setLastItemRef = useInfiniteScroll({
+  const { setTargetRef, isPaused, loadMore } = useInfiniteScroll({
     hasMore,
     onLoadMore: handleLoadMore,
     rootMargin: '0px 0px 320px 0px',
+    autoLoadPages: 5,
+    loadedPages: pageMeta.currentPage - 1,
   })
 
   return (
@@ -80,9 +83,15 @@ export const Hot = ({ hotGames, content_limit, initialMeta }: HotProps) => {
       <Games
         games={games}
         content_limit={content_limit}
-        loading={loading && hasMore}
+        loading={loading && hasMore && !isPaused}
         skeletonCount={8}
-        lastItemRef={hasMore ? setLastItemRef : undefined}
+        lastItemRef={hasMore ? setTargetRef : undefined}
+      />
+      <LoadMoreTrigger
+        isPaused={isPaused}
+        hasMore={hasMore}
+        loadMore={loadMore}
+        loading={loading}
       />
     </div>
   )

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface UseInfiniteScrollOptions {
   enabled?: boolean
@@ -7,6 +7,14 @@ interface UseInfiniteScrollOptions {
   root?: Element | Document | null
   rootMargin?: string
   threshold?: number | number[]
+  autoLoadPages?: number
+  loadedPages?: number
+}
+
+interface UseInfiniteScrollResult<T extends Element> {
+  setTargetRef: (node: T | null) => void
+  isPaused: boolean
+  loadMore: () => void
 }
 
 export const useInfiniteScroll = <T extends Element = HTMLDivElement>({
@@ -16,10 +24,16 @@ export const useInfiniteScroll = <T extends Element = HTMLDivElement>({
   root = null,
   rootMargin = '0px 0px 240px 0px',
   threshold = 0,
-}: UseInfiniteScrollOptions) => {
+  autoLoadPages,
+  loadedPages = 0,
+}: UseInfiniteScrollOptions): UseInfiniteScrollResult<T> => {
   const observerRef = useRef<IntersectionObserver | null>(null)
   const targetRef = useRef<T | null>(null)
   const inFlightRef = useRef(false)
+  const autoLoadCountRef = useRef(loadedPages)
+  const [isPaused, setIsPaused] = useState(
+    () => autoLoadPages !== undefined && loadedPages >= autoLoadPages,
+  )
   const optionsRef = useRef({ enabled, hasMore, onLoadMore })
 
   optionsRef.current = { enabled, hasMore, onLoadMore }
@@ -36,6 +50,18 @@ export const useInfiniteScroll = <T extends Element = HTMLDivElement>({
     }
   }, [])
 
+  const loadMore = useCallback(() => {
+    const current = optionsRef.current
+    if (!current.enabled || !current.hasMore || inFlightRef.current) return
+
+    inFlightRef.current = true
+    Promise.resolve(current.onLoadMore())
+      .catch(() => undefined)
+      .finally(() => {
+        inFlightRef.current = false
+      })
+  }, [])
+
   useEffect(() => {
     if (typeof IntersectionObserver === 'undefined') return
 
@@ -49,12 +75,18 @@ export const useInfiniteScroll = <T extends Element = HTMLDivElement>({
         const current = optionsRef.current
         if (!current.enabled || !current.hasMore || inFlightRef.current) return
 
+        if (autoLoadPages !== undefined && autoLoadCountRef.current >= autoLoadPages) {
+          setIsPaused(true)
+          return
+        }
+
         inFlightRef.current = true
 
         Promise.resolve(current.onLoadMore())
           .catch(() => undefined)
           .finally(() => {
             inFlightRef.current = false
+            autoLoadCountRef.current++
 
             const latestTarget = targetRef.current
             if (!latestTarget || !observerRef.current) return
@@ -79,7 +111,7 @@ export const useInfiniteScroll = <T extends Element = HTMLDivElement>({
         observerRef.current = null
       }
     }
-  }, [root, rootMargin, threshold])
+  }, [root, rootMargin, threshold, autoLoadPages])
 
-  return setTargetRef
+  return { setTargetRef, isPaused, loadMore }
 }

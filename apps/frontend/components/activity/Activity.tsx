@@ -6,6 +6,7 @@ import { Activity as ActivityInterface } from '@/interfaces/activity/activity.in
 import { PaginatedMeta, PaginatedResponse } from '@/interfaces/api/shionlib-api-res.interface'
 import { ActivityCard } from './ActivityCard'
 import { Masonry } from '@/components/common/shared/Masonry'
+import { LoadMoreTrigger } from '@/components/common/shared/LoadMoreTrigger'
 import { FileProgress } from './activities/FileProgress'
 import { buildActivityFeed } from './activities/helpers/activity-feed.helper'
 import { shionlibRequest } from '@/utils/request'
@@ -72,10 +73,12 @@ export const Activity = ({ activities: initialActivities, meta: initialMeta }: A
     }
   }, [hasMore, loading, pageMeta.currentPage, pageSize, setActivities, setPageMeta])
 
-  const setLastItemRef = useInfiniteScroll({
+  const { setTargetRef, isPaused, loadMore } = useInfiniteScroll({
     hasMore,
     onLoadMore: handleLoadMore,
     rootMargin: '0px 0px 320px 0px',
+    autoLoadPages: 5,
+    loadedPages: pageMeta.currentPage - 1,
   })
 
   return (
@@ -86,7 +89,7 @@ export const Activity = ({ activities: initialActivities, meta: initialMeta }: A
           return (
             <div
               key={key}
-              ref={index === feedItems.length - 1 && hasMore ? setLastItemRef : undefined}
+              ref={index === feedItems.length - 1 && hasMore ? setTargetRef : undefined}
               className="break-inside-avoid"
             >
               {item.kind === 'file' ? (
@@ -98,6 +101,12 @@ export const Activity = ({ activities: initialActivities, meta: initialMeta }: A
           )
         })}
       </Masonry>
+      <LoadMoreTrigger
+        isPaused={isPaused}
+        hasMore={hasMore}
+        loadMore={loadMore}
+        loading={loading}
+      />
     </div>
   )
 }

@@ -14,7 +14,7 @@ const getData = async () => {
         params: {
           'filter[sort_by]': 'hot_score',
           page: 1,
-          pageSize: 40,
+          pageSize: 12,
         },
       },
     ),

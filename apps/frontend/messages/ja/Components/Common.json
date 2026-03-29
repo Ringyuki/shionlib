@@ -58,6 +58,9 @@
       "sponsor": "スポンサー"
     }
   },
+  "InfiniteScroll": {
+    "load-more": "もっと見る"
+  },
   "User": {
     "Sponsor": {
       "tooltip": "Shionlibのサポーター！"

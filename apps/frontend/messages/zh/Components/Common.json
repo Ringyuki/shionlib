@@ -58,6 +58,9 @@
       "sponsor": "赞助"
     }
   },
+  "InfiniteScroll": {
+    "load-more": "加载更多"
+  },
   "User": {
     "Sponsor": {
       "tooltip": "Shionlib的小伙伴！"

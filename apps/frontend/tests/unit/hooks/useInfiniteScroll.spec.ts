@@ -44,7 +44,7 @@ describe('hooks/useInfiniteScroll (unit)', () => {
     )
 
     act(() => {
-      result.current(node)
+      result.current.setTargetRef(node)
     })
 
     expect(observers[0]?.observe).toHaveBeenCalledWith(node)
@@ -71,7 +71,7 @@ describe('hooks/useInfiniteScroll (unit)', () => {
     const { result } = renderHook(() => useInfiniteScroll({ onLoadMore, hasMore: true }))
 
     act(() => {
-      result.current(node)
+      result.current.setTargetRef(node)
       observers[0]?.trigger([{ isIntersecting: true, target: node }])
       observers[0]?.trigger([{ isIntersecting: true, target: node }])
     })
@@ -99,10 +99,55 @@ describe('hooks/useInfiniteScroll (unit)', () => {
     const { result } = renderHook(() => useInfiniteScroll({ onLoadMore, hasMore: false }))
 
     act(() => {
-      result.current(node)
+      result.current.setTargetRef(node)
       observers[0]?.trigger([{ isIntersecting: true, target: node }])
     })
 
     expect(onLoadMore).not.toHaveBeenCalled()
+  })
+
+  it('pauses after reaching autoLoadPages and loads more on manual trigger', async () => {
+    const onLoadMore = vi.fn().mockResolvedValue(undefined)
+    const node = document.createElement('div')
+
+    const { result } = renderHook(() =>
+      useInfiniteScroll({ onLoadMore, hasMore: true, autoLoadPages: 2 }),
+    )
+
+    act(() => {
+      result.current.setTargetRef(node)
+    })
+
+    // Auto-load 1
+    act(() => {
+      observers[0]?.trigger([{ isIntersecting: true, target: node }])
+    })
+    await waitFor(() => expect(onLoadMore).toHaveBeenCalledTimes(1))
+
+    // Auto-load 2
+    act(() => {
+      observers[0]?.trigger([{ isIntersecting: true, target: node }])
+    })
+    await waitFor(() => expect(onLoadMore).toHaveBeenCalledTimes(2))
+
+    // Third trigger should pause
+    act(() => {
+      observers[0]?.trigger([{ isIntersecting: true, target: node }])
+    })
+    expect(result.current.isPaused).toBe(true)
+    expect(onLoadMore).toHaveBeenCalledTimes(2)
+
+    // Manual loadMore should trigger one load without resuming auto-loading
+    await act(async () => {
+      result.current.loadMore()
+    })
+    await waitFor(() => expect(onLoadMore).toHaveBeenCalledTimes(3))
+    expect(result.current.isPaused).toBe(true)
+
+    // Observer still paused
+    act(() => {
+      observers[0]?.trigger([{ isIntersecting: true, target: node }])
+    })
+    expect(onLoadMore).toHaveBeenCalledTimes(3)
   })
 })

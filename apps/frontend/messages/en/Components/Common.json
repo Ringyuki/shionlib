@@ -58,6 +58,9 @@
       "sponsor": "Sponsor"
     }
   },
+  "InfiniteScroll": {
+    "load-more": "Load more"
+  },
   "User": {
     "Sponsor": {
       "tooltip": "Shionlib Supporter!"
