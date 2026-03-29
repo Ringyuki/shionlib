@@ -7,16 +7,14 @@ import { shionlibRequest } from '@/utils/request'
 import type {
   CreateSponsorOrderRes,
   PaySponsorOrderRes,
-  PaymentMethodInfo,
   SponsorOrderStatus,
 } from '@/interfaces/sponsor/sponsor.interface'
+import { useSponsorDialogStore } from '@/store/sponsorDialogStore'
 import { SponsorAmountStep } from './SponsorAmountStep'
 import { SponsorPaymentStep } from './SponsorPaymentStep'
 import { SponsorQRCodeStep } from './SponsorQRCodeStep'
 import { SponsorResultStep } from './SponsorResultStep'
 import { Heart } from 'lucide-react'
-
-type Step = 'amount' | 'payment' | 'qrcode' | 'result'
 
 interface SponsorModalProps {
   open: boolean
@@ -25,31 +23,31 @@ interface SponsorModalProps {
 
 export const SponsorModal = ({ open, onOpenChange }: SponsorModalProps) => {
   const t = useTranslations('Components.Sponsor.SponsorModal')
+  const {
+    step,
+    orderId,
+    paymentMethods,
+    payUrl,
+    payCurrency,
+    payAmount,
+    expiresAt,
+    setOrderCreated,
+    setPaymentInitiated,
+    setStep,
+    resetOrder,
+  } = useSponsorDialogStore()
 
-  const [step, setStep] = useState<Step>('amount')
   const [loading, setLoading] = useState(false)
-  const [orderId, setOrderId] = useState<number | null>(null)
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethodInfo[]>([])
-  const [payUrl, setPayUrl] = useState('')
-  const [payCurrency, setPayCurrency] = useState<string | null>(null)
-  const [payAmount, setPayAmount] = useState<number | null>(null)
-  const [expiresAt, setExpiresAt] = useState<string | null>(null)
   const [finalStatus, setFinalStatus] = useState<SponsorOrderStatus['status']>('NEW')
 
-  const reset = () => {
-    setStep('amount')
-    setLoading(false)
-    setOrderId(null)
-    setPaymentMethods([])
-    setPayUrl('')
-    setPayCurrency(null)
-    setPayAmount(null)
-    setExpiresAt(null)
-    setFinalStatus('NEW')
-  }
-
   const handleOpenChange = (value: boolean) => {
-    if (!value) reset()
+    if (!value) {
+      setLoading(false)
+      setFinalStatus('NEW')
+      if (step === 'result') {
+        resetOrder()
+      }
+    }
     onOpenChange(value)
   }
 
@@ -69,10 +67,11 @@ export const SponsorModal = ({ open, onOpenChange }: SponsorModalProps) => {
           isPrivate: data.isPrivate,
         },
       })
-      setOrderId(res.data?.orderId ?? 0)
-      setPaymentMethods(res.data?.paymentMethods ?? [])
-      setExpiresAt(res.data?.expiresAt ?? null)
-      setStep('payment')
+      setOrderCreated({
+        orderId: res.data?.orderId ?? 0,
+        paymentMethods: res.data?.paymentMethods ?? [],
+        expiresAt: res.data?.expiresAt ?? null,
+      })
     } finally {
       setLoading(false)
     }
@@ -86,19 +85,23 @@ export const SponsorModal = ({ open, onOpenChange }: SponsorModalProps) => {
         `/sponsor/order/${orderId}/pay`,
         { data: { method } },
       )
-      setPayUrl(res.data?.payUrl ?? '')
-      setPayCurrency(res.data?.payCurrency ?? null)
-      setPayAmount(res.data?.amount ?? null)
-      setStep('qrcode')
+      setPaymentInitiated({
+        payUrl: res.data?.payUrl ?? '',
+        payCurrency: res.data?.payCurrency ?? null,
+        payAmount: res.data?.amount ?? null,
+      })
     } finally {
       setLoading(false)
     }
   }
 
-  const handleStatusChange = useCallback((status: SponsorOrderStatus['status']) => {
-    setFinalStatus(status)
-    setStep('result')
-  }, [])
+  const handleStatusChange = useCallback(
+    (status: SponsorOrderStatus['status']) => {
+      setFinalStatus(status)
+      setStep('result')
+    },
+    [setStep],
+  )
 
   const title =
     step === 'result' ? undefined : (
@@ -113,14 +116,15 @@ export const SponsorModal = ({ open, onOpenChange }: SponsorModalProps) => {
       open={open}
       onOpenChange={handleOpenChange}
       title={title}
-      closable={step === 'result' || step === 'amount'}
+      description="你的赞助将用于分担 Shionlib 的储存和服务器开支，从而减少广告数量。"
+      closable
     >
       {step === 'amount' && <SponsorAmountStep onNext={handleAmountNext} loading={loading} />}
       {step === 'payment' && (
         <SponsorPaymentStep
           paymentMethods={paymentMethods}
           onSelect={handlePaymentSelect}
-          onBack={() => setStep('amount')}
+          onBack={resetOrder}
           loading={loading}
         />
       )}
@@ -139,7 +143,7 @@ export const SponsorModal = ({ open, onOpenChange }: SponsorModalProps) => {
         <SponsorResultStep
           status={finalStatus}
           onClose={() => handleOpenChange(false)}
-          onRetry={reset}
+          onRetry={resetOrder}
         />
       )}
     </Modal>

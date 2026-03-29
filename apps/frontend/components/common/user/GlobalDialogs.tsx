@@ -5,7 +5,9 @@ import { LogoutDialog } from '@/components/common/user/LogoutDialog'
 import { AnimeTraceDialog } from '@/components/common/search/animetrace/Dialog'
 import { PasskeyBindNudgeDialog } from '@/components/common/user/passkey/PasskeyBindNudgeDialog'
 import { PasskeyBindNudgeWatcher } from '@/components/common/user/passkey/PasskeyBindNudgeWatcher'
+import { SponsorModal } from '@/components/sponsor/SponsorModal'
 import { useAuthDialogStore } from '@/store/authDialogStore'
+import { useSponsorDialogStore } from '@/store/sponsorDialogStore'
 import { useSearchStore } from '@/store/searchStore'
 import { SearchDialog } from '../search/SearchDialog'
 
@@ -20,6 +22,7 @@ export const GlobalDialogs = () => {
     closePasskeyBindNudgeDialog,
   } = useAuthDialogStore()
   const { animeTraceDialogOpen, closeAnimeTraceDialog } = useSearchStore()
+  const { sponsorDialogOpen, closeSponsorDialog } = useSponsorDialogStore()
   return (
     <>
       <PasskeyBindNudgeWatcher />
@@ -49,6 +52,12 @@ export const GlobalDialogs = () => {
         open={passkeyBindNudgeDialogOpen}
         onOpenChange={open => {
           if (!open) closePasskeyBindNudgeDialog()
+        }}
+      />
+      <SponsorModal
+        open={sponsorDialogOpen}
+        onOpenChange={open => {
+          if (!open) closeSponsorDialog()
         }}
       />
     </>

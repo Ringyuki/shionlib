@@ -91,6 +91,7 @@ export const SponsorAmountStep = ({ onNext, loading }: SponsorAmountStepProps) =
               value={customAmount}
               onChange={value => setCustomAmount(value ?? 1)}
               autoFocus
+              prefix={<DollarSign className="size-3" />}
             />
           </div>
         )}

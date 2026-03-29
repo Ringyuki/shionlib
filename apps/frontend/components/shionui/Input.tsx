@@ -25,7 +25,7 @@ const sizeClasses: Record<InputSize, string> = {
 }
 
 const calcPadding = (base: string, hasPrefix: boolean, hasSuffixOrClear: boolean): string => {
-  return cn(base, hasPrefix && 'pl-9', hasSuffixOrClear && 'pr-12')
+  return cn(base, hasPrefix && 'pl-6', hasSuffixOrClear && 'pr-12')
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(

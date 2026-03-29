@@ -10,7 +10,7 @@ type InputSize = 'sm' | 'md' | 'lg'
 
 type InputNumberProps = Omit<
   React.ComponentProps<'input'>,
-  'value' | 'defaultValue' | 'onChange' | 'size' | 'type' | 'inputMode'
+  'value' | 'defaultValue' | 'onChange' | 'size' | 'type' | 'inputMode' | 'prefix' | 'suffix'
 > & {
   value?: number | null
   defaultValue?: number
@@ -39,7 +39,7 @@ const sizeClasses: Record<InputSize, string> = {
 }
 
 const calcPadding = (base: string, hasPrefix: boolean, hasInteractiveRight: boolean): string => {
-  return cn(base, hasPrefix && 'pl-9', hasInteractiveRight && 'pr-16')
+  return cn(base, hasPrefix && 'pl-6', hasInteractiveRight && 'pr-16')
 }
 
 function getStepPrecision(step: number): number {
