@@ -1,0 +1,22 @@
+model Ad {
+  id              Int       @id @default(autoincrement())
+  name            String    @db.VarChar(100)
+  placement       String    @db.VarChar(100)
+  image_zh        String    @db.VarChar(500)
+  image_ja        String?   @db.VarChar(500)
+  image_en        String?   @db.VarChar(500)
+  aspect          String    @db.VarChar(20)
+  link            String    @db.VarChar(500)
+  exclude_locales String[]  @default([])
+  enabled         Boolean   @default(true)
+  sort            Int       @default(0)
+  start_at        DateTime?
+  end_at          DateTime?
+
+  created DateTime @default(now())
+  updated DateTime @updatedAt
+
+  @@index([placement, enabled])
+  @@index([enabled])
+  @@map("ads")
+}
