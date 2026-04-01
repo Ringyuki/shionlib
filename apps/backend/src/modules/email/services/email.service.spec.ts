@@ -53,6 +53,20 @@ describe('EmailService', () => {
     })
   })
 
+  it('sendPasswordResetLink uses default expSeconds when not provided', async () => {
+    const { service, emailSender, i18nService } = createService()
+
+    await expect(
+      service.sendPasswordResetLink('a@example.com', 'https://reset.example.com'),
+    ).resolves.toBe(true)
+    expect(generatePasswordResetTemplateMock).toHaveBeenCalledWith(
+      i18nService,
+      'https://reset.example.com',
+      600,
+    )
+    expect(emailSender.send).toHaveBeenCalled()
+  })
+
   it('sendPasswordResetLink builds payload with i18n/template and delegates to emailSender', async () => {
     const { service, emailSender, i18nService } = createService()
 

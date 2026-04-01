@@ -6,6 +6,27 @@ import { EMAIL_SENDER, EmailSender } from './interfaces/email-sender.interface'
 import { ElasticEmailProvider } from './providers/elastic-email.provider'
 import { PostalEmailProvider } from './providers/postal-email.provider'
 
+// Inlining the factory function inside the decorator makes it inconvenient to test directly, so it is extracted here for easier unit testing.
+export function emailSenderFactory(
+  httpService: HttpService,
+  configService: ShionConfigService,
+): EmailSender {
+  const provider = configService.get('email.emailProvider')
+  const apiKey = configService.get('email.emailApiKey')
+  const endPoint = configService.get('email.emailEndPoint')
+  const senderAddress = configService.get('email.emailSenderAddress')
+  const senderName = configService.get('email.emailSenderName')
+
+  switch (provider) {
+    case 'elastic':
+      return new ElasticEmailProvider(httpService, apiKey, endPoint, senderAddress, senderName)
+    case 'postal':
+      return new PostalEmailProvider(httpService, apiKey, endPoint, senderAddress, senderName)
+    default:
+      throw new Error(`Unsupported email provider: ${provider}`)
+  }
+}
+
 @Global()
 @Module({
   imports: [HttpModule],
@@ -14,28 +35,7 @@ import { PostalEmailProvider } from './providers/postal-email.provider'
     {
       provide: EMAIL_SENDER,
       inject: [HttpService, ShionConfigService],
-      useFactory: (httpService: HttpService, configService: ShionConfigService): EmailSender => {
-        const provider = configService.get('email.emailProvider')
-        const apiKey = configService.get('email.emailApiKey')
-        const endPoint = configService.get('email.emailEndPoint')
-        const senderAddress = configService.get('email.emailSenderAddress')
-        const senderName = configService.get('email.emailSenderName')
-
-        switch (provider) {
-          case 'elastic':
-            return new ElasticEmailProvider(
-              httpService,
-              apiKey,
-              endPoint,
-              senderAddress,
-              senderName,
-            )
-          case 'postal':
-            return new PostalEmailProvider(httpService, apiKey, endPoint, senderAddress, senderName)
-          default:
-            throw new Error(`Unsupported email provider: ${provider}`)
-        }
-      },
+      useFactory: emailSenderFactory,
     },
   ],
   exports: [EmailService],

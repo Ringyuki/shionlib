@@ -60,8 +60,7 @@ jobs:
           script: |
             const run = context.payload.workflow_run
             if (run.conclusion !== 'success') {
-              core.info(`CI conclusion: ${run.conclusion}, skipping deploy`)
-              core.setOutput('should-deploy', 'false')
+              core.setFailed(`CI conclusion: ${run.conclusion}, aborting deploy`)
               return
             }
 
