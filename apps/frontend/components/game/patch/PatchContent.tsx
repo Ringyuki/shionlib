@@ -2,7 +2,8 @@ import { KunPatchResourceResponse } from '@/interfaces/patch/patch.interface'
 import { PatchItem } from './PatchItem'
 import { cn } from '@/utils/cn'
 import { Moyu } from './about/Moyu'
-import { Ad } from '@/components/common/site/Ad'
+import { AdSlotClient } from '@/components/common/site/Ad'
+import { AD_PLACEMENTS } from '@/constants/ad-placements'
 
 interface PatchContentProps {
   patches: KunPatchResourceResponse[]
@@ -25,8 +26,8 @@ export const PatchContent = ({ patches, className }: PatchContentProps) => {
           .map(patch => (
             <PatchItem key={patch.id} patch={patch} />
           ))}
-        <Ad id={1} />
-        <Ad id={2} />
+        <AdSlotClient placement={AD_PLACEMENTS.GAME_PATCH_BOTTOM_1} />
+        <AdSlotClient placement={AD_PLACEMENTS.GAME_PATCH_BOTTOM_2} />
       </div>
       <Moyu />
     </div>

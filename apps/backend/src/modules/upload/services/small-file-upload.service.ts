@@ -185,6 +185,24 @@ export class SmallFileUploadService {
     }
   }
 
+  async uploadAdImage(file: Express.Multer.File, req: RequestWithUser) {
+    if (!file) {
+      throw new ShionBizException(
+        ShionBizCode.SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED,
+        'shion-biz.SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED',
+      )
+    }
+
+    const data = await this.imageProcessService.process(Buffer.from(file.buffer), {
+      format: TargetFormatEnum.WEBP,
+    })
+    const key = `ad/image/${nodeRandomUUID()}${data.filenameSuffix}`
+    await this._upload(data, key, {
+      uploader_id: req.user.sub.toString(),
+    })
+    return { key }
+  }
+
   private async _upload(dto: ImageProcessResDto, key: string, metadata?: Record<string, string>) {
     try {
       const buffer = Buffer.from(dto.data)

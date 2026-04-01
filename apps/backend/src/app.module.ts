@@ -44,6 +44,7 @@ import { HealthModule } from './modules/health/health.module'
 import { PotatoVNModule } from './modules/potatovn/potatovn.module'
 import { WalkthroughModule } from './modules/walkthrough/walkthrough.module'
 import { SponsorModule } from './modules/sponsor/sponsor.module'
+import { AdModule } from './modules/ad/ad.module'
 
 @Module({
   imports: [
@@ -120,6 +121,7 @@ import { SponsorModule } from './modules/sponsor/sponsor.module'
     PotatoVNModule,
     WalkthroughModule,
     SponsorModule,
+    AdModule,
   ],
   controllers: [],
   providers: [

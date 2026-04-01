@@ -13,6 +13,7 @@ import {
   Gamepad2,
   ScrollText,
   Heart,
+  Megaphone,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -41,6 +42,7 @@ const sidebarItems: SidebarItem[] = [
   { key: 'reports', icon: ShieldAlert, href: '/admin/reports' },
   { key: 'malwareScans', icon: Biohazard, href: '/admin/malware-scans' },
   { key: 'sponsors', icon: Heart, href: '/admin/sponsors' },
+  { key: 'ads', icon: Megaphone, href: '/admin/ads' },
   // { key: 'characters', icon: Users, href: '/admin/characters' },
   // { key: 'developers', icon: Building2, href: '/admin/developers' },
   // { key: 'settings', icon: Settings, href: '/admin/settings' },

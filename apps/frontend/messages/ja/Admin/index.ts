@@ -7,6 +7,7 @@ import Walkthroughs from './Walkthroughs.json'
 import Reports from './Reports.json'
 import MalwareScans from './MalwareScans.json'
 import Sponsors from './Sponsors.json'
+import Ads from './Ads.json'
 
 const messages = {
   Sidebar,
@@ -18,6 +19,7 @@ const messages = {
   Reports,
   MalwareScans,
   Sponsors,
+  Ads,
 } as const
 
 export default messages

@@ -152,4 +152,7 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
   [ShionBizCode.SPONSOR_PROVIDER_REQUEST_FAILED]: HttpStatus.BAD_GATEWAY,
   [ShionBizCode.SPONSOR_PROVIDER_VERIFICATION_FAILED]: HttpStatus.BAD_GATEWAY,
   [ShionBizCode.SPONSOR_MODULE_DISABLED]: HttpStatus.SERVICE_UNAVAILABLE,
+
+  // 58
+  [ShionBizCode.AD_NOT_FOUND]: HttpStatus.NOT_FOUND,
 } as const satisfies Record<ShionBizCode, HttpStatus>

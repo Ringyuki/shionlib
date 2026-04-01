@@ -27,8 +27,8 @@ const hoisted = vi.hoisted(() => {
   const GameHeader = vi.fn(({ game }: { game: { id: number } }) =>
     React.createElement('section', { 'data-testid': 'game-header', 'data-id': String(game.id) }),
   )
-  const Ad = vi.fn(({ id }: { id: number }) =>
-    React.createElement('section', { 'data-testid': 'ad', 'data-id': String(id) }),
+  const AdSlot = vi.fn(({ placement }: { placement: string }) =>
+    React.createElement('section', { 'data-testid': 'ad', 'data-placement': placement }),
   )
   const GameTabsNav = vi.fn(() => React.createElement('section', { 'data-testid': 'game-tabs' }))
 
@@ -42,7 +42,7 @@ const hoisted = vi.hoisted(() => {
     getPreferredContent,
     ViewPing,
     GameHeader,
-    Ad,
+    AdSlot,
     GameTabsNav,
   }
 })
@@ -73,7 +73,7 @@ vi.mock('@/components/game/description/GameHeader', () => ({
   GameHeader: hoisted.GameHeader,
 }))
 vi.mock('@/components/common/site/Ad', () => ({
-  Ad: hoisted.Ad,
+  AdSlot: hoisted.AdSlot,
 }))
 vi.mock('@/components/game/TabsNav', () => ({
   GameTabsNav: hoisted.GameTabsNav,

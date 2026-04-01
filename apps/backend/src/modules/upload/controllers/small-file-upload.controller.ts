@@ -9,6 +9,9 @@ import {
   Req,
 } from '@nestjs/common'
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
+import { RolesGuard } from '../../auth/guards/roles.guard'
+import { Roles } from '../../auth/decorators/roles.decorator'
+import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { FileInterceptor } from '@nestjs/platform-express'
@@ -129,5 +132,30 @@ export class SmallFileUploadController {
     @Req() req: RequestWithUser,
   ) {
     return await this.smallFileUploadService.uploadCharacterImage(character_id, file, req)
+  }
+
+  @Put('ad/image')
+  @UseGuards(RolesGuard)
+  @Roles(ShionlibUserRoles.ADMIN)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: SMALL_FILE_UPLOAD_FILE_SIZE_HARD_LIMIT },
+      fileFilter: (_req, file, cb) => {
+        const ok = /^image\/(jpeg|png|webp|avif)$/.test(file.mimetype)
+        cb(
+          ok
+            ? null
+            : new ShionBizException(
+                ShionBizCode.SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE,
+                'shion-biz.SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE',
+              ),
+          ok,
+        )
+      },
+    }),
+  )
+  async uploadAdImage(@UploadedFile() file: Express.Multer.File, @Req() req: RequestWithUser) {
+    return await this.smallFileUploadService.uploadAdImage(file, req)
   }
 }

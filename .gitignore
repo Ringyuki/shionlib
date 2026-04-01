@@ -12,3 +12,5 @@ apps/*/tsconfig.tsbuildinfo
 
 .DS_Store
 .env*
+
+coverage/

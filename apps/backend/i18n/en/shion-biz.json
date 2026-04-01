@@ -125,5 +125,7 @@
   "SPONSOR_ORDER_EXPIRED": "this order has expired",
   "SPONSOR_PROVIDER_REQUEST_FAILED": "payment provider request failed, message: {message}",
   "SPONSOR_PROVIDER_VERIFICATION_FAILED": "payment verification failed",
-  "SPONSOR_MODULE_DISABLED": "sponsor module is currently disabled"
+  "SPONSOR_MODULE_DISABLED": "sponsor module is currently disabled",
+
+  "AD_NOT_FOUND": "ad not found"
 }

@@ -333,6 +333,28 @@ describe('SmallFileUploadService', () => {
     expect((global as any).fetch).toHaveBeenCalledTimes(5)
   })
 
+  it('uploadAdImage validates file presence and uploads', async () => {
+    const { service, imageProcessService, s3Service } = createService()
+
+    await expect(service.uploadAdImage(undefined as any, reqAdmin as any)).rejects.toMatchObject({
+      code: ShionBizCode.SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED,
+    })
+
+    imageProcessService.process.mockResolvedValueOnce(processResult)
+    await expect(service.uploadAdImage(makeFile(), reqAdmin as any)).resolves.toEqual({
+      key: 'ad/image/mock-uuid.webp',
+    })
+    expect(imageProcessService.process).toHaveBeenCalledWith(expect.any(Buffer), {
+      format: TargetFormatEnum.WEBP,
+    })
+    expect(s3Service.uploadFile).toHaveBeenCalledWith(
+      'ad/image/mock-uuid.webp',
+      expect.any(Buffer),
+      'image/webp',
+      { uploader_id: '1' },
+    )
+  })
+
   it('_uploadUserAvatar resizes and uploads avatar', async () => {
     const { service, imageProcessService, s3Service } = createService()
     imageProcessService.process.mockResolvedValueOnce(processResult)

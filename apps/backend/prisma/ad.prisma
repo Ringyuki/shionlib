@@ -1,7 +1,7 @@
 model Ad {
   id              Int       @id @default(autoincrement())
   name            String    @db.VarChar(100)
-  placement       String    @db.VarChar(100)
+  placement       String[]  @default([])
   image_zh        String    @db.VarChar(500)
   image_ja        String?   @db.VarChar(500)
   image_en        String?   @db.VarChar(500)
@@ -16,7 +16,7 @@ model Ad {
   created DateTime @default(now())
   updated DateTime @updatedAt
 
-  @@index([placement, enabled])
+  @@index([placement], type: Gin)
   @@index([enabled])
   @@map("ads")
 }

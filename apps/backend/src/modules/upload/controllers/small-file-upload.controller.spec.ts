@@ -24,6 +24,7 @@ describe('SmallFileUploadController', () => {
       uploadGameImage: jest.fn(),
       uploadDeveloperLogo: jest.fn(),
       uploadCharacterImage: jest.fn(),
+      uploadAdImage: jest.fn(),
     }
 
     return {
@@ -41,15 +42,17 @@ describe('SmallFileUploadController', () => {
     await controller.uploadGameImage(2, file, req as any)
     await controller.uploadDeveloperLogo(3, file, req as any)
     await controller.uploadCharacterImage(4, file, req as any)
+    await controller.uploadAdImage(file, req as any)
 
     expect(smallFileUploadService.uploadGameCover).toHaveBeenCalledWith(1, file, req)
     expect(smallFileUploadService.uploadGameImage).toHaveBeenCalledWith(2, file, req)
     expect(smallFileUploadService.uploadDeveloperLogo).toHaveBeenCalledWith(3, file, req)
     expect(smallFileUploadService.uploadCharacterImage).toHaveBeenCalledWith(4, file, req)
+    expect(smallFileUploadService.uploadAdImage).toHaveBeenCalledWith(file, req)
   })
 
   it('accepts supported image mimetypes and rejects unsupported ones in every fileFilter', () => {
-    expect(capturedFileInterceptorOptions).toHaveLength(4)
+    expect(capturedFileInterceptorOptions).toHaveLength(5)
 
     for (const options of capturedFileInterceptorOptions) {
       const okCb = jest.fn()

@@ -124,5 +124,7 @@
   "SPONSOR_ORDER_EXPIRED": "この注文は期限切れです",
   "SPONSOR_PROVIDER_REQUEST_FAILED": "決済サービスのリクエストに失敗しました。メッセージ: {message}",
   "SPONSOR_PROVIDER_VERIFICATION_FAILED": "決済の検証に失敗しました",
-  "SPONSOR_MODULE_DISABLED": "スポンサーモジュールは現在無効です"
+  "SPONSOR_MODULE_DISABLED": "スポンサーモジュールは現在無効です",
+
+  "AD_NOT_FOUND": "広告が見つかりません"
 }

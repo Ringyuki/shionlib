@@ -5,7 +5,8 @@ import { shionlibRequest } from '@/utils/request'
 import { GameData } from '@/interfaces/game/game.interface'
 import { ViewPing } from '@/components/game/ViewPing'
 import { GameHeader } from '@/components/game/description/GameHeader'
-import { Ad } from '@/components/common/site/Ad'
+import { AdSlot } from '@/components/common/site/Ad'
+import { AD_PLACEMENTS } from '@/constants/ad-placements'
 import { GameTabsNav } from '@/components/game/TabsNav'
 import { createGenerateMetadata } from '@/libs/seo/metadata'
 import { getPreferredContent } from '@/components/game/description/helpers/getPreferredContent'
@@ -33,7 +34,6 @@ export default async function GameLayout({ children, params }: GameLayoutProps) 
         <ForceScrollTop />
         <div className="flex flex-col gap-4">
           <GameHeader game={header.data} />
-          {/* <Ad id={3} /> */}
           <div
             className="flex flex-col gap-4 shadow-content-strong bg-card-soft w-full rounded-md p-4"
             id="game-content"
@@ -45,7 +45,7 @@ export default async function GameLayout({ children, params }: GameLayoutProps) 
               </div>
             </div>
           </div>
-          <Ad id={3} />
+          <AdSlot placement={AD_PLACEMENTS.GAME_DETAIL_BOTTOM} />
         </div>
       </>
     </div>

@@ -176,6 +176,7 @@ export type I18nTranslations = {
         "SPONSOR_PROVIDER_REQUEST_FAILED": string;
         "SPONSOR_PROVIDER_VERIFICATION_FAILED": string;
         "SPONSOR_MODULE_DISABLED": string;
+        "AD_NOT_FOUND": string;
     };
     "validation": {
         "common": {

@@ -5,7 +5,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/shionui/Alert'
 import { useTranslations } from 'next-intl'
 import { AlertCircle } from 'lucide-react'
 import { BBCodeContent } from '@/components/common/content/bbcode/BBCode'
-import { Ad } from '@/components/common/site/Ad'
+import { AdSlotClient } from '@/components/common/site/Ad'
+import { AD_PLACEMENTS } from '@/constants/ad-placements'
 
 interface GameDownloadContentProps {
   className?: string
@@ -48,8 +49,8 @@ export const GameDownloadContent = ({
             onTurnstileOpenChange={onTurnstileOpenChange}
           />
         ))}
-      <Ad id={1} />
-      <Ad id={2} />
+      <AdSlotClient placement={AD_PLACEMENTS.GAME_DOWNLOAD_BOTTOM_1} />
+      <AdSlotClient placement={AD_PLACEMENTS.GAME_DOWNLOAD_BOTTOM_2} />
     </div>
   )
 }

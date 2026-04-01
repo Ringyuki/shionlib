@@ -1,11 +1,9 @@
-import { SupportedLocales } from '@/config/i18n/supported'
-
 export interface Ad {
   id: number
   image_zh: string
-  image_ja?: string
-  image_en?: string
+  image_ja: string | null
+  image_en: string | null
   aspect: string
   link: string
-  excludeLocales?: SupportedLocales[]
+  exclude_locales: string[]
 }
