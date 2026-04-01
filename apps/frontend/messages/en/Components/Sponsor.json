@@ -1,6 +1,7 @@
 {
   "SponsorModal": {
     "title": "Sponsor Shionlib",
+    "description": "Your sponsorship will be used to help cover the storage and server costs of Shionlib, reducing the number of ads.",
     "amount-title": "Choose Amount",
     "amount-custom": "Custom",
     "name-placeholder": "Your name (optional)",

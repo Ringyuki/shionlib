@@ -1,6 +1,7 @@
 {
   "SponsorModal": {
     "title": "赞助 Shionlib",
+    "description": "你的赞助将用于分担 Shionlib 的储存和服务器开支，从而减少广告数量。",
     "amount-title": "选择金额",
     "amount-custom": "自定义",
     "name-placeholder": "你的名字（可选）",

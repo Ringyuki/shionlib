@@ -1,6 +1,7 @@
 {
   "SponsorModal": {
     "title": "Shionlib をスポンサーする",
+    "description": "あなたのスポンサーは Shionlib のストレージとサーバーのコストを軽減するために使用されます。",
     "amount-title": "金額を選択",
     "amount-custom": "カスタム",
     "name-placeholder": "お名前（任意）",

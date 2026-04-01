@@ -116,7 +116,7 @@ export const SponsorModal = ({ open, onOpenChange }: SponsorModalProps) => {
       open={open}
       onOpenChange={handleOpenChange}
       title={title}
-      description="你的赞助将用于分担 Shionlib 的储存和服务器开支，从而减少广告数量。"
+      description={t('description')}
       closable
     >
       {step === 'amount' && <SponsorAmountStep onNext={handleAmountNext} loading={loading} />}
