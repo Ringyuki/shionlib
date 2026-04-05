@@ -39,7 +39,7 @@ const sizeClasses: Record<InputSize, string> = {
 }
 
 const calcPadding = (base: string, hasPrefix: boolean, hasInteractiveRight: boolean): string => {
-  return cn(base, hasPrefix && 'pl-6', hasInteractiveRight && 'pr-16')
+  return cn(base, hasPrefix && 'pl-7', hasInteractiveRight && 'pr-16')
 }
 
 function getStepPrecision(step: number): number {
