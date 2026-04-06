@@ -27,8 +27,6 @@ interface NavProps {
   items: NavBarConfig['links']
 }
 
-const navItemClassName = 'font-normal px-4 py-2 rounded-md cursor-pointer duration-200'
-
 export const Nav = ({ items }: NavProps) => {
   const t = useTranslations('Components.Common.TopBar.NavBar')
   const segment = useSelectedLayoutSegment()
@@ -51,7 +49,7 @@ export const Nav = ({ items }: NavProps) => {
             target={link.external ? '_blank' : undefined}
             data-active={isActive ? 'true' : 'false'}
             className={cn(
-              navItemClassName,
+              'font-normal px-4 py-2 rounded-md cursor-pointer duration-200',
               link.external ? 'hover:opacity-70' : 'hover:bg-primary/5 hover:text-primary',
               isActive && 'bg-primary/10 hover:bg-primary/10 text-primary',
             )}
@@ -74,8 +72,8 @@ const NavAdPopoverItem = ({ item, label }: { item: NavBarAdPopoverItem; label: s
         <NavigationMenuItem>
           <NavigationMenuTrigger
             className={cn(
-              navItemClassName,
-              'bg-transparent hover:bg-transparent hover:opacity-70 focus:bg-transparent data-[state=open]:bg-transparent',
+              'font-normal px-4 py-2 rounded-md cursor-pointer duration-200',
+              'bg-transparent! hover:bg-transparent! hover:opacity-70 focus:bg-transparent data-[state=open]:bg-transparent',
               'h-auto text-base font-normal transition-opacity duration-200',
             )}
           >
