@@ -34,14 +34,29 @@ export interface ShionlibSiteConfig {
   }
 }
 
+export interface NavBarLinkItem {
+  type?: 'link'
+  label: string
+  href: string
+  external?: boolean
+  icon?: React.ReactNode
+  gradientText?: boolean
+  gradientTextColor?: string
+  excludeLocales?: SupportedLocales[]
+}
+
+export interface NavBarAdPopoverItem {
+  type: 'ad-popover'
+  label: string
+  adPlacement: string
+  icon?: React.ReactNode
+  gradientText?: boolean
+  gradientTextColor?: string
+  excludeLocales?: SupportedLocales[]
+}
+
+export type NavBarItem = NavBarLinkItem | NavBarAdPopoverItem
+
 export interface NavBarConfig {
-  links: {
-    label: string
-    href: string
-    external?: boolean
-    icon?: React.ReactNode
-    gradientText?: boolean
-    gradientTextColor?: string
-    excludeLocales?: SupportedLocales[]
-  }[]
+  links: NavBarItem[]
 }

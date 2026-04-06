@@ -102,9 +102,10 @@ export const MobileNav = ({ items }: MobileNavProps) => {
             </div>
             <div className="flex flex-col gap-3">
               <NavItem href="/" label={t('home')} />
-              {items.map((item, index) => (
-                <NavItem key={index} href={item.href} label={t(item.label)} />
-              ))}
+              {items.map((item, index) => {
+                if (item.type === 'ad-popover') return null
+                return <NavItem key={index} href={item.href} label={t(item.label)} />
+              })}
             </div>
           </div>
         </div>

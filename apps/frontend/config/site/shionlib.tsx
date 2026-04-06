@@ -1,6 +1,7 @@
 import { ShionlibSiteConfig, NavBarConfig } from '@/interfaces/site/shion-lib-site-config.interface'
 import { SparklesIcon } from 'lucide-react'
 import { supportedLocalesEnum } from '../i18n/supported'
+import { AD_PLACEMENTS } from '../../constants/ad-placements'
 
 export const shionlibSiteConfig: ShionlibSiteConfig = {
   canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://shionlib.com',
@@ -37,9 +38,9 @@ export const navBarConfig: NavBarConfig = {
       href: '/docs',
     },
     {
+      type: 'ad-popover',
       label: 'aiGirlFriend',
-      href: 'https://s.himoe.uk/ycnbdn',
-      external: true,
+      adPlacement: AD_PLACEMENTS.NAV_AI_GIRLFRIEND,
       icon: <SparklesIcon className="w-4 h-4" />,
       gradientText: true,
       excludeLocales: [supportedLocalesEnum.JA, supportedLocalesEnum.EN],

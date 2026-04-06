@@ -38,12 +38,12 @@ describe('config/site/shionlib (unit)', () => {
     expect(shionlibSiteConfig.robots.follow).toBe(false)
   })
 
-  it('contains required navbar links with one external entry', async () => {
+  it('contains required navbar links with one ad-popover entry', async () => {
     const { navBarConfig } = await loadConfig()
 
     expect(navBarConfig.links.length).toBeGreaterThan(0)
-    expect(navBarConfig.links.some(link => link.href === '/game')).toBe(true)
-    expect(navBarConfig.links.some(link => link.href === '/docs')).toBe(true)
-    expect(navBarConfig.links.some(link => link.external === true)).toBe(true)
+    expect(navBarConfig.links.some(link => 'href' in link && link.href === '/game')).toBe(true)
+    expect(navBarConfig.links.some(link => 'href' in link && link.href === '/docs')).toBe(true)
+    expect(navBarConfig.links.some(link => link.type === 'ad-popover')).toBe(true)
   })
 })
