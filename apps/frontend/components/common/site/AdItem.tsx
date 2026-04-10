@@ -5,14 +5,13 @@ import { FadeImage } from '@/components/common/shared/FadeImage'
 import Link from 'next/link'
 import { cn } from '@/utils/cn'
 import { useTranslations, useLocale } from 'next-intl'
-import { getLocalImageUrl } from './helpers/ad'
+import { getLocalImageUrl, needShowAd } from './helpers/ad'
 import { SupportedLocales } from '@/config/i18n/supported'
 
 export const AdItem = ({ ad }: { ad: Ad }) => {
   const t = useTranslations('Components.Common.Site.Ad')
   const locale = useLocale() as SupportedLocales
-
-  if (ad.exclude_locales?.includes(locale)) return null
+  if (!needShowAd(locale, [ad])) return null
 
   const image = getLocalImageUrl(locale, ad)
   return (
@@ -36,7 +35,9 @@ export const AdItem = ({ ad }: { ad: Ad }) => {
 }
 
 export const AdList = ({ ads }: { ads: Ad[] }) => {
-  if (!ads.length) return null
+  const locale = useLocale() as SupportedLocales
+  if (!needShowAd(locale, ads)) return null
+
   return (
     <div className="flex flex-col gap-4">
       {ads.map(ad => (

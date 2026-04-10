@@ -14,6 +14,7 @@ import { VerificationCodeController } from './controllers/verification-code.cont
 import { PasswordService } from './services/password.service'
 import { PasskeyService } from './services/passkey.service'
 import { PasskeyController } from './controllers/passkey.controller'
+import { SessionCleanupTask } from './tasks/session-cleanup.task'
 
 @Global()
 @Module({
@@ -39,6 +40,7 @@ import { PasskeyController } from './controllers/passkey.controller'
     VerificationCodeService,
     PasswordService,
     PasskeyService,
+    SessionCleanupTask,
   ],
   controllers: [AuthController, VerificationCodeController, PasskeyController],
   exports: [JwtModule, PassportModule, LoginSessionService, UserService],

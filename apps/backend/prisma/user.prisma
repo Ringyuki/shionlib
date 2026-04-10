@@ -96,6 +96,7 @@ model UserLoginSession {
   @@unique([refresh_token_prefix])
   @@index([family_id])
   @@index([user_id, status])
+  @@index([status, expires_at])
   @@map("user_login_sessions")
 }
 
