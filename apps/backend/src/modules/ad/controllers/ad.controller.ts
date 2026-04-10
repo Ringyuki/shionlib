@@ -1,7 +1,8 @@
-import { Controller, Get, Param } from '@nestjs/common'
+import { Controller, Get, Param, Req } from '@nestjs/common'
 import { AdService } from '../services/ad.service'
 import { CacheService } from '../../cache/services/cache.service'
 import { AdItemResDto } from '../dto/res/ad-item.res.dto'
+import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 
 @Controller('ad')
 export class AdController {
@@ -11,7 +12,12 @@ export class AdController {
   ) {}
 
   @Get('placement/:placement')
-  async getAdsByPlacement(@Param('placement') placement: string): Promise<AdItemResDto[]> {
+  async getAdsByPlacement(
+    @Req() req: RequestWithUser,
+    @Param('placement') placement: string,
+  ): Promise<AdItemResDto[]> {
+    if (await this.adService.isUserSponsor(req.user.sub)) return []
+
     const cacheKey = `ad:placement:${placement}`
     const cached = await this.cacheService.get<AdItemResDto[]>(cacheKey)
     if (cached) return cached

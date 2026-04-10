@@ -7,15 +7,18 @@ import { cn } from '@/utils/cn'
 import { useTranslations, useLocale } from 'next-intl'
 import { getLocalImageUrl, needShowAd } from './helpers/ad'
 import { SupportedLocales } from '@/config/i18n/supported'
+import { useAdFreeDialogStore } from '@/store/adFreeDialogStore'
+import { X } from 'lucide-react'
 
 export const AdItem = ({ ad }: { ad: Ad }) => {
   const t = useTranslations('Components.Common.Site.Ad')
   const locale = useLocale() as SupportedLocales
+  const { openAdFreeDialog } = useAdFreeDialogStore()
   if (!needShowAd(locale, [ad])) return null
 
   const image = getLocalImageUrl(locale, ad)
   return (
-    <div className="w-full">
+    <div className="group/ad w-full relative">
       <Link
         href={ad.link}
         target="_blank"
@@ -30,6 +33,22 @@ export const AdItem = ({ ad }: { ad: Ad }) => {
           <span className="text-white text-xs md:text-sm">{t('ad')}</span>
         </div>
       </Link>
+      <button
+        type="button"
+        onClick={e => {
+          e.preventDefault()
+          e.stopPropagation()
+          openAdFreeDialog()
+        }}
+        className={cn(
+          'absolute left-2 top-2 flex items-center gap-1 px-2 py-1',
+          'rounded-md bg-black/50 text-white text-xs cursor-pointer',
+          'opacity-0 group-hover/ad:opacity-100 transition-opacity duration-200',
+        )}
+      >
+        <X className="size-3" />
+        <span className="hidden md:inline">{t('hide-ad')}</span>
+      </button>
     </div>
   )
 }

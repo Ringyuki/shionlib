@@ -11,6 +11,7 @@ export interface User {
   lang: SupportedLocales
   content_limit?: ContentLimit
   status?: UserStatus
+  is_sponsor?: boolean
 }
 
 export interface UserProfile {

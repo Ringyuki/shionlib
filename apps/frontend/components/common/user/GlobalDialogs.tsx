@@ -6,6 +6,7 @@ import { AnimeTraceDialog } from '@/components/common/search/animetrace/Dialog'
 import { PasskeyBindNudgeDialog } from '@/components/common/user/passkey/PasskeyBindNudgeDialog'
 import { PasskeyBindNudgeWatcher } from '@/components/common/user/passkey/PasskeyBindNudgeWatcher'
 import { SponsorModal } from '@/components/sponsor/SponsorModal'
+import { AdFreeModal } from '@/components/common/site/AdFreeModal'
 import { useAuthDialogStore } from '@/store/authDialogStore'
 import { useSponsorDialogStore } from '@/store/sponsorDialogStore'
 import { useSearchStore } from '@/store/searchStore'
@@ -60,6 +61,7 @@ export const GlobalDialogs = () => {
           if (!open) closeSponsorDialog()
         }}
       />
+      <AdFreeModal />
     </>
   )
 }

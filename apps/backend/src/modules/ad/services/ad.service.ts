@@ -19,6 +19,15 @@ export class AdService {
     private readonly cacheService: CacheService,
   ) {}
 
+  async isUserSponsor(userId: number): Promise<boolean> {
+    if (!userId) return false
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { sponsor_expires_at: true },
+    })
+    return !!user?.sponsor_expires_at && user.sponsor_expires_at > new Date()
+  }
+
   async getAdsByPlacement(placement: string): Promise<AdItemResDto[]> {
     const now = new Date()
     return this.prisma.ad.findMany({

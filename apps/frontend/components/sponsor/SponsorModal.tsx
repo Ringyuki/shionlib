@@ -105,7 +105,7 @@ export const SponsorModal = ({ open, onOpenChange }: SponsorModalProps) => {
 
   const title =
     step === 'result' ? undefined : (
-      <span className="flex gap-2 items-center">
+      <span className="flex gap-2 items-center justify-center">
         {t('title')}
         <Heart className="size-5 text-destructive fill-destructive" />
       </span>

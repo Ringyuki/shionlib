@@ -85,7 +85,7 @@ export const SponsorAmountStep = ({ onNext, loading }: SponsorAmountStepProps) =
         {isCustom && (
           <div className="mt-2">
             <InputNumber
-              min={1}
+              min={5}
               max={10000}
               placeholder="1 - 10000"
               value={customAmount}

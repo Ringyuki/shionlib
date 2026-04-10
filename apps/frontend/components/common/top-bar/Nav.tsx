@@ -22,6 +22,7 @@ import {
 import { GradientText } from '@/components/shionui/GradientText'
 import { GradientIcon } from '@/components/shionui/GradientIcon'
 import { NavAdContent } from './NavAdContent'
+import { useShionlibUserStore } from '@/store/userStore'
 
 interface NavProps {
   items: NavBarConfig['links']
@@ -31,14 +32,17 @@ export const Nav = ({ items }: NavProps) => {
   const t = useTranslations('Components.Common.TopBar.NavBar')
   const segment = useSelectedLayoutSegment()
   const locale = useLocale() as SupportedLocales
+  const isSponsor = useShionlibUserStore(state => state.user.is_sponsor)
 
   return (
     <nav className="flex items-center gap-0.5">
       <RandomGame />
       {items.map((item, index) => {
         if (item.excludeLocales?.includes(locale)) return null
-        if (item.type === 'ad-popover')
+        if (item.type === 'ad-popover') {
+          if (isSponsor) return null
           return <NavAdPopoverItem key={`ad-${index}`} item={item} label={t(item.label)} />
+        }
 
         const link = item as NavBarLinkItem
         const isActive = segment === link.href.replace(/^\//, '')

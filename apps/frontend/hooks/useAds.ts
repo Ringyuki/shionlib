@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Ad } from '@/interfaces/site/ad.interface'
 import { fetchAdsByPlacement } from '@/libs/ad/fetch-ads'
+import { useShionlibUserStore } from '@/store/userStore'
 
 const TTL = 30 * 60_000
 
@@ -24,9 +25,15 @@ const isExpire = (cache: CachedAds) => {
 }
 
 export const useAds = (placement: string) => {
+  const isSponsor = useShionlibUserStore(state => state.user.is_sponsor)
   const [ads, setAds] = useState<Ad[]>([])
 
   useEffect(() => {
+    if (isSponsor) {
+      setAds([])
+      return
+    }
+
     const cached = localStorage.getItem(getKey(placement))
     if (cached) {
       const cache = JSON.parse(cached) as CachedAds
@@ -44,7 +51,7 @@ export const useAds = (placement: string) => {
       setAds(ads)
       ads.length && localStorage.setItem(getKey(placement), JSON.stringify(getValue(ads)))
     })
-  }, [placement])
+  }, [placement, isSponsor])
 
   return ads
 }

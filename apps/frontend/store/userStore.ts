@@ -12,6 +12,7 @@ interface ShionlibUserInfo {
   bio: string
   role: UserRole
   lang: SupportedLocales
+  is_sponsor?: boolean
 }
 
 const initialUser: ShionlibUserInfo = {
@@ -22,6 +23,7 @@ const initialUser: ShionlibUserInfo = {
   bio: '',
   role: UserRole.USER,
   lang: supportedLocalesEnum.EN,
+  is_sponsor: false,
 }
 
 export interface ShionlibUserStore {
