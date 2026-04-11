@@ -10,6 +10,8 @@ import type {
   SponsorOrderStatus,
 } from '@/interfaces/sponsor/sponsor.interface'
 import { useSponsorDialogStore } from '@/store/sponsorDialogStore'
+import { useShionlibUserStore } from '@/store/userStore'
+import type { User } from '@/interfaces/user/user.interface'
 import { SponsorAmountStep } from './SponsorAmountStep'
 import { SponsorPaymentStep } from './SponsorPaymentStep'
 import { SponsorQRCodeStep } from './SponsorQRCodeStep'
@@ -95,12 +97,21 @@ export const SponsorModal = ({ open, onOpenChange }: SponsorModalProps) => {
     }
   }
 
+  const { setUser } = useShionlibUserStore()
+
   const handleStatusChange = useCallback(
     (status: SponsorOrderStatus['status']) => {
       setFinalStatus(status)
       setStep('result')
+      if (status === 'DONE') {
+        shionlibRequest({ forceNotThrowError: true })
+          .get<User>('/user/me')
+          .then(res => {
+            if (res.data) setUser(res.data)
+          })
+      }
     },
-    [setStep],
+    [setStep, setUser],
   )
 
   const title =

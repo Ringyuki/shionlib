@@ -12,6 +12,7 @@ import { cn } from '@/utils/cn'
 import { useShionlibUserStore } from '@/store/userStore'
 import { PRESET_AMOUNTS } from './constants/sponsor'
 import { DollarSign } from 'lucide-react'
+import { Question } from '@/components/common/content/Question'
 
 interface SponsorAmountStepProps {
   onNext: (data: { amount: number; name: string; message: string; isPrivate: boolean }) => void
@@ -50,7 +51,10 @@ export const SponsorAmountStep = ({ onNext, loading }: SponsorAmountStepProps) =
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-sm font-medium mb-2">{t('amount-title')}</p>
+        <p className="text-sm font-medium mb-2 flex items-center gap-1">
+          {t('amount-title')}
+          <Question content={t('amount-hint')} />
+        </p>
         <div className="grid grid-cols-3 gap-2">
           {PRESET_AMOUNTS.map(value => (
             <button
@@ -85,7 +89,7 @@ export const SponsorAmountStep = ({ onNext, loading }: SponsorAmountStepProps) =
         {isCustom && (
           <div className="mt-2">
             <InputNumber
-              min={5}
+              min={1}
               max={10000}
               placeholder="1 - 10000"
               value={customAmount}

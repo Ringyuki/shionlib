@@ -3,6 +3,7 @@
     "title": "Shionlib をスポンサーする",
     "description": "あなたのスポンサーは Shionlib のストレージとサーバーのコストを軽減するために使用されます。",
     "amount-title": "金額を選択",
+    "amount-hint": "$1 ごとに 6 日間のスポンサーバッジが付与され、有効期間中は広告が非表示になります",
     "amount-custom": "カスタム",
     "name-placeholder": "お名前（任意）",
     "message-placeholder": "メッセージ（任意）",

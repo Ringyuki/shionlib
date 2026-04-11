@@ -3,6 +3,7 @@
     "title": "赞助 Shionlib",
     "description": "你的赞助将用于分担 Shionlib 的储存和服务器开支，从而减少广告数量。",
     "amount-title": "选择金额",
+    "amount-hint": "每 $1 赞助将获得 6 天的 Sponsor 标识，站内广告将在 Sponsor 标识有效期内不再显示",
     "amount-custom": "自定义",
     "name-placeholder": "你的名字（可选）",
     "message-placeholder": "留言（可选）",
