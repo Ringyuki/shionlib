@@ -23,7 +23,7 @@ describe('SponsorService', () => {
         const config: Record<string, unknown> = {
           'sponsor.enabled': true,
           'sponsor.provider': 'idatariver',
-          'sponsor.callbackBaseUrl': 'https://api.shionlib.com',
+          siteUrl: 'https://shionlib.com',
         }
         return config[key]
       }),
@@ -147,7 +147,7 @@ describe('SponsorService', () => {
         providerOrderId: 'idr-123',
         method: 'alipay',
         redirectUrl: undefined,
-        callbackUrl: 'https://api.shionlib.com/sponsor/webhook/idatariver',
+        callbackUrl: 'https://shionlib.com/api/sponsor/webhook/idatariver',
       })
     })
 
