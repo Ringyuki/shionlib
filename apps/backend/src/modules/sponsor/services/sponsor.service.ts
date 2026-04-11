@@ -97,8 +97,8 @@ export class SponsorService {
       )
     }
 
-    const callbackBaseUrl = this.configService.get('sponsor.callbackBaseUrl')
-    const callbackUrl = `${callbackBaseUrl}/sponsor/webhook/idatariver`
+    const siteUrl = this.configService.get('siteUrl')
+    const callbackUrl = `${siteUrl}/api/sponsor/webhook/idatariver`
 
     const { payUrl, payCurrency, amount } = await this.paymentProvider.payOrder({
       providerOrderId: order.provider_order_id,
