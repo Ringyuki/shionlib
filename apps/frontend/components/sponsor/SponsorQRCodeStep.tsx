@@ -9,7 +9,7 @@ import { Button } from '@/components/shionui/Button'
 import Counter from '@/components/shionui/Counter'
 import { shionlibRequest } from '@/utils/request'
 import type { SponsorOrderStatus } from '@/interfaces/sponsor/sponsor.interface'
-import { POLL_INTERVAL, MAX_POLLS } from './constants/sponsor'
+import { POLL_INTERVAL } from './constants/sponsor'
 import Link from 'next/link'
 
 interface SponsorQRCodeStepProps {
@@ -33,7 +33,6 @@ export const SponsorQRCodeStep = ({
 }: SponsorQRCodeStepProps) => {
   const t = useTranslations('Components.Sponsor.SponsorModal')
   const isMobile = useMedia('(max-width: 768px)', false)
-  const pollCountRef = useRef(0)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(() => {
@@ -55,13 +54,14 @@ export const SponsorQRCodeStep = ({
   }, [isMobile, payUrl])
 
   useEffect(() => {
-    pollCountRef.current = 0
+    const expiresTime = expiresAt ? new Date(expiresAt).getTime() : null
+
     const poll = async () => {
-      if (pollCountRef.current >= MAX_POLLS) {
+      if (expiresTime && Date.now() >= expiresTime) {
         stopPolling()
+        onStatusChange('EXPIRED')
         return
       }
-      pollCountRef.current++
       try {
         const res = await shionlibRequest().get<SponsorOrderStatus>(`/sponsor/order/${orderId}`)
         if (res.data && res.data.status !== 'NEW') {
@@ -76,7 +76,7 @@ export const SponsorQRCodeStep = ({
     intervalRef.current = setInterval(poll, POLL_INTERVAL)
 
     return stopPolling
-  }, [orderId, onStatusChange, stopPolling])
+  }, [orderId, expiresAt, onStatusChange, stopPolling])
 
   useEffect(() => {
     if (!remainingSeconds) return

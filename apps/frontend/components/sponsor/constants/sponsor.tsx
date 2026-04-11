@@ -19,4 +19,3 @@ export const METHOD_ICONS: Record<string, React.ReactNode> = {
 }
 
 export const POLL_INTERVAL = 3000
-export const MAX_POLLS = 100

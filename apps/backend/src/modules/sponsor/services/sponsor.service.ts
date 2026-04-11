@@ -147,6 +147,9 @@ export class SponsorService {
           order.status = providerInfo.status
           if (providerInfo.status === 'DONE') {
             order.paid_at = new Date()
+            if (order.user_id) {
+              await this.extendSponsorExpiry(order.user_id, Number(order.amount))
+            }
           }
         }
       } catch {
