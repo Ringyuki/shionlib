@@ -31,9 +31,8 @@ export const AdFreeModal = () => {
           {t('sponsor-cta')}
         </Button>
       }
-      description={t('ad-free-description')}
     >
-      {t('ad-free-pricing')}
+      <p>{t('ad-free-description')}</p>
     </Modal>
   )
 }
