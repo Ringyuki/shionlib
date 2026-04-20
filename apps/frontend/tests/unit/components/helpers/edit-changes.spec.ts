@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
   createDiffEntries,
-  createStringDiff,
   formatPath,
   formatValue,
   parseEditChanges,
-} from '../../../../components/user/home/edits/helpers/edit-changes'
+} from '../../../../components/common/diff/helpers'
+import { createStringDiff } from '../../../../components/common/diff/string-diff'
 
-describe('components/user/home/edits/helpers/edit-changes (unit)', () => {
+describe('components/common/diff/helpers (unit)', () => {
   it('formats values and paths', () => {
     expect(formatValue(null, '-')).toBe('-')
     expect(formatValue(123, '-')).toBe('123')

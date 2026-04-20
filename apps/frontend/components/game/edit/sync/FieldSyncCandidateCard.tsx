@@ -9,7 +9,7 @@ import {
   FieldTitle,
 } from '@/components/shionui/Field'
 import { actionIntent, confidenceIntent } from './candidate-intents'
-import { PayloadBlock } from './PayloadBlock'
+import { FieldSyncCandidateDiff } from './FieldSyncCandidateDiff'
 import type { FieldSyncCandidate } from './types'
 
 interface FieldSyncCandidateCardProps {
@@ -47,10 +47,7 @@ export const FieldSyncCandidateCard = ({
               {warning}
             </FieldDescription>
           ))}
-          <div className="grid gap-2 md:grid-cols-2">
-            {candidate.local && <PayloadBlock title={t('local')} value={candidate.local} />}
-            {candidate.remote && <PayloadBlock title={t('remote')} value={candidate.remote} />}
-          </div>
+          <FieldSyncCandidateDiff candidate={candidate} />
         </FieldContent>
       </Field>
     </FieldLabel>

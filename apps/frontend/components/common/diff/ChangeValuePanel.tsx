@@ -1,7 +1,7 @@
 import { ScrollArea } from '@/components/shionui/ScrollArea'
 import { cn } from '@/utils/cn'
-import { ChangeTone, CHANGE_PANEL_TONE_CLASSNAME } from '../constants/edit-changes'
-import { formatValue } from '../helpers/edit-changes'
+import { CHANGE_PANEL_TONE_CLASSNAME, type ChangeTone } from './constants'
+import { formatValue } from './helpers'
 
 interface ChangeValuePanelProps {
   value: unknown

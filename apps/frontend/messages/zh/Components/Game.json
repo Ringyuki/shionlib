@@ -691,6 +691,12 @@
       "local": "当前",
       "remote": "外部",
       "notApplicable": "不可直接应用",
+      "diff": {
+        "path": "位置",
+        "root": "（根）",
+        "noDifferences": "无差异",
+        "empty": "（空）"
+      },
       "field": {
         "links": "链接",
         "covers": "封面",

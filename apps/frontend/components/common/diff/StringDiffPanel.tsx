@@ -1,7 +1,7 @@
 import { ScrollArea } from '@/components/shionui/ScrollArea'
 import { cn } from '@/utils/cn'
-import { StringDiffTone, STRING_DIFF_SEGMENT_CLASSNAME } from '../constants/edit-changes'
-import { createStringDiff, StringDiffSegment } from '../helpers/edit-changes'
+import { STRING_DIFF_SEGMENT_CLASSNAME, type StringDiffTone } from './constants'
+import { createStringDiff, type StringDiffSegment } from './string-diff'
 
 interface StringDiffPanelProps {
   before: string

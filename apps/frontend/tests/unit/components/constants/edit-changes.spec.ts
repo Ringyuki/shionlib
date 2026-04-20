@@ -4,9 +4,9 @@ import {
   DIFF_BADGE_CLASSNAME,
   ROOT_PATH_KEY,
   STRING_DIFF_DP_MAX_CELLS,
-} from '../../../../components/user/home/edits/constants/edit-changes'
+} from '../../../../components/common/diff/constants'
 
-describe('components/user/home/edits/constants/edit-changes (unit)', () => {
+describe('components/common/diff/constants (unit)', () => {
   it('defines root key and dp guardrail', () => {
     expect(ROOT_PATH_KEY).toBe('__root__')
     expect(STRING_DIFF_DP_MAX_CELLS).toBeGreaterThan(1000)

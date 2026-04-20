@@ -691,6 +691,12 @@
       "local": "Current",
       "remote": "External",
       "notApplicable": "Not directly applicable",
+      "diff": {
+        "path": "Path",
+        "root": "(root)",
+        "noDifferences": "No differences",
+        "empty": "(empty)"
+      },
       "field": {
         "links": "links",
         "covers": "covers",

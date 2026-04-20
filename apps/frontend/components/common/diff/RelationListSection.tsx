@@ -1,11 +1,10 @@
-import { Badge } from '@/components/shionui/Badge'
 import { Plus, Minus } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import {
-  RelationTone,
   RELATION_ICON_TONE_CLASSNAME,
   RELATION_TEXT_TONE_CLASSNAME,
-} from '../constants/edit-changes'
+  type RelationTone,
+} from './constants'
 import { ChangeValuePanel } from './ChangeValuePanel'
 
 interface RelationListSectionProps {
@@ -40,16 +39,10 @@ export const RelationListSection = ({
         >
           {title}
         </span>
-        {/* <Badge variant="neutral" className="font-mono! text-xs">
-          {items.length}
-        </Badge> */}
       </div>
       <div className="pl-6 flex flex-col gap-2">
         {items.map((item, index) => (
           <div key={index} className="flex flex-col gap-1">
-            {/* <Badge variant="neutral" className="font-mono! text-xs w-fit">
-              #{index + 1}
-            </Badge> */}
             <ChangeValuePanel value={item} tone={tone} emptyLabel={emptyLabel} />
           </div>
         ))}

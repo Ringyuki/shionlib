@@ -1,8 +1,8 @@
-import { Badge } from '@/components/shionui/Badge'
 import { ArrowDown, ArrowRight } from 'lucide-react'
+import { Badge } from '@/components/shionui/Badge'
 import { cn } from '@/utils/cn'
-import { DIFF_BADGE_CLASSNAME } from '../constants/edit-changes'
-import { DiffEntry, formatPath } from '../helpers/edit-changes'
+import { DIFF_BADGE_CLASSNAME } from './constants'
+import { formatPath, type DiffEntry } from './helpers'
 import { ChangeValuePanel } from './ChangeValuePanel'
 import { StringDiffPanel } from './StringDiffPanel'
 
@@ -22,15 +22,12 @@ interface FieldDiffItemProps {
   labels: FieldDiffLabels
 }
 
-const ArrayDiffPanel = ({
-  oldValue,
-  value,
-  labels,
-}: {
-  oldValue: string[]
-  value: string[]
-  labels: FieldDiffLabels
-}) => {
+const isEmptyDiffValue = (value: unknown) => value === null || value === undefined || value === ''
+const isStringLikeDiffValue = (value: unknown) =>
+  typeof value === 'string' || isEmptyDiffValue(value)
+const toStringDiffValue = (value: unknown) => (isEmptyDiffValue(value) ? '' : String(value))
+
+const ArrayDiffPanel = ({ oldValue, value }: { oldValue: string[]; value: string[] }) => {
   const oldSet = new Set(oldValue)
   const newSet = new Set(value)
   const added = value.filter(v => !oldSet.has(v))
@@ -64,7 +61,10 @@ export const FieldDiffItem = ({ entry, labels }: FieldDiffItemProps) => {
   const isRemove = entry.type === 'REMOVE'
   const isChange = entry.type === 'CHANGE'
   const useStringDiff =
-    isChange && typeof entry.oldValue === 'string' && typeof entry.value === 'string'
+    isChange &&
+    (typeof entry.oldValue === 'string' || typeof entry.value === 'string') &&
+    isStringLikeDiffValue(entry.oldValue) &&
+    isStringLikeDiffValue(entry.value)
   const useArrayDiff =
     isChange &&
     Array.isArray(entry.oldValue) &&
@@ -95,18 +95,14 @@ export const FieldDiffItem = ({ entry, labels }: FieldDiffItemProps) => {
       {isChange &&
         (useStringDiff ? (
           <StringDiffPanel
-            before={entry.oldValue}
-            after={entry.value}
+            before={toStringDiffValue(entry.oldValue)}
+            after={toStringDiffValue(entry.value)}
             beforeLabel={labels.before}
             afterLabel={labels.after}
             emptyLabel={labels.empty}
           />
         ) : useArrayDiff ? (
-          <ArrayDiffPanel
-            oldValue={entry.oldValue as string[]}
-            value={entry.value as string[]}
-            labels={labels}
-          />
+          <ArrayDiffPanel oldValue={entry.oldValue as string[]} value={entry.value as string[]} />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-2 items-start">
             <div className="flex flex-col gap-1">
