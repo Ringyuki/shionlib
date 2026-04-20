@@ -14,6 +14,7 @@ describe('GameTagService', () => {
         findMany: jest.fn(),
         createMany: jest.fn(),
         deleteMany: jest.fn(),
+        update: jest.fn(),
       },
     }
     const prisma = {
@@ -128,13 +129,30 @@ describe('GameTagService', () => {
 
     it('no-ops when tags unchanged', async () => {
       const { service, tx } = createService()
-      tx.gameTagRelation.findMany.mockResolvedValue([{ tag_id: 1 }])
+      tx.gameTagRelation.findMany.mockResolvedValue([{ tag_id: 1, tag_alias: null }])
       tx.tag.findUnique.mockResolvedValue({ id: 1, name: 'galgame', aliases: [] })
 
       await service.setGameTags(10, ['galgame'])
 
       expect(tx.gameTagRelation.createMany).not.toHaveBeenCalled()
       expect(tx.gameTagRelation.deleteMany).not.toHaveBeenCalled()
+      expect(tx.gameTagRelation.update).not.toHaveBeenCalled()
+    })
+
+    it('updates relation alias when canonical tag already exists', async () => {
+      const { service, tx } = createService()
+      tx.gameTagRelation.findMany.mockResolvedValue([{ game_id: 10, tag_id: 1, tag_alias: null }])
+      tx.tag.findUnique.mockResolvedValue({ id: 1, name: 'avg', aliases: [] })
+      tx.tag.update.mockResolvedValue({ id: 1, name: 'avg', aliases: ['AVG'] })
+
+      await service.setGameTags(10, ['AVG'])
+
+      expect(tx.gameTagRelation.createMany).not.toHaveBeenCalled()
+      expect(tx.gameTagRelation.deleteMany).not.toHaveBeenCalled()
+      expect(tx.gameTagRelation.update).toHaveBeenCalledWith({
+        where: { game_id_tag_id: { game_id: 10, tag_id: 1 } },
+        data: { tag_alias: 'AVG' },
+      })
     })
   })
 })

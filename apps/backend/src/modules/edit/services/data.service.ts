@@ -66,6 +66,9 @@ export class DataService {
         sexual: true,
         violence: true,
         language: true,
+        source: true,
+        source_key: true,
+        source_url: true,
       },
     })
 
@@ -105,6 +108,9 @@ export class DataService {
         dims: true,
         sexual: true,
         violence: true,
+        source: true,
+        source_key: true,
+        source_url: true,
       },
     })
 

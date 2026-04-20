@@ -13,14 +13,20 @@ interface TagsProps {
   value?: string[]
 }
 
+interface TagSuggestion {
+  name: string
+  display_name?: string
+  count: number
+}
+
 const getData = async (q: string) => {
   try {
-    const data = await shionlibRequest().get<{ name: string; count: number }[]>('/search/tags', {
+    const data = await shionlibRequest().get<TagSuggestion[]>('/search/tags', {
       params: {
         q,
       },
     })
-    return (data.data ?? []).map(t => t.name)
+    return (data.data ?? []).map(t => t.display_name ?? t.name)
   } catch {
     return []
   }

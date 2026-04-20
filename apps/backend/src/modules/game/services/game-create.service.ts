@@ -4,7 +4,6 @@ import { PrismaService } from '../../../prisma.service'
 import {
   GameData,
   GameCharacter,
-  GameCharacterGender,
   GameCover,
   GameDeveloper,
   GameImage,
@@ -27,6 +26,7 @@ import { ActivityService } from '../../activity/services/activity.service'
 import { ActivityType } from '../../activity/dto/create-activity.dto'
 import { GameEditService } from './game-edit.service'
 import { GameTagService } from './game-tag.service'
+import { GameEntityUpsertService } from './game-entity-upsert.service'
 
 @Injectable()
 export class GameCreateService {
@@ -37,6 +37,7 @@ export class GameCreateService {
     private readonly activityService: ActivityService,
     private readonly gameEditService: GameEditService,
     private readonly gameTagService: GameTagService,
+    private readonly gameEntityUpsertService: GameEntityUpsertService,
   ) {}
 
   async createFromBangumiAndVNDB(
@@ -93,7 +94,7 @@ export class GameCreateService {
         await this._createGameLink(tx, finalGameData.links || [], game.id)
 
         for (const d of finalProducersData || []) {
-          const dev = await this.findOrCreateDeveloper(tx, d)
+          const dev = await this.gameEntityUpsertService.findOrCreateDeveloper(tx, d)
           await tx.gameDeveloperRelation
             .create({
               data: { game_id: game.id, developer_id: dev.id, role: '开发' },
@@ -104,7 +105,7 @@ export class GameCreateService {
         }
 
         for (const c of finalCharactersData || []) {
-          const ch = await this.findOrCreateCharacter(tx, c)
+          const ch = await this.gameEntityUpsertService.findOrCreateCharacter(tx, c)
           await tx.gameCharacterRelation
             .create({
               data: {
@@ -152,69 +153,6 @@ export class GameCreateService {
     return gameId
   }
 
-  private async findOrCreateDeveloper(tx: Prisma.TransactionClient, d: GameDeveloper) {
-    const existing = await tx.gameDeveloper.findFirst({
-      where: {
-        OR: [
-          d.v_id ? { v_id: d.v_id } : undefined,
-          d.b_id ? { b_id: d.b_id } : undefined,
-          d.name ? { name: d.name } : undefined,
-        ].filter(Boolean) as any,
-      },
-    })
-    if (existing) return existing
-    const devCreateData: any = {
-      v_id: d.v_id,
-      b_id: d.b_id,
-      name: d.name?.trim() || '',
-      aliases: this.dataOrEmpty(d.aliases, []),
-      logo: d.logo,
-      intro_jp: this.dataOrEmpty(d.intro_jp, ''),
-      intro_zh: this.dataOrEmpty(d.intro_zh, ''),
-      intro_en: this.dataOrEmpty(d.intro_en, ''),
-      extra_info: this.dataOrEmpty(d.extra_info, []),
-    }
-    return tx.gameDeveloper.create({ data: devCreateData })
-  }
-
-  private async findOrCreateCharacter(tx: Prisma.TransactionClient, c: GameCharacter) {
-    const existing = await tx.gameCharacter.findFirst({
-      where: {
-        OR: [c.v_id ? { v_id: c.v_id } : undefined, c.b_id ? { b_id: c.b_id } : undefined].filter(
-          Boolean,
-        ) as any,
-      },
-    })
-    if (existing) return existing
-    const chCreateData: any = {
-      v_id: c.v_id,
-      b_id: c.b_id,
-      image: c.image,
-      name_jp: this.dataOrEmpty(c.name_jp, ''),
-      name_zh: c.name_zh,
-      name_en: c.name_en,
-      aliases: this.dataOrEmpty(c.aliases, []),
-      intro_jp: this.dataOrEmpty(c.intro_jp, ''),
-      intro_zh: this.dataOrEmpty(c.intro_zh, ''),
-      intro_en: this.dataOrEmpty(c.intro_en, ''),
-      blood_type: c.blood_type,
-      height: c.height,
-      weight: c.weight,
-      bust: c.bust,
-      waist: c.waist,
-      hips: c.hips,
-      cup: c.cup,
-      age: c.age,
-      birthday: this.dataOrEmpty(c.birthday, []).filter(
-        (v): v is number => v !== null && v !== undefined,
-      ),
-      gender: this.dataOrEmpty(c.gender, []).filter(
-        (v): v is GameCharacterGender => v !== null && v !== undefined,
-      ),
-    }
-    return tx.gameCharacter.create({ data: chCreateData })
-  }
-
   private async _createGameLink(
     tx: Prisma.TransactionClient,
     linksData: GameLink[],
@@ -248,6 +186,9 @@ export class GameCreateService {
             dims: c.dims?.length ? c.dims : [0, 0],
             sexual: c.sexual,
             violence: c.violence,
+            source: c.source,
+            source_key: c.source_key,
+            source_url: c.source_url,
           })),
           skipDuplicates: true,
         })
@@ -268,6 +209,9 @@ export class GameCreateService {
           dims: i.dims?.length ? i.dims : [0, 0],
           sexual: i.sexual,
           violence: i.violence,
+          source: i.source,
+          source_key: i.source_key,
+          source_url: i.source_url,
         })),
       })
     }
@@ -360,7 +304,7 @@ export class GameCreateService {
 
     await this.prisma.$transaction(async tx => {
       for (const c of createCharactersData.characters) {
-        const ch = await this.findOrCreateCharacter(tx, c as GameCharacter)
+        const ch = await this.gameEntityUpsertService.findOrCreateCharacter(tx, c as GameCharacter)
         await tx.gameCharacterRelation.create({
           data: {
             game_id,
@@ -406,7 +350,7 @@ export class GameCreateService {
 
     await this.prisma.$transaction(async tx => {
       for (const d of createDevelopersData.developers) {
-        const dev = await this.findOrCreateDeveloper(tx, d as GameDeveloper)
+        const dev = await this.gameEntityUpsertService.findOrCreateDeveloper(tx, d as GameDeveloper)
         await tx.gameDeveloperRelation.create({
           data: {
             game_id,

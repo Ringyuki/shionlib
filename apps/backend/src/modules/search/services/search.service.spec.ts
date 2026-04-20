@@ -23,8 +23,8 @@ describe('SearchService', () => {
 
   it('queries Tag table for searchGameTags ordered by count', async () => {
     const tags = [
-      { id: 1, name: 'galgame', count: 50 },
-      { id: 2, name: 'otome', count: 20 },
+      { id: 1, name: 'galgame', count: 50, aliases: ['GalGame'] },
+      { id: 2, name: 'otome', count: 20, aliases: [] },
     ]
     const prisma = { tag: { findMany: jest.fn().mockResolvedValue(tags) } }
     const { service } = createService({ prisma })
@@ -32,12 +32,15 @@ describe('SearchService', () => {
     const result = await service.searchGameTags({ q: 'gal', limit: 5 } as any)
 
     expect(prisma.tag.findMany).toHaveBeenCalledWith({
-      where: { name: { contains: 'gal' } },
+      where: { OR: [{ name: { contains: 'gal' } }, { aliases: { has: 'gal' } }] },
       orderBy: { count: 'desc' },
       take: 5,
-      select: { id: true, name: true, count: true },
+      select: { id: true, name: true, count: true, aliases: true },
     })
-    expect(result).toEqual(tags)
+    expect(result).toEqual([
+      { id: 1, name: 'galgame', count: 50, aliases: ['GalGame'], display_name: 'GalGame' },
+      { id: 2, name: 'otome', count: 20, aliases: [], display_name: 'otome' },
+    ])
   })
 
   it('searchGameTags with empty query returns all tags', async () => {

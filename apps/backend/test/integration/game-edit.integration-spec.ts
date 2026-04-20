@@ -6,6 +6,7 @@ import { JwtAuthGuard } from '../../src/modules/auth/guards/jwt-auth.guard'
 import { PermissionService } from '../../src/modules/edit/services/permission.service'
 import { GameEditController } from '../../src/modules/game/controllers/game-edit.controller'
 import { GameEditService } from '../../src/modules/game/services/game-edit.service'
+import { GameFieldSyncService } from '../../src/modules/game/services/game-field-sync.service'
 
 describe('GameEdit (integration)', () => {
   let app: INestApplication
@@ -30,6 +31,12 @@ describe('GameEdit (integration)', () => {
     removeCharacters: jest.fn(),
     editCharacters: jest.fn(),
   }
+  const gameFieldSyncService = {
+    preview: jest.fn(),
+    apply: jest.fn(),
+    previewScalar: jest.fn(),
+    applyScalar: jest.fn(),
+  }
   const jwtAuthGuard: CanActivate = {
     canActivate: jest.fn((context: ExecutionContext) => {
       const req = context.switchToHttp().getRequest()
@@ -46,6 +53,7 @@ describe('GameEdit (integration)', () => {
       controllers: [GameEditController],
       providers: [
         { provide: GameEditService, useValue: gameEditService },
+        { provide: GameFieldSyncService, useValue: gameFieldSyncService },
         { provide: PermissionService, useValue: permissionService },
       ],
     })

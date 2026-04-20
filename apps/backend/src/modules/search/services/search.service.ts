@@ -16,13 +16,36 @@ export class SearchService {
   }
 
   async searchGameTags(query: SearchGameTagsReqDto) {
-    const q = query.q?.toLowerCase().trim() ?? ''
+    const rawQuery = query.q?.trim() ?? ''
+    const q = this.normalizeTag(rawQuery)
     const limit = query.limit ?? 10
-    return this.prisma.tag.findMany({
-      where: q ? { name: { contains: q } } : undefined,
+    const tags = await this.prisma.tag.findMany({
+      where: q
+        ? {
+            OR: [{ name: { contains: q } }, { aliases: { has: rawQuery } }],
+          }
+        : undefined,
       orderBy: { count: 'desc' },
       take: limit,
-      select: { id: true, name: true, count: true },
+      select: { id: true, name: true, count: true, aliases: true },
     })
+    return tags.map(tag => ({
+      ...tag,
+      display_name: this.pickTagDisplayName(tag.name, tag.aliases, rawQuery),
+    }))
+  }
+
+  private pickTagDisplayName(name: string, aliases: string[], rawQuery: string) {
+    const q = this.normalizeTag(rawQuery)
+    if (!q) return name
+    return (
+      aliases.find(alias => this.normalizeTag(alias) === q) ??
+      aliases.find(alias => this.normalizeTag(alias).includes(q)) ??
+      name
+    )
+  }
+
+  private normalizeTag(raw: string) {
+    return raw.toLowerCase().trim().replace(/\s+/g, ' ')
   }
 }

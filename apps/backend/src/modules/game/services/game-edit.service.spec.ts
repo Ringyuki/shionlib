@@ -57,6 +57,9 @@ describe('GameEditService', () => {
         findMany: jest.fn(),
         findFirst: jest.fn(),
       },
+      gameTagRelation: {
+        findMany: jest.fn(),
+      },
       $transaction: jest.fn(),
     }
 
@@ -114,7 +117,11 @@ describe('GameEditService', () => {
     }
 
     const bangumiAuthService = { bangumiRequest: jest.fn() }
-    const gameTagService = { setGameTags: jest.fn().mockResolvedValue(undefined) }
+    const gameTagService = {
+      normalizeTag: jest.fn((raw: string) => raw.toLowerCase().trim().replace(/\s+/g, ' ')),
+      normalizeDisplayTag: jest.fn((raw: string) => raw.trim().replace(/\s+/g, ' ')),
+      setGameTags: jest.fn().mockResolvedValue(undefined),
+    }
     const service = new GameEditService(
       prisma as any,
       searchEngine as any,
@@ -130,6 +137,7 @@ describe('GameEditService', () => {
       searchEngine,
       activityService,
       imageStorage,
+      gameTagService,
       service,
     }
   }
@@ -212,6 +220,33 @@ describe('GameEditService', () => {
     )
     expect(formatDocMock).toHaveBeenCalledWith({ id: 1 })
     expect(searchEngine.upsertGame).toHaveBeenCalledWith({ id: 1, indexed: true })
+  })
+
+  it('editGameScalar respects tag aliases when comparing and updating tags', async () => {
+    const { service, prisma, gameTagService } = createService()
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1 }).mockResolvedValueOnce({ id: 1 })
+    prisma.gameTagRelation.findMany.mockResolvedValueOnce([
+      { tag_alias: null, tag: { name: 'avg' } },
+    ])
+    pickChangesMock.mockReturnValueOnce({ before: {}, after: {}, field_changes: [] })
+
+    await service.editGameScalar(1, { tags: ['AVG'] } as any, req as any)
+
+    expect(gameTagService.setGameTags).toHaveBeenCalledWith(1, ['AVG'])
+  })
+
+  it('editGameScalar treats matching tag aliases as unchanged', async () => {
+    const { service, prisma, gameTagService, tx } = createService()
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1 }).mockResolvedValueOnce({ id: 1 })
+    prisma.gameTagRelation.findMany.mockResolvedValueOnce([
+      { tag_alias: 'AVG', tag: { name: 'avg' } },
+    ])
+    pickChangesMock.mockReturnValueOnce({ before: {}, after: {}, field_changes: [] })
+
+    await service.editGameScalar(1, { tags: ['AVG'] } as any, req as any)
+
+    expect(gameTagService.setGameTags).not.toHaveBeenCalled()
+    expect(tx.editRecord.create).not.toHaveBeenCalled()
   })
 
   it('links operations support no-op and success paths', async () => {

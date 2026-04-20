@@ -9,6 +9,7 @@ import { SearchDeveloper } from './developer/Search'
 import { Edit } from './developer/Edit'
 import { useEditPermissionStore } from '@/store/editPermissionStore'
 import { Empty } from '@/components/common/content/Empty'
+import { FieldSyncButton } from './sync/FieldSyncButton'
 
 interface DeveloperEditProps {
   initRelations: DeveloperRelation[]
@@ -49,6 +50,7 @@ export const Developer = ({ initRelations, id }: DeveloperEditProps) => {
         ))}
       </div>
       {relations.length === 0 && <Empty title={t('Item.no_developers')} />}
+      <FieldSyncButton gameId={id} field="developers" onApplied={fetchRelations} />
       <SearchDeveloper relations={relations} onAdd={handleAdd} game_id={id} />
     </div>
   )

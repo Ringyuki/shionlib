@@ -10,5 +10,5 @@ export default async function ImagePage({ params }: ImagePageProps) {
   const { id } = await params
   const data = await shionlibRequest().get<GameImage[]>(`/edit/game/${id}/image`)
 
-  return <GameImageEditComponent images={data?.data ?? []} />
+  return <GameImageEditComponent images={data?.data ?? []} id={Number(id)} />
 }

@@ -238,6 +238,18 @@ export class GameCoverDto {
   @Min(0, { message: ivm('validation.common.MIN', { property: 'violence', min: 0 }) })
   @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'violence' }) })
   violence: number
+
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'source' }) })
+  @IsOptional()
+  source?: string
+
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'source_key' }) })
+  @IsOptional()
+  source_key?: string
+
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'source_url' }) })
+  @IsOptional()
+  source_url?: string
 }
 
 export class EditGameCoverDto extends GameCoverDto {
@@ -305,6 +317,18 @@ export class GameImageDto {
   @Min(0, { message: ivm('validation.common.MIN', { property: 'violence', min: 0 }) })
   @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'violence' }) })
   violence: number
+
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'source' }) })
+  @IsOptional()
+  source?: string
+
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'source_key' }) })
+  @IsOptional()
+  source_key?: string
+
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'source_url' }) })
+  @IsOptional()
+  source_url?: string
 }
 
 export class EditGameImageDto extends GameImageDto {
@@ -527,4 +551,50 @@ export class EditGameRelationsReqDto {
   @Type(() => EditGameRelationItemDto)
   @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'relations' }) })
   relations: EditGameRelationItemDto[]
+}
+
+export class ApplyGameFieldSyncReqDto {
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'candidateIds' }) })
+  @IsString({
+    each: true,
+    message: ivm('validation.common.IS_STRING', { property: 'candidateIds' }),
+  })
+  candidateIds: string[]
+
+  @IsOptional()
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'note' }) })
+  @MaxLength(255, { message: ivm('validation.common.MAX_LENGTH', { property: 'note', max: 255 }) })
+  note?: string
+}
+
+export enum GameScalarSyncFieldEnum {
+  TITLES = 'titles',
+  ALIASES = 'aliases',
+  INTROS = 'intros',
+  RELEASE = 'release',
+  TYPE = 'type',
+  PLATFORMS = 'platform',
+  EXTRA = 'extra',
+  STAFFS = 'staffs',
+  TAGS = 'tags',
+}
+
+export class PreviewGameScalarSyncReqDto {
+  @IsEnum(GameScalarSyncFieldEnum, {
+    message: ivmEnum('validation.common.IS_ENUM', GameScalarSyncFieldEnum, {
+      property: 'field',
+    }),
+  })
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'field' }) })
+  field: GameScalarSyncFieldEnum
+}
+
+export class ApplyGameScalarSyncReqDto extends ApplyGameFieldSyncReqDto {
+  @IsEnum(GameScalarSyncFieldEnum, {
+    message: ivmEnum('validation.common.IS_ENUM', GameScalarSyncFieldEnum, {
+      property: 'field',
+    }),
+  })
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'field' }) })
+  field: GameScalarSyncFieldEnum
 }

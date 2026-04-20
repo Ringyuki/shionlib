@@ -674,6 +674,64 @@
         "added": "Added successfully"
       }
     },
+    "FieldSync": {
+      "button": "Sync external data",
+      "title": "Sync {field}",
+      "description": "Only selected candidates will be applied. This will not overwrite the whole field automatically.",
+      "previewFailed": "Failed to load sync preview",
+      "applySuccess": "Applied {count} sync item(s)",
+      "applyFailed": "Failed to apply sync",
+      "selected": "{count} selected",
+      "cancel": "Cancel",
+      "apply": "Apply selected",
+      "empty": "No sync candidates",
+      "search": "Search candidates...",
+      "selectRecommended": "Select recommended",
+      "clear": "Clear",
+      "local": "Current",
+      "remote": "External",
+      "notApplicable": "Not directly applicable",
+      "field": {
+        "links": "links",
+        "covers": "covers",
+        "images": "screenshots",
+        "developers": "developers",
+        "characters": "characters",
+        "relations": "related works",
+        "titles": "titles",
+        "aliases": "aliases",
+        "intros": "introductions",
+        "release": "release date",
+        "type": "type",
+        "platform": "platforms",
+        "extra": "extra info",
+        "staffs": "staff",
+        "tags": "tags"
+      },
+      "action": {
+        "add": "Add",
+        "update": "Update",
+        "remove": "Remove",
+        "unmatched": "Unmatched"
+      },
+      "source": {
+        "bangumi": "Bangumi",
+        "vndb": "VNDB",
+        "merged": "Merged"
+      },
+      "confidence": {
+        "exact": "Exact",
+        "high": "High",
+        "medium": "Review",
+        "low": "Low"
+      },
+      "summary": {
+        "total": "{count} candidate(s)",
+        "add": "{count} add",
+        "update": "{count} update",
+        "unmatched": "{count} unmatched"
+      }
+    },
     "EditNote": {
       "title": "Edit Note",
       "placeholder": "Edit reason, edit content etc. (optional, e.g. Changed release date to 2025-11-10, reason: release delayed)"

@@ -20,6 +20,7 @@ export class ImageUploadService {
         id: true,
         game_id: true,
         url: true,
+        source_url: true,
       },
     })
 
@@ -27,7 +28,7 @@ export class ImageUploadService {
       const { key } = await this.smallFileUploadService._uploadGameCover(c.game_id, c.url)
       await this.prisma.gameCover.update({
         where: { id: c.id },
-        data: { url: key },
+        data: { url: key, source_url: c.source_url ?? c.url },
       })
     }
 
@@ -45,6 +46,7 @@ export class ImageUploadService {
         id: true,
         game_id: true,
         url: true,
+        source_url: true,
       },
     })
 
@@ -52,7 +54,7 @@ export class ImageUploadService {
       const { key } = await this.smallFileUploadService._uploadGameImage(i.game_id, i.url)
       await this.prisma.gameImage.update({
         where: { id: i.id },
-        data: { url: key },
+        data: { url: key, source_url: i.source_url ?? i.url },
       })
     }
 

@@ -4,12 +4,14 @@ import { useTranslations } from 'next-intl'
 import { UseFormReturn } from 'react-hook-form'
 import { GameScalar } from '@/interfaces/edit/scalar.interface'
 import { BBCodeSupported } from '@/components/common/content/bbcode/BBCodeSupported'
+import type { ReactNode } from 'react'
 
 interface IntrosProps {
   form: UseFormReturn<GameScalar>
+  syncAction?: ReactNode
 }
 
-export const Intros = ({ form }: IntrosProps) => {
+export const Intros = ({ form, syncAction }: IntrosProps) => {
   const t = useTranslations('Components.Game.Edit.Scalar')
   return (
     <div className="flex flex-col gap-2">
@@ -20,7 +22,12 @@ export const Intros = ({ form }: IntrosProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t('intro_zh')}</FormLabel>
-            <BBCodeEditor value={field.value} onValueChange={field.onChange} />
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+              <div className="min-w-0 flex-1">
+                <BBCodeEditor value={field.value} onValueChange={field.onChange} />
+              </div>
+              {syncAction && <div className="shrink-0">{syncAction}</div>}
+            </div>
             <FormMessage />
           </FormItem>
         )}

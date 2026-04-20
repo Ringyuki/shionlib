@@ -674,6 +674,64 @@
         "added": "添加成功"
       }
     },
+    "FieldSync": {
+      "button": "同步外部数据",
+      "title": "同步{field}",
+      "description": "只会应用你勾选的候选项，不会自动覆盖全部字段。",
+      "previewFailed": "拉取同步预览失败",
+      "applySuccess": "已应用 {count} 项同步",
+      "applyFailed": "应用同步失败",
+      "selected": "已选择 {count} 项",
+      "cancel": "取消",
+      "apply": "应用所选",
+      "empty": "没有可同步的候选项",
+      "search": "搜索候选项...",
+      "selectRecommended": "选择推荐项",
+      "clear": "清空",
+      "local": "当前",
+      "remote": "外部",
+      "notApplicable": "不可直接应用",
+      "field": {
+        "links": "链接",
+        "covers": "封面",
+        "images": "截图",
+        "developers": "会社",
+        "characters": "角色",
+        "relations": "相关作品",
+        "titles": "标题",
+        "aliases": "别名",
+        "intros": "简介",
+        "release": "发售日",
+        "type": "类型",
+        "platform": "平台",
+        "extra": "附加信息",
+        "staffs": "制作人员",
+        "tags": "标签"
+      },
+      "action": {
+        "add": "新增",
+        "update": "更新",
+        "remove": "移除",
+        "unmatched": "未匹配"
+      },
+      "source": {
+        "bangumi": "Bangumi",
+        "vndb": "VNDB",
+        "merged": "合并来源"
+      },
+      "confidence": {
+        "exact": "精确匹配",
+        "high": "高置信",
+        "medium": "需确认",
+        "low": "低置信"
+      },
+      "summary": {
+        "total": "候选 {count}",
+        "add": "新增 {count}",
+        "update": "更新 {count}",
+        "unmatched": "未匹配 {count}"
+      }
+    },
     "EditNote": {
       "title": "备注",
       "placeholder": "修改原因, 修改内容等(可选, e.g. 修改发售日期为2025年11月10日，原因：发售延期)"

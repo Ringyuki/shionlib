@@ -26,9 +26,16 @@ describe('GameEditController', () => {
       editGameRelations: jest.fn(),
       syncRelationsFromBangumi: jest.fn(),
     }
+    const gameFieldSyncService = {
+      preview: jest.fn(),
+      apply: jest.fn(),
+      previewScalar: jest.fn(),
+      applyScalar: jest.fn(),
+    }
     return {
       gameEditService,
-      controller: new GameEditController(gameEditService as any),
+      gameFieldSyncService,
+      controller: new GameEditController(gameEditService as any, gameFieldSyncService as any),
     }
   }
 
@@ -114,5 +121,58 @@ describe('GameEditController', () => {
       req,
     )
     expect(gameEditService.syncRelationsFromBangumi).toHaveBeenCalledWith(5, req)
+  })
+
+  it('delegates field sync endpoints', async () => {
+    const { controller, gameFieldSyncService } = createController()
+    const req = { user: { sub: 4 } }
+    const dto = { candidateIds: ['c1'] }
+
+    await controller.previewLinkSync(1)
+    await controller.applyLinkSync(dto, 1, req as any)
+    await controller.previewCoverSync(1)
+    await controller.applyCoverSync(dto, 1, req as any)
+    await controller.previewImageSync(1)
+    await controller.applyImageSync(dto, 1, req as any)
+    await controller.previewDeveloperSync(1)
+    await controller.applyDeveloperSync(dto, 1, req as any)
+    await controller.previewCharacterSync(1)
+    await controller.applyCharacterSync(dto, 1, req as any)
+    await controller.previewRelationSync(1)
+    await controller.applyRelationSync(dto, 1, req as any)
+
+    expect(gameFieldSyncService.preview).toHaveBeenCalledWith(1, 'links')
+    expect(gameFieldSyncService.apply).toHaveBeenCalledWith(1, 'links', ['c1'], req)
+    expect(gameFieldSyncService.preview).toHaveBeenCalledWith(1, 'covers')
+    expect(gameFieldSyncService.apply).toHaveBeenCalledWith(1, 'covers', ['c1'], req)
+    expect(gameFieldSyncService.preview).toHaveBeenCalledWith(1, 'images')
+    expect(gameFieldSyncService.apply).toHaveBeenCalledWith(1, 'images', ['c1'], req)
+    expect(gameFieldSyncService.preview).toHaveBeenCalledWith(1, 'developers')
+    expect(gameFieldSyncService.apply).toHaveBeenCalledWith(1, 'developers', ['c1'], req)
+    expect(gameFieldSyncService.preview).toHaveBeenCalledWith(1, 'characters')
+    expect(gameFieldSyncService.apply).toHaveBeenCalledWith(1, 'characters', ['c1'], req)
+    expect(gameFieldSyncService.preview).toHaveBeenCalledWith(1, 'relations')
+    expect(gameFieldSyncService.apply).toHaveBeenCalledWith(1, 'relations', ['c1'], req)
+  })
+
+  it('delegates scalar sync endpoints', async () => {
+    const { controller, gameFieldSyncService } = createController()
+    const req = { user: { sub: 5 } }
+
+    await controller.previewScalarSync({ field: 'tags' } as any, 1)
+    await controller.applyScalarSync(
+      { field: 'tags', candidateIds: ['c1'], note: 'sync tags' } as any,
+      1,
+      req as any,
+    )
+
+    expect(gameFieldSyncService.previewScalar).toHaveBeenCalledWith(1, 'tags')
+    expect(gameFieldSyncService.applyScalar).toHaveBeenCalledWith(
+      1,
+      'tags',
+      ['c1'],
+      req,
+      'sync tags',
+    )
   })
 })

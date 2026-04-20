@@ -417,6 +417,9 @@ describe('GameDataFetcherService', () => {
         dims: [100, 200],
         sexual: 2,
         violence: 2,
+        source: 'vndb',
+        source_key: 'https://cover/fallback',
+        source_url: 'https://cover/fallback',
       },
     ])
     expect(result.finalGameData.nsfw).toBe(true)

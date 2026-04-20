@@ -4,6 +4,8 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
 
+export COMPOSE_PROJECT_NAME="${E2E_COMPOSE_PROJECT_NAME:-shionlib-e2e}"
+
 COMPOSE_UP_ARGS=(-d --wait)
 if [[ "${E2E_NO_BUILD:-0}" != "1" ]]; then
   COMPOSE_UP_ARGS+=(--build)
@@ -13,6 +15,12 @@ FRONTEND_PORT_VALUE="${FRONTEND_PORT:-3100}"
 E2E_BASE_URL_VALUE="${E2E_BASE_URL:-http://localhost:${FRONTEND_PORT_VALUE}}"
 KEEP_STACK="${E2E_KEEP_STACK:-0}"
 COMPOSE_RETRIES="${E2E_COMPOSE_RETRIES:-3}"
+RESET_VOLUMES="${E2E_RESET_VOLUMES:-1}"
+
+COMPOSE_DOWN_ARGS=(--remove-orphans)
+if [[ "$RESET_VOLUMES" == "1" ]]; then
+  COMPOSE_DOWN_ARGS+=(--volumes)
+fi
 
 cleanup() {
   if [[ "$KEEP_STACK" == "1" ]]; then
@@ -21,9 +29,13 @@ cleanup() {
   fi
 
   echo "[e2e-runner] Stopping compose stack..."
-  docker compose down --remove-orphans
+  docker compose down "${COMPOSE_DOWN_ARGS[@]}"
 }
 trap cleanup EXIT
+
+echo "[e2e-runner] Using compose project: ${COMPOSE_PROJECT_NAME}"
+echo "[e2e-runner] Resetting compose stack..."
+docker compose down "${COMPOSE_DOWN_ARGS[@]}" || true
 
 echo "[e2e-runner] Starting compose stack..."
 attempt=1
@@ -38,7 +50,7 @@ while true; do
   fi
 
   echo "[e2e-runner] compose up failed (attempt ${attempt}/${COMPOSE_RETRIES}), retrying..."
-  docker compose down --remove-orphans || true
+  docker compose down "${COMPOSE_DOWN_ARGS[@]}" || true
   sleep $((attempt * 5))
   attempt=$((attempt + 1))
 done

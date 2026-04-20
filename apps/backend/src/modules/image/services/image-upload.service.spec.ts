@@ -47,8 +47,8 @@ describe('ImageUploadService', () => {
   it('uploadGameCovers uploads and updates all remote covers', async () => {
     const { service, prisma, uploadService } = createService()
     ;(prisma.gameCover.findMany as jest.Mock).mockResolvedValue([
-      { id: 1, game_id: 11, url: 'https://a/1.jpg' },
-      { id: 2, game_id: 22, url: 'https://a/2.jpg' },
+      { id: 1, game_id: 11, url: 'https://a/1.jpg', source_url: null },
+      { id: 2, game_id: 22, url: 'https://a/2.jpg', source_url: 'https://source/2.jpg' },
     ])
     ;(uploadService._uploadGameCover as jest.Mock)
       .mockResolvedValueOnce({ key: 'covers/11.jpg' })
@@ -58,17 +58,17 @@ describe('ImageUploadService', () => {
 
     expect(prisma.gameCover.findMany).toHaveBeenCalledWith({
       where: { url: { startsWith: 'https://' } },
-      select: { id: true, game_id: true, url: true },
+      select: { id: true, game_id: true, url: true, source_url: true },
     })
     expect(uploadService._uploadGameCover).toHaveBeenNthCalledWith(1, 11, 'https://a/1.jpg')
     expect(uploadService._uploadGameCover).toHaveBeenNthCalledWith(2, 22, 'https://a/2.jpg')
     expect(prisma.gameCover.update).toHaveBeenNthCalledWith(1, {
       where: { id: 1 },
-      data: { url: 'covers/11.jpg' },
+      data: { url: 'covers/11.jpg', source_url: 'https://a/1.jpg' },
     })
     expect(prisma.gameCover.update).toHaveBeenNthCalledWith(2, {
       where: { id: 2 },
-      data: { url: 'covers/22.jpg' },
+      data: { url: 'covers/22.jpg', source_url: 'https://source/2.jpg' },
     })
     expect(count).toBe(2)
   })
@@ -76,7 +76,7 @@ describe('ImageUploadService', () => {
   it('uploadGameImages uploads and updates all remote images', async () => {
     const { service, prisma, uploadService } = createService()
     ;(prisma.gameImage.findMany as jest.Mock).mockResolvedValue([
-      { id: 3, game_id: 33, url: 'https://a/3.jpg' },
+      { id: 3, game_id: 33, url: 'https://a/3.jpg', source_url: null },
     ])
     ;(uploadService._uploadGameImage as jest.Mock).mockResolvedValue({ key: 'images/33.jpg' })
 
@@ -85,7 +85,7 @@ describe('ImageUploadService', () => {
     expect(uploadService._uploadGameImage).toHaveBeenCalledWith(33, 'https://a/3.jpg')
     expect(prisma.gameImage.update).toHaveBeenCalledWith({
       where: { id: 3 },
-      data: { url: 'images/33.jpg' },
+      data: { url: 'images/33.jpg', source_url: 'https://a/3.jpg' },
     })
     expect(count).toBe(1)
   })

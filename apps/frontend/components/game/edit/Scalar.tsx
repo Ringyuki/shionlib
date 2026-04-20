@@ -28,6 +28,8 @@ import { pickChanges, ChangesResult } from '@/utils/pick-changes'
 import { Confirm } from './scalar/Confirm'
 import { EditNote } from './EditNote'
 import { ReleaseDateTBA } from './scalar/ReleaseDateTBA'
+import { FieldSyncButton, GameScalarSyncField } from './sync/FieldSyncButton'
+import { GameScalarFields } from '@/interfaces/edit/permisson.interface'
 
 interface ScalarProps {
   data: GameScalar
@@ -44,7 +46,7 @@ export const Scalar = ({ data }: ScalarProps) => {
   })
   const serialize = (d: GameScalar): GameScalar => ({
     ...d,
-    tags: d.tags?.map((r: GameTagRelation) => r.tag.name) as any,
+    tags: d.tags?.map((r: GameTagRelation) => r.tag_alias ?? r.tag.name) as any,
   })
 
   const onSubmit = async (data: GameScalar) => {
@@ -68,6 +70,29 @@ export const Scalar = ({ data }: ScalarProps) => {
   const [formValues, setFormValues] = useState<GameScalar>(data)
   const [open, setOpen] = useState(false)
   const [note, setNote] = useState('')
+  const scalarSyncFields: Partial<Record<GameScalarFields, GameScalarSyncField>> = {
+    TITLES: 'titles',
+    PLATFORMS: 'platform',
+    TYPE: 'type',
+    ALIASES: 'aliases',
+    TAGS: 'tags',
+    INTROS: 'intros',
+    RELEASE: 'release',
+    EXTRA: 'extra',
+    STAFFS: 'staffs',
+  }
+  const renderSyncButton = (permission: GameScalarFields) => {
+    const field = scalarSyncFields[permission]
+    if (!field || !permissions?.scalarFields.includes(permission)) return null
+    return (
+      <FieldSyncButton
+        gameId={Number(id)}
+        field={field}
+        compact
+        onApplied={() => router.refresh()}
+      />
+    )
+  }
   useEffect(() => {
     const subscription = form.watch(values => {
       setFormValues(values as GameScalar)
@@ -91,16 +116,36 @@ export const Scalar = ({ data }: ScalarProps) => {
           }}
           className="space-y-4"
         >
-          {permissions?.scalarFields.includes('TITLES') && <Titles form={form} />}
-          {permissions?.scalarFields.includes('PLATFORMS') && <Platform form={form} />}
-          {permissions?.scalarFields.includes('TYPE') && <Type form={form} />}
-          {permissions?.scalarFields.includes('ALIASES') && <Aliases form={form} />}
-          {permissions?.scalarFields.includes('TAGS') && <Tags form={form} />}
-          {permissions?.scalarFields.includes('INTROS') && <Intros form={form} />}
-          {permissions?.scalarFields.includes('RELEASE') && <ReleaseDate form={form} />}
-          {permissions?.scalarFields.includes('RELEASE') && <ReleaseDateTBA form={form} />}
-          {permissions?.scalarFields.includes('EXTRA') && <ExtraInfo form={form} />}
-          {permissions?.scalarFields.includes('STAFFS') && <Staffs form={form} />}
+          {permissions?.scalarFields.includes('TITLES') && (
+            <Titles form={form} syncAction={renderSyncButton('TITLES')} />
+          )}
+          {permissions?.scalarFields.includes('PLATFORMS') && (
+            <Platform form={form} syncAction={renderSyncButton('PLATFORMS')} />
+          )}
+          {permissions?.scalarFields.includes('TYPE') && (
+            <Type form={form} syncAction={renderSyncButton('TYPE')} />
+          )}
+          {permissions?.scalarFields.includes('ALIASES') && (
+            <Aliases form={form} syncAction={renderSyncButton('ALIASES')} />
+          )}
+          {permissions?.scalarFields.includes('TAGS') && (
+            <Tags form={form} syncAction={renderSyncButton('TAGS')} />
+          )}
+          {permissions?.scalarFields.includes('INTROS') && (
+            <Intros form={form} syncAction={renderSyncButton('INTROS')} />
+          )}
+          {permissions?.scalarFields.includes('RELEASE') && (
+            <>
+              <ReleaseDate form={form} syncAction={renderSyncButton('RELEASE')} />
+              <ReleaseDateTBA form={form} />
+            </>
+          )}
+          {permissions?.scalarFields.includes('EXTRA') && (
+            <ExtraInfo form={form} syncAction={renderSyncButton('EXTRA')} />
+          )}
+          {permissions?.scalarFields.includes('STAFFS') && (
+            <Staffs form={form} syncAction={renderSyncButton('STAFFS')} />
+          )}
           {permissions?.scalarFields.includes('NSFW') && <NSFW form={form} />}
 
           <EditNote onChange={e => setNote(e.target.value)} />

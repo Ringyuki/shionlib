@@ -106,18 +106,19 @@ export class GameEditService {
     }
 
     if (hasTagChange) {
+      const nextTags = this.dedupeTagsByCanonical(tags as string[])
       const beforeTags = await this.prisma.gameTagRelation.findMany({
         where: { game_id: id },
-        select: { tag: { select: { name: true } } },
+        select: { tag_alias: true, tag: { select: { name: true } } },
       })
-      const beforeTagNames = beforeTags.map(r => r.tag.name).sort()
-      const afterTagNames = [...(tags as string[])].sort()
+      const beforeTagNames = beforeTags.map(r => r.tag_alias ?? r.tag.name).sort()
+      const afterTagNames = [...nextTags].sort()
       const tagsActuallyChanged =
         beforeTagNames.length !== afterTagNames.length ||
         beforeTagNames.some((name, i) => name !== afterTagNames[i])
 
       if (tagsActuallyChanged) {
-        await this.gameTagService.setGameTags(id, tags as string[])
+        await this.gameTagService.setGameTags(id, nextTags)
         await this.prisma.$transaction(async tx => {
           const editRecord = await tx.editRecord.create({
             data: {
@@ -129,7 +130,7 @@ export class GameEditService {
               field_mask: 1n << BigInt(GameFieldGroupBit.TAGS),
               changes: {
                 before: { tags: beforeTagNames },
-                after: { tags },
+                after: { tags: afterTagNames },
               } as any,
               field_changes: ['tags'],
               note,
@@ -154,6 +155,17 @@ export class GameEditService {
       select: rawDataQuery,
     })
     await this.searchEngine.upsertGame(formatDoc(updated as unknown as GameData))
+  }
+
+  private dedupeTagsByCanonical(tags: string[]) {
+    const byCanonical = new Map<string, string>()
+    for (const rawTag of tags) {
+      const canonical = this.gameTagService.normalizeTag(rawTag)
+      const display = this.gameTagService.normalizeDisplayTag(rawTag)
+      if (!canonical || byCanonical.has(canonical)) continue
+      byCanonical.set(canonical, display)
+    }
+    return [...byCanonical.values()]
   }
 
   async editLinks(id: number, links: EditGameLinkDto[], req: RequestWithUser) {
@@ -312,6 +324,9 @@ export class GameEditService {
         sexual: true,
         violence: true,
         language: true,
+        source: true,
+        source_key: true,
+        source_url: true,
       },
     })
     if (!coverToEdit) return
@@ -330,6 +345,9 @@ export class GameEditService {
           sexual: true,
           violence: true,
           language: true,
+          source: true,
+          source_key: true,
+          source_url: true,
         },
       })
       const editRecord = await tx.editRecord.create({
@@ -370,9 +388,26 @@ export class GameEditService {
   async addCovers(id: number, covers: GameCoverDto[], req: RequestWithUser) {
     const exisited = await this.prisma.gameCover.findMany({
       where: { game_id: id },
-      select: { url: true, type: true, dims: true, sexual: true, violence: true },
+      select: {
+        url: true,
+        type: true,
+        dims: true,
+        sexual: true,
+        violence: true,
+        source: true,
+        source_key: true,
+        source_url: true,
+      },
     })
-    const uniqueCovers = covers.filter(c => !exisited.some(e => e.url === c.url))
+    const uniqueCovers = covers.filter(
+      c =>
+        !exisited.some(
+          e =>
+            e.url === c.url ||
+            (c.source && c.source_key && e.source === c.source && e.source_key === c.source_key) ||
+            (c.source_url && e.source_url === c.source_url),
+        ),
+    )
     if (uniqueCovers.length === 0) return
 
     await this.prisma.$transaction(async tx => {
@@ -385,6 +420,9 @@ export class GameEditService {
           dims: c.dims,
           sexual: c.sexual,
           violence: c.violence,
+          source: c.source,
+          source_key: c.source_key,
+          source_url: c.source_url,
         })),
       })
       const editRecord = await tx.editRecord.create({
@@ -421,7 +459,17 @@ export class GameEditService {
   async removeCovers(id: number, covers: number[], req: RequestWithUser) {
     const coversToRemove = await this.prisma.gameCover.findMany({
       where: { game_id: id, id: { in: covers } },
-      select: { id: true, url: true, type: true, dims: true, sexual: true, violence: true },
+      select: {
+        id: true,
+        url: true,
+        type: true,
+        dims: true,
+        sexual: true,
+        violence: true,
+        source: true,
+        source_key: true,
+        source_url: true,
+      },
     })
     if (coversToRemove.length === 0) return
 
@@ -490,6 +538,9 @@ export class GameEditService {
         sexual: true,
         violence: true,
         game_id: true,
+        source: true,
+        source_key: true,
+        source_url: true,
       },
     })
     if (!imageToEdit || imageToEdit.game_id !== id) return
@@ -507,6 +558,9 @@ export class GameEditService {
           dims: true,
           sexual: true,
           violence: true,
+          source: true,
+          source_key: true,
+          source_url: true,
         },
       })
       const editRecord = await tx.editRecord.create({
@@ -547,9 +601,25 @@ export class GameEditService {
   async addImages(id: number, images: GameImageDto[], req: RequestWithUser) {
     const exisited = await this.prisma.gameImage.findMany({
       where: { game_id: id },
-      select: { url: true, dims: true, sexual: true, violence: true },
+      select: {
+        url: true,
+        dims: true,
+        sexual: true,
+        violence: true,
+        source: true,
+        source_key: true,
+        source_url: true,
+      },
     })
-    const uniqueImages = images.filter(i => !exisited.some(e => e.url === i.url))
+    const uniqueImages = images.filter(
+      i =>
+        !exisited.some(
+          e =>
+            e.url === i.url ||
+            (i.source && i.source_key && e.source === i.source && e.source_key === i.source_key) ||
+            (i.source_url && e.source_url === i.source_url),
+        ),
+    )
     if (uniqueImages.length === 0) return
 
     await this.prisma.$transaction(async tx => {
@@ -560,6 +630,9 @@ export class GameEditService {
           dims: i.dims,
           sexual: i.sexual,
           violence: i.violence,
+          source: i.source,
+          source_key: i.source_key,
+          source_url: i.source_url,
         })),
       })
       const editRecord = await tx.editRecord.create({
@@ -596,7 +669,16 @@ export class GameEditService {
   async removeImages(id: number, images: number[], req: RequestWithUser) {
     const imagesToRemove = await this.prisma.gameImage.findMany({
       where: { game_id: id, id: { in: images } },
-      select: { id: true, url: true, dims: true, sexual: true, violence: true },
+      select: {
+        id: true,
+        url: true,
+        dims: true,
+        sexual: true,
+        violence: true,
+        source: true,
+        source_key: true,
+        source_url: true,
+      },
     })
     if (imagesToRemove.length === 0) return
 

@@ -5,20 +5,20 @@ import { Edit } from './cover/Edit'
 import { useEditPermissionStore } from '@/store/editPermissionStore'
 import { Empty } from '@/components/common/content/Empty'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Create } from './cover/create/Create'
+import { shionlibRequest } from '@/utils/request'
+import { FieldSyncButton } from './sync/FieldSyncButton'
 
 interface CoverProps {
   covers: GameCover[]
+  id: number
 }
 
-export const Cover = ({ covers: initialCovers }: CoverProps) => {
+export const Cover = ({ covers: initialCovers, id }: CoverProps) => {
   const [covers, setCovers] = useState(initialCovers)
   const { gamePermissions: permissions } = useEditPermissionStore()
   const t = useTranslations('Components.Game.Edit.Cover')
-  if (!permissions?.relationFields.includes('MANAGE_COVERS')) {
-    return <Empty title={t('noPermission')} />
-  }
 
   const handleSuccess = (data: GameCover, id?: number) => {
     if (id) setCovers(prev => prev.map(prev => (prev.id === id ? { ...data, id } : prev)))
@@ -27,6 +27,17 @@ export const Cover = ({ covers: initialCovers }: CoverProps) => {
   const handleDelete = (id: number) => {
     setCovers(prev => prev.filter(cover => cover.id !== id))
   }
+  const fetchCovers = useCallback(async () => {
+    try {
+      const res = await shionlibRequest().get<GameCover[]>(`/edit/game/${id}/cover`)
+      setCovers(res.data || [])
+    } catch {}
+  }, [id])
+
+  if (!permissions?.relationFields.includes('MANAGE_COVERS')) {
+    return <Empty title={t('noPermission')} />
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -34,6 +45,7 @@ export const Cover = ({ covers: initialCovers }: CoverProps) => {
           <Edit key={cover.url} cover={cover} onSuccess={handleSuccess} onDelete={handleDelete} />
         ))}
       </div>
+      <FieldSyncButton gameId={id} field="covers" onApplied={fetchCovers} />
       <Create onSuccess={handleSuccess} />
     </div>
   )

@@ -10,5 +10,5 @@ export default async function CoverPage({ params }: CoverPageProps) {
   const { id } = await params
   const data = await shionlibRequest().get<GameCover[]>(`/edit/game/${id}/cover`)
 
-  return <Cover covers={data?.data ?? []} />
+  return <Cover covers={data?.data ?? []} id={Number(id)} />
 }

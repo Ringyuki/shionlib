@@ -7,6 +7,7 @@ import { formatDoc } from '../../search/helpers/format-doc'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 import { GameCreateService } from './game-create.service'
+import { GameEntityUpsertService } from './game-entity-upsert.service'
 
 describe('GameCreateService', () => {
   const formatDocMock = formatDoc as unknown as jest.Mock
@@ -68,6 +69,7 @@ describe('GameCreateService', () => {
     const gameTagService = {
       setGameTags: jest.fn().mockResolvedValue(undefined),
     }
+    const gameEntityUpsertService = new GameEntityUpsertService()
 
     const service = new GameCreateService(
       gameDataFetcherService as any,
@@ -76,6 +78,7 @@ describe('GameCreateService', () => {
       activityService as any,
       gameEditService as any,
       gameTagService as any,
+      gameEntityUpsertService,
     )
 
     return {
@@ -243,6 +246,9 @@ describe('GameCreateService', () => {
           dims: [0, 0],
           sexual: 1,
           violence: 2,
+          source: undefined,
+          source_key: undefined,
+          source_url: undefined,
         },
         {
           game_id: 101,
@@ -252,12 +258,26 @@ describe('GameCreateService', () => {
           dims: [300, 400],
           sexual: 0,
           violence: 0,
+          source: undefined,
+          source_key: undefined,
+          source_url: undefined,
         },
       ],
       skipDuplicates: true,
     })
     expect(tx.gameImage.createMany).toHaveBeenCalledWith({
-      data: [{ game_id: 101, url: 'https://img/1', dims: [0, 0], sexual: 0, violence: 0 }],
+      data: [
+        {
+          game_id: 101,
+          url: 'https://img/1',
+          dims: [0, 0],
+          sexual: 0,
+          violence: 0,
+          source: undefined,
+          source_key: undefined,
+          source_url: undefined,
+        },
+      ],
     })
     expect(tx.gameLink.createMany).toHaveBeenCalledWith({
       data: [
@@ -602,6 +622,9 @@ describe('GameCreateService', () => {
           dims: [0, 0],
           sexual: undefined,
           violence: undefined,
+          source: undefined,
+          source_key: undefined,
+          source_url: undefined,
         },
         {
           game_id: 77,
@@ -611,6 +634,9 @@ describe('GameCreateService', () => {
           dims: [10, 20],
           sexual: undefined,
           violence: undefined,
+          source: undefined,
+          source_key: undefined,
+          source_url: undefined,
         },
       ],
       skipDuplicates: true,

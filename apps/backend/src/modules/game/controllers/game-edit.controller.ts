@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common'
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
 import { GameEditService } from '../services/game-edit.service'
+import { GameFieldSyncService } from '../services/game-field-sync.service'
 import {
   EditGameReqDto,
   RemoveGameLinkReqDto,
@@ -34,6 +35,10 @@ import {
   AddGameRelationReqDto,
   RemoveGameRelationReqDto,
   EditGameRelationsReqDto,
+  ApplyGameFieldSyncReqDto,
+  ApplyGameScalarSyncReqDto,
+  GameScalarSyncFieldEnum,
+  PreviewGameScalarSyncReqDto,
 } from '../dto/req/edit-game.req.dto'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { EditAuthGuard } from '../../edit/guards/edit-auth.guard'
@@ -41,10 +46,30 @@ import { PermissionEntity } from '../../edit/enums/permission-entity.enum'
 import { gameRequiredBits, GamekeyToBit } from '../../edit/resolvers/permisson-resolver'
 import { GameFieldGroupBit } from '../../edit/enums/field-group.enum'
 
+const ScalarSyncFieldToBit: Record<GameScalarSyncFieldEnum, GameFieldGroupBit> = {
+  [GameScalarSyncFieldEnum.TITLES]: GameFieldGroupBit.TITLES,
+  [GameScalarSyncFieldEnum.ALIASES]: GameFieldGroupBit.ALIASES,
+  [GameScalarSyncFieldEnum.INTROS]: GameFieldGroupBit.INTROS,
+  [GameScalarSyncFieldEnum.RELEASE]: GameFieldGroupBit.RELEASE,
+  [GameScalarSyncFieldEnum.TYPE]: GameFieldGroupBit.TYPE,
+  [GameScalarSyncFieldEnum.PLATFORMS]: GameFieldGroupBit.PLATFORMS,
+  [GameScalarSyncFieldEnum.EXTRA]: GameFieldGroupBit.EXTRA,
+  [GameScalarSyncFieldEnum.STAFFS]: GameFieldGroupBit.STAFFS,
+  [GameScalarSyncFieldEnum.TAGS]: GameFieldGroupBit.TAGS,
+}
+
+const scalarSyncRequiredBits = (dto: { field?: GameScalarSyncFieldEnum }) => {
+  const bit = dto?.field ? ScalarSyncFieldToBit[dto.field] : undefined
+  return bit === undefined ? [] : [bit]
+}
+
 @UseGuards(JwtAuthGuard)
 @Controller('game')
 export class GameEditController {
-  constructor(private readonly gameEditService: GameEditService) {}
+  constructor(
+    private readonly gameEditService: GameEditService,
+    private readonly gameFieldSyncService: GameFieldSyncService,
+  ) {}
 
   @UseGuards(EditAuthGuard(PermissionEntity.GAME, gameRequiredBits, GamekeyToBit))
   @Patch(':id/edit/scalar')
@@ -54,6 +79,25 @@ export class GameEditController {
     @Req() req: RequestWithUser,
   ) {
     return this.gameEditService.editGameScalar(id, dto, req)
+  }
+
+  @UseGuards(EditAuthGuard(PermissionEntity.GAME, scalarSyncRequiredBits, undefined, 'scalar'))
+  @Post(':id/edit/scalar/sync/preview')
+  async previewScalarSync(
+    @Body() dto: PreviewGameScalarSyncReqDto,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.gameFieldSyncService.previewScalar(id, dto.field)
+  }
+
+  @UseGuards(EditAuthGuard(PermissionEntity.GAME, scalarSyncRequiredBits, undefined, 'scalar'))
+  @Post(':id/edit/scalar/sync/apply')
+  async applyScalarSync(
+    @Body() dto: ApplyGameScalarSyncReqDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameFieldSyncService.applyScalar(id, dto.field, dto.candidateIds, req, dto.note)
   }
 
   @UseGuards(
@@ -397,6 +441,186 @@ export class GameEditController {
     @Req() req: RequestWithUser,
   ) {
     return this.gameEditService.editGameRelations(id, dto.relations, req)
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_LINKS],
+      undefined,
+      'links',
+    ),
+  )
+  @Post(':id/edit/links/sync/preview')
+  async previewLinkSync(@Param('id', ParseIntPipe) id: number) {
+    return this.gameFieldSyncService.preview(id, 'links')
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_LINKS],
+      undefined,
+      'links',
+    ),
+  )
+  @Post(':id/edit/links/sync/apply')
+  async applyLinkSync(
+    @Body() dto: ApplyGameFieldSyncReqDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameFieldSyncService.apply(id, 'links', dto.candidateIds, req)
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_COVERS],
+      undefined,
+      'covers',
+    ),
+  )
+  @Post(':id/edit/covers/sync/preview')
+  async previewCoverSync(@Param('id', ParseIntPipe) id: number) {
+    return this.gameFieldSyncService.preview(id, 'covers')
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_COVERS],
+      undefined,
+      'covers',
+    ),
+  )
+  @Post(':id/edit/covers/sync/apply')
+  async applyCoverSync(
+    @Body() dto: ApplyGameFieldSyncReqDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameFieldSyncService.apply(id, 'covers', dto.candidateIds, req)
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_IMAGES],
+      undefined,
+      'images',
+    ),
+  )
+  @Post(':id/edit/images/sync/preview')
+  async previewImageSync(@Param('id', ParseIntPipe) id: number) {
+    return this.gameFieldSyncService.preview(id, 'images')
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_IMAGES],
+      undefined,
+      'images',
+    ),
+  )
+  @Post(':id/edit/images/sync/apply')
+  async applyImageSync(
+    @Body() dto: ApplyGameFieldSyncReqDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameFieldSyncService.apply(id, 'images', dto.candidateIds, req)
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_DEVELOPERS],
+      undefined,
+      'developers',
+    ),
+  )
+  @Post(':id/edit/developers/sync/preview')
+  async previewDeveloperSync(@Param('id', ParseIntPipe) id: number) {
+    return this.gameFieldSyncService.preview(id, 'developers')
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_DEVELOPERS],
+      undefined,
+      'developers',
+    ),
+  )
+  @Post(':id/edit/developers/sync/apply')
+  async applyDeveloperSync(
+    @Body() dto: ApplyGameFieldSyncReqDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameFieldSyncService.apply(id, 'developers', dto.candidateIds, req)
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_CHARACTERS],
+      undefined,
+      'characters',
+    ),
+  )
+  @Post(':id/edit/characters/sync/preview')
+  async previewCharacterSync(@Param('id', ParseIntPipe) id: number) {
+    return this.gameFieldSyncService.preview(id, 'characters')
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_CHARACTERS],
+      undefined,
+      'characters',
+    ),
+  )
+  @Post(':id/edit/characters/sync/apply')
+  async applyCharacterSync(
+    @Body() dto: ApplyGameFieldSyncReqDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameFieldSyncService.apply(id, 'characters', dto.candidateIds, req)
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_RELATIONS],
+      undefined,
+      'relations',
+    ),
+  )
+  @Post(':id/edit/relations/sync/preview')
+  async previewRelationSync(@Param('id', ParseIntPipe) id: number) {
+    return this.gameFieldSyncService.preview(id, 'relations')
+  }
+
+  @UseGuards(
+    EditAuthGuard(
+      PermissionEntity.GAME,
+      () => [GameFieldGroupBit.MANAGE_RELATIONS],
+      undefined,
+      'relations',
+    ),
+  )
+  @Post(':id/edit/relations/sync/apply')
+  async applyRelationSync(
+    @Body() dto: ApplyGameFieldSyncReqDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.gameFieldSyncService.apply(id, 'relations', dto.candidateIds, req)
   }
 
   @UseGuards(

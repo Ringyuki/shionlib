@@ -18,6 +18,8 @@ import { GameScoreController } from './controllers/game-score.controller'
 import { GameDownloadResourceReportService } from './services/game-download-resource-report.service'
 import { GameTagService } from './services/game-tag.service'
 import { DownloadProxyTicketService } from './services/download-proxy-ticket.service'
+import { GameEntityUpsertService } from './services/game-entity-upsert.service'
+import { GameFieldSyncService } from './services/game-field-sync.service'
 
 @Module({
   controllers: [
@@ -41,6 +43,8 @@ import { DownloadProxyTicketService } from './services/download-proxy-ticket.ser
     GameDownloadResourceReportService,
     GameTagService,
     DownloadProxyTicketService,
+    GameEntityUpsertService,
+    GameFieldSyncService,
   ],
   exports: [GameService, GameDownloadResourceReportService, GameTagService],
 })

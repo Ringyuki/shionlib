@@ -301,6 +301,9 @@ export class GameDataFetcherService {
         dims: s.dims,
         sexual: s.sexual,
         violence: s.violence,
+        source: 'vndb',
+        source_key: s.url,
+        source_url: s.url,
       }))
       finalGameData.platform = rawGameData.platforms as GamePlatform[]
       finalGameData.links = rawGameData.extlinks
@@ -428,6 +431,9 @@ export class GameDataFetcherService {
               dims: image.dims,
               sexual: image.sexual,
               violence: image.violence,
+              source: 'vndb',
+              source_key: image.id || image.url,
+              source_url: image.url,
             })
           else
             digs.push({
@@ -437,6 +443,9 @@ export class GameDataFetcherService {
               dims: image.dims,
               sexual: image.sexual,
               violence: image.violence,
+              source: 'vndb',
+              source_key: image.id || image.url,
+              source_url: image.url,
             })
         }
       }
@@ -567,6 +576,9 @@ export class GameDataFetcherService {
         dims: rawGameData.image.dims,
         sexual: rawGameData.image.sexual,
         violence: rawGameData.image.violence,
+        source: 'vndb',
+        source_key: rawGameData.image.url,
+        source_url: rawGameData.image.url,
       })
     }
 

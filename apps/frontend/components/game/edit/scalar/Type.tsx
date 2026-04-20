@@ -5,12 +5,14 @@ import { UseFormReturn } from 'react-hook-form'
 import { GameScalar } from '@/interfaces/edit/scalar.interface'
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/shionui/Form'
 import { Input } from '@/components/shionui/Input'
+import type { ReactNode } from 'react'
 
 interface TypeProps {
   form: UseFormReturn<GameScalar>
+  syncAction?: ReactNode
 }
 
-export const Type = ({ form }: TypeProps) => {
+export const Type = ({ form, syncAction }: TypeProps) => {
   const t = useTranslations('Components.Game.Edit.Scalar')
   return (
     <FormField
@@ -20,7 +22,10 @@ export const Type = ({ form }: TypeProps) => {
         <FormItem>
           <FormLabel>{t('type')}</FormLabel>
           <FormControl>
-            <Input {...field} />
+            <div className="flex items-center gap-2">
+              <Input {...field} className="min-w-0 flex-1" />
+              {syncAction && <div className="shrink-0">{syncAction}</div>}
+            </div>
           </FormControl>
           <FormMessage />
         </FormItem>

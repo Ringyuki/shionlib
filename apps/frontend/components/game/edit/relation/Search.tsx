@@ -2,7 +2,7 @@
 
 import { Input } from '@/components/shionui/Input'
 import { Button } from '@/components/shionui/Button'
-import { Search, Plus, RefreshCw } from 'lucide-react'
+import { Search, Plus } from 'lucide-react'
 import { GameRelation, GameItem } from '@/interfaces/game/game.interface'
 import { useTranslations } from 'next-intl'
 import { shionlibRequest } from '@/utils/request'
@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from '@/components/shionui/Select'
 import { GameRelationType, GameRelationTypeOptions } from '@/interfaces/game/game.interface'
+import { FieldSyncButton } from '../sync/FieldSyncButton'
 
 interface SearchRelationProps {
   relations: GameRelation[]
@@ -29,7 +30,6 @@ export const SearchRelation = ({ relations, onAdd, game_id }: SearchRelationProp
   const [searchResults, setSearchResults] = useState<GameItem[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [addLoading, setAddLoading] = useState(false)
-  const [syncLoading, setSyncLoading] = useState(false)
   const [selectedRelationType, setSelectedRelationType] = useState<GameRelationType>('SEQUEL')
 
   const handleSearch = async () => {
@@ -62,21 +62,6 @@ export const SearchRelation = ({ relations, onAdd, game_id }: SearchRelationProp
     }
   }
 
-  const handleSyncFromBangumi = async () => {
-    setSyncLoading(true)
-    try {
-      const res = await shionlibRequest().post<{ synced: number }>(
-        `/game/${game_id}/edit/relations/sync-from-bangumi`,
-      )
-      sileo.success({ title: t('syncSuccess', { count: res.data?.synced ?? 0 }) })
-      onAdd()
-    } catch {
-      sileo.error({ title: t('syncFailed') })
-    } finally {
-      setSyncLoading(false)
-    }
-  }
-
   return (
     <div className="space-y-2">
       <h3 className="text-base font-semibold">{t('Search.title')}</h3>
@@ -96,14 +81,7 @@ export const SearchRelation = ({ relations, onAdd, game_id }: SearchRelationProp
             ))}
           </SelectContent>
         </Select>
-        <Button
-          onClick={handleSyncFromBangumi}
-          loading={syncLoading}
-          intent="secondary"
-          renderIcon={<RefreshCw className="size-4" />}
-        >
-          {t('syncFromBangumi')}
-        </Button>
+        <FieldSyncButton gameId={game_id} field="relations" onApplied={onAdd} />
       </div>
 
       <div className="flex gap-2">

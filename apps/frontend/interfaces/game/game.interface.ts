@@ -8,6 +8,9 @@ export interface GameCover {
   dims: number[]
   sexual: number
   violence: number
+  source?: string
+  source_key?: string
+  source_url?: string
 }
 
 export interface GameImage {
@@ -16,6 +19,9 @@ export interface GameImage {
   dims: number[]
   sexual: number
   violence: number
+  source?: string
+  source_key?: string
+  source_url?: string
 }
 
 export interface GameItem {

@@ -10,17 +10,22 @@ export class GameTagService {
     return raw.toLowerCase().trim().replace(/\s+/g, ' ')
   }
 
+  normalizeDisplayTag(raw: string): string {
+    return raw.trim().replace(/\s+/g, ' ')
+  }
+
   /** Resolves a raw tag string to its canonical tag id and display alias. */
   async resolveTag(
     tx: Prisma.TransactionClient,
     raw: string,
   ): Promise<{ tagId: number; alias: string | null }> {
     const normalized = this.normalizeTag(raw)
-    const alias = raw !== normalized ? raw : null
+    const display = this.normalizeDisplayTag(raw)
+    const alias = display !== normalized ? display : null
 
     let tag = await tx.tag.findUnique({ where: { name: normalized } })
     if (!tag) {
-      tag = await tx.tag.findFirst({ where: { aliases: { has: raw } } })
+      tag = await tx.tag.findFirst({ where: { aliases: { has: display } } })
     }
 
     if (!tag) {
@@ -45,7 +50,8 @@ export class GameTagService {
   ): Promise<void> {
     const execute = async (tx: Prisma.TransactionClient) => {
       const existing = await tx.gameTagRelation.findMany({ where: { game_id: gameId } })
-      const existingIds = new Set(existing.map(r => r.tag_id))
+      const existingById = new Map(existing.map(r => [r.tag_id, r]))
+      const existingIds = new Set(existingById.keys())
 
       const resolved = new Map<number, string | null>()
       for (const raw of rawTags) {
@@ -55,6 +61,10 @@ export class GameTagService {
 
       const toRemove = [...existingIds].filter(id => !resolved.has(id))
       const toAdd = [...resolved.entries()].filter(([id]) => !existingIds.has(id))
+      const toUpdate = [...resolved.entries()].filter(([id, alias]) => {
+        const relation = existingById.get(id)
+        return relation && (relation.tag_alias ?? null) !== alias
+      })
 
       if (toRemove.length > 0) {
         await tx.gameTagRelation.deleteMany({
@@ -74,6 +84,13 @@ export class GameTagService {
         await tx.tag.updateMany({
           where: { id: { in: toAdd.map(([id]) => id) } },
           data: { count: { increment: 1 } },
+        })
+      }
+
+      for (const [tag_id, tag_alias] of toUpdate) {
+        await tx.gameTagRelation.update({
+          where: { game_id_tag_id: { game_id: gameId, tag_id } },
+          data: { tag_alias },
         })
       }
     }

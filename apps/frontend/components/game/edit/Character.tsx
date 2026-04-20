@@ -9,6 +9,7 @@ import { SearchCharacter } from './character/Search'
 import { Edit } from './character/Edit'
 import { useEditPermissionStore } from '@/store/editPermissionStore'
 import { Empty } from '@/components/common/content/Empty'
+import { FieldSyncButton } from './sync/FieldSyncButton'
 
 interface CharacterEditProps {
   initRelations: GameCharacterRelation[]
@@ -76,6 +77,7 @@ export const Character = ({ initRelations, id }: CharacterEditProps) => {
         ))}
       </div>
       {sorted.length === 0 && <Empty title={t('Item.no_characters')} />}
+      <FieldSyncButton gameId={id} field="characters" onApplied={fetchRelations} />
       <SearchCharacter relations={relations} onAdd={handleAdd} game_id={id} />
     </div>
   )
