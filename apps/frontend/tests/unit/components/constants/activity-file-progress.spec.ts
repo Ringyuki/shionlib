@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { ActivityType } from '../../../../interfaces/activity/activity.interface'
-import { fileActivityTypes } from '../../../../components/activity/activities/constants/activity-feed'
+import {
+  activityFeedCategories,
+  defaultActivityFeedCategory,
+  fileActivityTypes,
+} from '../../../../components/activity/activities/constants/activity-feed'
 import {
   eventBadgeVariantMap,
   stageDefinitions,
@@ -12,6 +16,17 @@ describe('components/home/activity/constants (unit)', () => {
     expect(fileActivityTypes.has(ActivityType.FILE_UPLOAD_TO_SERVER)).toBe(true)
     expect(fileActivityTypes.has(ActivityType.FILE_UPLOAD_TO_S3)).toBe(true)
     expect(fileActivityTypes.has(ActivityType.FILE_REUPLOAD)).toBe(true)
+  })
+
+  it('orders activity feed categories by value', () => {
+    expect(defaultActivityFeedCategory).toBe('comments')
+    expect(activityFeedCategories.map(category => category.value)).toEqual([
+      'comments',
+      'gameCreates',
+      'walkthroughCreates',
+      'edits',
+      'files',
+    ])
   })
 
   it('defines stage progression and badge mappings', () => {

@@ -7,6 +7,13 @@
     "ActivityCard": {
       "system": "System"
     },
+    "Categories": {
+      "comments": "Comments",
+      "gameCreates": "New Games",
+      "walkthroughCreates": "Walkthroughs",
+      "edits": "Edits",
+      "files": "Files"
+    },
     "Activities": {
       "Comment": {
         "commentedPrefix": "Commented on",

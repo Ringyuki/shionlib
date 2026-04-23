@@ -10,3 +10,15 @@ export const fileActivityTypes = new Set<ActivityType>([
   ActivityType.FILE_CHECK_HARMFUL,
   ActivityType.FILE_REUPLOAD,
 ])
+
+export const activityFeedCategories = [
+  { value: 'comments' },
+  { value: 'gameCreates' },
+  { value: 'walkthroughCreates' },
+  { value: 'edits' },
+  { value: 'files' },
+] as const
+
+export type ActivityFeedCategory = (typeof activityFeedCategories)[number]['value']
+
+export const defaultActivityFeedCategory: ActivityFeedCategory = 'comments'

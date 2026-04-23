@@ -7,6 +7,13 @@
     "ActivityCard": {
       "system": "システム"
     },
+    "Categories": {
+      "comments": "コメント",
+      "gameCreates": "新規ゲーム",
+      "walkthroughCreates": "攻略",
+      "edits": "編集",
+      "files": "ファイル"
+    },
     "Activities": {
       "Comment": {
         "commentedPrefix": "コメントしました",

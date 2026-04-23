@@ -38,7 +38,7 @@ describe('Activity (integration)', () => {
 
     const res = await request(app.getHttpServer())
       .get('/activity/list')
-      .query({ page: 2, pageSize: 20 })
+      .query({ page: 2, pageSize: 20, category: 'comments' })
       .expect(200)
 
     expect(res.headers['shionlib-request-id']).toBeDefined()
@@ -51,7 +51,7 @@ describe('Activity (integration)', () => {
       expect.objectContaining({ page: '2', pageSize: '20' }),
       expect.objectContaining({
         method: 'GET',
-        url: '/activity/list?page=2&pageSize=20',
+        url: '/activity/list?page=2&pageSize=20&category=comments',
       }),
     )
   })

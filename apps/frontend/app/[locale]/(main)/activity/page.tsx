@@ -6,6 +6,7 @@ import { createGenerateMetadata } from '@/libs/seo/metadata'
 import { shionlibRequest } from '@/utils/request'
 import { getTranslations } from 'next-intl/server'
 import { ContentLimit } from '@/interfaces/user/user.interface'
+import { defaultActivityFeedCategory } from '@/components/activity/activities/constants/activity-feed'
 
 const getData = async () => {
   const { data } = await shionlibRequest().get<
@@ -13,7 +14,8 @@ const getData = async () => {
   >(`/activity/list`, {
     params: {
       page: 1,
-      pageSize: 20,
+      pageSize: 10,
+      category: defaultActivityFeedCategory,
     },
   })
 
@@ -22,7 +24,7 @@ const getData = async () => {
     meta: data?.meta ?? {
       totalItems: 0,
       itemCount: 0,
-      itemsPerPage: 20,
+      itemsPerPage: 10,
       totalPages: 1,
       currentPage: 1,
       content_limit: ContentLimit.NEVER_SHOW_NSFW_CONTENT,
@@ -36,7 +38,7 @@ export default async function ActivityPage() {
   return (
     <div className="w-full mx-auto my-4 space-y-6">
       <ActivityHead />
-      <Activity activities={activities} meta={meta} />
+      <Activity activities={activities} meta={meta} initialCategory={defaultActivityFeedCategory} />
     </div>
   )
 }

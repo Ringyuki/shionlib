@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../../../prisma.service'
 import { CreateActivityReqDto } from '../dto/create-activity.dto'
-import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
 import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
 import { ActivityResDto } from '../dto/res/activity.res.dto'
 import { Prisma } from '@prisma/client'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { UserContentLimit } from '../../user/interfaces/user.interface'
 import { USER_AVATAR_SELECT, mapUserAvatar } from '../../../shared/constants/user-select.constant'
+import { GetActivityListReqDto } from '../dto/req/get-activity-list.req.dto'
+import { ActivityListCategoryTypes } from '../constants/activity-list-category.constant'
 
 @Injectable()
 export class ActivityService {
@@ -50,11 +51,14 @@ export class ActivityService {
   }
 
   async getList(
-    paginationReqDto: PaginationReqDto,
+    paginationReqDto: GetActivityListReqDto,
     req: RequestWithUser,
   ): Promise<PaginatedResult<ActivityResDto>> {
-    const { page, pageSize } = paginationReqDto
+    const { page, pageSize, category } = paginationReqDto
     const where: Prisma.ActivityWhereInput = {}
+    if (category) {
+      where.type = { in: ActivityListCategoryTypes[category] }
+    }
     if (
       req.user.content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT ||
       !req.user.content_limit

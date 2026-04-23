@@ -1,4 +1,5 @@
 import { PrismaService } from '../../../prisma.service'
+import { ActivityListCategory } from '../constants/activity-list-category.constant'
 import { ActivityService } from './activity.service'
 
 describe('ActivityService', () => {
@@ -148,12 +149,18 @@ describe('ActivityService', () => {
       },
     ])
 
-    const result = await service.getList({ page: 2, pageSize: 2 } as any, req as any)
+    const result = await service.getList(
+      { page: 2, pageSize: 2, category: ActivityListCategory.EDITS } as any,
+      req as any,
+    )
 
     expect(prisma.activity.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         skip: 2,
         take: 2,
+        where: expect.objectContaining({
+          type: { in: ['GAME_EDIT', 'DEVELOPER_EDIT', 'CHARACTER_EDIT'] },
+        }),
         orderBy: { created: 'desc' },
       }),
     )

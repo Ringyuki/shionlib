@@ -7,6 +7,13 @@
     "ActivityCard": {
       "system": "系统"
     },
+    "Categories": {
+      "comments": "评论",
+      "gameCreates": "新建游戏",
+      "walkthroughCreates": "攻略",
+      "edits": "编辑",
+      "files": "文件"
+    },
     "Activities": {
       "Comment": {
         "commentedPrefix": "在",
