@@ -5,12 +5,44 @@ describe('DeveloperEditController', () => {
     const developerEditService = {
       editDeveloperScalar: jest.fn(),
     }
-    const controller = new DeveloperEditController(developerEditService as any)
+    const developerFieldSyncService = {
+      previewBatch: jest.fn(),
+      apply: jest.fn(),
+    }
+    const controller = new DeveloperEditController(
+      developerEditService as any,
+      developerFieldSyncService as any,
+    )
     const dto = { name: 'dev-a' }
     const req = { user: { sub: 1 } }
 
     await controller.editDeveloperScalar(dto as any, 7, req as any)
 
     expect(developerEditService.editDeveloperScalar).toHaveBeenCalledWith(7, dto, req)
+  })
+
+  it('delegates scalar sync endpoints to service', async () => {
+    const developerEditService = {
+      editDeveloperScalar: jest.fn(),
+    }
+    const developerFieldSyncService = {
+      previewBatch: jest.fn(),
+      apply: jest.fn(),
+    }
+    const controller = new DeveloperEditController(
+      developerEditService as any,
+      developerFieldSyncService as any,
+    )
+    const req = { user: { sub: 1 } }
+
+    await controller.previewFieldSyncBatch({ fields: ['name', 'website'] } as any, 7)
+    await controller.applyScalarSync(
+      { field: 'name', candidateIds: ['c1'], note: 'sync' } as any,
+      7,
+      req as any,
+    )
+
+    expect(developerFieldSyncService.previewBatch).toHaveBeenCalledWith(7, ['name', 'website'])
+    expect(developerFieldSyncService.apply).toHaveBeenCalledWith(7, 'name', ['c1'], req, 'sync')
   })
 })

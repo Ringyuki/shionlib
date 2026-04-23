@@ -9,7 +9,7 @@ import { SearchDeveloper } from './developer/Search'
 import { Edit } from './developer/Edit'
 import { useEditPermissionStore } from '@/store/editPermissionStore'
 import { Empty } from '@/components/common/content/Empty'
-import { FieldSyncButton } from './sync/FieldSyncButton'
+import { useFieldSyncApplied } from './sync/field-sync-events'
 
 interface DeveloperEditProps {
   initRelations: DeveloperRelation[]
@@ -26,6 +26,7 @@ export const Developer = ({ initRelations, id }: DeveloperEditProps) => {
       setRelations(res.data || [])
     } catch {}
   }, [id])
+  useFieldSyncApplied('developers', fetchRelations)
 
   const { gamePermissions: permissions } = useEditPermissionStore()
   if (!permissions?.relationFields.includes('MANAGE_DEVELOPERS')) {
@@ -50,7 +51,6 @@ export const Developer = ({ initRelations, id }: DeveloperEditProps) => {
         ))}
       </div>
       {relations.length === 0 && <Empty title={t('Item.no_developers')} />}
-      <FieldSyncButton gameId={id} field="developers" onApplied={fetchRelations} />
       <SearchDeveloper relations={relations} onAdd={handleAdd} game_id={id} />
     </div>
   )

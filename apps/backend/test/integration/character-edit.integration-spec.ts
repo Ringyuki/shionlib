@@ -4,6 +4,7 @@ import request from 'supertest'
 import { requestId } from '../../src/common/middlewares/request-id.middleware'
 import { CharacterEditController } from '../../src/modules/character/controllers/character-edit.controller'
 import { CharacterEditService } from '../../src/modules/character/services/character-edit.service'
+import { CharacterFieldSyncService } from '../../src/modules/character/services/character-field-sync.service'
 import { JwtAuthGuard } from '../../src/modules/auth/guards/jwt-auth.guard'
 import { PermissionService } from '../../src/modules/edit/services/permission.service'
 
@@ -12,6 +13,10 @@ describe('CharacterEdit (integration)', () => {
 
   const characterEditService = {
     editCharacterScalar: jest.fn(),
+  }
+  const characterFieldSyncService = {
+    previewBatch: jest.fn(),
+    apply: jest.fn(),
   }
   const jwtAuthGuard: CanActivate = {
     canActivate: jest.fn((context: ExecutionContext) => {
@@ -29,6 +34,7 @@ describe('CharacterEdit (integration)', () => {
       controllers: [CharacterEditController],
       providers: [
         { provide: CharacterEditService, useValue: characterEditService },
+        { provide: CharacterFieldSyncService, useValue: characterFieldSyncService },
         { provide: PermissionService, useValue: permissionService },
       ],
     })

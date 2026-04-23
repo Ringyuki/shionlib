@@ -1,4 +1,4 @@
-import type { FieldSyncCandidate } from './types'
+import type { FieldSyncCandidate } from '../types/field-sync'
 
 export const filterCandidates = (candidates: FieldSyncCandidate[], query: string) => {
   if (!query.trim()) return candidates

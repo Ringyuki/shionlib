@@ -677,7 +677,7 @@
     "FieldSync": {
       "button": "同步外部数据",
       "title": "同步{field}",
-      "description": "只会应用你勾选的候选项，不会自动覆盖全部字段。",
+      "description": "只会应用你选择的候选项，不会自动覆盖全部字段。",
       "previewFailed": "拉取同步预览失败",
       "applySuccess": "已应用 {count} 项同步",
       "applyFailed": "应用同步失败",

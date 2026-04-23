@@ -1,23 +1,4 @@
-export type GameSyncField =
-  | 'links'
-  | 'covers'
-  | 'images'
-  | 'developers'
-  | 'characters'
-  | 'relations'
-
-export type GameScalarSyncField =
-  | 'titles'
-  | 'aliases'
-  | 'intros'
-  | 'release'
-  | 'type'
-  | 'platform'
-  | 'extra'
-  | 'staffs'
-  | 'tags'
-
-export type FieldSyncTarget = GameSyncField | GameScalarSyncField
+export type FieldSyncTarget = string
 export type SyncCandidateAction = 'add' | 'update' | 'remove' | 'unmatched'
 export type SyncCandidateSource = 'bangumi' | 'vndb' | 'merged'
 export type SyncCandidateConfidence = 'exact' | 'high' | 'medium' | 'low'
@@ -36,8 +17,8 @@ export interface FieldSyncCandidate {
   warnings?: string[]
 }
 
-export interface FieldSyncPreview {
-  field: FieldSyncTarget
+export interface FieldSyncPreview<TField extends FieldSyncTarget = FieldSyncTarget> {
+  field: TField
   generatedAt: string
   summary: {
     total: number
@@ -47,4 +28,9 @@ export interface FieldSyncPreview {
     defaultSelected: number
   }
   candidates: FieldSyncCandidate[]
+}
+
+export interface FieldSyncBatchPreview<TField extends FieldSyncTarget = FieldSyncTarget> {
+  previews: FieldSyncPreview<TField>[]
+  failedFields?: TField[]
 }

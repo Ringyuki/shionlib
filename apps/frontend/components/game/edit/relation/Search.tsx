@@ -16,7 +16,6 @@ import {
   SelectValue,
 } from '@/components/shionui/Select'
 import { GameRelationType, GameRelationTypeOptions } from '@/interfaces/game/game.interface'
-import { FieldSyncButton } from '../sync/FieldSyncButton'
 
 interface SearchRelationProps {
   relations: GameRelation[]
@@ -81,7 +80,6 @@ export const SearchRelation = ({ relations, onAdd, game_id }: SearchRelationProp
             ))}
           </SelectContent>
         </Select>
-        <FieldSyncButton gameId={game_id} field="relations" onApplied={onAdd} />
       </div>
 
       <div className="flex gap-2">

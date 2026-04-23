@@ -7,6 +7,7 @@ import { createGenerateMetadata } from '@/libs/seo/metadata'
 import { Button } from '@/components/shionui/Button'
 import Link from 'next/link'
 import { Undo2 } from 'lucide-react'
+import { GameFieldSyncButton } from '@/components/game/edit/sync/GameFieldSyncButton'
 
 interface EditLayoutProps {
   children: React.ReactNode
@@ -23,7 +24,7 @@ export default async function EditLayout({ children, params }: EditLayoutProps) 
   return (
     <div className="w-full flex flex-col gap-4">
       <div className="w-full flex flex-col gap-2">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <h2 className="text-2xl font-bold">{t('edit')}</h2>
           <Link href={`/game/${id}`}>
             <Button
@@ -35,6 +36,7 @@ export default async function EditLayout({ children, params }: EditLayoutProps) 
               {t('backToGame')}
             </Button>
           </Link>
+          <GameFieldSyncButton gameId={Number(id)} />
         </div>
         <p className="text-sm text-muted-foreground">{t('description')}</p>
       </div>

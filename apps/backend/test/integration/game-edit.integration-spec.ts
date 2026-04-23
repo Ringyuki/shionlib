@@ -32,9 +32,8 @@ describe('GameEdit (integration)', () => {
     editCharacters: jest.fn(),
   }
   const gameFieldSyncService = {
-    preview: jest.fn(),
+    previewBatch: jest.fn(),
     apply: jest.fn(),
-    previewScalar: jest.fn(),
     applyScalar: jest.fn(),
   }
   const jwtAuthGuard: CanActivate = {

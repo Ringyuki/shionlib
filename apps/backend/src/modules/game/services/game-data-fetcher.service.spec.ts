@@ -81,6 +81,102 @@ describe('GameDataFetcherService', () => {
     expect(spy).toHaveBeenCalledWith('100', 'v123', undefined)
   })
 
+  it('fetchVNDBOnlyData normalizes id and preserves VNDB-only sync snapshot shape', async () => {
+    const { service } = createService()
+    const spy = jest.spyOn(service as any, 'fetchRawVNDBData').mockResolvedValue({
+      rawGameData: {
+        id: 'v123',
+        titles: [{ lang: 'jp', title: 'JP Title' }],
+        aliases: ['Alias'],
+        released: '2026-01-02',
+        description: 'VNDB Description',
+        platforms: ['win'],
+        screenshots: [{ url: 'https://shot/1', dims: [1280, 720], sexual: 0, violence: 0 }],
+        va: [
+          {
+            character: {
+              id: 'c1',
+              name: 'Hero',
+              original: 'ヒロイン',
+              aliases: ['Heroine'],
+              description: 'Character intro',
+              vns: [{ id: 'v123', role: 'main' }],
+              image: { url: 'https://char/1' },
+            },
+          },
+        ],
+        developers: [
+          {
+            id: 'p1',
+            name: 'Studio',
+            original: '',
+            aliases: ['Circle'],
+            description: 'Dev intro',
+            extlinks: [{ label: 'Official website', url: 'https://studio' }],
+          },
+        ],
+        extlinks: [
+          { url: 'https://game.test/#fragment', label: 'official', name: 'Official' },
+          { url: 'https://game.test', label: 'duplicate', name: 'Duplicate' },
+        ],
+      },
+      rawReleasesData: [
+        {
+          extlinks: [{ url: 'https://release.test', label: 'release', name: 'Release' }],
+          languages: [{ lang: 'zh-Hans' }],
+          images: [
+            {
+              type: 'dig',
+              id: 'cover-1',
+              url: 'https://cover/1',
+              dims: [600, 800],
+              sexual: 2,
+              violence: 0,
+            },
+            {
+              type: 'back',
+              id: 'ignored',
+              url: 'https://cover/back',
+              dims: [600, 800],
+              sexual: 0,
+              violence: 0,
+            },
+          ],
+        },
+      ],
+    })
+
+    const result = await service.fetchVNDBOnlyData('123')
+
+    expect(spy).toHaveBeenCalledWith('v123')
+    expect(result.finalGameData).toMatchObject({
+      v_id: 'v123',
+      title_jp: 'JP Title',
+      intro_en: 'VNDB Description',
+      aliases: ['Alias'],
+      platform: ['win'],
+      nsfw: true,
+    })
+    expect(result.finalGameData.links).toEqual([
+      { url: 'https://game.test/#fragment', label: 'official', name: 'Official' },
+      { url: 'https://release.test', label: 'release', name: 'Release' },
+    ])
+    expect(result.finalGameData.images).toEqual([
+      expect.objectContaining({ source: 'vndb', source_key: 'https://shot/1' }),
+    ])
+    expect(result.finalCharactersData[0]).toEqual(
+      expect.objectContaining({ v_id: 'c1', name_jp: 'ヒロイン', name_en: 'Hero', role: 'main' }),
+    )
+    expect(result.finalProducersData[0]).toEqual(
+      expect.objectContaining({ v_id: 'p1', name: 'Studio', website: 'https://studio' }),
+    )
+    expect(result.finalCoversData).toEqual([
+      expect.objectContaining({ language: 'zh', source_key: 'cover-1' }),
+    ])
+    expect(dedupeCharactersMock).toHaveBeenCalled()
+    expect(dedupeDevelopersMock).toHaveBeenCalled()
+  })
+
   it('fetchDatafromBangumi validates subject type and fails on non-game', async () => {
     const { service, bangumiService } = createService()
     bangumiService.bangumiRequest.mockImplementation(async (url: string) => {

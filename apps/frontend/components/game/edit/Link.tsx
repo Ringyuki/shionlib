@@ -8,7 +8,7 @@ import { Edit } from './link/Edit'
 import { Add } from './link/Add'
 import { useEditPermissionStore } from '@/store/editPermissionStore'
 import { Empty } from '@/components/common/content/Empty'
-import { FieldSyncButton } from './sync/FieldSyncButton'
+import { useFieldSyncApplied } from './sync/field-sync-events'
 
 interface LinkEditProps {
   initLinks: GameLink[]
@@ -25,6 +25,7 @@ export const LinkEdit = ({ initLinks, id }: LinkEditProps) => {
       setLinks(res.data || [])
     } catch {}
   }, [id])
+  useFieldSyncApplied('links', fetchLinks)
 
   const { gamePermissions: permissions } = useEditPermissionStore()
   if (!permissions?.relationFields.includes('MANAGE_LINKS')) {
@@ -57,7 +58,6 @@ export const LinkEdit = ({ initLinks, id }: LinkEditProps) => {
         ))}
         {links.length === 0 && <Empty title={t('no_links')} />}
       </div>
-      <FieldSyncButton gameId={id} field="links" onApplied={fetchLinks} />
       <Add game_id={id} onAdd={handleAdd} />
     </div>
   )

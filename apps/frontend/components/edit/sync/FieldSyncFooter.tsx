@@ -15,7 +15,7 @@ export const FieldSyncFooter = ({
   onApply,
   onCancel,
 }: FieldSyncFooterProps) => {
-  const t = useTranslations('Components.Game.Edit.FieldSync')
+  const t = useTranslations('Components.Common.Edit.FieldSync')
 
   return (
     <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

@@ -8,6 +8,9 @@ import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum
 import { GameScalarResDto } from '../dto/res/game-scalar.res.dto'
 import { DeveloperScalarResDto } from '../dto/res/developer-scalar.res.dto'
 import { CharacterScalarResDto } from '../dto/res/character-scalar.res.dto'
+import { GameScalarSyncFieldEnum } from '../../game/dto/req/edit-game.req.dto'
+import { DeveloperScalarSyncFieldEnum } from '../../developer/dto/req/edit-developer.req.dto'
+import { CharacterScalarSyncFieldEnum } from '../../character/dto/req/edit-character.req.dto'
 
 export const GamekeyToBit: Record<keyof GameScalarResDto, GameFieldGroupBit> = {
   b_id: GameFieldGroupBit.IDS,
@@ -67,6 +70,54 @@ export const CharacterKeyToBit: Record<keyof CharacterScalarResDto, GameCharacte
   gender: GameCharacterFieldGroupBit.GENDER,
 }
 
+export const GameScalarSyncFieldToBit: Record<GameScalarSyncFieldEnum, GameFieldGroupBit> = {
+  [GameScalarSyncFieldEnum.TITLES]: GameFieldGroupBit.TITLES,
+  [GameScalarSyncFieldEnum.ALIASES]: GameFieldGroupBit.ALIASES,
+  [GameScalarSyncFieldEnum.INTROS]: GameFieldGroupBit.INTROS,
+  [GameScalarSyncFieldEnum.RELEASE]: GameFieldGroupBit.RELEASE,
+  [GameScalarSyncFieldEnum.TYPE]: GameFieldGroupBit.TYPE,
+  [GameScalarSyncFieldEnum.PLATFORMS]: GameFieldGroupBit.PLATFORMS,
+  [GameScalarSyncFieldEnum.EXTRA]: GameFieldGroupBit.EXTRA,
+  [GameScalarSyncFieldEnum.STAFFS]: GameFieldGroupBit.STAFFS,
+  [GameScalarSyncFieldEnum.TAGS]: GameFieldGroupBit.TAGS,
+}
+
+export const GameFieldSyncFieldToBit: Record<string, GameFieldGroupBit> = {
+  ...GameScalarSyncFieldToBit,
+  links: GameFieldGroupBit.MANAGE_LINKS,
+  covers: GameFieldGroupBit.MANAGE_COVERS,
+  images: GameFieldGroupBit.MANAGE_IMAGES,
+  developers: GameFieldGroupBit.MANAGE_DEVELOPERS,
+  characters: GameFieldGroupBit.MANAGE_CHARACTERS,
+  relations: GameFieldGroupBit.MANAGE_RELATIONS,
+}
+
+export const DeveloperScalarSyncFieldToBit: Record<
+  DeveloperScalarSyncFieldEnum,
+  GameDeveloperFieldGroupBit
+> = {
+  [DeveloperScalarSyncFieldEnum.NAME]: GameDeveloperFieldGroupBit.NAME,
+  [DeveloperScalarSyncFieldEnum.ALIASES]: GameDeveloperFieldGroupBit.ALIASES,
+  [DeveloperScalarSyncFieldEnum.INTROS]: GameDeveloperFieldGroupBit.INTROS,
+  [DeveloperScalarSyncFieldEnum.EXTRA]: GameDeveloperFieldGroupBit.EXTRA,
+  [DeveloperScalarSyncFieldEnum.LOGO]: GameDeveloperFieldGroupBit.LOGO,
+  [DeveloperScalarSyncFieldEnum.WEBSITE]: GameDeveloperFieldGroupBit.WEBSITE,
+}
+
+export const CharacterScalarSyncFieldToBit: Record<
+  CharacterScalarSyncFieldEnum,
+  GameCharacterFieldGroupBit
+> = {
+  [CharacterScalarSyncFieldEnum.NAMES]: GameCharacterFieldGroupBit.NAMES,
+  [CharacterScalarSyncFieldEnum.ALIASES]: GameCharacterFieldGroupBit.ALIASES,
+  [CharacterScalarSyncFieldEnum.INTROS]: GameCharacterFieldGroupBit.INTROS,
+  [CharacterScalarSyncFieldEnum.IMAGE]: GameCharacterFieldGroupBit.IMAGE,
+  [CharacterScalarSyncFieldEnum.BODY_METRICS]: GameCharacterFieldGroupBit.BODY_METRICS,
+  [CharacterScalarSyncFieldEnum.AGE_BIRTHDAY]: GameCharacterFieldGroupBit.AGE_BIRTHDAY,
+  [CharacterScalarSyncFieldEnum.BLOOD_TYPE]: GameCharacterFieldGroupBit.BLOOD_TYPE,
+  [CharacterScalarSyncFieldEnum.GENDER]: GameCharacterFieldGroupBit.GENDER,
+}
+
 export const gameRequiredBits = (dto: Record<string, unknown>): number[] => {
   return requiredBits(dto, GamekeyToBit)
 }
@@ -77,6 +128,42 @@ export const developerRequiredBits = (dto: Record<string, unknown>): number[] =>
 
 export const characterRequiredBits = (dto: Record<string, unknown>): number[] => {
   return requiredBits(dto, CharacterKeyToBit)
+}
+
+export const gameScalarSyncRequiredBits = (dto: { field?: GameScalarSyncFieldEnum }): number[] => {
+  return scalarSyncRequiredBits(dto, GameScalarSyncFieldToBit)
+}
+
+export const gameFieldSyncRequiredBits = (dto: { field?: string; fields?: string[] }): number[] => {
+  return scalarSyncRequiredBits(dto, GameFieldSyncFieldToBit)
+}
+
+export const developerScalarSyncRequiredBits = (dto: {
+  field?: DeveloperScalarSyncFieldEnum
+  fields?: DeveloperScalarSyncFieldEnum[]
+}): number[] => {
+  return scalarSyncRequiredBits(dto, DeveloperScalarSyncFieldToBit)
+}
+
+export const characterScalarSyncRequiredBits = (dto: {
+  field?: CharacterScalarSyncFieldEnum
+  fields?: CharacterScalarSyncFieldEnum[]
+}): number[] => {
+  return scalarSyncRequiredBits(dto, CharacterScalarSyncFieldToBit)
+}
+
+const scalarSyncRequiredBits = (
+  dto: { field?: string; fields?: string[] },
+  fieldToBit: Record<string, number>,
+): number[] => {
+  const fields = [
+    ...(dto?.field ? [dto.field] : []),
+    ...(Array.isArray(dto?.fields) ? dto.fields : []),
+  ]
+  const bits = fields
+    .map(field => fieldToBit[field])
+    .filter((bit): bit is number => bit !== undefined)
+  return [...new Set(bits)]
 }
 
 export const requiredBits = (

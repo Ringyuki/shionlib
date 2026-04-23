@@ -104,8 +104,10 @@ describe('GameFieldSyncService', () => {
     prisma.$transaction.mockImplementation(async (cb: any) => cb(tx))
 
     const bangumiAuthService = { bangumiRequest: jest.fn() }
-    const vndbService = { vndbRequest: jest.fn() }
-    const gameDataFetcherService = { fetchData: jest.fn().mockResolvedValue(emptySnapshot) }
+    const gameDataFetcherService = {
+      fetchData: jest.fn().mockResolvedValue(emptySnapshot),
+      fetchVNDBOnlyData: jest.fn().mockResolvedValue(emptySnapshot),
+    }
     const gameEditService = {
       addLinks: jest.fn(),
       editLinks: jest.fn(),
@@ -131,7 +133,6 @@ describe('GameFieldSyncService', () => {
     const service = new GameFieldSyncService(
       prisma as any,
       bangumiAuthService as any,
-      vndbService as any,
       gameDataFetcherService as any,
       gameEditService as any,
       new GameEntityUpsertService(),
@@ -144,7 +145,6 @@ describe('GameFieldSyncService', () => {
       prisma,
       tx,
       bangumiAuthService,
-      vndbService,
       gameDataFetcherService,
       gameEditService,
       activityService,
@@ -157,6 +157,11 @@ describe('GameFieldSyncService', () => {
     jest.clearAllMocks()
     formatDocMock.mockReturnValue({ id: 1, indexed: true })
   })
+
+  const previewField = async (service: GameFieldSyncService, field: string) => {
+    const result = await service.previewBatch(1, [field])
+    return result.previews[0]
+  }
 
   it('builds scalar candidates for each scalar field and applies the selected field', async () => {
     const { service, gameDataFetcherService, gameEditService } = createService()
@@ -192,7 +197,7 @@ describe('GameFieldSyncService', () => {
       GameScalarSyncFieldEnum.TAGS,
     ]
 
-    const previews = await Promise.all(fields.map(field => service.previewScalar(1, field)))
+    const previews = await Promise.all(fields.map(field => previewField(service, field)))
 
     expect(previews.every(preview => preview.summary.total === 1)).toBe(true)
     expect(previews[0].candidates[0].remote).toMatchObject({
@@ -240,21 +245,44 @@ describe('GameFieldSyncService', () => {
       },
     })
 
-    await expect(service.previewScalar(1, GameScalarSyncFieldEnum.ALIASES)).resolves.toMatchObject({
+    await expect(previewField(service, GameScalarSyncFieldEnum.ALIASES)).resolves.toMatchObject({
       summary: { total: 0 },
     })
-    await expect(
-      service.previewScalar(1, GameScalarSyncFieldEnum.PLATFORMS),
-    ).resolves.toMatchObject({ summary: { total: 0 } })
-    await expect(service.previewScalar(1, GameScalarSyncFieldEnum.RELEASE)).resolves.toMatchObject({
+    await expect(previewField(service, GameScalarSyncFieldEnum.PLATFORMS)).resolves.toMatchObject({
       summary: { total: 0 },
     })
-    await expect(service.previewScalar(1, GameScalarSyncFieldEnum.TITLES)).resolves.toMatchObject({
+    await expect(previewField(service, GameScalarSyncFieldEnum.RELEASE)).resolves.toMatchObject({
+      summary: { total: 0 },
+    })
+    await expect(previewField(service, GameScalarSyncFieldEnum.TITLES)).resolves.toMatchObject({
       summary: { total: 0 },
     })
     await expect(
       service.applyScalar(1, GameScalarSyncFieldEnum.TITLES, [], req as any),
     ).resolves.toEqual({ applied: 0 })
+  })
+
+  it('builds batch previews from a single external snapshot', async () => {
+    const { service, prisma, gameDataFetcherService } = createService()
+    gameDataFetcherService.fetchData.mockResolvedValue({
+      ...emptySnapshot,
+      finalGameData: {
+        title_jp: 'Remote JP',
+        links: [{ url: 'https://example.test', label: 'official', name: 'Official' }],
+      },
+    })
+    prisma.gameLink.findMany.mockResolvedValue([])
+
+    const result = await service.previewBatch(1, [
+      GameScalarSyncFieldEnum.TITLES,
+      'links',
+      GameScalarSyncFieldEnum.TITLES,
+    ])
+
+    expect(result.failedFields).toEqual([])
+    expect(result.previews.map(preview => preview.field)).toEqual(['titles', 'links'])
+    expect(result.previews.every(preview => preview.summary.total === 1)).toBe(true)
+    expect(gameDataFetcherService.fetchData).toHaveBeenCalledTimes(1)
   })
 
   it('previews and applies link additions and updates', async () => {
@@ -273,7 +301,7 @@ describe('GameFieldSyncService', () => {
       { id: 5, url: 'https://example.com/path', label: 'old', name: 'Official' },
     ])
 
-    const preview = await service.preview(1, 'links')
+    const preview = await previewField(service, 'links')
     await service.apply(
       1,
       'links',
@@ -369,8 +397,8 @@ describe('GameFieldSyncService', () => {
       },
     ])
 
-    const coverPreview = await service.preview(1, 'covers')
-    const imagePreview = await service.preview(1, 'images')
+    const coverPreview = await previewField(service, 'covers')
+    const imagePreview = await previewField(service, 'images')
     await service.apply(
       1,
       'covers',
@@ -435,7 +463,7 @@ describe('GameFieldSyncService', () => {
       { id: 20, b_id: '200', v_id: null, name: 'Studio', aliases: [] },
     ])
 
-    const preview = await service.preview(1, 'developers')
+    const preview = await previewField(service, 'developers')
 
     expect(preview.candidates).toHaveLength(1)
     expect(preview.candidates[0]).toMatchObject({
@@ -468,7 +496,7 @@ describe('GameFieldSyncService', () => {
     tx.gameDeveloper.create.mockResolvedValue({ id: 21, name: 'Studio' })
     tx.gameDeveloper.findMany.mockResolvedValue([{ id: 21, name: 'Studio' }])
 
-    const preview = await service.preview(1, 'developers')
+    const preview = await previewField(service, 'developers')
     await service.apply(1, 'developers', [preview.candidates[0].id], req as any)
 
     expect(tx.gameDeveloper.create).toHaveBeenCalled()
@@ -518,7 +546,7 @@ describe('GameFieldSyncService', () => {
       { id: 31, name_jp: 'Hero', name_zh: null, name_en: null },
     ])
 
-    const preview = await service.preview(1, 'characters')
+    const preview = await previewField(service, 'characters')
     await service.apply(1, 'characters', [preview.candidates[0].id], req as any)
 
     expect(tx.gameCharacter.create).toHaveBeenCalled()
@@ -558,7 +586,7 @@ describe('GameFieldSyncService', () => {
       { id: 30, to_game_id: 3, relation: GameRelationType.SEQUEL },
     ])
 
-    const preview = await service.preview(1, 'relations')
+    const preview = await previewField(service, 'relations')
     await service.apply(
       1,
       'relations',
@@ -639,7 +667,7 @@ describe('GameFieldSyncService', () => {
       },
     ])
 
-    const preview = await service.preview(1, 'characters')
+    const preview = await previewField(service, 'characters')
     const update = preview.candidates.find(c => c.action === 'update')!
     const add = preview.candidates.find(c => c.action === 'add')!
     await service.apply(1, 'characters', [update.id], req as any)
@@ -669,91 +697,36 @@ describe('GameFieldSyncService', () => {
   })
 
   it('uses VNDB-only snapshots when only a VNDB id is available', async () => {
-    const { service, prisma, vndbService } = createService()
+    const { service, prisma, gameDataFetcherService } = createService()
     prisma.game.findUnique.mockResolvedValue({ id: 1, b_id: null, v_id: '42' })
-    vndbService.vndbRequest.mockImplementation(
-      async (_mode: string, _filter: unknown, _fields: string[], type: string) => {
-        if (type === 'vn') {
-          return {
-            id: 'v42',
-            titles: [
-              { lang: 'jp', title: '日本語' },
-              { lang: 'zh-Hans', title: '中文' },
-              { lang: 'en', title: 'English' },
-            ],
-            aliases: ['Alias'],
-            released: '2025-05-01',
-            description: 'VNDB intro',
-            platforms: ['win'],
-            screenshots: [
-              { url: 'https://shot.test/1', dims: [1280, 720], sexual: 0, violence: 0 },
-            ],
-            va: [
-              {
-                character: {
-                  id: 'c1',
-                  aliases: ['Heroine'],
-                  description: 'Character intro',
-                  name: 'Hero',
-                  original: 'ヒロイン',
-                  blood_type: 'A',
-                  height: 160,
-                  weight: 45,
-                  bust: 80,
-                  waist: 55,
-                  hips: 82,
-                  cup: 'C',
-                  age: 18,
-                  birthday: [1, 2],
-                  gender: ['female'],
-                  image: { url: 'https://char.test/1', sexual: 0, violence: 0 },
-                  vns: [{ id: 'v42', role: GameCharacterRole.MAIN }],
-                },
-              },
-            ],
-            developers: [
-              {
-                id: 'p1',
-                name: 'Studio',
-                original: '',
-                aliases: ['Circle'],
-                description: 'Dev intro',
-                extlinks: [{ label: 'Official website', url: 'https://studio.test' }],
-              },
-            ],
-            extlinks: [{ url: 'https://game.test', label: 'official', name: 'Official' }],
-          }
-        }
-
-        return [
-          {
-            extlinks: [{ url: 'https://release.test', label: 'release', name: 'Release' }],
-            languages: [{ lang: 'zh-Hans' }],
-            images: [
-              {
-                type: 'dig',
-                id: 'cover-1',
-                url: 'https://cover.test/1',
-                dims: [600, 800],
-                sexual: 2,
-                violence: 0,
-              },
-              {
-                type: 'back',
-                id: 'ignored',
-                url: 'https://cover.test/back',
-                dims: [600, 800],
-                sexual: 0,
-                violence: 0,
-              },
-            ],
-          },
-        ]
+    gameDataFetcherService.fetchVNDBOnlyData.mockResolvedValue({
+      finalGameData: {
+        links: [
+          { url: 'https://game.test', label: 'official', name: 'Official' },
+          { url: 'https://release.test', label: 'release', name: 'Release' },
+        ],
       },
-    )
+      finalCharactersData: [
+        { v_id: 'c1', name_jp: 'ヒロイン', name_en: 'Hero', role: GameCharacterRole.MAIN },
+      ],
+      finalProducersData: [{ v_id: 'p1', name: 'Studio' }],
+      finalCoversData: [
+        {
+          language: 'zh-Hans',
+          type: 'dig',
+          url: 'https://cover.test/1',
+          dims: [600, 800],
+          sexual: 2,
+          violence: 0,
+          source: 'vndb',
+          source_key: 'cover-1',
+          source_url: 'https://cover.test/1',
+        },
+      ],
+    })
 
-    const linkPreview = await service.preview(1, 'links')
-    const coverPreview = await service.preview(1, 'covers')
+    const linkPreview = await previewField(service, 'links')
+    const coverPreview = await previewField(service, 'covers')
 
     expect(linkPreview.summary).toMatchObject({ total: 2, add: 2 })
     expect(coverPreview.candidates[0]).toMatchObject({
@@ -764,36 +737,33 @@ describe('GameFieldSyncService', () => {
         source_url: 'https://cover.test/1',
       }),
     })
-    expect(vndbService.vndbRequest).toHaveBeenCalledWith(
-      'single',
-      ['id', '=', 'v42'],
-      expect.any(Array),
-      'vn',
-    )
+    expect(gameDataFetcherService.fetchData).not.toHaveBeenCalled()
+    expect(gameDataFetcherService.fetchVNDBOnlyData).toHaveBeenCalledWith('42')
   })
 
   it('falls back to VNDB after Bangumi snapshot failure and throws when no fallback id exists', async () => {
-    const { service, prisma, gameDataFetcherService, vndbService } = createService()
+    const { service, prisma, gameDataFetcherService } = createService()
     gameDataFetcherService.fetchData.mockRejectedValue(new Error('bangumi down'))
-    vndbService.vndbRequest.mockImplementation(async (_mode, _filter, _fields, type) =>
-      type === 'vn' ? { id: 'v1', extlinks: [] } : [],
-    )
 
-    await expect(service.preview(1, 'links')).resolves.toMatchObject({ summary: { total: 0 } })
+    await expect(previewField(service, 'links')).resolves.toMatchObject({ summary: { total: 0 } })
+    expect(gameDataFetcherService.fetchVNDBOnlyData).toHaveBeenCalledWith('v1')
 
     prisma.game.findUnique.mockResolvedValue({ id: 1, b_id: '100', v_id: null })
-    await expect(service.preview(1, 'links')).rejects.toThrow('bangumi down')
+    await expect(service.previewBatch(1, ['links'])).resolves.toMatchObject({
+      previews: [],
+      failedFields: ['links'],
+    })
   })
 
   it('returns empty previews for games without external ids and rejects missing games', async () => {
     const { service, prisma } = createService()
     prisma.game.findUnique.mockResolvedValue({ id: 1, b_id: null, v_id: null })
 
-    await expect(service.preview(1, 'links')).resolves.toMatchObject({ summary: { total: 0 } })
+    await expect(previewField(service, 'links')).resolves.toMatchObject({ summary: { total: 0 } })
 
     prisma.game.findUnique.mockResolvedValue(null)
-    await expect(service.preview(1, 'links')).rejects.toBeTruthy()
-    await expect(service.previewScalar(1, GameScalarSyncFieldEnum.TITLES)).rejects.toBeTruthy()
+    await expect(previewField(service, 'links')).rejects.toBeTruthy()
+    await expect(previewField(service, GameScalarSyncFieldEnum.TITLES)).rejects.toBeTruthy()
   })
 
   it('covers helper edge cases used by candidate matching', () => {
@@ -809,8 +779,6 @@ describe('GameFieldSyncService', () => {
     expect(subject.normalizeCoverLanguage('en')).toBe('en')
     expect(subject.normalizeCoverLanguage('ko')).toBe('other')
     expect(subject.stripVndbPrefix('v123')).toBe('123')
-    expect(subject.ensureVndbPrefix('123')).toBe('v123')
-    expect(subject.ensureVndbPrefix('v123')).toBe('v123')
     expect(
       subject.sameMedia(
         { url: 'x', source: 'vndb', source_key: 'a' },

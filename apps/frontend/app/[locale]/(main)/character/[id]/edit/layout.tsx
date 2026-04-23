@@ -6,6 +6,7 @@ import { createGenerateMetadata } from '@/libs/seo/metadata'
 import { Button } from '@/components/shionui/Button'
 import Link from 'next/link'
 import { Undo2 } from 'lucide-react'
+import { CharacterFieldSyncButton } from '@/components/character/edit/sync/CharacterFieldSyncButton'
 
 interface CharacterEditLayoutProps {
   children: React.ReactNode
@@ -35,6 +36,7 @@ export default async function CharacterEditLayout({ children, params }: Characte
                 {t('backToCharacter')}
               </Button>
             </Link>
+            <CharacterFieldSyncButton characterId={Number(id)} />
           </div>
           <p className="text-sm text-muted-foreground">{t('description')}</p>
         </div>

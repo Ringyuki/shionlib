@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl'
 import { useCallback, useState } from 'react'
 import { Create } from './cover/create/Create'
 import { shionlibRequest } from '@/utils/request'
-import { FieldSyncButton } from './sync/FieldSyncButton'
+import { useFieldSyncApplied } from './sync/field-sync-events'
 
 interface CoverProps {
   covers: GameCover[]
@@ -33,6 +33,7 @@ export const Cover = ({ covers: initialCovers, id }: CoverProps) => {
       setCovers(res.data || [])
     } catch {}
   }, [id])
+  useFieldSyncApplied('covers', fetchCovers)
 
   if (!permissions?.relationFields.includes('MANAGE_COVERS')) {
     return <Empty title={t('noPermission')} />
@@ -45,7 +46,6 @@ export const Cover = ({ covers: initialCovers, id }: CoverProps) => {
           <Edit key={cover.url} cover={cover} onSuccess={handleSuccess} onDelete={handleDelete} />
         ))}
       </div>
-      <FieldSyncButton gameId={id} field="covers" onApplied={fetchCovers} />
       <Create onSuccess={handleSuccess} />
     </div>
   )

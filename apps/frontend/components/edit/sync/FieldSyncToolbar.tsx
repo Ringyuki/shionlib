@@ -16,16 +16,10 @@ export const FieldSyncToolbar = ({
   onSelectRecommended,
   onClearSelection,
 }: FieldSyncToolbarProps) => {
-  const t = useTranslations('Components.Game.Edit.FieldSync')
+  const t = useTranslations('Components.Common.Edit.FieldSync')
 
   return (
     <div className="flex flex-col gap-2 sm:flex-row">
-      <Input
-        prefix={<Search className="size-4" />}
-        value={query}
-        onChange={event => onQueryChange(event.target.value)}
-        placeholder={t('search')}
-      />
       <Button
         type="button"
         intent="secondary"
@@ -35,6 +29,12 @@ export const FieldSyncToolbar = ({
       >
         {t('selectRecommended')}
       </Button>
+      <Input
+        prefix={<Search className="size-4" />}
+        value={query}
+        onChange={event => onQueryChange(event.target.value)}
+        placeholder={t('search')}
+      />
       <Button
         type="button"
         intent="secondary"

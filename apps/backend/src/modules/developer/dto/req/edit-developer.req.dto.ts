@@ -1,5 +1,14 @@
-import { IsString, IsOptional, IsArray, ValidateNested, MaxLength } from 'class-validator'
-import { ivm } from '../../../../common/validation/i18n'
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  ValidateNested,
+  MaxLength,
+  IsEnum,
+  IsNotEmpty,
+  ArrayMinSize,
+} from 'class-validator'
+import { ivm, ivmEnum } from '../../../../common/validation/i18n'
 import { Type } from 'class-transformer'
 
 class ExtraInfo {
@@ -63,6 +72,49 @@ export class EditDeveloperReqDto {
   @IsString({ message: ivm('validation.common.IS_STRING', { property: 'website' }) })
   @IsOptional()
   website?: string
+
+  @IsOptional()
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'note' }) })
+  @MaxLength(255, { message: ivm('validation.common.MAX_LENGTH', { property: 'note', max: 255 }) })
+  note?: string
+}
+
+export enum DeveloperScalarSyncFieldEnum {
+  NAME = 'name',
+  ALIASES = 'aliases',
+  INTROS = 'intros',
+  EXTRA = 'extra',
+  LOGO = 'logo',
+  WEBSITE = 'website',
+}
+
+export class PreviewDeveloperScalarSyncBatchReqDto {
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'fields' }) })
+  @ArrayMinSize(1, { message: ivm('validation.common.ARRAY_MIN_SIZE', { property: 'fields' }) })
+  @IsEnum(DeveloperScalarSyncFieldEnum, {
+    each: true,
+    message: ivmEnum('validation.common.IS_ENUM', DeveloperScalarSyncFieldEnum, {
+      property: 'fields',
+    }),
+  })
+  fields: DeveloperScalarSyncFieldEnum[]
+}
+
+export class ApplyDeveloperScalarSyncReqDto {
+  @IsEnum(DeveloperScalarSyncFieldEnum, {
+    message: ivmEnum('validation.common.IS_ENUM', DeveloperScalarSyncFieldEnum, {
+      property: 'field',
+    }),
+  })
+  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'field' }) })
+  field: DeveloperScalarSyncFieldEnum
+
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'candidateIds' }) })
+  @IsString({
+    each: true,
+    message: ivm('validation.common.IS_STRING', { property: 'candidateIds' }),
+  })
+  candidateIds: string[]
 
   @IsOptional()
   @IsString({ message: ivm('validation.common.IS_STRING', { property: 'note' }) })

@@ -7,6 +7,80 @@
       "reset": "再読み込み"
     }
   },
+  "Edit": {
+    "FieldSync": {
+      "button": "外部データを同期",
+      "description": "選択した候補のみ適用します。フィールド全体を自動で上書きしません。",
+      "previewFailed": "同期プレビューの取得に失敗しました",
+      "applySuccess": "{count} 件の同期を適用しました",
+      "applyFailed": "同期の適用に失敗しました",
+      "selected": "{count} 件選択中",
+      "cancel": "キャンセル",
+      "apply": "選択項目を適用",
+      "empty": "同期候補はありません",
+      "search": "候補を検索...",
+      "selectRecommended": "推奨項目を選択",
+      "clear": "クリア",
+      "local": "現在",
+      "remote": "外部",
+      "notApplicable": "直接適用不可",
+      "diff": {
+        "path": "位置",
+        "root": "（ルート）",
+        "noDifferences": "差分なし",
+        "empty": "（空）"
+      },
+      "field": {
+        "links": "リンク",
+        "covers": "カバー",
+        "images": "スクリーンショット",
+        "developers": "開発者",
+        "characters": "キャラクター",
+        "relations": "関連作品",
+        "titles": "タイトル",
+        "aliases": "別名",
+        "intros": "紹介",
+        "release": "発売日",
+        "type": "種別",
+        "platform": "プラットフォーム",
+        "extra": "追加情報",
+        "staffs": "スタッフ",
+        "tags": "タグ",
+        "name": "名称",
+        "logo": "ロゴ",
+        "website": "公式サイト",
+        "names": "名前",
+        "image": "画像",
+        "body_metrics": "身体データ",
+        "age_birthday": "年齢/誕生日",
+        "blood_type": "血液型",
+        "gender": "性別"
+      },
+      "action": {
+        "add": "追加",
+        "update": "更新",
+        "remove": "削除",
+        "unmatched": "未一致"
+      },
+      "source": {
+        "bangumi": "Bangumi",
+        "vndb": "VNDB",
+        "merged": "統合ソース"
+      },
+      "confidence": {
+        "exact": "完全一致",
+        "high": "高信頼",
+        "medium": "要確認",
+        "low": "低信頼"
+      },
+      "summary": {
+        "total": "候補 {count}",
+        "add": "追加 {count}",
+        "update": "更新 {count}",
+        "unmatched": "未一致 {count}"
+      }
+    }
+  },
   "Site": {
     "Ad": {
       "ad": "広告",

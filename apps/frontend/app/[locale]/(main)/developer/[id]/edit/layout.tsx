@@ -6,6 +6,7 @@ import { createGenerateMetadata } from '@/libs/seo/metadata'
 import { Button } from '@/components/shionui/Button'
 import Link from 'next/link'
 import { Undo2 } from 'lucide-react'
+import { DeveloperFieldSyncButton } from '@/components/developer/edit/sync/DeveloperFieldSyncButton'
 
 interface DeveloperEditLayoutProps {
   children: React.ReactNode
@@ -35,6 +36,7 @@ export default async function DeveloperEditLayout({ children, params }: Develope
                 {t('backToDeveloper')}
               </Button>
             </Link>
+            <DeveloperFieldSyncButton developerId={Number(id)} />
           </div>
           <p className="text-sm text-muted-foreground">{t('description')}</p>
         </div>

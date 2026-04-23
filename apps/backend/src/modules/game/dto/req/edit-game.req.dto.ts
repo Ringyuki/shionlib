@@ -579,14 +579,34 @@ export enum GameScalarSyncFieldEnum {
   TAGS = 'tags',
 }
 
-export class PreviewGameScalarSyncReqDto {
-  @IsEnum(GameScalarSyncFieldEnum, {
-    message: ivmEnum('validation.common.IS_ENUM', GameScalarSyncFieldEnum, {
-      property: 'field',
+export enum GameFieldSyncTargetEnum {
+  LINKS = 'links',
+  COVERS = 'covers',
+  IMAGES = 'images',
+  DEVELOPERS = 'developers',
+  CHARACTERS = 'characters',
+  RELATIONS = 'relations',
+  TITLES = 'titles',
+  ALIASES = 'aliases',
+  INTROS = 'intros',
+  RELEASE = 'release',
+  TYPE = 'type',
+  PLATFORMS = 'platform',
+  EXTRA = 'extra',
+  STAFFS = 'staffs',
+  TAGS = 'tags',
+}
+
+export class PreviewGameFieldSyncBatchReqDto {
+  @IsArray({ message: ivm('validation.common.IS_ARRAY', { property: 'fields' }) })
+  @ArrayMinSize(1, { message: ivm('validation.common.ARRAY_MIN_SIZE', { property: 'fields' }) })
+  @IsEnum(GameFieldSyncTargetEnum, {
+    each: true,
+    message: ivmEnum('validation.common.IS_ENUM', GameFieldSyncTargetEnum, {
+      property: 'fields',
     }),
   })
-  @IsNotEmpty({ message: ivm('validation.common.IS_NOT_EMPTY', { property: 'field' }) })
-  field: GameScalarSyncFieldEnum
+  fields: GameFieldSyncTargetEnum[]
 }
 
 export class ApplyGameScalarSyncReqDto extends ApplyGameFieldSyncReqDto {

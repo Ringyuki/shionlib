@@ -21,6 +21,27 @@ const hoisted = vi.hoisted(() => {
   const EditTabsNav = vi.fn(() =>
     React.createElement('section', { 'data-testid': 'game-edit-tabs' }, 'tabs'),
   )
+  const CharacterFieldSyncButton = vi.fn(({ characterId }: { characterId: number }) =>
+    React.createElement(
+      'button',
+      { 'data-testid': 'character-sync-button', 'data-character-id': characterId },
+      'sync',
+    ),
+  )
+  const DeveloperFieldSyncButton = vi.fn(({ developerId }: { developerId: number }) =>
+    React.createElement(
+      'button',
+      { 'data-testid': 'developer-sync-button', 'data-developer-id': developerId },
+      'sync',
+    ),
+  )
+  const GameFieldSyncButton = vi.fn(({ gameId }: { gameId: number }) =>
+    React.createElement(
+      'button',
+      { 'data-testid': 'game-sync-button', 'data-game-id': gameId },
+      'sync',
+    ),
+  )
 
   return {
     hasLocale,
@@ -29,6 +50,9 @@ const hoisted = vi.hoisted(() => {
     createGenerateMetadata,
     Button,
     EditTabsNav,
+    CharacterFieldSyncButton,
+    DeveloperFieldSyncButton,
+    GameFieldSyncButton,
   }
 })
 
@@ -60,6 +84,15 @@ vi.mock('lucide-react', () => ({
 }))
 vi.mock('@/components/game/edit/EditTabsNav', () => ({
   EditTabsNav: hoisted.EditTabsNav,
+}))
+vi.mock('@/components/character/edit/sync/CharacterFieldSyncButton', () => ({
+  CharacterFieldSyncButton: hoisted.CharacterFieldSyncButton,
+}))
+vi.mock('@/components/developer/edit/sync/DeveloperFieldSyncButton', () => ({
+  DeveloperFieldSyncButton: hoisted.DeveloperFieldSyncButton,
+}))
+vi.mock('@/components/game/edit/sync/GameFieldSyncButton', () => ({
+  GameFieldSyncButton: hoisted.GameFieldSyncButton,
 }))
 
 describe('edit route wrappers (unit)', () => {

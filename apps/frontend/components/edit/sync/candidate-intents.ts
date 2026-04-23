@@ -1,4 +1,4 @@
-import type { SyncCandidateAction, SyncCandidateConfidence } from './types'
+import type { SyncCandidateAction, SyncCandidateConfidence } from '../types/field-sync'
 
 export const actionIntent = (action: SyncCandidateAction) => {
   if (action === 'add') return 'success'

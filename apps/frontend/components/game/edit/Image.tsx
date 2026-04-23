@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl'
 import { useCallback, useState } from 'react'
 import { Create } from './image/create/Create'
 import { shionlibRequest } from '@/utils/request'
-import { FieldSyncButton } from './sync/FieldSyncButton'
+import { useFieldSyncApplied } from './sync/field-sync-events'
 
 interface ImageProps {
   images: GameImage[]
@@ -33,6 +33,7 @@ export const Image = ({ images: initialImages, id }: ImageProps) => {
       setImages(res.data || [])
     } catch {}
   }, [id])
+  useFieldSyncApplied('images', fetchImages)
 
   if (!permissions?.relationFields.includes('MANAGE_IMAGES')) {
     return <Empty title={t('noPermission')} />
@@ -45,7 +46,6 @@ export const Image = ({ images: initialImages, id }: ImageProps) => {
           <Edit key={image.url} image={image} onSuccess={handleSuccess} onDelete={handleDelete} />
         ))}
       </div>
-      <FieldSyncButton gameId={id} field="images" onApplied={fetchImages} />
       <Create onSuccess={handleSuccess} />
     </div>
   )

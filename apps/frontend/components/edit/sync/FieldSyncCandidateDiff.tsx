@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl'
 import { ChangeDiff, type ChangeDiffLabels } from '@/components/common/diff/ChangeDiff'
-import type { FieldSyncCandidate } from './types'
+import type { FieldSyncCandidate } from '../types/field-sync'
 
 interface FieldSyncCandidateDiffProps {
   candidate: FieldSyncCandidate
@@ -17,7 +17,7 @@ const toDiffChanges = (candidate: FieldSyncCandidate) => {
 }
 
 export const FieldSyncCandidateDiff = ({ candidate }: FieldSyncCandidateDiffProps) => {
-  const t = useTranslations('Components.Game.Edit.FieldSync')
+  const t = useTranslations('Components.Common.Edit.FieldSync')
 
   if (!candidate.local && !candidate.remote) {
     return null

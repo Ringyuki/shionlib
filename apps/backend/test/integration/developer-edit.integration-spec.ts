@@ -4,6 +4,7 @@ import request from 'supertest'
 import { requestId } from '../../src/common/middlewares/request-id.middleware'
 import { DeveloperEditController } from '../../src/modules/developer/controllers/developer-edit.controller'
 import { DeveloperEditService } from '../../src/modules/developer/services/developer-edit.service'
+import { DeveloperFieldSyncService } from '../../src/modules/developer/services/developer-field-sync.service'
 import { JwtAuthGuard } from '../../src/modules/auth/guards/jwt-auth.guard'
 import { PermissionService } from '../../src/modules/edit/services/permission.service'
 
@@ -12,6 +13,10 @@ describe('DeveloperEdit (integration)', () => {
 
   const developerEditService = {
     editDeveloperScalar: jest.fn(),
+  }
+  const developerFieldSyncService = {
+    previewBatch: jest.fn(),
+    apply: jest.fn(),
   }
   const jwtAuthGuard: CanActivate = {
     canActivate: jest.fn((context: ExecutionContext) => {
@@ -29,6 +34,7 @@ describe('DeveloperEdit (integration)', () => {
       controllers: [DeveloperEditController],
       providers: [
         { provide: DeveloperEditService, useValue: developerEditService },
+        { provide: DeveloperFieldSyncService, useValue: developerFieldSyncService },
         { provide: PermissionService, useValue: permissionService },
       ],
     })

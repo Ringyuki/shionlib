@@ -10,6 +10,7 @@ import { Edit } from './relation/Edit'
 import { SearchRelation } from './relation/Search'
 import { z } from 'zod'
 import { relationSchemaType } from './relation/Form'
+import { useFieldSyncApplied } from './sync/field-sync-events'
 
 interface RelationEditProps {
   initRelations: GameRelation[]
@@ -26,6 +27,7 @@ export const Relation = ({ initRelations, id }: RelationEditProps) => {
       setRelations(res.data || [])
     } catch {}
   }, [id])
+  useFieldSyncApplied('relations', fetchRelations)
 
   const { gamePermissions: permissions } = useEditPermissionStore()
   if (!permissions?.relationFields.includes('MANAGE_RELATIONS')) {

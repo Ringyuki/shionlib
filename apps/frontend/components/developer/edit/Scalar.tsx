@@ -11,7 +11,7 @@ import { Website } from './scalar/Website'
 import { useForm } from 'react-hook-form'
 import { useEditPermissionStore } from '@/store/editPermissionStore'
 import { Button } from '@/components/shionui/Button'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Check } from 'lucide-react'
 import { shionlibRequest } from '@/utils/request'
@@ -23,6 +23,10 @@ import { Confirm } from './scalar/Confirm'
 import { EditNote } from './EditNote'
 import { redirect } from 'next/navigation'
 import { pick } from './helper/pick'
+import { isScalarValueEqual, mergeScalarFields } from '@/components/edit/sync/scalar-form-sync'
+import { useFieldSyncAppliedEvent } from './sync/field-sync-events'
+import { scalarSyncValueFields } from './types/field-sync'
+import type { FieldSyncTarget } from './types/field-sync'
 
 interface ScalarProps {
   data: DeveloperScalar
@@ -60,9 +64,39 @@ export const DeveloperScalarEdit = ({ data }: ScalarProps) => {
   }
 
   const [changes, setChanges] = useState<ChangesResult | null>(null)
+  const [baseline, setBaseline] = useState<DeveloperScalar>(data)
   const [formValues, setFormValues] = useState<DeveloperScalar>(data)
   const [open, setOpen] = useState(false)
   const [note, setNote] = useState('')
+  const fetchScalar = useCallback(
+    async (syncedFields: FieldSyncTarget | FieldSyncTarget[]) => {
+      try {
+        const res = await shionlibRequest().get<DeveloperScalar>(`/edit/developer/${id}/scalar`)
+        if (res.data === null) return
+        const syncedData = res.data
+        const fields = [
+          ...new Set([syncedFields].flat().flatMap(field => scalarSyncValueFields[field])),
+        ]
+        const nextValues = mergeScalarFields(
+          form.getValues(),
+          syncedData,
+          fields,
+          scalarField => !isScalarValueEqual(baseline[scalarField], syncedData[scalarField]),
+        )
+        setBaseline(mergeScalarFields(baseline, syncedData, fields))
+        form.reset(nextValues)
+        setFormValues(nextValues)
+      } catch {}
+    },
+    [baseline, form, id],
+  )
+  const handleFieldSyncApplied = useCallback(
+    (fields: FieldSyncTarget[]) => {
+      if (fields.length > 0) void fetchScalar(fields)
+    },
+    [fetchScalar],
+  )
+  useFieldSyncAppliedEvent(handleFieldSyncApplied)
   useEffect(() => {
     const subscription = form.watch(values => {
       setFormValues(values as DeveloperScalar)
@@ -70,9 +104,9 @@ export const DeveloperScalarEdit = ({ data }: ScalarProps) => {
     return () => subscription.unsubscribe()
   }, [form])
   useEffect(() => {
-    const { field_changes, before, after } = pickChanges(formValues, data)
+    const { field_changes, before, after } = pickChanges(formValues, baseline)
     setChanges({ field_changes, before, after })
-  }, [formValues, data])
+  }, [formValues, baseline])
   const handleSubmit = () => {
     onSubmit(formValues)
   }

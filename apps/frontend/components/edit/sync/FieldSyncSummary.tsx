@@ -1,13 +1,13 @@
 import { useTranslations } from 'next-intl'
 import { Badge } from '@/components/shionui/Badge'
-import type { FieldSyncPreview } from './types'
+import type { FieldSyncPreview } from '../types/field-sync'
 
 interface FieldSyncSummaryProps {
   preview: FieldSyncPreview
 }
 
 export const FieldSyncSummary = ({ preview }: FieldSyncSummaryProps) => {
-  const t = useTranslations('Components.Game.Edit.FieldSync')
+  const t = useTranslations('Components.Common.Edit.FieldSync')
 
   return (
     <div className="flex flex-wrap items-center gap-2">

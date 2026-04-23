@@ -5,7 +5,6 @@ import { ShionBizException } from '../../../common/exceptions/shion-business.exc
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { BangumiAuthService } from '../../bangumi/services/bangumi-auth.service'
-import { VNDBService } from '../../vndb/services/vndb.service'
 import { GameDataFetcherService } from './game-data-fetcher.service'
 import { GameEditService } from './game-edit.service'
 import { GameEntityUpsertService } from './game-entity-upsert.service'
@@ -22,12 +21,9 @@ import {
   GameLinkDto,
   GameScalarSyncFieldEnum,
 } from '../dto/req/edit-game.req.dto'
-import { GameCharacter, GameData, GameDeveloper, GameCover } from '../interfaces/game.interface'
+import { GameCharacter, GameCover, GameData, GameDeveloper } from '../interfaces/game.interface'
 import { BangumiSubjectRelation } from '../interfaces/bangumi/subject-relation.res.interface'
-import { VNDBGameItemRes } from '../interfaces/vndb/game-item.res'
-import { VNDBReleaseItemRes } from '../interfaces/vndb/release-item.res'
 import { BANGUMI_RELATION_MAP } from '../constants/game-relation.constant'
-import { dedupeCharactersInPlace, dedupeDevelopersInPlace } from '../helpers/dedupe'
 import { ActivityService } from '../../activity/services/activity.service'
 import { ActivityType } from '../../activity/dto/create-activity.dto'
 import { EditActionType } from '../../edit/enums/edit-action-type.enum'
@@ -45,9 +41,17 @@ export type GameSyncField =
   | 'relations'
 
 type SyncPreviewField = GameSyncField | GameScalarSyncFieldEnum
+const GAME_SCALAR_SYNC_FIELDS = new Set<string>(Object.values(GameScalarSyncFieldEnum))
 
 type SyncCandidateAction = 'add' | 'update' | 'remove' | 'unmatched'
 type SyncCandidateConfidence = 'exact' | 'high' | 'medium' | 'low'
+
+interface GameExternalSyncSnapshot {
+  finalGameData: Partial<GameData>
+  finalCharactersData?: GameCharacter[]
+  finalProducersData?: GameDeveloper[]
+  finalCoversData?: GameCover[]
+}
 
 export interface GameFieldSyncCandidate {
   id: string
@@ -67,13 +71,6 @@ interface InternalGameFieldSyncCandidate extends GameFieldSyncCandidate {
   apply?: Record<string, any>
 }
 
-interface ExternalSnapshot {
-  finalGameData: Partial<GameData>
-  finalCharactersData: GameCharacter[]
-  finalProducersData: GameDeveloper[]
-  finalCoversData: GameCover[]
-}
-
 @Injectable()
 export class GameFieldSyncService {
   private readonly logger = new Logger(GameFieldSyncService.name)
@@ -81,7 +78,6 @@ export class GameFieldSyncService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly bangumiAuthService: BangumiAuthService,
-    private readonly vndbService: VNDBService,
     private readonly gameDataFetcherService: GameDataFetcherService,
     private readonly gameEditService: GameEditService,
     private readonly gameEntityUpsertService: GameEntityUpsertService,
@@ -90,14 +86,33 @@ export class GameFieldSyncService {
     @Inject(SEARCH_ENGINE) private readonly searchEngine: SearchEngine,
   ) {}
 
-  async preview(gameId: number, field: GameSyncField) {
-    const candidates = await this.buildCandidates(gameId, field)
-    return this.toPreview(field, candidates)
-  }
+  async previewBatch(gameId: number, fields: string[]) {
+    const uniqueFields = [...new Set(fields)] as SyncPreviewField[]
+    let snapshot: GameExternalSyncSnapshot | undefined
+    let snapshotError: unknown
+    try {
+      snapshot = await this.loadBatchExternalSnapshot(gameId, uniqueFields)
+    } catch (err) {
+      if (err instanceof ShionBizException && err.code === ShionBizCode.GAME_NOT_FOUND) throw err
+      snapshotError = err
+    }
+    const previews: ReturnType<GameFieldSyncService['toPreview']>[] = []
+    const failedFields: SyncPreviewField[] = []
 
-  async previewScalar(gameId: number, field: GameScalarSyncFieldEnum) {
-    const candidates = await this.buildScalarCandidates(gameId, field)
-    return this.toPreview(field, candidates)
+    for (const field of uniqueFields) {
+      try {
+        if (snapshotError && field !== 'relations') throw snapshotError
+        const candidates = this.isScalarSyncField(field)
+          ? await this.buildScalarCandidates(gameId, field, snapshot)
+          : await this.buildCandidates(gameId, field, snapshot)
+        previews.push(this.toPreview(field, candidates))
+      } catch (err) {
+        this.logger.warn(`Game field sync preview failed for ${field}: ${err.message}`)
+        failedFields.push(field)
+      }
+    }
+
+    return { previews, failedFields }
   }
 
   async apply(gameId: number, field: GameSyncField, candidateIds: string[], req: RequestWithUser) {
@@ -153,18 +168,22 @@ export class GameFieldSyncService {
     return { applied: candidates.length }
   }
 
-  private async buildCandidates(gameId: number, field: GameSyncField) {
+  private async buildCandidates(
+    gameId: number,
+    field: GameSyncField,
+    snapshot?: GameExternalSyncSnapshot,
+  ) {
     switch (field) {
       case 'links':
-        return this.buildLinkCandidates(gameId)
+        return this.buildLinkCandidates(gameId, snapshot)
       case 'covers':
-        return this.buildCoverCandidates(gameId)
+        return this.buildCoverCandidates(gameId, snapshot)
       case 'images':
-        return this.buildImageCandidates(gameId)
+        return this.buildImageCandidates(gameId, snapshot)
       case 'developers':
-        return this.buildDeveloperCandidates(gameId)
+        return this.buildDeveloperCandidates(gameId, snapshot)
       case 'characters':
-        return this.buildCharacterCandidates(gameId)
+        return this.buildCharacterCandidates(gameId, snapshot)
       case 'relations':
         return this.buildRelationCandidates(gameId)
     }
@@ -173,10 +192,11 @@ export class GameFieldSyncService {
   private async buildScalarCandidates(
     gameId: number,
     field: GameScalarSyncFieldEnum,
+    snapshot?: GameExternalSyncSnapshot,
   ): Promise<InternalGameFieldSyncCandidate[]> {
     const game = await this.loadScalarGame(gameId)
-    const snapshot = await this.loadExternalSnapshot(game)
-    const external = snapshot.finalGameData
+    const externalSnapshot = snapshot ?? (await this.loadExternalSnapshot(game))
+    const external = externalSnapshot.finalGameData
     const localTags = game.tags.map(r => r.tag_alias ?? r.tag.name).sort()
 
     switch (field) {
@@ -269,10 +289,13 @@ export class GameFieldSyncService {
     }
   }
 
-  private async buildLinkCandidates(gameId: number): Promise<InternalGameFieldSyncCandidate[]> {
+  private async buildLinkCandidates(
+    gameId: number,
+    snapshot?: GameExternalSyncSnapshot,
+  ): Promise<InternalGameFieldSyncCandidate[]> {
     const game = await this.loadGame(gameId)
-    const snapshot = await this.loadExternalSnapshot(game)
-    const externalLinks = this.uniqueBy(snapshot.finalGameData.links ?? [], link =>
+    const externalSnapshot = snapshot ?? (await this.loadExternalSnapshot(game))
+    const externalLinks = this.uniqueBy(externalSnapshot.finalGameData.links ?? [], link =>
       this.normalizeUrl(link.url),
     )
     const localLinks = await this.prisma.gameLink.findMany({
@@ -317,10 +340,13 @@ export class GameFieldSyncService {
     })
   }
 
-  private async buildCoverCandidates(gameId: number): Promise<InternalGameFieldSyncCandidate[]> {
+  private async buildCoverCandidates(
+    gameId: number,
+    snapshot?: GameExternalSyncSnapshot,
+  ): Promise<InternalGameFieldSyncCandidate[]> {
     const game = await this.loadGame(gameId)
-    const snapshot = await this.loadExternalSnapshot(game)
-    const externalCovers = this.uniqueBy(snapshot.finalCoversData ?? [], c =>
+    const externalSnapshot = snapshot ?? (await this.loadExternalSnapshot(game))
+    const externalCovers = this.uniqueBy(externalSnapshot.finalCoversData ?? [], c =>
       this.mediaSourceKey(c),
     ).map(c => ({ ...c, language: this.normalizeCoverLanguage(c.language) }))
     const localCovers = await this.prisma.gameCover.findMany({
@@ -382,10 +408,13 @@ export class GameFieldSyncService {
     })
   }
 
-  private async buildImageCandidates(gameId: number): Promise<InternalGameFieldSyncCandidate[]> {
+  private async buildImageCandidates(
+    gameId: number,
+    snapshot?: GameExternalSyncSnapshot,
+  ): Promise<InternalGameFieldSyncCandidate[]> {
     const game = await this.loadGame(gameId)
-    const snapshot = await this.loadExternalSnapshot(game)
-    const externalImages = this.uniqueBy(snapshot.finalGameData.images ?? [], image =>
+    const externalSnapshot = snapshot ?? (await this.loadExternalSnapshot(game))
+    const externalImages = this.uniqueBy(externalSnapshot.finalGameData.images ?? [], image =>
       this.mediaSourceKey(image),
     )
     const localImages = await this.prisma.gameImage.findMany({
@@ -447,10 +476,11 @@ export class GameFieldSyncService {
 
   private async buildDeveloperCandidates(
     gameId: number,
+    snapshot?: GameExternalSyncSnapshot,
   ): Promise<InternalGameFieldSyncCandidate[]> {
     const game = await this.loadGame(gameId)
-    const snapshot = await this.loadExternalSnapshot(game)
-    const developers = this.uniqueBy(snapshot.finalProducersData ?? [], d =>
+    const externalSnapshot = snapshot ?? (await this.loadExternalSnapshot(game))
+    const developers = this.uniqueBy(externalSnapshot.finalProducersData ?? [], d =>
       d.b_id ? `b:${d.b_id}` : d.v_id ? `v:${d.v_id}` : `n:${this.normalizeText(d.name)}`,
     )
     const [localRelations, matchedDevelopers] = await Promise.all([
@@ -513,10 +543,11 @@ export class GameFieldSyncService {
 
   private async buildCharacterCandidates(
     gameId: number,
+    snapshot?: GameExternalSyncSnapshot,
   ): Promise<InternalGameFieldSyncCandidate[]> {
     const game = await this.loadGame(gameId)
-    const snapshot = await this.loadExternalSnapshot(game)
-    const characters = this.uniqueBy(snapshot.finalCharactersData ?? [], c =>
+    const externalSnapshot = snapshot ?? (await this.loadExternalSnapshot(game))
+    const characters = this.uniqueBy(externalSnapshot.finalCharactersData ?? [], c =>
       c.b_id ? `b:${c.b_id}` : c.v_id ? `v:${c.v_id}` : `n:${this.characterDisplayName(c)}`,
     )
     const [localRelations, matchedCharacters] = await Promise.all([
@@ -1023,6 +1054,15 @@ export class GameFieldSyncService {
     return game
   }
 
+  private async loadBatchExternalSnapshot(
+    gameId: number,
+    fields: SyncPreviewField[],
+  ): Promise<GameExternalSyncSnapshot | undefined> {
+    if (fields.every(field => field === 'relations')) return undefined
+    const game = await this.loadGame(gameId)
+    return this.loadExternalSnapshot(game)
+  }
+
   private async loadExternalSnapshot(game: { b_id: string | null; v_id: string | null }) {
     if (game.b_id) {
       try {
@@ -1037,7 +1077,7 @@ export class GameFieldSyncService {
       }
     }
 
-    if (game.v_id) return this.fetchVNDBOnlySnapshot(game.v_id)
+    if (game.v_id) return this.gameDataFetcherService.fetchVNDBOnlyData(game.v_id)
 
     return {
       finalGameData: {},
@@ -1047,141 +1087,16 @@ export class GameFieldSyncService {
     }
   }
 
+  private isScalarSyncField(field: SyncPreviewField): field is GameScalarSyncFieldEnum {
+    return GAME_SCALAR_SYNC_FIELDS.has(field)
+  }
+
   private async reindexGame(gameId: number) {
     const updated = await this.prisma.game.findUnique({
       where: { id: gameId },
       select: rawDataQuery,
     })
     await this.searchEngine.upsertGame(formatDoc(updated as unknown as GameData))
-  }
-
-  private async fetchVNDBOnlySnapshot(vId: string): Promise<ExternalSnapshot> {
-    const normalizedVId = this.ensureVndbPrefix(vId)
-    const [rawGameData, rawReleasesData] = await Promise.all([
-      this.vndbService.vndbRequest<VNDBGameItemRes>(
-        'single',
-        ['id', '=', normalizedVId],
-        [
-          'id',
-          'titles{title,lang,latin,main}',
-          'aliases',
-          'released',
-          'description',
-          'olang',
-          'platforms',
-          'screenshots{url,dims,sexual,violence}',
-          'va.character{id,aliases,description,name,original,blood_type,height,weight,bust,waist,hips,cup,age,birthday,gender,image{url,sexual,violence},vns{role,id}}',
-          'developers{id,name,original,aliases,type,description,extlinks{url,label,name}}',
-          'extlinks{url,label,name}',
-          'image{url,dims,sexual,violence}',
-        ],
-        'vn',
-      ),
-      this.vndbService.vndbRequest<VNDBReleaseItemRes>(
-        'multiple',
-        ['vn', '=', ['id', '=', normalizedVId]],
-        [
-          'images{type,photo,id,url,dims,sexual,violence}',
-          'languages{lang,title,latin,mtl}',
-          'platforms',
-          'extlinks{url,label,name}',
-        ],
-        'release',
-        100,
-      ),
-    ])
-
-    const links = [...(rawGameData.extlinks ?? [])]
-    for (const release of rawReleasesData) links.push(...(release.extlinks ?? []))
-    const finalGameData: Partial<GameData> = {
-      v_id: normalizedVId,
-      aliases: rawGameData.aliases ?? [],
-      release_date: rawGameData.released ? new Date(rawGameData.released) : undefined,
-      intro_en: rawGameData.description,
-      platform: rawGameData.platforms as any,
-    }
-    for (const title of rawGameData.titles ?? []) {
-      if (title.lang === 'jp') finalGameData.title_jp = title.title
-      if (title.lang === 'zh-Hans') finalGameData.title_zh = title.title
-      if (title.lang === 'en') finalGameData.title_en = title.title
-    }
-
-    const finalCharactersData = (rawGameData.va ?? []).map(va => ({
-      v_id: va.character.id,
-      name_jp: va.character.original || va.character.name,
-      name_en: va.character.name,
-      aliases: va.character.aliases,
-      intro_en: va.character.description,
-      role: va.character.vns.find(vn => vn.id === normalizedVId)?.role,
-      blood_type: va.character.blood_type,
-      height: va.character.height,
-      weight: va.character.weight,
-      bust: va.character.bust,
-      waist: va.character.waist,
-      hips: va.character.hips,
-      cup: va.character.cup,
-      age: va.character.age,
-      birthday: va.character.birthday,
-      gender: va.character.gender,
-      image: va.character.image?.url,
-    }))
-    dedupeCharactersInPlace(finalCharactersData)
-
-    const finalProducersData = (rawGameData.developers ?? []).map(developer => ({
-      v_id: developer.id,
-      name: developer.original || developer.name || developer.aliases?.[0] || '',
-      aliases: developer.aliases,
-      intro_en: developer.description,
-      website: developer.extlinks?.find(e => e.label === 'Official website')?.url,
-    }))
-    dedupeDevelopersInPlace(finalProducersData)
-
-    const finalCoversData = this.buildVNDBCovers(rawReleasesData)
-    if (finalCoversData.length > 0 && finalCoversData.every(c => c.sexual > 1)) {
-      finalGameData.nsfw = true
-    }
-
-    return {
-      finalGameData: {
-        ...finalGameData,
-        links: this.uniqueBy(links, link => this.normalizeUrl(link.url)).slice(0, 5),
-        images: (rawGameData.screenshots ?? []).map(s => ({
-          url: s.url,
-          dims: s.dims,
-          sexual: s.sexual,
-          violence: s.violence,
-          source: 'vndb',
-          source_key: s.url,
-          source_url: s.url,
-        })),
-      } as Partial<GameData>,
-      finalCharactersData,
-      finalProducersData,
-      finalCoversData,
-    }
-  }
-
-  private buildVNDBCovers(rawReleasesData: VNDBReleaseItemRes[]) {
-    const covers: GameCover[] = []
-    for (const release of rawReleasesData) {
-      for (const image of release.images ?? []) {
-        if (!['pkgfront', 'dig'].includes(image.type)) continue
-        covers.push({
-          language: this.normalizeCoverLanguage(
-            image.languages?.[0] || release.languages?.[0]?.lang,
-          ),
-          type: image.type,
-          url: image.url,
-          dims: image.dims,
-          sexual: image.sexual,
-          violence: image.violence,
-          source: 'vndb',
-          source_key: image.id || image.url,
-          source_url: image.url,
-        })
-      }
-    }
-    return this.uniqueBy(covers, c => this.mediaSourceKey(c)).slice(0, 30)
   }
 
   private async findDeveloperMatches(developers: GameDeveloper[]) {
@@ -1403,10 +1318,6 @@ export class GameFieldSyncService {
 
   private stripVndbPrefix(vId?: string) {
     return vId?.replace(/^v/, '')
-  }
-
-  private ensureVndbPrefix(vId: string) {
-    return vId.startsWith('v') ? vId : `v${vId}`
   }
 
   private sameMedia(

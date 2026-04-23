@@ -47,6 +47,86 @@ export class GameDataFetcherService {
     return this.fetchDatafromBangumi(b_id, `v${v_id}`, skip_consistency_check)
   }
 
+  async fetchVNDBOnlyData(v_id: string): Promise<{
+    finalGameData: Partial<GameData>
+    finalCharactersData: GameCharacter[]
+    finalProducersData: GameDeveloper[]
+    finalCoversData: GameCover[]
+  }> {
+    const normalizedVId = this.ensureVndbPrefix(v_id)
+    const { rawGameData, rawReleasesData } = await this.fetchRawVNDBData(normalizedVId)
+
+    const links = [...rawGameData.extlinks]
+    for (const release of rawReleasesData) links.push(...release.extlinks)
+
+    const finalGameData: Partial<GameData> = {
+      v_id: normalizedVId,
+      aliases: rawGameData.aliases,
+      release_date: rawGameData.released ? new Date(rawGameData.released) : undefined,
+      intro_en: rawGameData.description,
+      platform: rawGameData.platforms as GamePlatform[],
+    }
+    for (const title of rawGameData.titles) {
+      if (title.lang === 'jp') finalGameData.title_jp = title.title
+      if (title.lang === 'zh-Hans') finalGameData.title_zh = title.title
+      if (title.lang === 'en') finalGameData.title_en = title.title
+    }
+
+    const finalCharactersData = rawGameData.va.map(va => ({
+      v_id: va.character.id,
+      name_jp: va.character.original || va.character.name,
+      name_en: va.character.name,
+      aliases: va.character.aliases,
+      intro_en: va.character.description,
+      role: va.character.vns.find(vn => vn.id === normalizedVId)?.role,
+      blood_type: va.character.blood_type,
+      height: va.character.height,
+      weight: va.character.weight,
+      bust: va.character.bust,
+      waist: va.character.waist,
+      hips: va.character.hips,
+      cup: va.character.cup,
+      age: va.character.age,
+      birthday: va.character.birthday,
+      gender: va.character.gender,
+      image: va.character.image?.url,
+    }))
+    dedupeCharactersInPlace(finalCharactersData)
+
+    const finalProducersData = rawGameData.developers.map(developer => ({
+      v_id: developer.id,
+      name: developer.original || developer.name || developer.aliases?.[0] || '',
+      aliases: developer.aliases,
+      intro_en: developer.description,
+      website: developer.extlinks?.find(e => e.label === 'Official website')?.url,
+    }))
+    dedupeDevelopersInPlace(finalProducersData)
+
+    const finalCoversData = this.buildVNDBOnlyCovers(rawReleasesData)
+    if (finalCoversData.length > 0 && finalCoversData.every(c => c.sexual > 1)) {
+      finalGameData.nsfw = true
+    }
+
+    return {
+      finalGameData: {
+        ...finalGameData,
+        links: this.uniqueBy(links, link => this.normalizeUrl(link.url)).slice(0, 5),
+        images: rawGameData.screenshots.map(s => ({
+          url: s.url,
+          dims: s.dims,
+          sexual: s.sexual,
+          violence: s.violence,
+          source: 'vndb',
+          source_key: s.url,
+          source_url: s.url,
+        })),
+      } as Partial<GameData>,
+      finalCharactersData,
+      finalProducersData,
+      finalCoversData,
+    }
+  }
+
   private async fetchDatafromBangumi(
     b_id: string,
     v_id?: string,
@@ -247,39 +327,7 @@ export class GameDataFetcherService {
     bangumiRawGameData?: BangumiGameItemRes,
     skip_consistency_check?: boolean,
   ) {
-    const [rawGameData, rawReleasesData] = await Promise.all([
-      await this.vndbService.vndbRequest<VNDBGameItemRes>(
-        'single',
-        ['id', '=', v_id],
-        [
-          'id',
-          'titles{title,lang,latin,main}',
-          'aliases',
-          'released',
-          'description',
-          'olang',
-          'platforms',
-          'screenshots{url,dims,sexual,violence}',
-          'va.character{id,aliases,description,name,original,blood_type,height,weight,bust,waist,hips,cup,age,birthday,gender,image{url,sexual,violence},vns{role,id}}',
-          'developers{id,name,original,aliases,type,description,extlinks{url,label,name}}',
-          'extlinks{url,label,name}',
-          'image{url,dims,sexual,violence}',
-        ],
-        'vn',
-      ),
-      await this.vndbService.vndbRequest<VNDBReleaseItemRes>(
-        'multiple',
-        ['vn', '=', ['id', '=', v_id]],
-        [
-          'images{type,photo,id,url,dims,sexual,violence}',
-          'languages{lang,title,latin,mtl}',
-          'platforms',
-          'extlinks{url,label,name}',
-        ],
-        'release',
-        100,
-      ),
-    ])
+    const { rawGameData, rawReleasesData } = await this.fetchRawVNDBData(v_id)
     if (bangumiRawGameData && !skip_consistency_check) {
       this.consistencyCheck(bangumiRawGameData, rawGameData)
     }
@@ -293,7 +341,7 @@ export class GameDataFetcherService {
         if (title.lang === 'en') finalGameData.title_en = title.title
       }
       finalGameData.aliases = rawGameData.aliases
-      finalGameData.release_date = new Date(rawGameData.released)
+      if (rawGameData.released) finalGameData.release_date = new Date(rawGameData.released)
       if ((await detectLanguage(rawGameData.description)) === 'en')
         finalGameData.intro_en = rawGameData.description
       finalGameData.images = rawGameData.screenshots.map(s => ({
@@ -306,10 +354,8 @@ export class GameDataFetcherService {
         source_url: s.url,
       }))
       finalGameData.platform = rawGameData.platforms as GamePlatform[]
-      finalGameData.links = rawGameData.extlinks
-      for (const release of rawReleasesData) {
-        finalGameData.links.push(...release.extlinks)
-      }
+      finalGameData.links = [...rawGameData.extlinks]
+      for (const release of rawReleasesData) finalGameData.links.push(...release.extlinks)
       finalGameData.links = finalGameData.links.slice(0, 5)
 
       const match = createCharacterMatcher(finalCharactersData)
@@ -588,6 +634,109 @@ export class GameDataFetcherService {
     dedupeCharactersInPlace(finalCharactersData)
     dedupeDevelopersInPlace(finalProducersData)
     return { finalGameData, finalCharactersData, finalProducersData, finalCoversData }
+  }
+
+  private async fetchRawVNDBData(v_id: string) {
+    const [rawGameData, rawReleasesData] = await Promise.all([
+      this.vndbService.vndbRequest<VNDBGameItemRes>(
+        'single',
+        ['id', '=', v_id],
+        [
+          'id',
+          'titles{title,lang,latin,main}',
+          'aliases',
+          'released',
+          'description',
+          'olang',
+          'platforms',
+          'screenshots{url,dims,sexual,violence}',
+          'va.character{id,aliases,description,name,original,blood_type,height,weight,bust,waist,hips,cup,age,birthday,gender,image{url,sexual,violence},vns{role,id}}',
+          'developers{id,name,original,aliases,type,description,extlinks{url,label,name}}',
+          'extlinks{url,label,name}',
+          'image{url,dims,sexual,violence}',
+        ],
+        'vn',
+      ),
+      this.vndbService.vndbRequest<VNDBReleaseItemRes>(
+        'multiple',
+        ['vn', '=', ['id', '=', v_id]],
+        [
+          'images{type,photo,id,url,dims,sexual,violence}',
+          'languages{lang,title,latin,mtl}',
+          'platforms',
+          'extlinks{url,label,name}',
+        ],
+        'release',
+        100,
+      ),
+    ])
+    return { rawGameData, rawReleasesData }
+  }
+
+  private buildVNDBOnlyCovers(rawReleasesData: VNDBReleaseItemRes[]) {
+    const covers: GameCover[] = []
+    for (const release of rawReleasesData) {
+      for (const image of release.images) {
+        if (!['pkgfront', 'dig'].includes(image.type)) continue
+        covers.push({
+          language: this.normalizeCoverLanguage(
+            image.languages?.[0] || release.languages?.[0]?.lang,
+          ),
+          type: image.type,
+          url: image.url,
+          dims: image.dims,
+          sexual: image.sexual,
+          violence: image.violence,
+          source: 'vndb',
+          source_key: image.id || image.url,
+          source_url: image.url,
+        })
+      }
+    }
+    return this.uniqueBy(covers, c => this.mediaSourceKey(c)).slice(0, 30)
+  }
+
+  private normalizeCoverLanguage(language?: string | null) {
+    if (!language) return 'other'
+    const lang = language.toLowerCase()
+    if (lang.includes('zh')) return 'zh'
+    if (lang.includes('ja') || lang.includes('jp')) return 'jp'
+    if (lang.includes('en')) return 'en'
+    return 'other'
+  }
+
+  private mediaSourceKey(media: {
+    source?: string
+    source_key?: string
+    source_url?: string
+    url: string
+  }) {
+    return `${media.source ?? 'url'}:${media.source_key ?? media.source_url ?? this.normalizeUrl(media.url)}`
+  }
+
+  private normalizeUrl(url?: string) {
+    if (!url) return ''
+    try {
+      const parsed = new URL(url.trim())
+      parsed.hash = ''
+      parsed.hostname = parsed.hostname.toLowerCase()
+      return parsed.toString().replace(/\/$/, '')
+    } catch {
+      return url.trim().replace(/\/$/, '')
+    }
+  }
+
+  private uniqueBy<T>(items: T[], getKey: (item: T) => string) {
+    const map = new Map<string, T>()
+    for (const item of items) {
+      const key = getKey(item)
+      if (!map.has(key)) map.set(key, item)
+    }
+    return [...map.values()]
+  }
+
+  private ensureVndbPrefix(v_id: string) {
+    return v_id.startsWith('v') ? v_id : `v${v_id}`
   }
 
   private formatString(str: string | undefined) {
