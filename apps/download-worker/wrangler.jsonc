@@ -21,8 +21,8 @@
   "analytics_engine_datasets": [
     {
       "binding": "DOWNLOAD_ANALYTICS",
-      "dataset": "shionlib_downloads"
-    }
+      "dataset": "shionlib_downloads",
+    },
   ],
   "vars": {
     "DOWNLOAD_MAX_CONNS_CAP": "8",

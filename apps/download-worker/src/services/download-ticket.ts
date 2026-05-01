@@ -29,7 +29,7 @@ export const decryptTicket = async (ticket: string, secret: string) => {
     )
 
     const payload = JSON.parse(new TextDecoder().decode(plaintext)) as DownloadProxyTicketPayload
-    if (payload.v !== 2) return null
+    if (payload.v !== 3) return null
 
     return payload
   } catch {

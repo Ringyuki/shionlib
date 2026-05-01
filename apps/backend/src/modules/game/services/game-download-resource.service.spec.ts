@@ -47,6 +47,7 @@ describe('GameDownloadSourceService', () => {
 
     const b2Service = {
       getDownloadUrl: jest.fn(),
+      getDownloadAuthorizationInfo: jest.fn(),
     }
 
     const configValues = new Map<string, any>([
@@ -662,7 +663,12 @@ describe('GameDownloadSourceService', () => {
       },
     }
     prismaService.$transaction.mockImplementation(async (cb: any) => cb(tx))
-    b2Service.getDownloadUrl.mockResolvedValue('https://ft.hikarifallback.uk/games/31/worker.7z')
+    b2Service.getDownloadAuthorizationInfo.mockResolvedValue({
+      bucketName: 'shionlib-games',
+      fileKey: 's3/worker.file',
+      authorizationToken: 'worker-token',
+      downloadUrl: 'https://f005.backblazeb2.com',
+    })
     downloadProxyTicketService.issueDownloadUrl.mockReturnValue(
       'https://dl.hikarifallback.uk/dl/2/123e4567-e89b-12d3-a456-426614174000?ticket=opaque',
     )
@@ -676,10 +682,15 @@ describe('GameDownloadSourceService', () => {
     expect(downloadProxyTicketService.issueDownloadUrl).toHaveBeenCalledWith({
       fileId: 2,
       fileName: 'worker.7z',
-      originUrl: 'https://ft.hikarifallback.uk/games/31/worker.7z',
+      bucketName: 'shionlib-games',
+      fileKey: 's3/worker.file',
+      authorizationToken: 'worker-token',
+      downloadUrl: 'https://f005.backblazeb2.com',
       expiresIn: 1800,
       gameId: 31,
     })
+    expect(b2Service.getDownloadAuthorizationInfo).toHaveBeenCalledWith('s3/worker.file', 1800)
+    expect(b2Service.getDownloadUrl).not.toHaveBeenCalled()
   })
 
   it('getList maps resources to paginated response', async () => {

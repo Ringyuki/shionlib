@@ -12,13 +12,16 @@ export class DownloadProxyTicketService {
 
   issueDownloadUrl(input: IssueDownloadProxyUrlInput) {
     const payload: DownloadProxyTicketPayload = {
-      v: 2,
+      v: 3,
       sid: globalThis.crypto?.randomUUID?.() ?? nodeRandomUUID(),
       fid: input.fileId,
       n: input.fileName,
       exp: Math.floor(Date.now() / 1000) + input.expiresIn,
       mc: Math.max(1, this.configService.get('file_download.max_conns')),
-      p: input.originUrl,
+      b: input.bucketName,
+      k: input.fileKey,
+      a: input.authorizationToken,
+      u: input.downloadUrl,
       gid: input.gameId,
     }
 

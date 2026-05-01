@@ -26,3 +26,10 @@ export interface ApiInfoStorageApi {
 export interface B2DownloadAuth {
   authorizationToken: string
 }
+
+export interface B2DownloadAuthorizationInfo {
+  bucketName: string
+  fileKey: string
+  authorizationToken: string
+  downloadUrl: string
+}

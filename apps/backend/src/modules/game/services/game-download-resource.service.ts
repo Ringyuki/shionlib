@@ -441,17 +441,16 @@ export class GameDownloadSourceService {
     if (file.file_size > 1024 * 1024 * 1024 * 10) expiresIn = 4 * 60 * 60 // 4 hours
     if (file.file_size > 1024 * 1024 * 1024 * 20) expiresIn = 6 * 60 * 60 // 6 hours
 
-    const directUrl = await this.b2Service.getDownloadUrl(file.s3_file_key!, expiresIn)
     const file_url =
       this.configService.get('file_download.mode') === 'worker'
         ? this.downloadProxyTicketService.issueDownloadUrl({
             fileId: id,
             fileName: file.file_name,
-            originUrl: directUrl,
+            ...(await this.b2Service.getDownloadAuthorizationInfo(file.s3_file_key!, expiresIn)),
             expiresIn,
             gameId: game_id,
           })
-        : directUrl
+        : await this.b2Service.getDownloadUrl(file.s3_file_key!, expiresIn)
 
     return {
       file_url,

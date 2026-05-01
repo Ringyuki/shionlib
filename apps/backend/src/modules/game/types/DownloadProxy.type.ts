@@ -2,7 +2,7 @@ export type DownloadProxyTicketPayload = {
   /**
    * Version of the ticket payload
    */
-  v: 2
+  v: 3
   /**
    * Session ID
    * @description The session ID is used to identify the session of the download, stored in the worker's memory
@@ -30,11 +30,22 @@ export type DownloadProxyTicketPayload = {
    */
   mc: number
   /**
-   * Original URL
-   * @description The original URL is the URL of the file to be downloaded
-   * @example 'https://cdn.example.com/files/game.7z?Authorization=token123'
+   * B2 bucket name
    */
-  p: string
+  b: string
+  /**
+   * B2 file key
+   */
+  k: string
+  /**
+   * B2 download authorization token
+   */
+  a: string
+  /**
+   * B2 native download URL
+   * @example 'https://f005.backblazeb2.com'
+   */
+  u: string
   /**
    * Game ID
    * @description The game ID associated with this download, used for analytics
@@ -46,7 +57,10 @@ export type DownloadProxyTicketPayload = {
 export type IssueDownloadProxyUrlInput = {
   fileId: number
   fileName: string
-  originUrl: string
+  bucketName: string
+  fileKey: string
+  authorizationToken: string
+  downloadUrl: string
   expiresIn: number
   gameId: number
 }

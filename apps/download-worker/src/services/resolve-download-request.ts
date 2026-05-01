@@ -3,6 +3,7 @@ import { decryptTicket } from './download-ticket'
 import type { Env } from '../types/env'
 import type { ErrorResponder } from '../types/response'
 import type { DownloadRequestResolution } from '../types/download-request-context'
+import type { DownloadProxyTicketPayload } from '../types/download-proxy-ticket'
 
 const DOWNLOAD_ROUTE = /^\/dl\/(\d+)\/([^/]+)$/
 
@@ -37,7 +38,12 @@ export const resolveDownloadRequest = async (
     return reject(errorResponse(403, 'Ticket mismatch'))
   }
 
-  const originRequest = new Request(ticketPayload.p, {
+  const originUrl = buildOriginUrl(ticketPayload)
+  if (!originUrl) {
+    return reject(errorResponse(403, 'Invalid ticket'))
+  }
+
+  const originRequest = new Request(originUrl, {
     method: request.method,
     headers: buildOriginHeaders(request),
     redirect: 'follow',
@@ -56,3 +62,17 @@ const reject = (response: Response): DownloadRequestResolution => ({
   ok: false,
   response,
 })
+
+const buildOriginUrl = (ticketPayload: DownloadProxyTicketPayload) => {
+  try {
+    const downloadUrl = new URL(ticketPayload.u)
+    if (downloadUrl.protocol !== 'https:') return null
+
+    const bucketName = encodeURIComponent(ticketPayload.b)
+    const fileKey = encodeURIComponent(ticketPayload.k)
+    const authorizationToken = encodeURIComponent(ticketPayload.a)
+    return `${downloadUrl.origin}/file/${bucketName}/${fileKey}?Authorization=${authorizationToken}`
+  } catch {
+    return null
+  }
+}

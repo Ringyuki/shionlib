@@ -18,6 +18,18 @@ describe('DownloadProxyTicketService', () => {
     return { service, configService, configValues }
   }
 
+  const issueInput = (overrides: Record<string, any> = {}) => ({
+    fileId: 1,
+    fileName: 'game.7z',
+    bucketName: 'shionlib-games',
+    fileKey: 'games/game.7z',
+    authorizationToken: 'download-token',
+    downloadUrl: 'https://f005.backblazeb2.com',
+    expiresIn: 3600,
+    gameId: 1,
+    ...overrides,
+  })
+
   const decryptTicket = (ticket: string, secret: string): DownloadProxyTicketPayload => {
     const [ivRaw, ciphertextRaw, authTagRaw] = ticket.split('.')
     const iv = Buffer.from(ivRaw, 'base64url')
@@ -33,13 +45,11 @@ describe('DownloadProxyTicketService', () => {
   it('issueDownloadUrl returns a well-formed proxy URL with encrypted ticket', () => {
     const { service } = createService()
 
-    const url = service.issueDownloadUrl({
-      fileId: 42,
-      fileName: 'game.7z',
-      originUrl: 'https://cdn.example.com/files/game.7z?Authorization=token123',
-      expiresIn: 3600,
-      gameId: 1,
-    })
+    const url = service.issueDownloadUrl(
+      issueInput({
+        fileId: 42,
+      }),
+    )
 
     expect(url).toMatch(/^https:\/\/dl\.example\.com\/dl\/42\/[^/?]+\?ticket=/)
   })
@@ -47,22 +57,27 @@ describe('DownloadProxyTicketService', () => {
   it('encrypts ticket payload that can be decrypted with the same secret', () => {
     const { service } = createService()
 
-    const url = service.issueDownloadUrl({
-      fileId: 10,
-      fileName: 'test.rar',
-      originUrl: 'https://cdn.example.com/bucket/test.rar?Authorization=abc',
-      expiresIn: 1800,
-      gameId: 1,
-    })
+    const url = service.issueDownloadUrl(
+      issueInput({
+        fileId: 10,
+        fileName: 'test.rar',
+        fileKey: 'bucket/test.rar',
+        authorizationToken: 'abc',
+        expiresIn: 1800,
+      }),
+    )
 
     const ticket = decodeURIComponent(new URL(url).searchParams.get('ticket')!)
     const payload = decryptTicket(ticket, 'test-secret-key')
 
-    expect(payload.v).toBe(2)
+    expect(payload.v).toBe(3)
     expect(payload.fid).toBe(10)
     expect(payload.n).toBe('test.rar')
     expect(payload.mc).toBe(4)
-    expect(payload.p).toBe('https://cdn.example.com/bucket/test.rar?Authorization=abc')
+    expect(payload.b).toBe('shionlib-games')
+    expect(payload.k).toBe('bucket/test.rar')
+    expect(payload.a).toBe('abc')
+    expect(payload.u).toBe('https://f005.backblazeb2.com')
     expect(payload.exp).toBeGreaterThan(Math.floor(Date.now() / 1000))
     expect(payload.sid).toBeDefined()
   })
@@ -70,13 +85,11 @@ describe('DownloadProxyTicketService', () => {
   it('uses sid instead of fileName in the URL path', () => {
     const { service } = createService()
 
-    const url = service.issueDownloadUrl({
-      fileId: 1,
-      fileName: '[Frontwing] Corona Blossom.rar',
-      originUrl: 'https://cdn.example.com/files/game.rar?Auth=x',
-      expiresIn: 3600,
-      gameId: 1,
-    })
+    const url = service.issueDownloadUrl(
+      issueInput({
+        fileName: '[Frontwing] Corona Blossom.rar',
+      }),
+    )
 
     const pathnameParts = new URL(url).pathname.split('/')
     expect(pathnameParts).toHaveLength(4)
@@ -87,21 +100,27 @@ describe('DownloadProxyTicketService', () => {
     )
   })
 
-  it('stores the full origin URL in the ticket payload', () => {
+  it('stores B2 download source fields in the ticket payload', () => {
     const { service } = createService()
 
-    const url = service.issueDownloadUrl({
-      fileId: 5,
-      fileName: 'file.zip',
-      originUrl: 'https://cdn.example.com/deep/path/file.zip?token=abc&extra=1',
-      expiresIn: 3600,
-      gameId: 1,
-    })
+    const url = service.issueDownloadUrl(
+      issueInput({
+        fileId: 5,
+        fileName: 'file.zip',
+        bucketName: 'other-bucket',
+        fileKey: 'deep/path/file.zip',
+        authorizationToken: 'token-with-extra',
+        downloadUrl: 'https://f123.backblazeb2.com',
+      }),
+    )
 
     const ticket = decodeURIComponent(new URL(url).searchParams.get('ticket')!)
     const payload = decryptTicket(ticket, 'test-secret-key')
 
-    expect(payload.p).toBe('https://cdn.example.com/deep/path/file.zip?token=abc&extra=1')
+    expect(payload.b).toBe('other-bucket')
+    expect(payload.k).toBe('deep/path/file.zip')
+    expect(payload.a).toBe('token-with-extra')
+    expect(payload.u).toBe('https://f123.backblazeb2.com')
   })
 
   it('normalizes proxy_worker_host with trailing slash', () => {
@@ -109,13 +128,7 @@ describe('DownloadProxyTicketService', () => {
       'file_download.proxy_worker_host': 'https://dl.example.com/',
     })
 
-    const url = service.issueDownloadUrl({
-      fileId: 1,
-      fileName: 'game.7z',
-      originUrl: 'https://cdn.example.com/file?Auth=x',
-      expiresIn: 3600,
-      gameId: 1,
-    })
+    const url = service.issueDownloadUrl(issueInput())
 
     expect(url).toMatch(/^https:\/\/dl\.example\.com\/dl\/1\/[^/?]+/)
     expect(url).not.toContain('//dl/')
@@ -124,13 +137,11 @@ describe('DownloadProxyTicketService', () => {
   it('keeps sid in URL path consistent with encrypted payload', () => {
     const { service } = createService()
 
-    const url = service.issueDownloadUrl({
-      fileId: 7,
-      fileName: 'game.7z',
-      originUrl: 'https://cdn.example.com/file?Auth=x',
-      expiresIn: 3600,
-      gameId: 1,
-    })
+    const url = service.issueDownloadUrl(
+      issueInput({
+        fileId: 7,
+      }),
+    )
 
     const ticket = decodeURIComponent(new URL(url).searchParams.get('ticket')!)
     const payload = decryptTicket(ticket, 'test-secret-key')
@@ -145,15 +156,9 @@ describe('DownloadProxyTicketService', () => {
       'file_download.proxy_worker_host': '',
     })
 
-    expect(() =>
-      service.issueDownloadUrl({
-        fileId: 1,
-        fileName: 'game.7z',
-        originUrl: 'https://cdn.example.com/file?Auth=x',
-        expiresIn: 3600,
-        gameId: 1,
-      }),
-    ).toThrow('FILE_DOWNLOAD_PROXY_WORKER_HOST is required')
+    expect(() => service.issueDownloadUrl(issueInput())).toThrow(
+      'FILE_DOWNLOAD_PROXY_WORKER_HOST is required',
+    )
   })
 
   it('throws when ticket_secret is empty', () => {
@@ -161,15 +166,9 @@ describe('DownloadProxyTicketService', () => {
       'file_download.ticket_secret': '',
     })
 
-    expect(() =>
-      service.issueDownloadUrl({
-        fileId: 1,
-        fileName: 'game.7z',
-        originUrl: 'https://cdn.example.com/file?Auth=x',
-        expiresIn: 3600,
-        gameId: 1,
-      }),
-    ).toThrow('FILE_DOWNLOAD_TICKET_SECRET is required')
+    expect(() => service.issueDownloadUrl(issueInput())).toThrow(
+      'FILE_DOWNLOAD_TICKET_SECRET is required',
+    )
   })
 
   it('uses max_conns from config in ticket payload', () => {
@@ -177,13 +176,7 @@ describe('DownloadProxyTicketService', () => {
       'file_download.max_conns': 8,
     })
 
-    const url = service.issueDownloadUrl({
-      fileId: 1,
-      fileName: 'game.7z',
-      originUrl: 'https://cdn.example.com/file?Auth=x',
-      expiresIn: 3600,
-      gameId: 1,
-    })
+    const url = service.issueDownloadUrl(issueInput())
 
     const ticket = decodeURIComponent(new URL(url).searchParams.get('ticket')!)
     const payload = decryptTicket(ticket, 'test-secret-key')
@@ -196,13 +189,7 @@ describe('DownloadProxyTicketService', () => {
       'file_download.max_conns': 0,
     })
 
-    const url = service.issueDownloadUrl({
-      fileId: 1,
-      fileName: 'game.7z',
-      originUrl: 'https://cdn.example.com/file?Auth=x',
-      expiresIn: 3600,
-      gameId: 1,
-    })
+    const url = service.issueDownloadUrl(issueInput())
 
     const ticket = decodeURIComponent(new URL(url).searchParams.get('ticket')!)
     const payload = decryptTicket(ticket, 'test-secret-key')

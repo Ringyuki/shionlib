@@ -42,6 +42,7 @@ describe('B2Service', () => {
       apiInfo: {
         storageApi: {
           apiUrl: 'https://api.cached',
+          downloadUrl: 'https://download.cached',
           allowed: { buckets: [{ id: 'bucket-cached', name: 'bucket-name' }] },
         },
       },
@@ -50,7 +51,9 @@ describe('B2Service', () => {
     await expect((service as any).getAuthorizationToken()).resolves.toEqual({
       authorizationToken: 'cached-auth',
       bucketId: 'bucket-cached',
+      bucketName: 'bucket-name',
       apiUrl: 'https://api.cached',
+      downloadUrl: 'https://download.cached',
     })
     expect(httpService.get).not.toHaveBeenCalled()
   })
@@ -65,6 +68,7 @@ describe('B2Service', () => {
           apiInfo: {
             storageApi: {
               apiUrl: 'https://api.fresh',
+              downloadUrl: 'https://download.fresh',
               allowed: { buckets: [{ id: 'bucket-fresh', name: 'b' }] },
             },
           },
@@ -75,7 +79,9 @@ describe('B2Service', () => {
     await expect((service as any).getAuthorizationToken()).resolves.toEqual({
       authorizationToken: 'fresh-auth',
       bucketId: 'bucket-fresh',
+      bucketName: 'b',
       apiUrl: 'https://api.fresh',
+      downloadUrl: 'https://download.fresh',
     })
 
     expect(httpService.get).toHaveBeenCalledWith(
@@ -95,12 +101,14 @@ describe('B2Service', () => {
     )
   })
 
-  it('getDownloadAuthorizationToken uses auth info and default expiration when missing', async () => {
+  it('getDownloadAuthorizationInfo uses auth info and default expiration when missing', async () => {
     const { service, httpService } = createService()
     jest.spyOn(service as any, 'getAuthorizationToken').mockResolvedValueOnce({
       authorizationToken: 'auth-token',
       bucketId: 'bucket-id',
+      bucketName: 'bucket-name',
       apiUrl: 'https://api.b2',
+      downloadUrl: 'https://f005.backblazeb2.com',
     })
     httpService.post.mockReturnValueOnce(
       of({
@@ -108,9 +116,12 @@ describe('B2Service', () => {
       }),
     )
 
-    await expect((service as any).getDownloadAuthorizationToken('dir/file.zip')).resolves.toBe(
-      'download-token',
-    )
+    await expect(service.getDownloadAuthorizationInfo('dir/file.zip')).resolves.toEqual({
+      bucketName: 'bucket-name',
+      fileKey: 'dir/file.zip',
+      authorizationToken: 'download-token',
+      downloadUrl: 'https://f005.backblazeb2.com',
+    })
     expect(httpService.post).toHaveBeenCalledWith(
       'https://api.b2/b2api/v4/b2_get_download_authorization',
       {
