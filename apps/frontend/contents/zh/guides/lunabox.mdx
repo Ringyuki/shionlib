@@ -24,7 +24,22 @@ author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c
 
 从官方网站下载并安装 LunaBox：**https://box.lunarain.site**
 
-LunaBox 在安装过程中会注册自定义协议处理程序（`lunabox://`）。Shionlib 通过此协议将下载任务直接发送到 LunaBox。
+目前提供两种 Windows 版本：
+
+- **安装版（setup）**：推荐普通用户使用。安装过程中会自动尝试注册 `lunabox://` 协议，下载按钮通常开箱即用。数据默认保存在 `%APPDATA%\LunaBox`。
+- **便携版（portable）**：解压即用，但首次使用前通常需要手动注册 `lunabox://` 协议。数据默认保存在程序目录。
+
+如果你之后更换了便携版目录、重装系统，或发现安装版无法正常通过协议启动 LunaBox，也可以重新执行下面的命令。
+
+```powershell
+# 切换到 lunacli 所在目录，执行注册协议命令
+.\lunacli.exe --register-protocol
+
+# 将 lunacli 添加到系统环境变量后，可以直接使用，安装版会自动处理环境变量注册
+lunacli --register-protocol
+```
+
+你也可以参照(LunaBox文档)[https://box.lunarain.site/features/cli.html]
 
 > LunaBox 目前仅支持 **Windows**。移动设备上不会显示 LunaBox 按钮。
 
@@ -62,11 +77,21 @@ LunaBox 下载按钮默认显示。禁用方式：
 
 **点击 LunaBox 按钮没有反应**
 
-请确保 LunaBox 已安装并正在运行。安装程序必须已注册 `lunabox://` 协议处理程序。若 LunaBox 在安装完成前已打开，请重启后再试。
+优先检查是否已正确注册 `lunabox://` 协议：
+
+- 安装版：一般会自动注册；如果失效，参照上文重新注册协议，或者重新安装通常即可修复
+- 便携版：请先启动 LunaBox，再在文件所在目录执行 `.\lunacli.exe --register-protocol`
+
+执行命令后关闭后重新启动再试。
 
 **下载任务没有出现在 LunaBox 中**
 
-检查浏览器或系统安全设置是否拦截了 `lunabox://` 协议。部分系统会弹出确认对话框，询问是否允许打开此链接——点击**打开**或**允许**即可。
+- 检查浏览器或系统是否拦截了 `lunabox://` 协议
+- 检查是否有“是否打开 LunaBox”的确认弹窗被忽略
+
+**LunaBox 没有提前打开，能直接下载吗**
+
+可以。只要协议已注册，点击 Shionlib 的月亮图标按钮开始下载后，协议会自动启动 LunaBox，并把当前下载请求带过去。
 
 **Turnstile 验证后下载没有开始**
 
