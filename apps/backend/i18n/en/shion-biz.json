@@ -127,5 +127,7 @@
   "SPONSOR_PROVIDER_VERIFICATION_FAILED": "payment verification failed",
   "SPONSOR_MODULE_DISABLED": "sponsor module is currently disabled",
 
-  "AD_NOT_FOUND": "ad not found"
+  "AD_NOT_FOUND": "ad not found",
+
+  "ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE": "traffic detail is temporarily unavailable, message: {message}"
 }

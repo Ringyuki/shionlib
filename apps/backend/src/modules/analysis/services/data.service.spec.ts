@@ -1,7 +1,7 @@
-/* eslint-disable quotes */
 import { of, throwError } from 'rxjs'
 import { PrismaService } from '../../../prisma.service'
 import { ShionConfigService } from '../../../common/config/services/config.service'
+import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { DataService } from './data.service'
 
 describe('DataService', () => {
@@ -362,40 +362,34 @@ describe('DataService', () => {
       })
     })
 
-    it('falls back to empty result when config is missing', async () => {
+    it('throws biz error when config is missing', async () => {
       const { service, post } = createTrafficService({
         cloudflareAccountId: '',
         cloudflareSecret: '',
       })
       const warnSpy = jest.spyOn((service as any).logger, 'warn').mockImplementation()
 
-      const result = await service.getTrafficDetail()
+      await expect(service.getTrafficDetail()).rejects.toMatchObject({
+        code: ShionBizCode.ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE,
+      })
 
       expect(post).not.toHaveBeenCalled()
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('fallback to empty traffic detail'),
-      )
-      expect(result.totalDownloads).toBe(0)
-      expect(result.totalBytes).toBe(0)
-      expect(result.hourly).toEqual([])
-      expect(result.topFiles).toEqual([])
-      expect(result.countries).toEqual([])
-      expect(result.topGames).toEqual([])
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('traffic detail unavailable'))
     })
 
-    it('falls back to empty result when query fails', async () => {
+    it('throws biz error when query fails', async () => {
       const { service } = createTrafficService({ analyticsError: true })
       const warnSpy = jest.spyOn((service as any).logger, 'warn').mockImplementation()
+      const errorSpy = jest.spyOn((service as any).logger, 'error').mockImplementation()
 
-      const result = await service.getTrafficDetail()
+      await expect(service.getTrafficDetail()).rejects.toMatchObject({
+        code: ShionBizCode.ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE,
+      })
 
       expect(warnSpy).toHaveBeenCalledWith(
         expect.stringContaining('Failed to query traffic detail'),
       )
-      expect(result.totalDownloads).toBe(0)
-      expect(result.topFiles).toEqual([])
-      expect(result.countries).toEqual([])
-      expect(result.topGames).toEqual([])
+      expect(errorSpy).toHaveBeenCalled()
     })
 
     it('returns averageSize 0 when there are zero downloads', async () => {
@@ -416,7 +410,8 @@ describe('DataService', () => {
 
       await service.getTrafficDetail()
 
-      expect(post.mock.calls[2]?.[1]).toContain("timestamp >= toDateTime('2026-03-24 14:00:00')")
+      const expectedSince = '2026-03-24 14:00:00'
+      expect(post.mock.calls[2]?.[1]).toContain(`timestamp >= toDateTime('${expectedSince}')`)
 
       nowSpy.mockRestore()
     })

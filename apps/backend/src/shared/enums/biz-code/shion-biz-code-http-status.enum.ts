@@ -155,4 +155,7 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
 
   // 58
   [ShionBizCode.AD_NOT_FOUND]: HttpStatus.NOT_FOUND,
+
+  // 59
+  [ShionBizCode.ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE]: HttpStatus.BAD_GATEWAY,
 } as const satisfies Record<ShionBizCode, HttpStatus>

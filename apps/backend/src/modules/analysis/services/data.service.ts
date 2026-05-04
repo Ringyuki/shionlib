@@ -3,6 +3,8 @@ import { PrismaService } from '../../../prisma.service'
 import { HttpService } from '@nestjs/axios'
 import { firstValueFrom } from 'rxjs'
 import { ShionConfigService } from '../../../common/config/services/config.service'
+import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
+import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import {
   CloudflareAnalyticsData,
   CloudflareAnalyticsResult,
@@ -133,21 +135,14 @@ export class DataService {
     const secret = this.configService.get('cloudflare.analytics.secret')
 
     if (!accountId || !secret) {
-      this.logger.warn(
-        'Cloudflare config missing (CLOUDFLARE_ACCOUNT_ID/CLOUDFLARE_ANALYTICS_SECRET), fallback to empty traffic detail',
+      const message =
+        'Cloudflare config missing (CLOUDFLARE_ACCOUNT_ID/CLOUDFLARE_ANALYTICS_SECRET)'
+      this.logger.warn(`${message}, traffic detail unavailable`)
+      throw new ShionBizException(
+        ShionBizCode.ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE,
+        'shion-biz.ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE',
+        { message },
       )
-      return {
-        totalDownloads: 0,
-        totalBytes: 0,
-        averageSize: 0,
-        prevTotalDownloads: 0,
-        prevTotalBytes: 0,
-        prevAverageSize: 0,
-        hourly: [],
-        topFiles: [],
-        countries: [],
-        topGames: [],
-      }
     }
 
     try {
@@ -302,22 +297,14 @@ export class DataService {
         }),
       }
     } catch (error) {
-      this.logger.warn(
-        `Failed to query traffic detail: ${error instanceof Error ? error.message : 'unknown error'}`,
-      )
+      const message = error instanceof Error ? error.message : 'unknown error'
+      this.logger.warn(`Failed to query traffic detail: ${message}`)
       this.logger.error(error)
-      return {
-        totalDownloads: 0,
-        totalBytes: 0,
-        averageSize: 0,
-        prevTotalDownloads: 0,
-        prevTotalBytes: 0,
-        prevAverageSize: 0,
-        hourly: [],
-        topFiles: [],
-        countries: [],
-        topGames: [],
-      }
+      throw new ShionBizException(
+        ShionBizCode.ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE,
+        'shion-biz.ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE',
+        { message },
+      )
     }
   }
 

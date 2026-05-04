@@ -126,5 +126,7 @@
   "SPONSOR_PROVIDER_VERIFICATION_FAILED": "決済の検証に失敗しました",
   "SPONSOR_MODULE_DISABLED": "スポンサーモジュールは現在無効です",
 
-  "AD_NOT_FOUND": "広告が見つかりません"
+  "AD_NOT_FOUND": "広告が見つかりません",
+
+  "ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE": "トラフィック詳細は一時的に利用できません。メッセージ: {message}"
 }

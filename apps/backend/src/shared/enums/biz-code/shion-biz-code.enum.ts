@@ -29,6 +29,7 @@
  * 44 FAVORITE：favorite relation
  * 45 COMMENT：comment
  * 57 SPONSOR：sponsor/donation
+ * 59 ANALYSIS：analytics/metrics
  */
 
 export enum ShionBizCode {
@@ -185,4 +186,7 @@ export enum ShionBizCode {
 
   // 58
   AD_NOT_FOUND = 580101,
+
+  // 59
+  ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE = 590101,
 }

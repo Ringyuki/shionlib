@@ -127,5 +127,7 @@
   "SPONSOR_PROVIDER_VERIFICATION_FAILED": "支付验证失败",
   "SPONSOR_MODULE_DISABLED": "赞助模块当前未启用",
 
-  "AD_NOT_FOUND": "广告不存在"
+  "AD_NOT_FOUND": "广告不存在",
+
+  "ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE": "流量详情暂时不可用，信息: {message}"
 }
