@@ -12,6 +12,7 @@ import { ivm, ivmEnum } from '../../../../common/validation/i18n'
 
 export enum GameDownloadSourcePlatform {
   WINDOWS = 'win',
+  MACOS = 'mac',
   IOS = 'ios',
   ANDROID = 'and',
   LINUX = 'lin',
