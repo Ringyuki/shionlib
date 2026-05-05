@@ -3,6 +3,9 @@
     "ErrorView": {
       "defaultTitle": "出错了",
       "defaultDetails": "我们遇到一些错误，请稍后重试。",
+      "hintPrefix": "如果你认为这是一个错误，请在",
+      "hintLinkText": "站点设置",
+      "hintSuffix": "中启用NSFW内容显示。",
       "back": "返回",
       "reset": "重新加载"
     }

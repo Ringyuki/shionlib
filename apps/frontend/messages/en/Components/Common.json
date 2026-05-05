@@ -3,6 +3,9 @@
     "ErrorView": {
       "defaultTitle": "Error",
       "defaultDetails": "We ran into an error. Please try again later.",
+      "hintPrefix": "If you think this is an error, please check the",
+      "hintLinkText": "site settings",
+      "hintSuffix": "and enable NSFW content display.",
       "back": "Back",
       "reset": "Reload"
     }

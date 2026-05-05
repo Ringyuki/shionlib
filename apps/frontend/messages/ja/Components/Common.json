@@ -3,6 +3,9 @@
     "ErrorView": {
       "defaultTitle": "エラー",
       "defaultDetails": "エラーが発生しました。後でもう一度お試しください。",
+      "hintPrefix": "もし、これがエラーであると思われる場合は、",
+      "hintLinkText": "サイト設定",
+      "hintSuffix": "でNSFWコンテンツの表示を有効にしてください。",
       "back": "戻る",
       "reset": "再読み込み"
     }
