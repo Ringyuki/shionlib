@@ -1,0 +1,245 @@
+---
+title: Raw Japanese PC Game Setup Guide
+banner: 'https://t.shionlib.com/game/55/cover/91005f30-9a58-4783-ad22-6fe93b93b886.webp'
+description: 'A guide to disc image mounting, locale emulation, and common compatibility troubleshooting for older Japanese PC games'
+date: 2026-05-15
+author_uid: 3625
+author_name: 'liubiligrass'
+author_avatar: 'https://t.shionlib.com/user/3625/avatar/b3c28308-e73a-42f5-802b-43cafb730e57.webp'
+---
+
+Mounting tool: https://sourceforge.net/projects/imdisk-toolkit/
+
+Locale tool: https://github.com/xupefei/Locale-Emulator
+
+# Raw Japanese PC Game Setup Guide
+
+## Introduction
+
+After spending a lot of effort downloading an older game or an untranslated Japanese title, you may try extracting the ISO and launching an unpatched `xxx.exe`, only to be greeted by launch failures, garbled text, or error messages.
+
+Let us go back more than ten years, to the era when physical discs were still the main distribution medium.
+
+At that time, large game data was not suitable for efficient distribution over the internet, so developers usually shipped all code and assets on CD-ROM or DVD-ROM discs.
+
+More importantly, software development in that era was strongly tied to regional assumptions.
+
+Many Japanese PC game developers, especially those working on visual novels and GalGame engines, often assumed the following runtime environment:
+
+Japanese Windows, Shift-JIS（CP932）encoding, a physical optical drive, legacy multimedia frameworks such as DirectX 9 / DirectShow, and the relatively loose permission model of Windows XP.
+
+However, modern systems have changed significantly: Unicode has become the mainstream, optical drives have largely disappeared, Windows security mechanisms have become much stricter, DirectShow has gradually been deprecated, and UAC and DEP are enabled by default.
+
+As a result, many older games may encounter various compatibility issues on modern Windows systems.
+
+This guide explains the topic from three angles:
+
+- Background knowledge
+- Setup tutorial
+- Troubleshooting
+
+## Background
+
+### Formats
+
+When downloading older games, you will often see files such as:
+
+.iso
+.mdf
+.mds
+.cue
+.bin
+
+Many beginners directly extract these files with archive software and then launch the game.
+
+For some games that have already been adapted by translation groups, this may indeed work.
+
+However, for many original Japanese releases, games with DRM checks, or games that depend on the original disc structure, extracting the files directly can often cause installation failures, launch failures, DRM errors, missing-disc prompts, missing BGM, OP video issues, and other problems.
+
+#### What an ISO actually is
+
+Simply put, an `.iso` is essentially a fully digitized optical disc.
+
+It preserves the file system structure, data layout, and disc directory structure.
+
+Therefore, it is not a compressed archive.
+
+`.mdf + .mds` is closer to a complete physical disc image.
+
+Among them, `.mdf` stores the actual data, while `.mds` stores track and disc structure information.
+
+Since `.iso` and similar files are essentially discs, a computer naturally needs a “disc drive” to read them. On modern PCs where optical drives have mostly disappeared, Windows provides a virtual optical drive feature, allowing users to insert this digital disc into a virtual device. This is called mounting.
+
+Besides using Windows’ built-in ISO mounting feature, you can also use a dedicated mounting tool such as [imdisk-toolkit](https://sourceforge.net/projects/imdisk-toolkit/). However, ImDisk has limited support for some DRM systems, so alternative tools may sometimes be required.
+
+> #### Why mount instead of extract?
+>
+> Extracting files directly can break the original disc structure and fail to preserve some information required by DRM. Some games may fail to locate resources due to path changes, extraction also creates additional I/O overhead, and some games check whether they are running from an optical drive path.
+>
+> Mounting makes Windows treat the image as if it were a real inserted disc. As a result, the game still sees paths such as:
+>
+> `D:\`
+> `E:\`
+>
+> as “real” optical drives.
+>
+> Older commercial games often used DRM to prevent piracy and enforce a specific installation flow. To avoid unnecessary trouble, mounting the image is generally recommended.
+
+### Locale Emulation
+
+After mounting the game and launching `startup.exe`, there is a good chance that you will be greeted by garbled text.
+
+Modern Windows has fully adopted Unicode, but many Japanese games from around the 2000s still use Shift-JIS（CP932）and ANSI Win32 APIs for text processing.
+
+The problem is that on a Chinese Windows system, the default ANSI code page is usually GBK（CP936）. The game expects its text to be interpreted as Japanese, but the system interprets it as GBK instead, resulting in garbled text, square boxes, `???`, program logic errors, or even crashes.
+
+> #### Why not rely on the built-in system locale setting?
+>
+> Many old tutorials online say: “Just change the system locale for non-Unicode programs to Japanese.” This can indeed solve some problems.
+>
+> However, this is a global change. In some cases, it can be disastrous, causing old Chinese software to display garbled text, tools to malfunction, or encoding conflicts to occur.
+>
+> Even more problematic is the **“Beta: Use Unicode UTF-8 for worldwide language support”** option added by Microsoft in Windows 10. Once enabled, the system’s non-Unicode compatibility layer is forced into UTF-8 mode. This setting is vaguely explained and can easily cause even more issues when users enable it by mistake.
+
+To solve the language environment requirements of individual programs without affecting the entire system, technical communities have developed various locale emulation tools over the years. From Microsoft’s short-lived AppLocale to the open-source NTLEA, this technical route has continued to evolve. On modern Windows systems, [Locale Emulator](https://github.com/xupefei/Locale-Emulator), whose final release was published on Aug 26, 2021, has long been one of the most stable solutions. It works by hooking Win32 APIs and making the program believe it is running in a Japanese system environment.
+
+For newer 64-bit GalGames, [Locale_Remulator](https://github.com/InWILL/Locale_Remulator) is needed to address 64-bit support and other compatibility problems.
+
+## Tutorial
+
+1. Mount the disc
+
+    When using ISO and similar formats, you can right-click the file and choose mount. A virtual optical drive will then appear in File Explorer, and you can open it directly.
+
+    You can also install [imdisk-toolkit](https://sourceforge.net/projects/imdisk-toolkit/) and right-click the disc image file, then choose `Mount as ImDisk Virtual Disk`.
+
+   For some older games that use MDS/MDF, if ImDisk does not work, you can try [WinCDEmu](https://wincdemu.sysprogs.org/).
+
+2. Launch the installer under a Japanese locale environment
+
+    First install [Locale Emulator](https://github.com/xupefei/Locale-Emulator) or, preferably, [Locale_Remulator](https://github.com/InWILL/Locale_Remulator) on your system.
+
+    Open the newly mounted virtual disc and look for the main installer. In common naming conventions, it is usually named `Setup.exe` or `Installer.exe`. The actual game executable is often named after the game’s English title.
+
+    Right-click `Setup.exe` or the game executable. In the context menu, look for the “Locale Emulator” entry with the orange L icon.
+
+    If you are using Windows 11, Microsoft hides many traditional menu items by default. You need to click “Show more options” first.
+
+    Hover over the icon, and in the submenu that appears, click `Run in Japanese`.
+
+    In the Japanese installer wizard, keep clicking “次へ（Next）” or “同意する（I agree）” until you reach the installation path selection screen. Here, the important point is that **the installation path must not contain any Chinese characters, special symbols, or even full-width spaces**.
+
+    You need to manually check the path and choose a short path made only of letters.
+
+    > Many older games use ANSI APIs and non-Unicode file handling. They cannot correctly process Chinese characters, special symbols, or overly long paths. This may cause missing files, installation failures, or file reading errors.
+
+3. Create a dedicated locale shortcut
+
+    After installation is complete, do not directly use the desktop shortcut, because it is not bound to the locale emulation environment.
+
+    Go to the installation path you chose earlier, find the game executable `xxx(game English title).exe`, then right-click -> `Locale Emulator` -> `Modify Application Profile`.
+
+    After confirming that the profile is set to Japanese locale and timezone, click the `Create Shortcut` button in the tool interface. The system will generate a new shortcut bound to the locale settings. Use it to replace the desktop shortcut.
+
+4. Eject the disc
+
+    After all installation and configuration steps are complete, open This PC, right-click the virtual DVD drive, and choose Eject.
+
+## Troubleshooting
+
+**Important**
+
+> Many problems may be caused by antivirus software. Please check this first.
+
+- Windows compatibility mode
+
+  Some older games may require: right-click exe → Properties → Compatibility → Windows XP SP3
+
+- Japanese timezone
+
+  A small number of games check the system timezone.
+  If time-related errors occur, try switching to Tokyo timezone（UTC+9）or configuring it inside the locale tool.
+
+- Black screen in fullscreen
+
+  Use the powerful tool [Magpie](https://github.com/Blinue/Magpie).
+
+- Windows SmartScreen
+
+  Symptom: When launching the game, Windows shows `Windows protected your PC`
+
+  Cause: The program lacks a trusted digital signature, or the download source has insufficient reputation.
+
+  Solution: Click More info → Run anyway.
+
+- Garbled text or missing characters in-game
+
+  Symptom: Garbled text, missing characters, or square-box text appears in-game.
+
+  Cause: The game may be trying to find a specific Japanese font installed on the system, or a translation patch may require a special font.
+
+  Solution:
+  - Install the corresponding font.
+
+- LE installation failure or missing right-click menu
+
+  Symptom: LE reports successful installation, but the LE menu item cannot be found.
+
+  Cause: The context menu may not have refreshed immediately / the target file may be 64-bit / security software may have removed or blocked it.
+
+  - Solution: Restart / look for other fixes or patches / disable antivirus software or add the program to the whitelist.
+
+- Missing `d3dx9_xx.dll` or `MSVCP140.dll`
+
+  Symptom: The game immediately shows `d3dx9_xx.dll not found` or `MSVCP140.dll is missing`.
+
+  Cause: The game depends on specific multimedia or runtime libraries provided by Microsoft at the time, but these libraries are no longer included by default or have been reorganized in modern systems.
+
+  Solutions:
+
+  - Option 1: Download and install `DirectX End-User Runtimes (June 2010)` from Microsoft’s official website, or install a community-maintained all-in-one package such as Visual C++ Redistributable Runtimes All-in-One.
+  - Option 2: In Control Panel → Programs → Turn Windows features on or off, enable Legacy Components.
+
+- Unable to save progress / save crash error
+
+  Symptom: When clicking “Save,” a Japanese read/write error or permission error appears, or the game appears to save but the save file is not actually created.
+
+  Cause: This is a classic conflict caused by changes in operating system architecture. In the Windows XP era, system security was relatively weak, and administrator-like permissions were commonly assumed.
+
+  However, since Windows Vista introduced UAC, critical system directories such as `C:\Program Files (x86)` and `C:\Program Files` have been treated as highly protected areas.
+
+  When an older game tries to create a new save file inside these directories on a modern system, it may be denied write access.
+
+  Solutions:
+
+  - Option 1: Reinstall the game into a folder that does not require UAC permissions.
+
+  - Option 2: Launch the game as administrator.
+
+- Nothing happens after launching with locale emulation
+
+  Symptom: You start the main executable, and then... nothing happens.
+
+  Cause: This is one of the most difficult categories to troubleshoot. There is almost no universal solution. In many cases, you need to check Event Viewer logs and error messages.
+
+  However, several common causes can still be listed:
+
+  1. DEP（Data Execution Prevention）is triggered
+
+     Modern Windows, together with CPU hardware support, includes a low-level memory protection technology called DEP.
+
+     Its core purpose is to mark certain data memory regions as `non-executable（NX）`.
+
+     The problem is that some older games dynamically unpack or modify their own code during runtime. This behavior may be misjudged by modern Windows DEP. In such cases, the process may directly throw `0xc0000005`. If the program does not handle the exception properly, the process may be terminated before it even has a chance to draw an error dialog.
+
+  2. Old video codec problems（often with a popup window）
+
+     （Naming GIGA here）Many games immediately play an OP movie at startup. These older games often use the old DirectShow video framework to call early video formats, which may cause timeouts, freezes, and crashes.
+
+     You can try:
+     - Installing K-Lite Codec Pack
+     - Installing LAV Filters
+     - Using dgVoodoo2（recommended）
+
+    > What is dgVoodoo2?
+    > It is essentially an old graphics API translation layer. It can translate DirectX 8/9 into modern APIs, fix black screens, resolve resolution issues, and improve compatibility. For some older GalGames, the improvement in compatibility and performance can be quite noticeable.
