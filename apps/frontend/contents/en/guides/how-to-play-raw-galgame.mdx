@@ -109,41 +109,41 @@ For newer 64-bit GalGames, [Locale_Remulator](https://github.com/InWILL/Locale_R
 
 1. Mount the disc
 
-    When using ISO and similar formats, you can right-click the file and choose mount. A virtual optical drive will then appear in File Explorer, and you can open it directly.
+   When using ISO and similar formats, you can right-click the file and choose mount. A virtual optical drive will then appear in File Explorer, and you can open it directly.
 
-    You can also install [imdisk-toolkit](https://sourceforge.net/projects/imdisk-toolkit/) and right-click the disc image file, then choose `Mount as ImDisk Virtual Disk`.
+   You can also install [imdisk-toolkit](https://sourceforge.net/projects/imdisk-toolkit/) and right-click the disc image file, then choose `Mount as ImDisk Virtual Disk`.
 
    For some older games that use MDS/MDF, if ImDisk does not work, you can try [WinCDEmu](https://wincdemu.sysprogs.org/).
 
 2. Launch the installer under a Japanese locale environment
 
-    First install [Locale Emulator](https://github.com/xupefei/Locale-Emulator) or, preferably, [Locale_Remulator](https://github.com/InWILL/Locale_Remulator) on your system.
+   First install [Locale Emulator](https://github.com/xupefei/Locale-Emulator) or, preferably, [Locale_Remulator](https://github.com/InWILL/Locale_Remulator) on your system.
 
-    Open the newly mounted virtual disc and look for the main installer. In common naming conventions, it is usually named `Setup.exe` or `Installer.exe`. The actual game executable is often named after the game’s English title.
+   Open the newly mounted virtual disc and look for the main installer. In common naming conventions, it is usually named `Setup.exe` or `Installer.exe`. The actual game executable is often named after the game’s English title.
 
-    Right-click `Setup.exe` or the game executable. In the context menu, look for the “Locale Emulator” entry with the orange L icon.
+   Right-click `Setup.exe` or the game executable. In the context menu, look for the “Locale Emulator” entry with the orange L icon.
 
-    If you are using Windows 11, Microsoft hides many traditional menu items by default. You need to click “Show more options” first.
+   If you are using Windows 11, Microsoft hides many traditional menu items by default. You need to click “Show more options” first.
 
-    Hover over the icon, and in the submenu that appears, click `Run in Japanese`.
+   Hover over the icon, and in the submenu that appears, click `Run in Japanese`.
 
-    In the Japanese installer wizard, keep clicking “次へ（Next）” or “同意する（I agree）” until you reach the installation path selection screen. Here, the important point is that **the installation path must not contain any Chinese characters, special symbols, or even full-width spaces**.
+   In the Japanese installer wizard, keep clicking “次へ（Next）” or “同意する（I agree）” until you reach the installation path selection screen. Here, the important point is that **the installation path must not contain any Chinese characters, special symbols, or even full-width spaces**.
 
-    You need to manually check the path and choose a short path made only of letters.
+   You need to manually check the path and choose a short path made only of letters.
 
-    > Many older games use ANSI APIs and non-Unicode file handling. They cannot correctly process Chinese characters, special symbols, or overly long paths. This may cause missing files, installation failures, or file reading errors.
+   > Many older games use ANSI APIs and non-Unicode file handling. They cannot correctly process Chinese characters, special symbols, or overly long paths. This may cause missing files, installation failures, or file reading errors.
 
 3. Create a dedicated locale shortcut
 
-    After installation is complete, do not directly use the desktop shortcut, because it is not bound to the locale emulation environment.
+   After installation is complete, do not directly use the desktop shortcut, because it is not bound to the locale emulation environment.
 
-    Go to the installation path you chose earlier, find the game executable `xxx(game English title).exe`, then right-click -> `Locale Emulator` -> `Modify Application Profile`.
+   Go to the installation path you chose earlier, find the game executable `xxx(game English title).exe`, then right-click -> `Locale Emulator` -> `Modify Application Profile`.
 
-    After confirming that the profile is set to Japanese locale and timezone, click the `Create Shortcut` button in the tool interface. The system will generate a new shortcut bound to the locale settings. Use it to replace the desktop shortcut.
+   After confirming that the profile is set to Japanese locale and timezone, click the `Create Shortcut` button in the tool interface. The system will generate a new shortcut bound to the locale settings. Use it to replace the desktop shortcut.
 
 4. Eject the disc
 
-    After all installation and configuration steps are complete, open This PC, right-click the virtual DVD drive, and choose Eject.
+   After all installation and configuration steps are complete, open This PC, right-click the virtual DVD drive, and choose Eject.
 
 ## Troubleshooting
 
@@ -186,7 +186,6 @@ For newer 64-bit GalGames, [Locale_Remulator](https://github.com/InWILL/Locale_R
   Symptom: LE reports successful installation, but the LE menu item cannot be found.
 
   Cause: The context menu may not have refreshed immediately / the target file may be 64-bit / security software may have removed or blocked it.
-
   - Solution: Restart / look for other fixes or patches / disable antivirus software or add the program to the whitelist.
 
 - Missing `d3dx9_xx.dll` or `MSVCP140.dll`
@@ -196,7 +195,6 @@ For newer 64-bit GalGames, [Locale_Remulator](https://github.com/InWILL/Locale_R
   Cause: The game depends on specific multimedia or runtime libraries provided by Microsoft at the time, but these libraries are no longer included by default or have been reorganized in modern systems.
 
   Solutions:
-
   - Option 1: Download and install `DirectX End-User Runtimes (June 2010)` from Microsoft’s official website, or install a community-maintained all-in-one package such as Visual C++ Redistributable Runtimes All-in-One.
   - Option 2: In Control Panel → Programs → Turn Windows features on or off, enable Legacy Components.
 
@@ -211,7 +209,6 @@ For newer 64-bit GalGames, [Locale_Remulator](https://github.com/InWILL/Locale_R
   When an older game tries to create a new save file inside these directories on a modern system, it may be denied write access.
 
   Solutions:
-
   - Option 1: Reinstall the game into a folder that does not require UAC permissions.
 
   - Option 2: Launch the game as administrator.
@@ -223,7 +220,6 @@ For newer 64-bit GalGames, [Locale_Remulator](https://github.com/InWILL/Locale_R
   Cause: This is one of the most difficult categories to troubleshoot. There is almost no universal solution. In many cases, you need to check Event Viewer logs and error messages.
 
   However, several common causes can still be listed:
-
   1. DEP（Data Execution Prevention）is triggered
 
      Modern Windows, together with CPU hardware support, includes a low-level memory protection technology called DEP.
@@ -241,5 +237,5 @@ For newer 64-bit GalGames, [Locale_Remulator](https://github.com/InWILL/Locale_R
      - Installing LAV Filters
      - Using dgVoodoo2（recommended）
 
-    > What is dgVoodoo2?
-    > It is essentially an old graphics API translation layer. It can translate DirectX 8/9 into modern APIs, fix black screens, resolve resolution issues, and improve compatibility. For some older GalGames, the improvement in compatibility and performance can be quite noticeable.
+  > What is dgVoodoo2?
+  > It is essentially an old graphics API translation layer. It can translate DirectX 8/9 into modern APIs, fix black screens, resolve resolution issues, and improve compatibility. For some older GalGames, the improvement in compatibility and performance can be quite noticeable.
