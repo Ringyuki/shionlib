@@ -128,7 +128,13 @@ export const SponsorAmountStep = ({ onNext, loading }: SponsorAmountStepProps) =
         </Label>
       </div>
 
-      <Button className="w-full" onClick={handleSubmit} disabled={!amount} loading={loading}>
+      <Button
+        className="w-full"
+        onClick={handleSubmit}
+        disabled={!amount}
+        loading={loading}
+        loginRequired
+      >
         {t('next')}
       </Button>
     </div>

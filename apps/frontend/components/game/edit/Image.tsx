@@ -15,6 +15,9 @@ interface ImageProps {
   id: number
 }
 
+const getGameImageKey = (image: GameImage, index: number) =>
+  `image-${image.id ?? image.url}-${index}`
+
 export const Image = ({ images: initialImages, id }: ImageProps) => {
   const [images, setImages] = useState(initialImages)
   const { gamePermissions: permissions } = useEditPermissionStore()
@@ -42,8 +45,13 @@ export const Image = ({ images: initialImages, id }: ImageProps) => {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {images.map(image => (
-          <Edit key={image.url} image={image} onSuccess={handleSuccess} onDelete={handleDelete} />
+        {images.map((image, index) => (
+          <Edit
+            key={getGameImageKey(image, index)}
+            image={image}
+            onSuccess={handleSuccess}
+            onDelete={handleDelete}
+          />
         ))}
       </div>
       <Create onSuccess={handleSuccess} />

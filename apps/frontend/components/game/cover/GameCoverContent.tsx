@@ -16,6 +16,9 @@ interface GameCoverContentProps {
   content_limit?: ContentLimit
 }
 
+const getGameCoverKey = (cover: GameCover, index: number) =>
+  `cover-${cover.id ?? cover.url}-${index}`
+
 const flagMap: Record<Exclude<Language, 'other'>, string> = {
   jp: JP,
   zh: CN,
@@ -46,7 +49,7 @@ export const GameCoverContent = ({
 }: GameCoverContentProps) => {
   return (
     <div className={cn('grid grid-cols-1 md:grid-cols-2 gap-3', 'w-full', className)}>
-      {covers.map(cover => {
+      {covers.map((cover, index) => {
         const aspect = getAspectRatio(cover.dims as [number, number])
         const sizes = '(max-width: 768px) 100vw, 50vw'
         const url = cover.url.startsWith('http')
@@ -54,7 +57,7 @@ export const GameCoverContent = ({
           : process.env.NEXT_PUBLIC_SHIONLIB_IMAGE_BED_URL + cover.url
         return (
           <div
-            key={cover.url}
+            key={getGameCoverKey(cover, index)}
             className="relative w-full flex flex-col gap-2 cursor-pointer hover:opacity-80 transition-all duration-200"
             style={{ aspectRatio: aspect }}
           >

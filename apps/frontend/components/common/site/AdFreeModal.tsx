@@ -32,7 +32,7 @@ export const AdFreeModal = () => {
         </Button>
       }
     >
-      <p>{t('ad-free-description')}</p>
+      <p className="text-muted-foreground">{t('ad-free-description')}</p>
     </Modal>
   )
 }

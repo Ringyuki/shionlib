@@ -11,10 +11,12 @@ interface GameImagesProps {
   content_limit?: ContentLimit
 }
 
+const getGameImageKey = (image: GameImage, index: number) =>
+  `image-${image.id ?? image.url}-${index}`
+
 const _GameImage = ({ image }: { image: GameImage }) => {
   return (
     <ImageLightbox
-      key={image.url}
       src={image.url}
       alt={image.url}
       aspectRatio="16 / 9"
@@ -39,19 +41,20 @@ export const GameImages = ({ images, content_limit }: GameImagesProps) => {
         )}
         <ImageLightboxGallery>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {images.map(image => {
+            {images.map((image, index) => {
+              const key = getGameImageKey(image, index)
               if (image.sexual > 0) {
                 if (content_limit === ContentLimit.SHOW_WITH_SPOILER)
                   return (
-                    <Spoiler key={image.url} blur={32} showHint={true}>
+                    <Spoiler key={key} blur={32} showHint={true}>
                       <_GameImage image={image} />
                     </Spoiler>
                   )
                 if (content_limit === ContentLimit.JUST_SHOW)
-                  return <_GameImage key={image.url} image={image} />
+                  return <_GameImage key={key} image={image} />
                 return null
               }
-              return <_GameImage key={image.url} image={image} />
+              return <_GameImage key={key} image={image} />
             })}
           </div>
         </ImageLightboxGallery>
