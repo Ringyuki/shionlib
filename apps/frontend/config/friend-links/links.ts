@@ -39,4 +39,12 @@ export const friendLinks: FriendLink[] = [
     description:
       '本站自2025年1月25日正式上线以来,始终以简洁美观人性化的理念运营,以用户的体验为主,希望能够给广大用户带来优质的体验',
   },
+  {
+    id: 6,
+    name: 'TouchGal',
+    url: 'https://www.touchgal.ink',
+    logo: 'https://cloud.touchgaloss.com/2024/06/8b9411844520240614204452.webp',
+    description:
+      'TouchGal 是一个一站式 Galgame 文化社区。提供Galgame 论坛、Galgame 下载等服务。承诺永久免费, 高质量。为Galgame 爱好者提供一片净土！',
+  },
 ]
