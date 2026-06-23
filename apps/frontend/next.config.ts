@@ -54,6 +54,10 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'iloveren.link',
+      },
+      {
+        protocol: 'https',
         hostname: 'nysoure.com',
       },
       {
