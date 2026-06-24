@@ -239,6 +239,23 @@
         "tokenExpires": "トークン有効期限",
         "tokenExpiresSoon": "まもなく期限切れ",
         "tokenExpired": "トークンが期限切れです"
+      },
+      "Hikarinagi": {
+        "title": "Hikarinagi ID",
+        "description": "Hikarinagi ID で Shionlib にログインできます。",
+        "connected": "連携済み",
+        "notConnected": "未連携",
+        "connectedAs": "連携アカウント",
+        "connect": "Hikarinagi ID を連携",
+        "disconnect": "連携解除",
+        "unlinkSuccess": "Hikarinagi ID の連携を解除しました",
+        "lastMethodHint": "唯一のログイン方法です。連携を解除する前にパスワードを設定するか、パスキーを登録してください。",
+        "UnlinkConfirm": {
+          "title": "Hikarinagi ID の連携を解除",
+          "description": "解除すると、この Hikarinagi ID ではログインできなくなります。",
+          "cancel": "キャンセル",
+          "confirm": "連携解除"
+        }
       }
     }
   },

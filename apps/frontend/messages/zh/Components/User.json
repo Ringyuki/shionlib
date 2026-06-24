@@ -239,6 +239,23 @@
         "tokenExpires": "令牌有效期至",
         "tokenExpiresSoon": "即将过期",
         "tokenExpired": "令牌已过期"
+      },
+      "Hikarinagi": {
+        "title": "Hikarinagi ID",
+        "description": "使用你的 Hikarinagi ID 登录 Shionlib。",
+        "connected": "已关联",
+        "notConnected": "未关联",
+        "connectedAs": "关联邮箱",
+        "connect": "关联 Hikarinagi ID",
+        "disconnect": "解除关联",
+        "unlinkSuccess": "已解除 Hikarinagi ID 关联",
+        "lastMethodHint": "这是你唯一的登录方式，请先设置密码或绑定通行密钥再解除关联。",
+        "UnlinkConfirm": {
+          "title": "解除 Hikarinagi ID 关联",
+          "description": "解除后你将无法再用该 Hikarinagi ID 登录。",
+          "cancel": "取消",
+          "confirm": "解除关联"
+        }
       }
     }
   },

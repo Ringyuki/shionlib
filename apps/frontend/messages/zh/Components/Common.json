@@ -179,6 +179,8 @@
       "usePasskey": "使用 通行密钥 登录",
       "useHikarinagi": "使用 Hikarinagi ID 登录",
       "oidcError": "Hikarinagi ID 登录失败，请重试",
+      "oidcLinked": "已关联 Hikarinagi ID",
+      "oidcLinkConflict": "该 Hikarinagi ID 已被其他账号关联",
       "passkeyUnsupported": "当前设备或浏览器不支持通行密钥",
       "success": "登录成功",
       "validation": {

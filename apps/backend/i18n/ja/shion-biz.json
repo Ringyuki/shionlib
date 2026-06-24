@@ -12,6 +12,8 @@
   "AUTH_VERIFICATION_CODE_NOT_FOUND_OR_EXPIRED": "検証コードが見つかりませんか、期限切れです",
   "AUTH_VERIFICATION_CODE_ERROR": "検証コードが間違っています",
   "AUTH_INVALID_RESET_PASSWORD_TOKEN": "無効なパスワード再設定トークン",
+  "AUTH_OIDC_IDENTITY_NOT_FOUND": "連携アカウントが見つかりません",
+  "AUTH_OIDC_LAST_LOGIN_METHOD": "唯一のログイン方法のため連携を解除できません。先にパスワードを設定するか、パスキーを登録してください",
 
   "USER_NOT_FOUND": "ユーザーが見つかりません",
   "USER_EMAIL_ALREADY_EXISTS": "メールアドレスがすでに存在します",

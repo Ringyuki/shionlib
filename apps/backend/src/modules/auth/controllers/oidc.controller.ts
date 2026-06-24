@@ -1,12 +1,25 @@
-import { Controller, Get, Query, Req, Res } from '@nestjs/common'
-import { Request, Response } from 'express'
+import {
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common'
+import { Response } from 'express'
 import { ShionConfigService } from '../../../common/config/services/config.service'
-import { OidcFlowError, OidcService } from '../services/oidc.service'
+import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
+import { JwtAuthGuard } from '../guards/jwt-auth.guard'
+import { OidcFlowError, OidcMode, OidcService } from '../services/oidc.service'
 
 interface OidcTx {
   v: string
   s: string
   r: string
+  m: OidcMode
 }
 
 const TX_COOKIE = 'shionlib_oidc_tx'
@@ -29,7 +42,12 @@ function parseTx(raw: unknown): OidcTx | null {
   try {
     const parsed = JSON.parse(raw)
     if (parsed && typeof parsed.v === 'string' && typeof parsed.s === 'string') {
-      return { v: parsed.v, s: parsed.s, r: safeReturnTo(parsed.r) }
+      return {
+        v: parsed.v,
+        s: parsed.s,
+        r: safeReturnTo(parsed.r),
+        m: parsed.m === 'link' ? 'link' : 'login',
+      }
     }
   } catch {
     /* malformed tx cookie */
@@ -49,8 +67,11 @@ export class OidcController {
   ) {}
 
   @Get('start')
-  start(@Query('returnTo') returnTo: string, @Res() res: Response) {
-    const { url, tx } = this.oidcService.buildAuthorizeUrl(safeReturnTo(returnTo))
+  start(@Query('returnTo') returnTo: string, @Query('mode') mode: string, @Res() res: Response) {
+    const { url, tx } = this.oidcService.buildAuthorizeUrl(
+      safeReturnTo(returnTo),
+      mode === 'link' ? 'link' : 'login',
+    )
     res.setHeader(
       'Set-Cookie',
       `${TX_COOKIE}=${encodeURIComponent(tx)}; ${COOKIE_FLAGS}; Max-Age=600`,
@@ -63,7 +84,7 @@ export class OidcController {
     @Query('code') code: string,
     @Query('state') state: string,
     @Query('error') idpError: string,
-    @Req() req: Request,
+    @Req() req: RequestWithUser,
     @Res() res: Response,
   ) {
     const tx = parseTx(req.cookies?.[TX_COOKIE])
@@ -73,6 +94,15 @@ export class OidcController {
     try {
       if (idpError) throw new OidcFlowError('state')
       if (!code || !state || !tx || tx.s !== state) throw new OidcFlowError('state')
+
+      if (tx.m === 'link') {
+        const userId = req.user?.sub
+        if (!userId) throw new OidcFlowError('link_auth')
+        await this.oidcService.linkToUser(userId, code, tx.v)
+        res.setHeader('Set-Cookie', clearTx)
+        res.redirect(withQuery(returnTo, 'oidc_linked', '1'))
+        return
+      }
 
       const device = {
         ip: (req.headers['x-real-ip'] as string) || (req.headers['cf-connecting-ip'] as string),
@@ -91,5 +121,17 @@ export class OidcController {
       res.setHeader('Set-Cookie', clearTx)
       res.redirect(withQuery(returnTo, 'oidc_error', reason))
     }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('identities')
+  listIdentities(@Req() req: RequestWithUser) {
+    return this.oidcService.listIdentities(req.user.sub)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('identities/:id')
+  async unlink(@Req() req: RequestWithUser, @Param('id', ParseIntPipe) id: number) {
+    await this.oidcService.unlink(req.user.sub, id)
   }
 }

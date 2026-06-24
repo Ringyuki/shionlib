@@ -12,6 +12,8 @@
   "AUTH_VERIFICATION_CODE_NOT_FOUND_OR_EXPIRED": "验证码不存在或已过期",
   "AUTH_VERIFICATION_CODE_ERROR": "验证码错误",
   "AUTH_INVALID_RESET_PASSWORD_TOKEN": "无效的密码重置令牌",
+  "AUTH_OIDC_IDENTITY_NOT_FOUND": "未找到关联账号",
+  "AUTH_OIDC_LAST_LOGIN_METHOD": "这是你唯一的登录方式，无法解除关联；请先设置密码或绑定通行密钥",
 
   "USER_NOT_FOUND": "用户不存在",
   "USER_EMAIL_ALREADY_EXISTS": "邮箱已存在",

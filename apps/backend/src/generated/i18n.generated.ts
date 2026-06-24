@@ -81,6 +81,8 @@ export type I18nTranslations = {
         "AUTH_VERIFICATION_CODE_NOT_FOUND_OR_EXPIRED": string;
         "AUTH_VERIFICATION_CODE_ERROR": string;
         "AUTH_INVALID_RESET_PASSWORD_TOKEN": string;
+        "AUTH_OIDC_IDENTITY_NOT_FOUND": string;
+        "AUTH_OIDC_LAST_LOGIN_METHOD": string;
         "USER_NOT_FOUND": string;
         "USER_EMAIL_ALREADY_EXISTS": string;
         "USER_NAME_ALREADY_EXISTS": string;

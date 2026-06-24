@@ -1,9 +1,11 @@
 import { createHash, randomBytes, randomInt } from 'node:crypto'
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
 import { HttpService } from '@nestjs/axios'
 import { Prisma } from '@prisma/client'
 import { firstValueFrom } from 'rxjs'
 import { ShionConfigService } from '../../../common/config/services/config.service'
+import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
+import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { PrismaService } from '../../../prisma.service'
 import { UserStatus } from '../../../shared/enums/auth/user-status.enum'
 import { UserContentLimit } from '../../user/interfaces/user.interface'
@@ -11,7 +13,15 @@ import { LoginSessionService } from './login-session.service'
 
 export const OIDC_PROVIDER = 'hikarinagi'
 
-export type OidcFailureReason = 'state' | 'exchange' | 'email_unverified' | 'banned'
+export type OidcMode = 'login' | 'link'
+
+export type OidcFailureReason =
+  | 'state'
+  | 'exchange'
+  | 'email_unverified'
+  | 'banned'
+  | 'link_conflict'
+  | 'link_auth'
 
 export class OidcFlowError extends Error {
   constructor(public readonly reason: OidcFailureReason) {
@@ -59,7 +69,7 @@ export class OidcService {
     private readonly loginSessionService: LoginSessionService,
   ) {}
 
-  buildAuthorizeUrl(returnTo: string): { url: string; tx: string } {
+  buildAuthorizeUrl(returnTo: string, mode: OidcMode = 'login'): { url: string; tx: string } {
     const verifier = randomBytes(32).toString('base64url')
     const challenge = createHash('sha256').update(verifier).digest('base64url')
     const state = randomBytes(16).toString('base64url')
@@ -76,8 +86,72 @@ export class OidcService {
 
     return {
       url: `${this.config.get('oidc.issuer')}/auth?${params.toString()}`,
-      tx: JSON.stringify({ v: verifier, s: state, r: returnTo }),
+      tx: JSON.stringify({ v: verifier, s: state, r: returnTo, m: mode }),
     }
+  }
+
+  async linkToUser(userId: number, code: string, codeVerifier: string): Promise<void> {
+    const claims = await this.fetchIdentity(code, codeVerifier)
+    const key = { provider_subject: { provider: OIDC_PROVIDER, subject: claims.sub } }
+    const existing = await this.prisma.oidcIdentity.findUnique({
+      where: key,
+      select: { user_id: true },
+    })
+    if (existing) {
+      if (existing.user_id === userId) return
+      throw new OidcFlowError('link_conflict')
+    }
+    await this.prisma.oidcIdentity.create({
+      data: {
+        user_id: userId,
+        provider: OIDC_PROVIDER,
+        subject: claims.sub,
+        email_at_link: claims.email,
+        last_login_at: new Date(),
+      },
+    })
+  }
+
+  async listIdentities(userId: number) {
+    const [items, user, passkeyCount] = await Promise.all([
+      this.prisma.oidcIdentity.findMany({
+        where: { user_id: userId },
+        select: { id: true, provider: true, email_at_link: true, created: true },
+        orderBy: { created: 'asc' },
+      }),
+      this.prisma.user.findUnique({ where: { id: userId }, select: { password: true } }),
+      this.prisma.userPasskeyCredential.count({ where: { user_id: userId, revoked_at: null } }),
+    ])
+    return { items, can_unlink: !!user?.password || passkeyCount > 0 || items.length > 1 }
+  }
+
+  async unlink(userId: number, identityId: number): Promise<void> {
+    const identity = await this.prisma.oidcIdentity.findUnique({
+      where: { id: identityId },
+      select: { id: true, user_id: true },
+    })
+    if (!identity || identity.user_id !== userId) {
+      throw new ShionBizException(
+        ShionBizCode.AUTH_OIDC_IDENTITY_NOT_FOUND,
+        'shion-biz.AUTH_OIDC_IDENTITY_NOT_FOUND',
+        undefined,
+        HttpStatus.NOT_FOUND,
+      )
+    }
+    const [user, passkeyCount, linkCount] = await Promise.all([
+      this.prisma.user.findUnique({ where: { id: userId }, select: { password: true } }),
+      this.prisma.userPasskeyCredential.count({ where: { user_id: userId, revoked_at: null } }),
+      this.prisma.oidcIdentity.count({ where: { user_id: userId } }),
+    ])
+    if (!user?.password && passkeyCount === 0 && linkCount <= 1) {
+      throw new ShionBizException(
+        ShionBizCode.AUTH_OIDC_LAST_LOGIN_METHOD,
+        'shion-biz.AUTH_OIDC_LAST_LOGIN_METHOD',
+        undefined,
+        HttpStatus.BAD_REQUEST,
+      )
+    }
+    await this.prisma.oidcIdentity.delete({ where: { id: identityId } })
   }
 
   async login(code: string, codeVerifier: string, device: OidcDevice) {

@@ -14,10 +14,12 @@ export const OidcResultHandler = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const login = params.get('oidc_login')
+    const linked = params.get('oidc_linked')
     const error = params.get('oidc_error')
-    if (login !== '1' && !error) return
+    if (login !== '1' && linked !== '1' && !error) return
 
     params.delete('oidc_login')
+    params.delete('oidc_linked')
     params.delete('oidc_error')
     const qs = params.toString()
     window.history.replaceState(
@@ -27,7 +29,12 @@ export const OidcResultHandler = () => {
     )
 
     if (error) {
-      sileo.error({ title: t('oidcError') })
+      sileo.error({ title: error === 'link_conflict' ? t('oidcLinkConflict') : t('oidcError') })
+      return
+    }
+
+    if (linked === '1') {
+      sileo.success({ title: t('oidcLinked') })
       return
     }
 

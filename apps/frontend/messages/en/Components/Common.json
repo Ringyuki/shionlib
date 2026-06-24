@@ -179,6 +179,8 @@
       "usePasskey": "Use Passkey",
       "useHikarinagi": "Sign in with Hikarinagi ID",
       "oidcError": "Sign-in with Hikarinagi ID failed, please try again",
+      "oidcLinked": "Hikarinagi ID linked",
+      "oidcLinkConflict": "This Hikarinagi ID is already linked to another account",
       "passkeyUnsupported": "Passkey is not supported on this device/browser",
       "success": "Logged in successfully",
       "validation": {

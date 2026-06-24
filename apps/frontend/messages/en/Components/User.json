@@ -239,6 +239,23 @@
         "tokenExpires": "Token expires",
         "tokenExpiresSoon": "Expiring soon",
         "tokenExpired": "Token expired"
+      },
+      "Hikarinagi": {
+        "title": "Hikarinagi ID",
+        "description": "Sign in to Shionlib with your Hikarinagi ID.",
+        "connected": "Linked",
+        "notConnected": "Not linked",
+        "connectedAs": "Linked as",
+        "connect": "Link Hikarinagi ID",
+        "disconnect": "Unlink",
+        "unlinkSuccess": "Hikarinagi ID unlinked",
+        "lastMethodHint": "This is your only login method. Set a password or add a passkey before unlinking.",
+        "UnlinkConfirm": {
+          "title": "Unlink Hikarinagi ID",
+          "description": "After unlinking you will no longer be able to sign in with this Hikarinagi ID.",
+          "cancel": "Cancel",
+          "confirm": "Unlink"
+        }
       }
     }
   },

@@ -12,6 +12,8 @@
   "AUTH_VERIFICATION_CODE_NOT_FOUND_OR_EXPIRED": "verification code not found or expired",
   "AUTH_VERIFICATION_CODE_ERROR": "verification code error",
   "AUTH_INVALID_RESET_PASSWORD_TOKEN": "invalid reset password token",
+  "AUTH_OIDC_IDENTITY_NOT_FOUND": "linked account not found",
+  "AUTH_OIDC_LAST_LOGIN_METHOD": "cannot unlink your only login method; set a password or add a passkey first",
 
   "USER_NOT_FOUND": "user not found",
   "USER_EMAIL_ALREADY_EXISTS": "email already exists",
