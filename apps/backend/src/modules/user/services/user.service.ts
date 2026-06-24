@@ -137,6 +137,15 @@ export class UserService {
       throw new ShionBizException(ShionBizCode.USER_BANNED, 'shion-biz.USER_BANNED')
     }
 
+    if (!foundUser.password) {
+      throw new ShionBizException(
+        ShionBizCode.USER_INVALID_PASSWORD,
+        'shion-biz.USER_INVALID_PASSWORD',
+        undefined,
+        HttpStatus.UNAUTHORIZED,
+      )
+    }
+
     const isPasswordValid = await verifyPassword(password, foundUser.password)
     if (!isPasswordValid) {
       throw new ShionBizException(

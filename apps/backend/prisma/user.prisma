@@ -6,7 +6,7 @@ model User {
   id       Int     @id @default(autoincrement())
   name     String  @unique @db.VarChar(20)
   email    String  @unique @db.VarChar(255)
-  password String  @db.VarChar(255)
+  password String? @db.VarChar(255)
   avatar   String?
   cover    String?
   bio      String? @db.Text
@@ -43,6 +43,7 @@ model User {
   updated              DateTime              @updatedAt
   sessions             UserLoginSession[]    @relation("user_login_session")
   passkeys             UserPasskeyCredential[] @relation("user_passkey_credential")
+  oidc_identities      OidcIdentity[]          @relation("user_oidc_identity")
   game_upload_sessions GameUploadSession[]   @relation("user_create_game_upload_session")
   upload_quota         UserUploadQuota?      @relation("user_upload_quota")
   field_permissions    UserFieldPermission[] @relation("user_field_permissions")
@@ -146,4 +147,24 @@ model UserBannedRecord {
   @@index([user_id, banned_at])
   @@index([user_id, unbanned_at])
   @@map("user_banned_records")
+}
+
+model OidcIdentity {
+  id Int @id @default(autoincrement())
+
+  user_id Int
+  user    User @relation("user_oidc_identity", fields: [user_id], references: [id])
+
+  provider String @db.VarChar(32)
+  subject  String @db.VarChar(255)
+
+  email_at_link String? @db.VarChar(255)
+
+  last_login_at DateTime?
+  created       DateTime  @default(now())
+  updated       DateTime  @updatedAt
+
+  @@unique([provider, subject])
+  @@index([user_id])
+  @@map("oidc_identities")
 }

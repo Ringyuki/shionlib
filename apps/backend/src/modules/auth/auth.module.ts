@@ -1,4 +1,5 @@
 import { Global, Module } from '@nestjs/common'
+import { HttpModule } from '@nestjs/axios'
 import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
@@ -14,11 +15,14 @@ import { VerificationCodeController } from './controllers/verification-code.cont
 import { PasswordService } from './services/password.service'
 import { PasskeyService } from './services/passkey.service'
 import { PasskeyController } from './controllers/passkey.controller'
+import { OidcService } from './services/oidc.service'
+import { OidcController } from './controllers/oidc.controller'
 import { SessionCleanupTask } from './tasks/session-cleanup.task'
 
 @Global()
 @Module({
   imports: [
+    HttpModule,
     JwtModule.registerAsync({
       inject: [ShionConfigService],
       useFactory: (configService: ShionConfigService) => ({
@@ -40,9 +44,10 @@ import { SessionCleanupTask } from './tasks/session-cleanup.task'
     VerificationCodeService,
     PasswordService,
     PasskeyService,
+    OidcService,
     SessionCleanupTask,
   ],
-  controllers: [AuthController, VerificationCodeController, PasskeyController],
+  controllers: [AuthController, VerificationCodeController, PasskeyController, OidcController],
   exports: [JwtModule, PassportModule, LoginSessionService, UserService],
 })
 export class AuthModule {}

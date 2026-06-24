@@ -177,6 +177,8 @@
       "forgetPassword": "Forgot password?",
       "login": "Log in",
       "usePasskey": "Use Passkey",
+      "useHikarinagi": "Sign in with Hikarinagi ID",
+      "oidcError": "Sign-in with Hikarinagi ID failed, please try again",
       "passkeyUnsupported": "Passkey is not supported on this device/browser",
       "success": "Logged in successfully",
       "validation": {

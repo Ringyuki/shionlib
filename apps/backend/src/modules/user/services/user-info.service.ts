@@ -129,6 +129,12 @@ export class UserInfoService {
     if (!user) {
       throw new ShionBizException(ShionBizCode.USER_NOT_FOUND, 'shion-biz.USER_NOT_FOUND')
     }
+    if (!user.password) {
+      throw new ShionBizException(
+        ShionBizCode.USER_INVALID_PASSWORD,
+        'shion-biz.USER_INVALID_PASSWORD',
+      )
+    }
 
     const isPasswordValid = await verifyPassword(old_password, user.password)
     if (!isPasswordValid) {

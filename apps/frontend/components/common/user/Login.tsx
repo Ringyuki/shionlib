@@ -22,6 +22,7 @@ import { User } from '@/interfaces/user/user.interface'
 import { Link, usePathname, useRouter } from '@/i18n/navigation.client'
 import { useLocale } from 'next-intl'
 import { PasskeyLoginButton } from '@/components/common/user/passkey/PasskeyLoginButton'
+import { HikarinagiLoginButton } from '@/components/common/user/HikarinagiLoginButton'
 import { useAuthDialogStore } from '@/store/authDialogStore'
 
 interface LoginProps {
@@ -123,6 +124,7 @@ export const Login = ({ onSuccess, active = false }: LoginProps) => {
           onSuccess={handleLoginSuccess}
           autoAttempt={active}
         />
+        <HikarinagiLoginButton disabled={loading} />
       </form>
     </Form>
   )
