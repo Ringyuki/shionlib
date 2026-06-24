@@ -69,14 +69,24 @@ export class OidcService {
     private readonly loginSessionService: LoginSessionService,
   ) {}
 
-  buildAuthorizeUrl(returnTo: string, mode: OidcMode = 'login'): { url: string; tx: string } {
+  resolveRedirectUri(origin?: string): string {
+    const allowed = this.config.get('oidc.allowedOrigins')
+    const chosen = origin && allowed.includes(origin) ? origin : allowed[0]
+    return `${chosen}/api/auth/oidc/callback`
+  }
+
+  buildAuthorizeUrl(
+    returnTo: string,
+    mode: OidcMode,
+    redirectUri: string,
+  ): { url: string; tx: string } {
     const verifier = randomBytes(32).toString('base64url')
     const challenge = createHash('sha256').update(verifier).digest('base64url')
     const state = randomBytes(16).toString('base64url')
 
     const params = new URLSearchParams({
       client_id: this.config.get('oidc.clientId'),
-      redirect_uri: this.config.get('oidc.redirectUri'),
+      redirect_uri: redirectUri,
       response_type: 'code',
       scope: this.config.get('oidc.scopes'),
       code_challenge: challenge,
@@ -86,12 +96,17 @@ export class OidcService {
 
     return {
       url: `${this.config.get('oidc.issuer')}/auth?${params.toString()}`,
-      tx: JSON.stringify({ v: verifier, s: state, r: returnTo, m: mode }),
+      tx: JSON.stringify({ v: verifier, s: state, r: returnTo, m: mode, u: redirectUri }),
     }
   }
 
-  async linkToUser(userId: number, code: string, codeVerifier: string): Promise<void> {
-    const claims = await this.fetchIdentity(code, codeVerifier)
+  async linkToUser(
+    userId: number,
+    code: string,
+    codeVerifier: string,
+    redirectUri: string,
+  ): Promise<void> {
+    const claims = await this.fetchIdentity(code, codeVerifier, redirectUri)
     const key = { provider_subject: { provider: OIDC_PROVIDER, subject: claims.sub } }
     const existing = await this.prisma.oidcIdentity.findUnique({
       where: key,
@@ -154,8 +169,8 @@ export class OidcService {
     await this.prisma.oidcIdentity.delete({ where: { id: identityId } })
   }
 
-  async login(code: string, codeVerifier: string, device: OidcDevice) {
-    const claims = await this.fetchIdentity(code, codeVerifier)
+  async login(code: string, codeVerifier: string, device: OidcDevice, redirectUri: string) {
+    const claims = await this.fetchIdentity(code, codeVerifier, redirectUri)
     const user = await this.resolveUser(claims)
     if (user.status === UserStatus.BANNED) throw new OidcFlowError('banned')
 
@@ -172,7 +187,11 @@ export class OidcService {
     return { token, refresh_token: refreshToken, tokenExp }
   }
 
-  private async fetchIdentity(code: string, codeVerifier: string): Promise<OidcClaims> {
+  private async fetchIdentity(
+    code: string,
+    codeVerifier: string,
+    redirectUri: string,
+  ): Promise<OidcClaims> {
     const issuer = this.config.get('oidc.issuer')
     const basic = Buffer.from(
       `${encodeURIComponent(this.config.get('oidc.clientId'))}:${encodeURIComponent(
@@ -185,7 +204,7 @@ export class OidcService {
       const body = new URLSearchParams({
         grant_type: 'authorization_code',
         code,
-        redirect_uri: this.config.get('oidc.redirectUri'),
+        redirect_uri: redirectUri,
         code_verifier: codeVerifier,
       })
       const { data } = await firstValueFrom(

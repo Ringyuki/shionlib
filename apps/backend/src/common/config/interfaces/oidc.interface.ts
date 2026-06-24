@@ -3,7 +3,7 @@ export interface OidcConfig {
     issuer: string
     clientId: string
     clientSecret: string
-    redirectUri: string
+    allowedOrigins: string[]
     scopes: string
   }
 }

@@ -2,6 +2,7 @@ import { OidcController } from './oidc.controller'
 import { OidcFlowError } from '../services/oidc.service'
 
 const TX_COOKIE = 'shionlib_oidc_tx'
+const CB = 'https://shionlib.com/api/auth/oidc/callback'
 
 describe('OidcController', () => {
   const createController = () => {
@@ -10,6 +11,7 @@ describe('OidcController', () => {
         url: 'http://idp.test/oidc/auth?x=1',
         tx: 'TX',
       })),
+      resolveRedirectUri: jest.fn(() => CB),
       login: jest.fn(),
       linkToUser: jest.fn(),
       listIdentities: jest.fn(),
@@ -27,8 +29,8 @@ describe('OidcController', () => {
   }
 
   const res = () => ({ setHeader: jest.fn(), redirect: jest.fn() })
-  const tx = (over: Partial<{ v: string; s: string; r: string; m: string }> = {}) =>
-    JSON.stringify({ v: 'verifier', s: 'state', r: '/zh', m: 'login', ...over })
+  const tx = (over: Partial<{ v: string; s: string; r: string; m: string; u: string }> = {}) =>
+    JSON.stringify({ v: 'verifier', s: 'state', r: '/zh', m: 'login', u: CB, ...over })
 
   beforeEach(() => jest.clearAllMocks())
 
@@ -37,9 +39,9 @@ describe('OidcController', () => {
       const { controller, oidcService } = createController()
       const r = res()
 
-      controller.start('/games', undefined as any, r as any)
+      controller.start('/games', undefined as any, undefined as any, r as any)
 
-      expect(oidcService.buildAuthorizeUrl).toHaveBeenCalledWith('/games', 'login')
+      expect(oidcService.buildAuthorizeUrl).toHaveBeenCalledWith('/games', 'login', CB)
       expect(r.setHeader).toHaveBeenCalledWith(
         'Set-Cookie',
         expect.stringContaining(`${TX_COOKIE}=TX`),
@@ -49,15 +51,15 @@ describe('OidcController', () => {
 
     it('passes link mode through', () => {
       const { controller, oidcService } = createController()
-      controller.start('/me', 'link', res() as any)
-      expect(oidcService.buildAuthorizeUrl).toHaveBeenCalledWith('/me', 'link')
+      controller.start('/me', 'link', undefined as any, res() as any)
+      expect(oidcService.buildAuthorizeUrl).toHaveBeenCalledWith('/me', 'link', CB)
     })
 
     it('sanitizes off-site returnTo to /', () => {
       const { controller, oidcService } = createController()
-      controller.start('//evil.com', undefined as any, res() as any)
-      controller.start('/\\evil.com', undefined as any, res() as any)
-      controller.start('https://evil.com', undefined as any, res() as any)
+      controller.start('//evil.com', undefined as any, undefined as any, res() as any)
+      controller.start('/\\evil.com', undefined as any, undefined as any, res() as any)
+      controller.start('https://evil.com', undefined as any, undefined as any, res() as any)
 
       const calls = oidcService.buildAuthorizeUrl.mock.calls as unknown[][]
       for (const call of calls) expect(call[0]).toBe('/')
@@ -73,7 +75,7 @@ describe('OidcController', () => {
 
       await controller.callback('code', 'state', undefined as any, req as any, r as any)
 
-      expect(oidcService.login).toHaveBeenCalledWith('code', 'verifier', expect.any(Object))
+      expect(oidcService.login).toHaveBeenCalledWith('code', 'verifier', expect.any(Object), CB)
       const cookies = r.setHeader.mock.calls[0][1]
       expect(cookies).toEqual(
         expect.arrayContaining([
@@ -153,7 +155,7 @@ describe('OidcController', () => {
 
       await controller.callback('code', 'state', undefined as any, req as any, r as any)
 
-      expect(oidcService.linkToUser).toHaveBeenCalledWith(7, 'code', 'verifier')
+      expect(oidcService.linkToUser).toHaveBeenCalledWith(7, 'code', 'verifier', CB)
       expect(oidcService.login).not.toHaveBeenCalled()
       expect(r.redirect).toHaveBeenCalledWith('/zh?oidc_linked=1')
     })

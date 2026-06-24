@@ -20,6 +20,7 @@ interface OidcTx {
   s: string
   r: string
   m: OidcMode
+  u: string
 }
 
 const TX_COOKIE = 'shionlib_oidc_tx'
@@ -41,12 +42,18 @@ function parseTx(raw: unknown): OidcTx | null {
   if (typeof raw !== 'string') return null
   try {
     const parsed = JSON.parse(raw)
-    if (parsed && typeof parsed.v === 'string' && typeof parsed.s === 'string') {
+    if (
+      parsed &&
+      typeof parsed.v === 'string' &&
+      typeof parsed.s === 'string' &&
+      typeof parsed.u === 'string'
+    ) {
       return {
         v: parsed.v,
         s: parsed.s,
         r: safeReturnTo(parsed.r),
         m: parsed.m === 'link' ? 'link' : 'login',
+        u: parsed.u,
       }
     }
   } catch {
@@ -67,10 +74,16 @@ export class OidcController {
   ) {}
 
   @Get('start')
-  start(@Query('returnTo') returnTo: string, @Query('mode') mode: string, @Res() res: Response) {
+  start(
+    @Query('returnTo') returnTo: string,
+    @Query('mode') mode: string,
+    @Query('origin') origin: string,
+    @Res() res: Response,
+  ) {
     const { url, tx } = this.oidcService.buildAuthorizeUrl(
       safeReturnTo(returnTo),
       mode === 'link' ? 'link' : 'login',
+      this.oidcService.resolveRedirectUri(origin),
     )
     res.setHeader(
       'Set-Cookie',
@@ -98,7 +111,7 @@ export class OidcController {
       if (tx.m === 'link') {
         const userId = req.user?.sub
         if (!userId) throw new OidcFlowError('link_auth')
-        await this.oidcService.linkToUser(userId, code, tx.v)
+        await this.oidcService.linkToUser(userId, code, tx.v, tx.u)
         res.setHeader('Set-Cookie', clearTx)
         res.redirect(withQuery(returnTo, 'oidc_linked', '1'))
         return
@@ -108,7 +121,7 @@ export class OidcController {
         ip: (req.headers['x-real-ip'] as string) || (req.headers['cf-connecting-ip'] as string),
         user_agent: req.headers['user-agent'],
       }
-      const { token, refresh_token } = await this.oidcService.login(code, tx.v, device)
+      const { token, refresh_token } = await this.oidcService.login(code, tx.v, device, tx.u)
 
       res.setHeader('Set-Cookie', [
         clearTx,

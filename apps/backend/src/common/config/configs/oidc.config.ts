@@ -6,7 +6,12 @@ export default (): OidcConfig => ({
     issuer: withDefault('OIDC_ISSUER', 'http://localhost:5010/oidc'),
     clientId: withDefault('OIDC_CLIENT_ID', 'shionlib'),
     clientSecret: withDefault('OIDC_CLIENT_SECRET', ''),
-    redirectUri: withDefault('OIDC_REDIRECT_URI', 'http://localhost:3000/api/auth/oidc/callback'),
+    allowedOrigins: withDefault('OIDC_ALLOWED_ORIGINS', ['http://localhost:3000'], raw =>
+      raw
+        .split(',')
+        .map(origin => origin.trim())
+        .filter(Boolean),
+    ),
     scopes: withDefault('OIDC_SCOPES', 'openid profile email'),
   },
 })

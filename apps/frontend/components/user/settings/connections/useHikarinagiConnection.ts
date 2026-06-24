@@ -35,7 +35,8 @@ export const useHikarinagiConnection = () => {
 
   const startLink = () => {
     const returnTo = window.location.pathname + window.location.search
-    window.location.href = `/api/auth/oidc/start?mode=link&returnTo=${encodeURIComponent(returnTo)}`
+    const origin = window.location.origin
+    window.location.href = `/api/auth/oidc/start?mode=link&returnTo=${encodeURIComponent(returnTo)}&origin=${encodeURIComponent(origin)}`
   }
 
   const unlink = async (id: number) => {

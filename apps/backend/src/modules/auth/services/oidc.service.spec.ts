@@ -28,7 +28,7 @@ describe('OidcService', () => {
             'oidc.issuer': 'http://idp.test/oidc',
             'oidc.clientId': 'shionlib',
             'oidc.clientSecret': 'secret',
-            'oidc.redirectUri': 'http://localhost:3000/api/auth/oidc/callback',
+            'oidc.allowedOrigins': ['https://shionlib.com', 'https://shionlib.org'],
             'oidc.scopes': 'openid profile email',
           })[key],
       ),
@@ -57,30 +57,50 @@ describe('OidcService', () => {
   }
 
   const issued = { token: 'access', tokenExp: new Date('2026-06-01'), refreshToken: 'refresh' }
+  const REDIRECT = 'https://shionlib.com/api/auth/oidc/callback'
 
   beforeEach(() => jest.clearAllMocks())
 
   describe('buildAuthorizeUrl', () => {
-    it('builds an S256 PKCE authorize url and a tx carrying mode', () => {
+    it('builds an S256 PKCE authorize url and a tx carrying mode + redirect_uri', () => {
       const { service } = createService()
-      const { url, tx } = service.buildAuthorizeUrl('/games', 'link')
+      const { url, tx } = service.buildAuthorizeUrl('/games', 'link', REDIRECT)
 
       expect(url).toContain('http://idp.test/oidc/auth?')
       expect(url).toContain('client_id=shionlib')
       expect(url).toContain('response_type=code')
       expect(url).toContain('code_challenge_method=S256')
       expect(url).toContain('scope=openid+profile+email')
+      expect(url).toContain(`redirect_uri=${encodeURIComponent(REDIRECT)}`)
 
       const parsed = JSON.parse(tx)
       expect(parsed.r).toBe('/games')
       expect(parsed.m).toBe('link')
+      expect(parsed.u).toBe(REDIRECT)
       expect(typeof parsed.v).toBe('string')
       expect(typeof parsed.s).toBe('string')
     })
 
-    it('defaults mode to login', () => {
+    it('carries the requested mode', () => {
       const { service } = createService()
-      expect(JSON.parse(service.buildAuthorizeUrl('/').tx).m).toBe('login')
+      expect(JSON.parse(service.buildAuthorizeUrl('/', 'login', REDIRECT).tx).m).toBe('login')
+    })
+  })
+
+  describe('resolveRedirectUri', () => {
+    it('uses the request origin when it is allowlisted', () => {
+      const { service } = createService()
+      expect(service.resolveRedirectUri('https://shionlib.org')).toBe(
+        'https://shionlib.org/api/auth/oidc/callback',
+      )
+    })
+
+    it('falls back to the first allowed origin for an unknown or missing origin', () => {
+      const { service } = createService()
+      expect(service.resolveRedirectUri('https://evil.com')).toBe(
+        'https://shionlib.com/api/auth/oidc/callback',
+      )
+      expect(service.resolveRedirectUri()).toBe('https://shionlib.com/api/auth/oidc/callback')
     })
   })
 
@@ -93,7 +113,12 @@ describe('OidcService', () => {
       })
       ;(loginSessionService.issueOnLogin as jest.Mock).mockResolvedValue(issued)
 
-      const result = await service.login('code', 'verifier', { ip: '1.1.1.1', user_agent: 'jest' })
+      const result = await service.login(
+        'code',
+        'verifier',
+        { ip: '1.1.1.1', user_agent: 'jest' },
+        REDIRECT,
+      )
 
       expect(http.post).toHaveBeenCalledWith(
         'http://idp.test/oidc/token',
@@ -129,7 +154,7 @@ describe('OidcService', () => {
         user: { id: 2, role: 1, content_limit: 2, status: UserStatus.BANNED },
       })
 
-      await expect(service.login('code', 'verifier', {})).rejects.toMatchObject({
+      await expect(service.login('code', 'verifier', {}, REDIRECT)).rejects.toMatchObject({
         reason: 'banned',
       })
       expect(loginSessionService.issueOnLogin).not.toHaveBeenCalled()
@@ -139,7 +164,7 @@ describe('OidcService', () => {
       const { service, http } = createService()
       ;(http.post as jest.Mock).mockReturnValue(throwError(() => new Error('network')))
 
-      await expect(service.login('code', 'verifier', {})).rejects.toMatchObject({
+      await expect(service.login('code', 'verifier', {}, REDIRECT)).rejects.toMatchObject({
         reason: 'exchange',
       })
     })
@@ -148,7 +173,7 @@ describe('OidcService', () => {
       const { service, http } = createService()
       ;(http.post as jest.Mock).mockReturnValue(of({ data: { access_token: 'at' } }))
 
-      await expect(service.login('code', 'verifier', {})).rejects.toMatchObject({
+      await expect(service.login('code', 'verifier', {}, REDIRECT)).rejects.toMatchObject({
         reason: 'exchange',
       })
     })
@@ -157,7 +182,7 @@ describe('OidcService', () => {
       const { service, http } = createService()
       mockToken(http, { email: 'a@b.com' })
 
-      await expect(service.login('code', 'verifier', {})).rejects.toMatchObject({
+      await expect(service.login('code', 'verifier', {}, REDIRECT)).rejects.toMatchObject({
         reason: 'exchange',
       })
     })
@@ -166,7 +191,7 @@ describe('OidcService', () => {
       const { service, http } = createService()
       ;(http.post as jest.Mock).mockReturnValue(of({ data: { id_token: 'h.aGVsbG8.s' } }))
 
-      await expect(service.login('code', 'verifier', {})).rejects.toMatchObject({
+      await expect(service.login('code', 'verifier', {}, REDIRECT)).rejects.toMatchObject({
         reason: 'exchange',
       })
     })
@@ -179,7 +204,7 @@ describe('OidcService', () => {
       ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(null)
       ;(prisma.user.create as jest.Mock).mockRejectedValue(new Error('db down'))
 
-      await expect(service.login('code', 'verifier', {})).rejects.toThrow('db down')
+      await expect(service.login('code', 'verifier', {}, REDIRECT)).rejects.toThrow('db down')
     })
 
     it('rejects when the email is not verified', async () => {
@@ -187,7 +212,7 @@ describe('OidcService', () => {
       mockToken(http, { sub: 5, email: 'a@b.com', email_verified: false })
       ;(prisma.oidcIdentity.findUnique as jest.Mock).mockResolvedValue(null)
 
-      await expect(service.login('code', 'verifier', {})).rejects.toMatchObject({
+      await expect(service.login('code', 'verifier', {}, REDIRECT)).rejects.toMatchObject({
         reason: 'email_unverified',
       })
     })
@@ -197,7 +222,7 @@ describe('OidcService', () => {
       mockToken(http, { sub: 5, email_verified: true })
       ;(prisma.oidcIdentity.findUnique as jest.Mock).mockResolvedValue(null)
 
-      await expect(service.login('code', 'verifier', {})).rejects.toMatchObject({
+      await expect(service.login('code', 'verifier', {}, REDIRECT)).rejects.toMatchObject({
         reason: 'email_unverified',
       })
     })
@@ -214,7 +239,7 @@ describe('OidcService', () => {
       })
       ;(loginSessionService.issueOnLogin as jest.Mock).mockResolvedValue(issued)
 
-      await service.login('code', 'verifier', {})
+      await service.login('code', 'verifier', {}, REDIRECT)
 
       expect(prisma.user.findFirst).toHaveBeenCalledWith({
         where: { email: { equals: 'Merge@Example.com', mode: 'insensitive' } },
@@ -246,7 +271,7 @@ describe('OidcService', () => {
       })
       ;(loginSessionService.issueOnLogin as jest.Mock).mockResolvedValue(issued)
 
-      await service.login('code', 'verifier', {})
+      await service.login('code', 'verifier', {}, REDIRECT)
 
       expect(prisma.user.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
@@ -281,7 +306,7 @@ describe('OidcService', () => {
       })
       ;(loginSessionService.issueOnLogin as jest.Mock).mockResolvedValue(issued)
 
-      await service.login('code', 'verifier', {})
+      await service.login('code', 'verifier', {}, REDIRECT)
 
       const createdName = (prisma.user.create as jest.Mock).mock.calls[0][0].data.name as string
       expect(createdName).not.toBe('ringyuki')
@@ -301,7 +326,7 @@ describe('OidcService', () => {
       ;(prisma.user.create as jest.Mock).mockRejectedValue(p2002)
       ;(loginSessionService.issueOnLogin as jest.Mock).mockResolvedValue(issued)
 
-      await service.login('code', 'verifier', {})
+      await service.login('code', 'verifier', {}, REDIRECT)
 
       expect(loginSessionService.issueOnLogin).toHaveBeenCalledWith(77, {}, 1, 2)
     })
@@ -313,7 +338,7 @@ describe('OidcService', () => {
       mockToken(http, { sub: 20, email: 'link@example.com' })
       ;(prisma.oidcIdentity.findUnique as jest.Mock).mockResolvedValue(null)
 
-      await service.linkToUser(7, 'code', 'verifier')
+      await service.linkToUser(7, 'code', 'verifier', REDIRECT)
 
       expect(prisma.oidcIdentity.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
@@ -329,7 +354,7 @@ describe('OidcService', () => {
       mockToken(http, { sub: 20 })
       ;(prisma.oidcIdentity.findUnique as jest.Mock).mockResolvedValue({ user_id: 7 })
 
-      await service.linkToUser(7, 'code', 'verifier')
+      await service.linkToUser(7, 'code', 'verifier', REDIRECT)
 
       expect(prisma.oidcIdentity.create).not.toHaveBeenCalled()
     })
@@ -339,7 +364,7 @@ describe('OidcService', () => {
       mockToken(http, { sub: 20 })
       ;(prisma.oidcIdentity.findUnique as jest.Mock).mockResolvedValue({ user_id: 999 })
 
-      await expect(service.linkToUser(7, 'code', 'verifier')).rejects.toMatchObject({
+      await expect(service.linkToUser(7, 'code', 'verifier', REDIRECT)).rejects.toMatchObject({
         reason: 'link_conflict',
       })
       expect(prisma.oidcIdentity.create).not.toHaveBeenCalled()

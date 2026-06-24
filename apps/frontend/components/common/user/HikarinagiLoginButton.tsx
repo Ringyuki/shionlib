@@ -12,7 +12,8 @@ export const HikarinagiLoginButton = ({ disabled }: HikarinagiLoginButtonProps) 
 
   const start = () => {
     const returnTo = window.location.pathname + window.location.search
-    window.location.href = `/api/auth/oidc/start?returnTo=${encodeURIComponent(returnTo)}`
+    const origin = window.location.origin
+    window.location.href = `/api/auth/oidc/start?returnTo=${encodeURIComponent(returnTo)}&origin=${encodeURIComponent(origin)}`
   }
 
   return (
