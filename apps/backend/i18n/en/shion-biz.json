@@ -131,5 +131,6 @@
 
   "AD_NOT_FOUND": "ad not found",
 
-  "ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE": "traffic detail is temporarily unavailable, message: {message}"
+  "ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE": "traffic detail is temporarily unavailable, message: {message}",
+  "PARTNER_UNAUTHORIZED": "partner credentials are missing or invalid"
 }

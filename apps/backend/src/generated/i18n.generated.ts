@@ -180,6 +180,7 @@ export type I18nTranslations = {
         "SPONSOR_MODULE_DISABLED": string;
         "AD_NOT_FOUND": string;
         "ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE": string;
+        "PARTNER_UNAUTHORIZED": string;
     };
     "validation": {
         "common": {

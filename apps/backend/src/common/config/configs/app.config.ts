@@ -135,6 +135,10 @@ export default (): AppConfig => ({
     download_expires_in: withDefault('FILE_DOWNLOAD_EXPIRES_IN', 3600), // 1 hour
   },
 
+  partner: {
+    secret: withDefault('PARTNER_API_SECRET', ''),
+  },
+
   tasks: {
     image_upload: {
       enabled: withDefault('TASKS_IMAGE_UPLOAD_ENABLED', true),

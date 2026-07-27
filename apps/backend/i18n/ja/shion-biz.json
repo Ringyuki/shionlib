@@ -130,5 +130,6 @@
 
   "AD_NOT_FOUND": "広告が見つかりません",
 
-  "ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE": "トラフィック詳細は一時的に利用できません。メッセージ: {message}"
+  "ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE": "トラフィック詳細は一時的に利用できません。メッセージ: {message}",
+  "PARTNER_UNAUTHORIZED": "パートナー資格情報が存在しないか無効です"
 }

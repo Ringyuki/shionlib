@@ -131,5 +131,6 @@
 
   "AD_NOT_FOUND": "广告不存在",
 
-  "ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE": "流量详情暂时不可用，信息: {message}"
+  "ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE": "流量详情暂时不可用，信息: {message}",
+  "PARTNER_UNAUTHORIZED": "合作方凭据缺失或无效"
 }

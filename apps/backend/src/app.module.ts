@@ -45,6 +45,7 @@ import { PotatoVNModule } from './modules/potatovn/potatovn.module'
 import { WalkthroughModule } from './modules/walkthrough/walkthrough.module'
 import { SponsorModule } from './modules/sponsor/sponsor.module'
 import { AdModule } from './modules/ad/ad.module'
+import { PartnerModule } from './modules/partner/partner.module'
 
 @Module({
   imports: [
@@ -122,6 +123,7 @@ import { AdModule } from './modules/ad/ad.module'
     WalkthroughModule,
     SponsorModule,
     AdModule,
+    PartnerModule,
   ],
   controllers: [],
   providers: [
