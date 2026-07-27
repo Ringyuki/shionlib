@@ -95,6 +95,9 @@ export interface AppConfig {
     max_conns: number
     download_expires_in: number
   }
+  partner: {
+    secret: string
+  }
   tasks: {
     image_upload: {
       enabled: boolean

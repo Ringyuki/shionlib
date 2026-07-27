@@ -386,6 +386,10 @@ export class GameDownloadSourceService {
       )
     }
 
+    return await this.issueLink(id)
+  }
+
+  async issueLink(id: number) {
     const file = await this.prismaService.gameDownloadResourceFile.findUnique({
       where: {
         id,

@@ -46,6 +46,11 @@ import { GameFieldSyncService } from './services/game-field-sync.service'
     GameEntityUpsertService,
     GameFieldSyncService,
   ],
-  exports: [GameService, GameDownloadResourceReportService, GameTagService],
+  exports: [
+    GameService,
+    GameDownloadResourceReportService,
+    GameTagService,
+    GameDownloadSourceService,
+  ],
 })
 export class GameModule {}
