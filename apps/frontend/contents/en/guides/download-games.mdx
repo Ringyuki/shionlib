@@ -84,11 +84,19 @@ Click the button on the right side of the file entry to start downloading. Befor
 
 Click the **globe icon** button to download directly through your browser. This works for most users.
 
-### Push to Aria2
+### Push Download
 
-Click the **lightning icon** button to push the download link to a locally or remotely running Aria2 download manager.
+Click the **paper plane icon** button to open the push menu, which lists every push target you currently have enabled. Pick one and the download is handed over to that client.
 
-Before using this, configure Aria2 connection details (protocol, host, port, secret, download path) in **Account Settings → Download Settings**. If the connection fails, an error will appear and you will be directed to the settings page.
+| Push target      | What it does                                                    |
+| ---------------- | --------------------------------------------------------------- |
+| **Aria2**        | Pushes to a locally or remotely running Aria2 download manager  |
+| **LunaBox**      | Hands the download to LunaBox through the `lunabox://` protocol |
+| **ReinaManager** | Hands the download to ReinaManager through `reinamanager://`    |
+
+Before using Aria2, configure the connection details (protocol, host, port, secret, download path) in **Account Settings → Download Settings**. If the connection fails, an error appears and you are directed to the settings page — the gear icon next to the Aria2 entry in the push menu takes you there as well.
+
+LunaBox and ReinaManager can each be toggled in **Account Settings → Download Settings**; a disabled one no longer appears in the push menu. ReinaManager relies on a Bangumi ID to aggregate metadata, so the entry is unavailable for game entries that have no Bangumi ID.
 
 ## Verifying File Hash
 

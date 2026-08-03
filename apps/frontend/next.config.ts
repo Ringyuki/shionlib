@@ -54,7 +54,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'iloveren.link',
+        hostname: 'image.kungal.iloveren.link',
       },
       {
         protocol: 'https',

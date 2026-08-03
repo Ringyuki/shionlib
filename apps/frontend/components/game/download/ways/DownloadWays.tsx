@@ -1,22 +1,29 @@
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/shionui/Popover'
+import { Popover, PopoverAnchor, PopoverContent } from '@/components/shionui/Popover'
 import { useTranslations } from 'next-intl'
 import { useState, useRef } from 'react'
 import { flushSync, createPortal } from 'react-dom'
 import { GetDownloadLinkHandle, GetDownloadLink } from '../libs/get-download-link'
 import { GameDownloadResourceFile } from '@/interfaces/game/game-download-resource'
 import { addUrl } from '../helpers/aria2'
-import { buildLunaBoxUrl, openLunaBox } from '../helpers/lunabox'
+import { buildLunaBoxUrl } from '../helpers/lunabox'
+import { buildReinaUrl } from '../helpers/reina'
+import { openProtocolUrl } from '../helpers/protocol'
 import { useAria2Store } from '@/store/localSettingsStore'
 import { sileo } from 'sileo'
 import { useRouter } from '@/i18n/navigation.client'
+import { PushMenu } from './PushMenu'
 import { Aria2 } from './Aria2'
 import { Normal } from './Normal'
 import { LunaBox } from './LunaBox'
+import { Reina } from './Reina'
 import { useGameDownloadMeta } from '../GameDownloadContext'
-import { useLunaBoxStore } from '@/store/localSettingsStore'
+import { useLunaBoxStore, useReinaStore } from '@/store/localSettingsStore'
+
+type PendingWay = 'aria2' | 'lunabox' | 'reina' | 'normal'
 
 interface DownloadWaysProps {
   file: GameDownloadResourceFile
+  resourceId: number
   onTurnstileOpenChange: (open: boolean) => void
   downloadLink: string | null
   setDownloadLink: (link: string | null) => void
@@ -24,6 +31,7 @@ interface DownloadWaysProps {
 
 export const DownloadWays = ({
   file,
+  resourceId,
   onTurnstileOpenChange,
   downloadLink,
   setDownloadLink,
@@ -32,11 +40,11 @@ export const DownloadWays = ({
   const { getSettings } = useAria2Store()
   const { protocol, host, port, path, auth_secret, downloadPath } = getSettings()
   const router = useRouter()
-  const { game_title, bangumi_id } = useGameDownloadMeta()
+  const { game_title, bangumi_id, vndb_id } = useGameDownloadMeta()
   const showLunaBox = useLunaBoxStore(state => state.showLunaBox)
-  const [pushToAria2Loading, setPushToAria2Loading] = useState(false)
-  const [normalDownloadLoading, setNormalDownloadLoading] = useState(false)
-  const [lunaBoxLoading, setLunaBoxLoading] = useState(false)
+  const showReina = useReinaStore(state => state.showReina)
+  const [pending, setPending] = useState<PendingWay | null>(null)
+  const [pushMenuOpen, setPushMenuOpen] = useState(false)
   const downloadLinkRef = useRef<GetDownloadLinkHandle>(null)
   const downloadLinkExpiresAt = useRef(0)
   const [turnstileOpen, setTurnstileOpen] = useState(false)
@@ -53,11 +61,15 @@ export const DownloadWays = ({
     setDownloadLink(url ?? null)
     return url ?? null
   }
+  const startPush = (way: PendingWay) => {
+    setPushMenuOpen(false)
+    setPending(way)
+  }
   const handlePushToAria2 = async () => {
-    setPushToAria2Loading(true)
+    startPush('aria2')
     const url = await requestDownloadLink()
     if (!url) {
-      setPushToAria2Loading(false)
+      setPending(null)
       return
     }
 
@@ -83,17 +95,17 @@ export const DownloadWays = ({
           onClick: () => router.push('/user/settings/download'),
         },
       })
-      setPushToAria2Loading(false)
+      setPending(null)
       return
     }
 
     sileo.success({ title: t('downloadStarted') })
-    setPushToAria2Loading(false)
+    setPending(null)
   }
   const handleNormalDownload = async () => {
-    setNormalDownloadLoading(true)
+    setPending('normal')
     const url = await requestDownloadLink()
-    setNormalDownloadLoading(false)
+    setPending(null)
     if (!url) return
 
     const a = document.createElement('a')
@@ -106,9 +118,9 @@ export const DownloadWays = ({
     sileo.success({ title: t('downloadStarted') })
   }
   const handleLunaBox = async () => {
-    setLunaBoxLoading(true)
+    startPush('lunabox')
     const url = await requestDownloadLink()
-    setLunaBoxLoading(false)
+    setPending(null)
     if (!url) return
 
     const lunaBoxUrl = buildLunaBoxUrl({
@@ -121,7 +133,29 @@ export const DownloadWays = ({
       title: game_title,
       bangumiId: bangumi_id,
     })
-    openLunaBox(lunaBoxUrl)
+    openProtocolUrl(lunaBoxUrl)
+    sileo.success({ title: t('downloadStarted') })
+  }
+  const handleReina = async () => {
+    if (!bangumi_id) return
+    startPush('reina')
+    const url = await requestDownloadLink()
+    setPending(null)
+    if (!url) return
+
+    const reinaUrl = buildReinaUrl({
+      resourceId,
+      url,
+      fileName: file.file_name,
+      size: file.file_size,
+      checksumAlgo: file.hash_algorithm,
+      checksum: file.file_hash,
+      expiresAt: downloadLinkExpiresAt.current,
+      title: game_title ?? file.file_name,
+      bangumiId: bangumi_id,
+      vndbId: vndb_id,
+    })
+    openProtocolUrl(reinaUrl)
     sileo.success({ title: t('downloadStarted') })
   }
 
@@ -129,9 +163,7 @@ export const DownloadWays = ({
     downloadLinkRef.current?.cancelRequest?.()
     setTurnstileOpen(false)
     onTurnstileOpenChange(false)
-    setPushToAria2Loading(false)
-    setNormalDownloadLoading(false)
-    setLunaBoxLoading(false)
+    setPending(null)
   }
 
   const overlay =
@@ -150,18 +182,34 @@ export const DownloadWays = ({
     <>
       {overlay}
       <Popover open={turnstileOpen}>
-        <PopoverTrigger asChild>
+        <PopoverAnchor asChild>
           <div className="flex gap-2">
-            <Aria2 pushToAria2Loading={pushToAria2Loading} handlePushToAria2={handlePushToAria2} />
-            {showLunaBox && (
-              <LunaBox lunaBoxLoading={lunaBoxLoading} handleLunaBox={handleLunaBox} />
-            )}
+            <PushMenu
+              open={pushMenuOpen}
+              onOpenChange={setPushMenuOpen}
+              loading={pending !== null && pending !== 'normal'}
+            >
+              <Aria2
+                pushToAria2Loading={pending === 'aria2'}
+                handlePushToAria2={handlePushToAria2}
+              />
+              {showLunaBox && (
+                <LunaBox lunaBoxLoading={pending === 'lunabox'} handleLunaBox={handleLunaBox} />
+              )}
+              {showReina && (
+                <Reina
+                  reinaLoading={pending === 'reina'}
+                  handleReina={handleReina}
+                  disabled={!bangumi_id}
+                />
+              )}
+            </PushMenu>
             <Normal
-              normalDownloadLoading={normalDownloadLoading}
+              normalDownloadLoading={pending === 'normal'}
               handleNormalDownload={handleNormalDownload}
             />
           </div>
-        </PopoverTrigger>
+        </PopoverAnchor>
         <PopoverContent className="w-[320px] h-[170px] z-70" sideOffset={8}>
           <GetDownloadLink
             fileId={file.id}

@@ -11,6 +11,8 @@ interface LocalSettingsStore {
   setPosition: (position: ToastPosition) => void
   showLunaBox: boolean
   setShowLunaBox: (show: boolean) => void
+  showReina: boolean
+  setShowReina: (show: boolean) => void
 }
 
 export const toastPositions = [
@@ -70,6 +72,8 @@ const useLocalSettingsStore = create<LocalSettingsStore>()(
       setPosition: (position: ToastPosition) => set({ position }),
       showLunaBox: true,
       setShowLunaBox: (show: boolean) => set({ showLunaBox: show }),
+      showReina: true,
+      setShowReina: (show: boolean) => set({ showReina: show }),
     }),
     {
       name: 'shionlib-local-settings-store',
@@ -81,3 +85,4 @@ const useLocalSettingsStore = create<LocalSettingsStore>()(
 export const useAria2Store = useLocalSettingsStore
 export const useToastPreferenceStore = useLocalSettingsStore
 export const useLunaBoxStore = useLocalSettingsStore
+export const useReinaStore = useLocalSettingsStore
