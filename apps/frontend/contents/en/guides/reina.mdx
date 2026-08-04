@@ -28,10 +28,10 @@ Key features:
 
 You can download ReinaManager from the following page:
 
-* [ReinaManager Quick Start](https://reina.huoshen80.top/guild/start/quick-start)
+- [ReinaManager Quick Start](https://reina.huoshen80.top/guild/start/quick-start)
 
-* **Installer Edition**: Recommended for most users, supports automatic updates in subsequent releases.
-* **Portable Edition**: Download the ZIP archive and extract to use immediately. Ideal for portable drives, though future updates may require manual operations.
+- **Installer Edition**: Recommended for most users, supports automatic updates in subsequent releases.
+- **Portable Edition**: Download the ZIP archive and extract to use immediately. Ideal for portable drives, though future updates may require manual operations.
 
 ## Disabling or Enabling ReinaManager in Shionlib
 
@@ -72,17 +72,17 @@ After receiving the task, ReinaManager will:
 
 ReinaManager receives the following information with each push:
 
-| Field | Description |
-| --- | --- |
-| Download URL | Signed temporary direct download link |
-| File name | Original file name in Shionlib |
-| Archive format | File formats such as 7Z, ZIP, RAR, etc. |
-| File size | Exact byte count of the file |
-| Checksum | SHA-256 or BLAKE3 hash |
-| Game title | Title of the game |
-| resource_id | Resource ID in Shionlib used to identify this push resource |
-| Bangumi ID | Used for game matching and fetching metadata |
-| VNDB ID | Optional, used for mixed metadata aggregation |
+| Field          | Description                                                 |
+| -------------- | ----------------------------------------------------------- |
+| Download URL   | Signed temporary direct download link                       |
+| File name      | Original file name in Shionlib                              |
+| Archive format | File formats such as 7Z, ZIP, RAR, etc.                     |
+| File size      | Exact byte count of the file                                |
+| Checksum       | SHA-256 or BLAKE3 hash                                      |
+| Game title     | Title of the game                                           |
+| resource_id    | Resource ID in Shionlib used to identify this push resource |
+| Bangumi ID     | Used for game matching and fetching metadata                |
+| VNDB ID        | Optional, used for mixed metadata aggregation               |
 
 Bangumi ID will always be sent with the task. VNDB ID is only sent when the Shionlib entry is already linked to VNDB.
 
@@ -92,17 +92,17 @@ Bangumi ID will always be sent with the task. VNDB ID is only sent when the Shio
 
 Check the application logs first for entries related to the `reinamanager protocol`:
 
-* The application usually automatically registers or repairs protocol registration upon startup
-* If an error appears in the logs, try restarting ReinaManager first
-* If it still does not respond, contact the author with the logs for assistance
+- The application usually automatically registers or repairs protocol registration upon startup
+- If an error appears in the logs, try restarting ReinaManager first
+- If it still does not respond, contact the author with the logs for assistance
 
 ### The download task does not appear in ReinaManager
 
 Check the following items:
 
-* Whether the browser blocked the custom protocol
-* Whether ReinaManager showed an installation confirmation window
-* Whether the temporary download link has expired
+- Whether the browser blocked the custom protocol
+- Whether ReinaManager showed an installation confirmation window
+- Whether the temporary download link has expired
 
 ### Can I push directly if ReinaManager is not opened in advance?
 
