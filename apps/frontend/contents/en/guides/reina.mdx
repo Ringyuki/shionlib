@@ -1,0 +1,121 @@
+---
+title: Downloading with ReinaManager
+banner: 'https://images.yurari.moe/images/c28ffd9d-7e19-4f2f-a2c5-462d47914f78.webp'
+description: 'Learn how to enable ReinaManager in the Shionlib push menu and send game download tasks directly to ReinaManager for one-click library importing.'
+date: 2026-08-04
+author_uid: 9060
+author_name: 'huoshen80'
+author_avatar: 'https://t.shionlib.com/user/9060/avatar/de38cad8-927a-4194-a072-6c537e42bfed.webp'
+---
+
+## What is ReinaManager
+
+[ReinaManager](https://reina.huoshen80.top) is a lightweight, easy-to-use Galgame/Visual Novel management tool that helps you organize local games, aggregate metadata from multiple sources, and automatically track playtime.
+
+Key features:
+
+- 🌐 **Multi-Source Data Integration** — Fetch, merge, and display game metadata from multiple APIs
+- 🔍 **Powerful Search** — Search games by title, aliases, custom names, and other metadata
+- 🗂️ **Filter & Sort** — Filter and sort games across multiple dimensions, such as source, status, tags, etc.
+- 📚 **Library Management** — Organize your game collection with groups and categories, supporting drag-and-drop sorting
+- 🎮 **Playtime Tracking** — Automatically record game sessions, providing detailed playtime statistics and history
+- 🎨 **Personalization** — Customize game covers, titles, descriptions, tags, and more to create your own unique game library
+- 💾 **Save Data Backup** — Supports manual and automatic backups of game save data
+- 🛠️ **Tool Integration** — Launch games with Locale Emulator region switching and Magpie scaling integration
+- 📥 **Download Integration** — Receive game download tasks pushed from Shionlib for one-click library importing
+
+## Installing ReinaManager
+
+You can download ReinaManager from the following page:
+
+* [ReinaManager Quick Start](https://reina.huoshen80.top/guild/start/quick-start)
+
+* **Installer Edition**: Recommended for most users, supports automatic updates in subsequent releases.
+* **Portable Edition**: Download the ZIP archive and extract to use immediately. Ideal for portable drives, though future updates may require manual operations.
+
+## Disabling or Enabling ReinaManager in Shionlib
+
+ReinaManager appears in the file push menu by default.
+
+To disable it:
+
+1. Open **Settings** in Shionlib
+2. Go to **Download** settings
+3. Locate **ReinaManager**
+4. Turn off **Show ReinaManager in push menu**
+
+Once turned off, ReinaManager will no longer be displayed in the file push menu.
+
+## Downloading with ReinaManager
+
+1. Click **Download** on the game page to open the download panel
+2. Find the resource and file you wish to download
+3. Click the **paper plane icon** on the right side of the file row
+4. Select **ReinaManager** from the push menu
+5. Complete the Turnstile verification as prompted
+6. The browser will request to open ReinaManager
+7. Confirm the game information and installation location in ReinaManager
+8. Confirm to create the download task
+
+After receiving the task, ReinaManager will:
+
+1. Download the file and verify file size and hash checksums
+2. Extract common archive formats such as 7Z, ZIP, RAR, etc.
+3. Automatically strip redundant outer folders inside archives
+4. Scan and detect the game launcher executable
+5. Fetch mixed metadata using Bangumi and optional VNDB data
+6. Match existing games based on Bangumi ID
+7. Update existing games or create a complete local game entry in one go
+8. Link the download task with the final game entry
+
+## Pushed Information
+
+ReinaManager receives the following information with each push:
+
+| Field | Description |
+| --- | --- |
+| Download URL | Signed temporary direct download link |
+| File name | Original file name in Shionlib |
+| Archive format | File formats such as 7Z, ZIP, RAR, etc. |
+| File size | Exact byte count of the file |
+| Checksum | SHA-256 or BLAKE3 hash |
+| Game title | Title of the game |
+| resource_id | Resource ID in Shionlib used to identify this push resource |
+| Bangumi ID | Used for game matching and fetching metadata |
+| VNDB ID | Optional, used for mixed metadata aggregation |
+
+Bangumi ID will always be sent with the task. VNDB ID is only sent when the Shionlib entry is already linked to VNDB.
+
+## Troubleshooting
+
+### Nothing happens after selecting ReinaManager in the push menu
+
+Check the application logs first for entries related to the `reinamanager protocol`:
+
+* The application usually automatically registers or repairs protocol registration upon startup
+* If an error appears in the logs, try restarting ReinaManager first
+* If it still does not respond, contact the author with the logs for assistance
+
+### The download task does not appear in ReinaManager
+
+Check the following items:
+
+* Whether the browser blocked the custom protocol
+* Whether ReinaManager showed an installation confirmation window
+* Whether the temporary download link has expired
+
+### Can I push directly if ReinaManager is not opened in advance?
+
+Yes.
+
+After selecting ReinaManager, the system will automatically launch the application and transfer the download task.
+
+### Download does not start after Turnstile verification
+
+Reopen the push menu and select ReinaManager again.
+
+If the signed link is still within its validity period, you usually do not need to solve the verification again.
+
+### Prompted that the link has expired during download
+
+Temporary download links have an expiration time. Pushing the file again from Shionlib will generate a new download link.
