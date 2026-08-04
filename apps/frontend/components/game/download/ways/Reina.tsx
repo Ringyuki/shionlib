@@ -1,3 +1,4 @@
+import { HelpCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { FadeImage } from '@/components/common/shared/FadeImage'
 import { PushMenuItem } from './PushMenu'
@@ -26,6 +27,11 @@ export const Reina = ({ reinaLoading, handleReina, disabled }: ReinaProps) => {
       loading={reinaLoading}
       disabled={disabled}
       onSelect={handleReina}
+      action={{
+        href: '/docs/guides/reina',
+        icon: <HelpCircle className="size-3.5" />,
+        label: t('reinaHelpLink'),
+      }}
     />
   )
 }

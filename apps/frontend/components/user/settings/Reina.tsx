@@ -12,6 +12,7 @@ import {
 import { Switch } from '@/components/shionui/animated/Switch'
 import { Label } from '@/components/shionui/Label'
 import { useReinaStore } from '@/store/localSettingsStore'
+import { Link } from '@/i18n/navigation'
 import { FadeImage } from '@/components/common/shared/FadeImage'
 
 export const ReinaSettings = () => {
@@ -23,7 +24,12 @@ export const ReinaSettings = () => {
     <Card>
       <CardHeader>
         <CardTitle className="text-xl">{t('title')}</CardTitle>
-        <CardDescription className="text-card-foreground">{t('description')}</CardDescription>
+        <CardDescription className="text-card-foreground">
+          {t('description')}{' '}
+          <Link href="/docs/guides/reina" className="underline text-primary">
+            {t('learnMore')}
+          </Link>
+        </CardDescription>
         <CardAction>
           <FadeImage
             src="/assets/images/reina/reina.webp"

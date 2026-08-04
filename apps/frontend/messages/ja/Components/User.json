@@ -178,6 +178,7 @@
     "Reina": {
       "title": "ReinaManager",
       "description": "ReinaManager は Bangumi と VNDB からゲームのメタデータを集約するビジュアルノベル管理ツールです。有効にすると、ダウンロードパネルのプッシュメニューから直接 ReinaManager に送信できます。",
+      "learnMore": "詳しく見る",
       "showButton": "プッシュメニューに ReinaManager を表示"
     },
     "Aria2": {

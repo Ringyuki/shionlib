@@ -178,6 +178,7 @@
     "Reina": {
       "title": "ReinaManager",
       "description": "ReinaManager 是一款视觉小说管理工具，可通过 Bangumi 与 VNDB 聚合游戏元数据。启用后，可在下载面板的推送菜单中将下载任务直接发送到 ReinaManager。",
+      "learnMore": "了解更多",
       "showButton": "在推送菜单中显示 ReinaManager"
     },
     "Aria2": {

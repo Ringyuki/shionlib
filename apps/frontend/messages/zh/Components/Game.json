@@ -271,6 +271,7 @@
       "lunaBoxHelpLink": "LunaBox 使用指南",
       "reinaName": "ReinaManager",
       "reinaDescription": "在 ReinaManager 中下载并管理",
+      "reinaHelpLink": "ReinaManager 使用指南",
       "reinaUnavailable": "该游戏缺少 Bangumi ID，暂不支持",
       "normalDownload": "普通下载",
       "aria2NotReady": "无法连接到 Aria2，请检查设置是否正确",

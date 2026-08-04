@@ -178,6 +178,7 @@
     "Reina": {
       "title": "ReinaManager",
       "description": "ReinaManager is a visual novel management tool that aggregates game metadata from Bangumi and VNDB. Enable it to send downloads straight to ReinaManager from the push menu in the download panel.",
+      "learnMore": "Learn more",
       "showButton": "Show ReinaManager in the push menu"
     },
     "Aria2": {
