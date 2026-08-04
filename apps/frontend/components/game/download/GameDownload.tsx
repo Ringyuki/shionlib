@@ -11,6 +11,7 @@ interface GameDownloadProps {
   game_id: number
   game_title?: string
   bangumi_id?: string
+  vndb_id?: string
   open: boolean
   onLoadingChange: (loading: boolean) => void
   onOpenChange: (open: boolean) => void
@@ -20,6 +21,7 @@ export const GameDownload = ({
   game_id,
   game_title,
   bangumi_id,
+  vndb_id,
   open,
   onLoadingChange,
   onOpenChange,
@@ -86,7 +88,7 @@ export const GameDownload = ({
     setDownloadResources(prev => prev.filter(resource => resource.id !== id))
 
   return (
-    <GameDownloadMetaContext.Provider value={{ game_title, bangumi_id }}>
+    <GameDownloadMetaContext.Provider value={{ game_title, bangumi_id, vndb_id }}>
       <Modal
         title={t('title')}
         open={open && isReady}

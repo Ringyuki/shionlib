@@ -12,11 +12,13 @@ import { DownloadWays } from './ways/DownloadWays'
 
 interface GameDownloadFileItemProps {
   file: GameDownloadResourceFile
+  resourceId: number
   onTurnstileOpenChange: (open: boolean) => void
 }
 
 export const GameDownloadFileItem = ({
   file,
+  resourceId,
   onTurnstileOpenChange,
 }: GameDownloadFileItemProps) => {
   const t = useTranslations('Components.Game.Download.GameDownloadFileItem')
@@ -93,6 +95,7 @@ export const GameDownloadFileItem = ({
       {file.file_status === 3 && (
         <DownloadWays
           file={file}
+          resourceId={resourceId}
           onTurnstileOpenChange={onTurnstileOpenChange}
           downloadLink={downloadLink}
           setDownloadLink={setDownloadLink}

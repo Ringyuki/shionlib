@@ -79,6 +79,7 @@ export const GameDownloadResourceItem = ({
           <GameDownloadFileItem
             key={file.id}
             file={file}
+            resourceId={resource.id}
             onTurnstileOpenChange={onTurnstileOpenChange}
           />
         ))}

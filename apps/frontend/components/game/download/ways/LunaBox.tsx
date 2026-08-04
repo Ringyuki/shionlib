@@ -1,8 +1,7 @@
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/shionui/Tooltip'
-import { Button } from '@/components/shionui/Button'
-import { Moon, HelpCircle } from 'lucide-react'
+import { HelpCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { Link } from '@/i18n/navigation'
+import { FadeImage } from '@/components/common/shared/FadeImage'
+import { PushMenuItem } from './PushMenu'
 
 interface LunaBoxProps {
   lunaBoxLoading: boolean
@@ -13,26 +12,24 @@ export const LunaBox = ({ lunaBoxLoading, handleLunaBox }: LunaBoxProps) => {
   const t = useTranslations('Components.Game.Download.GameDownloadFileItem')
 
   return (
-    <div className="md:block hidden">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            intent="neutral"
-            appearance="soft"
-            size="icon"
-            className="size-8"
-            loading={lunaBoxLoading}
-            onClick={handleLunaBox}
-            renderIcon={<Moon className="fill-current" />}
-          />
-        </TooltipTrigger>
-        <TooltipContent className="flex items-center gap-1">
-          <span>{t('pushToLunaBox')}</span>
-          <Link href="/docs/guides/lunabox" className="inline-flex items-center">
-            <HelpCircle className="size-3.5 text-current" />
-          </Link>
-        </TooltipContent>
-      </Tooltip>
-    </div>
+    <PushMenuItem
+      icon={
+        <FadeImage
+          src="/assets/images/lunabox/lunabox.webp"
+          alt="LunaBox"
+          className="size-7 rounded-md"
+          sizes="28px"
+        />
+      }
+      title={t('lunaBoxName')}
+      description={t('lunaBoxDescription')}
+      loading={lunaBoxLoading}
+      onSelect={handleLunaBox}
+      action={{
+        href: '/docs/guides/lunabox',
+        icon: <HelpCircle className="size-3.5" />,
+        label: t('lunaBoxHelpLink'),
+      }}
+    />
   )
 }

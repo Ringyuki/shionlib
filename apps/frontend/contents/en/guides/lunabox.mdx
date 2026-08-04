@@ -1,7 +1,7 @@
 ---
 title: Downloading with LunaBox
 banner: 'https://images.yurari.moe/galgame/10568/hak8bxrz_2.png'
-description: 'Learn how to enable the LunaBox download button in Shionlib and push game downloads directly to the LunaBox desktop app.'
+description: 'Learn how to enable LunaBox in the Shionlib push menu and send game downloads directly to the LunaBox desktop app.'
 date: 2026-03-11
 author_uid: 1
 author_name: 'ringyuki'
@@ -26,7 +26,7 @@ Download and install LunaBox from the official site: **https://box.lunarain.site
 
 Two Windows editions are currently available:
 
-- **Installer (setup)**: Recommended for most users. During installation, LunaBox will usually try to register the `lunabox://` protocol automatically, so the download button should work out of the box. Data is stored in `%APPDATA%\LunaBox` by default.
+- **Installer (setup)**: Recommended for most users. During installation, LunaBox will usually try to register the `lunabox://` protocol automatically, so pushing should work out of the box. Data is stored in `%APPDATA%\LunaBox` by default.
 - **Portable**: Ready to use after extraction, but you will usually need to register the `lunabox://` protocol manually before first use. Data is stored in the program directory by default.
 
 If you later move the portable folder, reinstall Windows, or find that the installer build can no longer launch LunaBox through the protocol, you can run the registration command again:
@@ -41,25 +41,26 @@ lunacli --register-protocol
 
 You can also refer to the [LunaBox documentation](https://box.lunarain.site/features/cli.html).
 
-> LunaBox currently supports **Windows** only. The LunaBox button will not appear on mobile devices.
+> LunaBox currently supports **Windows** only.
 
-## Disabling or Enabling the LunaBox Button in Shionlib
+## Disabling or Enabling LunaBox in Shionlib
 
-The LunaBox download button is displayed by default. To disable it:
+LunaBox appears in the push menu by default. To disable it:
 
 1. Open **Settings** → **Download** (or go to `/user/settings/download`)
 2. Find the **LunaBox** section
-3. Uncheck **Show LunaBox download button**
+3. Turn off **Show LunaBox in the push menu**
 
-Once disabled, the LunaBox icon button will no longer appear next to the Aria2 and normal download buttons on every file row in the download panel.
+Once disabled, the LunaBox entry no longer appears in the push menu of the download panel.
 
 ## Using LunaBox to Download
 
 1. On any game page, click **Download** to open the download panel
 2. Find the resource and file you want
-3. Click the **moon icon** button to push the download to LunaBox
-4. If a Turnstile verification is required, complete it in the popup — LunaBox will receive the task automatically once verified
-5. Switch to LunaBox — the download will have started
+3. Click the **paper plane icon** button on the right of the file row to open the push menu
+4. Choose **LunaBox** to push the download to it
+5. If a Turnstile verification is required, complete it in the popup — LunaBox will receive the task automatically once verified
+6. Switch to LunaBox — the download will have started
 
 LunaBox receives the following information with each push:
 
@@ -75,7 +76,7 @@ LunaBox receives the following information with each push:
 
 ## Troubleshooting
 
-**The LunaBox button does nothing when clicked**
+**Nothing happens after choosing LunaBox in the push menu**
 
 First check whether the `lunabox://` protocol is registered correctly:
 
@@ -91,8 +92,8 @@ After running the command, restart LunaBox and try again.
 
 **Can it download if LunaBox was not opened in advance**
 
-Yes. As long as the protocol is registered, clicking the LunaBox button in Shionlib will launch LunaBox automatically and pass the current download request to it.
+Yes. As long as the protocol is registered, choosing LunaBox in the Shionlib push menu will launch LunaBox automatically and pass the current download request to it.
 
 **Turnstile verification does not complete**
 
-The Turnstile popup closes automatically after you solve it. If the download still does not start, click the moon icon again — the signed link is cached for your session so you will not need to verify again.
+The Turnstile popup closes automatically after you solve it. If the download still does not start, open the push menu and choose LunaBox again — the signed link is cached for your session so you will not need to verify again.

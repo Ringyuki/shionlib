@@ -173,7 +173,12 @@
       "title": "LunaBox",
       "description": "LunaBox は高速・美麗・多機能な軽量ビジュアルノベル管理ツールです。下のボタンを有効にすると、ダウンロードタスクを直接 LunaBox に送信できます。",
       "learnMore": "詳しく見る",
-      "showButton": "LunaBox ダウンロードボタンを表示"
+      "showButton": "プッシュメニューに LunaBox を表示"
+    },
+    "Reina": {
+      "title": "ReinaManager",
+      "description": "ReinaManager は Bangumi と VNDB からゲームのメタデータを集約するビジュアルノベル管理ツールです。有効にすると、ダウンロードパネルのプッシュメニューから直接 ReinaManager に送信できます。",
+      "showButton": "プッシュメニューに ReinaManager を表示"
     },
     "Aria2": {
       "title": "Aria2",

@@ -33,7 +33,12 @@ export const GameActions = ({ game, is_favorite }: GameActionsProps) => {
         <div className="flex gap-2 md:items-center flex-col md:flex-row items-start">
           <div className="flex gap-2 items-center flex-wrap">
             <div className="flex gap-2 items-center">
-              <Download game_id={game.id} game_title={title} bangumi_id={game.b_id} />
+              <Download
+                game_id={game.id}
+                game_title={title}
+                bangumi_id={game.b_id}
+                vndb_id={game.v_id}
+              />
               <Patch game_id={game.id} v_id={game.v_id!} />
               <Upload game_id={game.id} />
             </div>

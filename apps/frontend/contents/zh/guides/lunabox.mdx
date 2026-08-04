@@ -1,7 +1,7 @@
 ---
 title: 使用 LunaBox 下载
 banner: 'https://images.yurari.moe/galgame/10568/hak8bxrz_2.png'
-description: '了解如何在 Shionlib 中启用 LunaBox 下载按钮，并将游戏下载任务直接推送到 LunaBox 桌面应用。'
+description: '了解如何在 Shionlib 的推送菜单中启用 LunaBox，并将游戏下载任务直接推送到 LunaBox 桌面应用。'
 date: 2026-03-11
 author_uid: 1
 author_name: 'ringyuki'
@@ -41,25 +41,26 @@ lunacli --register-protocol
 
 参照[LunaBox文档](https://box.lunarain.site/features/cli.html)
 
-> LunaBox 目前仅支持 **Windows**。移动设备上不会显示 LunaBox 按钮。
+> LunaBox 目前仅支持 **Windows**。
 
-## 在 Shionlib 中禁用或启用 LunaBox 按钮
+## 在 Shionlib 中禁用或启用 LunaBox
 
-LunaBox 下载按钮默认显示。禁用方式：
+LunaBox 默认出现在推送菜单中。禁用方式：
 
 1. 打开**设置** → **下载**（或前往 `/user/settings/download`）
 2. 找到 **LunaBox** 设置项
-3. 取消勾选**显示 LunaBox 下载按钮**
+3. 关闭**在推送菜单中显示 LunaBox**
 
-禁用后，下载面板中每个文件行的 Aria2 按钮和普通下载按钮旁边，将不再出现 LunaBox 图标按钮。
+禁用后，下载面板的推送菜单中将不再出现 LunaBox 一项。
 
 ## 使用 LunaBox 下载
 
 1. 在任意游戏页面点击**下载**，打开下载面板
 2. 找到你想要的资源和文件
-3. 点击**月亮图标**按钮，将下载任务推送到 LunaBox
-4. 如果需要 Turnstile 验证，在弹出窗口中完成验证——验证通过后任务会自动发送给 LunaBox
-5. 切换到 LunaBox，下载即已开始
+3. 点击文件行右侧的**纸飞机图标**按钮，打开推送菜单
+4. 在菜单中选择 **LunaBox**，将下载任务推送过去
+5. 如果需要 Turnstile 验证，在弹出窗口中完成验证——验证通过后任务会自动发送给 LunaBox
+6. 切换到 LunaBox，下载即已开始
 
 每次推送时，LunaBox 会收到以下信息：
 
@@ -75,7 +76,7 @@ LunaBox 下载按钮默认显示。禁用方式：
 
 ## 常见问题
 
-**点击 LunaBox 按钮没有反应**
+**在推送菜单中选择 LunaBox 后没有反应**
 
 优先检查是否已正确注册 `lunabox://` 协议：
 
@@ -91,8 +92,8 @@ LunaBox 下载按钮默认显示。禁用方式：
 
 **LunaBox 没有提前打开，能直接下载吗**
 
-可以。只要协议已注册，点击 Shionlib 的月亮图标按钮开始下载后，协议会自动启动 LunaBox，并把当前下载请求带过去。
+可以。只要协议已注册，在 Shionlib 的推送菜单中选择 LunaBox 后，协议会自动启动 LunaBox，并把当前下载请求带过去。
 
 **Turnstile 验证后下载没有开始**
 
-Turnstile 弹窗在验证通过后会自动关闭。如果下载仍未开始，再次点击月亮图标即可——本次会话中签名链接已缓存，无需再次验证。
+Turnstile 弹窗在验证通过后会自动关闭。如果下载仍未开始，再次打开推送菜单选择 LunaBox 即可——本次会话中签名链接已缓存，无需再次验证。
