@@ -1,0 +1,121 @@
+---
+title: 使用 ReinaManager 下载
+banner: 'https://images.yurari.moe/images/c28ffd9d-7e19-4f2f-a2c5-462d47914f78.webp'
+description: '了解如何在 Shionlib 的推送菜单中启用 ReinaManager，并将游戏下载任务直接推送到 ReinaManager 完成一键入库。'
+date: 2026-08-04
+author_uid: 9060
+author_name: 'huoshen80'
+author_avatar: 'https://t.shionlib.com/user/9060/avatar/de38cad8-927a-4194-a072-6c537e42bfed.webp'
+---
+
+## 什么是 ReinaManager
+
+[ReinaManager](https://reina.huoshen80.top) 是一个轻量级、易上手的 galgame/视觉小说管理工具，可以帮助你整理本地游戏、聚合多个站点的元数据，并自动记录游玩时间。
+
+主要功能：
+
+- 🌐 **多源数据整合** - 获取合并展示多源 API 的游戏元数据
+- 🔍 **强大的搜索** - 通过游戏标题、别名、自定义名称及其他元数据搜索游戏
+- 🗂️ **筛选排序** - 对游戏进行多维度的筛选和排序，如按来源、状态、标签等
+- 📚 **收藏管理** - 通过分组和分类组织游戏库，并支持拖拽排序
+- 🎮 **游戏时长追踪** - 自动记录游戏会话，提供详细的游玩时间统计和历史记录
+- 🎨 **个性化定制** - 支持自定义游戏封面、名称、简介、标签等信息，打造专属游戏库
+- 💾 **存档备份** - 支持手动和自动备份游戏存档
+- 🛠️ **工具集成** - 启动游戏可联动 Locale Emulator 转区和 Magpie 放大
+- 📥 **下载集成** - 接收 Shionlib 推送的游戏下载任务，一键入库
+
+## 安装 ReinaManager
+
+可以从以下页面下载 ReinaManager：
+
+* [ReinaManager 快速开始](https://reina.huoshen80.top/guild/start/quick-start)
+
+* **安装版**：推荐普通用户使用，后续可自动更新。
+* **便携版**：下载 ZIP 压缩包后解压即用，可以放到移动介质中使用，后续更新可能需要手动操作。
+
+## 在 Shionlib 中禁用或启用 ReinaManager
+
+ReinaManager 默认显示在下载文件的推送菜单中。
+
+禁用方式：
+
+1. 打开 Shionlib 的**设置**
+2. 进入**下载**设置
+3. 找到 **ReinaManager**
+4. 关闭**在推送菜单中显示 ReinaManager**
+
+关闭后，文件推送菜单中将不再显示 ReinaManager。
+
+## 使用 ReinaManager 下载
+
+1. 在游戏页面点击**下载**，打开下载面板
+2. 找到需要下载的资源和文件
+3. 点击文件右侧的**纸飞机图标**
+4. 在推送菜单中选择 **ReinaManager**
+5. 根据提示完成 Turnstile 验证
+6. 浏览器将请求打开 ReinaManager
+7. 在 ReinaManager 中确认游戏信息和安装位置
+8. 确认后创建下载任务
+
+收到任务后，ReinaManager 会：
+
+1. 下载文件并校验文件大小与哈希
+2. 解压 7Z、ZIP、RAR 等常见压缩格式
+3. 自动剥离压缩包中无意义的外层文件夹
+4. 扫描并识别游戏启动程序
+5. 使用 Bangumi 和可选的 VNDB 数据获取 Mixed 元数据
+6. 根据 Bangumi ID 匹配已有游戏
+7. 更新已有游戏，或一次性创建完整本地游戏
+8. 关联任务与最终游戏
+
+## 推送信息
+
+每次推送时，ReinaManager 会收到以下信息：
+
+| 字段         | 内容                  |
+| ---------- | ------------------- |
+| 下载链接       | 带签名的临时文件直链          |
+| 文件名        | Shionlib 中的原始文件名    |
+| 压缩格式       | 7Z、ZIP、RAR 等文件格式    |
+| 文件大小       | 文件的精确字节数            |
+| 校验值        | SHA-256 或 BLAKE3 哈希 |
+| 游戏标题       | 游戏标题                |
+| resource_id | 书音站内的资源 ID，用于标识本次推送的资源 |
+| Bangumi ID | 用于匹配游戏和获取元数据        |
+| VNDB ID    | 可选，用于 Mixed 元数据聚合   |
+
+Bangumi ID 一定会随任务发送。VNDB ID 只有在 Shionlib 条目已经关联 VNDB 时才会发送。
+
+## 常见问题
+
+### 在推送菜单中选择 ReinaManager 后没有反应
+
+优先检查软件日志中 `reinamanager 协议` 相关的内容：
+
+* 软件通常会在启动时自动注册或者修复注册
+* 如果日志报错，可以先尝试重新启动 ReinaManager
+* 如果仍然没有反应可以联系作者并提供日志寻求帮助
+
+### 下载任务没有出现在 ReinaManager 中
+
+检查以下项目：
+
+* 浏览器是否拦截了自定义协议
+* ReinaManager 是否显示了安装确认窗口
+* 临时下载链接是否已经过期
+
+### ReinaManager 没有提前打开，可以直接推送吗
+
+可以。
+
+选择 ReinaManager 后，系统会自动启动程序并传递下载任务。
+
+### Turnstile 验证后没有开始下载
+
+重新打开推送菜单并选择 ReinaManager。
+
+如果签名链接仍在有效期内，通常不需要再次完成验证。
+
+### 下载过程中提示链接已经过期
+
+临时下载链接具有有效期。重新从 Shionlib 推送该文件，即可生成新的下载链接。
