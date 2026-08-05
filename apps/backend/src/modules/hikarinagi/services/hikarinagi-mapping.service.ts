@@ -23,14 +23,18 @@ export class HikarinagiMappingService {
     const seen = new Set<number>()
     let synced = 0
     let page = 1
-    let totalPages = 1
+    let totalPages: number | null = null
 
-    while (page <= totalPages) {
+    while (totalPages === null || page <= totalPages) {
       const { items, meta } = await this.hikarinagiClient.getMapping(
         page,
         HikarinagiMappingService.PAGE_SIZE,
       )
-      totalPages = meta?.total_pages ?? page
+      if (!meta) {
+        this.logger.warn('hikarinagi mapping page missing meta, aborting before stale cleanup')
+        return { synced, cleared: 0 }
+      }
+      totalPages = meta.total_pages
 
       synced += await this.applyPage(items, seen)
       page += 1

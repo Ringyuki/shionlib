@@ -15,7 +15,6 @@ export interface GalgameMappingMeta {
 export interface HikarinagiEnvelope<T> {
   success: boolean
   data: T
-  meta?: GalgameMappingMeta
   request_id: string
   timestamp: string
 }

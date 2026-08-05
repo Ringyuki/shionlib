@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common'
 import { HttpService } from '@nestjs/axios'
 import { firstValueFrom } from 'rxjs'
 import { ShionConfigService } from '../../../common/config/services/config.service'
-import { GalgameMappingEntry, HikarinagiEnvelope } from '../interfaces/galgame-mapping.interface'
+import {
+  GalgameMappingEntry,
+  GalgameMappingMeta,
+  HikarinagiEnvelope,
+} from '../interfaces/galgame-mapping.interface'
 
 @Injectable()
 export class HikarinagiClient {
@@ -18,13 +22,14 @@ export class HikarinagiClient {
   }
 
   async getMapping(page: number, pageSize: number) {
-    const envelope = await this.request<{ items: GalgameMappingEntry[] }>(
-      `/api/v3/internal/galgames/mapping?page=${page}&page_size=${pageSize}`,
-    )
+    const envelope = await this.request<{
+      items: GalgameMappingEntry[]
+      meta?: GalgameMappingMeta
+    }>(`/api/v3/internal/galgames/mapping?page=${page}&page_size=${pageSize}`)
 
     return {
       items: envelope.data?.items ?? [],
-      meta: envelope.meta ?? null,
+      meta: envelope.data?.meta ?? null,
     }
   }
 
