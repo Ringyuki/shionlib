@@ -38,6 +38,7 @@ export const GameActions = ({ game, is_favorite }: GameActionsProps) => {
                 game_title={title}
                 bangumi_id={game.b_id}
                 vndb_id={game.v_id}
+                hikarinagi_id={game.h_id}
               />
               <Patch game_id={game.id} v_id={game.v_id!} />
               <Upload game_id={game.id} />

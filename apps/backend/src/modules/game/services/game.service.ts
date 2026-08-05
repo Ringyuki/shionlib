@@ -13,12 +13,14 @@ import { applyDate } from '../helpers/date-filters'
 import { CacheService } from '../../cache/services/cache.service'
 import { RECENT_UPDATE_KEY, RECENT_UPDATE_TTL_MS } from '../constants/recent-update.constant'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
+import { HikarinagiMappingService } from '../../hikarinagi/services/hikarinagi-mapping.service'
 
 @Injectable()
 export class GameService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cacheService: CacheService,
+    private readonly hikarinagiMappingService: HikarinagiMappingService,
   ) {}
   async getById(id: number, content_limit?: number): Promise<GetGameResDto> {
     await this.handleNotFoundAndContentLimit(id, content_limit)
@@ -126,6 +128,7 @@ export class GameService {
     const select: Prisma.GameSelect = {
       v_id: true,
       b_id: true,
+      h_id: true,
       id: true,
       title_jp: true,
       title_zh: true,
@@ -167,8 +170,19 @@ export class GameService {
 
     return {
       ...header,
+      h_id: await this.resolveHikarinagiId(id, header),
       content_limit,
     }
+  }
+
+  private async resolveHikarinagiId(
+    id: number,
+    game: { h_id?: number | null; b_id?: string | null } | null,
+  ) {
+    if (!game) return null
+    if (game.h_id != null || !game.b_id) return game.h_id ?? null
+
+    return await this.hikarinagiMappingService.resolveByBangumiId(id, game.b_id)
   }
 
   async getDetails(id: number, content_limit?: number) {

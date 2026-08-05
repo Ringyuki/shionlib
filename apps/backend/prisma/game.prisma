@@ -5,6 +5,7 @@ model Game {
   id           Int         @id @default(autoincrement())
   v_id         String?
   b_id         String?
+  h_id         Int?        @unique
   title_jp     String      @default("") @db.VarChar(255)
   title_zh     String      @default("") @db.VarChar(255)
   title_en     String      @default("") @db.VarChar(255)

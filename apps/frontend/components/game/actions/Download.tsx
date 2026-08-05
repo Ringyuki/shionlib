@@ -9,9 +9,16 @@ interface DownloadProps {
   game_title?: string
   bangumi_id?: string
   vndb_id?: string
+  hikarinagi_id?: number
 }
 
-export const Download = ({ game_id, game_title, bangumi_id, vndb_id }: DownloadProps) => {
+export const Download = ({
+  game_id,
+  game_title,
+  bangumi_id,
+  vndb_id,
+  hikarinagi_id,
+}: DownloadProps) => {
   const [downloadOpen, setDownloadOpen] = useState(false)
   const [downloadBtnLoading, setDownloadBtnLoading] = useState(false)
   const t = useTranslations('Components.Game.Actions')
@@ -30,6 +37,7 @@ export const Download = ({ game_id, game_title, bangumi_id, vndb_id }: DownloadP
         game_title={game_title}
         bangumi_id={bangumi_id}
         vndb_id={vndb_id}
+        hikarinagi_id={hikarinagi_id}
         open={downloadOpen}
         onOpenChange={setDownloadOpen}
         onLoadingChange={setDownloadBtnLoading}

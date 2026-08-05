@@ -1,7 +1,9 @@
 import { GamePlatform } from '../../../game/interfaces/game.interface'
 
 export class PartnerDownloadSummaryResDto {
-  v_id: string
+  game_id: number
+  v_id: string | null
+  b_id: string | null
   resource_count: number
   file_count: number
   total_size: string

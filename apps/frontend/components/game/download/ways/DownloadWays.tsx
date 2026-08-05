@@ -40,7 +40,7 @@ export const DownloadWays = ({
   const { getSettings } = useAria2Store()
   const { protocol, host, port, path, auth_secret, downloadPath } = getSettings()
   const router = useRouter()
-  const { game_title, bangumi_id, vndb_id } = useGameDownloadMeta()
+  const { game_title, bangumi_id, vndb_id, hikarinagi_id } = useGameDownloadMeta()
   const showLunaBox = useLunaBoxStore(state => state.showLunaBox)
   const showReina = useReinaStore(state => state.showReina)
   const [pending, setPending] = useState<PendingWay | null>(null)
@@ -131,7 +131,7 @@ export const DownloadWays = ({
       checksum: file.file_hash,
       expiresAt: downloadLinkExpiresAt.current,
       title: game_title,
-      bangumiId: bangumi_id,
+      hikarinagiId: hikarinagi_id,
     })
     openProtocolUrl(lunaBoxUrl)
     sileo.success({ title: t('downloadStarted') })
@@ -154,6 +154,7 @@ export const DownloadWays = ({
       title: game_title ?? file.file_name,
       bangumiId: bangumi_id,
       vndbId: vndb_id,
+      hikarinagiId: hikarinagi_id,
     })
     openProtocolUrl(reinaUrl)
     sileo.success({ title: t('downloadStarted') })

@@ -8,7 +8,7 @@ interface LunaBoxParams {
   checksum: string
   expiresAt: number
   title?: string
-  bangumiId?: string
+  hikarinagiId?: number
 }
 
 export const buildLunaBoxUrl = ({
@@ -19,7 +19,7 @@ export const buildLunaBoxUrl = ({
   checksum,
   expiresAt,
   title,
-  bangumiId,
+  hikarinagiId,
 }: LunaBoxParams): string => {
   const params = new URLSearchParams({
     url,
@@ -33,10 +33,10 @@ export const buildLunaBoxUrl = ({
   })
 
   if (title) params.set('title', title)
-  if (bangumiId) {
-    params.set('source', 'bangumi')
-    params.set('meta_source', 'bangumi')
-    params.set('meta_id', bangumiId)
+  if (hikarinagiId) {
+    params.set('source', 'hikarinagi')
+    params.set('meta_source', 'hikarinagi')
+    params.set('meta_id', String(hikarinagiId))
   }
 
   return `lunabox://install?${params.toString()}`

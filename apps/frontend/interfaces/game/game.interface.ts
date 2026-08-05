@@ -212,6 +212,7 @@ export interface GameData {
 
   b_id?: string
   v_id?: string
+  h_id?: number
 
   id: number
   title_jp: string
@@ -244,6 +245,7 @@ export interface GameHeader extends Pick<
   GameData,
   | 'v_id'
   | 'b_id'
+  | 'h_id'
   | 'id'
   | 'title_jp'
   | 'title_zh'

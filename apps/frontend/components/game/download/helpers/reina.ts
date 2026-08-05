@@ -11,6 +11,7 @@ interface ReinaParams {
   title: string
   bangumiId: string
   vndbId?: string
+  hikarinagiId?: number
 }
 
 const ensureVndbPrefix = (vndbId: string) => (vndbId.startsWith('v') ? vndbId : `v${vndbId}`)
@@ -26,6 +27,7 @@ export const buildReinaUrl = ({
   title,
   bangumiId,
   vndbId,
+  hikarinagiId,
 }: ReinaParams): string => {
   const params = new URLSearchParams({
     v: '1',
@@ -43,6 +45,7 @@ export const buildReinaUrl = ({
   })
 
   if (vndbId) params.set('vndb_id', ensureVndbPrefix(vndbId))
+  if (hikarinagiId) params.set('hikarinagi_id', String(hikarinagiId))
 
   return `reinamanager://install?${params.toString()}`
 }

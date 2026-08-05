@@ -21,10 +21,15 @@ describe('GameService', () => {
       zcard: jest.fn(),
     }
 
+    const hikarinagiMappingService = {
+      resolveByBangumiId: jest.fn().mockResolvedValue(null),
+    }
+
     return {
       prisma,
       cacheService,
-      service: new GameService(prisma as any, cacheService as any),
+      hikarinagiMappingService,
+      service: new GameService(prisma as any, cacheService as any, hikarinagiMappingService as any),
     }
   }
 
@@ -320,5 +325,45 @@ describe('GameService', () => {
     )
 
     mathRandomSpy.mockRestore()
+  })
+
+  it('getHeader returns the stored h_id without calling hikarinagi', async () => {
+    const { service, prisma, hikarinagiMappingService } = createService()
+
+    prisma.game.findUnique
+      .mockResolvedValueOnce({ nsfw: false, covers: [{ sexual: 0 }] })
+      .mockResolvedValueOnce({ id: 1, b_id: '123456', h_id: 8001 })
+
+    await expect(service.getHeader(1, UserContentLimit.SHOW_WITH_SPOILER)).resolves.toEqual(
+      expect.objectContaining({ h_id: 8001 }),
+    )
+    expect(hikarinagiMappingService.resolveByBangumiId).not.toHaveBeenCalled()
+  })
+
+  it('getHeader resolves h_id from hikarinagi when it is not stored yet', async () => {
+    const { service, prisma, hikarinagiMappingService } = createService()
+    hikarinagiMappingService.resolveByBangumiId.mockResolvedValue(8002)
+
+    prisma.game.findUnique
+      .mockResolvedValueOnce({ nsfw: false, covers: [{ sexual: 0 }] })
+      .mockResolvedValueOnce({ id: 1, b_id: '123456', h_id: null })
+
+    await expect(service.getHeader(1, UserContentLimit.SHOW_WITH_SPOILER)).resolves.toEqual(
+      expect.objectContaining({ h_id: 8002 }),
+    )
+    expect(hikarinagiMappingService.resolveByBangumiId).toHaveBeenCalledWith(1, '123456')
+  })
+
+  it('getHeader skips the lookup when the game has no b_id to match on', async () => {
+    const { service, prisma, hikarinagiMappingService } = createService()
+
+    prisma.game.findUnique
+      .mockResolvedValueOnce({ nsfw: false, covers: [{ sexual: 0 }] })
+      .mockResolvedValueOnce({ id: 1, b_id: null, h_id: null })
+
+    await expect(service.getHeader(1, UserContentLimit.SHOW_WITH_SPOILER)).resolves.toEqual(
+      expect.objectContaining({ h_id: null }),
+    )
+    expect(hikarinagiMappingService.resolveByBangumiId).not.toHaveBeenCalled()
   })
 })
