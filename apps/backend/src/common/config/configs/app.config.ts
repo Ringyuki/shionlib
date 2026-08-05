@@ -139,6 +139,10 @@ export default (): AppConfig => ({
     secret: withDefault('PARTNER_API_SECRET', ''),
   },
 
+  hikarinagi: {
+    base_url: withDefault('HIKARINAGI_INTERNAL_BASE_URL', ''),
+  },
+
   tasks: {
     image_upload: {
       enabled: withDefault('TASKS_IMAGE_UPLOAD_ENABLED', true),

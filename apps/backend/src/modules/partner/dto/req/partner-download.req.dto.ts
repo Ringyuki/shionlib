@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString, Min, Max, MaxLength } from 'class-validator'
+import { IsNumber, IsOptional, IsString, Min, Max, MaxLength, ValidateIf } from 'class-validator'
 import { Type } from 'class-transformer'
 import { ivm } from '../../../../common/validation/i18n'
 
@@ -24,7 +24,13 @@ export class PartnerSummaryQueryReqDto {
 }
 
 export class PartnerVndbQueryReqDto {
+  @ValidateIf(o => !o.b_id)
   @IsString({ message: ivm('validation.common.IS_STRING', { property: 'v_id' }) })
   @MaxLength(32)
-  v_id: string
+  v_id?: string
+
+  @IsString({ message: ivm('validation.common.IS_STRING', { property: 'b_id' }) })
+  @IsOptional()
+  @MaxLength(32)
+  b_id?: string
 }

@@ -98,6 +98,9 @@ export interface AppConfig {
   partner: {
     secret: string
   }
+  hikarinagi: {
+    base_url: string
+  }
   tasks: {
     image_upload: {
       enabled: boolean

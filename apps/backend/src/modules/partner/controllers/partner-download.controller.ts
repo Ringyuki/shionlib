@@ -17,8 +17,8 @@ export class PartnerDownloadController {
   }
 
   @Get()
-  async getByVndbId(@Query() query: PartnerVndbQueryReqDto) {
-    return await this.partnerDownloadService.getByVndbId(query.v_id)
+  async getByExternalId(@Query() query: PartnerVndbQueryReqDto) {
+    return await this.partnerDownloadService.getByExternalId(query.v_id, query.b_id)
   }
 
   @Get('file/:fileId/link')

@@ -13,6 +13,7 @@ import { GameHotScoreCalcTask } from './tasks/game-hot-score-calc.task'
 import { GameDownloadSourceController } from './controllers/game-download-source.controller'
 import { HttpModule } from '@nestjs/axios'
 import { BangumiModule } from '../bangumi/bangumi.module'
+import { HikarinagiModule } from '../hikarinagi/hikarinagi.module'
 import { GameScoreService } from './services/game-score.service'
 import { GameScoreController } from './controllers/game-score.controller'
 import { GameDownloadResourceReportService } from './services/game-download-resource-report.service'
@@ -29,7 +30,7 @@ import { GameFieldSyncService } from './services/game-field-sync.service'
     GameDownloadSourceController,
     GameScoreController,
   ],
-  imports: [B2Module, HttpModule, BangumiModule],
+  imports: [B2Module, HttpModule, BangumiModule, HikarinagiModule],
   providers: [
     GameDataFetcherService,
     GameService,

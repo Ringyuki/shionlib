@@ -46,6 +46,7 @@ import { WalkthroughModule } from './modules/walkthrough/walkthrough.module'
 import { SponsorModule } from './modules/sponsor/sponsor.module'
 import { AdModule } from './modules/ad/ad.module'
 import { PartnerModule } from './modules/partner/partner.module'
+import { HikarinagiModule } from './modules/hikarinagi/hikarinagi.module'
 
 @Module({
   imports: [
@@ -124,6 +125,7 @@ import { PartnerModule } from './modules/partner/partner.module'
     SponsorModule,
     AdModule,
     PartnerModule,
+    HikarinagiModule,
   ],
   controllers: [],
   providers: [
