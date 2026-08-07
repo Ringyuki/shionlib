@@ -61,12 +61,12 @@ After receiving the task, ReinaManager will:
 
 1. Download the file and verify file size and hash checksums
 2. Extract common archive formats such as 7Z, ZIP, RAR, etc.
-3. Automatically strip redundant outer folders inside archives
+3. Automatically strip meaningless outer folders inside archives
 4. Scan and detect the game launcher executable
-5. Fetch mixed metadata using Bangumi and optional VNDB data
-6. Match existing games based on Bangumi ID
+5. Fetch Mixed metadata
+6. Match existing games based on the Bangumi ID or Hikarinagi ID
 7. Update existing games or create a complete local game entry in one go
-8. Link the download task with the final game entry
+8. Associate the task with the final game entry
 
 ## Pushed Information
 
@@ -83,8 +83,7 @@ ReinaManager receives the following information with each push:
 | resource_id    | Resource ID in Shionlib used to identify this push resource |
 | Bangumi ID     | Used for game matching and fetching metadata                |
 | VNDB ID        | Optional, used for mixed metadata aggregation               |
-
-Bangumi ID will always be sent with the task. VNDB ID is only sent when the Shionlib entry is already linked to VNDB.
+| Hikarinagi ID  | Optional, used for mixed metadata aggregation               |
 
 ## Troubleshooting
 
