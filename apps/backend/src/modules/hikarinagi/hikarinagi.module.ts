@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { HttpModule } from '@nestjs/axios'
 import { GameModule } from '../game/game.module'
 import { HikarinagiClient } from './clients/hikarinagi.client'
+import { MirrorModeGuard } from './guards/mirror-mode.guard'
 import { HikarinagiOpenClient } from './clients/hikarinagi-open.client'
 import { HikarinagiBootstrapService } from './services/hikarinagi-bootstrap.service'
 import { HikarinagiChangesService } from './services/hikarinagi-changes.service'
@@ -23,12 +24,14 @@ import { HikarinagiMappingSyncTask } from './tasks/hikarinagi-mapping-sync.task'
     HikarinagiBootstrapService,
     HikarinagiMappingSyncTask,
     HikarinagiChangesSyncTask,
+    MirrorModeGuard,
   ],
   exports: [
     HikarinagiMappingService,
     HikarinagiSyncService,
     HikarinagiChangesService,
     HikarinagiBootstrapService,
+    MirrorModeGuard,
   ],
 })
 export class HikarinagiModule {}

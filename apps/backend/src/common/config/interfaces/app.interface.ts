@@ -104,6 +104,7 @@ export interface AppConfig {
     token_url: string
     client_id: string
     client_secret: string
+    mirror_mode: boolean
     sync: {
       enabled: boolean
       creator_id: number

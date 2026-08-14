@@ -15,7 +15,9 @@ import {
 } from '../../edit/resolvers/permisson-resolver'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { CharacterFieldSyncService } from '../services/character-field-sync.service'
+import { MirrorModeGuard } from '../../hikarinagi/guards/mirror-mode.guard'
 
+@UseGuards(MirrorModeGuard)
 @Controller('character')
 export class CharacterEditController {
   constructor(

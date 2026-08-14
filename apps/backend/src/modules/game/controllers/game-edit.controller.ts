@@ -49,8 +49,9 @@ import {
   GamekeyToBit,
 } from '../../edit/resolvers/permisson-resolver'
 import { GameFieldGroupBit } from '../../edit/enums/field-group.enum'
+import { MirrorModeGuard } from '../../hikarinagi/guards/mirror-mode.guard'
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(MirrorModeGuard, JwtAuthGuard)
 @Controller('game')
 export class GameEditController {
   constructor(

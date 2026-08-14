@@ -145,6 +145,7 @@ export default (): AppConfig => ({
     token_url: withDefault('HIKARINAGI_OAUTH_TOKEN_URL', ''),
     client_id: withDefault('HIKARINAGI_CLIENT_ID', ''),
     client_secret: withDefault('HIKARINAGI_CLIENT_SECRET', ''),
+    mirror_mode: withDefault('HIKARINAGI_MIRROR_MODE', false),
     sync: {
       enabled: withDefault('HIKARINAGI_SYNC_ENABLED', false),
       creator_id: withDefault('HIKARINAGI_SYNC_CREATOR_ID', 1),

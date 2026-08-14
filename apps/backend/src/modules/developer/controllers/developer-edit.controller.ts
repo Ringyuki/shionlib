@@ -15,7 +15,9 @@ import {
   DeveloperKeyToBit,
 } from '../../edit/resolvers/permisson-resolver'
 import { DeveloperFieldSyncService } from '../services/developer-field-sync.service'
+import { MirrorModeGuard } from '../../hikarinagi/guards/mirror-mode.guard'
 
+@UseGuards(MirrorModeGuard)
 @Controller('developer')
 export class DeveloperEditController {
   constructor(

@@ -18,6 +18,7 @@ import { FetchGameDataReqDto } from '../dto/req/fetch-game-data.req.dto'
 import { GameCreateService } from '../services/game-create.service'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { CreateGameFromBangumiAndVNDBReqDto } from '../dto/req/create-game-from-bangumi-and-vndb.req.dto'
+import { MirrorModeGuard } from '../../hikarinagi/guards/mirror-mode.guard'
 import {
   CreateGameCharacterReqDto,
   CreateGameCoverReqDto,
@@ -25,7 +26,7 @@ import {
   CreateGameReqDto,
 } from '../dto/req/create-game.req.dto'
 
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(MirrorModeGuard, JwtAuthGuard, RolesGuard)
 @Roles(ShionlibUserRoles.USER)
 @Controller('game/create')
 export class GameCreateController {
