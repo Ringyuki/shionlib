@@ -100,6 +100,15 @@ export interface AppConfig {
   }
   hikarinagi: {
     base_url: string
+    open_base_url: string
+    token_url: string
+    client_id: string
+    client_secret: string
+    sync: {
+      enabled: boolean
+      creator_id: number
+      batch_size: number
+    }
   }
   tasks: {
     image_upload: {

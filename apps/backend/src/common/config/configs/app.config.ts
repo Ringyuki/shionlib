@@ -141,6 +141,15 @@ export default (): AppConfig => ({
 
   hikarinagi: {
     base_url: withDefault('HIKARINAGI_INTERNAL_BASE_URL', ''),
+    open_base_url: withDefault('HIKARINAGI_OPEN_BASE_URL', ''),
+    token_url: withDefault('HIKARINAGI_OAUTH_TOKEN_URL', ''),
+    client_id: withDefault('HIKARINAGI_CLIENT_ID', ''),
+    client_secret: withDefault('HIKARINAGI_CLIENT_SECRET', ''),
+    sync: {
+      enabled: withDefault('HIKARINAGI_SYNC_ENABLED', false),
+      creator_id: withDefault('HIKARINAGI_SYNC_CREATOR_ID', 1),
+      batch_size: withDefault('HIKARINAGI_SYNC_BATCH_SIZE', 200),
+    },
   },
 
   tasks: {

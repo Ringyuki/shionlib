@@ -33,6 +33,14 @@ export class HikarinagiClient {
     }
   }
 
+  async lookupById(hikarinagiId: number) {
+    const envelope = await this.request<GalgameMappingEntry | null>(
+      `/api/v3/internal/galgames/lookup?id=${hikarinagiId}`,
+    )
+
+    return envelope.data ?? null
+  }
+
   async lookupByBangumiId(bangumiId: number) {
     const envelope = await this.request<GalgameMappingEntry | null>(
       `/api/v3/internal/galgames/lookup?bangumi_game_id=${bangumiId}`,
