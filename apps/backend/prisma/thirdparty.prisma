@@ -40,3 +40,10 @@ model UserPvnBinding {
   @@map("user_pvn_bindings")
   @@index([pvn_user_id])
 }
+model HikarinagiSyncState {
+  id            Int      @id @default(1)
+  last_event_id BigInt   @default(0)
+  synced_at     DateTime @default(now())
+
+  @@map("hikarinagi_sync_state")
+}
