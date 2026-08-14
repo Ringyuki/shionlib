@@ -71,6 +71,22 @@ export class HikarinagiChangesService {
     }
   }
 
+  async latestEventId(): Promise<number> {
+    const page = await this.open.changes(0, 1)
+    return page.latest_id
+  }
+
+  /**
+   * Park the cursor at the current high-water mark. Used before a full bootstrap so the backlog
+   * that already describes the mirrored content is not replayed once the poller starts.
+   */
+  async parkCursor(): Promise<number> {
+    const latest = await this.latestEventId()
+    await this.writeCursor(latest)
+    this.logger.log(`catalog cursor parked at ${latest}`)
+    return latest
+  }
+
   private async applyEvent(event: {
     resource_type: string
     resource_id: number

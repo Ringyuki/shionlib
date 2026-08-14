@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core'
 import { Logger } from '@nestjs/common'
 import { AppModule } from '../app.module'
 import { PrismaService } from '../prisma.service'
+import { HikarinagiBootstrapService } from '../modules/hikarinagi/services/hikarinagi-bootstrap.service'
 import { HikarinagiChangesService } from '../modules/hikarinagi/services/hikarinagi-changes.service'
 import { HikarinagiSyncService } from '../modules/hikarinagi/services/hikarinagi-sync.service'
 
@@ -10,6 +11,7 @@ import { HikarinagiSyncService } from '../modules/hikarinagi/services/hikarinagi
 // transaction that is rolled back, so the reported counts are what a real run would change.
 //   node dist/scripts/hikarinagi-sync.js --ids=1,2,3
 //   node dist/scripts/hikarinagi-sync.js --ids=1,2,3 --write
+//   node dist/scripts/hikarinagi-sync.js --bootstrap --write [--from=<h_id>] [--limit=50]
 //   node dist/scripts/hikarinagi-sync.js --changes --write
 //   node dist/scripts/hikarinagi-sync.js --limit=20 --write
 
@@ -22,6 +24,8 @@ async function main() {
   const logger = new Logger('hikarinagi-sync')
   const write = process.argv.includes('--write')
   const changes = process.argv.includes('--changes')
+  const bootstrap = process.argv.includes('--bootstrap')
+  const from = Number(argValue('from')) || 0
   const ids = argValue('ids')
     .split(',')
     .map(Number)
@@ -33,6 +37,13 @@ async function main() {
   })
 
   try {
+    if (bootstrap) {
+      const result = await app.get(HikarinagiBootstrapService).run({ from, limit, dryRun: !write })
+      logger.log(`bootstrap: ${JSON.stringify(result)}`)
+      if (result.failed) process.exitCode = 1
+      return
+    }
+
     if (changes) {
       if (!write) throw new Error('--changes 会推进游标,必须显式加 --write')
       const result = await app.get(HikarinagiChangesService).consume()

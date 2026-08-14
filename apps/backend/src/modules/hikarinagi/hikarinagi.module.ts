@@ -3,6 +3,7 @@ import { HttpModule } from '@nestjs/axios'
 import { GameModule } from '../game/game.module'
 import { HikarinagiClient } from './clients/hikarinagi.client'
 import { HikarinagiOpenClient } from './clients/hikarinagi-open.client'
+import { HikarinagiBootstrapService } from './services/hikarinagi-bootstrap.service'
 import { HikarinagiChangesService } from './services/hikarinagi-changes.service'
 import { HikarinagiMappingService } from './services/hikarinagi-mapping.service'
 import { HikarinagiSyncService } from './services/hikarinagi-sync.service'
@@ -19,9 +20,15 @@ import { HikarinagiMappingSyncTask } from './tasks/hikarinagi-mapping-sync.task'
     HikarinagiMappingService,
     HikarinagiSyncService,
     HikarinagiChangesService,
+    HikarinagiBootstrapService,
     HikarinagiMappingSyncTask,
     HikarinagiChangesSyncTask,
   ],
-  exports: [HikarinagiMappingService, HikarinagiSyncService, HikarinagiChangesService],
+  exports: [
+    HikarinagiMappingService,
+    HikarinagiSyncService,
+    HikarinagiChangesService,
+    HikarinagiBootstrapService,
+  ],
 })
 export class HikarinagiModule {}
