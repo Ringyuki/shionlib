@@ -16,7 +16,7 @@ export const CharacterIntro = ({ character, appearances_count }: CharacterIntroP
         <div className="flex flex-col gap-4">
           <BasicInfos character={character} appearances_count={appearances_count} />
           <Details character={character} />
-          <CharacterActions character_id={character.id} />
+          <CharacterActions character_id={character.id} character_h_id={character.h_id} />
         </div>
       </CardContent>
     </Card>

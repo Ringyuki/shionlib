@@ -15,7 +15,7 @@ export const DeveloperIntro = ({ developer, works_count }: DeveloperIntroProps) 
         <div className="flex flex-col gap-4">
           <BasicInfos developer={developer} works_count={works_count} />
           <Details developer={developer} />
-          <DeveloperActions developer_id={developer.id} />
+          <DeveloperActions developer_id={developer.id} developer_h_id={developer.h_id} />
         </div>
       </CardContent>
     </Card>

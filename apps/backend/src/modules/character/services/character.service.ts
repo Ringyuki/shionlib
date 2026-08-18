@@ -18,6 +18,7 @@ export class CharacterService {
         id: true,
         b_id: true,
         v_id: true,
+        h_id: true,
         name_jp: true,
         name_zh: true,
         name_en: true,

@@ -82,6 +82,7 @@ export class DeveloperService {
       where: { id },
       select: {
         id: true,
+        h_id: true,
         name: true,
         aliases: true,
         logo: true,
