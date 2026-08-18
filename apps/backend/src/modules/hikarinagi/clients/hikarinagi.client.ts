@@ -3,6 +3,7 @@ import { HttpService } from '@nestjs/axios'
 import { firstValueFrom } from 'rxjs'
 import { ShionConfigService } from '../../../common/config/services/config.service'
 import {
+  CatalogChanges,
   GalgameMappingEntry,
   GalgameMappingMeta,
   HikarinagiEnvelope,
@@ -47,6 +48,14 @@ export class HikarinagiClient {
     )
 
     return envelope.data ?? null
+  }
+
+  async changes(since: number, limit: number): Promise<CatalogChanges> {
+    const envelope = await this.request<CatalogChanges>(
+      `/api/v3/internal/catalog/changes?since=${since}&limit=${limit}`,
+    )
+
+    return envelope.data
   }
 
   private get baseUrl(): string {

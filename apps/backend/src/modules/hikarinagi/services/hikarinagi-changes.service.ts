@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { PrismaService } from '../../../prisma.service'
 import { ShionConfigService } from '../../../common/config/services/config.service'
-import { HikarinagiOpenClient } from '../clients/hikarinagi-open.client'
+import { HikarinagiClient } from '../clients/hikarinagi.client'
 import { HikarinagiSyncService } from './hikarinagi-sync.service'
 
 interface ConsumeResult {
@@ -18,14 +18,14 @@ export class HikarinagiChangesService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly open: HikarinagiOpenClient,
+    private readonly internal: HikarinagiClient,
     private readonly sync: HikarinagiSyncService,
     private readonly configService: ShionConfigService,
   ) {}
 
   async consume(): Promise<ConsumeResult> {
     const result: ConsumeResult = { consumed: 0, applied: 0, failed: 0, cursor: 0 }
-    if (!this.open.enabled) return result
+    if (!this.internal.enabled) return result
     if (this.running) {
       this.logger.warn('previous catalog changes run is still in flight; skipping')
       return result
@@ -37,7 +37,7 @@ export class HikarinagiChangesService {
       let cursor = await this.readCursor()
 
       for (;;) {
-        const page = await this.open.changes(cursor, batchSize)
+        const page = await this.internal.changes(cursor, batchSize)
         if (!page.items.length) {
           result.cursor = cursor
           break
@@ -72,7 +72,7 @@ export class HikarinagiChangesService {
   }
 
   async latestEventId(): Promise<number> {
-    const page = await this.open.changes(0, 1)
+    const page = await this.internal.changes(0, 1)
     return page.latest_id
   }
 

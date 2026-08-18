@@ -18,3 +18,18 @@ export interface HikarinagiEnvelope<T> {
   request_id: string
   timestamp: string
 }
+
+export interface CatalogEvent {
+  id: number
+  resource_type: string
+  resource_id: number
+  kind: 'UPSERT' | 'DELETE' | 'MERGE'
+  merged_to_id: number | null
+  created_at: string
+}
+
+export interface CatalogChanges {
+  items: CatalogEvent[]
+  latest_id: number
+  has_more: boolean
+}

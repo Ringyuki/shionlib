@@ -127,18 +127,3 @@ export interface OpenProducerDetail {
   logo: OpenMedia | null
   revised_at: string | null
 }
-
-export interface OpenCatalogEvent {
-  id: number
-  resource_type: string
-  resource_id: number
-  kind: 'UPSERT' | 'DELETE' | 'MERGE'
-  merged_to_id: number | null
-  created_at: string
-}
-
-export interface OpenCatalogChanges {
-  items: OpenCatalogEvent[]
-  latest_id: number
-  has_more: boolean
-}

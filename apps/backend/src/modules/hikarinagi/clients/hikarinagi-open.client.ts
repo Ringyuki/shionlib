@@ -6,7 +6,6 @@ import { ShionConfigService } from '../../../common/config/services/config.servi
 import { HikarinagiTokenService } from '../services/hikarinagi-token.service'
 import { HikarinagiEnvelope } from '../interfaces/galgame-mapping.interface'
 import {
-  OpenCatalogChanges,
   OpenCharacterDetail,
   OpenGalgameCharacter,
   OpenGalgameDetail,
@@ -28,10 +27,6 @@ export class HikarinagiOpenClient {
 
   get enabled(): boolean {
     return Boolean(this.baseUrl) && this.tokenService.enabled
-  }
-
-  async changes(since: number, limit: number): Promise<OpenCatalogChanges> {
-    return this.request<OpenCatalogChanges>(`/catalog/changes?since=${since}&limit=${limit}`)
   }
 
   async galgame(id: number): Promise<OpenGalgameDetail | null> {
