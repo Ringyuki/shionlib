@@ -42,6 +42,7 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
   [ShionBizCode.GAME_VNDB_REQUEST_FAILED]: HttpStatus.BAD_REQUEST,
   [ShionBizCode.GAME_ALREADY_EXISTS]: HttpStatus.CONFLICT,
   [ShionBizCode.GAME_DATA_CONSISTENCY_CHECK_FAILED]: HttpStatus.BAD_REQUEST,
+  [ShionBizCode.GAME_ENTRY_MIRRORED]: HttpStatus.FORBIDDEN,
   [ShionBizCode.GAME_MISSING_BANGUMI_OR_VNDB_ID]: HttpStatus.BAD_REQUEST,
 
   // 41

@@ -47,6 +47,32 @@ services:
       retries: 30
       start_period: 90s
 
+  hikarinagi-stub:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    restart: unless-stopped
+    command: ['node', 'dist/scripts/e2e-hikarinagi-stub.js']
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-shionlib}:${POSTGRES_PASSWORD:-shionlib}@postgres:5432/${POSTGRES_DB:-shionlib}?schema=public
+      PARTNER_API_SECRET: ${PARTNER_API_SECRET:-e2e-internal-secret}
+      STUB_PORT: '5003'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:5003/api/v3/internal/catalog/changes',{headers:{'x-internal-secret':process.env.PARTNER_API_SECRET}}).then((r) => process.exit(r.status < 500 ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
   backend:
     build:
       context: .
@@ -56,7 +82,11 @@ services:
       - ./docker/env/backend.env
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-shionlib}:${POSTGRES_PASSWORD:-shionlib}@postgres:5432/${POSTGRES_DB:-shionlib}?schema=public
+      HIKARINAGI_INTERNAL_BASE_URL: http://hikarinagi-stub:5003
+      PARTNER_API_SECRET: ${PARTNER_API_SECRET:-e2e-internal-secret}
     depends_on:
+      hikarinagi-stub:
+        condition: service_healthy
       postgres:
         condition: service_healthy
       redis:

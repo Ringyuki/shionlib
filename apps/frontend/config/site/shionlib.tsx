@@ -2,6 +2,7 @@ import { ShionlibSiteConfig, NavBarConfig } from '@/interfaces/site/shion-lib-si
 import { SparklesIcon } from 'lucide-react'
 import { supportedLocalesEnum } from '../i18n/supported'
 import { AD_PLACEMENTS } from '../../constants/ad-placements'
+import { hikarinagiMirror } from './hikarinagi'
 
 export const shionlibSiteConfig: ShionlibSiteConfig = {
   canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://shionlib.com',
@@ -21,10 +22,14 @@ export const navBarConfig: NavBarConfig = {
       label: 'producers',
       href: '/developer',
     },
-    {
-      label: 'create',
-      href: '/create',
-    },
+    ...(hikarinagiMirror.enabled
+      ? []
+      : [
+          {
+            label: 'create',
+            href: '/create',
+          },
+        ]),
     {
       label: 'releases',
       href: '/release',

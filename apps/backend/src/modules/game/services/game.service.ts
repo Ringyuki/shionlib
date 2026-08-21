@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { PrismaService } from '../../../prisma.service'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
@@ -8,12 +8,29 @@ import { GetGameListReqDto } from '../dto/req/get-game-list.req.dto'
 import { GetGameResDto } from '../dto/res/get-game.res.dto'
 import { Prisma } from '@prisma/client'
 import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
-import { UserContentLimit } from '../../user/interfaces/user.interface'
-import { applyDate } from '../helpers/date-filters'
+import { releasePeriods } from '../helpers/date-filters'
+import { HikarinagiClient } from '../../hikarinagi/clients/hikarinagi.client'
+import {
+  mapBundleToCharacters,
+  mapBundleToDetails,
+  mapBundleToGameDetail,
+  hasRatedMedia,
+  mapBundleToHeader,
+  mapBundleToLinks,
+  mapBundleToRelations,
+  mapBundleToTags,
+  emptyNestedGame,
+  mapCardToListItem,
+} from '../../hikarinagi/mappers/galgame-read.mapper'
+import { InternalGalgameBundle } from '../../hikarinagi/interfaces/galgame-mapping.interface'
+import { galgameBundleKey } from '../../hikarinagi/constants/cache-keys.constant'
+import { includesRated } from '../../user/helpers/content-limit.helper'
 import { CacheService } from '../../cache/services/cache.service'
 import { RECENT_UPDATE_KEY, RECENT_UPDATE_TTL_MS } from '../constants/recent-update.constant'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
 import { HikarinagiMappingService } from '../../hikarinagi/services/hikarinagi-mapping.service'
+
+const GAME_DETAIL_CACHE_TTL_MS = 6 * 60 * 60 * 1000
 
 @Injectable()
 export class GameService {
@@ -21,156 +38,78 @@ export class GameService {
     private readonly prisma: PrismaService,
     private readonly cacheService: CacheService,
     private readonly hikarinagiMappingService: HikarinagiMappingService,
+    @Inject(forwardRef(() => HikarinagiClient))
+    private readonly hikarinagi: HikarinagiClient,
   ) {}
-  async getById(id: number, content_limit?: number): Promise<GetGameResDto> {
-    await this.handleNotFoundAndContentLimit(id, content_limit)
+  private async hikarinagiBundle(hikarinagiId: number): Promise<InternalGalgameBundle> {
+    const cacheKey = galgameBundleKey(hikarinagiId)
+    const cached = await this.cacheService.get<InternalGalgameBundle | null>(cacheKey)
+    if (cached) return cached
 
-    const select: Prisma.GameSelect = {
-      title_jp: true,
-      title_zh: true,
-      title_en: true,
-      intro_jp: true,
-      intro_zh: true,
-      intro_en: true,
-      tags: {
-        select: {
-          tag_alias: true,
-          tag: {
-            select: {
-              name: true,
-              count: true,
-            },
-          },
-        },
-      },
-      covers: {
-        select: {
-          language: true,
-          type: true,
-          url: true,
-          dims: true,
-          sexual: true,
-          violence: true,
-        },
-      },
-      developers: {
-        select: {
-          role: true,
-          developer: {
-            select: {
-              id: true,
-              name: true,
-              aliases: true,
-            },
-          },
-        },
-      },
-      characters: {
-        select: {
-          role: true,
-          image: true,
-          actor: true,
-          character: {
-            select: {
-              id: true,
-              image: true,
-              name_jp: true,
-              name_zh: true,
-              name_en: true,
-              aliases: true,
-              intro_jp: true,
-              intro_zh: true,
-              intro_en: true,
-              gender: true,
-              blood_type: true,
-              height: true,
-              weight: true,
-              bust: true,
-              waist: true,
-              hips: true,
-              cup: true,
-              age: true,
-              birthday: true,
-            },
-          },
-        },
-      },
-    }
-    if (content_limit !== UserContentLimit.NEVER_SHOW_NSFW_CONTENT) {
-      select.images = {
-        select: {
-          url: true,
-          dims: true,
-          sexual: true,
-          violence: true,
-        },
-      }
-    }
+    const bundle = await this.hikarinagi.galgameDetail(hikarinagiId)
+    if (!bundle) throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
+    await this.cacheService.set(cacheKey, bundle, GAME_DETAIL_CACHE_TTL_MS)
 
-    const game = await this.prisma.game.findUnique({
-      where: {
-        id,
+    return bundle
+  }
+
+  private async localShell(id: number) {
+    const local = await this.prisma.game.findUnique({
+      where: { id, status: 1 },
+      select: {
+        id: true,
+        v_id: true,
+        b_id: true,
+        h_id: true,
+        extra_info: true,
       },
-      select,
     })
+    if (!local) throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
 
-    const data = {
-      ...game,
+    const h_id = await this.resolveHikarinagiId(id, local)
+    if (h_id == null) throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
+
+    return { ...local, h_id }
+  }
+
+  async getById(id: number, content_limit?: number): Promise<GetGameResDto> {
+    const { bundle } = await this.readThrough(id, content_limit)
+
+    return {
+      ...mapBundleToGameDetail(bundle, includesRated(content_limit)),
+      tags: mapBundleToTags(bundle),
       content_limit,
     } as unknown as GetGameResDto
+  }
 
-    return data
+  private async relationsOf(bundle: InternalGalgameBundle, includeRated: boolean) {
+    const targetIds = (bundle.relations ?? []).map(row => row.target_galgame.id)
+    const shells = targetIds.length
+      ? await this.prisma.game.findMany({
+          where: { h_id: { in: targetIds }, status: 1 },
+          select: { id: true, h_id: true },
+        })
+      : []
+    const localIdByRemoteId = new Map(
+      shells.flatMap(shell => (shell.h_id == null ? [] : [[shell.h_id, shell.id] as const])),
+    )
+
+    return {
+      link: mapBundleToLinks(bundle),
+      relations_from: mapBundleToRelations(bundle, localIdByRemoteId, includeRated),
+    }
   }
 
   async getHeader(id: number, content_limit?: number) {
-    await this.handleNotFoundAndContentLimit(id, content_limit)
-
-    const select: Prisma.GameSelect = {
-      v_id: true,
-      b_id: true,
-      h_id: true,
-      id: true,
-      title_jp: true,
-      title_zh: true,
-      title_en: true,
-      aliases: true,
-      covers: {
-        select: {
-          language: true,
-          type: true,
-          url: true,
-          dims: true,
-          sexual: true,
-          violence: true,
-        },
-      },
-      developers: {
-        select: {
-          role: true,
-          developer: {
-            select: {
-              id: true,
-              name: true,
-              aliases: true,
-            },
-          },
-        },
-      },
-      release_date: true,
-      release_date_tba: true,
-      extra_info: true,
-      type: true,
-      platform: true,
-    }
-
-    const header = await this.prisma.game.findUnique({
-      where: { id },
-      select,
-    })
+    const { local, bundle } = await this.readThrough(id, content_limit)
 
     return {
-      ...header,
-      h_id: await this.resolveHikarinagiId(id, header),
+      id: local.id,
+      v_id: local.v_id,
+      b_id: local.b_id,
+      h_id: local.h_id,
+      extra_info: local.extra_info,
+      ...mapBundleToHeader(bundle, includesRated(content_limit)),
       content_limit,
     }
   }
@@ -186,139 +125,63 @@ export class GameService {
   }
 
   async getDetails(id: number, content_limit?: number) {
-    await this.handleNotFoundAndContentLimit(id, content_limit)
-
-    const select: Prisma.GameSelect = {
-      id: true,
-      intro_jp: true,
-      intro_zh: true,
-      intro_en: true,
-      images: {
-        select: {
-          url: true,
-          dims: true,
-          sexual: true,
-          violence: true,
-        },
-        where: {
-          sexual: {
-            in: [0],
-          },
-        },
-      },
-      extra_info: true,
-      tags: {
-        select: { tag_alias: true, tag: { select: { id: true, name: true, count: true } } },
-        orderBy: { tag: { count: 'desc' } },
-      },
-      staffs: true,
-      nsfw: true,
-      link: {
-        select: {
-          id: true,
-          url: true,
-          label: true,
-          name: true,
-        },
-      },
-      relations_from: {
-        select: {
-          id: true,
-          relation: true,
-          to_game_id: true,
-          to_game: {
-            select: {
-              id: true,
-              title_jp: true,
-              title_zh: true,
-              title_en: true,
-              intro_jp: true,
-              intro_zh: true,
-              intro_en: true,
-              covers: {
-                select: {
-                  language: true,
-                  type: true,
-                  url: true,
-                  dims: true,
-                  sexual: true,
-                  violence: true,
-                },
-                take: 3,
-              },
-            },
-          },
-        },
-        orderBy: { relation: 'asc' },
-      },
-    }
-    if (content_limit !== UserContentLimit.NEVER_SHOW_NSFW_CONTENT) {
-      select.images = {
-        select: {
-          url: true,
-          dims: true,
-          sexual: true,
-          violence: true,
-        },
-      }
-    }
-    const game = await this.prisma.game.findUnique({
-      where: {
-        id,
-      },
-      select,
-    })
+    const { local, bundle } = await this.readThrough(id, content_limit)
+    const relations = await this.relationsOf(bundle, includesRated(content_limit))
 
     return {
-      ...game,
+      id: local.id,
+      extra_info: local.extra_info,
+      tags: mapBundleToTags(bundle),
+      ...mapBundleToDetails(bundle, includesRated(content_limit)),
+      ...relations,
       content_limit,
     }
   }
 
   async getCharacters(id: number, content_limit?: number) {
-    await this.handleNotFoundAndContentLimit(id, content_limit)
+    const { bundle } = await this.readThrough(id, content_limit)
 
-    const select: Prisma.GameSelect = {
-      characters: {
-        select: {
-          role: true,
-          image: true,
-          actor: true,
-          character: {
-            select: {
-              id: true,
-              image: true,
-              name_jp: true,
-              name_zh: true,
-              name_en: true,
-              aliases: true,
-              intro_jp: true,
-              intro_zh: true,
-              intro_en: true,
-              gender: true,
-              blood_type: true,
-              height: true,
-              weight: true,
-              bust: true,
-              waist: true,
-              hips: true,
-              cup: true,
-              age: true,
-              birthday: true,
-            },
-          },
-        },
+    return { characters: mapBundleToCharacters(bundle), content_limit }
+  }
+
+  private async mergeCards(
+    shells: { id: number; h_id: number | null; views: number }[],
+    includeRated: boolean,
+  ) {
+    const ids = shells.map(shell => shell.h_id).filter((id): id is number => id != null)
+    const cards = ids.length ? await this.hikarinagi.galgameBatch(ids) : []
+    const byId = new Map(cards.map(card => [card.id, card]))
+
+    return shells.map(shell => {
+      const card = shell.h_id != null ? byId.get(shell.h_id) : undefined
+
+      return {
+        id: shell.id,
+        views: shell.views,
+        ...emptyNestedGame(),
+        ...(card ? mapCardToListItem(card, includeRated) : {}),
+      }
+    })
+  }
+
+  private pageOf(
+    items: GetGameListResDto[],
+    total: number,
+    page: number,
+    pageSize: number,
+    content_limit?: number,
+  ): PaginatedResult<GetGameListResDto> {
+    return {
+      items,
+      meta: {
+        totalItems: total,
+        itemCount: items.length,
+        itemsPerPage: pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        currentPage: page,
+        content_limit,
       },
     }
-
-    const characters = await this.prisma.game.findUnique({
-      where: {
-        id,
-      },
-      select,
-    })
-
-    return characters
   }
 
   async getList(
@@ -338,119 +201,59 @@ export class GameService {
       end_date,
     } = getGameListReqDto.filter ?? {}
 
-    let where: Prisma.GameWhereInput = {
-      status: 1,
-    }
-    if (content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT || !content_limit) {
-      where.nsfw = {
-        not: true,
-      }
-      where.covers = {
-        every: {
-          sexual: {
-            in: [0],
-          },
-        },
-      }
-    }
-    if (producer_id)
-      where.developers = {
-        some: {
-          developer: {
-            id: producer_id,
-          },
-        },
-      }
-    if (character_id)
-      where.characters = {
-        some: {
-          character: {
-            id: character_id,
-          },
-        },
-      }
-
-    if (tags)
-      where.tags = {
-        some: { tag: { name: { in: tags.map(t => t.toLowerCase().trim()) } } },
-      }
-
-    if (exclude_tags && exclude_tags.length > 0) {
-      const excludeCondition: Prisma.GameWhereInput = {
-        tags: {
-          none: { tag: { name: { in: exclude_tags.map(t => t.toLowerCase().trim()) } } },
-        },
-      }
-      where.AND = [...((where.AND as Prisma.GameWhereInput[]) ?? []), excludeCondition]
-    }
-
-    if (platforms && platforms.length > 0)
-      where.platform = {
-        hasSome: platforms,
-      }
-
-    if (start_date && end_date) {
-      const [from, to] = start_date <= end_date ? [start_date, end_date] : [end_date, start_date]
-      where.release_date = {
-        gte: new Date(from),
-        lte: new Date(to),
-      }
-    } else if (years || months) where = applyDate(where, { years, months })
-    if (start_date || end_date || years || months) {
-      where.release_date_tba = {
-        not: true,
-      }
-    }
-
-    const orderByArray: Prisma.GameOrderByWithRelationInput[] = []
-    orderByArray.push({ release_date_tba: 'asc' })
-    if (sort_by) {
-      orderByArray.push({ [sort_by]: sort_order } as Prisma.GameOrderByWithRelationInput)
-    } else {
-      orderByArray.push({ release_date: 'desc' })
-    }
-    orderByArray.push({ id: 'desc' })
-
-    const total = await this.prisma.game.count({
-      where,
+    const orderedByRelease = !sort_by || sort_by === 'release_date'
+    const { ids } = await this.hikarinagi.galgameIds({
+      producer_id,
+      character_id,
+      content_limit,
+      tags,
+      exclude_tags,
+      platforms,
+      release_periods: releasePeriods({ years, months }),
+      released_after: start_date?.toISOString(),
+      released_before: end_date?.toISOString(),
+      sort_order: orderedByRelease ? sort_order : undefined,
+      exclude_rated_covers: !includesRated(content_limit),
     })
-    const games = await this.prisma.game.findMany({
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      orderBy: orderByArray,
-      where,
-      select: {
-        id: true,
-        title_jp: true,
-        title_zh: true,
-        title_en: true,
-        aliases: true,
-        type: true,
-        covers: {
-          select: {
-            language: true,
-            type: true,
-            dims: true,
-            sexual: true,
-            violence: true,
-            url: true,
-          },
-        },
-        views: true,
-      },
-    })
+    if (!ids.length) return this.pageOf([], 0, page, pageSize, content_limit)
 
-    return {
-      items: games,
-      meta: {
-        totalItems: total,
-        itemCount: games.length,
-        itemsPerPage: pageSize,
-        totalPages: Math.ceil(total / pageSize),
-        currentPage: page,
+    const where: Prisma.GameWhereInput = { status: 1, h_id: { in: ids } }
+    const select = { id: true, h_id: true, views: true }
+    const skip = (page - 1) * pageSize
+
+    if (orderedByRelease) {
+      const rows = await this.prisma.game.findMany({ where, select })
+      const byHikarinagiId = new Map(rows.map(row => [row.h_id, row]))
+      const ordered = ids.map(id => byHikarinagiId.get(id)).filter(row => row !== undefined)
+      const shells = ordered.slice(skip, skip + pageSize)
+
+      return this.pageOf(
+        await this.mergeCards(shells, includesRated(content_limit)),
+        ordered.length,
+        page,
+        pageSize,
         content_limit,
-      },
+      )
     }
+
+    const [total, shells] = await Promise.all([
+      this.prisma.game.count({ where }),
+      this.prisma.game.findMany({
+        skip,
+        take: pageSize,
+        orderBy: [{ [sort_by]: sort_order }, { id: 'desc' }],
+        where,
+        select,
+      }),
+    ])
+
+    return this.pageOf(
+      await this.mergeCards(shells, includesRated(content_limit)),
+      total,
+      page,
+      pageSize,
+      content_limit,
+    )
   }
 
   async getRecentUpdate(
@@ -470,46 +273,19 @@ export class GameService {
     ])
     const gameIds = items.map(item => Number(item.member))
 
+    const safeIds = await this.hikarinagi.safeGalgameIds(content_limit)
     const where: Prisma.GameWhereInput = {
       id: { in: gameIds },
       status: 1,
+      ...(safeIds ? { h_id: { in: safeIds } } : {}),
     }
-    if (content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT || !content_limit) {
-      where.nsfw = {
-        not: true,
-      }
-      where.covers = {
-        every: {
-          sexual: {
-            in: [0],
-          },
-        },
-      }
-    }
-    const games = await this.prisma.game.findMany({
+    const shells = await this.prisma.game.findMany({
       where,
-      select: {
-        id: true,
-        title_jp: true,
-        title_zh: true,
-        title_en: true,
-        aliases: true,
-        type: true,
-        covers: {
-          select: {
-            language: true,
-            type: true,
-            dims: true,
-            sexual: true,
-            violence: true,
-            url: true,
-          },
-        },
-        views: true,
-      },
+      select: { id: true, h_id: true, views: true },
     })
-    const gameMap = new Map(games.map(game => [game.id, game]))
-    const sortedGames = gameIds.map(id => gameMap.get(id)).filter(Boolean) as typeof games
+    const shellMap = new Map(shells.map(shell => [shell.id, shell]))
+    const ordered = gameIds.map(id => shellMap.get(id)).filter(Boolean) as typeof shells
+    const sortedGames = await this.mergeCards(ordered, includesRated(content_limit))
 
     return {
       items: sortedGames,
@@ -534,53 +310,31 @@ export class GameService {
   }
 
   async getRandomGameId(req: RequestWithUser): Promise<number | null> {
-    const n = await this.prisma.game.count({
-      where: { status: 1 },
-    })
+    const safeIds = await this.hikarinagi.safeGalgameIds(req.user?.content_limit)
+    const where: Prisma.GameWhereInput = {
+      status: 1,
+      ...(safeIds ? { h_id: { in: safeIds } } : {}),
+    }
+    const n = await this.prisma.game.count({ where })
     if (n === 0) return null
-    const k = Math.floor(Math.random() * n)
 
     const item = await this.prisma.game.findFirst({
-      where: { status: 1 },
-      select: { id: true, nsfw: true, covers: { select: { sexual: true } } },
+      where,
+      select: { id: true },
       orderBy: { id: 'asc' },
-      skip: k,
+      skip: Math.floor(Math.random() * n),
     })
-    if (!item) return null
-    if (
-      (item.nsfw || item.covers.some(c => c.sexual > 0)) &&
-      (req.user.content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT ||
-        !req.user.content_limit)
-    ) {
-      return null
-    }
-    return item.id
+
+    return item?.id ?? null
   }
 
-  private async handleNotFoundAndContentLimit(id: number, content_limit?: number): Promise<void> {
-    const exist = await this.prisma.game.findUnique({
-      where: {
-        id,
-        status: 1,
-      },
-      select: {
-        views: true,
-        nsfw: true,
-        covers: {
-          select: {
-            sexual: true,
-          },
-        },
-      },
-    })
-    if (!exist) {
+  private async readThrough(id: number, content_limit?: number) {
+    const local = await this.localShell(id)
+    const bundle = await this.hikarinagiBundle(local.h_id)
+    if (!includesRated(content_limit) && hasRatedMedia(bundle)) {
       throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
     }
-    if (
-      (exist.nsfw || exist.covers.some(c => c.sexual > 0)) &&
-      (content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT || !content_limit)
-    ) {
-      throw new ShionBizException(ShionBizCode.GAME_NOT_FOUND)
-    }
+
+    return { local, bundle }
   }
 }

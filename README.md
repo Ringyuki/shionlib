@@ -16,7 +16,7 @@ If you have questions or suggestions, feel free to open an [Issue](https://githu
 
 Shionlib will always be **free** and **open source**; we do not charge users any fees. All resources on Shionlib are uploaded by users, and we cannot guarantee their completeness or safety.
 
-If there are lawful purchase channels in your country/region, you can find store or official website links under **Related Links** on a game’s page. If something is missing, you can add it via the **Edit** function.
+If there are lawful purchase channels in your country/region, you can find store or official website links under **Related Links** on a game’s page.
 
 As mentioned above, in many countries and regions there is often a lack of compliant channels for purchasing legitimate visual novels/Galgame. Many excellent developers have also disappeared for various reasons, and their works can be hard to find across the internet.
 

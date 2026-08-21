@@ -101,6 +101,7 @@ export type I18nTranslations = {
         "GAME_ALREADY_EXISTS": string;
         "GAME_DATA_CONSISTENCY_CHECK_FAILED": string;
         "GAME_MISSING_BANGUMI_OR_VNDB_ID": string;
+        "GAME_ENTRY_MIRRORED": string;
         "GAME_DEVELOPER_NOT_FOUND": string;
         "GAME_DEVELOPER_ALREADY_EXISTS": string;
         "GAME_DEVELOPER_MIN_ONE_REQUIRED": string;

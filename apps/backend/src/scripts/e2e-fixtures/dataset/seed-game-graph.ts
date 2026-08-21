@@ -242,6 +242,9 @@ export const seedGameGraph = async ({
       },
     })
 
+    // 条目内容由上游提供,e2e 用同库桩服务顶替,因此 h_id 指向自身
+    await prisma.game.update({ where: { id: created.id }, data: { h_id: created.id } })
+
     gameIdMap.set(game.id, created.id)
     createdGameIds.push(created.id)
 

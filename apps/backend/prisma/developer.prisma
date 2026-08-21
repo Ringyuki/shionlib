@@ -3,6 +3,7 @@ model GameDeveloper {
   id         Int      @id @default(autoincrement())
   b_id       String?
   v_id       String?
+  h_id       Int?     @unique
   name       String   @default("") @db.VarChar(255)
   aliases    String[] @default([])
   logo       String?

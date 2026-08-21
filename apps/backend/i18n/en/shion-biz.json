@@ -1,7 +1,6 @@
 {
   "COMMON_VALIDATION_FAILED": "validation failed",
   "COMMON_NOT_IMPLEMENTED": "not implemented",
-
   "AUTH_UNAUTHORIZED": "unauthorized",
   "AUTH_FORBIDDEN": "forbidden",
   "AUTH_INVALID_TOKEN": "invalid token",
@@ -14,7 +13,6 @@
   "AUTH_INVALID_RESET_PASSWORD_TOKEN": "invalid reset password token",
   "AUTH_OIDC_IDENTITY_NOT_FOUND": "linked account not found",
   "AUTH_OIDC_LAST_LOGIN_METHOD": "cannot unlink your only login method; set a password or add a passkey first",
-
   "USER_NOT_FOUND": "user not found",
   "USER_EMAIL_ALREADY_EXISTS": "email already exists",
   "USER_NAME_ALREADY_EXISTS": "name already exists",
@@ -26,7 +24,6 @@
   "USER_ALREADY_BANNED": "user already banned",
   "USER_ALREADY_UNBANNED": "user already unbanned",
   "USER_INVALID_BAN_DURATION": "invalid ban duration",
-
   "GAME_NOT_FOUND": "game not found",
   "GAME_INVALID_VNDB_ID": "invalid vndb id",
   "GAME_BANGUMI_REQUEST_FAILED": "bangumi request failed, message: {message}",
@@ -34,21 +31,18 @@
   "GAME_ALREADY_EXISTS": "game already exists",
   "GAME_DATA_CONSISTENCY_CHECK_FAILED": "game data consistency check failed",
   "GAME_MISSING_BANGUMI_OR_VNDB_ID": "missing bangumi id or vndb id",
-
+  "GAME_ENTRY_MIRRORED": "Entry data is maintained on hikarinagi; please edit it there",
   "GAME_DEVELOPER_NOT_FOUND": "developer not found",
   "GAME_DEVELOPER_ALREADY_EXISTS": "developer already exists",
   "GAME_DEVELOPER_MIN_ONE_REQUIRED": "at least one developer is required",
   "GAME_DEVELOPER_HAS_RELATIONS": "this developer has existing relations with game(s)",
   "GAME_DEVELOPER_HAS_CHILDREN": "this developer has existing child(ren) developer(s)",
-
   "GAME_CHARACTER_NOT_FOUND": "character not found",
   "GAME_CHARACTER_ALREADY_EXISTS": "character already exists",
   "GAME_CHARACTER_MIN_ONE_REQUIRED": "at least one character is required",
   "GAME_CHARACTER_HAS_RELATIONS": "this character has existing relations with game(s)",
-
   "GAME_COVER_ALREADY_EXISTS": "cover already exists",
   "GAME_COVER_MIN_ONE_REQUIRED": "at least one cover is required",
-
   "GAME_DOWNLOAD_RESOURCE_NOT_FOUND": "download resource not found",
   "GAME_DOWNLOAD_RESOURCE_NOT_OWNER": "download resource not owner",
   "GAME_DOWNLOAD_RESOURCE_UPLOAD_SESSION_ALREADY_USED": "upload session already used by another file",
@@ -59,12 +53,10 @@
   "GAME_DOWNLOAD_RESOURCE_REPORT_SUSPENDED": "your report capability is temporarily suspended",
   "GAME_DOWNLOAD_RESOURCE_MALWARE_CASE_NOT_FOUND": "malware review case not found",
   "GAME_DOWNLOAD_RESOURCE_MALWARE_CASE_ALREADY_PROCESSED": "this malware review case has already been processed",
-
   "GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND": "download resource file not found",
   "GAME_DOWNLOAD_RESOURCE_FILE_TOKEN_REQUIRED": "token is required",
   "GAME_DOWNLOAD_RESOURCE_FILE_INVALID_TOKEN": "validation failed, error codes: {errorCodes}",
   "GAME_DOWNLOAD_RESOURCE_FILE_NOT_OWNER": "you don't have permission to modify this file",
-
   "FAVORITE_ALREADY_EXISTS": "favorite already exists",
   "FAVORITE_ITEM_ALREADY_EXISTS": "favorite already contains this game",
   "FAVORITE_NOT_FOUND": "favorite not found",
@@ -74,11 +66,9 @@
   "FAVORITE_NAME_ALREADY_EXISTS": "favorite name already exists",
   "FAVORITE_NOT_ALLOW_VIEW": "you don't have permission to view this favorite",
   "FAVORITE_DEFAULT_NOT_ALLOW_DELETE": "default favorite can't be deleted",
-
   "COMMENT_NOT_FOUND": "comment not found",
   "COMMENT_NOT_OWNER": "comment not owner",
   "COMMENT_TOO_DEEP": "comment too deep",
-
   "GAME_UPLOAD_INVALID_TOTAL_SIZE": "invalid total size",
   "GAME_UPLOAD_TOO_MANY_CHUNKS": "too many chunks",
   "GAME_UPLOAD_TOO_LARGE": "upload file size exceeds limit",
@@ -94,43 +84,32 @@
   "GAME_UPLOAD_SESSION_NOT_OWNER": "upload session not owner",
   "GAME_UPLOAD_SESSION_ALREADY_USED": "upload session already used by another file",
   "GAME_UPLOAD_INVALID_FILE_STATUS": "upload file status invalid",
-
   "SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT": "upload file size exceeds limit",
   "SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED": "no file provided",
   "SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE": "unsupported file type",
-
   "USER_UPLOAD_QUOTA_NOT_FOUND": "upload quota not found",
   "USER_UPLOAD_QUOTA_EXCEEDED": "upload quota exceeded",
   "USER_UPLOAD_QUOTA_USE_CANT_BE_NEGATIVE": "upload quota use can't be negative",
   "USER_UPLOAD_QUOTA_RECORD_NOT_FOUND": "upload quota record not found",
-
   "EDIT_FIELD_PERMISSION_NOT_ENOUGH": "you don't have permission to modify {deniedFields} (bits:{deniedBits})",
-
   "EDIT_RECORD_NOT_FOUND": "edit record not found",
   "EDIT_RECORD_ALREADY_UNDONE": "edit record already undone",
   "EDIT_RECORD_CONFLICT": "edit record conflict",
-
   "MESSAGE_NOT_FOUND": "message not found",
   "MESSAGE_FORBIDDEN": "you don't have permission to view this message",
-
   "PVN_BINDING_NOT_FOUND": "PotatoVN binding not found",
   "PVN_BINDING_ALREADY_EXISTS": "PotatoVN account is already bound",
   "PVN_BINDING_AUTH_FAILED": "PotatoVN authentication failed, please check your credentials",
-
   "PVN_GAME_MAPPING_NOT_FOUND": "this game is not in your PotatoVN library",
-
   "WALKTHROUGH_NOT_FOUND": "walkthrough not found",
   "WALKTHROUGH_NOT_OWNER": "you don't have permission to modify this walkthrough",
-
   "SPONSOR_ORDER_NOT_FOUND": "sponsor order not found",
   "SPONSOR_ORDER_ALREADY_PAID": "this order has already been paid",
   "SPONSOR_ORDER_EXPIRED": "this order has expired",
   "SPONSOR_PROVIDER_REQUEST_FAILED": "payment provider request failed, message: {message}",
   "SPONSOR_PROVIDER_VERIFICATION_FAILED": "payment verification failed",
   "SPONSOR_MODULE_DISABLED": "sponsor module is currently disabled",
-
   "AD_NOT_FOUND": "ad not found",
-
   "ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE": "traffic detail is temporarily unavailable, message: {message}",
   "PARTNER_UNAUTHORIZED": "partner credentials are missing or invalid"
 }

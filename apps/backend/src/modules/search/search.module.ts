@@ -1,9 +1,11 @@
-import { Global, Module } from '@nestjs/common'
+import { Global, Module, forwardRef } from '@nestjs/common'
 import { ShionConfigService } from '../../common/config/services/config.service'
 import { SEARCH_ENGINE, SearchEngine } from './interfaces/search.interface'
 import { PgSearchEngine } from './engines/pg.engine'
 import { MeilisearchEngine } from './engines/meilisearch.engine'
 import { OpenSearchEngine } from './engines/opensearch.engine'
+import { HikarinagiSearchEngine } from './engines/hikarinagi.engine'
+import { HikarinagiClient } from '../hikarinagi/clients/hikarinagi.client'
 import { OpenSearchService } from './services/opensearch.service'
 import { SearchService } from './services/search.service'
 import { SearchController } from './controllers/search.controller'
@@ -16,10 +18,14 @@ import { RedisService } from './services/redis.service'
 import { BullModule } from '@nestjs/bull'
 import { SEARCH_ANALYTICS_QUEUE } from './constants/analytics'
 import { CacheService } from '../cache/services/cache.service'
+import { HikarinagiModule } from '../hikarinagi/hikarinagi.module'
 
 @Global()
 @Module({
-  imports: [BullModule.registerQueue({ name: SEARCH_ANALYTICS_QUEUE })],
+  imports: [
+    BullModule.registerQueue({ name: SEARCH_ANALYTICS_QUEUE }),
+    forwardRef(() => HikarinagiModule),
+  ],
   controllers: [SearchController],
   providers: [
     {
@@ -30,6 +36,7 @@ import { CacheService } from '../cache/services/cache.service'
         MeilisearchService,
         OpenSearchService,
         CacheService,
+        HikarinagiClient,
       ],
       useFactory: (
         config: ShionConfigService,
@@ -37,6 +44,7 @@ import { CacheService } from '../cache/services/cache.service'
         meili: MeilisearchService,
         opensearch: OpenSearchService,
         cache: CacheService,
+        hikarinagi: HikarinagiClient,
       ): SearchEngine => {
         const engine = config.get('search.engine')
         switch (engine) {
@@ -46,6 +54,8 @@ import { CacheService } from '../cache/services/cache.service'
             return new MeilisearchEngine(meili, config, cache)
           case 'opensearch':
             return new OpenSearchEngine(opensearch, config, cache)
+          case 'hikarinagi':
+            return new HikarinagiSearchEngine(prisma, hikarinagi)
           default:
             throw new Error(`Unsupported search engine: ${engine}`)
         }

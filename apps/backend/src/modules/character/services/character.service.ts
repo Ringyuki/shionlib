@@ -7,41 +7,23 @@ import { CharacterResDto } from '../dto/res/character.res.dto'
 import { GetListReqDto } from '../dto/req/get-list.req.dto'
 import { Prisma } from '@prisma/client'
 
+import { HikarinagiClient } from '../../hikarinagi/clients/hikarinagi.client'
+import { mapCharacterDetail } from '../../hikarinagi/mappers/galgame-read.mapper'
+
 @Injectable()
 export class CharacterService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly hikarinagi: HikarinagiClient,
+  ) {}
 
   async getCharacter(id: number) {
-    const character = await this.prisma.gameCharacter.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        b_id: true,
-        v_id: true,
-        name_jp: true,
-        name_zh: true,
-        name_en: true,
-        aliases: true,
-        intro_jp: true,
-        intro_zh: true,
-        intro_en: true,
-        image: true,
-        blood_type: true,
-        height: true,
-        weight: true,
-        bust: true,
-        waist: true,
-        hips: true,
-        cup: true,
-        age: true,
-        birthday: true,
-        gender: true,
-      },
-    })
-    if (!character) {
+    const remote = await this.hikarinagi.character(id)
+    if (!remote) {
       throw new ShionBizException(ShionBizCode.GAME_CHARACTER_NOT_FOUND)
     }
-    return character
+
+    return { id, h_id: id, ...mapCharacterDetail(remote) }
   }
 
   async getList(dto: GetListReqDto): Promise<PaginatedResult<CharacterResDto>> {

@@ -36,15 +36,20 @@ describe('UserDataService', () => {
       },
     } as unknown as PrismaService
 
-    const service = new UserDataService(prisma)
+    const hikarinagi = {
+      galgameBatch: jest.fn().mockResolvedValue([]),
+      safeGalgameIds: jest.fn().mockResolvedValue([11, 22]),
+    }
+    const service = new UserDataService(prisma, hikarinagi as any)
 
     return {
       service,
       prisma,
+      hikarinagi,
     }
   }
 
-  it('getGameResources applies nsfw filter for restricted user and marks current user status', async () => {
+  it('getGameResources restricts to hikarinagi-safe games and marks current user status', async () => {
     const { service, prisma } = createService()
     ;(prisma.gameDownloadResource.findMany as jest.Mock).mockResolvedValue([
       {
@@ -78,11 +83,7 @@ describe('UserDataService', () => {
         take: 2,
         where: {
           creator_id: 7,
-          game: {
-            nsfw: {
-              not: true,
-            },
-          },
+          game: { h_id: { in: [11, 22] } },
         },
       }),
     )
@@ -123,12 +124,13 @@ describe('UserDataService', () => {
     })
   })
 
-  it('getGameResources omits nsfw filter for permissive content limit and hides ongoing status for other users', async () => {
-    const { service, prisma } = createService()
+  it('getGameResources skips the safe-id filter for a permissive content limit and hides ongoing status for other users', async () => {
+    const { service, prisma, hikarinagi } = createService()
     ;(prisma.gameDownloadResource.findMany as jest.Mock).mockResolvedValue([])
     ;(prisma.gameUploadSession.findMany as jest.Mock).mockResolvedValue([{ id: 100 }])
     ;(prisma.gameDownloadResource.count as jest.Mock).mockResolvedValue(0)
 
+    hikarinagi.safeGalgameIds.mockResolvedValueOnce(null)
     const req = { user: { sub: 8, content_limit: UserContentLimit.JUST_SHOW } } as any
     const result = await service.getGameResources(7, req, { page: 1, pageSize: 10 } as any)
 
@@ -227,10 +229,7 @@ describe('UserDataService', () => {
         where: {
           creator_id: 7,
           status: WalkthroughStatus.HIDDEN,
-          game: {
-            nsfw: { not: true },
-            covers: { every: { sexual: { in: [0] } } },
-          },
+          game: { h_id: { in: [11, 22] } },
         },
         skip: 0,
         take: 10,
@@ -261,10 +260,7 @@ describe('UserDataService', () => {
       where: {
         creator_id: 7,
         status: { in: [WalkthroughStatus.PUBLISHED] },
-        game: {
-          nsfw: { not: true },
-          covers: { every: { sexual: { in: [0] } } },
-        },
+        game: { h_id: { in: [11, 22] } },
       },
     })
     expect(prisma.walkthrough.findMany).toHaveBeenCalledWith(
@@ -272,10 +268,7 @@ describe('UserDataService', () => {
         where: {
           creator_id: 7,
           status: { in: [WalkthroughStatus.PUBLISHED] },
-          game: {
-            nsfw: { not: true },
-            covers: { every: { sexual: { in: [0] } } },
-          },
+          game: { h_id: { in: [11, 22] } },
         },
         skip: 5,
         take: 5,

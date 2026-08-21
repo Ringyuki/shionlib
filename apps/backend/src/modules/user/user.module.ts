@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Module, forwardRef } from '@nestjs/common'
 import { UserController } from './controllers/user.controller'
 import { UserService } from './services/user.service'
 import { LoginSessionService } from '../auth/services/login-session.service'
@@ -10,6 +10,7 @@ import { UserInfoService } from './services/user-info.service'
 import { UserDataController } from './controllers/user-data.controller'
 import { UserDataService } from './services/user-data.service'
 import { UnbanUserTask } from './tasks/unban-user.task'
+import { HikarinagiModule } from '../hikarinagi/hikarinagi.module'
 
 @Module({
   controllers: [UserController, UserInfoController, UserDataController],
@@ -22,7 +23,7 @@ import { UnbanUserTask } from './tasks/unban-user.task'
     UserDataService,
     UnbanUserTask,
   ],
-  imports: [AuthModule],
+  imports: [AuthModule, forwardRef(() => HikarinagiModule)],
   exports: [UserService],
 })
 export class UserModule {}

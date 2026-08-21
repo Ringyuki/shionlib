@@ -6,15 +6,48 @@ import { PaginatedResult } from '../../../shared/interfaces/response/response.in
 import { GameResourcesResDto } from '../dto/res/game-resources.res.dto'
 import { Prisma, WalkthroughStatus } from '@prisma/client'
 import { PaginationReqDto } from '../../../shared/dto/req/pagination.req.dto'
-import { UserContentLimit } from '../interfaces/user.interface'
 import { CommentResDto } from '../../comment/dto/res/comment.res.dto'
 import { EditRecordItem } from '../dto/res/edit-records.res.dto'
 import { WalkthroughItemResDto } from '../dto/res/walkthrough.res.dto'
 import { USER_AVATAR_SELECT, mapUserAvatar } from '../../../shared/constants/user-select.constant'
 
+import { HikarinagiClient } from '../../hikarinagi/clients/hikarinagi.client'
+import { emptyNestedGame, mapCardToNestedGame } from '../../hikarinagi/mappers/galgame-read.mapper'
+import { includesRated } from '../helpers/content-limit.helper'
+
 @Injectable()
 export class UserDataService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly hikarinagi: HikarinagiClient,
+  ) {}
+
+  private async hydrateGames<T extends { game: { id: number; h_id: number | null } | null }>(
+    rows: T[],
+    includeRated: boolean,
+  ): Promise<T[]> {
+    const ids = [
+      ...new Set(rows.map(row => row.game?.h_id).filter((id): id is number => id != null)),
+    ]
+    if (!ids.length) return rows
+
+    const cards = await this.hikarinagi.galgameBatch(ids)
+    const byId = new Map(cards.map(card => [card.id, card]))
+
+    return rows.map(row => {
+      if (!row.game) return row
+      const card = row.game.h_id != null ? byId.get(row.game.h_id) : undefined
+
+      return {
+        ...row,
+        game: {
+          id: row.game.id,
+          ...emptyNestedGame(),
+          ...(card ? mapCardToNestedGame(card, includeRated) : {}),
+        },
+      } as T
+    })
+  }
 
   async getGameResources(
     user_id: number,
@@ -23,17 +56,9 @@ export class UserDataService {
   ): Promise<PaginatedResult<GameResourcesResDto>> {
     const { page, pageSize } = dto
 
+    const safeIds = await this.hikarinagi.safeGalgameIds(req.user?.content_limit)
     const where: Prisma.GameDownloadResourceWhereInput = {}
-    if (
-      req.user?.content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT ||
-      !req.user?.content_limit
-    ) {
-      where.game = {
-        nsfw: {
-          not: true,
-        },
-      }
-    }
+    if (safeIds) where.game = { h_id: { in: safeIds } }
     const resources = await this.prismaService.gameDownloadResource.findMany({
       skip: (page - 1) * pageSize,
       take: pageSize,
@@ -60,26 +85,7 @@ export class UserDataService {
         creator: {
           select: USER_AVATAR_SELECT,
         },
-        game: {
-          select: {
-            id: true,
-            title_jp: true,
-            title_zh: true,
-            title_en: true,
-            intro_jp: true,
-            intro_zh: true,
-            intro_en: true,
-            covers: {
-              select: {
-                url: true,
-                language: true,
-                dims: true,
-                sexual: true,
-                violence: true,
-              },
-            },
-          },
-        },
+        game: { select: { id: true, h_id: true } },
       },
     })
 
@@ -102,8 +108,13 @@ export class UserDataService {
       },
     })
 
+    const hydratedResources = await this.hydrateGames(
+      resources,
+      includesRated(req.user?.content_limit),
+    )
+
     return {
-      items: resources.map(r => ({
+      items: hydratedResources.map(r => ({
         id: r.id,
         platform: r.platform,
         language: r.language,
@@ -162,20 +173,7 @@ export class UserDataService {
         },
         liked_users: { where: { id: req.user?.sub || 0 }, select: { id: true }, take: 1 },
         _count: { select: { liked_users: true } },
-        game: {
-          select: {
-            id: true,
-            title_jp: true,
-            title_zh: true,
-            title_en: true,
-            intro_jp: true,
-            intro_zh: true,
-            intro_en: true,
-            covers: {
-              select: { url: true, language: true, dims: true, sexual: true, violence: true },
-            },
-          },
-        },
+        game: { select: { id: true, h_id: true } },
         creator: {
           select: USER_AVATAR_SELECT,
         },
@@ -185,8 +183,13 @@ export class UserDataService {
     })
 
     const isCurrentUser = user_id === req.user?.sub
+    const hydratedComments = await this.hydrateGames(
+      comments,
+      includesRated(req.user?.content_limit),
+    )
+
     return {
-      items: comments.map(comment => ({
+      items: hydratedComments.map(comment => ({
         id: comment.id,
         html: comment.html,
         parent_id: comment.parent_id,
@@ -235,15 +238,8 @@ export class UserDataService {
     if (status && visibleStatuses.includes(status) && status !== WalkthroughStatus.DELETED) {
       where.status = status
     }
-    if (
-      req.user?.content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT ||
-      !req.user?.content_limit
-    ) {
-      where.game = {
-        nsfw: { not: true },
-        covers: { every: { sexual: { in: [0] } } },
-      }
-    }
+    const safeIds = await this.hikarinagi.safeGalgameIds(req.user?.content_limit)
+    if (safeIds) where.game = { h_id: { in: safeIds } }
 
     const total = await this.prismaService.walkthrough.count({ where })
     const walkthroughs = await this.prismaService.walkthrough.findMany({
@@ -261,35 +257,20 @@ export class UserDataService {
         updated: true,
         edited: true,
         status: true,
-        game: {
-          select: {
-            id: true,
-            title_jp: true,
-            title_zh: true,
-            title_en: true,
-            intro_jp: true,
-            intro_zh: true,
-            intro_en: true,
-            covers: {
-              select: {
-                language: true,
-                url: true,
-                type: true,
-                dims: true,
-                sexual: true,
-                violence: true,
-              },
-            },
-          },
-        },
+        game: { select: { id: true, h_id: true } },
         creator: {
           select: USER_AVATAR_SELECT,
         },
       },
     })
 
+    const hydratedWalkthroughs = await this.hydrateGames(
+      walkthroughs,
+      includesRated(req.user?.content_limit),
+    )
+
     return {
-      items: walkthroughs.map(w => ({
+      items: hydratedWalkthroughs.map(w => ({
         ...w,
         creator: mapUserAvatar(w.creator),
       })) as unknown as WalkthroughItemResDto[],

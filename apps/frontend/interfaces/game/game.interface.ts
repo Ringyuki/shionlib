@@ -309,6 +309,7 @@ export interface DeveloperRelation {
 export interface GameCharacter {
   b_id?: string
   v_id?: string
+  h_id?: number
   id: number
   image?: string
 

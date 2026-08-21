@@ -2,7 +2,6 @@ import { GameCharacter } from '@/interfaces/game/game.interface'
 import { Card, CardContent } from '@/components/shionui/Card'
 import { BasicInfos } from './BasicInfos'
 import { Details } from './Details'
-import { CharacterActions } from '../actions/CharacterActions'
 
 interface CharacterIntroProps {
   character: GameCharacter
@@ -16,7 +15,6 @@ export const CharacterIntro = ({ character, appearances_count }: CharacterIntroP
         <div className="flex flex-col gap-4">
           <BasicInfos character={character} appearances_count={appearances_count} />
           <Details character={character} />
-          <CharacterActions character_id={character.id} />
         </div>
       </CardContent>
     </Card>

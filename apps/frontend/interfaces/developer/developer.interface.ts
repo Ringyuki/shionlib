@@ -2,6 +2,7 @@ import { ExtraInfo } from '../game/game.interface'
 
 export interface Developer {
   id: number
+  h_id?: number
   name: string
   aliases: string[]
   logo: string

@@ -100,6 +100,9 @@ export interface AppConfig {
   }
   hikarinagi: {
     base_url: string
+    sync: {
+      batch_size: number
+    }
   }
   tasks: {
     image_upload: {
@@ -107,7 +110,7 @@ export interface AppConfig {
     }
   }
   search: {
-    engine: 'pg' | 'meilisearch' | 'opensearch'
+    engine: 'pg' | 'meilisearch' | 'opensearch' | 'hikarinagi'
     meilisearch: {
       host: string
       apiKey: string

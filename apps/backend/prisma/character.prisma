@@ -2,6 +2,7 @@ model GameCharacter {
   id         Int                     @id @default(autoincrement())
   b_id       String?
   v_id       String?
+  h_id       Int?                    @unique
   image      String?
   name_jp    String                  @default("")
   name_zh    String?

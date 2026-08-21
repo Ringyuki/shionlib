@@ -141,6 +141,9 @@ export default (): AppConfig => ({
 
   hikarinagi: {
     base_url: withDefault('HIKARINAGI_INTERNAL_BASE_URL', ''),
+    sync: {
+      batch_size: withDefault('HIKARINAGI_SYNC_BATCH_SIZE', 200),
+    },
   },
 
   tasks: {

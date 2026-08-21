@@ -6,8 +6,6 @@ import { Download } from './Download'
 import { Upload } from './Upload'
 import { Comment } from './Comment'
 import { Favorite } from './Favorite'
-import { Edit } from './Edit'
-import { History } from './History'
 import { Patch } from './Patch'
 import { MoreActions } from './more/MoreActions'
 import { useShionlibUserStore } from '@/store/userStore'
@@ -44,8 +42,6 @@ export const GameActions = ({ game, is_favorite }: GameActionsProps) => {
               <Upload game_id={game.id} />
             </div>
             <div className="flex gap-2 items-center">
-              <Edit game_id={game.id} />
-              <History game_id={game.id} />
               <Favorite isFavorite={is_favorite} gameId={game.id} className="lg:hidden flex" />
               <Comment className="lg:hidden flex" gameId={game.id} />
             </div>
