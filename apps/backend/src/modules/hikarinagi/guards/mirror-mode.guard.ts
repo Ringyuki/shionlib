@@ -4,16 +4,16 @@ import { ShionBizException } from '../../../common/exceptions/shion-business.exc
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 
 /**
- * Entry data (games, characters, developers) is mirrored from hikarinagi once mirror mode is on,
- * so the local write paths that would fork it are closed. Downloads, comments, favorites and every
- * other shionlib-owned surface stay open.
+ * Entry data (games, characters, developers) is read through from hikarinagi, so the local write
+ * paths that would fork it are closed. Downloads, comments, favorites and every other
+ * shionlib-owned surface stay open.
  */
 @Injectable()
 export class MirrorModeGuard implements CanActivate {
   constructor(private readonly configService: ShionConfigService) {}
 
   canActivate(): boolean {
-    if (this.configService.get('hikarinagi.mirror_mode')) {
+    if (this.configService.get('hikarinagi.base_url')) {
       throw new ShionBizException(ShionBizCode.GAME_ENTRY_MIRRORED)
     }
     return true

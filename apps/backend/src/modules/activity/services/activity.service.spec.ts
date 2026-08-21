@@ -12,9 +12,14 @@ describe('ActivityService', () => {
       },
     } as unknown as PrismaService
 
-    const service = new ActivityService(prisma)
+    const hikarinagi = {
+      galgameBatch: jest.fn().mockResolvedValue([]),
+      safeGalgameIds: jest.fn().mockResolvedValue(null),
+    }
+    const service = new ActivityService(prisma, hikarinagi as any)
 
     return {
+      hikarinagi,
       service,
       prisma,
     }
@@ -196,5 +201,28 @@ describe('ActivityService', () => {
     })
 
     expect(result.items[2].file).toBeUndefined()
+  })
+  it('restricts the feed to hikarinagi-safe games for a strict reader', async () => {
+    const { service, prisma, hikarinagi } = createService()
+    hikarinagi.safeGalgameIds.mockResolvedValueOnce([11, 22])
+    ;(prisma.activity.count as jest.Mock).mockResolvedValue(0)
+    ;(prisma.activity.findMany as jest.Mock).mockResolvedValue([])
+
+    await service.getList({ page: 1, pageSize: 10 } as any, { user: { content_limit: 1 } } as any)
+
+    expect((prisma.activity.count as jest.Mock).mock.calls[0][0].where.game).toEqual({
+      h_id: { in: [11, 22] },
+    })
+  })
+
+  it('applies no game filter when the reader may see rated works', async () => {
+    const { service, prisma, hikarinagi } = createService()
+    hikarinagi.safeGalgameIds.mockResolvedValueOnce(null)
+    ;(prisma.activity.count as jest.Mock).mockResolvedValue(0)
+    ;(prisma.activity.findMany as jest.Mock).mockResolvedValue([])
+
+    await service.getList({ page: 1, pageSize: 10 } as any, { user: { content_limit: 3 } } as any)
+
+    expect((prisma.activity.count as jest.Mock).mock.calls[0][0].where.game).toBeUndefined()
   })
 })

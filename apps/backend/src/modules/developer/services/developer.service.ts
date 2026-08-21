@@ -7,9 +7,15 @@ import { GetListReqDto } from '../dto/req/get-list.req.dto'
 import { PaginatedResult } from '../../../shared/interfaces/response/response.interface'
 import { DeveloperResDto } from '../dto/res/developer.res.dto'
 
+import { HikarinagiClient } from '../../hikarinagi/clients/hikarinagi.client'
+import { mapProducerDetail } from '../../hikarinagi/mappers/galgame-read.mapper'
+
 @Injectable()
 export class DeveloperService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly hikarinagi: HikarinagiClient,
+  ) {}
 
   async getList(dto: GetListReqDto): Promise<PaginatedResult<DeveloperResDto>> {
     const { page, pageSize, q } = dto
@@ -71,35 +77,12 @@ export class DeveloperService {
   }
 
   async getById(id: number) {
-    const exist = await this.prisma.gameDeveloper.findUnique({
-      where: { id },
-    })
-    if (!exist) {
+    const remote = await this.hikarinagi.producer(id)
+    if (!remote) {
       throw new ShionBizException(ShionBizCode.GAME_DEVELOPER_NOT_FOUND)
     }
 
-    return await this.prisma.gameDeveloper.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        h_id: true,
-        name: true,
-        aliases: true,
-        logo: true,
-        intro_jp: true,
-        intro_zh: true,
-        intro_en: true,
-        website: true,
-        extra_info: true,
-        parent_developer: {
-          select: {
-            id: true,
-            name: true,
-            aliases: true,
-          },
-        },
-      },
-    })
+    return { id, h_id: id, ...mapProducerDetail(remote) }
   }
 
   async deleteById(id: number) {

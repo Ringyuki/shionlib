@@ -5,14 +5,47 @@ import { PaginatedResult } from '../../../shared/interfaces/response/response.in
 import { ActivityResDto } from '../dto/res/activity.res.dto'
 import { Prisma } from '@prisma/client'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
-import { UserContentLimit } from '../../user/interfaces/user.interface'
 import { USER_AVATAR_SELECT, mapUserAvatar } from '../../../shared/constants/user-select.constant'
 import { GetActivityListReqDto } from '../dto/req/get-activity-list.req.dto'
 import { ActivityListCategoryTypes } from '../constants/activity-list-category.constant'
 
+import { HikarinagiClient } from '../../hikarinagi/clients/hikarinagi.client'
+import { emptyNestedGame, mapCardToNestedGame } from '../../hikarinagi/mappers/galgame-read.mapper'
+import { includesRated } from '../../user/helpers/content-limit.helper'
+
 @Injectable()
 export class ActivityService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly hikarinagi: HikarinagiClient,
+  ) {}
+
+  private async hydrateGames<T extends { game: { id: number; h_id: number | null } | null }>(
+    rows: T[],
+    includeRated: boolean,
+  ): Promise<T[]> {
+    const ids = [
+      ...new Set(rows.map(row => row.game?.h_id).filter((id): id is number => id != null)),
+    ]
+    if (!ids.length) return rows
+
+    const cards = await this.hikarinagi.galgameBatch(ids)
+    const byId = new Map(cards.map(card => [card.id, card]))
+
+    return rows.map(row => {
+      if (!row.game) return row
+      const card = row.game.h_id != null ? byId.get(row.game.h_id) : undefined
+
+      return {
+        ...row,
+        game: {
+          id: row.game.id,
+          ...emptyNestedGame(),
+          ...(card ? mapCardToNestedGame(card, includeRated) : {}),
+        },
+      } as T
+    })
+  }
 
   async create(createActivityReqDto: CreateActivityReqDto, tx?: Prisma.TransactionClient) {
     const {
@@ -59,21 +92,8 @@ export class ActivityService {
     if (category) {
       where.type = { in: ActivityListCategoryTypes[category] }
     }
-    if (
-      req.user.content_limit === UserContentLimit.NEVER_SHOW_NSFW_CONTENT ||
-      !req.user.content_limit
-    ) {
-      where.game = {
-        nsfw: {
-          not: true,
-        },
-        covers: {
-          every: {
-            sexual: { in: [0] },
-          },
-        },
-      }
-    }
+    const safeIds = await this.hikarinagi.safeGalgameIds(req.user?.content_limit)
+    if (safeIds) where.game = { h_id: { in: safeIds } }
     const total = await this.prismaService.activity.count({
       where,
     })
@@ -87,27 +107,7 @@ export class ActivityService {
       select: {
         id: true,
         type: true,
-        game: {
-          select: {
-            id: true,
-            title_jp: true,
-            title_zh: true,
-            title_en: true,
-            intro_jp: true,
-            intro_zh: true,
-            intro_en: true,
-            covers: {
-              select: {
-                language: true,
-                url: true,
-                type: true,
-                dims: true,
-                sexual: true,
-                violence: true,
-              },
-            },
-          },
-        },
+        game: { select: { id: true, h_id: true } },
         walkthrough: {
           select: {
             id: true,
@@ -153,8 +153,10 @@ export class ActivityService {
       },
     })
 
+    const hydrated = await this.hydrateGames(activities, includesRated(req.user?.content_limit))
+
     return {
-      items: activities.map(a => ({
+      items: hydrated.map(a => ({
         id: a.id,
         type: a.type,
         user: mapUserAvatar(a.user),

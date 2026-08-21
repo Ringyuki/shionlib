@@ -100,14 +100,7 @@ export interface AppConfig {
   }
   hikarinagi: {
     base_url: string
-    open_base_url: string
-    token_url: string
-    client_id: string
-    client_secret: string
-    mirror_mode: boolean
     sync: {
-      enabled: boolean
-      creator_id: number
       batch_size: number
     }
   }
@@ -117,7 +110,7 @@ export interface AppConfig {
     }
   }
   search: {
-    engine: 'pg' | 'meilisearch' | 'opensearch'
+    engine: 'pg' | 'meilisearch' | 'opensearch' | 'hikarinagi'
     meilisearch: {
       host: string
       apiKey: string

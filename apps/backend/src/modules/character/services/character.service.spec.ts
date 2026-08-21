@@ -22,49 +22,15 @@ describe('CharacterService', () => {
       Promise.all(queries),
     )
 
-    const service = new CharacterService(prisma)
+    const hikarinagi = { character: jest.fn().mockResolvedValue(null) }
+    const service = new CharacterService(prisma as any, hikarinagi as any)
 
     return {
       service,
       prisma,
+      hikarinagi,
     }
   }
-
-  it('getCharacter throws when target does not exist', async () => {
-    const { service, prisma } = createService()
-    ;(prisma.gameCharacter.findUnique as jest.Mock).mockResolvedValue(null)
-
-    await expect(service.getCharacter(1)).rejects.toMatchObject({
-      code: ShionBizCode.GAME_CHARACTER_NOT_FOUND,
-    })
-  })
-
-  it('getCharacter returns selected fields when found', async () => {
-    const { service, prisma } = createService()
-    ;(prisma.gameCharacter.findUnique as jest.Mock).mockResolvedValue({
-      id: 1,
-      name_jp: 'jp',
-      name_zh: 'zh',
-      name_en: 'en',
-      aliases: ['a'],
-    })
-
-    const result = await service.getCharacter(1)
-
-    expect(prisma.gameCharacter.findUnique).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { id: 1 },
-        select: expect.objectContaining({
-          id: true,
-          name_jp: true,
-          name_zh: true,
-          name_en: true,
-          aliases: true,
-        }),
-      }),
-    )
-    expect(result).toMatchObject({ id: 1, name_jp: 'jp' })
-  })
 
   it('getList returns paginated list without search query', async () => {
     const { service, prisma } = createService()
@@ -187,5 +153,23 @@ describe('CharacterService', () => {
 
     expect(prisma.gameCharacter.delete).toHaveBeenCalledWith({ where: { id: 2 } })
     expect(result).toEqual({ id: 2, name_jp: 'n' })
+  })
+
+  it('getCharacter reads the entity through hikarinagi by its hikarinagi id', async () => {
+    const { service, hikarinagi } = createService()
+    hikarinagi.character.mockResolvedValue({ name: 'x', aliases: [] })
+
+    const result: any = await service.getCharacter(77)
+
+    expect(hikarinagi.character).toHaveBeenCalledWith(77)
+    expect(result.id).toBe(77)
+    expect(result.h_id).toBe(77)
+  })
+
+  it('getCharacter rejects when hikarinagi has no such entity', async () => {
+    const { service, hikarinagi } = createService()
+    hikarinagi.character.mockResolvedValue(null)
+
+    await expect(service.getCharacter(999)).rejects.toBeDefined()
   })
 })

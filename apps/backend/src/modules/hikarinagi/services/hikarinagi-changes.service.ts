@@ -2,7 +2,8 @@ import { Injectable, Logger } from '@nestjs/common'
 import { PrismaService } from '../../../prisma.service'
 import { ShionConfigService } from '../../../common/config/services/config.service'
 import { HikarinagiClient } from '../clients/hikarinagi.client'
-import { HikarinagiSyncService } from './hikarinagi-sync.service'
+import { CacheService } from '../../cache/services/cache.service'
+import { GALGAME_BUNDLE_KEY_PREFIX, galgameBundleKey } from '../constants/cache-keys.constant'
 
 interface ConsumeResult {
   consumed: number
@@ -19,7 +20,7 @@ export class HikarinagiChangesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly internal: HikarinagiClient,
-    private readonly sync: HikarinagiSyncService,
+    private readonly cache: CacheService,
     private readonly configService: ShionConfigService,
   ) {}
 
@@ -94,20 +95,26 @@ export class HikarinagiChangesService {
     merged_to_id: number | null
   }): Promise<void> {
     if (event.resource_type === 'GALGAME') {
-      if (event.kind === 'UPSERT') await this.sync.applyGalgame(event.resource_id)
-      else if (event.kind === 'DELETE') await this.sync.hideGalgame(event.resource_id)
-      else if (event.kind === 'MERGE' && event.merged_to_id !== null) {
-        await this.sync.mergeGalgame(event.resource_id, event.merged_to_id)
+      await this.invalidateGalgame(event.resource_id)
+      if (event.kind === 'MERGE' && event.merged_to_id !== null) {
+        await this.invalidateGalgame(event.merged_to_id)
       }
       return
     }
-    if (event.resource_type === 'CHARACTER' && event.kind === 'UPSERT') {
-      await this.sync.applyCharacter(event.resource_id)
-      return
+
+    if (event.resource_type === 'CHARACTER' || event.resource_type === 'PRODUCER') {
+      await this.cache.delByContains(GALGAME_BUNDLE_KEY_PREFIX)
     }
-    if (event.resource_type === 'PRODUCER' && event.kind === 'UPSERT') {
-      await this.sync.applyProducer(event.resource_id)
-    }
+  }
+
+  private async invalidateGalgame(hikarinagiId: number): Promise<void> {
+    await this.cache.del(galgameBundleKey(hikarinagiId))
+
+    const shell = await this.prisma.game.findFirst({
+      where: { h_id: hikarinagiId },
+      select: { id: true },
+    })
+    if (shell) await this.cache.delByContains(`game:${shell.id}:`)
   }
 
   private async readCursor(): Promise<number> {

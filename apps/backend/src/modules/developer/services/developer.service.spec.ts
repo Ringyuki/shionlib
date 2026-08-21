@@ -11,6 +11,7 @@ describe('DeveloperService', () => {
         count: jest.fn(),
         findMany: jest.fn(),
         findUnique: jest.fn(),
+        findFirst: jest.fn(),
         delete: jest.fn(),
       },
       gameDeveloperRelation: {
@@ -22,11 +23,13 @@ describe('DeveloperService', () => {
       Promise.all(queries),
     )
 
-    const service = new DeveloperService(prisma)
+    const hikarinagi = { producer: jest.fn().mockResolvedValue(null) }
+    const service = new DeveloperService(prisma as any, hikarinagi as any)
 
     return {
       service,
       prisma,
+      hikarinagi,
     }
   }
 
@@ -119,41 +122,6 @@ describe('DeveloperService', () => {
     })
   })
 
-  it('getById returns selected developer details', async () => {
-    const { service, prisma } = createService()
-    ;(prisma.gameDeveloper.findUnique as jest.Mock)
-      .mockResolvedValueOnce({ id: 9 })
-      .mockResolvedValueOnce({
-        id: 9,
-        name: 'dev-9',
-        aliases: ['d9'],
-        logo: 'logo-9',
-        intro_jp: 'jp',
-        intro_zh: 'zh',
-        intro_en: 'en',
-        website: 'https://dev9.test',
-        extra_info: { key: 'value' },
-        parent_developer: { id: 1, name: 'parent', aliases: ['p'] },
-      })
-
-    const result = await service.getById(9)
-
-    expect(prisma.gameDeveloper.findUnique).toHaveBeenNthCalledWith(1, {
-      where: { id: 9 },
-    })
-    expect(prisma.gameDeveloper.findUnique).toHaveBeenNthCalledWith(2, {
-      where: { id: 9 },
-      select: expect.objectContaining({
-        id: true,
-        name: true,
-        aliases: true,
-        logo: true,
-        parent_developer: expect.any(Object),
-      }),
-    })
-    expect(result).toMatchObject({ id: 9, name: 'dev-9' })
-  })
-
   it('deleteById throws when developer does not exist', async () => {
     const { service, prisma } = createService()
     ;(prisma.gameDeveloper.findUnique as jest.Mock).mockResolvedValue(null)
@@ -193,5 +161,59 @@ describe('DeveloperService', () => {
     await service.deleteById(4)
 
     expect(prisma.gameDeveloper.delete).toHaveBeenCalledWith({ where: { id: 4 } })
+  })
+
+  it('getById reads the entity through hikarinagi by its hikarinagi id', async () => {
+    const { service, hikarinagi } = createService()
+    hikarinagi.producer.mockResolvedValue({ name: 'x', aliases: [] })
+
+    const result: any = await service.getById(77)
+
+    expect(hikarinagi.producer).toHaveBeenCalledWith(77)
+    expect(result.id).toBe(77)
+    expect(result.h_id).toBe(77)
+  })
+
+  it('getById surfaces hikarinagi producer labels as extra_info, in label order', async () => {
+    const { service, prisma, hikarinagi } = createService()
+    hikarinagi.producer.mockResolvedValue({
+      name: 'x',
+      aliases: [],
+      country: '日本',
+      labels: [
+        { key: '现任社长', value: '某人', order: 1 },
+        { key: '官网', value: 'https://example.test', order: 0 },
+      ],
+    })
+
+    const result: any = await service.getById(77)
+
+    expect(result.extra_info).toEqual([
+      { key: '官网', value: 'https://example.test' },
+      { key: '现任社长', value: '某人' },
+      { key: '国家/地区', value: '日本' },
+    ])
+    expect(prisma.gameDeveloper.findFirst).not.toHaveBeenCalled()
+  })
+
+  it('getById does not duplicate a country already present in the labels', async () => {
+    const { service, hikarinagi } = createService()
+    hikarinagi.producer.mockResolvedValue({
+      name: 'x',
+      aliases: [],
+      country: '日本',
+      labels: [{ key: '国家/地区', value: '日本国', order: 0 }],
+    })
+
+    const result: any = await service.getById(77)
+
+    expect(result.extra_info).toEqual([{ key: '国家/地区', value: '日本国' }])
+  })
+
+  it('getById rejects when hikarinagi has no such entity', async () => {
+    const { service, hikarinagi } = createService()
+    hikarinagi.producer.mockResolvedValue(null)
+
+    await expect(service.getById(999)).rejects.toBeDefined()
   })
 })

@@ -12,7 +12,7 @@ export class HikarinagiChangesSyncTask {
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async handleCron() {
-    if (!this.configService.get('hikarinagi.sync.enabled')) return
+    if (!this.configService.get('hikarinagi.base_url')) return
     await this.changesService.consume()
   }
 }

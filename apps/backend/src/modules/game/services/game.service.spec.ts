@@ -19,17 +19,33 @@ describe('GameService', () => {
       zremrangebyscore: jest.fn(),
       zrangeWithScores: jest.fn(),
       zcard: jest.fn(),
+      get: jest.fn().mockResolvedValue(null),
+      set: jest.fn().mockResolvedValue(undefined),
+      del: jest.fn().mockResolvedValue(undefined),
     }
 
     const hikarinagiMappingService = {
       resolveByBangumiId: jest.fn().mockResolvedValue(null),
     }
 
+    const hikarinagiClient = {
+      galgameDetail: jest.fn().mockResolvedValue(null),
+      galgameIds: jest.fn().mockResolvedValue({ ids: [] }),
+      safeGalgameIds: jest.fn().mockResolvedValue(null),
+      galgameBatch: jest.fn().mockResolvedValue([]),
+    }
+
     return {
       prisma,
       cacheService,
       hikarinagiMappingService,
-      service: new GameService(prisma as any, cacheService as any, hikarinagiMappingService as any),
+      hikarinagiClient,
+      service: new GameService(
+        prisma as any,
+        cacheService as any,
+        hikarinagiMappingService as any,
+        hikarinagiClient as any,
+      ),
     }
   }
 
@@ -56,106 +72,190 @@ describe('GameService', () => {
     })
   })
 
-  it('getById returns game and switches image select by content limit', async () => {
-    const { service, prisma } = createService()
+  it('getById reads the detail and its tags through hikarinagi', async () => {
+    const { service, prisma, hikarinagiClient } = createService()
 
-    prisma.game.findUnique
-      .mockResolvedValueOnce({ nsfw: false, covers: [{ sexual: 0 }] })
-      .mockResolvedValueOnce({
-        title_jp: 'a',
-        images: [{ url: 'u1' }],
-      })
-    await expect(service.getById(1, UserContentLimit.SHOW_WITH_SPOILER)).resolves.toEqual(
-      expect.objectContaining({
-        title_jp: 'a',
-        content_limit: UserContentLimit.SHOW_WITH_SPOILER,
-      }),
+    const bundle = {
+      galgame: {
+        origin_title: 'げーむ',
+        trans_title: '游戏',
+        en_title: null,
+        origin_intro: 'しょうかい',
+        trans_intro: '简介',
+        en_intro: null,
+        origin_lang: 'ja',
+        covers: [
+          {
+            votes: 1,
+            language: 'ja',
+            kind: 'PKGFRONT',
+            media: { id: 1, src: 'covers/a.webp', width: 800, height: 600, sexual: 0, violence: 0 },
+          },
+        ],
+        images: [{ id: 2, src: 'images/b.webp', width: 100, height: 200, sexual: 0, violence: 0 }],
+      },
+      producers: [{ role: 'DEVELOPER', note: '', producer: { id: 7, name: 'brand', logo: null } }],
+      characters: [],
+      staff: [],
+      relations: [],
+      tags: [{ tag: { id: 5, name: 'ADV', aliases: [], count: 12 } }],
+    }
+
+    prisma.game.findUnique.mockResolvedValueOnce({ h_id: 42 })
+    hikarinagiClient.galgameDetail.mockResolvedValueOnce(bundle)
+
+    const res: any = await service.getById(1, UserContentLimit.SHOW_WITH_SPOILER)
+    expect(hikarinagiClient.galgameDetail).toHaveBeenCalledWith(42)
+    expect(res.title_jp).toBe('げーむ')
+    expect(res.title_zh).toBe('游戏')
+    expect(res.covers[0]).toEqual(
+      expect.objectContaining({ url: 'covers/a.webp', language: 'jp', type: 'pkgfront' }),
     )
-    expect(prisma.game.findUnique.mock.calls[1][0].select.images).toBeDefined()
-
-    jest.clearAllMocks()
-    prisma.game.findUnique
-      .mockResolvedValueOnce({ nsfw: false, covers: [{ sexual: 0 }] })
-      .mockResolvedValueOnce({
-        title_jp: 'b',
-      })
-    await service.getById(2, UserContentLimit.NEVER_SHOW_NSFW_CONTENT)
-    expect(prisma.game.findUnique.mock.calls[1][0].select.images).toBeUndefined()
+    expect(res.developers[0].developer.name).toBe('brand')
+    expect(res.tags).toEqual([
+      { tag_alias: null, tag: { id: 5, name: 'ADV', aliases: [], count: 12 } },
+    ])
+    expect(res.images).toHaveLength(1)
   })
 
-  it('getHeader/getDetails/getCharacters return data with expected select behavior', async () => {
-    const { service, prisma } = createService()
+  it('getById omits images for the strictest content limit', async () => {
+    const { service, prisma, hikarinagiClient } = createService()
 
-    prisma.game.findUnique
-      .mockResolvedValueOnce({ nsfw: false, covers: [{ sexual: 0 }] })
-      .mockResolvedValueOnce({
-        id: 1,
-        title_jp: 'header',
-      })
-    await expect(service.getHeader(1, UserContentLimit.SHOW_WITH_SPOILER)).resolves.toEqual(
-      expect.objectContaining({
-        id: 1,
-        content_limit: UserContentLimit.SHOW_WITH_SPOILER,
-      }),
+    prisma.game.findUnique.mockResolvedValueOnce({ h_id: 43 })
+    hikarinagiClient.galgameDetail.mockResolvedValueOnce({
+      galgame: { origin_title: 'x', origin_lang: 'ja', covers: [], images: [{ id: 1, src: 'i' }] },
+      producers: [],
+      characters: [],
+      staff: [],
+      relations: [],
+      tags: [],
+    })
+
+    const res: any = await service.getById(2, UserContentLimit.NEVER_SHOW_NSFW_CONTENT)
+    expect(res.images).toBeUndefined()
+  })
+
+  it('getHeader/getDetails/getCharacters read through hikarinagi and filter images by limit', async () => {
+    const { service, prisma, hikarinagiClient } = createService()
+    const bundle = {
+      galgame: {
+        origin_title: 'header',
+        origin_lang: 'ja',
+        aliases: [],
+        platforms: ['win'],
+        covers: [],
+        images: [
+          { id: 1, src: 'safe.webp', width: 1, height: 1, sexual: 0, violence: 0 },
+          { id: 2, src: 'adult.webp', width: 1, height: 1, sexual: 2, violence: 0 },
+        ],
+      },
+      producers: [],
+      characters: [{ role: 'MAIN', actors: [], character: { id: 9, name: 'c', aliases: [] } }],
+      staff: [],
+      relations: [],
+      tags: [],
+    }
+    hikarinagiClient.galgameDetail.mockResolvedValue(bundle)
+
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1, h_id: 77, extra_info: null })
+    const header: any = await service.getHeader(1, UserContentLimit.SHOW_WITH_SPOILER)
+    expect(header).toEqual(
+      expect.objectContaining({ id: 1, title_jp: 'header', platform: ['win'] }),
     )
 
     jest.clearAllMocks()
-    prisma.game.findUnique
-      .mockResolvedValueOnce({ nsfw: false, covers: [{ sexual: 0 }] })
-      .mockResolvedValueOnce({
-        id: 1,
-        images: [{ url: 'a' }],
-      })
-    await service.getDetails(1, UserContentLimit.NEVER_SHOW_NSFW_CONTENT)
-    expect(prisma.game.findUnique.mock.calls[1][0].select.images.where).toEqual({
-      sexual: { in: [0] },
+    hikarinagiClient.galgameDetail.mockResolvedValue(bundle)
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1, h_id: 77, extra_info: null })
+    const strict: any = await service.getDetails(1, UserContentLimit.NEVER_SHOW_NSFW_CONTENT)
+    expect(strict.images.map((i: any) => i.url)).toEqual(['safe.webp'])
+
+    jest.clearAllMocks()
+    hikarinagiClient.galgameDetail.mockResolvedValue(bundle)
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1, h_id: 77, extra_info: null })
+    const loose: any = await service.getDetails(1, UserContentLimit.SHOW_WITH_SPOILER)
+    expect(loose.images).toHaveLength(2)
+
+    jest.clearAllMocks()
+    hikarinagiClient.galgameDetail.mockResolvedValue(bundle)
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1, h_id: 77, extra_info: null })
+    const chars: any = await service.getCharacters(1, UserContentLimit.SHOW_WITH_SPOILER)
+    expect(chars.characters).toHaveLength(1)
+  })
+
+  it('gates the detail on hikarinagi nsfw, not on any local column', async () => {
+    const { service, prisma, hikarinagiClient } = createService()
+    prisma.game.findUnique.mockResolvedValue({ id: 1, h_id: 42, extra_info: null })
+    hikarinagiClient.galgameDetail.mockResolvedValue({
+      galgame: { origin_title: 'x', origin_lang: 'ja', nsfw: true, covers: [], images: [] },
+      characters: [],
+      staff: [],
+      producers: [],
+      relations: [],
+      tags: [],
     })
 
-    jest.clearAllMocks()
-    prisma.game.findUnique
-      .mockResolvedValueOnce({ nsfw: false, covers: [{ sexual: 0 }] })
-      .mockResolvedValueOnce({
-        id: 1,
-        images: [{ url: 'all' }],
-      })
-    await service.getDetails(1, UserContentLimit.SHOW_WITH_SPOILER)
-    expect(prisma.game.findUnique.mock.calls[1][0].select.images.where).toBeUndefined()
+    await expect(
+      service.getById(1, UserContentLimit.NEVER_SHOW_NSFW_CONTENT),
+    ).rejects.toMatchObject({ code: ShionBizCode.GAME_NOT_FOUND })
+    await expect(service.getById(1, UserContentLimit.JUST_SHOW)).resolves.toBeDefined()
 
-    jest.clearAllMocks()
-    prisma.game.findUnique
-      .mockResolvedValueOnce({ nsfw: false, covers: [{ sexual: 0 }] })
-      .mockResolvedValueOnce({
-        characters: [{ role: 'main' }],
-      })
-    await expect(service.getCharacters(1, UserContentLimit.SHOW_WITH_SPOILER)).resolves.toEqual({
-      characters: [{ role: 'main' }],
+    expect(prisma.game.findUnique).toHaveBeenCalledWith({
+      where: { id: 1, status: 1 },
+      select: { id: true, v_id: true, b_id: true, h_id: true, extra_info: true },
     })
   })
 
-  it('getList applies default safe-content filter and default ordering', async () => {
-    const { service, prisma } = createService()
-    prisma.game.count.mockResolvedValueOnce(3)
-    prisma.game.findMany.mockResolvedValueOnce([{ id: 1 }, { id: 2 }])
+  it('hides a work with any rated cover from a guest, even when nsfw is false', async () => {
+    const { service, prisma, hikarinagiClient } = createService()
+    prisma.game.findUnique.mockResolvedValue({ id: 1, h_id: 42, extra_info: null })
+    hikarinagiClient.galgameDetail.mockResolvedValue({
+      galgame: {
+        origin_title: 'x',
+        origin_lang: 'ja',
+        nsfw: false,
+        covers: [{ language: 'ja', kind: 'PACKAGE_FRONT', media: { src: 'a', sexual: 1 } }],
+        images: [],
+      },
+      characters: [],
+      staff: [],
+      producers: [],
+      relations: [],
+      tags: [],
+    })
+
+    await expect(service.getById(1, 0)).rejects.toMatchObject({
+      code: ShionBizCode.GAME_NOT_FOUND,
+    })
+    await expect(service.getById(1, UserContentLimit.JUST_SHOW)).resolves.toBeDefined()
+  })
+
+  it('getList takes candidates from hikarinagi and orders release_date by that order', async () => {
+    const { service, prisma, hikarinagiClient } = createService()
+    hikarinagiClient.galgameIds.mockResolvedValueOnce({ ids: [77, 55, 33] })
+    prisma.game.findMany.mockResolvedValueOnce([
+      { id: 3, h_id: 33, views: 0 },
+      { id: 1, h_id: 77, views: 0 },
+      { id: 2, h_id: 55, views: 0 },
+    ])
 
     const result = await service.getList({ page: 2, pageSize: 2 } as any)
 
-    expect(prisma.game.count).toHaveBeenCalledWith({
-      where: {
-        status: 1,
-        nsfw: { not: true },
-        covers: { every: { sexual: { in: [0] } } },
-      },
-    })
-    expect(prisma.game.findMany).toHaveBeenCalledWith(
+    expect(hikarinagiClient.galgameIds).toHaveBeenCalledWith(
       expect.objectContaining({
-        skip: 2,
-        take: 2,
-        orderBy: [{ release_date_tba: 'asc' }, { release_date: 'desc' }, { id: 'desc' }],
+        sort_order: undefined,
+        content_limit: undefined,
+        exclude_rated_covers: true,
       }),
     )
+    expect(prisma.game.findMany).toHaveBeenCalledWith({
+      where: { status: 1, h_id: { in: [77, 55, 33] } },
+      select: { id: true, h_id: true, views: true },
+    })
+    expect(prisma.game.count).not.toHaveBeenCalled()
+    expect(hikarinagiClient.galgameBatch).toHaveBeenCalledWith([33])
     expect(result.meta).toEqual({
       totalItems: 3,
-      itemCount: 2,
+      itemCount: 1,
       itemsPerPage: 2,
       totalPages: 2,
       currentPage: 2,
@@ -163,10 +263,22 @@ describe('GameService', () => {
     })
   })
 
-  it('getList applies producer/character/tag/date/sort filters', async () => {
-    const { service, prisma } = createService()
+  it('getList short-circuits when hikarinagi has no candidate', async () => {
+    const { service, prisma, hikarinagiClient } = createService()
+    hikarinagiClient.galgameIds.mockResolvedValueOnce({ ids: [] })
+
+    const result = await service.getList({ page: 1, pageSize: 10 } as any)
+
+    expect(prisma.game.findMany).not.toHaveBeenCalled()
+    expect(result.items).toEqual([])
+    expect(result.meta.totalItems).toBe(0)
+  })
+
+  it('getList forwards entity, tag, platform and date filters to hikarinagi', async () => {
+    const { service, prisma, hikarinagiClient } = createService()
+    hikarinagiClient.galgameIds.mockResolvedValueOnce({ ids: [9] })
     prisma.game.count.mockResolvedValueOnce(1)
-    prisma.game.findMany.mockResolvedValueOnce([{ id: 10 }])
+    prisma.game.findMany.mockResolvedValueOnce([{ id: 10, h_id: 9, views: 4 }])
 
     await service.getList(
       {
@@ -176,8 +288,10 @@ describe('GameService', () => {
         character_id: 22,
         filter: {
           tags: ['avg', 'gal'],
-          start_date: '2026-12-31',
-          end_date: '2026-01-01',
+          exclude_tags: ['nukige'],
+          platforms: ['win'],
+          start_date: new Date('2026-01-01'),
+          end_date: new Date('2026-12-31'),
           sort_by: 'views',
           sort_order: 'asc',
         },
@@ -185,39 +299,45 @@ describe('GameService', () => {
       UserContentLimit.SHOW_WITH_SPOILER,
     )
 
-    const where = prisma.game.count.mock.calls[0][0].where
-    expect(where.status).toBe(1)
-    expect(where.developers).toEqual({ some: { developer: { id: 11 } } })
-    expect(where.characters).toEqual({ some: { character: { id: 22 } } })
-    expect(where.tags).toEqual({ some: { tag: { name: { in: ['avg', 'gal'] } } } })
-    expect(where.release_date.gte.getTime()).toBe(new Date('2026-01-01').getTime())
-    expect(where.release_date.lte.getTime()).toBe(new Date('2026-12-31').getTime())
-    expect(where.release_date_tba).toEqual({ not: true })
-    expect(where.nsfw).toBeUndefined()
+    expect(hikarinagiClient.galgameIds).toHaveBeenCalledWith({
+      producer_id: 11,
+      character_id: 22,
+      content_limit: UserContentLimit.SHOW_WITH_SPOILER,
+      tags: ['avg', 'gal'],
+      exclude_tags: ['nukige'],
+      platforms: ['win'],
+      release_periods: undefined,
+      released_after: new Date('2026-01-01').toISOString(),
+      released_before: new Date('2026-12-31').toISOString(),
+      sort_order: undefined,
+      exclude_rated_covers: false,
+    })
+    expect(prisma.game.count).toHaveBeenCalledWith({
+      where: { status: 1, h_id: { in: [9] } },
+    })
     expect(prisma.game.findMany.mock.calls[0][0].orderBy).toEqual([
-      { release_date_tba: 'asc' },
       { views: 'asc' },
       { id: 'desc' },
     ])
   })
 
-  it('getList applies year/month date filter branch', async () => {
-    const { service, prisma } = createService()
-    prisma.game.count.mockResolvedValueOnce(0)
-    prisma.game.findMany.mockResolvedValueOnce([])
+  it('getList converts the year/month filter into hikarinagi release periods', async () => {
+    const { service, hikarinagiClient } = createService()
+    hikarinagiClient.galgameIds.mockResolvedValueOnce({ ids: [] })
 
     await service.getList(
       { page: 1, pageSize: 10, filter: { years: [2025], months: [2] } } as any,
       UserContentLimit.SHOW_WITH_SPOILER,
     )
 
-    const where = prisma.game.count.mock.calls[0][0].where
-    expect(where.release_date_tba).toEqual({ not: true })
-    expect(where.AND).toBeDefined()
+    expect(hikarinagiClient.galgameIds).toHaveBeenCalledWith(
+      expect.objectContaining({ release_periods: ['2025-02'] }),
+    )
   })
 
-  it('getRecentUpdate purges expired, queries cache, preserves score order and applies safe-content filter', async () => {
-    const { service, prisma, cacheService } = createService()
+  it('getRecentUpdate purges expired, queries cache, preserves score order and keeps only hikarinagi-safe games', async () => {
+    const { service, prisma, cacheService, hikarinagiClient } = createService()
+    hikarinagiClient.safeGalgameIds.mockResolvedValueOnce([11, 22])
     cacheService.zrangeWithScores.mockResolvedValueOnce([
       { member: '2', score: 20 },
       { member: '1', score: 10 },
@@ -242,8 +362,7 @@ describe('GameService', () => {
         where: {
           id: { in: [2, 1, 9] },
           status: 1,
-          nsfw: { not: true },
-          covers: { every: { sexual: { in: [0] } } },
+          h_id: { in: [11, 22] },
         },
       }),
     )
@@ -257,8 +376,9 @@ describe('GameService', () => {
     })
   })
 
-  it('getRecentUpdate can include nsfw when content limit allows it', async () => {
-    const { service, prisma, cacheService } = createService()
+  it('getRecentUpdate applies no safe-id filter when the content limit allows nsfw', async () => {
+    const { service, prisma, cacheService, hikarinagiClient } = createService()
+    hikarinagiClient.safeGalgameIds.mockResolvedValueOnce(null)
     cacheService.zrangeWithScores.mockResolvedValueOnce([{ member: '5', score: 1 }])
     cacheService.zcard.mockResolvedValueOnce(1)
     prisma.game.findMany.mockResolvedValueOnce([{ id: 5 }])
@@ -269,6 +389,7 @@ describe('GameService', () => {
     )
 
     const where = prisma.game.findMany.mock.calls[0][0].where
+    expect(where.h_id).toBeUndefined()
     expect(where.nsfw).toBeUndefined()
     expect(where.covers).toBeUndefined()
   })
@@ -285,54 +406,66 @@ describe('GameService', () => {
     })
   })
 
-  it('getRandomGameId handles empty set, missing item, nsfw limit and success path', async () => {
-    const { service, prisma } = createService()
+  it('getRandomGameId draws only from the hikarinagi-safe set', async () => {
+    const { service, prisma, hikarinagiClient } = createService()
     const mathRandomSpy = jest.spyOn(Math, 'random').mockReturnValue(0.4)
+    hikarinagiClient.safeGalgameIds.mockResolvedValue([11, 22])
 
     prisma.game.count.mockResolvedValueOnce(0)
-    await expect(service.getRandomGameId({ user: { content_limit: 2 } } as any)).resolves.toBeNull()
+    await expect(service.getRandomGameId({ user: { content_limit: 1 } } as any)).resolves.toBeNull()
 
     prisma.game.count.mockResolvedValueOnce(5)
     prisma.game.findFirst.mockResolvedValueOnce(null)
-    await expect(service.getRandomGameId({ user: { content_limit: 2 } } as any)).resolves.toBeNull()
+    await expect(service.getRandomGameId({ user: { content_limit: 1 } } as any)).resolves.toBeNull()
 
     prisma.game.count.mockResolvedValueOnce(5)
-    prisma.game.findFirst.mockResolvedValueOnce({
-      id: 9,
-      nsfw: true,
-      covers: [{ sexual: 1 }],
+    prisma.game.findFirst.mockResolvedValueOnce({ id: 10 })
+    await expect(service.getRandomGameId({ user: { content_limit: 1 } } as any)).resolves.toBe(10)
+
+    expect(prisma.game.findFirst).toHaveBeenLastCalledWith({
+      where: { status: 1, h_id: { in: [11, 22] } },
+      select: { id: true },
+      orderBy: { id: 'asc' },
+      skip: 2,
     })
+
+    mathRandomSpy.mockRestore()
+  })
+
+  it('getRandomGameId drops the safe-id filter for a permissive content limit', async () => {
+    const { service, prisma, hikarinagiClient } = createService()
+    const mathRandomSpy = jest.spyOn(Math, 'random').mockReturnValue(0)
+    hikarinagiClient.safeGalgameIds.mockResolvedValue(null)
+    prisma.game.count.mockResolvedValueOnce(1)
+    prisma.game.findFirst.mockResolvedValueOnce({ id: 3 })
+
     await expect(
-      service.getRandomGameId({
-        user: { content_limit: UserContentLimit.NEVER_SHOW_NSFW_CONTENT },
-      } as any),
-    ).resolves.toBeNull()
-
-    prisma.game.count.mockResolvedValueOnce(5)
-    prisma.game.findFirst.mockResolvedValueOnce({
-      id: 10,
-      nsfw: false,
-      covers: [{ sexual: 0 }],
-    })
-    await expect(service.getRandomGameId({ user: { content_limit: 2 } } as any)).resolves.toBe(10)
-
-    expect(prisma.game.findFirst).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        where: { status: 1 },
-        orderBy: { id: 'asc' },
-        skip: 2,
-      }),
-    )
+      service.getRandomGameId({ user: { content_limit: UserContentLimit.JUST_SHOW } } as any),
+    ).resolves.toBe(3)
+    expect(prisma.game.count).toHaveBeenLastCalledWith({ where: { status: 1 } })
 
     mathRandomSpy.mockRestore()
   })
 
   it('getHeader returns the stored h_id without calling hikarinagi', async () => {
-    const { service, prisma, hikarinagiMappingService } = createService()
+    const { service, prisma, hikarinagiMappingService, hikarinagiClient } = createService()
+    hikarinagiClient.galgameDetail.mockResolvedValue({
+      galgame: {
+        origin_title: 'x',
+        origin_lang: 'ja',
+        aliases: [],
+        covers: [],
+        images: [],
+        platforms: [],
+      },
+      producers: [],
+      characters: [],
+      staff: [],
+      relations: [],
+      tags: [],
+    })
 
-    prisma.game.findUnique
-      .mockResolvedValueOnce({ nsfw: false, covers: [{ sexual: 0 }] })
-      .mockResolvedValueOnce({ id: 1, b_id: '123456', h_id: 8001 })
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1, b_id: '123456', h_id: 8001 })
 
     await expect(service.getHeader(1, UserContentLimit.SHOW_WITH_SPOILER)).resolves.toEqual(
       expect.objectContaining({ h_id: 8001 }),
@@ -341,12 +474,25 @@ describe('GameService', () => {
   })
 
   it('getHeader resolves h_id from hikarinagi when it is not stored yet', async () => {
-    const { service, prisma, hikarinagiMappingService } = createService()
+    const { service, prisma, hikarinagiMappingService, hikarinagiClient } = createService()
     hikarinagiMappingService.resolveByBangumiId.mockResolvedValue(8002)
+    hikarinagiClient.galgameDetail.mockResolvedValue({
+      galgame: {
+        origin_title: 'x',
+        origin_lang: 'ja',
+        aliases: [],
+        covers: [],
+        images: [],
+        platforms: [],
+      },
+      producers: [],
+      characters: [],
+      staff: [],
+      relations: [],
+      tags: [],
+    })
 
-    prisma.game.findUnique
-      .mockResolvedValueOnce({ nsfw: false, covers: [{ sexual: 0 }] })
-      .mockResolvedValueOnce({ id: 1, b_id: '123456', h_id: null })
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1, b_id: '123456', h_id: null })
 
     await expect(service.getHeader(1, UserContentLimit.SHOW_WITH_SPOILER)).resolves.toEqual(
       expect.objectContaining({ h_id: 8002 }),
@@ -354,16 +500,14 @@ describe('GameService', () => {
     expect(hikarinagiMappingService.resolveByBangumiId).toHaveBeenCalledWith(1, '123456')
   })
 
-  it('getHeader skips the lookup when the game has no b_id to match on', async () => {
+  it('getHeader rejects an unmappable game — read-through has no content source', async () => {
     const { service, prisma, hikarinagiMappingService } = createService()
 
-    prisma.game.findUnique
-      .mockResolvedValueOnce({ nsfw: false, covers: [{ sexual: 0 }] })
-      .mockResolvedValueOnce({ id: 1, b_id: null, h_id: null })
+    prisma.game.findUnique.mockResolvedValueOnce({ id: 1, b_id: null, h_id: null })
 
-    await expect(service.getHeader(1, UserContentLimit.SHOW_WITH_SPOILER)).resolves.toEqual(
-      expect.objectContaining({ h_id: null }),
-    )
+    await expect(service.getHeader(1, UserContentLimit.SHOW_WITH_SPOILER)).rejects.toMatchObject({
+      code: ShionBizCode.GAME_NOT_FOUND,
+    })
     expect(hikarinagiMappingService.resolveByBangumiId).not.toHaveBeenCalled()
   })
 })
