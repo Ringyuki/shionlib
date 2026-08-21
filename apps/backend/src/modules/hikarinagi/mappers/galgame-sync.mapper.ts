@@ -1,11 +1,5 @@
-import { GameCharacterRole, Prisma } from '@prisma/client'
-import {
-  OpenCover,
-  OpenGalgameCharacter,
-  OpenGalgameDetail,
-  OpenGalgameStaff,
-  OpenMedia,
-} from '../interfaces/open-api.interface'
+import { GameCharacterRole } from '@prisma/client'
+import { OpenCover, OpenGalgameCharacter, OpenGalgameStaff } from '../interfaces/open-api.interface'
 
 const STAFF_ROLE_CN: Record<string, string> = {
   GAME_DESIGNER: '游戏设计师',
@@ -84,34 +78,4 @@ export function mapStaffs(rows: OpenGalgameStaff[]): { name: string; role: strin
     name: row.person.name,
     role: row.role ? (STAFF_ROLE_CN[row.role] ?? row.role) : '',
   }))
-}
-
-export function mapActor(row: OpenGalgameCharacter): string | null {
-  if (!row.actors.length) return null
-  return row.actors.map(actor => actor.name).join(', ')
-}
-
-export function mediaDims(media: OpenMedia): number[] {
-  return media.width !== null && media.height !== null ? [media.width, media.height] : []
-}
-
-export function mapGalgameScalars(detail: OpenGalgameDetail): Prisma.GameUpdateInput {
-  const zhOrigin = isZhOrigin(detail.origin_lang)
-  const enOrigin = detail.origin_lang === 'en'
-  const jaOrigin = !zhOrigin && !enOrigin
-
-  return {
-    title_jp: jaOrigin ? detail.origin_title : '',
-    title_zh: detail.trans_title ?? (zhOrigin ? detail.origin_title : ''),
-    title_en: detail.en_title ?? (enOrigin ? detail.origin_title : ''),
-    aliases: detail.aliases,
-    intro_jp: jaOrigin ? (detail.origin_intro ?? '') : '',
-    intro_zh: detail.trans_intro ?? (zhOrigin ? (detail.origin_intro ?? '') : ''),
-    intro_en: detail.en_intro ?? (enOrigin ? (detail.origin_intro ?? '') : ''),
-    release_date: detail.release_date ? new Date(detail.release_date) : null,
-    release_date_tba: detail.release_date_tbd,
-    type: detail.adv_type,
-    platform: detail.platforms,
-    nsfw: detail.nsfw,
-  }
 }
