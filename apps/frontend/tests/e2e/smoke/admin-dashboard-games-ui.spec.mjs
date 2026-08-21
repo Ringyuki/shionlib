@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 import {
   E2E_FIXTURES,
   applyAuthCookiesToPageContext,
+  findGameIdByTitle,
   loginAndExtractAuthCookies,
 } from '../_helpers/fixtures.mjs'
 
@@ -27,22 +28,12 @@ const getAdminGameStatus = async (request, adminAuth, gameId) => {
   return game.status
 }
 
-const createTemporaryGame = async (request, adminAuth, title) => {
-  const data = await expectApiSuccess(
-    await request.post('/api/game/create/game', {
-      headers: {
-        cookie: adminAuth.cookieHeader,
-      },
-      data: {
-        title_en: title,
-        intro_en: 'Temporary game for admin delete e2e.',
-        tags: ['e2e'],
-        platform: ['pc'],
-      },
-    }),
-  )
+// 条目由上游维护,shionlib 不再有创建端点。
+// 种子里备了三条一次性壳行,每个会改动/删除作品的用例各认领一条,互不干扰。
+const SCRATCH_TITLES = ['E2E Admin Scratch 4', 'E2E Admin Scratch 5', 'E2E Admin Scratch 6']
 
-  const gameId = Number(data)
+const claimScratchGame = async (request, slot) => {
+  const gameId = await findGameIdByTitle(request, SCRATCH_TITLES[slot])
   expect(Number.isInteger(gameId)).toBeTruthy()
   return gameId
 }
@@ -244,7 +235,7 @@ test.describe('Admin dashboard and games UI', () => {
   test('admin game should support status toggle and restore via actions menu', async ({
     page,
     request,
-  }, testInfo) => {
+  }) => {
     const adminAuth = await loginAndExtractAuthCookies(
       request,
       E2E_FIXTURES.users.admin.identifier,
@@ -252,8 +243,8 @@ test.describe('Admin dashboard and games UI', () => {
     )
     await applyAuthCookiesToPageContext(page, adminAuth)
 
-    const title = `E2E Admin Status Toggle ${Date.now()}-${testInfo.workerIndex}`
-    const targetGameId = await createTemporaryGame(request, adminAuth, title)
+    const title = SCRATCH_TITLES[0]
+    const targetGameId = await claimScratchGame(request, 0)
     let deleted = false
 
     try {
@@ -314,7 +305,7 @@ test.describe('Admin dashboard and games UI', () => {
   test('admin game should support add/remove recent update via actions menu', async ({
     page,
     request,
-  }, testInfo) => {
+  }) => {
     const adminAuth = await loginAndExtractAuthCookies(
       request,
       E2E_FIXTURES.users.admin.identifier,
@@ -322,8 +313,8 @@ test.describe('Admin dashboard and games UI', () => {
     )
     await applyAuthCookiesToPageContext(page, adminAuth)
 
-    const title = `E2E Admin Recent Update ${Date.now()}-${testInfo.workerIndex}`
-    const targetGameId = await createTemporaryGame(request, adminAuth, title)
+    const title = SCRATCH_TITLES[1]
+    const targetGameId = await claimScratchGame(request, 1)
     let deleted = false
 
     try {
@@ -387,7 +378,7 @@ test.describe('Admin dashboard and games UI', () => {
     }
   })
 
-  test('admin game should support delete via actions menu', async ({ page, request }, testInfo) => {
+  test('admin game should support delete via actions menu', async ({ page, request }) => {
     const adminAuth = await loginAndExtractAuthCookies(
       request,
       E2E_FIXTURES.users.admin.identifier,
@@ -395,8 +386,8 @@ test.describe('Admin dashboard and games UI', () => {
     )
     await applyAuthCookiesToPageContext(page, adminAuth)
 
-    const title = `E2E Admin Delete Game ${Date.now()}-${testInfo.workerIndex}`
-    const targetGameId = await createTemporaryGame(request, adminAuth, title)
+    const title = SCRATCH_TITLES[2]
+    const targetGameId = await claimScratchGame(request, 2)
     let deleted = false
 
     try {
