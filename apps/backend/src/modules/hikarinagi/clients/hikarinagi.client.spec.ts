@@ -161,4 +161,31 @@ describe('HikarinagiClient', () => {
 
     expect(urlOf(httpService).startsWith('http://upstream.test/api/v3/')).toBe(true)
   })
+
+  describe('when the upstream is not configured', () => {
+    const offline = () => createClient({ baseUrl: '' })
+
+    it('returns empty results instead of firing a request at an empty base url', async () => {
+      const { client, httpService } = offline()
+
+      await expect(client.galgameIds({ content_limit: 1 })).resolves.toEqual({ ids: [] })
+      await expect(client.galgameBatch([1, 2])).resolves.toEqual([])
+      await expect(client.galgameDetail(1)).resolves.toBeNull()
+      await expect(client.character(1)).resolves.toBeNull()
+      await expect(client.producer(1)).resolves.toBeNull()
+      await expect(client.searchGalgameIds({ q: 'x', page: 1, page_size: 10 })).resolves.toEqual({
+        ids: [],
+        meta: { total_items: 0, total_pages: 0 },
+      })
+      expect(httpService.get).not.toHaveBeenCalled()
+      expect(httpService.post).not.toHaveBeenCalled()
+    })
+
+    it('fails closed on the safe-id allowlist rather than dropping the gate', async () => {
+      const { client } = offline()
+
+      await expect(client.safeGalgameIds(0)).resolves.toEqual([])
+      await expect(client.safeGalgameIds(UserContentLimit.JUST_SHOW)).resolves.toEqual([])
+    })
+  })
 })

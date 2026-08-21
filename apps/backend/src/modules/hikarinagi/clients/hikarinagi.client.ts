@@ -69,6 +69,8 @@ export class HikarinagiClient {
   }
 
   async galgameDetail(hikarinagiId: number): Promise<InternalGalgameBundle | null> {
+    if (!this.enabled) return null
+
     try {
       const envelope = await this.request<InternalGalgameBundle>(
         `/api/v3/internal/galgames/${hikarinagiId}/detail`,
@@ -82,7 +84,7 @@ export class HikarinagiClient {
   }
 
   async galgameBatch(hikarinagiIds: number[]): Promise<InternalGalgameCard[]> {
-    if (!hikarinagiIds.length) return []
+    if (!this.enabled || !hikarinagiIds.length) return []
     const response = await firstValueFrom(
       this.httpService.post<HikarinagiEnvelope<InternalGalgameCard[]>>(
         `${this.baseUrl}/api/v3/internal/galgames/batch`,
@@ -100,6 +102,8 @@ export class HikarinagiClient {
     page_size: number
     content_limit?: number
   }): Promise<{ ids: number[]; meta: { total_items: number; total_pages: number } }> {
+    if (!this.enabled) return { ids: [], meta: { total_items: 0, total_pages: 0 } }
+
     const search = new URLSearchParams({
       q: params.q,
       page: String(params.page),
@@ -115,6 +119,8 @@ export class HikarinagiClient {
   }
 
   async character(hikarinagiId: number): Promise<Record<string, unknown> | null> {
+    if (!this.enabled) return null
+
     try {
       const envelope = await this.request<Record<string, unknown>>(
         `/api/v3/internal/characters/${hikarinagiId}`,
@@ -128,6 +134,8 @@ export class HikarinagiClient {
   }
 
   async producer(hikarinagiId: number): Promise<Record<string, unknown> | null> {
+    if (!this.enabled) return null
+
     try {
       const envelope = await this.request<Record<string, unknown>>(
         `/api/v3/internal/producers/${hikarinagiId}`,
@@ -158,6 +166,8 @@ export class HikarinagiClient {
   }
 
   async galgameIds(params: HikarinagiGalgameIdsQuery): Promise<{ ids: number[] }> {
+    if (!this.enabled) return { ids: [] }
+
     const cacheKey = `${GALGAME_IDS_KEY_PREFIX}${createHash('sha1').update(JSON.stringify(params)).digest('hex')}`
     const cached = await this.cacheService.get<number[] | null>(cacheKey)
     if (cached) return { ids: cached }
@@ -188,6 +198,7 @@ export class HikarinagiClient {
   }
 
   async safeGalgameIds(content_limit?: number): Promise<number[] | null> {
+    if (!this.enabled) return []
     if (includesRated(content_limit)) return null
 
     const { ids } = await this.galgameIds({ content_limit, exclude_rated_covers: true })
