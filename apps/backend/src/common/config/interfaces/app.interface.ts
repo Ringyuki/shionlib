@@ -103,6 +103,9 @@ export interface AppConfig {
     sync: {
       batch_size: number
     }
+    shell: {
+      creator_id: number
+    }
   }
   tasks: {
     image_upload: {

@@ -4,6 +4,7 @@ import { ShionConfigService } from '../../../common/config/services/config.servi
 import { HikarinagiClient } from '../clients/hikarinagi.client'
 import { CacheService } from '../../cache/services/cache.service'
 import { GALGAME_BUNDLE_KEY_PREFIX, galgameBundleKey } from '../constants/cache-keys.constant'
+import { HikarinagiShellService } from './hikarinagi-shell.service'
 
 interface ConsumeResult {
   consumed: number
@@ -22,6 +23,7 @@ export class HikarinagiChangesService {
     private readonly internal: HikarinagiClient,
     private readonly cache: CacheService,
     private readonly configService: ShionConfigService,
+    private readonly shells: HikarinagiShellService,
   ) {}
 
   async consume(): Promise<ConsumeResult> {
@@ -95,6 +97,7 @@ export class HikarinagiChangesService {
     merged_to_id: number | null
   }): Promise<void> {
     if (event.resource_type === 'GALGAME') {
+      if (event.kind === 'UPSERT') await this.shells.ensure(event.resource_id)
       await this.invalidateGalgame(event.resource_id)
       if (event.kind === 'MERGE' && event.merged_to_id !== null) {
         await this.invalidateGalgame(event.merged_to_id)

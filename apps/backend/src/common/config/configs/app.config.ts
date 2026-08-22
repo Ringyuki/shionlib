@@ -144,6 +144,9 @@ export default (): AppConfig => ({
     sync: {
       batch_size: withDefault('HIKARINAGI_SYNC_BATCH_SIZE', 200),
     },
+    shell: {
+      creator_id: withDefault('HIKARINAGI_SHELL_CREATOR_ID', 1),
+    },
   },
 
   tasks: {

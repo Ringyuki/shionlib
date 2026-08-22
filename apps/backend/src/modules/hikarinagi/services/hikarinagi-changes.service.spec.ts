@@ -18,14 +18,16 @@ describe('HikarinagiChangesService', () => {
       ...internalOverrides,
     }
     const config = { get: jest.fn().mockReturnValue(200) }
+    const shells = { ensure: jest.fn().mockResolvedValue(false) }
     const service = new HikarinagiChangesService(
       prisma as any,
       internal as any,
       cache as any,
       config as any,
+      shells as any,
     )
 
-    return { service, cache, prisma, internal }
+    return { service, cache, prisma, internal, shells }
   }
 
   const apply = (service: HikarinagiChangesService, event: unknown) => {
@@ -65,6 +67,27 @@ describe('HikarinagiChangesService', () => {
 
     expect(cache.del).toHaveBeenCalledWith(galgameBundleKey(7))
     expect(cache.del).toHaveBeenCalledWith(galgameBundleKey(9))
+  })
+
+  it('creates the local shell for an upserted galgame', async () => {
+    const { service, shells } = createService()
+
+    await apply(service, { resource_type: 'GALGAME', resource_id: 42, kind: 'UPSERT' })
+
+    expect(shells.ensure).toHaveBeenCalledWith(42)
+  })
+
+  it('does not create a shell for a merged-away galgame', async () => {
+    const { service, shells } = createService()
+
+    await apply(service, {
+      resource_type: 'GALGAME',
+      resource_id: 7,
+      kind: 'MERGE',
+      merged_to_id: 9,
+    })
+
+    expect(shells.ensure).not.toHaveBeenCalled()
   })
 
   it('drops every cached bundle when a character or producer changes', async () => {

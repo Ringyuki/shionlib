@@ -33,18 +33,6 @@ export class HikarinagiClient {
     return Boolean(this.baseUrl && this.secret)
   }
 
-  async getMapping(page: number, pageSize: number) {
-    const envelope = await this.request<{
-      items: GalgameMappingEntry[]
-      meta?: GalgameMappingMeta
-    }>(`/api/v3/internal/galgames/mapping?page=${page}&page_size=${pageSize}`)
-
-    return {
-      items: envelope.data?.items ?? [],
-      meta: envelope.data?.meta ?? null,
-    }
-  }
-
   async lookupById(hikarinagiId: number) {
     const envelope = await this.request<GalgameMappingEntry | null>(
       `/api/v3/internal/galgames/lookup?id=${hikarinagiId}`,

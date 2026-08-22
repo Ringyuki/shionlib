@@ -341,22 +341,30 @@ const server = createServer((req, res) => {
       return
     }
 
-    if (path === '/galgames/mapping') {
-      const { rows } = await pool.query('select id, v_id, b_id from games order by id asc')
-      send(res, {
-        items: rows.map(row => ({
-          id: Number(row.id),
-          vndb_id: row.v_id ? Number(String(row.v_id).replace(/^v/i, '')) : null,
-          bangumi_game_id: row.b_id ? Number(row.b_id) : null,
-        })),
-        meta: {
-          page: 1,
-          page_size: rows.length,
-          total_items: rows.length,
-          item_count: rows.length,
-          total_pages: 1,
-        },
-      })
+    if (path === '/galgames/lookup') {
+      const byId = url.searchParams.get('id')
+      const byVndb = url.searchParams.get('vndb_id')
+      const byBangumi = url.searchParams.get('bangumi_game_id')
+      const [column, value] = byId
+        ? ['id', byId]
+        : byVndb
+          ? ['v_id', `v${byVndb}`]
+          : ['b_id', byBangumi]
+      const { rows } = await pool.query(
+        `select id, v_id, b_id from games where ${column} = $1 limit 1`,
+        [column === 'id' ? Number(value) : value],
+      )
+      const row = rows[0]
+      send(
+        res,
+        row
+          ? {
+              id: Number(row.id),
+              vndb_id: row.v_id ? Number(String(row.v_id).replace(/^v/i, '')) : null,
+              bangumi_game_id: row.b_id ? Number(row.b_id) : null,
+            }
+          : null,
+      )
       return
     }
 
