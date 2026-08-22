@@ -1,6 +1,7 @@
 import { PrismaService } from '../../../prisma.service'
 import { WalkthroughStatus } from '@prisma/client'
 import { UserContentLimit } from '../interfaces/user.interface'
+import { HikarinagiCardService } from '../../hikarinagi/services/hikarinagi-card.service'
 import { UserDataService } from './user-data.service'
 
 describe('UserDataService', () => {
@@ -40,7 +41,11 @@ describe('UserDataService', () => {
       galgameBatch: jest.fn().mockResolvedValue([]),
       safeGalgameIds: jest.fn().mockResolvedValue([11, 22]),
     }
-    const service = new UserDataService(prisma, hikarinagi as any)
+    const service = new UserDataService(
+      prisma,
+      hikarinagi as any,
+      new HikarinagiCardService(hikarinagi as any),
+    )
 
     return {
       service,

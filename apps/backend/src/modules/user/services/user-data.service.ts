@@ -12,7 +12,7 @@ import { WalkthroughItemResDto } from '../dto/res/walkthrough.res.dto'
 import { USER_AVATAR_SELECT, mapUserAvatar } from '../../../shared/constants/user-select.constant'
 
 import { HikarinagiClient } from '../../hikarinagi/clients/hikarinagi.client'
-import { emptyNestedGame, mapCardToNestedGame } from '../../hikarinagi/mappers/galgame-read.mapper'
+import { HikarinagiCardService } from '../../hikarinagi/services/hikarinagi-card.service'
 import { includesRated } from '../helpers/content-limit.helper'
 
 @Injectable()
@@ -20,34 +20,8 @@ export class UserDataService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly hikarinagi: HikarinagiClient,
+    private readonly cards: HikarinagiCardService,
   ) {}
-
-  private async hydrateGames<T extends { game: { id: number; h_id: number | null } | null }>(
-    rows: T[],
-    includeRated: boolean,
-  ): Promise<T[]> {
-    const ids = [
-      ...new Set(rows.map(row => row.game?.h_id).filter((id): id is number => id != null)),
-    ]
-    if (!ids.length) return rows
-
-    const cards = await this.hikarinagi.galgameBatch(ids)
-    const byId = new Map(cards.map(card => [card.id, card]))
-
-    return rows.map(row => {
-      if (!row.game) return row
-      const card = row.game.h_id != null ? byId.get(row.game.h_id) : undefined
-
-      return {
-        ...row,
-        game: {
-          id: row.game.id,
-          ...emptyNestedGame(),
-          ...(card ? mapCardToNestedGame(card, includeRated) : {}),
-        },
-      } as T
-    })
-  }
 
   async getGameResources(
     user_id: number,
@@ -108,7 +82,7 @@ export class UserDataService {
       },
     })
 
-    const hydratedResources = await this.hydrateGames(
+    const hydratedResources = await this.cards.hydrate(
       resources,
       includesRated(req.user?.content_limit),
     )
@@ -183,7 +157,7 @@ export class UserDataService {
     })
 
     const isCurrentUser = user_id === req.user?.sub
-    const hydratedComments = await this.hydrateGames(
+    const hydratedComments = await this.cards.hydrate(
       comments,
       includesRated(req.user?.content_limit),
     )
@@ -264,7 +238,7 @@ export class UserDataService {
       },
     })
 
-    const hydratedWalkthroughs = await this.hydrateGames(
+    const hydratedWalkthroughs = await this.cards.hydrate(
       walkthroughs,
       includesRated(req.user?.content_limit),
     )

@@ -1,4 +1,5 @@
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
+import { HikarinagiCardService } from '../../hikarinagi/services/hikarinagi-card.service'
 import { FavoriteService } from './favorite.service'
 
 describe('FavoriteService', () => {
@@ -27,9 +28,12 @@ describe('FavoriteService', () => {
       },
     }
 
+    const hikarinagi = { galgameBatch: jest.fn().mockResolvedValue([]) }
+
     return {
       prisma,
-      service: new FavoriteService(prisma as any),
+      hikarinagi,
+      service: new FavoriteService(prisma as any, new HikarinagiCardService(hikarinagi as any)),
     }
   }
 
@@ -348,6 +352,62 @@ describe('FavoriteService', () => {
         currentPage: 2,
         content_limit: 2,
       },
+    })
+  })
+
+  it('getFavoriteItems renders the entry from upstream, not from the local shell', async () => {
+    const { service, prisma, hikarinagi } = createService()
+    prisma.favorite.findUnique.mockResolvedValueOnce({ user_id: 9, is_private: false })
+    prisma.favoriteItem.count.mockResolvedValue(1)
+    prisma.favoriteItem.findMany.mockResolvedValue([
+      { id: 1, note: 'mine', game: { id: 19988, h_id: 9168 } },
+    ])
+    hikarinagi.galgameBatch.mockResolvedValueOnce([
+      {
+        id: 9168,
+        origin_title: '怪盗キュアフローネ',
+        trans_title: null,
+        release_date: '2019-08-30',
+        covers: [],
+        developer: { id: 396, name: 'ゆずソフト' },
+      },
+    ])
+
+    const result: any = await service.getFavoriteItems(
+      1,
+      { page: 1, pageSize: 10 } as any,
+      { user: { sub: 9, content_limit: 1 } } as any,
+    )
+
+    expect(hikarinagi.galgameBatch).toHaveBeenCalledWith([9168])
+    expect(result.items[0].game).toMatchObject({
+      id: 19988,
+      title_jp: '怪盗キュアフローネ',
+      release_date: '2019-08-30',
+      developers: [{ developer: { id: 396, name: 'ゆずソフト' } }],
+    })
+  })
+
+  it('getFavoriteItems falls back to an empty entry when upstream has no card', async () => {
+    const { service, prisma } = createService()
+    prisma.favorite.findUnique.mockResolvedValueOnce({ user_id: 9, is_private: false })
+    prisma.favoriteItem.count.mockResolvedValue(1)
+    prisma.favoriteItem.findMany.mockResolvedValue([
+      { id: 1, note: null, game: { id: 19988, h_id: 9168 } },
+    ])
+
+    const result: any = await service.getFavoriteItems(
+      1,
+      { page: 1, pageSize: 10 } as any,
+      { user: { sub: 9, content_limit: 1 } } as any,
+    )
+
+    expect(result.items[0].game).toMatchObject({
+      id: 19988,
+      title_jp: '',
+      covers: [],
+      developers: [],
+      release_date: null,
     })
   })
 

@@ -237,7 +237,20 @@ export function emptyNestedGame() {
     intro_jp: '',
     intro_zh: '',
     intro_en: '',
+    release_date: null as string | null,
+    developers: [] as ReturnType<typeof cardDevelopers>,
   }
+}
+
+function cardDevelopers(card: InternalGalgameCard) {
+  if (!card.developer) return []
+
+  return [
+    {
+      role: mapDeveloperRole('DEVELOPER'),
+      developer: { id: card.developer.id, name: card.developer.name, aliases: [] as string[] },
+    },
+  ]
 }
 
 export function mapCardToNestedGame(card: InternalGalgameCard, includeRated: boolean) {
@@ -248,6 +261,8 @@ export function mapCardToNestedGame(card: InternalGalgameCard, includeRated: boo
     intro_jp,
     intro_zh,
     intro_en,
+    release_date: card.release_date,
+    developers: cardDevelopers(card),
   }
 }
 

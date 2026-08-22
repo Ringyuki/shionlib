@@ -11,10 +11,15 @@ import { PaginatedResult } from '../../../shared/interfaces/response/response.in
 import { GetFavoritesReqDto } from '../dto/req/get-favorites.req.dto'
 import { Prisma } from '@prisma/client'
 import { RequestWithUser } from '../../../shared/interfaces/auth/request-with-user.interface'
+import { HikarinagiCardService } from '../../hikarinagi/services/hikarinagi-card.service'
+import { includesRated } from '../../user/helpers/content-limit.helper'
 
 @Injectable()
 export class FavoriteService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cards: HikarinagiCardService,
+  ) {}
 
   async createFavorite(createFavoriteReqDto: CreateFavoriteReqDto, user_id: number) {
     const { name, description, is_private } = createFavoriteReqDto
@@ -374,47 +379,12 @@ export class FavoriteService {
       select: {
         id: true,
         note: true,
-        game: {
-          select: {
-            id: true,
-            title_jp: true,
-            title_zh: true,
-            title_en: true,
-            intro_jp: true,
-            intro_zh: true,
-            intro_en: true,
-            platform: true,
-            type: true,
-            tags: true,
-            developers: {
-              select: {
-                role: true,
-                developer: {
-                  select: {
-                    id: true,
-                    name: true,
-                    aliases: true,
-                  },
-                },
-              },
-            },
-            covers: {
-              select: {
-                url: true,
-                language: true,
-                dims: true,
-                sexual: true,
-                violence: true,
-              },
-            },
-            release_date: true,
-          },
-        },
+        game: { select: { id: true, h_id: true } },
       },
     })
 
     return {
-      items: favorite,
+      items: await this.cards.hydrate(favorite, includesRated(req.user?.content_limit)),
       meta: {
         totalItems: total,
         itemCount: favorite.length,
