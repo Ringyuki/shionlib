@@ -226,6 +226,7 @@ describe('OpenSearchEngine', () => {
         itemsPerPage: 2,
         totalPages: 2,
         currentPage: 2,
+        content_limit: 1,
       },
     })
   })

@@ -66,6 +66,7 @@ export class HikarinagiSearchEngine implements SearchEngine {
         itemsPerPage: pageSize,
         totalPages: result.meta.total_pages,
         currentPage: page,
+        content_limit,
       },
     } as PaginatedResult<unknown>
   }

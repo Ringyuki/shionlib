@@ -90,6 +90,7 @@ export class MeilisearchEngine implements SearchEngine {
           itemsPerPage: query.pageSize,
           totalPages: 0,
           currentPage: query.page,
+          content_limit,
         },
       }
     }

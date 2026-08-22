@@ -70,4 +70,24 @@ describe('HikarinagiSearchEngine', () => {
     expect(hikarinagi.galgameBatch).not.toHaveBeenCalled()
     expect(result.items).toEqual([])
   })
+
+  it('echoes the reader content limit in meta so the client knows whether to blur', async () => {
+    const { engine, hikarinagi } = createEngine()
+    hikarinagi.searchGalgameIds.mockResolvedValue({
+      ids: [],
+      meta: { total_items: 0, total_pages: 0 },
+    })
+
+    const permissive = await engine.searchGames(
+      { q: 'x', page: 1, pageSize: 20 } as any,
+      UserContentLimit.JUST_SHOW,
+    )
+    expect(permissive.meta.content_limit).toBe(UserContentLimit.JUST_SHOW)
+
+    const strict = await engine.searchGames(
+      { q: 'x', page: 1, pageSize: 20 } as any,
+      UserContentLimit.NEVER_SHOW_NSFW_CONTENT,
+    )
+    expect(strict.meta.content_limit).toBe(UserContentLimit.NEVER_SHOW_NSFW_CONTENT)
+  })
 })

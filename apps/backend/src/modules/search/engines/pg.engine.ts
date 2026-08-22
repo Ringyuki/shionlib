@@ -41,6 +41,7 @@ export class PgSearchEngine implements SearchEngine {
           itemsPerPage: pageSize,
           totalPages: 0,
           currentPage: page,
+          content_limit,
         },
       }
     }
@@ -136,6 +137,7 @@ export class PgSearchEngine implements SearchEngine {
         itemsPerPage: pageSize,
         totalPages: Math.ceil(total / pageSize),
         currentPage: page,
+        content_limit,
       },
     }
   }
