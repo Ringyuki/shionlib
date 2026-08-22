@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../../../prisma.service'
-import type { Prisma } from '@prisma/client'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 import { GetListReqDto } from '../dto/req/get-list.req.dto'
@@ -19,56 +18,25 @@ export class DeveloperService {
 
   async getList(dto: GetListReqDto): Promise<PaginatedResult<DeveloperResDto>> {
     const { page, pageSize, q } = dto
+    const remote = await this.hikarinagi.producerList({
+      page,
+      page_size: pageSize,
+      search: q || undefined,
+    })
+    const items = (remote?.items ?? []).map(row => ({
+      id: row.id,
+      name: row.name,
+      aliases: row.aliases,
+      logo: row.logo?.src ?? null,
+      works_count: row.works_count,
+    }))
+    const total = remote?.meta.total_items ?? 0
 
-    let aliasLikeIds: number[] = []
-    if (q && q.length > 0) {
-      const ids = await this.prisma.$queryRaw<Array<{ id: number }>>`
-        select id
-          from game_developers
-          where exists (
-            select 1 from unnest(aliases) as alias
-            where alias ilike ${'%' + q + '%'}
-          )
-        `
-      aliasLikeIds = ids.map(r => r.id)
-    }
-
-    const where: Prisma.GameDeveloperWhereInput = {}
-    if (q && q.length > 0) {
-      const or: Prisma.GameDeveloperWhereInput[] = [{ name: { contains: q, mode: 'insensitive' } }]
-      if (aliasLikeIds.length > 0) {
-        or.push({ id: { in: aliasLikeIds } })
-      }
-      where.OR = or
-    }
-
-    const [total, developers] = await this.prisma.$transaction([
-      this.prisma.gameDeveloper.count({ where }),
-      this.prisma.gameDeveloper.findMany({
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        where,
-        select: {
-          id: true,
-          name: true,
-          aliases: true,
-          logo: true,
-          _count: { select: { games: true } },
-        },
-        orderBy: { name: 'asc' },
-      }),
-    ])
     return {
-      items: developers.map(developer => ({
-        id: developer.id,
-        name: developer.name,
-        aliases: developer.aliases,
-        logo: developer.logo,
-        works_count: developer._count.games,
-      })),
+      items,
       meta: {
         totalItems: total,
-        itemCount: developers.length,
+        itemCount: items.length,
         itemsPerPage: pageSize,
         totalPages: Math.ceil(total / pageSize),
         currentPage: page,

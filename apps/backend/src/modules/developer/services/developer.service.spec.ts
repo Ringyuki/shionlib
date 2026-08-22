@@ -23,7 +23,12 @@ describe('DeveloperService', () => {
       Promise.all(queries),
     )
 
-    const hikarinagi = { producer: jest.fn().mockResolvedValue(null) }
+    const hikarinagi = {
+      producer: jest.fn().mockResolvedValue(null),
+      producerList: jest
+        .fn()
+        .mockResolvedValue({ items: [], meta: { total_items: 0, total_pages: 0 } }),
+    }
     const service = new DeveloperService(prisma as any, hikarinagi as any)
 
     return {
@@ -32,86 +37,6 @@ describe('DeveloperService', () => {
       hikarinagi,
     }
   }
-
-  it('getList returns paginated developers without search query', async () => {
-    const { service, prisma } = createService()
-    ;(prisma.gameDeveloper.count as jest.Mock).mockResolvedValue(2)
-    ;(prisma.gameDeveloper.findMany as jest.Mock).mockResolvedValue([
-      {
-        id: 1,
-        name: 'dev-a',
-        aliases: ['a'],
-        logo: 'logo-a',
-        _count: { games: 7 },
-      },
-      {
-        id: 2,
-        name: 'dev-b',
-        aliases: ['b'],
-        logo: 'logo-b',
-        _count: { games: 3 },
-      },
-    ])
-
-    const result = await service.getList({ page: 1, pageSize: 10, q: '' } as any)
-
-    expect(prisma.$queryRaw).not.toHaveBeenCalled()
-    expect(prisma.gameDeveloper.count).toHaveBeenCalledWith({ where: {} })
-    expect(prisma.gameDeveloper.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        skip: 0,
-        take: 10,
-        where: {},
-        orderBy: { name: 'asc' },
-      }),
-    )
-    expect(result).toEqual({
-      items: [
-        { id: 1, name: 'dev-a', aliases: ['a'], logo: 'logo-a', works_count: 7 },
-        { id: 2, name: 'dev-b', aliases: ['b'], logo: 'logo-b', works_count: 3 },
-      ],
-      meta: {
-        totalItems: 2,
-        itemCount: 2,
-        itemsPerPage: 10,
-        totalPages: 1,
-        currentPage: 1,
-      },
-    })
-  })
-
-  it('getList applies alias-like ids when query is present', async () => {
-    const { service, prisma } = createService()
-    ;(prisma.$queryRaw as jest.Mock).mockResolvedValue([{ id: 11 }, { id: 12 }])
-    ;(prisma.gameDeveloper.count as jest.Mock).mockResolvedValue(1)
-    ;(prisma.gameDeveloper.findMany as jest.Mock).mockResolvedValue([
-      {
-        id: 11,
-        name: 'dev-search',
-        aliases: ['search'],
-        logo: 'logo-s',
-        _count: { games: 1 },
-      },
-    ])
-
-    await service.getList({ page: 2, pageSize: 5, q: 'leaf' } as any)
-
-    expect(prisma.$queryRaw).toHaveBeenCalledTimes(1)
-    expect(prisma.gameDeveloper.count).toHaveBeenCalledWith({
-      where: {
-        OR: [{ name: { contains: 'leaf', mode: 'insensitive' } }, { id: { in: [11, 12] } }],
-      },
-    })
-    expect(prisma.gameDeveloper.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        skip: 5,
-        take: 5,
-        where: {
-          OR: [{ name: { contains: 'leaf', mode: 'insensitive' } }, { id: { in: [11, 12] } }],
-        },
-      }),
-    )
-  })
 
   it('getById throws when developer does not exist', async () => {
     const { service, prisma } = createService()
@@ -215,5 +140,64 @@ describe('DeveloperService', () => {
     hikarinagi.producer.mockResolvedValue(null)
 
     await expect(service.getById(999)).rejects.toBeDefined()
+  })
+
+  describe('getList', () => {
+    it('lists producers from upstream so the ids match what the detail route expects', async () => {
+      const { service, prisma, hikarinagi } = createService()
+      hikarinagi.producerList.mockResolvedValueOnce({
+        items: [
+          {
+            id: 396,
+            name: 'ゆずソフト',
+            aliases: ['yuzu'],
+            logo: { src: 'https://cdn/x.webp' },
+            works_count: 13,
+          },
+        ],
+        meta: { total_items: 1, total_pages: 1 },
+      })
+
+      const result = await service.getList({ page: 1, pageSize: 20, q: '' } as never)
+
+      expect(hikarinagi.producerList).toHaveBeenCalledWith({
+        page: 1,
+        page_size: 20,
+        search: undefined,
+      })
+      expect(prisma.gameDeveloper.findMany).not.toHaveBeenCalled()
+      expect(result.items).toEqual([
+        {
+          id: 396,
+          name: 'ゆずソフト',
+          aliases: ['yuzu'],
+          logo: 'https://cdn/x.webp',
+          works_count: 13,
+        },
+      ])
+      expect(result.meta.totalItems).toBe(1)
+    })
+
+    it('forwards the search keyword', async () => {
+      const { service, hikarinagi } = createService()
+
+      await service.getList({ page: 2, pageSize: 10, q: 'yuzu' } as never)
+
+      expect(hikarinagi.producerList).toHaveBeenCalledWith({
+        page: 2,
+        page_size: 10,
+        search: 'yuzu',
+      })
+    })
+
+    it('degrades to an empty page when the upstream is not configured', async () => {
+      const { service, hikarinagi } = createService()
+      hikarinagi.producerList.mockResolvedValueOnce(null)
+
+      const result = await service.getList({ page: 1, pageSize: 20 } as never)
+
+      expect(result.items).toEqual([])
+      expect(result.meta.totalItems).toBe(0)
+    })
   })
 })

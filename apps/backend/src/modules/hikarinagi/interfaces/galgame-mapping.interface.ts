@@ -141,6 +141,14 @@ export interface InternalGalgameCard {
   developer: { id: number; name: string } | null
 }
 
+export interface InternalProducerListItem {
+  id: number
+  name: string
+  aliases: string[]
+  logo: InternalMedia | null
+  works_count: number
+}
+
 export interface HikarinagiGalgameIdsQuery {
   producer_id?: number
   character_id?: number

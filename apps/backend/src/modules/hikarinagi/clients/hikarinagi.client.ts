@@ -12,6 +12,7 @@ import {
   CatalogChanges,
   InternalGalgameBundle,
   InternalGalgameCard,
+  InternalProducerListItem,
   GalgameMappingEntry,
   GalgameMappingMeta,
   HikarinagiEnvelope,
@@ -195,6 +196,27 @@ export class HikarinagiClient {
     await this.cacheService.set(cacheKey, ids, GALGAME_IDS_CACHE_TTL_MS)
 
     return { ids }
+  }
+
+  async producerList(params: {
+    page: number
+    page_size: number
+    search?: string
+  }): Promise<{ items: InternalProducerListItem[]; meta: GalgameMappingMeta } | null> {
+    if (!this.enabled) return null
+
+    const search = new URLSearchParams({
+      page: String(params.page),
+      page_size: String(params.page_size),
+    })
+    if (params.search) search.set('search', params.search)
+
+    const envelope = await this.request<{
+      items: InternalProducerListItem[]
+      meta: GalgameMappingMeta
+    }>(`/api/v3/internal/producers?${search.toString()}`)
+
+    return envelope.data ?? null
   }
 
   async safeGalgameIds(content_limit?: number): Promise<number[] | null> {
