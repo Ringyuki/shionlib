@@ -36,6 +36,10 @@ import { MessageService } from '../../message/services/message.service'
 import { MessageTone, MessageType } from '../../message/dto/req/send-message.req.dto'
 import { DownloadProxyTicketService } from './download-proxy-ticket.service'
 import { USER_AVATAR_SELECT, mapUserAvatar } from '../../../shared/constants/user-select.constant'
+import { HikarinagiClient } from '../../hikarinagi/clients/hikarinagi.client'
+import { HikarinagiCardService } from '../../hikarinagi/services/hikarinagi-card.service'
+import { mapCardToListItem } from '../../hikarinagi/mappers/galgame-read.mapper'
+import { includesRated } from '../../user/helpers/content-limit.helper'
 
 @Injectable()
 export class GameDownloadSourceService {
@@ -49,6 +53,8 @@ export class GameDownloadSourceService {
     private readonly uploadQuotaService: UploadQuotaService,
     private readonly messageService: MessageService,
     private readonly downloadProxyTicketService: DownloadProxyTicketService,
+    private readonly hikarinagi: HikarinagiClient,
+    private readonly cards: HikarinagiCardService,
   ) {}
 
   async getByGameId(id: number, req: RequestWithUser): Promise<GetGameDownloadResourceResDto[]> {
@@ -462,10 +468,15 @@ export class GameDownloadSourceService {
     }
   }
 
-  async getList(dto: PaginationReqDto): Promise<PaginatedResult<GetDownloadResourcesListResDto>> {
+  async getList(
+    dto: PaginationReqDto,
+    req: RequestWithUser,
+  ): Promise<PaginatedResult<GetDownloadResourcesListResDto>> {
     const { page, pageSize } = dto
 
-    const where = { status: 1 }
+    const safeIds = await this.hikarinagi.safeGalgameIds(req.user?.content_limit)
+    const where: Prisma.GameDownloadResourceWhereInput = { status: 1 }
+    if (safeIds) where.game = { h_id: { in: safeIds } }
     const total = await this.prismaService.gameDownloadResource.count({ where })
     const resources = await this.prismaService.gameDownloadResource.findMany({
       where,
@@ -479,14 +490,7 @@ export class GameDownloadSourceService {
         platform: true,
         language: true,
         note: true,
-        game: {
-          select: {
-            id: true,
-            title_jp: true,
-            title_zh: true,
-            title_en: true,
-          },
-        },
+        game: { select: { id: true, h_id: true } },
         _count: {
           select: {
             files: true,
@@ -505,8 +509,10 @@ export class GameDownloadSourceService {
       },
     })
 
+    const hydrated = await this.cards.hydrate(resources, includesRated(req.user?.content_limit))
+
     return {
-      items: resources.map(r => ({
+      items: hydrated.map(r => ({
         id: r.id,
         platform: r.platform,
         language: r.language,
@@ -588,14 +594,7 @@ export class GameDownloadSourceService {
             game_id: true,
             creator_id: true,
             status: true,
-            game: {
-              select: {
-                id: true,
-                title_jp: true,
-                title_zh: true,
-                title_en: true,
-              },
-            },
+            game: { select: { id: true, h_id: true } },
           },
         },
       },
@@ -659,7 +658,7 @@ export class GameDownloadSourceService {
     }
 
     const gameId = file.game_download_resource.game_id
-    const game = file.game_download_resource.game
+    const gameTitles = await this.resolveTitles(file.game_download_resource.game?.h_id ?? null)
     const oldUploadSessionId = file.upload_session_id
 
     await this.prismaService.$transaction(async tx => {
@@ -721,7 +720,14 @@ export class GameDownloadSourceService {
         tx,
       )
 
-      await this.notifyFavoriteUsers(gameId, game, file.file_name, dto.reason, req.user.sub, tx)
+      await this.notifyFavoriteUsers(
+        gameId,
+        gameTitles,
+        file.file_name,
+        dto.reason,
+        req.user.sub,
+        tx,
+      )
     })
 
     return { ok: true }
@@ -805,9 +811,17 @@ export class GameDownloadSourceService {
     })
   }
 
+  private async resolveTitles(hikarinagiId: number | null) {
+    const [card] = hikarinagiId != null ? await this.hikarinagi.galgameBatch([hikarinagiId]) : []
+    if (!card) return { title_jp: '', title_zh: '', title_en: '' }
+    const { title_jp, title_zh, title_en } = mapCardToListItem(card, false)
+
+    return { title_jp, title_zh, title_en }
+  }
+
   private async notifyFavoriteUsers(
     gameId: number,
-    game: { id: number; title_jp: string | null; title_zh: string | null; title_en: string | null },
+    game: { title_jp: string; title_zh: string; title_en: string },
     fileName: string,
     reason: string | undefined,
     operatorId: number,

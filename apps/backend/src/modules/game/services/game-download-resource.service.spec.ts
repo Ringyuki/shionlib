@@ -2,6 +2,7 @@ import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum
 import { ShionlibUserRoles } from '../../../shared/enums/auth/user-role.enum'
 import { ActivityFileStatus } from '../../activity/dto/create-activity.dto'
 import { of } from 'rxjs'
+import { HikarinagiCardService } from '../../hikarinagi/services/hikarinagi-card.service'
 import { GameDownloadSourceService } from './game-download-resource.service'
 
 describe('GameDownloadSourceService', () => {
@@ -82,6 +83,11 @@ describe('GameDownloadSourceService', () => {
       issueDownloadUrl: jest.fn(),
     }
 
+    const hikarinagi = {
+      galgameBatch: jest.fn().mockResolvedValue([]),
+      safeGalgameIds: jest.fn().mockResolvedValue(null),
+    }
+
     const service = new GameDownloadSourceService(
       prismaService as any,
       s3Service as any,
@@ -92,6 +98,8 @@ describe('GameDownloadSourceService', () => {
       uploadQuotaService as any,
       messageService as any,
       downloadProxyTicketService as any,
+      hikarinagi as any,
+      new HikarinagiCardService(hikarinagi as any),
     )
 
     return {
@@ -104,6 +112,7 @@ describe('GameDownloadSourceService', () => {
       uploadQuotaService,
       messageService,
       downloadProxyTicketService,
+      hikarinagi,
       configValues,
       service,
     }
@@ -128,12 +137,7 @@ describe('GameDownloadSourceService', () => {
       game_id: 30,
       creator_id: 100,
       status: 1,
-      game: {
-        id: 30,
-        title_jp: 'jp',
-        title_zh: 'zh',
-        title_en: 'en',
-      },
+      game: { id: 30, h_id: 9168 },
     },
   })
 
@@ -694,7 +698,7 @@ describe('GameDownloadSourceService', () => {
   })
 
   it('getList maps resources to paginated response', async () => {
-    const { service, prismaService } = createService()
+    const { service, prismaService, hikarinagi } = createService()
     const now = new Date('2026-02-18T00:00:00.000Z')
     prismaService.gameDownloadResource.count.mockResolvedValue(3)
     prismaService.gameDownloadResource.findMany.mockResolvedValue([
@@ -704,7 +708,7 @@ describe('GameDownloadSourceService', () => {
         language: ['jp'],
         note: 'n',
         downloads: 9,
-        game: { id: 2, title_jp: 'jp', title_zh: 'zh', title_en: 'en' },
+        game: { id: 2, h_id: 9168 },
         _count: { files: 2 },
         files: [{ file_name: 'a.7z' }, { file_name: 'b.7z' }],
         creator: { id: 100, name: 'alice', avatar: null, sponsor_expires_at: null },
@@ -712,8 +716,19 @@ describe('GameDownloadSourceService', () => {
       },
     ])
 
-    const result = await service.getList({ page: 1, pageSize: 10 } as any)
-    expect(result.items[0]).toEqual({
+    hikarinagi.galgameBatch.mockResolvedValueOnce([
+      { id: 9168, origin_title: 'jp', trans_title: 'zh', en_title: 'en', covers: [] },
+    ])
+
+    const result: any = await service.getList(
+      { page: 1, pageSize: 10 } as any,
+      {
+        user: { sub: 1, content_limit: 1 },
+      } as any,
+    )
+
+    expect(hikarinagi.galgameBatch).toHaveBeenCalledWith([9168])
+    expect(result.items[0]).toMatchObject({
       id: 1,
       platform: ['win'],
       language: ['jp'],
@@ -726,6 +741,19 @@ describe('GameDownloadSourceService', () => {
       created: now,
     })
     expect(result.meta.totalItems).toBe(3)
+  })
+
+  it('getList hides entries the reader is not allowed to see', async () => {
+    const { service, prismaService, hikarinagi } = createService()
+    hikarinagi.safeGalgameIds.mockResolvedValueOnce([9168])
+    prismaService.gameDownloadResource.count.mockResolvedValue(0)
+    prismaService.gameDownloadResource.findMany.mockResolvedValue([])
+
+    await service.getList({ page: 1, pageSize: 10 } as any, { user: undefined } as any)
+
+    expect(prismaService.gameDownloadResource.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { status: 1, game: { h_id: { in: [9168] } } } }),
+    )
   })
 
   it('migrateCreate validates game and returns created resource id', async () => {
@@ -843,8 +871,11 @@ describe('GameDownloadSourceService', () => {
   })
 
   it('reuploadFile success path updates history, replaces file and notifies followers', async () => {
-    const { service, prismaService, s3Service, uploadQuotaService, activityService } =
+    const { service, prismaService, s3Service, uploadQuotaService, activityService, hikarinagi } =
       createService()
+    hikarinagi.galgameBatch.mockResolvedValueOnce([
+      { id: 9168, origin_title: 'jp', trans_title: 'zh', en_title: 'en', covers: [] },
+    ])
     const dto = { upload_session_id: 556, reason: 'new package' }
     const file = makeUploadedFile()
     const session = {
@@ -915,7 +946,7 @@ describe('GameDownloadSourceService', () => {
     )
     expect(notifySpy).toHaveBeenCalledWith(
       30,
-      file.game_download_resource.game,
+      { title_jp: 'jp', title_zh: 'zh', title_en: 'en' },
       'file.7z',
       'new package',
       100,

@@ -25,14 +25,6 @@ import { USER_AVATAR_SELECT, mapUserAvatar } from '../../../shared/constants/use
 
 const WALKTHROUGH_SELECT = {
   id: true,
-  game: {
-    select: {
-      id: true,
-      title_jp: true,
-      title_zh: true,
-      title_en: true,
-    },
-  },
   title: true,
   html: true,
   lang: true,

@@ -35,8 +35,11 @@ export class GameDownloadSourceController {
   ) {}
 
   @Get('list')
-  async getDownloadSourceList(@Query() getDownloadSourceListReqDto: PaginationReqDto) {
-    return await this.gameDownloadSourceService.getList(getDownloadSourceListReqDto)
+  async getDownloadSourceList(
+    @Query() getDownloadSourceListReqDto: PaginationReqDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.gameDownloadSourceService.getList(getDownloadSourceListReqDto, req)
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

@@ -29,9 +29,11 @@ describe('GameDownloadSourceController', () => {
     const { controller, gameDownloadSourceService } = createController()
     const dto = { page: 1, pageSize: 20 }
 
-    await controller.getDownloadSourceList(dto as any)
+    const req = { user: { sub: 1, content_limit: 1 } }
 
-    expect(gameDownloadSourceService.getList).toHaveBeenCalledWith(dto)
+    await controller.getDownloadSourceList(dto as any, req as any)
+
+    expect(gameDownloadSourceService.getList).toHaveBeenCalledWith(dto, req)
   })
 
   it('delegates deleteDownloadResource', async () => {

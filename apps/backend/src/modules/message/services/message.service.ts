@@ -11,12 +11,15 @@ import { Prisma } from '@prisma/client'
 import { MessageNotifier } from './message-notifier.service'
 import { MessageTone, MessageType } from '../dto/req/send-message.req.dto'
 import { USER_AVATAR_SELECT, mapUserAvatar } from '../../../shared/constants/user-select.constant'
+import { HikarinagiCardService } from '../../hikarinagi/services/hikarinagi-card.service'
+import { includesRated } from '../../user/helpers/content-limit.helper'
 
 @Injectable()
 export class MessageService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly messageNotifier: MessageNotifier,
+    private readonly cards: HikarinagiCardService,
   ) {}
 
   async send(sendMessageReqDto: SendMessageReqDto, tx?: Prisma.TransactionClient) {
@@ -155,27 +158,7 @@ export class MessageService {
               html: true,
             },
           },
-          game: {
-            select: {
-              id: true,
-              title_zh: true,
-              title_en: true,
-              title_jp: true,
-              intro_jp: true,
-              intro_zh: true,
-              intro_en: true,
-              covers: {
-                select: {
-                  language: true,
-                  url: true,
-                  type: true,
-                  dims: true,
-                  sexual: true,
-                  violence: true,
-                },
-              },
-            },
-          },
+          game: { select: { id: true, h_id: true } },
           sender: {
             select: USER_AVATAR_SELECT,
           },
@@ -201,7 +184,9 @@ export class MessageService {
         receiver: mapUserAvatar(message.receiver),
       }
     })
-    return message
+    const [hydrated] = await this.cards.hydrate([message], includesRated(req.user?.content_limit))
+
+    return hydrated
   }
 
   async markAsRead(id: number, req: RequestWithUser, tx?: Prisma.TransactionClient) {

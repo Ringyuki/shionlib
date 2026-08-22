@@ -1,4 +1,5 @@
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
+import { HikarinagiCardService } from '../../hikarinagi/services/hikarinagi-card.service'
 import { MessageService } from './message.service'
 
 describe('MessageService', () => {
@@ -29,11 +30,18 @@ describe('MessageService', () => {
       notifyUnreadCount: jest.fn(),
     }
 
+    const hikarinagi = { galgameBatch: jest.fn().mockResolvedValue([]) }
+
     return {
       prisma,
       tx,
       messageNotifier,
-      service: new MessageService(prisma as any, messageNotifier as any),
+      hikarinagi,
+      service: new MessageService(
+        prisma as any,
+        messageNotifier as any,
+        new HikarinagiCardService(hikarinagi as any),
+      ),
     }
   }
 
@@ -224,6 +232,28 @@ describe('MessageService', () => {
       sender: { id: 3, name: 'user3', avatar: null, is_sponsor: false },
     })
     expect(markAsReadSpy).toHaveBeenCalledWith(1, req, tx)
+  })
+
+  it('getById renders the attached entry from upstream, outside the transaction', async () => {
+    const { service, prisma, hikarinagi } = createService()
+    prisma.message.findUnique.mockResolvedValue({
+      id: 1,
+      receiver: { id: 7, name: 'user7', avatar: null, sponsor_expires_at: null },
+      sender: null,
+      game: { id: 19988, h_id: 9168 },
+    })
+    const markAsReadSpy = jest.spyOn(service, 'markAsRead').mockResolvedValue(undefined)
+    hikarinagi.galgameBatch.mockResolvedValueOnce([
+      { id: 9168, origin_title: '怪盗キュアフローネ', trans_title: null, covers: [] },
+    ])
+
+    const result: any = await service.getById(1, req as any)
+
+    expect(hikarinagi.galgameBatch).toHaveBeenCalledWith([9168])
+    expect(hikarinagi.galgameBatch.mock.invocationCallOrder[0]).toBeGreaterThan(
+      markAsReadSpy.mock.invocationCallOrder[0],
+    )
+    expect(result.game).toMatchObject({ id: 19988, title_jp: '怪盗キュアフローネ' })
   })
 
   it('markAsRead updates read flag, recounts unread and notifies', async () => {
