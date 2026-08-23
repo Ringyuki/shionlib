@@ -194,6 +194,27 @@ describe('card completeness', () => {
     })
   })
 
+  it('carries release_date and the developer on list cards, not only on nested ones', () => {
+    const card = {
+      ...(jaCard as unknown as Record<string, unknown>),
+      release_date: '2019-08-30',
+      developer: { id: 396, name: 'ゆずソフト' },
+    } as never
+
+    expect(mapCardToListItem(card, true)).toMatchObject({
+      release_date: '2019-08-30',
+      developers: [{ developer: { id: 396, name: 'ゆずソフト' } }],
+    })
+    expect(mapCardToNestedGame(card, true)).toMatchObject({
+      release_date: '2019-08-30',
+      developers: [{ developer: { id: 396, name: 'ゆずソフト' } }],
+    })
+  })
+
+  it('leaves the developer list empty when the card has none', () => {
+    expect(mapCardToListItem(jaCard, true).developers).toEqual([])
+  })
+
   it('carries the intros on nested cards so embedded cards are not blank', () => {
     expect(mapCardToNestedGame(jaCard, true)).toMatchObject({
       intro_jp: 'にほんご',

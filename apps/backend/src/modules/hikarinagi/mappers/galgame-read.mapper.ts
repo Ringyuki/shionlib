@@ -223,6 +223,8 @@ export function mapCardToListItem(card: InternalGalgameCard, includeRated: boole
     aliases: card.aliases ?? [],
     type: card.adv_type ?? null,
     covers: covers(card.covers, includeRated),
+    release_date: card.release_date,
+    developers: cardDevelopers(card),
   }
 }
 
@@ -261,8 +263,6 @@ export function mapCardToNestedGame(card: InternalGalgameCard, includeRated: boo
     intro_jp,
     intro_zh,
     intro_en,
-    release_date: card.release_date,
-    developers: cardDevelopers(card),
   }
 }
 
