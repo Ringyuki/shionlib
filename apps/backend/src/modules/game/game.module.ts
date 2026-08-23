@@ -1,11 +1,8 @@
 import { forwardRef, Module } from '@nestjs/common'
 import { GameController } from './controllers/game.controller'
-import { GameDataFetcherService } from './services/game-data-fetcher.service'
 import { GameService } from './services/game.service'
-import { GameCreateService } from './services/game-create.service'
 import { GameDownloadSourceService } from './services/game-download-resource.service'
 import { B2Module } from '../b2/b2.module'
-import { GameEditService } from './services/game-edit.service'
 import { GameHotScoreService } from './services/game-hot-score.service'
 import { GameHotScoreCalcTask } from './tasks/game-hot-score-calc.task'
 import { GameDownloadSourceController } from './controllers/game-download-source.controller'
@@ -15,35 +12,21 @@ import { HikarinagiModule } from '../hikarinagi/hikarinagi.module'
 import { GameScoreService } from './services/game-score.service'
 import { GameScoreController } from './controllers/game-score.controller'
 import { GameDownloadResourceReportService } from './services/game-download-resource-report.service'
-import { GameTagService } from './services/game-tag.service'
 import { DownloadProxyTicketService } from './services/download-proxy-ticket.service'
-import { GameEntityUpsertService } from './services/game-entity-upsert.service'
-import { GameFieldSyncService } from './services/game-field-sync.service'
 
 @Module({
   controllers: [GameController, GameDownloadSourceController, GameScoreController],
   imports: [B2Module, HttpModule, BangumiModule, forwardRef(() => HikarinagiModule)],
   providers: [
-    GameDataFetcherService,
     GameService,
     GameController,
-    GameCreateService,
     GameDownloadSourceService,
-    GameEditService,
     GameHotScoreService,
     GameHotScoreCalcTask,
     GameScoreService,
     GameDownloadResourceReportService,
-    GameTagService,
     DownloadProxyTicketService,
-    GameEntityUpsertService,
-    GameFieldSyncService,
   ],
-  exports: [
-    GameService,
-    GameDownloadResourceReportService,
-    GameTagService,
-    GameDownloadSourceService,
-  ],
+  exports: [GameService, GameDownloadResourceReportService, GameDownloadSourceService],
 })
 export class GameModule {}

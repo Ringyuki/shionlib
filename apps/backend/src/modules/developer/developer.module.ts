@@ -5,12 +5,11 @@ import { DeveloperController } from './controllers/developer.controller'
 import { PrismaService } from '../../prisma.service'
 import { ActivityModule } from '../activity/activity.module'
 import { BangumiModule } from '../bangumi/bangumi.module'
-import { DeveloperFieldSyncService } from './services/developer-field-sync.service'
 import { HikarinagiModule } from '../hikarinagi/hikarinagi.module'
 
 @Module({
   imports: [forwardRef(() => HikarinagiModule), ActivityModule, BangumiModule],
-  providers: [DeveloperService, DeveloperEditService, DeveloperFieldSyncService, PrismaService],
+  providers: [DeveloperService, DeveloperEditService, PrismaService],
   controllers: [DeveloperController],
 })
 export class DeveloperModule {}

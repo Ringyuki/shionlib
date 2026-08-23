@@ -5,12 +5,11 @@ import { CharacterController } from './controllers/character.controller'
 import { PrismaService } from '../../prisma.service'
 import { ActivityModule } from '../activity/activity.module'
 import { BangumiModule } from '../bangumi/bangumi.module'
-import { CharacterFieldSyncService } from './services/character-field-sync.service'
 import { HikarinagiModule } from '../hikarinagi/hikarinagi.module'
 
 @Module({
   imports: [forwardRef(() => HikarinagiModule), ActivityModule, BangumiModule],
-  providers: [CharacterEditService, CharacterService, CharacterFieldSyncService, PrismaService],
+  providers: [CharacterEditService, CharacterService, PrismaService],
   controllers: [CharacterController],
 })
 export class CharacterModule {}
