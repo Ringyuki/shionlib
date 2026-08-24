@@ -530,6 +530,7 @@ export class GameDownloadSourceService {
         itemsPerPage: pageSize,
         totalPages: Math.ceil(total / pageSize),
         currentPage: page,
+        content_limit: req.user?.content_limit,
       },
     }
   }

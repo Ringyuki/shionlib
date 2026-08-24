@@ -4,19 +4,21 @@ import { ReleaseCard } from '../ReleaseCrad'
 import { Masonry } from '@/components/common/shared/Masonry'
 import { Empty } from '@/components/common/content/Empty'
 import { Pagination } from '@/components/common/content/Pagination'
+import { ContentLimit } from '@/interfaces/user/user.interface'
 
 interface ReleasesProps {
   releases: ReleaseItem[]
   meta: PaginatedMeta
+  content_limit?: ContentLimit
 }
 
-export const Releases = ({ releases, meta }: ReleasesProps) => {
+export const Releases = ({ releases, meta, content_limit }: ReleasesProps) => {
   return releases.length > 0 ? (
     <div className="flex flex-col gap-4">
       <Masonry columnCountBreakpoints={{ default: 1, sm: 2, md: 2, lg: 2 }}>
         {releases.map(release => (
           <div key={release.id} className="break-inside-avoid">
-            <ReleaseCard release={release} />
+            <ReleaseCard release={release} content_limit={content_limit} />
           </div>
         ))}
       </Masonry>

@@ -4,6 +4,7 @@ import { ReleaseItem } from '@/interfaces/release/upload.interface'
 import { shionlibRequest } from '@/utils/request'
 import { PaginatedResponse } from '@/interfaces/api/shionlib-api-res.interface'
 import { createGenerateMetadata } from '@/libs/seo/metadata'
+import { ContentLimit } from '@/interfaces/user/user.interface'
 import { getTranslations } from 'next-intl/server'
 
 const getData = async (page: number = 1) => {
@@ -32,7 +33,11 @@ export default async function ReleasesPage({ searchParams }: ReleasesPageProps) 
   return (
     <div className="w-full mx-auto my-4">
       <ReleaseListHeader />
-      <Releases releases={data.data?.items || []} meta={data.data?.meta!} />
+      <Releases
+        releases={data.data?.items || []}
+        meta={data.data?.meta!}
+        content_limit={data.data?.meta.content_limit as ContentLimit}
+      />
     </div>
   )
 }

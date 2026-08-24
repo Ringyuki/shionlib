@@ -10,12 +10,15 @@ import { getTranslations } from 'next-intl/server'
 import { GameData, LanguageNameMap } from '@/interfaces/game/game.interface'
 import { CalendarDays, Download, FileArchive } from 'lucide-react'
 import { Badge } from '@/components/shionui/Badge'
+import { GameEmbeddedCard } from '@/components/game/GameEmbeddedCard'
+import { ContentLimit } from '@/interfaces/user/user.interface'
 
 interface ReleaseCardProps {
   release: ReleaseItem
+  content_limit?: ContentLimit
 }
 
-export const ReleaseCard = async ({ release }: ReleaseCardProps) => {
+export const ReleaseCard = async ({ release, content_limit }: ReleaseCardProps) => {
   const t = await getTranslations('Components.Release.ReleaseCard')
   const locale = await getLocale()
   const langMap = { en: 'en', ja: 'jp', zh: 'zh' } as const
@@ -67,6 +70,7 @@ export const ReleaseCard = async ({ release }: ReleaseCardProps) => {
               </Badge>
             </div>
           </div>
+          <GameEmbeddedCard game={release.game} content_limit={content_limit} asLink={false} />
         </CardContent>
       </Card>
     </Link>
