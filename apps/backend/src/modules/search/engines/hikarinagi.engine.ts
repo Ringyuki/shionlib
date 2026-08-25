@@ -18,18 +18,57 @@ export class HikarinagiSearchEngine implements SearchEngine {
   async deleteGame(): Promise<void> {}
   async deleteAllGames(): Promise<void> {}
 
+  private async resolveIds(
+    query: SearchQuery,
+    page: number,
+    pageSize: number,
+    content_limit?: UserContentLimit,
+  ): Promise<{ ids: number[]; meta: { total_items: number; total_pages: number } }> {
+    const q = query.q?.trim()
+    const tag = query.tag?.trim()
+    if (!q && !tag) return { ids: [], meta: { total_items: 0, total_pages: 0 } }
+    if (!tag) {
+      return this.hikarinagi.searchGalgameIds({ q: q!, page, page_size: pageSize, content_limit })
+    }
+
+    const { ids: tagged } = await this.hikarinagi.galgameIds({
+      tags: [tag],
+      content_limit,
+      exclude_rated_covers: !includesRated(content_limit),
+    })
+    let matched = tagged
+    if (q) {
+      const hits = await this.hikarinagi.searchGalgameIds({
+        q,
+        page,
+        page_size: pageSize,
+        content_limit,
+      })
+      const taggedSet = new Set(tagged)
+      matched = hits.ids.filter(id => taggedSet.has(id))
+
+      return {
+        ids: matched,
+        meta: { total_items: hits.meta.total_items, total_pages: hits.meta.total_pages },
+      }
+    }
+
+    return {
+      ids: matched.slice((page - 1) * pageSize, page * pageSize),
+      meta: {
+        total_items: matched.length,
+        total_pages: Math.ceil(matched.length / pageSize),
+      },
+    }
+  }
+
   async searchGames(
     query: SearchQuery,
     content_limit?: UserContentLimit,
   ): Promise<PaginatedResult<unknown>> {
     const page = query.page ?? 1
     const pageSize = query.pageSize ?? 10
-    const result = await this.hikarinagi.searchGalgameIds({
-      q: query.q ?? '',
-      page,
-      page_size: pageSize,
-      content_limit,
-    })
+    const result = await this.resolveIds(query, page, pageSize, content_limit)
 
     const safeIds = await this.hikarinagi.safeGalgameIds(content_limit)
     const safeSet = safeIds ? new Set(safeIds) : null

@@ -9,6 +9,7 @@ describe('HikarinagiSearchEngine', () => {
     }
     const hikarinagi = {
       searchGalgameIds: jest.fn(),
+      galgameIds: jest.fn().mockResolvedValue({ ids: [] }),
       galgameBatch: jest.fn().mockResolvedValue([]),
       safeGalgameIds: jest.fn().mockResolvedValue(null),
     }
@@ -89,5 +90,83 @@ describe('HikarinagiSearchEngine', () => {
       UserContentLimit.NEVER_SHOW_NSFW_CONTENT,
     )
     expect(strict.meta.content_limit).toBe(UserContentLimit.NEVER_SHOW_NSFW_CONTENT)
+  })
+
+  describe('tag search', () => {
+    it('resolves a tag through the ids endpoint instead of the keyword search', async () => {
+      const { engine, hikarinagi } = createEngine()
+      hikarinagi.galgameIds.mockResolvedValue({ ids: [11, 22, 33] })
+
+      const result = await engine.searchGames(
+        { tag: '拔作', page: 1, pageSize: 2 } as any,
+        UserContentLimit.NEVER_SHOW_NSFW_CONTENT,
+      )
+
+      expect(hikarinagi.searchGalgameIds).not.toHaveBeenCalled()
+      expect(hikarinagi.galgameIds).toHaveBeenCalledWith({
+        tags: ['拔作'],
+        content_limit: UserContentLimit.NEVER_SHOW_NSFW_CONTENT,
+        exclude_rated_covers: true,
+      })
+      expect(result.meta.totalItems).toBe(3)
+      expect(result.meta.totalPages).toBe(2)
+    })
+
+    it('pages the tag result set locally', async () => {
+      const { engine, hikarinagi, prisma } = createEngine()
+      hikarinagi.galgameIds.mockResolvedValue({ ids: [11, 22, 33] })
+
+      await engine.searchGames(
+        { tag: '拔作', page: 2, pageSize: 2 } as any,
+        UserContentLimit.JUST_SHOW,
+      )
+
+      expect(prisma.game.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: expect.objectContaining({ h_id: { in: [33] } }) }),
+      )
+    })
+
+    it('keeps rated works in the tag result when the reader may see them', async () => {
+      const { engine, hikarinagi } = createEngine()
+      hikarinagi.galgameIds.mockResolvedValue({ ids: [] })
+
+      await engine.searchGames(
+        { tag: '拔作', page: 1, pageSize: 20 } as any,
+        UserContentLimit.JUST_SHOW,
+      )
+
+      expect(hikarinagi.galgameIds).toHaveBeenCalledWith(
+        expect.objectContaining({ exclude_rated_covers: false }),
+      )
+    })
+
+    it('narrows a keyword search down to the tag when both are given', async () => {
+      const { engine, hikarinagi } = createEngine()
+      hikarinagi.galgameIds.mockResolvedValue({ ids: [22, 44] })
+      hikarinagi.searchGalgameIds.mockResolvedValue({
+        ids: [11, 22, 33],
+        meta: { total_items: 3, total_pages: 1 },
+      })
+
+      const result = await engine.searchGames(
+        { q: 'yuzu', tag: '拔作', page: 1, pageSize: 20 } as any,
+        UserContentLimit.JUST_SHOW,
+      )
+
+      expect(hikarinagi.searchGalgameIds).toHaveBeenCalled()
+      expect(result.items).toEqual([])
+      expect(hikarinagi.galgameBatch).toHaveBeenCalledWith([22])
+    })
+
+    it('returns an empty page when neither a keyword nor a tag is given', async () => {
+      const { engine, hikarinagi } = createEngine()
+
+      const result = await engine.searchGames({ page: 1, pageSize: 20 } as any)
+
+      expect(hikarinagi.searchGalgameIds).not.toHaveBeenCalled()
+      expect(hikarinagi.galgameIds).not.toHaveBeenCalled()
+      expect(result.items).toEqual([])
+      expect(result.meta.totalItems).toBe(0)
+    })
   })
 })

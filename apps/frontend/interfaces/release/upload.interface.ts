@@ -1,4 +1,4 @@
-import { Platform, Language } from '../game/game.interface'
+import { Platform, Language, GameCover } from '../game/game.interface'
 
 export interface ReleaseItem {
   id: number
@@ -11,6 +11,10 @@ export interface ReleaseItem {
     title_jp: string
     title_zh: string
     title_en: string
+    intro_jp: string
+    intro_zh: string
+    intro_en: string
+    covers: GameCover[]
   }
   files: string[]
   files_count: number

@@ -741,6 +741,7 @@ describe('GameDownloadSourceService', () => {
       created: now,
     })
     expect(result.meta.totalItems).toBe(3)
+    expect(result.meta.content_limit).toBe(1)
   })
 
   it('getList hides entries the reader is not allowed to see', async () => {
