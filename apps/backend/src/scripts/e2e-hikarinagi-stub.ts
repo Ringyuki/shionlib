@@ -314,6 +314,52 @@ const server = createServer((req, res) => {
       return
     }
 
+    if (path === '/producers') {
+      const page = Number(url.searchParams.get('page') ?? '1')
+      const pageSize = Number(url.searchParams.get('page_size') ?? '20')
+      const search = url.searchParams.get('search')
+      const where = search
+        ? `where d.name ilike $3 or exists (
+        select 1 from unnest(d.aliases) as a where a ilike $3
+      )`
+        : ''
+      const params: unknown[] = [pageSize, (page - 1) * pageSize]
+      if (search) params.push(`%${search}%`)
+      const { rows } = await pool.query(
+        `select d.id, d.name, d.aliases, d.logo,
+                (select count(*) from game_developer_relations r where r.developer_id = d.id) as works_count
+           from game_developers d
+           ${where}
+           order by d.name asc, d.id asc
+           limit $1 offset $2`,
+        params,
+      )
+      const { rows: counted } = await pool.query(
+        `select count(*)::int as total from game_developers d ${where ? where.replace('$3', '$1') : ''}`,
+        search ? [`%${search}%`] : [],
+      )
+      const totalItems = Number(counted[0]?.total ?? 0)
+      send(res, {
+        items: rows.map(row => ({
+          id: Number(row.id),
+          name: row.name,
+          aliases: row.aliases ?? [],
+          logo: row.logo
+            ? { id: Number(row.id), src: String(row.logo), width: null, height: null }
+            : null,
+          works_count: Number(row.works_count ?? 0),
+        })),
+        meta: {
+          page,
+          page_size: pageSize,
+          total_items: totalItems,
+          item_count: rows.length,
+          total_pages: Math.ceil(totalItems / pageSize),
+        },
+      })
+      return
+    }
+
     const producer = /^\/producers\/(\d+)$/.exec(path)
     if (producer) {
       const { rows } = await pool.query('select * from game_developers where id = $1', [
