@@ -2,7 +2,6 @@ import { describe, expect, it, beforeEach, mock } from 'bun:test'
 
 // Must be set before config module is imported
 process.env.BACKEND_INTERNAL_URL = 'http://test-backend:5000'
-process.env.REDIS_HOST = 'localhost'
 process.env.OG_DESIGN_VERSION = '1'
 process.env.OG_CACHE_DISABLED = 'false' // enable in-memory cache so cache-hit tests work
 

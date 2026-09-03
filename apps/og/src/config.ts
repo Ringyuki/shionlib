@@ -6,10 +6,6 @@ const schema = z.object({
 
   BACKEND_INTERNAL_URL: z.string().url().default('http://localhost:5000'),
 
-  REDIS_HOST: z.string().default('localhost'),
-  REDIS_PORT: z.coerce.number().default(6379),
-  REDIS_DB: z.coerce.number().default(2),
-  REDIS_PASSWORD: z.string().optional(),
   SHIONLIB_IMAGE_BED_URL: z
     .string()
     .url()
@@ -27,7 +23,13 @@ export const config = schema.parse(process.env)
 
 export const OG_W = 1200
 export const OG_H = 630
-export const CACHE_TTL = 43200 // 12 hours
+
+/**
+ * Rendered cards are held in process, so this is bounded by count rather than
+ * time. Cards are ~600-950KB each and PM2 restarts the service at 1G, which is
+ * what keeps this well below 512.
+ */
+export const IMAGE_CACHE_MAX = 256
 
 export type SupportedLocale = 'en' | 'zh' | 'ja'
 export const SUPPORTED_LOCALES: SupportedLocale[] = ['en', 'zh', 'ja']
