@@ -24,7 +24,7 @@ const CACHE_HEADERS_DISABLED = {
 /**
  * Unified OG request handler.
  *
- * Flow: ETag check → Redis cache hit → render → cache write → respond
+ * Flow: ETag check → in-memory cache hit → render → cache write → respond
  */
 export async function serveOgImage(
   c: Context,
@@ -48,8 +48,8 @@ export async function serveOgImage(
     })
   }
 
-  // Redis cache hit
-  const cached = await getCachedImage(type, id, locale)
+  // In-memory cache hit
+  const cached = getCachedImage(type, id, locale)
   if (cached) {
     return new Response(cached, {
       headers: {
@@ -76,12 +76,7 @@ export async function serveOgImage(
     return c.json({ error: 'Render failed' }, 500)
   }
 
-  // Write to cache async — do not block the response
-  if (!config.OG_CACHE_DISABLED) {
-    setCachedImage(type, id, locale, buffer).catch(err =>
-      console.error('[og] cache write failed:', err),
-    )
-  }
+  setCachedImage(type, id, locale, buffer)
 
   return new Response(buffer, {
     headers: {

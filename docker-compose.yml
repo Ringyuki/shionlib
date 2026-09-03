@@ -118,8 +118,6 @@ services:
     env_file:
       - ./docker/env/og.env
     depends_on:
-      redis:
-        condition: service_healthy
       backend:
         condition: service_healthy
     ports:
