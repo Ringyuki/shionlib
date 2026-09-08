@@ -47,4 +47,11 @@ export const friendLinks: FriendLink[] = [
     description:
       'TouchGal 是一个一站式 Galgame 文化社区。提供Galgame 论坛、Galgame 下载等服务。承诺永久免费, 高质量。为Galgame 爱好者提供一片净土！',
   },
+  {
+    id: 7,
+    name: 'SakuGAL',
+    url: 'https://sakugal.com',
+    logo: 'https://sakugal.com/favicon.ico',
+    description: '免费galgame资源分享-珍惜每一段恋之故事',
+  },
 ]

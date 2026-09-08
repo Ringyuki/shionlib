@@ -74,6 +74,10 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'sakugal.com',
+      },
+      {
+        protocol: 'https',
         hostname: process.env.NEXT_PUBLIC_SHIONLIB_IMAGE_BED_HOST!,
       },
     ],
