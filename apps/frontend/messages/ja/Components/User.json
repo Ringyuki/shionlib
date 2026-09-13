@@ -181,6 +181,12 @@
       "learnMore": "詳しく見る",
       "showButton": "プッシュメニューに ReinaManager を表示"
     },
+    "PotatoVN": {
+      "title": "PotatoVN",
+      "description": "PotatoVN はオープンソースの Windows 向けビジュアルノベル管理ツールです。PotatoDownload プラグインをインストールすると、ダウンロードパネルのプッシュメニューから直接 PotatoVN に送信し、ダウンロード・検証・解凍・ライブラリ登録を自動で行えます。",
+      "learnMore": "詳しく見る",
+      "showButton": "プッシュメニューに PotatoVN を表示"
+    },
     "Aria2": {
       "title": "Aria2",
       "description": "このページではあなたの Aria2 設定を更新できます。",

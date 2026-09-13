@@ -1,6 +1,7 @@
 import { Aria2 } from '@/components/user/settings/Aria2'
 import { LunaBoxSettings } from '@/components/user/settings/LunaBox'
 import { ReinaSettings } from '@/components/user/settings/Reina'
+import { PotatoVNSettings } from '@/components/user/settings/PotatoVN'
 
 export const DownloadSettings = () => {
   return (
@@ -8,6 +9,7 @@ export const DownloadSettings = () => {
       <Aria2 />
       <LunaBoxSettings />
       <ReinaSettings />
+      <PotatoVNSettings />
     </div>
   )
 }

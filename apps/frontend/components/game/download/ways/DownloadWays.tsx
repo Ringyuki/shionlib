@@ -7,6 +7,7 @@ import { GameDownloadResourceFile } from '@/interfaces/game/game-download-resour
 import { addUrl } from '../helpers/aria2'
 import { buildLunaBoxUrl } from '../helpers/lunabox'
 import { buildReinaUrl } from '../helpers/reina'
+import { buildPotatoVNUrl } from '../helpers/potatovn'
 import { openProtocolUrl } from '../helpers/protocol'
 import { useAria2Store } from '@/store/localSettingsStore'
 import { sileo } from 'sileo'
@@ -16,10 +17,11 @@ import { Aria2 } from './Aria2'
 import { Normal } from './Normal'
 import { LunaBox } from './LunaBox'
 import { Reina } from './Reina'
+import { PotatoVN } from './PotatoVN'
 import { useGameDownloadMeta } from '../GameDownloadContext'
-import { useLunaBoxStore, useReinaStore } from '@/store/localSettingsStore'
+import { useLunaBoxStore, useReinaStore, usePotatoVNStore } from '@/store/localSettingsStore'
 
-type PendingWay = 'aria2' | 'lunabox' | 'reina' | 'normal'
+type PendingWay = 'aria2' | 'lunabox' | 'reina' | 'potatovn' | 'normal'
 
 interface DownloadWaysProps {
   file: GameDownloadResourceFile
@@ -43,6 +45,7 @@ export const DownloadWays = ({
   const { game_title, bangumi_id, vndb_id, hikarinagi_id } = useGameDownloadMeta()
   const showLunaBox = useLunaBoxStore(state => state.showLunaBox)
   const showReina = useReinaStore(state => state.showReina)
+  const showPotatoVN = usePotatoVNStore(state => state.showPotatoVN)
   const [pending, setPending] = useState<PendingWay | null>(null)
   const [pushMenuOpen, setPushMenuOpen] = useState(false)
   const downloadLinkRef = useRef<GetDownloadLinkHandle>(null)
@@ -159,6 +162,29 @@ export const DownloadWays = ({
     openProtocolUrl(reinaUrl)
     sileo.success({ title: t('downloadStarted') })
   }
+  const handlePotatoVN = async () => {
+    if (!bangumi_id) return
+    startPush('potatovn')
+    const url = await requestDownloadLink()
+    setPending(null)
+    if (!url) return
+
+    const potatoVNUrl = buildPotatoVNUrl({
+      resourceId,
+      url,
+      fileName: file.file_name,
+      size: file.file_size,
+      checksumAlgo: file.hash_algorithm,
+      checksum: file.file_hash,
+      expiresAt: downloadLinkExpiresAt.current,
+      title: game_title ?? file.file_name,
+      bangumiId: bangumi_id,
+      vndbId: vndb_id,
+      hikarinagiId: hikarinagi_id,
+    })
+    openProtocolUrl(potatoVNUrl)
+    sileo.success({ title: t('downloadStarted') })
+  }
 
   const handleTurnstileCancel = () => {
     downloadLinkRef.current?.cancelRequest?.()
@@ -201,6 +227,13 @@ export const DownloadWays = ({
                 <Reina
                   reinaLoading={pending === 'reina'}
                   handleReina={handleReina}
+                  disabled={!bangumi_id}
+                />
+              )}
+              {showPotatoVN && (
+                <PotatoVN
+                  potatoVNLoading={pending === 'potatovn'}
+                  handlePotatoVN={handlePotatoVN}
                   disabled={!bangumi_id}
                 />
               )}
