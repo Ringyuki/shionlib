@@ -181,6 +181,12 @@
       "learnMore": "了解更多",
       "showButton": "在推送菜单中显示 ReinaManager"
     },
+    "PotatoVN": {
+      "title": "PotatoVN",
+      "description": "PotatoVN 是一款开源的 Windows 视觉小说管理工具。为其安装 PotatoDownload 插件后，可在下载面板的推送菜单中将下载任务直接发送到 PotatoVN，自动完成下载、校验、解压与入库。",
+      "learnMore": "了解更多",
+      "showButton": "在推送菜单中显示 PotatoVN"
+    },
     "Aria2": {
       "title": "Aria2",
       "description": "你可以在此更新你的 Aria2 设置。",
