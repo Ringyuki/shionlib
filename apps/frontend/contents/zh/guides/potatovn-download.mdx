@@ -1,0 +1,115 @@
+---
+title: 使用 PotatoVN 下载
+banner: 'https://images.yurari.moe/galgame/11196/bvwn0x03_2.webp'
+description: '了解如何为 PotatoVN 安装 PotatoDownload 插件，在 Shionlib 的推送菜单中启用 PotatoVN，并把游戏下载任务直接推送到 PotatoVN，自动完成下载、校验、解压与入库。'
+date: 2026-09-13
+author_uid: 0
+author_name: 'luoyuxiaoxiao'
+author_avatar: ''
+---
+
+## 什么是 PotatoVN
+
+[PotatoVN](https://potatovn.net) 是一款开源的 Windows 视觉小说/Galgame 管理工具，支持自动识别本地游戏、从 Bangumi/VNDB 等站点获取游戏信息、记录游玩时长与状态，以及云端存档同步等功能。
+
+Shionlib 的推送功能通过 PotatoVN 的 **PotatoDownload** 插件实现。安装该插件后，PotatoVN 即可接收 Shionlib 推送的下载任务，并自动完成：
+
+- 📥 **下载** — 多线程分块下载，支持断点续传
+- ✅ **校验** — 核对文件大小与 SHA-256 / BLAKE3 哈希
+- 📦 **解压** — 支持 7Z、ZIP、RAR、TAR 等常见压缩格式
+- 📚 **入库** — 按 Bangumi / VNDB / Hikarinagi ID 匹配已有游戏，或新建条目并自动刮削元数据，再把解压后的目录添加为游戏安装位置
+
+插件源码：[luoyuxiaoxiao/PotatoDownload](https://github.com/luoyuxiaoxiao/PotatoDownload)
+
+## 安装 PotatoVN 与 PotatoDownload 插件
+
+1. 从 [potatovn.net](https://potatovn.net) 安装 PotatoVN（需要 1.10.2 或更新版本）。`potato-vn://` 协议由 PotatoVN 在安装时自动注册，无需手动操作。
+2. 打开 PotatoVN 的**设置 → 插件**，在插件市场中搜索 **PotatoDownload** 并安装。
+3. （可选）在插件设置中调整：
+   - **下载目录**：留空时使用系统盘下的 `Galgame` 文件夹（例如 `C:\Galgame`）
+   - **自动下载**：开启后收到推送立即开始下载并弹出下载面板；关闭后会先弹出确认对话框
+
+> PotatoVN 与 PotatoDownload 仅支持 **Windows**。
+
+## 在 Shionlib 中禁用或启用 PotatoVN
+
+PotatoVN 默认显示在下载文件的推送菜单中。
+
+禁用方式：
+
+1. 打开 Shionlib 的**设置**
+2. 进入**下载**设置
+3. 找到 **PotatoVN**
+4. 关闭**在推送菜单中显示 PotatoVN**
+
+关闭后，文件推送菜单中将不再显示 PotatoVN。
+
+## 使用 PotatoVN 下载
+
+1. 在游戏页面点击**下载**，打开下载面板
+2. 找到需要下载的资源和文件
+3. 点击文件右侧的**纸飞机图标**
+4. 在推送菜单中选择 **PotatoVN**
+5. 根据提示完成 Turnstile 验证
+6. 浏览器将请求打开 PotatoVN
+7. 若插件未开启自动下载，在 PotatoVN 中确认下载
+
+收到任务后，PotatoDownload 会：
+
+1. 将文件下载到插件设置的下载目录（中断后可续传）
+2. 校验文件大小与哈希
+3. 解压到游戏目录：压缩包内只有一个顶层文件夹时使用该文件夹名，否则使用压缩包文件名
+4. 按 Bangumi / VNDB / Hikarinagi ID 匹配游戏库中的已有游戏；没有则新建条目并刮削元数据
+5. 将解压后的目录添加为该游戏的安装位置
+
+点击 PotatoVN 侧边栏的**下载**按钮，可以随时查看进行中的任务和历史记录。
+
+## 推送信息
+
+每次推送时，PotatoVN 会收到以下信息：
+
+| 字段          | 内容                                      |
+| ------------- | ----------------------------------------- |
+| 下载链接      | 带签名的临时文件直链                      |
+| 文件名        | Shionlib 中的原始文件名                   |
+| 压缩格式      | 7Z、ZIP、RAR 等文件格式                   |
+| 文件大小      | 文件的精确字节数                          |
+| 校验值        | SHA-256 或 BLAKE3 哈希                    |
+| 游戏标题      | 游戏标题                                  |
+| resource_id   | 书音站内的资源 ID，用于标识本次推送的资源 |
+| Bangumi ID    | 用于匹配游戏和获取元数据                  |
+| VNDB ID       | 可选，用于匹配游戏和获取元数据            |
+| Hikarinagi ID | 可选，用于匹配游戏和获取元数据            |
+
+## 常见问题
+
+### 在推送菜单中选择 PotatoVN 后没有反应
+
+依次检查：
+
+- 是否已安装 PotatoVN，且已在插件市场中安装并启用 PotatoDownload
+- 浏览器是否拦截了 `potato-vn://` 协议，或"是否打开 PotatoVN"的确认弹窗被忽略
+- PotatoVN 的日志（`Logs\log.txt`）中是否有 `PotatoDownload` 相关的错误
+
+### PotatoVN 被唤起后跳转到了首页
+
+这是正常现象。PotatoVN 收到任何协议激活时都会导航到起始页，推送任务仍会由插件接收。点击侧边栏的**下载**按钮即可查看任务。
+
+### PotatoVN 提示"无效的推送请求"
+
+常见原因：
+
+- 临时下载链接已过期——重新从 Shionlib 推送该文件即可生成新的链接
+- 文件不是压缩包——PotatoDownload 只处理 7Z、ZIP、RAR、TAR 等压缩格式
+
+### PotatoVN 没有提前打开，可以直接推送吗
+
+可以。
+
+选择 PotatoVN 后，系统会自动启动程序并传递下载任务。
+
+### Turnstile 验证后没有开始下载
+
+重新打开推送菜单并选择 PotatoVN。
+
+如果签名链接仍在有效期内，通常不需要再次完成验证。
