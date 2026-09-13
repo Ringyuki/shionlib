@@ -1,0 +1,115 @@
+---
+title: Downloading with PotatoVN
+banner: 'https://images.yurari.moe/galgame/11196/bvwn0x03_2.webp'
+description: 'Learn how to install the PotatoDownload plugin for PotatoVN, enable PotatoVN in the Shionlib push menu, and send game download tasks straight to PotatoVN for automatic download, verification, extraction and library importing.'
+date: 2026-09-13
+author_uid: 8395
+author_name: 'luoyuxiaoxiao'
+author_avatar: 'https://t.shionlib.com/user/8395/avatar/59405d19-d41a-46f5-878a-6d4c98eefd4b.webp'
+---
+
+## What is PotatoVN
+
+[PotatoVN](https://potatovn.net) is an open-source visual novel / Galgame manager for Windows. It detects local games automatically, fetches game information from Bangumi, VNDB and other sources, tracks playtime and status, and syncs save data to the cloud.
+
+Shionlib pushes are handled by the **PotatoDownload** plugin for PotatoVN. Once the plugin is installed, PotatoVN can receive download tasks pushed from Shionlib and automatically:
+
+- 📥 **Download** — multi-connection chunked download with resume support
+- ✅ **Verify** — check the file size and the SHA-256 / BLAKE3 hash
+- 📦 **Extract** — common archive formats such as 7Z, ZIP, RAR and TAR
+- 📚 **Import** — match an existing game by its Bangumi / VNDB / Hikarinagi ID, or create a new entry and scrape its metadata, then register the extracted folder as the game's installation
+
+Plugin source: [luoyuxiaoxiao/PotatoDownload](https://github.com/luoyuxiaoxiao/PotatoDownload)
+
+## Installing PotatoVN and the PotatoDownload plugin
+
+1. Install PotatoVN from [potatovn.net](https://potatovn.net) (version 1.10.2 or newer). The `potato-vn://` protocol is registered by PotatoVN itself during installation — nothing to do by hand.
+2. Open **Settings → Plugins** in PotatoVN, search for **PotatoDownload** in the plugin market and install it.
+3. (Optional) Adjust the plugin settings:
+   - **Download folder**: when left empty, the `Galgame` folder on the system drive is used (e.g. `C:\Galgame`)
+   - **Auto download**: when enabled, a pushed task starts immediately and the download panel opens; when disabled, a confirmation dialog is shown first
+
+> PotatoVN and PotatoDownload only support **Windows**.
+
+## Disabling or Enabling PotatoVN in Shionlib
+
+PotatoVN appears in the file push menu by default.
+
+To disable it:
+
+1. Open **Settings** in Shionlib
+2. Go to **Download** settings
+3. Locate **PotatoVN**
+4. Turn off **Show PotatoVN in the push menu**
+
+Once turned off, PotatoVN will no longer be displayed in the file push menu.
+
+## Downloading with PotatoVN
+
+1. Click **Download** on the game page to open the download panel
+2. Find the resource and file you wish to download
+3. Click the **paper plane icon** on the right side of the file row
+4. Select **PotatoVN** from the push menu
+5. Complete the Turnstile verification as prompted
+6. The browser will request to open PotatoVN
+7. If auto download is disabled in the plugin, confirm the download in PotatoVN
+
+After receiving the task, PotatoDownload will:
+
+1. Download the file into the configured download folder (an interrupted download can be resumed)
+2. Verify the file size and hash
+3. Extract it into a game folder — named after the single top-level folder inside the archive if there is one, otherwise after the archive file name
+4. Match an existing game in the library by its Bangumi / VNDB / Hikarinagi ID; otherwise create a new entry and scrape its metadata
+5. Register the extracted folder as the game's installation
+
+Click the **Download** button in the PotatoVN sidebar at any time to see running tasks and the history.
+
+## Pushed Information
+
+PotatoVN receives the following information with each push:
+
+| Field          | Description                                                 |
+| -------------- | ----------------------------------------------------------- |
+| Download URL   | Signed temporary direct download link                       |
+| File name      | Original file name in Shionlib                              |
+| Archive format | File formats such as 7Z, ZIP, RAR, etc.                     |
+| File size      | Exact byte count of the file                                |
+| Checksum       | SHA-256 or BLAKE3 hash                                      |
+| Game title     | Title of the game                                           |
+| resource_id    | Resource ID in Shionlib used to identify this push resource |
+| Bangumi ID     | Used for game matching and fetching metadata                |
+| VNDB ID        | Optional, used for game matching and fetching metadata      |
+| Hikarinagi ID  | Optional, used for game matching and fetching metadata      |
+
+## Troubleshooting
+
+### Nothing happens after selecting PotatoVN in the push menu
+
+Check, in order:
+
+- PotatoVN is installed, and PotatoDownload is installed and enabled in its plugin market
+- The browser did not block the `potato-vn://` protocol, and the "Open PotatoVN?" prompt was not dismissed
+- The PotatoVN log (`Logs\log.txt`) for errors mentioning `PotatoDownload`
+
+### PotatoVN opens but jumps to its home page
+
+This is expected. PotatoVN navigates to its start page on any protocol activation; the pushed task is still received by the plugin. Click **Download** in the sidebar to see it.
+
+### PotatoVN reports an invalid push request
+
+Common causes:
+
+- The temporary download link has expired — push the file again from Shionlib to get a new link
+- The file is not an archive — PotatoDownload only handles archive formats such as 7Z, ZIP, RAR and TAR
+
+### Can I push directly if PotatoVN is not opened in advance?
+
+Yes.
+
+After selecting PotatoVN, the system will automatically launch the application and transfer the download task.
+
+### Download does not start after Turnstile verification
+
+Reopen the push menu and select PotatoVN again.
+
+If the signed link is still within its validity period, you usually do not need to solve the verification again.

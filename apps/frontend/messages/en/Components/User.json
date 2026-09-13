@@ -181,6 +181,12 @@
       "learnMore": "Learn more",
       "showButton": "Show ReinaManager in the push menu"
     },
+    "PotatoVN": {
+      "title": "PotatoVN",
+      "description": "PotatoVN is an open-source visual novel manager for Windows. With the PotatoDownload plugin installed, you can send downloads straight to PotatoVN from the push menu in the download panel — it downloads, verifies, extracts and adds the game to your library automatically.",
+      "learnMore": "Learn more",
+      "showButton": "Show PotatoVN in the push menu"
+    },
     "Aria2": {
       "title": "Aria2",
       "description": "You can update your Aria2 settings here.",
