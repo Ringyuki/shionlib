@@ -1,5 +1,6 @@
 export * from './app.interface'
 export * from './auth.interface'
 export * from './database.interface'
+export * from './nextmoe.interface'
 export * from './potatovn.interface'
 export * from './sponsor.interface'
