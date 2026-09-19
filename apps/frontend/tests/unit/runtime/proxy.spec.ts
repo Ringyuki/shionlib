@@ -111,6 +111,6 @@ describe('runtime/proxy (unit)', () => {
   it('exports matcher config for non-api paths', async () => {
     const { config } = await import('../../../proxy')
 
-    expect(config.matcher).toContain('(?!api|trpc|_next|_vercel|og|patch')
+    expect(config.matcher).toContain('(?!api|trpc|_next|_vercel|og|steamapp')
   })
 })

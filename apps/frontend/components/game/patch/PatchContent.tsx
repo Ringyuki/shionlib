@@ -1,4 +1,4 @@
-import { KunPatchResourceResponse } from '@/interfaces/patch/patch.interface'
+import { MoyuPatchResource } from '@/interfaces/patch/patch.interface'
 import { PatchItem } from './PatchItem'
 import { cn } from '@/utils/cn'
 import { Moyu } from './about/Moyu'
@@ -6,7 +6,7 @@ import { AdSlotClient } from '@/components/common/site/Ad'
 import { AD_PLACEMENTS } from '@/constants/ad-placements'
 
 interface PatchContentProps {
-  patches: KunPatchResourceResponse[]
+  patches: MoyuPatchResource[]
   className?: string
 }
 
@@ -16,13 +16,13 @@ export const PatchContent = ({ patches, className }: PatchContentProps) => {
       <div className={cn('flex flex-col gap-4 w-full', className)}>
         {patches
           .filter(patch => patch.type.includes('manual'))
-          .sort((a, b) => b.download - a.download)
+          .sort((a, b) => b.download_count - a.download_count)
           .map(patch => (
             <PatchItem key={patch.id} patch={patch} />
           ))}
         {patches
           .filter(patch => !patch.type.includes('manual'))
-          .sort((a, b) => b.download - a.download)
+          .sort((a, b) => b.download_count - a.download_count)
           .map(patch => (
             <PatchItem key={patch.id} patch={patch} />
           ))}

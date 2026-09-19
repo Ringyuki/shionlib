@@ -836,6 +836,9 @@
         "crack": "Crack patch",
         "fix": "Fix patch",
         "mod": "Mod patch",
+        "r18": "R18 patch",
+        "decensor": "Decensor patch",
+        "image": "Image edit patch",
         "other": "Other"
       }
     },

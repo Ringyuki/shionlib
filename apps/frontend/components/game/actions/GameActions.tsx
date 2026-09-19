@@ -38,7 +38,7 @@ export const GameActions = ({ game, is_favorite }: GameActionsProps) => {
                 vndb_id={game.v_id}
                 hikarinagi_id={game.h_id}
               />
-              <Patch game_id={game.id} v_id={game.v_id!} />
+              <Patch game_id={game.id} />
               <Upload game_id={game.id} />
             </div>
             <div className="flex gap-2 items-center">

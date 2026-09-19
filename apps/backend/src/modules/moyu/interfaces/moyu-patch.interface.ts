@@ -1,4 +1,5 @@
 export interface MoyuPublisher {
+  object: 'user'
   id: string
   name: string
   avatar_url: string
@@ -6,6 +7,7 @@ export interface MoyuPublisher {
 }
 
 export interface MoyuPatchResource {
+  object: 'patch_resource'
   id: string
   patch_id: string
   name: string
@@ -15,7 +17,7 @@ export interface MoyuPatchResource {
   model_name: string
   localization_group_name: string
   note: string
-  type: PatchType[]
+  type: string[]
   language: string[]
   platform: string[]
   download_count: number
@@ -23,19 +25,21 @@ export interface MoyuPatchResource {
   web_url: string
   created_at: string
   updated_at: string
-  publisher: MoyuPublisher
+  publisher?: MoyuPublisher
 }
 
-export type PatchType =
-  | 'manual'
-  | 'ai'
-  | 'machine_polishing'
-  | 'machine'
-  | 'save'
-  | 'crack'
-  | 'fix'
-  | 'mod'
-  | 'r18'
-  | 'decensor'
-  | 'image'
-  | 'other'
+export interface MoyuPatch {
+  object: 'patch'
+  id: string
+  vndb_id: string
+  web_url: string
+  resources?: MoyuPatchResource[]
+}
+
+export interface MoyuPatchList {
+  object: 'list'
+  items: MoyuPatch[]
+  next_cursor: string | null
+  total: number | null
+  missing?: string[]
+}
