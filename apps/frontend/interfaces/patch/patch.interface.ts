@@ -34,4 +34,7 @@ export type PatchType =
   | 'crack'
   | 'fix'
   | 'mod'
+  | 'r18'
+  | 'decensor'
+  | 'image'
   | 'other'
