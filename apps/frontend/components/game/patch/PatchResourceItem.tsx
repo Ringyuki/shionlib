@@ -1,4 +1,4 @@
-import { KunPatchResourceResponse } from '@/interfaces/patch/patch.interface'
+import { MoyuPatchResource } from '@/interfaces/patch/patch.interface'
 import { FileArchive, CloudCheck, Hash, ExternalLink } from 'lucide-react'
 import { Badge } from '@/components/shionui/Badge'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/shionui/Tooltip'
@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl'
 import { CopyButton } from '@/components/shionui/animated/CopyButton'
 
 interface PatchResourceItemProps {
-  patch: KunPatchResourceResponse
+  patch: MoyuPatchResource
 }
 
 export const PatchResourceItem = ({ patch }: PatchResourceItemProps) => {
@@ -40,7 +40,7 @@ export const PatchResourceItem = ({ patch }: PatchResourceItemProps) => {
       <div className="flex gap-2">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Link href={`https://www.moyu.moe/resource/${patch.id}`} target="_blank">
+            <Link href={patch.web_url} target="_blank">
               <Button
                 size="icon"
                 renderIcon={<ExternalLink className="size-4" />}

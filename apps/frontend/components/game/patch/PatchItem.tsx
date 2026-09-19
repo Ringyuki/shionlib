@@ -1,4 +1,4 @@
-import { KunPatchResourceResponse } from '@/interfaces/patch/patch.interface'
+import { MoyuPatchResource } from '@/interfaces/patch/patch.interface'
 import { Badge } from '@/components/shionui/Badge'
 import { Avatar } from '@/components/common/user/Avatar'
 import { GamePlatform } from '@/components/game/description/GamePlatform'
@@ -15,7 +15,7 @@ import { ScrollArea } from '@/components/shionui/ScrollArea'
 import { DownloadIcon } from 'lucide-react'
 
 interface GameDownloadResourceItemProps {
-  patch: KunPatchResourceResponse
+  patch: MoyuPatchResource
 }
 
 export const PatchItem = ({ patch }: GameDownloadResourceItemProps) => {
@@ -63,18 +63,22 @@ export const PatchItem = ({ patch }: GameDownloadResourceItemProps) => {
             )}
             <Badge size="sm" intent="secondary" appearance="solid">
               <DownloadIcon className="size-3" />
-              {patch.download}
+              {patch.download_count}
             </Badge>
           </div>
           <div className="flex gap-2 items-center shrink-0">
             <Avatar
-              user={patch.user}
-              homeUrl={`https://www.moyu.moe/user/${patch.user.id}`}
+              user={{
+                id: Number(patch.publisher.id),
+                name: patch.publisher.name,
+                avatar: patch.publisher.avatar_url,
+              }}
+              homeUrl={`https://www.moyu.moe/user/${patch.publisher.id}`}
               className="size-6 text-xs"
             />
             <span className="text-muted-foreground text-xs font-light flex items-center gap-1">
               <span>{t('created')}</span>
-              {timeFromNow(patch.created, locale)}
+              {timeFromNow(patch.created_at, locale)}
             </span>
           </div>
         </div>
