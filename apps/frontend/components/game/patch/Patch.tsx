@@ -1,10 +1,10 @@
 import { Modal } from '@/components/shionui/Modal'
 import { useTranslations } from 'next-intl'
-import { KunPatchResourceResponse } from '@/interfaces/patch/patch.interface'
+import { MoyuPatchResource } from '@/interfaces/patch/patch.interface'
 import { PatchContent } from './PatchContent'
 
 interface PatchProps {
-  patches: KunPatchResourceResponse[]
+  patches: MoyuPatchResource[]
   open: boolean
   onOpenChange: (open: boolean) => void
 }

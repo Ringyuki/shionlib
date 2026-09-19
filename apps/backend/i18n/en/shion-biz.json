@@ -111,5 +111,7 @@
   "SPONSOR_MODULE_DISABLED": "sponsor module is currently disabled",
   "AD_NOT_FOUND": "ad not found",
   "ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE": "traffic detail is temporarily unavailable, message: {message}",
-  "PARTNER_UNAUTHORIZED": "partner credentials are missing or invalid"
+  "PARTNER_UNAUTHORIZED": "partner credentials are missing or invalid",
+  "MOYU_PATCH_NOT_FOUND": "no patches for this game on 鲲 Galgame 补丁",
+  "MOYU_REQUEST_FAILED": "failed to get patches"
 }

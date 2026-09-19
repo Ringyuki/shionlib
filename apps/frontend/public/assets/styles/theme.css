@@ -203,6 +203,12 @@
   --type-fix-bg: color-mix(in oklab, var(--type-fix) 18%, transparent);
   --type-mod: #f07ab5;
   --type-mod-bg: color-mix(in oklab, var(--type-mod) 18%, transparent);
+  --type-r18: #f05a28;
+  --type-r18-bg: color-mix(in oklab, var(--type-r18) 18%, transparent);
+  --type-decensor: #a0663a;
+  --type-decensor-bg: color-mix(in oklab, var(--type-decensor) 18%, transparent);
+  --type-image: #3b82f6;
+  --type-image-bg: color-mix(in oklab, var(--type-image) 18%, transparent);
   --type-other: #6b7280;
   --type-other-bg: color-mix(in oklab, var(--type-other) 18%, transparent);
 }
@@ -324,6 +330,12 @@
   --type-fix-bg: color-mix(in oklab, var(--type-fix) 32%, transparent);
   --type-mod: #ff9bcb;
   --type-mod-bg: color-mix(in oklab, var(--type-mod) 32%, transparent);
+  --type-r18: #ff9a6b;
+  --type-r18-bg: color-mix(in oklab, var(--type-r18) 32%, transparent);
+  --type-decensor: #e0a878;
+  --type-decensor-bg: color-mix(in oklab, var(--type-decensor) 32%, transparent);
+  --type-image: #86b4ff;
+  --type-image-bg: color-mix(in oklab, var(--type-image) 32%, transparent);
   --type-other: #9ca5b8;
   --type-other-bg: color-mix(in oklab, var(--type-other) 32%, transparent);
 }

@@ -182,6 +182,8 @@ export type I18nTranslations = {
         "AD_NOT_FOUND": string;
         "ANALYSIS_TRAFFIC_DETAIL_UNAVAILABLE": string;
         "PARTNER_UNAUTHORIZED": string;
+        "MOYU_PATCH_NOT_FOUND": string;
+        "MOYU_REQUEST_FAILED": string;
     };
     "validation": {
         "common": {

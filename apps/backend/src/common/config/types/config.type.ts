@@ -2,6 +2,7 @@ import { AppConfig } from '../interfaces/app.interface'
 import { AuthConfig } from '../interfaces/auth.interface'
 import { DatabaseConfig } from '../interfaces/database.interface'
 import { LLMsConfig } from '../interfaces/llms.interface'
+import { NextMoeConfig } from '../interfaces/nextmoe.interface'
 import { OidcConfig } from '../interfaces/oidc.interface'
 import { PotatoVNConfig } from '../interfaces/potatovn.interface'
 import { SponsorConfig } from '../interfaces/sponsor.interface'
@@ -10,6 +11,7 @@ export type ConfigType = AppConfig &
   AuthConfig &
   DatabaseConfig &
   LLMsConfig &
+  NextMoeConfig &
   OidcConfig &
   PotatoVNConfig &
   SponsorConfig

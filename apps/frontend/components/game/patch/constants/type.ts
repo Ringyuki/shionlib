@@ -9,6 +9,9 @@ export const TypeMap: Record<string, Partial<PatchType>> = {
   crack: 'crack',
   fix: 'fix',
   mod: 'mod',
+  r18: 'r18',
+  decensor: 'decensor',
+  image: 'image',
   other: 'other',
 }
 
@@ -24,6 +27,9 @@ export const TypeTokenMap: Record<PatchType, { text: string; bg: string }> = {
   crack: { text: 'var(--type-crack)', bg: 'var(--type-crack-bg)' },
   fix: { text: 'var(--type-fix)', bg: 'var(--type-fix-bg)' },
   mod: { text: 'var(--type-mod)', bg: 'var(--type-mod-bg)' },
+  r18: { text: 'var(--type-r18)', bg: 'var(--type-r18-bg)' },
+  decensor: { text: 'var(--type-decensor)', bg: 'var(--type-decensor-bg)' },
+  image: { text: 'var(--type-image)', bg: 'var(--type-image-bg)' },
   other: { text: 'var(--type-other)', bg: 'var(--type-other-bg)' },
 }
 
@@ -36,5 +42,8 @@ export const SUPPORTED_TYPE_MAP: Record<string, string> = {
   crack: '破解补丁',
   fix: '修正补丁',
   mod: '魔改补丁',
+  r18: 'R18 成人内容补丁',
+  decensor: '去马赛克补丁',
+  image: '修图补丁',
   other: '其它',
 }

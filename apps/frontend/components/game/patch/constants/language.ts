@@ -5,4 +5,5 @@ export const LanguageMap: Record<string, Partial<Language>> = {
   'zh-Hant': 'zh-hant',
   ja: 'jp',
   en: 'en',
+  other: 'other',
 }

@@ -30,6 +30,7 @@
  * 45 COMMENT：comment
  * 57 SPONSOR：sponsor/donation
  * 59 ANALYSIS：analytics/metrics
+ * 61 MOYU：鲲 Galgame 补丁 (moyu) patch lookup
  */
 
 export enum ShionBizCode {
@@ -197,4 +198,8 @@ export enum ShionBizCode {
 
   // 60
   PARTNER_UNAUTHORIZED = 600101,
+
+  // 61
+  MOYU_PATCH_NOT_FOUND = 610101,
+  MOYU_REQUEST_FAILED = 610102,
 }

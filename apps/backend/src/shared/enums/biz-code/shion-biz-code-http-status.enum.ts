@@ -164,4 +164,8 @@ export const ShionBizCodeHttpStatus: Record<ShionBizCode, HttpStatus> = {
 
   // 60
   [ShionBizCode.PARTNER_UNAUTHORIZED]: HttpStatus.UNAUTHORIZED,
+
+  // 61
+  [ShionBizCode.MOYU_PATCH_NOT_FOUND]: HttpStatus.NOT_FOUND,
+  [ShionBizCode.MOYU_REQUEST_FAILED]: HttpStatus.BAD_GATEWAY,
 } as const satisfies Record<ShionBizCode, HttpStatus>

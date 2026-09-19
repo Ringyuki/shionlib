@@ -47,6 +47,7 @@ import { SponsorModule } from './modules/sponsor/sponsor.module'
 import { AdModule } from './modules/ad/ad.module'
 import { PartnerModule } from './modules/partner/partner.module'
 import { HikarinagiModule } from './modules/hikarinagi/hikarinagi.module'
+import { MoyuModule } from './modules/moyu/moyu.module'
 
 @Module({
   imports: [
@@ -126,6 +127,7 @@ import { HikarinagiModule } from './modules/hikarinagi/hikarinagi.module'
     AdModule,
     PartnerModule,
     HikarinagiModule,
+    MoyuModule,
   ],
   controllers: [],
   providers: [
