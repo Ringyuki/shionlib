@@ -2,6 +2,7 @@ export interface MoyuPublisher {
   id: string
   name: string
   avatar_url: string
+  web_url: string
 }
 
 export interface MoyuPatchResource {

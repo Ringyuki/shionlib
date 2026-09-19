@@ -73,7 +73,7 @@ export const PatchItem = ({ patch }: GameDownloadResourceItemProps) => {
                 name: patch.publisher.name,
                 avatar: patch.publisher.avatar_url,
               }}
-              homeUrl={`https://www.moyu.moe/user/${patch.publisher.id}`}
+              homeUrl={patch.publisher.web_url}
               className="size-6 text-xs"
             />
             <span className="text-muted-foreground text-xs font-light flex items-center gap-1">
