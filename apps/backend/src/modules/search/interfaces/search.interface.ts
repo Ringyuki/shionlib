@@ -14,7 +14,11 @@ export interface SearchEngine {
   bulkUpsertGames(docs: IndexedGame[]): Promise<void>
   deleteGame(id: number): Promise<void>
   deleteAllGames(): Promise<void>
-  searchGames(query: SearchQuery, content_limit?: UserContentLimit): Promise<PaginatedResult<any>>
+  searchGames(
+    query: SearchQuery,
+    content_limit?: UserContentLimit,
+    only_games_with_resources?: boolean,
+  ): Promise<PaginatedResult<any>>
   searchGameTags(query: string, limit?: number): Promise<string[]>
 }
 

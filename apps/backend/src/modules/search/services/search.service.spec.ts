@@ -7,18 +7,34 @@ describe('SearchService', () => {
     }
     const prisma = overrides.prisma ?? {
       tag: { findMany: jest.fn().mockResolvedValue([]) },
+      user: { findUnique: jest.fn().mockResolvedValue(null) },
     }
     return { service: new SearchService(searchEngine as any, prisma as any), searchEngine, prisma }
   }
 
   it('delegates searchGames to search engine with content limit', async () => {
-    const { service, searchEngine } = createService()
+    const { service, searchEngine, prisma } = createService()
     const query = { q: 'gal', page: 1, pageSize: 10 }
 
     const result = await service.searchGames(query as any, 2)
 
-    expect(searchEngine.searchGames).toHaveBeenCalledWith(query, 2)
+    expect(prisma.user.findUnique).not.toHaveBeenCalled()
+    expect(searchEngine.searchGames).toHaveBeenCalledWith(query, 2, true)
     expect(result).toEqual({ items: [], total: 0 })
+  })
+
+  it('passes the user resource setting to the search engine', async () => {
+    const { service, searchEngine, prisma } = createService()
+    prisma.user.findUnique.mockResolvedValueOnce({ only_games_with_resources: false })
+    const query = { q: 'gal', page: 1, pageSize: 10 }
+
+    await service.searchGames(query as any, 2, 7)
+
+    expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      where: { id: 7 },
+      select: { only_games_with_resources: true },
+    })
+    expect(searchEngine.searchGames).toHaveBeenCalledWith(query, 2, false)
   })
 
   it('queries Tag table for searchGameTags ordered by count', async () => {

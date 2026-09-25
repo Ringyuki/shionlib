@@ -29,12 +29,12 @@ describe('SearchController', () => {
     searchService.searchGames.mockResolvedValue({ items: [{ id: 1 }], total: 1 })
 
     const query = { q: 'a'.repeat(SUGG_PREFIX_MIN_LENGTH), page: 1, pageSize: 10 }
-    const req = { user: { content_limit: 1 } }
+    const req = { user: { sub: 5, content_limit: 1 } }
 
     const result = await controller.searchGames(query as any, req as any)
 
     expect(analyticsQueue.add).toHaveBeenCalledWith(SEARCH_ANALYTICS_QUEUE, query.q)
-    expect(searchService.searchGames).toHaveBeenCalledWith(query, 1)
+    expect(searchService.searchGames).toHaveBeenCalledWith(query, 1, 5)
     expect(result).toEqual({ items: [{ id: 1 }], total: 1 })
   })
 
@@ -46,7 +46,7 @@ describe('SearchController', () => {
     await controller.searchGames(query as any, { user: { content_limit: 2 } } as any)
 
     expect(analyticsQueue.add).not.toHaveBeenCalled()
-    expect(searchService.searchGames).toHaveBeenCalledWith(query, 2)
+    expect(searchService.searchGames).toHaveBeenCalledWith(query, 2, undefined)
   })
 
   it('searchGameTags delegates to service', async () => {

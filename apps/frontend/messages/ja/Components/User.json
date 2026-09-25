@@ -153,7 +153,7 @@
     },
     "GameList": {
       "title": "ゲーム一覧",
-      "description": "ゲーム一覧ページの表示内容を設定します。",
+      "description": "ゲーム一覧と検索結果の表示内容を設定します。",
       "onlyGamesWithResources": "ダウンロードリソースがあるゲームのみ表示",
       "success": "更新しました"
     },

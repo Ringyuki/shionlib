@@ -55,7 +55,7 @@ import { HikarinagiModule } from '../hikarinagi/hikarinagi.module'
           case 'opensearch':
             return new OpenSearchEngine(opensearch, config, cache)
           case 'hikarinagi':
-            return new HikarinagiSearchEngine(prisma, hikarinagi)
+            return new HikarinagiSearchEngine(prisma, hikarinagi, cache)
           default:
             throw new Error(`Unsupported search engine: ${engine}`)
         }

@@ -22,7 +22,7 @@ export class SearchController {
   async searchGames(@Query() query: SearchGamesReqDto, @Req() req: RequestWithUser) {
     if (query.q && query.q.length >= SUGG_PREFIX_MIN_LENGTH)
       this.analyticsQueue.add(SEARCH_ANALYTICS_QUEUE, query.q)
-    return this.searchService.searchGames(query, req.user?.content_limit)
+    return this.searchService.searchGames(query, req.user?.content_limit, req.user?.sub)
   }
 
   @Get('tags')

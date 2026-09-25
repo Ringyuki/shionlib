@@ -153,7 +153,7 @@
     },
     "GameList": {
       "title": "游戏列表",
-      "description": "设置游戏列表页的显示内容。",
+      "description": "设置游戏列表和搜索结果的显示内容。",
       "onlyGamesWithResources": "仅显示有下载资源的游戏",
       "success": "更新成功"
     },

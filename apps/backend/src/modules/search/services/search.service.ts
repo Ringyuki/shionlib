@@ -11,8 +11,21 @@ export class SearchService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async searchGames(query: SearchGamesReqDto, content_limit?: UserContentLimit) {
-    return this.searchEngine.searchGames(query, content_limit)
+  async searchGames(query: SearchGamesReqDto, content_limit?: UserContentLimit, user_id?: number) {
+    return this.searchEngine.searchGames(
+      query,
+      content_limit,
+      await this.shouldOnlyShowGamesWithResources(user_id),
+    )
+  }
+
+  private async shouldOnlyShowGamesWithResources(user_id?: number): Promise<boolean> {
+    if (!user_id) return true
+    const user = await this.prisma.user.findUnique({
+      where: { id: user_id },
+      select: { only_games_with_resources: true },
+    })
+    return user?.only_games_with_resources ?? true
   }
 
   async searchGameTags(query: SearchGameTagsReqDto) {
