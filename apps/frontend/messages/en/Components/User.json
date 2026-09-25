@@ -151,6 +151,12 @@
       "update": "Update content limit",
       "success": "Updated successfully"
     },
+    "GameList": {
+      "title": "Game list",
+      "description": "Choose what the game list page shows.",
+      "onlyGamesWithResources": "Only show games with download resources",
+      "success": "Updated successfully"
+    },
     "ToastPosition": {
       "title": "Toast position",
       "description": "You can set where global toast notifications appear.",

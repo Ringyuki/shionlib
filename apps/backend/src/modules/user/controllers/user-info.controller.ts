@@ -16,6 +16,7 @@ import { UpdateEmailReqDto } from '../dto/req/update-email.req.dto'
 import { UpdateNameReqDto } from '../dto/req/update-name.req.dto'
 import { UpdateBioReqDto } from '../dto/req/update-bio.req.dto'
 import { UpdatePasswordReqDto } from '../dto/req/update-password.req.dto'
+import { UpdateOnlyGamesWithResourcesReqDto } from '../dto/req/update-only-games-with-resources.req.dto'
 import { ShionBizException } from '../../../common/exceptions/shion-business.exception'
 import { ShionBizCode } from '../../../shared/enums/biz-code/shion-biz-code.enum'
 
@@ -110,5 +111,16 @@ export class UserInfoController {
     @Req() request: RequestWithUser,
   ) {
     return await this.userInfoService.updateContentLimit(body.content_limit, request.user.sub)
+  }
+
+  @Post('only-games-with-resources')
+  async updateOnlyGamesWithResources(
+    @Body() dto: UpdateOnlyGamesWithResourcesReqDto,
+    @Req() request: RequestWithUser,
+  ) {
+    return await this.userInfoService.updateOnlyGamesWithResources(
+      dto.only_games_with_resources,
+      request.user.sub,
+    )
   }
 }

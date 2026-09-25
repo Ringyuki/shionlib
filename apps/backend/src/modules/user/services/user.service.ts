@@ -218,6 +218,7 @@ export class UserService {
         role: true,
         lang: true,
         content_limit: true,
+        only_games_with_resources: true,
         sponsor_expires_at: true,
       },
     })

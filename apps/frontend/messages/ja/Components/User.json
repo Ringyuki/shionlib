@@ -151,6 +151,12 @@
       "update": "内容限制を更新",
       "success": "更新成功"
     },
+    "GameList": {
+      "title": "ゲーム一覧",
+      "description": "ゲーム一覧ページの表示内容を設定します。",
+      "onlyGamesWithResources": "ダウンロードリソースがあるゲームのみ表示",
+      "success": "更新しました"
+    },
     "ToastPosition": {
       "title": "Toast の表示位置",
       "description": "グローバル Toast 通知の表示位置を設定できます。",

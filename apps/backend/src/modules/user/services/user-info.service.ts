@@ -174,6 +174,10 @@ export class UserInfoService {
     await this.updateUserInfo('content_limit', content_limit, user_id)
   }
 
+  async updateOnlyGamesWithResources(only_games_with_resources: boolean, user_id: number) {
+    await this.updateUserInfo('only_games_with_resources', only_games_with_resources, user_id)
+  }
+
   private async updateUserInfo<T>(path: string, value: T, user_id: number) {
     const user = await this.prisma.user.findUnique({
       where: { id: user_id },

@@ -25,10 +25,11 @@ model User {
 
   favorites Favorite[] @relation("user_favorite")
 
-  lang          UserLang @default(en)
-  content_limit Int      @default(2)
-  role          Int      @default(1)
-  status        Int      @default(1)
+  lang                      UserLang @default(en)
+  content_limit             Int      @default(2)
+  only_games_with_resources Boolean  @default(true)
+  role                      Int      @default(1)
+  status                    Int      @default(1)
 
   upload_injected_file_times Int                @default(0)
   banned_records             UserBannedRecord[] @relation("user_banned")

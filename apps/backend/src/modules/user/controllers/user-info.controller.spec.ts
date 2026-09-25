@@ -11,6 +11,7 @@ describe('UserInfoController', () => {
       updatePassword: jest.fn(),
       updateLang: jest.fn(),
       updateContentLimit: jest.fn(),
+      updateOnlyGamesWithResources: jest.fn(),
     }
 
     return {
@@ -88,5 +89,15 @@ describe('UserInfoController', () => {
     await controller.updateContentLimit({ content_limit: 2 }, { user: { sub: 'u8' } } as any)
 
     expect(userInfoService.updateContentLimit).toHaveBeenCalledWith(2, 'u8')
+  })
+
+  it('delegates updateOnlyGamesWithResources', async () => {
+    const { controller, userInfoService } = createController()
+
+    await controller.updateOnlyGamesWithResources({ only_games_with_resources: false }, {
+      user: { sub: 'u9' },
+    } as any)
+
+    expect(userInfoService.updateOnlyGamesWithResources).toHaveBeenCalledWith(false, 'u9')
   })
 })

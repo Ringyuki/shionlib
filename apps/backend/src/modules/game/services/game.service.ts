@@ -187,6 +187,7 @@ export class GameService {
   async getList(
     getGameListReqDto: GetGameListReqDto,
     content_limit?: number,
+    only_games_with_resources = false,
   ): Promise<PaginatedResult<GetGameListResDto>> {
     const { page = 1, pageSize = 10, developer_id: producer_id, character_id } = getGameListReqDto
     const {
@@ -217,7 +218,11 @@ export class GameService {
     })
     if (!ids.length) return this.pageOf([], 0, page, pageSize, content_limit)
 
-    const where: Prisma.GameWhereInput = { status: 1, h_id: { in: ids } }
+    const where: Prisma.GameWhereInput = {
+      status: 1,
+      h_id: { in: ids },
+      ...(only_games_with_resources ? { download_resources: { some: { status: 1 } } } : {}),
+    }
     const select = { id: true, h_id: true, views: true }
     const skip = (page - 1) * pageSize
 
@@ -254,6 +259,19 @@ export class GameService {
       pageSize,
       content_limit,
     )
+  }
+
+  async shouldOnlyShowGamesWithResources(
+    getGameListReqDto: GetGameListReqDto,
+    user_id?: number,
+  ): Promise<boolean> {
+    if (getGameListReqDto.developer_id || getGameListReqDto.character_id) return false
+    if (!user_id) return true
+    const user = await this.prisma.user.findUnique({
+      where: { id: user_id },
+      select: { only_games_with_resources: true },
+    })
+    return user?.only_games_with_resources ?? true
   }
 
   async getRecentUpdate(

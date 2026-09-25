@@ -151,6 +151,12 @@
       "update": "更新内容限制",
       "success": "更新成功"
     },
+    "GameList": {
+      "title": "游戏列表",
+      "description": "设置游戏列表页的显示内容。",
+      "onlyGamesWithResources": "仅显示有下载资源的游戏",
+      "success": "更新成功"
+    },
     "ToastPosition": {
       "title": "Toast 位置",
       "description": "你可以在此设置全局 Toast 通知出现的位置。",

@@ -1,4 +1,5 @@
 import { ContentLimit } from '@/components/user/settings/ContentLimit'
+import { GameListSettings } from '@/components/user/settings/GameList'
 import { LanguageSettings } from '@/components/user/settings/Language'
 import { ToastPositionSettings } from '@/components/user/settings/ToastPosition'
 import { User } from '@/interfaces/user/user.interface'
@@ -12,6 +13,7 @@ export const SiteSettings = ({ user }: SiteSettingsProps) => {
     <div className="w-full flex flex-col gap-4">
       <ContentLimit initialContentLimit={user.content_limit!} />
       <LanguageSettings initialLanguage={user.lang} />
+      <GameListSettings initialOnlyGamesWithResources={user.only_games_with_resources ?? true} />
       <ToastPositionSettings />
     </div>
   )

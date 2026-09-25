@@ -13,6 +13,9 @@ describe('GameService', () => {
         update: jest.fn(),
         findFirst: jest.fn(),
       },
+      user: {
+        findUnique: jest.fn(),
+      },
     }
 
     const cacheService = {
@@ -263,6 +266,23 @@ describe('GameService', () => {
     })
   })
 
+  it('shouldOnlyShowGamesWithResources follows the user setting and defaults to on', async () => {
+    const { service, prisma } = createService()
+
+    await expect(service.shouldOnlyShowGamesWithResources({} as any)).resolves.toBe(true)
+    await expect(
+      service.shouldOnlyShowGamesWithResources({ developer_id: 1 } as any, 7),
+    ).resolves.toBe(false)
+    expect(prisma.user.findUnique).not.toHaveBeenCalled()
+
+    prisma.user.findUnique.mockResolvedValueOnce({ only_games_with_resources: false })
+    await expect(service.shouldOnlyShowGamesWithResources({} as any, 7)).resolves.toBe(false)
+    expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      where: { id: 7 },
+      select: { only_games_with_resources: true },
+    })
+  })
+
   it('getList short-circuits when hikarinagi has no candidate', async () => {
     const { service, prisma, hikarinagiClient } = createService()
     hikarinagiClient.galgameIds.mockResolvedValueOnce({ ids: [] })
@@ -272,6 +292,24 @@ describe('GameService', () => {
     expect(prisma.game.findMany).not.toHaveBeenCalled()
     expect(result.items).toEqual([])
     expect(result.meta.totalItems).toBe(0)
+  })
+
+  it('getList only keeps games with active download resources when requested', async () => {
+    const { service, prisma, hikarinagiClient } = createService()
+    hikarinagiClient.galgameIds.mockResolvedValueOnce({ ids: [77, 55] })
+    prisma.game.findMany.mockResolvedValueOnce([{ id: 1, h_id: 77, views: 0 }])
+
+    const result = await service.getList({ page: 1, pageSize: 10 } as any, undefined, true)
+
+    expect(prisma.game.findMany).toHaveBeenCalledWith({
+      where: {
+        status: 1,
+        h_id: { in: [77, 55] },
+        download_resources: { some: { status: 1 } },
+      },
+      select: { id: true, h_id: true, views: true },
+    })
+    expect(result.meta.totalItems).toBe(1)
   })
 
   it('getList forwards entity, tag, platform and date filters to hikarinagi', async () => {

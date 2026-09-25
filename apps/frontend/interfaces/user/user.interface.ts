@@ -10,6 +10,7 @@ export interface User {
   email?: string
   lang: SupportedLocales
   content_limit?: ContentLimit
+  only_games_with_resources?: boolean
   status?: UserStatus
   is_sponsor?: boolean
 }

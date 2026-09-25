@@ -4,6 +4,7 @@ describe('GameController', () => {
   const createController = () => {
     const gameService = {
       getList: jest.fn(),
+      shouldOnlyShowGamesWithResources: jest.fn().mockResolvedValue(false),
       getRandomGameId: jest.fn(),
       getRecentUpdate: jest.fn(),
       getById: jest.fn(),
@@ -59,13 +60,29 @@ describe('GameController', () => {
     expect(gameService.getList).toHaveBeenCalledWith(
       { page: 1, pageSize: 10, developer_id: 3, character_id: 4, filter: 'new' },
       2,
+      false,
     )
     expect(cacheService.set).toHaveBeenCalledWith(
-      `game:list:auth:u1:cl:2:query:${JSON.stringify(query)}`,
+      `game:list:auth:u1:cl:2:res:false:query:${JSON.stringify(query)}`,
       resultData,
       30 * 60 * 1000,
     )
     expect(result).toEqual(resultData)
+  })
+
+  it('getList keys the cache by the resolved resource setting', async () => {
+    const { controller, cacheService, gameService } = createController()
+    const query = { page: 1, pageSize: 10 }
+    cacheService.get.mockResolvedValue(null)
+    gameService.shouldOnlyShowGamesWithResources.mockResolvedValue(true)
+    gameService.getList.mockResolvedValue({ items: [] })
+
+    await controller.getList(query as any, req as any)
+    expect(gameService.shouldOnlyShowGamesWithResources).toHaveBeenCalledWith(query, 'u1')
+    expect(gameService.getList).toHaveBeenCalledWith(query, 2, true)
+    expect(cacheService.get).toHaveBeenCalledWith(
+      `game:list:auth:u1:cl:2:res:true:query:${JSON.stringify(query)}`,
+    )
   })
 
   it('delegates getRandomGame', async () => {

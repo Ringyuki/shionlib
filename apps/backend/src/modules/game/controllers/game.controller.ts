@@ -32,12 +32,20 @@ export class GameController {
 
   @Get('list')
   async getList(@Query() getGameListReqDto: GetGameListReqDto, @Req() req: RequestWithUser) {
-    const cacheKey = `game:list:auth:${req.user?.sub}:cl:${req.user?.content_limit}:query:${JSON.stringify(getGameListReqDto)}`
+    const onlyWithResources = await this.gameService.shouldOnlyShowGamesWithResources(
+      getGameListReqDto,
+      req.user?.sub,
+    )
+    const cacheKey = `game:list:auth:${req.user?.sub}:cl:${req.user?.content_limit}:res:${onlyWithResources}:query:${JSON.stringify(getGameListReqDto)}`
     const cached = await this.cacheService.get<PaginatedResult<GetGameListResDto>>(cacheKey)
     if (cached) {
       return cached
     }
-    const result = await this.gameService.getList(getGameListReqDto, req.user?.content_limit)
+    const result = await this.gameService.getList(
+      getGameListReqDto,
+      req.user?.content_limit,
+      onlyWithResources,
+    )
     await this.cacheService.set(cacheKey, result, 30 * 60 * 1000) // 30 minutes
     return result
   }
