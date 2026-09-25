@@ -23,6 +23,7 @@ const buildUserCreateData = (
   passwordHash: string,
   contentLimit: number,
   quotaSize: bigint,
+  onlyGamesWithResources = true,
 ) => ({
   name: user.name,
   email: user.email,
@@ -30,6 +31,7 @@ const buildUserCreateData = (
   role: user.role,
   lang: UserLang.en,
   content_limit: contentLimit,
+  only_games_with_resources: onlyGamesWithResources,
   upload_quota: {
     create: {
       size: quotaSize,
@@ -102,6 +104,20 @@ export const seedUsers = async (
 
   await prisma.user.create({
     data: buildUserCreateData(e2e_users.adminOpsUser, passwordHash, 2, 10_000_000_000n),
+    select: {
+      id: true,
+    },
+  })
+
+  await prisma.user.create({
+    data: buildUserCreateData(e2e_users.listAllUser, passwordHash, 3, 10_000_000_000n, false),
+    select: {
+      id: true,
+    },
+  })
+
+  await prisma.user.create({
+    data: buildUserCreateData(e2e_users.listSafeUser, passwordHash, 1, 10_000_000_000n, false),
     select: {
       id: true,
     },

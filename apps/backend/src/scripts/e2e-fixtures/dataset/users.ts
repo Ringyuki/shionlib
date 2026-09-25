@@ -29,4 +29,14 @@ export const e2e_users = {
     email: 'e2e_admin_ops_user@shionlib.local',
     role: 1,
   },
+  listAllUser: {
+    name: 'e2e_list_all_user',
+    email: 'e2e_list_all_user@shionlib.local',
+    role: 1,
+  },
+  listSafeUser: {
+    name: 'e2e_list_safe_user',
+    email: 'e2e_list_safe_user@shionlib.local',
+    role: 1,
+  },
 } as const

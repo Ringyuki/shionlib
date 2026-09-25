@@ -1,3 +1,5 @@
+import { request as playwrightRequest, test } from '@playwright/test'
+
 export const E2E_FIXTURES = {
   users: {
     admin: {
@@ -22,6 +24,14 @@ export const E2E_FIXTURES = {
     },
     adminOps: {
       identifier: 'e2e_admin_ops_user',
+      password: 'ShionlibE2E123!',
+    },
+    listAll: {
+      identifier: 'e2e_list_all_user',
+      password: 'ShionlibE2E123!',
+    },
+    listSafe: {
+      identifier: 'e2e_list_safe_user',
       password: 'ShionlibE2E123!',
     },
   },
@@ -176,24 +186,53 @@ export const ensureUiLoggedIn = async (page, identifier, password) => {
   await dialog.waitFor({ state: 'hidden' })
 }
 
-export const findGameIdByTitle = async (request, title) => {
-  const response = await request.get('/api/game/list', {
-    params: {
-      page: '1',
-      pageSize: '50',
-    },
+let listAllGamesPromise = null
+
+const fetchListAllGames = async () => {
+  const lookup = await playwrightRequest.newContext({
+    baseURL: test.info().project.use.baseURL,
   })
 
-  if (!response.ok()) {
-    throw new Error(`Failed to load game list: ${response.status()}`)
-  }
+  try {
+    await loginAndExtractAuthCookies(
+      lookup,
+      E2E_FIXTURES.users.listAll.identifier,
+      E2E_FIXTURES.users.listAll.password,
+    )
+    const response = await lookup.get('/api/game/list', {
+      params: {
+        page: '1',
+        pageSize: '50',
+      },
+    })
 
-  const payload = await response.json()
-  if (payload?.code !== 0 || !payload?.data?.items || !Array.isArray(payload.data.items)) {
-    throw new Error('Unexpected /api/game/list payload while resolving game id.')
-  }
+    if (!response.ok()) {
+      throw new Error(`Failed to load game list: ${response.status()}`)
+    }
 
-  const game = payload.data.items.find(
+    const payload = await response.json()
+    if (payload?.code !== 0 || !payload?.data?.items || !Array.isArray(payload.data.items)) {
+      throw new Error('Unexpected /api/game/list payload while resolving game id.')
+    }
+
+    return payload.data.items
+  } finally {
+    await lookup.dispose()
+  }
+}
+
+const loadListAllGames = () => {
+  listAllGamesPromise ??= fetchListAllGames().catch(error => {
+    listAllGamesPromise = null
+    throw error
+  })
+  return listAllGamesPromise
+}
+
+export const findGameIdByTitle = async (_request, title) => {
+  const items = await loadListAllGames()
+
+  const game = items.find(
     item => item.title_en === title || item.title_zh === title || item.title_jp === title,
   )
   if (!game) {
