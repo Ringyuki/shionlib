@@ -11,12 +11,14 @@ export class DownloadProxyTicketService {
   constructor(private readonly configService: ShionConfigService) {}
 
   issueDownloadUrl(input: IssueDownloadProxyUrlInput) {
+    const now = Math.floor(Date.now() / 1000)
     const payload: DownloadProxyTicketPayload = {
       v: 3,
       sid: globalThis.crypto?.randomUUID?.() ?? nodeRandomUUID(),
       fid: input.fileId,
       n: input.fileName,
-      exp: Math.floor(Date.now() / 1000) + input.expiresIn,
+      exp: now + input.expiresIn,
+      hx: now + input.maxExpiresIn,
       mc: Math.max(1, this.configService.get('file_download.max_conns')),
       b: input.bucketName,
       k: input.fileKey,

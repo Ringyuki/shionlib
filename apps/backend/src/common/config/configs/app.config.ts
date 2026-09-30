@@ -133,6 +133,8 @@ export default (): AppConfig => ({
     ticket_secret: withDefault('FILE_DOWNLOAD_TICKET_SECRET', ''),
     max_conns: withDefault('FILE_DOWNLOAD_MAX_CONNS', 8),
     download_expires_in: withDefault('FILE_DOWNLOAD_EXPIRES_IN', 3600), // 1 hour
+    download_estimated_speed: withDefault('FILE_DOWNLOAD_ESTIMATED_SPEED', 1024 * 1024),
+    download_max_expires_in: withDefault('FILE_DOWNLOAD_MAX_EXPIRES_IN', 24 * 60 * 60),
   },
 
   partner: {

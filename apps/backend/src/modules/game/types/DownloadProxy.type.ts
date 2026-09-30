@@ -25,6 +25,7 @@ export type DownloadProxyTicketPayload = {
    * Expiration time
    */
   exp: number
+  hx: number
   /**
    * Maximum concurrent connections
    */
@@ -62,5 +63,6 @@ export type IssueDownloadProxyUrlInput = {
   authorizationToken: string
   downloadUrl: string
   expiresIn: number
+  maxExpiresIn: number
   gameId: number
 }

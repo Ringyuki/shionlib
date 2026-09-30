@@ -28,6 +28,7 @@
     "DOWNLOAD_MAX_CONNS_CAP": "8",
     "DOWNLOAD_LEASE_TTL_MS": "45000",
     "DOWNLOAD_HEARTBEAT_MS": "15000",
+    "DOWNLOAD_SESSION_IDLE_TTL_MS": "3600000",
   },
   "version_metadata": {
     "binding": "CF_VERSION_METADATA",

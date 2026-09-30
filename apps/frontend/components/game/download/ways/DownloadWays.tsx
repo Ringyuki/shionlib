@@ -23,6 +23,8 @@ import { useLunaBoxStore, useReinaStore, usePotatoVNStore } from '@/store/localS
 
 type PendingWay = 'aria2' | 'lunabox' | 'reina' | 'potatovn' | 'normal'
 
+const LINK_REFRESH_MARGIN_SEC = 60
+
 interface DownloadWaysProps {
   file: GameDownloadResourceFile
   resourceId: number
@@ -53,7 +55,8 @@ export const DownloadWays = ({
   const [turnstileOpen, setTurnstileOpen] = useState(false)
 
   const requestDownloadLink = async () => {
-    if (downloadLink) return downloadLink
+    if (downloadLink && Date.now() / 1000 < downloadLinkExpiresAt.current - LINK_REFRESH_MARGIN_SEC)
+      return downloadLink
     flushSync(() => {
       setTurnstileOpen(true)
       onTurnstileOpenChange(true)

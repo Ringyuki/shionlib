@@ -447,17 +447,17 @@ export class GameDownloadSourceService {
       return resource
     })
 
-    let expiresIn = this.configService.get('file_download.download_expires_in')
-    if (file.file_size > 1024 * 1024 * 1024 * 10) expiresIn = 4 * 60 * 60 // 4 hours
-    if (file.file_size > 1024 * 1024 * 1024 * 20) expiresIn = 6 * 60 * 60 // 6 hours
+    const maxExpiresIn = this.configService.get('file_download.download_max_expires_in')
+    const expiresIn = Math.min(this.estimateLinkExpiresIn(Number(file.file_size)), maxExpiresIn)
 
     const file_url =
       this.configService.get('file_download.mode') === 'worker'
         ? this.downloadProxyTicketService.issueDownloadUrl({
             fileId: id,
             fileName: file.file_name,
-            ...(await this.b2Service.getDownloadAuthorizationInfo(file.s3_file_key!, expiresIn)),
+            ...(await this.b2Service.getDownloadAuthorizationInfo(file.s3_file_key!, maxExpiresIn)),
             expiresIn,
+            maxExpiresIn,
             gameId: game_id,
           })
         : await this.b2Service.getDownloadUrl(file.s3_file_key!, expiresIn)
@@ -466,6 +466,15 @@ export class GameDownloadSourceService {
       file_url,
       expires_in: expiresIn,
     }
+  }
+
+  private estimateLinkExpiresIn(fileSize: number) {
+    const baseExpiresIn = this.configService.get('file_download.download_expires_in')
+    const estimatedSpeed = Math.max(
+      1,
+      this.configService.get('file_download.download_estimated_speed'),
+    )
+    return baseExpiresIn + Math.ceil(fileSize / estimatedSpeed)
   }
 
   async getList(

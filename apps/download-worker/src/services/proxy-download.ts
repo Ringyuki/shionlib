@@ -1,5 +1,5 @@
 import { parsePositiveInt } from '../helpers/number'
-import { acquireLease, heartbeatLease, releaseLease } from './download-lease'
+import { acquireLease, heartbeatLease, isSessionActive, releaseLease } from './download-lease'
 import type { ProxyDownloadInput } from '../types/proxy-download'
 
 const buildDownloadHeaders = (originHeaders: Headers, fileName: string) => {
@@ -16,7 +16,15 @@ export const proxyDownload = async ({
   ticketPayload,
   errorResponse,
 }: ProxyDownloadInput) => {
+  const limiterId = env.DOWNLOAD_LIMITER.idFromName(ticketPayload.sid)
+  const limiter = env.DOWNLOAD_LIMITER.get(limiterId)
+  const session = { exp: ticketPayload.exp, hx: ticketPayload.hx }
+
   if (request.method === 'HEAD') {
+    if (!(await isSessionActive(limiter, session))) {
+      return errorResponse(410, 'Expired ticket')
+    }
+
     const originResponse = await fetch(originRequest)
     return new Response(null, {
       status: originResponse.status,
@@ -25,14 +33,16 @@ export const proxyDownload = async ({
     })
   }
 
-  const limiterId = env.DOWNLOAD_LIMITER.idFromName(ticketPayload.sid)
-  const limiter = env.DOWNLOAD_LIMITER.get(limiterId)
   const heartbeatMs = parsePositiveInt(env.DOWNLOAD_HEARTBEAT_MS, 15_000)
   const maxConnCap = parsePositiveInt(env.DOWNLOAD_MAX_CONNS_CAP, 8)
   const maxConn = Math.max(1, Math.min(ticketPayload.mc, maxConnCap))
-  const acquireResult = await acquireLease(limiter, maxConn)
+  const acquireResult = await acquireLease(limiter, maxConn, session)
 
   if (!acquireResult.ok) {
+    if (acquireResult.reason === 'session_expired') {
+      return errorResponse(410, 'Expired ticket')
+    }
+
     const res = errorResponse(429, 'Too Many Concurrent Download Connections')
     res.headers.set('Retry-After', '1')
     return res

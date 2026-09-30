@@ -209,7 +209,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'pnpm'
 
       - name: Install deps
@@ -217,6 +217,9 @@ jobs:
 
       - name: Type check
         run: pnpm --filter shionlib-download-worker typecheck
+
+      - name: Unit tests
+        run: pnpm --filter shionlib-download-worker test
 
   e2e-tests:
     name: E2E Tests

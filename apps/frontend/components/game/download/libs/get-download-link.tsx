@@ -15,7 +15,6 @@ export interface GetDownloadLinkHandle {
 
 export const GetDownloadLink = forwardRef<GetDownloadLinkHandle, GetDownloadLinkProps>(
   ({ fileId, onLink }, ref) => {
-    const [downloadLink, setDownloadLink] = useState<string | null>(null)
     const [showTurnstile, setShowTurnstile] = useState(false)
     const pendingResolver = useRef<((url: string | null) => void) | null>(null)
 
@@ -26,7 +25,6 @@ export const GetDownloadLink = forwardRef<GetDownloadLinkHandle, GetDownloadLink
         )
         const url = res.data?.file_url ?? null
         const expiresAt = Math.floor(Date.now() / 1000) + Number(res.data?.expires_in ?? 3600)
-        setDownloadLink(url)
         onLink?.(url, expiresAt)
         return url
       } catch (error) {
@@ -46,7 +44,6 @@ export const GetDownloadLink = forwardRef<GetDownloadLinkHandle, GetDownloadLink
 
     useImperativeHandle(ref, () => ({
       requestLink: () => {
-        if (downloadLink) return Promise.resolve(downloadLink)
         setShowTurnstile(true)
         return new Promise<string | null>(resolve => {
           pendingResolver.current = resolve

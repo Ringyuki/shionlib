@@ -26,6 +26,7 @@ describe('DownloadProxyTicketService', () => {
     authorizationToken: 'download-token',
     downloadUrl: 'https://f005.backblazeb2.com',
     expiresIn: 3600,
+    maxExpiresIn: 86400,
     gameId: 1,
     ...overrides,
   })
@@ -80,6 +81,18 @@ describe('DownloadProxyTicketService', () => {
     expect(payload.u).toBe('https://f005.backblazeb2.com')
     expect(payload.exp).toBeGreaterThan(Math.floor(Date.now() / 1000))
     expect(payload.sid).toBeDefined()
+  })
+
+  it('sets the hard expiry from maxExpiresIn relative to the same issue time as exp', () => {
+    const { service } = createService()
+
+    const url = service.issueDownloadUrl(issueInput({ expiresIn: 1800, maxExpiresIn: 86400 }))
+
+    const ticket = decodeURIComponent(new URL(url).searchParams.get('ticket')!)
+    const payload = decryptTicket(ticket, 'test-secret-key')
+
+    expect(payload.hx - payload.exp).toBe(86400 - 1800)
+    expect(payload.hx).toBeGreaterThan(Math.floor(Date.now() / 1000) + 86400 - 5)
   })
 
   it('uses sid instead of fileName in the URL path', () => {

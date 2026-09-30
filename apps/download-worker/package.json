@@ -6,11 +6,14 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tests",
+    "test": "vitest run"
   },
   "devDependencies": {
+    "@cloudflare/vitest-plugin": "^1.3.3",
     "@cloudflare/workers-types": "^4.20260312.0",
     "typescript": "^5.9.2",
+    "vitest": "^4.1.11",
     "wrangler": "^4.55.0"
   }
 }

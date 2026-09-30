@@ -94,6 +94,8 @@ export interface AppConfig {
     ticket_secret: string
     max_conns: number
     download_expires_in: number
+    download_estimated_speed: number
+    download_max_expires_in: number
   }
   partner: {
     secret: string

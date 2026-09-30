@@ -58,6 +58,8 @@ describe('GameDownloadSourceService', () => {
       ['file_download.ticket_secret', 'dev-download-ticket-secret'],
       ['file_download.max_conns', 4],
       ['file_download.download_expires_in', 1800],
+      ['file_download.download_estimated_speed', 1024 * 1024],
+      ['file_download.download_max_expires_in', 24 * 60 * 60],
     ])
     const configService = {
       get: jest.fn((key: string) => configValues.get(key)),
@@ -579,7 +581,7 @@ describe('GameDownloadSourceService', () => {
     expect(result).toEqual({ success: true, error_codes: ['ok'] })
   })
 
-  it('getDownloadLink increments counters and returns b2 url with long expiry for large files', async () => {
+  it('getDownloadLink increments counters and scales expiry with file size', async () => {
     const { service, prismaService, b2Service } = createService()
     jest
       .spyOn(service as any, 'validateToken')
@@ -604,17 +606,47 @@ describe('GameDownloadSourceService', () => {
     const result = await service.getDownloadLink(1, 'ok-token')
     expect(result).toEqual({
       file_url: 'https://b2/download',
-      expires_in: 6 * 60 * 60,
+      expires_in: 1800 + 25 * 1024,
     })
     expect(tx.gameDownloadResource.update).toHaveBeenCalled()
     expect(tx.game.update).toHaveBeenCalledWith({
       where: { id: 30 },
       data: { downloads: { increment: 1 } },
     })
-    expect(b2Service.getDownloadUrl).toHaveBeenCalledWith('s3/large.file', 6 * 60 * 60)
+    expect(b2Service.getDownloadUrl).toHaveBeenCalledWith('s3/large.file', 1800 + 25 * 1024)
   })
 
-  it('getDownloadLink keeps default expiry for small files', async () => {
+  it('getDownloadLink caps expiry at the configured maximum', async () => {
+    const { service, prismaService, b2Service } = createService()
+    jest
+      .spyOn(service as any, 'validateToken')
+      .mockResolvedValueOnce({ success: true, error_codes: [] })
+    prismaService.gameDownloadResourceFile.findUnique.mockResolvedValue({
+      game_download_resource_id: 22,
+      s3_file_key: 's3/huge.file',
+      file_size: 200n * 1024n * 1024n * 1024n,
+    })
+    const tx = {
+      gameDownloadResource: {
+        findUnique: jest.fn().mockResolvedValue({ updated: new Date('2026-02-18T00:00:00.000Z') }),
+        update: jest.fn().mockResolvedValue({ game_id: 32 }),
+      },
+      game: {
+        update: jest.fn(),
+      },
+    }
+    prismaService.$transaction.mockImplementation(async (cb: any) => cb(tx))
+    b2Service.getDownloadUrl.mockResolvedValue('https://b2/huge')
+
+    const result = await service.getDownloadLink(3, 'ok-token')
+    expect(result).toEqual({
+      file_url: 'https://b2/huge',
+      expires_in: 24 * 60 * 60,
+    })
+    expect(b2Service.getDownloadUrl).toHaveBeenCalledWith('s3/huge.file', 24 * 60 * 60)
+  })
+
+  it('getDownloadLink adds the estimated transfer time to the base expiry for small files', async () => {
     const { service, prismaService, b2Service } = createService()
     jest
       .spyOn(service as any, 'validateToken')
@@ -639,9 +671,9 @@ describe('GameDownloadSourceService', () => {
     const result = await service.getDownloadLink(2, 'ok-token')
     expect(result).toEqual({
       file_url: 'https://b2/small',
-      expires_in: 1800,
+      expires_in: 1800 + 2 * 1024,
     })
-    expect(b2Service.getDownloadUrl).toHaveBeenCalledWith('s3/small.file', 1800)
+    expect(b2Service.getDownloadUrl).toHaveBeenCalledWith('s3/small.file', 1800 + 2 * 1024)
   })
 
   it('getDownloadLink returns worker proxy url when worker mode is enabled', async () => {
@@ -681,7 +713,7 @@ describe('GameDownloadSourceService', () => {
     expect(result).toEqual({
       file_url:
         'https://dl.hikarifallback.uk/dl/2/123e4567-e89b-12d3-a456-426614174000?ticket=opaque',
-      expires_in: 1800,
+      expires_in: 1800 + 2 * 1024,
     })
     expect(downloadProxyTicketService.issueDownloadUrl).toHaveBeenCalledWith({
       fileId: 2,
@@ -690,10 +722,14 @@ describe('GameDownloadSourceService', () => {
       fileKey: 's3/worker.file',
       authorizationToken: 'worker-token',
       downloadUrl: 'https://f005.backblazeb2.com',
-      expiresIn: 1800,
+      expiresIn: 1800 + 2 * 1024,
+      maxExpiresIn: 24 * 60 * 60,
       gameId: 31,
     })
-    expect(b2Service.getDownloadAuthorizationInfo).toHaveBeenCalledWith('s3/worker.file', 1800)
+    expect(b2Service.getDownloadAuthorizationInfo).toHaveBeenCalledWith(
+      's3/worker.file',
+      24 * 60 * 60,
+    )
     expect(b2Service.getDownloadUrl).not.toHaveBeenCalled()
   })
 

@@ -22,7 +22,7 @@ export const resolveDownloadRequest = async (
   if (!ticketPayload) {
     return reject(errorResponse(403, 'Invalid ticket'))
   }
-  if (ticketPayload.exp <= Math.floor(Date.now() / 1000)) {
+  if ((ticketPayload.hx ?? ticketPayload.exp) <= Math.floor(Date.now() / 1000)) {
     return reject(errorResponse(410, 'Expired ticket'))
   }
 
