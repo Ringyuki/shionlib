@@ -246,7 +246,7 @@
     },
     "GameDownloadContent": {
       "alertTitle": "注意",
-      "alertDescription": "以下资源均由 Shionlib 用户上传，请自行鉴别文件安全性。\n对于大小不超过 10 GB 的文件，下载链接有效期为 {duration} 分钟；对于大小超过 10 GB 和 20 GB 的文件，下载链接有效期分别为 {duration1} 分钟和 {duration2} 分钟，请确保在有效期内完成下载。"
+      "alertDescription": "以下资源均由 Shionlib 用户上传，请自行鉴别文件安全性。\n获取下载链接后，请在 {start} 分钟内开始下载。"
     },
     "GameDownload": {
       "title": "下载",

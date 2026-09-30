@@ -32,9 +32,7 @@ export const GameDownloadContent = ({
         <AlertCircle />
         <AlertTitle>{t('alertTitle')}</AlertTitle>
         <AlertDescription>
-          <BBCodeContent
-            content={t('alertDescription', { duration: 120, duration1: 240, duration2: 360 })}
-          />
+          <BBCodeContent content={t('alertDescription', { start: 120 })} />
         </AlertDescription>
       </Alert>
       {downloadResources

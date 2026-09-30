@@ -246,7 +246,7 @@
     },
     "GameDownloadContent": {
       "alertTitle": "Notice",
-      "alertDescription": "The following resources are uploaded by Shionlib users. Please verify the safety of the files yourself.\nFor files less than 10 GB, the download link is valid for {duration} minutes; for files between 10 GB and 20 GB, the download link is valid for {duration1} minutes; for files more than 20 GB, the download link is valid for {duration2} minutes, please complete the download within the valid period."
+      "alertDescription": "The following resources are uploaded by Shionlib users. Please verify the safety of the files yourself.\nAfter getting a download link, please start the download within {start} minutes."
     },
     "GameDownload": {
       "title": "Download",
