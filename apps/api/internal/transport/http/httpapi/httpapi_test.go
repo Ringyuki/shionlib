@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/netip"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -321,4 +322,29 @@ func TestRegisterRejectsUnboundPathParams(t *testing.T) {
 		func(ctx context.Context, _ *embeddedUnexported) (*response.EmptyOutput, error) {
 			return response.Empty(ctx, builder), nil
 		})
+}
+
+func TestCORSPreflightAllowsUploadAndLocaleHeaders(t *testing.T) {
+	handler := newTestAPI(t)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodOptions, "/things", nil)
+	req.Header.Set("Origin", "https://shionlib.test")
+	req.Header.Set("Access-Control-Request-Method", http.MethodPost)
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, req)
+	if recorder.Code != http.StatusNoContent {
+		t.Fatalf("preflight status %d", recorder.Code)
+	}
+	headers := recorder.Header()
+	if headers.Get("Access-Control-Allow-Origin") != "*" || headers.Get("Access-Control-Allow-Methods") != "GET,POST" {
+		t.Fatalf("preflight headers %v", headers)
+	}
+	allowed := strings.Split(headers.Get("Access-Control-Allow-Headers"), ",")
+	for _, name := range []string{"Content-Type", "Authorization", "Accept-Language", "chunk-sha256"} {
+		if !slices.Contains(allowed, name) {
+			t.Fatalf("%s is not allowed: %v", name, allowed)
+		}
+	}
+	if headers.Get("Access-Control-Expose-Headers") != "shionlib-auth-stale" {
+		t.Fatalf("expose headers %v", headers)
+	}
 }

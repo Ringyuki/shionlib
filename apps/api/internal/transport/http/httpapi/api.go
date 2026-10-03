@@ -153,7 +153,7 @@ func cors(cfg CORS) func(http.Handler) http.Handler {
 				header.Set("Access-Control-Expose-Headers", "shionlib-auth-stale")
 				if r.Method == http.MethodOptions && r.Header.Get("Access-Control-Request-Method") != "" {
 					header.Set("Access-Control-Allow-Methods", methods)
-					header.Set("Access-Control-Allow-Headers", "Content-Type,Authorization")
+					header.Set("Access-Control-Allow-Headers", "Content-Type,Authorization,Accept-Language,chunk-sha256")
 					w.WriteHeader(http.StatusNoContent)
 					return
 				}

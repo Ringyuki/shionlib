@@ -78,6 +78,7 @@ HTTP method/path · request schema · response schema · status code · business
 | Malware scan evidence | `scan_log_path`/`scan_log_excerpt` came from the clamscan/clamd scan log; a local `clamscan` binary could be used | clamd over TCP (zINSTREAM) only; the API keeps its own log of clamd replies in `FILE_SCAN_LOG_DIR/clamav-scan.log` and takes the excerpt from it | one scanner path |
 | Bans issued by report and malware penalties | session families were blocked in Redis before the transaction committed | families are blocked after commit | no blocks for rolled-back bans |
 | `GET /s3/test/file/list` | raw SDK output including `$metadata` | the same PascalCase fields without `$metadata` | SDK internals |
+| CORS preflight | allowed headers `Content-Type, Authorization` | also `Accept-Language` and `chunk-sha256` | cross-origin chunked uploads and locale negotiation |
 
 ## Redis
 
