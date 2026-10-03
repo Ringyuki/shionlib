@@ -84,6 +84,7 @@
   "GAME_UPLOAD_SESSION_NOT_OWNER": "upload session not owner",
   "GAME_UPLOAD_SESSION_ALREADY_USED": "upload session already used by another file",
   "GAME_UPLOAD_INVALID_FILE_STATUS": "upload file status invalid",
+  "GAME_UPLOAD_INVALID_CHUNK_SIZE": "invalid chunk size, it must be positive and not exceed the transfer limit",
   "SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT": "upload file size exceeds limit",
   "SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED": "no file provided",
   "SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE": "unsupported file type",
