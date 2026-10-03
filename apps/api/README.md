@@ -31,6 +31,7 @@ go run ./cmd/api serve
 | `go run ./cmd/devtool bizcode check` / `docs` | validate / regenerate business codes |
 | `go run ./cmd/devtool feature create <name> <range>` | scaffold a capability |
 | `go run ./cmd/devtool deploy env` / `deploy check` | print / verify the environment block of `infra/compose.app.yml` |
+| `go run ./cmd/devtool e2e prepare` | reset the database and Redis prefix and load the Playwright e2e dataset (`reset` and `seed` run one half; see `docker/README.md`) |
 | `../../.claude/skills/go-backend/scripts/verify.sh` | everything CI runs |
 
 ## Deploy

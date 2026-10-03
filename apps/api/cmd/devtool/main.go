@@ -14,6 +14,9 @@ func main() {
 }
 
 func run(args []string) error {
+	if len(args) == 2 && args[0] == "e2e" {
+		return runE2E(context.Background(), args[1])
+	}
 	root, err := moduleRoot()
 	if err != nil {
 		return err
@@ -48,7 +51,7 @@ func run(args []string) error {
 }
 
 func usage() error {
-	return fmt.Errorf("usage: devtool <migrate diff <name> | migrate check | bizcode check | bizcode docs | feature create <name> <range> | deploy env | deploy check>")
+	return fmt.Errorf("usage: devtool <migrate diff <name> | migrate check | bizcode check | bizcode docs | feature create <name> <range> | deploy env | deploy check | e2e reset|seed|prepare>")
 }
 
 func moduleRoot() (string, error) {
