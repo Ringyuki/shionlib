@@ -59,6 +59,9 @@ func Register[I, O any](api *API, route Route, handler func(context.Context, *I)
 		operation.Security = []map[string][]string{{"accessToken": {}}, {"accessCookie": {}}}
 		operation.Middlewares = append(operation.Middlewares, api.requireAccess(route.Access))
 	}
+	if route.MaxBodyBytes > 0 {
+		operation.Middlewares = append(operation.Middlewares, api.limitBody(route.MaxBodyBytes))
+	}
 	throttle := route.Throttle
 	if throttle == "" {
 		throttle = DefaultThrottle
