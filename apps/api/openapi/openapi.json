@@ -272,6 +272,54 @@
         ],
         "type": "object"
       },
+      "BangumiRatingDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "count": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "rank": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "score": {
+            "format": "double",
+            "type": "number"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rank",
+          "total",
+          "count",
+          "score"
+        ],
+        "type": "object"
+      },
+      "BangumiScoreDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rating": {
+            "$ref": "#/components/schemas/BangumiRatingDTO"
+          }
+        },
+        "required": [
+          "rating",
+          "id"
+        ],
+        "type": "object"
+      },
       "CatalogHitDTO": {
         "additionalProperties": false,
         "properties": {
@@ -352,6 +400,320 @@
         ],
         "type": "object"
       },
+      "CharacterDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "age": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "birthday": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "blood_type": {
+            "enum": [
+              "a",
+              "b",
+              "ab",
+              "o"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "bust": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "cup": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "gender": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "h_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "height": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "hips": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "image": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "intro_en": {
+            "type": "string"
+          },
+          "intro_jp": {
+            "type": "string"
+          },
+          "intro_zh": {
+            "type": "string"
+          },
+          "name_en": {
+            "type": "string"
+          },
+          "name_jp": {
+            "type": "string"
+          },
+          "name_zh": {
+            "type": "string"
+          },
+          "waist": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "weight": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "h_id",
+          "name_jp",
+          "name_zh",
+          "name_en",
+          "aliases",
+          "intro_jp",
+          "intro_zh",
+          "intro_en",
+          "image",
+          "blood_type",
+          "height",
+          "weight",
+          "bust",
+          "waist",
+          "hips",
+          "cup",
+          "age",
+          "birthday",
+          "gender"
+        ],
+        "type": "object"
+      },
+      "CharacterListItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "age": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "b_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "birthday": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "blood_type": {
+            "enum": [
+              "a",
+              "b",
+              "ab",
+              "o"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "bust": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "cup": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "gender": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "height": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "hips": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "image": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "intro_en": {
+            "type": "string"
+          },
+          "intro_jp": {
+            "type": "string"
+          },
+          "intro_zh": {
+            "type": "string"
+          },
+          "name_en": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name_jp": {
+            "type": "string"
+          },
+          "name_zh": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "v_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "waist": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "weight": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "b_id",
+          "v_id",
+          "id",
+          "name_jp",
+          "name_zh",
+          "name_en",
+          "aliases",
+          "intro_jp",
+          "intro_zh",
+          "intro_en",
+          "image",
+          "blood_type",
+          "height",
+          "weight",
+          "bust",
+          "waist",
+          "hips",
+          "cup",
+          "age",
+          "birthday",
+          "gender"
+        ],
+        "type": "object"
+      },
       "CreateFavoriteInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -371,6 +733,313 @@
         "required": [
           "name",
           "is_private"
+        ],
+        "type": "object"
+      },
+      "DeletedCharacterDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "age": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "b_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "birthday": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "blood_type": {
+            "enum": [
+              "a",
+              "b",
+              "ab",
+              "o"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "bust": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "cup": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "gender": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "h_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "height": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "hips": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "image": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "intro_en": {
+            "type": "string"
+          },
+          "intro_jp": {
+            "type": "string"
+          },
+          "intro_zh": {
+            "type": "string"
+          },
+          "name_en": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name_jp": {
+            "type": "string"
+          },
+          "name_zh": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "v_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "waist": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "weight": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "b_id",
+          "v_id",
+          "h_id",
+          "image",
+          "name_jp",
+          "name_zh",
+          "name_en",
+          "aliases",
+          "intro_jp",
+          "intro_zh",
+          "intro_en",
+          "blood_type",
+          "height",
+          "weight",
+          "bust",
+          "waist",
+          "hips",
+          "cup",
+          "age",
+          "birthday",
+          "gender",
+          "created",
+          "updated"
+        ],
+        "type": "object"
+      },
+      "DeveloperDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "extra_info": {
+            "items": {
+              "$ref": "#/components/schemas/DeveloperExtraInfoDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "h_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "intro_en": {
+            "type": "string"
+          },
+          "intro_jp": {
+            "type": "string"
+          },
+          "intro_zh": {
+            "type": "string"
+          },
+          "logo": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "website": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "h_id",
+          "name",
+          "aliases",
+          "logo",
+          "intro_jp",
+          "intro_zh",
+          "intro_en",
+          "website",
+          "extra_info"
+        ],
+        "type": "object"
+      },
+      "DeveloperExtraInfoDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "type": "object"
+      },
+      "DeveloperListItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "logo": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "works_count": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "aliases",
+          "logo",
+          "works_count"
         ],
         "type": "object"
       },
@@ -436,6 +1105,39 @@
         ],
         "type": "object"
       },
+      "EnvelopeBangumiScoreDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/BangumiScoreDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeCatalogImportedDTO": {
         "additionalProperties": false,
         "properties": {
@@ -445,6 +1147,105 @@
           },
           "data": {
             "$ref": "#/components/schemas/CatalogImportedDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeCharacterDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CharacterDetailDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeDeletedCharacterDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DeletedCharacterDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeDeveloperDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DeveloperDetailDTO"
           },
           "message": {
             "type": "string"
@@ -544,6 +1345,171 @@
           },
           "data": {
             "$ref": "#/components/schemas/FavoriteItemPageDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeGameCharactersDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/GameCharactersDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeGameDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/GameDetailDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeGameDetailsDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/GameDetailsDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeGameHeaderDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/GameHeaderDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeGameListPageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/GameListPageDTO"
           },
           "message": {
             "type": "string"
@@ -707,6 +1673,84 @@
         ],
         "type": "object"
       },
+      "EnvelopeListSearchTagDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/SearchTagDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeListSearchTermDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/SearchTermDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeListString": {
         "additionalProperties": false,
         "properties": {
@@ -812,6 +1856,105 @@
         ],
         "type": "object"
       },
+      "EnvelopePageCharacterListItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageCharacterListItemDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePageDeveloperListItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageDeveloperListItemDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePageGameListItem": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageGameListItem"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopePageMessageItemDTO": {
         "additionalProperties": false,
         "properties": {
@@ -821,6 +1964,140 @@
           },
           "data": {
             "$ref": "#/components/schemas/PageMessageItemDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeRandomGameID": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeSearchGamePageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SearchGamePageDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeValue": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {},
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeVndbScoreDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/VndbScoreDTO"
           },
           "message": {
             "type": "string"
@@ -1161,6 +2438,202 @@
         ],
         "type": "object"
       },
+      "GameCharacterCreditDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "actor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "character": {
+            "$ref": "#/components/schemas/GameCharacterDTO"
+          },
+          "image": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "role": {
+            "enum": [
+              "main",
+              "primary",
+              "side",
+              "appears"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "image",
+          "actor",
+          "character"
+        ],
+        "type": "object"
+      },
+      "GameCharacterDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "age": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "birthday": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "blood_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "bust": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "cup": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "gender": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "height": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "hips": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "image": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "intro_en": {
+            "type": "string"
+          },
+          "intro_jp": {
+            "type": "string"
+          },
+          "intro_zh": {
+            "type": "string"
+          },
+          "name_en": {
+            "type": "string"
+          },
+          "name_jp": {
+            "type": "string"
+          },
+          "name_zh": {
+            "type": "string"
+          },
+          "waist": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "weight": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "image",
+          "name_jp",
+          "name_zh",
+          "name_en",
+          "aliases",
+          "intro_jp",
+          "intro_zh",
+          "intro_en",
+          "gender",
+          "blood_type",
+          "height",
+          "weight",
+          "bust",
+          "waist",
+          "hips",
+          "cup",
+          "age",
+          "birthday"
+        ],
+        "type": "object"
+      },
+      "GameCharactersDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "characters": {
+            "items": {
+              "$ref": "#/components/schemas/GameCharacterCreditDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "content_limit": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "characters",
+          "content_limit"
+        ],
+        "type": "object"
+      },
       "GameCover": {
         "additionalProperties": false,
         "properties": {
@@ -1228,6 +2701,194 @@
         ],
         "type": "object"
       },
+      "GameDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "characters": {
+            "items": {
+              "$ref": "#/components/schemas/GameCharacterCreditDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "content_limit": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "covers": {
+            "items": {
+              "$ref": "#/components/schemas/GameCover"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "developers": {
+            "items": {
+              "$ref": "#/components/schemas/GameCredit"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "images": {
+            "description": "Omitted for viewers who hide rated content",
+            "items": {
+              "$ref": "#/components/schemas/GameImageDTO"
+            },
+            "type": "array"
+          },
+          "intro_en": {
+            "type": "string"
+          },
+          "intro_jp": {
+            "type": "string"
+          },
+          "intro_zh": {
+            "type": "string"
+          },
+          "staffs": {
+            "items": {
+              "$ref": "#/components/schemas/GameStaffDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/GameTagLinkDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "title_en": {
+            "type": "string"
+          },
+          "title_jp": {
+            "type": "string"
+          },
+          "title_zh": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title_jp",
+          "title_zh",
+          "title_en",
+          "intro_jp",
+          "intro_zh",
+          "intro_en",
+          "covers",
+          "developers",
+          "characters",
+          "staffs",
+          "tags",
+          "content_limit"
+        ],
+        "type": "object"
+      },
+      "GameDetailsDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "content_limit": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "extra_info": {
+            "items": {
+              "$ref": "#/components/schemas/GameExtraInfoDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "images": {
+            "items": {
+              "$ref": "#/components/schemas/GameImageDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "intro_en": {
+            "type": "string"
+          },
+          "intro_jp": {
+            "type": "string"
+          },
+          "intro_zh": {
+            "type": "string"
+          },
+          "link": {
+            "items": {
+              "$ref": "#/components/schemas/GameLinkDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "nsfw": {
+            "type": "boolean"
+          },
+          "relations_from": {
+            "items": {
+              "$ref": "#/components/schemas/GameRelationDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "staffs": {
+            "items": {
+              "$ref": "#/components/schemas/GameStaffDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/GameTagLinkDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "extra_info",
+          "tags",
+          "intro_jp",
+          "intro_zh",
+          "intro_en",
+          "images",
+          "staffs",
+          "nsfw",
+          "link",
+          "relations_from",
+          "content_limit"
+        ],
+        "type": "object"
+      },
       "GameDeveloperRef": {
         "additionalProperties": false,
         "properties": {
@@ -1252,6 +2913,441 @@
           "id",
           "name",
           "aliases"
+        ],
+        "type": "object"
+      },
+      "GameExtraInfoDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "type": "object"
+      },
+      "GameHeaderDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "b_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "content_limit": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "covers": {
+            "items": {
+              "$ref": "#/components/schemas/GameCover"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "developers": {
+            "items": {
+              "$ref": "#/components/schemas/GameCredit"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "extra_info": {
+            "items": {
+              "$ref": "#/components/schemas/GameExtraInfoDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "h_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "platform": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "release_date": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "release_date_tba": {
+            "type": "boolean"
+          },
+          "title_en": {
+            "type": "string"
+          },
+          "title_jp": {
+            "type": "string"
+          },
+          "title_zh": {
+            "type": "string"
+          },
+          "type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "v_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "v_id",
+          "b_id",
+          "h_id",
+          "extra_info",
+          "title_jp",
+          "title_zh",
+          "title_en",
+          "aliases",
+          "covers",
+          "developers",
+          "release_date",
+          "release_date_tba",
+          "type",
+          "platform",
+          "content_limit"
+        ],
+        "type": "object"
+      },
+      "GameImageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "dims": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "sexual": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "url": {
+            "type": "string"
+          },
+          "violence": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "url",
+          "dims",
+          "sexual",
+          "violence"
+        ],
+        "type": "object"
+      },
+      "GameLinkDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "label",
+          "url"
+        ],
+        "type": "object"
+      },
+      "GameListItem": {
+        "additionalProperties": false,
+        "properties": {
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "covers": {
+            "items": {
+              "$ref": "#/components/schemas/GameCover"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "developers": {
+            "items": {
+              "$ref": "#/components/schemas/GameCredit"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "intro_en": {
+            "type": "string"
+          },
+          "intro_jp": {
+            "type": "string"
+          },
+          "intro_zh": {
+            "type": "string"
+          },
+          "release_date": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title_en": {
+            "type": "string"
+          },
+          "title_jp": {
+            "type": "string"
+          },
+          "title_zh": {
+            "type": "string"
+          },
+          "type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "views": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "views",
+          "title_jp",
+          "title_zh",
+          "title_en",
+          "aliases",
+          "type",
+          "covers",
+          "intro_jp",
+          "intro_zh",
+          "intro_en",
+          "release_date",
+          "developers"
+        ],
+        "type": "object"
+      },
+      "GameListPageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/GameListItem"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/GameListPageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "GameListPageMeta": {
+        "additionalProperties": false,
+        "properties": {
+          "content_limit": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currentPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemsPerPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalItems": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "content_limit",
+          "totalItems",
+          "itemCount",
+          "itemsPerPage",
+          "totalPages",
+          "currentPage"
+        ],
+        "type": "object"
+      },
+      "GameRelationDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "relation": {
+            "type": "string"
+          },
+          "to_game": {
+            "$ref": "#/components/schemas/GameCard"
+          },
+          "to_game_id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "relation",
+          "to_game_id",
+          "to_game"
+        ],
+        "type": "object"
+      },
+      "GameStaffDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "role"
+        ],
+        "type": "object"
+      },
+      "GameTagDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "aliases",
+          "count"
+        ],
+        "type": "object"
+      },
+      "GameTagLinkDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "tag": {
+            "$ref": "#/components/schemas/GameTagDTO"
+          },
+          "tag_alias": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "tag_alias",
+          "tag"
         ],
         "type": "object"
       },
@@ -1521,6 +3617,72 @@
         ],
         "type": "object"
       },
+      "PageCharacterListItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CharacterListItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "PageDeveloperListItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DeveloperListItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "PageGameListItem": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/GameListItem"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
       "PageMessageItemDTO": {
         "additionalProperties": false,
         "properties": {
@@ -1576,6 +3738,243 @@
         ],
         "type": "object"
       },
+      "SearchGameItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "_formatted": {
+            "$ref": "#/components/schemas/SearchHighlightDTO",
+            "description": "Highlighted fields when the search engine provides them"
+          },
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "covers": {
+            "items": {
+              "$ref": "#/components/schemas/GameCover"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "developers": {
+            "items": {
+              "$ref": "#/components/schemas/GameCredit"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "intro_en": {
+            "type": "string"
+          },
+          "intro_jp": {
+            "type": "string"
+          },
+          "intro_zh": {
+            "type": "string"
+          },
+          "release_date": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title_en": {
+            "type": "string"
+          },
+          "title_jp": {
+            "type": "string"
+          },
+          "title_zh": {
+            "type": "string"
+          },
+          "type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "views": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "views",
+          "title_jp",
+          "title_zh",
+          "title_en",
+          "aliases",
+          "type",
+          "covers",
+          "intro_jp",
+          "intro_zh",
+          "intro_en",
+          "release_date",
+          "developers"
+        ],
+        "type": "object"
+      },
+      "SearchGamePageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SearchGameItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/SearchGamePageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "SearchGamePageMeta": {
+        "additionalProperties": false,
+        "properties": {
+          "content_limit": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currentPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemsPerPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalItems": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "content_limit",
+          "totalItems",
+          "itemCount",
+          "itemsPerPage",
+          "totalPages",
+          "currentPage"
+        ],
+        "type": "object"
+      },
+      "SearchHighlightDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "intro_en": {
+            "type": "string"
+          },
+          "intro_jp": {
+            "type": "string"
+          },
+          "intro_zh": {
+            "type": "string"
+          },
+          "title_en": {
+            "type": "string"
+          },
+          "title_jp": {
+            "type": "string"
+          },
+          "title_zh": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SearchTagDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "count",
+          "aliases",
+          "display_name"
+        ],
+        "type": "object"
+      },
+      "SearchTermDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "score": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "query",
+          "score"
+        ],
+        "type": "object"
+      },
       "UpdateFavoriteInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -1628,6 +4027,39 @@
           "name",
           "avatar",
           "is_sponsor"
+        ],
+        "type": "object"
+      },
+      "VndbScoreDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "average": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "rating": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "votecount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rating",
+          "average",
+          "votecount"
         ],
         "type": "object"
       }
@@ -1987,6 +4419,453 @@
         "summary": "List configured catalog sources",
         "tags": [
           "admin-catalog"
+        ]
+      }
+    },
+    "/bangumi/get": {
+      "get": {
+        "operationId": "bangumi.get",
+        "parameters": [
+          {
+            "description": "Bangumi v0 resource kind",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "default": "subjects",
+              "description": "Bangumi v0 resource kind",
+              "enum": [
+                "subjects",
+                "characters",
+                "persons",
+                "episodes",
+                "indices"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Bangumi resource id",
+            "explode": false,
+            "in": "query",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "description": "Bangumi resource id",
+              "pattern": "^[0-9]{1,20}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional related collection of the resource",
+            "explode": false,
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "description": "Optional related collection of the resource",
+              "enum": [
+                "subjects",
+                "characters",
+                "persons"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeValue"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Read a Bangumi resource",
+        "tags": [
+          "bangumi"
+        ]
+      }
+    },
+    "/character/list": {
+      "get": {
+        "operationId": "character.list",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Matches names and aliases",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Matches names and aliases",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageCharacterListItemDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List characters",
+        "tags": [
+          "character"
+        ]
+      }
+    },
+    "/character/{id}": {
+      "delete": {
+        "operationId": "character.delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeDeletedCharacterDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Delete a character without game relations",
+        "tags": [
+          "character"
+        ]
+      },
+      "get": {
+        "operationId": "character.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeCharacterDetailDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get a character",
+        "tags": [
+          "character"
+        ]
+      }
+    },
+    "/developer/list": {
+      "get": {
+        "operationId": "developer.list",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Matches names and aliases",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Matches names and aliases",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageDeveloperListItemDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List developers",
+        "tags": [
+          "developer"
+        ]
+      }
+    },
+    "/developer/{id}": {
+      "delete": {
+        "operationId": "developer.delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Delete a developer without games or children",
+        "tags": [
+          "developer"
+        ]
+      },
+      "get": {
+        "operationId": "developer.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeDeveloperDetailDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get a developer",
+        "tags": [
+          "developer"
         ]
       }
     },
@@ -2625,6 +5504,675 @@
         ]
       }
     },
+    "/game/list": {
+      "get": {
+        "operationId": "game.list",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Only games credited to this developer; the resource setting is ignored",
+            "explode": false,
+            "in": "query",
+            "name": "developer_id",
+            "schema": {
+              "description": "Only games credited to this developer; the resource setting is ignored",
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Only games featuring this character; the resource setting is ignored",
+            "explode": false,
+            "in": "query",
+            "name": "character_id",
+            "schema": {
+              "description": "Only games featuring this character; the resource setting is ignored",
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Games carrying any of these tags",
+            "explode": true,
+            "in": "query",
+            "name": "filter[tags][]",
+            "schema": {
+              "description": "Games carrying any of these tags",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Games carrying none of these tags",
+            "explode": true,
+            "in": "query",
+            "name": "filter[exclude_tags][]",
+            "schema": {
+              "description": "Games carrying none of these tags",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Release years (1900-2100)",
+            "explode": true,
+            "in": "query",
+            "name": "filter[years][]",
+            "schema": {
+              "description": "Release years (1900-2100)",
+              "items": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Release months (1-12); combined with years or the current year",
+            "explode": true,
+            "in": "query",
+            "name": "filter[months][]",
+            "schema": {
+              "description": "Release months (1-12); combined with years or the current year",
+              "items": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Games available on any of these platforms",
+            "explode": true,
+            "in": "query",
+            "name": "filter[platforms][]",
+            "schema": {
+              "description": "Games available on any of these platforms",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            }
+          },
+          {
+            "description": "Sort key, release_date by default",
+            "explode": false,
+            "in": "query",
+            "name": "filter[sort_by]",
+            "schema": {
+              "description": "Sort key, release_date by default",
+              "enum": [
+                "release_date",
+                "views",
+                "downloads",
+                "hot_score"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Sort direction, desc by default",
+            "explode": false,
+            "in": "query",
+            "name": "filter[sort_order]",
+            "schema": {
+              "description": "Sort direction, desc by default",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Released on or after this date (ISO 8601)",
+            "explode": false,
+            "in": "query",
+            "name": "filter[start_date]",
+            "schema": {
+              "description": "Released on or after this date (ISO 8601)",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Released on or before this date (ISO 8601)",
+            "explode": false,
+            "in": "query",
+            "name": "filter[end_date]",
+            "schema": {
+              "description": "Released on or before this date (ISO 8601)",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeGameListPageDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List games with filters",
+        "tags": [
+          "game"
+        ]
+      }
+    },
+    "/game/random": {
+      "get": {
+        "operationId": "game.random",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeRandomGameID"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Pick a random visible game id",
+        "tags": [
+          "game"
+        ]
+      }
+    },
+    "/game/recent-update": {
+      "get": {
+        "operationId": "game.recentUpdate",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageGameListItem"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List recently updated games",
+        "tags": [
+          "game"
+        ]
+      }
+    },
+    "/game/score/bangumi/{id}": {
+      "get": {
+        "operationId": "game.bangumiScore",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeBangumiScoreDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get the Bangumi rating of a game",
+        "tags": [
+          "game"
+        ]
+      }
+    },
+    "/game/score/vndb/{id}": {
+      "get": {
+        "operationId": "game.vndbScore",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeVndbScoreDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get the VNDB rating of a game",
+        "tags": [
+          "game"
+        ]
+      }
+    },
+    "/game/{id}": {
+      "get": {
+        "operationId": "game.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeGameDetailDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get a game",
+        "tags": [
+          "game"
+        ]
+      }
+    },
+    "/game/{id}/characters": {
+      "get": {
+        "operationId": "game.characters",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeGameCharactersDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List the characters of a game",
+        "tags": [
+          "game"
+        ]
+      }
+    },
+    "/game/{id}/details": {
+      "get": {
+        "operationId": "game.details",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeGameDetailsDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get the details block of a game page",
+        "tags": [
+          "game"
+        ]
+      }
+    },
+    "/game/{id}/header": {
+      "get": {
+        "operationId": "game.header",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeGameHeaderDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get the header block of a game page",
+        "tags": [
+          "game"
+        ]
+      }
+    },
+    "/game/{id}/view": {
+      "post": {
+        "operationId": "game.view",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Count a page view",
+        "tags": [
+          "game"
+        ]
+      }
+    },
     "/health": {
       "get": {
         "operationId": "health.get",
@@ -3054,6 +6602,284 @@
         "summary": "Mark a message read",
         "tags": [
           "message"
+        ]
+      }
+    },
+    "/search/games": {
+      "get": {
+        "operationId": "search.games",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Keyword matched against titles, aliases, tags and developers",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Keyword matched against titles, aliases, tags and developers",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Exact tag name",
+            "explode": false,
+            "in": "query",
+            "name": "tag",
+            "schema": {
+              "description": "Exact tag name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeSearchGamePageDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Search games",
+        "tags": [
+          "search"
+        ]
+      }
+    },
+    "/search/suggest": {
+      "get": {
+        "operationId": "search.suggest",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "prefix",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 10,
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListSearchTermDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Suggest search queries for a prefix",
+        "tags": [
+          "search"
+        ]
+      }
+    },
+    "/search/tags": {
+      "get": {
+        "operationId": "search.tags",
+        "parameters": [
+          {
+            "description": "Matches tag names and aliases",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Matches tag names and aliases",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 10,
+              "format": "int64",
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListSearchTagDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Search tags",
+        "tags": [
+          "search"
+        ]
+      }
+    },
+    "/search/trending": {
+      "get": {
+        "operationId": "search.trending",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 10,
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Single trend window; all windows are summed when omitted",
+            "explode": false,
+            "in": "query",
+            "name": "window",
+            "schema": {
+              "description": "Single trend window; all windows are summed when omitted",
+              "enum": [
+                "1h",
+                "6h",
+                "1d"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListSearchTermDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Trending search queries",
+        "tags": [
+          "search"
         ]
       }
     }

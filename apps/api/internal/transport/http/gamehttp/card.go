@@ -75,6 +75,46 @@ func ToGameCard(card game.Card) GameCard {
 	return out
 }
 
+type GameListItem struct {
+	ID          int          `json:"id"`
+	Views       int          `json:"views"`
+	TitleJP     string       `json:"title_jp"`
+	TitleZH     string       `json:"title_zh"`
+	TitleEN     string       `json:"title_en"`
+	Aliases     []string     `json:"aliases"`
+	Type        *string      `json:"type"`
+	Covers      []GameCover  `json:"covers"`
+	IntroJP     string       `json:"intro_jp"`
+	IntroZH     string       `json:"intro_zh"`
+	IntroEN     string       `json:"intro_en"`
+	ReleaseDate *time.Time   `json:"release_date"`
+	Developers  []GameCredit `json:"developers"`
+}
+
+func ToGameListItem(card game.Card) GameListItem {
+	nested := ToGameCard(card)
+	return GameListItem{
+		ID:          nested.ID,
+		Views:       card.Views,
+		TitleJP:     nested.TitleJP,
+		TitleZH:     nested.TitleZH,
+		TitleEN:     nested.TitleEN,
+		Aliases:     nested.Aliases,
+		Type:        nested.Type,
+		Covers:      nested.Covers,
+		ReleaseDate: nested.ReleaseDate,
+		Developers:  nested.Developers,
+	}
+}
+
+func ToGameListItems(cards []game.Card) []GameListItem {
+	items := make([]GameListItem, len(cards))
+	for i, card := range cards {
+		items[i] = ToGameListItem(card)
+	}
+	return items
+}
+
 func nonNil(values []string) []string {
 	if values == nil {
 		return []string{}
