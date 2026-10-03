@@ -53,6 +53,7 @@ func New(opts Options) *API {
 
 	router := chi.NewRouter()
 	router.Use(
+		middleware.Trace(opts.QuietPaths),
 		middleware.RequestContext(opts.ClientResolver),
 		middleware.AccessLog(opts.Logger, opts.QuietPaths),
 		middleware.Recover(mapper, writer, opts.Logger),

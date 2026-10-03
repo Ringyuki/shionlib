@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -12,6 +13,9 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/i18n"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/requestid"
@@ -125,6 +129,7 @@ func AccessLog(logger *slog.Logger, quietPaths []string) func(http.Handler) http
 			case isQuiet(r.URL.Path, quietPaths):
 				level = slog.LevelDebug
 			}
+			annotateSpan(ctx, r.Method, pattern, recorder.status)
 			logger.LogAttrs(ctx, level, "http request", attrs...)
 		})
 	}
@@ -176,4 +181,21 @@ func (r *statusRecorder) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 
 func (r *statusRecorder) Unwrap() http.ResponseWriter {
 	return r.ResponseWriter
+}
+
+func annotateSpan(ctx context.Context, method, route string, status int) {
+	span := trace.SpanFromContext(ctx)
+	if !span.IsRecording() {
+		return
+	}
+	span.SetName(method + " " + route)
+	span.SetAttributes(
+		attribute.String("http.request.method", method),
+		attribute.String("http.route", route),
+		attribute.Int("http.response.status_code", status),
+		attribute.String("shionlib.request_id", requestid.From(ctx)),
+	)
+	if status >= http.StatusInternalServerError {
+		span.SetStatus(codes.Error, http.StatusText(status))
+	}
 }

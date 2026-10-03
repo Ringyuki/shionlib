@@ -13,6 +13,7 @@ import (
 	"github.com/riverqueue/river/riverdriver/riverpgxv5"
 	"github.com/riverqueue/river/rivermigrate"
 	"github.com/riverqueue/river/rivertype"
+	"github.com/riverqueue/rivercontrib/otelriver"
 	"github.com/robfig/cron/v3"
 )
 
@@ -50,7 +51,7 @@ type Runner struct {
 }
 
 func New(opts Options) (*Runner, error) {
-	config := &river.Config{Logger: opts.Logger}
+	config := &river.Config{Logger: opts.Logger, Middleware: []rivertype.Middleware{otelriver.NewMiddleware(nil)}}
 	if opts.Process {
 		workers := river.NewWorkers()
 		for _, register := range opts.Register {
@@ -121,7 +122,7 @@ func (r *Runner) Run(ctx context.Context) error {
 }
 
 func NewInserter(pool *pgxpool.Pool, logger *slog.Logger) (*river.Client[pgx.Tx], error) {
-	client, err := river.NewClient(riverpgxv5.New(pool), &river.Config{Logger: logger})
+	client, err := river.NewClient(riverpgxv5.New(pool), &river.Config{Logger: logger, Middleware: []rivertype.Middleware{otelriver.NewMiddleware(nil)}})
 	if err != nil {
 		return nil, fmt.Errorf("create job inserter: %w", err)
 	}

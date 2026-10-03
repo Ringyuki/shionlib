@@ -4,6 +4,8 @@ import (
 	"net"
 	"net/http"
 	"time"
+
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 type Options struct {
@@ -33,5 +35,5 @@ func New(opts Options) *http.Client {
 		ExpectContinueTimeout: time.Second,
 		ResponseHeaderTimeout: opts.Timeout,
 	}
-	return &http.Client{Timeout: opts.Timeout, Transport: transport}
+	return &http.Client{Timeout: opts.Timeout, Transport: otelhttp.NewTransport(transport)}
 }

@@ -75,6 +75,7 @@ func (c *Config) Validate() error {
 	require(c.Search.Engine != "meilisearch" || c.Search.MeilisearchHost != "", "MEILISEARCH_HOST is required when SEARCH_ENGINE=meilisearch")
 	require(slices.Contains([]string{"hikarinagi"}, c.Catalog.Source), "CATALOG_SOURCE must be hikarinagi")
 	require(slices.Contains([]string{"json", "text"}, c.Log.Format), "LOG_FORMAT must be json or text")
+	require(c.APM.SampleRate >= 0 && c.APM.SampleRate <= 1, "APM_SAMPLE_RATE must be between 0 and 1")
 	require(c.Upload.ChunkSizeBytes > 0 && c.Upload.ChunkSizeBytes <= c.Upload.TransferLimitBytes, "FILE_UPLOAD_CHUNK_SIZE must be positive and not exceed UPLOAD_LARGE_FILE_TRANSFER_LIMIT_BYTES")
 	require(c.Upload.MaxChunks > 0, "UPLOAD_LARGE_FILE_MAX_CHUNKS must be positive")
 	if _, err := time.LoadLocation(c.Tasks.ScheduleTimezone); err != nil {
@@ -88,6 +89,11 @@ func (c *Config) Validate() error {
 	for name, raw := range map[string]string{"SITE_URL": c.App.SiteURL, "OIDC_ISSUER": c.OIDC.Issuer, "HIKARINAGI_API_BASE_URL": c.Catalog.Hikarinagi.APIBaseURL} {
 		if parsed, err := url.Parse(raw); err != nil || parsed.Scheme == "" || parsed.Host == "" {
 			errs = append(errs, fmt.Errorf("%s must be an absolute URL", name))
+		}
+	}
+	if c.APM.Endpoint != "" {
+		if parsed, err := url.Parse(c.APM.Endpoint); err != nil || parsed.Scheme == "" || parsed.Host == "" {
+			errs = append(errs, fmt.Errorf("APM_ENDPOINT must be an absolute URL"))
 		}
 	}
 	for _, raw := range append(append([]string{}, c.WebAuthn.Origins...), c.OIDC.AllowedOrigins...) {

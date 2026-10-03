@@ -8,6 +8,7 @@ type Config struct {
 	App        App
 	HTTP       HTTP
 	Log        Log
+	APM        APM
 	Database   Database
 	Redis      Redis
 	Throttle   Throttle
@@ -51,6 +52,12 @@ type HTTP struct {
 	ReadTimeout       time.Duration `env:"HTTP_READ_TIMEOUT" envDefault:"10m"`
 	WriteTimeout      time.Duration `env:"HTTP_WRITE_TIMEOUT" envDefault:"10m"`
 	IdleTimeout       time.Duration `env:"HTTP_IDLE_TIMEOUT" envDefault:"120s"`
+}
+
+type APM struct {
+	Endpoint   string  `env:"APM_ENDPOINT"`
+	IngestKey  string  `env:"APM_INGEST_KEY"`
+	SampleRate float64 `env:"APM_SAMPLE_RATE" envDefault:"1"`
 }
 
 type Log struct {

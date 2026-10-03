@@ -21,18 +21,20 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/jobs"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/logger"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/redis"
+	"github.com/Ringyuki/shionlib/apps/api/internal/platform/telemetry"
 )
 
 type Infra struct {
-	Config  *config.Config
-	Logger  *slog.Logger
-	DB      *database.DB
-	SQL     *sql.DB
-	Ent     *ent.Client
-	Redis   *redis.Client
-	Catalog *i18n.Catalog
-	Queue   *queue.Queue
-	Now     func() time.Time
+	Config    *config.Config
+	Logger    *slog.Logger
+	DB        *database.DB
+	SQL       *sql.DB
+	Ent       *ent.Client
+	Redis     *redis.Client
+	Catalog   *i18n.Catalog
+	Queue     *queue.Queue
+	Telemetry *telemetry.Telemetry
+	Now       func() time.Time
 }
 
 func Now() time.Time {
@@ -50,6 +52,17 @@ func NewLogger(cfg *config.Config) *slog.Logger {
 
 func OpenInfra(ctx context.Context, cfg *config.Config, log *slog.Logger) (*Infra, error) {
 	catalog, err := i18n.Load(i18n.Locale(cfg.App.DefaultLocale))
+	if err != nil {
+		return nil, err
+	}
+	tracing, err := telemetry.Setup(ctx, telemetry.Options{
+		Endpoint:    cfg.APM.Endpoint,
+		IngestKey:   cfg.APM.IngestKey,
+		SampleRate:  cfg.APM.SampleRate,
+		ServiceName: cfg.App.Name,
+		Version:     cfg.App.Version,
+		Environment: cfg.App.Environment,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -81,15 +94,16 @@ func OpenInfra(ctx context.Context, cfg *config.Config, log *slog.Logger) (*Infr
 		return nil, errors.Join(err, cache.Shutdown(ctx), db.Close(ctx))
 	}
 	return &Infra{
-		Config:  cfg,
-		Logger:  log,
-		DB:      db,
-		SQL:     db.SQL,
-		Ent:     postgres.NewClient(db.SQL),
-		Redis:   cache,
-		Catalog: catalog,
-		Queue:   queue.New(inserter),
-		Now:     Now,
+		Config:    cfg,
+		Logger:    log,
+		DB:        db,
+		SQL:       db.SQL,
+		Ent:       postgres.NewClient(db.SQL),
+		Redis:     cache,
+		Catalog:   catalog,
+		Queue:     queue.New(inserter),
+		Telemetry: tracing,
+		Now:       Now,
 	}, nil
 }
 
@@ -122,6 +136,9 @@ func (i *Infra) Close(ctx context.Context) error {
 		errs = append(errs, i.DB.Close(ctx))
 	} else if i.SQL != nil {
 		errs = append(errs, i.SQL.Close())
+	}
+	if i.Telemetry != nil {
+		errs = append(errs, i.Telemetry.Shutdown(ctx))
 	}
 	if err := errors.Join(errs...); err != nil {
 		return fmt.Errorf("close infrastructure: %w", err)

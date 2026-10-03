@@ -1,5 +1,8 @@
 x-api-environment: &api-environment
   ALLOW_REGISTER: ${ALLOW_REGISTER:-}
+  APM_ENDPOINT: ${APM_ENDPOINT:-}
+  APM_INGEST_KEY: ${APM_INGEST_KEY:-}
+  APM_SAMPLE_RATE: ${APM_SAMPLE_RATE:-}
   APP_ENV: ${APP_ENV:-}
   APP_NAME: ${APP_NAME:-}
   APP_VERSION: ${APP_VERSION:-}
@@ -208,7 +211,9 @@ services:
   worker:
     <<: *api-service
     command: ['worker']
-    environment: *api-environment
+    environment:
+      <<: *api-environment
+      APP_NAME: ${WORKER_APP_NAME:-shionlib-worker}
     depends_on:
       migrate:
         condition: service_completed_successfully

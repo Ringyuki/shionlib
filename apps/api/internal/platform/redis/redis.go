@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/redis/go-redis/extra/redisotel/v9"
 	goredis "github.com/redis/go-redis/v9"
 )
 
@@ -33,6 +34,10 @@ func Open(ctx context.Context, opts Options) (*Client, error) {
 		ReadTimeout:  opts.Timeout,
 		WriteTimeout: opts.Timeout,
 	})
+	if err := redisotel.InstrumentTracing(client); err != nil {
+		_ = client.Close()
+		return nil, fmt.Errorf("instrument redis: %w", err)
+	}
 	pingCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	if err := client.Ping(pingCtx).Err(); err != nil {

@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"strings"
 
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/requestid"
 )
 
@@ -104,6 +106,9 @@ func (h *contextHandler) Handle(ctx context.Context, record slog.Record) error {
 	}
 	if attrs, ok := ctx.Value(attrsKey{}).([]slog.Attr); ok {
 		record.AddAttrs(attrs...)
+	}
+	if span := trace.SpanContextFromContext(ctx); span.IsValid() {
+		record.AddAttrs(slog.String("trace_id", span.TraceID().String()), slog.String("span_id", span.SpanID().String()))
 	}
 	return h.next.Handle(ctx, record)
 }

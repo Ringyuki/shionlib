@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/exaring/otelpgx"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
 )
@@ -35,6 +36,7 @@ func Open(ctx context.Context, opts Options) (*DB, error) {
 	config.MinConns = int32(opts.MinConns)
 	config.MaxConnLifetime = opts.ConnMaxLifetime
 	config.MaxConnIdleTime = opts.ConnMaxIdleTime
+	config.ConnConfig.Tracer = otelpgx.NewTracer()
 	runtime := config.ConnConfig.RuntimeParams
 	runtime["timezone"] = "UTC"
 	if opts.ApplicationName != "" {
