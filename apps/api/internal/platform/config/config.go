@@ -133,6 +133,7 @@ type Bucket struct {
 	Endpoint        string `env:"ENDPOINT"`
 	AccessKeyID     string `env:"ACCESS_KEY_ID"`
 	SecretAccessKey string `env:"SECRET_ACCESS_KEY"`
+	ForcePathStyle  bool   `env:"FORCE_PATH_STYLE" envDefault:"false"`
 }
 
 type Storage struct {

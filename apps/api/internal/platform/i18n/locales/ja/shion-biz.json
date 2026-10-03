@@ -23,6 +23,7 @@
   "USER_INVALID_CONTENT_LIMIT": "無効なコンテンツ制限状態",
   "USER_ALREADY_BANNED": "ユーザーがすでに禁止されました",
   "USER_ALREADY_UNBANNED": "ユーザーがすでに解禁されました",
+  "USER_INVALID_BAN_DURATION": "無効な禁止期間",
   "GAME_NOT_FOUND": "ゲームが見つかりません",
   "GAME_INVALID_VNDB_ID": "無効なvndb id",
   "GAME_BANGUMI_REQUEST_FAILED": "bangumiリクエストに失敗しました。メッセージ: {message}",

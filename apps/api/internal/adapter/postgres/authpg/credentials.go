@@ -15,11 +15,11 @@ import (
 )
 
 const (
-	uniqueCredentialID      = "user_passkey_credentials_credential_id_key"
-	uniqueIdentitySubject   = "oidc_identities_provider_subject_key"
-	passkeyUserForeignKey   = "user_passkey_credentials_user_id_fkey"
-	identityUserForeignKey  = "oidc_identities_user_id_fkey"
-	errMissingParentMessage = "%s references a missing user: %w"
+	constraintAuthenticatorID    = "user_passkey_credentials_credential_id_key"
+	uniqueIdentitySubject        = "oidc_identities_provider_subject_key"
+	constraintAuthenticatorOwner = "user_passkey_credentials_user_id_fkey"
+	identityUserForeignKey       = "oidc_identities_user_id_fkey"
+	errMissingParentMessage      = "%s references a missing user: %w"
 )
 
 func (r *Repository) ActivePasskeys(ctx context.Context, userID int) ([]auth.Passkey, error) {
@@ -68,9 +68,9 @@ func (r *Repository) CreatePasskey(ctx context.Context, in auth.NewPasskey) (aut
 		SetLastUsedAt(in.LastUsedAt).
 		Save(ctx)
 	switch {
-	case postgres.IsUniqueViolation(err, uniqueCredentialID):
+	case postgres.IsUniqueViolation(err, constraintAuthenticatorID):
 		return auth.Passkey{}, auth.ErrPasskeyExists
-	case postgres.IsForeignKeyViolation(err, passkeyUserForeignKey):
+	case postgres.IsForeignKeyViolation(err, constraintAuthenticatorOwner):
 		return auth.Passkey{}, fmt.Errorf(errMissingParentMessage, "passkey", err)
 	case err != nil:
 		return auth.Passkey{}, fmt.Errorf("create passkey: %w", err)

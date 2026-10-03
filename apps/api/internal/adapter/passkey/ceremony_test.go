@@ -140,6 +140,16 @@ func stored(registered auth.RegisteredPasskey, userID int) auth.Passkey {
 	return auth.Passkey{ID: 1, UserID: userID, CredentialID: registered.CredentialID, PublicKey: registered.PublicKey, Counter: registered.Counter, Transports: registered.Transports, DeviceType: &deviceType, BackedUp: registered.BackedUp}
 }
 
+func TestLocalDevelopmentSettingsAreAccepted(t *testing.T) {
+	ceremony, err := New(Settings{RPID: "localhost", RPName: "Shionlib", Origins: []string{"http://localhost:3000"}, Timeout: time.Minute})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ceremony.BeginRegistration(auth.PasskeyOwner{UserID: 1, Name: "a@example.test", DisplayName: "a"}, nil); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestRegistrationOptionsMatchTheLegacyShape(t *testing.T) {
 	ceremony := newCeremony(t)
 	owner := auth.PasskeyOwner{UserID: 42, Name: "alice@example.test", DisplayName: "alice"}

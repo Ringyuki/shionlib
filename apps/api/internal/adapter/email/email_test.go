@@ -40,10 +40,7 @@ func settings(provider, endpoint string) Settings {
 
 func TestElasticSendsQueryParameters(t *testing.T) {
 	srv, got := server(t, http.StatusOK, `{"success":true}`)
-	sender, err := NewSender(settings(ProviderElastic, srv.URL+"/v2/email/send"), httpclient.New(httpclient.Options{Timeout: time.Second}))
-	if err != nil {
-		t.Fatal(err)
-	}
+	sender := NewSender(settings(ProviderElastic, srv.URL+"/v2/email/send"), httpclient.New(httpclient.Options{Timeout: time.Second}))
 	if err := sender.Send(context.Background(), Message{Subject: "Hi", To: []string{"user@example.test"}, HTML: "<p>x</p>"}); err != nil {
 		t.Fatal(err)
 	}
@@ -60,7 +57,7 @@ func TestElasticSendsQueryParameters(t *testing.T) {
 
 func TestElasticFailsOnHTTPErrors(t *testing.T) {
 	srv, _ := server(t, http.StatusBadGateway, "down")
-	sender, _ := NewSender(settings(ProviderElastic, srv.URL), httpclient.New(httpclient.Options{Timeout: time.Second}))
+	sender := NewSender(settings(ProviderElastic, srv.URL), httpclient.New(httpclient.Options{Timeout: time.Second}))
 	if err := sender.Send(context.Background(), Message{Subject: "Hi", To: []string{"a@example.test"}}); err == nil || !strings.Contains(err.Error(), "502") {
 		t.Fatalf("expected an upstream error, got %v", err)
 	}
@@ -68,7 +65,7 @@ func TestElasticFailsOnHTTPErrors(t *testing.T) {
 
 func TestPostalSendsJSONAndRequiresSuccess(t *testing.T) {
 	srv, got := server(t, http.StatusOK, `{"status":"success"}`)
-	sender, _ := NewSender(settings(ProviderPostal, srv.URL), httpclient.New(httpclient.Options{Timeout: time.Second}))
+	sender := NewSender(settings(ProviderPostal, srv.URL), httpclient.New(httpclient.Options{Timeout: time.Second}))
 	if err := sender.Send(context.Background(), Message{Subject: "Hi", To: []string{"user@example.test"}, HTML: "<p>x</p>"}); err != nil {
 		t.Fatal(err)
 	}
@@ -84,19 +81,19 @@ func TestPostalSendsJSONAndRequiresSuccess(t *testing.T) {
 	}
 
 	failing, _ := server(t, http.StatusOK, `{"status":"error"}`)
-	sender, _ = NewSender(settings(ProviderPostal, failing.URL), httpclient.New(httpclient.Options{Timeout: time.Second}))
+	sender = NewSender(settings(ProviderPostal, failing.URL), httpclient.New(httpclient.Options{Timeout: time.Second}))
 	if err := sender.Send(context.Background(), Message{Subject: "Hi", To: []string{"a@example.test"}}); err == nil {
 		t.Fatal("a non-success status must fail")
 	}
 	malformed, _ := server(t, http.StatusOK, `not json`)
-	sender, _ = NewSender(settings(ProviderPostal, malformed.URL), httpclient.New(httpclient.Options{Timeout: time.Second}))
+	sender = NewSender(settings(ProviderPostal, malformed.URL), httpclient.New(httpclient.Options{Timeout: time.Second}))
 	if err := sender.Send(context.Background(), Message{Subject: "Hi", To: []string{"a@example.test"}}); err == nil {
 		t.Fatal("a malformed response must fail")
 	}
 }
 
 func TestUnknownProvider(t *testing.T) {
-	if _, err := NewSender(settings("smtp", "http://x"), httpclient.New(httpclient.Options{})); err == nil {
+	if err := NewSender(settings("smtp", "http://x"), httpclient.New(httpclient.Options{})).Send(context.Background(), Message{To: []string{"a@example.test"}}); err == nil {
 		t.Fatal("unknown providers must be rejected")
 	}
 }

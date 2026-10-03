@@ -61,6 +61,12 @@ func (c *Config) Validate() error {
 	require(c.Token.RefreshShortWindow > 0, "REFRESH_TOKEN_SHORT_WINDOW must be positive")
 	require(c.Token.RefreshLongWindow >= c.Token.RefreshShortWindow, "REFRESH_TOKEN_LONG_WINDOW must not be shorter than REFRESH_TOKEN_SHORT_WINDOW")
 	require(c.Token.RefreshAlgorithmVersion != "" && !strings.Contains(c.Token.RefreshAlgorithmVersion, "."), "REFRESH_TOKEN_ALGORITHM_VERSION must be non-empty and must not contain '.'")
+	require(c.Token.RefreshRotationGrace >= 0, "REFRESH_TOKEN_ROTATION_GRACE must not be negative")
+	require(c.WebAuthn.RPID != "" && c.WebAuthn.RPName != "", "WEBAUTHN_RP_ID and WEBAUTHN_RP_NAME are required")
+	require(len(c.WebAuthn.Origins) > 0, "WEBAUTHN_ORIGINS must list at least one origin")
+	require(c.WebAuthn.Timeout > 0 && c.WebAuthn.ChallengeTTL > 0, "WEBAUTHN_TIMEOUT and WEBAUTHN_CHALLENGE_TTL must be positive")
+	require(len(c.OIDC.AllowedOrigins) > 0, "OIDC_ALLOWED_ORIGINS must list at least one origin")
+	require(c.OIDC.ClientID != "", "OIDC_CLIENT_ID is required")
 	require(c.HTTP.Port > 0 && c.HTTP.Port < 65536, "PORT must be a valid TCP port")
 	require(slices.Contains([]string{"direct", "worker"}, c.Download.Mode), "FILE_DOWNLOAD_MODE must be direct or worker")
 	require(c.Download.Mode != "worker" || c.Download.TicketSecret != "", "FILE_DOWNLOAD_TICKET_SECRET is required when FILE_DOWNLOAD_MODE=worker")
@@ -82,6 +88,16 @@ func (c *Config) Validate() error {
 	for name, raw := range map[string]string{"SITE_URL": c.App.SiteURL, "OIDC_ISSUER": c.OIDC.Issuer, "HIKARINAGI_API_BASE_URL": c.Catalog.Hikarinagi.APIBaseURL} {
 		if parsed, err := url.Parse(raw); err != nil || parsed.Scheme == "" || parsed.Host == "" {
 			errs = append(errs, fmt.Errorf("%s must be an absolute URL", name))
+		}
+	}
+	for _, raw := range append(append([]string{}, c.WebAuthn.Origins...), c.OIDC.AllowedOrigins...) {
+		if parsed, err := url.Parse(raw); err != nil || parsed.Scheme == "" || parsed.Host == "" || parsed.Path != "" {
+			errs = append(errs, fmt.Errorf("origin %q must be a scheme://host[:port] origin", raw))
+		}
+	}
+	if c.Email.Endpoint != "" {
+		if parsed, err := url.Parse(c.Email.Endpoint); err != nil || parsed.Scheme == "" || parsed.Host == "" {
+			errs = append(errs, errors.New("EMAIL_PROVIDER_ENDPOINT must be an absolute URL"))
 		}
 	}
 	return errors.Join(errs...)

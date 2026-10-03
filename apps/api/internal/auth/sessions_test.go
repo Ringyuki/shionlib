@@ -196,7 +196,7 @@ func TestRefreshWaitsForAConcurrentRotation(t *testing.T) {
 	go func() {
 		defer close(done)
 		time.Sleep(15 * time.Millisecond)
-		raw := []byte(`{"access_token":"late","access_expires_at":"2026-10-03T01:00:00Z","refresh_token":"` + other.RefreshToken + `","refresh_expires_at":"2026-10-10T00:00:00Z","session_id":` + strconv.Itoa(other.SessionID) + `,"family_id":"` + issued.FamilyID + `"}`)
+		raw := []byte(`{"a":"late","ae":"2026-10-03T01:00:00Z","r":"` + other.RefreshToken + `","re":"2026-10-10T00:00:00Z","s":` + strconv.Itoa(other.SessionID) + `,"f":"` + issued.FamilyID + `"}`)
 		_ = f.store.Put(ctx, "refresh:replay:"+strconv.Itoa(issued.SessionID), raw, time.Minute)
 	}()
 	replayed, err := f.sessions.Refresh(ctx, issued.RefreshToken, auth.Device{})

@@ -300,12 +300,12 @@ func (s *Sessions) sign(who Principal, sessionID int, familyID string, token ref
 }
 
 type replayRecord struct {
-	AccessToken      string    `json:"access_token"`
-	AccessExpiresAt  time.Time `json:"access_expires_at"`
-	RefreshToken     string    `json:"refresh_token"`
-	RefreshExpiresAt time.Time `json:"refresh_expires_at"`
-	SessionID        int       `json:"session_id"`
-	FamilyID         string    `json:"family_id"`
+	Access         string    `json:"a"`
+	AccessExpires  time.Time `json:"ae"`
+	Refresh        string    `json:"r"`
+	RefreshExpires time.Time `json:"re"`
+	Session        int       `json:"s"`
+	Family         string    `json:"f"`
 }
 
 func replayKey(sessionID int) string {
@@ -316,7 +316,14 @@ func (s *Sessions) saveReplay(ctx context.Context, oldSessionID int, tokens Toke
 	if s.policy.RotationGrace <= 0 {
 		return nil
 	}
-	raw, err := json.Marshal(replayRecord(tokens))
+	raw, err := json.Marshal(replayRecord{
+		Access:         tokens.AccessToken,
+		AccessExpires:  tokens.AccessExpiresAt,
+		Refresh:        tokens.RefreshToken,
+		RefreshExpires: tokens.RefreshExpiresAt,
+		Session:        tokens.SessionID,
+		Family:         tokens.FamilyID,
+	})
 	if err != nil {
 		return fmt.Errorf("encode refresh replay: %w", err)
 	}
@@ -332,7 +339,14 @@ func (s *Sessions) loadReplay(ctx context.Context, oldSessionID int) (Tokens, bo
 	if err := json.Unmarshal(raw, &record); err != nil {
 		return Tokens{}, false, fmt.Errorf("decode refresh replay: %w", err)
 	}
-	return Tokens(record), true, nil
+	return Tokens{
+		AccessToken:      record.Access,
+		AccessExpiresAt:  record.AccessExpires,
+		RefreshToken:     record.Refresh,
+		RefreshExpiresAt: record.RefreshExpires,
+		SessionID:        record.Session,
+		FamilyID:         record.Family,
+	}, true, nil
 }
 
 func (s *Sessions) awaitReplay(ctx context.Context, oldSessionID int) (Tokens, bool, error) {

@@ -37,16 +37,24 @@ type Settings struct {
 	SenderName    string
 }
 
-func NewSender(settings Settings, client *http.Client) (Sender, error) {
+func NewSender(settings Settings, client *http.Client) Sender {
 	client = ipv4Only(client)
 	switch settings.Provider {
 	case ProviderElastic:
-		return &Elastic{settings: settings, client: client}, nil
+		return &Elastic{settings: settings, client: client}
 	case ProviderPostal:
-		return &Postal{settings: settings, client: client}, nil
+		return &Postal{settings: settings, client: client}
 	default:
-		return nil, fmt.Errorf("unsupported email provider %q", settings.Provider)
+		return unsupported{provider: settings.Provider}
 	}
+}
+
+type unsupported struct {
+	provider string
+}
+
+func (u unsupported) Send(context.Context, Message) error {
+	return fmt.Errorf("unsupported email provider %q", u.provider)
 }
 
 type Elastic struct {
