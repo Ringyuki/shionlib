@@ -20,7 +20,7 @@ const openAITimeout = 5 * time.Minute
 
 func wireContent(infra *Infra, shared *Shared, modules *Modules) {
 	settings := shared.Config.OpenAI
-	if settings.APIKey == "" {
+	if settings.APIKey == "" && !infra.Offline {
 		shared.Logger.Warn("OPENAI_API_KEY is empty: content moderation is disabled and new comments and walkthroughs are published without review")
 	}
 	classifier := openai.NewClient(httpclient.New(httpclient.Options{Timeout: openAITimeout}), openai.Options{

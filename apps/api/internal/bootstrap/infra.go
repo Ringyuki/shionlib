@@ -34,6 +34,7 @@ type Infra struct {
 	Catalog   *i18n.Catalog
 	Queue     *queue.Queue
 	Telemetry *telemetry.Telemetry
+	Offline   bool
 	Now       func() time.Time
 }
 
@@ -123,6 +124,7 @@ func OfflineInfra(cfg *config.Config, log *slog.Logger) (*Infra, error) {
 		Ent:     postgres.NewClient(sqlDB),
 		Redis:   &redis.Client{Client: goredis.NewClient(&goredis.Options{Addr: "127.0.0.1:0"})},
 		Catalog: catalog,
+		Offline: true,
 		Now:     Now,
 	}, nil
 }
