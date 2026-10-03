@@ -25,6 +25,7 @@ HTTP method/path · request schema · response schema · status code · business
 | `20261003073256_moderation_events_walkthrough_index` | Index on `moderation_events (walkthrough_id, created_at)` for the walkthrough review history | small table |
 | `20261003074710_catalog_link_exclusion` | Adds `catalog_source_links.excluded_at`: entries deleted by an admin are not re-imported until an admin imports them again | nullable column |
 | `20261003112405_walkthrough_review_pending` | Adds `walkthroughs.review_pending`: set when a publish request waits for review, cleared by the verdict or when the author or an admin changes the status | `NOT NULL DEFAULT false`; legacy rows are treated as not pending |
+| `20261003124058_seed_edit_permissions` | Upserts the edit-permission field mappings and role masks that the legacy `SeedService` wrote on every boot | idempotent; existing databases already hold the same values |
 
 ## Intentional deviations
 
@@ -141,6 +142,8 @@ HTTP method/path · request schema · response schema · status code · business
 | Admin comment and walkthrough search | a numeric keyword beyond int32 gave 500 | such keywords only match as text | bug |
 | Walkthrough reviews | a verdict published any `HIDDEN` walkthrough, so one hidden by its author or an admin while its review was queued was published again; a review lost after its retries stayed `HIDDEN` | verdicts apply only while `review_pending` is set (admin rescans set it); `moderation_requeue_stale_reviews` re-queues pending comment screenings and walkthrough reviews older than an hour every 30 minutes, unique per subject | correctness, recovery after lost jobs |
 | Object storage transfers | a lost Bull transfer job left an approved file on the server forever | `download_store_requeue` queues approved files still on the server after 15 minutes, every 10 minutes; transfer jobs are unique per file | recovery after lost jobs, cutover |
+| Requests abandoned by the client | the handler error surfaced as a 500 in logs | status 499, logged at info, not traced as an error | log noise |
+| Edit-permission seed | `SeedService` reset field mappings and role masks on every boot | a migration writes them once; nothing else changes role masks | boot side effects |
 
 ## Redis
 

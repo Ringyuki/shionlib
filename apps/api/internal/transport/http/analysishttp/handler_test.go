@@ -49,8 +49,8 @@ func TestTrafficDetailShape(t *testing.T) {
 	body := string(resp.Data)
 	for _, fragment := range []string{
 		`"totalDownloads":4,"totalBytes":10,"averageSize":3,"prevTotalDownloads":0,"prevTotalBytes":0,"prevAverageSize":0`,
-		`"hourly":[{"hour":"2026-10-02T02:00:00Z","totalBytes":0,"downloadCount":0}`,
-		`{"hour":"2026-10-03T01:00:00Z","totalBytes":0,"downloadCount":0}]`,
+		`"hourly":[{"hour":"2026-10-02T02:00:00.000Z","totalBytes":0,"downloadCount":0}`,
+		`{"hour":"2026-10-03T01:00:00.000Z","totalBytes":0,"downloadCount":0}]`,
 		`"topFiles":[{"fileId":"5","fileName":"a.zip","totalBytes":2,"downloadCount":1}]`,
 		`"countries":[]`,
 		`{"gameId":1,"gameName":{"title_jp":"ゲーム","title_zh":"游戏","title_en":"Game"},"totalBytes":3,"downloadCount":1}`,

@@ -72,12 +72,12 @@ func TestAdminGameListShape(t *testing.T) {
 	env := newAdminEnv(t)
 	resp := env.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/content/games?pageSize=1", As: &staff})
 	env.server.Expect(resp, http.StatusOK, 0)
-	want := `{"items":[{"id":2,"title_jp":"Hidden","title_zh":"","title_en":"","status":2,"views":0,"downloads":0,"nsfw":true,"created":"2025-01-02T03:04:05Z","updated":"2025-01-02T03:04:05Z","covers":[],"creator":{"id":7,"name":"importer"}}],"meta":{"totalItems":2,"itemCount":1,"itemsPerPage":1,"totalPages":2,"currentPage":1}}`
+	want := `{"items":[{"id":2,"title_jp":"Hidden","title_zh":"","title_en":"","status":2,"views":0,"downloads":0,"nsfw":true,"created":"2025-01-02T03:04:05.000Z","updated":"2025-01-02T03:04:05.000Z","covers":[],"creator":{"id":7,"name":"importer"}}],"meta":{"totalItems":2,"itemCount":1,"itemsPerPage":1,"totalPages":2,"currentPage":1}}`
 	if string(resp.Data) != want {
 		t.Fatalf("default order is id desc\n got %s\nwant %s", resp.Data, want)
 	}
 	resp = env.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/content/games?status=1&search=%E5%A4%8F&sortBy=views&sortOrder=asc", As: &staff})
-	want = `{"items":[{"id":1,"title_jp":"サマポケ","title_zh":"夏日口袋","title_en":"","status":1,"views":9,"downloads":3,"nsfw":false,"created":"2025-01-02T03:04:05Z","updated":"2025-01-02T03:04:05Z","covers":[{"url":"cover.webp"}],"creator":{"id":7,"name":"importer"},"cover":"cover.webp"}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1}}`
+	want = `{"items":[{"id":1,"title_jp":"サマポケ","title_zh":"夏日口袋","title_en":"","status":1,"views":9,"downloads":3,"nsfw":false,"created":"2025-01-02T03:04:05.000Z","updated":"2025-01-02T03:04:05.000Z","covers":[{"url":"cover.webp"}],"creator":{"id":7,"name":"importer"},"cover":"cover.webp"}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1}}`
 	if string(resp.Data) != want {
 		t.Fatalf("filtered\n got %s\nwant %s", resp.Data, want)
 	}
@@ -105,7 +105,7 @@ func TestAdminGameScalarRead(t *testing.T) {
 	env := newAdminEnv(t)
 	resp := env.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/content/games/1/edit/scalar", As: &staff})
 	env.server.Expect(resp, http.StatusOK, 0)
-	want := `{"b_id":"100","v_id":"v100","title_jp":"サマポケ","title_zh":"","title_en":"","aliases":["SP"],"intro_jp":"","intro_zh":"","intro_en":"","release_date":"2024-05-01T00:00:00Z","release_date_tba":false,"extra_info":[{"key":"k","value":"v"}],"staffs":null,"nsfw":false,"type":"ADV","platform":["win"],"status":1}`
+	want := `{"b_id":"100","v_id":"v100","title_jp":"サマポケ","title_zh":"","title_en":"","aliases":["SP"],"intro_jp":"","intro_zh":"","intro_en":"","release_date":"2024-05-01T00:00:00.000Z","release_date_tba":false,"extra_info":[{"key":"k","value":"v"}],"staffs":null,"nsfw":false,"type":"ADV","platform":["win"],"status":1}`
 	if string(resp.Data) != want {
 		t.Fatalf("scalar\n got %s\nwant %s", resp.Data, want)
 	}

@@ -336,7 +336,7 @@ func TestOIDCIdentities(t *testing.T) {
 
 	list := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/auth/oidc/identities", As: &who})
 	e.server.Expect(list, http.StatusOK, 0)
-	want := `{"items":[{"id":` + itoa(int64(identity.ID)) + `,"provider":"hikarinagi","email_at_link":"alice@example.test","created":"2026-10-03T01:02:03Z"}],"can_unlink":false}`
+	want := `{"items":[{"id":` + itoa(int64(identity.ID)) + `,"provider":"hikarinagi","email_at_link":"alice@example.test","created":"2026-10-03T01:02:03.000Z"}],"can_unlink":false}`
 	if string(list.Data) != want {
 		t.Fatalf("unexpected identities\n got %s\nwant %s", list.Data, want)
 	}

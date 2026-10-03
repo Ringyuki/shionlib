@@ -63,7 +63,7 @@ func TestCreateReport(t *testing.T) {
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/game/download-source/9/report", As: &reporter, Body: map[string]any{"reason": "MALWARE"}}), http.StatusNotFound, 440101)
 	resp := e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &reporter, Body: map[string]any{"reason": "MALWARE", "detail": "virus"}})
 	e.server.Expect(resp, http.StatusCreated, 0)
-	if string(resp.Data) != `{"id":1,"status":"PENDING","reason":"MALWARE","malicious_level":"CRITICAL","created":"2026-10-03T01:02:03Z"}` {
+	if string(resp.Data) != `{"id":1,"status":"PENDING","reason":"MALWARE","malicious_level":"CRITICAL","created":"2026-10-03T01:02:03.000Z"}` {
 		t.Fatalf("created %s", resp.Data)
 	}
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &reporter, Body: map[string]any{"reason": "MALWARE"}}), http.StatusConflict, 440201)
@@ -75,7 +75,7 @@ func TestAdminReportRoutes(t *testing.T) {
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/content/download-resource-reports", As: &reporter}), http.StatusForbidden, 403)
 	list := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/content/download-resource-reports?status=PENDING&sortBy=id&sortOrder=asc", As: &admin})
 	e.server.Expect(list, http.StatusOK, 0)
-	want := `{"items":[{"id":1,"reason":"BROKEN_LINK","detail":null,"status":"PENDING","malicious_level":"LOW","processed_at":null,"process_note":null,"created":"2026-10-03T01:02:03Z","updated":"2026-10-03T01:02:03Z","resource":{"id":5,"game_id":7,"game":{"id":7,"title_jp":"ゲーム","title_zh":"","title_en":""},"files":[]},"reporter":{"id":20,"name":"reporter","avatar":null,"is_sponsor":false},"reported_user":{"id":10,"name":"uploader","avatar":null,"is_sponsor":false},"processor":null}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1}}`
+	want := `{"items":[{"id":1,"reason":"BROKEN_LINK","detail":null,"status":"PENDING","malicious_level":"LOW","processed_at":null,"process_note":null,"created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","resource":{"id":5,"game_id":7,"game":{"id":7,"title_jp":"ゲーム","title_zh":"","title_en":""},"files":[]},"reporter":{"id":20,"name":"reporter","avatar":null,"is_sponsor":false},"reported_user":{"id":10,"name":"uploader","avatar":null,"is_sponsor":false},"processor":null}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1}}`
 	if string(list.Data) != want {
 		t.Fatalf("list\n got %s\nwant %s", list.Data, want)
 	}

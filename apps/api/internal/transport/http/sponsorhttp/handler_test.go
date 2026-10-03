@@ -52,7 +52,7 @@ func TestCreateOrderShape(t *testing.T) {
 	e := setup(t, true)
 	resp := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/sponsor/order", As: &owner, Body: map[string]any{"amount": 10.5, "name": "Alice", "isPrivate": false}})
 	e.server.Expect(resp, http.StatusCreated, 0)
-	want := `{"orderId":1,"providerOrderId":"idr-1","paymentMethods":[{"method":"alipay","name":"Alipay","enabled":true,"ratioRange":"11.0%"}],"expiresAt":"2026-10-03T02:02:03Z","accessToken":"signed:sponsor-order:1:idr-1"}`
+	want := `{"orderId":1,"providerOrderId":"idr-1","paymentMethods":[{"method":"alipay","name":"Alipay","enabled":true,"ratioRange":"11.0%"}],"expiresAt":"2026-10-03T02:02:03.000Z","accessToken":"signed:sponsor-order:1:idr-1"}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected body\n got %s\nwant %s", resp.Data, want)
 	}
@@ -100,12 +100,12 @@ func TestOrderStatusAccess(t *testing.T) {
 
 	redacted := e.server.Do(apitest.Request{Method: http.MethodGet, Path: path, As: &stranger})
 	e.server.Expect(redacted, http.StatusOK, 0)
-	if string(redacted.Data) != `{"id":1,"providerOrderId":"","amount":10,"status":"NEW","sponsorName":null,"user":null,"message":null,"isPrivate":true,"paymentMethod":null,"paidAt":null,"created":"2026-10-03T01:02:03Z"}` {
+	if string(redacted.Data) != `{"id":1,"providerOrderId":"","amount":10,"status":"NEW","sponsorName":null,"user":null,"message":null,"isPrivate":true,"paymentMethod":null,"paidAt":null,"created":"2026-10-03T01:02:03.000Z"}` {
 		t.Fatalf("strangers get a redacted order without a sync: %s", redacted.Data)
 	}
 	full := e.server.Do(apitest.Request{Method: http.MethodGet, Path: path, As: &owner})
 	e.server.Expect(full, http.StatusOK, 0)
-	if string(full.Data) != `{"id":1,"providerOrderId":"idr-5","amount":10,"status":"DONE","sponsorName":"Alice","user":{"id":1,"name":"owner","avatar":null,"is_sponsor":true},"message":"hi","isPrivate":true,"paymentMethod":null,"paidAt":"2026-10-03T01:02:03Z","created":"2026-10-03T01:02:03Z"}` {
+	if string(full.Data) != `{"id":1,"providerOrderId":"idr-5","amount":10,"status":"DONE","sponsorName":"Alice","user":{"id":1,"name":"owner","avatar":null,"is_sponsor":true},"message":"hi","isPrivate":true,"paymentMethod":null,"paidAt":"2026-10-03T01:02:03.000Z","created":"2026-10-03T01:02:03.000Z"}` {
 		t.Fatalf("owner syncs and sees the full order: %s", full.Data)
 	}
 
@@ -128,7 +128,7 @@ func TestWallAndStats(t *testing.T) {
 	e.repo.Seed(sponsor.Order{ProviderOrderID: "b", AmountCents: 50, Status: sponsor.StatusDone, PaidAt: &paid, IsPrivate: true})
 	wall := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/sponsor/wall?page=1&pageSize=10"})
 	e.server.Expect(wall, http.StatusOK, 0)
-	if string(wall.Data) != `{"items":[{"id":1,"sponsorName":"Alice","message":"Thanks!","user":{"id":1,"name":"owner","avatar":null,"is_sponsor":false},"amount":10.5,"paidAt":"2026-09-01T00:00:00Z"}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1}}` {
+	if string(wall.Data) != `{"items":[{"id":1,"sponsorName":"Alice","message":"Thanks!","user":{"id":1,"name":"owner","avatar":null,"is_sponsor":false},"amount":10.5,"paidAt":"2026-09-01T00:00:00.000Z"}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1}}` {
 		t.Fatalf("unexpected wall %s", wall.Data)
 	}
 	stats := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/sponsor/stats"})

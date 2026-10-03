@@ -90,7 +90,7 @@ func TestAdminUserListShape(t *testing.T) {
 	})
 	resp := env.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/users?page=1&pageSize=20&search=ring&sortBy=created&sortOrder=desc&role=2&status=1", As: &env.staff})
 	env.server.Expect(resp, http.StatusOK, 0)
-	want := `{"items":[{"id":3,"name":"ring","email":"ring@example.test","avatar":null,"role":2,"status":1,"lang":"zh","content_limit":2,"created":"2026-01-02T03:04:05Z","updated":"2026-01-02T03:04:05Z","last_login_at":null,"two_factor_enabled":true,"sponsor_expires_at":"2026-01-02T03:04:05Z","counts":{"comments":1,"resources":2,"favorites":3,"edits":4}}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":20,"totalPages":1,"currentPage":1}}`
+	want := `{"items":[{"id":3,"name":"ring","email":"ring@example.test","avatar":null,"role":2,"status":1,"lang":"zh","content_limit":2,"created":"2026-01-02T03:04:05.000Z","updated":"2026-01-02T03:04:05.000Z","last_login_at":null,"two_factor_enabled":true,"sponsor_expires_at":"2026-01-02T03:04:05.000Z","counts":{"comments":1,"resources":2,"favorites":3,"edits":4}}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":20,"totalPages":1,"currentPage":1}}`
 	if string(resp.Data) != want {
 		t.Fatalf("list\n got %s\nwant %s", resp.Data, want)
 	}
@@ -112,12 +112,12 @@ func TestAdminUserDetailShape(t *testing.T) {
 	env.store.AddDetail(admin.UserDetail{UserEntry: admin.UserEntry{ID: 6, Name: "six", Email: "six@example.test", Role: actor.RoleUser, Status: user.StatusActive, Lang: user.LangJA, ContentLimit: actor.ContentLimitNeverShow, Created: stamp, Updated: stamp}})
 	resp := env.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/users/5", As: &env.staff})
 	env.server.Expect(resp, http.StatusOK, 0)
-	want := `{"id":5,"name":"five","email":"five@example.test","avatar":null,"cover":null,"role":1,"status":2,"lang":"en","content_limit":1,"created":"2026-01-02T03:04:05Z","updated":"2026-01-02T03:04:05Z","last_login_at":null,"two_factor_enabled":false,"sponsor_expires_at":null,"upload_quota":{"size":"9007199254740992","used":"7","is_first_grant":true},"counts":{"comments":0,"resources":0,"favorites":0,"edits":0},"latest_ban":{"banned_at":"2026-01-02T03:04:05Z","banned_reason":"spam","banned_duration_days":3,"is_permanent":false,"unbanned_at":null,"banned_by":{"id":1,"name":"root"}}}`
+	want := `{"id":5,"name":"five","email":"five@example.test","avatar":null,"cover":null,"role":1,"status":2,"lang":"en","content_limit":1,"created":"2026-01-02T03:04:05.000Z","updated":"2026-01-02T03:04:05.000Z","last_login_at":null,"two_factor_enabled":false,"sponsor_expires_at":null,"upload_quota":{"size":"9007199254740992","used":"7","is_first_grant":true},"counts":{"comments":0,"resources":0,"favorites":0,"edits":0},"latest_ban":{"banned_at":"2026-01-02T03:04:05.000Z","banned_reason":"spam","banned_duration_days":3,"is_permanent":false,"unbanned_at":null,"banned_by":{"id":1,"name":"root"}}}`
 	if string(resp.Data) != want {
 		t.Fatalf("detail\n got %s\nwant %s", resp.Data, want)
 	}
 	resp = env.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/users/6", As: &env.staff})
-	want = `{"id":6,"name":"six","email":"six@example.test","avatar":null,"cover":null,"role":1,"status":1,"lang":"ja","content_limit":1,"created":"2026-01-02T03:04:05Z","updated":"2026-01-02T03:04:05Z","last_login_at":null,"two_factor_enabled":false,"sponsor_expires_at":null,"counts":{"comments":0,"resources":0,"favorites":0,"edits":0},"latest_ban":null}`
+	want = `{"id":6,"name":"six","email":"six@example.test","avatar":null,"cover":null,"role":1,"status":1,"lang":"ja","content_limit":1,"created":"2026-01-02T03:04:05.000Z","updated":"2026-01-02T03:04:05.000Z","last_login_at":null,"two_factor_enabled":false,"sponsor_expires_at":null,"counts":{"comments":0,"resources":0,"favorites":0,"edits":0},"latest_ban":null}`
 	if string(resp.Data) != want {
 		t.Fatalf("detail without quota\n got %s\nwant %s", resp.Data, want)
 	}
@@ -205,7 +205,7 @@ func TestAdminUserSessionsShape(t *testing.T) {
 	env.store.AddSession(admin.Session{ID: 2, FamilyID: "fam-2", Status: auth.SessionBlocked, Created: stamp, Updated: stamp, ExpiresAt: stamp, BlockedAt: &stamp, BlockedReason: ptr("admin_force_logout")})
 	resp := env.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/users/1/sessions?page=1&pageSize=5&status=4", As: &env.staff})
 	env.server.Expect(resp, http.StatusOK, 0)
-	want := `{"items":[{"id":2,"family_id":"fam-2","status":4,"ip":null,"user_agent":null,"device_info":null,"created":"2026-01-02T03:04:05Z","updated":"2026-01-02T03:04:05Z","last_used_at":null,"expires_at":"2026-01-02T03:04:05Z","rotated_at":null,"reused_at":null,"blocked_at":"2026-01-02T03:04:05Z","blocked_reason":"admin_force_logout"}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":5,"totalPages":1,"currentPage":1}}`
+	want := `{"items":[{"id":2,"family_id":"fam-2","status":4,"ip":null,"user_agent":null,"device_info":null,"created":"2026-01-02T03:04:05.000Z","updated":"2026-01-02T03:04:05.000Z","last_used_at":null,"expires_at":"2026-01-02T03:04:05.000Z","rotated_at":null,"reused_at":null,"blocked_at":"2026-01-02T03:04:05.000Z","blocked_reason":"admin_force_logout"}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":5,"totalPages":1,"currentPage":1}}`
 	if string(resp.Data) != want {
 		t.Fatalf("sessions\n got %s\nwant %s", resp.Data, want)
 	}

@@ -80,7 +80,7 @@ func TestGameResourcesShape(t *testing.T) {
 	e.seedStoredFile()
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/10/download-source"})
 	e.server.Expect(resp, http.StatusOK, 0)
-	want := `[{"id":1,"platform":["win"],"language":["jp"],"simulator":null,"note":"note","downloads":0,"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"created":"2026-10-03T01:02:03Z","updated":"2026-10-03T01:02:03Z","files":[{"id":1,"type":1,"file_name":"game.7z","file_size":2048,"file_url":null,"s3_file_key":"games/10/1/game.7z","hash_algorithm":"blake3","file_hash":"b3","file_status":3,"is_virus_false_positive":false,"malware_scan_cases":[],"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"latest_history":null}]}]`
+	want := `[{"id":1,"platform":["win"],"language":["jp"],"simulator":null,"note":"note","downloads":0,"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","files":[{"id":1,"type":1,"file_name":"game.7z","file_size":2048,"file_url":null,"s3_file_key":"games/10/1/game.7z","hash_algorithm":"blake3","file_hash":"b3","file_status":3,"is_virus_false_positive":false,"malware_scan_cases":[],"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"latest_history":null}]}]`
 	if string(resp.Data) != want {
 		t.Fatalf("game resources\n got %s\nwant %s", resp.Data, want)
 	}
@@ -204,7 +204,7 @@ func TestReuploadAndHistory(t *testing.T) {
 	e.repo.SeedHistory(download.History{FileID: file.ID, OperatorID: creator.UserID, Size: 2048, Hash: "b3", HashAlgorithm: upload.HashBLAKE3, StorageKey: ptr("games/10/1/game.7z"), Created: apitest.Now})
 	history := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/download-source/file/1/history"})
 	e.server.Expect(history, http.StatusOK, 0)
-	if string(history.Data) != `[{"id":1,"file_size":2048,"hash_algorithm":"blake3","file_hash":"b3","s3_file_key":"games/10/1/game.7z","reason":null,"operator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"created":"2026-10-03T01:02:03Z"}]` {
+	if string(history.Data) != `[{"id":1,"file_size":2048,"hash_algorithm":"blake3","file_hash":"b3","s3_file_key":"games/10/1/game.7z","reason":null,"operator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"created":"2026-10-03T01:02:03.000Z"}]` {
 		t.Fatalf("history %s", history.Data)
 	}
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/download-source/file/99/history"}), http.StatusNotFound, 450101)
@@ -227,7 +227,7 @@ func TestStorageTestRoutes(t *testing.T) {
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/s3/test/file/list", As: &admin}), http.StatusForbidden, 403)
 	list := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/s3/test/file/list", As: &superAdmin})
 	e.server.Expect(list, http.StatusOK, 0)
-	if string(list.Data) != `{"Contents":[{"Key":"games/1/a.7z","LastModified":"2026-01-02T03:04:05Z","ETag":"\"etag\"","Size":5,"StorageClass":"STANDARD"}],"IsTruncated":false,"KeyCount":1,"MaxKeys":1000,"Name":"game-bucket","Prefix":""}` {
+	if string(list.Data) != `{"Contents":[{"Key":"games/1/a.7z","LastModified":"2026-01-02T03:04:05.000Z","ETag":"\"etag\"","Size":5,"StorageClass":"STANDARD"}],"IsTruncated":false,"KeyCount":1,"MaxKeys":1000,"Name":"game-bucket","Prefix":""}` {
 		t.Fatalf("listing %s", list.Data)
 	}
 	resp := e.server.Do(apitest.Request{Method: http.MethodDelete, Path: "/s3/test/file?key=a%2Fb%2Fc.txt", As: &superAdmin})

@@ -23,8 +23,8 @@ func TestAdminListShapeAndFilter(t *testing.T) {
 	resp := server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/content/developers?search=soft&sortBy=updated&sortOrder=asc", As: &admin})
 	server.Expect(resp, http.StatusOK, 0)
 	want := `{"items":[` +
-		`{"id":4,"name":"Yuzusoft","logo":"logo.webp","gamesCount":9,"created":"2026-01-02T03:04:05Z","updated":"2026-01-02T03:04:05Z"},` +
-		`{"id":2,"name":"Key","gamesCount":0,"created":"2026-01-02T03:04:05Z","updated":"2026-01-02T03:04:05Z"}` +
+		`{"id":4,"name":"Yuzusoft","logo":"logo.webp","gamesCount":9,"created":"2026-01-02T03:04:05.000Z","updated":"2026-01-02T03:04:05.000Z"},` +
+		`{"id":2,"name":"Key","gamesCount":0,"created":"2026-01-02T03:04:05.000Z","updated":"2026-01-02T03:04:05.000Z"}` +
 		`],"meta":{"totalItems":2,"itemCount":2,"itemsPerPage":10,"totalPages":1,"currentPage":1}}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected page\n got %s\nwant %s", resp.Data, want)

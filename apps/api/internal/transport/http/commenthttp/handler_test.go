@@ -30,7 +30,7 @@ const (
 	bobPublic   = `{"id":2,"name":"bob","avatar":null,"is_sponsor":false}`
 	paragraph   = `<p class=\"[&amp;:not(:first-child)]:mt-6\"><span>hello</span></p>`
 	contentJSON = `{"root":{"type":"root","children":[{"type":"paragraph","children":[{"type":"text","text":"hello","format":0}]}]}}`
-	stamp       = `"2026-10-03T01:02:03Z"`
+	stamp       = `"2026-10-03T01:02:03.000Z"`
 )
 
 type env struct {

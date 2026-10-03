@@ -122,6 +122,8 @@ func AccessLog(logger *slog.Logger, quietPaths []string) func(http.Handler) http
 				}
 			}
 			switch {
+			case recorder.status == errmap.StatusClientClosedRequest:
+				level = slog.LevelInfo
 			case recorder.status >= http.StatusInternalServerError:
 				level = slog.LevelError
 			case recorder.status >= http.StatusBadRequest && recorder.status != http.StatusUnauthorized:

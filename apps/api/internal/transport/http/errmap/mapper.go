@@ -111,6 +111,9 @@ func (m *Mapper) FromError(ctx context.Context, err error) *ErrorResponse {
 	if errors.As(err, &withStatus) {
 		return m.FromStatus(ctx, withStatus.status, withStatus.cause)
 	}
+	if errors.Is(err, context.Canceled) && ctx.Err() != nil {
+		return m.FromStatus(ctx, StatusClientClosedRequest, err)
+	}
 	appErr, ok := apperror.From(err)
 	if !ok {
 		result := m.build(ctx, http.StatusInternalServerError, http.StatusInternalServerError, "common.error", nil, nil, err)

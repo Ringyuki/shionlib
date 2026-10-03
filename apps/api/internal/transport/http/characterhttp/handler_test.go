@@ -70,7 +70,7 @@ func TestDeleteRequiresAdmin(t *testing.T) {
 
 	resp := server.Do(apitest.Request{Method: http.MethodDelete, Path: path, As: &admin})
 	server.Expect(resp, http.StatusOK, 0)
-	want := `{"id":2,"b_id":null,"v_id":null,"h_id":null,"image":null,"name_jp":"free","name_zh":null,"name_en":null,"aliases":[],"intro_jp":"","intro_zh":"","intro_en":"","blood_type":null,"height":null,"weight":null,"bust":null,"waist":null,"hips":null,"cup":null,"age":null,"birthday":[],"gender":[],"created":"2025-01-02T03:04:05Z","updated":"2025-01-02T03:04:05Z"}`
+	want := `{"id":2,"b_id":null,"v_id":null,"h_id":null,"image":null,"name_jp":"free","name_zh":null,"name_en":null,"aliases":[],"intro_jp":"","intro_zh":"","intro_en":"","blood_type":null,"height":null,"weight":null,"bust":null,"waist":null,"hips":null,"cup":null,"age":null,"birthday":[],"gender":[],"created":"2025-01-02T03:04:05.000Z","updated":"2025-01-02T03:04:05.000Z"}`
 	if string(resp.Data) != want {
 		t.Fatalf("delete returns the removed row\n got %s\nwant %s", resp.Data, want)
 	}

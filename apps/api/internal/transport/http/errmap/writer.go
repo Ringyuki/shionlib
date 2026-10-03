@@ -1,9 +1,10 @@
 package errmap
 
 import (
-	"encoding/json"
 	"log/slog"
 	"net/http"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
 )
 
 type Writer struct {
@@ -22,7 +23,7 @@ func (w *Writer) Write(rw http.ResponseWriter, r *http.Request, resp *ErrorRespo
 	}
 	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
 	rw.WriteHeader(resp.GetStatus())
-	if err := json.NewEncoder(rw).Encode(resp); err != nil {
+	if err := response.EncodeJSON(rw, resp); err != nil {
 		w.logger.WarnContext(r.Context(), "write error response failed", slog.Any("error", err))
 	}
 }

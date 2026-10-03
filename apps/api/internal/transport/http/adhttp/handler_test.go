@@ -70,7 +70,7 @@ func TestAdminCRUD(t *testing.T) {
 		"name": "banner", "placement": []string{"home"}, "image_zh": "zh.webp", "aspect": "16:9", "link": "https://x.test", "start_at": "2026-10-01T00:00:00.000Z",
 	}})
 	server.Expect(created, http.StatusCreated, 0)
-	want := `{"id":1,"name":"banner","placement":["home"],"image_zh":"zh.webp","image_ja":null,"image_en":null,"aspect":"16:9","link":"https://x.test","exclude_locales":[],"enabled":true,"sort":0,"start_at":"2026-10-01T00:00:00Z","end_at":null,"created":"2026-10-03T01:02:03Z","updated":"2026-10-03T01:02:03Z"}`
+	want := `{"id":1,"name":"banner","placement":["home"],"image_zh":"zh.webp","image_ja":null,"image_en":null,"aspect":"16:9","link":"https://x.test","exclude_locales":[],"enabled":true,"sort":0,"start_at":"2026-10-01T00:00:00.000Z","end_at":null,"created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z"}`
 	if string(created.Data) != want {
 		t.Fatalf("unexpected created ad\n got %s\nwant %s", created.Data, want)
 	}

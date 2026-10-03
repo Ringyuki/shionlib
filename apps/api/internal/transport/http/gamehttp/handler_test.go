@@ -151,7 +151,7 @@ func TestDetailEndpoints(t *testing.T) {
 	e.server.Expect(resp, http.StatusOK, 0)
 	want = `{"id":1,"v_id":"v17","b_id":"42","h_id":900,"extra_info":[{"key":"官网","value":"https://example.test"}],"title_jp":"タイトル","title_zh":"标题","title_en":"","aliases":["alias"],` +
 		`"covers":[{"language":"jp","type":"pkgfront","url":"c.webp","dims":[1,2],"sexual":0,"violence":0}],"developers":[{"role":"开发","developer":{"id":5,"name":"Yuzu","aliases":["柚子社"]}}],` +
-		`"release_date":"2024-05-01T00:00:00Z","release_date_tba":false,"type":"adv","platform":["win"],"content_limit":0}`
+		`"release_date":"2024-05-01T00:00:00.000Z","release_date_tba":false,"type":"adv","platform":["win"],"content_limit":0}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected header\n got %s\nwant %s", resp.Data, want)
 	}

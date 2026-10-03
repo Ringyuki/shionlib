@@ -29,7 +29,7 @@ httpapi.Register(api, httpapi.Route{
 - Void: `response.Empty(ctx, h.resp)` (no `data` key).
 - Pages: `response.NewPage(items, total, pageSize, page)` → `{items, meta: {totalItems, itemCount, itemsPerPage, totalPages, currentPage}}`. Extra meta keys go into a local struct embedding `response.PageMeta`.
 - DTOs live in `dto.go`, use snake_case JSON, and never expose ent types. Shared DTOs (game cards) live in the owning capability's http package (`gamehttp.Card`).
-- Times are `time.Time` in UTC. Database `bigint` values that may exceed 2^53 are serialized as strings (`json:",string"`).
+- Times are `time.Time`; every response is encoded by `response.JSONFormat` (encoding/json v1 semantics, no HTML escaping, times as `2006-01-02T15:04:05.000Z` in UTC). Raw handlers and streams MUST write JSON with `response.EncodeJSON`/`response.MarshalJSON`, never `encoding/json` directly. Database `bigint` values that may exceed 2^53 are serialized as strings (`json:",string"`).
 - Cookies: only auth handlers set `Set-Cookie` through a dedicated output field; nothing else writes cookies.
 
 ## Non-Huma routes

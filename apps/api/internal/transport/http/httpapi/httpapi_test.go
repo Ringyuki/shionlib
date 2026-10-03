@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -80,6 +81,13 @@ func newTestAPI(t *testing.T) http.Handler {
 	httpapi.Register(api, httpapi.Route{ID: "thing.create", Method: http.MethodPost, Path: "/things", Access: httpapi.AccessUser},
 		func(ctx context.Context, in *createThingInput) (*response.Output[thing], error) {
 			return response.OK(ctx, builder, thing{Name: in.Body.Name, UserID: actor.From(ctx).UserID}), nil
+		})
+	httpapi.Register(api, httpapi.Route{ID: "thing.wait", Method: http.MethodGet, Path: "/waits"},
+		func(ctx context.Context, _ *struct{}) (*response.EmptyOutput, error) {
+			if err := ctx.Err(); err != nil {
+				return nil, fmt.Errorf("wait for upstream: %w", err)
+			}
+			return response.Empty(ctx, builder), nil
 		})
 	httpapi.Register(api, httpapi.Route{ID: "thing.get", Method: http.MethodGet, Path: "/things/{id}"},
 		func(ctx context.Context, in *thingPath) (*response.Output[thing], error) {
@@ -346,5 +354,17 @@ func TestCORSPreflightAllowsUploadAndLocaleHeaders(t *testing.T) {
 	}
 	if headers.Get("Access-Control-Expose-Headers") != "shionlib-auth-stale" {
 		t.Fatalf("expose headers %v", headers)
+	}
+}
+
+func TestRequestsAbandonedByTheClientAreNotServerErrors(t *testing.T) {
+	handler := newTestAPI(t)
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/waits", nil)
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, req)
+	if recorder.Code != 499 || !strings.Contains(recorder.Body.String(), `"code":499`) {
+		t.Fatalf("abandoned request: %d %s", recorder.Code, recorder.Body.String())
 	}
 }

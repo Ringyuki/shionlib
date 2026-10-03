@@ -116,7 +116,7 @@ func TestRegister(t *testing.T) {
 
 	created := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user", Body: body, Header: map[string]string{"Accept-Language": "ja-JP"}})
 	e.server.Expect(created, http.StatusCreated, 0)
-	if string(created.Data) != `{"id":2,"name":"newbie","email":"new@example.test","role":1,"created":"2026-10-03T01:02:03Z"}` {
+	if string(created.Data) != `{"id":2,"name":"newbie","email":"new@example.test","role":1,"created":"2026-10-03T01:02:03.000Z"}` {
 		t.Fatalf("unexpected registration %s", created.Data)
 	}
 	if got := e.users.User(2); got.Lang != user.LangJA || !e.users.HasDefaultFavorite(2) {
@@ -134,12 +134,12 @@ func TestMeProfileAndNameCheck(t *testing.T) {
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/user/me"}), http.StatusUnauthorized, 200101)
 	me := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/user/me", As: as(alice)})
 	e.server.Expect(me, http.StatusOK, 0)
-	if string(me.Data) != `{"id":1,"name":"alice","email":"alice@example.test","avatar":null,"cover":null,"bio":null,"role":1,"lang":"en","content_limit":1,"only_games_with_resources":false,"sponsor_expires_at":"2026-10-03T02:02:03Z","is_sponsor":true}` {
+	if string(me.Data) != `{"id":1,"name":"alice","email":"alice@example.test","avatar":null,"cover":null,"bio":null,"role":1,"lang":"en","content_limit":1,"only_games_with_resources":false,"sponsor_expires_at":"2026-10-03T02:02:03.000Z","is_sponsor":true}` {
 		t.Fatalf("unexpected me %s", me.Data)
 	}
 	profile := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/user/1"})
 	e.server.Expect(profile, http.StatusOK, 0)
-	if string(profile.Data) != `{"id":1,"name":"alice","avatar":null,"role":1,"bio":null,"cover":null,"created":"2026-10-03T01:02:03Z","status":1,"sponsor_expires_at":"2026-10-03T02:02:03Z","is_sponsor":true,"resource_count":1,"comment_count":2,"favorite_count":3,"edit_count":4,"walkthrough_count":5}` {
+	if string(profile.Data) != `{"id":1,"name":"alice","avatar":null,"role":1,"bio":null,"cover":null,"created":"2026-10-03T01:02:03.000Z","status":1,"sponsor_expires_at":"2026-10-03T02:02:03.000Z","is_sponsor":true,"resource_count":1,"comment_count":2,"favorite_count":3,"edit_count":4,"walkthrough_count":5}` {
 		t.Fatalf("unexpected profile %s", profile.Data)
 	}
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/user/99"}), http.StatusNotFound, 300101)
@@ -296,9 +296,9 @@ func TestEditRecords(t *testing.T) {
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/user/datas/1/edit-records?page=1&pageSize=3", As: viewer})
 	e.server.Expect(resp, http.StatusOK, 0)
 	want := `{"items":[` +
-		`{"id":3,"entity":"game","target_id":10,"action":"UPDATE_SCALAR","field_changes":["title_zh"],"changes":{"title_zh":"x"},"relation_type":"cover","created":"2026-10-03T01:02:03Z","updated":"2026-10-03T01:02:03Z","entity_info":{"id":10,"title_jp":"ゲーム","title_zh":"","title_en":"","intro_jp":"","intro_zh":"","intro_en":"","covers":[{"url":"c.webp","language":"jp","dims":[1,2],"sexual":0,"violence":0}]}},` +
-		`{"id":2,"entity":"character","target_id":5,"action":"ADD_RELATION","field_changes":[],"changes":null,"relation_type":null,"created":"2026-10-03T01:02:03Z","updated":"2026-10-03T01:02:03Z","entity_info":{"id":5,"name_jp":"キャラ","name_zh":"名前","name_en":null}},` +
-		`{"id":1,"entity":"developer","target_id":6,"action":"SET_RELATION","field_changes":[],"changes":null,"relation_type":null,"created":"2026-10-03T01:02:03Z","updated":"2026-10-03T01:02:03Z","entity_info":null}` +
+		`{"id":3,"entity":"game","target_id":10,"action":"UPDATE_SCALAR","field_changes":["title_zh"],"changes":{"title_zh":"x"},"relation_type":"cover","created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","entity_info":{"id":10,"title_jp":"ゲーム","title_zh":"","title_en":"","intro_jp":"","intro_zh":"","intro_en":"","covers":[{"url":"c.webp","language":"jp","dims":[1,2],"sexual":0,"violence":0}]}},` +
+		`{"id":2,"entity":"character","target_id":5,"action":"ADD_RELATION","field_changes":[],"changes":null,"relation_type":null,"created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","entity_info":{"id":5,"name_jp":"キャラ","name_zh":"名前","name_en":null}},` +
+		`{"id":1,"entity":"developer","target_id":6,"action":"SET_RELATION","field_changes":[],"changes":null,"relation_type":null,"created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","entity_info":null}` +
 		`],"meta":{"totalItems":3,"itemCount":3,"itemsPerPage":3,"totalPages":1,"currentPage":1}}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected edit records\n got %s\nwant %s", resp.Data, want)

@@ -1,7 +1,6 @@
 package messagehttp
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,6 +9,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/middleware"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
 )
 
 const keepAliveInterval = 25 * time.Second
@@ -71,7 +71,7 @@ func (h *Handler) stream(api *httpapi.API) http.HandlerFunc {
 }
 
 func writeEvent(w io.Writer, name string, payload any) error {
-	data, err := json.Marshal(payload)
+	data, err := response.MarshalJSON(payload)
 	if err != nil {
 		return err
 	}

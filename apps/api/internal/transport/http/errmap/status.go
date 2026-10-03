@@ -6,6 +6,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/apperror"
 )
 
+const StatusClientClosedRequest = 499
+
 var kindStatus = map[apperror.Kind]int{
 	apperror.KindInternal:             http.StatusInternalServerError,
 	apperror.KindInvalidArgument:      http.StatusBadRequest,

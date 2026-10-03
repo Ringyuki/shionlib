@@ -23,7 +23,7 @@ func BuildHTTP(infra *Infra, modules *Modules) *httpapi.API {
 		ClientResolver: clientinfo.NewResolver(cfg.TrustedProxyPrefixes()),
 		Authenticator:  modules.Authenticator,
 		CORS:           httpapi.CORS{Origins: cfg.HTTP.CORSOrigins, Methods: cfg.HTTP.CORSMethods},
-		QuietPaths:     []string{"/health"},
+		QuietPaths:     []string{"/health", "/socket.io"},
 		Throttling: &httpapi.Throttling{
 			Limiter: ratelimit.New(infra.Redis),
 			Policies: map[string]ratelimit.Policy{

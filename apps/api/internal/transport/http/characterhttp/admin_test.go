@@ -23,8 +23,8 @@ func TestAdminListShapeAndFilter(t *testing.T) {
 	resp := server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/content/characters?page=2&pageSize=5&search=%20so%20&sortBy=name&sortOrder=asc", As: &admin})
 	server.Expect(resp, http.StatusOK, 0)
 	want := `{"items":[` +
-		`{"id":7,"name_jp":"穹","name_zh":null,"name_en":"Sora","image":"c.webp","gender":["f"],"gamesCount":2,"created":"2026-01-02T03:04:05Z","updated":"2026-01-02T03:04:05Z"},` +
-		`{"id":3,"name_jp":"名無し","name_zh":null,"name_en":null,"gender":[],"gamesCount":0,"created":"2026-01-02T03:04:05Z","updated":"2026-01-02T03:04:05Z"}` +
+		`{"id":7,"name_jp":"穹","name_zh":null,"name_en":"Sora","image":"c.webp","gender":["f"],"gamesCount":2,"created":"2026-01-02T03:04:05.000Z","updated":"2026-01-02T03:04:05.000Z"},` +
+		`{"id":3,"name_jp":"名無し","name_zh":null,"name_en":null,"gender":[],"gamesCount":0,"created":"2026-01-02T03:04:05.000Z","updated":"2026-01-02T03:04:05.000Z"}` +
 		`],"meta":{"totalItems":12,"itemCount":2,"itemsPerPage":5,"totalPages":3,"currentPage":2}}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected page\n got %s\nwant %s", resp.Data, want)

@@ -60,7 +60,7 @@ func TestChunkedUploadFlow(t *testing.T) {
 
 	init := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/uploads/large/init", As: &member, Body: map[string]any{"file_name": "game.7z", "total_size": 10, "file_sha256": uploadtest.Digest([]byte(content))}})
 	e.server.Expect(init, http.StatusCreated, 0)
-	if string(init.Data) != `{"upload_session_id":1,"chunk_size":4,"total_chunks":3,"expires_at":"2026-10-04T01:02:03Z"}` {
+	if string(init.Data) != `{"upload_session_id":1,"chunk_size":4,"total_chunks":3,"expires_at":"2026-10-04T01:02:03.000Z"}` {
 		t.Fatalf("init %s", init.Data)
 	}
 
@@ -75,7 +75,7 @@ func TestChunkedUploadFlow(t *testing.T) {
 	}
 	ongoing := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/uploads/large/ongoing", As: &member})
 	e.server.Expect(ongoing, http.StatusOK, 0)
-	if string(ongoing.Data) != `[{"upload_session_id":1,"file_name":"game.7z","file_sha256":"`+uploadtest.Digest([]byte(content))+`","total_size":10,"chunk_size":4,"uploaded_chunks":[2,0,1],"total_chunks":3,"expires_at":"2026-10-04T01:02:03Z"}]` {
+	if string(ongoing.Data) != `[{"upload_session_id":1,"file_name":"game.7z","file_sha256":"`+uploadtest.Digest([]byte(content))+`","total_size":10,"chunk_size":4,"uploaded_chunks":[2,0,1],"total_chunks":3,"expires_at":"2026-10-04T01:02:03.000Z"}]` {
 		t.Fatalf("ongoing %s", ongoing.Data)
 	}
 	status := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/uploads/large/1/status", As: &member})

@@ -61,7 +61,7 @@ func TestListAndDetail(t *testing.T) {
 	server.Expect(server.Do(apitest.Request{Method: http.MethodGet, Path: "/message/list"}), http.StatusUnauthorized, 200101)
 	list := server.Do(apitest.Request{Method: http.MethodGet, Path: "/message/list?page=2&pageSize=2&unread=true&type=COMMENT_REPLY", As: &receiver})
 	server.Expect(list, http.StatusOK, 0)
-	want := `{"items":[{"id":1,"type":"COMMENT_REPLY","tone":"INFO","title":"Messages.Reply","receiver":{"id":7,"name":"receiver","avatar":null,"is_sponsor":false},"sender":{"id":8,"name":"sender","avatar":null,"is_sponsor":true},"read":false,"read_at":null,"created":"2026-10-03T01:02:03Z","updated":"2026-10-03T01:02:03Z"}],"meta":{"totalItems":3,"itemCount":1,"itemsPerPage":2,"totalPages":2,"currentPage":2}}`
+	want := `{"items":[{"id":1,"type":"COMMENT_REPLY","tone":"INFO","title":"Messages.Reply","receiver":{"id":7,"name":"receiver","avatar":null,"is_sponsor":false},"sender":{"id":8,"name":"sender","avatar":null,"is_sponsor":true},"read":false,"read_at":null,"created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z"}],"meta":{"totalItems":3,"itemCount":1,"itemsPerPage":2,"totalPages":2,"currentPage":2}}`
 	if string(list.Data) != want {
 		t.Fatalf("unexpected list\n got %s\nwant %s", list.Data, want)
 	}

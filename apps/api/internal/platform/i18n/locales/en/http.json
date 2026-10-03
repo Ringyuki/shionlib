@@ -10,6 +10,7 @@
   "415": "unsupported media type",
   "422": "unprocessable entity",
   "429": "too many requests",
+  "499": "client closed request",
   "500": "server error",
   "502": "bad gateway",
   "503": "service unavailable"

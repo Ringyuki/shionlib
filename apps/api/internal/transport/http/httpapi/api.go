@@ -71,6 +71,7 @@ func New(opts Options) *API {
 	router.MethodNotAllowed(notFound)
 
 	config := huma.DefaultConfig(opts.Title, opts.Version)
+	config.Formats = map[string]huma.Format{"application/json": response.JSONFormat, "json": response.JSONFormat}
 	config.CreateHooks = nil
 	config.DocsPath = ""
 	config.SchemasPath = ""

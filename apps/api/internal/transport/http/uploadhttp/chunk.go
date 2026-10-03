@@ -1,7 +1,6 @@
 package uploadhttp
 
 import (
-	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
@@ -74,7 +73,7 @@ func (h *Handler) chunk(api *httpapi.API) http.HandlerFunc {
 		}
 		w.Header().Set("Content-Type", jsonContentType)
 		w.WriteHeader(http.StatusOK)
-		_ = json.NewEncoder(w).Encode(out.Body)
+		_ = response.EncodeJSON(w, out.Body)
 	}
 }
 

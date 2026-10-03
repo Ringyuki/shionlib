@@ -37,7 +37,7 @@ func TestBindingLifecycle(t *testing.T) {
 
 	created := server.Do(apitest.Request{Method: http.MethodPost, Path: "/potatovn/binding", As: &member, Body: map[string]any{"pvn_user_name": "alice", "pvn_password": "secret"}})
 	server.Expect(created, http.StatusCreated, 0)
-	want := `{"pvn_user_id":77,"pvn_user_name":"Canonicalalice","pvn_user_avatar":null,"pvn_token_expires":"2026-12-01T00:00:00Z","created":"2026-10-03T01:02:03Z","updated":"2026-10-03T01:02:03Z"}`
+	want := `{"pvn_user_id":77,"pvn_user_name":"Canonicalalice","pvn_user_avatar":null,"pvn_token_expires":"2026-12-01T00:00:00.000Z","created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z"}`
 	if string(created.Data) != want {
 		t.Fatalf("unexpected binding\n got %s\nwant %s", created.Data, want)
 	}
@@ -68,7 +68,7 @@ func TestGameMappingRoutes(t *testing.T) {
 	}
 	added := server.Do(apitest.Request{Method: http.MethodPost, Path: "/potatovn/game/9", As: &member})
 	server.Expect(added, http.StatusCreated, 0)
-	want := `{"pvn_galgame_id":1001,"total_play_time":30,"last_play_date":"2023-11-15T22:13:20Z","play_type":1,"my_rate":8,"synced_at":"2026-10-03T01:02:03Z"}`
+	want := `{"pvn_galgame_id":1001,"total_play_time":30,"last_play_date":"2023-11-15T22:13:20.000Z","play_type":1,"my_rate":8,"synced_at":"2026-10-03T01:02:03.000Z"}`
 	if string(added.Data) != want {
 		t.Fatalf("unexpected mapping\n got %s\nwant %s", added.Data, want)
 	}
