@@ -56,6 +56,23 @@ func (t *Transactor) WithinTransaction(ctx context.Context, fn func(ctx context.
 	return nil
 }
 
+func (t *Transactor) AfterCommit(ctx context.Context, fn func(ctx context.Context)) {
+	tx := ent.TxFromContext(ctx)
+	if tx == nil {
+		fn(ctx)
+		return
+	}
+	tx.OnCommit(func(next ent.Committer) ent.Committer {
+		return ent.CommitFunc(func(commitCtx context.Context, committed *ent.Tx) error {
+			if err := next.Commit(commitCtx, committed); err != nil {
+				return err
+			}
+			fn(context.WithoutCancel(ctx))
+			return nil
+		})
+	})
+}
+
 func Client(ctx context.Context, base *ent.Client) *ent.Client {
 	if tx := ent.TxFromContext(ctx); tx != nil {
 		return tx.Client()

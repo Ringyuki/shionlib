@@ -11,6 +11,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/favorite"
 	"github.com/Ringyuki/shionlib/apps/api/internal/favorite/favoritetest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/game/gametest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 )
 
 var (
@@ -21,7 +23,7 @@ var (
 
 type fixture struct {
 	repo    *favoritetest.MemoryRepository
-	tx      *favoritetest.ImmediateTransactor
+	tx      *txtest.Immediate
 	service *favorite.Service
 }
 
@@ -31,8 +33,8 @@ func newFixture(cards ...game.Card) fixture {
 		clock = clock.Add(time.Second)
 		return clock
 	})
-	tx := &favoritetest.ImmediateTransactor{}
-	return fixture{repo: repo, tx: tx, service: favorite.NewService(repo, favoritetest.NewGames(cards...), tx)}
+	tx := &txtest.Immediate{}
+	return fixture{repo: repo, tx: tx, service: favorite.NewService(repo, gametest.NewCards(cards...), tx)}
 }
 
 func ptr[T any](v T) *T {

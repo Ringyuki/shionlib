@@ -9,8 +9,10 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/favorite"
 	"github.com/Ringyuki/shionlib/apps/api/internal/favorite/favoritetest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/game/gametest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/apitest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/favoritehttp"
+	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 )
 
 var (
@@ -22,8 +24,8 @@ func setup(t *testing.T) (*apitest.Server, *favoritetest.MemoryRepository) {
 	t.Helper()
 	server := apitest.New(t)
 	repo := favoritetest.NewMemoryRepository(func() time.Time { return apitest.Now })
-	games := favoritetest.NewGames(game.Card{ID: 10, TitleJP: "タイトル", Covers: []game.Cover{{Language: "jp", Type: "pkgfront", URL: "a.webp", Dims: []int{1, 2}}, {URL: "b.webp", Sexual: 1}}})
-	service := favorite.NewService(repo, games, &favoritetest.ImmediateTransactor{})
+	games := gametest.NewCards(game.Card{ID: 10, TitleJP: "タイトル", Covers: []game.Cover{{Language: "jp", Type: "pkgfront", URL: "a.webp", Dims: []int{1, 2}}, {URL: "b.webp", Sexual: 1}}})
+	service := favorite.NewService(repo, games, &txtest.Immediate{})
 	favoritehttp.NewHandler(service, server.Builder).Register(server.API)
 	return server, repo
 }
