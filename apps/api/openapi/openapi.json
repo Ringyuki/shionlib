@@ -403,6 +403,1955 @@
         ],
         "type": "object"
       },
+      "AdminCharacterItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "gamesCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "gender": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "image": {
+            "type": "string"
+          },
+          "name_en": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name_jp": {
+            "type": "string"
+          },
+          "name_zh": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name_jp",
+          "name_zh",
+          "name_en",
+          "gender",
+          "gamesCount",
+          "created",
+          "updated"
+        ],
+        "type": "object"
+      },
+      "AdminCommentCreatorDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "avatar": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "email": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "is_sponsor": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "id",
+          "name",
+          "avatar",
+          "is_sponsor"
+        ],
+        "type": "object"
+      },
+      "AdminCommentDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {},
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/AdminCommentCreatorDTO"
+          },
+          "edited": {
+            "type": "boolean"
+          },
+          "game": {
+            "$ref": "#/components/schemas/AdminCommentGameDTO"
+          },
+          "html": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "like_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "moderations": {
+            "items": {
+              "$ref": "#/components/schemas/AdminCommentEventDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "parent": {
+            "$ref": "#/components/schemas/CommentParentDTO"
+          },
+          "parent_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "reply_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "root_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "status": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "html",
+          "content",
+          "parent_id",
+          "root_id",
+          "reply_count",
+          "like_count",
+          "creator",
+          "parent",
+          "game",
+          "edited",
+          "status",
+          "created",
+          "updated",
+          "moderations"
+        ],
+        "type": "object"
+      },
+      "AdminCommentEventDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "audit_by": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "categories_json": {},
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decision": {
+            "enum": [
+              "ALLOW",
+              "BLOCK",
+              "REVIEW"
+            ],
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "max_score": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "model": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "scores_json": {},
+          "top_category": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "audit_by",
+          "model",
+          "decision",
+          "top_category",
+          "categories_json",
+          "scores_json",
+          "max_score",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "AdminCommentGameDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "title_en": {
+            "type": "string"
+          },
+          "title_jp": {
+            "type": "string"
+          },
+          "title_zh": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title_jp",
+          "title_zh",
+          "title_en"
+        ],
+        "type": "object"
+      },
+      "AdminCommentItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/AdminCommentCreatorDTO"
+          },
+          "edited": {
+            "type": "boolean"
+          },
+          "game": {
+            "$ref": "#/components/schemas/AdminCommentGameDTO"
+          },
+          "html": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "like_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "moderation": {
+            "$ref": "#/components/schemas/AdminCommentModerationDTO"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/CommentParentDTO"
+          },
+          "parent_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "reply_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "root_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "status": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "html",
+          "parent_id",
+          "root_id",
+          "reply_count",
+          "like_count",
+          "creator",
+          "parent",
+          "game",
+          "edited",
+          "status",
+          "created",
+          "updated"
+        ],
+        "type": "object"
+      },
+      "AdminCommentModerationDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decision": {
+            "enum": [
+              "ALLOW",
+              "BLOCK",
+              "REVIEW"
+            ],
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "max_score": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "model": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "top_category": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "decision",
+          "model",
+          "top_category",
+          "max_score",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "AdminCommentStatusInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "evidence": {
+            "maxLength": 1000,
+            "type": "string"
+          },
+          "notify": {
+            "description": "Defaults to true; only used when blocking",
+            "type": "boolean"
+          },
+          "reason": {
+            "maxLength": 2550,
+            "type": "string"
+          },
+          "status": {
+            "description": "1 visible, 2 pending review, 3 blocked",
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "top_category": {
+            "enum": [
+              "HARASSMENT",
+              "HARASSMENT_THREATENING",
+              "SEXUAL",
+              "SEXUAL_MINORS",
+              "HATE",
+              "HATE_THREATENING",
+              "ILLICIT",
+              "ILLICIT_VIOLENT",
+              "SELF_HARM",
+              "SELF_HARM_INTENT",
+              "SELF_HARM_INSTRUCTIONS",
+              "VIOLENCE",
+              "VIOLENCE_GRAPHIC",
+              "SPAM",
+              "MEANINGLESS"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "AdminDeveloperItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "gamesCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "logo": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "gamesCount",
+          "created",
+          "updated"
+        ],
+        "type": "object"
+      },
+      "AdminGameCoverDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "type": "object"
+      },
+      "AdminGameCreatorDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
+      "AdminGameExtraInfoDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "type": "object"
+      },
+      "AdminGameItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "cover": {
+            "type": "string"
+          },
+          "covers": {
+            "description": "At most one cover, kept for compatibility",
+            "items": {
+              "$ref": "#/components/schemas/AdminGameCoverDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/AdminGameCreatorDTO"
+          },
+          "downloads": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "nsfw": {
+            "type": "boolean"
+          },
+          "status": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "title_en": {
+            "type": "string"
+          },
+          "title_jp": {
+            "type": "string"
+          },
+          "title_zh": {
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "views": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "title_jp",
+          "title_zh",
+          "title_en",
+          "status",
+          "views",
+          "downloads",
+          "nsfw",
+          "created",
+          "updated",
+          "covers",
+          "creator"
+        ],
+        "type": "object"
+      },
+      "AdminGameScalarDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "b_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "extra_info": {},
+          "intro_en": {
+            "type": "string"
+          },
+          "intro_jp": {
+            "type": "string"
+          },
+          "intro_zh": {
+            "type": "string"
+          },
+          "nsfw": {
+            "type": "boolean"
+          },
+          "platform": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "release_date": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "release_date_tba": {
+            "type": "boolean"
+          },
+          "staffs": {},
+          "status": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "title_en": {
+            "type": "string"
+          },
+          "title_jp": {
+            "type": "string"
+          },
+          "title_zh": {
+            "type": "string"
+          },
+          "type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "v_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "b_id",
+          "v_id",
+          "title_jp",
+          "title_zh",
+          "title_en",
+          "aliases",
+          "intro_jp",
+          "intro_zh",
+          "intro_en",
+          "release_date",
+          "release_date_tba",
+          "extra_info",
+          "staffs",
+          "nsfw",
+          "type",
+          "platform",
+          "status"
+        ],
+        "type": "object"
+      },
+      "AdminGameScalarInputBody": {
+        "additionalProperties": true,
+        "properties": {
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "b_id": {
+            "description": "Blank or null clears the Bangumi id",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "extra_info": {
+            "description": "null stores an empty list",
+            "items": {
+              "$ref": "#/components/schemas/AdminGameExtraInfoDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "intro_en": {
+            "maxLength": 20000,
+            "type": "string"
+          },
+          "intro_jp": {
+            "maxLength": 20000,
+            "type": "string"
+          },
+          "intro_zh": {
+            "maxLength": 20000,
+            "type": "string"
+          },
+          "nsfw": {
+            "type": "boolean"
+          },
+          "platform": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "release_date": {
+            "description": "RFC 3339 date-time; empty or null clears it",
+            "pattern": "^$|^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?([Zz]|[+-]\\d{2}:\\d{2})$",
+            "patternDescription": "RFC 3339 date-time or empty",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "release_date_tba": {
+            "type": "boolean"
+          },
+          "staffs": {
+            "description": "null stores an empty list",
+            "items": {
+              "$ref": "#/components/schemas/AdminGameStaffDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              1,
+              2
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "title_en": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "title_jp": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "title_zh": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "type": {
+            "description": "Blank or null clears the type",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "v_id": {
+            "description": "Blank or null clears the VNDB id",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "AdminGameStaffDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "role"
+        ],
+        "type": "object"
+      },
+      "AdminGameStatusInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "description": "1 visible, 2 hidden",
+            "enum": [
+              1,
+              2
+            ],
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "AdminStatsOverviewDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "newGamesToday": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "newUsersToday": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalCharacters": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalComments": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalDevelopers": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalDownloads": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalGames": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalUsers": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalViews": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "totalGames",
+          "totalUsers",
+          "totalDownloads",
+          "totalViews",
+          "totalCharacters",
+          "totalDevelopers",
+          "totalComments",
+          "newGamesToday",
+          "newUsersToday"
+        ],
+        "type": "object"
+      },
+      "AdminStatsTrendDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "description": "YYYY-MM-DD in UTC+8",
+            "type": "string"
+          },
+          "downloads": {
+            "description": "Always 0; daily downloads are not tracked",
+            "format": "int64",
+            "type": "integer"
+          },
+          "games": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "users": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "views": {
+            "description": "Always 0; daily views are not tracked",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "games",
+          "users",
+          "downloads",
+          "views"
+        ],
+        "type": "object"
+      },
+      "AdminUserAllowMaskDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "allowMask": {
+            "description": "Decimal string of the user's own grants",
+            "type": "string"
+          }
+        },
+        "required": [
+          "allowMask"
+        ],
+        "type": "object"
+      },
+      "AdminUserBanDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "banned_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "banned_by": {
+            "$ref": "#/components/schemas/AdminUserRefDTO"
+          },
+          "banned_duration_days": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "banned_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "is_permanent": {
+            "type": "boolean"
+          },
+          "unbanned_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "banned_at",
+          "banned_reason",
+          "banned_duration_days",
+          "is_permanent",
+          "unbanned_at",
+          "banned_by"
+        ],
+        "type": "object"
+      },
+      "AdminUserBanInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "banned_by": {
+            "description": "Ignored; the acting administrator is recorded",
+            "format": "int64",
+            "type": "integer"
+          },
+          "banned_duration_days": {
+            "description": "Required unless is_permanent is true",
+            "format": "int64",
+            "maximum": 999,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "banned_reason": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "delete_user_comments": {
+            "type": "boolean"
+          },
+          "is_permanent": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "AdminUserCountsDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "comments": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "edits": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "favorites": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "resources": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "comments",
+          "resources",
+          "favorites",
+          "edits"
+        ],
+        "type": "object"
+      },
+      "AdminUserDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "avatar": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "content_limit": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/AdminUserCountsDTO"
+          },
+          "cover": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lang": {
+            "type": "string"
+          },
+          "last_login_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "latest_ban": {
+            "$ref": "#/components/schemas/AdminUserBanDTO"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sponsor_expires_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "two_factor_enabled": {
+            "type": "boolean"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "upload_quota": {
+            "$ref": "#/components/schemas/AdminUserQuotaDTO",
+            "description": "Absent when the user has no quota row"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email",
+          "avatar",
+          "cover",
+          "role",
+          "status",
+          "lang",
+          "content_limit",
+          "created",
+          "updated",
+          "last_login_at",
+          "two_factor_enabled",
+          "sponsor_expires_at",
+          "counts",
+          "latest_ban"
+        ],
+        "type": "object"
+      },
+      "AdminUserItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "avatar": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "content_limit": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/AdminUserCountsDTO"
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lang": {
+            "type": "string"
+          },
+          "last_login_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sponsor_expires_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "two_factor_enabled": {
+            "type": "boolean"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email",
+          "avatar",
+          "role",
+          "status",
+          "lang",
+          "content_limit",
+          "created",
+          "updated",
+          "last_login_at",
+          "two_factor_enabled",
+          "sponsor_expires_at",
+          "counts"
+        ],
+        "type": "object"
+      },
+      "AdminUserPasswordInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "password": {
+            "description": "Needs an upper-case letter, a lower-case letter and a digit or symbol",
+            "maxLength": 50,
+            "minLength": 8,
+            "type": "string"
+          }
+        },
+        "required": [
+          "password"
+        ],
+        "type": "object"
+      },
+      "AdminUserPermissionGroupDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "bitIndex": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "field": {
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "isRelation": {
+            "type": "boolean"
+          },
+          "mutable": {
+            "type": "boolean"
+          },
+          "source": {
+            "enum": [
+              "role",
+              "user",
+              "none"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "field",
+          "bitIndex",
+          "isRelation",
+          "fields",
+          "enabled",
+          "source",
+          "mutable"
+        ],
+        "type": "object"
+      },
+      "AdminUserPermissionsDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "allowMask": {
+            "description": "Decimal string",
+            "type": "string"
+          },
+          "entity": {
+            "type": "string"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/AdminUserPermissionGroupDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "roleMask": {
+            "description": "Decimal string",
+            "type": "string"
+          },
+          "userMask": {
+            "description": "Decimal string",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity",
+          "roleMask",
+          "userMask",
+          "allowMask",
+          "groups"
+        ],
+        "type": "object"
+      },
+      "AdminUserProfileDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "content_limit": {
+            "description": "Present when something changed",
+            "format": "int64",
+            "type": "integer"
+          },
+          "email": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lang": {
+            "description": "Present when something changed",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email"
+        ],
+        "type": "object"
+      },
+      "AdminUserProfileInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "content_limit": {
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "email": {
+            "format": "email",
+            "maxLength": 255,
+            "type": "string"
+          },
+          "lang": {
+            "enum": [
+              "en",
+              "zh",
+              "ja"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 20,
+            "minLength": 2,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AdminUserQuotaDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "is_first_grant": {
+            "type": "boolean"
+          },
+          "size": {
+            "description": "Bytes as a decimal string",
+            "type": "string"
+          },
+          "used": {
+            "description": "Bytes as a decimal string",
+            "type": "string"
+          }
+        },
+        "required": [
+          "size",
+          "used",
+          "is_first_grant"
+        ],
+        "type": "object"
+      },
+      "AdminUserQuotaSizeInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "ADD",
+              "SUB"
+            ],
+            "type": "string"
+          },
+          "action_reason": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "amount": {
+            "description": "Bytes",
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "action",
+          "amount"
+        ],
+        "type": "object"
+      },
+      "AdminUserQuotaUsedInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "description": "USE consumes quota, ADD gives it back",
+            "enum": [
+              "USE",
+              "ADD"
+            ],
+            "type": "string"
+          },
+          "action_reason": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "amount": {
+            "description": "Bytes",
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "action",
+          "amount"
+        ],
+        "type": "object"
+      },
+      "AdminUserRefDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
+      "AdminUserRoleInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "role": {
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "role"
+        ],
+        "type": "object"
+      },
+      "AdminUserSessionDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "blocked_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "blocked_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "device_info": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "expires_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "family_id": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ip": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "last_used_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reused_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rotated_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "user_agent": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "family_id",
+          "status",
+          "ip",
+          "user_agent",
+          "device_info",
+          "created",
+          "updated",
+          "last_used_at",
+          "expires_at",
+          "rotated_at",
+          "reused_at",
+          "blocked_at",
+          "blocked_reason"
+        ],
+        "type": "object"
+      },
+      "AdminUserSetPermissionsInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "allowBits": {
+            "description": "Replaces the user's grants; omitted or empty clears them",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": [
+              "array",
+              "null"
+            ],
+            "uniqueItems": true
+          },
+          "entity": {
+            "enum": [
+              "game",
+              "character",
+              "developer"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity"
+        ],
+        "type": "object"
+      },
+      "AdminUserSponsorInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "sponsor_expires_at": {
+            "description": "Omitted or null clears the badge",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "AdminWalkthroughCreatorDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "avatar": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "email": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "is_sponsor": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "id",
+          "name",
+          "avatar",
+          "is_sponsor"
+        ],
+        "type": "object"
+      },
+      "AdminWalkthroughDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {},
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/AdminWalkthroughCreatorDTO"
+          },
+          "edited": {
+            "type": "boolean"
+          },
+          "game": {
+            "$ref": "#/components/schemas/AdminWalkthroughGameDTO"
+          },
+          "html": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lang": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "moderations": {
+            "items": {
+              "$ref": "#/components/schemas/AdminWalkthroughEventDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "DRAFT",
+              "PUBLISHED",
+              "HIDDEN",
+              "DELETED"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "html",
+          "content",
+          "lang",
+          "edited",
+          "status",
+          "created",
+          "updated",
+          "creator",
+          "game",
+          "moderations"
+        ],
+        "type": "object"
+      },
+      "AdminWalkthroughEventDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "audit_by": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "categories_json": {},
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decision": {
+            "enum": [
+              "ALLOW",
+              "BLOCK",
+              "REVIEW"
+            ],
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "max_score": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "model": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "scores_json": {},
+          "top_category": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "audit_by",
+          "model",
+          "decision",
+          "top_category",
+          "categories_json",
+          "scores_json",
+          "max_score",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "AdminWalkthroughGameDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "title_en": {
+            "type": "string"
+          },
+          "title_jp": {
+            "type": "string"
+          },
+          "title_zh": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title_jp",
+          "title_zh",
+          "title_en"
+        ],
+        "type": "object"
+      },
+      "AdminWalkthroughItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/AdminWalkthroughCreatorDTO"
+          },
+          "edited": {
+            "type": "boolean"
+          },
+          "game": {
+            "$ref": "#/components/schemas/AdminWalkthroughGameDTO"
+          },
+          "html": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lang": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "moderation": {
+            "$ref": "#/components/schemas/AdminWalkthroughModerationDTO"
+          },
+          "status": {
+            "enum": [
+              "DRAFT",
+              "PUBLISHED",
+              "HIDDEN",
+              "DELETED"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "html",
+          "lang",
+          "edited",
+          "status",
+          "created",
+          "updated",
+          "creator",
+          "game"
+        ],
+        "type": "object"
+      },
+      "AdminWalkthroughModerationDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decision": {
+            "enum": [
+              "ALLOW",
+              "BLOCK",
+              "REVIEW"
+            ],
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "max_score": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "model": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "top_category": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "decision",
+          "model",
+          "top_category",
+          "max_score",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "AdminWalkthroughStatusInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "enum": [
+              "DRAFT",
+              "PUBLISHED",
+              "HIDDEN",
+              "DELETED"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
       "AnalysisCountryDTO": {
         "additionalProperties": false,
         "properties": {
@@ -2989,6 +4938,270 @@
         ],
         "type": "object"
       },
+      "EnvelopeAdminCommentDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminCommentDetailDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeAdminGameScalarDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminGameScalarDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeAdminStatsOverviewDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminStatsOverviewDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeAdminUserAllowMaskDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminUserAllowMaskDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeAdminUserDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminUserDetailDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeAdminUserPermissionsDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminUserPermissionsDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeAdminUserProfileDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminUserProfileDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeAdminWalkthroughDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminWalkthroughDetailDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeAnalysisOverviewDTO": {
         "additionalProperties": false,
         "properties": {
@@ -4052,6 +6265,45 @@
         ],
         "type": "object"
       },
+      "EnvelopeListAdminStatsTrendDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/AdminStatsTrendDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeListDownloadHistoryDTO": {
         "additionalProperties": false,
         "properties": {
@@ -4509,6 +6761,237 @@
           },
           "data": {
             "$ref": "#/components/schemas/PageAdAdminDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePageAdminCharacterItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageAdminCharacterItemDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePageAdminCommentItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageAdminCommentItemDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePageAdminDeveloperItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageAdminDeveloperItemDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePageAdminGameItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageAdminGameItemDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePageAdminUserItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageAdminUserItemDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePageAdminUserSessionDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageAdminUserSessionDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePageAdminWalkthroughItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageAdminWalkthroughItemDTO"
           },
           "message": {
             "type": "string"
@@ -8056,6 +10539,160 @@
         ],
         "type": "object"
       },
+      "PageAdminCharacterItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminCharacterItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "PageAdminCommentItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminCommentItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "PageAdminDeveloperItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminDeveloperItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "PageAdminGameItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminGameItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "PageAdminUserItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminUserItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "PageAdminUserSessionDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminUserSessionDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "PageAdminWalkthroughItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminWalkthroughItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
       "PageCatalogHitDTO": {
         "additionalProperties": false,
         "properties": {
@@ -11584,6 +14221,558 @@
         ]
       }
     },
+    "/admin/comments": {
+      "get": {
+        "operationId": "adminComment.list",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "default": "created",
+              "enum": [
+                "id",
+                "created",
+                "updated",
+                "status"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "default": "desc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "enum": [
+                1,
+                2,
+                3
+              ],
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "creatorId",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "gameId",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageAdminCommentItemDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List comments for moderation",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/comments/{id}": {
+      "get": {
+        "operationId": "adminComment.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdminCommentDetailDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Read a comment with its moderation history",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/comments/{id}/rescan": {
+      "post": {
+        "operationId": "adminComment.rescan",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Send a comment through moderation again",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/comments/{id}/status": {
+      "patch": {
+        "operationId": "adminComment.setStatus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminCommentStatusInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Change the moderation status of a comment",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/characters": {
+      "get": {
+        "operationId": "adminCharacter.list",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Case-insensitive substring of the Japanese, Chinese or English name",
+            "explode": false,
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "description": "Case-insensitive substring of the Japanese, Chinese or English name",
+              "type": "string"
+            }
+          },
+          {
+            "description": "name sorts by the Japanese name",
+            "explode": false,
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "default": "id",
+              "description": "name sorts by the Japanese name",
+              "enum": [
+                "id",
+                "name",
+                "created",
+                "updated"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "default": "desc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageAdminCharacterItemDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List characters for administration",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/developers": {
+      "get": {
+        "operationId": "adminDeveloper.list",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Case-insensitive substring of the name",
+            "explode": false,
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "description": "Case-insensitive substring of the name",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "default": "id",
+              "enum": [
+                "id",
+                "name",
+                "created",
+                "updated"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "default": "desc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageAdminDeveloperItemDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List developers for administration",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/admin/content/download-resource-reports": {
       "get": {
         "operationId": "adminReport.list",
@@ -11880,6 +15069,500 @@
           }
         ],
         "summary": "Review a download resource report",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/games": {
+      "get": {
+        "operationId": "adminGame.list",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Case-insensitive substring of the Japanese, Chinese or English title",
+            "explode": false,
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "description": "Case-insensitive substring of the Japanese, Chinese or English title",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "default": "id",
+              "enum": [
+                "id",
+                "title_jp",
+                "views",
+                "downloads",
+                "created",
+                "updated"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "default": "desc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "1 visible, 2 hidden",
+            "explode": false,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "description": "1 visible, 2 hidden",
+              "enum": [
+                1,
+                2
+              ],
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageAdminGameItemDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List games for administration",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/games/{id}": {
+      "delete": {
+        "operationId": "adminGame.delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Delete a game and keep it out of catalog imports",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/games/{id}/edit/scalar": {
+      "get": {
+        "operationId": "adminGame.scalar",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdminGameScalarDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Read the editable fields of a game",
+        "tags": [
+          "admin"
+        ]
+      },
+      "patch": {
+        "operationId": "adminGame.editScalar",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminGameScalarInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Edit the scalar fields of a game",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/games/{id}/recent-update": {
+      "delete": {
+        "operationId": "adminGame.unmarkRecentUpdate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Remove a game from the recent updates",
+        "tags": [
+          "admin"
+        ]
+      },
+      "put": {
+        "operationId": "adminGame.markRecentUpdate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Mark a game as recently updated",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/games/{id}/status": {
+      "patch": {
+        "operationId": "adminGame.setStatus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminGameStatusInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Show or hide a game",
         "tags": [
           "admin"
         ]
@@ -12499,6 +16182,1526 @@
         "summary": "Sponsorship totals",
         "tags": [
           "sponsor",
+          "admin"
+        ]
+      }
+    },
+    "/admin/stats/overview": {
+      "get": {
+        "operationId": "adminStats.overview",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdminStatsOverviewDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Site totals for the dashboard",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/stats/trends": {
+      "get": {
+        "operationId": "adminStats.trends",
+        "parameters": [
+          {
+            "description": "Number of days ending today (UTC+8)",
+            "explode": false,
+            "in": "query",
+            "name": "days",
+            "schema": {
+              "default": 30,
+              "description": "Number of days ending today (UTC+8)",
+              "format": "int64",
+              "maximum": 90,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListAdminStatsTrendDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Daily new games and users",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users": {
+      "get": {
+        "operationId": "adminUser.list",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Case-insensitive substring of the name or email, or an exact user id",
+            "explode": false,
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "description": "Case-insensitive substring of the name or email, or an exact user id",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "role",
+            "schema": {
+              "enum": [
+                1,
+                2,
+                3
+              ],
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "enum": [
+                1,
+                2
+              ],
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "default": "id",
+              "enum": [
+                "id",
+                "name",
+                "email",
+                "role",
+                "status",
+                "created",
+                "updated",
+                "last_login_at"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "default": "desc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageAdminUserItemDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List users",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{id}": {
+      "get": {
+        "operationId": "adminUser.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdminUserDetailDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Read a user",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{id}/ban": {
+      "post": {
+        "operationId": "adminUser.ban",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserBanInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Ban a user",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{id}/force-logout": {
+      "post": {
+        "operationId": "adminUser.forceLogout",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "End every session of a user",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{id}/permissions": {
+      "get": {
+        "operationId": "adminUser.permissions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "entity",
+            "required": true,
+            "schema": {
+              "enum": [
+                "game",
+                "character",
+                "developer"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdminUserPermissionsDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Read a user's edit permissions",
+        "tags": [
+          "admin"
+        ]
+      },
+      "patch": {
+        "operationId": "adminUser.setPermissions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserSetPermissionsInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdminUserAllowMaskDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Replace a user's edit permissions",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{id}/profile": {
+      "patch": {
+        "operationId": "adminUser.updateProfile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserProfileInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdminUserProfileDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Edit a user's profile",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{id}/quota/reset-used": {
+      "post": {
+        "operationId": "adminUser.resetQuotaUsed",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Reset the used upload quota",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{id}/quota/size": {
+      "patch": {
+        "operationId": "adminUser.adjustQuotaSize",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserQuotaSizeInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Grant or take upload quota",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{id}/quota/used": {
+      "patch": {
+        "operationId": "adminUser.adjustQuotaUsed",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserQuotaUsedInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Correct the used upload quota",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{id}/reset-password": {
+      "post": {
+        "operationId": "adminUser.resetPassword",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserPasswordInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Set a new password and end every session",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{id}/role": {
+      "patch": {
+        "operationId": "adminUser.setRole",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserRoleInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Change a user's role (super admins only)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{id}/sessions": {
+      "get": {
+        "operationId": "adminUser.sessions",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "1 active, 2 rotated, 3 reused, 4 blocked",
+            "explode": false,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "description": "1 active, 2 rotated, 3 reused, 4 blocked",
+              "format": "int64",
+              "maximum": 4,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageAdminUserSessionDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List a user's login sessions",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{id}/sponsor": {
+      "patch": {
+        "operationId": "adminUser.setSponsor",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserSponsorInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Set or clear the sponsor badge",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{id}/unban": {
+      "post": {
+        "operationId": "adminUser.unban",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Lift a user's ban",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/walkthroughs": {
+      "get": {
+        "operationId": "adminWalkthrough.list",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "default": "created",
+              "enum": [
+                "id",
+                "title",
+                "created",
+                "updated",
+                "status"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "default": "desc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "enum": [
+                "DRAFT",
+                "PUBLISHED",
+                "HIDDEN",
+                "DELETED"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "creatorId",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "gameId",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageAdminWalkthroughItemDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List walkthroughs for moderation",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/walkthroughs/{id}": {
+      "get": {
+        "operationId": "adminWalkthrough.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdminWalkthroughDetailDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Read a walkthrough with its moderation history",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/walkthroughs/{id}/rescan": {
+      "post": {
+        "operationId": "adminWalkthrough.rescan",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Send a walkthrough through moderation again",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/walkthroughs/{id}/status": {
+      "patch": {
+        "operationId": "adminWalkthrough.setStatus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminWalkthroughStatusInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Change the status of a walkthrough",
+        "tags": [
           "admin"
         ]
       }

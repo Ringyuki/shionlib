@@ -27,6 +27,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/search"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
+	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
 
 const emailTimeout = 15 * time.Second
@@ -62,6 +63,8 @@ type Shared struct {
 	Catalog    *catalog.Service
 	Search     *search.Indexer
 	Mailer     *email.Mailer
+	Sessions   *auth.Sessions
+	Users      *user.Service
 }
 
 type wiring func(infra *Infra, shared *Shared, modules *Modules)

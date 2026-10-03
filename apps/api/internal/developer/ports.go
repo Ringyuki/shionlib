@@ -11,6 +11,10 @@ type Repository interface {
 	Delete(ctx context.Context, id int) error
 }
 
+type AdminStore interface {
+	Search(ctx context.Context, filter AdminFilter, page Page) ([]AdminEntry, int, error)
+}
+
 type Transactor interface {
 	WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error
 }

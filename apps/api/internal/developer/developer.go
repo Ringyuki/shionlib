@@ -1,5 +1,7 @@
 package developer
 
+import "time"
+
 type ExtraInfo struct {
 	Key   string
 	Value string
@@ -34,4 +36,28 @@ type Page struct {
 
 func (p Page) Offset() int {
 	return (p.Number - 1) * p.Size
+}
+
+type SortField string
+
+const (
+	SortByID      SortField = "id"
+	SortByName    SortField = "name"
+	SortByCreated SortField = "created"
+	SortByUpdated SortField = "updated"
+)
+
+type AdminFilter struct {
+	Search     string
+	SortBy     SortField
+	Descending bool
+}
+
+type AdminEntry struct {
+	ID         int
+	Name       string
+	Logo       *string
+	GamesCount int
+	Created    time.Time
+	Updated    time.Time
 }

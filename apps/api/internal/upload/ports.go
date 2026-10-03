@@ -22,6 +22,7 @@ type Repository interface {
 type QuotaRepository interface {
 	FindQuota(ctx context.Context, userID int) (Quota, bool, error)
 	LockQuota(ctx context.Context, userID int) (Quota, error)
+	EnsureQuota(ctx context.Context, userID int) (Quota, error)
 	AddRecord(ctx context.Context, in NewQuotaRecord) error
 	AddUsed(ctx context.Context, quotaID int, delta int64) error
 	AddSize(ctx context.Context, quotaID int, delta int64) error
