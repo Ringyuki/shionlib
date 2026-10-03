@@ -3,7 +3,7 @@
 ## Configuration
 
 - All settings are fields in `internal/platform/config.Config`, parsed once at startup with `caarlos0/env`, validated in `Validate()`, then passed by value or pointer into constructors. Empty env values fall back to defaults.
-- Add a setting: field with `env:"NAME" envDefault:"..."`, validation, `.env.example` entry and the compose passthrough in `deploy/compose.*.yml`.
+- Add a setting: field with `env:"NAME" envDefault:"..."`, validation, `.env.example` entry, and the passthrough line in the `x-api-environment` block of `infra/compose.app.yml` (`go run ./cmd/devtool deploy env` prints it; `devtool deploy check` in verify.sh fails when they disagree).
 - Secrets are never logged (`logger` redacts keys containing password, secret, token, cookie, authorization, credential, api_key).
 
 ## Context
@@ -34,8 +34,11 @@
 
 ## Observability
 
-- Logging: `*slog.Logger` injected; JSON in production. Fields: `request_id`, `user_id`, `method`, `route`, `status`, `duration_ms`, `business_code`, `error`.
+- Logging: `*slog.Logger` injected; JSON in production. Fields: `request_id`, `trace_id`, `span_id`, `user_id`, `method`, `route`, `status`, `duration_ms`, `business_code`, `error`. `trace_id`/`span_id` are added automatically inside traced requests and jobs.
 - Business code logs only meaningful business events at Info. Errors are logged at boundaries only.
+- Tracing is OpenTelemetry, set up once in `internal/platform/telemetry` and exported to `APM_ENDPOINT`. HTTP server spans, outbound `platform/httpclient` calls, pgx queries, Redis commands and River jobs are instrumented automatically; do not wrap them again.
+- Business spans: only around a unit of work that is not already a request, job or query and is worth seeing on its own (for example one catalog import step). Use `telemetry.Tracer().Start(ctx, "<capability>.<operation>")`, end it with `defer span.End()`, record failures with `span.RecordError(err)`. Business packages receive no tracer; spans are started in adapters or transport.
+- Metrics: the APM derives request, query and job rates and durations from spans. New metrics MUST use OpenTelemetry semantic-convention names (`http.server.request.duration`, `db.client.operation.duration`, `messaging.process.duration`) or `shionlib.<capability>.<measure>` with a unit suffix in the description, and live in `internal/platform/telemetry`, never ad hoc in business code.
 
 ## Security baseline
 

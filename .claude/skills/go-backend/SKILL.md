@@ -15,7 +15,7 @@ Priorities when rules compete: correctness > architecture integrity > consistenc
 cmd/api ──► internal/bootstrap (composition root)
                  │ wires everything below
    internal/transport/{http/*http, jobs/*jobs}  ──►  business  ◄──  internal/adapter/*
-   internal/platform/* (config, logger, database, redis, jobs, cache, ratelimit, i18n, httpclient)
+   internal/platform/* (config, logger, telemetry, database, redis, jobs, cache, ratelimit, realtime, i18n, httpclient, runtime, server)
    kernel: internal/apperror, internal/actor  (importable by every layer)
 ```
 
@@ -42,6 +42,7 @@ cmd/api ──► internal/bootstrap (composition root)
 - MUST give every goroutine an owner, a stop condition and error handling; prefer `errgroup` and `runtime.App`.
 - MUST change the schema only through `internal/adapter/postgres/ent/schema` plus a generated migration (see recipes/add-migration.md).
 - MUST add tests at the level of the change: service rules with fakes, repository contract against Postgres, black-box HTTP tests with `apitest`.
+- MUST pass every new environment variable through `infra/compose.app.yml` (`devtool deploy env`).
 - MUST run `.claude/skills/go-backend/scripts/verify.sh` before declaring work done.
 
 ## MUST NOT
@@ -84,3 +85,5 @@ cmd/api ──► internal/bootstrap (composition root)
 .claude/skills/go-backend/scripts/verify.sh            # format, tidy, generate, vet, lint, tests, archtest, bizcodes, openapi
 TEST_DATABASE_URL=... TEST_REDIS_ADDR=... DEV_DATABASE_URL=... scripts/verify.sh   # adds integration tests and migration drift
 ```
+
+`verify.sh` also checks the deploy environment block (`devtool deploy check`). CI runs it plus `go test -race ./...` and `govulncheck`.

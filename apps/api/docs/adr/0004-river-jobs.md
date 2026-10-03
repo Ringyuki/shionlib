@@ -11,3 +11,6 @@ asynq on Redis (no transactional durability, separate scheduler locking); in-pro
 
 ## Consequences
 River tables live in the application database and are migrated by `migrate up`. Jobs are enqueued after the business transaction commits; periodic sweepers recover anything missed.
+
+## Migration
+Bull queues and Nest crons are dropped with the legacy backend; there is no in-flight job hand-off. `shionlib-api migrate up` creates River's tables. Work that was queued in Bull at cutover is recovered from database state by sweepers: `file_scan_pending` scans files still waiting for a scan, `download_store_requeue` queues approved files that never reached object storage, and `moderation_requeue_stale_reviews` re-screens pending comments and walkthrough reviews. Admin alert emails queued in Bull at cutover are lost; the in-app messages already exist.

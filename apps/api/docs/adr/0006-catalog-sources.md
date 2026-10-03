@@ -19,5 +19,10 @@ One transaction per entry:
 3. Replace covers, images and links (with source provenance), tag relations (tag counts recomputed), developer relations (developer-role credits only, as before), character relations and relations to games that are already linked.
 4. Developers and characters referenced for the first time get a placeholder row and link; they are imported by their own jobs.
 
+## Alternatives
+Keep reading Hikarinagi at request time through the Open API (latency and availability coupled to another service, no local search); copy Hikarinagi's database (couples two schemas and needs internal access); scrape VNDB/Bangumi directly (duplicates Hikarinagi's curation).
+
+## Migration
+`20261003062800_backfill_hikarinagi_links` links every local row that carries an `h_id` and carries the legacy changes cursor over, so the worker continues where the legacy sync stopped. Rows without metadata are filled by `catalog_refresh`, which queues never-synced links first. The legacy internal client and `hikarinagi_sync_state` are removed in the same release.
 ## Consequences
 Shionlib owns availability of its catalog. Imports and refreshes are background jobs bounded by the source's rate limit. The initial backfill follows the change feed from cursor 0 and fetches every referenced work once; running the worker against production before switching traffic pre-populates the tables the legacy backend ignores. The internal client, `hikarinagi_sync_state` (its cursor is carried into `catalog_sync_cursors`) and the partner API are removed.

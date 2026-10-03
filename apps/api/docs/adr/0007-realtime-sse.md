@@ -11,3 +11,6 @@ A Go socket.io server (large, protocol-heavy dependency for two events); WebSock
 
 ## Consequences
 The legacy web client loses live notifications against the Go backend until the new client adopts the stream; it still reads counts over HTTP. Reverse proxies must not buffer `text/event-stream` (`X-Accel-Buffering: no` is set).
+
+## Migration
+The socket.io namespace disappears at cutover. Clients switch to `GET /message/stream`; the unread count is sent on connect, so no state is carried over.
