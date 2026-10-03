@@ -22,6 +22,49 @@ func (plainJob) Kind() string {
 	return "plain_job"
 }
 
+type routedJob struct{}
+
+func (routedJob) Kind() string { return "routed" }
+
+func (routedJob) Queue() string { return "file_transfer" }
+
+func (routedJob) MaxAttempts() int { return 5 }
+
+type limitedJob struct{}
+
+func (limitedJob) Kind() string { return "limited" }
+
+func (limitedJob) MaxAttempts() int { return 10 }
+
+type uniqueJob struct {
+	unique bool
+}
+
+func (uniqueJob) Kind() string { return "unique" }
+
+func (u uniqueJob) UniqueByArgs() bool { return u.unique }
+
+func TestInsertOptions(t *testing.T) {
+	if opts := queue.InsertOptions(plainJob{}); opts != nil {
+		t.Fatalf("plain jobs keep River defaults: %+v", opts)
+	}
+	routed := queue.InsertOptions(routedJob{})
+	if routed == nil || routed.Queue != "file_transfer" || routed.MaxAttempts != 5 || routed.UniqueOpts.ByArgs {
+		t.Fatalf("routed: %+v", routed)
+	}
+	limited := queue.InsertOptions(limitedJob{})
+	if limited == nil || limited.Queue != "" || limited.MaxAttempts != 10 {
+		t.Fatalf("limited: %+v", limited)
+	}
+	if opts := queue.InsertOptions(uniqueJob{}); opts != nil {
+		t.Fatalf("jobs that opt out of uniqueness keep River defaults: %+v", opts)
+	}
+	unique := queue.InsertOptions(uniqueJob{unique: true})
+	if unique == nil || !unique.UniqueOpts.ByArgs || len(unique.UniqueOpts.ByState) != 5 {
+		t.Fatalf("unique: %+v", unique)
+	}
+}
+
 func TestEnqueueHonorsJobCapabilities(t *testing.T) {
 	ctx := context.Background()
 	db := pgtest.New(t)

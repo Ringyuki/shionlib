@@ -22,7 +22,7 @@ func (ImportJob) Kind() string {
 	return "catalog_import"
 }
 
-func (ImportJob) QueueName() string {
+func (ImportJob) Queue() string {
 	return ImportQueue
 }
 

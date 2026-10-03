@@ -13,16 +13,16 @@ type Job = interface {
 	Kind() string
 }
 
-type uniqueJob interface {
-	UniqueByArgs() bool
-}
-
-type queuedJob interface {
-	QueueName() string
+type routedJob interface {
+	Queue() string
 }
 
 type limitedJob interface {
 	MaxAttempts() int
+}
+
+type uniqueJob interface {
+	UniqueByArgs() bool
 }
 
 var pendingStates = []rivertype.JobState{
@@ -42,21 +42,28 @@ func New(client *river.Client[pgx.Tx]) *Queue {
 }
 
 func (q *Queue) Enqueue(ctx context.Context, job Job) error {
-	if _, err := q.client.Insert(ctx, job, insertOpts(job)); err != nil {
+	if _, err := q.client.Insert(ctx, job, InsertOptions(job)); err != nil {
 		return fmt.Errorf("enqueue %s: %w", job.Kind(), err)
 	}
 	return nil
 }
 
-func insertOpts(job Job) *river.InsertOpts {
-	opts := &river.InsertOpts{}
-	if queued, ok := job.(queuedJob); ok {
-		opts.Queue = queued.QueueName()
+func InsertOptions(job Job) *river.InsertOpts {
+	routed, hasQueue := job.(routedJob)
+	limited, hasLimit := job.(limitedJob)
+	unique, hasUnique := job.(uniqueJob)
+	hasUnique = hasUnique && unique.UniqueByArgs()
+	if !hasQueue && !hasLimit && !hasUnique {
+		return nil
 	}
-	if limited, ok := job.(limitedJob); ok {
+	opts := &river.InsertOpts{}
+	if hasQueue {
+		opts.Queue = routed.Queue()
+	}
+	if hasLimit {
 		opts.MaxAttempts = limited.MaxAttempts()
 	}
-	if unique, ok := job.(uniqueJob); ok && unique.UniqueByArgs() {
+	if hasUnique {
 		opts.UniqueOpts = river.UniqueOpts{ByArgs: true, ByState: pendingStates}
 	}
 	return opts

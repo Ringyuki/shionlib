@@ -31,23 +31,43 @@ func (a *API) throttleMiddleware(name, method, path string) func(huma.Context, f
 	route := method + " " + path
 	return func(ctx huma.Context, next func(huma.Context)) {
 		requestCtx := ctx.Context()
-		key := route + "|" + clientinfo.From(requestCtx).IP
-		decision, err := a.throttling.Limiter.Allow(requestCtx, policy, key)
-		if err != nil {
-			a.logger.WarnContext(requestCtx, "rate limiter unavailable; allowing request", slog.String("policy", name), slog.Any("error", err))
-			next(ctx)
-			return
-		}
-		ctx.SetHeader("X-RateLimit-Limit", strconv.Itoa(decision.Limit))
-		ctx.SetHeader("X-RateLimit-Remaining", strconv.Itoa(decision.Remaining))
-		ctx.SetHeader("X-RateLimit-Reset", strconv.FormatInt(int64(decision.ResetAfter.Seconds()+0.999), 10))
-		if !decision.Allowed {
-			retryAfter := strconv.FormatInt(int64(decision.RetryAfter.Seconds()+0.999), 10)
-			ctx.SetHeader("Retry-After", retryAfter)
-			ctx.SetHeader("Retry-After-"+policy.Name, retryAfter)
+		if !a.admit(requestCtx, policy, route, ctx.SetHeader) {
 			a.writeErr(ctx, a.mapper.FromStatus(requestCtx, http.StatusTooManyRequests, nil))
 			return
 		}
 		next(ctx)
 	}
+}
+
+func (a *API) Throttled(policy ratelimit.Policy, route string, next http.Handler) http.Handler {
+	if a.throttling == nil {
+		return next
+	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		if !a.admit(ctx, policy, route, w.Header().Set) {
+			a.writer.Write(w, r, a.mapper.FromStatus(ctx, http.StatusTooManyRequests, nil))
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (a *API) admit(ctx context.Context, policy ratelimit.Policy, route string, setHeader func(name, value string)) bool {
+	key := route + "|" + clientinfo.From(ctx).IP
+	decision, err := a.throttling.Limiter.Allow(ctx, policy, key)
+	if err != nil {
+		a.logger.WarnContext(ctx, "rate limiter unavailable; allowing request", slog.String("policy", policy.Name), slog.Any("error", err))
+		return true
+	}
+	setHeader("X-RateLimit-Limit", strconv.Itoa(decision.Limit))
+	setHeader("X-RateLimit-Remaining", strconv.Itoa(decision.Remaining))
+	setHeader("X-RateLimit-Reset", strconv.FormatInt(int64(decision.ResetAfter.Seconds()+0.999), 10))
+	if decision.Allowed {
+		return true
+	}
+	retryAfter := strconv.FormatInt(int64(decision.RetryAfter.Seconds()+0.999), 10)
+	setHeader("Retry-After", retryAfter)
+	setHeader("Retry-After-"+policy.Name, retryAfter)
+	return false
 }
