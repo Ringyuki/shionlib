@@ -136,19 +136,19 @@ func init() {
 	// catalogsourcelink.RevisionValidator is a validator for the "revision" field. It is called by the builders before save.
 	catalogsourcelink.RevisionValidator = catalogsourcelinkDescRevision.Validators[0].(func(string) error)
 	// catalogsourcelinkDescFailures is the schema descriptor for failures field.
-	catalogsourcelinkDescFailures := catalogsourcelinkFields[8].Descriptor()
+	catalogsourcelinkDescFailures := catalogsourcelinkFields[9].Descriptor()
 	// catalogsourcelink.DefaultFailures holds the default value on creation for the failures field.
 	catalogsourcelink.DefaultFailures = catalogsourcelinkDescFailures.Default.(int)
 	// catalogsourcelinkDescLastError is the schema descriptor for last_error field.
-	catalogsourcelinkDescLastError := catalogsourcelinkFields[9].Descriptor()
+	catalogsourcelinkDescLastError := catalogsourcelinkFields[10].Descriptor()
 	// catalogsourcelink.LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
 	catalogsourcelink.LastErrorValidator = catalogsourcelinkDescLastError.Validators[0].(func(string) error)
 	// catalogsourcelinkDescCreated is the schema descriptor for created field.
-	catalogsourcelinkDescCreated := catalogsourcelinkFields[10].Descriptor()
+	catalogsourcelinkDescCreated := catalogsourcelinkFields[11].Descriptor()
 	// catalogsourcelink.DefaultCreated holds the default value on creation for the created field.
 	catalogsourcelink.DefaultCreated = catalogsourcelinkDescCreated.Default.(func() time.Time)
 	// catalogsourcelinkDescUpdated is the schema descriptor for updated field.
-	catalogsourcelinkDescUpdated := catalogsourcelinkFields[11].Descriptor()
+	catalogsourcelinkDescUpdated := catalogsourcelinkFields[12].Descriptor()
 	// catalogsourcelink.DefaultUpdated holds the default value on creation for the updated field.
 	catalogsourcelink.DefaultUpdated = catalogsourcelinkDescUpdated.Default.(func() time.Time)
 	// catalogsourcelink.UpdateDefaultUpdated holds the default value on update for the updated field.

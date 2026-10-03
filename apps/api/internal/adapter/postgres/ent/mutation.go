@@ -3095,6 +3095,7 @@ type CatalogSourceLinkMutation struct {
 	revision      *string
 	synced_at     *time.Time
 	missing_at    *time.Time
+	excluded_at   *time.Time
 	failures      *int
 	addfailures   *int
 	last_error    *string
@@ -3521,6 +3522,55 @@ func (m *CatalogSourceLinkMutation) ResetMissingAt() {
 	delete(m.clearedFields, catalogsourcelink.FieldMissingAt)
 }
 
+// SetExcludedAt sets the "excluded_at" field.
+func (m *CatalogSourceLinkMutation) SetExcludedAt(t time.Time) {
+	m.excluded_at = &t
+}
+
+// ExcludedAt returns the value of the "excluded_at" field in the mutation.
+func (m *CatalogSourceLinkMutation) ExcludedAt() (r time.Time, exists bool) {
+	v := m.excluded_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExcludedAt returns the old "excluded_at" field's value of the CatalogSourceLink entity.
+// If the CatalogSourceLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSourceLinkMutation) OldExcludedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExcludedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExcludedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExcludedAt: %w", err)
+	}
+	return oldValue.ExcludedAt, nil
+}
+
+// ClearExcludedAt clears the value of the "excluded_at" field.
+func (m *CatalogSourceLinkMutation) ClearExcludedAt() {
+	m.excluded_at = nil
+	m.clearedFields[catalogsourcelink.FieldExcludedAt] = struct{}{}
+}
+
+// ExcludedAtCleared returns if the "excluded_at" field was cleared in this mutation.
+func (m *CatalogSourceLinkMutation) ExcludedAtCleared() bool {
+	_, ok := m.clearedFields[catalogsourcelink.FieldExcludedAt]
+	return ok
+}
+
+// ResetExcludedAt resets all changes to the "excluded_at" field.
+func (m *CatalogSourceLinkMutation) ResetExcludedAt() {
+	m.excluded_at = nil
+	delete(m.clearedFields, catalogsourcelink.FieldExcludedAt)
+}
+
 // SetFailures sets the "failures" field.
 func (m *CatalogSourceLinkMutation) SetFailures(i int) {
 	m.failures = &i
@@ -3732,7 +3782,7 @@ func (m *CatalogSourceLinkMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CatalogSourceLinkMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.source != nil {
 		fields = append(fields, catalogsourcelink.FieldSource)
 	}
@@ -3753,6 +3803,9 @@ func (m *CatalogSourceLinkMutation) Fields() []string {
 	}
 	if m.missing_at != nil {
 		fields = append(fields, catalogsourcelink.FieldMissingAt)
+	}
+	if m.excluded_at != nil {
+		fields = append(fields, catalogsourcelink.FieldExcludedAt)
 	}
 	if m.failures != nil {
 		fields = append(fields, catalogsourcelink.FieldFailures)
@@ -3788,6 +3841,8 @@ func (m *CatalogSourceLinkMutation) Field(name string) (ent.Value, bool) {
 		return m.SyncedAt()
 	case catalogsourcelink.FieldMissingAt:
 		return m.MissingAt()
+	case catalogsourcelink.FieldExcludedAt:
+		return m.ExcludedAt()
 	case catalogsourcelink.FieldFailures:
 		return m.Failures()
 	case catalogsourcelink.FieldLastError:
@@ -3819,6 +3874,8 @@ func (m *CatalogSourceLinkMutation) OldField(ctx context.Context, name string) (
 		return m.OldSyncedAt(ctx)
 	case catalogsourcelink.FieldMissingAt:
 		return m.OldMissingAt(ctx)
+	case catalogsourcelink.FieldExcludedAt:
+		return m.OldExcludedAt(ctx)
 	case catalogsourcelink.FieldFailures:
 		return m.OldFailures(ctx)
 	case catalogsourcelink.FieldLastError:
@@ -3884,6 +3941,13 @@ func (m *CatalogSourceLinkMutation) SetField(name string, value ent.Value) error
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetMissingAt(v)
+		return nil
+	case catalogsourcelink.FieldExcludedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExcludedAt(v)
 		return nil
 	case catalogsourcelink.FieldFailures:
 		v, ok := value.(int)
@@ -3979,6 +4043,9 @@ func (m *CatalogSourceLinkMutation) ClearedFields() []string {
 	if m.FieldCleared(catalogsourcelink.FieldMissingAt) {
 		fields = append(fields, catalogsourcelink.FieldMissingAt)
 	}
+	if m.FieldCleared(catalogsourcelink.FieldExcludedAt) {
+		fields = append(fields, catalogsourcelink.FieldExcludedAt)
+	}
 	if m.FieldCleared(catalogsourcelink.FieldLastError) {
 		fields = append(fields, catalogsourcelink.FieldLastError)
 	}
@@ -4004,6 +4071,9 @@ func (m *CatalogSourceLinkMutation) ClearField(name string) error {
 		return nil
 	case catalogsourcelink.FieldMissingAt:
 		m.ClearMissingAt()
+		return nil
+	case catalogsourcelink.FieldExcludedAt:
+		m.ClearExcludedAt()
 		return nil
 	case catalogsourcelink.FieldLastError:
 		m.ClearLastError()
@@ -4036,6 +4106,9 @@ func (m *CatalogSourceLinkMutation) ResetField(name string) error {
 		return nil
 	case catalogsourcelink.FieldMissingAt:
 		m.ResetMissingAt()
+		return nil
+	case catalogsourcelink.FieldExcludedAt:
+		m.ResetExcludedAt()
 		return nil
 	case catalogsourcelink.FieldFailures:
 		m.ResetFailures()

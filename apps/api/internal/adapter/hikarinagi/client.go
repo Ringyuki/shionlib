@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/oauth2"
@@ -32,15 +33,18 @@ type Options struct {
 }
 
 type Client struct {
-	base    string
-	http    *http.Client
-	limiter *rate.Limiter
+	base        string
+	http        *http.Client
+	credentials clientcredentials.Config
+	limiter     *rate.Limiter
+	mu          sync.Mutex
+	token       *oauth2.Token
 }
 
 func NewClient(opts Options) *Client {
-	base := opts.HTTPClient
-	if base == nil {
-		base = &http.Client{}
+	httpClient := opts.HTTPClient
+	if httpClient == nil {
+		httpClient = &http.Client{}
 	}
 	credentials := clientcredentials.Config{
 		ClientID:     opts.ClientID,
@@ -51,19 +55,68 @@ func NewClient(opts Options) *Client {
 	if opts.Resource != "" {
 		credentials.EndpointParams = url.Values{"resource": {opts.Resource}}
 	}
-	tokenCtx := context.WithValue(context.Background(), oauth2.HTTPClient, base)
-	authorized := &http.Client{
-		Timeout:   base.Timeout,
-		Transport: &oauth2.Transport{Source: credentials.TokenSource(tokenCtx), Base: base.Transport},
-	}
 	limit := rate.Inf
 	if opts.RequestsPerMin > 0 {
 		limit = rate.Every(time.Minute / time.Duration(opts.RequestsPerMin))
 	}
 	return &Client{
-		base:    strings.TrimRight(opts.BaseURL, "/"),
-		http:    authorized,
-		limiter: rate.NewLimiter(limit, 1),
+		base:        strings.TrimRight(opts.BaseURL, "/"),
+		http:        httpClient,
+		credentials: credentials,
+		limiter:     rate.NewLimiter(limit, 1),
+	}
+}
+
+func (c *Client) accessToken(ctx context.Context) (*oauth2.Token, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.token.Valid() {
+		return c.token, nil
+	}
+	token, err := c.credentials.Token(context.WithValue(ctx, oauth2.HTTPClient, c.http))
+	if err != nil {
+		var retrieve *oauth2.RetrieveError
+		if errors.As(err, &retrieve) && retrieve.Response != nil {
+			return nil, fmt.Errorf("hikarinagi token: status %d: %w", retrieve.Response.StatusCode, err)
+		}
+		return nil, fmt.Errorf("hikarinagi token: %w", err)
+	}
+	c.token = token
+	return token, nil
+}
+
+func (c *Client) forgetToken(stale *oauth2.Token) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.token == stale {
+		c.token = nil
+	}
+}
+
+func (c *Client) send(ctx context.Context, path, target string) (*http.Response, error) {
+	for attempt := 0; ; attempt++ {
+		if err := c.limiter.Wait(ctx); err != nil {
+			return nil, fmt.Errorf("hikarinagi %s: %w", path, err)
+		}
+		token, err := c.accessToken(ctx)
+		if err != nil {
+			return nil, err
+		}
+		request, err := http.NewRequestWithContext(ctx, http.MethodGet, target, nil)
+		if err != nil {
+			return nil, fmt.Errorf("hikarinagi %s: %w", path, err)
+		}
+		request.Header.Set("Accept", "application/json")
+		token.SetAuthHeader(request)
+		response, err := c.http.Do(request)
+		if err != nil {
+			return nil, fmt.Errorf("hikarinagi %s: %w", path, err)
+		}
+		if response.StatusCode != http.StatusUnauthorized || attempt > 0 {
+			return response, nil
+		}
+		_ = response.Body.Close()
+		c.forgetToken(token)
 	}
 }
 
@@ -77,25 +130,13 @@ type envelope struct {
 }
 
 func (c *Client) get(ctx context.Context, path string, query url.Values, out any) error {
-	if err := c.limiter.Wait(ctx); err != nil {
-		return fmt.Errorf("hikarinagi %s: %w", path, err)
-	}
 	target := c.base + path
 	if len(query) > 0 {
 		target += "?" + query.Encode()
 	}
-	request, err := http.NewRequestWithContext(ctx, http.MethodGet, target, nil)
+	response, err := c.send(ctx, path, target)
 	if err != nil {
-		return fmt.Errorf("hikarinagi %s: %w", path, err)
-	}
-	request.Header.Set("Accept", "application/json")
-	response, err := c.http.Do(request)
-	if err != nil {
-		var retrieve *oauth2.RetrieveError
-		if errors.As(err, &retrieve) {
-			return fmt.Errorf("hikarinagi token: status %d: %w", retrieve.Response.StatusCode, err)
-		}
-		return fmt.Errorf("hikarinagi %s: %w", path, err)
+		return err
 	}
 	defer func() { _ = response.Body.Close() }()
 	switch {

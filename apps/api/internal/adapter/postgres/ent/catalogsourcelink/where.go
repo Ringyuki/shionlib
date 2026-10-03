@@ -89,6 +89,11 @@ func MissingAt(v time.Time) predicate.CatalogSourceLink {
 	return predicate.CatalogSourceLink(sql.FieldEQ(FieldMissingAt, v))
 }
 
+// ExcludedAt applies equality check predicate on the "excluded_at" field. It's identical to ExcludedAtEQ.
+func ExcludedAt(v time.Time) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldEQ(FieldExcludedAt, v))
+}
+
 // Failures applies equality check predicate on the "failures" field. It's identical to FailuresEQ.
 func Failures(v int) predicate.CatalogSourceLink {
 	return predicate.CatalogSourceLink(sql.FieldEQ(FieldFailures, v))
@@ -517,6 +522,56 @@ func MissingAtIsNil() predicate.CatalogSourceLink {
 // MissingAtNotNil applies the NotNil predicate on the "missing_at" field.
 func MissingAtNotNil() predicate.CatalogSourceLink {
 	return predicate.CatalogSourceLink(sql.FieldNotNull(FieldMissingAt))
+}
+
+// ExcludedAtEQ applies the EQ predicate on the "excluded_at" field.
+func ExcludedAtEQ(v time.Time) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldEQ(FieldExcludedAt, v))
+}
+
+// ExcludedAtNEQ applies the NEQ predicate on the "excluded_at" field.
+func ExcludedAtNEQ(v time.Time) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldNEQ(FieldExcludedAt, v))
+}
+
+// ExcludedAtIn applies the In predicate on the "excluded_at" field.
+func ExcludedAtIn(vs ...time.Time) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldIn(FieldExcludedAt, vs...))
+}
+
+// ExcludedAtNotIn applies the NotIn predicate on the "excluded_at" field.
+func ExcludedAtNotIn(vs ...time.Time) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldNotIn(FieldExcludedAt, vs...))
+}
+
+// ExcludedAtGT applies the GT predicate on the "excluded_at" field.
+func ExcludedAtGT(v time.Time) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldGT(FieldExcludedAt, v))
+}
+
+// ExcludedAtGTE applies the GTE predicate on the "excluded_at" field.
+func ExcludedAtGTE(v time.Time) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldGTE(FieldExcludedAt, v))
+}
+
+// ExcludedAtLT applies the LT predicate on the "excluded_at" field.
+func ExcludedAtLT(v time.Time) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldLT(FieldExcludedAt, v))
+}
+
+// ExcludedAtLTE applies the LTE predicate on the "excluded_at" field.
+func ExcludedAtLTE(v time.Time) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldLTE(FieldExcludedAt, v))
+}
+
+// ExcludedAtIsNil applies the IsNil predicate on the "excluded_at" field.
+func ExcludedAtIsNil() predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldIsNull(FieldExcludedAt))
+}
+
+// ExcludedAtNotNil applies the NotNil predicate on the "excluded_at" field.
+func ExcludedAtNotNil() predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldNotNull(FieldExcludedAt))
 }
 
 // FailuresEQ applies the EQ predicate on the "failures" field.

@@ -43,7 +43,7 @@ func (w *ImportWorker) Timeout(*river.Job[catalog.ImportJob]) time.Duration {
 func (w *ImportWorker) Work(ctx context.Context, job *river.Job[catalog.ImportJob]) error {
 	_, err := w.importer.Import(ctx, catalog.Ref(job.Args))
 	switch {
-	case err == nil, errors.Is(err, catalog.ErrEntryNotFound):
+	case err == nil, errors.Is(err, catalog.ErrEntryNotFound), errors.Is(err, catalog.ErrExcluded):
 		return nil
 	case errors.Is(err, catalog.ErrUnknownSource):
 		return river.JobCancel(err)

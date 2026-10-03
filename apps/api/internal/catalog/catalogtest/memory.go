@@ -14,6 +14,7 @@ type LinkState struct {
 	LocalID   int
 	SyncedAt  *time.Time
 	MissingAt *time.Time
+	Excluded  *time.Time
 	Failures  int
 	LastError string
 	order     int
@@ -151,6 +152,33 @@ func (s *Store) MarkMissing(_ context.Context, ref catalog.Ref, hide bool, at ti
 	return nil
 }
 
+func (s *Store) Exclude(_ context.Context, entity catalog.Entity, localID int, at time.Time) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for ref, state := range s.links {
+		if ref.Entity == entity && state.LocalID == localID {
+			state.Excluded = &at
+		}
+	}
+	return nil
+}
+
+func (s *Store) Include(_ context.Context, ref catalog.Ref) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if state, ok := s.links[ref]; ok {
+		state.Excluded = nil
+	}
+	return nil
+}
+
+func (s *Store) Excluded(_ context.Context, ref catalog.Ref) (bool, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	state, ok := s.links[ref]
+	return ok && state.Excluded != nil, nil
+}
+
 func (s *Store) RecordFailure(_ context.Context, ref catalog.Ref, reason string, _ time.Time) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -170,7 +198,7 @@ func (s *Store) Stale(_ context.Context, source string, before time.Time, limit 
 	}
 	var candidates []candidate
 	for ref, state := range s.links {
-		if ref.Source != source || state.MissingAt != nil {
+		if ref.Source != source || state.MissingAt != nil || state.Excluded != nil {
 			continue
 		}
 		if state.SyncedAt == nil || state.SyncedAt.Before(before) {

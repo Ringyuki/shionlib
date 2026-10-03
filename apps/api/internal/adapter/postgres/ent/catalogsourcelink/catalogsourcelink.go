@@ -27,6 +27,8 @@ const (
 	FieldSyncedAt = "synced_at"
 	// FieldMissingAt holds the string denoting the missing_at field in the database.
 	FieldMissingAt = "missing_at"
+	// FieldExcludedAt holds the string denoting the excluded_at field in the database.
+	FieldExcludedAt = "excluded_at"
 	// FieldFailures holds the string denoting the failures field in the database.
 	FieldFailures = "failures"
 	// FieldLastError holds the string denoting the last_error field in the database.
@@ -49,6 +51,7 @@ var Columns = []string{
 	FieldRevision,
 	FieldSyncedAt,
 	FieldMissingAt,
+	FieldExcludedAt,
 	FieldFailures,
 	FieldLastError,
 	FieldCreated,
@@ -127,6 +130,11 @@ func BySyncedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByMissingAt orders the results by the missing_at field.
 func ByMissingAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMissingAt, opts...).ToFunc()
+}
+
+// ByExcludedAt orders the results by the excluded_at field.
+func ByExcludedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExcludedAt, opts...).ToFunc()
 }
 
 // ByFailures orders the results by the failures field.

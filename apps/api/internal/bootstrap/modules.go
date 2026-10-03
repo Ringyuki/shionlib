@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/activity"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/email"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/jwt"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/activitypg"
@@ -15,15 +16,19 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/queue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/redis/authredis"
 	"github.com/Ringyuki/shionlib/apps/api/internal/auth"
+	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/cache"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/config"
+	"github.com/Ringyuki/shionlib/apps/api/internal/platform/httpclient"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/realtime"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/redis"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
 )
+
+const emailTimeout = 15 * time.Second
 
 type Registrar interface {
 	Register(api *httpapi.API)
@@ -53,6 +58,8 @@ type Shared struct {
 	GameCards  *game.Cards
 	Messages   *message.Service
 	Activities *activity.Service
+	Catalog    *catalog.Service
+	Mailer     *email.Mailer
 }
 
 type wiring func(infra *Infra, shared *Shared, modules *Modules)
@@ -106,5 +113,13 @@ func buildShared(infra *Infra) *Shared {
 	}
 	shared.Activities = activity.NewService(activitypg.NewRepository(infra.Ent), gameCards)
 	shared.Messages = message.NewService(messagepg.NewRepository(infra.Ent), push.NewMessageNotifier(hub, infra.Logger), gameCards, transactor, infra.Now)
+	shared.Catalog = buildCatalog(infra, shared)
+	shared.Mailer = email.NewMailer(email.NewSender(email.Settings{
+		Provider:      cfg.Email.Provider,
+		APIKey:        cfg.Email.APIKey,
+		Endpoint:      cfg.Email.Endpoint,
+		SenderAddress: cfg.Email.SenderAddress,
+		SenderName:    cfg.Email.SenderName,
+	}, httpclient.New(httpclient.Options{Timeout: emailTimeout})), infra.Catalog)
 	return shared
 }

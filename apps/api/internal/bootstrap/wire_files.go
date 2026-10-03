@@ -128,6 +128,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		Activities: shared.Activities,
 		Messages:   shared.Messages,
 		Banner:     banner,
+		Mailer:     shared.Mailer,
 		Queue:      jobQueue,
 		Tx:         shared.Transactor,
 		Settings: scan.Settings{
@@ -146,6 +147,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		Resources: downloads,
 		Quota:     quota,
 		Banner:    banner,
+		Mailer:    shared.Mailer,
 		Messages:  shared.Messages,
 		Queue:     jobQueue,
 		Tx:        shared.Transactor,

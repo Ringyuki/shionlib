@@ -88,6 +88,20 @@ func (_c *CatalogSourceLinkCreate) SetNillableMissingAt(v *time.Time) *CatalogSo
 	return _c
 }
 
+// SetExcludedAt sets the "excluded_at" field.
+func (_c *CatalogSourceLinkCreate) SetExcludedAt(v time.Time) *CatalogSourceLinkCreate {
+	_c.mutation.SetExcludedAt(v)
+	return _c
+}
+
+// SetNillableExcludedAt sets the "excluded_at" field if the given value is not nil.
+func (_c *CatalogSourceLinkCreate) SetNillableExcludedAt(v *time.Time) *CatalogSourceLinkCreate {
+	if v != nil {
+		_c.SetExcludedAt(*v)
+	}
+	return _c
+}
+
 // SetFailures sets the "failures" field.
 func (_c *CatalogSourceLinkCreate) SetFailures(v int) *CatalogSourceLinkCreate {
 	_c.mutation.SetFailures(v)
@@ -305,6 +319,10 @@ func (_c *CatalogSourceLinkCreate) createSpec() (*CatalogSourceLink, *sqlgraph.C
 		_spec.SetField(catalogsourcelink.FieldMissingAt, field.TypeTime, value)
 		_node.MissingAt = &value
 	}
+	if value, ok := _c.mutation.ExcludedAt(); ok {
+		_spec.SetField(catalogsourcelink.FieldExcludedAt, field.TypeTime, value)
+		_node.ExcludedAt = &value
+	}
 	if value, ok := _c.mutation.Failures(); ok {
 		_spec.SetField(catalogsourcelink.FieldFailures, field.TypeInt, value)
 		_node.Failures = value
@@ -478,6 +496,24 @@ func (u *CatalogSourceLinkUpsert) UpdateMissingAt() *CatalogSourceLinkUpsert {
 // ClearMissingAt clears the value of the "missing_at" field.
 func (u *CatalogSourceLinkUpsert) ClearMissingAt() *CatalogSourceLinkUpsert {
 	u.SetNull(catalogsourcelink.FieldMissingAt)
+	return u
+}
+
+// SetExcludedAt sets the "excluded_at" field.
+func (u *CatalogSourceLinkUpsert) SetExcludedAt(v time.Time) *CatalogSourceLinkUpsert {
+	u.Set(catalogsourcelink.FieldExcludedAt, v)
+	return u
+}
+
+// UpdateExcludedAt sets the "excluded_at" field to the value that was provided on create.
+func (u *CatalogSourceLinkUpsert) UpdateExcludedAt() *CatalogSourceLinkUpsert {
+	u.SetExcluded(catalogsourcelink.FieldExcludedAt)
+	return u
+}
+
+// ClearExcludedAt clears the value of the "excluded_at" field.
+func (u *CatalogSourceLinkUpsert) ClearExcludedAt() *CatalogSourceLinkUpsert {
+	u.SetNull(catalogsourcelink.FieldExcludedAt)
 	return u
 }
 
@@ -703,6 +739,27 @@ func (u *CatalogSourceLinkUpsertOne) UpdateMissingAt() *CatalogSourceLinkUpsertO
 func (u *CatalogSourceLinkUpsertOne) ClearMissingAt() *CatalogSourceLinkUpsertOne {
 	return u.Update(func(s *CatalogSourceLinkUpsert) {
 		s.ClearMissingAt()
+	})
+}
+
+// SetExcludedAt sets the "excluded_at" field.
+func (u *CatalogSourceLinkUpsertOne) SetExcludedAt(v time.Time) *CatalogSourceLinkUpsertOne {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.SetExcludedAt(v)
+	})
+}
+
+// UpdateExcludedAt sets the "excluded_at" field to the value that was provided on create.
+func (u *CatalogSourceLinkUpsertOne) UpdateExcludedAt() *CatalogSourceLinkUpsertOne {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.UpdateExcludedAt()
+	})
+}
+
+// ClearExcludedAt clears the value of the "excluded_at" field.
+func (u *CatalogSourceLinkUpsertOne) ClearExcludedAt() *CatalogSourceLinkUpsertOne {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.ClearExcludedAt()
 	})
 }
 
@@ -1102,6 +1159,27 @@ func (u *CatalogSourceLinkUpsertBulk) UpdateMissingAt() *CatalogSourceLinkUpsert
 func (u *CatalogSourceLinkUpsertBulk) ClearMissingAt() *CatalogSourceLinkUpsertBulk {
 	return u.Update(func(s *CatalogSourceLinkUpsert) {
 		s.ClearMissingAt()
+	})
+}
+
+// SetExcludedAt sets the "excluded_at" field.
+func (u *CatalogSourceLinkUpsertBulk) SetExcludedAt(v time.Time) *CatalogSourceLinkUpsertBulk {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.SetExcludedAt(v)
+	})
+}
+
+// UpdateExcludedAt sets the "excluded_at" field to the value that was provided on create.
+func (u *CatalogSourceLinkUpsertBulk) UpdateExcludedAt() *CatalogSourceLinkUpsertBulk {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.UpdateExcludedAt()
+	})
+}
+
+// ClearExcludedAt clears the value of the "excluded_at" field.
+func (u *CatalogSourceLinkUpsertBulk) ClearExcludedAt() *CatalogSourceLinkUpsertBulk {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.ClearExcludedAt()
 	})
 }
 

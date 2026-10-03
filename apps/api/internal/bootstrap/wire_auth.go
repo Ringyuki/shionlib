@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/argon2hash"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/email"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/imaging"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/objectstore"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/oidcprovider"
@@ -29,13 +28,7 @@ func wireAuth(infra *Infra, shared *Shared, modules *Modules) {
 	credentials := authpg.NewRepository(infra.Ent)
 	store := authredis.NewStore(infra.Redis)
 	passwords := argon2hash.New(argon2hash.PasswordParams())
-	mailer := email.NewMailer(email.NewSender(email.Settings{
-		Provider:      cfg.Email.Provider,
-		APIKey:        cfg.Email.APIKey,
-		Endpoint:      cfg.Email.Endpoint,
-		SenderAddress: cfg.Email.SenderAddress,
-		SenderName:    cfg.Email.SenderName,
-	}, httpclient.New(httpclient.Options{Timeout: 15 * time.Second})), infra.Catalog)
+	mailer := shared.Mailer
 
 	sessions := auth.NewSessions(credentials, accounts, shared.Tokens, argon2hash.New(argon2hash.RefreshTokenParams()), shared.Families, store, shared.Transactor, infra.Now, auth.SessionPolicy{
 		Version:       cfg.Token.RefreshAlgorithmVersion,

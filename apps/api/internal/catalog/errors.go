@@ -15,4 +15,5 @@ var (
 var (
 	ErrNotFound    = errors.New("catalog entry not found at source")
 	ErrRateLimited = errors.New("catalog source rate limited")
+	ErrExcluded    = errors.New("catalog entry excluded locally")
 )

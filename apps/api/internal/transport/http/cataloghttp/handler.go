@@ -40,7 +40,7 @@ func (h *Handler) search(ctx context.Context, in *catalogSearchInput) (*response
 }
 
 func (h *Handler) importEntry(ctx context.Context, in *catalogImportInput) (*response.Output[catalogImportedDTO], error) {
-	id, err := h.service.Import(ctx, in.ref())
+	id, err := h.service.ImportNow(ctx, in.ref())
 	if err != nil {
 		return nil, err
 	}

@@ -11,7 +11,7 @@ import (
 
 const catalogImportWorkers = 2
 
-func wireCatalogSync(infra *Infra, shared *Shared, modules *Modules) {
+func buildCatalog(infra *Infra, shared *Shared) *catalog.Service {
 	cfg := shared.Config.Catalog
 	var sources []catalog.Source
 	if cfg.Source == catalog.SourceHikarinagi && cfg.Hikarinagi.ClientID != "" && cfg.Hikarinagi.ClientSecret != "" {
@@ -27,16 +27,20 @@ func wireCatalogSync(infra *Infra, shared *Shared, modules *Modules) {
 		})
 		sources = append(sources, hikarinagi.NewSource(client))
 	}
-	service := catalog.NewService(sources, catalogpg.NewStore(infra.Ent), shared.Transactor, shared.Queue, shared.Now, catalog.Options{
+	return catalog.NewService(sources, catalogpg.NewStore(infra.Ent), shared.Transactor, shared.Queue, shared.Now, catalog.Options{
 		CreatorID:    cfg.CreatorID,
 		RefreshAfter: cfg.RefreshInterval,
 		RefreshBatch: cfg.RefreshBatch,
 		ChangesBatch: cfg.ChangesBatch,
 	})
+}
+
+func wireCatalogSync(_ *Infra, shared *Shared, modules *Modules) {
+	service := shared.Catalog
 	modules.Handlers = append(modules.Handlers, cataloghttp.NewHandler(service, shared.Builder))
 	modules.Jobs.Register = append(modules.Jobs.Register, catalogjobs.NewImportWorker(service).Register)
 	modules.Jobs.Queues[catalog.ImportQueue] = catalogImportWorkers
-	if len(sources) > 0 {
+	if len(service.Sources()) > 0 {
 		modules.Jobs.Tasks = append(modules.Jobs.Tasks, catalogjobs.Tasks(service)...)
 	}
 }

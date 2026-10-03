@@ -23,6 +23,7 @@ HTTP method/path · request schema · response schema · status code · business
 | `20261003063000_pg_trgm` | `CREATE EXTENSION IF NOT EXISTS pg_trgm` (trusted extension, needs `CREATE` on the database) | none |
 | `20261003071608_search_and_foreign_key_indexes` | Trigram GIN indexes on game titles, tag names, developer and character names; GIN on `games.platform`; indexes on catalog foreign keys and on rated covers (`game_covers (game_id) WHERE sexual > 0`) | plain `CREATE INDEX` locks writes on these catalog tables for seconds; run during the cutover window |
 | `20261003073256_moderation_events_walkthrough_index` | Index on `moderation_events (walkthrough_id, created_at)` for the walkthrough review history | small table |
+| `20261003074710_catalog_link_exclusion` | Adds `catalog_source_links.excluded_at`: entries deleted by an admin are not re-imported until an admin imports them again | nullable column |
 
 ## Intentional deviations
 
@@ -72,7 +73,7 @@ HTTP method/path · request schema · response schema · status code · business
 | `PUT /uploads/large/:id/chunks/:index` | body buffered in memory (express.raw), 500 without `Content-Type: application/octet-stream`, concurrent re-sends could record an index twice and `complete` only compared counts | body streamed to disk while hashing (any content type), bodies over the transfer limit are 413, an index is recorded once and `complete` compares the distinct set | memory use, bug |
 | Upload clean-up task | a rejected file deleted its whole resource (including healthy files) and a second rejected file in the same resource aborted the run; expired sessions were re-processed every minute and their temp files were never removed | the resource is deleted only when no files remain; expired sessions are left alone; unreferenced temp files of finished sessions are removed after 48 h | bug |
 | Upload quota tasks | the monthly reset aborted on the first user without a quota row; the inactivity reset wrote a zero-amount record every night; one failure stopped the batch | users without quota rows are skipped, zero quotas are not reset again, failures are collected per user | bug |
-| Admin alerts for new reports and malware cases | in-app messages plus an email to every admin | in-app messages only (report alerts run as a River job); the email is sent once the email capability exposes a sender for `report.AdminMailer`/`scan.AdminMailer` | email sender not ported yet |
+| Admin alerts for new reports and malware cases | in-app messages plus an email to every admin, sent inline | in-app messages plus the same emails; report alerts run as a River job | request latency, retries |
 | Re-upload notifications | one message per favorite list containing the game | one message per user | duplicate notifications |
 | `GET /user/datas/:id/game-resources` | listed soft-deleted resources; a resource without files returned 500 | only active resources; `file_name` is `""` when a resource has no files | bug |
 | Malware DELETE review | the quota refund ran after the commit and its failures were only logged | the refund is part of the review transaction | consistency |

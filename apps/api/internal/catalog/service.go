@@ -71,6 +71,13 @@ func (s *Service) Import(ctx context.Context, ref Ref) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	excluded, err := s.store.Excluded(ctx, ref)
+	if err != nil {
+		return 0, err
+	}
+	if excluded {
+		return 0, ErrExcluded
+	}
 	write, err := s.fetch(ctx, source, ref)
 	if errors.Is(err, ErrNotFound) {
 		if err := s.store.MarkMissing(ctx, ref, ref.Entity == EntityGame, s.now()); err != nil {
@@ -143,6 +150,16 @@ func (s *Service) fetch(ctx context.Context, source Source, ref Ref) (writeFunc,
 	}
 }
 
+func (s *Service) ImportNow(ctx context.Context, ref Ref) (int, error) {
+	if _, err := s.source(ref.Source); err != nil {
+		return 0, err
+	}
+	if err := s.store.Include(ctx, ref); err != nil {
+		return 0, err
+	}
+	return s.Import(ctx, ref)
+}
+
 func (s *Service) Request(ctx context.Context, ref Ref) error {
 	if _, err := s.source(ref.Source); err != nil {
 		return err
@@ -150,7 +167,14 @@ func (s *Service) Request(ctx context.Context, ref Ref) error {
 	if !ref.Entity.Valid() || ref.ExternalID == "" {
 		return ErrEntryNotFound
 	}
+	if err := s.store.Include(ctx, ref); err != nil {
+		return err
+	}
 	return s.queue.Enqueue(ctx, ImportJob(ref))
+}
+
+func (s *Service) Exclude(ctx context.Context, entity Entity, localID int) error {
+	return s.store.Exclude(ctx, entity, localID, s.now())
 }
 
 func (s *Service) RefreshStale(ctx context.Context) error {

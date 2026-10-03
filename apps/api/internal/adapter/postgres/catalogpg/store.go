@@ -133,6 +133,42 @@ func (s *Store) MarkMissing(ctx context.Context, ref catalog.Ref, hide bool, at 
 	return nil
 }
 
+func (s *Store) Exclude(ctx context.Context, entity catalog.Entity, localID int, at time.Time) error {
+	err := s.db(ctx).CatalogSourceLink.Update().
+		Where(catalogsourcelink.Entity(string(entity)), catalogsourcelink.LocalID(localID)).
+		SetExcludedAt(at).
+		SetUpdated(at).
+		Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("exclude source links: %w", err)
+	}
+	return nil
+}
+
+func (s *Store) Include(ctx context.Context, ref catalog.Ref) error {
+	err := s.db(ctx).CatalogSourceLink.Update().
+		Where(
+			catalogsourcelink.Source(ref.Source),
+			catalogsourcelink.Entity(string(ref.Entity)),
+			catalogsourcelink.ExternalID(ref.ExternalID),
+			catalogsourcelink.ExcludedAtNotNil(),
+		).
+		ClearExcludedAt().
+		Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("include source link: %w", err)
+	}
+	return nil
+}
+
+func (s *Store) Excluded(ctx context.Context, ref catalog.Ref) (bool, error) {
+	row, err := s.link(ctx, ref)
+	if err != nil || row == nil {
+		return false, err
+	}
+	return row.ExcludedAt != nil, nil
+}
+
 func (s *Store) RecordFailure(ctx context.Context, ref catalog.Ref, reason string, at time.Time) error {
 	row, err := s.link(ctx, ref)
 	if err != nil || row == nil {
@@ -152,6 +188,7 @@ func (s *Store) Stale(ctx context.Context, source string, before time.Time, limi
 		Where(
 			catalogsourcelink.Source(source),
 			catalogsourcelink.MissingAtIsNil(),
+			catalogsourcelink.ExcludedAtIsNil(),
 			catalogsourcelink.Or(catalogsourcelink.SyncedAtIsNil(), catalogsourcelink.SyncedAtLT(before)),
 		).
 		Order(func(sel *sql.Selector) {

@@ -283,3 +283,38 @@ func TestSearchWrapsSourceFailures(t *testing.T) {
 		t.Fatalf("sources %v", f.service.Sources())
 	}
 }
+
+func TestExcludedEntriesAreOnlyImportedOnRequest(t *testing.T) {
+	f := setup()
+	f.source.Games["77"] = gameSnapshot("77")
+	id, err := f.service.Import(context.Background(), ref(catalog.EntityGame, "77"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := f.service.Exclude(context.Background(), catalog.EntityGame, id); err != nil {
+		t.Fatal(err)
+	}
+	requests := len(f.source.Requests)
+	if _, err := f.service.Import(context.Background(), ref(catalog.EntityGame, "77")); !errors.Is(err, catalog.ErrExcluded) {
+		t.Fatalf("background imports skip excluded entries: %v", err)
+	}
+	if len(f.source.Requests) != requests {
+		t.Fatalf("excluded entries are not fetched: %v", f.source.Requests)
+	}
+	again, err := f.service.ImportNow(context.Background(), ref(catalog.EntityGame, "77"))
+	if err != nil || again != id {
+		t.Fatalf("explicit import %d %v", again, err)
+	}
+	if excluded, _ := f.store.Excluded(context.Background(), ref(catalog.EntityGame, "77")); excluded {
+		t.Fatal("explicit import must include the entry again")
+	}
+	if err := f.service.Exclude(context.Background(), catalog.EntityGame, id); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.service.Request(context.Background(), ref(catalog.EntityGame, "77")); err != nil {
+		t.Fatal(err)
+	}
+	if excluded, _ := f.store.Excluded(context.Background(), ref(catalog.EntityGame, "77")); excluded {
+		t.Fatal("queued imports include the entry again")
+	}
+}

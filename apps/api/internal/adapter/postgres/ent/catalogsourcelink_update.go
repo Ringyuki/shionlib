@@ -152,6 +152,26 @@ func (_u *CatalogSourceLinkUpdate) ClearMissingAt() *CatalogSourceLinkUpdate {
 	return _u
 }
 
+// SetExcludedAt sets the "excluded_at" field.
+func (_u *CatalogSourceLinkUpdate) SetExcludedAt(v time.Time) *CatalogSourceLinkUpdate {
+	_u.mutation.SetExcludedAt(v)
+	return _u
+}
+
+// SetNillableExcludedAt sets the "excluded_at" field if the given value is not nil.
+func (_u *CatalogSourceLinkUpdate) SetNillableExcludedAt(v *time.Time) *CatalogSourceLinkUpdate {
+	if v != nil {
+		_u.SetExcludedAt(*v)
+	}
+	return _u
+}
+
+// ClearExcludedAt clears the value of the "excluded_at" field.
+func (_u *CatalogSourceLinkUpdate) ClearExcludedAt() *CatalogSourceLinkUpdate {
+	_u.mutation.ClearExcludedAt()
+	return _u
+}
+
 // SetFailures sets the "failures" field.
 func (_u *CatalogSourceLinkUpdate) SetFailures(v int) *CatalogSourceLinkUpdate {
 	_u.mutation.ResetFailures()
@@ -321,6 +341,12 @@ func (_u *CatalogSourceLinkUpdate) sqlSave(ctx context.Context) (_node int, err 
 	if _u.mutation.MissingAtCleared() {
 		_spec.ClearField(catalogsourcelink.FieldMissingAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.ExcludedAt(); ok {
+		_spec.SetField(catalogsourcelink.FieldExcludedAt, field.TypeTime, value)
+	}
+	if _u.mutation.ExcludedAtCleared() {
+		_spec.ClearField(catalogsourcelink.FieldExcludedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.Failures(); ok {
 		_spec.SetField(catalogsourcelink.FieldFailures, field.TypeInt, value)
 	}
@@ -478,6 +504,26 @@ func (_u *CatalogSourceLinkUpdateOne) SetNillableMissingAt(v *time.Time) *Catalo
 // ClearMissingAt clears the value of the "missing_at" field.
 func (_u *CatalogSourceLinkUpdateOne) ClearMissingAt() *CatalogSourceLinkUpdateOne {
 	_u.mutation.ClearMissingAt()
+	return _u
+}
+
+// SetExcludedAt sets the "excluded_at" field.
+func (_u *CatalogSourceLinkUpdateOne) SetExcludedAt(v time.Time) *CatalogSourceLinkUpdateOne {
+	_u.mutation.SetExcludedAt(v)
+	return _u
+}
+
+// SetNillableExcludedAt sets the "excluded_at" field if the given value is not nil.
+func (_u *CatalogSourceLinkUpdateOne) SetNillableExcludedAt(v *time.Time) *CatalogSourceLinkUpdateOne {
+	if v != nil {
+		_u.SetExcludedAt(*v)
+	}
+	return _u
+}
+
+// ClearExcludedAt clears the value of the "excluded_at" field.
+func (_u *CatalogSourceLinkUpdateOne) ClearExcludedAt() *CatalogSourceLinkUpdateOne {
+	_u.mutation.ClearExcludedAt()
 	return _u
 }
 
@@ -679,6 +725,12 @@ func (_u *CatalogSourceLinkUpdateOne) sqlSave(ctx context.Context) (_node *Catal
 	}
 	if _u.mutation.MissingAtCleared() {
 		_spec.ClearField(catalogsourcelink.FieldMissingAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ExcludedAt(); ok {
+		_spec.SetField(catalogsourcelink.FieldExcludedAt, field.TypeTime, value)
+	}
+	if _u.mutation.ExcludedAtCleared() {
+		_spec.ClearField(catalogsourcelink.FieldExcludedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Failures(); ok {
 		_spec.SetField(catalogsourcelink.FieldFailures, field.TypeInt, value)

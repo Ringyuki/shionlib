@@ -23,6 +23,7 @@ type fakeAPI struct {
 	paths      []string
 	routes     map[string]string
 	statusCode map[string]int
+	revoked    int
 }
 
 func (f *fakeAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +31,13 @@ func (f *fakeAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		f.token(w, r)
 		return
 	}
-	if r.Header.Get("Authorization") != "Bearer machine-token" {
+	f.mu.Lock()
+	revoked := f.revoked > 0
+	if revoked {
+		f.revoked--
+	}
+	f.mu.Unlock()
+	if revoked || r.Header.Get("Authorization") != "Bearer machine-token" {
 		w.WriteHeader(http.StatusUnauthorized)
 		_, _ = w.Write([]byte(`{"success":false,"error":{"code":"AUTH_TOKEN_INVALID","message":"no"}}`))
 		return
@@ -231,5 +238,23 @@ func TestSearchAndChanges(t *testing.T) {
 	}
 	if !slices.Equal(api.paths, wantPaths) {
 		t.Fatalf("paths %v", api.paths)
+	}
+}
+
+func TestARejectedTokenIsReplacedOnce(t *testing.T) {
+	source, api := setup(t, map[string]string{"/open/producers/5": `{"id": 5, "name": "枕", "aliases": [], "updated_at": "t"}`})
+	if _, err := source.Developer(context.Background(), "5"); err != nil {
+		t.Fatal(err)
+	}
+	api.revoked = 1
+	if _, err := source.Developer(context.Background(), "5"); err != nil {
+		t.Fatalf("a revoked token must be replaced: %v", err)
+	}
+	if api.tokens != 2 {
+		t.Fatalf("expected a second token, minted %d", api.tokens)
+	}
+	api.revoked = 2
+	if _, err := source.Developer(context.Background(), "5"); err == nil || !strings.Contains(err.Error(), "status 401") {
+		t.Fatalf("a second rejection is reported: %v", err)
 	}
 }

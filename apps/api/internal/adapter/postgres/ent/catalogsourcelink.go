@@ -31,6 +31,8 @@ type CatalogSourceLink struct {
 	SyncedAt *time.Time `json:"synced_at,omitempty"`
 	// MissingAt holds the value of the "missing_at" field.
 	MissingAt *time.Time `json:"missing_at,omitempty"`
+	// ExcludedAt holds the value of the "excluded_at" field.
+	ExcludedAt *time.Time `json:"excluded_at,omitempty"`
 	// Failures holds the value of the "failures" field.
 	Failures int `json:"failures,omitempty"`
 	// LastError holds the value of the "last_error" field.
@@ -51,7 +53,7 @@ func (*CatalogSourceLink) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case catalogsourcelink.FieldSource, catalogsourcelink.FieldEntity, catalogsourcelink.FieldExternalID, catalogsourcelink.FieldRevision, catalogsourcelink.FieldLastError:
 			values[i] = new(sql.NullString)
-		case catalogsourcelink.FieldSyncedAt, catalogsourcelink.FieldMissingAt, catalogsourcelink.FieldCreated, catalogsourcelink.FieldUpdated:
+		case catalogsourcelink.FieldSyncedAt, catalogsourcelink.FieldMissingAt, catalogsourcelink.FieldExcludedAt, catalogsourcelink.FieldCreated, catalogsourcelink.FieldUpdated:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -118,6 +120,13 @@ func (_m *CatalogSourceLink) assignValues(columns []string, values []any) error 
 			} else if value.Valid {
 				_m.MissingAt = new(time.Time)
 				*_m.MissingAt = value.Time
+			}
+		case catalogsourcelink.FieldExcludedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field excluded_at", values[i])
+			} else if value.Valid {
+				_m.ExcludedAt = new(time.Time)
+				*_m.ExcludedAt = value.Time
 			}
 		case catalogsourcelink.FieldFailures:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -204,6 +213,11 @@ func (_m *CatalogSourceLink) String() string {
 	builder.WriteString(", ")
 	if v := _m.MissingAt; v != nil {
 		builder.WriteString("missing_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.ExcludedAt; v != nil {
+		builder.WriteString("excluded_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")

@@ -26,6 +26,7 @@ func (CatalogSourceLink) Fields() []ent.Field {
 		field.String("revision").MaxLen(64).SchemaType(varchar(64)).Optional().Nillable(),
 		field.Time("synced_at").SchemaType(timestamp3).Optional().Nillable(),
 		field.Time("missing_at").SchemaType(timestamp3).Optional().Nillable(),
+		field.Time("excluded_at").SchemaType(timestamp3).Optional().Nillable(),
 		field.Int("failures").SchemaType(pg("integer")).Default(0),
 		field.String("last_error").MaxLen(500).SchemaType(varchar(500)).Optional().Nillable(),
 		created(),

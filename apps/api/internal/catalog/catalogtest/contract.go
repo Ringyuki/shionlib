@@ -129,6 +129,40 @@ func StoreContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		}
 	})
 
+	t.Run("excluded entries are skipped until included again", func(t *testing.T) {
+		env := newEnv(t)
+		creator := env.CreatorID(t)
+		id, _, err := env.Store.ApplyGame(ctx, contractSource, GameRecord("6", nil, nil), creator, at)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, _, err := env.Store.ApplyGame(ctx, contractSource, GameRecord("7", nil, nil), creator, at); err != nil {
+			t.Fatal(err)
+		}
+		if err := env.Store.Exclude(ctx, catalog.EntityGame, id, at); err != nil {
+			t.Fatal(err)
+		}
+		if excluded, err := env.Store.Excluded(ctx, ref(catalog.EntityGame, "6")); err != nil || !excluded {
+			t.Fatalf("excluded %v %v", excluded, err)
+		}
+		if excluded, err := env.Store.Excluded(ctx, ref(catalog.EntityGame, "7")); err != nil || excluded {
+			t.Fatalf("other entries stay included: %v %v", excluded, err)
+		}
+		refs, err := env.Store.Stale(ctx, contractSource, at.Add(time.Hour), 10)
+		if err != nil || !slices.Equal(refs, []catalog.Ref{ref(catalog.EntityGame, "7")}) {
+			t.Fatalf("excluded entries are not refreshed: %v %v", refs, err)
+		}
+		if err := env.Store.Include(ctx, ref(catalog.EntityGame, "6")); err != nil {
+			t.Fatal(err)
+		}
+		if excluded, err := env.Store.Excluded(ctx, ref(catalog.EntityGame, "6")); err != nil || excluded {
+			t.Fatalf("included again: %v %v", excluded, err)
+		}
+		if excluded, err := env.Store.Excluded(ctx, ref(catalog.EntityGame, "404")); err != nil || excluded {
+			t.Fatalf("unknown refs are not excluded: %v %v", excluded, err)
+		}
+	})
+
 	t.Run("unknown refs are tolerated", func(t *testing.T) {
 		env := newEnv(t)
 		missing := ref(catalog.EntityGame, "404")

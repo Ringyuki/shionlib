@@ -50,6 +50,11 @@ func TestImportWorkerMapsOutcomesToJobResults(t *testing.T) {
 				t.Fatal(err)
 			}
 		}},
+		{name: "locally excluded entries complete", err: catalog.ErrExcluded, check: func(t *testing.T, err error) {
+			if err != nil {
+				t.Fatal(err)
+			}
+		}},
 		{name: "unknown source cancels", err: catalog.ErrUnknownSource.New(), check: func(t *testing.T, err error) {
 			var cancel *rivertype.JobCancelError
 			if !errors.As(err, &cancel) {
