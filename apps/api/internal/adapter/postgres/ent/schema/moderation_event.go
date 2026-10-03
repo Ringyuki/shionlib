@@ -46,5 +46,6 @@ func (ModerationEvent) Edges() []ent.Edge {
 func (ModerationEvent) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("comment_id", "created_at").StorageKey("moderation_events_comment_id_created_at_idx"),
+		index.Fields("walkthrough_id", "created_at").StorageKey("moderation_events_walkthrough_id_created_at_idx"),
 	}
 }

@@ -22,6 +22,7 @@ HTTP method/path · request schema · response schema · status code · business
 | `20261003062900_messages_receiver_index` | `CREATE INDEX CONCURRENTLY` on `messages (receiver_id, read, created)` | no table lock |
 | `20261003063000_pg_trgm` | `CREATE EXTENSION IF NOT EXISTS pg_trgm` (trusted extension, needs `CREATE` on the database) | none |
 | `20261003071608_search_and_foreign_key_indexes` | Trigram GIN indexes on game titles, tag names, developer and character names; GIN on `games.platform`; indexes on catalog foreign keys and on rated covers (`game_covers (game_id) WHERE sexual > 0`) | plain `CREATE INDEX` locks writes on these catalog tables for seconds; run during the cutover window |
+| `20261003073256_moderation_events_walkthrough_index` | Index on `moderation_events (walkthrough_id, created_at)` for the walkthrough review history | small table |
 
 ## Intentional deviations
 

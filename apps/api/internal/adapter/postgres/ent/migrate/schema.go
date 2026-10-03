@@ -1477,6 +1477,11 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{ModerationEventsColumns[12], ModerationEventsColumns[10]},
 			},
+			{
+				Name:    "moderation_events_walkthrough_id_created_at_idx",
+				Unique:  false,
+				Columns: []*schema.Column{ModerationEventsColumns[13], ModerationEventsColumns[10]},
+			},
 		},
 	}
 	// OidcIdentitiesColumns holds the columns for the "oidc_identities" table.
