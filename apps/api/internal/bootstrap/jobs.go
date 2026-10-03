@@ -10,7 +10,7 @@ import (
 )
 
 type Jobs struct {
-	Register func(workers *river.Workers)
+	Register []func(workers *river.Workers)
 	Tasks    []jobs.Task
 	Queues   map[string]int
 }

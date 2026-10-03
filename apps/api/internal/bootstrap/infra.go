@@ -14,9 +14,11 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/queue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/config"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/database"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/i18n"
+	"github.com/Ringyuki/shionlib/apps/api/internal/platform/jobs"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/logger"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/redis"
 )
@@ -29,6 +31,7 @@ type Infra struct {
 	Ent     *ent.Client
 	Redis   *redis.Client
 	Catalog *i18n.Catalog
+	Queue   *queue.Queue
 	Now     func() time.Time
 }
 
@@ -73,6 +76,10 @@ func OpenInfra(ctx context.Context, cfg *config.Config, log *slog.Logger) (*Infr
 	if err != nil {
 		return nil, errors.Join(err, db.Close(ctx))
 	}
+	inserter, err := jobs.NewInserter(db.Pool, log)
+	if err != nil {
+		return nil, errors.Join(err, cache.Shutdown(ctx), db.Close(ctx))
+	}
 	return &Infra{
 		Config:  cfg,
 		Logger:  log,
@@ -81,6 +88,7 @@ func OpenInfra(ctx context.Context, cfg *config.Config, log *slog.Logger) (*Infr
 		Ent:     postgres.NewClient(db.SQL),
 		Redis:   cache,
 		Catalog: catalog,
+		Queue:   queue.New(inserter),
 		Now:     Now,
 	}, nil
 }

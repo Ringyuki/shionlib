@@ -1,24 +1,27 @@
 package bootstrap
 
 import (
+	"log/slog"
+	"time"
+
 	"github.com/Ringyuki/shionlib/apps/api/internal/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/jwt"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/activitypg"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/favoritepg"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/gamepg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/messagepg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/push"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/queue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/redis/authredis"
 	"github.com/Ringyuki/shionlib/apps/api/internal/auth"
-	"github.com/Ringyuki/shionlib/apps/api/internal/favorite"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
+	"github.com/Ringyuki/shionlib/apps/api/internal/platform/cache"
+	"github.com/Ringyuki/shionlib/apps/api/internal/platform/config"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/realtime"
-	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/activityhttp"
-	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/favoritehttp"
+	"github.com/Ringyuki/shionlib/apps/api/internal/platform/redis"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
-	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/messagehttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
 )
 
@@ -34,27 +37,74 @@ type Modules struct {
 	Jobs          Jobs
 }
 
+type Shared struct {
+	Config     *config.Config
+	Logger     *slog.Logger
+	Now        func() time.Time
+	Ent        *ent.Client
+	Redis      *redis.Client
+	Builder    *response.Builder
+	Transactor *postgres.Transactor
+	Cache      *cache.Cache
+	Queue      *queue.Queue
+	Realtime   *realtime.Hub
+	Tokens     *jwt.Codec
+	Families   *authredis.FamilyBlocklist
+	GameCards  *game.Cards
+	Messages   *message.Service
+	Activities *activity.Service
+}
+
+type wiring func(infra *Infra, shared *Shared, modules *Modules)
+
+var wirings = []wiring{
+	wireFavorite,
+	wireMessage,
+	wireActivity,
+	wireAuth,
+	wireContent,
+	wireFiles,
+	wireCatalog,
+	wireCatalogSync,
+	wireCommunity,
+	wireAdmin,
+}
+
 func BuildModules(infra *Infra) *Modules {
+	shared := buildShared(infra)
+	modules := &Modules{
+		Builder:       shared.Builder,
+		Authenticator: auth.NewAuthenticator(shared.Tokens, shared.Families),
+		Realtime:      shared.Realtime,
+		Jobs:          Jobs{Queues: map[string]int{}},
+	}
+	for _, wire := range wirings {
+		wire(infra, shared, modules)
+	}
+	return modules
+}
+
+func buildShared(infra *Infra) *Shared {
 	cfg := infra.Config
-	builder := response.NewBuilder(infra.Catalog, infra.Now)
-	tokens := jwt.NewCodec(cfg.Token.Secret, cfg.Token.ExpiresIn, infra.Now)
-	families := authredis.NewFamilyBlocklist(infra.Redis)
+	hub := realtime.NewHub(infra.Redis, infra.Logger)
 	transactor := postgres.NewTransactor(infra.Ent)
 	gameCards := game.NewCards(gamepg.NewCardStore(infra.Ent))
-	hub := realtime.NewHub(infra.Redis, infra.Logger)
-
-	activities := activity.NewService(activitypg.NewRepository(infra.Ent), gameCards)
-	messages := message.NewService(messagepg.NewRepository(infra.Ent), push.NewMessageNotifier(hub, infra.Logger), gameCards, transactor, infra.Now)
-
-	modules := &Modules{
-		Builder:       builder,
-		Authenticator: auth.NewAuthenticator(tokens, families),
-		Realtime:      hub,
+	shared := &Shared{
+		Config:     cfg,
+		Logger:     infra.Logger,
+		Now:        infra.Now,
+		Ent:        infra.Ent,
+		Redis:      infra.Redis,
+		Builder:    response.NewBuilder(infra.Catalog, infra.Now),
+		Transactor: transactor,
+		Cache:      cache.New(infra.Redis),
+		Queue:      infra.Queue,
+		Realtime:   hub,
+		Tokens:     jwt.NewCodec(cfg.Token.Secret, cfg.Token.ExpiresIn, infra.Now),
+		Families:   authredis.NewFamilyBlocklist(infra.Redis),
+		GameCards:  gameCards,
 	}
-	modules.Handlers = append(modules.Handlers,
-		favoritehttp.NewHandler(favorite.NewService(favoritepg.NewRepository(infra.Ent), gameCards, transactor), builder),
-		messagehttp.NewHandler(messages, hub, builder),
-		activityhttp.NewHandler(activities, builder),
-	)
-	return modules
+	shared.Activities = activity.NewService(activitypg.NewRepository(infra.Ent), gameCards)
+	shared.Messages = message.NewService(messagepg.NewRepository(infra.Ent), push.NewMessageNotifier(hub, infra.Logger), gameCards, transactor, infra.Now)
+	return shared
 }

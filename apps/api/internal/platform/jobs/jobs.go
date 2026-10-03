@@ -38,7 +38,7 @@ type Options struct {
 	Logger   *slog.Logger
 	Timezone *time.Location
 	Queues   map[string]int
-	Register func(workers *river.Workers)
+	Register []func(workers *river.Workers)
 	Tasks    []Task
 	Process  bool
 }
@@ -53,8 +53,8 @@ func New(opts Options) (*Runner, error) {
 	config := &river.Config{Logger: opts.Logger}
 	if opts.Process {
 		workers := river.NewWorkers()
-		if opts.Register != nil {
-			opts.Register(workers)
+		for _, register := range opts.Register {
+			register(workers)
 		}
 		tasks := make(map[string]Task, len(opts.Tasks))
 		periodic := make([]*river.PeriodicJob, 0, len(opts.Tasks))
@@ -118,6 +118,14 @@ func (r *Runner) Run(ctx context.Context) error {
 		return fmt.Errorf("stop job client: %w", err)
 	}
 	return nil
+}
+
+func NewInserter(pool *pgxpool.Pool, logger *slog.Logger) (*river.Client[pgx.Tx], error) {
+	client, err := river.NewClient(riverpgxv5.New(pool), &river.Config{Logger: logger})
+	if err != nil {
+		return nil, fmt.Errorf("create job inserter: %w", err)
+	}
+	return client, nil
 }
 
 func Migrate(ctx context.Context, pool *pgxpool.Pool) error {
