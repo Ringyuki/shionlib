@@ -153,6 +153,10 @@ linters:
         text: G703
         linters:
           - gosec
+      - path: internal/adapter/pgdump
+        text: G204
+        linters:
+          - gosec
       - text: "Function `(openapi->openapi\\$1|BuildHTTP->New->Install->Install\\$1|Recover\\$1\\$1\\$1)` should pass the context parameter"
         linters:
           - contextcheck

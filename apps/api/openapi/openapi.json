@@ -238,6 +238,153 @@
         ],
         "type": "object"
       },
+      "AdAdminDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "aspect": {
+            "type": "string"
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "end_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "exclude_locales": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "image_en": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "image_ja": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "image_zh": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "placement": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "sort": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "start_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "placement",
+          "image_zh",
+          "image_ja",
+          "image_en",
+          "aspect",
+          "link",
+          "exclude_locales",
+          "enabled",
+          "sort",
+          "start_at",
+          "end_at",
+          "created",
+          "updated"
+        ],
+        "type": "object"
+      },
+      "AdItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "aspect": {
+            "type": "string"
+          },
+          "exclude_locales": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "image_en": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "image_ja": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "image_zh": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "image_zh",
+          "image_ja",
+          "image_en",
+          "aspect",
+          "link",
+          "exclude_locales"
+        ],
+        "type": "object"
+      },
       "AddFavoriteGameInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -256,6 +403,244 @@
         ],
         "type": "object"
       },
+      "AnalysisCountryDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "country": {
+            "type": "string"
+          },
+          "downloadCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalBytes": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "country",
+          "totalBytes",
+          "downloadCount"
+        ],
+        "type": "object"
+      },
+      "AnalysisFileDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "downloadCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "fileId": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "totalBytes": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "fileId",
+          "fileName",
+          "totalBytes",
+          "downloadCount"
+        ],
+        "type": "object"
+      },
+      "AnalysisGameDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "downloadCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "gameId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "gameName": {
+            "$ref": "#/components/schemas/AnalysisGameNameDTO"
+          },
+          "totalBytes": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "gameId",
+          "gameName",
+          "totalBytes",
+          "downloadCount"
+        ],
+        "type": "object"
+      },
+      "AnalysisGameNameDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "title_en": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title_jp": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title_zh": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "title_jp",
+          "title_zh",
+          "title_en"
+        ],
+        "type": "object"
+      },
+      "AnalysisHourDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "downloadCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "hour": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "totalBytes": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "hour",
+          "totalBytes",
+          "downloadCount"
+        ],
+        "type": "object"
+      },
+      "AnalysisOverviewDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes_gotten": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "files": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "games": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "resources": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "storage": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "games",
+          "files",
+          "resources",
+          "storage",
+          "bytes_gotten"
+        ],
+        "type": "object"
+      },
+      "AnalysisTrafficDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "averageSize": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "countries": {
+            "items": {
+              "$ref": "#/components/schemas/AnalysisCountryDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "hourly": {
+            "items": {
+              "$ref": "#/components/schemas/AnalysisHourDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "prevAverageSize": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "prevTotalBytes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "prevTotalDownloads": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "topFiles": {
+            "items": {
+              "$ref": "#/components/schemas/AnalysisFileDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "topGames": {
+            "items": {
+              "$ref": "#/components/schemas/AnalysisGameDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "totalBytes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalDownloads": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "totalDownloads",
+          "totalBytes",
+          "averageSize",
+          "prevTotalDownloads",
+          "prevTotalBytes",
+          "prevAverageSize",
+          "hourly",
+          "topFiles",
+          "countries",
+          "topGames"
+        ],
+        "type": "object"
+      },
       "AuthMeta": {
         "additionalProperties": false,
         "properties": {
@@ -269,6 +654,97 @@
         "required": [
           "optionalTokenStale",
           "optionalTokenReason"
+        ],
+        "type": "object"
+      },
+      "BindPotatoVNInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "pvn_password": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "pvn_user_name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "pvn_user_name",
+          "pvn_password"
+        ],
+        "type": "object"
+      },
+      "CreateAdInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "aspect": {
+            "maxLength": 20,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "end_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "exclude_locales": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "image_en": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "image_ja": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "image_zh": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "link": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "type": "string"
+          },
+          "placement": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "sort": {
+            "format": "int64",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "type": "integer"
+          },
+          "start_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "placement",
+          "image_zh",
+          "aspect",
+          "link"
         ],
         "type": "object"
       },
@@ -291,6 +767,33 @@
         "required": [
           "name",
           "is_private"
+        ],
+        "type": "object"
+      },
+      "CreateSponsorOrderInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "description": "Amount in USD",
+            "format": "double",
+            "maximum": 10000,
+            "minimum": 1,
+            "type": "number"
+          },
+          "isPrivate": {
+            "type": "boolean"
+          },
+          "message": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "type": "string"
+          }
+        },
+        "required": [
+          "amount"
         ],
         "type": "object"
       },
@@ -332,6 +835,105 @@
           },
           "data": {
             "$ref": "#/components/schemas/ActivityPageDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeAdAdminDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdAdminDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeAnalysisOverviewDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AnalysisOverviewDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeAnalysisTrafficDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AnalysisTrafficDTO"
           },
           "message": {
             "type": "string"
@@ -555,6 +1157,45 @@
         ],
         "type": "object"
       },
+      "EnvelopeListAdItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/AdItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeListFavoriteSummaryDTO": {
         "additionalProperties": false,
         "properties": {
@@ -566,6 +1207,43 @@
             "items": {
               "$ref": "#/components/schemas/FavoriteSummaryDTO"
             },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeListValue": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {},
             "type": [
               "array",
               "null"
@@ -627,6 +1305,39 @@
         ],
         "type": "object"
       },
+      "EnvelopePageAdAdminDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageAdAdminDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopePageMessageItemDTO": {
         "additionalProperties": false,
         "properties": {
@@ -636,6 +1347,303 @@
           },
           "data": {
             "$ref": "#/components/schemas/PageMessageItemDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePageSponsorOrderDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageSponsorOrderDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePageSponsorWallItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageSponsorWallItemDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePotatoVNBindingDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PotatoVNBindingDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePotatoVNGameDataDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PotatoVNGameDataDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeSponsorOrderCreatedDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SponsorOrderCreatedDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeSponsorOrderDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SponsorOrderDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeSponsorPaymentDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SponsorPaymentDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeSponsorStatsDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SponsorStatsDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeSponsorWebhookDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SponsorWebhookDTO"
           },
           "message": {
             "type": "string"
@@ -1314,6 +2322,28 @@
         },
         "type": "object"
       },
+      "PageAdAdminDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdAdminDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
       "PageMessageItemDTO": {
         "additionalProperties": false,
         "properties": {
@@ -1369,6 +2399,469 @@
         ],
         "type": "object"
       },
+      "PageSponsorOrderDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SponsorOrderDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "PageSponsorWallItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SponsorWallItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "PaySponsorOrderInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "method": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "redirectUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "method"
+        ],
+        "type": "object"
+      },
+      "PotatoVNBindingDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "pvn_token_expires": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "pvn_user_avatar": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "pvn_user_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pvn_user_name": {
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pvn_user_id",
+          "pvn_user_name",
+          "pvn_user_avatar",
+          "pvn_token_expires",
+          "created",
+          "updated"
+        ],
+        "type": "object"
+      },
+      "PotatoVNGameDataDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "last_play_date": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "my_rate": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "play_type": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pvn_galgame_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "synced_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "total_play_time": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pvn_galgame_id",
+          "total_play_time",
+          "last_play_date",
+          "play_type",
+          "my_rate",
+          "synced_at"
+        ],
+        "type": "object"
+      },
+      "SponsorOrderCreatedDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "accessToken": {
+            "description": "Pass as ?token= to GET /sponsor/order/{id} to refresh an order without signing in",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "orderId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "paymentMethods": {
+            "items": {
+              "$ref": "#/components/schemas/SponsorPaymentMethodDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "providerOrderId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "orderId",
+          "providerOrderId",
+          "paymentMethods",
+          "expiresAt",
+          "accessToken"
+        ],
+        "type": "object"
+      },
+      "SponsorOrderDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "format": "double",
+            "type": "number"
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "isPrivate": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "paidAt": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "paymentMethod": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "providerOrderId": {
+            "type": "string"
+          },
+          "sponsorName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "NEW",
+              "DONE",
+              "EXPIRED",
+              "REFUND"
+            ],
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserSummary"
+          }
+        },
+        "required": [
+          "id",
+          "providerOrderId",
+          "amount",
+          "status",
+          "sponsorName",
+          "user",
+          "message",
+          "isPrivate",
+          "paymentMethod",
+          "paidAt",
+          "created"
+        ],
+        "type": "object"
+      },
+      "SponsorPaymentDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "payCurrency": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "payUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "payUrl",
+          "payCurrency",
+          "amount"
+        ],
+        "type": "object"
+      },
+      "SponsorPaymentMethodDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "desc": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "fixedFeeRange": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ratioRange": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "method",
+          "name",
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "SponsorStatsDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "totalAmount": {
+            "format": "double",
+            "type": "number"
+          },
+          "totalSponsors": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "totalSponsors",
+          "totalAmount"
+        ],
+        "type": "object"
+      },
+      "SponsorWallItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "format": "double",
+            "type": "number"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "message": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "paidAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "sponsorName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserSummary"
+          }
+        },
+        "required": [
+          "id",
+          "sponsorName",
+          "message",
+          "user",
+          "amount",
+          "paidAt"
+        ],
+        "type": "object"
+      },
+      "SponsorWebhookDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "received": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "received"
+        ],
+        "type": "object"
+      },
+      "UpdateAdInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "aspect": {
+            "maxLength": 20,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "end_at": {
+            "description": "null clears the end",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "exclude_locales": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "image_en": {
+            "description": "null clears the image",
+            "maxLength": 500,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "image_ja": {
+            "description": "null clears the image",
+            "maxLength": 500,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "image_zh": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "link": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "type": "string"
+          },
+          "placement": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "sort": {
+            "format": "int64",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
+            "type": "integer"
+          },
+          "start_at": {
+            "description": "null clears the start",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
       "UpdateFavoriteInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -1394,6 +2887,24 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "UpdateSponsorOrderStatusInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "enum": [
+              "NEW",
+              "DONE",
+              "EXPIRED",
+              "REFUND"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
         "type": "object"
       },
       "UserSummary": {
@@ -1523,6 +3034,817 @@
         "summary": "Site activity feed",
         "tags": [
           "activity"
+        ]
+      }
+    },
+    "/ad/placement/{placement}": {
+      "get": {
+        "operationId": "ad.placement",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "placement",
+            "required": true,
+            "schema": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListAdItemDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Ads shown in a placement; empty for sponsors",
+        "tags": [
+          "ad"
+        ]
+      }
+    },
+    "/admin/ad": {
+      "get": {
+        "operationId": "ad.admin.list",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "placement",
+            "schema": {
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "enabled",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "default": "id",
+              "enum": [
+                "id",
+                "sort",
+                "created",
+                "updated"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "default": "desc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageAdAdminDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List ads",
+        "tags": [
+          "ad",
+          "admin"
+        ]
+      },
+      "post": {
+        "operationId": "ad.admin.create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAdInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdAdminDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Create an ad",
+        "tags": [
+          "ad",
+          "admin"
+        ]
+      }
+    },
+    "/admin/ad/{id}": {
+      "delete": {
+        "operationId": "ad.admin.delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Delete an ad",
+        "tags": [
+          "ad",
+          "admin"
+        ]
+      },
+      "get": {
+        "operationId": "ad.admin.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdAdminDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Get an ad",
+        "tags": [
+          "ad",
+          "admin"
+        ]
+      },
+      "patch": {
+        "operationId": "ad.admin.update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAdInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdAdminDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Update an ad",
+        "tags": [
+          "ad",
+          "admin"
+        ]
+      }
+    },
+    "/admin/sponsor/orders": {
+      "get": {
+        "operationId": "sponsor.admin.orders",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "enum": [
+                "NEW",
+                "DONE",
+                "EXPIRED",
+                "REFUND"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageSponsorOrderDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List sponsor orders",
+        "tags": [
+          "sponsor",
+          "admin"
+        ]
+      }
+    },
+    "/admin/sponsor/orders/{id}": {
+      "delete": {
+        "operationId": "sponsor.admin.delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Delete a sponsor order",
+        "tags": [
+          "sponsor",
+          "admin"
+        ]
+      },
+      "get": {
+        "operationId": "sponsor.admin.order",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeSponsorOrderDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Get a sponsor order",
+        "tags": [
+          "sponsor",
+          "admin"
+        ]
+      }
+    },
+    "/admin/sponsor/orders/{id}/status": {
+      "patch": {
+        "operationId": "sponsor.admin.updateStatus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSponsorOrderStatusInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Override a sponsor order status",
+        "tags": [
+          "sponsor",
+          "admin"
+        ]
+      }
+    },
+    "/admin/sponsor/stats": {
+      "get": {
+        "operationId": "sponsor.admin.stats",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeSponsorStatsDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Sponsorship totals",
+        "tags": [
+          "sponsor",
+          "admin"
+        ]
+      }
+    },
+    "/analysis/data/overview": {
+      "get": {
+        "operationId": "analysis.overview",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAnalysisOverviewDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Site totals and 24-hour traffic",
+        "tags": [
+          "analysis"
+        ]
+      }
+    },
+    "/analysis/data/traffic-detail": {
+      "get": {
+        "operationId": "analysis.trafficDetail",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAnalysisTrafficDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Download traffic of the last 24 hours",
+        "tags": [
+          "analysis"
         ]
       }
     },
@@ -2590,6 +4912,703 @@
         "summary": "Mark a message read",
         "tags": [
           "message"
+        ]
+      }
+    },
+    "/moyu/game/{gameId}/patches": {
+      "get": {
+        "operationId": "moyu.patches",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gameId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListValue"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Community patch resources for a game, forwarded from NextMoe",
+        "tags": [
+          "moyu"
+        ]
+      }
+    },
+    "/potatovn/binding": {
+      "delete": {
+        "operationId": "potatovn.binding.delete",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Unbind the PotatoVN account",
+        "tags": [
+          "potatovn"
+        ]
+      },
+      "get": {
+        "operationId": "potatovn.binding.get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePotatoVNBindingDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Get the caller's PotatoVN binding",
+        "tags": [
+          "potatovn"
+        ]
+      },
+      "post": {
+        "operationId": "potatovn.binding.create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BindPotatoVNInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePotatoVNBindingDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Bind a PotatoVN account",
+        "tags": [
+          "potatovn"
+        ]
+      }
+    },
+    "/potatovn/game/{gameId}": {
+      "delete": {
+        "operationId": "potatovn.game.remove",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gameId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Remove a game from the PotatoVN library",
+        "tags": [
+          "potatovn"
+        ]
+      },
+      "get": {
+        "operationId": "potatovn.game.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gameId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePotatoVNGameDataDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "PotatoVN play data for a game",
+        "tags": [
+          "potatovn"
+        ]
+      },
+      "post": {
+        "operationId": "potatovn.game.add",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gameId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePotatoVNGameDataDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Add a game to the PotatoVN library",
+        "tags": [
+          "potatovn"
+        ]
+      }
+    },
+    "/sponsor/order": {
+      "post": {
+        "operationId": "sponsor.order.create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSponsorOrderInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeSponsorOrderCreatedDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create a sponsor order",
+        "tags": [
+          "sponsor"
+        ]
+      }
+    },
+    "/sponsor/order/{id}": {
+      "get": {
+        "operationId": "sponsor.order.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "accessToken returned when the order was created; lets anonymous sponsors refresh the order",
+            "explode": false,
+            "in": "query",
+            "name": "token",
+            "schema": {
+              "description": "accessToken returned when the order was created; lets anonymous sponsors refresh the order",
+              "maxLength": 128,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeSponsorOrderDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get a sponsor order and refresh its status for the owner",
+        "tags": [
+          "sponsor"
+        ]
+      }
+    },
+    "/sponsor/order/{id}/pay": {
+      "post": {
+        "operationId": "sponsor.order.pay",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaySponsorOrderInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeSponsorPaymentDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Start paying a sponsor order",
+        "tags": [
+          "sponsor"
+        ]
+      }
+    },
+    "/sponsor/stats": {
+      "get": {
+        "operationId": "sponsor.stats",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeSponsorStatsDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Sponsorship totals",
+        "tags": [
+          "sponsor"
+        ]
+      }
+    },
+    "/sponsor/wall": {
+      "get": {
+        "operationId": "sponsor.wall",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageSponsorWallItemDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List public sponsors",
+        "tags": [
+          "sponsor"
+        ]
+      }
+    },
+    "/sponsor/webhook/idatariver": {
+      "post": {
+        "operationId": "sponsor.webhook.idatariver",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Content-Type",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "contentMediaType": "application/octet-stream",
+                "format": "binary",
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeSponsorWebhookDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "iDataRiver payment callback",
+        "tags": [
+          "sponsor"
         ]
       }
     }
