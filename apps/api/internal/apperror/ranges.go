@@ -9,6 +9,8 @@ type Range struct {
 var Ranges = []Range{
 	{Prefix: 100, Owner: "internal/apperror", Domain: "common"},
 	{Prefix: 200, Owner: "internal/auth", Domain: "authentication"},
+	{Prefix: 400, Owner: "internal/game", Domain: "game"},
+	{Prefix: 460, Owner: "internal/favorite", Domain: "favorite"},
 }
 
 func PrefixOf(code int) int {

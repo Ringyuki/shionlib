@@ -4,9 +4,15 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/jwt"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/favoritepg"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/gamepg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/redis/authredis"
 	"github.com/Ringyuki/shionlib/apps/api/internal/auth"
+	"github.com/Ringyuki/shionlib/apps/api/internal/favorite"
+	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/clientinfo"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/favoritehttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/healthhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
@@ -36,6 +42,14 @@ func BuildHTTP(infra *Infra) *httpapi.API {
 	healthhttp.NewHandler(builder, 3*time.Second,
 		healthhttp.Check{Name: "db", Pinger: infra.DB},
 		healthhttp.Check{Name: "redis", Pinger: redisPinger{infra.Redis}},
+	).Register(api)
+
+	transactor := postgres.NewTransactor(infra.Ent)
+	gameCards := game.NewCards(gamepg.NewCardStore(infra.Ent))
+
+	favoritehttp.NewHandler(
+		favorite.NewService(favoritepg.NewRepository(infra.Ent), gameCards, transactor),
+		builder,
 	).Register(api)
 
 	return api

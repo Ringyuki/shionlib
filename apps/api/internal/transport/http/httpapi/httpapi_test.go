@@ -293,3 +293,32 @@ func TestUpstreamRequestIDIsOnlyTrustedFromProxies(t *testing.T) {
 		t.Fatal("request id from an untrusted client was accepted")
 	}
 }
+
+type hiddenPath struct {
+	ID int `path:"id"`
+}
+
+type embeddedUnexported struct {
+	hiddenPath
+}
+
+func TestRegisterRejectsUnboundPathParams(t *testing.T) {
+	defer func() {
+		if recover() == nil {
+			t.Fatal("expected registration to panic for an unbound path param")
+		}
+	}()
+	catalog, _ := i18n.Load(i18n.LocaleZH)
+	builder := response.NewBuilder(catalog, time.Now)
+	api := httpapi.New(httpapi.Options{
+		Logger:         slog.New(slog.NewTextHandler(io.Discard, nil)),
+		Catalog:        catalog,
+		Builder:        builder,
+		ClientResolver: clientinfo.NewResolver(nil),
+		Authenticator:  fakeAuthenticator{},
+	})
+	httpapi.Register(api, httpapi.Route{ID: "broken", Method: http.MethodGet, Path: "/broken/{id}"},
+		func(ctx context.Context, _ *embeddedUnexported) (*response.EmptyOutput, error) {
+			return response.Empty(ctx, builder), nil
+		})
+}

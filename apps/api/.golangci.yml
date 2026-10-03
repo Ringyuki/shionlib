@@ -162,3 +162,6 @@ linters:
       - path: internal/platform/config
         linters:
           - forbidigo
+      - path: internal/adapter/postgres/pgtest
+        linters:
+          - forbidigo

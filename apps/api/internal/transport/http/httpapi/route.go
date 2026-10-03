@@ -3,6 +3,7 @@ package httpapi
 import (
 	"context"
 	"net/http"
+	"reflect"
 
 	"github.com/danielgtaylor/huma/v2"
 
@@ -35,6 +36,7 @@ type Route struct {
 const throttleMetadataKey = "throttle"
 
 func Register[I, O any](api *API, route Route, handler func(context.Context, *I) (*O, error)) {
+	checkPathParams(route.Path, reflect.TypeFor[I]())
 	status := route.Status
 	if status == 0 {
 		status = http.StatusOK
