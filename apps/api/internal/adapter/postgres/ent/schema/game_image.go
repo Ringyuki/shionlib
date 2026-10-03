@@ -42,5 +42,6 @@ func (GameImage) Edges() []ent.Edge {
 func (GameImage) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("source", "source_key").StorageKey("game_images_source_source_key_idx"),
+		index.Fields("game_id").StorageKey("game_images_game_id_idx"),
 	}
 }

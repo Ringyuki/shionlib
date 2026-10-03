@@ -52,5 +52,7 @@ func (GameDeveloper) Indexes() []ent.Index {
 		index.Fields("b_id", "v_id").StorageKey("game_developers_b_id_v_id_idx"),
 		index.Fields("b_id").StorageKey("game_developers_b_id_idx"),
 		index.Fields("v_id").StorageKey("game_developers_v_id_idx"),
+		index.Fields("name").Annotations(entsql.IndexType("GIN"), entsql.OpClass("gin_trgm_ops")).StorageKey("game_developers_name_trgm_idx"),
+		index.Fields("parent_developer_id").StorageKey("game_developers_parent_developer_id_idx"),
 	}
 }

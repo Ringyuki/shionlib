@@ -38,5 +38,6 @@ func (GameDeveloperRelation) Edges() []ent.Edge {
 func (GameDeveloperRelation) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("game_id", "developer_id").Unique().StorageKey("game_developer_relations_game_id_developer_id_key"),
+		index.Fields("developer_id").StorageKey("game_developer_relations_developer_id_idx"),
 	}
 }

@@ -20,6 +20,8 @@ HTTP method/path · request schema · response schema · status code · business
 | `20261003062720_catalog_sources` | Adds `catalog_source_links` and `catalog_sync_cursors` | new tables |
 | `20261003062800_backfill_hikarinagi_links` | Links every game, developer and character with an `h_id` to source `hikarinagi`, copies `hikarinagi_sync_state.last_event_id` into `catalog_sync_cursors`, drops `hikarinagi_sync_state` | the legacy backend must be stopped first; down recreates the cursor table |
 | `20261003062900_messages_receiver_index` | `CREATE INDEX CONCURRENTLY` on `messages (receiver_id, read, created)` | no table lock |
+| `20261003063000_pg_trgm` | `CREATE EXTENSION IF NOT EXISTS pg_trgm` (trusted extension, needs `CREATE` on the database) | none |
+| `20261003071608_search_and_foreign_key_indexes` | Trigram GIN indexes on game titles, tag names, developer and character names; GIN on `games.platform`; indexes on catalog foreign keys and on rated covers (`game_covers (game_id) WHERE sexual > 0`) | plain `CREATE INDEX` locks writes on these catalog tables for seconds; run during the cutover window |
 
 ## Intentional deviations
 

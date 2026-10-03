@@ -499,6 +499,41 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{GamesColumns[18]},
 			},
+			{
+				Name:    "games_title_jp_trgm_idx",
+				Unique:  false,
+				Columns: []*schema.Column{GamesColumns[4]},
+				Annotation: &entsql.IndexAnnotation{
+					OpClass: "gin_trgm_ops",
+					Type:    "GIN",
+				},
+			},
+			{
+				Name:    "games_title_zh_trgm_idx",
+				Unique:  false,
+				Columns: []*schema.Column{GamesColumns[5]},
+				Annotation: &entsql.IndexAnnotation{
+					OpClass: "gin_trgm_ops",
+					Type:    "GIN",
+				},
+			},
+			{
+				Name:    "games_title_en_trgm_idx",
+				Unique:  false,
+				Columns: []*schema.Column{GamesColumns[6]},
+				Annotation: &entsql.IndexAnnotation{
+					OpClass: "gin_trgm_ops",
+					Type:    "GIN",
+				},
+			},
+			{
+				Name:    "games_platform_idx",
+				Unique:  false,
+				Columns: []*schema.Column{GamesColumns[17]},
+				Annotation: &entsql.IndexAnnotation{
+					Type: "GIN",
+				},
+			},
 		},
 	}
 	// GameCharactersColumns holds the columns for the "game_characters" table.
@@ -554,6 +589,33 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{GameCharactersColumns[2]},
 			},
+			{
+				Name:    "game_characters_name_jp_trgm_idx",
+				Unique:  false,
+				Columns: []*schema.Column{GameCharactersColumns[5]},
+				Annotation: &entsql.IndexAnnotation{
+					OpClass: "gin_trgm_ops",
+					Type:    "GIN",
+				},
+			},
+			{
+				Name:    "game_characters_name_zh_trgm_idx",
+				Unique:  false,
+				Columns: []*schema.Column{GameCharactersColumns[6]},
+				Annotation: &entsql.IndexAnnotation{
+					OpClass: "gin_trgm_ops",
+					Type:    "GIN",
+				},
+			},
+			{
+				Name:    "game_characters_name_en_trgm_idx",
+				Unique:  false,
+				Columns: []*schema.Column{GameCharactersColumns[7]},
+				Annotation: &entsql.IndexAnnotation{
+					OpClass: "gin_trgm_ops",
+					Type:    "GIN",
+				},
+			},
 		},
 	}
 	// GameCharacterRelationsColumns holds the columns for the "game_character_relations" table.
@@ -592,6 +654,11 @@ var (
 				Unique:  true,
 				Columns: []*schema.Column{GameCharacterRelationsColumns[6], GameCharacterRelationsColumns[7]},
 			},
+			{
+				Name:    "game_character_relations_character_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{GameCharacterRelationsColumns[7]},
+			},
 		},
 	}
 	// GameCoversColumns holds the columns for the "game_covers" table.
@@ -628,6 +695,19 @@ var (
 				Name:    "game_covers_source_source_key_idx",
 				Unique:  false,
 				Columns: []*schema.Column{GameCoversColumns[7], GameCoversColumns[8]},
+			},
+			{
+				Name:    "game_covers_game_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{GameCoversColumns[12]},
+			},
+			{
+				Name:    "game_covers_rated_game_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{GameCoversColumns[12]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "sexual > 0",
+				},
 			},
 		},
 	}
@@ -683,6 +763,20 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{GameDevelopersColumns[2]},
 			},
+			{
+				Name:    "game_developers_name_trgm_idx",
+				Unique:  false,
+				Columns: []*schema.Column{GameDevelopersColumns[4]},
+				Annotation: &entsql.IndexAnnotation{
+					OpClass: "gin_trgm_ops",
+					Type:    "GIN",
+				},
+			},
+			{
+				Name:    "game_developers_parent_developer_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{GameDevelopersColumns[14]},
+			},
 		},
 	}
 	// GameDeveloperRelationsColumns holds the columns for the "game_developer_relations" table.
@@ -718,6 +812,11 @@ var (
 				Name:    "game_developer_relations_game_id_developer_id_key",
 				Unique:  true,
 				Columns: []*schema.Column{GameDeveloperRelationsColumns[4], GameDeveloperRelationsColumns[5]},
+			},
+			{
+				Name:    "game_developer_relations_developer_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{GameDeveloperRelationsColumns[5]},
 			},
 		},
 	}
@@ -978,6 +1077,11 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{GameImagesColumns[5], GameImagesColumns[6]},
 			},
+			{
+				Name:    "game_images_game_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{GameImagesColumns[10]},
+			},
 		},
 	}
 	// GameLinksColumns holds the columns for the "game_links" table.
@@ -1001,6 +1105,13 @@ var (
 				Columns:    []*schema.Column{GameLinksColumns[6]},
 				RefColumns: []*schema.Column{GamesColumns[0]},
 				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "game_links_game_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{GameLinksColumns[6]},
 			},
 		},
 	}
@@ -1506,6 +1617,15 @@ var (
 				Name:    "tags_count_idx",
 				Unique:  false,
 				Columns: []*schema.Column{TagsColumns[3]},
+			},
+			{
+				Name:    "tags_name_trgm_idx",
+				Unique:  false,
+				Columns: []*schema.Column{TagsColumns[1]},
+				Annotation: &entsql.IndexAnnotation{
+					OpClass: "gin_trgm_ops",
+					Type:    "GIN",
+				},
 			},
 		},
 	}

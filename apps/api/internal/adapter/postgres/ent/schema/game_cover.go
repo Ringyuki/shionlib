@@ -44,5 +44,7 @@ func (GameCover) Edges() []ent.Edge {
 func (GameCover) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("source", "source_key").StorageKey("game_covers_source_source_key_idx"),
+		index.Fields("game_id").StorageKey("game_covers_game_id_idx"),
+		index.Fields("game_id").Annotations(entsql.IndexWhere("sexual > 0")).StorageKey("game_covers_rated_game_id_idx"),
 	}
 }

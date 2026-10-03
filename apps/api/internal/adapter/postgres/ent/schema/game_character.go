@@ -59,5 +59,8 @@ func (GameCharacter) Indexes() []ent.Index {
 		index.Fields("b_id", "v_id").StorageKey("game_characters_b_id_v_id_idx"),
 		index.Fields("b_id").StorageKey("game_characters_b_id_idx"),
 		index.Fields("v_id").StorageKey("game_characters_v_id_idx"),
+		index.Fields("name_jp").Annotations(entsql.IndexType("GIN"), entsql.OpClass("gin_trgm_ops")).StorageKey("game_characters_name_jp_trgm_idx"),
+		index.Fields("name_zh").Annotations(entsql.IndexType("GIN"), entsql.OpClass("gin_trgm_ops")).StorageKey("game_characters_name_zh_trgm_idx"),
+		index.Fields("name_en").Annotations(entsql.IndexType("GIN"), entsql.OpClass("gin_trgm_ops")).StorageKey("game_characters_name_en_trgm_idx"),
 	}
 }

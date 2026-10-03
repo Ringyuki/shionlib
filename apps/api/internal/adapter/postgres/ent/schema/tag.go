@@ -37,5 +37,6 @@ func (Tag) Edges() []ent.Edge {
 func (Tag) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("count").StorageKey("tags_count_idx"),
+		index.Fields("name").Annotations(entsql.IndexType("GIN"), entsql.OpClass("gin_trgm_ops")).StorageKey("tags_name_trgm_idx"),
 	}
 }

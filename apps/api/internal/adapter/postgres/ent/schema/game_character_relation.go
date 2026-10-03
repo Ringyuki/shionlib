@@ -40,5 +40,6 @@ func (GameCharacterRelation) Edges() []ent.Edge {
 func (GameCharacterRelation) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("game_id", "character_id").Unique().StorageKey("game_character_relations_game_id_character_id_key"),
+		index.Fields("character_id").StorageKey("game_character_relations_character_id_idx"),
 	}
 }

@@ -77,5 +77,9 @@ func (Game) Indexes() []ent.Index {
 		index.Fields("v_id").StorageKey("games_v_id_idx"),
 		index.Fields("hot_score").StorageKey("games_hot_score_idx"),
 		index.Fields("downloads").StorageKey("games_downloads_idx"),
+		index.Fields("title_jp").Annotations(entsql.IndexType("GIN"), entsql.OpClass("gin_trgm_ops")).StorageKey("games_title_jp_trgm_idx"),
+		index.Fields("title_zh").Annotations(entsql.IndexType("GIN"), entsql.OpClass("gin_trgm_ops")).StorageKey("games_title_zh_trgm_idx"),
+		index.Fields("title_en").Annotations(entsql.IndexType("GIN"), entsql.OpClass("gin_trgm_ops")).StorageKey("games_title_en_trgm_idx"),
+		index.Fields("platform").Annotations(entsql.IndexType("GIN")).StorageKey("games_platform_idx"),
 	}
 }
