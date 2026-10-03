@@ -1,0 +1,3013 @@
+{
+  "field_permission_mappings": [
+    {
+      "entity": "game",
+      "field": "IDS",
+      "bit_index": 0,
+      "is_relation": false
+    },
+    {
+      "entity": "game",
+      "field": "TITLES",
+      "bit_index": 1,
+      "is_relation": false
+    },
+    {
+      "entity": "game",
+      "field": "INTROS",
+      "bit_index": 2,
+      "is_relation": false
+    },
+    {
+      "entity": "game",
+      "field": "ALIASES",
+      "bit_index": 3,
+      "is_relation": false
+    },
+    {
+      "entity": "game",
+      "field": "RELEASE",
+      "bit_index": 4,
+      "is_relation": false
+    },
+    {
+      "entity": "game",
+      "field": "TYPE",
+      "bit_index": 5,
+      "is_relation": false
+    },
+    {
+      "entity": "game",
+      "field": "PLATFORMS",
+      "bit_index": 6,
+      "is_relation": false
+    },
+    {
+      "entity": "game",
+      "field": "EXTRA",
+      "bit_index": 7,
+      "is_relation": false
+    },
+    {
+      "entity": "game",
+      "field": "TAGS",
+      "bit_index": 8,
+      "is_relation": false
+    },
+    {
+      "entity": "game",
+      "field": "STAFFS",
+      "bit_index": 9,
+      "is_relation": false
+    },
+    {
+      "entity": "game",
+      "field": "MANAGE_LINKS",
+      "bit_index": 10,
+      "is_relation": true
+    },
+    {
+      "entity": "game",
+      "field": "MANAGE_COVERS",
+      "bit_index": 11,
+      "is_relation": true
+    },
+    {
+      "entity": "game",
+      "field": "MANAGE_IMAGES",
+      "bit_index": 12,
+      "is_relation": true
+    },
+    {
+      "entity": "game",
+      "field": "MANAGE_DEVELOPERS",
+      "bit_index": 13,
+      "is_relation": true
+    },
+    {
+      "entity": "game",
+      "field": "MANAGE_CHARACTERS",
+      "bit_index": 14,
+      "is_relation": true
+    },
+    {
+      "entity": "game",
+      "field": "STATUS",
+      "bit_index": 15,
+      "is_relation": false
+    },
+    {
+      "entity": "game",
+      "field": "NSFW",
+      "bit_index": 16,
+      "is_relation": false
+    },
+    {
+      "entity": "game",
+      "field": "VIEWS",
+      "bit_index": 17,
+      "is_relation": false
+    },
+    {
+      "entity": "character",
+      "field": "IDS",
+      "bit_index": 0,
+      "is_relation": false
+    },
+    {
+      "entity": "character",
+      "field": "NAMES",
+      "bit_index": 1,
+      "is_relation": false
+    },
+    {
+      "entity": "character",
+      "field": "INTROS",
+      "bit_index": 2,
+      "is_relation": false
+    },
+    {
+      "entity": "character",
+      "field": "ALIASES",
+      "bit_index": 3,
+      "is_relation": false
+    },
+    {
+      "entity": "character",
+      "field": "IMAGE",
+      "bit_index": 4,
+      "is_relation": false
+    },
+    {
+      "entity": "character",
+      "field": "BODY_METRICS",
+      "bit_index": 5,
+      "is_relation": false
+    },
+    {
+      "entity": "character",
+      "field": "AGE_BIRTHDAY",
+      "bit_index": 6,
+      "is_relation": false
+    },
+    {
+      "entity": "character",
+      "field": "BLOOD_TYPE",
+      "bit_index": 7,
+      "is_relation": false
+    },
+    {
+      "entity": "character",
+      "field": "GENDER",
+      "bit_index": 8,
+      "is_relation": false
+    },
+    {
+      "entity": "developer",
+      "field": "IDS",
+      "bit_index": 0,
+      "is_relation": false
+    },
+    {
+      "entity": "developer",
+      "field": "NAME",
+      "bit_index": 1,
+      "is_relation": false
+    },
+    {
+      "entity": "developer",
+      "field": "ALIASES",
+      "bit_index": 2,
+      "is_relation": false
+    },
+    {
+      "entity": "developer",
+      "field": "INTROS",
+      "bit_index": 3,
+      "is_relation": false
+    },
+    {
+      "entity": "developer",
+      "field": "EXTRA",
+      "bit_index": 4,
+      "is_relation": false
+    },
+    {
+      "entity": "developer",
+      "field": "LOGO",
+      "bit_index": 5,
+      "is_relation": false
+    },
+    {
+      "entity": "developer",
+      "field": "WEBSITE",
+      "bit_index": 6,
+      "is_relation": false
+    }
+  ],
+  "game_developers": [
+    {
+      "id": 1,
+      "b_id": "28936",
+      "v_id": "p3312",
+      "name": "まどそふと",
+      "aliases": [
+        "窗社"
+      ],
+      "logo": "developer/1/image/9973de50-6611-431f-a8bd-6d392011c3ae.webp",
+      "intro_jp": "まどそふとは、日本のアダルトゲームブランドである。2013年7月26日に処女作となる『ナマイキデレーション』を発売。2014年9月26日に『ヤキモチストリーム』を発売。2016年4月28日に『ワガママハイスペック』を発売した。3作目の『ワガママハイスペック』ではゲームの発売に先行してアニメーションが放送された。",
+      "intro_zh": "",
+      "intro_en": "",
+      "website": null,
+      "extra_info": [
+        {
+          "key": "引用来源",
+          "value": "madosoft.net"
+        }
+      ],
+      "parent_developer_id": null
+    },
+    {
+      "id": 2,
+      "b_id": "33461",
+      "v_id": "p6193",
+      "name": "きゃべつそふと",
+      "aliases": [
+        "包菜社",
+        "Cabbage Soft",
+        "卷心菜社"
+      ],
+      "logo": "developer/2/image/69028b2c-88ab-4427-8d5d-e4994c119f57.webp",
+      "intro_jp": "",
+      "intro_zh": "",
+      "intro_en": "",
+      "website": null,
+      "extra_info": [
+        {
+          "key": "官方网站",
+          "value": "http://cabbage-soft.com/"
+        }
+      ],
+      "parent_developer_id": null
+    },
+    {
+      "id": 3,
+      "b_id": "7380",
+      "v_id": "p76",
+      "name": "PULLTOP",
+      "aliases": [
+        "易拉罐社",
+        "プルトップ"
+      ],
+      "logo": "developer/3/image/74d128be-34ff-4da3-a893-1b0c2c24cdc6.webp",
+      "intro_jp": "株式会社ウィルプラスのアダルトゲームブランドである。\r\n2002年、Leafからウィルに移籍した椎原旬を中心としたメンバーにより結成。椎原旬・たけやまさみを中心とするラインと、藤原々々を中心とするラインで交互に作品を発表している。\r\nなお2010年にPULLTOP結成当初のスタッフ（椎原旬・下原正・たけやまさみ）がPULLTOP（ウィル）を退社し、新ブランド・SEVEN WONDERを旗揚げしている。",
+      "intro_zh": "",
+      "intro_en": "",
+      "website": null,
+      "extra_info": [
+        {
+          "key": "引用来源",
+          "value": "wikipedia"
+        },
+        {
+          "key": "设立",
+          "value": "2002年"
+        },
+        {
+          "key": "官方网站",
+          "value": "http://www.pulltop.com/"
+        },
+        {
+          "key": "母公司",
+          "value": "WillPlus"
+        }
+      ],
+      "parent_developer_id": null
+    }
+  ],
+  "game_characters": [
+    {
+      "id": 1,
+      "b_id": "74284",
+      "v_id": "c87837",
+      "image": "character/1/image/352bd5b4-8209-4a5d-9434-fe2a95310329.webp",
+      "name_jp": "和泉妃愛",
+      "name_zh": "和泉妃爱",
+      "name_en": "Izumi Hiyori",
+      "aliases": [
+        "和泉 妃愛",
+        "いずみ ひより",
+        "Izumi Hiyori",
+        "Hiyorin",
+        "ひよりん",
+        "Koizumi Hiyori",
+        "小泉 妃愛"
+      ],
+      "intro_jp": "智宏の妹にして子役上がりの覇権声優。\r\n一家の稼ぎ頭であり、家計を完全掌握している。\r\nその結果、ガチャを回すため平身低頭に徹する智宏と\r\nそれを甘やかす妃愛、という構図が完全に出来上がってしまった。\r\n実のところ、智宏のお世話をしないと調子が狂うのは妃愛の方だが、\r\nそれを知るのは智宏ただ一人。",
+      "intro_zh": "",
+      "intro_en": "Creative Skill: Voice Actress\nSpecial Skill: Rock Paper Scissors\nFavorite Food: Onii-chan's Chinese Fried Rice\nHobby: Housework\n\n[url=https://vndb.org/c87836]Tomohiro[/url]'s little sister, and a child star turned successful voice actress.\nAs the breadwinner of their family, she manages their household finances.\nIt ends up that in their household, she often spoils Tomohiro when he prostrates to her asking for money to roll gacha.\nIn reality, she's the one who would go crazy if she doesn't pamper Tomohiro, but he's the only one who knows that.\n\n\"So Onii is the student council president now?\nThis imouto always believed that you could succeed if you tried.\"\n\n[From the [url=https://madosoft.net/hamidashi/character]official website[/url]]\n\nShe voices characters in the gacha game Tomohiro plays, and is also a singer who [url=https://vndb.org/c87840]Shio[/url] is a fan of. Of course, her voice can also be found in the latest anime.",
+      "blood_type": null,
+      "height": null,
+      "weight": 40,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        9,
+        5
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 2,
+      "b_id": "74285",
+      "v_id": "c87838",
+      "image": "character/2/image/ed45c908-271c-4929-bc7c-588f7c1be99e.webp",
+      "name_jp": "常磐華乃",
+      "name_zh": "常磐华乃",
+      "name_en": "Tokiwa Kano",
+      "aliases": [
+        "常磐 華乃",
+        "ときわ かの",
+        "Tokiwa Kano",
+        "かのちん",
+        "ののか"
+      ],
+      "intro_jp": "今年度の頭に智宏のクラスへとやって来た謎の転入生。\r\n転入２日目から不登校になり、その謎に一層深みが増した。\r\nその正体は、世間でも知られた人気イラストレーター。\r\n最近はソシャゲの仕事をしながらSNSに落書きをアップし\r\n自尊心を満たしている。\r\n過去に智宏と面識があるらしいが……？\r\n好物はたこ焼き。好き過ぎて自画像がたこ焼き化している。",
+      "intro_zh": "",
+      "intro_en": "Creative Skill: Illustrator\nSpecial Skill: Sewing\nFavorite Food: Takoyaki\nHobby: Sleeping\n\nThe mysterious transfer student who transferred into class at the beginning of the year, and went truant on her second day.\nShe's actually a world-famous illustrator.\nRecently she's been working on art for social games while posting sketches online to maintain her pride.\nIt seems she's made acquaintance with [url=https://vndb.org/c87836]Tomohiro[/url] in the past.\nShe loves takoyaki. She loves it so much she set it as her profile picture.\n\n\"You know, I wasn't even planning on eating until now.\nBut of course I'll want to eat takoyaki if you tempt me like that!\"\n\n[From the [url=https://madosoft.net/hamidashi/character]official website[/url]]\n\nAs an illustrator she's known as Nonoka, who Tomohiro is a huge fan of. \nIn the gacha game he plays, she illustrates a character who [url=https://vndb.org/c87837]Hiyori[/url] voices.\nShe also illustrated the VTuber [url=https://vndb.org/c101936]Yukige Shiki[/url] and they both admire each other's work.\nShe works on games, anime, manga, eroge, and the like.",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        1,
+        31
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 3,
+      "b_id": "74286",
+      "v_id": "c87839",
+      "image": "character/3/image/05a250a8-8dd9-4117-94fc-a7e2c366d7f2.webp",
+      "name_jp": "錦あすみ",
+      "name_zh": "锦明日海",
+      "name_en": "Nishiki Asumi",
+      "aliases": [
+        "にしき　あすみ",
+        "Nishiki Asumi",
+        "すみぴっぴ"
+      ],
+      "intro_jp": "",
+      "intro_zh": "智宏在便利店偶遇到的后辈。\r\n然而，在学校几乎无法遇到。\r\n外表和性格都是非常稀有的“好孩子”角色，\r\n正因如此，对她不上学的理由一无所知。\r\n正在以雪景四季的名字，开展Vtuber活动。\r\n不输给专业人士歌喉的口碑，\r\n使她的的频道订阅数飞速增长。\r\n深爱肉包，哪怕盛夏都不会使她的爱变质。",
+      "intro_en": "Creative Skill: Vtuber\nSpecial Skill: Massaging\nFavorite Food: Steamed Meat Buns\nHobby: Singing\n\n[url=https://vndb.org/c87836]Tomohiro[/url]'s junior, she met him at a convenience store.\nYou won't often find her at school.\nLike a rare character, her appearances and personality are great, yet it's a mystery as to why she's truant.\nUnbeknownst to anyone, she's the face behind the Vtuber [url=https://vndb.org/c101936]Yukigeshiki[/url].\nWith her singing skills that put pros to shame, her subscriber count is skyrocketing. \nHer love for steamed meat buns doesn't fade even in the sweltering summer months.\n\n\"I'm not good at dealing with guys,\nBut I don't sense any obscenity from you, senpai...\"\n\n[From the [url=https://madosoft.net/hamidashi/character]official website[/url]]",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        12,
+        1
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 4,
+      "b_id": "74287",
+      "v_id": "c87840",
+      "image": "character/4/image/6074c5b8-6f2b-4321-93eb-082ae72b8724.webp",
+      "name_jp": "鎌倉詩桜",
+      "name_zh": "镰仓诗樱",
+      "name_en": "Kamakura Shio",
+      "aliases": [
+        "鎌倉 詩桜",
+        "かまくら しお",
+        "Kamakura Shio",
+        "Hoshi Shion",
+        "星しをん",
+        "Shiopoyo",
+        "しおぽよ",
+        "Miura Daikon-senpai",
+        "三浦大根先輩",
+        "Shogun",
+        "将軍"
+      ],
+      "intro_jp": "智宏が災難を被る羽目になった元凶であり、またの役職名を 前生徒会長 。\r\n会長職にあった当時は高いカリスマ性を誇り、他校にもファンがいたほど。\r\nただし、他の役員を全員クビにした経験を持つなど性根はねじれている。\r\n職業作家でもあり、自分の経験を描写に活かすタイプで、\r\n会長職もその一環だった。\r\n「名字から歴史ネタでいじられがち」な事を密かに気にしている。",
+      "intro_zh": "",
+      "intro_en": "Creative Skill: Novelist\nSpecial Skill: Ear Cleaning\nFavorite Food: Noodles, Local Specialties when Travelling\nHobby: Observing People, Fishing\n\nThe former student council president, she's the cause of [url=https://vndb.org/c87836]Tomohiro[/url]'s problems.\nWhen she was student council president, her charisma earned her fans even in other schools, let alone their own.\nBut she has a twisted personality, having fired all the other council members.\nIn her eyes, the student council presidency was just one of the life experiences that she draws upon to use in her works as a professional novelist.\nShe's annoyed that people make history jokes about her surname Kamakura, but she keeps that a secret.\n\n\"The pitch accent is wrong. It's not shi-o (→ ↑, salt), it's Shi-o (↑ ↑). \nAlthough it's true that my way of doing things makes some people salty...\"\n\n[From the [url=https://madosoft.net/hamidashi/character]official website[/url]]",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        2,
+        18
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 5,
+      "b_id": "74288",
+      "v_id": null,
+      "image": "",
+      "name_jp": "和泉智宏",
+      "name_zh": "和泉智宏",
+      "name_en": null,
+      "aliases": [
+        "和泉 智宏",
+        "いずみ ともひろ",
+        "Izumi Tomohiro"
+      ],
+      "intro_jp": "",
+      "intro_zh": "本作男主人公，典型自闭症。\r\n在班中形如空气，不幸抓阄抽中了学生会长，一日之内连升三级。",
+      "intro_en": "",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [],
+      "gender": []
+    },
+    {
+      "id": 6,
+      "b_id": "78074",
+      "v_id": "c91566",
+      "image": "character/6/image/674ebd7b-8e44-4a4e-86a9-2c73e32477a6.webp",
+      "name_jp": "竜閑天梨",
+      "name_zh": "龙闲天梨",
+      "name_en": "Ryuukan Ameri",
+      "aliases": [
+        "竜閑 天梨",
+        "りゅうかん あめり"
+      ],
+      "intro_jp": "智宏の同級生にして、クラスのカースト最上位。\r\n読モとしても活動中で、雑誌の表紙を飾るなど\r\nグングン人気を伸ばしている。\r\nただ、最近は仕事と友達付き合いの\r\nバランスに困っているようで……？",
+      "intro_zh": "",
+      "intro_en": "Creative Point: Fashion Model\nSpecial Skill: Makeup, Taking and Editing Pictures\nFavorite Food: Potato Salad\nHobby: Photo-based Social Media\n\nA popular model in fashion magazines. She's often featured on magazine covers, and recently was invited to a fashion show.\nShe was at the top of the school pecking order, but recently she's been too busy to meet with her friends.\nA savvy and experienced social media user, she doesn't seem to complement [url=https://vndb.org/c87836]Tomohiro[/url] at all. Yet for some reason, she's been hanging out with the student council lately.\n\n\"Uhmmm, I do like crowds, you know? Also, festival!\nIt's the very definition of 'enjoying your summer.'\"\n\n[From the [url=https://madosoft.net/hamidashi_totsu/character]official website[/url]]",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        3,
+        17
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 7,
+      "b_id": "78075",
+      "v_id": "c91567",
+      "image": "character/7/image/8995bbc3-39db-4a8b-ac8f-82a7b2ecdae2.webp",
+      "name_jp": "和泉里",
+      "name_zh": "和泉 里",
+      "name_en": "Izumi Miri",
+      "aliases": [
+        "和泉 里",
+        "いずみ みり",
+        "ミリ"
+      ],
+      "intro_jp": "智宏の従姉。クラスの担任であり、生徒会の顧問も兼任。\r\n学生時代は読モをやっていたというのも納得の美貌で、\r\n今日も男子学生の目を奪っている。\r\nまだまだ若いのか、言葉遣いはちょっと前のギャルそのもの。",
+      "intro_zh": "",
+      "intro_en": "[url=https://vndb.org/c87836]Tomohiro[/url]'s cousin, she serves as his homeroom teacher and the student council advisor.\nWith her beauty, it's no surprise she was a magazine fashion model in her student days. Even now, she attracts the attention of the male students.\nShe's still young, but her speech resembles that of a gal from the past.\n\n[From the [url=https://madosoft.net/hamidashi/sub_character]official website[/url]]",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        4,
+        16
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 8,
+      "b_id": "78076",
+      "v_id": "c91568",
+      "image": "character/8/image/a273d8a7-5b3b-4130-8b98-1d0ccf2d2e69.webp",
+      "name_jp": "新川広夢",
+      "name_zh": "新川广梦",
+      "name_en": "Shinkawa Hiromu",
+      "aliases": [
+        "新川 広夢",
+        "しんかわ ひろむ"
+      ],
+      "intro_jp": "智宏の席の後ろに座る男子。\r\nクラスでも珍しく智宏へ積極的に絡んでくる。\r\nその可愛らしい顔立ちは、中性的というよりもはや女の子。\r\n体格もさほど大きくなく、声色も適度に明るいため、\r\nドギマギさせられることもしばしば。",
+      "intro_zh": "",
+      "intro_en": "The boy who sits behind [url=https://vndb.org/c87836]Tomohiro[/url] in class.\nHe's strangely proactive about interacting with our protagonist.\nThat cute face is androgynous, and in fact some would say it's girly.\nYou might even find yourself flustered with that small build and somewhat bright voice.\n\n[Translated from the [url=https://madosoft.net/hamidashi/sub_character]official website[/url]]\n\n[spoiler]He's the face behind the popular VTuber Rema-chan (レマちゃん), who consistently gets over 100,000 views on her daily morning horoscopes. In addition, he's a famous crossplayer known as Mare-san (稀礼さん).[/spoiler]",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        12,
+        22
+      ],
+      "gender": [
+        "m",
+        "m"
+      ]
+    },
+    {
+      "id": 9,
+      "b_id": "78077",
+      "v_id": "c91569",
+      "image": "character/9/image/6da6c061-1579-40a6-888d-7b6751a4a6c4.webp",
+      "name_jp": "聖莉々子",
+      "name_zh": "圣莉莉子",
+      "name_en": "Hijiri Ririko",
+      "aliases": [
+        "聖 莉々子",
+        "ひじり りりこ"
+      ],
+      "intro_jp": "千玉随一のお嬢様校・百合ヶ峰学園の生徒会長。\r\n丁寧ながらやや上から目線な喋り方と、\r\nそのステータスの高さから、\r\n学生の間では同調圧力の鬼と化している。\r\n詩桜に対してライバル意識を持っているが、\r\n当の詩桜からはいい知り合いと思われている。",
+      "intro_zh": "",
+      "intro_en": "The student council president at Yurigamine Academy, the most prestigious girls' school in Chidama.\nOwing to that polite and slightly condescending tone in tandem with her high status, she's thought of as a demon of conformity as she always seeks the unanimous agreement of those present.\nIt seems she's thought of as a good acquaintance by [url=https://vndb.org/c87840]Shio[/url].\n\n[From the [url=https://madosoft.net/hamidashi/sub_character]official website[/url]]",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        8,
+        15
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 10,
+      "b_id": "170114",
+      "v_id": "c148006",
+      "image": "character/10/image/4f9b1a6a-d972-4110-a04a-44e3d2802aa9.webp",
+      "name_jp": "美倉礼良",
+      "name_zh": "美仓礼良",
+      "name_en": "Mikura Rara",
+      "aliases": [
+        "美倉礼良",
+        "みくら らら"
+      ],
+      "intro_jp": "聖家お抱えの家事代行で、自称「メイドさん」。\r\n莉々子の居住空間の清掃・片付けを担当しているものの、\r\nほとんどの業務を平日の日中に行うため、\r\n莉々子本人と接する機会はあまり無い。\r\n勤務態度は非常に真面目だが、\r\n勤務時間外は不真面目との目撃情報も。",
+      "intro_zh": "",
+      "intro_en": "She is a housekeeper for the Hijiri family and calls herself a \"maid\".\nAlthough she is in charge of cleaning and tidying up Ririko's living space,\nbut since she does most of her work during the weekdays, she doesn't have much contact with Ririko herself,\nshe does not have much opportunity to interact with Ririko herself.\nHer work attitude is very serious,\nHowever, there are some witnesses who say that she is not so serious outside of working hours.",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        11,
+        28
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 11,
+      "b_id": "104139",
+      "v_id": "c104918",
+      "image": "character/11/image/71cf0f46-4bc0-43b5-b349-6c74a9d79d28.webp",
+      "name_jp": "ルビイ",
+      "name_zh": null,
+      "name_en": "Ruby",
+      "aliases": [
+        "Ruby"
+      ],
+      "intro_jp": "敵組織《メデューサ》の女性幹部。\r\n主人公ソーマを「兄ぃ」と呼ぶ幼馴染でもある。\r\n組織きっての脅威として知られ、その犠牲となった\r\n命の数は計り知れない。フリギア軍の認定した\r\nコードネームは特級戦力《紅玉》。\r\n昔のよしみかソーマに対しては人懐っこく甘える\r\nものの、クラスメイトのことは酷く敵視している。",
+      "intro_zh": "",
+      "intro_en": "\"Let's play together again like in the old days, Nii?\"\n\n- Affiliation: Medusa.\n- Birthday: January 24.\n- Height: 157cm.\n- Three Size: B88(F)/W57/H89.\n- Likes: Waffles/Her brother, Souma.\n- Dislikes: ???\n- Will/Gem: \"Red, Brilliant Crimson Fruit of Wrath\" Red Berry Pigeon's Blood\nCrystallizes blood plasma and produces rubies. It can even turn all the blood flowing inside a target into a blade, making it unrivaled in its ability to kill in terms of lethality.\n\nShe is a female leader of the enemy organization, Medusa.\nShe is also a childhood friend of the main protagonist Souma, whom she calls \"Ani\".\nShe is known as one of the greatest threats in the organization, and the number of lives she has sacrificed is immeasurable.\nHer code name recognized by the Phrygian Military Army is \"Kogyoku\" which means \"special strength\".\nAlthough she is friendly and has sweet affection towards to Souma for old childhood times, she is very antagonistic to Souma's classmates.\n\n[Translated from [url=https://cabbage-soft.com/products/jewelry/character/]Official Website[/url]]",
+      "blood_type": null,
+      "height": 157,
+      "weight": null,
+      "bust": 88,
+      "waist": 57,
+      "hips": 89,
+      "cup": "F",
+      "age": null,
+      "birthday": [
+        1,
+        24
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 12,
+      "b_id": "105042",
+      "v_id": "c104902",
+      "image": "character/12/image/bb90d3a7-cf75-4019-8b48-1ea4ee7c6fc6.webp",
+      "name_jp": "アリアンナ",
+      "name_zh": null,
+      "name_en": "Arianna Heartbell",
+      "aliases": [
+        "Arianna Heartbell"
+      ],
+      "intro_jp": "「クラス・ペガサス」学級長となる女の子。\r\n足並みの揃わないクラスにおける唯一の良心で、\r\nまとまりのない連中を組織する苦労人。\r\n実は名門貴族のお嬢様なのだが、生来の優しさと\r\nフレンドリーさからいい意味で壁を感じさせない。\r\n伝説と謳われる『ダイヤモンド』の意志を持つ、\r\n世界でただ一人の人物。",
+      "intro_zh": "",
+      "intro_en": "\"Let's go, everyone! Let's give it hit with all of our strenght!\"\n\n- Affiliation: Pegasus Class.\n- Birthday: July 12.\n- Height: 162cm.\n- Three Size: B84(C)/W63/H87.\n- Likes: Fairy tale books.\n- Dislikes: Snakes.\n- Will/Gem: \"Wings of Hope in the sky\" Diamond Hope.\n\"I want to fly in the sky\" The power of hope. Grows shining and strong diamond wings of brilliant. It enables to fly and protects oneself and others by covering them.\n\nA girl who becomes the head of her class in Pegasus Class.\nShe is the sole conscience of the class and hard worker who organizes the disorganized group.\nShe is actually the daughter of a prestigious noble family, but her innate kindness and friendliness make her feel no barriers in a good way.\nShe is the only person in the world who possesses the legendary \"Diamond\" will.\n\n[Translated from [url=https://cabbage-soft.com/products/jewelry/character/]Official Website[/url]]",
+      "blood_type": null,
+      "height": 162,
+      "weight": null,
+      "bust": 84,
+      "waist": 63,
+      "hips": 87,
+      "cup": "C",
+      "age": null,
+      "birthday": [
+        7,
+        12
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 13,
+      "b_id": "105043",
+      "v_id": "c104905",
+      "image": "character/13/image/3644010d-b7e1-4155-af14-5cf87bc65d43.webp",
+      "name_jp": "ベルカ・トリアーデ",
+      "name_zh": null,
+      "name_en": "Berka Triade",
+      "aliases": [
+        "Berka Triade"
+      ],
+      "intro_jp": "怜悧かつスポーティなペガサス組のクラスメイト。\r\n剣の道を極めるべくアカデミアへ入学した。\r\n同性すらなびかせる美しい容姿とは裏腹に、\r\nとにかく「強い相手と闘って勝つ」以外のことに\r\n興味を示さない超マイペース女子。",
+      "intro_zh": "",
+      "intro_en": "\"Hey. If you're going to fight, can I join you?\"\n\n- Affiliation: Pegasus Class\n- Birthday: September 30\n- Height: 166 cm\n- Three Size: B85(C)/W62/H83\n- Likes: Strong enemies\n- Dislikes: Enemies of beauty\n- Will/Gem: \"A Thousand Feathers, A Thousand Cuts\" Alexandrite Sword\nA power that prides itself on \"not losing to anyone when it comes to swordsmanship\". All the abilities necessary for sword fights are sharpened, including awareness, sharpness, and judgment. At the end of the day, she is able to reach a state of being like a sixth sense.\n\nShe is a classmate of the Pegasus Class who has sharp sense and sporty.\nShe is enrolls to the Jewerly Academia to master the art of swordsmanship.\nDespite her beautiful appearance that even her own gender is attracted to, she is a very self-paced girl who shows no interest in anything other than \"fighting strong opponents and winning\".\n\n[Translated from [url=https://cabbage-soft.com/products/jewelry/character/]Official Website[/url]]",
+      "blood_type": null,
+      "height": 166,
+      "weight": null,
+      "bust": 85,
+      "waist": 62,
+      "hips": 83,
+      "cup": "C",
+      "age": null,
+      "birthday": [
+        9,
+        30
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 14,
+      "b_id": "105044",
+      "v_id": "c104910",
+      "image": "character/14/image/a1de4481-58e1-479d-a2bb-73928f6c66a5.webp",
+      "name_jp": "メア・アシュリーペッカー",
+      "name_zh": null,
+      "name_en": "Mare Ashley-Pecker",
+      "aliases": [
+        "Mare Ashley-Pecker"
+      ],
+      "intro_jp": "トップの成績でアカデミアへ入学した稀代の才媛。\r\n神学・修辞学・物理学・生物学などあらゆる学問に通じており、彼女の意志もまたその知性に裏打ちされたものだという。猫タイプの獣人種。\r\n幼く可愛げな容姿ながら、常に生意気で毒舌なポーカーフェイス。仲間や人情などには「興味がない」というスタンスを崩さない。",
+      "intro_zh": "",
+      "intro_en": "\"I can record data from all of you even after you die. Just do whatever you want.\"\n\n- Affiliation: Pegasus Class\n- Birthday: March 4\n- Height: 144 cm\n- Three Size: B70(A)/W54/H60\n- Likes: Fried chicken\n- Dislikes: Humanity\n- Will/Gem: \"Fearless is the Princess of Wisdom\" Topaz Reason. [spoiler]After Chatoyancy: \"Chains of Love, Courage and Wisdom\" Santa Maria Aquamarine Endless Chain[/spoiler]\n\nThe power of wisdom that \"fears nothing\". Based on the theory that the unknown is the root of fear, she can instantly analyze the data of any object she shines her light on.\n\nShe is a cat-type beast and a rare talented girl who entered academia with top grades.\nShe is well versed in theology, rhetoric, physics, biology, and all other studies, and her will is also backed by her intellect.\nDespite her young and cute appearance, she always has a poker face with a cheeky and sharp-tongued.\nShe never breaks her stance that she is \"not interested\" in friends or humanity.\n\n[Translated from [url=https://cabbage-soft.com/products/jewelry/character/]Official Website[/url]]",
+      "blood_type": null,
+      "height": 144,
+      "weight": null,
+      "bust": 70,
+      "waist": 54,
+      "hips": 60,
+      "cup": "A",
+      "age": null,
+      "birthday": [
+        3,
+        4
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 15,
+      "b_id": "106144",
+      "v_id": null,
+      "image": "character/15/image/eb81fc2d-ea65-4660-ad98-f90d207ec4c1.webp",
+      "name_jp": "ソーマ・ジェイス",
+      "name_zh": null,
+      "name_en": null,
+      "aliases": [
+        "Soma Jace"
+      ],
+      "intro_jp": "アカデミアへ入学する主人公。その正体は組織\r\n《宵闇連盟》に属するスパイ・エージェント。\r\n学園に眠る『賢者の石』なるアイテムを探るべく送り込まれた。\r\n優秀な頭脳で入試2位の成績を収める──も、なぜか最上級「クラス・ダイヤ」ではなく新設の「クラス・ペガサス」に振り分けられてしまう。",
+      "intro_zh": "",
+      "intro_en": "",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [],
+      "gender": []
+    },
+    {
+      "id": 16,
+      "b_id": "106145",
+      "v_id": "c104911",
+      "image": "character/16/image/3c580b27-6e5b-4170-aab2-f1ef1e91e4d6.webp",
+      "name_jp": "ヴェオ",
+      "name_zh": null,
+      "name_en": "Veo",
+      "aliases": [
+        "Veo"
+      ],
+      "intro_jp": "狼タイプのセリオンにしてクラスの問題児。\r\nよく他クラスとのいざこざを引き起こす。\r\nアカデミアの校則は「決闘」を禁じているものの、\r\n本人はあくまで「ただの喧嘩」と言い張っている。\r\n獣人嫌いのマークスとは文字通り犬猿の仲。\r\n一触即発のムードになるのを、\r\nしばしばアリアンナになだめられている。",
+      "intro_zh": "",
+      "intro_en": "\"I don't hate guys like you, I don't like them\"\n\n- Affiliation: Pegasus Class.\n- Birthday: Mid-October.\n- Height: 175cm.\n- Likes: Dried meat.\n- Dislikes: Group activities.\n\nHe is a wolf-type Therion and the problem child of the class that often causes conflicts with other classes.\nAlthough the academia school rules forbid \"dueling\", he insists that he is \"just a fight\".\nHe literally has a dog-monkey relationship with Markus, who hates beastmen.\nArianna often calms him down when he gets into a volatile mood.\n\n[Translated from [url=https://cabbage-soft.com/products/jewelry/character/]Official Website[/url]]",
+      "blood_type": null,
+      "height": 175,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [],
+      "gender": [
+        "m",
+        "m"
+      ]
+    },
+    {
+      "id": 17,
+      "b_id": "106146",
+      "v_id": "c104912",
+      "image": "character/17/image/01d2572d-4730-4adf-b42f-fa1802f0efdb.webp",
+      "name_jp": "マークス・フォン・レオンシュタイン",
+      "name_zh": null,
+      "name_en": "Markus von Leonstein",
+      "aliases": [
+        "Markus von Leonstein"
+      ],
+      "intro_jp": "フリギア王族・レオンシュタイン家の第四王子。\r\nその誇り高き血統とプライドから最上級クラスを\r\n志願するも、ペガサス組へ配属されてしまった。\r\n王子として常に甘やかされてきたマークスだが、\r\nアカデミアに集う頑固者たちは誰も彼を忖度してく\r\nれないため、初の環境に翻弄されることになる。\r\n妹であるノアを溺愛している。",
+      "intro_zh": "",
+      "intro_en": "\"Do you treat me, a prince, as if I were a beast?\"\n\n- Affiliation: Pegasus Class.\n- Birthday: April 22.\n- Height: 177 cm.\n- Likes: Tea.\n- Dislikes: Beastmen (Therion).\n\nThe fourth prince of the Phrygian royal family, the Leonsteins family.\nDue to his proud in blood lineage and pride, he applied for the Diamond Class. But he was assigned to the Pegasus Class.\nAs a prince, Markus has always been pampered. However, the stubborn people who gather at the academy do not take him seriously and he finds himself at the mercy of his first environment.\nHe loves his sister, Noah, very much.\n\n[Translated from [url=https://cabbage-soft.com/products/jewelry/character/]Official Website[/url]]",
+      "blood_type": null,
+      "height": 177,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        4,
+        22
+      ],
+      "gender": [
+        "m",
+        "m"
+      ]
+    },
+    {
+      "id": 18,
+      "b_id": "106147",
+      "v_id": "c104913",
+      "image": "character/18/image/468857d1-4590-40e2-a8d8-ef5ca5ed08c8.webp",
+      "name_jp": "シャーロット先生",
+      "name_zh": null,
+      "name_en": "Charlotte Jerome",
+      "aliases": [
+        "Charlotte Jerome",
+        "シャーロット先生 (Charlotte-sensei)"
+      ],
+      "intro_jp": "服装も性格もラフなクラス・ペガサス担任教師。\r\nよく言えば放任主義だが、悪く言えばズボラで、\r\n真面目でよく働くアリアンナに連絡や雑務を任せっ\r\nきりにしがち。\r\n担当科目は宝石学。アカデミア特有とも言える\r\n教科で、鉱物学的な研究から意志の解明まで、\r\n幅広い分野に渡る学問となっている。",
+      "intro_zh": "",
+      "intro_en": "\"For the best teacher like me to be in charge of this class, I suppose this is the best class, right?\"\n\n- Affiliation: Academy Teacher/Pegasus Class Homeroom Teacher\n- Birthday: October 5\n- Height: 168cm\n- Three Size: B89(D)/W64/H92\n- Likes: Holidays\n- Dislikes: Homecoming\n[spoiler]- Will/Gem: \"Lighting Flash Spiral Storm\" Tourmaline Tornado[/spoiler]\n\nThe casual-like homeroom teacher of Pegasus Class in both personality and attire.\nKindly speaking, she is a laissez-faire type of person. Badly speaking, she is a sloppy person. She tends to leave any communication related and trivial tasks to the diligent, hardworking Arianna.\nHer subject in charge is Gemology. It is a unique subject to Academia, covering a wide field from mineralogical researches to Will elucidations.\n\n[Translated from [url=https://cabbage-soft.com/products/jewelry/character/]Official Website[/url]]",
+      "blood_type": null,
+      "height": 168,
+      "weight": null,
+      "bust": 89,
+      "waist": 64,
+      "hips": 92,
+      "cup": "D",
+      "age": null,
+      "birthday": [
+        10,
+        5
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 19,
+      "b_id": "106148",
+      "v_id": "c104915",
+      "image": "character/19/image/50372da2-363f-4a98-9c76-10530dfa1b8e.webp",
+      "name_jp": "キャロライナ・マクラクラン",
+      "name_zh": null,
+      "name_en": "Carolina McLachlan",
+      "aliases": [
+        "Carolina McLachlan",
+        "キャロちゃん",
+        "キャロちゃん (Caro-chan)"
+      ],
+      "intro_jp": "アカデミアの広大な図書室を一人で管理する司書。\r\n地味な見た目のメガネなドジっ子で、せわしなく\r\n図書室中を駆け回る姿がしばしば目撃されている。\r\n生徒からも「キャロちゃん」とあだ名で親しまれて\r\nいるが、図書室内で騒いだり本を粗末に扱ったり\r\nすると天雷が落ちるといわれる。",
+      "intro_zh": "",
+      "intro_en": "\"The greatest crime sin in the library is to return the books you have taken back on the safe textile shelves. It's worth every million deaths.\"\n\n- Affiliation: Academy Librarian Teacher\n- Birthday: June 27\n- Height: 152 cm\n- Three Size: B75(A)/W59/H76\n- Likes: History books, dramas\n- Dislikes: Bad manners in her library\n\nThe librarian who alone manages the vast library of the Academia.\nShe is a plain-looking, bespectacled, clumsy girl who is often seen running around the library busily.\nShe is nicknamed \"Caro-chan\" by the students. It is said that if anyone make noise or treat books roughly poor in the library, thunder will strike them.\n\n[Translated from [url=https://cabbage-soft.com/products/jewelry/character/]Official Website[/url]]",
+      "blood_type": null,
+      "height": 152,
+      "weight": null,
+      "bust": 75,
+      "waist": 59,
+      "hips": 76,
+      "cup": "A",
+      "age": null,
+      "birthday": [
+        6,
+        27
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 20,
+      "b_id": "106149",
+      "v_id": "c104916",
+      "image": "character/20/image/1dd84051-bfe5-4dc0-b446-32f9fa857c33.webp",
+      "name_jp": "カーラ・S・クィンバーン",
+      "name_zh": null,
+      "name_en": "Carla Sylvia Quinburn",
+      "aliases": [
+        "Carla Sylvia Quinburn"
+      ],
+      "intro_jp": "最上級クラス「クラス・ダイヤ」の学級委員長。\r\n由緒ある家柄で紛れもないお嬢様のはずだが、\r\nそうと思えぬほど言葉遣いが汚い。\r\n同じ令嬢としてアリアンナを強くライバル視してお\r\nり、事あるごとに突っかかってくる。\r\nただし大体は空回りして自滅してしまう。",
+      "intro_zh": "",
+      "intro_en": "\"The restroom crickets who have fallen behind are yelping and peevishly screaming about something, and it's not pretty. Oh-ho-ho!\"\n\n- Affiliation: Diamond Class\n- Birthday: December 24th\n- Height: 161 cm\n- Three Size: B85(C)/W63/H89\n- Likes: Baccarat\n- Dislikes: Unfriendly things\n\nShe is the class president of the most advanced class, Diamond Class.\nAlthough she comes from a family with a long history and is a lady in her own right, her language is so foul that it is hard to believe that she is a lady.\nAs a daughter of the same family, she sees Arianna as a strong rival, and she pokes fun at her at every opportunity.\nHowever, she usually spins out of control and destroys herself.\n\n[Translated from [url=https://cabbage-soft.com/products/jewelry/character/]Official Website[/url]]",
+      "blood_type": null,
+      "height": 161,
+      "weight": null,
+      "bust": 85,
+      "waist": 63,
+      "hips": 89,
+      "cup": "C",
+      "age": null,
+      "birthday": [
+        12,
+        24
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 21,
+      "b_id": "106150",
+      "v_id": "c104917",
+      "image": "character/21/image/72ab6ae4-c6bc-47f5-bf09-0c9fe688420b.webp",
+      "name_jp": "ノア・フォン・レオンシュタイン",
+      "name_zh": null,
+      "name_en": "Noa von Leonstein",
+      "aliases": [
+        "Noa von Leonstein"
+      ],
+      "intro_jp": "マークスの妹にしてフリギア王家の第一王女。\r\nアカデミア附属校トップの超エリートでもある。\r\n楚々とした佇まいに高貴な立ち居振る舞いは、\r\nまさしく華やかな姫君そのもの。\r\n附属生ながら侮れない大人びた一面も覗かせる。\r\n「兄に見合わずよくできた妹」というのが、\r\n大体の共通認識。",
+      "intro_zh": "",
+      "intro_en": "\"Eheh, thank you to all Pegasus members for all the help you've given to my brother.\"\n\n- Affiliation: Academia Affiliated School\n- Birthday: February 14\n- Height: 150cm\n- Three Size: B78(B)/W58/H80\n- Likes: Her brother's paintings\n- Dislikes: Courtly ties\n[spoiler]- Will/Gem: \"Velvet Dandelion Flower Snowstorm\" Rhodonite Lion Heart[/spoiler]\n\nThe first princess of Phrygia's royal family, Markus' younger sister.\nShe is also top-elite of Academia Affiliated School.\nWith her graceful appearance and noble-like manner, she is indubitably the most brilliant princess in a pure sense.\nAlthough she is an affiliated student, she has a mature side that cannot be underestimated.\nPeople have a common perception that she is \"The refined sister in contrast with the indecorous brother.\"\n\n[Translated from [url=https://cabbage-soft.com/products/jewelry/character/]Official Website[/url]]",
+      "blood_type": null,
+      "height": 150,
+      "weight": null,
+      "bust": 78,
+      "waist": 58,
+      "hips": 80,
+      "cup": "B",
+      "age": null,
+      "birthday": [
+        2,
+        14
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 22,
+      "b_id": null,
+      "v_id": "c141169",
+      "image": "character/22/image/39982541-e094-48bf-9337-df6367d18730.webp",
+      "name_jp": "ギメル・ロードベイン",
+      "name_zh": null,
+      "name_en": "Gimel Lordbane",
+      "aliases": [],
+      "intro_jp": "",
+      "intro_zh": "",
+      "intro_en": "- Affiliation: Medusa.\n- Will/Gem: [spoiler]\"Sword of an Untold Interweaving Prayer's Love\" Gordion Chrysaor.[/spoiler]\n\nThe Ringleader of Medusa organization.",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [],
+      "gender": [
+        "m",
+        "m"
+      ]
+    },
+    {
+      "id": 23,
+      "b_id": null,
+      "v_id": "c141175",
+      "image": "character/23/image/dafa1c23-b4c3-4849-a906-f800fd3ca5a9.webp",
+      "name_jp": "",
+      "name_zh": null,
+      "name_en": "Keito",
+      "aliases": [],
+      "intro_jp": "",
+      "intro_zh": "",
+      "intro_en": "[spoiler]\n- Will/Gem:\n\"The Despised Mirror\" Eyes Meteorite.\n\"Six-way Flawless Flames of Calamity\" Perfect Star Sapphire.\n\"A Glittering Disaster Against the Covetous, Brilliant Extant Hometown of Nothingness - Rubra Melia Serpentes\" Dead Serpent End Brilliant Wonder World.\n\nShe was the Queen Euryale, who got turned into an ugly sapphire serpent by the ugly Empress Palace.\nAfter death, her Dying Will was left behind in the veins of land throughout Phrygia. After a vein of land parts were brought up to the surface, Euryale appeared before Arianna and others, seemingly given an order to \"put an end to the war.\"\nHowever, it is later known that Keito has materialized in every turning point in history, being the background causes of conflicts. She also caused the Seven Years War by killing Elisha, a sub-leader who founded Medusa organization.\nShe tried to end wars by doing the reverse, which is causing conflicts between species to decrease population. Once every lifeform would be exterminated, she would be able to build a world of only herself.\n\n[Translated from [url=https://dic.pixiv.net/a/ジュエリー・ハーツ・アカデミア]Pixiv Dictionary[/url]]\n[/spoiler]",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 24,
+      "b_id": null,
+      "v_id": "c141173",
+      "image": "character/24/image/fbe9b5ed-3f74-402f-b9ab-7430ccda1eb7.webp",
+      "name_jp": "",
+      "name_zh": null,
+      "name_en": "Victor Ray",
+      "aliases": [],
+      "intro_jp": "",
+      "intro_zh": "",
+      "intro_en": "- Will/Gem: [spoiler]\"A Thousand Feathers, A Thousand Cuts\" Alexandrite Sword.[/spoiler]\n\nA homeroom teacher of Diamond Class, later Pegasus Class. He is also the Shooting Club's advisor.\nRay and Charlotte are on good terms with each other.\n\n[Translated from [url=https://dic.pixiv.net/a/ジュエリー・ハーツ・アカデミア]Pixiv Dictionary[/url]]",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [],
+      "gender": [
+        "m",
+        "m"
+      ]
+    },
+    {
+      "id": 25,
+      "b_id": null,
+      "v_id": "c141164",
+      "image": "character/25/image/5540d23d-5e37-4b6a-a98d-58984aeebb40.webp",
+      "name_jp": "キルスティン・ホロウグレイヴ",
+      "name_zh": null,
+      "name_en": "Kirsten Hollowgrave",
+      "aliases": [],
+      "intro_jp": "",
+      "intro_zh": "",
+      "intro_en": "- Affiliation: Medusa.\n- Will/Gem: \"Lamenting the End of Those Sorrowful Squiggling Worms\" Spinel End.\n\nA human, she is one of the leaders of Medusa organization. [spoiler]Possessing exceptional strength in killing Vampires because of an ability called \"The Mind's Eye,\" she is only second to Gimelord in terms of combat power among all Medusa members.\nShe was a main hunting target for many Vampires because of her genotype called \"Rare Blood\" which caused strong attraction to them. After barely managing to escape from her imprisonment by the Vampires, she has seen that her hometown had already been destroyed by them. Since then, she has been holding an immense hatred towards the Vampire species.[/spoiler]\n\n[Translated from [url=https://dic.pixiv.net/a/ジュエリー・ハーツ・アカデミア]Pixiv Dictionary[/url]]",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 26,
+      "b_id": null,
+      "v_id": "c141162",
+      "image": "character/26/image/4cad6583-3665-4a38-924f-2a5bc1296ba2.webp",
+      "name_jp": "",
+      "name_zh": null,
+      "name_en": "Maynart Sky",
+      "aliases": [],
+      "intro_jp": "",
+      "intro_zh": "",
+      "intro_en": "- Affiliation: Medusa.\n- Will/Gem: \"Seraphic Cross Karma\" Clinochlore Crisscross.\n\nA Therion, he is one of the leaders of Medusa organization. He was once an Academia student, under teachings of Victor Ray. He's an easygoing person while also a smooth-talker.\n[spoiler]Maynart used to wield the gem Lapis Lazuli (the Will of pursuit) when he was a student. He once went on a journey to search for the fabled Golden Lord from fairy-tales, but at the end of the journey, his gem was broken to pieces. After obtaining a new Will, he became affiliated with Medusa. He also gained an ideal that \"Justice from the minority can never be acknowledged so I chose to be evil. The disadvantaged have to be tainted with vice if they want to save themselves.\"[/spoiler]\n\n[Translated from [url=https://dic.pixiv.net/a/ジュエリー・ハーツ・アカデミア]Pixiv Dictionary[/url]]",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [],
+      "gender": [
+        "m",
+        "m"
+      ]
+    },
+    {
+      "id": 27,
+      "b_id": null,
+      "v_id": "c141172",
+      "image": "character/27/image/118a96fc-0309-488a-ac5e-21e3e04be8d4.webp",
+      "name_jp": "セシリア・クランルージュ",
+      "name_zh": null,
+      "name_en": "Cecilia CranRouge",
+      "aliases": [],
+      "intro_jp": "",
+      "intro_zh": "",
+      "intro_en": "[spoiler]\n- Will/Gem: \"Complete Devastation Collapse Alcea Meteor\" Gibeon Meteorite.\n\nA Vampire girl who was confined together with χ as a test subject for \"Extreme Transmutation\" experiment. Having a special ability called \"Heaven's Eye,\" she could \"see\" the ancient karma of geological veins of land. \nThroughout her long time in confinement, she managed to see the history of Vampire species suppressing Human species. She formed a strong ideal that \"The Vampire species is a malice, a disgusting existence that should not be allowed to live in this world. All of them must be exterminated.\" This was formed into the Gem \"Meteorite.\"\nThe \"Meteorite\" that Gimel used to confront Pegasus troops was Cecilia's \"Dying Will\" that she left behind for him.\n\n[Translated from [url=https://dic.pixiv.net/a/ジュエリー・ハーツ・アカデミア]Pixiv Dictionary[/url]]\n[/spoiler]",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 28,
+      "b_id": null,
+      "v_id": "c141166",
+      "image": "character/28/image/a9b247e5-c535-49fd-acc0-3727495d26a0.webp",
+      "name_jp": "Dr.ゲゼルマンⅢ世",
+      "name_zh": null,
+      "name_en": "Dr. Gesellmann Ⅲ",
+      "aliases": [
+        "Bruno Gesellmann"
+      ],
+      "intro_jp": "",
+      "intro_zh": "",
+      "intro_en": "[spoiler]\n- Affiliation: Medusa.\n- Will/Gem: \"Interweaving Lifeforms Crystal Phenomenon\" Crystal Pareidolia.\n\nA doctor who has been in the quest to search for the Philosopher's Stone through experiments called \"Extreme Transmutation\" by manually creating Emerald and Diamond (members of The Great Four Gemstones.)\n\n[Translated from [url=https://dic.pixiv.net/a/ジュエリー・ハーツ・アカデミア]Pixiv Dictionary[/url]]\n[/spoiler]",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": 242,
+      "birthday": [
+        10,
+        5
+      ],
+      "gender": [
+        "m",
+        "m"
+      ]
+    },
+    {
+      "id": 29,
+      "b_id": null,
+      "v_id": "c141171",
+      "image": null,
+      "name_jp": "",
+      "name_zh": null,
+      "name_en": "χ",
+      "aliases": [
+        "Kai-kun",
+        "Chi"
+      ],
+      "intro_jp": "",
+      "intro_zh": "",
+      "intro_en": "[spoiler]\nIn Amber Era 1586 (around 30 years before Souma enrolled in Academia), he was a human boy confined in the basement below Academia's construction establishment by Dr. Gesellmann. He was named \"χ\", being the initial test subject for the first \"Extreme Transmutation\" experiment. His true identity is Gimel Lordbane.\nAfter a long period in confinement, when Gesellmann finally showed up in person, he managed to time his escape. Furthermore, he also engraved a seal on Gesellmann's back as a contract to be his lifetime servant.\nGimel's Will is accompanied by Cecilia's Dying Will, a Vampire who was confined with him, escaped with him, and was burned away under the sunlight.\n\n[Translated from [url=https://dic.pixiv.net/a/ジュエリー・ハーツ・アカデミア]Pixiv Dictionary[/url]]\n[/spoiler]",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [],
+      "gender": [
+        "m",
+        "m"
+      ]
+    },
+    {
+      "id": 30,
+      "b_id": null,
+      "v_id": "c141174",
+      "image": "character/30/image/249a042d-e3d8-475a-8cc5-8d0c87cc5ca7.webp",
+      "name_jp": "",
+      "name_zh": null,
+      "name_en": "Sgt. Nestor",
+      "aliases": [],
+      "intro_jp": "",
+      "intro_zh": "",
+      "intro_en": "A sergeant from Phrygia Kingdom Army. \nHe requested for personnel from the Academia to fight against Medusa. He accompanied Pegasus Class on scouting for a while. He is often seen smoking tobacco.\n\n[Translated from [url=https://dic.pixiv.net/a/ジュエリー・ハーツ・アカデミア]Pixiv Dictionary[/url]]",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [],
+      "gender": [
+        "m",
+        "m"
+      ]
+    },
+    {
+      "id": 31,
+      "b_id": "34202",
+      "v_id": "c35175",
+      "image": "character/31/image/49fd2799-6ed7-4fe2-bf79-39729b5b1b89.webp",
+      "name_jp": "箒星ひかり",
+      "name_zh": "帚星光",
+      "name_en": "Houkiboshi Hikari",
+      "aliases": [
+        "箒星 ひかり",
+        "ほうきぼし ひかり",
+        "ぴかりん",
+        "Pikarin"
+      ],
+      "intro_jp": "突然 彗星のごとく帰ってきた、暁斗たちの幼なじみ。\r\n明るく前向きな性格と、「やってみよう！」の一言で行動する旺盛な好奇心の持ち主。\r\n小さい頃はいつも 暁斗・沙夜 と3人で、秘密の天文台で星を観ていた。\r\n彼女にとって天体観測とは、銀河を旅する行為。 まだ見ぬ宙の彼方へ、その好奇心はまさしく “ひかり” の速度で広がっていった。\r\nが、そんな日々は自身の引っ越しによって終わりを迎えてしまう。\r\n\r\nその後は暁斗たちと疎遠となっていたが、年月を経てついに再開。\r\n当時は活発な男の子のようだったが、可愛くてスタイルも良い女子校生へと変身。\r\nそして、再び暁斗たちと星を眺める賑やかな日々を取り戻す。\r\n\r\n「それじゃ あたしたちも行こっか。 秘密の天文台へ」",
+      "intro_zh": "",
+      "intro_en": "Akito's childhood friend who suddenly appeared back in his life like a comet sweeping back on its orbit.\nHikari, Akito, and Saya always used to stargaze together at the secret observatory.\nShe's cheerful and positive, always willing to try something new.\nSometimes her insatiable curiosity can cause trouble for those around her\n\nStargazing for Hikari is just like traveling the galaxy together.\nHer interest in the stars, in seeing further, farther into the unknown propels her forward at the speed of light.\nShe began to stargaze after meeting Akita and Saya, but their meetings were cut short when her family moved away and she lost touch with her friends until they met again several years later.\nBy then, tomboyish country girl Hikari had grown into a cute and stylish teenager\n\n[From [url=https://moenovel.com/a-sky-full-of-stars/]Moenovel's site[/url]]",
+      "blood_type": "o",
+      "height": 161,
+      "weight": null,
+      "bust": 91,
+      "waist": 58,
+      "hips": 88,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        8,
+        20
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 32,
+      "b_id": "34203",
+      "v_id": "c35176",
+      "image": "character/32/image/7297e153-0ead-4ff9-9d04-a62edbe697d6.webp",
+      "name_jp": "天ノ川沙夜",
+      "name_zh": "天之川沙夜",
+      "name_en": "Amanogawa Saya",
+      "aliases": [
+        "天河沙夜",
+        "あまのがわ さや",
+        "通い妻ちゃん",
+        "送饭妻",
+        "Albireo Princess",
+        "Commuter Wife"
+      ],
+      "intro_jp": "濃い青と黄色みがかったオレンジの、左右で違う色の瞳・オッドアイを持つ少女。\r\n成績優秀でまじめ、一見しっかり者のようだが、それは頑張って演じている姿。\r\n本当の彼女はどこか抜けていて、放っておけないところがある。\r\n子供の頃に転校してきた際には、都会からすごい美少女が来たと近隣で噂になるも、\r\n当時はオッドアイがコンプレックスで、必死にサングラスで隠そうとしていた。\r\nその後 暁斗やひかりと仲良くなって、一緒に天体観測をするようになる。\r\n\r\n現在も照れ屋で人見知りだが、暁斗のことになると周囲の目を忘れていくらでも大胆になる。\r\n学園の部室に住み着いている暁斗を心配して毎日せっせと差し入れを運んでおり、\r\nその姿を見た周囲からは “通い妻ちゃん” の二つ名で呼ばれることも。\r\n\r\n「……仲間はずれ、やだからね」",
+      "intro_zh": "",
+      "intro_en": "A pretty girl with two different colored eyes, one a brilliant blue, and the other a yellow-orange. After seeing how she dutifully brings things for Akito when he starts sleeping in the astronomy club room, the other students begin calling her his “commuter wife”.\n\nShe transferred to Akito’s school when they were kids, and everyone was talking about the pretty girl who moved from the city.\nAt the time, she had a complex about her eyes, and always tried to hide them with sunglasses. But then, she became friends with Akito and Hikari, and began stargazing with them.\n\nStudious and serious, she gives off an aura of seeming mature for her age, but that’s actually an act, she’s actually a bit clumsy and people often feel the sudden urge to take care of her.\nShe’s shy and quiet around new people. It’s only when she’s near Akito that she can forget everyone around her and be herself.\n\n[From [url=https://moenovel.com/a-sky-full-of-stars/]Moenovel's site[/url]]",
+      "blood_type": "a",
+      "height": 154,
+      "weight": null,
+      "bust": 80,
+      "waist": 57,
+      "hips": 83,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        1,
+        16
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 33,
+      "b_id": "34204",
+      "v_id": "c35177",
+      "image": "character/33/image/539d7284-955d-46f4-913b-68add61b628d.webp",
+      "name_jp": "白鳥織姫",
+      "name_zh": "白鸟织姬",
+      "name_en": "Shiratori Orihime",
+      "aliases": [
+        "しらとり おりひめ",
+        "姫さん",
+        "姫ちゃん",
+        "Hime"
+      ],
+      "intro_jp": "エスカレーター式の名門校に通う3年生。 天文部の部長を務めている。\r\n実家がお金持ちで、丁寧な口調と鷹揚な態度が品の良さを感じさせるお嬢様。\r\n正統派美人だが、茶目っ気もあり若干 天然も入っている。\r\n怪しい占いに興じているが、実はそれは自分をミステリアスに見せるための演出。\r\n\r\nラスボス感が漂っており、彼女をよく知らない人からは敬遠されてしまうことも。\r\n実際は面倒見が良く後輩思いなので慕われており、男子にも後輩女子にもモテる。\r\n\r\n一度決めたことは貫き通す強い意志の持ち主……だが、その強さを保つために他人に弱さを見せられないでいる。\r\n\r\n「私は、運命を感じずにはいられないのです」",
+      "intro_zh": "",
+      "intro_en": "A senior at a private escalator school,\nTall and curvy, at a glance she’s a picture of beauty.\nCompared to clubs at other schools, the astronomy club at Orihime’s school is active and has alot of supplies.\n\nShe always speaks politely, and treats everyone graciously. At the same time, she can be a little flighty and mischievous.\nShe also likes to act mysteriously, showing interest in shady fortunes.\nOrihime can also be elegant, as she comes from a rich family.\n\nThis makes her seem a bit foreboding to some people, but she’s actually very kind to her juniors.\nFor this reason, people who don’t know her well keep their distance, but her juniors all adore her.\nShe’s popular with both boys and younger girls.\n\nOrihime is also fairly strong-willed, and no matter how nice she may seem, once she makes up her mind there’s no changing it. \nThis all an act to hide her insecurities, though.\n[From [url=https://moenovel.com/a-sky-full-of-stars/]Moenovel's site[/url]]",
+      "blood_type": "o",
+      "height": 162,
+      "weight": null,
+      "bust": 93,
+      "waist": 57,
+      "hips": 89,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        3,
+        14
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 34,
+      "b_id": "34205",
+      "v_id": "c35363",
+      "image": "character/34/image/7e79f91e-1212-4475-b8a6-959a823f9730.webp",
+      "name_jp": "日下部ころな",
+      "name_zh": "日下部可乐娜",
+      "name_en": "Kusakabe Korona",
+      "aliases": [
+        "くさかべ ころな",
+        "メローペ",
+        "Merope"
+      ],
+      "intro_jp": "暁斗たちより一つ年下なだけで、何かと報われない女の子。\r\nひかりに懐いていて暁斗のことが好きなのに、歳のせいで仲間に入れなかった。\r\nそれなのにちゃっかり仲間になっている沙夜が気に食わず、何かと突っかかってしまう。\r\n暁斗を見つけて駆け寄ったらドブに落ち、そのまま発見されず泣いていたというエピソードもある。\r\n\r\nネコみたいな性格で、懐いてる相手にはとことん甘えたがる。\r\n暁斗にも必死にアピールしており、ただしお子様なので羞恥心が足りず、天然の小悪魔になる。\r\n\r\n「これに懲りたら、もうちょっかい出さないでよねっ、わかった？」",
+      "intro_zh": "",
+      "intro_en": "One year younger than Akito and the others, nothing quite seems to go her way.\nShe thought Hikari was nice and had a crush on Akito.\nShe wanted to be a part of their group, but she was too young.\nThen she watched as Saya immediately became close to them and that didn’t sit right.\nThat, on top of everything else, made her hate the fact that she was a year younger all the more.\n\nShe loved Akito and tried desperately to get his attention, but as she was still a child with no sense of how to act properly, it made her act a little devilish.\nHer personality is a bit cat-like and contrary, but once she decides she likes you, she showers you with affection.\n\nThat said, things rarely go her way.\nFor example, should she spot Akito and run over greet him, calling, “Heyyy, Akkyyy”, that’s exactly the moment she’ll fall out of sight in a ditch and end up crying when he doesn’t find her.\n(true story)\n\n[From [url=https://moenovel.com/a-sky-full-of-stars/]Moenovel's site[/url]]",
+      "blood_type": "ab",
+      "height": 153,
+      "weight": null,
+      "bust": 78,
+      "waist": 56,
+      "hips": 83,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        9,
+        3
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 35,
+      "b_id": "34206",
+      "v_id": null,
+      "image": "character/35/image/01235c6e-d9e9-4acf-bcf7-b0b956df8593.webp",
+      "name_jp": "宙見暁斗",
+      "name_zh": "宙见晓斗",
+      "name_en": null,
+      "aliases": [
+        "そらみ あきと"
+      ],
+      "intro_jp": "学園で唯一の天文部員だが、星を観ないので付いたあだ名が “星を観ない天文部員”。\r\n部活動に天文部を選んだ理由は不純で、部室を寝床とするため。\r\n小さい頃に父がくれた天体望遠鏡で、ひかりと二人で月を観たのが星との出逢い。\r\nその後 沙夜も仲間に加わり、三人で星の世界にのめり込んでいった。\r\nしかし ひかりが引っ越した後は沙夜とも疎遠になり、星を観るのをやめてしまった。\r\n\r\n現在は恩師である美晴先生の実家のコンビニでバイトをしつつ、趣味で山に登ったりしている。\r\n山頂から朝陽を眺めながら飲む一杯のインスタントコーヒーを愛している。\r\n\r\n「一瞬―― 星に手が届いたみたいな気がした」",
+      "intro_zh": "",
+      "intro_en": "",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [],
+      "gender": []
+    },
+    {
+      "id": 36,
+      "b_id": "36235",
+      "v_id": "c39194",
+      "image": "character/36/image/90fe10e0-c118-45b5-908a-f0af078a201d.webp",
+      "name_jp": "早乙女美晴",
+      "name_zh": null,
+      "name_en": "Saotome Miharu",
+      "aliases": [
+        "早乙女 美晴",
+        "さおとめ みはる",
+        "Saotome Miharu"
+      ],
+      "intro_jp": "暁斗たちの元担任。\r\n優しく、時に厳しく、若くて美人だったのもあって子供たちの憧れの先生だった。\r\n暁斗たちにとっては、天文のことを教えてくれた師でもある。 天文部のOG。\r\n\r\nだが、それも昔の話。\r\n学園が廃校となった際 仕事を辞めて、実家に引きこもってニート生活をしている。\r\n\r\n「……働いてるヤツがそんなに偉いのか！」",
+      "intro_zh": "",
+      "intro_en": "Akito and his others' former homeroom teacher. A pretty, young teacher who was gentle, but firm. They thought she was the perfect teacher.\n\nHowever, that's all in the past. Since the school closed, she quit working and shut herself away at her parent's home.\n\nAn alumna of the astronomy club, she was the person who taught Akito and the others about astronomy.\n\n[From [url=https://moenovel.com/a-sky-full-of-stars/]Moenovel's site[/url]]\n\n\"...Is being a worker that great?!\"",
+      "blood_type": null,
+      "height": 160,
+      "weight": null,
+      "bust": 88,
+      "waist": 61,
+      "hips": 90,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        3,
+        22
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 37,
+      "b_id": "36236",
+      "v_id": "c41551",
+      "image": "character/37/image/0dacf076-e627-400a-b469-a0b177953f9f.webp",
+      "name_jp": "日下部武一",
+      "name_zh": null,
+      "name_en": "Kusakabe Takeichi",
+      "aliases": [
+        "日下部 武一",
+        "くさかべ たけいち"
+      ],
+      "intro_jp": "昔はガキ大将だった悪友。\r\n出会った当初は暁斗のことを快くなく思っていたが、やがて以前のことを謝罪し仲直りをする。\r\nそれからはよくつるむようになり、今では一番の男友達。 いつも軽口を言い合ったりする。\r\n\r\n暁斗と同じ星野第一に通っている。\r\nバスケ部に入っていて、1年ながらレギュラー争いをしているらしい。\r\n\r\n「おかしいだろ、“星を観ない天文部員”なんて」",
+      "intro_zh": "",
+      "intro_en": "[url=/c36076]Akito's[/url] childhood friend and also his best friend. In the past, he used to be a bully, but when he met with Akito and the others, he apologized for his deeds and became friends with them. Also a member of the basketball club.",
+      "blood_type": null,
+      "height": 178,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        12,
+        12
+      ],
+      "gender": [
+        "m",
+        "m"
+      ]
+    },
+    {
+      "id": 38,
+      "b_id": "36237",
+      "v_id": "c39195",
+      "image": "character/38/image/574cde67-3b4d-49b1-8e80-6d652ec270bd.webp",
+      "name_jp": "吉岡帆乃香",
+      "name_zh": null,
+      "name_en": "Yoshioka Honoka",
+      "aliases": [
+        "吉岡 帆乃香",
+        "よしおか ほのか",
+        "ほのほの",
+        "Yoshi-yoshi"
+      ],
+      "intro_jp": "明光学院に通う 1年生で、織姫から天文部部長を引き継いだ。\r\nほしのなか市内の天文部の集まりである “むつらぼしの会” では、会長である織姫を補佐する秘書のような立場になっている。\r\n\r\n織姫が夢見がちなため相対的にしっかりしているように見えるが、年相応な至って普通の女の子。\r\n意外と抜けていることもあり、織姫と一緒に あわあわ することも。\r\n\r\n「会長の補佐兼現部長を務めさせていただいております、吉岡です」",
+      "intro_zh": "",
+      "intro_en": "A first-year student at Meikou Academy, who takes over the position of astronomy club president from Orihime.\n\nWhen the astronomy clubs gather in Hoshinonaka City to form the 6 Stars Club, she takes the position of Orihime's secretary-like assistant.\n\nWhen compared to Orihime, who always has her head in the clouds, she seems to be rather mature, but in reality she's a normal girl for her age. There are even times when she spaces out and joins in Orihime's silliness.\n\n[From [url=https://moenovel.com/a-sky-full-of-stars/]Moenovel's site[/url]]\n\n\"I am Yoshioka, and I serve as the President's assistant and director\"",
+      "blood_type": null,
+      "height": 159,
+      "weight": null,
+      "bust": 84,
+      "waist": 58,
+      "hips": 86,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        7,
+        16
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 39,
+      "b_id": "36238",
+      "v_id": "c39196",
+      "image": "character/39/image/2420040b-a839-42aa-828c-1cac57395cca.webp",
+      "name_jp": "加納紀子",
+      "name_zh": "加纳纪子",
+      "name_en": "Kanou Noriko",
+      "aliases": [
+        "かのう のりこ"
+      ],
+      "intro_jp": "ひかりの先輩で、天ノ中 の天文部部長。\r\n天文の知識がなく導いてくれる先輩もいなかったため、今まで天体観測をしたことも無かった。\r\n\r\nまじめでおとなしいように見えて、独特なリアクションをすることも。\r\n学園での ひかりの様子を知る唯一の人。\r\n\r\n「私、実は初めてなんです、観望会って。 だから、今日楽しみにして来ました」",
+      "intro_zh": "",
+      "intro_en": "Hikari's senpai, and the astronomy club president at Tennochu Academy. Since she's has no astronomy club or any older members to teacher, she has not done any astronomical observations.\n\nShe's serious and quiet, and also makes unique reactions. At school, she's the only one who really knows Hikari.\n\n\"This will be my first time going to an observation meeting, so I look forward to today.\"",
+      "blood_type": null,
+      "height": 156,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        5,
+        7
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 40,
+      "b_id": "36239",
+      "v_id": "c39197",
+      "image": "character/40/image/6d7a83ef-01bb-446d-9485-f2a492dff7f5.webp",
+      "name_jp": "陣野鳴枝",
+      "name_zh": "阵野鸣枝",
+      "name_en": "Jinno Narue",
+      "aliases": [
+        "じんの なるえ"
+      ],
+      "intro_jp": "天ノ中西 の地学部の部長。\r\n天文も地学の一部ということで、天ノ中西の地学部は天文しかやっていない。\r\n\r\nこの部は代々ガジェット派で、彼女も一眼レフで天体写真を撮る活動をメインにしている。\r\n勝気でややキツイ言葉を使うことがあるが、冷静に状況を見るクールな一面も。\r\n\r\n「計画書見たよ。 ちょっと面白そうだって思った」",
+      "intro_zh": "",
+      "intro_en": "Amanonakanishi's Earth Science Club's president. Since Astronomy is considered a part of Earth Science, Amanokonakanishi's Earth Science Club ends up only doing astronomy.\n\nThe club has been proficient with gadgets for generations, and the club's main part of the Astronomy Group Activities is to take pictures with a single lens reflex camera. She is very determined and sometimes uses some harsh words, but is also very cool and composed.\n\n\"I looked at the plan. I thought it seemed interesting.\"",
+      "blood_type": null,
+      "height": 163,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        5,
+        28
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 41,
+      "b_id": "36240",
+      "v_id": "c41561",
+      "image": "character/41/image/c0e56916-107f-4be0-9ec7-cb6355547c79.webp",
+      "name_jp": "田尻啓介",
+      "name_zh": null,
+      "name_en": "Tajiri Keisuke",
+      "aliases": [
+        "たじり けいすけ"
+      ],
+      "intro_jp": "工業系の男子校・諸美沢 天文部の部長。\r\nこの天文部は “高価な望遠鏡より、一人一つの双眼鏡” をモットーに活動している。\r\n\r\nがっしりした体型と体育会系のノリをしているが、強面な顔に似合わず柔らかく丁寧な表情と物腰。\r\n\r\n「うちは、今の活動で満足していますので」",
+      "intro_zh": "",
+      "intro_en": "The president of Morumisawa Boys Academy astronomical club.",
+      "blood_type": null,
+      "height": 182,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        10,
+        25
+      ],
+      "gender": [
+        "m",
+        "m"
+      ]
+    },
+    {
+      "id": 42,
+      "b_id": "43461",
+      "v_id": "c40128",
+      "image": "character/42/image/de38463a-895c-40b2-becb-33971d4baff9.webp",
+      "name_jp": "山田陽南",
+      "name_zh": "山田阳南",
+      "name_en": "Yamada Hinami",
+      "aliases": [
+        "やまだ ひなみ",
+        "Hinamin"
+      ],
+      "intro_jp": "星野第一の天文部に在籍する暁斗の後輩。 ころなの友人で、かなりの不思議ちゃん。\r\n何を考えているのかイマイチよく分からないが、天文には興味を持っている。\r\n常に少し眠い目をしていて、無表情で突飛なことをぼそっと言ったりするタイプ。\r\nぼーっとしてるようで、頭の中では謎の壮大なストーリーが展開していたりする。\r\n沙夜を “アルビレオのプリンセス” と崇拝している。\r\n\r\n本篇中以配角身份出场，FD刚发售时没有个人线路\r\n2016年6月16日，根据投票结果，pulltop在FD的DLC“ひなみん√アペンドパッチ”中添加了其个人线",
+      "intro_zh": "",
+      "intro_en": "[url=/c35363]Korona's[/url] friend who's quite eccentric. To this day Akito and the others still don't know what she's thinking. She's interested in astronomy.\n\nMost times she has a look of dead tiredness on her face, but will sometimes mumble things about flying through the sky. Basically while she looks like she's not thinking of anything at all, her head is perpetually full of fantastic stories.\n\nShe admires Saya, calling her the \"Albireo Princess\".\n\n[From [url=https://moenovel.com/a-sky-full-of-stars/]Moenovel's site[/url]]\n\n\"It's a detailed simulation of what would happen if a person was sucked into a black hole. Look...\"",
+      "blood_type": null,
+      "height": 152,
+      "weight": null,
+      "bust": 73,
+      "waist": 55,
+      "hips": 74,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        2,
+        1
+      ],
+      "gender": [
+        "f",
+        "f"
+      ]
+    },
+    {
+      "id": 43,
+      "b_id": "77048",
+      "v_id": null,
+      "image": "character/43/image/e6ce094c-07eb-42b5-ad70-d13659711d41.webp",
+      "name_jp": "恵風学園",
+      "name_zh": "惠风学园",
+      "name_en": null,
+      "aliases": [],
+      "intro_jp": "工学系の5年制学校で、普通の教科の他に専門科目の授業が入っており、学年が上がるごとに専門科目が増えるカリキュラム。学園の歴史は古いが、物語開始の1年前に新校舎が完成し、曲線を多用した近未来的な空間になっている。完全バリアフリーなので、車椅子の小鳥も楽に移動できる。校舎建て替えを機に女子生徒の入学優遇措置を取っており、工学系の学校には珍しく生徒の男女比率はほぼ半々。",
+      "intro_zh": "",
+      "intro_en": "",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [],
+      "gender": []
+    },
+    {
+      "id": 44,
+      "b_id": "136391",
+      "v_id": "c82456",
+      "image": "character/44/image/390dca12-cb71-4628-9880-2df0c1a5295f.webp",
+      "name_jp": "コタロウ",
+      "name_zh": null,
+      "name_en": "Kotarou",
+      "aliases": [
+        "Kotarou",
+        "Kota-chan",
+        "Kotie"
+      ],
+      "intro_jp": "",
+      "intro_zh": "",
+      "intro_en": "A Shiba Inu who is usually shy and timid. If someone he likes comes along, he will wag his tail and want to play. He especially likes Saya, who gives him a lot of attention. He likes her more than the Saotome family, his current owners.\n\nAkito and Hikari helped save him from a river when they were kids.",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [],
+      "gender": [
+        "m",
+        "m"
+      ]
+    },
+    {
+      "id": 45,
+      "b_id": "136392",
+      "v_id": "c41559",
+      "image": "character/45/image/58e1b7ea-3d89-48e3-9455-b292f00b1bdc.webp",
+      "name_jp": "豊田",
+      "name_zh": null,
+      "name_en": "Toyoda",
+      "aliases": [
+        "Toyoda",
+        "豊田",
+        "とよだ"
+      ],
+      "intro_jp": "天ノ中西 地学部所属で陣野の後輩。\r\n丁寧な口調の草食系。\r\n天体写真を撮影していて、得意分野になると饒舌になることも。\r\n「天体ガイドに投稿したので、もしかしたら……来月号に載るかもです」",
+      "intro_zh": "",
+      "intro_en": "A quiet junior taking the place of Club President from [url=/c39197]Narue[/url] after she graduated.",
+      "blood_type": null,
+      "height": 168,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        11,
+        3
+      ],
+      "gender": [
+        "m",
+        "m"
+      ]
+    },
+    {
+      "id": 46,
+      "b_id": "136393",
+      "v_id": "c41560",
+      "image": "character/46/image/e3073912-1d2d-4f15-8124-8a02c98d380a.webp",
+      "name_jp": "川中島",
+      "name_zh": null,
+      "name_en": "Kawanakajima",
+      "aliases": [
+        "Kawanakajima",
+        "川中島",
+        "かわなかじま"
+      ],
+      "intro_jp": "諸美沢 天文部所属、田尻の後輩。\r\n気配りできる気持ちのいい奴。\r\n気合いの入った容姿に似合わず、星座を見てポエムを詠むのが好き。 心は乙女。\r\n「うっす。 俺らは、星座神話をモチーフにしたポエム作りをやってました！」",
+      "intro_zh": "",
+      "intro_en": "A student at an all-boys' school who loves astronomical poems. He takes the place of [url=/c41561]Tajiri[/url] as Club President after he graduates.",
+      "blood_type": null,
+      "height": 172,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [
+        4,
+        30
+      ],
+      "gender": [
+        "m",
+        "m"
+      ]
+    },
+    {
+      "id": 47,
+      "b_id": "136394",
+      "v_id": "c41562",
+      "image": "character/47/image/ef80738e-7fe1-4c74-9155-226c33896c23.webp",
+      "name_jp": "森田一郎",
+      "name_zh": null,
+      "name_en": "Morita Ichirou",
+      "aliases": [
+        "Morita Ichirou",
+        "森田 一郎",
+        "もりた いちろう"
+      ],
+      "intro_jp": "チャンプ爺さんの知り合いで、プラネタリウムの館長をしている人。\r\n独特の雰囲気を持った、すらっとした穏和で知的な紳士。\r\n星に対する自分の信念を持っていて、それを貫く姿勢を持っている。\r\n「うん、なかなかいい望遠鏡だ。 見せてもらってもいいですか？」",
+      "intro_zh": "",
+      "intro_en": "The director of the planetarium.",
+      "blood_type": null,
+      "height": 174,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [],
+      "gender": [
+        "m",
+        "m"
+      ]
+    },
+    {
+      "id": 48,
+      "b_id": "136440",
+      "v_id": null,
+      "image": "character/48/image/50b4559a-a6b4-4111-a02e-43e2834db907.webp",
+      "name_jp": "チャンプ爺さん",
+      "name_zh": null,
+      "name_en": null,
+      "aliases": [
+        "チャンプ爺さん"
+      ],
+      "intro_jp": "『さをとめ』 の常連客の爺さん。\r\nエロ本を週刊漫画雑誌チャンプに重ねて買っていくことから、このあだ名がついた。\r\nシャイなところがあり、若い女性と話すのが苦手。\r\n暁斗との間には謎の友情が芽生えていたりする。\r\n実は元ガラス工芸職人で、反射望遠鏡の主鏡研磨などを行っていたこともある。\r\n「お主がいるおかげで、わしはいつも安心してエロ本が買える」",
+      "intro_zh": "",
+      "intro_en": "",
+      "blood_type": null,
+      "height": null,
+      "weight": null,
+      "bust": null,
+      "waist": null,
+      "hips": null,
+      "cup": null,
+      "age": null,
+      "birthday": [],
+      "gender": []
+    }
+  ],
+  "games": [
+    {
+      "id": 1,
+      "v_id": "v53590",
+      "b_id": "524427",
+      "title_jp": "ハミダシクリエイティブ Re:Re:call",
+      "title_zh": "常轨脱离Creative Re:Re:call",
+      "title_en": "HAMIDASHI CREATIVE Re:Re:call",
+      "aliases": [
+        "Hamikuri Re:Re:call",
+        "ハミリリ",
+        "Hamiriri",
+        "富婆妹FD2",
+        "하미리리"
+      ],
+      "intro_jp": "くじ引きで生徒会長に任命された「和泉智宏」は、\r\n初めこそ安心安全を心がけ無難に業務を行っていたものの、\r\nいつの間にやら人並みの責任感を覚えはじめたばかりか、\r\n他の役員と休日に出かけるほど活動的になっていく。\r\n\r\nある日、個人サークルのスタッフとして同人誌即売会に参加させられた智宏は、\r\n本を販売し終えて、飲みものを買いに席を離れる。\r\nその途中、ふとした気の迷いで足を踏みいれた一次創作のスペースに、\r\nいるはずのない人物の姿を目撃して……？\r\n\r\nこれは本編から「ハミダシ」た、正ヒロインではない女の子の物語。",
+      "intro_zh": "",
+      "intro_en": "Izumi Tomohiro was appointed student council president by drawing lots. At first, he carries out his duties adequately and without risk, but before he knows it, he begins to feel a commonplace sense of commitment. He becomes so active that he even goes out on his days off with the other members.\n\nOne day, Tomohiro is forced to participate in a doujinshi sale as a staff member of a kojin circle. After selling the books, he leaves his seat to buy a drink. On the way, he wanders into the original creation space on a whim, and spots someone who shouldn't be there...\n\nThis is the story of a girl who is not the main heroine, and who strayed out (\"hamidashi\") from the main story.\n\n[Translated from the [url=https://madosoft.net/rerecall/story]official website[/url]]",
+      "release_date": "2025-04-24T16:00:00.000Z",
+      "release_date_tba": false,
+      "extra_info": [],
+      "tags": [
+        "Galgame",
+        "まどそふと",
+        "FD",
+        "废萌",
+        "宇都宮つみれ",
+        "2025",
+        "PC",
+        "R18",
+        "白毛",
+        "校园",
+        "游戏",
+        "纯爱",
+        "秋野花",
+        "東ノ助",
+        "Mado",
+        "妹",
+        "GAL",
+        "茜屋",
+        "汉化",
+        "MadoSoft",
+        "甲木順之助",
+        "AVG",
+        "erogame",
+        "欢乐",
+        "治愈",
+        "傲娇",
+        "5分"
+      ],
+      "staffs": [
+        {
+          "name": "甲木順之助",
+          "role": "剧本"
+        },
+        {
+          "name": "宇都宮つみれ",
+          "role": "原画"
+        },
+        {
+          "name": "もじゃすびい",
+          "role": "导演"
+        },
+        {
+          "name": "茜屋",
+          "role": "SD原画"
+        }
+      ],
+      "nsfw": false,
+      "type": null,
+      "platform": [
+        "win"
+      ],
+      "status": 1,
+      "hot_score": 18.28440361318448,
+      "views": 37479,
+      "downloads": 208
+    },
+    {
+      "id": 2,
+      "v_id": "v33175",
+      "b_id": "363763",
+      "title_jp": "ジュエリー・ハーツ・アカデミア -We will wing wonder world-",
+      "title_zh": "霞流宝石心 -壮志凌云振寰宇-",
+      "title_en": "",
+      "aliases": [
+        "ジュエハ",
+        "jeweha",
+        "宝石心学园",
+        "寶石心學院物語 -We will wing wonder world-",
+        "쥬얼리 하츠 아카데미아",
+        "쥬에하",
+        "宝石心学院"
+      ],
+      "intro_jp": "「輝け、僕らの意志──」\r\n\r\nフリギア王立ジュエリー・アカデミア──\r\n\r\nそこは『意志（ジェム）』と呼ばれる不思議な宝石を研究する学園。\r\n主人公ソーマ・ジェイスはアカデミアに眠る『賢者の石』を探るべく、\r\nエージェントとして『クラス・ダイヤ』への潜入を試みる。\r\nしかし……彼が配属されたのは謎の新設学級『クラス・ペガサス』だった。\r\n\r\n──素性を隠す外国のスパイ・ソーマ。\r\n──剣にしか興味のない女子・ベルカ。\r\n──誰ともつるまない孤高の不良・ヴェオ。\r\n──獣人にして稀代の才媛・メア。\r\n──成績も態度も最悪の王子・マークス。\r\n──唯一まともなクラスの良心・アリアンナ。\r\n\r\nペガサス組に揃ったのは目的も国籍もバラバラな６人の少年少女。\r\n彼らはしばしば反発し合いながらも、やがて世界を脅かす危機に直面することになる。\r\n\r\n『石喰い』──\r\n\r\nそれは、ノヴァ大陸全土を石化せんと迫る謎の災厄。\r\nその最前線に位置した彼らは、元凶の組織《メデューサ》との闘争に巻き込まれていき……？\r\n\r\n「いくよみんな──わたし達の全力を、思いっきりぶつけてやろう！」\r\n\r\n果たしてソーマはミッションを達成できるのか。\r\nそして、大陸を喰らう石化の脅威に打ち勝つことはできるのか。\r\n\r\n世界を羽ばたく意志と絆の冒険譚──ここに輝く。 ",
+      "intro_zh": "",
+      "intro_en": "\"Shine, our Will.\"\n\nPhrygia Royal, Academy of Jewelry, is a place where mysterious gem stone called \"The Will (意志 Ishi)\" are researched.\n\nThe main character, Souma Jace, attempts to infiltrate \"Diamond Class\" as an agent to search for the \"Philosopher's Gem Stone\" that lies dormant in the academy. But he is assigned to a mysterious new class that called \"Pegasus Class\".\n\n- Souma, a foreign agent who hides his true identity.\n- Berka, a girl who is only interested in swordship.\n- Veo, a solitary and loner delinquent who doesn't hang out with anyone.\n- Mare, a kemonomimi beast who has a rare talent.\n- Markus, a foreign prince with the worst grades and attitude.\n- Arianna, the only decent conscience member in the class.\n\nThe Pegasus Class group is made up of six boys and girls with different purposes and nationalities.\nThey often rebel against each other, but soon find themselves facing a crisis that threatens the world.\n\n\"The Stone Eaters\", a mysterious disaster that threatens to petrify the entire Nova continent. Located on the front lines, they become embroiled in a struggle against the \"Medusa,\" the organization responsible for the disaster.\n\n\"Let's go, everyone - let's give it everything what we've got!\"\n\nWill Soma be able to accomplish his mission and able to overcome the threat of petrification that threatens to destroy the continent?\n\nAn adventure tale of The Wills and bonds that fly across the world - here it shines.\n\n[Translated from [url=http://cabbage-soft.com/]Official Website[/url]]",
+      "release_date": "2022-07-28T16:00:00.000Z",
+      "release_date_tba": false,
+      "extra_info": [],
+      "tags": [
+        "Galgame",
+        "冬茜トム",
+        "しらたま",
+        "きゃべつそふと",
+        "萝莉",
+        "2022",
+        "PC",
+        "兽耳",
+        "GAL",
+        "游戏",
+        "我永远喜欢しらたま",
+        "废萌",
+        "画风好",
+        "CabbageSoft",
+        "剧情",
+        "汉化",
+        "生肉",
+        "剧情作",
+        "R18",
+        "战斗",
+        "奇幻",
+        "白玉",
+        "等汉化",
+        "悬疑",
+        "妹",
+        "メア",
+        "纯爱",
+        "吸血鬼",
+        "幼驯染",
+        "燃"
+      ],
+      "staffs": [
+        {
+          "name": "冬茜トム",
+          "role": "剧本"
+        },
+        {
+          "name": "しらたま、よねぞう（サブ）",
+          "role": "原画"
+        },
+        {
+          "name": "KyoKa",
+          "role": "主题歌演出"
+        },
+        {
+          "name": "KyoKa",
+          "role": "主题歌作词"
+        },
+        {
+          "name": "藤井稿太郎",
+          "role": "主题歌作曲"
+        },
+        {
+          "name": "藤井稿太郎",
+          "role": "音乐"
+        },
+        {
+          "name": "プリズムビジョン",
+          "role": "动画制作"
+        },
+        {
+          "name": "しげた",
+          "role": "导演"
+        }
+      ],
+      "nsfw": false,
+      "type": null,
+      "platform": [
+        "win",
+        "ps4",
+        "swi"
+      ],
+      "status": 1,
+      "hot_score": 15.31126712995152,
+      "views": 6216,
+      "downloads": 131
+    },
+    {
+      "id": 3,
+      "v_id": "v16560",
+      "b_id": "121488",
+      "title_jp": "見上げてごらん、夜空の星を",
+      "title_zh": "仰望夜空的星辰",
+      "title_en": "A Sky Full of Stars",
+      "aliases": [
+        "Full of Stars",
+        "MiaZora",
+        "看星星",
+        "미아게테",
+        "抬头看看吧，看那天上的繁星"
+      ],
+      "intro_jp": "「この列車は宙をゆく銀河鉄道天文台！\r\n　太陽系を征服しても、我ら三人の旅はまだまだ終わらない」\r\nどこへでも行けるって思ってた。\r\n宇宙の謎を全て解き明かすことだって、手を伸ばせば あの星を掴むことだってできる、そう思ってた――\r\n子供の頃、幼なじみたちと毎晩のように星を観ていた宙見暁斗。\r\n天体望遠鏡の先に浮かぶ無数の光に、胸を躍らせていた。\r\nそれはまるで、銀河を旅するような日々だった。\r\nだがしかし、成長した暁斗は “星を観ない天文部員” と呼ばれるようになっていた。\r\nやめてしまったのだ、夜空を見上げることを。\r\nそんな彼のもとに、“むつらぼしの会” への参加要請が届く。\r\n暁斗は誘いを断るべく会へ足を運ぶが、そこで思いがけない再会をする。\r\nそこには、どこか遠くへ引っ越していったはずの幼なじみ・箒星ひかり がいたのだ。\r\nいつも傍にいてくれた、もう一人の幼なじみ・天ノ川沙夜。\r\nむつらぼしの会 復活を望む他校の先輩・白鳥織姫。\r\nそして、暁斗を慕う後輩・日下部ころな。\r\n別れと再会、新しい出逢いを経て、再び夜空を見上げるようになった暁斗は取り戻していく。\r\nもう二度と戻らないと思っていた、大切な想いの数々を。\r\nそして知っていく。 未だ出逢ったことのなかった 特別な夜 を。\r\n「さあ、銀河の謎を解き明かすべく、次なる目的地へ向かおう！」\r\n仲間たちと宙を見上げ、星々を巡りゆく青春の日々が、また始まる。",
+      "intro_zh": "",
+      "intro_en": "When Akito was small, he would gaze at the stars every night with his childhood friends Hikari and Saya. He felt excited seeing the twinkles of countless stars through the telescope lens, so close that it felt like he could reach out and grab them with his hand. It inspired dreams of journeys into space, exploring the Milky Way and solving the mysteries of the galaxy. However, now he no longer looks up at the night sky and was called the ‘astronomy club member who doesn’t watch the stars’.\n\nHe received an invitation to attend the revival of the ‘Pleiades meeting’ with astronomy clubs from other schools in the area and decided to go to their next meeting to turn it down in person. There, he had an unexpected reunion with Hikari, whom he hadn’t seen since she moved some place far away. Together with Saya, senpai Orihime and kouhai Korona, his long-lost desire to look up at the stars has been rekindled and their star-filled youthful days full of new precious memories begin.\n\n[From [url=https://omochikaeri.wordpress.com/2015/12/18/december-2015-eroge-releases/]Hau~ Omochikaeri![/url]]",
+      "release_date": "2015-12-17T16:00:00.000Z",
+      "release_date_tba": false,
+      "extra_info": [],
+      "tags": [
+        "Galgame",
+        "pulltop",
+        "看星星",
+        "天文",
+        "幼驯染",
+        "异色瞳",
+        "紺野アスタ",
+        "青春",
+        "汉化",
+        "PC",
+        "2015",
+        "纯爱",
+        "GAL",
+        "废萌",
+        "ADV",
+        "八島タカヒロ",
+        "幼なじみ",
+        "R18",
+        "游戏",
+        "AVG",
+        "又吉愛",
+        "STEAM",
+        "遠野そよぎ",
+        "校园",
+        "萌作",
+        "治愈",
+        "基井あゆむ",
+        "小鸟居夕花",
+        "萌系",
+        "2015-12"
+      ],
+      "staffs": [
+        {
+          "name": "紺野アスタ(共通パート / 箒星ひかり / 天ノ川沙夜)、高嶋栄二(白鳥織姫 / 日下部ころな)",
+          "role": "剧本"
+        },
+        {
+          "name": "紺野アスタ",
+          "role": "企画"
+        },
+        {
+          "name": "八島タカヒロ、基井あゆむ",
+          "role": "原画"
+        },
+        {
+          "name": "田口まこと",
+          "role": "SD原画"
+        },
+        {
+          "name": "TWOFIVE",
+          "role": "音乐"
+        },
+        {
+          "name": "霜月はるか",
+          "role": "主题歌演出"
+        },
+        {
+          "name": "Minao Ohse",
+          "role": "主题歌作词"
+        },
+        {
+          "name": "おおくまけんいち",
+          "role": "主题歌作曲"
+        }
+      ],
+      "nsfw": false,
+      "type": null,
+      "platform": [
+        "win",
+        "dvd"
+      ],
+      "status": 1,
+      "hot_score": 12.101883957963532,
+      "views": 2874,
+      "downloads": 33
+    },
+    {
+      "id": 4,
+      "v_id": "v900004",
+      "b_id": "900004",
+      "title_jp": "E2E 管理用スクラッチ 4",
+      "title_zh": "E2E 管理临时作品 4",
+      "title_en": "E2E Admin Scratch 4",
+      "aliases": [],
+      "intro_jp": "",
+      "intro_zh": "",
+      "intro_en": "Disposable shell row for admin-only e2e actions.",
+      "release_date": "2020-01-04T00:00:00.000Z",
+      "release_date_tba": false,
+      "extra_info": [],
+      "tags": [
+        "e2e"
+      ],
+      "staffs": [],
+      "nsfw": false,
+      "type": "ADV",
+      "platform": [
+        "pc"
+      ],
+      "status": 1,
+      "hot_score": 0,
+      "views": 0,
+      "downloads": 0
+    },
+    {
+      "id": 5,
+      "v_id": "v900005",
+      "b_id": "900005",
+      "title_jp": "E2E 管理用スクラッチ 5",
+      "title_zh": "E2E 管理临时作品 5",
+      "title_en": "E2E Admin Scratch 5",
+      "aliases": [],
+      "intro_jp": "",
+      "intro_zh": "",
+      "intro_en": "Disposable shell row for admin-only e2e actions.",
+      "release_date": "2020-01-05T00:00:00.000Z",
+      "release_date_tba": false,
+      "extra_info": [],
+      "tags": [
+        "e2e"
+      ],
+      "staffs": [],
+      "nsfw": false,
+      "type": "ADV",
+      "platform": [
+        "pc"
+      ],
+      "status": 1,
+      "hot_score": 0,
+      "views": 0,
+      "downloads": 0
+    },
+    {
+      "id": 6,
+      "v_id": "v900006",
+      "b_id": "900006",
+      "title_jp": "E2E 管理用スクラッチ 6",
+      "title_zh": "E2E 管理临时作品 6",
+      "title_en": "E2E Admin Scratch 6",
+      "aliases": [],
+      "intro_jp": "",
+      "intro_zh": "",
+      "intro_en": "Disposable shell row for admin-only e2e actions.",
+      "release_date": "2020-01-06T00:00:00.000Z",
+      "release_date_tba": false,
+      "extra_info": [],
+      "tags": [
+        "e2e"
+      ],
+      "staffs": [],
+      "nsfw": false,
+      "type": "ADV",
+      "platform": [
+        "pc"
+      ],
+      "status": 1,
+      "hot_score": 0,
+      "views": 0,
+      "downloads": 0
+    }
+  ],
+  "game_covers": [
+    {
+      "id": 1,
+      "language": "jp",
+      "url": "game/1/cover/80af1ec4-948c-4775-9c5a-67586c0a9c2b.webp",
+      "type": "dig",
+      "dims": [
+        495,
+        700
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 1
+    },
+    {
+      "id": 2,
+      "language": "jp",
+      "url": "game/2/cover/51378ba4-2feb-475f-a217-b81c198cf488.webp",
+      "type": "dig",
+      "dims": [
+        1410,
+        1000
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 2
+    },
+    {
+      "id": 3,
+      "language": "en",
+      "url": "game/3/cover/9f4ca845-6729-4256-a5ae-2143444088c3.webp",
+      "type": "dig",
+      "dims": [
+        600,
+        900
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 3
+    },
+    {
+      "id": 4,
+      "language": "jp",
+      "url": "game/3/cover/0b7b87d0-d7d1-42cf-aa58-4f482c2b7c6a.webp",
+      "type": "dig",
+      "dims": [
+        560,
+        390
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 3
+    }
+  ],
+  "game_images": [
+    {
+      "id": 1,
+      "url": "game/1/image/bbf4092c-e630-47cf-aeff-d34d357f83ce.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 1
+    },
+    {
+      "id": 2,
+      "url": "game/1/image/dbcc318d-db57-40d1-bd4f-da6b9e80d441.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 1
+    },
+    {
+      "id": 3,
+      "url": "game/1/image/d465872c-f1c7-46c7-82b2-45ff2c8168a7.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 1
+    },
+    {
+      "id": 4,
+      "url": "game/1/image/a1b48f79-38af-4a0f-bb12-aa1be51096c8.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 1
+    },
+    {
+      "id": 5,
+      "url": "game/1/image/d8cf399b-ad57-4924-be91-dffa602b7f18.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 1
+    },
+    {
+      "id": 6,
+      "url": "game/1/image/e214192e-c657-4f0e-8a8b-38518342c4fb.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 2,
+      "violence": 0,
+      "game_id": 1
+    },
+    {
+      "id": 7,
+      "url": "game/1/image/362bb149-dcb6-4896-b844-f0b2fac32464.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 1
+    },
+    {
+      "id": 8,
+      "url": "game/1/image/bcb3610d-64af-480b-a0e3-c4e93decd11f.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 1
+    },
+    {
+      "id": 9,
+      "url": "game/1/image/a6e87fdc-da64-48d1-9e38-ae308f3ae7c7.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 1
+    },
+    {
+      "id": 10,
+      "url": "game/1/image/798cb05a-cc95-435c-b30b-e72a068e7104.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 1
+    },
+    {
+      "id": 11,
+      "url": "game/2/image/eb6305be-a841-40e4-890d-a8c4d679cc30.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 2
+    },
+    {
+      "id": 12,
+      "url": "game/2/image/72925958-1f97-4e00-b053-f659c0e10053.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 2
+    },
+    {
+      "id": 13,
+      "url": "game/2/image/830c4119-6615-42fb-b41f-587e493ac8f3.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 2
+    },
+    {
+      "id": 14,
+      "url": "game/2/image/055af99e-ba33-44a2-babe-ff902514fe70.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 2
+    },
+    {
+      "id": 15,
+      "url": "game/2/image/97f15853-fc74-4450-b0c4-86cc70fdc710.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 2
+    },
+    {
+      "id": 16,
+      "url": "game/2/image/98e6d237-742c-4c03-bc36-0ef513448462.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 2
+    },
+    {
+      "id": 17,
+      "url": "game/2/image/c52d8552-ebb3-46e9-a60b-dfecb3aba1ef.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 2
+    },
+    {
+      "id": 18,
+      "url": "game/2/image/195c5407-5b0b-43ad-b92b-79feb7e09439.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 2
+    },
+    {
+      "id": 19,
+      "url": "game/2/image/91b9dac6-5ad1-4102-90f8-159cf27fc53d.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 2
+    },
+    {
+      "id": 20,
+      "url": "game/2/image/7653747a-8f89-41a3-8952-d23ca1a17d41.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 2
+    },
+    {
+      "id": 21,
+      "url": "game/3/image/7bcb1454-b2f3-4829-b20c-2b294721ec09.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 3
+    },
+    {
+      "id": 22,
+      "url": "game/3/image/c600f4cc-2c46-442a-92bc-a50579e6a71a.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 3
+    },
+    {
+      "id": 23,
+      "url": "game/3/image/c5c98ede-3337-4a5f-9cf3-fa1e80c200cd.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 3
+    },
+    {
+      "id": 24,
+      "url": "game/3/image/d02b6b06-d0ec-4ccc-a8e6-3a280913835e.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 3
+    },
+    {
+      "id": 25,
+      "url": "game/3/image/96636870-9e65-472a-ad77-f652247e58f2.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 3
+    },
+    {
+      "id": 26,
+      "url": "game/3/image/3521caf6-85a7-4c70-a8eb-ea4ba2c1d2ce.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 3
+    },
+    {
+      "id": 27,
+      "url": "game/3/image/b0c163b2-8d95-485e-bcb7-cf3654ec95fe.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 3
+    },
+    {
+      "id": 28,
+      "url": "game/3/image/5ec7f3c3-68cc-422f-85ce-34b3c61289d2.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 3
+    },
+    {
+      "id": 29,
+      "url": "game/3/image/16433b8a-75e9-423e-820d-009936b5aec3.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 3
+    },
+    {
+      "id": 30,
+      "url": "game/3/image/4b37a4cc-e095-4fc7-89f2-b599acd70edd.webp",
+      "dims": [
+        1280,
+        720
+      ],
+      "sexual": 0,
+      "violence": 0,
+      "game_id": 3
+    }
+  ],
+  "game_links": [
+    {
+      "id": 1,
+      "url": "https://madosoft.net/rerecall/",
+      "label": "Official website",
+      "name": "website",
+      "game_id": 1
+    },
+    {
+      "id": 2,
+      "url": "https://erogamescape.dyndns.org/~ap2/ero/toukei_kaiseki/game.php?game=37533",
+      "label": "ErogameScape",
+      "name": "egs",
+      "game_id": 1
+    },
+    {
+      "id": 3,
+      "url": "https://www.bilibili.com/video/av114687488297141/",
+      "label": "Official website",
+      "name": "website",
+      "game_id": 1
+    },
+    {
+      "id": 4,
+      "url": "https://tieba.baidu.com/p/9672154092",
+      "label": "Official website",
+      "name": "website",
+      "game_id": 1
+    },
+    {
+      "id": 5,
+      "url": "https://cabbage-soft.com/products/jewelry/",
+      "label": "Official website",
+      "name": "website",
+      "game_id": 2
+    },
+    {
+      "id": 6,
+      "url": "https://erogamescape.dyndns.org/~ap2/ero/toukei_kaiseki/game.php?game=32066",
+      "label": "ErogameScape",
+      "name": "egs",
+      "game_id": 2
+    },
+    {
+      "id": 7,
+      "url": "https://www.melonbooks.co.jp/detail/detail.php?product_id=1373744",
+      "label": "Melonbooks.co.jp",
+      "name": "melonjp",
+      "game_id": 2
+    },
+    {
+      "id": 8,
+      "url": "http://www.getchu.com/soft.phtml?id=1171051",
+      "label": "Getchu",
+      "name": "getchu",
+      "game_id": 2
+    },
+    {
+      "id": 9,
+      "url": "https://www.dmm.co.jp/mono/pcgame/-/detail/=/cid=2097apc14056/",
+      "label": "DMM",
+      "name": "dmm",
+      "game_id": 2
+    },
+    {
+      "id": 10,
+      "url": "https://ja.wikipedia.org/wiki/見上げてごらん、夜空の星を",
+      "label": "Wikipedia (ja)",
+      "name": "jawiki",
+      "game_id": 3
+    },
+    {
+      "id": 11,
+      "url": "https://www.wikidata.org/wiki/Q24870119",
+      "label": "Wikidata",
+      "name": "wikidata",
+      "game_id": 3
+    },
+    {
+      "id": 12,
+      "url": "https://www.mobygames.com/game/a-sky-full-of-stars",
+      "label": "MobyGames",
+      "name": "mobygames",
+      "game_id": 3
+    },
+    {
+      "id": 13,
+      "url": "https://gamefaqs.gamespot.com/-/227797-",
+      "label": "GameFAQs",
+      "name": "gamefaqs_game",
+      "game_id": 3
+    },
+    {
+      "id": 14,
+      "url": "http://howlongtobeat.com/game.php?id=51505",
+      "label": "HowLongToBeat",
+      "name": "howlongtobeat",
+      "game_id": 3
+    }
+  ],
+  "game_developer_relations": [
+    {
+      "id": 1,
+      "role": "开发",
+      "game_id": 1,
+      "developer_id": 1
+    },
+    {
+      "id": 2,
+      "role": "开发",
+      "game_id": 2,
+      "developer_id": 2
+    },
+    {
+      "id": 3,
+      "role": "开发",
+      "game_id": 3,
+      "developer_id": 3
+    }
+  ],
+  "game_character_relations": [
+    {
+      "id": 1,
+      "image": "character/1/image/3e67734d-4c52-4e75-9591-50edf8b6819d.webp",
+      "actor": "",
+      "role": "side",
+      "game_id": 1,
+      "character_id": 1
+    },
+    {
+      "id": 2,
+      "image": "character/2/image/ca018fea-96ae-4810-a1eb-3ae04077dca7.webp",
+      "actor": "",
+      "role": "side",
+      "game_id": 1,
+      "character_id": 2
+    },
+    {
+      "id": 3,
+      "image": "character/3/image/28355595-4c99-4156-8a7b-0b028211fcc4.webp",
+      "actor": "",
+      "role": "side",
+      "game_id": 1,
+      "character_id": 3
+    },
+    {
+      "id": 4,
+      "image": "character/4/image/6a3f77fa-7637-4676-a7d6-bc82620f1057.webp",
+      "actor": "",
+      "role": "side",
+      "game_id": 1,
+      "character_id": 4
+    },
+    {
+      "id": 5,
+      "image": "",
+      "actor": "",
+      "role": null,
+      "game_id": 1,
+      "character_id": 5
+    },
+    {
+      "id": 6,
+      "image": "character/6/image/a2633366-8d6b-4272-94da-c6477296cde5.webp",
+      "actor": "",
+      "role": "side",
+      "game_id": 1,
+      "character_id": 6
+    },
+    {
+      "id": 7,
+      "image": "character/7/image/613ec5c3-c5d4-423e-b033-14e357749b7a.webp",
+      "actor": "",
+      "role": "side",
+      "game_id": 1,
+      "character_id": 7
+    },
+    {
+      "id": 8,
+      "image": "character/8/image/81bba691-8f9a-41e3-84df-24a2725a847c.webp",
+      "actor": "",
+      "role": "side",
+      "game_id": 1,
+      "character_id": 8
+    },
+    {
+      "id": 9,
+      "image": "character/9/image/48ce4d5f-0d0f-46d6-bf90-bf51942e5534.webp",
+      "actor": "笹本菜津枝",
+      "role": "primary",
+      "game_id": 1,
+      "character_id": 9
+    },
+    {
+      "id": 10,
+      "image": "character/10/image/0cad278c-22f8-4389-b4dc-98500ae58bb4.webp",
+      "actor": "和鳴るせ",
+      "role": "side",
+      "game_id": 1,
+      "character_id": 10
+    },
+    {
+      "id": 11,
+      "image": "character/11/image/f384ccc6-f322-4081-81c6-1dfabf94ffd0.webp",
+      "actor": "湯宮由海",
+      "role": "primary",
+      "game_id": 2,
+      "character_id": 11
+    },
+    {
+      "id": 12,
+      "image": "character/12/image/46e6cc5b-9152-46dc-af6d-a7c0fe1c0c8e.webp",
+      "actor": "星谷美緒",
+      "role": "primary",
+      "game_id": 2,
+      "character_id": 12
+    },
+    {
+      "id": 13,
+      "image": "character/13/image/42482103-bed7-4411-935a-005abad7742b.webp",
+      "actor": "内村史子",
+      "role": "primary",
+      "game_id": 2,
+      "character_id": 13
+    },
+    {
+      "id": 14,
+      "image": "character/14/image/60cc74d9-6441-48e6-b3cb-756bcc8eec29.webp",
+      "actor": "春村奈々",
+      "role": "primary",
+      "game_id": 2,
+      "character_id": 14
+    },
+    {
+      "id": 15,
+      "image": "character/15/image/d03ca5d3-421f-4f5f-9604-18056fc6c18e.webp",
+      "actor": "没有人",
+      "role": null,
+      "game_id": 2,
+      "character_id": 15
+    },
+    {
+      "id": 16,
+      "image": "character/16/image/1d32eb5d-9fbd-4674-94ac-30ab3c728442.webp",
+      "actor": "對馬芳哲",
+      "role": "side",
+      "game_id": 2,
+      "character_id": 16
+    },
+    {
+      "id": 17,
+      "image": "character/17/image/20a6b9be-f65d-4c96-8a3e-020908d1a51b.webp",
+      "actor": "おおしたこうた",
+      "role": "side",
+      "game_id": 2,
+      "character_id": 17
+    },
+    {
+      "id": 18,
+      "image": "character/18/image/8b80307f-002c-4946-8b9a-14ad36e1770d.webp",
+      "actor": "伊藤りかこ",
+      "role": "side",
+      "game_id": 2,
+      "character_id": 18
+    },
+    {
+      "id": 19,
+      "image": "character/19/image/f7740974-4b46-48a7-b313-2af0a2d9c7a0.webp",
+      "actor": "岡本理絵",
+      "role": "side",
+      "game_id": 2,
+      "character_id": 19
+    },
+    {
+      "id": 20,
+      "image": "character/20/image/0a627a00-33a8-44e9-8cc9-834f15121038.webp",
+      "actor": "風花ましろ",
+      "role": "side",
+      "game_id": 2,
+      "character_id": 20
+    },
+    {
+      "id": 21,
+      "image": "character/21/image/315dd7c7-fdde-403c-8ad8-8ada54b3a8b3.webp",
+      "actor": "結城ほのか",
+      "role": "side",
+      "game_id": 2,
+      "character_id": 21
+    },
+    {
+      "id": 22,
+      "image": "character/22/image/9dbddc88-ae5a-414c-970a-eab69e28a5e5.webp",
+      "actor": null,
+      "role": "side",
+      "game_id": 2,
+      "character_id": 22
+    },
+    {
+      "id": 23,
+      "image": "character/23/image/edae49d6-f619-4f44-828a-c9274bc088b9.webp",
+      "actor": null,
+      "role": "side",
+      "game_id": 2,
+      "character_id": 23
+    },
+    {
+      "id": 24,
+      "image": "character/24/image/f3a4e2ce-49af-4ea4-908f-8a679f2d68a8.webp",
+      "actor": null,
+      "role": "side",
+      "game_id": 2,
+      "character_id": 24
+    },
+    {
+      "id": 25,
+      "image": "character/25/image/b99f307c-4716-4e3e-892a-c90acfb4463d.webp",
+      "actor": null,
+      "role": "side",
+      "game_id": 2,
+      "character_id": 25
+    },
+    {
+      "id": 26,
+      "image": "character/26/image/c71822bc-9cef-43b7-a3e1-a9899ebd680a.webp",
+      "actor": null,
+      "role": "side",
+      "game_id": 2,
+      "character_id": 26
+    },
+    {
+      "id": 27,
+      "image": "character/27/image/72d37c32-5a7b-4e65-bb19-530901d5a5e0.webp",
+      "actor": null,
+      "role": "side",
+      "game_id": 2,
+      "character_id": 27
+    },
+    {
+      "id": 28,
+      "image": "character/28/image/dc78f648-e8f6-4d91-9d86-5a73e12c44ba.webp",
+      "actor": null,
+      "role": "side",
+      "game_id": 2,
+      "character_id": 28
+    },
+    {
+      "id": 29,
+      "image": null,
+      "actor": null,
+      "role": "side",
+      "game_id": 2,
+      "character_id": 29
+    },
+    {
+      "id": 30,
+      "image": "character/30/image/18652871-c30c-4b32-8456-1d9112755dbd.webp",
+      "actor": null,
+      "role": "side",
+      "game_id": 2,
+      "character_id": 30
+    },
+    {
+      "id": 31,
+      "image": "character/31/image/3edc8f7b-c3e6-46f6-a38b-23d5dddb5d8c.webp",
+      "actor": "ミルノ純",
+      "role": "primary",
+      "game_id": 3,
+      "character_id": 31
+    },
+    {
+      "id": 32,
+      "image": "character/32/image/1c9a65c9-624f-4232-8c08-8c7926f6ba20.webp",
+      "actor": "又吉愛",
+      "role": "primary",
+      "game_id": 3,
+      "character_id": 32
+    },
+    {
+      "id": 33,
+      "image": "character/33/image/c8db354e-6c30-4f27-b092-b1f079b40221.webp",
+      "actor": "岡嶋妙",
+      "role": "primary",
+      "game_id": 3,
+      "character_id": 33
+    },
+    {
+      "id": 34,
+      "image": "character/34/image/c5c242f9-8e75-48b9-8665-9b431d997547.webp",
+      "actor": "高森奈津美",
+      "role": "primary",
+      "game_id": 3,
+      "character_id": 34
+    },
+    {
+      "id": 35,
+      "image": "character/35/image/0cac4bb5-a7ac-4039-8c65-d832221effab.webp",
+      "actor": "",
+      "role": null,
+      "game_id": 3,
+      "character_id": 35
+    },
+    {
+      "id": 36,
+      "image": "character/36/image/86343101-fdbb-4a5d-a408-623f6a7ac3cc.webp",
+      "actor": "中島沙樹",
+      "role": "side",
+      "game_id": 3,
+      "character_id": 36
+    },
+    {
+      "id": 37,
+      "image": "character/37/image/1352fefb-bf96-4e47-a66f-c19099ac7887.webp",
+      "actor": "間島淳司",
+      "role": "side",
+      "game_id": 3,
+      "character_id": 37
+    },
+    {
+      "id": 38,
+      "image": "character/38/image/f381df95-1155-4f3b-ae0c-7d507ca98185.webp",
+      "actor": "松山紗香",
+      "role": "side",
+      "game_id": 3,
+      "character_id": 38
+    },
+    {
+      "id": 39,
+      "image": "character/39/image/aa1af77f-d2cb-4272-b09c-154d0e51cfdb.webp",
+      "actor": "竹内仁美",
+      "role": "side",
+      "game_id": 3,
+      "character_id": 39
+    },
+    {
+      "id": 40,
+      "image": "character/40/image/561e4f22-3588-4f0b-96bc-60d929d28089.webp",
+      "actor": "瑞沢渓",
+      "role": "side",
+      "game_id": 3,
+      "character_id": 40
+    },
+    {
+      "id": 41,
+      "image": "character/41/image/05d1dd02-9681-4122-86e8-e21378be11c9.webp",
+      "actor": "増田雄市",
+      "role": "side",
+      "game_id": 3,
+      "character_id": 41
+    },
+    {
+      "id": 42,
+      "image": "character/42/image/18c26795-8a85-4efd-8e9b-6348476b9f0c.webp",
+      "actor": "岩﨑春奈",
+      "role": "side",
+      "game_id": 3,
+      "character_id": 42
+    },
+    {
+      "id": 43,
+      "image": "character/43/image/90e91110-e9fa-409a-bd55-50e806b40d9d.webp",
+      "actor": "",
+      "role": null,
+      "game_id": 3,
+      "character_id": 43
+    },
+    {
+      "id": 44,
+      "image": "character/44/image/03e698e9-94e7-40be-8c21-a44f0795b2f5.webp",
+      "actor": "神保巴",
+      "role": "side",
+      "game_id": 3,
+      "character_id": 44
+    },
+    {
+      "id": 45,
+      "image": "character/45/image/9ccd9734-9af1-429e-be4e-9935c0096fc3.webp",
+      "actor": "中村圭佑",
+      "role": "side",
+      "game_id": 3,
+      "character_id": 45
+    },
+    {
+      "id": 46,
+      "image": "character/46/image/c26f3188-886c-4947-8676-b6866eb6dd62.webp",
+      "actor": "桜木章人",
+      "role": "side",
+      "game_id": 3,
+      "character_id": 46
+    },
+    {
+      "id": 47,
+      "image": "character/47/image/91fdeba0-1c74-433c-b90d-bcb4e6f15e4b.webp",
+      "actor": "大川透",
+      "role": "side",
+      "game_id": 3,
+      "character_id": 47
+    },
+    {
+      "id": 48,
+      "image": "character/48/image/f98bcd21-4d79-4aa6-8e2b-a638cba74216.webp",
+      "actor": "桜木章人",
+      "role": null,
+      "game_id": 3,
+      "character_id": 48
+    }
+  ]
+}
