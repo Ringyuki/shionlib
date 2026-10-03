@@ -4,3 +4,4 @@
 /devtool
 /api
 /entgen
+!.env.example
