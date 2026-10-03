@@ -247,7 +247,6 @@ type Bangumi struct {
 }
 
 type AI struct {
-	KeySecret            string        `env:"AI_KEY_SECRET"`
 	CatalogURL           string        `env:"AI_CATALOG_URL" envDefault:"https://models.dev/api.json"`
 	IdleTimeout          time.Duration `env:"AI_IDLE_TIMEOUT" envDefault:"120s"`
 	MaxCallDuration      time.Duration `env:"AI_MAX_CALL_DURATION" envDefault:"10m"`

@@ -1,13 +1,11 @@
 package bootstrap
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/aimoderation"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/keybox"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/llm"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/modelsdev"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/aipg"
@@ -28,11 +26,7 @@ const (
 
 func wireAI(infra *Infra, shared *Shared, modules *Modules) {
 	cfg := shared.Config.AI
-	box, err := keybox.NewBox(cfg.KeySecret)
-	if err != nil {
-		panic(fmt.Errorf("wire ai: %w", err))
-	}
-	repo := aipg.NewRepository(infra.Ent, box)
+	repo := aipg.NewRepository(infra.Ent)
 	requests := aipg.NewRequestStore(infra.Ent)
 	stats := aipg.NewStatsStore(infra.Ent)
 	gateway := ai.NewService(ai.Deps{

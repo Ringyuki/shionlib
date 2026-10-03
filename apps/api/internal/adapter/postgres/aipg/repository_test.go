@@ -1,7 +1,6 @@
 package aipg_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/ai"
@@ -15,9 +14,9 @@ func TestRepositoryContract(t *testing.T) {
 	})
 }
 
-func TestProviderKeysAreSealedAtRest(t *testing.T) {
+func TestProviderKeysAreStoredWithAHint(t *testing.T) {
 	db, env := repositoryEnv(t)
-	id, err := env.Repo.CreateProvider(t.Context(), ai.NewProvider{Name: "sealed", Kind: ai.KindOpenAI, APIKey: "sk-plaintext-secret-value", PriceMultiplier: 1})
+	id, err := env.Repo.CreateProvider(t.Context(), ai.NewProvider{Name: "plain", Kind: ai.KindOpenAI, APIKey: "sk-plaintext-secret-value", PriceMultiplier: 1})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -25,7 +24,7 @@ func TestProviderKeysAreSealedAtRest(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if strings.Contains(row.APIKey, "plaintext") || !strings.HasPrefix(row.APIKey, "v1:") || row.KeyHint != "sk-…alue" {
+	if row.APIKey != "sk-plaintext-secret-value" || row.KeyHint != "sk-…alue" {
 		t.Fatalf("stored key %q hint %q", row.APIKey, row.KeyHint)
 	}
 	connection, err := env.Repo.ProviderConnection(t.Context(), id)

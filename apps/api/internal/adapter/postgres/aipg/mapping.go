@@ -341,3 +341,22 @@ func nonNil[T any](values []T) []T {
 	}
 	return values
 }
+
+func toConnection(row *ent.AIProvider) ai.Connection {
+	return ai.Connection{Kind: ai.ProviderKind(row.Kind), BaseURL: row.BaseURL, APIKey: row.APIKey}
+}
+
+func toRouteTarget(row *ent.AIRoute) ai.RouteTarget {
+	provider := row.Edges.Provider
+	return ai.RouteTarget{
+		ID:            row.ID,
+		ProviderID:    provider.ID,
+		ProviderName:  provider.Name,
+		Connection:    toConnection(provider),
+		UpstreamID:    row.UpstreamID,
+		Protocol:      ai.Protocol(row.Protocol),
+		Price:         routePrice(row),
+		DroppedParams: nonNil(row.DroppedParams),
+		JSONMode:      row.JSONMode,
+	}
+}

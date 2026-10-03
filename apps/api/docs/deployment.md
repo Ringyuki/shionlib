@@ -36,7 +36,7 @@ The compose file passes every variable the API reads through `${VAR}` substituti
 
 Values live in the Dokploy compose env field. Setting a variable there does nothing unless the compose file references it.
 
-Required: `API_IMAGE`, `DATABASE_URL`, `TOKEN_SECRET` (16+ characters), `REFRESH_TOKEN_PEPPER`, `AI_KEY_SECRET` (32+ characters; seals AI provider keys, so changing it requires re-entering them). Production also needs at least `SITE_URL`, `REDIS_*`, `S3_FILE_*`, `S3_IMAGE_*`, `HIKARINAGI_CLIENT_ID`/`HIKARINAGI_CLIENT_SECRET` (an Open API client with `catalog:full catalog:sync`), `OIDC_CLIENT_SECRET`, `EMAIL_PROVIDER_*`, `APM_ENDPOINT`/`APM_INGEST_KEY` for traces (see `observability.md`), and `FILE_DOWNLOAD_TICKET_SECRET` when `FILE_DOWNLOAD_MODE=worker`.
+Required: `API_IMAGE`, `DATABASE_URL`, `TOKEN_SECRET` (16+ characters), `REFRESH_TOKEN_PEPPER`. Production also needs at least `SITE_URL`, `REDIS_*`, `S3_FILE_*`, `S3_IMAGE_*`, `HIKARINAGI_CLIENT_ID`/`HIKARINAGI_CLIENT_SECRET` (an Open API client with `catalog:full catalog:sync`), `OIDC_CLIENT_SECRET`, `EMAIL_PROVIDER_*`, `APM_ENDPOINT`/`APM_INGEST_KEY` for traces (see `observability.md`), and `FILE_DOWNLOAD_TICKET_SECRET` when `FILE_DOWNLOAD_MODE=worker`.
 
 ## Dokploy setup
 

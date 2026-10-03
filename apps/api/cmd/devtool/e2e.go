@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/argon2hash"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/keybox"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/config"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/database"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/redis"
@@ -47,14 +46,9 @@ func runE2E(ctx context.Context, command string) (err error) {
 	if password == "" {
 		password = e2eDefaultPassword
 	}
-	keys, err := keybox.NewBox(cfg.AI.KeySecret)
-	if err != nil {
-		return err
-	}
 	seeder := newE2ESeeder(e2eSeederDeps{
 		SQL:      db.SQL,
 		Redis:    cache,
-		Keys:     keys,
 		Hasher:   argon2hash.New(argon2hash.PasswordParams()),
 		Password: password,
 		Now:      func() time.Time { return time.Now().UTC() },

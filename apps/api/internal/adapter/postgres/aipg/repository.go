@@ -6,7 +6,6 @@ import (
 	"slices"
 	"time"
 
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/keybox"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aiprovider"
@@ -35,11 +34,10 @@ const (
 
 type Repository struct {
 	client *ent.Client
-	box    *keybox.Box
 }
 
-func NewRepository(client *ent.Client, box *keybox.Box) *Repository {
-	return &Repository{client: client, box: box}
+func NewRepository(client *ent.Client) *Repository {
+	return &Repository{client: client}
 }
 
 func (r *Repository) db(ctx context.Context) *ent.Client {
@@ -97,15 +95,7 @@ func (r *Repository) ProviderConnection(ctx context.Context, id int) (ai.Connect
 	if err != nil {
 		return ai.Connection{}, fmt.Errorf("get ai provider %d: %w", id, err)
 	}
-	return r.connection(row)
-}
-
-func (r *Repository) connection(row *ent.AIProvider) (ai.Connection, error) {
-	key, err := r.box.Open(row.APIKey)
-	if err != nil {
-		return ai.Connection{}, fmt.Errorf("open ai provider %d key: %w", row.ID, err)
-	}
-	return ai.Connection{Kind: ai.ProviderKind(row.Kind), BaseURL: row.BaseURL, APIKey: key}, nil
+	return toConnection(row), nil
 }
 
 func (r *Repository) ProviderNameTaken(ctx context.Context, name string, exceptID int) (bool, error) {
@@ -117,15 +107,11 @@ func (r *Repository) ProviderNameTaken(ctx context.Context, name string, exceptI
 }
 
 func (r *Repository) CreateProvider(ctx context.Context, in ai.NewProvider) (int, error) {
-	sealed, err := r.box.Seal(in.APIKey)
-	if err != nil {
-		return 0, fmt.Errorf("seal ai provider key: %w", err)
-	}
 	row, err := r.db(ctx).AIProvider.Create().
 		SetName(in.Name).
 		SetKind(string(in.Kind)).
 		SetNillableBaseURL(in.BaseURL).
-		SetAPIKey(sealed).
+		SetAPIKey(in.APIKey).
 		SetKeyHint(keyHint(in.APIKey)).
 		SetPriceMultiplier(in.PriceMultiplier).
 		SetNillableCatalogProviderID(in.CatalogProviderID).
@@ -152,11 +138,7 @@ func (r *Repository) UpdateProvider(ctx context.Context, id int, changes ai.Prov
 		}
 	}
 	if changes.APIKey != nil {
-		sealed, err := r.box.Seal(*changes.APIKey)
-		if err != nil {
-			return fmt.Errorf("seal ai provider key: %w", err)
-		}
-		update.SetAPIKey(sealed).SetKeyHint(keyHint(*changes.APIKey))
+		update.SetAPIKey(*changes.APIKey).SetKeyHint(keyHint(*changes.APIKey))
 	}
 	if changes.PriceMultiplier != nil {
 		update.SetPriceMultiplier(*changes.PriceMultiplier)

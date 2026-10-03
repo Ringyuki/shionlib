@@ -13,7 +13,6 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/aimoderation"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/keybox"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/aipg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
@@ -44,7 +43,6 @@ type e2ePasswordHasher interface {
 type e2eSeederDeps struct {
 	SQL      *sql.DB
 	Redis    *redis.Client
-	Keys     *keybox.Box
 	Hasher   e2ePasswordHasher
 	Password string
 	Now      func() time.Time
@@ -55,7 +53,6 @@ type e2eSeeder struct {
 	sql      *sql.DB
 	ent      *ent.Client
 	redis    *redis.Client
-	keys     *keybox.Box
 	hasher   e2ePasswordHasher
 	password string
 	now      func() time.Time
@@ -74,7 +71,6 @@ func newE2ESeeder(deps e2eSeederDeps) *e2eSeeder {
 		sql:      deps.SQL,
 		ent:      postgres.NewClient(deps.SQL),
 		redis:    deps.Redis,
-		keys:     deps.Keys,
 		hasher:   deps.Hasher,
 		password: deps.Password,
 		now:      deps.Now,
@@ -264,7 +260,7 @@ func (s *e2eSeeder) seedUsers(ctx context.Context, tx *ent.Client, passwordHash 
 }
 
 func (s *e2eSeeder) seedModeration(ctx context.Context, tx *ent.Client) error {
-	repo := aipg.NewRepository(tx, s.keys)
+	repo := aipg.NewRepository(tx)
 	baseURL := e2eUnreachableAIBaseURL
 	provider, err := repo.CreateProvider(ctx, ai.NewProvider{Name: "e2e-unreachable", Kind: ai.KindCompatible, BaseURL: &baseURL, APIKey: e2eUnreachableAIKey, PriceMultiplier: 1})
 	if err != nil {

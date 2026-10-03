@@ -121,11 +121,7 @@ func (r *Repository) ModelTarget(ctx context.Context, id int) (ai.ModelTarget, [
 	}
 	targets := make([]ai.RouteTarget, 0, len(routes))
 	for _, route := range routes {
-		target, err := r.routeTarget(route)
-		if err != nil {
-			return ai.ModelTarget{}, nil, err
-		}
-		targets = append(targets, target)
+		targets = append(targets, toRouteTarget(route))
 	}
 	return toModelTarget(row), targets, nil
 }
@@ -138,30 +134,7 @@ func (r *Repository) RouteTarget(ctx context.Context, id int) (ai.ModelTarget, a
 	if err != nil {
 		return ai.ModelTarget{}, ai.RouteTarget{}, fmt.Errorf("get ai route %d: %w", id, err)
 	}
-	target, err := r.routeTarget(row)
-	if err != nil {
-		return ai.ModelTarget{}, ai.RouteTarget{}, err
-	}
-	return toModelTarget(row.Edges.Model), target, nil
-}
-
-func (r *Repository) routeTarget(row *ent.AIRoute) (ai.RouteTarget, error) {
-	provider := row.Edges.Provider
-	connection, err := r.connection(provider)
-	if err != nil {
-		return ai.RouteTarget{}, err
-	}
-	return ai.RouteTarget{
-		ID:            row.ID,
-		ProviderID:    provider.ID,
-		ProviderName:  provider.Name,
-		Connection:    connection,
-		UpstreamID:    row.UpstreamID,
-		Protocol:      ai.Protocol(row.Protocol),
-		Price:         routePrice(row),
-		DroppedParams: nonNil(row.DroppedParams),
-		JSONMode:      row.JSONMode,
-	}, nil
+	return toModelTarget(row.Edges.Model), toRouteTarget(row), nil
 }
 
 func (r *Repository) SuperAdminIDs(ctx context.Context) ([]int, error) {

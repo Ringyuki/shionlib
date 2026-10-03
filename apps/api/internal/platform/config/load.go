@@ -78,7 +78,6 @@ func (c *Config) Validate() error {
 	require(c.APM.SampleRate >= 0 && c.APM.SampleRate <= 1, "APM_SAMPLE_RATE must be between 0 and 1")
 	require(c.Upload.ChunkSizeBytes > 0 && c.Upload.ChunkSizeBytes <= c.Upload.TransferLimitBytes, "FILE_UPLOAD_CHUNK_SIZE must be positive and not exceed UPLOAD_LARGE_FILE_TRANSFER_LIMIT_BYTES")
 	require(c.Upload.MaxChunks > 0, "UPLOAD_LARGE_FILE_MAX_CHUNKS must be positive")
-	require(len(c.AI.KeySecret) >= 32, "AI_KEY_SECRET must be at least 32 characters")
 	require(c.AI.IdleTimeout > 0 && c.AI.MaxCallDuration >= c.AI.IdleTimeout, "AI_IDLE_TIMEOUT must be positive and not exceed AI_MAX_CALL_DURATION")
 	require(c.AI.RequestRetentionDays > 0 && c.AI.PayloadRetentionDays > 0, "AI_REQUEST_RETENTION_DAYS and AI_PAYLOAD_RETENTION_DAYS must be positive")
 	if _, err := time.LoadLocation(c.Tasks.ScheduleTimezone); err != nil {

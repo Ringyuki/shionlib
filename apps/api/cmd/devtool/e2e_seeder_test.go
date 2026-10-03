@@ -4,14 +4,12 @@ import (
 	"bytes"
 	"context"
 	"slices"
-	"strings"
 	"testing"
 	"time"
 
 	goredis "github.com/redis/go-redis/v9"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/argon2hash"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/keybox"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsourcelink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
@@ -29,14 +27,9 @@ func TestE2EPrepareReproducesTheLegacyDatasetIdempotently(t *testing.T) {
 	if err := cache.Set(ctx, cache.Key("stale"), "1", 0).Err(); err != nil {
 		t.Fatal(err)
 	}
-	keys, err := keybox.NewBox(strings.Repeat("e2e-key-", 5))
-	if err != nil {
-		t.Fatal(err)
-	}
 	seeder := newE2ESeeder(e2eSeederDeps{
 		SQL:      db.SQL,
 		Redis:    cache,
-		Keys:     keys,
 		Hasher:   hasher,
 		Password: e2eDefaultPassword,
 		Now:      func() time.Time { return now },
