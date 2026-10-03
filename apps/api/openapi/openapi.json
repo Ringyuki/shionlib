@@ -1118,6 +1118,276 @@
         ],
         "type": "object"
       },
+      "CommentCreatedDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {},
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "html": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "like_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/CommentParentDTO"
+          },
+          "parent_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "root_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "status": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "content",
+          "html",
+          "parent_id",
+          "parent",
+          "root_id",
+          "creator",
+          "status",
+          "created",
+          "updated",
+          "like_count"
+        ],
+        "type": "object"
+      },
+      "CommentEditedDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {},
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "edited": {
+            "type": "boolean"
+          },
+          "html": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "parent_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "root_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "status": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "content",
+          "html",
+          "parent_id",
+          "root_id",
+          "creator",
+          "edited",
+          "status",
+          "created",
+          "updated"
+        ],
+        "type": "object"
+      },
+      "CommentItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "edited": {
+            "type": "boolean"
+          },
+          "html": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "is_liked": {
+            "type": "boolean"
+          },
+          "like_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/CommentItemParentDTO"
+          },
+          "parent_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "reply_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "root_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "status": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "html",
+          "parent_id",
+          "root_id",
+          "reply_count",
+          "parent",
+          "is_liked",
+          "like_count",
+          "creator",
+          "edited",
+          "status",
+          "created",
+          "updated"
+        ],
+        "type": "object"
+      },
+      "CommentItemParentDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "creator": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "html": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "CommentParentDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "creator": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "html": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "html",
+          "creator"
+        ],
+        "type": "object"
+      },
+      "CommentRawDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {},
+          "creator_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "content",
+          "creator_id"
+        ],
+        "type": "object"
+      },
       "CreateAdInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -1190,6 +1460,22 @@
         ],
         "type": "object"
       },
+      "CreateCommentInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "description": "Lexical editor state"
+          },
+          "parent_id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "type": "object"
+      },
       "CreateFavoriteInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -1259,6 +1545,39 @@
         },
         "required": [
           "amount"
+        ],
+        "type": "object"
+      },
+      "CreateWalkthroughInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "description": "Lexical editor state"
+          },
+          "game_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "DRAFT",
+              "PUBLISHED",
+              "HIDDEN",
+              "DELETED"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "game_id",
+          "title",
+          "content",
+          "status"
         ],
         "type": "object"
       },
@@ -2333,6 +2652,18 @@
         ],
         "type": "object"
       },
+      "EditCommentInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "description": "Lexical editor state"
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "type": "object"
+      },
       "EditDownloadSourceBody": {
         "additionalProperties": false,
         "properties": {
@@ -2635,6 +2966,105 @@
           },
           "data": {
             "$ref": "#/components/schemas/CharacterDetailDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeCommentCreatedDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CommentCreatedDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeCommentEditedDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CommentEditedDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeCommentRawDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CommentRawDTO"
           },
           "message": {
             "type": "string"
@@ -3768,6 +4198,39 @@
         ],
         "type": "object"
       },
+      "EnvelopePageCommentItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageCommentItemDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopePageDeveloperListItemDTO": {
         "additionalProperties": false,
         "properties": {
@@ -4531,6 +4994,72 @@
         ],
         "type": "object"
       },
+      "EnvelopeUserCommentPageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UserCommentPageDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeUserWalkthroughPageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UserWalkthroughPageDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeValue": {
         "additionalProperties": false,
         "properties": {
@@ -4571,6 +5100,72 @@
           },
           "data": {
             "$ref": "#/components/schemas/VndbScoreDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeWalkthroughDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/WalkthroughDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeWalkthroughPageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/WalkthroughPageDTO"
           },
           "message": {
             "type": "string"
@@ -6677,6 +7272,28 @@
         ],
         "type": "object"
       },
+      "PageCommentItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CommentItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
       "PageDeveloperListItemDTO": {
         "additionalProperties": false,
         "properties": {
@@ -8075,6 +8692,34 @@
         ],
         "type": "object"
       },
+      "UpdateWalkthroughInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "description": "Lexical editor state"
+          },
+          "status": {
+            "enum": [
+              "DRAFT",
+              "PUBLISHED",
+              "HIDDEN",
+              "DELETED"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "content",
+          "status"
+        ],
+        "type": "object"
+      },
       "UploadChunkDTO": {
         "additionalProperties": false,
         "properties": {
@@ -8175,6 +8820,137 @@
         ],
         "type": "object"
       },
+      "UserCommentDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameCard"
+          },
+          "html": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "is_liked": {
+            "type": "boolean"
+          },
+          "like_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/CommentParentDTO"
+          },
+          "parent_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "reply_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "root_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "html",
+          "parent_id",
+          "root_id",
+          "reply_count",
+          "parent",
+          "is_liked",
+          "like_count",
+          "game",
+          "creator",
+          "created",
+          "updated"
+        ],
+        "type": "object"
+      },
+      "UserCommentPageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/UserCommentDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/UserCommentPageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "UserCommentPageMeta": {
+        "additionalProperties": false,
+        "properties": {
+          "currentPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "is_current_user": {
+            "type": "boolean"
+          },
+          "itemCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemsPerPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalItems": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "is_current_user",
+          "totalItems",
+          "itemCount",
+          "itemsPerPage",
+          "totalPages",
+          "currentPage"
+        ],
+        "type": "object"
+      },
       "UserSummary": {
         "additionalProperties": false,
         "properties": {
@@ -8200,6 +8976,126 @@
           "name",
           "avatar",
           "is_sponsor"
+        ],
+        "type": "object"
+      },
+      "UserWalkthroughDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "edited": {
+            "type": "boolean"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameCard"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lang": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "DRAFT",
+              "PUBLISHED",
+              "HIDDEN",
+              "DELETED"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "lang",
+          "created",
+          "updated",
+          "edited",
+          "status",
+          "game",
+          "creator"
+        ],
+        "type": "object"
+      },
+      "UserWalkthroughPageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/UserWalkthroughDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/UserWalkthroughPageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "UserWalkthroughPageMeta": {
+        "additionalProperties": false,
+        "properties": {
+          "content_limit": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currentPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "is_current_user": {
+            "type": "boolean"
+          },
+          "itemCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemsPerPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalItems": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "is_current_user",
+          "content_limit",
+          "totalItems",
+          "itemCount",
+          "itemsPerPage",
+          "totalPages",
+          "currentPage"
         ],
         "type": "object"
       },
@@ -8233,6 +9129,175 @@
           "rating",
           "average",
           "votecount"
+        ],
+        "type": "object"
+      },
+      "WalkthroughDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {},
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "edited": {
+            "type": "boolean"
+          },
+          "html": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lang": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "DRAFT",
+              "PUBLISHED",
+              "HIDDEN",
+              "DELETED"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "html",
+          "lang",
+          "created",
+          "updated",
+          "edited",
+          "status",
+          "creator"
+        ],
+        "type": "object"
+      },
+      "WalkthroughItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "edited": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lang": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "DRAFT",
+              "PUBLISHED",
+              "HIDDEN",
+              "DELETED"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "lang",
+          "created",
+          "updated",
+          "edited",
+          "status",
+          "creator"
+        ],
+        "type": "object"
+      },
+      "WalkthroughPageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/WalkthroughItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/WalkthroughPageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "WalkthroughPageMeta": {
+        "additionalProperties": false,
+        "properties": {
+          "content_limit": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currentPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemsPerPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalItems": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "content_limit",
+          "totalItems",
+          "itemCount",
+          "itemsPerPage",
+          "totalPages",
+          "currentPage"
         ],
         "type": "object"
       }
@@ -10266,6 +11331,383 @@
         "summary": "Get a character",
         "tags": [
           "character"
+        ]
+      }
+    },
+    "/comment/game/{game_id}": {
+      "get": {
+        "operationId": "comment.listByGame",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "game_id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageCommentItemDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List comments of a game",
+        "tags": [
+          "comment"
+        ]
+      },
+      "post": {
+        "operationId": "comment.create",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "game_id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCommentInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeCommentCreatedDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Comment on a game",
+        "tags": [
+          "comment"
+        ]
+      }
+    },
+    "/comment/{comment_id}": {
+      "delete": {
+        "operationId": "comment.delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "comment_id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Delete a comment",
+        "tags": [
+          "comment"
+        ]
+      },
+      "patch": {
+        "operationId": "comment.edit",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "comment_id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditCommentInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeCommentEditedDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Edit a comment",
+        "tags": [
+          "comment"
+        ]
+      }
+    },
+    "/comment/{comment_id}/like": {
+      "post": {
+        "operationId": "comment.like",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "comment_id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Toggle a like on a comment",
+        "tags": [
+          "comment"
+        ]
+      }
+    },
+    "/comment/{comment_id}/raw": {
+      "get": {
+        "operationId": "comment.raw",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "comment_id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeCommentRawDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Editor state of a comment",
+        "tags": [
+          "comment"
         ]
       }
     },
@@ -14420,6 +15862,82 @@
         ]
       }
     },
+    "/user/datas/{id}/comments": {
+      "get": {
+        "operationId": "comment.listByUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeUserCommentPageDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List visible comments of a user",
+        "tags": [
+          "comment"
+        ]
+      }
+    },
     "/user/datas/{id}/game-resources": {
       "get": {
         "operationId": "download.userResources",
@@ -14494,6 +16012,421 @@
         "summary": "List the download resources uploaded by a user",
         "tags": [
           "download"
+        ]
+      }
+    },
+    "/user/datas/{id}/walkthroughs": {
+      "get": {
+        "operationId": "walkthrough.listByUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "enum": [
+                "DRAFT",
+                "PUBLISHED",
+                "HIDDEN",
+                "DELETED"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeUserWalkthroughPageDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List walkthroughs of a user",
+        "tags": [
+          "walkthrough"
+        ]
+      }
+    },
+    "/walkthrough": {
+      "post": {
+        "operationId": "walkthrough.create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWalkthroughInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeWalkthroughDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Create a walkthrough",
+        "tags": [
+          "walkthrough"
+        ]
+      }
+    },
+    "/walkthrough/game/{id}": {
+      "get": {
+        "operationId": "walkthrough.listByGame",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "enum": [
+                "DRAFT",
+                "PUBLISHED",
+                "HIDDEN",
+                "DELETED"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeWalkthroughPageDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List walkthroughs of a game",
+        "tags": [
+          "walkthrough"
+        ]
+      }
+    },
+    "/walkthrough/{id}": {
+      "delete": {
+        "operationId": "walkthrough.delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Delete a walkthrough",
+        "tags": [
+          "walkthrough"
+        ]
+      },
+      "get": {
+        "operationId": "walkthrough.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Only the literal true includes the editor state",
+            "explode": false,
+            "in": "query",
+            "name": "withContent",
+            "schema": {
+              "description": "Only the literal true includes the editor state",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeWalkthroughDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get a walkthrough",
+        "tags": [
+          "walkthrough"
+        ]
+      },
+      "patch": {
+        "operationId": "walkthrough.update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWalkthroughInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeWalkthroughDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Replace a walkthrough",
+        "tags": [
+          "walkthrough"
         ]
       }
     }
