@@ -38,6 +38,9 @@ step "golangci-lint"
 step "business codes"
 go run ./cmd/devtool bizcode check
 
+step "deploy environment"
+go run ./cmd/devtool deploy check
+
 step "tests"
 go test ./...
 

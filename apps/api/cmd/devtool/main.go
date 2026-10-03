@@ -38,13 +38,17 @@ func run(args []string) error {
 		return writeBizCodeDocs(root)
 	case "migrate check":
 		return checkMigrationDrift(context.Background(), root)
+	case "deploy env":
+		return printDeployEnv()
+	case "deploy check":
+		return checkDeployEnv(root)
 	default:
 		return usage()
 	}
 }
 
 func usage() error {
-	return fmt.Errorf("usage: devtool <migrate diff <name> | migrate check | bizcode check | bizcode docs | feature create <name> <range>>")
+	return fmt.Errorf("usage: devtool <migrate diff <name> | migrate check | bizcode check | bizcode docs | feature create <name> <range> | deploy env | deploy check>")
 }
 
 func moduleRoot() (string, error) {

@@ -5,12 +5,14 @@ on:
     branches: ['main', 'major/shionlib-next']
     paths:
       - 'apps/api/**'
+      - 'infra/**'
       - '.claude/skills/go-backend/**'
       - '.github/workflows/api.yml'
   push:
     branches: ['main', 'major/shionlib-next']
     paths:
       - 'apps/api/**'
+      - 'infra/**'
       - '.claude/skills/go-backend/**'
       - '.github/workflows/api.yml'
   workflow_dispatch:

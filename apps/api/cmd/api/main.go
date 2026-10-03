@@ -5,17 +5,22 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/bootstrap"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/config"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/database"
+	"github.com/Ringyuki/shionlib/apps/api/internal/platform/httpclient"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/jobs"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/runtime"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/server"
 )
+
+const healthTimeout = 3 * time.Second
 
 func main() {
 	if err := run(context.Background(), os.Args[1:]); err != nil {
@@ -42,8 +47,10 @@ func run(ctx context.Context, args []string) error {
 		return migrate(ctx, sub)
 	case "openapi":
 		return openapi(args[1:])
+	case "health":
+		return health(ctx)
 	default:
-		return fmt.Errorf("unknown command %q (expected serve, worker, migrate up|status, openapi)", command)
+		return fmt.Errorf("unknown command %q (expected serve, worker, migrate up|status, openapi, health)", command)
 	}
 }
 
@@ -111,6 +118,30 @@ func migrate(ctx context.Context, sub string) error {
 	default:
 		return fmt.Errorf("unknown migrate command %q", sub)
 	}
+}
+
+func health(ctx context.Context) error {
+	cfg, err := config.Load()
+	if err != nil {
+		return err
+	}
+	ctx, cancel := context.WithTimeout(ctx, healthTimeout)
+	defer cancel()
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://127.0.0.1:"+strconv.Itoa(cfg.HTTP.Port)+"/health/live", nil)
+	if err != nil {
+		return err
+	}
+	response, err := httpclient.New(httpclient.Options{Timeout: healthTimeout}).Do(request)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = response.Body.Close()
+	}()
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("liveness probe returned %d", response.StatusCode)
+	}
+	return nil
 }
 
 func openapi(args []string) error {

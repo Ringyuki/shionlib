@@ -1,0 +1,77 @@
+name: deploy api
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Target environment
+        type: choice
+        options:
+          - staging
+          - production
+        default: staging
+        required: true
+      image_tag:
+        description: Image tag to deploy (sha-<short>, major-shionlib-next or a release version)
+        type: string
+        required: true
+
+run-name: api ${{ inputs.image_tag }} to ${{ inputs.target }}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-api-${{ inputs.target }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy through Dokploy
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target }}
+    env:
+      DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
+      DOKPLOY_TOKEN: ${{ secrets.DOKPLOY_TOKEN }}
+      COMPOSE_ID: ${{ secrets.DOKPLOY_API_COMPOSE_ID }}
+      IMAGE_TAG: ${{ inputs.image_tag }}
+    steps:
+      - name: Check configuration
+        run: |
+          set -euo pipefail
+          if [ -z "$DOKPLOY_URL" ] || [ -z "$DOKPLOY_TOKEN" ] || [ -z "$COMPOSE_ID" ]; then
+            echo "::error::DOKPLOY_URL, DOKPLOY_TOKEN and DOKPLOY_API_COMPOSE_ID must be set for ${{ inputs.target }}"
+            exit 1
+          fi
+          if ! printf '%s' "$IMAGE_TAG" | grep -Eq '^[A-Za-z0-9._-]+$'; then
+            echo "::error::invalid image tag"
+            exit 1
+          fi
+
+      - name: Point the compose at the image
+        run: |
+          set -euo pipefail
+          base="${DOKPLOY_URL%/}"
+          image="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/shionlib-api:${IMAGE_TAG}"
+          current=$(curl -fsS "$base/api/compose.one?composeId=$COMPOSE_ID" \
+            -H "x-api-key: $DOKPLOY_TOKEN" -H 'accept: application/json' | jq -r '.env // ""')
+          if [ "$(printf '%s\n' "$current" | grep -c '=' || true)" -lt 3 ]; then
+            echo "::error::the compose env looks empty; refusing to overwrite it"
+            exit 1
+          fi
+          updated=$( { printf '%s\n' "$current" | grep -Ev '^(API_IMAGE|APP_VERSION)='; printf 'API_IMAGE=%s\nAPP_VERSION=%s\n' "$image" "$IMAGE_TAG"; } )
+          jq -n --arg id "$COMPOSE_ID" --arg env "$updated" '{composeId: $id, env: $env}' \
+            | curl -fsS -X POST "$base/api/compose.update" \
+                -H "x-api-key: $DOKPLOY_TOKEN" -H 'accept: application/json' -H 'Content-Type: application/json' \
+                --data-binary @- > /dev/null
+          echo "deploying $image"
+
+      - name: Deploy
+        run: |
+          set -euo pipefail
+          base="${DOKPLOY_URL%/}"
+          jq -n --arg id "$COMPOSE_ID" --arg title "api $IMAGE_TAG" --arg description "$GITHUB_SHA" \
+            '{composeId: $id, title: $title, description: $description}' \
+            | curl -fsS -X POST "$base/api/compose.deploy" \
+                -H "x-api-key: $DOKPLOY_TOKEN" -H 'accept: application/json' -H 'Content-Type: application/json' \
+                --data-binary @- > /dev/null

@@ -47,7 +47,7 @@ func (m *Migrator) Up(ctx context.Context) (err error) {
 	if err != nil {
 		return fmt.Errorf("read migration version: %w", err)
 	}
-	m.logger.InfoContext(ctx, "database migrations applied", slog.Uint64("version", uint64(version)))
+	m.logger.InfoContext(ctx, "database migrations applied", slog.Uint64("schema_version", uint64(version)))
 	return nil
 }
 
