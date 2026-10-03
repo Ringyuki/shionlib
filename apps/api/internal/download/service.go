@@ -2,7 +2,6 @@ package download
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"slices"
 	"time"
@@ -26,8 +25,6 @@ type Deps struct {
 	Store      ObjectStore
 	Now        func() time.Time
 }
-
-const requeueBatch = 200
 
 type Service struct {
 	repo       Repository
@@ -416,7 +413,7 @@ func (s *Service) notifyFavorites(ctx context.Context, who actor.Actor, file Fil
 		return err
 	}
 	card := cardOrStub(cards, file.GameID)
-	meta := map[string]any{
+	meta := message.Meta{
 		"file_name":     file.Name,
 		"game_title_jp": card.TitleJP,
 		"game_title_zh": card.TitleZH,
@@ -424,10 +421,6 @@ func (s *Service) notifyFavorites(ctx context.Context, who actor.Actor, file Fil
 	}
 	if reason != nil && *reason != "" {
 		meta["reason"] = *reason
-	}
-	raw, err := json.Marshal(meta)
-	if err != nil {
-		return err
 	}
 	gameID := file.GameID
 	for _, receiver := range receivers {
@@ -437,7 +430,7 @@ func (s *Service) notifyFavorites(ctx context.Context, who actor.Actor, file Fil
 			Title:      "Messages.System.File.Reupload.FileReuploadedTitle",
 			Content:    "Messages.System.File.Reupload.FileReuploadedContent",
 			GameID:     &gameID,
-			Meta:       raw,
+			Meta:       meta,
 			ReceiverID: receiver,
 		}); err != nil {
 			return err

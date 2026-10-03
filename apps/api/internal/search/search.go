@@ -1,6 +1,9 @@
 package search
 
-import "github.com/Ringyuki/shionlib/apps/api/internal/game"
+import (
+	"github.com/Ringyuki/shionlib/apps/api/internal/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/paging"
+)
 
 type Window string
 
@@ -19,10 +22,7 @@ const (
 	MinScore               = 0.01
 )
 
-type Page struct {
-	Number int
-	Size   int
-}
+type Page = paging.Page
 
 type Query struct {
 	Q    string
@@ -85,12 +85,4 @@ type TagMatch struct {
 type Term struct {
 	Query string
 	Score float64
-}
-
-type RecordSearchJob struct {
-	Query string `json:"query"`
-}
-
-func (RecordSearchJob) Kind() string {
-	return "search_analytics"
 }

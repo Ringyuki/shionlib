@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/paging"
 )
 
 const (
@@ -69,11 +70,15 @@ type ListFilter struct {
 	ContainGame *int
 }
 
-type Page struct {
-	Number int
-	Size   int
+type Page = paging.Page
+
+type CreateInput struct {
+	Name        string
+	Description *string
+	IsPrivate   bool
 }
 
-func (p Page) Offset() int {
-	return (p.Number - 1) * p.Size
+type ListQuery struct {
+	UserID *int
+	GameID *int
 }

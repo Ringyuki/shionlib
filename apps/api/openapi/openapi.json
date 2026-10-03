@@ -72,7 +72,7 @@
             "$ref": "#/components/schemas/ActivityFileDTO"
           },
           "game": {
-            "$ref": "#/components/schemas/GameCard"
+            "$ref": "#/components/schemas/GameCardDTO"
           },
           "id": {
             "format": "int64",
@@ -86,7 +86,7 @@
             "type": "string"
           },
           "user": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "walkthrough": {
             "$ref": "#/components/schemas/ActivityWalkthroughDTO"
@@ -174,7 +174,7 @@
             ]
           },
           "meta": {
-            "$ref": "#/components/schemas/ActivityPageMeta"
+            "$ref": "#/components/schemas/ActivityPageMetaDTO"
           }
         },
         "required": [
@@ -183,7 +183,7 @@
         ],
         "type": "object"
       },
-      "ActivityPageMeta": {
+      "ActivityPageMetaDTO": {
         "additionalProperties": false,
         "properties": {
           "content_limit": {
@@ -3171,7 +3171,7 @@
             "type": "string"
           },
           "creator": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "html": {
             "type": [
@@ -3237,7 +3237,7 @@
             "type": "string"
           },
           "creator": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "edited": {
             "type": "boolean"
@@ -3297,7 +3297,7 @@
             "type": "string"
           },
           "creator": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "edited": {
             "type": "boolean"
@@ -3370,7 +3370,7 @@
         "additionalProperties": false,
         "properties": {
           "creator": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "html": {
             "type": "string"
@@ -3392,7 +3392,7 @@
         "additionalProperties": false,
         "properties": {
           "creator": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "html": {
             "type": [
@@ -3936,7 +3936,7 @@
         "additionalProperties": false,
         "properties": {
           "creator": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "file_hash": {
             "type": "string"
@@ -4038,7 +4038,7 @@
             "type": "integer"
           },
           "operator": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "reason": {
             "type": [
@@ -4249,7 +4249,7 @@
             "type": "string"
           },
           "creator": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "downloads": {
             "format": "int64",
@@ -4269,7 +4269,7 @@
             "type": "integer"
           },
           "game": {
-            "$ref": "#/components/schemas/GameCard"
+            "$ref": "#/components/schemas/GameCardDTO"
           },
           "id": {
             "format": "int64",
@@ -4314,7 +4314,7 @@
         ],
         "type": "object"
       },
-      "DownloadReleaseMeta": {
+      "DownloadReleaseMetaDTO": {
         "additionalProperties": false,
         "properties": {
           "content_limit": {
@@ -4365,7 +4365,7 @@
             ]
           },
           "meta": {
-            "$ref": "#/components/schemas/DownloadReleaseMeta"
+            "$ref": "#/components/schemas/DownloadReleaseMetaDTO"
           }
         },
         "required": [
@@ -4382,7 +4382,7 @@
             "type": "string"
           },
           "creator": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "downloads": {
             "format": "int64",
@@ -4479,7 +4479,7 @@
         ],
         "type": "object"
       },
-      "DownloadSourceBody": {
+      "DownloadSourceBodyInput": {
         "additionalProperties": false,
         "properties": {
           "file_name": {
@@ -4560,7 +4560,7 @@
             "type": "string"
           },
           "creator": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "downloads": {
             "format": "int64",
@@ -4574,7 +4574,7 @@
             "type": "integer"
           },
           "game": {
-            "$ref": "#/components/schemas/GameCard"
+            "$ref": "#/components/schemas/GameCardDTO"
           },
           "id": {
             "format": "int64",
@@ -4628,7 +4628,7 @@
         ],
         "type": "object"
       },
-      "DownloadUserResourceMeta": {
+      "DownloadUserResourceMetaDTO": {
         "additionalProperties": false,
         "properties": {
           "content_limit": {
@@ -4687,7 +4687,7 @@
             ]
           },
           "meta": {
-            "$ref": "#/components/schemas/DownloadUserResourceMeta"
+            "$ref": "#/components/schemas/DownloadUserResourceMetaDTO"
           }
         },
         "required": [
@@ -4708,7 +4708,7 @@
         ],
         "type": "object"
       },
-      "EditDownloadSourceBody": {
+      "EditDownloadSourceBodyInput": {
         "additionalProperties": false,
         "properties": {
           "file_name": {
@@ -6093,7 +6093,7 @@
         ],
         "type": "object"
       },
-      "EnvelopeHealthLiveness": {
+      "EnvelopeHealthLivenessDTO": {
         "additionalProperties": false,
         "properties": {
           "code": {
@@ -6101,7 +6101,7 @@
             "type": "integer"
           },
           "data": {
-            "$ref": "#/components/schemas/HealthLiveness"
+            "$ref": "#/components/schemas/HealthLivenessDTO"
           },
           "message": {
             "type": "string"
@@ -6126,7 +6126,7 @@
         ],
         "type": "object"
       },
-      "EnvelopeHealthStatus": {
+      "EnvelopeHealthStatusDTO": {
         "additionalProperties": false,
         "properties": {
           "code": {
@@ -6134,7 +6134,7 @@
             "type": "integer"
           },
           "data": {
-            "$ref": "#/components/schemas/HealthStatus"
+            "$ref": "#/components/schemas/HealthStatusDTO"
           },
           "message": {
             "type": "string"
@@ -7181,7 +7181,7 @@
         ],
         "type": "object"
       },
-      "EnvelopePageGameListItem": {
+      "EnvelopePageGameListItemDTO": {
         "additionalProperties": false,
         "properties": {
           "code": {
@@ -7189,7 +7189,7 @@
             "type": "integer"
           },
           "data": {
-            "$ref": "#/components/schemas/PageGameListItem"
+            "$ref": "#/components/schemas/PageGameListItemDTO"
           },
           "message": {
             "type": "string"
@@ -7544,7 +7544,7 @@
         ],
         "type": "object"
       },
-      "EnvelopeRandomGameID": {
+      "EnvelopeRandomGameIDDTO": {
         "additionalProperties": false,
         "properties": {
           "code": {
@@ -8043,7 +8043,7 @@
         ],
         "type": "object"
       },
-      "EnvelopeUploadedImage": {
+      "EnvelopeUploadedImageDTO": {
         "additionalProperties": false,
         "properties": {
           "code": {
@@ -8051,7 +8051,7 @@
             "type": "integer"
           },
           "data": {
-            "$ref": "#/components/schemas/UploadedImage"
+            "$ref": "#/components/schemas/UploadedImageDTO"
           },
           "message": {
             "type": "string"
@@ -8529,7 +8529,7 @@
         "additionalProperties": false,
         "properties": {
           "game": {
-            "$ref": "#/components/schemas/GameCard"
+            "$ref": "#/components/schemas/GameCardDTO"
           },
           "id": {
             "format": "int64",
@@ -8562,7 +8562,7 @@
             ]
           },
           "meta": {
-            "$ref": "#/components/schemas/FavoriteItemPageMeta"
+            "$ref": "#/components/schemas/FavoriteItemPageMetaDTO"
           }
         },
         "required": [
@@ -8571,7 +8571,7 @@
         ],
         "type": "object"
       },
-      "FavoriteItemPageMeta": {
+      "FavoriteItemPageMetaDTO": {
         "additionalProperties": false,
         "properties": {
           "content_limit": {
@@ -8684,7 +8684,7 @@
         ],
         "type": "object"
       },
-      "GameCard": {
+      "GameCardDTO": {
         "additionalProperties": false,
         "properties": {
           "aliases": {
@@ -8698,7 +8698,7 @@
           },
           "covers": {
             "items": {
-              "$ref": "#/components/schemas/GameCover"
+              "$ref": "#/components/schemas/GameCoverDTO"
             },
             "type": [
               "array",
@@ -8707,7 +8707,7 @@
           },
           "developers": {
             "items": {
-              "$ref": "#/components/schemas/GameCredit"
+              "$ref": "#/components/schemas/GameCreditDTO"
             },
             "type": [
               "array",
@@ -8962,7 +8962,7 @@
         ],
         "type": "object"
       },
-      "GameCover": {
+      "GameCoverDTO": {
         "additionalProperties": false,
         "properties": {
           "dims": {
@@ -9013,11 +9013,11 @@
         ],
         "type": "object"
       },
-      "GameCredit": {
+      "GameCreditDTO": {
         "additionalProperties": false,
         "properties": {
           "developer": {
-            "$ref": "#/components/schemas/GameDeveloperRef"
+            "$ref": "#/components/schemas/GameDeveloperRefDTO"
           },
           "role": {
             "type": "string"
@@ -9047,7 +9047,7 @@
           },
           "covers": {
             "items": {
-              "$ref": "#/components/schemas/GameCover"
+              "$ref": "#/components/schemas/GameCoverDTO"
             },
             "type": [
               "array",
@@ -9056,7 +9056,7 @@
           },
           "developers": {
             "items": {
-              "$ref": "#/components/schemas/GameCredit"
+              "$ref": "#/components/schemas/GameCreditDTO"
             },
             "type": [
               "array",
@@ -9217,7 +9217,7 @@
         ],
         "type": "object"
       },
-      "GameDeveloperRef": {
+      "GameDeveloperRefDTO": {
         "additionalProperties": false,
         "properties": {
           "aliases": {
@@ -9284,7 +9284,7 @@
           },
           "covers": {
             "items": {
-              "$ref": "#/components/schemas/GameCover"
+              "$ref": "#/components/schemas/GameCoverDTO"
             },
             "type": [
               "array",
@@ -9293,7 +9293,7 @@
           },
           "developers": {
             "items": {
-              "$ref": "#/components/schemas/GameCredit"
+              "$ref": "#/components/schemas/GameCreditDTO"
             },
             "type": [
               "array",
@@ -9439,7 +9439,7 @@
         ],
         "type": "object"
       },
-      "GameListItem": {
+      "GameListItemDTO": {
         "additionalProperties": false,
         "properties": {
           "aliases": {
@@ -9453,7 +9453,7 @@
           },
           "covers": {
             "items": {
-              "$ref": "#/components/schemas/GameCover"
+              "$ref": "#/components/schemas/GameCoverDTO"
             },
             "type": [
               "array",
@@ -9462,7 +9462,7 @@
           },
           "developers": {
             "items": {
-              "$ref": "#/components/schemas/GameCredit"
+              "$ref": "#/components/schemas/GameCreditDTO"
             },
             "type": [
               "array",
@@ -9531,7 +9531,7 @@
         "properties": {
           "items": {
             "items": {
-              "$ref": "#/components/schemas/GameListItem"
+              "$ref": "#/components/schemas/GameListItemDTO"
             },
             "type": [
               "array",
@@ -9539,7 +9539,7 @@
             ]
           },
           "meta": {
-            "$ref": "#/components/schemas/GameListPageMeta"
+            "$ref": "#/components/schemas/GameListPageMetaDTO"
           }
         },
         "required": [
@@ -9548,7 +9548,7 @@
         ],
         "type": "object"
       },
-      "GameListPageMeta": {
+      "GameListPageMetaDTO": {
         "additionalProperties": false,
         "properties": {
           "content_limit": {
@@ -9597,7 +9597,7 @@
             "type": "string"
           },
           "to_game": {
-            "$ref": "#/components/schemas/GameCard"
+            "$ref": "#/components/schemas/GameCardDTO"
           },
           "to_game_id": {
             "format": "int64",
@@ -9679,7 +9679,7 @@
         ],
         "type": "object"
       },
-      "HealthLiveness": {
+      "HealthLivenessDTO": {
         "additionalProperties": false,
         "properties": {
           "status": {
@@ -9691,7 +9691,7 @@
         ],
         "type": "object"
       },
-      "HealthStatus": {
+      "HealthStatusDTO": {
         "additionalProperties": false,
         "properties": {
           "checks": {
@@ -9853,7 +9853,7 @@
             ]
           },
           "reviewer": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "scan_log_excerpt": {
             "type": [
@@ -9985,7 +9985,7 @@
             ]
           },
           "reviewer": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "status": {
             "type": "string"
@@ -9995,7 +9995,7 @@
             "type": "string"
           },
           "uploader": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "uploader_notified_at": {
             "format": "date-time",
@@ -10252,7 +10252,7 @@
             "type": "boolean"
           },
           "game": {
-            "$ref": "#/components/schemas/GameCard"
+            "$ref": "#/components/schemas/GameCardDTO"
           },
           "id": {
             "format": "int64",
@@ -10282,10 +10282,10 @@
             ]
           },
           "receiver": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "sender": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "title": {
             "type": "string"
@@ -10358,10 +10358,10 @@
             ]
           },
           "receiver": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "sender": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "title": {
             "type": "string"
@@ -10803,12 +10803,12 @@
         ],
         "type": "object"
       },
-      "PageGameListItem": {
+      "PageGameListItemDTO": {
         "additionalProperties": false,
         "properties": {
           "items": {
             "items": {
-              "$ref": "#/components/schemas/GameListItem"
+              "$ref": "#/components/schemas/GameListItemDTO"
             },
             "type": [
               "array",
@@ -11412,7 +11412,7 @@
             ]
           },
           "processor": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "reason": {
             "type": "string"
@@ -11618,16 +11618,16 @@
             ]
           },
           "processor": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "reason": {
             "type": "string"
           },
           "reported_user": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "reporter": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "resource": {
             "$ref": "#/components/schemas/ReportListResourceDTO"
@@ -11839,7 +11839,7 @@
           },
           "covers": {
             "items": {
-              "$ref": "#/components/schemas/GameCover"
+              "$ref": "#/components/schemas/GameCoverDTO"
             },
             "type": [
               "array",
@@ -11848,7 +11848,7 @@
           },
           "developers": {
             "items": {
-              "$ref": "#/components/schemas/GameCredit"
+              "$ref": "#/components/schemas/GameCreditDTO"
             },
             "type": [
               "array",
@@ -11925,7 +11925,7 @@
             ]
           },
           "meta": {
-            "$ref": "#/components/schemas/SearchGamePageMeta"
+            "$ref": "#/components/schemas/SearchGamePageMetaDTO"
           }
         },
         "required": [
@@ -11934,7 +11934,7 @@
         ],
         "type": "object"
       },
-      "SearchGamePageMeta": {
+      "SearchGamePageMetaDTO": {
         "additionalProperties": false,
         "properties": {
           "content_limit": {
@@ -12154,7 +12154,7 @@
             "type": "string"
           },
           "user": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           }
         },
         "required": [
@@ -12274,7 +12274,7 @@
             ]
           },
           "user": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           }
         },
         "required": [
@@ -12735,7 +12735,7 @@
         ],
         "type": "object"
       },
-      "UploadedImage": {
+      "UploadedImageDTO": {
         "additionalProperties": false,
         "properties": {
           "key": {
@@ -12767,10 +12767,10 @@
             "type": "string"
           },
           "creator": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "game": {
-            "$ref": "#/components/schemas/GameCard"
+            "$ref": "#/components/schemas/GameCardDTO"
           },
           "html": {
             "type": [
@@ -12844,7 +12844,7 @@
             ]
           },
           "meta": {
-            "$ref": "#/components/schemas/UserCommentPageMeta"
+            "$ref": "#/components/schemas/UserCommentPageMetaDTO"
           }
         },
         "required": [
@@ -12853,7 +12853,7 @@
         ],
         "type": "object"
       },
-      "UserCommentPageMeta": {
+      "UserCommentPageMetaDTO": {
         "additionalProperties": false,
         "properties": {
           "currentPage": {
@@ -13076,7 +13076,7 @@
         ],
         "type": "object"
       },
-      "UserSummary": {
+      "UserSummaryDTO": {
         "additionalProperties": false,
         "properties": {
           "avatar": {
@@ -13112,13 +13112,13 @@
             "type": "string"
           },
           "creator": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "edited": {
             "type": "boolean"
           },
           "game": {
-            "$ref": "#/components/schemas/GameCard"
+            "$ref": "#/components/schemas/GameCardDTO"
           },
           "id": {
             "format": "int64",
@@ -13173,7 +13173,7 @@
             ]
           },
           "meta": {
-            "$ref": "#/components/schemas/UserWalkthroughPageMeta"
+            "$ref": "#/components/schemas/UserWalkthroughPageMetaDTO"
           }
         },
         "required": [
@@ -13182,7 +13182,7 @@
         ],
         "type": "object"
       },
-      "UserWalkthroughPageMeta": {
+      "UserWalkthroughPageMetaDTO": {
         "additionalProperties": false,
         "properties": {
           "content_limit": {
@@ -13289,7 +13289,7 @@
             "type": "string"
           },
           "creator": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "edited": {
             "type": "boolean"
@@ -13345,7 +13345,7 @@
             "type": "string"
           },
           "creator": {
-            "$ref": "#/components/schemas/UserSummary"
+            "$ref": "#/components/schemas/UserSummaryDTO"
           },
           "edited": {
             "type": "boolean"
@@ -13402,7 +13402,7 @@
             ]
           },
           "meta": {
-            "$ref": "#/components/schemas/WalkthroughPageMeta"
+            "$ref": "#/components/schemas/WalkthroughPageMetaDTO"
           }
         },
         "required": [
@@ -13411,7 +13411,7 @@
         ],
         "type": "object"
       },
-      "WalkthroughPageMeta": {
+      "WalkthroughPageMetaDTO": {
         "additionalProperties": false,
         "properties": {
           "content_limit": {
@@ -13465,7 +13465,8 @@
   },
   "info": {
     "title": "Shionlib API",
-    "version": "dev"
+    "version": "dev",
+    "x-generated-by": "go run ./cmd/api openapi openapi/openapi.json; do not edit by hand"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -20609,7 +20610,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EditDownloadSourceBody"
+                "$ref": "#/components/schemas/EditDownloadSourceBodyInput"
               }
             }
           },
@@ -21015,7 +21016,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopeRandomGameID"
+                  "$ref": "#/components/schemas/EnvelopeRandomGameIDDTO"
                 }
               }
             },
@@ -21082,7 +21083,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopePageGameListItem"
+                  "$ref": "#/components/schemas/EnvelopePageGameListItemDTO"
                 }
               }
             },
@@ -21424,7 +21425,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DownloadSourceBody"
+                "$ref": "#/components/schemas/DownloadSourceBodyInput"
               }
             }
           },
@@ -21579,7 +21580,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopeHealthStatus"
+                  "$ref": "#/components/schemas/EnvelopeHealthStatusDTO"
                 }
               }
             },
@@ -21617,7 +21618,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopeHealthLiveness"
+                  "$ref": "#/components/schemas/EnvelopeHealthLivenessDTO"
                 }
               }
             },
@@ -23510,7 +23511,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopeUploadedImage"
+                  "$ref": "#/components/schemas/EnvelopeUploadedImageDTO"
                 }
               }
             },
@@ -24003,7 +24004,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopeUploadedImage"
+                  "$ref": "#/components/schemas/EnvelopeUploadedImageDTO"
                 }
               }
             },
@@ -24183,7 +24184,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopeUploadedImage"
+                  "$ref": "#/components/schemas/EnvelopeUploadedImageDTO"
                 }
               }
             },

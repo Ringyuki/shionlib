@@ -3,6 +3,7 @@ package messagetest
 import (
 	"cmp"
 	"context"
+	"encoding/json"
 	"slices"
 	"sync"
 	"time"
@@ -32,6 +33,10 @@ func (r *MemoryRepository) AddUser(summary user.Summary) {
 func (r *MemoryRepository) Create(_ context.Context, in message.NewMessage) (message.Message, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	meta, err := encodeMeta(in.Meta)
+	if err != nil {
+		return message.Message{}, err
+	}
 	r.nextID++
 	msg := message.Message{
 		ID:           r.nextID,
@@ -42,7 +47,7 @@ func (r *MemoryRepository) Create(_ context.Context, in message.NewMessage) (mes
 		LinkText:     in.LinkText,
 		LinkURL:      in.LinkURL,
 		ExternalLink: in.ExternalLink,
-		Meta:         in.Meta,
+		Meta:         meta,
 		CommentID:    in.CommentID,
 		GameID:       in.GameID,
 		Receiver:     r.summary(in.ReceiverID),
@@ -152,4 +157,11 @@ func (r *MemoryRepository) MarkAllUnread(_ context.Context, receiverID int) erro
 		}
 	}
 	return nil
+}
+
+func encodeMeta(meta message.Meta) (json.RawMessage, error) {
+	if len(meta) == 0 {
+		return nil, nil
+	}
+	return json.Marshal(meta)
 }

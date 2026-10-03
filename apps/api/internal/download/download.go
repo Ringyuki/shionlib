@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/paging"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
@@ -43,11 +44,11 @@ func (c CheckStatus) Rejected() bool {
 	return c >= CheckBrokenOrTruncated && c <= CheckHarmful
 }
 
-var (
-	Platforms  = []string{"win", "mac", "ios", "and", "lin", "ps3", "ps4", "psv", "psp", "swi", "dvd"}
-	Languages  = []string{"en", "zh", "zh-hant", "jp"}
-	Simulators = []string{"KRKR", "ONS", "ARTEMIS", "OTHER"}
-)
+var Platforms = []string{"win", "mac", "ios", "and", "lin", "ps3", "ps4", "psv", "psp", "swi", "dvd"}
+
+var Languages = []string{"en", "zh", "zh-hant", "jp"}
+
+var Simulators = []string{"KRKR", "ONS", "ARTEMIS", "OTHER"}
 
 func NeedsSimulator(platforms []string) bool {
 	return slices.Contains(platforms, "and") || slices.Contains(platforms, "ios")
@@ -247,11 +248,13 @@ type ReuploadInput struct {
 	Reason          *string
 }
 
-type Page struct {
-	Number int
-	Size   int
-}
+type Page = paging.Page
 
-func (p Page) Offset() int {
-	return (p.Number - 1) * p.Size
-}
+const (
+	TransferQueue       = "file_transfer"
+	TransferConcurrency = 2
+	transferAttempts    = 5
+	purgeAttempts       = 10
+)
+
+const requeueBatch = 200

@@ -38,7 +38,7 @@ func setup(t *testing.T, enabled bool) env {
 	provider.ExpiresAt = &expires
 	ratio := "11.0%"
 	provider.Methods = []sponsor.PaymentMethod{{Method: "alipay", Name: "Alipay", Enabled: true, RatioRange: &ratio}}
-	settings := sponsor.Settings{Enabled: enabled, Provider: "idatariver", CallbackURL: "https://shionlib.test/api/sponsor/webhook/idatariver"}
+	settings := sponsor.Options{Enabled: enabled, Provider: "idatariver", CallbackURL: "https://shionlib.test/api/sponsor/webhook/idatariver"}
 	service := sponsor.NewService(repo, provider, sponsortest.NewCache(), &txtest.Immediate{}, sponsortest.Signer{}, settings, func() time.Time { return apitest.Now })
 	sponsorhttp.NewHandler(service, server.Builder).Register(server.API)
 	return env{server: server, repo: repo, provider: provider}

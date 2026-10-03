@@ -2,14 +2,8 @@ package moderation
 
 import (
 	"encoding/json"
-	"errors"
 	"slices"
 	"time"
-)
-
-var (
-	ErrSubjectNotFound    = errors.New("moderation subject not found")
-	ErrClassifierDisabled = errors.New("moderation classifier is not configured")
 )
 
 type Decision string
@@ -208,30 +202,4 @@ func QueueConcurrency() map[string]int {
 	return map[string]int{ScreeningQueue: 10, CommentReviewQueue: 1, WalkthroughReviewQueue: 1}
 }
 
-type ScreenComment struct {
-	CommentID int `json:"comment_id"`
-}
-
-func (ScreenComment) Kind() string { return "moderation_screen_comment" }
-
-func (ScreenComment) Queue() string { return ScreeningQueue }
-
-func (ScreenComment) UniqueByArgs() bool { return true }
-
-type ReviewComment struct {
-	CommentID int `json:"comment_id"`
-}
-
-func (ReviewComment) Kind() string { return "moderation_review_comment" }
-
-func (ReviewComment) Queue() string { return CommentReviewQueue }
-
-type ReviewWalkthrough struct {
-	WalkthroughID int `json:"walkthrough_id"`
-}
-
-func (ReviewWalkthrough) Kind() string { return "moderation_review_walkthrough" }
-
-func (ReviewWalkthrough) Queue() string { return WalkthroughReviewQueue }
-
-func (ReviewWalkthrough) UniqueByArgs() bool { return true }
+const requeueBatch = 200

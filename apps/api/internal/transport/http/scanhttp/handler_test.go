@@ -54,7 +54,7 @@ func setup(t *testing.T) env {
 		Banner:     &scantest.Banner{},
 		Queue:      events,
 		Tx:         &txtest.Immediate{},
-		Settings:   scan.Settings{AutoBanThreshold: 3, AutoBanDays: 30},
+		Options:    scan.Options{AutoBanThreshold: 3, AutoBanDays: 30},
 		Now:        now,
 	})
 	scanhttp.NewHandler(service, server.Builder).Register(server.API)

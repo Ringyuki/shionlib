@@ -13,10 +13,6 @@ import (
 
 var tags = []string{"moyu"}
 
-type moyuPatchesInput struct {
-	GameID int `path:"gameId" minimum:"1"`
-}
-
 type Handler struct {
 	service *moyu.Service
 	resp    *response.Builder

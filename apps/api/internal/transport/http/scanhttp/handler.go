@@ -38,7 +38,7 @@ func (h *Handler) list(ctx context.Context, in *listMalwareCasesInput) (*respons
 	})), nil
 }
 
-func (h *Handler) get(ctx context.Context, in *malwareCasePath) (*response.Output[malwareCaseDetailDTO], error) {
+func (h *Handler) get(ctx context.Context, in *malwareCasePathInput) (*response.Output[malwareCaseDetailDTO], error) {
 	view, err := h.service.Get(ctx, in.ID)
 	if err != nil {
 		return nil, err

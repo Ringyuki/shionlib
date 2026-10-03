@@ -69,9 +69,6 @@ func (a *App) Start(parent context.Context) error {
 		})
 	}
 	runErr := group.Wait()
-	if runErr != nil {
-		a.logger.Error("runtime stopped with error", slog.Any("error", runErr))
-	}
 
 	closeCtx, cancel := context.WithTimeout(context.WithoutCancel(parent), a.shutdownTimeout)
 	defer cancel()
@@ -84,11 +81,10 @@ func (a *App) closeAll(ctx context.Context) error {
 	for i := len(a.closers) - 1; i >= 0; i-- {
 		entry := a.closers[i]
 		if err := entry.closer(ctx); err != nil {
-			a.logger.Error("component close failed", slog.String("component", entry.name), slog.Any("error", err))
 			errs = append(errs, fmt.Errorf("close %s: %w", entry.name, err))
 			continue
 		}
-		a.logger.Info("component closed", slog.String("component", entry.name))
+		a.logger.InfoContext(ctx, "component closed", slog.String("component", entry.name))
 	}
 	return errors.Join(errs...)
 }

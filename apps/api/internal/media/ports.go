@@ -1,8 +1,10 @@
 package media
 
-import "context"
+import (
+	"context"
+)
 
-type Processor interface {
+type Transcoder interface {
 	ToWebP(ctx context.Context, data []byte, bounds Bounds) (Encoded, error)
 }
 

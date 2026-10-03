@@ -3,6 +3,7 @@ package userhttp
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/apperror"
@@ -22,11 +23,11 @@ var tags = []string{"user"}
 
 type Handler struct {
 	service *user.Service
-	edits   *user.EditHistory
+	edits   *user.EditHistoryService
 	resp    *response.Builder
 }
 
-func NewHandler(service *user.Service, edits *user.EditHistory, resp *response.Builder) *Handler {
+func NewHandler(service *user.Service, edits *user.EditHistoryService, resp *response.Builder) *Handler {
 	return &Handler{service: service, edits: edits, resp: resp}
 }
 
@@ -82,7 +83,7 @@ func (h *Handler) me(ctx context.Context, _ *struct{}) (*response.Output[userMeD
 	return response.OK(ctx, h.resp, toMeDTO(me, h.resp.Now())), nil
 }
 
-func (h *Handler) profile(ctx context.Context, in *userPath) (*response.Output[userProfileDTO], error) {
+func (h *Handler) profile(ctx context.Context, in *userPathInput) (*response.Output[userProfileDTO], error) {
 	profile, err := h.service.Profile(ctx, in.ID)
 	if err != nil {
 		return nil, err
@@ -113,14 +114,14 @@ func (h *Handler) ban(ctx context.Context, in *banUserInput) (*response.EmptyOut
 	return response.Empty(ctx, h.resp), nil
 }
 
-func (h *Handler) unban(ctx context.Context, in *userPath) (*response.EmptyOutput, error) {
+func (h *Handler) unban(ctx context.Context, in *userPathInput) (*response.EmptyOutput, error) {
 	if err := h.service.Unban(ctx, in.ID); err != nil {
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil
 }
 
-func (h *Handler) avatar(ctx context.Context, in *avatarUploadInput) (*response.Output[mediahttp.UploadedImage], error) {
+func (h *Handler) avatar(ctx context.Context, in *avatarUploadInput) (*response.Output[mediahttp.UploadedImageDTO], error) {
 	upload, err := mediahttp.ReadUpload(in.RawBody.Data().Avatar, media.ProfileImageMaxBytes)
 	if err != nil {
 		return nil, err
@@ -129,10 +130,10 @@ func (h *Handler) avatar(ctx context.Context, in *avatarUploadInput) (*response.
 	if err != nil {
 		return nil, err
 	}
-	return response.OK(ctx, h.resp, mediahttp.UploadedImage{Key: key}), nil
+	return response.OK(ctx, h.resp, mediahttp.UploadedImageDTO{Key: key}), nil
 }
 
-func (h *Handler) cover(ctx context.Context, in *coverUploadInput) (*response.Output[mediahttp.UploadedImage], error) {
+func (h *Handler) cover(ctx context.Context, in *coverUploadInput) (*response.Output[mediahttp.UploadedImageDTO], error) {
 	upload, err := mediahttp.ReadUpload(in.RawBody.Data().Cover, media.ProfileImageMaxBytes)
 	if err != nil {
 		return nil, err
@@ -141,7 +142,7 @@ func (h *Handler) cover(ctx context.Context, in *coverUploadInput) (*response.Ou
 	if err != nil {
 		return nil, err
 	}
-	return response.OK(ctx, h.resp, mediahttp.UploadedImage{Key: key}), nil
+	return response.OK(ctx, h.resp, mediahttp.UploadedImageDTO{Key: key}), nil
 }
 
 func (h *Handler) bio(ctx context.Context, in *updateBioInput) (*response.Output[userBioDTO], error) {
@@ -214,4 +215,16 @@ func (h *Handler) editRecords(ctx context.Context, in *editRecordsInput) (*respo
 		return nil, err
 	}
 	return response.OK(ctx, h.resp, response.MapPage(records, total, in.PageSize, in.Page, toEditRecordDTO)), nil
+}
+
+func ToUserSummary(s user.Summary, now time.Time) UserSummaryDTO {
+	return UserSummaryDTO{ID: s.ID, Name: s.Name, Avatar: s.Avatar, IsSponsor: s.IsSponsor(now)}
+}
+
+func ToUserSummaryPtr(s *user.Summary, now time.Time) *UserSummaryDTO {
+	if s == nil {
+		return nil
+	}
+	summary := ToUserSummary(*s, now)
+	return &summary
 }

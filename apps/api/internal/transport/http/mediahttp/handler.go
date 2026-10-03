@@ -49,21 +49,11 @@ func NewHandler(service *media.Service, resp *response.Builder) *Handler {
 	return &Handler{service: service, resp: resp}
 }
 
-type adImageInput struct {
-	RawBody huma.MultipartFormFiles[struct {
-		File huma.FormFile `form:"file" required:"false"`
-	}]
-}
-
-type UploadedImage struct {
-	Key string `json:"key"`
-}
-
 func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "upload.adImage", Method: http.MethodPut, Path: "/uploads/small/ad/image", Summary: "Upload an advertisement image", Tags: tags, Access: httpapi.AccessAdmin, MaxBodyBytes: BodyLimit(media.AdImageMaxBytes)}, h.adImage)
 }
 
-func (h *Handler) adImage(ctx context.Context, in *adImageInput) (*response.Output[UploadedImage], error) {
+func (h *Handler) adImage(ctx context.Context, in *adImageInput) (*response.Output[UploadedImageDTO], error) {
 	upload, err := ReadUpload(in.RawBody.Data().File, media.AdImageMaxBytes)
 	if err != nil {
 		return nil, err
@@ -72,5 +62,5 @@ func (h *Handler) adImage(ctx context.Context, in *adImageInput) (*response.Outp
 	if err != nil {
 		return nil, err
 	}
-	return response.OK(ctx, h.resp, UploadedImage{Key: key}), nil
+	return response.OK(ctx, h.resp, UploadedImageDTO{Key: key}), nil
 }

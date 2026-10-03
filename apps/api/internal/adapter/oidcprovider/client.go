@@ -20,7 +20,7 @@ import (
 
 const maxTokenResponse = 1 << 20
 
-type Settings struct {
+type Options struct {
 	Issuer       string
 	ClientID     string
 	ClientSecret string
@@ -28,14 +28,14 @@ type Settings struct {
 }
 
 type Client struct {
-	settings Settings
+	settings Options
 	http     *http.Client
 	now      func() time.Time
 	mu       sync.Mutex
 	verifier *gooidc.IDTokenVerifier
 }
 
-func New(settings Settings, client *http.Client, now func() time.Time) *Client {
+func New(settings Options, client *http.Client, now func() time.Time) *Client {
 	settings.Issuer = strings.TrimSuffix(settings.Issuer, "/")
 	return &Client{settings: settings, http: client, now: now}
 }

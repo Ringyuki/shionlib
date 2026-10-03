@@ -43,5 +43,3 @@ type Covers interface {
 type Transactor interface {
 	WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error
 }
-
-type ScheduleSync func(ctx context.Context, job SyncLibraryJob) error

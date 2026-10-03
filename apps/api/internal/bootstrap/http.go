@@ -33,10 +33,10 @@ func BuildHTTP(infra *Infra, modules *Modules) *httpapi.API {
 			},
 		},
 	})
-	healthhttp.NewHandler(modules.Builder, 3*time.Second,
-		healthhttp.Check{Name: "db", Pinger: infra.DB},
-		healthhttp.Check{Name: "redis", Pinger: redisPinger{infra.Redis}},
-	).Register(api)
+	healthhttp.NewHandler(modules.Builder, 3*time.Second, map[string]healthhttp.Pinger{
+		"db":    infra.DB,
+		"redis": redisPinger{infra.Redis},
+	}).Register(api)
 	for _, handler := range modules.Handlers {
 		handler.Register(api)
 	}

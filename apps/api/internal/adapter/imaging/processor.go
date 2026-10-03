@@ -23,13 +23,13 @@ const (
 	webpQuality    = 80
 )
 
-type Processor struct{}
+type Transcoder struct{}
 
-func NewProcessor() *Processor {
-	return &Processor{}
+func NewTranscoder() *Transcoder {
+	return &Transcoder{}
 }
 
-func (p *Processor) ToWebP(ctx context.Context, data []byte, bounds media.Bounds) (media.Encoded, error) {
+func (p *Transcoder) ToWebP(ctx context.Context, data []byte, bounds media.Bounds) (media.Encoded, error) {
 	if err := ctx.Err(); err != nil {
 		return media.Encoded{}, err
 	}

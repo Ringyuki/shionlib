@@ -34,7 +34,7 @@ func (h *Handler) list(ctx context.Context, in *listCharactersInput) (*response.
 	return response.OK(ctx, h.resp, response.MapPage(items, total, in.PageSize, in.Page, toListItemDTO)), nil
 }
 
-func (h *Handler) get(ctx context.Context, in *characterPath) (*response.Output[characterDetailDTO], error) {
+func (h *Handler) get(ctx context.Context, in *characterPathInput) (*response.Output[characterDetailDTO], error) {
 	found, err := h.service.Get(ctx, in.ID)
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func (h *Handler) get(ctx context.Context, in *characterPath) (*response.Output[
 	return response.OK(ctx, h.resp, toDetailDTO(found)), nil
 }
 
-func (h *Handler) delete(ctx context.Context, in *characterPath) (*response.Output[deletedCharacterDTO], error) {
+func (h *Handler) delete(ctx context.Context, in *characterPathInput) (*response.Output[deletedCharacterDTO], error) {
 	deleted, err := h.service.Delete(ctx, in.ID)
 	if err != nil {
 		return nil, err

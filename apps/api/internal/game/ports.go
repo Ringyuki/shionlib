@@ -8,6 +8,11 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
 )
 
+type CardStore interface {
+	Cards(ctx context.Context, ids []int) ([]Card, error)
+	Exists(ctx context.Context, id int) (bool, error)
+}
+
 type Repository interface {
 	List(ctx context.Context, filter ListFilter, page Page) ([]int, int, error)
 	Listable(ctx context.Context, ids []int, visibility Visibility) ([]int, error)

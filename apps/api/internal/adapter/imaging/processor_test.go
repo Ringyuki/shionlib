@@ -53,7 +53,7 @@ func decodeWebP(t *testing.T, encoded media.Encoded) image.Image {
 
 func TestResizesInsideTheBounds(t *testing.T) {
 	ctx := context.Background()
-	p := NewProcessor()
+	p := NewTranscoder()
 	data := encodePNG(t, sample(400, 300))
 	cases := []struct {
 		bounds        media.Bounds
@@ -104,7 +104,7 @@ func TestAppliesJPEGOrientation(t *testing.T) {
 	if jpegOrientation(withExif) != 6 {
 		t.Fatalf("orientation not parsed")
 	}
-	encoded, err := NewProcessor().ToWebP(context.Background(), withExif, media.Bounds{})
+	encoded, err := NewTranscoder().ToWebP(context.Background(), withExif, media.Bounds{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -149,7 +149,7 @@ func TestDecodesWebPAndAVIF(t *testing.T) {
 		t.Fatal(err)
 	}
 	for name, data := range map[string][]byte{"webp": webpInput.Bytes(), "avif": avifInput.Bytes()} {
-		encoded, err := NewProcessor().ToWebP(ctx, data, media.Bounds{MaxWidth: 32})
+		encoded, err := NewTranscoder().ToWebP(ctx, data, media.Bounds{MaxWidth: 32})
 		if err != nil {
 			t.Fatalf("%s: %v", name, err)
 		}
@@ -160,14 +160,14 @@ func TestDecodesWebPAndAVIF(t *testing.T) {
 }
 
 func TestRejectsUndecodableInput(t *testing.T) {
-	if _, err := NewProcessor().ToWebP(context.Background(), []byte("not an image"), media.Bounds{}); !errors.Is(err, upload.ErrSmallFileUnsupported) {
+	if _, err := NewTranscoder().ToWebP(context.Background(), []byte("not an image"), media.Bounds{}); !errors.Is(err, upload.ErrSmallFileUnsupported) {
 		t.Fatalf("expected unsupported type, got %v", err)
 	}
 	huge := encodePNG(t, image.NewNRGBA(image.Rect(0, 0, 1, 1)))
 	binary.BigEndian.PutUint32(huge[16:20], 20000)
 	binary.BigEndian.PutUint32(huge[20:24], 20000)
 	binary.BigEndian.PutUint32(huge[29:33], crc32.ChecksumIEEE(huge[12:29]))
-	if _, err := NewProcessor().ToWebP(context.Background(), huge, media.Bounds{}); !errors.Is(err, upload.ErrSmallFileTooLarge) {
+	if _, err := NewTranscoder().ToWebP(context.Background(), huge, media.Bounds{}); !errors.Is(err, upload.ErrSmallFileTooLarge) {
 		t.Fatalf("pixel bombs must be rejected before decoding, got %v", err)
 	}
 }

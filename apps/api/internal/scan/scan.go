@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
+	"github.com/Ringyuki/shionlib/apps/api/internal/paging"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
 
@@ -41,15 +42,6 @@ const (
 )
 
 var SortFields = []string{"id", "created", "updated", "reviewed_at", "review_deadline"}
-
-type Settings struct {
-	Enabled          bool
-	ReviewTimeout    time.Duration
-	AutoBanThreshold int
-	AutoBanDays      int
-	AutoDeleteNote   string
-	SiteURL          string
-}
 
 type PendingFile struct {
 	ID              int
@@ -224,14 +216,7 @@ type ListFilter struct {
 	Descending bool
 }
 
-type Page struct {
-	Number int
-	Size   int
-}
-
-func (p Page) Offset() int {
-	return (p.Number - 1) * p.Size
-}
+type Page = paging.Page
 
 func NormalizeViruses(viruses []string) []string {
 	out := make([]string, 0, len(viruses))
@@ -242,8 +227,4 @@ func NormalizeViruses(viruses []string) []string {
 		}
 	}
 	return out
-}
-
-func isoTime(t time.Time) string {
-	return t.UTC().Format("2006-01-02T15:04:05.000Z")
 }

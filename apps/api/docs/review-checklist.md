@@ -14,3 +14,8 @@
 - Are there tests for every business rule, error code and authorization path touched?
 - Does the change duplicate an existing abstraction or capability?
 - Are generated files (ent, business codes, OpenAPI, migrations) regenerated and committed?
+- Is every new type in the file its role dictates and named with the project vocabulary (Service, Repository, Store, Handler, Input, DTO, Worker, Options)?
+- Do business types stay free of struct tags, with wire and storage shapes in DTOs and adapter records?
+- Is SQL confined to `internal/adapter/postgres`, parameterized, and only where ent cannot express it?
+- Are new list endpoints paginated, new outbound calls timed out, and new retries owned by exactly one layer?
+- Does every touched package keep a test that mirrors the changed file?

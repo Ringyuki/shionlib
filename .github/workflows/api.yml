@@ -26,6 +26,7 @@ permissions:
 
 env:
   GOLANGCI_LINT_VERSION: v2.14.0
+  GOVULNCHECK_VERSION: v1.8.0
 
 jobs:
   verify:
@@ -80,6 +81,31 @@ jobs:
     defaults:
       run:
         working-directory: apps/api
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable
+      TEST_REDIS_ADDR: localhost:6379
+      REQUIRE_INTEGRATION: '1'
     steps:
       - uses: actions/checkout@v4
 
@@ -106,4 +132,4 @@ jobs:
           cache-dependency-path: apps/api/go.sum
 
       - name: govulncheck
-        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+        run: go run golang.org/x/vuln/cmd/govulncheck@${GOVULNCHECK_VERSION} ./...

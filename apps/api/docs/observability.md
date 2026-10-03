@@ -22,4 +22,12 @@ OpenTelemetry traces are exported over OTLP/HTTP to `APM_ENDPOINT` + `/v1/traces
 - Spans: one server span per HTTP request named `<METHOD> <route pattern>` with `http.route`, `http.response.status_code` and `shionlib.request_id` (health paths are not traced); outbound HTTP clients from `internal/platform/httpclient`; every pgx query; Redis commands; River job insert and work.
 - Logs: lines written inside a traced request or job carry `trace_id` and `span_id`.
 
-Metrics still come from the access log.
+## Metrics
+
+There is no metrics exporter yet: the Hikarinagi APM ingests traces and logs only (ADR 0008). Request, query and job rates and durations are derived from spans and from the access log (`duration_ms`, `status`, `route`).
+
+When an exporter is added (future action, recorded in ADR 0008):
+
+- instruments are created only in `internal/platform/telemetry`, never in business code;
+- names follow the OpenTelemetry semantic conventions (`http.server.request.duration`, `db.client.operation.duration`, `messaging.process.duration`) or `shionlib.<capability>.<measure>` with the unit on the instrument;
+- HTTP, pgx, Redis and River metrics come from the same instrumentation libraries that produce the spans, not from hand-written counters.

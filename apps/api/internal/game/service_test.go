@@ -47,7 +47,7 @@ func newFixture(entries ...gametest.Entry) fixture {
 	catalog := gametest.NewCatalog(entries...)
 	recent := &gametest.RecentUpdates{}
 	prefs := gametest.Preferences{}
-	service := game.NewService(catalog, recent, prefs, game.NewCards(catalog), func() time.Time { return now }, func(n int) int { return n - 1 })
+	service := game.NewService(catalog, recent, prefs, game.NewCardService(catalog), func() time.Time { return now }, func(n int) int { return n - 1 })
 	return fixture{catalog: catalog, recent: recent, prefs: prefs, service: service}
 }
 

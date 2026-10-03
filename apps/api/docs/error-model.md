@@ -43,4 +43,13 @@ Validation errors carry field details:
 
 ## Logging
 
-Errors are returned, not logged, until they reach a boundary. The HTTP access log line includes `business_code`; 5xx lines also include the error text. River logs job failures in one place. Repositories and services never log errors they return.
+Errors are returned, not logged, until they reach a boundary that handles them:
+
+| Boundary | Where the error is recorded |
+|---|---|
+| HTTP request | the access log line (`business_code`; 5xx lines also carry the error text) |
+| Job or scheduled task | `platform/jobs` error handler (`kind`, `job_id`, `attempt`, `error`) |
+| Process start and shutdown | `cmd/api` prints the error returned by `runtime.App.Start` once and exits non-zero |
+| Fire-and-forget side effects (realtime push) and degraded reads (traffic statistics) | a single `WARN` where the error is swallowed; the error is not returned |
+
+Repositories, services, adapters and `runtime.App` never log an error they return.

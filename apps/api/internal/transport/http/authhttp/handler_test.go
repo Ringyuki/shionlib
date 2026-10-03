@@ -32,7 +32,7 @@ type env struct {
 	mailer   *authtest.Mailer
 	ceremony *authtest.Ceremony
 	idp      *authtest.IdentityProvider
-	sessions *auth.Sessions
+	sessions *auth.SessionService
 }
 
 func setup(t *testing.T, secure bool) *env {
@@ -49,18 +49,18 @@ func setup(t *testing.T, secure bool) *env {
 		idp:      &authtest.IdentityProvider{},
 	}
 	tx := &txtest.Immediate{}
-	e.sessions = auth.NewSessions(e.repo, e.users, authtest.Codec{}, authtest.Hasher{}, e.families, e.store, tx, now, auth.SessionPolicy{
+	e.sessions = auth.NewSessionService(e.repo, e.users, authtest.Codec{}, authtest.Hasher{}, e.families, e.store, tx, now, auth.SessionPolicy{
 		Version: "slrt1", Pepper: "pepper", AccessTTL: time.Hour, ShortWindow: 7 * 24 * time.Hour, LongWindow: 30 * 24 * time.Hour, RotationGrace: 100 * time.Second,
 	})
-	services := authhttp.Services{
+	services := authhttp.Deps{
 		Sessions: e.sessions,
-		Login:    auth.NewPasswordLogin(e.users, authtest.Hasher{}, e.sessions, now),
-		Codes:    auth.NewCodes(e.store, e.mailer, now),
-		Reset:    auth.NewPasswordReset(e.users, e.store, e.mailer, authtest.Hasher{}, e.sessions, tx, "https://shionlib.example"),
-		Passkeys: auth.NewPasskeys(e.users, e.repo, e.ceremony, e.store, e.sessions, tx, now, 5*time.Minute),
-		OIDC:     auth.NewOIDC(e.idp, e.repo, e.repo, e.users, e.sessions, tx, now, []string{"https://shionlib.example"}),
+		Login:    auth.NewLoginService(e.users, authtest.Hasher{}, e.sessions, now),
+		Codes:    auth.NewCodeService(e.store, e.mailer, now),
+		Reset:    auth.NewPasswordResetService(e.users, e.store, e.mailer, authtest.Hasher{}, e.sessions, tx, "https://shionlib.example"),
+		Passkeys: auth.NewPasskeyService(e.users, e.repo, e.ceremony, e.store, e.sessions, tx, now, 5*time.Minute),
+		OIDC:     auth.NewOIDCService(e.idp, e.repo, e.repo, e.users, e.sessions, tx, now, []string{"https://shionlib.example"}),
 	}
-	policy := authhttp.CookiePolicy{Secure: secure, AccessMaxAge: time.Hour, RefreshMaxAge: 7 * 24 * time.Hour}
+	policy := authhttp.CookieOptions{Secure: secure, AccessMaxAge: time.Hour, RefreshMaxAge: 7 * 24 * time.Hour}
 	authhttp.NewHandler(services, policy, e.server.Builder, slog.New(slog.NewTextHandler(io.Discard, nil))).Register(e.server.API)
 	return e
 }
@@ -139,11 +139,7 @@ func TestRefreshRotatesAndDetectsReuse(t *testing.T) {
 		t.Fatalf("Secure must follow AUTH_COOKIE_SECURE: %q", cookies)
 	}
 	rotated := refreshFrom(t, resp.Header)
-	for _, key := range e.store.Keys() {
-		if strings.HasPrefix(key, "refresh:replay:") {
-			_, _, _ = e.store.Take(context.Background(), key)
-		}
-	}
+	e.store.DropRefreshReplays()
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/auth/token/refresh", Header: map[string]string{"Cookie": "shionlib_refresh_token=" + issued.RefreshToken}}), http.StatusUnauthorized, 200105)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/auth/token/refresh", Header: map[string]string{"Cookie": "shionlib_refresh_token=" + rotated}}), http.StatusForbidden, 200106)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/auth/token/refresh", Header: map[string]string{"Cookie": "shionlib_refresh_token=bogus"}}), http.StatusUnauthorized, 200103)

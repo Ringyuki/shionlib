@@ -1,6 +1,8 @@
 package developer
 
-import "context"
+import (
+	"context"
+)
 
 type Repository interface {
 	List(ctx context.Context, query string, page Page) ([]Summary, int, error)

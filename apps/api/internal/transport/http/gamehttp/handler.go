@@ -11,10 +11,33 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
 )
 
-var (
-	tags        = []string{"game"}
-	bangumiTags = []string{"bangumi"}
-)
+func ToGameListItem(card game.Card) GameListItemDTO {
+	nested := ToGameCard(card)
+	return GameListItemDTO{
+		ID:          nested.ID,
+		Views:       card.Views,
+		TitleJP:     nested.TitleJP,
+		TitleZH:     nested.TitleZH,
+		TitleEN:     nested.TitleEN,
+		Aliases:     nested.Aliases,
+		Type:        nested.Type,
+		Covers:      nested.Covers,
+		ReleaseDate: nested.ReleaseDate,
+		Developers:  nested.Developers,
+	}
+}
+
+func ToGameListItems(cards []game.Card) []GameListItemDTO {
+	items := make([]GameListItemDTO, len(cards))
+	for i, card := range cards {
+		items[i] = ToGameListItem(card)
+	}
+	return items
+}
+
+var tags = []string{"game"}
+
+var bangumiTags = []string{"bangumi"}
 
 type Handler struct {
 	service *game.Service
@@ -49,25 +72,25 @@ func (h *Handler) list(ctx context.Context, in *listGamesInput) (*response.Outpu
 	items := ToGameListItems(cards)
 	return response.OK(ctx, h.resp, gameListPageDTO{
 		Items: items,
-		Meta: gameListPageMeta{
+		Meta: gameListPageMetaDTO{
 			PageMeta:     response.NewPageMeta(total, len(items), in.PageSize, in.Page),
 			ContentLimit: int(viewer.ContentLimit),
 		},
 	}), nil
 }
 
-func (h *Handler) random(ctx context.Context, _ *struct{}) (*response.Output[randomGameID], error) {
+func (h *Handler) random(ctx context.Context, _ *struct{}) (*response.Output[randomGameIDDTO], error) {
 	id, found, err := h.service.Random(ctx, actor.From(ctx))
 	if err != nil {
 		return nil, err
 	}
 	if !found {
-		return response.OK[randomGameID](ctx, h.resp, nil), nil
+		return response.OK[randomGameIDDTO](ctx, h.resp, nil), nil
 	}
-	return response.OK[randomGameID](ctx, h.resp, &id), nil
+	return response.OK[randomGameIDDTO](ctx, h.resp, &id), nil
 }
 
-func (h *Handler) recentUpdate(ctx context.Context, in *gameRecentUpdateInput) (*response.Output[response.Page[GameListItem]], error) {
+func (h *Handler) recentUpdate(ctx context.Context, in *gameRecentUpdateInput) (*response.Output[response.Page[GameListItemDTO]], error) {
 	cards, total, err := h.service.RecentUpdates(ctx, actor.From(ctx), game.Page{Number: in.Page, Size: in.PageSize})
 	if err != nil {
 		return nil, err
@@ -75,7 +98,7 @@ func (h *Handler) recentUpdate(ctx context.Context, in *gameRecentUpdateInput) (
 	return response.OK(ctx, h.resp, response.NewPage(ToGameListItems(cards), total, in.PageSize, in.Page)), nil
 }
 
-func (h *Handler) get(ctx context.Context, in *gamePath) (*response.Output[gameDetailDTO], error) {
+func (h *Handler) get(ctx context.Context, in *gamePathInput) (*response.Output[gameDetailDTO], error) {
 	viewer := actor.From(ctx)
 	detail, err := h.service.Get(ctx, viewer, in.ID)
 	if err != nil {
@@ -84,7 +107,7 @@ func (h *Handler) get(ctx context.Context, in *gamePath) (*response.Output[gameD
 	return response.OK(ctx, h.resp, toDetailDTO(detail, int(viewer.ContentLimit))), nil
 }
 
-func (h *Handler) header(ctx context.Context, in *gamePath) (*response.Output[gameHeaderDTO], error) {
+func (h *Handler) header(ctx context.Context, in *gamePathInput) (*response.Output[gameHeaderDTO], error) {
 	viewer := actor.From(ctx)
 	detail, err := h.service.Header(ctx, viewer, in.ID)
 	if err != nil {
@@ -93,7 +116,7 @@ func (h *Handler) header(ctx context.Context, in *gamePath) (*response.Output[ga
 	return response.OK(ctx, h.resp, toHeaderDTO(detail, int(viewer.ContentLimit))), nil
 }
 
-func (h *Handler) details(ctx context.Context, in *gamePath) (*response.Output[gameDetailsDTO], error) {
+func (h *Handler) details(ctx context.Context, in *gamePathInput) (*response.Output[gameDetailsDTO], error) {
 	viewer := actor.From(ctx)
 	detail, err := h.service.Details(ctx, viewer, in.ID)
 	if err != nil {
@@ -102,7 +125,7 @@ func (h *Handler) details(ctx context.Context, in *gamePath) (*response.Output[g
 	return response.OK(ctx, h.resp, toDetailsDTO(detail, int(viewer.ContentLimit))), nil
 }
 
-func (h *Handler) characters(ctx context.Context, in *gamePath) (*response.Output[gameCharactersDTO], error) {
+func (h *Handler) characters(ctx context.Context, in *gamePathInput) (*response.Output[gameCharactersDTO], error) {
 	viewer := actor.From(ctx)
 	credits, err := h.service.Characters(ctx, viewer, in.ID)
 	if err != nil {
@@ -111,14 +134,14 @@ func (h *Handler) characters(ctx context.Context, in *gamePath) (*response.Outpu
 	return response.OK(ctx, h.resp, gameCharactersDTO{Characters: mapSlice(credits, toCharacterCreditDTO), ContentLimit: int(viewer.ContentLimit)}), nil
 }
 
-func (h *Handler) view(ctx context.Context, in *gamePath) (*response.EmptyOutput, error) {
+func (h *Handler) view(ctx context.Context, in *gamePathInput) (*response.EmptyOutput, error) {
 	if err := h.service.IncreaseViews(ctx, in.ID); err != nil {
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil
 }
 
-func (h *Handler) bangumiScore(ctx context.Context, in *gamePath) (*response.Output[*bangumiScoreDTO], error) {
+func (h *Handler) bangumiScore(ctx context.Context, in *gamePathInput) (*response.Output[*bangumiScoreDTO], error) {
 	score, err := h.scores.Bangumi(ctx, in.ID)
 	if err != nil {
 		return nil, err
@@ -126,7 +149,7 @@ func (h *Handler) bangumiScore(ctx context.Context, in *gamePath) (*response.Out
 	return response.OK(ctx, h.resp, toBangumiScoreDTO(score)), nil
 }
 
-func (h *Handler) vndbScore(ctx context.Context, in *gamePath) (*response.Output[*vndbScoreDTO], error) {
+func (h *Handler) vndbScore(ctx context.Context, in *gamePathInput) (*response.Output[*vndbScoreDTO], error) {
 	score, err := h.scores.VNDB(ctx, in.ID)
 	if err != nil {
 		return nil, err
@@ -140,4 +163,12 @@ func (h *Handler) bangumiResource(ctx context.Context, in *bangumiResourceInput)
 		return nil, err
 	}
 	return response.OK(ctx, h.resp, json.RawMessage(raw)), nil
+}
+
+func mapSlice[S, T any](items []S, mapper func(S) T) []T {
+	out := make([]T, len(items))
+	for i, item := range items {
+		out[i] = mapper(item)
+	}
+	return out
 }

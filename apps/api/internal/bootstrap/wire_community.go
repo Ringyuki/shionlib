@@ -48,7 +48,7 @@ func wireCommunity(_ *Infra, shared *Shared, modules *Modules) {
 		shared.Cache,
 		shared.Transactor,
 		hmacsign.New(cfg.Token.Secret, sponsorOrderAccessPurpose),
-		sponsor.Settings{
+		sponsor.Options{
 			Enabled:     cfg.Sponsor.Enabled,
 			Provider:    cfg.Sponsor.Provider,
 			CallbackURL: strings.TrimSuffix(cfg.App.SiteURL, "/") + "/api/sponsor/webhook/idatariver",
@@ -60,7 +60,7 @@ func wireCommunity(_ *Infra, shared *Shared, modules *Modules) {
 	adService := ad.NewService(adRepository, adRepository, shared.Cache, shared.Now)
 
 	moyuService := moyu.NewService(
-		moyupg.NewGames(shared.Ent),
+		moyupg.NewGameStore(shared.Ent),
 		nextmoe.NewClient(httpclient.New(httpclient.Options{Timeout: 10 * time.Second}), cfg.NextMoe.BaseURL, cfg.NextMoe.APIKey),
 		shared.Cache,
 	)
@@ -85,7 +85,7 @@ func wireCommunity(_ *Infra, shared *Shared, modules *Modules) {
 		ZoneID:             cfg.Cloudflare.AnalyticsZoneID,
 		UseAnalyticsEngine: cfg.Download.Mode == "worker",
 	})
-	analysisService := analysis.NewService(analysispg.NewStats(shared.Ent), analytics, analytics, shared.Cache, shared.Logger, shared.Now)
+	analysisService := analysis.NewService(analysispg.NewStatsStore(shared.Ent), analytics, analytics, shared.Cache, shared.Logger, shared.Now)
 
 	modules.Handlers = append(modules.Handlers,
 		sponsorhttp.NewHandler(sponsorService, shared.Builder),

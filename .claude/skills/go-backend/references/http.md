@@ -16,8 +16,13 @@ httpapi.Register(api, httpapi.Route{
 - Every `{param}` in `Path` must be an exported `path:"param"` field on the input struct; registration panics otherwise. Do not embed path structs; embedding is only for exported shared query structs such as `httpapi.PageQuery`.
 - Handlers are thin: read `actor.From(ctx)`, call one service method, map the result to DTOs. No SQL, Redis, transactions or business decisions in handlers.
 
+## Files
+
+`handler*.go` (types `Handler`/`<Purpose>Handler`, their `Deps`/`Options`, consumed interfaces, `Register`, handler methods), `request*.go` (types `*Input`), `response*.go` (types `*DTO` and `to<X>DTO` mappers). Nothing else lives in an HTTP capability package; `archtest` enforces it.
+
 ## Inputs
 
+- Input structs are named `<action><Thing>Input` and live in `request*.go`.
 - Path, query, header and cookie params are fields with `path:`, `query:`, `header:`, `cookie:` tags. Body is a `Body` field.
 - Optional body fields are pointers with `json:",omitempty"`; required fields have no `omitempty`.
 - Validate shape with Huma tags: `minLength`, `maxLength`, `minimum`, `maximum`, `enum`, `pattern`, `format`. Unknown body properties are rejected.
@@ -28,8 +33,9 @@ httpapi.Register(api, httpapi.Route{
 - Success: `response.OK(ctx, h.resp, dto)` → `{code: 0, message, data, requestId, timestamp, meta?}`. `meta.auth` and header `shionlib-auth-stale: 1` are added automatically when an optional token was stale.
 - Void: `response.Empty(ctx, h.resp)` (no `data` key).
 - Pages: `response.NewPage(items, total, pageSize, page)` → `{items, meta: {totalItems, itemCount, itemsPerPage, totalPages, currentPage}}`. Extra meta keys go into a local struct embedding `response.PageMeta`.
-- DTOs live in `dto.go`, use snake_case JSON, and never expose ent types. Shared DTOs (game cards) live in the owning capability's http package (`gamehttp.Card`).
-- Times are `time.Time`; every response is encoded by `response.JSONFormat` (encoding/json v1 semantics, no HTML escaping, times as `2006-01-02T15:04:05.000Z` in UTC). Raw handlers and streams MUST write JSON with `response.EncodeJSON`/`response.MarshalJSON`, never `encoding/json` directly. Database `bigint` values that may exceed 2^53 are serialized as strings (`json:",string"`).
+- DTOs are named `<thing>DTO`, live in `response*.go`, use snake_case JSON, and never expose ent types or business models directly. Shared DTOs (game cards) are exported from the owning capability's http package (`gamehttp.GameCardDTO`).
+- Responses are DTOs or slices of DTOs. DTO fields are never `any`, `interface{}` or `map[string]any` (archtest); opaque stored JSON is `json.RawMessage`, and a field that holds one of several shapes uses a sealed interface named `<purpose>DTO` (`userhttp.editedEntityDTO`).
+- Times are `time.Time`; every JSON body leaves the process through `internal/platform/jsoncodec` (encoding/json v1 semantics, no HTML escaping, times as `2006-01-02T15:04:05.000Z` in UTC): `response.JSONFormat` for Huma routes, `jsoncodec.Encode`/`jsoncodec.Marshal` for raw handlers and SSE events, `realtime.Hub` for pushed events. Never call `encoding/json` to write a response. Database `bigint` values that may exceed 2^53 are serialized as strings (`json:",string"`).
 - Cookies: only auth handlers set `Set-Cookie` through a dedicated output field; nothing else writes cookies.
 
 ## Non-Huma routes

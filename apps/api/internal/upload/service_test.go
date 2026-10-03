@@ -36,7 +36,7 @@ func newFixture() fixture {
 	spool := uploadtest.NewMemorySpool()
 	tx := &txtest.Immediate{}
 	quota := upload.NewQuotaService(quotas, tx, upload.QuotaPolicy{BaseBytes: 100, CapBytes: 400, TopupStepBytes: 50, TopupThresholdBytes: 30, ReduceStepBytes: 20, ReduceInactiveDays: 45, GrantAfterDays: 7, LongestInactiveDays: 120}, func() time.Time { return now })
-	service := upload.NewService(repo, quota, spool, tx, upload.Settings{ChunkSize: 4, MaxChunks: 5, MaxFileSize: 16, TransferLimit: 8, SessionTTL: 24 * time.Hour}, func() time.Time { return now })
+	service := upload.NewService(repo, quota, spool, tx, upload.Options{ChunkSize: 4, MaxChunks: 5, MaxFileSize: 16, TransferLimit: 8, SessionTTL: 24 * time.Hour}, func() time.Time { return now })
 	return fixture{repo: repo, quotas: quotas, spool: spool, quota: quota, service: service}
 }
 

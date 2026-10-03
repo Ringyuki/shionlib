@@ -29,7 +29,7 @@ type Sender interface {
 	Send(ctx context.Context, msg Message) error
 }
 
-type Settings struct {
+type Options struct {
 	Provider      string
 	APIKey        string
 	Endpoint      string
@@ -37,7 +37,7 @@ type Settings struct {
 	SenderName    string
 }
 
-func NewSender(settings Settings, client *http.Client) Sender {
+func NewSender(settings Options, client *http.Client) Sender {
 	client = ipv4Only(client)
 	switch settings.Provider {
 	case ProviderElastic:
@@ -58,7 +58,7 @@ func (u unsupported) Send(context.Context, Message) error {
 }
 
 type Elastic struct {
-	settings Settings
+	settings Options
 	client   *http.Client
 }
 
@@ -86,7 +86,7 @@ func (e *Elastic) Send(ctx context.Context, msg Message) error {
 }
 
 type Postal struct {
-	settings Settings
+	settings Options
 	client   *http.Client
 }
 

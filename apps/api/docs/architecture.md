@@ -25,6 +25,34 @@ The Go backend in `apps/api` replaces the NestJS backend in `apps/backend`. It k
 
 Rules are enforced by `internal/archtest`, golangci-lint (depguard, forbidigo) and `cmd/devtool` checks; see `.claude/skills/go-backend` for the full rule set.
 
+## Code layout
+
+Every package of a kind has the same files, so a reader always knows where to look:
+
+```text
+internal/favorite/                 capability
+  favorite.go                      models and constants
+  ports.go                         interfaces it consumes
+  errors.go                        business codes
+  service.go                       Service: rules and transactions
+  service_test.go
+  favoritetest/                    memory fakes + RepositoryContract
+internal/adapter/postgres/favoritepg/
+  repository.go                    Repository (ent), error translation
+  mapping.go                       row → model
+  repository_test.go               RepositoryContract against Postgres
+internal/transport/http/favoritehttp/
+  handler.go                       Handler: routes, one service call each
+  request.go                       *Input structs with validation tags
+  response.go                      *DTO structs and mappers
+  handler_test.go                  black-box HTTP tests
+internal/transport/jobs/downloadjobs/
+  worker_store.go                  StoreWorker
+  tasks.go                         Register + Tasks
+```
+
+Larger capabilities add `<capability>_<concept>.go` model files, `service_<purpose>.go` for focused services (`auth.CodeService`), `jobs.go` for job args, `handler_<purpose>.go`/`request_<purpose>.go`/`response_<purpose>.go` for admin routes, and `store_<purpose>.go` for read models. `archtest.TestPackageStructure` rejects anything else; the vocabulary is in [glossary.md](glossary.md).
+
 ## Request lifecycle
 
 1. `middleware.RequestContext`: request id (trusted upstream id or new UUID), client IP from trusted proxies, request state.

@@ -1,6 +1,10 @@
 package character
 
-import "time"
+import (
+	"time"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/paging"
+)
 
 type Character struct {
 	ID        int
@@ -29,14 +33,7 @@ type Character struct {
 	Updated   time.Time
 }
 
-type Page struct {
-	Number int
-	Size   int
-}
-
-func (p Page) Offset() int {
-	return (p.Number - 1) * p.Size
-}
+type Page = paging.Page
 
 type SortField string
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"maps"
 	"slices"
 	"strconv"
 	"strings"
@@ -124,8 +125,8 @@ func TestScreenCommentBlocksHighScores(t *testing.T) {
 	}
 	sent := f.messages.All()
 	if len(sent) != 1 || sent[0].Type != message.TypeSystem || sent[0].Tone != message.ToneDestructive || sent[0].ReceiverID != 3 || sent[0].SenderID != nil ||
-		sent[0].Title != "Messages.System.Moderation.Comment.Block.Title" || sent[0].Content != "Messages.System.Moderation.Comment.Block.Content" || string(sent[0].Meta) != `{"top_category":"VIOLENCE"}` {
-		t.Fatalf("unexpected block notice %+v %s", sent, sent[0].Meta)
+		sent[0].Title != "Messages.System.Moderation.Comment.Block.Title" || sent[0].Content != "Messages.System.Moderation.Comment.Block.Content" || !maps.Equal(sent[0].Meta, message.Meta{"top_category": moderation.CategoryViolence}) {
+		t.Fatalf("unexpected block notice %+v %v", sent, sent[0].Meta)
 	}
 	if len(f.activities.All()) != 0 || len(f.queue.All()) != 0 {
 		t.Fatal("blocked comments create no activity and no review")
@@ -268,7 +269,7 @@ func TestReviewComment(t *testing.T) {
 		}
 		sent := f.messages.All()
 		if f.repo.CommentStatus(comment.ID) != moderationtest.CommentBlocked || len(sent) != 1 || sent[0].Content != "Messages.System.Moderation.Comment.Block.ReviewContent" ||
-			string(sent[0].Meta) != `{"top_category":"HARASSMENT","reason":"abuse","evidence":"x"}` {
+			!maps.Equal(sent[0].Meta, message.Meta{"top_category": moderation.CategoryHarassment, "reason": "abuse", "evidence": "x"}) {
 			t.Fatalf("unexpected block %+v", sent)
 		}
 	})
@@ -351,8 +352,8 @@ func TestReviewWalkthrough(t *testing.T) {
 		if notice.Type != message.TypeSystem || notice.Tone != message.ToneDestructive || notice.ReceiverID != 4 || *notice.GameID != 81 || notice.CommentID != nil ||
 			notice.Title != "Messages.System.Moderation.Walkthrough.Block.Title" || notice.Content != "Messages.System.Moderation.Walkthrough.Block.ReviewContent" ||
 			*notice.LinkText != "Messages.System.Moderation.Walkthrough.Block.LinkText" || *notice.LinkURL != "/game/81/walkthrough/"+strconv.Itoa(published.ID) ||
-			string(notice.Meta) != `{"top_category":"ILLICIT","reason":"real harm","evidence":"quote","walkthrough_title":"Route guide","walkthrough_id":`+strconv.Itoa(published.ID)+`}` {
-			t.Fatalf("unexpected notice %+v %s", notice, notice.Meta)
+			!maps.Equal(notice.Meta, message.Meta{"top_category": moderation.CategoryIllicit, "reason": "real harm", "evidence": "quote", "walkthrough_title": "Route guide", "walkthrough_id": published.ID}) {
+			t.Fatalf("unexpected notice %+v %v", notice, notice.Meta)
 		}
 	})
 

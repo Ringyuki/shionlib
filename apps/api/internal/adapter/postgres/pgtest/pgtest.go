@@ -11,7 +11,6 @@ import (
 	"io/fs"
 	"log/slog"
 	"net/url"
-	"os"
 	"slices"
 	"sync"
 	"testing"
@@ -22,6 +21,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/database"
+	"github.com/Ringyuki/shionlib/apps/api/internal/platform/database/databasetest"
 	"github.com/Ringyuki/shionlib/apps/api/migrations"
 )
 
@@ -41,13 +41,7 @@ var (
 
 func New(t *testing.T) *DB {
 	t.Helper()
-	adminURL := os.Getenv("TEST_DATABASE_URL")
-	if adminURL == "" {
-		if os.Getenv("REQUIRE_INTEGRATION") != "" {
-			t.Fatal("TEST_DATABASE_URL is required when REQUIRE_INTEGRATION is set")
-		}
-		t.Skip("TEST_DATABASE_URL is not set; skipping database integration test")
-	}
+	adminURL := databasetest.AdminURL(t)
 	ctx := context.Background()
 	templateOnce.Do(func() {
 		templateName, templateErr = ensureTemplate(ctx, adminURL)

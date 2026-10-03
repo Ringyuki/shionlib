@@ -34,7 +34,7 @@ func run(args []string) error {
 		if len(args) < 4 {
 			return fmt.Errorf("usage: devtool feature create <name> <range-prefix>")
 		}
-		return createFeature(root, args[2], args[3])
+		return createFeature(context.Background(), root, args[2], args[3])
 	case "bizcode check":
 		return checkBizCodes(root)
 	case "bizcode docs":

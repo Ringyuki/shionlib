@@ -74,7 +74,7 @@ func newFixture(enabled bool) fixture {
 		Mailer:     f.mailer,
 		Queue:      f.events,
 		Tx:         &txtest.Immediate{},
-		Settings: scan.Settings{
+		Options: scan.Options{
 			Enabled:          enabled,
 			ReviewTimeout:    24 * time.Hour,
 			AutoBanThreshold: 2,
@@ -94,11 +94,15 @@ func pending(id int, path string) scan.PendingFile {
 
 func decodeMeta(t *testing.T, msg message.NewMessage) map[string]any {
 	t.Helper()
-	var meta map[string]any
-	if err := json.Unmarshal(msg.Meta, &meta); err != nil {
+	raw, err := json.Marshal(msg.Meta)
+	if err != nil {
 		t.Fatal(err)
 	}
-	return meta
+	var out map[string]any
+	if err := json.Unmarshal(raw, &out); err != nil {
+		t.Fatal(err)
+	}
+	return out
 }
 
 func TestInspectArchiveClassification(t *testing.T) {
@@ -224,7 +228,7 @@ func TestScanQuarantinesInfectedFiles(t *testing.T) {
 	if len(messages) != 3 || messages[0].ReceiverID != 9 || messages[1].ReceiverID != 50 || messages[2].ReceiverID != 51 {
 		t.Fatalf("uploader and admins are told: %+v", messages)
 	}
-	if meta := decodeMeta(t, messages[0]); meta["detected_viruses"] != "Eicar, Trojan" || meta["review_deadline"] != "2026-10-04T12:00:00.000Z" {
+	if meta := decodeMeta(t, messages[0]); meta["detected_viruses"] != "Eicar, Trojan" || meta["review_deadline"] != "2026-10-04T12:00:00Z" {
 		t.Fatalf("uploader meta %v", meta)
 	}
 	if *messages[1].LinkURL != "/admin/malware-scans?id=1" || decodeMeta(t, messages[1])["uploader_name"] != "uploader" {

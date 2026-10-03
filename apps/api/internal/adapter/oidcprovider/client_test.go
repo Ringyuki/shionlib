@@ -103,7 +103,7 @@ func (p *provider) sign(t *testing.T) string {
 }
 
 func (p *provider) client() *Client {
-	return New(Settings{Issuer: p.issuer, ClientID: "shionlib", ClientSecret: "s3cr&t", Scopes: []string{"openid", "profile", "email"}}, httpclient.New(httpclient.Options{Timeout: 5 * time.Second}), func() time.Time { return now })
+	return New(Options{Issuer: p.issuer, ClientID: "shionlib", ClientSecret: "s3cr&t", Scopes: []string{"openid", "profile", "email"}}, httpclient.New(httpclient.Options{Timeout: 5 * time.Second}), func() time.Time { return now })
 }
 
 var exchange = auth.CodeExchange{Code: "code-1", Verifier: "verifier-1", RedirectURI: "https://shionlib.com/api/auth/oidc/callback", Nonce: "nonce-1"}

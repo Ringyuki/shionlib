@@ -11,6 +11,7 @@ import (
 	entmessage "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/userpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
+	"github.com/Ringyuki/shionlib/apps/api/internal/platform/jsoncodec"
 )
 
 type Repository struct {
@@ -39,7 +40,11 @@ func (r *Repository) Create(ctx context.Context, in message.NewMessage) (message
 		SetNillableSenderID(in.SenderID).
 		SetReceiverID(in.ReceiverID)
 	if len(in.Meta) > 0 {
-		create.SetMeta(in.Meta)
+		meta, err := jsoncodec.Marshal(in.Meta)
+		if err != nil {
+			return message.Message{}, fmt.Errorf("encode message meta: %w", err)
+		}
+		create.SetMeta(meta)
 	}
 	row, err := create.Save(ctx)
 	if err != nil {
@@ -142,30 +147,4 @@ func (r *Repository) MarkAllUnread(ctx context.Context, receiverID int) error {
 		return fmt.Errorf("mark all messages unread: %w", err)
 	}
 	return nil
-}
-
-func toMessage(row *ent.Message) message.Message {
-	msg := message.Message{
-		ID:           row.ID,
-		Type:         message.Type(row.Type),
-		Tone:         message.Tone(row.Tone),
-		Title:        row.Title,
-		Content:      row.Content,
-		LinkText:     row.LinkText,
-		LinkURL:      row.LinkURL,
-		ExternalLink: row.ExternalLink,
-		Meta:         row.Meta,
-		CommentID:    row.CommentID,
-		GameID:       row.GameID,
-		Read:         row.Read,
-		ReadAt:       row.ReadAt,
-		Created:      row.Created,
-		Updated:      row.Updated,
-		Receiver:     userpg.ToSummary(row.Edges.Receiver),
-		Sender:       userpg.ToSummaryPtr(row.Edges.Sender),
-	}
-	if row.Edges.Receiver == nil {
-		msg.Receiver.ID = row.ReceiverID
-	}
-	return msg
 }

@@ -10,18 +10,17 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
 )
 
-var (
-	tags        = []string{"download"}
-	storageTags = []string{"storage"}
-)
+var tags = []string{"download"}
+
+var storageTags = []string{"storage"}
 
 type Handler struct {
 	service *download.Service
-	links   *download.Links
+	links   *download.LinkService
 	resp    *response.Builder
 }
 
-func NewHandler(service *download.Service, links *download.Links, resp *response.Builder) *Handler {
+func NewHandler(service *download.Service, links *download.LinkService, resp *response.Builder) *Handler {
 	return &Handler{service: service, links: links, resp: resp}
 }
 
@@ -42,7 +41,7 @@ func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "storage.delete", Method: http.MethodDelete, Path: "/s3/test/file", Summary: "Delete every version of an object in the game bucket", Tags: storageTags, Access: httpapi.AccessSuperAdmin}, h.deleteObject)
 }
 
-func (h *Handler) gameResources(ctx context.Context, in *downloadGamePath) (*response.Output[[]downloadResourceDTO], error) {
+func (h *Handler) gameResources(ctx context.Context, in *downloadGamePathInput) (*response.Output[[]downloadResourceDTO], error) {
 	resources, err := h.service.GameResources(ctx, actor.From(ctx), in.ID)
 	if err != nil {
 		return nil, err
@@ -87,7 +86,7 @@ func (h *Handler) releases(ctx context.Context, in *releaseListInput) (*response
 	now := h.resp.Now()
 	page := downloadReleasePageDTO{
 		Items: make([]downloadReleaseDTO, len(releases)),
-		Meta:  downloadReleaseMeta{PageMeta: response.NewPageMeta(total, len(releases), in.PageSize, in.Page), ContentLimit: int(viewer.ContentLimit)},
+		Meta:  downloadReleaseMetaDTO{PageMeta: response.NewPageMeta(total, len(releases), in.PageSize, in.Page), ContentLimit: int(viewer.ContentLimit)},
 	}
 	for i, release := range releases {
 		page.Items[i] = toReleaseDTO(release, now)
@@ -95,7 +94,7 @@ func (h *Handler) releases(ctx context.Context, in *releaseListInput) (*response
 	return response.OK(ctx, h.resp, page), nil
 }
 
-func (h *Handler) delete(ctx context.Context, in *downloadResourcePath) (*response.EmptyOutput, error) {
+func (h *Handler) delete(ctx context.Context, in *downloadResourcePathInput) (*response.EmptyOutput, error) {
 	if err := h.service.Delete(ctx, actor.From(ctx), in.ID); err != nil {
 		return nil, err
 	}
@@ -151,7 +150,7 @@ func (h *Handler) reupload(ctx context.Context, in *downloadReuploadInput) (*res
 	return response.OK(ctx, h.resp, downloadReuploadDTO{OK: true}), nil
 }
 
-func (h *Handler) history(ctx context.Context, in *fileHistoryPath) (*response.Output[[]downloadHistoryDTO], error) {
+func (h *Handler) history(ctx context.Context, in *fileHistoryPathInput) (*response.Output[[]downloadHistoryDTO], error) {
 	entries, err := h.service.History(ctx, in.FileID)
 	if err != nil {
 		return nil, err
@@ -180,7 +179,7 @@ func (h *Handler) userResources(ctx context.Context, in *userResourcesInput) (*r
 	now := h.resp.Now()
 	page := downloadUserResourcePageDTO{
 		Items: make([]downloadUserResourceDTO, len(result.Items)),
-		Meta: downloadUserResourceMeta{
+		Meta: downloadUserResourceMetaDTO{
 			PageMeta:          response.NewPageMeta(result.Total, len(result.Items), in.PageSize, in.Page),
 			IsCurrentUser:     result.IsCurrentUser,
 			HasOnGoingSession: result.HasOngoingSession,

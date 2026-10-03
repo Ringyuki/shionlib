@@ -11,41 +11,6 @@ import (
 
 var tags = []string{"developer"}
 
-type developerPath struct {
-	ID int `path:"id"`
-}
-
-type listDevelopersInput struct {
-	httpapi.PageQuery
-	Q string `query:"q" doc:"Matches names and aliases"`
-}
-
-type developerListItemDTO struct {
-	ID         int      `json:"id"`
-	Name       string   `json:"name"`
-	Aliases    []string `json:"aliases"`
-	Logo       *string  `json:"logo"`
-	WorksCount int      `json:"works_count"`
-}
-
-type developerExtraInfoDTO struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
-
-type developerDetailDTO struct {
-	ID        int                     `json:"id"`
-	HID       *int                    `json:"h_id"`
-	Name      string                  `json:"name"`
-	Aliases   []string                `json:"aliases"`
-	Logo      *string                 `json:"logo"`
-	IntroJP   string                  `json:"intro_jp"`
-	IntroZH   string                  `json:"intro_zh"`
-	IntroEN   string                  `json:"intro_en"`
-	Website   *string                 `json:"website"`
-	ExtraInfo []developerExtraInfoDTO `json:"extra_info"`
-}
-
 type Handler struct {
 	service *developer.Service
 	resp    *response.Builder
@@ -72,7 +37,7 @@ func (h *Handler) list(ctx context.Context, in *listDevelopersInput) (*response.
 	return response.OK(ctx, h.resp, page), nil
 }
 
-func (h *Handler) get(ctx context.Context, in *developerPath) (*response.Output[developerDetailDTO], error) {
+func (h *Handler) get(ctx context.Context, in *developerPathInput) (*response.Output[developerDetailDTO], error) {
 	found, err := h.service.Get(ctx, in.ID)
 	if err != nil {
 		return nil, err
@@ -87,7 +52,7 @@ func (h *Handler) get(ctx context.Context, in *developerPath) (*response.Output[
 	}), nil
 }
 
-func (h *Handler) delete(ctx context.Context, in *developerPath) (*response.EmptyOutput, error) {
+func (h *Handler) delete(ctx context.Context, in *developerPathInput) (*response.EmptyOutput, error) {
 	if err := h.service.Delete(ctx, in.ID); err != nil {
 		return nil, err
 	}

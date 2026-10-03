@@ -4,7 +4,45 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
+	"github.com/Ringyuki/shionlib/apps/api/internal/paging"
 )
+
+const (
+	reasonPasswordChanged = "user_password_changed"
+	reasonEmailChanged    = "user_email_changed"
+	reasonBanned          = "user_banned"
+	emailChangeCodeTTL    = 30 * time.Minute
+)
+
+type Policy struct {
+	AllowRegister bool
+}
+
+type RegisterInput struct {
+	Name           string
+	Email          string
+	Password       string
+	Lang           *Lang
+	Code           string
+	CodeID         string
+	AcceptLanguage string
+}
+
+type EmailChange struct {
+	Email       string
+	CurrentID   string
+	CurrentCode string
+	NewID       string
+	NewCode     string
+}
+
+type BanInput struct {
+	BannedBy       *int
+	Reason         *string
+	DurationDays   *int
+	Permanent      bool
+	DeleteComments bool
+}
 
 const (
 	MinNameLength     = 2
@@ -127,11 +165,4 @@ type NewBan struct {
 	Permanent    bool
 }
 
-type Page struct {
-	Number int
-	Size   int
-}
-
-func (p Page) Offset() int {
-	return (p.Number - 1) * p.Size
-}
+type Page = paging.Page

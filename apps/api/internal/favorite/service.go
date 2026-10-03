@@ -19,12 +19,6 @@ func NewService(repo Repository, games GameCards, tx Transactor) *Service {
 	return &Service{repo: repo, games: games, tx: tx}
 }
 
-type CreateInput struct {
-	Name        string
-	Description *string
-	IsPrivate   bool
-}
-
 func (s *Service) Create(ctx context.Context, who actor.Actor, in CreateInput) (Favorite, error) {
 	if _, found, err := s.repo.FindByName(ctx, who.UserID, in.Name); err != nil {
 		return Favorite{}, err
@@ -127,11 +121,6 @@ func (s *Service) RemoveGame(ctx context.Context, who actor.Actor, favoriteID, g
 		return ErrItemNotFound
 	}
 	return s.repo.DeleteItem(ctx, item.ID)
-}
-
-type ListQuery struct {
-	UserID *int
-	GameID *int
 }
 
 func (s *Service) List(ctx context.Context, viewer actor.Actor, query ListQuery) ([]Summary, error) {

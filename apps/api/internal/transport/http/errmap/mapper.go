@@ -15,7 +15,12 @@ import (
 )
 
 type ErrorData struct {
-	Errors []apperror.FieldError `json:"errors"`
+	Errors []FieldError `json:"errors"`
+}
+
+type FieldError struct {
+	Field    string   `json:"field"`
+	Messages []string `json:"messages"`
 }
 
 type ErrorResponse struct {
@@ -126,7 +131,7 @@ func (m *Mapper) FromError(ctx context.Context, err error) *ErrorResponse {
 	fields := appErr.Fields()
 	var data *ErrorData
 	if len(fields) > 0 {
-		data = &ErrorData{Errors: fields}
+		data = &ErrorData{Errors: toFieldErrors(fields)}
 	}
 	result := m.build(ctx, status, def.Code(), appErr.MessageKey(), args, data, err)
 	var carrier HeaderCarrier
@@ -157,6 +162,14 @@ func (m *Mapper) build(ctx context.Context, status, code int, key string, args m
 		RequestID: requestid.From(ctx),
 		Timestamp: m.builder.Now(),
 	}
+}
+
+func toFieldErrors(fields []apperror.FieldError) []FieldError {
+	out := make([]FieldError, len(fields))
+	for i, field := range fields {
+		out[i] = FieldError{Field: field.Field, Messages: field.Messages}
+	}
+	return out
 }
 
 func appValidation(fields []apperror.FieldError) *apperror.Error {

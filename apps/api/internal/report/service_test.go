@@ -87,8 +87,12 @@ func expectCode(t *testing.T, err error, want apperror.Definition) {
 
 func meta(t *testing.T, msg message.NewMessage) map[string]any {
 	t.Helper()
+	raw, err := json.Marshal(msg.Meta)
+	if err != nil {
+		t.Fatal(err)
+	}
 	var out map[string]any
-	if err := json.Unmarshal(msg.Meta, &out); err != nil {
+	if err := json.Unmarshal(raw, &out); err != nil {
 		t.Fatal(err)
 	}
 	return out

@@ -2,7 +2,6 @@ package report
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -54,17 +53,6 @@ func NewService(deps Deps) *Service {
 		siteURL:   deps.SiteURL,
 		now:       deps.Now,
 	}
-}
-
-type penaltyOutcome struct {
-	count      int
-	banApplied bool
-	banDays    int
-	quotaBytes int64
-}
-
-func (p penaltyOutcome) applied() bool {
-	return p.banApplied || p.quotaBytes > 0
 }
 
 func (s *Service) Create(ctx context.Context, who actor.Actor, resourceID int, in CreateInput) (Report, error) {
@@ -122,15 +110,12 @@ func (s *Service) AlertAdmins(ctx context.Context, reportID int) error {
 		return err
 	}
 	reviewPath := adminReviewPrefix + strconv.Itoa(view.ID)
-	meta, err := json.Marshal(map[string]any{
+	meta := message.Meta{
 		"report_id":          view.ID,
 		"reporter_name":      displayName(view.Reporter),
 		"reported_user_name": displayName(view.ReportedUser),
 		"reason":             view.Reason,
 		"malicious_level":    view.Level,
-	})
-	if err != nil {
-		return err
 	}
 	linkText := "Messages.System.Report.NewReport.LinkText"
 	gameID := view.Resource.GameID
@@ -249,14 +234,14 @@ func (s *Service) settleValid(ctx context.Context, who actor.Actor, report Repor
 	if !notify {
 		return nil
 	}
-	if err := s.send(ctx, report.ReporterID, gameID, message.ToneSuccess, "Messages.System.Report.Valid", map[string]any{
+	if err := s.send(ctx, report.ReporterID, gameID, message.ToneSuccess, "Messages.System.Report.Valid", message.Meta{
 		"reason":          report.Reason,
 		"malicious_level": level,
 		"process_note":    note,
 	}); err != nil {
 		return err
 	}
-	return s.send(ctx, report.ReportedUserID, gameID, message.ToneDestructive, "Messages.System.Report.Penalty", map[string]any{
+	return s.send(ctx, report.ReportedUserID, gameID, message.ToneDestructive, "Messages.System.Report.Penalty", message.Meta{
 		"reason":          report.Reason,
 		"malicious_level": level,
 		"ban_days":        outcome.banDays,
@@ -276,7 +261,7 @@ func (s *Service) settleInvalid(ctx context.Context, who actor.Actor, report Rep
 	if !notify {
 		return nil
 	}
-	return s.send(ctx, report.ReporterID, gameID, message.ToneWarning, "Messages.System.Report.Invalid", map[string]any{
+	return s.send(ctx, report.ReporterID, gameID, message.ToneWarning, "Messages.System.Report.Invalid", message.Meta{
 		"false_report_count": outcome.count,
 		"ban_days":           outcome.banDays,
 		"quota_sub_gb":       outcome.quotaBytes / GiB,
@@ -340,18 +325,14 @@ func (s *Service) punishReporter(ctx context.Context, who actor.Actor, reporterI
 	return outcome, nil
 }
 
-func (s *Service) send(ctx context.Context, receiverID, gameID int, tone message.Tone, key string, meta map[string]any) error {
-	raw, err := json.Marshal(meta)
-	if err != nil {
-		return err
-	}
+func (s *Service) send(ctx context.Context, receiverID, gameID int, tone message.Tone, key string, meta message.Meta) error {
 	return s.messages.Send(ctx, message.NewMessage{
 		Type:       message.TypeSystem,
 		Tone:       tone,
 		Title:      key + ".Title",
 		Content:    key + ".Content",
 		GameID:     &gameID,
-		Meta:       raw,
+		Meta:       meta,
 		ReceiverID: receiverID,
 	})
 }

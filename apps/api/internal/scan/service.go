@@ -2,7 +2,6 @@ package scan
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -14,6 +13,30 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
 )
+
+type Options struct {
+	Enabled          bool
+	ReviewTimeout    time.Duration
+	AutoBanThreshold int
+	AutoBanDays      int
+	AutoDeleteNote   string
+	SiteURL          string
+}
+
+func checkReason(status download.CheckStatus) string {
+	switch status {
+	case download.CheckOK:
+		return "OK"
+	case download.CheckBrokenOrTruncated:
+		return "BROKEN_OR_TRUNCATED"
+	case download.CheckBrokenOrUnsupported:
+		return "BROKEN_OR_UNSUPPORTED"
+	case download.CheckEncrypted:
+		return "ENCRYPTED"
+	default:
+		return "HARMFUL"
+	}
+}
 
 type Deps struct {
 	Repo       Repository
@@ -28,7 +51,7 @@ type Deps struct {
 	Mailer     AdminMailer
 	Queue      Queue
 	Tx         Transactor
-	Settings   Settings
+	Options    Options
 	Now        func() time.Time
 }
 
@@ -45,7 +68,7 @@ type Service struct {
 	mailer     AdminMailer
 	queue      Queue
 	tx         Transactor
-	settings   Settings
+	options    Options
 	now        func() time.Time
 }
 
@@ -63,13 +86,13 @@ func NewService(deps Deps) *Service {
 		mailer:     deps.Mailer,
 		queue:      deps.Queue,
 		tx:         deps.Tx,
-		settings:   deps.Settings,
+		options:    deps.Options,
 		now:        deps.Now,
 	}
 }
 
 func (s *Service) ScanPending(ctx context.Context) error {
-	if !s.settings.Enabled {
+	if !s.options.Enabled {
 		return nil
 	}
 	pending, err := s.repo.ListPending(ctx, pendingFileBatch)
@@ -132,15 +155,12 @@ func (s *Service) reject(ctx context.Context, file PendingFile, status download.
 		if err := s.activities.Record(ctx, checkActivity(rejectionActivity(status), current, status)); err != nil {
 			return err
 		}
-		meta, err := json.Marshal(map[string]any{
+		meta := message.Meta{
 			"file_id":           current.ID,
 			"file_name":         current.Name,
 			"file_size":         current.Size,
 			"file_check_status": int(status),
 			"reason":            checkReason(status),
-		})
-		if err != nil {
-			return err
 		}
 		return s.messages.Send(ctx, message.NewMessage{
 			Type:       message.TypeSystem,
@@ -179,7 +199,7 @@ func (s *Service) approve(ctx context.Context, file PendingFile) error {
 
 func (s *Service) quarantine(ctx context.Context, file PendingFile, report Report) error {
 	viruses := NormalizeViruses(report.Viruses)
-	deadline := s.now().Add(s.settings.ReviewTimeout)
+	deadline := s.now().Add(s.options.ReviewTimeout)
 	var created *Case
 	err := s.withPending(ctx, file, func(ctx context.Context, current PendingFile) error {
 		if err := s.repo.SetCheckStatus(ctx, current.ID, download.CheckHarmfulPendingReview, false); err != nil {
@@ -206,14 +226,11 @@ func (s *Service) quarantine(ctx context.Context, file PendingFile, report Repor
 		if err != nil {
 			return err
 		}
-		meta, err := json.Marshal(map[string]any{
+		meta := message.Meta{
 			"malware_case_id":  scanCase.ID,
 			"file_name":        current.Name,
-			"review_deadline":  isoTime(scanCase.ReviewDeadline),
+			"review_deadline":  scanCase.ReviewDeadline,
 			"detected_viruses": strings.Join(viruses, ", "),
-		})
-		if err != nil {
-			return err
 		}
 		if err := s.messages.Send(ctx, message.NewMessage{
 			Type:       message.TypeSystem,
@@ -248,15 +265,12 @@ func (s *Service) alertAdmins(ctx context.Context, scanCase Case) error {
 		uploaderName = "User#" + strconv.Itoa(scanCase.UploaderID)
 	}
 	reviewPath := adminReviewPrefix + strconv.Itoa(scanCase.ID)
-	meta, err := json.Marshal(map[string]any{
+	meta := message.Meta{
 		"malware_case_id":  scanCase.ID,
 		"file_name":        scanCase.FileName,
 		"uploader_name":    uploaderName,
 		"detected_viruses": strings.Join(scanCase.Viruses, ", "),
-		"review_deadline":  isoTime(scanCase.ReviewDeadline),
-	})
-	if err != nil {
-		return err
+		"review_deadline":  scanCase.ReviewDeadline,
 	}
 	linkText := "Messages.System.File.Upload.FileVirusReviewRequiredLinkText"
 	var errs []error
@@ -295,7 +309,7 @@ func (s *Service) alertAdmins(ctx context.Context, scanCase Case) error {
 			GameTitle:    titles.Display(),
 			Viruses:      scanCase.Viruses,
 			Deadline:     scanCase.ReviewDeadline,
-			ReviewURL:    strings.TrimSuffix(s.settings.SiteURL, "/") + reviewPath,
+			ReviewURL:    strings.TrimSuffix(s.options.SiteURL, "/") + reviewPath,
 		}); err != nil {
 			errs = append(errs, err)
 		}
@@ -309,7 +323,7 @@ func (s *Service) ExpireOverdue(ctx context.Context) error {
 		return err
 	}
 	notify := true
-	note := s.settings.AutoDeleteNote
+	note := s.options.AutoDeleteNote
 	var errs []error
 	for _, id := range ids {
 		if err := s.decide(ctx, id, ReviewInput{Decision: DecisionDelete, Note: &note, NotifyUploader: &notify}, SourceTimeoutAutoDelete, nil); err != nil {
@@ -395,7 +409,7 @@ func (s *Service) allow(ctx context.Context, id int, note *string, notify bool, 
 		if !notify {
 			return nil
 		}
-		return s.notifyUploader(ctx, target, message.ToneSuccess, "FileVirusFalsePositiveReleased", map[string]any{
+		return s.notifyUploader(ctx, target, message.ToneSuccess, "FileVirusFalsePositiveReleased", message.Meta{
 			"malware_case_id": target.ID,
 			"file_name":       target.FileName,
 			"review_note":     note,
@@ -418,9 +432,9 @@ func (s *Service) delete(ctx context.Context, id int, note *string, notify bool,
 		if err != nil {
 			return err
 		}
-		if strikes == s.settings.AutoBanThreshold {
-			reason := fmt.Sprintf("Uploaded harmful file (%d times)", s.settings.AutoBanThreshold)
-			if _, err := s.banner.Ban(ctx, target.UploaderID, reviewer, reason, s.settings.AutoBanDays); err != nil {
+		if strikes == s.options.AutoBanThreshold {
+			reason := fmt.Sprintf("Uploaded harmful file (%d times)", s.options.AutoBanThreshold)
+			if _, err := s.banner.Ban(ctx, target.UploaderID, reviewer, reason, s.options.AutoBanDays); err != nil {
 				return err
 			}
 		}
@@ -453,11 +467,11 @@ func (s *Service) delete(ctx context.Context, id int, note *string, notify bool,
 		if !notify {
 			return nil
 		}
-		return s.notifyUploader(ctx, target, message.ToneDestructive, "FileVirusConfirmedDeleted", map[string]any{
+		return s.notifyUploader(ctx, target, message.ToneDestructive, "FileVirusConfirmedDeleted", message.Meta{
 			"malware_case_id":            target.ID,
 			"file_name":                  target.FileName,
 			"upload_injected_file_times": strikes,
-			"malware_auto_ban_threshold": s.settings.AutoBanThreshold,
+			"malware_auto_ban_threshold": s.options.AutoBanThreshold,
 			"review_note":                note,
 		})
 	})
@@ -470,18 +484,14 @@ func (s *Service) delete(ctx context.Context, id int, note *string, notify bool,
 	return nil
 }
 
-func (s *Service) notifyUploader(ctx context.Context, target Target, tone message.Tone, key string, meta map[string]any) error {
-	raw, err := json.Marshal(meta)
-	if err != nil {
-		return err
-	}
+func (s *Service) notifyUploader(ctx context.Context, target Target, tone message.Tone, key string, meta message.Meta) error {
 	return s.messages.Send(ctx, message.NewMessage{
 		Type:       message.TypeSystem,
 		Tone:       tone,
 		Title:      "Messages.System.File.Upload." + key + "Title",
 		Content:    "Messages.System.File.Upload." + key + "Content",
 		GameID:     target.GameID(),
-		Meta:       raw,
+		Meta:       meta,
 		ReceiverID: target.UploaderID,
 	})
 }

@@ -74,7 +74,7 @@ func (h *Handler) update(ctx context.Context, in *updateFavoriteInput) (*respons
 	return response.Empty(ctx, h.resp), nil
 }
 
-func (h *Handler) delete(ctx context.Context, in *favoritePath) (*response.EmptyOutput, error) {
+func (h *Handler) delete(ctx context.Context, in *favoritePathInput) (*response.EmptyOutput, error) {
 	if err := h.service.Delete(ctx, actor.From(ctx), in.ID); err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (h *Handler) items(ctx context.Context, in *favoriteItemsInput) (*response.
 	}
 	page := favoriteItemPageDTO{
 		Items: make([]favoriteItemDTO, len(items)),
-		Meta: favoriteItemPageMeta{
+		Meta: favoriteItemPageMetaDTO{
 			PageMeta:     response.NewPageMeta(total, len(items), in.PageSize, in.Page),
 			ContentLimit: int(viewer.ContentLimit),
 		},
@@ -114,14 +114,14 @@ func (h *Handler) updateItem(ctx context.Context, in *updateFavoriteItemInput) (
 	return response.Empty(ctx, h.resp), nil
 }
 
-func (h *Handler) deleteItem(ctx context.Context, in *favoriteItemPath) (*response.EmptyOutput, error) {
+func (h *Handler) deleteItem(ctx context.Context, in *favoriteItemPathInput) (*response.EmptyOutput, error) {
 	if err := h.service.DeleteItem(ctx, actor.From(ctx), in.ItemID); err != nil {
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil
 }
 
-func (h *Handler) gameStats(ctx context.Context, in *favoritePath) (*response.Output[favoriteGameStatsDTO], error) {
+func (h *Handler) gameStats(ctx context.Context, in *favoritePathInput) (*response.Output[favoriteGameStatsDTO], error) {
 	has, err := h.service.HasGame(ctx, actor.From(ctx), in.ID)
 	if err != nil {
 		return nil, err

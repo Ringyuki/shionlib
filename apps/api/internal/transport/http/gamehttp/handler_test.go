@@ -64,7 +64,7 @@ func setup(t *testing.T) env {
 		Resources: map[string][]byte{"subjects/42": []byte(`{"id":42,"name":"x"}`)},
 	}
 	vndb := &gametest.VNDB{Scores: map[string]game.VNDBScore{"v17": {ID: "v17", Rating: ptr(85.2), Average: ptr(8.4), VoteCount: 1200}}}
-	service := game.NewService(catalog, recent, gametest.Preferences{}, game.NewCards(catalog), func() time.Time { return apitest.Now }, func(int) int { return 0 })
+	service := game.NewService(catalog, recent, gametest.Preferences{}, game.NewCardService(catalog), func() time.Time { return apitest.Now }, func(int) int { return 0 })
 	scores := game.NewScoreService(catalog, bangumi, vndb, gametest.NewCache())
 	gamehttp.NewHandler(service, scores, server.Builder).Register(server.API)
 	return env{server: server, catalog: catalog, recent: recent, bangumi: bangumi}
@@ -119,7 +119,7 @@ func TestRandomAndRecentUpdates(t *testing.T) {
 func TestRandomWithoutCandidatesIsNull(t *testing.T) {
 	server := apitest.New(t)
 	catalog := gametest.NewCatalog()
-	service := game.NewService(catalog, &gametest.RecentUpdates{}, gametest.Preferences{}, game.NewCards(catalog), time.Now, func(int) int { return 0 })
+	service := game.NewService(catalog, &gametest.RecentUpdates{}, gametest.Preferences{}, game.NewCardService(catalog), time.Now, func(int) int { return 0 })
 	gamehttp.NewHandler(service, game.NewScoreService(catalog, &gametest.Bangumi{}, &gametest.VNDB{}, gametest.NewCache()), server.Builder).Register(server.API)
 	resp := server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/random"})
 	server.Expect(resp, http.StatusOK, 0)

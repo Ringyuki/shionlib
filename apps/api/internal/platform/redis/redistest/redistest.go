@@ -13,7 +13,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/redis"
 )
 
-func New(t *testing.T) *redis.Client {
+func Options(t *testing.T) redis.Options {
 	t.Helper()
 	addr := os.Getenv("TEST_REDIS_ADDR")
 	if addr == "" {
@@ -30,12 +30,19 @@ func New(t *testing.T) *redis.Client {
 	if err != nil {
 		t.Fatal(err)
 	}
+	return redis.Options{Host: host, Port: port, Timeout: 3 * time.Second}
+}
+
+func New(t *testing.T) *redis.Client {
+	t.Helper()
+	opts := Options(t)
 	var suffix [6]byte
 	if _, err := rand.Read(suffix[:]); err != nil {
 		t.Fatal(err)
 	}
 	prefix := "test:" + hex.EncodeToString(suffix[:])
-	client, err := redis.Open(context.Background(), redis.Options{Host: host, Port: port, KeyPrefix: prefix, Timeout: 3 * time.Second})
+	opts.KeyPrefix = prefix
+	client, err := redis.Open(context.Background(), opts)
 	if err != nil {
 		t.Fatal(err)
 	}

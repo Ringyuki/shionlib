@@ -7,33 +7,6 @@ import (
 	"time"
 )
 
-type ImportJob struct {
-	Source     string `json:"source"`
-	Entity     Entity `json:"entity"`
-	ExternalID string `json:"external_id"`
-}
-
-const (
-	ImportQueue       = "catalog"
-	importMaxAttempts = 5
-)
-
-func (ImportJob) Kind() string {
-	return "catalog_import"
-}
-
-func (ImportJob) Queue() string {
-	return ImportQueue
-}
-
-func (ImportJob) MaxAttempts() int {
-	return importMaxAttempts
-}
-
-func (ImportJob) UniqueByArgs() bool {
-	return true
-}
-
 type Options struct {
 	CreatorID    int
 	RefreshAfter time.Duration
@@ -71,12 +44,6 @@ func NewService(deps Deps) *Service {
 		indexer = noIndex{}
 	}
 	return &Service{sources: byName, store: deps.Store, tx: deps.Tx, queue: deps.Queue, indexer: indexer, now: deps.Now, opts: deps.Options}
-}
-
-type noIndex struct{}
-
-func (noIndex) GamesChanged(context.Context, []int) error {
-	return nil
 }
 
 func (s *Service) source(name string) (Source, error) {
@@ -142,8 +109,6 @@ func (s *Service) reindex(ctx context.Context, entity Entity, localID int) error
 	}
 	return s.indexer.GamesChanged(ctx, ids)
 }
-
-type writeFunc func(ctx context.Context) (int, []Ref, error)
 
 func (s *Service) fetch(ctx context.Context, source Source, ref Ref) (writeFunc, error) {
 	name := source.Name()
@@ -289,11 +254,6 @@ func (s *Service) applyChange(ctx context.Context, source string, change Change)
 	default:
 		return nil
 	}
-}
-
-type SearchResult struct {
-	Hits  []SearchHit
-	Total int
 }
 
 func (s *Service) Search(ctx context.Context, sourceName, query string, page, size int) (SearchResult, error) {

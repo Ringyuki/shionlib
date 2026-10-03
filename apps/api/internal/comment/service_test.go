@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"maps"
 	"strings"
 	"testing"
 	"time"
@@ -376,7 +377,7 @@ func TestAdminStatusChanges(t *testing.T) {
 		}
 		sent := messages.All()
 		if len(sent) != 1 || sent[0].Content != "Messages.System.Moderation.Comment.Block.ReviewContent" || *sent[0].SenderID != admin.UserID || sent[0].ReceiverID != alice.UserID ||
-			string(sent[0].Meta) != `{"top_category":"SPAM","reason":"ads"}` {
+			!maps.Equal(sent[0].Meta, message.Meta{"top_category": moderation.CategorySpam, "reason": "ads"}) {
 			t.Fatalf("unexpected block notice %+v", sent)
 		}
 		_, quiet, _, _, service, reply := setup(&stubStore{})
@@ -387,8 +388,8 @@ func TestAdminStatusChanges(t *testing.T) {
 		if err := service.SetStatus(ctx, admin, reply.ID, comment.StatusChange{Status: comment.StatusBlocked, Reason: ptr("")}); err != nil {
 			t.Fatal(err)
 		}
-		if sent := plain.All(); sent[0].Content != "Messages.System.Moderation.Comment.Block.Content" || string(sent[0].Meta) != `{"top_category":"HARASSMENT","reason":""}` {
-			t.Fatalf("unexpected default block notice %+v %s", sent, sent[0].Meta)
+		if sent := plain.All(); sent[0].Content != "Messages.System.Moderation.Comment.Block.Content" || !maps.Equal(sent[0].Meta, message.Meta{"top_category": moderation.CategoryHarassment, "reason": ""}) {
+			t.Fatalf("unexpected default block notice %+v %v", sent, sent[0].Meta)
 		}
 	})
 

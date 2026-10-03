@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
@@ -267,26 +266,5 @@ func translateUnique(err error, op string) error {
 		return user.ErrEmailAlreadyExists
 	default:
 		return fmt.Errorf("%s: %w", op, err)
-	}
-}
-
-func toUser(row *ent.User) user.User {
-	return user.User{
-		ID:                     row.ID,
-		Name:                   row.Name,
-		Email:                  row.Email,
-		PasswordHash:           row.Password,
-		Avatar:                 row.Avatar,
-		Cover:                  row.Cover,
-		Bio:                    row.Bio,
-		Lang:                   user.Lang(row.Lang),
-		ContentLimit:           actor.ContentLimit(row.ContentLimit),
-		OnlyGamesWithResources: row.OnlyGamesWithResources,
-		Role:                   actor.Role(row.Role),
-		Status:                 user.Status(row.Status),
-		EmailVerifiedAt:        row.EmailVerifiedAt,
-		TwoFactorEnabled:       row.TwoFactorEnabled,
-		SponsorExpiresAt:       row.SponsorExpiresAt,
-		Created:                row.Created,
 	}
 }

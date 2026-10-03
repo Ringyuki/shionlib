@@ -28,11 +28,11 @@ type fixture struct {
 func newFixture(entries ...gametest.Entry) fixture {
 	catalog := gametest.NewCatalog(entries...)
 	f := fixture{engine: &searchtest.Engine{}, queue: &searchtest.Queue{}, analytics: searchtest.NewAnalytics(), prefs: gametest.Preferences{}}
-	f.service = search.NewService(search.Dependencies{
+	f.service = search.NewService(search.Deps{
 		Engine:      f.engine,
 		Catalog:     catalog,
 		Tags:        searchtest.Tags{{ID: 1, Name: "school", Count: 5, Aliases: []string{"学园", "School Life"}}, {ID: 2, Name: "fantasy", Count: 9}},
-		Cards:       game.NewCards(catalog),
+		Cards:       game.NewCardService(catalog),
 		Preferences: f.prefs,
 		Queue:       f.queue,
 		Analytics:   f.analytics,

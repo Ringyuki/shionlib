@@ -1,12 +1,7 @@
 package download
 
-import "time"
-
-const (
-	TransferQueue       = "file_transfer"
-	TransferConcurrency = 2
-	transferAttempts    = 5
-	purgeAttempts       = 10
+import (
+	"time"
 )
 
 type StoreFile struct {

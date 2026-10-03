@@ -7,6 +7,22 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 )
 
+type DocumentSource interface {
+	Documents(ctx context.Context, ids []int) ([]Document, error)
+	DocumentIDs(ctx context.Context, afterID, limit int) ([]int, error)
+}
+
+type Index interface {
+	Configure(ctx context.Context) error
+	Upsert(ctx context.Context, docs []Document) error
+	Delete(ctx context.Context, ids []int) error
+	Clear(ctx context.Context) error
+}
+
+type IndexQueue interface {
+	Enqueue(ctx context.Context, job IndexJob) error
+}
+
 type Engine interface {
 	Search(ctx context.Context, criteria Criteria) (Result, error)
 }

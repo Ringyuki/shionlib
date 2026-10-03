@@ -55,10 +55,26 @@ type SecretHasher interface {
 	Verify(hash, secret string) (bool, error)
 }
 
-type EphemeralStore interface {
-	Put(ctx context.Context, key string, value []byte, ttl time.Duration) error
-	Get(ctx context.Context, key string) ([]byte, bool, error)
-	Take(ctx context.Context, key string) ([]byte, bool, error)
+type VerificationCodeStore interface {
+	SaveVerificationCode(ctx context.Context, id string, code VerificationCode, ttl time.Duration) error
+	FindVerificationCode(ctx context.Context, id, email string) (VerificationCode, bool, error)
+	TakeVerificationCode(ctx context.Context, id, email string) (VerificationCode, bool, error)
+}
+
+type PasswordResetStore interface {
+	SavePasswordReset(ctx context.Context, reset PasswordReset, ttl time.Duration) error
+	FindPasswordReset(ctx context.Context, token, email string) (PasswordReset, bool, error)
+	TakePasswordReset(ctx context.Context, token, email string) (PasswordReset, bool, error)
+}
+
+type PasskeyChallengeStore interface {
+	SavePasskeyChallenge(ctx context.Context, flowID string, challenge PendingPasskeyChallenge, ttl time.Duration) error
+	TakePasskeyChallenge(ctx context.Context, flowID string) (PendingPasskeyChallenge, bool, error)
+}
+
+type RefreshReplayStore interface {
+	SaveRefreshReplay(ctx context.Context, sessionID int, tokens Tokens, ttl time.Duration) error
+	FindRefreshReplay(ctx context.Context, sessionID int) (Tokens, bool, error)
 }
 
 type Mailer interface {
@@ -81,4 +97,14 @@ type IdentityProvider interface {
 
 type Transactor interface {
 	WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error
+}
+
+type AccessTokenCodec interface {
+	Sign(claims AccessClaims) (string, error)
+	Verify(token string) (AccessClaims, error)
+}
+
+type FamilyBlocklist interface {
+	Blocked(ctx context.Context, familyID string) (bool, error)
+	Block(ctx context.Context, familyID string, ttl time.Duration) error
 }

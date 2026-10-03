@@ -2,11 +2,14 @@
 
 | Level | Location | Dependencies |
 |---|---|---|
-| Rules | `internal/<capability>/service_test.go` | memory fakes from `<capability>test` |
+| Rules | `internal/<capability>/service*_test.go` | memory fakes from `<capability>test` |
+| Platform and transport infrastructure | `internal/platform/*/*_test.go`, `internal/transport/http/{errmap,response,...}` | real Postgres/Redis through `databasetest`/`redistest`, `httptest` |
 | Repository contract | `<capability>test/contract.go`, run by `<capability>test/memory_test.go` and `adapter/postgres/<capability>pg/repository_test.go` | real Postgres via `pgtest.New(t)` |
 | Adapter integration | `internal/adapter/**/_test.go` | Postgres (`pgtest`), Redis (`redistest`), `httptest.Server` for vendors |
 | HTTP contract | `internal/transport/http/<capability>http/handler_test.go` | `apitest.New(t)` + real service + memory fakes |
 | Architecture | `internal/archtest` | none |
+
+Files: `X_test.go` tests `X.go` (`X_internal_test.go` when it needs package internals); shared setup lives in `fixture_test.go`. Every package with production code has tests; `archtest` enforces both. Contract suites live in `<capability>test/contract.go` (`RepositoryContract`, `StoreContract`).
 
 Rules:
 

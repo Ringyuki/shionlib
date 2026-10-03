@@ -10,10 +10,9 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
 )
 
-var (
-	tags      = []string{"ad"}
-	adminTags = []string{"ad", "admin"}
-)
+var tags = []string{"ad"}
+
+var adminTags = []string{"ad", "admin"}
 
 type Handler struct {
 	service *ad.Service
@@ -53,7 +52,7 @@ func (h *Handler) list(ctx context.Context, in *listAdsInput) (*response.Output[
 	return response.OK(ctx, h.resp, response.MapPage(ads, total, in.PageSize, in.Page, toAdminDTO)), nil
 }
 
-func (h *Handler) get(ctx context.Context, in *adPath) (*response.Output[adAdminDTO], error) {
+func (h *Handler) get(ctx context.Context, in *adPathInput) (*response.Output[adAdminDTO], error) {
 	item, err := h.service.Get(ctx, in.ID)
 	if err != nil {
 		return nil, err
@@ -99,7 +98,7 @@ func (h *Handler) update(ctx context.Context, in *updateAdInput) (*response.Outp
 	return response.OK(ctx, h.resp, toAdminDTO(updated)), nil
 }
 
-func (h *Handler) delete(ctx context.Context, in *adPath) (*response.EmptyOutput, error) {
+func (h *Handler) delete(ctx context.Context, in *adPathInput) (*response.EmptyOutput, error) {
 	if err := h.service.Delete(ctx, in.ID); err != nil {
 		return nil, err
 	}

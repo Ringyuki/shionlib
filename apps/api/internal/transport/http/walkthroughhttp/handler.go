@@ -65,7 +65,7 @@ func (h *Handler) get(ctx context.Context, in *getWalkthroughInput) (*response.O
 	return response.OK(ctx, h.resp, toWalkthrough(view, h.resp.Now())), nil
 }
 
-func (h *Handler) delete(ctx context.Context, in *walkthroughPath) (*response.EmptyOutput, error) {
+func (h *Handler) delete(ctx context.Context, in *walkthroughPathInput) (*response.EmptyOutput, error) {
 	if err := h.service.Delete(ctx, actor.From(ctx), in.ID); err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func (h *Handler) listByGame(ctx context.Context, in *gameWalkthroughsInput) (*r
 	now := h.resp.Now()
 	page := walkthroughPageDTO{
 		Items: make([]walkthroughItemDTO, len(summaries)),
-		Meta:  walkthroughPageMeta{PageMeta: response.NewPageMeta(total, len(summaries), in.PageSize, in.Page), ContentLimit: int(viewer.ContentLimit)},
+		Meta:  walkthroughPageMetaDTO{PageMeta: response.NewPageMeta(total, len(summaries), in.PageSize, in.Page), ContentLimit: int(viewer.ContentLimit)},
 	}
 	for i, summary := range summaries {
 		page.Items[i] = toItem(summary, now)
@@ -98,7 +98,7 @@ func (h *Handler) listByUser(ctx context.Context, in *userWalkthroughsInput) (*r
 	now := h.resp.Now()
 	page := userWalkthroughPageDTO{
 		Items: make([]userWalkthroughDTO, len(summaries)),
-		Meta: userWalkthroughPageMeta{
+		Meta: userWalkthroughPageMetaDTO{
 			PageMeta:      response.NewPageMeta(total, len(summaries), in.PageSize, in.Page),
 			IsCurrentUser: in.ID == viewer.UserID,
 			ContentLimit:  int(viewer.ContentLimit),
@@ -108,4 +108,12 @@ func (h *Handler) listByUser(ctx context.Context, in *userWalkthroughsInput) (*r
 		page.Items[i] = toUserItem(summary, now)
 	}
 	return response.OK(ctx, h.resp, page), nil
+}
+
+func statusFilter(value string) *walkthrough.Status {
+	if value == "" {
+		return nil
+	}
+	status := walkthrough.Status(value)
+	return &status
 }

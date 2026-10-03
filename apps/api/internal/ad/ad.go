@@ -1,6 +1,11 @@
 package ad
 
-import "time"
+import (
+	"time"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/paging"
+	"github.com/Ringyuki/shionlib/apps/api/internal/patch"
+)
 
 const (
 	MaxNameLength        = 100
@@ -45,24 +50,19 @@ type NewAd struct {
 	EndAt          *time.Time
 }
 
-type Clearable[T any] struct {
-	Set   bool
-	Value *T
-}
-
 type Changes struct {
 	Name           *string
 	Placement      *[]string
 	ImageZH        *string
-	ImageJA        Clearable[string]
-	ImageEN        Clearable[string]
+	ImageJA        patch.Clearable[string]
+	ImageEN        patch.Clearable[string]
 	Aspect         *string
 	Link           *string
 	ExcludeLocales *[]string
 	Enabled        *bool
 	Sort           *int
-	StartAt        Clearable[time.Time]
-	EndAt          Clearable[time.Time]
+	StartAt        patch.Clearable[time.Time]
+	EndAt          patch.Clearable[time.Time]
 }
 
 type SortField string
@@ -81,11 +81,4 @@ type ListFilter struct {
 	Descending bool
 }
 
-type Page struct {
-	Number int
-	Size   int
-}
-
-func (p Page) Offset() int {
-	return (p.Number - 1) * p.Size
-}
+type Page = paging.Page

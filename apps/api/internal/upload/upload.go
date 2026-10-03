@@ -103,11 +103,3 @@ type Chunk struct {
 	SHA256        string
 	ContentLength int64
 }
-
-type Settings struct {
-	ChunkSize     int64
-	MaxChunks     int
-	MaxFileSize   int64
-	TransferLimit int64
-	SessionTTL    time.Duration
-}

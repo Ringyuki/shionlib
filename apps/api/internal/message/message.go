@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/paging"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
 
@@ -74,6 +75,8 @@ type Stored struct {
 	Comment *CommentRef
 }
 
+type Meta map[string]any
+
 type NewMessage struct {
 	Type         Type
 	Tone         Tone
@@ -82,7 +85,7 @@ type NewMessage struct {
 	LinkText     *string
 	LinkURL      *string
 	ExternalLink bool
-	Meta         json.RawMessage
+	Meta         Meta
 	CommentID    *int
 	GameID       *int
 	SenderID     *int
@@ -90,11 +93,11 @@ type NewMessage struct {
 }
 
 type Notice struct {
-	ID      int       `json:"id"`
-	Title   string    `json:"title"`
-	Type    Type      `json:"type"`
-	Tone    Tone      `json:"tone"`
-	Created time.Time `json:"created"`
+	ID      int
+	Title   string
+	Type    Type
+	Tone    Tone
+	Created time.Time
 }
 
 type Filter struct {
@@ -102,11 +105,4 @@ type Filter struct {
 	Type   *Type
 }
 
-type Page struct {
-	Number int
-	Size   int
-}
-
-func (p Page) Offset() int {
-	return (p.Number - 1) * p.Size
-}
+type Page = paging.Page

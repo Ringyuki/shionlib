@@ -41,7 +41,7 @@ func wireCatalog(infra *Infra, shared *Shared, modules *Modules) {
 	cfg := shared.Config
 	outbound := httpclient.New(httpclient.Options{Timeout: catalogOutboundTimeout})
 	games := gamepg.NewRepository(infra.Ent)
-	preferences := gamepg.NewPreferences(infra.Ent)
+	preferences := gamepg.NewPreferenceStore(infra.Ent)
 
 	gameService := game.NewService(games, gameredis.NewRecentUpdates(infra.Redis), preferences, shared.GameCards, shared.Now, randomIndex)
 	scores := game.NewScoreService(games, bangumi.NewClient(bangumi.Options{
@@ -53,7 +53,7 @@ func wireCatalog(infra *Infra, shared *Shared, modules *Modules) {
 	}), vndb.NewClient(outbound, vndb.DefaultBaseURL), shared.Cache)
 	hotScore := game.NewHotScoreService(games, hotScoreWeights(cfg.HotScore))
 
-	searchService := search.NewService(search.Dependencies{
+	searchService := search.NewService(search.Deps{
 		Engine:      searchEngine(cfg, infra, outbound),
 		Catalog:     games,
 		Tags:        searchpg.NewTagStore(infra.Ent),
@@ -84,13 +84,13 @@ func searchEngine(cfg *config.Config, infra *Infra, outbound *http.Client) searc
 			Index:  cfg.Search.MeilisearchIndex,
 		})
 	}
-	return searchpg.NewEngine(infra.Ent)
+	return searchpg.NewSearchStore(infra.Ent)
 }
 
-func BuildSearchIndexer(infra *Infra) *search.Indexer {
+func BuildSearchIndexer(infra *Infra) *search.IndexService {
 	cfg := infra.Config.Search
 	if cfg.Engine != "meilisearch" {
-		return search.NewIndexer(nil, nil, nil)
+		return search.NewIndexService(nil, nil, nil)
 	}
 	index := meilisearch.NewIndex(meilisearch.Options{
 		HTTP:   httpclient.New(httpclient.Options{Timeout: catalogOutboundTimeout}),
@@ -98,7 +98,7 @@ func BuildSearchIndexer(infra *Infra) *search.Indexer {
 		APIKey: cfg.MeilisearchAPIKey,
 		Index:  cfg.MeilisearchIndex,
 	})
-	return search.NewIndexer(searchpg.NewDocuments(infra.Ent), index, typedQueue[search.IndexJob]{queue: infra.Queue})
+	return search.NewIndexService(searchpg.NewDocumentStore(infra.Ent), index, typedQueue[search.IndexJob]{queue: infra.Queue})
 }
 
 type typedQueue[J queue.Job] struct {

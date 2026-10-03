@@ -3,6 +3,7 @@ package report
 import (
 	"time"
 
+	"github.com/Ringyuki/shionlib/apps/api/internal/paging"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
@@ -222,23 +223,15 @@ type ListFilter struct {
 	Descending     bool
 }
 
-type Page struct {
-	Number int
-	Size   int
+type Page = paging.Page
+
+func (p penaltyOutcome) applied() bool {
+	return p.banApplied || p.quotaBytes > 0
 }
 
-func (p Page) Offset() int {
-	return (p.Number - 1) * p.Size
-}
-
-type AlertAdmins struct {
-	ReportID int `json:"report_id"`
-}
-
-func (AlertAdmins) Kind() string {
-	return "report_alert_admins"
-}
-
-func (AlertAdmins) MaxAttempts() int {
-	return 5
+type penaltyOutcome struct {
+	count      int
+	banApplied bool
+	banDays    int
+	quotaBytes int64
 }

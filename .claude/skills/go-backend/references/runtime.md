@@ -13,14 +13,16 @@
 
 ## Concurrency
 
-- Long-running components implement `runtime.Runner` (`Run(ctx) error`) and are registered with `runtime.App`; closers run in reverse order on shutdown.
+- Long-running components implement `runtime.Runner` (`Run(ctx) error`) and are registered with `runtime.App`; closers run in reverse order on shutdown under `SHUTDOWN_TIMEOUT`, even after the run context is cancelled. `runtime.App.Start` returns component and close errors without logging them; `cmd/api` reports them once.
+- `go` statements are allowed only in `internal/platform` (archtest).
 - Fan-out inside a request uses `errgroup.WithContext` with a bounded `SetLimit`.
 - Background work goes through River jobs, not `go func()`.
 
 ## Jobs
 
-- Job args are plain structs in the business package with `Kind() string` and JSON tags. Business code enqueues through a port (`Enqueue(ctx, job) error`) implemented by `internal/adapter/queue`.
-- Workers live in `internal/transport/jobs/<capability>jobs`, call one service method, and return errors (River retries with backoff). They do not log errors themselves.
+- Job args are plain structs in the capability's `jobs.go` with `Kind() string` and JSON tags (the only business types with tags). Business code enqueues through a port (`Enqueue(ctx, job) error`) implemented by `internal/adapter/queue`.
+- Workers are exported `<Purpose>Worker` types in `internal/transport/jobs/<capability>jobs/worker_<purpose>.go` with a `New<Purpose>Worker` constructor; `Work` calls one service method and returns its error (River retries with backoff). They do not log errors themselves; `platform/jobs` logs every failure once.
+- `tasks.go` holds `Register(...) func(*river.Workers)` (adds the package's workers) and `Tasks(...) []jobs.Task`; bootstrap appends them to `Modules.Jobs`.
 - Scheduled tasks are `jobs.Task{Name, Schedule (cron, SCHEDULE_TIMEZONE), Timeout, Run}` added to `Modules.Jobs.Tasks`; they are leader-elected and never overlap.
 
 ## Cache
@@ -29,7 +31,7 @@
 
 ## Outbound HTTP
 
-- Use an `*http.Client` from `platform/httpclient.New` with an explicit timeout, injected into the adapter. Retries live in exactly one place (the adapter) with bounded attempts, backoff and jitter, and only for idempotent requests.
+- Use an `*http.Client` from `platform/httpclient.New` (15 s default timeout, response-header and TLS timeouts, tracing), injected into the adapter. Retries live in exactly one place: queued work is retried by River (bounded attempts, exponential backoff with jitter); an adapter retries only idempotent calls and only when no job wraps it (`hikarinagi.Client` re-fetches its token once on 401). Services and repositories never retry.
 - Vendor SDKs and URLs never appear in business packages; business defines the port.
 
 ## Observability
@@ -38,7 +40,7 @@
 - Business code logs only meaningful business events at Info. Errors are logged at boundaries only.
 - Tracing is OpenTelemetry, set up once in `internal/platform/telemetry` and exported to `APM_ENDPOINT`. HTTP server spans, outbound `platform/httpclient` calls, pgx queries, Redis commands and River jobs are instrumented automatically; do not wrap them again.
 - Business spans: only around a unit of work that is not already a request, job or query and is worth seeing on its own (for example one catalog import step). Use `telemetry.Tracer().Start(ctx, "<capability>.<operation>")`, end it with `defer span.End()`, record failures with `span.RecordError(err)`. Business packages receive no tracer; spans are started in adapters or transport.
-- Metrics: the APM derives request, query and job rates and durations from spans. New metrics MUST use OpenTelemetry semantic-convention names (`http.server.request.duration`, `db.client.operation.duration`, `messaging.process.duration`) or `shionlib.<capability>.<measure>` with a unit suffix in the description, and live in `internal/platform/telemetry`, never ad hoc in business code.
+- Metrics: there is no metrics exporter yet (the APM ingests traces and logs only; ADR 0008). Request, query and job rates and durations are derived from spans and from the access log. When an exporter is added, metrics MUST use OpenTelemetry semantic-convention names (`http.server.request.duration`, `db.client.operation.duration`, `messaging.process.duration`) or `shionlib.<capability>.<measure>` with the unit in the instrument, and are created only in `internal/platform/telemetry`, never in business code.
 
 ## Security baseline
 

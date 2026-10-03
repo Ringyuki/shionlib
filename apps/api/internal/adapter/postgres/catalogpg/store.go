@@ -17,6 +17,61 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
 )
 
+func unlinked(source string, entity catalog.Entity) func(*sql.Selector) {
+	return func(selector *sql.Selector) {
+		links := sql.Table(catalogsourcelink.Table)
+		selector.Where(sql.NotExists(
+			sql.Select(links.C(catalogsourcelink.FieldID)).From(links).Where(sql.And(
+				sql.ColumnsEQ(links.C(catalogsourcelink.FieldLocalID), selector.C("id")),
+				sql.EQ(links.C(catalogsourcelink.FieldSource), source),
+				sql.EQ(links.C(catalogsourcelink.FieldEntity), string(entity)),
+			)),
+		))
+	}
+}
+
+func equalOrNull[P ~func(*sql.Selector)](column string, value *string) P {
+	return func(selector *sql.Selector) {
+		if value == nil {
+			selector.Where(sql.IsNull(selector.C(column)))
+			return
+		}
+		selector.Where(sql.EQ(selector.C(column), *value))
+	}
+}
+
+func firstNonNil(values ...*string) *string {
+	for _, value := range values {
+		if value != nil {
+			return value
+		}
+	}
+	return nil
+}
+
+func (s *Store) linked(ctx context.Context, ref catalog.Ref, exists func(context.Context, int) (bool, error)) (int, bool, bool, error) {
+	link, err := s.link(ctx, ref)
+	if err != nil || link == nil {
+		return 0, false, false, err
+	}
+	found, err := exists(ctx, link.LocalID)
+	if err != nil {
+		return 0, false, false, fmt.Errorf("check linked %s: %w", ref.Entity, err)
+	}
+	if found {
+		return link.LocalID, link.SyncedAt != nil, true, nil
+	}
+	return 0, false, false, s.dropLink(ctx, link.ID)
+}
+
+func setOrClear[T any, B any](value *T, set func(T) B, clear func() B) {
+	if value != nil {
+		set(*value)
+		return
+	}
+	clear()
+}
+
 const (
 	gameStatusHidden = 2
 	maxErrorLength   = 500

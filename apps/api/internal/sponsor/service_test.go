@@ -34,8 +34,8 @@ func newFixture(enabled bool) fixture {
 	repo.AddUser(user.Summary{ID: member.UserID, Name: "member"})
 	provider := sponsortest.NewProvider()
 	cache := sponsortest.NewCache()
-	settings := sponsor.Settings{Enabled: enabled, Provider: "idatariver", CallbackURL: "https://shionlib.test/api/sponsor/webhook/idatariver"}
-	service := sponsor.NewService(repo, provider, cache, &txtest.Immediate{}, sponsortest.Signer{}, settings, func() time.Time { return now })
+	options := sponsor.Options{Enabled: enabled, Provider: "idatariver", CallbackURL: "https://shionlib.test/api/sponsor/webhook/idatariver"}
+	service := sponsor.NewService(repo, provider, cache, &txtest.Immediate{}, sponsortest.Signer{}, options, func() time.Time { return now })
 	return fixture{repo: repo, provider: provider, cache: cache, service: service}
 }
 

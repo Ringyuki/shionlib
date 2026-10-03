@@ -1,6 +1,8 @@
 package sitemap
 
-import "time"
+import (
+	"time"
+)
 
 type Section string
 

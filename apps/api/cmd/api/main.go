@@ -192,6 +192,7 @@ func openapi(args []string) error {
 		_ = infra.Close(context.Background())
 	}()
 	spec := bootstrap.BuildHTTP(infra, bootstrap.BuildModules(infra)).OpenAPI()
+	spec.Info.Extensions = map[string]any{"x-generated-by": "go run ./cmd/api openapi openapi/openapi.json; do not edit by hand"}
 	encoded, err := json.MarshalIndent(spec, "", "  ")
 	if err != nil {
 		return err

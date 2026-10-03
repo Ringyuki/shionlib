@@ -20,6 +20,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
+	"github.com/Ringyuki/shionlib/apps/api/internal/catalog/catalogtest"
 )
 
 var syncedAt = time.Date(2026, 10, 3, 8, 0, 0, 0, time.UTC)
@@ -390,4 +391,11 @@ func TestMarkMissingHidesGamesAndRecordFailureCountsErrors(t *testing.T) {
 	if err != nil || row.Status != 2 {
 		t.Fatalf("game must be hidden: %+v %v", row, err)
 	}
+}
+
+func TestStoreContract(t *testing.T) {
+	catalogtest.StoreContract(t, func(t *testing.T) catalogtest.Env {
+		db := pgtest.New(t)
+		return catalogtest.Env{Store: catalogpg.NewStore(db.Ent), CreatorID: db.User}
+	})
 }

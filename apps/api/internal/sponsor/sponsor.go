@@ -7,8 +7,40 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
+	"github.com/Ringyuki/shionlib/apps/api/internal/paging"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
+
+type transitionSource int
+
+const (
+	fromPoll transitionSource = iota
+	fromCallback
+	fromAdmin
+)
+
+type CreateOrderInput struct {
+	AmountCents int64
+	IsPrivate   bool
+	Name        string
+	Message     string
+}
+
+type PayInput struct {
+	Method      string
+	RedirectURL *string
+}
+
+func (t transitionSource) allows(current, target Status) bool {
+	switch t {
+	case fromPoll:
+		return current == StatusNew && target != StatusNew
+	case fromCallback:
+		return current != StatusDone && (target == StatusDone || target == StatusRefund)
+	default:
+		return true
+	}
+}
 
 type Status string
 
@@ -161,20 +193,7 @@ type ListFilter struct {
 	Status *Status
 }
 
-type Page struct {
-	Number int
-	Size   int
-}
-
-func (p Page) Offset() int {
-	return (p.Number - 1) * p.Size
-}
-
-type Settings struct {
-	Enabled     bool
-	Provider    string
-	CallbackURL string
-}
+type Page = paging.Page
 
 func CentsFromAmount(amount float64) int64 {
 	negative := amount < 0
@@ -196,9 +215,4 @@ func CentsFromAmount(amount float64) int64 {
 
 func Amount(cents int64) float64 {
 	return float64(cents) / 100
-}
-
-func sponsorshipFor(amountCents int64) time.Duration {
-	days := amountCents * DaysPerDollar / 100
-	return time.Duration(days) * 24 * time.Hour
 }

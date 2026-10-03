@@ -7,8 +7,8 @@ import (
 )
 
 type FieldError struct {
-	Field    string   `json:"field"`
-	Messages []string `json:"messages"`
+	Field    string
+	Messages []string
 }
 
 type Error struct {

@@ -30,7 +30,7 @@ func wireAuth(infra *Infra, shared *Shared, modules *Modules) {
 	passwords := argon2hash.New(argon2hash.PasswordParams())
 	mailer := shared.Mailer
 
-	sessions := auth.NewSessions(credentials, accounts, shared.Tokens, argon2hash.New(argon2hash.RefreshTokenParams()), shared.Families, store, shared.Transactor, infra.Now, auth.SessionPolicy{
+	sessions := auth.NewSessionService(credentials, accounts, shared.Tokens, argon2hash.New(argon2hash.RefreshTokenParams()), shared.Families, store, shared.Transactor, infra.Now, auth.SessionPolicy{
 		Version:       cfg.Token.RefreshAlgorithmVersion,
 		Pepper:        cfg.Token.RefreshPepper,
 		AccessTTL:     cfg.Token.ExpiresIn,
@@ -40,18 +40,18 @@ func wireAuth(infra *Infra, shared *Shared, modules *Modules) {
 		ReplayWait:    auth.DefaultReplayWait,
 		ReplayPoll:    auth.DefaultReplayPoll,
 	})
-	codes := auth.NewCodes(store, mailer, infra.Now)
-	ceremony, err := passkey.New(passkey.Settings{RPID: cfg.WebAuthn.RPID, RPName: cfg.WebAuthn.RPName, Origins: cfg.WebAuthn.Origins, Timeout: cfg.WebAuthn.Timeout})
+	codes := auth.NewCodeService(store, mailer, infra.Now)
+	ceremony, err := passkey.New(passkey.Options{RPID: cfg.WebAuthn.RPID, RPName: cfg.WebAuthn.RPName, Origins: cfg.WebAuthn.Origins, Timeout: cfg.WebAuthn.Timeout})
 	if err != nil {
 		panic(fmt.Errorf("wire passkeys: %w", err))
 	}
-	identityProvider := oidcprovider.New(oidcprovider.Settings{
+	identityProvider := oidcprovider.New(oidcprovider.Options{
 		Issuer:       cfg.OIDC.Issuer,
 		ClientID:     cfg.OIDC.ClientID,
 		ClientSecret: cfg.OIDC.ClientSecret,
 		Scopes:       cfg.OIDC.Scopes,
 	}, httpclient.New(httpclient.Options{Timeout: 10 * time.Second}), infra.Now)
-	images := media.NewService(imaging.NewProcessor(), objectstore.New(objectstore.Options{
+	images := media.NewService(imaging.NewTranscoder(), objectstore.New(objectstore.Options{
 		Bucket:          cfg.Storage.Image.Bucket,
 		Region:          cfg.Storage.Image.Region,
 		Endpoint:        cfg.Storage.Image.Endpoint,
@@ -64,15 +64,15 @@ func wireAuth(infra *Infra, shared *Shared, modules *Modules) {
 	shared.Sessions, shared.Users = sessions, profiles
 
 	modules.Handlers = append(modules.Handlers,
-		authhttp.NewHandler(authhttp.Services{
+		authhttp.NewHandler(authhttp.Deps{
 			Sessions: sessions,
-			Login:    auth.NewPasswordLogin(accounts, passwords, sessions, infra.Now),
+			Login:    auth.NewLoginService(accounts, passwords, sessions, infra.Now),
 			Codes:    codes,
-			Reset:    auth.NewPasswordReset(accounts, store, mailer, passwords, sessions, shared.Transactor, cfg.App.SiteURL),
-			Passkeys: auth.NewPasskeys(accounts, credentials, ceremony, store, sessions, shared.Transactor, infra.Now, cfg.WebAuthn.ChallengeTTL),
-			OIDC:     auth.NewOIDC(identityProvider, credentials, credentials, accounts, sessions, shared.Transactor, infra.Now, cfg.OIDC.AllowedOrigins),
-		}, authhttp.CookiePolicy{Secure: cfg.Token.CookieSecure, AccessMaxAge: cfg.Token.ExpiresIn, RefreshMaxAge: cfg.Token.RefreshShortWindow}, shared.Builder, shared.Logger),
-		userhttp.NewHandler(profiles, user.NewEditHistory(userpg.NewEditRecordStore(infra.Ent)), shared.Builder),
+			Reset:    auth.NewPasswordResetService(accounts, store, mailer, passwords, sessions, shared.Transactor, cfg.App.SiteURL),
+			Passkeys: auth.NewPasskeyService(accounts, credentials, ceremony, store, sessions, shared.Transactor, infra.Now, cfg.WebAuthn.ChallengeTTL),
+			OIDC:     auth.NewOIDCService(identityProvider, credentials, credentials, accounts, sessions, shared.Transactor, infra.Now, cfg.OIDC.AllowedOrigins),
+		}, authhttp.CookieOptions{Secure: cfg.Token.CookieSecure, AccessMaxAge: cfg.Token.ExpiresIn, RefreshMaxAge: cfg.Token.RefreshShortWindow}, shared.Builder, shared.Logger),
+		userhttp.NewHandler(profiles, user.NewEditHistoryService(userpg.NewEditRecordStore(infra.Ent)), shared.Builder),
 		mediahttp.NewHandler(images, shared.Builder),
 	)
 	modules.Jobs.Tasks = append(modules.Jobs.Tasks,

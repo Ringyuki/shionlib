@@ -22,7 +22,7 @@ type Service struct {
 	analytics Analytics
 }
 
-type Dependencies struct {
+type Deps struct {
 	Engine      Engine
 	Catalog     Catalog
 	Tags        TagStore
@@ -32,7 +32,7 @@ type Dependencies struct {
 	Analytics   Analytics
 }
 
-func NewService(deps Dependencies) *Service {
+func NewService(deps Deps) *Service {
 	return &Service{
 		engine:    deps.Engine,
 		catalog:   deps.Catalog,

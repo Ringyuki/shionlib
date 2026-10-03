@@ -74,7 +74,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 	banner := userPenalties{users: shared.Users}
 
 	quota := upload.NewQuotaService(uploadpg.NewQuotaRepository(infra.Ent), shared.Transactor, quotaPolicy(cfg), shared.Now)
-	uploads := upload.NewService(uploadpg.NewRepository(infra.Ent), quota, spool, shared.Transactor, upload.Settings{
+	uploads := upload.NewService(uploadpg.NewRepository(infra.Ent), quota, spool, shared.Transactor, upload.Options{
 		ChunkSize:     cfg.Upload.ChunkSizeBytes,
 		MaxChunks:     cfg.Upload.MaxChunks,
 		MaxFileSize:   cfg.Upload.MaxFileSizeBytes,
@@ -96,13 +96,13 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		Now:        shared.Now,
 	})
 	vendorClient := httpclient.New(httpclient.Options{Timeout: vendorTimeout})
-	links := download.NewLinks(
+	links := download.NewLinkService(
 		downloadRepo,
 		shared.Transactor,
 		turnstile.New(cfg.Cloudflare.TurnstileSecret, "", vendorClient),
 		b2.New(b2.Options{KeyID: cfg.Storage.B2ApplicationKeyID, Key: cfg.Storage.B2ApplicationKey, Client: vendorClient, Cache: shared.Cache}),
 		dlticket.NewSealer(cfg.Download.TicketSecret),
-		download.LinkSettings{
+		download.LinkOptions{
 			Mode:           cfg.Download.Mode,
 			CDNHost:        cfg.Download.CDNHost,
 			WorkerHost:     cfg.Download.WorkerHost,
@@ -113,7 +113,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		},
 		shared.Now,
 	)
-	transfers := download.NewTransfers(downloadRepo, store, spool, quota, shared.Activities, shared.Messages, shared.Transactor, shared.Now)
+	transfers := download.NewTransferService(downloadRepo, store, spool, quota, shared.Activities, shared.Messages, shared.Transactor, shared.Now)
 
 	scans := scan.NewService(scan.Deps{
 		Repo:     scanpg.NewRepository(infra.Ent),
@@ -132,7 +132,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		Mailer:     shared.Mailer,
 		Queue:      jobQueue,
 		Tx:         shared.Transactor,
-		Settings: scan.Settings{
+		Options: scan.Options{
 			Enabled:          cfg.FileScan.Enabled,
 			ReviewTimeout:    cfg.FileScan.MalwareReviewTimeout,
 			AutoBanThreshold: cfg.FileScan.MalwareAutoBanThreshold,

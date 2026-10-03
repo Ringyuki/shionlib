@@ -30,7 +30,7 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		gameID := env.NewGame(t)
 		created, err := env.Repo.Create(ctx, message.NewMessage{
 			Type: message.TypeSystem, Tone: message.ToneWarning, Title: "Messages.Title", Content: "body",
-			LinkText: ptr("open"), LinkURL: ptr("/x"), ExternalLink: true, Meta: json.RawMessage(`{"file_id":7}`),
+			LinkText: ptr("open"), LinkURL: ptr("/x"), ExternalLink: true, Meta: message.Meta{"file_id": 7},
 			GameID: &gameID, SenderID: &sender, ReceiverID: receiver,
 		})
 		if err != nil {

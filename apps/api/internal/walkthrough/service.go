@@ -24,13 +24,6 @@ func NewService(repo Repository, games GameCards, activities Activities, queue Q
 	return &Service{repo: repo, games: games, activities: activities, queue: queue, tx: tx}
 }
 
-type CreateInput struct {
-	GameID  int
-	Title   string
-	Content lexical.Document
-	Status  Status
-}
-
 func (s *Service) Create(ctx context.Context, who actor.Actor, in CreateInput) (View, error) {
 	exists, err := s.games.Exists(ctx, in.GameID)
 	if err != nil {
@@ -69,12 +62,6 @@ func (s *Service) Create(ctx context.Context, who actor.Actor, in CreateInput) (
 		return View{}, err
 	}
 	return s.repo.View(ctx, id)
-}
-
-type UpdateInput struct {
-	Title   string
-	Content lexical.Document
-	Status  Status
 }
 
 func (s *Service) Update(ctx context.Context, who actor.Actor, id int, in UpdateInput) (View, error) {

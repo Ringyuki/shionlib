@@ -6,9 +6,24 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/lexical"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moderation"
+	"github.com/Ringyuki/shionlib/apps/api/internal/paging"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
+
+type CreateInput struct {
+	GameID  int
+	Title   string
+	Content lexical.Document
+	Status  Status
+}
+
+type UpdateInput struct {
+	Title   string
+	Content lexical.Document
+	Status  Status
+}
 
 type Status string
 
@@ -95,14 +110,7 @@ type CreatorFilter struct {
 	ExcludeRated bool
 }
 
-type Page struct {
-	Number int
-	Size   int
-}
-
-func (p Page) Offset() int {
-	return (p.Number - 1) * p.Size
-}
+type Page = paging.Page
 
 type SortField string
 

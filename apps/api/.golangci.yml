@@ -60,6 +60,19 @@ linters:
           msg: use an injected *http.Client with a timeout
     depguard:
       rules:
+        fakes:
+          list-mode: lax
+          files:
+            - "**/*.go"
+          deny:
+            - pkg: github.com/golang/mock
+              desc: use memory fakes from <capability>test instead of generated mocks
+            - pkg: go.uber.org/mock
+              desc: use memory fakes from <capability>test instead of generated mocks
+            - pkg: github.com/stretchr/testify/mock
+              desc: use memory fakes from <capability>test instead of mocks
+            - pkg: github.com/vektra/mockery
+              desc: use memory fakes from <capability>test instead of generated mocks
         business:
           list-mode: lax
           files:
@@ -167,7 +180,7 @@ linters:
       - path: internal/platform/config
         linters:
           - forbidigo
-      - path: internal/adapter/postgres/pgtest
+      - path: internal/platform/database/databasetest
         linters:
           - forbidigo
       - path: internal/platform/redis/redistest

@@ -34,7 +34,7 @@ func setup(t *testing.T) env {
 	quotas := uploadtest.NewMemoryQuotaRepository()
 	tx := &txtest.Immediate{}
 	quota := upload.NewQuotaService(quotas, tx, upload.QuotaPolicy{}, func() time.Time { return apitest.Now })
-	service := upload.NewService(repo, quota, uploadtest.NewMemorySpool(), tx, upload.Settings{ChunkSize: 4, MaxChunks: 100, MaxFileSize: 1000, TransferLimit: 8, SessionTTL: 24 * time.Hour}, func() time.Time { return apitest.Now })
+	service := upload.NewService(repo, quota, uploadtest.NewMemorySpool(), tx, upload.Options{ChunkSize: 4, MaxChunks: 100, MaxFileSize: 1000, TransferLimit: 8, SessionTTL: 24 * time.Hour}, func() time.Time { return apitest.Now })
 	uploadhttp.NewHandler(service, quota, server.Builder, ratelimit.Policy{Name: "upload_chunk", Limit: 10000, Window: time.Minute}).Register(server.API)
 	return env{server: server, repo: repo, quotas: quotas}
 }

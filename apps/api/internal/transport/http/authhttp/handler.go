@@ -7,35 +7,130 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/url"
+	"strconv"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/auth"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/clientinfo"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/middleware"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
 )
+
+const (
+	RefreshCookie = "shionlib_refresh_token"
+	OIDCTxCookie  = "shionlib_oidc_tx"
+	oidcTxMaxAge  = 600
+)
+
+type CookieOptions struct {
+	Secure        bool
+	AccessMaxAge  time.Duration
+	RefreshMaxAge time.Duration
+}
+
+func (p CookieOptions) cookie(name, value string, maxAge int) string {
+	flags := "; HttpOnly; "
+	if p.Secure {
+		flags += "Secure; "
+	}
+	return name + "=" + value + flags + "SameSite=Lax; Path=/; Max-Age=" + strconv.Itoa(maxAge)
+}
+
+func (p CookieOptions) session(tokens auth.Tokens) []string {
+	return []string{
+		p.cookie(middleware.AccessTokenCookie, tokens.AccessToken, int(p.AccessMaxAge.Seconds())),
+		p.cookie(RefreshCookie, tokens.RefreshToken, int(p.RefreshMaxAge.Seconds())),
+	}
+}
+
+func (p CookieOptions) cleared() []string {
+	return []string{
+		p.cookie(middleware.AccessTokenCookie, "", 0),
+		p.cookie(RefreshCookie, "", 0),
+	}
+}
+
+func (p CookieOptions) transaction(tx auth.OIDCTransaction) (string, error) {
+	raw, err := json.Marshal(storedTransactionDTO{
+		Verifier:    tx.Verifier,
+		State:       tx.State,
+		ReturnTo:    tx.ReturnTo,
+		Mode:        string(tx.Mode),
+		RedirectURI: tx.RedirectURI,
+		Nonce:       tx.Nonce,
+	})
+	if err != nil {
+		return "", err
+	}
+	return p.cookie(OIDCTxCookie, url.QueryEscape(string(raw)), oidcTxMaxAge), nil
+}
+
+func (p CookieOptions) clearedTransaction() string {
+	return p.cookie(OIDCTxCookie, "", 0)
+}
+
+func parseTransaction(raw string) *auth.OIDCTransaction {
+	if raw == "" {
+		return nil
+	}
+	decoded, err := url.QueryUnescape(raw)
+	if err != nil {
+		return nil
+	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal([]byte(decoded), &fields); err != nil {
+		return nil
+	}
+	text := func(key string) (string, bool) {
+		var value string
+		if err := json.Unmarshal(fields[key], &value); err != nil {
+			return "", false
+		}
+		return value, true
+	}
+	verifier, okVerifier := text("v")
+	state, okState := text("s")
+	redirectURI, okRedirect := text("u")
+	if !okVerifier || !okState || !okRedirect {
+		return nil
+	}
+	returnTo, _ := text("r")
+	mode, _ := text("m")
+	nonce, _ := text("n")
+	return &auth.OIDCTransaction{
+		Verifier:    verifier,
+		State:       state,
+		ReturnTo:    auth.SafeReturnTo(returnTo),
+		Mode:        auth.ParseOIDCMode(mode),
+		RedirectURI: redirectURI,
+		Nonce:       nonce,
+	}
+}
 
 const throttleAuth = "auth"
 
 var tags = []string{"auth"}
 
-type Services struct {
-	Sessions *auth.Sessions
-	Login    *auth.PasswordLogin
-	Codes    *auth.Codes
-	Reset    *auth.PasswordReset
-	Passkeys *auth.Passkeys
-	OIDC     *auth.OIDC
+type Deps struct {
+	Sessions *auth.SessionService
+	Login    *auth.LoginService
+	Codes    *auth.CodeService
+	Reset    *auth.PasswordResetService
+	Passkeys *auth.PasskeyService
+	OIDC     *auth.OIDCService
 }
 
 type Handler struct {
-	services Services
-	cookies  CookiePolicy
+	services Deps
+	cookies  CookieOptions
 	resp     *response.Builder
 	logger   *slog.Logger
 }
 
-func NewHandler(services Services, cookies CookiePolicy, resp *response.Builder, logger *slog.Logger) *Handler {
+func NewHandler(services Deps, cookies CookieOptions, resp *response.Builder, logger *slog.Logger) *Handler {
 	return &Handler{services: services, cookies: cookies, resp: resp, logger: logger}
 }
 
@@ -57,12 +152,12 @@ func device(ctx context.Context) auth.Device {
 	return auth.Device{IP: info.IP, UserAgent: info.UserAgent}
 }
 
-func (h *Handler) session(ctx context.Context, tokens auth.Tokens) *sessionOutput {
+func (h *Handler) session(ctx context.Context, tokens auth.Tokens) *sessionOutputDTO {
 	out := response.OK(ctx, h.resp, authSessionDTO{AccessTokenExp: tokens.AccessExpiresAt.UnixMilli()})
-	return &sessionOutput{AuthStale: out.AuthStale, SetCookie: h.cookies.session(tokens), Body: out.Body}
+	return &sessionOutputDTO{AuthStale: out.AuthStale, SetCookie: h.cookies.session(tokens), Body: out.Body}
 }
 
-func (h *Handler) login(ctx context.Context, in *passwordLoginInput) (*sessionOutput, error) {
+func (h *Handler) login(ctx context.Context, in *passwordLoginInput) (*sessionOutputDTO, error) {
 	tokens, err := h.services.Login.Login(ctx, in.Body.Identifier, in.Body.Password, device(ctx))
 	if err != nil {
 		return nil, err
@@ -70,7 +165,7 @@ func (h *Handler) login(ctx context.Context, in *passwordLoginInput) (*sessionOu
 	return h.session(ctx, tokens), nil
 }
 
-func (h *Handler) refresh(ctx context.Context, in *refreshSessionInput) (*sessionOutput, error) {
+func (h *Handler) refresh(ctx context.Context, in *refreshSessionInput) (*sessionOutputDTO, error) {
 	tokens, err := h.services.Sessions.Refresh(ctx, in.RefreshToken, device(ctx))
 	if err != nil {
 		return nil, err
@@ -78,12 +173,12 @@ func (h *Handler) refresh(ctx context.Context, in *refreshSessionInput) (*sessio
 	return h.session(ctx, tokens), nil
 }
 
-func (h *Handler) logout(ctx context.Context, in *refreshSessionInput) (*logoutOutput, error) {
+func (h *Handler) logout(ctx context.Context, in *refreshSessionInput) (*logoutOutputDTO, error) {
 	if err := h.services.Sessions.Logout(ctx, in.RefreshToken); err != nil {
 		return nil, err
 	}
 	out := response.Empty(ctx, h.resp)
-	return &logoutOutput{AuthStale: out.AuthStale, SetCookie: h.cookies.cleared(), Body: out.Body}, nil
+	return &logoutOutputDTO{AuthStale: out.AuthStale, SetCookie: h.cookies.cleared(), Body: out.Body}, nil
 }
 
 func (h *Handler) forgotPassword(ctx context.Context, in *forgotPasswordInput) (*response.EmptyOutput, error) {
@@ -176,7 +271,7 @@ func (h *Handler) passkeyLoginOptions(ctx context.Context, in *passkeyLoginOptio
 	return response.OK(ctx, h.resp, passkeyFlowDTO{FlowID: flow.FlowID, Options: flow.Options}), nil
 }
 
-func (h *Handler) passkeyLoginVerify(ctx context.Context, in *passkeyLoginVerifyInput) (*sessionOutput, error) {
+func (h *Handler) passkeyLoginVerify(ctx context.Context, in *passkeyLoginVerifyInput) (*sessionOutputDTO, error) {
 	raw, err := json.Marshal(in.Body.Response)
 	if err != nil {
 		return nil, fmt.Errorf("encode passkey response: %w", err)
@@ -200,7 +295,7 @@ func (h *Handler) passkeyList(ctx context.Context, _ *struct{}) (*response.Outpu
 	return response.OK(ctx, h.resp, out), nil
 }
 
-func (h *Handler) passkeyRevoke(ctx context.Context, in *passkeyPath) (*response.Output[passkeyRevokedDTO], error) {
+func (h *Handler) passkeyRevoke(ctx context.Context, in *passkeyPathInput) (*response.Output[passkeyRevokedDTO], error) {
 	if err := h.services.Passkeys.Revoke(ctx, actor.From(ctx), in.ID); err != nil {
 		return nil, err
 	}
@@ -215,7 +310,7 @@ func (h *Handler) registerOIDC(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "auth.oidc.unlink", Method: http.MethodDelete, Path: "/auth/oidc/identities/{id}", Summary: "Unlink a Hikarinagi ID identity", Tags: oidcTags, Access: httpapi.AccessUser}, h.oidcUnlink)
 }
 
-func (h *Handler) oidcStart(_ context.Context, in *oidcStartInput) (*oidcRedirectOutput, error) {
+func (h *Handler) oidcStart(_ context.Context, in *oidcStartInput) (*oidcRedirectOutputDTO, error) {
 	location, tx, err := h.services.OIDC.Start(in.ReturnTo, in.Mode, in.Origin)
 	if err != nil {
 		return nil, err
@@ -224,10 +319,10 @@ func (h *Handler) oidcStart(_ context.Context, in *oidcStartInput) (*oidcRedirec
 	if err != nil {
 		return nil, fmt.Errorf("encode oidc transaction: %w", err)
 	}
-	return &oidcRedirectOutput{Location: location, SetCookie: []string{cookie}}, nil
+	return &oidcRedirectOutputDTO{Location: location, SetCookie: []string{cookie}}, nil
 }
 
-func (h *Handler) oidcCallback(ctx context.Context, in *oidcCallbackInput) (*oidcRedirectOutput, error) {
+func (h *Handler) oidcCallback(ctx context.Context, in *oidcCallbackInput) (*oidcRedirectOutputDTO, error) {
 	tx := parseTransaction(in.Transaction)
 	returnTo := "/"
 	if tx != nil {
@@ -244,12 +339,12 @@ func (h *Handler) oidcCallback(ctx context.Context, in *oidcCallbackInput) (*oid
 		if reason == auth.OIDCReasonProvider || reason == auth.OIDCReasonExchange {
 			h.logger.WarnContext(ctx, "oidc callback failed", slog.String("reason", reason), slog.Any("error", err))
 		}
-		return &oidcRedirectOutput{Location: auth.WithQuery(returnTo, "oidc_error", reason), SetCookie: cookies}, nil
+		return &oidcRedirectOutputDTO{Location: auth.WithQuery(returnTo, "oidc_error", reason), SetCookie: cookies}, nil
 	}
 	if result.Mode == auth.OIDCModeLink {
-		return &oidcRedirectOutput{Location: auth.WithQuery(returnTo, "oidc_linked", "1"), SetCookie: cookies}, nil
+		return &oidcRedirectOutputDTO{Location: auth.WithQuery(returnTo, "oidc_linked", "1"), SetCookie: cookies}, nil
 	}
-	return &oidcRedirectOutput{Location: auth.WithQuery(returnTo, "oidc_login", "1"), SetCookie: append(cookies, h.cookies.session(result.Tokens)...)}, nil
+	return &oidcRedirectOutputDTO{Location: auth.WithQuery(returnTo, "oidc_login", "1"), SetCookie: append(cookies, h.cookies.session(result.Tokens)...)}, nil
 }
 
 func (h *Handler) oidcIdentities(ctx context.Context, _ *struct{}) (*response.Output[oidcIdentitiesDTO], error) {
@@ -264,7 +359,7 @@ func (h *Handler) oidcIdentities(ctx context.Context, _ *struct{}) (*response.Ou
 	return response.OK(ctx, h.resp, out), nil
 }
 
-func (h *Handler) oidcUnlink(ctx context.Context, in *oidcIdentityPath) (*response.EmptyOutput, error) {
+func (h *Handler) oidcUnlink(ctx context.Context, in *oidcIdentityPathInput) (*response.EmptyOutput, error) {
 	if err := h.services.OIDC.Unlink(ctx, actor.From(ctx), in.ID); err != nil {
 		return nil, err
 	}

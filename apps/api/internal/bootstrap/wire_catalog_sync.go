@@ -46,7 +46,7 @@ func buildCatalog(infra *Infra, shared *Shared) *catalog.Service {
 func wireCatalogSync(_ *Infra, shared *Shared, modules *Modules) {
 	service := shared.Catalog
 	modules.Handlers = append(modules.Handlers, cataloghttp.NewHandler(service, shared.Builder))
-	modules.Jobs.Register = append(modules.Jobs.Register, catalogjobs.NewImportWorker(service).Register)
+	modules.Jobs.Register = append(modules.Jobs.Register, catalogjobs.Register(service))
 	modules.Jobs.Queues[catalog.ImportQueue] = catalogImportWorkers
 	if len(service.Sources()) > 0 {
 		modules.Jobs.Tasks = append(modules.Jobs.Tasks, catalogjobs.Tasks(service)...)

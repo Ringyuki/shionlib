@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/ad"
+	"github.com/Ringyuki/shionlib/apps/api/internal/patch"
 )
 
 type MemoryRepository struct {
@@ -184,7 +185,7 @@ func assign[T any](target *T, value *T) {
 	}
 }
 
-func applyClearable[T any](target **T, value ad.Clearable[T]) {
+func applyClearable[T any](target **T, value patch.Clearable[T]) {
 	if value.Set {
 		*target = value.Value
 	}

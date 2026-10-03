@@ -18,8 +18,74 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamerelation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 )
+
+const refreshHotScoreSQL = `
+WITH base AS (
+  SELECT
+    g.id,
+    GREATEST(1.0, EXTRACT(EPOCH FROM (NOW() - g.created)) / 86400.0) AS age_days,
+    GREATEST(0.0, EXTRACT(EPOCH FROM (NOW() - COALESCE(g.release_date, g.created))) / 86400.0) AS release_age_days,
+    g.views,
+    g.downloads
+  FROM "games" g
+  WHERE g.status = 1
+    AND COALESCE(g.release_date, g.created) <= NOW()
+),
+scores AS (
+  SELECT
+    b.id,
+    (
+      $1::float8 * LN(b.views + 1) +
+      $2::float8 * LN(b.downloads + 1) +
+      $3::float8 * LN(($4::float8 * b.views) / b.age_days + 1) +
+      $5::float8 * LN(($4::float8 * b.downloads) / b.age_days + 1) +
+      $6::float8 * EXP(- b.release_age_days / $7::float8) +
+      $8::float8 * EXP(- b.age_days / $9::float8)
+    ) AS new_score
+  FROM base b
+)
+UPDATE "games" AS g
+SET "hot_score" = s.new_score
+FROM scores s
+WHERE g.id = s.id
+  AND g."hot_score" IS DISTINCT FROM s.new_score`
+
+func (r *Repository) RefreshHotScore(ctx context.Context, w game.HotScoreWeights) (int64, error) {
+	result, err := r.db(ctx).ExecContext(ctx, refreshHotScoreSQL,
+		w.Views, w.Downloads, w.RecentViews, w.RecentWindowDays, w.RecentDownloads,
+		w.Release, w.HalfLifeReleaseDays, w.Created, w.HalfLifeCreatedDays,
+	)
+	if err != nil {
+		return 0, fmt.Errorf("refresh hot scores: %w", err)
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return 0, fmt.Errorf("count refreshed hot scores: %w", err)
+	}
+	return affected, nil
+}
+
+func overlaps(column string, values []string) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		b.WriteString(column).WriteString(" && ").Arg(pgvalue.Strings(values)).WriteString("::text[]")
+	})
+}
+
+func releasedIn(column string, periods []string) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		b.WriteString("(to_char(").WriteString(column).WriteString(", 'YYYY-MM') = ANY(").Arg(pgvalue.Strings(periods)).WriteString("::text[])")
+		b.WriteString(" OR to_char(").WriteString(column).WriteString(", 'YYYY') = ANY(").Arg(pgvalue.Strings(periods)).WriteString("::text[]))")
+	})
+}
+
+func gameWhere(build func(s *sql.Selector) *sql.Predicate) predicate.Game {
+	return predicate.Game(func(s *sql.Selector) {
+		s.Where(build(s))
+	})
+}
 
 const visibleStatus = 1
 
@@ -221,4 +287,8 @@ func (r *Repository) ExternalIDs(ctx context.Context, id int) (game.ExternalIDs,
 		return game.ExternalIDs{}, fmt.Errorf("load external ids of game %d: %w", id, err)
 	}
 	return game.ExternalIDs{BangumiID: row.BID, VNDBID: row.VID}, nil
+}
+
+func SafeForStrictViewers() predicate.Game {
+	return entgame.And(entgame.Nsfw(false), entgame.Not(entgame.HasCoversWith(gamecover.SexualGT(0))))
 }

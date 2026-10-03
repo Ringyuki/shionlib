@@ -8,8 +8,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 )
 
-const RecentUpdateRetention = 30 * 24 * time.Hour
-
 type Service struct {
 	repo   Repository
 	recent RecentUpdates

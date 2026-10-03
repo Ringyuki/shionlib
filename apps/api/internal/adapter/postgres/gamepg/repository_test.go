@@ -270,7 +270,7 @@ func TestRelationsViewsAndPreferences(t *testing.T) {
 		t.Fatalf("missing game: %v", err)
 	}
 
-	prefs := gamepg.NewPreferences(f.db.Ent)
+	prefs := gamepg.NewPreferenceStore(f.db.Ent)
 	user := f.db.User(t)
 	if only, err := prefs.OnlyGamesWithResources(f.ctx, user); err != nil || !only {
 		t.Fatalf("default: %v %v", only, err)

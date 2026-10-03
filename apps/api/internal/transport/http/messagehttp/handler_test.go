@@ -52,7 +52,7 @@ func TestListAndDetail(t *testing.T) {
 	server, service := setup(t, nil, nil)
 	ctx := context.Background()
 	for i := range 3 {
-		err := service.Send(ctx, message.NewMessage{Type: message.TypeCommentReply, Tone: message.ToneInfo, Title: "Messages.Reply", Content: "body", GameID: ptr(3), SenderID: ptr(8), ReceiverID: 7, Meta: []byte(`{"file_id":` + string(rune('1'+i)) + `}`)})
+		err := service.Send(ctx, message.NewMessage{Type: message.TypeCommentReply, Tone: message.ToneInfo, Title: "Messages.Reply", Content: "body", GameID: ptr(3), SenderID: ptr(8), ReceiverID: 7, Meta: message.Meta{"file_id": i + 1}})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -193,8 +193,13 @@ type hubNotifier struct {
 	hub *realtime.Hub
 }
 
+type noticeEvent struct {
+	ID    int    `json:"id"`
+	Title string `json:"title"`
+}
+
 func (n hubNotifier) NewMessage(ctx context.Context, receiverID int, notice message.Notice) {
-	_ = n.hub.Publish(ctx, receiverID, "message:new", notice)
+	_ = n.hub.Publish(ctx, receiverID, "message:new", noticeEvent{ID: notice.ID, Title: notice.Title})
 }
 
 func (n hubNotifier) Unread(ctx context.Context, receiverID int, count int) {

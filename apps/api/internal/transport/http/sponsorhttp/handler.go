@@ -14,10 +14,9 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
 )
 
-var (
-	tags      = []string{"sponsor"}
-	adminTags = []string{"sponsor", "admin"}
-)
+var tags = []string{"sponsor"}
+
+var adminTags = []string{"sponsor", "admin"}
 
 type Handler struct {
 	service *sponsor.Service
@@ -121,7 +120,7 @@ func (h *Handler) adminList(ctx context.Context, in *listSponsorOrdersInput) (*r
 	})), nil
 }
 
-func (h *Handler) adminOrder(ctx context.Context, in *sponsorOrderPath) (*response.Output[sponsorOrderDTO], error) {
+func (h *Handler) adminOrder(ctx context.Context, in *sponsorOrderPathInput) (*response.Output[sponsorOrderDTO], error) {
 	order, err := h.service.AdminOrder(ctx, in.ID)
 	if err != nil {
 		return nil, err
@@ -136,7 +135,7 @@ func (h *Handler) adminUpdateStatus(ctx context.Context, in *updateSponsorOrderS
 	return response.Empty(ctx, h.resp), nil
 }
 
-func (h *Handler) adminDelete(ctx context.Context, in *sponsorOrderPath) (*response.EmptyOutput, error) {
+func (h *Handler) adminDelete(ctx context.Context, in *sponsorOrderPathInput) (*response.EmptyOutput, error) {
 	if err := h.service.AdminDelete(ctx, in.ID); err != nil {
 		return nil, err
 	}
@@ -152,20 +151,23 @@ func callbackOrderID(contentType string, raw []byte) string {
 		}
 		return values.Get("orderId")
 	}
-	var body map[string]any
-	decoder := json.NewDecoder(bytes.NewReader(raw))
+	var body struct {
+		OrderID json.RawMessage `json:"orderId"`
+	}
+	if err := json.Unmarshal(raw, &body); err != nil {
+		return ""
+	}
+	var text string
+	if err := json.Unmarshal(body.OrderID, &text); err == nil {
+		return text
+	}
+	var number json.Number
+	decoder := json.NewDecoder(bytes.NewReader(body.OrderID))
 	decoder.UseNumber()
-	if err := decoder.Decode(&body); err != nil {
-		return ""
+	if err := decoder.Decode(&number); err == nil {
+		return number.String()
 	}
-	switch value := body["orderId"].(type) {
-	case string:
-		return value
-	case json.Number:
-		return value.String()
-	default:
-		return ""
-	}
+	return ""
 }
 
 func deref[T any](value *T) T {

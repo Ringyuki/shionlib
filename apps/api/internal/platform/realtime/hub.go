@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/Ringyuki/shionlib/apps/api/internal/platform/jsoncodec"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/redis"
 )
 
@@ -61,7 +62,7 @@ func (h *Hub) Ready() <-chan struct{} {
 }
 
 func (h *Hub) Publish(ctx context.Context, userID int, name string, payload any) error {
-	data, err := json.Marshal(payload)
+	data, err := jsoncodec.Marshal(payload)
 	if err != nil {
 		return fmt.Errorf("encode realtime event %s: %w", name, err)
 	}

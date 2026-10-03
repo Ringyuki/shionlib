@@ -128,7 +128,7 @@ func (a *authenticator) assert(t *testing.T, options json.RawMessage) json.RawMe
 
 func newCeremony(t *testing.T) *Ceremony {
 	t.Helper()
-	ceremony, err := New(Settings{RPID: rpID, RPName: "Shionlib", Origins: []string{origin}, Timeout: time.Minute})
+	ceremony, err := New(Options{RPID: rpID, RPName: "Shionlib", Origins: []string{origin}, Timeout: time.Minute})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,7 +141,7 @@ func stored(registered auth.RegisteredPasskey, userID int) auth.Passkey {
 }
 
 func TestLocalDevelopmentSettingsAreAccepted(t *testing.T) {
-	ceremony, err := New(Settings{RPID: "localhost", RPName: "Shionlib", Origins: []string{"http://localhost:3000"}, Timeout: time.Minute})
+	ceremony, err := New(Options{RPID: "localhost", RPName: "Shionlib", Origins: []string{"http://localhost:3000"}, Timeout: time.Minute})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -49,14 +49,14 @@ type fixture struct {
 	families *authtest.Blocklist
 	mailer   *authtest.Mailer
 	tx       *txtest.Immediate
-	sessions *auth.Sessions
-	codes    *auth.Codes
-	login    *auth.PasswordLogin
-	reset    *auth.PasswordReset
+	sessions *auth.SessionService
+	codes    *auth.CodeService
+	login    *auth.LoginService
+	reset    *auth.PasswordResetService
 	ceremony *authtest.Ceremony
-	passkeys *auth.Passkeys
+	passkeys *auth.PasskeyService
 	idp      *authtest.IdentityProvider
-	oidc     *auth.OIDC
+	oidc     *auth.OIDCService
 }
 
 func newFixture(t *testing.T) *fixture {
@@ -73,12 +73,12 @@ func newFixture(t *testing.T) *fixture {
 		ceremony: &authtest.Ceremony{},
 		idp:      &authtest.IdentityProvider{},
 	}
-	f.sessions = auth.NewSessions(f.repo, f.users, authtest.Codec{}, authtest.Hasher{}, f.families, f.store, f.tx, c.Now, policy)
-	f.codes = auth.NewCodes(f.store, f.mailer, c.Now)
-	f.login = auth.NewPasswordLogin(f.users, authtest.Hasher{}, f.sessions, c.Now)
-	f.reset = auth.NewPasswordReset(f.users, f.store, f.mailer, authtest.Hasher{}, f.sessions, f.tx, "https://shionlib.example")
-	f.passkeys = auth.NewPasskeys(f.users, f.repo, f.ceremony, f.store, f.sessions, f.tx, c.Now, 5*time.Minute)
-	f.oidc = auth.NewOIDC(f.idp, f.repo, f.repo, f.users, f.sessions, f.tx, c.Now, []string{"https://shionlib.example", "https://shionlib.org"})
+	f.sessions = auth.NewSessionService(f.repo, f.users, authtest.Codec{}, authtest.Hasher{}, f.families, f.store, f.tx, c.Now, policy)
+	f.codes = auth.NewCodeService(f.store, f.mailer, c.Now)
+	f.login = auth.NewLoginService(f.users, authtest.Hasher{}, f.sessions, c.Now)
+	f.reset = auth.NewPasswordResetService(f.users, f.store, f.mailer, authtest.Hasher{}, f.sessions, f.tx, "https://shionlib.example")
+	f.passkeys = auth.NewPasskeyService(f.users, f.repo, f.ceremony, f.store, f.sessions, f.tx, c.Now, 5*time.Minute)
+	f.oidc = auth.NewOIDCService(f.idp, f.repo, f.repo, f.users, f.sessions, f.tx, c.Now, []string{"https://shionlib.example", "https://shionlib.org"})
 	return f
 }
 

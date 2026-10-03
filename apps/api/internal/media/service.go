@@ -5,17 +5,15 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-
-	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
 
 type Service struct {
-	processor Processor
+	processor Transcoder
 	store     Store
 	newID     func() string
 }
 
-func NewService(processor Processor, store Store, newID func() string) *Service {
+func NewService(processor Transcoder, store Store, newID func() string) *Service {
 	if newID == nil {
 		newID = uuid.NewString
 	}
@@ -32,19 +30,6 @@ func (s *Service) StoreCover(ctx context.Context, userID int, file *Upload) (str
 
 func (s *Service) StoreAdImage(ctx context.Context, uploaderID int, file *Upload) (string, error) {
 	return s.save(ctx, adImage(uploaderID), file)
-}
-
-func Validate(file *Upload, maxBytes int) error {
-	if file == nil || len(file.Data) == 0 {
-		return upload.ErrSmallFileMissing
-	}
-	if !Accepts(file.ContentType) {
-		return upload.ErrSmallFileUnsupported
-	}
-	if len(file.Data) > maxBytes {
-		return upload.ErrSmallFileTooLarge
-	}
-	return nil
 }
 
 func (s *Service) save(ctx context.Context, k kind, file *Upload) (string, error) {

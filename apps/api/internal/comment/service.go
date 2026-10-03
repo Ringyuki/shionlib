@@ -23,11 +23,6 @@ func NewService(repo Repository, games GameCards, messages Messages, queue Queue
 	return &Service{repo: repo, games: games, messages: messages, queue: queue, tx: tx}
 }
 
-type CreateInput struct {
-	Content  lexical.Document
-	ParentID *int
-}
-
 func (s *Service) Create(ctx context.Context, who actor.Actor, gameID int, in CreateInput) (Entry, error) {
 	html, err := render(in.Content)
 	if err != nil {

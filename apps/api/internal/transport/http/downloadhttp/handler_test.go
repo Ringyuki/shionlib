@@ -60,7 +60,7 @@ func setup(t *testing.T) env {
 	cards := gametest.NewCards(game.Card{ID: 10, TitleJP: "ゲーム", Covers: []game.Cover{{URL: "safe.webp"}, {URL: "rated.webp", Sexual: 1}}})
 	service := download.NewService(download.Deps{Repo: repo, Games: cards, Sessions: sessions{}, Quota: quota{}, Activities: events, Messages: events, Tx: &txtest.Immediate{}, Queue: events, Store: store, Now: now})
 	challenge := &downloadtest.Challenge{Verdict: download.Verdict{Success: true}}
-	links := download.NewLinks(repo, &txtest.Immediate{}, challenge, &downloadtest.Authorizer{}, &downloadtest.Sealer{}, download.LinkSettings{Mode: download.ModeDirect, CDNHost: "https://cdn.example.com/", BaseExpiresIn: time.Hour, EstimatedSpeed: 1 << 20, MaxExpiresIn: 24 * time.Hour}, now)
+	links := download.NewLinkService(repo, &txtest.Immediate{}, challenge, &downloadtest.Authorizer{}, &downloadtest.Sealer{}, download.LinkOptions{Mode: download.ModeDirect, CDNHost: "https://cdn.example.com/", BaseExpiresIn: time.Hour, EstimatedSpeed: 1 << 20, MaxExpiresIn: 24 * time.Hour}, now)
 	downloadhttp.NewHandler(service, links, server.Builder).Register(server.API)
 	return env{server: server, repo: repo, store: store, challenge: challenge}
 }

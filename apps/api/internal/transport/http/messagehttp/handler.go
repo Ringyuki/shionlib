@@ -2,12 +2,17 @@ package messagehttp
 
 import (
 	"context"
+	"fmt"
+	"io"
 	"net/http"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
+	"github.com/Ringyuki/shionlib/apps/api/internal/platform/jsoncodec"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/realtime"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/middleware"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
 )
 
@@ -55,7 +60,7 @@ func (h *Handler) unread(ctx context.Context, _ *struct{}) (*response.Output[int
 	return response.OK(ctx, h.resp, count), nil
 }
 
-func (h *Handler) get(ctx context.Context, in *messagePath) (*response.Output[messageDetailDTO], error) {
+func (h *Handler) get(ctx context.Context, in *messagePathInput) (*response.Output[messageDetailDTO], error) {
 	detail, err := h.service.Open(ctx, actor.From(ctx), in.ID)
 	if err != nil {
 		return nil, err
@@ -77,9 +82,76 @@ func (h *Handler) unreadAll(ctx context.Context, _ *struct{}) (*response.EmptyOu
 	return response.Empty(ctx, h.resp), nil
 }
 
-func (h *Handler) read(ctx context.Context, in *messagePath) (*response.EmptyOutput, error) {
+func (h *Handler) read(ctx context.Context, in *messagePathInput) (*response.EmptyOutput, error) {
 	if err := h.service.MarkRead(ctx, actor.From(ctx), in.ID); err != nil {
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil
+}
+
+const keepAliveInterval = 25 * time.Second
+
+func (h *Handler) stream(api *httpapi.API) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		if err := middleware.RequireAuthenticated(ctx); err != nil {
+			api.ErrorWriter().Write(w, r, api.Mapper().FromError(ctx, err))
+			return
+		}
+		who := actor.From(ctx)
+		unread, err := h.service.UnreadCount(ctx, who)
+		if err != nil {
+			api.ErrorWriter().Write(w, r, api.Mapper().FromError(ctx, err))
+			return
+		}
+		controller := http.NewResponseController(w)
+		_ = controller.SetWriteDeadline(time.Time{})
+		header := w.Header()
+		header.Set("Content-Type", "text/event-stream")
+		header.Set("Cache-Control", "no-cache")
+		header.Set("Connection", "keep-alive")
+		header.Set("X-Accel-Buffering", "no")
+		w.WriteHeader(http.StatusOK)
+
+		subscription := h.hub.Subscribe(who.UserID)
+		defer subscription.Close()
+
+		if err := writeEvent(w, "message:unread", unreadEventDTO{Unread: unread}); err != nil {
+			return
+		}
+		if err := controller.Flush(); err != nil {
+			return
+		}
+		ticker := time.NewTicker(keepAliveInterval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case event, ok := <-subscription.Events():
+				if !ok {
+					return
+				}
+				if _, err := fmt.Fprintf(w, "event: %s\ndata: %s\n\n", event.Name, event.Data); err != nil {
+					return
+				}
+			case <-ticker.C:
+				if _, err := io.WriteString(w, "event: ping\ndata: {}\n\n"); err != nil {
+					return
+				}
+			}
+			if err := controller.Flush(); err != nil {
+				return
+			}
+		}
+	}
+}
+
+func writeEvent(w io.Writer, name string, payload any) error {
+	data, err := jsoncodec.Marshal(payload)
+	if err != nil {
+		return err
+	}
+	_, err = fmt.Fprintf(w, "event: %s\ndata: %s\n\n", name, data)
+	return err
 }

@@ -38,7 +38,7 @@ type Registrar interface {
 
 type Modules struct {
 	Builder       *response.Builder
-	Authenticator *auth.Authenticator
+	Authenticator *auth.AuthenticationService
 	Realtime      *realtime.Hub
 	Handlers      []Registrar
 	Jobs          Jobs
@@ -57,13 +57,13 @@ type Shared struct {
 	Realtime   *realtime.Hub
 	Tokens     *jwt.Codec
 	Families   *authredis.FamilyBlocklist
-	GameCards  *game.Cards
+	GameCards  *game.CardService
 	Messages   *message.Service
 	Activities *activity.Service
 	Catalog    *catalog.Service
-	Search     *search.Indexer
+	Search     *search.IndexService
 	Mailer     *email.Mailer
-	Sessions   *auth.Sessions
+	Sessions   *auth.SessionService
 	Users      *user.Service
 }
 
@@ -86,7 +86,7 @@ func BuildModules(infra *Infra) *Modules {
 	shared := buildShared(infra)
 	modules := &Modules{
 		Builder:       shared.Builder,
-		Authenticator: auth.NewAuthenticator(shared.Tokens, shared.Families),
+		Authenticator: auth.NewAuthenticationService(shared.Tokens, shared.Families),
 		Realtime:      shared.Realtime,
 		Jobs:          Jobs{Queues: map[string]int{}},
 	}
@@ -100,7 +100,7 @@ func buildShared(infra *Infra) *Shared {
 	cfg := infra.Config
 	hub := realtime.NewHub(infra.Redis, infra.Logger)
 	transactor := postgres.NewTransactor(infra.Ent)
-	gameCards := game.NewCards(gamepg.NewCardStore(infra.Ent))
+	gameCards := game.NewCardService(gamepg.NewCardStore(infra.Ent))
 	shared := &Shared{
 		Config:     cfg,
 		Logger:     infra.Logger,
@@ -120,7 +120,7 @@ func buildShared(infra *Infra) *Shared {
 	shared.Messages = message.NewService(messagepg.NewRepository(infra.Ent), push.NewMessageNotifier(hub, infra.Logger), gameCards, transactor, infra.Now)
 	shared.Search = BuildSearchIndexer(infra)
 	shared.Catalog = buildCatalog(infra, shared)
-	shared.Mailer = email.NewMailer(email.NewSender(email.Settings{
+	shared.Mailer = email.NewMailer(email.NewSender(email.Options{
 		Provider:      cfg.Email.Provider,
 		APIKey:        cfg.Email.APIKey,
 		Endpoint:      cfg.Email.Endpoint,

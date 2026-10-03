@@ -23,7 +23,7 @@ const (
 
 var errCloned = errors.New("passkey counter did not increase")
 
-type Settings struct {
+type Options struct {
 	RPID    string
 	RPName  string
 	Origins []string
@@ -34,7 +34,7 @@ type Ceremony struct {
 	web *webauthn.WebAuthn
 }
 
-func New(settings Settings) (*Ceremony, error) {
+func New(settings Options) (*Ceremony, error) {
 	timeout := webauthn.TimeoutConfig{Timeout: settings.Timeout, TimeoutUVD: settings.Timeout}
 	web, err := webauthn.New(&webauthn.Config{
 		RPID:                  settings.RPID,

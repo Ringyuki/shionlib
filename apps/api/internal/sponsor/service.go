@@ -14,23 +14,16 @@ type Service struct {
 	cache    Cache
 	tx       Transactor
 	signer   Signer
-	settings Settings
+	options  Options
 	now      func() time.Time
 }
 
-func NewService(repo Repository, provider Provider, cache Cache, tx Transactor, signer Signer, settings Settings, now func() time.Time) *Service {
-	return &Service{repo: repo, provider: provider, cache: cache, tx: tx, signer: signer, settings: settings, now: now}
-}
-
-type CreateOrderInput struct {
-	AmountCents int64
-	IsPrivate   bool
-	Name        string
-	Message     string
+func NewService(repo Repository, provider Provider, cache Cache, tx Transactor, signer Signer, options Options, now func() time.Time) *Service {
+	return &Service{repo: repo, provider: provider, cache: cache, tx: tx, signer: signer, options: options, now: now}
 }
 
 func (s *Service) CreateOrder(ctx context.Context, who actor.Actor, in CreateOrderInput) (CreatedOrder, error) {
-	if !s.settings.Enabled {
+	if !s.options.Enabled {
 		return CreatedOrder{}, ErrDisabled
 	}
 	providerOrderID, err := s.provider.CreateOrder(ctx, ProviderOrderRequest(in))
@@ -52,7 +45,7 @@ func (s *Service) CreateOrder(ctx context.Context, who actor.Actor, in CreateOrd
 	}
 	order, err := s.repo.Create(ctx, NewOrder{
 		ProviderOrderID: providerOrderID,
-		Provider:        s.settings.Provider,
+		Provider:        s.options.Provider,
 		AmountCents:     in.AmountCents,
 		SponsorName:     nonEmpty(in.Name),
 		Message:         nonEmpty(in.Message),
@@ -72,13 +65,8 @@ func (s *Service) CreateOrder(ctx context.Context, who actor.Actor, in CreateOrd
 	}, nil
 }
 
-type PayInput struct {
-	Method      string
-	RedirectURL *string
-}
-
 func (s *Service) PayOrder(ctx context.Context, id int, in PayInput) (Payment, error) {
-	if !s.settings.Enabled {
+	if !s.options.Enabled {
 		return Payment{}, ErrDisabled
 	}
 	order, err := s.repo.Get(ctx, id)
@@ -95,7 +83,7 @@ func (s *Service) PayOrder(ctx context.Context, id int, in PayInput) (Payment, e
 		ProviderOrderID: order.ProviderOrderID,
 		Method:          in.Method,
 		RedirectURL:     in.RedirectURL,
-		CallbackURL:     s.settings.CallbackURL,
+		CallbackURL:     s.options.CallbackURL,
 	})
 	if err != nil {
 		return Payment{}, err
@@ -200,25 +188,6 @@ func (s *Service) ExpireStaleOrders(ctx context.Context) error {
 	return err
 }
 
-type transitionSource int
-
-const (
-	fromPoll transitionSource = iota
-	fromCallback
-	fromAdmin
-)
-
-func (t transitionSource) allows(current, target Status) bool {
-	switch t {
-	case fromPoll:
-		return current == StatusNew && target != StatusNew
-	case fromCallback:
-		return current != StatusDone && (target == StatusDone || target == StatusRefund)
-	default:
-		return true
-	}
-}
-
 func (s *Service) transition(ctx context.Context, id int, target Status, source transitionSource) (bool, error) {
 	changed := false
 	err := s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
@@ -293,4 +262,15 @@ func nonEmpty(value string) *string {
 		return nil
 	}
 	return &value
+}
+
+func sponsorshipFor(amountCents int64) time.Duration {
+	days := amountCents * DaysPerDollar / 100
+	return time.Duration(days) * 24 * time.Hour
+}
+
+type Options struct {
+	Enabled     bool
+	Provider    string
+	CallbackURL string
 }

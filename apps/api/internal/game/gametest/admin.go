@@ -11,6 +11,7 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/patch"
 )
 
 type AdminGame struct {
@@ -168,7 +169,7 @@ func (s *AdminStore) UpdateScalar(_ context.Context, id int, c game.ScalarChange
 	return nil
 }
 
-func applyClearable[T any](dst **T, value game.Clearable[T]) {
+func applyClearable[T any](dst **T, value patch.Clearable[T]) {
 	if value.Set {
 		*dst = value.Value
 	}

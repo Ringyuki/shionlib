@@ -4,12 +4,44 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/activity"
 )
 
-const requeueBatch = 200
+func instructions(specific []string) string {
+	lines := make([]string, 0, len(baseRules)+len(categoryLabels)+len(closingRules)+len(specific))
+	lines = append(lines, baseRules...)
+	for _, entry := range categoryLabels {
+		lines = append(lines, "- "+entry.label)
+	}
+	lines = append(lines, closingRules...)
+	lines = append(lines, specific...)
+	return strings.Join(lines, "\n")
+}
+
+func commentReview(subject CommentSubject) ReviewRequest {
+	lines := []string{"Game: " + subject.Game.label()}
+	if parent := PlainText(subject.ParentHTML); subject.ParentID != nil && parent != "" {
+		lines = append(lines, quoted("Replying to", parent))
+	}
+	lines = append(lines, quoted("Comment", PlainText(subject.HTML)))
+	return ReviewRequest{Instructions: instructions(commentRules), Input: strings.Join(lines, "\n")}
+}
+
+func walkthroughReview(subject WalkthroughSubject) ReviewRequest {
+	lines := []string{
+		"Game: " + subject.Game.label(),
+		quoted("Walkthrough title", subject.Title),
+		quoted("Walkthrough content", PlainText(subject.HTML)),
+	}
+	return ReviewRequest{Instructions: instructions(walkthroughRules), Input: strings.Join(lines, "\n")}
+}
+
+func quoted(label, value string) string {
+	return label + `: "` + value + `"`
+}
 
 type Service struct {
 	repo       Repository

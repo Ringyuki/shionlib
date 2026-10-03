@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/ad"
+	"github.com/Ringyuki/shionlib/apps/api/internal/patch"
 )
 
 type Env struct {
@@ -141,12 +142,12 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		updated, err := env.Repo.Update(ctx, created.ID, ad.Changes{
 			Name:      ptr("after"),
 			Placement: ptr([]string{"sidebar"}),
-			ImageJA:   ad.Clearable[string]{Set: true},
-			ImageEN:   ad.Clearable[string]{Set: true, Value: ptr("en.webp")},
+			ImageJA:   patch.Clearable[string]{Set: true},
+			ImageEN:   patch.Clearable[string]{Set: true, Value: ptr("en.webp")},
 			Enabled:   ptr(false),
 			Sort:      ptr(9),
-			StartAt:   ad.Clearable[time.Time]{Set: true},
-			EndAt:     ad.Clearable[time.Time]{Set: true, Value: ptr(at.Add(time.Hour))},
+			StartAt:   patch.Clearable[time.Time]{Set: true},
+			EndAt:     patch.Clearable[time.Time]{Set: true, Value: ptr(at.Add(time.Hour))},
 		})
 		if err != nil {
 			t.Fatal(err)

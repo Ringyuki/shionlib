@@ -3,6 +3,8 @@ package media
 import (
 	"slices"
 	"strconv"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
 
 const (
@@ -30,6 +32,19 @@ type Encoded struct {
 	Data        []byte
 	ContentType string
 	Extension   string
+}
+
+func Validate(file *Upload, maxBytes int) error {
+	if file == nil || len(file.Data) == 0 {
+		return upload.ErrSmallFileMissing
+	}
+	if !Accepts(file.ContentType) {
+		return upload.ErrSmallFileUnsupported
+	}
+	if len(file.Data) > maxBytes {
+		return upload.ErrSmallFileTooLarge
+	}
+	return nil
 }
 
 type kind struct {

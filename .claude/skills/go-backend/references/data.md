@@ -15,13 +15,15 @@
 - Name every index and FK explicitly with `StorageKey` using Postgres defaults (`<table>_<cols>_idx`, `_key`, `_fkey`). FK `ON DELETE` via `entsql.OnDelete`; `ON UPDATE CASCADE` is applied by the diff hook for all FKs.
 - Expression defaults use `entsql.DefaultExpr`, never `entsql.Default`.
 
-## Repositories
+## Repositories and stores
 
+- Files: `repository*.go` (type `Repository`, implements the capability's own `Repository` port), `store*.go` (type `<Purpose>Store` for read models and foreign data), `mapping.go` (`to<X>` row → model functions and storage records). `archtest` enforces names and files.
 - Constructor `NewRepository(client *ent.Client) *Repository`; every method starts with `r.db(ctx)` = `postgres.Client(ctx, r.client)` so it joins an active transaction.
-- Return business models, never ent structs. Map with small `toX` functions in the adapter.
+- Return business models, never ent structs. Map with `to<X>` functions in `mapping.go`.
+- JSON columns are written from unexported records declared in `mapping.go` (`extraInfoRow`), never by marshaling a business model; business types carry no tags.
 - Translate errors (see errors.md). Wrap other errors with `fmt.Errorf("verb object: %w", err)`.
 - Lists are always bounded: paginate with `Offset/Limit`, cap batch reads.
-- Raw SQL is allowed in adapters for queries ent cannot express; use `postgres.Client(ctx, r.client).QueryContext`/`ExecContext` with `$n` parameters only.
+- Raw SQL is allowed only in `internal/adapter/postgres` (`archtest.TestRawSQLStaysInPostgresAdapters`, ADR 0003) for what ent cannot express: atomic counters (`SET downloads = downloads + 1`), aggregates and window functions for statistics, set-based recounts. Use `r.db(ctx).QueryContext`/`ExecContext` with `$n` parameters only; never build SQL from values with `fmt.Sprintf` (gosec G201/G202).
 
 ## Transactions
 

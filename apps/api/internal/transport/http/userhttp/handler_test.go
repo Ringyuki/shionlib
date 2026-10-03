@@ -17,7 +17,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/auth/authtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/media"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/apitest"
-	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/mediahttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/userhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
@@ -56,8 +55,8 @@ type env struct {
 	store    *authtest.MemoryStore
 	mailer   *authtest.Mailer
 	families *authtest.Blocklist
-	codes    *auth.Codes
-	sessions *auth.Sessions
+	codes    *auth.CodeService
+	sessions *auth.SessionService
 	bucket   *bucket
 	edits    *editStore
 }
@@ -76,12 +75,11 @@ func setup(t *testing.T) *env {
 		edits:    &editStore{},
 	}
 	tx := &txtest.Immediate{}
-	e.sessions = auth.NewSessions(e.repo, e.users, authtest.Codec{}, authtest.Hasher{}, e.families, e.store, tx, now, auth.SessionPolicy{Version: "slrt1", AccessTTL: time.Hour, ShortWindow: time.Hour, LongWindow: time.Hour})
-	e.codes = auth.NewCodes(e.store, e.mailer, now)
+	e.sessions = auth.NewSessionService(e.repo, e.users, authtest.Codec{}, authtest.Hasher{}, e.families, e.store, tx, now, auth.SessionPolicy{Version: "slrt1", AccessTTL: time.Hour, ShortWindow: time.Hour, LongWindow: time.Hour})
+	e.codes = auth.NewCodeService(e.store, e.mailer, now)
 	images := media.NewService(processor{}, e.bucket, func() string { return "uuid" })
 	service := user.NewService(e.users, tx, e.sessions, e.codes, authtest.Hasher{}, images, now, user.Policy{AllowRegister: true})
-	userhttp.NewHandler(service, user.NewEditHistory(e.edits), e.server.Builder).Register(e.server.API)
-	mediahttp.NewHandler(images, e.server.Builder).Register(e.server.API)
+	userhttp.NewHandler(service, user.NewEditHistoryService(e.edits), e.server.Builder).Register(e.server.API)
 	return e
 }
 
@@ -251,8 +249,6 @@ func upload(t *testing.T, field, contentType string, size int) (string, string) 
 func TestImageUploads(t *testing.T) {
 	e := setup(t)
 	alice := e.users.Seed(user.User{Name: "alice"})
-	admin := e.users.Seed(user.User{Name: "admin", Role: actor.RoleAdmin})
-
 	body, contentType := upload(t, "avatar", "image/gif", 10)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/avatar", As: as(alice), Body: body, Header: map[string]string{"Content-Type": contentType}}), http.StatusUnsupportedMediaType, 490103)
 	body, contentType = upload(t, "file", "image/png", 10)
@@ -274,13 +270,6 @@ func TestImageUploads(t *testing.T) {
 		t.Fatalf("unexpected cover %s", cover.Data)
 	}
 
-	body, contentType = upload(t, "file", "image/webp", 10)
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPut, Path: "/uploads/small/ad/image", As: as(alice), Body: body, Header: map[string]string{"Content-Type": contentType}}), http.StatusForbidden, 403)
-	ad := e.server.Do(apitest.Request{Method: http.MethodPut, Path: "/uploads/small/ad/image", As: as(admin), Body: body, Header: map[string]string{"Content-Type": contentType}})
-	e.server.Expect(ad, http.StatusOK, 0)
-	if string(ad.Data) != `{"key":"ad/image/uuid.webp"}` {
-		t.Fatalf("unexpected ad image %s", ad.Data)
-	}
 }
 
 func TestEditRecords(t *testing.T) {

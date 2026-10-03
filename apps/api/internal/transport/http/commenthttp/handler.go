@@ -47,7 +47,7 @@ func (h *Handler) edit(ctx context.Context, in *editCommentInput) (*response.Out
 	return response.OK(ctx, h.resp, toEdited(edited, h.resp.Now())), nil
 }
 
-func (h *Handler) raw(ctx context.Context, in *commentPath) (*response.Output[commentRawDTO], error) {
+func (h *Handler) raw(ctx context.Context, in *commentPathInput) (*response.Output[commentRawDTO], error) {
 	found, err := h.service.Raw(ctx, actor.From(ctx), in.CommentID)
 	if err != nil {
 		return nil, err
@@ -55,14 +55,14 @@ func (h *Handler) raw(ctx context.Context, in *commentPath) (*response.Output[co
 	return response.OK(ctx, h.resp, commentRawDTO{ID: found.ID, Content: found.Content, CreatorID: found.CreatorID}), nil
 }
 
-func (h *Handler) delete(ctx context.Context, in *commentPath) (*response.EmptyOutput, error) {
+func (h *Handler) delete(ctx context.Context, in *commentPathInput) (*response.EmptyOutput, error) {
 	if err := h.service.Delete(ctx, actor.From(ctx), in.CommentID); err != nil {
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil
 }
 
-func (h *Handler) like(ctx context.Context, in *commentPath) (*response.EmptyOutput, error) {
+func (h *Handler) like(ctx context.Context, in *commentPathInput) (*response.EmptyOutput, error) {
 	if err := h.service.ToggleLike(ctx, actor.From(ctx), in.CommentID); err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func (h *Handler) listByUser(ctx context.Context, in *userCommentsInput) (*respo
 	now := h.resp.Now()
 	page := userCommentPageDTO{
 		Items: make([]userCommentDTO, len(entries)),
-		Meta: userCommentPageMeta{
+		Meta: userCommentPageMetaDTO{
 			PageMeta:      response.NewPageMeta(total, len(entries), in.PageSize, in.Page),
 			IsCurrentUser: in.ID == viewer.UserID,
 		},

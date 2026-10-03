@@ -10,10 +10,9 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
 )
 
-var (
-	tags      = []string{"report"}
-	adminTags = []string{"admin"}
-)
+var tags = []string{"report"}
+
+var adminTags = []string{"admin"}
 
 type Handler struct {
 	service *report.Service
@@ -56,7 +55,7 @@ func (h *Handler) list(ctx context.Context, in *listReportsInput) (*response.Out
 	})), nil
 }
 
-func (h *Handler) get(ctx context.Context, in *reportPath) (*response.Output[reportDetailDTO], error) {
+func (h *Handler) get(ctx context.Context, in *reportPathInput) (*response.Output[reportDetailDTO], error) {
 	view, err := h.service.Get(ctx, in.ID)
 	if err != nil {
 		return nil, err

@@ -31,8 +31,8 @@ func setup(t *testing.T) env {
 		gametest.Entry{HasResources: true, Detail: game.Detail{ID: 2, TitleJP: "rated", Covers: []game.Cover{{URL: "r.webp", Sexual: 1}}}},
 	)
 	e := env{server: server, engine: &searchtest.Engine{}, queue: &searchtest.Queue{}, analytics: searchtest.NewAnalytics()}
-	service := search.NewService(search.Dependencies{
-		Engine: e.engine, Catalog: catalog, Cards: game.NewCards(catalog), Preferences: gametest.Preferences{},
+	service := search.NewService(search.Deps{
+		Engine: e.engine, Catalog: catalog, Cards: game.NewCardService(catalog), Preferences: gametest.Preferences{},
 		Tags:  searchtest.Tags{{ID: 1, Name: "school", Count: 5, Aliases: []string{"学园"}}},
 		Queue: e.queue, Analytics: e.analytics,
 	})

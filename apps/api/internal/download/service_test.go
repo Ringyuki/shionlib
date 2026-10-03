@@ -2,7 +2,6 @@ package download_test
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"slices"
 	"testing"
@@ -310,9 +309,8 @@ func TestReuploadRules(t *testing.T) {
 	if len(messages) != 2 || messages[0].ReceiverID != 5 || messages[1].ReceiverID != 6 {
 		t.Fatalf("one message per favoriting user, never the operator: %+v", messages)
 	}
-	var meta map[string]any
-	if err := json.Unmarshal(messages[0].Meta, &meta); err != nil || meta["file_name"] != "a.7z" || meta["reason"] != "better rip" || meta["game_title_jp"] != "ゲーム" {
-		t.Fatalf("meta %v %v", meta, err)
+	if meta := messages[0].Meta; meta["file_name"] != "a.7z" || meta["reason"] != "better rip" || meta["game_title_jp"] != "ゲーム" {
+		t.Fatalf("meta %v", meta)
 	}
 	jobs := f.events.Jobs()
 	if purge, ok := jobs[0].(download.PurgeObjects); len(jobs) != 1 || !ok || !slices.Equal(purge.Keys, []string{"games/10/1/a.7z"}) {

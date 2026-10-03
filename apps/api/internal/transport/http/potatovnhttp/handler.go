@@ -3,7 +3,6 @@ package potatovnhttp
 import (
 	"context"
 	"net/http"
-	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/potatovn"
@@ -12,35 +11,6 @@ import (
 )
 
 var tags = []string{"potatovn"}
-
-type bindPotatoVNInput struct {
-	Body struct {
-		PVNUserName string `json:"pvn_user_name" minLength:"1" maxLength:"255"`
-		PVNPassword string `json:"pvn_password" minLength:"1"`
-	}
-}
-
-type potatoVNGamePath struct {
-	GameID int `path:"gameId" minimum:"1"`
-}
-
-type potatoVNBindingDTO struct {
-	PVNUserID       int       `json:"pvn_user_id"`
-	PVNUserName     string    `json:"pvn_user_name"`
-	PVNUserAvatar   *string   `json:"pvn_user_avatar"`
-	PVNTokenExpires time.Time `json:"pvn_token_expires"`
-	Created         time.Time `json:"created"`
-	Updated         time.Time `json:"updated"`
-}
-
-type potatoVNGameDataDTO struct {
-	PVNGalgameID  int        `json:"pvn_galgame_id"`
-	TotalPlayTime int        `json:"total_play_time"`
-	LastPlayDate  *time.Time `json:"last_play_date"`
-	PlayType      int        `json:"play_type"`
-	MyRate        int        `json:"my_rate"`
-	SyncedAt      time.Time  `json:"synced_at"`
-}
 
 type Handler struct {
 	service *potatovn.Service
@@ -83,7 +53,7 @@ func (h *Handler) unbind(ctx context.Context, _ *struct{}) (*response.EmptyOutpu
 	return response.Empty(ctx, h.resp), nil
 }
 
-func (h *Handler) gameData(ctx context.Context, in *potatoVNGamePath) (*response.Output[potatoVNGameDataDTO], error) {
+func (h *Handler) gameData(ctx context.Context, in *potatoVNGamePathInput) (*response.Output[potatoVNGameDataDTO], error) {
 	mapping, err := h.service.GameData(ctx, actor.From(ctx), in.GameID)
 	if err != nil {
 		return nil, err
@@ -91,7 +61,7 @@ func (h *Handler) gameData(ctx context.Context, in *potatoVNGamePath) (*response
 	return response.OK(ctx, h.resp, toGameDataDTO(mapping)), nil
 }
 
-func (h *Handler) addGame(ctx context.Context, in *potatoVNGamePath) (*response.Output[potatoVNGameDataDTO], error) {
+func (h *Handler) addGame(ctx context.Context, in *potatoVNGamePathInput) (*response.Output[potatoVNGameDataDTO], error) {
 	mapping, err := h.service.AddGame(ctx, actor.From(ctx), in.GameID)
 	if err != nil {
 		return nil, err
@@ -99,31 +69,9 @@ func (h *Handler) addGame(ctx context.Context, in *potatoVNGamePath) (*response.
 	return response.OK(ctx, h.resp, toGameDataDTO(mapping)), nil
 }
 
-func (h *Handler) removeGame(ctx context.Context, in *potatoVNGamePath) (*response.EmptyOutput, error) {
+func (h *Handler) removeGame(ctx context.Context, in *potatoVNGamePathInput) (*response.EmptyOutput, error) {
 	if err := h.service.RemoveGame(ctx, actor.From(ctx), in.GameID); err != nil {
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil
-}
-
-func toBindingDTO(binding potatovn.Binding) potatoVNBindingDTO {
-	return potatoVNBindingDTO{
-		PVNUserID:       binding.PVNUserID,
-		PVNUserName:     binding.PVNUserName,
-		PVNUserAvatar:   binding.PVNUserAvatar,
-		PVNTokenExpires: binding.TokenExpires,
-		Created:         binding.Created,
-		Updated:         binding.Updated,
-	}
-}
-
-func toGameDataDTO(mapping potatovn.Mapping) potatoVNGameDataDTO {
-	return potatoVNGameDataDTO{
-		PVNGalgameID:  mapping.PVNGalgameID,
-		TotalPlayTime: mapping.TotalPlayTime,
-		LastPlayDate:  mapping.LastPlayDate,
-		PlayType:      mapping.PlayType,
-		MyRate:        mapping.MyRate,
-		SyncedAt:      mapping.SyncedAt,
-	}
 }

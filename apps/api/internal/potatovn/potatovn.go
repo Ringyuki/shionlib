@@ -2,10 +2,13 @@ package potatovn
 
 import (
 	"cmp"
+	"context"
 	"slices"
 	"strings"
 	"time"
 )
+
+type ScheduleSync func(ctx context.Context, job SyncLibraryJob) error
 
 const (
 	RefreshThreshold        = 3 * 24 * time.Hour
@@ -163,12 +166,4 @@ type GalgameDraft struct {
 type Cover struct {
 	Data        []byte
 	ContentType string
-}
-
-type SyncLibraryJob struct {
-	UserID int `json:"user_id"`
-}
-
-func (SyncLibraryJob) Kind() string {
-	return "potatovn_sync_library"
 }
