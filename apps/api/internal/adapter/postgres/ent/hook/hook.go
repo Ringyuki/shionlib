@@ -9,6 +9,126 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 )
 
+// The AICatalogModelFunc type is an adapter to allow the use of ordinary
+// function as AICatalogModel mutator.
+type AICatalogModelFunc func(context.Context, *ent.AICatalogModelMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AICatalogModelFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AICatalogModelMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AICatalogModelMutation", m)
+}
+
+// The AICatalogProviderFunc type is an adapter to allow the use of ordinary
+// function as AICatalogProvider mutator.
+type AICatalogProviderFunc func(context.Context, *ent.AICatalogProviderMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AICatalogProviderFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AICatalogProviderMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AICatalogProviderMutation", m)
+}
+
+// The AIModelFunc type is an adapter to allow the use of ordinary
+// function as AIModel mutator.
+type AIModelFunc func(context.Context, *ent.AIModelMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AIModelFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AIModelMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AIModelMutation", m)
+}
+
+// The AIProviderFunc type is an adapter to allow the use of ordinary
+// function as AIProvider mutator.
+type AIProviderFunc func(context.Context, *ent.AIProviderMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AIProviderFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AIProviderMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AIProviderMutation", m)
+}
+
+// The AIProviderOfferFunc type is an adapter to allow the use of ordinary
+// function as AIProviderOffer mutator.
+type AIProviderOfferFunc func(context.Context, *ent.AIProviderOfferMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AIProviderOfferFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AIProviderOfferMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AIProviderOfferMutation", m)
+}
+
+// The AIRequestFunc type is an adapter to allow the use of ordinary
+// function as AIRequest mutator.
+type AIRequestFunc func(context.Context, *ent.AIRequestMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AIRequestFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AIRequestMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AIRequestMutation", m)
+}
+
+// The AIRequestPayloadFunc type is an adapter to allow the use of ordinary
+// function as AIRequestPayload mutator.
+type AIRequestPayloadFunc func(context.Context, *ent.AIRequestPayloadMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AIRequestPayloadFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AIRequestPayloadMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AIRequestPayloadMutation", m)
+}
+
+// The AIRouteFunc type is an adapter to allow the use of ordinary
+// function as AIRoute mutator.
+type AIRouteFunc func(context.Context, *ent.AIRouteMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AIRouteFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AIRouteMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AIRouteMutation", m)
+}
+
+// The AIRouteAdjustmentFunc type is an adapter to allow the use of ordinary
+// function as AIRouteAdjustment mutator.
+type AIRouteAdjustmentFunc func(context.Context, *ent.AIRouteAdjustmentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AIRouteAdjustmentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AIRouteAdjustmentMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AIRouteAdjustmentMutation", m)
+}
+
+// The AISceneFunc type is an adapter to allow the use of ordinary
+// function as AIScene mutator.
+type AISceneFunc func(context.Context, *ent.AISceneMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AISceneFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AISceneMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AISceneMutation", m)
+}
+
 // The ActivityFunc type is an adapter to allow the use of ordinary
 // function as Activity mutator.
 type ActivityFunc func(context.Context, *ent.ActivityMutation) (ent.Value, error)

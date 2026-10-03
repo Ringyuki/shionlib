@@ -49,7 +49,7 @@ These files contain safe local defaults. Adjust them for your local test needs.
 
 - frontend on `http://localhost:3200`, Go API on `http://localhost:5201`, og on `http://localhost:4200`
 - `migrate` runs `shionlib-api migrate up` on an empty database, `seed` runs `devtool e2e prepare` (the Go port of `e2e-dataset.ts prepare`, image `docker/api-e2e/Dockerfile`), then `api` serves with workers enabled
-- API settings live in `docker/env/api-e2e.env`; they mirror `docker/env/backend.env` (same secrets, token windows, Redis DB, scan and download settings) and additionally set `DEFAULT_LOCALE=en`, a high `THROTTLE_AUTH_LIMIT` and an unreachable OpenAI endpoint so moderation fails like it did with the empty legacy key
+- API settings live in `docker/env/api-e2e.env`; they mirror `docker/env/backend.env` (same secrets, token windows, Redis DB, scan and download settings) and additionally set `DEFAULT_LOCALE=en`, a high `THROTTLE_AUTH_LIMIT` and an `AI_KEY_SECRET`; the dataset configures an AI provider at an unreachable address for both moderation scenes, so moderation fails and new content stays pending like it did with the empty legacy key
 
 ```bash
 pnpm test:e2e:go                 # build, start, seed, run Playwright, tear down

@@ -45,6 +45,10 @@ One word per concept. `internal/archtest` rejects the banned words below; review
 | Actor | The caller (`actor.Actor`); the guest actor has `UserID == 0`. |
 | Content limit | The viewer's NSFW preference: 0 guest, 1 never show, 2 show with spoiler, 3 just show. "Includes rated" means 2 or 3. |
 | Catalog source | A pluggable provider of game, developer and character metadata (Hikarinagi Open API by default). |
+| AI provider | An upstream AI account configured in the admin panel: kind, base URL, sealed API key, price multiplier (`ai.Provider`). |
+| AI model | The site's name for a model and its capabilities, optionally linked to a models.dev catalog entry (`ai.Model`). |
+| AI route | One way to reach a model: a provider, the upstream model id, protocol, price, priority and health status (`ai.Route`). |
+| AI scene | A call site in code (`moderation_screen`, `moderation_review`) bound to a model in the admin panel (`ai.SceneDefinition`). |
 
 ## Banned words
 

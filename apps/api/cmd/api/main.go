@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/bootstrap"
@@ -180,6 +181,7 @@ func openapi(args []string) error {
 		"DATABASE_URL":         "postgres://offline@localhost:5432/offline",
 		"TOKEN_SECRET":         "offline-openapi-secret",
 		"REFRESH_TOKEN_PEPPER": "offline",
+		"AI_KEY_SECRET":        strings.Repeat("offline-", 5),
 	})
 	if err != nil {
 		return err

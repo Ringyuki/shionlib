@@ -7,6 +7,16 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/ad"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aicatalogmodel"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aicatalogprovider"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aimodel"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aiprovider"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aiprovideroffer"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airequest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airequestpayload"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airoute"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airouteadjustment"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aiscene"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsourcelink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsynccursor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
@@ -53,6 +63,340 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	aicatalogmodelFields := schema.AICatalogModel{}.Fields()
+	_ = aicatalogmodelFields
+	// aicatalogmodelDescProviderID is the schema descriptor for provider_id field.
+	aicatalogmodelDescProviderID := aicatalogmodelFields[1].Descriptor()
+	// aicatalogmodel.ProviderIDValidator is a validator for the "provider_id" field. It is called by the builders before save.
+	aicatalogmodel.ProviderIDValidator = aicatalogmodelDescProviderID.Validators[0].(func(string) error)
+	// aicatalogmodelDescModelKey is the schema descriptor for model_key field.
+	aicatalogmodelDescModelKey := aicatalogmodelFields[2].Descriptor()
+	// aicatalogmodel.ModelKeyValidator is a validator for the "model_key" field. It is called by the builders before save.
+	aicatalogmodel.ModelKeyValidator = aicatalogmodelDescModelKey.Validators[0].(func(string) error)
+	// aicatalogmodelDescCanonicalID is the schema descriptor for canonical_id field.
+	aicatalogmodelDescCanonicalID := aicatalogmodelFields[3].Descriptor()
+	// aicatalogmodel.CanonicalIDValidator is a validator for the "canonical_id" field. It is called by the builders before save.
+	aicatalogmodel.CanonicalIDValidator = aicatalogmodelDescCanonicalID.Validators[0].(func(string) error)
+	// aicatalogmodelDescName is the schema descriptor for name field.
+	aicatalogmodelDescName := aicatalogmodelFields[4].Descriptor()
+	// aicatalogmodel.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	aicatalogmodel.NameValidator = aicatalogmodelDescName.Validators[0].(func(string) error)
+	// aicatalogmodelDescType is the schema descriptor for type field.
+	aicatalogmodelDescType := aicatalogmodelFields[5].Descriptor()
+	// aicatalogmodel.TypeValidator is a validator for the "type" field. It is called by the builders before save.
+	aicatalogmodel.TypeValidator = aicatalogmodelDescType.Validators[0].(func(string) error)
+	// aicatalogmodelDescFamily is the schema descriptor for family field.
+	aicatalogmodelDescFamily := aicatalogmodelFields[6].Descriptor()
+	// aicatalogmodel.FamilyValidator is a validator for the "family" field. It is called by the builders before save.
+	aicatalogmodel.FamilyValidator = aicatalogmodelDescFamily.Validators[0].(func(string) error)
+	// aicatalogmodelDescNpm is the schema descriptor for npm field.
+	aicatalogmodelDescNpm := aicatalogmodelFields[7].Descriptor()
+	// aicatalogmodel.NpmValidator is a validator for the "npm" field. It is called by the builders before save.
+	aicatalogmodel.NpmValidator = aicatalogmodelDescNpm.Validators[0].(func(string) error)
+	// aicatalogmodelDescTemperature is the schema descriptor for temperature field.
+	aicatalogmodelDescTemperature := aicatalogmodelFields[12].Descriptor()
+	// aicatalogmodel.DefaultTemperature holds the default value on creation for the temperature field.
+	aicatalogmodel.DefaultTemperature = aicatalogmodelDescTemperature.Default.(bool)
+	// aicatalogmodelDescToolCall is the schema descriptor for tool_call field.
+	aicatalogmodelDescToolCall := aicatalogmodelFields[13].Descriptor()
+	// aicatalogmodel.DefaultToolCall holds the default value on creation for the tool_call field.
+	aicatalogmodel.DefaultToolCall = aicatalogmodelDescToolCall.Default.(bool)
+	// aicatalogmodelDescReasoning is the schema descriptor for reasoning field.
+	aicatalogmodelDescReasoning := aicatalogmodelFields[14].Descriptor()
+	// aicatalogmodel.DefaultReasoning holds the default value on creation for the reasoning field.
+	aicatalogmodel.DefaultReasoning = aicatalogmodelDescReasoning.Default.(bool)
+	// aicatalogmodelDescReleaseDate is the schema descriptor for release_date field.
+	aicatalogmodelDescReleaseDate := aicatalogmodelFields[21].Descriptor()
+	// aicatalogmodel.ReleaseDateValidator is a validator for the "release_date" field. It is called by the builders before save.
+	aicatalogmodel.ReleaseDateValidator = aicatalogmodelDescReleaseDate.Validators[0].(func(string) error)
+	aicatalogproviderFields := schema.AICatalogProvider{}.Fields()
+	_ = aicatalogproviderFields
+	// aicatalogproviderDescName is the schema descriptor for name field.
+	aicatalogproviderDescName := aicatalogproviderFields[1].Descriptor()
+	// aicatalogprovider.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	aicatalogprovider.NameValidator = aicatalogproviderDescName.Validators[0].(func(string) error)
+	// aicatalogproviderDescNpm is the schema descriptor for npm field.
+	aicatalogproviderDescNpm := aicatalogproviderFields[2].Descriptor()
+	// aicatalogprovider.NpmValidator is a validator for the "npm" field. It is called by the builders before save.
+	aicatalogprovider.NpmValidator = aicatalogproviderDescNpm.Validators[0].(func(string) error)
+	// aicatalogproviderDescAPIURL is the schema descriptor for api_url field.
+	aicatalogproviderDescAPIURL := aicatalogproviderFields[3].Descriptor()
+	// aicatalogprovider.APIURLValidator is a validator for the "api_url" field. It is called by the builders before save.
+	aicatalogprovider.APIURLValidator = aicatalogproviderDescAPIURL.Validators[0].(func(string) error)
+	// aicatalogproviderDescDocURL is the schema descriptor for doc_url field.
+	aicatalogproviderDescDocURL := aicatalogproviderFields[4].Descriptor()
+	// aicatalogprovider.DocURLValidator is a validator for the "doc_url" field. It is called by the builders before save.
+	aicatalogprovider.DocURLValidator = aicatalogproviderDescDocURL.Validators[0].(func(string) error)
+	// aicatalogproviderDescID is the schema descriptor for id field.
+	aicatalogproviderDescID := aicatalogproviderFields[0].Descriptor()
+	// aicatalogprovider.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	aicatalogprovider.IDValidator = aicatalogproviderDescID.Validators[0].(func(string) error)
+	aimodelFields := schema.AIModel{}.Fields()
+	_ = aimodelFields
+	// aimodelDescKey is the schema descriptor for key field.
+	aimodelDescKey := aimodelFields[1].Descriptor()
+	// aimodel.KeyValidator is a validator for the "key" field. It is called by the builders before save.
+	aimodel.KeyValidator = aimodelDescKey.Validators[0].(func(string) error)
+	// aimodelDescName is the schema descriptor for name field.
+	aimodelDescName := aimodelFields[2].Descriptor()
+	// aimodel.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	aimodel.NameValidator = aimodelDescName.Validators[0].(func(string) error)
+	// aimodelDescDescription is the schema descriptor for description field.
+	aimodelDescDescription := aimodelFields[3].Descriptor()
+	// aimodel.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	aimodel.DescriptionValidator = aimodelDescDescription.Validators[0].(func(string) error)
+	// aimodelDescCanonicalID is the schema descriptor for canonical_id field.
+	aimodelDescCanonicalID := aimodelFields[4].Descriptor()
+	// aimodel.CanonicalIDValidator is a validator for the "canonical_id" field. It is called by the builders before save.
+	aimodel.CanonicalIDValidator = aimodelDescCanonicalID.Validators[0].(func(string) error)
+	// aimodelDescVision is the schema descriptor for vision field.
+	aimodelDescVision := aimodelFields[5].Descriptor()
+	// aimodel.DefaultVision holds the default value on creation for the vision field.
+	aimodel.DefaultVision = aimodelDescVision.Default.(bool)
+	// aimodelDescModeration is the schema descriptor for moderation field.
+	aimodelDescModeration := aimodelFields[6].Descriptor()
+	// aimodel.DefaultModeration holds the default value on creation for the moderation field.
+	aimodel.DefaultModeration = aimodelDescModeration.Default.(bool)
+	// aimodelDescTemperature is the schema descriptor for temperature field.
+	aimodelDescTemperature := aimodelFields[7].Descriptor()
+	// aimodel.DefaultTemperature holds the default value on creation for the temperature field.
+	aimodel.DefaultTemperature = aimodelDescTemperature.Default.(bool)
+	// aimodelDescToolCall is the schema descriptor for tool_call field.
+	aimodelDescToolCall := aimodelFields[8].Descriptor()
+	// aimodel.DefaultToolCall holds the default value on creation for the tool_call field.
+	aimodel.DefaultToolCall = aimodelDescToolCall.Default.(bool)
+	// aimodelDescReasoning is the schema descriptor for reasoning field.
+	aimodelDescReasoning := aimodelFields[9].Descriptor()
+	// aimodel.DefaultReasoning holds the default value on creation for the reasoning field.
+	aimodel.DefaultReasoning = aimodelDescReasoning.Default.(bool)
+	// aimodelDescIsDefault is the schema descriptor for is_default field.
+	aimodelDescIsDefault := aimodelFields[12].Descriptor()
+	// aimodel.DefaultIsDefault holds the default value on creation for the is_default field.
+	aimodel.DefaultIsDefault = aimodelDescIsDefault.Default.(bool)
+	// aimodelDescEnabled is the schema descriptor for enabled field.
+	aimodelDescEnabled := aimodelFields[13].Descriptor()
+	// aimodel.DefaultEnabled holds the default value on creation for the enabled field.
+	aimodel.DefaultEnabled = aimodelDescEnabled.Default.(bool)
+	// aimodelDescCreated is the schema descriptor for created field.
+	aimodelDescCreated := aimodelFields[14].Descriptor()
+	// aimodel.DefaultCreated holds the default value on creation for the created field.
+	aimodel.DefaultCreated = aimodelDescCreated.Default.(func() time.Time)
+	// aimodelDescUpdated is the schema descriptor for updated field.
+	aimodelDescUpdated := aimodelFields[15].Descriptor()
+	// aimodel.DefaultUpdated holds the default value on creation for the updated field.
+	aimodel.DefaultUpdated = aimodelDescUpdated.Default.(func() time.Time)
+	// aimodel.UpdateDefaultUpdated holds the default value on update for the updated field.
+	aimodel.UpdateDefaultUpdated = aimodelDescUpdated.UpdateDefault.(func() time.Time)
+	aiproviderFields := schema.AIProvider{}.Fields()
+	_ = aiproviderFields
+	// aiproviderDescName is the schema descriptor for name field.
+	aiproviderDescName := aiproviderFields[1].Descriptor()
+	// aiprovider.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	aiprovider.NameValidator = aiproviderDescName.Validators[0].(func(string) error)
+	// aiproviderDescKind is the schema descriptor for kind field.
+	aiproviderDescKind := aiproviderFields[2].Descriptor()
+	// aiprovider.KindValidator is a validator for the "kind" field. It is called by the builders before save.
+	aiprovider.KindValidator = aiproviderDescKind.Validators[0].(func(string) error)
+	// aiproviderDescBaseURL is the schema descriptor for base_url field.
+	aiproviderDescBaseURL := aiproviderFields[3].Descriptor()
+	// aiprovider.BaseURLValidator is a validator for the "base_url" field. It is called by the builders before save.
+	aiprovider.BaseURLValidator = aiproviderDescBaseURL.Validators[0].(func(string) error)
+	// aiproviderDescKeyHint is the schema descriptor for key_hint field.
+	aiproviderDescKeyHint := aiproviderFields[5].Descriptor()
+	// aiprovider.KeyHintValidator is a validator for the "key_hint" field. It is called by the builders before save.
+	aiprovider.KeyHintValidator = aiproviderDescKeyHint.Validators[0].(func(string) error)
+	// aiproviderDescPriceMultiplier is the schema descriptor for price_multiplier field.
+	aiproviderDescPriceMultiplier := aiproviderFields[6].Descriptor()
+	// aiprovider.DefaultPriceMultiplier holds the default value on creation for the price_multiplier field.
+	aiprovider.DefaultPriceMultiplier = aiproviderDescPriceMultiplier.Default.(float64)
+	// aiproviderDescCatalogProviderID is the schema descriptor for catalog_provider_id field.
+	aiproviderDescCatalogProviderID := aiproviderFields[7].Descriptor()
+	// aiprovider.CatalogProviderIDValidator is a validator for the "catalog_provider_id" field. It is called by the builders before save.
+	aiprovider.CatalogProviderIDValidator = aiproviderDescCatalogProviderID.Validators[0].(func(string) error)
+	// aiproviderDescEnabled is the schema descriptor for enabled field.
+	aiproviderDescEnabled := aiproviderFields[8].Descriptor()
+	// aiprovider.DefaultEnabled holds the default value on creation for the enabled field.
+	aiprovider.DefaultEnabled = aiproviderDescEnabled.Default.(bool)
+	// aiproviderDescCreated is the schema descriptor for created field.
+	aiproviderDescCreated := aiproviderFields[9].Descriptor()
+	// aiprovider.DefaultCreated holds the default value on creation for the created field.
+	aiprovider.DefaultCreated = aiproviderDescCreated.Default.(func() time.Time)
+	// aiproviderDescUpdated is the schema descriptor for updated field.
+	aiproviderDescUpdated := aiproviderFields[10].Descriptor()
+	// aiprovider.DefaultUpdated holds the default value on creation for the updated field.
+	aiprovider.DefaultUpdated = aiproviderDescUpdated.Default.(func() time.Time)
+	// aiprovider.UpdateDefaultUpdated holds the default value on update for the updated field.
+	aiprovider.UpdateDefaultUpdated = aiproviderDescUpdated.UpdateDefault.(func() time.Time)
+	aiproviderofferFields := schema.AIProviderOffer{}.Fields()
+	_ = aiproviderofferFields
+	// aiproviderofferDescUpstreamID is the schema descriptor for upstream_id field.
+	aiproviderofferDescUpstreamID := aiproviderofferFields[2].Descriptor()
+	// aiprovideroffer.UpstreamIDValidator is a validator for the "upstream_id" field. It is called by the builders before save.
+	aiprovideroffer.UpstreamIDValidator = aiproviderofferDescUpstreamID.Validators[0].(func(string) error)
+	// aiproviderofferDescName is the schema descriptor for name field.
+	aiproviderofferDescName := aiproviderofferFields[3].Descriptor()
+	// aiprovideroffer.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	aiprovideroffer.NameValidator = aiproviderofferDescName.Validators[0].(func(string) error)
+	// aiproviderofferDescCanonicalID is the schema descriptor for canonical_id field.
+	aiproviderofferDescCanonicalID := aiproviderofferFields[5].Descriptor()
+	// aiprovideroffer.CanonicalIDValidator is a validator for the "canonical_id" field. It is called by the builders before save.
+	aiprovideroffer.CanonicalIDValidator = aiproviderofferDescCanonicalID.Validators[0].(func(string) error)
+	airequestFields := schema.AIRequest{}.Fields()
+	_ = airequestFields
+	// airequestDescSource is the schema descriptor for source field.
+	airequestDescSource := airequestFields[2].Descriptor()
+	// airequest.SourceValidator is a validator for the "source" field. It is called by the builders before save.
+	airequest.SourceValidator = airequestDescSource.Validators[0].(func(string) error)
+	// airequestDescScene is the schema descriptor for scene field.
+	airequestDescScene := airequestFields[3].Descriptor()
+	// airequest.SceneValidator is a validator for the "scene" field. It is called by the builders before save.
+	airequest.SceneValidator = airequestDescScene.Validators[0].(func(string) error)
+	// airequestDescUpstreamID is the schema descriptor for upstream_id field.
+	airequestDescUpstreamID := airequestFields[7].Descriptor()
+	// airequest.UpstreamIDValidator is a validator for the "upstream_id" field. It is called by the builders before save.
+	airequest.UpstreamIDValidator = airequestDescUpstreamID.Validators[0].(func(string) error)
+	// airequestDescProtocol is the schema descriptor for protocol field.
+	airequestDescProtocol := airequestFields[8].Descriptor()
+	// airequest.ProtocolValidator is a validator for the "protocol" field. It is called by the builders before save.
+	airequest.ProtocolValidator = airequestDescProtocol.Validators[0].(func(string) error)
+	// airequestDescErrorKind is the schema descriptor for error_kind field.
+	airequestDescErrorKind := airequestFields[10].Descriptor()
+	// airequest.ErrorKindValidator is a validator for the "error_kind" field. It is called by the builders before save.
+	airequest.ErrorKindValidator = airequestDescErrorKind.Validators[0].(func(string) error)
+	// airequestDescErrorMessage is the schema descriptor for error_message field.
+	airequestDescErrorMessage := airequestFields[11].Descriptor()
+	// airequest.ErrorMessageValidator is a validator for the "error_message" field. It is called by the builders before save.
+	airequest.ErrorMessageValidator = airequestDescErrorMessage.Validators[0].(func(string) error)
+	// airequestDescAdaptation is the schema descriptor for adaptation field.
+	airequestDescAdaptation := airequestFields[13].Descriptor()
+	// airequest.AdaptationValidator is a validator for the "adaptation" field. It is called by the builders before save.
+	airequest.AdaptationValidator = airequestDescAdaptation.Validators[0].(func(string) error)
+	// airequestDescFinishReason is the schema descriptor for finish_reason field.
+	airequestDescFinishReason := airequestFields[14].Descriptor()
+	// airequest.FinishReasonValidator is a validator for the "finish_reason" field. It is called by the builders before save.
+	airequest.FinishReasonValidator = airequestDescFinishReason.Validators[0].(func(string) error)
+	// airequestDescInputTokens is the schema descriptor for input_tokens field.
+	airequestDescInputTokens := airequestFields[17].Descriptor()
+	// airequest.DefaultInputTokens holds the default value on creation for the input_tokens field.
+	airequest.DefaultInputTokens = airequestDescInputTokens.Default.(int)
+	// airequestDescOutputTokens is the schema descriptor for output_tokens field.
+	airequestDescOutputTokens := airequestFields[18].Descriptor()
+	// airequest.DefaultOutputTokens holds the default value on creation for the output_tokens field.
+	airequest.DefaultOutputTokens = airequestDescOutputTokens.Default.(int)
+	// airequestDescCacheReadTokens is the schema descriptor for cache_read_tokens field.
+	airequestDescCacheReadTokens := airequestFields[19].Descriptor()
+	// airequest.DefaultCacheReadTokens holds the default value on creation for the cache_read_tokens field.
+	airequest.DefaultCacheReadTokens = airequestDescCacheReadTokens.Default.(int)
+	// airequestDescCacheWriteTokens is the schema descriptor for cache_write_tokens field.
+	airequestDescCacheWriteTokens := airequestFields[20].Descriptor()
+	// airequest.DefaultCacheWriteTokens holds the default value on creation for the cache_write_tokens field.
+	airequest.DefaultCacheWriteTokens = airequestDescCacheWriteTokens.Default.(int)
+	// airequestDescReasoningTokens is the schema descriptor for reasoning_tokens field.
+	airequestDescReasoningTokens := airequestFields[21].Descriptor()
+	// airequest.DefaultReasoningTokens holds the default value on creation for the reasoning_tokens field.
+	airequest.DefaultReasoningTokens = airequestDescReasoningTokens.Default.(int)
+	// airequestDescCostUsd is the schema descriptor for cost_usd field.
+	airequestDescCostUsd := airequestFields[22].Descriptor()
+	// airequest.DefaultCostUsd holds the default value on creation for the cost_usd field.
+	airequest.DefaultCostUsd = airequestDescCostUsd.Default.(float64)
+	// airequestDescCreated is the schema descriptor for created field.
+	airequestDescCreated := airequestFields[23].Descriptor()
+	// airequest.DefaultCreated holds the default value on creation for the created field.
+	airequest.DefaultCreated = airequestDescCreated.Default.(func() time.Time)
+	airequestpayloadFields := schema.AIRequestPayload{}.Fields()
+	_ = airequestpayloadFields
+	// airequestpayloadDescCreated is the schema descriptor for created field.
+	airequestpayloadDescCreated := airequestpayloadFields[4].Descriptor()
+	// airequestpayload.DefaultCreated holds the default value on creation for the created field.
+	airequestpayload.DefaultCreated = airequestpayloadDescCreated.Default.(func() time.Time)
+	airouteFields := schema.AIRoute{}.Fields()
+	_ = airouteFields
+	// airouteDescUpstreamID is the schema descriptor for upstream_id field.
+	airouteDescUpstreamID := airouteFields[3].Descriptor()
+	// airoute.UpstreamIDValidator is a validator for the "upstream_id" field. It is called by the builders before save.
+	airoute.UpstreamIDValidator = airouteDescUpstreamID.Validators[0].(func(string) error)
+	// airouteDescProtocol is the schema descriptor for protocol field.
+	airouteDescProtocol := airouteFields[4].Descriptor()
+	// airoute.ProtocolValidator is a validator for the "protocol" field. It is called by the builders before save.
+	airoute.ProtocolValidator = airouteDescProtocol.Validators[0].(func(string) error)
+	// airouteDescPriceManual is the schema descriptor for price_manual field.
+	airouteDescPriceManual := airouteFields[5].Descriptor()
+	// airoute.DefaultPriceManual holds the default value on creation for the price_manual field.
+	airoute.DefaultPriceManual = airouteDescPriceManual.Default.(bool)
+	// airouteDescInputPrice is the schema descriptor for input_price field.
+	airouteDescInputPrice := airouteFields[6].Descriptor()
+	// airoute.DefaultInputPrice holds the default value on creation for the input_price field.
+	airoute.DefaultInputPrice = airouteDescInputPrice.Default.(float64)
+	// airouteDescOutputPrice is the schema descriptor for output_price field.
+	airouteDescOutputPrice := airouteFields[7].Descriptor()
+	// airoute.DefaultOutputPrice holds the default value on creation for the output_price field.
+	airoute.DefaultOutputPrice = airouteDescOutputPrice.Default.(float64)
+	// airouteDescJSONMode is the schema descriptor for json_mode field.
+	airouteDescJSONMode := airouteFields[12].Descriptor()
+	// airoute.DefaultJSONMode holds the default value on creation for the json_mode field.
+	airoute.DefaultJSONMode = airouteDescJSONMode.Default.(bool)
+	// airouteDescPriority is the schema descriptor for priority field.
+	airouteDescPriority := airouteFields[13].Descriptor()
+	// airoute.DefaultPriority holds the default value on creation for the priority field.
+	airoute.DefaultPriority = airouteDescPriority.Default.(int)
+	// airouteDescStatus is the schema descriptor for status field.
+	airouteDescStatus := airouteFields[14].Descriptor()
+	// airoute.DefaultStatus holds the default value on creation for the status field.
+	airoute.DefaultStatus = airouteDescStatus.Default.(string)
+	// airoute.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	airoute.StatusValidator = airouteDescStatus.Validators[0].(func(string) error)
+	// airouteDescStatusKind is the schema descriptor for status_kind field.
+	airouteDescStatusKind := airouteFields[15].Descriptor()
+	// airoute.StatusKindValidator is a validator for the "status_kind" field. It is called by the builders before save.
+	airoute.StatusKindValidator = airouteDescStatusKind.Validators[0].(func(string) error)
+	// airouteDescStatusMessage is the schema descriptor for status_message field.
+	airouteDescStatusMessage := airouteFields[16].Descriptor()
+	// airoute.StatusMessageValidator is a validator for the "status_message" field. It is called by the builders before save.
+	airoute.StatusMessageValidator = airouteDescStatusMessage.Validators[0].(func(string) error)
+	// airouteDescCreated is the schema descriptor for created field.
+	airouteDescCreated := airouteFields[18].Descriptor()
+	// airoute.DefaultCreated holds the default value on creation for the created field.
+	airoute.DefaultCreated = airouteDescCreated.Default.(func() time.Time)
+	// airouteDescUpdated is the schema descriptor for updated field.
+	airouteDescUpdated := airouteFields[19].Descriptor()
+	// airoute.DefaultUpdated holds the default value on creation for the updated field.
+	airoute.DefaultUpdated = airouteDescUpdated.Default.(func() time.Time)
+	// airoute.UpdateDefaultUpdated holds the default value on update for the updated field.
+	airoute.UpdateDefaultUpdated = airouteDescUpdated.UpdateDefault.(func() time.Time)
+	airouteadjustmentFields := schema.AIRouteAdjustment{}.Fields()
+	_ = airouteadjustmentFields
+	// airouteadjustmentDescKind is the schema descriptor for kind field.
+	airouteadjustmentDescKind := airouteadjustmentFields[2].Descriptor()
+	// airouteadjustment.KindValidator is a validator for the "kind" field. It is called by the builders before save.
+	airouteadjustment.KindValidator = airouteadjustmentDescKind.Validators[0].(func(string) error)
+	// airouteadjustmentDescValue is the schema descriptor for value field.
+	airouteadjustmentDescValue := airouteadjustmentFields[3].Descriptor()
+	// airouteadjustment.ValueValidator is a validator for the "value" field. It is called by the builders before save.
+	airouteadjustment.ValueValidator = airouteadjustmentDescValue.Validators[0].(func(string) error)
+	// airouteadjustmentDescPrevious is the schema descriptor for previous field.
+	airouteadjustmentDescPrevious := airouteadjustmentFields[4].Descriptor()
+	// airouteadjustment.PreviousValidator is a validator for the "previous" field. It is called by the builders before save.
+	airouteadjustment.PreviousValidator = airouteadjustmentDescPrevious.Validators[0].(func(string) error)
+	// airouteadjustmentDescErrorKind is the schema descriptor for error_kind field.
+	airouteadjustmentDescErrorKind := airouteadjustmentFields[5].Descriptor()
+	// airouteadjustment.ErrorKindValidator is a validator for the "error_kind" field. It is called by the builders before save.
+	airouteadjustment.ErrorKindValidator = airouteadjustmentDescErrorKind.Validators[0].(func(string) error)
+	// airouteadjustmentDescCreated is the schema descriptor for created field.
+	airouteadjustmentDescCreated := airouteadjustmentFields[7].Descriptor()
+	// airouteadjustment.DefaultCreated holds the default value on creation for the created field.
+	airouteadjustment.DefaultCreated = airouteadjustmentDescCreated.Default.(func() time.Time)
+	aisceneFields := schema.AIScene{}.Fields()
+	_ = aisceneFields
+	// aisceneDescKey is the schema descriptor for key field.
+	aisceneDescKey := aisceneFields[1].Descriptor()
+	// aiscene.KeyValidator is a validator for the "key" field. It is called by the builders before save.
+	aiscene.KeyValidator = aisceneDescKey.Validators[0].(func(string) error)
+	// aisceneDescUpdated is the schema descriptor for updated field.
+	aisceneDescUpdated := aisceneFields[6].Descriptor()
+	// aiscene.DefaultUpdated holds the default value on creation for the updated field.
+	aiscene.DefaultUpdated = aisceneDescUpdated.Default.(func() time.Time)
+	// aiscene.UpdateDefaultUpdated holds the default value on update for the updated field.
+	aiscene.UpdateDefaultUpdated = aisceneDescUpdated.UpdateDefault.(func() time.Time)
 	activityFields := schema.Activity{}.Fields()
 	_ = activityFields
 	// activityDescFileStatus is the schema descriptor for file_status field.

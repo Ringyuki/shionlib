@@ -25,7 +25,7 @@ type Config struct {
 	HotScore   HotScore
 	Cloudflare Cloudflare
 	Bangumi    Bangumi
-	OpenAI     OpenAI
+	AI         AI
 	NextMoe    NextMoe
 	PotatoVN   PotatoVN
 	Sponsor    Sponsor
@@ -246,11 +246,14 @@ type Bangumi struct {
 	ClientSecret string `env:"BANGUMI_CLIENT_SECRET"`
 }
 
-type OpenAI struct {
-	APIKey          string `env:"OPENAI_API_KEY"`
-	BaseURL         string `env:"OPENAI_BASE_URL" envDefault:"https://api.openai.com/v1"`
-	ModerationModel string `env:"OPENAI_MODERATION_MODEL" envDefault:"omni-moderation-latest"`
-	ReviewModel     string `env:"OPENAI_REVIEW_MODEL" envDefault:"gpt-5-mini"`
+type AI struct {
+	KeySecret            string        `env:"AI_KEY_SECRET"`
+	CatalogURL           string        `env:"AI_CATALOG_URL" envDefault:"https://models.dev/api.json"`
+	IdleTimeout          time.Duration `env:"AI_IDLE_TIMEOUT" envDefault:"120s"`
+	MaxCallDuration      time.Duration `env:"AI_MAX_CALL_DURATION" envDefault:"10m"`
+	RecordPayloads       bool          `env:"AI_RECORD_PAYLOADS" envDefault:"true"`
+	RequestRetentionDays int           `env:"AI_REQUEST_RETENTION_DAYS" envDefault:"90"`
+	PayloadRetentionDays int           `env:"AI_PAYLOAD_RETENTION_DAYS" envDefault:"7"`
 }
 
 type NextMoe struct {

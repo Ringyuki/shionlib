@@ -14,6 +14,16 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/ad"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aicatalogmodel"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aicatalogprovider"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aimodel"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aiprovider"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aiprovideroffer"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airequest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airequestpayload"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airoute"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airouteadjustment"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aiscene"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsourcelink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsynccursor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
@@ -115,6 +125,16 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			aicatalogmodel.Table:                  aicatalogmodel.ValidColumn,
+			aicatalogprovider.Table:               aicatalogprovider.ValidColumn,
+			aimodel.Table:                         aimodel.ValidColumn,
+			aiprovider.Table:                      aiprovider.ValidColumn,
+			aiprovideroffer.Table:                 aiprovideroffer.ValidColumn,
+			airequest.Table:                       airequest.ValidColumn,
+			airequestpayload.Table:                airequestpayload.ValidColumn,
+			airoute.Table:                         airoute.ValidColumn,
+			airouteadjustment.Table:               airouteadjustment.ValidColumn,
+			aiscene.Table:                         aiscene.ValidColumn,
 			activity.Table:                        activity.ValidColumn,
 			ad.Table:                              ad.ValidColumn,
 			catalogsourcelink.Table:               catalogsourcelink.ValidColumn,

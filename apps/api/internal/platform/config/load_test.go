@@ -10,6 +10,7 @@ func base() map[string]string {
 		"DATABASE_URL":         "postgres://localhost/db",
 		"TOKEN_SECRET":         "a-very-long-test-secret",
 		"REFRESH_TOKEN_PEPPER": "pepper",
+		"AI_KEY_SECRET":        "offline-ai-key-secret-at-least-32-chars",
 	}
 }
 

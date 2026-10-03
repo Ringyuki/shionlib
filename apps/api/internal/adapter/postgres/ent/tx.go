@@ -14,6 +14,26 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// AICatalogModel is the client for interacting with the AICatalogModel builders.
+	AICatalogModel *AICatalogModelClient
+	// AICatalogProvider is the client for interacting with the AICatalogProvider builders.
+	AICatalogProvider *AICatalogProviderClient
+	// AIModel is the client for interacting with the AIModel builders.
+	AIModel *AIModelClient
+	// AIProvider is the client for interacting with the AIProvider builders.
+	AIProvider *AIProviderClient
+	// AIProviderOffer is the client for interacting with the AIProviderOffer builders.
+	AIProviderOffer *AIProviderOfferClient
+	// AIRequest is the client for interacting with the AIRequest builders.
+	AIRequest *AIRequestClient
+	// AIRequestPayload is the client for interacting with the AIRequestPayload builders.
+	AIRequestPayload *AIRequestPayloadClient
+	// AIRoute is the client for interacting with the AIRoute builders.
+	AIRoute *AIRouteClient
+	// AIRouteAdjustment is the client for interacting with the AIRouteAdjustment builders.
+	AIRouteAdjustment *AIRouteAdjustmentClient
+	// AIScene is the client for interacting with the AIScene builders.
+	AIScene *AISceneClient
 	// Activity is the client for interacting with the Activity builders.
 	Activity *ActivityClient
 	// Ad is the client for interacting with the Ad builders.
@@ -231,6 +251,16 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.AICatalogModel = NewAICatalogModelClient(tx.config)
+	tx.AICatalogProvider = NewAICatalogProviderClient(tx.config)
+	tx.AIModel = NewAIModelClient(tx.config)
+	tx.AIProvider = NewAIProviderClient(tx.config)
+	tx.AIProviderOffer = NewAIProviderOfferClient(tx.config)
+	tx.AIRequest = NewAIRequestClient(tx.config)
+	tx.AIRequestPayload = NewAIRequestPayloadClient(tx.config)
+	tx.AIRoute = NewAIRouteClient(tx.config)
+	tx.AIRouteAdjustment = NewAIRouteAdjustmentClient(tx.config)
+	tx.AIScene = NewAISceneClient(tx.config)
 	tx.Activity = NewActivityClient(tx.config)
 	tx.Ad = NewAdClient(tx.config)
 	tx.CatalogSourceLink = NewCatalogSourceLinkClient(tx.config)
@@ -283,7 +313,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Activity.QueryXXX(), the query will be executed
+// applies a query, for example: AICatalogModel.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

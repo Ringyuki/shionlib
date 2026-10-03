@@ -15,6 +15,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/push"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/queue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/redis/authredis"
+	"github.com/Ringyuki/shionlib/apps/api/internal/ai"
 	"github.com/Ringyuki/shionlib/apps/api/internal/auth"
 	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
@@ -65,6 +66,7 @@ type Shared struct {
 	Mailer     *email.Mailer
 	Sessions   *auth.SessionService
 	Users      *user.Service
+	AI         *ai.Service
 }
 
 type wiring func(infra *Infra, shared *Shared, modules *Modules)
@@ -74,6 +76,7 @@ var wirings = []wiring{
 	wireMessage,
 	wireActivity,
 	wireAuth,
+	wireAI,
 	wireContent,
 	wireFiles,
 	wireCatalog,

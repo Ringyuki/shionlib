@@ -17,6 +17,16 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/ad"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aicatalogmodel"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aicatalogprovider"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aimodel"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aiprovider"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aiprovideroffer"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airequest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airequestpayload"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airoute"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/airouteadjustment"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/aiscene"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsourcelink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsynccursor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
@@ -67,6 +77,26 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// AICatalogModel is the client for interacting with the AICatalogModel builders.
+	AICatalogModel *AICatalogModelClient
+	// AICatalogProvider is the client for interacting with the AICatalogProvider builders.
+	AICatalogProvider *AICatalogProviderClient
+	// AIModel is the client for interacting with the AIModel builders.
+	AIModel *AIModelClient
+	// AIProvider is the client for interacting with the AIProvider builders.
+	AIProvider *AIProviderClient
+	// AIProviderOffer is the client for interacting with the AIProviderOffer builders.
+	AIProviderOffer *AIProviderOfferClient
+	// AIRequest is the client for interacting with the AIRequest builders.
+	AIRequest *AIRequestClient
+	// AIRequestPayload is the client for interacting with the AIRequestPayload builders.
+	AIRequestPayload *AIRequestPayloadClient
+	// AIRoute is the client for interacting with the AIRoute builders.
+	AIRoute *AIRouteClient
+	// AIRouteAdjustment is the client for interacting with the AIRouteAdjustment builders.
+	AIRouteAdjustment *AIRouteAdjustmentClient
+	// AIScene is the client for interacting with the AIScene builders.
+	AIScene *AISceneClient
 	// Activity is the client for interacting with the Activity builders.
 	Activity *ActivityClient
 	// Ad is the client for interacting with the Ad builders.
@@ -164,6 +194,16 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.AICatalogModel = NewAICatalogModelClient(c.config)
+	c.AICatalogProvider = NewAICatalogProviderClient(c.config)
+	c.AIModel = NewAIModelClient(c.config)
+	c.AIProvider = NewAIProviderClient(c.config)
+	c.AIProviderOffer = NewAIProviderOfferClient(c.config)
+	c.AIRequest = NewAIRequestClient(c.config)
+	c.AIRequestPayload = NewAIRequestPayloadClient(c.config)
+	c.AIRoute = NewAIRouteClient(c.config)
+	c.AIRouteAdjustment = NewAIRouteAdjustmentClient(c.config)
+	c.AIScene = NewAISceneClient(c.config)
 	c.Activity = NewActivityClient(c.config)
 	c.Ad = NewAdClient(c.config)
 	c.CatalogSourceLink = NewCatalogSourceLinkClient(c.config)
@@ -299,6 +339,16 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:                             ctx,
 		config:                          cfg,
+		AICatalogModel:                  NewAICatalogModelClient(cfg),
+		AICatalogProvider:               NewAICatalogProviderClient(cfg),
+		AIModel:                         NewAIModelClient(cfg),
+		AIProvider:                      NewAIProviderClient(cfg),
+		AIProviderOffer:                 NewAIProviderOfferClient(cfg),
+		AIRequest:                       NewAIRequestClient(cfg),
+		AIRequestPayload:                NewAIRequestPayloadClient(cfg),
+		AIRoute:                         NewAIRouteClient(cfg),
+		AIRouteAdjustment:               NewAIRouteAdjustmentClient(cfg),
+		AIScene:                         NewAISceneClient(cfg),
 		Activity:                        NewActivityClient(cfg),
 		Ad:                              NewAdClient(cfg),
 		CatalogSourceLink:               NewCatalogSourceLinkClient(cfg),
@@ -361,6 +411,16 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:                             ctx,
 		config:                          cfg,
+		AICatalogModel:                  NewAICatalogModelClient(cfg),
+		AICatalogProvider:               NewAICatalogProviderClient(cfg),
+		AIModel:                         NewAIModelClient(cfg),
+		AIProvider:                      NewAIProviderClient(cfg),
+		AIProviderOffer:                 NewAIProviderOfferClient(cfg),
+		AIRequest:                       NewAIRequestClient(cfg),
+		AIRequestPayload:                NewAIRequestPayloadClient(cfg),
+		AIRoute:                         NewAIRouteClient(cfg),
+		AIRouteAdjustment:               NewAIRouteAdjustmentClient(cfg),
+		AIScene:                         NewAISceneClient(cfg),
 		Activity:                        NewActivityClient(cfg),
 		Ad:                              NewAdClient(cfg),
 		CatalogSourceLink:               NewCatalogSourceLinkClient(cfg),
@@ -410,7 +470,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Activity.
+//		AICatalogModel.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -433,17 +493,20 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Activity, c.Ad, c.CatalogSourceLink, c.CatalogSyncCursor, c.Comment,
-		c.CommentLike, c.EditRecord, c.Favorite, c.FavoriteItem,
-		c.FieldPermissionMapping, c.Game, c.GameCharacter, c.GameCharacterRelation,
-		c.GameCover, c.GameDeveloper, c.GameDeveloperRelation, c.GameDownloadResource,
-		c.GameDownloadResourceFile, c.GameDownloadResourceFileHistory,
-		c.GameDownloadResourceReport, c.GameImage, c.GameLink, c.GameRelation,
-		c.GameTagRelation, c.GameUploadChunk, c.GameUploadSession, c.MalwareScanCase,
-		c.Message, c.ModerationEvent, c.OidcIdentity, c.RoleFieldPermission,
-		c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord, c.UserFieldPermission,
-		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
-		c.UserPvnBinding, c.UserUploadQuota, c.UserUploadQuotaRecord, c.Walkthrough,
+		c.AICatalogModel, c.AICatalogProvider, c.AIModel, c.AIProvider,
+		c.AIProviderOffer, c.AIRequest, c.AIRequestPayload, c.AIRoute,
+		c.AIRouteAdjustment, c.AIScene, c.Activity, c.Ad, c.CatalogSourceLink,
+		c.CatalogSyncCursor, c.Comment, c.CommentLike, c.EditRecord, c.Favorite,
+		c.FavoriteItem, c.FieldPermissionMapping, c.Game, c.GameCharacter,
+		c.GameCharacterRelation, c.GameCover, c.GameDeveloper, c.GameDeveloperRelation,
+		c.GameDownloadResource, c.GameDownloadResourceFile,
+		c.GameDownloadResourceFileHistory, c.GameDownloadResourceReport, c.GameImage,
+		c.GameLink, c.GameRelation, c.GameTagRelation, c.GameUploadChunk,
+		c.GameUploadSession, c.MalwareScanCase, c.Message, c.ModerationEvent,
+		c.OidcIdentity, c.RoleFieldPermission, c.SponsorOrder, c.Tag, c.User,
+		c.UserBannedRecord, c.UserFieldPermission, c.UserGamePvnMapping,
+		c.UserLoginSession, c.UserPasskeyCredential, c.UserPvnBinding,
+		c.UserUploadQuota, c.UserUploadQuotaRecord, c.Walkthrough,
 	} {
 		n.Use(hooks...)
 	}
@@ -453,17 +516,20 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Activity, c.Ad, c.CatalogSourceLink, c.CatalogSyncCursor, c.Comment,
-		c.CommentLike, c.EditRecord, c.Favorite, c.FavoriteItem,
-		c.FieldPermissionMapping, c.Game, c.GameCharacter, c.GameCharacterRelation,
-		c.GameCover, c.GameDeveloper, c.GameDeveloperRelation, c.GameDownloadResource,
-		c.GameDownloadResourceFile, c.GameDownloadResourceFileHistory,
-		c.GameDownloadResourceReport, c.GameImage, c.GameLink, c.GameRelation,
-		c.GameTagRelation, c.GameUploadChunk, c.GameUploadSession, c.MalwareScanCase,
-		c.Message, c.ModerationEvent, c.OidcIdentity, c.RoleFieldPermission,
-		c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord, c.UserFieldPermission,
-		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
-		c.UserPvnBinding, c.UserUploadQuota, c.UserUploadQuotaRecord, c.Walkthrough,
+		c.AICatalogModel, c.AICatalogProvider, c.AIModel, c.AIProvider,
+		c.AIProviderOffer, c.AIRequest, c.AIRequestPayload, c.AIRoute,
+		c.AIRouteAdjustment, c.AIScene, c.Activity, c.Ad, c.CatalogSourceLink,
+		c.CatalogSyncCursor, c.Comment, c.CommentLike, c.EditRecord, c.Favorite,
+		c.FavoriteItem, c.FieldPermissionMapping, c.Game, c.GameCharacter,
+		c.GameCharacterRelation, c.GameCover, c.GameDeveloper, c.GameDeveloperRelation,
+		c.GameDownloadResource, c.GameDownloadResourceFile,
+		c.GameDownloadResourceFileHistory, c.GameDownloadResourceReport, c.GameImage,
+		c.GameLink, c.GameRelation, c.GameTagRelation, c.GameUploadChunk,
+		c.GameUploadSession, c.MalwareScanCase, c.Message, c.ModerationEvent,
+		c.OidcIdentity, c.RoleFieldPermission, c.SponsorOrder, c.Tag, c.User,
+		c.UserBannedRecord, c.UserFieldPermission, c.UserGamePvnMapping,
+		c.UserLoginSession, c.UserPasskeyCredential, c.UserPvnBinding,
+		c.UserUploadQuota, c.UserUploadQuotaRecord, c.Walkthrough,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -472,6 +538,26 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *AICatalogModelMutation:
+		return c.AICatalogModel.mutate(ctx, m)
+	case *AICatalogProviderMutation:
+		return c.AICatalogProvider.mutate(ctx, m)
+	case *AIModelMutation:
+		return c.AIModel.mutate(ctx, m)
+	case *AIProviderMutation:
+		return c.AIProvider.mutate(ctx, m)
+	case *AIProviderOfferMutation:
+		return c.AIProviderOffer.mutate(ctx, m)
+	case *AIRequestMutation:
+		return c.AIRequest.mutate(ctx, m)
+	case *AIRequestPayloadMutation:
+		return c.AIRequestPayload.mutate(ctx, m)
+	case *AIRouteMutation:
+		return c.AIRoute.mutate(ctx, m)
+	case *AIRouteAdjustmentMutation:
+		return c.AIRouteAdjustment.mutate(ctx, m)
+	case *AISceneMutation:
+		return c.AIScene.mutate(ctx, m)
 	case *ActivityMutation:
 		return c.Activity.mutate(ctx, m)
 	case *AdMutation:
@@ -560,6 +646,1720 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Walkthrough.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// AICatalogModelClient is a client for the AICatalogModel schema.
+type AICatalogModelClient struct {
+	config
+}
+
+// NewAICatalogModelClient returns a client for the AICatalogModel from the given config.
+func NewAICatalogModelClient(c config) *AICatalogModelClient {
+	return &AICatalogModelClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `aicatalogmodel.Hooks(f(g(h())))`.
+func (c *AICatalogModelClient) Use(hooks ...Hook) {
+	c.hooks.AICatalogModel = append(c.hooks.AICatalogModel, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `aicatalogmodel.Intercept(f(g(h())))`.
+func (c *AICatalogModelClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AICatalogModel = append(c.inters.AICatalogModel, interceptors...)
+}
+
+// Create returns a builder for creating a AICatalogModel entity.
+func (c *AICatalogModelClient) Create() *AICatalogModelCreate {
+	mutation := newAICatalogModelMutation(c.config, OpCreate)
+	return &AICatalogModelCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AICatalogModel entities.
+func (c *AICatalogModelClient) CreateBulk(builders ...*AICatalogModelCreate) *AICatalogModelCreateBulk {
+	return &AICatalogModelCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AICatalogModelClient) MapCreateBulk(slice any, setFunc func(*AICatalogModelCreate, int)) *AICatalogModelCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AICatalogModelCreateBulk{err: fmt.Errorf("calling to AICatalogModelClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AICatalogModelCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AICatalogModelCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AICatalogModel.
+func (c *AICatalogModelClient) Update() *AICatalogModelUpdate {
+	mutation := newAICatalogModelMutation(c.config, OpUpdate)
+	return &AICatalogModelUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AICatalogModelClient) UpdateOne(_m *AICatalogModel) *AICatalogModelUpdateOne {
+	mutation := newAICatalogModelMutation(c.config, OpUpdateOne, withAICatalogModel(_m))
+	return &AICatalogModelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AICatalogModelClient) UpdateOneID(id int) *AICatalogModelUpdateOne {
+	mutation := newAICatalogModelMutation(c.config, OpUpdateOne, withAICatalogModelID(id))
+	return &AICatalogModelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AICatalogModel.
+func (c *AICatalogModelClient) Delete() *AICatalogModelDelete {
+	mutation := newAICatalogModelMutation(c.config, OpDelete)
+	return &AICatalogModelDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AICatalogModelClient) DeleteOne(_m *AICatalogModel) *AICatalogModelDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AICatalogModelClient) DeleteOneID(id int) *AICatalogModelDeleteOne {
+	builder := c.Delete().Where(aicatalogmodel.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AICatalogModelDeleteOne{builder}
+}
+
+// Query returns a query builder for AICatalogModel.
+func (c *AICatalogModelClient) Query() *AICatalogModelQuery {
+	return &AICatalogModelQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAICatalogModel},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AICatalogModel entity by its id.
+func (c *AICatalogModelClient) Get(ctx context.Context, id int) (*AICatalogModel, error) {
+	return c.Query().Where(aicatalogmodel.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AICatalogModelClient) GetX(ctx context.Context, id int) *AICatalogModel {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryProvider queries the provider edge of a AICatalogModel.
+func (c *AICatalogModelClient) QueryProvider(_m *AICatalogModel) *AICatalogProviderQuery {
+	query := (&AICatalogProviderClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(aicatalogmodel.Table, aicatalogmodel.FieldID, id),
+			sqlgraph.To(aicatalogprovider.Table, aicatalogprovider.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, aicatalogmodel.ProviderTable, aicatalogmodel.ProviderColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AICatalogModelClient) Hooks() []Hook {
+	return c.hooks.AICatalogModel
+}
+
+// Interceptors returns the client interceptors.
+func (c *AICatalogModelClient) Interceptors() []Interceptor {
+	return c.inters.AICatalogModel
+}
+
+func (c *AICatalogModelClient) mutate(ctx context.Context, m *AICatalogModelMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AICatalogModelCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AICatalogModelUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AICatalogModelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AICatalogModelDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AICatalogModel mutation op: %q", m.Op())
+	}
+}
+
+// AICatalogProviderClient is a client for the AICatalogProvider schema.
+type AICatalogProviderClient struct {
+	config
+}
+
+// NewAICatalogProviderClient returns a client for the AICatalogProvider from the given config.
+func NewAICatalogProviderClient(c config) *AICatalogProviderClient {
+	return &AICatalogProviderClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `aicatalogprovider.Hooks(f(g(h())))`.
+func (c *AICatalogProviderClient) Use(hooks ...Hook) {
+	c.hooks.AICatalogProvider = append(c.hooks.AICatalogProvider, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `aicatalogprovider.Intercept(f(g(h())))`.
+func (c *AICatalogProviderClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AICatalogProvider = append(c.inters.AICatalogProvider, interceptors...)
+}
+
+// Create returns a builder for creating a AICatalogProvider entity.
+func (c *AICatalogProviderClient) Create() *AICatalogProviderCreate {
+	mutation := newAICatalogProviderMutation(c.config, OpCreate)
+	return &AICatalogProviderCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AICatalogProvider entities.
+func (c *AICatalogProviderClient) CreateBulk(builders ...*AICatalogProviderCreate) *AICatalogProviderCreateBulk {
+	return &AICatalogProviderCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AICatalogProviderClient) MapCreateBulk(slice any, setFunc func(*AICatalogProviderCreate, int)) *AICatalogProviderCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AICatalogProviderCreateBulk{err: fmt.Errorf("calling to AICatalogProviderClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AICatalogProviderCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AICatalogProviderCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AICatalogProvider.
+func (c *AICatalogProviderClient) Update() *AICatalogProviderUpdate {
+	mutation := newAICatalogProviderMutation(c.config, OpUpdate)
+	return &AICatalogProviderUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AICatalogProviderClient) UpdateOne(_m *AICatalogProvider) *AICatalogProviderUpdateOne {
+	mutation := newAICatalogProviderMutation(c.config, OpUpdateOne, withAICatalogProvider(_m))
+	return &AICatalogProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AICatalogProviderClient) UpdateOneID(id string) *AICatalogProviderUpdateOne {
+	mutation := newAICatalogProviderMutation(c.config, OpUpdateOne, withAICatalogProviderID(id))
+	return &AICatalogProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AICatalogProvider.
+func (c *AICatalogProviderClient) Delete() *AICatalogProviderDelete {
+	mutation := newAICatalogProviderMutation(c.config, OpDelete)
+	return &AICatalogProviderDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AICatalogProviderClient) DeleteOne(_m *AICatalogProvider) *AICatalogProviderDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AICatalogProviderClient) DeleteOneID(id string) *AICatalogProviderDeleteOne {
+	builder := c.Delete().Where(aicatalogprovider.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AICatalogProviderDeleteOne{builder}
+}
+
+// Query returns a query builder for AICatalogProvider.
+func (c *AICatalogProviderClient) Query() *AICatalogProviderQuery {
+	return &AICatalogProviderQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAICatalogProvider},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AICatalogProvider entity by its id.
+func (c *AICatalogProviderClient) Get(ctx context.Context, id string) (*AICatalogProvider, error) {
+	return c.Query().Where(aicatalogprovider.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AICatalogProviderClient) GetX(ctx context.Context, id string) *AICatalogProvider {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryModels queries the models edge of a AICatalogProvider.
+func (c *AICatalogProviderClient) QueryModels(_m *AICatalogProvider) *AICatalogModelQuery {
+	query := (&AICatalogModelClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(aicatalogprovider.Table, aicatalogprovider.FieldID, id),
+			sqlgraph.To(aicatalogmodel.Table, aicatalogmodel.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, aicatalogprovider.ModelsTable, aicatalogprovider.ModelsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryProviders queries the providers edge of a AICatalogProvider.
+func (c *AICatalogProviderClient) QueryProviders(_m *AICatalogProvider) *AIProviderQuery {
+	query := (&AIProviderClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(aicatalogprovider.Table, aicatalogprovider.FieldID, id),
+			sqlgraph.To(aiprovider.Table, aiprovider.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, aicatalogprovider.ProvidersTable, aicatalogprovider.ProvidersColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AICatalogProviderClient) Hooks() []Hook {
+	return c.hooks.AICatalogProvider
+}
+
+// Interceptors returns the client interceptors.
+func (c *AICatalogProviderClient) Interceptors() []Interceptor {
+	return c.inters.AICatalogProvider
+}
+
+func (c *AICatalogProviderClient) mutate(ctx context.Context, m *AICatalogProviderMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AICatalogProviderCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AICatalogProviderUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AICatalogProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AICatalogProviderDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AICatalogProvider mutation op: %q", m.Op())
+	}
+}
+
+// AIModelClient is a client for the AIModel schema.
+type AIModelClient struct {
+	config
+}
+
+// NewAIModelClient returns a client for the AIModel from the given config.
+func NewAIModelClient(c config) *AIModelClient {
+	return &AIModelClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `aimodel.Hooks(f(g(h())))`.
+func (c *AIModelClient) Use(hooks ...Hook) {
+	c.hooks.AIModel = append(c.hooks.AIModel, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `aimodel.Intercept(f(g(h())))`.
+func (c *AIModelClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AIModel = append(c.inters.AIModel, interceptors...)
+}
+
+// Create returns a builder for creating a AIModel entity.
+func (c *AIModelClient) Create() *AIModelCreate {
+	mutation := newAIModelMutation(c.config, OpCreate)
+	return &AIModelCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AIModel entities.
+func (c *AIModelClient) CreateBulk(builders ...*AIModelCreate) *AIModelCreateBulk {
+	return &AIModelCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AIModelClient) MapCreateBulk(slice any, setFunc func(*AIModelCreate, int)) *AIModelCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AIModelCreateBulk{err: fmt.Errorf("calling to AIModelClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AIModelCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AIModelCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AIModel.
+func (c *AIModelClient) Update() *AIModelUpdate {
+	mutation := newAIModelMutation(c.config, OpUpdate)
+	return &AIModelUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AIModelClient) UpdateOne(_m *AIModel) *AIModelUpdateOne {
+	mutation := newAIModelMutation(c.config, OpUpdateOne, withAIModel(_m))
+	return &AIModelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AIModelClient) UpdateOneID(id int) *AIModelUpdateOne {
+	mutation := newAIModelMutation(c.config, OpUpdateOne, withAIModelID(id))
+	return &AIModelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AIModel.
+func (c *AIModelClient) Delete() *AIModelDelete {
+	mutation := newAIModelMutation(c.config, OpDelete)
+	return &AIModelDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AIModelClient) DeleteOne(_m *AIModel) *AIModelDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AIModelClient) DeleteOneID(id int) *AIModelDeleteOne {
+	builder := c.Delete().Where(aimodel.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AIModelDeleteOne{builder}
+}
+
+// Query returns a query builder for AIModel.
+func (c *AIModelClient) Query() *AIModelQuery {
+	return &AIModelQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAIModel},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AIModel entity by its id.
+func (c *AIModelClient) Get(ctx context.Context, id int) (*AIModel, error) {
+	return c.Query().Where(aimodel.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AIModelClient) GetX(ctx context.Context, id int) *AIModel {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRoutes queries the routes edge of a AIModel.
+func (c *AIModelClient) QueryRoutes(_m *AIModel) *AIRouteQuery {
+	query := (&AIRouteClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(aimodel.Table, aimodel.FieldID, id),
+			sqlgraph.To(airoute.Table, airoute.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, aimodel.RoutesTable, aimodel.RoutesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryScenes queries the scenes edge of a AIModel.
+func (c *AIModelClient) QueryScenes(_m *AIModel) *AISceneQuery {
+	query := (&AISceneClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(aimodel.Table, aimodel.FieldID, id),
+			sqlgraph.To(aiscene.Table, aiscene.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, aimodel.ScenesTable, aimodel.ScenesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRequests queries the requests edge of a AIModel.
+func (c *AIModelClient) QueryRequests(_m *AIModel) *AIRequestQuery {
+	query := (&AIRequestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(aimodel.Table, aimodel.FieldID, id),
+			sqlgraph.To(airequest.Table, airequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, aimodel.RequestsTable, aimodel.RequestsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AIModelClient) Hooks() []Hook {
+	return c.hooks.AIModel
+}
+
+// Interceptors returns the client interceptors.
+func (c *AIModelClient) Interceptors() []Interceptor {
+	return c.inters.AIModel
+}
+
+func (c *AIModelClient) mutate(ctx context.Context, m *AIModelMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AIModelCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AIModelUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AIModelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AIModelDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AIModel mutation op: %q", m.Op())
+	}
+}
+
+// AIProviderClient is a client for the AIProvider schema.
+type AIProviderClient struct {
+	config
+}
+
+// NewAIProviderClient returns a client for the AIProvider from the given config.
+func NewAIProviderClient(c config) *AIProviderClient {
+	return &AIProviderClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `aiprovider.Hooks(f(g(h())))`.
+func (c *AIProviderClient) Use(hooks ...Hook) {
+	c.hooks.AIProvider = append(c.hooks.AIProvider, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `aiprovider.Intercept(f(g(h())))`.
+func (c *AIProviderClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AIProvider = append(c.inters.AIProvider, interceptors...)
+}
+
+// Create returns a builder for creating a AIProvider entity.
+func (c *AIProviderClient) Create() *AIProviderCreate {
+	mutation := newAIProviderMutation(c.config, OpCreate)
+	return &AIProviderCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AIProvider entities.
+func (c *AIProviderClient) CreateBulk(builders ...*AIProviderCreate) *AIProviderCreateBulk {
+	return &AIProviderCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AIProviderClient) MapCreateBulk(slice any, setFunc func(*AIProviderCreate, int)) *AIProviderCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AIProviderCreateBulk{err: fmt.Errorf("calling to AIProviderClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AIProviderCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AIProviderCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AIProvider.
+func (c *AIProviderClient) Update() *AIProviderUpdate {
+	mutation := newAIProviderMutation(c.config, OpUpdate)
+	return &AIProviderUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AIProviderClient) UpdateOne(_m *AIProvider) *AIProviderUpdateOne {
+	mutation := newAIProviderMutation(c.config, OpUpdateOne, withAIProvider(_m))
+	return &AIProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AIProviderClient) UpdateOneID(id int) *AIProviderUpdateOne {
+	mutation := newAIProviderMutation(c.config, OpUpdateOne, withAIProviderID(id))
+	return &AIProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AIProvider.
+func (c *AIProviderClient) Delete() *AIProviderDelete {
+	mutation := newAIProviderMutation(c.config, OpDelete)
+	return &AIProviderDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AIProviderClient) DeleteOne(_m *AIProvider) *AIProviderDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AIProviderClient) DeleteOneID(id int) *AIProviderDeleteOne {
+	builder := c.Delete().Where(aiprovider.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AIProviderDeleteOne{builder}
+}
+
+// Query returns a query builder for AIProvider.
+func (c *AIProviderClient) Query() *AIProviderQuery {
+	return &AIProviderQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAIProvider},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AIProvider entity by its id.
+func (c *AIProviderClient) Get(ctx context.Context, id int) (*AIProvider, error) {
+	return c.Query().Where(aiprovider.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AIProviderClient) GetX(ctx context.Context, id int) *AIProvider {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCatalogProvider queries the catalog_provider edge of a AIProvider.
+func (c *AIProviderClient) QueryCatalogProvider(_m *AIProvider) *AICatalogProviderQuery {
+	query := (&AICatalogProviderClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(aiprovider.Table, aiprovider.FieldID, id),
+			sqlgraph.To(aicatalogprovider.Table, aicatalogprovider.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, aiprovider.CatalogProviderTable, aiprovider.CatalogProviderColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRoutes queries the routes edge of a AIProvider.
+func (c *AIProviderClient) QueryRoutes(_m *AIProvider) *AIRouteQuery {
+	query := (&AIRouteClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(aiprovider.Table, aiprovider.FieldID, id),
+			sqlgraph.To(airoute.Table, airoute.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, aiprovider.RoutesTable, aiprovider.RoutesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryOffers queries the offers edge of a AIProvider.
+func (c *AIProviderClient) QueryOffers(_m *AIProvider) *AIProviderOfferQuery {
+	query := (&AIProviderOfferClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(aiprovider.Table, aiprovider.FieldID, id),
+			sqlgraph.To(aiprovideroffer.Table, aiprovideroffer.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, aiprovider.OffersTable, aiprovider.OffersColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRequests queries the requests edge of a AIProvider.
+func (c *AIProviderClient) QueryRequests(_m *AIProvider) *AIRequestQuery {
+	query := (&AIRequestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(aiprovider.Table, aiprovider.FieldID, id),
+			sqlgraph.To(airequest.Table, airequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, aiprovider.RequestsTable, aiprovider.RequestsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AIProviderClient) Hooks() []Hook {
+	return c.hooks.AIProvider
+}
+
+// Interceptors returns the client interceptors.
+func (c *AIProviderClient) Interceptors() []Interceptor {
+	return c.inters.AIProvider
+}
+
+func (c *AIProviderClient) mutate(ctx context.Context, m *AIProviderMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AIProviderCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AIProviderUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AIProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AIProviderDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AIProvider mutation op: %q", m.Op())
+	}
+}
+
+// AIProviderOfferClient is a client for the AIProviderOffer schema.
+type AIProviderOfferClient struct {
+	config
+}
+
+// NewAIProviderOfferClient returns a client for the AIProviderOffer from the given config.
+func NewAIProviderOfferClient(c config) *AIProviderOfferClient {
+	return &AIProviderOfferClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `aiprovideroffer.Hooks(f(g(h())))`.
+func (c *AIProviderOfferClient) Use(hooks ...Hook) {
+	c.hooks.AIProviderOffer = append(c.hooks.AIProviderOffer, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `aiprovideroffer.Intercept(f(g(h())))`.
+func (c *AIProviderOfferClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AIProviderOffer = append(c.inters.AIProviderOffer, interceptors...)
+}
+
+// Create returns a builder for creating a AIProviderOffer entity.
+func (c *AIProviderOfferClient) Create() *AIProviderOfferCreate {
+	mutation := newAIProviderOfferMutation(c.config, OpCreate)
+	return &AIProviderOfferCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AIProviderOffer entities.
+func (c *AIProviderOfferClient) CreateBulk(builders ...*AIProviderOfferCreate) *AIProviderOfferCreateBulk {
+	return &AIProviderOfferCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AIProviderOfferClient) MapCreateBulk(slice any, setFunc func(*AIProviderOfferCreate, int)) *AIProviderOfferCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AIProviderOfferCreateBulk{err: fmt.Errorf("calling to AIProviderOfferClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AIProviderOfferCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AIProviderOfferCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AIProviderOffer.
+func (c *AIProviderOfferClient) Update() *AIProviderOfferUpdate {
+	mutation := newAIProviderOfferMutation(c.config, OpUpdate)
+	return &AIProviderOfferUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AIProviderOfferClient) UpdateOne(_m *AIProviderOffer) *AIProviderOfferUpdateOne {
+	mutation := newAIProviderOfferMutation(c.config, OpUpdateOne, withAIProviderOffer(_m))
+	return &AIProviderOfferUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AIProviderOfferClient) UpdateOneID(id int) *AIProviderOfferUpdateOne {
+	mutation := newAIProviderOfferMutation(c.config, OpUpdateOne, withAIProviderOfferID(id))
+	return &AIProviderOfferUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AIProviderOffer.
+func (c *AIProviderOfferClient) Delete() *AIProviderOfferDelete {
+	mutation := newAIProviderOfferMutation(c.config, OpDelete)
+	return &AIProviderOfferDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AIProviderOfferClient) DeleteOne(_m *AIProviderOffer) *AIProviderOfferDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AIProviderOfferClient) DeleteOneID(id int) *AIProviderOfferDeleteOne {
+	builder := c.Delete().Where(aiprovideroffer.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AIProviderOfferDeleteOne{builder}
+}
+
+// Query returns a query builder for AIProviderOffer.
+func (c *AIProviderOfferClient) Query() *AIProviderOfferQuery {
+	return &AIProviderOfferQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAIProviderOffer},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AIProviderOffer entity by its id.
+func (c *AIProviderOfferClient) Get(ctx context.Context, id int) (*AIProviderOffer, error) {
+	return c.Query().Where(aiprovideroffer.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AIProviderOfferClient) GetX(ctx context.Context, id int) *AIProviderOffer {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryProvider queries the provider edge of a AIProviderOffer.
+func (c *AIProviderOfferClient) QueryProvider(_m *AIProviderOffer) *AIProviderQuery {
+	query := (&AIProviderClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(aiprovideroffer.Table, aiprovideroffer.FieldID, id),
+			sqlgraph.To(aiprovider.Table, aiprovider.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, aiprovideroffer.ProviderTable, aiprovideroffer.ProviderColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AIProviderOfferClient) Hooks() []Hook {
+	return c.hooks.AIProviderOffer
+}
+
+// Interceptors returns the client interceptors.
+func (c *AIProviderOfferClient) Interceptors() []Interceptor {
+	return c.inters.AIProviderOffer
+}
+
+func (c *AIProviderOfferClient) mutate(ctx context.Context, m *AIProviderOfferMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AIProviderOfferCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AIProviderOfferUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AIProviderOfferUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AIProviderOfferDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AIProviderOffer mutation op: %q", m.Op())
+	}
+}
+
+// AIRequestClient is a client for the AIRequest schema.
+type AIRequestClient struct {
+	config
+}
+
+// NewAIRequestClient returns a client for the AIRequest from the given config.
+func NewAIRequestClient(c config) *AIRequestClient {
+	return &AIRequestClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `airequest.Hooks(f(g(h())))`.
+func (c *AIRequestClient) Use(hooks ...Hook) {
+	c.hooks.AIRequest = append(c.hooks.AIRequest, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `airequest.Intercept(f(g(h())))`.
+func (c *AIRequestClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AIRequest = append(c.inters.AIRequest, interceptors...)
+}
+
+// Create returns a builder for creating a AIRequest entity.
+func (c *AIRequestClient) Create() *AIRequestCreate {
+	mutation := newAIRequestMutation(c.config, OpCreate)
+	return &AIRequestCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AIRequest entities.
+func (c *AIRequestClient) CreateBulk(builders ...*AIRequestCreate) *AIRequestCreateBulk {
+	return &AIRequestCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AIRequestClient) MapCreateBulk(slice any, setFunc func(*AIRequestCreate, int)) *AIRequestCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AIRequestCreateBulk{err: fmt.Errorf("calling to AIRequestClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AIRequestCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AIRequestCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AIRequest.
+func (c *AIRequestClient) Update() *AIRequestUpdate {
+	mutation := newAIRequestMutation(c.config, OpUpdate)
+	return &AIRequestUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AIRequestClient) UpdateOne(_m *AIRequest) *AIRequestUpdateOne {
+	mutation := newAIRequestMutation(c.config, OpUpdateOne, withAIRequest(_m))
+	return &AIRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AIRequestClient) UpdateOneID(id int64) *AIRequestUpdateOne {
+	mutation := newAIRequestMutation(c.config, OpUpdateOne, withAIRequestID(id))
+	return &AIRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AIRequest.
+func (c *AIRequestClient) Delete() *AIRequestDelete {
+	mutation := newAIRequestMutation(c.config, OpDelete)
+	return &AIRequestDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AIRequestClient) DeleteOne(_m *AIRequest) *AIRequestDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AIRequestClient) DeleteOneID(id int64) *AIRequestDeleteOne {
+	builder := c.Delete().Where(airequest.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AIRequestDeleteOne{builder}
+}
+
+// Query returns a query builder for AIRequest.
+func (c *AIRequestClient) Query() *AIRequestQuery {
+	return &AIRequestQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAIRequest},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AIRequest entity by its id.
+func (c *AIRequestClient) Get(ctx context.Context, id int64) (*AIRequest, error) {
+	return c.Query().Where(airequest.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AIRequestClient) GetX(ctx context.Context, id int64) *AIRequest {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryModel queries the model edge of a AIRequest.
+func (c *AIRequestClient) QueryModel(_m *AIRequest) *AIModelQuery {
+	query := (&AIModelClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airequest.Table, airequest.FieldID, id),
+			sqlgraph.To(aimodel.Table, aimodel.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, airequest.ModelTable, airequest.ModelColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRoute queries the route edge of a AIRequest.
+func (c *AIRequestClient) QueryRoute(_m *AIRequest) *AIRouteQuery {
+	query := (&AIRouteClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airequest.Table, airequest.FieldID, id),
+			sqlgraph.To(airoute.Table, airoute.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, airequest.RouteTable, airequest.RouteColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryProvider queries the provider edge of a AIRequest.
+func (c *AIRequestClient) QueryProvider(_m *AIRequest) *AIProviderQuery {
+	query := (&AIProviderClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airequest.Table, airequest.FieldID, id),
+			sqlgraph.To(aiprovider.Table, aiprovider.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, airequest.ProviderTable, airequest.ProviderColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPayload queries the payload edge of a AIRequest.
+func (c *AIRequestClient) QueryPayload(_m *AIRequest) *AIRequestPayloadQuery {
+	query := (&AIRequestPayloadClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airequest.Table, airequest.FieldID, id),
+			sqlgraph.To(airequestpayload.Table, airequestpayload.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, airequest.PayloadTable, airequest.PayloadColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAdjustments queries the adjustments edge of a AIRequest.
+func (c *AIRequestClient) QueryAdjustments(_m *AIRequest) *AIRouteAdjustmentQuery {
+	query := (&AIRouteAdjustmentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airequest.Table, airequest.FieldID, id),
+			sqlgraph.To(airouteadjustment.Table, airouteadjustment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, airequest.AdjustmentsTable, airequest.AdjustmentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AIRequestClient) Hooks() []Hook {
+	return c.hooks.AIRequest
+}
+
+// Interceptors returns the client interceptors.
+func (c *AIRequestClient) Interceptors() []Interceptor {
+	return c.inters.AIRequest
+}
+
+func (c *AIRequestClient) mutate(ctx context.Context, m *AIRequestMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AIRequestCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AIRequestUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AIRequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AIRequestDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AIRequest mutation op: %q", m.Op())
+	}
+}
+
+// AIRequestPayloadClient is a client for the AIRequestPayload schema.
+type AIRequestPayloadClient struct {
+	config
+}
+
+// NewAIRequestPayloadClient returns a client for the AIRequestPayload from the given config.
+func NewAIRequestPayloadClient(c config) *AIRequestPayloadClient {
+	return &AIRequestPayloadClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `airequestpayload.Hooks(f(g(h())))`.
+func (c *AIRequestPayloadClient) Use(hooks ...Hook) {
+	c.hooks.AIRequestPayload = append(c.hooks.AIRequestPayload, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `airequestpayload.Intercept(f(g(h())))`.
+func (c *AIRequestPayloadClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AIRequestPayload = append(c.inters.AIRequestPayload, interceptors...)
+}
+
+// Create returns a builder for creating a AIRequestPayload entity.
+func (c *AIRequestPayloadClient) Create() *AIRequestPayloadCreate {
+	mutation := newAIRequestPayloadMutation(c.config, OpCreate)
+	return &AIRequestPayloadCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AIRequestPayload entities.
+func (c *AIRequestPayloadClient) CreateBulk(builders ...*AIRequestPayloadCreate) *AIRequestPayloadCreateBulk {
+	return &AIRequestPayloadCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AIRequestPayloadClient) MapCreateBulk(slice any, setFunc func(*AIRequestPayloadCreate, int)) *AIRequestPayloadCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AIRequestPayloadCreateBulk{err: fmt.Errorf("calling to AIRequestPayloadClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AIRequestPayloadCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AIRequestPayloadCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AIRequestPayload.
+func (c *AIRequestPayloadClient) Update() *AIRequestPayloadUpdate {
+	mutation := newAIRequestPayloadMutation(c.config, OpUpdate)
+	return &AIRequestPayloadUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AIRequestPayloadClient) UpdateOne(_m *AIRequestPayload) *AIRequestPayloadUpdateOne {
+	mutation := newAIRequestPayloadMutation(c.config, OpUpdateOne, withAIRequestPayload(_m))
+	return &AIRequestPayloadUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AIRequestPayloadClient) UpdateOneID(id int64) *AIRequestPayloadUpdateOne {
+	mutation := newAIRequestPayloadMutation(c.config, OpUpdateOne, withAIRequestPayloadID(id))
+	return &AIRequestPayloadUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AIRequestPayload.
+func (c *AIRequestPayloadClient) Delete() *AIRequestPayloadDelete {
+	mutation := newAIRequestPayloadMutation(c.config, OpDelete)
+	return &AIRequestPayloadDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AIRequestPayloadClient) DeleteOne(_m *AIRequestPayload) *AIRequestPayloadDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AIRequestPayloadClient) DeleteOneID(id int64) *AIRequestPayloadDeleteOne {
+	builder := c.Delete().Where(airequestpayload.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AIRequestPayloadDeleteOne{builder}
+}
+
+// Query returns a query builder for AIRequestPayload.
+func (c *AIRequestPayloadClient) Query() *AIRequestPayloadQuery {
+	return &AIRequestPayloadQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAIRequestPayload},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AIRequestPayload entity by its id.
+func (c *AIRequestPayloadClient) Get(ctx context.Context, id int64) (*AIRequestPayload, error) {
+	return c.Query().Where(airequestpayload.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AIRequestPayloadClient) GetX(ctx context.Context, id int64) *AIRequestPayload {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRequest queries the request edge of a AIRequestPayload.
+func (c *AIRequestPayloadClient) QueryRequest(_m *AIRequestPayload) *AIRequestQuery {
+	query := (&AIRequestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airequestpayload.Table, airequestpayload.FieldID, id),
+			sqlgraph.To(airequest.Table, airequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, airequestpayload.RequestTable, airequestpayload.RequestColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AIRequestPayloadClient) Hooks() []Hook {
+	return c.hooks.AIRequestPayload
+}
+
+// Interceptors returns the client interceptors.
+func (c *AIRequestPayloadClient) Interceptors() []Interceptor {
+	return c.inters.AIRequestPayload
+}
+
+func (c *AIRequestPayloadClient) mutate(ctx context.Context, m *AIRequestPayloadMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AIRequestPayloadCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AIRequestPayloadUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AIRequestPayloadUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AIRequestPayloadDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AIRequestPayload mutation op: %q", m.Op())
+	}
+}
+
+// AIRouteClient is a client for the AIRoute schema.
+type AIRouteClient struct {
+	config
+}
+
+// NewAIRouteClient returns a client for the AIRoute from the given config.
+func NewAIRouteClient(c config) *AIRouteClient {
+	return &AIRouteClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `airoute.Hooks(f(g(h())))`.
+func (c *AIRouteClient) Use(hooks ...Hook) {
+	c.hooks.AIRoute = append(c.hooks.AIRoute, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `airoute.Intercept(f(g(h())))`.
+func (c *AIRouteClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AIRoute = append(c.inters.AIRoute, interceptors...)
+}
+
+// Create returns a builder for creating a AIRoute entity.
+func (c *AIRouteClient) Create() *AIRouteCreate {
+	mutation := newAIRouteMutation(c.config, OpCreate)
+	return &AIRouteCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AIRoute entities.
+func (c *AIRouteClient) CreateBulk(builders ...*AIRouteCreate) *AIRouteCreateBulk {
+	return &AIRouteCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AIRouteClient) MapCreateBulk(slice any, setFunc func(*AIRouteCreate, int)) *AIRouteCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AIRouteCreateBulk{err: fmt.Errorf("calling to AIRouteClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AIRouteCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AIRouteCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AIRoute.
+func (c *AIRouteClient) Update() *AIRouteUpdate {
+	mutation := newAIRouteMutation(c.config, OpUpdate)
+	return &AIRouteUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AIRouteClient) UpdateOne(_m *AIRoute) *AIRouteUpdateOne {
+	mutation := newAIRouteMutation(c.config, OpUpdateOne, withAIRoute(_m))
+	return &AIRouteUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AIRouteClient) UpdateOneID(id int) *AIRouteUpdateOne {
+	mutation := newAIRouteMutation(c.config, OpUpdateOne, withAIRouteID(id))
+	return &AIRouteUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AIRoute.
+func (c *AIRouteClient) Delete() *AIRouteDelete {
+	mutation := newAIRouteMutation(c.config, OpDelete)
+	return &AIRouteDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AIRouteClient) DeleteOne(_m *AIRoute) *AIRouteDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AIRouteClient) DeleteOneID(id int) *AIRouteDeleteOne {
+	builder := c.Delete().Where(airoute.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AIRouteDeleteOne{builder}
+}
+
+// Query returns a query builder for AIRoute.
+func (c *AIRouteClient) Query() *AIRouteQuery {
+	return &AIRouteQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAIRoute},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AIRoute entity by its id.
+func (c *AIRouteClient) Get(ctx context.Context, id int) (*AIRoute, error) {
+	return c.Query().Where(airoute.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AIRouteClient) GetX(ctx context.Context, id int) *AIRoute {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryModel queries the model edge of a AIRoute.
+func (c *AIRouteClient) QueryModel(_m *AIRoute) *AIModelQuery {
+	query := (&AIModelClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airoute.Table, airoute.FieldID, id),
+			sqlgraph.To(aimodel.Table, aimodel.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, airoute.ModelTable, airoute.ModelColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryProvider queries the provider edge of a AIRoute.
+func (c *AIRouteClient) QueryProvider(_m *AIRoute) *AIProviderQuery {
+	query := (&AIProviderClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airoute.Table, airoute.FieldID, id),
+			sqlgraph.To(aiprovider.Table, aiprovider.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, airoute.ProviderTable, airoute.ProviderColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAdjustments queries the adjustments edge of a AIRoute.
+func (c *AIRouteClient) QueryAdjustments(_m *AIRoute) *AIRouteAdjustmentQuery {
+	query := (&AIRouteAdjustmentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airoute.Table, airoute.FieldID, id),
+			sqlgraph.To(airouteadjustment.Table, airouteadjustment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, airoute.AdjustmentsTable, airoute.AdjustmentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRequests queries the requests edge of a AIRoute.
+func (c *AIRouteClient) QueryRequests(_m *AIRoute) *AIRequestQuery {
+	query := (&AIRequestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airoute.Table, airoute.FieldID, id),
+			sqlgraph.To(airequest.Table, airequest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, airoute.RequestsTable, airoute.RequestsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AIRouteClient) Hooks() []Hook {
+	return c.hooks.AIRoute
+}
+
+// Interceptors returns the client interceptors.
+func (c *AIRouteClient) Interceptors() []Interceptor {
+	return c.inters.AIRoute
+}
+
+func (c *AIRouteClient) mutate(ctx context.Context, m *AIRouteMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AIRouteCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AIRouteUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AIRouteUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AIRouteDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AIRoute mutation op: %q", m.Op())
+	}
+}
+
+// AIRouteAdjustmentClient is a client for the AIRouteAdjustment schema.
+type AIRouteAdjustmentClient struct {
+	config
+}
+
+// NewAIRouteAdjustmentClient returns a client for the AIRouteAdjustment from the given config.
+func NewAIRouteAdjustmentClient(c config) *AIRouteAdjustmentClient {
+	return &AIRouteAdjustmentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `airouteadjustment.Hooks(f(g(h())))`.
+func (c *AIRouteAdjustmentClient) Use(hooks ...Hook) {
+	c.hooks.AIRouteAdjustment = append(c.hooks.AIRouteAdjustment, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `airouteadjustment.Intercept(f(g(h())))`.
+func (c *AIRouteAdjustmentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AIRouteAdjustment = append(c.inters.AIRouteAdjustment, interceptors...)
+}
+
+// Create returns a builder for creating a AIRouteAdjustment entity.
+func (c *AIRouteAdjustmentClient) Create() *AIRouteAdjustmentCreate {
+	mutation := newAIRouteAdjustmentMutation(c.config, OpCreate)
+	return &AIRouteAdjustmentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AIRouteAdjustment entities.
+func (c *AIRouteAdjustmentClient) CreateBulk(builders ...*AIRouteAdjustmentCreate) *AIRouteAdjustmentCreateBulk {
+	return &AIRouteAdjustmentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AIRouteAdjustmentClient) MapCreateBulk(slice any, setFunc func(*AIRouteAdjustmentCreate, int)) *AIRouteAdjustmentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AIRouteAdjustmentCreateBulk{err: fmt.Errorf("calling to AIRouteAdjustmentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AIRouteAdjustmentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AIRouteAdjustmentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AIRouteAdjustment.
+func (c *AIRouteAdjustmentClient) Update() *AIRouteAdjustmentUpdate {
+	mutation := newAIRouteAdjustmentMutation(c.config, OpUpdate)
+	return &AIRouteAdjustmentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AIRouteAdjustmentClient) UpdateOne(_m *AIRouteAdjustment) *AIRouteAdjustmentUpdateOne {
+	mutation := newAIRouteAdjustmentMutation(c.config, OpUpdateOne, withAIRouteAdjustment(_m))
+	return &AIRouteAdjustmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AIRouteAdjustmentClient) UpdateOneID(id int) *AIRouteAdjustmentUpdateOne {
+	mutation := newAIRouteAdjustmentMutation(c.config, OpUpdateOne, withAIRouteAdjustmentID(id))
+	return &AIRouteAdjustmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AIRouteAdjustment.
+func (c *AIRouteAdjustmentClient) Delete() *AIRouteAdjustmentDelete {
+	mutation := newAIRouteAdjustmentMutation(c.config, OpDelete)
+	return &AIRouteAdjustmentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AIRouteAdjustmentClient) DeleteOne(_m *AIRouteAdjustment) *AIRouteAdjustmentDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AIRouteAdjustmentClient) DeleteOneID(id int) *AIRouteAdjustmentDeleteOne {
+	builder := c.Delete().Where(airouteadjustment.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AIRouteAdjustmentDeleteOne{builder}
+}
+
+// Query returns a query builder for AIRouteAdjustment.
+func (c *AIRouteAdjustmentClient) Query() *AIRouteAdjustmentQuery {
+	return &AIRouteAdjustmentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAIRouteAdjustment},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AIRouteAdjustment entity by its id.
+func (c *AIRouteAdjustmentClient) Get(ctx context.Context, id int) (*AIRouteAdjustment, error) {
+	return c.Query().Where(airouteadjustment.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AIRouteAdjustmentClient) GetX(ctx context.Context, id int) *AIRouteAdjustment {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRoute queries the route edge of a AIRouteAdjustment.
+func (c *AIRouteAdjustmentClient) QueryRoute(_m *AIRouteAdjustment) *AIRouteQuery {
+	query := (&AIRouteClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airouteadjustment.Table, airouteadjustment.FieldID, id),
+			sqlgraph.To(airoute.Table, airoute.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, airouteadjustment.RouteTable, airouteadjustment.RouteColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRequest queries the request edge of a AIRouteAdjustment.
+func (c *AIRouteAdjustmentClient) QueryRequest(_m *AIRouteAdjustment) *AIRequestQuery {
+	query := (&AIRequestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airouteadjustment.Table, airouteadjustment.FieldID, id),
+			sqlgraph.To(airequest.Table, airequest.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, airouteadjustment.RequestTable, airouteadjustment.RequestColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AIRouteAdjustmentClient) Hooks() []Hook {
+	return c.hooks.AIRouteAdjustment
+}
+
+// Interceptors returns the client interceptors.
+func (c *AIRouteAdjustmentClient) Interceptors() []Interceptor {
+	return c.inters.AIRouteAdjustment
+}
+
+func (c *AIRouteAdjustmentClient) mutate(ctx context.Context, m *AIRouteAdjustmentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AIRouteAdjustmentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AIRouteAdjustmentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AIRouteAdjustmentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AIRouteAdjustmentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AIRouteAdjustment mutation op: %q", m.Op())
+	}
+}
+
+// AISceneClient is a client for the AIScene schema.
+type AISceneClient struct {
+	config
+}
+
+// NewAISceneClient returns a client for the AIScene from the given config.
+func NewAISceneClient(c config) *AISceneClient {
+	return &AISceneClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `aiscene.Hooks(f(g(h())))`.
+func (c *AISceneClient) Use(hooks ...Hook) {
+	c.hooks.AIScene = append(c.hooks.AIScene, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `aiscene.Intercept(f(g(h())))`.
+func (c *AISceneClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AIScene = append(c.inters.AIScene, interceptors...)
+}
+
+// Create returns a builder for creating a AIScene entity.
+func (c *AISceneClient) Create() *AISceneCreate {
+	mutation := newAISceneMutation(c.config, OpCreate)
+	return &AISceneCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AIScene entities.
+func (c *AISceneClient) CreateBulk(builders ...*AISceneCreate) *AISceneCreateBulk {
+	return &AISceneCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AISceneClient) MapCreateBulk(slice any, setFunc func(*AISceneCreate, int)) *AISceneCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AISceneCreateBulk{err: fmt.Errorf("calling to AISceneClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AISceneCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AISceneCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AIScene.
+func (c *AISceneClient) Update() *AISceneUpdate {
+	mutation := newAISceneMutation(c.config, OpUpdate)
+	return &AISceneUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AISceneClient) UpdateOne(_m *AIScene) *AISceneUpdateOne {
+	mutation := newAISceneMutation(c.config, OpUpdateOne, withAIScene(_m))
+	return &AISceneUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AISceneClient) UpdateOneID(id int) *AISceneUpdateOne {
+	mutation := newAISceneMutation(c.config, OpUpdateOne, withAISceneID(id))
+	return &AISceneUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AIScene.
+func (c *AISceneClient) Delete() *AISceneDelete {
+	mutation := newAISceneMutation(c.config, OpDelete)
+	return &AISceneDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AISceneClient) DeleteOne(_m *AIScene) *AISceneDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AISceneClient) DeleteOneID(id int) *AISceneDeleteOne {
+	builder := c.Delete().Where(aiscene.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AISceneDeleteOne{builder}
+}
+
+// Query returns a query builder for AIScene.
+func (c *AISceneClient) Query() *AISceneQuery {
+	return &AISceneQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAIScene},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AIScene entity by its id.
+func (c *AISceneClient) Get(ctx context.Context, id int) (*AIScene, error) {
+	return c.Query().Where(aiscene.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AISceneClient) GetX(ctx context.Context, id int) *AIScene {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryModel queries the model edge of a AIScene.
+func (c *AISceneClient) QueryModel(_m *AIScene) *AIModelQuery {
+	query := (&AIModelClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(aiscene.Table, aiscene.FieldID, id),
+			sqlgraph.To(aimodel.Table, aimodel.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, aiscene.ModelTable, aiscene.ModelColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AISceneClient) Hooks() []Hook {
+	return c.hooks.AIScene
+}
+
+// Interceptors returns the client interceptors.
+func (c *AISceneClient) Interceptors() []Interceptor {
+	return c.inters.AIScene
+}
+
+func (c *AISceneClient) mutate(ctx context.Context, m *AISceneMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AISceneCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AISceneUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AISceneUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AISceneDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AIScene mutation op: %q", m.Op())
 	}
 }
 
@@ -8587,10 +10387,12 @@ func (c *WalkthroughClient) mutate(ctx context.Context, m *WalkthroughMutation) 
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Activity, Ad, CatalogSourceLink, CatalogSyncCursor, Comment, CommentLike,
-		EditRecord, Favorite, FavoriteItem, FieldPermissionMapping, Game,
-		GameCharacter, GameCharacterRelation, GameCover, GameDeveloper,
-		GameDeveloperRelation, GameDownloadResource, GameDownloadResourceFile,
+		AICatalogModel, AICatalogProvider, AIModel, AIProvider, AIProviderOffer,
+		AIRequest, AIRequestPayload, AIRoute, AIRouteAdjustment, AIScene, Activity, Ad,
+		CatalogSourceLink, CatalogSyncCursor, Comment, CommentLike, EditRecord,
+		Favorite, FavoriteItem, FieldPermissionMapping, Game, GameCharacter,
+		GameCharacterRelation, GameCover, GameDeveloper, GameDeveloperRelation,
+		GameDownloadResource, GameDownloadResourceFile,
 		GameDownloadResourceFileHistory, GameDownloadResourceReport, GameImage,
 		GameLink, GameRelation, GameTagRelation, GameUploadChunk, GameUploadSession,
 		MalwareScanCase, Message, ModerationEvent, OidcIdentity, RoleFieldPermission,
@@ -8599,10 +10401,12 @@ type (
 		UserUploadQuota, UserUploadQuotaRecord, Walkthrough []ent.Hook
 	}
 	inters struct {
-		Activity, Ad, CatalogSourceLink, CatalogSyncCursor, Comment, CommentLike,
-		EditRecord, Favorite, FavoriteItem, FieldPermissionMapping, Game,
-		GameCharacter, GameCharacterRelation, GameCover, GameDeveloper,
-		GameDeveloperRelation, GameDownloadResource, GameDownloadResourceFile,
+		AICatalogModel, AICatalogProvider, AIModel, AIProvider, AIProviderOffer,
+		AIRequest, AIRequestPayload, AIRoute, AIRouteAdjustment, AIScene, Activity, Ad,
+		CatalogSourceLink, CatalogSyncCursor, Comment, CommentLike, EditRecord,
+		Favorite, FavoriteItem, FieldPermissionMapping, Game, GameCharacter,
+		GameCharacterRelation, GameCover, GameDeveloper, GameDeveloperRelation,
+		GameDownloadResource, GameDownloadResourceFile,
 		GameDownloadResourceFileHistory, GameDownloadResourceReport, GameImage,
 		GameLink, GameRelation, GameTagRelation, GameUploadChunk, GameUploadSession,
 		MalwareScanCase, Message, ModerationEvent, OidcIdentity, RoleFieldPermission,

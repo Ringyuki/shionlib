@@ -9,6 +9,449 @@ import (
 )
 
 var (
+	// AiCatalogModelsColumns holds the columns for the "ai_catalog_models" table.
+	AiCatalogModelsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "model_key", Type: field.TypeString, Size: 200, SchemaType: map[string]string{"postgres": "character varying(200)"}},
+		{Name: "canonical_id", Type: field.TypeString, Nullable: true, Size: 200, SchemaType: map[string]string{"postgres": "character varying(200)"}},
+		{Name: "name", Type: field.TypeString, Size: 200, SchemaType: map[string]string{"postgres": "character varying(200)"}},
+		{Name: "type", Type: field.TypeString, Nullable: true, Size: 32, SchemaType: map[string]string{"postgres": "character varying(32)"}},
+		{Name: "family", Type: field.TypeString, Nullable: true, Size: 100, SchemaType: map[string]string{"postgres": "character varying(100)"}},
+		{Name: "npm", Type: field.TypeString, Nullable: true, Size: 200, SchemaType: map[string]string{"postgres": "character varying(200)"}},
+		{Name: "input_modalities", Type: field.TypeOther, Nullable: true, Default: schema.Expr("ARRAY[]::text[]"), SchemaType: map[string]string{"postgres": "text[]"}},
+		{Name: "output_modalities", Type: field.TypeOther, Nullable: true, Default: schema.Expr("ARRAY[]::text[]"), SchemaType: map[string]string{"postgres": "text[]"}},
+		{Name: "context_limit", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "output_limit", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "temperature", Type: field.TypeBool, Default: true},
+		{Name: "tool_call", Type: field.TypeBool, Default: false},
+		{Name: "reasoning", Type: field.TypeBool, Default: false},
+		{Name: "structured_output", Type: field.TypeBool, Nullable: true},
+		{Name: "input_price", Type: field.TypeFloat64, Nullable: true},
+		{Name: "output_price", Type: field.TypeFloat64, Nullable: true},
+		{Name: "cache_read_price", Type: field.TypeFloat64, Nullable: true},
+		{Name: "cache_write_price", Type: field.TypeFloat64, Nullable: true},
+		{Name: "price_tiers", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "release_date", Type: field.TypeString, Nullable: true, Size: 32, SchemaType: map[string]string{"postgres": "character varying(32)"}},
+		{Name: "synced_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "provider_id", Type: field.TypeString, Size: 100, SchemaType: map[string]string{"postgres": "character varying(100)"}},
+	}
+	// AiCatalogModelsTable holds the schema information for the "ai_catalog_models" table.
+	AiCatalogModelsTable = &schema.Table{
+		Name:       "ai_catalog_models",
+		Columns:    AiCatalogModelsColumns,
+		PrimaryKey: []*schema.Column{AiCatalogModelsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ai_catalog_models_provider_id_fkey",
+				Columns:    []*schema.Column{AiCatalogModelsColumns[22]},
+				RefColumns: []*schema.Column{AiCatalogProvidersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "ai_catalog_models_provider_id_model_key_key",
+				Unique:  true,
+				Columns: []*schema.Column{AiCatalogModelsColumns[22], AiCatalogModelsColumns[1]},
+			},
+			{
+				Name:    "ai_catalog_models_canonical_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{AiCatalogModelsColumns[2]},
+			},
+			{
+				Name:    "ai_catalog_models_model_key_idx",
+				Unique:  false,
+				Columns: []*schema.Column{AiCatalogModelsColumns[1]},
+			},
+		},
+	}
+	// AiCatalogProvidersColumns holds the columns for the "ai_catalog_providers" table.
+	AiCatalogProvidersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 100, SchemaType: map[string]string{"postgres": "character varying(100)"}},
+		{Name: "name", Type: field.TypeString, Size: 200, SchemaType: map[string]string{"postgres": "character varying(200)"}},
+		{Name: "npm", Type: field.TypeString, Nullable: true, Size: 200, SchemaType: map[string]string{"postgres": "character varying(200)"}},
+		{Name: "api_url", Type: field.TypeString, Nullable: true, Size: 500, SchemaType: map[string]string{"postgres": "character varying(500)"}},
+		{Name: "doc_url", Type: field.TypeString, Nullable: true, Size: 500, SchemaType: map[string]string{"postgres": "character varying(500)"}},
+		{Name: "synced_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+	}
+	// AiCatalogProvidersTable holds the schema information for the "ai_catalog_providers" table.
+	AiCatalogProvidersTable = &schema.Table{
+		Name:       "ai_catalog_providers",
+		Columns:    AiCatalogProvidersColumns,
+		PrimaryKey: []*schema.Column{AiCatalogProvidersColumns[0]},
+	}
+	// AiModelsColumns holds the columns for the "ai_models" table.
+	AiModelsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "key", Type: field.TypeString, Size: 200, SchemaType: map[string]string{"postgres": "character varying(200)"}},
+		{Name: "name", Type: field.TypeString, Size: 100, SchemaType: map[string]string{"postgres": "character varying(100)"}},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 500, SchemaType: map[string]string{"postgres": "character varying(500)"}},
+		{Name: "canonical_id", Type: field.TypeString, Nullable: true, Size: 200, SchemaType: map[string]string{"postgres": "character varying(200)"}},
+		{Name: "vision", Type: field.TypeBool, Default: false},
+		{Name: "moderation", Type: field.TypeBool, Default: false},
+		{Name: "temperature", Type: field.TypeBool, Default: true},
+		{Name: "tool_call", Type: field.TypeBool, Default: false},
+		{Name: "reasoning", Type: field.TypeBool, Default: false},
+		{Name: "context_limit", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "output_limit", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "is_default", Type: field.TypeBool, Default: false},
+		{Name: "enabled", Type: field.TypeBool, Default: true},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+	}
+	// AiModelsTable holds the schema information for the "ai_models" table.
+	AiModelsTable = &schema.Table{
+		Name:       "ai_models",
+		Columns:    AiModelsColumns,
+		PrimaryKey: []*schema.Column{AiModelsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "ai_models_key_key",
+				Unique:  true,
+				Columns: []*schema.Column{AiModelsColumns[1]},
+			},
+			{
+				Name:    "ai_models_canonical_id_key",
+				Unique:  true,
+				Columns: []*schema.Column{AiModelsColumns[4]},
+			},
+		},
+	}
+	// AiProvidersColumns holds the columns for the "ai_providers" table.
+	AiProvidersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "name", Type: field.TypeString, Size: 60, SchemaType: map[string]string{"postgres": "character varying(60)"}},
+		{Name: "kind", Type: field.TypeString, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "base_url", Type: field.TypeString, Nullable: true, Size: 500, SchemaType: map[string]string{"postgres": "character varying(500)"}},
+		{Name: "api_key", Type: field.TypeString, Size: 2147483647},
+		{Name: "key_hint", Type: field.TypeString, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "price_multiplier", Type: field.TypeFloat64, Default: 1},
+		{Name: "enabled", Type: field.TypeBool, Default: true},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "catalog_provider_id", Type: field.TypeString, Nullable: true, Size: 100, SchemaType: map[string]string{"postgres": "character varying(100)"}},
+	}
+	// AiProvidersTable holds the schema information for the "ai_providers" table.
+	AiProvidersTable = &schema.Table{
+		Name:       "ai_providers",
+		Columns:    AiProvidersColumns,
+		PrimaryKey: []*schema.Column{AiProvidersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ai_providers_catalog_provider_id_fkey",
+				Columns:    []*schema.Column{AiProvidersColumns[10]},
+				RefColumns: []*schema.Column{AiCatalogProvidersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "ai_providers_name_key",
+				Unique:  true,
+				Columns: []*schema.Column{AiProvidersColumns[1]},
+			},
+			{
+				Name:    "ai_providers_catalog_provider_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{AiProvidersColumns[10]},
+			},
+		},
+	}
+	// AiProviderOffersColumns holds the columns for the "ai_provider_offers" table.
+	AiProviderOffersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "upstream_id", Type: field.TypeString, Size: 200, SchemaType: map[string]string{"postgres": "character varying(200)"}},
+		{Name: "name", Type: field.TypeString, Nullable: true, Size: 200, SchemaType: map[string]string{"postgres": "character varying(200)"}},
+		{Name: "protocols", Type: field.TypeOther, Nullable: true, Default: schema.Expr("ARRAY[]::text[]"), SchemaType: map[string]string{"postgres": "text[]"}},
+		{Name: "canonical_id", Type: field.TypeString, Nullable: true, Size: 200, SchemaType: map[string]string{"postgres": "character varying(200)"}},
+		{Name: "synced_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "provider_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// AiProviderOffersTable holds the schema information for the "ai_provider_offers" table.
+	AiProviderOffersTable = &schema.Table{
+		Name:       "ai_provider_offers",
+		Columns:    AiProviderOffersColumns,
+		PrimaryKey: []*schema.Column{AiProviderOffersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ai_provider_offers_provider_id_fkey",
+				Columns:    []*schema.Column{AiProviderOffersColumns[6]},
+				RefColumns: []*schema.Column{AiProvidersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "ai_provider_offers_provider_id_upstream_id_key",
+				Unique:  true,
+				Columns: []*schema.Column{AiProviderOffersColumns[6], AiProviderOffersColumns[1]},
+			},
+			{
+				Name:    "ai_provider_offers_canonical_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{AiProviderOffersColumns[4]},
+			},
+		},
+	}
+	// AiRequestsColumns holds the columns for the "ai_requests" table.
+	AiRequestsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true, SchemaType: map[string]string{"postgres": "bigserial"}},
+		{Name: "call_id", Type: field.TypeString, SchemaType: map[string]string{"postgres": "uuid"}},
+		{Name: "source", Type: field.TypeString, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "scene", Type: field.TypeString, Nullable: true, Size: 64, SchemaType: map[string]string{"postgres": "character varying(64)"}},
+		{Name: "upstream_id", Type: field.TypeString, Size: 200, SchemaType: map[string]string{"postgres": "character varying(200)"}},
+		{Name: "protocol", Type: field.TypeString, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "ok", Type: field.TypeBool},
+		{Name: "error_kind", Type: field.TypeString, Nullable: true, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "error_message", Type: field.TypeString, Nullable: true, Size: 500, SchemaType: map[string]string{"postgres": "character varying(500)"}},
+		{Name: "error_detail", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "adaptation", Type: field.TypeString, Nullable: true, Size: 100, SchemaType: map[string]string{"postgres": "character varying(100)"}},
+		{Name: "finish_reason", Type: field.TypeString, Nullable: true, Size: 32, SchemaType: map[string]string{"postgres": "character varying(32)"}},
+		{Name: "first_token_ms", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "duration_ms", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "input_tokens", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "output_tokens", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "cache_read_tokens", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "cache_write_tokens", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "reasoning_tokens", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "cost_usd", Type: field.TypeFloat64, Default: 0},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "model_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "provider_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "route_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// AiRequestsTable holds the schema information for the "ai_requests" table.
+	AiRequestsTable = &schema.Table{
+		Name:       "ai_requests",
+		Columns:    AiRequestsColumns,
+		PrimaryKey: []*schema.Column{AiRequestsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ai_requests_model_id_fkey",
+				Columns:    []*schema.Column{AiRequestsColumns[21]},
+				RefColumns: []*schema.Column{AiModelsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "ai_requests_provider_id_fkey",
+				Columns:    []*schema.Column{AiRequestsColumns[22]},
+				RefColumns: []*schema.Column{AiProvidersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "ai_requests_route_id_fkey",
+				Columns:    []*schema.Column{AiRequestsColumns[23]},
+				RefColumns: []*schema.Column{AiRoutesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "ai_requests_created_idx",
+				Unique:  false,
+				Columns: []*schema.Column{AiRequestsColumns[20]},
+			},
+			{
+				Name:    "ai_requests_scene_created_idx",
+				Unique:  false,
+				Columns: []*schema.Column{AiRequestsColumns[3], AiRequestsColumns[20]},
+			},
+			{
+				Name:    "ai_requests_model_id_created_idx",
+				Unique:  false,
+				Columns: []*schema.Column{AiRequestsColumns[21], AiRequestsColumns[20]},
+			},
+			{
+				Name:    "ai_requests_route_id_created_idx",
+				Unique:  false,
+				Columns: []*schema.Column{AiRequestsColumns[23], AiRequestsColumns[20]},
+			},
+			{
+				Name:    "ai_requests_provider_id_created_idx",
+				Unique:  false,
+				Columns: []*schema.Column{AiRequestsColumns[22], AiRequestsColumns[20]},
+			},
+			{
+				Name:    "ai_requests_call_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{AiRequestsColumns[1]},
+			},
+		},
+	}
+	// AiRequestPayloadsColumns holds the columns for the "ai_request_payloads" table.
+	AiRequestPayloadsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true, SchemaType: map[string]string{"postgres": "bigserial"}},
+		{Name: "input", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "output", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "request_id", Type: field.TypeInt64, Unique: true, SchemaType: map[string]string{"postgres": "bigserial"}},
+	}
+	// AiRequestPayloadsTable holds the schema information for the "ai_request_payloads" table.
+	AiRequestPayloadsTable = &schema.Table{
+		Name:       "ai_request_payloads",
+		Columns:    AiRequestPayloadsColumns,
+		PrimaryKey: []*schema.Column{AiRequestPayloadsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ai_request_payloads_request_id_fkey",
+				Columns:    []*schema.Column{AiRequestPayloadsColumns[4]},
+				RefColumns: []*schema.Column{AiRequestsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "ai_request_payloads_request_id_key",
+				Unique:  true,
+				Columns: []*schema.Column{AiRequestPayloadsColumns[4]},
+			},
+			{
+				Name:    "ai_request_payloads_created_idx",
+				Unique:  false,
+				Columns: []*schema.Column{AiRequestPayloadsColumns[3]},
+			},
+		},
+	}
+	// AiRoutesColumns holds the columns for the "ai_routes" table.
+	AiRoutesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "upstream_id", Type: field.TypeString, Size: 200, SchemaType: map[string]string{"postgres": "character varying(200)"}},
+		{Name: "protocol", Type: field.TypeString, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "price_manual", Type: field.TypeBool, Default: false},
+		{Name: "input_price", Type: field.TypeFloat64, Default: 0},
+		{Name: "output_price", Type: field.TypeFloat64, Default: 0},
+		{Name: "cache_read_price", Type: field.TypeFloat64, Nullable: true},
+		{Name: "cache_write_price", Type: field.TypeFloat64, Nullable: true},
+		{Name: "price_tiers", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "dropped_params", Type: field.TypeOther, Nullable: true, Default: schema.Expr("ARRAY[]::text[]"), SchemaType: map[string]string{"postgres": "text[]"}},
+		{Name: "json_mode", Type: field.TypeBool, Default: false},
+		{Name: "priority", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "status", Type: field.TypeString, Size: 16, Default: "active", SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "status_kind", Type: field.TypeString, Nullable: true, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "status_message", Type: field.TypeString, Nullable: true, Size: 500, SchemaType: map[string]string{"postgres": "character varying(500)"}},
+		{Name: "status_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "model_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "provider_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// AiRoutesTable holds the schema information for the "ai_routes" table.
+	AiRoutesTable = &schema.Table{
+		Name:       "ai_routes",
+		Columns:    AiRoutesColumns,
+		PrimaryKey: []*schema.Column{AiRoutesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ai_routes_model_id_fkey",
+				Columns:    []*schema.Column{AiRoutesColumns[18]},
+				RefColumns: []*schema.Column{AiModelsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "ai_routes_provider_id_fkey",
+				Columns:    []*schema.Column{AiRoutesColumns[19]},
+				RefColumns: []*schema.Column{AiProvidersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "ai_routes_model_id_provider_id_key",
+				Unique:  true,
+				Columns: []*schema.Column{AiRoutesColumns[18], AiRoutesColumns[19]},
+			},
+			{
+				Name:    "ai_routes_provider_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{AiRoutesColumns[19]},
+			},
+			{
+				Name:    "ai_routes_status_idx",
+				Unique:  false,
+				Columns: []*schema.Column{AiRoutesColumns[12]},
+			},
+		},
+	}
+	// AiRouteAdjustmentsColumns holds the columns for the "ai_route_adjustments" table.
+	AiRouteAdjustmentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "kind", Type: field.TypeString, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "value", Type: field.TypeString, Size: 200, SchemaType: map[string]string{"postgres": "character varying(200)"}},
+		{Name: "previous", Type: field.TypeString, Nullable: true, Size: 200, SchemaType: map[string]string{"postgres": "character varying(200)"}},
+		{Name: "error_kind", Type: field.TypeString, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "request_id", Type: field.TypeInt64, Nullable: true, SchemaType: map[string]string{"postgres": "bigserial"}},
+		{Name: "route_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// AiRouteAdjustmentsTable holds the schema information for the "ai_route_adjustments" table.
+	AiRouteAdjustmentsTable = &schema.Table{
+		Name:       "ai_route_adjustments",
+		Columns:    AiRouteAdjustmentsColumns,
+		PrimaryKey: []*schema.Column{AiRouteAdjustmentsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ai_route_adjustments_request_id_fkey",
+				Columns:    []*schema.Column{AiRouteAdjustmentsColumns[6]},
+				RefColumns: []*schema.Column{AiRequestsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "ai_route_adjustments_route_id_fkey",
+				Columns:    []*schema.Column{AiRouteAdjustmentsColumns[7]},
+				RefColumns: []*schema.Column{AiRoutesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "ai_route_adjustments_route_id_kind_value_key",
+				Unique:  true,
+				Columns: []*schema.Column{AiRouteAdjustmentsColumns[7], AiRouteAdjustmentsColumns[1], AiRouteAdjustmentsColumns[2]},
+			},
+			{
+				Name:    "ai_route_adjustments_request_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{AiRouteAdjustmentsColumns[6]},
+			},
+		},
+	}
+	// AiScenesColumns holds the columns for the "ai_scenes" table.
+	AiScenesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "key", Type: field.TypeString, Size: 64, SchemaType: map[string]string{"postgres": "character varying(64)"}},
+		{Name: "temperature", Type: field.TypeFloat64, Nullable: true},
+		{Name: "max_output_tokens", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "timeout_ms", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "model_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// AiScenesTable holds the schema information for the "ai_scenes" table.
+	AiScenesTable = &schema.Table{
+		Name:       "ai_scenes",
+		Columns:    AiScenesColumns,
+		PrimaryKey: []*schema.Column{AiScenesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ai_scenes_model_id_fkey",
+				Columns:    []*schema.Column{AiScenesColumns[6]},
+				RefColumns: []*schema.Column{AiModelsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "ai_scenes_key_key",
+				Unique:  true,
+				Columns: []*schema.Column{AiScenesColumns[1]},
+			},
+			{
+				Name:    "ai_scenes_model_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{AiScenesColumns[6]},
+			},
+		},
+	}
 	// ActivitiesColumns holds the columns for the "activities" table.
 	ActivitiesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -2059,6 +2502,16 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AiCatalogModelsTable,
+		AiCatalogProvidersTable,
+		AiModelsTable,
+		AiProvidersTable,
+		AiProviderOffersTable,
+		AiRequestsTable,
+		AiRequestPayloadsTable,
+		AiRoutesTable,
+		AiRouteAdjustmentsTable,
+		AiScenesTable,
 		ActivitiesTable,
 		AdsTable,
 		CatalogSourceLinksTable,
@@ -2106,6 +2559,48 @@ var (
 )
 
 func init() {
+	AiCatalogModelsTable.ForeignKeys[0].RefTable = AiCatalogProvidersTable
+	AiCatalogModelsTable.Annotation = &entsql.Annotation{
+		Table: "ai_catalog_models",
+	}
+	AiCatalogProvidersTable.Annotation = &entsql.Annotation{
+		Table: "ai_catalog_providers",
+	}
+	AiModelsTable.Annotation = &entsql.Annotation{
+		Table: "ai_models",
+	}
+	AiProvidersTable.ForeignKeys[0].RefTable = AiCatalogProvidersTable
+	AiProvidersTable.Annotation = &entsql.Annotation{
+		Table: "ai_providers",
+	}
+	AiProviderOffersTable.ForeignKeys[0].RefTable = AiProvidersTable
+	AiProviderOffersTable.Annotation = &entsql.Annotation{
+		Table: "ai_provider_offers",
+	}
+	AiRequestsTable.ForeignKeys[0].RefTable = AiModelsTable
+	AiRequestsTable.ForeignKeys[1].RefTable = AiProvidersTable
+	AiRequestsTable.ForeignKeys[2].RefTable = AiRoutesTable
+	AiRequestsTable.Annotation = &entsql.Annotation{
+		Table: "ai_requests",
+	}
+	AiRequestPayloadsTable.ForeignKeys[0].RefTable = AiRequestsTable
+	AiRequestPayloadsTable.Annotation = &entsql.Annotation{
+		Table: "ai_request_payloads",
+	}
+	AiRoutesTable.ForeignKeys[0].RefTable = AiModelsTable
+	AiRoutesTable.ForeignKeys[1].RefTable = AiProvidersTable
+	AiRoutesTable.Annotation = &entsql.Annotation{
+		Table: "ai_routes",
+	}
+	AiRouteAdjustmentsTable.ForeignKeys[0].RefTable = AiRequestsTable
+	AiRouteAdjustmentsTable.ForeignKeys[1].RefTable = AiRoutesTable
+	AiRouteAdjustmentsTable.Annotation = &entsql.Annotation{
+		Table: "ai_route_adjustments",
+	}
+	AiScenesTable.ForeignKeys[0].RefTable = AiModelsTable
+	AiScenesTable.Annotation = &entsql.Annotation{
+		Table: "ai_scenes",
+	}
 	ActivitiesTable.ForeignKeys[0].RefTable = CommentsTable
 	ActivitiesTable.ForeignKeys[1].RefTable = EditRecordsTable
 	ActivitiesTable.ForeignKeys[2].RefTable = GamesTable

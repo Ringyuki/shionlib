@@ -26,7 +26,7 @@ How each section of the Go backend engineering spec is met. **Enforced** means C
 | 20 | Authentication in transport, business permission in services, typed principal | `httpapi.Route.Access` + middleware authenticate; ownership and role rules in services; `actor.Actor` with an unexported context key | handler and service tests per authorization path | Enforced |
 | 21 | One data-access approach | ent + pgx pool; raw SQL only in Postgres adapters for what ent cannot express (ADR 0003) | depguard, `TestRawSQLStaysInPostgresAdapters` | Enforced |
 | 22 | Transactions decided by services, implemented by infrastructure | `Transactor` ports, `postgres.NewTransactor`, adapters join via `postgres.Client(ctx, client)`, `AfterCommit` hooks | transactor tests in `internal/adapter/postgres`, contract tests | Enforced |
-| 23 | Vendors behind adapters and minimal ports | every vendor in `internal/adapter/<vendor>`; ports in consumers | depguard (business may not import vendor SDKs) | Enforced |
+| 23 | Vendors behind adapters and minimal ports | every vendor in `internal/adapter/<vendor>`; ports in consumers; AI providers are reached only through the AI gateway (`ai.Upstream` implemented by `internal/adapter/llm`, ADR 0010) | depguard (business may not import vendor SDKs) | Enforced |
 | 24 | Typed, validated, immutable config; no `os.Getenv` | `platform/config` parsed once and validated; compose env block generated | forbidigo, `devtool deploy check` | Enforced |
 | 25 | Lifecycle and graceful shutdown order | `runtime.App` (signal → cancel → runners stop → closers in reverse under `SHUTDOWN_TIMEOUT`); HTTP server drains in-flight requests | `runtime` and `server` tests | Enforced |
 | 26 | Every goroutine owned; race tests | goroutines only in `internal/platform` | `TestGoroutinesHaveOwners`; CI `go test -race ./...` with Postgres and Redis | Enforced |
@@ -52,7 +52,7 @@ How each section of the Go backend engineering spec is met. **Enforced** means C
 | 46 | CI gate | `verify.sh`: gofmt, tidy, generated code, vet, golangci-lint, business codes, deploy env, tests (incl. archtest and integration), migration drift; separate race and govulncheck (pinned v1.8.0) jobs | `.github/workflows/api.yml` | Enforced |
 | 47 | Single API schema source | OpenAPI generated from route registrations | stale check in `verify.sh` | Enforced; client type generation **Deferred** until the new `@hina-ui/react` frontend starts |
 | 48 | Platform contract | `internal/platform/{config,logger,telemetry,database,redis,jobs,cache,ratelimit,realtime,i18n,jsoncodec,httpclient,runtime,server,requestid}`; transport infrastructure for response, errors, validation, authentication | depguard and archtest keep capabilities from re-implementing them | Enforced (metrics: see §18) |
-| 49 | ADRs with Context/Decision/Alternatives/Consequences/Migration | `docs/adr/0001`–`0009` | review | Reviewed |
+| 49 | ADRs with Context/Decision/Alternatives/Consequences/Migration | `docs/adr/0001`–`0010` | review | Reviewed |
 | 50 | Skill structure | `.claude/skills/go-backend/{SKILL.md,references,recipes,scripts}` (Claude Code skill path); the golden path replaces an `examples/` copy so examples cannot drift | — | Done |
 | 51 | SKILL.md content | principles, dependency direction, MUST/MUST NOT, workflow, golden path pointer, verification, references, "Where things go" | — | Done |
 | 52 | Decidable rules | rules are phrased as MUST/MUST NOT and the decidable ones are archtest or lint checks | this table | Done |

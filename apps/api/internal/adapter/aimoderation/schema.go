@@ -1,4 +1,4 @@
-package openai
+package aimoderation
 
 import "github.com/Ringyuki/shionlib/apps/api/internal/moderation"
 

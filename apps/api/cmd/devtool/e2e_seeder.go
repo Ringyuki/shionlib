@@ -12,7 +12,10 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/aimoderation"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/keybox"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/aipg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/fieldpermissionmapping"
@@ -24,6 +27,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/redis/gameredis"
+	"github.com/Ringyuki/shionlib/apps/api/internal/ai"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/redis"
 )
 
@@ -40,6 +44,7 @@ type e2ePasswordHasher interface {
 type e2eSeederDeps struct {
 	SQL      *sql.DB
 	Redis    *redis.Client
+	Keys     *keybox.Box
 	Hasher   e2ePasswordHasher
 	Password string
 	Now      func() time.Time
@@ -50,6 +55,7 @@ type e2eSeeder struct {
 	sql      *sql.DB
 	ent      *ent.Client
 	redis    *redis.Client
+	keys     *keybox.Box
 	hasher   e2ePasswordHasher
 	password string
 	now      func() time.Time
@@ -68,6 +74,7 @@ func newE2ESeeder(deps e2eSeederDeps) *e2eSeeder {
 		sql:      deps.SQL,
 		ent:      postgres.NewClient(deps.SQL),
 		redis:    deps.Redis,
+		keys:     deps.Keys,
 		hasher:   deps.Hasher,
 		password: deps.Password,
 		now:      deps.Now,
@@ -181,6 +188,9 @@ func (s *e2eSeeder) Seed(ctx context.Context) (e2eSeedResult, error) {
 		if err := s.seedPermissionMappings(ctx, tx, data.FieldPermissionMappings); err != nil {
 			return err
 		}
+		if err := s.seedModeration(ctx, tx); err != nil {
+			return err
+		}
 		graph, err := s.seedGameGraph(ctx, tx, data, users[e2eAdminIndex], users[e2eMemberIndex])
 		if err != nil {
 			return err
@@ -251,6 +261,37 @@ func (s *e2eSeeder) seedUsers(ctx context.Context, tx *ent.Client, passwordHash 
 		favoriteIDs = append(favoriteIDs, favorite.ID)
 	}
 	return userIDs, favoriteIDs, nil
+}
+
+func (s *e2eSeeder) seedModeration(ctx context.Context, tx *ent.Client) error {
+	repo := aipg.NewRepository(tx, s.keys)
+	baseURL := e2eUnreachableAIBaseURL
+	provider, err := repo.CreateProvider(ctx, ai.NewProvider{Name: "e2e-unreachable", Kind: ai.KindCompatible, BaseURL: &baseURL, APIKey: e2eUnreachableAIKey, PriceMultiplier: 1})
+	if err != nil {
+		return fmt.Errorf("seed ai provider: %w", err)
+	}
+	scenes := []struct {
+		scene      string
+		model      string
+		protocol   ai.Protocol
+		moderation bool
+	}{
+		{scene: aimoderation.ScreenScene, model: "omni-moderation-latest", protocol: ai.ProtocolModeration, moderation: true},
+		{scene: aimoderation.ReviewScene, model: "gpt-5-mini", protocol: ai.ProtocolChat},
+	}
+	for _, item := range scenes {
+		modelID, err := repo.CreateModel(ctx, ai.NewModel{Key: item.model, Name: item.model, Capabilities: ai.Capabilities{Moderation: item.moderation, Temperature: !item.moderation}})
+		if err != nil {
+			return fmt.Errorf("seed ai model %s: %w", item.model, err)
+		}
+		if _, err := repo.CreateRoute(ctx, ai.NewRoute{ModelID: modelID, ProviderID: provider, UpstreamID: item.model, Protocol: item.protocol}); err != nil {
+			return fmt.Errorf("seed ai route %s: %w", item.model, err)
+		}
+		if err := repo.SaveSceneConfig(ctx, ai.SceneConfig{Key: item.scene, ModelID: &modelID}); err != nil {
+			return fmt.Errorf("seed ai scene %s: %w", item.scene, err)
+		}
+	}
+	return nil
 }
 
 func (s *e2eSeeder) seedPermissionMappings(ctx context.Context, tx *ent.Client, rows []e2ePermissionMappingRow) error {

@@ -83,6 +83,7 @@ cmd/api ──► internal/bootstrap (composition root)
 | How is context passed? | first parameter everywhere; never `context.Background()` in request paths |
 | Database access? | ent in `internal/adapter/postgres/<capability>pg`, behind a port |
 | Redis access? | `internal/adapter/redis/<capability>redis` or `platform/cache`/`ratelimit`, behind a port |
+| Calling an AI model? | declare an `ai.SceneDefinition` (key, label, output), register it in `wireAI`, and call `ai.Service.Object/Text/Moderate` through a port in the consuming capability or an adapter like `internal/adapter/aimoderation`; models and keys are configured in the admin panel (ADR 0010) |
 | External services? | a port in the capability, an adapter in `internal/adapter/<vendor>` with a `platform/httpclient` client (recipes/add-external-client.md) |
 | Starting a goroutine? | don't: enqueue a River job, add a `jobs.Task`, or add a `runtime.Runner` in `internal/platform` |
 | Graceful shutdown? | `runtime.App` cancels runners, the HTTP server drains, closers run in reverse order under `SHUTDOWN_TIMEOUT` |

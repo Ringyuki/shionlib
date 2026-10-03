@@ -6,6 +6,36 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// AICatalogModel is the predicate function for aicatalogmodel builders.
+type AICatalogModel func(*sql.Selector)
+
+// AICatalogProvider is the predicate function for aicatalogprovider builders.
+type AICatalogProvider func(*sql.Selector)
+
+// AIModel is the predicate function for aimodel builders.
+type AIModel func(*sql.Selector)
+
+// AIProvider is the predicate function for aiprovider builders.
+type AIProvider func(*sql.Selector)
+
+// AIProviderOffer is the predicate function for aiprovideroffer builders.
+type AIProviderOffer func(*sql.Selector)
+
+// AIRequest is the predicate function for airequest builders.
+type AIRequest func(*sql.Selector)
+
+// AIRequestPayload is the predicate function for airequestpayload builders.
+type AIRequestPayload func(*sql.Selector)
+
+// AIRoute is the predicate function for airoute builders.
+type AIRoute func(*sql.Selector)
+
+// AIRouteAdjustment is the predicate function for airouteadjustment builders.
+type AIRouteAdjustment func(*sql.Selector)
+
+// AIScene is the predicate function for aiscene builders.
+type AIScene func(*sql.Selector)
+
 // Activity is the predicate function for activity builders.
 type Activity func(*sql.Selector)
 

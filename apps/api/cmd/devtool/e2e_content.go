@@ -7,6 +7,8 @@ import (
 
 const (
 	e2eDefaultPassword       = "ShionlibE2E123!"
+	e2eUnreachableAIBaseURL  = "http://127.0.0.1:9/v1"
+	e2eUnreachableAIKey      = "e2e-unreachable-ai-key"
 	e2ePrimaryFixtureGameID  = 1
 	e2eMalwareFixtureGameID  = 3
 	e2eSeededTagsPerGame     = 2

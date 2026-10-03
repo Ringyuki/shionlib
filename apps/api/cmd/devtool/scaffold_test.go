@@ -13,7 +13,7 @@ var notificationScaffold = scaffold{
 	Title:  "Notification",
 	Upper:  "NOTIFICATION",
 	Table:  "notifications",
-	Range:  630,
+	Range:  990,
 	Module: "github.com/Ringyuki/shionlib/apps/api",
 }
 
@@ -84,7 +84,7 @@ func TestRegisterRangeAppendsOnce(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(updated), `{Prefix: 630, Owner: "internal/notification", Domain: "notification"},`) {
+	if !strings.Contains(string(updated), `{Prefix: 990, Owner: "internal/notification", Domain: "notification"},`) {
 		t.Fatalf("range not registered:\n%s", updated)
 	}
 	if err := registerRange(root, notificationScaffold); err == nil {
