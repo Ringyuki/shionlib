@@ -27,6 +27,11 @@ func run(args []string) error {
 			return fmt.Errorf("usage: devtool migrate diff <name>")
 		}
 		return diffMigration(context.Background(), root, args[2])
+	case "feature create":
+		if len(args) < 4 {
+			return fmt.Errorf("usage: devtool feature create <name> <range-prefix>")
+		}
+		return createFeature(root, args[2], args[3])
 	case "bizcode check":
 		return checkBizCodes(root)
 	case "bizcode docs":
@@ -39,7 +44,7 @@ func run(args []string) error {
 }
 
 func usage() error {
-	return fmt.Errorf("usage: devtool <migrate diff <name> | migrate check | bizcode check | bizcode docs>")
+	return fmt.Errorf("usage: devtool <migrate diff <name> | migrate check | bizcode check | bizcode docs | feature create <name> <range>>")
 }
 
 func moduleRoot() (string, error) {

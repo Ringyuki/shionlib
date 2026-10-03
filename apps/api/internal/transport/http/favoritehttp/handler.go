@@ -35,7 +35,7 @@ func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "favorite.gameStats", Method: http.MethodGet, Path: "/favorites/game/{id}/stats", Summary: "Whether the caller favorited a game", Tags: tags, Access: httpapi.AccessUser}, h.gameStats)
 }
 
-func (h *Handler) create(ctx context.Context, in *createInput) (*response.Output[favoriteDTO], error) {
+func (h *Handler) create(ctx context.Context, in *createFavoriteInput) (*response.Output[favoriteDTO], error) {
 	created, err := h.service.Create(ctx, actor.From(ctx), favorite.CreateInput{
 		Name:        in.Body.Name,
 		Description: in.Body.Description,
@@ -47,26 +47,26 @@ func (h *Handler) create(ctx context.Context, in *createInput) (*response.Output
 	return response.OK(ctx, h.resp, toFavoriteDTO(created)), nil
 }
 
-func (h *Handler) list(ctx context.Context, in *listInput) (*response.Output[[]summaryDTO], error) {
+func (h *Handler) list(ctx context.Context, in *listFavoritesInput) (*response.Output[[]favoriteSummaryDTO], error) {
 	summaries, err := h.service.List(ctx, actor.From(ctx), favorite.ListQuery{UserID: in.userID(), GameID: in.gameID()})
 	if err != nil {
 		return nil, err
 	}
-	out := make([]summaryDTO, len(summaries))
+	out := make([]favoriteSummaryDTO, len(summaries))
 	for i, summary := range summaries {
-		out[i] = toSummaryDTO(summary)
+		out[i] = toFavoriteSummaryDTO(summary)
 	}
 	return response.OK(ctx, h.resp, out), nil
 }
 
-func (h *Handler) addGame(ctx context.Context, in *addGameInput) (*response.EmptyOutput, error) {
+func (h *Handler) addGame(ctx context.Context, in *addFavoriteGameInput) (*response.EmptyOutput, error) {
 	if err := h.service.AddGame(ctx, actor.From(ctx), in.ID, in.Body.GameID, in.Body.Note); err != nil {
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil
 }
 
-func (h *Handler) update(ctx context.Context, in *updateInput) (*response.EmptyOutput, error) {
+func (h *Handler) update(ctx context.Context, in *updateFavoriteInput) (*response.EmptyOutput, error) {
 	changes := favorite.Changes{Name: in.Body.Name, Description: in.Body.Description, IsPrivate: in.Body.IsPrivate}
 	if err := h.service.Update(ctx, actor.From(ctx), in.ID, changes); err != nil {
 		return nil, err
@@ -81,50 +81,50 @@ func (h *Handler) delete(ctx context.Context, in *favoritePath) (*response.Empty
 	return response.Empty(ctx, h.resp), nil
 }
 
-func (h *Handler) items(ctx context.Context, in *itemsInput) (*response.Output[itemPageDTO], error) {
+func (h *Handler) items(ctx context.Context, in *favoriteItemsInput) (*response.Output[favoriteItemPageDTO], error) {
 	viewer := actor.From(ctx)
 	items, total, err := h.service.Items(ctx, viewer, in.ID, favorite.Page{Number: in.Page, Size: in.PageSize})
 	if err != nil {
 		return nil, err
 	}
-	page := itemPageDTO{
-		Items: make([]itemDTO, len(items)),
-		Meta: itemPageMeta{
+	page := favoriteItemPageDTO{
+		Items: make([]favoriteItemDTO, len(items)),
+		Meta: favoriteItemPageMeta{
 			PageMeta:     response.NewPageMeta(total, len(items), in.PageSize, in.Page),
 			ContentLimit: int(viewer.ContentLimit),
 		},
 	}
 	for i, item := range items {
-		page.Items[i] = itemDTO{ID: item.ID, Note: item.Note, Game: gamehttp.ToCard(item.Game)}
+		page.Items[i] = favoriteItemDTO{ID: item.ID, Note: item.Note, Game: gamehttp.ToGameCard(item.Game)}
 	}
 	return response.OK(ctx, h.resp, page), nil
 }
 
-func (h *Handler) removeGame(ctx context.Context, in *removeGameInput) (*response.EmptyOutput, error) {
+func (h *Handler) removeGame(ctx context.Context, in *removeFavoriteGameInput) (*response.EmptyOutput, error) {
 	if err := h.service.RemoveGame(ctx, actor.From(ctx), in.ID, in.GameID); err != nil {
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil
 }
 
-func (h *Handler) updateItem(ctx context.Context, in *updateItemInput) (*response.EmptyOutput, error) {
+func (h *Handler) updateItem(ctx context.Context, in *updateFavoriteItemInput) (*response.EmptyOutput, error) {
 	if err := h.service.UpdateItem(ctx, actor.From(ctx), in.ItemID, in.Body.Note); err != nil {
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil
 }
 
-func (h *Handler) deleteItem(ctx context.Context, in *itemPath) (*response.EmptyOutput, error) {
+func (h *Handler) deleteItem(ctx context.Context, in *favoriteItemPath) (*response.EmptyOutput, error) {
 	if err := h.service.DeleteItem(ctx, actor.From(ctx), in.ItemID); err != nil {
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil
 }
 
-func (h *Handler) gameStats(ctx context.Context, in *favoritePath) (*response.Output[gameStatsDTO], error) {
+func (h *Handler) gameStats(ctx context.Context, in *favoritePath) (*response.Output[favoriteGameStatsDTO], error) {
 	has, err := h.service.HasGame(ctx, actor.From(ctx), in.ID)
 	if err != nil {
 		return nil, err
 	}
-	return response.OK(ctx, h.resp, gameStatsDTO{IsFavorite: has}), nil
+	return response.OK(ctx, h.resp, favoriteGameStatsDTO{IsFavorite: has}), nil
 }

@@ -30,14 +30,14 @@ func NewHandler(builder *response.Builder, timeout time.Duration, checks ...Chec
 	return &Handler{checks: checks, builder: builder, timeout: timeout}
 }
 
-type Status struct {
+type HealthStatus struct {
 	Status    string            `json:"status" enum:"ok,error"`
 	Timestamp time.Time         `json:"timestamp"`
 	Checks    map[string]string `json:"checks"`
 	LatencyMs int64             `json:"latencyMs"`
 }
 
-type liveness struct {
+type healthLiveness struct {
 	Status string `json:"status"`
 }
 
@@ -46,11 +46,11 @@ func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "health.live", Method: http.MethodGet, Path: "/health/live", Summary: "Liveness probe", Tags: []string{"health"}}, h.liveness)
 }
 
-func (h *Handler) readiness(ctx context.Context, _ *struct{}) (*response.Output[Status], error) {
+func (h *Handler) readiness(ctx context.Context, _ *struct{}) (*response.Output[HealthStatus], error) {
 	start := time.Now()
 	checkCtx, cancel := context.WithTimeout(ctx, h.timeout)
 	defer cancel()
-	status := Status{Status: "ok", Checks: make(map[string]string, len(h.checks))}
+	status := HealthStatus{Status: "ok", Checks: make(map[string]string, len(h.checks))}
 	var failures []error
 	for _, check := range h.checks {
 		if err := check.Pinger.Ping(checkCtx); err != nil {
@@ -68,6 +68,6 @@ func (h *Handler) readiness(ctx context.Context, _ *struct{}) (*response.Output[
 	return response.OK(ctx, h.builder, status), nil
 }
 
-func (h *Handler) liveness(ctx context.Context, _ *struct{}) (*response.Output[liveness], error) {
-	return response.OK(ctx, h.builder, liveness{Status: "ok"}), nil
+func (h *Handler) liveness(ctx context.Context, _ *struct{}) (*response.Output[healthLiveness], error) {
+	return response.OK(ctx, h.builder, healthLiveness{Status: "ok"}), nil
 }

@@ -45,7 +45,7 @@ func migrationDir(root string) (*sqltool.GolangMigrateDir, error) {
 func devDatabaseURL() (string, error) {
 	url := os.Getenv("DEV_DATABASE_URL")
 	if url == "" {
-		return "", errors.New("DEV_DATABASE_URL must point to an empty scratch database")
+		return "", errors.New("DEV_DATABASE_URL must point to a scratch database; its public schema is dropped on every run")
 	}
 	return url, nil
 }
@@ -63,6 +63,9 @@ func diffMigration(ctx context.Context, root, name string) error {
 		return err
 	}
 	registerPostgresDriver()
+	if err := resetScratchDatabase(ctx, url); err != nil {
+		return err
+	}
 	options := []schema.MigrateOption{
 		schema.WithDir(dir),
 		schema.WithMigrationMode(schema.ModeReplay),
@@ -130,4 +133,18 @@ func checkMigrationDrift(ctx context.Context, root string) error {
 		return err
 	}
 	return fmt.Errorf("ent schema and migrations have drifted; run `devtool migrate diff <name>`:\n%s", drift)
+}
+
+func resetScratchDatabase(ctx context.Context, url string) error {
+	db, err := sql.Open("postgres", url)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = db.Close()
+	}()
+	if _, err := db.ExecContext(ctx, `DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public`); err != nil {
+		return fmt.Errorf("reset scratch database: %w", err)
+	}
+	return nil
 }

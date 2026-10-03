@@ -6,7 +6,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 )
 
-type Cover struct {
+type GameCover struct {
 	Language string `json:"language" enum:"jp,en,zh,unknown"`
 	Type     string `json:"type" enum:"pkgfront,dig"`
 	URL      string `json:"url"`
@@ -15,34 +15,34 @@ type Cover struct {
 	Violence int    `json:"violence"`
 }
 
-type DeveloperRef struct {
+type GameDeveloperRef struct {
 	ID      int      `json:"id"`
 	Name    string   `json:"name"`
 	Aliases []string `json:"aliases"`
 }
 
-type Credit struct {
-	Role      string       `json:"role"`
-	Developer DeveloperRef `json:"developer"`
+type GameCredit struct {
+	Role      string           `json:"role"`
+	Developer GameDeveloperRef `json:"developer"`
 }
 
-type Card struct {
-	ID          int        `json:"id"`
-	TitleJP     string     `json:"title_jp"`
-	TitleZH     string     `json:"title_zh"`
-	TitleEN     string     `json:"title_en"`
-	Aliases     []string   `json:"aliases"`
-	Type        *string    `json:"type"`
-	Covers      []Cover    `json:"covers"`
-	IntroJP     string     `json:"intro_jp"`
-	IntroZH     string     `json:"intro_zh"`
-	IntroEN     string     `json:"intro_en"`
-	ReleaseDate *time.Time `json:"release_date"`
-	Developers  []Credit   `json:"developers"`
+type GameCard struct {
+	ID          int          `json:"id"`
+	TitleJP     string       `json:"title_jp"`
+	TitleZH     string       `json:"title_zh"`
+	TitleEN     string       `json:"title_en"`
+	Aliases     []string     `json:"aliases"`
+	Type        *string      `json:"type"`
+	Covers      []GameCover  `json:"covers"`
+	IntroJP     string       `json:"intro_jp"`
+	IntroZH     string       `json:"intro_zh"`
+	IntroEN     string       `json:"intro_en"`
+	ReleaseDate *time.Time   `json:"release_date"`
+	Developers  []GameCredit `json:"developers"`
 }
 
-func ToCard(card game.Card) Card {
-	out := Card{
+func ToGameCard(card game.Card) GameCard {
+	out := GameCard{
 		ID:          card.ID,
 		TitleJP:     card.TitleJP,
 		TitleZH:     card.TitleZH,
@@ -53,11 +53,11 @@ func ToCard(card game.Card) Card {
 		IntroZH:     card.IntroZH,
 		IntroEN:     card.IntroEN,
 		ReleaseDate: card.ReleaseDate,
-		Covers:      make([]Cover, len(card.Covers)),
-		Developers:  make([]Credit, len(card.Developers)),
+		Covers:      make([]GameCover, len(card.Covers)),
+		Developers:  make([]GameCredit, len(card.Developers)),
 	}
 	for i, cover := range card.Covers {
-		out.Covers[i] = Cover{
+		out.Covers[i] = GameCover{
 			Language: cover.Language,
 			Type:     cover.Type,
 			URL:      cover.URL,
@@ -67,9 +67,9 @@ func ToCard(card game.Card) Card {
 		}
 	}
 	for i, credit := range card.Developers {
-		out.Developers[i] = Credit{
+		out.Developers[i] = GameCredit{
 			Role:      credit.Role,
-			Developer: DeveloperRef{ID: credit.Developer.ID, Name: credit.Developer.Name, Aliases: nonNil(credit.Developer.Aliases)},
+			Developer: GameDeveloperRef{ID: credit.Developer.ID, Name: credit.Developer.Name, Aliases: nonNil(credit.Developer.Aliases)},
 		}
 	}
 	return out

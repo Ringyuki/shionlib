@@ -11,11 +11,11 @@ type favoritePath struct {
 	ID int `path:"id" minimum:"1"`
 }
 
-type itemPath struct {
+type favoriteItemPath struct {
 	ItemID int `path:"item_id" minimum:"1"`
 }
 
-type createInput struct {
+type createFavoriteInput struct {
 	Body struct {
 		Name        string  `json:"name" minLength:"1" maxLength:"255"`
 		Description *string `json:"description,omitempty" maxLength:"2000"`
@@ -23,7 +23,7 @@ type createInput struct {
 	}
 }
 
-type updateInput struct {
+type updateFavoriteInput struct {
 	ID   int `path:"id" minimum:"1"`
 	Body struct {
 		Name        *string `json:"name,omitempty" maxLength:"255"`
@@ -32,7 +32,7 @@ type updateInput struct {
 	}
 }
 
-type addGameInput struct {
+type addFavoriteGameInput struct {
 	ID   int `path:"id" minimum:"1"`
 	Body struct {
 		GameID int     `json:"game_id" minimum:"1"`
@@ -40,38 +40,38 @@ type addGameInput struct {
 	}
 }
 
-type updateItemInput struct {
+type updateFavoriteItemInput struct {
 	ItemID int `path:"item_id" minimum:"1"`
 	Body   struct {
 		Note *string `json:"note,omitempty" maxLength:"2000"`
 	}
 }
 
-type removeGameInput struct {
+type removeFavoriteGameInput struct {
 	ID     int `path:"id" minimum:"1"`
 	GameID int `path:"game_id" minimum:"1"`
 }
 
-type listInput struct {
+type listFavoritesInput struct {
 	UserID int `query:"user_id" minimum:"0" doc:"Owner whose lists to show; defaults to the caller"`
 	GameID int `query:"game_id" minimum:"0" doc:"When set, every list reports whether it contains this game"`
 }
 
-func (in *listInput) userID() *int {
+func (in *listFavoritesInput) userID() *int {
 	if in.UserID <= 0 {
 		return nil
 	}
 	return &in.UserID
 }
 
-func (in *listInput) gameID() *int {
+func (in *listFavoritesInput) gameID() *int {
 	if in.GameID <= 0 {
 		return nil
 	}
 	return &in.GameID
 }
 
-type itemsInput struct {
+type favoriteItemsInput struct {
 	ID int `path:"id" minimum:"1"`
 	httpapi.PageQuery
 }
@@ -83,7 +83,7 @@ type favoriteDTO struct {
 	IsPrivate   bool    `json:"is_private"`
 }
 
-type summaryDTO struct {
+type favoriteSummaryDTO struct {
 	ID          int     `json:"id"`
 	Name        string  `json:"name"`
 	Description *string `json:"description"`
@@ -93,23 +93,23 @@ type summaryDTO struct {
 	IsFavorite  *bool   `json:"is_favorite,omitempty"`
 }
 
-type itemDTO struct {
-	ID   int           `json:"id"`
-	Note *string       `json:"note"`
-	Game gamehttp.Card `json:"game"`
+type favoriteItemDTO struct {
+	ID   int               `json:"id"`
+	Note *string           `json:"note"`
+	Game gamehttp.GameCard `json:"game"`
 }
 
-type itemPageMeta struct {
+type favoriteItemPageMeta struct {
 	response.PageMeta
 	ContentLimit int `json:"content_limit"`
 }
 
-type itemPageDTO struct {
-	Items []itemDTO    `json:"items"`
-	Meta  itemPageMeta `json:"meta"`
+type favoriteItemPageDTO struct {
+	Items []favoriteItemDTO    `json:"items"`
+	Meta  favoriteItemPageMeta `json:"meta"`
 }
 
-type gameStatsDTO struct {
+type favoriteGameStatsDTO struct {
 	IsFavorite bool `json:"is_favorite"`
 }
 
@@ -117,8 +117,8 @@ func toFavoriteDTO(f favorite.Favorite) favoriteDTO {
 	return favoriteDTO{ID: f.ID, Name: f.Name, Description: f.Description, IsPrivate: f.IsPrivate}
 }
 
-func toSummaryDTO(s favorite.Summary) summaryDTO {
-	return summaryDTO{
+func toFavoriteSummaryDTO(s favorite.Summary) favoriteSummaryDTO {
+	return favoriteSummaryDTO{
 		ID:          s.ID,
 		Name:        s.Name,
 		Description: s.Description,
