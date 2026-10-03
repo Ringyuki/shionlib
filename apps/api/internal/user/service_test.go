@@ -426,3 +426,32 @@ func TestPasswordPolicy(t *testing.T) {
 		}
 	}
 }
+
+func TestPenalizeSkipsUsersItCannotBan(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture(true)
+	target := f.repo.Seed(user.User{Name: "uploader"})
+	root := f.repo.Seed(user.User{Name: "root", Role: actor.RoleSuperAdmin})
+	reviewer := f.repo.Seed(user.User{Name: "reviewer", Role: actor.RoleAdmin})
+	for _, id := range []int{root.ID, 999} {
+		if applied, err := f.service.Penalize(ctx, id, nil, "malware", 7); err != nil || applied {
+			t.Fatalf("user %d: applied=%v err=%v", id, applied, err)
+		}
+	}
+	if _, err := f.service.Penalize(ctx, target.ID, nil, "malware", 0); !errors.Is(err, user.ErrInvalidBanDuration) {
+		t.Fatalf("a penalty needs a duration: %v", err)
+	}
+	applied, err := f.service.Penalize(ctx, target.ID, ptr(reviewer.ID), "Resource report: MALWARE", 7)
+	if err != nil || !applied {
+		t.Fatalf("penalize: %v %v", applied, err)
+	}
+	if got := f.repo.User(target.ID); got.Status != user.StatusBanned || f.sessions.revoked[target.ID] != "user_banned" || f.repo.OpenBans(target.ID) != 1 {
+		t.Fatalf("penalty side effects missing: %+v %v", got, f.sessions.revoked)
+	}
+	if applied, err := f.service.Penalize(ctx, target.ID, nil, "again", 3); err != nil || applied {
+		t.Fatalf("already banned users are skipped: %v %v", applied, err)
+	}
+	if f.repo.OpenBans(target.ID) != 1 {
+		t.Fatal("no second ban record")
+	}
+}

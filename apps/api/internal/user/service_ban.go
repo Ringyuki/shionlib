@@ -51,6 +51,38 @@ func (s *Service) Ban(ctx context.Context, id int, in BanInput) error {
 	})
 }
 
+func (s *Service) Penalize(ctx context.Context, id int, bannedBy *int, reason string, days int) (bool, error) {
+	applied := false
+	err := s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
+		target, err := s.banTarget(ctx, id)
+		if errors.Is(err, ErrNotFound) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		if target.Banned() {
+			return nil
+		}
+		if days <= 0 {
+			return ErrInvalidBanDuration
+		}
+		if err := s.repo.CreateBan(ctx, NewBan{UserID: id, BannedBy: bannedBy, Reason: &reason, DurationDays: &days}); err != nil {
+			return err
+		}
+		banned := StatusBanned
+		if err := s.repo.Update(ctx, id, Changes{Status: &banned}); err != nil {
+			return err
+		}
+		if err := s.sessions.RevokeUser(ctx, id, reasonBanned); err != nil {
+			return err
+		}
+		applied = true
+		return nil
+	})
+	return applied, err
+}
+
 func (s *Service) Unban(ctx context.Context, id int) error {
 	return s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
 		target, err := s.banTarget(ctx, id)

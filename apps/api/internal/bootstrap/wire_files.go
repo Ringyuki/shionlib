@@ -11,7 +11,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/dlticket"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/localfs"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/objectstore"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/banpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/downloadpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/reportpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/scanpg"
@@ -33,6 +32,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/jobs/downloadjobs"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/jobs/reportjobs"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
+	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
 
 const (
@@ -70,7 +70,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		SecretAccessKey: cfg.Storage.Game.SecretAccessKey,
 		HTTPClient:      httpclient.New(httpclient.Options{Timeout: objectStoreTimeout}),
 	})
-	banner := banpg.NewBanner(infra.Ent, shared.Families, shared.Transactor, shared.Now)
+	banner := userPenalties{users: shared.Users}
 
 	quota := upload.NewQuotaService(uploadpg.NewQuotaRepository(infra.Ent), shared.Transactor, quotaPolicy(cfg), shared.Now)
 	uploads := upload.NewService(uploadpg.NewRepository(infra.Ent), quota, spool, shared.Transactor, upload.Settings{
@@ -199,4 +199,12 @@ func quotaPolicy(cfg *config.Config) upload.QuotaPolicy {
 		LongestInactiveDays: cfg.Upload.QuotaLongestInactiveDays,
 		Location:            location,
 	}
+}
+
+type userPenalties struct {
+	users *user.Service
+}
+
+func (p userPenalties) Ban(ctx context.Context, userID int, bannedBy *int, reason string, days int) (bool, error) {
+	return p.users.Penalize(ctx, userID, bannedBy, reason, days)
 }
