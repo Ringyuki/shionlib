@@ -153,6 +153,8 @@ func TestPermissionStore(t *testing.T) {
 	ctx := context.Background()
 	store := adminpg.NewPermissionStore(db.Ent)
 	target := db.User(t)
+	db.Ent.RoleFieldPermission.Delete().ExecX(ctx)
+	db.Ent.FieldPermissionMapping.Delete().ExecX(ctx)
 	db.Ent.RoleFieldPermission.Create().SetRole(1).SetEntity(rolefieldpermission.EntityGame).SetAllowMask(3).SaveX(ctx)
 	for _, m := range []struct {
 		field    string
@@ -190,5 +192,33 @@ func TestPermissionStore(t *testing.T) {
 	}
 	if err := store.SetUserMask(ctx, 987654, admin.PermissionGame, 1); !errors.Is(err, user.ErrNotFound) {
 		t.Fatalf("missing user: %v", err)
+	}
+}
+
+func TestMigrationsSeedTheLegacyEditPermissions(t *testing.T) {
+	db := pgtest.New(t)
+	ctx := context.Background()
+	store := adminpg.NewPermissionStore(db.Ent)
+	want := map[admin.PermissionEntity][3]int64{
+		admin.PermissionGame:      {718, 270334, 524287},
+		admin.PermissionCharacter: {494, 510, 511},
+		admin.PermissionDeveloper: {94, 126, 127},
+	}
+	for entity, masks := range want {
+		for i, role := range []actor.Role{actor.RoleUser, actor.RoleAdmin, actor.RoleSuperAdmin} {
+			if mask, err := store.RoleMask(ctx, role, entity); err != nil || mask != masks[i] {
+				t.Fatalf("%s role %d mask %d %v, want %d", entity, role, mask, err, masks[i])
+			}
+		}
+	}
+	game, err := store.PermissionMappings(ctx, admin.PermissionGame)
+	if err != nil || len(game) != 19 || game[18] != (admin.PermissionMapping{Field: "MANAGE_RELATIONS", BitIndex: 18, IsRelation: true}) {
+		t.Fatalf("game mappings %+v %v", game, err)
+	}
+	if characters, err := store.PermissionMappings(ctx, admin.PermissionCharacter); err != nil || len(characters) != 9 {
+		t.Fatalf("character mappings %+v %v", characters, err)
+	}
+	if developers, err := store.PermissionMappings(ctx, admin.PermissionDeveloper); err != nil || len(developers) != 7 {
+		t.Fatalf("developer mappings %+v %v", developers, err)
 	}
 }
