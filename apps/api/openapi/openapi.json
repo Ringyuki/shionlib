@@ -294,6 +294,859 @@
         ],
         "type": "object"
       },
+      "CreateReportInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "reason": {
+            "enum": [
+              "MALWARE",
+              "IRRELEVANT",
+              "BROKEN_LINK",
+              "MISLEADING_CONTENT",
+              "OTHER"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "DownloadFileDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "creator": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "file_hash": {
+            "type": "string"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "file_size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "file_status": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "file_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hash_algorithm": {
+            "enum": [
+              "sha256",
+              "blake3"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "is_virus_false_positive": {
+            "type": "boolean"
+          },
+          "latest_history": {
+            "$ref": "#/components/schemas/DownloadHistoryRefDTO"
+          },
+          "malware_scan_cases": {
+            "items": {
+              "$ref": "#/components/schemas/DownloadMalwareCaseDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "s3_file_key": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "file_name",
+          "file_size",
+          "file_url",
+          "s3_file_key",
+          "hash_algorithm",
+          "file_hash",
+          "file_status",
+          "is_virus_false_positive",
+          "malware_scan_cases",
+          "creator",
+          "latest_history"
+        ],
+        "type": "object"
+      },
+      "DownloadHistoryDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "file_hash": {
+            "type": "string"
+          },
+          "file_size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "hash_algorithm": {
+            "enum": [
+              "sha256",
+              "blake3"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "operator": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "s3_file_key": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "file_size",
+          "hash_algorithm",
+          "file_hash",
+          "s3_file_key",
+          "reason",
+          "operator",
+          "created"
+        ],
+        "type": "object"
+      },
+      "DownloadHistoryReasonInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DownloadHistoryRefDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "operator_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "reason",
+          "created",
+          "operator_id"
+        ],
+        "type": "object"
+      },
+      "DownloadLinkDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "expires_in": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "file_url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_url",
+          "expires_in"
+        ],
+        "type": "object"
+      },
+      "DownloadMalwareCaseDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "detected_viruses": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "detected_viruses"
+        ],
+        "type": "object"
+      },
+      "DownloadMigrateFileInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "file_content_type": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "file_hash": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "file_name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "file_size": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "s3_file_key": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_name",
+          "file_size",
+          "file_hash",
+          "file_content_type",
+          "s3_file_key"
+        ],
+        "type": "object"
+      },
+      "DownloadMigrateResourceInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "language": {
+            "items": {
+              "enum": [
+                "en",
+                "zh",
+                "zh-hant",
+                "jp"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "note": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "platform": {
+            "items": {
+              "enum": [
+                "win",
+                "mac",
+                "ios",
+                "and",
+                "lin",
+                "ps3",
+                "ps4",
+                "psv",
+                "psp",
+                "swi",
+                "dvd"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "simulator": {
+            "enum": [
+              "KRKR",
+              "ONS",
+              "ARTEMIS",
+              "OTHER"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "platform",
+          "language"
+        ],
+        "type": "object"
+      },
+      "DownloadReleaseDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "downloads": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "files": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "files_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameCard"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "language": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "platform": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "platform",
+          "language",
+          "note",
+          "downloads",
+          "game",
+          "files",
+          "files_count",
+          "creator",
+          "created"
+        ],
+        "type": "object"
+      },
+      "DownloadReleaseMeta": {
+        "additionalProperties": false,
+        "properties": {
+          "content_limit": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currentPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemsPerPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalItems": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "content_limit",
+          "totalItems",
+          "itemCount",
+          "itemsPerPage",
+          "totalPages",
+          "currentPage"
+        ],
+        "type": "object"
+      },
+      "DownloadReleasePageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DownloadReleaseDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/DownloadReleaseMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "DownloadResourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "downloads": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/DownloadFileDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "language": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "platform": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "simulator": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "platform",
+          "language",
+          "simulator",
+          "note",
+          "downloads",
+          "creator",
+          "created",
+          "updated",
+          "files"
+        ],
+        "type": "object"
+      },
+      "DownloadReuploadDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "type": "object"
+      },
+      "DownloadReuploadInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "upload_session_id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "upload_session_id"
+        ],
+        "type": "object"
+      },
+      "DownloadSourceBody": {
+        "additionalProperties": false,
+        "properties": {
+          "file_name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "language": {
+            "items": {
+              "enum": [
+                "en",
+                "zh",
+                "zh-hant",
+                "jp"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "note": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "platform": {
+            "items": {
+              "enum": [
+                "win",
+                "mac",
+                "ios",
+                "and",
+                "lin",
+                "ps3",
+                "ps4",
+                "psv",
+                "psp",
+                "swi",
+                "dvd"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "simulator": {
+            "enum": [
+              "KRKR",
+              "ONS",
+              "ARTEMIS",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "upload_session_id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "file_name",
+          "platform",
+          "language",
+          "upload_session_id"
+        ],
+        "type": "object"
+      },
+      "DownloadUserResourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "downloads": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "files_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameCard"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "language": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "more_than_one_file": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "platform": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "platform",
+          "language",
+          "note",
+          "downloads",
+          "file_name",
+          "more_than_one_file",
+          "files_count",
+          "game",
+          "creator",
+          "created",
+          "updated"
+        ],
+        "type": "object"
+      },
+      "DownloadUserResourceMeta": {
+        "additionalProperties": false,
+        "properties": {
+          "content_limit": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currentPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "has_on_going_session": {
+            "type": "boolean"
+          },
+          "is_current_user": {
+            "type": "boolean"
+          },
+          "itemCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemsPerPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalItems": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "is_current_user",
+          "has_on_going_session",
+          "content_limit",
+          "totalItems",
+          "itemCount",
+          "itemsPerPage",
+          "totalPages",
+          "currentPage"
+        ],
+        "type": "object"
+      },
+      "DownloadUserResourcePageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DownloadUserResourceDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/DownloadUserResourceMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "EditDownloadSourceBody": {
+        "additionalProperties": false,
+        "properties": {
+          "file_name": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "language": {
+            "items": {
+              "enum": [
+                "en",
+                "zh",
+                "zh-hant",
+                "jp"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "note": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "platform": {
+            "items": {
+              "enum": [
+                "win",
+                "mac",
+                "ios",
+                "and",
+                "lin",
+                "ps3",
+                "ps4",
+                "psv",
+                "psp",
+                "swi",
+                "dvd"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "simulator": {
+            "enum": [
+              "KRKR",
+              "ONS",
+              "ARTEMIS",
+              "OTHER"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "platform",
+          "language"
+        ],
+        "type": "object"
+      },
       "EmptyEnvelope": {
         "additionalProperties": false,
         "properties": {
@@ -332,6 +1185,138 @@
           },
           "data": {
             "$ref": "#/components/schemas/ActivityPageDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeDownloadLinkDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DownloadLinkDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeDownloadReleasePageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DownloadReleasePageDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeDownloadReuploadDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DownloadReuploadDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeDownloadUserResourcePageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DownloadUserResourcePageDTO"
           },
           "message": {
             "type": "string"
@@ -521,6 +1506,39 @@
         ],
         "type": "object"
       },
+      "EnvelopeInitUploadDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/InitUploadDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeInt": {
         "additionalProperties": false,
         "properties": {
@@ -531,6 +1549,84 @@
           "data": {
             "format": "int64",
             "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeListDownloadHistoryDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/DownloadHistoryDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeListDownloadResourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/DownloadResourceDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "message": {
             "type": "string"
@@ -594,6 +1690,78 @@
         ],
         "type": "object"
       },
+      "EnvelopeListOngoingUploadDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/OngoingUploadDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeMalwareCaseDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/MalwareCaseDetailDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeMessageDetailDTO": {
         "additionalProperties": false,
         "properties": {
@@ -627,6 +1795,39 @@
         ],
         "type": "object"
       },
+      "EnvelopePageMalwareCaseItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageMalwareCaseItemDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopePageMessageItemDTO": {
         "additionalProperties": false,
         "properties": {
@@ -636,6 +1837,270 @@
           },
           "data": {
             "$ref": "#/components/schemas/PageMessageItemDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePageReportListItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageReportListItemDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeReportCreatedDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ReportCreatedDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeReportDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ReportDetailDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeStorageListingDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/StorageListingDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeUploadChunkDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UploadChunkDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeUploadCompleteDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UploadCompleteDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeUploadQuotaDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UploadQuotaDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeUploadStatusDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UploadStatusDTO"
           },
           "message": {
             "type": "string"
@@ -1115,6 +2580,497 @@
         ],
         "type": "object"
       },
+      "InitUploadDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "chunk_size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "total_chunks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "upload_session_id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "upload_session_id",
+          "chunk_size",
+          "total_chunks",
+          "expires_at"
+        ],
+        "type": "object"
+      },
+      "InitUploadInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "chunk_size": {
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "file_name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "file_sha256": {
+            "description": "BLAKE3 hex digest of the whole file",
+            "minLength": 1,
+            "type": "string"
+          },
+          "total_size": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "file_name",
+          "total_size",
+          "file_sha256"
+        ],
+        "type": "object"
+      },
+      "MalwareCaseDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decision_source": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "detected_viruses": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "detector": {
+            "type": "string"
+          },
+          "file": {
+            "$ref": "#/components/schemas/MalwareDetailFileDTO"
+          },
+          "file_hash": {
+            "type": "string"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "file_size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "hash_algorithm": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "notify_uploader_on_allow": {
+            "type": "boolean"
+          },
+          "resource": {
+            "$ref": "#/components/schemas/MalwareDetailResourceDTO"
+          },
+          "review_deadline": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "review_note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reviewed_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reviewer": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "scan_log_excerpt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "scan_log_path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "scan_result": {},
+          "status": {
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "uploader": {
+            "$ref": "#/components/schemas/MalwareMemberDTO"
+          },
+          "uploader_notified_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "decision_source",
+          "review_note",
+          "review_deadline",
+          "reviewed_at",
+          "detector",
+          "detected_viruses",
+          "scan_result",
+          "scan_log_path",
+          "scan_log_excerpt",
+          "file_name",
+          "file_size",
+          "file_hash",
+          "hash_algorithm",
+          "notify_uploader_on_allow",
+          "uploader_notified_at",
+          "created",
+          "updated",
+          "file",
+          "resource",
+          "uploader",
+          "reviewer"
+        ],
+        "type": "object"
+      },
+      "MalwareCaseItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "decision_source": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "detected_viruses": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "detector": {
+            "type": "string"
+          },
+          "file": {
+            "$ref": "#/components/schemas/MalwareListFileDTO"
+          },
+          "file_hash": {
+            "type": "string"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "file_size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "hash_algorithm": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "notify_uploader_on_allow": {
+            "type": "boolean"
+          },
+          "resource": {
+            "$ref": "#/components/schemas/MalwareListResourceDTO"
+          },
+          "review_deadline": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "review_note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reviewed_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reviewer": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "uploader": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "uploader_notified_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "decision_source",
+          "review_note",
+          "review_deadline",
+          "reviewed_at",
+          "detector",
+          "detected_viruses",
+          "file_name",
+          "file_size",
+          "file_hash",
+          "hash_algorithm",
+          "notify_uploader_on_allow",
+          "uploader_notified_at",
+          "created",
+          "updated",
+          "file",
+          "resource",
+          "uploader",
+          "reviewer"
+        ],
+        "type": "object"
+      },
+      "MalwareDetailFileDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "creator_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "file_check_status": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "file_status": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "is_virus_false_positive": {
+            "type": "boolean"
+          },
+          "type": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "upload_session_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "file_status",
+          "file_check_status",
+          "is_virus_false_positive",
+          "upload_session_id",
+          "creator_id"
+        ],
+        "type": "object"
+      },
+      "MalwareDetailResourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "game": {
+            "$ref": "#/components/schemas/MalwareGameDTO"
+          },
+          "game_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "game_id",
+          "note",
+          "game"
+        ],
+        "type": "object"
+      },
+      "MalwareGameDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "title_en": {
+            "type": "string"
+          },
+          "title_jp": {
+            "type": "string"
+          },
+          "title_zh": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title_jp",
+          "title_zh",
+          "title_en"
+        ],
+        "type": "object"
+      },
+      "MalwareListFileDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "file_check_status": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "file_status": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "is_virus_false_positive": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "file_status",
+          "file_check_status",
+          "is_virus_false_positive"
+        ],
+        "type": "object"
+      },
+      "MalwareListResourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "game": {
+            "$ref": "#/components/schemas/MalwareGameDTO"
+          },
+          "game_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "game_id",
+          "game"
+        ],
+        "type": "object"
+      },
+      "MalwareMemberDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "avatar": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "is_sponsor": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "role",
+          "status",
+          "id",
+          "name",
+          "avatar",
+          "is_sponsor"
+        ],
+        "type": "object"
+      },
       "MessageCommentDTO": {
         "additionalProperties": false,
         "properties": {
@@ -1314,6 +3270,80 @@
         },
         "type": "object"
       },
+      "OngoingUploadDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "chunk_size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "file_sha256": {
+            "type": "string"
+          },
+          "total_chunks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total_size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "upload_session_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "uploaded_chunks": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "upload_session_id",
+          "file_name",
+          "file_sha256",
+          "total_size",
+          "chunk_size",
+          "uploaded_chunks",
+          "total_chunks",
+          "expires_at"
+        ],
+        "type": "object"
+      },
+      "PageMalwareCaseItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MalwareCaseItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
       "PageMessageItemDTO": {
         "additionalProperties": false,
         "properties": {
@@ -1369,6 +3399,538 @@
         ],
         "type": "object"
       },
+      "PageReportListItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ReportListItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "ReportCreatedDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "malicious_level": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "reason",
+          "malicious_level",
+          "created"
+        ],
+        "type": "object"
+      },
+      "ReportDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "detail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "malicious_level": {
+            "type": "string"
+          },
+          "process_note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "processed_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "processor": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reported_penalty_applied": {
+            "type": "boolean"
+          },
+          "reported_user": {
+            "$ref": "#/components/schemas/ReportMemberDTO"
+          },
+          "reporter": {
+            "$ref": "#/components/schemas/ReportMemberDTO"
+          },
+          "reporter_penalty_applied": {
+            "type": "boolean"
+          },
+          "resource": {
+            "$ref": "#/components/schemas/ReportDetailResourceDTO"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reason",
+          "detail",
+          "status",
+          "malicious_level",
+          "process_note",
+          "processed_at",
+          "reporter_penalty_applied",
+          "reported_penalty_applied",
+          "created",
+          "updated",
+          "resource",
+          "reporter",
+          "reported_user",
+          "processor"
+        ],
+        "type": "object"
+      },
+      "ReportDetailResourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/ReportFileDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "game": {
+            "$ref": "#/components/schemas/ReportGameDTO"
+          },
+          "game_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "game_id",
+          "note",
+          "game",
+          "files"
+        ],
+        "type": "object"
+      },
+      "ReportFileDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "file_check_status": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "file_hash": {
+            "type": "string"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "file_size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "file_status": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "hash_algorithm": {
+            "enum": [
+              "sha256",
+              "blake3"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "file_name",
+          "file_size",
+          "file_status",
+          "file_check_status",
+          "hash_algorithm",
+          "file_hash"
+        ],
+        "type": "object"
+      },
+      "ReportFileNameDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "file_name": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "file_name"
+        ],
+        "type": "object"
+      },
+      "ReportGameDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "title_en": {
+            "type": "string"
+          },
+          "title_jp": {
+            "type": "string"
+          },
+          "title_zh": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title_jp",
+          "title_zh",
+          "title_en"
+        ],
+        "type": "object"
+      },
+      "ReportListItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "detail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "malicious_level": {
+            "type": "string"
+          },
+          "process_note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "processed_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "processor": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reported_user": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "reporter": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "resource": {
+            "$ref": "#/components/schemas/ReportListResourceDTO"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "reason",
+          "detail",
+          "status",
+          "malicious_level",
+          "processed_at",
+          "process_note",
+          "created",
+          "updated",
+          "resource",
+          "reporter",
+          "reported_user",
+          "processor"
+        ],
+        "type": "object"
+      },
+      "ReportListResourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/ReportFileNameDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "game": {
+            "$ref": "#/components/schemas/ReportGameDTO"
+          },
+          "game_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "game_id",
+          "game",
+          "files"
+        ],
+        "type": "object"
+      },
+      "ReportMemberDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "avatar": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "is_sponsor": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "role",
+          "status",
+          "id",
+          "name",
+          "avatar",
+          "is_sponsor"
+        ],
+        "type": "object"
+      },
+      "ReviewMalwareCaseInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "decision": {
+            "enum": [
+              "ALLOW",
+              "DELETE"
+            ],
+            "type": "string"
+          },
+          "notify_uploader": {
+            "type": "boolean"
+          },
+          "review_note": {
+            "maxLength": 500,
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "type": "object"
+      },
+      "ReviewReportInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "malicious_level": {
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH",
+              "CRITICAL"
+            ],
+            "type": "string"
+          },
+          "notify": {
+            "type": "boolean"
+          },
+          "process_note": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "remove_resource": {
+            "type": "boolean"
+          },
+          "verdict": {
+            "enum": [
+              "VALID",
+              "INVALID"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "verdict"
+        ],
+        "type": "object"
+      },
+      "StorageListingDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "Contents": {
+            "items": {
+              "$ref": "#/components/schemas/StorageObjectDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "ContinuationToken": {
+            "type": "string"
+          },
+          "IsTruncated": {
+            "type": "boolean"
+          },
+          "KeyCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "MaxKeys": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "NextContinuationToken": {
+            "type": "string"
+          },
+          "Prefix": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Contents",
+          "IsTruncated",
+          "KeyCount",
+          "MaxKeys",
+          "Name",
+          "Prefix"
+        ],
+        "type": "object"
+      },
+      "StorageObjectDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "ETag": {
+            "type": "string"
+          },
+          "Key": {
+            "type": "string"
+          },
+          "LastModified": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "Size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "StorageClass": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Key",
+          "Size"
+        ],
+        "type": "object"
+      },
       "UpdateFavoriteInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -1394,6 +3956,106 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "UploadChunkDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "chunk_index": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok",
+          "chunk_index"
+        ],
+        "type": "object"
+      },
+      "UploadCompleteDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "type": "object"
+      },
+      "UploadQuotaDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "used": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "size",
+          "used"
+        ],
+        "type": "object"
+      },
+      "UploadStatusDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "chunk_size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "file_sha256": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "UPLOADING",
+              "COMPLETED",
+              "ABORTED",
+              "EXPIRED"
+            ],
+            "type": "string"
+          },
+          "total_chunks": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total_size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "uploaded_chunks": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "uploaded_chunks",
+          "file_sha256",
+          "total_size",
+          "chunk_size",
+          "total_chunks",
+          "expires_at"
+        ],
         "type": "object"
       },
       "UserSummary": {
@@ -1523,6 +4185,603 @@
         "summary": "Site activity feed",
         "tags": [
           "activity"
+        ]
+      }
+    },
+    "/admin/content/download-resource-reports": {
+      "get": {
+        "operationId": "adminReport.list",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "enum": [
+                "PENDING",
+                "VALID",
+                "INVALID"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "reason",
+            "schema": {
+              "enum": [
+                "MALWARE",
+                "IRRELEVANT",
+                "BROKEN_LINK",
+                "MISLEADING_CONTENT",
+                "OTHER"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "malicious_level",
+            "schema": {
+              "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH",
+                "CRITICAL"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "resource_id",
+            "schema": {
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "reporter_id",
+            "schema": {
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "reported_user_id",
+            "schema": {
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "default": "created",
+              "enum": [
+                "id",
+                "created",
+                "updated",
+                "processed_at"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "default": "desc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageReportListItemDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List download resource reports",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/download-resource-reports/{id}": {
+      "get": {
+        "operationId": "adminReport.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeReportDetailDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Read a download resource report",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/download-resource-reports/{id}/review": {
+      "patch": {
+        "operationId": "adminReport.review",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewReportInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeReportDetailDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Review a download resource report",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/malware-scan-cases": {
+      "get": {
+        "operationId": "adminMalware.list",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "enum": [
+                "PENDING",
+                "RELEASED_FALSE_POSITIVE",
+                "DELETED"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "decision_source",
+            "schema": {
+              "enum": [
+                "ADMIN_ALLOW",
+                "ADMIN_DELETE",
+                "TIMEOUT_AUTO_DELETE"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "file_id",
+            "schema": {
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "resource_id",
+            "schema": {
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "uploader_id",
+            "schema": {
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "reviewer_id",
+            "schema": {
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "default": "created",
+              "enum": [
+                "id",
+                "created",
+                "updated",
+                "reviewed_at",
+                "review_deadline"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "default": "desc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageMalwareCaseItemDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List malware scan cases",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/malware-scan-cases/{id}": {
+      "get": {
+        "operationId": "adminMalware.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeMalwareCaseDetailDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Read a malware scan case",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/malware-scan-cases/{id}/review": {
+      "patch": {
+        "operationId": "adminMalware.review",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewMalwareCaseInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeMalwareCaseDetailDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Allow or delete a quarantined file",
+        "tags": [
+          "admin"
         ]
       }
     },
@@ -2161,6 +5420,763 @@
         ]
       }
     },
+    "/game/download-source/file-history/{historyId}/reason": {
+      "patch": {
+        "operationId": "download.historyReason",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "historyId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadHistoryReasonInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Edit the reason of a file history entry",
+        "tags": [
+          "download"
+        ]
+      }
+    },
+    "/game/download-source/file/{fileId}/history": {
+      "get": {
+        "operationId": "download.history",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "fileId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListDownloadHistoryDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List the upload history of a file",
+        "tags": [
+          "download"
+        ]
+      }
+    },
+    "/game/download-source/file/{fileId}/reupload": {
+      "put": {
+        "operationId": "download.reupload",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "fileId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadReuploadInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeDownloadReuploadDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Replace a stored file with a new upload",
+        "tags": [
+          "download"
+        ]
+      }
+    },
+    "/game/download-source/list": {
+      "get": {
+        "operationId": "download.releases",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeDownloadReleasePageDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List recently released download resources",
+        "tags": [
+          "download"
+        ]
+      }
+    },
+    "/game/download-source/migrate/file/{downloadSourceId}": {
+      "post": {
+        "operationId": "download.migrateFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "downloadSourceId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadMigrateFileInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Import a stored file into a download resource",
+        "tags": [
+          "download"
+        ]
+      }
+    },
+    "/game/download-source/migrate/{gameId}": {
+      "post": {
+        "operationId": "download.migrateResource",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gameId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadMigrateResourceInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeInt"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Import a download resource",
+        "tags": [
+          "download"
+        ]
+      }
+    },
+    "/game/download-source/{id}": {
+      "delete": {
+        "operationId": "download.delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Delete a download resource and its stored objects",
+        "tags": [
+          "download"
+        ]
+      },
+      "patch": {
+        "operationId": "download.edit",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditDownloadSourceBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Edit a download resource",
+        "tags": [
+          "download"
+        ]
+      }
+    },
+    "/game/download-source/{id}/report": {
+      "post": {
+        "operationId": "report.create",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReportInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeReportCreatedDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Report a download resource",
+        "tags": [
+          "report"
+        ]
+      }
+    },
+    "/game/download/{id}/link": {
+      "get": {
+        "operationId": "download.link",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Cloudflare Turnstile response token",
+            "explode": false,
+            "in": "query",
+            "name": "token",
+            "schema": {
+              "description": "Cloudflare Turnstile response token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeDownloadLinkDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Issue a download link for a file",
+        "tags": [
+          "download"
+        ]
+      }
+    },
+    "/game/{id}/download-source": {
+      "get": {
+        "operationId": "download.gameResources",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListDownloadResourceDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List the download resources of a game",
+        "tags": [
+          "download"
+        ]
+      },
+      "post": {
+        "operationId": "download.create",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadSourceBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Create a download resource from a completed upload",
+        "tags": [
+          "download"
+        ]
+      }
+    },
     "/health": {
       "get": {
         "operationId": "health.get",
@@ -2590,6 +6606,585 @@
         "summary": "Mark a message read",
         "tags": [
           "message"
+        ]
+      }
+    },
+    "/s3/test/file": {
+      "delete": {
+        "operationId": "storage.delete",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Delete every version of an object in the game bucket",
+        "tags": [
+          "storage"
+        ]
+      }
+    },
+    "/s3/test/file/list": {
+      "get": {
+        "operationId": "storage.list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeStorageListingDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List objects of the game bucket",
+        "tags": [
+          "storage"
+        ]
+      }
+    },
+    "/uploads/large/init": {
+      "post": {
+        "operationId": "upload.init",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitUploadInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeInitUploadDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Start a chunked upload session",
+        "tags": [
+          "upload"
+        ]
+      }
+    },
+    "/uploads/large/ongoing": {
+      "get": {
+        "operationId": "upload.ongoing",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListOngoingUploadDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List the caller's unfinished large uploads",
+        "tags": [
+          "upload"
+        ]
+      }
+    },
+    "/uploads/large/{id}": {
+      "delete": {
+        "operationId": "upload.abort",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Abort an upload session",
+        "tags": [
+          "upload"
+        ]
+      }
+    },
+    "/uploads/large/{id}/chunks/{index}": {
+      "put": {
+        "operationId": "upload.chunk",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "index",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Lowercase hex SHA-256 of the chunk bytes",
+            "in": "header",
+            "name": "chunk-sha256",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "contentMediaType": "application/octet-stream",
+                "format": "binary",
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeUploadChunkDTO"
+                }
+              }
+            },
+            "description": "Chunk stored"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Upload one chunk of an upload session",
+        "tags": [
+          "upload"
+        ]
+      }
+    },
+    "/uploads/large/{id}/complete": {
+      "patch": {
+        "operationId": "upload.complete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeUploadCompleteDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Verify and complete an upload session",
+        "tags": [
+          "upload"
+        ]
+      }
+    },
+    "/uploads/large/{id}/status": {
+      "get": {
+        "operationId": "upload.status",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeUploadStatusDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Read an upload session",
+        "tags": [
+          "upload"
+        ]
+      }
+    },
+    "/uploads/quota": {
+      "get": {
+        "operationId": "upload.quota",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeUploadQuotaDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Read the caller's upload quota",
+        "tags": [
+          "upload"
+        ]
+      }
+    },
+    "/user/datas/{id}/game-resources": {
+      "get": {
+        "operationId": "download.userResources",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeDownloadUserResourcePageDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List the download resources uploaded by a user",
+        "tags": [
+          "download"
         ]
       }
     }
