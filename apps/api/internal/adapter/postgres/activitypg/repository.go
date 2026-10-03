@@ -1,0 +1,135 @@
+package activitypg
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/activity"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
+	entactivity "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/activity"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacter"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedeveloper"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/walkthrough"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/gamepg"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/userpg"
+)
+
+type Repository struct {
+	client *ent.Client
+}
+
+func NewRepository(client *ent.Client) *Repository {
+	return &Repository{client: client}
+}
+
+func (r *Repository) Create(ctx context.Context, in activity.NewActivity) error {
+	err := postgres.Client(ctx, r.client).Activity.Create().
+		SetType(entactivity.Type(in.Type)).
+		SetUserID(in.UserID).
+		SetNillableGameID(in.GameID).
+		SetNillableWalkthroughID(in.WalkthroughID).
+		SetNillableEditRecordID(in.EditRecordID).
+		SetNillableCommentID(in.CommentID).
+		SetNillableDeveloperID(in.DeveloperID).
+		SetNillableCharacterID(in.CharacterID).
+		SetNillableFileID(in.FileID).
+		SetNillableFileStatus(in.FileStatus).
+		SetNillableFileCheckStatus(in.FileCheckStatus).
+		SetNillableFileSize(in.FileSize).
+		SetNillableFileName(in.FileName).
+		Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("record activity %s: %w", in.Type, err)
+	}
+	return nil
+}
+
+func (r *Repository) List(ctx context.Context, filter activity.Filter, page activity.Page) ([]activity.Entry, int, error) {
+	query := postgres.Client(ctx, r.client).Activity.Query()
+	if len(filter.Types) > 0 {
+		types := make([]entactivity.Type, len(filter.Types))
+		for i, kind := range filter.Types {
+			types[i] = entactivity.Type(kind)
+		}
+		query.Where(entactivity.TypeIn(types...))
+	}
+	if filter.ExcludeRated {
+		query.Where(entactivity.Or(entactivity.Not(entactivity.HasGame()), entactivity.HasGameWith(gamepg.SafeForStrictViewers())))
+	}
+	total, err := query.Clone().Count(ctx)
+	if err != nil {
+		return nil, 0, fmt.Errorf("count activities: %w", err)
+	}
+	rows, err := query.
+		WithUser(userpg.SelectSummary).
+		WithWalkthrough(func(q *ent.WalkthroughQuery) { q.Select(walkthrough.FieldID, walkthrough.FieldTitle) }).
+		WithComment(func(q *ent.CommentQuery) { q.Select(comment.FieldID, comment.FieldHTML) }).
+		WithDeveloper(func(q *ent.GameDeveloperQuery) { q.Select(gamedeveloper.FieldID, gamedeveloper.FieldName) }).
+		WithCharacter(func(q *ent.GameCharacterQuery) {
+			q.Select(gamecharacter.FieldID, gamecharacter.FieldNameJp, gamecharacter.FieldNameZh, gamecharacter.FieldNameEn)
+		}).
+		WithFile(func(q *ent.GameDownloadResourceFileQuery) {
+			q.Select(gamedownloadresourcefile.FieldID, gamedownloadresourcefile.FieldFileName, gamedownloadresourcefile.FieldFileSize)
+		}).
+		Order(ent.Desc(entactivity.FieldCreated), ent.Desc(entactivity.FieldID)).
+		Offset(page.Offset()).
+		Limit(page.Size).
+		All(ctx)
+	if err != nil {
+		return nil, 0, fmt.Errorf("list activities: %w", err)
+	}
+	entries := make([]activity.Entry, len(rows))
+	for i, row := range rows {
+		entries[i] = toEntry(row)
+	}
+	return entries, total, nil
+}
+
+func toEntry(row *ent.Activity) activity.Entry {
+	entry := activity.Entry{
+		ID:      row.ID,
+		Type:    activity.Type(row.Type),
+		User:    userpg.ToSummary(row.Edges.User),
+		GameID:  row.GameID,
+		Created: row.Created,
+		Updated: row.Updated,
+	}
+	if ref := row.Edges.Walkthrough; ref != nil {
+		entry.Walkthrough = &activity.WalkthroughRef{ID: ref.ID, Title: ref.Title}
+	}
+	if ref := row.Edges.Comment; ref != nil {
+		entry.Comment = &activity.CommentRef{ID: ref.ID, HTML: ref.HTML}
+	}
+	if ref := row.Edges.Developer; ref != nil {
+		entry.Developer = &activity.DeveloperRef{ID: ref.ID, Name: ref.Name}
+	}
+	if ref := row.Edges.Character; ref != nil {
+		entry.Character = &activity.CharacterRef{ID: ref.ID, NameJP: ref.NameJp, NameZH: ref.NameZh, NameEN: ref.NameEn}
+	}
+	entry.File = fileRef(row)
+	return entry
+}
+
+func fileRef(row *ent.Activity) *activity.FileRef {
+	file := row.Edges.File
+	if file == nil && row.FileName == nil && row.FileSize == nil {
+		return nil
+	}
+	ref := &activity.FileRef{FileStatus: row.FileStatus, FileCheckStatus: row.FileCheckStatus}
+	if file != nil {
+		ref.ID = file.ID
+		ref.FileName = file.FileName
+		ref.FileSize = file.FileSize
+		return ref
+	}
+	if row.FileName != nil {
+		ref.FileName = *row.FileName
+	}
+	if row.FileSize != nil {
+		ref.FileSize = *row.FileSize
+	}
+	return ref
+}

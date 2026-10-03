@@ -30,6 +30,9 @@ HTTP method/path · request schema · response schema · status code · business
 | `DELETE /favorites/:id/games/:game_id` | revealed item existence to non-owners | ownership checked first | data leak |
 | Concurrent duplicate inserts | unique violations surfaced as 500 | mapped to the business conflict code | correctness |
 | Default locale | `en` | `zh` | product direction |
+| Realtime notifications | socket.io namespace `/ws`, client emits `message:unread:pull` | Server-Sent Events at `GET /message/stream` (events `message:new`, `message:unread`, `ping`); the unread count is sent on connect | plain HTTP, no socket.io dependency (ADR 0007) |
+| Message push timing | `message:new` emitted before the transaction committed | emitted after commit | phantom notifications on rollback |
+| `POST /message/:id/read` for a missing or foreign message | 500 | 404 `MESSAGE_NOT_FOUND` | bug |
 | Catalog data | read at request time from Hikarinagi internal APIs | materialized locally from catalog sources (see ADR 0006) | removes internal coupling |
 | Partner API (`/partner/*`) | secret-authenticated download data for Hikarinagi | removed | internal communication removed |
 | Configuration | `*_MS`/`*_SEC` numbers, `REFRESH_TOKEN_ALOGRITHM_VERSION` | Go durations (`60s`, `1h`), corrected names; see `.env.example` | clarity, validation at startup |

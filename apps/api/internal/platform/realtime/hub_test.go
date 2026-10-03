@@ -22,6 +22,7 @@ func TestPublishReachesOnlyTheTargetUser(t *testing.T) {
 		<-done
 	})
 
+	<-hub.Ready()
 	alice := hub.Subscribe(1)
 	bob := hub.Subscribe(2)
 	defer alice.Close()

@@ -23,3 +23,7 @@ The OpenAPI 3.1 document `apps/api/openapi/openapi.json` is generated from the G
 - Authentication: `Authorization: Bearer <jwt>` or the `shionlib_access_token` cookie. Refresh tokens live only in the `shionlib_refresh_token` cookie.
 - Localization: `shionlib_locale` cookie, then `lang` query, then `Accept-Language`; default `zh`.
 - Rate limiting: per route and client IP; `X-RateLimit-*` headers on every response, `Retry-After` on 429.
+
+## Realtime
+
+`GET /message/stream` (login required) is a Server-Sent Events stream. Events: `message:unread` (`{"unread": n}`, sent on connect and on every change), `message:new` (`{id, title, type, tone, created}`), `ping` (keep-alive every 25 s). The stream is not part of the OpenAPI document.

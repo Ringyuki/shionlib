@@ -69,6 +69,7 @@ func serve(ctx context.Context, withHTTP bool) error {
 		return app.Start(ctx)
 	}
 	api := bootstrap.BuildHTTP(infra, modules)
+	app.Run("realtime", modules.Realtime)
 	app.Run("http", server.NewHTTP(api.Handler(), server.HTTPOptions{
 		Addr:              ":" + strconv.Itoa(cfg.HTTP.Port),
 		ReadHeaderTimeout: cfg.HTTP.ReadHeaderTimeout,

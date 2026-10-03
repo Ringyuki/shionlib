@@ -37,11 +37,13 @@ func (s *Subscription) Close() {
 }
 
 type Hub struct {
-	client *redis.Client
-	logger *slog.Logger
-	prefix string
-	mu     sync.RWMutex
-	subs   map[int]map[*Subscription]struct{}
+	client    *redis.Client
+	logger    *slog.Logger
+	prefix    string
+	mu        sync.RWMutex
+	subs      map[int]map[*Subscription]struct{}
+	ready     chan struct{}
+	readyOnce sync.Once
 }
 
 func NewHub(client *redis.Client, logger *slog.Logger) *Hub {
@@ -50,7 +52,12 @@ func NewHub(client *redis.Client, logger *slog.Logger) *Hub {
 		logger: logger,
 		prefix: client.Key("realtime", "user") + ":",
 		subs:   map[int]map[*Subscription]struct{}{},
+		ready:  make(chan struct{}),
 	}
+}
+
+func (h *Hub) Ready() <-chan struct{} {
+	return h.ready
 }
 
 func (h *Hub) Publish(ctx context.Context, userID int, name string, payload any) error {
@@ -87,6 +94,7 @@ func (h *Hub) Run(ctx context.Context) error {
 	if _, err := pubsub.Receive(ctx); err != nil {
 		return fmt.Errorf("subscribe to realtime events: %w", err)
 	}
+	h.readyOnce.Do(func() { close(h.ready) })
 	channel := pubsub.Channel()
 	for {
 		select {

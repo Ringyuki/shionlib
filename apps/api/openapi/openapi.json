@@ -1,6 +1,243 @@
 {
   "components": {
     "schemas": {
+      "ActivityCharacterDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name_en": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name_jp": {
+            "type": "string"
+          },
+          "name_zh": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name_jp",
+          "name_zh",
+          "name_en"
+        ],
+        "type": "object"
+      },
+      "ActivityCommentDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "html": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "html"
+        ],
+        "type": "object"
+      },
+      "ActivityDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "character": {
+            "$ref": "#/components/schemas/ActivityCharacterDTO"
+          },
+          "comment": {
+            "$ref": "#/components/schemas/ActivityCommentDTO"
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "developer": {
+            "$ref": "#/components/schemas/ActivityDeveloperDTO"
+          },
+          "file": {
+            "$ref": "#/components/schemas/ActivityFileDTO"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameCard"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "walkthrough": {
+            "$ref": "#/components/schemas/ActivityWalkthroughDTO"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "user",
+          "game",
+          "walkthrough",
+          "comment",
+          "developer",
+          "character",
+          "created",
+          "updated"
+        ],
+        "type": "object"
+      },
+      "ActivityDeveloperDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
+      "ActivityFileDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "file_check_status": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "file_size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "file_status": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "file_name",
+          "file_size",
+          "file_status",
+          "file_check_status"
+        ],
+        "type": "object"
+      },
+      "ActivityPageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ActivityDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ActivityPageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "ActivityPageMeta": {
+        "additionalProperties": false,
+        "properties": {
+          "content_limit": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "currentPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemsPerPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalItems": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "content_limit",
+          "totalItems",
+          "itemCount",
+          "itemsPerPage",
+          "totalPages",
+          "currentPage"
+        ],
+        "type": "object"
+      },
+      "ActivityWalkthroughDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ],
+        "type": "object"
+      },
       "AddFavoriteGameInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -81,6 +318,39 @@
         "required": [
           "code",
           "message",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeActivityPageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ActivityPageDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
           "requestId",
           "timestamp"
         ],
@@ -251,6 +521,40 @@
         ],
         "type": "object"
       },
+      "EnvelopeInt": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeListFavoriteSummaryDTO": {
         "additionalProperties": false,
         "properties": {
@@ -266,6 +570,72 @@
               "array",
               "null"
             ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeMessageDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/MessageDetailDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePageMessageItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageMessageItemDTO"
           },
           "message": {
             "type": "string"
@@ -745,6 +1115,196 @@
         ],
         "type": "object"
       },
+      "MessageCommentDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "html": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "html"
+        ],
+        "type": "object"
+      },
+      "MessageDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "comment": {
+            "$ref": "#/components/schemas/MessageCommentDTO"
+          },
+          "content": {
+            "type": "string"
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "external_link": {
+            "type": "boolean"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameCard"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "link_text": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "link_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "meta": {},
+          "read": {
+            "type": "boolean"
+          },
+          "read_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "receiver": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "sender": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "title": {
+            "type": "string"
+          },
+          "tone": {
+            "enum": [
+              "PRIMARY",
+              "SECONDARY",
+              "SUCCESS",
+              "WARNING",
+              "INFO",
+              "DESTRUCTIVE",
+              "NEUTRAL"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "COMMENT_REPLY",
+              "COMMENT_LIKE",
+              "SYSTEM"
+            ],
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "tone",
+          "title",
+          "content",
+          "link_text",
+          "link_url",
+          "external_link",
+          "meta",
+          "comment",
+          "game",
+          "sender",
+          "receiver",
+          "read",
+          "read_at",
+          "created",
+          "updated"
+        ],
+        "type": "object"
+      },
+      "MessageItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "read": {
+            "type": "boolean"
+          },
+          "read_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "receiver": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "sender": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "title": {
+            "type": "string"
+          },
+          "tone": {
+            "enum": [
+              "PRIMARY",
+              "SECONDARY",
+              "SUCCESS",
+              "WARNING",
+              "INFO",
+              "DESTRUCTIVE",
+              "NEUTRAL"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "COMMENT_REPLY",
+              "COMMENT_LIKE",
+              "SYSTEM"
+            ],
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "tone",
+          "title",
+          "receiver",
+          "sender",
+          "read",
+          "read_at",
+          "created",
+          "updated"
+        ],
+        "type": "object"
+      },
       "Meta": {
         "additionalProperties": false,
         "properties": {
@@ -752,6 +1312,61 @@
             "$ref": "#/components/schemas/AuthMeta"
           }
         },
+        "type": "object"
+      },
+      "PageMessageItemDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MessageItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "PageMeta": {
+        "additionalProperties": false,
+        "properties": {
+          "currentPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemsPerPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalItems": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "totalItems",
+          "itemCount",
+          "itemsPerPage",
+          "totalPages",
+          "currentPage"
+        ],
         "type": "object"
       },
       "UpdateFavoriteInputBody": {
@@ -780,6 +1395,34 @@
           }
         },
         "type": "object"
+      },
+      "UserSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "avatar": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "is_sponsor": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "avatar",
+          "is_sponsor"
+        ],
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -801,6 +1444,88 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/activity/list": {
+      "get": {
+        "operationId": "activity.list",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "enum": [
+                "comments",
+                "gameCreates",
+                "walkthroughCreates",
+                "edits",
+                "files"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeActivityPageDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Site activity feed",
+        "tags": [
+          "activity"
+        ]
+      }
+    },
     "/favorites": {
       "get": {
         "operationId": "favorite.list",
@@ -1509,6 +2234,362 @@
         "summary": "Liveness probe",
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/message/all/read": {
+      "post": {
+        "operationId": "message.readAll",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Mark every message read",
+        "tags": [
+          "message"
+        ]
+      }
+    },
+    "/message/all/unread": {
+      "post": {
+        "operationId": "message.unreadAll",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Mark every message unread",
+        "tags": [
+          "message"
+        ]
+      }
+    },
+    "/message/list": {
+      "get": {
+        "operationId": "message.list",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Only unread (true) or only read (false) messages",
+            "explode": false,
+            "in": "query",
+            "name": "unread",
+            "schema": {
+              "description": "Only unread (true) or only read (false) messages",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "enum": [
+                "COMMENT_REPLY",
+                "COMMENT_LIKE",
+                "SYSTEM"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageMessageItemDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List the caller's messages",
+        "tags": [
+          "message"
+        ]
+      }
+    },
+    "/message/unread": {
+      "get": {
+        "operationId": "message.unread",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeInt"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Count unread messages",
+        "tags": [
+          "message"
+        ]
+      }
+    },
+    "/message/{id}": {
+      "get": {
+        "operationId": "message.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeMessageDetailDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Open a message and mark it read",
+        "tags": [
+          "message"
+        ]
+      }
+    },
+    "/message/{id}/read": {
+      "post": {
+        "operationId": "message.read",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Mark a message read",
+        "tags": [
+          "message"
         ]
       }
     }
