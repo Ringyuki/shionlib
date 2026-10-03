@@ -154,7 +154,7 @@ linters:
         text: G703
         linters:
           - gosec
-      - path: internal/adapter/sevenzip
+      - path: internal/adapter/(sevenzip|pgdump)
         text: G204
         linters:
           - gosec
