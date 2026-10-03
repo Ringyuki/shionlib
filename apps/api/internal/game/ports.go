@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
+	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
 )
 
 type Repository interface {
@@ -49,4 +50,31 @@ type VNDB interface {
 
 type HotScoreStore interface {
 	RefreshHotScore(ctx context.Context, weights HotScoreWeights) (int64, error)
+}
+
+type AdminStore interface {
+	Search(ctx context.Context, filter AdminFilter, page Page) ([]AdminEntry, int, error)
+	Scalar(ctx context.Context, id int) (Scalar, error)
+	Lock(ctx context.Context, id int) error
+	SetStatus(ctx context.Context, id int, status Status) error
+	UpdateScalar(ctx context.Context, id int, changes ScalarChanges) error
+	StorageKeys(ctx context.Context, id int) ([]string, error)
+	Delete(ctx context.Context, id int) error
+}
+
+type RecentUpdateMarks interface {
+	Add(ctx context.Context, gameID int, at time.Time) error
+	Remove(ctx context.Context, gameID int) error
+}
+
+type CatalogExclusions interface {
+	Exclude(ctx context.Context, entity catalog.Entity, localID int) error
+}
+
+type ObjectPurger interface {
+	PurgeLater(ctx context.Context, keys []string) error
+}
+
+type Transactor interface {
+	WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error
 }

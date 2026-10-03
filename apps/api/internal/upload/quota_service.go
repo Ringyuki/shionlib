@@ -120,14 +120,18 @@ func (q *QuotaService) ResetUsed(ctx context.Context, userID int) error {
 		if err != nil {
 			return err
 		}
-		if quota.Used == 0 {
-			return nil
-		}
-		if err := q.repo.SetUsed(ctx, quota.ID, 0); err != nil {
-			return err
-		}
-		return q.repo.AddRecord(ctx, NewQuotaRecord{QuotaID: quota.ID, Field: FieldUsed, Action: ActionAdd, Amount: quota.Used, Reason: optional(ReasonResetUsed)})
+		return q.resetUsed(ctx, quota, ReasonResetUsed)
 	})
+}
+
+func (q *QuotaService) resetUsed(ctx context.Context, quota Quota, reason string) error {
+	if quota.Used == 0 {
+		return nil
+	}
+	if err := q.repo.SetUsed(ctx, quota.ID, 0); err != nil {
+		return err
+	}
+	return q.repo.AddRecord(ctx, NewQuotaRecord{QuotaID: quota.ID, Field: FieldUsed, Action: ActionAdd, Amount: quota.Used, Reason: optional(reason)})
 }
 
 func (q *QuotaService) InitialGrant(ctx context.Context, userID int) error {

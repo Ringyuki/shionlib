@@ -61,6 +61,7 @@ func wireAuth(infra *Infra, shared *Shared, modules *Modules) {
 		HTTPClient:      httpclient.New(httpclient.Options{Timeout: 30 * time.Second}),
 	}), nil)
 	profiles := user.NewService(accounts, shared.Transactor, sessions, codes, passwords, images, infra.Now, user.Policy{AllowRegister: cfg.App.AllowRegister})
+	shared.Sessions, shared.Users = sessions, profiles
 
 	modules.Handlers = append(modules.Handlers,
 		authhttp.NewHandler(authhttp.Services{

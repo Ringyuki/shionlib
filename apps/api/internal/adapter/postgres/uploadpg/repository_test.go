@@ -340,6 +340,42 @@ func TestQuotaLedger(t *testing.T) {
 	}
 }
 
+func TestEnsureQuotaCreatesOnceAndLocks(t *testing.T) {
+	ctx := context.Background()
+	db := pgtest.New(t)
+	repo := uploadpg.NewQuotaRepository(db.Ent)
+	owner, fresh := db.User(t), db.User(t)
+	existing := newQuota(t, db, owner, 1000, 200, true)
+
+	err := postgres.NewTransactor(db.Ent).WithinTransaction(ctx, func(ctx context.Context) error {
+		quota, err := repo.EnsureQuota(ctx, owner)
+		if err != nil {
+			return err
+		}
+		if quota.ID != existing.ID || quota.Size != 1000 || quota.Used != 200 || !quota.IsFirstGrant {
+			t.Fatalf("existing quota is returned untouched: %+v", quota)
+		}
+		created, err := repo.EnsureQuota(ctx, fresh)
+		if err != nil {
+			return err
+		}
+		again, err := repo.EnsureQuota(ctx, fresh)
+		if err != nil {
+			return err
+		}
+		if created.ID == 0 || again.ID != created.ID || created.Size != 0 || created.Used != 0 || created.IsFirstGrant || created.UserID != fresh {
+			t.Fatalf("missing quota is created once: %+v %+v", created, again)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count := db.Ent.UserUploadQuota.Query().CountX(ctx); count != 2 {
+		t.Fatalf("quota rows: %d", count)
+	}
+}
+
 func TestCountApprovedFiles(t *testing.T) {
 	ctx := context.Background()
 	db := pgtest.New(t)

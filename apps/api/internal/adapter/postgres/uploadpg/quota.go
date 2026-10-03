@@ -2,6 +2,8 @@ package uploadpg
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -54,6 +56,21 @@ func (r *QuotaRepository) LockQuota(ctx context.Context, userID int) (upload.Quo
 		return upload.Quota{}, fmt.Errorf("lock upload quota of user %d: %w", userID, err)
 	}
 	return toQuota(row), nil
+}
+
+func (r *QuotaRepository) EnsureQuota(ctx context.Context, userID int) (upload.Quota, error) {
+	err := r.db(ctx).UserUploadQuota.Create().
+		SetUserID(userID).
+		SetSize(0).
+		SetUsed(0).
+		SetIsFirstGrant(false).
+		OnConflictColumns(useruploadquota.FieldUserID).
+		DoNothing().
+		Exec(ctx)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return upload.Quota{}, fmt.Errorf("create upload quota of user %d: %w", userID, err)
+	}
+	return r.LockQuota(ctx, userID)
 }
 
 func (r *QuotaRepository) AddRecord(ctx context.Context, in upload.NewQuotaRecord) error {

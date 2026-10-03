@@ -86,6 +86,18 @@ func (r *MemoryQuotaRepository) LockQuota(_ context.Context, userID int) (upload
 	return quota, nil
 }
 
+func (r *MemoryQuotaRepository) EnsureQuota(_ context.Context, userID int) (upload.Quota, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if quota, ok := r.quotas[userID]; ok {
+		return quota, nil
+	}
+	r.nextID++
+	quota := upload.Quota{ID: r.nextID, UserID: userID}
+	r.quotas[userID] = quota
+	return quota, nil
+}
+
 func (r *MemoryQuotaRepository) AddRecord(_ context.Context, in upload.NewQuotaRecord) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
