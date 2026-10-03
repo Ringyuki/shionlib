@@ -30,17 +30,18 @@ const (
 )
 
 type Walkthrough struct {
-	ID        int
-	GameID    int
-	Title     string
-	Content   json.RawMessage
-	HTML      string
-	Lang      *string
-	Created   time.Time
-	Updated   time.Time
-	Edited    bool
-	Status    Status
-	CreatorID int
+	ID            int
+	GameID        int
+	Title         string
+	Content       json.RawMessage
+	HTML          string
+	Lang          *string
+	Created       time.Time
+	Updated       time.Time
+	Edited        bool
+	Status        Status
+	CreatorID     int
+	ReviewPending bool
 }
 
 type View struct {
@@ -62,21 +63,23 @@ type Summary struct {
 }
 
 type NewWalkthrough struct {
-	GameID    int
-	Title     string
-	Content   json.RawMessage
-	HTML      string
-	Lang      *string
-	Status    Status
-	CreatorID int
+	GameID        int
+	Title         string
+	Content       json.RawMessage
+	HTML          string
+	Lang          *string
+	Status        Status
+	CreatorID     int
+	ReviewPending bool
 }
 
 type Changes struct {
-	Title   string
-	Content json.RawMessage
-	HTML    string
-	Lang    *string
-	Status  Status
+	Title         string
+	Content       json.RawMessage
+	HTML          string
+	Lang          *string
+	Status        Status
+	ReviewPending bool
 }
 
 type GameFilter struct {

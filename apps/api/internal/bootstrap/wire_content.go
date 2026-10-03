@@ -38,6 +38,7 @@ func wireContent(infra *Infra, shared *Shared, modules *Modules) {
 		walkthroughhttp.NewHandler(walkthroughs, shared.Builder),
 	)
 	modules.Jobs.Register = append(modules.Jobs.Register, moderationjobs.Register(moderations))
+	modules.Jobs.Tasks = append(modules.Jobs.Tasks, moderationjobs.Tasks(moderations, shared.Now)...)
 	for name, workers := range moderation.QueueConcurrency() {
 		modules.Jobs.Queues[name] = workers
 	}

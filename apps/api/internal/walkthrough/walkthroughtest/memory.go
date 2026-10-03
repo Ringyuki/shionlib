@@ -88,16 +88,17 @@ func (r *MemoryRepository) Create(_ context.Context, in walkthrough.NewWalkthrou
 	}
 	r.nextID++
 	w := walkthrough.Walkthrough{
-		ID:        r.nextID,
-		GameID:    in.GameID,
-		Title:     in.Title,
-		Content:   slices.Clone(in.Content),
-		HTML:      in.HTML,
-		Lang:      in.Lang,
-		Created:   r.now(),
-		Updated:   r.now(),
-		Status:    in.Status,
-		CreatorID: in.CreatorID,
+		ID:            r.nextID,
+		GameID:        in.GameID,
+		Title:         in.Title,
+		Content:       slices.Clone(in.Content),
+		HTML:          in.HTML,
+		Lang:          in.Lang,
+		Created:       r.now(),
+		Updated:       r.now(),
+		Status:        in.Status,
+		CreatorID:     in.CreatorID,
+		ReviewPending: in.ReviewPending,
 	}
 	r.walkthroughs[w.ID] = w
 	return w, nil
@@ -110,12 +111,20 @@ func (r *MemoryRepository) Update(_ context.Context, id int, changes walkthrough
 		w.HTML = changes.HTML
 		w.Lang = changes.Lang
 		w.Status = changes.Status
+		w.ReviewPending = changes.ReviewPending
 		w.Edited = true
 	})
 }
 
 func (r *MemoryRepository) SetStatus(_ context.Context, id int, status walkthrough.Status) error {
-	return r.update(id, func(w *walkthrough.Walkthrough) { w.Status = status })
+	return r.update(id, func(w *walkthrough.Walkthrough) {
+		w.Status = status
+		w.ReviewPending = false
+	})
+}
+
+func (r *MemoryRepository) MarkReviewPending(_ context.Context, id int) error {
+	return r.update(id, func(w *walkthrough.Walkthrough) { w.ReviewPending = true })
 }
 
 func (r *MemoryRepository) update(id int, fn func(w *walkthrough.Walkthrough)) error {

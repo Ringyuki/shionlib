@@ -24,6 +24,7 @@ HTTP method/path · request schema · response schema · status code · business
 | `20261003071608_search_and_foreign_key_indexes` | Trigram GIN indexes on game titles, tag names, developer and character names; GIN on `games.platform`; indexes on catalog foreign keys and on rated covers (`game_covers (game_id) WHERE sexual > 0`) | plain `CREATE INDEX` locks writes on these catalog tables for seconds; run during the cutover window |
 | `20261003073256_moderation_events_walkthrough_index` | Index on `moderation_events (walkthrough_id, created_at)` for the walkthrough review history | small table |
 | `20261003074710_catalog_link_exclusion` | Adds `catalog_source_links.excluded_at`: entries deleted by an admin are not re-imported until an admin imports them again | nullable column |
+| `20261003112405_walkthrough_review_pending` | Adds `walkthroughs.review_pending`: set when a publish request waits for review, cleared by the verdict or when the author or an admin changes the status | `NOT NULL DEFAULT false`; legacy rows are treated as not pending |
 
 ## Intentional deviations
 
@@ -138,6 +139,7 @@ HTTP method/path · request schema · response schema · status code · business
 | `GET /admin/stats/trends` | days were grouped with `created AT TIME ZONE 'Asia/Shanghai'`, which shifted rows 8 hours the wrong way; `startDate`/`endDate` were validated and ignored | rows are grouped by UTC+8 day (`created + 8h`), matching the zero-filled labels; `startDate`/`endDate` are ignored without validation; `downloads`/`views` stay 0 | bug |
 | `PATCH /admin/comments/:id/status` | `status` accepted numeric strings, `notify` was coerced with JS `Boolean()` | JSON integer 1–3 and JSON boolean only (422) | one validation pipeline |
 | Admin comment and walkthrough search | a numeric keyword beyond int32 gave 500 | such keywords only match as text | bug |
+| Walkthrough reviews | a verdict published any `HIDDEN` walkthrough, so one hidden by its author or an admin while its review was queued was published again; a review lost after its retries stayed `HIDDEN` | verdicts apply only while `review_pending` is set (admin rescans set it); `moderation_requeue_walkthrough_reviews` queues pending reviews older than an hour every 30 minutes, unique per walkthrough | correctness |
 
 ## Redis
 

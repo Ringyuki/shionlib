@@ -95,6 +95,11 @@ func CreatorID(v int) predicate.Walkthrough {
 	return predicate.Walkthrough(sql.FieldEQ(FieldCreatorID, v))
 }
 
+// ReviewPending applies equality check predicate on the "review_pending" field. It's identical to ReviewPendingEQ.
+func ReviewPending(v bool) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldEQ(FieldReviewPending, v))
+}
+
 // GameIDEQ applies the EQ predicate on the "game_id" field.
 func GameIDEQ(v int) predicate.Walkthrough {
 	return predicate.Walkthrough(sql.FieldEQ(FieldGameID, v))
@@ -448,6 +453,16 @@ func CreatorIDIn(vs ...int) predicate.Walkthrough {
 // CreatorIDNotIn applies the NotIn predicate on the "creator_id" field.
 func CreatorIDNotIn(vs ...int) predicate.Walkthrough {
 	return predicate.Walkthrough(sql.FieldNotIn(FieldCreatorID, vs...))
+}
+
+// ReviewPendingEQ applies the EQ predicate on the "review_pending" field.
+func ReviewPendingEQ(v bool) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldEQ(FieldReviewPending, v))
+}
+
+// ReviewPendingNEQ applies the NEQ predicate on the "review_pending" field.
+func ReviewPendingNEQ(v bool) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldNEQ(FieldReviewPending, v))
 }
 
 // HasActivities applies the HasEdge predicate on the "activities" edge.

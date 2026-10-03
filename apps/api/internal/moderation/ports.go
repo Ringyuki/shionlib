@@ -2,6 +2,7 @@ package moderation
 
 import (
 	"context"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
@@ -16,6 +17,7 @@ type Repository interface {
 	LockWalkthroughSubject(ctx context.Context, id int) (WalkthroughSubject, error)
 	PublishWalkthrough(ctx context.Context, id int) error
 	HideWalkthrough(ctx context.Context, id int) error
+	PendingWalkthroughReviews(ctx context.Context, updatedBefore time.Time, limit int) ([]int, error)
 	RecordEvent(ctx context.Context, in NewEvent) error
 }
 

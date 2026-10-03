@@ -75,6 +75,7 @@ func (r *Repository) Create(ctx context.Context, in walkthrough.NewWalkthrough) 
 		SetNillableLang(in.Lang).
 		SetStatus(entwalkthrough.Status(in.Status)).
 		SetCreatorID(in.CreatorID).
+		SetReviewPending(in.ReviewPending).
 		Save(ctx)
 	if postgres.IsForeignKeyViolation(err, gameFK) {
 		return walkthrough.Walkthrough{}, game.ErrNotFound
@@ -91,6 +92,7 @@ func (r *Repository) Update(ctx context.Context, id int, changes walkthrough.Cha
 		SetContent(changes.Content).
 		SetHTML(changes.HTML).
 		SetStatus(entwalkthrough.Status(changes.Status)).
+		SetReviewPending(changes.ReviewPending).
 		SetEdited(true)
 	if changes.Lang != nil {
 		update.SetLang(*changes.Lang)
@@ -101,7 +103,11 @@ func (r *Repository) Update(ctx context.Context, id int, changes walkthrough.Cha
 }
 
 func (r *Repository) SetStatus(ctx context.Context, id int, status walkthrough.Status) error {
-	return r.exec(ctx, id, r.db(ctx).Walkthrough.UpdateOneID(id).SetStatus(entwalkthrough.Status(status)))
+	return r.exec(ctx, id, r.db(ctx).Walkthrough.UpdateOneID(id).SetStatus(entwalkthrough.Status(status)).SetReviewPending(false))
+}
+
+func (r *Repository) MarkReviewPending(ctx context.Context, id int) error {
+	return r.exec(ctx, id, r.db(ctx).Walkthrough.UpdateOneID(id).SetReviewPending(true))
 }
 
 func (r *Repository) exec(ctx context.Context, id int, update *ent.WalkthroughUpdateOne) error {
@@ -182,16 +188,17 @@ func statuses(values []walkthrough.Status) []entwalkthrough.Status {
 
 func toWalkthrough(row *ent.Walkthrough) walkthrough.Walkthrough {
 	return walkthrough.Walkthrough{
-		ID:        row.ID,
-		GameID:    row.GameID,
-		Title:     row.Title,
-		Content:   row.Content,
-		HTML:      row.HTML,
-		Lang:      row.Lang,
-		Created:   row.Created,
-		Updated:   row.Updated,
-		Edited:    row.Edited,
-		Status:    walkthrough.Status(row.Status),
-		CreatorID: row.CreatorID,
+		ID:            row.ID,
+		GameID:        row.GameID,
+		Title:         row.Title,
+		Content:       row.Content,
+		HTML:          row.HTML,
+		Lang:          row.Lang,
+		Created:       row.Created,
+		Updated:       row.Updated,
+		Edited:        row.Edited,
+		Status:        walkthrough.Status(row.Status),
+		CreatorID:     row.CreatorID,
+		ReviewPending: row.ReviewPending,
 	}
 }

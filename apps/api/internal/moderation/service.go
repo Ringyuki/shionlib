@@ -4,9 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/activity"
 )
+
+const requeueBatch = 200
 
 type Service struct {
 	repo       Repository
@@ -126,7 +129,7 @@ func (s *Service) ReviewWalkthrough(ctx context.Context, walkthroughID int) erro
 	if err != nil {
 		return err
 	}
-	if subject.Deleted {
+	if subject.Deleted || !subject.ReviewPending {
 		return nil
 	}
 	verdict, err := s.classifier.Review(ctx, walkthroughReview(subject))
@@ -192,10 +195,23 @@ func (s *Service) lockUnchangedWalkthrough(ctx context.Context, reviewed Walkthr
 	if err != nil {
 		return nil, err
 	}
-	if current.Deleted || current.HTML != reviewed.HTML || current.Title != reviewed.Title {
+	if current.Deleted || !current.ReviewPending || current.HTML != reviewed.HTML || current.Title != reviewed.Title {
 		return nil, nil
 	}
 	return &current, nil
+}
+
+func (s *Service) RequeueWalkthroughReviews(ctx context.Context, updatedBefore time.Time) error {
+	ids, err := s.repo.PendingWalkthroughReviews(ctx, updatedBefore, requeueBatch)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		if err := s.queue.Enqueue(ctx, ReviewWalkthrough{WalkthroughID: id}); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (s *Service) approveComment(ctx context.Context, subject CommentSubject) error {

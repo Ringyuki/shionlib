@@ -188,13 +188,14 @@ type CommentSubject struct {
 }
 
 type WalkthroughSubject struct {
-	ID        int
-	CreatorID int
-	GameID    int
-	Title     string
-	HTML      string
-	Deleted   bool
-	Game      GameTitles
+	ID            int
+	CreatorID     int
+	GameID        int
+	Title         string
+	HTML          string
+	Deleted       bool
+	ReviewPending bool
+	Game          GameTitles
 }
 
 const (
@@ -230,3 +231,5 @@ type ReviewWalkthrough struct {
 func (ReviewWalkthrough) Kind() string { return "moderation_review_walkthrough" }
 
 func (ReviewWalkthrough) Queue() string { return WalkthroughReviewQueue }
+
+func (ReviewWalkthrough) UniqueByArgs() bool { return true }

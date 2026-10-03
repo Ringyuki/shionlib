@@ -127,6 +127,20 @@ func (_c *WalkthroughCreate) SetCreatorID(v int) *WalkthroughCreate {
 	return _c
 }
 
+// SetReviewPending sets the "review_pending" field.
+func (_c *WalkthroughCreate) SetReviewPending(v bool) *WalkthroughCreate {
+	_c.mutation.SetReviewPending(v)
+	return _c
+}
+
+// SetNillableReviewPending sets the "review_pending" field if the given value is not nil.
+func (_c *WalkthroughCreate) SetNillableReviewPending(v *bool) *WalkthroughCreate {
+	if v != nil {
+		_c.SetReviewPending(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *WalkthroughCreate) SetID(v int) *WalkthroughCreate {
 	_c.mutation.SetID(v)
@@ -224,6 +238,10 @@ func (_c *WalkthroughCreate) defaults() {
 		v := walkthrough.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
+	if _, ok := _c.mutation.ReviewPending(); !ok {
+		v := walkthrough.DefaultReviewPending
+		_c.mutation.SetReviewPending(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -271,6 +289,9 @@ func (_c *WalkthroughCreate) check() error {
 	}
 	if _, ok := _c.mutation.CreatorID(); !ok {
 		return &ValidationError{Name: "creator_id", err: errors.New(`ent: missing required field "Walkthrough.creator_id"`)}
+	}
+	if _, ok := _c.mutation.ReviewPending(); !ok {
+		return &ValidationError{Name: "review_pending", err: errors.New(`ent: missing required field "Walkthrough.review_pending"`)}
 	}
 	if len(_c.mutation.GameIDs()) == 0 {
 		return &ValidationError{Name: "game", err: errors.New(`ent: missing required edge "Walkthrough.game"`)}
@@ -342,6 +363,10 @@ func (_c *WalkthroughCreate) createSpec() (*Walkthrough, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(walkthrough.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
+	}
+	if value, ok := _c.mutation.ReviewPending(); ok {
+		_spec.SetField(walkthrough.FieldReviewPending, field.TypeBool, value)
+		_node.ReviewPending = value
 	}
 	if nodes := _c.mutation.ActivitiesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -575,6 +600,18 @@ func (u *WalkthroughUpsert) UpdateCreatorID() *WalkthroughUpsert {
 	return u
 }
 
+// SetReviewPending sets the "review_pending" field.
+func (u *WalkthroughUpsert) SetReviewPending(v bool) *WalkthroughUpsert {
+	u.Set(walkthrough.FieldReviewPending, v)
+	return u
+}
+
+// UpdateReviewPending sets the "review_pending" field to the value that was provided on create.
+func (u *WalkthroughUpsert) UpdateReviewPending() *WalkthroughUpsert {
+	u.SetExcluded(walkthrough.FieldReviewPending)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -756,6 +793,20 @@ func (u *WalkthroughUpsertOne) SetCreatorID(v int) *WalkthroughUpsertOne {
 func (u *WalkthroughUpsertOne) UpdateCreatorID() *WalkthroughUpsertOne {
 	return u.Update(func(s *WalkthroughUpsert) {
 		s.UpdateCreatorID()
+	})
+}
+
+// SetReviewPending sets the "review_pending" field.
+func (u *WalkthroughUpsertOne) SetReviewPending(v bool) *WalkthroughUpsertOne {
+	return u.Update(func(s *WalkthroughUpsert) {
+		s.SetReviewPending(v)
+	})
+}
+
+// UpdateReviewPending sets the "review_pending" field to the value that was provided on create.
+func (u *WalkthroughUpsertOne) UpdateReviewPending() *WalkthroughUpsertOne {
+	return u.Update(func(s *WalkthroughUpsert) {
+		s.UpdateReviewPending()
 	})
 }
 
@@ -1106,6 +1157,20 @@ func (u *WalkthroughUpsertBulk) SetCreatorID(v int) *WalkthroughUpsertBulk {
 func (u *WalkthroughUpsertBulk) UpdateCreatorID() *WalkthroughUpsertBulk {
 	return u.Update(func(s *WalkthroughUpsert) {
 		s.UpdateCreatorID()
+	})
+}
+
+// SetReviewPending sets the "review_pending" field.
+func (u *WalkthroughUpsertBulk) SetReviewPending(v bool) *WalkthroughUpsertBulk {
+	return u.Update(func(s *WalkthroughUpsert) {
+		s.SetReviewPending(v)
+	})
+}
+
+// UpdateReviewPending sets the "review_pending" field to the value that was provided on create.
+func (u *WalkthroughUpsertBulk) UpdateReviewPending() *WalkthroughUpsertBulk {
+	return u.Update(func(s *WalkthroughUpsert) {
+		s.UpdateReviewPending()
 	})
 }
 

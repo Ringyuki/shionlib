@@ -157,6 +157,20 @@ func (_u *WalkthroughUpdate) SetNillableCreatorID(v *int) *WalkthroughUpdate {
 	return _u
 }
 
+// SetReviewPending sets the "review_pending" field.
+func (_u *WalkthroughUpdate) SetReviewPending(v bool) *WalkthroughUpdate {
+	_u.mutation.SetReviewPending(v)
+	return _u
+}
+
+// SetNillableReviewPending sets the "review_pending" field if the given value is not nil.
+func (_u *WalkthroughUpdate) SetNillableReviewPending(v *bool) *WalkthroughUpdate {
+	if v != nil {
+		_u.SetReviewPending(*v)
+	}
+	return _u
+}
+
 // AddActivityIDs adds the "activities" edge to the Activity entity by IDs.
 func (_u *WalkthroughUpdate) AddActivityIDs(ids ...int) *WalkthroughUpdate {
 	_u.mutation.AddActivityIDs(ids...)
@@ -369,6 +383,9 @@ func (_u *WalkthroughUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(walkthrough.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.ReviewPending(); ok {
+		_spec.SetField(walkthrough.FieldReviewPending, field.TypeBool, value)
 	}
 	if _u.mutation.ActivitiesCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -662,6 +679,20 @@ func (_u *WalkthroughUpdateOne) SetNillableCreatorID(v *int) *WalkthroughUpdateO
 	return _u
 }
 
+// SetReviewPending sets the "review_pending" field.
+func (_u *WalkthroughUpdateOne) SetReviewPending(v bool) *WalkthroughUpdateOne {
+	_u.mutation.SetReviewPending(v)
+	return _u
+}
+
+// SetNillableReviewPending sets the "review_pending" field if the given value is not nil.
+func (_u *WalkthroughUpdateOne) SetNillableReviewPending(v *bool) *WalkthroughUpdateOne {
+	if v != nil {
+		_u.SetReviewPending(*v)
+	}
+	return _u
+}
+
 // AddActivityIDs adds the "activities" edge to the Activity entity by IDs.
 func (_u *WalkthroughUpdateOne) AddActivityIDs(ids ...int) *WalkthroughUpdateOne {
 	_u.mutation.AddActivityIDs(ids...)
@@ -904,6 +935,9 @@ func (_u *WalkthroughUpdateOne) sqlSave(ctx context.Context) (_node *Walkthrough
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(walkthrough.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.ReviewPending(); ok {
+		_spec.SetField(walkthrough.FieldReviewPending, field.TypeBool, value)
 	}
 	if _u.mutation.ActivitiesCleared() {
 		edge := &sqlgraph.EdgeSpec{

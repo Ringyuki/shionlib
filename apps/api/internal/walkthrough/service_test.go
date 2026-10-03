@@ -72,7 +72,7 @@ func TestCreateHoldsPublishedWalkthroughsForReview(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if created.Status != walkthrough.StatusHidden || created.CreatorID != author.UserID || created.Lang == nil || *created.Lang != "jp" || created.Creator.ID != author.UserID ||
+	if created.Status != walkthrough.StatusHidden || !created.ReviewPending || created.CreatorID != author.UserID || created.Lang == nil || *created.Lang != "jp" || created.Creator.ID != author.UserID ||
 		created.HTML != `<p class="[&amp;:not(:first-child)]:mt-6"><span>この攻略では、はじめに共通ルートを進めて、三日目の選択肢でヒロイン分岐に入ります。</span></p>` {
 		t.Fatalf("unexpected walkthrough %+v", created)
 	}
@@ -88,7 +88,7 @@ func TestCreateHoldsPublishedWalkthroughsForReview(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if draft.Status != walkthrough.StatusDraft || draft.Lang != nil || len(f.queue.All()) != 1 {
+	if draft.Status != walkthrough.StatusDraft || draft.ReviewPending || draft.Lang != nil || len(f.queue.All()) != 1 {
 		t.Fatalf("drafts are stored as is and not reviewed: %+v", draft)
 	}
 	if _, err := f.service.Create(ctx, author, walkthrough.CreateInput{GameID: 404, Title: "x", Content: document(t, "x"), Status: walkthrough.StatusDraft}); !errors.Is(err, game.ErrNotFound) {
@@ -100,6 +100,22 @@ func TestCreateHoldsPublishedWalkthroughsForReview(t *testing.T) {
 	}
 	if _, err := f.service.Create(ctx, author, walkthrough.CreateInput{GameID: gameID, Title: "x", Content: document(t, texts...), Status: walkthrough.StatusDraft}); !errors.Is(err, walkthrough.ErrContentTooLong) {
 		t.Fatalf("rendered html beyond the column size: %v", err)
+	}
+}
+
+func TestHidingAWalkthroughCancelsItsPendingReview(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	created, err := f.service.Create(ctx, author, walkthrough.CreateInput{GameID: gameID, Title: "Guide", Content: document(t, "x"), Status: walkthrough.StatusPublished})
+	if err != nil {
+		t.Fatal(err)
+	}
+	hidden, err := f.service.Update(ctx, author, created.ID, walkthrough.UpdateInput{Title: "Guide", Content: document(t, "x"), Status: walkthrough.StatusHidden})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if hidden.Status != walkthrough.StatusHidden || hidden.ReviewPending {
+		t.Fatalf("hiding by the author cancels the review: %+v", hidden)
 	}
 }
 
@@ -119,7 +135,7 @@ func TestUpdateAndDeleteRequireOwnership(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if updated.Status != walkthrough.StatusHidden || !updated.Edited || updated.Title != input.Title || *updated.Lang != "zh-hant" {
+	if updated.Status != walkthrough.StatusHidden || !updated.ReviewPending || !updated.Edited || updated.Title != input.Title || *updated.Lang != "zh-hant" {
 		t.Fatalf("unexpected update %+v", updated)
 	}
 	if jobs := f.queue.All(); len(jobs) != 1 || jobs[0] != (moderation.ReviewWalkthrough{WalkthroughID: created.ID}) {
@@ -261,8 +277,8 @@ func TestAdminStatusAndRescan(t *testing.T) {
 	if err := service.SetStatus(ctx, hidden.ID, walkthrough.StatusPublished); err != nil {
 		t.Fatal(err)
 	}
-	if got, _ := f.repo.Get(ctx, hidden.ID); got.Status != walkthrough.StatusPublished {
-		t.Fatalf("status not changed: %+v", got)
+	if got, _ := f.repo.Get(ctx, hidden.ID); got.Status != walkthrough.StatusPublished || got.ReviewPending {
+		t.Fatalf("status not changed or review still pending: %+v", got)
 	}
 	if err := service.Rescan(ctx, deleted.ID); !errors.Is(err, walkthrough.ErrNotFound) {
 		t.Fatalf("deleted walkthroughs cannot be rescanned: %v", err)
@@ -273,7 +289,7 @@ func TestAdminStatusAndRescan(t *testing.T) {
 	if jobs := f.queue.All(); len(jobs) != 1 || jobs[0] != (moderation.ReviewWalkthrough{WalkthroughID: hidden.ID}) {
 		t.Fatalf("unexpected jobs %+v", jobs)
 	}
-	if got, _ := f.repo.Get(ctx, hidden.ID); got.Status != walkthrough.StatusPublished {
-		t.Fatal("rescan does not change the status")
+	if got, _ := f.repo.Get(ctx, hidden.ID); got.Status != walkthrough.StatusPublished || !got.ReviewPending {
+		t.Fatal("rescan keeps the status and marks the review pending")
 	}
 }

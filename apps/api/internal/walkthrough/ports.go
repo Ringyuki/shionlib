@@ -15,6 +15,7 @@ type Repository interface {
 	Create(ctx context.Context, in NewWalkthrough) (Walkthrough, error)
 	Update(ctx context.Context, id int, changes Changes) error
 	SetStatus(ctx context.Context, id int, status Status) error
+	MarkReviewPending(ctx context.Context, id int) error
 	ListByGame(ctx context.Context, filter GameFilter, page Page) ([]Summary, int, error)
 	ListByCreator(ctx context.Context, filter CreatorFilter, page Page) ([]Summary, int, error)
 }

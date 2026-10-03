@@ -7,6 +7,7 @@ import (
 	"github.com/riverqueue/river"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/moderation"
+	"github.com/Ringyuki/shionlib/apps/api/internal/platform/jobs"
 )
 
 const (
@@ -59,4 +60,25 @@ func (w *reviewWalkthroughWorker) Work(ctx context.Context, job *river.Job[moder
 
 func (w *reviewWalkthroughWorker) Timeout(*river.Job[moderation.ReviewWalkthrough]) time.Duration {
 	return reviewTimeout
+}
+
+const (
+	requeueSchedule     = "*/30 * * * *"
+	requeueTimeout      = 2 * time.Minute
+	staleWalkthroughAge = time.Hour
+)
+
+type Requeuer interface {
+	RequeueWalkthroughReviews(ctx context.Context, updatedBefore time.Time) error
+}
+
+func Tasks(requeuer Requeuer, now func() time.Time) []jobs.Task {
+	return []jobs.Task{{
+		Name:     "moderation_requeue_walkthrough_reviews",
+		Schedule: requeueSchedule,
+		Timeout:  requeueTimeout,
+		Run: func(ctx context.Context) error {
+			return requeuer.RequeueWalkthroughReviews(ctx, now().Add(-staleWalkthroughAge))
+		},
+	}}
 }

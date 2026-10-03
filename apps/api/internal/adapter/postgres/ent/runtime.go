@@ -1053,4 +1053,8 @@ func init() {
 	walkthroughDescEdited := walkthroughFields[8].Descriptor()
 	// walkthrough.DefaultEdited holds the default value on creation for the edited field.
 	walkthrough.DefaultEdited = walkthroughDescEdited.Default.(bool)
+	// walkthroughDescReviewPending is the schema descriptor for review_pending field.
+	walkthroughDescReviewPending := walkthroughFields[11].Descriptor()
+	// walkthrough.DefaultReviewPending holds the default value on creation for the review_pending field.
+	walkthrough.DefaultReviewPending = walkthroughDescReviewPending.Default.(bool)
 }

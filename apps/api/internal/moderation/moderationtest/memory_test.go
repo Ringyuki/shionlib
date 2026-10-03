@@ -27,10 +27,10 @@ func TestMemoryRepositoryContract(t *testing.T) {
 				return repo.SeedComment(subject, fixture.Status)
 			},
 			CommentStatus: func(_ *testing.T, id int) string { return repo.CommentStatus(id) },
-			NewWalkthrough: func(_ *testing.T, status string) moderation.WalkthroughSubject {
+			NewWalkthrough: func(_ *testing.T, status string, reviewPending bool) moderation.WalkthroughSubject {
 				users++
 				games++
-				return repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: users, GameID: games, Title: "guide", HTML: "<p>guide</p>", Game: moderation.GameTitles{JP: "ゲーム"}}, status)
+				return repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: users, GameID: games, Title: "guide", HTML: "<p>guide</p>", ReviewPending: reviewPending, Game: moderation.GameTitles{JP: "ゲーム"}}, status)
 			},
 			WalkthroughStatus: func(_ *testing.T, id int) string { return repo.WalkthroughStatus(id) },
 			EventCount:        func(*testing.T) int { return len(repo.Events()) },

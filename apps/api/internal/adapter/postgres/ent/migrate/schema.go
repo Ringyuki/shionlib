@@ -2021,6 +2021,7 @@ var (
 		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "edited", Type: field.TypeBool, Default: false},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"DRAFT", "PUBLISHED", "HIDDEN", "DELETED"}, Default: "DRAFT", SchemaType: map[string]string{"postgres": "walkthrough_status"}},
+		{Name: "review_pending", Type: field.TypeBool, Default: false},
 		{Name: "game_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "creator_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
 	}
@@ -2032,13 +2033,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "walkthroughs_game_id_fkey",
-				Columns:    []*schema.Column{WalkthroughsColumns[9]},
+				Columns:    []*schema.Column{WalkthroughsColumns[10]},
 				RefColumns: []*schema.Column{GamesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "walkthroughs_creator_id_fkey",
-				Columns:    []*schema.Column{WalkthroughsColumns[10]},
+				Columns:    []*schema.Column{WalkthroughsColumns[11]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -2047,12 +2048,12 @@ var (
 			{
 				Name:    "walkthroughs_game_id_created_idx",
 				Unique:  false,
-				Columns: []*schema.Column{WalkthroughsColumns[9], WalkthroughsColumns[5]},
+				Columns: []*schema.Column{WalkthroughsColumns[10], WalkthroughsColumns[5]},
 			},
 			{
 				Name:    "walkthroughs_creator_id_created_idx",
 				Unique:  false,
-				Columns: []*schema.Column{WalkthroughsColumns[10], WalkthroughsColumns[5]},
+				Columns: []*schema.Column{WalkthroughsColumns[11], WalkthroughsColumns[5]},
 			},
 		},
 	}

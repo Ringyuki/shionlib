@@ -4,6 +4,7 @@ import (
 	"context"
 	"slices"
 	"sync"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/moderation"
 )
@@ -27,6 +28,7 @@ type commentRow struct {
 type walkthroughRow struct {
 	subject moderation.WalkthroughSubject
 	status  string
+	updated time.Time
 }
 
 type MemoryRepository struct {
@@ -74,7 +76,7 @@ func (r *MemoryRepository) SeedWalkthrough(subject moderation.WalkthroughSubject
 		r.nextID++
 		subject.ID = r.nextID
 	}
-	r.walkthroughs[subject.ID] = &walkthroughRow{subject: subject, status: status}
+	r.walkthroughs[subject.ID] = &walkthroughRow{subject: subject, status: status, updated: time.Now()}
 	return subject
 }
 
@@ -153,8 +155,9 @@ func (r *MemoryRepository) LockWalkthroughSubject(ctx context.Context, id int) (
 func (r *MemoryRepository) PublishWalkthrough(_ context.Context, id int) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if row, ok := r.walkthroughs[id]; ok && (row.status == WalkthroughPublished || row.status == WalkthroughHidden) {
+	if row, ok := r.walkthroughs[id]; ok && row.subject.ReviewPending && (row.status == WalkthroughPublished || row.status == WalkthroughHidden) {
 		row.status = WalkthroughPublished
+		row.subject.ReviewPending = false
 	}
 	return nil
 }
@@ -164,8 +167,25 @@ func (r *MemoryRepository) HideWalkthrough(_ context.Context, id int) error {
 	defer r.mu.Unlock()
 	if row, ok := r.walkthroughs[id]; ok && row.status != WalkthroughDeleted {
 		row.status = WalkthroughHidden
+		row.subject.ReviewPending = false
 	}
 	return nil
+}
+
+func (r *MemoryRepository) PendingWalkthroughReviews(_ context.Context, updatedBefore time.Time, limit int) ([]int, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var ids []int
+	for id, row := range r.walkthroughs {
+		if row.subject.ReviewPending && row.status != WalkthroughDeleted && row.updated.Before(updatedBefore) {
+			ids = append(ids, id)
+		}
+	}
+	slices.Sort(ids)
+	if len(ids) > limit {
+		ids = ids[:limit]
+	}
+	return ids, nil
 }
 
 func (r *MemoryRepository) RecordEvent(_ context.Context, in moderation.NewEvent) error {

@@ -50692,6 +50692,7 @@ type WalkthroughMutation struct {
 	updated           *time.Time
 	edited            *bool
 	status            *walkthrough.Status
+	review_pending    *bool
 	clearedFields     map[string]struct{}
 	activities        map[int]struct{}
 	removedactivities map[int]struct{}
@@ -51200,6 +51201,42 @@ func (m *WalkthroughMutation) ResetCreatorID() {
 	m.creator = nil
 }
 
+// SetReviewPending sets the "review_pending" field.
+func (m *WalkthroughMutation) SetReviewPending(b bool) {
+	m.review_pending = &b
+}
+
+// ReviewPending returns the value of the "review_pending" field in the mutation.
+func (m *WalkthroughMutation) ReviewPending() (r bool, exists bool) {
+	v := m.review_pending
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldReviewPending returns the old "review_pending" field's value of the Walkthrough entity.
+// If the Walkthrough object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WalkthroughMutation) OldReviewPending(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldReviewPending is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldReviewPending requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldReviewPending: %w", err)
+	}
+	return oldValue.ReviewPending, nil
+}
+
+// ResetReviewPending resets all changes to the "review_pending" field.
+func (m *WalkthroughMutation) ResetReviewPending() {
+	m.review_pending = nil
+}
+
 // AddActivityIDs adds the "activities" edge to the Activity entity by ids.
 func (m *WalkthroughMutation) AddActivityIDs(ids ...int) {
 	if m.activities == nil {
@@ -51396,7 +51433,7 @@ func (m *WalkthroughMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *WalkthroughMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.game != nil {
 		fields = append(fields, walkthrough.FieldGameID)
 	}
@@ -51427,6 +51464,9 @@ func (m *WalkthroughMutation) Fields() []string {
 	if m.creator != nil {
 		fields = append(fields, walkthrough.FieldCreatorID)
 	}
+	if m.review_pending != nil {
+		fields = append(fields, walkthrough.FieldReviewPending)
+	}
 	return fields
 }
 
@@ -51455,6 +51495,8 @@ func (m *WalkthroughMutation) Field(name string) (ent.Value, bool) {
 		return m.Status()
 	case walkthrough.FieldCreatorID:
 		return m.CreatorID()
+	case walkthrough.FieldReviewPending:
+		return m.ReviewPending()
 	}
 	return nil, false
 }
@@ -51484,6 +51526,8 @@ func (m *WalkthroughMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldStatus(ctx)
 	case walkthrough.FieldCreatorID:
 		return m.OldCreatorID(ctx)
+	case walkthrough.FieldReviewPending:
+		return m.OldReviewPending(ctx)
 	}
 	return nil, fmt.Errorf("unknown Walkthrough field %s", name)
 }
@@ -51562,6 +51606,13 @@ func (m *WalkthroughMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatorID(v)
+		return nil
+	case walkthrough.FieldReviewPending:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReviewPending(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Walkthrough field %s", name)
@@ -51653,6 +51704,9 @@ func (m *WalkthroughMutation) ResetField(name string) error {
 		return nil
 	case walkthrough.FieldCreatorID:
 		m.ResetCreatorID()
+		return nil
+	case walkthrough.FieldReviewPending:
+		m.ResetReviewPending()
 		return nil
 	}
 	return fmt.Errorf("unknown Walkthrough field %s", name)

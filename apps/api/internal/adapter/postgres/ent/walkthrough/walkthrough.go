@@ -35,6 +35,8 @@ const (
 	FieldStatus = "status"
 	// FieldCreatorID holds the string denoting the creator_id field in the database.
 	FieldCreatorID = "creator_id"
+	// FieldReviewPending holds the string denoting the review_pending field in the database.
+	FieldReviewPending = "review_pending"
 	// EdgeActivities holds the string denoting the activities edge name in mutations.
 	EdgeActivities = "activities"
 	// EdgeGame holds the string denoting the game edge name in mutations.
@@ -88,6 +90,7 @@ var Columns = []string{
 	FieldEdited,
 	FieldStatus,
 	FieldCreatorID,
+	FieldReviewPending,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -115,6 +118,8 @@ var (
 	UpdateDefaultUpdated func() time.Time
 	// DefaultEdited holds the default value on creation for the "edited" field.
 	DefaultEdited bool
+	// DefaultReviewPending holds the default value on creation for the "review_pending" field.
+	DefaultReviewPending bool
 )
 
 // Status defines the type for the "status" enum field.
@@ -196,6 +201,11 @@ func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 // ByCreatorID orders the results by the creator_id field.
 func ByCreatorID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatorID, opts...).ToFunc()
+}
+
+// ByReviewPending orders the results by the review_pending field.
+func ByReviewPending(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReviewPending, opts...).ToFunc()
 }
 
 // ByActivitiesCount orders the results by activities count.

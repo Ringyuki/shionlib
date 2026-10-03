@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
@@ -300,7 +301,7 @@ func TestReviewComment(t *testing.T) {
 }
 
 func (f fixture) walkthrough(status string) moderation.WalkthroughSubject {
-	return f.repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: 4, GameID: 81, Title: "Route guide", HTML: "<p>Pick <b>A</b></p>", Game: moderation.GameTitles{JP: "ゲーム"}}, status)
+	return f.repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: 4, GameID: 81, Title: "Route guide", HTML: "<p>Pick <b>A</b></p>", ReviewPending: true, Game: moderation.GameTitles{JP: "ゲーム"}}, status)
 }
 
 func TestReviewWalkthrough(t *testing.T) {
@@ -351,6 +352,18 @@ func TestReviewWalkthrough(t *testing.T) {
 			*notice.LinkText != "Messages.System.Moderation.Walkthrough.Block.LinkText" || *notice.LinkURL != "/game/81/walkthrough/"+strconv.Itoa(published.ID) ||
 			string(notice.Meta) != `{"top_category":"ILLICIT","reason":"real harm","evidence":"quote","walkthrough_title":"Route guide","walkthrough_id":`+strconv.Itoa(published.ID)+`}` {
 			t.Fatalf("unexpected notice %+v %s", notice, notice.Meta)
+		}
+	})
+
+	t.Run("walkthroughs no longer awaiting review are skipped", func(t *testing.T) {
+		f := newFixture()
+		hidden := f.repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: 4, GameID: 81, Title: "Route guide", HTML: "<p>x</p>"}, moderationtest.WalkthroughHidden)
+		f.classifier.Verdict = moderation.Verdict{Decision: moderation.DecisionAllow, TopCategory: moderation.CategoryHarassment}
+		if err := f.service.ReviewWalkthrough(ctx, hidden.ID); err != nil {
+			t.Fatal(err)
+		}
+		if f.repo.WalkthroughStatus(hidden.ID) != moderationtest.WalkthroughHidden || len(f.classifier.Reviewed) != 0 {
+			t.Fatal("a walkthrough hidden by its author or an admin must stay hidden")
 		}
 	})
 
@@ -419,5 +432,24 @@ func TestScreeningHelpers(t *testing.T) {
 	}
 	if moderation.PlainText("") != "" {
 		t.Fatal("empty html")
+	}
+}
+
+func TestRequeueWalkthroughReviews(t *testing.T) {
+	f := newFixture()
+	stuck := f.walkthrough(moderationtest.WalkthroughHidden)
+	f.repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: 4, GameID: 81, Title: "done", HTML: "<p>x</p>"}, moderationtest.WalkthroughPublished)
+	if err := f.service.RequeueWalkthroughReviews(context.Background(), time.Now().Add(-time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	if len(f.queue.All()) != 0 {
+		t.Fatalf("recent reviews are left alone: %v", f.queue.All())
+	}
+	if err := f.service.RequeueWalkthroughReviews(context.Background(), time.Now().Add(time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	jobs := f.queue.All()
+	if len(jobs) != 1 || jobs[0] != moderation.Job(moderation.ReviewWalkthrough{WalkthroughID: stuck.ID}) {
+		t.Fatalf("stale pending reviews are queued again: %v", jobs)
 	}
 }

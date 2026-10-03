@@ -39,12 +39,18 @@ func (s *AdminService) SetStatus(ctx context.Context, id int, status Status) err
 }
 
 func (s *AdminService) Rescan(ctx context.Context, id int) error {
-	existing, err := s.repo.Get(ctx, id)
+	err := s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
+		existing, err := s.repo.Lock(ctx, id)
+		if err != nil {
+			return err
+		}
+		if existing.Status == StatusDeleted {
+			return ErrNotFound
+		}
+		return s.repo.MarkReviewPending(ctx, id)
+	})
 	if err != nil {
 		return err
-	}
-	if existing.Status == StatusDeleted {
-		return ErrNotFound
 	}
 	return s.queue.Enqueue(ctx, moderation.ReviewWalkthrough{WalkthroughID: id})
 }

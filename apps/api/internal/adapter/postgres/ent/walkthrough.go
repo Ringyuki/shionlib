@@ -41,6 +41,8 @@ type Walkthrough struct {
 	Status walkthrough.Status `json:"status,omitempty"`
 	// CreatorID holds the value of the "creator_id" field.
 	CreatorID int `json:"creator_id,omitempty"`
+	// ReviewPending holds the value of the "review_pending" field.
+	ReviewPending bool `json:"review_pending,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the WalkthroughQuery when eager-loading is set.
 	Edges        WalkthroughEdges `json:"edges"`
@@ -109,7 +111,7 @@ func (*Walkthrough) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case walkthrough.FieldContent:
 			values[i] = new([]byte)
-		case walkthrough.FieldEdited:
+		case walkthrough.FieldEdited, walkthrough.FieldReviewPending:
 			values[i] = new(sql.NullBool)
 		case walkthrough.FieldID, walkthrough.FieldGameID, walkthrough.FieldCreatorID:
 			values[i] = new(sql.NullInt64)
@@ -201,6 +203,12 @@ func (_m *Walkthrough) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.CreatorID = int(value.Int64)
 			}
+		case walkthrough.FieldReviewPending:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field review_pending", values[i])
+			} else if value.Valid {
+				_m.ReviewPending = value.Bool
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -288,6 +296,9 @@ func (_m *Walkthrough) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("creator_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.CreatorID))
+	builder.WriteString(", ")
+	builder.WriteString("review_pending=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ReviewPending))
 	builder.WriteByte(')')
 	return builder.String()
 }

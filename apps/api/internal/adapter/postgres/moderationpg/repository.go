@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
@@ -120,20 +121,22 @@ func (r *Repository) walkthroughSubject(ctx context.Context, id int, lock bool) 
 		return moderation.WalkthroughSubject{}, fmt.Errorf("load walkthrough %d for moderation: %w", id, err)
 	}
 	return moderation.WalkthroughSubject{
-		ID:        row.ID,
-		CreatorID: row.CreatorID,
-		GameID:    row.GameID,
-		Title:     row.Title,
-		HTML:      row.HTML,
-		Deleted:   walkthrough.Status(row.Status) == walkthrough.StatusDeleted,
-		Game:      titles(row.Edges.Game),
+		ID:            row.ID,
+		CreatorID:     row.CreatorID,
+		GameID:        row.GameID,
+		Title:         row.Title,
+		HTML:          row.HTML,
+		Deleted:       walkthrough.Status(row.Status) == walkthrough.StatusDeleted,
+		ReviewPending: row.ReviewPending,
+		Game:          titles(row.Edges.Game),
 	}, nil
 }
 
 func (r *Repository) PublishWalkthrough(ctx context.Context, id int) error {
 	err := r.db(ctx).Walkthrough.Update().
-		Where(entwalkthrough.ID(id), entwalkthrough.StatusIn(entwalkthrough.StatusPUBLISHED, entwalkthrough.StatusHIDDEN)).
+		Where(entwalkthrough.ID(id), entwalkthrough.ReviewPending(true), entwalkthrough.StatusIn(entwalkthrough.StatusPUBLISHED, entwalkthrough.StatusHIDDEN)).
 		SetStatus(entwalkthrough.StatusPUBLISHED).
+		SetReviewPending(false).
 		Exec(ctx)
 	if err != nil {
 		return fmt.Errorf("publish walkthrough %d: %w", id, err)
@@ -145,11 +148,28 @@ func (r *Repository) HideWalkthrough(ctx context.Context, id int) error {
 	err := r.db(ctx).Walkthrough.Update().
 		Where(entwalkthrough.ID(id), entwalkthrough.StatusNEQ(entwalkthrough.StatusDELETED)).
 		SetStatus(entwalkthrough.StatusHIDDEN).
+		SetReviewPending(false).
 		Exec(ctx)
 	if err != nil {
 		return fmt.Errorf("hide walkthrough %d: %w", id, err)
 	}
 	return nil
+}
+
+func (r *Repository) PendingWalkthroughReviews(ctx context.Context, updatedBefore time.Time, limit int) ([]int, error) {
+	ids, err := r.db(ctx).Walkthrough.Query().
+		Where(
+			entwalkthrough.ReviewPending(true),
+			entwalkthrough.StatusNEQ(entwalkthrough.StatusDELETED),
+			entwalkthrough.UpdatedLT(updatedBefore.UTC()),
+		).
+		Order(ent.Asc(entwalkthrough.FieldUpdated), ent.Asc(entwalkthrough.FieldID)).
+		Limit(limit).
+		IDs(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list pending walkthrough reviews: %w", err)
+	}
+	return ids, nil
 }
 
 func (r *Repository) RecordEvent(ctx context.Context, in moderation.NewEvent) error {

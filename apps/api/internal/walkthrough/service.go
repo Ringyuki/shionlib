@@ -46,13 +46,14 @@ func (s *Service) Create(ctx context.Context, who actor.Actor, in CreateInput) (
 	var id int
 	err = s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
 		created, err := s.repo.Create(ctx, NewWalkthrough{
-			GameID:    in.GameID,
-			Title:     in.Title,
-			Content:   in.Content.Raw(),
-			HTML:      html,
-			Lang:      DetectLanguage("", in.Content.Text()).Stored(),
-			Status:    heldForReview(in.Status),
-			CreatorID: who.UserID,
+			GameID:        in.GameID,
+			Title:         in.Title,
+			Content:       in.Content.Raw(),
+			HTML:          html,
+			Lang:          DetectLanguage("", in.Content.Text()).Stored(),
+			Status:        heldForReview(in.Status),
+			CreatorID:     who.UserID,
+			ReviewPending: in.Status == StatusPublished,
 		})
 		if err != nil {
 			return err
@@ -86,11 +87,12 @@ func (s *Service) Update(ctx context.Context, who actor.Actor, id int, in Update
 			return err
 		}
 		return s.repo.Update(ctx, id, Changes{
-			Title:   in.Title,
-			Content: in.Content.Raw(),
-			HTML:    html,
-			Lang:    DetectLanguage(in.Title, in.Content.Text()).Stored(),
-			Status:  heldForReview(in.Status),
+			Title:         in.Title,
+			Content:       in.Content.Raw(),
+			HTML:          html,
+			Lang:          DetectLanguage(in.Title, in.Content.Text()).Stored(),
+			Status:        heldForReview(in.Status),
+			ReviewPending: in.Status == StatusPublished,
 		})
 	})
 	if err != nil {

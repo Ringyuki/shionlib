@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"slices"
 	"testing"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/moderation"
 )
@@ -19,7 +21,7 @@ type Env struct {
 	Repo              moderation.Repository
 	NewComment        func(t *testing.T, fixture CommentFixture) moderation.CommentSubject
 	CommentStatus     func(t *testing.T, id int) string
-	NewWalkthrough    func(t *testing.T, status string) moderation.WalkthroughSubject
+	NewWalkthrough    func(t *testing.T, status string, reviewPending bool) moderation.WalkthroughSubject
 	WalkthroughStatus func(t *testing.T, id int) string
 	EventCount        func(t *testing.T) int
 }
@@ -86,44 +88,61 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		}
 	})
 
-	t.Run("walkthroughs publish only from published or hidden and never leave deleted", func(t *testing.T) {
+	t.Run("walkthrough verdicts apply only while a review is pending", func(t *testing.T) {
 		env := newEnv(t)
-		hidden := env.NewWalkthrough(t, WalkthroughHidden)
-		draft := env.NewWalkthrough(t, WalkthroughDraft)
-		deleted := env.NewWalkthrough(t, WalkthroughDeleted)
+		pending := env.NewWalkthrough(t, WalkthroughHidden, true)
+		hidden := env.NewWalkthrough(t, WalkthroughHidden, false)
+		draft := env.NewWalkthrough(t, WalkthroughDraft, true)
+		deleted := env.NewWalkthrough(t, WalkthroughDeleted, true)
 
-		got, err := env.Repo.WalkthroughSubject(ctx, hidden.ID)
+		got, err := env.Repo.WalkthroughSubject(ctx, pending.ID)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if got.Deleted || got.Title != hidden.Title || got.HTML != hidden.HTML || got.CreatorID != hidden.CreatorID || got.GameID != hidden.GameID || got.Game != hidden.Game {
-			t.Fatalf("unexpected walkthrough subject %+v, want %+v", got, hidden)
+		if got.Deleted || !got.ReviewPending || got.Title != pending.Title || got.HTML != pending.HTML || got.CreatorID != pending.CreatorID || got.GameID != pending.GameID || got.Game != pending.Game {
+			t.Fatalf("unexpected walkthrough subject %+v, want %+v", got, pending)
+		}
+		if got, err := env.Repo.WalkthroughSubject(ctx, hidden.ID); err != nil || got.ReviewPending {
+			t.Fatalf("hidden walkthrough is not pending: %+v %v", got, err)
 		}
 		if locked, err := env.Repo.LockWalkthroughSubject(ctx, deleted.ID); err != nil || !locked.Deleted {
 			t.Fatalf("deleted walkthrough must be reported: %+v %v", locked, err)
 		}
-		for _, id := range []int{hidden.ID, draft.ID, deleted.ID} {
+		before := time.Now().Add(time.Hour)
+		if ids, err := env.Repo.PendingWalkthroughReviews(ctx, before, 10); err != nil || !slices.Equal(ids, []int{pending.ID, draft.ID}) {
+			t.Fatalf("pending reviews %v %v", ids, err)
+		}
+		if ids, err := env.Repo.PendingWalkthroughReviews(ctx, time.Now().Add(-time.Hour), 10); err != nil || len(ids) != 0 {
+			t.Fatalf("recent reviews are not requeued: %v %v", ids, err)
+		}
+		for _, id := range []int{pending.ID, hidden.ID, draft.ID, deleted.ID} {
 			if err := env.Repo.PublishWalkthrough(ctx, id); err != nil {
 				t.Fatal(err)
 			}
 		}
-		if env.WalkthroughStatus(t, hidden.ID) != WalkthroughPublished || env.WalkthroughStatus(t, draft.ID) != WalkthroughDraft || env.WalkthroughStatus(t, deleted.ID) != WalkthroughDeleted {
-			t.Fatalf("unexpected statuses after publish: %s %s %s", env.WalkthroughStatus(t, hidden.ID), env.WalkthroughStatus(t, draft.ID), env.WalkthroughStatus(t, deleted.ID))
+		if env.WalkthroughStatus(t, pending.ID) != WalkthroughPublished || env.WalkthroughStatus(t, hidden.ID) != WalkthroughHidden || env.WalkthroughStatus(t, draft.ID) != WalkthroughDraft || env.WalkthroughStatus(t, deleted.ID) != WalkthroughDeleted {
+			t.Fatalf("unexpected statuses after publish: %s %s %s %s", env.WalkthroughStatus(t, pending.ID), env.WalkthroughStatus(t, hidden.ID), env.WalkthroughStatus(t, draft.ID), env.WalkthroughStatus(t, deleted.ID))
 		}
-		for _, id := range []int{hidden.ID, draft.ID, deleted.ID} {
+		if got, _ := env.Repo.WalkthroughSubject(ctx, pending.ID); got.ReviewPending {
+			t.Fatal("publishing clears the pending review")
+		}
+		for _, id := range []int{pending.ID, draft.ID, deleted.ID} {
 			if err := env.Repo.HideWalkthrough(ctx, id); err != nil {
 				t.Fatal(err)
 			}
 		}
-		if env.WalkthroughStatus(t, hidden.ID) != WalkthroughHidden || env.WalkthroughStatus(t, draft.ID) != WalkthroughHidden || env.WalkthroughStatus(t, deleted.ID) != WalkthroughDeleted {
-			t.Fatalf("unexpected statuses after hide: %s %s %s", env.WalkthroughStatus(t, hidden.ID), env.WalkthroughStatus(t, draft.ID), env.WalkthroughStatus(t, deleted.ID))
+		if env.WalkthroughStatus(t, pending.ID) != WalkthroughHidden || env.WalkthroughStatus(t, draft.ID) != WalkthroughHidden || env.WalkthroughStatus(t, deleted.ID) != WalkthroughDeleted {
+			t.Fatalf("unexpected statuses after hide: %s %s %s", env.WalkthroughStatus(t, pending.ID), env.WalkthroughStatus(t, draft.ID), env.WalkthroughStatus(t, deleted.ID))
+		}
+		if ids, err := env.Repo.PendingWalkthroughReviews(ctx, before, 10); err != nil || len(ids) != 0 {
+			t.Fatalf("hiding clears the pending review: %v %v", ids, err)
 		}
 	})
 
 	t.Run("events are recorded for comments and walkthroughs", func(t *testing.T) {
 		env := newEnv(t)
 		comment := env.NewComment(t, CommentFixture{Status: CommentPending, HTML: "<p>x</p>"})
-		walkthrough := env.NewWalkthrough(t, WalkthroughHidden)
+		walkthrough := env.NewWalkthrough(t, WalkthroughHidden, false)
 		score, reason, evidence := 0.12345, "reason", "evidence"
 		if err := env.Repo.RecordEvent(ctx, moderation.NewEvent{
 			CommentID:   &comment.ID,

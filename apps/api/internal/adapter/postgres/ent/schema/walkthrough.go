@@ -30,6 +30,7 @@ func (Walkthrough) Fields() []ent.Field {
 		field.Bool("edited").Default(false),
 		field.Enum("status").Values("DRAFT", "PUBLISHED", "HIDDEN", "DELETED").SchemaType(pgEnum("walkthrough_status")).Default("DRAFT"),
 		field.Int("creator_id").SchemaType(pg("integer")),
+		field.Bool("review_pending").Default(false),
 	}
 }
 
