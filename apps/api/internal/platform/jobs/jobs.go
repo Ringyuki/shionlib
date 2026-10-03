@@ -175,6 +175,13 @@ func (w *taskWorker) Work(ctx context.Context, job *river.Job[scheduledTask]) er
 	return nil
 }
 
+func (w *taskWorker) Timeout(job *river.Job[scheduledTask]) time.Duration {
+	if task, ok := w.tasks[job.Args.Name]; ok && task.Timeout > 0 {
+		return task.Timeout
+	}
+	return 0
+}
+
 type errorHandler struct {
 	logger *slog.Logger
 }
