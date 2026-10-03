@@ -203,7 +203,7 @@ type Hikarinagi struct {
 	ClientID       string        `env:"HIKARINAGI_CLIENT_ID"`
 	ClientSecret   string        `env:"HIKARINAGI_CLIENT_SECRET"`
 	Resource       string        `env:"HIKARINAGI_OPEN_RESOURCE" envDefault:"https://api.hikarinagi.org/open"`
-	Scopes         []string      `env:"HIKARINAGI_SCOPES" envSeparator:" " envDefault:"catalog:read catalog:full"`
+	Scopes         []string      `env:"HIKARINAGI_SCOPES" envSeparator:" " envDefault:"catalog:full catalog:sync"`
 	Timeout        time.Duration `env:"HIKARINAGI_TIMEOUT" envDefault:"15s"`
 	RequestsPerMin int           `env:"HIKARINAGI_REQUESTS_PER_MINUTE" envDefault:"55"`
 }

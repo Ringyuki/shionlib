@@ -69,7 +69,7 @@ func (f *fakeAPI) token(w http.ResponseWriter, r *http.Request) {
 	if r.Form.Get("client_id") != "" {
 		id, secret = r.Form.Get("client_id"), r.Form.Get("client_secret")
 	}
-	if id != "shionlib" || secret != "s3cret" || r.Form.Get("grant_type") != "client_credentials" || r.Form.Get("resource") != "https://api.hikarinagi.test/open" || r.Form.Get("scope") != "catalog:read catalog:full" {
+	if id != "shionlib" || secret != "s3cret" || r.Form.Get("grant_type") != "client_credentials" || r.Form.Get("resource") != "https://api.hikarinagi.test/open" || r.Form.Get("scope") != "catalog:full catalog:sync" {
 		f.t.Errorf("unexpected token request %v (client %q)", r.Form, id)
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -92,7 +92,7 @@ func setup(t *testing.T, routes map[string]string) (*hikarinagi.Source, *fakeAPI
 		ClientID:     "shionlib",
 		ClientSecret: "s3cret",
 		Resource:     "https://api.hikarinagi.test/open",
-		Scopes:       []string{"catalog:read", "catalog:full"},
+		Scopes:       []string{"catalog:full", "catalog:sync"},
 		HTTPClient:   server.Client(),
 	})
 	return hikarinagi.NewSource(client), api
@@ -107,7 +107,7 @@ const galgameDetail = `{
   "images": [{"url": "https://cdn.test/s.webp", "width": null, "height": null, "sexual": 1, "violence": 0}],
   "tags": [{"name": "纯爱", "likes": 3}],
   "external_links": [{"name": "official", "label": "官网", "url": "https://example.test"}],
-  "vndb_id": 4242, "bangumi_id": 1234,
+  "external_source": {"vndb": "v4242", "bangumi": "1234"},
   "revised_at": null, "updated_at": "2026-09-01T00:00:00.000Z", "rating": {"score": 9}
 }`
 
@@ -129,7 +129,7 @@ func TestGameCombinesDetailAndSubresources(t *testing.T) {
 	if snapshot.ReleaseDate == nil || !snapshot.ReleaseDate.Equal(time.Date(2015, 10, 23, 0, 0, 0, 0, time.UTC)) || *snapshot.Type != "ADV" || !snapshot.NSFW || snapshot.Revision != "2026-09-01T00:00:00.000Z" {
 		t.Fatalf("scalars %+v", snapshot)
 	}
-	if *snapshot.External.VNDB != "4242" || *snapshot.External.Bangumi != "1234" {
+	if *snapshot.External.VNDB != "v4242" || *snapshot.External.Bangumi != "1234" {
 		t.Fatalf("external ids %+v", snapshot.External)
 	}
 	if len(snapshot.Covers) != 1 || snapshot.Covers[0].Kind != "PKGFRONT" || snapshot.Covers[0].Language != "ja" || *snapshot.Covers[0].Width != 800 || snapshot.Covers[0].Votes != 3 {
@@ -159,7 +159,7 @@ func TestGameCombinesDetailAndSubresources(t *testing.T) {
 
 func TestDeveloperAndCharacterDetails(t *testing.T) {
 	source, _ := setup(t, map[string]string{
-		"/open/producers/5":  `{"id": 5, "name": "枕", "aliases": ["Makura"], "intro": "紹介", "trans_intro": "介绍", "en_intro": null, "website": "https://makura.test", "logo": {"url": "https://cdn.test/logo.webp", "width": 10, "height": 10, "sexual": 0, "violence": 0}, "labels": [{"key": "country", "value": "JP"}], "vndb_id": "p100", "bangumi_id": null, "revised_at": "2026-08-01T00:00:00.000Z", "updated_at": "2026-09-01T00:00:00.000Z", "type": "COMPANY"}`,
+		"/open/producers/5":  `{"id": 5, "name": "枕", "aliases": ["Makura"], "intro": "紹介", "trans_intro": "介绍", "en_intro": null, "website": "https://makura.test", "logo": {"url": "https://cdn.test/logo.webp", "width": 10, "height": 10, "sexual": 0, "violence": 0}, "labels": [{"key": "country", "value": "JP"}], "external_source": {"vndb": "p100", "bangumi": null}, "revised_at": "2026-08-01T00:00:00.000Z", "updated_at": "2026-09-01T00:00:00.000Z", "type": "COMPANY"}`,
 		"/open/characters/9": `{"id": 9, "name": "御桜稟", "trans_name": "御樱禀", "en_name": "Rin", "aliases": [], "intro": "紹介", "trans_intro": null, "en_intro": null, "image": null, "gender": "女", "blood_type": "A", "height": 158, "weight": null, "bust": null, "waist": null, "hips": null, "cup": null, "age": 17, "birthday_month": 4, "birthday_day": 1, "updated_at": "2026-09-01T00:00:00.000Z"}`,
 	})
 	developer, err := source.Developer(context.Background(), "5")
@@ -175,6 +175,9 @@ func TestDeveloperAndCharacterDetails(t *testing.T) {
 	character, err := source.Character(context.Background(), "9")
 	if err != nil {
 		t.Fatal(err)
+	}
+	if character.External.VNDB != nil || character.External.Bangumi != nil {
+		t.Fatalf("clients without catalog:sync get no external source: %+v", character.External)
 	}
 	if character.Name.Origin != "御桜稟" || *character.Name.English != "Rin" || character.Image != nil || !slices.Equal(character.Gender, []string{"女"}) || *character.BloodType != "A" || *character.Age != 17 || !slices.Equal(character.Birthday, []int{4, 1}) {
 		t.Fatalf("character %+v", character)

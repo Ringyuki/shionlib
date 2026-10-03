@@ -181,7 +181,7 @@ func toGameSnapshot(detail galgameDetailDTO, staff []galgameStaffDTO, characters
 		Type:           detail.AdvType,
 		Platforms:      detail.Platforms,
 		NSFW:           detail.NSFW,
-		External:       catalog.ExternalIDs{VNDB: detail.VNDBID.pointer(), Bangumi: detail.BangumiID.pointer()},
+		External:       detail.ExternalSource.ids(),
 		Revision:       revision(detail.RevisedAt, detail.UpdatedAt),
 	}
 	for _, cover := range detail.Covers {
@@ -245,7 +245,7 @@ func toDeveloperSnapshot(detail producerDetailDTO) catalog.DeveloperSnapshot {
 		Intro:      catalog.Localized{Origin: deref(detail.Intro), OriginLang: "ja", Translated: detail.TransIntro, English: detail.EnIntro},
 		Website:    detail.Website,
 		Logo:       optionalMedia(detail.Logo),
-		External:   catalog.ExternalIDs{VNDB: detail.VNDBID.pointer(), Bangumi: detail.BangumiID.pointer()},
+		External:   detail.ExternalSource.ids(),
 		Revision:   revision(detail.RevisedAt, detail.UpdatedAt),
 	}
 	for _, label := range detail.Labels {
@@ -269,7 +269,7 @@ func toCharacterSnapshot(detail characterDetailDTO) catalog.CharacterSnapshot {
 		Hips:       detail.Hips,
 		Cup:        detail.Cup,
 		Age:        detail.Age,
-		External:   catalog.ExternalIDs{VNDB: detail.VNDBID.pointer(), Bangumi: detail.BangumiID.pointer()},
+		External:   detail.ExternalSource.ids(),
 		Revision:   revision(detail.RevisedAt, detail.UpdatedAt),
 	}
 	if detail.Gender != nil && *detail.Gender != "" {

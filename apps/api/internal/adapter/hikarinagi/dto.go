@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"strconv"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
 )
 
 type externalID string
@@ -36,6 +38,18 @@ func (e externalID) pointer() *string {
 	}
 	value := string(e)
 	return &value
+}
+
+type externalSourceDTO struct {
+	VNDB    externalID `json:"vndb"`
+	Bangumi externalID `json:"bangumi"`
+}
+
+func (e *externalSourceDTO) ids() catalog.ExternalIDs {
+	if e == nil {
+		return catalog.ExternalIDs{}
+	}
+	return catalog.ExternalIDs{VNDB: e.VNDB.pointer(), Bangumi: e.Bangumi.pointer()}
 }
 
 type mediaDTO struct {
@@ -76,28 +90,27 @@ type linkDTO struct {
 }
 
 type galgameDetailDTO struct {
-	ID             int        `json:"id"`
-	OriginTitle    string     `json:"origin_title"`
-	OriginLang     *string    `json:"origin_lang"`
-	TransTitle     *string    `json:"trans_title"`
-	EnTitle        *string    `json:"en_title"`
-	OriginIntro    *string    `json:"origin_intro"`
-	TransIntro     *string    `json:"trans_intro"`
-	EnIntro        *string    `json:"en_intro"`
-	Aliases        []string   `json:"aliases"`
-	AdvType        *string    `json:"adv_type"`
-	Platforms      []string   `json:"platforms"`
-	NSFW           bool       `json:"nsfw"`
-	ReleaseDate    *string    `json:"release_date"`
-	ReleaseDateTBD bool       `json:"release_date_tbd"`
-	Covers         []coverDTO `json:"covers"`
-	Images         []mediaDTO `json:"images"`
-	Tags           []tagDTO   `json:"tags"`
-	ExternalLinks  []linkDTO  `json:"external_links"`
-	VNDBID         externalID `json:"vndb_id"`
-	BangumiID      externalID `json:"bangumi_id"`
-	RevisedAt      *string    `json:"revised_at"`
-	UpdatedAt      string     `json:"updated_at"`
+	ID             int                `json:"id"`
+	OriginTitle    string             `json:"origin_title"`
+	OriginLang     *string            `json:"origin_lang"`
+	TransTitle     *string            `json:"trans_title"`
+	EnTitle        *string            `json:"en_title"`
+	OriginIntro    *string            `json:"origin_intro"`
+	TransIntro     *string            `json:"trans_intro"`
+	EnIntro        *string            `json:"en_intro"`
+	Aliases        []string           `json:"aliases"`
+	AdvType        *string            `json:"adv_type"`
+	Platforms      []string           `json:"platforms"`
+	NSFW           bool               `json:"nsfw"`
+	ReleaseDate    *string            `json:"release_date"`
+	ReleaseDateTBD bool               `json:"release_date_tbd"`
+	Covers         []coverDTO         `json:"covers"`
+	Images         []mediaDTO         `json:"images"`
+	Tags           []tagDTO           `json:"tags"`
+	ExternalLinks  []linkDTO          `json:"external_links"`
+	ExternalSource *externalSourceDTO `json:"external_source"`
+	RevisedAt      *string            `json:"revised_at"`
+	UpdatedAt      string             `json:"updated_at"`
 }
 
 type galgameStaffDTO struct {
@@ -124,46 +137,44 @@ type galgameRelationDTO struct {
 }
 
 type producerDetailDTO struct {
-	ID         int        `json:"id"`
-	Name       string     `json:"name"`
-	Aliases    []string   `json:"aliases"`
-	Intro      *string    `json:"intro"`
-	TransIntro *string    `json:"trans_intro"`
-	EnIntro    *string    `json:"en_intro"`
-	Website    *string    `json:"website"`
-	Logo       *mediaDTO  `json:"logo"`
-	Labels     []labelDTO `json:"labels"`
-	VNDBID     externalID `json:"vndb_id"`
-	BangumiID  externalID `json:"bangumi_id"`
-	RevisedAt  *string    `json:"revised_at"`
-	UpdatedAt  string     `json:"updated_at"`
+	ID             int                `json:"id"`
+	Name           string             `json:"name"`
+	Aliases        []string           `json:"aliases"`
+	Intro          *string            `json:"intro"`
+	TransIntro     *string            `json:"trans_intro"`
+	EnIntro        *string            `json:"en_intro"`
+	Website        *string            `json:"website"`
+	Logo           *mediaDTO          `json:"logo"`
+	Labels         []labelDTO         `json:"labels"`
+	ExternalSource *externalSourceDTO `json:"external_source"`
+	RevisedAt      *string            `json:"revised_at"`
+	UpdatedAt      string             `json:"updated_at"`
 }
 
 type characterDetailDTO struct {
-	ID            int        `json:"id"`
-	Name          string     `json:"name"`
-	TransName     *string    `json:"trans_name"`
-	EnName        *string    `json:"en_name"`
-	Aliases       []string   `json:"aliases"`
-	Intro         string     `json:"intro"`
-	TransIntro    *string    `json:"trans_intro"`
-	EnIntro       *string    `json:"en_intro"`
-	Image         *mediaDTO  `json:"image"`
-	Gender        *string    `json:"gender"`
-	BloodType     *string    `json:"blood_type"`
-	Height        *int       `json:"height"`
-	Weight        *int       `json:"weight"`
-	Bust          *int       `json:"bust"`
-	Waist         *int       `json:"waist"`
-	Hips          *int       `json:"hips"`
-	Cup           *string    `json:"cup"`
-	Age           *int       `json:"age"`
-	BirthdayMonth *int       `json:"birthday_month"`
-	BirthdayDay   *int       `json:"birthday_day"`
-	VNDBID        externalID `json:"vndb_id"`
-	BangumiID     externalID `json:"bangumi_id"`
-	RevisedAt     *string    `json:"revised_at"`
-	UpdatedAt     string     `json:"updated_at"`
+	ID             int                `json:"id"`
+	Name           string             `json:"name"`
+	TransName      *string            `json:"trans_name"`
+	EnName         *string            `json:"en_name"`
+	Aliases        []string           `json:"aliases"`
+	Intro          string             `json:"intro"`
+	TransIntro     *string            `json:"trans_intro"`
+	EnIntro        *string            `json:"en_intro"`
+	Image          *mediaDTO          `json:"image"`
+	Gender         *string            `json:"gender"`
+	BloodType      *string            `json:"blood_type"`
+	Height         *int               `json:"height"`
+	Weight         *int               `json:"weight"`
+	Bust           *int               `json:"bust"`
+	Waist          *int               `json:"waist"`
+	Hips           *int               `json:"hips"`
+	Cup            *string            `json:"cup"`
+	Age            *int               `json:"age"`
+	BirthdayMonth  *int               `json:"birthday_month"`
+	BirthdayDay    *int               `json:"birthday_day"`
+	ExternalSource *externalSourceDTO `json:"external_source"`
+	RevisedAt      *string            `json:"revised_at"`
+	UpdatedAt      string             `json:"updated_at"`
 }
 
 type searchHitDTO struct {
