@@ -17,6 +17,9 @@ HTTP method/path · request schema · response schema · status code · business
 | `20260925074133_baseline` | Exact Prisma schema (applied only on fresh databases) | none |
 | `20261003000000_normalize_legacy_names` | Enum types renamed to snake_case; `bitIndex`/`isRelation`/`allowMask` columns renamed; `_user_like_comment(A,B)` renamed to `comment_likes(comment_id,user_id)` | metadata-only renames |
 | `20261003000100_game_tag_relations_primary_key` | Adds the missing primary key `(game_id, tag_id)` | builds an index; table is small |
+| `20261003062720_catalog_sources` | Adds `catalog_source_links` and `catalog_sync_cursors` | new tables |
+| `20261003062800_backfill_hikarinagi_links` | Links every game, developer and character with an `h_id` to source `hikarinagi`, copies `hikarinagi_sync_state.last_event_id` into `catalog_sync_cursors`, drops `hikarinagi_sync_state` | the legacy backend must be stopped first; down recreates the cursor table |
+| `20261003062900_messages_receiver_index` | `CREATE INDEX CONCURRENTLY` on `messages (receiver_id, read, created)` | no table lock |
 
 ## Intentional deviations
 
@@ -36,6 +39,8 @@ HTTP method/path · request schema · response schema · status code · business
 | Catalog data | read at request time from Hikarinagi internal APIs | materialized locally from catalog sources (see ADR 0006) | removes internal coupling |
 | Partner API (`/partner/*`) | secret-authenticated download data for Hikarinagi | removed | internal communication removed |
 | Configuration | `*_MS`/`*_SEC` numbers, `REFRESH_TOKEN_ALOGRITHM_VERSION` | Go durations (`60s`, `1h`), corrected names; see `.env.example` | clarity, validation at startup |
+| Games deleted at the source | the shell stayed visible and its detail routes returned 404 | the game is hidden (`status = 2`) when the source reports it gone; merged entries are marked missing and the merge target is imported | consistent lists and details |
+| Catalog administration | none | `GET /admin/catalog/sources`, `GET /admin/catalog/search`, `POST /admin/catalog/import` (synchronous), `POST /admin/catalog/import/queue` | operators can import or refresh one entry |
 
 ## Redis
 

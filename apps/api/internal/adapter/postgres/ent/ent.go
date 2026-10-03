@@ -14,6 +14,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/ad"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsourcelink"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsynccursor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/commentlike"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/editrecord"
@@ -115,6 +117,8 @@ func checkColumn(t, c string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			activity.Table:                        activity.ValidColumn,
 			ad.Table:                              ad.ValidColumn,
+			catalogsourcelink.Table:               catalogsourcelink.ValidColumn,
+			catalogsynccursor.Table:               catalogsynccursor.ValidColumn,
 			comment.Table:                         comment.ValidColumn,
 			commentlike.Table:                     commentlike.ValidColumn,
 			editrecord.Table:                      editrecord.ValidColumn,

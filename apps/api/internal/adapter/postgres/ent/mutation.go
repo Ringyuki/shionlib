@@ -14,6 +14,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/ad"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsourcelink"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsynccursor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/commentlike"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/editrecord"
@@ -68,6 +70,8 @@ const (
 	// Node types.
 	TypeActivity                        = "Activity"
 	TypeAd                              = "Ad"
+	TypeCatalogSourceLink               = "CatalogSourceLink"
+	TypeCatalogSyncCursor               = "CatalogSyncCursor"
 	TypeComment                         = "Comment"
 	TypeCommentLike                     = "CommentLike"
 	TypeEditRecord                      = "EditRecord"
@@ -3075,6 +3079,1520 @@ func (m *AdMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *AdMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Ad edge %s", name)
+}
+
+// CatalogSourceLinkMutation represents an operation that mutates the CatalogSourceLink nodes in the graph.
+type CatalogSourceLinkMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	source        *string
+	entity        *string
+	external_id   *string
+	local_id      *int
+	addlocal_id   *int
+	revision      *string
+	synced_at     *time.Time
+	missing_at    *time.Time
+	failures      *int
+	addfailures   *int
+	last_error    *string
+	created       *time.Time
+	updated       *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*CatalogSourceLink, error)
+	predicates    []predicate.CatalogSourceLink
+}
+
+var _ ent.Mutation = (*CatalogSourceLinkMutation)(nil)
+
+// catalogsourcelinkOption allows management of the mutation configuration using functional options.
+type catalogsourcelinkOption func(*CatalogSourceLinkMutation)
+
+// newCatalogSourceLinkMutation creates new mutation for the CatalogSourceLink entity.
+func newCatalogSourceLinkMutation(c config, op Op, opts ...catalogsourcelinkOption) *CatalogSourceLinkMutation {
+	m := &CatalogSourceLinkMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCatalogSourceLink,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCatalogSourceLinkID sets the ID field of the mutation.
+func withCatalogSourceLinkID(id int) catalogsourcelinkOption {
+	return func(m *CatalogSourceLinkMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CatalogSourceLink
+		)
+		m.oldValue = func(ctx context.Context) (*CatalogSourceLink, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CatalogSourceLink.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCatalogSourceLink sets the old CatalogSourceLink of the mutation.
+func withCatalogSourceLink(node *CatalogSourceLink) catalogsourcelinkOption {
+	return func(m *CatalogSourceLinkMutation) {
+		m.oldValue = func(context.Context) (*CatalogSourceLink, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CatalogSourceLinkMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CatalogSourceLinkMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CatalogSourceLink entities.
+func (m *CatalogSourceLinkMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CatalogSourceLinkMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CatalogSourceLinkMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CatalogSourceLink.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetSource sets the "source" field.
+func (m *CatalogSourceLinkMutation) SetSource(s string) {
+	m.source = &s
+}
+
+// Source returns the value of the "source" field in the mutation.
+func (m *CatalogSourceLinkMutation) Source() (r string, exists bool) {
+	v := m.source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSource returns the old "source" field's value of the CatalogSourceLink entity.
+// If the CatalogSourceLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSourceLinkMutation) OldSource(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSource is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSource requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSource: %w", err)
+	}
+	return oldValue.Source, nil
+}
+
+// ResetSource resets all changes to the "source" field.
+func (m *CatalogSourceLinkMutation) ResetSource() {
+	m.source = nil
+}
+
+// SetEntity sets the "entity" field.
+func (m *CatalogSourceLinkMutation) SetEntity(s string) {
+	m.entity = &s
+}
+
+// Entity returns the value of the "entity" field in the mutation.
+func (m *CatalogSourceLinkMutation) Entity() (r string, exists bool) {
+	v := m.entity
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEntity returns the old "entity" field's value of the CatalogSourceLink entity.
+// If the CatalogSourceLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSourceLinkMutation) OldEntity(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEntity is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEntity requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEntity: %w", err)
+	}
+	return oldValue.Entity, nil
+}
+
+// ResetEntity resets all changes to the "entity" field.
+func (m *CatalogSourceLinkMutation) ResetEntity() {
+	m.entity = nil
+}
+
+// SetExternalID sets the "external_id" field.
+func (m *CatalogSourceLinkMutation) SetExternalID(s string) {
+	m.external_id = &s
+}
+
+// ExternalID returns the value of the "external_id" field in the mutation.
+func (m *CatalogSourceLinkMutation) ExternalID() (r string, exists bool) {
+	v := m.external_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExternalID returns the old "external_id" field's value of the CatalogSourceLink entity.
+// If the CatalogSourceLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSourceLinkMutation) OldExternalID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExternalID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExternalID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExternalID: %w", err)
+	}
+	return oldValue.ExternalID, nil
+}
+
+// ResetExternalID resets all changes to the "external_id" field.
+func (m *CatalogSourceLinkMutation) ResetExternalID() {
+	m.external_id = nil
+}
+
+// SetLocalID sets the "local_id" field.
+func (m *CatalogSourceLinkMutation) SetLocalID(i int) {
+	m.local_id = &i
+	m.addlocal_id = nil
+}
+
+// LocalID returns the value of the "local_id" field in the mutation.
+func (m *CatalogSourceLinkMutation) LocalID() (r int, exists bool) {
+	v := m.local_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLocalID returns the old "local_id" field's value of the CatalogSourceLink entity.
+// If the CatalogSourceLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSourceLinkMutation) OldLocalID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLocalID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLocalID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLocalID: %w", err)
+	}
+	return oldValue.LocalID, nil
+}
+
+// AddLocalID adds i to the "local_id" field.
+func (m *CatalogSourceLinkMutation) AddLocalID(i int) {
+	if m.addlocal_id != nil {
+		*m.addlocal_id += i
+	} else {
+		m.addlocal_id = &i
+	}
+}
+
+// AddedLocalID returns the value that was added to the "local_id" field in this mutation.
+func (m *CatalogSourceLinkMutation) AddedLocalID() (r int, exists bool) {
+	v := m.addlocal_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetLocalID resets all changes to the "local_id" field.
+func (m *CatalogSourceLinkMutation) ResetLocalID() {
+	m.local_id = nil
+	m.addlocal_id = nil
+}
+
+// SetRevision sets the "revision" field.
+func (m *CatalogSourceLinkMutation) SetRevision(s string) {
+	m.revision = &s
+}
+
+// Revision returns the value of the "revision" field in the mutation.
+func (m *CatalogSourceLinkMutation) Revision() (r string, exists bool) {
+	v := m.revision
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRevision returns the old "revision" field's value of the CatalogSourceLink entity.
+// If the CatalogSourceLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSourceLinkMutation) OldRevision(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRevision is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRevision requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRevision: %w", err)
+	}
+	return oldValue.Revision, nil
+}
+
+// ClearRevision clears the value of the "revision" field.
+func (m *CatalogSourceLinkMutation) ClearRevision() {
+	m.revision = nil
+	m.clearedFields[catalogsourcelink.FieldRevision] = struct{}{}
+}
+
+// RevisionCleared returns if the "revision" field was cleared in this mutation.
+func (m *CatalogSourceLinkMutation) RevisionCleared() bool {
+	_, ok := m.clearedFields[catalogsourcelink.FieldRevision]
+	return ok
+}
+
+// ResetRevision resets all changes to the "revision" field.
+func (m *CatalogSourceLinkMutation) ResetRevision() {
+	m.revision = nil
+	delete(m.clearedFields, catalogsourcelink.FieldRevision)
+}
+
+// SetSyncedAt sets the "synced_at" field.
+func (m *CatalogSourceLinkMutation) SetSyncedAt(t time.Time) {
+	m.synced_at = &t
+}
+
+// SyncedAt returns the value of the "synced_at" field in the mutation.
+func (m *CatalogSourceLinkMutation) SyncedAt() (r time.Time, exists bool) {
+	v := m.synced_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSyncedAt returns the old "synced_at" field's value of the CatalogSourceLink entity.
+// If the CatalogSourceLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSourceLinkMutation) OldSyncedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSyncedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSyncedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSyncedAt: %w", err)
+	}
+	return oldValue.SyncedAt, nil
+}
+
+// ClearSyncedAt clears the value of the "synced_at" field.
+func (m *CatalogSourceLinkMutation) ClearSyncedAt() {
+	m.synced_at = nil
+	m.clearedFields[catalogsourcelink.FieldSyncedAt] = struct{}{}
+}
+
+// SyncedAtCleared returns if the "synced_at" field was cleared in this mutation.
+func (m *CatalogSourceLinkMutation) SyncedAtCleared() bool {
+	_, ok := m.clearedFields[catalogsourcelink.FieldSyncedAt]
+	return ok
+}
+
+// ResetSyncedAt resets all changes to the "synced_at" field.
+func (m *CatalogSourceLinkMutation) ResetSyncedAt() {
+	m.synced_at = nil
+	delete(m.clearedFields, catalogsourcelink.FieldSyncedAt)
+}
+
+// SetMissingAt sets the "missing_at" field.
+func (m *CatalogSourceLinkMutation) SetMissingAt(t time.Time) {
+	m.missing_at = &t
+}
+
+// MissingAt returns the value of the "missing_at" field in the mutation.
+func (m *CatalogSourceLinkMutation) MissingAt() (r time.Time, exists bool) {
+	v := m.missing_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMissingAt returns the old "missing_at" field's value of the CatalogSourceLink entity.
+// If the CatalogSourceLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSourceLinkMutation) OldMissingAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMissingAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMissingAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMissingAt: %w", err)
+	}
+	return oldValue.MissingAt, nil
+}
+
+// ClearMissingAt clears the value of the "missing_at" field.
+func (m *CatalogSourceLinkMutation) ClearMissingAt() {
+	m.missing_at = nil
+	m.clearedFields[catalogsourcelink.FieldMissingAt] = struct{}{}
+}
+
+// MissingAtCleared returns if the "missing_at" field was cleared in this mutation.
+func (m *CatalogSourceLinkMutation) MissingAtCleared() bool {
+	_, ok := m.clearedFields[catalogsourcelink.FieldMissingAt]
+	return ok
+}
+
+// ResetMissingAt resets all changes to the "missing_at" field.
+func (m *CatalogSourceLinkMutation) ResetMissingAt() {
+	m.missing_at = nil
+	delete(m.clearedFields, catalogsourcelink.FieldMissingAt)
+}
+
+// SetFailures sets the "failures" field.
+func (m *CatalogSourceLinkMutation) SetFailures(i int) {
+	m.failures = &i
+	m.addfailures = nil
+}
+
+// Failures returns the value of the "failures" field in the mutation.
+func (m *CatalogSourceLinkMutation) Failures() (r int, exists bool) {
+	v := m.failures
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFailures returns the old "failures" field's value of the CatalogSourceLink entity.
+// If the CatalogSourceLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSourceLinkMutation) OldFailures(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFailures is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFailures requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFailures: %w", err)
+	}
+	return oldValue.Failures, nil
+}
+
+// AddFailures adds i to the "failures" field.
+func (m *CatalogSourceLinkMutation) AddFailures(i int) {
+	if m.addfailures != nil {
+		*m.addfailures += i
+	} else {
+		m.addfailures = &i
+	}
+}
+
+// AddedFailures returns the value that was added to the "failures" field in this mutation.
+func (m *CatalogSourceLinkMutation) AddedFailures() (r int, exists bool) {
+	v := m.addfailures
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetFailures resets all changes to the "failures" field.
+func (m *CatalogSourceLinkMutation) ResetFailures() {
+	m.failures = nil
+	m.addfailures = nil
+}
+
+// SetLastError sets the "last_error" field.
+func (m *CatalogSourceLinkMutation) SetLastError(s string) {
+	m.last_error = &s
+}
+
+// LastError returns the value of the "last_error" field in the mutation.
+func (m *CatalogSourceLinkMutation) LastError() (r string, exists bool) {
+	v := m.last_error
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastError returns the old "last_error" field's value of the CatalogSourceLink entity.
+// If the CatalogSourceLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSourceLinkMutation) OldLastError(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastError is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastError requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastError: %w", err)
+	}
+	return oldValue.LastError, nil
+}
+
+// ClearLastError clears the value of the "last_error" field.
+func (m *CatalogSourceLinkMutation) ClearLastError() {
+	m.last_error = nil
+	m.clearedFields[catalogsourcelink.FieldLastError] = struct{}{}
+}
+
+// LastErrorCleared returns if the "last_error" field was cleared in this mutation.
+func (m *CatalogSourceLinkMutation) LastErrorCleared() bool {
+	_, ok := m.clearedFields[catalogsourcelink.FieldLastError]
+	return ok
+}
+
+// ResetLastError resets all changes to the "last_error" field.
+func (m *CatalogSourceLinkMutation) ResetLastError() {
+	m.last_error = nil
+	delete(m.clearedFields, catalogsourcelink.FieldLastError)
+}
+
+// SetCreated sets the "created" field.
+func (m *CatalogSourceLinkMutation) SetCreated(t time.Time) {
+	m.created = &t
+}
+
+// Created returns the value of the "created" field in the mutation.
+func (m *CatalogSourceLinkMutation) Created() (r time.Time, exists bool) {
+	v := m.created
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreated returns the old "created" field's value of the CatalogSourceLink entity.
+// If the CatalogSourceLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSourceLinkMutation) OldCreated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreated: %w", err)
+	}
+	return oldValue.Created, nil
+}
+
+// ResetCreated resets all changes to the "created" field.
+func (m *CatalogSourceLinkMutation) ResetCreated() {
+	m.created = nil
+}
+
+// SetUpdated sets the "updated" field.
+func (m *CatalogSourceLinkMutation) SetUpdated(t time.Time) {
+	m.updated = &t
+}
+
+// Updated returns the value of the "updated" field in the mutation.
+func (m *CatalogSourceLinkMutation) Updated() (r time.Time, exists bool) {
+	v := m.updated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdated returns the old "updated" field's value of the CatalogSourceLink entity.
+// If the CatalogSourceLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSourceLinkMutation) OldUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdated: %w", err)
+	}
+	return oldValue.Updated, nil
+}
+
+// ResetUpdated resets all changes to the "updated" field.
+func (m *CatalogSourceLinkMutation) ResetUpdated() {
+	m.updated = nil
+}
+
+// Where appends a list predicates to the CatalogSourceLinkMutation builder.
+func (m *CatalogSourceLinkMutation) Where(ps ...predicate.CatalogSourceLink) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CatalogSourceLinkMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CatalogSourceLinkMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CatalogSourceLink, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CatalogSourceLinkMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CatalogSourceLinkMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CatalogSourceLink).
+func (m *CatalogSourceLinkMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CatalogSourceLinkMutation) Fields() []string {
+	fields := make([]string, 0, 11)
+	if m.source != nil {
+		fields = append(fields, catalogsourcelink.FieldSource)
+	}
+	if m.entity != nil {
+		fields = append(fields, catalogsourcelink.FieldEntity)
+	}
+	if m.external_id != nil {
+		fields = append(fields, catalogsourcelink.FieldExternalID)
+	}
+	if m.local_id != nil {
+		fields = append(fields, catalogsourcelink.FieldLocalID)
+	}
+	if m.revision != nil {
+		fields = append(fields, catalogsourcelink.FieldRevision)
+	}
+	if m.synced_at != nil {
+		fields = append(fields, catalogsourcelink.FieldSyncedAt)
+	}
+	if m.missing_at != nil {
+		fields = append(fields, catalogsourcelink.FieldMissingAt)
+	}
+	if m.failures != nil {
+		fields = append(fields, catalogsourcelink.FieldFailures)
+	}
+	if m.last_error != nil {
+		fields = append(fields, catalogsourcelink.FieldLastError)
+	}
+	if m.created != nil {
+		fields = append(fields, catalogsourcelink.FieldCreated)
+	}
+	if m.updated != nil {
+		fields = append(fields, catalogsourcelink.FieldUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CatalogSourceLinkMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case catalogsourcelink.FieldSource:
+		return m.Source()
+	case catalogsourcelink.FieldEntity:
+		return m.Entity()
+	case catalogsourcelink.FieldExternalID:
+		return m.ExternalID()
+	case catalogsourcelink.FieldLocalID:
+		return m.LocalID()
+	case catalogsourcelink.FieldRevision:
+		return m.Revision()
+	case catalogsourcelink.FieldSyncedAt:
+		return m.SyncedAt()
+	case catalogsourcelink.FieldMissingAt:
+		return m.MissingAt()
+	case catalogsourcelink.FieldFailures:
+		return m.Failures()
+	case catalogsourcelink.FieldLastError:
+		return m.LastError()
+	case catalogsourcelink.FieldCreated:
+		return m.Created()
+	case catalogsourcelink.FieldUpdated:
+		return m.Updated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CatalogSourceLinkMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case catalogsourcelink.FieldSource:
+		return m.OldSource(ctx)
+	case catalogsourcelink.FieldEntity:
+		return m.OldEntity(ctx)
+	case catalogsourcelink.FieldExternalID:
+		return m.OldExternalID(ctx)
+	case catalogsourcelink.FieldLocalID:
+		return m.OldLocalID(ctx)
+	case catalogsourcelink.FieldRevision:
+		return m.OldRevision(ctx)
+	case catalogsourcelink.FieldSyncedAt:
+		return m.OldSyncedAt(ctx)
+	case catalogsourcelink.FieldMissingAt:
+		return m.OldMissingAt(ctx)
+	case catalogsourcelink.FieldFailures:
+		return m.OldFailures(ctx)
+	case catalogsourcelink.FieldLastError:
+		return m.OldLastError(ctx)
+	case catalogsourcelink.FieldCreated:
+		return m.OldCreated(ctx)
+	case catalogsourcelink.FieldUpdated:
+		return m.OldUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown CatalogSourceLink field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CatalogSourceLinkMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case catalogsourcelink.FieldSource:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSource(v)
+		return nil
+	case catalogsourcelink.FieldEntity:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEntity(v)
+		return nil
+	case catalogsourcelink.FieldExternalID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExternalID(v)
+		return nil
+	case catalogsourcelink.FieldLocalID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLocalID(v)
+		return nil
+	case catalogsourcelink.FieldRevision:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRevision(v)
+		return nil
+	case catalogsourcelink.FieldSyncedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSyncedAt(v)
+		return nil
+	case catalogsourcelink.FieldMissingAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMissingAt(v)
+		return nil
+	case catalogsourcelink.FieldFailures:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFailures(v)
+		return nil
+	case catalogsourcelink.FieldLastError:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastError(v)
+		return nil
+	case catalogsourcelink.FieldCreated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreated(v)
+		return nil
+	case catalogsourcelink.FieldUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CatalogSourceLink field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CatalogSourceLinkMutation) AddedFields() []string {
+	var fields []string
+	if m.addlocal_id != nil {
+		fields = append(fields, catalogsourcelink.FieldLocalID)
+	}
+	if m.addfailures != nil {
+		fields = append(fields, catalogsourcelink.FieldFailures)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CatalogSourceLinkMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case catalogsourcelink.FieldLocalID:
+		return m.AddedLocalID()
+	case catalogsourcelink.FieldFailures:
+		return m.AddedFailures()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CatalogSourceLinkMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case catalogsourcelink.FieldLocalID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLocalID(v)
+		return nil
+	case catalogsourcelink.FieldFailures:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddFailures(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CatalogSourceLink numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CatalogSourceLinkMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(catalogsourcelink.FieldRevision) {
+		fields = append(fields, catalogsourcelink.FieldRevision)
+	}
+	if m.FieldCleared(catalogsourcelink.FieldSyncedAt) {
+		fields = append(fields, catalogsourcelink.FieldSyncedAt)
+	}
+	if m.FieldCleared(catalogsourcelink.FieldMissingAt) {
+		fields = append(fields, catalogsourcelink.FieldMissingAt)
+	}
+	if m.FieldCleared(catalogsourcelink.FieldLastError) {
+		fields = append(fields, catalogsourcelink.FieldLastError)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CatalogSourceLinkMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CatalogSourceLinkMutation) ClearField(name string) error {
+	switch name {
+	case catalogsourcelink.FieldRevision:
+		m.ClearRevision()
+		return nil
+	case catalogsourcelink.FieldSyncedAt:
+		m.ClearSyncedAt()
+		return nil
+	case catalogsourcelink.FieldMissingAt:
+		m.ClearMissingAt()
+		return nil
+	case catalogsourcelink.FieldLastError:
+		m.ClearLastError()
+		return nil
+	}
+	return fmt.Errorf("unknown CatalogSourceLink nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CatalogSourceLinkMutation) ResetField(name string) error {
+	switch name {
+	case catalogsourcelink.FieldSource:
+		m.ResetSource()
+		return nil
+	case catalogsourcelink.FieldEntity:
+		m.ResetEntity()
+		return nil
+	case catalogsourcelink.FieldExternalID:
+		m.ResetExternalID()
+		return nil
+	case catalogsourcelink.FieldLocalID:
+		m.ResetLocalID()
+		return nil
+	case catalogsourcelink.FieldRevision:
+		m.ResetRevision()
+		return nil
+	case catalogsourcelink.FieldSyncedAt:
+		m.ResetSyncedAt()
+		return nil
+	case catalogsourcelink.FieldMissingAt:
+		m.ResetMissingAt()
+		return nil
+	case catalogsourcelink.FieldFailures:
+		m.ResetFailures()
+		return nil
+	case catalogsourcelink.FieldLastError:
+		m.ResetLastError()
+		return nil
+	case catalogsourcelink.FieldCreated:
+		m.ResetCreated()
+		return nil
+	case catalogsourcelink.FieldUpdated:
+		m.ResetUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown CatalogSourceLink field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CatalogSourceLinkMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CatalogSourceLinkMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CatalogSourceLinkMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CatalogSourceLinkMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CatalogSourceLinkMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CatalogSourceLinkMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CatalogSourceLinkMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown CatalogSourceLink unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CatalogSourceLinkMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown CatalogSourceLink edge %s", name)
+}
+
+// CatalogSyncCursorMutation represents an operation that mutates the CatalogSyncCursor nodes in the graph.
+type CatalogSyncCursorMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	source        *string
+	cursor        *string
+	created       *time.Time
+	updated       *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*CatalogSyncCursor, error)
+	predicates    []predicate.CatalogSyncCursor
+}
+
+var _ ent.Mutation = (*CatalogSyncCursorMutation)(nil)
+
+// catalogsynccursorOption allows management of the mutation configuration using functional options.
+type catalogsynccursorOption func(*CatalogSyncCursorMutation)
+
+// newCatalogSyncCursorMutation creates new mutation for the CatalogSyncCursor entity.
+func newCatalogSyncCursorMutation(c config, op Op, opts ...catalogsynccursorOption) *CatalogSyncCursorMutation {
+	m := &CatalogSyncCursorMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCatalogSyncCursor,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCatalogSyncCursorID sets the ID field of the mutation.
+func withCatalogSyncCursorID(id int) catalogsynccursorOption {
+	return func(m *CatalogSyncCursorMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *CatalogSyncCursor
+		)
+		m.oldValue = func(ctx context.Context) (*CatalogSyncCursor, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().CatalogSyncCursor.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCatalogSyncCursor sets the old CatalogSyncCursor of the mutation.
+func withCatalogSyncCursor(node *CatalogSyncCursor) catalogsynccursorOption {
+	return func(m *CatalogSyncCursorMutation) {
+		m.oldValue = func(context.Context) (*CatalogSyncCursor, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CatalogSyncCursorMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CatalogSyncCursorMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of CatalogSyncCursor entities.
+func (m *CatalogSyncCursorMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CatalogSyncCursorMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CatalogSyncCursorMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().CatalogSyncCursor.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetSource sets the "source" field.
+func (m *CatalogSyncCursorMutation) SetSource(s string) {
+	m.source = &s
+}
+
+// Source returns the value of the "source" field in the mutation.
+func (m *CatalogSyncCursorMutation) Source() (r string, exists bool) {
+	v := m.source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSource returns the old "source" field's value of the CatalogSyncCursor entity.
+// If the CatalogSyncCursor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSyncCursorMutation) OldSource(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSource is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSource requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSource: %w", err)
+	}
+	return oldValue.Source, nil
+}
+
+// ResetSource resets all changes to the "source" field.
+func (m *CatalogSyncCursorMutation) ResetSource() {
+	m.source = nil
+}
+
+// SetCursor sets the "cursor" field.
+func (m *CatalogSyncCursorMutation) SetCursor(s string) {
+	m.cursor = &s
+}
+
+// Cursor returns the value of the "cursor" field in the mutation.
+func (m *CatalogSyncCursorMutation) Cursor() (r string, exists bool) {
+	v := m.cursor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCursor returns the old "cursor" field's value of the CatalogSyncCursor entity.
+// If the CatalogSyncCursor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSyncCursorMutation) OldCursor(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCursor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCursor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCursor: %w", err)
+	}
+	return oldValue.Cursor, nil
+}
+
+// ResetCursor resets all changes to the "cursor" field.
+func (m *CatalogSyncCursorMutation) ResetCursor() {
+	m.cursor = nil
+}
+
+// SetCreated sets the "created" field.
+func (m *CatalogSyncCursorMutation) SetCreated(t time.Time) {
+	m.created = &t
+}
+
+// Created returns the value of the "created" field in the mutation.
+func (m *CatalogSyncCursorMutation) Created() (r time.Time, exists bool) {
+	v := m.created
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreated returns the old "created" field's value of the CatalogSyncCursor entity.
+// If the CatalogSyncCursor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSyncCursorMutation) OldCreated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreated: %w", err)
+	}
+	return oldValue.Created, nil
+}
+
+// ResetCreated resets all changes to the "created" field.
+func (m *CatalogSyncCursorMutation) ResetCreated() {
+	m.created = nil
+}
+
+// SetUpdated sets the "updated" field.
+func (m *CatalogSyncCursorMutation) SetUpdated(t time.Time) {
+	m.updated = &t
+}
+
+// Updated returns the value of the "updated" field in the mutation.
+func (m *CatalogSyncCursorMutation) Updated() (r time.Time, exists bool) {
+	v := m.updated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdated returns the old "updated" field's value of the CatalogSyncCursor entity.
+// If the CatalogSyncCursor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSyncCursorMutation) OldUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdated: %w", err)
+	}
+	return oldValue.Updated, nil
+}
+
+// ResetUpdated resets all changes to the "updated" field.
+func (m *CatalogSyncCursorMutation) ResetUpdated() {
+	m.updated = nil
+}
+
+// Where appends a list predicates to the CatalogSyncCursorMutation builder.
+func (m *CatalogSyncCursorMutation) Where(ps ...predicate.CatalogSyncCursor) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CatalogSyncCursorMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CatalogSyncCursorMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.CatalogSyncCursor, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CatalogSyncCursorMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CatalogSyncCursorMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (CatalogSyncCursor).
+func (m *CatalogSyncCursorMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CatalogSyncCursorMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.source != nil {
+		fields = append(fields, catalogsynccursor.FieldSource)
+	}
+	if m.cursor != nil {
+		fields = append(fields, catalogsynccursor.FieldCursor)
+	}
+	if m.created != nil {
+		fields = append(fields, catalogsynccursor.FieldCreated)
+	}
+	if m.updated != nil {
+		fields = append(fields, catalogsynccursor.FieldUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CatalogSyncCursorMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case catalogsynccursor.FieldSource:
+		return m.Source()
+	case catalogsynccursor.FieldCursor:
+		return m.Cursor()
+	case catalogsynccursor.FieldCreated:
+		return m.Created()
+	case catalogsynccursor.FieldUpdated:
+		return m.Updated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CatalogSyncCursorMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case catalogsynccursor.FieldSource:
+		return m.OldSource(ctx)
+	case catalogsynccursor.FieldCursor:
+		return m.OldCursor(ctx)
+	case catalogsynccursor.FieldCreated:
+		return m.OldCreated(ctx)
+	case catalogsynccursor.FieldUpdated:
+		return m.OldUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown CatalogSyncCursor field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CatalogSyncCursorMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case catalogsynccursor.FieldSource:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSource(v)
+		return nil
+	case catalogsynccursor.FieldCursor:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCursor(v)
+		return nil
+	case catalogsynccursor.FieldCreated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreated(v)
+		return nil
+	case catalogsynccursor.FieldUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown CatalogSyncCursor field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CatalogSyncCursorMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CatalogSyncCursorMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CatalogSyncCursorMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown CatalogSyncCursor numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CatalogSyncCursorMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CatalogSyncCursorMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CatalogSyncCursorMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown CatalogSyncCursor nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CatalogSyncCursorMutation) ResetField(name string) error {
+	switch name {
+	case catalogsynccursor.FieldSource:
+		m.ResetSource()
+		return nil
+	case catalogsynccursor.FieldCursor:
+		m.ResetCursor()
+		return nil
+	case catalogsynccursor.FieldCreated:
+		m.ResetCreated()
+		return nil
+	case catalogsynccursor.FieldUpdated:
+		m.ResetUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown CatalogSyncCursor field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CatalogSyncCursorMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CatalogSyncCursorMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CatalogSyncCursorMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CatalogSyncCursorMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CatalogSyncCursorMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CatalogSyncCursorMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CatalogSyncCursorMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown CatalogSyncCursor unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CatalogSyncCursorMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown CatalogSyncCursor edge %s", name)
 }
 
 // CommentMutation represents an operation that mutates the Comment nodes in the graph.

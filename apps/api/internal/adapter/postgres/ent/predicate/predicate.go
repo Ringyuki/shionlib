@@ -12,6 +12,12 @@ type Activity func(*sql.Selector)
 // Ad is the predicate function for ad builders.
 type Ad func(*sql.Selector)
 
+// CatalogSourceLink is the predicate function for catalogsourcelink builders.
+type CatalogSourceLink func(*sql.Selector)
+
+// CatalogSyncCursor is the predicate function for catalogsynccursor builders.
+type CatalogSyncCursor func(*sql.Selector)
+
 // Comment is the predicate function for comment builders.
 type Comment func(*sql.Selector)
 

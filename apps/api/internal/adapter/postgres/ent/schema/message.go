@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 type Message struct {
@@ -48,5 +49,7 @@ func (Message) Edges() []ent.Edge {
 }
 
 func (Message) Indexes() []ent.Index {
-	return []ent.Index{}
+	return []ent.Index{
+		index.Fields("receiver_id", "read", "created").StorageKey("messages_receiver_id_read_created_idx"),
+	}
 }

@@ -135,6 +135,58 @@ var (
 			},
 		},
 	}
+	// CatalogSourceLinksColumns holds the columns for the "catalog_source_links" table.
+	CatalogSourceLinksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "source", Type: field.TypeString, Size: 32, SchemaType: map[string]string{"postgres": "character varying(32)"}},
+		{Name: "entity", Type: field.TypeString, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "external_id", Type: field.TypeString, Size: 64, SchemaType: map[string]string{"postgres": "character varying(64)"}},
+		{Name: "local_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "revision", Type: field.TypeString, Nullable: true, Size: 64, SchemaType: map[string]string{"postgres": "character varying(64)"}},
+		{Name: "synced_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "missing_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "failures", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "last_error", Type: field.TypeString, Nullable: true, Size: 500, SchemaType: map[string]string{"postgres": "character varying(500)"}},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+	}
+	// CatalogSourceLinksTable holds the schema information for the "catalog_source_links" table.
+	CatalogSourceLinksTable = &schema.Table{
+		Name:       "catalog_source_links",
+		Columns:    CatalogSourceLinksColumns,
+		PrimaryKey: []*schema.Column{CatalogSourceLinksColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "catalog_source_links_source_entity_external_id_key",
+				Unique:  true,
+				Columns: []*schema.Column{CatalogSourceLinksColumns[1], CatalogSourceLinksColumns[2], CatalogSourceLinksColumns[3]},
+			},
+			{
+				Name:    "catalog_source_links_source_entity_local_id_key",
+				Unique:  true,
+				Columns: []*schema.Column{CatalogSourceLinksColumns[1], CatalogSourceLinksColumns[2], CatalogSourceLinksColumns[4]},
+			},
+			{
+				Name:    "catalog_source_links_source_synced_at_idx",
+				Unique:  false,
+				Columns: []*schema.Column{CatalogSourceLinksColumns[1], CatalogSourceLinksColumns[6]},
+			},
+		},
+	}
+	// CatalogSyncCursorsColumns holds the columns for the "catalog_sync_cursors" table.
+	CatalogSyncCursorsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "source", Type: field.TypeString, Unique: true, Size: 32, SchemaType: map[string]string{"postgres": "character varying(32)"}},
+		{Name: "cursor", Type: field.TypeString, Size: 255, SchemaType: map[string]string{"postgres": "character varying(255)"}},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+	}
+	// CatalogSyncCursorsTable holds the schema information for the "catalog_sync_cursors" table.
+	CatalogSyncCursorsTable = &schema.Table{
+		Name:       "catalog_sync_cursors",
+		Columns:    CatalogSyncCursorsColumns,
+		PrimaryKey: []*schema.Column{CatalogSyncCursorsColumns[0]},
+	}
 	// CommentsColumns holds the columns for the "comments" table.
 	CommentsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -1264,6 +1316,13 @@ var (
 				OnDelete:   schema.Restrict,
 			},
 		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "messages_receiver_id_read_created_idx",
+				Unique:  false,
+				Columns: []*schema.Column{MessagesColumns[16], MessagesColumns[9], MessagesColumns[11]},
+			},
+		},
 	}
 	// ModerationEventsColumns holds the columns for the "moderation_events" table.
 	ModerationEventsColumns = []*schema.Column{
@@ -1875,6 +1934,8 @@ var (
 	Tables = []*schema.Table{
 		ActivitiesTable,
 		AdsTable,
+		CatalogSourceLinksTable,
+		CatalogSyncCursorsTable,
 		CommentsTable,
 		CommentLikesTable,
 		EditRecordsTable,
@@ -1931,6 +1992,12 @@ func init() {
 	}
 	AdsTable.Annotation = &entsql.Annotation{
 		Table: "ads",
+	}
+	CatalogSourceLinksTable.Annotation = &entsql.Annotation{
+		Table: "catalog_source_links",
+	}
+	CatalogSyncCursorsTable.Annotation = &entsql.Annotation{
+		Table: "catalog_sync_cursors",
 	}
 	CommentsTable.ForeignKeys[0].RefTable = CommentsTable
 	CommentsTable.ForeignKeys[1].RefTable = CommentsTable

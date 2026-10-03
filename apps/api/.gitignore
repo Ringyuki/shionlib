@@ -5,3 +5,4 @@
 /api
 /entgen
 !.env.example
+migrations/atlas.sum

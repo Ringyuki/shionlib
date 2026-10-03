@@ -17,7 +17,9 @@ require (
 	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.48.0
 	github.com/riverqueue/river/rivertype v0.48.0
 	github.com/robfig/cron/v3 v3.0.1
+	golang.org/x/oauth2 v0.37.0
 	golang.org/x/sync v0.23.0
+	golang.org/x/time v0.16.0
 	golang.org/x/tools v0.51.0
 )
 

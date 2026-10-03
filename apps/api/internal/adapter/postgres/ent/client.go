@@ -17,6 +17,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/ad"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsourcelink"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsynccursor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/commentlike"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/editrecord"
@@ -69,6 +71,10 @@ type Client struct {
 	Activity *ActivityClient
 	// Ad is the client for interacting with the Ad builders.
 	Ad *AdClient
+	// CatalogSourceLink is the client for interacting with the CatalogSourceLink builders.
+	CatalogSourceLink *CatalogSourceLinkClient
+	// CatalogSyncCursor is the client for interacting with the CatalogSyncCursor builders.
+	CatalogSyncCursor *CatalogSyncCursorClient
 	// Comment is the client for interacting with the Comment builders.
 	Comment *CommentClient
 	// CommentLike is the client for interacting with the CommentLike builders.
@@ -160,6 +166,8 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Activity = NewActivityClient(c.config)
 	c.Ad = NewAdClient(c.config)
+	c.CatalogSourceLink = NewCatalogSourceLinkClient(c.config)
+	c.CatalogSyncCursor = NewCatalogSyncCursorClient(c.config)
 	c.Comment = NewCommentClient(c.config)
 	c.CommentLike = NewCommentLikeClient(c.config)
 	c.EditRecord = NewEditRecordClient(c.config)
@@ -293,6 +301,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:                          cfg,
 		Activity:                        NewActivityClient(cfg),
 		Ad:                              NewAdClient(cfg),
+		CatalogSourceLink:               NewCatalogSourceLinkClient(cfg),
+		CatalogSyncCursor:               NewCatalogSyncCursorClient(cfg),
 		Comment:                         NewCommentClient(cfg),
 		CommentLike:                     NewCommentLikeClient(cfg),
 		EditRecord:                      NewEditRecordClient(cfg),
@@ -353,6 +363,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:                          cfg,
 		Activity:                        NewActivityClient(cfg),
 		Ad:                              NewAdClient(cfg),
+		CatalogSourceLink:               NewCatalogSourceLinkClient(cfg),
+		CatalogSyncCursor:               NewCatalogSyncCursorClient(cfg),
 		Comment:                         NewCommentClient(cfg),
 		CommentLike:                     NewCommentLikeClient(cfg),
 		EditRecord:                      NewEditRecordClient(cfg),
@@ -421,17 +433,17 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Activity, c.Ad, c.Comment, c.CommentLike, c.EditRecord, c.Favorite,
-		c.FavoriteItem, c.FieldPermissionMapping, c.Game, c.GameCharacter,
-		c.GameCharacterRelation, c.GameCover, c.GameDeveloper, c.GameDeveloperRelation,
-		c.GameDownloadResource, c.GameDownloadResourceFile,
-		c.GameDownloadResourceFileHistory, c.GameDownloadResourceReport, c.GameImage,
-		c.GameLink, c.GameRelation, c.GameTagRelation, c.GameUploadChunk,
-		c.GameUploadSession, c.MalwareScanCase, c.Message, c.ModerationEvent,
-		c.OidcIdentity, c.RoleFieldPermission, c.SponsorOrder, c.Tag, c.User,
-		c.UserBannedRecord, c.UserFieldPermission, c.UserGamePvnMapping,
-		c.UserLoginSession, c.UserPasskeyCredential, c.UserPvnBinding,
-		c.UserUploadQuota, c.UserUploadQuotaRecord, c.Walkthrough,
+		c.Activity, c.Ad, c.CatalogSourceLink, c.CatalogSyncCursor, c.Comment,
+		c.CommentLike, c.EditRecord, c.Favorite, c.FavoriteItem,
+		c.FieldPermissionMapping, c.Game, c.GameCharacter, c.GameCharacterRelation,
+		c.GameCover, c.GameDeveloper, c.GameDeveloperRelation, c.GameDownloadResource,
+		c.GameDownloadResourceFile, c.GameDownloadResourceFileHistory,
+		c.GameDownloadResourceReport, c.GameImage, c.GameLink, c.GameRelation,
+		c.GameTagRelation, c.GameUploadChunk, c.GameUploadSession, c.MalwareScanCase,
+		c.Message, c.ModerationEvent, c.OidcIdentity, c.RoleFieldPermission,
+		c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord, c.UserFieldPermission,
+		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
+		c.UserPvnBinding, c.UserUploadQuota, c.UserUploadQuotaRecord, c.Walkthrough,
 	} {
 		n.Use(hooks...)
 	}
@@ -441,17 +453,17 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Activity, c.Ad, c.Comment, c.CommentLike, c.EditRecord, c.Favorite,
-		c.FavoriteItem, c.FieldPermissionMapping, c.Game, c.GameCharacter,
-		c.GameCharacterRelation, c.GameCover, c.GameDeveloper, c.GameDeveloperRelation,
-		c.GameDownloadResource, c.GameDownloadResourceFile,
-		c.GameDownloadResourceFileHistory, c.GameDownloadResourceReport, c.GameImage,
-		c.GameLink, c.GameRelation, c.GameTagRelation, c.GameUploadChunk,
-		c.GameUploadSession, c.MalwareScanCase, c.Message, c.ModerationEvent,
-		c.OidcIdentity, c.RoleFieldPermission, c.SponsorOrder, c.Tag, c.User,
-		c.UserBannedRecord, c.UserFieldPermission, c.UserGamePvnMapping,
-		c.UserLoginSession, c.UserPasskeyCredential, c.UserPvnBinding,
-		c.UserUploadQuota, c.UserUploadQuotaRecord, c.Walkthrough,
+		c.Activity, c.Ad, c.CatalogSourceLink, c.CatalogSyncCursor, c.Comment,
+		c.CommentLike, c.EditRecord, c.Favorite, c.FavoriteItem,
+		c.FieldPermissionMapping, c.Game, c.GameCharacter, c.GameCharacterRelation,
+		c.GameCover, c.GameDeveloper, c.GameDeveloperRelation, c.GameDownloadResource,
+		c.GameDownloadResourceFile, c.GameDownloadResourceFileHistory,
+		c.GameDownloadResourceReport, c.GameImage, c.GameLink, c.GameRelation,
+		c.GameTagRelation, c.GameUploadChunk, c.GameUploadSession, c.MalwareScanCase,
+		c.Message, c.ModerationEvent, c.OidcIdentity, c.RoleFieldPermission,
+		c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord, c.UserFieldPermission,
+		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
+		c.UserPvnBinding, c.UserUploadQuota, c.UserUploadQuotaRecord, c.Walkthrough,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -464,6 +476,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Activity.mutate(ctx, m)
 	case *AdMutation:
 		return c.Ad.mutate(ctx, m)
+	case *CatalogSourceLinkMutation:
+		return c.CatalogSourceLink.mutate(ctx, m)
+	case *CatalogSyncCursorMutation:
+		return c.CatalogSyncCursor.mutate(ctx, m)
 	case *CommentMutation:
 		return c.Comment.mutate(ctx, m)
 	case *CommentLikeMutation:
@@ -938,6 +954,272 @@ func (c *AdClient) mutate(ctx context.Context, m *AdMutation) (Value, error) {
 		return (&AdDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Ad mutation op: %q", m.Op())
+	}
+}
+
+// CatalogSourceLinkClient is a client for the CatalogSourceLink schema.
+type CatalogSourceLinkClient struct {
+	config
+}
+
+// NewCatalogSourceLinkClient returns a client for the CatalogSourceLink from the given config.
+func NewCatalogSourceLinkClient(c config) *CatalogSourceLinkClient {
+	return &CatalogSourceLinkClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `catalogsourcelink.Hooks(f(g(h())))`.
+func (c *CatalogSourceLinkClient) Use(hooks ...Hook) {
+	c.hooks.CatalogSourceLink = append(c.hooks.CatalogSourceLink, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `catalogsourcelink.Intercept(f(g(h())))`.
+func (c *CatalogSourceLinkClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CatalogSourceLink = append(c.inters.CatalogSourceLink, interceptors...)
+}
+
+// Create returns a builder for creating a CatalogSourceLink entity.
+func (c *CatalogSourceLinkClient) Create() *CatalogSourceLinkCreate {
+	mutation := newCatalogSourceLinkMutation(c.config, OpCreate)
+	return &CatalogSourceLinkCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CatalogSourceLink entities.
+func (c *CatalogSourceLinkClient) CreateBulk(builders ...*CatalogSourceLinkCreate) *CatalogSourceLinkCreateBulk {
+	return &CatalogSourceLinkCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CatalogSourceLinkClient) MapCreateBulk(slice any, setFunc func(*CatalogSourceLinkCreate, int)) *CatalogSourceLinkCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CatalogSourceLinkCreateBulk{err: fmt.Errorf("calling to CatalogSourceLinkClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CatalogSourceLinkCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CatalogSourceLinkCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CatalogSourceLink.
+func (c *CatalogSourceLinkClient) Update() *CatalogSourceLinkUpdate {
+	mutation := newCatalogSourceLinkMutation(c.config, OpUpdate)
+	return &CatalogSourceLinkUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CatalogSourceLinkClient) UpdateOne(_m *CatalogSourceLink) *CatalogSourceLinkUpdateOne {
+	mutation := newCatalogSourceLinkMutation(c.config, OpUpdateOne, withCatalogSourceLink(_m))
+	return &CatalogSourceLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CatalogSourceLinkClient) UpdateOneID(id int) *CatalogSourceLinkUpdateOne {
+	mutation := newCatalogSourceLinkMutation(c.config, OpUpdateOne, withCatalogSourceLinkID(id))
+	return &CatalogSourceLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CatalogSourceLink.
+func (c *CatalogSourceLinkClient) Delete() *CatalogSourceLinkDelete {
+	mutation := newCatalogSourceLinkMutation(c.config, OpDelete)
+	return &CatalogSourceLinkDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CatalogSourceLinkClient) DeleteOne(_m *CatalogSourceLink) *CatalogSourceLinkDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CatalogSourceLinkClient) DeleteOneID(id int) *CatalogSourceLinkDeleteOne {
+	builder := c.Delete().Where(catalogsourcelink.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CatalogSourceLinkDeleteOne{builder}
+}
+
+// Query returns a query builder for CatalogSourceLink.
+func (c *CatalogSourceLinkClient) Query() *CatalogSourceLinkQuery {
+	return &CatalogSourceLinkQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCatalogSourceLink},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CatalogSourceLink entity by its id.
+func (c *CatalogSourceLinkClient) Get(ctx context.Context, id int) (*CatalogSourceLink, error) {
+	return c.Query().Where(catalogsourcelink.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CatalogSourceLinkClient) GetX(ctx context.Context, id int) *CatalogSourceLink {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CatalogSourceLinkClient) Hooks() []Hook {
+	return c.hooks.CatalogSourceLink
+}
+
+// Interceptors returns the client interceptors.
+func (c *CatalogSourceLinkClient) Interceptors() []Interceptor {
+	return c.inters.CatalogSourceLink
+}
+
+func (c *CatalogSourceLinkClient) mutate(ctx context.Context, m *CatalogSourceLinkMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CatalogSourceLinkCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CatalogSourceLinkUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CatalogSourceLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CatalogSourceLinkDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CatalogSourceLink mutation op: %q", m.Op())
+	}
+}
+
+// CatalogSyncCursorClient is a client for the CatalogSyncCursor schema.
+type CatalogSyncCursorClient struct {
+	config
+}
+
+// NewCatalogSyncCursorClient returns a client for the CatalogSyncCursor from the given config.
+func NewCatalogSyncCursorClient(c config) *CatalogSyncCursorClient {
+	return &CatalogSyncCursorClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `catalogsynccursor.Hooks(f(g(h())))`.
+func (c *CatalogSyncCursorClient) Use(hooks ...Hook) {
+	c.hooks.CatalogSyncCursor = append(c.hooks.CatalogSyncCursor, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `catalogsynccursor.Intercept(f(g(h())))`.
+func (c *CatalogSyncCursorClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CatalogSyncCursor = append(c.inters.CatalogSyncCursor, interceptors...)
+}
+
+// Create returns a builder for creating a CatalogSyncCursor entity.
+func (c *CatalogSyncCursorClient) Create() *CatalogSyncCursorCreate {
+	mutation := newCatalogSyncCursorMutation(c.config, OpCreate)
+	return &CatalogSyncCursorCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CatalogSyncCursor entities.
+func (c *CatalogSyncCursorClient) CreateBulk(builders ...*CatalogSyncCursorCreate) *CatalogSyncCursorCreateBulk {
+	return &CatalogSyncCursorCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CatalogSyncCursorClient) MapCreateBulk(slice any, setFunc func(*CatalogSyncCursorCreate, int)) *CatalogSyncCursorCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CatalogSyncCursorCreateBulk{err: fmt.Errorf("calling to CatalogSyncCursorClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CatalogSyncCursorCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CatalogSyncCursorCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CatalogSyncCursor.
+func (c *CatalogSyncCursorClient) Update() *CatalogSyncCursorUpdate {
+	mutation := newCatalogSyncCursorMutation(c.config, OpUpdate)
+	return &CatalogSyncCursorUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CatalogSyncCursorClient) UpdateOne(_m *CatalogSyncCursor) *CatalogSyncCursorUpdateOne {
+	mutation := newCatalogSyncCursorMutation(c.config, OpUpdateOne, withCatalogSyncCursor(_m))
+	return &CatalogSyncCursorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CatalogSyncCursorClient) UpdateOneID(id int) *CatalogSyncCursorUpdateOne {
+	mutation := newCatalogSyncCursorMutation(c.config, OpUpdateOne, withCatalogSyncCursorID(id))
+	return &CatalogSyncCursorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CatalogSyncCursor.
+func (c *CatalogSyncCursorClient) Delete() *CatalogSyncCursorDelete {
+	mutation := newCatalogSyncCursorMutation(c.config, OpDelete)
+	return &CatalogSyncCursorDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CatalogSyncCursorClient) DeleteOne(_m *CatalogSyncCursor) *CatalogSyncCursorDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CatalogSyncCursorClient) DeleteOneID(id int) *CatalogSyncCursorDeleteOne {
+	builder := c.Delete().Where(catalogsynccursor.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CatalogSyncCursorDeleteOne{builder}
+}
+
+// Query returns a query builder for CatalogSyncCursor.
+func (c *CatalogSyncCursorClient) Query() *CatalogSyncCursorQuery {
+	return &CatalogSyncCursorQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCatalogSyncCursor},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CatalogSyncCursor entity by its id.
+func (c *CatalogSyncCursorClient) Get(ctx context.Context, id int) (*CatalogSyncCursor, error) {
+	return c.Query().Where(catalogsynccursor.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CatalogSyncCursorClient) GetX(ctx context.Context, id int) *CatalogSyncCursor {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CatalogSyncCursorClient) Hooks() []Hook {
+	return c.hooks.CatalogSyncCursor
+}
+
+// Interceptors returns the client interceptors.
+func (c *CatalogSyncCursorClient) Interceptors() []Interceptor {
+	return c.inters.CatalogSyncCursor
+}
+
+func (c *CatalogSyncCursorClient) mutate(ctx context.Context, m *CatalogSyncCursorMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CatalogSyncCursorCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CatalogSyncCursorUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CatalogSyncCursorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CatalogSyncCursorDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CatalogSyncCursor mutation op: %q", m.Op())
 	}
 }
 
@@ -8305,28 +8587,28 @@ func (c *WalkthroughClient) mutate(ctx context.Context, m *WalkthroughMutation) 
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Activity, Ad, Comment, CommentLike, EditRecord, Favorite, FavoriteItem,
-		FieldPermissionMapping, Game, GameCharacter, GameCharacterRelation, GameCover,
-		GameDeveloper, GameDeveloperRelation, GameDownloadResource,
-		GameDownloadResourceFile, GameDownloadResourceFileHistory,
-		GameDownloadResourceReport, GameImage, GameLink, GameRelation, GameTagRelation,
-		GameUploadChunk, GameUploadSession, MalwareScanCase, Message, ModerationEvent,
-		OidcIdentity, RoleFieldPermission, SponsorOrder, Tag, User, UserBannedRecord,
-		UserFieldPermission, UserGamePvnMapping, UserLoginSession,
-		UserPasskeyCredential, UserPvnBinding, UserUploadQuota, UserUploadQuotaRecord,
-		Walkthrough []ent.Hook
+		Activity, Ad, CatalogSourceLink, CatalogSyncCursor, Comment, CommentLike,
+		EditRecord, Favorite, FavoriteItem, FieldPermissionMapping, Game,
+		GameCharacter, GameCharacterRelation, GameCover, GameDeveloper,
+		GameDeveloperRelation, GameDownloadResource, GameDownloadResourceFile,
+		GameDownloadResourceFileHistory, GameDownloadResourceReport, GameImage,
+		GameLink, GameRelation, GameTagRelation, GameUploadChunk, GameUploadSession,
+		MalwareScanCase, Message, ModerationEvent, OidcIdentity, RoleFieldPermission,
+		SponsorOrder, Tag, User, UserBannedRecord, UserFieldPermission,
+		UserGamePvnMapping, UserLoginSession, UserPasskeyCredential, UserPvnBinding,
+		UserUploadQuota, UserUploadQuotaRecord, Walkthrough []ent.Hook
 	}
 	inters struct {
-		Activity, Ad, Comment, CommentLike, EditRecord, Favorite, FavoriteItem,
-		FieldPermissionMapping, Game, GameCharacter, GameCharacterRelation, GameCover,
-		GameDeveloper, GameDeveloperRelation, GameDownloadResource,
-		GameDownloadResourceFile, GameDownloadResourceFileHistory,
-		GameDownloadResourceReport, GameImage, GameLink, GameRelation, GameTagRelation,
-		GameUploadChunk, GameUploadSession, MalwareScanCase, Message, ModerationEvent,
-		OidcIdentity, RoleFieldPermission, SponsorOrder, Tag, User, UserBannedRecord,
-		UserFieldPermission, UserGamePvnMapping, UserLoginSession,
-		UserPasskeyCredential, UserPvnBinding, UserUploadQuota, UserUploadQuotaRecord,
-		Walkthrough []ent.Interceptor
+		Activity, Ad, CatalogSourceLink, CatalogSyncCursor, Comment, CommentLike,
+		EditRecord, Favorite, FavoriteItem, FieldPermissionMapping, Game,
+		GameCharacter, GameCharacterRelation, GameCover, GameDeveloper,
+		GameDeveloperRelation, GameDownloadResource, GameDownloadResourceFile,
+		GameDownloadResourceFileHistory, GameDownloadResourceReport, GameImage,
+		GameLink, GameRelation, GameTagRelation, GameUploadChunk, GameUploadSession,
+		MalwareScanCase, Message, ModerationEvent, OidcIdentity, RoleFieldPermission,
+		SponsorOrder, Tag, User, UserBannedRecord, UserFieldPermission,
+		UserGamePvnMapping, UserLoginSession, UserPasskeyCredential, UserPvnBinding,
+		UserUploadQuota, UserUploadQuotaRecord, Walkthrough []ent.Interceptor
 	}
 )
 

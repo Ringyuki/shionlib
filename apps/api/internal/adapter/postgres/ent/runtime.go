@@ -7,6 +7,8 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/ad"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsourcelink"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsynccursor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/editrecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favorite"
@@ -115,6 +117,62 @@ func init() {
 	ad.DefaultUpdated = adDescUpdated.Default.(func() time.Time)
 	// ad.UpdateDefaultUpdated holds the default value on update for the updated field.
 	ad.UpdateDefaultUpdated = adDescUpdated.UpdateDefault.(func() time.Time)
+	catalogsourcelinkFields := schema.CatalogSourceLink{}.Fields()
+	_ = catalogsourcelinkFields
+	// catalogsourcelinkDescSource is the schema descriptor for source field.
+	catalogsourcelinkDescSource := catalogsourcelinkFields[1].Descriptor()
+	// catalogsourcelink.SourceValidator is a validator for the "source" field. It is called by the builders before save.
+	catalogsourcelink.SourceValidator = catalogsourcelinkDescSource.Validators[0].(func(string) error)
+	// catalogsourcelinkDescEntity is the schema descriptor for entity field.
+	catalogsourcelinkDescEntity := catalogsourcelinkFields[2].Descriptor()
+	// catalogsourcelink.EntityValidator is a validator for the "entity" field. It is called by the builders before save.
+	catalogsourcelink.EntityValidator = catalogsourcelinkDescEntity.Validators[0].(func(string) error)
+	// catalogsourcelinkDescExternalID is the schema descriptor for external_id field.
+	catalogsourcelinkDescExternalID := catalogsourcelinkFields[3].Descriptor()
+	// catalogsourcelink.ExternalIDValidator is a validator for the "external_id" field. It is called by the builders before save.
+	catalogsourcelink.ExternalIDValidator = catalogsourcelinkDescExternalID.Validators[0].(func(string) error)
+	// catalogsourcelinkDescRevision is the schema descriptor for revision field.
+	catalogsourcelinkDescRevision := catalogsourcelinkFields[5].Descriptor()
+	// catalogsourcelink.RevisionValidator is a validator for the "revision" field. It is called by the builders before save.
+	catalogsourcelink.RevisionValidator = catalogsourcelinkDescRevision.Validators[0].(func(string) error)
+	// catalogsourcelinkDescFailures is the schema descriptor for failures field.
+	catalogsourcelinkDescFailures := catalogsourcelinkFields[8].Descriptor()
+	// catalogsourcelink.DefaultFailures holds the default value on creation for the failures field.
+	catalogsourcelink.DefaultFailures = catalogsourcelinkDescFailures.Default.(int)
+	// catalogsourcelinkDescLastError is the schema descriptor for last_error field.
+	catalogsourcelinkDescLastError := catalogsourcelinkFields[9].Descriptor()
+	// catalogsourcelink.LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
+	catalogsourcelink.LastErrorValidator = catalogsourcelinkDescLastError.Validators[0].(func(string) error)
+	// catalogsourcelinkDescCreated is the schema descriptor for created field.
+	catalogsourcelinkDescCreated := catalogsourcelinkFields[10].Descriptor()
+	// catalogsourcelink.DefaultCreated holds the default value on creation for the created field.
+	catalogsourcelink.DefaultCreated = catalogsourcelinkDescCreated.Default.(func() time.Time)
+	// catalogsourcelinkDescUpdated is the schema descriptor for updated field.
+	catalogsourcelinkDescUpdated := catalogsourcelinkFields[11].Descriptor()
+	// catalogsourcelink.DefaultUpdated holds the default value on creation for the updated field.
+	catalogsourcelink.DefaultUpdated = catalogsourcelinkDescUpdated.Default.(func() time.Time)
+	// catalogsourcelink.UpdateDefaultUpdated holds the default value on update for the updated field.
+	catalogsourcelink.UpdateDefaultUpdated = catalogsourcelinkDescUpdated.UpdateDefault.(func() time.Time)
+	catalogsynccursorFields := schema.CatalogSyncCursor{}.Fields()
+	_ = catalogsynccursorFields
+	// catalogsynccursorDescSource is the schema descriptor for source field.
+	catalogsynccursorDescSource := catalogsynccursorFields[1].Descriptor()
+	// catalogsynccursor.SourceValidator is a validator for the "source" field. It is called by the builders before save.
+	catalogsynccursor.SourceValidator = catalogsynccursorDescSource.Validators[0].(func(string) error)
+	// catalogsynccursorDescCursor is the schema descriptor for cursor field.
+	catalogsynccursorDescCursor := catalogsynccursorFields[2].Descriptor()
+	// catalogsynccursor.CursorValidator is a validator for the "cursor" field. It is called by the builders before save.
+	catalogsynccursor.CursorValidator = catalogsynccursorDescCursor.Validators[0].(func(string) error)
+	// catalogsynccursorDescCreated is the schema descriptor for created field.
+	catalogsynccursorDescCreated := catalogsynccursorFields[3].Descriptor()
+	// catalogsynccursor.DefaultCreated holds the default value on creation for the created field.
+	catalogsynccursor.DefaultCreated = catalogsynccursorDescCreated.Default.(func() time.Time)
+	// catalogsynccursorDescUpdated is the schema descriptor for updated field.
+	catalogsynccursorDescUpdated := catalogsynccursorFields[4].Descriptor()
+	// catalogsynccursor.DefaultUpdated holds the default value on creation for the updated field.
+	catalogsynccursor.DefaultUpdated = catalogsynccursorDescUpdated.Default.(func() time.Time)
+	// catalogsynccursor.UpdateDefaultUpdated holds the default value on update for the updated field.
+	catalogsynccursor.UpdateDefaultUpdated = catalogsynccursorDescUpdated.UpdateDefault.(func() time.Time)
 	commentFields := schema.Comment{}.Fields()
 	_ = commentFields
 	// commentDescHTML is the schema descriptor for html field.

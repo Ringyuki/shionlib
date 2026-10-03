@@ -18,6 +18,10 @@ type Tx struct {
 	Activity *ActivityClient
 	// Ad is the client for interacting with the Ad builders.
 	Ad *AdClient
+	// CatalogSourceLink is the client for interacting with the CatalogSourceLink builders.
+	CatalogSourceLink *CatalogSourceLinkClient
+	// CatalogSyncCursor is the client for interacting with the CatalogSyncCursor builders.
+	CatalogSyncCursor *CatalogSyncCursorClient
 	// Comment is the client for interacting with the Comment builders.
 	Comment *CommentClient
 	// CommentLike is the client for interacting with the CommentLike builders.
@@ -229,6 +233,8 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Activity = NewActivityClient(tx.config)
 	tx.Ad = NewAdClient(tx.config)
+	tx.CatalogSourceLink = NewCatalogSourceLinkClient(tx.config)
+	tx.CatalogSyncCursor = NewCatalogSyncCursorClient(tx.config)
 	tx.Comment = NewCommentClient(tx.config)
 	tx.CommentLike = NewCommentLikeClient(tx.config)
 	tx.EditRecord = NewEditRecordClient(tx.config)

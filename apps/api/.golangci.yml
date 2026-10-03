@@ -145,6 +145,7 @@ linters:
         linters:
           - gosec
           - noctx
+          - contextcheck
       - path: cmd/devtool
         linters:
           - forbidigo

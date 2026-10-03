@@ -1,0 +1,1 @@
+DROP INDEX CONCURRENTLY IF EXISTS messages_receiver_id_read_created_idx;
