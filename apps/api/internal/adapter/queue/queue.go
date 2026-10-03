@@ -8,8 +8,12 @@ import (
 	"github.com/riverqueue/river"
 )
 
-type Job interface {
+type Job = interface {
 	Kind() string
+}
+
+type routedJob interface {
+	Queue() string
 }
 
 type Queue struct {
@@ -21,7 +25,11 @@ func New(client *river.Client[pgx.Tx]) *Queue {
 }
 
 func (q *Queue) Enqueue(ctx context.Context, job Job) error {
-	if _, err := q.client.Insert(ctx, job, nil); err != nil {
+	var opts *river.InsertOpts
+	if routed, ok := job.(routedJob); ok && routed.Queue() != "" {
+		opts = &river.InsertOpts{Queue: routed.Queue()}
+	}
+	if _, err := q.client.Insert(ctx, job, opts); err != nil {
 		return fmt.Errorf("enqueue %s: %w", job.Kind(), err)
 	}
 	return nil
