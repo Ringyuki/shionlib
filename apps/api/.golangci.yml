@@ -1,0 +1,164 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/Ringyuki/shionlib/apps/api
+  exclusions:
+    generated: lax
+
+linters:
+  default: none
+  enable:
+    - govet
+    - staticcheck
+    - errcheck
+    - ineffassign
+    - unused
+    - contextcheck
+    - gosec
+    - bodyclose
+    - errorlint
+    - nilerr
+    - copyloopvar
+    - rowserrcheck
+    - sqlclosecheck
+    - noctx
+    - depguard
+    - forbidigo
+    - misspell
+    - unconvert
+    - wastedassign
+  settings:
+    errcheck:
+      exclude-functions:
+        - (io.Closer).Close
+    gosec:
+      excludes:
+        - G104
+        - G115
+    forbidigo:
+      analyze-types: true
+      forbid:
+        - pattern: ^fmt\.Print(f|ln)?$
+          msg: use the injected *slog.Logger
+        - pattern: ^log\.(Print|Fatal|Panic)(f|ln)?$
+          msg: use the injected *slog.Logger
+        - pattern: ^os\.(Getenv|LookupEnv|Environ)$
+          msg: read configuration through internal/platform/config
+        - pattern: ^http\.(Get|Post|Head|PostForm)$
+          msg: use an injected *http.Client with a timeout
+        - pattern: ^http\.DefaultClient$
+          msg: use an injected *http.Client with a timeout
+    depguard:
+      rules:
+        business:
+          list-mode: lax
+          files:
+            - "**/internal/**/*.go"
+            - "!**/internal/adapter/**"
+            - "!**/internal/platform/**"
+            - "!**/internal/transport/**"
+            - "!**/internal/bootstrap/**"
+            - "!**/internal/archtest/**"
+            - "!$test"
+          deny:
+            - pkg: net/http
+              desc: business packages must not depend on HTTP; return apperror values instead
+            - pkg: database/sql
+              desc: database access belongs to internal/adapter/postgres
+            - pkg: github.com/Ringyuki/shionlib/apps/api/internal/transport
+              desc: business packages must not import transport
+            - pkg: github.com/Ringyuki/shionlib/apps/api/internal/adapter
+              desc: business packages depend on consumer-owned ports, never on adapters
+            - pkg: github.com/Ringyuki/shionlib/apps/api/internal/platform
+              desc: business packages receive platform capabilities through constructor-injected ports
+            - pkg: github.com/Ringyuki/shionlib/apps/api/internal/bootstrap
+              desc: only cmd/* may import the composition root
+            - pkg: github.com/danielgtaylor/huma
+              desc: web framework types stay in internal/transport
+            - pkg: github.com/go-chi/chi
+              desc: web framework types stay in internal/transport
+            - pkg: entgo.io/ent
+              desc: ORM types stay in internal/adapter/postgres
+            - pkg: github.com/jackc/pgx
+              desc: driver types stay in internal/adapter/postgres and internal/platform/database
+            - pkg: github.com/redis/go-redis
+              desc: Redis types stay in internal/adapter/redis and internal/platform/redis
+            - pkg: github.com/aws/aws-sdk-go-v2
+              desc: vendor SDKs stay in internal/adapter
+            - pkg: github.com/riverqueue/river
+              desc: queue types stay in internal/adapter and internal/platform
+        transport:
+          list-mode: lax
+          files:
+            - "**/internal/transport/**"
+          deny:
+            - pkg: github.com/Ringyuki/shionlib/apps/api/internal/adapter
+              desc: transport talks to business services, never to adapters
+            - pkg: github.com/Ringyuki/shionlib/apps/api/internal/bootstrap
+              desc: only cmd/* may import the composition root
+            - pkg: entgo.io/ent
+              desc: ORM types must not leak into transport
+            - pkg: github.com/jackc/pgx
+              desc: driver types must not leak into transport
+            - pkg: database/sql
+              desc: database access belongs to internal/adapter/postgres
+        adapter:
+          list-mode: lax
+          files:
+            - "**/internal/adapter/**"
+          deny:
+            - pkg: github.com/Ringyuki/shionlib/apps/api/internal/transport
+              desc: adapters must not depend on transport
+            - pkg: github.com/Ringyuki/shionlib/apps/api/internal/bootstrap
+              desc: only cmd/* may import the composition root
+            - pkg: github.com/danielgtaylor/huma
+              desc: web framework types stay in internal/transport
+            - pkg: github.com/go-chi/chi
+              desc: web framework types stay in internal/transport
+        platform:
+          list-mode: lax
+          files:
+            - "**/internal/platform/**"
+          deny:
+            - pkg: github.com/Ringyuki/shionlib/apps/api/internal/transport
+              desc: platform must not depend on transport
+            - pkg: github.com/Ringyuki/shionlib/apps/api/internal/adapter
+              desc: platform must not depend on adapters
+            - pkg: github.com/Ringyuki/shionlib/apps/api/internal/bootstrap
+              desc: only cmd/* may import the composition root
+  exclusions:
+    generated: lax
+    paths:
+      - internal/adapter/postgres/ent
+    rules:
+      - path: _test\.go
+        linters:
+          - gosec
+          - noctx
+      - path: cmd/devtool
+        linters:
+          - forbidigo
+          - gosec
+      - path: cmd/api
+        text: G703
+        linters:
+          - gosec
+      - text: "Function `(openapi->openapi\\$1|BuildHTTP->New->Install->Install\\$1|Recover\\$1\\$1\\$1)` should pass the context parameter"
+        linters:
+          - contextcheck
+      - path: cmd/entgen
+        linters:
+          - forbidigo
+      - path: internal/platform/config
+        linters:
+          - forbidigo

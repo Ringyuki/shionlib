@@ -1,0 +1,49 @@
+{
+  "email": {
+    "VERIFICATION_CODE_SUBJECT": "Shionlib 検証コード",
+    "VERIFICATION_CODE_PREFIX": "あなたの検証コードは: ",
+    "VERIFICATION_CODE_SUFFIX": "です。{exp}分以内に使用してください。",
+    "VERIFICATION_CODE_IGNORE": "この検証コードをリクエストしていない場合は、このメールを無視してください。",
+    "PASSWORD_RESET_SUBJECT": "Shionlib パスワード再設定",
+    "PASSWORD_RESET_GREETING": "Shionlib パスワードの再設定リクエストを受け取りました。",
+    "PASSWORD_RESET_INSTRUCTION": "以下のボタンをクリックして新しいパスワードを設定してください。",
+    "PASSWORD_RESET_BUTTON": "パスワードを再設定",
+    "PASSWORD_RESET_LINK_EXPIRES": "このリンクは {exp} 分で期限切れになります。",
+    "PASSWORD_RESET_COPY_LINK": "ボタンが動作しない場合は、次のリンクをブラウザにコピーしてください。",
+    "PASSWORD_RESET_IGNORE": "心当たりがない場合は、このメールを無視してください。",
+    "REPORT_NOTIFICATION_SUBJECT": "Shionlib ダウンロードリソース通報通知",
+    "REPORT_NOTIFICATION_INTRO": "確認が必要な新しいダウンロードリソースの通報があります：",
+    "REPORT_ID": "通報 ID",
+    "MALWARE_CASE_ID": "マルウェア審査 ID",
+    "REPORTER": "通報者",
+    "REPORTED_USER": "被通報者",
+    "UPLOADER": "アップロード者",
+    "FILE_NAME": "ファイル名",
+    "GAME": "ゲーム",
+    "REASON": "通報理由",
+    "MALICIOUS_LEVEL": "悪意レベル",
+    "DETAIL": "詳細",
+    "DETECTED_VIRUSES": "検出されたウイルス",
+    "REVIEW_DEADLINE": "審査期限",
+    "REVIEW_REPORT": "通報を確認",
+    "REVIEW_MALWARE_CASE": "マルウェア審査を確認",
+    "MALWARE_SCAN_NOTIFICATION_SUBJECT": "Shionlib マルウェア審査通知",
+    "MALWARE_SCAN_NOTIFICATION_INTRO": "ウイルススキャンで検出されたファイルが審査待ちです：",
+    "REPORT_NOTIFICATION_FOOTER": "このメールはシステムから自動送信されました。直接返信しないでください。"
+  },
+  "report": {
+    "reason": {
+      "MALWARE": "マルウェア",
+      "IRRELEVANT": "無関係なコンテンツ",
+      "BROKEN_LINK": "リンク切れ",
+      "MISLEADING_CONTENT": "誤解を招くコンテンツ",
+      "OTHER": "その他"
+    },
+    "level": {
+      "LOW": "低",
+      "MEDIUM": "中",
+      "HIGH": "高",
+      "CRITICAL": "危険"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "400": "invalid request",
+  "401": "unauthorized",
+  "403": "forbidden",
+  "404": "not found",
+  "405": "method not allowed",
+  "409": "conflict",
+  "410": "gone",
+  "413": "payload too large",
+  "415": "unsupported media type",
+  "422": "unprocessable entity",
+  "429": "too many requests",
+  "500": "server error",
+  "502": "bad gateway",
+  "503": "service unavailable"
+}

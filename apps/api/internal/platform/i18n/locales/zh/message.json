@@ -1,0 +1,49 @@
+{
+  "email": {
+    "VERIFICATION_CODE_SUBJECT": "Shionlib 验证码",
+    "VERIFICATION_CODE_PREFIX": "您的验证码是: ",
+    "VERIFICATION_CODE_SUFFIX": "请在{exp}分钟内使用。",
+    "VERIFICATION_CODE_IGNORE": "如果您没有请求此验证码，请忽略此邮件。",
+    "PASSWORD_RESET_SUBJECT": "找回您的 Shionlib 密码",
+    "PASSWORD_RESET_GREETING": "我们收到了一个找回您 Shionlib 密码的请求。",
+    "PASSWORD_RESET_INSTRUCTION": "点击下方按钮即可设置新的密码。",
+    "PASSWORD_RESET_BUTTON": "重置密码",
+    "PASSWORD_RESET_LINK_EXPIRES": "该链接将在 {exp} 分钟后失效。",
+    "PASSWORD_RESET_COPY_LINK": "如果按钮无法点击，请复制下面的链接到浏览器：",
+    "PASSWORD_RESET_IGNORE": "如果这不是您本人的操作，请忽略此邮件。",
+    "REPORT_NOTIFICATION_SUBJECT": "Shionlib 下载资源举报通知",
+    "REPORT_NOTIFICATION_INTRO": "有新的下载资源举报需要您审核：",
+    "REPORT_ID": "举报 ID",
+    "MALWARE_CASE_ID": "报毒审核 ID",
+    "REPORTER": "举报者",
+    "REPORTED_USER": "被举报者",
+    "UPLOADER": "上传者",
+    "FILE_NAME": "文件名",
+    "GAME": "游戏",
+    "REASON": "举报原因",
+    "MALICIOUS_LEVEL": "恶意等级",
+    "DETAIL": "详情",
+    "DETECTED_VIRUSES": "检测到的病毒",
+    "REVIEW_DEADLINE": "审核截止时间",
+    "REVIEW_REPORT": "审核举报",
+    "REVIEW_MALWARE_CASE": "审核报毒记录",
+    "MALWARE_SCAN_NOTIFICATION_SUBJECT": "Shionlib 报毒审核通知",
+    "MALWARE_SCAN_NOTIFICATION_INTRO": "有文件被病毒扫描标记，等待你审核：",
+    "REPORT_NOTIFICATION_FOOTER": "此邮件由系统自动发送，请勿直接回复。"
+  },
+  "report": {
+    "reason": {
+      "MALWARE": "恶意软件",
+      "IRRELEVANT": "内容不相关",
+      "BROKEN_LINK": "链接失效",
+      "MISLEADING_CONTENT": "误导性内容",
+      "OTHER": "其他"
+    },
+    "level": {
+      "LOW": "低",
+      "MEDIUM": "中",
+      "HIGH": "高",
+      "CRITICAL": "严重"
+    }
+  }
+}

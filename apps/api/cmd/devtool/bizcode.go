@@ -1,0 +1,179 @@
+package main
+
+import (
+	"errors"
+	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"os"
+	"path/filepath"
+	"slices"
+	"strconv"
+	"strings"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/apperror"
+)
+
+const businessCodesDoc = "docs/business-codes.md"
+
+type bizCode struct {
+	Code    int
+	Name    string
+	Kind    string
+	Package string
+	File    string
+}
+
+func collectBizCodes(root string) ([]bizCode, error) {
+	var codes []bizCode
+	err := filepath.WalkDir(filepath.Join(root, "internal"), func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() || filepath.Ext(path) != ".go" || strings.HasSuffix(path, "_test.go") {
+			return nil
+		}
+		file, err := parser.ParseFile(token.NewFileSet(), path, nil, 0)
+		if err != nil {
+			return err
+		}
+		rel, _ := filepath.Rel(root, path)
+		pkg := filepath.ToSlash(filepath.Dir(rel))
+		var problems []error
+		ast.Inspect(file, func(node ast.Node) bool {
+			call, ok := node.(*ast.CallExpr)
+			if !ok || !isDefineCall(call, pkg) {
+				return true
+			}
+			code, name, kind, err := defineArgs(call)
+			if err != nil {
+				problems = append(problems, fmt.Errorf("%s: %w", rel, err))
+				return true
+			}
+			codes = append(codes, bizCode{Code: code, Name: name, Kind: kind, Package: pkg, File: rel})
+			return true
+		})
+		return errors.Join(problems...)
+	})
+	slices.SortFunc(codes, func(a, b bizCode) int { return a.Code - b.Code })
+	return codes, err
+}
+
+func isDefineCall(call *ast.CallExpr, pkg string) bool {
+	switch fn := call.Fun.(type) {
+	case *ast.SelectorExpr:
+		ident, ok := fn.X.(*ast.Ident)
+		return ok && ident.Name == "apperror" && fn.Sel.Name == "Define"
+	case *ast.Ident:
+		return pkg == "internal/apperror" && fn.Name == "Define"
+	}
+	return false
+}
+
+func defineArgs(call *ast.CallExpr) (int, string, string, error) {
+	if len(call.Args) != 3 {
+		return 0, "", "", errors.New("apperror.Define requires code, name and kind")
+	}
+	codeLit, ok := call.Args[0].(*ast.BasicLit)
+	if !ok || codeLit.Kind != token.INT {
+		return 0, "", "", errors.New("business code must be an integer literal")
+	}
+	code, err := strconv.Atoi(codeLit.Value)
+	if err != nil {
+		return 0, "", "", err
+	}
+	nameLit, ok := call.Args[1].(*ast.BasicLit)
+	if !ok || nameLit.Kind != token.STRING {
+		return 0, "", "", errors.New("business code name must be a string literal")
+	}
+	name, err := strconv.Unquote(nameLit.Value)
+	if err != nil {
+		return 0, "", "", err
+	}
+	kind := ""
+	switch k := call.Args[2].(type) {
+	case *ast.SelectorExpr:
+		kind = k.Sel.Name
+	case *ast.Ident:
+		kind = k.Name
+	}
+	return code, name, strings.TrimPrefix(kind, "Kind"), nil
+}
+
+func checkBizCodes(root string) error {
+	codes, err := collectBizCodes(root)
+	if err != nil {
+		return err
+	}
+	var problems []error
+	byCode := map[int]bizCode{}
+	byName := map[string]bizCode{}
+	owners := map[int]apperror.Range{}
+	for _, r := range apperror.Ranges {
+		if existing, ok := owners[r.Prefix]; ok {
+			problems = append(problems, fmt.Errorf("range %d is owned twice (%s, %s)", r.Prefix, existing.Owner, r.Owner))
+		}
+		owners[r.Prefix] = r
+	}
+	for _, code := range codes {
+		if code.Code < 100000 || code.Code > 999999 {
+			problems = append(problems, fmt.Errorf("%s: code %d must have six digits", code.File, code.Code))
+		}
+		if existing, ok := byCode[code.Code]; ok {
+			problems = append(problems, fmt.Errorf("code %d is defined twice (%s, %s)", code.Code, existing.File, code.File))
+		}
+		if existing, ok := byName[code.Name]; ok {
+			problems = append(problems, fmt.Errorf("name %s is defined twice (%s, %s)", code.Name, existing.File, code.File))
+		}
+		byCode[code.Code] = code
+		byName[code.Name] = code
+		owner, ok := owners[apperror.PrefixOf(code.Code)]
+		switch {
+		case !ok:
+			problems = append(problems, fmt.Errorf("%s: code %d uses unregistered range %d; add it to internal/apperror/ranges.go", code.File, code.Code, apperror.PrefixOf(code.Code)))
+		case owner.Owner != code.Package:
+			problems = append(problems, fmt.Errorf("%s: code %d belongs to range %d owned by %s", code.File, code.Code, owner.Prefix, owner.Owner))
+		}
+	}
+	if err := errors.Join(problems...); err != nil {
+		return err
+	}
+	current, err := os.ReadFile(filepath.Join(root, businessCodesDoc))
+	if err != nil {
+		return fmt.Errorf("read %s: %w (run `devtool bizcode docs`)", businessCodesDoc, err)
+	}
+	if string(current) != renderBizCodes(codes) {
+		return fmt.Errorf("%s is stale; run `devtool bizcode docs`", businessCodesDoc)
+	}
+	return nil
+}
+
+func writeBizCodeDocs(root string) error {
+	codes, err := collectBizCodes(root)
+	if err != nil {
+		return err
+	}
+	path := filepath.Join(root, businessCodesDoc)
+	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
+		return err
+	}
+	return os.WriteFile(path, []byte(renderBizCodes(codes)), 0o600)
+}
+
+func renderBizCodes(codes []bizCode) string {
+	var b strings.Builder
+	b.WriteString("# Business codes\n\n")
+	b.WriteString("Generated by `go run ./cmd/devtool bizcode docs`. Do not edit by hand.\n\n")
+	b.WriteString("## Ranges\n\n| Range | Domain | Owner package |\n|---|---|---|\n")
+	ranges := slices.Clone(apperror.Ranges)
+	slices.SortFunc(ranges, func(a, b apperror.Range) int { return a.Prefix - b.Prefix })
+	for _, r := range ranges {
+		fmt.Fprintf(&b, "| %dxxx | %s | `%s` |\n", r.Prefix, r.Domain, r.Owner)
+	}
+	b.WriteString("\n## Codes\n\n| Code | Name | Kind | Defined in |\n|---|---|---|---|\n")
+	for _, code := range codes {
+		fmt.Fprintf(&b, "| %d | `%s` | %s | `%s` |\n", code.Code, code.Name, code.Kind, code.File)
+	}
+	return b.String()
+}

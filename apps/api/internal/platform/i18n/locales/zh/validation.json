@@ -1,0 +1,29 @@
+{
+  "common": {
+    "IS_NOT_EMPTY": "{property} 不能为空",
+    "PROPERTY_SHOULD_NOT_EXIST": "{property} 不应该存在",
+    "MIN": "{property} 必须大于 {min}",
+    "MAX": "{property} 必须小于 {max}",
+    "MIN_LENGTH": "{property} 必须大于 {min} 个字符",
+    "MAX_LENGTH": "{property} 必须小于 {max} 个字符",
+    "CANNOT_ALL_BE_EMPTY": "{property} 不能全部为空",
+
+    "IS_STRING": "{property} 必须是字符串",
+    "IS_EMAIL": "{property} 必须是有效的邮箱地址",
+    "IS_NUMBER": "{property} 必须是数字",
+    "IS_INT": "{property} 必须是整数",
+    "IS_BOOLEAN": "{property} 必须是布尔值",
+    "IS_ARRAY": "{property} 必须是数组",
+    "ARRAY_MAX_SIZE": "{property} 不能超过 {max} 个元素",
+    "ARRAY_MIN_SIZE": "{property} 不能少于 {min} 个元素",
+    "IS_OBJECT": "{property} 必须是对象",
+    "IS_DATE": "{property} 必须是日期",
+    "IS_URL": "{property} 必须是有效的URL",
+    "IS_ENUM": "{property} 必须是以下值之一: {allowed}",
+    "IS_UUID": "{property} 必须是有效的UUID",
+    "IS_JSON": "{property} 必须是有效的JSON"
+  },
+  "user": {
+    "PASSWORD_MATCHES": "密码必须至少包含一个大写字母，一个小写字母和一个数字"
+  }
+}
