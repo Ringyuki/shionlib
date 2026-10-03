@@ -18,6 +18,7 @@ type adminFixture struct {
 	recent     *gametest.RecentMarks
 	exclusions *gametest.Exclusions
 	purger     *gametest.Purger
+	index      *gametest.SearchIndex
 	service    *game.AdminService
 }
 
@@ -27,8 +28,17 @@ func newAdminFixture(games ...gametest.AdminGame) adminFixture {
 		recent:     gametest.NewRecentMarks(),
 		exclusions: &gametest.Exclusions{},
 		purger:     &gametest.Purger{},
+		index:      &gametest.SearchIndex{},
 	}
-	f.service = game.NewAdminService(f.store, f.recent, f.exclusions, f.purger, &txtest.Immediate{}, func() time.Time { return now })
+	f.service = game.NewAdminService(game.AdminDeps{
+		Store:   f.store,
+		Recent:  f.recent,
+		Catalog: f.exclusions,
+		Purger:  f.purger,
+		Index:   f.index,
+		Tx:      &txtest.Immediate{},
+		Now:     func() time.Time { return now },
+	})
 	return f
 }
 
@@ -148,5 +158,24 @@ func TestAdminStatusAndRecentUpdates(t *testing.T) {
 	}
 	if _, err := f.service.Scalar(ctx, 9); !errors.Is(err, game.ErrNotFound) {
 		t.Fatalf("missing scalar: %v", err)
+	}
+}
+
+func TestAdminChangesReindexTheGame(t *testing.T) {
+	f := newAdminFixture(adminGame(1, "a", game.StatusVisible), adminGame(2, "b", game.StatusVisible))
+	if err := f.service.SetStatus(context.Background(), 1, game.StatusHidden); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.service.EditScalar(context.Background(), 2, game.ScalarChanges{}); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.service.EditScalar(context.Background(), 2, game.ScalarChanges{TitleZH: ptr("新")}); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.service.Delete(context.Background(), 1); err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(f.index.Changed, []int{1, 2, 1}) {
+		t.Fatalf("reindexed %v", f.index.Changed)
 	}
 }

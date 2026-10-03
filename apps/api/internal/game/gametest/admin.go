@@ -280,3 +280,15 @@ func (p *Purger) Purged() [][]string {
 	defer p.mu.Unlock()
 	return slices.Clone(p.purged)
 }
+
+type SearchIndex struct {
+	mu      sync.Mutex
+	Changed []int
+}
+
+func (i *SearchIndex) GamesChanged(_ context.Context, ids []int) error {
+	i.mu.Lock()
+	defer i.mu.Unlock()
+	i.Changed = append(i.Changed, ids...)
+	return nil
+}

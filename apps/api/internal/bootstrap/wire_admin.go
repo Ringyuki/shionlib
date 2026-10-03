@@ -44,14 +44,15 @@ func (q objectPurgeQueue) PurgeLater(ctx context.Context, keys []string) error {
 }
 
 func wireAdmin(infra *Infra, shared *Shared, modules *Modules) {
-	games := game.NewAdminService(
-		gamepg.NewAdminStore(infra.Ent),
-		gameredis.NewRecentUpdates(infra.Redis),
-		shared.Catalog,
-		objectPurgeQueue{queue: shared.Queue, now: shared.Now},
-		shared.Transactor,
-		shared.Now,
-	)
+	games := game.NewAdminService(game.AdminDeps{
+		Store:   gamepg.NewAdminStore(infra.Ent),
+		Recent:  gameredis.NewRecentUpdates(infra.Redis),
+		Catalog: shared.Catalog,
+		Purger:  objectPurgeQueue{queue: shared.Queue, now: shared.Now},
+		Index:   shared.Search,
+		Tx:      shared.Transactor,
+		Now:     shared.Now,
+	})
 	users := admin.NewUserService(admin.UserDeps{
 		Accounts:    userpg.NewRepository(infra.Ent),
 		Store:       adminpg.NewUserStore(infra.Ent),

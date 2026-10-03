@@ -46,7 +46,15 @@ func newAdminEnv(t *testing.T) adminEnv {
 		exclusions: &gametest.Exclusions{},
 		purger:     &gametest.Purger{},
 	}
-	service := game.NewAdminService(env.store, env.recent, env.exclusions, env.purger, &txtest.Immediate{}, func() time.Time { return apitest.Now })
+	service := game.NewAdminService(game.AdminDeps{
+		Store:   env.store,
+		Recent:  env.recent,
+		Catalog: env.exclusions,
+		Purger:  env.purger,
+		Index:   &gametest.SearchIndex{},
+		Tx:      &txtest.Immediate{},
+		Now:     func() time.Time { return apitest.Now },
+	})
 	gamehttp.NewAdminHandler(service, env.server.Builder).Register(env.server.API)
 	return env
 }
