@@ -71,6 +71,38 @@ func StoreContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		}
 	})
 
+	t.Run("related games are found through credits", func(t *testing.T) {
+		env := newEnv(t)
+		creator := env.CreatorID(t)
+		first, _, err := env.Store.ApplyGame(ctx, contractSource, GameRecord("11", []string{"810"}, []string{"710"}), creator, at)
+		if err != nil {
+			t.Fatal(err)
+		}
+		second, _, err := env.Store.ApplyGame(ctx, contractSource, GameRecord("12", []string{"810"}, nil), creator, at)
+		if err != nil {
+			t.Fatal(err)
+		}
+		developer, _, err := env.Store.LocalID(ctx, ref(catalog.EntityDeveloper, "810"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		games, err := env.Store.RelatedGames(ctx, catalog.EntityDeveloper, developer)
+		slices.Sort(games)
+		if err != nil || !slices.Equal(games, []int{min(first, second), max(first, second)}) {
+			t.Fatalf("developer games %v %v", games, err)
+		}
+		character, _, err := env.Store.LocalID(ctx, ref(catalog.EntityCharacter, "710"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if games, err := env.Store.RelatedGames(ctx, catalog.EntityCharacter, character); err != nil || !slices.Equal(games, []int{first}) {
+			t.Fatalf("character games %v %v", games, err)
+		}
+		if games, err := env.Store.RelatedGames(ctx, catalog.EntityGame, first); err != nil || !slices.Equal(games, []int{first}) {
+			t.Fatalf("game %v %v", games, err)
+		}
+	})
+
 	t.Run("stale returns unsynced then oldest links and skips missing ones", func(t *testing.T) {
 		env := newEnv(t)
 		creator := env.CreatorID(t)

@@ -41,21 +41,42 @@ type Options struct {
 	ChangesBatch int
 }
 
+type Deps struct {
+	Sources []Source
+	Store   Store
+	Tx      Transactor
+	Queue   Queue
+	Indexer Indexer
+	Now     func() time.Time
+	Options Options
+}
+
 type Service struct {
 	sources map[string]Source
 	store   Store
 	tx      Transactor
 	queue   Queue
+	indexer Indexer
 	now     func() time.Time
 	opts    Options
 }
 
-func NewService(sources []Source, store Store, tx Transactor, queue Queue, now func() time.Time, opts Options) *Service {
-	byName := make(map[string]Source, len(sources))
-	for _, source := range sources {
+func NewService(deps Deps) *Service {
+	byName := make(map[string]Source, len(deps.Sources))
+	for _, source := range deps.Sources {
 		byName[source.Name()] = source
 	}
-	return &Service{sources: byName, store: store, tx: tx, queue: queue, now: now, opts: opts}
+	indexer := deps.Indexer
+	if indexer == nil {
+		indexer = noIndex{}
+	}
+	return &Service{sources: byName, store: deps.Store, tx: deps.Tx, queue: deps.Queue, indexer: indexer, now: deps.Now, opts: deps.Options}
+}
+
+type noIndex struct{}
+
+func (noIndex) GamesChanged(context.Context, []int) error {
+	return nil
 }
 
 func (s *Service) source(name string) (Source, error) {
@@ -108,7 +129,18 @@ func (s *Service) Import(ctx context.Context, ref Ref) (int, error) {
 			return localID, err
 		}
 	}
-	return localID, nil
+	return localID, s.reindex(ctx, ref.Entity, localID)
+}
+
+func (s *Service) reindex(ctx context.Context, entity Entity, localID int) error {
+	if entity == EntityGame {
+		return s.indexer.GamesChanged(ctx, []int{localID})
+	}
+	ids, err := s.store.RelatedGames(ctx, entity, localID)
+	if err != nil {
+		return err
+	}
+	return s.indexer.GamesChanged(ctx, ids)
 }
 
 type writeFunc func(ctx context.Context) (int, []Ref, error)

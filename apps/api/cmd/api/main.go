@@ -49,8 +49,13 @@ func run(ctx context.Context, args []string) error {
 		return openapi(args[1:])
 	case "health":
 		return health(ctx)
+	case "search":
+		if len(args) < 2 || args[1] != "reindex" {
+			return errors.New("usage: shionlib-api search reindex")
+		}
+		return reindex(ctx)
 	default:
-		return fmt.Errorf("unknown command %q (expected serve, worker, migrate up|status, openapi, health)", command)
+		return fmt.Errorf("unknown command %q (expected serve, worker, migrate up|status, openapi, health, search reindex)", command)
 	}
 }
 
@@ -118,6 +123,32 @@ func migrate(ctx context.Context, sub string) error {
 	default:
 		return fmt.Errorf("unknown migrate command %q", sub)
 	}
+}
+
+func reindex(ctx context.Context) error {
+	cfg, err := config.Load()
+	if err != nil {
+		return err
+	}
+	logger := bootstrap.NewLogger(cfg)
+	infra, err := bootstrap.OpenInfra(ctx, cfg, logger)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = infra.Close(context.WithoutCancel(ctx))
+	}()
+	indexer := bootstrap.BuildSearchIndexer(infra)
+	if !indexer.Enabled() {
+		_, err := fmt.Fprintf(os.Stdout, "search engine %s keeps no external index\n", cfg.Search.Engine)
+		return err
+	}
+	count, err := indexer.Rebuild(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = fmt.Fprintf(os.Stdout, "indexed %d games\n", count)
+	return err
 }
 
 func health(ctx context.Context) error {

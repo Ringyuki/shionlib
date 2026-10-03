@@ -13,7 +13,7 @@ The API ships as one container image and runs as a Dokploy compose project defin
 
 The image runs as the unprivileged `shionlib` user. `/var/lib/shionlib/upload` and `/var/lib/shionlib/scan-logs` are the upload spool and scan log directories.
 
-Subcommands: `serve` (HTTP; also runs jobs when `WORKERS_ENABLED=true`), `worker` (jobs only), `migrate up|status`, `health` (liveness probe against `127.0.0.1:$PORT/health/live`), `openapi [file]`.
+Subcommands: `serve` (HTTP; also runs jobs when `WORKERS_ENABLED=true`), `worker` (jobs only), `migrate up|status`, `health` (liveness probe against `127.0.0.1:$PORT/health/live`), `search reindex` (rebuilds the Meilisearch index when `SEARCH_ENGINE=meilisearch`), `openapi [file]`.
 
 `.github/workflows/api-image.yml` pushes `ghcr.io/<owner>/shionlib-api` for `linux/amd64` and `linux/arm64` on every push to `major/shionlib-next` (`sha-<short>`, `major-shionlib-next`) and on `api-v<version>` tags (`<version>`).
 

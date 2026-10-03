@@ -19,6 +19,7 @@ type fixture struct {
 	store   *catalogtest.Store
 	queue   *catalogtest.Queue
 	tx      *txtest.Immediate
+	index   *catalogtest.Indexer
 	service *catalog.Service
 }
 
@@ -28,12 +29,16 @@ func setup() fixture {
 		store:  catalogtest.NewStore(),
 		queue:  &catalogtest.Queue{},
 		tx:     &txtest.Immediate{},
+		index:  &catalogtest.Indexer{},
 	}
-	f.service = catalog.NewService([]catalog.Source{f.source}, f.store, f.tx, f.queue, func() time.Time { return now }, catalog.Options{
-		CreatorID:    1,
-		RefreshAfter: 24 * time.Hour,
-		RefreshBatch: 2,
-		ChangesBatch: 10,
+	f.service = catalog.NewService(catalog.Deps{
+		Sources: []catalog.Source{f.source},
+		Store:   f.store,
+		Tx:      f.tx,
+		Queue:   f.queue,
+		Indexer: f.index,
+		Now:     func() time.Time { return now },
+		Options: catalog.Options{CreatorID: 1, RefreshAfter: 24 * time.Hour, RefreshBatch: 2, ChangesBatch: 10},
 	})
 	return f
 }
@@ -316,5 +321,41 @@ func TestExcludedEntriesAreOnlyImportedOnRequest(t *testing.T) {
 	}
 	if excluded, _ := f.store.Excluded(context.Background(), ref(catalog.EntityGame, "77")); excluded {
 		t.Fatal("queued imports include the entry again")
+	}
+}
+
+func TestImportsReindexTheAffectedGames(t *testing.T) {
+	f := setup()
+	f.source.Games["77"] = gameSnapshot("77")
+	f.source.Games["78"] = gameSnapshot("78")
+	f.source.Developers["5"] = catalog.DeveloperSnapshot{ExternalID: "5", Name: "枕"}
+	f.source.Characters["9"] = catalog.CharacterSnapshot{ExternalID: "9", Name: catalog.Localized{Origin: "稟"}}
+	first, err := f.service.Import(context.Background(), ref(catalog.EntityGame, "77"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := f.service.Import(context.Background(), ref(catalog.EntityGame, "78"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.service.Import(context.Background(), ref(catalog.EntityDeveloper, "5")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.service.Import(context.Background(), ref(catalog.EntityCharacter, "9")); err != nil {
+		t.Fatal(err)
+	}
+	both := []int{min(first, second), max(first, second)}
+	want := [][]int{{first}, {second}, both, both}
+	if len(f.index.Changed) != len(want) {
+		t.Fatalf("changed %v", f.index.Changed)
+	}
+	for i := range want {
+		if !slices.Equal(f.index.Changed[i], want[i]) {
+			t.Fatalf("changed %v, want %v", f.index.Changed, want)
+		}
+	}
+	f.index.Err = errors.New("queue down")
+	if _, err := f.service.Import(context.Background(), ref(catalog.EntityGame, "77")); err == nil {
+		t.Fatal("a failed reindex must surface so the job retries")
 	}
 }

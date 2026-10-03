@@ -125,6 +125,7 @@ HTTP method/path · request schema · response schema · status code · business
 | `GET /user/datas/:id/edit-records` | no content filtering | strict viewers do not see records that target rated games (items and total) | content rules |
 | Session device data | `ip` only from `x-real-ip`/`cf-connecting-ip`, otherwise null | the trusted-proxy client IP, falling back to the peer address | consistent with access logs |
 | Email templates | values interpolated without HTML escaping | HTML-escaped; Elastic Email receives several recipients as `to=a;b` | correctness |
+| Search index writes (`SEARCH_ENGINE=meilisearch`) | only admin edit/delete and the `reindex:all` script wrote documents | catalog imports queue a `search_index` job for the game, or for every game of an imported developer or character; `shionlib-api search reindex` rebuilds the index (settings, clear, batches of 500) | the local catalog changes through sync |
 
 ## Redis
 

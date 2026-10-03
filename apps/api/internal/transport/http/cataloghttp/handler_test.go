@@ -23,7 +23,14 @@ func setup(t *testing.T) (*apitest.Server, *catalogtest.Source, *catalogtest.Que
 	server := apitest.New(t)
 	source := catalogtest.NewSource(catalog.SourceHikarinagi)
 	queue := &catalogtest.Queue{}
-	service := catalog.NewService([]catalog.Source{source}, catalogtest.NewStore(), &txtest.Immediate{}, queue, func() time.Time { return apitest.Now }, catalog.Options{CreatorID: 1})
+	service := catalog.NewService(catalog.Deps{
+		Sources: []catalog.Source{source},
+		Store:   catalogtest.NewStore(),
+		Tx:      &txtest.Immediate{},
+		Queue:   queue,
+		Now:     func() time.Time { return apitest.Now },
+		Options: catalog.Options{CreatorID: 1},
+	})
 	cataloghttp.NewHandler(service, server.Builder).Register(server.API)
 	return server, source, queue
 }

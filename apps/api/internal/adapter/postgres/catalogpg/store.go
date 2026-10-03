@@ -12,6 +12,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsourcelink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsynccursor"
 	entgame "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacterrelation"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedeveloperrelation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
 )
 
@@ -167,6 +169,25 @@ func (s *Store) Excluded(ctx context.Context, ref catalog.Ref) (bool, error) {
 		return false, err
 	}
 	return row.ExcludedAt != nil, nil
+}
+
+func (s *Store) RelatedGames(ctx context.Context, entity catalog.Entity, localID int) ([]int, error) {
+	var (
+		ids []int
+		err error
+	)
+	switch entity {
+	case catalog.EntityDeveloper:
+		ids, err = s.db(ctx).GameDeveloperRelation.Query().Where(gamedeveloperrelation.DeveloperID(localID)).Select(gamedeveloperrelation.FieldGameID).Ints(ctx)
+	case catalog.EntityCharacter:
+		ids, err = s.db(ctx).GameCharacterRelation.Query().Where(gamecharacterrelation.CharacterID(localID)).Select(gamecharacterrelation.FieldGameID).Ints(ctx)
+	case catalog.EntityGame:
+		return []int{localID}, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("list games related to %s %d: %w", entity, localID, err)
+	}
+	return ids, nil
 }
 
 func (s *Store) RecordFailure(ctx context.Context, ref catalog.Ref, reason string, at time.Time) error {

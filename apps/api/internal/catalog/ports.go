@@ -25,6 +25,7 @@ type Store interface {
 	Exclude(ctx context.Context, entity Entity, localID int, at time.Time) error
 	Include(ctx context.Context, ref Ref) error
 	Excluded(ctx context.Context, ref Ref) (bool, error)
+	RelatedGames(ctx context.Context, entity Entity, localID int) ([]int, error)
 	RecordFailure(ctx context.Context, ref Ref, reason string, at time.Time) error
 	Stale(ctx context.Context, source string, before time.Time, limit int) ([]Ref, error)
 	LocalID(ctx context.Context, ref Ref) (int, bool, error)
@@ -38,4 +39,8 @@ type Queue interface {
 
 type Transactor interface {
 	WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error
+}
+
+type Indexer interface {
+	GamesChanged(ctx context.Context, ids []int) error
 }

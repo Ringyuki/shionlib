@@ -179,6 +179,36 @@ func (s *Store) Excluded(_ context.Context, ref catalog.Ref) (bool, error) {
 	return ok && state.Excluded != nil, nil
 }
 
+func (s *Store) RelatedGames(_ context.Context, entity catalog.Entity, localID int) ([]int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if entity == catalog.EntityGame {
+		return []int{localID}, nil
+	}
+	var ids []int
+	for gameID, record := range s.Games {
+		var externals []string
+		switch entity {
+		case catalog.EntityDeveloper:
+			for _, credit := range record.Developers {
+				externals = append(externals, credit.ExternalID)
+			}
+		case catalog.EntityCharacter:
+			for _, credit := range record.Characters {
+				externals = append(externals, credit.ExternalID)
+			}
+		}
+		for ref, state := range s.links {
+			if ref.Entity == entity && state.LocalID == localID && slices.Contains(externals, ref.ExternalID) {
+				ids = append(ids, gameID)
+				break
+			}
+		}
+	}
+	slices.Sort(ids)
+	return ids, nil
+}
+
 func (s *Store) RecordFailure(_ context.Context, ref catalog.Ref, reason string, _ time.Time) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -365,4 +395,20 @@ func (q *Queue) Refs() []catalog.Ref {
 		refs[i] = catalog.Ref(job)
 	}
 	return refs
+}
+
+type Indexer struct {
+	mu      sync.Mutex
+	Changed [][]int
+	Err     error
+}
+
+func (i *Indexer) GamesChanged(_ context.Context, ids []int) error {
+	i.mu.Lock()
+	defer i.mu.Unlock()
+	if i.Err != nil {
+		return i.Err
+	}
+	i.Changed = append(i.Changed, slices.Clone(ids))
+	return nil
 }

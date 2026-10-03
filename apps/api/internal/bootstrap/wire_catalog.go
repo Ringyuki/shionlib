@@ -70,7 +70,7 @@ func wireCatalog(infra *Infra, shared *Shared, modules *Modules) {
 		searchhttp.NewHandler(searchService, shared.Builder),
 		sitemaphttp.NewHandler(sitemap.NewService(sitemappg.NewStore(infra.Ent), shared.Cache, shared.Now), cfg.App.SiteURL),
 	)
-	modules.Jobs.Register = append(modules.Jobs.Register, searchjobs.Register(searchService))
+	modules.Jobs.Register = append(modules.Jobs.Register, searchjobs.Register(searchService), searchjobs.RegisterIndex(shared.Search))
 	modules.Jobs.Tasks = append(modules.Jobs.Tasks, gamejobs.HotScoreTask(hotScore, shared.Logger))
 	modules.Jobs.Tasks = append(modules.Jobs.Tasks, searchjobs.Tasks(searchService)...)
 }
@@ -85,6 +85,28 @@ func searchEngine(cfg *config.Config, infra *Infra, outbound *http.Client) searc
 		})
 	}
 	return searchpg.NewEngine(infra.Ent)
+}
+
+func BuildSearchIndexer(infra *Infra) *search.Indexer {
+	cfg := infra.Config.Search
+	if cfg.Engine != "meilisearch" {
+		return search.NewIndexer(nil, nil, nil)
+	}
+	index := meilisearch.NewIndex(meilisearch.Options{
+		HTTP:   httpclient.New(httpclient.Options{Timeout: catalogOutboundTimeout}),
+		Host:   cfg.MeilisearchHost,
+		APIKey: cfg.MeilisearchAPIKey,
+		Index:  cfg.MeilisearchIndex,
+	})
+	return search.NewIndexer(searchpg.NewDocuments(infra.Ent), index, typedQueue[search.IndexJob]{queue: infra.Queue})
+}
+
+type typedQueue[J queue.Job] struct {
+	queue *queue.Queue
+}
+
+func (q typedQueue[J]) Enqueue(ctx context.Context, job J) error {
+	return q.queue.Enqueue(ctx, job)
 }
 
 func hotScoreWeights(cfg config.HotScore) game.HotScoreWeights {
