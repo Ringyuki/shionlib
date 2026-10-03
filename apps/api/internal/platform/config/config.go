@@ -263,6 +263,7 @@ type Sponsor struct {
 }
 
 type Tasks struct {
-	WorkersEnabled     bool `env:"WORKERS_ENABLED" envDefault:"true"`
-	ImageUploadEnabled bool `env:"TASKS_IMAGE_UPLOAD_ENABLED" envDefault:"true"`
+	WorkersEnabled     bool   `env:"WORKERS_ENABLED" envDefault:"true"`
+	ScheduleTimezone   string `env:"SCHEDULE_TIMEZONE" envDefault:"Asia/Shanghai"`
+	ImageUploadEnabled bool   `env:"TASKS_IMAGE_UPLOAD_ENABLED" envDefault:"true"`
 }

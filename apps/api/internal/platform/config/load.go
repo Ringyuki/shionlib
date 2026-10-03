@@ -7,6 +7,8 @@ import (
 	"net/url"
 	"slices"
 	"strings"
+	"time"
+	_ "time/tzdata"
 
 	"github.com/caarlos0/env/v11"
 )
@@ -69,6 +71,9 @@ func (c *Config) Validate() error {
 	require(slices.Contains([]string{"json", "text"}, c.Log.Format), "LOG_FORMAT must be json or text")
 	require(c.Upload.ChunkSizeBytes > 0 && c.Upload.ChunkSizeBytes <= c.Upload.TransferLimitBytes, "FILE_UPLOAD_CHUNK_SIZE must be positive and not exceed UPLOAD_LARGE_FILE_TRANSFER_LIMIT_BYTES")
 	require(c.Upload.MaxChunks > 0, "UPLOAD_LARGE_FILE_MAX_CHUNKS must be positive")
+	if _, err := time.LoadLocation(c.Tasks.ScheduleTimezone); err != nil {
+		errs = append(errs, fmt.Errorf("SCHEDULE_TIMEZONE: %w", err))
+	}
 	for _, raw := range c.HTTP.TrustedProxies {
 		if _, err := ParsePrefix(raw); err != nil {
 			errs = append(errs, fmt.Errorf("TRUSTED_PROXIES: %w", err))

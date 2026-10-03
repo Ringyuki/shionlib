@@ -3,54 +3,42 @@ package bootstrap
 import (
 	"time"
 
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/jwt"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/favoritepg"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/gamepg"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/redis/authredis"
-	"github.com/Ringyuki/shionlib/apps/api/internal/auth"
-	"github.com/Ringyuki/shionlib/apps/api/internal/favorite"
-	"github.com/Ringyuki/shionlib/apps/api/internal/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/platform/ratelimit"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/clientinfo"
-	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/favoritehttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/healthhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
-	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
 )
 
 const apiTitle = "Shionlib API"
 
-func BuildHTTP(infra *Infra) *httpapi.API {
+func BuildHTTP(infra *Infra, modules *Modules) *httpapi.API {
 	cfg := infra.Config
-	builder := response.NewBuilder(infra.Catalog, infra.Now)
-	tokens := jwt.NewCodec(cfg.Token.Secret, cfg.Token.ExpiresIn, infra.Now)
-	authenticator := auth.NewAuthenticator(tokens, authredis.NewFamilyBlocklist(infra.Redis))
-
 	api := httpapi.New(httpapi.Options{
 		Title:          apiTitle,
 		Version:        cfg.App.Version,
 		ExposeOpenAPI:  cfg.HTTP.ExposeOpenAPI,
 		Logger:         infra.Logger,
 		Catalog:        infra.Catalog,
-		Builder:        builder,
+		Builder:        modules.Builder,
 		ClientResolver: clientinfo.NewResolver(cfg.TrustedProxyPrefixes()),
-		Authenticator:  authenticator,
+		Authenticator:  modules.Authenticator,
 		CORS:           httpapi.CORS{Origins: cfg.HTTP.CORSOrigins, Methods: cfg.HTTP.CORSMethods},
 		QuietPaths:     []string{"/health"},
+		Throttling: &httpapi.Throttling{
+			Limiter: ratelimit.New(infra.Redis),
+			Policies: map[string]ratelimit.Policy{
+				httpapi.DefaultThrottle: {Name: httpapi.DefaultThrottle, Limit: cfg.Throttle.Limit, Window: cfg.Throttle.TTL, Block: cfg.Throttle.BlockDuration},
+				"download":              {Name: "download", Limit: cfg.Throttle.DownloadLimit, Window: cfg.Throttle.DownloadTTL, Block: cfg.Throttle.DownloadBlockDuration},
+				"auth":                  {Name: "auth", Limit: cfg.Throttle.AuthLimit, Window: cfg.Throttle.AuthTTL, Block: cfg.Throttle.AuthBlockDuration},
+			},
+		},
 	})
-
-	healthhttp.NewHandler(builder, 3*time.Second,
+	healthhttp.NewHandler(modules.Builder, 3*time.Second,
 		healthhttp.Check{Name: "db", Pinger: infra.DB},
 		healthhttp.Check{Name: "redis", Pinger: redisPinger{infra.Redis}},
 	).Register(api)
-
-	transactor := postgres.NewTransactor(infra.Ent)
-	gameCards := game.NewCards(gamepg.NewCardStore(infra.Ent))
-
-	favoritehttp.NewHandler(
-		favorite.NewService(favoritepg.NewRepository(infra.Ent), gameCards, transactor),
-		builder,
-	).Register(api)
-
+	for _, handler := range modules.Handlers {
+		handler.Register(api)
+	}
 	return api
 }

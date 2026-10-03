@@ -21,8 +21,6 @@ type CORS struct {
 	Methods []string
 }
 
-type ThrottleFactory func(policy string) func(huma.Context, func(huma.Context))
-
 type Options struct {
 	Title          string
 	Version        string
@@ -35,16 +33,17 @@ type Options struct {
 	CORS           CORS
 	QuietPaths     []string
 	Global         []func(http.Handler) http.Handler
-	Throttle       ThrottleFactory
+	Throttling     *Throttling
 }
 
 type API struct {
-	router   chi.Router
-	huma     huma.API
-	mapper   *errmap.Mapper
-	writer   *errmap.Writer
-	builder  *response.Builder
-	throttle ThrottleFactory
+	router     chi.Router
+	huma       huma.API
+	mapper     *errmap.Mapper
+	writer     *errmap.Writer
+	builder    *response.Builder
+	throttling *Throttling
+	logger     *slog.Logger
 }
 
 func New(opts Options) *API {
@@ -84,12 +83,13 @@ func New(opts Options) *API {
 	}
 
 	return &API{
-		router:   router,
-		huma:     humachi.New(router, config),
-		mapper:   mapper,
-		writer:   writer,
-		builder:  opts.Builder,
-		throttle: opts.Throttle,
+		router:     router,
+		huma:       humachi.New(router, config),
+		mapper:     mapper,
+		writer:     writer,
+		builder:    opts.Builder,
+		throttling: opts.Throttling,
+		logger:     opts.Logger,
 	}
 }
 

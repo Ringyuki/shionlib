@@ -165,3 +165,6 @@ linters:
       - path: internal/adapter/postgres/pgtest
         linters:
           - forbidigo
+      - path: internal/platform/redis/redistest
+        linters:
+          - forbidigo

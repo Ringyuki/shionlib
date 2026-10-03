@@ -12,6 +12,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/bootstrap"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/config"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/database"
+	"github.com/Ringyuki/shionlib/apps/api/internal/platform/jobs"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/runtime"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/server"
 )
@@ -30,7 +31,9 @@ func run(ctx context.Context, args []string) error {
 	}
 	switch command {
 	case "serve":
-		return serve(ctx)
+		return serve(ctx, true)
+	case "worker":
+		return serve(ctx, false)
 	case "migrate":
 		sub := "up"
 		if len(args) > 1 {
@@ -40,11 +43,11 @@ func run(ctx context.Context, args []string) error {
 	case "openapi":
 		return openapi(args[1:])
 	default:
-		return fmt.Errorf("unknown command %q (expected serve, migrate up|status, openapi)", command)
+		return fmt.Errorf("unknown command %q (expected serve, worker, migrate up|status, openapi)", command)
 	}
 }
 
-func serve(ctx context.Context) error {
+func serve(ctx context.Context, withHTTP bool) error {
 	cfg, err := config.Load()
 	if err != nil {
 		return err
@@ -54,9 +57,18 @@ func serve(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	api := bootstrap.BuildHTTP(infra)
 	app := runtime.NewApp(logger, cfg.App.ShutdownTimeout)
 	app.Close("infrastructure", infra.Close)
+	modules := bootstrap.BuildModules(infra)
+	runner, err := bootstrap.BuildJobs(infra, !withHTTP || cfg.Tasks.WorkersEnabled, modules.Jobs)
+	if err != nil {
+		return errors.Join(err, infra.Close(ctx))
+	}
+	app.Run("jobs", runner)
+	if !withHTTP {
+		return app.Start(ctx)
+	}
+	api := bootstrap.BuildHTTP(infra, modules)
 	app.Run("http", server.NewHTTP(api.Handler(), server.HTTPOptions{
 		Addr:              ":" + strconv.Itoa(cfg.HTTP.Port),
 		ReadHeaderTimeout: cfg.HTTP.ReadHeaderTimeout,
@@ -84,7 +96,10 @@ func migrate(ctx context.Context, sub string) error {
 	migrator := database.NewMigrator(db.SQL, logger)
 	switch sub {
 	case "up":
-		return migrator.Up(ctx)
+		if err := migrator.Up(ctx); err != nil {
+			return err
+		}
+		return jobs.Migrate(ctx, db.Pool)
 	case "status":
 		version, dirty, err := migrator.Status()
 		if err != nil {
@@ -113,7 +128,7 @@ func openapi(args []string) error {
 	defer func() {
 		_ = infra.Close(context.Background())
 	}()
-	spec := bootstrap.BuildHTTP(infra).OpenAPI()
+	spec := bootstrap.BuildHTTP(infra, bootstrap.BuildModules(infra)).OpenAPI()
 	encoded, err := json.MarshalIndent(spec, "", "  ")
 	if err != nil {
 		return err

@@ -59,11 +59,13 @@ func Register[I, O any](api *API, route Route, handler func(context.Context, *I)
 		operation.Security = []map[string][]string{{"accessToken": {}}, {"accessCookie": {}}}
 		operation.Middlewares = append(operation.Middlewares, api.requireAccess(route.Access))
 	}
-	if route.Throttle != "" {
-		operation.Metadata[throttleMetadataKey] = route.Throttle
-		if api.throttle != nil {
-			operation.Middlewares = append(operation.Middlewares, api.throttle(route.Throttle))
-		}
+	throttle := route.Throttle
+	if throttle == "" {
+		throttle = DefaultThrottle
+	}
+	operation.Metadata[throttleMetadataKey] = throttle
+	if api.throttling != nil {
+		operation.Middlewares = append(huma.Middlewares{api.throttleMiddleware(throttle, route.Method, route.Path)}, operation.Middlewares...)
 	}
 	huma.Register(api.huma, operation, handler)
 }
