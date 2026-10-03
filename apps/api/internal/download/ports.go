@@ -36,6 +36,7 @@ type Repository interface {
 	ClearFilePath(ctx context.Context, id int) error
 	DeleteFile(ctx context.Context, id int) error
 	ListStoredWithLocalCopy(ctx context.Context, limit int) ([]File, error)
+	ListAwaitingStore(ctx context.Context, updatedBefore time.Time, limit int) ([]int, error)
 	ListRejected(ctx context.Context, limit int) ([]File, error)
 	CreateHistory(ctx context.Context, in NewHistory) error
 	LatestHistory(ctx context.Context, fileID int) (History, bool, error)

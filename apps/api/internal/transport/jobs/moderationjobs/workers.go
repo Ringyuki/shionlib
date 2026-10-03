@@ -63,22 +63,22 @@ func (w *reviewWalkthroughWorker) Timeout(*river.Job[moderation.ReviewWalkthroug
 }
 
 const (
-	requeueSchedule     = "*/30 * * * *"
-	requeueTimeout      = 2 * time.Minute
-	staleWalkthroughAge = time.Hour
+	requeueSchedule = "*/30 * * * *"
+	requeueTimeout  = 2 * time.Minute
+	staleReviewAge  = time.Hour
 )
 
 type Requeuer interface {
-	RequeueWalkthroughReviews(ctx context.Context, updatedBefore time.Time) error
+	RequeueStaleReviews(ctx context.Context, updatedBefore time.Time) error
 }
 
 func Tasks(requeuer Requeuer, now func() time.Time) []jobs.Task {
 	return []jobs.Task{{
-		Name:     "moderation_requeue_walkthrough_reviews",
+		Name:     "moderation_requeue_stale_reviews",
 		Schedule: requeueSchedule,
 		Timeout:  requeueTimeout,
 		Run: func(ctx context.Context) error {
-			return requeuer.RequeueWalkthroughReviews(ctx, now().Add(-staleWalkthroughAge))
+			return requeuer.RequeueStaleReviews(ctx, now().Add(-staleReviewAge))
 		},
 	}}
 }

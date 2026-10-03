@@ -201,12 +201,21 @@ func (s *Service) lockUnchangedWalkthrough(ctx context.Context, reviewed Walkthr
 	return &current, nil
 }
 
-func (s *Service) RequeueWalkthroughReviews(ctx context.Context, updatedBefore time.Time) error {
-	ids, err := s.repo.PendingWalkthroughReviews(ctx, updatedBefore, requeueBatch)
+func (s *Service) RequeueStaleReviews(ctx context.Context, updatedBefore time.Time) error {
+	comments, err := s.repo.PendingComments(ctx, updatedBefore, requeueBatch)
 	if err != nil {
 		return err
 	}
-	for _, id := range ids {
+	for _, id := range comments {
+		if err := s.queue.Enqueue(ctx, ScreenComment{CommentID: id}); err != nil {
+			return err
+		}
+	}
+	walkthroughs, err := s.repo.PendingWalkthroughReviews(ctx, updatedBefore, requeueBatch)
+	if err != nil {
+		return err
+	}
+	for _, id := range walkthroughs {
 		if err := s.queue.Enqueue(ctx, ReviewWalkthrough{WalkthroughID: id}); err != nil {
 			return err
 		}

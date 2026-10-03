@@ -490,6 +490,24 @@ func (r *Repository) ListStoredWithLocalCopy(ctx context.Context, limit int) ([]
 	return toFiles(rows), nil
 }
 
+func (r *Repository) ListAwaitingStore(ctx context.Context, updatedBefore time.Time, limit int) ([]int, error) {
+	ids, err := r.db(ctx).GameDownloadResourceFile.Query().
+		Where(
+			gamedownloadresourcefile.Type(download.FileTypeObjectStore),
+			gamedownloadresourcefile.FileStatus(download.FileOnServer),
+			gamedownloadresourcefile.FileCheckStatus(int(download.CheckOK)),
+			gamedownloadresourcefile.FilePathNotNil(),
+			gamedownloadresourcefile.UpdatedLT(updatedBefore.UTC()),
+		).
+		Order(ent.Asc(gamedownloadresourcefile.FieldID)).
+		Limit(limit).
+		IDs(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list files awaiting object storage: %w", err)
+	}
+	return ids, nil
+}
+
 func (r *Repository) ListRejected(ctx context.Context, limit int) ([]download.File, error) {
 	rows, err := r.fileQuery(ctx).
 		Where(

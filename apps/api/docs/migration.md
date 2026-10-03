@@ -139,7 +139,8 @@ HTTP method/path · request schema · response schema · status code · business
 | `GET /admin/stats/trends` | days were grouped with `created AT TIME ZONE 'Asia/Shanghai'`, which shifted rows 8 hours the wrong way; `startDate`/`endDate` were validated and ignored | rows are grouped by UTC+8 day (`created + 8h`), matching the zero-filled labels; `startDate`/`endDate` are ignored without validation; `downloads`/`views` stay 0 | bug |
 | `PATCH /admin/comments/:id/status` | `status` accepted numeric strings, `notify` was coerced with JS `Boolean()` | JSON integer 1–3 and JSON boolean only (422) | one validation pipeline |
 | Admin comment and walkthrough search | a numeric keyword beyond int32 gave 500 | such keywords only match as text | bug |
-| Walkthrough reviews | a verdict published any `HIDDEN` walkthrough, so one hidden by its author or an admin while its review was queued was published again; a review lost after its retries stayed `HIDDEN` | verdicts apply only while `review_pending` is set (admin rescans set it); `moderation_requeue_walkthrough_reviews` queues pending reviews older than an hour every 30 minutes, unique per walkthrough | correctness |
+| Walkthrough reviews | a verdict published any `HIDDEN` walkthrough, so one hidden by its author or an admin while its review was queued was published again; a review lost after its retries stayed `HIDDEN` | verdicts apply only while `review_pending` is set (admin rescans set it); `moderation_requeue_stale_reviews` re-queues pending comment screenings and walkthrough reviews older than an hour every 30 minutes, unique per subject | correctness, recovery after lost jobs |
+| Object storage transfers | a lost Bull transfer job left an approved file on the server forever | `download_store_requeue` queues approved files still on the server after 15 minutes, every 10 minutes; transfer jobs are unique per file | recovery after lost jobs, cutover |
 
 ## Redis
 

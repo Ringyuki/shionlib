@@ -25,6 +25,10 @@ func (StoreFile) MaxAttempts() int {
 	return transferAttempts
 }
 
+func (StoreFile) UniqueByArgs() bool {
+	return true
+}
+
 type PurgeObjects struct {
 	Keys   []string  `json:"keys"`
 	Before time.Time `json:"before"`

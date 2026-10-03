@@ -18,6 +18,7 @@ type Repository interface {
 	PublishWalkthrough(ctx context.Context, id int) error
 	HideWalkthrough(ctx context.Context, id int) error
 	PendingWalkthroughReviews(ctx context.Context, updatedBefore time.Time, limit int) ([]int, error)
+	PendingComments(ctx context.Context, updatedBefore time.Time, limit int) ([]int, error)
 	RecordEvent(ctx context.Context, in NewEvent) error
 }
 

@@ -405,3 +405,22 @@ func TestRemoveFileDropsEmptyResources(t *testing.T) {
 		t.Fatalf("removing a missing file is a no-op: %v %v", found, err)
 	}
 }
+
+func TestRequeueStoresQueuesApprovedFilesStillOnTheServer(t *testing.T) {
+	f := newFixture()
+	path := "/spool/a.sltf"
+	approved := f.repo.SeedFile(download.File{Type: download.FileTypeObjectStore, Status: download.FileOnServer, CheckStatus: download.CheckOK, Path: &path, Updated: now.Add(-time.Hour)})
+	f.repo.SeedFile(download.File{Type: download.FileTypeObjectStore, Status: download.FileOnServer, CheckStatus: download.CheckOK, Path: &path, Updated: now})
+	f.repo.SeedFile(download.File{Type: download.FileTypeObjectStore, Status: download.FileInObjectStore, CheckStatus: download.CheckOK, Path: &path, Updated: now.Add(-time.Hour)})
+	f.repo.SeedFile(download.File{Type: download.FileTypeObjectStore, Status: download.FileOnServer, CheckStatus: download.CheckHarmfulPendingReview, Path: &path, Updated: now.Add(-time.Hour)})
+	if err := f.service.RequeueStores(context.Background(), now.Add(-15*time.Minute)); err != nil {
+		t.Fatal(err)
+	}
+	jobs := f.events.Jobs()
+	if len(jobs) != 1 || jobs[0] != download.Job(download.StoreFile{FileID: approved.ID}) {
+		t.Fatalf("jobs %+v", jobs)
+	}
+	if !(download.StoreFile{}).UniqueByArgs() {
+		t.Fatal("store jobs must be unique so the sweeper never doubles a transfer")
+	}
+}

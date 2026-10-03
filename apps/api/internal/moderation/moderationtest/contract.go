@@ -88,6 +88,18 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		}
 	})
 
+	t.Run("pending comments older than the cutoff are listed", func(t *testing.T) {
+		env := newEnv(t)
+		pending := env.NewComment(t, CommentFixture{Status: CommentPending, HTML: "<p>a</p>"})
+		env.NewComment(t, CommentFixture{Status: CommentVisible, HTML: "<p>b</p>"})
+		if ids, err := env.Repo.PendingComments(ctx, time.Now().Add(time.Hour), 10); err != nil || !slices.Equal(ids, []int{pending.ID}) {
+			t.Fatalf("pending comments %v %v", ids, err)
+		}
+		if ids, err := env.Repo.PendingComments(ctx, time.Now().Add(-time.Hour), 10); err != nil || len(ids) != 0 {
+			t.Fatalf("recent comments are left alone: %v %v", ids, err)
+		}
+	})
+
 	t.Run("walkthrough verdicts apply only while a review is pending", func(t *testing.T) {
 		env := newEnv(t)
 		pending := env.NewWalkthrough(t, WalkthroughHidden, true)

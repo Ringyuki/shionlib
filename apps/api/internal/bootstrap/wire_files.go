@@ -36,6 +36,7 @@ import (
 )
 
 const (
+	storeRequeueAge     = 15 * time.Minute
 	uploadChunkPolicy   = "upload_chunk"
 	uploadChunkLimit    = 10000
 	vendorTimeout       = 15 * time.Second
@@ -175,6 +176,9 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 			return uploads.CleanOrphans(ctx)
 		}},
 		jobs.Task{Name: "download_file_cleanup", Schedule: everyMinute, Timeout: shortTaskTimeout, Run: transfers.CleanFiles},
+		jobs.Task{Name: "download_store_requeue", Schedule: everyTenMinutes, Timeout: shortTaskTimeout, Run: func(ctx context.Context) error {
+			return downloads.RequeueStores(ctx, shared.Now().Add(-storeRequeueAge))
+		}},
 		jobs.Task{Name: "upload_quota_initial_grant", Schedule: everyTenMinutes, Timeout: quotaTaskTimeout, Run: quota.RunInitialGrants},
 		jobs.Task{Name: "upload_quota_dynamic_topup", Schedule: everyTenMinutes, Timeout: quotaTaskTimeout, Run: quota.RunDynamicTopups},
 		jobs.Task{Name: "upload_quota_dynamic_reduce", Schedule: dailyAtMidnight, Timeout: quotaTaskTimeout, Run: quota.RunDynamicReductions},

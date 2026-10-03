@@ -156,6 +156,18 @@ func (r *Repository) HideWalkthrough(ctx context.Context, id int) error {
 	return nil
 }
 
+func (r *Repository) PendingComments(ctx context.Context, updatedBefore time.Time, limit int) ([]int, error) {
+	ids, err := r.db(ctx).Comment.Query().
+		Where(entcomment.Status(int(comment.StatusPending)), entcomment.UpdatedLT(updatedBefore.UTC())).
+		Order(ent.Asc(entcomment.FieldUpdated), ent.Asc(entcomment.FieldID)).
+		Limit(limit).
+		IDs(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list pending comments: %w", err)
+	}
+	return ids, nil
+}
+
 func (r *Repository) PendingWalkthroughReviews(ctx context.Context, updatedBefore time.Time, limit int) ([]int, error) {
 	ids, err := r.db(ctx).Walkthrough.Query().
 		Where(

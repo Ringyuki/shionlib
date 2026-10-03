@@ -216,6 +216,8 @@ func (ScreenComment) Kind() string { return "moderation_screen_comment" }
 
 func (ScreenComment) Queue() string { return ScreeningQueue }
 
+func (ScreenComment) UniqueByArgs() bool { return true }
+
 type ReviewComment struct {
 	CommentID int `json:"comment_id"`
 }

@@ -438,7 +438,6 @@ func TestFileOperations(t *testing.T) {
 	f.file(t, resource.ID, creator, "link", func(c *ent.GameDownloadResourceFileCreate) {
 		c.SetType(download.FileTypeDirectLink).SetFilePath("/spool/link.sltf")
 	})
-
 	withCopies, err := f.repo.ListStoredWithLocalCopy(ctx, 10)
 	if err != nil || len(withCopies) != 1 || withCopies[0].ID != stored.ID {
 		t.Fatalf("stored files with local copies: %+v %v", withCopies, err)
@@ -601,4 +600,25 @@ func TestUsersAndSessions(t *testing.T) {
 	if has, _ := f.repo.HasUploadingSession(ctx, stranger); has {
 		t.Fatal("user without sessions")
 	}
+}
+
+func TestListAwaitingStore(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture(t)
+	creator := f.db.User(t)
+	resource := f.resource(t, f.db.Game(t), creator)
+	approved := f.file(t, resource.ID, creator, "approved.7z", func(c *ent.GameDownloadResourceFileCreate) {
+		c.SetFileStatus(download.FileOnServer).SetFileCheckStatus(int(download.CheckOK)).SetFilePath("/spool/approved.sltf")
+	})
+	f.file(t, resource.ID, creator, "unscanned.7z", func(c *ent.GameDownloadResourceFileCreate) {
+		c.SetFileStatus(download.FileOnServer).SetFilePath("/spool/unscanned.sltf")
+	})
+	awaiting, err := f.repo.ListAwaitingStore(ctx, time.Now().Add(time.Hour), 10)
+	if err != nil || len(awaiting) != 1 || awaiting[0] != approved.ID {
+		t.Fatalf("approved files awaiting storage: %v %v", awaiting, err)
+	}
+	if recent, err := f.repo.ListAwaitingStore(ctx, time.Now().Add(-time.Hour), 10); err != nil || len(recent) != 0 {
+		t.Fatalf("recently approved files are left to their own job: %v %v", recent, err)
+	}
+
 }

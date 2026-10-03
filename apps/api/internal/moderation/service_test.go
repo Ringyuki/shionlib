@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -435,21 +436,24 @@ func TestScreeningHelpers(t *testing.T) {
 	}
 }
 
-func TestRequeueWalkthroughReviews(t *testing.T) {
+func TestRequeueStaleReviews(t *testing.T) {
 	f := newFixture()
 	stuck := f.walkthrough(moderationtest.WalkthroughHidden)
 	f.repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: 4, GameID: 81, Title: "done", HTML: "<p>x</p>"}, moderationtest.WalkthroughPublished)
-	if err := f.service.RequeueWalkthroughReviews(context.Background(), time.Now().Add(-time.Hour)); err != nil {
+	pending := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 1, GameID: 81, HTML: "<p>a</p>"}, moderationtest.CommentPending)
+	f.repo.SeedComment(moderation.CommentSubject{CreatorID: 1, GameID: 81, HTML: "<p>b</p>"}, moderationtest.CommentVisible)
+	if err := f.service.RequeueStaleReviews(context.Background(), time.Now().Add(-time.Hour)); err != nil {
 		t.Fatal(err)
 	}
 	if len(f.queue.All()) != 0 {
 		t.Fatalf("recent reviews are left alone: %v", f.queue.All())
 	}
-	if err := f.service.RequeueWalkthroughReviews(context.Background(), time.Now().Add(time.Hour)); err != nil {
+	if err := f.service.RequeueStaleReviews(context.Background(), time.Now().Add(time.Hour)); err != nil {
 		t.Fatal(err)
 	}
 	jobs := f.queue.All()
-	if len(jobs) != 1 || jobs[0] != moderation.Job(moderation.ReviewWalkthrough{WalkthroughID: stuck.ID}) {
+	want := []moderation.Job{moderation.ScreenComment{CommentID: pending.ID}, moderation.ReviewWalkthrough{WalkthroughID: stuck.ID}}
+	if !slices.Equal(jobs, want) {
 		t.Fatalf("stale pending reviews are queued again: %v", jobs)
 	}
 }

@@ -27,6 +27,8 @@ type Deps struct {
 	Now        func() time.Time
 }
 
+const requeueBatch = 200
+
 type Service struct {
 	repo       Repository
 	games      GameCards
@@ -494,4 +496,17 @@ func fileActivity(kind activity.Type, userID, gameID, fileID, status int, check 
 		FileSize:        size,
 		FileName:        name,
 	}
+}
+
+func (s *Service) RequeueStores(ctx context.Context, updatedBefore time.Time) error {
+	ids, err := s.repo.ListAwaitingStore(ctx, updatedBefore, requeueBatch)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		if err := s.queue.Enqueue(ctx, StoreFile{FileID: id}); err != nil {
+			return err
+		}
+	}
+	return nil
 }

@@ -23,6 +23,7 @@ const (
 type commentRow struct {
 	subject moderation.CommentSubject
 	status  string
+	updated time.Time
 }
 
 type walkthroughRow struct {
@@ -50,7 +51,7 @@ func (r *MemoryRepository) SeedComment(subject moderation.CommentSubject, status
 		r.nextID++
 		subject.ID = r.nextID
 	}
-	r.comments[subject.ID] = &commentRow{subject: subject, status: status}
+	r.comments[subject.ID] = &commentRow{subject: subject, status: status, updated: time.Now()}
 	return subject
 }
 
@@ -170,6 +171,22 @@ func (r *MemoryRepository) HideWalkthrough(_ context.Context, id int) error {
 		row.subject.ReviewPending = false
 	}
 	return nil
+}
+
+func (r *MemoryRepository) PendingComments(_ context.Context, updatedBefore time.Time, limit int) ([]int, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var ids []int
+	for id, row := range r.comments {
+		if row.status == CommentPending && row.updated.Before(updatedBefore) {
+			ids = append(ids, id)
+		}
+	}
+	slices.Sort(ids)
+	if len(ids) > limit {
+		ids = ids[:limit]
+	}
+	return ids, nil
 }
 
 func (r *MemoryRepository) PendingWalkthroughReviews(_ context.Context, updatedBefore time.Time, limit int) ([]int, error) {

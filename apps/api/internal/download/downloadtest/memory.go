@@ -72,7 +72,12 @@ func (r *MemoryRepository) SeedFile(file download.File) download.File {
 	if file.HashAlgorithm == "" {
 		file.HashAlgorithm = upload.HashBLAKE3
 	}
-	file.Created, file.Updated = r.now(), r.now()
+	if file.Created.IsZero() {
+		file.Created = r.now()
+	}
+	if file.Updated.IsZero() {
+		file.Updated = r.now()
+	}
 	r.files[file.ID] = file
 	return r.decorate(file)
 }
@@ -465,6 +470,17 @@ func (r *MemoryRepository) ListStoredWithLocalCopy(_ context.Context, limit int)
 	return r.filtered(func(f download.File) bool {
 		return f.Type == download.FileTypeObjectStore && f.Status == download.FileInObjectStore && f.Path != nil
 	}, limit), nil
+}
+
+func (r *MemoryRepository) ListAwaitingStore(_ context.Context, updatedBefore time.Time, limit int) ([]int, error) {
+	files := r.filtered(func(f download.File) bool {
+		return f.Type == download.FileTypeObjectStore && f.Status == download.FileOnServer && f.CheckStatus == download.CheckOK && f.Path != nil && f.Updated.Before(updatedBefore)
+	}, limit)
+	ids := make([]int, len(files))
+	for i, f := range files {
+		ids[i] = f.ID
+	}
+	return ids, nil
 }
 
 func (r *MemoryRepository) ListRejected(_ context.Context, limit int) ([]download.File, error) {
