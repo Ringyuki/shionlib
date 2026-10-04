@@ -1,5 +1,5 @@
 import {
-  Callout,
+  Alert,
   CloseButton,
   Dialog,
   Heading,
@@ -88,11 +88,9 @@ function AuthDialog({ open, view, oidcFailed, onSwitch, onClose }: AuthDialogPro
                   </Text>
                 </Stack>
               </Stack>
-              {oidcFailed && view === 'sign-in' && (
-                <Callout tone="danger" role="alert">
-                  {t('methods.oidcFailed')}
-                </Callout>
-              )}
+              <Alert tone="danger" open={oidcFailed && view === 'sign-in'}>
+                {t('methods.oidcFailed')}
+              </Alert>
               {view === 'sign-in' && <SignInForm key="sign-in" onSwitch={onSwitch} />}
               {view === 'sign-up' && <SignUpFormView key="sign-up" onSwitch={onSwitch} />}
               {view === 'forgot-password' && (

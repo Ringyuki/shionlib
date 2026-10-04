@@ -1,4 +1,4 @@
-import { Callout, Empty, Heading, Pagination, SearchInput, Stack, Text } from '@hina-ui/react'
+import { Empty, Heading, Pagination, Result, SearchInput, Stack, Text } from '@hina-ui/react'
 import { SearchX } from 'lucide-react'
 import { Form, useNavigate, useNavigation } from 'react-router'
 import { useTranslations } from 'use-intl'
@@ -46,9 +46,7 @@ export function SearchResultsView({ query, page, games, unavailable }: SearchRes
       {query === '' ? (
         <Text tone="muted">{t('results.prompt')}</Text>
       ) : unavailable ? (
-        <Callout tone="warning" role="status">
-          {t('results.unavailable')}
-        </Callout>
+        <Result status="warning" title={t('results.unavailable')} />
       ) : items.length === 0 ? (
         <Empty icon={<SearchX />} title={t('results.empty', { query })} />
       ) : (

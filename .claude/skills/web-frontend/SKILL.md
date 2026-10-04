@@ -70,6 +70,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 ## MUST NOT
 
 - MUST NOT write native JSX tags outside the document shell in `root.tsx` (lint).
+- MUST NOT mount or unmount feedback conditionally (`cond && <Alert>`, ternaries): an `Alert` stays rendered and is shown with `open` (action failures use `FailureAlert` from `~/shared/ui/failure-alert`), a `Callout` is static content, and whole-page outcomes use `Result`/`Empty` (lint).
 - MUST NOT override hina-ui tokens beyond the documented accent roles, or add colours, gradients or shadows of your own; ask before introducing any new token.
 - MUST NOT declare object types with snake_case keys or types named `*DTO`/`*Response`/`*Request`/`*Payload`/`*Body` (lint).
 - MUST NOT use `fetch`, `openapi-fetch`, axios, SWR or React Query outside `~/shared/api` (lint).

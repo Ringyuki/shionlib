@@ -31,6 +31,13 @@ const documentShellTags = {
   message: nativeTagMessage,
 }
 
+const mountedFeedback = {
+  selector:
+    ':matches(LogicalExpression, ConditionalExpression) > JSXElement > JSXOpeningElement > JSXIdentifier[name=/^(Alert|Callout|Banner)$/]',
+  message:
+    'Feedback stays mounted: show and hide an Alert with `open`; a Callout is static content and is never toggled.',
+}
+
 const featureEntry = {
   regex: '^~/features/[^/]+/(?![^/]+\\.server$).+',
   message: 'Import a feature through its public entry (~/features/<name>).',
@@ -76,7 +83,7 @@ export default defineConfig([
         'error',
         { name: 'fetch', message: 'Call the API through ~/shared/api.' },
       ],
-      'no-restricted-syntax': ['error', ...apiShapes, nativeTags],
+      'no-restricted-syntax': ['error', ...apiShapes, nativeTags, mountedFeedback],
       '@typescript-eslint/consistent-type-assertions': ['error', { assertionStyle: 'never' }],
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/no-restricted-imports': restrictedImports(featureEntry),
@@ -85,7 +92,7 @@ export default defineConfig([
   {
     files: ['app/root.tsx'],
     rules: {
-      'no-restricted-syntax': ['error', ...apiShapes, documentShellTags],
+      'no-restricted-syntax': ['error', ...apiShapes, documentShellTags, mountedFeedback],
     },
   },
   {
@@ -182,6 +189,7 @@ export default defineConfig([
         },
         ...apiShapes,
         nativeTags,
+        mountedFeedback,
       ],
       '@typescript-eslint/no-restricted-imports': restrictedImports(
         featureEntry,

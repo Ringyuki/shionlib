@@ -14,7 +14,7 @@ import { useLocale, useTranslations } from 'use-intl'
 import { codeLength, emailIssues, signUpIssues, type AuthView, type SignUpForm } from '../auth'
 import { useFormFeedback } from '../use-form-feedback'
 import { useSignUp } from '../use-sign-up'
-import { FailureCallout } from './failure-callout'
+import { FailureAlert } from '~/shared/ui/failure-alert'
 
 const blank: SignUpForm = { name: '', email: '', code: '', password: '', adult: false }
 
@@ -100,7 +100,7 @@ export function SignUpFormView({ onSwitch }: { onSwitch: (view: AuthView) => voi
               {t('adult')}
             </Checkbox>
           </FormField>
-          <FailureCallout message={message} />
+          <FailureAlert message={message} />
           <Button type="submit" loading={submitting} block>
             {t('submit')}
           </Button>

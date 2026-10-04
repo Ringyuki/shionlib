@@ -33,6 +33,11 @@ Change these only together, and recheck contrast in both themes. All other token
 - The header (`ui/site-header.tsx`) holds `SidebarTrigger`, the brand on small screens, the search form and the language menu.
 - The main area scrolls inside `AppShell`; `useMainScrollRestore` wires hina-ui's scroll restorer to React Router (top on new pages, previous position on back/forward and reload), and `root.tsx` injects `firstPaintRestoreScript()`.
 
+## Feedback
+
+- Follow hina-ui's split: `Callout` is static content written into a page, `Alert` reports what just happened, `Toast` is transient. An `Alert` is always rendered and toggled with `open`, so it expands and fades instead of popping in; `FailureAlert` (`~/shared/ui/failure-alert`) does this for action failures and keeps the last message while it closes.
+- A page whose whole state is an outcome (invalid link, search unavailable, password changed) renders `Result` or `Empty` instead of a form, not an alert.
+
 ## Sign-in
 
 - Signing in, signing up and requesting a password reset happen in one dialog (`features/auth`, `AuthDialogProvider` in the `site` layout); the only auth page is the reset link target `/:lang/user/password/forget`. Legacy `/:lang/login` and `/:lang/register` redirect to `?auth=sign-in` / `?auth=sign-up`.

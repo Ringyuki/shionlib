@@ -4,7 +4,7 @@ import { useTranslations } from 'use-intl'
 import { signInIssues, type AuthView, type SignIn } from '../auth'
 import { useFormFeedback } from '../use-form-feedback'
 import { useSignIn } from '../use-sign-in'
-import { FailureCallout } from './failure-callout'
+import { FailureAlert } from '~/shared/ui/failure-alert'
 import { SignInMethods } from './sign-in-methods'
 
 export function SignInForm({ onSwitch }: { onSwitch: (view: AuthView) => void }) {
@@ -42,7 +42,7 @@ export function SignInForm({ onSwitch }: { onSwitch: (view: AuthView) => void })
               {t('forgot')}
             </Button>
           </Inline>
-          <FailureCallout message={message} />
+          <FailureAlert message={message} />
           <Button type="submit" loading={submitting} block>
             {t('submit')}
           </Button>

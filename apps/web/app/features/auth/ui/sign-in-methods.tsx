@@ -4,7 +4,7 @@ import { useTranslations } from 'use-intl'
 import { browserApiUrl } from '~/shared/api/browser'
 import { authViewParam } from '../auth'
 import { usePasskeySignIn } from '../use-passkey-sign-in'
-import { FailureCallout } from './failure-callout'
+import { FailureAlert } from '~/shared/ui/failure-alert'
 
 export function SignInMethods() {
   const t = useTranslations('auth.methods')
@@ -49,7 +49,7 @@ export function SignInMethods() {
       >
         {t('hikarinagi')}
       </Button>
-      <FailureCallout message={passkey.failure?.message ?? problem} />
+      <FailureAlert message={passkey.failure?.message ?? problem} />
     </Stack>
   )
 }

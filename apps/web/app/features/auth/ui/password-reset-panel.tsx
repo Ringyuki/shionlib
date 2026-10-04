@@ -1,20 +1,20 @@
 import {
   Button,
-  Callout,
   Form,
   FormField,
   Heading,
   PasswordInput,
+  Result,
   Stack,
   Text,
 } from '@hina-ui/react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { useTranslations } from 'use-intl'
+import { FailureAlert } from '~/shared/ui/failure-alert'
 import { authViewParam, passwordResetIssues, type PasswordResetForm } from '../auth'
 import { useFormFeedback } from '../use-form-feedback'
 import { usePasswordReset } from '../use-password-reset'
-import { FailureCallout } from './failure-callout'
 
 type PasswordResetPanelProps = {
   token: string
@@ -24,30 +24,31 @@ type PasswordResetPanelProps = {
 
 export function PasswordResetPanel({ token, email, valid }: PasswordResetPanelProps) {
   const t = useTranslations('auth.reset')
+  if (!valid) {
+    return (
+      <Result
+        status="warning"
+        title={t('invalid')}
+        className="py-12"
+        actions={
+          <Button asChild variant="soft">
+            <Link to={{ search: `?${authViewParam}=forgot-password` }}>{t('requestAgain')}</Link>
+          </Button>
+        }
+      />
+    )
+  }
   return (
     <Stack gap="lg" className="mx-auto w-full max-w-sm py-8">
       <Stack gap="xs">
         <Heading level={1} size="2xl" weight="semibold">
           {t('title')}
         </Heading>
-        {valid && (
-          <Text size="sm" tone="muted">
-            {t('description', { email })}
-          </Text>
-        )}
+        <Text size="sm" tone="muted">
+          {t('description', { email })}
+        </Text>
       </Stack>
-      {valid ? (
-        <ResetForm token={token} email={email} />
-      ) : (
-        <Stack gap="md">
-          <Callout tone="warning" role="status">
-            {t('invalid')}
-          </Callout>
-          <Button asChild variant="soft" block>
-            <Link to={{ search: `?${authViewParam}=forgot-password` }}>{t('requestAgain')}</Link>
-          </Button>
-        </Stack>
-      )}
+      <ResetForm token={token} email={email} />
     </Stack>
   )
 }
@@ -60,14 +61,15 @@ function ResetForm({ token, email }: { token: string; email: string }) {
 
   if (reset.done) {
     return (
-      <Stack gap="md">
-        <Callout tone="success" role="status">
-          {t('done')}
-        </Callout>
-        <Button asChild block>
-          <Link to={{ search: `?${authViewParam}=sign-in` }}>{t('signIn')}</Link>
-        </Button>
-      </Stack>
+      <Result
+        status="success"
+        title={t('done')}
+        actions={
+          <Button asChild>
+            <Link to={{ search: `?${authViewParam}=sign-in` }}>{t('signIn')}</Link>
+          </Button>
+        }
+      />
     )
   }
 
@@ -95,7 +97,7 @@ function ResetForm({ token, email }: { token: string; email: string }) {
               autoComplete="new-password"
             />
           </FormField>
-          <FailureCallout message={message} />
+          <FailureAlert message={message} />
           <Button type="submit" loading={submitting} block>
             {t('submit')}
           </Button>
