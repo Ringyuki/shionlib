@@ -6,6 +6,7 @@ import { SearchPalette, type SearchShortcut } from '~/features/search'
 import { BrandLogo, Wordmark } from '~/shared/ui/brand'
 import { navSections, sitePaths } from '../shell'
 import { LocaleMenu } from './locale-menu'
+import { ThemeMenu } from './theme-menu'
 import { navIcons } from './nav-icons'
 
 type SiteHeaderProps = {
@@ -39,6 +40,7 @@ export function SiteHeader({ viewerId }: SiteHeaderProps) {
       </Link>
       <SearchPalette shortcuts={shortcuts} />
       <Inline gap="xs" align="center" className="md:ms-auto">
+        <ThemeMenu />
         <LocaleMenu />
       </Inline>
     </>

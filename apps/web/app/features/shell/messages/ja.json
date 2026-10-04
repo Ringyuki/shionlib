@@ -20,5 +20,19 @@
     "messages": "通知",
     "settings": "設定"
   },
-  "signOut": "ログアウト"
+  "signOut": "ログアウト",
+  "theme": {
+    "label": "テーマ",
+    "system": "システムに合わせる",
+    "light": "ライト",
+    "dark": "ダーク"
+  },
+  "footer": {
+    "label": "サイト情報",
+    "help": "ヘルプ",
+    "uploadRules": "アップロードのルール",
+    "friendLinks": "リンク",
+    "version": "バージョン {version}"
+  },
+  "scrollTop": "トップへ戻る"
 }

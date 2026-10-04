@@ -43,6 +43,10 @@ Change these only together, and recheck contrast in both themes. All other token
 - Signing in, signing up and requesting a password reset happen in one dialog (`features/auth`, `AuthDialogProvider` in the `site` layout); the only auth page is the reset link target `/:lang/user/password/forget`. Legacy `/:lang/login` and `/:lang/register` redirect to `?auth=sign-in` / `?auth=sign-up`.
 - Anything that needs an account uses `Button` from `~/shared/ui/button` with `loginRequired`, never a disabled button: a guest's click opens the dialog and is replayed on the same element once the viewer is signed in. The gate (`~/shared/ui/auth-gate`) is the only way shared code learns about the viewer.
 
+## Theme
+
+- Dark mode is hina-ui's `dark` class on `<html>`. The preference (`system`, `light`, `dark`) lives in the `shionlib_theme` cookie; the root loader renders `class="dark"` for an explicit dark choice and inlines `systemThemeScript()` for `system`, so the first paint is already right. `ThemeProvider`/`useTheme` (`~/shared/ui/theme-provider`) apply changes and follow the system while it is chosen; the header's `ThemeMenu` changes it.
+
 ## Brand and images
 
 - `BrandLogo` shows `public/brand/logo.png` (from `favicon.ico`); `Wordmark` shows `public/brand/wordmark.svg` (Shionlib blue baked in). Both render through hina-ui `Image` with `eager` and `lazy={false}`, so they are in the server HTML and never fade in.

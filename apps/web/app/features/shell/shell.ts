@@ -26,6 +26,9 @@ export function sitePaths(locale: Locale) {
     upload: `/${locale}/upload`,
     profile: (userId: number) => `/${locale}/user/${userId}`,
     settings: `/${locale}/user/settings`,
+    help: `/${locale}/docs`,
+    uploadRules: `/${locale}/docs/guides/upload-game-files`,
+    friendLinks: `/${locale}/friend-link`,
   }
 }
 
@@ -74,3 +77,5 @@ export function sidebarModeFrom(cookieHeader: string): SidebarMode {
 export function sidebarCookieValue(mode: SidebarMode): string {
   return `${sidebarCookie}=${mode}; Path=/; Max-Age=31536000; SameSite=Lax`
 }
+
+export const repositoryUrl = 'https://github.com/Ringyuki/shionlib'

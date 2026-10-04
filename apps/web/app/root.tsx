@@ -8,18 +8,25 @@ import {
   Scripts,
   ScrollRestoration,
   useParams,
+  useRouteLoaderData,
 } from 'react-router'
 import { readServerEnv } from '~/shared/config/env.server'
 import { htmlLang } from '~/shared/i18n/locale'
 import { apiMiddleware } from '~/shared/route/api.server'
 import { ImageBaseProvider } from '~/shared/ui/image-base'
+import { darkClass, systemThemeScript, themeFrom } from '~/shared/ui/theme'
+import { ThemeProvider } from '~/shared/ui/theme-provider'
 import type { Route } from './+types/root'
 import './app.css'
 
 export const middleware: Route.MiddlewareFunction[] = [apiMiddleware]
 
-export function loader() {
-  return { imageBaseUrl: readServerEnv().imageBaseUrl }
+export function loader({ request }: Route.LoaderArgs) {
+  const env = readServerEnv()
+  return {
+    imageBaseUrl: env.imageBaseUrl,
+    theme: themeFrom(request.headers.get('cookie') ?? ''),
+  }
 }
 
 export function shouldRevalidate() {
@@ -28,11 +35,17 @@ export function shouldRevalidate() {
 
 export function Layout({ children }: { children: ReactNode }) {
   const { lang } = useParams()
+  const theme = useRouteLoaderData<typeof loader>('root')?.theme ?? 'system'
   return (
-    <html lang={htmlLang(lang)}>
+    <html
+      lang={htmlLang(lang)}
+      className={theme === 'dark' ? darkClass : undefined}
+      suppressHydrationWarning
+    >
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {theme === 'system' && <script dangerouslySetInnerHTML={{ __html: systemThemeScript() }} />}
         <Meta />
         <Links />
       </head>
@@ -51,9 +64,11 @@ export function Layout({ children }: { children: ReactNode }) {
 
 export default function App({ loaderData }: Route.ComponentProps) {
   return (
-    <ImageBaseProvider base={loaderData.imageBaseUrl}>
-      <Outlet />
-    </ImageBaseProvider>
+    <ThemeProvider initial={loaderData.theme}>
+      <ImageBaseProvider base={loaderData.imageBaseUrl}>
+        <Outlet />
+      </ImageBaseProvider>
+    </ThemeProvider>
   )
 }
 

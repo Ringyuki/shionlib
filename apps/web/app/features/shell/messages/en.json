@@ -20,5 +20,19 @@
     "messages": "Messages",
     "settings": "Settings"
   },
-  "signOut": "Sign out"
+  "signOut": "Sign out",
+  "theme": {
+    "label": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "footer": {
+    "label": "Site information",
+    "help": "Help",
+    "uploadRules": "Upload rules",
+    "friendLinks": "Friends",
+    "version": "Version {version}"
+  },
+  "scrollTop": "Back to top"
 }
