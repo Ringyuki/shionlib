@@ -1,6 +1,6 @@
 :root {
   --hn-accent: #34a2d5;
-  --hn-accent-on: #0a0a0a;
+  --hn-accent-on: #ffffff;
   --hn-accent-text: #206a8e;
   --hn-accent-soft: color-mix(in oklab, var(--hn-accent) 12%, var(--hn-surface));
   --hn-accent-border: color-mix(in oklab, var(--hn-accent) 34%, transparent);
@@ -8,8 +8,8 @@
 }
 
 .dark {
-  --hn-accent: #4cb8ea;
-  --hn-accent-on: #000000;
+  --hn-accent: #34a2d5;
+  --hn-accent-on: #ffffff;
   --hn-accent-text: #4cb8ea;
   --hn-accent-soft: color-mix(in oklab, var(--hn-accent) 24%, var(--hn-surface));
   --hn-accent-border: color-mix(in oklab, var(--hn-accent) 30%, transparent);
