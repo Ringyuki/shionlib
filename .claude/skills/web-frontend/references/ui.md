@@ -35,7 +35,7 @@ Change these only together, and recheck contrast in both themes. All other token
 
 ## Feedback
 
-- Follow hina-ui's split: `Callout` is static content written into a page, `Alert` reports what just happened, `Toast` is transient. An `Alert` is always rendered and toggled with `open`, so it expands and fades instead of popping in; `FailureAlert` (`~/shared/ui/failure-alert`) does this for action failures and keeps the last message while it closes.
+- Follow hina-ui's split: `Callout` is static content written into a page, `Alert` reports what just happened, `Toast` is transient. An `Alert` is always rendered and toggled with `open`, so it expands and fades instead of popping in; action failures render `<Alert tone="danger" open={message !== undefined}>` directly.
 - A page whose whole state is an outcome (invalid link, search unavailable, password changed) renders `Result` or `Empty` instead of a form, not an alert.
 
 ## Sign-in

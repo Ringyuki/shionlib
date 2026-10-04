@@ -2,16 +2,16 @@ import { useEffect } from 'react'
 import { href, useFetcher } from 'react-router'
 import type { artworkLoader } from './auth.server'
 
-export function useArtwork(open: boolean) {
+export function useArtwork(wanted: boolean) {
   const fetcher = useFetcher<typeof artworkLoader>()
   const load = fetcher.load
-  const loaded = fetcher.data !== undefined || fetcher.state !== 'idle'
+  const requested = fetcher.data !== undefined || fetcher.state !== 'idle'
 
   useEffect(() => {
-    if (open && !loaded) {
+    if (wanted && !requested) {
       void load(href('/resources/auth/artwork'))
     }
-  }, [open, loaded, load])
+  }, [wanted, requested, load])
 
-  return fetcher.data ?? null
+  return fetcher.data
 }

@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Checkbox,
   Form,
@@ -14,7 +15,6 @@ import { useLocale, useTranslations } from 'use-intl'
 import { codeLength, emailIssues, signUpIssues, type AuthView, type SignUpForm } from '../auth'
 import { useFormFeedback } from '../use-form-feedback'
 import { useSignUp } from '../use-sign-up'
-import { FailureAlert } from '~/shared/ui/failure-alert'
 
 const blank: SignUpForm = { name: '', email: '', code: '', password: '', adult: false }
 
@@ -100,7 +100,9 @@ export function SignUpFormView({ onSwitch }: { onSwitch: (view: AuthView) => voi
               {t('adult')}
             </Checkbox>
           </FormField>
-          <FailureAlert message={message} />
+          <Alert tone="danger" open={message !== undefined}>
+            {message}
+          </Alert>
           <Button type="submit" loading={submitting} block>
             {t('submit')}
           </Button>

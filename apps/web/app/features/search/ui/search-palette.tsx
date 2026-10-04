@@ -2,6 +2,7 @@ import {
   Button,
   CommandPalette,
   Kbd,
+  Spinner,
   Text,
   type CommandItem,
   type CommandItems,
@@ -11,14 +12,12 @@ import {
   Building2,
   Gamepad2,
   History,
-  LoaderCircle,
   Search,
   SearchX,
   Trash2,
   TrendingUp,
   UserRound,
 } from 'lucide-react'
-import type { ComponentProps } from 'react'
 import { useNavigate } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 import { developerNames, gameTitle, originalTitle, releaseDate } from '~/features/game'
@@ -188,7 +187,7 @@ export function SearchPalette({ shortcuts }: SearchPaletteProps) {
       })
     }
     if (palette.palette === undefined) {
-      items.push(status('searching', t('searching'), Spinning))
+      items.push(status('searching', t('searching'), Spinner))
     } else {
       items.push(...resultGroups(palette.palette))
     }
@@ -231,8 +230,4 @@ export function SearchPalette({ shortcuts }: SearchPaletteProps) {
       />
     </>
   )
-}
-
-function Spinning(props: ComponentProps<typeof LoaderCircle>) {
-  return <LoaderCircle {...props} className={`${props.className ?? ''} animate-spin`} />
 }

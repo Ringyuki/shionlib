@@ -1,15 +1,15 @@
-import { Button, Divider, Stack, Text } from '@hina-ui/react'
+import { Alert, Button, Divider, Stack, Text } from '@hina-ui/react'
 import { Fingerprint, KeyRound } from 'lucide-react'
 import { useTranslations } from 'use-intl'
 import { browserApiUrl } from '~/shared/api/browser'
 import { authViewParam } from '../auth'
 import { usePasskeySignIn } from '../use-passkey-sign-in'
-import { FailureAlert } from '~/shared/ui/failure-alert'
 
 export function SignInMethods() {
   const t = useTranslations('auth.methods')
   const passkey = usePasskeySignIn()
-  const problem = passkey.problem === undefined ? undefined : t(passkey.problem)
+  const problem =
+    passkey.failure?.message ?? (passkey.problem === undefined ? undefined : t(passkey.problem))
 
   const signInWithHikarinagi = () => {
     const url = new URL(window.location.href)
@@ -49,7 +49,9 @@ export function SignInMethods() {
       >
         {t('hikarinagi')}
       </Button>
-      <FailureAlert message={passkey.failure?.message ?? problem} />
+      <Alert tone="danger" open={problem !== undefined}>
+        {problem}
+      </Alert>
     </Stack>
   )
 }

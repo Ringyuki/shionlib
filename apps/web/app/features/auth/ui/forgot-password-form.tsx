@@ -1,7 +1,6 @@
 import { Alert, Button, Form, FormField, Input } from '@hina-ui/react'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
-import { FailureAlert } from '~/shared/ui/failure-alert'
 import { emailIssues, type AuthView, type EmailOnly } from '../auth'
 import { useFormFeedback } from '../use-form-feedback'
 import { usePasswordResetRequest } from '../use-password-reset-request'
@@ -33,7 +32,9 @@ export function ForgotPasswordForm({ onSwitch }: { onSwitch: (view: AuthView) =>
           <Alert tone="success" open={request.done}>
             {t('sent')}
           </Alert>
-          <FailureAlert message={message} />
+          <Alert tone="danger" open={message !== undefined}>
+            {message}
+          </Alert>
           <Button type="submit" loading={submitting} block>
             {t('submit')}
           </Button>

@@ -3,6 +3,7 @@ import {
   CloseButton,
   Dialog,
   Heading,
+  Image,
   Inline,
   ScrollArea,
   Stack,
@@ -12,10 +13,10 @@ import type { ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { AuthGateProvider, type AuthGate } from '~/shared/ui/auth-gate'
 import { BrandLogo, Wordmark } from '~/shared/ui/brand'
-import type { AuthView } from '../auth'
+import { useImageUrl } from '~/shared/ui/image-base'
+import type { Artwork, AuthView } from '../auth'
 import { useArtwork } from '../use-artwork'
 import { useAuthDialog } from '../use-auth-dialog'
-import { AuthArtwork } from './auth-artwork'
 import { ForgotPasswordForm } from './forgot-password-form'
 import { SignInForm } from './sign-in-form'
 import { SignUpFormView } from './sign-up-form'
@@ -28,6 +29,7 @@ export function AuthDialogProvider({
   children: ReactNode
 }) {
   const dialog = useAuthDialog(signedIn)
+  const artwork = useArtwork(!signedIn)
   const gate: AuthGate = {
     signedIn,
     requireSignIn: resume => dialog.show('sign-in', resume),
@@ -36,6 +38,7 @@ export function AuthDialogProvider({
     <AuthGateProvider gate={gate}>
       {children}
       <AuthDialog
+        artwork={artwork}
         open={dialog.open}
         view={dialog.view}
         oidcFailed={dialog.oidcFailed}
@@ -47,6 +50,7 @@ export function AuthDialogProvider({
 }
 
 type AuthDialogProps = {
+  artwork: Artwork | null | undefined
   open: boolean
   view: AuthView
   oidcFailed: boolean
@@ -54,9 +58,9 @@ type AuthDialogProps = {
   onClose: () => void
 }
 
-function AuthDialog({ open, view, oidcFailed, onSwitch, onClose }: AuthDialogProps) {
+function AuthDialog({ artwork, open, view, oidcFailed, onSwitch, onClose }: AuthDialogProps) {
   const t = useTranslations('auth')
-  const artwork = useArtwork(open)
+  const image = useImageUrl()
   return (
     <Dialog
       title={t(`${view}.title`)}
@@ -71,7 +75,13 @@ function AuthDialog({ open, view, oidcFailed, onSwitch, onClose }: AuthDialogPro
       className="max-w-[58rem] md:h-[42rem]"
       renderBody={({ close }) => (
         <Inline gap="none" align="stretch" wrap={false} className="relative h-full min-h-0">
-          <AuthArtwork artwork={artwork} className="hidden aspect-[2/3] h-full shrink-0 md:flex" />
+          <Image
+            src={image(artwork?.url)}
+            alt=""
+            aria-hidden
+            fit="cover"
+            className="bg-subtle hidden aspect-[2/3] h-full w-auto shrink-0 md:block"
+          />
           <ScrollArea className="min-h-0 min-w-0 flex-1">
             <Stack gap="lg" justify="center" className="min-h-full px-6 py-8 sm:px-8">
               <Stack gap="md">

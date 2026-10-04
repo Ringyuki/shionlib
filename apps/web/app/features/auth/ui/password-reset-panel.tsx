@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Form,
   FormField,
@@ -11,7 +12,6 @@ import {
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { useTranslations } from 'use-intl'
-import { FailureAlert } from '~/shared/ui/failure-alert'
 import { authViewParam, passwordResetIssues, type PasswordResetForm } from '../auth'
 import { useFormFeedback } from '../use-form-feedback'
 import { usePasswordReset } from '../use-password-reset'
@@ -97,7 +97,9 @@ function ResetForm({ token, email }: { token: string; email: string }) {
               autoComplete="new-password"
             />
           </FormField>
-          <FailureAlert message={message} />
+          <Alert tone="danger" open={message !== undefined}>
+            {message}
+          </Alert>
           <Button type="submit" loading={submitting} block>
             {t('submit')}
           </Button>
