@@ -42,6 +42,30 @@ describe('createApiSession', () => {
     expect(sent?.headers.get('x-forwarded-for')).toBe('203.0.113.9')
   })
 
+  it('passes cookies issued by any API response on to the visitor and to later calls', async () => {
+    const api = upstream(request =>
+      request.url.endsWith('/auth/login')
+        ? new Response(null, {
+            status: 200,
+            headers: [
+              ['set-cookie', 'shionlib_access_token=signed; Path=/; HttpOnly'],
+              ['set-cookie', 'shionlib_refresh_token=r; Path=/; HttpOnly'],
+            ],
+          })
+        : json(200, { code: 0 }),
+    )
+    const session = createApiSession(incoming(''), apiUrl, { ...api, now })
+    await session.fetch(new Request(`${apiUrl}/auth/login`, { method: 'POST' }))
+    await session.fetch(new Request(`${apiUrl}/user/me`))
+    expect(session.issuedCookies()).toEqual([
+      'shionlib_access_token=signed; Path=/; HttpOnly',
+      'shionlib_refresh_token=r; Path=/; HttpOnly',
+    ])
+    expect(api.seen[1]?.headers.get('cookie')).toBe(
+      'shionlib_access_token=signed; shionlib_refresh_token=r',
+    )
+  })
+
   it('refreshes once and retries when the access token is rejected', async () => {
     const api = upstream(request => {
       if (request.url.endsWith('/auth/token/refresh')) {

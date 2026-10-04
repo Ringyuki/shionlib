@@ -45,9 +45,16 @@ export function createApiSession(
     return headers
   }
 
-  const send = (request: Request) => {
+  const keep = (setCookies: readonly string[]) => {
+    issued.push(...setCookies)
+    cookies.apply(setCookies)
+  }
+
+  const send = async (request: Request) => {
     const headers = decorate(new Headers(request.headers))
-    return fetch(new Request(request, { headers }))
+    const response = await fetch(new Request(request, { headers }))
+    keep(response.headers.getSetCookie())
+    return response
   }
 
   const refresh = () => {
@@ -62,15 +69,11 @@ export function createApiSession(
         }),
       )
       if (response.ok) {
-        const setCookies = response.headers.getSetCookie()
-        issued.push(...setCookies)
-        cookies.apply(setCookies)
+        keep(response.headers.getSetCookie())
         return true
       }
       if (response.status === 401 || response.status === 403) {
-        const cleared = [accessTokenCookie, refreshTokenCookie].map(expiredCookie)
-        issued.push(...cleared)
-        cookies.apply(cleared)
+        keep([accessTokenCookie, refreshTokenCookie].map(expiredCookie))
       }
       return false
     })()
