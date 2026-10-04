@@ -28389,15 +28389,12 @@
             }
           },
           {
-            "description": "Comma-separated kinds of entries to search",
-            "explode": false,
+            "description": "Kinds of entries to search, one parameter per kind; games when omitted",
+            "explode": true,
             "in": "query",
             "name": "types",
             "schema": {
-              "default": [
-                "game"
-              ],
-              "description": "Comma-separated kinds of entries to search",
+              "description": "Kinds of entries to search, one parameter per kind; games when omitted",
               "items": {
                 "enum": [
                   "game",

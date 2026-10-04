@@ -36,9 +36,12 @@ func (h *Handler) Register(api *httpapi.API) {
 }
 
 func (h *Handler) search(ctx context.Context, in *searchInput) (*response.Output[searchResultsDTO], error) {
-	kinds := make([]catalog.Entity, len(in.Types))
-	for i, kind := range in.Types {
-		kinds[i] = catalog.Entity(kind)
+	kinds := []catalog.Entity{catalog.EntityGame}
+	if len(in.Types) > 0 {
+		kinds = make([]catalog.Entity, len(in.Types))
+		for i, kind := range in.Types {
+			kinds[i] = catalog.Entity(kind)
+		}
 	}
 	results, err := h.service.Search(ctx, actor.From(ctx), search.Query{Q: in.Q, Kinds: kinds, Page: in.Page, Size: in.PageSize})
 	if err != nil {

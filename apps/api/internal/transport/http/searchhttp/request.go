@@ -7,7 +7,7 @@ import (
 type searchInput struct {
 	httpapi.PageQuery
 	Q     string   `query:"q" maxLength:"100" doc:"Keyword sent to the catalog source"`
-	Types []string `query:"types" default:"game" enum:"game,developer,character" doc:"Comma-separated kinds of entries to search"`
+	Types []string `query:"types,explode" enum:"game,developer,character" doc:"Kinds of entries to search, one parameter per kind; games when omitted"`
 }
 
 type searchRecordInput struct {

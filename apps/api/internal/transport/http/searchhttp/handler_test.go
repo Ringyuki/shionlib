@@ -84,7 +84,7 @@ func TestSearchReturnsOneSectionPerKind(t *testing.T) {
 	e.catalog.Links[catalog.EntityDeveloper] = map[string]int{"5": 50}
 	e.catalog.Links[catalog.EntityCharacter] = map[string]int{"9": 90}
 
-	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search?q=%E5%8D%83&types=game,developer,character&pageSize=5"})
+	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search?q=%E5%8D%83&types=game&types=developer&types=character&pageSize=5"})
 	e.server.Expect(resp, http.StatusOK, 0)
 	got := decode(t, resp.Data)
 	if len(got.Games.Items) != 1 || got.Games.Items[0].ID != 1 || got.Games.Items[0].TitleJP != "千恋＊万花" || got.Games.Total != 3 {
