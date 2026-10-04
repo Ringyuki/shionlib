@@ -7230,7 +7230,7 @@ export type components = {
             title_en: string;
             title_jp: string;
             title_zh: string;
-        };
+        } | null;
         SearchCharacterSectionDTO: {
             items: components["schemas"]["SearchCharacterDTO"][] | null;
             /**
