@@ -68,12 +68,12 @@ function AuthDialog({ open, view, oidcFailed, onSwitch, onClose }: AuthDialogPro
         }
       }}
       size="2xl"
-      className="max-w-[52rem] md:h-[40rem]"
+      className="max-w-[58rem] md:h-[42rem]"
       renderBody={({ close }) => (
         <Inline gap="none" align="stretch" wrap={false} className="relative h-full min-h-0">
           <AuthArtwork artwork={artwork} className="hidden aspect-[2/3] h-full shrink-0 md:flex" />
           <ScrollArea className="min-h-0 min-w-0 flex-1">
-            <Stack gap="lg" className="px-6 py-8 sm:px-10">
+            <Stack gap="lg" justify="center" className="min-h-full px-6 py-8 sm:px-8">
               <Stack gap="md">
                 <Inline gap="sm" align="center" wrap={false}>
                   <BrandLogo className="size-8" />
