@@ -1,4 +1,4 @@
-import { cn, Image, Text } from '@hina-ui/react'
+import { cn, Image } from '@hina-ui/react'
 
 type BrandProps = {
   className?: string
@@ -21,16 +21,16 @@ export function BrandLogo({ className }: BrandProps) {
 
 export function Wordmark({ className, collapsed = false }: BrandProps) {
   return (
-    <Text
-      as="span"
-      role="img"
-      aria-label="Shionlib"
+    <Image
+      src="/brand/wordmark.svg"
+      alt=""
+      eager
+      lazy={false}
+      skeleton={false}
+      fit="contain"
       aria-hidden={collapsed || undefined}
       data-collapsed={collapsed ? '' : undefined}
-      className={cn(
-        'text-accent block aspect-[4622/728] h-5 shrink-0 bg-current [mask:url(/brand/wordmark.svg)_center/contain_no-repeat]',
-        className,
-      )}
+      className={cn('aspect-[4622/728] h-5 w-auto shrink-0', className)}
     />
   )
 }
