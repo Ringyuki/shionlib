@@ -11,6 +11,7 @@ export function BrandLogo({ className }: BrandProps) {
       src="/brand/logo.png"
       alt=""
       eager
+      lazy={false}
       skeleton={false}
       fit="contain"
       className={cn('size-8 shrink-0', className)}
