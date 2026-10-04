@@ -13535,7 +13535,7 @@ export interface operations {
                 pageSize?: number;
                 /** @description Keyword sent to the catalog source */
                 q?: string;
-                /** @description Comma-separated kinds of entries to search */
+                /** @description Kinds of entries to search, one parameter per kind; games when omitted */
                 types?: ("game" | "developer" | "character")[] | null;
             };
             header?: never;
