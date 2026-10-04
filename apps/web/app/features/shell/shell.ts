@@ -25,8 +25,6 @@ export function sitePaths(locale: Locale) {
     home: `/${locale}`,
     search: `/${locale}/search/game`,
     upload: `/${locale}/upload`,
-    signIn: `/${locale}/login`,
-    signUp: `/${locale}/register`,
     profile: (userId: number) => `/${locale}/user/${userId}`,
     settings: `/${locale}/user/settings`,
   }

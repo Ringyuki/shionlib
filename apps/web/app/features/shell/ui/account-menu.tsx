@@ -10,10 +10,12 @@ import {
   Text,
   Tooltip,
 } from '@hina-ui/react'
-import { ChevronsUpDown, Heart, LogIn, Settings, UserRound } from 'lucide-react'
-import { Link, useNavigate } from 'react-router'
+import { ChevronsUpDown, Heart, LogIn, LogOut, Settings, UserRound } from 'lucide-react'
+import { useNavigate } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
+import { useSignOut } from '~/features/auth'
 import type { Schema } from '~/shared/api/types'
+import { useAuthGate } from '~/shared/ui/auth-gate'
 import { useImageUrl } from '~/shared/ui/image-base'
 import { sitePaths } from '../shell'
 import { SidebarLabel } from './sidebar-label'
@@ -28,21 +30,22 @@ export function AccountMenu({ viewer, rail }: AccountMenuProps) {
   const locale = useLocale()
   const navigate = useNavigate()
   const image = useImageUrl()
+  const gate = useAuthGate()
+  const { signOut } = useSignOut()
   const paths = sitePaths(locale)
 
   if (viewer === null) {
     return (
       <Tooltip content={t('signIn')} side="right" disabled={!rail}>
         <Button
-          asChild
           variant="soft"
           block
+          aria-label={rail ? t('signIn') : undefined}
+          onClick={() => gate.requireSignIn()}
           className="h-10 justify-start gap-3 rounded-lg ps-[11px] font-medium [&_svg]:size-5 [&_svg]:shrink-0"
         >
-          <Link to={paths.signIn} aria-label={rail ? t('signIn') : undefined}>
-            <LogIn aria-hidden />
-            <SidebarLabel collapsed={rail}>{t('signIn')}</SidebarLabel>
-          </Link>
+          <LogIn aria-hidden />
+          <SidebarLabel collapsed={rail}>{t('signIn')}</SidebarLabel>
         </Button>
       </Tooltip>
     )
@@ -71,6 +74,10 @@ export function AccountMenu({ viewer, rail }: AccountMenuProps) {
           <DropdownMenuSeparator />
           <DropdownMenuItem icon={<Settings />} onSelect={() => navigate(paths.settings)}>
             {t('nav.settings')}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem icon={<LogOut />} onSelect={() => void signOut()}>
+            {t('signOut')}
           </DropdownMenuItem>
         </>
       }

@@ -21,5 +21,6 @@
     "uploads": "我的上传",
     "messages": "消息",
     "settings": "设置"
-  }
+  },
+  "signOut": "退出登录"
 }

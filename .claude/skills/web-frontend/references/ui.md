@@ -33,6 +33,11 @@ Change these only together, and recheck contrast in both themes. All other token
 - The header (`ui/site-header.tsx`) holds `SidebarTrigger`, the brand on small screens, the search form and the language menu.
 - The main area scrolls inside `AppShell`; `useMainScrollRestore` wires hina-ui's scroll restorer to React Router (top on new pages, previous position on back/forward and reload), and `root.tsx` injects `firstPaintRestoreScript()`.
 
+## Sign-in
+
+- Signing in, signing up and requesting a password reset happen in one dialog (`features/auth`, `AuthDialogProvider` in the `site` layout); the only auth page is the reset link target `/:lang/user/password/forget`. Legacy `/:lang/login` and `/:lang/register` redirect to `?auth=sign-in` / `?auth=sign-up`.
+- Anything that needs an account uses `Button` from `~/shared/ui/button` with `loginRequired`, never a disabled button: a guest's click opens the dialog and is replayed on the same element once the viewer is signed in. The gate (`~/shared/ui/auth-gate`) is the only way shared code learns about the viewer.
+
 ## Brand and images
 
 - `BrandLogo` shows `public/brand/logo.png` (from `favicon.ico`); `Wordmark` shows `public/brand/wordmark.svg` (Shionlib blue baked in). Both render through hina-ui `Image` with `eager` and `lazy={false}`, so they are in the server HTML and never fade in.

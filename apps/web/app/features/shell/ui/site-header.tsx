@@ -3,7 +3,7 @@ import { Search } from 'lucide-react'
 import { Form, Link, useSearchParams } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 import { sitePaths } from '../shell'
-import { BrandLogo, Wordmark } from './brand'
+import { BrandLogo, Wordmark } from '~/shared/ui/brand'
 import { LocaleMenu } from './locale-menu'
 
 export function SiteHeader() {

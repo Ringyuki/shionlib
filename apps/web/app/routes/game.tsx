@@ -20,18 +20,11 @@ export function meta({ loaderData, params }: Route.MetaArgs) {
   return [{ title: `${gameTitle(loaderData.game, params.lang)} | Shionlib` }]
 }
 
-export default function GameRoute({ loaderData, matches }: Route.ComponentProps) {
-  const signedIn = matches[2].loaderData.viewer !== null
+export default function GameRoute({ loaderData }: Route.ComponentProps) {
   return (
     <GameHeader
       game={loaderData.game}
-      actions={
-        <FavoriteButton
-          gameId={loaderData.game.id}
-          favorited={loaderData.favorited}
-          signedIn={signedIn}
-        />
-      }
+      actions={<FavoriteButton gameId={loaderData.game.id} favorited={loaderData.favorited} />}
     />
   )
 }

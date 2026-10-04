@@ -7,5 +7,7 @@ export function loader({ request }: Route.LoaderArgs) {
     request.headers.get('cookie') ?? '',
     request.headers.get('accept-language') ?? '',
   )
-  return redirect(`/${locale}`)
+  const url = new URL(request.url)
+  const path = url.pathname === '/' ? '' : url.pathname
+  return redirect(`/${locale}${path}${url.search}`)
 }

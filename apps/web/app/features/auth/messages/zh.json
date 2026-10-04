@@ -1,0 +1,69 @@
+{
+  "close": "关闭",
+  "artwork": "插图",
+  "sign-in": {
+    "title": "登录 Shionlib",
+    "description": "登录后可以上传资源、收藏游戏和参与讨论。",
+    "identifier": "用户名或邮箱",
+    "password": "密码",
+    "submit": "登录",
+    "noAccount": "还没有账号？",
+    "toSignUp": "注册",
+    "forgot": "忘记密码？"
+  },
+  "sign-up": {
+    "title": "注册 Shionlib",
+    "description": "注册后会自动登录。",
+    "name": "用户名",
+    "nameHint": "2–20 个字符，注册后可以修改",
+    "email": "邮箱",
+    "sendCode": "发送验证码",
+    "resendIn": "{seconds} 秒后可重发",
+    "codeSent": "验证码已发送到 {email}",
+    "code": "验证码",
+    "codeFirst": "请先发送验证码",
+    "password": "密码",
+    "passwordHint": "8–50 个字符，包含大写字母、小写字母，以及数字或符号",
+    "adult": "我已年满 18 周岁",
+    "submit": "注册并登录",
+    "hasAccount": "已有账号？",
+    "toSignIn": "登录"
+  },
+  "forgot-password": {
+    "title": "找回密码",
+    "description": "输入注册时的邮箱，我们会发一封重置密码的邮件。",
+    "email": "邮箱",
+    "submit": "发送重置邮件",
+    "sent": "邮件已发送，请尽快查看收件箱，链接很快会过期。",
+    "back": "返回登录"
+  },
+  "methods": {
+    "divider": "或",
+    "passkey": "使用通行密钥登录",
+    "hikarinagi": "使用 Hikarinagi ID 登录",
+    "unsupported": "当前设备或浏览器不支持通行密钥",
+    "cancelled": "通行密钥验证没有完成",
+    "oidcFailed": "Hikarinagi ID 登录失败，请重试"
+  },
+  "issue": {
+    "required": "必填",
+    "email": "邮箱格式不正确",
+    "nameLength": "用户名需要 2–20 个字符",
+    "passwordLength": "密码需要 8–50 个字符",
+    "passwordPolicy": "密码需要包含大写字母、小写字母，以及数字或符号",
+    "codeLength": "请输入 6 位数字验证码",
+    "adult": "年满 18 周岁才能注册",
+    "mismatch": "两次输入的密码不一致"
+  },
+  "reset": {
+    "title": "重置密码",
+    "description": "为 {email} 设置新密码，设置后所有已登录的设备都需要重新登录。",
+    "password": "新密码",
+    "confirmation": "再次输入新密码",
+    "submit": "重置密码",
+    "done": "密码已重置，请用新密码登录。",
+    "signIn": "去登录",
+    "invalid": "这个重置链接无效或已过期。",
+    "requestAgain": "重新发送重置邮件"
+  }
+}

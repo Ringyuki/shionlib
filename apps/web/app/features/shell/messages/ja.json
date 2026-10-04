@@ -21,5 +21,6 @@
     "uploads": "アップロード履歴",
     "messages": "通知",
     "settings": "設定"
-  }
+  },
+  "signOut": "ログアウト"
 }

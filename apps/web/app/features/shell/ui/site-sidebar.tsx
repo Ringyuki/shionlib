@@ -5,7 +5,7 @@ import type { Schema } from '~/shared/api/types'
 import { sitePaths, type NavSection, type SidebarMode } from '../shell'
 import { useDesktop } from '../use-desktop'
 import { AccountMenu } from './account-menu'
-import { BrandLogo, Wordmark } from './brand'
+import { BrandLogo, Wordmark } from '~/shared/ui/brand'
 import { SidebarSection } from './sidebar-section'
 import { UploadAction } from './upload-action'
 

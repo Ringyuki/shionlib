@@ -62,7 +62,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 - MUST keep viewer-specific catches (e.g. guests get `false`) in use-cases by status or `ApiError.is(...)`, never by message text.
 - MUST put user-facing text in the feature's `messages/{zh,en,ja}.json`; `zh` is the source, `en`/`ja` must have the same keys (the `Messages` type enforces it). API error messages are already localized; show `failure.message`.
 - MUST build UI from `@hina-ui/react` components and tokens; use Tailwind utilities only for layout glue.
-- MUST show the brand with `BrandLogo` (`public/brand/logo.png`, the favicon artwork) and `Wordmark` (`public/brand/wordmark.svg`, "Shionlib" in Cinzel 700 as paths), never with live text.
+- MUST show the brand with `BrandLogo` and `Wordmark` from `~/shared/ui/brand` (`public/brand/logo.png`, the favicon artwork; `public/brand/wordmark.svg`, "Shionlib" in Cinzel 700 as paths), never with live text.
 - MUST resolve stored image keys with `useImageUrl()` (base from `IMAGE_BASE_URL`, provided by the root loader).
 - MUST keep the code comment-free (lint enforces; inline lint directives are disabled).
 - MUST run `.claude/skills/web-frontend/scripts/verify.sh` before declaring work done.
@@ -92,6 +92,8 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 | Form validation errors?                      | `routeAction` returns `failure.data.errors` (field → messages); render them next to the field                       |
 | 404 for a bad id?                            | `idParam(params.id)`; missing records come back from the API as 404 through `routeLoader`                           |
 | Who is signed in?                            | `loadViewer` in the `site` layout loader; pages read it from `matches`                                              |
+| Action that needs a signed-in user?          | `Button` from `~/shared/ui/button` with `loginRequired`: guests get the sign-in dialog, the click replays after it  |
+| Sign in, sign up, sign out?                  | `features/auth`: the dialog (`?auth=sign-in`/`sign-up`/`forgot-password` opens it), `useSignOut`; no auth pages    |
 | Navigation entry or shell change?            | `features/shell` (`shell.ts` model, `ui/site-sidebar.tsx`, `ui/site-header.tsx`)                                    |
 | An image from the API?                       | `const image = useImageUrl()` then `image(cover.url)`                                                               |
 | Auth cookies and refresh?                    | handled by `apiMiddleware` + `createApiSession`; never touch tokens in features                                     |

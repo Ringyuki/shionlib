@@ -46,3 +46,14 @@ function syntheticFailure(response: Response): ApiFailure {
     timestamp: new Date().toISOString(),
   }
 }
+
+export function fieldMessages(failure: ApiFailure): Record<string, string> {
+  const messages: Record<string, string> = {}
+  for (const field of failure.data?.errors ?? []) {
+    const first = field.messages?.[0]
+    if (first !== undefined) {
+      messages[field.field] = first
+    }
+  }
+  return messages
+}

@@ -1,32 +1,19 @@
-import { Button, Checkbox, Popover, Spinner, Stack, Text } from '@hina-ui/react'
+import { Checkbox, Popover, Spinner, Stack, Text } from '@hina-ui/react'
 import { Heart } from 'lucide-react'
 import { useTranslations } from 'use-intl'
 import type { Schema } from '~/shared/api/types'
+import { Button } from '~/shared/ui/button'
 import { useFavoriteLists } from '../use-favorite-lists'
 import { useMembershipToggle } from '../use-membership-toggle'
 
 type FavoriteButtonProps = {
   gameId: number
   favorited: boolean
-  signedIn: boolean
 }
 
-export function FavoriteButton({ gameId, favorited, signedIn }: FavoriteButtonProps) {
+export function FavoriteButton({ gameId, favorited }: FavoriteButtonProps) {
   const t = useTranslations('favorite')
   const { lists, loading, load } = useFavoriteLists(gameId)
-  const trigger = (
-    <Button
-      variant={favorited ? 'solid' : 'outline'}
-      icon={<Heart fill={favorited ? 'currentColor' : 'none'} />}
-      disabled={!signedIn}
-      title={signedIn ? undefined : t('signInRequired')}
-    >
-      {favorited ? t('favorited') : t('favorite')}
-    </Button>
-  )
-  if (!signedIn) {
-    return trigger
-  }
   return (
     <Popover
       onOpenChange={open => open && load()}
@@ -47,7 +34,13 @@ export function FavoriteButton({ gameId, favorited, signedIn }: FavoriteButtonPr
         </Stack>
       }
     >
-      {trigger}
+      <Button
+        loginRequired
+        variant={favorited ? 'solid' : 'outline'}
+        icon={<Heart fill={favorited ? 'currentColor' : 'none'} />}
+      >
+        {favorited ? t('favorited') : t('favorite')}
+      </Button>
     </Popover>
   )
 }
