@@ -11,14 +11,20 @@
 - `TooltipProvider` and `Toaster` are mounted once in `root.tsx`; `UiLocaleProvider` in `lang.tsx`.
 - Use tokens (`text-muted`, `border-line`, `bg-subtle`) instead of raw colours; Tailwind utilities only glue layout.
 
-## Shionlib theme
+## Accent customisation
 
-`app/shared/ui/theme.css` maps the Shionlib tokens onto hina-ui:
+`app/shared/ui/theme.css` follows hina-ui's "自定义主题" guide and nothing more: it sets the six accent roles for `:root` and `.dark`.
 
-- `--color-brand-*` is the Shionlib blue scale (`#34a2d5` at 600) and drives `--hn-accent*`; `--color-neutral-*` is the Shionlib neutral scale; success, warning, info and danger use the Shionlib 600 shades with white text.
-- Radii: 4/6/8/10/14 px (`--hn-radius-xs` … `--hn-radius-xl`).
-- Domain colours: `platform-<key>` (+ `-fg`) for the 19 platforms and `resource-<type>` (+ `-soft`) for the 12 resource types, with dark-mode values.
-- Nothing else: no gradients, glows or extra hues.
+| Role                 | Light                                       | Dark                     |
+| -------------------- | ------------------------------------------- | ------------------------ |
+| `--hn-accent`        | `#34a2d5` (Shionlib blue)                   | `#4cb8ea`                |
+| `--hn-accent-on`     | `#0a0a0a` (white on the blue is 2.9:1)      | `#000000`                |
+| `--hn-accent-text`   | `#206a8e` (6.0:1 on surface, 5.3:1 on soft) | `#4cb8ea`                |
+| `--hn-accent-soft`   | accent 12 % over surface                    | accent 24 % over surface |
+| `--hn-accent-border` | accent 34 %                                 | accent 30 %              |
+| `--hn-focus-ring`    | `#2784b0`                                   | `#4cb8ea`                |
+
+Change these only together, and recheck contrast in both themes. All other tokens are hina-ui's defaults.
 
 ## Shell
 

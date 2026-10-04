@@ -13,7 +13,7 @@ Product rules from the rewrite brief:
 
 - Every page exists for the core jobs: browsing games, downloading and uploading resources. Pages and widgets that serve none of them are not built.
 - The UI is built only from `@hina-ui/react` components with **zero native tags**: no `div`, `span`, `p`, `a`, `button`, `header`, `main`, `svg` in JSX. Semantic elements come from `as` on hina-ui layout components (`<Stack as="aside">`), links from router components. Only `root.tsx` writes the document shell (`html`, `head`, `body`, `meta`, `link`, `script`).
-- The look is hina-ui's with **Shionlib tokens** (`app/shared/ui/theme.css`: the Shionlib blue brand scale, its neutral scale and status colours, 10 px large radius, platform and resource-type colours). Do not invent colours, gradients, glows or effects; when something needs a colour, use a token.
+- The look is hina-ui's, customised only the way hina-ui documents it (design/colors, "自定义主题"): `app/shared/ui/theme.css` overrides the six accent roles (`--hn-accent`, `-on`, `-text`, `-soft`, `-border`, `--hn-focus-ring`) for light and dark with the Shionlib blue, checked for contrast. Every other token (palette, neutrals, status colours, radii, fonts, density) stays hina-ui's. Do not invent colours, gradients, glows or effects.
 - The site layout is hina-ui `AppShell` (sidebar, header, main, mobile drawer) with Shionlib's own sidebar in `features/shell`, built to the same standard as hina-ui's `Sidebar` (rail collapse that keeps icons in place, fading labels, tooltips in rail, drawer close button, accessible names).
 - i18n stays (`zh`, `en`, `ja`) with Chinese as the primary language and Asia as the main audience.
 
@@ -70,7 +70,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 ## MUST NOT
 
 - MUST NOT write native JSX tags outside the document shell in `root.tsx` (lint).
-- MUST NOT add colours, gradients or shadows that are not tokens in `theme.css` or hina-ui.
+- MUST NOT override hina-ui tokens beyond the documented accent roles, or add colours, gradients or shadows of your own; ask before introducing any new token.
 - MUST NOT declare object types with snake_case keys or types named `*DTO`/`*Response`/`*Request`/`*Payload`/`*Body` (lint).
 - MUST NOT use `fetch`, `openapi-fetch`, axios, SWR or React Query outside `~/shared/api` (lint).
 - MUST NOT use `as` type assertions outside `~/shared/api` (`as const` is fine) (lint).
@@ -94,7 +94,6 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 | Who is signed in?                            | `loadViewer` in the `site` layout loader; pages read it from `matches`                                              |
 | Navigation entry or shell change?            | `features/shell` (`shell.ts` model, `ui/site-sidebar.tsx`, `ui/site-header.tsx`)                                    |
 | An image from the API?                       | `const image = useImageUrl()` then `image(cover.url)`                                                               |
-| A platform or resource-type colour?          | `bg-platform-<key>`/`text-platform-<key>-fg`, `text-resource-<type>`/`bg-resource-<type>-soft`                      |
 | Auth cookies and refresh?                    | handled by `apiMiddleware` + `createApiSession`; never touch tokens in features                                     |
 | Messages?                                    | `features/<name>/messages/*.json`, registered in `app/messages/{zh,en,ja}.ts`                                       |
 | Tests?                                       | `references/testing.md`: model and use-cases with `fakeApi()`, server helpers with stubs                            |
@@ -103,7 +102,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 
 - references/architecture.md — layers, dependency rules, naming, the lint rules that enforce them
 - references/data.md — request tool, generated contract, loaders, actions, fetchers, errors, sessions
-- references/ui.md — hina-ui, Shionlib theme, shell and sidebar, brand, images, messages and locales, SEO metadata
+- references/ui.md — hina-ui, accent customisation, shell and sidebar, brand, images, messages and locales, SEO metadata
 - references/testing.md — test levels and fakes
 - recipes/add-feature.md, add-route.md, add-mutation.md
 
