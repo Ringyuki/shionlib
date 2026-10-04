@@ -36,7 +36,10 @@ export function SiteSidebar({ sections, viewer, mode, onClose }: SiteSidebarProp
       <Flex
         align="center"
         gap="sm"
-        className={cn('border-line h-14 shrink-0 border-b', desktop ? 'ps-[1.125rem] pe-3' : '')}
+        className={cn(
+          'border-line box-content h-14 shrink-0 border-b',
+          desktop ? 'ps-[1.125rem] pe-3' : '',
+        )}
       >
         <Link to={sitePaths(locale).home} aria-label="Shionlib" className="min-w-0">
           <Inline gap="sm" align="center" className="flex-nowrap">
