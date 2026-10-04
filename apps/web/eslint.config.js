@@ -7,6 +7,30 @@ import { noComments } from './eslint/no-comments.js'
 const apiShapeMessage =
   'API shapes come from ~/shared/api (Schema, ApiData, ApiBody, ApiQuery); never redeclare them.'
 
+const apiShapes = [
+  { selector: 'TSPropertySignature > Identifier.key[name=/_/]', message: apiShapeMessage },
+  { selector: 'TSPropertySignature > Literal.key[value=/_/]', message: apiShapeMessage },
+  {
+    selector:
+      ':matches(TSTypeAliasDeclaration, TSInterfaceDeclaration) > Identifier.id[name=/(DTO|Dto|Response|Request|Payload|Body)$/]',
+    message: apiShapeMessage,
+  },
+]
+
+const nativeTagMessage =
+  'Zero native tags: compose @hina-ui/react components (pass `as` for semantic elements) or router components.'
+
+const nativeTags = {
+  selector: 'JSXOpeningElement > JSXIdentifier[name=/^[a-z]/]',
+  message: nativeTagMessage,
+}
+
+const documentShellTags = {
+  selector:
+    'JSXOpeningElement > JSXIdentifier[name=/^(?!(html|head|body|meta|title|link|script)$)[a-z]/]',
+  message: nativeTagMessage,
+}
+
 const featureEntry = {
   regex: '^~/features/[^/]+/(?![^/]+\\.server$).+',
   message: 'Import a feature through its public entry (~/features/<name>).',
@@ -52,19 +76,16 @@ export default defineConfig([
         'error',
         { name: 'fetch', message: 'Call the API through ~/shared/api.' },
       ],
-      'no-restricted-syntax': [
-        'error',
-        { selector: 'TSPropertySignature > Identifier.key[name=/_/]', message: apiShapeMessage },
-        { selector: 'TSPropertySignature > Literal.key[value=/_/]', message: apiShapeMessage },
-        {
-          selector:
-            ':matches(TSTypeAliasDeclaration, TSInterfaceDeclaration) > Identifier.id[name=/(DTO|Dto|Response|Request|Payload|Body)$/]',
-          message: apiShapeMessage,
-        },
-      ],
+      'no-restricted-syntax': ['error', ...apiShapes, nativeTags],
       '@typescript-eslint/consistent-type-assertions': ['error', { assertionStyle: 'never' }],
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/no-restricted-imports': restrictedImports(featureEntry),
+    },
+  },
+  {
+    files: ['app/root.tsx'],
+    rules: {
+      'no-restricted-syntax': ['error', ...apiShapes, documentShellTags],
     },
   },
   {
@@ -159,7 +180,8 @@ export default defineConfig([
           selector: "CallExpression[callee.object.name='api']",
           message: 'Routes are thin: call a feature use-case instead of the API.',
         },
-        { selector: 'TSPropertySignature > Identifier.key[name=/_/]', message: apiShapeMessage },
+        ...apiShapes,
+        nativeTags,
       ],
       '@typescript-eslint/no-restricted-imports': restrictedImports(
         featureEntry,

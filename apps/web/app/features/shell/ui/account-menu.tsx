@@ -1,0 +1,109 @@
+import {
+  Avatar,
+  Button,
+  DropdownMenu,
+  Flex,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  Stack,
+  Text,
+  Tooltip,
+} from '@hina-ui/react'
+import { ChevronsUpDown, Heart, LogIn, Settings, UserRound } from 'lucide-react'
+import { Link, useNavigate } from 'react-router'
+import { useLocale, useTranslations } from 'use-intl'
+import type { Schema } from '~/shared/api/types'
+import { useImageUrl } from '~/shared/ui/image-base'
+import { sitePaths } from '../shell'
+import { SidebarLabel } from './sidebar-label'
+
+type AccountMenuProps = {
+  viewer: Schema<'UserMeDTO'> | null
+  rail: boolean
+}
+
+export function AccountMenu({ viewer, rail }: AccountMenuProps) {
+  const t = useTranslations('shell')
+  const locale = useLocale()
+  const navigate = useNavigate()
+  const image = useImageUrl()
+  const paths = sitePaths(locale)
+
+  if (viewer === null) {
+    return (
+      <Tooltip content={t('signIn')} side="right" disabled={!rail}>
+        <Button
+          asChild
+          variant="soft"
+          block
+          className="h-10 justify-start gap-3 rounded-lg ps-3 font-medium [&_svg]:size-5 [&_svg]:shrink-0"
+        >
+          <Link to={paths.signIn} aria-label={rail ? t('signIn') : undefined}>
+            <LogIn aria-hidden />
+            <SidebarLabel collapsed={rail}>{t('signIn')}</SidebarLabel>
+          </Link>
+        </Button>
+      </Tooltip>
+    )
+  }
+
+  return (
+    <DropdownMenu
+      side={rail ? 'right' : 'top'}
+      align={rail ? 'end' : 'start'}
+      label={t('account')}
+      content={
+        <>
+          <DropdownMenuLabel>{viewer.email}</DropdownMenuLabel>
+          <DropdownMenuItem
+            icon={<UserRound />}
+            onSelect={() => navigate(paths.profile(viewer.id))}
+          >
+            {t('profile')}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            icon={<Heart />}
+            onSelect={() => navigate(`${paths.profile(viewer.id)}/favorites`)}
+          >
+            {t('nav.favorites')}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem icon={<Settings />} onSelect={() => navigate(paths.settings)}>
+            {t('nav.settings')}
+          </DropdownMenuItem>
+        </>
+      }
+    >
+      <Button asChild variant="ghost" tone="neutral" block>
+        <Flex
+          as="button"
+          align="center"
+          gap="none"
+          aria-label={rail ? viewer.name : undefined}
+          className="h-12 justify-start gap-3 rounded-lg ps-1.5 pe-2"
+        >
+          <Avatar src={image(viewer.avatar)} name={viewer.name} size="md" className="shrink-0" />
+          <Stack
+            gap="none"
+            aria-hidden={rail || undefined}
+            data-collapsed={rail ? '' : undefined}
+            className="hn-sidebar-label min-w-0 flex-1 text-start"
+          >
+            <Text as="span" size="sm" weight="medium" truncate>
+              {viewer.name}
+            </Text>
+            <Text as="span" size="xs" tone="faint" truncate>
+              {t('accountHint')}
+            </Text>
+          </Stack>
+          <ChevronsUpDown
+            aria-hidden
+            data-collapsed={rail ? '' : undefined}
+            className="hn-sidebar-label text-faint size-4 shrink-0"
+          />
+        </Flex>
+      </Button>
+    </DropdownMenu>
+  )
+}

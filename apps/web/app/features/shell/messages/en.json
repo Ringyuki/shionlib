@@ -1,0 +1,25 @@
+{
+  "navigation": "Main navigation",
+  "account": "Account",
+  "accountHint": "Account and preferences",
+  "profile": "Profile",
+  "language": "Language",
+  "search": "Search",
+  "searchPlaceholder": "Search games, developers, characters",
+  "upload": "Upload",
+  "signIn": "Sign in / Sign up",
+  "section": {
+    "discover": "Discover",
+    "mine": "Library"
+  },
+  "nav": {
+    "home": "Home",
+    "games": "Games",
+    "releases": "Releases",
+    "developers": "Developers",
+    "favorites": "Favorites",
+    "uploads": "My uploads",
+    "messages": "Messages",
+    "settings": "Settings"
+  }
+}

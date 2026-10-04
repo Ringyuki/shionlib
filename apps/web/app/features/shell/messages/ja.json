@@ -1,0 +1,25 @@
+{
+  "navigation": "メインナビゲーション",
+  "account": "アカウント",
+  "accountHint": "アカウントと設定",
+  "profile": "プロフィール",
+  "language": "言語",
+  "search": "検索",
+  "searchPlaceholder": "ゲーム・ブランド・キャラクターを検索",
+  "upload": "アップロード",
+  "signIn": "ログイン / 登録",
+  "section": {
+    "discover": "見つける",
+    "mine": "マイページ"
+  },
+  "nav": {
+    "home": "ホーム",
+    "games": "ゲーム",
+    "releases": "新作",
+    "developers": "ブランド",
+    "favorites": "お気に入り",
+    "uploads": "アップロード履歴",
+    "messages": "通知",
+    "settings": "設定"
+  }
+}

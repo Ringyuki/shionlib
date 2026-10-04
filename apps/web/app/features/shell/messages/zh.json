@@ -1,0 +1,25 @@
+{
+  "navigation": "主导航",
+  "account": "账号",
+  "accountHint": "账号与偏好",
+  "profile": "个人主页",
+  "language": "语言",
+  "search": "搜索",
+  "searchPlaceholder": "搜索游戏、开发商、角色",
+  "upload": "上传资源",
+  "signIn": "登录 / 注册",
+  "section": {
+    "discover": "发现",
+    "mine": "我的"
+  },
+  "nav": {
+    "home": "首页",
+    "games": "游戏库",
+    "releases": "新作",
+    "developers": "开发商",
+    "favorites": "收藏",
+    "uploads": "我的上传",
+    "messages": "消息",
+    "settings": "设置"
+  }
+}

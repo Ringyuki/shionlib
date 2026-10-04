@@ -13,9 +13,10 @@ API_INTERNAL_URL=http://localhost:5000 pnpm dev
 ```
 
 - `API_INTERNAL_URL` is where the web server reaches the Go API (default `http://localhost:5000`). In development Vite also proxies `/api/*` to it for browser-side calls.
+- `IMAGE_BASE_URL` is the image host that stored image keys are served from (default `https://t.shionlib.com`).
 - `pnpm api:generate` regenerates the API types after `apps/api/openapi/openapi.json` changes.
 - `.claude/skills/web-frontend/scripts/verify.sh` runs every check CI runs.
 
 ## Production
 
-`apps/web/Dockerfile` (build context: `apps/web`) produces an image serving on port 3000. The ingress routes `/api/*` (prefix stripped) to the API and everything else to the web container; the web container needs `API_INTERNAL_URL` pointing at the API service.
+`apps/web/Dockerfile` (build context: `apps/web`) produces an image serving on port 3000. The ingress routes `/api/*` (prefix stripped) to the API and everything else to the web container; the web container needs `API_INTERNAL_URL` pointing at the API service and `IMAGE_BASE_URL` for images.

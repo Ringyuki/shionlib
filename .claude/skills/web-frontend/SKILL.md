@@ -9,6 +9,14 @@ Priorities when rules compete: correctness > architecture integrity > consistenc
 
 `apps/web` is a server-rendered React Router (framework mode) app built on `@hina-ui/react` and Tailwind CSS v4. The Go API is its only backend. It is a rewrite, not a port: the legacy `apps/frontend` is never a template for code, UI or texts; it only serves as a checklist of features and as the list of public URLs that must keep working.
 
+Product rules from the rewrite brief:
+
+- Every page exists for the core jobs: browsing games, downloading and uploading resources. Pages and widgets that serve none of them are not built.
+- The UI is built only from `@hina-ui/react` components with **zero native tags**: no `div`, `span`, `p`, `a`, `button`, `header`, `main`, `svg` in JSX. Semantic elements come from `as` on hina-ui layout components (`<Stack as="aside">`), links from router components. Only `root.tsx` writes the document shell (`html`, `head`, `body`, `meta`, `link`, `script`).
+- The look is hina-ui's with **Shionlib tokens** (`app/shared/ui/theme.css`: the Shionlib blue brand scale, its neutral scale and status colours, 10 px large radius, platform and resource-type colours). Do not invent colours, gradients, glows or effects; when something needs a colour, use a token.
+- The site layout is hina-ui `AppShell` (sidebar, header, main, mobile drawer) with Shionlib's own sidebar in `features/shell`, built to the same standard as hina-ui's `Sidebar` (rail collapse that keeps icons in place, fading labels, tooltips in rail, drawer close button, accessible names).
+- i18n stays (`zh`, `en`, `ja`) with Chinese as the primary language and Asia as the main audience.
+
 ## The five rules
 
 1. **One request tool, inferred types, zero copies.** Every API call goes through `~/shared/api` (`ApiClient`), whose argument and result types are inferred from `app/shared/api/generated/openapi.ts`, generated from `apps/api/openapi/openapi.json`. No file in apps/web may declare an API path, request, response, field or business code by hand, in any form. Name an API type only through `Schema<'X'>`, `ApiData<Path, Method>`, `ApiBody<...>`, `ApiQuery<...>`, `ApiFailure`, or derive from them (`Pick`, indexed access). Business codes come from the generated `BusinessCode`.
@@ -54,11 +62,15 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 - MUST keep viewer-specific catches (e.g. guests get `false`) in use-cases by status or `ApiError.is(...)`, never by message text.
 - MUST put user-facing text in the feature's `messages/{zh,en,ja}.json`; `zh` is the source, `en`/`ja` must have the same keys (the `Messages` type enforces it). API error messages are already localized; show `failure.message`.
 - MUST build UI from `@hina-ui/react` components and tokens; use Tailwind utilities only for layout glue.
+- MUST show the brand with `BrandLogo` (`public/brand/logo.png`, the favicon artwork) and `Wordmark` (`public/brand/wordmark.svg`, "Shionlib" in Cinzel 700 as paths), never with live text.
+- MUST resolve stored image keys with `useImageUrl()` (base from `IMAGE_BASE_URL`, provided by the root loader).
 - MUST keep the code comment-free (lint enforces; inline lint directives are disabled).
 - MUST run `.claude/skills/web-frontend/scripts/verify.sh` before declaring work done.
 
 ## MUST NOT
 
+- MUST NOT write native JSX tags outside the document shell in `root.tsx` (lint).
+- MUST NOT add colours, gradients or shadows that are not tokens in `theme.css` or hina-ui.
 - MUST NOT declare object types with snake_case keys or types named `*DTO`/`*Response`/`*Request`/`*Payload`/`*Body` (lint).
 - MUST NOT use `fetch`, `openapi-fetch`, axios, SWR or React Query outside `~/shared/api` (lint).
 - MUST NOT use `as` type assertions outside `~/shared/api` (`as const` is fine) (lint).
@@ -80,6 +92,9 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 | Form validation errors?                      | `routeAction` returns `failure.data.errors` (field → messages); render them next to the field                       |
 | 404 for a bad id?                            | `idParam(params.id)`; missing records come back from the API as 404 through `routeLoader`                           |
 | Who is signed in?                            | `loadViewer` in the `site` layout loader; pages read it from `matches`                                              |
+| Navigation entry or shell change?            | `features/shell` (`shell.ts` model, `ui/site-sidebar.tsx`, `ui/site-header.tsx`)                                    |
+| An image from the API?                       | `const image = useImageUrl()` then `image(cover.url)`                                                               |
+| A platform or resource-type colour?          | `bg-platform-<key>`/`text-platform-<key>-fg`, `text-resource-<type>`/`bg-resource-<type>-soft`                      |
 | Auth cookies and refresh?                    | handled by `apiMiddleware` + `createApiSession`; never touch tokens in features                                     |
 | Messages?                                    | `features/<name>/messages/*.json`, registered in `app/messages/{zh,en,ja}.ts`                                       |
 | Tests?                                       | `references/testing.md`: model and use-cases with `fakeApi()`, server helpers with stubs                            |
@@ -88,7 +103,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 
 - references/architecture.md — layers, dependency rules, naming, the lint rules that enforce them
 - references/data.md — request tool, generated contract, loaders, actions, fetchers, errors, sessions
-- references/ui.md — hina-ui, messages and locales, SEO metadata
+- references/ui.md — hina-ui, Shionlib theme, shell and sidebar, brand, images, messages and locales, SEO metadata
 - references/testing.md — test levels and fakes
 - recipes/add-feature.md, add-route.md, add-mutation.md
 
