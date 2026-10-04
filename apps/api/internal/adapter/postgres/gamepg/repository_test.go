@@ -1,7 +1,6 @@
 package gamepg_test
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"math"
@@ -14,81 +13,10 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacterrelation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamerelation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/gamepg"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
+	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 )
-
-type fixtures struct {
-	t   *testing.T
-	db  *pgtest.DB
-	ctx context.Context
-}
-
-func newFixtures(t *testing.T) fixtures {
-	return fixtures{t: t, db: pgtest.New(t), ctx: context.Background()}
-}
-
-func (f fixtures) game(mutate ...func(*ent.GameCreate)) int {
-	f.t.Helper()
-	return f.db.Game(f.t, mutate...)
-}
-
-func (f fixtures) cover(gameID, sexual int) {
-	f.t.Helper()
-	if err := f.db.Ent.GameCover.Create().SetGameID(gameID).SetLanguage("jp").SetType("pkgfront").SetURL("c.webp").SetDims(pgvalue.Ints{1, 2}).SetSexual(sexual).SetViolence(0).Exec(f.ctx); err != nil {
-		f.t.Fatal(err)
-	}
-}
-
-func (f fixtures) resource(gameID, status int) {
-	f.t.Helper()
-	if err := f.db.Ent.GameDownloadResource.Create().SetGameID(gameID).SetCreatorID(f.db.User(f.t)).SetStatus(status).Exec(f.ctx); err != nil {
-		f.t.Fatal(err)
-	}
-}
-
-func (f fixtures) tag(name string, count int, gameIDs ...int) int {
-	f.t.Helper()
-	row, err := f.db.Ent.Tag.Create().SetName(name).SetCount(count).SetAliases(pgvalue.Strings{name + "-alias"}).Save(f.ctx)
-	if err != nil {
-		f.t.Fatal(err)
-	}
-	for _, id := range gameIDs {
-		if err := f.db.Ent.GameTagRelation.Create().SetGameID(id).SetTagID(row.ID).Exec(f.ctx); err != nil {
-			f.t.Fatal(err)
-		}
-	}
-	return row.ID
-}
-
-func (f fixtures) developer(name string) int {
-	f.t.Helper()
-	row, err := f.db.Ent.GameDeveloper.Create().SetName(name).SetAliases(pgvalue.Strings{name + " alias"}).Save(f.ctx)
-	if err != nil {
-		f.t.Fatal(err)
-	}
-	return row.ID
-}
-
-func (f fixtures) credit(gameID, developerID int, role string) {
-	f.t.Helper()
-	if err := f.db.Ent.GameDeveloperRelation.Create().SetGameID(gameID).SetDeveloperID(developerID).SetRole(role).Exec(f.ctx); err != nil {
-		f.t.Fatal(err)
-	}
-}
-
-func ids(t *testing.T, got []int, err error) []int {
-	t.Helper()
-	if err != nil {
-		t.Fatal(err)
-	}
-	return got
-}
-
-func date(year int, month time.Month) func(*ent.GameCreate) {
-	return func(c *ent.GameCreate) { c.SetReleaseDate(time.Date(year, month, 10, 0, 0, 0, 0, time.UTC)) }
-}
 
 func TestListFiltersAndOrders(t *testing.T) {
 	f := newFixtures(t)
@@ -172,6 +100,52 @@ func TestListFiltersAndOrders(t *testing.T) {
 	}
 	if _, ok, err := repo.ListableAt(f.ctx, game.Visibility{}, 99); err != nil || ok {
 		t.Fatalf("offset beyond the end: %v %v", ok, err)
+	}
+}
+
+func TestListByNewestPublicResource(t *testing.T) {
+	f := newFixtures(t)
+	repo := gamepg.NewRepository(f.db.Ent)
+	base := time.Date(2026, 9, 1, 12, 0, 0, 0, time.UTC)
+	early, late, tieLow, tieHigh, removedNewest, pendingOnly, rated := f.game(), f.game(), f.game(), f.game(), f.game(), f.game(), f.game()
+	none := f.game()
+	f.published(early, base)
+	f.published(late, base.Add(-time.Hour))
+	f.published(late, base.Add(2*time.Hour))
+	f.published(tieLow, base.Add(time.Hour))
+	f.published(tieHigh, base.Add(time.Hour))
+	f.published(removedNewest, base.Add(-5*time.Hour))
+	removed := f.resource(removedNewest, download.ResourceRemoved, createdAt(base.Add(10*time.Hour)))
+	f.file(removed, 1, download.FileInObjectStore)
+	pending := f.resource(pendingOnly, download.ResourceActive, createdAt(base.Add(20*time.Hour)))
+	f.file(pending, 1, download.FileOnServer)
+	f.published(rated, base.Add(3*time.Hour))
+	f.cover(rated, 2)
+	f.tag("Shared", 1, early, late, tieLow, tieHigh, removedNewest, pendingOnly, rated, none)
+
+	page := game.Page{Number: 1, Size: 10}
+	newest := game.ListFilter{SortBy: game.SortByResourceUpdated, SortOrder: game.SortDescending}
+	got, total, err := repo.List(f.ctx, newest, page)
+	if err != nil || total != 6 || !slices.Equal(got, []int{rated, late, tieHigh, tieLow, early, removedNewest}) {
+		t.Fatalf("newest public resource first, game id breaking ties, games without one left out (pending %d, none %d): %v %d %v", pendingOnly, none, got, total, err)
+	}
+	oldest := newest
+	oldest.SortOrder = game.SortAscending
+	if got, _, _ := repo.List(f.ctx, oldest, page); !slices.Equal(got, []int{removedNewest, early, tieHigh, tieLow, late, rated}) {
+		t.Fatalf("ascending: %v", got)
+	}
+	if got, _, _ := repo.List(f.ctx, newest, game.Page{Number: 2, Size: 2}); !slices.Equal(got, []int{tieHigh, tieLow}) {
+		t.Fatalf("second page: %v", got)
+	}
+	filtered := newest
+	filtered.Visibility = game.Visibility{ExcludeRated: true, OnlyWithResources: true}
+	filtered.Tags = []string{"shared"}
+	got, total, err = repo.List(f.ctx, filtered, page)
+	if err != nil || total != 5 || !slices.Equal(got, []int{late, tieHigh, tieLow, early, removedNewest}) {
+		t.Fatalf("combined with other filters: %v %d %v", got, total, err)
+	}
+	if got, _, _ := repo.List(f.ctx, game.ListFilter{SortBy: game.SortByViews, Visibility: game.Visibility{OnlyWithResources: true}}, page); !slices.Contains(got, pendingOnly) {
+		t.Fatalf("the resource setting alone still counts active resources: %v", got)
 	}
 }
 

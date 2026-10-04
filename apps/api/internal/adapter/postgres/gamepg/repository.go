@@ -13,12 +13,14 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecover"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedeveloperrelation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameimage"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamelink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamerelation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
+	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 )
 
@@ -107,9 +109,21 @@ func ListablePredicates(visibility game.Visibility) []predicate.Game {
 		predicates = append(predicates, SafeForStrictViewers())
 	}
 	if visibility.OnlyWithResources {
-		predicates = append(predicates, entgame.HasDownloadResourcesWith(gamedownloadresource.Status(visibleStatus)))
+		predicates = append(predicates, entgame.HasDownloadResourcesWith(ActiveResource()))
 	}
 	return predicates
+}
+
+func ActiveResource() predicate.GameDownloadResource {
+	return gamedownloadresource.Status(download.ResourceActive)
+}
+
+func PublicFile() predicate.GameDownloadResourceFile {
+	return gamedownloadresourcefile.FileStatus(download.FileInObjectStore)
+}
+
+func PublicResource() predicate.GameDownloadResource {
+	return gamedownloadresource.And(ActiveResource(), gamedownloadresource.HasFilesWith(PublicFile()))
 }
 
 func filterPredicates(filter game.ListFilter) []predicate.Game {
@@ -142,6 +156,9 @@ func filterPredicates(filter game.ListFilter) []predicate.Game {
 	if filter.ReleasedBefore != nil {
 		predicates = append(predicates, entgame.ReleaseDateLTE(filter.ReleasedBefore.UTC()))
 	}
+	if filter.RequiresPublicResource() {
+		predicates = append(predicates, entgame.HasDownloadResourcesWith(PublicResource()))
+	}
 	return predicates
 }
 
@@ -166,8 +183,26 @@ func ordering(filter game.ListFilter) []entgame.OrderOption {
 		return []entgame.OrderOption{entgame.ByDownloads(direction), tiebreak}
 	case game.SortByHotScore:
 		return []entgame.OrderOption{entgame.ByHotScore(direction), tiebreak}
+	case game.SortByResourceUpdated:
+		return []entgame.OrderOption{byLatestPublicResource(filter.SortOrder != game.SortAscending), tiebreak}
 	default:
 		return []entgame.OrderOption{entgame.ByReleaseDate(direction, sql.OrderNullsLast()), tiebreak}
+	}
+}
+
+func byLatestPublicResource(descending bool) entgame.OrderOption {
+	return func(s *sql.Selector) {
+		resources := sql.Table(gamedownloadresource.Table)
+		latest := sql.Select(sql.Max(resources.C(gamedownloadresource.FieldCreated))).
+			From(resources).
+			Where(sql.ColumnsEQ(resources.C(gamedownloadresource.FieldGameID), s.C(entgame.FieldID)))
+		PublicResource()(latest)
+		s.OrderExpr(sql.ExprFunc(func(b *sql.Builder) {
+			b.Wrap(func(b *sql.Builder) { b.Join(latest) })
+			if descending {
+				b.WriteString(" DESC")
+			}
+		}))
 	}
 }
 

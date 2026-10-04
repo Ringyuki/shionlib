@@ -12089,6 +12089,19 @@
               "null"
             ]
           },
+          "resources": {
+            "$ref": "#/components/schemas/GameResourceSummaryDTO"
+          },
+          "tags": {
+            "description": "The game's most used tags, at most three",
+            "items": {
+              "$ref": "#/components/schemas/GameTagRefDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "title_en": {
             "type": "string"
           },
@@ -12117,7 +12130,9 @@
           "intro_zh",
           "intro_en",
           "release_date",
-          "developers"
+          "developers",
+          "resources",
+          "tags"
         ],
         "type": "object"
       },
@@ -12769,6 +12784,49 @@
         ],
         "type": "object"
       },
+      "GameLatestResourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "description": "When the newest downloadable resource was published",
+            "format": "date-time",
+            "type": "string"
+          },
+          "languages": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "platforms": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "size": {
+            "description": "Total size in bytes of its downloadable files",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "at",
+          "size",
+          "platforms",
+          "languages"
+        ],
+        "type": [
+          "object",
+          "null"
+        ]
+      },
       "GameLinkDTO": {
         "additionalProperties": false,
         "properties": {
@@ -12844,6 +12902,19 @@
               "null"
             ]
           },
+          "resources": {
+            "$ref": "#/components/schemas/GameResourceSummaryDTO"
+          },
+          "tags": {
+            "description": "The game's most used tags, at most three",
+            "items": {
+              "$ref": "#/components/schemas/GameTagRefDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "title_en": {
             "type": "string"
           },
@@ -12877,7 +12948,9 @@
           "intro_zh",
           "intro_en",
           "release_date",
-          "developers"
+          "developers",
+          "resources",
+          "tags"
         ],
         "type": "object"
       },
@@ -12967,6 +13040,53 @@
         ],
         "type": "object"
       },
+      "GameResourceSummaryDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "count": {
+            "description": "Number of downloadable resources",
+            "format": "int64",
+            "type": "integer"
+          },
+          "downloads": {
+            "description": "Downloads across the downloadable resources",
+            "format": "int64",
+            "type": "integer"
+          },
+          "languages": {
+            "description": "Languages of the downloadable resources, most common first",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "latest": {
+            "$ref": "#/components/schemas/GameLatestResourceDTO",
+            "description": "The newest downloadable resource; null when there is none"
+          },
+          "platforms": {
+            "description": "Platforms of the downloadable resources, most common first",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "count",
+          "downloads",
+          "platforms",
+          "languages",
+          "latest"
+        ],
+        "type": "object"
+      },
       "GameStaffDTO": {
         "additionalProperties": false,
         "properties": {
@@ -13031,6 +13151,23 @@
         "required": [
           "tag_alias",
           "tag"
+        ],
+        "type": "object"
+      },
+      "GameTagRefDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
         ],
         "type": "object"
       },
@@ -26654,17 +26791,18 @@
             }
           },
           {
-            "description": "Sort key, release_date by default",
+            "description": "Sort key, release_date by default; resource_updated orders by the newest downloadable resource and lists only games that have one",
             "explode": false,
             "in": "query",
             "name": "filter[sort_by]",
             "schema": {
-              "description": "Sort key, release_date by default",
+              "description": "Sort key, release_date by default; resource_updated orders by the newest downloadable resource and lists only games that have one",
               "enum": [
                 "release_date",
                 "views",
                 "downloads",
-                "hot_score"
+                "hot_score",
+                "resource_updated"
               ],
               "type": "string"
             }

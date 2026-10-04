@@ -49,7 +49,7 @@ func (r *Repository) db(ctx context.Context) *ent.Client {
 
 func (r *Repository) ListGameResources(ctx context.Context, gameID int) ([]download.GameResource, error) {
 	rows, err := r.db(ctx).GameDownloadResource.Query().
-		Where(gamedownloadresource.GameID(gameID), gamedownloadresource.Status(download.ResourceActive)).
+		Where(gamedownloadresource.GameID(gameID), gamepg.ActiveResource()).
 		Order(ent.Asc(gamedownloadresource.FieldID)).
 		WithCreator(userpg.SelectSummary).
 		WithFiles(func(q *ent.GameDownloadResourceFileQuery) {
@@ -157,7 +157,7 @@ func (r *Repository) ListUserResources(ctx context.Context, creatorID int, exclu
 }
 
 func (r *Repository) listListed(ctx context.Context, excludeRated bool, page download.Page, extra ...predicate.GameDownloadResource) ([]*ent.GameDownloadResource, int, error) {
-	predicates := append([]predicate.GameDownloadResource{gamedownloadresource.Status(download.ResourceActive)}, extra...)
+	predicates := append([]predicate.GameDownloadResource{gamepg.ActiveResource()}, extra...)
 	if excludeRated {
 		predicates = append(predicates, gamedownloadresource.HasGameWith(gamepg.SafeForStrictViewers()))
 	}

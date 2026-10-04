@@ -118,6 +118,29 @@ func TestListForwardsFilters(t *testing.T) {
 	}
 }
 
+func TestListByNewestResourceKeepsOnlyDownloadableGames(t *testing.T) {
+	downloadable := ratedCover(1)
+	downloadable.Resources = game.ResourceSummary{Count: 1, Downloads: 4, Platforms: []string{"win"}, Languages: []string{"zh"}}
+	downloadable.Detail.Tags = []game.TagLink{{Tag: game.Tag{ID: 5, Name: "school"}}}
+	f := newFixture(downloadable, safe(2))
+	f.prefs[permissive.UserID] = false
+
+	cards, total, err := f.service.List(context.Background(), permissive, game.ListQuery{Page: game.Page{Number: 1, Size: 10}, SortBy: game.SortByResourceUpdated})
+	filter := f.catalog.LastFilter
+	if err != nil || total != 1 || !slices.Equal(ids(cards), []int{1}) {
+		t.Fatalf("only games with a downloadable resource are listed: %v %d %v", ids(cards), total, err)
+	}
+	if !filter.RequiresPublicResource() || filter.OnlyWithResources || filter.SortOrder != game.SortDescending {
+		t.Fatalf("the sort requires resources whatever the setting says: %+v", filter)
+	}
+	if card := cards[0]; card.Resources.Downloads != 4 || len(card.Tags) != 1 || card.Tags[0].Name != "school" || len(card.Covers) != 2 {
+		t.Fatalf("cards carry their resource summary and tags: %+v", card)
+	}
+	if (game.ListFilter{SortBy: game.SortByDownloads}).RequiresPublicResource() {
+		t.Fatal("other sorts keep games without resources")
+	}
+}
+
 func TestReleasePeriods(t *testing.T) {
 	cases := []struct {
 		name   string

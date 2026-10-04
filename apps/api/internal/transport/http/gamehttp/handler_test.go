@@ -18,7 +18,16 @@ var (
 	strict     = actor.Actor{UserID: 1, Role: actor.RoleUser, ContentLimit: actor.ContentLimitNeverShow}
 	permissive = actor.Actor{UserID: 2, Role: actor.RoleUser, ContentLimit: actor.ContentLimitJustShow}
 	released   = time.Date(2024, 5, 1, 0, 0, 0, 0, time.UTC)
+	published  = time.Date(2026, 9, 30, 8, 0, 0, 0, time.UTC)
 )
+
+const sequelCard = `{"id":2,"title_jp":"続編","title_zh":"","title_en":"","aliases":[],"type":null,"covers":[],"intro_jp":"","intro_zh":"","intro_en":"","release_date":null,"developers":[],` +
+	`"resources":{"count":2,"downloads":15,"platforms":["win","and"],"languages":["zh"],"latest":{"at":"2026-09-30T08:00:00.000Z","size":2048,"platforms":["and"],"languages":["zh"]}},` +
+	`"tags":[{"id":4,"name":"sequel"}]}`
+
+const sequelListItem = `{"id":2,"views":0,"title_jp":"続編","title_zh":"","title_en":"","aliases":[],"type":null,"covers":[],"intro_jp":"","intro_zh":"","intro_en":"","release_date":null,"developers":[],` +
+	`"resources":{"count":2,"downloads":15,"platforms":["win","and"],"languages":["zh"],"latest":{"at":"2026-09-30T08:00:00.000Z","size":2048,"platforms":["and"],"languages":["zh"]}},` +
+	`"tags":[{"id":4,"name":"sequel"}]}`
 
 func ptr[T any](v T) *T {
 	return &v
@@ -55,7 +64,14 @@ func setup(t *testing.T) env {
 	server := apitest.New(t)
 	catalog := gametest.NewCatalog(
 		detailed(),
-		gametest.Entry{HasResources: true, Detail: game.Detail{ID: 2, TitleJP: "続編"}},
+		gametest.Entry{
+			HasResources: true,
+			Resources: game.ResourceSummary{
+				Count: 2, Downloads: 15, Platforms: []string{"win", "and"}, Languages: []string{"zh"},
+				Latest: &game.LatestResource{At: published, Size: 2048, Platforms: []string{"and"}, Languages: []string{"zh"}},
+			},
+			Detail: game.Detail{ID: 2, TitleJP: "続編", Tags: []game.TagLink{{Tag: game.Tag{ID: 4, Name: "sequel", Aliases: []string{"续作"}, Count: 3}}}},
+		},
 		gametest.Entry{HasResources: true, Detail: game.Detail{ID: 3, TitleJP: "前作", Covers: []game.Cover{{URL: "r.webp", Sexual: 1}}}},
 	)
 	recent := &gametest.RecentUpdates{}
@@ -74,7 +90,7 @@ func TestListShapeAndFilters(t *testing.T) {
 	e := setup(t)
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/list?pageSize=1"})
 	e.server.Expect(resp, http.StatusOK, 0)
-	want := `{"items":[{"id":2,"views":0,"title_jp":"続編","title_zh":"","title_en":"","aliases":[],"type":null,"covers":[],"intro_jp":"","intro_zh":"","intro_en":"","release_date":null,"developers":[]}],"meta":{"totalItems":2,"itemCount":1,"itemsPerPage":1,"totalPages":2,"currentPage":1,"content_limit":0}}`
+	want := `{"items":[` + sequelListItem + `],"meta":{"totalItems":2,"itemCount":1,"itemsPerPage":1,"totalPages":2,"currentPage":1,"content_limit":0}}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected list\n got %s\nwant %s", resp.Data, want)
 	}
@@ -94,6 +110,16 @@ func TestListShapeAndFilters(t *testing.T) {
 		t.Fatalf("dates: %v %v", filter.ReleasedAfter, filter.ReleasedBefore)
 	}
 
+	resp = e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/list?filter[sort_by]=resource_updated", As: &permissive})
+	e.server.Expect(resp, http.StatusOK, 0)
+	var byResource struct {
+		Items []gamehttp.GameListItemDTO `json:"items"`
+	}
+	resp.Decode(t, &byResource)
+	if len(byResource.Items) != 1 || byResource.Items[0].ID != 2 || e.catalog.LastFilter.SortBy != game.SortByResourceUpdated || e.catalog.LastFilter.SortOrder != game.SortDescending {
+		t.Fatalf("resource_updated lists only games with downloadable resources: %s %+v", resp.Data, e.catalog.LastFilter)
+	}
+
 	for _, bad := range []string{"pageSize=101", "filter[years][]=1800", "filter[months][]=13", "filter[sort_by]=title", "filter[start_date]=yesterday", "filter[years][]=x"} {
 		e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/list?" + bad}), http.StatusUnprocessableEntity, 100101)
 	}
@@ -110,7 +136,7 @@ func TestRandomAndRecentUpdates(t *testing.T) {
 	e.recent.IDs = []int{3, 2}
 	resp = e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/recent-update?pageSize=2"})
 	e.server.Expect(resp, http.StatusOK, 0)
-	want := `{"items":[{"id":2,"views":0,"title_jp":"続編","title_zh":"","title_en":"","aliases":[],"type":null,"covers":[],"intro_jp":"","intro_zh":"","intro_en":"","release_date":null,"developers":[]}],"meta":{"totalItems":2,"itemCount":1,"itemsPerPage":2,"totalPages":1,"currentPage":1}}`
+	want := `{"items":[` + sequelListItem + `],"meta":{"totalItems":2,"itemCount":1,"itemsPerPage":2,"totalPages":1,"currentPage":1}}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected recent updates\n got %s\nwant %s", resp.Data, want)
 	}
@@ -161,7 +187,7 @@ func TestDetailEndpoints(t *testing.T) {
 	want = `{"id":1,"extra_info":[{"key":"官网","value":"https://example.test"}],"tags":[{"tag_alias":null,"tag":{"id":3,"name":"school","aliases":["学园"],"count":9}}],` +
 		`"intro_jp":"紹介","intro_zh":"简介","intro_en":"","images":[{"url":"safe.webp","dims":[3,4],"sexual":0,"violence":0}],"staffs":[{"name":"Writer","role":"剧本"}],"nsfw":false,` +
 		`"link":[{"id":4,"name":"official","label":"Official","url":"https://example.test"}],` +
-		`"relations_from":[{"id":6,"relation":"SEQUEL","to_game_id":2,"to_game":{"id":2,"title_jp":"続編","title_zh":"","title_en":"","aliases":[],"type":null,"covers":[],"intro_jp":"","intro_zh":"","intro_en":"","release_date":null,"developers":[]}}],"content_limit":0}`
+		`"relations_from":[{"id":6,"relation":"SEQUEL","to_game_id":2,"to_game":` + sequelCard + `}],"content_limit":0}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected details\n got %s\nwant %s", resp.Data, want)
 	}

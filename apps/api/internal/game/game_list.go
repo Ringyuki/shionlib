@@ -10,10 +10,11 @@ import (
 type SortBy string
 
 const (
-	SortByReleaseDate SortBy = "release_date"
-	SortByViews       SortBy = "views"
-	SortByDownloads   SortBy = "downloads"
-	SortByHotScore    SortBy = "hot_score"
+	SortByReleaseDate     SortBy = "release_date"
+	SortByViews           SortBy = "views"
+	SortByDownloads       SortBy = "downloads"
+	SortByHotScore        SortBy = "hot_score"
+	SortByResourceUpdated SortBy = "resource_updated"
 )
 
 type SortOrder string
@@ -54,6 +55,10 @@ type ListFilter struct {
 	ReleasedBefore *time.Time
 	SortBy         SortBy
 	SortOrder      SortOrder
+}
+
+func (f ListFilter) RequiresPublicResource() bool {
+	return f.SortBy == SortByResourceUpdated
 }
 
 func ReleasePeriods(years, months []int, now time.Time) []string {

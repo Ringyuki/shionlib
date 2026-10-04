@@ -14,6 +14,7 @@ type Entry struct {
 	Views        int
 	Hidden       bool
 	HasResources bool
+	Resources    game.ResourceSummary
 	DeveloperIDs []int
 	CharacterIDs []int
 }
@@ -80,6 +81,9 @@ func (c *Catalog) List(_ context.Context, filter game.ListFilter, page game.Page
 			continue
 		}
 		if filter.CharacterID != nil && !slices.Contains(entry.CharacterIDs, *filter.CharacterID) {
+			continue
+		}
+		if filter.RequiresPublicResource() && entry.Resources.Count == 0 {
 			continue
 		}
 		matched = append(matched, id)
@@ -182,10 +186,18 @@ func (c *Catalog) Cards(_ context.Context, ids []int) ([]game.Card, error) {
 		cards = append(cards, game.Card{
 			ID: d.ID, Views: entry.Views, TitleJP: d.TitleJP, TitleZH: d.TitleZH, TitleEN: d.TitleEN, Aliases: d.Aliases,
 			Type: d.Type, Covers: d.Covers, IntroJP: d.IntroJP, IntroZH: d.IntroZH, IntroEN: d.IntroEN,
-			ReleaseDate: d.ReleaseDate, Developers: d.Developers,
+			ReleaseDate: d.ReleaseDate, Developers: d.Developers, Resources: entry.Resources, Tags: cardTags(d.Tags),
 		})
 	}
 	return cards, nil
+}
+
+func cardTags(links []game.TagLink) []game.TagRef {
+	tags := []game.TagRef{}
+	for _, link := range links[:min(len(links), game.CardTagLimit)] {
+		tags = append(tags, game.TagRef{ID: link.Tag.ID, Name: link.Tag.Name})
+	}
+	return tags
 }
 
 func (c *Catalog) Exists(_ context.Context, id int) (bool, error) {

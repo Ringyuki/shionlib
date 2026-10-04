@@ -4,14 +4,17 @@ import (
 	"cmp"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/character"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 )
@@ -57,6 +60,56 @@ func toCard(row *ent.Game) game.Card {
 		})
 	}
 	return card
+}
+
+type publicResourceRecord struct {
+	ID        int             `sql:"id"`
+	GameID    int             `sql:"game_id"`
+	Platform  pgvalue.Strings `sql:"platform"`
+	Language  pgvalue.Strings `sql:"language"`
+	Downloads int             `sql:"downloads"`
+	Created   time.Time       `sql:"created"`
+	Size      int64           `sql:"size"`
+}
+
+func (r publicResourceRecord) newerThan(other publicResourceRecord) bool {
+	return cmp.Or(r.Created.Compare(other.Created), cmp.Compare(r.ID, other.ID)) > 0
+}
+
+func toResourceSummary(records []publicResourceRecord) game.ResourceSummary {
+	summary := game.ResourceSummary{Platforms: []string{}, Languages: []string{}}
+	if len(records) == 0 {
+		return summary
+	}
+	platforms, languages := map[string]int{}, map[string]int{}
+	latest := records[0]
+	for _, record := range records {
+		summary.Count++
+		summary.Downloads += record.Downloads
+		countOnce(platforms, record.Platform)
+		countOnce(languages, record.Language)
+		if record.newerThan(latest) {
+			latest = record
+		}
+	}
+	summary.Platforms = byUsage(platforms)
+	summary.Languages = byUsage(languages)
+	summary.Latest = &game.LatestResource{At: latest.Created, Size: latest.Size, Platforms: nonNil(latest.Platform), Languages: nonNil(latest.Language)}
+	return summary
+}
+
+func countOnce(counts map[string]int, values []string) {
+	for _, value := range slices.Compact(slices.Sorted(slices.Values(values))) {
+		counts[value]++
+	}
+}
+
+func byUsage(counts map[string]int) []string {
+	values := slices.AppendSeq(make([]string, 0, len(counts)), maps.Keys(counts))
+	slices.SortFunc(values, func(a, b string) int {
+		return cmp.Or(cmp.Compare(counts[b], counts[a]), cmp.Compare(a, b))
+	})
+	return values
 }
 
 func nonNil(values []string) []string {

@@ -19,7 +19,7 @@ type listGamesInput struct {
 	Years       []int    `query:"filter[years][],explode" doc:"Release years (1900-2100)"`
 	Months      []int    `query:"filter[months][],explode" doc:"Release months (1-12); combined with years or the current year"`
 	Platforms   []string `query:"filter[platforms][],explode" doc:"Games available on any of these platforms"`
-	SortBy      string   `query:"filter[sort_by]" enum:"release_date,views,downloads,hot_score" doc:"Sort key, release_date by default"`
+	SortBy      string   `query:"filter[sort_by]" enum:"release_date,views,downloads,hot_score,resource_updated" doc:"Sort key, release_date by default; resource_updated orders by the newest downloadable resource and lists only games that have one"`
 	SortOrder   string   `query:"filter[sort_order]" enum:"asc,desc" doc:"Sort direction, desc by default"`
 	StartDate   string   `query:"filter[start_date]" doc:"Released on or after this date (ISO 8601)"`
 	EndDate     string   `query:"filter[end_date]" doc:"Released on or before this date (ISO 8601)"`

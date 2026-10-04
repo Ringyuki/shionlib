@@ -10,6 +10,8 @@ import (
 
 const RecentUpdateRetention = 30 * 24 * time.Hour
 
+const CardTagLimit = 3
+
 type Status int
 
 const (
@@ -45,6 +47,26 @@ type Credit struct {
 	Developer DeveloperRef
 }
 
+type LatestResource struct {
+	At        time.Time
+	Size      int64
+	Platforms []string
+	Languages []string
+}
+
+type ResourceSummary struct {
+	Count     int
+	Downloads int
+	Platforms []string
+	Languages []string
+	Latest    *LatestResource
+}
+
+type TagRef struct {
+	ID   int
+	Name string
+}
+
 type Card struct {
 	ID          int
 	Views       int
@@ -59,6 +81,8 @@ type Card struct {
 	IntroEN     string
 	ReleaseDate *time.Time
 	Developers  []Credit
+	Resources   ResourceSummary
+	Tags        []TagRef
 }
 
 func (c Card) VisibleTo(viewer actor.Actor) Card {

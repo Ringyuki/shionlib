@@ -24,6 +24,8 @@ func ToGameListItem(card game.Card) GameListItemDTO {
 		Covers:      nested.Covers,
 		ReleaseDate: nested.ReleaseDate,
 		Developers:  nested.Developers,
+		Resources:   nested.Resources,
+		Tags:        nested.Tags,
 	}
 }
 

@@ -30,19 +30,59 @@ type GameCreditDTO struct {
 	Developer GameDeveloperRefDTO `json:"developer"`
 }
 
+type GameLatestResourceDTO struct {
+	_         struct{}  `nullable:"true"`
+	At        time.Time `json:"at" doc:"When the newest downloadable resource was published"`
+	Size      int64     `json:"size" doc:"Total size in bytes of its downloadable files"`
+	Platforms []string  `json:"platforms"`
+	Languages []string  `json:"languages"`
+}
+
+type GameResourceSummaryDTO struct {
+	Count     int                    `json:"count" doc:"Number of downloadable resources"`
+	Downloads int                    `json:"downloads" doc:"Downloads across the downloadable resources"`
+	Platforms []string               `json:"platforms" doc:"Platforms of the downloadable resources, most common first"`
+	Languages []string               `json:"languages" doc:"Languages of the downloadable resources, most common first"`
+	Latest    *GameLatestResourceDTO `json:"latest" doc:"The newest downloadable resource; null when there is none"`
+}
+
+type GameTagRefDTO struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
 type GameCardDTO struct {
-	ID          int             `json:"id"`
-	TitleJP     string          `json:"title_jp"`
-	TitleZH     string          `json:"title_zh"`
-	TitleEN     string          `json:"title_en"`
-	Aliases     []string        `json:"aliases"`
-	Type        *string         `json:"type"`
-	Covers      []GameCoverDTO  `json:"covers"`
-	IntroJP     string          `json:"intro_jp"`
-	IntroZH     string          `json:"intro_zh"`
-	IntroEN     string          `json:"intro_en"`
-	ReleaseDate *time.Time      `json:"release_date"`
-	Developers  []GameCreditDTO `json:"developers"`
+	ID          int                    `json:"id"`
+	TitleJP     string                 `json:"title_jp"`
+	TitleZH     string                 `json:"title_zh"`
+	TitleEN     string                 `json:"title_en"`
+	Aliases     []string               `json:"aliases"`
+	Type        *string                `json:"type"`
+	Covers      []GameCoverDTO         `json:"covers"`
+	IntroJP     string                 `json:"intro_jp"`
+	IntroZH     string                 `json:"intro_zh"`
+	IntroEN     string                 `json:"intro_en"`
+	ReleaseDate *time.Time             `json:"release_date"`
+	Developers  []GameCreditDTO        `json:"developers"`
+	Resources   GameResourceSummaryDTO `json:"resources"`
+	Tags        []GameTagRefDTO        `json:"tags" doc:"The game's most used tags, at most three"`
+}
+
+func toResourceSummaryDTO(summary game.ResourceSummary) GameResourceSummaryDTO {
+	out := GameResourceSummaryDTO{
+		Count:     summary.Count,
+		Downloads: summary.Downloads,
+		Platforms: nonNil(summary.Platforms),
+		Languages: nonNil(summary.Languages),
+	}
+	if latest := summary.Latest; latest != nil {
+		out.Latest = &GameLatestResourceDTO{At: latest.At, Size: latest.Size, Platforms: nonNil(latest.Platforms), Languages: nonNil(latest.Languages)}
+	}
+	return out
+}
+
+func toTagRefDTO(tag game.TagRef) GameTagRefDTO {
+	return GameTagRefDTO(tag)
 }
 
 func ToGameCard(card game.Card) GameCardDTO {
@@ -59,6 +99,8 @@ func ToGameCard(card game.Card) GameCardDTO {
 		ReleaseDate: card.ReleaseDate,
 		Covers:      make([]GameCoverDTO, len(card.Covers)),
 		Developers:  make([]GameCreditDTO, len(card.Developers)),
+		Resources:   toResourceSummaryDTO(card.Resources),
+		Tags:        mapSlice(card.Tags, toTagRefDTO),
 	}
 	for i, cover := range card.Covers {
 		out.Covers[i] = GameCoverDTO{
@@ -80,19 +122,21 @@ func ToGameCard(card game.Card) GameCardDTO {
 }
 
 type GameListItemDTO struct {
-	ID          int             `json:"id"`
-	Views       int             `json:"views"`
-	TitleJP     string          `json:"title_jp"`
-	TitleZH     string          `json:"title_zh"`
-	TitleEN     string          `json:"title_en"`
-	Aliases     []string        `json:"aliases"`
-	Type        *string         `json:"type"`
-	Covers      []GameCoverDTO  `json:"covers"`
-	IntroJP     string          `json:"intro_jp"`
-	IntroZH     string          `json:"intro_zh"`
-	IntroEN     string          `json:"intro_en"`
-	ReleaseDate *time.Time      `json:"release_date"`
-	Developers  []GameCreditDTO `json:"developers"`
+	ID          int                    `json:"id"`
+	Views       int                    `json:"views"`
+	TitleJP     string                 `json:"title_jp"`
+	TitleZH     string                 `json:"title_zh"`
+	TitleEN     string                 `json:"title_en"`
+	Aliases     []string               `json:"aliases"`
+	Type        *string                `json:"type"`
+	Covers      []GameCoverDTO         `json:"covers"`
+	IntroJP     string                 `json:"intro_jp"`
+	IntroZH     string                 `json:"intro_zh"`
+	IntroEN     string                 `json:"intro_en"`
+	ReleaseDate *time.Time             `json:"release_date"`
+	Developers  []GameCreditDTO        `json:"developers"`
+	Resources   GameResourceSummaryDTO `json:"resources"`
+	Tags        []GameTagRefDTO        `json:"tags" doc:"The game's most used tags, at most three"`
 }
 
 func nonNil(values []string) []string {

@@ -111,7 +111,7 @@ func TestItemsPageWithContentLimitAndCoverFiltering(t *testing.T) {
 	}
 	resp := server.Do(apitest.Request{Method: http.MethodGet, Path: "/favorites/" + itoa(fav.ID) + "/items?page=1&pageSize=2", As: &owner})
 	server.Expect(resp, http.StatusOK, 0)
-	want := `{"items":[{"id":1,"note":null,"game":{"id":10,"title_jp":"タイトル","title_zh":"","title_en":"","aliases":[],"type":null,"covers":[{"language":"jp","type":"pkgfront","url":"a.webp","dims":[1,2],"sexual":0,"violence":0}],"intro_jp":"","intro_zh":"","intro_en":"","release_date":null,"developers":[]}}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":2,"totalPages":1,"currentPage":1,"content_limit":1}}`
+	want := `{"items":[{"id":1,"note":null,"game":{"id":10,"title_jp":"タイトル","title_zh":"","title_en":"","aliases":[],"type":null,"covers":[{"language":"jp","type":"pkgfront","url":"a.webp","dims":[1,2],"sexual":0,"violence":0}],"intro_jp":"","intro_zh":"","intro_en":"","release_date":null,"developers":[],"resources":{"count":0,"downloads":0,"platforms":[],"languages":[],"latest":null},"tags":[]}}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":2,"totalPages":1,"currentPage":1,"content_limit":1}}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected page\n got %s\nwant %s", resp.Data, want)
 	}
