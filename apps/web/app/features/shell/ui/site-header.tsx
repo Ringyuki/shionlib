@@ -1,16 +1,33 @@
-import { Button, Inline, SearchInput, SidebarTrigger } from '@hina-ui/react'
-import { Search } from 'lucide-react'
-import { Form, Link, useSearchParams } from 'react-router'
+import { Inline, SidebarTrigger } from '@hina-ui/react'
+import { Upload } from 'lucide-react'
+import { Link } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
-import { sitePaths } from '../shell'
+import { SearchPalette, type SearchShortcut } from '~/features/search'
 import { BrandLogo, Wordmark } from '~/shared/ui/brand'
+import { navSections, sitePaths } from '../shell'
 import { LocaleMenu } from './locale-menu'
+import { navIcons } from './nav-icons'
 
-export function SiteHeader() {
+type SiteHeaderProps = {
+  viewerId: number | null
+}
+
+export function SiteHeader({ viewerId }: SiteHeaderProps) {
   const t = useTranslations('shell')
   const locale = useLocale()
   const paths = sitePaths(locale)
-  const [params] = useSearchParams()
+  const entries = navSections(locale, viewerId)
+    .flatMap(section => section.entries)
+    .filter(entry => entry.key !== 'home')
+  const shortcuts: SearchShortcut[] = [
+    ...entries.map(entry => ({
+      id: entry.key,
+      label: t(`nav.${entry.key}`),
+      to: entry.to,
+      icon: navIcons[entry.key],
+    })),
+    { id: 'upload', label: t('upload'), to: paths.upload, icon: Upload },
+  ]
   return (
     <>
       <SidebarTrigger />
@@ -20,25 +37,8 @@ export function SiteHeader() {
           <Wordmark className="h-4 max-sm:hidden" />
         </Inline>
       </Link>
-      <Form
-        method="get"
-        action={paths.search}
-        role="search"
-        className="w-full max-w-md max-md:hidden"
-      >
-        <SearchInput
-          name="q"
-          defaultValue={params.get('q') ?? ''}
-          placeholder={t('searchPlaceholder')}
-          aria-label={t('search')}
-        />
-      </Form>
-      <Inline gap="xs" align="center" className="ms-auto">
-        <Button asChild variant="ghost" tone="neutral" iconOnly className="md:hidden">
-          <Link to={paths.search} aria-label={t('search')}>
-            <Search />
-          </Link>
-        </Button>
+      <SearchPalette shortcuts={shortcuts} />
+      <Inline gap="xs" align="center" className="md:ms-auto">
         <LocaleMenu />
       </Inline>
     </>

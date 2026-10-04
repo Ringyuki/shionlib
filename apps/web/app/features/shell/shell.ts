@@ -23,7 +23,6 @@ const entry = (key: NavKey, to: string, end = false): NavEntry => ({ key, to, en
 export function sitePaths(locale: Locale) {
   return {
     home: `/${locale}`,
-    search: `/${locale}/search/game`,
     upload: `/${locale}/upload`,
     profile: (userId: number) => `/${locale}/user/${userId}`,
     settings: `/${locale}/user/settings`,

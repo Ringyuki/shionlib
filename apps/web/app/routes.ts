@@ -12,12 +12,15 @@ export default [
   route('resources/auth/passkey-sign-in', 'routes/resources.auth.passkey-sign-in.ts'),
   route('resources/auth/sign-out', 'routes/resources.auth.sign-out.ts'),
   route('resources/auth/artwork', 'routes/resources.auth.artwork.ts'),
+  route('resources/search', 'routes/resources.search.ts'),
   route(':lang', 'routes/lang.tsx', [
     route('login', 'routes/auth-redirect.ts', { id: 'login' }),
     route('register', 'routes/auth-redirect.ts', { id: 'register' }),
     layout('routes/site.tsx', [
       index('routes/home.tsx'),
       route('user/password/forget', 'routes/password-reset.tsx'),
+      route('search', 'routes/search.tsx'),
+      route('search/game', 'routes/search-legacy.ts'),
       route('game/:id', 'routes/game.tsx'),
       route('*', 'routes/not-found.ts'),
     ]),

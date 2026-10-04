@@ -1,0 +1,30 @@
+{
+  "label": "検索",
+  "placeholder": "ゲーム、ブランド、キャラクターを検索",
+  "groups": {
+    "suggestions": "候補",
+    "games": "ゲーム",
+    "developers": "ブランド",
+    "characters": "キャラクター",
+    "recent": "最近の検索",
+    "trending": "人気の検索",
+    "shortcuts": "移動",
+    "status": "状態"
+  },
+  "clearRecent": "最近の検索を消去",
+  "seeAll": "「{query}」のゲーム {total, number} 件をすべて表示",
+  "searching": "検索中…",
+  "empty": "「{query}」は見つかりませんでした。原題や別名で試してください。",
+  "unavailable": "現在検索を利用できません。しばらくしてからお試しください。",
+  "works": "{count} 作品",
+  "results": {
+    "title": "検索",
+    "heading": "「{query}」の検索結果",
+    "count": "{total, number} 件のゲーム",
+    "prompt": "ゲーム名、ブランド名、キャラクター名で検索できます。",
+    "openPalette": "検索を開く",
+    "empty": "「{query}」は見つかりませんでした。原題や別名で試してください。",
+    "unavailable": "現在検索を利用できません。しばらくしてからお試しください。",
+    "pages": "検索結果のページ"
+  }
+}

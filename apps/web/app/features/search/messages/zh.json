@@ -1,0 +1,30 @@
+{
+  "label": "搜索",
+  "placeholder": "搜索游戏、开发商、角色",
+  "groups": {
+    "suggestions": "联想",
+    "games": "游戏",
+    "developers": "开发商",
+    "characters": "角色",
+    "recent": "最近搜索",
+    "trending": "热搜",
+    "shortcuts": "前往",
+    "status": "状态"
+  },
+  "clearRecent": "清除最近搜索",
+  "seeAll": "查看「{query}」的全部 {total, number} 个游戏",
+  "searching": "搜索中…",
+  "empty": "没有找到「{query}」。试试日文原名或别名。",
+  "unavailable": "搜索暂时不可用，请稍后再试。",
+  "works": "{count} 部作品",
+  "results": {
+    "title": "搜索",
+    "heading": "「{query}」的搜索结果",
+    "count": "共 {total, number} 个游戏",
+    "prompt": "输入游戏名、开发商或角色名开始搜索。",
+    "openPalette": "打开搜索",
+    "empty": "没有找到「{query}」。试试日文原名或别名。",
+    "unavailable": "搜索暂时不可用，请稍后再试。",
+    "pages": "搜索结果分页"
+  }
+}

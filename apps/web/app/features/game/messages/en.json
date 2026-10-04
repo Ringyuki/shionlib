@@ -1,4 +1,27 @@
 {
   "releaseTba": "Release date TBA",
-  "released": "Released {date, date, long}"
+  "released": "Released {date, date, long}",
+  "tba": "TBA",
+  "noResources": "No resources yet",
+  "resources": "{count, plural, one {# resource} other {# resources}}",
+  "downloads": "{count, plural, one {# download} other {# downloads}}",
+  "platform": {
+    "win": "Windows",
+    "mac": "macOS",
+    "ios": "iOS",
+    "and": "Android",
+    "lin": "Linux",
+    "ps3": "PS3",
+    "ps4": "PS4",
+    "psv": "PS Vita",
+    "psp": "PSP",
+    "swi": "Switch",
+    "dvd": "DVD"
+  },
+  "language": {
+    "en": "English",
+    "zh": "Simplified Chinese",
+    "zh-hant": "Traditional Chinese",
+    "jp": "Japanese"
+  }
 }

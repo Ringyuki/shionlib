@@ -1,0 +1,30 @@
+{
+  "label": "Search",
+  "placeholder": "Search games, developers, characters",
+  "groups": {
+    "suggestions": "Suggestions",
+    "games": "Games",
+    "developers": "Developers",
+    "characters": "Characters",
+    "recent": "Recent searches",
+    "trending": "Trending",
+    "shortcuts": "Go to",
+    "status": "Status"
+  },
+  "clearRecent": "Clear recent searches",
+  "seeAll": "See all {total, number} games for “{query}”",
+  "searching": "Searching…",
+  "empty": "Nothing found for “{query}”. Try the original Japanese title or an alias.",
+  "unavailable": "Search is unavailable right now. Please try again later.",
+  "works": "{count, plural, one {# work} other {# works}}",
+  "results": {
+    "title": "Search",
+    "heading": "Results for “{query}”",
+    "count": "{total, plural, one {# game} other {# games}}",
+    "prompt": "Search by game title, developer or character name.",
+    "openPalette": "Open search",
+    "empty": "Nothing found for “{query}”. Try the original Japanese title or an alias.",
+    "unavailable": "Search is unavailable right now. Please try again later.",
+    "pages": "Search result pages"
+  }
+}

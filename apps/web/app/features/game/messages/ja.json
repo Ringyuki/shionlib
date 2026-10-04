@@ -1,4 +1,27 @@
 {
   "releaseTba": "発売日未定",
-  "released": "{date, date, long}発売"
+  "released": "{date, date, long}発売",
+  "tba": "未定",
+  "noResources": "リソースなし",
+  "resources": "リソース {count} 件",
+  "downloads": "{count, number} 回ダウンロード",
+  "platform": {
+    "win": "Windows",
+    "mac": "macOS",
+    "ios": "iOS",
+    "and": "Android",
+    "lin": "Linux",
+    "ps3": "PS3",
+    "ps4": "PS4",
+    "psv": "PS Vita",
+    "psp": "PSP",
+    "swi": "Switch",
+    "dvd": "DVD"
+  },
+  "language": {
+    "en": "英語",
+    "zh": "簡体字",
+    "zh-hant": "繁体字",
+    "jp": "日本語"
+  }
 }

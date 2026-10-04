@@ -1,6 +1,18 @@
 import { describe, expect, it } from 'vitest'
+import en from './messages/en.json'
+import ja from './messages/ja.json'
+import zh from './messages/zh.json'
 import type { Schema } from '~/shared/api/types'
-import { gameTitle, isExplicit, primaryCover } from './game'
+import {
+  type Platform,
+  type ResourceLanguage,
+  developerNames,
+  gameTitle,
+  isExplicit,
+  originalTitle,
+  primaryCover,
+  releaseDate,
+} from './game'
 
 const cover = (type: Schema<'GameCoverDTO'>['type'], url: string): Schema<'GameCoverDTO'> => ({
   dims: null,
@@ -39,5 +51,35 @@ describe('isExplicit', () => {
   it('flags sexual or violent covers', () => {
     expect(isExplicit({ ...cover('pkgfront', 'a'), sexual: 1 })).toBe(true)
     expect(isExplicit(cover('pkgfront', 'a'))).toBe(false)
+  })
+})
+
+describe('resource labels', () => {
+  it('name every platform and language the API accepts in each locale', () => {
+    const platforms: Record<Platform, string>[] = [zh.platform, en.platform, ja.platform]
+    const languages: Record<ResourceLanguage, string>[] = [zh.language, en.language, ja.language]
+    expect(platforms.every(table => Object.values(table).every(label => label !== ''))).toBe(true)
+    expect(languages.every(table => Object.values(table).every(label => label !== ''))).toBe(true)
+  })
+})
+
+describe('display helpers', () => {
+  const game = {
+    title_jp: 'サクラノ詩',
+    title_zh: '樱之诗',
+    title_en: '',
+    developers: [{ role: '开发', developer: { id: 1, name: '枕', aliases: [] } }],
+    release_date: '2015-04-24T00:00:00Z',
+  }
+
+  it('shows the original title only when it differs', () => {
+    expect(originalTitle(game, 'zh')).toBe('サクラノ詩')
+    expect(originalTitle(game, 'ja')).toBeUndefined()
+  })
+
+  it('lists developers and parses the release date', () => {
+    expect(developerNames(game)).toEqual(['枕'])
+    expect(releaseDate(game)?.getUTCFullYear()).toBe(2015)
+    expect(releaseDate({ release_date: null })).toBeUndefined()
   })
 })

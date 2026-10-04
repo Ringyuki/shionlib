@@ -38,7 +38,7 @@ export function SiteShell({ viewer, sidebar, children }: SiteShellProps) {
           onClose={state.closeMobile}
         />
       }
-      header={<SiteHeader />}
+      header={<SiteHeader viewerId={viewer?.id ?? null} />}
     >
       <Container size="xl" className="px-4 py-6 sm:px-6 lg:py-8">
         {children}

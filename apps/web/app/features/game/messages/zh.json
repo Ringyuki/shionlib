@@ -1,4 +1,27 @@
 {
   "releaseTba": "发售日待定",
-  "released": "发售于 {date, date, long}"
+  "released": "发售于 {date, date, long}",
+  "tba": "待定",
+  "noResources": "暂无资源",
+  "resources": "{count} 个资源",
+  "downloads": "{count, number} 次下载",
+  "platform": {
+    "win": "Windows",
+    "mac": "macOS",
+    "ios": "iOS",
+    "and": "Android",
+    "lin": "Linux",
+    "ps3": "PS3",
+    "ps4": "PS4",
+    "psv": "PS Vita",
+    "psp": "PSP",
+    "swi": "Switch",
+    "dvd": "DVD"
+  },
+  "language": {
+    "en": "英文",
+    "zh": "简中",
+    "zh-hant": "繁中",
+    "jp": "日文"
+  }
 }
