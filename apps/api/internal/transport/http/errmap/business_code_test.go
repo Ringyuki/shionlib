@@ -1,6 +1,7 @@
 package errmap_test
 
 import (
+	"reflect"
 	"slices"
 	"testing"
 
@@ -32,5 +33,14 @@ func TestErrorCodesReferenceTheBusinessCodeSchema(t *testing.T) {
 	}
 	if registry.Map()["BusinessCode"] == nil {
 		t.Fatal("BusinessCode was not registered")
+	}
+}
+
+func TestErrorDataIsNullableInTheSchema(t *testing.T) {
+	registry := huma.NewMapRegistry("#/components/schemas/", huma.DefaultSchemaNamer)
+	registry.Schema(reflect.TypeFor[errmap.ErrorResponse](), true, "")
+	data := registry.Map()["ErrorResponse"].Properties["data"]
+	if data == nil || len(data.AnyOf) != 2 || data.AnyOf[0].Ref != "#/components/schemas/ErrorData" || data.AnyOf[1].Type != "null" {
+		t.Fatalf("data schema %+v", data)
 	}
 }

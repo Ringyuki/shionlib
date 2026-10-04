@@ -179,3 +179,10 @@ func appValidation(fields []apperror.FieldError) *apperror.Error {
 	}
 	return err
 }
+
+func (ErrorResponse) TransformSchema(_ huma.Registry, s *huma.Schema) *huma.Schema {
+	if data, ok := s.Properties["data"]; ok {
+		s.Properties["data"] = &huma.Schema{AnyOf: []*huma.Schema{data, {Type: "null"}}}
+	}
+	return s
+}

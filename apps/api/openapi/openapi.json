@@ -11818,7 +11818,14 @@
             "description": "A business code, or the HTTP status when the failure has no business code."
           },
           "data": {
-            "$ref": "#/components/schemas/ErrorData"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorData"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "message": {
             "type": "string"
