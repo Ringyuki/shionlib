@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"slices"
+	"strings"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -39,7 +41,8 @@ func (s *Store) ApplyGame(ctx context.Context, source string, record catalog.Gam
 	if err := s.replaceLinks(ctx, gameID, record.Links); err != nil {
 		return 0, nil, err
 	}
-	if err := s.replaceTags(ctx, gameID, record.Tags); err != nil {
+	tagChanges, err := s.replaceTags(ctx, gameID, record.Tags)
+	if err != nil {
 		return 0, nil, err
 	}
 	var related []catalog.Ref
@@ -57,6 +60,9 @@ func (s *Store) ApplyGame(ctx context.Context, source string, record catalog.Gam
 		return 0, nil, err
 	}
 	if err := s.saveLink(ctx, ref, gameID, record.Revision, at); err != nil {
+		return 0, nil, err
+	}
+	if err := s.adjustTagCounts(ctx, tagChanges); err != nil {
 		return 0, nil, err
 	}
 	return gameID, related, nil
@@ -246,45 +252,90 @@ func (s *Store) replaceLinks(ctx context.Context, gameID int, links []catalog.Li
 	return nil
 }
 
-func (s *Store) replaceTags(ctx context.Context, gameID int, names []string) error {
+type tagCountChanges struct {
+	ids    []int
+	deltas []int
+}
+
+func (s *Store) replaceTags(ctx context.Context, gameID int, names []string) (tagCountChanges, error) {
 	db := s.db(ctx)
 	previous, err := db.GameTagRelation.Query().Where(gametagrelation.GameID(gameID)).Select(gametagrelation.FieldTagID).Ints(ctx)
 	if err != nil {
-		return fmt.Errorf("load tag relations: %w", err)
+		return tagCountChanges{}, fmt.Errorf("load tag relations: %w", err)
 	}
 	if _, err := db.GameTagRelation.Delete().Where(gametagrelation.GameID(gameID)).Exec(ctx); err != nil {
-		return fmt.Errorf("clear tag relations: %w", err)
+		return tagCountChanges{}, fmt.Errorf("clear tag relations: %w", err)
 	}
 	var current []int
+	names = slices.Compact(slices.Sorted(slices.Values(names)))
 	if len(names) > 0 {
 		builders := make([]*ent.TagCreate, len(names))
 		for i, name := range names {
 			builders[i] = db.Tag.Create().SetName(name)
 		}
 		if err := db.Tag.CreateBulk(builders...).OnConflict(sql.ConflictColumns(tag.FieldName)).DoNothing().Exec(ctx); err != nil && !ent.IsNotFound(err) {
-			return fmt.Errorf("upsert tags: %w", err)
+			return tagCountChanges{}, fmt.Errorf("upsert tags: %w", err)
 		}
 		current, err = db.Tag.Query().Where(tag.NameIn(names...)).IDs(ctx)
 		if err != nil {
-			return fmt.Errorf("load tag ids: %w", err)
+			return tagCountChanges{}, fmt.Errorf("load tag ids: %w", err)
 		}
 		relations := make([]*ent.GameTagRelationCreate, len(current))
 		for i, id := range current {
 			relations[i] = db.GameTagRelation.Create().SetGameID(gameID).SetTagID(id)
 		}
 		if err := db.GameTagRelation.CreateBulk(relations...).Exec(ctx); err != nil {
-			return fmt.Errorf("insert tag relations: %w", err)
+			return tagCountChanges{}, fmt.Errorf("insert tag relations: %w", err)
 		}
 	}
-	affected := slices.Compact(slices.Sorted(slices.Values(append(previous, current...))))
-	if len(affected) == 0 {
+	return countChanges(previous, current), nil
+}
+
+func countChanges(previous, current []int) tagCountChanges {
+	delta := map[int]int{}
+	for _, id := range previous {
+		delta[id]--
+	}
+	for _, id := range current {
+		delta[id]++
+	}
+	var changes tagCountChanges
+	for _, id := range slices.Sorted(maps.Keys(delta)) {
+		if delta[id] != 0 {
+			changes.ids = append(changes.ids, id)
+			changes.deltas = append(changes.deltas, delta[id])
+		}
+	}
+	return changes
+}
+
+func (s *Store) adjustTagCounts(ctx context.Context, changes tagCountChanges) error {
+	if len(changes.ids) == 0 {
 		return nil
 	}
-	_, err = db.ExecContext(ctx, `UPDATE tags SET count = (SELECT count(*) FROM game_tag_relations r WHERE r.tag_id = tags.id), updated = CURRENT_TIMESTAMP WHERE id = ANY($1)`, pgvalue.Ints(affected))
+	_, err := s.db(ctx).ExecContext(ctx, `WITH locked AS (
+	SELECT id FROM tags WHERE id = ANY($1::bigint[]) ORDER BY id FOR NO KEY UPDATE
+)
+UPDATE tags SET count = tags.count + change.delta, updated = CURRENT_TIMESTAMP
+FROM locked JOIN unnest($1::bigint[], $2::int[]) AS change(id, delta) ON change.id = locked.id
+WHERE tags.id = locked.id`, pgvalue.Ints(changes.ids), pgvalue.Ints(changes.deltas))
 	if err != nil {
-		return fmt.Errorf("recount tags: %w", err)
+		return fmt.Errorf("adjust tag counts: %w", err)
 	}
 	return nil
+}
+
+type placeholder struct {
+	id        int
+	needsSync bool
+}
+
+func developersByExternalID(a, b catalog.DeveloperLink) int {
+	return strings.Compare(a.ExternalID, b.ExternalID)
+}
+
+func charactersByExternalID(a, b catalog.CharacterLink) int {
+	return strings.Compare(a.ExternalID, b.ExternalID)
 }
 
 func (s *Store) replaceDevelopers(ctx context.Context, gameID int, source string, credits []catalog.DeveloperLink) ([]catalog.Ref, error) {
@@ -292,13 +343,21 @@ func (s *Store) replaceDevelopers(ctx context.Context, gameID int, source string
 	if _, err := db.GameDeveloperRelation.Delete().Where(gamedeveloperrelation.GameID(gameID)).Exec(ctx); err != nil {
 		return nil, fmt.Errorf("clear developer relations: %w", err)
 	}
-	var refs []catalog.Ref
-	seen := map[int]bool{}
-	for _, credit := range credits {
-		developerID, needsSync, err := s.ensureDeveloper(ctx, source, credit)
+	ensured := map[string]placeholder{}
+	for _, credit := range slices.SortedFunc(slices.Values(credits), developersByExternalID) {
+		if _, ok := ensured[credit.ExternalID]; ok {
+			continue
+		}
+		id, needsSync, err := s.ensureDeveloper(ctx, source, credit)
 		if err != nil {
 			return nil, err
 		}
+		ensured[credit.ExternalID] = placeholder{id: id, needsSync: needsSync}
+	}
+	var refs []catalog.Ref
+	seen := map[int]bool{}
+	for _, credit := range credits {
+		developerID, needsSync := ensured[credit.ExternalID].id, ensured[credit.ExternalID].needsSync
 		if seen[developerID] {
 			continue
 		}
@@ -318,13 +377,21 @@ func (s *Store) replaceCharacters(ctx context.Context, gameID int, source string
 	if _, err := db.GameCharacterRelation.Delete().Where(gamecharacterrelation.GameID(gameID)).Exec(ctx); err != nil {
 		return nil, fmt.Errorf("clear character relations: %w", err)
 	}
-	var refs []catalog.Ref
-	seen := map[int]bool{}
-	for _, credit := range credits {
-		characterID, needsSync, err := s.ensureCharacter(ctx, source, credit)
+	ensured := map[string]placeholder{}
+	for _, credit := range slices.SortedFunc(slices.Values(credits), charactersByExternalID) {
+		if _, ok := ensured[credit.ExternalID]; ok {
+			continue
+		}
+		id, needsSync, err := s.ensureCharacter(ctx, source, credit)
 		if err != nil {
 			return nil, err
 		}
+		ensured[credit.ExternalID] = placeholder{id: id, needsSync: needsSync}
+	}
+	var refs []catalog.Ref
+	seen := map[int]bool{}
+	for _, credit := range credits {
+		characterID, needsSync := ensured[credit.ExternalID].id, ensured[credit.ExternalID].needsSync
 		if seen[characterID] {
 			continue
 		}

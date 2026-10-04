@@ -3,11 +3,15 @@ package catalogpg_test
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"slices"
 	"strings"
 	"testing"
 	"time"
 
+	"golang.org/x/sync/errgroup"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/catalogpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsourcelink"
@@ -398,4 +402,63 @@ func TestStoreContract(t *testing.T) {
 		db := pgtest.New(t)
 		return catalogtest.Env{Store: catalogpg.NewStore(db.Ent), CreatorID: db.User}
 	})
+}
+
+func TestConcurrentImportsSharingTagsCommitWithExactCounts(t *testing.T) {
+	ctx := context.Background()
+	db := pgtest.New(t)
+	store := catalogpg.NewStore(db.Ent)
+	tx := postgres.NewTransactor(db.Ent)
+	creator := db.User(t)
+	names := make([]string, 12)
+	for i := range names {
+		names[i] = fmt.Sprintf("tag-%02d", i)
+	}
+	const games = 24
+	var group errgroup.Group
+	for n := range games {
+		group.Go(func() error {
+			record := fullGame()
+			record.ExternalID = fmt.Sprint(1000 + n)
+			record.HikarinagiID = ptr(1000 + n)
+			record.VID, record.BID = nil, nil
+			record.Relations = nil
+			record.Tags = slices.Clone(names)
+			record.Developers = []catalog.DeveloperLink{
+				{ExternalID: "501", HikarinagiID: ptr(501), Name: "枕", Role: "开发"},
+				{ExternalID: "502", HikarinagiID: ptr(502), Name: "八月", Role: "开发"},
+			}
+			record.Characters = []catalog.CharacterLink{
+				{ExternalID: "901", HikarinagiID: ptr(901), NameJP: "御桜稟", Role: "main"},
+				{ExternalID: "902", HikarinagiID: ptr(902), NameJP: "夏目藍", Role: "main"},
+			}
+			if n%2 == 1 {
+				slices.Reverse(record.Tags)
+				slices.Reverse(record.Developers)
+				slices.Reverse(record.Characters)
+			}
+			return tx.WithinTransaction(ctx, func(ctx context.Context) error {
+				_, _, err := store.ApplyGame(ctx, catalog.SourceHikarinagi, record, creator, syncedAt)
+				return err
+			})
+		})
+	}
+	if err := group.Wait(); err != nil {
+		t.Fatalf("concurrent imports must not deadlock: %v", err)
+	}
+	if developers, err := db.Ent.GameDeveloper.Query().Count(ctx); err != nil || developers != 2 {
+		t.Fatalf("shared developers must be created once: %d %v", developers, err)
+	}
+	if links, err := db.Ent.CatalogSourceLink.Query().Where(catalogsourcelink.Entity(string(catalog.EntityCharacter))).Count(ctx); err != nil || links != 2 {
+		t.Fatalf("shared characters must be linked once: %d %v", links, err)
+	}
+	counts, err := db.Ent.Tag.Query().Where(tag.NameIn(names...)).All(ctx)
+	if err != nil || len(counts) != len(names) {
+		t.Fatalf("tags %v %v", counts, err)
+	}
+	for _, row := range counts {
+		if row.Count != games {
+			t.Fatalf("tag %s counted %d, want %d", row.Name, row.Count, games)
+		}
+	}
 }
