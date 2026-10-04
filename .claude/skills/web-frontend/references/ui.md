@@ -23,7 +23,7 @@
 ## Shell
 
 - `features/shell/ui/site-shell.tsx` renders hina-ui `AppShell` with controlled sidebar state (`expanded`/`rail`, remembered in the `shionlib_sidebar` cookie) and mobile drawer state.
-- The sidebar (`ui/site-sidebar.tsx`) is Shionlib's own: brand row aligned with the 56 px header, the upload action, navigation sections, and the account menu. It uses hina-ui's motion utilities (`hn-sidebar` for the width transition, `hn-sidebar-label` for fading labels), keeps icons centred at 34 px in both states, swaps section titles for dividers and shows tooltips in rail, and renders a `CloseButton` inside the mobile drawer.
+- The sidebar (`ui/site-sidebar.tsx`) is Shionlib's own: brand row aligned with the 56 px header, the upload action, navigation sections, and the account menu. It uses hina-ui's motion utilities (`hn-sidebar` for the width transition, `hn-sidebar-label` for fading labels), keeps every icon, the logo and the avatar centred at 34 px in both states (the rail is 69 px so its content is an even 68 px inside the 1 px border; items are 44 px wide; bordered buttons take 1 px off their start padding), swaps section titles for dividers and shows tooltips in rail, and renders a `CloseButton` inside the mobile drawer.
 - The header (`ui/site-header.tsx`) holds `SidebarTrigger`, the brand on small screens, the search form and the language menu.
 - The main area scrolls inside `AppShell`; `useMainScrollRestore` wires hina-ui's scroll restorer to React Router (top on new pages, previous position on back/forward and reload), and `root.tsx` injects `firstPaintRestoreScript()`.
 

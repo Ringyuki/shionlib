@@ -29,7 +29,7 @@ export function SiteSidebar({ sections, viewer, mode, onClose }: SiteSidebarProp
       className={cn(
         'h-full min-h-0 overflow-hidden',
         desktop
-          ? 'hn-sidebar border-line bg-surface w-64 border-e data-[state=rail]:w-[4.25rem]'
+          ? 'hn-sidebar border-line bg-surface w-64 border-e data-[state=rail]:w-[69px]'
           : 'w-full',
       )}
     >

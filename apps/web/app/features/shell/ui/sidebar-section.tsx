@@ -28,7 +28,7 @@ export function SidebarSection({ section, rail }: SidebarSectionProps) {
         <Divider
           aria-hidden
           data-collapsed={rail ? undefined : ''}
-          className="hn-sidebar-label pointer-events-none absolute inset-x-2 top-1/2"
+          className="hn-sidebar-label pointer-events-none absolute inset-x-2 top-1/2 w-auto"
         />
       </Flex>
       {section.entries.map(entry => (

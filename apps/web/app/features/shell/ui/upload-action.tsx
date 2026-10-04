@@ -18,7 +18,7 @@ export function UploadAction({ rail }: UploadActionProps) {
       <Button
         asChild
         block
-        className="h-10 justify-start gap-3 rounded-lg ps-3 font-medium [&_svg]:size-5 [&_svg]:shrink-0"
+        className="h-10 justify-start gap-3 rounded-lg ps-[11px] font-medium [&_svg]:size-5 [&_svg]:shrink-0"
       >
         <Link to={sitePaths(locale).upload} aria-label={rail ? label : undefined}>
           <Upload aria-hidden />

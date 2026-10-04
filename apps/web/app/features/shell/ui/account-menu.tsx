@@ -37,7 +37,7 @@ export function AccountMenu({ viewer, rail }: AccountMenuProps) {
           asChild
           variant="soft"
           block
-          className="h-10 justify-start gap-3 rounded-lg ps-3 font-medium [&_svg]:size-5 [&_svg]:shrink-0"
+          className="h-10 justify-start gap-3 rounded-lg ps-[11px] font-medium [&_svg]:size-5 [&_svg]:shrink-0"
         >
           <Link to={paths.signIn} aria-label={rail ? t('signIn') : undefined}>
             <LogIn aria-hidden />
@@ -81,7 +81,7 @@ export function AccountMenu({ viewer, rail }: AccountMenuProps) {
           align="center"
           gap="none"
           aria-label={rail ? viewer.name : undefined}
-          className="h-12 justify-start gap-3 rounded-lg ps-1.5 pe-2"
+          className="h-12 justify-start gap-3 rounded-lg ps-[5px] pe-2"
         >
           <Avatar src={image(viewer.avatar)} name={viewer.name} size="md" className="shrink-0" />
           <Stack
