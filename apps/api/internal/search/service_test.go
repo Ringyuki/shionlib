@@ -2,10 +2,12 @@ package search_test
 
 import (
 	"context"
+	"errors"
 	"slices"
 	"testing"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
+	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game/gametest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/search"
@@ -18,24 +20,35 @@ var (
 )
 
 type fixture struct {
-	engine    *searchtest.Engine
+	catalog   *searchtest.Catalog
+	titles    *searchtest.Titles
+	cache     *gametest.Cache
 	queue     *searchtest.Queue
 	analytics *searchtest.Analytics
-	prefs     gametest.Preferences
 	service   *search.Service
 }
 
 func newFixture(entries ...gametest.Entry) fixture {
-	catalog := gametest.NewCatalog(entries...)
-	f := fixture{engine: &searchtest.Engine{}, queue: &searchtest.Queue{}, analytics: searchtest.NewAnalytics(), prefs: gametest.Preferences{}}
+	games := gametest.NewCatalog(entries...)
+	f := fixture{
+		catalog:   searchtest.NewCatalog(),
+		titles:    &searchtest.Titles{Known: []string{"サクラノ詩", "サクラノ刻", "千恋＊万花"}},
+		cache:     gametest.NewCache(),
+		queue:     &searchtest.Queue{},
+		analytics: searchtest.NewAnalytics(),
+	}
 	f.service = search.NewService(search.Deps{
-		Engine:      f.engine,
-		Catalog:     catalog,
-		Tags:        searchtest.Tags{{ID: 1, Name: "school", Count: 5, Aliases: []string{"学园", "School Life"}}, {ID: 2, Name: "fantasy", Count: 9}},
-		Cards:       game.NewCardService(catalog),
-		Preferences: f.prefs,
-		Queue:       f.queue,
-		Analytics:   f.analytics,
+		Source:     catalog.SourceHikarinagi,
+		Catalog:    f.catalog,
+		Games:      games,
+		Cards:      game.NewCardService(games),
+		Developers: searchtest.Developers{50: {ID: 50, Name: "枕", WorksCount: 3}},
+		Characters: searchtest.Characters{90: {ID: 90, NameJP: "御桜稟"}},
+		Titles:     f.titles,
+		Tags:       searchtest.Tags{{ID: 1, Name: "school", Count: 5, Aliases: []string{"学园", "School Life"}}, {ID: 2, Name: "fantasy", Count: 9}},
+		Cache:      f.cache,
+		Queue:      f.queue,
+		Analytics:  f.analytics,
 	})
 	return f
 }
@@ -48,47 +61,142 @@ func entry(id int, rated, resources bool) gametest.Entry {
 	return gametest.Entry{HasResources: resources, Detail: game.Detail{ID: id, TitleJP: "t", Covers: covers}}
 }
 
-func TestGamesHydratesHitsInEngineOrder(t *testing.T) {
+func hits(ids ...string) []catalog.SearchHit {
+	out := make([]catalog.SearchHit, len(ids))
+	for i, id := range ids {
+		out[i] = catalog.SearchHit{ExternalID: id, Title: id}
+	}
+	return out
+}
+
+func gameIDs(cards []game.Card) []int {
+	ids := make([]int, len(cards))
+	for i, card := range cards {
+		ids[i] = card.ID
+	}
+	return ids
+}
+
+func everything(q string) search.Query {
+	return search.Query{Q: q, Kinds: search.Kinds, Page: 1, Size: 10}
+}
+
+func TestSearchMapsUpstreamHitsToLocalEntriesInUpstreamOrder(t *testing.T) {
 	hidden := entry(4, false, true)
 	hidden.Hidden = true
 	f := newFixture(entry(1, false, true), entry(2, true, true), entry(3, false, false), hidden)
-	title := "<span>t</span>"
-	f.engine.Result = search.Result{Hits: []search.Hit{{GameID: 3}, {GameID: 2}, {GameID: 1, Highlight: &search.Highlight{TitleJP: &title}}, {GameID: 4}, {GameID: 404}}, Total: 40, TotalPages: 4}
+	f.catalog.Hits[catalog.EntityGame] = hits("c", "b", "a", "d", "x", "a2")
+	f.catalog.Hits[catalog.EntityDeveloper] = hits("5", "6")
+	f.catalog.Hits[catalog.EntityCharacter] = hits("9")
+	f.catalog.Links[catalog.EntityGame] = map[string]int{"a": 1, "a2": 1, "b": 2, "c": 3, "d": 4}
+	f.catalog.Links[catalog.EntityDeveloper] = map[string]int{"5": 50}
+	f.catalog.Links[catalog.EntityCharacter] = map[string]int{"9": 90}
 
-	page, err := f.service.Games(context.Background(), guest, search.Query{Q: " t ", Page: search.Page{Number: 1, Size: 10}})
+	results, err := f.service.Search(context.Background(), guest, everything(" サクラ "))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(page.Items) != 1 || page.Items[0].Card.ID != 1 || page.Items[0].Highlight == nil || page.Total != 40 || page.TotalPages != 4 {
-		t.Fatalf("guests only see safe listable games with resources: %+v", page)
+	if ids := gameIDs(results.Games.Items); !slices.Equal(ids, []int{3, 1}) || results.Games.Total != 6 {
+		t.Fatalf("guests skip rated and hidden games, duplicates collapse, games without resources stay: %v total %d", ids, results.Games.Total)
 	}
-	criteria := f.engine.Criteria[0]
-	if criteria.Q != "t" || !criteria.ExcludeRated || !criteria.OnlyWithResources {
-		t.Fatalf("unexpected criteria %+v", criteria)
+	if len(results.Developers.Items) != 1 || results.Developers.Items[0].Name != "枕" || results.Developers.Total != 2 {
+		t.Fatalf("developers %+v", results.Developers)
 	}
-	if len(f.queue.Jobs) != 1 || f.queue.Jobs[0].Query != " t " {
-		t.Fatalf("the raw query is recorded: %+v", f.queue.Jobs)
+	if len(results.Characters.Items) != 1 || results.Characters.Items[0].NameJP != "御桜稟" || results.Characters.Total != 1 {
+		t.Fatalf("characters %+v", results.Characters)
+	}
+	wantUnknown := []catalog.Ref{
+		{Source: catalog.SourceHikarinagi, Entity: catalog.EntityGame, ExternalID: "x"},
+		{Source: catalog.SourceHikarinagi, Entity: catalog.EntityDeveloper, ExternalID: "6"},
+	}
+	for _, ref := range wantUnknown {
+		if !slices.Contains(f.catalog.Unknown, ref) {
+			t.Fatalf("unknown entries are handed to the catalog: %v", f.catalog.Unknown)
+		}
+	}
+	if !slices.Contains(f.catalog.Searches, "hikarinagi:game:サクラ:1:10") {
+		t.Fatalf("the query is trimmed before reaching the source: %v", f.catalog.Searches)
 	}
 
-	f.prefs[permissive.UserID] = false
-	page, _ = f.service.Games(context.Background(), permissive, search.Query{Tag: "school", Page: search.Page{Number: 1, Size: 10}})
-	got := []int{}
-	for _, item := range page.Items {
-		got = append(got, item.Card.ID)
-	}
-	if !slices.Equal(got, []int{3, 2, 1}) || len(page.Items[1].Card.Covers) != 2 {
-		t.Fatalf("permissive viewers without the resource setting: %v", page.Items)
-	}
-	if len(f.queue.Jobs) != 1 || f.engine.Criteria[1].ExcludeRated || f.engine.Criteria[1].OnlyWithResources || f.engine.Criteria[1].Tag != "school" {
-		t.Fatalf("tag-only searches are not recorded: %+v %+v", f.queue.Jobs, f.engine.Criteria[1])
+	permitted, err := f.service.Search(context.Background(), permissive, everything("サクラ"))
+	if err != nil || !slices.Equal(gameIDs(permitted.Games.Items), []int{3, 2, 1}) {
+		t.Fatalf("permissive viewers see rated games: %v %v", gameIDs(permitted.Games.Items), err)
 	}
 }
 
-func TestGamesWithoutTermsIsEmpty(t *testing.T) {
+func TestSearchOnlyAsksForRequestedKinds(t *testing.T) {
+	f := newFixture(entry(1, false, true))
+	f.catalog.Hits[catalog.EntityGame] = hits("a")
+	f.catalog.Links[catalog.EntityGame] = map[string]int{"a": 1}
+	results, err := f.service.Search(context.Background(), guest, search.Query{Q: "a", Kinds: []catalog.Entity{catalog.EntityGame, catalog.EntityGame, "tag"}, Page: 1, Size: 5})
+	if err != nil || len(results.Games.Items) != 1 {
+		t.Fatalf("games %+v %v", results.Games, err)
+	}
+	if !slices.Equal(f.catalog.Searches, []string{"hikarinagi:game:a:1:5"}) {
+		t.Fatalf("searches %v", f.catalog.Searches)
+	}
+	if results.Developers.Items == nil || results.Characters.Items == nil {
+		t.Fatal("sections that were not requested are empty, not nil")
+	}
+}
+
+func TestSearchCachesUpstreamPagesPerKeyword(t *testing.T) {
+	f := newFixture(entry(1, false, true))
+	f.catalog.Hits[catalog.EntityGame] = hits("a", "b")
+	f.catalog.Links[catalog.EntityGame] = map[string]int{"a": 1}
+	game := func(q string, page int) search.Results {
+		t.Helper()
+		results, err := f.service.Search(context.Background(), guest, search.Query{Q: q, Kinds: []catalog.Entity{catalog.EntityGame}, Page: page, Size: 1})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return results
+	}
+	game("Sakura", 1)
+	if again := game("  sakura ", 1); len(again.Games.Items) != 1 || again.Games.Total != 2 {
+		t.Fatalf("cached page %+v", again.Games)
+	}
+	game("sakura", 2)
+	if len(f.catalog.Searches) != 2 {
+		t.Fatalf("one upstream call per keyword and page: %v", f.catalog.Searches)
+	}
+	f.catalog.Links[catalog.EntityGame]["b"] = 1
+	if third := game("sakura", 2); len(third.Games.Items) != 1 {
+		t.Fatalf("local ids are resolved on every call: %+v", third.Games)
+	}
+}
+
+func TestBlankSearchSkipsTheSource(t *testing.T) {
 	f := newFixture()
-	page, err := f.service.Games(context.Background(), guest, search.Query{Q: "  ", Tag: " ", Page: search.Page{Number: 1, Size: 10}})
-	if err != nil || len(page.Items) != 0 || page.Total != 0 || len(f.engine.Criteria) != 0 {
-		t.Fatalf("blank queries skip the engine: %+v %v", page, err)
+	results, err := f.service.Search(context.Background(), guest, everything("   "))
+	if err != nil || len(results.Games.Items) != 0 || results.Games.Items == nil || len(f.catalog.Searches) != 0 {
+		t.Fatalf("blank queries are empty: %+v %v %v", results, err, f.catalog.Searches)
+	}
+}
+
+func TestSearchFailsWhenTheSourceIsUnavailable(t *testing.T) {
+	f := newFixture()
+	f.catalog.Err = catalog.ErrSourceUnavailable.New()
+	if _, err := f.service.Search(context.Background(), guest, everything("a")); !errors.Is(err, catalog.ErrSourceUnavailable) {
+		t.Fatalf("expected source unavailable, got %v", err)
+	}
+}
+
+func TestSuggestMatchesLocalTitles(t *testing.T) {
+	f := newFixture()
+	ctx := context.Background()
+	suggestions, err := f.service.Suggest(ctx, guest, " サクラ ", 10)
+	if err != nil || !slices.Equal(suggestions, []string{"サクラノ詩", "サクラノ刻"}) {
+		t.Fatalf("suggestions %v %v", suggestions, err)
+	}
+	if _, err := f.service.Suggest(ctx, permissive, "千", 1); err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(f.titles.Visibility, []game.Visibility{{ExcludeRated: true}, {ExcludeRated: false}}) {
+		t.Fatalf("visibility follows the viewer: %v", f.titles.Visibility)
+	}
+	if blank, err := f.service.Suggest(ctx, guest, "  ", 10); err != nil || blank == nil || len(blank) != 0 || len(f.titles.Visibility) != 2 {
+		t.Fatalf("blank prefixes skip the store: %v %v", blank, err)
 	}
 }
 
@@ -116,55 +224,38 @@ func TestTagsPickDisplayNames(t *testing.T) {
 	}
 }
 
-func TestAnalyticsRecordingTrendsAndSuggestions(t *testing.T) {
+func TestRecordingFeedsTrending(t *testing.T) {
 	f := newFixture()
 	ctx := context.Background()
-	for _, q := range []string{"  Sakura ", "sakura", "さくら", "  "} {
+	long := string(make([]rune, search.MaxRecordedQueryLength+1))
+	for _, q := range []string{"  Sakura  No ", "  ", long} {
+		if err := f.service.Record(ctx, q); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if !slices.Equal(f.queue.Jobs, []search.RecordSearchJob{{Query: "sakura no"}}) {
+		t.Fatalf("only meaningful queries are queued, normalized: %+v", f.queue.Jobs)
+	}
+	for _, q := range []string{"sakura no", "SAKURA  no", "さくら", " "} {
 		if err := f.service.RecordSearch(ctx, q); err != nil {
 			t.Fatal(err)
 		}
 	}
-	long := make([]rune, search.MaxRecordedQueryLength+1)
-	for i := range long {
-		long[i] = 'x'
-	}
-	if err := f.service.RecordSearch(ctx, string(long)); err != nil {
-		t.Fatal(err)
-	}
-	if f.analytics.Trends[search.WindowHour]["sakura"] != 2 || len(f.analytics.Trends[search.WindowDay]) != 2 {
+	if f.analytics.Trends[search.WindowHour]["sakura no"] != 2 || len(f.analytics.Trends[search.WindowDay]) != 2 {
 		t.Fatalf("unexpected trends %+v", f.analytics.Trends)
 	}
-	if f.analytics.Prefixes["さ"]["さくら"] != 1 || f.analytics.Prefixes["さく"]["さくら"] != 1 || f.analytics.Prefixes["sak"]["sakura"] != 2 {
-		t.Fatalf("prefixes are built per character: %+v", f.analytics.Prefixes)
-	}
-	if _, ok := f.analytics.Prefixes[string([]byte("さ")[:1])]; ok {
-		t.Fatal("prefixes must not split multi-byte characters")
-	}
-
 	trending, err := f.service.Trending(ctx, 1, nil)
-	if err != nil || len(trending) != 1 || trending[0] != (search.Term{Query: "sakura", Score: 6}) {
+	if err != nil || len(trending) != 1 || trending[0] != (search.Term{Query: "sakura no", Score: 6}) {
 		t.Fatalf("scores are summed across windows: %+v %v", trending, err)
 	}
 	window := search.WindowHour
-	trending, _ = f.service.Trending(ctx, 10, &window)
-	if len(trending) != 2 || trending[0].Score != 2 {
-		t.Fatalf("single window: %+v", trending)
+	if single, _ := f.service.Trending(ctx, 10, &window); len(single) != 2 || single[0].Score != 2 {
+		t.Fatalf("single window: %+v", single)
 	}
-	suggestions, _ := f.service.Suggest(ctx, "SA", 10)
-	if len(suggestions) != 1 || suggestions[0].Query != "sakura" {
-		t.Fatalf("prefix is lower-cased: %+v", suggestions)
-	}
-
 	if err := f.service.DecayTrends(ctx); err != nil {
 		t.Fatal(err)
 	}
-	if err := f.service.DecaySuggestions(ctx); err != nil {
-		t.Fatal(err)
-	}
-	if err := f.service.TrimSuggestions(ctx); err != nil {
-		t.Fatal(err)
-	}
-	if f.analytics.Trends[search.WindowHour]["sakura"] != 2*search.DecayFactor || f.analytics.TrimmedKeep != search.MaxCandidatesPerPrefix {
-		t.Fatalf("decay and trim: %+v %d", f.analytics.Trends, f.analytics.TrimmedKeep)
+	if f.analytics.Trends[search.WindowHour]["sakura no"] != 2*search.DecayFactor {
+		t.Fatalf("decay: %+v", f.analytics.Trends)
 	}
 }

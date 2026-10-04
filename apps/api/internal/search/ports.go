@@ -2,45 +2,47 @@ package search
 
 import (
 	"context"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
+	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
+	"github.com/Ringyuki/shionlib/apps/api/internal/character"
+	"github.com/Ringyuki/shionlib/apps/api/internal/developer"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 )
 
-type DocumentSource interface {
-	Documents(ctx context.Context, ids []int) ([]Document, error)
-	DocumentIDs(ctx context.Context, afterID, limit int) ([]int, error)
-}
-
-type Index interface {
-	Configure(ctx context.Context) error
-	Upsert(ctx context.Context, docs []Document) error
-	Delete(ctx context.Context, ids []int) error
-	Clear(ctx context.Context) error
-}
-
-type IndexQueue interface {
-	Enqueue(ctx context.Context, job IndexJob) error
-}
-
-type Engine interface {
-	Search(ctx context.Context, criteria Criteria) (Result, error)
-}
-
 type Catalog interface {
-	Listable(ctx context.Context, ids []int, visibility game.Visibility) ([]int, error)
+	Search(ctx context.Context, sourceName string, entity catalog.Entity, query string, page, size int) (catalog.SearchResult, error)
+	Resolve(ctx context.Context, sourceName string, entity catalog.Entity, externalIDs []string) (map[string]int, error)
 }
 
-type TagStore interface {
-	Tags(ctx context.Context, query string, limit int) ([]Tag, error)
+type Games interface {
+	Listable(ctx context.Context, ids []int, visibility game.Visibility) ([]int, error)
 }
 
 type GameCards interface {
 	ByIDs(ctx context.Context, ids []int, viewer actor.Actor) (map[int]game.Card, error)
 }
 
-type Preferences interface {
-	OnlyGamesWithResources(ctx context.Context, userID int) (bool, error)
+type Developers interface {
+	Summaries(ctx context.Context, ids []int) (map[int]developer.Summary, error)
+}
+
+type Characters interface {
+	Summaries(ctx context.Context, ids []int) (map[int]character.Summary, error)
+}
+
+type Titles interface {
+	Titles(ctx context.Context, prefix string, visibility game.Visibility, limit int) ([]string, error)
+}
+
+type TagStore interface {
+	Tags(ctx context.Context, query string, limit int) ([]Tag, error)
+}
+
+type Cache interface {
+	Get(ctx context.Context, key string, dst any) (bool, error)
+	Set(ctx context.Context, key string, value any, ttl time.Duration) error
 }
 
 type Queue interface {
@@ -48,10 +50,7 @@ type Queue interface {
 }
 
 type Analytics interface {
-	Increment(ctx context.Context, query string, windows []Window, prefixes []string, keep int) error
+	Increment(ctx context.Context, query string, windows []Window) error
 	Top(ctx context.Context, window Window, limit int) ([]Term, error)
-	Suggestions(ctx context.Context, prefix string, limit int) ([]Term, error)
 	DecayTrends(ctx context.Context, windows []Window, factor, minScore float64) error
-	DecaySuggestions(ctx context.Context, factor, minScore float64) error
-	TrimSuggestions(ctx context.Context, keep int) error
 }

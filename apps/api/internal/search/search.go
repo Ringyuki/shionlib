@@ -1,8 +1,12 @@
 package search
 
 import (
+	"time"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
+	"github.com/Ringyuki/shionlib/apps/api/internal/character"
+	"github.com/Ringyuki/shionlib/apps/api/internal/developer"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
-	"github.com/Ringyuki/shionlib/apps/api/internal/paging"
 )
 
 type Window string
@@ -16,58 +20,35 @@ const (
 var Windows = []Window{WindowHour, WindowSixHours, WindowDay}
 
 const (
-	MaxCandidatesPerPrefix = 200
 	MaxRecordedQueryLength = 64
 	DecayFactor            = 0.9
 	MinScore               = 0.01
+	UpstreamCacheTTL       = time.Minute
 )
 
-type Page = paging.Page
+var Kinds = []catalog.Entity{catalog.EntityGame, catalog.EntityDeveloper, catalog.EntityCharacter}
 
 type Query struct {
-	Q    string
-	Tag  string
-	Page Page
+	Q     string
+	Kinds []catalog.Entity
+	Page  int
+	Size  int
 }
 
-type Criteria struct {
-	Q                 string
-	Tag               string
-	ExcludeRated      bool
-	OnlyWithResources bool
-	Page              Page
+type Section[T any] struct {
+	Items []T
+	Total int
 }
 
-type Highlight struct {
-	TitleJP *string
-	TitleZH *string
-	TitleEN *string
-	IntroJP *string
-	IntroZH *string
-	IntroEN *string
-	Aliases []string
+type Results struct {
+	Games      Section[game.Card]
+	Developers Section[developer.Summary]
+	Characters Section[character.Summary]
 }
 
-type Hit struct {
-	GameID    int
-	Highlight *Highlight
-}
-
-type Result struct {
-	Hits       []Hit
-	Total      int
-	TotalPages int
-}
-
-type Item struct {
-	Card      game.Card
-	Highlight *Highlight
-}
-
-type GamePage struct {
-	Items      []Item
-	Total      int
-	TotalPages int
+type UpstreamPage struct {
+	ExternalIDs []string
+	Total       int
 }
 
 type Tag struct {

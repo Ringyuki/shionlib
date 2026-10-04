@@ -2,10 +2,14 @@ package searchhttp_test
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
+	"slices"
 	"testing"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
+	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
+	"github.com/Ringyuki/shionlib/apps/api/internal/character"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game/gametest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/search"
@@ -18,7 +22,7 @@ var permissive = actor.Actor{UserID: 3, Role: actor.RoleUser, ContentLimit: acto
 
 type env struct {
 	server    *apitest.Server
-	engine    *searchtest.Engine
+	catalog   *searchtest.Catalog
 	queue     *searchtest.Queue
 	analytics *searchtest.Analytics
 }
@@ -26,72 +30,126 @@ type env struct {
 func setup(t *testing.T) env {
 	t.Helper()
 	server := apitest.New(t)
-	catalog := gametest.NewCatalog(
+	games := gametest.NewCatalog(
 		gametest.Entry{HasResources: true, Views: 4, Detail: game.Detail{ID: 1, TitleJP: "千恋＊万花"}},
 		gametest.Entry{HasResources: true, Detail: game.Detail{ID: 2, TitleJP: "rated", Covers: []game.Cover{{URL: "r.webp", Sexual: 1}}}},
 	)
-	e := env{server: server, engine: &searchtest.Engine{}, queue: &searchtest.Queue{}, analytics: searchtest.NewAnalytics()}
+	e := env{server: server, catalog: searchtest.NewCatalog(), queue: &searchtest.Queue{}, analytics: searchtest.NewAnalytics()}
+	logo := "m.webp"
+	zh := "稟"
 	service := search.NewService(search.Deps{
-		Engine: e.engine, Catalog: catalog, Cards: game.NewCardService(catalog), Preferences: gametest.Preferences{},
-		Tags:  searchtest.Tags{{ID: 1, Name: "school", Count: 5, Aliases: []string{"学园"}}},
-		Queue: e.queue, Analytics: e.analytics,
+		Source:     catalog.SourceHikarinagi,
+		Catalog:    e.catalog,
+		Games:      games,
+		Cards:      game.NewCardService(games),
+		Developers: searchtest.Developers{50: {ID: 50, Name: "枕", Logo: &logo, WorksCount: 3}},
+		Characters: searchtest.Characters{90: {ID: 90, NameJP: "御桜稟", NameZH: &zh, Game: &character.GameRef{ID: 1, TitleJP: "サクラノ詩"}}},
+		Titles:     &searchtest.Titles{Known: []string{"千恋＊万花", "千の刃濤"}},
+		Tags:       searchtest.Tags{{ID: 1, Name: "school", Count: 5, Aliases: []string{"学园"}}},
+		Cache:      gametest.NewCache(),
+		Queue:      e.queue,
+		Analytics:  e.analytics,
 	})
 	searchhttp.NewHandler(service, server.Builder).Register(server.API)
 	return e
 }
 
-func TestSearchGamesShape(t *testing.T) {
+type results struct {
+	Games struct {
+		Items []struct {
+			ID      int    `json:"id"`
+			TitleJP string `json:"title_jp"`
+		} `json:"items"`
+		Total int `json:"total"`
+	} `json:"games"`
+	Developers json.RawMessage `json:"developers"`
+	Characters json.RawMessage `json:"characters"`
+}
+
+func decode(t *testing.T, raw []byte) results {
+	t.Helper()
+	var out results
+	if err := json.Unmarshal(raw, &out); err != nil {
+		t.Fatalf("decode %s: %v", raw, err)
+	}
+	return out
+}
+
+func TestSearchReturnsOneSectionPerKind(t *testing.T) {
 	e := setup(t)
-	highlight := `<span class="search-highlight">千恋</span>＊万花`
-	e.engine.Result = search.Result{Hits: []search.Hit{{GameID: 2}, {GameID: 1, Highlight: &search.Highlight{TitleJP: &highlight}}}, Total: 2, TotalPages: 1}
+	e.catalog.Hits[catalog.EntityGame] = []catalog.SearchHit{{ExternalID: "b"}, {ExternalID: "a"}, {ExternalID: "x"}}
+	e.catalog.Hits[catalog.EntityDeveloper] = []catalog.SearchHit{{ExternalID: "5"}}
+	e.catalog.Hits[catalog.EntityCharacter] = []catalog.SearchHit{{ExternalID: "9"}}
+	e.catalog.Links[catalog.EntityGame] = map[string]int{"a": 1, "b": 2}
+	e.catalog.Links[catalog.EntityDeveloper] = map[string]int{"5": 50}
+	e.catalog.Links[catalog.EntityCharacter] = map[string]int{"9": 90}
 
-	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search/games?q=%E5%8D%83%E6%81%8B&pageSize=20"})
+	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search?q=%E5%8D%83&types=game,developer,character&pageSize=5"})
 	e.server.Expect(resp, http.StatusOK, 0)
-	want := `{"items":[{"id":1,"views":4,"title_jp":"千恋＊万花","title_zh":"","title_en":"","aliases":[],"type":null,"covers":[],"intro_jp":"","intro_zh":"","intro_en":"","release_date":null,"developers":[],"_formatted":{"title_jp":"<span class=\"search-highlight\">千恋</span>＊万花"}}],"meta":{"totalItems":2,"itemCount":1,"itemsPerPage":20,"totalPages":1,"currentPage":1,"content_limit":0}}`
-	if string(resp.Data) != want {
-		t.Fatalf("unexpected search page\n got %s\nwant %s", resp.Data, want)
+	got := decode(t, resp.Data)
+	if len(got.Games.Items) != 1 || got.Games.Items[0].ID != 1 || got.Games.Items[0].TitleJP != "千恋＊万花" || got.Games.Total != 3 {
+		t.Fatalf("guests only get safe games, in source order: %s", resp.Data)
 	}
-	if len(e.queue.Jobs) != 1 || e.queue.Jobs[0].Query != "千恋" {
-		t.Fatalf("keyword searches are recorded: %+v", e.queue.Jobs)
+	if string(got.Developers) != `{"items":[{"id":50,"name":"枕","aliases":[],"logo":"m.webp","works_count":3}],"total":1}` {
+		t.Fatalf("developers %s", got.Developers)
+	}
+	if string(got.Characters) != `{"items":[{"id":90,"image":null,"name_jp":"御桜稟","name_zh":"稟","name_en":null,"aliases":[],"game":{"id":1,"title_jp":"サクラノ詩","title_zh":"","title_en":""}}],"total":1}` {
+		t.Fatalf("characters %s", got.Characters)
+	}
+	if !slices.Contains(e.catalog.Searches, "hikarinagi:game:千:1:5") {
+		t.Fatalf("paging reaches the source: %v", e.catalog.Searches)
+	}
+	if len(e.queue.Jobs) != 0 {
+		t.Fatalf("live searches are not recorded: %+v", e.queue.Jobs)
 	}
 
-	resp = e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search/games", As: &permissive})
+	resp = e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search?q=%E5%8D%83", As: &permissive})
 	e.server.Expect(resp, http.StatusOK, 0)
-	if string(resp.Data) != `{"items":[],"meta":{"totalItems":0,"itemCount":0,"itemsPerPage":10,"totalPages":0,"currentPage":1,"content_limit":3}}` {
-		t.Fatalf("empty search: %s", resp.Data)
+	got = decode(t, resp.Data)
+	if len(got.Games.Items) != 2 || got.Games.Items[0].ID != 2 || string(got.Developers) != `{"items":[],"total":0}` {
+		t.Fatalf("games are the default kind and permissive viewers see rated ones: %s", resp.Data)
 	}
 }
 
-func TestTagsTrendingAndSuggestions(t *testing.T) {
+func TestSearchRejectsUnknownKindsAndReportsSourceFailures(t *testing.T) {
 	e := setup(t)
-	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search/tags?q=%E5%AD%A6"})
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search?q=a&types=tag"}), http.StatusUnprocessableEntity, 100101)
+	e.catalog.Err = catalog.ErrSourceUnavailable.New()
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search?q=a"}), http.StatusBadGateway, 620101)
+	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search?q="})
 	e.server.Expect(resp, http.StatusOK, 0)
-	if string(resp.Data) != `[{"id":1,"name":"school","count":5,"aliases":["学园"],"display_name":"学园"}]` {
-		t.Fatalf("tags: %s", resp.Data)
+	if string(resp.Data) != `{"games":{"items":[],"total":0},"developers":{"items":[],"total":0},"characters":{"items":[],"total":0}}` {
+		t.Fatalf("blank search: %s", resp.Data)
 	}
+}
 
-	if err := e.analytics.Increment(context.Background(), "sakura", search.Windows, []string{"s", "sa"}, 200); err != nil {
+func TestRecordTrendingSuggestionsAndTags(t *testing.T) {
+	e := setup(t)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/search/record", Body: map[string]string{"q": " Sakura "}}), http.StatusCreated, 0)
+	if !slices.Equal(e.queue.Jobs, []search.RecordSearchJob{{Query: "sakura"}}) {
+		t.Fatalf("settled keywords are queued: %+v", e.queue.Jobs)
+	}
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/search/record", Body: map[string]string{"q": ""}}), http.StatusUnprocessableEntity, 100101)
+
+	if err := e.analytics.Increment(context.Background(), "sakura", search.Windows); err != nil {
 		t.Fatal(err)
 	}
-	resp = e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search/trending?window=1h"})
+	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search/trending?window=1h"})
 	e.server.Expect(resp, http.StatusOK, 0)
 	if string(resp.Data) != `[{"query":"sakura","score":1}]` {
 		t.Fatalf("trending: %s", resp.Data)
 	}
-	resp = e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search/trending"})
-	if string(resp.Data) != `[{"query":"sakura","score":3}]` {
-		t.Fatalf("summed trending: %s", resp.Data)
-	}
-	resp = e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search/suggest?prefix=SA"})
+
+	resp = e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search/suggest?prefix=%E5%8D%83%E6%81%8B"})
 	e.server.Expect(resp, http.StatusOK, 0)
-	if string(resp.Data) != `[{"query":"sakura","score":1}]` {
-		t.Fatalf("suggest: %s", resp.Data)
+	if string(resp.Data) != `["千恋＊万花"]` {
+		t.Fatalf("suggestions: %s", resp.Data)
 	}
-	resp = e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search/suggest?prefix=zz"})
-	if string(resp.Data) != `[]` {
-		t.Fatalf("empty suggestions: %s", resp.Data)
-	}
-	for _, bad := range []string{"/search/suggest", "/search/suggest?prefix=", "/search/trending?window=2h", "/search/trending?limit=51", "/search/tags?limit=101"} {
-		e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: bad}), http.StatusUnprocessableEntity, 100101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search/suggest"}), http.StatusUnprocessableEntity, 100101)
+
+	resp = e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/tags?q=%E5%AD%A6"})
+	e.server.Expect(resp, http.StatusOK, 0)
+	if string(resp.Data) != `[{"id":1,"name":"school","count":5,"aliases":["学园"],"display_name":"学园"}]` {
+		t.Fatalf("tags: %s", resp.Data)
 	}
 }

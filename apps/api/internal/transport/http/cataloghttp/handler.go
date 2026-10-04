@@ -22,7 +22,7 @@ func NewHandler(service *catalog.Service, resp *response.Builder) *Handler {
 
 func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "catalog.sources", Method: http.MethodGet, Path: "/admin/catalog/sources", Summary: "List configured catalog sources", Tags: tags, Access: httpapi.AccessAdmin}, h.sources)
-	httpapi.Register(api, httpapi.Route{ID: "catalog.search", Method: http.MethodGet, Path: "/admin/catalog/search", Summary: "Search games at a catalog source", Tags: tags, Access: httpapi.AccessAdmin}, h.search)
+	httpapi.Register(api, httpapi.Route{ID: "catalog.search", Method: http.MethodGet, Path: "/admin/catalog/search", Summary: "Search entries at a catalog source", Tags: tags, Access: httpapi.AccessAdmin}, h.search)
 	httpapi.Register(api, httpapi.Route{ID: "catalog.import", Method: http.MethodPost, Path: "/admin/catalog/import", Summary: "Import or refresh one catalog entry now", Tags: tags, Access: httpapi.AccessAdmin}, h.importEntry)
 	httpapi.Register(api, httpapi.Route{ID: "catalog.enqueue", Method: http.MethodPost, Path: "/admin/catalog/import/queue", Summary: "Queue a catalog entry for import", Tags: tags, Access: httpapi.AccessAdmin}, h.enqueue)
 }
@@ -32,7 +32,7 @@ func (h *Handler) sources(ctx context.Context, _ *struct{}) (*response.Output[[]
 }
 
 func (h *Handler) search(ctx context.Context, in *catalogSearchInput) (*response.Output[response.Page[catalogHitDTO]], error) {
-	result, err := h.service.Search(ctx, in.Source, in.Query, in.Page, in.PageSize)
+	result, err := h.service.Search(ctx, in.Source, catalog.Entity(in.Entity), in.Query, in.Page, in.PageSize)
 	if err != nil {
 		return nil, err
 	}

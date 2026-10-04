@@ -7,9 +7,13 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/clientinfo"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/healthhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/searchhttp"
 )
 
-const apiTitle = "Shionlib API"
+const (
+	apiTitle            = "Shionlib API"
+	searchThrottleLimit = 120
+)
 
 func BuildHTTP(infra *Infra, modules *Modules) *httpapi.API {
 	cfg := infra.Config
@@ -30,6 +34,7 @@ func BuildHTTP(infra *Infra, modules *Modules) *httpapi.API {
 				httpapi.DefaultThrottle: {Name: httpapi.DefaultThrottle, Limit: cfg.Throttle.Limit, Window: cfg.Throttle.TTL, Block: cfg.Throttle.BlockDuration},
 				"download":              {Name: "download", Limit: cfg.Throttle.DownloadLimit, Window: cfg.Throttle.DownloadTTL, Block: cfg.Throttle.DownloadBlockDuration},
 				"auth":                  {Name: "auth", Limit: cfg.Throttle.AuthLimit, Window: cfg.Throttle.AuthTTL, Block: cfg.Throttle.AuthBlockDuration},
+				searchhttp.Throttle:     {Name: searchhttp.Throttle, Limit: searchThrottleLimit, Window: time.Minute, Block: cfg.Throttle.BlockDuration},
 			},
 		},
 	})

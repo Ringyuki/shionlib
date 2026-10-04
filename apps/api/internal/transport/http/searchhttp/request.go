@@ -4,13 +4,19 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
 )
 
-type searchGamesInput struct {
+type searchInput struct {
 	httpapi.PageQuery
-	Q   string `query:"q" doc:"Keyword matched against titles, aliases, tags and developers"`
-	Tag string `query:"tag" doc:"Exact tag name"`
+	Q     string   `query:"q" maxLength:"100" doc:"Keyword sent to the catalog source"`
+	Types []string `query:"types" default:"game" enum:"game,developer,character" doc:"Comma-separated kinds of entries to search"`
 }
 
-type searchTagsInput struct {
+type searchRecordInput struct {
+	Body struct {
+		Q string `json:"q" minLength:"1" maxLength:"100" doc:"Keyword the visitor settled on"`
+	}
+}
+
+type tagSearchInput struct {
 	Q     string `query:"q" doc:"Matches tag names and aliases"`
 	Limit int    `query:"limit" default:"10" minimum:"0" maximum:"100"`
 }
@@ -21,6 +27,6 @@ type searchTrendingInput struct {
 }
 
 type searchSuggestInput struct {
-	Prefix string `query:"prefix" required:"true" minLength:"1"`
-	Limit  int    `query:"limit" default:"10" minimum:"1" maximum:"50"`
+	Prefix string `query:"prefix" required:"true" minLength:"1" maxLength:"100"`
+	Limit  int    `query:"limit" default:"10" minimum:"1" maximum:"20"`
 }

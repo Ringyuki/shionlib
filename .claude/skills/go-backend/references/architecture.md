@@ -13,7 +13,7 @@
 | `internal/transport/http/*` | HTTP handlers and HTTP infrastructure (`httpapi`, `errmap`, `response`, `middleware`, `reqstate`, `clientinfo`, `apitest`, `lexicalhttp`) | kernel, business, platform, transport |
 | `internal/transport/jobs/*` | River workers and scheduled tasks that call business services | kernel, business, platform, transport |
 | `internal/bootstrap` | Composition root | everything except `cmd` |
-| `cmd/api` | Process entrypoint: `serve`, `worker`, `migrate`, `openapi`, `health`, `search reindex` | everything |
+| `cmd/api` | Process entrypoint: `serve`, `worker`, `migrate`, `openapi`, `health` | everything |
 | `cmd/devtool`, `cmd/entgen`, `internal/archtest` | Tooling | everything |
 
 `internal/archtest` and golangci depguard encode this table; change the table and the tests together, with an ADR.

@@ -19,7 +19,6 @@ type Deps struct {
 	Store   Store
 	Tx      Transactor
 	Queue   Queue
-	Indexer Indexer
 	Now     func() time.Time
 	Options Options
 }
@@ -29,7 +28,6 @@ type Service struct {
 	store   Store
 	tx      Transactor
 	queue   Queue
-	indexer Indexer
 	now     func() time.Time
 	opts    Options
 }
@@ -39,11 +37,7 @@ func NewService(deps Deps) *Service {
 	for _, source := range deps.Sources {
 		byName[source.Name()] = source
 	}
-	indexer := deps.Indexer
-	if indexer == nil {
-		indexer = noIndex{}
-	}
-	return &Service{sources: byName, store: deps.Store, tx: deps.Tx, queue: deps.Queue, indexer: indexer, now: deps.Now, opts: deps.Options}
+	return &Service{sources: byName, store: deps.Store, tx: deps.Tx, queue: deps.Queue, now: deps.Now, opts: deps.Options}
 }
 
 func (s *Service) source(name string) (Source, error) {
@@ -96,18 +90,7 @@ func (s *Service) Import(ctx context.Context, ref Ref) (int, error) {
 			return localID, err
 		}
 	}
-	return localID, s.reindex(ctx, ref.Entity, localID)
-}
-
-func (s *Service) reindex(ctx context.Context, entity Entity, localID int) error {
-	if entity == EntityGame {
-		return s.indexer.GamesChanged(ctx, []int{localID})
-	}
-	ids, err := s.store.RelatedGames(ctx, entity, localID)
-	if err != nil {
-		return err
-	}
-	return s.indexer.GamesChanged(ctx, ids)
+	return localID, nil
 }
 
 func (s *Service) fetch(ctx context.Context, source Source, ref Ref) (writeFunc, error) {
@@ -256,16 +239,39 @@ func (s *Service) applyChange(ctx context.Context, source string, change Change)
 	}
 }
 
-func (s *Service) Search(ctx context.Context, sourceName, query string, page, size int) (SearchResult, error) {
+func (s *Service) Search(ctx context.Context, sourceName string, entity Entity, query string, page, size int) (SearchResult, error) {
 	source, err := s.source(sourceName)
 	if err != nil {
 		return SearchResult{}, err
 	}
-	hits, total, err := source.SearchGames(ctx, query, page, size)
+	hits, total, err := source.Search(ctx, entity, query, page, size)
 	if err != nil {
 		return SearchResult{}, ErrSourceUnavailable.Wrap(err)
 	}
 	return SearchResult{Hits: hits, Total: total}, nil
+}
+
+func (s *Service) Resolve(ctx context.Context, sourceName string, entity Entity, externalIDs []string) (map[string]int, error) {
+	if _, err := s.source(sourceName); err != nil {
+		return nil, err
+	}
+	links, err := s.store.Links(ctx, sourceName, entity, externalIDs)
+	if err != nil {
+		return nil, err
+	}
+	resolved := make(map[string]int, len(links))
+	for _, externalID := range externalIDs {
+		link, known := links[externalID]
+		switch {
+		case !known:
+			if err := s.queue.Enqueue(ctx, ImportJob{Source: sourceName, Entity: entity, ExternalID: externalID}); err != nil {
+				return nil, err
+			}
+		case !link.Excluded:
+			resolved[externalID] = link.LocalID
+		}
+	}
+	return resolved, nil
 }
 
 func (s *Service) Sources() []string {

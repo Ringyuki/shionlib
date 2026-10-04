@@ -30,7 +30,6 @@ func buildCatalog(infra *Infra, shared *Shared) *catalog.Service {
 		Store:   catalogpg.NewStore(infra.Ent),
 		Tx:      shared.Transactor,
 		Queue:   shared.Queue,
-		Indexer: shared.Search,
 		Now:     shared.Now,
 		Options: catalog.Options{
 			CreatorID:    cfg.CreatorID,

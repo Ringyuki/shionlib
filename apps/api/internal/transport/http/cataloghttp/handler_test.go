@@ -2,6 +2,7 @@ package cataloghttp_test
 
 import (
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -49,14 +50,21 @@ func TestCatalogRoutesRequireAdmins(t *testing.T) {
 func TestSearchReturnsAPage(t *testing.T) {
 	server, source, _ := setup(t)
 	cover := "https://cdn.test/c.webp"
-	source.Hits = []catalog.SearchHit{{ExternalID: "77", Title: "サクラノ詩", CoverURL: &cover}, {ExternalID: "78", Title: "続"}}
+	source.Hits[catalog.EntityGame] = []catalog.SearchHit{{ExternalID: "77", Title: "サクラノ詩", CoverURL: &cover}, {ExternalID: "78", Title: "続"}}
+	source.Hits[catalog.EntityDeveloper] = []catalog.SearchHit{{ExternalID: "5", Title: "枕"}}
 	resp := server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/catalog/search?q=sakura&pageSize=1", As: &admin})
 	server.Expect(resp, http.StatusOK, 0)
 	want := `{"items":[{"external_id":"77","title":"サクラノ詩","subtitle":null,"developer":null,"cover":"https://cdn.test/c.webp"}],"meta":{"totalItems":2,"itemCount":1,"itemsPerPage":1,"totalPages":2,"currentPage":1}}`
 	if string(resp.Data) != want {
 		t.Fatalf("search %s", resp.Data)
 	}
+	developers := server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/catalog/search?q=makura&entity=developer", As: &admin})
+	server.Expect(developers, http.StatusOK, 0)
+	if !strings.Contains(string(developers.Data), `"external_id":"5"`) {
+		t.Fatalf("developer search %s", developers.Data)
+	}
 	server.Expect(server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/catalog/search", As: &admin}), http.StatusUnprocessableEntity, 100101)
+	server.Expect(server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/catalog/search?q=x&entity=tag", As: &admin}), http.StatusUnprocessableEntity, 100101)
 	server.Expect(server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/catalog/search?q=x&source=vndb", As: &admin}), http.StatusBadRequest, 620102)
 }
 

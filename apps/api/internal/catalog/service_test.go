@@ -3,6 +3,7 @@ package catalog_test
 import (
 	"context"
 	"errors"
+	"maps"
 	"slices"
 	"testing"
 	"time"
@@ -19,7 +20,6 @@ type fixture struct {
 	store   *catalogtest.Store
 	queue   *catalogtest.Queue
 	tx      *txtest.Immediate
-	index   *catalogtest.Indexer
 	service *catalog.Service
 }
 
@@ -29,14 +29,12 @@ func setup() fixture {
 		store:  catalogtest.NewStore(),
 		queue:  &catalogtest.Queue{},
 		tx:     &txtest.Immediate{},
-		index:  &catalogtest.Indexer{},
 	}
 	f.service = catalog.NewService(catalog.Deps{
 		Sources: []catalog.Source{f.source},
 		Store:   f.store,
 		Tx:      f.tx,
 		Queue:   f.queue,
-		Indexer: f.index,
 		Now:     func() time.Time { return now },
 		Options: catalog.Options{CreatorID: 1, RefreshAfter: 24 * time.Hour, RefreshBatch: 2, ChangesBatch: 10},
 	})
@@ -169,7 +167,7 @@ func TestUnknownSourcesAreRejected(t *testing.T) {
 	if err := f.service.Request(context.Background(), other); !errors.Is(err, catalog.ErrUnknownSource) {
 		t.Fatalf("request: %v", err)
 	}
-	if _, err := f.service.Search(context.Background(), "vndb", "q", 1, 10); !errors.Is(err, catalog.ErrUnknownSource) {
+	if _, err := f.service.Search(context.Background(), "vndb", catalog.EntityGame, "q", 1, 10); !errors.Is(err, catalog.ErrUnknownSource) {
 		t.Fatalf("search: %v", err)
 	}
 }
@@ -275,13 +273,18 @@ func TestPullChangesStopsAtTheFirstError(t *testing.T) {
 
 func TestSearchWrapsSourceFailures(t *testing.T) {
 	f := setup()
-	f.source.Hits = []catalog.SearchHit{{ExternalID: "1", Title: "a"}, {ExternalID: "2", Title: "b"}, {ExternalID: "3", Title: "c"}}
-	result, err := f.service.Search(context.Background(), catalog.SourceHikarinagi, "a", 2, 2)
+	f.source.Hits[catalog.EntityGame] = []catalog.SearchHit{{ExternalID: "1", Title: "a"}, {ExternalID: "2", Title: "b"}, {ExternalID: "3", Title: "c"}}
+	f.source.Hits[catalog.EntityCharacter] = []catalog.SearchHit{{ExternalID: "9", Title: "稟"}}
+	result, err := f.service.Search(context.Background(), catalog.SourceHikarinagi, catalog.EntityGame, "a", 2, 2)
 	if err != nil || result.Total != 3 || len(result.Hits) != 1 || result.Hits[0].ExternalID != "3" {
 		t.Fatalf("search %+v %v", result, err)
 	}
+	characters, err := f.service.Search(context.Background(), catalog.SourceHikarinagi, catalog.EntityCharacter, "稟", 1, 5)
+	if err != nil || characters.Total != 1 || characters.Hits[0].ExternalID != "9" {
+		t.Fatalf("searches are scoped to the entity: %+v %v", characters, err)
+	}
 	f.source.Err = errors.New("timeout")
-	if _, err := f.service.Search(context.Background(), catalog.SourceHikarinagi, "a", 1, 2); !errors.Is(err, catalog.ErrSourceUnavailable) {
+	if _, err := f.service.Search(context.Background(), catalog.SourceHikarinagi, catalog.EntityGame, "a", 1, 2); !errors.Is(err, catalog.ErrSourceUnavailable) {
 		t.Fatalf("expected source unavailable, got %v", err)
 	}
 	if !slices.Equal(f.service.Sources(), []string{catalog.SourceHikarinagi}) {
@@ -324,38 +327,30 @@ func TestExcludedEntriesAreOnlyImportedOnRequest(t *testing.T) {
 	}
 }
 
-func TestImportsReindexTheAffectedGames(t *testing.T) {
+func TestResolveMapsLinkedEntriesAndQueuesUnknownOnes(t *testing.T) {
 	f := setup()
 	f.source.Games["77"] = gameSnapshot("77")
 	f.source.Games["78"] = gameSnapshot("78")
-	f.source.Developers["5"] = catalog.DeveloperSnapshot{ExternalID: "5", Name: "枕"}
-	f.source.Characters["9"] = catalog.CharacterSnapshot{ExternalID: "9", Name: catalog.Localized{Origin: "稟"}}
 	first, err := f.service.Import(context.Background(), ref(catalog.EntityGame, "77"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	second, err := f.service.Import(context.Background(), ref(catalog.EntityGame, "78"))
+	excluded, err := f.service.Import(context.Background(), ref(catalog.EntityGame, "78"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := f.service.Import(context.Background(), ref(catalog.EntityDeveloper, "5")); err != nil {
+	if err := f.service.Exclude(context.Background(), catalog.EntityGame, excluded); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := f.service.Import(context.Background(), ref(catalog.EntityCharacter, "9")); err != nil {
-		t.Fatal(err)
+	queued := len(f.queue.Refs())
+	resolved, err := f.service.Resolve(context.Background(), catalog.SourceHikarinagi, catalog.EntityGame, []string{"79", "77", "78"})
+	if err != nil || !maps.Equal(resolved, map[string]int{"77": first}) {
+		t.Fatalf("resolved %v %v", resolved, err)
 	}
-	both := []int{min(first, second), max(first, second)}
-	want := [][]int{{first}, {second}, both, both}
-	if len(f.index.Changed) != len(want) {
-		t.Fatalf("changed %v", f.index.Changed)
+	if refs := f.queue.Refs()[queued:]; !slices.Equal(refs, []catalog.Ref{ref(catalog.EntityGame, "79")}) {
+		t.Fatalf("only unknown entries are queued for import: %v", refs)
 	}
-	for i := range want {
-		if !slices.Equal(f.index.Changed[i], want[i]) {
-			t.Fatalf("changed %v, want %v", f.index.Changed, want)
-		}
-	}
-	f.index.Err = errors.New("queue down")
-	if _, err := f.service.Import(context.Background(), ref(catalog.EntityGame, "77")); err == nil {
-		t.Fatal("a failed reindex must surface so the job retries")
+	if _, err := f.service.Resolve(context.Background(), "vndb", catalog.EntityGame, []string{"1"}); !errors.Is(err, catalog.ErrUnknownSource) {
+		t.Fatalf("unknown source: %v", err)
 	}
 }

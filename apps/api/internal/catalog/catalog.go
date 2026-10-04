@@ -10,13 +10,14 @@ const (
 	importMaxAttempts = 5
 )
 
-func (noIndex) GamesChanged(context.Context, []int) error {
-	return nil
-}
-
 type SearchResult struct {
 	Hits  []SearchHit
 	Total int
+}
+
+type SourceLink struct {
+	LocalID  int
+	Excluded bool
 }
 
 type Entity string
@@ -179,7 +180,5 @@ type SearchHit struct {
 	Developer  *string
 	CoverURL   *string
 }
-
-type noIndex struct{}
 
 type writeFunc func(ctx context.Context) (int, []Ref, error)

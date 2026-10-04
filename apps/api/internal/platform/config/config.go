@@ -21,7 +21,6 @@ type Config struct {
 	FileScan   FileScan
 	Download   Download
 	Catalog    Catalog
-	Search     Search
 	HotScore   HotScore
 	Cloudflare Cloudflare
 	Bangumi    Bangumi
@@ -214,13 +213,6 @@ type Hikarinagi struct {
 	Scopes         []string      `env:"HIKARINAGI_SCOPES" envSeparator:" " envDefault:"catalog:full catalog:sync"`
 	Timeout        time.Duration `env:"HIKARINAGI_TIMEOUT" envDefault:"15s"`
 	RequestsPerMin int           `env:"HIKARINAGI_REQUESTS_PER_MINUTE" envDefault:"55"`
-}
-
-type Search struct {
-	Engine            string `env:"SEARCH_ENGINE" envDefault:"pg"`
-	MeilisearchHost   string `env:"MEILISEARCH_HOST"`
-	MeilisearchAPIKey string `env:"MEILISEARCH_API_KEY"`
-	MeilisearchIndex  string `env:"MEILISEARCH_INDEX_NAME" envDefault:"shionlib_games"`
 }
 
 type HotScore struct {

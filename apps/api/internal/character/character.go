@@ -33,6 +33,23 @@ type Character struct {
 	Updated   time.Time
 }
 
+type GameRef struct {
+	ID      int
+	TitleJP string
+	TitleZH string
+	TitleEN string
+}
+
+type Summary struct {
+	ID      int
+	Image   *string
+	NameJP  string
+	NameZH  *string
+	NameEN  *string
+	Aliases []string
+	Game    *GameRef
+}
+
 type Page = paging.Page
 
 type SortField string

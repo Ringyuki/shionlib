@@ -49,7 +49,6 @@ func wireAdmin(infra *Infra, shared *Shared, modules *Modules) {
 		Recent:  gameredis.NewRecentUpdates(infra.Redis),
 		Catalog: shared.Catalog,
 		Purger:  objectPurgeQueue{queue: shared.Queue, now: shared.Now},
-		Index:   shared.Search,
 		Tx:      shared.Transactor,
 		Now:     shared.Now,
 	})

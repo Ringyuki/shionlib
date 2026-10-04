@@ -51,7 +51,6 @@ func newAdminEnv(t *testing.T) adminEnv {
 		Recent:  env.recent,
 		Catalog: env.exclusions,
 		Purger:  env.purger,
-		Index:   &gametest.SearchIndex{},
 		Tx:      &txtest.Immediate{},
 		Now:     func() time.Time { return apitest.Now },
 	})

@@ -8,6 +8,7 @@ import (
 type catalogSearchInput struct {
 	httpapi.PageQuery
 	Source string `query:"source" default:"hikarinagi" doc:"Catalog source name"`
+	Entity string `query:"entity" default:"game" enum:"game,developer,character" doc:"Entry kind"`
 	Query  string `query:"q" required:"true" minLength:"1" maxLength:"100" doc:"Search keyword"`
 }
 

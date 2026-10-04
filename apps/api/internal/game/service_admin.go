@@ -14,7 +14,6 @@ type AdminDeps struct {
 	Recent  RecentUpdateMarks
 	Catalog CatalogExclusions
 	Purger  ObjectPurger
-	Index   SearchIndex
 	Tx      Transactor
 	Now     func() time.Time
 }
@@ -24,13 +23,12 @@ type AdminService struct {
 	recent  RecentUpdateMarks
 	catalog CatalogExclusions
 	purger  ObjectPurger
-	index   SearchIndex
 	tx      Transactor
 	now     func() time.Time
 }
 
 func NewAdminService(deps AdminDeps) *AdminService {
-	return &AdminService{store: deps.Store, recent: deps.Recent, catalog: deps.Catalog, purger: deps.Purger, index: deps.Index, tx: deps.Tx, now: deps.Now}
+	return &AdminService{store: deps.Store, recent: deps.Recent, catalog: deps.Catalog, purger: deps.Purger, tx: deps.Tx, now: deps.Now}
 }
 
 func (s *AdminService) Search(ctx context.Context, filter AdminFilter, page Page) ([]AdminEntry, int, error) {
@@ -43,14 +41,11 @@ func (s *AdminService) Scalar(ctx context.Context, id int) (Scalar, error) {
 }
 
 func (s *AdminService) SetStatus(ctx context.Context, id int, status Status) error {
-	if err := s.store.SetStatus(ctx, id, status); err != nil {
-		return err
-	}
-	return s.index.GamesChanged(ctx, []int{id})
+	return s.store.SetStatus(ctx, id, status)
 }
 
 func (s *AdminService) EditScalar(ctx context.Context, id int, changes ScalarChanges) error {
-	err := s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
+	return s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
 		if err := s.store.Lock(ctx, id); err != nil {
 			return err
 		}
@@ -59,10 +54,6 @@ func (s *AdminService) EditScalar(ctx context.Context, id int, changes ScalarCha
 		}
 		return s.store.UpdateScalar(ctx, id, changes.normalized())
 	})
-	if err != nil || changes.Empty() {
-		return err
-	}
-	return s.index.GamesChanged(ctx, []int{id})
 }
 
 func (s *AdminService) Delete(ctx context.Context, id int) error {
@@ -83,7 +74,7 @@ func (s *AdminService) Delete(ctx context.Context, id int) error {
 	if err != nil {
 		return err
 	}
-	return errors.Join(s.recent.Remove(ctx, id), s.purger.PurgeLater(ctx, keys), s.index.GamesChanged(ctx, []int{id}))
+	return errors.Join(s.recent.Remove(ctx, id), s.purger.PurgeLater(ctx, keys))
 }
 
 func (s *AdminService) MarkRecentlyUpdated(ctx context.Context, id int) error {

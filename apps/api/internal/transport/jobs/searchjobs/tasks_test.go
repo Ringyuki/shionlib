@@ -20,10 +20,10 @@ func TestTasksMaintainTheAnalytics(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if schedules["search.decay_trends"] != "0 * * * *" || schedules["search.decay_suggestions"] != "5 * * * *" || schedules["search.trim_suggestions"] != "10 * * * *" {
+	if len(schedules) != 1 || schedules["search.decay_trends"] != "0 * * * *" {
 		t.Fatalf("unexpected schedules %v", schedules)
 	}
-	if analytics.DecayCalls != 2 || analytics.TrimmedKeep != search.MaxCandidatesPerPrefix {
-		t.Fatalf("tasks must run the analytics maintenance: %d %d", analytics.DecayCalls, analytics.TrimmedKeep)
+	if analytics.DecayCalls != 1 {
+		t.Fatalf("tasks must decay the trends: %d", analytics.DecayCalls)
 	}
 }

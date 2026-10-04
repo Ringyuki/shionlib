@@ -25,7 +25,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/httpclient"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/realtime"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/redis"
-	"github.com/Ringyuki/shionlib/apps/api/internal/search"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
@@ -62,7 +61,6 @@ type Shared struct {
 	Messages   *message.Service
 	Activities *activity.Service
 	Catalog    *catalog.Service
-	Search     *search.IndexService
 	Mailer     *email.Mailer
 	Sessions   *auth.SessionService
 	Users      *user.Service
@@ -121,7 +119,6 @@ func buildShared(infra *Infra) *Shared {
 	}
 	shared.Activities = activity.NewService(activitypg.NewRepository(infra.Ent), gameCards)
 	shared.Messages = message.NewService(messagepg.NewRepository(infra.Ent), push.NewMessageNotifier(hub, infra.Logger), gameCards, transactor, infra.Now)
-	shared.Search = BuildSearchIndexer(infra)
 	shared.Catalog = buildCatalog(infra, shared)
 	shared.Mailer = email.NewMailer(email.NewSender(email.Options{
 		Provider:      cfg.Email.Provider,

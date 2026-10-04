@@ -126,3 +126,36 @@ func TestAdminSearch(t *testing.T) {
 		t.Fatalf("past the end: %+v %d %v", entries, total, err)
 	}
 }
+
+func TestSummariesPickTheFirstVisibleGame(t *testing.T) {
+	db := pgtest.New(t)
+	ctx := context.Background()
+	repo := characterpg.NewRepository(db.Ent)
+	sora := db.Ent.GameCharacter.Create().SetNameJp("ソラ").SetNameZh("小穹").SetImage("c.webp").SetAliases(pgvalue.Strings{"Sora"}).SaveX(ctx).ID
+	lonely := db.Ent.GameCharacter.Create().SetNameJp("ハル").SaveX(ctx).ID
+	hidden := db.Game(t, func(c *ent.GameCreate) { c.SetStatus(2).SetTitleJp("隠し") })
+	first := db.Game(t, func(c *ent.GameCreate) { c.SetTitleJp("ヨスガノソラ").SetTitleZh("缘之空") })
+	second := db.Game(t, func(c *ent.GameCreate) { c.SetTitleJp("ハルカナソラ") })
+	for _, gameID := range []int{hidden, first, second} {
+		db.Ent.GameCharacterRelation.Create().SetGameID(gameID).SetCharacterID(sora).ExecX(ctx)
+	}
+	db.Ent.GameCharacterRelation.Create().SetGameID(hidden).SetCharacterID(lonely).ExecX(ctx)
+
+	summaries, err := repo.Summaries(ctx, []int{sora, lonely, sora + lonely + 1000})
+	if err != nil || len(summaries) != 2 {
+		t.Fatalf("summaries %+v %v", summaries, err)
+	}
+	got := summaries[sora]
+	if got.NameJP != "ソラ" || got.NameZH == nil || *got.NameZH != "小穹" || got.Image == nil || *got.Image != "c.webp" || !slices.Equal(got.Aliases, []string{"Sora"}) {
+		t.Fatalf("summary %+v", got)
+	}
+	if got.Game == nil || got.Game.ID != first || got.Game.TitleJP != "ヨスガノソラ" || got.Game.TitleZH != "缘之空" {
+		t.Fatalf("game %+v", got.Game)
+	}
+	if alone := summaries[lonely]; alone.Game != nil || alone.Aliases == nil {
+		t.Fatalf("hidden games are skipped and aliases are never nil: %+v", alone)
+	}
+	if empty, err := repo.Summaries(ctx, nil); err != nil || len(empty) != 0 {
+		t.Fatalf("no ids: %v %v", empty, err)
+	}
+}

@@ -179,34 +179,16 @@ func (s *Store) Excluded(_ context.Context, ref catalog.Ref) (bool, error) {
 	return ok && state.Excluded != nil, nil
 }
 
-func (s *Store) RelatedGames(_ context.Context, entity catalog.Entity, localID int) ([]int, error) {
+func (s *Store) Links(_ context.Context, source string, entity catalog.Entity, externalIDs []string) (map[string]catalog.SourceLink, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if entity == catalog.EntityGame {
-		return []int{localID}, nil
-	}
-	var ids []int
-	for gameID, record := range s.Games {
-		var externals []string
-		switch entity {
-		case catalog.EntityDeveloper:
-			for _, credit := range record.Developers {
-				externals = append(externals, credit.ExternalID)
-			}
-		case catalog.EntityCharacter:
-			for _, credit := range record.Characters {
-				externals = append(externals, credit.ExternalID)
-			}
-		}
-		for ref, state := range s.links {
-			if ref.Entity == entity && state.LocalID == localID && slices.Contains(externals, ref.ExternalID) {
-				ids = append(ids, gameID)
-				break
-			}
+	links := map[string]catalog.SourceLink{}
+	for _, externalID := range externalIDs {
+		if state, ok := s.links[catalog.Ref{Source: source, Entity: entity, ExternalID: externalID}]; ok {
+			links[externalID] = catalog.SourceLink{LocalID: state.LocalID, Excluded: state.Excluded != nil}
 		}
 	}
-	slices.Sort(ids)
-	return ids, nil
+	return links, nil
 }
 
 func (s *Store) RecordFailure(_ context.Context, ref catalog.Ref, reason string, _ time.Time) error {
@@ -284,7 +266,7 @@ type Source struct {
 	Games      map[string]catalog.GameSnapshot
 	Developers map[string]catalog.DeveloperSnapshot
 	Characters map[string]catalog.CharacterSnapshot
-	Hits       []catalog.SearchHit
+	Hits       map[catalog.Entity][]catalog.SearchHit
 	Feed       map[string]catalog.ChangeBatch
 	Err        error
 	mu         sync.Mutex
@@ -297,6 +279,7 @@ func NewSource(name string) *Source {
 		Games:      map[string]catalog.GameSnapshot{},
 		Developers: map[string]catalog.DeveloperSnapshot{},
 		Characters: map[string]catalog.CharacterSnapshot{},
+		Hits:       map[catalog.Entity][]catalog.SearchHit{},
 		Feed:       map[string]catalog.ChangeBatch{},
 	}
 }
@@ -347,14 +330,15 @@ func (s *Source) Character(_ context.Context, externalID string) (catalog.Charac
 	return snapshot, nil
 }
 
-func (s *Source) SearchGames(_ context.Context, query string, page, size int) ([]catalog.SearchHit, int, error) {
-	s.record("search:" + query)
+func (s *Source) Search(_ context.Context, entity catalog.Entity, query string, page, size int) ([]catalog.SearchHit, int, error) {
+	s.record("search:" + string(entity) + ":" + query)
 	if s.Err != nil {
 		return nil, 0, s.Err
 	}
-	start := min((page-1)*size, len(s.Hits))
-	end := min(start+size, len(s.Hits))
-	return s.Hits[start:end], len(s.Hits), nil
+	hits := s.Hits[entity]
+	start := min((page-1)*size, len(hits))
+	end := min(start+size, len(hits))
+	return hits[start:end], len(hits), nil
 }
 
 func (s *Source) Changes(_ context.Context, cursor string, _ int) (catalog.ChangeBatch, error) {
@@ -395,20 +379,4 @@ func (q *Queue) Refs() []catalog.Ref {
 		refs[i] = catalog.Ref(job)
 	}
 	return refs
-}
-
-type Indexer struct {
-	mu      sync.Mutex
-	Changed [][]int
-	Err     error
-}
-
-func (i *Indexer) GamesChanged(_ context.Context, ids []int) error {
-	i.mu.Lock()
-	defer i.mu.Unlock()
-	if i.Err != nil {
-		return i.Err
-	}
-	i.Changed = append(i.Changed, slices.Clone(ids))
-	return nil
 }

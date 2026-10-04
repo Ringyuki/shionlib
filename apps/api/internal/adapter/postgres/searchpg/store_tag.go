@@ -9,7 +9,9 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/gamepg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/search"
 )
 
@@ -39,4 +41,13 @@ func (s *TagStore) Tags(ctx context.Context, query string, limit int) ([]search.
 		tags[i] = search.Tag{ID: row.ID, Name: row.Name, Count: row.Count, Aliases: aliases}
 	}
 	return tags, nil
+}
+
+func matchingTag(q string) predicate.Tag {
+	return predicate.Tag(func(s *sql.Selector) {
+		s.Where(sql.Or(
+			sql.ContainsFold(s.C(tag.FieldName), q),
+			gamepg.AnyElementContainsFold(s.C(tag.FieldAliases), q),
+		))
+	})
 }

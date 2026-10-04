@@ -23,7 +23,6 @@ go run ./cmd/api serve
 | `go run ./cmd/api worker` | jobs and scheduled tasks only |
 | `go run ./cmd/api migrate up` | apply migrations (adopts a Prisma-managed database) |
 | `go run ./cmd/api openapi openapi/openapi.json` | regenerate the OpenAPI document |
-| `go run ./cmd/api search reindex` | rebuild the Meilisearch index (`SEARCH_ENGINE=meilisearch`) |
 | `go run ./cmd/api health` | liveness probe used by the container healthcheck |
 | `go run ./cmd/entgen` | regenerate ent code from `internal/adapter/postgres/ent/schema` |
 | `go run ./cmd/devtool migrate diff <name>` | generate a migration from schema changes (needs `DEV_DATABASE_URL`) |

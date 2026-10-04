@@ -114,3 +114,27 @@ func TestAdminSearch(t *testing.T) {
 		t.Fatalf("second page: %+v %d %v", entries, total, err)
 	}
 }
+
+func TestSummariesCountVisibleWorks(t *testing.T) {
+	db := pgtest.New(t)
+	ctx := context.Background()
+	repo := developerpg.NewRepository(db.Ent)
+	makura := db.Ent.GameDeveloper.Create().SetName("枕").SetAliases(pgvalue.Strings{"Makura"}).SetLogo("m.webp").SaveX(ctx).ID
+	empty := db.Ent.GameDeveloper.Create().SetName("空").SaveX(ctx).ID
+	for _, status := range []int{1, 1, 2} {
+		gameID := db.Game(t, func(c *ent.GameCreate) { c.SetStatus(status) })
+		db.Ent.GameDeveloperRelation.Create().SetGameID(gameID).SetDeveloperID(makura).ExecX(ctx)
+	}
+
+	summaries, err := repo.Summaries(ctx, []int{makura, empty, makura + empty + 1000})
+	if err != nil || len(summaries) != 2 {
+		t.Fatalf("summaries %+v %v", summaries, err)
+	}
+	got := summaries[makura]
+	if got.Name != "枕" || !slices.Equal(got.Aliases, []string{"Makura"}) || got.Logo == nil || *got.Logo != "m.webp" || got.WorksCount != 2 {
+		t.Fatalf("summary %+v", got)
+	}
+	if other := summaries[empty]; other.WorksCount != 0 || other.Aliases == nil {
+		t.Fatalf("empty developer %+v", other)
+	}
+}

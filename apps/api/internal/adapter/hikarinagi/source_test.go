@@ -212,12 +212,19 @@ func TestSearchAndChanges(t *testing.T) {
 		"/open/search":          `{"items": [{"id": 77, "type": "galgame", "title": "サクラノ詩", "subtitle": "樱之诗", "developer": "枕", "cover": {"url": "https://cdn.test/c.webp", "width": 1, "height": 1, "sexual": 0, "violence": 0, "votes": 0}}, {"id": 3, "type": "character", "title": "x", "subtitle": null, "developer": null, "cover": null}], "meta": {"page": 2, "page_size": 5, "total_items": 6, "item_count": 2, "total_pages": 2}}`,
 		"/open/catalog/changes": `{"items": [{"id": 11, "resource_type": "GALGAME", "resource_id": 77, "kind": "UPSERT", "merged_to_id": null, "created_at": "t"}, {"id": 12, "resource_type": "LIGHT_NOVEL", "resource_id": 1, "kind": "UPSERT", "merged_to_id": null, "created_at": "t"}, {"id": 13, "resource_type": "PRODUCER", "resource_id": 5, "kind": "MERGE", "merged_to_id": 6, "created_at": "t"}, {"id": 14, "resource_type": "CHARACTER", "resource_id": 9, "kind": "DELETE", "merged_to_id": null, "created_at": "t"}], "latest_id": 20, "has_more": true}`,
 	})
-	hits, total, err := source.SearchGames(context.Background(), "サクラ", 2, 5)
+	hits, total, err := source.Search(context.Background(), catalog.EntityGame, "サクラ", 2, 5)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if total != 6 || len(hits) != 1 || hits[0].ExternalID != "77" || *hits[0].Subtitle != "樱之诗" || *hits[0].CoverURL != "https://cdn.test/c.webp" {
 		t.Fatalf("hits %+v total %d", hits, total)
+	}
+	characters, _, err := source.Search(context.Background(), catalog.EntityCharacter, "サクラ", 2, 5)
+	if err != nil || len(characters) != 1 || characters[0].ExternalID != "3" {
+		t.Fatalf("characters %+v %v", characters, err)
+	}
+	if _, _, err := source.Search(context.Background(), "tag", "サクラ", 1, 5); err == nil {
+		t.Fatal("unsupported entities must be rejected")
 	}
 	batch, err := source.Changes(context.Background(), "", 50)
 	if err != nil {
@@ -236,6 +243,7 @@ func TestSearchAndChanges(t *testing.T) {
 	}
 	wantPaths := []string{
 		"/api/v3/open/search?page=2&page_size=5&q=%E3%82%B5%E3%82%AF%E3%83%A9&types=galgame",
+		"/api/v3/open/search?page=2&page_size=5&q=%E3%82%B5%E3%82%AF%E3%83%A9&types=character",
 		"/api/v3/open/catalog/changes?limit=50&since=0",
 		"/api/v3/open/catalog/changes?limit=50&since=14",
 	}

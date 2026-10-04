@@ -142,6 +142,25 @@ func (r *Repository) List(ctx context.Context, query string, page developer.Page
 	return summaries, total, nil
 }
 
+func (r *Repository) Summaries(ctx context.Context, ids []int) (map[int]developer.Summary, error) {
+	summaries := make(map[int]developer.Summary, len(ids))
+	if len(ids) == 0 {
+		return summaries, nil
+	}
+	rows, err := r.db(ctx).GameDeveloper.Query().Where(gamedeveloper.IDIn(ids...)).All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("load developer summaries: %w", err)
+	}
+	works, err := r.worksCount(ctx, rows)
+	if err != nil {
+		return nil, err
+	}
+	for _, row := range rows {
+		summaries[row.ID] = developer.Summary{ID: row.ID, Name: row.Name, Aliases: nonNil(row.Aliases), Logo: row.Logo, WorksCount: works[row.ID]}
+	}
+	return summaries, nil
+}
+
 func (r *Repository) worksCount(ctx context.Context, rows []*ent.GameDeveloper) (map[int]int, error) {
 	counts := map[int]int{}
 	if len(rows) == 0 {

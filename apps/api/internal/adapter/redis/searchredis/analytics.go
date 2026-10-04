@@ -11,8 +11,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/search"
 )
 
-const scanBatch = 200
-
 type Analytics struct {
 	client *redis.Client
 }
@@ -25,27 +23,10 @@ func (a *Analytics) trendKey(window search.Window) string {
 	return a.client.Key("search", "trends", string(window))
 }
 
-func (a *Analytics) suggestKey(prefix string) string {
-	return a.client.Key("search", "suggest", prefix)
-}
-
-func (a *Analytics) suggestPattern() string {
-	return a.client.Key("search", "suggest") + ":*"
-}
-
-func trimStop(keep int) int64 {
-	return int64(-(keep + 1))
-}
-
-func (a *Analytics) Increment(ctx context.Context, query string, windows []search.Window, prefixes []string, keep int) error {
+func (a *Analytics) Increment(ctx context.Context, query string, windows []search.Window) error {
 	_, err := a.client.Pipelined(ctx, func(pipe goredis.Pipeliner) error {
 		for _, window := range windows {
 			pipe.ZIncrBy(ctx, a.trendKey(window), 1, query)
-		}
-		for _, prefix := range prefixes {
-			key := a.suggestKey(prefix)
-			pipe.ZIncrBy(ctx, key, 1, query)
-			pipe.ZRemRangeByRank(ctx, key, 0, trimStop(keep))
 		}
 		return nil
 	})
@@ -85,10 +66,6 @@ func (a *Analytics) Top(ctx context.Context, window search.Window, limit int) ([
 	return a.top(ctx, a.trendKey(window), limit)
 }
 
-func (a *Analytics) Suggestions(ctx context.Context, prefix string, limit int) ([]search.Term, error) {
-	return a.top(ctx, a.suggestKey(prefix), limit)
-}
-
 func (a *Analytics) decay(ctx context.Context, keys []string, factor, minScore float64) error {
 	_, err := a.client.Pipelined(ctx, func(pipe goredis.Pipeliner) error {
 		for _, key := range keys {
@@ -109,47 +86,4 @@ func (a *Analytics) DecayTrends(ctx context.Context, windows []search.Window, fa
 		return fmt.Errorf("decay search trends: %w", err)
 	}
 	return nil
-}
-
-func (a *Analytics) DecaySuggestions(ctx context.Context, factor, minScore float64) error {
-	return a.eachSuggestBatch(ctx, func(keys []string) error {
-		if err := a.decay(ctx, keys, factor, minScore); err != nil {
-			return fmt.Errorf("decay search suggestions: %w", err)
-		}
-		return nil
-	})
-}
-
-func (a *Analytics) TrimSuggestions(ctx context.Context, keep int) error {
-	return a.eachSuggestBatch(ctx, func(keys []string) error {
-		_, err := a.client.Pipelined(ctx, func(pipe goredis.Pipeliner) error {
-			for _, key := range keys {
-				pipe.ZRemRangeByRank(ctx, key, 0, trimStop(keep))
-			}
-			return nil
-		})
-		if err != nil {
-			return fmt.Errorf("trim search suggestions: %w", err)
-		}
-		return nil
-	})
-}
-
-func (a *Analytics) eachSuggestBatch(ctx context.Context, fn func(keys []string) error) error {
-	var cursor uint64
-	for {
-		keys, next, err := a.client.Scan(ctx, cursor, a.suggestPattern(), scanBatch).Result()
-		if err != nil {
-			return fmt.Errorf("scan search suggestions: %w", err)
-		}
-		if len(keys) > 0 {
-			if err := fn(keys); err != nil {
-				return err
-			}
-		}
-		if next == 0 {
-			return nil
-		}
-		cursor = next
-	}
 }

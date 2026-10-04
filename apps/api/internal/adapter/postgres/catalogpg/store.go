@@ -12,8 +12,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsourcelink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsynccursor"
 	entgame "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacterrelation"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedeveloperrelation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
 )
 
@@ -225,23 +223,25 @@ func (s *Store) Excluded(ctx context.Context, ref catalog.Ref) (bool, error) {
 	return row.ExcludedAt != nil, nil
 }
 
-func (s *Store) RelatedGames(ctx context.Context, entity catalog.Entity, localID int) ([]int, error) {
-	var (
-		ids []int
-		err error
-	)
-	switch entity {
-	case catalog.EntityDeveloper:
-		ids, err = s.db(ctx).GameDeveloperRelation.Query().Where(gamedeveloperrelation.DeveloperID(localID)).Select(gamedeveloperrelation.FieldGameID).Ints(ctx)
-	case catalog.EntityCharacter:
-		ids, err = s.db(ctx).GameCharacterRelation.Query().Where(gamecharacterrelation.CharacterID(localID)).Select(gamecharacterrelation.FieldGameID).Ints(ctx)
-	case catalog.EntityGame:
-		return []int{localID}, nil
+func (s *Store) Links(ctx context.Context, source string, entity catalog.Entity, externalIDs []string) (map[string]catalog.SourceLink, error) {
+	links := make(map[string]catalog.SourceLink, len(externalIDs))
+	if len(externalIDs) == 0 {
+		return links, nil
 	}
+	rows, err := s.db(ctx).CatalogSourceLink.Query().
+		Where(
+			catalogsourcelink.Source(source),
+			catalogsourcelink.Entity(string(entity)),
+			catalogsourcelink.ExternalIDIn(externalIDs...),
+		).
+		All(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("list games related to %s %d: %w", entity, localID, err)
+		return nil, fmt.Errorf("load source links: %w", err)
 	}
-	return ids, nil
+	for _, row := range rows {
+		links[row.ExternalID] = catalog.SourceLink{LocalID: row.LocalID, Excluded: row.ExcludedAt != nil}
+	}
+	return links, nil
 }
 
 func (s *Store) RecordFailure(ctx context.Context, ref catalog.Ref, reason string, at time.Time) error {

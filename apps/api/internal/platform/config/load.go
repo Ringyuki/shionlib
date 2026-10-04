@@ -71,8 +71,6 @@ func (c *Config) Validate() error {
 	require(slices.Contains([]string{"direct", "worker"}, c.Download.Mode), "FILE_DOWNLOAD_MODE must be direct or worker")
 	require(c.Download.Mode != "worker" || c.Download.TicketSecret != "", "FILE_DOWNLOAD_TICKET_SECRET is required when FILE_DOWNLOAD_MODE=worker")
 	require(slices.Contains([]string{"elastic", "postal"}, c.Email.Provider), "EMAIL_PROVIDER must be elastic or postal")
-	require(slices.Contains([]string{"pg", "meilisearch"}, c.Search.Engine), "SEARCH_ENGINE must be pg or meilisearch")
-	require(c.Search.Engine != "meilisearch" || c.Search.MeilisearchHost != "", "MEILISEARCH_HOST is required when SEARCH_ENGINE=meilisearch")
 	require(slices.Contains([]string{"hikarinagi"}, c.Catalog.Source), "CATALOG_SOURCE must be hikarinagi")
 	require(c.Catalog.ImportWorkers > 0, "CATALOG_IMPORT_WORKERS must be positive")
 	require(c.Catalog.Hikarinagi.RequestsPerMin > 0, "HIKARINAGI_REQUESTS_PER_MINUTE must be positive")

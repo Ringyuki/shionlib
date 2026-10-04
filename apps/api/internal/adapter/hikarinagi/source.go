@@ -2,6 +2,7 @@ package hikarinagi
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -50,6 +51,12 @@ var changeEntities = map[string]catalog.Entity{
 	"GALGAME":   catalog.EntityGame,
 	"PRODUCER":  catalog.EntityDeveloper,
 	"CHARACTER": catalog.EntityCharacter,
+}
+
+var searchTypes = map[catalog.Entity]string{
+	catalog.EntityGame:      "galgame",
+	catalog.EntityDeveloper: "producer",
+	catalog.EntityCharacter: "character",
 }
 
 type Source struct {
@@ -117,10 +124,14 @@ func (s *Source) Character(ctx context.Context, externalID string) (catalog.Char
 	return toCharacterSnapshot(detail), nil
 }
 
-func (s *Source) SearchGames(ctx context.Context, query string, page, size int) ([]catalog.SearchHit, int, error) {
+func (s *Source) Search(ctx context.Context, entity catalog.Entity, query string, page, size int) ([]catalog.SearchHit, int, error) {
+	kind, ok := searchTypes[entity]
+	if !ok {
+		return nil, 0, fmt.Errorf("hikarinagi search: unsupported entity %q", entity)
+	}
 	params := url.Values{
 		"q":         {query},
-		"types":     {"galgame"},
+		"types":     {kind},
 		"page":      {strconv.Itoa(page)},
 		"page_size": {strconv.Itoa(size)},
 	}
@@ -130,7 +141,7 @@ func (s *Source) SearchGames(ctx context.Context, query string, page, size int) 
 	}
 	hits := make([]catalog.SearchHit, 0, len(result.Items))
 	for _, item := range result.Items {
-		if item.Type != "galgame" {
+		if item.Type != kind {
 			continue
 		}
 		hit := catalog.SearchHit{ExternalID: itoa(item.ID), Title: item.Title, Subtitle: item.Subtitle, Developer: item.Developer}

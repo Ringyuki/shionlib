@@ -4,11 +4,9 @@ import (
 	"context"
 	"crypto/rand"
 	"math/big"
-	"net/http"
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/bangumi"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/meilisearch"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/characterpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/developerpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/gamepg"
@@ -53,60 +51,32 @@ func wireCatalog(infra *Infra, shared *Shared, modules *Modules) {
 	}), vndb.NewClient(outbound, vndb.DefaultBaseURL), shared.Cache)
 	hotScore := game.NewHotScoreService(games, hotScoreWeights(cfg.HotScore))
 
+	characters := characterpg.NewRepository(infra.Ent)
+	developers := developerpg.NewRepository(infra.Ent)
 	searchService := search.NewService(search.Deps{
-		Engine:      searchEngine(cfg, infra, outbound),
-		Catalog:     games,
-		Tags:        searchpg.NewTagStore(infra.Ent),
-		Cards:       shared.GameCards,
-		Preferences: preferences,
-		Queue:       searchJobQueue{queue: shared.Queue},
-		Analytics:   searchredis.NewAnalytics(infra.Redis),
+		Source:     cfg.Catalog.Source,
+		Catalog:    shared.Catalog,
+		Games:      games,
+		Cards:      shared.GameCards,
+		Developers: developers,
+		Characters: characters,
+		Titles:     searchpg.NewTitleStore(infra.Ent),
+		Tags:       searchpg.NewTagStore(infra.Ent),
+		Cache:      shared.Cache,
+		Queue:      searchJobQueue{queue: shared.Queue},
+		Analytics:  searchredis.NewAnalytics(infra.Redis),
 	})
 
 	modules.Handlers = append(modules.Handlers,
 		gamehttp.NewHandler(gameService, scores, shared.Builder),
-		characterhttp.NewHandler(character.NewService(characterpg.NewRepository(infra.Ent), shared.Transactor), shared.Builder),
-		developerhttp.NewHandler(developer.NewService(developerpg.NewRepository(infra.Ent), shared.Transactor), shared.Builder),
+		characterhttp.NewHandler(character.NewService(characters, shared.Transactor), shared.Builder),
+		developerhttp.NewHandler(developer.NewService(developers, shared.Transactor), shared.Builder),
 		searchhttp.NewHandler(searchService, shared.Builder),
 		sitemaphttp.NewHandler(sitemap.NewService(sitemappg.NewStore(infra.Ent), shared.Cache, shared.Now), cfg.App.SiteURL),
 	)
-	modules.Jobs.Register = append(modules.Jobs.Register, searchjobs.Register(searchService), searchjobs.RegisterIndex(shared.Search))
+	modules.Jobs.Register = append(modules.Jobs.Register, searchjobs.Register(searchService))
 	modules.Jobs.Tasks = append(modules.Jobs.Tasks, gamejobs.HotScoreTask(hotScore, shared.Logger))
 	modules.Jobs.Tasks = append(modules.Jobs.Tasks, searchjobs.Tasks(searchService)...)
-}
-
-func searchEngine(cfg *config.Config, infra *Infra, outbound *http.Client) search.Engine {
-	if cfg.Search.Engine == "meilisearch" {
-		return meilisearch.NewEngine(meilisearch.Options{
-			HTTP:   outbound,
-			Host:   cfg.Search.MeilisearchHost,
-			APIKey: cfg.Search.MeilisearchAPIKey,
-			Index:  cfg.Search.MeilisearchIndex,
-		})
-	}
-	return searchpg.NewSearchStore(infra.Ent)
-}
-
-func BuildSearchIndexer(infra *Infra) *search.IndexService {
-	cfg := infra.Config.Search
-	if cfg.Engine != "meilisearch" {
-		return search.NewIndexService(nil, nil, nil)
-	}
-	index := meilisearch.NewIndex(meilisearch.Options{
-		HTTP:   httpclient.New(httpclient.Options{Timeout: catalogOutboundTimeout}),
-		Host:   cfg.MeilisearchHost,
-		APIKey: cfg.MeilisearchAPIKey,
-		Index:  cfg.MeilisearchIndex,
-	})
-	return search.NewIndexService(searchpg.NewDocumentStore(infra.Ent), index, typedQueue[search.IndexJob]{queue: infra.Queue})
-}
-
-type typedQueue[J queue.Job] struct {
-	queue *queue.Queue
-}
-
-func (q typedQueue[J]) Enqueue(ctx context.Context, job J) error {
-	return q.queue.Enqueue(ctx, job)
 }
 
 func hotScoreWeights(cfg config.HotScore) game.HotScoreWeights {

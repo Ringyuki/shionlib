@@ -11027,7 +11027,7 @@
         ],
         "type": "object"
       },
-      "EnvelopeSearchGamePageDTO": {
+      "EnvelopeSearchResultsDTO": {
         "additionalProperties": false,
         "properties": {
           "code": {
@@ -11035,7 +11035,7 @@
             "type": "integer"
           },
           "data": {
-            "$ref": "#/components/schemas/SearchGamePageDTO"
+            "$ref": "#/components/schemas/SearchResultsDTO"
           },
           "message": {
             "type": "string"
@@ -15198,13 +15198,9 @@
         ],
         "type": "object"
       },
-      "SearchGameItemDTO": {
+      "SearchCharacterDTO": {
         "additionalProperties": false,
         "properties": {
-          "_formatted": {
-            "$ref": "#/components/schemas/SearchHighlightDTO",
-            "description": "Highlighted fields when the search engine provides them"
-          },
           "aliases": {
             "items": {
               "type": "string"
@@ -15214,18 +15210,102 @@
               "null"
             ]
           },
-          "covers": {
+          "game": {
+            "$ref": "#/components/schemas/SearchCharacterGameDTO",
+            "description": "First visible game the character appears in"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "image": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name_en": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name_jp": {
+            "type": "string"
+          },
+          "name_zh": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "image",
+          "name_jp",
+          "name_zh",
+          "name_en",
+          "aliases",
+          "game"
+        ],
+        "type": "object"
+      },
+      "SearchCharacterGameDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "title_en": {
+            "type": "string"
+          },
+          "title_jp": {
+            "type": "string"
+          },
+          "title_zh": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title_jp",
+          "title_zh",
+          "title_en"
+        ],
+        "type": "object"
+      },
+      "SearchCharacterSectionDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
             "items": {
-              "$ref": "#/components/schemas/GameCoverDTO"
+              "$ref": "#/components/schemas/SearchCharacterDTO"
             },
             "type": [
               "array",
               "null"
             ]
           },
-          "developers": {
+          "total": {
+            "description": "Matches at the catalog source, including entries not listed here",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "type": "object"
+      },
+      "SearchDeveloperDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "aliases": {
             "items": {
-              "$ref": "#/components/schemas/GameCreditDTO"
+              "type": "string"
             },
             "type": [
               "array",
@@ -15236,150 +15316,110 @@
             "format": "int64",
             "type": "integer"
           },
-          "intro_en": {
-            "type": "string"
-          },
-          "intro_jp": {
-            "type": "string"
-          },
-          "intro_zh": {
-            "type": "string"
-          },
-          "release_date": {
-            "format": "date-time",
+          "logo": {
             "type": [
               "string",
               "null"
             ]
           },
-          "title_en": {
+          "name": {
             "type": "string"
           },
-          "title_jp": {
-            "type": "string"
-          },
-          "title_zh": {
-            "type": "string"
-          },
-          "type": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "views": {
+          "works_count": {
             "format": "int64",
             "type": "integer"
           }
         },
         "required": [
           "id",
-          "views",
-          "title_jp",
-          "title_zh",
-          "title_en",
+          "name",
           "aliases",
-          "type",
-          "covers",
-          "intro_jp",
-          "intro_zh",
-          "intro_en",
-          "release_date",
-          "developers"
+          "logo",
+          "works_count"
         ],
         "type": "object"
       },
-      "SearchGamePageDTO": {
+      "SearchDeveloperSectionDTO": {
         "additionalProperties": false,
         "properties": {
           "items": {
             "items": {
-              "$ref": "#/components/schemas/SearchGameItemDTO"
+              "$ref": "#/components/schemas/SearchDeveloperDTO"
             },
             "type": [
               "array",
               "null"
             ]
           },
-          "meta": {
-            "$ref": "#/components/schemas/SearchGamePageMetaDTO"
+          "total": {
+            "description": "Matches at the catalog source, including entries not listed here",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "type": "object"
+      },
+      "SearchGameSectionDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/GameListItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "total": {
+            "description": "Matches at the catalog source, including entries not listed here",
+            "format": "int64",
+            "type": "integer"
           }
         },
         "required": [
           "items",
-          "meta"
+          "total"
         ],
         "type": "object"
       },
-      "SearchGamePageMetaDTO": {
+      "SearchRecordInputBody": {
         "additionalProperties": false,
         "properties": {
-          "content_limit": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "currentPage": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "itemCount": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "itemsPerPage": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "totalItems": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "totalPages": {
-            "format": "int64",
-            "type": "integer"
+          "q": {
+            "description": "Keyword the visitor settled on",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
           }
         },
         "required": [
-          "content_limit",
-          "totalItems",
-          "itemCount",
-          "itemsPerPage",
-          "totalPages",
-          "currentPage"
+          "q"
         ],
         "type": "object"
       },
-      "SearchHighlightDTO": {
+      "SearchResultsDTO": {
         "additionalProperties": false,
         "properties": {
-          "aliases": {
-            "items": {
-              "type": "string"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
+          "characters": {
+            "$ref": "#/components/schemas/SearchCharacterSectionDTO"
           },
-          "intro_en": {
-            "type": "string"
+          "developers": {
+            "$ref": "#/components/schemas/SearchDeveloperSectionDTO"
           },
-          "intro_jp": {
-            "type": "string"
-          },
-          "intro_zh": {
-            "type": "string"
-          },
-          "title_en": {
-            "type": "string"
-          },
-          "title_jp": {
-            "type": "string"
-          },
-          "title_zh": {
-            "type": "string"
+          "games": {
+            "$ref": "#/components/schemas/SearchGameSectionDTO"
           }
         },
+        "required": [
+          "games",
+          "developers",
+          "characters"
+        ],
         "type": "object"
       },
       "SearchTagDTO": {
@@ -19795,6 +19835,22 @@
             }
           },
           {
+            "description": "Entry kind",
+            "explode": false,
+            "in": "query",
+            "name": "entity",
+            "schema": {
+              "default": "game",
+              "description": "Entry kind",
+              "enum": [
+                "game",
+                "developer",
+                "character"
+              ],
+              "type": "string"
+            }
+          },
+          {
             "description": "Search keyword",
             "explode": false,
             "in": "query",
@@ -19845,7 +19901,7 @@
             "accessCookie": []
           }
         ],
-        "summary": "Search games at a catalog source",
+        "summary": "Search entries at a catalog source",
         "tags": [
           "admin-catalog"
         ]
@@ -28145,9 +28201,9 @@
         ]
       }
     },
-    "/search/games": {
+    "/search": {
       "get": {
-        "operationId": "search.games",
+        "operationId": "search.query",
         "parameters": [
           {
             "description": "1-based page number",
@@ -28177,23 +28233,38 @@
             }
           },
           {
-            "description": "Keyword matched against titles, aliases, tags and developers",
+            "description": "Keyword sent to the catalog source",
             "explode": false,
             "in": "query",
             "name": "q",
             "schema": {
-              "description": "Keyword matched against titles, aliases, tags and developers",
+              "description": "Keyword sent to the catalog source",
+              "maxLength": 100,
               "type": "string"
             }
           },
           {
-            "description": "Exact tag name",
+            "description": "Comma-separated kinds of entries to search",
             "explode": false,
             "in": "query",
-            "name": "tag",
+            "name": "types",
             "schema": {
-              "description": "Exact tag name",
-              "type": "string"
+              "default": [
+                "game"
+              ],
+              "description": "Comma-separated kinds of entries to search",
+              "items": {
+                "enum": [
+                  "game",
+                  "developer",
+                  "character"
+                ],
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
             }
           }
         ],
@@ -28202,7 +28273,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopeSearchGamePageDTO"
+                  "$ref": "#/components/schemas/EnvelopeSearchResultsDTO"
                 }
               }
             },
@@ -28226,7 +28297,55 @@
             "description": "Error"
           }
         },
-        "summary": "Search games",
+        "summary": "Search games, developers and characters",
+        "tags": [
+          "search"
+        ]
+      }
+    },
+    "/search/record": {
+      "post": {
+        "operationId": "search.record",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchRecordInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Count a settled search keyword towards the trends",
         "tags": [
           "search"
         ]
@@ -28242,6 +28361,7 @@
             "name": "prefix",
             "required": true,
             "schema": {
+              "maxLength": 100,
               "minLength": 1,
               "type": "string"
             }
@@ -28253,7 +28373,7 @@
             "schema": {
               "default": 10,
               "format": "int64",
-              "maximum": 50,
+              "maximum": 20,
               "minimum": 1,
               "type": "integer"
             }
@@ -28264,7 +28384,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopeListSearchTermDTO"
+                  "$ref": "#/components/schemas/EnvelopeListString"
                 }
               }
             },
@@ -28288,69 +28408,7 @@
             "description": "Error"
           }
         },
-        "summary": "Suggest search queries for a prefix",
-        "tags": [
-          "search"
-        ]
-      }
-    },
-    "/search/tags": {
-      "get": {
-        "operationId": "search.tags",
-        "parameters": [
-          {
-            "description": "Matches tag names and aliases",
-            "explode": false,
-            "in": "query",
-            "name": "q",
-            "schema": {
-              "description": "Matches tag names and aliases",
-              "type": "string"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "limit",
-            "schema": {
-              "default": 10,
-              "format": "int64",
-              "maximum": 100,
-              "minimum": 0,
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EnvelopeListSearchTagDTO"
-                }
-              }
-            },
-            "description": "OK",
-            "headers": {
-              "shionlib-auth-stale": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Search tags",
+        "summary": "Suggest game titles for a prefix",
         "tags": [
           "search"
         ]
@@ -28417,7 +28475,7 @@
             "description": "Error"
           }
         },
-        "summary": "Trending search queries",
+        "summary": "Trending search keywords",
         "tags": [
           "search"
         ]
@@ -28753,6 +28811,68 @@
         "summary": "iDataRiver payment callback",
         "tags": [
           "sponsor"
+        ]
+      }
+    },
+    "/tags": {
+      "get": {
+        "operationId": "tag.search",
+        "parameters": [
+          {
+            "description": "Matches tag names and aliases",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Matches tag names and aliases",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 10,
+              "format": "int64",
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListSearchTagDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Search tags",
+        "tags": [
+          "tags"
         ]
       }
     },

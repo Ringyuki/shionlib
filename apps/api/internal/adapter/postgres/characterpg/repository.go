@@ -14,6 +14,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/gamepg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/character"
+	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 )
 
 var adminSortFields = map[character.SortField]string{
@@ -151,6 +152,37 @@ func (r *Repository) List(ctx context.Context, query string, page character.Page
 		characters[i] = gamepg.ToCharacter(row)
 	}
 	return characters, total, nil
+}
+
+func (r *Repository) Summaries(ctx context.Context, ids []int) (map[int]character.Summary, error) {
+	summaries := make(map[int]character.Summary, len(ids))
+	if len(ids) == 0 {
+		return summaries, nil
+	}
+	rows, err := r.db(ctx).GameCharacter.Query().
+		Where(gamecharacter.IDIn(ids...)).
+		WithGames(func(q *ent.GameCharacterRelationQuery) {
+			q.Where(gamecharacterrelation.HasGameWith(gamepg.ListablePredicates(game.Visibility{})...)).
+				Order(gamecharacterrelation.ByID()).
+				WithGame()
+		}).
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("load character summaries: %w", err)
+	}
+	for _, row := range rows {
+		summary := character.Summary{ID: row.ID, Image: row.Image, NameJP: row.NameJp, NameZH: row.NameZh, NameEN: row.NameEn, Aliases: slices.Clone([]string(row.Aliases))}
+		if summary.Aliases == nil {
+			summary.Aliases = []string{}
+		}
+		if len(row.Edges.Games) > 0 {
+			if appeared := row.Edges.Games[0].Edges.Game; appeared != nil {
+				summary.Game = &character.GameRef{ID: appeared.ID, TitleJP: appeared.TitleJp, TitleZH: appeared.TitleZh, TitleEN: appeared.TitleEn}
+			}
+		}
+		summaries[row.ID] = summary
+	}
+	return summaries, nil
 }
 
 func (r *Repository) Get(ctx context.Context, id int) (character.Character, error) {
