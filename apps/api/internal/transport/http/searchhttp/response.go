@@ -26,10 +26,11 @@ type searchDeveloperSectionDTO struct {
 }
 
 type searchCharacterGameDTO struct {
-	ID      int    `json:"id"`
-	TitleJP string `json:"title_jp"`
-	TitleZH string `json:"title_zh"`
-	TitleEN string `json:"title_en"`
+	_       struct{} `nullable:"true"`
+	ID      int      `json:"id"`
+	TitleJP string   `json:"title_jp"`
+	TitleZH string   `json:"title_zh"`
+	TitleEN string   `json:"title_en"`
 }
 
 type searchCharacterDTO struct {

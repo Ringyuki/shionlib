@@ -15418,7 +15418,10 @@
           "title_zh",
           "title_en"
         ],
-        "type": "object"
+        "type": [
+          "object",
+          "null"
+        ]
       },
       "SearchCharacterSectionDTO": {
         "additionalProperties": false,
