@@ -82,3 +82,25 @@ func TestTelemetryHeadersArePercentDecoded(t *testing.T) {
 		t.Fatalf("headers %v", headers)
 	}
 }
+
+func TestCatalogSettingsAreValidated(t *testing.T) {
+	for name, overrides := range map[string]map[string]string{
+		"no import workers":   {"CATALOG_IMPORT_WORKERS": "0"},
+		"no request budget":   {"HIKARINAGI_REQUESTS_PER_MINUTE": "0"},
+		"unknown source name": {"CATALOG_SOURCE": "vndb"},
+	} {
+		env := base()
+		for key, value := range overrides {
+			env[key] = value
+		}
+		if _, err := LoadFrom(env); err == nil {
+			t.Errorf("%s: expected a validation error", name)
+		}
+	}
+	env := base()
+	env["CATALOG_IMPORT_WORKERS"] = "8"
+	cfg, err := LoadFrom(env)
+	if err != nil || cfg.Catalog.ImportWorkers != 8 {
+		t.Fatalf("import workers %+v %v", cfg, err)
+	}
+}

@@ -9,8 +9,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/jobs/catalogjobs"
 )
 
-const catalogImportWorkers = 2
-
 func buildCatalog(infra *Infra, shared *Shared) *catalog.Service {
 	cfg := shared.Config.Catalog
 	var sources []catalog.Source
@@ -47,7 +45,7 @@ func wireCatalogSync(_ *Infra, shared *Shared, modules *Modules) {
 	service := shared.Catalog
 	modules.Handlers = append(modules.Handlers, cataloghttp.NewHandler(service, shared.Builder))
 	modules.Jobs.Register = append(modules.Jobs.Register, catalogjobs.Register(service))
-	modules.Jobs.Queues[catalog.ImportQueue] = catalogImportWorkers
+	modules.Jobs.Queues[catalog.ImportQueue] = shared.Config.Catalog.ImportWorkers
 	if len(service.Sources()) > 0 {
 		modules.Jobs.Tasks = append(modules.Jobs.Tasks, catalogjobs.Tasks(service)...)
 	}

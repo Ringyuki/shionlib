@@ -201,6 +201,7 @@ type Catalog struct {
 	RefreshInterval time.Duration `env:"CATALOG_REFRESH_INTERVAL" envDefault:"168h"`
 	RefreshBatch    int           `env:"CATALOG_REFRESH_BATCH" envDefault:"50"`
 	ChangesBatch    int           `env:"CATALOG_CHANGES_BATCH" envDefault:"200"`
+	ImportWorkers   int           `env:"CATALOG_IMPORT_WORKERS" envDefault:"2"`
 	Hikarinagi      Hikarinagi
 }
 

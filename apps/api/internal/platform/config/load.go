@@ -74,6 +74,8 @@ func (c *Config) Validate() error {
 	require(slices.Contains([]string{"pg", "meilisearch"}, c.Search.Engine), "SEARCH_ENGINE must be pg or meilisearch")
 	require(c.Search.Engine != "meilisearch" || c.Search.MeilisearchHost != "", "MEILISEARCH_HOST is required when SEARCH_ENGINE=meilisearch")
 	require(slices.Contains([]string{"hikarinagi"}, c.Catalog.Source), "CATALOG_SOURCE must be hikarinagi")
+	require(c.Catalog.ImportWorkers > 0, "CATALOG_IMPORT_WORKERS must be positive")
+	require(c.Catalog.Hikarinagi.RequestsPerMin > 0, "HIKARINAGI_REQUESTS_PER_MINUTE must be positive")
 	require(slices.Contains([]string{"json", "text"}, c.Log.Format), "LOG_FORMAT must be json or text")
 	require(c.Telemetry.SampleRate >= 0 && c.Telemetry.SampleRate <= 1, "OTEL_TRACES_SAMPLER_ARG must be between 0 and 1")
 	require(c.Upload.ChunkSizeBytes > 0 && c.Upload.ChunkSizeBytes <= c.Upload.TransferLimitBytes, "FILE_UPLOAD_CHUNK_SIZE must be positive and not exceed UPLOAD_LARGE_FILE_TRANSFER_LIMIT_BYTES")
