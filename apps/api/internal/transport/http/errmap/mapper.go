@@ -27,7 +27,7 @@ type ErrorResponse struct {
 	status    int
 	headers   http.Header
 	cause     error
-	Code      int        `json:"code"`
+	Code      Code       `json:"code"`
 	Message   string     `json:"message"`
 	Data      *ErrorData `json:"data"`
 	RequestID string     `json:"requestId"`
@@ -122,7 +122,7 @@ func (m *Mapper) FromError(ctx context.Context, err error) *ErrorResponse {
 	appErr, ok := apperror.From(err)
 	if !ok {
 		result := m.build(ctx, http.StatusInternalServerError, http.StatusInternalServerError, "common.error", nil, nil, err)
-		reqstate.RecordError(ctx, result.Code, err)
+		reqstate.RecordError(ctx, int(result.Code), err)
 		return result
 	}
 	def := appErr.Definition()
@@ -156,7 +156,7 @@ func (m *Mapper) build(ctx context.Context, status, code int, key string, args m
 	return &ErrorResponse{
 		status:    status,
 		cause:     cause,
-		Code:      code,
+		Code:      Code(code),
 		Message:   m.builder.Translate(ctx, key, args),
 		Data:      data,
 		RequestID: requestid.From(ctx),

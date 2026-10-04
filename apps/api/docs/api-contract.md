@@ -6,7 +6,7 @@ The OpenAPI 3.1 document `apps/api/openapi/openapi.json` is generated from the G
 
 | Field | Type | Notes |
 |---|---|---|
-| `code` | integer | `0` on success |
+| `code` | integer | `0` on success; on failure a business code (all of them, with names, in `components.schemas.BusinessCode` via `x-enum-varnames`) or the HTTP status when the failure has none |
 | `message` | string | localized; `common.success` is empty |
 | `data` | any | omitted entirely for void operations |
 | `requestId` | string | equals the `Shionlib-Request-Id` response header |
