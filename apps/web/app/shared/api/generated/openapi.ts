@@ -563,7 +563,7 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** Search games at a catalog source */
+        /** Search entries at a catalog source */
         get: operations["catalog.search"];
         put?: never;
         post?: never;
@@ -2444,17 +2444,34 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/search/games": {
+    "/search": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Search games */
-        get: operations["search.games"];
+        /** Search games, developers and characters */
+        get: operations["search.query"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/search/record": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Count a settled search keyword towards the trends */
+        post: operations["search.record"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2468,25 +2485,8 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** Suggest search queries for a prefix */
+        /** Suggest game titles for a prefix */
         get: operations["search.suggest"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/search/tags": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Search tags */
-        get: operations["search.tags"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2502,7 +2502,7 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** Trending search queries */
+        /** Trending search keywords */
         get: operations["search.trending"];
         put?: never;
         post?: never;
@@ -2608,6 +2608,23 @@ export type paths = {
         put?: never;
         /** iDataRiver payment callback */
         post: operations["sponsor.webhook.idatariver"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search tags */
+        get: operations["tag.search"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -6090,10 +6107,10 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
-        EnvelopeSearchGamePageDTO: {
+        EnvelopeSearchResultsDTO: {
             /** Format: int64 */
             code: number;
-            data: components["schemas"]["SearchGamePageDTO"];
+            data: components["schemas"]["SearchResultsDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -7153,52 +7170,65 @@ export type components = {
             /** @enum {string} */
             verdict: "VALID" | "INVALID";
         };
-        SearchGameItemDTO: {
-            /** @description Highlighted fields when the search engine provides them */
-            _formatted?: components["schemas"]["SearchHighlightDTO"];
+        SearchCharacterDTO: {
             aliases: string[] | null;
-            covers: components["schemas"]["GameCoverDTO"][] | null;
-            developers: components["schemas"]["GameCreditDTO"][] | null;
+            /** @description First visible game the character appears in */
+            game: components["schemas"]["SearchCharacterGameDTO"];
             /** Format: int64 */
             id: number;
-            intro_en: string;
-            intro_jp: string;
-            intro_zh: string;
-            /** Format: date-time */
-            release_date: string | null;
+            image: string | null;
+            name_en: string | null;
+            name_jp: string;
+            name_zh: string | null;
+        };
+        SearchCharacterGameDTO: {
+            /** Format: int64 */
+            id: number;
             title_en: string;
             title_jp: string;
             title_zh: string;
-            type: string | null;
-            /** Format: int64 */
-            views: number;
         };
-        SearchGamePageDTO: {
-            items: components["schemas"]["SearchGameItemDTO"][] | null;
-            meta: components["schemas"]["SearchGamePageMetaDTO"];
+        SearchCharacterSectionDTO: {
+            items: components["schemas"]["SearchCharacterDTO"][] | null;
+            /**
+             * Format: int64
+             * @description Matches at the catalog source, including entries not listed here
+             */
+            total: number;
         };
-        SearchGamePageMetaDTO: {
+        SearchDeveloperDTO: {
+            aliases: string[] | null;
             /** Format: int64 */
-            content_limit: number;
+            id: number;
+            logo: string | null;
+            name: string;
             /** Format: int64 */
-            currentPage: number;
-            /** Format: int64 */
-            itemCount: number;
-            /** Format: int64 */
-            itemsPerPage: number;
-            /** Format: int64 */
-            totalItems: number;
-            /** Format: int64 */
-            totalPages: number;
+            works_count: number;
         };
-        SearchHighlightDTO: {
-            aliases?: string[] | null;
-            intro_en?: string;
-            intro_jp?: string;
-            intro_zh?: string;
-            title_en?: string;
-            title_jp?: string;
-            title_zh?: string;
+        SearchDeveloperSectionDTO: {
+            items: components["schemas"]["SearchDeveloperDTO"][] | null;
+            /**
+             * Format: int64
+             * @description Matches at the catalog source, including entries not listed here
+             */
+            total: number;
+        };
+        SearchGameSectionDTO: {
+            items: components["schemas"]["GameListItemDTO"][] | null;
+            /**
+             * Format: int64
+             * @description Matches at the catalog source, including entries not listed here
+             */
+            total: number;
+        };
+        SearchRecordInputBody: {
+            /** @description Keyword the visitor settled on */
+            q: string;
+        };
+        SearchResultsDTO: {
+            characters: components["schemas"]["SearchCharacterSectionDTO"];
+            developers: components["schemas"]["SearchDeveloperSectionDTO"];
+            games: components["schemas"]["SearchGameSectionDTO"];
         };
         SearchTagDTO: {
             aliases: string[] | null;
@@ -9096,6 +9126,8 @@ export interface operations {
                 pageSize?: number;
                 /** @description Catalog source name */
                 source?: string;
+                /** @description Entry kind */
+                entity?: "game" | "developer" | "character";
                 /** @description Search keyword */
                 q: string;
             };
@@ -13451,17 +13483,17 @@ export interface operations {
             };
         };
     };
-    "search.games": {
+    "search.query": {
         parameters: {
             query?: {
                 /** @description 1-based page number */
                 page?: number;
                 /** @description Items per page */
                 pageSize?: number;
-                /** @description Keyword matched against titles, aliases, tags and developers */
+                /** @description Keyword sent to the catalog source */
                 q?: string;
-                /** @description Exact tag name */
-                tag?: string;
+                /** @description Comma-separated kinds of entries to search */
+                types?: ("game" | "developer" | "character")[] | null;
             };
             header?: never;
             path?: never;
@@ -13476,7 +13508,41 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["EnvelopeSearchGamePageDTO"];
+                    "application/json": components["schemas"]["EnvelopeSearchResultsDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "search.record": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SearchRecordInputBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
                 };
             };
             /** @description Error */
@@ -13509,41 +13575,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["EnvelopeListSearchTermDTO"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    "search.tags": {
-        parameters: {
-            query?: {
-                /** @description Matches tag names and aliases */
-                q?: string;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    "shionlib-auth-stale"?: string;
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EnvelopeListSearchTagDTO"];
+                    "application/json": components["schemas"]["EnvelopeListString"];
                 };
             };
             /** @description Error */
@@ -13784,6 +13816,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeSponsorWebhookDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "tag.search": {
+        parameters: {
+            query?: {
+                /** @description Matches tag names and aliases */
+                q?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeListSearchTagDTO"];
                 };
             };
             /** @description Error */
