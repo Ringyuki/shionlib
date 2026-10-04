@@ -6343,7 +6343,7 @@ export type components = {
         ErrorResponse: {
             /** @description A business code, or the HTTP status when the failure has no business code. */
             code: components["schemas"]["BusinessCode"] | number;
-            data: components["schemas"]["ErrorData"];
+            data: components["schemas"]["ErrorData"] | null;
             message: string;
             requestId: string;
             /** Format: date-time */
@@ -6413,6 +6413,9 @@ export type components = {
             intro_zh: string;
             /** Format: date-time */
             release_date: string | null;
+            resources: components["schemas"]["GameResourceSummaryDTO"];
+            /** @description The game's most used tags, at most three */
+            tags: components["schemas"]["GameTagRefDTO"][] | null;
             title_en: string;
             title_jp: string;
             title_zh: string;
@@ -6547,6 +6550,20 @@ export type components = {
             /** Format: int64 */
             violence: number;
         };
+        GameLatestResourceDTO: {
+            /**
+             * Format: date-time
+             * @description When the newest downloadable resource was published
+             */
+            at: string;
+            languages: string[] | null;
+            platforms: string[] | null;
+            /**
+             * Format: int64
+             * @description Total size in bytes of its downloadable files
+             */
+            size: number;
+        } | null;
         GameLinkDTO: {
             /** Format: int64 */
             id: number;
@@ -6565,6 +6582,9 @@ export type components = {
             intro_zh: string;
             /** Format: date-time */
             release_date: string | null;
+            resources: components["schemas"]["GameResourceSummaryDTO"];
+            /** @description The game's most used tags, at most three */
+            tags: components["schemas"]["GameTagRefDTO"][] | null;
             title_en: string;
             title_jp: string;
             title_zh: string;
@@ -6598,6 +6618,24 @@ export type components = {
             /** Format: int64 */
             to_game_id: number;
         };
+        GameResourceSummaryDTO: {
+            /**
+             * Format: int64
+             * @description Number of downloadable resources
+             */
+            count: number;
+            /**
+             * Format: int64
+             * @description Downloads across the downloadable resources
+             */
+            downloads: number;
+            /** @description Languages of the downloadable resources, most common first */
+            languages: string[] | null;
+            /** @description The newest downloadable resource; null when there is none */
+            latest: components["schemas"]["GameLatestResourceDTO"];
+            /** @description Platforms of the downloadable resources, most common first */
+            platforms: string[] | null;
+        };
         GameStaffDTO: {
             name: string;
             role: string;
@@ -6613,6 +6651,11 @@ export type components = {
         GameTagLinkDTO: {
             tag: components["schemas"]["GameTagDTO"];
             tag_alias: string | null;
+        };
+        GameTagRefDTO: {
+            /** Format: int64 */
+            id: number;
+            name: string;
         };
         HealthLivenessDTO: {
             status: string;
@@ -12554,8 +12597,8 @@ export interface operations {
                 "filter[months][]"?: number[] | null;
                 /** @description Games available on any of these platforms */
                 "filter[platforms][]"?: string[] | null;
-                /** @description Sort key, release_date by default */
-                "filter[sort_by]"?: "release_date" | "views" | "downloads" | "hot_score";
+                /** @description Sort key, release_date by default; resource_updated orders by the newest downloadable resource and lists only games that have one */
+                "filter[sort_by]"?: "release_date" | "views" | "downloads" | "hot_score" | "resource_updated";
                 /** @description Sort direction, desc by default */
                 "filter[sort_order]"?: "asc" | "desc";
                 /** @description Released on or after this date (ISO 8601) */
