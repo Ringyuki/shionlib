@@ -44,7 +44,14 @@ export function SiteSidebar({ sections, viewer, mode, onClose }: SiteSidebarProp
         <Link to={sitePaths(locale).home} aria-label="Shionlib" className="min-w-0">
           <Inline gap="sm" align="center" className="flex-nowrap">
             <BrandLogo />
-            <Wordmark collapsed={rail} className="hn-sidebar-label" />
+            <Flex
+              as="span"
+              aria-hidden={rail || undefined}
+              data-collapsed={rail ? '' : undefined}
+              className="hn-sidebar-label"
+            >
+              <Wordmark />
+            </Flex>
           </Inline>
         </Link>
         {!desktop && <CloseButton className="ms-auto" onClick={onClose} />}
