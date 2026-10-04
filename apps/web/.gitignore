@@ -1,0 +1,6 @@
+node_modules
+build
+.react-router
+coverage
+test-results
+playwright-report

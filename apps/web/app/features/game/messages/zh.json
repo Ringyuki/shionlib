@@ -1,0 +1,4 @@
+{
+  "releaseTba": "发售日待定",
+  "released": "发售于 {date, date, long}"
+}

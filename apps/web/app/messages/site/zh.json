@@ -1,0 +1,14 @@
+{
+  "name": "Shionlib",
+  "tagline": "Galgame 资源与资料库",
+  "latest": "最新游戏",
+  "notFoundTitle": "页面不存在",
+  "notFoundDescription": "你要找的内容不存在或已被移除。",
+  "errorTitle": "出错了",
+  "errorDescription": "请求没有成功，请稍后再试。",
+  "signInTitle": "需要登录",
+  "signInDescription": "登录后才能查看这里的内容。",
+  "forbiddenTitle": "没有权限",
+  "forbiddenDescription": "你没有访问这里的权限。",
+  "backHome": "返回首页"
+}

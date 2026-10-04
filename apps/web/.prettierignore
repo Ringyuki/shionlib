@@ -1,0 +1,4 @@
+build
+.react-router
+app/shared/api/generated
+pnpm-lock.yaml
