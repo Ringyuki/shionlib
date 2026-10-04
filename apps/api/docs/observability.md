@@ -15,16 +15,16 @@
 
 ## Traces
 
-OpenTelemetry traces are exported over OTLP/HTTP to `APM_ENDPOINT` + `/v1/traces` (the Hikarinagi APM ingest) with `Authorization: Bearer $APM_INGEST_KEY`. Unset `APM_ENDPOINT` disables export; instrumentation then runs against a no-op provider.
+OpenTelemetry traces are exported over OTLP/HTTP to `OTEL_EXPORTER_OTLP_ENDPOINT` + `/v1/traces`, so any OTLP backend can receive them. `OTEL_EXPORTER_OTLP_HEADERS` adds request headers in the OpenTelemetry format (`name=value` pairs separated by commas, values percent-encoded, e.g. `Authorization=Bearer%20<token>`). Unset `OTEL_EXPORTER_OTLP_ENDPOINT` disables export; instrumentation then runs against a no-op provider.
 
-- Sampling: parent-based, `APM_SAMPLE_RATE` of new root traces (0..1, default 1). Incoming `traceparent` headers are honoured.
+- Sampling: parent-based trace-id ratio, `OTEL_TRACES_SAMPLER_ARG` of new root traces (0..1, default 1). Incoming `traceparent` headers are honoured.
 - Resource: `service.name` = `APP_NAME` (`shionlib-api`; the worker runs as `shionlib-worker`), `service.version` = `APP_VERSION`, `deployment.environment` = `APP_ENV`.
 - Spans: one server span per HTTP request named `<METHOD> <route pattern>` with `http.route`, `http.response.status_code` and `shionlib.request_id` (health paths are not traced); outbound HTTP clients from `internal/platform/httpclient`; every pgx query; Redis commands; River job insert and work.
 - Logs: lines written inside a traced request or job carry `trace_id` and `span_id`.
 
 ## Metrics
 
-There is no metrics exporter yet: the Hikarinagi APM ingests traces and logs only (ADR 0008). Request, query and job rates and durations are derived from spans and from the access log (`duration_ms`, `status`, `route`).
+There is no metrics exporter yet; it waits for the choice of a monitoring backend (ADR 0008). Request, query and job rates and durations are derived from spans and from the access log (`duration_ms`, `status`, `route`).
 
 When an exporter is added (future action, recorded in ADR 0008):
 

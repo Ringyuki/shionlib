@@ -8,7 +8,7 @@ type Config struct {
 	App        App
 	HTTP       HTTP
 	Log        Log
-	APM        APM
+	Telemetry  Telemetry
 	Database   Database
 	Redis      Redis
 	Throttle   Throttle
@@ -54,10 +54,10 @@ type HTTP struct {
 	IdleTimeout       time.Duration `env:"HTTP_IDLE_TIMEOUT" envDefault:"120s"`
 }
 
-type APM struct {
-	Endpoint   string  `env:"APM_ENDPOINT"`
-	IngestKey  string  `env:"APM_INGEST_KEY"`
-	SampleRate float64 `env:"APM_SAMPLE_RATE" envDefault:"1"`
+type Telemetry struct {
+	Endpoint   string  `env:"OTEL_EXPORTER_OTLP_ENDPOINT"`
+	Headers    string  `env:"OTEL_EXPORTER_OTLP_HEADERS"`
+	SampleRate float64 `env:"OTEL_TRACES_SAMPLER_ARG" envDefault:"1"`
 }
 
 type Log struct {

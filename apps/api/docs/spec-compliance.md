@@ -21,7 +21,7 @@ How each section of the Go backend engineering spec is met. **Enforced** means C
 | 15 | One pagination contract, documented exceptions | `httpapi.PageQuery` + `response.NewPage/MapPage`; extras through `<thing>PageMetaDTO`; unpaginated owner-scoped collections listed in api-contract.md | review for new lists | Reviewed |
 | 16 | Context first, propagated, never replaced in request paths | — | contextcheck, `archtest.TestRequestPathsKeepTheirContext` (one allow-listed site with reason) | Enforced |
 | 17 | Structured logs, fixed fields, no `fmt.Println`, redaction | `platform/logger` (JSON, `request_id`/`trace_id`/`span_id`/`user_id`, redaction of password/secret/token/cookie/authorization/credential/api key) | forbidigo, `TestLoggersComeFromThePlatform`, logger redaction tests | Enforced |
-| 18 | Unified tracing and metrics naming | OpenTelemetry for HTTP, pgx, Redis, River, outbound HTTP (ADR 0008); metric naming rules in observability.md | telemetry wiring tests | Tracing Enforced; metrics exporter **Deferred**: the APM ingests traces and logs only; add the exporter in `platform/telemetry` when it gains a metrics endpoint (ADR 0008) |
+| 18 | Unified tracing and metrics naming | OpenTelemetry for HTTP, pgx, Redis, River, outbound HTTP (ADR 0008); metric naming rules in observability.md | telemetry wiring tests | Tracing Enforced; metrics exporter **Deferred**: no monitoring backend is chosen yet; add the exporter in `platform/telemetry` once one is (ADR 0008) |
 | 19 | Request ID: trusted upstream or generated; in logs, responses, errors | `middleware.RequestContext` accepts a well-formed upstream id only from trusted proxies; envelope and error bodies carry `requestId`; logger adds it | `requestid`, `clientinfo`, `errmap`, `httpapi` tests | Enforced |
 | 20 | Authentication in transport, business permission in services, typed principal | `httpapi.Route.Access` + middleware authenticate; ownership and role rules in services; `actor.Actor` with an unexported context key | handler and service tests per authorization path | Enforced |
 | 21 | One data-access approach | ent + pgx pool; raw SQL only in Postgres adapters for what ent cannot express (ADR 0003) | depguard, `TestRawSQLStaysInPostgresAdapters` | Enforced |
@@ -69,5 +69,5 @@ How each section of the Go backend engineering spec is met. **Enforced** means C
 
 | Item | Reason | Trigger |
 |---|---|---|
-| Metrics exporter | the APM has no metrics ingest | APM metrics endpoint, or a decision to run a Prometheus scrape target (new ADR) |
+| Metrics exporter | no monitoring backend is chosen yet | choice of a backend: OTLP metrics or a Prometheus scrape target (new ADR) |
 | Generated frontend client | the new frontend waits for `@hina-ui/react` | start of the frontend rewrite |

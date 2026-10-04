@@ -57,9 +57,9 @@ func OpenInfra(ctx context.Context, cfg *config.Config, log *slog.Logger) (*Infr
 		return nil, err
 	}
 	tracing, err := telemetry.Setup(ctx, telemetry.Options{
-		Endpoint:    cfg.APM.Endpoint,
-		IngestKey:   cfg.APM.IngestKey,
-		SampleRate:  cfg.APM.SampleRate,
+		Endpoint:    cfg.Telemetry.Endpoint,
+		Headers:     cfg.Telemetry.ExportHeaders(),
+		SampleRate:  cfg.Telemetry.SampleRate,
 		ServiceName: cfg.App.Name,
 		Version:     cfg.App.Version,
 		Environment: cfg.App.Environment,

@@ -38,9 +38,9 @@
 
 - Logging: `*slog.Logger` injected; JSON in production. Fields: `request_id`, `trace_id`, `span_id`, `user_id`, `method`, `route`, `status`, `duration_ms`, `business_code`, `error`. `trace_id`/`span_id` are added automatically inside traced requests and jobs.
 - Business code logs only meaningful business events at Info. Errors are logged at boundaries only.
-- Tracing is OpenTelemetry, set up once in `internal/platform/telemetry` and exported to `APM_ENDPOINT`. HTTP server spans, outbound `platform/httpclient` calls, pgx queries, Redis commands and River jobs are instrumented automatically; do not wrap them again.
+- Tracing is OpenTelemetry, set up once in `internal/platform/telemetry` and exported over OTLP to `OTEL_EXPORTER_OTLP_ENDPOINT`. HTTP server spans, outbound `platform/httpclient` calls, pgx queries, Redis commands and River jobs are instrumented automatically; do not wrap them again.
 - Business spans: only around a unit of work that is not already a request, job or query and is worth seeing on its own (for example one catalog import step). Use `telemetry.Tracer().Start(ctx, "<capability>.<operation>")`, end it with `defer span.End()`, record failures with `span.RecordError(err)`. Business packages receive no tracer; spans are started in adapters or transport.
-- Metrics: there is no metrics exporter yet (the APM ingests traces and logs only; ADR 0008). Request, query and job rates and durations are derived from spans and from the access log. When an exporter is added, metrics MUST use OpenTelemetry semantic-convention names (`http.server.request.duration`, `db.client.operation.duration`, `messaging.process.duration`) or `shionlib.<capability>.<measure>` with the unit in the instrument, and are created only in `internal/platform/telemetry`, never in business code.
+- Metrics: there is no metrics exporter yet (no monitoring backend is chosen; ADR 0008). Request, query and job rates and durations are derived from spans and from the access log. When an exporter is added, metrics MUST use OpenTelemetry semantic-convention names (`http.server.request.duration`, `db.client.operation.duration`, `messaging.process.duration`) or `shionlib.<capability>.<measure>` with the unit in the instrument, and are created only in `internal/platform/telemetry`, never in business code.
 
 ## Security baseline
 

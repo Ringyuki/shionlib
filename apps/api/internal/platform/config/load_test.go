@@ -50,3 +50,35 @@ func TestAuthSettingsAreValidated(t *testing.T) {
 		t.Fatalf("valid settings rejected: %v %+v", err, cfg)
 	}
 }
+
+func TestTelemetrySettingsAreValidated(t *testing.T) {
+	cases := map[string]map[string]string{
+		"relative endpoint":     {"OTEL_EXPORTER_OTLP_ENDPOINT": "/otlp"},
+		"header without value":  {"OTEL_EXPORTER_OTLP_HEADERS": "Authorization"},
+		"header without name":   {"OTEL_EXPORTER_OTLP_HEADERS": "=token"},
+		"sample rate above one": {"OTEL_TRACES_SAMPLER_ARG": "1.5"},
+	}
+	for name, overrides := range cases {
+		env := base()
+		for key, value := range overrides {
+			env[key] = value
+		}
+		if _, err := LoadFrom(env); err == nil {
+			t.Errorf("%s: expected a validation error", name)
+		}
+	}
+}
+
+func TestTelemetryHeadersArePercentDecoded(t *testing.T) {
+	env := base()
+	env["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://otlp.example.com"
+	env["OTEL_EXPORTER_OTLP_HEADERS"] = "Authorization=Bearer%20token, X-Scope-OrgID = shionlib ,"
+	cfg, err := LoadFrom(env)
+	if err != nil {
+		t.Fatal(err)
+	}
+	headers := cfg.Telemetry.ExportHeaders()
+	if len(headers) != 2 || headers["Authorization"] != "Bearer token" || headers["X-Scope-OrgID"] != "shionlib" {
+		t.Fatalf("headers %v", headers)
+	}
+}

@@ -23,7 +23,7 @@ const (
 
 type Options struct {
 	Endpoint    string
-	IngestKey   string
+	Headers     map[string]string
 	SampleRate  float64
 	ServiceName string
 	Version     string
@@ -43,8 +43,8 @@ func Setup(ctx context.Context, opts Options) (*Telemetry, error) {
 	exporterOptions := []otlptracehttp.Option{
 		otlptracehttp.WithEndpointURL(strings.TrimRight(opts.Endpoint, "/") + tracesPath),
 	}
-	if opts.IngestKey != "" {
-		exporterOptions = append(exporterOptions, otlptracehttp.WithHeaders(map[string]string{"Authorization": "Bearer " + opts.IngestKey}))
+	if len(opts.Headers) > 0 {
+		exporterOptions = append(exporterOptions, otlptracehttp.WithHeaders(opts.Headers))
 	}
 	if opts.HTTPClient != nil {
 		exporterOptions = append(exporterOptions, otlptracehttp.WithHTTPClient(opts.HTTPClient))

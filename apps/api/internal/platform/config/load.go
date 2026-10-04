@@ -75,7 +75,7 @@ func (c *Config) Validate() error {
 	require(c.Search.Engine != "meilisearch" || c.Search.MeilisearchHost != "", "MEILISEARCH_HOST is required when SEARCH_ENGINE=meilisearch")
 	require(slices.Contains([]string{"hikarinagi"}, c.Catalog.Source), "CATALOG_SOURCE must be hikarinagi")
 	require(slices.Contains([]string{"json", "text"}, c.Log.Format), "LOG_FORMAT must be json or text")
-	require(c.APM.SampleRate >= 0 && c.APM.SampleRate <= 1, "APM_SAMPLE_RATE must be between 0 and 1")
+	require(c.Telemetry.SampleRate >= 0 && c.Telemetry.SampleRate <= 1, "OTEL_TRACES_SAMPLER_ARG must be between 0 and 1")
 	require(c.Upload.ChunkSizeBytes > 0 && c.Upload.ChunkSizeBytes <= c.Upload.TransferLimitBytes, "FILE_UPLOAD_CHUNK_SIZE must be positive and not exceed UPLOAD_LARGE_FILE_TRANSFER_LIMIT_BYTES")
 	require(c.Upload.MaxChunks > 0, "UPLOAD_LARGE_FILE_MAX_CHUNKS must be positive")
 	require(c.AI.IdleTimeout > 0 && c.AI.MaxCallDuration >= c.AI.IdleTimeout, "AI_IDLE_TIMEOUT must be positive and not exceed AI_MAX_CALL_DURATION")
@@ -93,10 +93,13 @@ func (c *Config) Validate() error {
 			errs = append(errs, fmt.Errorf("%s must be an absolute URL", name))
 		}
 	}
-	if c.APM.Endpoint != "" {
-		if parsed, err := url.Parse(c.APM.Endpoint); err != nil || parsed.Scheme == "" || parsed.Host == "" {
-			errs = append(errs, fmt.Errorf("APM_ENDPOINT must be an absolute URL"))
+	if c.Telemetry.Endpoint != "" {
+		if parsed, err := url.Parse(c.Telemetry.Endpoint); err != nil || parsed.Scheme == "" || parsed.Host == "" {
+			errs = append(errs, errors.New("OTEL_EXPORTER_OTLP_ENDPOINT must be an absolute URL"))
 		}
+	}
+	if _, err := parseHeaders(c.Telemetry.Headers); err != nil {
+		errs = append(errs, fmt.Errorf("OTEL_EXPORTER_OTLP_HEADERS: %w", err))
 	}
 	for _, raw := range append(append([]string{}, c.WebAuthn.Origins...), c.OIDC.AllowedOrigins...) {
 		if parsed, err := url.Parse(raw); err != nil || parsed.Scheme == "" || parsed.Host == "" || parsed.Path != "" {
@@ -130,6 +133,31 @@ func ParsePrefix(raw string) (netip.Prefix, error) {
 		return netip.Prefix{}, err
 	}
 	return netip.PrefixFrom(addr, addr.BitLen()), nil
+}
+
+func (t Telemetry) ExportHeaders() map[string]string {
+	headers, _ := parseHeaders(t.Headers)
+	return headers
+}
+
+func parseHeaders(raw string) (map[string]string, error) {
+	headers := map[string]string{}
+	for pair := range strings.SplitSeq(raw, ",") {
+		if strings.TrimSpace(pair) == "" {
+			continue
+		}
+		name, value, found := strings.Cut(pair, "=")
+		name = strings.TrimSpace(name)
+		if !found || name == "" {
+			return nil, fmt.Errorf("%q must be name=value", strings.TrimSpace(pair))
+		}
+		decoded, err := url.PathUnescape(value)
+		if err != nil {
+			return nil, fmt.Errorf("header %s: %w", name, err)
+		}
+		headers[name] = strings.TrimSpace(decoded)
+	}
+	return headers, nil
 }
 
 func trimAll(values []string) []string {

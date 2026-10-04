@@ -20,7 +20,7 @@ func TestSetupWithoutAnEndpointIsDisabled(t *testing.T) {
 	}
 }
 
-func TestSpansAreExportedToTheIngestEndpoint(t *testing.T) {
+func TestSpansAreExportedToTheOTLPEndpoint(t *testing.T) {
 	var mu sync.Mutex
 	var paths, auths []string
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +34,7 @@ func TestSpansAreExportedToTheIngestEndpoint(t *testing.T) {
 	t.Cleanup(server.Close)
 	tracing, err := telemetry.Setup(context.Background(), telemetry.Options{
 		Endpoint:    server.URL + "/",
-		IngestKey:   "ingest-key",
+		Headers:     map[string]string{"Authorization": "Bearer ingest-key"},
 		SampleRate:  1,
 		ServiceName: "shionlib-api",
 		Version:     "test",
