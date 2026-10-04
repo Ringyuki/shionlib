@@ -145,26 +145,25 @@ func (s *Store) saveLink(ctx context.Context, ref catalog.Ref, localID int, revi
 	return nil
 }
 
-func (s *Store) claimLink(ctx context.Context, ref catalog.Ref, localID int) (int, error) {
+func (s *Store) lockRef(ctx context.Context, ref catalog.Ref) error {
+	key := ref.Source + "/" + string(ref.Entity) + "/" + ref.ExternalID
+	if _, err := s.db(ctx).ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", key); err != nil {
+		return fmt.Errorf("lock %s: %w", key, err)
+	}
+	return nil
+}
+
+func (s *Store) insertLink(ctx context.Context, ref catalog.Ref, localID int) (int, error) {
 	err := s.db(ctx).CatalogSourceLink.Create().
 		SetSource(ref.Source).
 		SetEntity(string(ref.Entity)).
 		SetExternalID(ref.ExternalID).
 		SetLocalID(localID).
-		OnConflict(sql.ConflictColumns(catalogsourcelink.FieldSource, catalogsourcelink.FieldEntity, catalogsourcelink.FieldExternalID)).
-		DoNothing().
 		Exec(ctx)
-	if err != nil && !postgres.IsNotFound(err) {
-		return 0, fmt.Errorf("claim source link: %w", err)
-	}
-	row, err := s.link(ctx, ref)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("insert source link: %w", err)
 	}
-	if row == nil {
-		return 0, fmt.Errorf("claim source link %s/%s/%s: link vanished", ref.Source, ref.Entity, ref.ExternalID)
-	}
-	return row.LocalID, nil
+	return localID, nil
 }
 
 func (s *Store) dropLink(ctx context.Context, id int) error {

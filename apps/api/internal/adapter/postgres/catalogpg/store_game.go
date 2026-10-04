@@ -69,6 +69,9 @@ func (s *Store) ApplyGame(ctx context.Context, source string, record catalog.Gam
 }
 
 func (s *Store) resolveGame(ctx context.Context, ref catalog.Ref, record catalog.GameRecord, creatorID int) (int, error) {
+	if err := s.lockRef(ctx, ref); err != nil {
+		return 0, err
+	}
 	id, _, ok, err := s.linked(ctx, ref, s.gameExists)
 	if err != nil || ok {
 		return id, err
@@ -76,7 +79,7 @@ func (s *Store) resolveGame(ctx context.Context, ref catalog.Ref, record catalog
 	if record.HikarinagiID != nil {
 		row, err := s.db(ctx).Game.Query().Where(entgame.HID(*record.HikarinagiID)).Only(ctx)
 		if err == nil {
-			return s.claimLink(ctx, ref, row.ID)
+			return s.insertLink(ctx, ref, row.ID)
 		}
 		if !ent.IsNotFound(err) {
 			return 0, fmt.Errorf("find game by hikarinagi id: %w", err)
@@ -86,22 +89,13 @@ func (s *Store) resolveGame(ctx context.Context, ref catalog.Ref, record catalog
 		if err != nil {
 			return 0, err
 		}
-		return s.claimLink(ctx, ref, id)
+		return s.insertLink(ctx, ref, id)
 	}
 	created, err := s.db(ctx).Game.Create().SetCreatorID(creatorID).SetNillableHID(record.HikarinagiID).Save(ctx)
 	if err != nil {
 		return 0, fmt.Errorf("create game: %w", err)
 	}
-	claimed, err := s.claimLink(ctx, ref, created.ID)
-	if err != nil {
-		return 0, err
-	}
-	if claimed != created.ID {
-		if err := s.db(ctx).Game.DeleteOneID(created.ID).Exec(ctx); err != nil {
-			return 0, fmt.Errorf("discard duplicate game: %w", err)
-		}
-	}
-	return claimed, nil
+	return s.insertLink(ctx, ref, created.ID)
 }
 
 func (s *Store) gameExists(ctx context.Context, id int) (bool, error) {

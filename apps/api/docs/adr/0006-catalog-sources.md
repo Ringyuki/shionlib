@@ -14,9 +14,11 @@ Game, developer and character metadata were read at request time from Hikarinagi
 
 ## Applying a game
 One transaction per entry:
-1. Resolve the local row: existing link → row with the same `h_id` (Hikarinagi) → exactly one unlinked row with the same `v_id` or `b_id` → new row owned by `CATALOG_IMPORT_CREATOR_ID`. A concurrent claim of the same link wins; a row created by the loser is discarded.
+1. Resolve the local row under a transaction-scoped advisory lock on the source key `(source, entity, external_id)`: existing link → row with the same `h_id` (Hikarinagi) → exactly one unlinked row with the same `v_id` or `b_id` → new row owned by `CATALOG_IMPORT_CREATOR_ID`. Developers and characters referenced by the game are resolved the same way, in external-id order, so concurrent imports never create duplicates or race for a link.
+
+Local ids stay the primary keys: they are in public URLs and in every table that references games, developers and characters, an entry may be linked to more than one source or to none, and a source may merge entries; the source key is the natural key of the link.
 2. Overwrite titles, intros, aliases, release, type, platforms, NSFW and staff. External ids are filled in only when the `(b_id, v_id)` pair is not used by another row.
-3. Replace covers, images and links (with source provenance), tag relations (tag counts recomputed), developer relations (developer-role credits only, as before), character relations and relations to games that are already linked.
+3. Replace covers, images and links (with source provenance), tag relations (new tags inserted in name order; tag counts adjusted by this game's delta as the last statement, rows locked in id order), developer relations (developer-role credits only, as before), character relations and relations to games that are already linked.
 4. Developers and characters referenced for the first time get a placeholder row and link; they are imported by their own jobs.
 
 ## Alternatives

@@ -14,20 +14,26 @@ import (
 
 func (s *Store) ensureDeveloper(ctx context.Context, source string, credit catalog.DeveloperLink) (int, bool, error) {
 	ref := catalog.Ref{Source: source, Entity: catalog.EntityDeveloper, ExternalID: credit.ExternalID}
+	if err := s.lockRef(ctx, ref); err != nil {
+		return 0, false, err
+	}
 	id, synced, ok, err := s.linked(ctx, ref, s.developerExists)
 	if err != nil || ok {
 		return id, !synced, err
 	}
-	id, fresh, err := s.createDeveloper(ctx, credit.HikarinagiID, credit.Name, credit.Aliases, credit.Logo)
+	id, err = s.createDeveloper(ctx, credit.HikarinagiID, credit.Name, credit.Aliases, credit.Logo)
 	if err != nil {
 		return 0, false, err
 	}
-	id, err = s.claimDeveloper(ctx, ref, id, fresh)
+	id, err = s.insertLink(ctx, ref, id)
 	return id, true, err
 }
 
 func (s *Store) ApplyDeveloper(ctx context.Context, source string, record catalog.DeveloperRecord, at time.Time) (int, error) {
 	ref := catalog.Ref{Source: source, Entity: catalog.EntityDeveloper, ExternalID: record.ExternalID}
+	if err := s.lockRef(ctx, ref); err != nil {
+		return 0, err
+	}
 	id, _, ok, err := s.linked(ctx, ref, s.developerExists)
 	if err != nil {
 		return 0, err
@@ -108,18 +114,18 @@ func (s *Store) adoptDeveloper(ctx context.Context, ref catalog.Ref, record cata
 				return 0, fmt.Errorf("find unlinked developer: %w", err)
 			}
 			if len(candidates) == 1 {
-				return s.claimDeveloper(ctx, ref, candidates[0], false)
+				return s.insertLink(ctx, ref, candidates[0])
 			}
 		}
 	}
-	id, fresh, err := s.createDeveloper(ctx, record.HikarinagiID, record.Name, record.Aliases, record.Logo)
+	id, err := s.createDeveloper(ctx, record.HikarinagiID, record.Name, record.Aliases, record.Logo)
 	if err != nil {
 		return 0, err
 	}
-	return s.claimDeveloper(ctx, ref, id, fresh)
+	return s.insertLink(ctx, ref, id)
 }
 
-func (s *Store) createDeveloper(ctx context.Context, hikarinagiID *int, name string, aliases []string, logo *string) (int, bool, error) {
+func (s *Store) createDeveloper(ctx context.Context, hikarinagiID *int, name string, aliases []string, logo *string) (int, error) {
 	create := s.db(ctx).GameDeveloper.Create().
 		SetName(name).
 		SetAliases(pgvalue.Strings(aliases)).
@@ -127,28 +133,15 @@ func (s *Store) createDeveloper(ctx context.Context, hikarinagiID *int, name str
 	if hikarinagiID != nil {
 		id, err := create.SetHID(*hikarinagiID).OnConflictColumns(gamedeveloper.FieldHID).Ignore().ID(ctx)
 		if err != nil {
-			return 0, false, fmt.Errorf("upsert developer: %w", err)
+			return 0, fmt.Errorf("upsert developer: %w", err)
 		}
-		return id, false, nil
+		return id, nil
 	}
 	row, err := create.Save(ctx)
 	if err != nil {
-		return 0, false, fmt.Errorf("create developer: %w", err)
+		return 0, fmt.Errorf("create developer: %w", err)
 	}
-	return row.ID, true, nil
-}
-
-func (s *Store) claimDeveloper(ctx context.Context, ref catalog.Ref, id int, fresh bool) (int, error) {
-	claimed, err := s.claimLink(ctx, ref, id)
-	if err != nil {
-		return 0, err
-	}
-	if claimed != id && fresh {
-		if err := s.db(ctx).GameDeveloper.DeleteOneID(id).Exec(ctx); err != nil {
-			return 0, fmt.Errorf("discard duplicate developer: %w", err)
-		}
-	}
-	return claimed, nil
+	return row.ID, nil
 }
 
 func (s *Store) developerExists(ctx context.Context, id int) (bool, error) {

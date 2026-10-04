@@ -13,21 +13,27 @@ import (
 
 func (s *Store) ensureCharacter(ctx context.Context, source string, credit catalog.CharacterLink) (int, bool, error) {
 	ref := catalog.Ref{Source: source, Entity: catalog.EntityCharacter, ExternalID: credit.ExternalID}
+	if err := s.lockRef(ctx, ref); err != nil {
+		return 0, false, err
+	}
 	id, synced, ok, err := s.linked(ctx, ref, s.characterExists)
 	if err != nil || ok {
 		return id, !synced, err
 	}
 	seed := catalog.CharacterRecord{HikarinagiID: credit.HikarinagiID, NameJP: credit.NameJP, NameZH: credit.NameZH, NameEN: credit.NameEN, Image: credit.Image}
-	id, fresh, err := s.createCharacter(ctx, seed)
+	id, err = s.createCharacter(ctx, seed)
 	if err != nil {
 		return 0, false, err
 	}
-	id, err = s.claimCharacter(ctx, ref, id, fresh)
+	id, err = s.insertLink(ctx, ref, id)
 	return id, true, err
 }
 
 func (s *Store) ApplyCharacter(ctx context.Context, source string, record catalog.CharacterRecord, at time.Time) (int, error) {
 	ref := catalog.Ref{Source: source, Entity: catalog.EntityCharacter, ExternalID: record.ExternalID}
+	if err := s.lockRef(ctx, ref); err != nil {
+		return 0, err
+	}
 	id, _, ok, err := s.linked(ctx, ref, s.characterExists)
 	if err != nil {
 		return 0, err
@@ -110,18 +116,18 @@ func (s *Store) adoptCharacter(ctx context.Context, ref catalog.Ref, record cata
 				return 0, fmt.Errorf("find unlinked character: %w", err)
 			}
 			if len(candidates) == 1 {
-				return s.claimCharacter(ctx, ref, candidates[0], false)
+				return s.insertLink(ctx, ref, candidates[0])
 			}
 		}
 	}
-	id, fresh, err := s.createCharacter(ctx, record)
+	id, err := s.createCharacter(ctx, record)
 	if err != nil {
 		return 0, err
 	}
-	return s.claimCharacter(ctx, ref, id, fresh)
+	return s.insertLink(ctx, ref, id)
 }
 
-func (s *Store) createCharacter(ctx context.Context, record catalog.CharacterRecord) (int, bool, error) {
+func (s *Store) createCharacter(ctx context.Context, record catalog.CharacterRecord) (int, error) {
 	create := s.db(ctx).GameCharacter.Create().
 		SetNameJp(record.NameJP).
 		SetNillableNameZh(record.NameZH).
@@ -130,28 +136,15 @@ func (s *Store) createCharacter(ctx context.Context, record catalog.CharacterRec
 	if record.HikarinagiID != nil {
 		id, err := create.SetHID(*record.HikarinagiID).OnConflictColumns(gamecharacter.FieldHID).Ignore().ID(ctx)
 		if err != nil {
-			return 0, false, fmt.Errorf("upsert character: %w", err)
+			return 0, fmt.Errorf("upsert character: %w", err)
 		}
-		return id, false, nil
+		return id, nil
 	}
 	row, err := create.Save(ctx)
 	if err != nil {
-		return 0, false, fmt.Errorf("create character: %w", err)
+		return 0, fmt.Errorf("create character: %w", err)
 	}
-	return row.ID, true, nil
-}
-
-func (s *Store) claimCharacter(ctx context.Context, ref catalog.Ref, id int, fresh bool) (int, error) {
-	claimed, err := s.claimLink(ctx, ref, id)
-	if err != nil {
-		return 0, err
-	}
-	if claimed != id && fresh {
-		if err := s.db(ctx).GameCharacter.DeleteOneID(id).Exec(ctx); err != nil {
-			return 0, fmt.Errorf("discard duplicate character: %w", err)
-		}
-	}
-	return claimed, nil
+	return row.ID, nil
 }
 
 func (s *Store) characterExists(ctx context.Context, id int) (bool, error) {
