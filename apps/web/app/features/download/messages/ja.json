@@ -23,6 +23,5 @@
   "copied": "リンクをコピーしました（{minutes} 分間有効）",
   "copyReady": "リンクを発行しました（{minutes} 分間有効）",
   "copy": "コピー",
-  "scanning": "スキャン完了後にダウンロードできます",
   "asDefault": "{label}（既定）"
 }

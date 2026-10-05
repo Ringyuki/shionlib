@@ -1,8 +1,8 @@
-import { CopyButton, Inline, Stack, Text, Tooltip } from '@hina-ui/react'
+import { CopyButton, Inline, Stack, Text } from '@hina-ui/react'
 import { FileArchive } from 'lucide-react'
 import { useFormatter, useTranslations } from 'use-intl'
 import { DownloadButton } from '~/features/download'
-import { detections, fileSize, fileState, shortHash, type ResourceFile } from '../resource'
+import { fileSize, fileState, shortHash, type ResourceFile } from '../resource'
 import { FileHistoryButton } from './file-history-button'
 import { FileState } from './file-state'
 
@@ -60,25 +60,11 @@ function FileRow({ file }: { file: ResourceFile }) {
 }
 
 function FileAction({ file }: { file: ResourceFile }) {
-  const t = useTranslations()
   const state = fileState(file)
-  if (state === 'risky') {
-    return (
-      <Text size="xs" tone="danger" className="max-w-48 shrink-0 text-end">
-        {t('resource.stateHint.risky', { names: detections(file).join(', ') })}
-      </Text>
-    )
-  }
-  const button = (
-    <DownloadButton file={{ id: file.id, name: file.file_name }} disabled={state === 'scanning'} />
-  )
-  return state === 'scanning' ? (
-    <Tooltip content={t('download.scanning')}>
-      <Stack tabIndex={0} className="shrink-0">
-        {button}
-      </Stack>
-    </Tooltip>
-  ) : (
-    button
+  return (
+    <DownloadButton
+      file={{ id: file.id, name: file.file_name }}
+      disabled={state === 'scanning' || state === 'risky'}
+    />
   )
 }

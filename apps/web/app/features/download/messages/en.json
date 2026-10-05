@@ -23,6 +23,5 @@
   "copied": "Link copied, valid for {minutes} min",
   "copyReady": "Link ready, valid for {minutes} min",
   "copy": "Copy",
-  "scanning": "Downloadable once the scan finishes",
   "asDefault": "{label} (default)"
 }
