@@ -59,6 +59,7 @@ Change these only together, and recheck contrast in both themes. All other token
 ## Writing metadata
 
 - Never glue facts into one string with separators (`a · b · c`, `a / b`). Facts that sit side by side are separate elements spaced by `Inline` gaps, with a small icon when the kind is not obvious (`Clock` + 「4 小时前更新」, `Download` + 「1,284 次下载」); a date reads as a phrase (「发售于 2015年12月18日」).
+- Catalog tags are links, so they render as `Chip asChild` around a router `Link` with a `Hash` icon (`gap-1`), never `Tag`. They link to the game library filtered by the tag's canonical name (`tagPath`, `/{lang}/game?tag=`), and show the alias when one exists. `Tag` stays for labels that do nothing (platforms, languages, file states).
 - A game row (`GameRow`, search results and relations) keeps its cover at 3:4 (`w-22`), and its text fills exactly the cover's height: title and original title at the top, developer, date and resources at the bottom (`Stack justify="between"`). Never stretch or squash the cover to fit the text.
 - Lists of names (developers, aliases, staff) go through use-intl's `format.list(...)`, which joins them the way each language does (「A、B 和 C」); `format.list` also accepts links. A list that may be long is truncated to one line with the full list in a tooltip, not cut with 「等 N 个」.
 - A single string slot (a `CommandPalette` item `description`) carries one fact, not several joined together.

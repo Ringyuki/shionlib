@@ -88,6 +88,10 @@ export function gamePath(locale: Locale, id: number, tab: GameTab = 'resources')
   return tab === 'resources' ? base : `${base}/${tab}`
 }
 
+export function tagPath(locale: Locale, tag: string): string {
+  return `/${locale}/game?${new URLSearchParams({ tag })}`
+}
+
 export function introIn(game: Introduced, language: IntroLanguage): string {
   return game[introKey[language]].trim()
 }

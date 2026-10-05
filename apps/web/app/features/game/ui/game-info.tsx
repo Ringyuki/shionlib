@@ -6,7 +6,6 @@ import {
   Link,
   Section,
   Stack,
-  Tag,
 } from '@hina-ui/react'
 import { useFormatter, useTranslations } from 'use-intl'
 import { CatalogCorrection } from '~/shared/ui/catalog-attribution'
@@ -14,6 +13,7 @@ import { groupStaff, type GameDetails } from '../game'
 import { GameIntro } from './game-intro'
 import { GameRelations } from './game-relations'
 import { GameScreenshots } from './game-screenshots'
+import { GameTags } from './game-tags'
 
 const factListClass =
   'grid grid-cols-[auto_1fr] items-baseline gap-x-6 gap-y-2 [&>dd]:m-0! [&>dt]:m-0!'
@@ -30,15 +30,7 @@ export function GameInfo({ details, entry }: { details: GameDetails; entry: numb
   return (
     <Stack gap="xl">
       <GameIntro details={details} />
-      {tags.length > 0 && (
-        <Section title={t('tags')}>
-          <Inline gap="xs">
-            {tags.map(link => (
-              <Tag key={link.tag.id}>{link.tag_alias ?? link.tag.name}</Tag>
-            ))}
-          </Inline>
-        </Section>
-      )}
+      {tags.length > 0 && <GameTags tags={tags} />}
       {images.length > 0 && (
         <GameScreenshots images={images} contentLimit={details.content_limit} />
       )}
