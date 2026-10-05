@@ -1,5 +1,5 @@
-import { Alert, Button, Divider, Stack, Text } from '@hina-ui/react'
-import { Fingerprint, KeyRound } from 'lucide-react'
+import { Alert, Button, Divider, Image, Stack, Text } from '@hina-ui/react'
+import { Fingerprint } from 'lucide-react'
 import { useTranslations } from 'use-intl'
 import { browserApiUrl } from '~/shared/api/browser'
 import { authViewParam } from '../auth'
@@ -42,7 +42,17 @@ export function SignInMethods() {
       <Button
         variant="outline"
         tone="neutral"
-        icon={<KeyRound />}
+        icon={
+          <Image
+            src="/brand/hikarinagi-icon.webp"
+            alt=""
+            eager
+            lazy={false}
+            skeleton={false}
+            fit="cover"
+            className="size-5 shrink-0"
+          />
+        }
         disabled={passkey.pending}
         onClick={signInWithHikarinagi}
         block
