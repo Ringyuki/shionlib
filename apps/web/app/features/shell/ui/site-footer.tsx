@@ -17,14 +17,14 @@ export function SiteFooter() {
       className="mt-16 flex-col items-center gap-4 pb-14 md:flex-row md:justify-between"
     >
       <Inline gap="sm" align="center" wrap={false}>
-        <BrandLogo className="size-8" />
+        <BrandLogo className="size-6" />
         <Inline gap="xs" align="center" wrap={false}>
           <Copyright aria-hidden className="size-3" />
-          <Text as="span" size="xs">
+          <Text as="span" size="sm">
             2025
           </Text>
         </Inline>
-        <Wordmark size="sm" />
+        <Wordmark size="xs" tone="inherit" />
       </Inline>
       <Inline gap="lg" align="center" justify="center">
         <Inline gap="lg" align="center">
@@ -41,7 +41,7 @@ export function SiteFooter() {
             </RouterLink>
           </Link>
         </Inline>
-        <Divider orientation="vertical" className="h-4 max-md:hidden" />
+        <Divider orientation="vertical" className="h-4 self-center max-md:hidden" />
         <Inline gap="lg" align="center">
           <Link tone="neutral" href={repositoryUrl} target="_blank" rel="noreferrer">
             <FooterLabel icon={<RiGithubFill className="size-3" />}>GitHub</FooterLabel>

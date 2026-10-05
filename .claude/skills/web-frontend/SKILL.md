@@ -66,7 +66,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 - MUST keep viewer-specific catches (e.g. guests get `false`) in use-cases by status or `ApiError.is(...)`, never by message text.
 - MUST put user-facing text in the feature's `messages/{zh,en,ja}.json`; `zh` is the source, `en`/`ja` must have the same keys (the `Messages` type enforces it). API error messages are already localized; show `failure.message`.
 - MUST build UI from `@hina-ui/react` components and tokens; use Tailwind utilities only for layout glue.
-- MUST show the brand with `BrandLogo` and `Wordmark` from `~/shared/ui/brand` (`public/brand/logo.png`, the favicon artwork; `public/brand/wordmark.svg` "Shionlib" and `public/brand/wordmark-zh.svg` 「书音的图书馆」, chosen by locale), never with live text.
+- MUST show the brand with `BrandLogo` and `Wordmark` from `~/shared/ui/brand` (`public/brand/logo.png`, the favicon artwork; the wordmark is `app/shared/ui/wordmark.svg` "Shionlib" or `wordmark-zh.svg` 「书音的图书馆」 by locale, imported as an inline SVG component with `currentColor`, `tone="brand"` for the Shionlib blue or `tone="inherit"` to follow the text), never with live text.
 - MUST resolve stored image keys with `useImageUrl()` (base from `IMAGE_BASE_URL`, provided by the root loader).
 - MUST keep the code comment-free (lint enforces; inline lint directives are disabled).
 - MUST run `.claude/skills/web-frontend/scripts/verify.sh` before declaring work done.

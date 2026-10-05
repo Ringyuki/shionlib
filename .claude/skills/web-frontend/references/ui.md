@@ -49,7 +49,7 @@ Change these only together, and recheck contrast in both themes. All other token
 
 ## Brand and images
 
-- `BrandLogo` shows `public/brand/logo.png` (from `favicon.ico`); `Wordmark` shows `public/brand/wordmark-zh.svg` (「书音的图书馆」) for `zh` and `public/brand/wordmark.svg` ("Shionlib") otherwise, both with Shionlib blue baked in so they read in light and dark themes. The Chinese wordmark has finer strokes, so it renders 20% taller (`size` `md` 24px / `sm` 20px against 20px / 16px for the Latin one). Both render through hina-ui `Image` with `eager` and `lazy={false}`, so they are in the server HTML and never fade in.
+- `BrandLogo` shows `public/brand/logo.png` (from `favicon.ico`); `Wordmark` renders `app/shared/ui/wordmark-zh.svg` (「书音的图书馆」) for `zh` and `app/shared/ui/wordmark.svg` ("Shionlib") otherwise as inline SVG (`vite-plugin-svgr`, `?react`) filled with `currentColor`, so it is in the server HTML and never loads separately. `tone="brand"` (default) colours it with `text-accent` (the Shionlib blue in both themes); `tone="inherit"` follows the surrounding text, as in the footer. The Chinese wordmark has finer strokes, so each `size` renders it 20% taller (`md` 24px, `sm` 20px, `xs` 16px against 20px, 16px, 14px for the Latin one). `BrandLogo` still renders through hina-ui `Image` with `eager` and `lazy={false}`.
 - API image fields are storage keys; `useImageUrl()` prefixes them with `IMAGE_BASE_URL` and passes absolute, `data:` and `blob:` URLs through.
 
 ## Messages and locales
