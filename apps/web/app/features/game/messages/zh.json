@@ -63,7 +63,8 @@
     "relations": "关联作品",
     "extra": "其他信息",
     "links": "相关链接",
-    "screenshot": "游戏截图"
+    "screenshot": "游戏截图",
+    "viewScreenshot": "查看截图 {index}"
   },
   "introLanguage": {
     "zh": "中文",

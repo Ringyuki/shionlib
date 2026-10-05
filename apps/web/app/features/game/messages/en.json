@@ -63,7 +63,8 @@
     "relations": "Related games",
     "extra": "More details",
     "links": "Links",
-    "screenshot": "Screenshot"
+    "screenshot": "Screenshot",
+    "viewScreenshot": "View screenshot {index}"
   },
   "introLanguage": {
     "zh": "Chinese",

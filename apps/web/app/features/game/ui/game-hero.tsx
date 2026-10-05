@@ -37,13 +37,12 @@ export function GameHero({ game, images, scores, resources, favorite }: GameHero
   const locale = useLocale()
   const title = gameTitle(game, locale)
   const original = originalTitle(game, locale)
-  const bannerAt = bannerIndex(images, game.content_limit)
-  const banner = bannerAt === undefined ? undefined : images[bannerAt]
+  const banner = bannerIndex(images, game.content_limit)
   const staged = banner !== undefined
   return (
     <Stack as="header" gap="none">
-      {banner !== undefined && (
-        <GameBanner image={banner} className="h-44 rounded-2xl sm:h-64 lg:h-80" />
+      {staged && (
+        <GameBanner images={images} index={banner} className="h-44 rounded-2xl sm:h-64 lg:h-80" />
       )}
       <Grid
         className={cn(

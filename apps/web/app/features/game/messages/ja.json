@@ -63,7 +63,8 @@
     "relations": "関連作品",
     "extra": "その他の情報",
     "links": "関連リンク",
-    "screenshot": "スクリーンショット"
+    "screenshot": "スクリーンショット",
+    "viewScreenshot": "スクリーンショット {index} を見る"
   },
   "introLanguage": {
     "zh": "中国語",
