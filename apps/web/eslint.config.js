@@ -86,6 +86,25 @@ export default defineConfig([
     },
   },
   {
+    files: ['app/**/*.ts', 'scripts/**/*.ts'],
+    ignores: ['**/*.test.ts', 'app/shared/api/generated/**'],
+    rules: {
+      'max-lines': ['error', { max: 200, skipBlankLines: true, skipComments: true }],
+    },
+  },
+  {
+    files: ['app/**/*.tsx'],
+    rules: {
+      'max-lines': ['error', { max: 150, skipBlankLines: true, skipComments: true }],
+    },
+  },
+  {
+    files: ['**/*.test.ts'],
+    rules: {
+      'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
+    },
+  },
+  {
     files: ['app/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-globals': [

@@ -1,5 +1,12 @@
 import * as v from 'valibot'
-import { gameTabs, introLanguages, type GameTab, type IntroLanguage } from './game'
+import {
+  gameTabs,
+  introLanguages,
+  platforms,
+  type GameTab,
+  type IntroLanguage,
+  type Platform,
+} from './game'
 
 export const viewCommand = v.object({
   gameId: v.pipe(v.number(), v.safeInteger(), v.minValue(1)),
@@ -18,5 +25,12 @@ const gameTab = v.picklist(gameTabs)
 
 export function gameTabFrom(value: unknown): GameTab | undefined {
   const parsed = v.safeParse(gameTab, value)
+  return parsed.success ? parsed.output : undefined
+}
+
+const platform = v.picklist(platforms)
+
+export function platformFrom(value: unknown): Platform | undefined {
+  const parsed = v.safeParse(platform, value)
   return parsed.success ? parsed.output : undefined
 }

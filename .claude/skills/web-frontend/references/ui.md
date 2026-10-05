@@ -26,6 +26,10 @@
 
 Change these only together, and recheck contrast in both themes. All other tokens are hina-ui's defaults.
 
+### Platform colours
+
+`app/shared/ui/platform.css` (imported after `theme.css`) holds the one approved addition: each platform's brand colour as `--platform-<key>` and `--platform-<key>-fg`, with dark-mode values where the light ones would vanish (macOS, iOS and PSP invert to light, Linux turns dark grey), exposed to Tailwind as `bg-platform-<key>` / `text-platform-<key>-fg`. Only `PlatformTag` (`~/features/game`) uses them: a solid `Tag` in the brand colour with the platform's icon (`react-icons`). Tags that sit with it (languages, engine, game type) are solid neutral `Tag`s, because hina-ui wants one variant per group of tags and colour only for meaning.
+
 ## Shell
 
 - `features/shell/ui/site-shell.tsx` renders hina-ui `AppShell` with controlled sidebar state (`expanded`/`rail`, remembered in the `shionlib_sidebar` cookie) and mobile drawer state.

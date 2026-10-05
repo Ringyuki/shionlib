@@ -59,6 +59,7 @@ A route module may export `loader`, `action`, `meta`, `headers`, `shouldRevalida
 | no type members with snake_case keys, no types named `*DTO`/`*Response`/`*Request`/`*Payload`/`*Body`                     | everything except `app/shared/api` and tests               |
 | valibot only in `*.schema.ts`, `~/shared/form`, `~/shared/route`; zod, yup, joi, ajv, superstruct, io-ts, arktype nowhere | everything                                                 |
 | no comments, no inline lint directives                                                                                    | everything                                                 |
+| at most 150 non-blank lines per `.tsx`, 200 per `.ts`, 300 per test                                                       | `app/**`, `scripts/**`                                     |
 
 ## Naming
 

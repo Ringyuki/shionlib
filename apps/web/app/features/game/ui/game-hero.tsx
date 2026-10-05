@@ -1,27 +1,23 @@
-import { cn, Grid, Heading, Inline, Link, Stack, Tag, Text, Tooltip } from '@hina-ui/react'
-import { Download, Upload } from 'lucide-react'
-import { Suspense, type ReactNode } from 'react'
-import { Await, Link as RouterLink } from 'react-router'
-import { useFormatter, useLocale, useMessages, useTranslations } from 'use-intl'
+import { cn, Grid, Heading, Inline, Stack, Text } from '@hina-ui/react'
+import type { ReactNode } from 'react'
+import { useLocale } from 'use-intl'
 import type { ResourceSummary } from '~/features/resource'
-import { keepScroll, sitePaths } from '~/features/shell'
-import { labelOf } from '~/shared/i18n/labels'
-import { Button } from '~/shared/ui/button'
 import { CatalogAttribution } from '~/shared/ui/catalog-attribution'
 import {
   bannerIndex,
-  gamePath,
   gameTitle,
   originalTitle,
-  releaseDate,
   type GameHeader,
   type GameImage,
-  type Score,
   type Scores,
 } from '../game'
+import { GameActions } from './game-actions'
+import { GameAliases } from './game-aliases'
 import { GameBanner } from './game-banner'
+import { GameByline } from './game-byline'
+import { GameChips } from './game-chips'
 import { GameCover } from './game-covers'
-import { GameMoreMenu } from './game-more-menu'
+import { GameRatings } from './game-ratings'
 
 type GameHeroProps = {
   game: GameHeader
@@ -63,7 +59,7 @@ export function GameHero({ game, images, intro, scores, resources, favorite }: G
         </Stack>
         <Stack gap="md" className="min-w-0 pt-4 sm:pt-5">
           <Stack gap="xs">
-            <Byline game={game} />
+            <GameByline game={game} />
             <Heading level={1} size="2xl" weight="semibold" className="text-balance max-sm:text-xl">
               {title}
             </Heading>
@@ -72,15 +68,11 @@ export function GameHero({ game, images, intro, scores, resources, favorite }: G
                 {original}
               </Text>
             )}
-            <Aliases aliases={game.aliases ?? []} />
+            <GameAliases aliases={game.aliases ?? []} />
           </Stack>
           <Inline gap="sm" align="center" className="gap-y-2">
-            <Chips game={game} />
-            <Suspense fallback={null}>
-              <Await resolve={scores} errorElement={null}>
-                {resolved => <Ratings scores={resolved} />}
-              </Await>
-            </Suspense>
+            <GameChips game={game} />
+            <GameRatings scores={scores} />
           </Inline>
           {intro !== '' && (
             <Text size="sm" tone="muted" className="line-clamp-2 max-w-prose max-sm:hidden">
@@ -94,138 +86,10 @@ export function GameHero({ game, images, intro, scores, resources, favorite }: G
           gap="md"
           className="col-span-2 gap-y-4 pt-5 sm:col-span-1 sm:col-start-2"
         >
-          <Actions game={game} resources={resources} favorite={favorite} />
+          <GameActions game={game} resources={resources} favorite={favorite} />
           {game.h_id !== null && <CatalogAttribution entity="galgame" id={game.h_id} />}
         </Inline>
       </Grid>
     </Stack>
-  )
-}
-
-function Byline({ game }: { game: GameHeader }) {
-  const t = useTranslations('game')
-  const locale = useLocale()
-  const format = useFormatter()
-  const released = game.release_date_tba ? undefined : releaseDate(game)
-  const developers = (game.developers ?? []).map(({ developer }) => (
-    <Link key={developer.id} asChild className="font-medium">
-      <RouterLink to={`/${locale}/developer/${developer.id}`} prefetch="intent">
-        {developer.name}
-      </RouterLink>
-    </Link>
-  ))
-  return (
-    <Inline gap="md" align="baseline">
-      {developers.length > 0 && <Text size="sm">{format.list(developers)}</Text>}
-      <Text size="sm" tone="muted">
-        {released === undefined ? t('releaseTba') : t('released', { date: released })}
-      </Text>
-    </Inline>
-  )
-}
-
-function Chips({ game }: { game: GameHeader }) {
-  const labels = useMessages().game
-  return (
-    <>
-      {(game.platform ?? []).map(platform => (
-        <Tag key={platform} size="sm">
-          {labelOf(labels.platform, platform)}
-        </Tag>
-      ))}
-      {game.type !== null && game.type !== '' && (
-        <Tag size="sm" variant="outline">
-          {game.type}
-        </Tag>
-      )}
-    </>
-  )
-}
-
-function Ratings({ scores }: { scores: Scores }) {
-  const t = useTranslations('game.score')
-  const rows = [
-    { key: 'bangumi', label: t('bangumi'), score: scores.bangumi },
-    { key: 'vndb', label: t('vndb'), score: scores.vndb },
-  ].flatMap(row => (row.score === undefined ? [] : [{ ...row, score: row.score }]))
-  return rows.map(row => <Rating key={row.key} label={row.label} score={row.score} />)
-}
-
-function Rating({ label, score }: { label: string; score: Score }) {
-  const t = useTranslations('game.score')
-  return (
-    <Link
-      href={score.url}
-      target="_blank"
-      rel="noreferrer"
-      tone="neutral"
-      title={t('votes', { source: label, count: score.votes })}
-      className="inline-flex items-baseline gap-1.5"
-    >
-      <Text as="span" size="xs" tone="muted">
-        {label}
-      </Text>
-      <Text as="span" weight="semibold" className="text-inherit tabular-nums">
-        {score.value.toFixed(1)}
-      </Text>
-    </Link>
-  )
-}
-
-function Aliases({ aliases }: { aliases: readonly string[] }) {
-  const t = useTranslations('game.facts')
-  const format = useFormatter()
-  if (aliases.length === 0) {
-    return null
-  }
-  const names = format.list(aliases)
-  return (
-    <Tooltip content={names}>
-      <Text size="xs" tone="faint" truncate tabIndex={0} className="max-w-prose">
-        {t('aliases', { names })}
-      </Text>
-    </Tooltip>
-  )
-}
-
-function Actions({
-  game,
-  resources,
-  favorite,
-}: {
-  game: GameHeader
-  resources: ResourceSummary
-  favorite: ReactNode
-}) {
-  const t = useTranslations('game.actions')
-  const locale = useLocale()
-  const available = resources.count > 0
-  const uploadPath = `${sitePaths(locale).upload}?game=${game.id}`
-  return (
-    <Inline gap="sm">
-      {available && (
-        <Button asChild>
-          <RouterLink
-            to={{
-              pathname: gamePath(locale, game.id),
-              hash: resources.first === undefined ? '' : `resource-${resources.first}`,
-            }}
-            state={keepScroll}
-            preventScrollReset
-          >
-            <Download aria-hidden />
-            {t('download', { count: resources.count })}
-          </RouterLink>
-        </Button>
-      )}
-      <Button asChild loginRequired variant={available ? 'soft' : 'solid'}>
-        <RouterLink to={uploadPath}>
-          <Upload aria-hidden />
-          {t('upload')}
-        </RouterLink>
-      </Button>
-      {favorite}
-      <GameMoreMenu game={game} />
-    </Inline>
   )
 }

@@ -1,2 +1,3 @@
-export { SearchPalette, type SearchShortcut } from './ui/search-palette'
+export { SearchPalette } from './ui/search-palette'
+export type { SearchShortcut } from './use-palette-items'
 export { SearchResultsView } from './ui/search-results'

@@ -74,6 +74,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 - MUST pass stored image keys straight to hina-ui `Image` (`<Image src={cover.url}>`): `root.tsx` mounts `ImageResolverProvider` with `imageResolver(IMAGE_BASE_URL)`. Other consumers (an `Avatar` `src`) call hina-ui's `useImageResolver()`.
 - MUST read browser-visible configuration (`IMAGE_BASE_URL`, `TURNSTILE_SITE_KEY`, `HIKARINAGI_SITE_URL`) through `usePublicConfig()` (`~/shared/config/public-config`), filled by the root loader from `readServerEnv().publicConfig`; never read `process.env` or `import.meta.env` in features.
 - MUST keep the code comment-free (lint enforces; inline lint directives are disabled).
+- MUST keep files short: at most 150 non-blank lines for `.tsx`, 200 for other `.ts`, 300 for tests (lint enforces). When a file grows past that, split it by responsibility (a section, a field group, a hook that builds data), never by cutting it into arbitrary parts; stylesheets follow the same idea, one concern per file (`theme.css` accent roles, `platform.css` platform colours).
 - MUST run `.claude/skills/web-frontend/scripts/verify.sh` before declaring work done.
 
 ## MUST NOT
@@ -82,7 +83,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 - MUST NOT hand-write input validation (`typeof`, `Array.isArray`, `JSON.parse`, `Number(...)`, regexes over input), restate API limits as numbers, import valibot outside `*.schema.ts`/`~/shared/form`/`~/shared/route`, or use another validation library (lint).
 - MUST NOT build look-alikes or wrappers of hina-ui components (custom placeholders, skeletons, spinners, alert wrappers, loading states): use the component and its own states (`Image` skeleton and fade, `Spinner`, `Alert open`). Project components exist only for Shionlib behaviour hina-ui cannot know (`Button` with `loginRequired`).
 - MUST NOT mount or unmount feedback conditionally (`cond && <Alert>`, ternaries): an `Alert` stays rendered and is shown with `open` (`<Alert tone="danger" open={message !== undefined}>`), a `Callout` is static content, and whole-page outcomes use `Result`/`Empty` (lint).
-- MUST NOT override hina-ui tokens beyond the documented accent roles, or add colours, gradients or shadows of your own; ask before introducing any new token.
+- MUST NOT override hina-ui tokens beyond the documented accent roles, or add colours, gradients or shadows of your own; ask before introducing any new token. The one approved exception is the platform brand colours in `app/shared/ui/platform.css`, used only by `PlatformTag` (`references/ui.md`).
 - MUST NOT declare object types with snake_case keys or types named `*DTO`/`*Response`/`*Request`/`*Payload`/`*Body` (lint).
 - MUST NOT use `fetch`, `openapi-fetch`, axios, SWR or React Query outside `~/shared/api`; third-party browser services (Cloudflare Turnstile, the visitor's aria2) are reached only through `~/shared/vendor` (lint).
 - MUST NOT use `as` type assertions outside `~/shared/api` (`as const` is fine) (lint).

@@ -1,3 +1,4 @@
+import { constraints } from '~/shared/api/generated/constraints'
 import type { Schema } from '~/shared/api/types'
 import type { Locale } from '~/shared/i18n/locale'
 
@@ -14,6 +15,8 @@ type Dated = Pick<Schema<'GameListItemDTO'>, 'release_date'>
 export type Platform = NonNullable<Schema<'DownloadSourceBodyInput'>['platform']>[number]
 
 export type ResourceLanguage = NonNullable<Schema<'DownloadSourceBodyInput'>['language']>[number]
+
+export const platforms: readonly Platform[] = constraints.DownloadSourceBodyInput.platform.itemEnum
 
 const titleOrder: Record<Locale, (keyof Titled)[]> = {
   zh: ['title_zh', 'title_jp', 'title_en'],

@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { useFormatter, useLocale, useMessages, useTranslations } from 'use-intl'
 import type { Schema } from '~/shared/api/types'
 import { labelOf } from '~/shared/i18n/labels'
+import { PlatformTag } from './platform-tag'
 import { developerNames, gameTitle, originalTitle, primaryCover, releaseDate } from '../game'
 
 type GameRowProps = {
@@ -19,7 +20,6 @@ export function GameRow({ game }: GameRowProps) {
   const released = releaseDate(game)
   const developers = developerNames(game)
   const { resources } = game
-  const platforms = (resources.platforms ?? []).map(key => labelOf(labels.platform, key))
   const languages = (resources.languages ?? []).map(key => labelOf(labels.language, key))
 
   return (
@@ -61,8 +61,11 @@ export function GameRow({ game }: GameRowProps) {
                 </Text>
               ) : (
                 <>
-                  {[...platforms, ...languages].map(label => (
-                    <Tag key={label} size="sm">
+                  {(resources.platforms ?? []).map(platform => (
+                    <PlatformTag key={platform} platform={platform} />
+                  ))}
+                  {languages.map(label => (
+                    <Tag key={label} size="sm" variant="solid">
                       {label}
                     </Tag>
                   ))}

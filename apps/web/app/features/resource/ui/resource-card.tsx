@@ -11,6 +11,7 @@ import {
 } from '@hina-ui/react'
 import { Clock, Download } from 'lucide-react'
 import { useMessages, useTranslations } from 'use-intl'
+import { PlatformTag } from '~/features/game'
 import { labelOf } from '~/shared/i18n/labels'
 import { ownedBy, resourceAnchor, type Resource } from '../resource'
 import { ResourceMenu } from './resource-menu'
@@ -35,17 +36,15 @@ export function ResourceCard({ resource, viewerId }: ResourceCardProps) {
         <Grid className="grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
           <Inline gap="xs">
             {(resource.platform ?? []).map(platform => (
-              <Tag key={platform} tone="accent" className={tagClass}>
-                {labelOf(labels.game.platform, platform)}
-              </Tag>
+              <PlatformTag key={platform} platform={platform} size="md" className={tagClass} />
             ))}
             {(resource.language ?? []).map(language => (
-              <Tag key={language} variant="outline" className={tagClass}>
+              <Tag key={language} size="md" variant="solid" className={tagClass}>
                 {labelOf(labels.game.language, language)}
               </Tag>
             ))}
             {resource.simulator !== null && (
-              <Tag variant="outline" className={tagClass}>
+              <Tag size="md" variant="solid" className={tagClass}>
                 {labelOf(labels.resource.simulatorName, resource.simulator)}
               </Tag>
             )}
