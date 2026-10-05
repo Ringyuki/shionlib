@@ -3,7 +3,6 @@
   "uploadFirst": "アップロード",
   "filter": "プラットフォームで絞り込む",
   "all": "すべて",
-  "byline": "{name} · <time></time>に更新",
   "downloads": "{count, number} 回ダウンロード",
   "files": "ファイル",
   "hash": "{algorithm}：{hash}",
@@ -67,5 +66,6 @@
     "languages": "言語を 1 つ以上選んでください",
     "simulator": "エンジンを選んでください"
   },
-  "stateHelp": "説明を見る"
+  "stateHelp": "説明を見る",
+  "updated": "<time></time>に更新"
 }

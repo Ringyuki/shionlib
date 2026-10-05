@@ -16,7 +16,7 @@ import {
   Text,
 } from '@hina-ui/react'
 import { useState } from 'react'
-import { useLocale, useMessages, useTranslations } from 'use-intl'
+import { useFormatter, useLocale, useMessages, useTranslations } from 'use-intl'
 import { labelOf } from '~/shared/i18n/labels'
 import {
   groupStaff,
@@ -42,6 +42,7 @@ export function GameInfo({ details }: { details: GameDetails }) {
   const extra = details.extra_info ?? []
   const links = details.link ?? []
   const t = useTranslations('game.info')
+  const format = useFormatter()
   return (
     <Stack gap="xl">
       <Intro details={details} />
@@ -59,7 +60,7 @@ export function GameInfo({ details }: { details: GameDetails }) {
         <Section title={t('staff')}>
           <DescriptionList className={factListClass}>
             {staff.map(group => (
-              <Facts key={group.role} term={group.role} details={group.names.join(' / ')} />
+              <Facts key={group.role} term={group.role} details={format.list(group.names)} />
             ))}
           </DescriptionList>
         </Section>

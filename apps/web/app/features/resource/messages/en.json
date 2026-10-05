@@ -3,7 +3,6 @@
   "uploadFirst": "Upload",
   "filter": "Filter by platform",
   "all": "All",
-  "byline": "{name} · updated <time></time>",
   "downloads": "{count, plural, one {# download} other {# downloads}}",
   "files": "Files",
   "hash": "{algorithm}: {hash}",
@@ -67,5 +66,6 @@
     "languages": "Choose at least one language",
     "simulator": "Choose an engine"
   },
-  "stateHelp": "What does this mean?"
+  "stateHelp": "What does this mean?",
+  "updated": "Updated <time></time>"
 }

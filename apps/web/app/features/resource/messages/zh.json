@@ -3,8 +3,7 @@
   "uploadFirst": "上传资源",
   "filter": "按平台筛选",
   "all": "全部",
-  "byline": "{name} · 更新于 <time></time>",
-  "downloads": "下载 {count, number} 次",
+  "downloads": "{count, number} 次下载",
   "files": "文件",
   "hash": "{algorithm}：{hash}",
   "copyHash": "复制完整校验值",
@@ -67,5 +66,6 @@
     "languages": "至少选择一种语言",
     "simulator": "请选择引擎"
   },
-  "stateHelp": "查看说明"
+  "stateHelp": "查看说明",
+  "updated": "<time></time>更新"
 }

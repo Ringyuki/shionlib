@@ -5,8 +5,6 @@
   "noLists": "お気に入りリストがありません",
   "defaultList": "デフォルト",
   "private": "非公開",
-  "listMeta": "{count} 件 · {visibility}",
-  "public": "公開",
   "newList": "新しいリスト",
   "listName": "名前",
   "listNamePlaceholder": "例：やりたい",
@@ -18,5 +16,6 @@
   "listNameHint": "{max} 文字まで",
   "listDescription": "説明",
   "listDescriptionHint": "任意、{max} 文字まで",
-  "makePrivateHint": "他の人には表示されません"
+  "makePrivateHint": "他の人には表示されません",
+  "gameCount": "{count} 件"
 }

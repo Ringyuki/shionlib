@@ -17,12 +17,7 @@ export function GameRow({ game }: GameRowProps) {
   const title = gameTitle(game, locale)
   const original = originalTitle(game, locale)
   const released = releaseDate(game)
-  const byline = [
-    developerNames(game).join(' / '),
-    released === undefined ? t('tba') : format.dateTime(released, { dateStyle: 'medium' }),
-  ]
-    .filter(part => part !== '')
-    .join(' · ')
+  const developers = developerNames(game)
   const { resources } = game
   const platforms = (resources.platforms ?? []).map(key => labelOf(labels.platform, key))
   const languages = (resources.languages ?? []).map(key => labelOf(labels.language, key))
@@ -47,9 +42,18 @@ export function GameRow({ game }: GameRowProps) {
                 {original}
               </Text>
             )}
-            <Text size="sm" tone="muted" truncate>
-              {byline}
-            </Text>
+            <Inline gap="md" wrap={false} className="min-w-0">
+              {developers.length > 0 && (
+                <Text size="sm" tone="muted" truncate>
+                  {format.list(developers)}
+                </Text>
+              )}
+              <Text size="sm" tone="faint" className="shrink-0">
+                {released === undefined
+                  ? t('tba')
+                  : format.dateTime(released, { dateStyle: 'medium' })}
+              </Text>
+            </Inline>
             <Inline gap="xs" align="center">
               {resources.count === 0 ? (
                 <Text size="sm" tone="faint">

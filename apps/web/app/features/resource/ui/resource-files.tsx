@@ -37,15 +37,12 @@ function FileRow({ file }: { file: ResourceFile }) {
           </Text>
           <FileState file={file} />
         </Inline>
-        <Inline gap="xs" align="center">
+        <Inline gap="md" align="center" className="gap-y-1">
           <Text size="xs" tone="muted" className="tabular-nums">
             {format.number(size.value, { maximumFractionDigits: size.unit === 'B' ? 0 : 2 })}{' '}
             {size.unit}
           </Text>
           <Inline gap="xs" align="center" wrap={false} className="max-sm:hidden">
-            <Text size="xs" tone="faint" aria-hidden>
-              ·
-            </Text>
             <Text size="xs" tone="muted" className="font-mono">
               {t('hash', { algorithm, hash: shortHash(file.file_hash) })}
             </Text>

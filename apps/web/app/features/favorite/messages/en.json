@@ -5,8 +5,6 @@
   "noLists": "No favorite lists yet",
   "defaultList": "Default list",
   "private": "Private",
-  "listMeta": "{count, plural, one {# game} other {# games}} · {visibility}",
-  "public": "Public",
   "newList": "New list",
   "listName": "Name",
   "listNamePlaceholder": "e.g. To play",
@@ -18,5 +16,6 @@
   "listNameHint": "Up to {max} characters",
   "listDescription": "Description",
   "listDescriptionHint": "Optional, up to {max} characters",
-  "makePrivateHint": "Nobody else can see this list"
+  "makePrivateHint": "Nobody else can see this list",
+  "gameCount": "{count, plural, one {# game} other {# games}}"
 }

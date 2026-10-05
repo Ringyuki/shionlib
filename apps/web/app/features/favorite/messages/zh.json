@@ -5,8 +5,6 @@
   "noLists": "还没有收藏夹",
   "defaultList": "默认收藏夹",
   "private": "私密",
-  "listMeta": "{count} 个游戏 · {visibility}",
-  "public": "公开",
   "newList": "新建收藏夹",
   "listName": "名称",
   "listNamePlaceholder": "例如：想玩",
@@ -18,5 +16,6 @@
   "listNameHint": "最多 {max} 字",
   "listDescription": "简介",
   "listDescriptionHint": "选填，最多 {max} 字",
-  "makePrivateHint": "其他人看不到这个收藏夹"
+  "makePrivateHint": "其他人看不到这个收藏夹",
+  "gameCount": "{count} 个游戏"
 }

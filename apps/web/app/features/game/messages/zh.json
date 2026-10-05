@@ -31,12 +31,12 @@
     "characters": "角色"
   },
   "facts": {
-    "moreAliases": "等 {count} 个"
+    "aliases": "又名 {names}"
   },
   "score": {
     "bangumi": "Bangumi",
     "vndb": "VNDB",
-    "votes": "{source} · {count, number} 人评分",
+    "votes": "{source}：{count, number} 人评分",
     "count": "{count, number} 人"
   },
   "actions": {

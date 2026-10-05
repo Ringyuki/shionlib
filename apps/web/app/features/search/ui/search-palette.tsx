@@ -19,8 +19,8 @@ import {
   UserRound,
 } from 'lucide-react'
 import { useNavigate } from 'react-router'
-import { useLocale, useTranslations } from 'use-intl'
-import { developerNames, gameTitle, originalTitle, releaseDate } from '~/features/game'
+import { useFormatter, useLocale, useTranslations } from 'use-intl'
+import { developerNames, gameTitle, originalTitle } from '~/features/game'
 import { characterName } from '~/features/character'
 import type { Palette } from '../search'
 import { useSearchPalette } from '../use-search-palette'
@@ -38,7 +38,7 @@ type SearchPaletteProps = {
 
 export function SearchPalette({ shortcuts }: SearchPaletteProps) {
   const t = useTranslations('search')
-  const tGame = useTranslations('game')
+  const format = useFormatter()
   const locale = useLocale()
   const navigate = useNavigate()
   const palette = useSearchPalette()
@@ -79,25 +79,13 @@ export function SearchPalette({ shortcuts }: SearchPaletteProps) {
       groups.push({
         label: t('groups.games'),
         items: [
-          ...games.map(game => {
-            const released = releaseDate(game)
-            return {
-              id: `game:${game.id}`,
-              label: gameTitle(game, locale),
-              description: [
-                originalTitle(game, locale),
-                developerNames(game).join(' / '),
-                released === undefined ? undefined : String(released.getFullYear()),
-                game.resources.count === 0
-                  ? tGame('noResources')
-                  : tGame('resources', { count: game.resources.count }),
-              ]
-                .filter(part => part !== undefined && part !== '')
-                .join(' · '),
-              icon: Gamepad2,
-              onSelect: () => go(`/${locale}/game/${game.id}`, true),
-            }
-          }),
+          ...games.map(game => ({
+            id: `game:${game.id}`,
+            label: gameTitle(game, locale),
+            description: originalTitle(game, locale) ?? format.list(developerNames(game)),
+            icon: Gamepad2,
+            onSelect: () => go(`/${locale}/game/${game.id}`, true),
+          })),
           {
             id: 'see-all',
             label: t('seeAll', { query, total: results?.games.total ?? 0 }),

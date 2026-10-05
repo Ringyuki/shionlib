@@ -1,6 +1,6 @@
 import { cn, Grid, Heading, Inline, Link, Stack, Tag, Text, Tooltip } from '@hina-ui/react'
 import { Download, Upload } from 'lucide-react'
-import { Fragment, Suspense, type ReactNode } from 'react'
+import { Suspense, type ReactNode } from 'react'
 import { Await, Link as RouterLink } from 'react-router'
 import { useFormatter, useLocale, useMessages, useTranslations } from 'use-intl'
 import type { ResourceSummary } from '~/features/resource'
@@ -22,8 +22,6 @@ import {
 import { GameBanner } from './game-banner'
 import { GameCover } from './game-covers'
 import { GameMoreMenu } from './game-more-menu'
-
-const shownAliases = 3
 
 type GameHeroProps = {
   game: GameHeader
@@ -103,22 +101,20 @@ function Byline({ game }: { game: GameHeader }) {
   const locale = useLocale()
   const format = useFormatter()
   const released = game.release_date_tba ? undefined : releaseDate(game)
-  const developers = game.developers ?? []
+  const developers = (game.developers ?? []).map(({ developer }) => (
+    <Link key={developer.id} asChild className="font-medium">
+      <RouterLink to={`/${locale}/developer/${developer.id}`} prefetch="intent">
+        {developer.name}
+      </RouterLink>
+    </Link>
+  ))
   return (
-    <Text size="sm" tone="muted">
-      {developers.map(({ developer }, index) => (
-        <Fragment key={developer.id}>
-          {index > 0 && ' / '}
-          <Link asChild className="font-medium">
-            <RouterLink to={`/${locale}/developer/${developer.id}`} prefetch="intent">
-              {developer.name}
-            </RouterLink>
-          </Link>
-        </Fragment>
-      ))}
-      {developers.length > 0 && ' · '}
-      {released === undefined ? t('releaseTba') : format.dateTime(released, { dateStyle: 'long' })}
-    </Text>
+    <Inline gap="md" align="baseline">
+      {developers.length > 0 && <Text size="sm">{format.list(developers)}</Text>}
+      <Text size="sm" tone="muted">
+        {released === undefined ? t('releaseTba') : t('released', { date: released })}
+      </Text>
+    </Inline>
   )
 }
 
@@ -172,31 +168,17 @@ function Rating({ label, score }: { label: string; score: Score }) {
 
 function Aliases({ aliases }: { aliases: readonly string[] }) {
   const t = useTranslations('game.facts')
+  const format = useFormatter()
   if (aliases.length === 0) {
     return null
   }
-  const shown = aliases.slice(0, shownAliases)
-  const hidden = aliases.length - shown.length
+  const names = format.list(aliases)
   return (
-    <Text size="xs" tone="faint">
-      {shown.join(' · ')}
-      {hidden > 0 && (
-        <>
-          {' '}
-          <Tooltip content={aliases.join(' · ')}>
-            <Text
-              as="span"
-              size="xs"
-              tone="faint"
-              tabIndex={0}
-              className="cursor-help whitespace-nowrap underline decoration-dotted"
-            >
-              {t('moreAliases', { count: hidden })}
-            </Text>
-          </Tooltip>
-        </>
-      )}
-    </Text>
+    <Tooltip content={names}>
+      <Text size="xs" tone="faint" truncate tabIndex={0} className="max-w-prose">
+        {t('aliases', { names })}
+      </Text>
+    </Tooltip>
   )
 }
 

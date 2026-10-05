@@ -31,12 +31,12 @@
     "characters": "キャラクター"
   },
   "facts": {
-    "moreAliases": "ほか {count} 件"
+    "aliases": "別名 {names}"
   },
   "score": {
     "bangumi": "Bangumi",
     "vndb": "VNDB",
-    "votes": "{source} · {count, number} 件",
+    "votes": "{source}：{count, number} 件の評価",
     "count": "{count, number} 件"
   },
   "actions": {

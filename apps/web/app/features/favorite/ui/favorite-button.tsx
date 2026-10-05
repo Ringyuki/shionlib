@@ -2,13 +2,14 @@ import {
   Button as HinaButton,
   Checkbox,
   Divider,
+  Inline,
   Popover,
   Spinner,
   Stack,
   Text,
   toast,
 } from '@hina-ui/react'
-import { Heart, Plus } from 'lucide-react'
+import { Heart, Lock, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 import type { Schema } from '~/shared/api/types'
@@ -108,12 +109,12 @@ function MembershipOption({
       checked={included}
       disabled={pending}
       onCheckedChange={next => toggle(next === true)}
-      description={t('listMeta', {
-        count: shownGameCount(list, included),
-        visibility: list.is_private ? t('private') : t('public'),
-      })}
+      description={t('gameCount', { count: shownGameCount(list, included) })}
     >
-      {list.default ? t('defaultList') : list.name}
+      <Inline gap="xs" align="center" wrap={false} as="span">
+        {list.default ? t('defaultList') : list.name}
+        {list.is_private && <Lock aria-label={t('private')} className="size-3.5 text-faint" />}
+      </Inline>
     </Checkbox>
   )
 }

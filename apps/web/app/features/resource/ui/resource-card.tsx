@@ -10,7 +10,8 @@ import {
   Time,
   useImageResolver,
 } from '@hina-ui/react'
-import { useMessages, useTranslations } from 'use-intl'
+import { Clock, Download } from 'lucide-react'
+import { useFormatter, useMessages, useTranslations } from 'use-intl'
 import { labelOf } from '~/shared/i18n/labels'
 import { ownedBy, resourceAnchor, type Resource } from '../resource'
 import { ResourceFiles } from './resource-files'
@@ -25,12 +26,12 @@ export function ResourceCard({ resource, viewerId }: ResourceCardProps) {
   const t = useTranslations('resource')
   const labels = useMessages()
   const resolveImage = useImageResolver()
+  const format = useFormatter()
   const { creator } = resource
   const note = resource.note?.trim() ?? ''
-  const identity = [
-    ...(resource.platform ?? []).map(platform => labelOf(labels.game.platform, platform)),
-    ...(resource.language ?? []).map(language => labelOf(labels.game.language, language)),
-  ].join(' · ')
+  const platforms = (resource.platform ?? []).map(platform =>
+    labelOf(labels.game.platform, platform),
+  )
   return (
     <Card
       as="article"
@@ -43,29 +44,45 @@ export function ResourceCard({ resource, viewerId }: ResourceCardProps) {
           <Stack gap="xs" className="min-w-0">
             <Inline gap="sm" align="center">
               <Heading level={3} size="md" weight="semibold">
-                {identity}
+                {format.list(platforms)}
               </Heading>
+              {(resource.language ?? []).map(language => (
+                <Tag key={language} size="sm">
+                  {labelOf(labels.game.language, language)}
+                </Tag>
+              ))}
               {resource.simulator !== null && (
                 <Tag size="sm" variant="outline">
                   {labelOf(labels.resource.simulatorName, resource.simulator)}
                 </Tag>
               )}
             </Inline>
-            <Inline gap="sm" align="center" wrap={false}>
-              <Avatar
-                src={creator.avatar === null ? undefined : resolveImage(creator.avatar, 'image')}
-                name={creator.name}
-                size="sm"
-                className="size-5 shrink-0 text-[0.625rem]"
-              />
-              <Text size="xs" tone="muted" className="min-w-0">
-                {t.rich('byline', {
-                  name: creator.name,
-                  time: () => <Time value={resource.updated} format="relative" />,
-                })}
-                {' · '}
-                {t('downloads', { count: resource.downloads })}
-              </Text>
+            <Inline gap="md" align="center" className="gap-y-1 [&_svg]:size-3.5 [&_svg]:text-faint">
+              <Inline gap="xs" align="center" wrap={false}>
+                <Avatar
+                  src={creator.avatar === null ? undefined : resolveImage(creator.avatar, 'image')}
+                  name={creator.name}
+                  size="sm"
+                  className="size-5 shrink-0 text-[0.625rem]"
+                />
+                <Text size="xs" tone="muted">
+                  {creator.name}
+                </Text>
+              </Inline>
+              <Inline gap="xs" align="center" wrap={false}>
+                <Clock aria-hidden />
+                <Text size="xs" tone="muted">
+                  {t.rich('updated', {
+                    time: () => <Time value={resource.updated} format="relative" />,
+                  })}
+                </Text>
+              </Inline>
+              <Inline gap="xs" align="center" wrap={false}>
+                <Download aria-hidden />
+                <Text size="xs" tone="muted" className="tabular-nums">
+                  {t('downloads', { count: resource.downloads })}
+                </Text>
+              </Inline>
             </Inline>
           </Stack>
           <ResourceMenu resource={resource} owned={ownedBy(resource, viewerId)} />
