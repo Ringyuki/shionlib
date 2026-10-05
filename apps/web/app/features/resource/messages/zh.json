@@ -1,0 +1,70 @@
+{
+  "empty": "这个游戏还没有资源。",
+  "uploadFirst": "上传资源",
+  "filter": "按平台筛选",
+  "all": "全部",
+  "byline": "{name} · 更新于 <time></time>",
+  "downloads": "下载 {count, number} 次",
+  "files": "文件",
+  "hash": "{algorithm}：{hash}",
+  "copyHash": "复制完整校验值",
+  "state": {
+    "passed": "通过",
+    "scanning": "扫描中",
+    "falsePositive": "误报已确认",
+    "risky": "有风险"
+  },
+  "stateHint": {
+    "passed": "已通过安全扫描",
+    "scanning": "扫描完成后可下载，目前只有你能看到这个文件",
+    "falsePositive": "曾被识别为 {names}，经审核确认为误报",
+    "risky": "已拦截：检测到 {names}"
+  },
+  "replaced": "<time></time>替换了文件",
+  "replacedBecause": "<time></time>替换了文件：{reason}",
+  "actions": "资源操作",
+  "history": "替换记录",
+  "report": "举报",
+  "edit": "编辑",
+  "delete": "删除",
+  "deleteConfirm": "删除这个资源？",
+  "deleteDescription": "资源里的文件会一并删除，无法恢复。",
+  "deleted": "资源已删除",
+  "historyTitle": "替换记录",
+  "historyEmpty": "这个文件还没有被替换过。",
+  "historyEntry": "{name} 上传了 {size}",
+  "reportTitle": "举报资源",
+  "reportReason": "原因",
+  "reportDetail": "补充说明",
+  "reportDetailHint": "选填，最多 {max} 字",
+  "reportSubmit": "提交举报",
+  "reported": "已收到举报，我们会尽快处理",
+  "cancel": "取消",
+  "reason": {
+    "BROKEN_LINK": "文件失效",
+    "IRRELEVANT": "内容不符",
+    "MALWARE": "有毒",
+    "MISLEADING_CONTENT": "描述误导",
+    "OTHER": "其他"
+  },
+  "editTitle": "编辑资源",
+  "platforms": "平台",
+  "languages": "语言",
+  "simulator": "引擎",
+  "simulatorHint": "手机平台的资源需要注明用哪种引擎运行",
+  "note": "说明",
+  "noteHint": "选填，最多 {max} 字",
+  "save": "保存",
+  "saved": "资源已更新",
+  "simulatorName": {
+    "KRKR": "KiriKiri（KRKR）",
+    "ONS": "ONScripter",
+    "ARTEMIS": "Artemis",
+    "OTHER": "其他"
+  },
+  "issue": {
+    "platforms": "至少选择一个平台",
+    "languages": "至少选择一种语言",
+    "simulator": "请选择引擎"
+  }
+}

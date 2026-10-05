@@ -1,0 +1,1 @@
+export { characterName } from './character'

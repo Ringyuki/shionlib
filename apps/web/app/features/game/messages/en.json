@@ -23,5 +23,83 @@
     "zh": "Simplified Chinese",
     "zh-hant": "Traditional Chinese",
     "jp": "Japanese"
+  },
+  "tabs": {
+    "label": "Game page",
+    "resources": "Downloads",
+    "info": "About",
+    "characters": "Characters"
+  },
+  "facts": {
+    "moreAliases": "+{count} more"
+  },
+  "score": {
+    "bangumi": "Bangumi",
+    "vndb": "VNDB",
+    "votes": "{source} · {count, plural, one {# vote} other {# votes}}",
+    "count": "{count, number}"
+  },
+  "actions": {
+    "upload": "Upload",
+    "more": "More actions",
+    "copyLink": "Copy link",
+    "linkCopied": "Link copied",
+    "copyFailed": "Could not copy; copy the address bar instead",
+    "viewOnHikarinagi": "View on Hikarinagi",
+    "editOnHikarinagi": "Edit on Hikarinagi",
+    "download": "Download ({count, plural, one {# resource} other {# resources}})",
+    "uploadShort": "Upload"
+  },
+  "cover": {
+    "view": "View cover",
+    "explicit": "Adult content, click to show"
+  },
+  "info": {
+    "intro": "Description",
+    "noIntro": "This game has no description yet.",
+    "introLanguage": "Description language",
+    "tags": "Tags",
+    "staff": "Staff",
+    "screenshots": "Screenshots",
+    "relations": "Related games",
+    "extra": "More details",
+    "links": "Links",
+    "viewScreenshot": "View screenshot {index}"
+  },
+  "introLanguage": {
+    "zh": "Chinese",
+    "jp": "Japanese",
+    "en": "English"
+  },
+  "relation": {
+    "PREQUEL": "Prequel",
+    "SEQUEL": "Sequel",
+    "MAIN_STORY": "Main story",
+    "SIDE_STORY": "Side story",
+    "EXPANSION": "Expansion",
+    "VARIANT": "Other version",
+    "MAIN_VERSION": "Original version",
+    "COLLECTION": "Collection",
+    "COLLECTED_WORK": "Included work",
+    "SAME_UNIVERSE": "Same setting",
+    "DIFFERENT_ADAPTATION": "Alternative adaptation",
+    "SHARED_CHARACTERS": "Shared characters",
+    "FAN_DISC": "Fan disc"
+  },
+  "characters": {
+    "empty": "This game has no characters yet.",
+    "voice": "CV {name}",
+    "role": {
+      "main": "Protagonist",
+      "primary": "Main characters",
+      "side": "Side characters",
+      "appears": "Appearances"
+    }
+  },
+  "meta": {
+    "developers": "Developer",
+    "released": "Release date",
+    "platforms": "Platforms",
+    "type": "Type"
   }
 }

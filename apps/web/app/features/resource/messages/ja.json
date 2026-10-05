@@ -1,0 +1,70 @@
+{
+  "empty": "このゲームにはまだダウンロードがありません。",
+  "uploadFirst": "アップロード",
+  "filter": "プラットフォームで絞り込む",
+  "all": "すべて",
+  "byline": "{name} · <time></time>に更新",
+  "downloads": "{count, number} 回ダウンロード",
+  "files": "ファイル",
+  "hash": "{algorithm}：{hash}",
+  "copyHash": "チェックサムをコピー",
+  "state": {
+    "passed": "スキャン済み",
+    "scanning": "スキャン中",
+    "falsePositive": "誤検知確認済み",
+    "risky": "ブロック"
+  },
+  "stateHint": {
+    "passed": "マルウェアスキャンを通過しました",
+    "scanning": "スキャン完了後にダウンロードできます。現在はあなたにだけ表示されています",
+    "falsePositive": "{names} として検出されましたが、誤検知と確認されました",
+    "risky": "ブロック：{names} を検出"
+  },
+  "replaced": "<time></time>にファイルを差し替え",
+  "replacedBecause": "<time></time>にファイルを差し替え：{reason}",
+  "actions": "リソースの操作",
+  "history": "差し替え履歴",
+  "report": "報告",
+  "edit": "編集",
+  "delete": "削除",
+  "deleteConfirm": "このリソースを削除しますか？",
+  "deleteDescription": "ファイルも削除され、元に戻せません。",
+  "deleted": "リソースを削除しました",
+  "historyTitle": "差し替え履歴",
+  "historyEmpty": "このファイルはまだ差し替えられていません。",
+  "historyEntry": "{name} が {size} をアップロード",
+  "reportTitle": "リソースを報告",
+  "reportReason": "理由",
+  "reportDetail": "詳細",
+  "reportDetailHint": "任意、{max} 文字まで",
+  "reportSubmit": "報告する",
+  "reported": "報告を受け付けました。確認いたします",
+  "cancel": "キャンセル",
+  "reason": {
+    "BROKEN_LINK": "ファイルが壊れている",
+    "IRRELEVANT": "内容が違う",
+    "MALWARE": "マルウェア",
+    "MISLEADING_CONTENT": "説明が誤解を招く",
+    "OTHER": "その他"
+  },
+  "editTitle": "リソースを編集",
+  "platforms": "プラットフォーム",
+  "languages": "言語",
+  "simulator": "エンジン",
+  "simulatorHint": "モバイル向けリソースは動作エンジンを指定してください",
+  "note": "説明",
+  "noteHint": "任意、{max} 文字まで",
+  "save": "保存",
+  "saved": "リソースを更新しました",
+  "simulatorName": {
+    "KRKR": "吉里吉里（KRKR）",
+    "ONS": "ONScripter",
+    "ARTEMIS": "Artemis",
+    "OTHER": "その他"
+  },
+  "issue": {
+    "platforms": "プラットフォームを 1 つ以上選んでください",
+    "languages": "言語を 1 つ以上選んでください",
+    "simulator": "エンジンを選んでください"
+  }
+}

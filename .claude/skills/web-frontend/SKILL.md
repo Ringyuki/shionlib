@@ -50,6 +50,7 @@ app/
     form/                      form kit from generated API constraints, useSubmissionFeedback, check helpers
     http/                      pure HTTP helpers (readCookie)
     config/                    server env (env.server.ts) and the public config sent to the browser
+    catalog/                   links back to the catalog source (Hikarinagi entry and editor URLs)
     storage/                   readLocal/writeLocal over localStorage
     vendor/                    browser clients of third-party services (Turnstile, aria2); the only fetch outside api/
     i18n/  ui/                 <topic>.schema.ts beside a module holds its input guards
@@ -92,29 +93,34 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 
 ## Where things go
 
-| Question                                        | Answer                                                                                                                     |
-| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| New page?                                       | `recipes/add-route.md`: route entry in `app/routes.ts`, thin module in `app/routes/`, use-cases and UI in a feature        |
-| New feature?                                    | `recipes/add-feature.md`; copy `app/features/favorite` (golden path)                                                       |
-| Calling the API?                                | a use-case in `<feature>.use-cases.ts` taking `api: ApiClient`                                                             |
-| Typing API data in a component?                 | `Schema<'GameHeaderDTO'>`, `ApiData<'/game/{id}', 'get'>`, or `Pick` from them                                             |
-| Button that changes data without navigating?    | resource route + `<feature>.server.ts` action + `use-<purpose>.ts` fetcher hook (`recipes/add-mutation.md`)                |
-| Optimistic UI?                                  | derive it from `fetcher.json` / `fetcher.formData` in the hook                                                             |
-| A form?                                         | `recipes/add-form.md`: `<name>.schema.ts` form schema from `useFormKit()`, `<Form rules>`, `useSubmissionFeedback`         |
-| Parsing a request body, cookie, param, storage? | a schema in the nearest `*.schema.ts`; `readCommand`, `idParam`, `readCookie`, `parseOptional` (`references/forms.md`)     |
-| Form validation errors?                         | `routeAction` returns `failure.data.errors` (field → messages); render them next to the field                              |
-| 404 for a bad id?                               | `idParam(params.id)`; missing records come back from the API as 404 through `routeLoader`                                  |
-| Who is signed in?                               | `loadViewer` in the `site` layout loader; pages read it from `matches`                                                     |
-| Action that needs a signed-in user?             | `Button` from `~/shared/ui/button` with `loginRequired`: guests get the sign-in dialog, the click replays after it         |
-| Search?                                         | `features/search`: the header's `SearchPalette` (CommandPalette, `/` and ⌘K) and `/:lang/search?q=`; never filter locally  |
-| Sign in, sign up, sign out?                     | `features/auth`: the dialog (`?auth=sign-in`/`sign-up`/`forgot-password` opens it), `useSignOut`; no auth pages            |
-| Navigation entry or shell change?               | `features/shell` (`shell.ts` model, `ui/site-sidebar.tsx`, `ui/site-header.tsx`)                                           |
-| An image from the API?                          | `<Image src={cover.url}>`; outside `Image`, `useImageResolver()(key, 'image')`                                             |
-| Human verification (downloads)?                 | `TurnstileChallenge` from `~/shared/vendor/turnstile-challenge`; the token goes to the API through an action               |
-| A per-browser setting?                          | a key constant in the model, a guard in `<name>.schema.ts`, `readLocal`/`writeLocal` from `~/shared/storage/local-storage` |
-| Auth cookies and refresh?                       | handled by `apiMiddleware` + `createApiSession`; never touch tokens in features                                            |
-| Messages?                                       | `features/<name>/messages/*.json`, registered in `app/messages/{zh,en,ja}.ts`                                              |
-| Tests?                                          | `references/testing.md`: model and use-cases with `fakeApi()`, server helpers with stubs                                   |
+| Question                                             | Answer                                                                                                                                             |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| New page?                                            | `recipes/add-route.md`: route entry in `app/routes.ts`, thin module in `app/routes/`, use-cases and UI in a feature                                |
+| New feature?                                         | `recipes/add-feature.md`; copy `app/features/favorite` (golden path)                                                                               |
+| Calling the API?                                     | a use-case in `<feature>.use-cases.ts` taking `api: ApiClient`                                                                                     |
+| Typing API data in a component?                      | `Schema<'GameHeaderDTO'>`, `ApiData<'/game/{id}', 'get'>`, or `Pick` from them                                                                     |
+| Button that changes data without navigating?         | resource route + `<feature>.server.ts` action + `use-<purpose>.ts` fetcher hook (`recipes/add-mutation.md`)                                        |
+| Optimistic UI?                                       | derive it from `fetcher.json` / `fetcher.formData` in the hook                                                                                     |
+| A form?                                              | `recipes/add-form.md`: `<name>.schema.ts` form schema from `useFormKit()`, `<Form rules>`, `useSubmissionFeedback`                                 |
+| Parsing a request body, cookie, param, storage?      | a schema in the nearest `*.schema.ts`; `readCommand`, `idParam`, `readCookie`, `parseOptional` (`references/forms.md`)                             |
+| Form validation errors?                              | `routeAction` returns `failure.data.errors` (field → messages); render them next to the field                                                      |
+| 404 for a bad id?                                    | `idParam(params.id)`; missing records come back from the API as 404 through `routeLoader`                                                          |
+| Who is signed in?                                    | `loadViewer` in the `site` layout loader; pages read it from `matches`                                                                             |
+| Action that needs a signed-in user?                  | `Button` from `~/shared/ui/button` with `loginRequired`: guests get the sign-in dialog, the click replays after it                                 |
+| Search?                                              | `features/search`: the header's `SearchPalette` (CommandPalette, `/` and ⌘K) and `/:lang/search?q=`; never filter locally                          |
+| Sign in, sign up, sign out?                          | `features/auth`: the dialog (`?auth=sign-in`/`sign-up`/`forgot-password` opens it), `useSignOut`; no auth pages                                    |
+| Navigation entry or shell change?                    | `features/shell` (`shell.ts` model, `ui/site-sidebar.tsx`, `ui/site-header.tsx`)                                                                   |
+| An image from the API?                               | `<Image src={cover.url}>`; outside `Image`, `useImageResolver()(key, 'image')`                                                                     |
+| Human verification (downloads)?                      | `TurnstileChallenge` from `~/shared/vendor/turnstile-challenge`; the token goes to the API through an action                                       |
+| Downloading a file?                                  | `DownloadButton` from `~/features/download`: Turnstile, then `resources/download/link`, then browser, aria2 or copy by the visitor's local setting |
+| Resources of a game (list, report, edit, delete)?    | `features/resource`; the list is rendered by the game page's resources tab                                                                         |
+| A page with tabs (game page)?                        | parent route loads what the tabs share; each tab is a child route reading `matches`; hina `Tabs` driven by the URL (`references/ui.md`)            |
+| Choices of an enum field (platforms, reasons)?       | the model reads `constraints.<Body>.<field>.enum` / `.itemEnum` from `~/shared/api/generated/constraints`; never list them by hand                 |
+| Catalog data on a page (game, character, developer)? | `CatalogAttribution` from `~/shared/ui/catalog-attribution` with the entry's `h_id`; it is required by Hikarinagi's terms                          |
+| A per-browser setting?                               | a key constant in the model, a guard in `<name>.schema.ts`, `readLocal`/`writeLocal` from `~/shared/storage/local-storage`                         |
+| Auth cookies and refresh?                            | handled by `apiMiddleware` + `createApiSession`; never touch tokens in features                                                                    |
+| Messages?                                            | `features/<name>/messages/*.json`, registered in `app/messages/{zh,en,ja}.ts`                                                                      |
+| Tests?                                               | `references/testing.md`: model and use-cases with `fakeApi()`, server helpers with stubs                                                           |
 
 ## References
 

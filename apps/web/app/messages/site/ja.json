@@ -10,5 +10,7 @@
   "signInDescription": "このページを見るにはログインしてください。",
   "forbiddenTitle": "アクセス権がありません",
   "forbiddenDescription": "このページへのアクセス権がありません。",
-  "backHome": "ホームに戻る"
+  "backHome": "ホームに戻る",
+  "catalogSource": "作品データ提供",
+  "catalogEntry": "Hikarinagi で作品を見る"
 }

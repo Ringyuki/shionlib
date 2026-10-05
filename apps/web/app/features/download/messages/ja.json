@@ -1,0 +1,28 @@
+{
+  "download": "ダウンロード",
+  "methods": "ほかのダウンロード方法",
+  "viaBrowser": "ブラウザでダウンロード",
+  "viaAria2": "aria2 に送る",
+  "copyLink": "ダウンロードリンクをコピー",
+  "verifying": "ロボットでないことを確認しています",
+  "verifyingHint": "確認が済むと自動で始まります。",
+  "verification": {
+    "unavailable": "認証を読み込めませんでした。接続を確認して再試行してください",
+    "error": "認証に失敗しました。再試行してください",
+    "expired": "認証の有効期限が切れました。再試行してください",
+    "timeout": "認証がタイムアウトしました。再試行してください"
+  },
+  "retryAfter": "{message}。{seconds} 秒後に再試行してください",
+  "aria2": {
+    "sent": "aria2 に送りました",
+    "unreachable": "aria2（{endpoint}）に接続できません。設定を確認してください",
+    "unauthorized": "aria2 がシークレットを拒否しました。設定を確認してください",
+    "rejected": "aria2 がタスクを受け付けませんでした：{message}"
+  },
+  "useBrowser": "ブラウザでダウンロード",
+  "copied": "リンクをコピーしました（{minutes} 分間有効）",
+  "copyReady": "リンクを発行しました（{minutes} 分間有効）",
+  "copy": "コピー",
+  "scanning": "スキャン完了後にダウンロードできます",
+  "asDefault": "{label}（既定）"
+}

@@ -6,7 +6,7 @@ import { labelOf } from '~/shared/i18n/labels'
 import { developerNames, gameTitle, originalTitle, primaryCover, releaseDate } from '../game'
 
 type GameRowProps = {
-  game: Schema<'GameListItemDTO'>
+  game: Schema<'GameCardDTO'>
 }
 
 export function GameRow({ game }: GameRowProps) {

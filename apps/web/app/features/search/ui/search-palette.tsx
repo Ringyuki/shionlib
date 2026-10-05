@@ -21,7 +21,8 @@ import {
 import { useNavigate } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 import { developerNames, gameTitle, originalTitle, releaseDate } from '~/features/game'
-import { characterName, type Palette } from '../search'
+import { characterName } from '~/features/character'
+import type { Palette } from '../search'
 import { useSearchPalette } from '../use-search-palette'
 
 export type SearchShortcut = {

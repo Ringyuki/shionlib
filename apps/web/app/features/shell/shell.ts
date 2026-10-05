@@ -77,3 +77,5 @@ export const repositoryUrl = 'https://github.com/Ringyuki/shionlib'
 export const telegramUrl = 'https://t.me/shionlib'
 
 export const contactEmail = 'admin@shionlib.com'
+
+export const keepScroll = { keepScroll: true } as const

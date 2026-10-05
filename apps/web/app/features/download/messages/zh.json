@@ -1,0 +1,28 @@
+{
+  "download": "下载",
+  "methods": "其他下载方式",
+  "viaBrowser": "用浏览器下载",
+  "viaAria2": "推送到 aria2",
+  "copyLink": "复制下载链接",
+  "verifying": "正在确认你不是机器人",
+  "verifyingHint": "通过后会自动开始，不用再点一次。",
+  "verification": {
+    "unavailable": "人机验证没有加载出来，请检查网络后重试",
+    "error": "人机验证没有通过，请重试",
+    "expired": "人机验证已过期，请重试",
+    "timeout": "人机验证超时，请重试"
+  },
+  "retryAfter": "{message}，请 {seconds} 秒后再试",
+  "aria2": {
+    "sent": "已推送到 aria2",
+    "unreachable": "无法连接 aria2（{endpoint}），请检查设置",
+    "unauthorized": "aria2 拒绝了密钥，请检查设置",
+    "rejected": "aria2 没有接受任务：{message}"
+  },
+  "useBrowser": "改用浏览器下载",
+  "copied": "链接已复制，{minutes} 分钟内有效",
+  "copyReady": "链接已生成，{minutes} 分钟内有效",
+  "copy": "复制",
+  "scanning": "扫描完成后可下载",
+  "asDefault": "{label}（默认）"
+}

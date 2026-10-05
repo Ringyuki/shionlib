@@ -1,13 +1,10 @@
 import type { ApiData } from '~/shared/api/types'
-import type { Locale } from '~/shared/i18n/locale'
 
 export type SearchResults = ApiData<'/search', 'get'>
 
 export type GameHit = NonNullable<SearchResults['games']['items']>[number]
 
 export type DeveloperHit = NonNullable<SearchResults['developers']['items']>[number]
-
-export type CharacterHit = NonNullable<SearchResults['characters']['items']>[number]
 
 export type Palette = {
   query: string
@@ -56,9 +53,4 @@ export function emptyResults(): SearchResults {
     developers: { items: [], total: 0 },
     characters: { items: [], total: 0 },
   }
-}
-
-export function characterName(hit: CharacterHit, locale: Locale): string {
-  const localized = locale === 'zh' ? hit.name_zh : locale === 'en' ? hit.name_en : null
-  return localized?.trim() || hit.name_jp
 }

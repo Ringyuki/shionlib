@@ -1,0 +1,70 @@
+{
+  "empty": "No downloads for this game yet.",
+  "uploadFirst": "Upload",
+  "filter": "Filter by platform",
+  "all": "All",
+  "byline": "{name} · updated <time></time>",
+  "downloads": "{count, plural, one {# download} other {# downloads}}",
+  "files": "Files",
+  "hash": "{algorithm}: {hash}",
+  "copyHash": "Copy the full checksum",
+  "state": {
+    "passed": "Clean",
+    "scanning": "Scanning",
+    "falsePositive": "False positive",
+    "risky": "Blocked"
+  },
+  "stateHint": {
+    "passed": "Passed the malware scan",
+    "scanning": "Downloadable once the scan finishes; only you can see this file for now",
+    "falsePositive": "Flagged as {names}, confirmed as a false positive",
+    "risky": "Blocked: {names} detected"
+  },
+  "replaced": "File replaced <time></time>",
+  "replacedBecause": "File replaced <time></time>: {reason}",
+  "actions": "Resource actions",
+  "history": "Replacement history",
+  "report": "Report",
+  "edit": "Edit",
+  "delete": "Delete",
+  "deleteConfirm": "Delete this resource?",
+  "deleteDescription": "Its files are deleted too. This cannot be undone.",
+  "deleted": "Resource deleted",
+  "historyTitle": "Replacement history",
+  "historyEmpty": "This file has never been replaced.",
+  "historyEntry": "{name} uploaded {size}",
+  "reportTitle": "Report resource",
+  "reportReason": "Reason",
+  "reportDetail": "Details",
+  "reportDetailHint": "Optional, up to {max} characters",
+  "reportSubmit": "Send report",
+  "reported": "Thanks, we will look into it soon",
+  "cancel": "Cancel",
+  "reason": {
+    "BROKEN_LINK": "Broken file",
+    "IRRELEVANT": "Wrong content",
+    "MALWARE": "Malware",
+    "MISLEADING_CONTENT": "Misleading description",
+    "OTHER": "Other"
+  },
+  "editTitle": "Edit resource",
+  "platforms": "Platforms",
+  "languages": "Languages",
+  "simulator": "Engine",
+  "simulatorHint": "Mobile resources must name the engine that runs them",
+  "note": "Note",
+  "noteHint": "Optional, up to {max} characters",
+  "save": "Save",
+  "saved": "Resource updated",
+  "simulatorName": {
+    "KRKR": "KiriKiri (KRKR)",
+    "ONS": "ONScripter",
+    "ARTEMIS": "Artemis",
+    "OTHER": "Other"
+  },
+  "issue": {
+    "platforms": "Choose at least one platform",
+    "languages": "Choose at least one language",
+    "simulator": "Choose an engine"
+  }
+}

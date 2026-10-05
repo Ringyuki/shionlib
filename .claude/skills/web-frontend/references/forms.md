@@ -23,6 +23,7 @@ All validation in `apps/web` uses **valibot**. hina-ui `Form` accepts any Standa
 - **Rules the API does not declare**:
   - Rules that exist only in the API's business logic (password policy, whether a code is right) are not repeated. The API answers 422 with field errors in the visitor's language, and `useSubmissionFeedback` puts them under the fields.
   - Rules that exist only in the UI (confirmation matches, age declaration ticked) are written in the form schema with the feature's own messages (`<name>.issue.<key>`).
+- **Choices**: the options of an enum field (report reasons, platforms, languages) come from the same file: `constraints.CreateReportInputBody.reason.enum`, or `.itemEnum` and `.minItems` for arrays, read in the feature model (`reportReasons`, `platformOptions`, `leastPlatforms`). A model may change their display order, never their content.
 - **Generic messages** (required, too short, too long, format, choice) live in `app/messages/form/{zh,en,ja}.json` (namespace `form`). They are produced by `useFormKit()`.
 
 ## Building a form

@@ -1,0 +1,28 @@
+{
+  "download": "Download",
+  "methods": "Other ways to download",
+  "viaBrowser": "Download in the browser",
+  "viaAria2": "Send to aria2",
+  "copyLink": "Copy download link",
+  "verifying": "Checking that you are human",
+  "verifyingHint": "The download starts by itself once this passes.",
+  "verification": {
+    "unavailable": "The verification did not load. Check your connection and try again",
+    "error": "The verification failed. Try again",
+    "expired": "The verification expired. Try again",
+    "timeout": "The verification timed out. Try again"
+  },
+  "retryAfter": "{message}. Try again in {seconds} s",
+  "aria2": {
+    "sent": "Sent to aria2",
+    "unreachable": "Cannot reach aria2 ({endpoint}). Check your settings",
+    "unauthorized": "aria2 rejected the secret. Check your settings",
+    "rejected": "aria2 did not accept the task: {message}"
+  },
+  "useBrowser": "Use the browser instead",
+  "copied": "Link copied, valid for {minutes} min",
+  "copyReady": "Link ready, valid for {minutes} min",
+  "copy": "Copy",
+  "scanning": "Downloadable once the scan finishes",
+  "asDefault": "{label} (default)"
+}

@@ -1,0 +1,120 @@
+import { describe, expect, it } from 'vitest'
+import en from './messages/en.json'
+import ja from './messages/ja.json'
+import zh from './messages/zh.json'
+import {
+  detections,
+  fileSize,
+  fileState,
+  ownedBy,
+  reportReasons,
+  resourcePlatforms,
+  shortHash,
+  summarizeResources,
+  withPlatform,
+  type ReportReason,
+  type Resource,
+} from './resource'
+
+const file = {
+  file_status: 3,
+  malware_scan_cases: null,
+  is_virus_false_positive: false,
+}
+
+const resource = (id: number, platform: Resource['platform']): Resource => ({
+  id,
+  platform,
+  language: ['zh'],
+  simulator: null,
+  note: null,
+  downloads: 0,
+  creator: { id: 7, name: 'mikan', avatar: null, is_sponsor: false },
+  created: '2026-10-01T00:00:00Z',
+  updated: '2026-10-01T00:00:00Z',
+  files: [],
+})
+
+describe('fileState', () => {
+  it('tells stored, scanning, risky and cleared files apart', () => {
+    expect(fileState(file)).toBe('passed')
+    expect(fileState({ ...file, file_status: 2 })).toBe('scanning')
+    const infected = { ...file, malware_scan_cases: [{ id: 1, detected_viruses: ['Trojan.X'] }] }
+    expect(fileState(infected)).toBe('risky')
+    expect(fileState({ ...infected, is_virus_false_positive: true })).toBe('falsePositive')
+  })
+
+  it('lists each detection once', () => {
+    expect(
+      detections({
+        malware_scan_cases: [
+          { id: 1, detected_viruses: ['A', 'B'] },
+          { id: 2, detected_viruses: ['A'] },
+        ],
+      }),
+    ).toEqual(['A', 'B'])
+  })
+})
+
+describe('display helpers', () => {
+  it('shortens hashes and sizes files in binary units', () => {
+    expect(shortHash('9f3a1c00112233445566e02b8c')).toBe('9f3a1c…e02b8c')
+    expect(shortHash('abc')).toBe('abc')
+    expect(fileSize(4.12 * 1024 ** 3)).toMatchObject({ unit: 'GB' })
+    expect(fileSize(512)).toEqual({ value: 512, unit: 'B' })
+  })
+})
+
+describe('platform filter', () => {
+  const resources = [resource(1, ['win']), resource(2, ['swi', 'win']), resource(3, null)]
+
+  it('offers the platforms in order of appearance', () => {
+    expect(resourcePlatforms(resources)).toEqual(['win', 'swi'])
+  })
+
+  it('keeps every resource without a platform choice', () => {
+    expect(withPlatform(resources, 'swi').map(entry => entry.id)).toEqual([2])
+    expect(withPlatform(resources, undefined)).toHaveLength(3)
+  })
+})
+
+describe('ownedBy', () => {
+  it('matches only the uploader', () => {
+    expect(ownedBy(resource(1, null), 7)).toBe(true)
+    expect(ownedBy(resource(1, null), 8)).toBe(false)
+    expect(ownedBy(resource(1, null), null)).toBe(false)
+  })
+})
+
+describe('report reasons', () => {
+  it('offers the most common reason first', () => {
+    expect(reportReasons[0]).toBe('BROKEN_LINK')
+    expect(new Set(reportReasons).size).toBe(reportReasons.length)
+  })
+
+  it('names every reason the API accepts in each locale', () => {
+    const tables: Record<ReportReason, string>[] = [zh.reason, en.reason, ja.reason]
+    expect(tables.every(table => reportReasons.every(reason => (table[reason] ?? '') !== ''))).toBe(
+      true,
+    )
+  })
+})
+
+describe('summarizeResources', () => {
+  it('adds up downloads and finds the latest update', () => {
+    const older = { ...resource(1, ['win']), downloads: 3, updated: '2026-09-01T00:00:00Z' }
+    const newer = { ...resource(2, ['swi']), downloads: 4, updated: '2026-10-01T00:00:00Z' }
+    expect(summarizeResources([older, newer])).toEqual({
+      count: 2,
+      downloads: 7,
+      updated: '2026-10-01T00:00:00Z',
+      first: 1,
+    })
+    expect(summarizeResources([])).toEqual({
+      count: 0,
+      downloads: 0,
+      updated: undefined,
+      first: undefined,
+    })
+  })
+})

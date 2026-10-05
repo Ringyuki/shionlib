@@ -23,5 +23,83 @@
     "zh": "簡体字",
     "zh-hant": "繁体字",
     "jp": "日本語"
+  },
+  "tabs": {
+    "label": "ゲームページ",
+    "resources": "ダウンロード",
+    "info": "概要",
+    "characters": "キャラクター"
+  },
+  "facts": {
+    "moreAliases": "ほか {count} 件"
+  },
+  "score": {
+    "bangumi": "Bangumi",
+    "vndb": "VNDB",
+    "votes": "{source} · {count, number} 件",
+    "count": "{count, number} 件"
+  },
+  "actions": {
+    "upload": "アップロード",
+    "more": "その他の操作",
+    "copyLink": "リンクをコピー",
+    "linkCopied": "リンクをコピーしました",
+    "copyFailed": "コピーできませんでした。アドレスバーからコピーしてください",
+    "viewOnHikarinagi": "Hikarinagi で見る",
+    "editOnHikarinagi": "Hikarinagi で編集",
+    "download": "ダウンロード（{count} 件）",
+    "uploadShort": "アップロード"
+  },
+  "cover": {
+    "view": "パッケージを見る",
+    "explicit": "成人向けコンテンツ。クリックで表示"
+  },
+  "info": {
+    "intro": "あらすじ",
+    "noIntro": "このゲームにはまだあらすじがありません。",
+    "introLanguage": "あらすじの言語",
+    "tags": "タグ",
+    "staff": "スタッフ",
+    "screenshots": "スクリーンショット",
+    "relations": "関連作品",
+    "extra": "その他の情報",
+    "links": "関連リンク",
+    "viewScreenshot": "スクリーンショット {index} を見る"
+  },
+  "introLanguage": {
+    "zh": "中国語",
+    "jp": "日本語",
+    "en": "英語"
+  },
+  "relation": {
+    "PREQUEL": "前作",
+    "SEQUEL": "続編",
+    "MAIN_STORY": "本編",
+    "SIDE_STORY": "外伝",
+    "EXPANSION": "追加ディスク",
+    "VARIANT": "別バージョン",
+    "MAIN_VERSION": "オリジナル版",
+    "COLLECTION": "セット",
+    "COLLECTED_WORK": "収録作品",
+    "SAME_UNIVERSE": "同一世界観",
+    "DIFFERENT_ADAPTATION": "別アレンジ",
+    "SHARED_CHARACTERS": "キャラクター共通",
+    "FAN_DISC": "ファンディスク"
+  },
+  "characters": {
+    "empty": "このゲームにはまだキャラクター情報がありません。",
+    "voice": "CV {name}",
+    "role": {
+      "main": "主人公",
+      "primary": "メインキャラクター",
+      "side": "サブキャラクター",
+      "appears": "登場"
+    }
+  },
+  "meta": {
+    "developers": "ブランド",
+    "released": "発売日",
+    "platforms": "プラットフォーム",
+    "type": "ジャンル"
   }
 }

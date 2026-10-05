@@ -10,5 +10,7 @@
   "signInDescription": "Sign in to see this page.",
   "forbiddenTitle": "Access denied",
   "forbiddenDescription": "You do not have permission to see this page.",
-  "backHome": "Back to home"
+  "backHome": "Back to home",
+  "catalogSource": "Catalog data from",
+  "catalogEntry": "View the entry on Hikarinagi"
 }

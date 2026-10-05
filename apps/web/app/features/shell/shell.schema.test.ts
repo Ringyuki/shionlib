@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { historyStateOf, scrollTopOf, sidebarModeFrom } from './shell.schema'
+import { keepScroll } from './shell'
+import { historyStateOf, keepsScrollOn, scrollTopOf, sidebarModeFrom } from './shell.schema'
 
 describe('sidebarModeFrom', () => {
   it('reads the remembered mode and defaults to expanded', () => {
@@ -16,5 +17,13 @@ describe('scroll restoration input', () => {
     expect(scrollTopOf('120')).toBe(120)
     expect(scrollTopOf('x')).toBeUndefined()
     expect(scrollTopOf(null)).toBeUndefined()
+  })
+})
+
+describe('keepsScrollOn', () => {
+  it('recognises navigations that keep the scroll position', () => {
+    expect(keepsScrollOn(keepScroll)).toBe(true)
+    expect(keepsScrollOn({ keepScroll: 'yes' })).toBe(false)
+    expect(keepsScrollOn(null)).toBe(false)
   })
 })

@@ -7,7 +7,7 @@ import {
 } from '@hina-ui/react'
 import { useEffect, useRef, type RefObject } from 'react'
 import { useLocation, useNavigation } from 'react-router'
-import { historyStateOf, scrollTopOf } from './shell.schema'
+import { historyStateOf, keepsScrollOn, scrollTopOf } from './shell.schema'
 
 const abandonEvents = ['wheel', 'touchstart', 'keydown'] as const
 
@@ -85,12 +85,15 @@ export function useMainScrollRestore(shell: RefObject<AppShellHandle | null>, ke
       mounted.current = true
       return
     }
+    const keep = keepsScrollOn(location.state)
     const frame = window.requestAnimationFrame(() => {
-      restorer.current?.restore()
+      if (!keep) {
+        restorer.current?.restore()
+      }
       if (location.hash !== '') {
         document.getElementById(location.hash.slice(1))?.scrollIntoView()
       }
     })
     return () => window.cancelAnimationFrame(frame)
-  }, [location.key, location.hash])
+  }, [location.key, location.hash, location.state])
 }

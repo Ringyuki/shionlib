@@ -1,23 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  characterName,
-  maxQueryLength,
-  maxRecent,
-  normalizeQuery,
-  pageCount,
-  rememberSearch,
-  type CharacterHit,
-} from './search'
-
-const character: CharacterHit = {
-  id: 1,
-  image: null,
-  name_jp: '御桜稟',
-  name_zh: '御樱禀',
-  name_en: null,
-  aliases: [],
-  game: null,
-}
+import { maxQueryLength, maxRecent, normalizeQuery, pageCount, rememberSearch } from './search'
 
 describe('normalizeQuery', () => {
   it('collapses whitespace and caps the length', () => {
@@ -40,13 +22,5 @@ describe('paging', () => {
   it('counts at least one page', () => {
     expect(pageCount(41, 20)).toBe(3)
     expect(pageCount(0, 20)).toBe(1)
-  })
-})
-
-describe('characterName', () => {
-  it('uses the localized name when there is one', () => {
-    expect(characterName(character, 'zh')).toBe('御樱禀')
-    expect(characterName(character, 'en')).toBe('御桜稟')
-    expect(characterName(character, 'ja')).toBe('御桜稟')
   })
 })
