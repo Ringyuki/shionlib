@@ -33,7 +33,7 @@ export function GalleryThumb({
       aria-label={label}
       onClick={onOpen}
       className={cn(
-        'block h-auto w-full cursor-zoom-in overflow-hidden rounded-lg border-0 p-0',
+        'block h-auto w-full cursor-zoom-in overflow-hidden rounded-lg border-0 p-0 [&>.hn-transition]:size-full',
         className,
       )}
     >
@@ -43,7 +43,6 @@ export function GalleryThumb({
         ratio={ratio}
         fit="cover"
         eager={eager}
-        lazy={!eager}
         className={ratio === undefined ? 'size-full' : 'w-full'}
         imageClass={imageClass}
         {...data}

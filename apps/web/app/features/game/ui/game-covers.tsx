@@ -19,7 +19,6 @@ export function GameCover({ game, title, className }: GameCoverProps) {
       preview={cover !== undefined}
       previewSize={cover === undefined ? undefined : imageSize(cover)}
       eager
-      lazy={false}
       className={className}
     />
   )

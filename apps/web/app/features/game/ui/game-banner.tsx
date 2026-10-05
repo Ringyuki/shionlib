@@ -29,6 +29,7 @@ export function GameBanner({ images, index, className }: GameBannerProps) {
         onOpen={() => show(index)}
         eager
         className={className}
+        imageClass="object-top"
       />
       <Lightbox {...lightbox} />
     </>
