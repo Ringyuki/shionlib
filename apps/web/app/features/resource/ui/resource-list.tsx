@@ -58,9 +58,13 @@ export function ResourceList({ gameId, resources, viewerId }: ResourceListProps)
           className="self-start"
         />
       )}
-      {shown.map(resource => (
-        <ResourceCard key={resource.id} resource={resource} viewerId={viewerId} />
-      ))}
+      <Stack gap="none" className="divide-y divide-line">
+        {shown.map(resource => (
+          <Stack key={resource.id} className="py-6 first:pt-0 last:pb-0">
+            <ResourceCard resource={resource} viewerId={viewerId} />
+          </Stack>
+        ))}
+      </Stack>
     </Stack>
   )
 }

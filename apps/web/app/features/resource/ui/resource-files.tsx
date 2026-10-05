@@ -13,7 +13,7 @@ export function ResourceFiles({ files }: { files: readonly ResourceFile[] }) {
       as="ul"
       aria-label={t('files')}
       gap="none"
-      className="m-0 list-none divide-y divide-line border-t border-line p-0"
+      className="m-0 list-none divide-y divide-line overflow-hidden rounded-lg border border-line bg-surface p-0"
     >
       {files.map(file => (
         <FileRow key={file.id} file={file} />
@@ -28,7 +28,7 @@ function FileRow({ file }: { file: ResourceFile }) {
   const size = fileSize(file.file_size)
   const algorithm = file.hash_algorithm === 'blake3' ? 'BLAKE3' : 'SHA-256'
   return (
-    <Inline as="li" gap="md" align="center" wrap={false} className="px-5 py-3">
+    <Inline as="li" gap="md" align="center" wrap={false} className="px-4 py-3">
       <FileArchive aria-hidden className="size-5 shrink-0 text-faint max-sm:hidden" />
       <Stack gap="none" className="min-w-0 flex-1">
         <Inline gap="sm" align="center" wrap={false} className="min-w-0">

@@ -32,6 +32,7 @@ export function DownloadButton({ file, disabled = false }: DownloadButtonProps) 
       <Inline ref={setAnchor} className="shrink-0">
         <SplitButton
           size="sm"
+          variant="soft"
           loading={download.busy}
           disabled={disabled}
           menuLabel={t('methods')}
