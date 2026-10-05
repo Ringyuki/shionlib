@@ -1,16 +1,18 @@
-import { isFailure } from './failure.schema'
+import { isFailure, retryAfterFrom } from './failure.schema'
 import { BusinessCode } from './generated/business-codes'
 import type { ApiFailure, BusinessCodeName } from './types'
 
 export class ApiError extends Error {
   readonly status: number
   readonly failure: ApiFailure
+  readonly retryAfter: number | undefined
 
-  constructor(status: number, failure: ApiFailure) {
+  constructor(status: number, failure: ApiFailure, retryAfter?: number) {
     super(failure.message)
     this.name = 'ApiError'
     this.status = status
     this.failure = failure
+    this.retryAfter = retryAfter
   }
 
   get code(): number {
@@ -22,7 +24,11 @@ export class ApiError extends Error {
   }
 
   static fromResponse(response: Response, body: unknown): ApiError {
-    return new ApiError(response.status, isFailure(body) ? body : syntheticFailure(response))
+    return new ApiError(
+      response.status,
+      isFailure(body) ? body : syntheticFailure(response),
+      retryAfterFrom(response.headers.get('retry-after')),
+    )
   }
 }
 

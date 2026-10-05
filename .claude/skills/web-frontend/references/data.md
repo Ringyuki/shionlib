@@ -39,8 +39,19 @@ await api.put('/favorites/{id}', { params: { path: { id: listId } }, body: { gam
 - Read results as `fetcher.data` (typed by `useFetcher<typeof handler>()`); failures are `{ ok: false, failure }`.
 - Optimistic state is derived from `fetcher.json`/`fetcher.formData` while the fetcher is busy, never stored separately.
 - After an action, React Router revalidates the page loaders and loaded fetchers; do not refetch by hand.
+- A submission whose result no loader shows (a view counter, issuing a download link) passes `defaultShouldRevalidate: false` to `fetcher.submit`, so it does not reload the page.
+- `routeAction` failures also carry `retryAfter` (seconds, from the API's `Retry-After` on 429), read from `ApiError.retryAfter`; show it next to `failure.message`.
 
 ## Browser calls
+
+### Third-party services
+
+The visitor's browser also talks to services that are not ours. Each has one client in `app/shared/vendor/` and nothing else calls them:
+
+- `turnstile.ts` loads Cloudflare Turnstile from `challenges.cloudflare.com` once; `TurnstileChallenge` (`turnstile-challenge.tsx`) renders the widget into a hina-ui `Stack` ref with the site key from `usePublicConfig()`, the visitor's locale and theme, `appearance: 'interaction-only'`, and reports `onToken`/`onFailure`. Tokens are single-use: request a new one for every protected call and send it through an action, never to the API from the browser.
+- `aria2.ts` pushes a URL to the visitor's own aria2 over JSON-RPC (`aria2.addUri`) and returns `{ ok: true, gid }` or `{ ok: false, reason: 'unreachable' | 'unauthorized' | 'rejected' }`; replies are parsed by `aria2.schema.ts`.
+
+### Our API from the browser
 
 The browser talks to the web server only. The exceptions are endpoints that cannot be proxied through loaders and actions: chunked uploads and the `GET /message/stream` SSE stream. They use the same-origin `/api` prefix (proxied to the API by the ingress, and by Vite in development) and are wrapped in a hook in their feature.
 

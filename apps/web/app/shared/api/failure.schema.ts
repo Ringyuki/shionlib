@@ -9,3 +9,10 @@ const failure = v.looseObject({
 export function isFailure(value: unknown): value is ApiFailure {
   return v.is(failure, value)
 }
+
+const seconds = v.pipe(v.string(), v.toNumber(), v.safeInteger(), v.minValue(0))
+
+export function retryAfterFrom(header: string | null): number | undefined {
+  const parsed = v.safeParse(seconds, header)
+  return parsed.success ? parsed.output : undefined
+}

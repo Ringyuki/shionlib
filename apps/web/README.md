@@ -14,9 +14,11 @@ API_INTERNAL_URL=http://localhost:5000 pnpm dev
 
 - `API_INTERNAL_URL` is where the web server reaches the Go API (default `http://localhost:5000`). In development Vite also proxies `/api/*` to it for browser-side calls.
 - `IMAGE_BASE_URL` is the image host that stored image keys are served from (default `https://t.shionlib.com`).
+- `TURNSTILE_SITE_KEY` is the Cloudflare Turnstile site key for download verification; it pairs with the API's `CLOUDFLARE_TURNSTILE_SECRET`. For local development use Cloudflare's test key `1x00000000000000000000AA` with the test secret `1x0000000000000000000000000000000AA`.
+- `HIKARINAGI_SITE_URL` is the Hikarinagi site that catalog entries link back to (default `https://www.hikarinagi.org`).
 - `pnpm api:generate` regenerates the API types after `apps/api/openapi/openapi.json` changes.
 - `.claude/skills/web-frontend/scripts/verify.sh` runs every check CI runs.
 
 ## Production
 
-`apps/web/Dockerfile` (build context: `apps/web`) produces an image serving on port 3000. The ingress routes `/api/*` (prefix stripped) to the API and everything else to the web container; the web container needs `API_INTERNAL_URL` pointing at the API service and `IMAGE_BASE_URL` for images.
+`apps/web/Dockerfile` (build context: `apps/web`) produces an image serving on port 3000. The ingress routes `/api/*` (prefix stripped) to the API and everything else to the web container; the web container needs `API_INTERNAL_URL` pointing at the API service, `IMAGE_BASE_URL` for images, `TURNSTILE_SITE_KEY` and `HIKARINAGI_SITE_URL`.

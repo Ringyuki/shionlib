@@ -2,7 +2,6 @@ import { Card, Image, SimpleGrid, Text } from '@hina-ui/react'
 import { Link } from 'react-router'
 import { useLocale } from 'use-intl'
 import type { Schema } from '~/shared/api/types'
-import { useImageUrl } from '~/shared/ui/image-base'
 import { gameTitle, primaryCover } from '../game'
 
 type GameGridProps = {
@@ -11,7 +10,6 @@ type GameGridProps = {
 
 export function GameGrid({ games }: GameGridProps) {
   const locale = useLocale()
-  const image = useImageUrl()
   return (
     <SimpleGrid min="10rem" gap="md">
       {games.map(game => {
@@ -19,7 +17,7 @@ export function GameGrid({ games }: GameGridProps) {
         return (
           <Card key={game.id} padded={false} className="overflow-hidden">
             <Link to={`/${locale}/game/${game.id}`} prefetch="intent">
-              <Image src={image(primaryCover(game)?.url)} alt={title} ratio={3 / 4} fit="cover" />
+              <Image src={primaryCover(game)?.url} alt={title} ratio={3 / 4} fit="cover" />
               <Text size="sm" truncate className="p-2">
                 {title}
               </Text>

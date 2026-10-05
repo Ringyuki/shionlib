@@ -1,4 +1,11 @@
-import { Center, firstPaintRestoreScript, Heading, Toaster, TooltipProvider } from '@hina-ui/react'
+import {
+  Center,
+  firstPaintRestoreScript,
+  Heading,
+  ImageResolverProvider,
+  Toaster,
+  TooltipProvider,
+} from '@hina-ui/react'
 import type { ReactNode } from 'react'
 import {
   isRouteErrorResponse,
@@ -11,9 +18,10 @@ import {
   useRouteLoaderData,
 } from 'react-router'
 import { readServerEnv } from '~/shared/config/env.server'
+import { PublicConfigProvider } from '~/shared/config/public-config'
 import { htmlLang } from '~/shared/i18n/locale.schema'
 import { apiMiddleware } from '~/shared/route/api.server'
-import { ImageBaseProvider } from '~/shared/ui/image-base'
+import { imageResolver } from '~/shared/ui/image-resolver'
 import { darkClass, systemThemeScript } from '~/shared/ui/theme'
 import { themeFrom } from '~/shared/ui/theme.schema'
 import { ThemeProvider } from '~/shared/ui/theme-provider'
@@ -23,9 +31,8 @@ import './app.css'
 export const middleware: Route.MiddlewareFunction[] = [apiMiddleware]
 
 export function loader({ request }: Route.LoaderArgs) {
-  const env = readServerEnv()
   return {
-    imageBaseUrl: env.imageBaseUrl,
+    publicConfig: readServerEnv().publicConfig,
     theme: themeFrom(request.headers.get('cookie') ?? ''),
   }
 }
@@ -66,9 +73,11 @@ export function Layout({ children }: { children: ReactNode }) {
 export default function App({ loaderData }: Route.ComponentProps) {
   return (
     <ThemeProvider initial={loaderData.theme}>
-      <ImageBaseProvider base={loaderData.imageBaseUrl}>
-        <Outlet />
-      </ImageBaseProvider>
+      <PublicConfigProvider config={loaderData.publicConfig}>
+        <ImageResolverProvider resolver={imageResolver(loaderData.publicConfig.imageBaseUrl)}>
+          <Outlet />
+        </ImageResolverProvider>
+      </PublicConfigProvider>
     </ThemeProvider>
   )
 }

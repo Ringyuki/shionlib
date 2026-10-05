@@ -61,7 +61,8 @@ export async function signInAction(args: ActionFunctionArgs) {
 | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | Path id                                                       | `idParam(params.id)` (`~/shared/route/params`), which throws 404                                                                           |
 | Cookie                                                        | `readCookie(header, name)` (`~/shared/http/cookie`), then a guard from a `*.schema.ts` (`themeFrom`, `sidebarModeFrom`, `negotiateLocale`) |
-| Query string, storage, history state                          | a `v.fallback(...)` schema in the feature's `*.schema.ts`, such as `pageParam` or `parseRecent`                                            |
+| Query string, history state                                   | a `v.fallback(...)` schema in the feature's `*.schema.ts`, such as `pageParam`                                                             |
+| `localStorage`                                                | `readLocal(key, guard)` / `writeLocal(key, value)` (`~/shared/storage/local-storage`) with a guard such as `parseRecent`                   |
 | Unknown value on the client (`fetcher.json`, browser results) | `parseOptional(schema, value)` from `~/shared/form/check`                                                                                  |
 
 ## Tests

@@ -9,6 +9,7 @@ import {
   Stack,
   Text,
   Tooltip,
+  useImageResolver,
 } from '@hina-ui/react'
 import { ChevronsUpDown, Heart, LogIn, LogOut, Settings, UserRound } from 'lucide-react'
 import { useNavigate } from 'react-router'
@@ -16,7 +17,6 @@ import { useLocale, useTranslations } from 'use-intl'
 import { useSignOut } from '~/features/auth'
 import type { Schema } from '~/shared/api/types'
 import { useAuthGate } from '~/shared/ui/auth-gate'
-import { useImageUrl } from '~/shared/ui/image-base'
 import { sitePaths } from '../shell'
 import { SidebarLabel } from './sidebar-label'
 
@@ -29,7 +29,7 @@ export function AccountMenu({ viewer, rail }: AccountMenuProps) {
   const t = useTranslations('shell')
   const locale = useLocale()
   const navigate = useNavigate()
-  const image = useImageUrl()
+  const resolveImage = useImageResolver()
   const gate = useAuthGate()
   const { signOut } = useSignOut()
   const paths = sitePaths(locale)
@@ -90,7 +90,12 @@ export function AccountMenu({ viewer, rail }: AccountMenuProps) {
           aria-label={rail ? viewer.name : undefined}
           className="h-12 justify-start gap-3 rounded-lg ps-[5px] pe-2"
         >
-          <Avatar src={image(viewer.avatar)} name={viewer.name} size="md" className="shrink-0" />
+          <Avatar
+            src={viewer.avatar === null ? undefined : resolveImage(viewer.avatar, 'image')}
+            name={viewer.name}
+            size="md"
+            className="shrink-0"
+          />
           <Stack
             gap="none"
             aria-hidden={rail || undefined}

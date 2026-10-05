@@ -90,7 +90,11 @@ export default defineConfig([
     rules: {
       'no-restricted-globals': [
         'error',
-        { name: 'fetch', message: 'Call the API through ~/shared/api.' },
+        {
+          name: 'fetch',
+          message:
+            'Call the API through ~/shared/api; third-party browser services live in ~/shared/vendor.',
+        },
       ],
       'no-restricted-syntax': ['error', ...apiShapes, nativeTags, mountedFeedback],
       '@typescript-eslint/consistent-type-assertions': ['error', { assertionStyle: 'never' }],
@@ -168,6 +172,12 @@ export default defineConfig([
       'no-restricted-syntax': 'off',
       '@typescript-eslint/consistent-type-assertions': 'off',
       '@typescript-eslint/no-restricted-imports': 'off',
+    },
+  },
+  {
+    files: ['app/shared/vendor/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-globals': 'off',
     },
   },
   {

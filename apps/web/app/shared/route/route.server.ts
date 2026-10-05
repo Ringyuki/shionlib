@@ -28,7 +28,10 @@ export async function routeAction<Result>(
     return { ok: true as const, result: await run(apiFrom(context)) }
   } catch (error) {
     if (error instanceof ApiError) {
-      return data({ ok: false as const, failure: error.failure }, { status: error.status })
+      return data(
+        { ok: false as const, failure: error.failure, retryAfter: error.retryAfter },
+        { status: error.status },
+      )
     }
     throw error
   }

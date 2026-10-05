@@ -3,7 +3,6 @@ import { Link } from 'react-router'
 import { useFormatter, useLocale, useMessages, useTranslations } from 'use-intl'
 import type { Schema } from '~/shared/api/types'
 import { labelOf } from '~/shared/i18n/labels'
-import { useImageUrl } from '~/shared/ui/image-base'
 import { developerNames, gameTitle, originalTitle, primaryCover, releaseDate } from '../game'
 
 type GameRowProps = {
@@ -15,7 +14,6 @@ export function GameRow({ game }: GameRowProps) {
   const labels = useMessages().game
   const locale = useLocale()
   const format = useFormatter()
-  const image = useImageUrl()
   const title = gameTitle(game, locale)
   const original = originalTitle(game, locale)
   const released = releaseDate(game)
@@ -34,7 +32,7 @@ export function GameRow({ game }: GameRowProps) {
       <Link to={`/${locale}/game/${game.id}`} prefetch="intent">
         <Inline gap="md" align="start" wrap={false} className="p-3">
           <Image
-            src={image(primaryCover(game)?.url)}
+            src={primaryCover(game)?.url}
             alt=""
             ratio={3 / 4}
             fit="cover"

@@ -49,7 +49,10 @@ app/
     route/                     routeLoader, routeAction, readCommand, apiMiddleware, idParam
     form/                      form kit from generated API constraints, useSubmissionFeedback, check helpers
     http/                      pure HTTP helpers (readCookie)
-    i18n/  ui/  config/        <topic>.schema.ts beside a module holds its input guards
+    config/                    server env (env.server.ts) and the public config sent to the browser
+    storage/                   readLocal/writeLocal over localStorage
+    vendor/                    browser clients of third-party services (Turnstile, aria2); the only fetch outside api/
+    i18n/  ui/                 <topic>.schema.ts beside a module holds its input guards
 ```
 
 Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules end in `.server.ts`.
@@ -67,7 +70,8 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 - MUST put user-facing text in the feature's `messages/{zh,en,ja}.json`; `zh` is the source, `en`/`ja` must have the same keys (the `Messages` type enforces it). API error messages are already localized; show `failure.message`.
 - MUST build UI from `@hina-ui/react` components and tokens; use Tailwind utilities only for layout glue.
 - MUST show the brand with `BrandLogo` and `Wordmark` from `~/shared/ui/brand` (`public/brand/logo.png`, the favicon artwork; the wordmark is `app/shared/ui/wordmark.svg` "Shionlib" or `wordmark-zh.svg` 「书音的图书馆」 by locale, imported as an inline SVG component with `currentColor`, `tone="brand"` for the Shionlib blue or `tone="inherit"` to follow the text), never with live text.
-- MUST resolve stored image keys with `useImageUrl()` (base from `IMAGE_BASE_URL`, provided by the root loader).
+- MUST pass stored image keys straight to hina-ui `Image` (`<Image src={cover.url}>`): `root.tsx` mounts `ImageResolverProvider` with `imageResolver(IMAGE_BASE_URL)`. Other consumers (an `Avatar` `src`) call hina-ui's `useImageResolver()`.
+- MUST read browser-visible configuration (`IMAGE_BASE_URL`, `TURNSTILE_SITE_KEY`, `HIKARINAGI_SITE_URL`) through `usePublicConfig()` (`~/shared/config/public-config`), filled by the root loader from `readServerEnv().publicConfig`; never read `process.env` or `import.meta.env` in features.
 - MUST keep the code comment-free (lint enforces; inline lint directives are disabled).
 - MUST run `.claude/skills/web-frontend/scripts/verify.sh` before declaring work done.
 
@@ -79,7 +83,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 - MUST NOT mount or unmount feedback conditionally (`cond && <Alert>`, ternaries): an `Alert` stays rendered and is shown with `open` (`<Alert tone="danger" open={message !== undefined}>`), a `Callout` is static content, and whole-page outcomes use `Result`/`Empty` (lint).
 - MUST NOT override hina-ui tokens beyond the documented accent roles, or add colours, gradients or shadows of your own; ask before introducing any new token.
 - MUST NOT declare object types with snake_case keys or types named `*DTO`/`*Response`/`*Request`/`*Payload`/`*Body` (lint).
-- MUST NOT use `fetch`, `openapi-fetch`, axios, SWR or React Query outside `~/shared/api` (lint).
+- MUST NOT use `fetch`, `openapi-fetch`, axios, SWR or React Query outside `~/shared/api`; third-party browser services (Cloudflare Turnstile, the visitor's aria2) are reached only through `~/shared/vendor` (lint).
 - MUST NOT use `as` type assertions outside `~/shared/api` (`as const` is fine) (lint).
 - MUST NOT import React state/effects or `ApiClient` into route modules, or call `api.*` there (lint).
 - MUST NOT import another feature's internals, or `*.server` modules from client code (lint).
@@ -88,27 +92,29 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 
 ## Where things go
 
-| Question                                        | Answer                                                                                                                    |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| New page?                                       | `recipes/add-route.md`: route entry in `app/routes.ts`, thin module in `app/routes/`, use-cases and UI in a feature       |
-| New feature?                                    | `recipes/add-feature.md`; copy `app/features/favorite` (golden path)                                                      |
-| Calling the API?                                | a use-case in `<feature>.use-cases.ts` taking `api: ApiClient`                                                            |
-| Typing API data in a component?                 | `Schema<'GameHeaderDTO'>`, `ApiData<'/game/{id}', 'get'>`, or `Pick` from them                                            |
-| Button that changes data without navigating?    | resource route + `<feature>.server.ts` action + `use-<purpose>.ts` fetcher hook (`recipes/add-mutation.md`)               |
-| Optimistic UI?                                  | derive it from `fetcher.json` / `fetcher.formData` in the hook                                                            |
-| A form?                                         | `recipes/add-form.md`: `<name>.schema.ts` form schema from `useFormKit()`, `<Form rules>`, `useSubmissionFeedback`        |
-| Parsing a request body, cookie, param, storage? | a schema in the nearest `*.schema.ts`; `readCommand`, `idParam`, `readCookie`, `parseOptional` (`references/forms.md`)    |
-| Form validation errors?                         | `routeAction` returns `failure.data.errors` (field → messages); render them next to the field                             |
-| 404 for a bad id?                               | `idParam(params.id)`; missing records come back from the API as 404 through `routeLoader`                                 |
-| Who is signed in?                               | `loadViewer` in the `site` layout loader; pages read it from `matches`                                                    |
-| Action that needs a signed-in user?             | `Button` from `~/shared/ui/button` with `loginRequired`: guests get the sign-in dialog, the click replays after it        |
-| Search?                                         | `features/search`: the header's `SearchPalette` (CommandPalette, `/` and ⌘K) and `/:lang/search?q=`; never filter locally |
-| Sign in, sign up, sign out?                     | `features/auth`: the dialog (`?auth=sign-in`/`sign-up`/`forgot-password` opens it), `useSignOut`; no auth pages           |
-| Navigation entry or shell change?               | `features/shell` (`shell.ts` model, `ui/site-sidebar.tsx`, `ui/site-header.tsx`)                                          |
-| An image from the API?                          | `const image = useImageUrl()` then `image(cover.url)`                                                                     |
-| Auth cookies and refresh?                       | handled by `apiMiddleware` + `createApiSession`; never touch tokens in features                                           |
-| Messages?                                       | `features/<name>/messages/*.json`, registered in `app/messages/{zh,en,ja}.ts`                                             |
-| Tests?                                          | `references/testing.md`: model and use-cases with `fakeApi()`, server helpers with stubs                                  |
+| Question                                        | Answer                                                                                                                     |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| New page?                                       | `recipes/add-route.md`: route entry in `app/routes.ts`, thin module in `app/routes/`, use-cases and UI in a feature        |
+| New feature?                                    | `recipes/add-feature.md`; copy `app/features/favorite` (golden path)                                                       |
+| Calling the API?                                | a use-case in `<feature>.use-cases.ts` taking `api: ApiClient`                                                             |
+| Typing API data in a component?                 | `Schema<'GameHeaderDTO'>`, `ApiData<'/game/{id}', 'get'>`, or `Pick` from them                                             |
+| Button that changes data without navigating?    | resource route + `<feature>.server.ts` action + `use-<purpose>.ts` fetcher hook (`recipes/add-mutation.md`)                |
+| Optimistic UI?                                  | derive it from `fetcher.json` / `fetcher.formData` in the hook                                                             |
+| A form?                                         | `recipes/add-form.md`: `<name>.schema.ts` form schema from `useFormKit()`, `<Form rules>`, `useSubmissionFeedback`         |
+| Parsing a request body, cookie, param, storage? | a schema in the nearest `*.schema.ts`; `readCommand`, `idParam`, `readCookie`, `parseOptional` (`references/forms.md`)     |
+| Form validation errors?                         | `routeAction` returns `failure.data.errors` (field → messages); render them next to the field                              |
+| 404 for a bad id?                               | `idParam(params.id)`; missing records come back from the API as 404 through `routeLoader`                                  |
+| Who is signed in?                               | `loadViewer` in the `site` layout loader; pages read it from `matches`                                                     |
+| Action that needs a signed-in user?             | `Button` from `~/shared/ui/button` with `loginRequired`: guests get the sign-in dialog, the click replays after it         |
+| Search?                                         | `features/search`: the header's `SearchPalette` (CommandPalette, `/` and ⌘K) and `/:lang/search?q=`; never filter locally  |
+| Sign in, sign up, sign out?                     | `features/auth`: the dialog (`?auth=sign-in`/`sign-up`/`forgot-password` opens it), `useSignOut`; no auth pages            |
+| Navigation entry or shell change?               | `features/shell` (`shell.ts` model, `ui/site-sidebar.tsx`, `ui/site-header.tsx`)                                           |
+| An image from the API?                          | `<Image src={cover.url}>`; outside `Image`, `useImageResolver()(key, 'image')`                                             |
+| Human verification (downloads)?                 | `TurnstileChallenge` from `~/shared/vendor/turnstile-challenge`; the token goes to the API through an action               |
+| A per-browser setting?                          | a key constant in the model, a guard in `<name>.schema.ts`, `readLocal`/`writeLocal` from `~/shared/storage/local-storage` |
+| Auth cookies and refresh?                       | handled by `apiMiddleware` + `createApiSession`; never touch tokens in features                                            |
+| Messages?                                       | `features/<name>/messages/*.json`, registered in `app/messages/{zh,en,ja}.ts`                                              |
+| Tests?                                          | `references/testing.md`: model and use-cases with `fakeApi()`, server helpers with stubs                                   |
 
 ## References
 

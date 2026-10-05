@@ -53,7 +53,8 @@ A route module may export `loader`, `action`, `meta`, `headers`, `shouldRevalida
 | features never import `routes` or `messages`                                                                              | `app/features`                                             |
 | model and use-case files never import React, React Router, use-intl, hina-ui, `~/shared/route`, `~/shared/ui`             | `app/features/*/*.ts` except hooks, server files and index |
 | routes never import React (types excepted), `ApiClient` or the session, and never call `api.*`                            | `app/routes`                                               |
-| no `fetch`, `openapi-fetch`, axios, ky, SWR, React Query                                                                  | everything except `app/shared/api`                         |
+| no `fetch`                                                                                                                | everything except `app/shared/api` and `app/shared/vendor` |
+| no `openapi-fetch`, axios, ky, SWR, React Query                                                                           | everything except `app/shared/api`                         |
 | no `as` assertions (`as const` allowed)                                                                                   | everything except `app/shared/api`                         |
 | no type members with snake_case keys, no types named `*DTO`/`*Response`/`*Request`/`*Payload`/`*Body`                     | everything except `app/shared/api` and tests               |
 | valibot only in `*.schema.ts`, `~/shared/form`, `~/shared/route`; zod, yup, joi, ajv, superstruct, io-ts, arktype nowhere | everything                                                 |

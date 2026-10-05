@@ -46,6 +46,13 @@ describe('routeAction', () => {
     expect(result).toMatchObject({ init: { status: 404 }, data: { ok: false, failure } })
   })
 
+  it('keeps the wait of a rate-limited action', async () => {
+    const result = await routeAction(args(), async () => {
+      throw new ApiError(429, failure, 30)
+    })
+    expect(result).toMatchObject({ init: { status: 429 }, data: { ok: false, retryAfter: 30 } })
+  })
+
   it('wraps successful results', async () => {
     await expect(routeAction(args(), async () => 3)).resolves.toEqual({ ok: true, result: 3 })
   })

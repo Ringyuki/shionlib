@@ -28,6 +28,18 @@ describe('createApi', () => {
     expect(error instanceof ApiError && error.is('AUTH_UNAUTHORIZED')).toBe(true)
   })
 
+  it('reads how long a rate-limited caller has to wait', async () => {
+    const api = createApi({
+      baseUrl: 'http://api.test',
+      fetch: async () =>
+        Response.json(
+          { code: 429, message: '请求过于频繁', data: null, requestId: 'r', timestamp: 't' },
+          { status: 429, headers: { 'retry-after': '17' } },
+        ),
+    })
+    await expect(api.get('/user/me')).rejects.toMatchObject({ status: 429, retryAfter: 17 })
+  })
+
   it('describes failures without an error envelope by their HTTP status', async () => {
     const api = createApi({
       baseUrl: 'http://api.test',

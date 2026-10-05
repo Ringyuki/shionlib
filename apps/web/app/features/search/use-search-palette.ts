@@ -1,24 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { href, useFetcher } from 'react-router'
+import { readLocal, writeLocal } from '~/shared/storage/local-storage'
 import { normalizeQuery, recentStorageKey, rememberSearch, searchDelayMs } from './search'
 import { parseRecent, type RecordSearch } from './search.schema'
 import type { paletteLoader, recordSearchAction } from './search.server'
 
-function readRecent(): string[] {
-  try {
-    return parseRecent(window.localStorage.getItem(recentStorageKey))
-  } catch {
-    return []
-  }
-}
+const readRecent = () => readLocal(recentStorageKey, parseRecent)
 
-function writeRecent(recent: readonly string[]) {
-  try {
-    window.localStorage.setItem(recentStorageKey, JSON.stringify(recent))
-  } catch {
-    return
-  }
-}
+const writeRecent = (recent: readonly string[]) => writeLocal(recentStorageKey, recent)
 
 function editable(target: EventTarget | null): boolean {
   return (
