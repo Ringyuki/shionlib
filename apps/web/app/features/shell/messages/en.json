@@ -32,7 +32,8 @@
     "help": "Help",
     "uploadRules": "Upload rules",
     "friendLinks": "Friends",
-    "version": "Version {version}"
+    "version": "Version {version}",
+    "copyright": "© {year} Shionlib"
   },
   "scrollTop": "Back to top"
 }

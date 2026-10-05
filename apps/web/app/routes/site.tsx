@@ -9,7 +9,13 @@ import type { Route } from './+types/site'
 export function loader(args: Route.LoaderArgs) {
   const sidebar = sidebarModeFrom(args.request.headers.get('cookie') ?? '')
   const { version } = readServerEnv()
-  return routeLoader(args, async api => ({ viewer: await loadViewer(api), sidebar, version }))
+  const year = new Date().getFullYear()
+  return routeLoader(args, async api => ({
+    viewer: await loadViewer(api),
+    sidebar,
+    version,
+    year,
+  }))
 }
 
 export default function SiteLayout({ loaderData }: Route.ComponentProps) {
@@ -19,6 +25,7 @@ export default function SiteLayout({ loaderData }: Route.ComponentProps) {
         viewer={loaderData.viewer}
         sidebar={loaderData.sidebar}
         version={loaderData.version}
+        year={loaderData.year}
       >
         <Outlet />
       </SiteShell>

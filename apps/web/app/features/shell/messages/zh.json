@@ -32,7 +32,8 @@
     "help": "帮助",
     "uploadRules": "上传规则",
     "friendLinks": "友链",
-    "version": "版本 {version}"
+    "version": "版本 {version}",
+    "copyright": "© {year} Shionlib"
   },
   "scrollTop": "回到顶部"
 }

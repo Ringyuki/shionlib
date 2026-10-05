@@ -13,12 +13,13 @@ type SiteShellProps = {
   viewer: Schema<'UserMeDTO'> | null
   sidebar: SidebarMode
   version: string
+  year: number
   children: ReactNode
 }
 
 export const mainScrollKey = 'main'
 
-export function SiteShell({ viewer, sidebar, version, children }: SiteShellProps) {
+export function SiteShell({ viewer, sidebar, version, year, children }: SiteShellProps) {
   const locale = useLocale()
   const t = useTranslations('shell')
   const shell = useRef<AppShellHandle>(null)
@@ -46,7 +47,7 @@ export function SiteShell({ viewer, sidebar, version, children }: SiteShellProps
       >
         <Container size="xl" className="px-4 py-6 sm:px-6 lg:py-8">
           {children}
-          <SiteFooter version={version} />
+          <SiteFooter version={version} year={year} />
         </Container>
       </AppShell>
       <ScrollTop target={() => shell.current?.mainViewport} label={t('scrollTop')} />
