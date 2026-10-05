@@ -1,6 +1,7 @@
 import { Section, SegmentedControl, Text } from '@hina-ui/react'
 import { useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
+import { BBCodeText } from '~/shared/ui/bbcode-text'
 import { introIn, writtenIntros, type GameDetails, type IntroLanguage } from '../game'
 import { introLanguageFrom } from '../game.schema'
 
@@ -23,9 +24,11 @@ export function GameIntro({ details }: { details: GameDetails }) {
           className="self-start"
         />
       )}
-      <Text className="whitespace-pre-line" tone={language === undefined ? 'muted' : undefined}>
-        {language === undefined ? t('info.noIntro') : introIn(details, language)}
-      </Text>
+      {language === undefined ? (
+        <Text tone="muted">{t('info.noIntro')}</Text>
+      ) : (
+        <BBCodeText source={introIn(details, language)} />
+      )}
     </Section>
   )
 }

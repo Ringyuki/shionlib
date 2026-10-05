@@ -13,6 +13,7 @@ import { Clock, Download } from 'lucide-react'
 import { useMessages, useTranslations } from 'use-intl'
 import { PlatformTag } from '~/features/game'
 import { labelOf } from '~/shared/i18n/labels'
+import { BBCodeText } from '~/shared/ui/bbcode-text'
 import { ownedBy, resourceAnchor, type Resource } from '../resource'
 import { ResourceMenu } from './resource-menu'
 import { ResourceFiles } from './resource-files'
@@ -84,11 +85,7 @@ export function ResourceCard({ resource, viewerId }: ResourceCardProps) {
             <ResourceMenu resource={resource} owned={ownedBy(resource, viewerId)} />
           </Stack>
         </Grid>
-        {note !== '' && (
-          <Text size="sm" className="break-words whitespace-pre-line">
-            {note}
-          </Text>
-        )}
+        {note !== '' && <BBCodeText source={note} size="sm" />}
         <ResourceFiles files={resource.files ?? []} />
       </Stack>
     </Card>

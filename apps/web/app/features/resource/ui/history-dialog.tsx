@@ -1,6 +1,7 @@
 import { Dialog, Empty, Section, Spinner, Stack, Time, Timeline } from '@hina-ui/react'
 import { useEffect } from 'react'
 import { useFormatter, useTranslations } from 'use-intl'
+import { BBCodeText } from '~/shared/ui/bbcode-text'
 import { fileSize, type ResourceFile } from '../resource'
 import { useFileHistory } from '../use-file-history'
 
@@ -57,6 +58,11 @@ function FileHistory({ file, titled }: { file: ResourceFile; titled: boolean }) 
         <Timeline
           items={entries}
           renderTime={({ item }) => <Time value={item.time} format="datetime" />}
+          renderDescription={({ item }) =>
+            item.description === undefined ? null : (
+              <BBCodeText source={item.description} size="inherit" tone="muted" />
+            )
+          }
         />
       )}
     </Section>

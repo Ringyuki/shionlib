@@ -9,6 +9,7 @@ import {
   TableRow,
   Text,
 } from '@hina-ui/react'
+import { FileArchive } from 'lucide-react'
 import { useFormatter, useTranslations } from 'use-intl'
 import { DownloadButton } from '~/features/download'
 import { fileSize, fileState, shortHash, type ResourceFile } from '../resource'
@@ -46,9 +47,12 @@ function FileRow({ file }: { file: ResourceFile }) {
     <TableRow>
       <TableCell className="w-full max-w-0 ps-0">
         <Inline gap="sm" align="center" className="gap-y-1">
-          <Text size="sm" truncate title={file.file_name} className="max-w-full">
-            {file.file_name}
-          </Text>
+          <Inline gap="xs" align="center" wrap={false} className="max-w-full min-w-0">
+            <FileArchive aria-hidden className="size-4 shrink-0 text-faint" />
+            <Text size="sm" truncate title={file.file_name}>
+              {file.file_name}
+            </Text>
+          </Inline>
           <FileState file={file} />
         </Inline>
       </TableCell>

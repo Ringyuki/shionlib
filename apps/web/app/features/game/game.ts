@@ -1,6 +1,8 @@
 import { constraints } from '~/shared/api/generated/constraints'
 import type { Schema } from '~/shared/api/types'
+import { vndbUrl } from '~/shared/catalog/vndb'
 import type { Locale } from '~/shared/i18n/locale'
+import { bbcodePlainText } from '~/shared/markup/bbcode'
 
 type Titled = Pick<Schema<'GameHeaderDTO'>, 'title_zh' | 'title_jp' | 'title_en'>
 
@@ -147,7 +149,7 @@ export function bangumiScore(data: Schema<'BangumiScoreDTO'>, subject: string): 
 export function vndbScore(data: Schema<'VndbScoreDTO'>, vn: string): Score | undefined {
   return data.rating === null || data.votecount === 0
     ? undefined
-    : { value: data.rating / 10, votes: data.votecount, url: `https://vndb.org/${vn}` }
+    : { value: data.rating / 10, votes: data.votecount, url: vndbUrl(vn) }
 }
 
 export function imageSize(image: GameImage): { width: number; height: number } | undefined {
@@ -170,7 +172,7 @@ export function coverRatio(cover: GameImage | undefined): number {
 const descriptionLength = 160
 
 export function gameDescription(game: Introduced, locale: Locale): string {
-  const intro = preferredIntro(game, locale).replace(/\s+/g, ' ').trim()
+  const intro = bbcodePlainText(preferredIntro(game, locale)).replace(/\s+/g, ' ').trim()
   return intro.length <= descriptionLength ? intro : `${intro.slice(0, descriptionLength - 1)}…`
 }
 

@@ -118,6 +118,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 | A page with tabs (game page)?                        | parent route loads what the tabs share; each tab is a child route reading `matches`; hina `Tabs` driven by the URL (`references/ui.md`)            |
 | Choices of an enum field (platforms, reasons)?       | the model reads `constraints.<Body>.<field>.enum` / `.itemEnum` from `~/shared/api/generated/constraints`; never list them by hand                 |
 | Catalog data on a page (game, character, developer)? | `CatalogAttribution` from `~/shared/ui/catalog-attribution` with the entry's `h_id`; it is required by Hikarinagi's terms                          |
+| BBCode text (notes, intros, history reasons)?        | `BBCodeText` (`~/shared/ui/bbcode-text`); `bbcodePlainText` (`~/shared/markup/bbcode`) for meta; never raw                                         |
 | A per-browser setting?                               | a key constant in the model, a guard in `<name>.schema.ts`, `readLocal`/`writeLocal` from `~/shared/storage/local-storage`                         |
 | Auth cookies and refresh?                            | handled by `apiMiddleware` + `createApiSession`; never touch tokens in features                                                                    |
 | Messages?                                            | `features/<name>/messages/*.json`, registered in `app/messages/{zh,en,ja}.ts`                                                                      |

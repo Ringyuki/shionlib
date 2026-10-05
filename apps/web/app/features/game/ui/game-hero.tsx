@@ -2,6 +2,7 @@ import { cn, Grid, Heading, Inline, Stack, Text } from '@hina-ui/react'
 import type { ReactNode } from 'react'
 import { useLocale } from 'use-intl'
 import type { ResourceSummary } from '~/features/resource'
+import { BBCodeText } from '~/shared/ui/bbcode-text'
 import { CatalogAttribution } from '~/shared/ui/catalog-attribution'
 import {
   bannerIndex,
@@ -75,9 +76,12 @@ export function GameHero({ game, images, intro, scores, resources, favorite }: G
             <GameRatings scores={scores} />
           </Inline>
           {intro !== '' && (
-            <Text size="sm" tone="muted" className="line-clamp-2 max-w-prose max-sm:hidden">
-              {intro}
-            </Text>
+            <BBCodeText
+              source={intro}
+              size="sm"
+              tone="muted"
+              className="line-clamp-2 max-w-prose whitespace-normal max-sm:hidden"
+            />
           )}
         </Stack>
         <Inline

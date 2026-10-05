@@ -64,6 +64,8 @@ Change these only together, and recheck contrast in both themes. All other token
 
 ## Catalog attribution
 
+Resource notes, file history reasons and catalog intros (VNDB descriptions) are BBCode. `parseBBCode` (`~/shared/markup/bbcode`) turns them into nodes: `b`, `i`, `u`, `s`, `quote`, `spoiler` and `mask`, and `url` with or without a value; `size` and `color` keep only their text, and unknown or unbalanced tags stay as text. A link must be an `http(s)` address or a VNDB entry path (`/c123`, resolved by `vndbUrl` from `~/shared/catalog/vndb`); anything else keeps its label as plain text. `BBCodeText` renders the nodes with hina-ui only (`Text as="strong"/"em"/"u"/"s"` carrying the surrounding tone and weight, `Link underline` opening in a new tab with `rel="noopener noreferrer nofollow ugc"`, `Blockquote`, `Spoiler`), keeps line breaks (`whitespace-pre-line`), and takes `size`, `tone` and `className` so it can stand in for the `Text` it replaces; a clamped summary adds `whitespace-normal`. Meta descriptions use `bbcodePlainText`, which drops spoiler content.
+
 Game, character and developer data comes from Hikarinagi's open API, whose terms require naming Hikarinagi as the source and linking to the entry. Every page that shows such an entry renders `CatalogAttribution` (`~/shared/ui/catalog-attribution`) with the entity and its `h_id`: the text 「条目数据来自」 followed by Hikarinagi's wordmark (`app/shared/ui/hikarinagi-wordmark.svg`, inline, colours untouched) linking to `HIKARINAGI_SITE_URL/<galgames|producers|characters>/<id>`. Entry and editor URLs come from `~/shared/catalog/hikarinagi`. The Hikarinagi ID button keeps using `public/brand/hikarinagi-icon.webp`.
 
 ## Messages and locales
