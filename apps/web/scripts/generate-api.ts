@@ -29,6 +29,9 @@ type JsonSchema = {
   maximum?: number
   pattern?: string
   enum?: unknown[]
+  minItems?: number
+  maxItems?: number
+  items?: JsonSchema
   properties?: Record<string, JsonSchema>
   required?: string[]
 }
@@ -57,6 +60,8 @@ const constraintKeys = [
   'maximum',
   'pattern',
   'enum',
+  'minItems',
+  'maxItems',
 ] as const
 
 function fieldConstraint(field: JsonSchema, required: boolean) {
@@ -70,6 +75,9 @@ function fieldConstraint(field: JsonSchema, required: boolean) {
     if (field[key] !== undefined) {
       constraint[key] = field[key]
     }
+  }
+  if (field.items?.enum !== undefined) {
+    constraint.itemEnum = field.items.enum
   }
   return constraint
 }

@@ -18,6 +18,9 @@ export type FieldConstraint = {
   readonly maximum?: number
   readonly pattern?: string
   readonly enum?: readonly unknown[]
+  readonly itemEnum?: readonly unknown[]
+  readonly minItems?: number
+  readonly maxItems?: number
 }
 
 export type FieldIssue =

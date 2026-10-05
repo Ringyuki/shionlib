@@ -359,7 +359,9 @@ export const constraints = {
     "items": {
       "type": "array",
       "required": true,
-      "nullable": true
+      "nullable": true,
+      "minItems": 1,
+      "maxItems": 500
     }
   },
   "AiModelAddRouteInputBody": {
@@ -433,14 +435,16 @@ export const constraints = {
     "routes": {
       "type": "array",
       "required": true,
-      "nullable": true
+      "nullable": true,
+      "maxItems": 20
     }
   },
   "AiModelReorderInputBody": {
     "ids": {
       "type": "array",
       "required": true,
-      "nullable": true
+      "nullable": true,
+      "maxItems": 50
     }
   },
   "AiModelUpdateInputBody": {
@@ -491,7 +495,9 @@ export const constraints = {
     "messages": {
       "type": "array",
       "required": true,
-      "nullable": true
+      "nullable": true,
+      "minItems": 1,
+      "maxItems": 50
     },
     "schema": {
       "type": "unknown",
@@ -507,7 +513,9 @@ export const constraints = {
     "targets": {
       "type": "array",
       "required": true,
-      "nullable": true
+      "nullable": true,
+      "minItems": 1,
+      "maxItems": 3
     },
     "temperature": {
       "type": "number",
@@ -631,7 +639,9 @@ export const constraints = {
     "ids": {
       "type": "array",
       "required": true,
-      "nullable": true
+      "nullable": true,
+      "minItems": 1,
+      "maxItems": 500
     }
   },
   "AiRouteUpdateInputBody": {
@@ -1037,7 +1047,14 @@ export const constraints = {
     "language": {
       "type": "array",
       "required": true,
-      "nullable": true
+      "nullable": true,
+      "minItems": 1,
+      "itemEnum": [
+        "en",
+        "zh",
+        "zh-hant",
+        "jp"
+      ]
     },
     "note": {
       "type": "string",
@@ -1048,7 +1065,21 @@ export const constraints = {
     "platform": {
       "type": "array",
       "required": true,
-      "nullable": true
+      "nullable": true,
+      "minItems": 1,
+      "itemEnum": [
+        "win",
+        "mac",
+        "ios",
+        "and",
+        "lin",
+        "ps3",
+        "ps4",
+        "psv",
+        "psp",
+        "swi",
+        "dvd"
+      ]
     },
     "simulator": {
       "type": "string",
@@ -1087,7 +1118,14 @@ export const constraints = {
     "language": {
       "type": "array",
       "required": true,
-      "nullable": true
+      "nullable": true,
+      "minItems": 1,
+      "itemEnum": [
+        "en",
+        "zh",
+        "zh-hant",
+        "jp"
+      ]
     },
     "note": {
       "type": "string",
@@ -1098,7 +1136,21 @@ export const constraints = {
     "platform": {
       "type": "array",
       "required": true,
-      "nullable": true
+      "nullable": true,
+      "minItems": 1,
+      "itemEnum": [
+        "win",
+        "mac",
+        "ios",
+        "and",
+        "lin",
+        "ps3",
+        "ps4",
+        "psv",
+        "psp",
+        "swi",
+        "dvd"
+      ]
     },
     "simulator": {
       "type": "string",
@@ -1135,7 +1187,14 @@ export const constraints = {
     "language": {
       "type": "array",
       "required": true,
-      "nullable": true
+      "nullable": true,
+      "minItems": 1,
+      "itemEnum": [
+        "en",
+        "zh",
+        "zh-hant",
+        "jp"
+      ]
     },
     "note": {
       "type": "string",
@@ -1146,7 +1205,21 @@ export const constraints = {
     "platform": {
       "type": "array",
       "required": true,
-      "nullable": true
+      "nullable": true,
+      "minItems": 1,
+      "itemEnum": [
+        "win",
+        "mac",
+        "ios",
+        "and",
+        "lin",
+        "ps3",
+        "ps4",
+        "psv",
+        "psp",
+        "swi",
+        "dvd"
+      ]
     },
     "simulator": {
       "type": "string",
