@@ -3,7 +3,15 @@
   "favorited": "お気に入り済み",
   "chooseLists": "保存先",
   "noLists": "お気に入りリストがありません",
-  "loading": "リストを読み込み中",
   "defaultList": "デフォルト",
-  "private": "非公開"
+  "private": "非公開",
+  "listMeta": "{count} 件 · {visibility}",
+  "public": "公開",
+  "newList": "新しいリスト",
+  "listName": "名前",
+  "listNamePlaceholder": "例：やりたい",
+  "makePrivate": "自分だけに表示",
+  "create": "作成して保存",
+  "cancel": "キャンセル",
+  "created": "「{name}」を作成して保存しました"
 }

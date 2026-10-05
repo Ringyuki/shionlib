@@ -1,6 +1,6 @@
 import type { ApiClient } from '~/shared/api/client'
 import { ApiError } from '~/shared/api/error'
-import type { MembershipChange } from './favorite.schema'
+import type { ListCreation, MembershipChange } from './favorite.schema'
 
 export async function loadFavoriteLists(api: ApiClient, gameId: number) {
   const lists = await api.get('/favorites', { params: { query: { game_id: gameId } } })
@@ -30,4 +30,15 @@ export async function changeMembership(api: ApiClient, change: MembershipChange)
   await api.delete('/favorites/{id}/games/{game_id}', {
     params: { path: { id: change.listId, game_id: change.gameId } },
   })
+}
+
+export async function createListWithGame(api: ApiClient, creation: ListCreation) {
+  const list = await api.post('/favorites', {
+    body: { name: creation.name.trim(), is_private: creation.isPrivate },
+  })
+  await api.put('/favorites/{id}', {
+    params: { path: { id: list.id } },
+    body: { game_id: creation.gameId },
+  })
+  return list
 }

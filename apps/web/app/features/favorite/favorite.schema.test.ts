@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { parseOptional } from '~/shared/form/check'
-import { membershipChangeCommand } from './favorite.schema'
+import { firstIssueMessage, parseOptional } from '~/shared/form/check'
+import { createFormKit } from '~/shared/form/form-kit'
+import { listCreationForm, membershipChangeCommand } from './favorite.schema'
 
 describe('membershipChangeCommand', () => {
   it('accepts a complete change', () => {
@@ -18,5 +19,15 @@ describe('membershipChangeCommand', () => {
     ]) {
       expect(parseOptional(membershipChangeCommand, value)).toBeUndefined()
     }
+  })
+})
+
+describe('listCreationForm', () => {
+  const form = listCreationForm(createFormKit(issue => issue.kind))
+
+  it('needs a name within the API limits', () => {
+    expect(firstIssueMessage(form, { name: '想玩', isPrivate: false })).toBeUndefined()
+    expect(firstIssueMessage(form, { name: '  ', isPrivate: false })).toBe('required')
+    expect(firstIssueMessage(form, { name: '汐'.repeat(300), isPrivate: true })).toBe('maxLength')
   })
 })

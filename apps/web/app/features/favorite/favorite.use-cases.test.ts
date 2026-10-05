@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { fakeApi } from '~/shared/api/testing'
-import { changeMembership, isFavorite, loadFavoriteLists } from './favorite.use-cases'
+import {
+  changeMembership,
+  createListWithGame,
+  isFavorite,
+  loadFavoriteLists,
+} from './favorite.use-cases'
 
 describe('isFavorite', () => {
   it('reports the stats of a signed-in viewer', async () => {
@@ -46,5 +51,19 @@ describe('changeMembership', () => {
     const fake = fakeApi().on('delete', '/favorites/{id}/games/{game_id}', undefined)
     await changeMembership(fake.api, { listId: 2, gameId: 9, included: false })
     expect(new URL(fake.requests[0]?.url ?? '').pathname).toBe('/favorites/2/games/9')
+  })
+})
+
+describe('createListWithGame', () => {
+  it('creates the list and puts the game in it', async () => {
+    const fake = fakeApi()
+      .on('post', '/favorites', { id: 8, name: '想玩', description: null, is_private: true })
+      .on('put', '/favorites/{id}', undefined)
+    await expect(
+      createListWithGame(fake.api, { gameId: 3, name: ' 想玩 ', isPrivate: true }),
+    ).resolves.toMatchObject({ id: 8 })
+    await expect(fake.requests[0]?.json()).resolves.toEqual({ name: '想玩', is_private: true })
+    expect(new URL(fake.requests[1]?.url ?? '').pathname).toBe('/favorites/8')
+    await expect(fake.requests[1]?.json()).resolves.toEqual({ game_id: 3 })
   })
 })

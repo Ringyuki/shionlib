@@ -3,7 +3,15 @@
   "favorited": "Favorited",
   "chooseLists": "Save to",
   "noLists": "No favorite lists yet",
-  "loading": "Loading lists",
   "defaultList": "Default list",
-  "private": "Private"
+  "private": "Private",
+  "listMeta": "{count, plural, one {# game} other {# games}} · {visibility}",
+  "public": "Public",
+  "newList": "New list",
+  "listName": "Name",
+  "listNamePlaceholder": "e.g. To play",
+  "makePrivate": "Only visible to me",
+  "create": "Create and save",
+  "cancel": "Cancel",
+  "created": "Created “{name}” and saved the game"
 }

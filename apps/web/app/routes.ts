@@ -4,6 +4,7 @@ export default [
   index('routes/locale-redirect.ts'),
   route('user/password/forget', 'routes/locale-redirect.ts', { id: 'password-reset-locale' }),
   route('resources/favorites', 'routes/resources.favorites.ts'),
+  route('resources/favorites/lists', 'routes/resources.favorites.lists.ts'),
   route('resources/auth/sign-in', 'routes/resources.auth.sign-in.ts'),
   route('resources/auth/sign-up', 'routes/resources.auth.sign-up.ts'),
   route('resources/auth/sign-up-code', 'routes/resources.auth.sign-up-code.ts'),

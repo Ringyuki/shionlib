@@ -3,7 +3,15 @@
   "favorited": "已收藏",
   "chooseLists": "收藏到",
   "noLists": "还没有收藏夹",
-  "loading": "正在加载收藏夹",
   "defaultList": "默认收藏夹",
-  "private": "私密"
+  "private": "私密",
+  "listMeta": "{count} 个游戏 · {visibility}",
+  "public": "公开",
+  "newList": "新建收藏夹",
+  "listName": "名称",
+  "listNamePlaceholder": "例如：想玩",
+  "makePrivate": "仅自己可见",
+  "create": "创建并收藏",
+  "cancel": "取消",
+  "created": "已新建「{name}」并收藏"
 }
