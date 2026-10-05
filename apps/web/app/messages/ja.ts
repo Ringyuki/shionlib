@@ -5,12 +5,14 @@ import game from '~/features/game/messages/ja.json'
 import resource from '~/features/resource/messages/ja.json'
 import search from '~/features/search/messages/ja.json'
 import shell from '~/features/shell/messages/ja.json'
+import bbcode from './bbcode/ja.json'
 import form from './form/ja.json'
 import site from './site/ja.json'
 import type { Messages } from './zh'
 
 export const messages: Messages = {
   auth,
+  bbcode,
   download,
   favorite,
   form,

@@ -120,6 +120,9 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 | Choices of an enum field (platforms, reasons)?       | the model reads `constraints.<Body>.<field>.enum` / `.itemEnum` from `~/shared/api/generated/constraints`; never list them by hand                 |
 | Catalog data on a page (game, character, developer)? | `CatalogAttribution` from `~/shared/ui/catalog-attribution` with the entry's `h_id`; it is required by Hikarinagi's terms                          |
 | BBCode text (notes, intros, history reasons)?        | `BBCodeText` (`~/shared/ui/bbcode-text`); `bbcodePlainText` (`~/shared/markup/bbcode`) for meta; never raw                                         |
+| Writing BBCode (resource notes)?                     | `BBCodeEditor` (`~/shared/ui/bbcode-editor`) inside the `FormField`; never a bare `Textarea`                                                       |
+| Picking a few values from a short fixed list?        | `Chip selectable` in a labelled group (`ChoiceChips`); not `CheckboxGroup`, not a dropdown                                                         |
+| Truncated text that needs its full value?            | `Tooltip disabled={!overflowing}` with `useOverflowing` (`~/shared/ui`); trigger sized `w-fit`                                                     |
 | A per-browser setting?                               | a key constant in the model, a guard in `<name>.schema.ts`, `readLocal`/`writeLocal` from `~/shared/storage/local-storage`                         |
 | Auth cookies and refresh?                            | handled by `apiMiddleware` + `createApiSession`; never touch tokens in features                                                                    |
 | Messages?                                            | `features/<name>/messages/*.json`, registered in `app/messages/{zh,en,ja}.ts`                                                                      |

@@ -15,6 +15,7 @@ export {
 } from './game'
 export { loadGamePage, loadLatestGames, loadScores } from './game.use-cases'
 export { GameCharacters } from './ui/game-characters'
+export { PlatformIcon } from './ui/platform-icon'
 export { PlatformTag } from './ui/platform-tag'
 export { GameGrid } from './ui/game-grid'
 export { GameInfo } from './ui/game-info'

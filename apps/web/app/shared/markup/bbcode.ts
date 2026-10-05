@@ -123,12 +123,16 @@ function trimmed(nodes: readonly BBCodeNode[]): BBCodeNode[] {
   })
 }
 
+export function isWebAddress(value: string): boolean {
+  return webAddress.test(value.trim())
+}
+
 function linkTarget(raw: string): string | undefined {
   const target = raw.trim()
   if (vndbEntry.test(target)) {
     return vndbUrl(target)
   }
-  return webAddress.test(target) ? target : undefined
+  return isWebAddress(target) ? target : undefined
 }
 
 function plainText(nodes: readonly BBCodeNode[]): string {
