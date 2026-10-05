@@ -16,6 +16,8 @@ import { ownedBy, resourceAnchor, type Resource } from '../resource'
 import { ResourceMenu } from './resource-menu'
 import { ResourceFiles } from './resource-files'
 
+const tagClass = 'h-7 px-2.5'
+
 type ResourceCardProps = {
   resource: Resource
   viewerId: number | null
@@ -28,18 +30,24 @@ export function ResourceCard({ resource, viewerId }: ResourceCardProps) {
   const { creator } = resource
   const note = resource.note?.trim() ?? ''
   return (
-    <Card as="article" id={resourceAnchor(resource.id)} className="scroll-mt-24">
-      <Stack gap="md">
+    <Card as="article" padded={false} id={resourceAnchor(resource.id)} className="scroll-mt-24">
+      <Stack gap="sm" className="p-4">
         <Grid className="grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
           <Inline gap="xs">
             {(resource.platform ?? []).map(platform => (
-              <Tag key={platform}>{labelOf(labels.game.platform, platform)}</Tag>
+              <Tag key={platform} tone="accent" className={tagClass}>
+                {labelOf(labels.game.platform, platform)}
+              </Tag>
             ))}
             {(resource.language ?? []).map(language => (
-              <Tag key={language}>{labelOf(labels.game.language, language)}</Tag>
+              <Tag key={language} variant="outline" className={tagClass}>
+                {labelOf(labels.game.language, language)}
+              </Tag>
             ))}
             {resource.simulator !== null && (
-              <Tag>{labelOf(labels.resource.simulatorName, resource.simulator)}</Tag>
+              <Tag variant="outline" className={tagClass}>
+                {labelOf(labels.resource.simulatorName, resource.simulator)}
+              </Tag>
             )}
           </Inline>
           <Inline
