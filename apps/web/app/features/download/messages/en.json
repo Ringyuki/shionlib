@@ -23,10 +23,5 @@
   "copied": "Link copied, valid for {minutes} min",
   "copyReady": "Link ready, valid for {minutes} min",
   "copy": "Copy",
-  "asDefault": "{label} (default)",
-  "method": "Download with: {method}",
-  "methodName": {
-    "browser": "Browser",
-    "aria2": "aria2"
-  }
+  "asDefault": "{label} (default)"
 }

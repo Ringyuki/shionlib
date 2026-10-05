@@ -23,10 +23,5 @@
   "copied": "リンクをコピーしました（{minutes} 分間有効）",
   "copyReady": "リンクを発行しました（{minutes} 分間有効）",
   "copy": "コピー",
-  "asDefault": "{label}（既定）",
-  "method": "ダウンロード方法：{method}",
-  "methodName": {
-    "browser": "ブラウザ",
-    "aria2": "aria2"
-  }
+  "asDefault": "{label}（既定）"
 }

@@ -32,10 +32,3 @@ const storedSettings = v.fallback(
 export function downloadSettingsFrom(stored: string | null): DownloadSettings {
   return v.parse(storedSettings, stored)
 }
-
-const method = v.picklist(downloadMethods)
-
-export function downloadMethodFrom(value: unknown) {
-  const parsed = v.safeParse(method, value)
-  return parsed.success ? parsed.output : undefined
-}

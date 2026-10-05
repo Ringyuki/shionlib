@@ -8,13 +8,11 @@
   "hash": "{algorithm}: {hash}",
   "copyHash": "Copy the full checksum",
   "state": {
-    "passed": "Clean",
     "scanning": "Processing",
     "falsePositive": "May contain malware",
     "risky": "Blocked"
   },
   "stateHint": {
-    "passed": "Passed the malware scan",
     "scanning": "The file is still being processed and scanned and can be downloaded afterwards; only you can see it for now.",
     "falsePositive": "The malware scan flagged this file, but an administrator released it. Detected: {names}.",
     "risky": "The malware scan detected {names}; the file is blocked and cannot be downloaded."
@@ -65,12 +63,11 @@
   },
   "stateHelp": "What does this mean?",
   "updated": "Updated <time></time>",
-  "filterLabel": "Filter",
   "column": {
     "file": "File",
     "size": "Size",
     "hash": "Checksum",
-    "scan": "Scan",
     "download": "Download"
-  }
+  },
+  "actions": "Resource actions"
 }

@@ -1,6 +1,6 @@
 import { useMemo, useSyncExternalStore } from 'react'
-import { readLocal, writeLocal } from '~/shared/storage/local-storage'
-import { downloadSettingsKey, type DownloadSettings } from './download'
+import { readLocal } from '~/shared/storage/local-storage'
+import { downloadSettingsKey } from './download'
 import { downloadSettingsFrom } from './download.schema'
 
 const changed = 'shionlib:download-settings'
@@ -20,10 +20,5 @@ const nothingStored = () => null
 
 export function useDownloadSettings() {
   const raw = useSyncExternalStore(subscribe, stored, nothingStored)
-  const settings = useMemo(() => downloadSettingsFrom(raw), [raw])
-  const save = (next: DownloadSettings) => {
-    writeLocal(downloadSettingsKey, next)
-    window.dispatchEvent(new Event(changed))
-  }
-  return { settings, save }
+  return useMemo(() => downloadSettingsFrom(raw), [raw])
 }

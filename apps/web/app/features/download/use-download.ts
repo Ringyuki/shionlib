@@ -21,7 +21,7 @@ type Link = {
 
 export function useDownload(file: DownloadFile) {
   const t = useTranslations('download')
-  const { settings } = useDownloadSettings()
+  const settings = useDownloadSettings()
   const fetcher = useFetcher<typeof downloadLinkAction>()
   const [intent, setIntent] = useState<DownloadIntent | undefined>(undefined)
   const [verifying, setVerifying] = useState(false)

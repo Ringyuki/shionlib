@@ -8,13 +8,11 @@
   "hash": "{algorithm}：{hash}",
   "copyHash": "复制完整校验值",
   "state": {
-    "passed": "通过",
     "scanning": "处理中",
     "falsePositive": "可能存在病毒",
     "risky": "已拦截"
   },
   "stateHint": {
-    "passed": "已通过病毒扫描",
     "scanning": "文件还在处理和扫描，完成后才能下载；目前只有你能看到它。",
     "falsePositive": "病毒扫描流程曾标记此文件，但管理员已放行。检测到的病毒名：{names}。",
     "risky": "病毒扫描检测到 {names}，文件已被拦截，无法下载。"
@@ -65,12 +63,11 @@
   },
   "stateHelp": "查看说明",
   "updated": "<time></time>更新",
-  "filterLabel": "筛选",
   "column": {
     "file": "文件",
     "size": "大小",
     "hash": "校验值",
-    "scan": "安全扫描",
     "download": "下载"
-  }
+  },
+  "actions": "资源操作"
 }

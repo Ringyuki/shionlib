@@ -1,9 +1,8 @@
-import { Empty, Inline, SegmentedControl, Stack, Text } from '@hina-ui/react'
+import { Empty, SegmentedControl, Stack } from '@hina-ui/react'
 import { Upload } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { useLocale, useMessages, useTranslations } from 'use-intl'
-import { DownloadMethodMenu } from '~/features/download'
 import { sitePaths } from '~/features/shell'
 import { labelOf } from '~/shared/i18n/labels'
 import { Button } from '~/shared/ui/button'
@@ -46,26 +45,19 @@ export function ResourceList({ gameId, resources, viewerId }: ResourceListProps)
   )
   return (
     <Stack gap="md">
-      <Inline justify={filtering ? 'between' : 'end'} align="center" gap="md">
-        {filtering && (
-          <Inline gap="sm" align="center">
-            <Text size="sm" tone="muted">
-              {t('filterLabel')}
-            </Text>
-            <SegmentedControl
-              size="sm"
-              aria-label={t('filter')}
-              value={platform}
-              onValueChange={value => setPlatform(String(value))}
-              options={[
-                { value: allPlatforms, label: t('all') },
-                ...platforms.map(value => ({ value, label: labelOf(labels, value) })),
-              ]}
-            />
-          </Inline>
-        )}
-        <DownloadMethodMenu />
-      </Inline>
+      {filtering && (
+        <SegmentedControl
+          size="sm"
+          aria-label={t('filter')}
+          value={platform}
+          onValueChange={value => setPlatform(String(value))}
+          options={[
+            { value: allPlatforms, label: t('all') },
+            ...platforms.map(value => ({ value, label: labelOf(labels, value) })),
+          ]}
+          className="self-start"
+        />
+      )}
       {shown.map(resource => (
         <ResourceCard key={resource.id} resource={resource} viewerId={viewerId} />
       ))}

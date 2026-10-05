@@ -23,10 +23,5 @@
   "copied": "链接已复制，{minutes} 分钟内有效",
   "copyReady": "链接已生成，{minutes} 分钟内有效",
   "copy": "复制",
-  "asDefault": "{label}（默认）",
-  "method": "下载方式：{method}",
-  "methodName": {
-    "browser": "浏览器",
-    "aria2": "aria2"
-  }
+  "asDefault": "{label}（默认）"
 }

@@ -8,13 +8,11 @@
   "hash": "{algorithm}：{hash}",
   "copyHash": "チェックサムをコピー",
   "state": {
-    "passed": "スキャン済み",
     "scanning": "処理中",
     "falsePositive": "ウイルスの可能性あり",
     "risky": "ブロック"
   },
   "stateHint": {
-    "passed": "ウイルススキャンを通過しました",
     "scanning": "処理とスキャンが終わるとダウンロードできます。現在はあなたにだけ表示されています。",
     "falsePositive": "ウイルススキャンで検出されましたが、管理者が許可しました。検出名：{names}。",
     "risky": "ウイルススキャンで {names} を検出したため、ブロックされています。ダウンロードできません。"
@@ -65,12 +63,11 @@
   },
   "stateHelp": "説明を見る",
   "updated": "<time></time>に更新",
-  "filterLabel": "絞り込み",
   "column": {
     "file": "ファイル",
     "size": "サイズ",
     "hash": "チェックサム",
-    "scan": "スキャン",
     "download": "ダウンロード"
-  }
+  },
+  "actions": "リソースの操作"
 }

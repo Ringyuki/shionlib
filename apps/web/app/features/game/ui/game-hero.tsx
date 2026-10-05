@@ -26,12 +26,13 @@ import { GameMoreMenu } from './game-more-menu'
 type GameHeroProps = {
   game: GameHeader
   images: readonly GameImage[]
+  intro: string
   scores: Promise<Scores>
   resources: ResourceSummary
   favorite: ReactNode
 }
 
-export function GameHero({ game, images, scores, resources, favorite }: GameHeroProps) {
+export function GameHero({ game, images, intro, scores, resources, favorite }: GameHeroProps) {
   const locale = useLocale()
   const title = gameTitle(game, locale)
   const original = originalTitle(game, locale)
@@ -81,6 +82,11 @@ export function GameHero({ game, images, scores, resources, favorite }: GameHero
               </Await>
             </Suspense>
           </Inline>
+          {intro !== '' && (
+            <Text size="sm" tone="muted" className="line-clamp-2 max-w-prose max-sm:hidden">
+              {intro}
+            </Text>
+          )}
         </Stack>
         <Inline
           justify="between"
