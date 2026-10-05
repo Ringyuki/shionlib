@@ -1,6 +1,9 @@
 {
   "favorite": "Favorite",
   "favorited": "Favorited",
-  "chooseLists": "Add to lists",
-  "noLists": "No favorite lists yet"
+  "chooseLists": "Save to",
+  "noLists": "No favorite lists yet",
+  "loading": "Loading lists",
+  "defaultList": "Default list",
+  "private": "Private"
 }

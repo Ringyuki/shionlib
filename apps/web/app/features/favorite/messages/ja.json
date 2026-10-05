@@ -1,6 +1,9 @@
 {
   "favorite": "お気に入り",
   "favorited": "お気に入り済み",
-  "chooseLists": "リストに追加",
-  "noLists": "まだリストがありません"
+  "chooseLists": "保存先",
+  "noLists": "お気に入りリストがありません",
+  "loading": "リストを読み込み中",
+  "defaultList": "デフォルト",
+  "private": "非公開"
 }

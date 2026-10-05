@@ -1,5 +1,13 @@
-import { Checkbox, Popover, Spinner, Stack, Text } from '@hina-ui/react'
-import { Heart } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  Inline,
+  Spinner,
+  toast,
+} from '@hina-ui/react'
+import { Heart, Lock } from 'lucide-react'
 import { useTranslations } from 'use-intl'
 import type { Schema } from '~/shared/api/types'
 import { Button } from '~/shared/ui/button'
@@ -13,60 +21,59 @@ type FavoriteButtonProps = {
 
 export function FavoriteButton({ gameId, favorited }: FavoriteButtonProps) {
   const t = useTranslations('favorite')
-  const { lists, loading, load } = useFavoriteLists(gameId)
+  const { lists, load } = useFavoriteLists(gameId)
   return (
-    <Popover
-      onOpenChange={open => open && load()}
+    <DropdownMenu
+      label={t('chooseLists')}
+      align="end"
+      onOpenChange={open => {
+        if (open) {
+          load()
+        }
+      }}
       content={
-        <Stack gap="sm" className="min-w-56">
-          <Text size="sm" weight="medium">
-            {t('chooseLists')}
-          </Text>
-          {loading && <Spinner size="sm" />}
-          {lists?.map(list => (
-            <MembershipOption key={list.id} list={list} gameId={gameId} />
-          ))}
-          {lists?.length === 0 && (
-            <Text size="sm" tone="muted">
-              {t('noLists')}
-            </Text>
+        <>
+          <DropdownMenuLabel>{t('chooseLists')}</DropdownMenuLabel>
+          {lists === undefined && (
+            <DropdownMenuItem disabled icon={<Spinner size="sm" />}>
+              {t('loading')}
+            </DropdownMenuItem>
           )}
-        </Stack>
+          {lists?.length === 0 && <DropdownMenuItem disabled>{t('noLists')}</DropdownMenuItem>}
+          {lists?.map(list => (
+            <MembershipItem key={list.id} list={list} gameId={gameId} />
+          ))}
+        </>
       }
     >
       <Button
         loginRequired
-        variant={favorited ? 'solid' : 'outline'}
+        variant={favorited ? 'soft' : 'outline'}
+        tone={favorited ? 'accent' : 'neutral'}
         icon={<Heart fill={favorited ? 'currentColor' : 'none'} />}
       >
         {favorited ? t('favorited') : t('favorite')}
       </Button>
-    </Popover>
+    </DropdownMenu>
   )
 }
 
-function MembershipOption({
-  list,
-  gameId,
-}: {
-  list: Schema<'FavoriteSummaryDTO'>
-  gameId: number
-}) {
-  const { included, toggle, pending, failure } = useMembershipToggle(list, gameId)
+function MembershipItem({ list, gameId }: { list: Schema<'FavoriteSummaryDTO'>; gameId: number }) {
+  const t = useTranslations('favorite')
+  const { included, toggle, pending } = useMembershipToggle(list, gameId, failure =>
+    toast.danger(failure.message),
+  )
   return (
-    <Stack gap="xs">
-      <Checkbox
-        checked={included}
-        disabled={pending}
-        onCheckedChange={next => toggle(next === true)}
-      >
-        {list.name}
-      </Checkbox>
-      {failure && (
-        <Text size="xs" tone="danger">
-          {failure.message}
-        </Text>
-      )}
-    </Stack>
+    <DropdownMenuCheckboxItem
+      checked={included}
+      disabled={pending}
+      onCheckedChange={toggle}
+      onSelect={event => event.preventDefault()}
+    >
+      <Inline gap="xs" align="center" wrap={false} as="span">
+        {list.default ? t('defaultList') : list.name}
+        {list.is_private && <Lock aria-label={t('private')} className="size-3.5 text-faint" />}
+      </Inline>
+    </DropdownMenuCheckboxItem>
   )
 }
