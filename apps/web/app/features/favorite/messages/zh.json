@@ -13,5 +13,10 @@
   "makePrivate": "仅自己可见",
   "create": "创建并收藏",
   "cancel": "取消",
-  "created": "已新建「{name}」并收藏"
+  "created": "已新建「{name}」并收藏",
+  "newListDescription": "新建后会把这个游戏收进去。",
+  "listNameHint": "最多 {max} 字",
+  "listDescription": "简介",
+  "listDescriptionHint": "选填，最多 {max} 字",
+  "makePrivateHint": "其他人看不到这个收藏夹"
 }

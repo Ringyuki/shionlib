@@ -33,8 +33,13 @@ export async function changeMembership(api: ApiClient, change: MembershipChange)
 }
 
 export async function createListWithGame(api: ApiClient, creation: ListCreation) {
+  const description = creation.description.trim()
   const list = await api.post('/favorites', {
-    body: { name: creation.name.trim(), is_private: creation.isPrivate },
+    body: {
+      name: creation.name.trim(),
+      is_private: creation.isPrivate,
+      ...(description === '' ? {} : { description }),
+    },
   })
   await api.put('/favorites/{id}', {
     params: { path: { id: list.id } },

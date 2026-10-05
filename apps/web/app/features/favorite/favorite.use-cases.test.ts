@@ -60,7 +60,12 @@ describe('createListWithGame', () => {
       .on('post', '/favorites', { id: 8, name: '想玩', description: null, is_private: true })
       .on('put', '/favorites/{id}', undefined)
     await expect(
-      createListWithGame(fake.api, { gameId: 3, name: ' 想玩 ', isPrivate: true }),
+      createListWithGame(fake.api, {
+        gameId: 3,
+        name: ' 想玩 ',
+        description: ' ',
+        isPrivate: true,
+      }),
     ).resolves.toMatchObject({ id: 8 })
     await expect(fake.requests[0]?.json()).resolves.toEqual({ name: '想玩', is_private: true })
     expect(new URL(fake.requests[1]?.url ?? '').pathname).toBe('/favorites/8')

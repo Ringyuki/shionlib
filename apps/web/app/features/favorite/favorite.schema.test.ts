@@ -26,8 +26,10 @@ describe('listCreationForm', () => {
   const form = listCreationForm(createFormKit(issue => issue.kind))
 
   it('needs a name within the API limits', () => {
-    expect(firstIssueMessage(form, { name: '想玩', isPrivate: false })).toBeUndefined()
-    expect(firstIssueMessage(form, { name: '  ', isPrivate: false })).toBe('required')
-    expect(firstIssueMessage(form, { name: '汐'.repeat(300), isPrivate: true })).toBe('maxLength')
+    const valid = { name: '想玩', description: '', isPrivate: false }
+    expect(firstIssueMessage(form, valid)).toBeUndefined()
+    expect(firstIssueMessage(form, { ...valid, name: '  ' })).toBe('required')
+    expect(firstIssueMessage(form, { ...valid, name: '汐'.repeat(300) })).toBe('maxLength')
+    expect(firstIssueMessage(form, { ...valid, description: '汐'.repeat(2001) })).toBe('maxLength')
   })
 })

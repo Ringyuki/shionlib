@@ -13,5 +13,10 @@
   "makePrivate": "自分だけに表示",
   "create": "作成して保存",
   "cancel": "キャンセル",
-  "created": "「{name}」を作成して保存しました"
+  "created": "「{name}」を作成して保存しました",
+  "newListDescription": "作成後、このゲームを追加します。",
+  "listNameHint": "{max} 文字まで",
+  "listDescription": "説明",
+  "listDescriptionHint": "任意、{max} 文字まで",
+  "makePrivateHint": "他の人には表示されません"
 }

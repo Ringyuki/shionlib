@@ -13,5 +13,10 @@
   "makePrivate": "Only visible to me",
   "create": "Create and save",
   "cancel": "Cancel",
-  "created": "Created “{name}” and saved the game"
+  "created": "Created “{name}” and saved the game",
+  "newListDescription": "The game is saved to the new list right away.",
+  "listNameHint": "Up to {max} characters",
+  "listDescription": "Description",
+  "listDescriptionHint": "Optional, up to {max} characters",
+  "makePrivateHint": "Nobody else can see this list"
 }
