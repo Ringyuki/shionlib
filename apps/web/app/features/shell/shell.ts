@@ -29,9 +29,8 @@ export function sitePaths(locale: Locale) {
     upload: `/${locale}/upload`,
     profile: (userId: number) => `/${locale}/user/${userId}`,
     settings: `/${locale}/user/settings`,
-    help: `/${locale}/docs`,
-    uploadRules: `/${locale}/docs/guides/upload-game-files`,
     friendLinks: `/${locale}/friend-link`,
+    sponsor: `/${locale}/sponsor`,
   }
 }
 
@@ -74,3 +73,7 @@ export function sidebarCookieValue(mode: SidebarMode): string {
 }
 
 export const repositoryUrl = 'https://github.com/Ringyuki/shionlib'
+
+export const telegramUrl = 'https://t.me/shionlib'
+
+export const contactEmail = 'admin@shionlib.com'

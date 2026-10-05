@@ -29,11 +29,9 @@
   },
   "footer": {
     "label": "Site information",
-    "help": "Help",
-    "uploadRules": "Upload rules",
-    "friendLinks": "Friends",
-    "version": "Version {version}",
-    "copyright": "© {year} Shionlib"
+    "friendLinks": "Friend Links",
+    "sponsor": "Sponsor",
+    "contact": "Contact"
   },
   "scrollTop": "Back to top"
 }

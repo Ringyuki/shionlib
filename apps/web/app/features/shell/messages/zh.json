@@ -29,11 +29,9 @@
   },
   "footer": {
     "label": "站点信息",
-    "help": "帮助",
-    "uploadRules": "上传规则",
-    "friendLinks": "友链",
-    "version": "版本 {version}",
-    "copyright": "© {year} Shionlib"
+    "friendLinks": "友情链接",
+    "sponsor": "赞助",
+    "contact": "联系我们"
   },
   "scrollTop": "回到顶部"
 }

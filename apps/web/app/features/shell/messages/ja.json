@@ -29,11 +29,9 @@
   },
   "footer": {
     "label": "サイト情報",
-    "help": "ヘルプ",
-    "uploadRules": "アップロードのルール",
-    "friendLinks": "リンク",
-    "version": "バージョン {version}",
-    "copyright": "© {year} Shionlib"
+    "friendLinks": "友情リンク",
+    "sponsor": "スポンサー",
+    "contact": "お問い合わせ"
   },
   "scrollTop": "トップへ戻る"
 }

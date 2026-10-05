@@ -1,46 +1,70 @@
-import { Divider, Inline, Link, Stack, Text } from '@hina-ui/react'
+import { Divider, Flex, Inline, Link, Text } from '@hina-ui/react'
+import { Copyright, Heart, MessageCircle } from 'lucide-react'
+import type { ReactNode } from 'react'
+import { RiGithubFill, RiTelegram2Fill } from 'react-icons/ri'
 import { Link as RouterLink } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
-import { repositoryUrl, sitePaths } from '../shell'
+import { BrandLogo, Wordmark } from '~/shared/ui/brand'
+import { contactEmail, repositoryUrl, sitePaths, telegramUrl } from '../shell'
 
-type SiteFooterProps = {
-  version: string
-  year: number
-}
-
-export function SiteFooter({ version, year }: SiteFooterProps) {
+export function SiteFooter() {
   const t = useTranslations('shell.footer')
-  const locale = useLocale()
-  const paths = sitePaths(locale)
-  const links = [
-    { key: 'help', to: paths.help },
-    { key: 'uploadRules', to: paths.uploadRules },
-    { key: 'friendLinks', to: paths.friendLinks },
-  ] as const
+  const paths = sitePaths(useLocale())
   return (
-    <Stack as="footer" gap="md" className="mt-16 pb-14">
-      <Divider />
-      <Inline gap="md" align="center" justify="between">
-        <Inline as="nav" gap="lg" align="center" aria-label={t('label')}>
-          {links.map(link => (
-            <Link key={link.key} asChild tone="neutral">
-              <RouterLink to={link.to}>
-                <Text as="span" size="sm" tone="muted">
-                  {t(link.key)}
-                </Text>
-              </RouterLink>
-            </Link>
-          ))}
-          <Link tone="neutral" href={repositoryUrl} target="_blank" rel="noreferrer">
-            <Text as="span" size="sm" tone="muted">
-              GitHub
-            </Text>
+    <Flex
+      as="footer"
+      aria-label={t('label')}
+      className="mt-16 flex-col items-center gap-4 pb-14 md:flex-row md:justify-between"
+    >
+      <Inline gap="sm" align="center" wrap={false}>
+        <BrandLogo className="size-8" />
+        <Inline gap="xs" align="center" wrap={false}>
+          <Copyright aria-hidden className="size-3" />
+          <Text as="span" size="xs">
+            2025
+          </Text>
+        </Inline>
+        <Wordmark size="sm" />
+      </Inline>
+      <Inline gap="lg" align="center" justify="center">
+        <Inline gap="lg" align="center">
+          <Link asChild tone="neutral">
+            <RouterLink to={paths.friendLinks}>
+              <FooterLabel>{t('friendLinks')}</FooterLabel>
+            </RouterLink>
+          </Link>
+          <Link asChild tone="neutral">
+            <RouterLink to={paths.sponsor}>
+              <FooterLabel icon={<Heart className="text-danger-text size-3 fill-current" />}>
+                {t('sponsor')}
+              </FooterLabel>
+            </RouterLink>
           </Link>
         </Inline>
-        <Text size="xs" tone="faint">
-          {t('copyright', { year })} · {t('version', { version })}
-        </Text>
+        <Divider orientation="vertical" className="h-4 max-md:hidden" />
+        <Inline gap="lg" align="center">
+          <Link tone="neutral" href={repositoryUrl} target="_blank" rel="noreferrer">
+            <FooterLabel icon={<RiGithubFill className="size-3" />}>GitHub</FooterLabel>
+          </Link>
+          <Link tone="neutral" href={telegramUrl} target="_blank" rel="noreferrer">
+            <FooterLabel icon={<RiTelegram2Fill className="size-3" />}>Telegram</FooterLabel>
+          </Link>
+          <Link tone="neutral" href={`mailto:${contactEmail}`}>
+            <FooterLabel icon={<MessageCircle className="size-3" />}>{t('contact')}</FooterLabel>
+          </Link>
+        </Inline>
       </Inline>
-    </Stack>
+    </Flex>
+  )
+}
+
+function FooterLabel({ icon, children }: { icon?: ReactNode; children: ReactNode }) {
+  return (
+    <Inline as="span" gap="xs" align="center" wrap={false}>
+      {icon}
+      <Text as="span" size="sm" className="text-inherit">
+        {children}
+      </Text>
+    </Inline>
   )
 }
