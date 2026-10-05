@@ -170,3 +170,11 @@ export function gameDescription(game: Introduced, locale: Locale): string {
   const intro = preferredIntro(game, locale).replace(/\s+/g, ' ').trim()
   return intro.length <= descriptionLength ? intro : `${intro.slice(0, descriptionLength - 1)}…`
 }
+
+export function bannerIndex(
+  images: readonly GameImage[],
+  contentLimit: number,
+): number | undefined {
+  const index = images.findIndex(image => !masked(image, contentLimit) && !isExplicit(image))
+  return index === -1 ? undefined : index
+}

@@ -30,10 +30,11 @@ export function meta({ loaderData, params }: Route.MetaArgs) {
 }
 
 export default function GameRoute({ loaderData }: Route.ComponentProps) {
-  const { header, characters, scores, resources, favorited } = loaderData
+  const { header, details, characters, scores, resources, favorited } = loaderData
   return (
     <GamePage
       header={header}
+      details={details}
       characters={characters}
       scores={scores}
       resources={summarizeResources(resources)}

@@ -48,7 +48,7 @@
     "viewOnHikarinagi": "View on Hikarinagi",
     "editOnHikarinagi": "Edit on Hikarinagi",
     "download": "Download ({count, plural, one {# resource} other {# resources}})",
-    "uploadShort": "Upload"
+    "readMore": "Read the full description"
   },
   "cover": {
     "view": "View cover",

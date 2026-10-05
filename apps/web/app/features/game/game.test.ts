@@ -4,6 +4,7 @@ import ja from './messages/ja.json'
 import zh from './messages/zh.json'
 import type { Schema } from '~/shared/api/types'
 import {
+  bannerIndex,
   type Platform,
   type ResourceLanguage,
   developerNames,
@@ -90,5 +91,15 @@ describe('gameDescription', () => {
     const intro = { intro_zh: '', intro_jp: '一行目\n二行目', intro_en: 'English' }
     expect(gameDescription(intro, 'zh')).toBe('一行目 二行目')
     expect(gameDescription({ ...intro, intro_jp: '汐'.repeat(400) }, 'ja')).toHaveLength(160)
+  })
+})
+
+describe('bannerIndex', () => {
+  const image = (sexual: number) => ({ url: `${sexual}`, dims: null, sexual, violence: 0 })
+
+  it('picks the first image that is safe to show large', () => {
+    expect(bannerIndex([image(1), image(0)], 3)).toBe(1)
+    expect(bannerIndex([image(1)], 2)).toBeUndefined()
+    expect(bannerIndex([], 0)).toBeUndefined()
   })
 })
