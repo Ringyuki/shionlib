@@ -1,15 +1,12 @@
 import type { ApiClient } from '~/shared/api/client'
 import { ApiError } from '~/shared/api/error'
 import {
-  pickArtwork,
   type EmailOnly,
   type PasskeyAssertion,
   type PasswordReset,
   type SignIn,
   type SignUp,
 } from './auth'
-
-const artworkPool = 24
 
 export async function signIn(api: ApiClient, command: SignIn) {
   return api.post('/user/login', {
@@ -74,11 +71,4 @@ export async function resetPassword(api: ApiClient, command: PasswordReset) {
     body: { token: command.token, email: command.email, password: command.password },
   })
   return null
-}
-
-export async function loadArtwork(api: ApiClient, random: () => number) {
-  const page = await api.get('/game/list', {
-    params: { query: { 'filter[sort_by]': 'hot_score', pageSize: artworkPool } },
-  })
-  return pickArtwork(page.items ?? [], random) ?? null
 }

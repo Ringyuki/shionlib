@@ -10,7 +10,6 @@ import {
 import {
   checkPasswordResetLink,
   finishPasskeySignIn,
-  loadArtwork,
   requestPasswordReset,
   requestSignUpCode,
   resetPassword,
@@ -62,10 +61,6 @@ export async function passkeySignInAction(args: ActionFunctionArgs) {
 
 export function signOutAction(args: ActionFunctionArgs) {
   return routeAction(args, api => signOut(api))
-}
-
-export function artworkLoader(args: LoaderFunctionArgs) {
-  return routeLoader(args, api => loadArtwork(api, Math.random))
 }
 
 export function passwordResetLoader(args: LoaderFunctionArgs) {

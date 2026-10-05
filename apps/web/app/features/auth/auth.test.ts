@@ -6,21 +6,10 @@ import {
   parseSignIn,
   parseSignUp,
   passwordResetIssues,
-  pickArtwork,
   remainingSeconds,
   signInIssues,
   signUpIssues,
 } from './auth'
-
-const cover = (overrides: Partial<{ url: string; type: 'pkgfront' | 'dig'; sexual: number }>) => ({
-  language: 'jp' as const,
-  type: 'pkgfront' as const,
-  url: 'a.webp',
-  dims: [3, 4],
-  sexual: 0,
-  violence: 0,
-  ...overrides,
-})
 
 describe('auth views', () => {
   it('recognises the dialog views only', () => {
@@ -103,24 +92,6 @@ describe('form issues', () => {
     expect(passwordResetIssues({ password: 'Secret12', confirmation: 'Secret13' })).toEqual({
       confirmation: 'mismatch',
     })
-  })
-})
-
-describe('pickArtwork', () => {
-  it('prefers safe package fronts and falls back to any safe cover', () => {
-    const games = [
-      {
-        covers: [cover({ url: 'rated.webp', sexual: 1 }), cover({ url: 'dig.webp', type: 'dig' })],
-      },
-      { covers: [cover({ url: 'front.webp' })] },
-      { covers: null },
-    ]
-    expect(pickArtwork(games, () => 0.99)).toEqual({ url: 'front.webp', dims: [3, 4] })
-    expect(pickArtwork([games[0] ?? { covers: [] }], () => 0)).toEqual({
-      url: 'dig.webp',
-      dims: [3, 4],
-    })
-    expect(pickArtwork([], () => 0)).toBeUndefined()
   })
 })
 

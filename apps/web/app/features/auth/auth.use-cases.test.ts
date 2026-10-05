@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { fakeApi } from '~/shared/api/testing'
-import {
-  checkPasswordResetLink,
-  loadArtwork,
-  requestSignUpCode,
-  signIn,
-  signUp,
-} from './auth.use-cases'
+import { checkPasswordResetLink, requestSignUpCode, signIn, signUp } from './auth.use-cases'
 
 describe('signIn', () => {
   it('trims the identifier but not the password', async () => {
@@ -98,24 +92,5 @@ describe('checkPasswordResetLink', () => {
         'e',
       ),
     ).rejects.toMatchObject({ status: 503 })
-  })
-})
-
-describe('loadArtwork', () => {
-  it('picks a cover among the hottest games', async () => {
-    const fake = fakeApi().on('get', '/game/list', {
-      items: [],
-      meta: {
-        totalItems: 0,
-        itemCount: 0,
-        itemsPerPage: 24,
-        totalPages: 0,
-        currentPage: 1,
-        content_limit: 0,
-      },
-    })
-    await expect(loadArtwork(fake.api, () => 0)).resolves.toBeNull()
-    const query = new URL(fake.requests[0]?.url ?? '').searchParams
-    expect(query.get('filter[sort_by]')).toBe('hot_score')
   })
 })

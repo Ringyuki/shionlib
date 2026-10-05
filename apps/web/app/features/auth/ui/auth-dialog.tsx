@@ -10,16 +10,17 @@ import {
   Text,
 } from '@hina-ui/react'
 import type { ReactNode } from 'react'
+import { preload } from 'react-dom'
 import { useTranslations } from 'use-intl'
 import { AuthGateProvider, type AuthGate } from '~/shared/ui/auth-gate'
 import { BrandLogo, Wordmark } from '~/shared/ui/brand'
-import { useImageUrl } from '~/shared/ui/image-base'
-import type { Artwork, AuthView } from '../auth'
-import { useArtwork } from '../use-artwork'
+import type { AuthView } from '../auth'
 import { useAuthDialog } from '../use-auth-dialog'
 import { ForgotPasswordForm } from './forgot-password-form'
 import { SignInForm } from './sign-in-form'
 import { SignUpFormView } from './sign-up-form'
+
+const artwork = '/auth/artwork.webp'
 
 export function AuthDialogProvider({
   signedIn,
@@ -29,7 +30,9 @@ export function AuthDialogProvider({
   children: ReactNode
 }) {
   const dialog = useAuthDialog(signedIn)
-  const artwork = useArtwork(!signedIn)
+  if (!signedIn) {
+    preload(artwork, { as: 'image', fetchPriority: 'low' })
+  }
   const gate: AuthGate = {
     signedIn,
     requireSignIn: resume => dialog.show('sign-in', resume),
@@ -38,7 +41,6 @@ export function AuthDialogProvider({
     <AuthGateProvider gate={gate}>
       {children}
       <AuthDialog
-        artwork={artwork}
         open={dialog.open}
         view={dialog.view}
         oidcFailed={dialog.oidcFailed}
@@ -50,7 +52,6 @@ export function AuthDialogProvider({
 }
 
 type AuthDialogProps = {
-  artwork: Artwork | null | undefined
   open: boolean
   view: AuthView
   oidcFailed: boolean
@@ -58,9 +59,8 @@ type AuthDialogProps = {
   onClose: () => void
 }
 
-function AuthDialog({ artwork, open, view, oidcFailed, onSwitch, onClose }: AuthDialogProps) {
+function AuthDialog({ open, view, oidcFailed, onSwitch, onClose }: AuthDialogProps) {
   const t = useTranslations('auth')
-  const image = useImageUrl()
   return (
     <Dialog
       title={t(`${view}.title`)}
@@ -76,10 +76,11 @@ function AuthDialog({ artwork, open, view, oidcFailed, onSwitch, onClose }: Auth
       renderBody={({ close }) => (
         <Inline gap="none" align="stretch" wrap={false} className="relative h-full min-h-0">
           <Image
-            src={image(artwork?.url)}
+            src={artwork}
             alt=""
             aria-hidden
             fit="cover"
+            imageClass="object-[28%_50%]"
             className="bg-subtle hidden aspect-[2/3] h-full w-auto shrink-0 md:block"
           />
           <ScrollArea className="min-h-0 min-w-0 flex-1">

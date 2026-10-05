@@ -1,4 +1,3 @@
-import type { Schema } from '~/shared/api/types'
 import { isLocale, type Locale } from '~/shared/i18n/locale'
 
 export type AuthView = 'sign-in' | 'sign-up' | 'forgot-password'
@@ -47,10 +46,6 @@ export const codeResendSeconds = 60
 const nameRange = { min: 2, max: 20 }
 
 const passwordRange = { min: 8, max: 50 }
-
-type GameCard = Pick<Schema<'GameListItemDTO'>, 'covers'>
-
-export type Artwork = Pick<Schema<'GameCoverDTO'>, 'url' | 'dims'>
 
 export function isAuthView(value: string | null): value is AuthView {
   return authViews.some(view => view === value)
@@ -137,16 +132,6 @@ export function passwordResetIssues(form: PasswordResetForm): Issues<PasswordRes
 
 export function meetsPasswordPolicy(password: string): boolean {
   return /[A-Z]/.test(password) && /[a-z]/.test(password) && /[^A-Za-z_]/.test(password)
-}
-
-export function pickArtwork(games: readonly GameCard[], random: () => number): Artwork | undefined {
-  const safe = games.flatMap(game =>
-    (game.covers ?? []).filter(cover => cover.sexual === 0 && cover.violence === 0),
-  )
-  const fronts = safe.filter(cover => cover.type === 'pkgfront')
-  const pool = fronts.length > 0 ? fronts : safe
-  const cover = pool[Math.floor(random() * pool.length)]
-  return cover === undefined ? undefined : { url: cover.url, dims: cover.dims }
 }
 
 export function remainingSeconds(sentAt: number | undefined, now: number): number {

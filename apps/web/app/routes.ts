@@ -11,7 +11,6 @@ export default [
   route('resources/auth/passkey-options', 'routes/resources.auth.passkey-options.ts'),
   route('resources/auth/passkey-sign-in', 'routes/resources.auth.passkey-sign-in.ts'),
   route('resources/auth/sign-out', 'routes/resources.auth.sign-out.ts'),
-  route('resources/auth/artwork', 'routes/resources.auth.artwork.ts'),
   route('resources/search', 'routes/resources.search.ts'),
   route(':lang', 'routes/lang.tsx', [
     route('login', 'routes/auth-redirect.ts', { id: 'login' }),
