@@ -92,6 +92,7 @@ export function SignUpFormView({ onSwitch }: { onSwitch: (view: AuthView) => voi
               value={values.code}
               onValueChange={code => setValues({ ...values, code: code.toUpperCase() })}
               length={codeLength}
+              otp
             />
           </FormField>
           <FormField
