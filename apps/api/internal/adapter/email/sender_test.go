@@ -14,6 +14,7 @@ import (
 )
 
 type captured struct {
+	path   string
 	method string
 	query  map[string][]string
 	header http.Header
@@ -25,7 +26,7 @@ func server(t *testing.T, status int, reply string) (*httptest.Server, *captured
 	got := &captured{}
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		raw, _ := io.ReadAll(r.Body)
-		got.method, got.query, got.header, got.body = r.Method, r.URL.Query(), r.Header.Clone(), string(raw)
+		got.path, got.method, got.query, got.header, got.body = r.URL.Path, r.Method, r.URL.Query(), r.Header.Clone(), string(raw)
 		w.WriteHeader(status)
 		_, _ = w.Write([]byte(reply))
 	}))
@@ -107,11 +108,20 @@ func TestPostalSendsJSONAndRequiresSuccess(t *testing.T) {
 	if got.header.Get("X-Server-API-Key") != "api-key" {
 		t.Fatalf("missing api key header %v", got.header)
 	}
+	if got.path != PostalSendPath {
+		t.Fatalf("a bare host is completed with the send path: %s", got.path)
+	}
 
-	failing, _ := server(t, http.StatusOK, `{"status":"error"}`)
+	explicit, sent := server(t, http.StatusOK, `{"status":"success"}`)
+	sender = NewSender(settings(ProviderPostal, explicit.URL+"/custom/send"), httpclient.New(httpclient.Options{Timeout: time.Second}))
+	if err := sender.Send(context.Background(), Message{Subject: "Hi", To: []string{"a@example.test"}}); err != nil || sent.path != "/custom/send" {
+		t.Fatalf("an explicit path is kept: %s %v", sent.path, err)
+	}
+
+	failing, _ := server(t, http.StatusOK, `{"status":"error","data":{"code":"UnauthenticatedFromAddress","message":"The From address is not authorised"}}`)
 	sender = NewSender(settings(ProviderPostal, failing.URL), httpclient.New(httpclient.Options{Timeout: time.Second}))
-	if err := sender.Send(context.Background(), Message{Subject: "Hi", To: []string{"a@example.test"}}); err == nil {
-		t.Fatal("a non-success status must fail")
+	if err := sender.Send(context.Background(), Message{Subject: "Hi", To: []string{"a@example.test"}}); err == nil || !strings.Contains(err.Error(), "UnauthenticatedFromAddress") {
+		t.Fatalf("a non-success status must fail with Postal's reason, got %v", err)
 	}
 	malformed, _ := server(t, http.StatusOK, `not json`)
 	sender = NewSender(settings(ProviderPostal, malformed.URL), httpclient.New(httpclient.Options{Timeout: time.Second}))

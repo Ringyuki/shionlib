@@ -17,6 +17,7 @@ const (
 	ProviderElastic = "elastic"
 	ProviderPostal  = "postal"
 	ElasticEndpoint = "https://api.elasticemail.com/v2/email/send"
+	PostalSendPath  = "/api/v1/send/message"
 	maxErrorBody    = 2048
 )
 
@@ -119,6 +120,10 @@ type postalRequest struct {
 
 type postalResponse struct {
 	Status string `json:"status"`
+	Data   struct {
+		Code    string `json:"code"`
+		Message string `json:"message"`
+	} `json:"data"`
 }
 
 func (p *Postal) Send(ctx context.Context, msg Message) error {
@@ -131,7 +136,7 @@ func (p *Postal) Send(ctx context.Context, msg Message) error {
 	if err != nil {
 		return fmt.Errorf("encode postal request: %w", err)
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, p.settings.Endpoint, bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, postalURL(p.settings.Endpoint), bytes.NewReader(body))
 	if err != nil {
 		return fmt.Errorf("build postal request: %w", err)
 	}
@@ -146,9 +151,18 @@ func (p *Postal) Send(ctx context.Context, msg Message) error {
 		return fmt.Errorf("decode postal response: %w", err)
 	}
 	if decoded.Status != "success" {
-		return fmt.Errorf("postal rejected the message with status %q", decoded.Status)
+		return fmt.Errorf("postal rejected the message with status %q: %s %s", decoded.Status, decoded.Data.Code, decoded.Data.Message)
 	}
 	return nil
+}
+
+func postalURL(endpoint string) string {
+	parsed, err := url.Parse(endpoint)
+	if err != nil || strings.Trim(parsed.Path, "/") != "" {
+		return endpoint
+	}
+	parsed.Path = PostalSendPath
+	return parsed.String()
 }
 
 func do(client *http.Client, req *http.Request) ([]byte, error) {
