@@ -20,11 +20,23 @@ export function BrandLogo({ className }: BrandProps) {
 }
 
 const wordmarks = {
-  latin: { src: '/brand/wordmark.svg', ratio: 'aspect-[4892/874]' },
-  chinese: { src: '/brand/wordmark-zh.svg', ratio: 'aspect-[5989/1038]' },
+  latin: {
+    src: '/brand/wordmark.svg',
+    ratio: 'aspect-[4892/874]',
+    heights: { sm: 'h-4', md: 'h-5' },
+  },
+  chinese: {
+    src: '/brand/wordmark-zh.svg',
+    ratio: 'aspect-[5989/1038]',
+    heights: { sm: 'h-5', md: 'h-6' },
+  },
 } as const
 
-export function Wordmark({ className }: BrandProps) {
+type WordmarkProps = BrandProps & {
+  size?: 'sm' | 'md'
+}
+
+export function Wordmark({ size = 'md', className }: WordmarkProps) {
   const wordmark = wordmarks[useLocale() === 'zh' ? 'chinese' : 'latin']
   return (
     <Image
@@ -34,7 +46,7 @@ export function Wordmark({ className }: BrandProps) {
       lazy={false}
       skeleton={false}
       fit="contain"
-      className={cn(wordmark.ratio, 'h-5 w-auto shrink-0', className)}
+      className={cn(wordmark.ratio, wordmark.heights[size], 'w-auto shrink-0', className)}
     />
   )
 }

@@ -35,7 +35,7 @@ export function SiteHeader({ viewerId }: SiteHeaderProps) {
       <Link to={paths.home} aria-label="Shionlib" className="lg:hidden">
         <Inline gap="sm" align="center" className="flex-nowrap">
           <BrandLogo className="size-7" />
-          <Wordmark className="h-4 max-sm:hidden" />
+          <Wordmark size="sm" className="max-sm:hidden" />
         </Inline>
       </Link>
       <SearchPalette shortcuts={shortcuts} />

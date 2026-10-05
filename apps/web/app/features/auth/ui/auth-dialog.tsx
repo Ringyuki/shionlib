@@ -88,7 +88,7 @@ function AuthDialog({ open, view, oidcFailed, onSwitch, onClose }: AuthDialogPro
               <Stack gap="md">
                 <Inline gap="sm" align="center" wrap={false}>
                   <BrandLogo className="size-8" />
-                  <Wordmark className="h-5" />
+                  <Wordmark />
                 </Inline>
                 <Stack gap="xs" aria-hidden>
                   <Heading level={2} size="xl" weight="semibold">
