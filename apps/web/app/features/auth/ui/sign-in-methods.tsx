@@ -50,7 +50,7 @@ export function SignInMethods() {
             lazy={false}
             skeleton={false}
             fit="cover"
-            className="size-5 shrink-0"
+            className="size-5 shrink-0 rounded-md"
           />
         }
         disabled={passkey.pending}
