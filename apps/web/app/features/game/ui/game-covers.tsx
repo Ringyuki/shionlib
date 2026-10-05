@@ -4,17 +4,17 @@ import { coverRatio, imageSize, masked, primaryCover, type GameHeader } from '..
 
 type GameCoverProps = {
   game: Pick<GameHeader, 'covers' | 'content_limit'>
-  title: string
+  alt: string
   className?: string
 }
 
-export function GameCover({ game, title, className }: GameCoverProps) {
+export function GameCover({ game, alt, className }: GameCoverProps) {
   const t = useTranslations('game.cover')
   const cover = primaryCover(game)
   const image = (
     <Image
       src={cover?.url}
-      alt={title}
+      alt={alt}
       ratio={coverRatio(cover)}
       preview={cover !== undefined}
       previewSize={cover === undefined ? undefined : imageSize(cover)}

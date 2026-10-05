@@ -54,7 +54,7 @@ export function GameHero({ game, images, intro, scores, resources, favorite }: G
         >
           <GameCover
             game={game}
-            title={title}
+            alt={title}
             className={cn('rounded-xl', staged && 'ring-4 ring-canvas')}
           />
         </Stack>

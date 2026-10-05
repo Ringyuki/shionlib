@@ -1,6 +1,7 @@
 import {
   CopyButton,
   Inline,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -42,24 +43,29 @@ function FileRow({ file }: { file: ResourceFile }) {
   const t = useTranslations('resource')
   const format = useFormatter()
   const size = fileSize(file.file_size)
+  const sizeText = `${format.number(size.value, { maximumFractionDigits: size.unit === 'B' ? 0 : 2 })} ${size.unit}`
   const state = fileState(file)
   return (
     <TableRow>
       <TableCell className="w-full max-w-0 ps-0">
         <Inline gap="sm" align="center" className="gap-y-1">
-          <Inline gap="xs" align="center" wrap={false} className="max-w-full min-w-0">
-            <FileArchive aria-hidden className="size-4 shrink-0 text-faint" />
-            <Text size="sm" truncate title={file.file_name}>
-              {file.file_name}
-            </Text>
+          <Inline gap="xs" align="start" wrap={false} className="max-w-full min-w-0">
+            <FileArchive aria-hidden className="mt-0.5 size-4 shrink-0 text-faint" />
+            <Stack gap="none" className="min-w-0">
+              <Text size="sm" className="break-words">
+                {file.file_name}
+              </Text>
+              <Text size="xs" tone="muted" className="sm:hidden">
+                {sizeText}
+              </Text>
+            </Stack>
           </Inline>
           <FileState file={file} />
         </Inline>
       </TableCell>
-      <TableCell align="end" className="whitespace-nowrap">
+      <TableCell align="end" className={`${wide} whitespace-nowrap`}>
         <Text as="span" size="sm" tone="muted">
-          {format.number(size.value, { maximumFractionDigits: size.unit === 'B' ? 0 : 2 })}{' '}
-          {size.unit}
+          {sizeText}
         </Text>
       </TableCell>
       <TableCell className={`${wide} whitespace-nowrap`}>

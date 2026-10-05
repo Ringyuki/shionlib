@@ -31,6 +31,33 @@ const documentShellTags = {
   message: nativeTagMessage,
 }
 
+const titledComponents = [
+  'Alert',
+  'AlertDialog',
+  'Callout',
+  'DataListItem',
+  'Dialog',
+  'Drawer',
+  'Empty',
+  'PageHeader',
+  'Panel',
+  'Popconfirm',
+  'Result',
+  'Section',
+  'Sheet',
+]
+
+const nativeTooltip = {
+  selector: `JSXOpeningElement:not([name.name=/^(${titledComponents.join('|')})$/]) > JSXAttribute[name.name='title']`,
+  message:
+    'No native title tooltips: wrap the trigger in a hina-ui Tooltip, or show the text in full.',
+}
+
+const nativeDialogs = ['alert', 'confirm', 'prompt'].map(name => ({
+  name,
+  message: 'No native browser dialogs: use hina-ui AlertDialog, Dialog or toast.',
+}))
+
 const mountedFeedback = {
   selector:
     ':matches(LogicalExpression, ConditionalExpression) > JSXElement > JSXOpeningElement > JSXIdentifier[name=/^(Alert|Callout|Banner)$/]',
@@ -114,8 +141,17 @@ export default defineConfig([
           message:
             'Call the API through ~/shared/api; third-party browser services live in ~/shared/vendor.',
         },
+        ...nativeDialogs,
       ],
-      'no-restricted-syntax': ['error', ...apiShapes, nativeTags, mountedFeedback],
+      'no-restricted-properties': [
+        'error',
+        ...nativeDialogs.map(dialog => ({
+          object: 'window',
+          property: dialog.name,
+          message: dialog.message,
+        })),
+      ],
+      'no-restricted-syntax': ['error', ...apiShapes, nativeTags, nativeTooltip, mountedFeedback],
       '@typescript-eslint/consistent-type-assertions': ['error', { assertionStyle: 'never' }],
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/no-restricted-imports': restrictedImports(featureEntry),
@@ -149,7 +185,13 @@ export default defineConfig([
   {
     files: ['app/root.tsx'],
     rules: {
-      'no-restricted-syntax': ['error', ...apiShapes, documentShellTags, mountedFeedback],
+      'no-restricted-syntax': [
+        'error',
+        ...apiShapes,
+        documentShellTags,
+        nativeTooltip,
+        mountedFeedback,
+      ],
     },
   },
   {

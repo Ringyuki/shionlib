@@ -1,4 +1,4 @@
-import { Link, Text } from '@hina-ui/react'
+import { Link, Text, Tooltip } from '@hina-ui/react'
 import { Suspense } from 'react'
 import { Await } from 'react-router'
 import { useTranslations } from 'use-intl'
@@ -26,20 +26,21 @@ function Ratings({ scores }: { scores: Scores }) {
 function Rating({ label, score }: { label: string; score: Score }) {
   const t = useTranslations('game.score')
   return (
-    <Link
-      href={score.url}
-      target="_blank"
-      rel="noreferrer"
-      tone="neutral"
-      title={t('votes', { source: label, count: score.votes })}
-      className="inline-flex items-baseline gap-1.5"
-    >
-      <Text as="span" size="xs" tone="muted">
-        {label}
-      </Text>
-      <Text as="span" weight="semibold" className="text-inherit tabular-nums">
-        {score.value.toFixed(1)}
-      </Text>
-    </Link>
+    <Tooltip content={t('votes', { source: label, count: score.votes })}>
+      <Link
+        href={score.url}
+        target="_blank"
+        rel="noreferrer"
+        tone="neutral"
+        className="inline-flex items-baseline gap-1.5"
+      >
+        <Text as="span" size="xs" tone="muted">
+          {label}
+        </Text>
+        <Text as="span" weight="semibold" className="text-inherit tabular-nums">
+          {score.value.toFixed(1)}
+        </Text>
+      </Link>
+    </Tooltip>
   )
 }

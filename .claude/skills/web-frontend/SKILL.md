@@ -80,6 +80,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 ## MUST NOT
 
 - MUST NOT write native JSX tags outside the document shell in `root.tsx` (lint).
+- MUST NOT fall back on the browser's own UI: no `title` tooltips (wrap the trigger in hina-ui `Tooltip`, or show the text in full; `title` is allowed only as the prop of `Dialog`, `Section`, `Empty`, `Result` and the other titled hina-ui components), no `alert`/`confirm`/`prompt` (`AlertDialog`, `Dialog`, `toast`), no native validation bubbles (hina-ui `Form` sets `noValidate`; errors show under the fields) (lint).
 - MUST NOT hand-write input validation (`typeof`, `Array.isArray`, `JSON.parse`, `Number(...)`, regexes over input), restate API limits as numbers, import valibot outside `*.schema.ts`/`~/shared/form`/`~/shared/route`, or use another validation library (lint).
 - MUST NOT build look-alikes or wrappers of hina-ui components (custom placeholders, skeletons, spinners, alert wrappers, loading states): use the component and its own states (`Image` skeleton and fade, `Spinner`, `Alert open`). Project components exist only for Shionlib behaviour hina-ui cannot know (`Button` with `loginRequired`).
 - MUST NOT mount or unmount feedback conditionally (`cond && <Alert>`, ternaries): an `Alert` stays rendered and is shown with `open` (`<Alert tone="danger" open={message !== undefined}>`), a `Callout` is static content, and whole-page outcomes use `Result`/`Empty` (lint).
