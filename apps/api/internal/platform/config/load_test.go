@@ -7,9 +7,11 @@ import (
 
 func base() map[string]string {
 	return map[string]string{
-		"DATABASE_URL":         "postgres://localhost/db",
-		"TOKEN_SECRET":         "a-very-long-test-secret",
-		"REFRESH_TOKEN_PEPPER": "pepper",
+		"DATABASE_URL":           "postgres://localhost/db",
+		"TOKEN_SECRET":           "a-very-long-test-secret",
+		"REFRESH_TOKEN_PEPPER":   "pepper",
+		"EMAIL_PROVIDER_API_KEY": "email-key",
+		"EMAIL_SENDER_ADDRESS":   "noreply@shionlib.com",
 	}
 }
 
@@ -31,6 +33,9 @@ func TestAuthSettingsAreValidated(t *testing.T) {
 		"zero challenge ttl":         {"WEBAUTHN_CHALLENGE_TTL": "0s"},
 		"relative email endpoint":    {"EMAIL_PROVIDER_ENDPOINT": "/v2/email/send"},
 		"unknown email provider":     {"EMAIL_PROVIDER": "smtp"},
+		"no email key in production": {"EMAIL_PROVIDER_API_KEY": ""},
+		"no email sender address":    {"EMAIL_SENDER_ADDRESS": ""},
+		"postal without endpoint":    {"EMAIL_PROVIDER": "postal"},
 		"refresh version with a dot": {"REFRESH_TOKEN_ALGORITHM_VERSION": "slrt.1"},
 	}
 	for name, overrides := range cases {
@@ -102,5 +107,15 @@ func TestCatalogSettingsAreValidated(t *testing.T) {
 	cfg, err := LoadFrom(env)
 	if err != nil || cfg.Catalog.ImportWorkers != 8 {
 		t.Fatalf("import workers %+v %v", cfg, err)
+	}
+}
+
+func TestEmailSettingsAreOptionalOutsideProduction(t *testing.T) {
+	env := base()
+	env["APP_ENV"] = "development"
+	env["EMAIL_PROVIDER_API_KEY"] = ""
+	env["EMAIL_SENDER_ADDRESS"] = ""
+	if _, err := LoadFrom(env); err != nil {
+		t.Fatalf("development may run without mail: %v", err)
 	}
 }

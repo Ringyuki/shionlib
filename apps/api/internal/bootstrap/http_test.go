@@ -17,6 +17,7 @@ func TestOpenAPISchemaNamesAreStable(t *testing.T) {
 		"DATABASE_URL":         "postgres://offline@localhost:5432/offline",
 		"TOKEN_SECRET":         "offline-openapi-secret",
 		"REFRESH_TOKEN_PEPPER": "offline",
+		"APP_ENV":              "development",
 	})
 	if err != nil {
 		t.Fatal(err)

@@ -16,6 +16,7 @@ import (
 const (
 	ProviderElastic = "elastic"
 	ProviderPostal  = "postal"
+	ElasticEndpoint = "https://api.elasticemail.com/v2/email/send"
 	maxErrorBody    = 2048
 )
 
@@ -72,7 +73,11 @@ func (e *Elastic) Send(ctx context.Context, msg Message) error {
 	query.Set("to", strings.Join(msg.To, ";"))
 	query.Set("bodyHtml", msg.HTML)
 	query.Set("isTransactional", "true")
-	endpoint, err := url.Parse(e.settings.Endpoint)
+	target := e.settings.Endpoint
+	if target == "" {
+		target = ElasticEndpoint
+	}
+	endpoint, err := url.Parse(target)
 	if err != nil {
 		return fmt.Errorf("elastic email endpoint: %w", err)
 	}
@@ -81,8 +86,23 @@ func (e *Elastic) Send(ctx context.Context, msg Message) error {
 	if err != nil {
 		return fmt.Errorf("build elastic email request: %w", err)
 	}
-	_, err = do(e.client, req)
-	return err
+	raw, err := do(e.client, req)
+	if err != nil {
+		return err
+	}
+	var decoded elasticResponse
+	if err := json.Unmarshal(raw, &decoded); err != nil {
+		return fmt.Errorf("decode elastic email response: %w", err)
+	}
+	if !decoded.Success {
+		return fmt.Errorf("elastic email rejected the message: %s", decoded.Error)
+	}
+	return nil
+}
+
+type elasticResponse struct {
+	Success bool   `json:"success"`
+	Error   string `json:"error"`
 }
 
 type Postal struct {

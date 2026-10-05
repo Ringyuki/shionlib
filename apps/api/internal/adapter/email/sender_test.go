@@ -37,6 +37,35 @@ func settings(provider, endpoint string) Options {
 	return Options{Provider: provider, APIKey: "api-key", Endpoint: endpoint, SenderAddress: "noreply@example.test", SenderName: "Shionlib"}
 }
 
+func TestElasticReportsRejectedMessages(t *testing.T) {
+	srv, _ := server(t, http.StatusOK, `{"success":false,"error":"Incorrect apikey"}`)
+	sender := NewSender(settings(ProviderElastic, srv.URL), httpclient.New(httpclient.Options{Timeout: time.Second}))
+	err := sender.Send(context.Background(), Message{Subject: "Hi", To: []string{"a@example.test"}})
+	if err == nil || !strings.Contains(err.Error(), "Incorrect apikey") {
+		t.Fatalf("a rejected message must fail with the provider's reason, got %v", err)
+	}
+}
+
+func TestElasticDefaultsToTheOfficialEndpoint(t *testing.T) {
+	var target string
+	client := &http.Client{Transport: roundTrip(func(r *http.Request) (*http.Response, error) {
+		target = r.URL.Scheme + "://" + r.URL.Host + r.URL.Path
+		return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader(`{"success":true}`)), Header: http.Header{}}, nil
+	})}
+	if err := NewSender(settings(ProviderElastic, ""), client).Send(context.Background(), Message{Subject: "Hi", To: []string{"a@example.test"}}); err != nil {
+		t.Fatal(err)
+	}
+	if target != ElasticEndpoint {
+		t.Fatalf("endpoint %s", target)
+	}
+}
+
+type roundTrip func(*http.Request) (*http.Response, error)
+
+func (f roundTrip) RoundTrip(r *http.Request) (*http.Response, error) {
+	return f(r)
+}
+
 func TestElasticSendsQueryParameters(t *testing.T) {
 	srv, got := server(t, http.StatusOK, `{"success":true}`)
 	sender := NewSender(settings(ProviderElastic, srv.URL+"/v2/email/send"), httpclient.New(httpclient.Options{Timeout: time.Second}))
