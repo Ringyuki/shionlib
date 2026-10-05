@@ -14,7 +14,7 @@ export function SiteFooter() {
     <Flex
       as="footer"
       aria-label={t('label')}
-      className="mt-16 flex-col items-center gap-4 pb-14 md:flex-row md:justify-between"
+      className="mt-16 flex-col items-center gap-4 md:flex-row md:justify-between"
     >
       <Inline gap="sm" align="center" wrap={false}>
         <BrandLogo className="size-6" />
