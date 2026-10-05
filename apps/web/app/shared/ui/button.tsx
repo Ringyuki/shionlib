@@ -1,14 +1,34 @@
-import { Button as HinaButton, type ButtonProps as HinaButtonProps } from '@hina-ui/react'
+import {
+  Button as HinaButton,
+  IconButton as HinaIconButton,
+  type ButtonProps as HinaButtonProps,
+  type IconButtonProps as HinaIconButtonProps,
+} from '@hina-ui/react'
 import type { MouseEvent } from 'react'
 import { useAuthGate } from './auth-gate'
 
-export type ButtonProps = HinaButtonProps & {
-  loginRequired?: boolean
-}
+type LoginRequired = { loginRequired?: boolean }
+
+export type ButtonProps = HinaButtonProps & LoginRequired
+
+export type IconButtonProps = HinaIconButtonProps & LoginRequired
 
 export function Button({ loginRequired = false, onClickCapture, ...props }: ButtonProps) {
+  const guard = useLoginGuard(loginRequired, onClickCapture)
+  return <HinaButton {...props} onClickCapture={guard} />
+}
+
+export function IconButton({ loginRequired = false, onClickCapture, ...props }: IconButtonProps) {
+  const guard = useLoginGuard(loginRequired, onClickCapture)
+  return <HinaIconButton {...props} onClickCapture={guard} />
+}
+
+function useLoginGuard(
+  loginRequired: boolean,
+  onClickCapture: ((event: MouseEvent<HTMLElement>) => void) | undefined,
+) {
   const gate = useAuthGate()
-  const guard = (event: MouseEvent<HTMLElement>) => {
+  return (event: MouseEvent<HTMLElement>) => {
     if (loginRequired && !gate.signedIn) {
       event.preventDefault()
       event.stopPropagation()
@@ -18,5 +38,4 @@ export function Button({ loginRequired = false, onClickCapture, ...props }: Butt
     }
     onClickCapture?.(event)
   }
-  return <HinaButton {...props} onClickCapture={guard} />
 }

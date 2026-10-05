@@ -36,7 +36,12 @@ export function GameActions({ game, resources, favorite }: GameActionsProps) {
           </Link>
         </Button>
       )}
-      <Button asChild loginRequired variant={available ? 'soft' : 'solid'}>
+      <Button
+        asChild
+        loginRequired
+        variant={available ? 'outline' : 'solid'}
+        tone={available ? 'neutral' : 'accent'}
+      >
         <Link to={uploadPath}>
           <Upload aria-hidden />
           {t('upload')}

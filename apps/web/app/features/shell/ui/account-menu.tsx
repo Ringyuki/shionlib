@@ -11,7 +11,7 @@ import {
   Tooltip,
   useImageResolver,
 } from '@hina-ui/react'
-import { ChevronsUpDown, Heart, LogIn, LogOut, Settings, UserRound } from 'lucide-react'
+import { Bookmark, ChevronsUpDown, LogIn, LogOut, Settings, UserRound } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 import { useSignOut } from '~/features/auth'
@@ -66,7 +66,7 @@ export function AccountMenu({ viewer, rail }: AccountMenuProps) {
             {t('profile')}
           </DropdownMenuItem>
           <DropdownMenuItem
-            icon={<Heart />}
+            icon={<Bookmark />}
             onSelect={() => navigate(`${paths.profile(viewer.id)}/favorites`)}
           >
             {t('nav.favorites')}

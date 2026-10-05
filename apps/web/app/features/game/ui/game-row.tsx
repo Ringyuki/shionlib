@@ -25,56 +25,60 @@ export function GameRow({ game }: GameRowProps) {
   return (
     <Card padded={false} className="hn-interactive overflow-hidden">
       <Link to={`/${locale}/game/${game.id}`} prefetch="intent">
-        <Inline gap="md" align="start" wrap={false} className="p-3">
+        <Inline gap="md" align="stretch" wrap={false} className="p-3">
           <Image
             src={primaryCover(game)?.url}
             alt=""
             ratio={3 / 4}
             fit="cover"
-            className="w-16 shrink-0 rounded-md"
+            className="w-22 shrink-0 rounded-md"
           />
-          <Stack gap="xs" className="min-w-0 flex-1">
-            <Text weight="medium" truncate>
-              {title}
-            </Text>
-            {original !== undefined && (
-              <Text size="sm" tone="muted" truncate>
-                {original}
+          <Stack justify="between" className="min-w-0 flex-1">
+            <Stack gap="xs">
+              <Text weight="medium" truncate>
+                {title}
               </Text>
-            )}
-            <Inline gap="md" wrap={false} className="min-w-0">
-              {developers.length > 0 && (
+              {original !== undefined && (
                 <Text size="sm" tone="muted" truncate>
-                  {format.list(developers)}
+                  {original}
                 </Text>
               )}
-              <Text size="sm" tone="faint" className="shrink-0">
-                {released === undefined
-                  ? t('tba')
-                  : format.dateTime(released, { dateStyle: 'medium' })}
-              </Text>
-            </Inline>
-            <Inline gap="xs" align="center">
-              {resources.count === 0 ? (
-                <Text size="sm" tone="faint">
-                  {t('noResources')}
-                </Text>
-              ) : (
-                <>
-                  {(resources.platforms ?? []).map(platform => (
-                    <PlatformTag key={platform} platform={platform} />
-                  ))}
-                  {languages.map(label => (
-                    <Tag key={label} size="sm" variant="outline">
-                      {label}
-                    </Tag>
-                  ))}
-                  <Text size="sm" tone="muted">
-                    {t('resources', { count: resources.count })}
+            </Stack>
+            <Stack gap="xs">
+              <Inline gap="md" wrap={false} className="min-w-0">
+                {developers.length > 0 && (
+                  <Text size="sm" tone="muted" truncate>
+                    {format.list(developers)}
                   </Text>
-                </>
-              )}
-            </Inline>
+                )}
+                <Text size="sm" tone="faint" className="shrink-0">
+                  {released === undefined
+                    ? t('tba')
+                    : format.dateTime(released, { dateStyle: 'medium' })}
+                </Text>
+              </Inline>
+              <Inline gap="xs" align="center">
+                {resources.count === 0 ? (
+                  <Text size="sm" tone="faint">
+                    {t('noResources')}
+                  </Text>
+                ) : (
+                  <>
+                    {(resources.platforms ?? []).map(platform => (
+                      <PlatformTag key={platform} platform={platform} />
+                    ))}
+                    {languages.map(label => (
+                      <Tag key={label} size="sm" variant="outline">
+                        {label}
+                      </Tag>
+                    ))}
+                    <Text size="sm" tone="muted">
+                      {t('resources', { count: resources.count })}
+                    </Text>
+                  </>
+                )}
+              </Inline>
+            </Stack>
           </Stack>
         </Inline>
       </Link>

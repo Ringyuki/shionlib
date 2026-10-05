@@ -9,11 +9,11 @@ import {
   Text,
   toast,
 } from '@hina-ui/react'
-import { Heart, Lock, Plus } from 'lucide-react'
+import { Bookmark, Lock, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 import type { Schema } from '~/shared/api/types'
-import { Button } from '~/shared/ui/button'
+import { IconButton } from '~/shared/ui/button'
 import { shownGameCount } from '../favorite'
 import { useFavoriteLists } from '../use-favorite-lists'
 import { useMembershipToggle } from '../use-membership-toggle'
@@ -78,14 +78,14 @@ export function FavoriteButton({ gameId, favorited }: FavoriteButtonProps) {
           </Stack>
         }
       >
-        <Button
+        <IconButton
           loginRequired
-          variant={favorited ? 'soft' : 'outline'}
-          tone={favorited ? 'accent' : 'neutral'}
-          icon={<Heart fill={favorited ? 'currentColor' : 'none'} />}
+          variant="outline"
+          tone="neutral"
+          label={favorited ? t('favorited') : t('favorite')}
         >
-          {favorited ? t('favorited') : t('favorite')}
-        </Button>
+          <Bookmark fill={favorited ? 'currentColor' : 'none'} />
+        </IconButton>
       </Popover>
       <NewListDialog gameId={gameId} open={creating} onOpenChange={setCreating} />
     </>

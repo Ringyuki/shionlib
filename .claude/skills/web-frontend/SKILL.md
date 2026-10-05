@@ -108,7 +108,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 | Form validation errors?                              | `routeAction` returns `failure.data.errors` (field → messages); render them next to the field                                                      |
 | 404 for a bad id?                                    | `idParam(params.id)`; missing records come back from the API as 404 through `routeLoader`                                                          |
 | Who is signed in?                                    | `loadViewer` in the `site` layout loader; pages read it from `matches`                                                                             |
-| Action that needs a signed-in user?                  | `Button` from `~/shared/ui/button` with `loginRequired`: guests get the sign-in dialog, the click replays after it                                 |
+| Action that needs a signed-in user?                  | `Button`/`IconButton` from `~/shared/ui/button` with `loginRequired`: guests get the sign-in dialog, the click replays                             |
 | Search?                                              | `features/search`: the header's `SearchPalette` (CommandPalette, `/` and ⌘K) and `/:lang/search?q=`; never filter locally                          |
 | Sign in, sign up, sign out?                          | `features/auth`: the dialog (`?auth=sign-in`/`sign-up`/`forgot-password` opens it), `useSignOut`; no auth pages                                    |
 | Navigation entry or shell change?                    | `features/shell` (`shell.ts` model, `ui/site-sidebar.tsx`, `ui/site-header.tsx`)                                                                   |
