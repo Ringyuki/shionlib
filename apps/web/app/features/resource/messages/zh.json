@@ -10,15 +10,15 @@
   "copyHash": "复制完整校验值",
   "state": {
     "passed": "通过",
-    "scanning": "扫描中",
-    "falsePositive": "误报已确认",
-    "risky": "有风险"
+    "scanning": "处理中",
+    "falsePositive": "可能存在病毒",
+    "risky": "已拦截"
   },
   "stateHint": {
-    "passed": "已通过安全扫描",
-    "scanning": "扫描完成后可下载，目前只有你能看到这个文件",
-    "falsePositive": "曾被识别为 {names}，经审核确认为误报",
-    "risky": "已拦截：检测到 {names}"
+    "passed": "已通过病毒扫描",
+    "scanning": "文件还在处理和扫描，完成后才能下载；目前只有你能看到它。",
+    "falsePositive": "病毒扫描流程曾标记此文件，但管理员已放行。检测到的病毒名：{names}。",
+    "risky": "病毒扫描检测到 {names}，文件已被拦截，无法下载。"
   },
   "replaced": "<time></time>替换了文件",
   "replacedBecause": "<time></time>替换了文件：{reason}",
@@ -66,5 +66,6 @@
     "platforms": "至少选择一个平台",
     "languages": "至少选择一种语言",
     "simulator": "请选择引擎"
-  }
+  },
+  "stateHelp": "查看说明"
 }

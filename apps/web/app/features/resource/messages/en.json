@@ -10,15 +10,15 @@
   "copyHash": "Copy the full checksum",
   "state": {
     "passed": "Clean",
-    "scanning": "Scanning",
-    "falsePositive": "False positive",
+    "scanning": "Processing",
+    "falsePositive": "May contain malware",
     "risky": "Blocked"
   },
   "stateHint": {
     "passed": "Passed the malware scan",
-    "scanning": "Downloadable once the scan finishes; only you can see this file for now",
-    "falsePositive": "Flagged as {names}, confirmed as a false positive",
-    "risky": "Blocked: {names} detected"
+    "scanning": "The file is still being processed and scanned and can be downloaded afterwards; only you can see it for now.",
+    "falsePositive": "The malware scan flagged this file, but an administrator released it. Detected: {names}.",
+    "risky": "The malware scan detected {names}; the file is blocked and cannot be downloaded."
   },
   "replaced": "File replaced <time></time>",
   "replacedBecause": "File replaced <time></time>: {reason}",
@@ -66,5 +66,6 @@
     "platforms": "Choose at least one platform",
     "languages": "Choose at least one language",
     "simulator": "Choose an engine"
-  }
+  },
+  "stateHelp": "What does this mean?"
 }

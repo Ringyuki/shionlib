@@ -10,15 +10,15 @@
   "copyHash": "チェックサムをコピー",
   "state": {
     "passed": "スキャン済み",
-    "scanning": "スキャン中",
-    "falsePositive": "誤検知確認済み",
+    "scanning": "処理中",
+    "falsePositive": "ウイルスの可能性あり",
     "risky": "ブロック"
   },
   "stateHint": {
-    "passed": "マルウェアスキャンを通過しました",
-    "scanning": "スキャン完了後にダウンロードできます。現在はあなたにだけ表示されています",
-    "falsePositive": "{names} として検出されましたが、誤検知と確認されました",
-    "risky": "ブロック：{names} を検出"
+    "passed": "ウイルススキャンを通過しました",
+    "scanning": "処理とスキャンが終わるとダウンロードできます。現在はあなたにだけ表示されています。",
+    "falsePositive": "ウイルススキャンで検出されましたが、管理者が許可しました。検出名：{names}。",
+    "risky": "ウイルススキャンで {names} を検出したため、ブロックされています。ダウンロードできません。"
   },
   "replaced": "<time></time>にファイルを差し替え",
   "replacedBecause": "<time></time>にファイルを差し替え：{reason}",
@@ -66,5 +66,6 @@
     "platforms": "プラットフォームを 1 つ以上選んでください",
     "languages": "言語を 1 つ以上選んでください",
     "simulator": "エンジンを選んでください"
-  }
+  },
+  "stateHelp": "説明を見る"
 }
