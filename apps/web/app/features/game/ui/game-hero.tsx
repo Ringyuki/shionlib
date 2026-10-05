@@ -20,7 +20,7 @@ import {
   type Scores,
 } from '../game'
 import { GameBanner } from './game-banner'
-import { GameCovers } from './game-covers'
+import { GameCover } from './game-covers'
 import { GameMoreMenu } from './game-more-menu'
 
 const shownAliases = 3
@@ -37,12 +37,13 @@ export function GameHero({ game, images, scores, resources, favorite }: GameHero
   const locale = useLocale()
   const title = gameTitle(game, locale)
   const original = originalTitle(game, locale)
-  const banner = bannerIndex(images, game.content_limit)
+  const bannerAt = bannerIndex(images, game.content_limit)
+  const banner = bannerAt === undefined ? undefined : images[bannerAt]
   const staged = banner !== undefined
   return (
     <Stack as="header" gap="none">
-      {staged && (
-        <GameBanner images={images} index={banner} className="h-44 rounded-2xl sm:h-64 lg:h-80" />
+      {banner !== undefined && (
+        <GameBanner image={banner} className="h-44 rounded-2xl sm:h-64 lg:h-80" />
       )}
       <Grid
         className={cn(
@@ -56,10 +57,10 @@ export function GameHero({ game, images, scores, resources, favorite }: GameHero
             staged && '-mt-12 sm:-mt-20 lg:-mt-24',
           )}
         >
-          <GameCovers
+          <GameCover
             game={game}
             title={title}
-            className={cn('rounded-xl', staged && 'shadow-md ring-4 ring-canvas')}
+            className={cn('rounded-xl', staged && 'ring-4 ring-canvas')}
           />
         </Stack>
         <Stack gap="md" className="min-w-0 pt-4 sm:pt-5">

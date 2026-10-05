@@ -51,7 +51,6 @@
     "readMore": "阅读完整简介"
   },
   "cover": {
-    "view": "查看封面",
     "explicit": "成人内容，点击显示"
   },
   "info": {
@@ -64,7 +63,7 @@
     "relations": "关联作品",
     "extra": "其他信息",
     "links": "相关链接",
-    "viewScreenshot": "查看截图 {index}"
+    "screenshot": "游戏截图"
   },
   "introLanguage": {
     "zh": "中文",

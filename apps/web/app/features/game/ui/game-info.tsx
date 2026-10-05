@@ -2,12 +2,14 @@ import {
   DescriptionDetails,
   DescriptionList,
   DescriptionTerm,
+  Image,
+  ImageGroup,
   Inline,
-  Lightbox,
   Link,
   Masonry,
   Section,
   SegmentedControl,
+  Spoiler,
   SimpleGrid,
   Stack,
   Tag,
@@ -27,8 +29,6 @@ import {
   type IntroLanguage,
 } from '../game'
 import { introLanguageFrom } from '../game.schema'
-import { useGallery } from '../use-gallery'
-import { GalleryThumb } from './gallery-thumb'
 import { GameRow } from './game-row'
 
 const factListClass =
@@ -125,29 +125,34 @@ function Intro({ details }: { details: GameDetails }) {
 }
 
 function Screenshots({ images, contentLimit }: { images: GameImage[]; contentLimit: number }) {
-  const t = useTranslations('game.info')
-  const { thumb, show, lightbox } = useGallery(images, index =>
-    t('viewScreenshot', { index: index + 1 }),
-  )
+  const t = useTranslations('game')
   const positions = images.map((image, index) => ({ image, index }))
   return (
-    <Section title={t('screenshots')}>
-      <Masonry items={positions} getKey={entry => entry.index} minColumnWidth={240} gap="sm">
-        {({ item }) => {
-          const size = imageSize(item.image)
-          return (
-            <GalleryThumb
-              src={item.image.url}
-              label={t('viewScreenshot', { index: item.index + 1 })}
-              ratio={size === undefined ? 16 / 9 : size.width / size.height}
-              masked={masked(item.image, contentLimit)}
-              data={thumb(item.index)}
-              onOpen={() => show(item.index)}
-            />
-          )
-        }}
-      </Masonry>
-      <Lightbox {...lightbox} />
+    <Section title={t('info.screenshots')}>
+      <ImageGroup>
+        <Masonry items={positions} getKey={entry => entry.index} minColumnWidth={240} gap="sm">
+          {({ item }) => {
+            const size = imageSize(item.image)
+            const screenshot = (
+              <Image
+                src={item.image.url}
+                alt={t('info.screenshot')}
+                ratio={size === undefined ? 16 / 9 : size.width / size.height}
+                preview
+                previewSize={size}
+                className="rounded-lg"
+              />
+            )
+            return masked(item.image, contentLimit) ? (
+              <Spoiler aria-label={t('cover.explicit')} className="block rounded-lg">
+                {screenshot}
+              </Spoiler>
+            ) : (
+              screenshot
+            )
+          }}
+        </Masonry>
+      </ImageGroup>
     </Section>
   )
 }

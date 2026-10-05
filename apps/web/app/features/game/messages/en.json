@@ -51,7 +51,6 @@
     "readMore": "Read the full description"
   },
   "cover": {
-    "view": "View cover",
     "explicit": "Adult content, click to show"
   },
   "info": {
@@ -64,7 +63,7 @@
     "relations": "Related games",
     "extra": "More details",
     "links": "Links",
-    "viewScreenshot": "View screenshot {index}"
+    "screenshot": "Screenshot"
   },
   "introLanguage": {
     "zh": "Chinese",

@@ -1,44 +1,33 @@
-import { Image, Lightbox } from '@hina-ui/react'
+import { cn, Image, Spoiler } from '@hina-ui/react'
 import { useTranslations } from 'use-intl'
-import { coverRatio, masked, primaryCover, type GameHeader } from '../game'
-import { useGallery } from '../use-gallery'
-import { GalleryThumb } from './gallery-thumb'
+import { coverRatio, imageSize, masked, primaryCover, type GameHeader } from '../game'
 
-type GameCoversProps = {
+type GameCoverProps = {
   game: Pick<GameHeader, 'covers' | 'content_limit'>
   title: string
   className?: string
-  imageClass?: string
-  fill?: boolean
 }
 
-export function GameCovers({ game, title, className, imageClass, fill = false }: GameCoversProps) {
+export function GameCover({ game, title, className }: GameCoverProps) {
   const t = useTranslations('game.cover')
-  const primary = primaryCover(game)
-  const covers =
-    primary === undefined
-      ? []
-      : [primary, ...(game.covers ?? []).filter(cover => cover !== primary)]
-  const { thumb, show, lightbox } = useGallery(covers, () => title)
-  if (primary === undefined) {
-    return (
-      <Image alt={title} ratio={fill ? undefined : coverRatio(undefined)} className={className} />
-    )
-  }
-  return (
-    <>
-      <GalleryThumb
-        src={primary.url}
-        label={t('view')}
-        ratio={fill ? undefined : coverRatio(primary)}
-        masked={masked(primary, game.content_limit)}
-        data={thumb(0)}
-        onOpen={() => show(0)}
-        eager
-        className={className}
-        imageClass={imageClass}
-      />
-      <Lightbox {...lightbox} />
-    </>
+  const cover = primaryCover(game)
+  const image = (
+    <Image
+      src={cover?.url}
+      alt={title}
+      ratio={coverRatio(cover)}
+      preview={cover !== undefined}
+      previewSize={cover === undefined ? undefined : imageSize(cover)}
+      eager
+      lazy={false}
+      className={className}
+    />
+  )
+  return cover !== undefined && masked(cover, game.content_limit) ? (
+    <Spoiler aria-label={t('explicit')} className={cn('block', className)}>
+      {image}
+    </Spoiler>
+  ) : (
+    image
   )
 }

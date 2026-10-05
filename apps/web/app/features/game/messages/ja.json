@@ -51,7 +51,6 @@
     "readMore": "あらすじをすべて読む"
   },
   "cover": {
-    "view": "パッケージを見る",
     "explicit": "成人向けコンテンツ。クリックで表示"
   },
   "info": {
@@ -64,7 +63,7 @@
     "relations": "関連作品",
     "extra": "その他の情報",
     "links": "関連リンク",
-    "viewScreenshot": "スクリーンショット {index} を見る"
+    "screenshot": "スクリーンショット"
   },
   "introLanguage": {
     "zh": "中国語",
