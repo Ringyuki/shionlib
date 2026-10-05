@@ -19,10 +19,7 @@
     "falsePositive": "病毒扫描流程曾标记此文件，但管理员已放行。检测到的病毒名：{names}。",
     "risky": "病毒扫描检测到 {names}，文件已被拦截，无法下载。"
   },
-  "replaced": "<time></time>替换了文件",
-  "replacedBecause": "<time></time>替换了文件：{reason}",
-  "actions": "资源操作",
-  "history": "替换记录",
+  "history": "历史",
   "report": "举报",
   "edit": "编辑",
   "delete": "删除",
@@ -67,5 +64,13 @@
     "simulator": "请选择引擎"
   },
   "stateHelp": "查看说明",
-  "updated": "<time></time>更新"
+  "updated": "<time></time>更新",
+  "filterLabel": "筛选",
+  "column": {
+    "file": "文件",
+    "size": "大小",
+    "hash": "校验值",
+    "scan": "安全扫描",
+    "download": "下载"
+  }
 }

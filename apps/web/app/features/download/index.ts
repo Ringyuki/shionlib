@@ -8,3 +8,4 @@ export {
 } from './download'
 export { downloadSettingsFrom } from './download.schema'
 export { DownloadButton } from './ui/download-button'
+export { DownloadMethodMenu } from './ui/download-method-menu'

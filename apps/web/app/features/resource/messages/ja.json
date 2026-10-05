@@ -19,10 +19,7 @@
     "falsePositive": "ウイルススキャンで検出されましたが、管理者が許可しました。検出名：{names}。",
     "risky": "ウイルススキャンで {names} を検出したため、ブロックされています。ダウンロードできません。"
   },
-  "replaced": "<time></time>にファイルを差し替え",
-  "replacedBecause": "<time></time>にファイルを差し替え：{reason}",
-  "actions": "リソースの操作",
-  "history": "差し替え履歴",
+  "history": "履歴",
   "report": "報告",
   "edit": "編集",
   "delete": "削除",
@@ -67,5 +64,13 @@
     "simulator": "エンジンを選んでください"
   },
   "stateHelp": "説明を見る",
-  "updated": "<time></time>に更新"
+  "updated": "<time></time>に更新",
+  "filterLabel": "絞り込み",
+  "column": {
+    "file": "ファイル",
+    "size": "サイズ",
+    "hash": "チェックサム",
+    "scan": "スキャン",
+    "download": "ダウンロード"
+  }
 }

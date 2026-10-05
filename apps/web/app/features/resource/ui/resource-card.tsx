@@ -1,21 +1,10 @@
-import {
-  Avatar,
-  Blockquote,
-  Card,
-  Heading,
-  Inline,
-  Stack,
-  Tag,
-  Text,
-  Time,
-  useImageResolver,
-} from '@hina-ui/react'
+import { Avatar, Card, Inline, Stack, Tag, Text, Time, useImageResolver } from '@hina-ui/react'
 import { Clock, Download } from 'lucide-react'
-import { useFormatter, useMessages, useTranslations } from 'use-intl'
+import { useMessages, useTranslations } from 'use-intl'
 import { labelOf } from '~/shared/i18n/labels'
 import { ownedBy, resourceAnchor, type Resource } from '../resource'
+import { ResourceActions } from './resource-actions'
 import { ResourceFiles } from './resource-files'
-import { ResourceMenu } from './resource-menu'
 
 type ResourceCardProps = {
   resource: Resource
@@ -26,72 +15,59 @@ export function ResourceCard({ resource, viewerId }: ResourceCardProps) {
   const t = useTranslations('resource')
   const labels = useMessages()
   const resolveImage = useImageResolver()
-  const format = useFormatter()
   const { creator } = resource
   const note = resource.note?.trim() ?? ''
-  const platforms = (resource.platform ?? []).map(platform =>
-    labelOf(labels.game.platform, platform),
-  )
   return (
-    <Card
-      as="article"
-      padded={false}
-      id={resourceAnchor(resource.id)}
-      className="scroll-mt-24 overflow-hidden"
-    >
-      <Stack gap="md" className="px-5 py-4">
-        <Inline justify="between" align="start" gap="md" wrap={false}>
-          <Stack gap="xs" className="min-w-0">
-            <Inline gap="sm" align="center">
-              <Heading level={3} size="md" weight="semibold">
-                {format.list(platforms)}
-              </Heading>
-              {(resource.language ?? []).map(language => (
-                <Tag key={language} size="sm">
-                  {labelOf(labels.game.language, language)}
-                </Tag>
-              ))}
-              {resource.simulator !== null && (
-                <Tag size="sm" variant="outline">
-                  {labelOf(labels.resource.simulatorName, resource.simulator)}
-                </Tag>
-              )}
+    <Card as="article" id={resourceAnchor(resource.id)} className="scroll-mt-24">
+      <Stack gap="md">
+        <Inline justify="between" align="center" gap="md" className="gap-y-2">
+          <Inline gap="xs">
+            {(resource.platform ?? []).map(platform => (
+              <Tag key={platform}>{labelOf(labels.game.platform, platform)}</Tag>
+            ))}
+            {(resource.language ?? []).map(language => (
+              <Tag key={language}>{labelOf(labels.game.language, language)}</Tag>
+            ))}
+            {resource.simulator !== null && (
+              <Tag>{labelOf(labels.resource.simulatorName, resource.simulator)}</Tag>
+            )}
+          </Inline>
+          <Inline gap="md" align="center" className="gap-y-1 [&_svg]:size-3.5 [&_svg]:text-faint">
+            <Inline gap="xs" align="center" wrap={false}>
+              <Avatar
+                src={creator.avatar === null ? undefined : resolveImage(creator.avatar, 'image')}
+                name={creator.name}
+                size="sm"
+                className="size-5 shrink-0 text-[0.625rem]"
+              />
+              <Text size="sm" tone="muted">
+                {creator.name}
+              </Text>
             </Inline>
-            <Inline gap="md" align="center" className="gap-y-1 [&_svg]:size-3.5 [&_svg]:text-faint">
-              <Inline gap="xs" align="center" wrap={false}>
-                <Avatar
-                  src={creator.avatar === null ? undefined : resolveImage(creator.avatar, 'image')}
-                  name={creator.name}
-                  size="sm"
-                  className="size-5 shrink-0 text-[0.625rem]"
-                />
-                <Text size="xs" tone="muted">
-                  {creator.name}
-                </Text>
-              </Inline>
-              <Inline gap="xs" align="center" wrap={false}>
-                <Clock aria-hidden />
-                <Text size="xs" tone="muted">
-                  {t.rich('updated', {
-                    time: () => <Time value={resource.updated} format="relative" />,
-                  })}
-                </Text>
-              </Inline>
-              <Inline gap="xs" align="center" wrap={false}>
-                <Download aria-hidden />
-                <Text size="xs" tone="muted" className="tabular-nums">
-                  {t('downloads', { count: resource.downloads })}
-                </Text>
-              </Inline>
+            <Inline gap="xs" align="center" wrap={false}>
+              <Clock aria-hidden />
+              <Text size="sm" tone="muted">
+                {t.rich('updated', {
+                  time: () => <Time value={resource.updated} format="relative" />,
+                })}
+              </Text>
             </Inline>
-          </Stack>
-          <ResourceMenu resource={resource} owned={ownedBy(resource, viewerId)} />
+            <Inline gap="xs" align="center" wrap={false}>
+              <Download aria-hidden />
+              <Text size="sm" tone="muted" className="tabular-nums">
+                {t('downloads', { count: resource.downloads })}
+              </Text>
+            </Inline>
+          </Inline>
         </Inline>
         {note !== '' && (
-          <Blockquote className="m-0 text-sm break-words whitespace-pre-line">{note}</Blockquote>
+          <Text size="sm" className="break-words whitespace-pre-line">
+            {note}
+          </Text>
         )}
+        <ResourceFiles files={resource.files ?? []} />
+        <ResourceActions resource={resource} owned={ownedBy(resource, viewerId)} />
       </Stack>
-      <ResourceFiles files={resource.files ?? []} />
     </Card>
   )
 }
