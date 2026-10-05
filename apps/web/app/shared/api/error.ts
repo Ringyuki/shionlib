@@ -1,3 +1,4 @@
+import { isFailure } from './failure.schema'
 import { BusinessCode } from './generated/business-codes'
 import type { ApiFailure, BusinessCodeName } from './types'
 
@@ -23,18 +24,6 @@ export class ApiError extends Error {
   static fromResponse(response: Response, body: unknown): ApiError {
     return new ApiError(response.status, isFailure(body) ? body : syntheticFailure(response))
   }
-}
-
-export function isFailure(value: unknown): value is ApiFailure {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'code' in value &&
-    typeof value.code === 'number' &&
-    value.code !== 0 &&
-    'message' in value &&
-    typeof value.message === 'string'
-  )
 }
 
 function syntheticFailure(response: Response): ApiFailure {

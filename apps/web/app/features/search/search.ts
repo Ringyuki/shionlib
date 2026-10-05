@@ -46,30 +46,6 @@ export function rememberSearch(recent: readonly string[], query: string): string
   return [normalized, ...others].slice(0, maxRecent)
 }
 
-export function parseRecent(stored: string | null): string[] {
-  if (stored === null) {
-    return []
-  }
-  try {
-    const parsed: unknown = JSON.parse(stored)
-    if (!Array.isArray(parsed)) {
-      return []
-    }
-    return parsed
-      .filter(entry => typeof entry === 'string')
-      .map(entry => normalizeQuery(entry))
-      .filter(entry => entry !== '')
-      .slice(0, maxRecent)
-  } catch {
-    return []
-  }
-}
-
-export function pageParam(raw: string | null): number {
-  const page = Number(raw)
-  return Number.isSafeInteger(page) && page > 0 ? page : 1
-}
-
 export function pageCount(total: number, size: number): number {
   return Math.max(1, Math.ceil(total / size))
 }

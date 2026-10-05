@@ -1,0 +1,8 @@
+{
+  "required": "Required",
+  "minLength": "At least {min, plural, one {# character} other {# characters}}",
+  "maxLength": "At most {max, plural, one {# character} other {# characters}}",
+  "email": "Enter a valid email address",
+  "format": "This format is not valid",
+  "enum": "Choose one of the options"
+}

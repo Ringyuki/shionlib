@@ -1,4 +1,5 @@
-import { locales, type Locale } from '~/shared/i18n/locale'
+import type { Locale } from '~/shared/i18n/locale'
+import { isLocale } from '~/shared/i18n/locale.schema'
 
 export type NavKey =
   'home' | 'games' | 'releases' | 'developers' | 'favorites' | 'uploads' | 'messages' | 'settings'
@@ -14,7 +15,9 @@ export type NavSection = {
   entries: NavEntry[]
 }
 
-export type SidebarMode = 'expanded' | 'rail'
+export const sidebarModes = ['expanded', 'rail'] as const
+
+export type SidebarMode = (typeof sidebarModes)[number]
 
 export const sidebarCookie = 'shionlib_sidebar'
 
@@ -62,16 +65,8 @@ export function navSections(locale: Locale, viewerId: number | null): NavSection
 
 export function switchLocale(pathname: string, locale: Locale): string {
   const [, first = '', ...rest] = pathname.split('/')
-  const tail = locales.some(candidate => candidate === first) ? rest : [first, ...rest]
+  const tail = isLocale(first) ? rest : [first, ...rest]
   return ['', locale, ...tail].join('/').replace(/\/$/, '') || `/${locale}`
-}
-
-export function sidebarModeFrom(cookieHeader: string): SidebarMode {
-  const value = cookieHeader
-    .split(';')
-    .map(part => part.trim().split('='))
-    .find(([name]) => name === sidebarCookie)?.[1]
-  return value === 'rail' ? 'rail' : 'expanded'
 }
 
 export function sidebarCookieValue(mode: SidebarMode): string {

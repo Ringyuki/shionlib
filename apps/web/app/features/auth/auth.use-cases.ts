@@ -6,7 +6,7 @@ import {
   type PasswordReset,
   type SignIn,
   type SignUp,
-} from './auth'
+} from './auth.schema'
 
 export async function signIn(api: ApiClient, command: SignIn) {
   return api.post('/user/login', {

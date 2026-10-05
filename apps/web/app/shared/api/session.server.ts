@@ -1,5 +1,6 @@
 import { BusinessCode } from './generated/business-codes'
-import { isFailure } from './error'
+import { isFailure } from './failure.schema'
+import { tokenExpiry } from './token.schema'
 
 export const accessTokenCookie = 'shionlib_access_token'
 export const refreshTokenCookie = 'shionlib_refresh_token'
@@ -121,22 +122,8 @@ function expiredCookie(name: string): string {
 }
 
 function tokenOutlives(token: string | undefined, instant: number): boolean {
-  const payload = token?.split('.')[1]
-  if (payload === undefined) {
-    return false
-  }
-  try {
-    const claims: unknown = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'))
-    return (
-      typeof claims === 'object' &&
-      claims !== null &&
-      'exp' in claims &&
-      typeof claims.exp === 'number' &&
-      claims.exp > instant
-    )
-  } catch {
-    return false
-  }
+  const expiry = tokenExpiry(token)
+  return expiry !== undefined && expiry > instant
 }
 
 class CookieJar {

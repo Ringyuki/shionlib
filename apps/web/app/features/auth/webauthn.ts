@@ -1,3 +1,6 @@
+import { parseOptional } from '~/shared/form/check'
+import { isPasskeyRequestOptions, passkeyCredential, type PasskeyCredential } from './auth.schema'
+
 export function passkeysSupported(): boolean {
   return (
     typeof window !== 'undefined' &&
@@ -6,10 +9,8 @@ export function passkeysSupported(): boolean {
   )
 }
 
-export async function assertPasskey(
-  options: unknown,
-): Promise<Record<string, unknown> | undefined> {
-  if (!isRequestOptions(options)) {
+export async function assertPasskey(options: unknown): Promise<PasskeyCredential | undefined> {
+  if (!isPasskeyRequestOptions(options)) {
     return undefined
   }
   const credential = await navigator.credentials.get({
@@ -18,14 +19,5 @@ export async function assertPasskey(
   if (!(credential instanceof PublicKeyCredential)) {
     return undefined
   }
-  const json: unknown = credential.toJSON()
-  return isRecord(json) ? json : undefined
-}
-
-function isRequestOptions(value: unknown): value is PublicKeyCredentialRequestOptionsJSON {
-  return isRecord(value) && typeof value.challenge === 'string'
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
+  return parseOptional(passkeyCredential, credential.toJSON())
 }

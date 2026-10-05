@@ -1,6 +1,6 @@
 import type { ApiClient } from '~/shared/api/client'
 import { ApiError } from '~/shared/api/error'
-import type { MembershipChange } from './favorite'
+import type { MembershipChange } from './favorite.schema'
 
 export async function loadFavoriteLists(api: ApiClient, gameId: number) {
   const lists = await api.get('/favorites', { params: { query: { game_id: gameId } } })

@@ -1,7 +1,7 @@
-import { data, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import type { ActionFunctionArgs, LoaderFunctionArgs } from 'react-router'
 import { idParam } from '~/shared/route/params'
-import { routeAction, routeLoader } from '~/shared/route/route.server'
-import { parseMembershipChange } from './favorite'
+import { readCommand, routeAction, routeLoader } from '~/shared/route/route.server'
+import { membershipChangeCommand } from './favorite.schema'
 import { changeMembership, loadFavoriteLists } from './favorite.use-cases'
 
 export function favoriteListsLoader(args: LoaderFunctionArgs) {
@@ -10,9 +10,6 @@ export function favoriteListsLoader(args: LoaderFunctionArgs) {
 }
 
 export async function favoriteMembershipAction(args: ActionFunctionArgs) {
-  const change = parseMembershipChange(await args.request.json().catch(() => undefined))
-  if (change === undefined) {
-    throw data(null, { status: 400 })
-  }
+  const change = await readCommand(args, membershipChangeCommand)
   return routeAction(args, api => changeMembership(api, change))
 }

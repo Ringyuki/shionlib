@@ -1,5 +1,5 @@
 import { redirect } from 'react-router'
-import { negotiateLocale } from '~/shared/i18n/locale'
+import { negotiateLocale } from '~/shared/i18n/locale.schema'
 import type { Route } from './+types/locale-redirect'
 
 export function loader({ request }: Route.LoaderArgs) {

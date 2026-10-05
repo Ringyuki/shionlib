@@ -19,3 +19,73 @@ await writeFile(
   new URL('business-codes.ts', target),
   `${banner}export const BusinessCode = {\n${entries}\n} as const\n`,
 )
+
+type JsonSchema = {
+  type?: string | string[]
+  format?: string
+  minLength?: number
+  maxLength?: number
+  minimum?: number
+  maximum?: number
+  pattern?: string
+  enum?: unknown[]
+  properties?: Record<string, JsonSchema>
+  required?: string[]
+}
+
+type Operation = {
+  requestBody?: { content?: Record<string, { schema?: { $ref?: string } }> }
+}
+
+const schemas: Record<string, JsonSchema> = document.components.schemas
+const paths: Record<string, Record<string, Operation>> = document.paths
+const bodies = new Set<string>()
+for (const operations of Object.values(paths)) {
+  for (const operation of Object.values(operations)) {
+    const reference = operation.requestBody?.content?.['application/json']?.schema?.$ref
+    if (reference !== undefined) {
+      bodies.add(reference.split('/').at(-1) ?? '')
+    }
+  }
+}
+
+const constraintKeys = [
+  'format',
+  'minLength',
+  'maxLength',
+  'minimum',
+  'maximum',
+  'pattern',
+  'enum',
+] as const
+
+function fieldConstraint(field: JsonSchema, required: boolean) {
+  const types = [field.type].flat().filter(type => type !== undefined)
+  const constraint: Record<string, unknown> = {
+    type: types.find(type => type !== 'null') ?? 'unknown',
+    required,
+    nullable: types.includes('null'),
+  }
+  for (const key of constraintKeys) {
+    if (field[key] !== undefined) {
+      constraint[key] = field[key]
+    }
+  }
+  return constraint
+}
+
+const constraints = Object.fromEntries(
+  [...bodies].sort().map(body => {
+    const schema = schemas[body] ?? {}
+    const required = new Set(schema.required ?? [])
+    const fields = Object.entries(schema.properties ?? {})
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([name, field]) => [name, fieldConstraint(field, required.has(name))])
+    return [body, Object.fromEntries(fields)]
+  }),
+)
+
+await writeFile(
+  new URL('constraints.ts', target),
+  `${banner}export const constraints = ${JSON.stringify(constraints, null, 2)} as const\n`,
+)

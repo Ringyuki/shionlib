@@ -11,10 +11,11 @@ import {
   useRouteLoaderData,
 } from 'react-router'
 import { readServerEnv } from '~/shared/config/env.server'
-import { htmlLang } from '~/shared/i18n/locale'
+import { htmlLang } from '~/shared/i18n/locale.schema'
 import { apiMiddleware } from '~/shared/route/api.server'
 import { ImageBaseProvider } from '~/shared/ui/image-base'
-import { darkClass, systemThemeScript, themeFrom } from '~/shared/ui/theme'
+import { darkClass, systemThemeScript } from '~/shared/ui/theme'
+import { themeFrom } from '~/shared/ui/theme.schema'
 import { ThemeProvider } from '~/shared/ui/theme-provider'
 import type { Route } from './+types/root'
 import './app.css'

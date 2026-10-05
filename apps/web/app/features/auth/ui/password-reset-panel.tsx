@@ -12,8 +12,10 @@ import {
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { useTranslations } from 'use-intl'
-import { authViewParam, passwordResetIssues, type PasswordResetForm } from '../auth'
-import { useFormFeedback } from '../use-form-feedback'
+import { useFormKit } from '~/shared/form/use-form-kit'
+import { useSubmissionFeedback } from '~/shared/form/use-submission-feedback'
+import { authViewParam } from '../auth'
+import { passwordResetForm, type PasswordResetValues } from '../auth.schema'
 import { usePasswordReset } from '../use-password-reset'
 
 type PasswordResetPanelProps = {
@@ -55,9 +57,11 @@ export function PasswordResetPanel({ token, email, valid }: PasswordResetPanelPr
 
 function ResetForm({ token, email }: { token: string; email: string }) {
   const t = useTranslations('auth.reset')
-  const [values, setValues] = useState<PasswordResetForm>({ password: '', confirmation: '' })
+  const [values, setValues] = useState<PasswordResetValues>({ password: '', confirmation: '' })
   const reset = usePasswordReset()
-  const { form, explain, message } = useFormFeedback(reset.failure)
+  const issue = useTranslations('auth.issue')
+  const kit = useFormKit()
+  const { form, message } = useSubmissionFeedback(reset.failure)
 
   if (reset.done) {
     return (
@@ -77,7 +81,7 @@ function ResetForm({ token, email }: { token: string; email: string }) {
     <Form
       ref={form}
       values={values}
-      rules={() => explain(passwordResetIssues(values))}
+      rules={passwordResetForm(kit, issue)}
       onSubmit={() => reset.submit({ token, email, password: values.password })}
     >
       {({ submitting }) => (

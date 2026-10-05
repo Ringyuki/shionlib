@@ -35,7 +35,7 @@ await api.put('/favorites/{id}', { params: { path: { id: listId } }, body: { gam
 ## Fetchers
 
 - Mutations and lazy loads that should not navigate use a fetcher inside a feature hook.
-- Submit JSON: `fetcher.submit(command, { method: 'post', action: href('/resources/x'), encType: 'application/json' })`. The action parses the body with the model's parser (`parse<Command>(value): Command | undefined`) and answers 400 for malformed input.
+- Submit JSON: `fetcher.submit(command, { method: 'post', action: href('/resources/x'), encType: 'application/json' })`. The action parses the body with `readCommand(args, <thing>Command)` (valibot command schema from `<name>.schema.ts`), which answers 400 for malformed input; see `forms.md`.
 - Read results as `fetcher.data` (typed by `useFetcher<typeof handler>()`); failures are `{ ok: false, failure }`.
 - Optimistic state is derived from `fetcher.json`/`fetcher.formData` while the fetcher is busy, never stored separately.
 - After an action, React Router revalidates the page loaders and loaded fetchers; do not refetch by hand.

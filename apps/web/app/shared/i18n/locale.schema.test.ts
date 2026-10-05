@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { htmlLang, negotiateLocale } from './locale'
+import { htmlLang, negotiateLocale } from './locale.schema'
 
 describe('negotiateLocale', () => {
   it('prefers the locale cookie', () => {
@@ -19,5 +19,11 @@ describe('htmlLang', () => {
   it('maps locales to BCP 47 tags', () => {
     expect(htmlLang('zh')).toBe('zh-CN')
     expect(htmlLang('unknown')).toBe('zh-CN')
+  })
+})
+
+describe('negotiateLocale weights', () => {
+  it('treats malformed weights as unwanted', () => {
+    expect(negotiateLocale('', 'en;q=abc, ja;q=0.5')).toBe('ja')
   })
 })

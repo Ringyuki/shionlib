@@ -1,12 +1,12 @@
-import { data, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
-import { routeAction, routeLoader } from '~/shared/route/route.server'
+import type { ActionFunctionArgs, LoaderFunctionArgs } from 'react-router'
+import { readCommand, routeAction, routeLoader } from '~/shared/route/route.server'
 import {
-  parseEmailOnly,
-  parsePasskeyAssertion,
-  parsePasswordReset,
-  parseSignIn,
-  parseSignUp,
-} from './auth'
+  emailCommand,
+  passkeyAssertionCommand,
+  passwordResetCommand,
+  signInCommand,
+  signUpCommand,
+} from './auth.schema'
 import {
   checkPasswordResetLink,
   finishPasskeySignIn,
@@ -19,34 +19,23 @@ import {
   startPasskeySignIn,
 } from './auth.use-cases'
 
-async function command<Command>(
-  args: ActionFunctionArgs,
-  parse: (value: unknown) => Command | undefined,
-): Promise<Command> {
-  const parsed = parse(await args.request.json().catch(() => undefined))
-  if (parsed === undefined) {
-    throw data(null, { status: 400 })
-  }
-  return parsed
-}
-
 export async function signInAction(args: ActionFunctionArgs) {
-  const credentials = await command(args, parseSignIn)
+  const credentials = await readCommand(args, signInCommand)
   return routeAction(args, api => signIn(api, credentials))
 }
 
 export async function signUpAction(args: ActionFunctionArgs) {
-  const registration = await command(args, parseSignUp)
+  const registration = await readCommand(args, signUpCommand)
   return routeAction(args, api => signUp(api, registration))
 }
 
 export async function signUpCodeAction(args: ActionFunctionArgs) {
-  const request = await command(args, parseEmailOnly)
+  const request = await readCommand(args, emailCommand)
   return routeAction(args, api => requestSignUpCode(api, request))
 }
 
 export async function passwordResetRequestAction(args: ActionFunctionArgs) {
-  const request = await command(args, parseEmailOnly)
+  const request = await readCommand(args, emailCommand)
   return routeAction(args, api => requestPasswordReset(api, request))
 }
 
@@ -55,7 +44,7 @@ export function passkeyOptionsAction(args: ActionFunctionArgs) {
 }
 
 export async function passkeySignInAction(args: ActionFunctionArgs) {
-  const assertion = await command(args, parsePasskeyAssertion)
+  const assertion = await readCommand(args, passkeyAssertionCommand)
   return routeAction(args, api => finishPasskeySignIn(api, assertion))
 }
 
@@ -75,6 +64,6 @@ export function passwordResetLoader(args: LoaderFunctionArgs) {
 }
 
 export async function passwordResetAction(args: ActionFunctionArgs) {
-  const reset = await command(args, parsePasswordReset)
+  const reset = await readCommand(args, passwordResetCommand)
   return routeAction(args, api => resetPassword(api, reset))
 }

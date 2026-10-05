@@ -5,8 +5,6 @@ import {
   maxRecent,
   normalizeQuery,
   pageCount,
-  pageParam,
-  parseRecent,
   rememberSearch,
   type CharacterHit,
 } from './search'
@@ -36,20 +34,10 @@ describe('recent searches', () => {
     const many = Array.from({ length: maxRecent }, (_, index) => `q${index}`)
     expect(rememberSearch(many, 'new')).toHaveLength(maxRecent)
   })
-
-  it('reads only well-formed stored lists', () => {
-    expect(parseRecent('["a", 1, " b "]')).toEqual(['a', 'b'])
-    expect(parseRecent('{')).toEqual([])
-    expect(parseRecent('"a"')).toEqual([])
-    expect(parseRecent(null)).toEqual([])
-  })
 })
 
 describe('paging', () => {
-  it('parses positive pages and counts at least one page', () => {
-    expect(pageParam('3')).toBe(3)
-    expect(pageParam('0')).toBe(1)
-    expect(pageParam('x')).toBe(1)
+  it('counts at least one page', () => {
     expect(pageCount(41, 20)).toBe(3)
     expect(pageCount(0, 20)).toBe(1)
   })

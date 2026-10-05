@@ -1,11 +1,12 @@
 import { href, useFetcher } from 'react-router'
 import type { Schema } from '~/shared/api/types'
-import { parseMembershipChange, type MembershipChange } from './favorite'
+import { parseOptional } from '~/shared/form/check'
+import { membershipChangeCommand, type MembershipChange } from './favorite.schema'
 import type { favoriteMembershipAction } from './favorite.server'
 
 export function useMembershipToggle(list: Schema<'FavoriteSummaryDTO'>, gameId: number) {
   const fetcher = useFetcher<typeof favoriteMembershipAction>()
-  const submitted = parseMembershipChange(fetcher.json)
+  const submitted = parseOptional(membershipChangeCommand, fetcher.json)
   const included = submitted?.included ?? list.is_favorite === true
   const toggle = (next: boolean) => {
     const change: MembershipChange = { listId: list.id, gameId, included: next }

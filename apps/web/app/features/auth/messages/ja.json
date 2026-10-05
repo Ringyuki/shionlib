@@ -15,7 +15,7 @@
     "title": "Shionlib に新規登録",
     "description": "登録後、そのままログインします。",
     "name": "ユーザー名",
-    "nameHint": "2〜20 文字。登録後に変更できます",
+    "nameHint": "{min}〜{max} 文字。登録後に変更できます",
     "email": "メールアドレス",
     "sendCode": "コードを送信",
     "resendIn": "{seconds} 秒後に再送信",
@@ -23,7 +23,7 @@
     "code": "確認コード",
     "codeFirst": "先に確認コードを送信してください",
     "password": "パスワード",
-    "passwordHint": "8〜50 文字。大文字、小文字、数字または記号を含めてください",
+    "passwordHint": "{min}〜{max} 文字",
     "adult": "18 歳以上です",
     "submit": "登録してログイン",
     "hasAccount": "アカウントをお持ちの方",
@@ -46,12 +46,6 @@
     "oidcFailed": "Hikarinagi ID でのログインに失敗しました。もう一度お試しください"
   },
   "issue": {
-    "required": "必須項目です",
-    "email": "メールアドレスの形式が正しくありません",
-    "nameLength": "ユーザー名は 2〜20 文字です",
-    "passwordLength": "パスワードは 8〜50 文字です",
-    "passwordPolicy": "大文字、小文字、数字または記号を含めてください",
-    "codeLength": "6 桁の確認コードを入力してください",
     "adult": "18 歳以上の方のみ登録できます",
     "mismatch": "パスワードが一致しません"
   },

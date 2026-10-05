@@ -1,5 +1,5 @@
 import { href, useFetcher } from 'react-router'
-import type { EmailOnly } from './auth'
+import type { EmailOnly } from './auth.schema'
 import type { passwordResetRequestAction } from './auth.server'
 
 export function usePasswordResetRequest() {

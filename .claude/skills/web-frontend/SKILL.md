@@ -36,7 +36,8 @@ app/
   messages/                    composition: per-locale message objects assembled from features
   routes/                      thin route modules; resources.*.ts are fetcher endpoints
   features/<name>/
-    <name>.ts                  model: Schema-derived types, pure rules
+    <name>.ts                  model: Schema-derived types, constants, pure rules (no validation)
+    <name>.schema.ts           valibot: command schemas, form schemas, input guards (references/forms.md)
     <name>.use-cases.ts        use-cases: (api: ApiClient, input) => Promise<result>
     <name>.server.ts           loaders/actions reused by several routes (resource routes)
     use-<purpose>.ts           hooks: fetchers, optimistic state, client integration
@@ -45,8 +46,10 @@ app/
     index.ts                   public, client-safe entry
   shared/                      platform: never imports features, routes or messages
     api/                       request tool, generated types, session forwarding, test fakes
-    route/                     routeLoader, routeAction, apiMiddleware, params
-    i18n/  ui/  config/
+    route/                     routeLoader, routeAction, readCommand, apiMiddleware, idParam
+    form/                      form kit from generated API constraints, useSubmissionFeedback, check helpers
+    http/                      pure HTTP helpers (readCookie)
+    i18n/  ui/  config/        <topic>.schema.ts beside a module holds its input guards
 ```
 
 Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules end in `.server.ts`.
@@ -57,7 +60,8 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 - MUST call the API only through `ApiClient` (`api.get/post/put/patch/delete(path, init)`); the result is the envelope's `data`, failures throw `ApiError` (`status`, `code`, `is('BUSINESS_CODE')`, `failure`).
 - MUST load page data in route `loader`s via `routeLoader(args, api => useCase(api, ...))`; API failures become route error responses with the API's status.
 - MUST perform mutations in `action`s via `routeAction(args, api => ...)`, which returns `{ ok: true, result }` or `{ ok: false, failure }` with the API status.
-- MUST use `useFetcher` (inside a feature hook) for mutations and loads that must not navigate; submit JSON (`encType: 'application/json'`) to a resource route or the page action, and parse the input in the action before calling the use-case.
+- MUST use `useFetcher` (inside a feature hook) for mutations and loads that must not navigate; submit JSON (`encType: 'application/json'`) to a resource route or the page action, and parse it in the action with `readCommand(args, <thing>Command)` before calling the use-case.
+- MUST validate with valibot only, following `references/forms.md`: command schemas, form schemas and input guards live in `<module>.schema.ts`; form fields that the API constrains come from `useFormKit()` (`kit.text('<RequestBody>', '<field>')`, generated from OpenAPI) and limits in texts from `lengthOf(...)`; only UI-only rules are written by hand, with the feature's `issue` messages; API-only rules (password policy, code correctness) are left to the API, whose field errors `useSubmissionFeedback` puts under the fields.
 - MUST type fetchers with `useFetcher<typeof handler>()` and links with `href(...)` so paths and data are checked.
 - MUST keep viewer-specific catches (e.g. guests get `false`) in use-cases by status or `ApiError.is(...)`, never by message text.
 - MUST put user-facing text in the feature's `messages/{zh,en,ja}.json`; `zh` is the source, `en`/`ja` must have the same keys (the `Messages` type enforces it). API error messages are already localized; show `failure.message`.
@@ -70,6 +74,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 ## MUST NOT
 
 - MUST NOT write native JSX tags outside the document shell in `root.tsx` (lint).
+- MUST NOT hand-write input validation (`typeof`, `Array.isArray`, `JSON.parse`, `Number(...)`, regexes over input), restate API limits as numbers, import valibot outside `*.schema.ts`/`~/shared/form`/`~/shared/route`, or use another validation library (lint).
 - MUST NOT build look-alikes or wrappers of hina-ui components (custom placeholders, skeletons, spinners, alert wrappers, loading states): use the component and its own states (`Image` skeleton and fade, `Spinner`, `Alert open`). Project components exist only for Shionlib behaviour hina-ui cannot know (`Button` with `loginRequired`).
 - MUST NOT mount or unmount feedback conditionally (`cond && <Alert>`, ternaries): an `Alert` stays rendered and is shown with `open` (`<Alert tone="danger" open={message !== undefined}>`), a `Callout` is static content, and whole-page outcomes use `Result`/`Empty` (lint).
 - MUST NOT override hina-ui tokens beyond the documented accent roles, or add colours, gradients or shadows of your own; ask before introducing any new token.
@@ -83,33 +88,36 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 
 ## Where things go
 
-| Question                                     | Answer                                                                                                              |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| New page?                                    | `recipes/add-route.md`: route entry in `app/routes.ts`, thin module in `app/routes/`, use-cases and UI in a feature |
-| New feature?                                 | `recipes/add-feature.md`; copy `app/features/favorite` (golden path)                                                |
-| Calling the API?                             | a use-case in `<feature>.use-cases.ts` taking `api: ApiClient`                                                      |
-| Typing API data in a component?              | `Schema<'GameHeaderDTO'>`, `ApiData<'/game/{id}', 'get'>`, or `Pick` from them                                      |
-| Button that changes data without navigating? | resource route + `<feature>.server.ts` action + `use-<purpose>.ts` fetcher hook (`recipes/add-mutation.md`)         |
-| Optimistic UI?                               | derive it from `fetcher.json` / `fetcher.formData` in the hook                                                      |
-| Form validation errors?                      | `routeAction` returns `failure.data.errors` (field → messages); render them next to the field                       |
-| 404 for a bad id?                            | `idParam(params.id)`; missing records come back from the API as 404 through `routeLoader`                           |
-| Who is signed in?                            | `loadViewer` in the `site` layout loader; pages read it from `matches`                                              |
-| Action that needs a signed-in user?          | `Button` from `~/shared/ui/button` with `loginRequired`: guests get the sign-in dialog, the click replays after it  |
-| Search?                                      | `features/search`: the header's `SearchPalette` (CommandPalette, `/` and ⌘K) and `/:lang/search?q=`; never filter locally |
-| Sign in, sign up, sign out?                  | `features/auth`: the dialog (`?auth=sign-in`/`sign-up`/`forgot-password` opens it), `useSignOut`; no auth pages    |
-| Navigation entry or shell change?            | `features/shell` (`shell.ts` model, `ui/site-sidebar.tsx`, `ui/site-header.tsx`)                                    |
-| An image from the API?                       | `const image = useImageUrl()` then `image(cover.url)`                                                               |
-| Auth cookies and refresh?                    | handled by `apiMiddleware` + `createApiSession`; never touch tokens in features                                     |
-| Messages?                                    | `features/<name>/messages/*.json`, registered in `app/messages/{zh,en,ja}.ts`                                       |
-| Tests?                                       | `references/testing.md`: model and use-cases with `fakeApi()`, server helpers with stubs                            |
+| Question                                        | Answer                                                                                                                    |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| New page?                                       | `recipes/add-route.md`: route entry in `app/routes.ts`, thin module in `app/routes/`, use-cases and UI in a feature       |
+| New feature?                                    | `recipes/add-feature.md`; copy `app/features/favorite` (golden path)                                                      |
+| Calling the API?                                | a use-case in `<feature>.use-cases.ts` taking `api: ApiClient`                                                            |
+| Typing API data in a component?                 | `Schema<'GameHeaderDTO'>`, `ApiData<'/game/{id}', 'get'>`, or `Pick` from them                                            |
+| Button that changes data without navigating?    | resource route + `<feature>.server.ts` action + `use-<purpose>.ts` fetcher hook (`recipes/add-mutation.md`)               |
+| Optimistic UI?                                  | derive it from `fetcher.json` / `fetcher.formData` in the hook                                                            |
+| A form?                                         | `recipes/add-form.md`: `<name>.schema.ts` form schema from `useFormKit()`, `<Form rules>`, `useSubmissionFeedback`        |
+| Parsing a request body, cookie, param, storage? | a schema in the nearest `*.schema.ts`; `readCommand`, `idParam`, `readCookie`, `parseOptional` (`references/forms.md`)    |
+| Form validation errors?                         | `routeAction` returns `failure.data.errors` (field → messages); render them next to the field                             |
+| 404 for a bad id?                               | `idParam(params.id)`; missing records come back from the API as 404 through `routeLoader`                                 |
+| Who is signed in?                               | `loadViewer` in the `site` layout loader; pages read it from `matches`                                                    |
+| Action that needs a signed-in user?             | `Button` from `~/shared/ui/button` with `loginRequired`: guests get the sign-in dialog, the click replays after it        |
+| Search?                                         | `features/search`: the header's `SearchPalette` (CommandPalette, `/` and ⌘K) and `/:lang/search?q=`; never filter locally |
+| Sign in, sign up, sign out?                     | `features/auth`: the dialog (`?auth=sign-in`/`sign-up`/`forgot-password` opens it), `useSignOut`; no auth pages           |
+| Navigation entry or shell change?               | `features/shell` (`shell.ts` model, `ui/site-sidebar.tsx`, `ui/site-header.tsx`)                                          |
+| An image from the API?                          | `const image = useImageUrl()` then `image(cover.url)`                                                                     |
+| Auth cookies and refresh?                       | handled by `apiMiddleware` + `createApiSession`; never touch tokens in features                                           |
+| Messages?                                       | `features/<name>/messages/*.json`, registered in `app/messages/{zh,en,ja}.ts`                                             |
+| Tests?                                          | `references/testing.md`: model and use-cases with `fakeApi()`, server helpers with stubs                                  |
 
 ## References
 
 - references/architecture.md — layers, dependency rules, naming, the lint rules that enforce them
 - references/data.md — request tool, generated contract, loaders, actions, fetchers, errors, sessions
 - references/ui.md — hina-ui, accent customisation, shell and sidebar, brand, images, messages and locales, SEO metadata
+- references/forms.md — valibot schemas, generated API constraints, form kit, command parsing, input guards
 - references/testing.md — test levels and fakes
-- recipes/add-feature.md, add-route.md, add-mutation.md
+- recipes/add-feature.md, add-route.md, add-mutation.md, add-form.md
 
 ## Verification
 

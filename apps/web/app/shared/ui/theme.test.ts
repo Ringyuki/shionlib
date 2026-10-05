@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { systemThemeScript, themeCookieValue, themeFrom } from './theme'
+import { systemThemeScript, themeCookieValue } from './theme'
+import { themeFrom } from './theme.schema'
 
 describe('theme preference', () => {
   it('reads the cookie and falls back to the system theme', () => {

@@ -38,6 +38,15 @@ const mountedFeedback = {
     'Feedback stays mounted: show and hide an Alert with `open`; a Callout is static content and is never toggled.',
 }
 
+const otherValidators = ['zod', 'yup', 'joi', 'ajv', 'superstruct', 'io-ts', 'arktype'].map(
+  name => ({
+    name,
+    message: 'Validation uses valibot schemas (references/forms.md).',
+  }),
+)
+
+const schemaHomes = ['app/**/*.schema.ts', 'app/shared/form/**', 'app/shared/route/**']
+
 const featureEntry = {
   regex: '^~/features/[^/]+/(?![^/]+\\.server$).+',
   message: 'Import a feature through its public entry (~/features/<name>).',
@@ -87,6 +96,31 @@ export default defineConfig([
       '@typescript-eslint/consistent-type-assertions': ['error', { assertionStyle: 'never' }],
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/no-restricted-imports': restrictedImports(featureEntry),
+    },
+  },
+  {
+    files: ['app/**/*.{ts,tsx}'],
+    ignores: schemaHomes,
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'valibot',
+              message:
+                'Schemas live in <module>.schema.ts; ~/shared/form and ~/shared/route hold the helpers.',
+            },
+            ...otherValidators,
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: schemaHomes,
+    rules: {
+      'no-restricted-imports': ['error', { paths: otherValidators }],
     },
   },
   {

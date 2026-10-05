@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
-import { authViewParam, isAuthView, type AuthView } from './auth'
+import { authViewParam, type AuthView } from './auth'
+import { isAuthView } from './auth.schema'
 
 const oidcErrorParam = 'oidc_error'
 

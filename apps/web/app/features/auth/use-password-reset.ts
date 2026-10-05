@@ -1,5 +1,5 @@
 import { useFetcher } from 'react-router'
-import type { PasswordReset } from './auth'
+import type { PasswordReset } from './auth.schema'
 import type { passwordResetAction } from './auth.server'
 
 export function usePasswordReset() {

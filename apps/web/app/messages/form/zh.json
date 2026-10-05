@@ -1,0 +1,8 @@
+{
+  "required": "必填",
+  "minLength": "至少 {min} 个字符",
+  "maxLength": "最多 {max} 个字符",
+  "email": "邮箱格式不正确",
+  "format": "格式不正确",
+  "enum": "请选择有效的选项"
+}

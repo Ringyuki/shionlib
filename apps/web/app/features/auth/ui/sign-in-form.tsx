@@ -1,8 +1,10 @@
 import { Alert, Button, Form, FormField, Inline, Input, PasswordInput, Text } from '@hina-ui/react'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
-import { signInIssues, type AuthView, type SignIn } from '../auth'
-import { useFormFeedback } from '../use-form-feedback'
+import { useFormKit } from '~/shared/form/use-form-kit'
+import { useSubmissionFeedback } from '~/shared/form/use-submission-feedback'
+import type { AuthView } from '../auth'
+import { signInForm, type SignIn } from '../auth.schema'
 import { useSignIn } from '../use-sign-in'
 import { SignInMethods } from './sign-in-methods'
 
@@ -10,15 +12,11 @@ export function SignInForm({ onSwitch }: { onSwitch: (view: AuthView) => void })
   const t = useTranslations('auth.sign-in')
   const [values, setValues] = useState<SignIn>({ identifier: '', password: '' })
   const { submit, failure } = useSignIn()
-  const { form, explain, message } = useFormFeedback(failure)
+  const kit = useFormKit()
+  const { form, message } = useSubmissionFeedback(failure)
 
   return (
-    <Form
-      ref={form}
-      values={values}
-      rules={() => explain(signInIssues(values))}
-      onSubmit={() => submit(values)}
-    >
+    <Form ref={form} values={values} rules={signInForm(kit)} onSubmit={() => submit(values)}>
       {({ submitting }) => (
         <>
           <FormField name="identifier" label={t('identifier')} required>

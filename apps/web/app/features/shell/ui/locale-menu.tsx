@@ -2,7 +2,8 @@ import { Button, DropdownMenu, DropdownMenuRadioGroup, DropdownMenuRadioItem } f
 import { Languages } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
-import { isLocale, locales } from '~/shared/i18n/locale'
+import { locales } from '~/shared/i18n/locale'
+import { isLocale } from '~/shared/i18n/locale.schema'
 import { switchLocale } from '../shell'
 
 const names = { zh: '简体中文', en: 'English', ja: '日本語' } as const

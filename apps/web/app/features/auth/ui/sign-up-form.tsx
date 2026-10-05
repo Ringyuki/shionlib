@@ -12,23 +12,29 @@ import {
 } from '@hina-ui/react'
 import { useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
-import { codeLength, emailIssues, signUpIssues, type AuthView, type SignUpForm } from '../auth'
-import { useFormFeedback } from '../use-form-feedback'
+import { firstIssueMessage } from '~/shared/form/check'
+import { lengthOf } from '~/shared/form/form-kit'
+import { useFormKit } from '~/shared/form/use-form-kit'
+import { useSubmissionFeedback } from '~/shared/form/use-submission-feedback'
+import { codeLength, type AuthView } from '../auth'
+import { codeRequestForm, signUpForm, type SignUpValues } from '../auth.schema'
 import { useSignUp } from '../use-sign-up'
 
-const blank: SignUpForm = { name: '', email: '', code: '', password: '', adult: false }
+const blank: SignUpValues = { name: '', email: '', code: '', password: '', adult: false }
 
 export function SignUpFormView({ onSwitch }: { onSwitch: (view: AuthView) => void }) {
   const t = useTranslations('auth.sign-up')
   const locale = useLocale()
-  const [values, setValues] = useState<SignUpForm>(blank)
+  const [values, setValues] = useState<SignUpValues>(blank)
   const signUp = useSignUp(locale)
-  const { form, explain, message } = useFormFeedback(signUp.failure ?? signUp.codeFailure)
+  const issue = useTranslations('auth.issue')
+  const kit = useFormKit()
+  const { form, message } = useSubmissionFeedback(signUp.failure ?? signUp.codeFailure)
 
   const sendCode = () => {
-    const issues = explain(emailIssues(values))
-    if (Object.keys(issues).length > 0) {
-      form.current?.setErrors(issues)
+    const problem = firstIssueMessage(codeRequestForm(kit), { email: values.email })
+    if (problem !== undefined) {
+      form.current?.setErrors({ email: problem })
       return
     }
     void signUp.requestCode(values.email)
@@ -45,10 +51,15 @@ export function SignUpFormView({ onSwitch }: { onSwitch: (view: AuthView) => voi
   const codeHint = signUp.sentTo === undefined ? undefined : t('codeSent', { email: signUp.sentTo })
 
   return (
-    <Form ref={form} values={values} rules={() => explain(signUpIssues(values))} onSubmit={submit}>
+    <Form ref={form} values={values} rules={signUpForm(kit, issue)} onSubmit={submit}>
       {({ submitting }) => (
         <>
-          <FormField name="name" label={t('name')} description={t('nameHint')} required>
+          <FormField
+            name="name"
+            label={t('name')}
+            description={t('nameHint', lengthOf('RegisterUserInputBody', 'name'))}
+            required
+          >
             <Input
               value={values.name}
               onValueChange={name => setValues({ ...values, name })}
@@ -79,13 +90,16 @@ export function SignUpFormView({ onSwitch }: { onSwitch: (view: AuthView) => voi
           <FormField name="code" label={t('code')} required>
             <PinInput
               value={values.code}
-              onValueChange={code => setValues({ ...values, code })}
+              onValueChange={code => setValues({ ...values, code: code.toUpperCase() })}
               length={codeLength}
-              type="number"
-              otp
             />
           </FormField>
-          <FormField name="password" label={t('password')} description={t('passwordHint')} required>
+          <FormField
+            name="password"
+            label={t('password')}
+            description={t('passwordHint', lengthOf('RegisterUserInputBody', 'password'))}
+            required
+          >
             <PasswordInput
               value={values.password}
               onValueChange={password => setValues({ ...values, password })}

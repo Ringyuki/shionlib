@@ -7,15 +7,9 @@ import {
 } from '@hina-ui/react'
 import { useEffect, useRef, type RefObject } from 'react'
 import { useLocation, useNavigation } from 'react-router'
+import { historyStateOf, scrollTopOf } from './shell.schema'
 
 const abandonEvents = ['wheel', 'touchstart', 'keydown'] as const
-
-function historyState(): Record<string, unknown> {
-  const state: unknown = window.history.state
-  return typeof state === 'object' && state !== null
-    ? Object.fromEntries(Object.entries(state))
-    : {}
-}
 
 export function useMainScrollRestore(shell: RefObject<AppShellHandle | null>, key: string) {
   const restorer = useRef<ScrollRestorer | null>(null)
@@ -41,10 +35,10 @@ export function useMainScrollRestore(shell: RefObject<AppShellHandle | null>, ke
         takeFirstPaintTop: () => {
           const at = target?.getAttribute(SCROLL_AT_ATTR)
           target?.removeAttribute(SCROLL_AT_ATTR)
-          return at === null || at === undefined ? undefined : Number(at)
+          return scrollTopOf(at)
         },
         readState: () => {
-          const state = historyState()
+          const state = historyStateOf(window.history.state)
           return { ...state, position: state.idx }
         },
         writeState: state => window.history.replaceState(state, ''),

@@ -1,5 +1,5 @@
 import { href, useFetcher } from 'react-router'
-import type { SignIn } from './auth'
+import type { SignIn } from './auth.schema'
 import type { signInAction } from './auth.server'
 
 export function useSignIn() {

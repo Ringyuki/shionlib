@@ -1,6 +1,6 @@
-import { data, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
-import { routeAction, routeLoader } from '~/shared/route/route.server'
-import { pageParam } from './search'
+import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import { readCommand, routeAction, routeLoader } from '~/shared/route/route.server'
+import { pageParam, recordSearchCommand } from './search.schema'
 import { loadPalette, recordSearch, searchGames } from './search.use-cases'
 
 export function paletteLoader(args: LoaderFunctionArgs) {
@@ -9,14 +9,7 @@ export function paletteLoader(args: LoaderFunctionArgs) {
 }
 
 export async function recordSearchAction(args: ActionFunctionArgs) {
-  const body: unknown = await args.request.json().catch(() => undefined)
-  const query =
-    typeof body === 'object' && body !== null && 'query' in body && typeof body.query === 'string'
-      ? body.query
-      : undefined
-  if (query === undefined) {
-    throw data(null, { status: 400 })
-  }
+  const { query } = await readCommand(args, recordSearchCommand)
   return routeAction(args, api => recordSearch(api, query))
 }
 

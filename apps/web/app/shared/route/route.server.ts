@@ -1,4 +1,5 @@
 import { data, type RouterContextProvider } from 'react-router'
+import * as v from 'valibot'
 import type { ApiClient } from '~/shared/api/client'
 import { ApiError } from '~/shared/api/error'
 import { apiFrom } from './api.server'
@@ -31,4 +32,15 @@ export async function routeAction<Result>(
     }
     throw error
   }
+}
+
+export async function readCommand<Schema extends v.GenericSchema>(
+  { request }: { request: Request },
+  schema: Schema,
+): Promise<v.InferOutput<Schema>> {
+  const parsed = v.safeParse(schema, await request.json().catch(() => undefined))
+  if (!parsed.success) {
+    throw data(null, { status: 400 })
+  }
+  return parsed.output
 }

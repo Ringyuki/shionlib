@@ -1,6 +1,6 @@
 import { FavoriteButton, isFavorite } from '~/features/favorite'
 import { GameHeader, gameTitle, loadGameHeader } from '~/features/game'
-import { isLocale } from '~/shared/i18n/locale'
+import { isLocale } from '~/shared/i18n/locale.schema'
 import { idParam } from '~/shared/route/params'
 import { routeLoader } from '~/shared/route/route.server'
 import type { Route } from './+types/game'

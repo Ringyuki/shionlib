@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { href, useFetcher } from 'react-router'
 import type { Locale } from '~/shared/i18n/locale'
-import { remainingSeconds, type SignUpForm } from './auth'
+import { remainingSeconds } from './auth'
+import type { SignUpValues } from './auth.schema'
 import type { signUpAction, signUpCodeAction } from './auth.server'
 
 export function useSignUp(locale: Locale) {
@@ -31,7 +32,7 @@ export function useSignUp(locale: Locale) {
     )
   }
 
-  const submit = (form: SignUpForm) => {
+  const submit = (form: SignUpValues) => {
     if (sent === undefined) {
       return Promise.resolve(false)
     }

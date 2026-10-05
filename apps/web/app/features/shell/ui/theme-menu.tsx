@@ -1,7 +1,8 @@
 import { Button, DropdownMenu, DropdownMenuRadioGroup, DropdownMenuRadioItem } from '@hina-ui/react'
 import { Monitor, Moon, Sun } from 'lucide-react'
 import { useTranslations } from 'use-intl'
-import { isThemePreference, themePreferences } from '~/shared/ui/theme'
+import { themePreferences } from '~/shared/ui/theme'
+import { isThemePreference } from '~/shared/ui/theme.schema'
 import { useTheme } from '~/shared/ui/theme-provider'
 
 const icons = { system: Monitor, light: Sun, dark: Moon } as const

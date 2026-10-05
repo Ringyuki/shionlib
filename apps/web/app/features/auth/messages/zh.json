@@ -15,7 +15,7 @@
     "title": "注册 Shionlib",
     "description": "注册后会自动登录。",
     "name": "用户名",
-    "nameHint": "2–20 个字符，注册后可以修改",
+    "nameHint": "{min}–{max} 个字符，注册后可以修改",
     "email": "邮箱",
     "sendCode": "发送验证码",
     "resendIn": "{seconds} 秒后可重发",
@@ -23,7 +23,7 @@
     "code": "验证码",
     "codeFirst": "请先发送验证码",
     "password": "密码",
-    "passwordHint": "8–50 个字符，包含大写字母、小写字母，以及数字或符号",
+    "passwordHint": "{min}–{max} 个字符",
     "adult": "我已年满 18 周岁",
     "submit": "注册并登录",
     "hasAccount": "已有账号？",
@@ -46,12 +46,6 @@
     "oidcFailed": "Hikarinagi ID 登录失败，请重试"
   },
   "issue": {
-    "required": "必填",
-    "email": "邮箱格式不正确",
-    "nameLength": "用户名需要 2–20 个字符",
-    "passwordLength": "密码需要 8–50 个字符",
-    "passwordPolicy": "密码需要包含大写字母、小写字母，以及数字或符号",
-    "codeLength": "请输入 6 位数字验证码",
     "adult": "年满 18 周岁才能注册",
     "mismatch": "两次输入的密码不一致"
   },

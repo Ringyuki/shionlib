@@ -1,12 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { href, useFetcher } from 'react-router'
-import {
-  normalizeQuery,
-  parseRecent,
-  recentStorageKey,
-  rememberSearch,
-  searchDelayMs,
-} from './search'
+import { normalizeQuery, recentStorageKey, rememberSearch, searchDelayMs } from './search'
+import { parseRecent, type RecordSearch } from './search.schema'
 import type { paletteLoader, recordSearchAction } from './search.server'
 
 function readRecent(): string[] {
@@ -99,10 +94,12 @@ export function useSearchPalette() {
       return
     }
     remember()
-    void recorder.submit(
-      { query },
-      { method: 'post', action: href('/resources/search'), encType: 'application/json' },
-    )
+    const record: RecordSearch = { query }
+    void recorder.submit(record, {
+      method: 'post',
+      action: href('/resources/search'),
+      encType: 'application/json',
+    })
   }
 
   const clearRecent = () => {

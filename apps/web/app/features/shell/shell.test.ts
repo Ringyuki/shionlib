@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { navSections, sidebarCookieValue, sidebarModeFrom, sitePaths, switchLocale } from './shell'
+import { navSections, sidebarCookieValue, sitePaths, switchLocale } from './shell'
 
 describe('navSections', () => {
   it('shows only discovery to guests', () => {
@@ -41,11 +41,6 @@ describe('switchLocale', () => {
 })
 
 describe('sidebar mode cookie', () => {
-  it('reads the remembered mode', () => {
-    expect(sidebarModeFrom('a=1; shionlib_sidebar=rail')).toBe('rail')
-    expect(sidebarModeFrom('')).toBe('expanded')
-  })
-
   it('writes a year-long cookie', () => {
     expect(sidebarCookieValue('rail')).toBe(
       'shionlib_sidebar=rail; Path=/; Max-Age=31536000; SameSite=Lax',

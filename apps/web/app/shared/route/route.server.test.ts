@@ -1,9 +1,10 @@
 import { RouterContextProvider } from 'react-router'
+import * as v from 'valibot'
 import { describe, expect, it } from 'vitest'
 import { ApiError } from '~/shared/api/error'
 import { fakeApi } from '~/shared/api/testing'
 import { apiContext } from './api.server'
-import { routeAction, routeLoader } from './route.server'
+import { readCommand, routeAction, routeLoader } from './route.server'
 
 const failure = {
   code: 460103,
@@ -47,5 +48,25 @@ describe('routeAction', () => {
 
   it('wraps successful results', async () => {
     await expect(routeAction(args(), async () => 3)).resolves.toEqual({ ok: true, result: 3 })
+  })
+})
+
+describe('readCommand', () => {
+  const command = v.object({ listId: v.number() })
+  const post = (body: string) =>
+    new Request('http://web.test/resources/x', { method: 'POST', body })
+
+  it('returns the parsed body', async () => {
+    await expect(readCommand({ request: post('{"listId":3}') }, command)).resolves.toEqual({
+      listId: 3,
+    })
+  })
+
+  it('answers 400 for bodies that do not match or are not JSON', async () => {
+    for (const body of ['{"listId":"3"}', 'not json']) {
+      await expect(readCommand({ request: post(body) }, command)).rejects.toMatchObject({
+        init: { status: 400 },
+      })
+    }
   })
 })
