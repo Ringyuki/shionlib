@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
@@ -33,6 +34,9 @@ func TestCodesAreSingleUse(t *testing.T) {
 	}
 	if err := f.codes.Check(ctx, id, "a@example.test", mail.Body); err != nil {
 		t.Fatalf("check does not consume: %v", err)
+	}
+	if err := f.codes.Check(ctx, id, "a@example.test", " "+strings.ToLower(mail.Body)+" "); err != nil {
+		t.Fatalf("codes ignore case and surrounding spaces: %v", err)
 	}
 	if err := f.codes.Verify(ctx, id, "a@example.test", mail.Body); err != nil {
 		t.Fatal(err)

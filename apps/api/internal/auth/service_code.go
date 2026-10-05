@@ -48,7 +48,7 @@ func (c *CodeService) Check(ctx context.Context, id, email, code string) error {
 	if !found {
 		return ErrVerificationCodeNotFound
 	}
-	if stored.Email != email || subtle.ConstantTimeCompare([]byte(stored.Code), []byte(code)) != 1 {
+	if stored.Email != email || subtle.ConstantTimeCompare([]byte(stored.Code), []byte(strings.ToUpper(strings.TrimSpace(code)))) != 1 {
 		return ErrVerificationCodeMismatch
 	}
 	return nil
