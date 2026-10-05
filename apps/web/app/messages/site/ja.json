@@ -12,5 +12,7 @@
   "forbiddenDescription": "このページへのアクセス権がありません。",
   "backHome": "ホームに戻る",
   "catalogSource": "作品データ提供",
-  "catalogEntry": "Hikarinagi で作品を見る"
+  "catalogEntry": "Hikarinagi で作品を見る",
+  "catalogCorrection": "情報に誤りや不足がありますか？",
+  "catalogEdit": "Hikarinagi で編集"
 }

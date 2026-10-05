@@ -12,5 +12,7 @@
   "forbiddenDescription": "You do not have permission to see this page.",
   "backHome": "Back to home",
   "catalogSource": "Catalog data from",
-  "catalogEntry": "View the entry on Hikarinagi"
+  "catalogEntry": "View the entry on Hikarinagi",
+  "catalogCorrection": "Something wrong or missing?",
+  "catalogEdit": "Edit it on Hikarinagi"
 }

@@ -9,6 +9,7 @@ import {
   Tag,
 } from '@hina-ui/react'
 import { useFormatter, useTranslations } from 'use-intl'
+import { CatalogCorrection } from '~/shared/ui/catalog-attribution'
 import { groupStaff, type GameDetails } from '../game'
 import { GameIntro } from './game-intro'
 import { GameRelations } from './game-relations'
@@ -17,7 +18,7 @@ import { GameScreenshots } from './game-screenshots'
 const factListClass =
   'grid grid-cols-[auto_1fr] items-baseline gap-x-6 gap-y-2 [&>dd]:m-0! [&>dt]:m-0!'
 
-export function GameInfo({ details }: { details: GameDetails }) {
+export function GameInfo({ details, entry }: { details: GameDetails; entry: number | null }) {
   const tags = details.tags ?? []
   const staff = groupStaff(details.staffs ?? [])
   const images = details.images ?? []
@@ -71,6 +72,7 @@ export function GameInfo({ details }: { details: GameDetails }) {
           </Inline>
         </Section>
       )}
+      {entry !== null && <CatalogCorrection entity="galgame" id={entry} />}
     </Stack>
   )
 }

@@ -1,6 +1,6 @@
 import type { ApiClient } from '~/shared/api/client'
-import { ApiError } from '~/shared/api/error'
-import { bangumiScore, vndbScore, type GameHeader, type Scores } from './game'
+import type { GameHeader } from './game'
+import { bangumiScore, scoreSites, vndbScore, type Scores } from './game-score'
 
 export async function loadGamePage(api: ApiClient, id: number) {
   const params = { params: { path: { id } } }
@@ -12,31 +12,23 @@ export async function loadGamePage(api: ApiClient, id: number) {
   return { header, details, characters: characters.characters ?? [] }
 }
 
-async function optional<Value>(request: Promise<Value>): Promise<Value | undefined> {
-  try {
-    return await request
-  } catch (error) {
-    if (error instanceof ApiError) {
-      return undefined
-    }
-    throw error
-  }
-}
-
 export async function loadScores(
   api: ApiClient,
   game: Pick<GameHeader, 'id' | 'b_id' | 'v_id'>,
 ): Promise<Scores> {
   const params = { params: { path: { id: game.id } } }
-  const [bangumi, vndb] = await Promise.all([
-    game.b_id === null ? undefined : optional(api.get('/game/score/bangumi/{id}', params)),
-    game.v_id === null ? undefined : optional(api.get('/game/score/vndb/{id}', params)),
+  const sources = new Set(scoreSites(game).map(site => site.source))
+  const [bangumi, vndb] = await Promise.allSettled([
+    sources.has('bangumi')
+      ? api.get('/game/score/bangumi/{id}', params).then(bangumiScore)
+      : undefined,
+    sources.has('vndb') ? api.get('/game/score/vndb/{id}', params).then(vndbScore) : undefined,
   ])
-  return {
-    bangumi:
-      bangumi === undefined || game.b_id === null ? undefined : bangumiScore(bangumi, game.b_id),
-    vndb: vndb === undefined || game.v_id === null ? undefined : vndbScore(vndb, game.v_id),
-  }
+  return { bangumi: settled(bangumi), vndb: settled(vndb) }
+}
+
+function settled<Value>(result: PromiseSettledResult<Value | undefined>): Value | undefined {
+  return result.status === 'fulfilled' ? result.value : undefined
 }
 
 export async function countView(api: ApiClient, id: number) {

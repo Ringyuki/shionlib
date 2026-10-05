@@ -36,17 +36,11 @@
   "score": {
     "bangumi": "Bangumi",
     "vndb": "VNDB",
-    "votes": "{source}: {count, plural, one {# vote} other {# votes}}",
-    "count": "{count, number}"
+    "votes": "{count, plural, one {# vote} other {# votes}}",
+    "none": "No rating"
   },
   "actions": {
     "upload": "Upload",
-    "more": "More actions",
-    "copyLink": "Copy link",
-    "linkCopied": "Link copied",
-    "copyFailed": "Could not copy; copy the address bar instead",
-    "viewOnHikarinagi": "View on Hikarinagi",
-    "editOnHikarinagi": "Edit on Hikarinagi",
     "download": "Download ({count, plural, one {# resource} other {# resources}})",
     "readMore": "Read the full description"
   },

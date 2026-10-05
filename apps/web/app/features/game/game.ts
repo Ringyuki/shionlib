@@ -1,6 +1,5 @@
 import { constraints } from '~/shared/api/generated/constraints'
 import type { Schema } from '~/shared/api/types'
-import { vndbUrl } from '~/shared/catalog/vndb'
 import type { Locale } from '~/shared/i18n/locale'
 import { bbcodePlainText } from '~/shared/markup/bbcode'
 
@@ -126,30 +125,6 @@ export function groupStaff(
     groups.set(staff.role, names)
   }
   return [...groups].map(([role, names]) => ({ role, names }))
-}
-
-export type Score = {
-  value: number
-  votes: number
-  url: string
-}
-
-export type Scores = {
-  bangumi?: Score
-  vndb?: Score
-}
-
-export function bangumiScore(data: Schema<'BangumiScoreDTO'>, subject: string): Score | undefined {
-  const { score, total } = data.rating
-  return score > 0 && total > 0
-    ? { value: score, votes: total, url: `https://bgm.tv/subject/${subject}` }
-    : undefined
-}
-
-export function vndbScore(data: Schema<'VndbScoreDTO'>, vn: string): Score | undefined {
-  return data.rating === null || data.votecount === 0
-    ? undefined
-    : { value: data.rating / 10, votes: data.votecount, url: vndbUrl(vn) }
 }
 
 export function imageSize(image: GameImage): { width: number; height: number } | undefined {

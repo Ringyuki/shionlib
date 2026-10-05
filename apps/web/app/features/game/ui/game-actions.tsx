@@ -7,7 +7,6 @@ import type { ResourceSummary } from '~/features/resource'
 import { keepScroll, sitePaths } from '~/features/shell'
 import { Button } from '~/shared/ui/button'
 import { gamePath, type GameHeader } from '../game'
-import { GameMoreMenu } from './game-more-menu'
 
 type GameActionsProps = {
   game: GameHeader
@@ -44,7 +43,6 @@ export function GameActions({ game, resources, favorite }: GameActionsProps) {
         </Link>
       </Button>
       {favorite}
-      <GameMoreMenu game={game} />
     </Inline>
   )
 }

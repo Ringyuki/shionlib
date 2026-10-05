@@ -36,17 +36,11 @@
   "score": {
     "bangumi": "Bangumi",
     "vndb": "VNDB",
-    "votes": "{source}：{count, number} 件の評価",
-    "count": "{count, number} 件"
+    "votes": "{count, number} 件の評価",
+    "none": "評価なし"
   },
   "actions": {
     "upload": "アップロード",
-    "more": "その他の操作",
-    "copyLink": "リンクをコピー",
-    "linkCopied": "リンクをコピーしました",
-    "copyFailed": "コピーできませんでした。アドレスバーからコピーしてください",
-    "viewOnHikarinagi": "Hikarinagi で見る",
-    "editOnHikarinagi": "Hikarinagi で編集",
     "download": "ダウンロード（{count} 件）",
     "readMore": "あらすじをすべて読む"
   },

@@ -36,17 +36,11 @@
   "score": {
     "bangumi": "Bangumi",
     "vndb": "VNDB",
-    "votes": "{source}：{count, number} 人评分",
-    "count": "{count, number} 人"
+    "votes": "{count, number} 人评分",
+    "none": "暂无评分"
   },
   "actions": {
     "upload": "上传资源",
-    "more": "更多操作",
-    "copyLink": "复制链接",
-    "linkCopied": "链接已复制",
-    "copyFailed": "复制失败，请手动复制地址栏",
-    "viewOnHikarinagi": "在 Hikarinagi 查看",
-    "editOnHikarinagi": "在 Hikarinagi 编辑",
     "download": "下载（{count} 个资源）",
     "readMore": "阅读完整简介"
   },

@@ -12,5 +12,7 @@
   "forbiddenDescription": "你没有访问这里的权限。",
   "backHome": "返回首页",
   "catalogSource": "条目数据来自",
-  "catalogEntry": "在 Hikarinagi 查看条目"
+  "catalogEntry": "在 Hikarinagi 查看条目",
+  "catalogCorrection": "资料有误或不全？",
+  "catalogEdit": "去 Hikarinagi 编辑"
 }

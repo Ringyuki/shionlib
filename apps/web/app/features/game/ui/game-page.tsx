@@ -2,13 +2,8 @@ import { Stack } from '@hina-ui/react'
 import type { ReactNode } from 'react'
 import { useLocale } from 'use-intl'
 import type { ResourceSummary } from '~/features/resource'
-import {
-  preferredIntro,
-  type CharacterCredit,
-  type GameDetails,
-  type GameHeader,
-  type Scores,
-} from '../game'
+import { preferredIntro, type CharacterCredit, type GameDetails, type GameHeader } from '../game'
+import type { Scores } from '../game-score'
 import { useViewCount } from '../use-view-count'
 import { GameHero } from './game-hero'
 import { GameTabs } from './game-tabs'

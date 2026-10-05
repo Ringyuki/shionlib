@@ -18,7 +18,7 @@ export function GameAliases({ aliases }: { aliases: readonly string[] }) {
         tone="faint"
         truncate
         tabIndex={overflowing ? 0 : undefined}
-        className="w-fit max-w-prose"
+        className="w-fit max-w-[min(65ch,100%)]"
       >
         {t('aliases', { names })}
       </Text>

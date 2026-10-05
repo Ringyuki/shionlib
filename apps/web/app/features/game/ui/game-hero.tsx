@@ -4,21 +4,15 @@ import { useLocale } from 'use-intl'
 import type { ResourceSummary } from '~/features/resource'
 import { BBCodeText } from '~/shared/ui/bbcode-text'
 import { CatalogAttribution } from '~/shared/ui/catalog-attribution'
-import {
-  bannerIndex,
-  gameTitle,
-  originalTitle,
-  type GameHeader,
-  type GameImage,
-  type Scores,
-} from '../game'
+import { bannerIndex, gameTitle, originalTitle, type GameHeader, type GameImage } from '../game'
+import { scoreSites, type Scores } from '../game-score'
 import { GameActions } from './game-actions'
 import { GameAliases } from './game-aliases'
 import { GameBanner } from './game-banner'
 import { GameByline } from './game-byline'
 import { GameChips } from './game-chips'
 import { GameCover } from './game-covers'
-import { GameRatings } from './game-ratings'
+import { GameScores } from './game-scores'
 
 type GameHeroProps = {
   game: GameHeader
@@ -58,22 +52,29 @@ export function GameHero({ game, images, intro, scores, resources, favorite }: G
             className={cn('rounded-xl', staged && 'ring-4 ring-canvas')}
           />
         </Stack>
-        <Stack gap="md" className="min-w-0 pt-4 sm:pt-5">
-          <Stack gap="xs">
-            <GameByline game={game} />
-            <Heading level={1} size="2xl" weight="semibold" className="text-balance max-sm:text-xl">
-              {title}
-            </Heading>
-            {original !== undefined && (
-              <Text tone="muted" className="text-balance sm:text-lg">
-                {original}
-              </Text>
-            )}
-            <GameAliases aliases={game.aliases ?? []} />
-          </Stack>
+        <Stack gap="md" className={cn('min-w-0', staged && 'pt-4 sm:pt-5')}>
+          <Grid className="gap-x-8 gap-y-4 sm:grid-cols-[minmax(0,1fr)_auto]">
+            <Stack gap="xs">
+              <GameByline game={game} />
+              <Heading
+                level={1}
+                size="2xl"
+                weight="semibold"
+                className="text-balance max-sm:text-xl"
+              >
+                {title}
+              </Heading>
+              {original !== undefined && (
+                <Text tone="muted" className="text-balance sm:text-lg">
+                  {original}
+                </Text>
+              )}
+              <GameAliases aliases={game.aliases ?? []} />
+            </Stack>
+            <GameScores sites={scoreSites(game)} scores={scores} />
+          </Grid>
           <Inline gap="sm" align="center" className="gap-y-2">
             <GameChips game={game} />
-            <GameRatings scores={scores} />
           </Inline>
           {intro !== '' && (
             <BBCodeText
