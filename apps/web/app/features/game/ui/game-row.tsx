@@ -65,7 +65,7 @@ export function GameRow({ game }: GameRowProps) {
                     <PlatformTag key={platform} platform={platform} />
                   ))}
                   {languages.map(label => (
-                    <Tag key={label} size="sm" variant="solid">
+                    <Tag key={label} size="sm" variant="outline">
                       {label}
                     </Tag>
                   ))}

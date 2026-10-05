@@ -9,7 +9,7 @@ export function GameChips({ game }: { game: GameHeader }) {
         <PlatformTag key={platform} platform={platform} />
       ))}
       {game.type !== null && game.type !== '' && (
-        <Tag size="sm" variant="solid">
+        <Tag size="sm" variant="outline">
           {game.type}
         </Tag>
       )}

@@ -39,12 +39,12 @@ export function ResourceCard({ resource, viewerId }: ResourceCardProps) {
               <PlatformTag key={platform} platform={platform} size="md" className={tagClass} />
             ))}
             {(resource.language ?? []).map(language => (
-              <Tag key={language} size="md" variant="solid" className={tagClass}>
+              <Tag key={language} size="md" variant="outline" className={tagClass}>
                 {labelOf(labels.game.language, language)}
               </Tag>
             ))}
             {resource.simulator !== null && (
-              <Tag size="md" variant="solid" className={tagClass}>
+              <Tag size="md" variant="outline" className={tagClass}>
                 {labelOf(labels.resource.simulatorName, resource.simulator)}
               </Tag>
             )}
