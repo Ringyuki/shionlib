@@ -49,7 +49,7 @@ Change these only together, and recheck contrast in both themes. All other token
 
 ## Brand and images
 
-- `BrandLogo` shows `public/brand/logo.png` (from `favicon.ico`); `Wordmark` shows `public/brand/wordmark.svg` (Shionlib blue baked in). Both render through hina-ui `Image` with `eager` and `lazy={false}`, so they are in the server HTML and never fade in.
+- `BrandLogo` shows `public/brand/logo.png` (from `favicon.ico`); `Wordmark` shows `public/brand/wordmark-zh.svg` (「书音的图书馆」) for `zh` and `public/brand/wordmark.svg` ("Shionlib") otherwise, both with Shionlib blue baked in so they read in light and dark themes. Both render through hina-ui `Image` with `eager` and `lazy={false}`, so they are in the server HTML and never fade in.
 - API image fields are storage keys; `useImageUrl()` prefixes them with `IMAGE_BASE_URL` and passes absolute, `data:` and `blob:` URLs through.
 
 ## Messages and locales
