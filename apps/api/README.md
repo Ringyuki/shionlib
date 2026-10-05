@@ -12,8 +12,11 @@ Go 1.27, PostgreSQL 16+, Redis 7+, golangci-lint v2.14.
 cp .env.example .env            # adjust DATABASE_URL, REDIS_*, TOKEN_SECRET, REFRESH_TOKEN_PEPPER
 set -a; . ./.env; set +a
 go run ./cmd/api migrate up
-go run ./cmd/api serve
+scripts/dev.sh serve            # HTTP API, rebuilt and restarted on every change
+scripts/dev.sh worker           # jobs and scheduled tasks, hot-reloaded the same way
 ```
+
+`scripts/dev.sh` runs [air](https://github.com/air-verse/air) (pinned in `tools.mod`, started with `go tool -modfile=tools.mod air`) with `.air.toml`. It reads `.env`, or the file in `API_ENV_FILE`, without overriding variables that are already set, so `PORT=5811 scripts/dev.sh worker` runs a worker next to the API. Each command builds its own binary under `tmp/`. From the repository root, `pnpm dev:api` and `pnpm dev:worker` do the same.
 
 ## Commands
 

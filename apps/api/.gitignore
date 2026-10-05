@@ -6,3 +6,4 @@
 /entgen
 !.env.example
 migrations/atlas.sum
+/tmp/

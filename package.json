@@ -14,6 +14,8 @@
     "dev": "pnpm -r --parallel --stream --filter shionlib-backend --filter shionlib-frontend --filter shionlib-og --filter shionlib-download-worker run dev",
     "dev:frontend": "pnpm --filter shionlib-frontend dev",
     "dev:web": "pnpm --dir apps/web dev",
+    "dev:api": "apps/api/scripts/dev.sh serve",
+    "dev:worker": "apps/api/scripts/dev.sh worker",
     "dev:backend": "pnpm --filter shionlib-backend start:dev",
     "dev:og": "pnpm --filter shionlib-og dev",
     "dev:download-worker": "pnpm --filter shionlib-download-worker dev",
