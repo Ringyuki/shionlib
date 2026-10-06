@@ -39,13 +39,25 @@ type downloadLinkInput struct {
 	Token string `query:"token" doc:"Cloudflare Turnstile response token"`
 }
 
+type downloadFileUploadInput struct {
+	UploadSessionID int    `json:"upload_session_id" minimum:"1"`
+	FileName        string `json:"file_name,omitempty" maxLength:"255" doc:"Shown name; defaults to the uploaded file's name"`
+}
+
+func fileUploads(in []downloadFileUploadInput) []download.FileUpload {
+	files := make([]download.FileUpload, len(in))
+	for i, file := range in {
+		files[i] = download.FileUpload{UploadSessionID: file.UploadSessionID, Name: file.FileName}
+	}
+	return files
+}
+
 type downloadSourceBodyInput struct {
-	FileName        string   `json:"file_name" minLength:"1" maxLength:"255"`
-	Platform        []string `json:"platform" minItems:"1" enum:"win,mac,ios,and,lin,ps3,ps4,psv,psp,swi,dvd"`
-	Language        []string `json:"language" minItems:"1" enum:"en,zh,zh-hant,jp"`
-	UploadSessionID int      `json:"upload_session_id"`
-	Simulator       *string  `json:"simulator,omitempty" enum:"KRKR,ONS,ARTEMIS,OTHER"`
-	Note            *string  `json:"note,omitempty" maxLength:"255"`
+	Platform  []string                  `json:"platform" minItems:"1" enum:"win,mac,ios,and,lin,ps3,ps4,psv,psp,swi,dvd"`
+	Language  []string                  `json:"language" minItems:"1" enum:"en,zh,zh-hant,jp"`
+	Simulator *string                   `json:"simulator,omitempty" enum:"KRKR,ONS,ARTEMIS,OTHER"`
+	Note      *string                   `json:"note,omitempty" maxLength:"255"`
+	Files     []downloadFileUploadInput `json:"files" minItems:"1" maxItems:"1000" doc:"Completed upload sessions to attach, one per file"`
 }
 
 type createDownloadSourceInput struct {
@@ -53,8 +65,25 @@ type createDownloadSourceInput struct {
 	Body downloadSourceBodyInput
 }
 
+type addDownloadFilesInput struct {
+	ID   int `path:"id" minimum:"1"`
+	Body struct {
+		Files []downloadFileUploadInput `json:"files" minItems:"1" maxItems:"1000"`
+	}
+}
+
+type downloadFilePathInput struct {
+	FileID int `path:"fileId" minimum:"1"`
+}
+
+type renameDownloadFileInput struct {
+	FileID int `path:"fileId" minimum:"1"`
+	Body   struct {
+		FileName string `json:"file_name" minLength:"1" maxLength:"255"`
+	}
+}
+
 type editDownloadSourceBodyInput struct {
-	FileName  *string  `json:"file_name,omitempty" maxLength:"255"`
 	Platform  []string `json:"platform" minItems:"1" enum:"win,mac,ios,and,lin,ps3,ps4,psv,psp,swi,dvd"`
 	Language  []string `json:"language" minItems:"1" enum:"en,zh,zh-hant,jp"`
 	Simulator *string  `json:"simulator,omitempty" enum:"KRKR,ONS,ARTEMIS,OTHER"`

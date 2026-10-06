@@ -44,29 +44,35 @@ type downloadFileDTO struct {
 }
 
 type downloadResourceDTO struct {
-	ID        int                     `json:"id"`
-	Platform  []string                `json:"platform"`
-	Language  []string                `json:"language"`
-	Simulator *string                 `json:"simulator"`
-	Note      *string                 `json:"note"`
-	Downloads int                     `json:"downloads"`
-	Creator   userhttp.UserSummaryDTO `json:"creator"`
-	Created   time.Time               `json:"created"`
-	Updated   time.Time               `json:"updated"`
-	Files     []downloadFileDTO       `json:"files"`
+	ID          int                     `json:"id"`
+	Platform    []string                `json:"platform"`
+	Language    []string                `json:"language"`
+	Simulator   *string                 `json:"simulator"`
+	Note        *string                 `json:"note"`
+	Downloads   int                     `json:"downloads"`
+	Creator     userhttp.UserSummaryDTO `json:"creator"`
+	PublishedAt *time.Time              `json:"published_at" doc:"Null while the resource is still being checked; only its uploader sees it then"`
+	Created     time.Time               `json:"created"`
+	Updated     time.Time               `json:"updated"`
+	Files       []downloadFileDTO       `json:"files"`
+}
+
+type downloadResourceCreatedDTO struct {
+	ID int `json:"id"`
 }
 
 type downloadReleaseDTO struct {
-	ID         int                     `json:"id"`
-	Platform   []string                `json:"platform"`
-	Language   []string                `json:"language"`
-	Note       *string                 `json:"note"`
-	Downloads  int                     `json:"downloads"`
-	Game       gamehttp.GameCardDTO    `json:"game"`
-	Files      []string                `json:"files"`
-	FilesCount int                     `json:"files_count"`
-	Creator    userhttp.UserSummaryDTO `json:"creator"`
-	Created    time.Time               `json:"created"`
+	ID          int                     `json:"id"`
+	Platform    []string                `json:"platform"`
+	Language    []string                `json:"language"`
+	Note        *string                 `json:"note"`
+	Downloads   int                     `json:"downloads"`
+	Game        gamehttp.GameCardDTO    `json:"game"`
+	Files       []string                `json:"files"`
+	FilesCount  int                     `json:"files_count"`
+	Creator     userhttp.UserSummaryDTO `json:"creator"`
+	PublishedAt *time.Time              `json:"published_at"`
+	Created     time.Time               `json:"created"`
 }
 
 type downloadReleaseMetaDTO struct {
@@ -90,6 +96,7 @@ type downloadUserResourceDTO struct {
 	FilesCount      int                     `json:"files_count"`
 	Game            gamehttp.GameCardDTO    `json:"game"`
 	Creator         userhttp.UserSummaryDTO `json:"creator"`
+	PublishedAt     *time.Time              `json:"published_at"`
 	Created         time.Time               `json:"created"`
 	Updated         time.Time               `json:"updated"`
 }
@@ -142,16 +149,17 @@ type storageListingDTO struct {
 
 func toResourceDTO(r download.GameResource, now time.Time) downloadResourceDTO {
 	out := downloadResourceDTO{
-		ID:        r.ID,
-		Platform:  nonNil(r.Platforms),
-		Language:  nonNil(r.Languages),
-		Simulator: r.Simulator,
-		Note:      r.Note,
-		Downloads: r.Downloads,
-		Creator:   userhttp.ToUserSummary(r.Creator, now),
-		Created:   r.Created,
-		Updated:   r.Updated,
-		Files:     make([]downloadFileDTO, len(r.Files)),
+		ID:          r.ID,
+		Platform:    nonNil(r.Platforms),
+		Language:    nonNil(r.Languages),
+		Simulator:   r.Simulator,
+		Note:        r.Note,
+		Downloads:   r.Downloads,
+		Creator:     userhttp.ToUserSummary(r.Creator, now),
+		PublishedAt: r.PublishedAt,
+		Created:     r.Created,
+		Updated:     r.Updated,
+		Files:       make([]downloadFileDTO, len(r.Files)),
 	}
 	for i, file := range r.Files {
 		cases := make([]downloadMalwareCaseDTO, len(file.MalwareCases))
@@ -182,16 +190,17 @@ func toResourceDTO(r download.GameResource, now time.Time) downloadResourceDTO {
 
 func toReleaseDTO(r download.Release, now time.Time) downloadReleaseDTO {
 	return downloadReleaseDTO{
-		ID:         r.ID,
-		Platform:   nonNil(r.Platforms),
-		Language:   nonNil(r.Languages),
-		Note:       r.Note,
-		Downloads:  r.Downloads,
-		Game:       gamehttp.ToGameCard(r.Game),
-		Files:      nonNil(r.FileNames),
-		FilesCount: r.FilesCount,
-		Creator:    userhttp.ToUserSummary(r.Creator, now),
-		Created:    r.Created,
+		ID:          r.ID,
+		Platform:    nonNil(r.Platforms),
+		Language:    nonNil(r.Languages),
+		Note:        r.Note,
+		Downloads:   r.Downloads,
+		Game:        gamehttp.ToGameCard(r.Game),
+		Files:       nonNil(r.FileNames),
+		FilesCount:  r.FilesCount,
+		Creator:     userhttp.ToUserSummary(r.Creator, now),
+		PublishedAt: r.PublishedAt,
+		Created:     r.Created,
 	}
 }
 
@@ -206,6 +215,7 @@ func toUserResourceDTO(r download.UserResource, now time.Time) downloadUserResou
 		FilesCount:      r.FilesCount,
 		Game:            gamehttp.ToGameCard(r.Game),
 		Creator:         userhttp.ToUserSummary(r.Creator, now),
+		PublishedAt:     r.PublishedAt,
 		Created:         r.Created,
 		Updated:         r.Updated,
 	}

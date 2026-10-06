@@ -143,5 +143,7 @@
   "AI_PLAYGROUND_TARGET_NOT_FOUND": "调试目标不存在",
   "AI_CATALOG_PROVIDER_NOT_FOUND": "模型目录中没有该服务商",
   "SETTING_NOT_FOUND": "配置项不存在",
-  "SETTING_INVALID_VALUE": "配置值不合法"
+  "SETTING_INVALID_VALUE": "配置值不合法",
+  "GAME_DOWNLOAD_RESOURCE_TOO_MANY_FILES": "资源里的文件太多了，最多 {max} 个",
+  "GAME_DOWNLOAD_RESOURCE_LAST_FILE": "资源至少要保留一个文件"
 }

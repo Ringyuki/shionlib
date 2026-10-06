@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadchunk"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
@@ -234,21 +233,6 @@ func (_u *GameUploadSessionUpdate) SetUpdated(v time.Time) *GameUploadSessionUpd
 	return _u
 }
 
-// AddGameDownloadResourceIDs adds the "game_download_resources" edge to the GameDownloadResource entity by IDs.
-func (_u *GameUploadSessionUpdate) AddGameDownloadResourceIDs(ids ...int) *GameUploadSessionUpdate {
-	_u.mutation.AddGameDownloadResourceIDs(ids...)
-	return _u
-}
-
-// AddGameDownloadResources adds the "game_download_resources" edges to the GameDownloadResource entity.
-func (_u *GameUploadSessionUpdate) AddGameDownloadResources(v ...*GameDownloadResource) *GameUploadSessionUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddGameDownloadResourceIDs(ids...)
-}
-
 // SetGameDownloadResourceFileID sets the "game_download_resource_file" edge to the GameDownloadResourceFile entity by ID.
 func (_u *GameUploadSessionUpdate) SetGameDownloadResourceFileID(id int) *GameUploadSessionUpdate {
 	_u.mutation.SetGameDownloadResourceFileID(id)
@@ -310,27 +294,6 @@ func (_u *GameUploadSessionUpdate) SetCreator(v *User) *GameUploadSessionUpdate 
 // Mutation returns the GameUploadSessionMutation object of the builder.
 func (_u *GameUploadSessionUpdate) Mutation() *GameUploadSessionMutation {
 	return _u.mutation
-}
-
-// ClearGameDownloadResources clears all "game_download_resources" edges to the GameDownloadResource entity.
-func (_u *GameUploadSessionUpdate) ClearGameDownloadResources() *GameUploadSessionUpdate {
-	_u.mutation.ClearGameDownloadResources()
-	return _u
-}
-
-// RemoveGameDownloadResourceIDs removes the "game_download_resources" edge to GameDownloadResource entities by IDs.
-func (_u *GameUploadSessionUpdate) RemoveGameDownloadResourceIDs(ids ...int) *GameUploadSessionUpdate {
-	_u.mutation.RemoveGameDownloadResourceIDs(ids...)
-	return _u
-}
-
-// RemoveGameDownloadResources removes "game_download_resources" edges to GameDownloadResource entities.
-func (_u *GameUploadSessionUpdate) RemoveGameDownloadResources(v ...*GameDownloadResource) *GameUploadSessionUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveGameDownloadResourceIDs(ids...)
 }
 
 // ClearGameDownloadResourceFile clears the "game_download_resource_file" edge to the GameDownloadResourceFile entity.
@@ -494,51 +457,6 @@ func (_u *GameUploadSessionUpdate) sqlSave(ctx context.Context) (_node int, err 
 	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(gameuploadsession.FieldUpdated, field.TypeTime, value)
-	}
-	if _u.mutation.GameDownloadResourcesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   gameuploadsession.GameDownloadResourcesTable,
-			Columns: []string{gameuploadsession.GameDownloadResourcesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresource.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedGameDownloadResourcesIDs(); len(nodes) > 0 && !_u.mutation.GameDownloadResourcesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   gameuploadsession.GameDownloadResourcesTable,
-			Columns: []string{gameuploadsession.GameDownloadResourcesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresource.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.GameDownloadResourcesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   gameuploadsession.GameDownloadResourcesTable,
-			Columns: []string{gameuploadsession.GameDownloadResourcesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresource.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.GameDownloadResourceFileCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -893,21 +811,6 @@ func (_u *GameUploadSessionUpdateOne) SetUpdated(v time.Time) *GameUploadSession
 	return _u
 }
 
-// AddGameDownloadResourceIDs adds the "game_download_resources" edge to the GameDownloadResource entity by IDs.
-func (_u *GameUploadSessionUpdateOne) AddGameDownloadResourceIDs(ids ...int) *GameUploadSessionUpdateOne {
-	_u.mutation.AddGameDownloadResourceIDs(ids...)
-	return _u
-}
-
-// AddGameDownloadResources adds the "game_download_resources" edges to the GameDownloadResource entity.
-func (_u *GameUploadSessionUpdateOne) AddGameDownloadResources(v ...*GameDownloadResource) *GameUploadSessionUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddGameDownloadResourceIDs(ids...)
-}
-
 // SetGameDownloadResourceFileID sets the "game_download_resource_file" edge to the GameDownloadResourceFile entity by ID.
 func (_u *GameUploadSessionUpdateOne) SetGameDownloadResourceFileID(id int) *GameUploadSessionUpdateOne {
 	_u.mutation.SetGameDownloadResourceFileID(id)
@@ -969,27 +872,6 @@ func (_u *GameUploadSessionUpdateOne) SetCreator(v *User) *GameUploadSessionUpda
 // Mutation returns the GameUploadSessionMutation object of the builder.
 func (_u *GameUploadSessionUpdateOne) Mutation() *GameUploadSessionMutation {
 	return _u.mutation
-}
-
-// ClearGameDownloadResources clears all "game_download_resources" edges to the GameDownloadResource entity.
-func (_u *GameUploadSessionUpdateOne) ClearGameDownloadResources() *GameUploadSessionUpdateOne {
-	_u.mutation.ClearGameDownloadResources()
-	return _u
-}
-
-// RemoveGameDownloadResourceIDs removes the "game_download_resources" edge to GameDownloadResource entities by IDs.
-func (_u *GameUploadSessionUpdateOne) RemoveGameDownloadResourceIDs(ids ...int) *GameUploadSessionUpdateOne {
-	_u.mutation.RemoveGameDownloadResourceIDs(ids...)
-	return _u
-}
-
-// RemoveGameDownloadResources removes "game_download_resources" edges to GameDownloadResource entities.
-func (_u *GameUploadSessionUpdateOne) RemoveGameDownloadResources(v ...*GameDownloadResource) *GameUploadSessionUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveGameDownloadResourceIDs(ids...)
 }
 
 // ClearGameDownloadResourceFile clears the "game_download_resource_file" edge to the GameDownloadResourceFile entity.
@@ -1183,51 +1065,6 @@ func (_u *GameUploadSessionUpdateOne) sqlSave(ctx context.Context) (_node *GameU
 	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(gameuploadsession.FieldUpdated, field.TypeTime, value)
-	}
-	if _u.mutation.GameDownloadResourcesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   gameuploadsession.GameDownloadResourcesTable,
-			Columns: []string{gameuploadsession.GameDownloadResourcesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresource.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedGameDownloadResourcesIDs(); len(nodes) > 0 && !_u.mutation.GameDownloadResourcesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   gameuploadsession.GameDownloadResourcesTable,
-			Columns: []string{gameuploadsession.GameDownloadResourcesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresource.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.GameDownloadResourcesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   gameuploadsession.GameDownloadResourcesTable,
-			Columns: []string{gameuploadsession.GameDownloadResourcesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresource.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.GameDownloadResourceFileCleared() {
 		edge := &sqlgraph.EdgeSpec{

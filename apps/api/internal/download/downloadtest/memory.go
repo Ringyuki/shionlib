@@ -197,6 +197,10 @@ func (r *MemoryRepository) listed(keep func(download.Resource) bool, excludeRate
 		matched = append(matched, resource)
 	}
 	slices.Reverse(matched)
+	return paged(matched, page)
+}
+
+func paged(matched []download.Resource, page download.Page) ([]download.Resource, int) {
 	total := len(matched)
 	start := min(page.Offset(), total)
 	end := min(start+page.Size, total)
@@ -214,7 +218,16 @@ func (r *MemoryRepository) names(resourceID int) []string {
 func (r *MemoryRepository) ListReleases(_ context.Context, excludeRated bool, page download.Page) ([]download.Release, int, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	resources, total := r.listed(func(download.Resource) bool { return true }, excludeRated, page)
+	var published []download.Resource
+	for _, resource := range r.sortedResources() {
+		if resource.Status == download.ResourceActive && resource.Published() && (!excludeRated || !r.ratedGames[resource.GameID]) {
+			published = append(published, resource)
+		}
+	}
+	slices.SortStableFunc(published, func(a, b download.Resource) int {
+		return cmp.Or(b.PublishedAt.Compare(*a.PublishedAt), cmp.Compare(b.ID, a.ID))
+	})
+	resources, total := paged(published, page)
 	out := make([]download.Release, len(resources))
 	for i, resource := range resources {
 		names := r.names(resource.ID)
@@ -223,10 +236,12 @@ func (r *MemoryRepository) ListReleases(_ context.Context, excludeRated bool, pa
 	return out, total, nil
 }
 
-func (r *MemoryRepository) ListUserResources(_ context.Context, creatorID int, excludeRated bool, page download.Page) ([]download.UserResource, int, error) {
+func (r *MemoryRepository) ListUserResources(_ context.Context, creatorID int, filter download.UserResourceFilter, page download.Page) ([]download.UserResource, int, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	resources, total := r.listed(func(res download.Resource) bool { return res.CreatorID == creatorID }, excludeRated, page)
+	resources, total := r.listed(func(res download.Resource) bool {
+		return res.CreatorID == creatorID && (filter.IncludeUnpublished || res.Published())
+	}, filter.ExcludeRated, page)
 	out := make([]download.UserResource, len(resources))
 	for i, resource := range resources {
 		names := r.names(resource.ID)
@@ -241,33 +256,21 @@ func (r *MemoryRepository) HasUploadingSession(_ context.Context, userID int) (b
 	return r.uploading[userID], nil
 }
 
-func (r *MemoryRepository) ResourceUsesSession(_ context.Context, gameID, sessionID int) (bool, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	for _, resource := range r.resources {
-		if resource.GameID == gameID && resource.UploadSessionID != nil && *resource.UploadSessionID == sessionID {
-			return true, nil
-		}
-	}
-	return false, nil
-}
-
 func (r *MemoryRepository) CreateResource(_ context.Context, in download.NewResource) (download.Resource, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.nextResource++
 	resource := download.Resource{
-		ID:              r.nextResource,
-		GameID:          in.GameID,
-		Status:          download.ResourceActive,
-		Platforms:       slices.Clone(in.Platforms),
-		Languages:       slices.Clone(in.Languages),
-		Simulator:       in.Simulator,
-		Note:            in.Note,
-		UploadSessionID: in.UploadSessionID,
-		CreatorID:       in.CreatorID,
-		Created:         r.now(),
-		Updated:         r.now(),
+		ID:        r.nextResource,
+		GameID:    in.GameID,
+		Status:    download.ResourceActive,
+		Platforms: slices.Clone(in.Platforms),
+		Languages: slices.Clone(in.Languages),
+		Simulator: in.Simulator,
+		Note:      in.Note,
+		CreatorID: in.CreatorID,
+		Created:   r.now(),
+		Updated:   r.now(),
 	}
 	r.resources[resource.ID] = resource
 	return resource, nil
@@ -334,14 +337,6 @@ func (r *MemoryRepository) UpdateResource(_ context.Context, id int, changes dow
 		resource.Note = changes.Note
 	}
 	r.resources[id] = resource
-	if changes.FileName != nil {
-		for fileID, file := range r.files {
-			if file.ResourceID == id {
-				file.Name = *changes.FileName
-				r.files[fileID] = file
-			}
-		}
-	}
 	return nil
 }
 
@@ -354,6 +349,32 @@ func (r *MemoryRepository) SetResourceStatus(_ context.Context, id, status int, 
 
 func (r *MemoryRepository) TouchResource(_ context.Context, id int, updated time.Time) error {
 	return r.mutateResource(id, func(res *download.Resource) { res.Updated = updated })
+}
+
+func (r *MemoryRepository) PublishIfReady(_ context.Context, id int, at time.Time) (bool, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	resource, ok := r.resources[id]
+	if !ok || resource.Published() {
+		return false, nil
+	}
+	files := r.filesOf(id)
+	if len(files) == 0 {
+		return false, nil
+	}
+	for _, file := range files {
+		if file.Status != download.FileInObjectStore {
+			return false, nil
+		}
+	}
+	published := at
+	resource.PublishedAt = &published
+	r.resources[id] = resource
+	return true, nil
+}
+
+func (r *MemoryRepository) RenameFile(_ context.Context, id int, name string) error {
+	return r.mutateFile(id, func(file *download.File) { file.Name = name })
 }
 
 func (r *MemoryRepository) DeleteResource(_ context.Context, id int) error {

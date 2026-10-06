@@ -114,35 +114,52 @@ func TestResourceLifecycle(t *testing.T) {
 	f := newFixture(t)
 	creator := f.db.User(t)
 	gameID := f.db.Game(t)
-	session := f.session(t, creator, gameuploadsession.StatusCOMPLETED)
 
 	created, err := f.repo.CreateResource(ctx, download.NewResource{
-		GameID:          gameID,
-		Platforms:       []string{"and", "win"},
-		Languages:       []string{"zh"},
-		Simulator:       ptr("KRKR"),
-		Note:            ptr("note"),
-		UploadSessionID: &session,
-		CreatorID:       creator,
+		GameID:    gameID,
+		Platforms: []string{"and", "win"},
+		Languages: []string{"zh"},
+		Simulator: ptr("KRKR"),
+		Note:      ptr("note"),
+		CreatorID: creator,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if created.Status != download.ResourceActive || created.Simulator == nil || *created.Simulator != "KRKR" || !slices.Equal(created.Platforms, []string{"and", "win"}) || created.UploadSessionID == nil || *created.UploadSessionID != session {
+	if created.Status != download.ResourceActive || created.Simulator == nil || *created.Simulator != "KRKR" || !slices.Equal(created.Platforms, []string{"and", "win"}) || created.Published() {
 		t.Fatalf("unexpected resource %+v", created)
 	}
 	if _, err := f.repo.CreateResource(ctx, download.NewResource{GameID: 987654, CreatorID: creator}); !errors.Is(err, game.ErrNotFound) {
 		t.Fatalf("missing game: %v", err)
 	}
-	if used, err := f.repo.ResourceUsesSession(ctx, gameID, session); err != nil || !used {
-		t.Fatalf("session usage: %v %v", used, err)
-	}
-	if used, _ := f.repo.ResourceUsesSession(ctx, f.db.Game(t), session); used {
-		t.Fatal("session usage is scoped to the game")
+	if published, err := f.repo.PublishIfReady(ctx, created.ID, time.Now()); err != nil || published {
+		t.Fatalf("a resource without files is not published: %v %v", published, err)
 	}
 
 	first := f.file(t, created.ID, creator, "a.7z")
-	second := f.file(t, created.ID, creator, "b.7z")
+	second := f.file(t, created.ID, creator, "b.7z", func(c *ent.GameDownloadResourceFileCreate) { c.SetFileStatus(download.FileOnServer) })
+	if published, err := f.repo.PublishIfReady(ctx, created.ID, time.Now()); err != nil || published {
+		t.Fatalf("a resource with a file still on the server is not published: %v %v", published, err)
+	}
+	if err := f.repo.MarkFileStored(ctx, second.ID, "games/b.7z"); err != nil {
+		t.Fatal(err)
+	}
+	publishedAt := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	if published, err := f.repo.PublishIfReady(ctx, created.ID, publishedAt); err != nil || !published {
+		t.Fatalf("a resource whose files are all stored is published: %v %v", published, err)
+	}
+	if again, err := f.repo.PublishIfReady(ctx, created.ID, publishedAt.Add(time.Hour)); err != nil || again {
+		t.Fatalf("publication happens once: %v %v", again, err)
+	}
+	if got, _ := f.repo.GetResource(ctx, created.ID); got.PublishedAt == nil || !got.PublishedAt.Equal(publishedAt) {
+		t.Fatalf("published at: %+v", got)
+	}
+	if err := f.repo.RenameFile(ctx, first.ID, "本体.7z"); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.repo.RenameFile(ctx, 987654, "x"); !errors.Is(err, download.ErrFileNotFound) {
+		t.Fatalf("renaming a missing file: %v", err)
+	}
 	pinned := time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC)
 	if err := f.db.Ent.GameDownloadResource.UpdateOneID(created.ID).SetUpdated(pinned).Exec(ctx); err != nil {
 		t.Fatal(err)
@@ -151,7 +168,7 @@ func TestResourceLifecycle(t *testing.T) {
 		if _, err := f.repo.LockResource(ctx, created.ID); err != nil {
 			return err
 		}
-		return f.repo.UpdateResource(ctx, created.ID, download.ResourceChanges{Platforms: []string{"win"}, Languages: []string{"en", "jp"}, FileName: ptr("renamed.7z")})
+		return f.repo.UpdateResource(ctx, created.ID, download.ResourceChanges{Platforms: []string{"win"}, Languages: []string{"en", "jp"}})
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -164,8 +181,8 @@ func TestResourceLifecycle(t *testing.T) {
 		t.Fatalf("edit must preserve updated and note, clear simulator: %+v", updated)
 	}
 	files, err := f.repo.ListFiles(ctx, created.ID)
-	if err != nil || len(files) != 2 || files[0].ID != first.ID || files[1].ID != second.ID || files[0].Name != "renamed.7z" || files[1].Name != "renamed.7z" {
-		t.Fatalf("files must be renamed: %+v %v", files, err)
+	if err != nil || len(files) != 2 || files[0].ID != first.ID || files[1].ID != second.ID || files[0].Name != "本体.7z" || files[1].Name != "b.7z" {
+		t.Fatalf("each file keeps its own name: %+v %v", files, err)
 	}
 	if err := f.repo.UpdateResource(ctx, created.ID, download.ResourceChanges{Platforms: []string{"ios"}, Languages: []string{"jp"}, Simulator: ptr("ONS"), Note: ptr("changed")}); err != nil {
 		t.Fatal(err)
@@ -378,15 +395,17 @@ func TestListReleasesAndUserResources(t *testing.T) {
 	if _, err := f.db.Ent.GameCover.Create().SetGameID(coverGame).SetLanguage("jp").SetURL("c.webp").SetType("pkgfront").SetSexual(1).SetViolence(0).Save(ctx); err != nil {
 		t.Fatal(err)
 	}
-	created := func(at time.Time) func(*ent.GameDownloadResourceCreate) {
-		return func(c *ent.GameDownloadResourceCreate) { c.SetCreated(at) }
+	at := func(created time.Time, published *time.Time) func(*ent.GameDownloadResourceCreate) {
+		return func(c *ent.GameDownloadResourceCreate) { c.SetCreated(created).SetNillablePublishedAt(published) }
 	}
 	base := time.Date(2026, 4, 1, 0, 0, 0, 0, time.UTC)
-	oldest := f.resource(t, safeGame, alice, created(base))
-	newest := f.resource(t, safeGame, bob, created(base.Add(3*time.Hour)))
-	nsfw := f.resource(t, nsfwGame, alice, created(base.Add(time.Hour)))
-	covered := f.resource(t, coverGame, alice, created(base.Add(2*time.Hour)))
-	f.resource(t, safeGame, alice, created(base.Add(4*time.Hour)), func(c *ent.GameDownloadResourceCreate) { c.SetStatus(download.ResourceRemoved) })
+	hours := func(n int) *time.Time { value := base.Add(time.Duration(n) * time.Hour); return &value }
+	oldest := f.resource(t, safeGame, alice, at(base, hours(5)))
+	newest := f.resource(t, safeGame, bob, at(*hours(3), hours(3)))
+	nsfw := f.resource(t, nsfwGame, alice, at(*hours(1), hours(1)))
+	covered := f.resource(t, coverGame, alice, at(*hours(2), hours(2)))
+	f.resource(t, safeGame, alice, at(*hours(4), hours(4)), func(c *ent.GameDownloadResourceCreate) { c.SetStatus(download.ResourceRemoved) })
+	unpublished := f.resource(t, safeGame, alice, at(*hours(6), nil))
 	f.file(t, oldest.ID, alice, "b-second.7z")
 	f.file(t, oldest.ID, alice, "a-first.7z", func(c *ent.GameDownloadResourceFileCreate) { c.SetFileStatus(download.FileOnServer) })
 
@@ -394,26 +413,30 @@ func TestListReleasesAndUserResources(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if total != 4 || len(all) != 4 || all[0].ID != newest.ID || all[1].ID != covered.ID || all[2].ID != nsfw.ID || all[3].ID != oldest.ID {
-		t.Fatalf("releases newest first: %d %+v", total, all)
+	if total != 4 || len(all) != 4 || all[0].ID != oldest.ID || all[1].ID != newest.ID || all[2].ID != covered.ID || all[3].ID != nsfw.ID {
+		t.Fatalf("published releases, latest publication first: %d %+v", total, all)
 	}
-	if last := all[3]; last.GameID != safeGame || last.FilesCount != 2 || !slices.Equal(last.FileNames, []string{"b-second.7z", "a-first.7z"}) || last.Creator.ID != alice {
-		t.Fatalf("release shape: %+v", last)
+	if first := all[0]; first.GameID != safeGame || first.FilesCount != 2 || !slices.Equal(first.FileNames, []string{"b-second.7z", "a-first.7z"}) || first.Creator.ID != alice || !first.PublishedAt.Equal(*hours(5)) {
+		t.Fatalf("release shape: %+v", first)
 	}
 	safe, total, err := f.repo.ListReleases(ctx, true, download.Page{Number: 1, Size: 1})
-	if err != nil || total != 2 || len(safe) != 1 || safe[0].ID != newest.ID {
+	if err != nil || total != 2 || len(safe) != 1 || safe[0].ID != oldest.ID {
 		t.Fatalf("strict viewers skip rated games: %d %+v %v", total, safe, err)
 	}
 	next, _, _ := f.repo.ListReleases(ctx, true, download.Page{Number: 2, Size: 1})
-	if len(next) != 1 || next[0].ID != oldest.ID {
+	if len(next) != 1 || next[0].ID != newest.ID {
 		t.Fatalf("second page: %+v", next)
 	}
 
-	mine, total, err := f.repo.ListUserResources(ctx, alice, false, download.Page{Number: 1, Size: 10})
+	mine, total, err := f.repo.ListUserResources(ctx, alice, download.UserResourceFilter{}, download.Page{Number: 1, Size: 10})
 	if err != nil || total != 3 || len(mine) != 3 || mine[0].ID != covered.ID || mine[2].ID != oldest.ID {
-		t.Fatalf("user resources: %d %+v %v", total, mine, err)
+		t.Fatalf("published user resources, newest first: %d %+v %v", total, mine, err)
 	}
-	strict, total, err := f.repo.ListUserResources(ctx, alice, true, download.Page{Number: 1, Size: 10})
+	own, total, err := f.repo.ListUserResources(ctx, alice, download.UserResourceFilter{IncludeUnpublished: true}, download.Page{Number: 1, Size: 10})
+	if err != nil || total != 4 || own[0].ID != unpublished.ID || own[0].PublishedAt != nil {
+		t.Fatalf("uploaders also see unpublished resources: %d %+v %v", total, own, err)
+	}
+	strict, total, err := f.repo.ListUserResources(ctx, alice, download.UserResourceFilter{ExcludeRated: true}, download.Page{Number: 1, Size: 10})
 	if err != nil || total != 1 || len(strict) != 1 || strict[0].ID != oldest.ID || strict[0].FilesCount != 2 {
 		t.Fatalf("strict user resources: %d %+v %v", total, strict, err)
 	}

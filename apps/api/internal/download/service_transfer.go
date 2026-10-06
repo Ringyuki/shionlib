@@ -78,6 +78,9 @@ func (t *TransferService) Store(ctx context.Context, fileID int) error {
 		if err := t.repo.MarkFileStored(ctx, current.ID, key); err != nil {
 			return err
 		}
+		if _, err := t.repo.PublishIfReady(ctx, current.ResourceID, t.now()); err != nil {
+			return err
+		}
 		if err := t.activities.Record(ctx, fileActivity(activity.TypeFileUploadToS3, current.CreatorID, current.GameID, current.ID, FileInObjectStore, CheckOK, nil, nil)); err != nil {
 			return err
 		}

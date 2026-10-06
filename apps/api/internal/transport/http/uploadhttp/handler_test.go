@@ -63,7 +63,7 @@ func TestChunkedUploadFlow(t *testing.T) {
 		t.Fatalf("quota %s", quota.Data)
 	}
 
-	init := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/uploads/large/init", As: &member, Body: map[string]any{"file_name": "game.7z", "total_size": 10, "file_sha256": uploadtest.Digest([]byte(content))}})
+	init := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/uploads/large/init", As: &member, Body: map[string]any{"file_name": "game.7z", "total_size": 10}})
 	e.server.Expect(init, http.StatusCreated, 0)
 	if string(init.Data) != `{"upload_session_id":1,"chunk_size":4,"total_chunks":3,"expires_at":"2026-10-04T01:02:03.000Z"}` {
 		t.Fatalf("init %s", init.Data)
@@ -80,7 +80,7 @@ func TestChunkedUploadFlow(t *testing.T) {
 	}
 	ongoing := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/uploads/large/ongoing", As: &member})
 	e.server.Expect(ongoing, http.StatusOK, 0)
-	if string(ongoing.Data) != `[{"upload_session_id":1,"file_name":"game.7z","file_sha256":"`+uploadtest.Digest([]byte(content))+`","total_size":10,"chunk_size":4,"uploaded_chunks":[2,0,1],"total_chunks":3,"expires_at":"2026-10-04T01:02:03.000Z"}]` {
+	if string(ongoing.Data) != `[{"upload_session_id":1,"file_name":"game.7z","total_size":10,"chunk_size":4,"uploaded_chunks":[2,0,1],"total_chunks":3,"expires_at":"2026-10-04T01:02:03.000Z"}]` {
 		t.Fatalf("ongoing %s", ongoing.Data)
 	}
 	status := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/uploads/large/1/status", As: &member})
@@ -88,7 +88,9 @@ func TestChunkedUploadFlow(t *testing.T) {
 	if !strings.Contains(string(status.Data), `"status":"UPLOADING","uploaded_chunks":[0,1,2]`) {
 		t.Fatalf("status %s", status.Data)
 	}
-	complete := e.server.Do(apitest.Request{Method: http.MethodPatch, Path: "/uploads/large/1/complete", As: &member})
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPatch, Path: "/uploads/large/1/complete", As: &member, Body: map[string]any{"file_sha256": "not-hex"}}), http.StatusUnprocessableEntity, 100101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPatch, Path: "/uploads/large/1/complete", As: &member, Body: map[string]any{"file_sha256": uploadtest.Digest([]byte("other"))}}), http.StatusConflict, 480110)
+	complete := e.server.Do(apitest.Request{Method: http.MethodPatch, Path: "/uploads/large/1/complete", As: &member, Body: map[string]any{"file_sha256": uploadtest.Digest([]byte(content))}})
 	e.server.Expect(complete, http.StatusOK, 0)
 	if string(complete.Data) != `{"ok":true}` {
 		t.Fatalf("complete %s", complete.Data)
@@ -103,7 +105,7 @@ func TestChunkedUploadFlow(t *testing.T) {
 func TestAbortReturnsEmptyEnvelope(t *testing.T) {
 	e := setup(t)
 	e.quotas.SeedQuota(upload.Quota{UserID: member.UserID, Size: 100})
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/uploads/large/init", As: &member, Body: map[string]any{"file_name": "a", "total_size": 4, "file_sha256": "x"}}), http.StatusCreated, 0)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/uploads/large/init", As: &member, Body: map[string]any{"file_name": "a", "total_size": 4}}), http.StatusCreated, 0)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodDelete, Path: "/uploads/large/1", As: &outsider}), http.StatusForbidden, 480113)
 	resp := e.server.Do(apitest.Request{Method: http.MethodDelete, Path: "/uploads/large/1", As: &member})
 	e.server.Expect(resp, http.StatusOK, 0)
@@ -119,24 +121,23 @@ func TestAbortReturnsEmptyEnvelope(t *testing.T) {
 func TestInitErrorsAndValidation(t *testing.T) {
 	e := setup(t)
 	path := "/uploads/large/init"
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, Body: map[string]any{"file_name": "a", "total_size": 4, "file_sha256": "x"}}), http.StatusUnauthorized, 200101)
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &member, Body: map[string]any{"file_name": "a", "total_size": 4, "file_sha256": "x"}}), http.StatusNotFound, 500101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, Body: map[string]any{"file_name": "a", "total_size": 4}}), http.StatusUnauthorized, 200101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &member, Body: map[string]any{"file_name": "a", "total_size": 4}}), http.StatusNotFound, 500101)
 	e.quotas.SeedQuota(upload.Quota{UserID: member.UserID, Size: 3})
-	exceeded := e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &member, Body: map[string]any{"file_name": "a", "total_size": 4, "file_sha256": "x"}})
+	exceeded := e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &member, Body: map[string]any{"file_name": "a", "total_size": 4}})
 	e.server.Expect(exceeded, http.StatusConflict, 500102)
 	if !strings.Contains(exceeded.Message, "额度") && !strings.Contains(strings.ToLower(exceeded.Message), "quota") {
 		t.Fatalf("quota errors mention the quota: %q", exceeded.Message)
 	}
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &member, Body: map[string]any{"file_name": "a", "total_size": 2, "chunk_size": 9, "file_sha256": "x"}}), http.StatusBadRequest, 480116)
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &member, Body: map[string]any{"file_name": "a", "total_size": 2, "chunk_size": 0, "file_sha256": "x"}}), http.StatusUnprocessableEntity, 100101)
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &member, Body: map[string]any{"file_name": "", "total_size": 2, "file_sha256": "x"}}), http.StatusUnprocessableEntity, 100101)
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &member, Body: map[string]any{"file_name": "a", "total_size": 2}}), http.StatusUnprocessableEntity, 100101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &member, Body: map[string]any{"file_name": "a", "total_size": 2, "chunk_size": 9}}), http.StatusBadRequest, 480116)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &member, Body: map[string]any{"file_name": "a", "total_size": 2, "chunk_size": 0}}), http.StatusUnprocessableEntity, 100101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &member, Body: map[string]any{"file_name": "", "total_size": 2}}), http.StatusUnprocessableEntity, 100101)
 }
 
 func TestChunkRouteErrors(t *testing.T) {
 	e := setup(t)
 	e.quotas.SeedQuota(upload.Quota{UserID: member.UserID, Size: 100})
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/uploads/large/init", As: &member, Body: map[string]any{"file_name": "a", "total_size": 6, "file_sha256": "x"}}), http.StatusCreated, 0)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/uploads/large/init", As: &member, Body: map[string]any{"file_name": "a", "total_size": 6}}), http.StatusCreated, 0)
 
 	e.server.Expect(e.server.Do(chunkRequest("1", "0", "0123", uploadtest.Digest([]byte("0123")), nil)), http.StatusUnauthorized, 200101)
 	invalid := e.server.Do(chunkRequest("abc", "0", "0123", "x", &member))

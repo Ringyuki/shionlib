@@ -32,15 +32,15 @@ func TestCardsSummarizePublicResources(t *testing.T) {
 	f.file(tied, 4000, download.FileOnServer)
 	removed := f.resource(popular, download.ResourceRemoved, createdAt(base.Add(72*time.Hour)), offering([]string{"ps4"}, []string{"en"}, 99))
 	f.file(removed, 1000, download.FileInObjectStore)
-	pending := f.resource(popular, download.ResourceActive, createdAt(base.Add(96*time.Hour)), offering([]string{"swi"}, []string{"en"}, 50))
+	pending := f.resource(popular, download.ResourceActive, createdAt(base.Add(96*time.Hour)), offering([]string{"swi"}, []string{"en"}, 50), unpublished)
 	f.file(pending, 2000, download.FileOnServer)
 	f.file(pending, 3000, download.FilePending)
 
 	quietRemoved := f.resource(quiet, download.ResourceRemoved, offering([]string{"win"}, []string{"jp"}, 7))
 	f.file(quietRemoved, 10, download.FileInObjectStore)
-	quietPending := f.resource(quiet, download.ResourceActive, offering([]string{"win"}, []string{"jp"}, 7))
+	quietPending := f.resource(quiet, download.ResourceActive, offering([]string{"win"}, []string{"jp"}, 7), unpublished)
 	f.file(quietPending, 10, download.FileOnServer)
-	f.resource(quiet, download.ResourceActive, offering([]string{"win"}, []string{"jp"}, 7))
+	f.resource(quiet, download.ResourceActive, offering([]string{"win"}, []string{"jp"}, 7), unpublished)
 
 	cards, err := store.Cards(f.ctx, []int{popular, quiet, bare, 999999})
 	if err != nil {

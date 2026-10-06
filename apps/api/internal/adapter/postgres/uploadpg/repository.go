@@ -33,7 +33,7 @@ func (r *Repository) CreateSession(ctx context.Context, in upload.NewSession) (u
 		SetTotalChunks(in.TotalChunks).
 		SetUploadedChunks(pgvalue.Ints{}).
 		SetHashAlgorithm(gameuploadsession.HashAlgorithmBlake3).
-		SetFileSha256(in.FileHash).
+		SetFileSha256("").
 		SetStatus(gameuploadsession.StatusUPLOADING).
 		SetStoragePath(in.StoragePath).
 		SetExpiresAt(in.ExpiresAt.UTC()).
@@ -104,16 +104,26 @@ func (r *Repository) AddChunk(ctx context.Context, id, index int) error {
 	return nil
 }
 
-func (r *Repository) SetStatus(ctx context.Context, id int, from, to upload.SessionStatus, mimeType *string) (bool, error) {
-	update := r.db(ctx).GameUploadSession.Update().
+func (r *Repository) SetStatus(ctx context.Context, id int, from, to upload.SessionStatus) (bool, error) {
+	changed, err := r.db(ctx).GameUploadSession.Update().
 		Where(gameuploadsession.ID(id), gameuploadsession.StatusEQ(gameuploadsession.Status(from))).
-		SetStatus(gameuploadsession.Status(to))
-	if mimeType != nil {
-		update.SetMimeType(*mimeType)
-	}
-	changed, err := update.Save(ctx)
+		SetStatus(gameuploadsession.Status(to)).
+		Save(ctx)
 	if err != nil {
 		return false, fmt.Errorf("set upload session %d status: %w", id, err)
+	}
+	return changed > 0, nil
+}
+
+func (r *Repository) Complete(ctx context.Context, id int, hash, mimeType string) (bool, error) {
+	changed, err := r.db(ctx).GameUploadSession.Update().
+		Where(gameuploadsession.ID(id), gameuploadsession.StatusEQ(gameuploadsession.StatusUPLOADING)).
+		SetStatus(gameuploadsession.StatusCOMPLETED).
+		SetFileSha256(hash).
+		SetMimeType(mimeType).
+		Save(ctx)
+	if err != nil {
+		return false, fmt.Errorf("complete upload session %d: %w", id, err)
 	}
 	return changed > 0, nil
 }

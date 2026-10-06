@@ -43,8 +43,6 @@ const (
 	FieldCreated = "created"
 	// FieldUpdated holds the string denoting the updated field in the database.
 	FieldUpdated = "updated"
-	// EdgeGameDownloadResources holds the string denoting the game_download_resources edge name in mutations.
-	EdgeGameDownloadResources = "game_download_resources"
 	// EdgeGameDownloadResourceFile holds the string denoting the game_download_resource_file edge name in mutations.
 	EdgeGameDownloadResourceFile = "game_download_resource_file"
 	// EdgeGameUploadChunks holds the string denoting the game_upload_chunks edge name in mutations.
@@ -55,13 +53,6 @@ const (
 	EdgeCreator = "creator"
 	// Table holds the table name of the gameuploadsession in the database.
 	Table = "game_upload_sessions"
-	// GameDownloadResourcesTable is the table that holds the game_download_resources relation/edge.
-	GameDownloadResourcesTable = "game_download_resources"
-	// GameDownloadResourcesInverseTable is the table name for the GameDownloadResource entity.
-	// It exists in this package in order to avoid circular dependency with the "gamedownloadresource" package.
-	GameDownloadResourcesInverseTable = "game_download_resources"
-	// GameDownloadResourcesColumn is the table column denoting the game_download_resources relation/edge.
-	GameDownloadResourcesColumn = "upload_session_id"
 	// GameDownloadResourceFileTable is the table that holds the game_download_resource_file relation/edge.
 	GameDownloadResourceFileTable = "game_download_resource_files"
 	// GameDownloadResourceFileInverseTable is the table name for the GameDownloadResourceFile entity.
@@ -260,20 +251,6 @@ func ByUpdated(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdated, opts...).ToFunc()
 }
 
-// ByGameDownloadResourcesCount orders the results by game_download_resources count.
-func ByGameDownloadResourcesCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newGameDownloadResourcesStep(), opts...)
-	}
-}
-
-// ByGameDownloadResources orders the results by game_download_resources terms.
-func ByGameDownloadResources(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newGameDownloadResourcesStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
 // ByGameDownloadResourceFileField orders the results by game_download_resource_file field.
 func ByGameDownloadResourceFileField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -307,13 +284,6 @@ func ByCreatorField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newCreatorStep(), sql.OrderByField(field, opts...))
 	}
-}
-func newGameDownloadResourcesStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(GameDownloadResourcesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, GameDownloadResourcesTable, GameDownloadResourcesColumn),
-	)
 }
 func newGameDownloadResourceFileStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(

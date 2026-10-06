@@ -86,7 +86,6 @@ type NewSession struct {
 	TotalSize   int64
 	ChunkSize   int64
 	TotalChunks int
-	FileHash    string
 	StoragePath string
 	ExpiresAt   time.Time
 	CreatorID   int
@@ -96,7 +95,6 @@ type InitInput struct {
 	FileName  string
 	TotalSize int64
 	ChunkSize *int64
-	FileHash  string
 }
 
 type Chunk struct {

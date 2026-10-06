@@ -55,18 +55,22 @@ func NeedsSimulator(platforms []string) bool {
 }
 
 type Resource struct {
-	ID              int
-	GameID          int
-	Status          int
-	Platforms       []string
-	Languages       []string
-	Simulator       *string
-	Note            *string
-	Downloads       int
-	UploadSessionID *int
-	CreatorID       int
-	Created         time.Time
-	Updated         time.Time
+	ID          int
+	GameID      int
+	Status      int
+	Platforms   []string
+	Languages   []string
+	Simulator   *string
+	Note        *string
+	Downloads   int
+	CreatorID   int
+	PublishedAt *time.Time
+	Created     time.Time
+	Updated     time.Time
+}
+
+func (r Resource) Published() bool {
+	return r.PublishedAt != nil
 }
 
 type File struct {
@@ -159,6 +163,11 @@ type UserResource struct {
 	Creator    user.Summary
 }
 
+type UserResourceFilter struct {
+	ExcludeRated       bool
+	IncludeUnpublished bool
+}
+
 type UserResources struct {
 	Items             []UserResource
 	Total             int
@@ -167,13 +176,12 @@ type UserResources struct {
 }
 
 type NewResource struct {
-	GameID          int
-	Platforms       []string
-	Languages       []string
-	Simulator       *string
-	Note            *string
-	UploadSessionID *int
-	CreatorID       int
+	GameID    int
+	Platforms []string
+	Languages []string
+	Simulator *string
+	Note      *string
+	CreatorID int
 }
 
 type NewFile struct {
@@ -216,16 +224,19 @@ type ResourceChanges struct {
 	Languages []string
 	Simulator *string
 	Note      *string
-	FileName  *string
+}
+
+type FileUpload struct {
+	UploadSessionID int
+	Name            string
 }
 
 type CreateInput struct {
-	FileName        string
-	Platforms       []string
-	Languages       []string
-	Simulator       *string
-	Note            *string
-	UploadSessionID int
+	Platforms []string
+	Languages []string
+	Simulator *string
+	Note      *string
+	Files     []FileUpload
 }
 
 type MigrateResourceInput struct {

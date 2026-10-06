@@ -27,7 +27,10 @@ func NewHandler(service *download.Service, links *download.LinkService, resp *re
 func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "download.gameResources", Method: http.MethodGet, Path: "/game/{id}/download-source", Summary: "List the download resources of a game", Tags: tags}, h.gameResources)
 	httpapi.Register(api, httpapi.Route{ID: "download.link", Method: http.MethodGet, Path: "/game/download/{id}/link", Summary: "Issue a download link for a file", Tags: tags, Throttle: "download"}, h.link)
-	httpapi.Register(api, httpapi.Route{ID: "download.create", Method: http.MethodPost, Path: "/game/{id}/download-source", Summary: "Create a download resource from a completed upload", Tags: tags, Access: httpapi.AccessUser}, h.create)
+	httpapi.Register(api, httpapi.Route{ID: "download.create", Method: http.MethodPost, Path: "/game/{id}/download-source", Summary: "Create a download resource from completed uploads", Tags: tags, Access: httpapi.AccessUser}, h.create)
+	httpapi.Register(api, httpapi.Route{ID: "download.addFiles", Method: http.MethodPost, Path: "/game/download-source/{id}/files", Summary: "Add completed uploads to a download resource", Tags: tags, Access: httpapi.AccessUser}, h.addFiles)
+	httpapi.Register(api, httpapi.Route{ID: "download.renameFile", Method: http.MethodPatch, Path: "/game/download-source/file/{fileId}", Summary: "Rename a file of a download resource", Tags: tags, Access: httpapi.AccessUser}, h.renameFile)
+	httpapi.Register(api, httpapi.Route{ID: "download.deleteFile", Method: http.MethodDelete, Path: "/game/download-source/file/{fileId}", Summary: "Remove a file from a download resource", Tags: tags, Access: httpapi.AccessUser}, h.deleteFile)
 	httpapi.Register(api, httpapi.Route{ID: "download.releases", Method: http.MethodGet, Path: "/game/download-source/list", Summary: "List recently released download resources", Tags: tags}, h.releases)
 	httpapi.Register(api, httpapi.Route{ID: "download.delete", Method: http.MethodDelete, Path: "/game/download-source/{id}", Summary: "Delete a download resource and its stored objects", Tags: tags, Access: httpapi.AccessSuperAdmin}, h.delete)
 	httpapi.Register(api, httpapi.Route{ID: "download.edit", Method: http.MethodPatch, Path: "/game/download-source/{id}", Summary: "Edit a download resource", Tags: tags, Access: httpapi.AccessUser}, h.edit)
@@ -62,16 +65,36 @@ func (h *Handler) link(ctx context.Context, in *downloadLinkInput) (*response.Ou
 	return response.OK(ctx, h.resp, downloadLinkDTO{FileURL: link.URL, ExpiresIn: link.ExpiresIn}), nil
 }
 
-func (h *Handler) create(ctx context.Context, in *createDownloadSourceInput) (*response.EmptyOutput, error) {
-	err := h.service.Create(ctx, actor.From(ctx), in.ID, download.CreateInput{
-		FileName:        in.Body.FileName,
-		Platforms:       in.Body.Platform,
-		Languages:       in.Body.Language,
-		Simulator:       in.Body.Simulator,
-		Note:            in.Body.Note,
-		UploadSessionID: in.Body.UploadSessionID,
+func (h *Handler) create(ctx context.Context, in *createDownloadSourceInput) (*response.Output[downloadResourceCreatedDTO], error) {
+	resource, err := h.service.Create(ctx, actor.From(ctx), in.ID, download.CreateInput{
+		Platforms: in.Body.Platform,
+		Languages: in.Body.Language,
+		Simulator: in.Body.Simulator,
+		Note:      in.Body.Note,
+		Files:     fileUploads(in.Body.Files),
 	})
 	if err != nil {
+		return nil, err
+	}
+	return response.OK(ctx, h.resp, downloadResourceCreatedDTO{ID: resource.ID}), nil
+}
+
+func (h *Handler) addFiles(ctx context.Context, in *addDownloadFilesInput) (*response.EmptyOutput, error) {
+	if err := h.service.AddFiles(ctx, actor.From(ctx), in.ID, fileUploads(in.Body.Files)); err != nil {
+		return nil, err
+	}
+	return response.Empty(ctx, h.resp), nil
+}
+
+func (h *Handler) renameFile(ctx context.Context, in *renameDownloadFileInput) (*response.EmptyOutput, error) {
+	if err := h.service.RenameFile(ctx, actor.From(ctx), in.FileID, in.Body.FileName); err != nil {
+		return nil, err
+	}
+	return response.Empty(ctx, h.resp), nil
+}
+
+func (h *Handler) deleteFile(ctx context.Context, in *downloadFilePathInput) (*response.EmptyOutput, error) {
+	if err := h.service.DeleteFile(ctx, actor.From(ctx), in.FileID); err != nil {
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil
@@ -107,7 +130,6 @@ func (h *Handler) edit(ctx context.Context, in *editDownloadSourceInput) (*respo
 		Languages: in.Body.Language,
 		Simulator: in.Body.Simulator,
 		Note:      in.Body.Note,
-		FileName:  in.Body.FileName,
 	})
 	if err != nil {
 		return nil, err

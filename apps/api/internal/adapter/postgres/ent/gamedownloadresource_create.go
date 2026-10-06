@@ -15,7 +15,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
@@ -103,16 +102,16 @@ func (_c *GameDownloadResourceCreate) SetNillableDownloads(v *int) *GameDownload
 	return _c
 }
 
-// SetUploadSessionID sets the "upload_session_id" field.
-func (_c *GameDownloadResourceCreate) SetUploadSessionID(v int) *GameDownloadResourceCreate {
-	_c.mutation.SetUploadSessionID(v)
+// SetPublishedAt sets the "published_at" field.
+func (_c *GameDownloadResourceCreate) SetPublishedAt(v time.Time) *GameDownloadResourceCreate {
+	_c.mutation.SetPublishedAt(v)
 	return _c
 }
 
-// SetNillableUploadSessionID sets the "upload_session_id" field if the given value is not nil.
-func (_c *GameDownloadResourceCreate) SetNillableUploadSessionID(v *int) *GameDownloadResourceCreate {
+// SetNillablePublishedAt sets the "published_at" field if the given value is not nil.
+func (_c *GameDownloadResourceCreate) SetNillablePublishedAt(v *time.Time) *GameDownloadResourceCreate {
 	if v != nil {
-		_c.SetUploadSessionID(*v)
+		_c.SetPublishedAt(*v)
 	}
 	return _c
 }
@@ -205,11 +204,6 @@ func (_c *GameDownloadResourceCreate) AddMalwareScanCases(v ...*MalwareScanCase)
 		ids[i] = v[i].ID
 	}
 	return _c.AddMalwareScanCaseIDs(ids...)
-}
-
-// SetUploadSession sets the "upload_session" edge to the GameUploadSession entity.
-func (_c *GameDownloadResourceCreate) SetUploadSession(v *GameUploadSession) *GameDownloadResourceCreate {
-	return _c.SetUploadSessionID(v.ID)
 }
 
 // SetCreator sets the "creator" edge to the User entity.
@@ -360,6 +354,10 @@ func (_c *GameDownloadResourceCreate) createSpec() (*GameDownloadResource, *sqlg
 		_spec.SetField(gamedownloadresource.FieldDownloads, field.TypeInt, value)
 		_node.Downloads = value
 	}
+	if value, ok := _c.mutation.PublishedAt(); ok {
+		_spec.SetField(gamedownloadresource.FieldPublishedAt, field.TypeTime, value)
+		_node.PublishedAt = &value
+	}
 	if value, ok := _c.mutation.Created(); ok {
 		_spec.SetField(gamedownloadresource.FieldCreated, field.TypeTime, value)
 		_node.Created = value
@@ -431,23 +429,6 @@ func (_c *GameDownloadResourceCreate) createSpec() (*GameDownloadResource, *sqlg
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.UploadSessionIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   gamedownloadresource.UploadSessionTable,
-			Columns: []string{gamedownloadresource.UploadSessionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(gameuploadsession.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.UploadSessionID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.CreatorIDs(); len(nodes) > 0 {
@@ -639,21 +620,21 @@ func (u *GameDownloadResourceUpsert) AddDownloads(v int) *GameDownloadResourceUp
 	return u
 }
 
-// SetUploadSessionID sets the "upload_session_id" field.
-func (u *GameDownloadResourceUpsert) SetUploadSessionID(v int) *GameDownloadResourceUpsert {
-	u.Set(gamedownloadresource.FieldUploadSessionID, v)
+// SetPublishedAt sets the "published_at" field.
+func (u *GameDownloadResourceUpsert) SetPublishedAt(v time.Time) *GameDownloadResourceUpsert {
+	u.Set(gamedownloadresource.FieldPublishedAt, v)
 	return u
 }
 
-// UpdateUploadSessionID sets the "upload_session_id" field to the value that was provided on create.
-func (u *GameDownloadResourceUpsert) UpdateUploadSessionID() *GameDownloadResourceUpsert {
-	u.SetExcluded(gamedownloadresource.FieldUploadSessionID)
+// UpdatePublishedAt sets the "published_at" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsert) UpdatePublishedAt() *GameDownloadResourceUpsert {
+	u.SetExcluded(gamedownloadresource.FieldPublishedAt)
 	return u
 }
 
-// ClearUploadSessionID clears the value of the "upload_session_id" field.
-func (u *GameDownloadResourceUpsert) ClearUploadSessionID() *GameDownloadResourceUpsert {
-	u.SetNull(gamedownloadresource.FieldUploadSessionID)
+// ClearPublishedAt clears the value of the "published_at" field.
+func (u *GameDownloadResourceUpsert) ClearPublishedAt() *GameDownloadResourceUpsert {
+	u.SetNull(gamedownloadresource.FieldPublishedAt)
 	return u
 }
 
@@ -872,24 +853,24 @@ func (u *GameDownloadResourceUpsertOne) UpdateDownloads() *GameDownloadResourceU
 	})
 }
 
-// SetUploadSessionID sets the "upload_session_id" field.
-func (u *GameDownloadResourceUpsertOne) SetUploadSessionID(v int) *GameDownloadResourceUpsertOne {
+// SetPublishedAt sets the "published_at" field.
+func (u *GameDownloadResourceUpsertOne) SetPublishedAt(v time.Time) *GameDownloadResourceUpsertOne {
 	return u.Update(func(s *GameDownloadResourceUpsert) {
-		s.SetUploadSessionID(v)
+		s.SetPublishedAt(v)
 	})
 }
 
-// UpdateUploadSessionID sets the "upload_session_id" field to the value that was provided on create.
-func (u *GameDownloadResourceUpsertOne) UpdateUploadSessionID() *GameDownloadResourceUpsertOne {
+// UpdatePublishedAt sets the "published_at" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertOne) UpdatePublishedAt() *GameDownloadResourceUpsertOne {
 	return u.Update(func(s *GameDownloadResourceUpsert) {
-		s.UpdateUploadSessionID()
+		s.UpdatePublishedAt()
 	})
 }
 
-// ClearUploadSessionID clears the value of the "upload_session_id" field.
-func (u *GameDownloadResourceUpsertOne) ClearUploadSessionID() *GameDownloadResourceUpsertOne {
+// ClearPublishedAt clears the value of the "published_at" field.
+func (u *GameDownloadResourceUpsertOne) ClearPublishedAt() *GameDownloadResourceUpsertOne {
 	return u.Update(func(s *GameDownloadResourceUpsert) {
-		s.ClearUploadSessionID()
+		s.ClearPublishedAt()
 	})
 }
 
@@ -1278,24 +1259,24 @@ func (u *GameDownloadResourceUpsertBulk) UpdateDownloads() *GameDownloadResource
 	})
 }
 
-// SetUploadSessionID sets the "upload_session_id" field.
-func (u *GameDownloadResourceUpsertBulk) SetUploadSessionID(v int) *GameDownloadResourceUpsertBulk {
+// SetPublishedAt sets the "published_at" field.
+func (u *GameDownloadResourceUpsertBulk) SetPublishedAt(v time.Time) *GameDownloadResourceUpsertBulk {
 	return u.Update(func(s *GameDownloadResourceUpsert) {
-		s.SetUploadSessionID(v)
+		s.SetPublishedAt(v)
 	})
 }
 
-// UpdateUploadSessionID sets the "upload_session_id" field to the value that was provided on create.
-func (u *GameDownloadResourceUpsertBulk) UpdateUploadSessionID() *GameDownloadResourceUpsertBulk {
+// UpdatePublishedAt sets the "published_at" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertBulk) UpdatePublishedAt() *GameDownloadResourceUpsertBulk {
 	return u.Update(func(s *GameDownloadResourceUpsert) {
-		s.UpdateUploadSessionID()
+		s.UpdatePublishedAt()
 	})
 }
 
-// ClearUploadSessionID clears the value of the "upload_session_id" field.
-func (u *GameDownloadResourceUpsertBulk) ClearUploadSessionID() *GameDownloadResourceUpsertBulk {
+// ClearPublishedAt clears the value of the "published_at" field.
+func (u *GameDownloadResourceUpsertBulk) ClearPublishedAt() *GameDownloadResourceUpsertBulk {
 	return u.Update(func(s *GameDownloadResourceUpsert) {
-		s.ClearUploadSessionID()
+		s.ClearPublishedAt()
 	})
 }
 

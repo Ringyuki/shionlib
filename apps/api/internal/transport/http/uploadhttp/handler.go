@@ -146,7 +146,6 @@ func (h *Handler) init(ctx context.Context, in *initUploadInput) (*response.Outp
 		FileName:  in.Body.FileName,
 		TotalSize: in.Body.TotalSize,
 		ChunkSize: in.Body.ChunkSize,
-		FileHash:  in.Body.FileSHA256,
 	})
 	if err != nil {
 		return nil, err
@@ -167,8 +166,8 @@ func (h *Handler) status(ctx context.Context, in *uploadSessionPathInput) (*resp
 	return response.OK(ctx, h.resp, toUploadStatus(session)), nil
 }
 
-func (h *Handler) complete(ctx context.Context, in *uploadSessionPathInput) (*response.Output[uploadCompleteDTO], error) {
-	if err := h.service.Complete(ctx, actor.From(ctx), in.ID); err != nil {
+func (h *Handler) complete(ctx context.Context, in *completeUploadInput) (*response.Output[uploadCompleteDTO], error) {
+	if err := h.service.Complete(ctx, actor.From(ctx), in.ID, in.Body.FileSHA256); err != nil {
 		return nil, err
 	}
 	return response.OK(ctx, h.resp, uploadCompleteDTO{OK: true}), nil

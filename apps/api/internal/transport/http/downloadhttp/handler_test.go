@@ -2,6 +2,7 @@ package downloadhttp_test
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -17,6 +18,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/downloadhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
+	"github.com/Ringyuki/shionlib/apps/api/internal/upload/uploadtest"
 )
 
 var (
@@ -29,13 +31,13 @@ var (
 type sessions struct{}
 
 func (sessions) Claim(_ context.Context, who actor.Actor, id int) (upload.Session, error) {
-	if id != 5 {
+	if id < 5 || id > 8 {
 		return upload.Session{}, upload.ErrSessionNotFound
 	}
 	if who.UserID != creator.UserID {
 		return upload.Session{}, upload.ErrSessionNotOwner
 	}
-	return upload.Session{ID: 5, Status: upload.StatusCompleted, CreatorID: creator.UserID, FileName: "s.7z", StoragePath: "/spool/5.part", TotalSize: 9, FileHash: "h", HashAlgorithm: upload.HashBLAKE3}, nil
+	return upload.Session{ID: id, Status: upload.StatusCompleted, CreatorID: creator.UserID, FileName: fmt.Sprintf("s%d.7z", id), StoragePath: fmt.Sprintf("/spool/%d.part", id), TotalSize: 9, FileHash: "h", HashAlgorithm: upload.HashBLAKE3}, nil
 }
 
 type quota struct{}
@@ -59,7 +61,8 @@ func setup(t *testing.T) env {
 	events := &downloadtest.Recorder{}
 	store := downloadtest.NewObjectStore()
 	cards := gametest.NewCards(game.Card{ID: 10, TitleJP: "ゲーム", Covers: []game.Cover{{URL: "safe.webp"}, {URL: "rated.webp", Sexual: 1}}})
-	service := download.NewService(download.Deps{Repo: repo, Games: cards, Sessions: sessions{}, Quota: quota{}, Activities: events, Messages: events, Tx: &txtest.Immediate{}, Queue: events, Store: store, Now: now})
+	settings := settingtest.Set(settingtest.Source{}, download.MaxFilesPerResource, 3)
+	service := download.NewService(download.Deps{Repo: repo, Games: cards, Sessions: sessions{}, Quota: quota{}, Activities: events, Messages: events, Tx: &txtest.Immediate{}, Queue: events, Store: store, Local: uploadtest.NewMemorySpool(), Settings: settings, Now: now})
 	challenge := &downloadtest.Challenge{Verdict: download.Verdict{Success: true}}
 	links := download.NewLinkService(repo, &txtest.Immediate{}, challenge, &downloadtest.Authorizer{}, &downloadtest.Sealer{}, settingtest.Source{}, download.LinkOptions{Mode: download.ModeDirect, CDNHost: "https://cdn.example.com/"}, now)
 	downloadhttp.NewHandler(service, links, server.Builder).Register(server.API)
@@ -71,7 +74,7 @@ func ptr[T any](v T) *T {
 }
 
 func (e env) seedStoredFile() (download.Resource, download.File) {
-	resource := e.repo.SeedResource(download.Resource{GameID: 10, CreatorID: creator.UserID, Platforms: []string{"win"}, Languages: []string{"jp"}, Note: ptr("note")})
+	resource := e.repo.SeedResource(download.Resource{GameID: 10, CreatorID: creator.UserID, Platforms: []string{"win"}, Languages: []string{"jp"}, Note: ptr("note"), PublishedAt: ptr(apitest.Now)})
 	file := e.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "game.7z", Size: 2048, Status: download.FileInObjectStore, StorageKey: ptr("games/10/1/game.7z"), Hash: "b3", CreatorID: creator.UserID})
 	return resource, file
 }
@@ -81,7 +84,7 @@ func TestGameResourcesShape(t *testing.T) {
 	e.seedStoredFile()
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/10/download-source"})
 	e.server.Expect(resp, http.StatusOK, 0)
-	want := `[{"id":1,"platform":["win"],"language":["jp"],"simulator":null,"note":"note","downloads":0,"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","files":[{"id":1,"type":1,"file_name":"game.7z","file_size":2048,"file_url":null,"s3_file_key":"games/10/1/game.7z","hash_algorithm":"blake3","file_hash":"b3","file_status":3,"is_virus_false_positive":false,"malware_scan_cases":[],"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"latest_history":null}]}]`
+	want := `[{"id":1,"platform":["win"],"language":["jp"],"simulator":null,"note":"note","downloads":0,"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"published_at":"2026-10-03T01:02:03.000Z","created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","files":[{"id":1,"type":1,"file_name":"game.7z","file_size":2048,"file_url":null,"s3_file_key":"games/10/1/game.7z","hash_algorithm":"blake3","file_hash":"b3","file_status":3,"is_virus_false_positive":false,"malware_scan_cases":[],"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"latest_history":null}]}]`
 	if string(resp.Data) != want {
 		t.Fatalf("game resources\n got %s\nwant %s", resp.Data, want)
 	}
@@ -112,29 +115,70 @@ func TestDownloadLink(t *testing.T) {
 func TestCreateDownloadSource(t *testing.T) {
 	e := setup(t)
 	path := "/game/10/download-source"
-	body := map[string]any{"file_name": "x.7z", "platform": []string{"win"}, "language": []string{"jp"}, "upload_session_id": 5}
+	files := func(ids ...int) []map[string]any {
+		out := make([]map[string]any, len(ids))
+		for i, id := range ids {
+			out[i] = map[string]any{"upload_session_id": id}
+		}
+		return out
+	}
+	body := map[string]any{"platform": []string{"win"}, "language": []string{"jp"}, "files": []map[string]any{{"upload_session_id": 5, "file_name": "本体.7z"}, {"upload_session_id": 6}}}
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, Body: body}), http.StatusUnauthorized, 200101)
 	resp := e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &creator, Body: body})
 	e.server.Expect(resp, http.StatusCreated, 0)
-	if resp.HasData {
-		t.Fatalf("create omits data: %s", resp.Body)
+	if string(resp.Data) != `{"id":1}` {
+		t.Fatalf("create returns the resource id: %s", resp.Data)
+	}
+	stored, _ := e.repo.ListFiles(context.Background(), 1)
+	if len(stored) != 2 || stored[0].Name != "本体.7z" || stored[1].Name != "s6.7z" {
+		t.Fatalf("files %+v", stored)
 	}
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &creator, Body: body}), http.StatusConflict, 440103)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &visitor, Body: body}), http.StatusForbidden, 480113)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/game/404/download-source", As: &creator, Body: body}), http.StatusNotFound, 400101)
+	tooMany := map[string]any{"platform": []string{"win"}, "language": []string{"jp"}, "files": files(5, 6, 7, 8)}
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &creator, Body: tooMany}), http.StatusBadRequest, 440104)
 
-	mobile := map[string]any{"file_name": "x.apk", "platform": []string{"and"}, "language": []string{"jp"}, "upload_session_id": 5}
-	missing := e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &creator, Body: mobile})
-	e.server.Expect(missing, http.StatusUnprocessableEntity, 100101)
-	if !strings.Contains(string(missing.Data), `"field":"simulator"`) {
-		t.Fatalf("mobile platforms require a simulator: %s", missing.Data)
+	invalid := map[string]map[string]any{
+		"mobile without simulator": {"platform": []string{"and"}, "language": []string{"jp"}, "files": files(7)},
+		"unknown platform":         {"platform": []string{"nes"}, "language": []string{"jp"}, "files": files(7)},
+		"no platform":              {"platform": []string{}, "language": []string{"jp"}, "files": files(7)},
+		"long note":                {"platform": []string{"win"}, "language": []string{"jp"}, "files": files(7), "note": strings.Repeat("n", 256)},
+		"no files":                 {"platform": []string{"win"}, "language": []string{"jp"}, "files": []map[string]any{}},
+		"long file name":           {"platform": []string{"win"}, "language": []string{"jp"}, "files": []map[string]any{{"upload_session_id": 7, "file_name": strings.Repeat("n", 256)}}},
 	}
-	badEnum := map[string]any{"file_name": "x", "platform": []string{"nes"}, "language": []string{"jp"}, "upload_session_id": 5}
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &creator, Body: badEnum}), http.StatusUnprocessableEntity, 100101)
-	emptyPlatforms := map[string]any{"file_name": "x", "platform": []string{}, "language": []string{"jp"}, "upload_session_id": 5}
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &creator, Body: emptyPlatforms}), http.StatusUnprocessableEntity, 100101)
-	longNote := map[string]any{"file_name": "x", "platform": []string{"win"}, "language": []string{"jp"}, "upload_session_id": 5, "note": strings.Repeat("n", 256)}
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &creator, Body: longNote}), http.StatusUnprocessableEntity, 100101)
+	for name, invalidBody := range invalid {
+		resp := e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &creator, Body: invalidBody})
+		if resp.Status != http.StatusUnprocessableEntity || resp.Code != 100101 {
+			t.Fatalf("%s: %d %s", name, resp.Status, resp.Body)
+		}
+	}
+}
+
+func TestFileRoutes(t *testing.T) {
+	e := setup(t)
+	resource, file := e.seedStoredFile()
+	filesPath := fmt.Sprintf("/game/download-source/%d/files", resource.ID)
+	add := map[string]any{"files": []map[string]any{{"upload_session_id": 7, "file_name": "patch.zip"}}}
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: filesPath, As: &visitor, Body: add}), http.StatusForbidden, 440102)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: filesPath, As: &creator, Body: add}), http.StatusCreated, 0)
+	stored, _ := e.repo.ListFiles(context.Background(), resource.ID)
+	if len(stored) != 2 || stored[1].Name != "patch.zip" {
+		t.Fatalf("files after adding %+v", stored)
+	}
+
+	filePath := fmt.Sprintf("/game/download-source/file/%d", file.ID)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPatch, Path: filePath, As: &visitor, Body: map[string]any{"file_name": "x.7z"}}), http.StatusForbidden, 450104)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPatch, Path: filePath, As: &creator, Body: map[string]any{"file_name": ""}}), http.StatusUnprocessableEntity, 100101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPatch, Path: filePath, As: &creator, Body: map[string]any{"file_name": "本体.7z"}}), http.StatusOK, 0)
+	if renamed, _ := e.repo.GetFile(context.Background(), file.ID); renamed.Name != "本体.7z" {
+		t.Fatalf("renamed %+v", renamed)
+	}
+
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodDelete, Path: filePath, As: &visitor}), http.StatusForbidden, 450104)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodDelete, Path: filePath, As: &creator}), http.StatusOK, 0)
+	last := fmt.Sprintf("/game/download-source/file/%d", stored[1].ID)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodDelete, Path: last, As: &creator}), http.StatusConflict, 440105)
 }
 
 func TestEditAndDelete(t *testing.T) {

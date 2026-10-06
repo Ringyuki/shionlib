@@ -57,8 +57,6 @@ type GameUploadSession struct {
 
 // GameUploadSessionEdges holds the relations/edges for other nodes in the graph.
 type GameUploadSessionEdges struct {
-	// GameDownloadResources holds the value of the game_download_resources edge.
-	GameDownloadResources []*GameDownloadResource `json:"game_download_resources,omitempty"`
 	// GameDownloadResourceFile holds the value of the game_download_resource_file edge.
 	GameDownloadResourceFile *GameDownloadResourceFile `json:"game_download_resource_file,omitempty"`
 	// GameUploadChunks holds the value of the game_upload_chunks edge.
@@ -69,16 +67,7 @@ type GameUploadSessionEdges struct {
 	Creator *User `json:"creator,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
-}
-
-// GameDownloadResourcesOrErr returns the GameDownloadResources value or an error if the edge
-// was not loaded in eager-loading.
-func (e GameUploadSessionEdges) GameDownloadResourcesOrErr() ([]*GameDownloadResource, error) {
-	if e.loadedTypes[0] {
-		return e.GameDownloadResources, nil
-	}
-	return nil, &NotLoadedError{edge: "game_download_resources"}
+	loadedTypes [4]bool
 }
 
 // GameDownloadResourceFileOrErr returns the GameDownloadResourceFile value or an error if the edge
@@ -86,7 +75,7 @@ func (e GameUploadSessionEdges) GameDownloadResourcesOrErr() ([]*GameDownloadRes
 func (e GameUploadSessionEdges) GameDownloadResourceFileOrErr() (*GameDownloadResourceFile, error) {
 	if e.GameDownloadResourceFile != nil {
 		return e.GameDownloadResourceFile, nil
-	} else if e.loadedTypes[1] {
+	} else if e.loadedTypes[0] {
 		return nil, &NotFoundError{label: gamedownloadresourcefile.Label}
 	}
 	return nil, &NotLoadedError{edge: "game_download_resource_file"}
@@ -95,7 +84,7 @@ func (e GameUploadSessionEdges) GameDownloadResourceFileOrErr() (*GameDownloadRe
 // GameUploadChunksOrErr returns the GameUploadChunks value or an error if the edge
 // was not loaded in eager-loading.
 func (e GameUploadSessionEdges) GameUploadChunksOrErr() ([]*GameUploadChunk, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[1] {
 		return e.GameUploadChunks, nil
 	}
 	return nil, &NotLoadedError{edge: "game_upload_chunks"}
@@ -106,7 +95,7 @@ func (e GameUploadSessionEdges) GameUploadChunksOrErr() ([]*GameUploadChunk, err
 func (e GameUploadSessionEdges) UserUploadQuotaRecordOrErr() (*UserUploadQuotaRecord, error) {
 	if e.UserUploadQuotaRecord != nil {
 		return e.UserUploadQuotaRecord, nil
-	} else if e.loadedTypes[3] {
+	} else if e.loadedTypes[2] {
 		return nil, &NotFoundError{label: useruploadquotarecord.Label}
 	}
 	return nil, &NotLoadedError{edge: "user_upload_quota_record"}
@@ -117,7 +106,7 @@ func (e GameUploadSessionEdges) UserUploadQuotaRecordOrErr() (*UserUploadQuotaRe
 func (e GameUploadSessionEdges) CreatorOrErr() (*User, error) {
 	if e.Creator != nil {
 		return e.Creator, nil
-	} else if e.loadedTypes[4] {
+	} else if e.loadedTypes[3] {
 		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "creator"}
@@ -253,11 +242,6 @@ func (_m *GameUploadSession) assignValues(columns []string, values []any) error 
 // This includes values selected through modifiers, order, etc.
 func (_m *GameUploadSession) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
-}
-
-// QueryGameDownloadResources queries the "game_download_resources" edge of the GameUploadSession entity.
-func (_m *GameUploadSession) QueryGameDownloadResources() *GameDownloadResourceQuery {
-	return NewGameUploadSessionClient(_m.config).QueryGameDownloadResources(_m)
 }
 
 // QueryGameDownloadResourceFile queries the "game_download_resource_file" edge of the GameUploadSession entity.

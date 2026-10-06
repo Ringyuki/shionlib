@@ -15,7 +15,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
@@ -156,23 +155,23 @@ func (_u *GameDownloadResourceUpdate) AddDownloads(v int) *GameDownloadResourceU
 	return _u
 }
 
-// SetUploadSessionID sets the "upload_session_id" field.
-func (_u *GameDownloadResourceUpdate) SetUploadSessionID(v int) *GameDownloadResourceUpdate {
-	_u.mutation.SetUploadSessionID(v)
+// SetPublishedAt sets the "published_at" field.
+func (_u *GameDownloadResourceUpdate) SetPublishedAt(v time.Time) *GameDownloadResourceUpdate {
+	_u.mutation.SetPublishedAt(v)
 	return _u
 }
 
-// SetNillableUploadSessionID sets the "upload_session_id" field if the given value is not nil.
-func (_u *GameDownloadResourceUpdate) SetNillableUploadSessionID(v *int) *GameDownloadResourceUpdate {
+// SetNillablePublishedAt sets the "published_at" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdate) SetNillablePublishedAt(v *time.Time) *GameDownloadResourceUpdate {
 	if v != nil {
-		_u.SetUploadSessionID(*v)
+		_u.SetPublishedAt(*v)
 	}
 	return _u
 }
 
-// ClearUploadSessionID clears the value of the "upload_session_id" field.
-func (_u *GameDownloadResourceUpdate) ClearUploadSessionID() *GameDownloadResourceUpdate {
-	_u.mutation.ClearUploadSessionID()
+// ClearPublishedAt clears the value of the "published_at" field.
+func (_u *GameDownloadResourceUpdate) ClearPublishedAt() *GameDownloadResourceUpdate {
+	_u.mutation.ClearPublishedAt()
 	return _u
 }
 
@@ -244,11 +243,6 @@ func (_u *GameDownloadResourceUpdate) AddMalwareScanCases(v ...*MalwareScanCase)
 		ids[i] = v[i].ID
 	}
 	return _u.AddMalwareScanCaseIDs(ids...)
-}
-
-// SetUploadSession sets the "upload_session" edge to the GameUploadSession entity.
-func (_u *GameDownloadResourceUpdate) SetUploadSession(v *GameUploadSession) *GameDownloadResourceUpdate {
-	return _u.SetUploadSessionID(v.ID)
 }
 
 // SetCreator sets the "creator" edge to the User entity.
@@ -328,12 +322,6 @@ func (_u *GameDownloadResourceUpdate) RemoveMalwareScanCases(v ...*MalwareScanCa
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveMalwareScanCaseIDs(ids...)
-}
-
-// ClearUploadSession clears the "upload_session" edge to the GameUploadSession entity.
-func (_u *GameDownloadResourceUpdate) ClearUploadSession() *GameDownloadResourceUpdate {
-	_u.mutation.ClearUploadSession()
-	return _u
 }
 
 // ClearCreator clears the "creator" edge to the User entity.
@@ -452,6 +440,12 @@ func (_u *GameDownloadResourceUpdate) sqlSave(ctx context.Context) (_node int, e
 	}
 	if value, ok := _u.mutation.AddedDownloads(); ok {
 		_spec.AddField(gamedownloadresource.FieldDownloads, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.PublishedAt(); ok {
+		_spec.SetField(gamedownloadresource.FieldPublishedAt, field.TypeTime, value)
+	}
+	if _u.mutation.PublishedAtCleared() {
+		_spec.ClearField(gamedownloadresource.FieldPublishedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(gamedownloadresource.FieldUpdated, field.TypeTime, value)
@@ -613,35 +607,6 @@ func (_u *GameDownloadResourceUpdate) sqlSave(ctx context.Context) (_node int, e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(malwarescancase.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.UploadSessionCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   gamedownloadresource.UploadSessionTable,
-			Columns: []string{gamedownloadresource.UploadSessionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(gameuploadsession.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.UploadSessionIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   gamedownloadresource.UploadSessionTable,
-			Columns: []string{gamedownloadresource.UploadSessionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(gameuploadsession.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -820,23 +785,23 @@ func (_u *GameDownloadResourceUpdateOne) AddDownloads(v int) *GameDownloadResour
 	return _u
 }
 
-// SetUploadSessionID sets the "upload_session_id" field.
-func (_u *GameDownloadResourceUpdateOne) SetUploadSessionID(v int) *GameDownloadResourceUpdateOne {
-	_u.mutation.SetUploadSessionID(v)
+// SetPublishedAt sets the "published_at" field.
+func (_u *GameDownloadResourceUpdateOne) SetPublishedAt(v time.Time) *GameDownloadResourceUpdateOne {
+	_u.mutation.SetPublishedAt(v)
 	return _u
 }
 
-// SetNillableUploadSessionID sets the "upload_session_id" field if the given value is not nil.
-func (_u *GameDownloadResourceUpdateOne) SetNillableUploadSessionID(v *int) *GameDownloadResourceUpdateOne {
+// SetNillablePublishedAt sets the "published_at" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdateOne) SetNillablePublishedAt(v *time.Time) *GameDownloadResourceUpdateOne {
 	if v != nil {
-		_u.SetUploadSessionID(*v)
+		_u.SetPublishedAt(*v)
 	}
 	return _u
 }
 
-// ClearUploadSessionID clears the value of the "upload_session_id" field.
-func (_u *GameDownloadResourceUpdateOne) ClearUploadSessionID() *GameDownloadResourceUpdateOne {
-	_u.mutation.ClearUploadSessionID()
+// ClearPublishedAt clears the value of the "published_at" field.
+func (_u *GameDownloadResourceUpdateOne) ClearPublishedAt() *GameDownloadResourceUpdateOne {
+	_u.mutation.ClearPublishedAt()
 	return _u
 }
 
@@ -908,11 +873,6 @@ func (_u *GameDownloadResourceUpdateOne) AddMalwareScanCases(v ...*MalwareScanCa
 		ids[i] = v[i].ID
 	}
 	return _u.AddMalwareScanCaseIDs(ids...)
-}
-
-// SetUploadSession sets the "upload_session" edge to the GameUploadSession entity.
-func (_u *GameDownloadResourceUpdateOne) SetUploadSession(v *GameUploadSession) *GameDownloadResourceUpdateOne {
-	return _u.SetUploadSessionID(v.ID)
 }
 
 // SetCreator sets the "creator" edge to the User entity.
@@ -992,12 +952,6 @@ func (_u *GameDownloadResourceUpdateOne) RemoveMalwareScanCases(v ...*MalwareSca
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveMalwareScanCaseIDs(ids...)
-}
-
-// ClearUploadSession clears the "upload_session" edge to the GameUploadSession entity.
-func (_u *GameDownloadResourceUpdateOne) ClearUploadSession() *GameDownloadResourceUpdateOne {
-	_u.mutation.ClearUploadSession()
-	return _u
 }
 
 // ClearCreator clears the "creator" edge to the User entity.
@@ -1146,6 +1100,12 @@ func (_u *GameDownloadResourceUpdateOne) sqlSave(ctx context.Context) (_node *Ga
 	}
 	if value, ok := _u.mutation.AddedDownloads(); ok {
 		_spec.AddField(gamedownloadresource.FieldDownloads, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.PublishedAt(); ok {
+		_spec.SetField(gamedownloadresource.FieldPublishedAt, field.TypeTime, value)
+	}
+	if _u.mutation.PublishedAtCleared() {
+		_spec.ClearField(gamedownloadresource.FieldPublishedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(gamedownloadresource.FieldUpdated, field.TypeTime, value)
@@ -1307,35 +1267,6 @@ func (_u *GameDownloadResourceUpdateOne) sqlSave(ctx context.Context) (_node *Ga
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(malwarescancase.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.UploadSessionCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   gamedownloadresource.UploadSessionTable,
-			Columns: []string{gamedownloadresource.UploadSessionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(gameuploadsession.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.UploadSessionIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   gamedownloadresource.UploadSessionTable,
-			Columns: []string{gamedownloadresource.UploadSessionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(gameuploadsession.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -32817,6 +32817,7 @@ type GameDownloadResourceMutation struct {
 	note                      *string
 	downloads                 *int
 	adddownloads              *int
+	published_at              *time.Time
 	created                   *time.Time
 	updated                   *time.Time
 	clearedFields             map[string]struct{}
@@ -32831,8 +32832,6 @@ type GameDownloadResourceMutation struct {
 	malware_scan_cases        map[int]struct{}
 	removedmalware_scan_cases map[int]struct{}
 	clearedmalware_scan_cases bool
-	upload_session            *int
-	clearedupload_session     bool
 	creator                   *int
 	clearedcreator            bool
 	done                      bool
@@ -33288,53 +33287,53 @@ func (m *GameDownloadResourceMutation) ResetDownloads() {
 	m.adddownloads = nil
 }
 
-// SetUploadSessionID sets the "upload_session_id" field.
-func (m *GameDownloadResourceMutation) SetUploadSessionID(i int) {
-	m.upload_session = &i
+// SetPublishedAt sets the "published_at" field.
+func (m *GameDownloadResourceMutation) SetPublishedAt(t time.Time) {
+	m.published_at = &t
 }
 
-// UploadSessionID returns the value of the "upload_session_id" field in the mutation.
-func (m *GameDownloadResourceMutation) UploadSessionID() (r int, exists bool) {
-	v := m.upload_session
+// PublishedAt returns the value of the "published_at" field in the mutation.
+func (m *GameDownloadResourceMutation) PublishedAt() (r time.Time, exists bool) {
+	v := m.published_at
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldUploadSessionID returns the old "upload_session_id" field's value of the GameDownloadResource entity.
+// OldPublishedAt returns the old "published_at" field's value of the GameDownloadResource entity.
 // If the GameDownloadResource object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GameDownloadResourceMutation) OldUploadSessionID(ctx context.Context) (v *int, err error) {
+func (m *GameDownloadResourceMutation) OldPublishedAt(ctx context.Context) (v *time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUploadSessionID is only allowed on UpdateOne operations")
+		return v, errors.New("OldPublishedAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUploadSessionID requires an ID field in the mutation")
+		return v, errors.New("OldPublishedAt requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUploadSessionID: %w", err)
+		return v, fmt.Errorf("querying old value for OldPublishedAt: %w", err)
 	}
-	return oldValue.UploadSessionID, nil
+	return oldValue.PublishedAt, nil
 }
 
-// ClearUploadSessionID clears the value of the "upload_session_id" field.
-func (m *GameDownloadResourceMutation) ClearUploadSessionID() {
-	m.upload_session = nil
-	m.clearedFields[gamedownloadresource.FieldUploadSessionID] = struct{}{}
+// ClearPublishedAt clears the value of the "published_at" field.
+func (m *GameDownloadResourceMutation) ClearPublishedAt() {
+	m.published_at = nil
+	m.clearedFields[gamedownloadresource.FieldPublishedAt] = struct{}{}
 }
 
-// UploadSessionIDCleared returns if the "upload_session_id" field was cleared in this mutation.
-func (m *GameDownloadResourceMutation) UploadSessionIDCleared() bool {
-	_, ok := m.clearedFields[gamedownloadresource.FieldUploadSessionID]
+// PublishedAtCleared returns if the "published_at" field was cleared in this mutation.
+func (m *GameDownloadResourceMutation) PublishedAtCleared() bool {
+	_, ok := m.clearedFields[gamedownloadresource.FieldPublishedAt]
 	return ok
 }
 
-// ResetUploadSessionID resets all changes to the "upload_session_id" field.
-func (m *GameDownloadResourceMutation) ResetUploadSessionID() {
-	m.upload_session = nil
-	delete(m.clearedFields, gamedownloadresource.FieldUploadSessionID)
+// ResetPublishedAt resets all changes to the "published_at" field.
+func (m *GameDownloadResourceMutation) ResetPublishedAt() {
+	m.published_at = nil
+	delete(m.clearedFields, gamedownloadresource.FieldPublishedAt)
 }
 
 // SetCreatorID sets the "creator_id" field.
@@ -33634,33 +33633,6 @@ func (m *GameDownloadResourceMutation) ResetMalwareScanCases() {
 	m.removedmalware_scan_cases = nil
 }
 
-// ClearUploadSession clears the "upload_session" edge to the GameUploadSession entity.
-func (m *GameDownloadResourceMutation) ClearUploadSession() {
-	m.clearedupload_session = true
-	m.clearedFields[gamedownloadresource.FieldUploadSessionID] = struct{}{}
-}
-
-// UploadSessionCleared reports if the "upload_session" edge to the GameUploadSession entity was cleared.
-func (m *GameDownloadResourceMutation) UploadSessionCleared() bool {
-	return m.UploadSessionIDCleared() || m.clearedupload_session
-}
-
-// UploadSessionIDs returns the "upload_session" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UploadSessionID instead. It exists only for internal usage by the builders.
-func (m *GameDownloadResourceMutation) UploadSessionIDs() (ids []int) {
-	if id := m.upload_session; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetUploadSession resets all changes to the "upload_session" edge.
-func (m *GameDownloadResourceMutation) ResetUploadSession() {
-	m.upload_session = nil
-	m.clearedupload_session = false
-}
-
 // ClearCreator clears the "creator" edge to the User entity.
 func (m *GameDownloadResourceMutation) ClearCreator() {
 	m.clearedcreator = true
@@ -33744,8 +33716,8 @@ func (m *GameDownloadResourceMutation) Fields() []string {
 	if m.downloads != nil {
 		fields = append(fields, gamedownloadresource.FieldDownloads)
 	}
-	if m.upload_session != nil {
-		fields = append(fields, gamedownloadresource.FieldUploadSessionID)
+	if m.published_at != nil {
+		fields = append(fields, gamedownloadresource.FieldPublishedAt)
 	}
 	if m.creator != nil {
 		fields = append(fields, gamedownloadresource.FieldCreatorID)
@@ -33778,8 +33750,8 @@ func (m *GameDownloadResourceMutation) Field(name string) (ent.Value, bool) {
 		return m.Note()
 	case gamedownloadresource.FieldDownloads:
 		return m.Downloads()
-	case gamedownloadresource.FieldUploadSessionID:
-		return m.UploadSessionID()
+	case gamedownloadresource.FieldPublishedAt:
+		return m.PublishedAt()
 	case gamedownloadresource.FieldCreatorID:
 		return m.CreatorID()
 	case gamedownloadresource.FieldCreated:
@@ -33809,8 +33781,8 @@ func (m *GameDownloadResourceMutation) OldField(ctx context.Context, name string
 		return m.OldNote(ctx)
 	case gamedownloadresource.FieldDownloads:
 		return m.OldDownloads(ctx)
-	case gamedownloadresource.FieldUploadSessionID:
-		return m.OldUploadSessionID(ctx)
+	case gamedownloadresource.FieldPublishedAt:
+		return m.OldPublishedAt(ctx)
 	case gamedownloadresource.FieldCreatorID:
 		return m.OldCreatorID(ctx)
 	case gamedownloadresource.FieldCreated:
@@ -33875,12 +33847,12 @@ func (m *GameDownloadResourceMutation) SetField(name string, value ent.Value) er
 		}
 		m.SetDownloads(v)
 		return nil
-	case gamedownloadresource.FieldUploadSessionID:
-		v, ok := value.(int)
+	case gamedownloadresource.FieldPublishedAt:
+		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetUploadSessionID(v)
+		m.SetPublishedAt(v)
 		return nil
 	case gamedownloadresource.FieldCreatorID:
 		v, ok := value.(int)
@@ -33972,8 +33944,8 @@ func (m *GameDownloadResourceMutation) ClearedFields() []string {
 	if m.FieldCleared(gamedownloadresource.FieldNote) {
 		fields = append(fields, gamedownloadresource.FieldNote)
 	}
-	if m.FieldCleared(gamedownloadresource.FieldUploadSessionID) {
-		fields = append(fields, gamedownloadresource.FieldUploadSessionID)
+	if m.FieldCleared(gamedownloadresource.FieldPublishedAt) {
+		fields = append(fields, gamedownloadresource.FieldPublishedAt)
 	}
 	return fields
 }
@@ -34001,8 +33973,8 @@ func (m *GameDownloadResourceMutation) ClearField(name string) error {
 	case gamedownloadresource.FieldNote:
 		m.ClearNote()
 		return nil
-	case gamedownloadresource.FieldUploadSessionID:
-		m.ClearUploadSessionID()
+	case gamedownloadresource.FieldPublishedAt:
+		m.ClearPublishedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown GameDownloadResource nullable field %s", name)
@@ -34033,8 +34005,8 @@ func (m *GameDownloadResourceMutation) ResetField(name string) error {
 	case gamedownloadresource.FieldDownloads:
 		m.ResetDownloads()
 		return nil
-	case gamedownloadresource.FieldUploadSessionID:
-		m.ResetUploadSessionID()
+	case gamedownloadresource.FieldPublishedAt:
+		m.ResetPublishedAt()
 		return nil
 	case gamedownloadresource.FieldCreatorID:
 		m.ResetCreatorID()
@@ -34051,7 +34023,7 @@ func (m *GameDownloadResourceMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *GameDownloadResourceMutation) AddedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 5)
 	if m.game != nil {
 		edges = append(edges, gamedownloadresource.EdgeGame)
 	}
@@ -34063,9 +34035,6 @@ func (m *GameDownloadResourceMutation) AddedEdges() []string {
 	}
 	if m.malware_scan_cases != nil {
 		edges = append(edges, gamedownloadresource.EdgeMalwareScanCases)
-	}
-	if m.upload_session != nil {
-		edges = append(edges, gamedownloadresource.EdgeUploadSession)
 	}
 	if m.creator != nil {
 		edges = append(edges, gamedownloadresource.EdgeCreator)
@@ -34099,10 +34068,6 @@ func (m *GameDownloadResourceMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case gamedownloadresource.EdgeUploadSession:
-		if id := m.upload_session; id != nil {
-			return []ent.Value{*id}
-		}
 	case gamedownloadresource.EdgeCreator:
 		if id := m.creator; id != nil {
 			return []ent.Value{*id}
@@ -34113,7 +34078,7 @@ func (m *GameDownloadResourceMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *GameDownloadResourceMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 5)
 	if m.removedfiles != nil {
 		edges = append(edges, gamedownloadresource.EdgeFiles)
 	}
@@ -34154,7 +34119,7 @@ func (m *GameDownloadResourceMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *GameDownloadResourceMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 5)
 	if m.clearedgame {
 		edges = append(edges, gamedownloadresource.EdgeGame)
 	}
@@ -34166,9 +34131,6 @@ func (m *GameDownloadResourceMutation) ClearedEdges() []string {
 	}
 	if m.clearedmalware_scan_cases {
 		edges = append(edges, gamedownloadresource.EdgeMalwareScanCases)
-	}
-	if m.clearedupload_session {
-		edges = append(edges, gamedownloadresource.EdgeUploadSession)
 	}
 	if m.clearedcreator {
 		edges = append(edges, gamedownloadresource.EdgeCreator)
@@ -34188,8 +34150,6 @@ func (m *GameDownloadResourceMutation) EdgeCleared(name string) bool {
 		return m.clearedreports
 	case gamedownloadresource.EdgeMalwareScanCases:
 		return m.clearedmalware_scan_cases
-	case gamedownloadresource.EdgeUploadSession:
-		return m.clearedupload_session
 	case gamedownloadresource.EdgeCreator:
 		return m.clearedcreator
 	}
@@ -34202,9 +34162,6 @@ func (m *GameDownloadResourceMutation) ClearEdge(name string) error {
 	switch name {
 	case gamedownloadresource.EdgeGame:
 		m.ClearGame()
-		return nil
-	case gamedownloadresource.EdgeUploadSession:
-		m.ClearUploadSession()
 		return nil
 	case gamedownloadresource.EdgeCreator:
 		m.ClearCreator()
@@ -34228,9 +34185,6 @@ func (m *GameDownloadResourceMutation) ResetEdge(name string) error {
 		return nil
 	case gamedownloadresource.EdgeMalwareScanCases:
 		m.ResetMalwareScanCases()
-		return nil
-	case gamedownloadresource.EdgeUploadSession:
-		m.ResetUploadSession()
 		return nil
 	case gamedownloadresource.EdgeCreator:
 		m.ResetCreator()
@@ -41897,9 +41851,6 @@ type GameUploadSessionMutation struct {
 	created                            *time.Time
 	updated                            *time.Time
 	clearedFields                      map[string]struct{}
-	game_download_resources            map[int]struct{}
-	removedgame_download_resources     map[int]struct{}
-	clearedgame_download_resources     bool
 	game_download_resource_file        *int
 	clearedgame_download_resource_file bool
 	game_upload_chunks                 map[int]struct{}
@@ -42608,60 +42559,6 @@ func (m *GameUploadSessionMutation) ResetUpdated() {
 	m.updated = nil
 }
 
-// AddGameDownloadResourceIDs adds the "game_download_resources" edge to the GameDownloadResource entity by ids.
-func (m *GameUploadSessionMutation) AddGameDownloadResourceIDs(ids ...int) {
-	if m.game_download_resources == nil {
-		m.game_download_resources = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.game_download_resources[ids[i]] = struct{}{}
-	}
-}
-
-// ClearGameDownloadResources clears the "game_download_resources" edge to the GameDownloadResource entity.
-func (m *GameUploadSessionMutation) ClearGameDownloadResources() {
-	m.clearedgame_download_resources = true
-}
-
-// GameDownloadResourcesCleared reports if the "game_download_resources" edge to the GameDownloadResource entity was cleared.
-func (m *GameUploadSessionMutation) GameDownloadResourcesCleared() bool {
-	return m.clearedgame_download_resources
-}
-
-// RemoveGameDownloadResourceIDs removes the "game_download_resources" edge to the GameDownloadResource entity by IDs.
-func (m *GameUploadSessionMutation) RemoveGameDownloadResourceIDs(ids ...int) {
-	if m.removedgame_download_resources == nil {
-		m.removedgame_download_resources = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.game_download_resources, ids[i])
-		m.removedgame_download_resources[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedGameDownloadResources returns the removed IDs of the "game_download_resources" edge to the GameDownloadResource entity.
-func (m *GameUploadSessionMutation) RemovedGameDownloadResourcesIDs() (ids []int) {
-	for id := range m.removedgame_download_resources {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// GameDownloadResourcesIDs returns the "game_download_resources" edge IDs in the mutation.
-func (m *GameUploadSessionMutation) GameDownloadResourcesIDs() (ids []int) {
-	for id := range m.game_download_resources {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetGameDownloadResources resets all changes to the "game_download_resources" edge.
-func (m *GameUploadSessionMutation) ResetGameDownloadResources() {
-	m.game_download_resources = nil
-	m.clearedgame_download_resources = false
-	m.removedgame_download_resources = nil
-}
-
 // SetGameDownloadResourceFileID sets the "game_download_resource_file" edge to the GameDownloadResourceFile entity by id.
 func (m *GameUploadSessionMutation) SetGameDownloadResourceFileID(id int) {
 	m.game_download_resource_file = &id
@@ -43229,10 +43126,7 @@ func (m *GameUploadSessionMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *GameUploadSessionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 5)
-	if m.game_download_resources != nil {
-		edges = append(edges, gameuploadsession.EdgeGameDownloadResources)
-	}
+	edges := make([]string, 0, 4)
 	if m.game_download_resource_file != nil {
 		edges = append(edges, gameuploadsession.EdgeGameDownloadResourceFile)
 	}
@@ -43252,12 +43146,6 @@ func (m *GameUploadSessionMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *GameUploadSessionMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case gameuploadsession.EdgeGameDownloadResources:
-		ids := make([]ent.Value, 0, len(m.game_download_resources))
-		for id := range m.game_download_resources {
-			ids = append(ids, id)
-		}
-		return ids
 	case gameuploadsession.EdgeGameDownloadResourceFile:
 		if id := m.game_download_resource_file; id != nil {
 			return []ent.Value{*id}
@@ -43282,10 +43170,7 @@ func (m *GameUploadSessionMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *GameUploadSessionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 5)
-	if m.removedgame_download_resources != nil {
-		edges = append(edges, gameuploadsession.EdgeGameDownloadResources)
-	}
+	edges := make([]string, 0, 4)
 	if m.removedgame_upload_chunks != nil {
 		edges = append(edges, gameuploadsession.EdgeGameUploadChunks)
 	}
@@ -43296,12 +43181,6 @@ func (m *GameUploadSessionMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *GameUploadSessionMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case gameuploadsession.EdgeGameDownloadResources:
-		ids := make([]ent.Value, 0, len(m.removedgame_download_resources))
-		for id := range m.removedgame_download_resources {
-			ids = append(ids, id)
-		}
-		return ids
 	case gameuploadsession.EdgeGameUploadChunks:
 		ids := make([]ent.Value, 0, len(m.removedgame_upload_chunks))
 		for id := range m.removedgame_upload_chunks {
@@ -43314,10 +43193,7 @@ func (m *GameUploadSessionMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *GameUploadSessionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 5)
-	if m.clearedgame_download_resources {
-		edges = append(edges, gameuploadsession.EdgeGameDownloadResources)
-	}
+	edges := make([]string, 0, 4)
 	if m.clearedgame_download_resource_file {
 		edges = append(edges, gameuploadsession.EdgeGameDownloadResourceFile)
 	}
@@ -43337,8 +43213,6 @@ func (m *GameUploadSessionMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *GameUploadSessionMutation) EdgeCleared(name string) bool {
 	switch name {
-	case gameuploadsession.EdgeGameDownloadResources:
-		return m.clearedgame_download_resources
 	case gameuploadsession.EdgeGameDownloadResourceFile:
 		return m.clearedgame_download_resource_file
 	case gameuploadsession.EdgeGameUploadChunks:
@@ -43372,9 +43246,6 @@ func (m *GameUploadSessionMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *GameUploadSessionMutation) ResetEdge(name string) error {
 	switch name {
-	case gameuploadsession.EdgeGameDownloadResources:
-		m.ResetGameDownloadResources()
-		return nil
 	case gameuploadsession.EdgeGameDownloadResourceFile:
 		m.ResetGameDownloadResourceFile()
 		return nil

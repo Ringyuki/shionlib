@@ -143,5 +143,7 @@
   "AI_PLAYGROUND_TARGET_NOT_FOUND": "Playground target not found",
   "AI_CATALOG_PROVIDER_NOT_FOUND": "The provider is not in the catalog",
   "SETTING_NOT_FOUND": "Setting not found",
-  "SETTING_INVALID_VALUE": "Invalid setting value"
+  "SETTING_INVALID_VALUE": "Invalid setting value",
+  "GAME_DOWNLOAD_RESOURCE_TOO_MANY_FILES": "A resource can hold at most {max} files",
+  "GAME_DOWNLOAD_RESOURCE_LAST_FILE": "A resource must keep at least one file"
 }

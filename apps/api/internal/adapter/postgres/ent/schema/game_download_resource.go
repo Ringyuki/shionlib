@@ -27,7 +27,7 @@ func (GameDownloadResource) Fields() []ent.Field {
 		field.Other("language", stringsType).SchemaType(textArray).Optional().Annotations(emptyArray("text[]")),
 		field.String("note").MaxLen(255).SchemaType(varchar(255)).Optional().Nillable(),
 		field.Int("downloads").SchemaType(pg("integer")).Default(0),
-		field.Int("upload_session_id").SchemaType(pg("integer")).Optional().Nillable(),
+		field.Time("published_at").SchemaType(timestamp3).Optional().Nillable(),
 		field.Int("creator_id").SchemaType(pg("integer")),
 		created(),
 		updated(),
@@ -40,7 +40,6 @@ func (GameDownloadResource) Edges() []ent.Edge {
 		edge.To("files", GameDownloadResourceFile.Type).StorageKey(edge.Symbol("game_download_resource_files_game_download_resource_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("reports", GameDownloadResourceReport.Type).StorageKey(edge.Symbol("game_download_resource_reports_resource_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("malware_scan_cases", MalwareScanCase.Type).StorageKey(edge.Symbol("malware_scan_cases_resource_id_fkey")).Annotations(entsql.OnDelete(entsql.SetNull)),
-		edge.From("upload_session", GameUploadSession.Type).Ref("game_download_resources").Field("upload_session_id").Unique(),
 		edge.From("creator", User.Type).Ref("game_download_resources").Field("creator_id").Unique().Required(),
 	}
 }

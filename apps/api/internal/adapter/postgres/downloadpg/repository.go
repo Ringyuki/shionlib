@@ -21,12 +21,10 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/userpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
-	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
 
 const (
 	resourceGameFK        = "game_download_resources_game_id_fkey"
-	resourceSessionFK     = "game_download_resources_upload_session_id_fkey"
 	fileResourceFK        = "game_download_resource_files_game_download_resource_id_fkey"
 	fileSessionFK         = "game_download_resource_files_upload_session_id_fkey"
 	uniqueFileSession     = "game_download_resource_files_upload_session_id_key"
@@ -131,7 +129,8 @@ func (r *Repository) recentHistory(ctx context.Context, fileIDs []int) (map[int]
 }
 
 func (r *Repository) ListReleases(ctx context.Context, excludeRated bool, page download.Page) ([]download.Release, int, error) {
-	rows, total, err := r.listListed(ctx, excludeRated, page)
+	order := []gamedownloadresource.OrderOption{ent.Desc(gamedownloadresource.FieldPublishedAt), ent.Desc(gamedownloadresource.FieldID)}
+	rows, total, err := r.listListed(ctx, excludeRated, page, order, gamedownloadresource.PublishedAtNotNil())
 	if err != nil {
 		return nil, 0, fmt.Errorf("list releases: %w", err)
 	}
@@ -143,8 +142,13 @@ func (r *Repository) ListReleases(ctx context.Context, excludeRated bool, page d
 	return releases, total, nil
 }
 
-func (r *Repository) ListUserResources(ctx context.Context, creatorID int, excludeRated bool, page download.Page) ([]download.UserResource, int, error) {
-	rows, total, err := r.listListed(ctx, excludeRated, page, gamedownloadresource.CreatorID(creatorID))
+func (r *Repository) ListUserResources(ctx context.Context, creatorID int, filter download.UserResourceFilter, page download.Page) ([]download.UserResource, int, error) {
+	predicates := []predicate.GameDownloadResource{gamedownloadresource.CreatorID(creatorID)}
+	if !filter.IncludeUnpublished {
+		predicates = append(predicates, gamedownloadresource.PublishedAtNotNil())
+	}
+	order := []gamedownloadresource.OrderOption{ent.Desc(gamedownloadresource.FieldCreated), ent.Desc(gamedownloadresource.FieldID)}
+	rows, total, err := r.listListed(ctx, filter.ExcludeRated, page, order, predicates...)
 	if err != nil {
 		return nil, 0, fmt.Errorf("list resources of user %d: %w", creatorID, err)
 	}
@@ -156,7 +160,7 @@ func (r *Repository) ListUserResources(ctx context.Context, creatorID int, exclu
 	return items, total, nil
 }
 
-func (r *Repository) listListed(ctx context.Context, excludeRated bool, page download.Page, extra ...predicate.GameDownloadResource) ([]*ent.GameDownloadResource, int, error) {
+func (r *Repository) listListed(ctx context.Context, excludeRated bool, page download.Page, order []gamedownloadresource.OrderOption, extra ...predicate.GameDownloadResource) ([]*ent.GameDownloadResource, int, error) {
 	predicates := append([]predicate.GameDownloadResource{gamepg.ActiveResource()}, extra...)
 	if excludeRated {
 		predicates = append(predicates, gamedownloadresource.HasGameWith(gamepg.SafeForStrictViewers()))
@@ -167,7 +171,7 @@ func (r *Repository) listListed(ctx context.Context, excludeRated bool, page dow
 		return nil, 0, err
 	}
 	rows, err := query.
-		Order(ent.Desc(gamedownloadresource.FieldCreated), ent.Desc(gamedownloadresource.FieldID)).
+		Order(order...).
 		Offset(page.Offset()).
 		Limit(page.Size).
 		WithCreator(userpg.SelectSummary).
@@ -192,23 +196,12 @@ func (r *Repository) HasUploadingSession(ctx context.Context, userID int) (bool,
 	return exists, nil
 }
 
-func (r *Repository) ResourceUsesSession(ctx context.Context, gameID, sessionID int) (bool, error) {
-	exists, err := r.db(ctx).GameDownloadResource.Query().
-		Where(gamedownloadresource.GameID(gameID), gamedownloadresource.UploadSessionID(sessionID)).
-		Exist(ctx)
-	if err != nil {
-		return false, fmt.Errorf("check resource of upload session %d: %w", sessionID, err)
-	}
-	return exists, nil
-}
-
 func (r *Repository) CreateResource(ctx context.Context, in download.NewResource) (download.Resource, error) {
 	create := r.db(ctx).GameDownloadResource.Create().
 		SetGameID(in.GameID).
 		SetPlatform(textArray(in.Platforms)).
 		SetLanguage(textArray(in.Languages)).
 		SetNillableNote(in.Note).
-		SetNillableUploadSessionID(in.UploadSessionID).
 		SetCreatorID(in.CreatorID)
 	if in.Simulator != nil {
 		create.SetSimulator(gamedownloadresource.Simulator(*in.Simulator))
@@ -217,8 +210,6 @@ func (r *Repository) CreateResource(ctx context.Context, in download.NewResource
 	switch {
 	case postgres.IsForeignKeyViolation(err, resourceGameFK):
 		return download.Resource{}, game.ErrNotFound
-	case postgres.IsForeignKeyViolation(err, resourceSessionFK):
-		return download.Resource{}, upload.ErrSessionNotFound
 	case err != nil:
 		return download.Resource{}, fmt.Errorf("create download resource: %w", err)
 	}
@@ -270,17 +261,23 @@ func (r *Repository) UpdateResource(ctx context.Context, id int, changes downloa
 	if err := update.Exec(ctx); err != nil {
 		return fmt.Errorf("update download resource %d: %w", id, err)
 	}
-	if changes.FileName == nil {
-		return nil
-	}
-	err = r.db(ctx).GameDownloadResourceFile.Update().
-		Where(gamedownloadresourcefile.GameDownloadResourceID(id)).
-		SetFileName(*changes.FileName).
-		Exec(ctx)
-	if err != nil {
-		return fmt.Errorf("rename files of download resource %d: %w", id, err)
-	}
 	return nil
+}
+
+func (r *Repository) PublishIfReady(ctx context.Context, id int, at time.Time) (bool, error) {
+	published, err := r.db(ctx).GameDownloadResource.Update().
+		Where(
+			gamedownloadresource.ID(id),
+			gamedownloadresource.PublishedAtIsNil(),
+			gamedownloadresource.HasFiles(),
+			gamedownloadresource.Not(gamedownloadresource.HasFilesWith(gamedownloadresourcefile.FileStatusNEQ(download.FileInObjectStore))),
+		).
+		SetPublishedAt(at.UTC()).
+		Save(ctx)
+	if err != nil {
+		return false, fmt.Errorf("publish download resource %d: %w", id, err)
+	}
+	return published > 0, nil
 }
 
 func (r *Repository) SetResourceStatus(ctx context.Context, id, status int, updated time.Time) error {

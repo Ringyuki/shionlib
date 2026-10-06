@@ -117,7 +117,7 @@ func TestListByNewestPublicResource(t *testing.T) {
 	f.published(removedNewest, base.Add(-5*time.Hour))
 	removed := f.resource(removedNewest, download.ResourceRemoved, createdAt(base.Add(10*time.Hour)))
 	f.file(removed, 1, download.FileInObjectStore)
-	pending := f.resource(pendingOnly, download.ResourceActive, createdAt(base.Add(20*time.Hour)))
+	pending := f.resource(pendingOnly, download.ResourceActive, createdAt(base.Add(20*time.Hour)), unpublished)
 	f.file(pending, 1, download.FileOnServer)
 	f.published(rated, base.Add(3*time.Hour))
 	f.cover(rated, 2)
@@ -144,8 +144,8 @@ func TestListByNewestPublicResource(t *testing.T) {
 	if err != nil || total != 5 || !slices.Equal(got, []int{late, tieHigh, tieLow, early, removedNewest}) {
 		t.Fatalf("combined with other filters: %v %d %v", got, total, err)
 	}
-	if got, _, _ := repo.List(f.ctx, game.ListFilter{SortBy: game.SortByViews, Visibility: game.Visibility{OnlyWithResources: true}}, page); !slices.Contains(got, pendingOnly) {
-		t.Fatalf("the resource setting alone still counts active resources: %v", got)
+	if got, _, _ := repo.List(f.ctx, game.ListFilter{SortBy: game.SortByViews, Visibility: game.Visibility{OnlyWithResources: true}}, page); slices.Contains(got, pendingOnly) || !slices.Contains(got, early) {
+		t.Fatalf("only published resources count for viewers who hide games without resources: %v", got)
 	}
 }
 

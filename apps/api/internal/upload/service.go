@@ -66,7 +66,6 @@ func (s *Service) Init(ctx context.Context, who actor.Actor, in InitInput) (Sess
 			TotalSize:   in.TotalSize,
 			ChunkSize:   chunkSize,
 			TotalChunks: int(totalChunks),
-			FileHash:    in.FileHash,
 			StoragePath: s.spool.Path(PendingStorageName),
 			ExpiresAt:   s.now().Add(SessionTTL.Read(s.settings)),
 			CreatorID:   who.UserID,
@@ -89,7 +88,7 @@ func (s *Service) Init(ctx context.Context, who actor.Actor, in InitInput) (Sess
 		return Session{}, err
 	}
 	if err := s.spool.Allocate(ctx, session.StoragePath, session.TotalSize); err != nil {
-		_, markErr := s.repo.SetStatus(ctx, session.ID, StatusUploading, StatusAborted, nil)
+		_, markErr := s.repo.SetStatus(ctx, session.ID, StatusUploading, StatusAborted)
 		return Session{}, errors.Join(fmt.Errorf("allocate upload file: %w", err), markErr)
 	}
 	return session, nil
@@ -151,7 +150,7 @@ func (s *Service) Status(ctx context.Context, who actor.Actor, id int) (Session,
 	return session, nil
 }
 
-func (s *Service) Complete(ctx context.Context, who actor.Actor, id int) error {
+func (s *Service) Complete(ctx context.Context, who actor.Actor, id int, fileHash string) error {
 	session, err := s.repo.GetSession(ctx, id)
 	if err != nil {
 		return err
@@ -172,11 +171,10 @@ func (s *Service) Complete(ctx context.Context, who actor.Actor, id int) error {
 	if err != nil {
 		return err
 	}
-	if digest != session.FileHash {
+	if digest != fileHash {
 		return ErrFileBLAKE3Mismatch
 	}
-	mimeType := DefaultMimeType
-	changed, err := s.repo.SetStatus(ctx, session.ID, StatusUploading, StatusCompleted, &mimeType)
+	changed, err := s.repo.Complete(ctx, session.ID, digest, DefaultMimeType)
 	if err != nil {
 		return err
 	}
@@ -202,7 +200,7 @@ func (s *Service) Abort(ctx context.Context, who actor.Actor, id int) error {
 		if session.CreatorID != who.UserID {
 			return ErrSessionNotOwner
 		}
-		if _, err := s.repo.SetStatus(ctx, session.ID, StatusUploading, StatusAborted, nil); err != nil {
+		if _, err := s.repo.SetStatus(ctx, session.ID, StatusUploading, StatusAborted); err != nil {
 			return err
 		}
 		path = session.StoragePath
@@ -257,7 +255,7 @@ func (s *Service) expire(ctx context.Context, id int) error {
 		if err != nil || !stale {
 			return err
 		}
-		if _, err := s.repo.SetStatus(ctx, session.ID, session.Status, StatusExpired, nil); err != nil {
+		if _, err := s.repo.SetStatus(ctx, session.ID, session.Status, StatusExpired); err != nil {
 			return err
 		}
 		path = session.StoragePath

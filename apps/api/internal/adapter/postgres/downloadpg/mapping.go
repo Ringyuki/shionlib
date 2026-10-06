@@ -8,17 +8,17 @@ import (
 
 func toResource(row *ent.GameDownloadResource) download.Resource {
 	resource := download.Resource{
-		ID:              row.ID,
-		GameID:          row.GameID,
-		Status:          row.Status,
-		Platforms:       nonNilStrings(row.Platform),
-		Languages:       nonNilStrings(row.Language),
-		Note:            row.Note,
-		Downloads:       row.Downloads,
-		UploadSessionID: row.UploadSessionID,
-		CreatorID:       row.CreatorID,
-		Created:         row.Created,
-		Updated:         row.Updated,
+		ID:          row.ID,
+		GameID:      row.GameID,
+		Status:      row.Status,
+		Platforms:   nonNilStrings(row.Platform),
+		Languages:   nonNilStrings(row.Language),
+		Note:        row.Note,
+		Downloads:   row.Downloads,
+		PublishedAt: row.PublishedAt,
+		CreatorID:   row.CreatorID,
+		Created:     row.Created,
+		Updated:     row.Updated,
 	}
 	if row.Simulator != nil {
 		simulator := string(*row.Simulator)

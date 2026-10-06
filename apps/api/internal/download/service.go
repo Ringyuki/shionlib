@@ -8,8 +8,10 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
+	"github.com/Ringyuki/shionlib/apps/api/internal/apperror"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
 
@@ -23,6 +25,8 @@ type Deps struct {
 	Tx         Transactor
 	Queue      Queue
 	Store      ObjectStore
+	Local      LocalFiles
+	Settings   setting.Source
 	Now        func() time.Time
 }
 
@@ -36,6 +40,8 @@ type Service struct {
 	tx         Transactor
 	queue      Queue
 	store      ObjectStore
+	local      LocalFiles
+	settings   setting.Source
 	now        func() time.Time
 }
 
@@ -50,6 +56,8 @@ func NewService(deps Deps) *Service {
 		tx:         deps.Tx,
 		queue:      deps.Queue,
 		store:      deps.Store,
+		local:      deps.Local,
+		settings:   deps.Settings,
 		now:        deps.Now,
 	}
 }
@@ -68,6 +76,9 @@ func (s *Service) GameResources(ctx context.Context, viewer actor.Actor, gameID 
 	}
 	visible := make([]GameResource, 0, len(resources))
 	for _, resource := range resources {
+		if !resource.Published() && resource.CreatorID != viewer.UserID {
+			continue
+		}
 		resource.Files = slices.DeleteFunc(resource.Files, func(f GameFile) bool {
 			return f.Status != FileInObjectStore && f.CreatorID != viewer.UserID
 		})
@@ -98,7 +109,8 @@ func (s *Service) Releases(ctx context.Context, viewer actor.Actor, page Page) (
 }
 
 func (s *Service) UserResources(ctx context.Context, viewer actor.Actor, userID int, page Page) (UserResources, error) {
-	items, total, err := s.repo.ListUserResources(ctx, userID, !viewer.IncludesRated(), page)
+	isCurrentUser := viewer.Authenticated() && viewer.UserID == userID
+	items, total, err := s.repo.ListUserResources(ctx, userID, UserResourceFilter{ExcludeRated: !viewer.IncludesRated(), IncludeUnpublished: isCurrentUser}, page)
 	if err != nil {
 		return UserResources{}, err
 	}
@@ -113,7 +125,7 @@ func (s *Service) UserResources(ctx context.Context, viewer actor.Actor, userID 
 	for i, item := range items {
 		items[i].Game = cardOrStub(cards, item.GameID)
 	}
-	result := UserResources{Items: items, Total: total, IsCurrentUser: viewer.Authenticated() && viewer.UserID == userID}
+	result := UserResources{Items: items, Total: total, IsCurrentUser: isCurrentUser}
 	if result.IsCurrentUser {
 		result.HasOngoingSession, err = s.repo.HasUploadingSession(ctx, userID)
 		if err != nil {
@@ -123,37 +135,70 @@ func (s *Service) UserResources(ctx context.Context, viewer actor.Actor, userID 
 	return result, nil
 }
 
-func (s *Service) Create(ctx context.Context, who actor.Actor, gameID int, in CreateInput) error {
+func (s *Service) Create(ctx context.Context, who actor.Actor, gameID int, in CreateInput) (Resource, error) {
 	exists, err := s.games.Exists(ctx, gameID)
 	if err != nil {
-		return err
+		return Resource{}, err
 	}
 	if !exists {
-		return game.ErrNotFound
+		return Resource{}, game.ErrNotFound
 	}
-	return s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
-		session, err := s.sessions.Claim(ctx, who, in.UploadSessionID)
-		if err != nil {
-			return err
-		}
-		if used, err := s.sessionInUse(ctx, gameID, session.ID); err != nil {
-			return err
-		} else if used {
-			return ErrSessionAlreadyUsed
-		}
+	var created Resource
+	err = s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
 		resource, err := s.repo.CreateResource(ctx, NewResource{
-			GameID:          gameID,
-			Platforms:       in.Platforms,
-			Languages:       in.Languages,
-			Simulator:       in.Simulator,
-			Note:            in.Note,
-			UploadSessionID: &session.ID,
-			CreatorID:       who.UserID,
+			GameID:    gameID,
+			Platforms: in.Platforms,
+			Languages: in.Languages,
+			Simulator: in.Simulator,
+			Note:      in.Note,
+			CreatorID: who.UserID,
 		})
 		if err != nil {
 			return err
 		}
-		name := in.FileName
+		created = resource
+		return s.attach(ctx, who, resource, in.Files, 0)
+	})
+	return created, err
+}
+
+func (s *Service) AddFiles(ctx context.Context, who actor.Actor, resourceID int, files []FileUpload) error {
+	return s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
+		resource, err := s.ownedResource(ctx, who, resourceID)
+		if err != nil {
+			return err
+		}
+		existing, err := s.repo.CountFiles(ctx, resource.ID)
+		if err != nil {
+			return err
+		}
+		return s.attach(ctx, who, resource, files, existing)
+	})
+}
+
+func (s *Service) attach(ctx context.Context, who actor.Actor, resource Resource, files []FileUpload, existing int) error {
+	if len(files) == 0 {
+		return apperror.ErrValidationFailed.WithField("files", "at least one file is required")
+	}
+	if limit := MaxFilesPerResource.Read(s.settings); existing+len(files) > limit {
+		return ErrTooManyFiles.WithArgs(map[string]any{"max": limit})
+	}
+	claimed := make(map[int]bool, len(files))
+	for _, upload := range files {
+		if claimed[upload.UploadSessionID] {
+			return ErrSessionAlreadyUsed
+		}
+		claimed[upload.UploadSessionID] = true
+		session, err := s.sessions.Claim(ctx, who, upload.UploadSessionID)
+		if err != nil {
+			return err
+		}
+		if _, used, err := s.repo.FindFileBySession(ctx, session.ID); err != nil {
+			return err
+		} else if used {
+			return ErrSessionAlreadyUsed
+		}
+		name := upload.Name
 		if name == "" {
 			name = session.FileName
 		}
@@ -173,29 +218,98 @@ func (s *Service) Create(ctx context.Context, who actor.Actor, gameID int, in Cr
 		if err != nil {
 			return err
 		}
-		return s.activities.Record(ctx, fileActivity(activity.TypeFileUploadToServer, who.UserID, gameID, file.ID, FileOnServer, CheckPending, &session.TotalSize, &name))
+		if err := s.activities.Record(ctx, fileActivity(activity.TypeFileUploadToServer, who.UserID, resource.GameID, file.ID, FileOnServer, CheckPending, &session.TotalSize, &name)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *Service) ownedResource(ctx context.Context, who actor.Actor, id int) (Resource, error) {
+	resource, err := s.repo.LockResource(ctx, id)
+	if err != nil {
+		return Resource{}, err
+	}
+	if resource.Status != ResourceActive {
+		return Resource{}, ErrResourceNotFound
+	}
+	if resource.CreatorID != who.UserID && !who.AtLeast(actor.RoleAdmin) {
+		return Resource{}, ErrResourceNotOwner
+	}
+	return resource, nil
+}
+
+func (s *Service) ownedFile(ctx context.Context, who actor.Actor, id int) (File, error) {
+	file, err := s.repo.LockFile(ctx, id)
+	if err != nil {
+		return File{}, err
+	}
+	if file.ResourceStatus != ResourceActive {
+		return File{}, ErrFileNotFound
+	}
+	if file.CreatorID != who.UserID && !who.AtLeast(actor.RoleAdmin) {
+		return File{}, ErrFileNotOwner
+	}
+	return file, nil
+}
+
+func (s *Service) RenameFile(ctx context.Context, who actor.Actor, fileID int, name string) error {
+	return s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
+		file, err := s.ownedFile(ctx, who, fileID)
+		if err != nil {
+			return err
+		}
+		if err := s.repo.RenameFile(ctx, file.ID, name); err != nil {
+			return err
+		}
+		return s.repo.TouchResource(ctx, file.ResourceID, s.now())
 	})
 }
 
-func (s *Service) sessionInUse(ctx context.Context, gameID, sessionID int) (bool, error) {
-	if used, err := s.repo.ResourceUsesSession(ctx, gameID, sessionID); err != nil || used {
-		return used, err
+func (s *Service) DeleteFile(ctx context.Context, who actor.Actor, fileID int) error {
+	var removed File
+	err := s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
+		file, err := s.ownedFile(ctx, who, fileID)
+		if err != nil {
+			return err
+		}
+		remaining, err := s.repo.CountFiles(ctx, file.ResourceID)
+		if err != nil {
+			return err
+		}
+		if remaining <= 1 {
+			return ErrLastFile
+		}
+		if err := s.repo.DeleteFile(ctx, file.ID); err != nil {
+			return err
+		}
+		if file.UploadSessionID != nil {
+			if err := s.quota.Withdraw(ctx, file.CreatorID, *file.UploadSessionID); err != nil {
+				return err
+			}
+		}
+		if err := s.repo.TouchResource(ctx, file.ResourceID, s.now()); err != nil {
+			return err
+		}
+		removed = file
+		_, err = s.repo.PublishIfReady(ctx, file.ResourceID, s.now())
+		return err
+	})
+	if err != nil {
+		return err
 	}
-	_, found, err := s.repo.FindFileBySession(ctx, sessionID)
-	return found, err
+	if removed.Path != nil && s.local.Owns(*removed.Path) {
+		if err := s.local.Remove(ctx, *removed.Path); err != nil {
+			return err
+		}
+	}
+	return s.PurgeLater(ctx, storageKeys([]File{removed}))
 }
 
 func (s *Service) Edit(ctx context.Context, who actor.Actor, id int, changes ResourceChanges) error {
 	return s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
-		resource, err := s.repo.LockResource(ctx, id)
-		if err != nil {
+		if _, err := s.ownedResource(ctx, who, id); err != nil {
 			return err
-		}
-		if resource.Status != ResourceActive {
-			return ErrResourceNotFound
-		}
-		if resource.CreatorID != who.UserID && !who.AtLeast(actor.RoleAdmin) {
-			return ErrResourceNotOwner
 		}
 		return s.repo.UpdateResource(ctx, id, changes)
 	})
@@ -320,19 +434,24 @@ func (s *Service) MigrateResource(ctx context.Context, gameID int, in MigrateRes
 }
 
 func (s *Service) MigrateFile(ctx context.Context, resourceID int, in MigrateFileInput) error {
-	_, err := s.repo.CreateFile(ctx, NewFile{
-		ResourceID:    resourceID,
-		Type:          FileTypeObjectStore,
-		Name:          in.FileName,
-		Size:          in.FileSize,
-		StorageKey:    &in.StorageKey,
-		ContentType:   &in.ContentType,
-		HashAlgorithm: upload.HashBLAKE3,
-		Hash:          in.FileHash,
-		Status:        FileInObjectStore,
-		CreatorID:     migrationCreatorID,
+	return s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
+		if _, err := s.repo.CreateFile(ctx, NewFile{
+			ResourceID:    resourceID,
+			Type:          FileTypeObjectStore,
+			Name:          in.FileName,
+			Size:          in.FileSize,
+			StorageKey:    &in.StorageKey,
+			ContentType:   &in.ContentType,
+			HashAlgorithm: upload.HashBLAKE3,
+			Hash:          in.FileHash,
+			Status:        FileInObjectStore,
+			CreatorID:     migrationCreatorID,
+		}); err != nil {
+			return err
+		}
+		_, err := s.repo.PublishIfReady(ctx, resourceID, s.now())
+		return err
 	})
-	return err
 }
 
 func (s *Service) Reupload(ctx context.Context, who actor.Actor, fileID int, in ReuploadInput) error {

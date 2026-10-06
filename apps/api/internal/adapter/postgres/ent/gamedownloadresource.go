@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 )
@@ -35,8 +34,8 @@ type GameDownloadResource struct {
 	Note *string `json:"note,omitempty"`
 	// Downloads holds the value of the "downloads" field.
 	Downloads int `json:"downloads,omitempty"`
-	// UploadSessionID holds the value of the "upload_session_id" field.
-	UploadSessionID *int `json:"upload_session_id,omitempty"`
+	// PublishedAt holds the value of the "published_at" field.
+	PublishedAt *time.Time `json:"published_at,omitempty"`
 	// CreatorID holds the value of the "creator_id" field.
 	CreatorID int `json:"creator_id,omitempty"`
 	// Created holds the value of the "created" field.
@@ -59,13 +58,11 @@ type GameDownloadResourceEdges struct {
 	Reports []*GameDownloadResourceReport `json:"reports,omitempty"`
 	// MalwareScanCases holds the value of the malware_scan_cases edge.
 	MalwareScanCases []*MalwareScanCase `json:"malware_scan_cases,omitempty"`
-	// UploadSession holds the value of the upload_session edge.
-	UploadSession *GameUploadSession `json:"upload_session,omitempty"`
 	// Creator holds the value of the creator edge.
 	Creator *User `json:"creator,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [5]bool
 }
 
 // GameOrErr returns the Game value or an error if the edge
@@ -106,23 +103,12 @@ func (e GameDownloadResourceEdges) MalwareScanCasesOrErr() ([]*MalwareScanCase, 
 	return nil, &NotLoadedError{edge: "malware_scan_cases"}
 }
 
-// UploadSessionOrErr returns the UploadSession value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e GameDownloadResourceEdges) UploadSessionOrErr() (*GameUploadSession, error) {
-	if e.UploadSession != nil {
-		return e.UploadSession, nil
-	} else if e.loadedTypes[4] {
-		return nil, &NotFoundError{label: gameuploadsession.Label}
-	}
-	return nil, &NotLoadedError{edge: "upload_session"}
-}
-
 // CreatorOrErr returns the Creator value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e GameDownloadResourceEdges) CreatorOrErr() (*User, error) {
 	if e.Creator != nil {
 		return e.Creator, nil
-	} else if e.loadedTypes[5] {
+	} else if e.loadedTypes[4] {
 		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "creator"}
@@ -135,11 +121,11 @@ func (*GameDownloadResource) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case gamedownloadresource.FieldPlatform, gamedownloadresource.FieldLanguage:
 			values[i] = new(pgvalue.Strings)
-		case gamedownloadresource.FieldID, gamedownloadresource.FieldStatus, gamedownloadresource.FieldGameID, gamedownloadresource.FieldDownloads, gamedownloadresource.FieldUploadSessionID, gamedownloadresource.FieldCreatorID:
+		case gamedownloadresource.FieldID, gamedownloadresource.FieldStatus, gamedownloadresource.FieldGameID, gamedownloadresource.FieldDownloads, gamedownloadresource.FieldCreatorID:
 			values[i] = new(sql.NullInt64)
 		case gamedownloadresource.FieldSimulator, gamedownloadresource.FieldNote:
 			values[i] = new(sql.NullString)
-		case gamedownloadresource.FieldCreated, gamedownloadresource.FieldUpdated:
+		case gamedownloadresource.FieldPublishedAt, gamedownloadresource.FieldCreated, gamedownloadresource.FieldUpdated:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -206,12 +192,12 @@ func (_m *GameDownloadResource) assignValues(columns []string, values []any) err
 			} else if value.Valid {
 				_m.Downloads = int(value.Int64)
 			}
-		case gamedownloadresource.FieldUploadSessionID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field upload_session_id", values[i])
+		case gamedownloadresource.FieldPublishedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field published_at", values[i])
 			} else if value.Valid {
-				_m.UploadSessionID = new(int)
-				*_m.UploadSessionID = int(value.Int64)
+				_m.PublishedAt = new(time.Time)
+				*_m.PublishedAt = value.Time
 			}
 		case gamedownloadresource.FieldCreatorID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -262,11 +248,6 @@ func (_m *GameDownloadResource) QueryReports() *GameDownloadResourceReportQuery 
 // QueryMalwareScanCases queries the "malware_scan_cases" edge of the GameDownloadResource entity.
 func (_m *GameDownloadResource) QueryMalwareScanCases() *MalwareScanCaseQuery {
 	return NewGameDownloadResourceClient(_m.config).QueryMalwareScanCases(_m)
-}
-
-// QueryUploadSession queries the "upload_session" edge of the GameDownloadResource entity.
-func (_m *GameDownloadResource) QueryUploadSession() *GameUploadSessionQuery {
-	return NewGameDownloadResourceClient(_m.config).QueryUploadSession(_m)
 }
 
 // QueryCreator queries the "creator" edge of the GameDownloadResource entity.
@@ -322,9 +303,9 @@ func (_m *GameDownloadResource) String() string {
 	builder.WriteString("downloads=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Downloads))
 	builder.WriteString(", ")
-	if v := _m.UploadSessionID; v != nil {
-		builder.WriteString("upload_session_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
+	if v := _m.PublishedAt; v != nil {
+		builder.WriteString("published_at=")
+		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("creator_id=")

@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadchunk"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
@@ -148,21 +147,6 @@ func (_c *GameUploadSessionCreate) SetNillableUpdated(v *time.Time) *GameUploadS
 func (_c *GameUploadSessionCreate) SetID(v int) *GameUploadSessionCreate {
 	_c.mutation.SetID(v)
 	return _c
-}
-
-// AddGameDownloadResourceIDs adds the "game_download_resources" edge to the GameDownloadResource entity by IDs.
-func (_c *GameUploadSessionCreate) AddGameDownloadResourceIDs(ids ...int) *GameUploadSessionCreate {
-	_c.mutation.AddGameDownloadResourceIDs(ids...)
-	return _c
-}
-
-// AddGameDownloadResources adds the "game_download_resources" edges to the GameDownloadResource entity.
-func (_c *GameUploadSessionCreate) AddGameDownloadResources(v ...*GameDownloadResource) *GameUploadSessionCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddGameDownloadResourceIDs(ids...)
 }
 
 // SetGameDownloadResourceFileID sets the "game_download_resource_file" edge to the GameDownloadResourceFile entity by ID.
@@ -404,22 +388,6 @@ func (_c *GameUploadSessionCreate) createSpec() (*GameUploadSession, *sqlgraph.C
 	if value, ok := _c.mutation.Updated(); ok {
 		_spec.SetField(gameuploadsession.FieldUpdated, field.TypeTime, value)
 		_node.Updated = value
-	}
-	if nodes := _c.mutation.GameDownloadResourcesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   gameuploadsession.GameDownloadResourcesTable,
-			Columns: []string{gameuploadsession.GameDownloadResourcesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresource.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.GameDownloadResourceFileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadchunk"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
@@ -29,7 +28,6 @@ type GameUploadSessionQuery struct {
 	order                        []gameuploadsession.OrderOption
 	inters                       []Interceptor
 	predicates                   []predicate.GameUploadSession
-	withGameDownloadResources    *GameDownloadResourceQuery
 	withGameDownloadResourceFile *GameDownloadResourceFileQuery
 	withGameUploadChunks         *GameUploadChunkQuery
 	withUserUploadQuotaRecord    *UserUploadQuotaRecordQuery
@@ -69,28 +67,6 @@ func (_q *GameUploadSessionQuery) Unique(unique bool) *GameUploadSessionQuery {
 func (_q *GameUploadSessionQuery) Order(o ...gameuploadsession.OrderOption) *GameUploadSessionQuery {
 	_q.order = append(_q.order, o...)
 	return _q
-}
-
-// QueryGameDownloadResources chains the current query on the "game_download_resources" edge.
-func (_q *GameUploadSessionQuery) QueryGameDownloadResources() *GameDownloadResourceQuery {
-	query := (&GameDownloadResourceClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(gameuploadsession.Table, gameuploadsession.FieldID, selector),
-			sqlgraph.To(gamedownloadresource.Table, gamedownloadresource.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, gameuploadsession.GameDownloadResourcesTable, gameuploadsession.GameDownloadResourcesColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // QueryGameDownloadResourceFile chains the current query on the "game_download_resource_file" edge.
@@ -373,7 +349,6 @@ func (_q *GameUploadSessionQuery) Clone() *GameUploadSessionQuery {
 		order:                        append([]gameuploadsession.OrderOption{}, _q.order...),
 		inters:                       append([]Interceptor{}, _q.inters...),
 		predicates:                   append([]predicate.GameUploadSession{}, _q.predicates...),
-		withGameDownloadResources:    _q.withGameDownloadResources.Clone(),
 		withGameDownloadResourceFile: _q.withGameDownloadResourceFile.Clone(),
 		withGameUploadChunks:         _q.withGameUploadChunks.Clone(),
 		withUserUploadQuotaRecord:    _q.withUserUploadQuotaRecord.Clone(),
@@ -383,17 +358,6 @@ func (_q *GameUploadSessionQuery) Clone() *GameUploadSessionQuery {
 		path:      _q.path,
 		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
-}
-
-// WithGameDownloadResources tells the query-builder to eager-load the nodes that are connected to
-// the "game_download_resources" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *GameUploadSessionQuery) WithGameDownloadResources(opts ...func(*GameDownloadResourceQuery)) *GameUploadSessionQuery {
-	query := (&GameDownloadResourceClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withGameDownloadResources = query
-	return _q
 }
 
 // WithGameDownloadResourceFile tells the query-builder to eager-load the nodes that are connected to
@@ -518,8 +482,7 @@ func (_q *GameUploadSessionQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	var (
 		nodes       = []*GameUploadSession{}
 		_spec       = _q.querySpec()
-		loadedTypes = [5]bool{
-			_q.withGameDownloadResources != nil,
+		loadedTypes = [4]bool{
 			_q.withGameDownloadResourceFile != nil,
 			_q.withGameUploadChunks != nil,
 			_q.withUserUploadQuotaRecord != nil,
@@ -546,15 +509,6 @@ func (_q *GameUploadSessionQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
-	}
-	if query := _q.withGameDownloadResources; query != nil {
-		if err := _q.loadGameDownloadResources(ctx, query, nodes,
-			func(n *GameUploadSession) { n.Edges.GameDownloadResources = []*GameDownloadResource{} },
-			func(n *GameUploadSession, e *GameDownloadResource) {
-				n.Edges.GameDownloadResources = append(n.Edges.GameDownloadResources, e)
-			}); err != nil {
-			return nil, err
-		}
 	}
 	if query := _q.withGameDownloadResourceFile; query != nil {
 		if err := _q.loadGameDownloadResourceFile(ctx, query, nodes, nil,
@@ -586,39 +540,6 @@ func (_q *GameUploadSessionQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	return nodes, nil
 }
 
-func (_q *GameUploadSessionQuery) loadGameDownloadResources(ctx context.Context, query *GameDownloadResourceQuery, nodes []*GameUploadSession, init func(*GameUploadSession), assign func(*GameUploadSession, *GameDownloadResource)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*GameUploadSession)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(gamedownloadresource.FieldUploadSessionID)
-	}
-	query.Where(predicate.GameDownloadResource(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(gameuploadsession.GameDownloadResourcesColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.UploadSessionID
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "upload_session_id" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "upload_session_id" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
 func (_q *GameUploadSessionQuery) loadGameDownloadResourceFile(ctx context.Context, query *GameDownloadResourceFileQuery, nodes []*GameUploadSession, init func(*GameUploadSession), assign func(*GameUploadSession, *GameDownloadResourceFile)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*GameUploadSession)

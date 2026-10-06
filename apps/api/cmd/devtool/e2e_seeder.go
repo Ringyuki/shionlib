@@ -697,12 +697,18 @@ func (s *e2eSeeder) seedComments(ctx context.Context, tx *ent.Client, content e2
 }
 
 func (s *e2eSeeder) createResource(ctx context.Context, tx *ent.Client, gameID, creatorID int, resource e2eSeededResource, file e2eSeededFile) (int, *ent.GameDownloadResourceFile, error) {
+	var publishedAt *time.Time
+	if file.FileStatus == download.FileInObjectStore {
+		now := s.now()
+		publishedAt = &now
+	}
 	row, err := tx.GameDownloadResource.Create().
 		SetGameID(gameID).
 		SetCreatorID(creatorID).
 		SetPlatform(pgvalue.Strings(resource.Platform)).
 		SetLanguage(pgvalue.Strings(resource.Language)).
 		SetNote(resource.Note).
+		SetNillablePublishedAt(publishedAt).
 		Save(ctx)
 	if err != nil {
 		return 0, nil, fmt.Errorf("create download resource for game %d: %w", gameID, err)

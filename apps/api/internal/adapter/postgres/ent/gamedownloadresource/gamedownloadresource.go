@@ -29,8 +29,8 @@ const (
 	FieldNote = "note"
 	// FieldDownloads holds the string denoting the downloads field in the database.
 	FieldDownloads = "downloads"
-	// FieldUploadSessionID holds the string denoting the upload_session_id field in the database.
-	FieldUploadSessionID = "upload_session_id"
+	// FieldPublishedAt holds the string denoting the published_at field in the database.
+	FieldPublishedAt = "published_at"
 	// FieldCreatorID holds the string denoting the creator_id field in the database.
 	FieldCreatorID = "creator_id"
 	// FieldCreated holds the string denoting the created field in the database.
@@ -45,8 +45,6 @@ const (
 	EdgeReports = "reports"
 	// EdgeMalwareScanCases holds the string denoting the malware_scan_cases edge name in mutations.
 	EdgeMalwareScanCases = "malware_scan_cases"
-	// EdgeUploadSession holds the string denoting the upload_session edge name in mutations.
-	EdgeUploadSession = "upload_session"
 	// EdgeCreator holds the string denoting the creator edge name in mutations.
 	EdgeCreator = "creator"
 	// Table holds the table name of the gamedownloadresource in the database.
@@ -79,13 +77,6 @@ const (
 	MalwareScanCasesInverseTable = "malware_scan_cases"
 	// MalwareScanCasesColumn is the table column denoting the malware_scan_cases relation/edge.
 	MalwareScanCasesColumn = "resource_id"
-	// UploadSessionTable is the table that holds the upload_session relation/edge.
-	UploadSessionTable = "game_download_resources"
-	// UploadSessionInverseTable is the table name for the GameUploadSession entity.
-	// It exists in this package in order to avoid circular dependency with the "gameuploadsession" package.
-	UploadSessionInverseTable = "game_upload_sessions"
-	// UploadSessionColumn is the table column denoting the upload_session relation/edge.
-	UploadSessionColumn = "upload_session_id"
 	// CreatorTable is the table that holds the creator relation/edge.
 	CreatorTable = "game_download_resources"
 	// CreatorInverseTable is the table name for the User entity.
@@ -105,7 +96,7 @@ var Columns = []string{
 	FieldLanguage,
 	FieldNote,
 	FieldDownloads,
-	FieldUploadSessionID,
+	FieldPublishedAt,
 	FieldCreatorID,
 	FieldCreated,
 	FieldUpdated,
@@ -204,9 +195,9 @@ func ByDownloads(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDownloads, opts...).ToFunc()
 }
 
-// ByUploadSessionID orders the results by the upload_session_id field.
-func ByUploadSessionID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUploadSessionID, opts...).ToFunc()
+// ByPublishedAt orders the results by the published_at field.
+func ByPublishedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPublishedAt, opts...).ToFunc()
 }
 
 // ByCreatorID orders the results by the creator_id field.
@@ -273,13 +264,6 @@ func ByMalwareScanCases(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption 
 	}
 }
 
-// ByUploadSessionField orders the results by upload_session field.
-func ByUploadSessionField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUploadSessionStep(), sql.OrderByField(field, opts...))
-	}
-}
-
 // ByCreatorField orders the results by creator field.
 func ByCreatorField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -312,13 +296,6 @@ func newMalwareScanCasesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(MalwareScanCasesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, MalwareScanCasesTable, MalwareScanCasesColumn),
-	)
-}
-func newUploadSessionStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(UploadSessionInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, UploadSessionTable, UploadSessionColumn),
 	)
 }
 func newCreatorStep() *sqlgraph.Step {

@@ -9,7 +9,6 @@ import (
 type ongoingUploadDTO struct {
 	UploadSessionID int       `json:"upload_session_id"`
 	FileName        string    `json:"file_name"`
-	FileSHA256      string    `json:"file_sha256"`
 	TotalSize       int64     `json:"total_size"`
 	ChunkSize       int64     `json:"chunk_size"`
 	UploadedChunks  []int     `json:"uploaded_chunks"`
@@ -32,7 +31,7 @@ type uploadChunkDTO struct {
 type uploadStatusDTO struct {
 	Status         upload.SessionStatus `json:"status" enum:"UPLOADING,COMPLETED,ABORTED,EXPIRED"`
 	UploadedChunks []int                `json:"uploaded_chunks"`
-	FileSHA256     string               `json:"file_sha256"`
+	FileSHA256     *string              `json:"file_sha256" doc:"BLAKE3 digest of the whole file; null until the upload is completed"`
 	TotalSize      int64                `json:"total_size"`
 	ChunkSize      int64                `json:"chunk_size"`
 	TotalChunks    int                  `json:"total_chunks"`
@@ -56,7 +55,6 @@ func toOngoingUpload(s upload.Session) ongoingUploadDTO {
 	return ongoingUploadDTO{
 		UploadSessionID: s.ID,
 		FileName:        s.FileName,
-		FileSHA256:      s.FileHash,
 		TotalSize:       s.TotalSize,
 		ChunkSize:       s.ChunkSize,
 		UploadedChunks:  chunks,
@@ -66,10 +64,14 @@ func toOngoingUpload(s upload.Session) ongoingUploadDTO {
 }
 
 func toUploadStatus(s upload.Session) uploadStatusDTO {
+	var digest *string
+	if s.FileHash != "" {
+		digest = &s.FileHash
+	}
 	return uploadStatusDTO{
 		Status:         s.Status,
 		UploadedChunks: s.SortedChunks(),
-		FileSHA256:     s.FileHash,
+		FileSHA256:     digest,
 		TotalSize:      s.TotalSize,
 		ChunkSize:      s.ChunkSize,
 		TotalChunks:    s.TotalChunks,

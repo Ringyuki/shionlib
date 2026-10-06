@@ -5558,22 +5558,6 @@ func (c *GameDownloadResourceClient) QueryMalwareScanCases(_m *GameDownloadResou
 	return query
 }
 
-// QueryUploadSession queries the upload_session edge of a GameDownloadResource.
-func (c *GameDownloadResourceClient) QueryUploadSession(_m *GameDownloadResource) *GameUploadSessionQuery {
-	query := (&GameUploadSessionClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(gamedownloadresource.Table, gamedownloadresource.FieldID, id),
-			sqlgraph.To(gameuploadsession.Table, gameuploadsession.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, gamedownloadresource.UploadSessionTable, gamedownloadresource.UploadSessionColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryCreator queries the creator edge of a GameDownloadResource.
 func (c *GameDownloadResourceClient) QueryCreator(_m *GameDownloadResource) *UserQuery {
 	query := (&UserClient{config: c.config}).Query()
@@ -7040,22 +7024,6 @@ func (c *GameUploadSessionClient) GetX(ctx context.Context, id int) *GameUploadS
 		panic(err)
 	}
 	return obj
-}
-
-// QueryGameDownloadResources queries the game_download_resources edge of a GameUploadSession.
-func (c *GameUploadSessionClient) QueryGameDownloadResources(_m *GameUploadSession) *GameDownloadResourceQuery {
-	query := (&GameDownloadResourceClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(gameuploadsession.Table, gameuploadsession.FieldID, id),
-			sqlgraph.To(gamedownloadresource.Table, gamedownloadresource.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, gameuploadsession.GameDownloadResourcesTable, gameuploadsession.GameDownloadResourcesColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
 }
 
 // QueryGameDownloadResourceFile queries the game_download_resource_file edge of a GameUploadSession.

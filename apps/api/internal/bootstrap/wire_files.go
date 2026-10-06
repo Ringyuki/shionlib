@@ -83,6 +83,8 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		Tx:         shared.Transactor,
 		Queue:      jobQueue,
 		Store:      store,
+		Local:      spool,
+		Settings:   shared.Settings,
 		Now:        shared.Now,
 	})
 	vendorClient := httpclient.New(httpclient.Options{Timeout: vendorTimeout})

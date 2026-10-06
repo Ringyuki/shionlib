@@ -385,6 +385,26 @@
         ],
         "type": "object"
       },
+      "AddDownloadFilesInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/DownloadFileUploadInput"
+            },
+            "maxItems": 1000,
+            "minItems": 1,
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "files"
+        ],
+        "type": "object"
+      },
       "AddFavoriteGameInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -4988,6 +5008,8 @@
           440101,
           440102,
           440103,
+          440104,
+          440105,
           440201,
           440202,
           440203,
@@ -5133,6 +5155,8 @@
           "GAME_DOWNLOAD_RESOURCE_NOT_FOUND",
           "GAME_DOWNLOAD_RESOURCE_NOT_OWNER",
           "GAME_DOWNLOAD_RESOURCE_UPLOAD_SESSION_ALREADY_USED",
+          "GAME_DOWNLOAD_RESOURCE_TOO_MANY_FILES",
+          "GAME_DOWNLOAD_RESOURCE_LAST_FILE",
           "GAME_DOWNLOAD_RESOURCE_REPORT_DUPLICATED",
           "GAME_DOWNLOAD_RESOURCE_REPORT_SELF_NOT_ALLOWED",
           "GAME_DOWNLOAD_RESOURCE_REPORT_NOT_FOUND",
@@ -5949,6 +5973,20 @@
         ],
         "type": "object"
       },
+      "CompleteUploadInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "file_sha256": {
+            "description": "BLAKE3 hex digest of the whole file, computed while uploading",
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_sha256"
+        ],
+        "type": "object"
+      },
       "CreateAdInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -6529,6 +6567,25 @@
         ],
         "type": "object"
       },
+      "DownloadFileUploadInput": {
+        "additionalProperties": false,
+        "properties": {
+          "file_name": {
+            "description": "Shown name; defaults to the uploaded file's name",
+            "maxLength": 255,
+            "type": "string"
+          },
+          "upload_session_id": {
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "upload_session_id"
+        ],
+        "type": "object"
+      },
       "DownloadHistoryDTO": {
         "additionalProperties": false,
         "properties": {
@@ -6815,6 +6872,13 @@
               "array",
               "null"
             ]
+          },
+          "published_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
@@ -6827,6 +6891,7 @@
           "files",
           "files_count",
           "creator",
+          "published_at",
           "created"
         ],
         "type": "object"
@@ -6891,6 +6956,19 @@
         ],
         "type": "object"
       },
+      "DownloadResourceCreatedDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
       "DownloadResourceDTO": {
         "additionalProperties": false,
         "properties": {
@@ -6942,6 +7020,14 @@
               "null"
             ]
           },
+          "published_at": {
+            "description": "Null while the resource is still being checked; only its uploader sees it then",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "simulator": {
             "type": [
               "string",
@@ -6961,6 +7047,7 @@
           "note",
           "downloads",
           "creator",
+          "published_at",
           "created",
           "updated",
           "files"
@@ -6999,10 +7086,17 @@
       "DownloadSourceBodyInput": {
         "additionalProperties": false,
         "properties": {
-          "file_name": {
-            "maxLength": 255,
-            "minLength": 1,
-            "type": "string"
+          "files": {
+            "description": "Completed upload sessions to attach, one per file",
+            "items": {
+              "$ref": "#/components/schemas/DownloadFileUploadInput"
+            },
+            "maxItems": 1000,
+            "minItems": 1,
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "language": {
             "items": {
@@ -7055,17 +7149,12 @@
               "OTHER"
             ],
             "type": "string"
-          },
-          "upload_session_id": {
-            "format": "int64",
-            "type": "integer"
           }
         },
         "required": [
-          "file_name",
           "platform",
           "language",
-          "upload_session_id"
+          "files"
         ],
         "type": "object"
       },
@@ -7124,6 +7213,13 @@
               "null"
             ]
           },
+          "published_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "updated": {
             "format": "date-time",
             "type": "string"
@@ -7140,6 +7236,7 @@
           "files_count",
           "game",
           "creator",
+          "published_at",
           "created",
           "updated"
         ],
@@ -7228,10 +7325,6 @@
       "EditDownloadSourceBodyInput": {
         "additionalProperties": false,
         "properties": {
-          "file_name": {
-            "maxLength": 255,
-            "type": "string"
-          },
           "language": {
             "items": {
               "enum": [
@@ -8751,6 +8844,39 @@
           },
           "data": {
             "$ref": "#/components/schemas/DownloadReleasePageDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeDownloadResourceCreatedDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DownloadResourceCreatedDTO"
           },
           "message": {
             "type": "string"
@@ -13405,11 +13531,6 @@
             "minLength": 1,
             "type": "string"
           },
-          "file_sha256": {
-            "description": "BLAKE3 hex digest of the whole file",
-            "minLength": 1,
-            "type": "string"
-          },
           "total_size": {
             "format": "int64",
             "type": "integer"
@@ -13417,8 +13538,7 @@
         },
         "required": [
           "file_name",
-          "total_size",
-          "file_sha256"
+          "total_size"
         ],
         "type": "object"
       },
@@ -14120,9 +14240,6 @@
           "file_name": {
             "type": "string"
           },
-          "file_sha256": {
-            "type": "string"
-          },
           "total_chunks": {
             "format": "int64",
             "type": "integer"
@@ -14149,7 +14266,6 @@
         "required": [
           "upload_session_id",
           "file_name",
-          "file_sha256",
           "total_size",
           "chunk_size",
           "uploaded_chunks",
@@ -15046,6 +15162,20 @@
           "email",
           "role",
           "created"
+        ],
+        "type": "object"
+      },
+      "RenameDownloadFileInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "file_name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_name"
         ],
         "type": "object"
       },
@@ -16553,7 +16683,11 @@
             "type": "string"
           },
           "file_sha256": {
-            "type": "string"
+            "description": "BLAKE3 digest of the whole file; null until the upload is completed",
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "status": {
             "enum": [
@@ -26645,6 +26779,130 @@
         ]
       }
     },
+    "/game/download-source/file/{fileId}": {
+      "delete": {
+        "operationId": "download.deleteFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "fileId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Remove a file from a download resource",
+        "tags": [
+          "download"
+        ]
+      },
+      "patch": {
+        "operationId": "download.renameFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "fileId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameDownloadFileInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Rename a file of a download resource",
+        "tags": [
+          "download"
+        ]
+      }
+    },
     "/game/download-source/file/{fileId}/history": {
       "get": {
         "operationId": "download.history",
@@ -27085,6 +27343,74 @@
           }
         ],
         "summary": "Edit a download resource",
+        "tags": [
+          "download"
+        ]
+      }
+    },
+    "/game/download-source/{id}/files": {
+      "post": {
+        "operationId": "download.addFiles",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddDownloadFilesInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Add completed uploads to a download resource",
         "tags": [
           "download"
         ]
@@ -27868,7 +28194,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EmptyEnvelope"
+                  "$ref": "#/components/schemas/EnvelopeDownloadResourceCreatedDTO"
                 }
               }
             },
@@ -27900,7 +28226,7 @@
             "accessCookie": []
           }
         ],
-        "summary": "Create a download resource from a completed upload",
+        "summary": "Create a download resource from completed uploads",
         "tags": [
           "download"
         ]
@@ -29865,6 +30191,16 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteUploadInputBody"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {

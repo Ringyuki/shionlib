@@ -12,6 +12,10 @@ var ErrResourceNotOwner = apperror.Define(440102, "GAME_DOWNLOAD_RESOURCE_NOT_OW
 
 var ErrSessionAlreadyUsed = apperror.Define(440103, "GAME_DOWNLOAD_RESOURCE_UPLOAD_SESSION_ALREADY_USED", apperror.KindConflict)
 
+var ErrTooManyFiles = apperror.Define(440104, "GAME_DOWNLOAD_RESOURCE_TOO_MANY_FILES", apperror.KindInvalidArgument)
+
+var ErrLastFile = apperror.Define(440105, "GAME_DOWNLOAD_RESOURCE_LAST_FILE", apperror.KindConflict)
+
 var ErrFileNotFound = apperror.Define(450101, "GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND", apperror.KindNotFound)
 
 var ErrTokenRequired = apperror.Define(450102, "GAME_DOWNLOAD_RESOURCE_FILE_TOKEN_REQUIRED", apperror.KindInvalidArgument)

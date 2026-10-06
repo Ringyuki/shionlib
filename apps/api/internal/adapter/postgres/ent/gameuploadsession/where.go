@@ -736,29 +736,6 @@ func UpdatedLTE(v time.Time) predicate.GameUploadSession {
 	return predicate.GameUploadSession(sql.FieldLTE(FieldUpdated, v))
 }
 
-// HasGameDownloadResources applies the HasEdge predicate on the "game_download_resources" edge.
-func HasGameDownloadResources() predicate.GameUploadSession {
-	return predicate.GameUploadSession(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, GameDownloadResourcesTable, GameDownloadResourcesColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasGameDownloadResourcesWith applies the HasEdge predicate on the "game_download_resources" edge with a given conditions (other predicates).
-func HasGameDownloadResourcesWith(preds ...predicate.GameDownloadResource) predicate.GameUploadSession {
-	return predicate.GameUploadSession(func(s *sql.Selector) {
-		step := newGameDownloadResourcesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasGameDownloadResourceFile applies the HasEdge predicate on the "game_download_resource_file" edge.
 func HasGameDownloadResourceFile() predicate.GameUploadSession {
 	return predicate.GameUploadSession(func(s *sql.Selector) {

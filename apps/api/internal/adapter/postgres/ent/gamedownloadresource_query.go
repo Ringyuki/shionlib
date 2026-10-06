@@ -17,7 +17,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
@@ -34,7 +33,6 @@ type GameDownloadResourceQuery struct {
 	withFiles            *GameDownloadResourceFileQuery
 	withReports          *GameDownloadResourceReportQuery
 	withMalwareScanCases *MalwareScanCaseQuery
-	withUploadSession    *GameUploadSessionQuery
 	withCreator          *UserQuery
 	modifiers            []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
@@ -154,28 +152,6 @@ func (_q *GameDownloadResourceQuery) QueryMalwareScanCases() *MalwareScanCaseQue
 			sqlgraph.From(gamedownloadresource.Table, gamedownloadresource.FieldID, selector),
 			sqlgraph.To(malwarescancase.Table, malwarescancase.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, gamedownloadresource.MalwareScanCasesTable, gamedownloadresource.MalwareScanCasesColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryUploadSession chains the current query on the "upload_session" edge.
-func (_q *GameDownloadResourceQuery) QueryUploadSession() *GameUploadSessionQuery {
-	query := (&GameUploadSessionClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(gamedownloadresource.Table, gamedownloadresource.FieldID, selector),
-			sqlgraph.To(gameuploadsession.Table, gameuploadsession.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, gamedownloadresource.UploadSessionTable, gamedownloadresource.UploadSessionColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -401,7 +377,6 @@ func (_q *GameDownloadResourceQuery) Clone() *GameDownloadResourceQuery {
 		withFiles:            _q.withFiles.Clone(),
 		withReports:          _q.withReports.Clone(),
 		withMalwareScanCases: _q.withMalwareScanCases.Clone(),
-		withUploadSession:    _q.withUploadSession.Clone(),
 		withCreator:          _q.withCreator.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
@@ -451,17 +426,6 @@ func (_q *GameDownloadResourceQuery) WithMalwareScanCases(opts ...func(*MalwareS
 		opt(query)
 	}
 	_q.withMalwareScanCases = query
-	return _q
-}
-
-// WithUploadSession tells the query-builder to eager-load the nodes that are connected to
-// the "upload_session" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *GameDownloadResourceQuery) WithUploadSession(opts ...func(*GameUploadSessionQuery)) *GameDownloadResourceQuery {
-	query := (&GameUploadSessionClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withUploadSession = query
 	return _q
 }
 
@@ -554,12 +518,11 @@ func (_q *GameDownloadResourceQuery) sqlAll(ctx context.Context, hooks ...queryH
 	var (
 		nodes       = []*GameDownloadResource{}
 		_spec       = _q.querySpec()
-		loadedTypes = [6]bool{
+		loadedTypes = [5]bool{
 			_q.withGame != nil,
 			_q.withFiles != nil,
 			_q.withReports != nil,
 			_q.withMalwareScanCases != nil,
-			_q.withUploadSession != nil,
 			_q.withCreator != nil,
 		}
 	)
@@ -612,12 +575,6 @@ func (_q *GameDownloadResourceQuery) sqlAll(ctx context.Context, hooks ...queryH
 			func(n *GameDownloadResource, e *MalwareScanCase) {
 				n.Edges.MalwareScanCases = append(n.Edges.MalwareScanCases, e)
 			}); err != nil {
-			return nil, err
-		}
-	}
-	if query := _q.withUploadSession; query != nil {
-		if err := _q.loadUploadSession(ctx, query, nodes, nil,
-			func(n *GameDownloadResource, e *GameUploadSession) { n.Edges.UploadSession = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -752,38 +709,6 @@ func (_q *GameDownloadResourceQuery) loadMalwareScanCases(ctx context.Context, q
 	}
 	return nil
 }
-func (_q *GameDownloadResourceQuery) loadUploadSession(ctx context.Context, query *GameUploadSessionQuery, nodes []*GameDownloadResource, init func(*GameDownloadResource), assign func(*GameDownloadResource, *GameUploadSession)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*GameDownloadResource)
-	for i := range nodes {
-		if nodes[i].UploadSessionID == nil {
-			continue
-		}
-		fk := *nodes[i].UploadSessionID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(gameuploadsession.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "upload_session_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
 func (_q *GameDownloadResourceQuery) loadCreator(ctx context.Context, query *UserQuery, nodes []*GameDownloadResource, init func(*GameDownloadResource), assign func(*GameDownloadResource, *User)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*GameDownloadResource)
@@ -844,9 +769,6 @@ func (_q *GameDownloadResourceQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if _q.withGame != nil {
 			_spec.Node.AddColumnOnce(gamedownloadresource.FieldGameID)
-		}
-		if _q.withUploadSession != nil {
-			_spec.Node.AddColumnOnce(gamedownloadresource.FieldUploadSessionID)
 		}
 		if _q.withCreator != nil {
 			_spec.Node.AddColumnOnce(gamedownloadresource.FieldCreatorID)

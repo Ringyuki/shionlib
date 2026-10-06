@@ -3,6 +3,7 @@ package download_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"slices"
 	"testing"
 	"time"
@@ -14,8 +15,10 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/download/downloadtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game/gametest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
+	"github.com/Ringyuki/shionlib/apps/api/internal/upload/uploadtest"
 )
 
 var (
@@ -59,6 +62,7 @@ func (q *quota) Withdraw(_ context.Context, userID, sessionID int) error {
 
 type fixture struct {
 	repo     *downloadtest.MemoryRepository
+	spool    *uploadtest.MemorySpool
 	sessions *sessions
 	quota    *quota
 	events   *downloadtest.Recorder
@@ -70,6 +74,7 @@ func newFixture() fixture {
 	repo := downloadtest.NewMemoryRepository(func() time.Time { return now })
 	f := fixture{
 		repo:     repo,
+		spool:    uploadtest.NewMemorySpool(),
 		sessions: &sessions{byID: map[int]upload.Session{}},
 		quota:    &quota{},
 		events:   &downloadtest.Recorder{},
@@ -86,6 +91,8 @@ func newFixture() fixture {
 		Tx:         &txtest.Immediate{},
 		Queue:      f.events,
 		Store:      f.store,
+		Local:      f.spool,
+		Settings:   settingtest.Set(settingtest.Source{}, download.MaxFilesPerResource, 3),
 		Now:        func() time.Time { return now },
 	})
 	return f
@@ -105,7 +112,7 @@ func expectCode(t *testing.T, err error, want apperror.Definition) {
 func TestGameResourcesHidesUnfinishedFilesFromOthers(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()
-	stored := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID})
+	stored := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, PublishedAt: ptr(now)})
 	storedFile := f.repo.SeedFile(download.File{ResourceID: stored.ID, Name: "a.7z", Status: download.FileInObjectStore, CreatorID: owner.UserID})
 	pending := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID})
 	f.repo.SeedFile(download.File{ResourceID: pending.ID, Name: "b.7z", Status: download.FileOnServer, CreatorID: owner.UserID})
@@ -118,14 +125,14 @@ func TestGameResourcesHidesUnfinishedFilesFromOthers(t *testing.T) {
 	}
 	seen, err := f.service.GameResources(ctx, other, 10)
 	if err != nil || len(seen) != 1 || seen[0].ID != stored.ID {
-		t.Fatalf("others only see stored files: %+v %v", seen, err)
+		t.Fatalf("others only see published resources: %+v %v", seen, err)
 	}
 	if seen[0].Files[0].LatestReupload() != nil {
 		t.Fatal("a single history entry is the original upload, not a re-upload")
 	}
 	mine, _ := f.service.GameResources(ctx, owner, 10)
 	if len(mine) != 2 {
-		t.Fatalf("creators see their pending files: %+v", mine)
+		t.Fatalf("creators see their unpublished resources: %+v", mine)
 	}
 	f.repo.SeedHistory(download.History{FileID: storedFile.ID, OperatorID: admin.UserID, Reason: ptr("fix"), Created: now})
 	again, _ := f.service.GameResources(ctx, other, 10)
@@ -134,36 +141,138 @@ func TestGameResourcesHidesUnfinishedFilesFromOthers(t *testing.T) {
 	}
 }
 
-func TestCreateFromCompletedSession(t *testing.T) {
+func (f fixture) completed(id int, name string, size int64) {
+	f.sessions.byID[id] = upload.Session{ID: id, Status: upload.StatusCompleted, CreatorID: owner.UserID, FileName: name, StoragePath: fmt.Sprintf("/spool/%d.part", id), TotalSize: size, HashAlgorithm: upload.HashBLAKE3, FileHash: fmt.Sprintf("b3-%d", id), MimeType: ptr("application/octet-stream")}
+}
+
+func TestCreateAttachesEveryUpload(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()
-	f.sessions.byID[5] = upload.Session{ID: 5, Status: upload.StatusCompleted, CreatorID: owner.UserID, FileName: "session.7z", StoragePath: "/spool/5.part", TotalSize: 2048, HashAlgorithm: upload.HashBLAKE3, FileHash: "b3", MimeType: ptr("application/octet-stream")}
-	f.sessions.byID[6] = upload.Session{ID: 6, Status: upload.StatusUploading, CreatorID: owner.UserID}
-	input := download.CreateInput{Platforms: []string{"and"}, Languages: []string{"jp"}, Simulator: ptr("KRKR"), UploadSessionID: 5}
+	f.completed(5, "game.part1.rar", 2048)
+	f.completed(6, "game.part2.rar", 1024)
+	f.sessions.byID[7] = upload.Session{ID: 7, Status: upload.StatusUploading, CreatorID: owner.UserID}
+	input := download.CreateInput{Platforms: []string{"and"}, Languages: []string{"jp"}, Simulator: ptr("KRKR"), Files: []download.FileUpload{{UploadSessionID: 5}, {UploadSessionID: 6, Name: "第二卷.rar"}}}
 
-	expectCode(t, f.service.Create(ctx, owner, 404, input), game.ErrNotFound)
-	expectCode(t, f.service.Create(ctx, owner, 10, download.CreateInput{UploadSessionID: 99}), upload.ErrSessionNotFound)
-	expectCode(t, f.service.Create(ctx, owner, 10, download.CreateInput{UploadSessionID: 6}), upload.ErrInvalidSessionStatus)
-	expectCode(t, f.service.Create(ctx, other, 10, input), upload.ErrSessionNotOwner)
+	_, err := f.service.Create(ctx, owner, 404, input)
+	expectCode(t, err, game.ErrNotFound)
+	for _, tc := range []struct {
+		files []download.FileUpload
+		want  apperror.Definition
+	}{
+		{nil, apperror.ErrValidationFailed},
+		{[]download.FileUpload{{UploadSessionID: 99}}, upload.ErrSessionNotFound},
+		{[]download.FileUpload{{UploadSessionID: 7}}, upload.ErrInvalidSessionStatus},
+		{[]download.FileUpload{{UploadSessionID: 5}, {UploadSessionID: 5}}, download.ErrSessionAlreadyUsed},
+		{[]download.FileUpload{{UploadSessionID: 5}, {UploadSessionID: 6}, {UploadSessionID: 8}, {UploadSessionID: 9}}, download.ErrTooManyFiles},
+	} {
+		fresh := newFixture()
+		fresh.completed(5, "game.part1.rar", 2048)
+		fresh.completed(6, "game.part2.rar", 1024)
+		fresh.sessions.byID[7] = f.sessions.byID[7]
+		_, err := fresh.service.Create(ctx, owner, 10, download.CreateInput{Files: tc.files})
+		expectCode(t, err, tc.want)
+	}
+	_, err = f.service.Create(ctx, other, 10, input)
+	expectCode(t, err, upload.ErrSessionNotOwner)
 
-	if err := f.service.Create(ctx, owner, 10, input); err != nil {
+	resource, err := f.service.Create(ctx, owner, 10, input)
+	if err != nil {
 		t.Fatal(err)
 	}
-	resource, _ := f.repo.GetResource(ctx, 1)
 	files, _ := f.repo.ListFiles(ctx, resource.ID)
-	if resource.Simulator == nil || *resource.Simulator != "KRKR" || *resource.UploadSessionID != 5 || len(files) != 1 {
+	if resource.ID == 0 || resource.Published() || *resource.Simulator != "KRKR" || len(files) != 2 {
 		t.Fatalf("resource %+v files %+v", resource, files)
 	}
-	file := files[0]
-	if file.Name != "session.7z" || *file.Path != "/spool/5.part" || file.Size != 2048 || file.Status != download.FileOnServer || file.CheckStatus != download.CheckPending || file.Hash != "b3" {
-		t.Fatalf("file %+v", file)
+	if files[0].Name != "game.part1.rar" || *files[0].Path != "/spool/5.part" || files[0].Size != 2048 || files[0].Status != download.FileOnServer || files[0].CheckStatus != download.CheckPending || files[0].Hash != "b3-5" || *files[0].UploadSessionID != 5 {
+		t.Fatalf("first file %+v", files[0])
+	}
+	if files[1].Name != "第二卷.rar" || *files[1].UploadSessionID != 6 {
+		t.Fatalf("named file %+v", files[1])
 	}
 	recorded := f.events.Activities()
-	if len(recorded) != 1 || recorded[0].Type != activity.TypeFileUploadToServer || *recorded[0].FileStatus != download.FileOnServer || *recorded[0].FileCheckStatus != 0 || *recorded[0].FileSize != 2048 {
-		t.Fatalf("activity %+v", recorded)
+	if len(recorded) != 2 || recorded[0].Type != activity.TypeFileUploadToServer || *recorded[1].FileSize != 1024 || *recorded[1].GameID != 10 {
+		t.Fatalf("activities %+v", recorded)
 	}
-	expectCode(t, f.service.Create(ctx, owner, 10, input), download.ErrSessionAlreadyUsed)
-	expectCode(t, f.service.Create(ctx, owner, 11, input), download.ErrSessionAlreadyUsed)
+	_, err = f.service.Create(ctx, owner, 11, download.CreateInput{Files: []download.FileUpload{{UploadSessionID: 6}}})
+	expectCode(t, err, download.ErrSessionAlreadyUsed)
+}
+
+func TestAddFilesCountsTowardsTheLimit(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	resource := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, PublishedAt: ptr(now)})
+	f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "game.7z", Status: download.FileInObjectStore, CreatorID: owner.UserID})
+	removed := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, Status: download.ResourceRemoved})
+	f.completed(5, "patch.zip", 10)
+	f.completed(6, "ost.zip", 10)
+	f.completed(7, "extra.zip", 10)
+
+	expectCode(t, f.service.AddFiles(ctx, owner, 999, []download.FileUpload{{UploadSessionID: 5}}), download.ErrResourceNotFound)
+	expectCode(t, f.service.AddFiles(ctx, owner, removed.ID, []download.FileUpload{{UploadSessionID: 5}}), download.ErrResourceNotFound)
+	expectCode(t, f.service.AddFiles(ctx, other, resource.ID, []download.FileUpload{{UploadSessionID: 5}}), download.ErrResourceNotOwner)
+	expectCode(t, f.service.AddFiles(ctx, owner, resource.ID, []download.FileUpload{{UploadSessionID: 5}, {UploadSessionID: 6}, {UploadSessionID: 7}}), download.ErrTooManyFiles)
+	if err := f.service.AddFiles(ctx, owner, resource.ID, []download.FileUpload{{UploadSessionID: 5}, {UploadSessionID: 6}}); err != nil {
+		t.Fatal(err)
+	}
+	if count, _ := f.repo.CountFiles(ctx, resource.ID); count != 3 {
+		t.Fatalf("files after adding: %d", count)
+	}
+	seen, _ := f.service.GameResources(ctx, other, 10)
+	if len(seen) != 1 || len(seen[0].Files) != 1 || seen[0].Files[0].Name != "game.7z" {
+		t.Fatalf("a published resource stays visible while added files are checked: %+v", seen)
+	}
+}
+
+func TestRenameFile(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	resource := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID})
+	file := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "a.7z", CreatorID: owner.UserID})
+	sibling := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "b.7z", CreatorID: owner.UserID})
+
+	expectCode(t, f.service.RenameFile(ctx, owner, 999, "x.7z"), download.ErrFileNotFound)
+	expectCode(t, f.service.RenameFile(ctx, other, file.ID, "x.7z"), download.ErrFileNotOwner)
+	if err := f.service.RenameFile(ctx, admin, file.ID, "本体.7z"); err != nil {
+		t.Fatal(err)
+	}
+	renamed, _ := f.repo.GetFile(ctx, file.ID)
+	untouched, _ := f.repo.GetFile(ctx, sibling.ID)
+	if renamed.Name != "本体.7z" || untouched.Name != "b.7z" {
+		t.Fatalf("only the named file is renamed: %q %q", renamed.Name, untouched.Name)
+	}
+}
+
+func TestDeleteFileKeepsTheLastOne(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	resource := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID})
+	stored := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "game.7z", Status: download.FileInObjectStore, StorageKey: ptr("games/10/1/game.7z"), UploadSessionID: ptr(5), CreatorID: owner.UserID})
+	pending := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "broken.7z", Status: download.FileOnServer, Path: ptr("/spool/6.part"), UploadSessionID: ptr(6), CreatorID: owner.UserID})
+	f.spool.Put("/spool/6.part", []byte("x"), now)
+
+	expectCode(t, f.service.DeleteFile(ctx, other, pending.ID), download.ErrFileNotOwner)
+	if err := f.service.DeleteFile(ctx, owner, pending.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.repo.GetFile(ctx, pending.ID); !errors.Is(err, download.ErrFileNotFound) {
+		t.Fatalf("file removed: %v", err)
+	}
+	if !slices.Equal(f.spool.Removed(), []string{"/spool/6.part"}) || !slices.Equal(f.quota.withdrawn, []withdrawal{{owner.UserID, 6}}) {
+		t.Fatalf("local copy %v and quota %+v are released", f.spool.Removed(), f.quota.withdrawn)
+	}
+	if got, _ := f.repo.GetResource(ctx, resource.ID); !got.Published() {
+		t.Fatal("removing the last unfinished file publishes the resource")
+	}
+	expectCode(t, f.service.DeleteFile(ctx, owner, stored.ID), download.ErrLastFile)
+
+	second := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "extra.7z", Status: download.FileInObjectStore, StorageKey: ptr("games/10/3/extra.7z"), CreatorID: owner.UserID})
+	if err := f.service.DeleteFile(ctx, admin, second.ID); err != nil {
+		t.Fatal(err)
+	}
+	jobs := f.events.Jobs()
+	if purge, ok := jobs[len(jobs)-1].(download.PurgeObjects); !ok || !slices.Equal(purge.Keys, []string{"games/10/3/extra.7z"}) {
+		t.Fatalf("stored objects are purged: %+v", jobs)
+	}
 }
 
 func TestEditRules(t *testing.T) {
@@ -172,7 +281,7 @@ func TestEditRules(t *testing.T) {
 	resource := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, Note: ptr("old"), Simulator: ptr("ONS")})
 	f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "a.7z"})
 	removed := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, Status: download.ResourceRemoved})
-	changes := download.ResourceChanges{Platforms: []string{"win"}, Languages: []string{"zh"}, FileName: ptr("renamed.7z")}
+	changes := download.ResourceChanges{Platforms: []string{"win"}, Languages: []string{"zh"}}
 
 	expectCode(t, f.service.Edit(ctx, owner, 999, changes), download.ErrResourceNotFound)
 	expectCode(t, f.service.Edit(ctx, owner, removed.ID, changes), download.ErrResourceNotFound)
@@ -181,9 +290,8 @@ func TestEditRules(t *testing.T) {
 		t.Fatalf("admins may edit: %v", err)
 	}
 	got, _ := f.repo.GetResource(ctx, resource.ID)
-	files, _ := f.repo.ListFiles(ctx, resource.ID)
-	if got.Simulator != nil || *got.Note != "old" || !slices.Equal(got.Platforms, []string{"win"}) || files[0].Name != "renamed.7z" {
-		t.Fatalf("edited %+v files %+v", got, files)
+	if got.Simulator != nil || *got.Note != "old" || !slices.Equal(got.Platforms, []string{"win"}) {
+		t.Fatalf("edited %+v", got)
 	}
 }
 
@@ -260,6 +368,9 @@ func TestMigrations(t *testing.T) {
 	files, _ := f.repo.ListFiles(ctx, id)
 	if len(files) != 1 || files[0].Status != download.FileInObjectStore || files[0].HashAlgorithm != upload.HashBLAKE3 || *files[0].StorageKey != "games/10/9/a.7z" {
 		t.Fatalf("migrated file %+v", files)
+	}
+	if resource, _ := f.repo.GetResource(ctx, id); !resource.Published() {
+		t.Fatal("a resource whose imported files are all stored is published")
 	}
 	expectCode(t, f.service.MigrateFile(ctx, 999, download.MigrateFileInput{}), download.ErrResourceNotFound)
 }
@@ -353,10 +464,11 @@ func TestReleasesAndUserResources(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()
 	f.repo.MarkRated(11)
-	safe := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID})
+	rated := f.repo.SeedResource(download.Resource{GameID: 11, CreatorID: owner.UserID, PublishedAt: ptr(now)})
+	safe := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, PublishedAt: ptr(now.Add(-time.Hour))})
 	f.repo.SeedFile(download.File{ResourceID: safe.ID, Name: "a.7z"})
 	f.repo.SeedFile(download.File{ResourceID: safe.ID, Name: "b.7z"})
-	rated := f.repo.SeedResource(download.Resource{GameID: 11, CreatorID: owner.UserID})
+	f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID})
 	f.repo.MarkUploading(owner.UserID)
 
 	strict, total, err := f.service.Releases(ctx, owner, download.Page{Number: 1, Size: 10})
@@ -365,10 +477,10 @@ func TestReleasesAndUserResources(t *testing.T) {
 	}
 	permissive, total, _ := f.service.Releases(ctx, other, download.Page{Number: 1, Size: 10})
 	if total != 2 || permissive[0].ID != rated.ID {
-		t.Fatalf("permissive viewers see everything newest first: %+v", permissive)
+		t.Fatalf("permissive viewers see published resources, latest publication first: %+v", permissive)
 	}
 	mine, err := f.service.UserResources(ctx, owner, owner.UserID, download.Page{Number: 1, Size: 10})
-	if err != nil || !mine.IsCurrentUser || !mine.HasOngoingSession || mine.Total != 1 {
+	if err != nil || !mine.IsCurrentUser || !mine.HasOngoingSession || mine.Total != 2 {
 		t.Fatalf("own resources %+v %v", mine, err)
 	}
 	theirs, _ := f.service.UserResources(ctx, other, owner.UserID, download.Page{Number: 1, Size: 10})

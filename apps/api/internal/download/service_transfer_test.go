@@ -196,3 +196,27 @@ func TestCleanFilesHandlesStoredAndRejectedFiles(t *testing.T) {
 		t.Fatalf("removed %v", removed)
 	}
 }
+
+func TestStorePublishesTheResourceWithItsLastFile(t *testing.T) {
+	ctx := context.Background()
+	f := newTransferFixture()
+	resource := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: 1})
+	var files []download.File
+	for _, name := range []string{"game.part1.rar", "game.part2.rar"} {
+		path := f.spool.Path(name)
+		f.spool.Put(path, []byte(name), now)
+		files = append(files, f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: name, Path: &path, Status: download.FileOnServer, CheckStatus: download.CheckOK, CreatorID: 1}))
+	}
+	if err := f.transfers.Store(ctx, files[0].ID); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := f.repo.GetResource(ctx, resource.ID); got.Published() {
+		t.Fatal("a resource is not published while one of its files is still on the server")
+	}
+	if err := f.transfers.Store(ctx, files[1].ID); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := f.repo.GetResource(ctx, resource.ID); !got.Published() || !got.PublishedAt.Equal(now) {
+		t.Fatalf("storing the last file publishes the resource: %+v", got)
+	}
+}

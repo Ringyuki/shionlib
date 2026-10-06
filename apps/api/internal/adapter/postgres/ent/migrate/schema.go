@@ -1273,10 +1273,10 @@ var (
 		{Name: "language", Type: field.TypeOther, Nullable: true, Default: schema.Expr("ARRAY[]::text[]"), SchemaType: map[string]string{"postgres": "text[]"}},
 		{Name: "note", Type: field.TypeString, Nullable: true, Size: 255, SchemaType: map[string]string{"postgres": "character varying(255)"}},
 		{Name: "downloads", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "published_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "game_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "upload_session_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "creator_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
 	}
 	// GameDownloadResourcesTable holds the schema information for the "game_download_resources" table.
@@ -1287,15 +1287,9 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "game_download_resources_game_id_fkey",
-				Columns:    []*schema.Column{GameDownloadResourcesColumns[9]},
+				Columns:    []*schema.Column{GameDownloadResourcesColumns[10]},
 				RefColumns: []*schema.Column{GamesColumns[0]},
 				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "game_download_resources_upload_session_id_fkey",
-				Columns:    []*schema.Column{GameDownloadResourcesColumns[10]},
-				RefColumns: []*schema.Column{GameUploadSessionsColumns[0]},
-				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "game_download_resources_creator_id_fkey",
@@ -1308,7 +1302,7 @@ var (
 			{
 				Name:    "game_download_resources_game_id_status_idx",
 				Unique:  false,
-				Columns: []*schema.Column{GameDownloadResourcesColumns[9], GameDownloadResourcesColumns[1]},
+				Columns: []*schema.Column{GameDownloadResourcesColumns[10], GameDownloadResourcesColumns[1]},
 			},
 		},
 	}
@@ -2722,8 +2716,7 @@ func init() {
 		Table: "game_developer_relations",
 	}
 	GameDownloadResourcesTable.ForeignKeys[0].RefTable = GamesTable
-	GameDownloadResourcesTable.ForeignKeys[1].RefTable = GameUploadSessionsTable
-	GameDownloadResourcesTable.ForeignKeys[2].RefTable = UsersTable
+	GameDownloadResourcesTable.ForeignKeys[1].RefTable = UsersTable
 	GameDownloadResourcesTable.Annotation = &entsql.Annotation{
 		Table: "game_download_resources",
 	}

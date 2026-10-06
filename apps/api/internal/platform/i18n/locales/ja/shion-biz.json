@@ -143,5 +143,7 @@
   "AI_PLAYGROUND_TARGET_NOT_FOUND": "プレイグラウンドの対象が見つかりません",
   "AI_CATALOG_PROVIDER_NOT_FOUND": "カタログにこのプロバイダーがありません",
   "SETTING_NOT_FOUND": "設定項目が見つかりません",
-  "SETTING_INVALID_VALUE": "設定値が正しくありません"
+  "SETTING_INVALID_VALUE": "設定値が正しくありません",
+  "GAME_DOWNLOAD_RESOURCE_TOO_MANY_FILES": "リソースに含められるファイルは最大 {max} 個です",
+  "GAME_DOWNLOAD_RESOURCE_LAST_FILE": "リソースには少なくとも 1 つのファイルが必要です"
 }

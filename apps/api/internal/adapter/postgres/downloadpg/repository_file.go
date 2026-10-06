@@ -127,6 +127,12 @@ func (r *Repository) MarkFileStored(ctx context.Context, id int, key string) err
 	})
 }
 
+func (r *Repository) RenameFile(ctx context.Context, id int, name string) error {
+	return r.updateFile(ctx, id, "rename", func(u *ent.GameDownloadResourceFileUpdateOne) {
+		u.SetFileName(name)
+	})
+}
+
 func (r *Repository) ClearFilePath(ctx context.Context, id int) error {
 	return r.updateFile(ctx, id, "clear path of", func(u *ent.GameDownloadResourceFileUpdateOne) {
 		u.ClearFilePath()

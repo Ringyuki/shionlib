@@ -35,7 +35,7 @@ func (f fixtures) cover(gameID, sexual int) {
 
 func (f fixtures) resource(gameID, status int, mutate ...func(*ent.GameDownloadResourceCreate)) int {
 	f.t.Helper()
-	create := f.db.Ent.GameDownloadResource.Create().SetGameID(gameID).SetCreatorID(f.db.User(f.t)).SetStatus(status)
+	create := f.db.Ent.GameDownloadResource.Create().SetGameID(gameID).SetCreatorID(f.db.User(f.t)).SetStatus(status).SetPublishedAt(time.Now())
 	for _, fn := range mutate {
 		fn(create)
 	}
@@ -119,4 +119,8 @@ func offering(platforms, languages []string, downloads int) func(*ent.GameDownlo
 	return func(c *ent.GameDownloadResourceCreate) {
 		c.SetPlatform(pgvalue.Strings(platforms)).SetLanguage(pgvalue.Strings(languages)).SetDownloads(downloads)
 	}
+}
+
+func unpublished(c *ent.GameDownloadResourceCreate) {
+	c.Mutation().ClearPublishedAt()
 }

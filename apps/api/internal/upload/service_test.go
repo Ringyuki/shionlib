@@ -68,7 +68,7 @@ func expectCode(t *testing.T, err error, want apperror.Definition) {
 
 func (f fixture) startUpload(t *testing.T, content []byte) upload.Session {
 	t.Helper()
-	session, err := f.service.Init(context.Background(), uploader, upload.InitInput{FileName: "game.7z", TotalSize: int64(len(content)), FileHash: uploadtest.Digest(content)})
+	session, err := f.service.Init(context.Background(), uploader, upload.InitInput{FileName: "game.7z", TotalSize: int64(len(content))})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -89,7 +89,7 @@ func (f fixture) sendChunks(t *testing.T, session upload.Session, content []byte
 func TestInitValidatesQuotaAndLimits(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()
-	_, err := f.service.Init(ctx, uploader, upload.InitInput{FileName: "a", TotalSize: 4, FileHash: "h"})
+	_, err := f.service.Init(ctx, uploader, upload.InitInput{FileName: "a", TotalSize: 4})
 	expectCode(t, err, upload.ErrQuotaNotFound)
 
 	f.quotas.SeedQuota(upload.Quota{UserID: uploader.UserID, Size: 30, Used: 10})
@@ -113,7 +113,7 @@ func TestInitValidatesQuotaAndLimits(t *testing.T) {
 			expectCode(t, err, tc.want)
 		})
 	}
-	if _, err := f.service.Init(ctx, admin, upload.InitInput{FileName: "big", TotalSize: 17, ChunkSize: ptr[int64](8), FileHash: "h"}); err != nil {
+	if _, err := f.service.Init(ctx, admin, upload.InitInput{FileName: "big", TotalSize: 17, ChunkSize: ptr[int64](8)}); err != nil {
 		t.Fatalf("admins bypass the size cap: %v", err)
 	}
 }
@@ -121,7 +121,7 @@ func TestInitValidatesQuotaAndLimits(t *testing.T) {
 func TestInitCreatesSessionFileAndCharge(t *testing.T) {
 	f := newFixture()
 	f.quotas.SeedQuota(upload.Quota{UserID: uploader.UserID, Size: 100})
-	session, err := f.service.Init(context.Background(), uploader, upload.InitInput{FileName: "game.7z", TotalSize: 10, FileHash: "hash"})
+	session, err := f.service.Init(context.Background(), uploader, upload.InitInput{FileName: "game.7z", TotalSize: 10})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,7 +146,7 @@ func TestInitAbortsWhenTheFileCannotBeAllocated(t *testing.T) {
 	f := newFixture()
 	f.quotas.SeedQuota(upload.Quota{UserID: uploader.UserID, Size: 100})
 	f.spool.FailNext = errors.New("disk full")
-	if _, err := f.service.Init(context.Background(), uploader, upload.InitInput{FileName: "a", TotalSize: 4, FileHash: "h"}); err == nil {
+	if _, err := f.service.Init(context.Background(), uploader, upload.InitInput{FileName: "a", TotalSize: 4}); err == nil {
 		t.Fatal("expected allocation failure")
 	}
 	stored, _ := f.repo.GetSession(context.Background(), 1)
@@ -208,7 +208,8 @@ func TestStatusAndComplete(t *testing.T) {
 	content := []byte("0123456789")
 	session := f.startUpload(t, content)
 
-	expectCode(t, f.service.Complete(ctx, uploader, session.ID), upload.ErrIncomplete)
+	digest := uploadtest.Digest(content)
+	expectCode(t, f.service.Complete(ctx, uploader, session.ID, digest), upload.ErrIncomplete)
 	f.sendChunks(t, session, content)
 	if _, err := f.service.Status(ctx, stranger, session.ID); !errors.Is(err, upload.ErrSessionNotOwner) {
 		t.Fatalf("status owner: %v", err)
@@ -217,31 +218,32 @@ func TestStatusAndComplete(t *testing.T) {
 	if err != nil || !slices.Equal(status.SortedChunks(), []int{0, 1, 2}) {
 		t.Fatalf("status %+v %v", status, err)
 	}
-	expectCode(t, f.service.Complete(ctx, stranger, session.ID), upload.ErrSessionNotOwner)
+	expectCode(t, f.service.Complete(ctx, stranger, session.ID, digest), upload.ErrSessionNotOwner)
 
 	tampered := f.startUpload(t, content)
 	f.sendChunks(t, tampered, []byte("abcdefghij"))
-	expectCode(t, f.service.Complete(ctx, uploader, tampered.ID), upload.ErrFileBLAKE3Mismatch)
+	expectCode(t, f.service.Complete(ctx, uploader, tampered.ID, digest), upload.ErrFileBLAKE3Mismatch)
 
-	if err := f.service.Complete(ctx, uploader, session.ID); err != nil {
+	expectCode(t, f.service.Complete(ctx, uploader, session.ID, uploadtest.Digest([]byte("something else"))), upload.ErrFileBLAKE3Mismatch)
+	if err := f.service.Complete(ctx, uploader, session.ID, digest); err != nil {
 		t.Fatal(err)
 	}
 	completed, _ := f.repo.GetSession(ctx, session.ID)
-	if completed.Status != upload.StatusCompleted || completed.MimeType == nil || *completed.MimeType != upload.DefaultMimeType {
+	if completed.Status != upload.StatusCompleted || completed.FileHash != digest || completed.MimeType == nil || *completed.MimeType != upload.DefaultMimeType {
 		t.Fatalf("completed %+v", completed)
 	}
-	expectCode(t, f.service.Complete(ctx, uploader, session.ID), upload.ErrInvalidSessionStatus)
+	expectCode(t, f.service.Complete(ctx, uploader, session.ID, digest), upload.ErrInvalidSessionStatus)
 	after, err := f.service.Status(ctx, uploader, session.ID)
 	if err != nil || after.Status != upload.StatusCompleted {
 		t.Fatalf("status works for completed sessions: %+v %v", after, err)
 	}
 
 	expired := f.repo.Seed(upload.Session{Status: upload.StatusUploading, TotalChunks: 1, UploadedChunks: []int{0, 0}, CreatorID: uploader.UserID, ExpiresAt: now.Add(-time.Second)})
-	expectCode(t, f.service.Complete(ctx, uploader, expired.ID), upload.ErrSessionExpired)
+	expectCode(t, f.service.Complete(ctx, uploader, expired.ID, digest), upload.ErrSessionExpired)
 	_, err = f.service.Status(ctx, uploader, expired.ID)
 	expectCode(t, err, upload.ErrSessionExpired)
 	duplicated := f.repo.Seed(upload.Session{Status: upload.StatusUploading, TotalChunks: 2, UploadedChunks: []int{0, 0}, CreatorID: uploader.UserID, ExpiresAt: now.Add(time.Hour)})
-	expectCode(t, f.service.Complete(ctx, uploader, duplicated.ID), upload.ErrIncomplete)
+	expectCode(t, f.service.Complete(ctx, uploader, duplicated.ID, digest), upload.ErrIncomplete)
 }
 
 func TestAbortRefundsAndRemovesTheFile(t *testing.T) {
@@ -284,7 +286,7 @@ func TestCleanStaleSessionsExpiresAndRefunds(t *testing.T) {
 	f := newFixture()
 	f.quotas.SeedQuota(upload.Quota{UserID: uploader.UserID, Size: 100})
 	aborted := f.startUpload(t, []byte("0123"))
-	if _, err := f.repo.SetStatus(ctx, aborted.ID, upload.StatusUploading, upload.StatusAborted, nil); err != nil {
+	if _, err := f.repo.SetStatus(ctx, aborted.ID, upload.StatusUploading, upload.StatusAborted); err != nil {
 		t.Fatal(err)
 	}
 	attached := f.repo.Seed(upload.Session{Status: upload.StatusCompleted, CreatorID: uploader.UserID, StoragePath: f.spool.Path("x"), Updated: now.Add(-7 * time.Hour)})

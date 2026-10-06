@@ -86,9 +86,9 @@ func Downloads(v int) predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(sql.FieldEQ(FieldDownloads, v))
 }
 
-// UploadSessionID applies equality check predicate on the "upload_session_id" field. It's identical to UploadSessionIDEQ.
-func UploadSessionID(v int) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldEQ(FieldUploadSessionID, v))
+// PublishedAt applies equality check predicate on the "published_at" field. It's identical to PublishedAtEQ.
+func PublishedAt(v time.Time) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldPublishedAt, v))
 }
 
 // CreatorID applies equality check predicate on the "creator_id" field. It's identical to CreatorIDEQ.
@@ -411,34 +411,54 @@ func DownloadsLTE(v int) predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(sql.FieldLTE(FieldDownloads, v))
 }
 
-// UploadSessionIDEQ applies the EQ predicate on the "upload_session_id" field.
-func UploadSessionIDEQ(v int) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldEQ(FieldUploadSessionID, v))
+// PublishedAtEQ applies the EQ predicate on the "published_at" field.
+func PublishedAtEQ(v time.Time) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldPublishedAt, v))
 }
 
-// UploadSessionIDNEQ applies the NEQ predicate on the "upload_session_id" field.
-func UploadSessionIDNEQ(v int) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldNEQ(FieldUploadSessionID, v))
+// PublishedAtNEQ applies the NEQ predicate on the "published_at" field.
+func PublishedAtNEQ(v time.Time) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNEQ(FieldPublishedAt, v))
 }
 
-// UploadSessionIDIn applies the In predicate on the "upload_session_id" field.
-func UploadSessionIDIn(vs ...int) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldIn(FieldUploadSessionID, vs...))
+// PublishedAtIn applies the In predicate on the "published_at" field.
+func PublishedAtIn(vs ...time.Time) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldIn(FieldPublishedAt, vs...))
 }
 
-// UploadSessionIDNotIn applies the NotIn predicate on the "upload_session_id" field.
-func UploadSessionIDNotIn(vs ...int) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldNotIn(FieldUploadSessionID, vs...))
+// PublishedAtNotIn applies the NotIn predicate on the "published_at" field.
+func PublishedAtNotIn(vs ...time.Time) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNotIn(FieldPublishedAt, vs...))
 }
 
-// UploadSessionIDIsNil applies the IsNil predicate on the "upload_session_id" field.
-func UploadSessionIDIsNil() predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldIsNull(FieldUploadSessionID))
+// PublishedAtGT applies the GT predicate on the "published_at" field.
+func PublishedAtGT(v time.Time) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGT(FieldPublishedAt, v))
 }
 
-// UploadSessionIDNotNil applies the NotNil predicate on the "upload_session_id" field.
-func UploadSessionIDNotNil() predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(sql.FieldNotNull(FieldUploadSessionID))
+// PublishedAtGTE applies the GTE predicate on the "published_at" field.
+func PublishedAtGTE(v time.Time) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGTE(FieldPublishedAt, v))
+}
+
+// PublishedAtLT applies the LT predicate on the "published_at" field.
+func PublishedAtLT(v time.Time) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLT(FieldPublishedAt, v))
+}
+
+// PublishedAtLTE applies the LTE predicate on the "published_at" field.
+func PublishedAtLTE(v time.Time) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLTE(FieldPublishedAt, v))
+}
+
+// PublishedAtIsNil applies the IsNil predicate on the "published_at" field.
+func PublishedAtIsNil() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldIsNull(FieldPublishedAt))
+}
+
+// PublishedAtNotNil applies the NotNil predicate on the "published_at" field.
+func PublishedAtNotNil() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNotNull(FieldPublishedAt))
 }
 
 // CreatorIDEQ applies the EQ predicate on the "creator_id" field.
@@ -625,29 +645,6 @@ func HasMalwareScanCases() predicate.GameDownloadResource {
 func HasMalwareScanCasesWith(preds ...predicate.MalwareScanCase) predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(func(s *sql.Selector) {
 		step := newMalwareScanCasesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasUploadSession applies the HasEdge predicate on the "upload_session" edge.
-func HasUploadSession() predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, UploadSessionTable, UploadSessionColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasUploadSessionWith applies the HasEdge predicate on the "upload_session" edge with a given conditions (other predicates).
-func HasUploadSessionWith(preds ...predicate.GameUploadSession) predicate.GameDownloadResource {
-	return predicate.GameDownloadResource(func(s *sql.Selector) {
-		step := newUploadSessionStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

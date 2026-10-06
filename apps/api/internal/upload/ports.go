@@ -13,7 +13,8 @@ type Repository interface {
 	LockSession(ctx context.Context, id int) (Session, error)
 	ListUploading(ctx context.Context, creatorID int, now time.Time, limit int) ([]Session, error)
 	AddChunk(ctx context.Context, id, index int) error
-	SetStatus(ctx context.Context, id int, from, to SessionStatus, mimeType *string) (bool, error)
+	SetStatus(ctx context.Context, id int, from, to SessionStatus) (bool, error)
+	Complete(ctx context.Context, id int, hash, mimeType string) (bool, error)
 	ListStale(ctx context.Context, before time.Time, limit int) ([]Session, error)
 	HasFile(ctx context.Context, sessionID int) (bool, error)
 	ReferencedPaths(ctx context.Context, paths []string) (map[string]bool, error)

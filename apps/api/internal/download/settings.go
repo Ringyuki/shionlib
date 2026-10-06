@@ -7,6 +7,12 @@ import (
 )
 
 var (
+	MaxFilesPerResource = setting.Int(setting.Spec[int]{
+		Name:        "download.max_files_per_resource",
+		Label:       "单个资源最多文件数",
+		Description: "一个资源里最多能放的文件数，包括分卷。",
+		Default:     100, Min: 1, Max: 1000,
+	})
 	LinkExpiresIn = setting.Duration(setting.Spec[time.Duration]{
 		Name:        "download.link_expires_in",
 		Label:       "下载链接基础有效期",

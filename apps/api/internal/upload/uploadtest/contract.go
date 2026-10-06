@@ -17,7 +17,7 @@ type Env struct {
 }
 
 func newSession(user int, path string, expires time.Time) upload.NewSession {
-	return upload.NewSession{FileName: "game.7z", TotalSize: 10, ChunkSize: 4, TotalChunks: 3, FileHash: "hash", StoragePath: path, ExpiresAt: expires, CreatorID: user}
+	return upload.NewSession{FileName: "game.7z", TotalSize: 10, ChunkSize: 4, TotalChunks: 3, StoragePath: path, ExpiresAt: expires, CreatorID: user}
 }
 
 func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
@@ -38,7 +38,7 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 			t.Fatal(err)
 		}
 		got, err := env.Repo.GetSession(ctx, created.ID)
-		if err != nil || got.StoragePath != "/spool/1.part" || got.TotalSize != 10 || got.ChunkSize != 4 || got.TotalChunks != 3 || got.CreatorID != user || got.FileHash != "hash" {
+		if err != nil || got.StoragePath != "/spool/1.part" || got.TotalSize != 10 || got.ChunkSize != 4 || got.TotalChunks != 3 || got.CreatorID != user || got.FileHash != "" {
 			t.Fatalf("get: %+v %v", got, err)
 		}
 		locked, err := env.Repo.LockSession(ctx, created.ID)
@@ -71,17 +71,20 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		env := newEnv(t)
 		created, _ := env.Repo.CreateSession(ctx, newSession(env.NewUser(t), "/spool/b.part", later))
 		mime := upload.DefaultMimeType
-		if changed, err := env.Repo.SetStatus(ctx, created.ID, upload.StatusCompleted, upload.StatusExpired, nil); err != nil || changed {
+		if changed, err := env.Repo.SetStatus(ctx, created.ID, upload.StatusCompleted, upload.StatusExpired); err != nil || changed {
 			t.Fatalf("wrong source state must not change: %v %v", changed, err)
 		}
-		if changed, err := env.Repo.SetStatus(ctx, created.ID, upload.StatusUploading, upload.StatusCompleted, &mime); err != nil || !changed {
+		if changed, err := env.Repo.Complete(ctx, created.ID, "digest", mime); err != nil || !changed {
 			t.Fatalf("complete: %v %v", changed, err)
 		}
 		got, _ := env.Repo.GetSession(ctx, created.ID)
-		if got.Status != upload.StatusCompleted || got.MimeType == nil || *got.MimeType != mime {
+		if got.Status != upload.StatusCompleted || got.FileHash != "digest" || got.MimeType == nil || *got.MimeType != mime {
 			t.Fatalf("after complete %+v", got)
 		}
-		if changed, err := env.Repo.SetStatus(ctx, 987654, upload.StatusUploading, upload.StatusAborted, nil); err != nil || changed {
+		if changed, err := env.Repo.Complete(ctx, created.ID, "other", mime); err != nil || changed {
+			t.Fatalf("a completed session is not completed again: %v %v", changed, err)
+		}
+		if changed, err := env.Repo.SetStatus(ctx, 987654, upload.StatusUploading, upload.StatusAborted); err != nil || changed {
 			t.Fatalf("missing session: %v %v", changed, err)
 		}
 	})
@@ -93,7 +96,7 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		second, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/c2.part", later))
 		_, _ = env.Repo.CreateSession(ctx, newSession(user, "/spool/c3.part", time.Now().Add(-time.Minute)))
 		done, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/c4.part", later))
-		_, _ = env.Repo.SetStatus(ctx, done.ID, upload.StatusUploading, upload.StatusAborted, nil)
+		_, _ = env.Repo.SetStatus(ctx, done.ID, upload.StatusUploading, upload.StatusAborted)
 		_, _ = env.Repo.CreateSession(ctx, newSession(other, "/spool/c5.part", later))
 		got, err := env.Repo.ListUploading(ctx, user, time.Now(), 10)
 		if err != nil || len(got) != 2 || got[0].ID != first.ID || got[1].ID != second.ID {
@@ -109,16 +112,16 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		env := newEnv(t)
 		user := env.NewUser(t)
 		aborted, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/s1.part", later))
-		_, _ = env.Repo.SetStatus(ctx, aborted.ID, upload.StatusUploading, upload.StatusAborted, nil)
+		_, _ = env.Repo.SetStatus(ctx, aborted.ID, upload.StatusUploading, upload.StatusAborted)
 		expiredUpload, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/s2.part", time.Now().Add(-48*time.Hour)))
 		live, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/s3.part", later))
 		orphanCompleted, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/s4.part", later))
-		_, _ = env.Repo.SetStatus(ctx, orphanCompleted.ID, upload.StatusUploading, upload.StatusCompleted, nil)
+		_, _ = env.Repo.Complete(ctx, orphanCompleted.ID, "digest", upload.DefaultMimeType)
 		attached, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/s5.part", later))
-		_, _ = env.Repo.SetStatus(ctx, attached.ID, upload.StatusUploading, upload.StatusCompleted, nil)
+		_, _ = env.Repo.Complete(ctx, attached.ID, "digest", upload.DefaultMimeType)
 		env.AttachFile(t, attached.ID, "/spool/s5.part")
 		finished, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/s6.part", time.Now().Add(-48*time.Hour)))
-		_, _ = env.Repo.SetStatus(ctx, finished.ID, upload.StatusUploading, upload.StatusExpired, nil)
+		_, _ = env.Repo.SetStatus(ctx, finished.ID, upload.StatusUploading, upload.StatusExpired)
 
 		stale, err := env.Repo.ListStale(ctx, time.Now().Add(time.Hour), 10)
 		if err != nil {

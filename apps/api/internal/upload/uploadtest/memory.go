@@ -58,7 +58,6 @@ func (r *MemoryRepository) CreateSession(_ context.Context, in upload.NewSession
 		TotalChunks:    in.TotalChunks,
 		UploadedChunks: []int{},
 		HashAlgorithm:  upload.HashBLAKE3,
-		FileHash:       in.FileHash,
 		Status:         upload.StatusUploading,
 		StoragePath:    in.StoragePath,
 		ExpiresAt:      in.ExpiresAt,
@@ -121,17 +120,28 @@ func (r *MemoryRepository) AddChunk(_ context.Context, id, index int) error {
 	return nil
 }
 
-func (r *MemoryRepository) SetStatus(_ context.Context, id int, from, to upload.SessionStatus, mimeType *string) (bool, error) {
+func (r *MemoryRepository) SetStatus(_ context.Context, id int, from, to upload.SessionStatus) (bool, error) {
 	changed := false
 	missing := r.mutate(id, func(s *upload.Session) bool {
 		if s.Status != from {
 			return false
 		}
 		s.Status = to
-		if mimeType != nil {
-			value := *mimeType
-			s.MimeType = &value
+		changed = true
+		return true
+	})
+	return changed && missing == nil, nil
+}
+
+func (r *MemoryRepository) Complete(_ context.Context, id int, hash, mimeType string) (bool, error) {
+	changed := false
+	missing := r.mutate(id, func(s *upload.Session) bool {
+		if s.Status != upload.StatusUploading {
+			return false
 		}
+		s.Status = upload.StatusCompleted
+		s.FileHash = hash
+		s.MimeType = &mimeType
 		changed = true
 		return true
 	})

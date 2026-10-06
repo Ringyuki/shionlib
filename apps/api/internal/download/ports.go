@@ -14,9 +14,8 @@ import (
 type Repository interface {
 	ListGameResources(ctx context.Context, gameID int) ([]GameResource, error)
 	ListReleases(ctx context.Context, excludeRated bool, page Page) ([]Release, int, error)
-	ListUserResources(ctx context.Context, creatorID int, excludeRated bool, page Page) ([]UserResource, int, error)
+	ListUserResources(ctx context.Context, creatorID int, filter UserResourceFilter, page Page) ([]UserResource, int, error)
 	HasUploadingSession(ctx context.Context, userID int) (bool, error)
-	ResourceUsesSession(ctx context.Context, gameID, sessionID int) (bool, error)
 	CreateResource(ctx context.Context, in NewResource) (Resource, error)
 	CreateFile(ctx context.Context, in NewFile) (File, error)
 	GetResource(ctx context.Context, id int) (Resource, error)
@@ -24,6 +23,7 @@ type Repository interface {
 	UpdateResource(ctx context.Context, id int, changes ResourceChanges) error
 	SetResourceStatus(ctx context.Context, id, status int, updated time.Time) error
 	TouchResource(ctx context.Context, id int, updated time.Time) error
+	PublishIfReady(ctx context.Context, id int, at time.Time) (bool, error)
 	DeleteResource(ctx context.Context, id int) error
 	CountDownload(ctx context.Context, resourceID, gameID int) error
 	ListFiles(ctx context.Context, resourceID int) ([]File, error)
@@ -33,6 +33,7 @@ type Repository interface {
 	FindFileBySession(ctx context.Context, sessionID int) (File, bool, error)
 	ReplaceFileContent(ctx context.Context, id int, content FileContent) error
 	MarkFileStored(ctx context.Context, id int, key string) error
+	RenameFile(ctx context.Context, id int, name string) error
 	ClearFilePath(ctx context.Context, id int) error
 	DeleteFile(ctx context.Context, id int) error
 	ListStoredWithLocalCopy(ctx context.Context, limit int) ([]File, error)

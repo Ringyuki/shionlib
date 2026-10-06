@@ -109,7 +109,7 @@ func ListablePredicates(visibility game.Visibility) []predicate.Game {
 		predicates = append(predicates, SafeForStrictViewers())
 	}
 	if visibility.OnlyWithResources {
-		predicates = append(predicates, entgame.HasDownloadResourcesWith(ActiveResource()))
+		predicates = append(predicates, entgame.HasDownloadResourcesWith(PublicResource()))
 	}
 	return predicates
 }
@@ -123,7 +123,7 @@ func PublicFile() predicate.GameDownloadResourceFile {
 }
 
 func PublicResource() predicate.GameDownloadResource {
-	return gamedownloadresource.And(ActiveResource(), gamedownloadresource.HasFilesWith(PublicFile()))
+	return gamedownloadresource.And(ActiveResource(), gamedownloadresource.PublishedAtNotNil())
 }
 
 func filterPredicates(filter game.ListFilter) []predicate.Game {

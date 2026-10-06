@@ -31,7 +31,6 @@ func newSession(t *testing.T, repo *uploadpg.Repository, creator int, path strin
 		TotalSize:   100,
 		ChunkSize:   40,
 		TotalChunks: 3,
-		FileHash:    "blake3hash",
 		StoragePath: path,
 		ExpiresAt:   expires,
 		CreatorID:   creator,
@@ -92,7 +91,7 @@ func TestSessionLifecycle(t *testing.T) {
 	creator := db.User(t)
 
 	session := newSession(t, repo, creator, "/spool/PENDING.sltf", base.Add(time.Hour))
-	if session.ID == 0 || session.Status != upload.StatusUploading || session.HashAlgorithm != upload.HashBLAKE3 || session.FileHash != "blake3hash" || len(session.UploadedChunks) != 0 || session.ChunkSize != 40 || session.TotalChunks != 3 {
+	if session.ID == 0 || session.Status != upload.StatusUploading || session.HashAlgorithm != upload.HashBLAKE3 || session.FileHash != "" || len(session.UploadedChunks) != 0 || session.ChunkSize != 40 || session.TotalChunks != 3 {
 		t.Fatalf("unexpected created session %+v", session)
 	}
 	if err := repo.SetStoragePath(ctx, session.ID, "/spool/1.sltf"); err != nil {
@@ -112,16 +111,16 @@ func TestSessionLifecycle(t *testing.T) {
 	}
 
 	mime := "application/octet-stream"
-	changed, err := repo.SetStatus(ctx, session.ID, upload.StatusUploading, upload.StatusCompleted, &mime)
+	changed, err := repo.Complete(ctx, session.ID, "blake3hash", mime)
 	if err != nil || !changed {
 		t.Fatalf("first transition: %v %v", changed, err)
 	}
-	changed, err = repo.SetStatus(ctx, session.ID, upload.StatusUploading, upload.StatusAborted, nil)
+	changed, err = repo.SetStatus(ctx, session.ID, upload.StatusUploading, upload.StatusAborted)
 	if err != nil || changed {
 		t.Fatalf("transition from a stale status must not apply: %v %v", changed, err)
 	}
 	got, _ = repo.GetSession(ctx, session.ID)
-	if got.Status != upload.StatusCompleted || got.MimeType == nil || *got.MimeType != mime {
+	if got.Status != upload.StatusCompleted || got.FileHash != "blake3hash" || got.MimeType == nil || *got.MimeType != mime {
 		t.Fatalf("unexpected completed session %+v", got)
 	}
 
@@ -160,7 +159,7 @@ func TestListUploading(t *testing.T) {
 	second := newSession(t, repo, creator, "/spool/b.sltf", base.Add(2*time.Hour))
 	newSession(t, repo, creator, "/spool/c.sltf", base.Add(-time.Minute))
 	completed := newSession(t, repo, creator, "/spool/d.sltf", base.Add(time.Hour))
-	if _, err := repo.SetStatus(ctx, completed.ID, upload.StatusUploading, upload.StatusCompleted, nil); err != nil {
+	if _, err := repo.Complete(ctx, completed.ID, "hash", upload.DefaultMimeType); err != nil {
 		t.Fatal(err)
 	}
 	newSession(t, repo, other, "/spool/e.sltf", base.Add(time.Hour))
@@ -187,7 +186,7 @@ func TestListStaleAndReferencedPaths(t *testing.T) {
 	cutoff := now.Add(-6 * time.Hour)
 
 	aborted := newSession(t, repo, creator, "/spool/aborted.sltf", now.Add(time.Hour))
-	if _, err := repo.SetStatus(ctx, aborted.ID, upload.StatusUploading, upload.StatusAborted, nil); err != nil {
+	if _, err := repo.SetStatus(ctx, aborted.ID, upload.StatusUploading, upload.StatusAborted); err != nil {
 		t.Fatal(err)
 	}
 	expiredUpload := newSession(t, repo, creator, "/spool/old.sltf", cutoff.Add(-time.Minute))
