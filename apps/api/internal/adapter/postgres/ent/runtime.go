@@ -45,6 +45,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/oidcidentity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/rolefieldpermission"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/schema"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/setting"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/settingchange"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
@@ -1085,6 +1087,32 @@ func init() {
 	rolefieldpermission.DefaultUpdated = rolefieldpermissionDescUpdated.Default.(func() time.Time)
 	// rolefieldpermission.UpdateDefaultUpdated holds the default value on update for the updated field.
 	rolefieldpermission.UpdateDefaultUpdated = rolefieldpermissionDescUpdated.UpdateDefault.(func() time.Time)
+	settingFields := schema.Setting{}.Fields()
+	_ = settingFields
+	// settingDescName is the schema descriptor for name field.
+	settingDescName := settingFields[1].Descriptor()
+	// setting.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	setting.NameValidator = settingDescName.Validators[0].(func(string) error)
+	// settingDescCreated is the schema descriptor for created field.
+	settingDescCreated := settingFields[3].Descriptor()
+	// setting.DefaultCreated holds the default value on creation for the created field.
+	setting.DefaultCreated = settingDescCreated.Default.(func() time.Time)
+	// settingDescUpdated is the schema descriptor for updated field.
+	settingDescUpdated := settingFields[4].Descriptor()
+	// setting.DefaultUpdated holds the default value on creation for the updated field.
+	setting.DefaultUpdated = settingDescUpdated.Default.(func() time.Time)
+	// setting.UpdateDefaultUpdated holds the default value on update for the updated field.
+	setting.UpdateDefaultUpdated = settingDescUpdated.UpdateDefault.(func() time.Time)
+	settingchangeFields := schema.SettingChange{}.Fields()
+	_ = settingchangeFields
+	// settingchangeDescName is the schema descriptor for name field.
+	settingchangeDescName := settingchangeFields[1].Descriptor()
+	// settingchange.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	settingchange.NameValidator = settingchangeDescName.Validators[0].(func(string) error)
+	// settingchangeDescCreated is the schema descriptor for created field.
+	settingchangeDescCreated := settingchangeFields[5].Descriptor()
+	// settingchange.DefaultCreated holds the default value on creation for the created field.
+	settingchange.DefaultCreated = settingchangeDescCreated.Default.(func() time.Time)
 	sponsororderFields := schema.SponsorOrder{}.Fields()
 	_ = sponsororderFields
 	// sponsororderDescProviderOrderID is the schema descriptor for provider_order_id field.

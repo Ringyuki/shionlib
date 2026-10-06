@@ -25,6 +25,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/oidcidentity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/settingchange"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
@@ -546,6 +547,21 @@ func (_u *UserUpdate) AddEditRecords(v ...*EditRecord) *UserUpdate {
 	return _u.AddEditRecordIDs(ids...)
 }
 
+// AddSettingChangeIDs adds the "setting_changes" edge to the SettingChange entity by IDs.
+func (_u *UserUpdate) AddSettingChangeIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddSettingChangeIDs(ids...)
+	return _u
+}
+
+// AddSettingChanges adds the "setting_changes" edges to the SettingChange entity.
+func (_u *UserUpdate) AddSettingChanges(v ...*SettingChange) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSettingChangeIDs(ids...)
+}
+
 // AddFavoriteIDs adds the "favorites" edge to the Favorite entity by IDs.
 func (_u *UserUpdate) AddFavoriteIDs(ids ...int) *UserUpdate {
 	_u.mutation.AddFavoriteIDs(ids...)
@@ -1055,6 +1071,27 @@ func (_u *UserUpdate) RemoveEditRecords(v ...*EditRecord) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveEditRecordIDs(ids...)
+}
+
+// ClearSettingChanges clears all "setting_changes" edges to the SettingChange entity.
+func (_u *UserUpdate) ClearSettingChanges() *UserUpdate {
+	_u.mutation.ClearSettingChanges()
+	return _u
+}
+
+// RemoveSettingChangeIDs removes the "setting_changes" edge to SettingChange entities by IDs.
+func (_u *UserUpdate) RemoveSettingChangeIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveSettingChangeIDs(ids...)
+	return _u
+}
+
+// RemoveSettingChanges removes "setting_changes" edges to SettingChange entities.
+func (_u *UserUpdate) RemoveSettingChanges(v ...*SettingChange) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSettingChangeIDs(ids...)
 }
 
 // ClearFavorites clears all "favorites" edges to the Favorite entity.
@@ -2083,6 +2120,51 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(editrecord.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SettingChangesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SettingChangesTable,
+			Columns: []string{user.SettingChangesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(settingchange.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSettingChangesIDs(); len(nodes) > 0 && !_u.mutation.SettingChangesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SettingChangesTable,
+			Columns: []string{user.SettingChangesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(settingchange.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SettingChangesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SettingChangesTable,
+			Columns: []string{user.SettingChangesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(settingchange.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -3250,6 +3332,21 @@ func (_u *UserUpdateOne) AddEditRecords(v ...*EditRecord) *UserUpdateOne {
 	return _u.AddEditRecordIDs(ids...)
 }
 
+// AddSettingChangeIDs adds the "setting_changes" edge to the SettingChange entity by IDs.
+func (_u *UserUpdateOne) AddSettingChangeIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddSettingChangeIDs(ids...)
+	return _u
+}
+
+// AddSettingChanges adds the "setting_changes" edges to the SettingChange entity.
+func (_u *UserUpdateOne) AddSettingChanges(v ...*SettingChange) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddSettingChangeIDs(ids...)
+}
+
 // AddFavoriteIDs adds the "favorites" edge to the Favorite entity by IDs.
 func (_u *UserUpdateOne) AddFavoriteIDs(ids ...int) *UserUpdateOne {
 	_u.mutation.AddFavoriteIDs(ids...)
@@ -3759,6 +3856,27 @@ func (_u *UserUpdateOne) RemoveEditRecords(v ...*EditRecord) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveEditRecordIDs(ids...)
+}
+
+// ClearSettingChanges clears all "setting_changes" edges to the SettingChange entity.
+func (_u *UserUpdateOne) ClearSettingChanges() *UserUpdateOne {
+	_u.mutation.ClearSettingChanges()
+	return _u
+}
+
+// RemoveSettingChangeIDs removes the "setting_changes" edge to SettingChange entities by IDs.
+func (_u *UserUpdateOne) RemoveSettingChangeIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveSettingChangeIDs(ids...)
+	return _u
+}
+
+// RemoveSettingChanges removes "setting_changes" edges to SettingChange entities.
+func (_u *UserUpdateOne) RemoveSettingChanges(v ...*SettingChange) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveSettingChangeIDs(ids...)
 }
 
 // ClearFavorites clears all "favorites" edges to the Favorite entity.
@@ -4817,6 +4935,51 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(editrecord.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.SettingChangesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SettingChangesTable,
+			Columns: []string{user.SettingChangesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(settingchange.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedSettingChangesIDs(); len(nodes) > 0 && !_u.mutation.SettingChangesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SettingChangesTable,
+			Columns: []string{user.SettingChangesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(settingchange.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.SettingChangesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SettingChangesTable,
+			Columns: []string{user.SettingChangesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(settingchange.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

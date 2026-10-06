@@ -24,8 +24,11 @@ One word per concept. `internal/archtest` rejects the banned words below; review
 | Queue | The port business code enqueues jobs through; implemented by `internal/adapter/queue`. | `report.Queue` |
 | Notifier | A port that pushes realtime events to connected users; implemented by `internal/adapter/push`. | `message.Notifier` |
 | Deps | A struct bundling a service's or handler's injected dependencies when the constructor would take too many. | `catalog.Deps` |
-| Options | Constructor values that tune behavior (limits, URLs, timeouts). | `upload.Options`, `httpclient.Options` |
-| Policy | Business rule parameters that decide what is allowed. | `user.Policy`, `auth.SessionPolicy` |
+| Options | Constructor values fixed for the life of the process (URLs, modes, client timeouts). Values an operator tunes are settings instead. | `download.LinkOptions`, `httpclient.Options` |
+| Policy | Business rule parameters that decide what is allowed and are fixed at startup. | `auth.SessionPolicy` |
+| Setting | A tunable value declared with `setting.Int/Bytes/Float/Duration/Flag/Text` in the owning package's `settings.go`, changed from the admin panel and read where it is used with `Key.Read(source)`. | `upload.MaxFileSize` |
+| Source | `setting.Source`, the one interface every package reads settings through: `*setting.Service` in production, `settingtest.Source` in tests. | |
+| Announcer | A port that tells the other processes a shared snapshot changed so they reload it; implemented by `platform/refresh.Watcher`. | `setting.Announcer` |
 | Contract test | A suite in `<capability>test/contract.go` that every implementation of a port passes (memory fake and real adapter). | `favoritetest.RepositoryContract` |
 | Fake | An in-memory implementation of a port in `<capability>test`, used instead of mocks. | `favoritetest.MemoryRepository` |
 | Golden path | `internal/favorite` with `favoritepg` and `favoritehttp`: the reference implementation to copy. | |

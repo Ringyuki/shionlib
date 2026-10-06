@@ -15,6 +15,8 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/i18n"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/ratelimit"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/clientinfo"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
@@ -45,7 +47,13 @@ func (l *countingLimiter) Allow(_ context.Context, policy ratelimit.Policy, key 
 	}, nil
 }
 
-func newThrottledAPI(t *testing.T, limiter httpapi.RateLimiter) *httpapi.API {
+func throttleSettings() settingtest.Source {
+	source := settingtest.Source{}
+	settingtest.Set(source, httpapi.DefaultThrottleLimit, 1)
+	return settingtest.Set(source, httpapi.UploadChunkThrottleLimit, 2)
+}
+
+func newThrottledAPI(t *testing.T, limiter httpapi.RateLimiter, settings setting.Source) *httpapi.API {
 	t.Helper()
 	catalog, err := i18n.Load(i18n.LocaleZH)
 	if err != nil {
@@ -64,7 +72,11 @@ func newThrottledAPI(t *testing.T, limiter httpapi.RateLimiter) *httpapi.API {
 	if limiter != nil {
 		options.Throttling = &httpapi.Throttling{
 			Limiter:  limiter,
-			Policies: map[string]ratelimit.Policy{httpapi.DefaultThrottle: {Name: httpapi.DefaultThrottle, Limit: 1, Window: time.Minute}},
+			Settings: settings,
+			Policies: map[string]httpapi.ThrottlePolicy{
+				httpapi.DefaultThrottle: {Limit: httpapi.DefaultThrottleLimit, Window: httpapi.DefaultThrottleWindow, Block: httpapi.DefaultThrottleBlock},
+				"upload_chunk":          {Limit: httpapi.UploadChunkThrottleLimit, Window: httpapi.UploadChunkThrottleWindow, Block: httpapi.DefaultThrottleBlock},
+			},
 		}
 	}
 	api := httpapi.New(options)
@@ -75,8 +87,7 @@ func newThrottledAPI(t *testing.T, limiter httpapi.RateLimiter) *httpapi.API {
 	raw := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	})
-	policy := ratelimit.Policy{Name: "upload_chunk", Limit: 2, Window: time.Minute}
-	api.Router().Put("/raw/{id}", api.Throttled(policy, "PUT /raw/{id}", raw).ServeHTTP)
+	api.Router().Put("/raw/{id}", api.Throttled("upload_chunk", "PUT /raw/{id}", raw).ServeHTTP)
 	return api
 }
 
@@ -91,7 +102,7 @@ func send(api *httpapi.API, method, path string) *httptest.ResponseRecorder {
 
 func TestThrottledRawRoutesShareTheHumaDecisionRules(t *testing.T) {
 	limiter := &countingLimiter{hits: map[string]int{}}
-	api := newThrottledAPI(t, limiter)
+	api := newThrottledAPI(t, limiter, throttleSettings())
 	for range 2 {
 		if rec := send(api, http.MethodPut, "/raw/1"); rec.Code != http.StatusNoContent || rec.Header().Get("X-RateLimit-Limit") != "2" || rec.Header().Get("X-RateLimit-Reset") != "2" {
 			t.Fatalf("allowed request: %d %v", rec.Code, rec.Header())
@@ -119,16 +130,32 @@ func TestThrottledRawRoutesShareTheHumaDecisionRules(t *testing.T) {
 
 func TestThrottledFailsOpenAndIsANoOpWithoutThrottling(t *testing.T) {
 	broken := &countingLimiter{hits: map[string]int{}, broken: true}
-	api := newThrottledAPI(t, broken)
+	api := newThrottledAPI(t, broken, throttleSettings())
 	for range 3 {
 		if rec := send(api, http.MethodPut, "/raw/1"); rec.Code != http.StatusNoContent || rec.Header().Get("X-RateLimit-Limit") != "" {
 			t.Fatalf("limiter errors must allow: %d %v", rec.Code, rec.Header())
 		}
 	}
-	plain := newThrottledAPI(t, nil)
+	plain := newThrottledAPI(t, nil, nil)
 	for range 3 {
 		if rec := send(plain, http.MethodPut, "/raw/1"); rec.Code != http.StatusNoContent {
 			t.Fatalf("no throttling configured: %d", rec.Code)
 		}
+	}
+}
+
+func TestThrottleLimitsFollowTheSettingsOnEveryRequest(t *testing.T) {
+	limiter := &countingLimiter{hits: map[string]int{}}
+	settings := throttleSettings()
+	api := newThrottledAPI(t, limiter, settings)
+	if rec := send(api, http.MethodGet, "/ping"); rec.Code != http.StatusOK {
+		t.Fatalf("first request: %d", rec.Code)
+	}
+	if rec := send(api, http.MethodGet, "/ping"); rec.Code != http.StatusTooManyRequests {
+		t.Fatalf("second request: %d", rec.Code)
+	}
+	settingtest.Set(settings, httpapi.DefaultThrottleLimit, 5)
+	if rec := send(api, http.MethodGet, "/ping"); rec.Code != http.StatusOK || rec.Header().Get("X-RateLimit-Limit") != "5" {
+		t.Fatalf("raised limit: %d %v", rec.Code, rec.Header())
 	}
 }

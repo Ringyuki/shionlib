@@ -2,8 +2,20 @@
 
 ## Configuration
 
-- All settings are fields in `internal/platform/config.Config`, parsed once at startup with `caarlos0/env`, validated in `Validate()`, then passed by value or pointer into constructors. Empty env values fall back to defaults.
-- Add a setting: field with `env:"NAME" envDefault:"..."`, validation, `.env.example` entry, and the passthrough line in the `x-api-environment` block of `infra/compose.app.yml` (`go run ./cmd/devtool deploy env` prints it; `devtool deploy check` in verify.sh fails when they disagree).
+Two sources, never both for one value (ADR 0011):
+
+- **Settings** (`internal/setting`): every value an operator may tune while the site runs. Declare it in the owning package's `settings.go`, the only file where `setting.Int/Bytes/Float/Duration/Flag/Text` may be called (archtest):
+  ```go
+  var MaxFileSize = setting.Bytes(setting.Spec[int64]{
+      Name:        "upload.max_file_size",
+      Label:       "单个文件大小上限",
+      Description: "管理员不受这个限制。",
+      Default:     20 * gib, Min: mib, Max: 64 * tib,
+  })
+  ```
+  Names are `group.name` in snake case; the label and description are what the admin panel shows. Durations are whole seconds; bounds are mandatory for numbers, `MaxLength` for text. Inject a `setting.Source` (a field named `settings`) and read at the point of use: `MaxFileSize.Read(s.settings)`. Read once per operation when one decision uses the value twice. Never copy a setting into `Options`, `Policy` or a struct built in bootstrap: that freezes it until the next deploy. Tests pass `settingtest.Source{}` (defaults) and override with `settingtest.Set(source, upload.MaxFileSize, 16)`.
+- **Environment** (`internal/platform/config.Config`): what a process needs before it starts or what belongs to the deployment: addresses, ports, secrets and credentials, buckets, paths, pools, client timeouts, logging and tracing, worker placement. Parsed once with `caarlos0/env`, validated in `Validate()`, passed into constructors. Add one with a field `env:"NAME" envDefault:"..."`, validation, an `.env.example` entry and the passthrough line in the `x-api-environment` block of `infra/compose.app.yml` (`go run ./cmd/devtool deploy env` prints it; `devtool deploy check` in verify.sh fails when they disagree). A numeric, duration or boolean variable also needs an entry in `deploymentKnobs` in `internal/archtest/settings_test.go` saying why it must be fixed at startup; without one archtest fails and points to the config center.
+- Each process loads the settings before serving and `platform/refresh.Watcher` reloads them on a Redis announcement or every minute. Changes go through `setting.Service` (validated, then recorded with the editor, time, old and new value; no reason or note is asked for) from `/admin/settings`; the e2e dataset writes its overrides in `devtool e2e prepare`.
 - Secrets are never logged (`logger` redacts keys containing password, secret, token, cookie, authorization, credential, api_key).
 
 ## Context

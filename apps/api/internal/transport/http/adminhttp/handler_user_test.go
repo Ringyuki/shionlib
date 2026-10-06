@@ -10,6 +10,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/admin"
 	"github.com/Ringyuki/shionlib/apps/api/internal/admin/admintest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/auth"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/adminhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/apitest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
@@ -50,7 +51,7 @@ func newUserEnv(t *testing.T) userEnv {
 	}
 	now := func() time.Time { return apitest.Now }
 	tx := &txtest.Immediate{}
-	profiles := user.NewService(env.accounts, tx, env.sessions, nil, admintest.Hasher{}, nil, now, user.Policy{})
+	profiles := user.NewService(env.accounts, tx, env.sessions, nil, admintest.Hasher{}, nil, now, settingtest.Source{})
 	service := admin.NewUserService(admin.UserDeps{
 		Accounts:    env.accounts,
 		Store:       env.store,
@@ -58,7 +59,7 @@ func newUserEnv(t *testing.T) userEnv {
 		Bans:        profiles,
 		Sessions:    env.sessions,
 		Passwords:   admintest.Hasher{},
-		Quotas:      upload.NewQuotaService(env.quotas, tx, upload.QuotaPolicy{}, now),
+		Quotas:      upload.NewQuotaService(env.quotas, tx, settingtest.Source{}, time.UTC, now),
 		Tx:          tx,
 	})
 	adminhttp.NewUserHandler(service, env.server.Builder).Register(env.server.API)

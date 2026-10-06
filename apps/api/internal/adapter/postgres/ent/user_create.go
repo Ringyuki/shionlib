@@ -24,6 +24,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/oidcidentity"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/settingchange"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
@@ -479,6 +480,21 @@ func (_c *UserCreate) AddEditRecords(v ...*EditRecord) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddEditRecordIDs(ids...)
+}
+
+// AddSettingChangeIDs adds the "setting_changes" edge to the SettingChange entity by IDs.
+func (_c *UserCreate) AddSettingChangeIDs(ids ...int) *UserCreate {
+	_c.mutation.AddSettingChangeIDs(ids...)
+	return _c
+}
+
+// AddSettingChanges adds the "setting_changes" edges to the SettingChange entity.
+func (_c *UserCreate) AddSettingChanges(v ...*SettingChange) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddSettingChangeIDs(ids...)
 }
 
 // AddFavoriteIDs adds the "favorites" edge to the Favorite entity by IDs.
@@ -1145,6 +1161,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(editrecord.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.SettingChangesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SettingChangesTable,
+			Columns: []string{user.SettingChangesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(settingchange.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

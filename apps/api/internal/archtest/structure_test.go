@@ -225,9 +225,9 @@ func checkCapability(pkg sourcePackage) []finding {
 		}
 	}
 	for _, file := range pkg.files {
-		allowed := isModelFile(pkg, file.name) || file.name == "errors.go" || file.name == "ports.go" || file.name == "jobs.go" || serviceFile.MatchString(file.name)
+		allowed := isModelFile(pkg, file.name) || file.name == "errors.go" || file.name == "ports.go" || file.name == "jobs.go" || file.name == settingsFile || serviceFile.MatchString(file.name)
 		if !allowed {
-			out = append(out, finding{pkg.dir + "/" + file.name, fmt.Sprintf("file name must be %s.go, %s_<concept>.go, ports.go, errors.go, jobs.go or service[_<purpose>].go", pkg.name, pkg.name)})
+			out = append(out, finding{pkg.dir + "/" + file.name, fmt.Sprintf("file name must be %s.go, %s_<concept>.go, ports.go, errors.go, jobs.go, settings.go or service[_<purpose>].go", pkg.name, pkg.name)})
 		}
 		for _, decl := range file.ast.Decls {
 			switch d := decl.(type) {

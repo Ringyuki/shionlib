@@ -5081,7 +5081,9 @@
           630120,
           630121,
           630122,
-          630123
+          630123,
+          640101,
+          640102
         ],
         "format": "int64",
         "type": "integer",
@@ -5224,7 +5226,9 @@
           "AI_CATALOG_OWNED",
           "AI_SCHEMA_INVALID",
           "AI_PLAYGROUND_TARGET_NOT_FOUND",
-          "AI_CATALOG_PROVIDER_NOT_FOUND"
+          "AI_CATALOG_PROVIDER_NOT_FOUND",
+          "SETTING_NOT_FOUND",
+          "SETTING_INVALID_VALUE"
         ]
       },
       "CatalogHitDTO": {
@@ -9891,6 +9895,45 @@
         ],
         "type": "object"
       },
+      "EnvelopeListSettingDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/SettingDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeListString": {
         "additionalProperties": false,
         "properties": {
@@ -10660,6 +10703,39 @@
         ],
         "type": "object"
       },
+      "EnvelopePageSettingChangeDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageSettingChangeDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopePageSponsorOrderDTO": {
         "additionalProperties": false,
         "properties": {
@@ -10891,6 +10967,39 @@
         ],
         "type": "object"
       },
+      "EnvelopePublicSettingsDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PublicSettingsDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeRandomGameIDDTO": {
         "additionalProperties": false,
         "properties": {
@@ -11036,6 +11145,39 @@
           },
           "data": {
             "$ref": "#/components/schemas/SearchResultsDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeSettingDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SettingDTO"
           },
           "message": {
             "type": "string"
@@ -14445,6 +14587,28 @@
         ],
         "type": "object"
       },
+      "PageSettingChangeDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SettingChangeDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
       "PageSponsorOrderDTO": {
         "additionalProperties": false,
         "properties": {
@@ -14792,6 +14956,22 @@
           "play_type",
           "my_rate",
           "synced_at"
+        ],
+        "type": "object"
+      },
+      "PublicSettingsDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "allow_register": {
+            "type": "boolean"
+          },
+          "sponsor_enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "allow_register",
+          "sponsor_enabled"
         ],
         "type": "object"
       },
@@ -15619,6 +15799,121 @@
         "required": [
           "query",
           "score"
+        ],
+        "type": "object"
+      },
+      "SettingChangeDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "editor": {
+            "$ref": "#/components/schemas/SettingEditorDTO"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "previous": {
+            "description": "Null when the default applied before the change"
+          },
+          "value": {
+            "description": "Null when the change restored the default"
+          }
+        },
+        "required": [
+          "id",
+          "previous",
+          "value",
+          "editor",
+          "created"
+        ],
+        "type": "object"
+      },
+      "SettingDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "default": {},
+          "description": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "kind": {
+            "description": "Durations are in seconds, bytes in bytes",
+            "enum": [
+              "int",
+              "bytes",
+              "float",
+              "duration",
+              "flag",
+              "text"
+            ],
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "last_change": {
+            "$ref": "#/components/schemas/SettingChangeDTO"
+          },
+          "max": {},
+          "max_length": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "min": {},
+          "name": {
+            "type": "string"
+          },
+          "overridden": {
+            "description": "False when the default applies",
+            "type": "boolean"
+          },
+          "value": {}
+        },
+        "required": [
+          "name",
+          "group",
+          "kind",
+          "label",
+          "description",
+          "value",
+          "default",
+          "overridden",
+          "last_change"
+        ],
+        "type": "object"
+      },
+      "SettingEditorDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
+      "SettingUpdateInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "description": "The new value as JSON: a number for int, bytes, float and duration (seconds), a boolean for flag, a string for text"
+          }
+        },
+        "required": [
+          "value"
         ],
         "type": "object"
       },
@@ -21740,6 +22035,264 @@
         "summary": "Allow or delete a quarantined file",
         "tags": [
           "admin"
+        ]
+      }
+    },
+    "/admin/settings": {
+      "get": {
+        "operationId": "setting.list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListSettingDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List every tunable setting with its value and bounds",
+        "tags": [
+          "admin-settings"
+        ]
+      }
+    },
+    "/admin/settings/{name}": {
+      "delete": {
+        "operationId": "setting.reset",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 3,
+              "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeSettingDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Restore a setting to its default",
+        "tags": [
+          "admin-settings"
+        ]
+      },
+      "patch": {
+        "operationId": "setting.update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 3,
+              "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingUpdateInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeSettingDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Change a setting",
+        "tags": [
+          "admin-settings"
+        ]
+      }
+    },
+    "/admin/settings/{name}/history": {
+      "get": {
+        "operationId": "setting.history",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 3,
+              "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageSettingChangeDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List the changes of a setting",
+        "tags": [
+          "admin-settings"
         ]
       }
     },
@@ -28623,6 +29176,44 @@
         "summary": "Trending search keywords",
         "tags": [
           "search"
+        ]
+      }
+    },
+    "/settings/public": {
+      "get": {
+        "operationId": "setting.public",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePublicSettingsDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Read the settings the site shows to visitors",
+        "tags": [
+          "settings"
         ]
       }
     },

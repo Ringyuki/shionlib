@@ -1484,6 +1484,13 @@ export const constraints = {
       "maxLength": 100
     }
   },
+  "SettingUpdateInputBody": {
+    "value": {
+      "type": "unknown",
+      "required": true,
+      "nullable": false
+    }
+  },
   "UpdateAdInputBody": {
     "aspect": {
       "type": "string",

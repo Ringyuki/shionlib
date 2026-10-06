@@ -141,5 +141,7 @@
   "AI_CATALOG_OWNED": "この設定はモデルカタログから取得されます",
   "AI_SCHEMA_INVALID": "出力スキーマはオブジェクト型の JSON Schema である必要があります",
   "AI_PLAYGROUND_TARGET_NOT_FOUND": "プレイグラウンドの対象が見つかりません",
-  "AI_CATALOG_PROVIDER_NOT_FOUND": "カタログにこのプロバイダーがありません"
+  "AI_CATALOG_PROVIDER_NOT_FOUND": "カタログにこのプロバイダーがありません",
+  "SETTING_NOT_FOUND": "設定項目が見つかりません",
+  "SETTING_INVALID_VALUE": "設定値が正しくありません"
 }

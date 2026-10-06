@@ -15,7 +15,7 @@ Priorities when rules compete: correctness > architecture integrity > consistenc
 cmd/api ──► internal/bootstrap (composition root)
                  │ wires everything below
    internal/transport/{http/*http, jobs/*jobs}  ──►  business  ◄──  internal/adapter/*
-   internal/platform/* (config, logger, telemetry, database, redis, jobs, cache, ratelimit, realtime, i18n, httpclient, runtime, server)
+   internal/platform/* (config, logger, telemetry, database, redis, jobs, cache, ratelimit, realtime, refresh, i18n, httpclient, runtime, server)
    kernel: internal/apperror, internal/actor  (importable by every layer)
 ```
 
@@ -27,7 +27,7 @@ cmd/api ──► internal/bootstrap (composition root)
 ## MUST
 
 - MUST read `apps/api/internal/favorite` (golden path) and its adapter, handler and tests before adding a module.
-- MUST put code in the file its role dictates (references/architecture.md "File layout"): models in `<capability>.go`/`<capability>_<concept>.go`, interfaces in `ports.go`, errors in `errors.go`, job args in `jobs.go`, services in `service.go`/`service_<purpose>.go`; HTTP code in `handler*.go`/`request*.go`/`response*.go`; workers in `worker_<purpose>.go` plus `tasks.go`; Postgres code in `repository*.go`/`store*.go`/`mapping.go`.
+- MUST put code in the file its role dictates (references/architecture.md "File layout"): models in `<capability>.go`/`<capability>_<concept>.go`, interfaces in `ports.go`, errors in `errors.go`, job args in `jobs.go`, settings in `settings.go`, services in `service.go`/`service_<purpose>.go`; HTTP code in `handler*.go`/`request*.go`/`response*.go`; workers in `worker_<purpose>.go` plus `tasks.go`; Postgres code in `repository*.go`/`store*.go`/`mapping.go`.
 - MUST name types by role: `Service`/`<Purpose>Service`, `Repository`, `<Purpose>Store`, `Handler`/`<Purpose>Handler`, `*Input` (HTTP requests), `*DTO` (HTTP responses), `<Purpose>Worker` with `New<Purpose>Worker`, `Deps`/`Options`/`Policy` (see `apps/api/docs/glossary.md`).
 - MUST keep business types free of struct tags; JSON shapes live in transport DTOs and adapter records. Job args in `jobs.go` are the only exception.
 - MUST keep the codebase comment-free. Encode intent in names and tests. Only `//go:` directives are allowed (archtest enforces).
@@ -45,7 +45,8 @@ cmd/api ──► internal/bootstrap (composition root)
 - MUST start goroutines only inside `internal/platform` (as `runtime.Runner`s registered with `runtime.App`, or `errgroup` with a limit); everything else uses River jobs.
 - MUST change the schema only through `internal/adapter/postgres/ent/schema` plus a generated migration (see recipes/add-migration.md).
 - MUST add tests at the level of the change: service rules with fakes, repository contract against Postgres, black-box HTTP tests with `apitest`. `X_test.go` tests `X.go`; shared setup goes in `fixture_test.go`; every package has tests.
-- MUST pass every new environment variable through `infra/compose.app.yml` (`devtool deploy env`).
+- MUST declare every value an operator may tune (limits, sizes, quotas, lifetimes, weights, batch sizes, retention, feature switches) as a setting in the owning package's `settings.go` (`setting.Int/Bytes/Float/Duration/Flag/Text` with name, Chinese label, default and bounds) and read it where it is used with `Key.Read(source)`; never copy it into `Options`/`Policy` at startup (ADR 0011).
+- MUST keep environment variables for what a process needs before it starts or what belongs to the deployment (addresses, secrets, paths, pools, client timeouts); a new numeric, duration or boolean variable needs an entry with its reason in `archtest` `deploymentKnobs`, and every new variable goes through `infra/compose.app.yml` (`devtool deploy env`).
 - MUST run `.claude/skills/go-backend/scripts/verify.sh` before declaring work done.
 
 ## MUST NOT
@@ -83,6 +84,7 @@ cmd/api ──► internal/bootstrap (composition root)
 | How is context passed? | first parameter everywhere; never `context.Background()` in request paths |
 | Database access? | ent in `internal/adapter/postgres/<capability>pg`, behind a port |
 | Redis access? | `internal/adapter/redis/<capability>redis` or `platform/cache`/`ratelimit`, behind a port |
+| A value operators will want to change? | a setting in the package's `settings.go`, read with `Key.Read(s.settings)` from an injected `setting.Source`; tests use `settingtest.Source` and `settingtest.Set`; super admins change it at `/admin/settings` (references/runtime.md "Configuration") |
 | Calling an AI model? | declare an `ai.SceneDefinition` (key, label, output), register it in `wireAI`, and call `ai.Service.Object/Text/Moderate` through a port in the consuming capability or an adapter like `internal/adapter/aimoderation`; models and keys are configured in the admin panel (ADR 0010) |
 | External services? | a port in the capability, an adapter in `internal/adapter/<vendor>` with a `platform/httpclient` client (recipes/add-external-client.md) |
 | Starting a goroutine? | don't: enqueue a River job, add a `jobs.Task`, or add a `runtime.Runner` in `internal/platform` |

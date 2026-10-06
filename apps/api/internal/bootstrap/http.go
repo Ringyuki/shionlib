@@ -8,12 +8,10 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/healthhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/searchhttp"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/uploadhttp"
 )
 
-const (
-	apiTitle            = "Shionlib API"
-	searchThrottleLimit = 120
-)
+const apiTitle = "Shionlib API"
 
 func BuildHTTP(infra *Infra, modules *Modules) *httpapi.API {
 	cfg := infra.Config
@@ -29,12 +27,14 @@ func BuildHTTP(infra *Infra, modules *Modules) *httpapi.API {
 		CORS:           httpapi.CORS{Origins: cfg.HTTP.CORSOrigins, Methods: cfg.HTTP.CORSMethods},
 		QuietPaths:     []string{"/health", "/socket.io"},
 		Throttling: &httpapi.Throttling{
-			Limiter: ratelimit.New(infra.Redis),
-			Policies: map[string]ratelimit.Policy{
-				httpapi.DefaultThrottle: {Name: httpapi.DefaultThrottle, Limit: cfg.Throttle.Limit, Window: cfg.Throttle.TTL, Block: cfg.Throttle.BlockDuration},
-				"download":              {Name: "download", Limit: cfg.Throttle.DownloadLimit, Window: cfg.Throttle.DownloadTTL, Block: cfg.Throttle.DownloadBlockDuration},
-				"auth":                  {Name: "auth", Limit: cfg.Throttle.AuthLimit, Window: cfg.Throttle.AuthTTL, Block: cfg.Throttle.AuthBlockDuration},
-				searchhttp.Throttle:     {Name: searchhttp.Throttle, Limit: searchThrottleLimit, Window: time.Minute, Block: cfg.Throttle.BlockDuration},
+			Limiter:  ratelimit.New(infra.Redis),
+			Settings: modules.Settings,
+			Policies: map[string]httpapi.ThrottlePolicy{
+				httpapi.DefaultThrottle:  {Limit: httpapi.DefaultThrottleLimit, Window: httpapi.DefaultThrottleWindow, Block: httpapi.DefaultThrottleBlock},
+				"download":               {Limit: httpapi.DownloadThrottleLimit, Window: httpapi.DownloadThrottleWindow, Block: httpapi.DownloadThrottleBlock},
+				"auth":                   {Limit: httpapi.AuthThrottleLimit, Window: httpapi.AuthThrottleWindow, Block: httpapi.AuthThrottleBlock},
+				searchhttp.Throttle:      {Limit: httpapi.SearchThrottleLimit, Window: httpapi.SearchThrottleWindow, Block: httpapi.DefaultThrottleBlock},
+				uploadhttp.ChunkThrottle: {Limit: httpapi.UploadChunkThrottleLimit, Window: httpapi.UploadChunkThrottleWindow, Block: httpapi.DefaultThrottleBlock},
 			},
 		},
 	})

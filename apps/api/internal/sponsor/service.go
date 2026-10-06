@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
 )
 
 type Service struct {
@@ -14,16 +15,17 @@ type Service struct {
 	cache    Cache
 	tx       Transactor
 	signer   Signer
+	settings setting.Source
 	options  Options
 	now      func() time.Time
 }
 
-func NewService(repo Repository, provider Provider, cache Cache, tx Transactor, signer Signer, options Options, now func() time.Time) *Service {
-	return &Service{repo: repo, provider: provider, cache: cache, tx: tx, signer: signer, options: options, now: now}
+func NewService(repo Repository, provider Provider, cache Cache, tx Transactor, signer Signer, settings setting.Source, options Options, now func() time.Time) *Service {
+	return &Service{repo: repo, provider: provider, cache: cache, tx: tx, signer: signer, settings: settings, options: options, now: now}
 }
 
 func (s *Service) CreateOrder(ctx context.Context, who actor.Actor, in CreateOrderInput) (CreatedOrder, error) {
-	if !s.options.Enabled {
+	if !Enabled.Read(s.settings) {
 		return CreatedOrder{}, ErrDisabled
 	}
 	providerOrderID, err := s.provider.CreateOrder(ctx, ProviderOrderRequest(in))
@@ -66,7 +68,7 @@ func (s *Service) CreateOrder(ctx context.Context, who actor.Actor, in CreateOrd
 }
 
 func (s *Service) PayOrder(ctx context.Context, id int, in PayInput) (Payment, error) {
-	if !s.options.Enabled {
+	if !Enabled.Read(s.settings) {
 		return Payment{}, ErrDisabled
 	}
 	order, err := s.repo.Get(ctx, id)
@@ -270,7 +272,6 @@ func sponsorshipFor(amountCents int64) time.Duration {
 }
 
 type Options struct {
-	Enabled     bool
 	Provider    string
 	CallbackURL string
 }

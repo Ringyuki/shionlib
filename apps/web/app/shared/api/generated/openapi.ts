@@ -881,6 +881,58 @@ export type paths = {
         patch: operations["adminMalware.review"];
         trace?: never;
     };
+    "/admin/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List every tunable setting with its value and bounds */
+        get: operations["setting.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/settings/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Restore a setting to its default */
+        delete: operations["setting.reset"];
+        options?: never;
+        head?: never;
+        /** Change a setting */
+        patch: operations["setting.update"];
+        trace?: never;
+    };
+    "/admin/settings/{name}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the changes of a setting */
+        get: operations["setting.history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/sponsor/orders": {
         parameters: {
             query?: never;
@@ -2504,6 +2556,23 @@ export type paths = {
         };
         /** Trending search keywords */
         get: operations["search.trending"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/settings/public": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the settings the site shows to visitors */
+        get: operations["setting.public"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4518,7 +4587,7 @@ export type components = {
          * Format: int64
          * @enum {integer}
          */
-        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 450101 | 450102 | 450103 | 450104 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 490101 | 490102 | 490103 | 500101 | 500102 | 500103 | 500104 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 610101 | 610102 | 620101 | 620102 | 620103 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123;
+        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 450101 | 450102 | 450103 | 450104 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 490101 | 490102 | 490103 | 500101 | 500102 | 500103 | 500104 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 610101 | 610102 | 620101 | 620102 | 620103 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102;
         CatalogHitDTO: {
             cover: string | null;
             developer: string | null;
@@ -5766,6 +5835,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeListSettingDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["SettingDTO"][] | null;
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeListString: {
             /** Format: int64 */
             code: number;
@@ -5996,6 +6075,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopePageSettingChangeDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["PageSettingChangeDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopePageSponsorOrderDTO: {
             /** Format: int64 */
             code: number;
@@ -6066,6 +6155,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopePublicSettingsDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["PublicSettingsDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeRandomGameIDDTO: {
             /** Format: int64 */
             code: number;
@@ -6111,6 +6210,16 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["SearchResultsDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeSettingDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["SettingDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -6970,6 +7079,10 @@ export type components = {
             items: components["schemas"]["ReportListItemDTO"][] | null;
             meta: components["schemas"]["PageMeta"];
         };
+        PageSettingChangeDTO: {
+            items: components["schemas"]["SettingChangeDTO"][] | null;
+            meta: components["schemas"]["PageMeta"];
+        };
         PageSponsorOrderDTO: {
             items: components["schemas"]["SponsorOrderDTO"][] | null;
             meta: components["schemas"]["PageMeta"];
@@ -7062,6 +7175,10 @@ export type components = {
             synced_at: string;
             /** Format: int64 */
             total_play_time: number;
+        };
+        PublicSettingsDTO: {
+            allow_register: boolean;
+            sponsor_enabled: boolean;
         };
         RegisterUserInputBody: {
             code: string;
@@ -7286,6 +7403,46 @@ export type components = {
             query: string;
             /** Format: double */
             score: number;
+        };
+        SettingChangeDTO: {
+            /** Format: date-time */
+            created: string;
+            editor: components["schemas"]["SettingEditorDTO"];
+            /** Format: int64 */
+            id: number;
+            /** @description Null when the default applied before the change */
+            previous: unknown;
+            /** @description Null when the change restored the default */
+            value: unknown;
+        };
+        SettingDTO: {
+            default: unknown;
+            description: string;
+            group: string;
+            /**
+             * @description Durations are in seconds, bytes in bytes
+             * @enum {string}
+             */
+            kind: "int" | "bytes" | "float" | "duration" | "flag" | "text";
+            label: string;
+            last_change: components["schemas"]["SettingChangeDTO"];
+            max?: unknown;
+            /** Format: int64 */
+            max_length?: number;
+            min?: unknown;
+            name: string;
+            /** @description False when the default applies */
+            overridden: boolean;
+            value: unknown;
+        };
+        SettingEditorDTO: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+        };
+        SettingUpdateInputBody: {
+            /** @description The new value as JSON: a number for int, bytes, float and duration (seconds), a boolean for flag, a string for text */
+            value: unknown;
         };
         SponsorOrderCreatedDTO: {
             /** @description Pass as ?token= to GET /sponsor/order/{id} to refresh an order without signing in */
@@ -9901,6 +10058,141 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeMalwareCaseDetailDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "setting.list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeListSettingDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "setting.reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeSettingDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "setting.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SettingUpdateInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeSettingDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "setting.history": {
+        parameters: {
+            query?: {
+                /** @description 1-based page number */
+                page?: number;
+                /** @description Items per page */
+                pageSize?: number;
+            };
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopePageSettingChangeDTO"];
                 };
             };
             /** @description Error */
@@ -13653,6 +13945,36 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeListSearchTermDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "setting.public": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopePublicSettingsDTO"];
                 };
             };
             /** @description Error */

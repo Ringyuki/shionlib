@@ -9,23 +9,24 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
 )
 
 type Service struct {
-	repo    Repository
-	quota   *QuotaService
-	spool   Spool
-	tx      Transactor
-	options Options
-	now     func() time.Time
+	repo     Repository
+	quota    *QuotaService
+	spool    Spool
+	tx       Transactor
+	settings setting.Source
+	now      func() time.Time
 }
 
-func NewService(repo Repository, quota *QuotaService, spool Spool, tx Transactor, options Options, now func() time.Time) *Service {
-	return &Service{repo: repo, quota: quota, spool: spool, tx: tx, options: options, now: now}
+func NewService(repo Repository, quota *QuotaService, spool Spool, tx Transactor, settings setting.Source, now func() time.Time) *Service {
+	return &Service{repo: repo, quota: quota, spool: spool, tx: tx, settings: settings, now: now}
 }
 
-func (s *Service) Options() Options {
-	return s.options
+func (s *Service) ChunkLimit() int64 {
+	return ChunkLimit.Read(s.settings)
 }
 
 func (s *Service) Ongoing(ctx context.Context, who actor.Actor) ([]Session, error) {
@@ -40,21 +41,22 @@ func (s *Service) Init(ctx context.Context, who actor.Actor, in InitInput) (Sess
 	if exceeded {
 		return Session{}, ErrQuotaExceeded
 	}
-	chunkSize := s.options.ChunkSize
+	chunkLimit := ChunkLimit.Read(s.settings)
+	chunkSize := min(ChunkSize.Read(s.settings), chunkLimit)
 	if in.ChunkSize != nil {
 		chunkSize = *in.ChunkSize
 	}
-	if chunkSize <= 0 || chunkSize > s.options.TransferLimit {
+	if chunkSize <= 0 || chunkSize > chunkLimit {
 		return Session{}, ErrInvalidChunkSize
 	}
 	if in.TotalSize <= 0 {
 		return Session{}, ErrInvalidTotalSize
 	}
 	totalChunks := (in.TotalSize + chunkSize - 1) / chunkSize
-	if totalChunks > int64(s.options.MaxChunks) {
+	if totalChunks > int64(MaxChunks.Read(s.settings)) {
 		return Session{}, ErrTooManyChunks
 	}
-	if in.TotalSize > s.options.MaxFileSize && !who.AtLeast(actor.RoleAdmin) {
+	if in.TotalSize > MaxFileSize.Read(s.settings) && !who.AtLeast(actor.RoleAdmin) {
 		return Session{}, ErrTooLarge
 	}
 	var session Session
@@ -66,7 +68,7 @@ func (s *Service) Init(ctx context.Context, who actor.Actor, in InitInput) (Sess
 			TotalChunks: int(totalChunks),
 			FileHash:    in.FileHash,
 			StoragePath: s.spool.Path(PendingStorageName),
-			ExpiresAt:   s.now().Add(s.options.SessionTTL),
+			ExpiresAt:   s.now().Add(SessionTTL.Read(s.settings)),
 			CreatorID:   who.UserID,
 		})
 		if err != nil {
@@ -311,12 +313,4 @@ func (s *Service) removeOwned(ctx context.Context, path string) error {
 		return nil
 	}
 	return s.spool.Remove(ctx, path)
-}
-
-type Options struct {
-	ChunkSize     int64
-	MaxChunks     int
-	MaxFileSize   int64
-	TransferLimit int64
-	SessionTTL    time.Duration
 }

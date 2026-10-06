@@ -501,6 +501,30 @@ func (f RoleFieldPermissionFunc) Mutate(ctx context.Context, m ent.Mutation) (en
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RoleFieldPermissionMutation", m)
 }
 
+// The SettingFunc type is an adapter to allow the use of ordinary
+// function as Setting mutator.
+type SettingFunc func(context.Context, *ent.SettingMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SettingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SettingMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SettingMutation", m)
+}
+
+// The SettingChangeFunc type is an adapter to allow the use of ordinary
+// function as SettingChange mutator.
+type SettingChangeFunc func(context.Context, *ent.SettingChangeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SettingChangeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SettingChangeMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SettingChangeMutation", m)
+}
+
 // The SponsorOrderFunc type is an adapter to allow the use of ordinary
 // function as SponsorOrder mutator.
 type SponsorOrderFunc func(context.Context, *ent.SponsorOrderMutation) (ent.Value, error)

@@ -341,21 +341,3 @@ func TestBangumiResourceAllowsOnlyKnownPaths(t *testing.T) {
 		}
 	}
 }
-
-type hotScoreStore struct {
-	weights game.HotScoreWeights
-}
-
-func (s *hotScoreStore) RefreshHotScore(_ context.Context, weights game.HotScoreWeights) (int64, error) {
-	s.weights = weights
-	return 3, nil
-}
-
-func TestHotScorePassesConfiguredWeights(t *testing.T) {
-	store := &hotScoreStore{}
-	weights := game.HotScoreWeights{HalfLifeReleaseDays: 30, Views: 0.6}
-	affected, err := game.NewHotScoreService(store, weights).Refresh(context.Background())
-	if err != nil || affected != 3 || store.weights != weights {
-		t.Fatalf("refresh: %d %v %+v", affected, err, store.weights)
-	}
-}

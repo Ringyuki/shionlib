@@ -5,31 +5,32 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
 )
 
 type Options struct {
-	CreatorID    int
-	RefreshAfter time.Duration
-	RefreshBatch int
-	ChangesBatch int
+	CreatorID int
 }
 
 type Deps struct {
-	Sources []Source
-	Store   Store
-	Tx      Transactor
-	Queue   Queue
-	Now     func() time.Time
-	Options Options
+	Sources  []Source
+	Store    Store
+	Tx       Transactor
+	Queue    Queue
+	Settings setting.Source
+	Now      func() time.Time
+	Options  Options
 }
 
 type Service struct {
-	sources map[string]Source
-	store   Store
-	tx      Transactor
-	queue   Queue
-	now     func() time.Time
-	opts    Options
+	sources  map[string]Source
+	store    Store
+	tx       Transactor
+	queue    Queue
+	settings setting.Source
+	now      func() time.Time
+	opts     Options
 }
 
 func NewService(deps Deps) *Service {
@@ -37,7 +38,7 @@ func NewService(deps Deps) *Service {
 	for _, source := range deps.Sources {
 		byName[source.Name()] = source
 	}
-	return &Service{sources: byName, store: deps.Store, tx: deps.Tx, queue: deps.Queue, now: deps.Now, opts: deps.Options}
+	return &Service{sources: byName, store: deps.Store, tx: deps.Tx, queue: deps.Queue, settings: deps.Settings, now: deps.Now, opts: deps.Options}
 }
 
 func (s *Service) source(name string) (Source, error) {
@@ -158,9 +159,9 @@ func (s *Service) Exclude(ctx context.Context, entity Entity, localID int) error
 }
 
 func (s *Service) RefreshStale(ctx context.Context) error {
-	before := s.now().Add(-s.opts.RefreshAfter)
+	before := s.now().Add(-RefreshInterval.Read(s.settings))
 	for name := range s.sources {
-		refs, err := s.store.Stale(ctx, name, before, s.opts.RefreshBatch)
+		refs, err := s.store.Stale(ctx, name, before, RefreshBatch.Read(s.settings))
 		if err != nil {
 			return err
 		}
@@ -192,7 +193,7 @@ func (s *Service) pull(ctx context.Context, name string, feed ChangeFeed) error 
 		return err
 	}
 	for {
-		batch, err := feed.Changes(ctx, cursor, s.opts.ChangesBatch)
+		batch, err := feed.Changes(ctx, cursor, ChangesBatch.Read(s.settings))
 		if err != nil {
 			return err
 		}

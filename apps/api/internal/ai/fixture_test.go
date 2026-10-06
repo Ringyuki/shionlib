@@ -11,6 +11,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/ai"
 	"github.com/Ringyuki/shionlib/apps/api/internal/ai/aitest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 )
 
@@ -199,14 +200,14 @@ func newFixture(t *testing.T) *fixture {
 		return "call-" + strconv.Itoa(ids)
 	}
 	tx := &txtest.Immediate{}
-	f.gateway = ai.NewService(ai.Deps{Scenes: scenes, Repo: f.repo, Requests: f.requests, Upstream: f.upstream, Queue: f.queue, Now: f.clock.Now, NewID: newID, Options: ai.Options{IdleTimeout: time.Minute, RecordPayloads: true}})
+	f.gateway = ai.NewService(ai.Deps{Scenes: scenes, Repo: f.repo, Requests: f.requests, Upstream: f.upstream, Queue: f.queue, Now: f.clock.Now, NewID: newID, Settings: settingtest.Source{}, Options: ai.Options{IdleTimeout: time.Minute}})
 	f.catalog = ai.NewCatalogService(ai.CatalogDeps{Source: f.source, Store: f.catalogs, Repo: f.repo, Tx: tx, Now: f.clock.Now, Options: ai.CatalogOptions{StaleAfter: 20 * time.Hour, SearchLimit: 40}})
 	f.probe = ai.NewProbeService(f.gateway, f.repo, f.queue, f.clock.Now)
 	f.routes = ai.NewRouteService(ai.RouteDeps{Repo: f.repo, Stats: f.stats, Catalog: f.catalog, Probe: f.probe, Tx: tx, Now: f.clock.Now})
 	f.providers = ai.NewProviderService(ai.ProviderDeps{Repo: f.repo, Stats: f.stats, Routes: f.routes, Catalog: f.catalog, Upstream: f.upstream, Tx: tx, Now: f.clock.Now})
 	f.models = ai.NewModelService(ai.ModelDeps{Gateway: f.gateway, Repo: f.repo, Stats: f.stats, Routes: f.routes, Catalog: f.catalog, Tx: tx, Now: f.clock.Now})
 	f.scenes = ai.NewSceneService(f.gateway, f.repo, f.stats, f.clock.Now)
-	f.usage = ai.NewUsageService(ai.UsageDeps{Gateway: f.gateway, Repo: f.repo, Requests: f.requests, Stats: f.stats, Now: f.clock.Now, Options: ai.UsageOptions{RequestRetention: 90 * 24 * time.Hour, PayloadRetention: 7 * 24 * time.Hour, BreakdownLimit: 50, CostSeries: 2}})
+	f.usage = ai.NewUsageService(ai.UsageDeps{Gateway: f.gateway, Repo: f.repo, Requests: f.requests, Stats: f.stats, Now: f.clock.Now, Settings: settingtest.Source{}, Options: ai.UsageOptions{BreakdownLimit: 50, CostSeries: 2}})
 	f.playground = ai.NewPlaygroundService(f.gateway, f.requests, newID)
 	f.notices = ai.NewNoticeService(f.repo, f.messenger)
 	return f

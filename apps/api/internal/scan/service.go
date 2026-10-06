@@ -12,15 +12,12 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
 )
 
 type Options struct {
-	Enabled          bool
-	ReviewTimeout    time.Duration
-	AutoBanThreshold int
-	AutoBanDays      int
-	AutoDeleteNote   string
-	SiteURL          string
+	Enabled bool
+	SiteURL string
 }
 
 func checkReason(status download.CheckStatus) string {
@@ -51,6 +48,7 @@ type Deps struct {
 	Mailer     AdminMailer
 	Queue      Queue
 	Tx         Transactor
+	Settings   setting.Source
 	Options    Options
 	Now        func() time.Time
 }
@@ -68,6 +66,7 @@ type Service struct {
 	mailer     AdminMailer
 	queue      Queue
 	tx         Transactor
+	settings   setting.Source
 	options    Options
 	now        func() time.Time
 }
@@ -86,6 +85,7 @@ func NewService(deps Deps) *Service {
 		mailer:     deps.Mailer,
 		queue:      deps.Queue,
 		tx:         deps.Tx,
+		settings:   deps.Settings,
 		options:    deps.Options,
 		now:        deps.Now,
 	}
@@ -199,7 +199,7 @@ func (s *Service) approve(ctx context.Context, file PendingFile) error {
 
 func (s *Service) quarantine(ctx context.Context, file PendingFile, report Report) error {
 	viruses := NormalizeViruses(report.Viruses)
-	deadline := s.now().Add(s.options.ReviewTimeout)
+	deadline := s.now().Add(ReviewTimeout.Read(s.settings))
 	var created *Case
 	err := s.withPending(ctx, file, func(ctx context.Context, current PendingFile) error {
 		if err := s.repo.SetCheckStatus(ctx, current.ID, download.CheckHarmfulPendingReview, false); err != nil {
@@ -323,7 +323,7 @@ func (s *Service) ExpireOverdue(ctx context.Context) error {
 		return err
 	}
 	notify := true
-	note := s.options.AutoDeleteNote
+	note := AutoDeleteNote.Read(s.settings)
 	var errs []error
 	for _, id := range ids {
 		if err := s.decide(ctx, id, ReviewInput{Decision: DecisionDelete, Note: &note, NotifyUploader: &notify}, SourceTimeoutAutoDelete, nil); err != nil {
@@ -432,9 +432,9 @@ func (s *Service) delete(ctx context.Context, id int, note *string, notify bool,
 		if err != nil {
 			return err
 		}
-		if strikes == s.options.AutoBanThreshold {
-			reason := fmt.Sprintf("Uploaded harmful file (%d times)", s.options.AutoBanThreshold)
-			if _, err := s.banner.Ban(ctx, target.UploaderID, reviewer, reason, s.options.AutoBanDays); err != nil {
+		if threshold := AutoBanThreshold.Read(s.settings); strikes == threshold {
+			reason := fmt.Sprintf("Uploaded harmful file (%d times)", threshold)
+			if _, err := s.banner.Ban(ctx, target.UploaderID, reviewer, reason, AutoBanDays.Read(s.settings)); err != nil {
 				return err
 			}
 		}
@@ -471,7 +471,7 @@ func (s *Service) delete(ctx context.Context, id int, note *string, notify bool,
 			"malware_case_id":            target.ID,
 			"file_name":                  target.FileName,
 			"upload_injected_file_times": strikes,
-			"malware_auto_ban_threshold": s.options.AutoBanThreshold,
+			"malware_auto_ban_threshold": AutoBanThreshold.Read(s.settings),
 			"review_note":                note,
 		})
 	})

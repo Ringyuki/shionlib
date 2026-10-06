@@ -12,6 +12,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/admin/admintest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/apperror"
 	"github.com/Ringyuki/shionlib/apps/api/internal/auth"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload/uploadtest"
@@ -52,7 +53,7 @@ func newFixture() fixture {
 		quotas:      uploadtest.NewMemoryQuotaRepository(),
 	}
 	tx := &txtest.Immediate{}
-	profiles := user.NewService(f.accounts, tx, f.sessions, nil, admintest.Hasher{}, nil, clock, user.Policy{})
+	profiles := user.NewService(f.accounts, tx, f.sessions, nil, admintest.Hasher{}, nil, clock, settingtest.Source{})
 	f.service = admin.NewUserService(admin.UserDeps{
 		Accounts:    f.accounts,
 		Store:       f.store,
@@ -60,7 +61,7 @@ func newFixture() fixture {
 		Bans:        profiles,
 		Sessions:    f.sessions,
 		Passwords:   admintest.Hasher{},
-		Quotas:      upload.NewQuotaService(f.quotas, tx, upload.QuotaPolicy{}, clock),
+		Quotas:      upload.NewQuotaService(f.quotas, tx, settingtest.Source{}, time.UTC, clock),
 		Tx:          tx,
 	})
 	f.member = f.accounts.Seed(user.User{Name: "member"})

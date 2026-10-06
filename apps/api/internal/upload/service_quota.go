@@ -5,6 +5,8 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
 )
 
 func (q *QuotaService) AdminAdjustSize(ctx context.Context, userID int, action QuotaAction, amount int64, reason string) error {
@@ -51,14 +53,15 @@ func (q *QuotaService) AdminResetUsed(ctx context.Context, userID int) error {
 }
 
 type QuotaService struct {
-	repo   QuotaRepository
-	tx     Transactor
-	policy QuotaPolicy
-	now    func() time.Time
+	repo     QuotaRepository
+	tx       Transactor
+	settings setting.Source
+	location *time.Location
+	now      func() time.Time
 }
 
-func NewQuotaService(repo QuotaRepository, tx Transactor, policy QuotaPolicy, now func() time.Time) *QuotaService {
-	return &QuotaService{repo: repo, tx: tx, policy: policy, now: now}
+func NewQuotaService(repo QuotaRepository, tx Transactor, settings setting.Source, location *time.Location, now func() time.Time) *QuotaService {
+	return &QuotaService{repo: repo, tx: tx, settings: settings, location: location, now: now}
 }
 
 func (q *QuotaService) Get(ctx context.Context, userID int) (Quota, error) {
@@ -184,7 +187,7 @@ func (q *QuotaService) InitialGrant(ctx context.Context, userID int) error {
 		if err != nil || quota.IsFirstGrant {
 			return err
 		}
-		_, err = q.AdjustSize(ctx, userID, ActionAdd, q.policy.BaseBytes, ReasonInitialGrant)
+		_, err = q.AdjustSize(ctx, userID, ActionAdd, QuotaBase.Read(q.settings), ReasonInitialGrant)
 		return err
 	})
 }
@@ -195,33 +198,34 @@ func (q *QuotaService) DynamicTopup(ctx context.Context, userID int) error {
 		if err != nil || !quota.IsFirstGrant {
 			return err
 		}
-		if quota.Size >= q.policy.CapBytes || quota.Size-quota.Used > q.policy.TopupThresholdBytes {
+		if quota.Size >= QuotaCap.Read(q.settings) || quota.Size-quota.Used > QuotaTopupThreshold.Read(q.settings) {
 			return nil
 		}
-		approved, err := q.repo.CountApprovedFiles(ctx, userID, q.policy.monthStart(q.now()))
+		approved, err := q.repo.CountApprovedFiles(ctx, userID, monthStart(q.now(), q.location))
 		if err != nil || approved == 0 {
 			return err
 		}
-		_, err = q.AdjustSize(ctx, userID, ActionAdd, q.policy.TopupStepBytes, ReasonDynamicTopup)
+		_, err = q.AdjustSize(ctx, userID, ActionAdd, QuotaTopupStep.Read(q.settings), ReasonDynamicTopup)
 		return err
 	})
 }
 
 func (q *QuotaService) DynamicReduce(ctx context.Context, userID int) error {
 	return q.tx.WithinTransaction(ctx, func(ctx context.Context) error {
+		base, step, inactiveDays := QuotaBase.Read(q.settings), QuotaReduceStep.Read(q.settings), QuotaReduceInactiveDays.Read(q.settings)
 		quota, err := q.repo.LockQuota(ctx, userID)
-		if err != nil || !quota.IsFirstGrant || quota.Size <= q.policy.BaseBytes {
+		if err != nil || !quota.IsFirstGrant || quota.Size <= base {
 			return err
 		}
-		if q.policy.ReduceInactiveDays <= 0 || q.policy.ReduceStepBytes <= 0 {
+		if inactiveDays <= 0 || step <= 0 {
 			return nil
 		}
-		cutoff := q.now().AddDate(0, 0, -q.policy.ReduceInactiveDays)
+		cutoff := q.now().AddDate(0, 0, -inactiveDays)
 		approved, err := q.repo.CountApprovedFiles(ctx, userID, cutoff)
 		if err != nil || approved > 0 {
 			return err
 		}
-		amount := min(quota.Size-q.policy.BaseBytes, q.policy.ReduceStepBytes)
+		amount := min(quota.Size-base, step)
 		_, err = q.AdjustSize(ctx, userID, ActionSub, amount, ReasonDynamicReduce)
 		return err
 	})
@@ -239,7 +243,7 @@ func (q *QuotaService) ResetQuota(ctx context.Context, userID int) error {
 }
 
 func (q *QuotaService) RunInitialGrants(ctx context.Context) error {
-	cutoff := q.now().AddDate(0, 0, -q.policy.GrantAfterDays)
+	cutoff := q.now().AddDate(0, 0, -QuotaGrantAfterDays.Read(q.settings))
 	return q.eachUser(ctx, func(ctx context.Context, afterID int) ([]int, error) {
 		return q.repo.GrantCandidates(ctx, cutoff, afterID, quotaBatchSize)
 	}, q.InitialGrant)
@@ -258,7 +262,7 @@ func (q *QuotaService) RunMonthlyResets(ctx context.Context) error {
 }
 
 func (q *QuotaService) RunInactiveResets(ctx context.Context) error {
-	cutoff := q.now().AddDate(0, 0, -q.policy.LongestInactiveDays)
+	cutoff := q.now().AddDate(0, 0, -QuotaLongestInactiveDays.Read(q.settings))
 	return q.eachUser(ctx, func(ctx context.Context, afterID int) ([]int, error) {
 		return q.repo.InactiveUploaders(ctx, cutoff, afterID, quotaBatchSize)
 	}, q.ResetQuota)

@@ -5,10 +5,12 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/danielgtaylor/huma/v2"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/ratelimit"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/clientinfo"
 )
 
@@ -18,20 +20,39 @@ type RateLimiter interface {
 	Allow(ctx context.Context, policy ratelimit.Policy, key string) (ratelimit.Decision, error)
 }
 
-type Throttling struct {
-	Limiter  RateLimiter
-	Policies map[string]ratelimit.Policy
+type ThrottlePolicy struct {
+	Limit  setting.Key[int]
+	Window setting.Key[time.Duration]
+	Block  setting.Key[time.Duration]
 }
 
-func (a *API) throttleMiddleware(name, method, path string) func(huma.Context, func(huma.Context)) {
-	policy, ok := a.throttling.Policies[name]
+type Throttling struct {
+	Limiter  RateLimiter
+	Settings setting.Source
+	Policies map[string]ThrottlePolicy
+}
+
+func (t *Throttling) policy(name string) func() ratelimit.Policy {
+	keys, ok := t.Policies[name]
 	if !ok {
 		panic("httpapi: unknown throttle policy " + name)
 	}
+	return func() ratelimit.Policy {
+		return ratelimit.Policy{
+			Name:   name,
+			Limit:  keys.Limit.Read(t.Settings),
+			Window: keys.Window.Read(t.Settings),
+			Block:  keys.Block.Read(t.Settings),
+		}
+	}
+}
+
+func (a *API) throttleMiddleware(name, method, path string) func(huma.Context, func(huma.Context)) {
+	policy := a.throttling.policy(name)
 	route := method + " " + path
 	return func(ctx huma.Context, next func(huma.Context)) {
 		requestCtx := ctx.Context()
-		if !a.admit(requestCtx, policy, route, ctx.SetHeader) {
+		if !a.admit(requestCtx, policy(), route, ctx.SetHeader) {
 			a.writeErr(ctx, a.mapper.FromStatus(requestCtx, http.StatusTooManyRequests, nil))
 			return
 		}
@@ -39,13 +60,14 @@ func (a *API) throttleMiddleware(name, method, path string) func(huma.Context, f
 	}
 }
 
-func (a *API) Throttled(policy ratelimit.Policy, route string, next http.Handler) http.Handler {
+func (a *API) Throttled(name, route string, next http.Handler) http.Handler {
 	if a.throttling == nil {
 		return next
 	}
+	policy := a.throttling.policy(name)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		if !a.admit(ctx, policy, route, w.Header().Set) {
+		if !a.admit(ctx, policy(), route, w.Header().Set) {
 			a.writer.Write(w, r, a.mapper.FromStatus(ctx, http.StatusTooManyRequests, nil))
 			return
 		}

@@ -9,6 +9,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
 	"github.com/Ringyuki/shionlib/apps/api/internal/catalog/catalogtest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/apitest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/cataloghttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
@@ -25,12 +26,13 @@ func setup(t *testing.T) (*apitest.Server, *catalogtest.Source, *catalogtest.Que
 	source := catalogtest.NewSource(catalog.SourceHikarinagi)
 	queue := &catalogtest.Queue{}
 	service := catalog.NewService(catalog.Deps{
-		Sources: []catalog.Source{source},
-		Store:   catalogtest.NewStore(),
-		Tx:      &txtest.Immediate{},
-		Queue:   queue,
-		Now:     func() time.Time { return apitest.Now },
-		Options: catalog.Options{CreatorID: 1},
+		Sources:  []catalog.Source{source},
+		Store:    catalogtest.NewStore(),
+		Tx:       &txtest.Immediate{},
+		Queue:    queue,
+		Now:      func() time.Time { return apitest.Now },
+		Settings: settingtest.Source{},
+		Options:  catalog.Options{CreatorID: 1},
 	})
 	cataloghttp.NewHandler(service, server.Builder).Register(server.API)
 	return server, source, queue

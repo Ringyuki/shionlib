@@ -1299,6 +1299,29 @@ func HasEditRecordsWith(preds ...predicate.EditRecord) predicate.User {
 	})
 }
 
+// HasSettingChanges applies the HasEdge predicate on the "setting_changes" edge.
+func HasSettingChanges() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SettingChangesTable, SettingChangesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSettingChangesWith applies the HasEdge predicate on the "setting_changes" edge with a given conditions (other predicates).
+func HasSettingChangesWith(preds ...predicate.SettingChange) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newSettingChangesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasFavorites applies the HasEdge predicate on the "favorites" edge.
 func HasFavorites() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

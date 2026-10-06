@@ -8,11 +8,12 @@ import (
 	"slices"
 	"sync"
 	"time"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
 )
 
 type Options struct {
-	IdleTimeout    time.Duration
-	RecordPayloads bool
+	IdleTimeout time.Duration
 }
 
 type Deps struct {
@@ -23,6 +24,7 @@ type Deps struct {
 	Queue    Queue
 	Now      func() time.Time
 	NewID    func() string
+	Settings setting.Source
 	Options  Options
 }
 
@@ -34,6 +36,7 @@ type Service struct {
 	queue    Queue
 	now      func() time.Time
 	newID    func() string
+	settings setting.Source
 	options  Options
 	mu       sync.Mutex
 	failures map[int]routeFailures
@@ -48,6 +51,7 @@ func NewService(deps Deps) *Service {
 		queue:    deps.Queue,
 		now:      deps.Now,
 		newID:    deps.NewID,
+		settings: deps.Settings,
 		options:  deps.Options,
 		failures: map[int]routeFailures{},
 	}
@@ -384,7 +388,7 @@ func (s *Service) record(ctx context.Context, attempt attemptRecord) (int64, err
 	if first := attempt.completion.FirstToken; first > 0 {
 		record.FirstToken = &first
 	}
-	if s.options.RecordPayloads {
+	if RecordPayloads.Read(s.settings) {
 		payload := attempt.payload
 		if attempt.completion.Text != "" {
 			output := attempt.completion.Text

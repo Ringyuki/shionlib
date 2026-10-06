@@ -11,7 +11,6 @@ type Config struct {
 	Telemetry  Telemetry
 	Database   Database
 	Redis      Redis
-	Throttle   Throttle
 	Token      Token
 	WebAuthn   WebAuthn
 	OIDC       OIDC
@@ -21,7 +20,6 @@ type Config struct {
 	FileScan   FileScan
 	Download   Download
 	Catalog    Catalog
-	HotScore   HotScore
 	Cloudflare Cloudflare
 	Bangumi    Bangumi
 	AI         AI
@@ -36,7 +34,6 @@ type App struct {
 	Environment     string        `env:"APP_ENV" envDefault:"production"`
 	Version         string        `env:"APP_VERSION" envDefault:"dev"`
 	SiteURL         string        `env:"SITE_URL" envDefault:"https://shionlib.com"`
-	AllowRegister   bool          `env:"ALLOW_REGISTER" envDefault:"true"`
 	DefaultLocale   string        `env:"DEFAULT_LOCALE" envDefault:"zh"`
 	ShutdownTimeout time.Duration `env:"SHUTDOWN_TIMEOUT" envDefault:"30s"`
 }
@@ -84,18 +81,6 @@ type Redis struct {
 	DB        int           `env:"REDIS_DB" envDefault:"0"`
 	KeyPrefix string        `env:"REDIS_KEY_PREFIX" envDefault:"shionlib"`
 	Timeout   time.Duration `env:"REDIS_TIMEOUT" envDefault:"3s"`
-}
-
-type Throttle struct {
-	TTL                   time.Duration `env:"THROTTLE_TTL" envDefault:"60s"`
-	Limit                 int           `env:"THROTTLE_LIMIT" envDefault:"600"`
-	BlockDuration         time.Duration `env:"THROTTLE_BLOCK_DURATION" envDefault:"10s"`
-	DownloadTTL           time.Duration `env:"THROTTLE_DOWNLOAD_TTL" envDefault:"1h"`
-	DownloadLimit         int           `env:"THROTTLE_DOWNLOAD_LIMIT" envDefault:"60"`
-	DownloadBlockDuration time.Duration `env:"THROTTLE_DOWNLOAD_BLOCK_DURATION" envDefault:"12h"`
-	AuthTTL               time.Duration `env:"THROTTLE_AUTH_TTL" envDefault:"10m"`
-	AuthLimit             int           `env:"THROTTLE_AUTH_LIMIT" envDefault:"20"`
-	AuthBlockDuration     time.Duration `env:"THROTTLE_AUTH_BLOCK_DURATION" envDefault:"10m"`
 }
 
 type Token struct {
@@ -152,56 +137,31 @@ type Storage struct {
 }
 
 type Upload struct {
-	TransferLimitBytes          int64         `env:"UPLOAD_LARGE_FILE_TRANSFER_LIMIT_BYTES" envDefault:"104857600"`
-	MaxFileSizeBytes            int64         `env:"UPLOAD_LARGE_FILE_MAX_SIZE" envDefault:"21474836480"`
-	MaxChunks                   int           `env:"UPLOAD_LARGE_FILE_MAX_CHUNKS" envDefault:"10000"`
-	RootDir                     string        `env:"FILE_UPLOAD_ROOT_DIR" envDefault:"/var/lib/shionlib/upload"`
-	ChunkSizeBytes              int64         `env:"FILE_UPLOAD_CHUNK_SIZE" envDefault:"52428800"`
-	SessionExpiresIn            time.Duration `env:"FILE_UPLOAD_SESSION_EXPIRES_IN" envDefault:"24h"`
-	TempFileSuffix              string        `env:"FILE_UPLOAD_TEMP_FILE_SUFFIX" envDefault:".sltf"`
-	SmallFileMaxBytes           int64         `env:"UPLOAD_SMALL_FILE_MAX_SIZE" envDefault:"10485760"`
-	QuotaBaseBytes              int64         `env:"UPLOAD_QUOTA_BASE_SIZE_BYTES" envDefault:"5368709120"`
-	QuotaCapBytes               int64         `env:"UPLOAD_QUOTA_CAP_SIZE_BYTES" envDefault:"21474836480"`
-	QuotaDynamicStepBytes       int64         `env:"UPLOAD_QUOTA_DYNAMIC_STEP_BYTES" envDefault:"2147483648"`
-	QuotaDynamicThresholdBytes  int64         `env:"UPLOAD_QUOTA_DYNAMIC_THRESHOLD_BYTES" envDefault:"2684354560"`
-	QuotaDynamicReduceStepBytes int64         `env:"UPLOAD_QUOTA_DYNAMIC_REDUCE_STEP_BYTES" envDefault:"1073741824"`
-	QuotaReduceInactiveDays     int           `env:"UPLOAD_QUOTA_DYNAMIC_REDUCE_INACTIVE_DAYS" envDefault:"45"`
-	QuotaGrantAfterDays         int           `env:"UPLOAD_QUOTA_GRANT_AFTER_DAYS" envDefault:"7"`
-	QuotaLongestInactiveDays    int           `env:"UPLOAD_QUOTA_LONGEST_INACTIVE_DAYS" envDefault:"120"`
+	RootDir        string `env:"FILE_UPLOAD_ROOT_DIR" envDefault:"/var/lib/shionlib/upload"`
+	TempFileSuffix string `env:"FILE_UPLOAD_TEMP_FILE_SUFFIX" envDefault:".sltf"`
 }
 
 type FileScan struct {
-	Enabled                 bool          `env:"FILE_SCAN_ENABLED" envDefault:"true"`
-	ClamdHost               string        `env:"CLAMDSCAN_HOST" envDefault:"clamav"`
-	ClamdPort               int           `env:"CLAMDSCAN_PORT" envDefault:"3310"`
-	ClamdTimeout            time.Duration `env:"CLAMDSCAN_TIMEOUT" envDefault:"2m"`
-	ArchiveToolPath         string        `env:"ARCHIVE_TOOL_PATH" envDefault:"7zz"`
-	ScanLogDir              string        `env:"FILE_SCAN_LOG_DIR" envDefault:"/var/lib/shionlib/scan-logs"`
-	MalwareReviewTimeout    time.Duration `env:"FILE_SCAN_MALWARE_REVIEW_TIMEOUT" envDefault:"24h"`
-	MalwareAutoBanThreshold int           `env:"FILE_SCAN_MALWARE_AUTO_BAN_THRESHOLD" envDefault:"3"`
-	MalwareAutoBanDays      int           `env:"FILE_SCAN_MALWARE_AUTO_BAN_DURATION_DAYS" envDefault:"30"`
-	MalwareAutoDeleteNote   string        `env:"FILE_SCAN_MALWARE_AUTO_DELETE_REVIEW_NOTE" envDefault:"Auto delete due to review timeout"`
+	Enabled         bool          `env:"FILE_SCAN_ENABLED" envDefault:"true"`
+	ClamdHost       string        `env:"CLAMDSCAN_HOST" envDefault:"clamav"`
+	ClamdPort       int           `env:"CLAMDSCAN_PORT" envDefault:"3310"`
+	ClamdTimeout    time.Duration `env:"CLAMDSCAN_TIMEOUT" envDefault:"2m"`
+	ArchiveToolPath string        `env:"ARCHIVE_TOOL_PATH" envDefault:"7zz"`
+	ScanLogDir      string        `env:"FILE_SCAN_LOG_DIR" envDefault:"/var/lib/shionlib/scan-logs"`
 }
 
 type Download struct {
-	Mode           string        `env:"FILE_DOWNLOAD_MODE" envDefault:"direct"`
-	CDNHost        string        `env:"FILE_DOWNLOAD_CDN_HOST" envDefault:"https://ft.hikarifallback.uk/"`
-	WorkerHost     string        `env:"FILE_DOWNLOAD_PROXY_WORKER_HOST" envDefault:"https://dl.hikarifallback.uk/"`
-	TicketSecret   string        `env:"FILE_DOWNLOAD_TICKET_SECRET"`
-	MaxConns       int           `env:"FILE_DOWNLOAD_MAX_CONNS" envDefault:"8"`
-	ExpiresIn      time.Duration `env:"FILE_DOWNLOAD_EXPIRES_IN" envDefault:"1h"`
-	EstimatedSpeed int64         `env:"FILE_DOWNLOAD_ESTIMATED_SPEED" envDefault:"1048576"`
-	MaxExpiresIn   time.Duration `env:"FILE_DOWNLOAD_MAX_EXPIRES_IN" envDefault:"24h"`
+	Mode         string `env:"FILE_DOWNLOAD_MODE" envDefault:"direct"`
+	CDNHost      string `env:"FILE_DOWNLOAD_CDN_HOST" envDefault:"https://ft.hikarifallback.uk/"`
+	WorkerHost   string `env:"FILE_DOWNLOAD_PROXY_WORKER_HOST" envDefault:"https://dl.hikarifallback.uk/"`
+	TicketSecret string `env:"FILE_DOWNLOAD_TICKET_SECRET"`
 }
 
 type Catalog struct {
-	Source          string        `env:"CATALOG_SOURCE" envDefault:"hikarinagi"`
-	CreatorID       int           `env:"CATALOG_IMPORT_CREATOR_ID" envDefault:"1"`
-	RefreshInterval time.Duration `env:"CATALOG_REFRESH_INTERVAL" envDefault:"168h"`
-	RefreshBatch    int           `env:"CATALOG_REFRESH_BATCH" envDefault:"50"`
-	ChangesBatch    int           `env:"CATALOG_CHANGES_BATCH" envDefault:"200"`
-	ImportWorkers   int           `env:"CATALOG_IMPORT_WORKERS" envDefault:"2"`
-	Hikarinagi      Hikarinagi
+	Source        string `env:"CATALOG_SOURCE" envDefault:"hikarinagi"`
+	CreatorID     int    `env:"CATALOG_IMPORT_CREATOR_ID" envDefault:"1"`
+	ImportWorkers int    `env:"CATALOG_IMPORT_WORKERS" envDefault:"2"`
+	Hikarinagi    Hikarinagi
 }
 
 type Hikarinagi struct {
@@ -213,18 +173,6 @@ type Hikarinagi struct {
 	Scopes         []string      `env:"HIKARINAGI_SCOPES" envSeparator:" " envDefault:"catalog:full catalog:sync"`
 	Timeout        time.Duration `env:"HIKARINAGI_TIMEOUT" envDefault:"15s"`
 	RequestsPerMin int           `env:"HIKARINAGI_REQUESTS_PER_MINUTE" envDefault:"55"`
-}
-
-type HotScore struct {
-	HalfLifeReleaseDays   float64 `env:"GAME_HOT_SCORE_HALF_LIFE_RELEASE_DAYS" envDefault:"30"`
-	HalfLifeCreatedDays   float64 `env:"GAME_HOT_SCORE_HALF_LIFE_CREATED_DAYS" envDefault:"15"`
-	WeightViews           float64 `env:"GAME_HOT_SCORE_WEIGHT_VIEWS" envDefault:"0.6"`
-	WeightDownloads       float64 `env:"GAME_HOT_SCORE_WEIGHT_DOWNLOADS" envDefault:"1.0"`
-	WeightRelease         float64 `env:"GAME_HOT_SCORE_WEIGHT_RELEASE" envDefault:"0.8"`
-	WeightCreated         float64 `env:"GAME_HOT_SCORE_WEIGHT_CREATED" envDefault:"0.4"`
-	RecentWindowDays      float64 `env:"GAME_HOT_SCORE_RECENT_WINDOW_DAYS" envDefault:"7"`
-	WeightRecentViews     float64 `env:"GAME_HOT_SCORE_WEIGHT_RECENT_VIEWS" envDefault:"0.6"`
-	WeightRecentDownloads float64 `env:"GAME_HOT_SCORE_WEIGHT_RECENT_DOWNLOADS" envDefault:"0.9"`
 }
 
 type Cloudflare struct {
@@ -240,12 +188,9 @@ type Bangumi struct {
 }
 
 type AI struct {
-	CatalogURL           string        `env:"AI_CATALOG_URL" envDefault:"https://models.dev/api.json"`
-	IdleTimeout          time.Duration `env:"AI_IDLE_TIMEOUT" envDefault:"120s"`
-	MaxCallDuration      time.Duration `env:"AI_MAX_CALL_DURATION" envDefault:"10m"`
-	RecordPayloads       bool          `env:"AI_RECORD_PAYLOADS" envDefault:"true"`
-	RequestRetentionDays int           `env:"AI_REQUEST_RETENTION_DAYS" envDefault:"90"`
-	PayloadRetentionDays int           `env:"AI_PAYLOAD_RETENTION_DAYS" envDefault:"7"`
+	CatalogURL      string        `env:"AI_CATALOG_URL" envDefault:"https://models.dev/api.json"`
+	IdleTimeout     time.Duration `env:"AI_IDLE_TIMEOUT" envDefault:"120s"`
+	MaxCallDuration time.Duration `env:"AI_MAX_CALL_DURATION" envDefault:"10m"`
 }
 
 type NextMoe struct {
@@ -258,7 +203,6 @@ type PotatoVN struct {
 }
 
 type Sponsor struct {
-	Enabled             bool   `env:"SPONSOR_ENABLED" envDefault:"false"`
 	Provider            string `env:"SPONSOR_PROVIDER" envDefault:"idatariver"`
 	IdatariverBaseURL   string `env:"IDATARIVER_BASE_URL" envDefault:"https://open.idatariver.com"`
 	IdatariverSecret    string `env:"IDATARIVER_DEVELOPER_SECRET"`

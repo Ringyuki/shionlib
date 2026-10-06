@@ -15,6 +15,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/scan"
 	"github.com/Ringyuki/shionlib/apps/api/internal/scan/scantest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload/uploadtest"
 )
@@ -74,15 +75,9 @@ func newFixture(enabled bool) fixture {
 		Mailer:     f.mailer,
 		Queue:      f.events,
 		Tx:         &txtest.Immediate{},
-		Options: scan.Options{
-			Enabled:          enabled,
-			ReviewTimeout:    24 * time.Hour,
-			AutoBanThreshold: 2,
-			AutoBanDays:      30,
-			AutoDeleteNote:   "Auto delete due to review timeout",
-			SiteURL:          "https://shionlib.example/",
-		},
-		Now: func() time.Time { return now },
+		Settings:   settingtest.Set(settingtest.Source{}, scan.AutoBanThreshold, 2),
+		Options:    scan.Options{Enabled: enabled, SiteURL: "https://shionlib.example/"},
+		Now:        func() time.Time { return now },
 	})
 	return f
 }

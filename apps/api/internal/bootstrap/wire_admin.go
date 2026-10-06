@@ -10,7 +10,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/commentpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/developerpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/gamepg"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/uploadpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/userpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/walkthroughpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/queue"
@@ -27,7 +26,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/developerhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/gamehttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/walkthroughhttp"
-	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 	"github.com/Ringyuki/shionlib/apps/api/internal/walkthrough"
 )
 
@@ -59,7 +57,7 @@ func wireAdmin(infra *Infra, shared *Shared, modules *Modules) {
 		Bans:        shared.Users,
 		Sessions:    shared.Sessions,
 		Passwords:   argon2hash.New(argon2hash.PasswordParams()),
-		Quotas:      upload.NewQuotaService(uploadpg.NewQuotaRepository(infra.Ent), shared.Transactor, quotaPolicy(shared.Config), shared.Now),
+		Quotas:      newQuotaService(infra, shared),
 		Tx:          shared.Transactor,
 	})
 	comments := commentpg.NewRepository(infra.Ent)

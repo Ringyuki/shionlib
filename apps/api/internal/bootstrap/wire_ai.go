@@ -21,7 +21,6 @@ const (
 	aiCatalogSearch     = 40
 	aiBreakdownLimit    = 50
 	aiCostSeries        = 5
-	day                 = 24 * time.Hour
 )
 
 func wireAI(infra *Infra, shared *Shared, modules *Modules) {
@@ -37,7 +36,8 @@ func wireAI(infra *Infra, shared *Shared, modules *Modules) {
 		Queue:    shared.Queue,
 		Now:      infra.Now,
 		NewID:    uuid.NewString,
-		Options:  ai.Options{IdleTimeout: cfg.IdleTimeout, RecordPayloads: cfg.RecordPayloads},
+		Settings: shared.Settings,
+		Options:  ai.Options{IdleTimeout: cfg.IdleTimeout},
 	})
 	catalog := ai.NewCatalogService(ai.CatalogDeps{
 		Source:  modelsdev.NewClient(httpclient.New(httpclient.Options{Timeout: aiCatalogTimeout}), cfg.CatalogURL),
@@ -56,13 +56,9 @@ func wireAI(infra *Infra, shared *Shared, modules *Modules) {
 		Repo:     repo,
 		Requests: requests,
 		Stats:    stats,
+		Settings: shared.Settings,
 		Now:      infra.Now,
-		Options: ai.UsageOptions{
-			RequestRetention: time.Duration(cfg.RequestRetentionDays) * day,
-			PayloadRetention: time.Duration(cfg.PayloadRetentionDays) * day,
-			BreakdownLimit:   aiBreakdownLimit,
-			CostSeries:       aiCostSeries,
-		},
+		Options:  ai.UsageOptions{BreakdownLimit: aiBreakdownLimit, CostSeries: aiCostSeries},
 	})
 	shared.AI = gateway
 

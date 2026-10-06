@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
-	"github.com/Ringyuki/shionlib/apps/api/internal/platform/ratelimit"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/apitest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/uploadhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
@@ -33,9 +33,14 @@ func setup(t *testing.T) env {
 	repo := uploadtest.NewMemoryRepository(func() time.Time { return apitest.Now })
 	quotas := uploadtest.NewMemoryQuotaRepository()
 	tx := &txtest.Immediate{}
-	quota := upload.NewQuotaService(quotas, tx, upload.QuotaPolicy{}, func() time.Time { return apitest.Now })
-	service := upload.NewService(repo, quota, uploadtest.NewMemorySpool(), tx, upload.Options{ChunkSize: 4, MaxChunks: 100, MaxFileSize: 1000, TransferLimit: 8, SessionTTL: 24 * time.Hour}, func() time.Time { return apitest.Now })
-	uploadhttp.NewHandler(service, quota, server.Builder, ratelimit.Policy{Name: "upload_chunk", Limit: 10000, Window: time.Minute}).Register(server.API)
+	settings := settingtest.Source{}
+	settingtest.Set(settings, upload.ChunkSize, 4)
+	settingtest.Set(settings, upload.ChunkLimit, 8)
+	settingtest.Set(settings, upload.MaxChunks, 100)
+	settingtest.Set(settings, upload.MaxFileSize, 1000)
+	quota := upload.NewQuotaService(quotas, tx, settings, time.UTC, func() time.Time { return apitest.Now })
+	service := upload.NewService(repo, quota, uploadtest.NewMemorySpool(), tx, settings, func() time.Time { return apitest.Now })
+	uploadhttp.NewHandler(service, quota, server.Builder).Register(server.API)
 	return env{server: server, repo: repo, quotas: quotas}
 }
 

@@ -80,10 +80,7 @@ func (c *Config) Validate() error {
 	require(c.Catalog.Hikarinagi.RequestsPerMin > 0, "HIKARINAGI_REQUESTS_PER_MINUTE must be positive")
 	require(slices.Contains([]string{"json", "text"}, c.Log.Format), "LOG_FORMAT must be json or text")
 	require(c.Telemetry.SampleRate >= 0 && c.Telemetry.SampleRate <= 1, "OTEL_TRACES_SAMPLER_ARG must be between 0 and 1")
-	require(c.Upload.ChunkSizeBytes > 0 && c.Upload.ChunkSizeBytes <= c.Upload.TransferLimitBytes, "FILE_UPLOAD_CHUNK_SIZE must be positive and not exceed UPLOAD_LARGE_FILE_TRANSFER_LIMIT_BYTES")
-	require(c.Upload.MaxChunks > 0, "UPLOAD_LARGE_FILE_MAX_CHUNKS must be positive")
 	require(c.AI.IdleTimeout > 0 && c.AI.MaxCallDuration >= c.AI.IdleTimeout, "AI_IDLE_TIMEOUT must be positive and not exceed AI_MAX_CALL_DURATION")
-	require(c.AI.RequestRetentionDays > 0 && c.AI.PayloadRetentionDays > 0, "AI_REQUEST_RETENTION_DAYS and AI_PAYLOAD_RETENTION_DAYS must be positive")
 	if _, err := time.LoadLocation(c.Tasks.ScheduleTimezone); err != nil {
 		errs = append(errs, fmt.Errorf("SCHEDULE_TIMEZONE: %w", err))
 	}

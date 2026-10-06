@@ -11,6 +11,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/ai"
 	"github.com/Ringyuki/shionlib/apps/api/internal/ai/aitest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/aihttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/apitest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
@@ -155,13 +156,13 @@ func setup(t *testing.T) *fixture {
 	}
 	f.requests = aitest.NewMemoryRequestLog(f.repo)
 	tx := &txtest.Immediate{}
-	gateway := ai.NewService(ai.Deps{Scenes: scenes, Repo: f.repo, Requests: f.requests, Upstream: f.upstream, Queue: f.queue, Now: now, NewID: newID, Options: ai.Options{IdleTimeout: time.Minute, RecordPayloads: true}})
+	gateway := ai.NewService(ai.Deps{Scenes: scenes, Repo: f.repo, Requests: f.requests, Upstream: f.upstream, Queue: f.queue, Now: now, NewID: newID, Settings: settingtest.Source{}, Options: ai.Options{IdleTimeout: time.Minute}})
 	catalog := ai.NewCatalogService(ai.CatalogDeps{Source: catalogSource{}, Store: aitest.NewMemoryCatalogStore(), Repo: f.repo, Tx: tx, Now: now, Options: ai.CatalogOptions{StaleAfter: 20 * time.Hour, SearchLimit: 40}})
 	probe := ai.NewProbeService(gateway, f.repo, f.queue, now)
 	routes := ai.NewRouteService(ai.RouteDeps{Repo: f.repo, Stats: f.stats, Catalog: catalog, Probe: probe, Tx: tx, Now: now})
 	providers := ai.NewProviderService(ai.ProviderDeps{Repo: f.repo, Stats: f.stats, Routes: routes, Catalog: catalog, Upstream: f.upstream, Tx: tx, Now: now})
 	models := ai.NewModelService(ai.ModelDeps{Gateway: gateway, Repo: f.repo, Stats: f.stats, Routes: routes, Catalog: catalog, Tx: tx, Now: now})
-	usage := ai.NewUsageService(ai.UsageDeps{Gateway: gateway, Repo: f.repo, Requests: f.requests, Stats: f.stats, Now: now, Options: ai.UsageOptions{RequestRetention: 90 * 24 * time.Hour, PayloadRetention: 7 * 24 * time.Hour, BreakdownLimit: 50, CostSeries: 5}})
+	usage := ai.NewUsageService(ai.UsageDeps{Gateway: gateway, Repo: f.repo, Requests: f.requests, Stats: f.stats, Now: now, Settings: settingtest.Source{}, Options: ai.UsageOptions{BreakdownLimit: 50, CostSeries: 5}})
 	builder := f.server.Builder
 	aihttp.NewProviderHandler(providers, builder).Register(f.server.API)
 	aihttp.NewModelHandler(models, builder).Register(f.server.API)

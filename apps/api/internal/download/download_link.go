@@ -29,6 +29,18 @@ type Authorization struct {
 	DownloadURL string
 }
 
+type LinkExpiry struct {
+	Base  time.Duration
+	Speed int64
+	Max   time.Duration
+}
+
+func (e LinkExpiry) Seconds(size int64) int64 {
+	speed := max(1, e.Speed)
+	estimated := int64(e.Base/time.Second) + (size+speed-1)/speed
+	return min(estimated, int64(e.Max/time.Second))
+}
+
 type Ticket struct {
 	Version     int
 	SessionID   string

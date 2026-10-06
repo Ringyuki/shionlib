@@ -19,10 +19,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/sevenzip"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/turnstile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
-	"github.com/Ringyuki/shionlib/apps/api/internal/platform/config"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/httpclient"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/jobs"
-	"github.com/Ringyuki/shionlib/apps/api/internal/platform/ratelimit"
 	"github.com/Ringyuki/shionlib/apps/api/internal/report"
 	"github.com/Ringyuki/shionlib/apps/api/internal/scan"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/downloadhttp"
@@ -37,8 +35,6 @@ import (
 
 const (
 	storeRequeueAge     = 15 * time.Minute
-	uploadChunkPolicy   = "upload_chunk"
-	uploadChunkLimit    = 10000
 	vendorTimeout       = 15 * time.Second
 	objectStoreTimeout  = 10 * time.Minute
 	everyMinute         = "* * * * *"
@@ -73,14 +69,8 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 	})
 	banner := userPenalties{users: shared.Users}
 
-	quota := upload.NewQuotaService(uploadpg.NewQuotaRepository(infra.Ent), shared.Transactor, quotaPolicy(cfg), shared.Now)
-	uploads := upload.NewService(uploadpg.NewRepository(infra.Ent), quota, spool, shared.Transactor, upload.Options{
-		ChunkSize:     cfg.Upload.ChunkSizeBytes,
-		MaxChunks:     cfg.Upload.MaxChunks,
-		MaxFileSize:   cfg.Upload.MaxFileSizeBytes,
-		TransferLimit: cfg.Upload.TransferLimitBytes,
-		SessionTTL:    cfg.Upload.SessionExpiresIn,
-	}, shared.Now)
+	quota := newQuotaService(infra, shared)
+	uploads := upload.NewService(uploadpg.NewRepository(infra.Ent), quota, spool, shared.Transactor, shared.Settings, shared.Now)
 
 	downloadRepo := downloadpg.NewRepository(infra.Ent)
 	downloads := download.NewService(download.Deps{
@@ -102,14 +92,11 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		turnstile.New(cfg.Cloudflare.TurnstileSecret, "", vendorClient),
 		b2.New(b2.Options{KeyID: cfg.Storage.B2ApplicationKeyID, Key: cfg.Storage.B2ApplicationKey, Client: vendorClient, Cache: shared.Cache}),
 		dlticket.NewSealer(cfg.Download.TicketSecret),
+		shared.Settings,
 		download.LinkOptions{
-			Mode:           cfg.Download.Mode,
-			CDNHost:        cfg.Download.CDNHost,
-			WorkerHost:     cfg.Download.WorkerHost,
-			MaxConns:       cfg.Download.MaxConns,
-			BaseExpiresIn:  cfg.Download.ExpiresIn,
-			EstimatedSpeed: cfg.Download.EstimatedSpeed,
-			MaxExpiresIn:   cfg.Download.MaxExpiresIn,
+			Mode:       cfg.Download.Mode,
+			CDNHost:    cfg.Download.CDNHost,
+			WorkerHost: cfg.Download.WorkerHost,
 		},
 		shared.Now,
 	)
@@ -132,13 +119,10 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		Mailer:     shared.Mailer,
 		Queue:      jobQueue,
 		Tx:         shared.Transactor,
+		Settings:   shared.Settings,
 		Options: scan.Options{
-			Enabled:          cfg.FileScan.Enabled,
-			ReviewTimeout:    cfg.FileScan.MalwareReviewTimeout,
-			AutoBanThreshold: cfg.FileScan.MalwareAutoBanThreshold,
-			AutoBanDays:      cfg.FileScan.MalwareAutoBanDays,
-			AutoDeleteNote:   cfg.FileScan.MalwareAutoDeleteNote,
-			SiteURL:          cfg.App.SiteURL,
+			Enabled: cfg.FileScan.Enabled,
+			SiteURL: cfg.App.SiteURL,
 		},
 		Now: shared.Now,
 	})
@@ -156,9 +140,8 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		Now:       shared.Now,
 	})
 
-	chunkPolicy := ratelimit.Policy{Name: uploadChunkPolicy, Limit: uploadChunkLimit, Window: time.Minute, Block: cfg.Throttle.BlockDuration}
 	modules.Handlers = append(modules.Handlers,
-		uploadhttp.NewHandler(uploads, quota, shared.Builder, chunkPolicy),
+		uploadhttp.NewHandler(uploads, quota, shared.Builder),
 		downloadhttp.NewHandler(downloads, links, shared.Builder),
 		reporthttp.NewHandler(reports, shared.Builder),
 		scanhttp.NewHandler(scans, shared.Builder),
@@ -187,22 +170,12 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 	)
 }
 
-func quotaPolicy(cfg *config.Config) upload.QuotaPolicy {
-	location, err := time.LoadLocation(cfg.Tasks.ScheduleTimezone)
+func newQuotaService(infra *Infra, shared *Shared) *upload.QuotaService {
+	location, err := time.LoadLocation(shared.Config.Tasks.ScheduleTimezone)
 	if err != nil {
 		location = time.UTC
 	}
-	return upload.QuotaPolicy{
-		BaseBytes:           cfg.Upload.QuotaBaseBytes,
-		CapBytes:            cfg.Upload.QuotaCapBytes,
-		TopupStepBytes:      cfg.Upload.QuotaDynamicStepBytes,
-		TopupThresholdBytes: cfg.Upload.QuotaDynamicThresholdBytes,
-		ReduceStepBytes:     cfg.Upload.QuotaDynamicReduceStepBytes,
-		ReduceInactiveDays:  cfg.Upload.QuotaReduceInactiveDays,
-		GrantAfterDays:      cfg.Upload.QuotaGrantAfterDays,
-		LongestInactiveDays: cfg.Upload.QuotaLongestInactiveDays,
-		Location:            location,
-	}
+	return upload.NewQuotaService(uploadpg.NewQuotaRepository(infra.Ent), shared.Transactor, shared.Settings, location, shared.Now)
 }
 
 type userPenalties struct {

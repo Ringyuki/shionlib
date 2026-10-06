@@ -48,8 +48,8 @@ func wireCommunity(_ *Infra, shared *Shared, modules *Modules) {
 		shared.Cache,
 		shared.Transactor,
 		hmacsign.New(cfg.Token.Secret, sponsorOrderAccessPurpose),
+		shared.Settings,
 		sponsor.Options{
-			Enabled:     cfg.Sponsor.Enabled,
 			Provider:    cfg.Sponsor.Provider,
 			CallbackURL: strings.TrimSuffix(cfg.App.SiteURL, "/") + "/api/sponsor/webhook/idatariver",
 		},

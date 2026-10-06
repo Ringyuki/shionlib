@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"regexp"
 	"strings"
 	"time"
@@ -25,9 +27,15 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/settingpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/redis/gameredis"
 	"github.com/Ringyuki/shionlib/apps/api/internal/ai"
+	"github.com/Ringyuki/shionlib/apps/api/internal/bootstrap"
+	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/redis"
+	"github.com/Ringyuki/shionlib/apps/api/internal/platform/refresh"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
 )
 
 var e2eKeptTables = regexp.MustCompile(`^(schema_migrations|_prisma_migrations|river_.*)$`)
@@ -35,6 +43,14 @@ var e2eKeptTables = regexp.MustCompile(`^(schema_migrations|_prisma_migrations|r
 var e2eWhitespace = regexp.MustCompile(`\s+`)
 
 const e2eRedisScanBatch = 500
+
+var e2eSettings = []struct {
+	name  string
+	value string
+}{
+	{name: httpapi.AuthThrottleLimit.Name(), value: "100000"},
+	{name: download.MaxConns.Name(), value: "4"},
+}
 
 type e2ePasswordHasher interface {
 	Hash(secret string) (string, error)
@@ -187,6 +203,9 @@ func (s *e2eSeeder) Seed(ctx context.Context) (e2eSeedResult, error) {
 		if err := s.seedModeration(ctx, tx); err != nil {
 			return err
 		}
+		if err := s.seedSettings(ctx, tx, users[e2eAdminIndex]); err != nil {
+			return err
+		}
 		graph, err := s.seedGameGraph(ctx, tx, data, users[e2eAdminIndex], users[e2eMemberIndex])
 		if err != nil {
 			return err
@@ -210,6 +229,7 @@ func (s *e2eSeeder) Seed(ctx context.Context) (e2eSeedResult, error) {
 	if err := s.primeRecentUpdates(ctx, result.GameIDs); err != nil {
 		return e2eSeedResult{}, err
 	}
+	refresh.NewWatcher(s.redis, slog.New(slog.NewTextHandler(s.out, nil)), refresh.Options{Topic: bootstrap.SettingsTopic}).Announce(ctx)
 	s.logf("Seed completed.")
 	s.logf("E2E login user: %s / %s", e2eSeedUsers[e2eMemberIndex].Name, s.password)
 	s.logf("Primary game id: %d", result.PrimaryGameID)
@@ -285,6 +305,27 @@ func (s *e2eSeeder) seedModeration(ctx context.Context, tx *ent.Client) error {
 		}
 		if err := repo.SaveSceneConfig(ctx, ai.SceneConfig{Key: item.scene, ModelID: &modelID}); err != nil {
 			return fmt.Errorf("seed ai scene %s: %w", item.scene, err)
+		}
+	}
+	return nil
+}
+
+func (s *e2eSeeder) seedSettings(ctx context.Context, tx *ent.Client, adminID int) error {
+	repo := settingpg.NewRepository(tx)
+	for _, override := range e2eSettings {
+		def, ok := setting.Find(override.name)
+		if !ok {
+			return fmt.Errorf("seed setting %s: not declared", override.name)
+		}
+		value, err := def.Normalize(json.RawMessage(override.value))
+		if err != nil {
+			return fmt.Errorf("seed setting %s: %w", override.name, err)
+		}
+		if err := repo.Save(ctx, override.name, value); err != nil {
+			return err
+		}
+		if err := repo.Record(ctx, setting.NewChange{Name: override.name, Value: value, EditorID: adminID}); err != nil {
+			return err
 		}
 	}
 	return nil

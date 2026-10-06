@@ -10,6 +10,7 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
 	"github.com/Ringyuki/shionlib/apps/api/internal/catalog/catalogtest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 )
 
@@ -31,12 +32,13 @@ func setup() fixture {
 		tx:     &txtest.Immediate{},
 	}
 	f.service = catalog.NewService(catalog.Deps{
-		Sources: []catalog.Source{f.source},
-		Store:   f.store,
-		Tx:      f.tx,
-		Queue:   f.queue,
-		Now:     func() time.Time { return now },
-		Options: catalog.Options{CreatorID: 1, RefreshAfter: 24 * time.Hour, RefreshBatch: 2, ChangesBatch: 10},
+		Sources:  []catalog.Source{f.source},
+		Store:    f.store,
+		Tx:       f.tx,
+		Queue:    f.queue,
+		Now:      func() time.Time { return now },
+		Settings: catalogSettings(),
+		Options:  catalog.Options{CreatorID: 1},
 	})
 	return f
 }
@@ -353,4 +355,11 @@ func TestResolveMapsLinkedEntriesAndQueuesUnknownOnes(t *testing.T) {
 	if _, err := f.service.Resolve(context.Background(), "vndb", catalog.EntityGame, []string{"1"}); !errors.Is(err, catalog.ErrUnknownSource) {
 		t.Fatalf("unknown source: %v", err)
 	}
+}
+
+func catalogSettings() settingtest.Source {
+	settings := settingtest.Source{}
+	settingtest.Set(settings, catalog.RefreshInterval, 24*time.Hour)
+	settingtest.Set(settings, catalog.RefreshBatch, 2)
+	return settingtest.Set(settings, catalog.ChangesBatch, 10)
 }

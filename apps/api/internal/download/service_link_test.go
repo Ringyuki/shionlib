@@ -9,6 +9,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/apperror"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download/downloadtest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 )
 
@@ -29,36 +30,16 @@ func newLinkFixture(mode string, size int64) linkFixture {
 	key := "games/10/1/ゲーム 体験版.7z"
 	file := repo.SeedFile(download.File{ResourceID: resource.ID, Name: "ゲーム 体験版.7z", Size: size, Status: download.FileInObjectStore, StorageKey: &key})
 	f := linkFixture{repo: repo, challenge: &downloadtest.Challenge{Verdict: download.Verdict{Success: true}}, authorizer: &downloadtest.Authorizer{}, sealer: &downloadtest.Sealer{}, file: file}
-	f.links = download.NewLinkService(repo, &txtest.Immediate{}, f.challenge, f.authorizer, f.sealer, download.LinkOptions{
-		Mode:           mode,
-		CDNHost:        "https://cdn.example.com",
-		WorkerHost:     "https://dl.example.com/",
-		MaxConns:       0,
-		BaseExpiresIn:  1800 * time.Second,
-		EstimatedSpeed: mib,
-		MaxExpiresIn:   86400 * time.Second,
+	settings := settingtest.Source{}
+	settingtest.Set(settings, download.LinkExpiresIn, 1800*time.Second)
+	settingtest.Set(settings, download.LinkMaxExpiresIn, 86400*time.Second)
+	settingtest.Set(settings, download.MaxConns, 0)
+	f.links = download.NewLinkService(repo, &txtest.Immediate{}, f.challenge, f.authorizer, f.sealer, settings, download.LinkOptions{
+		Mode:       mode,
+		CDNHost:    "https://cdn.example.com",
+		WorkerHost: "https://dl.example.com/",
 	}, func() time.Time { return now })
 	return f
-}
-
-func TestExpiresInGrowsWithSizeAndIsCapped(t *testing.T) {
-	settings := download.LinkOptions{BaseExpiresIn: 1800 * time.Second, EstimatedSpeed: mib, MaxExpiresIn: 86400 * time.Second}
-	cases := map[int64]int64{
-		25 << 30:  1800 + 25*1024,
-		2 << 30:   1800 + 2*1024,
-		200 << 30: 86400,
-		1:         1801,
-		0:         1800,
-	}
-	for size, want := range cases {
-		if got := settings.ExpiresIn(size); got != want {
-			t.Fatalf("size %d: got %d want %d", size, got, want)
-		}
-	}
-	zeroSpeed := download.LinkOptions{BaseExpiresIn: time.Hour, MaxExpiresIn: 24 * time.Hour}
-	if got := zeroSpeed.ExpiresIn(10); got != 3610 {
-		t.Fatalf("speed is clamped to at least one byte per second: %d", got)
-	}
 }
 
 func TestIssueRequiresAValidToken(t *testing.T) {

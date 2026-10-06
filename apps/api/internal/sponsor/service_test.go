@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/sponsor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/sponsor/sponsortest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
@@ -34,8 +35,9 @@ func newFixture(enabled bool) fixture {
 	repo.AddUser(user.Summary{ID: member.UserID, Name: "member"})
 	provider := sponsortest.NewProvider()
 	cache := sponsortest.NewCache()
-	options := sponsor.Options{Enabled: enabled, Provider: "idatariver", CallbackURL: "https://shionlib.test/api/sponsor/webhook/idatariver"}
-	service := sponsor.NewService(repo, provider, cache, &txtest.Immediate{}, sponsortest.Signer{}, options, func() time.Time { return now })
+	options := sponsor.Options{Provider: "idatariver", CallbackURL: "https://shionlib.test/api/sponsor/webhook/idatariver"}
+	settings := settingtest.Set(settingtest.Source{}, sponsor.Enabled, enabled)
+	service := sponsor.NewService(repo, provider, cache, &txtest.Immediate{}, sponsortest.Signer{}, settings, options, func() time.Time { return now })
 	return fixture{repo: repo, provider: provider, cache: cache, service: service}
 }
 

@@ -16,6 +16,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/auth"
 	"github.com/Ringyuki/shionlib/apps/api/internal/auth/authtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/media"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/apitest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/userhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
@@ -78,7 +79,7 @@ func setup(t *testing.T) *env {
 	e.sessions = auth.NewSessionService(e.repo, e.users, authtest.Codec{}, authtest.Hasher{}, e.families, e.store, tx, now, auth.SessionPolicy{Version: "slrt1", AccessTTL: time.Hour, ShortWindow: time.Hour, LongWindow: time.Hour})
 	e.codes = auth.NewCodeService(e.store, e.mailer, now)
 	images := media.NewService(processor{}, e.bucket, func() string { return "uuid" })
-	service := user.NewService(e.users, tx, e.sessions, e.codes, authtest.Hasher{}, images, now, user.Policy{AllowRegister: true})
+	service := user.NewService(e.users, tx, e.sessions, e.codes, authtest.Hasher{}, images, now, settingtest.Source{})
 	userhttp.NewHandler(service, user.NewEditHistoryService(e.edits), e.server.Builder).Register(e.server.API)
 	return e
 }

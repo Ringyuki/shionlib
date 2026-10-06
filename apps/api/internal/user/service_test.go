@@ -9,6 +9,7 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/media"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
@@ -115,7 +116,7 @@ func newFixture(allowRegister bool) *fixture {
 	}
 	now := func() time.Time { return f.clock }
 	f.repo = usertest.NewMemoryRepository(now)
-	f.service = user.NewService(f.repo, f.tx, f.sessions, f.codes, fakeHasher{}, f.images, now, user.Policy{AllowRegister: allowRegister})
+	f.service = user.NewService(f.repo, f.tx, f.sessions, f.codes, fakeHasher{}, f.images, now, settingtest.Set(settingtest.Source{}, user.AllowRegister, allowRegister))
 	return f
 }
 

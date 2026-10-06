@@ -96,6 +96,10 @@ type Tx struct {
 	OidcIdentity *OidcIdentityClient
 	// RoleFieldPermission is the client for interacting with the RoleFieldPermission builders.
 	RoleFieldPermission *RoleFieldPermissionClient
+	// Setting is the client for interacting with the Setting builders.
+	Setting *SettingClient
+	// SettingChange is the client for interacting with the SettingChange builders.
+	SettingChange *SettingChangeClient
 	// SponsorOrder is the client for interacting with the SponsorOrder builders.
 	SponsorOrder *SponsorOrderClient
 	// Tag is the client for interacting with the Tag builders.
@@ -292,6 +296,8 @@ func (tx *Tx) init() {
 	tx.ModerationEvent = NewModerationEventClient(tx.config)
 	tx.OidcIdentity = NewOidcIdentityClient(tx.config)
 	tx.RoleFieldPermission = NewRoleFieldPermissionClient(tx.config)
+	tx.Setting = NewSettingClient(tx.config)
+	tx.SettingChange = NewSettingChangeClient(tx.config)
 	tx.SponsorOrder = NewSponsorOrderClient(tx.config)
 	tx.Tag = NewTagClient(tx.config)
 	tx.User = NewUserClient(tx.config)

@@ -26,17 +26,13 @@ func buildCatalog(infra *Infra, shared *Shared) *catalog.Service {
 		sources = append(sources, hikarinagi.NewSource(client))
 	}
 	return catalog.NewService(catalog.Deps{
-		Sources: sources,
-		Store:   catalogpg.NewStore(infra.Ent),
-		Tx:      shared.Transactor,
-		Queue:   shared.Queue,
-		Now:     shared.Now,
-		Options: catalog.Options{
-			CreatorID:    cfg.CreatorID,
-			RefreshAfter: cfg.RefreshInterval,
-			RefreshBatch: cfg.RefreshBatch,
-			ChangesBatch: cfg.ChangesBatch,
-		},
+		Sources:  sources,
+		Store:    catalogpg.NewStore(infra.Ent),
+		Tx:       shared.Transactor,
+		Queue:    shared.Queue,
+		Settings: shared.Settings,
+		Now:      shared.Now,
+		Options:  catalog.Options{CreatorID: cfg.CreatorID},
 	})
 }
 

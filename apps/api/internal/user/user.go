@@ -14,10 +14,6 @@ const (
 	emailChangeCodeTTL    = 30 * time.Minute
 )
 
-type Policy struct {
-	AllowRegister bool
-}
-
 type RegisterInput struct {
 	Name           string
 	Email          string

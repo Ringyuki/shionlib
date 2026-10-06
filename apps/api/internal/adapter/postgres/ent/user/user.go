@@ -77,6 +77,8 @@ const (
 	EdgeFieldPermissions = "field_permissions"
 	// EdgeEditRecords holds the string denoting the edit_records edge name in mutations.
 	EdgeEditRecords = "edit_records"
+	// EdgeSettingChanges holds the string denoting the setting_changes edge name in mutations.
+	EdgeSettingChanges = "setting_changes"
 	// EdgeFavorites holds the string denoting the favorites edge name in mutations.
 	EdgeFavorites = "favorites"
 	// EdgeGames holds the string denoting the games edge name in mutations.
@@ -200,6 +202,13 @@ const (
 	EditRecordsInverseTable = "edit_records"
 	// EditRecordsColumn is the table column denoting the edit_records relation/edge.
 	EditRecordsColumn = "actor_id"
+	// SettingChangesTable is the table that holds the setting_changes relation/edge.
+	SettingChangesTable = "setting_changes"
+	// SettingChangesInverseTable is the table name for the SettingChange entity.
+	// It exists in this package in order to avoid circular dependency with the "settingchange" package.
+	SettingChangesInverseTable = "setting_changes"
+	// SettingChangesColumn is the table column denoting the setting_changes relation/edge.
+	SettingChangesColumn = "actor_id"
 	// FavoritesTable is the table that holds the favorites relation/edge.
 	FavoritesTable = "favorites"
 	// FavoritesInverseTable is the table name for the Favorite entity.
@@ -687,6 +696,20 @@ func ByEditRecords(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// BySettingChangesCount orders the results by setting_changes count.
+func BySettingChangesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSettingChangesStep(), opts...)
+	}
+}
+
+// BySettingChanges orders the results by setting_changes terms.
+func BySettingChanges(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSettingChangesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByFavoritesCount orders the results by favorites count.
 func ByFavoritesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -985,6 +1008,13 @@ func newEditRecordsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(EditRecordsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, EditRecordsTable, EditRecordsColumn),
+	)
+}
+func newSettingChangesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SettingChangesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SettingChangesTable, SettingChangesColumn),
 	)
 }
 func newFavoritesStep() *sqlgraph.Step {

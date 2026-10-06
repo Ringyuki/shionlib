@@ -7,13 +7,13 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
 )
 
 type UsageOptions struct {
-	RequestRetention time.Duration
-	PayloadRetention time.Duration
-	BreakdownLimit   int
-	CostSeries       int
+	BreakdownLimit int
+	CostSeries     int
 }
 
 type UsageDeps struct {
@@ -21,6 +21,7 @@ type UsageDeps struct {
 	Repo     Repository
 	Requests RequestLog
 	Stats    StatsStore
+	Settings setting.Source
 	Now      func() time.Time
 	Options  UsageOptions
 }
@@ -30,12 +31,13 @@ type UsageService struct {
 	repo     Repository
 	requests RequestLog
 	stats    StatsStore
+	settings setting.Source
 	now      func() time.Time
 	options  UsageOptions
 }
 
 func NewUsageService(deps UsageDeps) *UsageService {
-	return &UsageService{gateway: deps.Gateway, repo: deps.Repo, requests: deps.Requests, stats: deps.Stats, now: deps.Now, options: deps.Options}
+	return &UsageService{gateway: deps.Gateway, repo: deps.Repo, requests: deps.Requests, stats: deps.Stats, settings: deps.Settings, now: deps.Now, options: deps.Options}
 }
 
 func (s *UsageService) Overview(ctx context.Context, r Range) (Overview, error) {
@@ -165,10 +167,10 @@ func (s *UsageService) Request(ctx context.Context, id int64) (RequestDetail, er
 
 func (s *UsageService) Purge(ctx context.Context) error {
 	now := s.now()
-	if _, err := s.requests.PurgeRequests(ctx, now.Add(-s.options.RequestRetention)); err != nil {
+	if _, err := s.requests.PurgeRequests(ctx, now.AddDate(0, 0, -RequestRetentionDays.Read(s.settings))); err != nil {
 		return err
 	}
-	_, err := s.requests.PurgePayloads(ctx, now.Add(-s.options.PayloadRetention))
+	_, err := s.requests.PurgePayloads(ctx, now.AddDate(0, 0, -PayloadRetentionDays.Read(s.settings)))
 	return err
 }
 

@@ -51,7 +51,7 @@ internal/transport/jobs/downloadjobs/
   tasks.go                         Register + Tasks
 ```
 
-Larger capabilities add `<capability>_<concept>.go` model files, `service_<purpose>.go` for focused services (`auth.CodeService`), `jobs.go` for job args, `handler_<purpose>.go`/`request_<purpose>.go`/`response_<purpose>.go` for admin routes, and `store_<purpose>.go` for read models. `archtest.TestPackageStructure` rejects anything else; the vocabulary is in [glossary.md](glossary.md).
+Larger capabilities add `<capability>_<concept>.go` model files, `service_<purpose>.go` for focused services (`auth.CodeService`), `jobs.go` for job args, `settings.go` for tunable settings, `handler_<purpose>.go`/`request_<purpose>.go`/`response_<purpose>.go` for admin routes, and `store_<purpose>.go` for read models. `archtest.TestPackageStructure` rejects anything else; the vocabulary is in [glossary.md](glossary.md).
 
 ## Request lifecycle
 
@@ -60,6 +60,15 @@ Larger capabilities add `<capability>_<concept>.go` model files, `service_<purpo
 3. CORS, locale (`shionlib_locale` cookie → `lang` query → `Accept-Language` → default `zh`), optional authentication (bearer header, then `shionlib_access_token` cookie).
 4. Huma decodes and validates the input, runs the per-operation rate limit and access middleware, then the handler.
 5. The handler calls one service method and returns `response.Output`; errors go through `errmap` into the unified envelope.
+
+## Configuration
+
+Two sources, never both for the same value:
+
+- **Environment** (`internal/platform/config`): what a process must know before it starts or what belongs to the deployment. Addresses, ports, secrets and credentials, buckets, paths, connection pools and client timeouts, logging and tracing, which process runs workers. Changing one means a redeploy.
+- **Config center** (`internal/setting`, ADR 0011): every value an operator tunes while the site runs. Rate limits, upload limits and quotas, scan review rules, download link lifetimes, hot score weights, catalog sync batches, AI log retention, the register and sponsor switches. Each package declares its keys in `settings.go` with a label, default and bounds; services read them where they are used with `Key.Read(source)`, so a change applies to the next request or job. Super admins change them through `/admin/settings`; every change is validated against the bounds and recorded with who made it, when, and the old and new value.
+
+`archtest.TestTunableValuesLiveInTheSettingCenter` rejects a numeric, duration or boolean environment variable unless it is listed with the reason it must stay fixed at startup.
 
 ## Processes
 

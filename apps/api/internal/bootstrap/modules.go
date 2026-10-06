@@ -25,6 +25,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/httpclient"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/realtime"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/redis"
+	"github.com/Ringyuki/shionlib/apps/api/internal/platform/refresh"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
@@ -37,11 +39,13 @@ type Registrar interface {
 }
 
 type Modules struct {
-	Builder       *response.Builder
-	Authenticator *auth.AuthenticationService
-	Realtime      *realtime.Hub
-	Handlers      []Registrar
-	Jobs          Jobs
+	Builder         *response.Builder
+	Authenticator   *auth.AuthenticationService
+	Realtime        *realtime.Hub
+	Settings        *setting.Service
+	SettingsWatcher *refresh.Watcher
+	Handlers        []Registrar
+	Jobs            Jobs
 }
 
 type Shared struct {
@@ -55,6 +59,8 @@ type Shared struct {
 	Cache      *cache.Cache
 	Queue      *queue.Queue
 	Realtime   *realtime.Hub
+	Settings   *setting.Service
+	Watcher    *refresh.Watcher
 	Tokens     *jwt.Codec
 	Families   *authredis.FamilyBlocklist
 	GameCards  *game.CardService
@@ -70,6 +76,7 @@ type Shared struct {
 type wiring func(infra *Infra, shared *Shared, modules *Modules)
 
 var wirings = []wiring{
+	wireSetting,
 	wireFavorite,
 	wireMessage,
 	wireActivity,
@@ -86,10 +93,12 @@ var wirings = []wiring{
 func BuildModules(infra *Infra) *Modules {
 	shared := buildShared(infra)
 	modules := &Modules{
-		Builder:       shared.Builder,
-		Authenticator: auth.NewAuthenticationService(shared.Tokens, shared.Families),
-		Realtime:      shared.Realtime,
-		Jobs:          Jobs{Queues: map[string]int{}},
+		Builder:         shared.Builder,
+		Authenticator:   auth.NewAuthenticationService(shared.Tokens, shared.Families),
+		Realtime:        shared.Realtime,
+		Settings:        shared.Settings,
+		SettingsWatcher: shared.Watcher,
+		Jobs:            Jobs{Queues: map[string]int{}},
 	}
 	for _, wire := range wirings {
 		wire(infra, shared, modules)
@@ -117,6 +126,7 @@ func buildShared(infra *Infra) *Shared {
 		Families:   authredis.NewFamilyBlocklist(infra.Redis),
 		GameCards:  gameCards,
 	}
+	shared.Settings, shared.Watcher = buildSettings(infra, transactor)
 	shared.Activities = activity.NewService(activitypg.NewRepository(infra.Ent), gameCards)
 	shared.Messages = message.NewService(messagepg.NewRepository(infra.Ent), push.NewMessageNotifier(hub, infra.Logger), gameCards, transactor, infra.Now)
 	shared.Catalog = buildCatalog(infra, shared)

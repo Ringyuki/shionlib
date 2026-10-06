@@ -56,20 +56,7 @@ type NewQuotaRecord struct {
 	SessionID *int
 }
 
-type QuotaPolicy struct {
-	BaseBytes           int64
-	CapBytes            int64
-	TopupStepBytes      int64
-	TopupThresholdBytes int64
-	ReduceStepBytes     int64
-	ReduceInactiveDays  int
-	GrantAfterDays      int
-	LongestInactiveDays int
-	Location            *time.Location
-}
-
-func (p QuotaPolicy) monthStart(now time.Time) time.Time {
-	location := p.Location
+func monthStart(now time.Time, location *time.Location) time.Time {
 	if location == nil {
 		location = time.UTC
 	}

@@ -13,6 +13,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/download/downloadtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/scan"
 	"github.com/Ringyuki/shionlib/apps/api/internal/scan/scantest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/apitest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/scanhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
@@ -54,7 +55,7 @@ func setup(t *testing.T) env {
 		Banner:     &scantest.Banner{},
 		Queue:      events,
 		Tx:         &txtest.Immediate{},
-		Options:    scan.Options{AutoBanThreshold: 3, AutoBanDays: 30},
+		Settings:   settingtest.Source{},
 		Now:        now,
 	})
 	scanhttp.NewHandler(service, server.Builder).Register(server.API)

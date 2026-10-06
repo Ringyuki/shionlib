@@ -10,6 +10,7 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/apperror"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload/uploadtest"
@@ -35,9 +36,23 @@ func newFixture() fixture {
 	quotas := uploadtest.NewMemoryQuotaRepository()
 	spool := uploadtest.NewMemorySpool()
 	tx := &txtest.Immediate{}
-	quota := upload.NewQuotaService(quotas, tx, upload.QuotaPolicy{BaseBytes: 100, CapBytes: 400, TopupStepBytes: 50, TopupThresholdBytes: 30, ReduceStepBytes: 20, ReduceInactiveDays: 45, GrantAfterDays: 7, LongestInactiveDays: 120}, func() time.Time { return now })
-	service := upload.NewService(repo, quota, spool, tx, upload.Options{ChunkSize: 4, MaxChunks: 5, MaxFileSize: 16, TransferLimit: 8, SessionTTL: 24 * time.Hour}, func() time.Time { return now })
+	settings := testSettings()
+	quota := upload.NewQuotaService(quotas, tx, settings, time.UTC, func() time.Time { return now })
+	service := upload.NewService(repo, quota, spool, tx, settings, func() time.Time { return now })
 	return fixture{repo: repo, quotas: quotas, spool: spool, quota: quota, service: service}
+}
+
+func testSettings() settingtest.Source {
+	settings := settingtest.Source{}
+	settingtest.Set(settings, upload.QuotaBase, 100)
+	settingtest.Set(settings, upload.QuotaCap, 400)
+	settingtest.Set(settings, upload.QuotaTopupStep, 50)
+	settingtest.Set(settings, upload.QuotaTopupThreshold, 30)
+	settingtest.Set(settings, upload.QuotaReduceStep, 20)
+	settingtest.Set(settings, upload.ChunkSize, 4)
+	settingtest.Set(settings, upload.ChunkLimit, 8)
+	settingtest.Set(settings, upload.MaxChunks, 5)
+	return settingtest.Set(settings, upload.MaxFileSize, 16)
 }
 
 func ptr[T any](v T) *T {

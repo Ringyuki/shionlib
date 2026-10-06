@@ -67,10 +67,14 @@ func serve(ctx context.Context, withHTTP bool) error {
 	app := runtime.NewApp(logger, cfg.App.ShutdownTimeout)
 	app.Close("infrastructure", infra.Close)
 	modules := bootstrap.BuildModules(infra)
+	if err := modules.Settings.Reload(ctx); err != nil {
+		return errors.Join(err, infra.Close(ctx))
+	}
 	runner, err := bootstrap.BuildJobs(infra, !withHTTP || cfg.Tasks.WorkersEnabled, modules.Jobs)
 	if err != nil {
 		return errors.Join(err, infra.Close(ctx))
 	}
+	app.Run("settings", modules.SettingsWatcher)
 	app.Run("jobs", runner)
 	if !withHTTP {
 		return app.Start(ctx)

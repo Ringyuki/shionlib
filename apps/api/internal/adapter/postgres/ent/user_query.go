@@ -28,6 +28,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/oidcidentity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/settingchange"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
@@ -60,6 +61,7 @@ type UserQuery struct {
 	withGameDownloadResourceFileHistories *GameDownloadResourceFileHistoryQuery
 	withFieldPermissions                  *UserFieldPermissionQuery
 	withEditRecords                       *EditRecordQuery
+	withSettingChanges                    *SettingChangeQuery
 	withFavorites                         *FavoriteQuery
 	withGames                             *GameQuery
 	withMessagesSent                      *MessageQuery
@@ -392,6 +394,28 @@ func (_q *UserQuery) QueryEditRecords() *EditRecordQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(editrecord.Table, editrecord.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.EditRecordsTable, user.EditRecordsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySettingChanges chains the current query on the "setting_changes" edge.
+func (_q *UserQuery) QuerySettingChanges() *SettingChangeQuery {
+	query := (&SettingChangeClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(settingchange.Table, settingchange.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SettingChangesTable, user.SettingChangesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -956,6 +980,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		withGameDownloadResourceFileHistories: _q.withGameDownloadResourceFileHistories.Clone(),
 		withFieldPermissions:                  _q.withFieldPermissions.Clone(),
 		withEditRecords:                       _q.withEditRecords.Clone(),
+		withSettingChanges:                    _q.withSettingChanges.Clone(),
 		withFavorites:                         _q.withFavorites.Clone(),
 		withGames:                             _q.withGames.Clone(),
 		withMessagesSent:                      _q.withMessagesSent.Clone(),
@@ -1119,6 +1144,17 @@ func (_q *UserQuery) WithEditRecords(opts ...func(*EditRecordQuery)) *UserQuery 
 		opt(query)
 	}
 	_q.withEditRecords = query
+	return _q
+}
+
+// WithSettingChanges tells the query-builder to eager-load the nodes that are connected to
+// the "setting_changes" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithSettingChanges(opts ...func(*SettingChangeQuery)) *UserQuery {
+	query := (&SettingChangeClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withSettingChanges = query
 	return _q
 }
 
@@ -1376,7 +1412,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [29]bool{
+		loadedTypes = [30]bool{
 			_q.withActivities != nil,
 			_q.withComments != nil,
 			_q.withLikedComments != nil,
@@ -1390,6 +1426,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			_q.withGameDownloadResourceFileHistories != nil,
 			_q.withFieldPermissions != nil,
 			_q.withEditRecords != nil,
+			_q.withSettingChanges != nil,
 			_q.withFavorites != nil,
 			_q.withGames != nil,
 			_q.withMessagesSent != nil,
@@ -1531,6 +1568,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadEditRecords(ctx, query, nodes,
 			func(n *User) { n.Edges.EditRecords = []*EditRecord{} },
 			func(n *User, e *EditRecord) { n.Edges.EditRecords = append(n.Edges.EditRecords, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withSettingChanges; query != nil {
+		if err := _q.loadSettingChanges(ctx, query, nodes,
+			func(n *User) { n.Edges.SettingChanges = []*SettingChange{} },
+			func(n *User, e *SettingChange) { n.Edges.SettingChanges = append(n.Edges.SettingChanges, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -2071,6 +2115,39 @@ func (_q *UserQuery) loadEditRecords(ctx context.Context, query *EditRecordQuery
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "actor_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadSettingChanges(ctx context.Context, query *SettingChangeQuery, nodes []*User, init func(*User), assign func(*User, *SettingChange)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(settingchange.FieldActorID)
+	}
+	query.Where(predicate.SettingChange(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.SettingChangesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ActorID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "actor_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "actor_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

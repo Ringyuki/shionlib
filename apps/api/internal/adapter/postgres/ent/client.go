@@ -56,6 +56,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/oidcidentity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/rolefieldpermission"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/setting"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/settingchange"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
@@ -159,6 +161,10 @@ type Client struct {
 	OidcIdentity *OidcIdentityClient
 	// RoleFieldPermission is the client for interacting with the RoleFieldPermission builders.
 	RoleFieldPermission *RoleFieldPermissionClient
+	// Setting is the client for interacting with the Setting builders.
+	Setting *SettingClient
+	// SettingChange is the client for interacting with the SettingChange builders.
+	SettingChange *SettingChangeClient
 	// SponsorOrder is the client for interacting with the SponsorOrder builders.
 	SponsorOrder *SponsorOrderClient
 	// Tag is the client for interacting with the Tag builders.
@@ -235,6 +241,8 @@ func (c *Client) init() {
 	c.ModerationEvent = NewModerationEventClient(c.config)
 	c.OidcIdentity = NewOidcIdentityClient(c.config)
 	c.RoleFieldPermission = NewRoleFieldPermissionClient(c.config)
+	c.Setting = NewSettingClient(c.config)
+	c.SettingChange = NewSettingChangeClient(c.config)
 	c.SponsorOrder = NewSponsorOrderClient(c.config)
 	c.Tag = NewTagClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -380,6 +388,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ModerationEvent:                 NewModerationEventClient(cfg),
 		OidcIdentity:                    NewOidcIdentityClient(cfg),
 		RoleFieldPermission:             NewRoleFieldPermissionClient(cfg),
+		Setting:                         NewSettingClient(cfg),
+		SettingChange:                   NewSettingChangeClient(cfg),
 		SponsorOrder:                    NewSponsorOrderClient(cfg),
 		Tag:                             NewTagClient(cfg),
 		User:                            NewUserClient(cfg),
@@ -452,6 +462,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ModerationEvent:                 NewModerationEventClient(cfg),
 		OidcIdentity:                    NewOidcIdentityClient(cfg),
 		RoleFieldPermission:             NewRoleFieldPermissionClient(cfg),
+		Setting:                         NewSettingClient(cfg),
+		SettingChange:                   NewSettingChangeClient(cfg),
 		SponsorOrder:                    NewSponsorOrderClient(cfg),
 		Tag:                             NewTagClient(cfg),
 		User:                            NewUserClient(cfg),
@@ -503,10 +515,10 @@ func (c *Client) Use(hooks ...Hook) {
 		c.GameDownloadResourceFileHistory, c.GameDownloadResourceReport, c.GameImage,
 		c.GameLink, c.GameRelation, c.GameTagRelation, c.GameUploadChunk,
 		c.GameUploadSession, c.MalwareScanCase, c.Message, c.ModerationEvent,
-		c.OidcIdentity, c.RoleFieldPermission, c.SponsorOrder, c.Tag, c.User,
-		c.UserBannedRecord, c.UserFieldPermission, c.UserGamePvnMapping,
-		c.UserLoginSession, c.UserPasskeyCredential, c.UserPvnBinding,
-		c.UserUploadQuota, c.UserUploadQuotaRecord, c.Walkthrough,
+		c.OidcIdentity, c.RoleFieldPermission, c.Setting, c.SettingChange,
+		c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord, c.UserFieldPermission,
+		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
+		c.UserPvnBinding, c.UserUploadQuota, c.UserUploadQuotaRecord, c.Walkthrough,
 	} {
 		n.Use(hooks...)
 	}
@@ -526,10 +538,10 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.GameDownloadResourceFileHistory, c.GameDownloadResourceReport, c.GameImage,
 		c.GameLink, c.GameRelation, c.GameTagRelation, c.GameUploadChunk,
 		c.GameUploadSession, c.MalwareScanCase, c.Message, c.ModerationEvent,
-		c.OidcIdentity, c.RoleFieldPermission, c.SponsorOrder, c.Tag, c.User,
-		c.UserBannedRecord, c.UserFieldPermission, c.UserGamePvnMapping,
-		c.UserLoginSession, c.UserPasskeyCredential, c.UserPvnBinding,
-		c.UserUploadQuota, c.UserUploadQuotaRecord, c.Walkthrough,
+		c.OidcIdentity, c.RoleFieldPermission, c.Setting, c.SettingChange,
+		c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord, c.UserFieldPermission,
+		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
+		c.UserPvnBinding, c.UserUploadQuota, c.UserUploadQuotaRecord, c.Walkthrough,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -620,6 +632,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.OidcIdentity.mutate(ctx, m)
 	case *RoleFieldPermissionMutation:
 		return c.RoleFieldPermission.mutate(ctx, m)
+	case *SettingMutation:
+		return c.Setting.mutate(ctx, m)
+	case *SettingChangeMutation:
+		return c.SettingChange.mutate(ctx, m)
 	case *SponsorOrderMutation:
 		return c.SponsorOrder.mutate(ctx, m)
 	case *TagMutation:
@@ -7988,6 +8004,288 @@ func (c *RoleFieldPermissionClient) mutate(ctx context.Context, m *RoleFieldPerm
 	}
 }
 
+// SettingClient is a client for the Setting schema.
+type SettingClient struct {
+	config
+}
+
+// NewSettingClient returns a client for the Setting from the given config.
+func NewSettingClient(c config) *SettingClient {
+	return &SettingClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `setting.Hooks(f(g(h())))`.
+func (c *SettingClient) Use(hooks ...Hook) {
+	c.hooks.Setting = append(c.hooks.Setting, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `setting.Intercept(f(g(h())))`.
+func (c *SettingClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Setting = append(c.inters.Setting, interceptors...)
+}
+
+// Create returns a builder for creating a Setting entity.
+func (c *SettingClient) Create() *SettingCreate {
+	mutation := newSettingMutation(c.config, OpCreate)
+	return &SettingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Setting entities.
+func (c *SettingClient) CreateBulk(builders ...*SettingCreate) *SettingCreateBulk {
+	return &SettingCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SettingClient) MapCreateBulk(slice any, setFunc func(*SettingCreate, int)) *SettingCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SettingCreateBulk{err: fmt.Errorf("calling to SettingClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SettingCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SettingCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Setting.
+func (c *SettingClient) Update() *SettingUpdate {
+	mutation := newSettingMutation(c.config, OpUpdate)
+	return &SettingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SettingClient) UpdateOne(_m *Setting) *SettingUpdateOne {
+	mutation := newSettingMutation(c.config, OpUpdateOne, withSetting(_m))
+	return &SettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SettingClient) UpdateOneID(id int) *SettingUpdateOne {
+	mutation := newSettingMutation(c.config, OpUpdateOne, withSettingID(id))
+	return &SettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Setting.
+func (c *SettingClient) Delete() *SettingDelete {
+	mutation := newSettingMutation(c.config, OpDelete)
+	return &SettingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SettingClient) DeleteOne(_m *Setting) *SettingDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SettingClient) DeleteOneID(id int) *SettingDeleteOne {
+	builder := c.Delete().Where(setting.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SettingDeleteOne{builder}
+}
+
+// Query returns a query builder for Setting.
+func (c *SettingClient) Query() *SettingQuery {
+	return &SettingQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSetting},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Setting entity by its id.
+func (c *SettingClient) Get(ctx context.Context, id int) (*Setting, error) {
+	return c.Query().Where(setting.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SettingClient) GetX(ctx context.Context, id int) *Setting {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SettingClient) Hooks() []Hook {
+	return c.hooks.Setting
+}
+
+// Interceptors returns the client interceptors.
+func (c *SettingClient) Interceptors() []Interceptor {
+	return c.inters.Setting
+}
+
+func (c *SettingClient) mutate(ctx context.Context, m *SettingMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SettingCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SettingUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SettingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SettingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Setting mutation op: %q", m.Op())
+	}
+}
+
+// SettingChangeClient is a client for the SettingChange schema.
+type SettingChangeClient struct {
+	config
+}
+
+// NewSettingChangeClient returns a client for the SettingChange from the given config.
+func NewSettingChangeClient(c config) *SettingChangeClient {
+	return &SettingChangeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `settingchange.Hooks(f(g(h())))`.
+func (c *SettingChangeClient) Use(hooks ...Hook) {
+	c.hooks.SettingChange = append(c.hooks.SettingChange, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `settingchange.Intercept(f(g(h())))`.
+func (c *SettingChangeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SettingChange = append(c.inters.SettingChange, interceptors...)
+}
+
+// Create returns a builder for creating a SettingChange entity.
+func (c *SettingChangeClient) Create() *SettingChangeCreate {
+	mutation := newSettingChangeMutation(c.config, OpCreate)
+	return &SettingChangeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SettingChange entities.
+func (c *SettingChangeClient) CreateBulk(builders ...*SettingChangeCreate) *SettingChangeCreateBulk {
+	return &SettingChangeCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SettingChangeClient) MapCreateBulk(slice any, setFunc func(*SettingChangeCreate, int)) *SettingChangeCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SettingChangeCreateBulk{err: fmt.Errorf("calling to SettingChangeClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SettingChangeCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SettingChangeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SettingChange.
+func (c *SettingChangeClient) Update() *SettingChangeUpdate {
+	mutation := newSettingChangeMutation(c.config, OpUpdate)
+	return &SettingChangeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SettingChangeClient) UpdateOne(_m *SettingChange) *SettingChangeUpdateOne {
+	mutation := newSettingChangeMutation(c.config, OpUpdateOne, withSettingChange(_m))
+	return &SettingChangeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SettingChangeClient) UpdateOneID(id int) *SettingChangeUpdateOne {
+	mutation := newSettingChangeMutation(c.config, OpUpdateOne, withSettingChangeID(id))
+	return &SettingChangeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SettingChange.
+func (c *SettingChangeClient) Delete() *SettingChangeDelete {
+	mutation := newSettingChangeMutation(c.config, OpDelete)
+	return &SettingChangeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SettingChangeClient) DeleteOne(_m *SettingChange) *SettingChangeDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SettingChangeClient) DeleteOneID(id int) *SettingChangeDeleteOne {
+	builder := c.Delete().Where(settingchange.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SettingChangeDeleteOne{builder}
+}
+
+// Query returns a query builder for SettingChange.
+func (c *SettingChangeClient) Query() *SettingChangeQuery {
+	return &SettingChangeQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSettingChange},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SettingChange entity by its id.
+func (c *SettingChangeClient) Get(ctx context.Context, id int) (*SettingChange, error) {
+	return c.Query().Where(settingchange.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SettingChangeClient) GetX(ctx context.Context, id int) *SettingChange {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryActor queries the actor edge of a SettingChange.
+func (c *SettingChangeClient) QueryActor(_m *SettingChange) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(settingchange.Table, settingchange.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, settingchange.ActorTable, settingchange.ActorColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SettingChangeClient) Hooks() []Hook {
+	return c.hooks.SettingChange
+}
+
+// Interceptors returns the client interceptors.
+func (c *SettingChangeClient) Interceptors() []Interceptor {
+	return c.inters.SettingChange
+}
+
+func (c *SettingChangeClient) mutate(ctx context.Context, m *SettingChangeMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SettingChangeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SettingChangeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SettingChangeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SettingChangeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SettingChange mutation op: %q", m.Op())
+	}
+}
+
 // SponsorOrderClient is a client for the SponsorOrder schema.
 type SponsorOrderClient struct {
 	config
@@ -8611,6 +8909,22 @@ func (c *UserClient) QueryEditRecords(_m *User) *EditRecordQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(editrecord.Table, editrecord.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.EditRecordsTable, user.EditRecordsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySettingChanges queries the setting_changes edge of a User.
+func (c *UserClient) QuerySettingChanges(_m *User) *SettingChangeQuery {
+	query := (&SettingChangeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(settingchange.Table, settingchange.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SettingChangesTable, user.SettingChangesColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -10396,9 +10710,10 @@ type (
 		GameDownloadResourceFileHistory, GameDownloadResourceReport, GameImage,
 		GameLink, GameRelation, GameTagRelation, GameUploadChunk, GameUploadSession,
 		MalwareScanCase, Message, ModerationEvent, OidcIdentity, RoleFieldPermission,
-		SponsorOrder, Tag, User, UserBannedRecord, UserFieldPermission,
-		UserGamePvnMapping, UserLoginSession, UserPasskeyCredential, UserPvnBinding,
-		UserUploadQuota, UserUploadQuotaRecord, Walkthrough []ent.Hook
+		Setting, SettingChange, SponsorOrder, Tag, User, UserBannedRecord,
+		UserFieldPermission, UserGamePvnMapping, UserLoginSession,
+		UserPasskeyCredential, UserPvnBinding, UserUploadQuota, UserUploadQuotaRecord,
+		Walkthrough []ent.Hook
 	}
 	inters struct {
 		AICatalogModel, AICatalogProvider, AIModel, AIProvider, AIProviderOffer,
@@ -10410,9 +10725,10 @@ type (
 		GameDownloadResourceFileHistory, GameDownloadResourceReport, GameImage,
 		GameLink, GameRelation, GameTagRelation, GameUploadChunk, GameUploadSession,
 		MalwareScanCase, Message, ModerationEvent, OidcIdentity, RoleFieldPermission,
-		SponsorOrder, Tag, User, UserBannedRecord, UserFieldPermission,
-		UserGamePvnMapping, UserLoginSession, UserPasskeyCredential, UserPvnBinding,
-		UserUploadQuota, UserUploadQuotaRecord, Walkthrough []ent.Interceptor
+		Setting, SettingChange, SponsorOrder, Tag, User, UserBannedRecord,
+		UserFieldPermission, UserGamePvnMapping, UserLoginSession,
+		UserPasskeyCredential, UserPvnBinding, UserUploadQuota, UserUploadQuotaRecord,
+		Walkthrough []ent.Interceptor
 	}
 )
 

@@ -29,6 +29,7 @@
 | `ports.go` | every interface the capability consumes, and nothing else |
 | `errors.go` | every `apperror.Define` / `errors.New` value, and nothing else |
 | `jobs.go` | River job args (types with `Kind()`); the only place struct tags are allowed |
+| `settings.go` | exported `setting.Int/Bytes/Float/Duration/Flag/Text` declarations and the unit constants they use, nothing else (any package, including `httpapi`) |
 | `service.go` | `Service`, its `Deps`/`Options`, `NewService`, methods and unexported helper functions; no other types, constants or variables |
 | `service_<purpose>.go` | `<Purpose>Service` (`CodeService`, `HotScoreService`), its `<Purpose>Deps`/`Options`, constructor, methods and helpers, under the same restriction |
 | `<capability>test/` | `memory.go` (fakes), `contract.go` (`RepositoryContract`), `memory_test.go` |

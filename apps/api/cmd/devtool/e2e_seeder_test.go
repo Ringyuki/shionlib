@@ -74,6 +74,8 @@ func TestE2EPrepareReproducesTheLegacyDatasetIdempotently(t *testing.T) {
 		"game_download_resource_files": 2,
 		"malware_scan_cases":           1,
 		"catalog_source_links":         6,
+		"settings":                     2,
+		"setting_changes":              2,
 	}
 	for table, want := range counts {
 		var got int

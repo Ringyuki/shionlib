@@ -1992,6 +1992,50 @@ var (
 			},
 		},
 	}
+	// SettingsColumns holds the columns for the "settings" table.
+	SettingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "name", Type: field.TypeString, Unique: true, Size: 128, SchemaType: map[string]string{"postgres": "character varying(128)"}},
+		{Name: "value", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+	}
+	// SettingsTable holds the schema information for the "settings" table.
+	SettingsTable = &schema.Table{
+		Name:       "settings",
+		Columns:    SettingsColumns,
+		PrimaryKey: []*schema.Column{SettingsColumns[0]},
+	}
+	// SettingChangesColumns holds the columns for the "setting_changes" table.
+	SettingChangesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "name", Type: field.TypeString, Size: 128, SchemaType: map[string]string{"postgres": "character varying(128)"}},
+		{Name: "previous", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "value", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "actor_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// SettingChangesTable holds the schema information for the "setting_changes" table.
+	SettingChangesTable = &schema.Table{
+		Name:       "setting_changes",
+		Columns:    SettingChangesColumns,
+		PrimaryKey: []*schema.Column{SettingChangesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "setting_changes_actor_id_fkey",
+				Columns:    []*schema.Column{SettingChangesColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "setting_changes_name_created_idx",
+				Unique:  false,
+				Columns: []*schema.Column{SettingChangesColumns[1], SettingChangesColumns[4]},
+			},
+		},
+	}
 	// SponsorOrdersColumns holds the columns for the "sponsor_orders" table.
 	SponsorOrdersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -2543,6 +2587,8 @@ var (
 		ModerationEventsTable,
 		OidcIdentitiesTable,
 		RoleFieldPermissionsTable,
+		SettingsTable,
+		SettingChangesTable,
 		SponsorOrdersTable,
 		TagsTable,
 		UsersTable,
@@ -2751,6 +2797,13 @@ func init() {
 	}
 	RoleFieldPermissionsTable.Annotation = &entsql.Annotation{
 		Table: "role_field_permissions",
+	}
+	SettingsTable.Annotation = &entsql.Annotation{
+		Table: "settings",
+	}
+	SettingChangesTable.ForeignKeys[0].RefTable = UsersTable
+	SettingChangesTable.Annotation = &entsql.Annotation{
+		Table: "setting_changes",
 	}
 	SponsorOrdersTable.ForeignKeys[0].RefTable = UsersTable
 	SponsorOrdersTable.Annotation = &entsql.Annotation{

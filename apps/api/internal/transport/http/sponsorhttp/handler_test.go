@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/sponsor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/sponsor/sponsortest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/apitest"
@@ -38,8 +39,9 @@ func setup(t *testing.T, enabled bool) env {
 	provider.ExpiresAt = &expires
 	ratio := "11.0%"
 	provider.Methods = []sponsor.PaymentMethod{{Method: "alipay", Name: "Alipay", Enabled: true, RatioRange: &ratio}}
-	settings := sponsor.Options{Enabled: enabled, Provider: "idatariver", CallbackURL: "https://shionlib.test/api/sponsor/webhook/idatariver"}
-	service := sponsor.NewService(repo, provider, sponsortest.NewCache(), &txtest.Immediate{}, sponsortest.Signer{}, settings, func() time.Time { return apitest.Now })
+	options := sponsor.Options{Provider: "idatariver", CallbackURL: "https://shionlib.test/api/sponsor/webhook/idatariver"}
+	settings := settingtest.Set(settingtest.Source{}, sponsor.Enabled, enabled)
+	service := sponsor.NewService(repo, provider, sponsortest.NewCache(), &txtest.Immediate{}, sponsortest.Signer{}, settings, options, func() time.Time { return apitest.Now })
 	sponsorhttp.NewHandler(service, server.Builder).Register(server.API)
 	return env{server: server, repo: repo, provider: provider}
 }

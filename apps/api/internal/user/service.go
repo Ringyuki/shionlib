@@ -8,6 +8,7 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/media"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
 )
 
 type Service struct {
@@ -18,11 +19,11 @@ type Service struct {
 	passwords PasswordHasher
 	images    Images
 	now       func() time.Time
-	policy    Policy
+	settings  setting.Source
 }
 
-func NewService(repo Repository, tx Transactor, sessions SessionRevoker, codes VerificationCodes, passwords PasswordHasher, images Images, now func() time.Time, policy Policy) *Service {
-	return &Service{repo: repo, tx: tx, sessions: sessions, codes: codes, passwords: passwords, images: images, now: now, policy: policy}
+func NewService(repo Repository, tx Transactor, sessions SessionRevoker, codes VerificationCodes, passwords PasswordHasher, images Images, now func() time.Time, settings setting.Source) *Service {
+	return &Service{repo: repo, tx: tx, sessions: sessions, codes: codes, passwords: passwords, images: images, now: now, settings: settings}
 }
 
 func (s *Service) Register(ctx context.Context, in RegisterInput) (User, error) {
@@ -33,7 +34,7 @@ func (s *Service) Register(ctx context.Context, in RegisterInput) (User, error) 
 	if in.Lang != nil && *in.Lang != "" {
 		lang = *in.Lang
 	}
-	if !s.policy.AllowRegister {
+	if !AllowRegister.Read(s.settings) {
 		return User{}, ErrNotAllowRegister
 	}
 	if _, found, err := s.repo.FindByEmail(ctx, in.Email); err != nil {

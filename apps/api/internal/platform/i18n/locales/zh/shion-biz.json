@@ -141,5 +141,7 @@
   "AI_CATALOG_OWNED": "此设置来自模型目录",
   "AI_SCHEMA_INVALID": "输出模式必须是类型为对象的 JSON Schema",
   "AI_PLAYGROUND_TARGET_NOT_FOUND": "调试目标不存在",
-  "AI_CATALOG_PROVIDER_NOT_FOUND": "模型目录中没有该服务商"
+  "AI_CATALOG_PROVIDER_NOT_FOUND": "模型目录中没有该服务商",
+  "SETTING_NOT_FOUND": "配置项不存在",
+  "SETTING_INVALID_VALUE": "配置值不合法"
 }

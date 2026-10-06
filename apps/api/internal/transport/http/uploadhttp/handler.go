@@ -12,7 +12,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/apperror"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/jsoncodec"
-	"github.com/Ringyuki/shionlib/apps/api/internal/platform/ratelimit"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/errmap"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/middleware"
@@ -30,7 +29,7 @@ const (
 
 func (h *Handler) registerChunk(api *httpapi.API) {
 	route := http.MethodPut + " " + chunkPath
-	api.Router().Method(http.MethodPut, chunkPath, api.Throttled(h.chunks, route, h.chunk(api)))
+	api.Router().Method(http.MethodPut, chunkPath, api.Throttled(ChunkThrottle, route, h.chunk(api)))
 	documentChunk(api.OpenAPI())
 }
 
@@ -44,7 +43,7 @@ func (h *Handler) chunk(api *httpapi.API) http.HandlerFunc {
 			fail(err)
 			return
 		}
-		limit := h.service.Options().TransferLimit
+		limit := h.service.ChunkLimit()
 		if r.ContentLength > limit {
 			fail(errmap.WithStatus(http.StatusRequestEntityTooLarge, nil))
 			return
@@ -106,17 +105,18 @@ func documentChunk(oapi *huma.OpenAPI) {
 	})
 }
 
+const ChunkThrottle = "upload_chunk"
+
 var tags = []string{"upload"}
 
 type Handler struct {
 	service *upload.Service
 	quota   *upload.QuotaService
 	resp    *response.Builder
-	chunks  ratelimit.Policy
 }
 
-func NewHandler(service *upload.Service, quota *upload.QuotaService, resp *response.Builder, chunks ratelimit.Policy) *Handler {
-	return &Handler{service: service, quota: quota, resp: resp, chunks: chunks}
+func NewHandler(service *upload.Service, quota *upload.QuotaService, resp *response.Builder) *Handler {
+	return &Handler{service: service, quota: quota, resp: resp}
 }
 
 func (h *Handler) Register(api *httpapi.API) {

@@ -20,7 +20,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/character"
 	"github.com/Ringyuki/shionlib/apps/api/internal/developer"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
-	"github.com/Ringyuki/shionlib/apps/api/internal/platform/config"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/httpclient"
 	"github.com/Ringyuki/shionlib/apps/api/internal/search"
 	"github.com/Ringyuki/shionlib/apps/api/internal/sitemap"
@@ -49,7 +48,7 @@ func wireCatalog(infra *Infra, shared *Shared, modules *Modules) {
 		Tokens:       bangumiredis.NewTokenStore(infra.Redis),
 		Now:          shared.Now,
 	}), vndb.NewClient(outbound, vndb.DefaultBaseURL), shared.Cache)
-	hotScore := game.NewHotScoreService(games, hotScoreWeights(cfg.HotScore))
+	hotScore := game.NewHotScoreService(games, shared.Settings)
 
 	characters := characterpg.NewRepository(infra.Ent)
 	developers := developerpg.NewRepository(infra.Ent)
@@ -77,20 +76,6 @@ func wireCatalog(infra *Infra, shared *Shared, modules *Modules) {
 	modules.Jobs.Register = append(modules.Jobs.Register, searchjobs.Register(searchService))
 	modules.Jobs.Tasks = append(modules.Jobs.Tasks, gamejobs.HotScoreTask(hotScore, shared.Logger))
 	modules.Jobs.Tasks = append(modules.Jobs.Tasks, searchjobs.Tasks(searchService)...)
-}
-
-func hotScoreWeights(cfg config.HotScore) game.HotScoreWeights {
-	return game.HotScoreWeights{
-		HalfLifeReleaseDays: cfg.HalfLifeReleaseDays,
-		HalfLifeCreatedDays: cfg.HalfLifeCreatedDays,
-		Views:               cfg.WeightViews,
-		Downloads:           cfg.WeightDownloads,
-		Release:             cfg.WeightRelease,
-		Created:             cfg.WeightCreated,
-		RecentWindowDays:    cfg.RecentWindowDays,
-		RecentViews:         cfg.WeightRecentViews,
-		RecentDownloads:     cfg.WeightRecentDownloads,
-	}
 }
 
 func randomIndex(n int) int {
