@@ -100,7 +100,13 @@ const restrictedImports = (...patterns) => [
 ]
 
 export default defineConfig([
-  globalIgnores(['build', '.react-router', 'app/shared/api/generated']),
+  globalIgnores([
+    'build',
+    '.react-router',
+    'app/shared/api/generated',
+    'test-results',
+    'playwright-report',
+  ]),
   js.configs.recommended,
   tseslint.configs.strict,
   reactHooks.configs.flat.recommended,
@@ -126,7 +132,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/*.test.ts'],
+    files: ['**/*.test.ts', 'e2e/**/*.ts'],
     rules: {
       'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
     },

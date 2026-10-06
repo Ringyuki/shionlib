@@ -2,3 +2,6 @@ build
 .react-router
 app/shared/api/generated
 pnpm-lock.yaml
+test-results
+playwright-report
+e2e/.sessions
