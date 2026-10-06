@@ -53,7 +53,18 @@ The visitor's browser also talks to services that are not ours. Each has one cli
 
 ### Our API from the browser
 
-The browser talks to the web server only. The exceptions are endpoints that cannot be proxied through loaders and actions: chunked uploads and the `GET /message/stream` SSE stream. They use the same-origin `/api` prefix (proxied to the API by the ingress, and by Vite in development) and are wrapped in a hook in their feature.
+The browser talks to the web server only. The exceptions cannot go through loaders and actions: uploads, which run for hours across pages, and the `GET /message/stream` SSE stream. They use the same-origin `/api` prefix (proxied to the API by the ingress, and by Vite in development).
+
+- **Transport.** `~/shared/api/xhr.ts` is the only place that uses `XMLHttpRequest`; it gives upload progress, which `fetch` cannot. `browser-client.ts` builds a typed `ApiClient` over it (`createBrowserApi()`), and `chunk.ts` puts one upload chunk with progress (`uploadChunk`), its path, header and result typed from the generated contract.
+- **Session.** Both refresh an expired session once (`POST /auth/token/refresh`, shared by concurrent requests) and repeat the request, on 401 `AUTH_UNAUTHORIZED`/`AUTH_INVALID_TOKEN` or the `shionlib-auth-stale` header, the same rule as `session.server.ts` (`~/shared/api/session.ts`).
+- **Who may use it.** Only `features/upload` imports `browser-client`, `chunk` or `xhr` (lint).
+
+### The upload manager (`features/upload`)
+
+- One `UploadManager` per tab and signed-in viewer, created by `UploadProvider` in the `site` layout and started in an effect; uploads continue across navigations.
+- Functional core, imperative shell: `upload-state.ts` (`reduce(state, event)`), `upload-restore.ts` and the rules in `upload.ts` are pure and tested exhaustively; `UploadManager` (queue, persistence, submissions), `UploadRunner` (one file's chunks, retries, stall detection) and `FileHasher` (a Web Worker computing chunk SHA-256 and the file's BLAKE3 with `hash-wasm`) own the requests, workers and timers. React reads snapshots through `useUploads()` (`useSyncExternalStore`).
+- The server holds progress. `localStorage` (`shionlib_uploads_<viewer>`, parsed by `upload.schema.ts`) keeps only what it cannot know: what each file is for (a new resource with its fields, an added file, a replaced file), each file's name, size and modification time, and its session. After a reload, uploads still in progress wait for their file to be chosen again; they are matched by name, size and modification time, rehashed locally, and only the missing chunks are sent.
+- A resource is created, or files are added or replaced, once all its uploads are finished. Web Locks keep one tab per session.
 
 ## Caching and revalidation
 

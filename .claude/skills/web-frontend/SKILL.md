@@ -41,11 +41,16 @@ app/
     <name>.use-cases.ts        use-cases: (api: ApiClient, input) => Promise<result>
     <name>.server.ts           loaders/actions reused by several routes (resource routes)
     use-<purpose>.ts           hooks: fetchers, optimistic state, client integration
+    <name>-<role>.ts           long-lived client work in plain TypeScript (features/upload): pure state and rules
+                               (<name>-state.ts, <name>-restore.ts), classes that own requests, workers and timers
+                               (<name>-manager.ts, <name>-runner.ts); React binds through a use-*.ts hook
+    <purpose>.worker.ts        Web Worker entry: a thin message adapter over a function in a plain module
     ui/<component>.tsx         components (hina-ui based)
     messages/{zh,en,ja}.json   the feature's messages (namespace <name>)
     index.ts                   public, client-safe entry
   shared/                      platform: never imports features, routes or messages
-    api/                       request tool, generated types, session forwarding, test fakes
+    api/                       request tool, generated types, session forwarding, the browser transport
+                               (xhr.ts, browser-client.ts, chunk.ts), test fakes
     route/                     routeLoader, routeAction, readCommand, apiMiddleware, idParam
     form/                      form kit from generated API constraints, useSubmissionFeedback, check helpers
     http/                      pure HTTP helpers (readCookie)
@@ -87,12 +92,12 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 - MUST NOT mount or unmount feedback conditionally (`cond && <Alert>`, ternaries): an `Alert` stays rendered and is shown with `open` (`<Alert tone="danger" open={message !== undefined}>`), a `Callout` is static content, and whole-page outcomes use `Result`/`Empty` (lint).
 - MUST NOT override hina-ui tokens beyond the documented accent roles, or add colours, gradients or shadows of your own; ask before introducing any new token. The one approved exception is the platform brand colours in `app/shared/ui/platform.css`, used only by `PlatformTag` (`references/ui.md`).
 - MUST NOT declare object types with snake_case keys or types named `*DTO`/`*Response`/`*Request`/`*Payload`/`*Body` (lint).
-- MUST NOT use `fetch`, `openapi-fetch`, axios, SWR or React Query outside `~/shared/api`; third-party browser services (Cloudflare Turnstile, the visitor's aria2) are reached only through `~/shared/vendor` (lint).
+- MUST NOT use `fetch`, `XMLHttpRequest`, `openapi-fetch`, axios, SWR or React Query outside `~/shared/api`; third-party browser services (Cloudflare Turnstile, the visitor's aria2) are reached only through `~/shared/vendor` (lint).
 - MUST NOT use `as` type assertions outside `~/shared/api` (`as const` is fine) (lint).
 - MUST NOT import React state/effects or `ApiClient` into route modules, or call `api.*` there (lint).
 - MUST NOT import another feature's internals, or `*.server` modules from client code (lint).
-- MUST NOT call the API from the browser, except through dedicated browser endpoints that cannot go through the web server (large uploads, the message SSE stream).
-- MUST NOT store server data in global client state; the router's loader data and fetchers are the cache.
+- MUST NOT call the API from the browser, except from `features/upload` (the upload endpoints and the calls that turn finished uploads into resource files) and the message SSE stream; those go through `~/shared/api/browser-client` and `~/shared/api/chunk` over the XHR adapter (`references/data.md`, lint).
+- MUST NOT store server data in global client state; the router's loader data and fetchers are the cache. The one client-side process is the upload manager (`features/upload`), which holds running uploads, not server data for pages.
 
 ## Where things go
 
@@ -115,6 +120,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 | Navigation entry or shell change?                    | `features/shell` (`shell.ts` model, `ui/site-sidebar.tsx`, `ui/site-header.tsx`)                                                                   |
 | An image from the API?                               | `<Image src={cover.url}>`; outside `Image`, `useImageResolver()(key, 'image')`                                                                     |
 | Human verification (downloads)?                      | `TurnstileChallenge` from `~/shared/vendor/turnstile-challenge`; the token goes to the API through an action                                       |
+| Uploading files?                                     | `features/upload`: `useUploadManager()?.add(target, files)` hands files to the site-wide manager; `useUploads()` reads progress; never call the upload endpoints elsewhere |
 | Downloading a file?                                  | `DownloadButton` from `~/features/download`: Turnstile, then `resources/download/link`, then browser, aria2 or copy by the visitor's local setting |
 | Resources of a game (list, report, edit, delete)?    | `features/resource`; the list is rendered by the game page's resources tab                                                                         |
 | A page with tabs (game page)?                        | parent route loads what the tabs share; each tab is a child route reading `matches`; hina `Tabs` driven by the URL (`references/ui.md`)            |

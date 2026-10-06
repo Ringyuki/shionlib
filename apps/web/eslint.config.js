@@ -85,7 +85,13 @@ const clientSafe = {
   message: 'Server modules are imported only by routes, root and other *.server.ts modules.',
 }
 
-const restrictedImports = (...patterns) => [
+const browserCalls = {
+  regex: '^~/shared/api/(browser-client|chunk|xhr)$',
+  message:
+    'Only the upload manager (features/upload) calls the API from the browser; everything else goes through loaders and actions.',
+}
+
+const importRules = patterns => [
   'error',
   {
     paths: [
@@ -97,6 +103,33 @@ const restrictedImports = (...patterns) => [
     ],
     patterns,
   },
+]
+
+const restrictedImports = (...patterns) => importRules([...patterns, browserCalls])
+
+const uploadImports = (...patterns) => importRules(patterns)
+
+const withoutRoutes = {
+  regex: '^~/(routes|messages)(/|$)',
+  message: 'Features never depend on routes or the message composition.',
+}
+
+const pureLibraries = {
+  regex: '^(react|react-dom|react-router|use-intl|@hina-ui/react)$',
+  message: 'Models and use-cases are pure TypeScript; React integration lives in hooks and ui.',
+}
+
+const pureShared = {
+  regex: '^~/shared/(route|ui)(/|$)',
+  message: 'Models and use-cases are pure TypeScript; route integration lives in *.server.ts.',
+}
+
+const pureFiles = ['app/features/*/*.ts']
+
+const pureIgnores = [
+  'app/features/*/use-*.ts',
+  'app/features/*/*.server.ts',
+  'app/features/*/index.ts',
 ]
 
 export default defineConfig([
@@ -146,6 +179,10 @@ export default defineConfig([
           name: 'fetch',
           message:
             'Call the API through ~/shared/api; third-party browser services live in ~/shared/vendor.',
+        },
+        {
+          name: 'XMLHttpRequest',
+          message: 'Requests go through ~/shared/api; the XHR adapter is ~/shared/api/xhr.',
         },
         ...nativeDialogs,
       ],
@@ -250,42 +287,29 @@ export default defineConfig([
   {
     files: ['app/features/**/*.{ts,tsx}'],
     rules: {
-      '@typescript-eslint/no-restricted-imports': restrictedImports(featureEntry, clientSafe, {
-        regex: '^~/(routes|messages)(/|$)',
-        message: 'Features never depend on routes or the message composition.',
-      }),
+      '@typescript-eslint/no-restricted-imports': restrictedImports(
+        featureEntry,
+        clientSafe,
+        withoutRoutes,
+      ),
     },
   },
   {
     files: ['app/features/**/*.server.ts'],
     rules: {
-      '@typescript-eslint/no-restricted-imports': restrictedImports(featureEntry, {
-        regex: '^~/(routes|messages)(/|$)',
-        message: 'Features never depend on routes or the message composition.',
-      }),
+      '@typescript-eslint/no-restricted-imports': restrictedImports(featureEntry, withoutRoutes),
     },
   },
   {
-    files: ['app/features/*/*.ts'],
-    ignores: ['app/features/*/use-*.ts', 'app/features/*/*.server.ts', 'app/features/*/index.ts'],
+    files: pureFiles,
+    ignores: pureIgnores,
     rules: {
       '@typescript-eslint/no-restricted-imports': restrictedImports(
         featureEntry,
         clientSafe,
-        {
-          regex: '^(react|react-dom|react-router|use-intl|@hina-ui/react)$',
-          message:
-            'Models and use-cases are pure TypeScript; React integration lives in hooks and ui.',
-        },
-        {
-          regex: '^~/shared/(route|ui)(/|$)',
-          message:
-            'Models and use-cases are pure TypeScript; route integration lives in *.server.ts.',
-        },
-        {
-          regex: '^~/(routes|messages)(/|$)',
-          message: 'Features never depend on routes or the message composition.',
-        },
+        pureLibraries,
+        pureShared,
+        withoutRoutes,
       ),
     },
   },
@@ -322,6 +346,29 @@ export default defineConfig([
     rules: {
       'no-restricted-syntax': 'off',
       '@typescript-eslint/no-restricted-imports': restrictedImports(featureEntry),
+    },
+  },
+  {
+    files: ['app/features/upload/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': uploadImports(
+        featureEntry,
+        clientSafe,
+        withoutRoutes,
+      ),
+    },
+  },
+  {
+    files: ['app/features/upload/*.ts'],
+    ignores: [...pureIgnores, '**/*.test.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': uploadImports(
+        featureEntry,
+        clientSafe,
+        pureLibraries,
+        pureShared,
+        withoutRoutes,
+      ),
     },
   },
 ])

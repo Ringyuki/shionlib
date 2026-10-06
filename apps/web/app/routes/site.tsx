@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router'
 import { AuthDialogProvider } from '~/features/auth'
 import { SiteShell, sidebarModeFrom } from '~/features/shell'
+import { UploadProvider } from '~/features/upload'
 import { loadViewer } from '~/features/viewer'
 import { routeLoader } from '~/shared/route/route.server'
 import type { Route } from './+types/site'
@@ -13,9 +14,11 @@ export function loader(args: Route.LoaderArgs) {
 export default function SiteLayout({ loaderData }: Route.ComponentProps) {
   return (
     <AuthDialogProvider signedIn={loaderData.viewer !== null}>
-      <SiteShell viewer={loaderData.viewer} sidebar={loaderData.sidebar}>
-        <Outlet />
-      </SiteShell>
+      <UploadProvider viewer={loaderData.viewer?.id}>
+        <SiteShell viewer={loaderData.viewer} sidebar={loaderData.sidebar}>
+          <Outlet />
+        </SiteShell>
+      </UploadProvider>
     </AuthDialogProvider>
   )
 }

@@ -1,13 +1,10 @@
-import { BusinessCode } from './generated/business-codes'
-import { isFailure } from './failure.schema'
+import { asksForRefresh } from './session'
 import { tokenExpiry } from './token.schema'
 
 export const accessTokenCookie = 'shionlib_access_token'
 export const refreshTokenCookie = 'shionlib_refresh_token'
-export const authStaleHeader = 'shionlib-auth-stale'
 
 const forwardedHeaders = ['user-agent', 'accept-language', 'x-forwarded-for', 'x-real-ip']
-const refreshCodes: number[] = [BusinessCode.AUTH_UNAUTHORIZED, BusinessCode.AUTH_INVALID_TOKEN]
 const refreshLeewaySeconds = 30
 
 export type ApiSession = {
@@ -82,17 +79,14 @@ export function createApiSession(
   }
 
   const needsRefresh = async (response: Response) => {
-    if (response.headers.get(authStaleHeader) === '1') {
-      return true
-    }
-    if (response.status !== 401) {
-      return false
-    }
-    const body: unknown = await response
-      .clone()
-      .json()
-      .catch(() => undefined)
-    return isFailure(body) && refreshCodes.includes(body.code)
+    const body: unknown =
+      response.status === 401
+        ? await response
+            .clone()
+            .json()
+            .catch(() => undefined)
+        : undefined
+    return asksForRefresh(response.status, response.headers, body)
   }
 
   return {
