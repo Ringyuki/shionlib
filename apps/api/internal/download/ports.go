@@ -29,6 +29,7 @@ type Repository interface {
 	ListFiles(ctx context.Context, resourceID int) ([]File, error)
 	CountFiles(ctx context.Context, resourceID int) (int, error)
 	GetFile(ctx context.Context, id int) (File, error)
+	GetPublicFile(ctx context.Context, id int) (File, error)
 	LockFile(ctx context.Context, id int) (File, error)
 	FindFileBySession(ctx context.Context, sessionID int) (File, bool, error)
 	ReplaceFileContent(ctx context.Context, id int, content FileContent) error
@@ -36,7 +37,7 @@ type Repository interface {
 	RenameFile(ctx context.Context, id int, name string) error
 	ClearFilePath(ctx context.Context, id int) error
 	DeleteFile(ctx context.Context, id int) error
-	ListStoredWithLocalCopy(ctx context.Context, limit int) ([]File, error)
+	ListUnneededLocalCopies(ctx context.Context, limit int) ([]File, error)
 	ListAwaitingStore(ctx context.Context, updatedBefore time.Time, limit int) ([]int, error)
 	ListRejected(ctx context.Context, limit int) ([]File, error)
 	CreateHistory(ctx context.Context, in NewHistory) error

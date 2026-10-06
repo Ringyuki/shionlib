@@ -2,7 +2,6 @@ package download
 
 import (
 	"context"
-	"errors"
 	"slices"
 	"time"
 
@@ -270,6 +269,9 @@ func (s *Service) DeleteFile(ctx context.Context, who actor.Actor, fileID int) e
 		if err != nil {
 			return err
 		}
+		if file.CheckStatus == CheckHarmfulPendingReview && !who.AtLeast(actor.RoleAdmin) {
+			return ErrFileUnderReview
+		}
 		remaining, err := s.repo.CountFiles(ctx, file.ResourceID)
 		if err != nil {
 			return err
@@ -284,8 +286,7 @@ func (s *Service) DeleteFile(ctx context.Context, who actor.Actor, fileID int) e
 			return err
 		}
 		removed = file
-		_, err = s.repo.PublishIfReady(ctx, file.ResourceID, s.now())
-		return err
+		return publishResource(ctx, s.repo, s.messages, file.ResourceID, s.now())
 	})
 	if err != nil {
 		return err
@@ -346,41 +347,6 @@ func (s *Service) TakeDown(ctx context.Context, resourceID int) ([]string, error
 		return s.repo.SetResourceStatus(ctx, resource.ID, ResourceRemoved, s.now())
 	})
 	return keys, err
-}
-
-func (s *Service) RemoveFile(ctx context.Context, fileID int) (File, bool, error) {
-	var removed File
-	found := false
-	err := s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
-		file, err := s.repo.LockFile(ctx, fileID)
-		if errors.Is(err, ErrFileNotFound) {
-			return nil
-		}
-		if err != nil {
-			return err
-		}
-		if err := s.repo.DeleteFile(ctx, file.ID); err != nil {
-			return err
-		}
-		removed, found = file, true
-		return s.RemoveEmptyResource(ctx, file.ResourceID)
-	})
-	return removed, found, err
-}
-
-func (s *Service) RemoveEmptyResource(ctx context.Context, resourceID int) error {
-	return removeEmptyResource(ctx, s.repo, resourceID)
-}
-
-func removeEmptyResource(ctx context.Context, repo Repository, resourceID int) error {
-	remaining, err := repo.CountFiles(ctx, resourceID)
-	if err != nil || remaining > 0 {
-		return err
-	}
-	if err := repo.DeleteResource(ctx, resourceID); err != nil && !errors.Is(err, ErrResourceNotFound) {
-		return err
-	}
-	return nil
 }
 
 func (s *Service) PurgeLater(ctx context.Context, keys []string) error {

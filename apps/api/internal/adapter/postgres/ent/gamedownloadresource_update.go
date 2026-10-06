@@ -175,6 +175,26 @@ func (_u *GameDownloadResourceUpdate) ClearPublishedAt() *GameDownloadResourceUp
 	return _u
 }
 
+// SetCheckRetryAt sets the "check_retry_at" field.
+func (_u *GameDownloadResourceUpdate) SetCheckRetryAt(v time.Time) *GameDownloadResourceUpdate {
+	_u.mutation.SetCheckRetryAt(v)
+	return _u
+}
+
+// SetNillableCheckRetryAt sets the "check_retry_at" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdate) SetNillableCheckRetryAt(v *time.Time) *GameDownloadResourceUpdate {
+	if v != nil {
+		_u.SetCheckRetryAt(*v)
+	}
+	return _u
+}
+
+// ClearCheckRetryAt clears the value of the "check_retry_at" field.
+func (_u *GameDownloadResourceUpdate) ClearCheckRetryAt() *GameDownloadResourceUpdate {
+	_u.mutation.ClearCheckRetryAt()
+	return _u
+}
+
 // SetCreatorID sets the "creator_id" field.
 func (_u *GameDownloadResourceUpdate) SetCreatorID(v int) *GameDownloadResourceUpdate {
 	_u.mutation.SetCreatorID(v)
@@ -446,6 +466,12 @@ func (_u *GameDownloadResourceUpdate) sqlSave(ctx context.Context) (_node int, e
 	}
 	if _u.mutation.PublishedAtCleared() {
 		_spec.ClearField(gamedownloadresource.FieldPublishedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CheckRetryAt(); ok {
+		_spec.SetField(gamedownloadresource.FieldCheckRetryAt, field.TypeTime, value)
+	}
+	if _u.mutation.CheckRetryAtCleared() {
+		_spec.ClearField(gamedownloadresource.FieldCheckRetryAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(gamedownloadresource.FieldUpdated, field.TypeTime, value)
@@ -805,6 +831,26 @@ func (_u *GameDownloadResourceUpdateOne) ClearPublishedAt() *GameDownloadResourc
 	return _u
 }
 
+// SetCheckRetryAt sets the "check_retry_at" field.
+func (_u *GameDownloadResourceUpdateOne) SetCheckRetryAt(v time.Time) *GameDownloadResourceUpdateOne {
+	_u.mutation.SetCheckRetryAt(v)
+	return _u
+}
+
+// SetNillableCheckRetryAt sets the "check_retry_at" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdateOne) SetNillableCheckRetryAt(v *time.Time) *GameDownloadResourceUpdateOne {
+	if v != nil {
+		_u.SetCheckRetryAt(*v)
+	}
+	return _u
+}
+
+// ClearCheckRetryAt clears the value of the "check_retry_at" field.
+func (_u *GameDownloadResourceUpdateOne) ClearCheckRetryAt() *GameDownloadResourceUpdateOne {
+	_u.mutation.ClearCheckRetryAt()
+	return _u
+}
+
 // SetCreatorID sets the "creator_id" field.
 func (_u *GameDownloadResourceUpdateOne) SetCreatorID(v int) *GameDownloadResourceUpdateOne {
 	_u.mutation.SetCreatorID(v)
@@ -1106,6 +1152,12 @@ func (_u *GameDownloadResourceUpdateOne) sqlSave(ctx context.Context) (_node *Ga
 	}
 	if _u.mutation.PublishedAtCleared() {
 		_spec.ClearField(gamedownloadresource.FieldPublishedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CheckRetryAt(); ok {
+		_spec.SetField(gamedownloadresource.FieldCheckRetryAt, field.TypeTime, value)
+	}
+	if _u.mutation.CheckRetryAtCleared() {
+		_spec.ClearField(gamedownloadresource.FieldCheckRetryAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(gamedownloadresource.FieldUpdated, field.TypeTime, value)

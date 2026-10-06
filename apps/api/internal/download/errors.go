@@ -16,6 +16,8 @@ var ErrTooManyFiles = apperror.Define(440104, "GAME_DOWNLOAD_RESOURCE_TOO_MANY_F
 
 var ErrLastFile = apperror.Define(440105, "GAME_DOWNLOAD_RESOURCE_LAST_FILE", apperror.KindConflict)
 
+var ErrDuplicateFileName = apperror.Define(440106, "GAME_DOWNLOAD_RESOURCE_DUPLICATE_FILE_NAME", apperror.KindConflict)
+
 var ErrFileNotFound = apperror.Define(450101, "GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND", apperror.KindNotFound)
 
 var ErrTokenRequired = apperror.Define(450102, "GAME_DOWNLOAD_RESOURCE_FILE_TOKEN_REQUIRED", apperror.KindInvalidArgument)
@@ -23,6 +25,8 @@ var ErrTokenRequired = apperror.Define(450102, "GAME_DOWNLOAD_RESOURCE_FILE_TOKE
 var ErrInvalidToken = apperror.Define(450103, "GAME_DOWNLOAD_RESOURCE_FILE_INVALID_TOKEN", apperror.KindPermissionDenied)
 
 var ErrFileNotOwner = apperror.Define(450104, "GAME_DOWNLOAD_RESOURCE_FILE_NOT_OWNER", apperror.KindPermissionDenied)
+
+var ErrFileUnderReview = apperror.Define(450105, "GAME_DOWNLOAD_RESOURCE_FILE_UNDER_REVIEW", apperror.KindConflict)
 
 var ErrLocalFileMissing = errors.New("local upload file is missing")
 

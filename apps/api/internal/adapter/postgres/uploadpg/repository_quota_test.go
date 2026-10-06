@@ -2,6 +2,7 @@ package uploadpg_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -109,11 +110,13 @@ func TestStoredBytesCountStoredFilesOfActiveResources(t *testing.T) {
 	db := pgtest.New(t)
 	repo := uploadpg.NewQuotaRepository(db.Ent)
 	uploader := db.User(t)
+	files := 0
 	addFile := func(creator, resource, fileType int, size int64) {
+		files++
 		db.Ent.GameDownloadResourceFile.Create().
 			SetGameDownloadResourceID(resource).
 			SetType(fileType).
-			SetFileName("file.7z").
+			SetFileName(fmt.Sprintf("file-%d.7z", files)).
 			SetFileSize(size).
 			SetFileHash("hash").
 			SetCreatorID(creator).

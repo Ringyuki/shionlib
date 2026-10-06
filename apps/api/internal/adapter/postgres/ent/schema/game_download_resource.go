@@ -28,6 +28,7 @@ func (GameDownloadResource) Fields() []ent.Field {
 		field.String("note").MaxLen(255).SchemaType(varchar(255)).Optional().Nillable(),
 		field.Int("downloads").SchemaType(pg("integer")).Default(0),
 		field.Time("published_at").SchemaType(timestamp3).Optional().Nillable(),
+		field.Time("check_retry_at").SchemaType(timestamp3).Optional().Nillable(),
 		field.Int("creator_id").SchemaType(pg("integer")),
 		created(),
 		updated(),

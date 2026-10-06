@@ -44,25 +44,31 @@ func (r *Repository) pendingQuery(ctx context.Context) *ent.GameDownloadResource
 	})
 }
 
-func (r *Repository) ListPending(ctx context.Context, limit int) ([]scan.PendingFile, error) {
-	rows, err := r.pendingQuery(ctx).
+func (r *Repository) PendingResources(ctx context.Context, now time.Time) ([]int, error) {
+	ids, err := r.db(ctx).GameDownloadResource.Query().
 		Where(
-			gamedownloadresourcefile.Type(download.FileTypeObjectStore),
-			gamedownloadresourcefile.FileStatus(download.FileOnServer),
-			gamedownloadresourcefile.FileCheckStatus(int(download.CheckPending)),
-			gamedownloadresourcefile.FilePathNotNil(),
+			gamedownloadresource.Status(download.ResourceActive),
+			gamedownloadresource.Or(gamedownloadresource.CheckRetryAtIsNil(), gamedownloadresource.CheckRetryAtLTE(now.UTC())),
+			gamedownloadresource.HasFilesWith(
+				gamedownloadresourcefile.Type(download.FileTypeObjectStore),
+				gamedownloadresourcefile.FileStatus(download.FileOnServer),
+				gamedownloadresourcefile.FileCheckStatus(int(download.CheckPending)),
+				gamedownloadresourcefile.FilePathNotNil(),
+			),
 		).
-		Order(ent.Asc(gamedownloadresourcefile.FieldID)).
-		Limit(limit).
-		All(ctx)
+		Order(ent.Asc(gamedownloadresource.FieldID)).
+		IDs(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("list files pending scan: %w", err)
+		return nil, fmt.Errorf("list resources pending scan: %w", err)
 	}
-	files := make([]scan.PendingFile, len(rows))
-	for i, row := range rows {
-		files[i] = toPendingFile(row)
+	return ids, nil
+}
+
+func (r *Repository) DelayCheck(ctx context.Context, resourceID int, until time.Time) error {
+	if err := r.db(ctx).GameDownloadResource.UpdateOneID(resourceID).SetCheckRetryAt(until.UTC()).Exec(ctx); err != nil {
+		return fmt.Errorf("delay check of resource %d: %w", resourceID, err)
 	}
-	return files, nil
+	return nil
 }
 
 func (r *Repository) ResourceFiles(ctx context.Context, resourceID int) ([]scan.PendingFile, error) {

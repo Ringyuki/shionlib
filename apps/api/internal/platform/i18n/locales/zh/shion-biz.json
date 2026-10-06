@@ -90,7 +90,7 @@
   "SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED": "未提供文件",
   "SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE": "不支持的文件类型",
   "USER_UPLOAD_QUOTA_EXCEEDED": "上传额度不足",
-  "USER_UPLOAD_IN_FLIGHT_EXCEEDED": "进行中的上传已达上限，请先完成或取消一部分",
+  "USER_UPLOAD_IN_FLIGHT_EXCEEDED": "同时上传的文件总大小已达上限，请先完成或取消一部分上传",
   "UPLOAD_SPOOL_FULL": "服务器暂存空间不足，请稍后再试",
   "EDIT_FIELD_PERMISSION_NOT_ENOUGH": "你没有权限修改 {deniedFields} (bits:{deniedBits})",
   "EDIT_RECORD_NOT_FOUND": "编辑记录不存在",
@@ -144,5 +144,7 @@
   "SETTING_NOT_FOUND": "配置项不存在",
   "SETTING_INVALID_VALUE": "配置值不合法",
   "GAME_DOWNLOAD_RESOURCE_TOO_MANY_FILES": "资源里的文件太多了，最多 {max} 个",
-  "GAME_DOWNLOAD_RESOURCE_LAST_FILE": "资源至少要保留一个文件"
+  "GAME_DOWNLOAD_RESOURCE_LAST_FILE": "资源至少要保留一个文件",
+  "GAME_DOWNLOAD_RESOURCE_FILE_UNDER_REVIEW": "文件正在审核，不能删除",
+  "GAME_DOWNLOAD_RESOURCE_DUPLICATE_FILE_NAME": "这个资源里已经有同名的文件"
 }

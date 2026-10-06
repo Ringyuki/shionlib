@@ -116,6 +116,20 @@ func (_c *GameDownloadResourceCreate) SetNillablePublishedAt(v *time.Time) *Game
 	return _c
 }
 
+// SetCheckRetryAt sets the "check_retry_at" field.
+func (_c *GameDownloadResourceCreate) SetCheckRetryAt(v time.Time) *GameDownloadResourceCreate {
+	_c.mutation.SetCheckRetryAt(v)
+	return _c
+}
+
+// SetNillableCheckRetryAt sets the "check_retry_at" field if the given value is not nil.
+func (_c *GameDownloadResourceCreate) SetNillableCheckRetryAt(v *time.Time) *GameDownloadResourceCreate {
+	if v != nil {
+		_c.SetCheckRetryAt(*v)
+	}
+	return _c
+}
+
 // SetCreatorID sets the "creator_id" field.
 func (_c *GameDownloadResourceCreate) SetCreatorID(v int) *GameDownloadResourceCreate {
 	_c.mutation.SetCreatorID(v)
@@ -357,6 +371,10 @@ func (_c *GameDownloadResourceCreate) createSpec() (*GameDownloadResource, *sqlg
 	if value, ok := _c.mutation.PublishedAt(); ok {
 		_spec.SetField(gamedownloadresource.FieldPublishedAt, field.TypeTime, value)
 		_node.PublishedAt = &value
+	}
+	if value, ok := _c.mutation.CheckRetryAt(); ok {
+		_spec.SetField(gamedownloadresource.FieldCheckRetryAt, field.TypeTime, value)
+		_node.CheckRetryAt = &value
 	}
 	if value, ok := _c.mutation.Created(); ok {
 		_spec.SetField(gamedownloadresource.FieldCreated, field.TypeTime, value)
@@ -638,6 +656,24 @@ func (u *GameDownloadResourceUpsert) ClearPublishedAt() *GameDownloadResourceUps
 	return u
 }
 
+// SetCheckRetryAt sets the "check_retry_at" field.
+func (u *GameDownloadResourceUpsert) SetCheckRetryAt(v time.Time) *GameDownloadResourceUpsert {
+	u.Set(gamedownloadresource.FieldCheckRetryAt, v)
+	return u
+}
+
+// UpdateCheckRetryAt sets the "check_retry_at" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsert) UpdateCheckRetryAt() *GameDownloadResourceUpsert {
+	u.SetExcluded(gamedownloadresource.FieldCheckRetryAt)
+	return u
+}
+
+// ClearCheckRetryAt clears the value of the "check_retry_at" field.
+func (u *GameDownloadResourceUpsert) ClearCheckRetryAt() *GameDownloadResourceUpsert {
+	u.SetNull(gamedownloadresource.FieldCheckRetryAt)
+	return u
+}
+
 // SetCreatorID sets the "creator_id" field.
 func (u *GameDownloadResourceUpsert) SetCreatorID(v int) *GameDownloadResourceUpsert {
 	u.Set(gamedownloadresource.FieldCreatorID, v)
@@ -871,6 +907,27 @@ func (u *GameDownloadResourceUpsertOne) UpdatePublishedAt() *GameDownloadResourc
 func (u *GameDownloadResourceUpsertOne) ClearPublishedAt() *GameDownloadResourceUpsertOne {
 	return u.Update(func(s *GameDownloadResourceUpsert) {
 		s.ClearPublishedAt()
+	})
+}
+
+// SetCheckRetryAt sets the "check_retry_at" field.
+func (u *GameDownloadResourceUpsertOne) SetCheckRetryAt(v time.Time) *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetCheckRetryAt(v)
+	})
+}
+
+// UpdateCheckRetryAt sets the "check_retry_at" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertOne) UpdateCheckRetryAt() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateCheckRetryAt()
+	})
+}
+
+// ClearCheckRetryAt clears the value of the "check_retry_at" field.
+func (u *GameDownloadResourceUpsertOne) ClearCheckRetryAt() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.ClearCheckRetryAt()
 	})
 }
 
@@ -1277,6 +1334,27 @@ func (u *GameDownloadResourceUpsertBulk) UpdatePublishedAt() *GameDownloadResour
 func (u *GameDownloadResourceUpsertBulk) ClearPublishedAt() *GameDownloadResourceUpsertBulk {
 	return u.Update(func(s *GameDownloadResourceUpsert) {
 		s.ClearPublishedAt()
+	})
+}
+
+// SetCheckRetryAt sets the "check_retry_at" field.
+func (u *GameDownloadResourceUpsertBulk) SetCheckRetryAt(v time.Time) *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetCheckRetryAt(v)
+	})
+}
+
+// UpdateCheckRetryAt sets the "check_retry_at" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertBulk) UpdateCheckRetryAt() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateCheckRetryAt()
+	})
+}
+
+// ClearCheckRetryAt clears the value of the "check_retry_at" field.
+func (u *GameDownloadResourceUpsertBulk) ClearCheckRetryAt() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.ClearCheckRetryAt()
 	})
 }
 

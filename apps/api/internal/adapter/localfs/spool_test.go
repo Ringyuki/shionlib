@@ -15,14 +15,12 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/localfs"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
-	"github.com/Ringyuki/shionlib/apps/api/internal/scan"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
 
 var (
 	_ upload.Spool        = (*localfs.Spool)(nil)
 	_ download.LocalFiles = (*localfs.Spool)(nil)
-	_ scan.LocalFiles     = (*localfs.Spool)(nil)
 )
 
 func sha(data []byte) string {

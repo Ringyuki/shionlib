@@ -11,7 +11,8 @@ import (
 )
 
 type Repository interface {
-	ListPending(ctx context.Context, limit int) ([]PendingFile, error)
+	PendingResources(ctx context.Context, now time.Time) ([]int, error)
+	DelayCheck(ctx context.Context, resourceID int, until time.Time) error
 	ResourceFiles(ctx context.Context, resourceID int) ([]PendingFile, error)
 	LockFile(ctx context.Context, fileID int) (PendingFile, bool, error)
 	SetCheckStatus(ctx context.Context, fileID int, status download.CheckStatus, falsePositive bool) error
@@ -30,11 +31,16 @@ type Repository interface {
 type ArchiveTool interface {
 	List(ctx context.Context, path string) (ToolRun, error)
 	Test(ctx context.Context, path string) (ToolRun, error)
-	Extract(ctx context.Context, path, destination string, extensions []string) (ToolRun, error)
+	Extract(ctx context.Context, path, destination string, extensions, skip []string) (ToolRun, error)
 }
 
 type VirusScanner interface {
 	Scan(ctx context.Context, name string, content io.Reader) (Report, error)
+	MaxSize() int64
+}
+
+type Spool interface {
+	SpoolRoom(ctx context.Context) (int64, error)
 }
 
 type Workspace interface {
@@ -48,11 +54,6 @@ type Workspace interface {
 type Files interface {
 	TakeDown(ctx context.Context, resourceID int) ([]string, error)
 	PurgeLater(ctx context.Context, keys []string) error
-}
-
-type LocalFiles interface {
-	Owns(path string) bool
-	Remove(ctx context.Context, path string) error
 }
 
 type Activities interface {

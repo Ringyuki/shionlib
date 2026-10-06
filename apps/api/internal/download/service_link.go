@@ -47,11 +47,11 @@ func (l *LinkService) Issue(ctx context.Context, fileID int, token string) (Link
 	if !verdict.Success {
 		return Link{}, ErrInvalidToken.WithArgs(map[string]any{"errorCodes": strings.Join(verdict.ErrorCodes, ",")})
 	}
-	file, err := l.repo.GetFile(ctx, fileID)
+	file, err := l.repo.GetPublicFile(ctx, fileID)
 	if err != nil {
 		return Link{}, err
 	}
-	if file.ResourceStatus != ResourceActive || file.Status != FileInObjectStore || file.StorageKey == nil || *file.StorageKey == "" {
+	if file.Status != FileInObjectStore || file.StorageKey == nil || *file.StorageKey == "" {
 		return Link{}, ErrFileNotFound
 	}
 	expiry := l.expiry()

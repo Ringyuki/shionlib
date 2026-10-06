@@ -91,6 +91,11 @@ func PublishedAt(v time.Time) predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(sql.FieldEQ(FieldPublishedAt, v))
 }
 
+// CheckRetryAt applies equality check predicate on the "check_retry_at" field. It's identical to CheckRetryAtEQ.
+func CheckRetryAt(v time.Time) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldCheckRetryAt, v))
+}
+
 // CreatorID applies equality check predicate on the "creator_id" field. It's identical to CreatorIDEQ.
 func CreatorID(v int) predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(sql.FieldEQ(FieldCreatorID, v))
@@ -459,6 +464,56 @@ func PublishedAtIsNil() predicate.GameDownloadResource {
 // PublishedAtNotNil applies the NotNil predicate on the "published_at" field.
 func PublishedAtNotNil() predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(sql.FieldNotNull(FieldPublishedAt))
+}
+
+// CheckRetryAtEQ applies the EQ predicate on the "check_retry_at" field.
+func CheckRetryAtEQ(v time.Time) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldCheckRetryAt, v))
+}
+
+// CheckRetryAtNEQ applies the NEQ predicate on the "check_retry_at" field.
+func CheckRetryAtNEQ(v time.Time) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNEQ(FieldCheckRetryAt, v))
+}
+
+// CheckRetryAtIn applies the In predicate on the "check_retry_at" field.
+func CheckRetryAtIn(vs ...time.Time) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldIn(FieldCheckRetryAt, vs...))
+}
+
+// CheckRetryAtNotIn applies the NotIn predicate on the "check_retry_at" field.
+func CheckRetryAtNotIn(vs ...time.Time) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNotIn(FieldCheckRetryAt, vs...))
+}
+
+// CheckRetryAtGT applies the GT predicate on the "check_retry_at" field.
+func CheckRetryAtGT(v time.Time) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGT(FieldCheckRetryAt, v))
+}
+
+// CheckRetryAtGTE applies the GTE predicate on the "check_retry_at" field.
+func CheckRetryAtGTE(v time.Time) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldGTE(FieldCheckRetryAt, v))
+}
+
+// CheckRetryAtLT applies the LT predicate on the "check_retry_at" field.
+func CheckRetryAtLT(v time.Time) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLT(FieldCheckRetryAt, v))
+}
+
+// CheckRetryAtLTE applies the LTE predicate on the "check_retry_at" field.
+func CheckRetryAtLTE(v time.Time) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldLTE(FieldCheckRetryAt, v))
+}
+
+// CheckRetryAtIsNil applies the IsNil predicate on the "check_retry_at" field.
+func CheckRetryAtIsNil() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldIsNull(FieldCheckRetryAt))
+}
+
+// CheckRetryAtNotNil applies the NotNil predicate on the "check_retry_at" field.
+func CheckRetryAtNotNil() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNotNull(FieldCheckRetryAt))
 }
 
 // CreatorIDEQ applies the EQ predicate on the "creator_id" field.

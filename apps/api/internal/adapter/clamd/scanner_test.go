@@ -2,6 +2,7 @@ package clamd_test
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/binary"
 	"encoding/json"
 	"io"
@@ -149,6 +150,26 @@ func TestErrorReplies(t *testing.T) {
 	unreachable := clamd.New(clamd.Options{Address: "127.0.0.1:1", Timeout: time.Second})
 	if _, err := unreachable.Scan(t.Context(), "x.exe", strings.NewReader("x")); err == nil {
 		t.Fatal("dial failures must be errors")
+	}
+}
+
+func TestReplyWaitGrowsWithTheStreamedSize(t *testing.T) {
+	slow := func(int) string {
+		time.Sleep(400 * time.Millisecond)
+		return "stream: OK"
+	}
+	small := startFake(t, slow, 0)
+	scanner := clamd.New(clamd.Options{Address: small.listener.Addr().String(), Timeout: 200 * time.Millisecond, LogDir: t.TempDir()})
+	if _, err := scanner.Scan(t.Context(), "small.exe", strings.NewReader("x")); err == nil {
+		t.Fatal("a small stream waits only the base timeout")
+	}
+	large := startFake(t, slow, 0)
+	scanner = clamd.New(clamd.Options{Address: large.listener.Addr().String(), Timeout: 200 * time.Millisecond, LogDir: t.TempDir()})
+	if _, err := scanner.Scan(t.Context(), "data.cab", bytes.NewReader(make([]byte, 5<<20))); err != nil {
+		t.Fatalf("a larger stream waits longer for its reply: %v", err)
+	}
+	if scanner.MaxSize() != 4000<<20 {
+		t.Fatalf("the limit matches clamd.conf: %d", scanner.MaxSize())
 	}
 }
 

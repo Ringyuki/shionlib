@@ -298,6 +298,9 @@ func (r *MemoryRepository) CreateFile(_ context.Context, in download.NewFile) (d
 		if in.UploadSessionID != nil && file.UploadSessionID != nil && *file.UploadSessionID == *in.UploadSessionID {
 			return download.File{}, upload.ErrSessionAlreadyUsed
 		}
+		if file.ResourceID == in.ResourceID && file.Name == in.Name {
+			return download.File{}, download.ErrDuplicateFileName
+		}
 	}
 	r.nextFile++
 	file := download.File{
@@ -367,7 +370,7 @@ func (r *MemoryRepository) PublishIfReady(_ context.Context, id int, at time.Tim
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	resource, ok := r.resources[id]
-	if !ok || resource.Published() {
+	if !ok || resource.Status != download.ResourceActive || resource.Published() {
 		return false, nil
 	}
 	files := r.filesOf(id)
@@ -386,7 +389,22 @@ func (r *MemoryRepository) PublishIfReady(_ context.Context, id int, at time.Tim
 }
 
 func (r *MemoryRepository) RenameFile(_ context.Context, id int, name string) error {
+	if r.nameTaken(id, name) {
+		return download.ErrDuplicateFileName
+	}
 	return r.mutateFile(id, func(file *download.File) { file.Name = name })
+}
+
+func (r *MemoryRepository) nameTaken(id int, name string) bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	resourceID := r.files[id].ResourceID
+	for _, file := range r.files {
+		if file.ID != id && file.ResourceID == resourceID && file.Name == name {
+			return true
+		}
+	}
+	return false
 }
 
 func (r *MemoryRepository) DeleteResource(_ context.Context, id int) error {
@@ -427,6 +445,22 @@ func (r *MemoryRepository) GetFile(_ context.Context, id int) (download.File, er
 	file, ok := r.files[id]
 	if !ok {
 		return download.File{}, download.ErrFileNotFound
+	}
+	return r.decorate(file), nil
+}
+
+func (r *MemoryRepository) GetPublicFile(_ context.Context, id int) (download.File, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	file, ok := r.files[id]
+	resource := r.resources[file.ResourceID]
+	if !ok || resource.Status != download.ResourceActive || !resource.Published() {
+		return download.File{}, download.ErrFileNotFound
+	}
+	for _, sibling := range r.filesOf(file.ResourceID) {
+		if sibling.CheckStatus == download.CheckHarmfulPendingReview {
+			return download.File{}, download.ErrFileNotFound
+		}
 	}
 	return r.decorate(file), nil
 }
@@ -488,8 +522,8 @@ func (r *MemoryRepository) filtered(keep func(download.File) bool, limit int) []
 	defer r.mu.Unlock()
 	var out []download.File
 	for _, file := range r.files {
-		if keep(file) {
-			out = append(out, r.decorate(file))
+		if decorated := r.decorate(file); keep(decorated) {
+			out = append(out, decorated)
 		}
 	}
 	slices.SortFunc(out, func(a, b download.File) int { return cmp.Compare(a.ID, b.ID) })
@@ -499,15 +533,15 @@ func (r *MemoryRepository) filtered(keep func(download.File) bool, limit int) []
 	return out
 }
 
-func (r *MemoryRepository) ListStoredWithLocalCopy(_ context.Context, limit int) ([]download.File, error) {
+func (r *MemoryRepository) ListUnneededLocalCopies(_ context.Context, limit int) ([]download.File, error) {
 	return r.filtered(func(f download.File) bool {
-		return f.Type == download.FileTypeObjectStore && f.Status == download.FileInObjectStore && f.Path != nil
+		return f.Type == download.FileTypeObjectStore && f.Path != nil && (f.Status == download.FileInObjectStore || f.ResourceStatus != download.ResourceActive)
 	}, limit), nil
 }
 
 func (r *MemoryRepository) ListAwaitingStore(_ context.Context, updatedBefore time.Time, limit int) ([]int, error) {
 	files := r.filtered(func(f download.File) bool {
-		return f.Type == download.FileTypeObjectStore && f.Status == download.FileOnServer && f.CheckStatus == download.CheckOK && f.Path != nil && f.Updated.Before(updatedBefore)
+		return f.ResourceStatus == download.ResourceActive && f.Type == download.FileTypeObjectStore && f.Status == download.FileOnServer && f.CheckStatus == download.CheckOK && f.Path != nil && f.Updated.Before(updatedBefore)
 	}, limit)
 	ids := make([]int, len(files))
 	for i, f := range files {

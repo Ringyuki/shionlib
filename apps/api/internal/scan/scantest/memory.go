@@ -18,6 +18,7 @@ type MemoryRepository struct {
 	now       func() time.Time
 	files     map[int]scan.PendingFile
 	resources map[int]bool
+	retryAt   map[int]time.Time
 	cases     map[int]scan.Case
 	nextCase  int
 	Strikes   map[int]int
@@ -34,6 +35,7 @@ func NewMemoryRepository(now func() time.Time) *MemoryRepository {
 		now:       now,
 		files:     map[int]scan.PendingFile{},
 		resources: map[int]bool{},
+		retryAt:   map[int]time.Time{},
 		cases:     map[int]scan.Case{},
 		Strikes:   map[int]int{},
 		Names:     map[int]string{},
@@ -80,20 +82,31 @@ func (r *MemoryRepository) Case(id int) scan.Case {
 	return r.cases[id]
 }
 
-func (r *MemoryRepository) ListPending(_ context.Context, limit int) ([]scan.PendingFile, error) {
+func (r *MemoryRepository) RetryAt(resourceID int) time.Time {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	var out []scan.PendingFile
+	return r.retryAt[resourceID]
+}
+
+func (r *MemoryRepository) PendingResources(_ context.Context, now time.Time) ([]int, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var out []int
 	for _, file := range r.files {
-		if file.Type == download.FileTypeObjectStore && file.Status == download.FileOnServer && file.CheckStatus == download.CheckPending && file.Path != "" {
-			out = append(out, file)
+		due := !r.retryAt[file.ResourceID].After(now)
+		if r.resources[file.ResourceID] && due && file.Type == download.FileTypeObjectStore && file.Status == download.FileOnServer && file.CheckStatus == download.CheckPending && file.Path != "" && !slices.Contains(out, file.ResourceID) {
+			out = append(out, file.ResourceID)
 		}
 	}
-	slices.SortFunc(out, func(a, b scan.PendingFile) int { return cmp.Compare(a.ID, b.ID) })
-	if len(out) > limit {
-		out = out[:limit]
-	}
+	slices.Sort(out)
 	return out, nil
+}
+
+func (r *MemoryRepository) DelayCheck(_ context.Context, resourceID int, until time.Time) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.retryAt[resourceID] = until
+	return nil
 }
 
 func (r *MemoryRepository) LockFile(_ context.Context, fileID int) (scan.PendingFile, bool, error) {
@@ -289,6 +302,7 @@ type ArchiveTool struct {
 	Listings  map[string]scan.ToolRun
 	Tests     map[string]scan.ToolRun
 	Contents  map[string][]string
+	Extracts  map[string]scan.ToolRun
 	Workspace *Workspace
 	Inspected []string
 	Extracted []string
@@ -303,22 +317,39 @@ func (a *ArchiveTool) Test(_ context.Context, path string) (scan.ToolRun, error)
 	return a.Tests[path], nil
 }
 
-func (a *ArchiveTool) Extract(_ context.Context, path, destination string, _ []string) (scan.ToolRun, error) {
+func (a *ArchiveTool) Extract(_ context.Context, path, destination string, _, skip []string) (scan.ToolRun, error) {
 	a.Extracted = append(a.Extracted, path)
 	for _, entry := range a.Contents[path] {
-		if scan.Scanned(entry) {
+		if scan.Scanned(entry) && !slices.Contains(skip, entry) {
 			a.Workspace.Put(destination, entry)
 		}
 	}
-	return scan.ToolRun{}, nil
+	return a.Extracts[path], nil
+}
+
+type Spool struct {
+	Room int64
+}
+
+func (s *Spool) SpoolRoom(context.Context) (int64, error) {
+	return s.Room, nil
 }
 
 type Scanner struct {
 	Reports map[string]scan.Report
 	Scanned []string
+	Limit   int64
+	Err     error
+}
+
+func (s *Scanner) MaxSize() int64 {
+	return s.Limit
 }
 
 func (s *Scanner) Scan(_ context.Context, name string, content io.Reader) (scan.Report, error) {
+	if s.Err != nil {
+		return scan.Report{}, s.Err
+	}
 	if _, err := io.Copy(io.Discard, content); err != nil {
 		return scan.Report{}, err
 	}

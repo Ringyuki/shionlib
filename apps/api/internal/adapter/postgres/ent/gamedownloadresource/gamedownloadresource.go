@@ -31,6 +31,8 @@ const (
 	FieldDownloads = "downloads"
 	// FieldPublishedAt holds the string denoting the published_at field in the database.
 	FieldPublishedAt = "published_at"
+	// FieldCheckRetryAt holds the string denoting the check_retry_at field in the database.
+	FieldCheckRetryAt = "check_retry_at"
 	// FieldCreatorID holds the string denoting the creator_id field in the database.
 	FieldCreatorID = "creator_id"
 	// FieldCreated holds the string denoting the created field in the database.
@@ -97,6 +99,7 @@ var Columns = []string{
 	FieldNote,
 	FieldDownloads,
 	FieldPublishedAt,
+	FieldCheckRetryAt,
 	FieldCreatorID,
 	FieldCreated,
 	FieldUpdated,
@@ -198,6 +201,11 @@ func ByDownloads(opts ...sql.OrderTermOption) OrderOption {
 // ByPublishedAt orders the results by the published_at field.
 func ByPublishedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPublishedAt, opts...).ToFunc()
+}
+
+// ByCheckRetryAt orders the results by the check_retry_at field.
+func ByCheckRetryAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCheckRetryAt, opts...).ToFunc()
 }
 
 // ByCreatorID orders the results by the creator_id field.

@@ -18,7 +18,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/scan/scantest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
-	"github.com/Ringyuki/shionlib/apps/api/internal/upload/uploadtest"
 )
 
 var (
@@ -31,7 +30,7 @@ type fixture struct {
 	workspace *scantest.Workspace
 	tool      *scantest.ArchiveTool
 	scanner   *scantest.Scanner
-	spool     *uploadtest.MemorySpool
+	room      *scantest.Spool
 	events    *downloadtest.Recorder
 	banner    *scantest.Banner
 	mailer    *scantest.Mailer
@@ -44,8 +43,8 @@ func newFixture(enabled bool) fixture {
 		repo:      scantest.NewMemoryRepository(func() time.Time { return now }),
 		workspace: workspace,
 		tool:      &scantest.ArchiveTool{Listings: map[string]scan.ToolRun{}, Tests: map[string]scan.ToolRun{}, Contents: map[string][]string{}, Workspace: workspace},
-		scanner:   &scantest.Scanner{Reports: map[string]scan.Report{}},
-		spool:     uploadtest.NewMemorySpool(),
+		scanner:   &scantest.Scanner{Reports: map[string]scan.Report{}, Limit: 1 << 20},
+		room:      &scantest.Spool{Room: 1 << 30},
 		events:    &downloadtest.Recorder{},
 		banner:    &scantest.Banner{Applied: true},
 		mailer:    &scantest.Mailer{},
@@ -55,8 +54,8 @@ func newFixture(enabled bool) fixture {
 		Archives:   f.tool,
 		Scanner:    f.scanner,
 		Workspace:  f.workspace,
+		Spool:      f.room,
 		Files:      f.repo,
-		Local:      f.spool,
 		Activities: f.events,
 		Messages:   f.events,
 		Banner:     f.banner,
@@ -120,8 +119,8 @@ func TestInspectArchiveClassification(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tool := &scantest.ArchiveTool{Listings: map[string]scan.ToolRun{"f": tc.listing}, Tests: map[string]scan.ToolRun{"f": tc.test}}
 			got, err := scan.InspectArchive(ctx, tool, "f")
-			if err != nil || got != tc.want {
-				t.Fatalf("got %d %v want %d", got, err, tc.want)
+			if err != nil || got.Status != tc.want {
+				t.Fatalf("got %d %v want %d", got.Status, err, tc.want)
 			}
 		})
 	}
@@ -199,6 +198,54 @@ func TestStandaloneExecutablesAreScannedWhole(t *testing.T) {
 	}
 	if !slices.Equal(f.scanner.Scanned, []string{"Patch.EXE"}) {
 		t.Fatalf("an uploaded executable is scanned itself: %v", f.scanner.Scanned)
+	}
+}
+
+func TestEntriesOverTheScannerLimitAreNeitherExtractedNorScanned(t *testing.T) {
+	f := newFixture(true)
+	f.repo.SeedFile(pending(1, "/spool/1.part"))
+	f.tool.Listings["/spool/1.part"] = scan.ToolRun{Stdout: "Path = /spool/1.part\nType = 7z\n\n----------\nPath = game/setup.exe\nSize = 10\n\nPath = game/data.cab\nSize = 2097152\n\nPath = game/movie.mp4\nSize = 2097152\n"}
+	f.tool.Contents["/spool/1.part"] = []string{"game/setup.exe", "game/data.cab", "game/movie.mp4"}
+	huge := pending(2, "/spool/2.part")
+	huge.Name, huge.Size = "Huge.exe", 2<<20
+	f.repo.SeedFile(huge)
+	if err := f.service.ScanPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(f.scanner.Scanned, []string{"game/setup.exe"}) {
+		t.Fatalf("files too large to scan are skipped: %v", f.scanner.Scanned)
+	}
+	for _, id := range []int{1, 2} {
+		if file, _ := f.repo.File(id); file.CheckStatus != download.CheckOK {
+			t.Fatalf("file %d is approved: %+v", id, file)
+		}
+	}
+}
+
+func TestChecksWaitForRoomToExtract(t *testing.T) {
+	f := newFixture(true)
+	f.repo.SeedFile(pending(1, "/spool/1.part"))
+	f.tool.Listings["/spool/1.part"] = scan.ToolRun{Stdout: "Path = /spool/1.part\nType = zip\n\n----------\nPath = setup.exe\nSize = 100\n"}
+	f.tool.Contents["/spool/1.part"] = []string{"setup.exe"}
+	f.room.Room = 99
+	if err := f.service.ScanPending(context.Background()); err == nil {
+		t.Fatal("a check without room to extract fails")
+	}
+	if file, _ := f.repo.File(1); file.CheckStatus != download.CheckPending || len(f.tool.Extracted) != 0 || f.repo.RetryAt(10).IsZero() {
+		t.Fatalf("nothing is extracted and the resource waits: %+v %v", file, f.tool.Extracted)
+	}
+}
+
+func TestExtractionCutShortScansWhatWasExtracted(t *testing.T) {
+	f := newFixture(true)
+	f.repo.SeedFile(pending(1, "/spool/1.part"))
+	f.tool.Contents["/spool/1.part"] = []string{"setup.exe"}
+	f.tool.Extracts = map[string]scan.ToolRun{"/spool/1.part": {Failed: true, Killed: true, Message: "command timeout"}}
+	if err := f.service.ScanPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if file, _ := f.repo.File(1); file.CheckStatus != download.CheckOK || !slices.Equal(f.scanner.Scanned, []string{"setup.exe"}) {
+		t.Fatalf("a timed out extraction is handled like a timed out test: %+v %v", file, f.scanner.Scanned)
 	}
 }
 
@@ -301,6 +348,47 @@ func TestIncompleteSetsWaitForTheirMissingVolumes(t *testing.T) {
 	}
 }
 
+func TestWaitingSetsDoNotHoldUpOtherResources(t *testing.T) {
+	f := newFixture(true)
+	for id := 1; id <= 60; id++ {
+		f.repo.SeedFile(volume(id, fmt.Sprintf("game.part%d.rar", id+1), now))
+	}
+	f.repo.SeedFile(pending(100, "/spool/100.part"))
+	if err := f.service.ScanPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if file, _ := f.repo.File(100); file.CheckStatus != download.CheckOK {
+		t.Fatalf("a later upload is checked while a set waits: %+v", file)
+	}
+}
+
+func TestFailedChecksAreRetriedLater(t *testing.T) {
+	f := newFixture(true)
+	f.repo.SeedFile(pending(1, "/spool/1.part"))
+	f.tool.Contents["/spool/1.part"] = []string{"setup.exe"}
+	f.scanner.Err = errors.New("clamd is down")
+	if err := f.service.ScanPending(context.Background()); err == nil {
+		t.Fatal("the failure is reported")
+	}
+	if file, _ := f.repo.File(1); file.CheckStatus != download.CheckPending || !f.repo.RetryAt(10).Equal(now.Add(30*time.Minute)) {
+		t.Fatalf("the resource waits before the next try: %+v %v", file, f.repo.RetryAt(10))
+	}
+	if err := f.service.ScanPending(context.Background()); err != nil || len(f.tool.Inspected) != 1 {
+		t.Fatalf("a delayed resource is skipped: %v %v", err, f.tool.Inspected)
+	}
+}
+
+func TestRemovedResourcesAreNotScanned(t *testing.T) {
+	f := newFixture(true)
+	f.repo.SeedFile(pending(1, "/spool/1.part"))
+	if _, err := f.repo.TakeDown(context.Background(), 10); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.service.ScanPending(context.Background()); err != nil || len(f.tool.Inspected) != 0 {
+		t.Fatalf("files of a removed resource are left alone: %v %v", err, f.tool.Inspected)
+	}
+}
+
 func held(id int) scan.PendingFile {
 	file := volume(id, fmt.Sprintf("game.part%d.rar", id), now)
 	file.CheckStatus = download.CheckHarmfulPendingReview
@@ -359,10 +447,7 @@ func TestReviewDeleteTakesTheResourceDownAndBansRepeatOffenders(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(true)
 	for _, id := range []int{1, 2} {
-		file := held(id)
-		file.Path = uploadtest.SpoolRoot + fmt.Sprintf("%d.part", id)
-		f.spool.Put(file.Path, []byte("virus"), now)
-		f.repo.SeedFile(file)
+		f.repo.SeedFile(held(id))
 	}
 	f.repo.Keys[10] = []string{"games/7/5/bonus.zip"}
 	fileID, resourceID, gameID := 1, 10, 7
@@ -381,11 +466,6 @@ func TestReviewDeleteTakesTheResourceDownAndBansRepeatOffenders(t *testing.T) {
 	}
 	if len(f.banner.Bans) != 1 || f.banner.Bans[0].UserID != 9 || f.banner.Bans[0].Days != 30 || *f.banner.Bans[0].BannedBy != reviewer.UserID || f.banner.Bans[0].Reason != "Uploaded harmful file (2 times)" {
 		t.Fatalf("ban at the threshold %+v", f.banner.Bans)
-	}
-	for _, id := range []int{1, 2} {
-		if _, ok := f.spool.Content(uploadtest.SpoolRoot + fmt.Sprintf("%d.part", id)); ok {
-			t.Fatalf("local copy %d removed", id)
-		}
 	}
 	messages := f.events.Messages()
 	meta := decodeMeta(t, messages[0])

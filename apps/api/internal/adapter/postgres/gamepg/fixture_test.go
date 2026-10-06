@@ -2,10 +2,12 @@ package gamepg_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
@@ -48,10 +50,11 @@ func (f fixtures) resource(gameID, status int, mutate ...func(*ent.GameDownloadR
 
 func (f fixtures) file(resourceID int, size int64, status int) {
 	f.t.Helper()
+	existing := f.db.Ent.GameDownloadResourceFile.Query().Where(gamedownloadresourcefile.GameDownloadResourceID(resourceID)).CountX(f.ctx)
 	err := f.db.Ent.GameDownloadResourceFile.Create().
 		SetGameDownloadResourceID(resourceID).
 		SetType(download.FileTypeObjectStore).
-		SetFileName("game.7z").
+		SetFileName(fmt.Sprintf("game-%d.7z", existing+1)).
 		SetFileSize(size).
 		SetFileHash("hash").
 		SetFileStatus(status).

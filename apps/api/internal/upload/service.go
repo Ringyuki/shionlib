@@ -94,22 +94,26 @@ func (s *Service) admit(ctx context.Context, userID int, size int64) error {
 	if err := allowance.Admit(size); err != nil {
 		return err
 	}
-	return s.ensureSpool(ctx, size)
-}
-
-func (s *Service) ensureSpool(ctx context.Context, size int64) error {
-	available, err := s.spool.Available(ctx)
+	room, err := s.SpoolRoom(ctx)
 	if err != nil {
 		return err
 	}
-	pending, err := s.repo.PendingBytes(ctx, s.now())
-	if err != nil {
-		return err
-	}
-	if available-pending-size < SpoolReserve.Read(s.settings) {
+	if room < size {
 		return ErrSpoolFull
 	}
 	return nil
+}
+
+func (s *Service) SpoolRoom(ctx context.Context) (int64, error) {
+	available, err := s.spool.Available(ctx)
+	if err != nil {
+		return 0, err
+	}
+	pending, err := s.repo.PendingBytes(ctx, s.now())
+	if err != nil {
+		return 0, err
+	}
+	return available - pending - SpoolReserve.Read(s.settings), nil
 }
 
 func (s *Service) WriteChunk(ctx context.Context, who actor.Actor, id, index int, chunk Chunk, body io.Reader) error {

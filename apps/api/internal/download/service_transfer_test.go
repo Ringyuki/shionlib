@@ -135,6 +135,15 @@ func TestStoreRefusesUnapprovedOrMissingFiles(t *testing.T) {
 	if got, _ := f.repo.GetFile(ctx, missing.ID); got.Status != download.FileOnServer {
 		t.Fatalf("failed uploads leave the file pending: %+v", got)
 	}
+	f.store.PutErr = nil
+	removed := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: 1, Status: download.ResourceRemoved})
+	takenDown := f.repo.SeedFile(download.File{ResourceID: removed.ID, Path: &path, Status: download.FileOnServer, CheckStatus: download.CheckOK})
+	if err := f.transfers.Store(ctx, takenDown.ID); err != nil || len(f.events.Messages()) != 0 {
+		t.Fatalf("files of removed resources are not stored: %v %+v", err, f.events.Messages())
+	}
+	if got, _ := f.repo.GetFile(ctx, takenDown.ID); got.Status != download.FileOnServer || got.StorageKey != nil {
+		t.Fatalf("the file stays on the server for the cleanup: %+v", got)
+	}
 }
 
 func TestPurgeDeletesOnlyOlderVersions(t *testing.T) {
@@ -162,6 +171,10 @@ func TestCleanFilesHandlesStoredAndRejectedFiles(t *testing.T) {
 	lonely := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: 1})
 	lonelyFile := f.repo.SeedFile(download.File{ResourceID: lonely.ID, Status: download.FileOnServer, CheckStatus: download.CheckBrokenOrTruncated})
 	review := f.repo.SeedFile(download.File{ResourceID: keep.ID, Status: download.FileOnServer, CheckStatus: download.CheckHarmfulPendingReview})
+	removed := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: 1, Status: download.ResourceRemoved})
+	takenDownPath := f.spool.Path("taken")
+	f.spool.Put(takenDownPath, []byte("x"), now)
+	takenDown := f.repo.SeedFile(download.File{ResourceID: removed.ID, Path: &takenDownPath, Status: download.FileOnServer, CheckStatus: download.CheckOK})
 
 	if err := f.transfers.CleanFiles(ctx); err != nil {
 		t.Fatal(err)
@@ -187,8 +200,11 @@ func TestCleanFilesHandlesStoredAndRejectedFiles(t *testing.T) {
 	if _, err := f.repo.GetFile(ctx, review.ID); err != nil {
 		t.Fatal("files pending malware review are not cleaned")
 	}
-	if removed := f.spool.Removed(); !slices.Contains(removed, storedPath) || !slices.Contains(removed, brokenPath) || slices.Contains(removed, outsidePath) {
-		t.Fatalf("removed %v", removed)
+	if got, _ := f.repo.GetFile(ctx, takenDown.ID); got.Path != nil {
+		t.Fatalf("files of removed resources drop their local copy: %+v", got)
+	}
+	if removedPaths := f.spool.Removed(); !slices.Contains(removedPaths, storedPath) || !slices.Contains(removedPaths, brokenPath) || !slices.Contains(removedPaths, takenDownPath) || slices.Contains(removedPaths, outsidePath) {
+		t.Fatalf("removed %v", removedPaths)
 	}
 }
 
@@ -243,5 +259,8 @@ func TestCleaningARejectedFilePublishesTheRest(t *testing.T) {
 	}
 	if got, _ := f.repo.GetResource(ctx, resource.ID); !got.Published() {
 		t.Fatal("once the rejected file is gone, the stored rest is published")
+	}
+	if messages := f.events.Messages(); len(messages) != 1 || messages[0].Title != "Messages.System.File.Upload.ResourcePublishedTitle" || messages[0].ReceiverID != 1 {
+		t.Fatalf("the uploader hears about the publication: %+v", messages)
 	}
 }

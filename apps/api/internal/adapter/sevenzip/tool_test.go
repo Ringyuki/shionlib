@@ -6,6 +6,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
+	"strings"
 	"testing"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/sevenzip"
@@ -86,9 +88,14 @@ func TestInspectArchiveClassifiesRealArchives(t *testing.T) {
 		if err != nil {
 			t.Fatalf("%s: %v", filepath.Base(path), err)
 		}
-		if got != want {
-			t.Errorf("%s classified %d, want %d", filepath.Base(path), got, want)
+		if got.Status != want {
+			t.Errorf("%s classified %d, want %d", filepath.Base(path), got.Status, want)
 		}
+	}
+	listed, err := scan.InspectArchive(t.Context(), tool, valid)
+	slices.SortFunc(listed.Entries, func(a, b scan.ArchiveEntry) int { return strings.Compare(a.Path, b.Path) })
+	if err != nil || !slices.Equal(listed.Entries, []scan.ArchiveEntry{{Path: "data.bin", Size: 64 << 10}, {Path: "readme.txt", Size: 6}}) {
+		t.Fatalf("entries with their sizes: %+v %v", listed.Entries, err)
 	}
 }
 
@@ -142,7 +149,7 @@ func TestExtractTakesOnlyMatchingEntriesFromSplitArchives(t *testing.T) {
 	}
 	archive(t, binary, dir, "set.7z", []string{"-v100k", "-mx0"}, "game")
 	destination := filepath.Join(dir, "out")
-	run, err := sevenzip.New(binary).Extract(t.Context(), filepath.Join(dir, "set.7z.001"), destination, []string{"exe", "dll"})
+	run, err := sevenzip.New(binary).Extract(t.Context(), filepath.Join(dir, "set.7z.001"), destination, []string{"exe", "dll"}, nil)
 	if err != nil || run.Failed {
 		t.Fatalf("extract: %+v %v", run, err)
 	}
@@ -158,7 +165,14 @@ func TestExtractTakesOnlyMatchingEntriesFromSplitArchives(t *testing.T) {
 		t.Fatalf("only executables are extracted, whatever their case: %v %v", extracted, err)
 	}
 	empty := filepath.Join(dir, "none")
-	if run, err := sevenzip.New(binary).Extract(t.Context(), filepath.Join(dir, "set.7z.001"), empty, []string{"vbs"}); err != nil || run.Failed {
+	if run, err := sevenzip.New(binary).Extract(t.Context(), filepath.Join(dir, "set.7z.001"), empty, []string{"vbs"}, nil); err != nil || run.Failed {
 		t.Fatalf("an archive without matching entries extracts nothing without failing: %+v %v", run, err)
+	}
+	skipped := filepath.Join(dir, "skipped")
+	if run, err := sevenzip.New(binary).Extract(t.Context(), filepath.Join(dir, "set.7z.001"), skipped, []string{"exe"}, []string{"game/bin/SETUP.EXE"}); err != nil || run.Failed {
+		t.Fatalf("extract with a skipped entry: %+v %v", run, err)
+	}
+	if _, err := os.Stat(filepath.Join(skipped, "game", "bin", "SETUP.EXE")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("a skipped entry is not extracted: %v", err)
 	}
 }

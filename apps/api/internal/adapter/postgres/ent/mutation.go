@@ -32814,6 +32814,7 @@ type GameDownloadResourceMutation struct {
 	downloads                 *int
 	adddownloads              *int
 	published_at              *time.Time
+	check_retry_at            *time.Time
 	created                   *time.Time
 	updated                   *time.Time
 	clearedFields             map[string]struct{}
@@ -33332,6 +33333,55 @@ func (m *GameDownloadResourceMutation) ResetPublishedAt() {
 	delete(m.clearedFields, gamedownloadresource.FieldPublishedAt)
 }
 
+// SetCheckRetryAt sets the "check_retry_at" field.
+func (m *GameDownloadResourceMutation) SetCheckRetryAt(t time.Time) {
+	m.check_retry_at = &t
+}
+
+// CheckRetryAt returns the value of the "check_retry_at" field in the mutation.
+func (m *GameDownloadResourceMutation) CheckRetryAt() (r time.Time, exists bool) {
+	v := m.check_retry_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCheckRetryAt returns the old "check_retry_at" field's value of the GameDownloadResource entity.
+// If the GameDownloadResource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceMutation) OldCheckRetryAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCheckRetryAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCheckRetryAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCheckRetryAt: %w", err)
+	}
+	return oldValue.CheckRetryAt, nil
+}
+
+// ClearCheckRetryAt clears the value of the "check_retry_at" field.
+func (m *GameDownloadResourceMutation) ClearCheckRetryAt() {
+	m.check_retry_at = nil
+	m.clearedFields[gamedownloadresource.FieldCheckRetryAt] = struct{}{}
+}
+
+// CheckRetryAtCleared returns if the "check_retry_at" field was cleared in this mutation.
+func (m *GameDownloadResourceMutation) CheckRetryAtCleared() bool {
+	_, ok := m.clearedFields[gamedownloadresource.FieldCheckRetryAt]
+	return ok
+}
+
+// ResetCheckRetryAt resets all changes to the "check_retry_at" field.
+func (m *GameDownloadResourceMutation) ResetCheckRetryAt() {
+	m.check_retry_at = nil
+	delete(m.clearedFields, gamedownloadresource.FieldCheckRetryAt)
+}
+
 // SetCreatorID sets the "creator_id" field.
 func (m *GameDownloadResourceMutation) SetCreatorID(i int) {
 	m.creator = &i
@@ -33690,7 +33740,7 @@ func (m *GameDownloadResourceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GameDownloadResourceMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.status != nil {
 		fields = append(fields, gamedownloadresource.FieldStatus)
 	}
@@ -33714,6 +33764,9 @@ func (m *GameDownloadResourceMutation) Fields() []string {
 	}
 	if m.published_at != nil {
 		fields = append(fields, gamedownloadresource.FieldPublishedAt)
+	}
+	if m.check_retry_at != nil {
+		fields = append(fields, gamedownloadresource.FieldCheckRetryAt)
 	}
 	if m.creator != nil {
 		fields = append(fields, gamedownloadresource.FieldCreatorID)
@@ -33748,6 +33801,8 @@ func (m *GameDownloadResourceMutation) Field(name string) (ent.Value, bool) {
 		return m.Downloads()
 	case gamedownloadresource.FieldPublishedAt:
 		return m.PublishedAt()
+	case gamedownloadresource.FieldCheckRetryAt:
+		return m.CheckRetryAt()
 	case gamedownloadresource.FieldCreatorID:
 		return m.CreatorID()
 	case gamedownloadresource.FieldCreated:
@@ -33779,6 +33834,8 @@ func (m *GameDownloadResourceMutation) OldField(ctx context.Context, name string
 		return m.OldDownloads(ctx)
 	case gamedownloadresource.FieldPublishedAt:
 		return m.OldPublishedAt(ctx)
+	case gamedownloadresource.FieldCheckRetryAt:
+		return m.OldCheckRetryAt(ctx)
 	case gamedownloadresource.FieldCreatorID:
 		return m.OldCreatorID(ctx)
 	case gamedownloadresource.FieldCreated:
@@ -33849,6 +33906,13 @@ func (m *GameDownloadResourceMutation) SetField(name string, value ent.Value) er
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPublishedAt(v)
+		return nil
+	case gamedownloadresource.FieldCheckRetryAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCheckRetryAt(v)
 		return nil
 	case gamedownloadresource.FieldCreatorID:
 		v, ok := value.(int)
@@ -33943,6 +34007,9 @@ func (m *GameDownloadResourceMutation) ClearedFields() []string {
 	if m.FieldCleared(gamedownloadresource.FieldPublishedAt) {
 		fields = append(fields, gamedownloadresource.FieldPublishedAt)
 	}
+	if m.FieldCleared(gamedownloadresource.FieldCheckRetryAt) {
+		fields = append(fields, gamedownloadresource.FieldCheckRetryAt)
+	}
 	return fields
 }
 
@@ -33971,6 +34038,9 @@ func (m *GameDownloadResourceMutation) ClearField(name string) error {
 		return nil
 	case gamedownloadresource.FieldPublishedAt:
 		m.ClearPublishedAt()
+		return nil
+	case gamedownloadresource.FieldCheckRetryAt:
+		m.ClearCheckRetryAt()
 		return nil
 	}
 	return fmt.Errorf("unknown GameDownloadResource nullable field %s", name)
@@ -34003,6 +34073,9 @@ func (m *GameDownloadResourceMutation) ResetField(name string) error {
 		return nil
 	case gamedownloadresource.FieldPublishedAt:
 		m.ResetPublishedAt()
+		return nil
+	case gamedownloadresource.FieldCheckRetryAt:
+		m.ResetCheckRetryAt()
 		return nil
 	case gamedownloadresource.FieldCreatorID:
 		m.ResetCreatorID()

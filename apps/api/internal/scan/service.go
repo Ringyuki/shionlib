@@ -44,8 +44,8 @@ type Deps struct {
 	Archives   ArchiveTool
 	Scanner    VirusScanner
 	Workspace  Workspace
+	Spool      Spool
 	Files      Files
-	Local      LocalFiles
 	Activities Activities
 	Messages   Messenger
 	Banner     Banner
@@ -62,8 +62,8 @@ type Service struct {
 	archives   ArchiveTool
 	scanner    VirusScanner
 	workspace  Workspace
+	spool      Spool
 	files      Files
-	local      LocalFiles
 	activities Activities
 	messages   Messenger
 	banner     Banner
@@ -81,8 +81,8 @@ func NewService(deps Deps) *Service {
 		archives:   deps.Archives,
 		scanner:    deps.Scanner,
 		workspace:  deps.Workspace,
+		spool:      deps.Spool,
 		files:      deps.Files,
-		local:      deps.Local,
 		activities: deps.Activities,
 		messages:   deps.Messages,
 		banner:     deps.Banner,
@@ -99,15 +99,9 @@ func (s *Service) ScanPending(ctx context.Context) error {
 	if !s.options.Enabled {
 		return nil
 	}
-	pending, err := s.repo.ListPending(ctx, pendingFileBatch)
+	resources, err := s.repo.PendingResources(ctx, s.now())
 	if err != nil {
 		return err
-	}
-	var resources []int
-	for _, file := range pending {
-		if !slices.Contains(resources, file.ResourceID) {
-			resources = append(resources, file.ResourceID)
-		}
 	}
 	var errs []error
 	for _, resourceID := range resources {
@@ -115,7 +109,8 @@ func (s *Service) ScanPending(ctx context.Context) error {
 			return errors.Join(append(errs, err)...)
 		}
 		if err := s.scanResource(ctx, resourceID); err != nil {
-			errs = append(errs, fmt.Errorf("scan resource %d: %w", resourceID, err))
+			delayErr := s.repo.DelayCheck(context.WithoutCancel(ctx), resourceID, s.now().Add(checkRetryDelay))
+			errs = append(errs, fmt.Errorf("scan resource %d: %w", resourceID, errors.Join(err, delayErr)))
 		}
 	}
 	return errors.Join(errs...)
@@ -152,14 +147,14 @@ func (s *Service) check(ctx context.Context, unit Unit) error {
 	if err != nil {
 		return err
 	}
-	status, err := InspectArchive(ctx, s.archives, entry)
+	archive, err := InspectArchive(ctx, s.archives, entry)
 	if err != nil {
 		return err
 	}
-	if status != download.CheckOK {
-		return s.reject(ctx, unit, status)
+	if archive.Status != download.CheckOK {
+		return s.reject(ctx, unit, archive.Status)
 	}
-	report, err := s.scanContents(ctx, unit, entry, workspace)
+	report, err := s.scanContents(ctx, unit, entry, workspace, archive.Entries)
 	if err != nil {
 		return err
 	}
@@ -182,21 +177,30 @@ func (s *Service) stage(ctx context.Context, unit Unit, workspace string) (strin
 	return filepath.Join(volumes, filepath.Base(unit.Entry().Name)), nil
 }
 
-func (s *Service) scanContents(ctx context.Context, unit Unit, entry, workspace string) (Report, error) {
+func (s *Service) scanContents(ctx context.Context, unit Unit, entry, workspace string, listed []ArchiveEntry) (Report, error) {
+	limit := s.scanner.MaxSize()
 	var entries []EntryReport
-	if !unit.Set() && Executable(unit.Entry().Name) {
-		report, err := s.scanFile(ctx, unit.Entry().Name, entry)
+	if whole := unit.Entry(); !unit.Set() && Executable(whole.Name) && whole.Size <= limit {
+		report, err := s.scanFile(ctx, whole.Name, entry)
 		if err != nil {
 			return Report{}, err
 		}
-		entries = append(entries, EntryReport{Name: unit.Entry().Name, Report: report})
+		entries = append(entries, EntryReport{Name: whole.Name, Report: report})
 	}
-	extracted := filepath.Join(workspace, "contents")
-	run, err := s.archives.Extract(ctx, entry, extracted, ScannedExtensions)
+	skip, size := extractionPlan(listed, limit)
+	room, err := s.spool.SpoolRoom(ctx)
 	if err != nil {
 		return Report{}, err
 	}
-	if run.Failed {
+	if size > room {
+		return Report{}, fmt.Errorf("extracting %d bytes needs more than the %d bytes the spool can spare", size, room)
+	}
+	extracted := filepath.Join(workspace, "contents")
+	run, err := s.archives.Extract(ctx, entry, extracted, ScannedExtensions, skip)
+	if err != nil {
+		return Report{}, err
+	}
+	if run.Failed && !run.Killed {
 		return Report{}, fmt.Errorf("extract executables: %s", strings.TrimSpace(run.blob()))
 	}
 	paths, err := s.workspace.Files(ctx, extracted)
@@ -558,7 +562,7 @@ func (s *Service) heldFiles(ctx context.Context, target Target) ([]PendingFile, 
 }
 
 func (s *Service) delete(ctx context.Context, id int, note *string, notify bool, source DecisionSource, reviewer *int) error {
-	var keys, localPaths []string
+	var keys []string
 	err := s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
 		target, err := s.lockPending(ctx, id)
 		if err != nil {
@@ -575,8 +579,8 @@ func (s *Service) delete(ctx context.Context, id int, note *string, notify bool,
 			}
 		}
 		if target.ResourceID != nil {
-			keys, localPaths, err = s.takeDown(ctx, *target.ResourceID)
-			if err != nil {
+			keys, err = s.files.TakeDown(ctx, *target.ResourceID)
+			if err != nil && !errors.Is(err, download.ErrResourceNotFound) {
 				return err
 			}
 		}
@@ -602,33 +606,7 @@ func (s *Service) delete(ctx context.Context, id int, note *string, notify bool,
 	if err != nil {
 		return err
 	}
-	for _, path := range localPaths {
-		if s.local.Owns(path) {
-			_ = s.local.Remove(ctx, path)
-		}
-	}
 	return s.files.PurgeLater(ctx, keys)
-}
-
-func (s *Service) takeDown(ctx context.Context, resourceID int) ([]string, []string, error) {
-	files, err := s.repo.ResourceFiles(ctx, resourceID)
-	if err != nil {
-		return nil, nil, err
-	}
-	keys, err := s.files.TakeDown(ctx, resourceID)
-	if errors.Is(err, download.ErrResourceNotFound) {
-		return nil, nil, nil
-	}
-	if err != nil {
-		return nil, nil, err
-	}
-	var localPaths []string
-	for _, file := range files {
-		if file.Path != "" {
-			localPaths = append(localPaths, file.Path)
-		}
-	}
-	return keys, localPaths, nil
 }
 
 func (s *Service) notifyUploader(ctx context.Context, target Target, tone message.Tone, key string, meta message.Meta) error {

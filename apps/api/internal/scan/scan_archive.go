@@ -47,19 +47,56 @@ var bufferOverflow = regexp.MustCompile(`(?i)maxBuffer|stdout maxBuffer exceeded
 
 var timedOut = regexp.MustCompile(`(?i)ETIMEDOUT|timeout`)
 
-func InspectArchive(ctx context.Context, tool ArchiveTool, path string) (download.CheckStatus, error) {
+type Archive struct {
+	Status  download.CheckStatus
+	Entries []ArchiveEntry
+}
+
+type ArchiveEntry struct {
+	Path   string
+	Size   int64
+	Folder bool
+}
+
+func InspectArchive(ctx context.Context, tool ArchiveTool, path string) (Archive, error) {
 	listing, err := tool.List(ctx, path)
 	if err != nil {
-		return 0, err
+		return Archive{}, err
 	}
 	if status, decided := classifyListing(listing); decided {
-		return status, nil
+		return Archive{Status: status}, nil
 	}
 	test, err := tool.Test(ctx, path)
 	if err != nil {
-		return 0, err
+		return Archive{}, err
 	}
-	return classifyTest(test), nil
+	return Archive{Status: classifyTest(test), Entries: listedEntries(listing.Stdout)}, nil
+}
+
+func listedEntries(stdout string) []ArchiveEntry {
+	_, body, found := strings.Cut(stdout, "\n----------\n")
+	if !found {
+		return nil
+	}
+	var entries []ArchiveEntry
+	for block := range strings.SplitSeq(body, "\n\n") {
+		var entry ArchiveEntry
+		for line := range strings.SplitSeq(block, "\n") {
+			key, value, _ := strings.Cut(line, " = ")
+			switch key {
+			case "Path":
+				entry.Path = value
+			case "Size":
+				entry.Size, _ = strconv.ParseInt(value, 10, 64)
+			case "Folder":
+				entry.Folder = value == "+"
+			}
+		}
+		if entry.Path != "" {
+			entries = append(entries, entry)
+		}
+	}
+	return entries
 }
 
 func classifyListing(run ToolRun) (download.CheckStatus, bool) {

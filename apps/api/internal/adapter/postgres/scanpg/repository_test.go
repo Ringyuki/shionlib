@@ -102,29 +102,28 @@ func TestPendingFiles(t *testing.T) {
 	pending := f.file(t, resource.ID, creator, func(c *ent.GameDownloadResourceFileCreate) {
 		c.SetFilePath("/spool/1.sltf").SetUploadSessionID(session.ID)
 	})
-	f.file(t, resource.ID, creator, nil)
-	f.file(t, resource.ID, creator, func(c *ent.GameDownloadResourceFileCreate) { c.SetFilePath("/spool/2.sltf").SetFileCheckStatus(1) })
+	f.file(t, resource.ID, creator, func(c *ent.GameDownloadResourceFileCreate) { c.SetFileName("no-copy.7z") })
 	f.file(t, resource.ID, creator, func(c *ent.GameDownloadResourceFileCreate) {
-		c.SetFilePath("/spool/3.sltf").SetFileStatus(download.FileInObjectStore)
+		c.SetFileName("approved.7z").SetFilePath("/spool/2.sltf").SetFileCheckStatus(1)
 	})
 	f.file(t, resource.ID, creator, func(c *ent.GameDownloadResourceFileCreate) {
-		c.SetFilePath("/spool/4.sltf").SetType(download.FileTypeDirectLink)
+		c.SetFileName("stored.7z").SetFilePath("/spool/3.sltf").SetFileStatus(download.FileInObjectStore)
+	})
+	f.file(t, resource.ID, creator, func(c *ent.GameDownloadResourceFileCreate) {
+		c.SetFileName("link").SetFilePath("/spool/4.sltf").SetType(download.FileTypeDirectLink)
 	})
 
-	files, err := f.repo.ListPending(ctx, 10)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(files) != 1 {
-		t.Fatalf("only pending uploads with a local copy are scanned: %+v", files)
-	}
-	got := files[0]
-	if got.ID != pending.ID || got.ResourceID != resource.ID || got.GameID != gameID || got.Path != "/spool/1.sltf" || got.Name != "game.7z" || got.Size != 123 || got.Hash != "digest" || got.HashAlgorithm != "blake3" || got.UploadSessionID == nil || *got.UploadSessionID != session.ID || got.CreatorID != creator || got.CheckStatus != download.CheckPending || got.Status != download.FileOnServer || got.Type != download.FileTypeObjectStore || got.Created.IsZero() {
-		t.Fatalf("unexpected pending file %+v", got)
+	ids, err := f.repo.PendingResources(ctx, time.Now())
+	if err != nil || !slices.Equal(ids, []int{resource.ID}) {
+		t.Fatalf("resources with pending uploads that have a local copy: %v %v", ids, err)
 	}
 	all, err := f.repo.ResourceFiles(ctx, resource.ID)
 	if err != nil || len(all) != 5 || all[0].ID != pending.ID || all[2].CheckStatus != download.CheckOK || all[3].Status != download.FileInObjectStore || all[0].GameID != gameID {
 		t.Fatalf("every file of the resource, oldest first: %+v %v", all, err)
+	}
+	got := all[0]
+	if got.ID != pending.ID || got.ResourceID != resource.ID || got.GameID != gameID || got.Path != "/spool/1.sltf" || got.Name != "game.7z" || got.Size != 123 || got.Hash != "digest" || got.HashAlgorithm != "blake3" || got.UploadSessionID == nil || *got.UploadSessionID != session.ID || got.CreatorID != creator || got.CheckStatus != download.CheckPending || got.Status != download.FileOnServer || got.Type != download.FileTypeObjectStore || got.Created.IsZero() {
+		t.Fatalf("unexpected pending file %+v", got)
 	}
 	if none, err := f.repo.ResourceFiles(ctx, 987654); err != nil || len(none) != 0 {
 		t.Fatalf("a missing resource has no files: %+v %v", none, err)
@@ -147,14 +146,35 @@ func TestPendingFiles(t *testing.T) {
 	if row.FileCheckStatus != int(download.CheckHarmfulPendingReview) || !row.IsVirusFalsePositive {
 		t.Fatalf("check status not stored: %+v", row)
 	}
-	if files, _ := f.repo.ListPending(ctx, 10); len(files) != 0 {
-		t.Fatalf("scanned files leave the queue: %+v", files)
+	if ids, _ := f.repo.PendingResources(ctx, time.Now()); len(ids) != 0 {
+		t.Fatalf("scanned files leave the queue: %v", ids)
 	}
 	if _, found, err := f.repo.LockFile(ctx, 987654); err != nil || found {
 		t.Fatalf("missing file: %v %v", found, err)
 	}
 	if err := f.repo.SetCheckStatus(ctx, 987654, download.CheckOK, false); !errors.Is(err, download.ErrFileNotFound) {
 		t.Fatalf("missing file update: %v", err)
+	}
+}
+
+func TestPendingResourcesSkipRemovedAndDelayedResources(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture(t)
+	creator, gameID := f.db.User(t), f.db.Game(t)
+	live, removed, delayed := f.resource(t, gameID, creator), f.resource(t, gameID, creator), f.resource(t, gameID, creator)
+	for _, resource := range []*ent.GameDownloadResource{live, removed, delayed} {
+		f.file(t, resource.ID, creator, func(c *ent.GameDownloadResourceFileCreate) { c.SetFilePath(fmt.Sprintf("/spool/%d.sltf", resource.ID)) })
+	}
+	f.db.Ent.GameDownloadResource.UpdateOneID(removed.ID).SetStatus(download.ResourceRemoved).ExecX(ctx)
+	now := time.Now()
+	if err := f.repo.DelayCheck(ctx, delayed.ID, now.Add(time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	if ids, err := f.repo.PendingResources(ctx, now); err != nil || !slices.Equal(ids, []int{live.ID}) {
+		t.Fatalf("removed and delayed resources wait: %v %v", ids, err)
+	}
+	if ids, _ := f.repo.PendingResources(ctx, now.Add(2*time.Hour)); !slices.Equal(ids, []int{live.ID, delayed.ID}) {
+		t.Fatalf("a delayed resource is due again after its retry time: %v", ids)
 	}
 }
 
@@ -248,10 +268,13 @@ func TestExpiredAndListedCases(t *testing.T) {
 	resource := f.resource(t, gameID, alice)
 	now := time.Date(2026, 6, 1, 0, 0, 0, 0, time.UTC)
 
-	late := f.newCase(t, f.file(t, resource.ID, alice, nil), gameID, now.Add(-time.Hour))
-	later := f.newCase(t, f.file(t, resource.ID, alice, nil), gameID, now.Add(-2*time.Hour))
-	f.newCase(t, f.file(t, resource.ID, bob, nil), gameID, now.Add(time.Hour))
-	done := f.newCase(t, f.file(t, resource.ID, bob, nil), gameID, now.Add(-3*time.Hour))
+	named := func(name string) func(*ent.GameDownloadResourceFileCreate) {
+		return func(c *ent.GameDownloadResourceFileCreate) { c.SetFileName(name) }
+	}
+	late := f.newCase(t, f.file(t, resource.ID, alice, named("late.7z")), gameID, now.Add(-time.Hour))
+	later := f.newCase(t, f.file(t, resource.ID, alice, named("later.7z")), gameID, now.Add(-2*time.Hour))
+	f.newCase(t, f.file(t, resource.ID, bob, named("future.7z")), gameID, now.Add(time.Hour))
+	done := f.newCase(t, f.file(t, resource.ID, bob, named("done.7z")), gameID, now.Add(-3*time.Hour))
 	if err := f.repo.ResolveCase(ctx, done.ID, scan.Resolution{Status: scan.CaseDeleted, Source: scan.SourceAdminDelete, ReviewedBy: &reviewer, ReviewedAt: now}); err != nil {
 		t.Fatal(err)
 	}

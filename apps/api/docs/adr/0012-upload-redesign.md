@@ -27,22 +27,26 @@ Malware scanning streamed whole files to ClamAV. The legacy `clamscan` skipped f
   - on user pages.
   Uploaders always see their own resources and files with their processing state. Files appended to a published resource stay hidden until they are stored.
 - **Set-aware checks.**
+  - File names are unique within a resource, so the volumes of a set cannot clash.
   - Files whose names form a split archive (`.partN.rar`, `.rar`+`.rNN`, `.NNN`, `.zNN`+`.zip`) are grouped. They are hard-linked under their own names into a scan workspace on the spool and checked together by 7-Zip from the volume it opens (the first one, or the `.zip` of a split zip).
   - A set whose names show a gap or a missing first or last volume waits `scan.incomplete_set_timeout` (24 hours) for the uploader to add the missing volumes. A missing last volume of a RAR or 7z set, or a broken volume, shows up in the test.
+  - The check task takes every active resource with files waiting for a check, so a set waiting for its volumes never holds up other uploads. A resource whose check fails, for example while clamd is down, is tried again after 30 minutes.
   - Encrypted archives stay rejected.
   - Raw disc images are not accepted at the top level; listing and extracting images inside archives is a later phase.
 - **Malware scanning stays on ClamAV** but scans what matters.
   - One 7-Zip pass extracts the executables, scripts and nested archives of an archive or set into the workspace, matched by extension without regard to case. Each one is then streamed to ClamAV. A file uploaded as an executable is also scanned whole.
   - Extracting entry by entry would decompress a solid archive from its start for every entry.
   - Other entries are not scanned. Every scanned entry is written to the scan log, and a quarantine case keeps each entry's result.
-  - clamd's stream and scan limits are 4000M, in one `infra/clamav/clamd.conf` mounted in production and copied into the e2e image.
+  - clamd's stream and scan limits are 4000M, in one `infra/clamav/clamd.conf` mounted in production and copied into the e2e image. Entries larger than that are neither extracted nor scanned. The wait for clamd's reply grows with the bytes sent.
+  - The sizes come from the 7-Zip listing. Extraction only starts if the entries fit on the spool without touching its reserve and the bytes live uploads still have to write; otherwise the check is tried again later. An extraction cut short by its timeout is treated like a timed out test: what was extracted is scanned.
   - The scanner is a port, so another engine only needs an adapter. A confirmed miss is the trigger to change engines.
   - Targeted tampering is handled by uploader trust tiers (below) and by later phases: listing rules, and comparing executables with trusted uploads of the same game.
 - **Resource-level outcomes.**
   - A rejected file, or every file of a rejected or expired set, is marked with its reason and removed by the cleanup task. The rest of the resource publishes once it is stored; a resource left without files is deleted.
   - Corrupt sets are removed whole because 7-Zip cannot name the broken volume.
-  - A file under malware review hides the whole resource; this is derived from the files, not stored on the resource. Confirmed malware takes the whole resource down, purges its files, and keeps the existing strikes and ban. A false positive releases every held file of the resource.
-  - Uploaders get one message when a resource is published (`ResourcePublished`), one per file added to an already published resource, and one per rejected file or set naming the files, the reason and any missing volume numbers.
+  - A file under malware review hides the whole resource, including download links to its stored files; this is derived from the files, not stored on the resource. Only admins can delete a file under review. Confirmed malware takes the whole resource down, purges its files, and keeps the existing strikes and ban. A false positive releases every held file of the resource.
+  - Files of a removed resource are no longer checked, stored or published; the cleanup task deletes their local copies.
+  - Uploaders get one message when a resource is published (`ResourcePublished`), however the last unfinished file went (stored, rejected or deleted), one per file added to an already published resource, and one per rejected file or set naming the files, the reason and any missing volume numbers.
 
 - **Upload allowance follows the uploader's tier and is derived from records**, so nothing is charged, refunded or reset.
   - *Stored* bytes are the files in object storage of the uploader's active resources. *In-flight* bytes are live upload sessions plus completed uploads not attached to a file yet. Deleting a resource or a rejected file frees its space at once.
@@ -61,6 +65,7 @@ Malware scanning streamed whole files to ClamAV. The legacy `clamscan` skipped f
 
 ## Consequences
 - New column `published_at` (backfilled from `created` for resources whose files are all stored); `upload_session_id` is dropped.
+- New column `check_retry_at` on resources and a unique index on `(game_download_resource_id, file_name)`.
 - Clients of the old create and init endpoints must send the new shapes (see migration.md).
 - Scanning reads each archive with 7-Zip instead of streaming it whole, which makes ClamAV coverage independent of archive size.
 - `user_upload_quotas` and `user_upload_quota_records` are dropped and `users.upload_trusted` is added. The admin quota endpoints give way to the upload-trust endpoint, and report penalties no longer subtract bytes.

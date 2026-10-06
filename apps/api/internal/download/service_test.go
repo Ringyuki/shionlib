@@ -146,6 +146,7 @@ func TestCreateAttachesEveryUpload(t *testing.T) {
 		{[]download.FileUpload{{UploadSessionID: 99}}, upload.ErrSessionNotFound},
 		{[]download.FileUpload{{UploadSessionID: 7}}, upload.ErrInvalidSessionStatus},
 		{[]download.FileUpload{{UploadSessionID: 5}, {UploadSessionID: 5}}, download.ErrSessionAlreadyUsed},
+		{[]download.FileUpload{{UploadSessionID: 5}, {UploadSessionID: 6, Name: "game.part1.rar"}}, download.ErrDuplicateFileName},
 		{[]download.FileUpload{{UploadSessionID: 5}, {UploadSessionID: 6}, {UploadSessionID: 8}, {UploadSessionID: 9}}, download.ErrTooManyFiles},
 	} {
 		fresh := newFixture()
@@ -215,6 +216,7 @@ func TestRenameFile(t *testing.T) {
 
 	expectCode(t, f.service.RenameFile(ctx, owner, 999, "x.7z"), download.ErrFileNotFound)
 	expectCode(t, f.service.RenameFile(ctx, other, file.ID, "x.7z"), download.ErrFileNotOwner)
+	expectCode(t, f.service.RenameFile(ctx, owner, file.ID, "b.7z"), download.ErrDuplicateFileName)
 	if err := f.service.RenameFile(ctx, admin, file.ID, "本体.7z"); err != nil {
 		t.Fatal(err)
 	}
@@ -222,6 +224,18 @@ func TestRenameFile(t *testing.T) {
 	untouched, _ := f.repo.GetFile(ctx, sibling.ID)
 	if renamed.Name != "本体.7z" || untouched.Name != "b.7z" {
 		t.Fatalf("only the named file is renamed: %q %q", renamed.Name, untouched.Name)
+	}
+}
+
+func TestFilesUnderReviewAreDeletedOnlyByAdmins(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	resource := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID})
+	f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "game.part1.rar", Status: download.FileInObjectStore, CreatorID: owner.UserID})
+	held := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "game.part2.rar", Status: download.FileOnServer, CheckStatus: download.CheckHarmfulPendingReview, CreatorID: owner.UserID})
+	expectCode(t, f.service.DeleteFile(ctx, owner, held.ID), download.ErrFileUnderReview)
+	if err := f.service.DeleteFile(ctx, admin, held.ID); err != nil {
+		t.Fatalf("admins may delete a held file: %v", err)
 	}
 }
 
@@ -245,6 +259,9 @@ func TestDeleteFileKeepsTheLastOne(t *testing.T) {
 	}
 	if got, _ := f.repo.GetResource(ctx, resource.ID); !got.Published() {
 		t.Fatal("removing the last unfinished file publishes the resource")
+	}
+	if messages := f.events.Messages(); len(messages) != 1 || messages[0].Title != "Messages.System.File.Upload.ResourcePublishedTitle" || messages[0].ReceiverID != owner.UserID {
+		t.Fatalf("the uploader hears about the publication: %+v", messages)
 	}
 	expectCode(t, f.service.DeleteFile(ctx, owner, stored.ID), download.ErrLastFile)
 
@@ -473,36 +490,16 @@ func TestReleasesAndUserResources(t *testing.T) {
 	}
 }
 
-func TestRemoveFileDropsEmptyResources(t *testing.T) {
-	ctx := context.Background()
-	f := newFixture()
-	resource := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID})
-	first := f.repo.SeedFile(download.File{ResourceID: resource.ID})
-	second := f.repo.SeedFile(download.File{ResourceID: resource.ID})
-	if _, found, err := f.service.RemoveFile(ctx, first.ID); err != nil || !found {
-		t.Fatalf("remove first: %v %v", found, err)
-	}
-	if _, err := f.repo.GetResource(ctx, resource.ID); err != nil {
-		t.Fatal("resources with files left are kept")
-	}
-	if _, found, err := f.service.RemoveFile(ctx, second.ID); err != nil || !found {
-		t.Fatalf("remove second: %v %v", found, err)
-	}
-	if _, err := f.repo.GetResource(ctx, resource.ID); !errors.Is(err, download.ErrResourceNotFound) {
-		t.Fatalf("empty resources are deleted: %v", err)
-	}
-	if _, found, err := f.service.RemoveFile(ctx, second.ID); err != nil || found {
-		t.Fatalf("removing a missing file is a no-op: %v %v", found, err)
-	}
-}
-
 func TestRequeueStoresQueuesApprovedFilesStillOnTheServer(t *testing.T) {
 	f := newFixture()
 	path := "/spool/a.sltf"
-	approved := f.repo.SeedFile(download.File{Type: download.FileTypeObjectStore, Status: download.FileOnServer, CheckStatus: download.CheckOK, Path: &path, Updated: now.Add(-time.Hour)})
-	f.repo.SeedFile(download.File{Type: download.FileTypeObjectStore, Status: download.FileOnServer, CheckStatus: download.CheckOK, Path: &path, Updated: now})
-	f.repo.SeedFile(download.File{Type: download.FileTypeObjectStore, Status: download.FileInObjectStore, CheckStatus: download.CheckOK, Path: &path, Updated: now.Add(-time.Hour)})
-	f.repo.SeedFile(download.File{Type: download.FileTypeObjectStore, Status: download.FileOnServer, CheckStatus: download.CheckHarmfulPendingReview, Path: &path, Updated: now.Add(-time.Hour)})
+	live := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: 1})
+	removed := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: 1, Status: download.ResourceRemoved})
+	approved := f.repo.SeedFile(download.File{ResourceID: live.ID, Type: download.FileTypeObjectStore, Status: download.FileOnServer, CheckStatus: download.CheckOK, Path: &path, Updated: now.Add(-time.Hour)})
+	f.repo.SeedFile(download.File{ResourceID: live.ID, Type: download.FileTypeObjectStore, Status: download.FileOnServer, CheckStatus: download.CheckOK, Path: &path, Updated: now})
+	f.repo.SeedFile(download.File{ResourceID: live.ID, Type: download.FileTypeObjectStore, Status: download.FileInObjectStore, CheckStatus: download.CheckOK, Path: &path, Updated: now.Add(-time.Hour)})
+	f.repo.SeedFile(download.File{ResourceID: live.ID, Type: download.FileTypeObjectStore, Status: download.FileOnServer, CheckStatus: download.CheckHarmfulPendingReview, Path: &path, Updated: now.Add(-time.Hour)})
+	f.repo.SeedFile(download.File{ResourceID: removed.ID, Type: download.FileTypeObjectStore, Status: download.FileOnServer, CheckStatus: download.CheckOK, Path: &path, Updated: now.Add(-time.Hour)})
 	if err := f.service.RequeueStores(context.Background(), now.Add(-15*time.Minute)); err != nil {
 		t.Fatal(err)
 	}

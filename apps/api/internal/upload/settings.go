@@ -34,13 +34,13 @@ var (
 	MaxFileSize = setting.Bytes(setting.Spec[int64]{
 		Name:        "upload.max_file_size",
 		Label:       "单个文件大小上限",
-		Description: "新上传者和普通上传者的单个文件上限，可信档和管理员不受限制。",
+		Description: "新上传者和普通上传者的单个文件上限，可信上传者和管理员不受限制。",
 		Default:     30 * gib, Min: mib, Max: 64 * tib,
 	})
 	SessionTTL = setting.Duration(setting.Spec[time.Duration]{
 		Name:        "upload.session_ttl",
 		Label:       "上传会话有效期",
-		Description: "过期仍未完成的上传会被清理，占用的配额退回。",
+		Description: "上传在这段时间内没有完成就会过期，已经上传的部分会被清理。",
 		Default:     day, Min: time.Hour, Max: 30 * day,
 	})
 	NewUploaderQuota = setting.Bytes(setting.Spec[int64]{
@@ -62,38 +62,38 @@ var (
 	})
 	RegularAfter = setting.Int(setting.Spec[int]{
 		Name:        "upload.regular_after",
-		Label:       "升为普通档所需已发布资源数",
-		Description: "还要求最近一段时间内没有违规，见“普通档无违规时长”。",
+		Label:       "升为普通上传者所需已发布资源数",
+		Description: "还要求最近一段时间内没有违规，见“违规后不能升级的时长”。",
 		Default:     3, Min: 1, Max: 10_000,
 	})
 	TrustedAfter = setting.Int(setting.Spec[int]{
 		Name:        "upload.trusted_after",
-		Label:       "升为可信档所需已发布资源数",
-		Description: "管理员也可以直接授予可信档。",
+		Label:       "升为可信上传者所需已发布资源数",
+		Description: "管理员也可以直接把用户设为可信上传者。",
 		Default:     30, Min: 1, Max: 100_000,
 	})
 	ViolationWindow = setting.Duration(setting.Spec[time.Duration]{
 		Name:        "upload.violation_window",
-		Label:       "普通档无违规时长",
-		Description: "这段时间内有违规（确认的病毒或成立的举报）就不算普通档。",
+		Label:       "违规后不能升级的时长",
+		Description: "这段时间内有过违规（确认上传了病毒，或者被举报且举报成立）的上传者，只按新上传者计算。",
 		Default:     90 * day, Min: day, Max: 365 * day,
 	})
 	ViolationFreeze = setting.Duration(setting.Spec[time.Duration]{
 		Name:        "upload.violation_freeze",
-		Label:       "违规降档时长",
-		Description: "违规后在这段时间内降一档。",
+		Label:       "违规后降级的时长",
+		Description: "上传者违规后，在这段时间内按低一级的上传者计算。",
 		Default:     30 * day, Min: day, Max: 365 * day,
 	})
 	InFlightLimit = setting.Bytes(setting.Spec[int64]{
 		Name:        "upload.in_flight_limit",
-		Label:       "每人进行中上传上限",
-		Description: "一个人正在上传、以及传完还没发布成资源的文件加起来的上限，保护服务器暂存盘。",
+		Label:       "每人同时上传的总大小上限",
+		Description: "一个人正在上传的文件，加上已经上传完但还没有添加到资源里的文件，总大小不能超过这个值。",
 		Default:     30 * gib, Min: gib, Max: tib,
 	})
 	SpoolReserve = setting.Bytes(setting.Spec[int64]{
 		Name:        "upload.spool_reserve",
 		Label:       "暂存盘保留空间",
-		Description: "扣掉所有进行中上传还没写完的部分后，暂存盘至少要留出这么多空间，不够时暂停接受新的上传。",
+		Description: "扣掉正在上传的文件还没写完的部分后，暂存盘至少要留出这么多空间。空间不够时，不接受新的上传，检查文件时也不解压。",
 		Default:     20 * gib, Min: 0, Max: tib,
 	})
 )

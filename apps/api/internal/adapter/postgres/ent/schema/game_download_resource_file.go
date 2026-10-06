@@ -55,6 +55,7 @@ func (GameDownloadResourceFile) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("upload_session_id").Unique().StorageKey("game_download_resource_files_upload_session_id_key"),
 		index.Fields("file_path").Unique().StorageKey("game_download_resource_files_file_path_key"),
+		index.Fields("game_download_resource_id", "file_name").Unique().StorageKey("game_download_resource_files_resource_file_name_key"),
 		index.Fields("file_path").StorageKey("game_download_resource_files_file_path_idx"),
 	}
 }

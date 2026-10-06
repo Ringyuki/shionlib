@@ -822,11 +822,11 @@ func init() {
 	// gamedownloadresource.DefaultDownloads holds the default value on creation for the downloads field.
 	gamedownloadresource.DefaultDownloads = gamedownloadresourceDescDownloads.Default.(int)
 	// gamedownloadresourceDescCreated is the schema descriptor for created field.
-	gamedownloadresourceDescCreated := gamedownloadresourceFields[10].Descriptor()
+	gamedownloadresourceDescCreated := gamedownloadresourceFields[11].Descriptor()
 	// gamedownloadresource.DefaultCreated holds the default value on creation for the created field.
 	gamedownloadresource.DefaultCreated = gamedownloadresourceDescCreated.Default.(func() time.Time)
 	// gamedownloadresourceDescUpdated is the schema descriptor for updated field.
-	gamedownloadresourceDescUpdated := gamedownloadresourceFields[11].Descriptor()
+	gamedownloadresourceDescUpdated := gamedownloadresourceFields[12].Descriptor()
 	// gamedownloadresource.DefaultUpdated holds the default value on creation for the updated field.
 	gamedownloadresource.DefaultUpdated = gamedownloadresourceDescUpdated.Default.(func() time.Time)
 	// gamedownloadresource.UpdateDefaultUpdated holds the default value on update for the updated field.

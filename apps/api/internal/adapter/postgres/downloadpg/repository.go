@@ -29,6 +29,7 @@ const (
 	fileSessionFK         = "game_download_resource_files_upload_session_id_fkey"
 	uniqueFileSession     = "game_download_resource_files_upload_session_id_key"
 	uniqueFilePath        = "game_download_resource_files_file_path_key"
+	uniqueFileName        = "game_download_resource_files_resource_file_name_key"
 	recentHistoryPerFile  = 2
 	statusUploadingString = gameuploadsession.StatusUPLOADING
 )
@@ -268,6 +269,7 @@ func (r *Repository) PublishIfReady(ctx context.Context, id int, at time.Time) (
 	published, err := r.db(ctx).GameDownloadResource.Update().
 		Where(
 			gamedownloadresource.ID(id),
+			gamedownloadresource.Status(download.ResourceActive),
 			gamedownloadresource.PublishedAtIsNil(),
 			gamedownloadresource.HasFiles(),
 			gamedownloadresource.Not(gamedownloadresource.HasFilesWith(gamedownloadresourcefile.FileStatusNEQ(download.FileInObjectStore))),

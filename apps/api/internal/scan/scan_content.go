@@ -22,6 +22,22 @@ func Executable(name string) bool {
 	return slices.Contains(executableExtensions, extension(name))
 }
 
+func extractionPlan(entries []ArchiveEntry, limit int64) ([]string, int64) {
+	var skip []string
+	var size int64
+	for _, entry := range entries {
+		if entry.Folder || !Scanned(entry.Path) {
+			continue
+		}
+		if entry.Size > limit {
+			skip = append(skip, entry.Path)
+			continue
+		}
+		size += entry.Size
+	}
+	return skip, size
+}
+
 func extension(name string) string {
 	return strings.TrimPrefix(strings.ToLower(path.Ext(name)), ".")
 }

@@ -27,6 +27,8 @@ const (
 	excerptFallback  = 20
 	excerptLimit     = 30
 	maxReplyBytes    = 64 << 10
+	streamLimit      = 4000 << 20
+	scanBytesPerSec  = 5 << 20
 )
 
 var foundPattern = regexp.MustCompile(`(?i)FOUND`)
@@ -84,6 +86,10 @@ func (s *Scanner) Scan(ctx context.Context, name string, content io.Reader) (sca
 	return report, nil
 }
 
+func (s *Scanner) MaxSize() int64 {
+	return streamLimit
+}
+
 func (s *Scanner) stream(ctx context.Context, content io.Reader) (string, error) {
 	dialer := net.Dialer{Timeout: s.timeout}
 	conn, err := dialer.DialContext(ctx, "tcp", s.address)
@@ -93,8 +99,9 @@ func (s *Scanner) stream(ctx context.Context, content io.Reader) (string, error)
 	defer func() { _ = conn.Close() }()
 	stop := context.AfterFunc(ctx, func() { _ = conn.Close() })
 	defer stop()
-	if sendErr := s.send(conn, content); sendErr != nil {
-		if reply, readErr := s.readReply(conn); readErr == nil && reply != "" {
+	sent, sendErr := s.send(conn, content)
+	if sendErr != nil {
+		if reply, readErr := s.readReply(conn, s.timeout); readErr == nil && reply != "" {
 			return reply, nil
 		}
 		if ctxErr := ctx.Err(); ctxErr != nil {
@@ -102,7 +109,7 @@ func (s *Scanner) stream(ctx context.Context, content io.Reader) (string, error)
 		}
 		return "", sendErr
 	}
-	reply, err := s.readReply(conn)
+	reply, err := s.readReply(conn, s.timeout+time.Duration(sent/scanBytesPerSec)*time.Second)
 	if err != nil {
 		if ctxErr := ctx.Err(); ctxErr != nil {
 			return "", ctxErr
@@ -112,27 +119,29 @@ func (s *Scanner) stream(ctx context.Context, content io.Reader) (string, error)
 	return reply, nil
 }
 
-func (s *Scanner) send(conn net.Conn, file io.Reader) error {
+func (s *Scanner) send(conn net.Conn, file io.Reader) (int64, error) {
 	if err := s.write(conn, []byte("zINSTREAM\x00")); err != nil {
-		return err
+		return 0, err
 	}
+	var sent int64
 	buf := make([]byte, 4+s.chunkSize)
 	for {
 		n, readErr := io.ReadFull(file, buf[4:])
 		if n > 0 {
 			binary.BigEndian.PutUint32(buf[:4], uint32(n))
 			if err := s.write(conn, buf[:4+n]); err != nil {
-				return err
+				return sent, err
 			}
+			sent += int64(n)
 		}
 		if errors.Is(readErr, io.EOF) || errors.Is(readErr, io.ErrUnexpectedEOF) {
 			break
 		}
 		if readErr != nil {
-			return fmt.Errorf("read file for clamd: %w", readErr)
+			return sent, fmt.Errorf("read file for clamd: %w", readErr)
 		}
 	}
-	return s.write(conn, []byte{0, 0, 0, 0})
+	return sent, s.write(conn, []byte{0, 0, 0, 0})
 }
 
 func (s *Scanner) write(conn net.Conn, data []byte) error {
@@ -145,8 +154,8 @@ func (s *Scanner) write(conn net.Conn, data []byte) error {
 	return nil
 }
 
-func (s *Scanner) readReply(conn net.Conn) (string, error) {
-	if err := conn.SetReadDeadline(time.Now().Add(s.timeout)); err != nil {
+func (s *Scanner) readReply(conn net.Conn, wait time.Duration) (string, error) {
+	if err := conn.SetReadDeadline(time.Now().Add(wait)); err != nil {
 		return "", fmt.Errorf("set clamd read deadline: %w", err)
 	}
 	raw, err := bufio.NewReader(io.LimitReader(conn, maxReplyBytes)).ReadString(0)

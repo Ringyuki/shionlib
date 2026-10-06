@@ -34,7 +34,7 @@ func (t *TransferService) Store(ctx context.Context, fileID int) error {
 	if err != nil {
 		return err
 	}
-	if file.Status == FileInObjectStore && file.StorageKey != nil {
+	if file.ResourceStatus != ResourceActive || file.Status == FileInObjectStore && file.StorageKey != nil {
 		return nil
 	}
 	if file.CheckStatus != CheckOK {
@@ -68,7 +68,7 @@ func (t *TransferService) Store(ctx context.Context, fileID int) error {
 		if err != nil {
 			return err
 		}
-		if current.Status != FileOnServer || current.CheckStatus != CheckOK || current.Path == nil || *current.Path != localPath {
+		if current.ResourceStatus != ResourceActive || current.Status != FileOnServer || current.CheckStatus != CheckOK || current.Path == nil || *current.Path != localPath {
 			return nil
 		}
 		if err := t.recordHistory(ctx, current, key); err != nil {
@@ -99,13 +99,21 @@ func (t *TransferService) announce(ctx context.Context, file File) error {
 		return err
 	}
 	if resource.Published() {
-		return t.notify(ctx, file.CreatorID, file.GameID, "FileUploadSuccess", message.Meta{"file_id": file.ID, "file_name": file.Name, "file_size": file.Size})
+		return t.messages.Send(ctx, uploadMessage(file.CreatorID, file.GameID, "FileUploadSuccess", message.Meta{"file_id": file.ID, "file_name": file.Name, "file_size": file.Size}))
 	}
-	published, err := t.repo.PublishIfReady(ctx, file.ResourceID, t.now())
+	return publishResource(ctx, t.repo, t.messages, file.ResourceID, t.now())
+}
+
+func publishResource(ctx context.Context, repo Repository, messages Messenger, resourceID int, at time.Time) error {
+	published, err := repo.PublishIfReady(ctx, resourceID, at)
 	if err != nil || !published {
 		return err
 	}
-	files, err := t.repo.ListFiles(ctx, file.ResourceID)
+	resource, err := repo.GetResource(ctx, resourceID)
+	if err != nil {
+		return err
+	}
+	files, err := repo.ListFiles(ctx, resourceID)
 	if err != nil {
 		return err
 	}
@@ -115,11 +123,11 @@ func (t *TransferService) announce(ctx context.Context, file File) error {
 		names[i] = stored.Name
 		size += stored.Size
 	}
-	return t.notify(ctx, resource.CreatorID, resource.GameID, "ResourcePublished", message.Meta{"resource_id": resource.ID, "file_names": names, "file_count": len(files), "file_size": size})
+	return messages.Send(ctx, uploadMessage(resource.CreatorID, resource.GameID, "ResourcePublished", message.Meta{"resource_id": resource.ID, "file_names": names, "file_count": len(files), "file_size": size}))
 }
 
-func (t *TransferService) notify(ctx context.Context, receiverID, gameID int, key string, meta message.Meta) error {
-	return t.messages.Send(ctx, message.NewMessage{
+func uploadMessage(receiverID, gameID int, key string, meta message.Meta) message.NewMessage {
+	return message.NewMessage{
 		Type:       message.TypeSystem,
 		Tone:       message.ToneSuccess,
 		Title:      "Messages.System.File.Upload." + key + "Title",
@@ -127,7 +135,7 @@ func (t *TransferService) notify(ctx context.Context, receiverID, gameID int, ke
 		GameID:     &gameID,
 		Meta:       meta,
 		ReceiverID: receiverID,
-	})
+	}
 }
 
 func (t *TransferService) recordHistory(ctx context.Context, file File, key string) error {
@@ -175,11 +183,11 @@ func (t *TransferService) Purge(ctx context.Context, job PurgeObjects) error {
 
 func (t *TransferService) CleanFiles(ctx context.Context) error {
 	var errs []error
-	stored, err := t.repo.ListStoredWithLocalCopy(ctx, cleanupBatch)
+	copies, err := t.repo.ListUnneededLocalCopies(ctx, cleanupBatch)
 	if err != nil {
 		return err
 	}
-	for _, file := range stored {
+	for _, file := range copies {
 		if file.Path == nil || !t.local.Owns(*file.Path) {
 			continue
 		}
@@ -223,14 +231,24 @@ func (t *TransferService) discardRejected(ctx context.Context, fileID int) error
 		if err := removeEmptyResource(ctx, t.repo, file.ResourceID); err != nil {
 			return err
 		}
-		_, err = t.repo.PublishIfReady(ctx, file.ResourceID, t.now())
-		return err
+		return publishResource(ctx, t.repo, t.messages, file.ResourceID, t.now())
 	})
 	if err != nil {
 		return err
 	}
 	if localPath != nil && t.local.Owns(*localPath) {
 		return t.local.Remove(ctx, *localPath)
+	}
+	return nil
+}
+
+func removeEmptyResource(ctx context.Context, repo Repository, resourceID int) error {
+	remaining, err := repo.CountFiles(ctx, resourceID)
+	if err != nil || remaining > 0 {
+		return err
+	}
+	if err := repo.DeleteResource(ctx, resourceID); err != nil && !errors.Is(err, ErrResourceNotFound) {
+		return err
 	}
 	return nil
 }

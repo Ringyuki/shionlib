@@ -154,6 +154,12 @@ func TestResourceLifecycle(t *testing.T) {
 	if got, _ := f.repo.GetResource(ctx, created.ID); got.PublishedAt == nil || !got.PublishedAt.Equal(publishedAt) {
 		t.Fatalf("published at: %+v", got)
 	}
+	removed := f.resource(t, gameID, creator)
+	f.file(t, removed.ID, creator, "c.7z")
+	f.db.Ent.GameDownloadResource.UpdateOneID(removed.ID).SetStatus(download.ResourceRemoved).ExecX(ctx)
+	if published, err := f.repo.PublishIfReady(ctx, removed.ID, time.Now()); err != nil || published {
+		t.Fatalf("a removed resource is never published: %v %v", published, err)
+	}
 	if err := f.repo.RenameFile(ctx, first.ID, "本体.7z"); err != nil {
 		t.Fatal(err)
 	}
@@ -446,6 +452,46 @@ func TestListReleasesAndUserResources(t *testing.T) {
 	}
 }
 
+func TestGetPublicFileOnlyReturnsFilesOfPublicResources(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture(t)
+	creator, gameID := f.db.User(t), f.db.Game(t)
+	published := func(c *ent.GameDownloadResourceCreate) { c.SetPublishedAt(time.Now()) }
+	public := f.file(t, f.resource(t, gameID, creator, published).ID, creator, "public.7z")
+	unpublished := f.file(t, f.resource(t, gameID, creator).ID, creator, "unpublished.7z")
+	removed := f.file(t, f.resource(t, gameID, creator, published, func(c *ent.GameDownloadResourceCreate) { c.SetStatus(download.ResourceRemoved) }).ID, creator, "removed.7z")
+	heldResource := f.resource(t, gameID, creator, published)
+	beside := f.file(t, heldResource.ID, creator, "beside.7z")
+	f.file(t, heldResource.ID, creator, "held.7z", func(c *ent.GameDownloadResourceFileCreate) {
+		c.SetFileStatus(download.FileOnServer).SetFileCheckStatus(int(download.CheckHarmfulPendingReview))
+	})
+	if got, err := f.repo.GetPublicFile(ctx, public.ID); err != nil || got.ID != public.ID || got.GameID != gameID {
+		t.Fatalf("a file of a public resource: %+v %v", got, err)
+	}
+	for _, hidden := range []*ent.GameDownloadResourceFile{unpublished, removed, beside} {
+		if _, err := f.repo.GetPublicFile(ctx, hidden.ID); !errors.Is(err, download.ErrFileNotFound) {
+			t.Fatalf("%s is hidden: %v", hidden.FileName, err)
+		}
+	}
+}
+
+func TestFileNamesAreUniqueWithinAResource(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture(t)
+	creator, gameID := f.db.User(t), f.db.Game(t)
+	resource, other := f.resource(t, gameID, creator), f.resource(t, gameID, creator)
+	first := f.file(t, resource.ID, creator, "game.part1.rar")
+	second := f.file(t, resource.ID, creator, "game.part2.rar")
+	f.file(t, other.ID, creator, "game.part1.rar")
+	newFile := download.NewFile{ResourceID: resource.ID, Type: download.FileTypeObjectStore, Name: "game.part1.rar", Size: 1, Hash: "h", HashAlgorithm: "blake3", Status: download.FileOnServer, CreatorID: creator}
+	if _, err := f.repo.CreateFile(ctx, newFile); !errors.Is(err, download.ErrDuplicateFileName) {
+		t.Fatalf("a second file with the same name: %v", err)
+	}
+	if err := f.repo.RenameFile(ctx, second.ID, first.FileName); !errors.Is(err, download.ErrDuplicateFileName) {
+		t.Fatalf("renaming onto a taken name: %v", err)
+	}
+}
+
 func TestFileOperations(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(t)
@@ -465,18 +511,25 @@ func TestFileOperations(t *testing.T) {
 	f.file(t, resource.ID, creator, "link", func(c *ent.GameDownloadResourceFileCreate) {
 		c.SetType(download.FileTypeDirectLink).SetFilePath("/spool/link.sltf")
 	})
-	withCopies, err := f.repo.ListStoredWithLocalCopy(ctx, 10)
-	if err != nil || len(withCopies) != 1 || withCopies[0].ID != stored.ID {
-		t.Fatalf("stored files with local copies: %+v %v", withCopies, err)
+	removedResource := f.resource(t, gameID, creator)
+	takenDown := f.file(t, removedResource.ID, creator, "taken.7z", func(c *ent.GameDownloadResourceFileCreate) {
+		c.SetFileStatus(download.FileOnServer).SetFilePath("/spool/taken.sltf")
+	})
+	f.db.Ent.GameDownloadResource.UpdateOneID(removedResource.ID).SetStatus(download.ResourceRemoved).ExecX(ctx)
+	withCopies, err := f.repo.ListUnneededLocalCopies(ctx, 10)
+	if err != nil || len(withCopies) != 2 || withCopies[0].ID != stored.ID || withCopies[1].ID != takenDown.ID {
+		t.Fatalf("local copies of stored files and of removed resources: %+v %v", withCopies, err)
 	}
 	rejectedFiles, err := f.repo.ListRejected(ctx, 10)
 	if err != nil || len(rejectedFiles) != 1 || rejectedFiles[0].ID != rejected.ID || rejectedFiles[0].GameID != gameID {
 		t.Fatalf("rejected files: %+v %v", rejectedFiles, err)
 	}
-	if err := f.repo.ClearFilePath(ctx, stored.ID); err != nil {
-		t.Fatal(err)
+	for _, id := range []int{stored.ID, takenDown.ID} {
+		if err := f.repo.ClearFilePath(ctx, id); err != nil {
+			t.Fatal(err)
+		}
 	}
-	if withCopies, _ = f.repo.ListStoredWithLocalCopy(ctx, 10); len(withCopies) != 0 {
+	if withCopies, _ = f.repo.ListUnneededLocalCopies(ctx, 10); len(withCopies) != 0 {
 		t.Fatalf("cleared path: %+v", withCopies)
 	}
 
@@ -646,6 +699,10 @@ func TestListAwaitingStore(t *testing.T) {
 	}
 	if recent, err := f.repo.ListAwaitingStore(ctx, time.Now().Add(-time.Hour), 10); err != nil || len(recent) != 0 {
 		t.Fatalf("recently approved files are left to their own job: %v %v", recent, err)
+	}
+	f.db.Ent.GameDownloadResource.UpdateOneID(resource.ID).SetStatus(download.ResourceRemoved).ExecX(ctx)
+	if removed, err := f.repo.ListAwaitingStore(ctx, time.Now().Add(time.Hour), 10); err != nil || len(removed) != 0 {
+		t.Fatalf("files of removed resources are not stored: %v %v", removed, err)
 	}
 
 }

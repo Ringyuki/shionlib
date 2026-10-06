@@ -9,6 +9,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/gamepg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
@@ -35,6 +36,8 @@ func (r *Repository) CreateFile(ctx context.Context, in download.NewFile) (downl
 		return download.File{}, upload.ErrSessionNotFound
 	case postgres.IsUniqueViolation(err, uniqueFileSession), postgres.IsUniqueViolation(err, uniqueFilePath):
 		return download.File{}, upload.ErrSessionAlreadyUsed
+	case postgres.IsUniqueViolation(err, uniqueFileName):
+		return download.File{}, download.ErrDuplicateFileName
 	case err != nil:
 		return download.File{}, fmt.Errorf("create download file: %w", err)
 	}
@@ -67,6 +70,19 @@ func (r *Repository) GetFile(ctx context.Context, id int) (download.File, error)
 	}
 	if err != nil {
 		return download.File{}, fmt.Errorf("get download file %d: %w", id, err)
+	}
+	return toFile(row, row.Edges.GameDownloadResource), nil
+}
+
+func (r *Repository) GetPublicFile(ctx context.Context, id int) (download.File, error) {
+	row, err := r.fileQuery(ctx).
+		Where(gamedownloadresourcefile.ID(id), gamedownloadresourcefile.HasGameDownloadResourceWith(gamepg.PublicResource())).
+		Only(ctx)
+	if postgres.IsNotFound(err) {
+		return download.File{}, download.ErrFileNotFound
+	}
+	if err != nil {
+		return download.File{}, fmt.Errorf("get public download file %d: %w", id, err)
 	}
 	return toFile(row, row.Edges.GameDownloadResource), nil
 }
@@ -128,9 +144,13 @@ func (r *Repository) MarkFileStored(ctx context.Context, id int, key string) err
 }
 
 func (r *Repository) RenameFile(ctx context.Context, id int, name string) error {
-	return r.updateFile(ctx, id, "rename", func(u *ent.GameDownloadResourceFileUpdateOne) {
+	err := r.updateFile(ctx, id, "rename", func(u *ent.GameDownloadResourceFileUpdateOne) {
 		u.SetFileName(name)
 	})
+	if postgres.IsUniqueViolation(err, uniqueFileName) {
+		return download.ErrDuplicateFileName
+	}
+	return err
 }
 
 func (r *Repository) ClearFilePath(ctx context.Context, id int) error {
@@ -163,18 +183,21 @@ func (r *Repository) DeleteFile(ctx context.Context, id int) error {
 	return nil
 }
 
-func (r *Repository) ListStoredWithLocalCopy(ctx context.Context, limit int) ([]download.File, error) {
+func (r *Repository) ListUnneededLocalCopies(ctx context.Context, limit int) ([]download.File, error) {
 	rows, err := r.fileQuery(ctx).
 		Where(
 			gamedownloadresourcefile.Type(download.FileTypeObjectStore),
-			gamedownloadresourcefile.FileStatus(download.FileInObjectStore),
 			gamedownloadresourcefile.FilePathNotNil(),
+			gamedownloadresourcefile.Or(
+				gamedownloadresourcefile.FileStatus(download.FileInObjectStore),
+				gamedownloadresourcefile.HasGameDownloadResourceWith(gamedownloadresource.StatusNEQ(download.ResourceActive)),
+			),
 		).
 		Order(ent.Asc(gamedownloadresourcefile.FieldID)).
 		Limit(limit).
 		All(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("list stored files with local copies: %w", err)
+		return nil, fmt.Errorf("list unneeded local copies: %w", err)
 	}
 	return toFiles(rows), nil
 }
@@ -187,6 +210,7 @@ func (r *Repository) ListAwaitingStore(ctx context.Context, updatedBefore time.T
 			gamedownloadresourcefile.FileCheckStatus(int(download.CheckOK)),
 			gamedownloadresourcefile.FilePathNotNil(),
 			gamedownloadresourcefile.UpdatedLT(updatedBefore.UTC()),
+			gamedownloadresourcefile.HasGameDownloadResourceWith(gamedownloadresource.Status(download.ResourceActive)),
 		).
 		Order(ent.Asc(gamedownloadresourcefile.FieldID)).
 		Limit(limit).

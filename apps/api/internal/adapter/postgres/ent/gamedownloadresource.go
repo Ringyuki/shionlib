@@ -36,6 +36,8 @@ type GameDownloadResource struct {
 	Downloads int `json:"downloads,omitempty"`
 	// PublishedAt holds the value of the "published_at" field.
 	PublishedAt *time.Time `json:"published_at,omitempty"`
+	// CheckRetryAt holds the value of the "check_retry_at" field.
+	CheckRetryAt *time.Time `json:"check_retry_at,omitempty"`
 	// CreatorID holds the value of the "creator_id" field.
 	CreatorID int `json:"creator_id,omitempty"`
 	// Created holds the value of the "created" field.
@@ -125,7 +127,7 @@ func (*GameDownloadResource) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case gamedownloadresource.FieldSimulator, gamedownloadresource.FieldNote:
 			values[i] = new(sql.NullString)
-		case gamedownloadresource.FieldPublishedAt, gamedownloadresource.FieldCreated, gamedownloadresource.FieldUpdated:
+		case gamedownloadresource.FieldPublishedAt, gamedownloadresource.FieldCheckRetryAt, gamedownloadresource.FieldCreated, gamedownloadresource.FieldUpdated:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -198,6 +200,13 @@ func (_m *GameDownloadResource) assignValues(columns []string, values []any) err
 			} else if value.Valid {
 				_m.PublishedAt = new(time.Time)
 				*_m.PublishedAt = value.Time
+			}
+		case gamedownloadresource.FieldCheckRetryAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field check_retry_at", values[i])
+			} else if value.Valid {
+				_m.CheckRetryAt = new(time.Time)
+				*_m.CheckRetryAt = value.Time
 			}
 		case gamedownloadresource.FieldCreatorID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -305,6 +314,11 @@ func (_m *GameDownloadResource) String() string {
 	builder.WriteString(", ")
 	if v := _m.PublishedAt; v != nil {
 		builder.WriteString("published_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.CheckRetryAt; v != nil {
+		builder.WriteString("check_retry_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")

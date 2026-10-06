@@ -37,7 +37,7 @@ const (
 const (
 	Detector          = "clamscan"
 	expiredCaseBatch  = 20
-	pendingFileBatch  = 50
+	checkRetryDelay   = 30 * time.Minute
 	adminReviewPrefix = "/admin/malware-scans?id="
 )
 

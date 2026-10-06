@@ -1274,6 +1274,7 @@ var (
 		{Name: "note", Type: field.TypeString, Nullable: true, Size: 255, SchemaType: map[string]string{"postgres": "character varying(255)"}},
 		{Name: "downloads", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "published_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "check_retry_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "game_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
@@ -1287,13 +1288,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "game_download_resources_game_id_fkey",
-				Columns:    []*schema.Column{GameDownloadResourcesColumns[10]},
+				Columns:    []*schema.Column{GameDownloadResourcesColumns[11]},
 				RefColumns: []*schema.Column{GamesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "game_download_resources_creator_id_fkey",
-				Columns:    []*schema.Column{GameDownloadResourcesColumns[11]},
+				Columns:    []*schema.Column{GameDownloadResourcesColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Restrict,
 			},
@@ -1302,7 +1303,7 @@ var (
 			{
 				Name:    "game_download_resources_game_id_status_idx",
 				Unique:  false,
-				Columns: []*schema.Column{GameDownloadResourcesColumns[10], GameDownloadResourcesColumns[1]},
+				Columns: []*schema.Column{GameDownloadResourcesColumns[11], GameDownloadResourcesColumns[1]},
 			},
 		},
 	}
@@ -1362,6 +1363,11 @@ var (
 				Name:    "game_download_resource_files_file_path_key",
 				Unique:  true,
 				Columns: []*schema.Column{GameDownloadResourceFilesColumns[3]},
+			},
+			{
+				Name:    "game_download_resource_files_resource_file_name_key",
+				Unique:  true,
+				Columns: []*schema.Column{GameDownloadResourceFilesColumns[15], GameDownloadResourceFilesColumns[2]},
 			},
 			{
 				Name:    "game_download_resource_files_file_path_idx",

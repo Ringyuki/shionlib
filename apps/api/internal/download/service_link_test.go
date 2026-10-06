@@ -26,7 +26,8 @@ type linkFixture struct {
 
 func newLinkFixture(mode string, size int64) linkFixture {
 	repo := downloadtest.NewMemoryRepository(func() time.Time { return now })
-	resource := repo.SeedResource(download.Resource{GameID: 10, CreatorID: 1, Updated: now.Add(-time.Hour)})
+	published := now.Add(-time.Hour)
+	resource := repo.SeedResource(download.Resource{GameID: 10, CreatorID: 1, Updated: published, PublishedAt: &published})
 	key := "games/10/1/ゲーム 体験版.7z"
 	file := repo.SeedFile(download.File{ResourceID: resource.ID, Name: "ゲーム 体験版.7z", Size: size, Status: download.FileInObjectStore, StorageKey: &key})
 	f := linkFixture{repo: repo, challenge: &downloadtest.Challenge{Verdict: download.Verdict{Success: true}}, authorizer: &downloadtest.Authorizer{}, sealer: &downloadtest.Sealer{}, file: file}
@@ -68,6 +69,13 @@ func TestIssueRejectsFilesThatAreNotInStorage(t *testing.T) {
 	key := "k"
 	hidden := f.repo.SeedFile(download.File{ResourceID: removed.ID, Status: download.FileInObjectStore, StorageKey: &key})
 	_, err = f.links.Issue(ctx, hidden.ID, "token")
+	expectCode(t, err, download.ErrFileNotFound)
+	unpublished := f.repo.SeedResource(download.Resource{GameID: 10})
+	waiting := f.repo.SeedFile(download.File{ResourceID: unpublished.ID, Status: download.FileInObjectStore, StorageKey: &key})
+	_, err = f.links.Issue(ctx, waiting.ID, "token")
+	expectCode(t, err, download.ErrFileNotFound)
+	f.repo.SeedFile(download.File{ResourceID: f.file.ResourceID, Status: download.FileOnServer, CheckStatus: download.CheckHarmfulPendingReview})
+	_, err = f.links.Issue(ctx, f.file.ID, "token")
 	expectCode(t, err, download.ErrFileNotFound)
 	if f.repo.GameDownloads[10] != 0 {
 		t.Fatal("refused links are not counted")

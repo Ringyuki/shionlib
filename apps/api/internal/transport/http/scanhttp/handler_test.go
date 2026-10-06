@@ -16,7 +16,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/apitest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/scanhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
-	"github.com/Ringyuki/shionlib/apps/api/internal/upload/uploadtest"
 )
 
 var (
@@ -41,7 +40,6 @@ func setup(t *testing.T) env {
 		Archives:   &scantest.ArchiveTool{},
 		Scanner:    &scantest.Scanner{},
 		Files:      repo,
-		Local:      uploadtest.NewMemorySpool(),
 		Activities: events,
 		Messages:   events,
 		Banner:     &scantest.Banner{},

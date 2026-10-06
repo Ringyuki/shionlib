@@ -2,6 +2,7 @@ package analysispg_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/analysispg"
@@ -31,13 +32,15 @@ func TestStats(t *testing.T) {
 		}
 		return row.ID
 	}
+	files := 0
 	file := func(resourceID, kind, status int, size int64) int {
+		files++
 		row, err := db.Ent.GameDownloadResourceFile.Create().
 			SetGameDownloadResourceID(resourceID).
 			SetCreatorID(creator).
 			SetType(kind).
 			SetFileStatus(status).
-			SetFileName("f.zip").
+			SetFileName(fmt.Sprintf("f-%d.zip", files)).
 			SetFileHash("h").
 			SetFileSize(size).
 			Save(ctx)
