@@ -28,9 +28,7 @@ export function SiteSidebar({ sections, viewer, mode, onClose }: SiteSidebarProp
       data-state={rail ? 'rail' : 'expanded'}
       className={cn(
         'h-full min-h-0 overflow-hidden',
-        desktop
-          ? 'hn-sidebar border-line bg-surface w-64 border-e data-[state=rail]:w-[69px]'
-          : 'w-full',
+        desktop ? 'hn-sidebar border-line w-64 border-e data-[state=rail]:w-[69px]' : 'w-full',
       )}
     >
       <Flex
