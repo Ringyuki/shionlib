@@ -406,6 +406,10 @@ func TestListReleasesAndUserResources(t *testing.T) {
 	covered := f.resource(t, coverGame, alice, at(*hours(2), hours(2)))
 	f.resource(t, safeGame, alice, at(*hours(4), hours(4)), func(c *ent.GameDownloadResourceCreate) { c.SetStatus(download.ResourceRemoved) })
 	unpublished := f.resource(t, safeGame, alice, at(*hours(6), nil))
+	underReview := f.resource(t, safeGame, alice, at(*hours(7), hours(7)))
+	f.file(t, underReview.ID, alice, "patch.exe", func(c *ent.GameDownloadResourceFileCreate) {
+		c.SetFileStatus(download.FileOnServer).SetFileCheckStatus(int(download.CheckHarmfulPendingReview))
+	})
 	f.file(t, oldest.ID, alice, "b-second.7z")
 	f.file(t, oldest.ID, alice, "a-first.7z", func(c *ent.GameDownloadResourceFileCreate) { c.SetFileStatus(download.FileOnServer) })
 
@@ -433,8 +437,8 @@ func TestListReleasesAndUserResources(t *testing.T) {
 		t.Fatalf("published user resources, newest first: %d %+v %v", total, mine, err)
 	}
 	own, total, err := f.repo.ListUserResources(ctx, alice, download.UserResourceFilter{IncludeUnpublished: true}, download.Page{Number: 1, Size: 10})
-	if err != nil || total != 4 || own[0].ID != unpublished.ID || own[0].PublishedAt != nil {
-		t.Fatalf("uploaders also see unpublished resources: %d %+v %v", total, own, err)
+	if err != nil || total != 5 || own[0].ID != underReview.ID || own[1].ID != unpublished.ID || own[1].PublishedAt != nil {
+		t.Fatalf("uploaders also see unpublished resources and those under review: %d %+v %v", total, own, err)
 	}
 	strict, total, err := f.repo.ListUserResources(ctx, alice, download.UserResourceFilter{ExcludeRated: true}, download.Page{Number: 1, Size: 10})
 	if err != nil || total != 1 || len(strict) != 1 || strict[0].ID != oldest.ID || strict[0].FilesCount != 2 {

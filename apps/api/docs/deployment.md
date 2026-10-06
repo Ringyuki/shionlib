@@ -24,7 +24,7 @@ Subcommands: `serve` (HTTP; also runs jobs when `WORKERS_ENABLED=true`), `worker
 | `migrate` | `migrate up` | runs once per deploy; applies SQL migrations (adopting a Prisma database on the first run) and River's tables |
 | `api` | `serve` | `WORKERS_ENABLED=false`; serves HTTP on port 5000; starts after `migrate` succeeded |
 | `worker` | `worker` | River workers and leader-elected scheduled tasks; starts after `migrate` and a healthy `clamav` |
-| `clamav` | image default | `clamd` on `clamav:3310`, signatures in the `clamav-db` volume |
+| `clamav` | image default | `clamd` on `clamav:3310` with `infra/clamav/clamd.conf` mounted (4000M stream and scan limits), signatures in the `clamav-db` volume |
 
 `api` and `worker` share the `uploads` and `scan-logs` volumes: chunked uploads land on disk through `api` and are scanned and transferred to object storage by `worker`. Both must run on the same Docker host. Size the host disk for concurrent uploads (up to the `upload.max_file_size` setting each).
 

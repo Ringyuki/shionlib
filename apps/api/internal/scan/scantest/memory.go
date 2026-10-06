@@ -3,6 +3,7 @@ package scantest
 import (
 	"cmp"
 	"context"
+	"io"
 	"slices"
 	"sync"
 	"time"
@@ -23,6 +24,9 @@ type MemoryRepository struct {
 	Admins    []scan.Admin
 	Names     map[int]string
 	Titles    map[int]scan.GameTitles
+	Keys      map[int][]string
+	TakenDown []int
+	Purged    []string
 }
 
 func NewMemoryRepository(now func() time.Time) *MemoryRepository {
@@ -34,6 +38,7 @@ func NewMemoryRepository(now func() time.Time) *MemoryRepository {
 		Strikes:   map[int]int{},
 		Names:     map[int]string{},
 		Titles:    map[int]scan.GameTitles{},
+		Keys:      map[int][]string{},
 	}
 }
 
@@ -247,41 +252,50 @@ func (r *MemoryRepository) GameTitles(_ context.Context, gameID int) (scan.GameT
 	return titles, ok, nil
 }
 
-func (r *MemoryRepository) RemoveFile(_ context.Context, fileID int) (download.File, bool, error) {
+func (r *MemoryRepository) ResourceFiles(_ context.Context, resourceID int) ([]scan.PendingFile, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	file, ok := r.files[fileID]
-	if !ok {
-		return download.File{}, false, nil
+	var out []scan.PendingFile
+	for _, file := range r.files {
+		if file.ResourceID == resourceID {
+			out = append(out, file)
+		}
 	}
-	delete(r.files, fileID)
-	r.dropIfEmpty(file.ResourceID)
-	path := file.Path
-	return download.File{ID: file.ID, ResourceID: file.ResourceID, Path: &path, UploadSessionID: file.UploadSessionID, CreatorID: file.CreatorID}, true, nil
+	slices.SortFunc(out, func(a, b scan.PendingFile) int { return cmp.Compare(a.ID, b.ID) })
+	return out, nil
 }
 
-func (r *MemoryRepository) RemoveEmptyResource(_ context.Context, resourceID int) error {
+func (r *MemoryRepository) TakeDown(_ context.Context, resourceID int) ([]string, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	r.dropIfEmpty(resourceID)
+	if !r.resources[resourceID] {
+		return nil, download.ErrResourceNotFound
+	}
+	r.resources[resourceID] = false
+	r.TakenDown = append(r.TakenDown, resourceID)
+	return r.Keys[resourceID], nil
+}
+
+func (r *MemoryRepository) PurgeLater(_ context.Context, keys []string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if len(keys) > 0 {
+		r.Purged = append(r.Purged, keys...)
+	}
 	return nil
 }
 
-func (r *MemoryRepository) dropIfEmpty(resourceID int) {
-	for _, file := range r.files {
-		if file.ResourceID == resourceID {
-			return
-		}
-	}
-	delete(r.resources, resourceID)
-}
-
 type ArchiveTool struct {
-	Listings map[string]scan.ToolRun
-	Tests    map[string]scan.ToolRun
+	Listings  map[string]scan.ToolRun
+	Tests     map[string]scan.ToolRun
+	Contents  map[string][]string
+	Workspace *Workspace
+	Inspected []string
+	Extracted []string
 }
 
 func (a *ArchiveTool) List(_ context.Context, path string) (scan.ToolRun, error) {
+	a.Inspected = append(a.Inspected, path)
 	return a.Listings[path], nil
 }
 
@@ -289,12 +303,27 @@ func (a *ArchiveTool) Test(_ context.Context, path string) (scan.ToolRun, error)
 	return a.Tests[path], nil
 }
 
-type Scanner struct {
-	Reports map[string]scan.Report
+func (a *ArchiveTool) Extract(_ context.Context, path, destination string, _ []string) (scan.ToolRun, error) {
+	a.Extracted = append(a.Extracted, path)
+	for _, entry := range a.Contents[path] {
+		if scan.Scanned(entry) {
+			a.Workspace.Put(destination, entry)
+		}
+	}
+	return scan.ToolRun{}, nil
 }
 
-func (s *Scanner) Scan(_ context.Context, path string) (scan.Report, error) {
-	return s.Reports[path], nil
+type Scanner struct {
+	Reports map[string]scan.Report
+	Scanned []string
+}
+
+func (s *Scanner) Scan(_ context.Context, name string, content io.Reader) (scan.Report, error) {
+	if _, err := io.Copy(io.Discard, content); err != nil {
+		return scan.Report{}, err
+	}
+	s.Scanned = append(s.Scanned, name)
+	return s.Reports[name], nil
 }
 
 type Ban struct {

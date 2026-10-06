@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/binary"
 	"encoding/json"
-	"errors"
 	"io"
 	"net"
 	"os"
@@ -89,21 +88,12 @@ func (f *fakeClamd) last() (string, []byte) {
 	return f.command, f.received[len(f.received)-1]
 }
 
-func writeFile(t *testing.T, content string) string {
-	t.Helper()
-	path := filepath.Join(t.TempDir(), "upload.sltf")
-	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	return path
-}
-
 func TestCleanStream(t *testing.T) {
 	fake := startFake(t, func(int) string { return "stream: OK" }, 0)
 	logDir := t.TempDir()
 	scanner := clamd.New(clamd.Options{Address: fake.listener.Addr().String(), Timeout: 5 * time.Second, LogDir: logDir, ChunkSize: 3})
-	path := writeFile(t, "hello world")
-	report, err := scanner.Scan(t.Context(), path)
+	path := "game/bin/setup.exe"
+	report, err := scanner.Scan(t.Context(), path, strings.NewReader("hello world"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -133,8 +123,8 @@ func TestCleanStream(t *testing.T) {
 func TestInfectedStream(t *testing.T) {
 	fake := startFake(t, func(int) string { return "stream: Eicar-Test-Signature FOUND" }, 0)
 	scanner := clamd.New(clamd.Options{Address: fake.listener.Addr().String(), Timeout: 5 * time.Second, LogDir: t.TempDir()})
-	path := writeFile(t, "X5O!P%@AP")
-	report, err := scanner.Scan(t.Context(), path)
+	path := "setup.exe"
+	report, err := scanner.Scan(t.Context(), path, strings.NewReader("X5O!P%@AP"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -152,23 +142,20 @@ func TestInfectedStream(t *testing.T) {
 func TestErrorReplies(t *testing.T) {
 	fake := startFake(t, func(int) string { return "INSTREAM size limit exceeded. ERROR" }, 4)
 	scanner := clamd.New(clamd.Options{Address: fake.listener.Addr().String(), Timeout: 5 * time.Second, LogDir: t.TempDir(), ChunkSize: 2})
-	_, err := scanner.Scan(t.Context(), writeFile(t, strings.Repeat("a", 64)))
+	_, err := scanner.Scan(t.Context(), "big.exe", strings.NewReader(strings.Repeat("a", 64)))
 	if err == nil || !strings.Contains(err.Error(), "size limit exceeded") {
 		t.Fatalf("expected a size limit error, got %v", err)
 	}
 	unreachable := clamd.New(clamd.Options{Address: "127.0.0.1:1", Timeout: time.Second})
-	if _, err := unreachable.Scan(t.Context(), writeFile(t, "x")); err == nil {
+	if _, err := unreachable.Scan(t.Context(), "x.exe", strings.NewReader("x")); err == nil {
 		t.Fatal("dial failures must be errors")
-	}
-	if _, err := scanner.Scan(t.Context(), filepath.Join(t.TempDir(), "missing")); !errors.Is(err, os.ErrNotExist) {
-		t.Fatalf("missing file: %v", err)
 	}
 }
 
 func TestUnexpectedReply(t *testing.T) {
 	fake := startFake(t, func(int) string { return "stream: something odd" }, 0)
 	scanner := clamd.New(clamd.Options{Address: fake.listener.Addr().String(), Timeout: 5 * time.Second, LogDir: t.TempDir()})
-	if _, err := scanner.Scan(t.Context(), writeFile(t, "x")); err == nil {
+	if _, err := scanner.Scan(t.Context(), "x.exe", strings.NewReader("x")); err == nil {
 		t.Fatal("unexpected replies must fail")
 	}
 }

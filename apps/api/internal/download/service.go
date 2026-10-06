@@ -76,7 +76,7 @@ func (s *Service) GameResources(ctx context.Context, viewer actor.Actor, gameID 
 	}
 	visible := make([]GameResource, 0, len(resources))
 	for _, resource := range resources {
-		if !resource.Published() && resource.CreatorID != viewer.UserID {
+		if !resource.VisibleTo(viewer.UserID) {
 			continue
 		}
 		resource.Files = slices.DeleteFunc(resource.Files, func(f GameFile) bool {

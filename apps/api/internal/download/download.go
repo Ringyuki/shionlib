@@ -38,10 +38,11 @@ const (
 	CheckEncrypted            CheckStatus = 4
 	CheckHarmful              CheckStatus = 5
 	CheckHarmfulPendingReview CheckStatus = 6
+	CheckIncompleteSet        CheckStatus = 7
 )
 
 func (c CheckStatus) Rejected() bool {
-	return c >= CheckBrokenOrTruncated && c <= CheckHarmful
+	return (c >= CheckBrokenOrTruncated && c <= CheckHarmful) || c == CheckIncompleteSet
 }
 
 var Platforms = []string{"win", "mac", "ios", "and", "lin", "ps3", "ps4", "psv", "psp", "swi", "dvd"}
@@ -145,6 +146,14 @@ type GameResource struct {
 	Resource
 	Creator user.Summary
 	Files   []GameFile
+}
+
+func (r GameResource) UnderReview() bool {
+	return slices.ContainsFunc(r.Files, func(file GameFile) bool { return file.CheckStatus == CheckHarmfulPendingReview })
+}
+
+func (r GameResource) VisibleTo(viewerID int) bool {
+	return r.CreatorID == viewerID || (r.Published() && !r.UnderReview())
 }
 
 type Release struct {

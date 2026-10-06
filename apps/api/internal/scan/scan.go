@@ -57,6 +57,11 @@ type PendingFile struct {
 	HashAlgorithm   string
 	UploadSessionID *int
 	CreatorID       int
+	Created         time.Time
+}
+
+func (f PendingFile) awaitingCheck() bool {
+	return f.Type == download.FileTypeObjectStore && f.Status == download.FileOnServer && f.CheckStatus == download.CheckPending && f.Path != ""
 }
 
 type Report struct {

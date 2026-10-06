@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"slices"
 	"testing"
 	"time"
@@ -40,32 +41,36 @@ func (q *quota) Withdraw(_ context.Context, userID, sessionID int) error {
 }
 
 type fixture struct {
-	repo    *scantest.MemoryRepository
-	tool    *scantest.ArchiveTool
-	scanner *scantest.Scanner
-	spool   *uploadtest.MemorySpool
-	quota   *quota
-	events  *downloadtest.Recorder
-	banner  *scantest.Banner
-	mailer  *scantest.Mailer
-	service *scan.Service
+	repo      *scantest.MemoryRepository
+	workspace *scantest.Workspace
+	tool      *scantest.ArchiveTool
+	scanner   *scantest.Scanner
+	spool     *uploadtest.MemorySpool
+	quota     *quota
+	events    *downloadtest.Recorder
+	banner    *scantest.Banner
+	mailer    *scantest.Mailer
+	service   *scan.Service
 }
 
 func newFixture(enabled bool) fixture {
+	workspace := scantest.NewWorkspace()
 	f := fixture{
-		repo:    scantest.NewMemoryRepository(func() time.Time { return now }),
-		tool:    &scantest.ArchiveTool{Listings: map[string]scan.ToolRun{}, Tests: map[string]scan.ToolRun{}},
-		scanner: &scantest.Scanner{Reports: map[string]scan.Report{}},
-		spool:   uploadtest.NewMemorySpool(),
-		quota:   &quota{},
-		events:  &downloadtest.Recorder{},
-		banner:  &scantest.Banner{Applied: true},
-		mailer:  &scantest.Mailer{},
+		repo:      scantest.NewMemoryRepository(func() time.Time { return now }),
+		workspace: workspace,
+		tool:      &scantest.ArchiveTool{Listings: map[string]scan.ToolRun{}, Tests: map[string]scan.ToolRun{}, Contents: map[string][]string{}, Workspace: workspace},
+		scanner:   &scantest.Scanner{Reports: map[string]scan.Report{}},
+		spool:     uploadtest.NewMemorySpool(),
+		quota:     &quota{},
+		events:    &downloadtest.Recorder{},
+		banner:    &scantest.Banner{Applied: true},
+		mailer:    &scantest.Mailer{},
 	}
 	f.service = scan.NewService(scan.Deps{
 		Repo:       f.repo,
 		Archives:   f.tool,
 		Scanner:    f.scanner,
+		Workspace:  f.workspace,
 		Files:      f.repo,
 		Local:      f.spool,
 		Quota:      f.quota,
@@ -170,19 +175,26 @@ func TestScanRejectsBrokenArchives(t *testing.T) {
 	}
 	messages := f.events.Messages()
 	meta := decodeMeta(t, messages[0])
-	if len(messages) != 1 || messages[0].Tone != message.ToneDestructive || messages[0].Title != "Messages.System.File.Upload.FileUploadFailedTitle" || meta["reason"] != "ENCRYPTED" || meta["file_check_status"] != float64(4) {
+	if len(messages) != 1 || messages[0].Tone != message.ToneDestructive || messages[0].Title != "Messages.System.File.Upload.FileUploadFailedTitle" || meta["reason"] != "ENCRYPTED" || meta["file_check_status"] != float64(4) || meta["file_name"] != "file.7z" {
 		t.Fatalf("message %+v meta %v", messages, meta)
 	}
-	if len(f.events.Jobs()) != 0 {
-		t.Fatal("rejected files are never stored")
+	if len(f.events.Jobs()) != 0 || len(f.tool.Extracted) != 0 {
+		t.Fatal("rejected files are neither scanned nor stored")
+	}
+	if !slices.Equal(f.workspace.Discarded, []string{"/work/scan-1"}) {
+		t.Fatalf("the workspace is discarded: %v", f.workspace.Discarded)
 	}
 }
 
-func TestScanApprovesCleanFiles(t *testing.T) {
+func TestScanApprovesCleanFilesAfterScanningTheirExecutables(t *testing.T) {
 	f := newFixture(true)
 	f.repo.SeedFile(pending(1, "/spool/1.part"))
+	f.tool.Contents["/spool/1.part"] = []string{"game/bin/setup.exe", "game/data.pak", "game/readme.txt", "game/extras/patch.zip"}
 	if err := f.service.ScanPending(context.Background()); err != nil {
 		t.Fatal(err)
+	}
+	if !slices.Equal(f.scanner.Scanned, []string{"game/bin/setup.exe", "game/extras/patch.zip"}) {
+		t.Fatalf("only executables and nested archives are scanned: %v", f.scanner.Scanned)
 	}
 	if file, _ := f.repo.File(1); file.CheckStatus != download.CheckOK {
 		t.Fatalf("check status %d", file.CheckStatus)
@@ -197,14 +209,29 @@ func TestScanApprovesCleanFiles(t *testing.T) {
 	}
 }
 
+func TestStandaloneExecutablesAreScannedWhole(t *testing.T) {
+	f := newFixture(true)
+	file := pending(1, "/spool/1.part")
+	file.Name = "Patch.EXE"
+	f.repo.SeedFile(file)
+	if err := f.service.ScanPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(f.scanner.Scanned, []string{"Patch.EXE"}) {
+		t.Fatalf("an uploaded executable is scanned itself: %v", f.scanner.Scanned)
+	}
+}
+
 func TestScanQuarantinesInfectedFiles(t *testing.T) {
 	f := newFixture(true)
 	f.repo.SeedFile(pending(1, "/spool/1.part"))
+	f.tool.Contents["/spool/1.part"] = []string{"bin/setup.exe", "bin/clean.dll"}
 	f.repo.Admins = []scan.Admin{{ID: 50, Email: "a@example.com"}, {ID: 51}}
 	f.repo.Names[9] = "uploader"
 	f.repo.Titles[7] = scan.GameTitles{ID: 7, TitleJP: "ゲーム"}
 	logPath := "/var/log/clamav-scan.log"
-	f.scanner.Reports["/spool/1.part"] = scan.Report{Infected: true, Viruses: []string{" Eicar ", "Eicar", "Trojan"}, Result: json.RawMessage(`{"isInfected":true}`), LogPath: &logPath}
+	f.scanner.Reports["bin/setup.exe"] = scan.Report{Infected: true, Viruses: []string{" Eicar ", "Trojan"}, Result: json.RawMessage(`{"file":"bin/setup.exe","isInfected":true}`), LogPath: &logPath}
+	f.scanner.Reports["bin/clean.dll"] = scan.Report{Result: json.RawMessage(`{"file":"bin/clean.dll","isInfected":false}`)}
 	if err := f.service.ScanPending(context.Background()); err != nil {
 		t.Fatal(err)
 	}
@@ -212,8 +239,11 @@ func TestScanQuarantinesInfectedFiles(t *testing.T) {
 		t.Fatalf("check status %d", file.CheckStatus)
 	}
 	scanCase := f.repo.Case(1)
-	if scanCase.Status != scan.CasePending || !slices.Equal(scanCase.Viruses, []string{"Eicar", "Trojan"}) || !scanCase.ReviewDeadline.Equal(now.Add(24*time.Hour)) || *scanCase.ScanLogPath != logPath {
+	if scanCase.Status != scan.CasePending || !slices.Equal(scanCase.Viruses, []string{"Eicar (bin/setup.exe)", "Trojan (bin/setup.exe)"}) || !scanCase.ReviewDeadline.Equal(now.Add(24*time.Hour)) || *scanCase.ScanLogPath != logPath {
 		t.Fatalf("case %+v", scanCase)
+	}
+	if string(scanCase.ScanResult) != `[{"file":"bin/setup.exe","isInfected":true},{"file":"bin/clean.dll","isInfected":false}]` {
+		t.Fatalf("every scanned entry is kept in the result: %s", scanCase.ScanResult)
 	}
 	recorded := f.events.Activities()
 	if len(recorded) != 1 || recorded[0].Type != activity.TypeFileCheckHarmful || *recorded[0].FileCheckStatus != int(download.CheckHarmful) {
@@ -223,7 +253,7 @@ func TestScanQuarantinesInfectedFiles(t *testing.T) {
 	if len(messages) != 3 || messages[0].ReceiverID != 9 || messages[1].ReceiverID != 50 || messages[2].ReceiverID != 51 {
 		t.Fatalf("uploader and admins are told: %+v", messages)
 	}
-	if meta := decodeMeta(t, messages[0]); meta["detected_viruses"] != "Eicar, Trojan" || meta["review_deadline"] != "2026-10-04T12:00:00Z" {
+	if meta := decodeMeta(t, messages[0]); meta["detected_viruses"] != "Eicar (bin/setup.exe), Trojan (bin/setup.exe)" || meta["review_deadline"] != "2026-10-04T12:00:00Z" {
 		t.Fatalf("uploader meta %v", meta)
 	}
 	if *messages[1].LinkURL != "/admin/malware-scans?id=1" || decodeMeta(t, messages[1])["uploader_name"] != "uploader" {
@@ -237,14 +267,79 @@ func TestScanQuarantinesInfectedFiles(t *testing.T) {
 	}
 }
 
-func TestReviewAllowReleasesTheFile(t *testing.T) {
+func volume(id int, name string, created time.Time) scan.PendingFile {
+	file := pending(id, fmt.Sprintf("/spool/%d.part", id))
+	file.ResourceID, file.Name, file.Created = 10, name, created
+	return file
+}
+
+func TestVolumeSetsAreCheckedTogether(t *testing.T) {
+	f := newFixture(true)
+	f.repo.SeedFile(volume(2, "game.part2.rar", now))
+	f.repo.SeedFile(volume(1, "game.part1.rar", now))
+	f.tool.Contents["/work/scan-1/volumes/game.part1.rar"] = []string{"setup.exe"}
+	if err := f.service.ScanPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if f.workspace.Links["/work/scan-1/volumes/game.part1.rar"] != "/spool/1.part" || f.workspace.Links["/work/scan-1/volumes/game.part2.rar"] != "/spool/2.part" {
+		t.Fatalf("volumes are linked under their names: %v", f.workspace.Links)
+	}
+	if !slices.Equal(f.tool.Inspected, []string{"/work/scan-1/volumes/game.part1.rar"}) || !slices.Equal(f.scanner.Scanned, []string{"setup.exe"}) {
+		t.Fatalf("the set is opened once from its first volume: %v %v", f.tool.Inspected, f.scanner.Scanned)
+	}
+	if jobs := f.events.Jobs(); len(jobs) != 2 || jobs[0] != (download.StoreFile{FileID: 1}) || jobs[1] != (download.StoreFile{FileID: 2}) {
+		t.Fatalf("every volume is approved: %+v", jobs)
+	}
+}
+
+func TestIncompleteSetsWaitForTheirMissingVolumes(t *testing.T) {
+	f := newFixture(true)
+	f.repo.SeedFile(volume(1, "game.part1.rar", now.Add(-time.Hour)))
+	f.repo.SeedFile(volume(3, "game.part3.rar", now.Add(-time.Hour)))
+	if err := f.service.ScanPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if file, _ := f.repo.File(1); file.CheckStatus != download.CheckPending || len(f.tool.Inspected) != 0 || len(f.events.Messages()) != 0 {
+		t.Fatalf("an incomplete set waits for its uploader: %+v", file)
+	}
+
+	late := newFixture(true)
+	late.repo.SeedFile(volume(1, "game.part1.rar", now.Add(-25*time.Hour)))
+	late.repo.SeedFile(volume(3, "game.part3.rar", now))
+	if err := late.service.ScanPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	for _, id := range []int{1, 3} {
+		if file, _ := late.repo.File(id); file.CheckStatus != download.CheckIncompleteSet {
+			t.Fatalf("volume %d of an expired incomplete set is rejected: %+v", id, file)
+		}
+	}
+	if !slices.Equal(late.quota.withdrawn, []withdrawal{{9, 101}, {9, 103}}) {
+		t.Fatalf("every volume is refunded: %+v", late.quota.withdrawn)
+	}
+	messages := late.events.Messages()
+	meta := decodeMeta(t, messages[0])
+	if len(messages) != 1 || meta["reason"] != "INCOMPLETE_SET" || fmt.Sprint(meta["missing_volumes"]) != "[2]" || meta["file_name"] != "game.part1.rar, game.part3.rar" {
+		t.Fatalf("one message names the missing volumes: %+v %v", messages, meta)
+	}
+}
+
+func held(id int) scan.PendingFile {
+	file := volume(id, fmt.Sprintf("game.part%d.rar", id), now)
+	file.CheckStatus = download.CheckHarmfulPendingReview
+	return file
+}
+
+func TestReviewAllowReleasesTheWholeResource(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(true)
-	file := pending(1, "/spool/1.part")
-	file.CheckStatus = download.CheckHarmfulPendingReview
-	f.repo.SeedFile(file)
+	f.repo.SeedFile(held(1))
+	f.repo.SeedFile(held(2))
+	stored := volume(3, "bonus.zip", now)
+	stored.Status, stored.CheckStatus = download.FileInObjectStore, download.CheckOK
+	f.repo.SeedFile(stored)
 	fileID, resourceID, gameID := 1, 10, 7
-	scanCase := f.repo.SeedCase(scan.Case{FileID: &fileID, ResourceID: &resourceID, GameID: &gameID, UploaderID: 9, FileName: "file.7z"})
+	scanCase := f.repo.SeedCase(scan.Case{FileID: &fileID, ResourceID: &resourceID, GameID: &gameID, UploaderID: 9, FileName: "game.part1.rar, game.part2.rar"})
 
 	if _, err := f.service.Review(ctx, reviewer, 999, scan.ReviewInput{Decision: scan.DecisionAllow}); !errors.Is(err, scan.ErrCaseNotFound) {
 		t.Fatalf("missing case: %v", err)
@@ -256,11 +351,13 @@ func TestReviewAllowReleasesTheFile(t *testing.T) {
 	if view.Status != scan.CaseReleased || *view.DecisionSource != scan.SourceAdminAllow || *view.ReviewedBy != reviewer.UserID || !view.NotifyOnAllow || view.UploaderNotifiedAt == nil {
 		t.Fatalf("released case %+v", view.Case)
 	}
-	if got, _ := f.repo.File(1); got.CheckStatus != download.CheckOK {
-		t.Fatalf("file %+v", got)
+	for _, id := range []int{1, 2} {
+		if got, _ := f.repo.File(id); got.CheckStatus != download.CheckOK {
+			t.Fatalf("held file %d is released: %+v", id, got)
+		}
 	}
-	if jobs := f.events.Jobs(); len(jobs) != 1 || jobs[0] != (download.StoreFile{FileID: 1}) {
-		t.Fatalf("store job %+v", jobs)
+	if jobs := f.events.Jobs(); len(jobs) != 2 || jobs[0] != (download.StoreFile{FileID: 1}) || jobs[1] != (download.StoreFile{FileID: 2}) {
+		t.Fatalf("released files are stored: %+v", jobs)
 	}
 	messages := f.events.Messages()
 	if len(messages) != 1 || messages[0].Tone != message.ToneSuccess || decodeMeta(t, messages[0])["review_note"] != "false positive" {
@@ -281,15 +378,19 @@ func TestReviewAllowWithoutNotification(t *testing.T) {
 	}
 }
 
-func TestReviewDeleteRemovesTheFileAndBansRepeatOffenders(t *testing.T) {
+func TestReviewDeleteTakesTheResourceDownAndBansRepeatOffenders(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(true)
-	file := pending(1, uploadtest.SpoolRoot+"1.part")
-	f.spool.Put(file.Path, []byte("virus"), now)
-	f.repo.SeedFile(file)
+	for _, id := range []int{1, 2} {
+		file := held(id)
+		file.Path = uploadtest.SpoolRoot + fmt.Sprintf("%d.part", id)
+		f.spool.Put(file.Path, []byte("virus"), now)
+		f.repo.SeedFile(file)
+	}
+	f.repo.Keys[10] = []string{"games/7/5/bonus.zip"}
 	fileID, resourceID, gameID := 1, 10, 7
 	f.repo.Strikes[9] = 1
-	scanCase := f.repo.SeedCase(scan.Case{FileID: &fileID, ResourceID: &resourceID, GameID: &gameID, UploaderID: 9, FileName: "file.7z"})
+	scanCase := f.repo.SeedCase(scan.Case{FileID: &fileID, ResourceID: &resourceID, GameID: &gameID, UploaderID: 9, FileName: "game.part1.rar"})
 
 	view, err := f.service.Review(ctx, reviewer, scanCase.ID, scan.ReviewInput{Decision: scan.DecisionDelete})
 	if err != nil {
@@ -298,17 +399,19 @@ func TestReviewDeleteRemovesTheFileAndBansRepeatOffenders(t *testing.T) {
 	if view.Status != scan.CaseDeleted || *view.DecisionSource != scan.SourceAdminDelete {
 		t.Fatalf("deleted case %+v", view.Case)
 	}
-	if _, ok := f.repo.File(1); ok || f.repo.HasResource(10) {
-		t.Fatal("the file and its now empty resource are deleted")
+	if !slices.Equal(f.repo.TakenDown, []int{10}) || !slices.Equal(f.repo.Purged, []string{"games/7/5/bonus.zip"}) {
+		t.Fatalf("the whole resource is taken down and purged: %v %v", f.repo.TakenDown, f.repo.Purged)
 	}
 	if len(f.banner.Bans) != 1 || f.banner.Bans[0].UserID != 9 || f.banner.Bans[0].Days != 30 || *f.banner.Bans[0].BannedBy != reviewer.UserID || f.banner.Bans[0].Reason != "Uploaded harmful file (2 times)" {
 		t.Fatalf("ban at the threshold %+v", f.banner.Bans)
 	}
-	if !slices.Equal(f.quota.withdrawn, []withdrawal{{UserID: 9, SessionID: 101}}) {
-		t.Fatalf("refund %+v", f.quota.withdrawn)
+	if !slices.Equal(f.quota.withdrawn, []withdrawal{{9, 101}, {9, 102}}) {
+		t.Fatalf("every file is refunded: %+v", f.quota.withdrawn)
 	}
-	if _, ok := f.spool.Content(file.Path); ok {
-		t.Fatal("local copy removed")
+	for _, id := range []int{1, 2} {
+		if _, ok := f.spool.Content(uploadtest.SpoolRoot + fmt.Sprintf("%d.part", id)); ok {
+			t.Fatalf("local copy %d removed", id)
+		}
 	}
 	messages := f.events.Messages()
 	meta := decodeMeta(t, messages[0])

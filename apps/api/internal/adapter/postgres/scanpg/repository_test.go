@@ -119,8 +119,15 @@ func TestPendingFiles(t *testing.T) {
 		t.Fatalf("only pending uploads with a local copy are scanned: %+v", files)
 	}
 	got := files[0]
-	if got.ID != pending.ID || got.ResourceID != resource.ID || got.GameID != gameID || got.Path != "/spool/1.sltf" || got.Name != "game.7z" || got.Size != 123 || got.Hash != "digest" || got.HashAlgorithm != "blake3" || got.UploadSessionID == nil || *got.UploadSessionID != session.ID || got.CreatorID != creator || got.CheckStatus != download.CheckPending || got.Status != download.FileOnServer || got.Type != download.FileTypeObjectStore {
+	if got.ID != pending.ID || got.ResourceID != resource.ID || got.GameID != gameID || got.Path != "/spool/1.sltf" || got.Name != "game.7z" || got.Size != 123 || got.Hash != "digest" || got.HashAlgorithm != "blake3" || got.UploadSessionID == nil || *got.UploadSessionID != session.ID || got.CreatorID != creator || got.CheckStatus != download.CheckPending || got.Status != download.FileOnServer || got.Type != download.FileTypeObjectStore || got.Created.IsZero() {
 		t.Fatalf("unexpected pending file %+v", got)
+	}
+	all, err := f.repo.ResourceFiles(ctx, resource.ID)
+	if err != nil || len(all) != 5 || all[0].ID != pending.ID || all[2].CheckStatus != download.CheckOK || all[3].Status != download.FileInObjectStore || all[0].GameID != gameID {
+		t.Fatalf("every file of the resource, oldest first: %+v %v", all, err)
+	}
+	if none, err := f.repo.ResourceFiles(ctx, 987654); err != nil || len(none) != 0 {
+		t.Fatalf("a missing resource has no files: %+v %v", none, err)
 	}
 
 	err = postgres.NewTransactor(f.db.Ent).WithinTransaction(ctx, func(ctx context.Context) error {

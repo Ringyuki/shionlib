@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"context"
 	"net"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -36,6 +37,7 @@ import (
 const (
 	storeRequeueAge     = 15 * time.Minute
 	vendorTimeout       = 15 * time.Second
+	scanWorkspaceDir    = ".work"
 	objectStoreTimeout  = 10 * time.Minute
 	everyMinute         = "* * * * *"
 	everyTenMinutes     = "*/10 * * * *"
@@ -112,6 +114,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 			Timeout: cfg.FileScan.ClamdTimeout,
 			LogDir:  cfg.FileScan.ScanLogDir,
 		}),
+		Workspace:  localfs.NewWorkspace(filepath.Join(cfg.Upload.RootDir, scanWorkspaceDir)),
 		Files:      downloads,
 		Local:      spool,
 		Quota:      quota,

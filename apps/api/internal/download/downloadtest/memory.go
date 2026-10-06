@@ -200,6 +200,18 @@ func (r *MemoryRepository) listed(keep func(download.Resource) bool, excludeRate
 	return paged(matched, page)
 }
 
+func (r *MemoryRepository) public(resource download.Resource) bool {
+	if !resource.Published() {
+		return false
+	}
+	for _, file := range r.files {
+		if file.ResourceID == resource.ID && file.CheckStatus == download.CheckHarmfulPendingReview {
+			return false
+		}
+	}
+	return true
+}
+
 func paged(matched []download.Resource, page download.Page) ([]download.Resource, int) {
 	total := len(matched)
 	start := min(page.Offset(), total)
@@ -220,7 +232,7 @@ func (r *MemoryRepository) ListReleases(_ context.Context, excludeRated bool, pa
 	defer r.mu.Unlock()
 	var published []download.Resource
 	for _, resource := range r.sortedResources() {
-		if resource.Status == download.ResourceActive && resource.Published() && (!excludeRated || !r.ratedGames[resource.GameID]) {
+		if resource.Status == download.ResourceActive && r.public(resource) && (!excludeRated || !r.ratedGames[resource.GameID]) {
 			published = append(published, resource)
 		}
 	}
@@ -240,7 +252,7 @@ func (r *MemoryRepository) ListUserResources(_ context.Context, creatorID int, f
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	resources, total := r.listed(func(res download.Resource) bool {
-		return res.CreatorID == creatorID && (filter.IncludeUnpublished || res.Published())
+		return res.CreatorID == creatorID && (filter.IncludeUnpublished || r.public(res))
 	}, filter.ExcludeRated, page)
 	out := make([]download.UserResource, len(resources))
 	for i, resource := range resources {

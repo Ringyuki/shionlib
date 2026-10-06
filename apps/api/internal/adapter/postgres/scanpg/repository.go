@@ -65,6 +65,21 @@ func (r *Repository) ListPending(ctx context.Context, limit int) ([]scan.Pending
 	return files, nil
 }
 
+func (r *Repository) ResourceFiles(ctx context.Context, resourceID int) ([]scan.PendingFile, error) {
+	rows, err := r.pendingQuery(ctx).
+		Where(gamedownloadresourcefile.GameDownloadResourceID(resourceID)).
+		Order(ent.Asc(gamedownloadresourcefile.FieldID)).
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list files of resource %d: %w", resourceID, err)
+	}
+	files := make([]scan.PendingFile, len(rows))
+	for i, row := range rows {
+		files[i] = toPendingFile(row)
+	}
+	return files, nil
+}
+
 func (r *Repository) LockFile(ctx context.Context, fileID int) (scan.PendingFile, bool, error) {
 	row, err := r.pendingQuery(ctx).Where(gamedownloadresourcefile.ID(fileID)).ForUpdate().Only(ctx)
 	if postgres.IsNotFound(err) {

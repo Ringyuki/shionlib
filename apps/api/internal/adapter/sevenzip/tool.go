@@ -17,6 +17,7 @@ const (
 	fallbackBinary  = "7z"
 	listTimeout     = 30 * time.Second
 	testTimeout     = 10 * time.Minute
+	extractTimeout  = 30 * time.Minute
 	outputLimit     = 64 << 20
 )
 
@@ -38,6 +39,14 @@ func (t *Tool) List(ctx context.Context, path string) (scan.ToolRun, error) {
 
 func (t *Tool) Test(ctx context.Context, path string) (scan.ToolRun, error) {
 	return t.run(ctx, testTimeout, "t", "-bb0", "-bd", "-y", "-p-", path)
+}
+
+func (t *Tool) Extract(ctx context.Context, path, destination string, extensions []string) (scan.ToolRun, error) {
+	args := []string{"x", "-y", "-bd", "-bb0", "-p-", "-ssc-", "-o" + destination}
+	for _, extension := range extensions {
+		args = append(args, "-ir!*."+extension)
+	}
+	return t.run(ctx, extractTimeout, append(args, path)...)
 }
 
 func (t *Tool) current() string {

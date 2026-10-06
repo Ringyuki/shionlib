@@ -24,13 +24,23 @@ Malware scanning streamed whole files to ClamAV. The legacy `clamscan` skipped f
   - in recent releases, which are ordered by publication time;
   - on user pages.
   Uploaders always see their own resources and files with their processing state. Files appended to a published resource stay hidden until they are stored.
-- **Set-aware checks.** Files whose names form a split archive (`.partN.rar`, `.rar`+`.rNN`, `.NNN`, `.zNN`+`.zip`) are grouped and checked together by 7-Zip from the first volume. Gaps and missing first volumes are reported from the names right away; a missing last volume or a broken volume from the test. Encrypted archives stay rejected. Raw disc images are not accepted at the top level; listing and extracting images inside archives is a later phase.
-- **Malware scanning stays on ClamAV** but scans what matters. 7-Zip lists each archive or set, and the executables, scripts and nested archives in it are streamed to ClamAV one by one, up to ClamAV's 4 GB stream limit. Other entries are listed but not scanned, and what was scanned is recorded with the result. The scanner is a port, so another engine only needs an adapter. A confirmed miss is the trigger to change engines. Targeted tampering is handled by later phases: uploader trust tiers, listing rules, and comparing executables with trusted uploads of the same game.
+- **Set-aware checks.**
+  - Files whose names form a split archive (`.partN.rar`, `.rar`+`.rNN`, `.NNN`, `.zNN`+`.zip`) are grouped. They are hard-linked under their own names into a scan workspace on the spool and checked together by 7-Zip from the volume it opens (the first one, or the `.zip` of a split zip).
+  - A set whose names show a gap or a missing first or last volume waits `scan.incomplete_set_timeout` (24 hours) for the uploader to add the missing volumes. A missing last volume of a RAR or 7z set, or a broken volume, shows up in the test.
+  - Encrypted archives stay rejected.
+  - Raw disc images are not accepted at the top level; listing and extracting images inside archives is a later phase.
+- **Malware scanning stays on ClamAV** but scans what matters.
+  - One 7-Zip pass extracts the executables, scripts and nested archives of an archive or set into the workspace, matched by extension without regard to case. Each one is then streamed to ClamAV. A file uploaded as an executable is also scanned whole.
+  - Extracting entry by entry would decompress a solid archive from its start for every entry.
+  - Other entries are not scanned. Every scanned entry is written to the scan log, and a quarantine case keeps each entry's result.
+  - clamd's stream and scan limits are 4000M, in one `infra/clamav/clamd.conf` mounted in production and copied into the e2e image.
+  - The scanner is a port, so another engine only needs an adapter. A confirmed miss is the trigger to change engines.
+  - Targeted tampering is handled by later phases: uploader trust tiers, listing rules, and comparing executables with trusted uploads of the same game.
 - **Resource-level outcomes.**
-  - A rejected standalone file is removed and its quota returned; the rest of the resource still publishes.
-  - A rejected volume blocks its whole set until the uploader replaces or removes it.
-  - A file under malware review hides the whole resource. Confirmed malware takes the whole resource down, with the existing strikes and ban. A false positive publishes it again.
-  - Uploaders get one message per resource when it is published, and one per problem naming the file and the reason.
+  - A rejected file, or every file of a rejected or expired set, is marked with its reason and removed by the cleanup task with its quota returned. The rest of the resource publishes once it is stored; a resource left without files is deleted.
+  - Corrupt sets are removed whole because 7-Zip cannot name the broken volume.
+  - A file under malware review hides the whole resource; this is derived from the files, not stored on the resource. Confirmed malware takes the whole resource down, refunds and purges its files, and keeps the existing strikes and ban. A false positive releases every held file of the resource.
+  - Uploaders get one message when a resource is published (`ResourcePublished`), one per file added to an already published resource, and one per rejected file or set naming the files, the reason and any missing volume numbers.
 
 ## Alternatives
 - Keep one file per resource: uploaders keep repacking, and split downloads from other sources cannot be shared as they are.

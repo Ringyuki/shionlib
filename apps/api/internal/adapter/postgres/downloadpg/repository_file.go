@@ -207,6 +207,7 @@ func (r *Repository) ListRejected(ctx context.Context, limit int) ([]download.Fi
 				int(download.CheckBrokenOrUnsupported),
 				int(download.CheckEncrypted),
 				int(download.CheckHarmful),
+				int(download.CheckIncompleteSet),
 			),
 		).
 		Order(ent.Asc(gamedownloadresourcefile.FieldID)).

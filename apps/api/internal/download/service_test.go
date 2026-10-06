@@ -534,3 +534,24 @@ func TestRequeueStoresQueuesApprovedFilesStillOnTheServer(t *testing.T) {
 		t.Fatal("store jobs must be unique so the sweeper never doubles a transfer")
 	}
 }
+
+func TestResourcesUnderMalwareReviewAreHiddenFromOthers(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	resource := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, PublishedAt: ptr(now)})
+	f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "game.7z", Status: download.FileInObjectStore, CheckStatus: download.CheckOK, CreatorID: owner.UserID})
+	f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "patch.exe", Status: download.FileOnServer, CheckStatus: download.CheckHarmfulPendingReview, CreatorID: owner.UserID})
+
+	if seen, _ := f.service.GameResources(ctx, other, 10); len(seen) != 0 {
+		t.Fatalf("a resource under review is hidden on the game page: %+v", seen)
+	}
+	if releases, total, _ := f.service.Releases(ctx, other, download.Page{Number: 1, Size: 10}); total != 0 || len(releases) != 0 {
+		t.Fatalf("and in releases: %+v", releases)
+	}
+	if theirs, _ := f.service.UserResources(ctx, other, owner.UserID, download.Page{Number: 1, Size: 10}); theirs.Total != 0 {
+		t.Fatalf("and on the uploader's page: %+v", theirs)
+	}
+	if mine, _ := f.service.GameResources(ctx, owner, 10); len(mine) != 1 || len(mine[0].Files) != 2 {
+		t.Fatalf("its uploader still sees it with the held file: %+v", mine)
+	}
+}

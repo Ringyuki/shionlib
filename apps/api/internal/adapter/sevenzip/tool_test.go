@@ -124,3 +124,41 @@ func TestFallsBackFrom7zzTo7z(t *testing.T) {
 		t.Fatalf("only 7zz falls back: %v", err)
 	}
 }
+
+func TestExtractTakesOnlyMatchingEntriesFromSplitArchives(t *testing.T) {
+	binary := installedBinary(t)
+	dir := t.TempDir()
+	payload := make([]byte, 256<<10)
+	if _, err := rand.Read(payload); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(dir, "game", "bin"), 0o750); err != nil {
+		t.Fatal(err)
+	}
+	for name, content := range map[string][]byte{"game/bin/SETUP.EXE": payload, "game/readme.txt": []byte("hi"), "game/data.pak": payload} {
+		if err := os.WriteFile(filepath.Join(dir, filepath.FromSlash(name)), content, 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	archive(t, binary, dir, "set.7z", []string{"-v100k", "-mx0"}, "game")
+	destination := filepath.Join(dir, "out")
+	run, err := sevenzip.New(binary).Extract(t.Context(), filepath.Join(dir, "set.7z.001"), destination, []string{"exe", "dll"})
+	if err != nil || run.Failed {
+		t.Fatalf("extract: %+v %v", run, err)
+	}
+	var extracted []string
+	err = filepath.WalkDir(destination, func(path string, entry os.DirEntry, err error) error {
+		if err == nil && !entry.IsDir() {
+			rel, _ := filepath.Rel(destination, path)
+			extracted = append(extracted, filepath.ToSlash(rel))
+		}
+		return err
+	})
+	if err != nil || len(extracted) != 1 || extracted[0] != "game/bin/SETUP.EXE" {
+		t.Fatalf("only executables are extracted, whatever their case: %v %v", extracted, err)
+	}
+	empty := filepath.Join(dir, "none")
+	if run, err := sevenzip.New(binary).Extract(t.Context(), filepath.Join(dir, "set.7z.001"), empty, []string{"vbs"}); err != nil || run.Failed {
+		t.Fatalf("an archive without matching entries extracts nothing without failing: %+v %v", run, err)
+	}
+}

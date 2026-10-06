@@ -118,12 +118,16 @@ func ActiveResource() predicate.GameDownloadResource {
 	return gamedownloadresource.Status(download.ResourceActive)
 }
 
+func UnderReviewFile() predicate.GameDownloadResourceFile {
+	return gamedownloadresourcefile.FileCheckStatus(int(download.CheckHarmfulPendingReview))
+}
+
 func PublicFile() predicate.GameDownloadResourceFile {
 	return gamedownloadresourcefile.FileStatus(download.FileInObjectStore)
 }
 
 func PublicResource() predicate.GameDownloadResource {
-	return gamedownloadresource.And(ActiveResource(), gamedownloadresource.PublishedAtNotNil())
+	return gamedownloadresource.And(ActiveResource(), gamedownloadresource.PublishedAtNotNil(), gamedownloadresource.Not(gamedownloadresource.HasFilesWith(UnderReviewFile())))
 }
 
 func filterPredicates(filter game.ListFilter) []predicate.Game {

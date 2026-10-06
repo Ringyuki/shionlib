@@ -81,8 +81,8 @@ func TestStoreUploadsAndFinalizes(t *testing.T) {
 		t.Fatalf("activity %+v", recorded)
 	}
 	messages := f.events.Messages()
-	if len(messages) != 1 || messages[0].ReceiverID != 1 || messages[0].Meta["file_name"] != "Game v1.7z" {
-		t.Fatalf("message %+v", messages)
+	if len(messages) != 1 || messages[0].ReceiverID != 1 || messages[0].Title != "Messages.System.File.Upload.ResourcePublishedTitle" || messages[0].Meta["file_count"] != 1 {
+		t.Fatalf("storing the only file publishes the resource with one message: %+v", messages)
 	}
 	if f.repo.Strikes[1] != 0 {
 		t.Fatal("a successful upload resets malware strikes")
@@ -210,13 +210,43 @@ func TestStorePublishesTheResourceWithItsLastFile(t *testing.T) {
 	if err := f.transfers.Store(ctx, files[0].ID); err != nil {
 		t.Fatal(err)
 	}
-	if got, _ := f.repo.GetResource(ctx, resource.ID); got.Published() {
-		t.Fatal("a resource is not published while one of its files is still on the server")
+	if got, _ := f.repo.GetResource(ctx, resource.ID); got.Published() || len(f.events.Messages()) != 0 {
+		t.Fatal("a resource is not published, and nothing is announced, while one of its files is still on the server")
 	}
 	if err := f.transfers.Store(ctx, files[1].ID); err != nil {
 		t.Fatal(err)
 	}
 	if got, _ := f.repo.GetResource(ctx, resource.ID); !got.Published() || !got.PublishedAt.Equal(now) {
 		t.Fatalf("storing the last file publishes the resource: %+v", got)
+	}
+	messages := f.events.Messages()
+	if len(messages) != 1 || messages[0].Content != "Messages.System.File.Upload.ResourcePublishedContent" || !slices.Equal(messages[0].Meta["file_names"].([]string), []string{"game.part1.rar", "game.part2.rar"}) {
+		t.Fatalf("one message announces the published resource: %+v", messages)
+	}
+	path := f.spool.Path("bonus.zip")
+	f.spool.Put(path, []byte("bonus"), now)
+	bonus := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "bonus.zip", Path: &path, Status: download.FileOnServer, CheckStatus: download.CheckOK, CreatorID: 1})
+	if err := f.transfers.Store(ctx, bonus.ID); err != nil {
+		t.Fatal(err)
+	}
+	if messages := f.events.Messages(); len(messages) != 2 || messages[1].Title != "Messages.System.File.Upload.FileUploadSuccessTitle" || messages[1].Meta["file_name"] != "bonus.zip" {
+		t.Fatalf("files added to a published resource are announced one by one: %+v", messages)
+	}
+}
+
+func TestCleaningARejectedFilePublishesTheRest(t *testing.T) {
+	ctx := context.Background()
+	f := newTransferFixture()
+	resource := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: 1})
+	f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "game.7z", Status: download.FileInObjectStore, CheckStatus: download.CheckOK})
+	set := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "extra.part1.rar", Status: download.FileOnServer, CheckStatus: download.CheckIncompleteSet})
+	if err := f.transfers.CleanFiles(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.repo.GetFile(ctx, set.ID); !errors.Is(err, download.ErrFileNotFound) {
+		t.Fatalf("files of an incomplete set are rejected like any other: %v", err)
+	}
+	if got, _ := f.repo.GetResource(ctx, resource.ID); !got.Published() {
+		t.Fatal("once the rejected file is gone, the stored rest is published")
 	}
 }

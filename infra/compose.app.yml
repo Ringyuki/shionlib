@@ -176,6 +176,7 @@ services:
     restart: unless-stopped
     volumes:
       - clamav-db:/var/lib/clamav
+      - ./clamav/clamd.conf:/etc/clamav/clamd.conf:ro
     networks:
       - shionlib
     healthcheck:

@@ -2,6 +2,7 @@ package scan
 
 import (
 	"context"
+	"io"
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/activity"
@@ -11,6 +12,7 @@ import (
 
 type Repository interface {
 	ListPending(ctx context.Context, limit int) ([]PendingFile, error)
+	ResourceFiles(ctx context.Context, resourceID int) ([]PendingFile, error)
 	LockFile(ctx context.Context, fileID int) (PendingFile, bool, error)
 	SetCheckStatus(ctx context.Context, fileID int, status download.CheckStatus, falsePositive bool) error
 	CreateCase(ctx context.Context, in NewCase) (Case, error)
@@ -28,15 +30,24 @@ type Repository interface {
 type ArchiveTool interface {
 	List(ctx context.Context, path string) (ToolRun, error)
 	Test(ctx context.Context, path string) (ToolRun, error)
+	Extract(ctx context.Context, path, destination string, extensions []string) (ToolRun, error)
 }
 
 type VirusScanner interface {
-	Scan(ctx context.Context, path string) (Report, error)
+	Scan(ctx context.Context, name string, content io.Reader) (Report, error)
+}
+
+type Workspace interface {
+	Create(ctx context.Context) (string, error)
+	Link(ctx context.Context, source, target string) error
+	Files(ctx context.Context, dir string) ([]string, error)
+	Open(ctx context.Context, path string) (io.ReadCloser, error)
+	Discard(ctx context.Context, dir string) error
 }
 
 type Files interface {
-	RemoveFile(ctx context.Context, fileID int) (download.File, bool, error)
-	RemoveEmptyResource(ctx context.Context, resourceID int) error
+	TakeDown(ctx context.Context, resourceID int) ([]string, error)
+	PurgeLater(ctx context.Context, keys []string) error
 }
 
 type LocalFiles interface {

@@ -78,23 +78,10 @@ func (t *TransferService) Store(ctx context.Context, fileID int) error {
 		if err := t.repo.MarkFileStored(ctx, current.ID, key); err != nil {
 			return err
 		}
-		if _, err := t.repo.PublishIfReady(ctx, current.ResourceID, t.now()); err != nil {
-			return err
-		}
 		if err := t.activities.Record(ctx, fileActivity(activity.TypeFileUploadToS3, current.CreatorID, current.GameID, current.ID, FileInObjectStore, CheckOK, nil, nil)); err != nil {
 			return err
 		}
-		meta := message.Meta{"file_id": current.ID, "file_name": current.Name, "file_size": current.Size}
-		gameID := current.GameID
-		if err := t.messages.Send(ctx, message.NewMessage{
-			Type:       message.TypeSystem,
-			Tone:       message.ToneSuccess,
-			Title:      "Messages.System.File.Upload.FileUploadSuccessTitle",
-			Content:    "Messages.System.File.Upload.FileUploadSuccessContent",
-			GameID:     &gameID,
-			Meta:       meta,
-			ReceiverID: current.CreatorID,
-		}); err != nil {
+		if err := t.announce(ctx, current); err != nil {
 			return err
 		}
 		stored = true
@@ -105,6 +92,43 @@ func (t *TransferService) Store(ctx context.Context, fileID int) error {
 	}
 	_ = t.local.Remove(ctx, localPath)
 	return nil
+}
+
+func (t *TransferService) announce(ctx context.Context, file File) error {
+	resource, err := t.repo.GetResource(ctx, file.ResourceID)
+	if err != nil {
+		return err
+	}
+	if resource.Published() {
+		return t.notify(ctx, file.CreatorID, file.GameID, "FileUploadSuccess", message.Meta{"file_id": file.ID, "file_name": file.Name, "file_size": file.Size})
+	}
+	published, err := t.repo.PublishIfReady(ctx, file.ResourceID, t.now())
+	if err != nil || !published {
+		return err
+	}
+	files, err := t.repo.ListFiles(ctx, file.ResourceID)
+	if err != nil {
+		return err
+	}
+	names := make([]string, len(files))
+	var size int64
+	for i, stored := range files {
+		names[i] = stored.Name
+		size += stored.Size
+	}
+	return t.notify(ctx, resource.CreatorID, resource.GameID, "ResourcePublished", message.Meta{"resource_id": resource.ID, "file_names": names, "file_count": len(files), "file_size": size})
+}
+
+func (t *TransferService) notify(ctx context.Context, receiverID, gameID int, key string, meta message.Meta) error {
+	return t.messages.Send(ctx, message.NewMessage{
+		Type:       message.TypeSystem,
+		Tone:       message.ToneSuccess,
+		Title:      "Messages.System.File.Upload." + key + "Title",
+		Content:    "Messages.System.File.Upload." + key + "Content",
+		GameID:     &gameID,
+		Meta:       meta,
+		ReceiverID: receiverID,
+	})
 }
 
 func (t *TransferService) recordHistory(ctx context.Context, file File, key string) error {
@@ -202,7 +226,11 @@ func (t *TransferService) discardRejected(ctx context.Context, fileID int) error
 			return err
 		}
 		localPath = file.Path
-		return removeEmptyResource(ctx, t.repo, file.ResourceID)
+		if err := removeEmptyResource(ctx, t.repo, file.ResourceID); err != nil {
+			return err
+		}
+		_, err = t.repo.PublishIfReady(ctx, file.ResourceID, t.now())
+		return err
 	})
 	if err != nil {
 		return err

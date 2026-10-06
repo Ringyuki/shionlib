@@ -26,6 +26,12 @@ var (
 		Label:   "自动封禁天数",
 		Default: 30, Min: 1, Max: 3650,
 	})
+	IncompleteSetTimeout = setting.Duration(setting.Spec[time.Duration]{
+		Name:        "scan.incomplete_set_timeout",
+		Label:       "分卷补传等待时长",
+		Description: "分卷压缩包缺卷时等待上传者补传的时长，超时仍不全就整组移除并退还配额。",
+		Default:     day, Min: time.Hour, Max: 30 * day,
+	})
 	AutoDeleteNote = setting.Text(setting.Spec[string]{
 		Name:        "scan.auto_delete_note",
 		Label:       "超时删除说明",

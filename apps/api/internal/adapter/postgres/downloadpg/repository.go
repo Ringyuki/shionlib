@@ -130,7 +130,7 @@ func (r *Repository) recentHistory(ctx context.Context, fileIDs []int) (map[int]
 
 func (r *Repository) ListReleases(ctx context.Context, excludeRated bool, page download.Page) ([]download.Release, int, error) {
 	order := []gamedownloadresource.OrderOption{ent.Desc(gamedownloadresource.FieldPublishedAt), ent.Desc(gamedownloadresource.FieldID)}
-	rows, total, err := r.listListed(ctx, excludeRated, page, order, gamedownloadresource.PublishedAtNotNil())
+	rows, total, err := r.listListed(ctx, excludeRated, page, order, gamepg.PublicResource())
 	if err != nil {
 		return nil, 0, fmt.Errorf("list releases: %w", err)
 	}
@@ -145,7 +145,7 @@ func (r *Repository) ListReleases(ctx context.Context, excludeRated bool, page d
 func (r *Repository) ListUserResources(ctx context.Context, creatorID int, filter download.UserResourceFilter, page download.Page) ([]download.UserResource, int, error) {
 	predicates := []predicate.GameDownloadResource{gamedownloadresource.CreatorID(creatorID)}
 	if !filter.IncludeUnpublished {
-		predicates = append(predicates, gamedownloadresource.PublishedAtNotNil())
+		predicates = append(predicates, gamepg.PublicResource())
 	}
 	order := []gamedownloadresource.OrderOption{ent.Desc(gamedownloadresource.FieldCreated), ent.Desc(gamedownloadresource.FieldID)}
 	rows, total, err := r.listListed(ctx, filter.ExcludeRated, page, order, predicates...)

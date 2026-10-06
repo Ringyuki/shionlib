@@ -57,8 +57,8 @@ func New(opts Options) *Scanner {
 	return &Scanner{address: opts.Address, timeout: opts.Timeout, chunkSize: opts.ChunkSize, logDir: opts.LogDir}
 }
 
-func (s *Scanner) Scan(ctx context.Context, path string) (scan.Report, error) {
-	reply, err := s.stream(ctx, path)
+func (s *Scanner) Scan(ctx context.Context, name string, content io.Reader) (scan.Report, error) {
+	reply, err := s.stream(ctx, content)
 	if err != nil {
 		return scan.Report{}, err
 	}
@@ -70,26 +70,21 @@ func (s *Scanner) Scan(ctx context.Context, path string) (scan.Report, error) {
 		File       string   `json:"file"`
 		IsInfected bool     `json:"isInfected"`
 		Viruses    []string `json:"viruses"`
-	}{File: path, IsInfected: len(viruses) > 0, Viruses: viruses})
+	}{File: name, IsInfected: len(viruses) > 0, Viruses: viruses})
 	if err != nil {
 		return scan.Report{}, err
 	}
 	report := scan.Report{Infected: len(viruses) > 0, Viruses: viruses, Result: result}
-	if logPath, ok := s.appendLog(path, reply); ok {
+	if logPath, ok := s.appendLog(name, reply); ok {
 		report.LogPath = &logPath
 		if report.Infected {
-			report.LogExcerpt = excerpt(logPath, path)
+			report.LogExcerpt = excerpt(logPath, name)
 		}
 	}
 	return report, nil
 }
 
-func (s *Scanner) stream(ctx context.Context, path string) (string, error) {
-	file, err := os.Open(filepath.Clean(path))
-	if err != nil {
-		return "", fmt.Errorf("open file for clamd: %w", err)
-	}
-	defer func() { _ = file.Close() }()
+func (s *Scanner) stream(ctx context.Context, content io.Reader) (string, error) {
 	dialer := net.Dialer{Timeout: s.timeout}
 	conn, err := dialer.DialContext(ctx, "tcp", s.address)
 	if err != nil {
@@ -98,7 +93,7 @@ func (s *Scanner) stream(ctx context.Context, path string) (string, error) {
 	defer func() { _ = conn.Close() }()
 	stop := context.AfterFunc(ctx, func() { _ = conn.Close() })
 	defer stop()
-	if sendErr := s.send(conn, file); sendErr != nil {
+	if sendErr := s.send(conn, content); sendErr != nil {
 		if reply, readErr := s.readReply(conn); readErr == nil && reply != "" {
 			return reply, nil
 		}
