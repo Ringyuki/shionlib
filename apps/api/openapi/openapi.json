@@ -4552,7 +4552,7 @@
             ]
           },
           "in_flight": {
-            "description": "Bytes of uploads not yet attached to a resource",
+            "description": "Bytes of uploads in progress",
             "format": "int64",
             "type": "integer"
           },
@@ -4569,7 +4569,7 @@
             ]
           },
           "stored": {
-            "description": "Bytes of the uploader's files in active resources",
+            "description": "Bytes of the uploader's files in active resources and of finished uploads not yet in a resource",
             "format": "int64",
             "type": "integer"
           },
@@ -14251,6 +14251,14 @@
           "file_name": {
             "type": "string"
           },
+          "status": {
+            "description": "COMPLETED sessions are finished uploads not yet in a resource",
+            "enum": [
+              "UPLOADING",
+              "COMPLETED"
+            ],
+            "type": "string"
+          },
           "total_chunks": {
             "format": "int64",
             "type": "integer"
@@ -14276,6 +14284,7 @@
         },
         "required": [
           "upload_session_id",
+          "status",
           "file_name",
           "total_size",
           "chunk_size",
@@ -29901,7 +29910,7 @@
             "accessCookie": []
           }
         ],
-        "summary": "List the caller's unfinished large uploads",
+        "summary": "List the caller's uploads in progress and finished uploads not yet in a resource",
         "tags": [
           "upload"
         ]
@@ -29959,7 +29968,7 @@
             "accessCookie": []
           }
         ],
-        "summary": "Abort an upload session",
+        "summary": "Abort an upload, or discard a finished upload not yet in a resource",
         "tags": [
           "upload"
         ]

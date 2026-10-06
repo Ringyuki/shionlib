@@ -214,8 +214,8 @@ func TestWriteChunkRules(t *testing.T) {
 	}
 	expectCode(t, f.service.WriteChunk(ctx, uploader, session.ID, 1, bad, nil), upload.ErrInvalidChunkSHA256)
 	stored, _ := f.repo.GetSession(ctx, session.ID)
-	if !slices.Equal(stored.UploadedChunks, []int{1}) {
-		t.Fatalf("chunks %v", stored.UploadedChunks)
+	if !slices.Equal(stored.UploadedChunks, []int{1}) || !stored.ExpiresAt.Equal(now.Add(upload.SessionTTL.Read(testSettings()))) {
+		t.Fatalf("each new chunk records itself and extends the session: %v %v", stored.UploadedChunks, stored.ExpiresAt)
 	}
 }
 
@@ -249,7 +249,10 @@ func TestStatusAndComplete(t *testing.T) {
 	if completed.Status != upload.StatusCompleted || completed.FileHash != digest || completed.MimeType == nil || *completed.MimeType != upload.DefaultMimeType {
 		t.Fatalf("completed %+v", completed)
 	}
-	expectCode(t, f.service.Complete(ctx, uploader, session.ID, digest), upload.ErrInvalidSessionStatus)
+	if err := f.service.Complete(ctx, uploader, session.ID, digest); err != nil {
+		t.Fatalf("completing again with the same digest succeeds: %v", err)
+	}
+	expectCode(t, f.service.Complete(ctx, uploader, session.ID, uploadtest.Digest([]byte("something else"))), upload.ErrInvalidSessionStatus)
 	after, err := f.service.Status(ctx, uploader, session.ID)
 	if err != nil || after.Status != upload.StatusCompleted {
 		t.Fatalf("status works for completed sessions: %+v %v", after, err)
@@ -279,6 +282,25 @@ func TestAbortRemovesTheFile(t *testing.T) {
 		t.Fatal("temp file must be removed")
 	}
 	expectCode(t, f.service.Abort(ctx, uploader, session.ID), upload.ErrInvalidSessionStatus)
+}
+
+func TestAbortDiscardsFinishedUploadsNotYetInAResource(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	finished := f.repo.Seed(upload.Session{Status: upload.StatusCompleted, CreatorID: uploader.UserID, StoragePath: f.spool.Path("finished")})
+	f.spool.Put(finished.StoragePath, []byte("data"), now)
+	used := f.repo.Seed(upload.Session{Status: upload.StatusCompleted, CreatorID: uploader.UserID, StoragePath: f.spool.Path("used")})
+	f.repo.AttachFile(used.ID, used.StoragePath)
+	expectCode(t, f.service.Abort(ctx, uploader, used.ID), upload.ErrSessionAlreadyUsed)
+	if err := f.service.Abort(ctx, uploader, finished.ID); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := f.repo.GetSession(ctx, finished.ID); got.Status != upload.StatusAborted {
+		t.Fatalf("discarded %+v", got)
+	}
+	if _, ok := f.spool.Content(finished.StoragePath); ok {
+		t.Fatal("the finished file is removed")
+	}
 }
 
 func TestClaimChecksStatusThenOwner(t *testing.T) {
@@ -324,6 +346,19 @@ func TestCleanStaleSessionsExpiresThem(t *testing.T) {
 	removed := f.spool.Removed()
 	if !slices.Contains(removed, aborted.StoragePath) || !slices.Contains(removed, orphan.StoragePath) || slices.Contains(removed, "/elsewhere/z") {
 		t.Fatalf("only files under the spool root are removed: %v", removed)
+	}
+}
+
+func TestFinishedUploadsWaitWhileTheUploaderIsStillUploading(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	finished := f.repo.Seed(upload.Session{Status: upload.StatusCompleted, CreatorID: uploader.UserID, StoragePath: f.spool.Path("first"), Updated: now.Add(-7 * time.Hour)})
+	f.startUpload(t, []byte("0123"))
+	if err := f.service.CleanStaleSessions(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := f.repo.GetSession(ctx, finished.ID); got.Status != upload.StatusCompleted {
+		t.Fatalf("the first file of a batch survives while the rest uploads: %+v", got)
 	}
 }
 

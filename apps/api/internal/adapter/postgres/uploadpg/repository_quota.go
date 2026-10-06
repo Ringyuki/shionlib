@@ -22,18 +22,21 @@ SELECT GREATEST(
 )`
 
 const storedBytesSQL = `
-SELECT COALESCE(SUM(f.file_size), 0)
-FROM game_download_resource_files f
-JOIN game_download_resources r ON r.id = f.game_download_resource_id
-WHERE f.creator_id = $1 AND f.type = $2 AND r.status = $3`
+SELECT
+	(SELECT COALESCE(SUM(f.file_size), 0)
+	FROM game_download_resource_files f
+	JOIN game_download_resources r ON r.id = f.game_download_resource_id
+	WHERE f.creator_id = $1 AND f.type = $2 AND r.status = $3)
+	+
+	(SELECT COALESCE(SUM(s.total_size), 0)
+	FROM game_upload_sessions s
+	WHERE s.creator_id = $1 AND s.status = 'COMPLETED'
+	AND NOT EXISTS (SELECT 1 FROM game_download_resource_files f WHERE f.upload_session_id = s.id))`
 
 const inFlightBytesSQL = `
 SELECT COALESCE(SUM(s.total_size), 0)
 FROM game_upload_sessions s
-WHERE s.creator_id = $1 AND (
-	(s.status = 'UPLOADING' AND s.expires_at >= $2)
-	OR (s.status = 'COMPLETED' AND NOT EXISTS (SELECT 1 FROM game_download_resource_files f WHERE f.upload_session_id = s.id))
-)`
+WHERE s.creator_id = $1 AND s.status = 'UPLOADING' AND s.expires_at >= $2`
 
 type QuotaRepository struct {
 	client *ent.Client

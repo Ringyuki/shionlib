@@ -10,6 +10,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
+	entuser "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
@@ -84,26 +86,25 @@ func (r *Repository) LockSession(ctx context.Context, id int) (upload.Session, e
 	return toSession(row), nil
 }
 
-func (r *Repository) ListUploading(ctx context.Context, creatorID int, now time.Time, limit int) ([]upload.Session, error) {
+func (r *Repository) ListOngoing(ctx context.Context, creatorID int, now time.Time, limit int) ([]upload.Session, error) {
 	rows, err := r.db(ctx).GameUploadSession.Query().
 		Where(
 			gameuploadsession.CreatorID(creatorID),
-			gameuploadsession.StatusEQ(gameuploadsession.StatusUPLOADING),
-			gameuploadsession.ExpiresAtGTE(now.UTC()),
+			gameuploadsession.Or(liveUpload(now), unattached()),
 		).
 		Order(ent.Asc(gameuploadsession.FieldID)).
 		Limit(limit).
 		All(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("list uploading sessions: %w", err)
+		return nil, fmt.Errorf("list ongoing upload sessions: %w", err)
 	}
 	return toSessions(rows), nil
 }
 
-func (r *Repository) AddChunk(ctx context.Context, id, index int) error {
+func (r *Repository) AddChunk(ctx context.Context, id, index int, expiresAt time.Time) error {
 	_, err := r.db(ctx).ExecContext(ctx,
-		`UPDATE game_upload_sessions SET uploaded_chunks = array_append(uploaded_chunks, $2::integer), updated = $3 WHERE id = $1 AND NOT ($2::integer = ANY(uploaded_chunks))`,
-		id, index, time.Now().UTC())
+		`UPDATE game_upload_sessions SET uploaded_chunks = array_append(uploaded_chunks, $2::integer), expires_at = $3, updated = $4 WHERE id = $1 AND NOT ($2::integer = ANY(uploaded_chunks))`,
+		id, index, expiresAt.UTC(), time.Now().UTC())
 	if err != nil {
 		return fmt.Errorf("record upload chunk %d of session %d: %w", index, id, err)
 	}
@@ -134,7 +135,7 @@ func (r *Repository) Complete(ctx context.Context, id int, hash, mimeType string
 	return changed > 0, nil
 }
 
-func (r *Repository) ListStale(ctx context.Context, before time.Time, limit int) ([]upload.Session, error) {
+func (r *Repository) ListStale(ctx context.Context, now, before time.Time, limit int) ([]upload.Session, error) {
 	rows, err := r.db(ctx).GameUploadSession.Query().
 		Where(gameuploadsession.Or(
 			gameuploadsession.StatusEQ(gameuploadsession.StatusABORTED),
@@ -143,9 +144,9 @@ func (r *Repository) ListStale(ctx context.Context, before time.Time, limit int)
 				gameuploadsession.ExpiresAtLT(before.UTC()),
 			),
 			gameuploadsession.And(
-				gameuploadsession.StatusEQ(gameuploadsession.StatusCOMPLETED),
+				unattached(),
 				gameuploadsession.UpdatedLT(before.UTC()),
-				gameuploadsession.Not(gameuploadsession.HasGameDownloadResourceFile()),
+				gameuploadsession.Not(gameuploadsession.HasCreatorWith(entuser.HasGameUploadSessionsWith(liveUpload(now)))),
 			),
 		)).
 		Order(ent.Asc(gameuploadsession.FieldID)).
@@ -163,6 +164,22 @@ func (r *Repository) HasFile(ctx context.Context, sessionID int) (bool, error) {
 		return false, fmt.Errorf("check file of upload session %d: %w", sessionID, err)
 	}
 	return exists, nil
+}
+
+func (r *Repository) HasLiveUpload(ctx context.Context, creatorID int, now time.Time) (bool, error) {
+	live, err := r.db(ctx).GameUploadSession.Query().Where(gameuploadsession.CreatorID(creatorID), liveUpload(now)).Exist(ctx)
+	if err != nil {
+		return false, fmt.Errorf("check live uploads of user %d: %w", creatorID, err)
+	}
+	return live, nil
+}
+
+func liveUpload(now time.Time) predicate.GameUploadSession {
+	return gameuploadsession.And(gameuploadsession.StatusEQ(gameuploadsession.StatusUPLOADING), gameuploadsession.ExpiresAtGTE(now.UTC()))
+}
+
+func unattached() predicate.GameUploadSession {
+	return gameuploadsession.And(gameuploadsession.StatusEQ(gameuploadsession.StatusCOMPLETED), gameuploadsession.Not(gameuploadsession.HasGameDownloadResourceFile()))
 }
 
 func (r *Repository) PendingBytes(ctx context.Context, now time.Time) (int64, error) {

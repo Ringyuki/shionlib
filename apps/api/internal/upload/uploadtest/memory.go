@@ -91,12 +91,14 @@ func (r *MemoryRepository) LockSession(ctx context.Context, id int) (upload.Sess
 	return r.GetSession(ctx, id)
 }
 
-func (r *MemoryRepository) ListUploading(_ context.Context, creatorID int, now time.Time, limit int) ([]upload.Session, error) {
+func (r *MemoryRepository) ListOngoing(_ context.Context, creatorID int, now time.Time, limit int) ([]upload.Session, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	out := []upload.Session{}
 	for _, session := range r.sessions {
-		if session.CreatorID == creatorID && session.Status == upload.StatusUploading && !session.ExpiresAt.Before(now) {
+		uploading := session.Status == upload.StatusUploading && !session.ExpiresAt.Before(now)
+		unattached := session.Status == upload.StatusCompleted && !r.attached[session.ID]
+		if session.CreatorID == creatorID && (uploading || unattached) {
 			out = append(out, session)
 		}
 	}
@@ -123,7 +125,7 @@ func (r *MemoryRepository) LockAdmission(context.Context) error {
 	return nil
 }
 
-func (r *MemoryRepository) AddChunk(_ context.Context, id, index int) error {
+func (r *MemoryRepository) AddChunk(_ context.Context, id, index int, expiresAt time.Time) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	session, ok := r.sessions[id]
@@ -131,6 +133,7 @@ func (r *MemoryRepository) AddChunk(_ context.Context, id, index int) error {
 		return nil
 	}
 	session.UploadedChunks = append(slices.Clone(session.UploadedChunks), index)
+	session.ExpiresAt = expiresAt
 	session.Updated = r.now()
 	r.sessions[id] = session
 	return nil
@@ -164,7 +167,7 @@ func (r *MemoryRepository) Complete(_ context.Context, id int, hash, mimeType st
 	return changed && missing == nil, nil
 }
 
-func (r *MemoryRepository) ListStale(_ context.Context, before time.Time, limit int) ([]upload.Session, error) {
+func (r *MemoryRepository) ListStale(_ context.Context, now, before time.Time, limit int) ([]upload.Session, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	out := []upload.Session{}
@@ -176,7 +179,7 @@ func (r *MemoryRepository) ListStale(_ context.Context, before time.Time, limit 
 		case upload.StatusUploading:
 			stale = session.ExpiresAt.Before(before)
 		case upload.StatusCompleted:
-			stale = session.Updated.Before(before) && !r.attached[session.ID]
+			stale = session.Updated.Before(before) && !r.attached[session.ID] && !r.liveUpload(session.CreatorID, now)
 		}
 		if stale {
 			out = append(out, session)
@@ -193,6 +196,21 @@ func (r *MemoryRepository) HasFile(_ context.Context, sessionID int) (bool, erro
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	return r.attached[sessionID], nil
+}
+
+func (r *MemoryRepository) HasLiveUpload(_ context.Context, creatorID int, now time.Time) (bool, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.liveUpload(creatorID, now), nil
+}
+
+func (r *MemoryRepository) liveUpload(creatorID int, now time.Time) bool {
+	for _, session := range r.sessions {
+		if session.CreatorID == creatorID && session.Status == upload.StatusUploading && !session.Expired(now) {
+			return true
+		}
+	}
+	return false
 }
 
 func (r *MemoryRepository) ReferencedPaths(_ context.Context, paths []string) (map[string]bool, error) {

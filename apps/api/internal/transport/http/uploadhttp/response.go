@@ -7,13 +7,14 @@ import (
 )
 
 type ongoingUploadDTO struct {
-	UploadSessionID int       `json:"upload_session_id"`
-	FileName        string    `json:"file_name"`
-	TotalSize       int64     `json:"total_size"`
-	ChunkSize       int64     `json:"chunk_size"`
-	UploadedChunks  []int     `json:"uploaded_chunks"`
-	TotalChunks     int       `json:"total_chunks"`
-	ExpiresAt       time.Time `json:"expires_at"`
+	UploadSessionID int                  `json:"upload_session_id"`
+	Status          upload.SessionStatus `json:"status" enum:"UPLOADING,COMPLETED" doc:"COMPLETED sessions are finished uploads not yet in a resource"`
+	FileName        string               `json:"file_name"`
+	TotalSize       int64                `json:"total_size"`
+	ChunkSize       int64                `json:"chunk_size"`
+	UploadedChunks  []int                `json:"uploaded_chunks"`
+	TotalChunks     int                  `json:"total_chunks"`
+	ExpiresAt       time.Time            `json:"expires_at"`
 }
 
 type initUploadDTO struct {
@@ -47,9 +48,9 @@ type AllowanceDTO struct {
 	Approved      int         `json:"approved" doc:"Published resources of the uploader"`
 	Trusted       bool        `json:"trusted" doc:"Trusted tier granted by an admin"`
 	FrozenUntil   *time.Time  `json:"frozen_until" doc:"Set while a violation keeps the uploader one tier down"`
-	Stored        int64       `json:"stored" doc:"Bytes of the uploader's files in active resources"`
+	Stored        int64       `json:"stored" doc:"Bytes of the uploader's files in active resources and of finished uploads not yet in a resource"`
 	StoredLimit   *int64      `json:"stored_limit" doc:"Null when unlimited; counts stored and in-flight bytes"`
-	InFlight      int64       `json:"in_flight" doc:"Bytes of uploads not yet attached to a resource"`
+	InFlight      int64       `json:"in_flight" doc:"Bytes of uploads in progress"`
 	InFlightLimit int64       `json:"in_flight_limit"`
 	MaxFileSize   *int64      `json:"max_file_size" doc:"Null when unlimited"`
 }
@@ -75,6 +76,7 @@ func toOngoingUpload(s upload.Session) ongoingUploadDTO {
 	}
 	return ongoingUploadDTO{
 		UploadSessionID: s.ID,
+		Status:          s.Status,
 		FileName:        s.FileName,
 		TotalSize:       s.TotalSize,
 		ChunkSize:       s.ChunkSize,

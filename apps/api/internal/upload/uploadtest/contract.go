@@ -53,17 +53,18 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		}
 	})
 
-	t.Run("chunks are recorded once in arrival order", func(t *testing.T) {
+	t.Run("chunks are recorded once in arrival order and extend the session", func(t *testing.T) {
 		env := newEnv(t)
 		created, _ := env.Repo.CreateSession(ctx, newSession(env.NewUser(t), "/spool/a.part", later))
+		extended := later.Add(time.Hour).Truncate(time.Millisecond)
 		for _, index := range []int{2, 0, 2} {
-			if err := env.Repo.AddChunk(ctx, created.ID, index); err != nil {
+			if err := env.Repo.AddChunk(ctx, created.ID, index, extended); err != nil {
 				t.Fatal(err)
 			}
 		}
 		got, _ := env.Repo.GetSession(ctx, created.ID)
-		if !slices.Equal(got.UploadedChunks, []int{2, 0}) {
-			t.Fatalf("chunks %v", got.UploadedChunks)
+		if !slices.Equal(got.UploadedChunks, []int{2, 0}) || !got.ExpiresAt.Equal(extended) {
+			t.Fatalf("chunks %v expires %v", got.UploadedChunks, got.ExpiresAt)
 		}
 	})
 
@@ -94,7 +95,7 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		user := env.NewUser(t)
 		started, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/p1.part", later))
 		halfway, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/p2.part", later))
-		if err := env.Repo.AddChunk(ctx, halfway.ID, 0); err != nil {
+		if err := env.Repo.AddChunk(ctx, halfway.ID, 0, later); err != nil {
 			t.Fatal(err)
 		}
 		_, _ = env.Repo.CreateSession(ctx, newSession(user, "/spool/p3.part", time.Now().Add(-time.Minute)))
@@ -106,7 +107,7 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		}
 	})
 
-	t.Run("ongoing lists only live uploads of the creator", func(t *testing.T) {
+	t.Run("ongoing lists live uploads and finished uploads not yet in a resource", func(t *testing.T) {
 		env := newEnv(t)
 		user, other := env.NewUser(t), env.NewUser(t)
 		first, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/c1.part", later))
@@ -115,11 +116,16 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		done, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/c4.part", later))
 		_, _ = env.Repo.SetStatus(ctx, done.ID, upload.StatusUploading, upload.StatusAborted)
 		_, _ = env.Repo.CreateSession(ctx, newSession(other, "/spool/c5.part", later))
-		got, err := env.Repo.ListUploading(ctx, user, time.Now(), 10)
-		if err != nil || len(got) != 2 || got[0].ID != first.ID || got[1].ID != second.ID {
+		finished, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/c6.part", later))
+		_, _ = env.Repo.Complete(ctx, finished.ID, "digest", upload.DefaultMimeType)
+		used, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/c7.part", later))
+		_, _ = env.Repo.Complete(ctx, used.ID, "digest", upload.DefaultMimeType)
+		env.AttachFile(t, used.ID, "/spool/c7.part")
+		got, err := env.Repo.ListOngoing(ctx, user, time.Now(), 10)
+		if err != nil || len(got) != 3 || got[0].ID != first.ID || got[1].ID != second.ID || got[2].ID != finished.ID || got[2].Status != upload.StatusCompleted {
 			t.Fatalf("ongoing %+v %v", got, err)
 		}
-		limited, _ := env.Repo.ListUploading(ctx, user, time.Now(), 1)
+		limited, _ := env.Repo.ListOngoing(ctx, user, time.Now(), 1)
 		if len(limited) != 1 {
 			t.Fatalf("limit ignored: %+v", limited)
 		}
@@ -127,12 +133,14 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 
 	t.Run("stale sessions and referenced paths", func(t *testing.T) {
 		env := newEnv(t)
-		user := env.NewUser(t)
+		user, idle := env.NewUser(t), env.NewUser(t)
 		aborted, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/s1.part", later))
 		_, _ = env.Repo.SetStatus(ctx, aborted.ID, upload.StatusUploading, upload.StatusAborted)
 		expiredUpload, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/s2.part", time.Now().Add(-48*time.Hour)))
 		live, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/s3.part", later))
-		orphanCompleted, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/s4.part", later))
+		keptCompleted, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/s4.part", later))
+		_, _ = env.Repo.Complete(ctx, keptCompleted.ID, "digest", upload.DefaultMimeType)
+		orphanCompleted, _ := env.Repo.CreateSession(ctx, newSession(idle, "/spool/s7.part", later))
 		_, _ = env.Repo.Complete(ctx, orphanCompleted.ID, "digest", upload.DefaultMimeType)
 		attached, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/s5.part", later))
 		_, _ = env.Repo.Complete(ctx, attached.ID, "digest", upload.DefaultMimeType)
@@ -140,7 +148,8 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		finished, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/s6.part", time.Now().Add(-48*time.Hour)))
 		_, _ = env.Repo.SetStatus(ctx, finished.ID, upload.StatusUploading, upload.StatusExpired)
 
-		stale, err := env.Repo.ListStale(ctx, time.Now().Add(time.Hour), 10)
+		now := time.Now()
+		stale, err := env.Repo.ListStale(ctx, now, now.Add(time.Hour), 10)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -149,9 +158,15 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 			ids = append(ids, session.ID)
 		}
 		if !slices.Equal(ids, []int{aborted.ID, expiredUpload.ID, orphanCompleted.ID}) {
-			t.Fatalf("stale ids %v (live %d attached %d expired %d)", ids, live.ID, attached.ID, finished.ID)
+			t.Fatalf("stale ids %v (live %d kept %d attached %d expired %d)", ids, live.ID, keptCompleted.ID, attached.ID, finished.ID)
 		}
-		recent, _ := env.Repo.ListStale(ctx, time.Now().Add(-time.Hour), 10)
+		if busy, err := env.Repo.HasLiveUpload(ctx, user, now); err != nil || !busy {
+			t.Fatalf("a user with an upload in progress: %v %v", busy, err)
+		}
+		if busy, _ := env.Repo.HasLiveUpload(ctx, idle, now); busy {
+			t.Fatal("finished uploads are not live")
+		}
+		recent, _ := env.Repo.ListStale(ctx, now, now.Add(-time.Hour), 10)
 		for _, session := range recent {
 			if session.ID == orphanCompleted.ID {
 				t.Fatal("recently completed sessions are not stale yet")

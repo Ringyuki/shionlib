@@ -87,7 +87,7 @@ var (
 	InFlightLimit = setting.Bytes(setting.Spec[int64]{
 		Name:        "upload.in_flight_limit",
 		Label:       "每人同时上传的总大小上限",
-		Description: "一个人正在上传的文件，加上已经上传完但还没有添加到资源里的文件，总大小不能超过这个值。",
+		Description: "一个人正在上传的文件总大小不能超过这个值。已经上传完、还没有添加到资源里的文件不算在内，它们计入存储上限。",
 		Default:     30 * gib, Min: gib, Max: tib,
 	})
 	SpoolReserve = setting.Bytes(setting.Spec[int64]{

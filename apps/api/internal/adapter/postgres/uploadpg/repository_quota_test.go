@@ -133,16 +133,19 @@ func TestStoredBytesCountStoredFilesOfActiveResources(t *testing.T) {
 	addFile(uploader, removed, download.FileTypeObjectStore, 1000)
 	addFile(db.User(t), active, download.FileTypeObjectStore, 1000)
 
+	sessions := uploadpg.NewRepository(db.Ent)
+	finished := newSession(t, sessions, uploader, "/spool/finished.sltf", time.Now().Add(time.Hour))
+	db.Ent.GameUploadSession.UpdateOneID(finished.ID).SetStatus(gameuploadsession.StatusCOMPLETED).ExecX(ctx)
 	stored, err := repo.StoredBytes(ctx, uploader)
-	if err != nil || stored != 123 {
-		t.Fatalf("stored bytes %d %v", stored, err)
+	if err != nil || stored != 123+finished.TotalSize {
+		t.Fatalf("stored bytes count files and finished uploads not yet in a resource: %d %v", stored, err)
 	}
 	if none, err := repo.StoredBytes(ctx, db.User(t)); err != nil || none != 0 {
 		t.Fatalf("users without files store nothing: %d %v", none, err)
 	}
 }
 
-func TestInFlightBytesCountLiveAndUnattachedUploads(t *testing.T) {
+func TestInFlightBytesCountUploadsInProgress(t *testing.T) {
 	ctx := context.Background()
 	db := pgtest.New(t)
 	repo := uploadpg.NewRepository(db.Ent)
@@ -167,7 +170,7 @@ func TestInFlightBytesCountLiveAndUnattachedUploads(t *testing.T) {
 	newSession(t, repo, db.User(t), "/spool/other.sltf", now.Add(time.Hour))
 
 	inFlight, err := quotas.InFlightBytes(ctx, uploader, now)
-	if err != nil || inFlight != 200 {
+	if err != nil || inFlight != 100 {
 		t.Fatalf("in-flight bytes %d %v", inFlight, err)
 	}
 }

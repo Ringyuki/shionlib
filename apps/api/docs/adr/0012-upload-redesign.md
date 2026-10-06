@@ -49,10 +49,16 @@ Malware scanning streamed whole files to ClamAV. The legacy `clamscan` skipped f
   - Uploaders get one message when a resource is published (`ResourcePublished`), however the last unfinished file went (stored, rejected or deleted), one per file added to an already published resource, and one per rejected file or set naming the files, the reason and any missing volume numbers.
 
 - **Upload allowance follows the uploader's tier and is derived from records**, so nothing is charged, refunded or reset.
-  - *Stored* bytes are the files in object storage of the uploader's active resources. *In-flight* bytes are live upload sessions plus completed uploads not attached to a file yet. Deleting a resource or a rejected file frees its space at once.
+  - *Stored* bytes are the uploader's files in active resources plus finished uploads not yet in a resource. *In-flight* bytes are uploads in progress. Deleting a resource or a rejected file frees its space at once.
+  - A resource is created only once all its files are uploaded, so finished uploads count as stored rather than in flight; otherwise a resource larger than the in-flight limit could never be completed.
   - Tiers, with every number a setting: new uploader (`upload.new_uploader_quota`, 50 GiB); regular after `upload.regular_after` (3) published resources (`upload.regular_quota`, 300 GiB); trusted after `upload.trusted_after` (30) published resources or when an admin grants it (`PATCH /admin/users/{id}/upload-trust`, `upload.trusted_quota`, 2 TiB); admins unlimited. Stored plus in-flight bytes stay within the tier's limit.
   - A violation is malware confirmed by an admin or a valid report of medium level or above. It drops the uploader one tier for `upload.violation_freeze` (30 days), and a regular uploader stays a new uploader while the violation is within `upload.violation_window` (90 days). Bans and their messages are unchanged; the penalty message says whether the tier dropped.
   - Every uploader has at most `upload.in_flight_limit` (30 GiB) in flight (`USER_UPLOAD_IN_FLIGHT_EXCEEDED`). New and regular uploaders have at most `upload.max_file_size` (30 GiB) per file.
+- **Upload sessions follow the browser's upload manager.**
+  - Every accepted chunk extends the session by `upload.session_ttl`, so a session expires only after that long without progress.
+  - `GET /uploads/large/ongoing` also lists finished uploads not yet in a resource (`status: COMPLETED`), and `DELETE /uploads/large/{id}` discards them.
+  - A finished upload not yet in a resource is cleaned up six hours after it finished, but only while its uploader has no upload in progress, so the first files of a resource wait for the last one.
+  - Completing a session again with the same digest succeeds, so a client can retry a completion whose response it never received.
   - An upload starts only if the spool keeps `upload.spool_reserve` (20 GiB) free after the bytes that live uploads have still to write (`UPLOAD_SPOOL_FULL`). Uploads are admitted one at a time under a transaction lock, so concurrent starts cannot overrun these limits.
   - `GET /uploads/quota` returns the tier, the counts behind it, any freeze, and the usage and limits.
 

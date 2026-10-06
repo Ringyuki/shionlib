@@ -100,7 +100,7 @@ func TestSessionLifecycle(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, index := range []int{2, 0, 2} {
-		if err := repo.AddChunk(ctx, session.ID, index); err != nil {
+		if err := repo.AddChunk(ctx, session.ID, index, base.Add(time.Hour)); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -151,34 +151,6 @@ func TestSessionLifecycle(t *testing.T) {
 	}
 }
 
-func TestListUploading(t *testing.T) {
-	ctx := context.Background()
-	db := pgtest.New(t)
-	repo := uploadpg.NewRepository(db.Ent)
-	creator, other := db.User(t), db.User(t)
-
-	active := newSession(t, repo, creator, "/spool/a.sltf", base.Add(time.Hour))
-	second := newSession(t, repo, creator, "/spool/b.sltf", base.Add(2*time.Hour))
-	newSession(t, repo, creator, "/spool/c.sltf", base.Add(-time.Minute))
-	completed := newSession(t, repo, creator, "/spool/d.sltf", base.Add(time.Hour))
-	if _, err := repo.Complete(ctx, completed.ID, "hash", upload.DefaultMimeType); err != nil {
-		t.Fatal(err)
-	}
-	newSession(t, repo, other, "/spool/e.sltf", base.Add(time.Hour))
-
-	sessions, err := repo.ListUploading(ctx, creator, base, 10)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(sessions) != 2 || sessions[0].ID != active.ID || sessions[1].ID != second.ID {
-		t.Fatalf("only the caller's unexpired uploading sessions are listed: %+v", sessions)
-	}
-	limited, _ := repo.ListUploading(ctx, creator, base, 1)
-	if len(limited) != 1 {
-		t.Fatalf("limit ignored: %+v", limited)
-	}
-}
-
 func TestListStaleAndReferencedPaths(t *testing.T) {
 	ctx := context.Background()
 	db := pgtest.New(t)
@@ -214,7 +186,7 @@ func TestListStaleAndReferencedPaths(t *testing.T) {
 		c.SetUploadSessionID(attachedCompleted.ID).SetFilePath("/spool/file-only.sltf")
 	})
 
-	stale, err := repo.ListStale(ctx, cutoff, 10)
+	stale, err := repo.ListStale(ctx, now, cutoff, 10)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -225,7 +197,7 @@ func TestListStaleAndReferencedPaths(t *testing.T) {
 	if !slices.Equal(ids, []int{aborted.ID, expiredUpload.ID, orphanCompleted.ID}) {
 		t.Fatalf("unexpected stale sessions %v", ids)
 	}
-	if limited, _ := repo.ListStale(ctx, cutoff, 1); len(limited) != 1 || limited[0].ID != aborted.ID {
+	if limited, _ := repo.ListStale(ctx, now, cutoff, 1); len(limited) != 1 || limited[0].ID != aborted.ID {
 		t.Fatalf("stale listing is bounded and ordered: %+v", limited)
 	}
 

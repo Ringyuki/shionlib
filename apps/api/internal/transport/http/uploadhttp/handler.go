@@ -120,11 +120,11 @@ func NewHandler(service *upload.Service, quota *upload.QuotaService, resp *respo
 }
 
 func (h *Handler) Register(api *httpapi.API) {
-	httpapi.Register(api, httpapi.Route{ID: "upload.ongoing", Method: http.MethodGet, Path: "/uploads/large/ongoing", Summary: "List the caller's unfinished large uploads", Tags: tags, Access: httpapi.AccessUser}, h.ongoing)
+	httpapi.Register(api, httpapi.Route{ID: "upload.ongoing", Method: http.MethodGet, Path: "/uploads/large/ongoing", Summary: "List the caller's uploads in progress and finished uploads not yet in a resource", Tags: tags, Access: httpapi.AccessUser}, h.ongoing)
 	httpapi.Register(api, httpapi.Route{ID: "upload.init", Method: http.MethodPost, Path: "/uploads/large/init", Summary: "Start a chunked upload session", Tags: tags, Access: httpapi.AccessUser}, h.init)
 	httpapi.Register(api, httpapi.Route{ID: "upload.status", Method: http.MethodGet, Path: "/uploads/large/{id}/status", Summary: "Read an upload session", Tags: tags, Access: httpapi.AccessUser}, h.status)
 	httpapi.Register(api, httpapi.Route{ID: "upload.complete", Method: http.MethodPatch, Path: "/uploads/large/{id}/complete", Summary: "Verify and complete an upload session", Tags: tags, Access: httpapi.AccessUser}, h.complete)
-	httpapi.Register(api, httpapi.Route{ID: "upload.abort", Method: http.MethodDelete, Path: "/uploads/large/{id}", Summary: "Abort an upload session", Tags: tags, Access: httpapi.AccessUser}, h.abort)
+	httpapi.Register(api, httpapi.Route{ID: "upload.abort", Method: http.MethodDelete, Path: "/uploads/large/{id}", Summary: "Abort an upload, or discard a finished upload not yet in a resource", Tags: tags, Access: httpapi.AccessUser}, h.abort)
 	httpapi.Register(api, httpapi.Route{ID: "upload.quota", Method: http.MethodGet, Path: "/uploads/quota", Summary: "Read the caller's upload tier and limits", Tags: tags, Access: httpapi.AccessUser}, h.getQuota)
 	h.registerChunk(api)
 }

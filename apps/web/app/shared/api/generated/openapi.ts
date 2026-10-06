@@ -2725,7 +2725,7 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** List the caller's unfinished large uploads */
+        /** List the caller's uploads in progress and finished uploads not yet in a resource */
         get: operations["upload.ongoing"];
         put?: never;
         post?: never;
@@ -2745,7 +2745,7 @@ export type paths = {
         get?: never;
         put?: never;
         post?: never;
-        /** Abort an upload session */
+        /** Abort an upload, or discard a finished upload not yet in a resource */
         delete: operations["upload.abort"];
         options?: never;
         head?: never;
@@ -4463,7 +4463,7 @@ export type components = {
             frozen_until: string | null;
             /**
              * Format: int64
-             * @description Bytes of uploads not yet attached to a resource
+             * @description Bytes of uploads in progress
              */
             in_flight: number;
             /** Format: int64 */
@@ -4475,7 +4475,7 @@ export type components = {
             max_file_size: number | null;
             /**
              * Format: int64
-             * @description Bytes of the uploader's files in active resources
+             * @description Bytes of the uploader's files in active resources and of finished uploads not yet in a resource
              */
             stored: number;
             /**
@@ -7030,6 +7030,11 @@ export type components = {
             /** Format: date-time */
             expires_at: string;
             file_name: string;
+            /**
+             * @description COMPLETED sessions are finished uploads not yet in a resource
+             * @enum {string}
+             */
+            status: "UPLOADING" | "COMPLETED";
             /** Format: int64 */
             total_chunks: number;
             /** Format: int64 */

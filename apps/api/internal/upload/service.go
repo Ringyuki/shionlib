@@ -30,7 +30,7 @@ func (s *Service) ChunkLimit() int64 {
 }
 
 func (s *Service) Ongoing(ctx context.Context, who actor.Actor) ([]Session, error) {
-	return s.repo.ListUploading(ctx, who.UserID, s.now(), ongoingSessionLimit)
+	return s.repo.ListOngoing(ctx, who.UserID, s.now(), ongoingSessionLimit)
 }
 
 func (s *Service) Init(ctx context.Context, who actor.Actor, in InitInput) (Session, error) {
@@ -155,7 +155,7 @@ func (s *Service) WriteChunk(ctx context.Context, who actor.Actor, id, index int
 	if digest != chunk.SHA256 {
 		return ErrChunkSHA256Mismatch
 	}
-	return s.repo.AddChunk(ctx, session.ID, index)
+	return s.repo.AddChunk(ctx, session.ID, index, s.now().Add(SessionTTL.Read(s.settings)))
 }
 
 func (s *Service) Status(ctx context.Context, who actor.Actor, id int) (Session, error) {
@@ -177,6 +177,12 @@ func (s *Service) Complete(ctx context.Context, who actor.Actor, id int, fileHas
 	if err != nil {
 		return err
 	}
+	if session.CreatorID != who.UserID {
+		return ErrSessionNotOwner
+	}
+	if session.Status == StatusCompleted && session.FileHash == fileHash {
+		return nil
+	}
 	if session.Status != StatusUploading {
 		return ErrInvalidSessionStatus
 	}
@@ -185,9 +191,6 @@ func (s *Service) Complete(ctx context.Context, who actor.Actor, id int, fileHas
 	}
 	if session.Expired(s.now()) {
 		return ErrSessionExpired
-	}
-	if session.CreatorID != who.UserID {
-		return ErrSessionNotOwner
 	}
 	digest, err := s.spool.Digest(ctx, session.StoragePath)
 	if err != nil {
@@ -213,16 +216,13 @@ func (s *Service) Abort(ctx context.Context, who actor.Actor, id int) error {
 		if err != nil {
 			return err
 		}
-		if session.Status != StatusUploading {
-			return ErrInvalidSessionStatus
-		}
-		if session.Expired(s.now()) {
-			return ErrSessionExpired
-		}
 		if session.CreatorID != who.UserID {
 			return ErrSessionNotOwner
 		}
-		if _, err := s.repo.SetStatus(ctx, session.ID, StatusUploading, StatusAborted); err != nil {
+		if err := s.discardable(ctx, session); err != nil {
+			return err
+		}
+		if _, err := s.repo.SetStatus(ctx, session.ID, session.Status, StatusAborted); err != nil {
 			return err
 		}
 		path = session.StoragePath
@@ -233,6 +233,27 @@ func (s *Service) Abort(ctx context.Context, who actor.Actor, id int) error {
 	}
 	_ = s.removeOwned(ctx, path)
 	return nil
+}
+
+func (s *Service) discardable(ctx context.Context, session Session) error {
+	switch session.Status {
+	case StatusUploading:
+		if session.Expired(s.now()) {
+			return ErrSessionExpired
+		}
+		return nil
+	case StatusCompleted:
+		attached, err := s.repo.HasFile(ctx, session.ID)
+		if err != nil {
+			return err
+		}
+		if attached {
+			return ErrSessionAlreadyUsed
+		}
+		return nil
+	default:
+		return ErrInvalidSessionStatus
+	}
 }
 
 func (s *Service) Claim(ctx context.Context, who actor.Actor, id int) (Session, error) {
@@ -250,7 +271,8 @@ func (s *Service) Claim(ctx context.Context, who actor.Actor, id int) (Session, 
 }
 
 func (s *Service) CleanStaleSessions(ctx context.Context) error {
-	stale, err := s.repo.ListStale(ctx, s.now().Add(-staleSessionGrace), staleSessionBatch)
+	now := s.now()
+	stale, err := s.repo.ListStale(ctx, now, now.Add(-staleSessionGrace), staleSessionBatch)
 	if err != nil {
 		return err
 	}
@@ -301,7 +323,11 @@ func (s *Service) isStale(ctx context.Context, session Session) (bool, error) {
 			return false, nil
 		}
 		attached, err := s.repo.HasFile(ctx, session.ID)
-		return !attached, err
+		if err != nil || attached {
+			return false, err
+		}
+		live, err := s.repo.HasLiveUpload(ctx, session.CreatorID, s.now())
+		return !live, err
 	default:
 		return session.ExpiresAt.Before(cutoff), nil
 	}
