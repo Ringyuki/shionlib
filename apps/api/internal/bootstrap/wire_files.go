@@ -41,10 +41,7 @@ const (
 	objectStoreTimeout  = 10 * time.Minute
 	everyMinute         = "* * * * *"
 	everyTenMinutes     = "*/10 * * * *"
-	dailyAtMidnight     = "0 0 * * *"
-	monthlyAtMidnight   = "0 0 1 * *"
 	shortTaskTimeout    = 10 * time.Minute
-	quotaTaskTimeout    = 30 * time.Minute
 	scanTaskTimeout     = time.Hour
 	transferQueueBudget = download.TransferConcurrency
 )
@@ -79,7 +76,6 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		Repo:       downloadRepo,
 		Games:      shared.GameCards,
 		Sessions:   uploads,
-		Quota:      quota,
 		Activities: shared.Activities,
 		Messages:   shared.Messages,
 		Tx:         shared.Transactor,
@@ -104,7 +100,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		},
 		shared.Now,
 	)
-	transfers := download.NewTransferService(downloadRepo, store, spool, quota, shared.Activities, shared.Messages, shared.Transactor, shared.Now)
+	transfers := download.NewTransferService(downloadRepo, store, spool, shared.Activities, shared.Messages, shared.Transactor, shared.Now)
 
 	scans := scan.NewService(scan.Deps{
 		Repo:     scanpg.NewRepository(infra.Ent),
@@ -117,7 +113,6 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		Workspace:  localfs.NewWorkspace(filepath.Join(cfg.Upload.RootDir, scanWorkspaceDir)),
 		Files:      downloads,
 		Local:      spool,
-		Quota:      quota,
 		Activities: shared.Activities,
 		Messages:   shared.Messages,
 		Banner:     banner,
@@ -135,7 +130,6 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 	reports := report.NewService(report.Deps{
 		Repo:      reportpg.NewRepository(infra.Ent),
 		Resources: downloads,
-		Quota:     quota,
 		Banner:    banner,
 		Mailer:    shared.Mailer,
 		Messages:  shared.Messages,
@@ -167,20 +161,11 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		jobs.Task{Name: "download_store_requeue", Schedule: everyTenMinutes, Timeout: shortTaskTimeout, Run: func(ctx context.Context) error {
 			return downloads.RequeueStores(ctx, shared.Now().Add(-storeRequeueAge))
 		}},
-		jobs.Task{Name: "upload_quota_initial_grant", Schedule: everyTenMinutes, Timeout: quotaTaskTimeout, Run: quota.RunInitialGrants},
-		jobs.Task{Name: "upload_quota_dynamic_topup", Schedule: everyTenMinutes, Timeout: quotaTaskTimeout, Run: quota.RunDynamicTopups},
-		jobs.Task{Name: "upload_quota_dynamic_reduce", Schedule: dailyAtMidnight, Timeout: quotaTaskTimeout, Run: quota.RunDynamicReductions},
-		jobs.Task{Name: "upload_quota_reset_used", Schedule: monthlyAtMidnight, Timeout: quotaTaskTimeout, Run: quota.RunMonthlyResets},
-		jobs.Task{Name: "upload_quota_inactive_reset", Schedule: dailyAtMidnight, Timeout: quotaTaskTimeout, Run: quota.RunInactiveResets},
 	)
 }
 
 func newQuotaService(infra *Infra, shared *Shared) *upload.QuotaService {
-	location, err := time.LoadLocation(shared.Config.Tasks.ScheduleTimezone)
-	if err != nil {
-		location = time.UTC
-	}
-	return upload.NewQuotaService(uploadpg.NewQuotaRepository(infra.Ent), shared.Transactor, shared.Settings, location, shared.Now)
+	return upload.NewQuotaService(uploadpg.NewQuotaRepository(infra.Ent), shared.Settings, shared.Now)
 }
 
 type userPenalties struct {

@@ -105,9 +105,6 @@ func (r *Repository) Create(ctx context.Context, in user.NewUser) (user.User, er
 		if err != nil {
 			return translateUnique(err, "create user")
 		}
-		if err := db.UserUploadQuota.Create().SetUserID(row.ID).SetSize(0).SetUsed(0).Exec(ctx); err != nil {
-			return fmt.Errorf("create upload quota: %w", err)
-		}
 		if err := db.Favorite.Create().SetUserID(row.ID).SetName(user.DefaultFavorite).SetDefault(true).Exec(ctx); err != nil {
 			return fmt.Errorf("create default favorite: %w", err)
 		}

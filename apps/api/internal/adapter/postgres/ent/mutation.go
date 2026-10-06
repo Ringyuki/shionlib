@@ -65,8 +65,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userloginsession"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userpasskeycredential"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userpvnbinding"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/useruploadquota"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/useruploadquotarecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/walkthrough"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 )
@@ -132,8 +130,6 @@ const (
 	TypeUserLoginSession                = "UserLoginSession"
 	TypeUserPasskeyCredential           = "UserPasskeyCredential"
 	TypeUserPvnBinding                  = "UserPvnBinding"
-	TypeUserUploadQuota                 = "UserUploadQuota"
-	TypeUserUploadQuotaRecord           = "UserUploadQuotaRecord"
 	TypeWalkthrough                     = "Walkthrough"
 )
 
@@ -41856,8 +41852,6 @@ type GameUploadSessionMutation struct {
 	game_upload_chunks                 map[int]struct{}
 	removedgame_upload_chunks          map[int]struct{}
 	clearedgame_upload_chunks          bool
-	user_upload_quota_record           *int
-	cleareduser_upload_quota_record    bool
 	creator                            *int
 	clearedcreator                     bool
 	done                               bool
@@ -42652,45 +42646,6 @@ func (m *GameUploadSessionMutation) ResetGameUploadChunks() {
 	m.removedgame_upload_chunks = nil
 }
 
-// SetUserUploadQuotaRecordID sets the "user_upload_quota_record" edge to the UserUploadQuotaRecord entity by id.
-func (m *GameUploadSessionMutation) SetUserUploadQuotaRecordID(id int) {
-	m.user_upload_quota_record = &id
-}
-
-// ClearUserUploadQuotaRecord clears the "user_upload_quota_record" edge to the UserUploadQuotaRecord entity.
-func (m *GameUploadSessionMutation) ClearUserUploadQuotaRecord() {
-	m.cleareduser_upload_quota_record = true
-}
-
-// UserUploadQuotaRecordCleared reports if the "user_upload_quota_record" edge to the UserUploadQuotaRecord entity was cleared.
-func (m *GameUploadSessionMutation) UserUploadQuotaRecordCleared() bool {
-	return m.cleareduser_upload_quota_record
-}
-
-// UserUploadQuotaRecordID returns the "user_upload_quota_record" edge ID in the mutation.
-func (m *GameUploadSessionMutation) UserUploadQuotaRecordID() (id int, exists bool) {
-	if m.user_upload_quota_record != nil {
-		return *m.user_upload_quota_record, true
-	}
-	return
-}
-
-// UserUploadQuotaRecordIDs returns the "user_upload_quota_record" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UserUploadQuotaRecordID instead. It exists only for internal usage by the builders.
-func (m *GameUploadSessionMutation) UserUploadQuotaRecordIDs() (ids []int) {
-	if id := m.user_upload_quota_record; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetUserUploadQuotaRecord resets all changes to the "user_upload_quota_record" edge.
-func (m *GameUploadSessionMutation) ResetUserUploadQuotaRecord() {
-	m.user_upload_quota_record = nil
-	m.cleareduser_upload_quota_record = false
-}
-
 // ClearCreator clears the "creator" edge to the User entity.
 func (m *GameUploadSessionMutation) ClearCreator() {
 	m.clearedcreator = true
@@ -43126,15 +43081,12 @@ func (m *GameUploadSessionMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *GameUploadSessionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 3)
 	if m.game_download_resource_file != nil {
 		edges = append(edges, gameuploadsession.EdgeGameDownloadResourceFile)
 	}
 	if m.game_upload_chunks != nil {
 		edges = append(edges, gameuploadsession.EdgeGameUploadChunks)
-	}
-	if m.user_upload_quota_record != nil {
-		edges = append(edges, gameuploadsession.EdgeUserUploadQuotaRecord)
 	}
 	if m.creator != nil {
 		edges = append(edges, gameuploadsession.EdgeCreator)
@@ -43156,10 +43108,6 @@ func (m *GameUploadSessionMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case gameuploadsession.EdgeUserUploadQuotaRecord:
-		if id := m.user_upload_quota_record; id != nil {
-			return []ent.Value{*id}
-		}
 	case gameuploadsession.EdgeCreator:
 		if id := m.creator; id != nil {
 			return []ent.Value{*id}
@@ -43170,7 +43118,7 @@ func (m *GameUploadSessionMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *GameUploadSessionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 3)
 	if m.removedgame_upload_chunks != nil {
 		edges = append(edges, gameuploadsession.EdgeGameUploadChunks)
 	}
@@ -43193,15 +43141,12 @@ func (m *GameUploadSessionMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *GameUploadSessionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 3)
 	if m.clearedgame_download_resource_file {
 		edges = append(edges, gameuploadsession.EdgeGameDownloadResourceFile)
 	}
 	if m.clearedgame_upload_chunks {
 		edges = append(edges, gameuploadsession.EdgeGameUploadChunks)
-	}
-	if m.cleareduser_upload_quota_record {
-		edges = append(edges, gameuploadsession.EdgeUserUploadQuotaRecord)
 	}
 	if m.clearedcreator {
 		edges = append(edges, gameuploadsession.EdgeCreator)
@@ -43217,8 +43162,6 @@ func (m *GameUploadSessionMutation) EdgeCleared(name string) bool {
 		return m.clearedgame_download_resource_file
 	case gameuploadsession.EdgeGameUploadChunks:
 		return m.clearedgame_upload_chunks
-	case gameuploadsession.EdgeUserUploadQuotaRecord:
-		return m.cleareduser_upload_quota_record
 	case gameuploadsession.EdgeCreator:
 		return m.clearedcreator
 	}
@@ -43231,9 +43174,6 @@ func (m *GameUploadSessionMutation) ClearEdge(name string) error {
 	switch name {
 	case gameuploadsession.EdgeGameDownloadResourceFile:
 		m.ClearGameDownloadResourceFile()
-		return nil
-	case gameuploadsession.EdgeUserUploadQuotaRecord:
-		m.ClearUserUploadQuotaRecord()
 		return nil
 	case gameuploadsession.EdgeCreator:
 		m.ClearCreator()
@@ -43251,9 +43191,6 @@ func (m *GameUploadSessionMutation) ResetEdge(name string) error {
 		return nil
 	case gameuploadsession.EdgeGameUploadChunks:
 		m.ResetGameUploadChunks()
-		return nil
-	case gameuploadsession.EdgeUserUploadQuotaRecord:
-		m.ResetUserUploadQuotaRecord()
 		return nil
 	case gameuploadsession.EdgeCreator:
 		m.ResetCreator()
@@ -52677,6 +52614,7 @@ type UserMutation struct {
 	email_verified_at                            *time.Time
 	last_login_at                                *time.Time
 	two_factor_enabled                           *bool
+	upload_trusted                               *bool
 	sponsor_expires_at                           *time.Time
 	created                                      *time.Time
 	updated                                      *time.Time
@@ -52746,8 +52684,6 @@ type UserMutation struct {
 	game_upload_sessions                         map[int]struct{}
 	removedgame_upload_sessions                  map[int]struct{}
 	clearedgame_upload_sessions                  bool
-	upload_quota                                 *int
-	clearedupload_quota                          bool
 	walkthroughs                                 map[int]struct{}
 	removedwalkthroughs                          map[int]struct{}
 	clearedwalkthroughs                          bool
@@ -53571,6 +53507,42 @@ func (m *UserMutation) OldTwoFactorEnabled(ctx context.Context) (v bool, err err
 // ResetTwoFactorEnabled resets all changes to the "two_factor_enabled" field.
 func (m *UserMutation) ResetTwoFactorEnabled() {
 	m.two_factor_enabled = nil
+}
+
+// SetUploadTrusted sets the "upload_trusted" field.
+func (m *UserMutation) SetUploadTrusted(b bool) {
+	m.upload_trusted = &b
+}
+
+// UploadTrusted returns the value of the "upload_trusted" field in the mutation.
+func (m *UserMutation) UploadTrusted() (r bool, exists bool) {
+	v := m.upload_trusted
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUploadTrusted returns the old "upload_trusted" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldUploadTrusted(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUploadTrusted is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUploadTrusted requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUploadTrusted: %w", err)
+	}
+	return oldValue.UploadTrusted, nil
+}
+
+// ResetUploadTrusted resets all changes to the "upload_trusted" field.
+func (m *UserMutation) ResetUploadTrusted() {
+	m.upload_trusted = nil
 }
 
 // SetSponsorExpiresAt sets the "sponsor_expires_at" field.
@@ -54867,45 +54839,6 @@ func (m *UserMutation) ResetGameUploadSessions() {
 	m.removedgame_upload_sessions = nil
 }
 
-// SetUploadQuotaID sets the "upload_quota" edge to the UserUploadQuota entity by id.
-func (m *UserMutation) SetUploadQuotaID(id int) {
-	m.upload_quota = &id
-}
-
-// ClearUploadQuota clears the "upload_quota" edge to the UserUploadQuota entity.
-func (m *UserMutation) ClearUploadQuota() {
-	m.clearedupload_quota = true
-}
-
-// UploadQuotaCleared reports if the "upload_quota" edge to the UserUploadQuota entity was cleared.
-func (m *UserMutation) UploadQuotaCleared() bool {
-	return m.clearedupload_quota
-}
-
-// UploadQuotaID returns the "upload_quota" edge ID in the mutation.
-func (m *UserMutation) UploadQuotaID() (id int, exists bool) {
-	if m.upload_quota != nil {
-		return *m.upload_quota, true
-	}
-	return
-}
-
-// UploadQuotaIDs returns the "upload_quota" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UploadQuotaID instead. It exists only for internal usage by the builders.
-func (m *UserMutation) UploadQuotaIDs() (ids []int) {
-	if id := m.upload_quota; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetUploadQuota resets all changes to the "upload_quota" edge.
-func (m *UserMutation) ResetUploadQuota() {
-	m.upload_quota = nil
-	m.clearedupload_quota = false
-}
-
 // AddWalkthroughIDs adds the "walkthroughs" edge to the Walkthrough entity by ids.
 func (m *UserMutation) AddWalkthroughIDs(ids ...int) {
 	if m.walkthroughs == nil {
@@ -55264,7 +55197,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 18)
+	fields := make([]string, 0, 19)
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
 	}
@@ -55309,6 +55242,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.two_factor_enabled != nil {
 		fields = append(fields, user.FieldTwoFactorEnabled)
+	}
+	if m.upload_trusted != nil {
+		fields = append(fields, user.FieldUploadTrusted)
 	}
 	if m.sponsor_expires_at != nil {
 		fields = append(fields, user.FieldSponsorExpiresAt)
@@ -55357,6 +55293,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.LastLoginAt()
 	case user.FieldTwoFactorEnabled:
 		return m.TwoFactorEnabled()
+	case user.FieldUploadTrusted:
+		return m.UploadTrusted()
 	case user.FieldSponsorExpiresAt:
 		return m.SponsorExpiresAt()
 	case user.FieldCreated:
@@ -55402,6 +55340,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldLastLoginAt(ctx)
 	case user.FieldTwoFactorEnabled:
 		return m.OldTwoFactorEnabled(ctx)
+	case user.FieldUploadTrusted:
+		return m.OldUploadTrusted(ctx)
 	case user.FieldSponsorExpiresAt:
 		return m.OldSponsorExpiresAt(ctx)
 	case user.FieldCreated:
@@ -55521,6 +55461,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTwoFactorEnabled(v)
+		return nil
+	case user.FieldUploadTrusted:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUploadTrusted(v)
 		return nil
 	case user.FieldSponsorExpiresAt:
 		v, ok := value.(time.Time)
@@ -55733,6 +55680,9 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldTwoFactorEnabled:
 		m.ResetTwoFactorEnabled()
 		return nil
+	case user.FieldUploadTrusted:
+		m.ResetUploadTrusted()
+		return nil
 	case user.FieldSponsorExpiresAt:
 		m.ResetSponsorExpiresAt()
 		return nil
@@ -55748,7 +55698,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 29)
+	edges := make([]string, 0, 28)
 	if m.activities != nil {
 		edges = append(edges, user.EdgeActivities)
 	}
@@ -55814,9 +55764,6 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.game_upload_sessions != nil {
 		edges = append(edges, user.EdgeGameUploadSessions)
-	}
-	if m.upload_quota != nil {
-		edges = append(edges, user.EdgeUploadQuota)
 	}
 	if m.walkthroughs != nil {
 		edges = append(edges, user.EdgeWalkthroughs)
@@ -55973,10 +55920,6 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeUploadQuota:
-		if id := m.upload_quota; id != nil {
-			return []ent.Value{*id}
-		}
 	case user.EdgeWalkthroughs:
 		ids := make([]ent.Value, 0, len(m.walkthroughs))
 		for id := range m.walkthroughs {
@@ -56019,7 +55962,7 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 29)
+	edges := make([]string, 0, 28)
 	if m.removedactivities != nil {
 		edges = append(edges, user.EdgeActivities)
 	}
@@ -56276,7 +56219,7 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 29)
+	edges := make([]string, 0, 28)
 	if m.clearedactivities {
 		edges = append(edges, user.EdgeActivities)
 	}
@@ -56342,9 +56285,6 @@ func (m *UserMutation) ClearedEdges() []string {
 	}
 	if m.clearedgame_upload_sessions {
 		edges = append(edges, user.EdgeGameUploadSessions)
-	}
-	if m.clearedupload_quota {
-		edges = append(edges, user.EdgeUploadQuota)
 	}
 	if m.clearedwalkthroughs {
 		edges = append(edges, user.EdgeWalkthroughs)
@@ -56415,8 +56355,6 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedpotatovn_binding
 	case user.EdgeGameUploadSessions:
 		return m.clearedgame_upload_sessions
-	case user.EdgeUploadQuota:
-		return m.clearedupload_quota
 	case user.EdgeWalkthroughs:
 		return m.clearedwalkthroughs
 	case user.EdgeBannedRecords:
@@ -56439,9 +56377,6 @@ func (m *UserMutation) ClearEdge(name string) error {
 	switch name {
 	case user.EdgePotatovnBinding:
 		m.ClearPotatovnBinding()
-		return nil
-	case user.EdgeUploadQuota:
-		m.ClearUploadQuota()
 		return nil
 	}
 	return fmt.Errorf("unknown User unique edge %s", name)
@@ -56516,9 +56451,6 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgeGameUploadSessions:
 		m.ResetGameUploadSessions()
-		return nil
-	case user.EdgeUploadQuota:
-		m.ResetUploadQuota()
 		return nil
 	case user.EdgeWalkthroughs:
 		m.ResetWalkthroughs()
@@ -62738,1757 +62670,6 @@ func (m *UserPvnBindingMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown UserPvnBinding edge %s", name)
-}
-
-// UserUploadQuotaMutation represents an operation that mutates the UserUploadQuota nodes in the graph.
-type UserUploadQuotaMutation struct {
-	config
-	op             Op
-	typ            string
-	id             *int
-	size           *int64
-	addsize        *int64
-	used           *int64
-	addused        *int64
-	is_first_grant *bool
-	created        *time.Time
-	updated        *time.Time
-	clearedFields  map[string]struct{}
-	records        map[int]struct{}
-	removedrecords map[int]struct{}
-	clearedrecords bool
-	user           *int
-	cleareduser    bool
-	done           bool
-	oldValue       func(context.Context) (*UserUploadQuota, error)
-	predicates     []predicate.UserUploadQuota
-}
-
-var _ ent.Mutation = (*UserUploadQuotaMutation)(nil)
-
-// useruploadquotaOption allows management of the mutation configuration using functional options.
-type useruploadquotaOption func(*UserUploadQuotaMutation)
-
-// newUserUploadQuotaMutation creates new mutation for the UserUploadQuota entity.
-func newUserUploadQuotaMutation(c config, op Op, opts ...useruploadquotaOption) *UserUploadQuotaMutation {
-	m := &UserUploadQuotaMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeUserUploadQuota,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withUserUploadQuotaID sets the ID field of the mutation.
-func withUserUploadQuotaID(id int) useruploadquotaOption {
-	return func(m *UserUploadQuotaMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *UserUploadQuota
-		)
-		m.oldValue = func(ctx context.Context) (*UserUploadQuota, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().UserUploadQuota.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withUserUploadQuota sets the old UserUploadQuota of the mutation.
-func withUserUploadQuota(node *UserUploadQuota) useruploadquotaOption {
-	return func(m *UserUploadQuotaMutation) {
-		m.oldValue = func(context.Context) (*UserUploadQuota, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m UserUploadQuotaMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m UserUploadQuotaMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of UserUploadQuota entities.
-func (m *UserUploadQuotaMutation) SetID(id int) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *UserUploadQuotaMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *UserUploadQuotaMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().UserUploadQuota.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetSize sets the "size" field.
-func (m *UserUploadQuotaMutation) SetSize(i int64) {
-	m.size = &i
-	m.addsize = nil
-}
-
-// Size returns the value of the "size" field in the mutation.
-func (m *UserUploadQuotaMutation) Size() (r int64, exists bool) {
-	v := m.size
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSize returns the old "size" field's value of the UserUploadQuota entity.
-// If the UserUploadQuota object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserUploadQuotaMutation) OldSize(ctx context.Context) (v int64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSize is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSize requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSize: %w", err)
-	}
-	return oldValue.Size, nil
-}
-
-// AddSize adds i to the "size" field.
-func (m *UserUploadQuotaMutation) AddSize(i int64) {
-	if m.addsize != nil {
-		*m.addsize += i
-	} else {
-		m.addsize = &i
-	}
-}
-
-// AddedSize returns the value that was added to the "size" field in this mutation.
-func (m *UserUploadQuotaMutation) AddedSize() (r int64, exists bool) {
-	v := m.addsize
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetSize resets all changes to the "size" field.
-func (m *UserUploadQuotaMutation) ResetSize() {
-	m.size = nil
-	m.addsize = nil
-}
-
-// SetUsed sets the "used" field.
-func (m *UserUploadQuotaMutation) SetUsed(i int64) {
-	m.used = &i
-	m.addused = nil
-}
-
-// Used returns the value of the "used" field in the mutation.
-func (m *UserUploadQuotaMutation) Used() (r int64, exists bool) {
-	v := m.used
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUsed returns the old "used" field's value of the UserUploadQuota entity.
-// If the UserUploadQuota object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserUploadQuotaMutation) OldUsed(ctx context.Context) (v int64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUsed is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUsed requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUsed: %w", err)
-	}
-	return oldValue.Used, nil
-}
-
-// AddUsed adds i to the "used" field.
-func (m *UserUploadQuotaMutation) AddUsed(i int64) {
-	if m.addused != nil {
-		*m.addused += i
-	} else {
-		m.addused = &i
-	}
-}
-
-// AddedUsed returns the value that was added to the "used" field in this mutation.
-func (m *UserUploadQuotaMutation) AddedUsed() (r int64, exists bool) {
-	v := m.addused
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetUsed resets all changes to the "used" field.
-func (m *UserUploadQuotaMutation) ResetUsed() {
-	m.used = nil
-	m.addused = nil
-}
-
-// SetUserID sets the "user_id" field.
-func (m *UserUploadQuotaMutation) SetUserID(i int) {
-	m.user = &i
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *UserUploadQuotaMutation) UserID() (r int, exists bool) {
-	v := m.user
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the UserUploadQuota entity.
-// If the UserUploadQuota object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserUploadQuotaMutation) OldUserID(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *UserUploadQuotaMutation) ResetUserID() {
-	m.user = nil
-}
-
-// SetIsFirstGrant sets the "is_first_grant" field.
-func (m *UserUploadQuotaMutation) SetIsFirstGrant(b bool) {
-	m.is_first_grant = &b
-}
-
-// IsFirstGrant returns the value of the "is_first_grant" field in the mutation.
-func (m *UserUploadQuotaMutation) IsFirstGrant() (r bool, exists bool) {
-	v := m.is_first_grant
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldIsFirstGrant returns the old "is_first_grant" field's value of the UserUploadQuota entity.
-// If the UserUploadQuota object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserUploadQuotaMutation) OldIsFirstGrant(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIsFirstGrant is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIsFirstGrant requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIsFirstGrant: %w", err)
-	}
-	return oldValue.IsFirstGrant, nil
-}
-
-// ResetIsFirstGrant resets all changes to the "is_first_grant" field.
-func (m *UserUploadQuotaMutation) ResetIsFirstGrant() {
-	m.is_first_grant = nil
-}
-
-// SetCreated sets the "created" field.
-func (m *UserUploadQuotaMutation) SetCreated(t time.Time) {
-	m.created = &t
-}
-
-// Created returns the value of the "created" field in the mutation.
-func (m *UserUploadQuotaMutation) Created() (r time.Time, exists bool) {
-	v := m.created
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreated returns the old "created" field's value of the UserUploadQuota entity.
-// If the UserUploadQuota object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserUploadQuotaMutation) OldCreated(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreated is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreated requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreated: %w", err)
-	}
-	return oldValue.Created, nil
-}
-
-// ResetCreated resets all changes to the "created" field.
-func (m *UserUploadQuotaMutation) ResetCreated() {
-	m.created = nil
-}
-
-// SetUpdated sets the "updated" field.
-func (m *UserUploadQuotaMutation) SetUpdated(t time.Time) {
-	m.updated = &t
-}
-
-// Updated returns the value of the "updated" field in the mutation.
-func (m *UserUploadQuotaMutation) Updated() (r time.Time, exists bool) {
-	v := m.updated
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdated returns the old "updated" field's value of the UserUploadQuota entity.
-// If the UserUploadQuota object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserUploadQuotaMutation) OldUpdated(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdated is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdated requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdated: %w", err)
-	}
-	return oldValue.Updated, nil
-}
-
-// ResetUpdated resets all changes to the "updated" field.
-func (m *UserUploadQuotaMutation) ResetUpdated() {
-	m.updated = nil
-}
-
-// AddRecordIDs adds the "records" edge to the UserUploadQuotaRecord entity by ids.
-func (m *UserUploadQuotaMutation) AddRecordIDs(ids ...int) {
-	if m.records == nil {
-		m.records = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.records[ids[i]] = struct{}{}
-	}
-}
-
-// ClearRecords clears the "records" edge to the UserUploadQuotaRecord entity.
-func (m *UserUploadQuotaMutation) ClearRecords() {
-	m.clearedrecords = true
-}
-
-// RecordsCleared reports if the "records" edge to the UserUploadQuotaRecord entity was cleared.
-func (m *UserUploadQuotaMutation) RecordsCleared() bool {
-	return m.clearedrecords
-}
-
-// RemoveRecordIDs removes the "records" edge to the UserUploadQuotaRecord entity by IDs.
-func (m *UserUploadQuotaMutation) RemoveRecordIDs(ids ...int) {
-	if m.removedrecords == nil {
-		m.removedrecords = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.records, ids[i])
-		m.removedrecords[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedRecords returns the removed IDs of the "records" edge to the UserUploadQuotaRecord entity.
-func (m *UserUploadQuotaMutation) RemovedRecordsIDs() (ids []int) {
-	for id := range m.removedrecords {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// RecordsIDs returns the "records" edge IDs in the mutation.
-func (m *UserUploadQuotaMutation) RecordsIDs() (ids []int) {
-	for id := range m.records {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetRecords resets all changes to the "records" edge.
-func (m *UserUploadQuotaMutation) ResetRecords() {
-	m.records = nil
-	m.clearedrecords = false
-	m.removedrecords = nil
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (m *UserUploadQuotaMutation) ClearUser() {
-	m.cleareduser = true
-	m.clearedFields[useruploadquota.FieldUserID] = struct{}{}
-}
-
-// UserCleared reports if the "user" edge to the User entity was cleared.
-func (m *UserUploadQuotaMutation) UserCleared() bool {
-	return m.cleareduser
-}
-
-// UserIDs returns the "user" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UserID instead. It exists only for internal usage by the builders.
-func (m *UserUploadQuotaMutation) UserIDs() (ids []int) {
-	if id := m.user; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetUser resets all changes to the "user" edge.
-func (m *UserUploadQuotaMutation) ResetUser() {
-	m.user = nil
-	m.cleareduser = false
-}
-
-// Where appends a list predicates to the UserUploadQuotaMutation builder.
-func (m *UserUploadQuotaMutation) Where(ps ...predicate.UserUploadQuota) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the UserUploadQuotaMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *UserUploadQuotaMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.UserUploadQuota, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *UserUploadQuotaMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *UserUploadQuotaMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (UserUploadQuota).
-func (m *UserUploadQuotaMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *UserUploadQuotaMutation) Fields() []string {
-	fields := make([]string, 0, 6)
-	if m.size != nil {
-		fields = append(fields, useruploadquota.FieldSize)
-	}
-	if m.used != nil {
-		fields = append(fields, useruploadquota.FieldUsed)
-	}
-	if m.user != nil {
-		fields = append(fields, useruploadquota.FieldUserID)
-	}
-	if m.is_first_grant != nil {
-		fields = append(fields, useruploadquota.FieldIsFirstGrant)
-	}
-	if m.created != nil {
-		fields = append(fields, useruploadquota.FieldCreated)
-	}
-	if m.updated != nil {
-		fields = append(fields, useruploadquota.FieldUpdated)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *UserUploadQuotaMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case useruploadquota.FieldSize:
-		return m.Size()
-	case useruploadquota.FieldUsed:
-		return m.Used()
-	case useruploadquota.FieldUserID:
-		return m.UserID()
-	case useruploadquota.FieldIsFirstGrant:
-		return m.IsFirstGrant()
-	case useruploadquota.FieldCreated:
-		return m.Created()
-	case useruploadquota.FieldUpdated:
-		return m.Updated()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *UserUploadQuotaMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case useruploadquota.FieldSize:
-		return m.OldSize(ctx)
-	case useruploadquota.FieldUsed:
-		return m.OldUsed(ctx)
-	case useruploadquota.FieldUserID:
-		return m.OldUserID(ctx)
-	case useruploadquota.FieldIsFirstGrant:
-		return m.OldIsFirstGrant(ctx)
-	case useruploadquota.FieldCreated:
-		return m.OldCreated(ctx)
-	case useruploadquota.FieldUpdated:
-		return m.OldUpdated(ctx)
-	}
-	return nil, fmt.Errorf("unknown UserUploadQuota field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *UserUploadQuotaMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case useruploadquota.FieldSize:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSize(v)
-		return nil
-	case useruploadquota.FieldUsed:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUsed(v)
-		return nil
-	case useruploadquota.FieldUserID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
-	case useruploadquota.FieldIsFirstGrant:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetIsFirstGrant(v)
-		return nil
-	case useruploadquota.FieldCreated:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreated(v)
-		return nil
-	case useruploadquota.FieldUpdated:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdated(v)
-		return nil
-	}
-	return fmt.Errorf("unknown UserUploadQuota field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *UserUploadQuotaMutation) AddedFields() []string {
-	var fields []string
-	if m.addsize != nil {
-		fields = append(fields, useruploadquota.FieldSize)
-	}
-	if m.addused != nil {
-		fields = append(fields, useruploadquota.FieldUsed)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *UserUploadQuotaMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case useruploadquota.FieldSize:
-		return m.AddedSize()
-	case useruploadquota.FieldUsed:
-		return m.AddedUsed()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *UserUploadQuotaMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case useruploadquota.FieldSize:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddSize(v)
-		return nil
-	case useruploadquota.FieldUsed:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddUsed(v)
-		return nil
-	}
-	return fmt.Errorf("unknown UserUploadQuota numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *UserUploadQuotaMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *UserUploadQuotaMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *UserUploadQuotaMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown UserUploadQuota nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *UserUploadQuotaMutation) ResetField(name string) error {
-	switch name {
-	case useruploadquota.FieldSize:
-		m.ResetSize()
-		return nil
-	case useruploadquota.FieldUsed:
-		m.ResetUsed()
-		return nil
-	case useruploadquota.FieldUserID:
-		m.ResetUserID()
-		return nil
-	case useruploadquota.FieldIsFirstGrant:
-		m.ResetIsFirstGrant()
-		return nil
-	case useruploadquota.FieldCreated:
-		m.ResetCreated()
-		return nil
-	case useruploadquota.FieldUpdated:
-		m.ResetUpdated()
-		return nil
-	}
-	return fmt.Errorf("unknown UserUploadQuota field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *UserUploadQuotaMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.records != nil {
-		edges = append(edges, useruploadquota.EdgeRecords)
-	}
-	if m.user != nil {
-		edges = append(edges, useruploadquota.EdgeUser)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *UserUploadQuotaMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case useruploadquota.EdgeRecords:
-		ids := make([]ent.Value, 0, len(m.records))
-		for id := range m.records {
-			ids = append(ids, id)
-		}
-		return ids
-	case useruploadquota.EdgeUser:
-		if id := m.user; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *UserUploadQuotaMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedrecords != nil {
-		edges = append(edges, useruploadquota.EdgeRecords)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *UserUploadQuotaMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case useruploadquota.EdgeRecords:
-		ids := make([]ent.Value, 0, len(m.removedrecords))
-		for id := range m.removedrecords {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *UserUploadQuotaMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedrecords {
-		edges = append(edges, useruploadquota.EdgeRecords)
-	}
-	if m.cleareduser {
-		edges = append(edges, useruploadquota.EdgeUser)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *UserUploadQuotaMutation) EdgeCleared(name string) bool {
-	switch name {
-	case useruploadquota.EdgeRecords:
-		return m.clearedrecords
-	case useruploadquota.EdgeUser:
-		return m.cleareduser
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *UserUploadQuotaMutation) ClearEdge(name string) error {
-	switch name {
-	case useruploadquota.EdgeUser:
-		m.ClearUser()
-		return nil
-	}
-	return fmt.Errorf("unknown UserUploadQuota unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *UserUploadQuotaMutation) ResetEdge(name string) error {
-	switch name {
-	case useruploadquota.EdgeRecords:
-		m.ResetRecords()
-		return nil
-	case useruploadquota.EdgeUser:
-		m.ResetUser()
-		return nil
-	}
-	return fmt.Errorf("unknown UserUploadQuota edge %s", name)
-}
-
-// UserUploadQuotaRecordMutation represents an operation that mutates the UserUploadQuotaRecord nodes in the graph.
-type UserUploadQuotaRecordMutation struct {
-	config
-	op                       Op
-	typ                      string
-	id                       *int
-	field                    *useruploadquotarecord.Field
-	amount                   *int64
-	addamount                *int64
-	action                   *useruploadquotarecord.Action
-	action_reason            *string
-	status                   *useruploadquotarecord.Status
-	created                  *time.Time
-	updated                  *time.Time
-	clearedFields            map[string]struct{}
-	upload_session           *int
-	clearedupload_session    bool
-	user_upload_quota        *int
-	cleareduser_upload_quota bool
-	done                     bool
-	oldValue                 func(context.Context) (*UserUploadQuotaRecord, error)
-	predicates               []predicate.UserUploadQuotaRecord
-}
-
-var _ ent.Mutation = (*UserUploadQuotaRecordMutation)(nil)
-
-// useruploadquotarecordOption allows management of the mutation configuration using functional options.
-type useruploadquotarecordOption func(*UserUploadQuotaRecordMutation)
-
-// newUserUploadQuotaRecordMutation creates new mutation for the UserUploadQuotaRecord entity.
-func newUserUploadQuotaRecordMutation(c config, op Op, opts ...useruploadquotarecordOption) *UserUploadQuotaRecordMutation {
-	m := &UserUploadQuotaRecordMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeUserUploadQuotaRecord,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withUserUploadQuotaRecordID sets the ID field of the mutation.
-func withUserUploadQuotaRecordID(id int) useruploadquotarecordOption {
-	return func(m *UserUploadQuotaRecordMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *UserUploadQuotaRecord
-		)
-		m.oldValue = func(ctx context.Context) (*UserUploadQuotaRecord, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().UserUploadQuotaRecord.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withUserUploadQuotaRecord sets the old UserUploadQuotaRecord of the mutation.
-func withUserUploadQuotaRecord(node *UserUploadQuotaRecord) useruploadquotarecordOption {
-	return func(m *UserUploadQuotaRecordMutation) {
-		m.oldValue = func(context.Context) (*UserUploadQuotaRecord, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m UserUploadQuotaRecordMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m UserUploadQuotaRecordMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of UserUploadQuotaRecord entities.
-func (m *UserUploadQuotaRecordMutation) SetID(id int) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *UserUploadQuotaRecordMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *UserUploadQuotaRecordMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().UserUploadQuotaRecord.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetFieldField sets the "field" field.
-func (m *UserUploadQuotaRecordMutation) SetFieldField(u useruploadquotarecord.Field) {
-	m.field = &u
-}
-
-// GetField returns the value of the "field" field in the mutation.
-func (m *UserUploadQuotaRecordMutation) GetField() (r useruploadquotarecord.Field, exists bool) {
-	v := m.field
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// GetOldField returns the old "field" field's value of the UserUploadQuotaRecord entity.
-// If the UserUploadQuotaRecord object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserUploadQuotaRecordMutation) GetOldField(ctx context.Context) (v useruploadquotarecord.Field, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("GetOldField is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("GetOldField requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for GetOldField: %w", err)
-	}
-	return oldValue.Field, nil
-}
-
-// ResetFieldField resets all changes to the "field" field.
-func (m *UserUploadQuotaRecordMutation) ResetFieldField() {
-	m.field = nil
-}
-
-// SetAmount sets the "amount" field.
-func (m *UserUploadQuotaRecordMutation) SetAmount(i int64) {
-	m.amount = &i
-	m.addamount = nil
-}
-
-// Amount returns the value of the "amount" field in the mutation.
-func (m *UserUploadQuotaRecordMutation) Amount() (r int64, exists bool) {
-	v := m.amount
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAmount returns the old "amount" field's value of the UserUploadQuotaRecord entity.
-// If the UserUploadQuotaRecord object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserUploadQuotaRecordMutation) OldAmount(ctx context.Context) (v int64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAmount is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAmount requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAmount: %w", err)
-	}
-	return oldValue.Amount, nil
-}
-
-// AddAmount adds i to the "amount" field.
-func (m *UserUploadQuotaRecordMutation) AddAmount(i int64) {
-	if m.addamount != nil {
-		*m.addamount += i
-	} else {
-		m.addamount = &i
-	}
-}
-
-// AddedAmount returns the value that was added to the "amount" field in this mutation.
-func (m *UserUploadQuotaRecordMutation) AddedAmount() (r int64, exists bool) {
-	v := m.addamount
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetAmount resets all changes to the "amount" field.
-func (m *UserUploadQuotaRecordMutation) ResetAmount() {
-	m.amount = nil
-	m.addamount = nil
-}
-
-// SetAction sets the "action" field.
-func (m *UserUploadQuotaRecordMutation) SetAction(u useruploadquotarecord.Action) {
-	m.action = &u
-}
-
-// Action returns the value of the "action" field in the mutation.
-func (m *UserUploadQuotaRecordMutation) Action() (r useruploadquotarecord.Action, exists bool) {
-	v := m.action
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAction returns the old "action" field's value of the UserUploadQuotaRecord entity.
-// If the UserUploadQuotaRecord object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserUploadQuotaRecordMutation) OldAction(ctx context.Context) (v useruploadquotarecord.Action, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAction is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAction requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAction: %w", err)
-	}
-	return oldValue.Action, nil
-}
-
-// ResetAction resets all changes to the "action" field.
-func (m *UserUploadQuotaRecordMutation) ResetAction() {
-	m.action = nil
-}
-
-// SetActionReason sets the "action_reason" field.
-func (m *UserUploadQuotaRecordMutation) SetActionReason(s string) {
-	m.action_reason = &s
-}
-
-// ActionReason returns the value of the "action_reason" field in the mutation.
-func (m *UserUploadQuotaRecordMutation) ActionReason() (r string, exists bool) {
-	v := m.action_reason
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldActionReason returns the old "action_reason" field's value of the UserUploadQuotaRecord entity.
-// If the UserUploadQuotaRecord object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserUploadQuotaRecordMutation) OldActionReason(ctx context.Context) (v *string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldActionReason is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldActionReason requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldActionReason: %w", err)
-	}
-	return oldValue.ActionReason, nil
-}
-
-// ClearActionReason clears the value of the "action_reason" field.
-func (m *UserUploadQuotaRecordMutation) ClearActionReason() {
-	m.action_reason = nil
-	m.clearedFields[useruploadquotarecord.FieldActionReason] = struct{}{}
-}
-
-// ActionReasonCleared returns if the "action_reason" field was cleared in this mutation.
-func (m *UserUploadQuotaRecordMutation) ActionReasonCleared() bool {
-	_, ok := m.clearedFields[useruploadquotarecord.FieldActionReason]
-	return ok
-}
-
-// ResetActionReason resets all changes to the "action_reason" field.
-func (m *UserUploadQuotaRecordMutation) ResetActionReason() {
-	m.action_reason = nil
-	delete(m.clearedFields, useruploadquotarecord.FieldActionReason)
-}
-
-// SetStatus sets the "status" field.
-func (m *UserUploadQuotaRecordMutation) SetStatus(u useruploadquotarecord.Status) {
-	m.status = &u
-}
-
-// Status returns the value of the "status" field in the mutation.
-func (m *UserUploadQuotaRecordMutation) Status() (r useruploadquotarecord.Status, exists bool) {
-	v := m.status
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldStatus returns the old "status" field's value of the UserUploadQuotaRecord entity.
-// If the UserUploadQuotaRecord object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserUploadQuotaRecordMutation) OldStatus(ctx context.Context) (v useruploadquotarecord.Status, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldStatus requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
-	}
-	return oldValue.Status, nil
-}
-
-// ResetStatus resets all changes to the "status" field.
-func (m *UserUploadQuotaRecordMutation) ResetStatus() {
-	m.status = nil
-}
-
-// SetUploadSessionID sets the "upload_session_id" field.
-func (m *UserUploadQuotaRecordMutation) SetUploadSessionID(i int) {
-	m.upload_session = &i
-}
-
-// UploadSessionID returns the value of the "upload_session_id" field in the mutation.
-func (m *UserUploadQuotaRecordMutation) UploadSessionID() (r int, exists bool) {
-	v := m.upload_session
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUploadSessionID returns the old "upload_session_id" field's value of the UserUploadQuotaRecord entity.
-// If the UserUploadQuotaRecord object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserUploadQuotaRecordMutation) OldUploadSessionID(ctx context.Context) (v *int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUploadSessionID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUploadSessionID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUploadSessionID: %w", err)
-	}
-	return oldValue.UploadSessionID, nil
-}
-
-// ClearUploadSessionID clears the value of the "upload_session_id" field.
-func (m *UserUploadQuotaRecordMutation) ClearUploadSessionID() {
-	m.upload_session = nil
-	m.clearedFields[useruploadquotarecord.FieldUploadSessionID] = struct{}{}
-}
-
-// UploadSessionIDCleared returns if the "upload_session_id" field was cleared in this mutation.
-func (m *UserUploadQuotaRecordMutation) UploadSessionIDCleared() bool {
-	_, ok := m.clearedFields[useruploadquotarecord.FieldUploadSessionID]
-	return ok
-}
-
-// ResetUploadSessionID resets all changes to the "upload_session_id" field.
-func (m *UserUploadQuotaRecordMutation) ResetUploadSessionID() {
-	m.upload_session = nil
-	delete(m.clearedFields, useruploadquotarecord.FieldUploadSessionID)
-}
-
-// SetUserUploadQuotaID sets the "user_upload_quota_id" field.
-func (m *UserUploadQuotaRecordMutation) SetUserUploadQuotaID(i int) {
-	m.user_upload_quota = &i
-}
-
-// UserUploadQuotaID returns the value of the "user_upload_quota_id" field in the mutation.
-func (m *UserUploadQuotaRecordMutation) UserUploadQuotaID() (r int, exists bool) {
-	v := m.user_upload_quota
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserUploadQuotaID returns the old "user_upload_quota_id" field's value of the UserUploadQuotaRecord entity.
-// If the UserUploadQuotaRecord object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserUploadQuotaRecordMutation) OldUserUploadQuotaID(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserUploadQuotaID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserUploadQuotaID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserUploadQuotaID: %w", err)
-	}
-	return oldValue.UserUploadQuotaID, nil
-}
-
-// ResetUserUploadQuotaID resets all changes to the "user_upload_quota_id" field.
-func (m *UserUploadQuotaRecordMutation) ResetUserUploadQuotaID() {
-	m.user_upload_quota = nil
-}
-
-// SetCreated sets the "created" field.
-func (m *UserUploadQuotaRecordMutation) SetCreated(t time.Time) {
-	m.created = &t
-}
-
-// Created returns the value of the "created" field in the mutation.
-func (m *UserUploadQuotaRecordMutation) Created() (r time.Time, exists bool) {
-	v := m.created
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreated returns the old "created" field's value of the UserUploadQuotaRecord entity.
-// If the UserUploadQuotaRecord object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserUploadQuotaRecordMutation) OldCreated(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreated is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreated requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreated: %w", err)
-	}
-	return oldValue.Created, nil
-}
-
-// ResetCreated resets all changes to the "created" field.
-func (m *UserUploadQuotaRecordMutation) ResetCreated() {
-	m.created = nil
-}
-
-// SetUpdated sets the "updated" field.
-func (m *UserUploadQuotaRecordMutation) SetUpdated(t time.Time) {
-	m.updated = &t
-}
-
-// Updated returns the value of the "updated" field in the mutation.
-func (m *UserUploadQuotaRecordMutation) Updated() (r time.Time, exists bool) {
-	v := m.updated
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdated returns the old "updated" field's value of the UserUploadQuotaRecord entity.
-// If the UserUploadQuotaRecord object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserUploadQuotaRecordMutation) OldUpdated(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdated is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdated requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdated: %w", err)
-	}
-	return oldValue.Updated, nil
-}
-
-// ResetUpdated resets all changes to the "updated" field.
-func (m *UserUploadQuotaRecordMutation) ResetUpdated() {
-	m.updated = nil
-}
-
-// ClearUploadSession clears the "upload_session" edge to the GameUploadSession entity.
-func (m *UserUploadQuotaRecordMutation) ClearUploadSession() {
-	m.clearedupload_session = true
-	m.clearedFields[useruploadquotarecord.FieldUploadSessionID] = struct{}{}
-}
-
-// UploadSessionCleared reports if the "upload_session" edge to the GameUploadSession entity was cleared.
-func (m *UserUploadQuotaRecordMutation) UploadSessionCleared() bool {
-	return m.UploadSessionIDCleared() || m.clearedupload_session
-}
-
-// UploadSessionIDs returns the "upload_session" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UploadSessionID instead. It exists only for internal usage by the builders.
-func (m *UserUploadQuotaRecordMutation) UploadSessionIDs() (ids []int) {
-	if id := m.upload_session; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetUploadSession resets all changes to the "upload_session" edge.
-func (m *UserUploadQuotaRecordMutation) ResetUploadSession() {
-	m.upload_session = nil
-	m.clearedupload_session = false
-}
-
-// ClearUserUploadQuota clears the "user_upload_quota" edge to the UserUploadQuota entity.
-func (m *UserUploadQuotaRecordMutation) ClearUserUploadQuota() {
-	m.cleareduser_upload_quota = true
-	m.clearedFields[useruploadquotarecord.FieldUserUploadQuotaID] = struct{}{}
-}
-
-// UserUploadQuotaCleared reports if the "user_upload_quota" edge to the UserUploadQuota entity was cleared.
-func (m *UserUploadQuotaRecordMutation) UserUploadQuotaCleared() bool {
-	return m.cleareduser_upload_quota
-}
-
-// UserUploadQuotaIDs returns the "user_upload_quota" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UserUploadQuotaID instead. It exists only for internal usage by the builders.
-func (m *UserUploadQuotaRecordMutation) UserUploadQuotaIDs() (ids []int) {
-	if id := m.user_upload_quota; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetUserUploadQuota resets all changes to the "user_upload_quota" edge.
-func (m *UserUploadQuotaRecordMutation) ResetUserUploadQuota() {
-	m.user_upload_quota = nil
-	m.cleareduser_upload_quota = false
-}
-
-// Where appends a list predicates to the UserUploadQuotaRecordMutation builder.
-func (m *UserUploadQuotaRecordMutation) Where(ps ...predicate.UserUploadQuotaRecord) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the UserUploadQuotaRecordMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *UserUploadQuotaRecordMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.UserUploadQuotaRecord, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *UserUploadQuotaRecordMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *UserUploadQuotaRecordMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (UserUploadQuotaRecord).
-func (m *UserUploadQuotaRecordMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *UserUploadQuotaRecordMutation) Fields() []string {
-	fields := make([]string, 0, 9)
-	if m.field != nil {
-		fields = append(fields, useruploadquotarecord.FieldField)
-	}
-	if m.amount != nil {
-		fields = append(fields, useruploadquotarecord.FieldAmount)
-	}
-	if m.action != nil {
-		fields = append(fields, useruploadquotarecord.FieldAction)
-	}
-	if m.action_reason != nil {
-		fields = append(fields, useruploadquotarecord.FieldActionReason)
-	}
-	if m.status != nil {
-		fields = append(fields, useruploadquotarecord.FieldStatus)
-	}
-	if m.upload_session != nil {
-		fields = append(fields, useruploadquotarecord.FieldUploadSessionID)
-	}
-	if m.user_upload_quota != nil {
-		fields = append(fields, useruploadquotarecord.FieldUserUploadQuotaID)
-	}
-	if m.created != nil {
-		fields = append(fields, useruploadquotarecord.FieldCreated)
-	}
-	if m.updated != nil {
-		fields = append(fields, useruploadquotarecord.FieldUpdated)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *UserUploadQuotaRecordMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case useruploadquotarecord.FieldField:
-		return m.GetField()
-	case useruploadquotarecord.FieldAmount:
-		return m.Amount()
-	case useruploadquotarecord.FieldAction:
-		return m.Action()
-	case useruploadquotarecord.FieldActionReason:
-		return m.ActionReason()
-	case useruploadquotarecord.FieldStatus:
-		return m.Status()
-	case useruploadquotarecord.FieldUploadSessionID:
-		return m.UploadSessionID()
-	case useruploadquotarecord.FieldUserUploadQuotaID:
-		return m.UserUploadQuotaID()
-	case useruploadquotarecord.FieldCreated:
-		return m.Created()
-	case useruploadquotarecord.FieldUpdated:
-		return m.Updated()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *UserUploadQuotaRecordMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case useruploadquotarecord.FieldField:
-		return m.GetOldField(ctx)
-	case useruploadquotarecord.FieldAmount:
-		return m.OldAmount(ctx)
-	case useruploadquotarecord.FieldAction:
-		return m.OldAction(ctx)
-	case useruploadquotarecord.FieldActionReason:
-		return m.OldActionReason(ctx)
-	case useruploadquotarecord.FieldStatus:
-		return m.OldStatus(ctx)
-	case useruploadquotarecord.FieldUploadSessionID:
-		return m.OldUploadSessionID(ctx)
-	case useruploadquotarecord.FieldUserUploadQuotaID:
-		return m.OldUserUploadQuotaID(ctx)
-	case useruploadquotarecord.FieldCreated:
-		return m.OldCreated(ctx)
-	case useruploadquotarecord.FieldUpdated:
-		return m.OldUpdated(ctx)
-	}
-	return nil, fmt.Errorf("unknown UserUploadQuotaRecord field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *UserUploadQuotaRecordMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case useruploadquotarecord.FieldField:
-		v, ok := value.(useruploadquotarecord.Field)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetFieldField(v)
-		return nil
-	case useruploadquotarecord.FieldAmount:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAmount(v)
-		return nil
-	case useruploadquotarecord.FieldAction:
-		v, ok := value.(useruploadquotarecord.Action)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAction(v)
-		return nil
-	case useruploadquotarecord.FieldActionReason:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetActionReason(v)
-		return nil
-	case useruploadquotarecord.FieldStatus:
-		v, ok := value.(useruploadquotarecord.Status)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetStatus(v)
-		return nil
-	case useruploadquotarecord.FieldUploadSessionID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUploadSessionID(v)
-		return nil
-	case useruploadquotarecord.FieldUserUploadQuotaID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserUploadQuotaID(v)
-		return nil
-	case useruploadquotarecord.FieldCreated:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreated(v)
-		return nil
-	case useruploadquotarecord.FieldUpdated:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdated(v)
-		return nil
-	}
-	return fmt.Errorf("unknown UserUploadQuotaRecord field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *UserUploadQuotaRecordMutation) AddedFields() []string {
-	var fields []string
-	if m.addamount != nil {
-		fields = append(fields, useruploadquotarecord.FieldAmount)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *UserUploadQuotaRecordMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case useruploadquotarecord.FieldAmount:
-		return m.AddedAmount()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *UserUploadQuotaRecordMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case useruploadquotarecord.FieldAmount:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddAmount(v)
-		return nil
-	}
-	return fmt.Errorf("unknown UserUploadQuotaRecord numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *UserUploadQuotaRecordMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(useruploadquotarecord.FieldActionReason) {
-		fields = append(fields, useruploadquotarecord.FieldActionReason)
-	}
-	if m.FieldCleared(useruploadquotarecord.FieldUploadSessionID) {
-		fields = append(fields, useruploadquotarecord.FieldUploadSessionID)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *UserUploadQuotaRecordMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *UserUploadQuotaRecordMutation) ClearField(name string) error {
-	switch name {
-	case useruploadquotarecord.FieldActionReason:
-		m.ClearActionReason()
-		return nil
-	case useruploadquotarecord.FieldUploadSessionID:
-		m.ClearUploadSessionID()
-		return nil
-	}
-	return fmt.Errorf("unknown UserUploadQuotaRecord nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *UserUploadQuotaRecordMutation) ResetField(name string) error {
-	switch name {
-	case useruploadquotarecord.FieldField:
-		m.ResetFieldField()
-		return nil
-	case useruploadquotarecord.FieldAmount:
-		m.ResetAmount()
-		return nil
-	case useruploadquotarecord.FieldAction:
-		m.ResetAction()
-		return nil
-	case useruploadquotarecord.FieldActionReason:
-		m.ResetActionReason()
-		return nil
-	case useruploadquotarecord.FieldStatus:
-		m.ResetStatus()
-		return nil
-	case useruploadquotarecord.FieldUploadSessionID:
-		m.ResetUploadSessionID()
-		return nil
-	case useruploadquotarecord.FieldUserUploadQuotaID:
-		m.ResetUserUploadQuotaID()
-		return nil
-	case useruploadquotarecord.FieldCreated:
-		m.ResetCreated()
-		return nil
-	case useruploadquotarecord.FieldUpdated:
-		m.ResetUpdated()
-		return nil
-	}
-	return fmt.Errorf("unknown UserUploadQuotaRecord field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *UserUploadQuotaRecordMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.upload_session != nil {
-		edges = append(edges, useruploadquotarecord.EdgeUploadSession)
-	}
-	if m.user_upload_quota != nil {
-		edges = append(edges, useruploadquotarecord.EdgeUserUploadQuota)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *UserUploadQuotaRecordMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case useruploadquotarecord.EdgeUploadSession:
-		if id := m.upload_session; id != nil {
-			return []ent.Value{*id}
-		}
-	case useruploadquotarecord.EdgeUserUploadQuota:
-		if id := m.user_upload_quota; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *UserUploadQuotaRecordMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *UserUploadQuotaRecordMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *UserUploadQuotaRecordMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedupload_session {
-		edges = append(edges, useruploadquotarecord.EdgeUploadSession)
-	}
-	if m.cleareduser_upload_quota {
-		edges = append(edges, useruploadquotarecord.EdgeUserUploadQuota)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *UserUploadQuotaRecordMutation) EdgeCleared(name string) bool {
-	switch name {
-	case useruploadquotarecord.EdgeUploadSession:
-		return m.clearedupload_session
-	case useruploadquotarecord.EdgeUserUploadQuota:
-		return m.cleareduser_upload_quota
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *UserUploadQuotaRecordMutation) ClearEdge(name string) error {
-	switch name {
-	case useruploadquotarecord.EdgeUploadSession:
-		m.ClearUploadSession()
-		return nil
-	case useruploadquotarecord.EdgeUserUploadQuota:
-		m.ClearUserUploadQuota()
-		return nil
-	}
-	return fmt.Errorf("unknown UserUploadQuotaRecord unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *UserUploadQuotaRecordMutation) ResetEdge(name string) error {
-	switch name {
-	case useruploadquotarecord.EdgeUploadSession:
-		m.ResetUploadSession()
-		return nil
-	case useruploadquotarecord.EdgeUserUploadQuota:
-		m.ResetUserUploadQuota()
-		return nil
-	}
-	return fmt.Errorf("unknown UserUploadQuotaRecord edge %s", name)
 }
 
 // WalkthroughMutation represents an operation that mutates the Walkthrough nodes in the graph.

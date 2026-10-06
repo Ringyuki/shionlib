@@ -16,15 +16,14 @@ type TransferService struct {
 	repo       Repository
 	store      ObjectStore
 	local      LocalFiles
-	quota      Quota
 	activities Activities
 	messages   Messenger
 	tx         Transactor
 	now        func() time.Time
 }
 
-func NewTransferService(repo Repository, store ObjectStore, local LocalFiles, quota Quota, activities Activities, messages Messenger, tx Transactor, now func() time.Time) *TransferService {
-	return &TransferService{repo: repo, store: store, local: local, quota: quota, activities: activities, messages: messages, tx: tx, now: now}
+func NewTransferService(repo Repository, store ObjectStore, local LocalFiles, activities Activities, messages Messenger, tx Transactor, now func() time.Time) *TransferService {
+	return &TransferService{repo: repo, store: store, local: local, activities: activities, messages: messages, tx: tx, now: now}
 }
 
 func (t *TransferService) Store(ctx context.Context, fileID int) error {
@@ -216,11 +215,6 @@ func (t *TransferService) discardRejected(ctx context.Context, fileID int) error
 		}
 		if file.Type != FileTypeObjectStore || file.Status != FileOnServer || !file.CheckStatus.Rejected() {
 			return nil
-		}
-		if file.UploadSessionID != nil {
-			if err := t.quota.Withdraw(ctx, file.CreatorID, *file.UploadSessionID); err != nil {
-				return err
-			}
 		}
 		if err := t.repo.DeleteFile(ctx, file.ID); err != nil {
 			return err

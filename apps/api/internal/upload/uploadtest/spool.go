@@ -21,10 +21,11 @@ type MemorySpool struct {
 	modified map[string]time.Time
 	removed  []string
 	FailNext error
+	Space    int64
 }
 
 func NewMemorySpool() *MemorySpool {
-	return &MemorySpool{files: map[string][]byte{}, modified: map[string]time.Time{}}
+	return &MemorySpool{files: map[string][]byte{}, modified: map[string]time.Time{}, Space: 1 << 50}
 }
 
 func Digest(content []byte) string {
@@ -132,4 +133,10 @@ func (s *MemorySpool) Stale(_ context.Context, before time.Time) ([]string, erro
 	}
 	slices.Sort(out)
 	return out, nil
+}
+
+func (s *MemorySpool) Available(context.Context) (int64, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.Space, nil
 }

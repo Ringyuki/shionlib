@@ -107,6 +107,22 @@ func (r *MemoryRepository) ListUploading(_ context.Context, creatorID int, now t
 	return out, nil
 }
 
+func (r *MemoryRepository) PendingBytes(_ context.Context, now time.Time) (int64, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var pending int64
+	for _, session := range r.sessions {
+		if session.Status == upload.StatusUploading && !session.Expired(now) {
+			pending += session.PendingBytes()
+		}
+	}
+	return pending, nil
+}
+
+func (r *MemoryRepository) LockAdmission(context.Context) error {
+	return nil
+}
+
 func (r *MemoryRepository) AddChunk(_ context.Context, id, index int) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()

@@ -125,7 +125,7 @@ func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "upload.status", Method: http.MethodGet, Path: "/uploads/large/{id}/status", Summary: "Read an upload session", Tags: tags, Access: httpapi.AccessUser}, h.status)
 	httpapi.Register(api, httpapi.Route{ID: "upload.complete", Method: http.MethodPatch, Path: "/uploads/large/{id}/complete", Summary: "Verify and complete an upload session", Tags: tags, Access: httpapi.AccessUser}, h.complete)
 	httpapi.Register(api, httpapi.Route{ID: "upload.abort", Method: http.MethodDelete, Path: "/uploads/large/{id}", Summary: "Abort an upload session", Tags: tags, Access: httpapi.AccessUser}, h.abort)
-	httpapi.Register(api, httpapi.Route{ID: "upload.quota", Method: http.MethodGet, Path: "/uploads/quota", Summary: "Read the caller's upload quota", Tags: tags, Access: httpapi.AccessUser}, h.getQuota)
+	httpapi.Register(api, httpapi.Route{ID: "upload.quota", Method: http.MethodGet, Path: "/uploads/quota", Summary: "Read the caller's upload tier and limits", Tags: tags, Access: httpapi.AccessUser}, h.getQuota)
 	h.registerChunk(api)
 }
 
@@ -180,10 +180,10 @@ func (h *Handler) abort(ctx context.Context, in *uploadSessionPathInput) (*respo
 	return response.Empty(ctx, h.resp), nil
 }
 
-func (h *Handler) getQuota(ctx context.Context, _ *struct{}) (*response.Output[uploadQuotaDTO], error) {
-	quota, err := h.quota.Get(ctx, actor.From(ctx).UserID)
+func (h *Handler) getQuota(ctx context.Context, _ *struct{}) (*response.Output[AllowanceDTO], error) {
+	allowance, err := h.quota.Allowance(ctx, actor.From(ctx).UserID)
 	if err != nil {
 		return nil, err
 	}
-	return response.OK(ctx, h.resp, uploadQuotaDTO{Size: quota.Size, Used: quota.Used}), nil
+	return response.OK(ctx, h.resp, ToAllowanceDTO(allowance)), nil
 }

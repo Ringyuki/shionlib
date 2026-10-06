@@ -1,303 +1,67 @@
 package upload
 
 import (
-	"cmp"
 	"context"
-	"errors"
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
 )
 
-func (q *QuotaService) AdminAdjustSize(ctx context.Context, userID int, action QuotaAction, amount int64, reason string) error {
-	return q.tx.WithinTransaction(ctx, func(ctx context.Context) error {
-		quota, err := q.repo.EnsureQuota(ctx, userID)
-		if err != nil {
-			return err
-		}
-		delta := amount
-		switch action {
-		case ActionAdd:
-		case ActionSub:
-			if quota.Size-amount < quota.Used {
-				return ErrQuotaExceeded
-			}
-			delta = -amount
-		default:
-			return errors.New("size adjustments accept ADD or SUB")
-		}
-		if err := q.repo.AddRecord(ctx, NewQuotaRecord{QuotaID: quota.ID, Field: FieldSize, Action: action, Amount: amount, Reason: optional(cmp.Or(reason, ReasonAdminAdjust))}); err != nil {
-			return err
-		}
-		return q.repo.AddSize(ctx, quota.ID, delta)
-	})
-}
-
-func (q *QuotaService) AdminAdjustUsed(ctx context.Context, userID int, action QuotaAction, amount int64, reason string) error {
-	return q.tx.WithinTransaction(ctx, func(ctx context.Context) error {
-		if _, err := q.repo.EnsureQuota(ctx, userID); err != nil {
-			return err
-		}
-		return q.AdjustUsed(ctx, userID, action, amount, cmp.Or(reason, ReasonAdminAdjust), nil)
-	})
-}
-
-func (q *QuotaService) AdminResetUsed(ctx context.Context, userID int) error {
-	return q.tx.WithinTransaction(ctx, func(ctx context.Context) error {
-		quota, err := q.repo.EnsureQuota(ctx, userID)
-		if err != nil {
-			return err
-		}
-		return q.resetUsed(ctx, quota, ReasonAdminResetUsed)
-	})
-}
-
 type QuotaService struct {
 	repo     QuotaRepository
-	tx       Transactor
 	settings setting.Source
-	location *time.Location
 	now      func() time.Time
 }
 
-func NewQuotaService(repo QuotaRepository, tx Transactor, settings setting.Source, location *time.Location, now func() time.Time) *QuotaService {
-	return &QuotaService{repo: repo, tx: tx, settings: settings, location: location, now: now}
+func NewQuotaService(repo QuotaRepository, settings setting.Source, now func() time.Time) *QuotaService {
+	return &QuotaService{repo: repo, settings: settings, now: now}
 }
 
-func (q *QuotaService) Get(ctx context.Context, userID int) (Quota, error) {
-	quota, found, err := q.repo.FindQuota(ctx, userID)
+func (q *QuotaService) Allowance(ctx context.Context, userID int) (Allowance, error) {
+	now := q.now()
+	standing, err := q.repo.Standing(ctx, userID)
 	if err != nil {
-		return Quota{}, err
+		return Allowance{}, err
 	}
-	if !found {
-		return Quota{UserID: userID}, nil
-	}
-	return quota, nil
-}
-
-func (q *QuotaService) Exceeds(ctx context.Context, userID int, amount int64) (bool, error) {
-	quota, found, err := q.repo.FindQuota(ctx, userID)
+	stored, err := q.repo.StoredBytes(ctx, userID)
 	if err != nil {
-		return false, err
+		return Allowance{}, err
 	}
-	if !found {
-		return false, ErrQuotaNotFound
-	}
-	return quota.Used+amount > quota.Size, nil
-}
-
-func (q *QuotaService) AdjustUsed(ctx context.Context, userID int, action QuotaAction, amount int64, reason string, sessionID *int) error {
-	return q.tx.WithinTransaction(ctx, func(ctx context.Context) error {
-		quota, err := q.repo.LockQuota(ctx, userID)
-		if err != nil {
-			return err
-		}
-		delta := -amount
-		switch action {
-		case ActionUse:
-			if quota.Used+amount > quota.Size {
-				return ErrQuotaExceeded
-			}
-			delta = amount
-		case ActionAdd:
-			if quota.Used < amount {
-				return ErrQuotaUsedCantBeNegative
-			}
-		default:
-			return errors.New("used amount adjustments accept ADD or USE")
-		}
-		if err := q.repo.AddRecord(ctx, NewQuotaRecord{QuotaID: quota.ID, Field: FieldUsed, Action: action, Amount: amount, Reason: optional(reason), SessionID: sessionID}); err != nil {
-			return err
-		}
-		return q.repo.AddUsed(ctx, quota.ID, delta)
-	})
-}
-
-func (q *QuotaService) AdjustSize(ctx context.Context, userID int, action QuotaAction, amount int64, reason string) (int64, error) {
-	err := q.tx.WithinTransaction(ctx, func(ctx context.Context) error {
-		quota, err := q.repo.LockQuota(ctx, userID)
-		if err != nil {
-			return err
-		}
-		delta := amount
-		switch action {
-		case ActionAdd:
-		case ActionSub:
-			delta = -amount
-		default:
-			return errors.New("size adjustments accept ADD or SUB")
-		}
-		if err := q.repo.AddRecord(ctx, NewQuotaRecord{QuotaID: quota.ID, Field: FieldSize, Action: action, Amount: amount, Reason: optional(reason)}); err != nil {
-			return err
-		}
-		if err := q.repo.AddSize(ctx, quota.ID, delta); err != nil {
-			return err
-		}
-		if reason == ReasonInitialGrant {
-			return q.repo.MarkFirstGrant(ctx, quota.ID)
-		}
-		return nil
-	})
+	inFlight, err := q.repo.InFlightBytes(ctx, userID, now)
 	if err != nil {
-		return 0, err
+		return Allowance{}, err
 	}
-	return amount, nil
-}
-
-func (q *QuotaService) Withdraw(ctx context.Context, userID, sessionID int) error {
-	return q.tx.WithinTransaction(ctx, func(ctx context.Context) error {
-		record, found, err := q.repo.FindWithdrawable(ctx, userID, sessionID)
-		if err != nil || !found {
-			return err
-		}
-		delta := -record.Amount
-		if record.Action == ActionUse {
-			delta = record.Amount
-		}
-		if err := q.repo.MarkWithdrawn(ctx, record.ID); err != nil {
-			return err
-		}
-		return q.repo.AddUsed(ctx, record.QuotaID, -delta)
-	})
-}
-
-func (q *QuotaService) ResetUsed(ctx context.Context, userID int) error {
-	return q.tx.WithinTransaction(ctx, func(ctx context.Context) error {
-		quota, err := q.repo.LockQuota(ctx, userID)
-		if err != nil {
-			return err
-		}
-		return q.resetUsed(ctx, quota, ReasonResetUsed)
-	})
-}
-
-func (q *QuotaService) resetUsed(ctx context.Context, quota Quota, reason string) error {
-	if quota.Used == 0 {
-		return nil
+	tier, frozenUntil := standing.Tier(TierRules{
+		RegularAfter:    RegularAfter.Read(q.settings),
+		TrustedAfter:    TrustedAfter.Read(q.settings),
+		ViolationWindow: ViolationWindow.Read(q.settings),
+		Freeze:          ViolationFreeze.Read(q.settings),
+	}, now)
+	allowance := Allowance{
+		Tier:          tier,
+		Approved:      standing.Approved,
+		Trusted:       standing.Trusted,
+		FrozenUntil:   frozenUntil,
+		Stored:        stored,
+		InFlight:      inFlight,
+		InFlightLimit: InFlightLimit.Read(q.settings),
 	}
-	if err := q.repo.SetUsed(ctx, quota.ID, 0); err != nil {
-		return err
+	maxFileSize := MaxFileSize.Read(q.settings)
+	switch tier {
+	case TierNew:
+		allowance.StoredLimit, allowance.MaxFileSize = bytes(NewUploaderQuota.Read(q.settings)), &maxFileSize
+	case TierRegular:
+		allowance.StoredLimit, allowance.MaxFileSize = bytes(RegularQuota.Read(q.settings)), &maxFileSize
+	case TierTrusted:
+		allowance.StoredLimit = bytes(TrustedQuota.Read(q.settings))
 	}
-	return q.repo.AddRecord(ctx, NewQuotaRecord{QuotaID: quota.ID, Field: FieldUsed, Action: ActionAdd, Amount: quota.Used, Reason: optional(reason)})
+	return allowance, nil
 }
 
-func (q *QuotaService) InitialGrant(ctx context.Context, userID int) error {
-	return q.tx.WithinTransaction(ctx, func(ctx context.Context) error {
-		quota, err := q.repo.LockQuota(ctx, userID)
-		if err != nil || quota.IsFirstGrant {
-			return err
-		}
-		_, err = q.AdjustSize(ctx, userID, ActionAdd, QuotaBase.Read(q.settings), ReasonInitialGrant)
-		return err
-	})
+func (q *QuotaService) SetTrusted(ctx context.Context, userID int, trusted bool) error {
+	return q.repo.SetTrusted(ctx, userID, trusted)
 }
 
-func (q *QuotaService) DynamicTopup(ctx context.Context, userID int) error {
-	return q.tx.WithinTransaction(ctx, func(ctx context.Context) error {
-		quota, err := q.repo.LockQuota(ctx, userID)
-		if err != nil || !quota.IsFirstGrant {
-			return err
-		}
-		if quota.Size >= QuotaCap.Read(q.settings) || quota.Size-quota.Used > QuotaTopupThreshold.Read(q.settings) {
-			return nil
-		}
-		approved, err := q.repo.CountApprovedFiles(ctx, userID, monthStart(q.now(), q.location))
-		if err != nil || approved == 0 {
-			return err
-		}
-		_, err = q.AdjustSize(ctx, userID, ActionAdd, QuotaTopupStep.Read(q.settings), ReasonDynamicTopup)
-		return err
-	})
-}
-
-func (q *QuotaService) DynamicReduce(ctx context.Context, userID int) error {
-	return q.tx.WithinTransaction(ctx, func(ctx context.Context) error {
-		base, step, inactiveDays := QuotaBase.Read(q.settings), QuotaReduceStep.Read(q.settings), QuotaReduceInactiveDays.Read(q.settings)
-		quota, err := q.repo.LockQuota(ctx, userID)
-		if err != nil || !quota.IsFirstGrant || quota.Size <= base {
-			return err
-		}
-		if inactiveDays <= 0 || step <= 0 {
-			return nil
-		}
-		cutoff := q.now().AddDate(0, 0, -inactiveDays)
-		approved, err := q.repo.CountApprovedFiles(ctx, userID, cutoff)
-		if err != nil || approved > 0 {
-			return err
-		}
-		amount := min(quota.Size-base, step)
-		_, err = q.AdjustSize(ctx, userID, ActionSub, amount, ReasonDynamicReduce)
-		return err
-	})
-}
-
-func (q *QuotaService) ResetQuota(ctx context.Context, userID int) error {
-	return q.tx.WithinTransaction(ctx, func(ctx context.Context) error {
-		quota, err := q.repo.LockQuota(ctx, userID)
-		if err != nil || quota.Size <= 0 {
-			return err
-		}
-		_, err = q.AdjustSize(ctx, userID, ActionSub, quota.Size, ReasonResetQuota)
-		return err
-	})
-}
-
-func (q *QuotaService) RunInitialGrants(ctx context.Context) error {
-	cutoff := q.now().AddDate(0, 0, -QuotaGrantAfterDays.Read(q.settings))
-	return q.eachUser(ctx, func(ctx context.Context, afterID int) ([]int, error) {
-		return q.repo.GrantCandidates(ctx, cutoff, afterID, quotaBatchSize)
-	}, q.InitialGrant)
-}
-
-func (q *QuotaService) RunDynamicTopups(ctx context.Context) error {
-	return q.eachUser(ctx, q.activeUploaders, q.DynamicTopup)
-}
-
-func (q *QuotaService) RunDynamicReductions(ctx context.Context) error {
-	return q.eachUser(ctx, q.activeUploaders, q.DynamicReduce)
-}
-
-func (q *QuotaService) RunMonthlyResets(ctx context.Context) error {
-	return q.eachUser(ctx, q.activeUploaders, q.ResetUsed)
-}
-
-func (q *QuotaService) RunInactiveResets(ctx context.Context) error {
-	cutoff := q.now().AddDate(0, 0, -QuotaLongestInactiveDays.Read(q.settings))
-	return q.eachUser(ctx, func(ctx context.Context, afterID int) ([]int, error) {
-		return q.repo.InactiveUploaders(ctx, cutoff, afterID, quotaBatchSize)
-	}, q.ResetQuota)
-}
-
-func (q *QuotaService) activeUploaders(ctx context.Context, afterID int) ([]int, error) {
-	return q.repo.ActiveUploaders(ctx, afterID, quotaBatchSize)
-}
-
-func (q *QuotaService) eachUser(ctx context.Context, page func(ctx context.Context, afterID int) ([]int, error), apply func(ctx context.Context, userID int) error) error {
-	var errs []error
-	afterID := 0
-	for {
-		ids, err := page(ctx, afterID)
-		if err != nil {
-			return errors.Join(append(errs, err)...)
-		}
-		for _, id := range ids {
-			if err := ctx.Err(); err != nil {
-				return errors.Join(append(errs, err)...)
-			}
-			if err := apply(ctx, id); err != nil && !errors.Is(err, ErrQuotaNotFound) {
-				errs = append(errs, err)
-			}
-			afterID = id
-		}
-		if len(ids) < quotaBatchSize {
-			return errors.Join(errs...)
-		}
-	}
-}
-
-func optional(value string) *string {
-	if value == "" {
-		return nil
-	}
+func bytes(value int64) *int64 {
 	return &value
 }

@@ -62,12 +62,6 @@ type UserEntry struct {
 	Counts           Counts
 }
 
-type Quota struct {
-	Size         int64
-	Used         int64
-	IsFirstGrant bool
-}
-
 type UserRef struct {
 	ID   int
 	Name string
@@ -85,7 +79,7 @@ type BanRecord struct {
 type UserDetail struct {
 	UserEntry
 	Cover     *string
-	Quota     *Quota
+	Upload    upload.Allowance
 	LatestBan *BanRecord
 }
 
@@ -116,12 +110,6 @@ type ProfileChanges struct {
 	Email        *string
 	Lang         *user.Lang
 	ContentLimit *actor.ContentLimit
-}
-
-type QuotaChange struct {
-	Action upload.QuotaAction
-	Amount int64
-	Reason string
 }
 
 func CanManage(who actor.Actor, target user.User) bool {

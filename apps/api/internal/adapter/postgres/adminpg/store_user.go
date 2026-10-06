@@ -14,7 +14,6 @@ import (
 	entuser "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userloginsession"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/useruploadquota"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/admin"
 	"github.com/Ringyuki/shionlib/apps/api/internal/auth"
@@ -114,13 +113,6 @@ func (s *UserStore) UserDetail(ctx context.Context, id int) (admin.UserDetail, e
 		return admin.UserDetail{}, err
 	}
 	detail := admin.UserDetail{UserEntry: toEntry(row, counts[id]), Cover: row.Cover}
-	quota, err := db.UserUploadQuota.Query().Where(useruploadquota.UserID(id)).Only(ctx)
-	switch {
-	case err == nil:
-		detail.Quota = &admin.Quota{Size: quota.Size, Used: quota.Used, IsFirstGrant: quota.IsFirstGrant}
-	case !postgres.IsNotFound(err):
-		return admin.UserDetail{}, fmt.Errorf("load upload quota of user %d: %w", id, err)
-	}
 	ban, err := db.UserBannedRecord.Query().
 		Where(userbannedrecord.UserID(id)).
 		WithBannedByUser(func(q *ent.UserQuery) { q.Select(entuser.FieldID, entuser.FieldName) }).

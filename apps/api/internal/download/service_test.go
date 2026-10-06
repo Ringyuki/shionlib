@@ -46,25 +46,10 @@ func (s *sessions) Claim(_ context.Context, who actor.Actor, id int) (upload.Ses
 	return session, nil
 }
 
-type withdrawal struct {
-	UserID    int
-	SessionID int
-}
-
-type quota struct {
-	withdrawn []withdrawal
-}
-
-func (q *quota) Withdraw(_ context.Context, userID, sessionID int) error {
-	q.withdrawn = append(q.withdrawn, withdrawal{userID, sessionID})
-	return nil
-}
-
 type fixture struct {
 	repo     *downloadtest.MemoryRepository
 	spool    *uploadtest.MemorySpool
 	sessions *sessions
-	quota    *quota
 	events   *downloadtest.Recorder
 	store    *downloadtest.ObjectStore
 	service  *download.Service
@@ -76,7 +61,6 @@ func newFixture() fixture {
 		repo:     repo,
 		spool:    uploadtest.NewMemorySpool(),
 		sessions: &sessions{byID: map[int]upload.Session{}},
-		quota:    &quota{},
 		events:   &downloadtest.Recorder{},
 		store:    downloadtest.NewObjectStore(),
 	}
@@ -85,7 +69,6 @@ func newFixture() fixture {
 		Repo:       repo,
 		Games:      cards,
 		Sessions:   f.sessions,
-		Quota:      f.quota,
 		Activities: f.events,
 		Messages:   f.events,
 		Tx:         &txtest.Immediate{},
@@ -257,8 +240,8 @@ func TestDeleteFileKeepsTheLastOne(t *testing.T) {
 	if _, err := f.repo.GetFile(ctx, pending.ID); !errors.Is(err, download.ErrFileNotFound) {
 		t.Fatalf("file removed: %v", err)
 	}
-	if !slices.Equal(f.spool.Removed(), []string{"/spool/6.part"}) || !slices.Equal(f.quota.withdrawn, []withdrawal{{owner.UserID, 6}}) {
-		t.Fatalf("local copy %v and quota %+v are released", f.spool.Removed(), f.quota.withdrawn)
+	if !slices.Equal(f.spool.Removed(), []string{"/spool/6.part"}) {
+		t.Fatalf("the local copy is released: %v", f.spool.Removed())
 	}
 	if got, _ := f.repo.GetResource(ctx, resource.ID); !got.Published() {
 		t.Fatal("removing the last unfinished file publishes the resource")
@@ -409,9 +392,6 @@ func TestReuploadRules(t *testing.T) {
 	}
 	if histories := f.repo.Histories(file.ID); len(histories) != 1 || histories[0].OperatorID != admin.UserID || *histories[0].Reason != "better rip" || histories[0].StorageKey != nil {
 		t.Fatalf("history %+v", histories)
-	}
-	if !slices.Equal(f.quota.withdrawn, []withdrawal{{UserID: owner.UserID, SessionID: oldSession}}) {
-		t.Fatalf("the original creator is refunded for the replaced session: %+v", f.quota.withdrawn)
 	}
 	if got, _ := f.repo.GetResource(ctx, resource.ID); !got.Updated.Equal(now) {
 		t.Fatalf("reupload bumps the resource: %+v", got)

@@ -67,8 +67,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userloginsession"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userpasskeycredential"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userpvnbinding"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/useruploadquota"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/useruploadquotarecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/walkthrough"
 
 	stdsql "database/sql"
@@ -183,10 +181,6 @@ type Client struct {
 	UserPasskeyCredential *UserPasskeyCredentialClient
 	// UserPvnBinding is the client for interacting with the UserPvnBinding builders.
 	UserPvnBinding *UserPvnBindingClient
-	// UserUploadQuota is the client for interacting with the UserUploadQuota builders.
-	UserUploadQuota *UserUploadQuotaClient
-	// UserUploadQuotaRecord is the client for interacting with the UserUploadQuotaRecord builders.
-	UserUploadQuotaRecord *UserUploadQuotaRecordClient
 	// Walkthrough is the client for interacting with the Walkthrough builders.
 	Walkthrough *WalkthroughClient
 }
@@ -252,8 +246,6 @@ func (c *Client) init() {
 	c.UserLoginSession = NewUserLoginSessionClient(c.config)
 	c.UserPasskeyCredential = NewUserPasskeyCredentialClient(c.config)
 	c.UserPvnBinding = NewUserPvnBindingClient(c.config)
-	c.UserUploadQuota = NewUserUploadQuotaClient(c.config)
-	c.UserUploadQuotaRecord = NewUserUploadQuotaRecordClient(c.config)
 	c.Walkthrough = NewWalkthroughClient(c.config)
 }
 
@@ -399,8 +391,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		UserLoginSession:                NewUserLoginSessionClient(cfg),
 		UserPasskeyCredential:           NewUserPasskeyCredentialClient(cfg),
 		UserPvnBinding:                  NewUserPvnBindingClient(cfg),
-		UserUploadQuota:                 NewUserUploadQuotaClient(cfg),
-		UserUploadQuotaRecord:           NewUserUploadQuotaRecordClient(cfg),
 		Walkthrough:                     NewWalkthroughClient(cfg),
 	}, nil
 }
@@ -473,8 +463,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		UserLoginSession:                NewUserLoginSessionClient(cfg),
 		UserPasskeyCredential:           NewUserPasskeyCredentialClient(cfg),
 		UserPvnBinding:                  NewUserPvnBindingClient(cfg),
-		UserUploadQuota:                 NewUserUploadQuotaClient(cfg),
-		UserUploadQuotaRecord:           NewUserUploadQuotaRecordClient(cfg),
 		Walkthrough:                     NewWalkthroughClient(cfg),
 	}, nil
 }
@@ -518,7 +506,7 @@ func (c *Client) Use(hooks ...Hook) {
 		c.OidcIdentity, c.RoleFieldPermission, c.Setting, c.SettingChange,
 		c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord, c.UserFieldPermission,
 		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
-		c.UserPvnBinding, c.UserUploadQuota, c.UserUploadQuotaRecord, c.Walkthrough,
+		c.UserPvnBinding, c.Walkthrough,
 	} {
 		n.Use(hooks...)
 	}
@@ -541,7 +529,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.OidcIdentity, c.RoleFieldPermission, c.Setting, c.SettingChange,
 		c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord, c.UserFieldPermission,
 		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
-		c.UserPvnBinding, c.UserUploadQuota, c.UserUploadQuotaRecord, c.Walkthrough,
+		c.UserPvnBinding, c.Walkthrough,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -654,10 +642,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.UserPasskeyCredential.mutate(ctx, m)
 	case *UserPvnBindingMutation:
 		return c.UserPvnBinding.mutate(ctx, m)
-	case *UserUploadQuotaMutation:
-		return c.UserUploadQuota.mutate(ctx, m)
-	case *UserUploadQuotaRecordMutation:
-		return c.UserUploadQuotaRecord.mutate(ctx, m)
 	case *WalkthroughMutation:
 		return c.Walkthrough.mutate(ctx, m)
 	default:
@@ -7058,22 +7042,6 @@ func (c *GameUploadSessionClient) QueryGameUploadChunks(_m *GameUploadSession) *
 	return query
 }
 
-// QueryUserUploadQuotaRecord queries the user_upload_quota_record edge of a GameUploadSession.
-func (c *GameUploadSessionClient) QueryUserUploadQuotaRecord(_m *GameUploadSession) *UserUploadQuotaRecordQuery {
-	query := (&UserUploadQuotaRecordClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(gameuploadsession.Table, gameuploadsession.FieldID, id),
-			sqlgraph.To(useruploadquotarecord.Table, useruploadquotarecord.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, gameuploadsession.UserUploadQuotaRecordTable, gameuploadsession.UserUploadQuotaRecordColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryCreator queries the creator edge of a GameUploadSession.
 func (c *GameUploadSessionClient) QueryCreator(_m *GameUploadSession) *UserQuery {
 	query := (&UserClient{config: c.config}).Query()
@@ -9028,22 +8996,6 @@ func (c *UserClient) QueryGameUploadSessions(_m *User) *GameUploadSessionQuery {
 	return query
 }
 
-// QueryUploadQuota queries the upload_quota edge of a User.
-func (c *UserClient) QueryUploadQuota(_m *User) *UserUploadQuotaQuery {
-	query := (&UserUploadQuotaClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(useruploadquota.Table, useruploadquota.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, user.UploadQuotaTable, user.UploadQuotaColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryWalkthroughs queries the walkthroughs edge of a User.
 func (c *UserClient) QueryWalkthroughs(_m *User) *WalkthroughQuery {
 	query := (&WalkthroughClient{config: c.config}).Query()
@@ -10139,336 +10091,6 @@ func (c *UserPvnBindingClient) mutate(ctx context.Context, m *UserPvnBindingMuta
 	}
 }
 
-// UserUploadQuotaClient is a client for the UserUploadQuota schema.
-type UserUploadQuotaClient struct {
-	config
-}
-
-// NewUserUploadQuotaClient returns a client for the UserUploadQuota from the given config.
-func NewUserUploadQuotaClient(c config) *UserUploadQuotaClient {
-	return &UserUploadQuotaClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `useruploadquota.Hooks(f(g(h())))`.
-func (c *UserUploadQuotaClient) Use(hooks ...Hook) {
-	c.hooks.UserUploadQuota = append(c.hooks.UserUploadQuota, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `useruploadquota.Intercept(f(g(h())))`.
-func (c *UserUploadQuotaClient) Intercept(interceptors ...Interceptor) {
-	c.inters.UserUploadQuota = append(c.inters.UserUploadQuota, interceptors...)
-}
-
-// Create returns a builder for creating a UserUploadQuota entity.
-func (c *UserUploadQuotaClient) Create() *UserUploadQuotaCreate {
-	mutation := newUserUploadQuotaMutation(c.config, OpCreate)
-	return &UserUploadQuotaCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of UserUploadQuota entities.
-func (c *UserUploadQuotaClient) CreateBulk(builders ...*UserUploadQuotaCreate) *UserUploadQuotaCreateBulk {
-	return &UserUploadQuotaCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *UserUploadQuotaClient) MapCreateBulk(slice any, setFunc func(*UserUploadQuotaCreate, int)) *UserUploadQuotaCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &UserUploadQuotaCreateBulk{err: fmt.Errorf("calling to UserUploadQuotaClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*UserUploadQuotaCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &UserUploadQuotaCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for UserUploadQuota.
-func (c *UserUploadQuotaClient) Update() *UserUploadQuotaUpdate {
-	mutation := newUserUploadQuotaMutation(c.config, OpUpdate)
-	return &UserUploadQuotaUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *UserUploadQuotaClient) UpdateOne(_m *UserUploadQuota) *UserUploadQuotaUpdateOne {
-	mutation := newUserUploadQuotaMutation(c.config, OpUpdateOne, withUserUploadQuota(_m))
-	return &UserUploadQuotaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *UserUploadQuotaClient) UpdateOneID(id int) *UserUploadQuotaUpdateOne {
-	mutation := newUserUploadQuotaMutation(c.config, OpUpdateOne, withUserUploadQuotaID(id))
-	return &UserUploadQuotaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for UserUploadQuota.
-func (c *UserUploadQuotaClient) Delete() *UserUploadQuotaDelete {
-	mutation := newUserUploadQuotaMutation(c.config, OpDelete)
-	return &UserUploadQuotaDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *UserUploadQuotaClient) DeleteOne(_m *UserUploadQuota) *UserUploadQuotaDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *UserUploadQuotaClient) DeleteOneID(id int) *UserUploadQuotaDeleteOne {
-	builder := c.Delete().Where(useruploadquota.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &UserUploadQuotaDeleteOne{builder}
-}
-
-// Query returns a query builder for UserUploadQuota.
-func (c *UserUploadQuotaClient) Query() *UserUploadQuotaQuery {
-	return &UserUploadQuotaQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeUserUploadQuota},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a UserUploadQuota entity by its id.
-func (c *UserUploadQuotaClient) Get(ctx context.Context, id int) (*UserUploadQuota, error) {
-	return c.Query().Where(useruploadquota.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *UserUploadQuotaClient) GetX(ctx context.Context, id int) *UserUploadQuota {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryRecords queries the records edge of a UserUploadQuota.
-func (c *UserUploadQuotaClient) QueryRecords(_m *UserUploadQuota) *UserUploadQuotaRecordQuery {
-	query := (&UserUploadQuotaRecordClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(useruploadquota.Table, useruploadquota.FieldID, id),
-			sqlgraph.To(useruploadquotarecord.Table, useruploadquotarecord.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, useruploadquota.RecordsTable, useruploadquota.RecordsColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryUser queries the user edge of a UserUploadQuota.
-func (c *UserUploadQuotaClient) QueryUser(_m *UserUploadQuota) *UserQuery {
-	query := (&UserClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(useruploadquota.Table, useruploadquota.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, useruploadquota.UserTable, useruploadquota.UserColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *UserUploadQuotaClient) Hooks() []Hook {
-	return c.hooks.UserUploadQuota
-}
-
-// Interceptors returns the client interceptors.
-func (c *UserUploadQuotaClient) Interceptors() []Interceptor {
-	return c.inters.UserUploadQuota
-}
-
-func (c *UserUploadQuotaClient) mutate(ctx context.Context, m *UserUploadQuotaMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&UserUploadQuotaCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&UserUploadQuotaUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&UserUploadQuotaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&UserUploadQuotaDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown UserUploadQuota mutation op: %q", m.Op())
-	}
-}
-
-// UserUploadQuotaRecordClient is a client for the UserUploadQuotaRecord schema.
-type UserUploadQuotaRecordClient struct {
-	config
-}
-
-// NewUserUploadQuotaRecordClient returns a client for the UserUploadQuotaRecord from the given config.
-func NewUserUploadQuotaRecordClient(c config) *UserUploadQuotaRecordClient {
-	return &UserUploadQuotaRecordClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `useruploadquotarecord.Hooks(f(g(h())))`.
-func (c *UserUploadQuotaRecordClient) Use(hooks ...Hook) {
-	c.hooks.UserUploadQuotaRecord = append(c.hooks.UserUploadQuotaRecord, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `useruploadquotarecord.Intercept(f(g(h())))`.
-func (c *UserUploadQuotaRecordClient) Intercept(interceptors ...Interceptor) {
-	c.inters.UserUploadQuotaRecord = append(c.inters.UserUploadQuotaRecord, interceptors...)
-}
-
-// Create returns a builder for creating a UserUploadQuotaRecord entity.
-func (c *UserUploadQuotaRecordClient) Create() *UserUploadQuotaRecordCreate {
-	mutation := newUserUploadQuotaRecordMutation(c.config, OpCreate)
-	return &UserUploadQuotaRecordCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of UserUploadQuotaRecord entities.
-func (c *UserUploadQuotaRecordClient) CreateBulk(builders ...*UserUploadQuotaRecordCreate) *UserUploadQuotaRecordCreateBulk {
-	return &UserUploadQuotaRecordCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *UserUploadQuotaRecordClient) MapCreateBulk(slice any, setFunc func(*UserUploadQuotaRecordCreate, int)) *UserUploadQuotaRecordCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &UserUploadQuotaRecordCreateBulk{err: fmt.Errorf("calling to UserUploadQuotaRecordClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*UserUploadQuotaRecordCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &UserUploadQuotaRecordCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for UserUploadQuotaRecord.
-func (c *UserUploadQuotaRecordClient) Update() *UserUploadQuotaRecordUpdate {
-	mutation := newUserUploadQuotaRecordMutation(c.config, OpUpdate)
-	return &UserUploadQuotaRecordUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *UserUploadQuotaRecordClient) UpdateOne(_m *UserUploadQuotaRecord) *UserUploadQuotaRecordUpdateOne {
-	mutation := newUserUploadQuotaRecordMutation(c.config, OpUpdateOne, withUserUploadQuotaRecord(_m))
-	return &UserUploadQuotaRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *UserUploadQuotaRecordClient) UpdateOneID(id int) *UserUploadQuotaRecordUpdateOne {
-	mutation := newUserUploadQuotaRecordMutation(c.config, OpUpdateOne, withUserUploadQuotaRecordID(id))
-	return &UserUploadQuotaRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for UserUploadQuotaRecord.
-func (c *UserUploadQuotaRecordClient) Delete() *UserUploadQuotaRecordDelete {
-	mutation := newUserUploadQuotaRecordMutation(c.config, OpDelete)
-	return &UserUploadQuotaRecordDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *UserUploadQuotaRecordClient) DeleteOne(_m *UserUploadQuotaRecord) *UserUploadQuotaRecordDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *UserUploadQuotaRecordClient) DeleteOneID(id int) *UserUploadQuotaRecordDeleteOne {
-	builder := c.Delete().Where(useruploadquotarecord.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &UserUploadQuotaRecordDeleteOne{builder}
-}
-
-// Query returns a query builder for UserUploadQuotaRecord.
-func (c *UserUploadQuotaRecordClient) Query() *UserUploadQuotaRecordQuery {
-	return &UserUploadQuotaRecordQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeUserUploadQuotaRecord},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a UserUploadQuotaRecord entity by its id.
-func (c *UserUploadQuotaRecordClient) Get(ctx context.Context, id int) (*UserUploadQuotaRecord, error) {
-	return c.Query().Where(useruploadquotarecord.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *UserUploadQuotaRecordClient) GetX(ctx context.Context, id int) *UserUploadQuotaRecord {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryUploadSession queries the upload_session edge of a UserUploadQuotaRecord.
-func (c *UserUploadQuotaRecordClient) QueryUploadSession(_m *UserUploadQuotaRecord) *GameUploadSessionQuery {
-	query := (&GameUploadSessionClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(useruploadquotarecord.Table, useruploadquotarecord.FieldID, id),
-			sqlgraph.To(gameuploadsession.Table, gameuploadsession.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, useruploadquotarecord.UploadSessionTable, useruploadquotarecord.UploadSessionColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryUserUploadQuota queries the user_upload_quota edge of a UserUploadQuotaRecord.
-func (c *UserUploadQuotaRecordClient) QueryUserUploadQuota(_m *UserUploadQuotaRecord) *UserUploadQuotaQuery {
-	query := (&UserUploadQuotaClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(useruploadquotarecord.Table, useruploadquotarecord.FieldID, id),
-			sqlgraph.To(useruploadquota.Table, useruploadquota.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, useruploadquotarecord.UserUploadQuotaTable, useruploadquotarecord.UserUploadQuotaColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *UserUploadQuotaRecordClient) Hooks() []Hook {
-	return c.hooks.UserUploadQuotaRecord
-}
-
-// Interceptors returns the client interceptors.
-func (c *UserUploadQuotaRecordClient) Interceptors() []Interceptor {
-	return c.inters.UserUploadQuotaRecord
-}
-
-func (c *UserUploadQuotaRecordClient) mutate(ctx context.Context, m *UserUploadQuotaRecordMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&UserUploadQuotaRecordCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&UserUploadQuotaRecordUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&UserUploadQuotaRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&UserUploadQuotaRecordDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown UserUploadQuotaRecord mutation op: %q", m.Op())
-	}
-}
-
 // WalkthroughClient is a client for the Walkthrough schema.
 type WalkthroughClient struct {
 	config
@@ -10680,8 +10302,7 @@ type (
 		MalwareScanCase, Message, ModerationEvent, OidcIdentity, RoleFieldPermission,
 		Setting, SettingChange, SponsorOrder, Tag, User, UserBannedRecord,
 		UserFieldPermission, UserGamePvnMapping, UserLoginSession,
-		UserPasskeyCredential, UserPvnBinding, UserUploadQuota, UserUploadQuotaRecord,
-		Walkthrough []ent.Hook
+		UserPasskeyCredential, UserPvnBinding, Walkthrough []ent.Hook
 	}
 	inters struct {
 		AICatalogModel, AICatalogProvider, AIModel, AIProvider, AIProviderOffer,
@@ -10695,8 +10316,7 @@ type (
 		MalwareScanCase, Message, ModerationEvent, OidcIdentity, RoleFieldPermission,
 		Setting, SettingChange, SponsorOrder, Tag, User, UserBannedRecord,
 		UserFieldPermission, UserGamePvnMapping, UserLoginSession,
-		UserPasskeyCredential, UserPvnBinding, UserUploadQuota, UserUploadQuotaRecord,
-		Walkthrough []ent.Interceptor
+		UserPasskeyCredential, UserPvnBinding, Walkthrough []ent.Interceptor
 	}
 )
 

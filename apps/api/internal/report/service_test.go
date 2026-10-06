@@ -16,7 +16,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/report"
 	"github.com/Ringyuki/shionlib/apps/api/internal/report/reporttest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
-	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
 
 const (
@@ -36,7 +35,6 @@ var (
 type fixture struct {
 	repo      *reporttest.MemoryRepository
 	resources *reporttest.Resources
-	quota     *reporttest.Quota
 	banner    *reporttest.Banner
 	mailer    *reporttest.Mailer
 	events    *downloadtest.Recorder
@@ -47,7 +45,6 @@ func newFixture() fixture {
 	f := fixture{
 		repo:      reporttest.NewMemoryRepository(func() time.Time { return now }),
 		resources: reporttest.NewResources(),
-		quota:     &reporttest.Quota{Missing: map[int]bool{}},
 		banner:    &reporttest.Banner{},
 		mailer:    &reporttest.Mailer{},
 		events:    &downloadtest.Recorder{},
@@ -62,7 +59,6 @@ func newFixture() fixture {
 	f.service = report.NewService(report.Deps{
 		Repo:      f.repo,
 		Resources: f.resources,
-		Quota:     f.quota,
 		Banner:    f.banner,
 		Messages:  f.events,
 		Mailer:    f.mailer,
@@ -181,9 +177,6 @@ func TestReviewValidMalwarePunishesUploaderAndTakesDownTheResource(t *testing.T)
 	if view.Status != report.StatusValid || view.Level != report.LevelCritical || !view.ReportedPenaltyApplied || *view.ProcessedBy != adminAct.UserID || *view.ProcessNote != "confirmed" {
 		t.Fatalf("reviewed %+v", view.Report)
 	}
-	if !slices.Equal(f.quota.Adjustments, []reporttest.Adjustment{{UserID: uploaderID, Action: upload.ActionSub, Amount: 5 * report.GiB, Reason: "REPORT_MALWARE"}}) {
-		t.Fatalf("quota %+v", f.quota.Adjustments)
-	}
 	if !slices.Equal(f.banner.Bans, []reporttest.Ban{{UserID: uploaderID, Reason: "Resource report: MALWARE", Days: 30}}) {
 		t.Fatalf("ban %+v", f.banner.Bans)
 	}
@@ -194,7 +187,7 @@ func TestReviewValidMalwarePunishesUploaderAndTakesDownTheResource(t *testing.T)
 	if len(messages) != 2 || messages[0].ReceiverID != reporterID || messages[0].Tone != message.ToneSuccess || messages[1].ReceiverID != uploaderID || messages[1].Tone != message.ToneDestructive {
 		t.Fatalf("messages %+v", messages)
 	}
-	if got := meta(t, messages[1]); got["ban_days"] != float64(30) || got["quota_sub_gb"] != float64(5) || got["process_note"] != "confirmed" {
+	if got := meta(t, messages[1]); got["ban_days"] != float64(30) || got["upload_tier_demoted"] != true || got["process_note"] != "confirmed" {
 		t.Fatalf("penalty meta %v", got)
 	}
 	_, err = f.service.Review(ctx, adminAct, created.ID, report.ReviewInput{Verdict: report.VerdictInvalid})
@@ -212,7 +205,7 @@ func TestReviewValidKeepsTheResourceWhenAsked(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if view.ReportedPenaltyApplied || len(f.quota.Adjustments) != 0 || len(f.banner.Bans) != 0 {
+	if view.ReportedPenaltyApplied || len(f.banner.Bans) != 0 {
 		t.Fatalf("admins are never penalized: %+v", view.Report)
 	}
 	if len(f.resources.TakenDown) != 0 || len(f.events.Messages()) != 0 {
@@ -220,24 +213,39 @@ func TestReviewValidKeepsTheResourceWhenAsked(t *testing.T) {
 	}
 }
 
-func TestReviewValidFailsWithoutQuotaRow(t *testing.T) {
+func TestReviewValidCountsAsAViolationFromMediumUp(t *testing.T) {
 	ctx := context.Background()
-	f := newFixture()
-	f.quota.Missing[uploaderID] = true
-	created := f.repo.Seed(report.Report{ResourceID: resourceID, ReporterID: reporterID, ReportedUserID: uploaderID, Reason: report.ReasonOther, Level: report.LevelMedium})
-	_, err := f.service.Review(ctx, adminAct, created.ID, report.ReviewInput{Verdict: report.VerdictValid})
-	expectCode(t, err, upload.ErrQuotaNotFound)
+	for _, tc := range []struct {
+		level     report.Level
+		violation bool
+	}{
+		{level: report.LevelLow},
+		{level: report.LevelMedium, violation: true},
+	} {
+		f := newFixture()
+		created := f.repo.Seed(report.Report{ResourceID: resourceID, ReporterID: reporterID, ReportedUserID: uploaderID, Reason: report.ReasonOther, Level: tc.level})
+		view, err := f.service.Review(ctx, adminAct, created.ID, report.ReviewInput{Verdict: report.VerdictValid})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if view.ReportedPenaltyApplied != tc.violation || len(f.banner.Bans) != 0 {
+			t.Fatalf("%s: %+v %+v", tc.level, view.Report, f.banner.Bans)
+		}
+		messages := f.events.Messages()
+		if got := meta(t, messages[1]); got["upload_tier_demoted"] != tc.violation || got["ban_days"] != float64(0) {
+			t.Fatalf("%s: penalty meta %v", tc.level, got)
+		}
+	}
 }
 
 func TestReviewInvalidLadder(t *testing.T) {
 	ctx := context.Background()
 	cases := []struct {
 		previous int
-		quota    int64
 		banDays  int
 	}{
 		{previous: 0},
-		{previous: 2, quota: report.GiB},
+		{previous: 2},
 		{previous: 4, banDays: 3},
 		{previous: 7, banDays: 14},
 		{previous: 8},
@@ -253,17 +261,14 @@ func TestReviewInvalidLadder(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		applied := tc.quota > 0 || tc.banDays > 0
+		applied := tc.banDays > 0
 		if view.Status != report.StatusInvalid || view.ReporterPenaltyApplied != applied {
 			t.Fatalf("previous %d: %+v", tc.previous, view.Report)
-		}
-		if tc.quota > 0 && (len(f.quota.Adjustments) != 1 || f.quota.Adjustments[0].Reason != "REPORT_FALSE_POSITIVE") {
-			t.Fatalf("previous %d quota %+v", tc.previous, f.quota.Adjustments)
 		}
 		if tc.banDays > 0 && (len(f.banner.Bans) != 1 || f.banner.Bans[0].Days != tc.banDays) {
 			t.Fatalf("previous %d bans %+v", tc.previous, f.banner.Bans)
 		}
-		if !applied && (len(f.quota.Adjustments) != 0 || len(f.banner.Bans) != 0) {
+		if !applied && len(f.banner.Bans) != 0 {
 			t.Fatalf("previous %d unexpected penalty", tc.previous)
 		}
 		messages := f.events.Messages()

@@ -126,7 +126,15 @@ func (s *UserService) Search(ctx context.Context, filter UserFilter, page Page) 
 }
 
 func (s *UserService) Detail(ctx context.Context, id int) (UserDetail, error) {
-	return s.store.UserDetail(ctx, id)
+	detail, err := s.store.UserDetail(ctx, id)
+	if err != nil {
+		return UserDetail{}, err
+	}
+	detail.Upload, err = s.quotas.Allowance(ctx, id)
+	if err != nil {
+		return UserDetail{}, err
+	}
+	return detail, nil
 }
 
 func (s *UserService) UpdateProfile(ctx context.Context, who actor.Actor, id int, in ProfileChanges) (user.User, bool, error) {
@@ -237,25 +245,11 @@ func (s *UserService) Sessions(ctx context.Context, filter SessionFilter, page P
 	return s.store.Sessions(ctx, filter, page)
 }
 
-func (s *UserService) AdjustQuotaSize(ctx context.Context, who actor.Actor, id int, change QuotaChange) error {
+func (s *UserService) SetUploadTrust(ctx context.Context, who actor.Actor, id int, trusted bool) error {
 	if _, err := s.manageable(ctx, who, id, true); err != nil {
 		return err
 	}
-	return s.quotas.AdminAdjustSize(ctx, id, change.Action, change.Amount, change.Reason)
-}
-
-func (s *UserService) AdjustQuotaUsed(ctx context.Context, who actor.Actor, id int, change QuotaChange) error {
-	if _, err := s.manageable(ctx, who, id, true); err != nil {
-		return err
-	}
-	return s.quotas.AdminAdjustUsed(ctx, id, change.Action, change.Amount, change.Reason)
-}
-
-func (s *UserService) ResetQuotaUsed(ctx context.Context, who actor.Actor, id int) error {
-	if _, err := s.manageable(ctx, who, id, true); err != nil {
-		return err
-	}
-	return s.quotas.AdminResetUsed(ctx, id)
+	return s.quotas.SetTrusted(ctx, id, trusted)
 }
 
 func (s *UserService) SetSponsorExpiry(ctx context.Context, id int, expiresAt *time.Time) error {

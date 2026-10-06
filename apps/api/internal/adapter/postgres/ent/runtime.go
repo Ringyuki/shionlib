@@ -56,8 +56,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userloginsession"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userpasskeycredential"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userpvnbinding"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/useruploadquota"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/useruploadquotarecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/walkthrough"
 )
 
@@ -1209,12 +1207,16 @@ func init() {
 	userDescTwoFactorEnabled := userFields[15].Descriptor()
 	// user.DefaultTwoFactorEnabled holds the default value on creation for the two_factor_enabled field.
 	user.DefaultTwoFactorEnabled = userDescTwoFactorEnabled.Default.(bool)
+	// userDescUploadTrusted is the schema descriptor for upload_trusted field.
+	userDescUploadTrusted := userFields[16].Descriptor()
+	// user.DefaultUploadTrusted holds the default value on creation for the upload_trusted field.
+	user.DefaultUploadTrusted = userDescUploadTrusted.Default.(bool)
 	// userDescCreated is the schema descriptor for created field.
-	userDescCreated := userFields[17].Descriptor()
+	userDescCreated := userFields[18].Descriptor()
 	// user.DefaultCreated holds the default value on creation for the created field.
 	user.DefaultCreated = userDescCreated.Default.(func() time.Time)
 	// userDescUpdated is the schema descriptor for updated field.
-	userDescUpdated := userFields[18].Descriptor()
+	userDescUpdated := userFields[19].Descriptor()
 	// user.DefaultUpdated holds the default value on creation for the updated field.
 	user.DefaultUpdated = userDescUpdated.Default.(func() time.Time)
 	// user.UpdateDefaultUpdated holds the default value on update for the updated field.
@@ -1365,38 +1367,6 @@ func init() {
 	userpvnbinding.DefaultUpdated = userpvnbindingDescUpdated.Default.(func() time.Time)
 	// userpvnbinding.UpdateDefaultUpdated holds the default value on update for the updated field.
 	userpvnbinding.UpdateDefaultUpdated = userpvnbindingDescUpdated.UpdateDefault.(func() time.Time)
-	useruploadquotaFields := schema.UserUploadQuota{}.Fields()
-	_ = useruploadquotaFields
-	// useruploadquotaDescIsFirstGrant is the schema descriptor for is_first_grant field.
-	useruploadquotaDescIsFirstGrant := useruploadquotaFields[4].Descriptor()
-	// useruploadquota.DefaultIsFirstGrant holds the default value on creation for the is_first_grant field.
-	useruploadquota.DefaultIsFirstGrant = useruploadquotaDescIsFirstGrant.Default.(bool)
-	// useruploadquotaDescCreated is the schema descriptor for created field.
-	useruploadquotaDescCreated := useruploadquotaFields[5].Descriptor()
-	// useruploadquota.DefaultCreated holds the default value on creation for the created field.
-	useruploadquota.DefaultCreated = useruploadquotaDescCreated.Default.(func() time.Time)
-	// useruploadquotaDescUpdated is the schema descriptor for updated field.
-	useruploadquotaDescUpdated := useruploadquotaFields[6].Descriptor()
-	// useruploadquota.DefaultUpdated holds the default value on creation for the updated field.
-	useruploadquota.DefaultUpdated = useruploadquotaDescUpdated.Default.(func() time.Time)
-	// useruploadquota.UpdateDefaultUpdated holds the default value on update for the updated field.
-	useruploadquota.UpdateDefaultUpdated = useruploadquotaDescUpdated.UpdateDefault.(func() time.Time)
-	useruploadquotarecordFields := schema.UserUploadQuotaRecord{}.Fields()
-	_ = useruploadquotarecordFields
-	// useruploadquotarecordDescActionReason is the schema descriptor for action_reason field.
-	useruploadquotarecordDescActionReason := useruploadquotarecordFields[4].Descriptor()
-	// useruploadquotarecord.ActionReasonValidator is a validator for the "action_reason" field. It is called by the builders before save.
-	useruploadquotarecord.ActionReasonValidator = useruploadquotarecordDescActionReason.Validators[0].(func(string) error)
-	// useruploadquotarecordDescCreated is the schema descriptor for created field.
-	useruploadquotarecordDescCreated := useruploadquotarecordFields[8].Descriptor()
-	// useruploadquotarecord.DefaultCreated holds the default value on creation for the created field.
-	useruploadquotarecord.DefaultCreated = useruploadquotarecordDescCreated.Default.(func() time.Time)
-	// useruploadquotarecordDescUpdated is the schema descriptor for updated field.
-	useruploadquotarecordDescUpdated := useruploadquotarecordFields[9].Descriptor()
-	// useruploadquotarecord.DefaultUpdated holds the default value on creation for the updated field.
-	useruploadquotarecord.DefaultUpdated = useruploadquotarecordDescUpdated.Default.(func() time.Time)
-	// useruploadquotarecord.UpdateDefaultUpdated holds the default value on update for the updated field.
-	useruploadquotarecord.UpdateDefaultUpdated = useruploadquotarecordDescUpdated.UpdateDefault.(func() time.Time)
 	walkthroughFields := schema.Walkthrough{}.Fields()
 	_ = walkthroughFields
 	// walkthroughDescTitle is the schema descriptor for title field.

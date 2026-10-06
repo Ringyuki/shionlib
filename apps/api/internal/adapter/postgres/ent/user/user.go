@@ -45,6 +45,8 @@ const (
 	FieldLastLoginAt = "last_login_at"
 	// FieldTwoFactorEnabled holds the string denoting the two_factor_enabled field in the database.
 	FieldTwoFactorEnabled = "two_factor_enabled"
+	// FieldUploadTrusted holds the string denoting the upload_trusted field in the database.
+	FieldUploadTrusted = "upload_trusted"
 	// FieldSponsorExpiresAt holds the string denoting the sponsor_expires_at field in the database.
 	FieldSponsorExpiresAt = "sponsor_expires_at"
 	// FieldCreated holds the string denoting the created field in the database.
@@ -95,8 +97,6 @@ const (
 	EdgePotatovnBinding = "potatovn_binding"
 	// EdgeGameUploadSessions holds the string denoting the game_upload_sessions edge name in mutations.
 	EdgeGameUploadSessions = "game_upload_sessions"
-	// EdgeUploadQuota holds the string denoting the upload_quota edge name in mutations.
-	EdgeUploadQuota = "upload_quota"
 	// EdgeWalkthroughs holds the string denoting the walkthroughs edge name in mutations.
 	EdgeWalkthroughs = "walkthroughs"
 	// EdgeBannedRecords holds the string denoting the banned_records edge name in mutations.
@@ -265,13 +265,6 @@ const (
 	GameUploadSessionsInverseTable = "game_upload_sessions"
 	// GameUploadSessionsColumn is the table column denoting the game_upload_sessions relation/edge.
 	GameUploadSessionsColumn = "creator_id"
-	// UploadQuotaTable is the table that holds the upload_quota relation/edge.
-	UploadQuotaTable = "user_upload_quotas"
-	// UploadQuotaInverseTable is the table name for the UserUploadQuota entity.
-	// It exists in this package in order to avoid circular dependency with the "useruploadquota" package.
-	UploadQuotaInverseTable = "user_upload_quotas"
-	// UploadQuotaColumn is the table column denoting the upload_quota relation/edge.
-	UploadQuotaColumn = "user_id"
 	// WalkthroughsTable is the table that holds the walkthroughs relation/edge.
 	WalkthroughsTable = "walkthroughs"
 	// WalkthroughsInverseTable is the table name for the Walkthrough entity.
@@ -341,6 +334,7 @@ var Columns = []string{
 	FieldEmailVerifiedAt,
 	FieldLastLoginAt,
 	FieldTwoFactorEnabled,
+	FieldUploadTrusted,
 	FieldSponsorExpiresAt,
 	FieldCreated,
 	FieldUpdated,
@@ -381,6 +375,8 @@ var (
 	DefaultUploadInjectedFileTimes int
 	// DefaultTwoFactorEnabled holds the default value on creation for the "two_factor_enabled" field.
 	DefaultTwoFactorEnabled bool
+	// DefaultUploadTrusted holds the default value on creation for the "upload_trusted" field.
+	DefaultUploadTrusted bool
 	// DefaultCreated holds the default value on creation for the "created" field.
 	DefaultCreated func() time.Time
 	// DefaultUpdated holds the default value on creation for the "updated" field.
@@ -497,6 +493,11 @@ func ByLastLoginAt(opts ...sql.OrderTermOption) OrderOption {
 // ByTwoFactorEnabled orders the results by the two_factor_enabled field.
 func ByTwoFactorEnabled(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTwoFactorEnabled, opts...).ToFunc()
+}
+
+// ByUploadTrusted orders the results by the upload_trusted field.
+func ByUploadTrusted(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUploadTrusted, opts...).ToFunc()
 }
 
 // BySponsorExpiresAt orders the results by the sponsor_expires_at field.
@@ -815,13 +816,6 @@ func ByGameUploadSessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOptio
 	}
 }
 
-// ByUploadQuotaField orders the results by upload_quota field.
-func ByUploadQuotaField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUploadQuotaStep(), sql.OrderByField(field, opts...))
-	}
-}
-
 // ByWalkthroughsCount orders the results by walkthroughs count.
 func ByWalkthroughsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -1071,13 +1065,6 @@ func newGameUploadSessionsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(GameUploadSessionsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, GameUploadSessionsTable, GameUploadSessionsColumn),
-	)
-}
-func newUploadQuotaStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(UploadQuotaInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, UploadQuotaTable, UploadQuotaColumn),
 	)
 }
 func newWalkthroughsStep() *sqlgraph.Step {

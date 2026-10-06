@@ -18,23 +18,15 @@ type Repository interface {
 	ListStale(ctx context.Context, before time.Time, limit int) ([]Session, error)
 	HasFile(ctx context.Context, sessionID int) (bool, error)
 	ReferencedPaths(ctx context.Context, paths []string) (map[string]bool, error)
+	PendingBytes(ctx context.Context, now time.Time) (int64, error)
+	LockAdmission(ctx context.Context) error
 }
 
 type QuotaRepository interface {
-	FindQuota(ctx context.Context, userID int) (Quota, bool, error)
-	LockQuota(ctx context.Context, userID int) (Quota, error)
-	EnsureQuota(ctx context.Context, userID int) (Quota, error)
-	AddRecord(ctx context.Context, in NewQuotaRecord) error
-	AddUsed(ctx context.Context, quotaID int, delta int64) error
-	AddSize(ctx context.Context, quotaID int, delta int64) error
-	SetUsed(ctx context.Context, quotaID int, used int64) error
-	MarkFirstGrant(ctx context.Context, quotaID int) error
-	FindWithdrawable(ctx context.Context, userID, sessionID int) (QuotaRecord, bool, error)
-	MarkWithdrawn(ctx context.Context, recordID int) error
-	CountApprovedFiles(ctx context.Context, userID int, since time.Time) (int, error)
-	GrantCandidates(ctx context.Context, registeredBefore time.Time, afterID, limit int) ([]int, error)
-	ActiveUploaders(ctx context.Context, afterID, limit int) ([]int, error)
-	InactiveUploaders(ctx context.Context, lastSeenBefore time.Time, afterID, limit int) ([]int, error)
+	Standing(ctx context.Context, userID int) (Standing, error)
+	StoredBytes(ctx context.Context, userID int) (int64, error)
+	InFlightBytes(ctx context.Context, userID int, now time.Time) (int64, error)
+	SetTrusted(ctx context.Context, userID int, trusted bool) error
 }
 
 type Spool interface {
@@ -46,6 +38,7 @@ type Spool interface {
 	Digest(ctx context.Context, path string) (string, error)
 	Remove(ctx context.Context, path string) error
 	Stale(ctx context.Context, before time.Time) ([]string, error)
+	Available(ctx context.Context) (int64, error)
 }
 
 type Transactor interface {

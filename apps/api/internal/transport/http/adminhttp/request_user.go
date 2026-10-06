@@ -102,21 +102,10 @@ type adminUserSetPermissionsInput struct {
 	}
 }
 
-type adminUserQuotaSizeInput struct {
+type adminUserUploadTrustInput struct {
 	ID   int `path:"id" minimum:"1"`
 	Body struct {
-		Action       string  `json:"action" enum:"ADD,SUB"`
-		Amount       int64   `json:"amount" minimum:"1" doc:"Bytes"`
-		ActionReason *string `json:"action_reason,omitempty" maxLength:"255"`
-	}
-}
-
-type adminUserQuotaUsedInput struct {
-	ID   int `path:"id" minimum:"1"`
-	Body struct {
-		Action       string  `json:"action" enum:"USE,ADD" doc:"USE consumes quota, ADD gives it back"`
-		Amount       int64   `json:"amount" minimum:"1" doc:"Bytes"`
-		ActionReason *string `json:"action_reason,omitempty" maxLength:"255"`
+		Trusted bool `json:"trusted" doc:"Grant or withdraw the trusted upload tier"`
 	}
 }
 

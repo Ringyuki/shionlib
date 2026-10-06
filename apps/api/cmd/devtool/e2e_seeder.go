@@ -266,9 +266,6 @@ func (s *e2eSeeder) seedUsers(ctx context.Context, tx *ent.Client, passwordHash 
 		if err != nil {
 			return nil, nil, fmt.Errorf("create user %s: %w", seed.Name, err)
 		}
-		if err := tx.UserUploadQuota.Create().SetUserID(row.ID).SetSize(seed.QuotaSize).SetUsed(0).SetIsFirstGrant(true).Exec(ctx); err != nil {
-			return nil, nil, fmt.Errorf("create upload quota of %s: %w", seed.Name, err)
-		}
 		favorite, err := tx.Favorite.Create().SetUserID(row.ID).SetName(e2eDefaultFavoriteName).SetDefault(true).Save(ctx)
 		if err != nil {
 			return nil, nil, fmt.Errorf("create default favorite of %s: %w", seed.Name, err)

@@ -47,8 +47,6 @@ const (
 	EdgeGameDownloadResourceFile = "game_download_resource_file"
 	// EdgeGameUploadChunks holds the string denoting the game_upload_chunks edge name in mutations.
 	EdgeGameUploadChunks = "game_upload_chunks"
-	// EdgeUserUploadQuotaRecord holds the string denoting the user_upload_quota_record edge name in mutations.
-	EdgeUserUploadQuotaRecord = "user_upload_quota_record"
 	// EdgeCreator holds the string denoting the creator edge name in mutations.
 	EdgeCreator = "creator"
 	// Table holds the table name of the gameuploadsession in the database.
@@ -67,13 +65,6 @@ const (
 	GameUploadChunksInverseTable = "game_upload_chunks"
 	// GameUploadChunksColumn is the table column denoting the game_upload_chunks relation/edge.
 	GameUploadChunksColumn = "game_upload_session_id"
-	// UserUploadQuotaRecordTable is the table that holds the user_upload_quota_record relation/edge.
-	UserUploadQuotaRecordTable = "user_upload_quota_records"
-	// UserUploadQuotaRecordInverseTable is the table name for the UserUploadQuotaRecord entity.
-	// It exists in this package in order to avoid circular dependency with the "useruploadquotarecord" package.
-	UserUploadQuotaRecordInverseTable = "user_upload_quota_records"
-	// UserUploadQuotaRecordColumn is the table column denoting the user_upload_quota_record relation/edge.
-	UserUploadQuotaRecordColumn = "upload_session_id"
 	// CreatorTable is the table that holds the creator relation/edge.
 	CreatorTable = "game_upload_sessions"
 	// CreatorInverseTable is the table name for the User entity.
@@ -272,13 +263,6 @@ func ByGameUploadChunks(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption 
 	}
 }
 
-// ByUserUploadQuotaRecordField orders the results by user_upload_quota_record field.
-func ByUserUploadQuotaRecordField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUserUploadQuotaRecordStep(), sql.OrderByField(field, opts...))
-	}
-}
-
 // ByCreatorField orders the results by creator field.
 func ByCreatorField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -297,13 +281,6 @@ func newGameUploadChunksStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(GameUploadChunksInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, GameUploadChunksTable, GameUploadChunksColumn),
-	)
-}
-func newUserUploadQuotaRecordStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(UserUploadQuotaRecordInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, UserUploadQuotaRecordTable, UserUploadQuotaRecordColumn),
 	)
 }
 func newCreatorStep() *sqlgraph.Step {

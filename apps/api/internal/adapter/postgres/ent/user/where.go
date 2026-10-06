@@ -125,6 +125,11 @@ func TwoFactorEnabled(v bool) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldTwoFactorEnabled, v))
 }
 
+// UploadTrusted applies equality check predicate on the "upload_trusted" field. It's identical to UploadTrustedEQ.
+func UploadTrusted(v bool) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldUploadTrusted, v))
+}
+
 // SponsorExpiresAt applies equality check predicate on the "sponsor_expires_at" field. It's identical to SponsorExpiresAtEQ.
 func SponsorExpiresAt(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldSponsorExpiresAt, v))
@@ -870,6 +875,16 @@ func TwoFactorEnabledNEQ(v bool) predicate.User {
 	return predicate.User(sql.FieldNEQ(FieldTwoFactorEnabled, v))
 }
 
+// UploadTrustedEQ applies the EQ predicate on the "upload_trusted" field.
+func UploadTrustedEQ(v bool) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldUploadTrusted, v))
+}
+
+// UploadTrustedNEQ applies the NEQ predicate on the "upload_trusted" field.
+func UploadTrustedNEQ(v bool) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldUploadTrusted, v))
+}
+
 // SponsorExpiresAtEQ applies the EQ predicate on the "sponsor_expires_at" field.
 func SponsorExpiresAtEQ(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldSponsorExpiresAt, v))
@@ -1498,29 +1513,6 @@ func HasGameUploadSessions() predicate.User {
 func HasGameUploadSessionsWith(preds ...predicate.GameUploadSession) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := newGameUploadSessionsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasUploadQuota applies the HasEdge predicate on the "upload_quota" edge.
-func HasUploadQuota() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, UploadQuotaTable, UploadQuotaColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasUploadQuotaWith applies the HasEdge predicate on the "upload_quota" edge with a given conditions (other predicates).
-func HasUploadQuotaWith(preds ...predicate.UserUploadQuota) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newUploadQuotaStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

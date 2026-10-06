@@ -42,9 +42,30 @@ type uploadCompleteDTO struct {
 	OK bool `json:"ok"`
 }
 
-type uploadQuotaDTO struct {
-	Size int64 `json:"size"`
-	Used int64 `json:"used"`
+type AllowanceDTO struct {
+	Tier          upload.Tier `json:"tier" enum:"new,regular,trusted,admin"`
+	Approved      int         `json:"approved" doc:"Published resources of the uploader"`
+	Trusted       bool        `json:"trusted" doc:"Trusted tier granted by an admin"`
+	FrozenUntil   *time.Time  `json:"frozen_until" doc:"Set while a violation keeps the uploader one tier down"`
+	Stored        int64       `json:"stored" doc:"Bytes of the uploader's files in active resources"`
+	StoredLimit   *int64      `json:"stored_limit" doc:"Null when unlimited; counts stored and in-flight bytes"`
+	InFlight      int64       `json:"in_flight" doc:"Bytes of uploads not yet attached to a resource"`
+	InFlightLimit int64       `json:"in_flight_limit"`
+	MaxFileSize   *int64      `json:"max_file_size" doc:"Null when unlimited"`
+}
+
+func ToAllowanceDTO(a upload.Allowance) AllowanceDTO {
+	return AllowanceDTO{
+		Tier:          a.Tier,
+		Approved:      a.Approved,
+		Trusted:       a.Trusted,
+		FrozenUntil:   a.FrozenUntil,
+		Stored:        a.Stored,
+		StoredLimit:   a.StoredLimit,
+		InFlight:      a.InFlight,
+		InFlightLimit: a.InFlightLimit,
+		MaxFileSize:   a.MaxFileSize,
+	}
 }
 
 func toOngoingUpload(s upload.Session) ongoingUploadDTO {

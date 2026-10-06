@@ -16,12 +16,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload/uploadtest"
 )
 
-type noQuota struct{}
-
-func (noQuota) Withdraw(context.Context, int, int) error {
-	return nil
-}
-
 func TestBackoffDoublesUpToAnHour(t *testing.T) {
 	cases := map[int]time.Duration{1: time.Minute, 2: 2 * time.Minute, 3: 4 * time.Minute, 7: time.Hour, 30: time.Hour}
 	for attempt, want := range cases {
@@ -38,7 +32,7 @@ func TestStoreWorkerCancelsWhenTheLocalFileIsGone(t *testing.T) {
 	path := "/spool/missing.part"
 	file := repo.SeedFile(download.File{ResourceID: resource.ID, Path: &path, Status: download.FileOnServer, CheckStatus: download.CheckOK})
 	events := &downloadtest.Recorder{}
-	transfers := download.NewTransferService(repo, downloadtest.NewObjectStore(), uploadtest.NewMemorySpool(), noQuota{}, events, events, &txtest.Immediate{}, func() time.Time { return now })
+	transfers := download.NewTransferService(repo, downloadtest.NewObjectStore(), uploadtest.NewMemorySpool(), events, events, &txtest.Immediate{}, func() time.Time { return now })
 	downloadjobs.Register(transfers)(river.NewWorkers())
 	worker := downloadjobs.NewStoreWorker(transfers)
 	job := &river.Job[download.StoreFile]{JobRow: &rivertype.JobRow{Attempt: 1}, Args: download.StoreFile{FileID: file.ID}}

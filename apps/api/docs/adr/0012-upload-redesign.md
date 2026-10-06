@@ -1,4 +1,4 @@
-# ADR 0012: Multi-file resources, set-aware checks and publication
+# ADR 0012: Multi-file resources, set-aware checks, publication and upload tiers
 
 ## Context
 The legacy upload flow is built around one file per resource.
@@ -8,6 +8,8 @@ The legacy upload flow is built around one file per resource.
 - The browser must read the whole file once to compute its BLAKE3 digest before the upload can start.
 
 Production data (2026-10) shows the effect: all 7396 resources hold a single file, all of them `.rar`, `.zip` or `.7z`, with no split volumes and no raw disc images. Uploaders repack everything into one archive because nothing else is accepted.
+
+The upload quota was a counter per user (`user_upload_quotas.size`/`used`). Five cron tasks changed it: 5 GB granted seven days after registration, 2 GB top-ups up to 20 GB, reductions after 45 days without uploads, `used` reset every month and the whole quota reset after 120 days of inactivity. Uploads charged it when they started; aborts, rejections, deletions and malware reviews refunded it, and report penalties subtracted from it. A refund missed on any of these paths drifted the counter, and the monthly reset let anyone upload the cap again each month whatever they had uploaded before. The limit did not depend on whether an uploader's resources had ever been published, and nothing limited how much the spool had to hold at once.
 
 Malware scanning streamed whole files to ClamAV. The legacy `clamscan` skipped files over 100 MB (the median upload is 1.4 GB). clamd rejects streams over its 100 MB default, so the Go scanner failed on most uploads. In the site's history there were two ClamAV detections and two malware reports; all four were judged false positives or invalid.
 
@@ -35,20 +37,30 @@ Malware scanning streamed whole files to ClamAV. The legacy `clamscan` skipped f
   - Other entries are not scanned. Every scanned entry is written to the scan log, and a quarantine case keeps each entry's result.
   - clamd's stream and scan limits are 4000M, in one `infra/clamav/clamd.conf` mounted in production and copied into the e2e image.
   - The scanner is a port, so another engine only needs an adapter. A confirmed miss is the trigger to change engines.
-  - Targeted tampering is handled by later phases: uploader trust tiers, listing rules, and comparing executables with trusted uploads of the same game.
+  - Targeted tampering is handled by uploader trust tiers (below) and by later phases: listing rules, and comparing executables with trusted uploads of the same game.
 - **Resource-level outcomes.**
-  - A rejected file, or every file of a rejected or expired set, is marked with its reason and removed by the cleanup task with its quota returned. The rest of the resource publishes once it is stored; a resource left without files is deleted.
+  - A rejected file, or every file of a rejected or expired set, is marked with its reason and removed by the cleanup task. The rest of the resource publishes once it is stored; a resource left without files is deleted.
   - Corrupt sets are removed whole because 7-Zip cannot name the broken volume.
-  - A file under malware review hides the whole resource; this is derived from the files, not stored on the resource. Confirmed malware takes the whole resource down, refunds and purges its files, and keeps the existing strikes and ban. A false positive releases every held file of the resource.
+  - A file under malware review hides the whole resource; this is derived from the files, not stored on the resource. Confirmed malware takes the whole resource down, purges its files, and keeps the existing strikes and ban. A false positive releases every held file of the resource.
   - Uploaders get one message when a resource is published (`ResourcePublished`), one per file added to an already published resource, and one per rejected file or set naming the files, the reason and any missing volume numbers.
+
+- **Upload allowance follows the uploader's tier and is derived from records**, so nothing is charged, refunded or reset.
+  - *Stored* bytes are the files in object storage of the uploader's active resources. *In-flight* bytes are live upload sessions plus completed uploads not attached to a file yet. Deleting a resource or a rejected file frees its space at once.
+  - Tiers, with every number a setting: new uploader (`upload.new_uploader_quota`, 50 GiB); regular after `upload.regular_after` (3) published resources (`upload.regular_quota`, 300 GiB); trusted after `upload.trusted_after` (30) published resources or when an admin grants it (`PATCH /admin/users/{id}/upload-trust`, `upload.trusted_quota`, 2 TiB); admins unlimited. Stored plus in-flight bytes stay within the tier's limit.
+  - A violation is malware confirmed by an admin or a valid report of medium level or above. It drops the uploader one tier for `upload.violation_freeze` (30 days), and a regular uploader stays a new uploader while the violation is within `upload.violation_window` (90 days). Bans and their messages are unchanged; the penalty message says whether the tier dropped.
+  - Every uploader has at most `upload.in_flight_limit` (30 GiB) in flight (`USER_UPLOAD_IN_FLIGHT_EXCEEDED`). New and regular uploaders have at most `upload.max_file_size` (30 GiB) per file.
+  - An upload starts only if the spool keeps `upload.spool_reserve` (20 GiB) free after the bytes that live uploads have still to write (`UPLOAD_SPOOL_FULL`). Uploads are admitted one at a time under a transaction lock, so concurrent starts cannot overrun these limits.
+  - `GET /uploads/quota` returns the tier, the counts behind it, any freeze, and the usage and limits.
 
 ## Alternatives
 - Keep one file per resource: uploaders keep repacking, and split downloads from other sources cannot be shared as they are.
 - Accept raw disc images now: nobody uploads them, and they download worse than an archive.
 - Defender in a Windows VM, or a commercial Linux engine: better detection, but a new machine or a yearly license plus upkeep, for a threat that has not materialised. Static engines do not stop targeted tampering either.
+- Keep the quota counter and its cron tasks: every path that frees space must refund it exactly once, and the monthly reset makes the limit a monthly allowance instead of a cap on what an uploader holds.
 - Derive publication from file states on every query: it cannot keep a published resource visible while an appended file is processed, and it cannot order releases by publication.
 
 ## Consequences
 - New column `published_at` (backfilled from `created` for resources whose files are all stored); `upload_session_id` is dropped.
 - Clients of the old create and init endpoints must send the new shapes (see migration.md).
 - Scanning reads each archive with 7-Zip instead of streaming it whole, which makes ClamAV coverage independent of archive size.
+- `user_upload_quotas` and `user_upload_quota_records` are dropped and `users.upload_trusted` is added. The admin quota endpoints give way to the upload-trust endpoint, and report penalties no longer subtract bytes.

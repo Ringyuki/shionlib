@@ -118,10 +118,6 @@ type Tx struct {
 	UserPasskeyCredential *UserPasskeyCredentialClient
 	// UserPvnBinding is the client for interacting with the UserPvnBinding builders.
 	UserPvnBinding *UserPvnBindingClient
-	// UserUploadQuota is the client for interacting with the UserUploadQuota builders.
-	UserUploadQuota *UserUploadQuotaClient
-	// UserUploadQuotaRecord is the client for interacting with the UserUploadQuotaRecord builders.
-	UserUploadQuotaRecord *UserUploadQuotaRecordClient
 	// Walkthrough is the client for interacting with the Walkthrough builders.
 	Walkthrough *WalkthroughClient
 
@@ -307,8 +303,6 @@ func (tx *Tx) init() {
 	tx.UserLoginSession = NewUserLoginSessionClient(tx.config)
 	tx.UserPasskeyCredential = NewUserPasskeyCredentialClient(tx.config)
 	tx.UserPvnBinding = NewUserPvnBindingClient(tx.config)
-	tx.UserUploadQuota = NewUserUploadQuotaClient(tx.config)
-	tx.UserUploadQuotaRecord = NewUserUploadQuotaRecordClient(tx.config)
 	tx.Walkthrough = NewWalkthroughClient(tx.config)
 }
 

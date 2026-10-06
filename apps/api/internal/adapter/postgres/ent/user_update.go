@@ -34,7 +34,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userloginsession"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userpasskeycredential"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userpvnbinding"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/useruploadquota"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/walkthrough"
 )
 
@@ -322,6 +321,20 @@ func (_u *UserUpdate) SetTwoFactorEnabled(v bool) *UserUpdate {
 func (_u *UserUpdate) SetNillableTwoFactorEnabled(v *bool) *UserUpdate {
 	if v != nil {
 		_u.SetTwoFactorEnabled(*v)
+	}
+	return _u
+}
+
+// SetUploadTrusted sets the "upload_trusted" field.
+func (_u *UserUpdate) SetUploadTrusted(v bool) *UserUpdate {
+	_u.mutation.SetUploadTrusted(v)
+	return _u
+}
+
+// SetNillableUploadTrusted sets the "upload_trusted" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableUploadTrusted(v *bool) *UserUpdate {
+	if v != nil {
+		_u.SetUploadTrusted(*v)
 	}
 	return _u
 }
@@ -684,25 +697,6 @@ func (_u *UserUpdate) AddGameUploadSessions(v ...*GameUploadSession) *UserUpdate
 		ids[i] = v[i].ID
 	}
 	return _u.AddGameUploadSessionIDs(ids...)
-}
-
-// SetUploadQuotaID sets the "upload_quota" edge to the UserUploadQuota entity by ID.
-func (_u *UserUpdate) SetUploadQuotaID(id int) *UserUpdate {
-	_u.mutation.SetUploadQuotaID(id)
-	return _u
-}
-
-// SetNillableUploadQuotaID sets the "upload_quota" edge to the UserUploadQuota entity by ID if the given value is not nil.
-func (_u *UserUpdate) SetNillableUploadQuotaID(id *int) *UserUpdate {
-	if id != nil {
-		_u = _u.SetUploadQuotaID(*id)
-	}
-	return _u
-}
-
-// SetUploadQuota sets the "upload_quota" edge to the UserUploadQuota entity.
-func (_u *UserUpdate) SetUploadQuota(v *UserUploadQuota) *UserUpdate {
-	return _u.SetUploadQuotaID(v.ID)
 }
 
 // AddWalkthroughIDs adds the "walkthroughs" edge to the Walkthrough entity by IDs.
@@ -1247,12 +1241,6 @@ func (_u *UserUpdate) RemoveGameUploadSessions(v ...*GameUploadSession) *UserUpd
 	return _u.RemoveGameUploadSessionIDs(ids...)
 }
 
-// ClearUploadQuota clears the "upload_quota" edge to the UserUploadQuota entity.
-func (_u *UserUpdate) ClearUploadQuota() *UserUpdate {
-	_u.mutation.ClearUploadQuota()
-	return _u
-}
-
 // ClearWalkthroughs clears all "walkthroughs" edges to the Walkthrough entity.
 func (_u *UserUpdate) ClearWalkthroughs() *UserUpdate {
 	_u.mutation.ClearWalkthroughs()
@@ -1532,6 +1520,9 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.TwoFactorEnabled(); ok {
 		_spec.SetField(user.FieldTwoFactorEnabled, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.UploadTrusted(); ok {
+		_spec.SetField(user.FieldUploadTrusted, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.SponsorExpiresAt(); ok {
 		_spec.SetField(user.FieldSponsorExpiresAt, field.TypeTime, value)
@@ -2509,35 +2500,6 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(gameuploadsession.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.UploadQuotaCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.UploadQuotaTable,
-			Columns: []string{user.UploadQuotaColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(useruploadquota.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.UploadQuotaIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.UploadQuotaTable,
-			Columns: []string{user.UploadQuotaColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(useruploadquota.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -3111,6 +3073,20 @@ func (_u *UserUpdateOne) SetNillableTwoFactorEnabled(v *bool) *UserUpdateOne {
 	return _u
 }
 
+// SetUploadTrusted sets the "upload_trusted" field.
+func (_u *UserUpdateOne) SetUploadTrusted(v bool) *UserUpdateOne {
+	_u.mutation.SetUploadTrusted(v)
+	return _u
+}
+
+// SetNillableUploadTrusted sets the "upload_trusted" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableUploadTrusted(v *bool) *UserUpdateOne {
+	if v != nil {
+		_u.SetUploadTrusted(*v)
+	}
+	return _u
+}
+
 // SetSponsorExpiresAt sets the "sponsor_expires_at" field.
 func (_u *UserUpdateOne) SetSponsorExpiresAt(v time.Time) *UserUpdateOne {
 	_u.mutation.SetSponsorExpiresAt(v)
@@ -3469,25 +3445,6 @@ func (_u *UserUpdateOne) AddGameUploadSessions(v ...*GameUploadSession) *UserUpd
 		ids[i] = v[i].ID
 	}
 	return _u.AddGameUploadSessionIDs(ids...)
-}
-
-// SetUploadQuotaID sets the "upload_quota" edge to the UserUploadQuota entity by ID.
-func (_u *UserUpdateOne) SetUploadQuotaID(id int) *UserUpdateOne {
-	_u.mutation.SetUploadQuotaID(id)
-	return _u
-}
-
-// SetNillableUploadQuotaID sets the "upload_quota" edge to the UserUploadQuota entity by ID if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableUploadQuotaID(id *int) *UserUpdateOne {
-	if id != nil {
-		_u = _u.SetUploadQuotaID(*id)
-	}
-	return _u
-}
-
-// SetUploadQuota sets the "upload_quota" edge to the UserUploadQuota entity.
-func (_u *UserUpdateOne) SetUploadQuota(v *UserUploadQuota) *UserUpdateOne {
-	return _u.SetUploadQuotaID(v.ID)
 }
 
 // AddWalkthroughIDs adds the "walkthroughs" edge to the Walkthrough entity by IDs.
@@ -4032,12 +3989,6 @@ func (_u *UserUpdateOne) RemoveGameUploadSessions(v ...*GameUploadSession) *User
 	return _u.RemoveGameUploadSessionIDs(ids...)
 }
 
-// ClearUploadQuota clears the "upload_quota" edge to the UserUploadQuota entity.
-func (_u *UserUpdateOne) ClearUploadQuota() *UserUpdateOne {
-	_u.mutation.ClearUploadQuota()
-	return _u
-}
-
 // ClearWalkthroughs clears all "walkthroughs" edges to the Walkthrough entity.
 func (_u *UserUpdateOne) ClearWalkthroughs() *UserUpdateOne {
 	_u.mutation.ClearWalkthroughs()
@@ -4347,6 +4298,9 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.TwoFactorEnabled(); ok {
 		_spec.SetField(user.FieldTwoFactorEnabled, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.UploadTrusted(); ok {
+		_spec.SetField(user.FieldUploadTrusted, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.SponsorExpiresAt(); ok {
 		_spec.SetField(user.FieldSponsorExpiresAt, field.TypeTime, value)
@@ -5324,35 +5278,6 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(gameuploadsession.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.UploadQuotaCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.UploadQuotaTable,
-			Columns: []string{user.UploadQuotaColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(useruploadquota.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.UploadQuotaIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.UploadQuotaTable,
-			Columns: []string{user.UploadQuotaColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(useruploadquota.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

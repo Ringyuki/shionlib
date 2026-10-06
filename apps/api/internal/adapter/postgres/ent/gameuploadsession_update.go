@@ -16,7 +16,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/useruploadquotarecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 )
 
@@ -267,25 +266,6 @@ func (_u *GameUploadSessionUpdate) AddGameUploadChunks(v ...*GameUploadChunk) *G
 	return _u.AddGameUploadChunkIDs(ids...)
 }
 
-// SetUserUploadQuotaRecordID sets the "user_upload_quota_record" edge to the UserUploadQuotaRecord entity by ID.
-func (_u *GameUploadSessionUpdate) SetUserUploadQuotaRecordID(id int) *GameUploadSessionUpdate {
-	_u.mutation.SetUserUploadQuotaRecordID(id)
-	return _u
-}
-
-// SetNillableUserUploadQuotaRecordID sets the "user_upload_quota_record" edge to the UserUploadQuotaRecord entity by ID if the given value is not nil.
-func (_u *GameUploadSessionUpdate) SetNillableUserUploadQuotaRecordID(id *int) *GameUploadSessionUpdate {
-	if id != nil {
-		_u = _u.SetUserUploadQuotaRecordID(*id)
-	}
-	return _u
-}
-
-// SetUserUploadQuotaRecord sets the "user_upload_quota_record" edge to the UserUploadQuotaRecord entity.
-func (_u *GameUploadSessionUpdate) SetUserUploadQuotaRecord(v *UserUploadQuotaRecord) *GameUploadSessionUpdate {
-	return _u.SetUserUploadQuotaRecordID(v.ID)
-}
-
 // SetCreator sets the "creator" edge to the User entity.
 func (_u *GameUploadSessionUpdate) SetCreator(v *User) *GameUploadSessionUpdate {
 	return _u.SetCreatorID(v.ID)
@@ -321,12 +301,6 @@ func (_u *GameUploadSessionUpdate) RemoveGameUploadChunks(v ...*GameUploadChunk)
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveGameUploadChunkIDs(ids...)
-}
-
-// ClearUserUploadQuotaRecord clears the "user_upload_quota_record" edge to the UserUploadQuotaRecord entity.
-func (_u *GameUploadSessionUpdate) ClearUserUploadQuotaRecord() *GameUploadSessionUpdate {
-	_u.mutation.ClearUserUploadQuotaRecord()
-	return _u
 }
 
 // ClearCreator clears the "creator" edge to the User entity.
@@ -525,35 +499,6 @@ func (_u *GameUploadSessionUpdate) sqlSave(ctx context.Context) (_node int, err 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(gameuploadchunk.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.UserUploadQuotaRecordCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   gameuploadsession.UserUploadQuotaRecordTable,
-			Columns: []string{gameuploadsession.UserUploadQuotaRecordColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(useruploadquotarecord.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.UserUploadQuotaRecordIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   gameuploadsession.UserUploadQuotaRecordTable,
-			Columns: []string{gameuploadsession.UserUploadQuotaRecordColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(useruploadquotarecord.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -845,25 +790,6 @@ func (_u *GameUploadSessionUpdateOne) AddGameUploadChunks(v ...*GameUploadChunk)
 	return _u.AddGameUploadChunkIDs(ids...)
 }
 
-// SetUserUploadQuotaRecordID sets the "user_upload_quota_record" edge to the UserUploadQuotaRecord entity by ID.
-func (_u *GameUploadSessionUpdateOne) SetUserUploadQuotaRecordID(id int) *GameUploadSessionUpdateOne {
-	_u.mutation.SetUserUploadQuotaRecordID(id)
-	return _u
-}
-
-// SetNillableUserUploadQuotaRecordID sets the "user_upload_quota_record" edge to the UserUploadQuotaRecord entity by ID if the given value is not nil.
-func (_u *GameUploadSessionUpdateOne) SetNillableUserUploadQuotaRecordID(id *int) *GameUploadSessionUpdateOne {
-	if id != nil {
-		_u = _u.SetUserUploadQuotaRecordID(*id)
-	}
-	return _u
-}
-
-// SetUserUploadQuotaRecord sets the "user_upload_quota_record" edge to the UserUploadQuotaRecord entity.
-func (_u *GameUploadSessionUpdateOne) SetUserUploadQuotaRecord(v *UserUploadQuotaRecord) *GameUploadSessionUpdateOne {
-	return _u.SetUserUploadQuotaRecordID(v.ID)
-}
-
 // SetCreator sets the "creator" edge to the User entity.
 func (_u *GameUploadSessionUpdateOne) SetCreator(v *User) *GameUploadSessionUpdateOne {
 	return _u.SetCreatorID(v.ID)
@@ -899,12 +825,6 @@ func (_u *GameUploadSessionUpdateOne) RemoveGameUploadChunks(v ...*GameUploadChu
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveGameUploadChunkIDs(ids...)
-}
-
-// ClearUserUploadQuotaRecord clears the "user_upload_quota_record" edge to the UserUploadQuotaRecord entity.
-func (_u *GameUploadSessionUpdateOne) ClearUserUploadQuotaRecord() *GameUploadSessionUpdateOne {
-	_u.mutation.ClearUserUploadQuotaRecord()
-	return _u
 }
 
 // ClearCreator clears the "creator" edge to the User entity.
@@ -1133,35 +1053,6 @@ func (_u *GameUploadSessionUpdateOne) sqlSave(ctx context.Context) (_node *GameU
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(gameuploadchunk.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.UserUploadQuotaRecordCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   gameuploadsession.UserUploadQuotaRecordTable,
-			Columns: []string{gameuploadsession.UserUploadQuotaRecordColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(useruploadquotarecord.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.UserUploadQuotaRecordIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   gameuploadsession.UserUploadQuotaRecordTable,
-			Columns: []string{gameuploadsession.UserUploadQuotaRecordColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(useruploadquotarecord.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

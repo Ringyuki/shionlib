@@ -37,7 +37,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userloginsession"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userpasskeycredential"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userpvnbinding"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/useruploadquota"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/walkthrough"
 )
 
@@ -70,7 +69,6 @@ type UserQuery struct {
 	withGamePvnMappings                   *UserGamePvnMappingQuery
 	withPotatovnBinding                   *UserPvnBindingQuery
 	withGameUploadSessions                *GameUploadSessionQuery
-	withUploadQuota                       *UserUploadQuotaQuery
 	withWalkthroughs                      *WalkthroughQuery
 	withBannedRecords                     *UserBannedRecordQuery
 	withBannedByRecords                   *UserBannedRecordQuery
@@ -599,28 +597,6 @@ func (_q *UserQuery) QueryGameUploadSessions() *GameUploadSessionQuery {
 	return query
 }
 
-// QueryUploadQuota chains the current query on the "upload_quota" edge.
-func (_q *UserQuery) QueryUploadQuota() *UserUploadQuotaQuery {
-	query := (&UserUploadQuotaClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(useruploadquota.Table, useruploadquota.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, user.UploadQuotaTable, user.UploadQuotaColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // QueryWalkthroughs chains the current query on the "walkthroughs" edge.
 func (_q *UserQuery) QueryWalkthroughs() *WalkthroughQuery {
 	query := (&WalkthroughClient{config: _q.config}).Query()
@@ -989,7 +965,6 @@ func (_q *UserQuery) Clone() *UserQuery {
 		withGamePvnMappings:                   _q.withGamePvnMappings.Clone(),
 		withPotatovnBinding:                   _q.withPotatovnBinding.Clone(),
 		withGameUploadSessions:                _q.withGameUploadSessions.Clone(),
-		withUploadQuota:                       _q.withUploadQuota.Clone(),
 		withWalkthroughs:                      _q.withWalkthroughs.Clone(),
 		withBannedRecords:                     _q.withBannedRecords.Clone(),
 		withBannedByRecords:                   _q.withBannedByRecords.Clone(),
@@ -1246,17 +1221,6 @@ func (_q *UserQuery) WithGameUploadSessions(opts ...func(*GameUploadSessionQuery
 	return _q
 }
 
-// WithUploadQuota tells the query-builder to eager-load the nodes that are connected to
-// the "upload_quota" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *UserQuery) WithUploadQuota(opts ...func(*UserUploadQuotaQuery)) *UserQuery {
-	query := (&UserUploadQuotaClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withUploadQuota = query
-	return _q
-}
-
 // WithWalkthroughs tells the query-builder to eager-load the nodes that are connected to
 // the "walkthroughs" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithWalkthroughs(opts ...func(*WalkthroughQuery)) *UserQuery {
@@ -1412,7 +1376,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [30]bool{
+		loadedTypes = [29]bool{
 			_q.withActivities != nil,
 			_q.withComments != nil,
 			_q.withLikedComments != nil,
@@ -1435,7 +1399,6 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			_q.withGamePvnMappings != nil,
 			_q.withPotatovnBinding != nil,
 			_q.withGameUploadSessions != nil,
-			_q.withUploadQuota != nil,
 			_q.withWalkthroughs != nil,
 			_q.withBannedRecords != nil,
 			_q.withBannedByRecords != nil,
@@ -1632,12 +1595,6 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			func(n *User, e *GameUploadSession) {
 				n.Edges.GameUploadSessions = append(n.Edges.GameUploadSessions, e)
 			}); err != nil {
-			return nil, err
-		}
-	}
-	if query := _q.withUploadQuota; query != nil {
-		if err := _q.loadUploadQuota(ctx, query, nodes, nil,
-			func(n *User, e *UserUploadQuota) { n.Edges.UploadQuota = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -2391,33 +2348,6 @@ func (_q *UserQuery) loadGameUploadSessions(ctx context.Context, query *GameUplo
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "creator_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
-func (_q *UserQuery) loadUploadQuota(ctx context.Context, query *UserUploadQuotaQuery, nodes []*User, init func(*User), assign func(*User, *UserUploadQuota)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(useruploadquota.FieldUserID)
-	}
-	query.Where(predicate.UserUploadQuota(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.UploadQuotaColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.UserID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

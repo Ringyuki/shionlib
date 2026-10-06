@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/admin"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/uploadhttp"
 )
 
 type adminUserCountsDTO struct {
@@ -50,12 +51,6 @@ func toAdminUserItem(entry admin.UserEntry) adminUserItemDTO {
 	}
 }
 
-type adminUserQuotaDTO struct {
-	Size         string `json:"size" doc:"Bytes as a decimal string"`
-	Used         string `json:"used" doc:"Bytes as a decimal string"`
-	IsFirstGrant bool   `json:"is_first_grant"`
-}
-
 type adminUserRefDTO struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
@@ -71,23 +66,23 @@ type adminUserBanDTO struct {
 }
 
 type adminUserDetailDTO struct {
-	ID               int                `json:"id"`
-	Name             string             `json:"name"`
-	Email            string             `json:"email"`
-	Avatar           *string            `json:"avatar"`
-	Cover            *string            `json:"cover"`
-	Role             int                `json:"role"`
-	Status           int                `json:"status"`
-	Lang             string             `json:"lang"`
-	ContentLimit     int                `json:"content_limit"`
-	Created          time.Time          `json:"created"`
-	Updated          time.Time          `json:"updated"`
-	LastLoginAt      *time.Time         `json:"last_login_at"`
-	TwoFactorEnabled bool               `json:"two_factor_enabled"`
-	SponsorExpiresAt *time.Time         `json:"sponsor_expires_at"`
-	UploadQuota      *adminUserQuotaDTO `json:"upload_quota,omitempty" doc:"Absent when the user has no quota row"`
-	Counts           adminUserCountsDTO `json:"counts"`
-	LatestBan        *adminUserBanDTO   `json:"latest_ban"`
+	ID               int                     `json:"id"`
+	Name             string                  `json:"name"`
+	Email            string                  `json:"email"`
+	Avatar           *string                 `json:"avatar"`
+	Cover            *string                 `json:"cover"`
+	Role             int                     `json:"role"`
+	Status           int                     `json:"status"`
+	Lang             string                  `json:"lang"`
+	ContentLimit     int                     `json:"content_limit"`
+	Created          time.Time               `json:"created"`
+	Updated          time.Time               `json:"updated"`
+	LastLoginAt      *time.Time              `json:"last_login_at"`
+	TwoFactorEnabled bool                    `json:"two_factor_enabled"`
+	SponsorExpiresAt *time.Time              `json:"sponsor_expires_at"`
+	Upload           uploadhttp.AllowanceDTO `json:"upload"`
+	Counts           adminUserCountsDTO      `json:"counts"`
+	LatestBan        *adminUserBanDTO        `json:"latest_ban"`
 }
 
 func toAdminUserDetail(detail admin.UserDetail) adminUserDetailDTO {
@@ -109,9 +104,7 @@ func toAdminUserDetail(detail admin.UserDetail) adminUserDetailDTO {
 		SponsorExpiresAt: item.SponsorExpiresAt,
 		Counts:           item.Counts,
 	}
-	if quota := detail.Quota; quota != nil {
-		out.UploadQuota = &adminUserQuotaDTO{Size: strconv.FormatInt(quota.Size, 10), Used: strconv.FormatInt(quota.Used, 10), IsFirstGrant: quota.IsFirstGrant}
-	}
+	out.Upload = uploadhttp.ToAllowanceDTO(detail.Upload)
 	if ban := detail.LatestBan; ban != nil {
 		out.LatestBan = &adminUserBanDTO{
 			BannedAt:           ban.BannedAt,

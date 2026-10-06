@@ -45,9 +45,8 @@ type PasswordHasher interface {
 }
 
 type Quotas interface {
-	AdminAdjustSize(ctx context.Context, userID int, action upload.QuotaAction, amount int64, reason string) error
-	AdminAdjustUsed(ctx context.Context, userID int, action upload.QuotaAction, amount int64, reason string) error
-	AdminResetUsed(ctx context.Context, userID int) error
+	Allowance(ctx context.Context, userID int) (upload.Allowance, error)
+	SetTrusted(ctx context.Context, userID int, trusted bool) error
 }
 
 type Transactor interface {

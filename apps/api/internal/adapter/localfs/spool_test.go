@@ -185,3 +185,11 @@ func TestRemoveExistsAndStale(t *testing.T) {
 		t.Fatalf("missing root %v %v", stale, err)
 	}
 }
+
+func TestAvailableReadsTheFreeSpaceOfTheRoot(t *testing.T) {
+	missing := localfs.NewSpool(filepath.Join(t.TempDir(), "not", "created"), ".sltf")
+	free, err := missing.Available(t.Context())
+	if err != nil || free <= 0 {
+		t.Fatalf("a root that does not exist yet reports its nearest parent: %d %v", free, err)
+	}
+}

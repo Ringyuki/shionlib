@@ -59,7 +59,7 @@ func newUserEnv(t *testing.T) userEnv {
 		Bans:        profiles,
 		Sessions:    env.sessions,
 		Passwords:   admintest.Hasher{},
-		Quotas:      upload.NewQuotaService(env.quotas, tx, settingtest.Source{}, time.UTC, now),
+		Quotas:      upload.NewQuotaService(env.quotas, uploadSettings(), now),
 		Tx:          tx,
 	})
 	adminhttp.NewUserHandler(service, env.server.Builder).Register(env.server.API)
@@ -107,20 +107,20 @@ func TestAdminUserDetailShape(t *testing.T) {
 	env := newUserEnv(t)
 	env.store.AddDetail(admin.UserDetail{
 		UserEntry: admin.UserEntry{ID: 5, Name: "five", Email: "five@example.test", Role: actor.RoleUser, Status: user.StatusBanned, Lang: user.LangEN, ContentLimit: actor.ContentLimitNeverShow, Created: stamp, Updated: stamp},
-		Quota:     &admin.Quota{Size: 1 << 53, Used: 7, IsFirstGrant: true},
 		LatestBan: &admin.BanRecord{BannedAt: stamp, Reason: ptr("spam"), DurationDays: ptr(3), BannedBy: &admin.UserRef{ID: 1, Name: "root"}},
 	})
+	env.quotas.SeedUsage(5, 7, 3)
 	env.store.AddDetail(admin.UserDetail{UserEntry: admin.UserEntry{ID: 6, Name: "six", Email: "six@example.test", Role: actor.RoleUser, Status: user.StatusActive, Lang: user.LangJA, ContentLimit: actor.ContentLimitNeverShow, Created: stamp, Updated: stamp}})
 	resp := env.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/users/5", As: &env.staff})
 	env.server.Expect(resp, http.StatusOK, 0)
-	want := `{"id":5,"name":"five","email":"five@example.test","avatar":null,"cover":null,"role":1,"status":2,"lang":"en","content_limit":1,"created":"2026-01-02T03:04:05.000Z","updated":"2026-01-02T03:04:05.000Z","last_login_at":null,"two_factor_enabled":false,"sponsor_expires_at":null,"upload_quota":{"size":"9007199254740992","used":"7","is_first_grant":true},"counts":{"comments":0,"resources":0,"favorites":0,"edits":0},"latest_ban":{"banned_at":"2026-01-02T03:04:05.000Z","banned_reason":"spam","banned_duration_days":3,"is_permanent":false,"unbanned_at":null,"banned_by":{"id":1,"name":"root"}}}`
+	want := `{"id":5,"name":"five","email":"five@example.test","avatar":null,"cover":null,"role":1,"status":2,"lang":"en","content_limit":1,"created":"2026-01-02T03:04:05.000Z","updated":"2026-01-02T03:04:05.000Z","last_login_at":null,"two_factor_enabled":false,"sponsor_expires_at":null,"upload":{"tier":"new","approved":0,"trusted":false,"frozen_until":null,"stored":7,"stored_limit":100,"in_flight":3,"in_flight_limit":50,"max_file_size":16},"counts":{"comments":0,"resources":0,"favorites":0,"edits":0},"latest_ban":{"banned_at":"2026-01-02T03:04:05.000Z","banned_reason":"spam","banned_duration_days":3,"is_permanent":false,"unbanned_at":null,"banned_by":{"id":1,"name":"root"}}}`
 	if string(resp.Data) != want {
 		t.Fatalf("detail\n got %s\nwant %s", resp.Data, want)
 	}
 	resp = env.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/users/6", As: &env.staff})
-	want = `{"id":6,"name":"six","email":"six@example.test","avatar":null,"cover":null,"role":1,"status":1,"lang":"ja","content_limit":1,"created":"2026-01-02T03:04:05.000Z","updated":"2026-01-02T03:04:05.000Z","last_login_at":null,"two_factor_enabled":false,"sponsor_expires_at":null,"counts":{"comments":0,"resources":0,"favorites":0,"edits":0},"latest_ban":null}`
+	want = `{"id":6,"name":"six","email":"six@example.test","avatar":null,"cover":null,"role":1,"status":1,"lang":"ja","content_limit":1,"created":"2026-01-02T03:04:05.000Z","updated":"2026-01-02T03:04:05.000Z","last_login_at":null,"two_factor_enabled":false,"sponsor_expires_at":null,"upload":{"tier":"new","approved":0,"trusted":false,"frozen_until":null,"stored":0,"stored_limit":100,"in_flight":0,"in_flight_limit":50,"max_file_size":16},"counts":{"comments":0,"resources":0,"favorites":0,"edits":0},"latest_ban":null}`
 	if string(resp.Data) != want {
-		t.Fatalf("detail without quota\n got %s\nwant %s", resp.Data, want)
+		t.Fatalf("detail without uploads\n got %s\nwant %s", resp.Data, want)
 	}
 	env.server.Expect(env.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/users/99", As: &env.staff}), http.StatusNotFound, 300101)
 }
@@ -243,24 +243,27 @@ func TestAdminUserPermissions(t *testing.T) {
 	}
 }
 
-func TestAdminUserQuota(t *testing.T) {
+func TestAdminUserUploadTrust(t *testing.T) {
 	env := newUserEnv(t)
 	id := env.member.ID
-	env.server.Expect(env.server.Do(apitest.Request{Method: http.MethodPatch, Path: env.path(id, "/quota/size"), As: &env.staff, Body: map[string]any{"action": "ADD", "amount": 100}}), http.StatusOK, 0)
-	env.server.Expect(env.server.Do(apitest.Request{Method: http.MethodPatch, Path: env.path(id, "/quota/used"), As: &env.staff, Body: map[string]any{"action": "USE", "amount": 60, "action_reason": "manual"}}), http.StatusOK, 0)
-	env.server.Expect(env.server.Do(apitest.Request{Method: http.MethodPatch, Path: env.path(id, "/quota/size"), As: &env.staff, Body: map[string]any{"action": "SUB", "amount": 41}}), http.StatusConflict, 500102)
-	env.server.Expect(env.server.Do(apitest.Request{Method: http.MethodPatch, Path: env.path(id, "/quota/used"), As: &env.staff, Body: map[string]any{"action": "ADD", "amount": 61}}), http.StatusConflict, 500103)
-	env.server.Expect(env.server.Do(apitest.Request{Method: http.MethodPatch, Path: env.path(id, "/quota/used"), As: &env.staff, Body: map[string]any{"action": "SUB", "amount": 1}}), http.StatusUnprocessableEntity, 100101)
-	env.server.Expect(env.server.Do(apitest.Request{Method: http.MethodPatch, Path: env.path(id, "/quota/size"), As: &env.staff, Body: map[string]any{"action": "ADD", "amount": 0}}), http.StatusUnprocessableEntity, 100101)
-	if quota := env.quotas.Quota(id); quota.Size != 100 || quota.Used != 60 {
-		t.Fatalf("quota: %+v", quota)
+	path := env.path(id, "/upload-trust")
+	env.server.Expect(env.server.Do(apitest.Request{Method: http.MethodPatch, Path: path, As: &env.staff, Body: map[string]any{"trusted": true}}), http.StatusOK, 0)
+	if standing, _ := env.quotas.Standing(t.Context(), id); !standing.Trusted {
+		t.Fatalf("granted: %+v", standing)
 	}
-	resp := env.server.Do(apitest.Request{Method: http.MethodPost, Path: env.path(id, "/quota/reset-used"), As: &env.staff})
-	env.server.Expect(resp, http.StatusCreated, 0)
-	if quota := env.quotas.Quota(id); quota.Used != 0 || resp.HasData {
-		t.Fatalf("reset: %+v %s", quota, resp.Body)
+	env.server.Expect(env.server.Do(apitest.Request{Method: http.MethodPatch, Path: path, As: &env.staff, Body: map[string]any{}}), http.StatusUnprocessableEntity, 100101)
+	env.server.Expect(env.server.Do(apitest.Request{Method: http.MethodPatch, Path: path, As: &env.staff, Body: map[string]any{"trusted": false}}), http.StatusOK, 0)
+	if standing, _ := env.quotas.Standing(t.Context(), id); standing.Trusted {
+		t.Fatalf("withdrawn: %+v", standing)
 	}
-	env.server.Expect(env.server.Do(apitest.Request{Method: http.MethodPost, Path: env.path(env.peer.ID, "/quota/reset-used"), As: &env.staff}), http.StatusUnauthorized, 200101)
+	env.server.Expect(env.server.Do(apitest.Request{Method: http.MethodPatch, Path: env.path(env.peer.ID, "/upload-trust"), As: &env.staff, Body: map[string]any{"trusted": true}}), http.StatusUnauthorized, 200101)
+}
+
+func uploadSettings() settingtest.Source {
+	settings := settingtest.Source{}
+	settingtest.Set(settings, upload.NewUploaderQuota, 100)
+	settingtest.Set(settings, upload.InFlightLimit, 50)
+	return settingtest.Set(settings, upload.MaxFileSize, 16)
 }
 
 func TestAdminUserSponsor(t *testing.T) {

@@ -9,7 +9,6 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/report"
-	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
 
@@ -219,26 +218,6 @@ func (r *Resources) PurgeLater(_ context.Context, keys []string) error {
 		r.Purged = append(r.Purged, keys)
 	}
 	return nil
-}
-
-type Adjustment struct {
-	UserID int
-	Action upload.QuotaAction
-	Amount int64
-	Reason string
-}
-
-type Quota struct {
-	Adjustments []Adjustment
-	Missing     map[int]bool
-}
-
-func (q *Quota) AdjustSize(_ context.Context, userID int, action upload.QuotaAction, amount int64, reason string) (int64, error) {
-	if q.Missing[userID] {
-		return 0, upload.ErrQuotaNotFound
-	}
-	q.Adjustments = append(q.Adjustments, Adjustment{UserID: userID, Action: action, Amount: amount, Reason: reason})
-	return amount, nil
 }
 
 type Ban struct {

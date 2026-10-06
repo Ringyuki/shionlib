@@ -58,10 +58,6 @@ type Sessions interface {
 	Claim(ctx context.Context, who actor.Actor, id int) (upload.Session, error)
 }
 
-type Quota interface {
-	Withdraw(ctx context.Context, userID, sessionID int) error
-}
-
 type Activities interface {
 	Record(ctx context.Context, in activity.NewActivity) error
 }

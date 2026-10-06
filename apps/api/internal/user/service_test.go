@@ -170,7 +170,7 @@ func TestRegisterCreatesTheAccount(t *testing.T) {
 	if created.Lang != user.LangJA || created.ContentLimit != actor.ContentLimitNeverShow || created.PasswordHash == nil || *created.PasswordHash != "hash:Secret123" || created.EmailVerifiedAt == nil {
 		t.Fatalf("unexpected account %+v", created)
 	}
-	if !f.repo.HasDefaultFavorite(created.ID) || !f.repo.HasQuota(created.ID) || f.tx.Calls == 0 {
+	if !f.repo.HasDefaultFavorite(created.ID) || f.tx.Calls == 0 {
 		t.Fatal("registration must create the favorite and quota inside a transaction")
 	}
 	if _, ok := f.codes.codes["code-1"]; ok {

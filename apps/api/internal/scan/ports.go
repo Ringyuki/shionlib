@@ -55,10 +55,6 @@ type LocalFiles interface {
 	Remove(ctx context.Context, path string) error
 }
 
-type Quota interface {
-	Withdraw(ctx context.Context, userID, sessionID int) error
-}
-
 type Activities interface {
 	Record(ctx context.Context, in activity.NewActivity) error
 }

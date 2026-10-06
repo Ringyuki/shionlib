@@ -11,13 +11,11 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
-	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
 
 type Deps struct {
 	Repo      Repository
 	Resources Resources
-	Quota     Quota
 	Banner    Banner
 	Messages  Messenger
 	Mailer    AdminMailer
@@ -30,7 +28,6 @@ type Deps struct {
 type Service struct {
 	repo      Repository
 	resources Resources
-	quota     Quota
 	banner    Banner
 	messages  Messenger
 	mailer    AdminMailer
@@ -44,7 +41,6 @@ func NewService(deps Deps) *Service {
 	return &Service{
 		repo:      deps.Repo,
 		resources: deps.Resources,
-		quota:     deps.Quota,
 		banner:    deps.Banner,
 		messages:  deps.Messages,
 		mailer:    deps.Mailer,
@@ -242,11 +238,11 @@ func (s *Service) settleValid(ctx context.Context, who actor.Actor, report Repor
 		return err
 	}
 	return s.send(ctx, report.ReportedUserID, gameID, message.ToneDestructive, "Messages.System.Report.Penalty", message.Meta{
-		"reason":          report.Reason,
-		"malicious_level": level,
-		"ban_days":        outcome.banDays,
-		"quota_sub_gb":    outcome.quotaBytes / GiB,
-		"process_note":    note,
+		"reason":              report.Reason,
+		"malicious_level":     level,
+		"ban_days":            outcome.banDays,
+		"upload_tier_demoted": outcome.violation,
+		"process_note":        note,
 	})
 }
 
@@ -264,7 +260,6 @@ func (s *Service) settleInvalid(ctx context.Context, who actor.Actor, report Rep
 	return s.send(ctx, report.ReporterID, gameID, message.ToneWarning, "Messages.System.Report.Invalid", message.Meta{
 		"false_report_count": outcome.count,
 		"ban_days":           outcome.banDays,
-		"quota_sub_gb":       outcome.quotaBytes / GiB,
 		"process_note":       note,
 	})
 }
@@ -275,12 +270,7 @@ func (s *Service) punishReported(ctx context.Context, who actor.Actor, report Re
 		return penaltyOutcome{}, err
 	}
 	policy := TargetPenalty(level)
-	if policy.QuotaBytes > 0 {
-		if _, err := s.quota.AdjustSize(ctx, target.ID, upload.ActionSub, policy.QuotaBytes, "REPORT_"+string(report.Reason)); err != nil {
-			return penaltyOutcome{}, err
-		}
-	}
-	outcome := penaltyOutcome{quotaBytes: policy.QuotaBytes}
+	outcome := penaltyOutcome{violation: policy.Violation}
 	if policy.BanDays > 0 && target.Status != UserBanned {
 		reviewer := who.UserID
 		outcome.banApplied, err = s.banner.Ban(ctx, target.ID, &reviewer, "Resource report: "+string(report.Reason), policy.BanDays)
@@ -305,12 +295,6 @@ func (s *Service) punishReporter(ctx context.Context, who actor.Actor, reporterI
 	}
 	outcome := penaltyOutcome{count: count}
 	policy := FalseReportPenalty(count)
-	if policy.QuotaBytes > 0 {
-		outcome.quotaBytes, err = s.quota.AdjustSize(ctx, reporterID, upload.ActionSub, policy.QuotaBytes, falsePositiveQuotaReason)
-		if err != nil {
-			return penaltyOutcome{}, err
-		}
-	}
 	if policy.BanDays > 0 && reporter.Status != UserBanned {
 		reviewer := who.UserID
 		reason := fmt.Sprintf("Malicious reports: %d in %d days", count, FalseReportWindowDays)

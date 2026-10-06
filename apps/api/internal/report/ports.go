@@ -6,7 +6,6 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
-	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
 
 type Repository interface {
@@ -27,10 +26,6 @@ type Resources interface {
 	Resource(ctx context.Context, id int) (download.Resource, error)
 	TakeDown(ctx context.Context, resourceID int) ([]string, error)
 	PurgeLater(ctx context.Context, keys []string) error
-}
-
-type Quota interface {
-	AdjustSize(ctx context.Context, userID int, action upload.QuotaAction, amount int64, reason string) (int64, error)
 }
 
 type Banner interface {

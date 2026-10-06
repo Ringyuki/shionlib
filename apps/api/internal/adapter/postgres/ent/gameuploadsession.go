@@ -12,7 +12,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/useruploadquotarecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 )
 
@@ -61,13 +60,11 @@ type GameUploadSessionEdges struct {
 	GameDownloadResourceFile *GameDownloadResourceFile `json:"game_download_resource_file,omitempty"`
 	// GameUploadChunks holds the value of the game_upload_chunks edge.
 	GameUploadChunks []*GameUploadChunk `json:"game_upload_chunks,omitempty"`
-	// UserUploadQuotaRecord holds the value of the user_upload_quota_record edge.
-	UserUploadQuotaRecord *UserUploadQuotaRecord `json:"user_upload_quota_record,omitempty"`
 	// Creator holds the value of the creator edge.
 	Creator *User `json:"creator,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [3]bool
 }
 
 // GameDownloadResourceFileOrErr returns the GameDownloadResourceFile value or an error if the edge
@@ -90,23 +87,12 @@ func (e GameUploadSessionEdges) GameUploadChunksOrErr() ([]*GameUploadChunk, err
 	return nil, &NotLoadedError{edge: "game_upload_chunks"}
 }
 
-// UserUploadQuotaRecordOrErr returns the UserUploadQuotaRecord value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e GameUploadSessionEdges) UserUploadQuotaRecordOrErr() (*UserUploadQuotaRecord, error) {
-	if e.UserUploadQuotaRecord != nil {
-		return e.UserUploadQuotaRecord, nil
-	} else if e.loadedTypes[2] {
-		return nil, &NotFoundError{label: useruploadquotarecord.Label}
-	}
-	return nil, &NotLoadedError{edge: "user_upload_quota_record"}
-}
-
 // CreatorOrErr returns the Creator value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e GameUploadSessionEdges) CreatorOrErr() (*User, error) {
 	if e.Creator != nil {
 		return e.Creator, nil
-	} else if e.loadedTypes[3] {
+	} else if e.loadedTypes[2] {
 		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "creator"}
@@ -252,11 +238,6 @@ func (_m *GameUploadSession) QueryGameDownloadResourceFile() *GameDownloadResour
 // QueryGameUploadChunks queries the "game_upload_chunks" edge of the GameUploadSession entity.
 func (_m *GameUploadSession) QueryGameUploadChunks() *GameUploadChunkQuery {
 	return NewGameUploadSessionClient(_m.config).QueryGameUploadChunks(_m)
-}
-
-// QueryUserUploadQuotaRecord queries the "user_upload_quota_record" edge of the GameUploadSession entity.
-func (_m *GameUploadSession) QueryUserUploadQuotaRecord() *UserUploadQuotaRecordQuery {
-	return NewGameUploadSessionClient(_m.config).QueryUserUploadQuotaRecord(_m)
 }
 
 // QueryCreator queries the "creator" edge of the GameUploadSession entity.

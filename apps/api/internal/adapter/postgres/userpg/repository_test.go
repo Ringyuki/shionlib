@@ -9,7 +9,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/editrecord"
 	entfavorite "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favorite"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/useruploadquota"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/userpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
@@ -27,13 +26,6 @@ func TestRepositoryContract(t *testing.T) {
 					t.Fatal(err)
 				}
 				return ok
-			},
-			HasQuota: func(t *testing.T, id int) bool {
-				quota, err := db.Ent.UserUploadQuota.Query().Where(useruploadquota.UserID(id)).Only(context.Background())
-				if err != nil {
-					t.Fatal(err)
-				}
-				return quota.Size == 0 && quota.Used == 0
 			},
 		}
 	})

@@ -5,22 +5,24 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"sync/atomic"
 	"testing"
 	"time"
 
+	"golang.org/x/sync/errgroup"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/uploadpg"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload/uploadtest"
 )
 
-var (
-	_ upload.Repository      = (*uploadpg.Repository)(nil)
-	_ upload.QuotaRepository = (*uploadpg.QuotaRepository)(nil)
-)
+var _ upload.Repository = (*uploadpg.Repository)(nil)
 
 var base = time.Date(2026, 9, 1, 12, 0, 0, 0, time.UTC)
 
@@ -252,221 +254,35 @@ func TestListStaleAndReferencedPaths(t *testing.T) {
 	}
 }
 
-func newQuota(t *testing.T, db *pgtest.DB, user int, size, used int64, firstGrant bool) *ent.UserUploadQuota {
-	t.Helper()
-	row, err := db.Ent.UserUploadQuota.Create().SetUserID(user).SetSize(size).SetUsed(used).SetIsFirstGrant(firstGrant).Save(context.Background())
-	if err != nil {
-		t.Fatal(err)
-	}
-	return row
-}
-
-func TestQuotaLedger(t *testing.T) {
+func TestAdmissionLockKeepsConcurrentInitsWithinTheInFlightLimit(t *testing.T) {
 	ctx := context.Background()
 	db := pgtest.New(t)
-	sessions := uploadpg.NewRepository(db.Ent)
-	repo := uploadpg.NewQuotaRepository(db.Ent)
-	owner, stranger := db.User(t), db.User(t)
-	row := newQuota(t, db, owner, 1000, 0, false)
-
-	if _, found, err := repo.FindQuota(ctx, stranger); err != nil || found {
-		t.Fatalf("missing quota: %v %v", found, err)
+	uploader := actor.Actor{UserID: db.User(t), Role: actor.RoleUser}
+	settings := settingtest.Source{}
+	settingtest.Set(settings, upload.InFlightLimit, 300)
+	settingtest.Set(settings, upload.SpoolReserve, 0)
+	quota := upload.NewQuotaService(uploadpg.NewQuotaRepository(db.Ent), settings, time.Now)
+	service := upload.NewService(uploadpg.NewRepository(db.Ent), quota, uploadtest.NewMemorySpool(), postgres.NewTransactor(db.Ent), settings, time.Now)
+	var admitted, refused atomic.Int32
+	var group errgroup.Group
+	for range 8 {
+		group.Go(func() error {
+			_, err := service.Init(ctx, uploader, upload.InitInput{FileName: "game.7z", TotalSize: 100})
+			switch {
+			case err == nil:
+				admitted.Add(1)
+			case errors.Is(err, upload.ErrInFlightExceeded):
+				refused.Add(1)
+			default:
+				return err
+			}
+			return nil
+		})
 	}
-	if _, err := repo.LockQuota(ctx, stranger); !errors.Is(err, upload.ErrQuotaNotFound) {
-		t.Fatalf("lock missing quota: %v", err)
-	}
-	if err := repo.AddUsed(ctx, 987654, 1); !errors.Is(err, upload.ErrQuotaNotFound) {
-		t.Fatalf("update missing quota: %v", err)
-	}
-
-	err := postgres.NewTransactor(db.Ent).WithinTransaction(ctx, func(ctx context.Context) error {
-		quota, err := repo.LockQuota(ctx, owner)
-		if err != nil {
-			return err
-		}
-		if err := repo.AddUsed(ctx, quota.ID, 300); err != nil {
-			return err
-		}
-		if err := repo.AddSize(ctx, quota.ID, -100); err != nil {
-			return err
-		}
-		return repo.MarkFirstGrant(ctx, quota.ID)
-	})
-	if err != nil {
+	if err := group.Wait(); err != nil {
 		t.Fatal(err)
 	}
-	quota, found, err := repo.FindQuota(ctx, owner)
-	if err != nil || !found || quota.ID != row.ID || quota.Size != 900 || quota.Used != 300 || !quota.IsFirstGrant || quota.UserID != owner {
-		t.Fatalf("unexpected quota %+v %v %v", quota, found, err)
+	if admitted.Load() != 3 || refused.Load() != 5 {
+		t.Fatalf("admitted %d refused %d", admitted.Load(), refused.Load())
 	}
-	if err := repo.SetUsed(ctx, quota.ID, 0); err != nil {
-		t.Fatal(err)
-	}
-	if quota, _, _ = repo.FindQuota(ctx, owner); quota.Used != 0 {
-		t.Fatalf("used not reset: %+v", quota)
-	}
-
-	first := newSession(t, sessions, owner, "/spool/q1.sltf", base)
-	second := newSession(t, sessions, owner, "/spool/q2.sltf", base)
-	reason := "GAME_UPLOAD"
-	for _, record := range []upload.NewQuotaRecord{
-		{QuotaID: quota.ID, Field: upload.FieldUsed, Action: upload.ActionUse, Amount: 50, Reason: &reason, SessionID: &first.ID},
-		{QuotaID: quota.ID, Field: upload.FieldSize, Action: upload.ActionAdd, Amount: 70, SessionID: &second.ID},
-		{QuotaID: quota.ID, Field: upload.FieldSize, Action: upload.ActionSub, Amount: 5},
-	} {
-		if err := repo.AddRecord(ctx, record); err != nil {
-			t.Fatal(err)
-		}
-	}
-	record, found, err := repo.FindWithdrawable(ctx, owner, first.ID)
-	if err != nil || !found || record.Amount != 50 || record.Action != upload.ActionUse || record.Field != upload.FieldUsed || record.QuotaID != quota.ID || record.Reason == nil || *record.Reason != reason || record.Withdrawn {
-		t.Fatalf("unexpected withdrawable record %+v %v %v", record, found, err)
-	}
-	if _, found, _ := repo.FindWithdrawable(ctx, stranger, first.ID); found {
-		t.Fatal("records of other users must not be withdrawn")
-	}
-	if _, found, _ := repo.FindWithdrawable(ctx, owner, second.ID); found {
-		t.Fatal("size records are not withdrawable")
-	}
-	if err := repo.MarkWithdrawn(ctx, record.ID); err != nil {
-		t.Fatal(err)
-	}
-	if _, found, _ := repo.FindWithdrawable(ctx, owner, first.ID); found {
-		t.Fatal("withdrawn records are not withdrawable twice")
-	}
-	if err := repo.MarkWithdrawn(ctx, 987654); !errors.Is(err, upload.ErrQuotaRecordNotFound) {
-		t.Fatalf("missing record: %v", err)
-	}
-}
-
-func TestEnsureQuotaCreatesOnceAndLocks(t *testing.T) {
-	ctx := context.Background()
-	db := pgtest.New(t)
-	repo := uploadpg.NewQuotaRepository(db.Ent)
-	owner, fresh := db.User(t), db.User(t)
-	existing := newQuota(t, db, owner, 1000, 200, true)
-
-	err := postgres.NewTransactor(db.Ent).WithinTransaction(ctx, func(ctx context.Context) error {
-		quota, err := repo.EnsureQuota(ctx, owner)
-		if err != nil {
-			return err
-		}
-		if quota.ID != existing.ID || quota.Size != 1000 || quota.Used != 200 || !quota.IsFirstGrant {
-			t.Fatalf("existing quota is returned untouched: %+v", quota)
-		}
-		created, err := repo.EnsureQuota(ctx, fresh)
-		if err != nil {
-			return err
-		}
-		again, err := repo.EnsureQuota(ctx, fresh)
-		if err != nil {
-			return err
-		}
-		if created.ID == 0 || again.ID != created.ID || created.Size != 0 || created.Used != 0 || created.IsFirstGrant || created.UserID != fresh {
-			t.Fatalf("missing quota is created once: %+v %+v", created, again)
-		}
-		return nil
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count := db.Ent.UserUploadQuota.Query().CountX(ctx); count != 2 {
-		t.Fatalf("quota rows: %d", count)
-	}
-}
-
-func TestCountApprovedFiles(t *testing.T) {
-	ctx := context.Background()
-	db := pgtest.New(t)
-	repo := uploadpg.NewQuotaRepository(db.Ent)
-	creator := db.User(t)
-	since := time.Now().UTC().Add(-time.Hour)
-
-	newFile(t, db, creator, func(c *ent.GameDownloadResourceFileCreate) { c.SetFileCheckStatus(1) })
-	newFile(t, db, creator, func(c *ent.GameDownloadResourceFileCreate) { c.SetFileCheckStatus(1).SetCreated(since.Add(-time.Hour)) })
-	newFile(t, db, creator, func(c *ent.GameDownloadResourceFileCreate) { c.SetFileCheckStatus(2) })
-	newFile(t, db, db.User(t), func(c *ent.GameDownloadResourceFileCreate) { c.SetFileCheckStatus(1) })
-
-	count, err := repo.CountApprovedFiles(ctx, creator, since)
-	if err != nil || count != 1 {
-		t.Fatalf("approved files since cutoff: %d %v", count, err)
-	}
-}
-
-func TestUploaderQueries(t *testing.T) {
-	ctx := context.Background()
-	db := pgtest.New(t)
-	repo := uploadpg.NewQuotaRepository(db.Ent)
-	old := time.Now().UTC().AddDate(0, 0, -30)
-	cutoff := time.Now().UTC().AddDate(0, 0, -7)
-
-	user := func(created time.Time, role, status int) int {
-		return configureUser(t, db, db.User(t), created, role, status)
-	}
-	candidate := user(old, 1, 1)
-	newQuota(t, db, candidate, 0, 0, false)
-	second := user(old, 1, 1)
-	newQuota(t, db, second, 0, 0, false)
-	recent := user(time.Now().UTC(), 1, 1)
-	newQuota(t, db, recent, 0, 0, false)
-	granted := user(old, 1, 1)
-	newQuota(t, db, granted, 10, 0, true)
-	admin := user(old, 2, 1)
-	newQuota(t, db, admin, 0, 0, false)
-	banned := user(old, 1, 2)
-	newQuota(t, db, banned, 0, 0, false)
-	user(old, 1, 1)
-
-	ids, err := repo.GrantCandidates(ctx, cutoff, 0, 10)
-	if err != nil || !slices.Equal(ids, []int{candidate, second}) {
-		t.Fatalf("grant candidates: %v %v", ids, err)
-	}
-	if page, _ := repo.GrantCandidates(ctx, cutoff, candidate, 10); !slices.Equal(page, []int{second}) {
-		t.Fatalf("keyset pagination: %v", page)
-	}
-	if page, _ := repo.GrantCandidates(ctx, cutoff, 0, 1); !slices.Equal(page, []int{candidate}) {
-		t.Fatalf("limit: %v", page)
-	}
-
-	active, err := repo.ActiveUploaders(ctx, 0, 10)
-	if err != nil || !slices.Equal(active, []int{candidate, second, recent, granted}) {
-		t.Fatalf("active uploaders: %v %v", active, err)
-	}
-
-	if _, err := db.Ent.UserLoginSession.Create().
-		SetUserID(second).
-		SetRefreshTokenHash("hash").
-		SetRefreshTokenPrefix("prefix").
-		SetExpiresAt(time.Now().UTC().Add(time.Hour)).
-		Save(ctx); err != nil {
-		t.Fatal(err)
-	}
-	stale, err := db.Ent.UserLoginSession.Create().
-		SetUserID(granted).
-		SetRefreshTokenHash("hash2").
-		SetRefreshTokenPrefix("prefix2").
-		SetExpiresAt(time.Now().UTC().Add(time.Hour)).
-		Save(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err := db.SQL.ExecContext(ctx, `UPDATE user_login_sessions SET updated = $2 WHERE id = $1`, stale.ID, old); err != nil {
-		t.Fatal(err)
-	}
-	inactive, err := repo.InactiveUploaders(ctx, cutoff, 0, 10)
-	if err != nil || !slices.Equal(inactive, []int{candidate, recent, granted}) {
-		t.Fatalf("inactive uploaders: %v %v", inactive, err)
-	}
-}
-
-func configureUser(t *testing.T, db *pgtest.DB, id int, created time.Time, role, status int) int {
-	t.Helper()
-	ctx := context.Background()
-	if err := db.Ent.User.UpdateOneID(id).SetRole(role).SetStatus(status).Exec(ctx); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := db.SQL.ExecContext(ctx, `UPDATE users SET created = $2 WHERE id = $1`, id, created); err != nil {
-		t.Fatal(err)
-	}
-	return id
 }

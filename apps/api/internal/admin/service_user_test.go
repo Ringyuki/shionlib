@@ -61,7 +61,7 @@ func newFixture() fixture {
 		Bans:        profiles,
 		Sessions:    f.sessions,
 		Passwords:   admintest.Hasher{},
-		Quotas:      upload.NewQuotaService(f.quotas, tx, settingtest.Source{}, time.UTC, clock),
+		Quotas:      upload.NewQuotaService(f.quotas, settingtest.Source{}, clock),
 		Tx:          tx,
 	})
 	f.member = f.accounts.Seed(user.User{Name: "member"})
@@ -269,30 +269,23 @@ func TestPermissionsMergeRoleAndUserMasks(t *testing.T) {
 	}
 }
 
-func TestQuotaAdjustmentsUseTheUploadQuota(t *testing.T) {
+func TestUploadTrustIsGrantedByStaffAndShownInTheDetail(t *testing.T) {
 	f := newFixture()
 	ctx := context.Background()
-	who := as(f.staff)
-	if err := f.service.AdjustQuotaSize(ctx, who, f.member.ID, admin.QuotaChange{Action: upload.ActionAdd, Amount: 100}); err != nil {
+	f.store.AddDetail(admin.UserDetail{UserEntry: admin.UserEntry{ID: f.member.ID}})
+	f.quotas.SeedUsage(f.member.ID, 40, 5)
+	if err := f.service.SetUploadTrust(ctx, as(f.staff), f.member.ID, true); err != nil {
 		t.Fatal(err)
 	}
-	if err := f.service.AdjustQuotaUsed(ctx, who, f.member.ID, admin.QuotaChange{Action: upload.ActionUse, Amount: 40, Reason: "fix"}); err != nil {
+	detail, err := f.service.Detail(ctx, f.member.ID)
+	if err != nil {
 		t.Fatal(err)
 	}
-	if got := f.quotas.Quota(f.member.ID); got.Size != 100 || got.Used != 40 {
-		t.Fatalf("quota: %+v", got)
+	if detail.Upload.Tier != upload.TierTrusted || !detail.Upload.Trusted || detail.Upload.Stored != 40 || detail.Upload.InFlight != 5 {
+		t.Fatalf("upload allowance %+v", detail.Upload)
 	}
-	if err := f.service.AdjustQuotaSize(ctx, who, f.member.ID, admin.QuotaChange{Action: upload.ActionSub, Amount: 61}); !errors.Is(err, upload.ErrQuotaExceeded) {
-		t.Fatalf("size below used: %v", err)
-	}
-	if err := f.service.ResetQuotaUsed(ctx, who, f.member.ID); err != nil {
-		t.Fatal(err)
-	}
-	if got := f.quotas.Quota(f.member.ID); got.Used != 0 {
-		t.Fatalf("reset: %+v", got)
-	}
-	if err := f.service.ResetQuotaUsed(ctx, who, f.peer.ID); !errors.Is(err, auth.ErrUnauthorized) {
-		t.Fatalf("peer quota: %v", err)
+	if err := f.service.SetUploadTrust(ctx, as(f.staff), f.peer.ID, true); !errors.Is(err, auth.ErrUnauthorized) {
+		t.Fatalf("peer trust: %v", err)
 	}
 }
 

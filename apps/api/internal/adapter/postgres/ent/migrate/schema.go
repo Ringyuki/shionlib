@@ -2134,6 +2134,7 @@ var (
 		{Name: "email_verified_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "last_login_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "two_factor_enabled", Type: field.TypeBool, Default: false},
+		{Name: "upload_trusted", Type: field.TypeBool, Default: false},
 		{Name: "sponsor_expires_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
@@ -2157,7 +2158,7 @@ var (
 			{
 				Name:    "users_created_idx",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[17]},
+				Columns: []*schema.Column{UsersColumns[18]},
 			},
 			{
 				Name:    "users_role_idx",
@@ -2434,63 +2435,6 @@ var (
 			},
 		},
 	}
-	// UserUploadQuotasColumns holds the columns for the "user_upload_quotas" table.
-	UserUploadQuotasColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "size", Type: field.TypeInt64},
-		{Name: "used", Type: field.TypeInt64},
-		{Name: "is_first_grant", Type: field.TypeBool, Default: false},
-		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
-		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
-		{Name: "user_id", Type: field.TypeInt, Unique: true, SchemaType: map[string]string{"postgres": "serial"}},
-	}
-	// UserUploadQuotasTable holds the schema information for the "user_upload_quotas" table.
-	UserUploadQuotasTable = &schema.Table{
-		Name:       "user_upload_quotas",
-		Columns:    UserUploadQuotasColumns,
-		PrimaryKey: []*schema.Column{UserUploadQuotasColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "user_upload_quotas_user_id_fkey",
-				Columns:    []*schema.Column{UserUploadQuotasColumns[6]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
-	// UserUploadQuotaRecordsColumns holds the columns for the "user_upload_quota_records" table.
-	UserUploadQuotaRecordsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "field", Type: field.TypeEnum, Enums: []string{"SIZE", "USED"}, SchemaType: map[string]string{"postgres": "user_upload_quota_record_field"}},
-		{Name: "amount", Type: field.TypeInt64},
-		{Name: "action", Type: field.TypeEnum, Enums: []string{"ADD", "SUB", "USE"}, SchemaType: map[string]string{"postgres": "user_upload_quota_record_action"}},
-		{Name: "action_reason", Type: field.TypeString, Nullable: true, Size: 255, SchemaType: map[string]string{"postgres": "character varying(255)"}},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"COMPLETED", "WITHDRAWN"}, Default: "COMPLETED", SchemaType: map[string]string{"postgres": "user_upload_quota_record_status"}},
-		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
-		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
-		{Name: "upload_session_id", Type: field.TypeInt, Unique: true, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
-		{Name: "user_upload_quota_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
-	}
-	// UserUploadQuotaRecordsTable holds the schema information for the "user_upload_quota_records" table.
-	UserUploadQuotaRecordsTable = &schema.Table{
-		Name:       "user_upload_quota_records",
-		Columns:    UserUploadQuotaRecordsColumns,
-		PrimaryKey: []*schema.Column{UserUploadQuotaRecordsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "user_upload_quota_records_upload_session_id_fkey",
-				Columns:    []*schema.Column{UserUploadQuotaRecordsColumns[8]},
-				RefColumns: []*schema.Column{GameUploadSessionsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "user_upload_quota_records_user_upload_quota_id_fkey",
-				Columns:    []*schema.Column{UserUploadQuotaRecordsColumns[9]},
-				RefColumns: []*schema.Column{UserUploadQuotasColumns[0]},
-				OnDelete:   schema.Restrict,
-			},
-		},
-	}
 	// WalkthroughsColumns holds the columns for the "walkthroughs" table.
 	WalkthroughsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -2592,8 +2536,6 @@ var (
 		UserLoginSessionsTable,
 		UserPasskeyCredentialsTable,
 		UserPvnBindingsTable,
-		UserUploadQuotasTable,
-		UserUploadQuotaRecordsTable,
 		WalkthroughsTable,
 	}
 )
@@ -2834,15 +2776,6 @@ func init() {
 	UserPvnBindingsTable.ForeignKeys[0].RefTable = UsersTable
 	UserPvnBindingsTable.Annotation = &entsql.Annotation{
 		Table: "user_pvn_bindings",
-	}
-	UserUploadQuotasTable.ForeignKeys[0].RefTable = UsersTable
-	UserUploadQuotasTable.Annotation = &entsql.Annotation{
-		Table: "user_upload_quotas",
-	}
-	UserUploadQuotaRecordsTable.ForeignKeys[0].RefTable = GameUploadSessionsTable
-	UserUploadQuotaRecordsTable.ForeignKeys[1].RefTable = UserUploadQuotasTable
-	UserUploadQuotaRecordsTable.Annotation = &entsql.Annotation{
-		Table: "user_upload_quota_records",
 	}
 	WalkthroughsTable.ForeignKeys[0].RefTable = GamesTable
 	WalkthroughsTable.ForeignKeys[1].RefTable = UsersTable

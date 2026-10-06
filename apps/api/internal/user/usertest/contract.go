@@ -19,14 +19,13 @@ type Repository interface {
 type Env struct {
 	Repo               Repository
 	HasDefaultFavorite func(t *testing.T, userID int) bool
-	HasQuota           func(t *testing.T, userID int) bool
 }
 
 func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 	ctx := context.Background()
 	hash := "$argon2id$hash"
 
-	t.Run("create provisions the default favorite and upload quota", func(t *testing.T) {
+	t.Run("create provisions the default favorite", func(t *testing.T) {
 		env := newEnv(t)
 		verified := time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC)
 		created, err := env.Repo.Create(ctx, user.NewUser{Name: "Alice", Email: "Alice@Example.test", PasswordHash: &hash, Lang: user.LangJA, ContentLimit: actor.ContentLimitNeverShow, EmailVerifiedAt: &verified})
@@ -39,8 +38,8 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if created.PasswordHash == nil || *created.PasswordHash != hash || created.EmailVerifiedAt == nil || !created.EmailVerifiedAt.Equal(verified) {
 			t.Fatalf("credentials not stored %+v", created)
 		}
-		if !env.HasDefaultFavorite(t, created.ID) || !env.HasQuota(t, created.ID) {
-			t.Fatal("registration must create the default favorite and the upload quota")
+		if !env.HasDefaultFavorite(t, created.ID) {
+			t.Fatal("registration must create the default favorite")
 		}
 		got, err := env.Repo.Get(ctx, created.ID)
 		if err != nil || got.Email != "Alice@Example.test" {

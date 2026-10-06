@@ -29,7 +29,6 @@ func TestAlertWorkerNotifiesTheAdmins(t *testing.T) {
 	service := report.NewService(report.Deps{
 		Repo:      repo,
 		Resources: resources,
-		Quota:     &reporttest.Quota{Missing: map[int]bool{}},
 		Banner:    &reporttest.Banner{},
 		Messages:  events,
 		Mailer:    mailer,

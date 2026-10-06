@@ -265,54 +265,6 @@ export const constraints = {
       "maxLength": 20
     }
   },
-  "AdminUserQuotaSizeInputBody": {
-    "action": {
-      "type": "string",
-      "required": true,
-      "nullable": false,
-      "enum": [
-        "ADD",
-        "SUB"
-      ]
-    },
-    "action_reason": {
-      "type": "string",
-      "required": false,
-      "nullable": false,
-      "maxLength": 255
-    },
-    "amount": {
-      "type": "integer",
-      "required": true,
-      "nullable": false,
-      "format": "int64",
-      "minimum": 1
-    }
-  },
-  "AdminUserQuotaUsedInputBody": {
-    "action": {
-      "type": "string",
-      "required": true,
-      "nullable": false,
-      "enum": [
-        "USE",
-        "ADD"
-      ]
-    },
-    "action_reason": {
-      "type": "string",
-      "required": false,
-      "nullable": false,
-      "maxLength": 255
-    },
-    "amount": {
-      "type": "integer",
-      "required": true,
-      "nullable": false,
-      "format": "int64",
-      "minimum": 1
-    }
-  },
   "AdminUserRoleInputBody": {
     "role": {
       "type": "integer",
@@ -349,6 +301,13 @@ export const constraints = {
       "required": false,
       "nullable": true,
       "format": "date-time"
+    }
+  },
+  "AdminUserUploadTrustInputBody": {
+    "trusted": {
+      "type": "boolean",
+      "required": true,
+      "nullable": false
     }
   },
   "AdminWalkthroughStatusInputBody": {

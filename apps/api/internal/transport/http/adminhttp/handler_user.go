@@ -11,7 +11,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/auth"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
-	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
 
@@ -41,9 +40,7 @@ func (h *UserHandler) Register(api *httpapi.API) {
 	httpapi.Register(api, route("adminUser.sessions", http.MethodGet, "/admin/users/{id}/sessions", "List a user's login sessions"), h.sessions)
 	httpapi.Register(api, route("adminUser.permissions", http.MethodGet, "/admin/users/{id}/permissions", "Read a user's edit permissions"), h.permissions)
 	httpapi.Register(api, route("adminUser.setPermissions", http.MethodPatch, "/admin/users/{id}/permissions", "Replace a user's edit permissions"), h.setPermissions)
-	httpapi.Register(api, route("adminUser.adjustQuotaSize", http.MethodPatch, "/admin/users/{id}/quota/size", "Grant or take upload quota"), h.adjustQuotaSize)
-	httpapi.Register(api, route("adminUser.adjustQuotaUsed", http.MethodPatch, "/admin/users/{id}/quota/used", "Correct the used upload quota"), h.adjustQuotaUsed)
-	httpapi.Register(api, route("adminUser.resetQuotaUsed", http.MethodPost, "/admin/users/{id}/quota/reset-used", "Reset the used upload quota"), h.resetQuotaUsed)
+	httpapi.Register(api, route("adminUser.setUploadTrust", http.MethodPatch, "/admin/users/{id}/upload-trust", "Grant or withdraw the trusted upload tier"), h.setUploadTrust)
 	httpapi.Register(api, route("adminUser.setSponsor", http.MethodPatch, "/admin/users/{id}/sponsor", "Set or clear the sponsor badge"), h.setSponsor)
 }
 
@@ -149,24 +146,8 @@ func (h *UserHandler) setPermissions(ctx context.Context, in *adminUserSetPermis
 	return response.OK(ctx, h.resp, adminUserAllowMaskDTO{AllowMask: strconv.FormatInt(mask, 10)}), nil
 }
 
-func (h *UserHandler) adjustQuotaSize(ctx context.Context, in *adminUserQuotaSizeInput) (*response.EmptyOutput, error) {
-	change := admin.QuotaChange{Action: upload.QuotaAction(in.Body.Action), Amount: in.Body.Amount, Reason: deref(in.Body.ActionReason)}
-	if err := h.service.AdjustQuotaSize(ctx, actor.From(ctx), in.ID, change); err != nil {
-		return nil, err
-	}
-	return response.Empty(ctx, h.resp), nil
-}
-
-func (h *UserHandler) adjustQuotaUsed(ctx context.Context, in *adminUserQuotaUsedInput) (*response.EmptyOutput, error) {
-	change := admin.QuotaChange{Action: upload.QuotaAction(in.Body.Action), Amount: in.Body.Amount, Reason: deref(in.Body.ActionReason)}
-	if err := h.service.AdjustQuotaUsed(ctx, actor.From(ctx), in.ID, change); err != nil {
-		return nil, err
-	}
-	return response.Empty(ctx, h.resp), nil
-}
-
-func (h *UserHandler) resetQuotaUsed(ctx context.Context, in *adminUserPathInput) (*response.EmptyOutput, error) {
-	if err := h.service.ResetQuotaUsed(ctx, actor.From(ctx), in.ID); err != nil {
+func (h *UserHandler) setUploadTrust(ctx context.Context, in *adminUserUploadTrustInput) (*response.EmptyOutput, error) {
+	if err := h.service.SetUploadTrust(ctx, actor.From(ctx), in.ID, in.Body.Trusted); err != nil {
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil
@@ -177,11 +158,4 @@ func (h *UserHandler) setSponsor(ctx context.Context, in *adminUserSponsorInput)
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil
-}
-
-func deref(value *string) string {
-	if value == nil {
-		return ""
-	}
-	return *value
 }

@@ -1534,9 +1534,8 @@
             "format": "date-time",
             "type": "string"
           },
-          "upload_quota": {
-            "$ref": "#/components/schemas/AdminUserQuotaDTO",
-            "description": "Absent when the user has no quota row"
+          "upload": {
+            "$ref": "#/components/schemas/AllowanceDTO"
           }
         },
         "required": [
@@ -1554,6 +1553,7 @@
           "last_login_at",
           "two_factor_enabled",
           "sponsor_expires_at",
+          "upload",
           "counts",
           "latest_ban"
         ],
@@ -1803,83 +1803,6 @@
         },
         "type": "object"
       },
-      "AdminUserQuotaDTO": {
-        "additionalProperties": false,
-        "properties": {
-          "is_first_grant": {
-            "type": "boolean"
-          },
-          "size": {
-            "description": "Bytes as a decimal string",
-            "type": "string"
-          },
-          "used": {
-            "description": "Bytes as a decimal string",
-            "type": "string"
-          }
-        },
-        "required": [
-          "size",
-          "used",
-          "is_first_grant"
-        ],
-        "type": "object"
-      },
-      "AdminUserQuotaSizeInputBody": {
-        "additionalProperties": false,
-        "properties": {
-          "action": {
-            "enum": [
-              "ADD",
-              "SUB"
-            ],
-            "type": "string"
-          },
-          "action_reason": {
-            "maxLength": 255,
-            "type": "string"
-          },
-          "amount": {
-            "description": "Bytes",
-            "format": "int64",
-            "minimum": 1,
-            "type": "integer"
-          }
-        },
-        "required": [
-          "action",
-          "amount"
-        ],
-        "type": "object"
-      },
-      "AdminUserQuotaUsedInputBody": {
-        "additionalProperties": false,
-        "properties": {
-          "action": {
-            "description": "USE consumes quota, ADD gives it back",
-            "enum": [
-              "USE",
-              "ADD"
-            ],
-            "type": "string"
-          },
-          "action_reason": {
-            "maxLength": 255,
-            "type": "string"
-          },
-          "amount": {
-            "description": "Bytes",
-            "format": "int64",
-            "minimum": 1,
-            "type": "integer"
-          }
-        },
-        "required": [
-          "action",
-          "amount"
-        ],
-        "type": "object"
-      },
       "AdminUserRefDTO": {
         "additionalProperties": false,
         "properties": {
@@ -2053,6 +1976,19 @@
             ]
           }
         },
+        "type": "object"
+      },
+      "AdminUserUploadTrustInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "trusted": {
+            "description": "Grant or withdraw the trusted upload tier",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "trusted"
+        ],
         "type": "object"
       },
       "AdminWalkthroughCreatorDTO": {
@@ -4599,6 +4535,79 @@
         ],
         "type": "object"
       },
+      "AllowanceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "approved": {
+            "description": "Published resources of the uploader",
+            "format": "int64",
+            "type": "integer"
+          },
+          "frozen_until": {
+            "description": "Set while a violation keeps the uploader one tier down",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "in_flight": {
+            "description": "Bytes of uploads not yet attached to a resource",
+            "format": "int64",
+            "type": "integer"
+          },
+          "in_flight_limit": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "max_file_size": {
+            "description": "Null when unlimited",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "stored": {
+            "description": "Bytes of the uploader's files in active resources",
+            "format": "int64",
+            "type": "integer"
+          },
+          "stored_limit": {
+            "description": "Null when unlimited; counts stored and in-flight bytes",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "tier": {
+            "enum": [
+              "new",
+              "regular",
+              "trusted",
+              "admin"
+            ],
+            "type": "string"
+          },
+          "trusted": {
+            "description": "Trusted tier granted by an admin",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "tier",
+          "approved",
+          "trusted",
+          "frozen_until",
+          "stored",
+          "stored_limit",
+          "in_flight",
+          "in_flight_limit",
+          "max_file_size"
+        ],
+        "type": "object"
+      },
       "AnalysisCountryDTO": {
         "additionalProperties": false,
         "properties": {
@@ -5053,10 +5062,9 @@
           490101,
           490102,
           490103,
-          500101,
           500102,
-          500103,
-          500104,
+          500105,
+          500106,
           530101,
           530102,
           540101,
@@ -5200,10 +5208,9 @@
           "SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT",
           "SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED",
           "SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE",
-          "USER_UPLOAD_QUOTA_NOT_FOUND",
           "USER_UPLOAD_QUOTA_EXCEEDED",
-          "USER_UPLOAD_QUOTA_USE_CANT_BE_NEGATIVE",
-          "USER_UPLOAD_QUOTA_RECORD_NOT_FOUND",
+          "USER_UPLOAD_IN_FLIGHT_EXCEEDED",
+          "UPLOAD_SPOOL_FULL",
           "MESSAGE_NOT_FOUND",
           "MESSAGE_FORBIDDEN",
           "PVN_BINDING_NOT_FOUND",
@@ -8316,6 +8323,39 @@
           },
           "data": {
             "$ref": "#/components/schemas/AiSummaryDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeAllowanceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AllowanceDTO"
           },
           "message": {
             "type": "string"
@@ -11568,39 +11608,6 @@
           },
           "data": {
             "$ref": "#/components/schemas/UploadCompleteDTO"
-          },
-          "message": {
-            "type": "string"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/Meta"
-          },
-          "requestId": {
-            "type": "string"
-          },
-          "timestamp": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "code",
-          "message",
-          "data",
-          "requestId",
-          "timestamp"
-        ],
-        "type": "object"
-      },
-      "EnvelopeUploadQuotaDTO": {
-        "additionalProperties": false,
-        "properties": {
-          "code": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "data": {
-            "$ref": "#/components/schemas/UploadQuotaDTO"
           },
           "message": {
             "type": "string"
@@ -16650,24 +16657,6 @@
         },
         "required": [
           "ok"
-        ],
-        "type": "object"
-      },
-      "UploadQuotaDTO": {
-        "additionalProperties": false,
-        "properties": {
-          "size": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "used": {
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "size",
-          "used"
         ],
         "type": "object"
       },
@@ -23394,200 +23383,6 @@
         ]
       }
     },
-    "/admin/users/{id}/quota/reset-used": {
-      "post": {
-        "operationId": "adminUser.resetQuotaUsed",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "format": "int64",
-              "minimum": 1,
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EmptyEnvelope"
-                }
-              }
-            },
-            "description": "Created",
-            "headers": {
-              "shionlib-auth-stale": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "accessToken": []
-          },
-          {
-            "accessCookie": []
-          }
-        ],
-        "summary": "Reset the used upload quota",
-        "tags": [
-          "admin"
-        ]
-      }
-    },
-    "/admin/users/{id}/quota/size": {
-      "patch": {
-        "operationId": "adminUser.adjustQuotaSize",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "format": "int64",
-              "minimum": 1,
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AdminUserQuotaSizeInputBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EmptyEnvelope"
-                }
-              }
-            },
-            "description": "OK",
-            "headers": {
-              "shionlib-auth-stale": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "accessToken": []
-          },
-          {
-            "accessCookie": []
-          }
-        ],
-        "summary": "Grant or take upload quota",
-        "tags": [
-          "admin"
-        ]
-      }
-    },
-    "/admin/users/{id}/quota/used": {
-      "patch": {
-        "operationId": "adminUser.adjustQuotaUsed",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "format": "int64",
-              "minimum": 1,
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AdminUserQuotaUsedInputBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EmptyEnvelope"
-                }
-              }
-            },
-            "description": "OK",
-            "headers": {
-              "shionlib-auth-stale": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "accessToken": []
-          },
-          {
-            "accessCookie": []
-          }
-        ],
-        "summary": "Correct the used upload quota",
-        "tags": [
-          "admin"
-        ]
-      }
-    },
     "/admin/users/{id}/reset-password": {
       "post": {
         "operationId": "adminUser.resetPassword",
@@ -23942,6 +23737,74 @@
           }
         ],
         "summary": "Lift a user's ban",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/users/{id}/upload-trust": {
+      "patch": {
+        "operationId": "adminUser.setUploadTrust",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserUploadTrustInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Grant or withdraw the trusted upload tier",
         "tags": [
           "admin"
         ]
@@ -30310,7 +30173,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopeUploadQuotaDTO"
+                  "$ref": "#/components/schemas/EnvelopeAllowanceDTO"
                 }
               }
             },
@@ -30342,7 +30205,7 @@
             "accessCookie": []
           }
         ],
-        "summary": "Read the caller's upload quota",
+        "summary": "Read the caller's upload tier and limits",
         "tags": [
           "upload"
         ]

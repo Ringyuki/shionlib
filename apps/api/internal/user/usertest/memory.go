@@ -30,7 +30,6 @@ type MemoryRepository struct {
 	stats            map[int]user.Stats
 	bans             []banRecord
 	defaultFavorites map[int]bool
-	quotas           map[int]bool
 	deletedComments  map[int]bool
 }
 
@@ -41,7 +40,6 @@ func NewMemoryRepository(now func() time.Time) *MemoryRepository {
 		lastLogin:        map[int]time.Time{},
 		stats:            map[int]user.Stats{},
 		defaultFavorites: map[int]bool{},
-		quotas:           map[int]bool{},
 		deletedComments:  map[int]bool{},
 	}
 }
@@ -104,12 +102,6 @@ func (r *MemoryRepository) HasDefaultFavorite(id int) bool {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	return r.defaultFavorites[id]
-}
-
-func (r *MemoryRepository) HasQuota(id int) bool {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	return r.quotas[id]
 }
 
 func (r *MemoryRepository) CommentsDeleted(id int) bool {
@@ -206,7 +198,6 @@ func (r *MemoryRepository) Create(_ context.Context, in user.NewUser) (user.User
 	}
 	r.users[created.ID] = created
 	r.defaultFavorites[created.ID] = true
-	r.quotas[created.ID] = true
 	return created, nil
 }
 

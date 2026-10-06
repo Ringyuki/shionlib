@@ -76,7 +76,7 @@ func TestSearchUsersFiltersAndCounts(t *testing.T) {
 	}
 }
 
-func TestUserDetailLoadsQuotaAndLatestBan(t *testing.T) {
+func TestUserDetailLoadsLatestBan(t *testing.T) {
 	db := pgtest.New(t)
 	ctx := context.Background()
 	store := adminpg.NewUserStore(db.Ent)
@@ -85,17 +85,16 @@ func TestUserDetailLoadsQuotaAndLatestBan(t *testing.T) {
 		t.Fatalf("missing user: %v", err)
 	}
 	detail, err := store.UserDetail(ctx, target)
-	if err != nil || detail.Quota != nil || detail.LatestBan != nil || detail.ID != target {
+	if err != nil || detail.LatestBan != nil || detail.ID != target {
 		t.Fatalf("bare user: %+v %v", detail, err)
 	}
-	db.Ent.UserUploadQuota.Create().SetUserID(target).SetSize(1 << 40).SetUsed(5).SetIsFirstGrant(true).SaveX(ctx)
 	older := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 	newer := older.Add(time.Hour)
 	db.Ent.UserBannedRecord.Create().SetUserID(target).SetBannedAt(older).SetIsPermanent(true).SaveX(ctx)
 	db.Ent.UserBannedRecord.Create().SetUserID(target).SetBannedAt(newer).SetBannedBy(moderator).SetBannedReason("spam").SetBannedDurationDays(3).SaveX(ctx)
 	detail, err = store.UserDetail(ctx, target)
-	if err != nil || detail.Quota == nil || *detail.Quota != (admin.Quota{Size: 1 << 40, Used: 5, IsFirstGrant: true}) {
-		t.Fatalf("quota: %+v %v", detail.Quota, err)
+	if err != nil {
+		t.Fatal(err)
 	}
 	ban := detail.LatestBan
 	if ban == nil || !ban.BannedAt.Equal(newer) || ban.Reason == nil || *ban.Reason != "spam" || ban.DurationDays == nil || *ban.DurationDays != 3 || ban.Permanent || ban.BannedBy == nil || ban.BannedBy.ID != moderator || ban.BannedBy.Name == "" {

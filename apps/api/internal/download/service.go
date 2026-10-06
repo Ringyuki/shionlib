@@ -19,7 +19,6 @@ type Deps struct {
 	Repo       Repository
 	Games      GameCards
 	Sessions   Sessions
-	Quota      Quota
 	Activities Activities
 	Messages   Messenger
 	Tx         Transactor
@@ -34,7 +33,6 @@ type Service struct {
 	repo       Repository
 	games      GameCards
 	sessions   Sessions
-	quota      Quota
 	activities Activities
 	messages   Messenger
 	tx         Transactor
@@ -50,7 +48,6 @@ func NewService(deps Deps) *Service {
 		repo:       deps.Repo,
 		games:      deps.Games,
 		sessions:   deps.Sessions,
-		quota:      deps.Quota,
 		activities: deps.Activities,
 		messages:   deps.Messages,
 		tx:         deps.Tx,
@@ -283,11 +280,6 @@ func (s *Service) DeleteFile(ctx context.Context, who actor.Actor, fileID int) e
 		if err := s.repo.DeleteFile(ctx, file.ID); err != nil {
 			return err
 		}
-		if file.UploadSessionID != nil {
-			if err := s.quota.Withdraw(ctx, file.CreatorID, *file.UploadSessionID); err != nil {
-				return err
-			}
-		}
 		if err := s.repo.TouchResource(ctx, file.ResourceID, s.now()); err != nil {
 			return err
 		}
@@ -492,11 +484,6 @@ func (s *Service) Reupload(ctx context.Context, who actor.Actor, fileID int, in 
 		}
 		if err := s.repo.TouchResource(ctx, file.ResourceID, s.now()); err != nil {
 			return err
-		}
-		if file.UploadSessionID != nil {
-			if err := s.quota.Withdraw(ctx, file.CreatorID, *file.UploadSessionID); err != nil {
-				return err
-			}
 		}
 		if err := s.repo.ReplaceFileContent(ctx, file.ID, FileContent{
 			Path:            session.StoragePath,

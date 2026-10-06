@@ -28,19 +28,18 @@ type e2eSeedUser struct {
 	Email                  string
 	Role                   int
 	ContentLimit           int
-	QuotaSize              int64
 	OnlyGamesWithResources bool
 }
 
 var e2eSeedUsers = []e2eSeedUser{
-	{Name: "e2e_admin", Email: "e2e_admin@shionlib.local", Role: 3, ContentLimit: 3, QuotaSize: 20_000_000_000, OnlyGamesWithResources: true},
-	{Name: "e2e_user", Email: "e2e_user@shionlib.local", Role: 1, ContentLimit: 2, QuotaSize: 10_000_000_000, OnlyGamesWithResources: true},
-	{Name: "e2e_mutable_user", Email: "e2e_mutable_user@shionlib.local", Role: 1, ContentLimit: 2, QuotaSize: 10_000_000_000, OnlyGamesWithResources: true},
-	{Name: "e2e_permission_user", Email: "e2e_permission_user@shionlib.local", Role: 1, ContentLimit: 2, QuotaSize: 10_000_000_000, OnlyGamesWithResources: true},
-	{Name: "e2e_relation_user", Email: "e2e_relation_user@shionlib.local", Role: 1, ContentLimit: 2, QuotaSize: 10_000_000_000, OnlyGamesWithResources: true},
-	{Name: "e2e_admin_ops_user", Email: "e2e_admin_ops_user@shionlib.local", Role: 1, ContentLimit: 2, QuotaSize: 10_000_000_000, OnlyGamesWithResources: true},
-	{Name: "e2e_list_all_user", Email: "e2e_list_all_user@shionlib.local", Role: 1, ContentLimit: 3, QuotaSize: 10_000_000_000, OnlyGamesWithResources: false},
-	{Name: "e2e_list_safe_user", Email: "e2e_list_safe_user@shionlib.local", Role: 1, ContentLimit: 1, QuotaSize: 10_000_000_000, OnlyGamesWithResources: false},
+	{Name: "e2e_admin", Email: "e2e_admin@shionlib.local", Role: 3, ContentLimit: 3, OnlyGamesWithResources: true},
+	{Name: "e2e_user", Email: "e2e_user@shionlib.local", Role: 1, ContentLimit: 2, OnlyGamesWithResources: true},
+	{Name: "e2e_mutable_user", Email: "e2e_mutable_user@shionlib.local", Role: 1, ContentLimit: 2, OnlyGamesWithResources: true},
+	{Name: "e2e_permission_user", Email: "e2e_permission_user@shionlib.local", Role: 1, ContentLimit: 2, OnlyGamesWithResources: true},
+	{Name: "e2e_relation_user", Email: "e2e_relation_user@shionlib.local", Role: 1, ContentLimit: 2, OnlyGamesWithResources: true},
+	{Name: "e2e_admin_ops_user", Email: "e2e_admin_ops_user@shionlib.local", Role: 1, ContentLimit: 2, OnlyGamesWithResources: true},
+	{Name: "e2e_list_all_user", Email: "e2e_list_all_user@shionlib.local", Role: 1, ContentLimit: 3, OnlyGamesWithResources: false},
+	{Name: "e2e_list_safe_user", Email: "e2e_list_safe_user@shionlib.local", Role: 1, ContentLimit: 1, OnlyGamesWithResources: false},
 }
 
 const (

@@ -782,29 +782,6 @@ func HasGameUploadChunksWith(preds ...predicate.GameUploadChunk) predicate.GameU
 	})
 }
 
-// HasUserUploadQuotaRecord applies the HasEdge predicate on the "user_upload_quota_record" edge.
-func HasUserUploadQuotaRecord() predicate.GameUploadSession {
-	return predicate.GameUploadSession(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, UserUploadQuotaRecordTable, UserUploadQuotaRecordColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasUserUploadQuotaRecordWith applies the HasEdge predicate on the "user_upload_quota_record" edge with a given conditions (other predicates).
-func HasUserUploadQuotaRecordWith(preds ...predicate.UserUploadQuotaRecord) predicate.GameUploadSession {
-	return predicate.GameUploadSession(func(s *sql.Selector) {
-		step := newUserUploadQuotaRecordStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasCreator applies the HasEdge predicate on the "creator" edge.
 func HasCreator() predicate.GameUploadSession {
 	return predicate.GameUploadSession(func(s *sql.Selector) {

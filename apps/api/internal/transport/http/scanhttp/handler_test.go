@@ -1,7 +1,6 @@
 package scanhttp_test
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -25,12 +24,6 @@ var (
 	admin  = actor.Actor{UserID: 2, Role: actor.RoleAdmin}
 )
 
-type quotaFake struct{}
-
-func (quotaFake) Withdraw(context.Context, int, int) error {
-	return nil
-}
-
 type env struct {
 	server *apitest.Server
 	repo   *scantest.MemoryRepository
@@ -49,7 +42,6 @@ func setup(t *testing.T) env {
 		Scanner:    &scantest.Scanner{},
 		Files:      repo,
 		Local:      uploadtest.NewMemorySpool(),
-		Quota:      quotaFake{},
 		Activities: events,
 		Messages:   events,
 		Banner:     &scantest.Banner{},

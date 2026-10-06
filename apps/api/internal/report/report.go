@@ -43,21 +43,19 @@ const (
 )
 
 const (
-	GiB                      int64 = 1 << 30
-	FalseReportWindow              = 30 * 24 * time.Hour
-	FalseReportWindowDays          = 30
-	SuspendThreshold               = 12
-	RoleUser                       = 1
-	UserBanned                     = 2
-	adminReviewPrefix              = "/admin/reports?id="
-	falsePositiveQuotaReason       = "REPORT_FALSE_POSITIVE"
+	FalseReportWindow     = 30 * 24 * time.Hour
+	FalseReportWindowDays = 30
+	SuspendThreshold      = 12
+	RoleUser              = 1
+	UserBanned            = 2
+	adminReviewPrefix     = "/admin/reports?id="
 )
 
 var SortFields = []string{"id", "created", "updated", "processed_at"}
 
 type Penalty struct {
-	QuotaBytes int64
-	BanDays    int
+	BanDays   int
+	Violation bool
 }
 
 var defaultLevels = map[Reason]Level{
@@ -70,9 +68,9 @@ var defaultLevels = map[Reason]Level{
 
 var targetPenalties = map[Level]Penalty{
 	LevelLow:      {},
-	LevelMedium:   {QuotaBytes: GiB},
-	LevelHigh:     {QuotaBytes: 2 * GiB, BanDays: 7},
-	LevelCritical: {QuotaBytes: 5 * GiB, BanDays: 30},
+	LevelMedium:   {Violation: true},
+	LevelHigh:     {BanDays: 7, Violation: true},
+	LevelCritical: {BanDays: 30, Violation: true},
 }
 
 func DefaultLevel(reason Reason) Level {
@@ -88,8 +86,6 @@ func TargetPenalty(level Level) Penalty {
 
 func FalseReportPenalty(count int) Penalty {
 	switch count {
-	case 3:
-		return Penalty{QuotaBytes: GiB}
 	case 5:
 		return Penalty{BanDays: 3}
 	case 8:
@@ -226,12 +222,12 @@ type ListFilter struct {
 type Page = paging.Page
 
 func (p penaltyOutcome) applied() bool {
-	return p.banApplied || p.quotaBytes > 0
+	return p.banApplied || p.violation
 }
 
 type penaltyOutcome struct {
 	count      int
 	banApplied bool
 	banDays    int
-	quotaBytes int64
+	violation  bool
 }

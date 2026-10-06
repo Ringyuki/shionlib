@@ -33,7 +33,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userloginsession"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userpasskeycredential"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userpvnbinding"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/useruploadquota"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/walkthrough"
 )
 
@@ -235,6 +234,20 @@ func (_c *UserCreate) SetTwoFactorEnabled(v bool) *UserCreate {
 func (_c *UserCreate) SetNillableTwoFactorEnabled(v *bool) *UserCreate {
 	if v != nil {
 		_c.SetTwoFactorEnabled(*v)
+	}
+	return _c
+}
+
+// SetUploadTrusted sets the "upload_trusted" field.
+func (_c *UserCreate) SetUploadTrusted(v bool) *UserCreate {
+	_c.mutation.SetUploadTrusted(v)
+	return _c
+}
+
+// SetNillableUploadTrusted sets the "upload_trusted" field if the given value is not nil.
+func (_c *UserCreate) SetNillableUploadTrusted(v *bool) *UserCreate {
+	if v != nil {
+		_c.SetUploadTrusted(*v)
 	}
 	return _c
 }
@@ -621,25 +634,6 @@ func (_c *UserCreate) AddGameUploadSessions(v ...*GameUploadSession) *UserCreate
 	return _c.AddGameUploadSessionIDs(ids...)
 }
 
-// SetUploadQuotaID sets the "upload_quota" edge to the UserUploadQuota entity by ID.
-func (_c *UserCreate) SetUploadQuotaID(id int) *UserCreate {
-	_c.mutation.SetUploadQuotaID(id)
-	return _c
-}
-
-// SetNillableUploadQuotaID sets the "upload_quota" edge to the UserUploadQuota entity by ID if the given value is not nil.
-func (_c *UserCreate) SetNillableUploadQuotaID(id *int) *UserCreate {
-	if id != nil {
-		_c = _c.SetUploadQuotaID(*id)
-	}
-	return _c
-}
-
-// SetUploadQuota sets the "upload_quota" edge to the UserUploadQuota entity.
-func (_c *UserCreate) SetUploadQuota(v *UserUploadQuota) *UserCreate {
-	return _c.SetUploadQuotaID(v.ID)
-}
-
 // AddWalkthroughIDs adds the "walkthroughs" edge to the Walkthrough entity by IDs.
 func (_c *UserCreate) AddWalkthroughIDs(ids ...int) *UserCreate {
 	_c.mutation.AddWalkthroughIDs(ids...)
@@ -793,6 +787,10 @@ func (_c *UserCreate) defaults() {
 		v := user.DefaultTwoFactorEnabled
 		_c.mutation.SetTwoFactorEnabled(v)
 	}
+	if _, ok := _c.mutation.UploadTrusted(); !ok {
+		v := user.DefaultUploadTrusted
+		_c.mutation.SetUploadTrusted(v)
+	}
 	if _, ok := _c.mutation.Created(); !ok {
 		v := user.DefaultCreated()
 		_c.mutation.SetCreated(v)
@@ -851,6 +849,9 @@ func (_c *UserCreate) check() error {
 	}
 	if _, ok := _c.mutation.TwoFactorEnabled(); !ok {
 		return &ValidationError{Name: "two_factor_enabled", err: errors.New(`ent: missing required field "User.two_factor_enabled"`)}
+	}
+	if _, ok := _c.mutation.UploadTrusted(); !ok {
+		return &ValidationError{Name: "upload_trusted", err: errors.New(`ent: missing required field "User.upload_trusted"`)}
 	}
 	if _, ok := _c.mutation.Updated(); !ok {
 		return &ValidationError{Name: "updated", err: errors.New(`ent: missing required field "User.updated"`)}
@@ -947,6 +948,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.TwoFactorEnabled(); ok {
 		_spec.SetField(user.FieldTwoFactorEnabled, field.TypeBool, value)
 		_node.TwoFactorEnabled = value
+	}
+	if value, ok := _c.mutation.UploadTrusted(); ok {
+		_spec.SetField(user.FieldUploadTrusted, field.TypeBool, value)
+		_node.UploadTrusted = value
 	}
 	if value, ok := _c.mutation.SponsorExpiresAt(); ok {
 		_spec.SetField(user.FieldSponsorExpiresAt, field.TypeTime, value)
@@ -1305,22 +1310,6 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(gameuploadsession.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.UploadQuotaIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.UploadQuotaTable,
-			Columns: []string{user.UploadQuotaColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(useruploadquota.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1716,6 +1705,18 @@ func (u *UserUpsert) UpdateTwoFactorEnabled() *UserUpsert {
 	return u
 }
 
+// SetUploadTrusted sets the "upload_trusted" field.
+func (u *UserUpsert) SetUploadTrusted(v bool) *UserUpsert {
+	u.Set(user.FieldUploadTrusted, v)
+	return u
+}
+
+// UpdateUploadTrusted sets the "upload_trusted" field to the value that was provided on create.
+func (u *UserUpsert) UpdateUploadTrusted() *UserUpsert {
+	u.SetExcluded(user.FieldUploadTrusted)
+	return u
+}
+
 // SetSponsorExpiresAt sets the "sponsor_expires_at" field.
 func (u *UserUpsert) SetSponsorExpiresAt(v time.Time) *UserUpsert {
 	u.Set(user.FieldSponsorExpiresAt, v)
@@ -2074,6 +2075,20 @@ func (u *UserUpsertOne) SetTwoFactorEnabled(v bool) *UserUpsertOne {
 func (u *UserUpsertOne) UpdateTwoFactorEnabled() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateTwoFactorEnabled()
+	})
+}
+
+// SetUploadTrusted sets the "upload_trusted" field.
+func (u *UserUpsertOne) SetUploadTrusted(v bool) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetUploadTrusted(v)
+	})
+}
+
+// UpdateUploadTrusted sets the "upload_trusted" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateUploadTrusted() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateUploadTrusted()
 	})
 }
 
@@ -2606,6 +2621,20 @@ func (u *UserUpsertBulk) SetTwoFactorEnabled(v bool) *UserUpsertBulk {
 func (u *UserUpsertBulk) UpdateTwoFactorEnabled() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateTwoFactorEnabled()
+	})
+}
+
+// SetUploadTrusted sets the "upload_trusted" field.
+func (u *UserUpsertBulk) SetUploadTrusted(v bool) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetUploadTrusted(v)
+	})
+}
+
+// UpdateUploadTrusted sets the "upload_trusted" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateUploadTrusted() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateUploadTrusted()
 	})
 }
 

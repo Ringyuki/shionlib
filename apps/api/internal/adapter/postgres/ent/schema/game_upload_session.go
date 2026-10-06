@@ -41,7 +41,6 @@ func (GameUploadSession) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("game_download_resource_file", GameDownloadResourceFile.Type).Unique().StorageKey(edge.Symbol("game_download_resource_files_upload_session_id_fkey")).Annotations(entsql.OnDelete(entsql.SetNull)),
 		edge.To("game_upload_chunks", GameUploadChunk.Type).StorageKey(edge.Symbol("game_upload_chunks_game_upload_session_id_fkey")).Annotations(entsql.OnDelete(entsql.Restrict)),
-		edge.To("user_upload_quota_record", UserUploadQuotaRecord.Type).Unique().StorageKey(edge.Symbol("user_upload_quota_records_upload_session_id_fkey")).Annotations(entsql.OnDelete(entsql.SetNull)),
 		edge.From("creator", User.Type).Ref("game_upload_sessions").Field("creator_id").Unique().Required(),
 	}
 }

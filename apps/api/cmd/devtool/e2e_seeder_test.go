@@ -56,7 +56,6 @@ func TestE2EPrepareReproducesTheLegacyDatasetIdempotently(t *testing.T) {
 
 	counts := map[string]int{
 		"users":                        8,
-		"user_upload_quotas":           8,
 		"favorites":                    8,
 		"favorite_items":               1,
 		"field_permission_mappings":    34,

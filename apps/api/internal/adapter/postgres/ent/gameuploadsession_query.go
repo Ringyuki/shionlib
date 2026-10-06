@@ -18,7 +18,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/useruploadquotarecord"
 )
 
 // GameUploadSessionQuery is the builder for querying GameUploadSession entities.
@@ -30,7 +29,6 @@ type GameUploadSessionQuery struct {
 	predicates                   []predicate.GameUploadSession
 	withGameDownloadResourceFile *GameDownloadResourceFileQuery
 	withGameUploadChunks         *GameUploadChunkQuery
-	withUserUploadQuotaRecord    *UserUploadQuotaRecordQuery
 	withCreator                  *UserQuery
 	modifiers                    []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
@@ -106,28 +104,6 @@ func (_q *GameUploadSessionQuery) QueryGameUploadChunks() *GameUploadChunkQuery 
 			sqlgraph.From(gameuploadsession.Table, gameuploadsession.FieldID, selector),
 			sqlgraph.To(gameuploadchunk.Table, gameuploadchunk.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, gameuploadsession.GameUploadChunksTable, gameuploadsession.GameUploadChunksColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryUserUploadQuotaRecord chains the current query on the "user_upload_quota_record" edge.
-func (_q *GameUploadSessionQuery) QueryUserUploadQuotaRecord() *UserUploadQuotaRecordQuery {
-	query := (&UserUploadQuotaRecordClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(gameuploadsession.Table, gameuploadsession.FieldID, selector),
-			sqlgraph.To(useruploadquotarecord.Table, useruploadquotarecord.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, gameuploadsession.UserUploadQuotaRecordTable, gameuploadsession.UserUploadQuotaRecordColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -351,7 +327,6 @@ func (_q *GameUploadSessionQuery) Clone() *GameUploadSessionQuery {
 		predicates:                   append([]predicate.GameUploadSession{}, _q.predicates...),
 		withGameDownloadResourceFile: _q.withGameDownloadResourceFile.Clone(),
 		withGameUploadChunks:         _q.withGameUploadChunks.Clone(),
-		withUserUploadQuotaRecord:    _q.withUserUploadQuotaRecord.Clone(),
 		withCreator:                  _q.withCreator.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
@@ -379,17 +354,6 @@ func (_q *GameUploadSessionQuery) WithGameUploadChunks(opts ...func(*GameUploadC
 		opt(query)
 	}
 	_q.withGameUploadChunks = query
-	return _q
-}
-
-// WithUserUploadQuotaRecord tells the query-builder to eager-load the nodes that are connected to
-// the "user_upload_quota_record" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *GameUploadSessionQuery) WithUserUploadQuotaRecord(opts ...func(*UserUploadQuotaRecordQuery)) *GameUploadSessionQuery {
-	query := (&UserUploadQuotaRecordClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withUserUploadQuotaRecord = query
 	return _q
 }
 
@@ -482,10 +446,9 @@ func (_q *GameUploadSessionQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	var (
 		nodes       = []*GameUploadSession{}
 		_spec       = _q.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [3]bool{
 			_q.withGameDownloadResourceFile != nil,
 			_q.withGameUploadChunks != nil,
-			_q.withUserUploadQuotaRecord != nil,
 			_q.withCreator != nil,
 		}
 	)
@@ -522,12 +485,6 @@ func (_q *GameUploadSessionQuery) sqlAll(ctx context.Context, hooks ...queryHook
 			func(n *GameUploadSession, e *GameUploadChunk) {
 				n.Edges.GameUploadChunks = append(n.Edges.GameUploadChunks, e)
 			}); err != nil {
-			return nil, err
-		}
-	}
-	if query := _q.withUserUploadQuotaRecord; query != nil {
-		if err := _q.loadUserUploadQuotaRecord(ctx, query, nodes, nil,
-			func(n *GameUploadSession, e *UserUploadQuotaRecord) { n.Edges.UserUploadQuotaRecord = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -595,36 +552,6 @@ func (_q *GameUploadSessionQuery) loadGameUploadChunks(ctx context.Context, quer
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "game_upload_session_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
-func (_q *GameUploadSessionQuery) loadUserUploadQuotaRecord(ctx context.Context, query *UserUploadQuotaRecordQuery, nodes []*GameUploadSession, init func(*GameUploadSession), assign func(*GameUploadSession, *UserUploadQuotaRecord)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*GameUploadSession)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(useruploadquotarecord.FieldUploadSessionID)
-	}
-	query.Where(predicate.UserUploadQuotaRecord(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(gameuploadsession.UserUploadQuotaRecordColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.UploadSessionID
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "upload_session_id" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "upload_session_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

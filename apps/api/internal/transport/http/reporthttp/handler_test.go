@@ -42,7 +42,6 @@ func setup(t *testing.T) env {
 	service := report.NewService(report.Deps{
 		Repo:      repo,
 		Resources: resources,
-		Quota:     &reporttest.Quota{},
 		Banner:    &reporttest.Banner{},
 		Messages:  events,
 		Queue:     events,

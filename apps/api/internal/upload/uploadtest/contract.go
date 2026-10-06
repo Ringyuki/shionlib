@@ -89,6 +89,23 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		}
 	})
 
+	t.Run("pending bytes count what live uploads have still to write", func(t *testing.T) {
+		env := newEnv(t)
+		user := env.NewUser(t)
+		started, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/p1.part", later))
+		halfway, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/p2.part", later))
+		if err := env.Repo.AddChunk(ctx, halfway.ID, 0); err != nil {
+			t.Fatal(err)
+		}
+		_, _ = env.Repo.CreateSession(ctx, newSession(user, "/spool/p3.part", time.Now().Add(-time.Minute)))
+		done, _ := env.Repo.CreateSession(ctx, newSession(user, "/spool/p4.part", later))
+		_, _ = env.Repo.Complete(ctx, done.ID, "digest", upload.DefaultMimeType)
+		pending, err := env.Repo.PendingBytes(ctx, time.Now())
+		if err != nil || pending != started.TotalSize+halfway.TotalSize-halfway.ChunkSize {
+			t.Fatalf("pending bytes: %d %v", pending, err)
+		}
+	})
+
 	t.Run("ongoing lists only live uploads of the creator", func(t *testing.T) {
 		env := newEnv(t)
 		user, other := env.NewUser(t), env.NewUser(t)

@@ -42,10 +42,8 @@ var ErrSmallFileMissing = apperror.Define(490102, "SMALL_FILE_UPLOAD_FILE_NO_FIL
 
 var ErrSmallFileUnsupported = apperror.Define(490103, "SMALL_FILE_UPLOAD_UNSUPPORTED_FILE_TYPE", apperror.KindUnsupportedMediaType)
 
-var ErrQuotaNotFound = apperror.Define(500101, "USER_UPLOAD_QUOTA_NOT_FOUND", apperror.KindNotFound)
-
 var ErrQuotaExceeded = apperror.Define(500102, "USER_UPLOAD_QUOTA_EXCEEDED", apperror.KindConflict)
 
-var ErrQuotaUsedCantBeNegative = apperror.Define(500103, "USER_UPLOAD_QUOTA_USE_CANT_BE_NEGATIVE", apperror.KindConflict)
+var ErrInFlightExceeded = apperror.Define(500105, "USER_UPLOAD_IN_FLIGHT_EXCEEDED", apperror.KindConflict)
 
-var ErrQuotaRecordNotFound = apperror.Define(500104, "USER_UPLOAD_QUOTA_RECORD_NOT_FOUND", apperror.KindNotFound)
+var ErrSpoolFull = apperror.Define(500106, "UPLOAD_SPOOL_FULL", apperror.KindUnavailable)

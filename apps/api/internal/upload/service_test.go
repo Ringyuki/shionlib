@@ -37,18 +37,18 @@ func newFixture() fixture {
 	spool := uploadtest.NewMemorySpool()
 	tx := &txtest.Immediate{}
 	settings := testSettings()
-	quota := upload.NewQuotaService(quotas, tx, settings, time.UTC, func() time.Time { return now })
+	quota := upload.NewQuotaService(quotas, settings, func() time.Time { return now })
 	service := upload.NewService(repo, quota, spool, tx, settings, func() time.Time { return now })
 	return fixture{repo: repo, quotas: quotas, spool: spool, quota: quota, service: service}
 }
 
 func testSettings() settingtest.Source {
 	settings := settingtest.Source{}
-	settingtest.Set(settings, upload.QuotaBase, 100)
-	settingtest.Set(settings, upload.QuotaCap, 400)
-	settingtest.Set(settings, upload.QuotaTopupStep, 50)
-	settingtest.Set(settings, upload.QuotaTopupThreshold, 30)
-	settingtest.Set(settings, upload.QuotaReduceStep, 20)
+	settingtest.Set(settings, upload.NewUploaderQuota, 100)
+	settingtest.Set(settings, upload.RegularQuota, 400)
+	settingtest.Set(settings, upload.TrustedQuota, 1000)
+	settingtest.Set(settings, upload.InFlightLimit, 50)
+	settingtest.Set(settings, upload.SpoolReserve, 10)
 	settingtest.Set(settings, upload.ChunkSize, 4)
 	settingtest.Set(settings, upload.ChunkLimit, 8)
 	settingtest.Set(settings, upload.MaxChunks, 5)
@@ -86,41 +86,66 @@ func (f fixture) sendChunks(t *testing.T, session upload.Session, content []byte
 	}
 }
 
-func TestInitValidatesQuotaAndLimits(t *testing.T) {
+func TestInitValidatesLimits(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()
-	_, err := f.service.Init(ctx, uploader, upload.InitInput{FileName: "a", TotalSize: 4})
-	expectCode(t, err, upload.ErrQuotaNotFound)
-
-	f.quotas.SeedQuota(upload.Quota{UserID: uploader.UserID, Size: 30, Used: 10})
-	f.quotas.SeedQuota(upload.Quota{UserID: admin.UserID, Size: 100})
 	cases := []struct {
 		name string
-		who  actor.Actor
 		in   upload.InitInput
 		want apperror.Definition
 	}{
-		{name: "quota exceeded", who: uploader, in: upload.InitInput{TotalSize: 21}, want: upload.ErrQuotaExceeded},
-		{name: "chunk size above the transfer limit", who: uploader, in: upload.InitInput{TotalSize: 8, ChunkSize: ptr[int64](9)}, want: upload.ErrInvalidChunkSize},
-		{name: "zero chunk size", who: uploader, in: upload.InitInput{TotalSize: 8, ChunkSize: ptr[int64](0)}, want: upload.ErrInvalidChunkSize},
-		{name: "empty file", who: uploader, in: upload.InitInput{TotalSize: 0}, want: upload.ErrInvalidTotalSize},
-		{name: "too many chunks", who: uploader, in: upload.InitInput{TotalSize: 20, ChunkSize: ptr[int64](2)}, want: upload.ErrTooManyChunks},
-		{name: "too large for users", who: uploader, in: upload.InitInput{TotalSize: 17, ChunkSize: ptr[int64](8)}, want: upload.ErrTooLarge},
+		{name: "chunk size above the transfer limit", in: upload.InitInput{TotalSize: 8, ChunkSize: ptr[int64](9)}, want: upload.ErrInvalidChunkSize},
+		{name: "zero chunk size", in: upload.InitInput{TotalSize: 8, ChunkSize: ptr[int64](0)}, want: upload.ErrInvalidChunkSize},
+		{name: "empty file", in: upload.InitInput{TotalSize: 0}, want: upload.ErrInvalidTotalSize},
+		{name: "too many chunks", in: upload.InitInput{TotalSize: 20, ChunkSize: ptr[int64](2)}, want: upload.ErrTooManyChunks},
+		{name: "too large for new uploaders", in: upload.InitInput{TotalSize: 17, ChunkSize: ptr[int64](8)}, want: upload.ErrTooLarge},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := f.service.Init(ctx, tc.who, tc.in)
+			_, err := f.service.Init(ctx, uploader, tc.in)
 			expectCode(t, err, tc.want)
 		})
 	}
+}
+
+func TestInitAdmitsUploadsByAllowance(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	f.quotas.SeedUsage(uploader.UserID, 80, 10)
+	_, err := f.service.Init(ctx, uploader, upload.InitInput{FileName: "a", TotalSize: 11})
+	expectCode(t, err, upload.ErrQuotaExceeded)
+	f.quotas.SeedUsage(uploader.UserID, 0, 45)
+	_, err = f.service.Init(ctx, uploader, upload.InitInput{FileName: "a", TotalSize: 8})
+	expectCode(t, err, upload.ErrInFlightExceeded)
+	f.quotas.SeedUsage(uploader.UserID, 0, 0)
+	f.quotas.SeedStanding(uploader.UserID, upload.Standing{Role: actor.RoleUser, Trusted: true})
+	if _, err := f.service.Init(ctx, uploader, upload.InitInput{FileName: "big", TotalSize: 17, ChunkSize: ptr[int64](8)}); err != nil {
+		t.Fatalf("trusted uploaders have no file size cap: %v", err)
+	}
+	f.quotas.SeedStanding(admin.UserID, upload.Standing{Role: actor.RoleAdmin})
+	f.quotas.SeedUsage(admin.UserID, 1<<40, 0)
 	if _, err := f.service.Init(ctx, admin, upload.InitInput{FileName: "big", TotalSize: 17, ChunkSize: ptr[int64](8)}); err != nil {
-		t.Fatalf("admins bypass the size cap: %v", err)
+		t.Fatalf("admins store without limit: %v", err)
 	}
 }
 
-func TestInitCreatesSessionFileAndCharge(t *testing.T) {
+func TestInitKeepsTheSpoolReserve(t *testing.T) {
+	ctx := context.Background()
 	f := newFixture()
-	f.quotas.SeedQuota(upload.Quota{UserID: uploader.UserID, Size: 100})
+	f.spool.Space = 30
+	if _, err := f.service.Init(ctx, uploader, upload.InitInput{FileName: "a", TotalSize: 16, ChunkSize: ptr[int64](8)}); err != nil {
+		t.Fatal(err)
+	}
+	_, err := f.service.Init(ctx, uploader, upload.InitInput{FileName: "b", TotalSize: 8})
+	expectCode(t, err, upload.ErrSpoolFull)
+	f.spool.Space = 34
+	if _, err := f.service.Init(ctx, uploader, upload.InitInput{FileName: "b", TotalSize: 8}); err != nil {
+		t.Fatalf("the reserve counts what running uploads have still to write: %v", err)
+	}
+}
+
+func TestInitCreatesSessionAndFile(t *testing.T) {
+	f := newFixture()
 	session, err := f.service.Init(context.Background(), uploader, upload.InitInput{FileName: "game.7z", TotalSize: 10})
 	if err != nil {
 		t.Fatal(err)
@@ -135,16 +160,10 @@ func TestInitCreatesSessionFileAndCharge(t *testing.T) {
 	if content, ok := f.spool.Content(session.StoragePath); !ok || len(content) != 10 {
 		t.Fatalf("file must be preallocated to the total size: %d %v", len(content), ok)
 	}
-	quota := f.quotas.Quota(uploader.UserID)
-	records := f.quotas.Records()
-	if quota.Used != 10 || len(records) != 1 || records[0].Action != upload.ActionUse || records[0].Field != upload.FieldUsed || *records[0].SessionID != session.ID || *records[0].Reason != upload.ReasonGameUpload {
-		t.Fatalf("quota charge %+v %+v", quota, records)
-	}
 }
 
 func TestInitAbortsWhenTheFileCannotBeAllocated(t *testing.T) {
 	f := newFixture()
-	f.quotas.SeedQuota(upload.Quota{UserID: uploader.UserID, Size: 100})
 	f.spool.FailNext = errors.New("disk full")
 	if _, err := f.service.Init(context.Background(), uploader, upload.InitInput{FileName: "a", TotalSize: 4}); err == nil {
 		t.Fatal("expected allocation failure")
@@ -158,7 +177,6 @@ func TestInitAbortsWhenTheFileCannotBeAllocated(t *testing.T) {
 func TestWriteChunkRules(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()
-	f.quotas.SeedQuota(upload.Quota{UserID: uploader.UserID, Size: 100})
 	content := []byte("0123456789")
 	session := f.startUpload(t, content)
 	chunk := func(index int) upload.Chunk {
@@ -204,7 +222,6 @@ func TestWriteChunkRules(t *testing.T) {
 func TestStatusAndComplete(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()
-	f.quotas.SeedQuota(upload.Quota{UserID: uploader.UserID, Size: 100})
 	content := []byte("0123456789")
 	session := f.startUpload(t, content)
 
@@ -246,18 +263,17 @@ func TestStatusAndComplete(t *testing.T) {
 	expectCode(t, f.service.Complete(ctx, uploader, duplicated.ID, digest), upload.ErrIncomplete)
 }
 
-func TestAbortRefundsAndRemovesTheFile(t *testing.T) {
+func TestAbortRemovesTheFile(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()
-	f.quotas.SeedQuota(upload.Quota{UserID: uploader.UserID, Size: 100})
 	session := f.startUpload(t, []byte("0123456789"))
 	expectCode(t, f.service.Abort(ctx, stranger, session.ID), upload.ErrSessionNotOwner)
 	if err := f.service.Abort(ctx, uploader, session.ID); err != nil {
 		t.Fatal(err)
 	}
 	stored, _ := f.repo.GetSession(ctx, session.ID)
-	if stored.Status != upload.StatusAborted || f.quotas.Quota(uploader.UserID).Used != 0 {
-		t.Fatalf("abort %+v %+v", stored, f.quotas.Quota(uploader.UserID))
+	if stored.Status != upload.StatusAborted {
+		t.Fatalf("abort %+v", stored)
 	}
 	if _, ok := f.spool.Content(session.StoragePath); ok {
 		t.Fatal("temp file must be removed")
@@ -281,10 +297,9 @@ func TestClaimChecksStatusThenOwner(t *testing.T) {
 	}
 }
 
-func TestCleanStaleSessionsExpiresAndRefunds(t *testing.T) {
+func TestCleanStaleSessionsExpiresThem(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()
-	f.quotas.SeedQuota(upload.Quota{UserID: uploader.UserID, Size: 100})
 	aborted := f.startUpload(t, []byte("0123"))
 	if _, err := f.repo.SetStatus(ctx, aborted.ID, upload.StatusUploading, upload.StatusAborted); err != nil {
 		t.Fatal(err)
@@ -305,9 +320,6 @@ func TestCleanStaleSessionsExpiresAndRefunds(t *testing.T) {
 	}
 	if got, _ := f.repo.GetSession(ctx, attached.ID); got.Status != upload.StatusCompleted {
 		t.Fatalf("attached sessions stay completed: %+v", got)
-	}
-	if f.quotas.Quota(uploader.UserID).Used != 0 {
-		t.Fatalf("aborted upload must be refunded: %+v", f.quotas.Quota(uploader.UserID))
 	}
 	removed := f.spool.Removed()
 	if !slices.Contains(removed, aborted.StoragePath) || !slices.Contains(removed, orphan.StoragePath) || slices.Contains(removed, "/elsewhere/z") {

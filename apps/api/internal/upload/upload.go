@@ -24,7 +24,6 @@ const (
 const (
 	DefaultMimeType     = "application/octet-stream"
 	PendingStorageName  = "PENDING"
-	ReasonGameUpload    = "GAME_UPLOAD"
 	staleSessionGrace   = 6 * time.Hour
 	orphanFileTTL       = 48 * time.Hour
 	staleSessionBatch   = 200
@@ -79,6 +78,10 @@ func (s Session) SortedChunks() []int {
 
 func (s Session) ReceivedChunks() int {
 	return len(slices.Compact(s.SortedChunks()))
+}
+
+func (s Session) PendingBytes() int64 {
+	return max(0, s.TotalSize-int64(s.ReceivedChunks())*s.ChunkSize)
 }
 
 type NewSession struct {

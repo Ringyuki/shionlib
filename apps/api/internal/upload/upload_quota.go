@@ -2,64 +2,87 @@ package upload
 
 import (
 	"time"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 )
 
-type QuotaField string
+type Tier string
 
 const (
-	FieldSize QuotaField = "SIZE"
-	FieldUsed QuotaField = "USED"
+	TierNew     Tier = "new"
+	TierRegular Tier = "regular"
+	TierTrusted Tier = "trusted"
+	TierAdmin   Tier = "admin"
 )
 
-type QuotaAction string
-
-const (
-	ActionAdd QuotaAction = "ADD"
-	ActionSub QuotaAction = "SUB"
-	ActionUse QuotaAction = "USE"
-)
-
-const (
-	ReasonInitialGrant  = "INITIAL_GRANT"
-	ReasonResetUsed     = "RESET_USED"
-	ReasonDynamicTopup  = "DYNAMIC_TOPUP"
-	ReasonDynamicReduce = "DYNAMIC_REDUCE"
-	ReasonResetQuota    = "RESET_QUOTA"
-	quotaBatchSize      = 500
-)
-
-type Quota struct {
-	ID           int
-	UserID       int
-	Size         int64
-	Used         int64
-	IsFirstGrant bool
+type Standing struct {
+	Role          actor.Role
+	Approved      int
+	Trusted       bool
+	LastViolation *time.Time
 }
 
-type QuotaRecord struct {
-	ID        int
-	QuotaID   int
-	Field     QuotaField
-	Action    QuotaAction
-	Amount    int64
-	Reason    *string
-	SessionID *int
-	Withdrawn bool
+type TierRules struct {
+	RegularAfter    int
+	TrustedAfter    int
+	ViolationWindow time.Duration
+	Freeze          time.Duration
 }
 
-type NewQuotaRecord struct {
-	QuotaID   int
-	Field     QuotaField
-	Action    QuotaAction
-	Amount    int64
-	Reason    *string
-	SessionID *int
-}
-
-func monthStart(now time.Time, location *time.Location) time.Time {
-	if location == nil {
-		location = time.UTC
+func (s Standing) Tier(rules TierRules, now time.Time) (Tier, *time.Time) {
+	if s.Role >= actor.RoleAdmin {
+		return TierAdmin, nil
 	}
-	local := now.In(location)
-	return time.Date(local.Year(), local.Month(), 1, 0, 0, 0, 0, location)
+	earned := TierNew
+	if s.Approved >= rules.RegularAfter {
+		earned = TierRegular
+	}
+	if s.Trusted || s.Approved >= rules.TrustedAfter {
+		earned = TierTrusted
+	}
+	if s.LastViolation == nil {
+		return earned, nil
+	}
+	tier := earned
+	var frozenUntil *time.Time
+	if until := s.LastViolation.Add(rules.Freeze); now.Before(until) {
+		tier = demote(earned)
+		frozenUntil = &until
+	}
+	if earned == TierRegular && now.Before(s.LastViolation.Add(rules.ViolationWindow)) {
+		tier = TierNew
+	}
+	return tier, frozenUntil
+}
+
+func demote(tier Tier) Tier {
+	if tier == TierTrusted {
+		return TierRegular
+	}
+	return TierNew
+}
+
+type Allowance struct {
+	Tier          Tier
+	Approved      int
+	Trusted       bool
+	FrozenUntil   *time.Time
+	Stored        int64
+	StoredLimit   *int64
+	InFlight      int64
+	InFlightLimit int64
+	MaxFileSize   *int64
+}
+
+func (a Allowance) Admit(size int64) error {
+	if a.MaxFileSize != nil && size > *a.MaxFileSize {
+		return ErrTooLarge
+	}
+	if a.InFlight+size > a.InFlightLimit {
+		return ErrInFlightExceeded
+	}
+	if a.StoredLimit != nil && a.Stored+a.InFlight+size > *a.StoredLimit {
+		return ErrQuotaExceeded
+	}
+	return nil
 }

@@ -1139,57 +1139,6 @@ export type paths = {
         patch: operations["adminUser.updateProfile"];
         trace?: never;
     };
-    "/admin/users/{id}/quota/reset-used": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Reset the used upload quota */
-        post: operations["adminUser.resetQuotaUsed"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/admin/users/{id}/quota/size": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Grant or take upload quota */
-        patch: operations["adminUser.adjustQuotaSize"];
-        trace?: never;
-    };
-    "/admin/users/{id}/quota/used": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Correct the used upload quota */
-        patch: operations["adminUser.adjustQuotaUsed"];
-        trace?: never;
-    };
     "/admin/users/{id}/reset-password": {
         parameters: {
             query?: never;
@@ -1273,6 +1222,23 @@ export type paths = {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/admin/users/{id}/upload-trust": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Grant or withdraw the trusted upload tier */
+        patch: operations["adminUser.setUploadTrust"];
         trace?: never;
     };
     "/admin/walkthroughs": {
@@ -2844,7 +2810,7 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** Read the caller's upload quota */
+        /** Read the caller's upload tier and limits */
         get: operations["upload.quota"];
         put?: never;
         post?: never;
@@ -3731,8 +3697,7 @@ export type components = {
             two_factor_enabled: boolean;
             /** Format: date-time */
             updated: string;
-            /** @description Absent when the user has no quota row */
-            upload_quota?: components["schemas"]["AdminUserQuotaDTO"];
+            upload: components["schemas"]["AllowanceDTO"];
         };
         AdminUserItemDTO: {
             avatar: string | null;
@@ -3808,36 +3773,6 @@ export type components = {
             lang?: "en" | "zh" | "ja";
             name?: string;
         };
-        AdminUserQuotaDTO: {
-            is_first_grant: boolean;
-            /** @description Bytes as a decimal string */
-            size: string;
-            /** @description Bytes as a decimal string */
-            used: string;
-        };
-        AdminUserQuotaSizeInputBody: {
-            /** @enum {string} */
-            action: "ADD" | "SUB";
-            action_reason?: string;
-            /**
-             * Format: int64
-             * @description Bytes
-             */
-            amount: number;
-        };
-        AdminUserQuotaUsedInputBody: {
-            /**
-             * @description USE consumes quota, ADD gives it back
-             * @enum {string}
-             */
-            action: "USE" | "ADD";
-            action_reason?: string;
-            /**
-             * Format: int64
-             * @description Bytes
-             */
-            amount: number;
-        };
         AdminUserRefDTO: {
             /** Format: int64 */
             id: number;
@@ -3887,6 +3822,10 @@ export type components = {
              * @description Omitted or null clears the badge
              */
             sponsor_expires_at?: string | null;
+        };
+        AdminUserUploadTrustInputBody: {
+            /** @description Grant or withdraw the trusted upload tier */
+            trusted: boolean;
         };
         AdminWalkthroughCreatorDTO: {
             avatar: string | null;
@@ -4511,6 +4450,44 @@ export type components = {
             buckets: components["schemas"]["AiSeriesBucketDTO"][] | null;
             stats: components["schemas"]["AiStatsDTO"];
         };
+        AllowanceDTO: {
+            /**
+             * Format: int64
+             * @description Published resources of the uploader
+             */
+            approved: number;
+            /**
+             * Format: date-time
+             * @description Set while a violation keeps the uploader one tier down
+             */
+            frozen_until: string | null;
+            /**
+             * Format: int64
+             * @description Bytes of uploads not yet attached to a resource
+             */
+            in_flight: number;
+            /** Format: int64 */
+            in_flight_limit: number;
+            /**
+             * Format: int64
+             * @description Null when unlimited
+             */
+            max_file_size: number | null;
+            /**
+             * Format: int64
+             * @description Bytes of the uploader's files in active resources
+             */
+            stored: number;
+            /**
+             * Format: int64
+             * @description Null when unlimited; counts stored and in-flight bytes
+             */
+            stored_limit: number | null;
+            /** @enum {string} */
+            tier: "new" | "regular" | "trusted" | "admin";
+            /** @description Trusted tier granted by an admin */
+            trusted: boolean;
+        };
         AnalysisCountryDTO: {
             country: string;
             /** Format: int64 */
@@ -4625,7 +4602,7 @@ export type components = {
          * Format: int64
          * @enum {integer}
          */
-        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 450101 | 450102 | 450103 | 450104 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 490101 | 490102 | 490103 | 500101 | 500102 | 500103 | 500104 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 610101 | 610102 | 620101 | 620102 | 620103 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102;
+        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 450101 | 450102 | 450103 | 450104 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 610101 | 610102 | 620101 | 620102 | 620103 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102;
         CatalogHitDTO: {
             cover: string | null;
             developer: string | null;
@@ -5417,6 +5394,16 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["AiSummaryDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeAllowanceDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["AllowanceDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -6369,16 +6356,6 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["UploadCompleteDTO"];
-            message: string;
-            meta?: components["schemas"]["Meta"];
-            requestId: string;
-            /** Format: date-time */
-            timestamp: string;
-        };
-        EnvelopeUploadQuotaDTO: {
-            /** Format: int64 */
-            code: number;
-            data: components["schemas"]["UploadQuotaDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -7677,12 +7654,6 @@ export type components = {
         };
         UploadCompleteDTO: {
             ok: boolean;
-        };
-        UploadQuotaDTO: {
-            /** Format: int64 */
-            size: number;
-            /** Format: int64 */
-            used: number;
         };
         UploadStatusDTO: {
             /** Format: int64 */
@@ -10752,110 +10723,6 @@ export interface operations {
             };
         };
     };
-    "adminUser.resetQuotaUsed": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Created */
-            201: {
-                headers: {
-                    "shionlib-auth-stale"?: string;
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmptyEnvelope"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    "adminUser.adjustQuotaSize": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AdminUserQuotaSizeInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    "shionlib-auth-stale"?: string;
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmptyEnvelope"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    "adminUser.adjustQuotaUsed": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AdminUserQuotaUsedInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    "shionlib-auth-stale"?: string;
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmptyEnvelope"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
     "adminUser.resetPassword": {
         parameters: {
             query?: never;
@@ -11016,6 +10883,42 @@ export interface operations {
         responses: {
             /** @description Created */
             201: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminUser.setUploadTrust": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminUserUploadTrustInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
                 headers: {
                     "shionlib-auth-stale"?: string;
                     [name: string]: unknown;
@@ -14621,7 +14524,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["EnvelopeUploadQuotaDTO"];
+                    "application/json": components["schemas"]["EnvelopeAllowanceDTO"];
                 };
             };
             /** @description Error */

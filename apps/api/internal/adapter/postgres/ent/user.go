@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userpvnbinding"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/useruploadquota"
 )
 
 // User is the model entity for the User schema.
@@ -49,6 +48,8 @@ type User struct {
 	LastLoginAt *time.Time `json:"last_login_at,omitempty"`
 	// TwoFactorEnabled holds the value of the "two_factor_enabled" field.
 	TwoFactorEnabled bool `json:"two_factor_enabled,omitempty"`
+	// UploadTrusted holds the value of the "upload_trusted" field.
+	UploadTrusted bool `json:"upload_trusted,omitempty"`
 	// SponsorExpiresAt holds the value of the "sponsor_expires_at" field.
 	SponsorExpiresAt *time.Time `json:"sponsor_expires_at,omitempty"`
 	// Created holds the value of the "created" field.
@@ -107,8 +108,6 @@ type UserEdges struct {
 	PotatovnBinding *UserPvnBinding `json:"potatovn_binding,omitempty"`
 	// GameUploadSessions holds the value of the game_upload_sessions edge.
 	GameUploadSessions []*GameUploadSession `json:"game_upload_sessions,omitempty"`
-	// UploadQuota holds the value of the upload_quota edge.
-	UploadQuota *UserUploadQuota `json:"upload_quota,omitempty"`
 	// Walkthroughs holds the value of the walkthroughs edge.
 	Walkthroughs []*Walkthrough `json:"walkthroughs,omitempty"`
 	// BannedRecords holds the value of the banned_records edge.
@@ -125,7 +124,7 @@ type UserEdges struct {
 	CommentLikes []*CommentLike `json:"comment_likes,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [30]bool
+	loadedTypes [29]bool
 }
 
 // ActivitiesOrErr returns the Activities value or an error if the edge
@@ -328,21 +327,10 @@ func (e UserEdges) GameUploadSessionsOrErr() ([]*GameUploadSession, error) {
 	return nil, &NotLoadedError{edge: "game_upload_sessions"}
 }
 
-// UploadQuotaOrErr returns the UploadQuota value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) UploadQuotaOrErr() (*UserUploadQuota, error) {
-	if e.UploadQuota != nil {
-		return e.UploadQuota, nil
-	} else if e.loadedTypes[22] {
-		return nil, &NotFoundError{label: useruploadquota.Label}
-	}
-	return nil, &NotLoadedError{edge: "upload_quota"}
-}
-
 // WalkthroughsOrErr returns the Walkthroughs value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) WalkthroughsOrErr() ([]*Walkthrough, error) {
-	if e.loadedTypes[23] {
+	if e.loadedTypes[22] {
 		return e.Walkthroughs, nil
 	}
 	return nil, &NotLoadedError{edge: "walkthroughs"}
@@ -351,7 +339,7 @@ func (e UserEdges) WalkthroughsOrErr() ([]*Walkthrough, error) {
 // BannedRecordsOrErr returns the BannedRecords value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) BannedRecordsOrErr() ([]*UserBannedRecord, error) {
-	if e.loadedTypes[24] {
+	if e.loadedTypes[23] {
 		return e.BannedRecords, nil
 	}
 	return nil, &NotLoadedError{edge: "banned_records"}
@@ -360,7 +348,7 @@ func (e UserEdges) BannedRecordsOrErr() ([]*UserBannedRecord, error) {
 // BannedByRecordsOrErr returns the BannedByRecords value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) BannedByRecordsOrErr() ([]*UserBannedRecord, error) {
-	if e.loadedTypes[25] {
+	if e.loadedTypes[24] {
 		return e.BannedByRecords, nil
 	}
 	return nil, &NotLoadedError{edge: "banned_by_records"}
@@ -369,7 +357,7 @@ func (e UserEdges) BannedByRecordsOrErr() ([]*UserBannedRecord, error) {
 // SessionsOrErr returns the Sessions value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) SessionsOrErr() ([]*UserLoginSession, error) {
-	if e.loadedTypes[26] {
+	if e.loadedTypes[25] {
 		return e.Sessions, nil
 	}
 	return nil, &NotLoadedError{edge: "sessions"}
@@ -378,7 +366,7 @@ func (e UserEdges) SessionsOrErr() ([]*UserLoginSession, error) {
 // PasskeysOrErr returns the Passkeys value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) PasskeysOrErr() ([]*UserPasskeyCredential, error) {
-	if e.loadedTypes[27] {
+	if e.loadedTypes[26] {
 		return e.Passkeys, nil
 	}
 	return nil, &NotLoadedError{edge: "passkeys"}
@@ -387,7 +375,7 @@ func (e UserEdges) PasskeysOrErr() ([]*UserPasskeyCredential, error) {
 // OidcIdentitiesOrErr returns the OidcIdentities value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) OidcIdentitiesOrErr() ([]*OidcIdentity, error) {
-	if e.loadedTypes[28] {
+	if e.loadedTypes[27] {
 		return e.OidcIdentities, nil
 	}
 	return nil, &NotLoadedError{edge: "oidc_identities"}
@@ -396,7 +384,7 @@ func (e UserEdges) OidcIdentitiesOrErr() ([]*OidcIdentity, error) {
 // CommentLikesOrErr returns the CommentLikes value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) CommentLikesOrErr() ([]*CommentLike, error) {
-	if e.loadedTypes[29] {
+	if e.loadedTypes[28] {
 		return e.CommentLikes, nil
 	}
 	return nil, &NotLoadedError{edge: "comment_likes"}
@@ -407,7 +395,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldOnlyGamesWithResources, user.FieldTwoFactorEnabled:
+		case user.FieldOnlyGamesWithResources, user.FieldTwoFactorEnabled, user.FieldUploadTrusted:
 			values[i] = new(sql.NullBool)
 		case user.FieldID, user.FieldContentLimit, user.FieldRole, user.FieldStatus, user.FieldUploadInjectedFileTimes:
 			values[i] = new(sql.NullInt64)
@@ -531,6 +519,12 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field two_factor_enabled", values[i])
 			} else if value.Valid {
 				_m.TwoFactorEnabled = value.Bool
+			}
+		case user.FieldUploadTrusted:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field upload_trusted", values[i])
+			} else if value.Valid {
+				_m.UploadTrusted = value.Bool
 			}
 		case user.FieldSponsorExpiresAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -674,11 +668,6 @@ func (_m *User) QueryGameUploadSessions() *GameUploadSessionQuery {
 	return NewUserClient(_m.config).QueryGameUploadSessions(_m)
 }
 
-// QueryUploadQuota queries the "upload_quota" edge of the User entity.
-func (_m *User) QueryUploadQuota() *UserUploadQuotaQuery {
-	return NewUserClient(_m.config).QueryUploadQuota(_m)
-}
-
 // QueryWalkthroughs queries the "walkthroughs" edge of the User entity.
 func (_m *User) QueryWalkthroughs() *WalkthroughQuery {
 	return NewUserClient(_m.config).QueryWalkthroughs(_m)
@@ -790,6 +779,9 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("two_factor_enabled=")
 	builder.WriteString(fmt.Sprintf("%v", _m.TwoFactorEnabled))
+	builder.WriteString(", ")
+	builder.WriteString("upload_trusted=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UploadTrusted))
 	builder.WriteString(", ")
 	if v := _m.SponsorExpiresAt; v != nil {
 		builder.WriteString("sponsor_expires_at=")

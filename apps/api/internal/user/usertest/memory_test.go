@@ -15,7 +15,6 @@ func TestMemoryRepositoryContract(t *testing.T) {
 		return Env{
 			Repo:               repo,
 			HasDefaultFavorite: func(_ *testing.T, id int) bool { return repo.HasDefaultFavorite(id) },
-			HasQuota:           func(_ *testing.T, id int) bool { return repo.HasQuota(id) },
 		}
 	})
 }

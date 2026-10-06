@@ -26,27 +26,12 @@ var (
 	reviewer = actor.Actor{UserID: 50, Role: actor.RoleAdmin}
 )
 
-type withdrawal struct {
-	UserID    int
-	SessionID int
-}
-
-type quota struct {
-	withdrawn []withdrawal
-}
-
-func (q *quota) Withdraw(_ context.Context, userID, sessionID int) error {
-	q.withdrawn = append(q.withdrawn, withdrawal{userID, sessionID})
-	return nil
-}
-
 type fixture struct {
 	repo      *scantest.MemoryRepository
 	workspace *scantest.Workspace
 	tool      *scantest.ArchiveTool
 	scanner   *scantest.Scanner
 	spool     *uploadtest.MemorySpool
-	quota     *quota
 	events    *downloadtest.Recorder
 	banner    *scantest.Banner
 	mailer    *scantest.Mailer
@@ -61,7 +46,6 @@ func newFixture(enabled bool) fixture {
 		tool:      &scantest.ArchiveTool{Listings: map[string]scan.ToolRun{}, Tests: map[string]scan.ToolRun{}, Contents: map[string][]string{}, Workspace: workspace},
 		scanner:   &scantest.Scanner{Reports: map[string]scan.Report{}},
 		spool:     uploadtest.NewMemorySpool(),
-		quota:     &quota{},
 		events:    &downloadtest.Recorder{},
 		banner:    &scantest.Banner{Applied: true},
 		mailer:    &scantest.Mailer{},
@@ -73,7 +57,6 @@ func newFixture(enabled bool) fixture {
 		Workspace:  f.workspace,
 		Files:      f.repo,
 		Local:      f.spool,
-		Quota:      f.quota,
 		Activities: f.events,
 		Messages:   f.events,
 		Banner:     f.banner,
@@ -165,9 +148,6 @@ func TestScanRejectsBrokenArchives(t *testing.T) {
 	file, _ := f.repo.File(1)
 	if file.CheckStatus != download.CheckEncrypted {
 		t.Fatalf("check status %d", file.CheckStatus)
-	}
-	if !slices.Equal(f.quota.withdrawn, []withdrawal{{UserID: 9, SessionID: 101}}) {
-		t.Fatalf("rejected uploads are refunded: %+v", f.quota.withdrawn)
 	}
 	recorded := f.events.Activities()
 	if len(recorded) != 1 || recorded[0].Type != activity.TypeFileCheckEncrypted || *recorded[0].FileCheckStatus != 4 || *recorded[0].FileStatus != 2 {
@@ -314,9 +294,6 @@ func TestIncompleteSetsWaitForTheirMissingVolumes(t *testing.T) {
 			t.Fatalf("volume %d of an expired incomplete set is rejected: %+v", id, file)
 		}
 	}
-	if !slices.Equal(late.quota.withdrawn, []withdrawal{{9, 101}, {9, 103}}) {
-		t.Fatalf("every volume is refunded: %+v", late.quota.withdrawn)
-	}
 	messages := late.events.Messages()
 	meta := decodeMeta(t, messages[0])
 	if len(messages) != 1 || meta["reason"] != "INCOMPLETE_SET" || fmt.Sprint(meta["missing_volumes"]) != "[2]" || meta["file_name"] != "game.part1.rar, game.part3.rar" {
@@ -404,9 +381,6 @@ func TestReviewDeleteTakesTheResourceDownAndBansRepeatOffenders(t *testing.T) {
 	}
 	if len(f.banner.Bans) != 1 || f.banner.Bans[0].UserID != 9 || f.banner.Bans[0].Days != 30 || *f.banner.Bans[0].BannedBy != reviewer.UserID || f.banner.Bans[0].Reason != "Uploaded harmful file (2 times)" {
 		t.Fatalf("ban at the threshold %+v", f.banner.Bans)
-	}
-	if !slices.Equal(f.quota.withdrawn, []withdrawal{{9, 101}, {9, 102}}) {
-		t.Fatalf("every file is refunded: %+v", f.quota.withdrawn)
 	}
 	for _, id := range []int{1, 2} {
 		if _, ok := f.spool.Content(uploadtest.SpoolRoot + fmt.Sprintf("%d.part", id)); ok {

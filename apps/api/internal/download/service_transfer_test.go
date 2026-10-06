@@ -18,7 +18,6 @@ type transferFixture struct {
 	repo      *downloadtest.MemoryRepository
 	store     *downloadtest.ObjectStore
 	spool     *uploadtest.MemorySpool
-	quota     *quota
 	events    *downloadtest.Recorder
 	transfers *download.TransferService
 }
@@ -28,10 +27,9 @@ func newTransferFixture() transferFixture {
 		repo:   downloadtest.NewMemoryRepository(func() time.Time { return now }),
 		store:  downloadtest.NewObjectStore(),
 		spool:  uploadtest.NewMemorySpool(),
-		quota:  &quota{},
 		events: &downloadtest.Recorder{},
 	}
-	f.transfers = download.NewTransferService(f.repo, f.store, f.spool, f.quota, f.events, f.events, &txtest.Immediate{}, func() time.Time { return now })
+	f.transfers = download.NewTransferService(f.repo, f.store, f.spool, f.events, f.events, &txtest.Immediate{}, func() time.Time { return now })
 	return f
 }
 
@@ -188,9 +186,6 @@ func TestCleanFilesHandlesStoredAndRejectedFiles(t *testing.T) {
 	}
 	if _, err := f.repo.GetFile(ctx, review.ID); err != nil {
 		t.Fatal("files pending malware review are not cleaned")
-	}
-	if !slices.Equal(f.quota.withdrawn, []withdrawal{{UserID: 3, SessionID: 9}}) {
-		t.Fatalf("rejected uploads are refunded: %+v", f.quota.withdrawn)
 	}
 	if removed := f.spool.Removed(); !slices.Contains(removed, storedPath) || !slices.Contains(removed, brokenPath) || slices.Contains(removed, outsidePath) {
 		t.Fatalf("removed %v", removed)

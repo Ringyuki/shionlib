@@ -46,7 +46,6 @@ type Deps struct {
 	Workspace  Workspace
 	Files      Files
 	Local      LocalFiles
-	Quota      Quota
 	Activities Activities
 	Messages   Messenger
 	Banner     Banner
@@ -65,7 +64,6 @@ type Service struct {
 	workspace  Workspace
 	files      Files
 	local      LocalFiles
-	quota      Quota
 	activities Activities
 	messages   Messenger
 	banner     Banner
@@ -85,7 +83,6 @@ func NewService(deps Deps) *Service {
 		workspace:  deps.Workspace,
 		files:      deps.Files,
 		local:      deps.Local,
-		quota:      deps.Quota,
 		activities: deps.Activities,
 		messages:   deps.Messages,
 		banner:     deps.Banner,
@@ -252,11 +249,6 @@ func (s *Service) reject(ctx context.Context, unit Unit, status download.CheckSt
 		for _, file := range current {
 			if err := s.repo.SetCheckStatus(ctx, file.ID, status, false); err != nil {
 				return err
-			}
-			if file.UploadSessionID != nil {
-				if err := s.quota.Withdraw(ctx, file.CreatorID, *file.UploadSessionID); err != nil {
-					return err
-				}
 			}
 			if err := s.activities.Record(ctx, checkActivity(rejectionActivity(status), file, status)); err != nil {
 				return err
@@ -632,11 +624,6 @@ func (s *Service) takeDown(ctx context.Context, resourceID int) ([]string, []str
 	}
 	var localPaths []string
 	for _, file := range files {
-		if file.UploadSessionID != nil {
-			if err := s.quota.Withdraw(ctx, file.CreatorID, *file.UploadSessionID); err != nil {
-				return nil, nil, err
-			}
-		}
 		if file.Path != "" {
 			localPaths = append(localPaths, file.Path)
 		}

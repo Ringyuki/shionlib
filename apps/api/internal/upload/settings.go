@@ -34,8 +34,8 @@ var (
 	MaxFileSize = setting.Bytes(setting.Spec[int64]{
 		Name:        "upload.max_file_size",
 		Label:       "单个文件大小上限",
-		Description: "管理员不受这个限制。",
-		Default:     20 * gib, Min: mib, Max: 64 * tib,
+		Description: "新上传者和普通上传者的单个文件上限，可信档和管理员不受限制。",
+		Default:     30 * gib, Min: mib, Max: 64 * tib,
 	})
 	SessionTTL = setting.Duration(setting.Spec[time.Duration]{
 		Name:        "upload.session_ttl",
@@ -43,52 +43,57 @@ var (
 		Description: "过期仍未完成的上传会被清理，占用的配额退回。",
 		Default:     day, Min: time.Hour, Max: 30 * day,
 	})
-	QuotaBase = setting.Bytes(setting.Spec[int64]{
-		Name:        "upload.quota_base",
-		Label:       "初始配额",
-		Description: "上传者第一次获得的配额，也是不活跃回收的下限。",
-		Default:     5 * gib, Min: 0, Max: 64 * tib,
+	NewUploaderQuota = setting.Bytes(setting.Spec[int64]{
+		Name:        "upload.new_uploader_quota",
+		Label:       "新上传者存储上限",
+		Description: "还没有足够已发布资源的上传者，名下文件加上进行中的上传最多占用的空间。",
+		Default:     50 * gib, Min: gib, Max: 64 * tib,
 	})
-	QuotaCap = setting.Bytes(setting.Spec[int64]{
-		Name:        "upload.quota_cap",
-		Label:       "动态配额上限",
-		Description: "自动增加的配额最多加到这个值。",
-		Default:     20 * gib, Min: 0, Max: 64 * tib,
+	RegularQuota = setting.Bytes(setting.Spec[int64]{
+		Name:    "upload.regular_quota",
+		Label:   "普通上传者存储上限",
+		Default: 300 * gib, Min: gib, Max: 64 * tib,
 	})
-	QuotaTopupStep = setting.Bytes(setting.Spec[int64]{
-		Name:        "upload.quota_topup_step",
-		Label:       "自动增加步长",
-		Description: "本月有资源通过审核、剩余配额低于阈值时，每次增加的配额。",
-		Default:     2 * gib, Min: 0, Max: tib,
+	TrustedQuota = setting.Bytes(setting.Spec[int64]{
+		Name:        "upload.trusted_quota",
+		Label:       "可信上传者存储上限",
+		Description: "可信上传者不受单个文件大小上限限制。",
+		Default:     2 * tib, Min: gib, Max: 64 * tib,
 	})
-	QuotaTopupThreshold = setting.Bytes(setting.Spec[int64]{
-		Name:        "upload.quota_topup_threshold",
-		Label:       "自动增加阈值",
-		Description: "剩余配额低于这个值时才会自动增加。",
-		Default:     5 * gib / 2, Min: 0, Max: tib,
+	RegularAfter = setting.Int(setting.Spec[int]{
+		Name:        "upload.regular_after",
+		Label:       "升为普通档所需已发布资源数",
+		Description: "还要求最近一段时间内没有违规，见“普通档无违规时长”。",
+		Default:     3, Min: 1, Max: 10_000,
 	})
-	QuotaReduceStep = setting.Bytes(setting.Spec[int64]{
-		Name:        "upload.quota_reduce_step",
-		Label:       "不活跃回收步长",
-		Description: "长期没有资源通过审核时每次回收的配额，设为 0 不回收。",
-		Default:     gib, Min: 0, Max: tib,
+	TrustedAfter = setting.Int(setting.Spec[int]{
+		Name:        "upload.trusted_after",
+		Label:       "升为可信档所需已发布资源数",
+		Description: "管理员也可以直接授予可信档。",
+		Default:     30, Min: 1, Max: 100_000,
 	})
-	QuotaReduceInactiveDays = setting.Int(setting.Spec[int]{
-		Name:        "upload.quota_reduce_inactive_days",
-		Label:       "不活跃回收天数",
-		Description: "连续这么多天没有资源通过审核才开始回收，设为 0 不回收。",
-		Default:     45, Min: 0, Max: 3650,
+	ViolationWindow = setting.Duration(setting.Spec[time.Duration]{
+		Name:        "upload.violation_window",
+		Label:       "普通档无违规时长",
+		Description: "这段时间内有违规（确认的病毒或成立的举报）就不算普通档。",
+		Default:     90 * day, Min: day, Max: 365 * day,
 	})
-	QuotaGrantAfterDays = setting.Int(setting.Spec[int]{
-		Name:        "upload.quota_grant_after_days",
-		Label:       "初始配额等待天数",
-		Description: "注册满这么多天的用户才会获得初始配额。",
-		Default:     7, Min: 0, Max: 3650,
+	ViolationFreeze = setting.Duration(setting.Spec[time.Duration]{
+		Name:        "upload.violation_freeze",
+		Label:       "违规降档时长",
+		Description: "违规后在这段时间内降一档。",
+		Default:     30 * day, Min: day, Max: 365 * day,
 	})
-	QuotaLongestInactiveDays = setting.Int(setting.Spec[int]{
-		Name:        "upload.quota_longest_inactive_days",
-		Label:       "长期未登录清零天数",
-		Description: "超过这么多天没有登录的上传者，配额清零。",
-		Default:     120, Min: 1, Max: 3650,
+	InFlightLimit = setting.Bytes(setting.Spec[int64]{
+		Name:        "upload.in_flight_limit",
+		Label:       "每人进行中上传上限",
+		Description: "一个人正在上传、以及传完还没发布成资源的文件加起来的上限，保护服务器暂存盘。",
+		Default:     30 * gib, Min: gib, Max: tib,
+	})
+	SpoolReserve = setting.Bytes(setting.Spec[int64]{
+		Name:        "upload.spool_reserve",
+		Label:       "暂存盘保留空间",
+		Description: "扣掉所有进行中上传还没写完的部分后，暂存盘至少要留出这么多空间，不够时暂停接受新的上传。",
+		Default:     20 * gib, Min: 0, Max: tib,
 	})
 )

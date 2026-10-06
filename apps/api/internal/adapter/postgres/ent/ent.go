@@ -64,8 +64,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userloginsession"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userpasskeycredential"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userpvnbinding"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/useruploadquota"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/useruploadquotarecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/walkthrough"
 )
 
@@ -179,8 +177,6 @@ func checkColumn(t, c string) error {
 			userloginsession.Table:                userloginsession.ValidColumn,
 			userpasskeycredential.Table:           userpasskeycredential.ValidColumn,
 			userpvnbinding.Table:                  userpvnbinding.ValidColumn,
-			useruploadquota.Table:                 useruploadquota.ValidColumn,
-			useruploadquotarecord.Table:           useruploadquotarecord.ValidColumn,
 			walkthrough.Table:                     walkthrough.ValidColumn,
 		})
 	})

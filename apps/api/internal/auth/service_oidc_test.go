@@ -129,7 +129,7 @@ func TestOIDCLoginProvisionsAndReusesAccounts(t *testing.T) {
 	if !found || created.Name != "ringyuki" || created.EmailVerifiedAt == nil || created.HasPassword() || created.ContentLimit != actor.ContentLimitNeverShow {
 		t.Fatalf("unexpected provisioned user %+v", created)
 	}
-	if !f.users.HasDefaultFavorite(created.ID) || !f.users.HasQuota(created.ID) {
+	if !f.users.HasDefaultFavorite(created.ID) {
 		t.Fatal("provisioning must create the default favorite and quota")
 	}
 	again, err := callback(f, actor.Guest(), auth.OIDCModeLogin)

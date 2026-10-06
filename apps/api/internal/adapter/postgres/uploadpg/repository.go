@@ -2,6 +2,7 @@ package uploadpg
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -12,6 +13,11 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
+
+const pendingBytesSQL = `
+SELECT COALESCE(SUM(GREATEST(total_size - COALESCE(cardinality(uploaded_chunks), 0)::bigint * chunk_size, 0)), 0)
+FROM game_upload_sessions
+WHERE status = 'UPLOADING' AND expires_at >= $1`
 
 type Repository struct {
 	client *ent.Client
@@ -159,6 +165,21 @@ func (r *Repository) HasFile(ctx context.Context, sessionID int) (bool, error) {
 	return exists, nil
 }
 
+func (r *Repository) PendingBytes(ctx context.Context, now time.Time) (int64, error) {
+	var pending int64
+	if err := scalar(ctx, r.db(ctx), &pending, pendingBytesSQL, now.UTC()); err != nil {
+		return 0, fmt.Errorf("sum pending upload bytes: %w", err)
+	}
+	return pending, nil
+}
+
+func (r *Repository) LockAdmission(ctx context.Context) error {
+	if _, err := r.db(ctx).ExecContext(ctx, "SELECT pg_advisory_xact_lock(hashtextextended('upload/admission', 0))"); err != nil {
+		return fmt.Errorf("lock upload admission: %w", err)
+	}
+	return nil
+}
+
 func (r *Repository) ReferencedPaths(ctx context.Context, paths []string) (map[string]bool, error) {
 	referenced := map[string]bool{}
 	if len(paths) == 0 {
@@ -187,4 +208,24 @@ WHERE file_path = ANY($1::text[])`, pgvalue.Strings(paths))
 		return nil, fmt.Errorf("read referenced upload paths: %w", err)
 	}
 	return referenced, nil
+}
+
+func scalar(ctx context.Context, client *ent.Client, target any, query string, args ...any) error {
+	rows, err := client.QueryContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = rows.Close()
+	}()
+	if !rows.Next() {
+		if err := rows.Err(); err != nil {
+			return err
+		}
+		return sql.ErrNoRows
+	}
+	if err := rows.Scan(target); err != nil {
+		return err
+	}
+	return rows.Err()
 }

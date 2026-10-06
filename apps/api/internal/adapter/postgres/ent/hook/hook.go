@@ -633,30 +633,6 @@ func (f UserPvnBindingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Val
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserPvnBindingMutation", m)
 }
 
-// The UserUploadQuotaFunc type is an adapter to allow the use of ordinary
-// function as UserUploadQuota mutator.
-type UserUploadQuotaFunc func(context.Context, *ent.UserUploadQuotaMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f UserUploadQuotaFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.UserUploadQuotaMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserUploadQuotaMutation", m)
-}
-
-// The UserUploadQuotaRecordFunc type is an adapter to allow the use of ordinary
-// function as UserUploadQuotaRecord mutator.
-type UserUploadQuotaRecordFunc func(context.Context, *ent.UserUploadQuotaRecordMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f UserUploadQuotaRecordFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.UserUploadQuotaRecordMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserUploadQuotaRecordMutation", m)
-}
-
 // The WalkthroughFunc type is an adapter to allow the use of ordinary
 // function as Walkthrough mutator.
 type WalkthroughFunc func(context.Context, *ent.WalkthroughMutation) (ent.Value, error)

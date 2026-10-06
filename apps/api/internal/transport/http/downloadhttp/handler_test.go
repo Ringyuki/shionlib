@@ -40,12 +40,6 @@ func (sessions) Claim(_ context.Context, who actor.Actor, id int) (upload.Sessio
 	return upload.Session{ID: id, Status: upload.StatusCompleted, CreatorID: creator.UserID, FileName: fmt.Sprintf("s%d.7z", id), StoragePath: fmt.Sprintf("/spool/%d.part", id), TotalSize: 9, FileHash: "h", HashAlgorithm: upload.HashBLAKE3}, nil
 }
 
-type quota struct{}
-
-func (quota) Withdraw(context.Context, int, int) error {
-	return nil
-}
-
 type env struct {
 	server    *apitest.Server
 	repo      *downloadtest.MemoryRepository
@@ -62,7 +56,7 @@ func setup(t *testing.T) env {
 	store := downloadtest.NewObjectStore()
 	cards := gametest.NewCards(game.Card{ID: 10, TitleJP: "ゲーム", Covers: []game.Cover{{URL: "safe.webp"}, {URL: "rated.webp", Sexual: 1}}})
 	settings := settingtest.Set(settingtest.Source{}, download.MaxFilesPerResource, 3)
-	service := download.NewService(download.Deps{Repo: repo, Games: cards, Sessions: sessions{}, Quota: quota{}, Activities: events, Messages: events, Tx: &txtest.Immediate{}, Queue: events, Store: store, Local: uploadtest.NewMemorySpool(), Settings: settings, Now: now})
+	service := download.NewService(download.Deps{Repo: repo, Games: cards, Sessions: sessions{}, Activities: events, Messages: events, Tx: &txtest.Immediate{}, Queue: events, Store: store, Local: uploadtest.NewMemorySpool(), Settings: settings, Now: now})
 	challenge := &downloadtest.Challenge{Verdict: download.Verdict{Success: true}}
 	links := download.NewLinkService(repo, &txtest.Immediate{}, challenge, &downloadtest.Authorizer{}, &downloadtest.Sealer{}, settingtest.Source{}, download.LinkOptions{Mode: download.ModeDirect, CDNHost: "https://cdn.example.com/"}, now)
 	downloadhttp.NewHandler(service, links, server.Builder).Register(server.API)

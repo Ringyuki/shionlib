@@ -162,11 +162,5 @@ type UserPasskeyCredential func(*sql.Selector)
 // UserPvnBinding is the predicate function for userpvnbinding builders.
 type UserPvnBinding func(*sql.Selector)
 
-// UserUploadQuota is the predicate function for useruploadquota builders.
-type UserUploadQuota func(*sql.Selector)
-
-// UserUploadQuotaRecord is the predicate function for useruploadquotarecord builders.
-type UserUploadQuotaRecord func(*sql.Selector)
-
 // Walkthrough is the predicate function for walkthrough builders.
 type Walkthrough func(*sql.Selector)

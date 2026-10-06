@@ -34,13 +34,6 @@ func (s *Service) Ongoing(ctx context.Context, who actor.Actor) ([]Session, erro
 }
 
 func (s *Service) Init(ctx context.Context, who actor.Actor, in InitInput) (Session, error) {
-	exceeded, err := s.quota.Exceeds(ctx, who.UserID, in.TotalSize)
-	if err != nil {
-		return Session{}, err
-	}
-	if exceeded {
-		return Session{}, ErrQuotaExceeded
-	}
 	chunkLimit := ChunkLimit.Read(s.settings)
 	chunkSize := min(ChunkSize.Read(s.settings), chunkLimit)
 	if in.ChunkSize != nil {
@@ -56,11 +49,11 @@ func (s *Service) Init(ctx context.Context, who actor.Actor, in InitInput) (Sess
 	if totalChunks > int64(MaxChunks.Read(s.settings)) {
 		return Session{}, ErrTooManyChunks
 	}
-	if in.TotalSize > MaxFileSize.Read(s.settings) && !who.AtLeast(actor.RoleAdmin) {
-		return Session{}, ErrTooLarge
-	}
 	var session Session
-	err = s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
+	err := s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
+		if err := s.admit(ctx, who.UserID, in.TotalSize); err != nil {
+			return err
+		}
 		created, err := s.repo.CreateSession(ctx, NewSession{
 			FileName:    in.FileName,
 			TotalSize:   in.TotalSize,
@@ -77,10 +70,6 @@ func (s *Service) Init(ctx context.Context, who actor.Actor, in InitInput) (Sess
 		if err := s.repo.SetStoragePath(ctx, created.ID, created.StoragePath); err != nil {
 			return err
 		}
-		sessionID := created.ID
-		if err := s.quota.AdjustUsed(ctx, who.UserID, ActionUse, in.TotalSize, ReasonGameUpload, &sessionID); err != nil {
-			return err
-		}
 		session = created
 		return nil
 	})
@@ -92,6 +81,35 @@ func (s *Service) Init(ctx context.Context, who actor.Actor, in InitInput) (Sess
 		return Session{}, errors.Join(fmt.Errorf("allocate upload file: %w", err), markErr)
 	}
 	return session, nil
+}
+
+func (s *Service) admit(ctx context.Context, userID int, size int64) error {
+	if err := s.repo.LockAdmission(ctx); err != nil {
+		return err
+	}
+	allowance, err := s.quota.Allowance(ctx, userID)
+	if err != nil {
+		return err
+	}
+	if err := allowance.Admit(size); err != nil {
+		return err
+	}
+	return s.ensureSpool(ctx, size)
+}
+
+func (s *Service) ensureSpool(ctx context.Context, size int64) error {
+	available, err := s.spool.Available(ctx)
+	if err != nil {
+		return err
+	}
+	pending, err := s.repo.PendingBytes(ctx, s.now())
+	if err != nil {
+		return err
+	}
+	if available-pending-size < SpoolReserve.Read(s.settings) {
+		return ErrSpoolFull
+	}
+	return nil
 }
 
 func (s *Service) WriteChunk(ctx context.Context, who actor.Actor, id, index int, chunk Chunk, body io.Reader) error {
@@ -204,7 +222,7 @@ func (s *Service) Abort(ctx context.Context, who actor.Actor, id int) error {
 			return err
 		}
 		path = session.StoragePath
-		return s.quota.Withdraw(ctx, who.UserID, session.ID)
+		return nil
 	})
 	if err != nil {
 		return err
@@ -259,7 +277,7 @@ func (s *Service) expire(ctx context.Context, id int) error {
 			return err
 		}
 		path = session.StoragePath
-		return s.quota.Withdraw(ctx, session.CreatorID, session.ID)
+		return nil
 	})
 	if err != nil {
 		return err
