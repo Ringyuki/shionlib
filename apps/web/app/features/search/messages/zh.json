@@ -10,6 +10,7 @@
     "recent": "最近搜索",
     "trending": "热门搜索"
   },
+  "clear": "清除",
   "clearRecent": "清除最近搜索",
   "seeAll": "查看「{query}」的全部 {total, number} 个游戏",
   "searching": "正在搜索…",

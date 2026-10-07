@@ -7,6 +7,26 @@ test('opens the search palette with the slash key', async ({ page }) => {
   await expect(page.getByRole('dialog').getByPlaceholder('搜索游戏、开发商、角色')).toBeFocused()
 })
 
+test('keeps recent searches in the palette until they are cleared', async ({ page }) => {
+  await page.goto('/zh')
+  await page.waitForLoadState('networkidle')
+  await page.keyboard.press('/')
+  const palette = page.getByRole('dialog')
+  const input = palette.getByPlaceholder('搜索游戏、开发商、角色')
+  await input.fill('e2e recent term')
+  await input.press('Enter')
+  await expect(page).toHaveURL(/\/zh\/search\?q=e2e\+recent\+term$/)
+  await expect(palette).toBeHidden()
+  await page
+    .getByRole('banner')
+    .getByRole('button', { name: /搜索游戏、开发商、角色/ })
+    .click()
+  await expect(palette.getByRole('option', { name: 'e2e recent term' })).toBeVisible()
+  await palette.getByRole('button', { name: '清除最近搜索' }).click()
+  await expect(palette.getByRole('option', { name: 'e2e recent term' })).toHaveCount(0)
+  await expect(input).toBeFocused()
+})
+
 test('keeps what the palette shows while it closes and starts empty the next time', async ({
   page,
 }) => {

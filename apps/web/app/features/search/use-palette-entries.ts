@@ -1,5 +1,5 @@
-import type { SelectOptionGroup } from '@hina-ui/react'
-import { ArrowRight, History, Search, Trash2, TrendingUp, type LucideIcon } from 'lucide-react'
+import type { SelectItems, SelectOptionGroup } from '@hina-ui/react'
+import { ArrowRight, History, Search, TrendingUp, type LucideIcon } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { useFormatter, useLocale, useTranslations } from 'use-intl'
 import { characterName } from '~/features/character'
@@ -24,7 +24,8 @@ export type PaletteStatus = 'searching' | 'empty' | 'unavailable' | undefined
 type EntryGroup = SelectOptionGroup<PaletteEntry>
 
 type PaletteView = {
-  groups: EntryGroup[]
+  entries: SelectItems<PaletteEntry>
+  recentShown: boolean
   status: PaletteStatus
   searchAll: () => void
 }
@@ -117,24 +118,16 @@ export function usePaletteEntries(palette: ReturnType<typeof useSearchPalette>):
 
   if (query === '') {
     const recent = palette.recent.map(term => fill(`recent:${term}`, term, History))
-    const groups = [
-      ...group(
-        t('groups.recent'),
-        recent.length === 0
-          ? []
-          : [
-              ...recent,
-              command('recent:clear', t('clearRecent'), Trash2, palette.clearRecent, {
-                stays: true,
-              }),
-            ],
-      ),
-      ...group(
-        t('groups.trending'),
-        (palette.palette?.trending ?? []).map(term => fill(`trending:${term}`, term, TrendingUp)),
-      ),
-    ]
-    return { groups, status: undefined, searchAll }
+    const trending = group(
+      t('groups.trending'),
+      (palette.palette?.trending ?? []).map(term => fill(`trending:${term}`, term, TrendingUp)),
+    )
+    return {
+      entries: [...recent, ...trending],
+      recentShown: recent.length > 0,
+      status: undefined,
+      searchAll,
+    }
   }
 
   const suggestions = group(
@@ -142,14 +135,15 @@ export function usePaletteEntries(palette: ReturnType<typeof useSearchPalette>):
     (palette.palette?.suggestions ?? []).map(title => fill(`suggest:${title}`, title, Search)),
   )
   if (palette.palette === undefined) {
-    return { groups: suggestions, status: 'searching', searchAll }
+    return { entries: suggestions, recentShown: false, status: 'searching', searchAll }
   }
   if (palette.palette.unavailable) {
-    return { groups: suggestions, status: 'unavailable', searchAll }
+    return { entries: suggestions, recentShown: false, status: 'unavailable', searchAll }
   }
   const results = resultGroups(palette.palette)
   return {
-    groups: [...suggestions, ...results],
+    entries: [...suggestions, ...results],
+    recentShown: false,
     status: results.length === 0 ? 'empty' : undefined,
     searchAll,
   }

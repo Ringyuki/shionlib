@@ -10,6 +10,7 @@
     "recent": "Recent searches",
     "trending": "Trending"
   },
+  "clear": "Clear",
   "clearRecent": "Clear recent searches",
   "seeAll": "See all {total, number} games for “{query}”",
   "searching": "Searching…",

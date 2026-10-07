@@ -10,6 +10,7 @@
     "recent": "最近の検索",
     "trending": "人気の検索"
   },
+  "clear": "消去",
   "clearRecent": "最近の検索を消去",
   "seeAll": "「{query}」のゲーム {total, number} 件をすべて表示",
   "searching": "検索中…",

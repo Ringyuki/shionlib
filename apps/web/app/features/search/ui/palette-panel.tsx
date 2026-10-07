@@ -3,6 +3,7 @@ import {
   Empty,
   Inline,
   Listbox,
+  ScrollArea,
   SearchInput,
   Spinner,
   Stack,
@@ -10,16 +11,17 @@ import {
   type InputHandle,
   type ListboxValue,
 } from '@hina-ui/react'
-import { CloudOff, SearchX } from 'lucide-react'
+import { CloudOff, SearchX, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useTranslations } from 'use-intl'
+import { Button } from '~/shared/ui/button'
 import { usePaletteEntries, type PaletteEntry } from '../use-palette-entries'
 import type { useSearchPalette } from '../use-search-palette'
 import { PictureOption } from './picture-option'
 
 export function PalettePanel({ palette }: { palette: ReturnType<typeof useSearchPalette> }) {
   const t = useTranslations('search')
-  const { groups, status, searchAll } = usePaletteEntries(palette)
+  const { entries, recentShown, status, searchAll } = usePaletteEntries(palette)
   const input = useRef<InputHandle>(null)
   const list = useRef<HTMLElement>(null)
   const [refills, setRefills] = useState(0)
@@ -29,7 +31,9 @@ export function PalettePanel({ palette }: { palette: ReturnType<typeof useSearch
     }
   }, [refills])
   const pick = (value: ListboxValue) => {
-    const entry = groups.flatMap(group => group.options).find(option => option.value === value)
+    const entry = entries
+      .flatMap(item => ('options' in item ? item.options : [item]))
+      .find(option => option.value === value)
     entry?.action()
     if (entry?.stays === true) {
       setRefills(count => count + 1)
@@ -56,18 +60,41 @@ export function PalettePanel({ palette }: { palette: ReturnType<typeof useSearch
         aria-label={t('label')}
       />
       <Divider />
-      {groups.length > 0 && (
-        <Listbox
-          ref={list}
-          variant="bare"
-          options={groups}
-          value={null}
-          onValueChange={pick}
-          renderOption={({ option }) => <PaletteOption entry={option} />}
-          renderTrailing={() => null}
-          maxHeight="min(60vh, 32rem)"
-          aria-label={t('list')}
-        />
+      {entries.length > 0 && (
+        <ScrollArea style={{ maxHeight: 'min(60vh, 32rem)' }}>
+          {recentShown && (
+            <Inline align="center" justify="between" wrap={false} className="px-3.5 pt-2.5 pb-1.5">
+              <Text size="xs" tone="muted" weight="medium">
+                {t('groups.recent')}
+              </Text>
+              <Button
+                variant="link"
+                tone="danger"
+                size="sm"
+                className="text-xs"
+                icon={<Trash2 />}
+                aria-label={t('clearRecent')}
+                onClick={() => {
+                  palette.clearRecent()
+                  setRefills(count => count + 1)
+                }}
+              >
+                {t('clear')}
+              </Button>
+            </Inline>
+          )}
+          <Listbox
+            ref={list}
+            variant="bare"
+            options={entries}
+            value={null}
+            onValueChange={pick}
+            renderOption={({ option }) => <PaletteOption entry={option} />}
+            renderTrailing={() => null}
+            maxHeight="none"
+            aria-label={t('list')}
+          />
+        </ScrollArea>
       )}
       {status === 'searching' && (
         <Inline gap="sm" justify="center" align="center" className="py-6">
