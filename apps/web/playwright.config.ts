@@ -1,11 +1,13 @@
 import { defineConfig, devices } from '@playwright/test'
+import type { IngressOptions } from './e2e/support/ingress'
 
 const port = Number(process.env.E2E_WEB_PORT ?? 5330)
 const external = process.env.E2E_BASE_URL
 const baseURL = external ?? `http://localhost:${port}`
 const ci = process.env.CI !== undefined
+const api = process.env.E2E_API_URL ?? 'http://localhost:5201'
 
-export default defineConfig({
+export default defineConfig<IngressOptions>({
   testDir: 'e2e',
   fullyParallel: true,
   forbidOnly: ci,
@@ -14,6 +16,7 @@ export default defineConfig({
   reporter: ci ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL,
+    apiOrigin: external === undefined ? api : undefined,
     locale: 'zh-CN',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
@@ -36,7 +39,7 @@ export default defineConfig({
           timeout: 180_000,
           env: {
             PORT: String(port),
-            API_INTERNAL_URL: process.env.E2E_API_URL ?? 'http://localhost:5201',
+            API_INTERNAL_URL: api,
             TURNSTILE_SITE_KEY: '1x00000000000000000000AA',
             HIKARINAGI_SITE_URL: 'https://www.hikarinagi.org',
           },

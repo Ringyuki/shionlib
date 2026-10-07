@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { sessionFile } from './support/accounts'
 
 test('opens on the resources tab with the seeded files', async ({ page }) => {
   await page.goto('/zh/game/1')
@@ -25,10 +26,20 @@ test('links catalog tags to the game library', async ({ page }) => {
   await expect(tag).toHaveAttribute('href', /^\/zh\/game\?tag=/)
 })
 
-test('blocks the download of a file held for review', async ({ page }) => {
+test('hides a resource held for review from visitors', async ({ page }) => {
   await page.goto('/zh/game/3')
-  const row = page.getByRole('row', { name: /seeded-malware-sample\.zip/ })
-  await expect(row.getByRole('button', { name: '下载', exact: true })).toBeDisabled()
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  await expect(page.getByText('seeded-malware-sample.zip')).toHaveCount(0)
+})
+
+test.describe('as the uploader of the held resource', () => {
+  test.use({ storageState: sessionFile('admin') })
+
+  test('blocks the download of the file held for review', async ({ page }) => {
+    await page.goto('/zh/game/3')
+    const row = page.getByRole('row', { name: /seeded-malware-sample\.zip/ })
+    await expect(row.getByRole('button', { name: '下载', exact: true })).toBeDisabled()
+  })
 })
 
 test('renders the page in the visitor language', async ({ page }) => {

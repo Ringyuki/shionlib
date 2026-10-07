@@ -36,6 +36,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/refresh"
 	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
+	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
 
 var e2eKeptTables = regexp.MustCompile(`^(schema_migrations|_prisma_migrations|river_.*)$`)
@@ -50,6 +51,7 @@ var e2eSettings = []struct {
 }{
 	{name: httpapi.AuthThrottleLimit.Name(), value: "100000"},
 	{name: download.MaxConns.Name(), value: "4"},
+	{name: upload.ChunkSize.Name(), value: "1048576"},
 }
 
 type e2ePasswordHasher interface {

@@ -22,11 +22,13 @@ Every user flow a phase ports gets Playwright specs in `apps/web/e2e` in the sam
   - Playwright then builds the web app and serves it on `:5330`.
   - CI runs the same script in `.github/workflows/web-e2e.yml`.
 - **Run against an API that is already up:** reseed it first (`go run ./cmd/devtool e2e prepare` with that API's env), then run `E2E_API_URL=http://localhost:<port> pnpm e2e` in `apps/web`.
-  - Behind an HTTP proxy, also set `NO_PROXY=localhost,127.0.0.1`. Otherwise Playwright's server check goes to the proxy, gets an answer and never starts the web server.
+- **Behind an HTTP proxy** (either way), set `NO_PROXY=localhost,127.0.0.1`. Otherwise Playwright's server check goes to the proxy, gets an answer and never starts the web server.
+- **Ingress:** `pnpm start` serves only the web app, while in production the ingress sends `/api/*` to the API. Specs whose page calls the API itself (uploads) import `test` from `./support/ingress`, which forwards the page's `/api/*` requests to `E2E_API_URL` without the prefix. Against `E2E_BASE_URL` the real ingress does it and the fixture stays off.
 - **Dataset:**
   - Games 1 to 6.
   - Resource 1 on game 1, uploaded by `e2e_mutable_user`, can be reported.
-  - The file on game 3 is held for malware review.
+  - The file on game 3 is held for malware review, so its resource shows only to its uploader, `e2e_admin`.
+  - The default upload chunk size is 1 MiB, so a file of a few MiB uploads in several chunks.
   - Accounts are `e2e_user` (member), `e2e_mutable_user` (owner of resource 1) and `e2e_admin`. All use the password `ShionlibE2E123!` (`E2E_USER_PASSWORD`).
   - Other seeded accounts serve specs that sign in or out on their own.
 - **Sessions:**
@@ -34,7 +36,8 @@ Every user flow a phase ports gets Playwright specs in `apps/web/e2e` in the sam
   - Specs reuse them with `test.use({ storageState: sessionFile('member') })`.
   - A spec that signs out uses its own account, so it never revokes a shared session.
 - **Isolation:**
-  - Specs run in parallel on one dataset. Each mutation touches a game or account that no other spec reads: favorites on games 2, 4 and 5, reports by the member, edits by the owner.
+  - Specs run in parallel on one dataset. Each mutation touches a game or account that no other spec reads: favorites on games 2, 4 and 5, reports by the member, edits by the owner, uploads by the owner on game 6.
+  - Upload specs run serially (`mode: 'serial'`): the server lists every unfinished upload of the account, so parallel uploads would show up in each other's tray.
   - Never assert on data that another spec changes.
   - A flow that cannot repeat on the same data (reporting a resource once) sets `test.describe.configure({ retries: 0 })`.
 - **Selectors:**
