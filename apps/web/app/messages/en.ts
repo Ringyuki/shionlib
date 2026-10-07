@@ -5,6 +5,7 @@ import game from '~/features/game/messages/en.json'
 import resource from '~/features/resource/messages/en.json'
 import search from '~/features/search/messages/en.json'
 import shell from '~/features/shell/messages/en.json'
+import upload from '~/features/upload/messages/en.json'
 import bbcode from './bbcode/en.json'
 import form from './form/en.json'
 import site from './site/en.json'
@@ -21,4 +22,5 @@ export const messages: Messages = {
   search,
   shell,
   site,
+  upload,
 }

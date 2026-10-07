@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   admit,
+  fileLimit,
   matchFiles,
   chunkLength,
   sameFile,
@@ -31,12 +32,36 @@ describe('upload rules', () => {
     expect(sameFile({ ...known, size: 11 }, known)).toBe(false)
   })
 
-  it('admits files that fit the allowance', () => {
-    expect(admit(allowance, [20, 30])).toBe(undefined)
-    expect(admit(allowance, [0, 3])).toBe('empty')
-    expect(admit(allowance, [31])).toBe('tooLarge')
-    expect(admit(allowance, [30, 30])).toBe('overQuota')
-    expect(admit({ ...allowance, max_file_size: null, stored_limit: null }, [500])).toBe(undefined)
+  it('admits files that fit the allowance and names the first that does not', () => {
+    const file = (name: string, size: number) => ({ name, size })
+    expect(admit(allowance, [file('a', 20), file('b', 30)])).toBe(undefined)
+    expect(admit(allowance, [file('a', 3), file('b', 0)])).toEqual({ kind: 'empty', file: 'b' })
+    expect(admit(allowance, [file('a', 31)])).toEqual({
+      kind: 'tooLarge',
+      file: 'a',
+      size: 31,
+      limit: 30,
+    })
+    expect(admit(allowance, [file('a', 30), file('b', 30)])).toEqual({
+      kind: 'overQuota',
+      total: 60,
+      left: 50,
+    })
+    expect(admit({ ...allowance, stored: 90 }, [])).toEqual({ kind: 'full' })
+    expect(admit({ ...allowance, stored: 120 }, [file('a', 1)])).toEqual({ kind: 'full' })
+    expect(admit(undefined, [file('a', 500)])).toBe(undefined)
+    expect(admit(undefined, [file('a', 0)])).toEqual({ kind: 'empty', file: 'a' })
+  })
+
+  it('caps a file by the in-flight limit when the tier has no file limit', () => {
+    const unlimited = { ...allowance, max_file_size: null, stored_limit: null }
+    expect(fileLimit(unlimited)).toBe(50)
+    expect(fileLimit(allowance)).toBe(30)
+    expect(admit(unlimited, [{ name: 'a', size: 51 }])).toMatchObject({
+      kind: 'tooLarge',
+      limit: 50,
+    })
+    expect(admit(unlimited, [{ name: 'a', size: 50 }])).toBe(undefined)
   })
 
   it('measures chunks, the last one shorter', () => {
@@ -85,6 +110,6 @@ describe('upload rules', () => {
     const chosen = [file('a.rar', 1), file('b.rar', 9), file('c.rar', 1), file('a.rar', 2)]
     const { matches, unmatched } = matchFiles(uploads, chosen)
     expect([...matches.keys()]).toEqual(['a', 'b'])
-    expect(unmatched.map(entry => entry.name)).toEqual(['c.rar', 'a.rar'])
+    expect(unmatched.map(entry => entry.name)).toEqual(['a.rar'])
   })
 })

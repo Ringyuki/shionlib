@@ -21,7 +21,7 @@ function ongoing(id: number, status: OngoingUpload['status'], chunks: number[]):
 
 function saved(submitting: boolean, uploads: SavedState['uploads']): SavedState {
   return {
-    submissions: [{ id: 's', target: { kind: 'append', resourceId: 1 }, submitting }],
+    submissions: [{ id: 's', target: { kind: 'append', resourceId: 1 }, label: 'x', submitting }],
     uploads,
   }
 }
@@ -63,7 +63,7 @@ describe('restoreState', () => {
       ongoing(10, 'COMPLETED', [0, 1, 2]),
     ])
     expect(state.submissions).toEqual([
-      { id: orphanSubmission, target: { kind: 'orphan' }, phase: { name: 'uploading' } },
+      { id: orphanSubmission, target: { kind: 'orphan' }, label: '', phase: { name: 'uploading' } },
     ])
     expect(
       state.uploads.map(upload => [upload.file.lastModified, upload.sent, upload.phase.name]),
@@ -78,8 +78,18 @@ describe('savedStateOf', () => {
   it('keeps what the server cannot tell', () => {
     const state: UploadState = {
       submissions: [
-        { id: 's', target: { kind: 'append', resourceId: 1 }, phase: { name: 'submitting' } },
-        { id: 'gone', target: { kind: 'append', resourceId: 2 }, phase: { name: 'submitted' } },
+        {
+          id: 's',
+          target: { kind: 'append', resourceId: 1 },
+          label: 'x',
+          phase: { name: 'submitting' },
+        },
+        {
+          id: 'gone',
+          target: { kind: 'append', resourceId: 2 },
+          label: 'y',
+          phase: { name: 'submitted' },
+        },
       ],
       uploads: [
         { id: 'a', submission: 's', file, session, sent: 10, speed: 0, phase: { name: 'done' } },
@@ -95,7 +105,9 @@ describe('savedStateOf', () => {
       ],
     }
     expect(savedStateOf(state)).toEqual({
-      submissions: [{ id: 's', target: { kind: 'append', resourceId: 1 }, submitting: true }],
+      submissions: [
+        { id: 's', target: { kind: 'append', resourceId: 1 }, label: 'x', submitting: true },
+      ],
       uploads: [{ id: 'a', submission: 's', file, name: undefined, session, done: true }],
     })
   })

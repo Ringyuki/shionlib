@@ -20,6 +20,11 @@
   "history": "历史",
   "report": "举报",
   "edit": "编辑",
+  "addFiles": "添加文件",
+  "addFilesDescription": "上传完成后，这些文件会加入这个资源。",
+  "replaceFile": "替换文件",
+  "replaceDescription": "上传完成后，新文件会替换 {name}。",
+  "replaceReason": "替换原因",
   "delete": "删除",
   "deleteConfirm": "删除这个资源？",
   "deleteDescription": "资源里的文件会一并删除，无法恢复。",
@@ -30,7 +35,7 @@
   "reportTitle": "举报资源",
   "reportReason": "原因",
   "reportDetail": "补充说明",
-  "reportDetailHint": "选填，最多 {max} 字",
+  "optionalHint": "选填，最多 {max} 字",
   "reportSubmit": "提交举报",
   "reported": "已收到举报，我们会尽快处理",
   "cancel": "取消",
@@ -59,7 +64,8 @@
   "issue": {
     "platforms": "至少选择一个平台",
     "languages": "至少选择一种语言",
-    "simulator": "请选择引擎"
+    "simulator": "请选择引擎",
+    "files": "请选择文件"
   },
   "stateHelp": "查看说明",
   "updated": "<time></time>更新",
@@ -69,5 +75,29 @@
     "hash": "校验值",
     "download": "下载"
   },
-  "actions": "资源操作"
+  "actions": "资源操作",
+  "uploadTitle": "上传资源",
+  "uploadDescription": "选好游戏和文件，填写资源信息后开始上传。上传会在后台进行，期间可以离开这个页面。",
+  "uploadGame": "游戏",
+  "changeGame": "更换",
+  "uploadFiles": "文件",
+  "uploadDrop": "点击选择文件，或者把文件拖到这里",
+  "fileLimit": "单个文件不能超过 {limit}",
+  "fileLimitNoQuota": "单个文件不能超过 {limit}，存储空间不限",
+  "storage": {
+    "label": "存储空间（共 {limit}）",
+    "stored": "已存储",
+    "uploading": "正在上传",
+    "chosen": "本次选择"
+  },
+  "uploadStart": "开始上传",
+  "uploadStarted": "已开始上传，可以在右上角查看进度",
+  "uploadSignIn": "登录后才能上传资源",
+  "signIn": "登录",
+  "admission": {
+    "full": "存储空间已经用完，暂时不能上传新文件",
+    "empty": "{file} 是空文件，不能上传",
+    "tooLarge": "{file} 有 {size}，单个文件不能超过 {limit}",
+    "overQuota": "所选文件共 {total}，但只剩 {left} 空间"
+  }
 }

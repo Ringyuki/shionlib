@@ -6,7 +6,13 @@ import { useLocale, useMessages, useTranslations } from 'use-intl'
 import { sitePaths } from '~/features/shell'
 import { labelOf } from '~/shared/i18n/labels'
 import { Button } from '~/shared/ui/button'
-import { platformFilterFrom, resourcePlatforms, withPlatform, type Resource } from '../resource'
+import {
+  platformFilterFrom,
+  resourcePlatforms,
+  withPlatform,
+  type Resource,
+  type ResourceViewer,
+} from '../resource'
 import { ResourceCard } from './resource-card'
 
 const allPlatforms = 'all'
@@ -14,10 +20,10 @@ const allPlatforms = 'all'
 type ResourceListProps = {
   gameId: number
   resources: readonly Resource[]
-  viewerId: number | null
+  viewer: ResourceViewer | null
 }
 
-export function ResourceList({ gameId, resources, viewerId }: ResourceListProps) {
+export function ResourceList({ gameId, resources, viewer }: ResourceListProps) {
   const t = useTranslations('resource')
   const locale = useLocale()
   const labels = useMessages().game.platform
@@ -59,7 +65,7 @@ export function ResourceList({ gameId, resources, viewerId }: ResourceListProps)
         />
       )}
       {shown.map(resource => (
-        <ResourceCard key={resource.id} resource={resource} viewerId={viewerId} />
+        <ResourceCard key={resource.id} resource={resource} viewer={viewer} />
       ))}
     </Stack>
   )

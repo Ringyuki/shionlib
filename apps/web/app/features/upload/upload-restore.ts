@@ -13,6 +13,7 @@ export function savedStateOf(state: UploadState): SavedState {
     submissions: submissions.map(submission => ({
       id: submission.id,
       target: submission.target,
+      label: submission.label,
       submitting: submission.phase.name === 'submitting',
     })),
     uploads: state.uploads
@@ -45,6 +46,7 @@ export function restoreState(saved: SavedState, ongoing: readonly OngoingUpload[
     return {
       id: submission.id,
       target: submission.target,
+      label: submission.label,
       phase: submission.submitting && consumed ? { name: 'submitted' } : { name: 'uploading' },
     }
   })
@@ -53,6 +55,7 @@ export function restoreState(saved: SavedState, ongoing: readonly OngoingUpload[
     submissions.push({
       id: orphanSubmission,
       target: { kind: 'orphan' },
+      label: '',
       phase: { name: 'uploading' },
     })
   }

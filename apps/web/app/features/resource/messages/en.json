@@ -20,6 +20,11 @@
   "history": "History",
   "report": "Report",
   "edit": "Edit",
+  "addFiles": "Add files",
+  "addFilesDescription": "Once uploaded, these files join this resource.",
+  "replaceFile": "Replace file",
+  "replaceDescription": "Once uploaded, the new file replaces {name}.",
+  "replaceReason": "Reason for replacing",
   "delete": "Delete",
   "deleteConfirm": "Delete this resource?",
   "deleteDescription": "Its files are deleted too. This cannot be undone.",
@@ -30,7 +35,7 @@
   "reportTitle": "Report resource",
   "reportReason": "Reason",
   "reportDetail": "Details",
-  "reportDetailHint": "Optional, up to {max} characters",
+  "optionalHint": "Optional, up to {max} characters",
   "reportSubmit": "Send report",
   "reported": "Thanks, we will look into it soon",
   "cancel": "Cancel",
@@ -59,7 +64,8 @@
   "issue": {
     "platforms": "Choose at least one platform",
     "languages": "Choose at least one language",
-    "simulator": "Choose an engine"
+    "simulator": "Choose an engine",
+    "files": "Choose a file"
   },
   "stateHelp": "What does this mean?",
   "updated": "Updated <time></time>",
@@ -69,5 +75,29 @@
     "hash": "Checksum",
     "download": "Download"
   },
-  "actions": "Resource actions"
+  "actions": "Resource actions",
+  "uploadTitle": "Upload a resource",
+  "uploadDescription": "Choose the game and the files, describe the resource, then start uploading. Uploads continue in the background, so you can leave this page.",
+  "uploadGame": "Game",
+  "changeGame": "Change",
+  "uploadFiles": "Files",
+  "uploadDrop": "Click to choose files, or drop them here",
+  "fileLimit": "Each file can be up to {limit}",
+  "fileLimitNoQuota": "Each file can be up to {limit}; storage is unlimited",
+  "storage": {
+    "label": "Storage ({limit} in total)",
+    "stored": "Stored",
+    "uploading": "Uploading",
+    "chosen": "Chosen"
+  },
+  "uploadStart": "Start uploading",
+  "uploadStarted": "Uploading started; follow its progress at the top right",
+  "uploadSignIn": "Sign in to upload resources",
+  "signIn": "Sign in",
+  "admission": {
+    "full": "Your storage is full, so you cannot upload new files for now",
+    "empty": "{file} is empty and cannot be uploaded",
+    "tooLarge": "{file} is {size}, but each file can be up to {limit}",
+    "overQuota": "The chosen files add up to {total}, but only {left} is left"
+  }
 }

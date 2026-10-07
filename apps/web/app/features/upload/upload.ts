@@ -23,7 +23,7 @@ export type FileIdentity = { name: string; size: number; lastModified: number }
 
 export type UploadSession = { id: number; chunkSize: number; totalChunks: number }
 
-export type WaitReason = 'network' | 'busy' | 'signedOut' | 'elsewhere'
+export type WaitReason = 'network' | 'busy' | 'inFlight' | 'signedOut' | 'elsewhere'
 
 export type FailureReason = 'differentFile' | 'changedFile' | 'expired' | 'rejected'
 
@@ -53,11 +53,17 @@ export type SubmissionPhase =
   | { name: 'submitted' }
   | { name: 'failed'; message?: string }
 
-export type Submission = { id: string; target: UploadTarget; phase: SubmissionPhase }
+export type Submission = { id: string; target: UploadTarget; label: string; phase: SubmissionPhase }
 
 export type UploadState = { submissions: Submission[]; uploads: Upload[] }
 
-export type Admission = 'empty' | 'tooLarge' | 'overQuota' | undefined
+export type Admission =
+  | { kind: 'full' }
+  | { kind: 'empty'; file: string }
+  | { kind: 'tooLarge'; file: string; size: number; limit: number }
+  | { kind: 'overQuota'; total: number; left: number }
+
+export type TrayStatus = 'idle' | 'active' | 'attention' | 'finished'
 
 export const activeFiles = 2
 
@@ -69,6 +75,10 @@ export const emptyState: UploadState = { submissions: [], uploads: [] }
 
 export function uploadStorageKey(viewer: number): string {
   return `shionlib_uploads_${viewer}`
+}
+
+export function chosenFiles(value: File | File[] | null): File[] {
+  return value === null ? [] : [value].flat()
 }
 
 export function identityOf(file: File): FileIdentity {
@@ -84,31 +94,55 @@ export function matchFiles(uploads: readonly Upload[], chosen: readonly File[]) 
   const waiting = uploads.filter(upload => upload.phase.name === 'needsFile')
   const matches = new Map<string, File>()
   const unmatched = chosen.filter(file => {
+    const identity = identityOf(file)
     const upload = waiting.find(
-      candidate => !matches.has(candidate.id) && sameFile(identityOf(file), candidate.file),
+      candidate => !matches.has(candidate.id) && sameFile(identity, candidate.file),
     )
     if (upload !== undefined) {
       matches.set(upload.id, file)
+      return false
     }
-    return upload === undefined
+    return !uploads.some(candidate => sameFile(identity, candidate.file))
   })
   return { matches, unmatched }
 }
 
-export function admit(allowance: Allowance, sizes: readonly number[]): Admission {
-  if (sizes.some(size => size === 0)) {
-    return 'empty'
+export function remainingBytes(allowance: Allowance): number | null {
+  if (allowance.stored_limit === null) {
+    return null
   }
-  const largest = Math.max(...sizes)
-  if (allowance.max_file_size !== null && largest > allowance.max_file_size) {
-    return 'tooLarge'
+  return Math.max(0, allowance.stored_limit - allowance.stored - allowance.in_flight)
+}
+
+export function fileLimit(allowance: Allowance): number {
+  return allowance.max_file_size === null
+    ? allowance.in_flight_limit
+    : Math.min(allowance.max_file_size, allowance.in_flight_limit)
+}
+
+export function admit(
+  allowance: Allowance | undefined,
+  files: readonly Pick<File, 'name' | 'size'>[],
+): Admission | undefined {
+  const left = allowance === undefined ? null : remainingBytes(allowance)
+  if (left === 0) {
+    return { kind: 'full' }
   }
-  const total = sizes.reduce((sum, size) => sum + size, 0)
-  if (
-    allowance.stored_limit !== null &&
-    allowance.stored + allowance.in_flight + total > allowance.stored_limit
-  ) {
-    return 'overQuota'
+  const empty = files.find(file => file.size === 0)
+  if (empty !== undefined) {
+    return { kind: 'empty', file: empty.name }
+  }
+  if (allowance === undefined) {
+    return undefined
+  }
+  const limit = fileLimit(allowance)
+  const large = files.find(file => file.size > limit)
+  if (large !== undefined) {
+    return { kind: 'tooLarge', file: large.name, size: large.size, limit }
+  }
+  const total = files.reduce((sum, file) => sum + file.size, 0)
+  if (left !== null && total > left) {
+    return { kind: 'overQuota', total, left }
   }
   return undefined
 }
@@ -138,4 +172,24 @@ export function totals(uploads: readonly Upload[]) {
   const size = active.reduce((sum, upload) => sum + upload.file.size, 0)
   const sent = active.reduce((sum, upload) => sum + upload.sent, 0)
   return { size, sent, ratio: size === 0 ? 0 : sent / size }
+}
+
+export function trayStatus(state: UploadState): TrayStatus {
+  if (state.submissions.length === 0) {
+    return 'idle'
+  }
+  const attention =
+    state.uploads.some(
+      upload => upload.phase.name === 'needsFile' || upload.phase.name === 'failed',
+    ) ||
+    state.submissions.some(
+      submission => submission.phase.name === 'failed' || submission.target.kind === 'orphan',
+    )
+  if (attention) {
+    return 'attention'
+  }
+  const active = state.submissions.some(
+    submission => submission.phase.name === 'uploading' || submission.phase.name === 'submitting',
+  )
+  return active ? 'active' : 'finished'
 }

@@ -3,6 +3,7 @@ import { Upload } from 'lucide-react'
 import { Link } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 import { SearchPalette, type SearchShortcut } from '~/features/search'
+import { UploadTray } from '~/features/upload'
 import { BrandLogo, Wordmark } from '~/shared/ui/brand'
 import { navSections, sitePaths } from '../shell'
 import { LocaleMenu } from './locale-menu'
@@ -40,6 +41,7 @@ export function SiteHeader({ viewerId }: SiteHeaderProps) {
       </Link>
       <SearchPalette shortcuts={shortcuts} />
       <Inline gap="xs" align="center" className="md:ms-auto">
+        <UploadTray />
         <ThemeMenu />
         <LocaleMenu />
       </Inline>

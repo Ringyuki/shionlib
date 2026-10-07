@@ -1,18 +1,24 @@
 import { DropdownMenu, DropdownMenuItem, DropdownMenuSeparator } from '@hina-ui/react'
-import { Ellipsis, Flag, History, PencilLine, Trash2 } from 'lucide-react'
+import { Ellipsis, FilePlus, Flag, History, PencilLine, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { useAuthGate } from '~/shared/ui/auth-gate'
 import { Button } from '~/shared/ui/button'
-import type { Resource } from '../resource'
+import type { Resource, ResourceRights } from '../resource'
+import { AddFilesDialog } from './add-files-dialog'
 import { DeleteDialog } from './delete-dialog'
 import { EditDialog } from './edit-dialog'
 import { HistoryDialog } from './history-dialog'
 import { ReportDialog } from './report-dialog'
 
-type Opened = 'history' | 'report' | 'edit' | 'delete' | undefined
+type Opened = 'history' | 'report' | 'edit' | 'add' | 'delete' | undefined
 
-export function ResourceMenu({ resource, owned }: { resource: Resource; owned: boolean }) {
+type ResourceMenuProps = {
+  resource: Resource
+  rights: ResourceRights
+}
+
+export function ResourceMenu({ resource, rights }: ResourceMenuProps) {
   const t = useTranslations('resource')
   const gate = useAuthGate()
   const [opened, setOpened] = useState<Opened>(undefined)
@@ -34,11 +40,22 @@ export function ResourceMenu({ resource, owned }: { resource: Resource; owned: b
             <DropdownMenuItem icon={<History />} onSelect={() => setOpened('history')}>
               {t('history')}
             </DropdownMenuItem>
-            {owned ? (
+            {rights.manage ? (
               <>
                 <DropdownMenuItem icon={<PencilLine />} onSelect={() => setOpened('edit')}>
                   {t('edit')}
                 </DropdownMenuItem>
+                <DropdownMenuItem icon={<FilePlus />} onSelect={() => setOpened('add')}>
+                  {t('addFiles')}
+                </DropdownMenuItem>
+              </>
+            ) : (
+              <DropdownMenuItem icon={<Flag />} onSelect={report}>
+                {t('report')}
+              </DropdownMenuItem>
+            )}
+            {rights.remove && (
+              <>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   icon={<Trash2 />}
@@ -48,10 +65,6 @@ export function ResourceMenu({ resource, owned }: { resource: Resource; owned: b
                   {t('delete')}
                 </DropdownMenuItem>
               </>
-            ) : (
-              <DropdownMenuItem icon={<Flag />} onSelect={report}>
-                {t('report')}
-              </DropdownMenuItem>
             )}
           </>
         }
@@ -70,17 +83,17 @@ export function ResourceMenu({ resource, owned }: { resource: Resource; owned: b
         open={opened === 'history'}
         onOpenChange={openWhen('history')}
       />
-      {owned ? (
+      {rights.manage ? (
         <>
           <EditDialog
             resource={resource}
             open={opened === 'edit'}
             onOpenChange={openWhen('edit')}
           />
-          <DeleteDialog
-            resourceId={resource.id}
-            open={opened === 'delete'}
-            onOpenChange={openWhen('delete')}
+          <AddFilesDialog
+            resource={resource}
+            open={opened === 'add'}
+            onOpenChange={openWhen('add')}
           />
         </>
       ) : (
@@ -88,6 +101,13 @@ export function ResourceMenu({ resource, owned }: { resource: Resource; owned: b
           resourceId={resource.id}
           open={opened === 'report'}
           onOpenChange={openWhen('report')}
+        />
+      )}
+      {rights.remove && (
+        <DeleteDialog
+          resourceId={resource.id}
+          open={opened === 'delete'}
+          onOpenChange={openWhen('delete')}
         />
       )}
     </>

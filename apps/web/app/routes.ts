@@ -13,12 +13,14 @@ export default [
   route('resources/auth/passkey-sign-in', 'routes/resources.auth.passkey-sign-in.ts'),
   route('resources/auth/sign-out', 'routes/resources.auth.sign-out.ts'),
   route('resources/search', 'routes/resources.search.ts'),
+  route('resources/search/games', 'routes/resources.search.games.ts'),
   route('resources/game/view', 'routes/resources.game.view.ts'),
   route('resources/download/link', 'routes/resources.download.link.ts'),
   route('resources/resource/history', 'routes/resources.resource.history.ts'),
   route('resources/resource/report', 'routes/resources.resource.report.ts'),
   route('resources/resource/edit', 'routes/resources.resource.edit.ts'),
   route('resources/resource/delete', 'routes/resources.resource.delete.ts'),
+  route('resources/upload/allowance', 'routes/resources.upload.allowance.ts'),
   route(':lang', 'routes/lang.tsx', [
     route('login', 'routes/auth-redirect.ts', { id: 'login' }),
     route('register', 'routes/auth-redirect.ts', { id: 'register' }),
@@ -26,6 +28,7 @@ export default [
       index('routes/home.tsx'),
       route('user/password/forget', 'routes/password-reset.tsx'),
       route('search', 'routes/search.tsx'),
+      route('upload', 'routes/upload.tsx'),
       route('search/game', 'routes/search-legacy.ts'),
       route('game/:id', 'routes/game.tsx', [
         index('routes/game.resources.tsx'),

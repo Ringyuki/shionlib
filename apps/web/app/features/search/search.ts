@@ -16,6 +16,8 @@ export type Palette = {
 
 export const paletteSize = 5
 
+export const pickerSize = 8
+
 export const resultsPageSize = 20
 
 export const trendingSize = 8

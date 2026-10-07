@@ -37,10 +37,10 @@ describe('decide', () => {
     })
   })
 
-  it('waits while the server is busy or the session is gone', () => {
+  it('waits while the server is busy, other uploads fill the in-flight limit or the session is gone', () => {
     expect(decide(apiError(503, 'UPLOAD_SPOOL_FULL'), 0, 0)).toMatchObject({ reason: 'busy' })
     expect(decide(apiError(409, 'USER_UPLOAD_IN_FLIGHT_EXCEEDED'), 0, 0)).toMatchObject({
-      reason: 'busy',
+      reason: 'inFlight',
     })
     expect(decide(apiError(401, 'AUTH_UNAUTHORIZED'), 0, 0)).toMatchObject({ reason: 'signedOut' })
   })

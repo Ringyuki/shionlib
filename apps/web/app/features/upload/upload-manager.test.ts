@@ -104,10 +104,11 @@ describe('UploadManager', () => {
   it('uploads every file of a resource, then creates it', async () => {
     const server = fakeServer()
     const { manager, writes } = setup(server)
-    manager.add({ kind: 'create', gameId: 3, resource: { platform: ['win'], language: ['jp'] } }, [
-      { file: tenBytes() },
-      { file: new File(['abcd'], 'game.part2.rar'), name: '第二卷.rar' },
-    ])
+    manager.add(
+      { kind: 'create', gameId: 3, resource: { platform: ['win'], language: ['jp'] } },
+      'ゲーム',
+      [{ file: tenBytes() }, { file: new File(['abcd'], 'game.part2.rar'), name: '第二卷.rar' }],
+    )
     await vi.waitFor(() =>
       expect(manager.getSnapshot().submissions[0]?.phase.name).toBe('submitted'),
     )
@@ -134,7 +135,9 @@ describe('UploadManager', () => {
       expires_at: '',
     }
     const saved: SavedState = {
-      submissions: [{ id: 's', target: { kind: 'append', resourceId: 4 }, submitting: false }],
+      submissions: [
+        { id: 's', target: { kind: 'append', resourceId: 4 }, label: 'ゲーム', submitting: false },
+      ],
       uploads: [
         {
           id: 'u',
@@ -168,12 +171,35 @@ describe('UploadManager', () => {
     })
   })
 
+  it('restores once even when started twice and stopped in between', async () => {
+    const saved: SavedState = {
+      submissions: [
+        { id: 's', target: { kind: 'append', resourceId: 4 }, label: 'ゲーム', submitting: false },
+      ],
+      uploads: [
+        {
+          id: 'u',
+          submission: 's',
+          file: { name: 'game.7z', size: 10, lastModified: 7 },
+          done: false,
+        },
+      ],
+    }
+    const { manager } = setup(fakeServer(), {
+      storage: { read: () => saved, write: () => undefined },
+    })
+    const first = manager.start()
+    manager.dispose()
+    await Promise.all([first, manager.start()])
+    expect(manager.getSnapshot().uploads.map(upload => upload.id)).toEqual(['u'])
+  })
+
   it('pauses and resumes', async () => {
     let paused = false
     const { manager } = setup(fakeServer(), {
       send: upload => (paused ? Promise.resolve() : hanging(upload)),
     })
-    manager.add({ kind: 'append', resourceId: 4 }, [{ file: tenBytes() }])
+    manager.add({ kind: 'append', resourceId: 4 }, 'ゲーム', [{ file: tenBytes() }])
     await vi.waitFor(() => expect(manager.getSnapshot().uploads[0]?.session?.id).toBe(1))
     manager.pause('id2')
     paused = true
@@ -193,7 +219,7 @@ describe('UploadManager', () => {
         return true
       },
     })
-    manager.add({ kind: 'append', resourceId: 4 }, [{ file: tenBytes() }])
+    manager.add({ kind: 'append', resourceId: 4 }, 'ゲーム', [{ file: tenBytes() }])
     await vi.waitFor(() =>
       expect(manager.getSnapshot().uploads[0]?.phase).toEqual({
         name: 'waiting',
@@ -210,7 +236,7 @@ describe('UploadManager', () => {
   it('discards the session of a cancelled upload', async () => {
     const server = fakeServer()
     const { manager } = setup(server, { send: hanging })
-    manager.add({ kind: 'append', resourceId: 4 }, [{ file: tenBytes() }])
+    manager.add({ kind: 'append', resourceId: 4 }, 'ゲーム', [{ file: tenBytes() }])
     await vi.waitFor(() => expect(manager.getSnapshot().uploads[0]?.session?.id).toBe(1))
     manager.cancel('id2')
     await vi.waitFor(() => expect(server.called('DELETE', '/uploads/large/1')).toBeDefined())

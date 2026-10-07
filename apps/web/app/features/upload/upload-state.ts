@@ -35,8 +35,11 @@ export function reduce(state: UploadState, event: UploadEvent): UploadState {
       }
     case 'restored':
       return {
-        submissions: [...event.state.submissions, ...state.submissions],
-        uploads: [...event.state.uploads, ...state.uploads],
+        submissions: [
+          ...unknownTo(state.submissions, event.state.submissions),
+          ...state.submissions,
+        ],
+        uploads: [...unknownTo(state.uploads, event.state.uploads), ...state.uploads],
       }
     case 'fileFound':
     case 'resumed':
@@ -105,6 +108,10 @@ export function findUpload(state: UploadState, id: string): Upload | undefined {
 
 export function busy(state: UploadState): boolean {
   return state.uploads.some(upload => !settled(upload))
+}
+
+function unknownTo<Entry extends { id: string }>(known: readonly Entry[], restored: Entry[]) {
+  return restored.filter(entry => !known.some(current => current.id === entry.id))
 }
 
 function phase(state: UploadState, id: string, next: UploadPhase): UploadState {

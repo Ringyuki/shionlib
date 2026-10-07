@@ -7,7 +7,7 @@ import { Slots } from './upload-slots'
 import { findUpload, nextToStart, readyToSubmit, uploadsOf, type UploadEvent } from './upload-state'
 import { UploadStore } from './upload-store'
 import { transfer, type TransferContext, type UploadDeps } from './upload-transfer'
-import { discardSession, loadAllowance, restoreUploads, submitUploads } from './upload.use-cases'
+import { discardSession, restoreUploads, submitUploads } from './upload.use-cases'
 
 export type PickedFile = { file: File; name?: string }
 
@@ -38,15 +38,11 @@ export class UploadManager {
   getSnapshot = () => this.store.getSnapshot()
 
   async start() {
-    this.lifetime = new AbortController()
+    const lifetime = new AbortController()
+    this.lifetime = lifetime
     const saved = this.deps.storage.read()
-    const restored = await restoreUploads(
-      this.deps.api,
-      saved,
-      this.lifetime.signal,
-      this.deps.random,
-    )
-    if (restored !== undefined) {
+    const restored = await restoreUploads(this.deps.api, saved, lifetime.signal, this.deps.random)
+    if (restored !== undefined && !lifetime.signal.aborted) {
       this.dispatch({ type: 'restored', state: restored })
       this.advance()
     }
@@ -60,11 +56,7 @@ export class UploadManager {
     this.hashers.clear()
   }
 
-  allowance() {
-    return loadAllowance(this.deps.api)
-  }
-
-  add(target: UploadTarget, picks: readonly PickedFile[]): string {
+  add(target: UploadTarget, label: string, picks: readonly PickedFile[]): string {
     const submission = this.deps.newId()
     const uploads = picks.map(pick => {
       const id = this.deps.newId()
@@ -82,7 +74,7 @@ export class UploadManager {
     })
     this.dispatch({
       type: 'added',
-      submission: { id: submission, target, phase: { name: 'uploading' } },
+      submission: { id: submission, target, label, phase: { name: 'uploading' } },
       uploads,
     })
     this.advance()

@@ -5,6 +5,7 @@ import { nextToStart, readyToSubmit, reduce } from './upload-state'
 const submission: Submission = {
   id: 's',
   target: { kind: 'append', resourceId: 1 },
+  label: 'x',
   phase: { name: 'uploading' },
 }
 
@@ -60,6 +61,28 @@ describe('reduce', () => {
     state = reduce(state, { type: 'paused', upload: 'a' })
     state = reduce(state, { type: 'resumed', upload: 'a' })
     expect(state.uploads[0]?.phase).toEqual({ name: 'queued' })
+  })
+})
+
+describe('restoring', () => {
+  it('keeps what is already known and adds the rest', () => {
+    const known = reduce(emptyState, {
+      type: 'added',
+      submission,
+      uploads: [upload('a', { sent: 7 })],
+    })
+    const restored = reduce(known, {
+      type: 'restored',
+      state: {
+        submissions: [submission, { ...submission, id: 't' }],
+        uploads: [upload('a'), upload('b', { submission: 't' })],
+      },
+    })
+    expect(restored.submissions.map(entry => entry.id)).toEqual(['t', 's'])
+    expect(restored.uploads.map(entry => [entry.id, entry.sent])).toEqual([
+      ['b', 0],
+      ['a', 7],
+    ])
   })
 })
 

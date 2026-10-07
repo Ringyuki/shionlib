@@ -1,0 +1,47 @@
+{
+  "tray": "アップロード",
+  "total": "{sent} / {size}",
+  "target": {
+    "create": "新しいリソース：{label}",
+    "append": "ファイルの追加：{label}",
+    "replace": "ファイルの差し替え：{label}",
+    "orphan": "リソースのないアップロード"
+  },
+  "submission": {
+    "submitting": "送信中",
+    "submitted": "完了",
+    "failed": "送信に失敗しました"
+  },
+  "phase": {
+    "queued": "待機中",
+    "needsFile": "ファイルを選び直してください",
+    "paused": "一時停止中",
+    "done": "アップロード済み"
+  },
+  "wait": {
+    "network": "接続が切れました。まもなく再試行します",
+    "busy": "サーバーが混み合っています。まもなく再試行します",
+    "inFlight": "アップロード中の合計が上限に達しています。前のファイルが終わると自動で始まります",
+    "signedOut": "ログインの有効期限が切れました。ログインし直すと再開します",
+    "elsewhere": "別のタブでアップロード中です"
+  },
+  "failure": {
+    "differentFile": "選んだファイルは前にアップロードしたものと違います",
+    "changedFile": "アップロード中にファイルが変更されました",
+    "expired": "アップロードの期限が切れました。もう一度アップロードしてください",
+    "rejected": "アップロードに失敗しました"
+  },
+  "speed": "{speed}/秒",
+  "remaining": "残り {time}",
+  "pause": "一時停止",
+  "resume": "再開",
+  "cancel": "キャンセル",
+  "retry": "もう一度送信",
+  "dismiss": "削除",
+  "chooseAgain": "ファイルを選んで続ける",
+  "chooseAgainHint": "ページを再読み込みしたため、次のファイルを選び直してください：{names}",
+  "orphanHint": "これらのアップロードはどのリソースにも属していません。キャンセルできます。",
+  "unmatched": "続きをアップロードするファイルと一致しません：{names}",
+  "submittedToast": "{label} が完了しました",
+  "failedToast": "{label} を送信できませんでした"
+}

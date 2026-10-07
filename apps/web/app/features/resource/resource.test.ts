@@ -4,10 +4,9 @@ import ja from './messages/ja.json'
 import zh from './messages/zh.json'
 import {
   detections,
-  fileSize,
   fileState,
-  ownedBy,
   reportReasons,
+  rightsOver,
   resourcePlatforms,
   shortHash,
   summarizeResources,
@@ -58,11 +57,9 @@ describe('fileState', () => {
 })
 
 describe('display helpers', () => {
-  it('shortens hashes and sizes files in binary units', () => {
+  it('shortens hashes', () => {
     expect(shortHash('9f3a1c00112233445566e02b8c')).toBe('9f3a1c…e02b8c')
     expect(shortHash('abc')).toBe('abc')
-    expect(fileSize(4.12 * 1024 ** 3)).toMatchObject({ unit: 'GB' })
-    expect(fileSize(512)).toEqual({ value: 512, unit: 'B' })
   })
 })
 
@@ -79,11 +76,25 @@ describe('platform filter', () => {
   })
 })
 
-describe('ownedBy', () => {
-  it('matches only the uploader', () => {
-    expect(ownedBy(resource(1, null), 7)).toBe(true)
-    expect(ownedBy(resource(1, null), 8)).toBe(false)
-    expect(ownedBy(resource(1, null), null)).toBe(false)
+describe('rightsOver', () => {
+  it('lets the uploader and admins manage and only super admins remove', () => {
+    expect(rightsOver(resource(1, null), { id: 7, role: 1 })).toEqual({
+      manage: true,
+      remove: false,
+    })
+    expect(rightsOver(resource(1, null), { id: 8, role: 1 })).toEqual({
+      manage: false,
+      remove: false,
+    })
+    expect(rightsOver(resource(1, null), { id: 8, role: 2 })).toEqual({
+      manage: true,
+      remove: false,
+    })
+    expect(rightsOver(resource(1, null), { id: 8, role: 3 })).toEqual({
+      manage: true,
+      remove: true,
+    })
+    expect(rightsOver(resource(1, null), null)).toEqual({ manage: false, remove: false })
   })
 })
 

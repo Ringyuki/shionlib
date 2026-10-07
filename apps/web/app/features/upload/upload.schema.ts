@@ -30,7 +30,12 @@ const savedUpload = v.object({
   done: v.boolean(),
 })
 
-const savedSubmission = v.object({ id: v.string(), target, submitting: v.boolean() })
+const savedSubmission = v.object({
+  id: v.string(),
+  target,
+  label: v.string(),
+  submitting: v.boolean(),
+})
 
 const savedState = v.object({
   submissions: v.array(savedSubmission),

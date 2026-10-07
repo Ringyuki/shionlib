@@ -26,5 +26,6 @@
     "empty": "Nothing found for “{query}”. Try the original Japanese title or an alias.",
     "unavailable": "Search is unavailable right now. Please try again later.",
     "pages": "Search result pages"
-  }
+  },
+  "pickGame": "Search for a game"
 }

@@ -61,7 +61,7 @@ export function ReportDialog({ resourceId, open, onOpenChange }: ReportDialogPro
               <FormField
                 name="detail"
                 label={t('reportDetail')}
-                description={t('reportDetailHint', lengthOf('CreateReportInputBody', 'detail'))}
+                description={t('optionalHint', lengthOf('CreateReportInputBody', 'detail'))}
               >
                 <Textarea
                   value={values.detail}

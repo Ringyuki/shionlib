@@ -11,7 +11,7 @@ import {
   type Resource,
 } from './resource'
 
-export type ResourceIssue = 'platforms' | 'languages' | 'simulator'
+export type ResourceIssue = 'platforms' | 'languages' | 'simulator' | 'files'
 
 export type ResourceIssueMessage = (issue: ResourceIssue) => string
 
@@ -54,11 +54,20 @@ export function reportForm(kit: FormKit) {
 
 export type ReportValues = v.InferInput<ReturnType<typeof reportForm>>
 
+const platformField = (issue: ResourceIssueMessage) =>
+  v.pipe(platforms, v.minLength(leastPlatforms, issue('platforms')))
+
+const languageField = (issue: ResourceIssueMessage) =>
+  v.pipe(languages, v.minLength(leastLanguages, issue('languages')))
+
+const filesField = (issue: ResourceIssueMessage) =>
+  v.pipe(v.array(v.instance(File)), v.minLength(1, issue('files')))
+
 export function editForm(kit: FormKit, issue: ResourceIssueMessage) {
   return v.pipe(
     v.object({
-      platform: v.pipe(platforms, v.minLength(leastPlatforms, issue('platforms'))),
-      language: v.pipe(languages, v.minLength(leastLanguages, issue('languages'))),
+      platform: platformField(issue),
+      language: languageField(issue),
       simulator,
       note: kit.text('EditDownloadSourceBodyInput', 'note'),
     }),
@@ -73,6 +82,43 @@ export function editForm(kit: FormKit, issue: ResourceIssueMessage) {
   )
 }
 
+export function uploadForm(kit: FormKit, issue: ResourceIssueMessage) {
+  return v.pipe(
+    v.object({
+      platform: platformField(issue),
+      language: languageField(issue),
+      simulator,
+      note: kit.text('DownloadSourceBodyInput', 'note'),
+      files: filesField(issue),
+    }),
+    v.forward(
+      v.partialCheck(
+        [['platform'], ['simulator']],
+        input => !needsSimulator(input.platform) || input.simulator !== '',
+        issue('simulator'),
+      ),
+      ['simulator'],
+    ),
+  )
+}
+
+export type UploadValues = v.InferInput<ReturnType<typeof uploadForm>>
+
+export function addFilesForm(issue: ResourceIssueMessage) {
+  return v.object({ files: filesField(issue) })
+}
+
+export type AddFilesValues = v.InferInput<ReturnType<typeof addFilesForm>>
+
+export function replaceForm(kit: FormKit, issue: ResourceIssueMessage) {
+  return v.object({
+    files: filesField(issue),
+    reason: kit.text('DownloadReuploadInputBody', 'reason'),
+  })
+}
+
+export type ReplaceValues = v.InferInput<ReturnType<typeof replaceForm>>
+
 export type EditValues = v.InferInput<ReturnType<typeof editForm>>
 
 export function editValuesFrom(resource: Resource): EditValues {
@@ -86,9 +132,9 @@ export function editValuesFrom(resource: Resource): EditValues {
   }
 }
 
-const fileQuery = v.pipe(v.string(), v.toNumber(), v.safeInteger(), v.minValue(1))
+const idQuery = v.pipe(v.string(), v.toNumber(), v.safeInteger(), v.minValue(1))
 
-export function fileParam(raw: string | null): number | undefined {
-  const parsed = v.safeParse(fileQuery, raw)
+export function queryId(raw: string | null): number | undefined {
+  const parsed = v.safeParse(idQuery, raw)
   return parsed.success ? parsed.output : undefined
 }

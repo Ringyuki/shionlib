@@ -14,7 +14,7 @@ import { useMessages, useTranslations } from 'use-intl'
 import { PlatformTag } from '~/features/game'
 import { labelOf } from '~/shared/i18n/labels'
 import { BBCodeText } from '~/shared/ui/bbcode-text'
-import { ownedBy, resourceAnchor, type Resource } from '../resource'
+import { resourceAnchor, rightsOver, type Resource, type ResourceViewer } from '../resource'
 import { ResourceMenu } from './resource-menu'
 import { ResourceFiles } from './resource-files'
 
@@ -22,15 +22,16 @@ const tagClass = 'h-7 px-2.5'
 
 type ResourceCardProps = {
   resource: Resource
-  viewerId: number | null
+  viewer: ResourceViewer | null
 }
 
-export function ResourceCard({ resource, viewerId }: ResourceCardProps) {
+export function ResourceCard({ resource, viewer }: ResourceCardProps) {
   const t = useTranslations('resource')
   const labels = useMessages()
   const resolveImage = useImageResolver()
   const { creator } = resource
   const note = resource.note?.trim() ?? ''
+  const rights = rightsOver(resource, viewer)
   return (
     <Card as="article" padded={false} id={resourceAnchor(resource.id)} className="scroll-mt-24">
       <Stack gap="sm" className="p-4">
@@ -82,11 +83,11 @@ export function ResourceCard({ resource, viewerId }: ResourceCardProps) {
             </Inline>
           </Inline>
           <Stack className="col-start-2 row-start-1 sm:col-start-3">
-            <ResourceMenu resource={resource} owned={ownedBy(resource, viewerId)} />
+            <ResourceMenu resource={resource} rights={rights} />
           </Stack>
         </Grid>
         {note !== '' && <BBCodeText source={note} size="sm" />}
-        <ResourceFiles files={resource.files ?? []} />
+        <ResourceFiles files={resource.files ?? []} manageable={rights.manage} />
       </Stack>
     </Card>
   )

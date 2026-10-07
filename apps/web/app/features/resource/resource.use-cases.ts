@@ -1,4 +1,5 @@
 import type { ApiClient } from '~/shared/api/client'
+import { ApiError } from '~/shared/api/error'
 import { needsSimulator } from './resource'
 import type { ResourceDeletion, ResourceEdit, ResourceReport } from './resource.schema'
 
@@ -40,4 +41,23 @@ export async function editResource(api: ApiClient, edit: ResourceEdit) {
 
 export async function deleteResource(api: ApiClient, deletion: ResourceDeletion) {
   await api.delete('/game/download-source/{id}', { params: { path: { id: deletion.resourceId } } })
+}
+
+export async function loadUploadPage(api: ApiClient, gameId: number | undefined) {
+  const [game, allowance] = await Promise.all([
+    gameId === undefined
+      ? null
+      : api.get('/game/{id}/header', { params: { path: { id: gameId } } }),
+    loadAllowance(api),
+  ])
+  return { game, allowance }
+}
+
+export function loadAllowance(api: ApiClient) {
+  return api.get('/uploads/quota').catch((error: unknown) => {
+    if (error instanceof ApiError && error.status === 401) {
+      return null
+    }
+    throw error
+  })
 }

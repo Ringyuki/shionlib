@@ -1,4 +1,5 @@
 import { constraints } from '~/shared/api/generated/constraints'
+import type { ResourceDraft } from '~/features/upload'
 import type { Schema } from '~/shared/api/types'
 
 export type Resource = Schema<'DownloadResourceDTO'>
@@ -6,6 +7,10 @@ export type Resource = Schema<'DownloadResourceDTO'>
 export type ResourceFile = Schema<'DownloadFileDTO'>
 
 export type FileHistory = Schema<'DownloadHistoryDTO'>
+
+export type ResourceViewer = Pick<Schema<'UserMeDTO'>, 'id' | 'role'>
+
+export type ResourceRights = { manage: boolean; remove: boolean }
 
 type EditFields = Schema<'EditDownloadSourceBodyInput'>
 
@@ -42,11 +47,13 @@ const mobilePlatforms: readonly Platform[] = ['and', 'ios']
 
 export const platformFilterFrom = 4
 
-export const fileInObjectStore = 3
+const fileInObjectStore = 3
+
+const adminRole = 2
+
+const superAdminRole = 3
 
 const hashEdge = 6
-
-const sizeUnits = ['B', 'KB', 'MB', 'GB', 'TB'] as const
 
 export function resourceAnchor(id: number): string {
   return `resource-${id}`
@@ -57,10 +64,14 @@ export function detections(file: Pick<ResourceFile, 'malware_scan_cases'>): stri
   return [...new Set(names)]
 }
 
+export function stored(file: Pick<ResourceFile, 'file_status'>): boolean {
+  return file.file_status === fileInObjectStore
+}
+
 export function fileState(
   file: Pick<ResourceFile, 'file_status' | 'malware_scan_cases' | 'is_virus_false_positive'>,
 ): FileState {
-  if (file.file_status !== fileInObjectStore) {
+  if (!stored(file)) {
     return 'scanning'
   }
   if (detections(file).length === 0) {
@@ -73,16 +84,6 @@ export function shortHash(hash: string): string {
   return hash.length <= hashEdge * 2 + 1
     ? hash
     : `${hash.slice(0, hashEdge)}…${hash.slice(-hashEdge)}`
-}
-
-export function fileSize(bytes: number): { value: number; unit: (typeof sizeUnits)[number] } {
-  let value = Math.max(0, bytes)
-  let unit = 0
-  while (value >= 1024 && unit < sizeUnits.length - 1) {
-    value /= 1024
-    unit += 1
-  }
-  return { value, unit: sizeUnits[unit] ?? 'B' }
 }
 
 export function resourcePlatforms(resources: readonly Resource[]): string[] {
@@ -98,12 +99,40 @@ export function withPlatform(
     : resources.filter(resource => (resource.platform ?? []).includes(platform))
 }
 
-export function ownedBy(resource: Pick<Resource, 'creator'>, viewerId: number | null): boolean {
-  return viewerId !== null && resource.creator.id === viewerId
+export function rightsOver(
+  resource: Pick<Resource, 'creator'>,
+  viewer: ResourceViewer | null,
+): ResourceRights {
+  if (viewer === null) {
+    return { manage: false, remove: false }
+  }
+  return {
+    manage: resource.creator.id === viewer.id || viewer.role >= adminRole,
+    remove: viewer.role >= superAdminRole,
+  }
 }
 
 export function needsSimulator(platforms: readonly Platform[]): boolean {
   return platforms.some(platform => mobilePlatforms.includes(platform))
+}
+
+export type ResourceFieldValues = {
+  platform: Platform[]
+  language: Language[]
+  simulator: Simulator | ''
+  note: string
+}
+
+export function resourceDraft(values: ResourceFieldValues): ResourceDraft {
+  const note = values.note.trim()
+  return {
+    platform: values.platform,
+    language: values.language,
+    ...(needsSimulator(values.platform) && values.simulator !== ''
+      ? { simulator: values.simulator }
+      : {}),
+    ...(note === '' ? {} : { note }),
+  }
 }
 
 export type ResourceSummary = {

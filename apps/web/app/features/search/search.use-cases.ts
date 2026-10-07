@@ -4,9 +4,11 @@ import {
   emptyResults,
   normalizeQuery,
   paletteSize,
+  pickerSize,
   resultsPageSize,
   suggestionSize,
   trendingSize,
+  type GameHit,
   type Palette,
   type SearchResults,
 } from './search'
@@ -92,4 +94,16 @@ export async function recordSearch(api: ApiClient, raw: string) {
     await api.post('/search/record', { body: { q: query } })
   }
   return null
+}
+
+export async function findGames(api: ApiClient, raw: string): Promise<GameHit[]> {
+  const query = normalizeQuery(raw)
+  if (query === '') {
+    return []
+  }
+  const found = await quietly(
+    api.get('/search', { params: { query: { q: query, types: ['game'], pageSize: pickerSize } } }),
+    null,
+  )
+  return found?.games.items ?? []
 }

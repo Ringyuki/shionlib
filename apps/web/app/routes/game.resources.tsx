@@ -7,7 +7,7 @@ export default function GameResources({ matches }: Route.ComponentProps) {
     <ResourceList
       gameId={game.loaderData.header.id}
       resources={game.loaderData.resources}
-      viewerId={site.loaderData.viewer?.id ?? null}
+      viewer={site.loaderData.viewer}
     />
   )
 }

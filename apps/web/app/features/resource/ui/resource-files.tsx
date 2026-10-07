@@ -1,5 +1,6 @@
 import {
   CopyButton,
+  IconButton,
   Inline,
   Stack,
   Table,
@@ -10,15 +11,23 @@ import {
   TableRow,
   Text,
 } from '@hina-ui/react'
-import { FileArchive } from 'lucide-react'
-import { useFormatter, useTranslations } from 'use-intl'
+import { FileArchive, FileUp } from 'lucide-react'
+import { useState } from 'react'
+import { useTranslations } from 'use-intl'
 import { DownloadButton } from '~/features/download'
-import { fileSize, fileState, shortHash, type ResourceFile } from '../resource'
+import { useBytes } from '~/shared/i18n/use-bytes'
+import { fileState, shortHash, stored, type ResourceFile } from '../resource'
 import { FileState } from './file-state'
+import { ReplaceFileDialog } from './replace-file-dialog'
 
 const wide = 'max-sm:hidden'
 
-export function ResourceFiles({ files }: { files: readonly ResourceFile[] }) {
+type ResourceFilesProps = {
+  files: readonly ResourceFile[]
+  manageable: boolean
+}
+
+export function ResourceFiles({ files, manageable }: ResourceFilesProps) {
   const t = useTranslations('resource.column')
   return (
     <Table variant="secondary" hover={false} className="[&_tbody_tr:last-child]:border-0">
@@ -32,18 +41,18 @@ export function ResourceFiles({ files }: { files: readonly ResourceFile[] }) {
       </TableHeader>
       <TableBody>
         {files.map(file => (
-          <FileRow key={file.id} file={file} />
+          <FileRow key={file.id} file={file} replaceable={manageable && stored(file)} />
         ))}
       </TableBody>
     </Table>
   )
 }
 
-function FileRow({ file }: { file: ResourceFile }) {
+function FileRow({ file, replaceable }: { file: ResourceFile; replaceable: boolean }) {
   const t = useTranslations('resource')
-  const format = useFormatter()
-  const size = fileSize(file.file_size)
-  const sizeText = `${format.number(size.value, { maximumFractionDigits: size.unit === 'B' ? 0 : 2 })} ${size.unit}`
+  const [replacing, setReplacing] = useState(false)
+  const bytes = useBytes()
+  const sizeText = bytes(file.file_size)
   const state = fileState(file)
   return (
     <TableRow>
@@ -77,10 +86,20 @@ function FileRow({ file }: { file: ResourceFile }) {
         </Inline>
       </TableCell>
       <TableCell align="end" className="pe-0">
-        <DownloadButton
-          file={{ id: file.id, name: file.file_name }}
-          disabled={state === 'scanning' || state === 'risky'}
-        />
+        <Inline gap="xs" align="center" justify="end" wrap={false}>
+          {replaceable && (
+            <>
+              <IconButton label={t('replaceFile')} size="sm" onClick={() => setReplacing(true)}>
+                <FileUp />
+              </IconButton>
+              <ReplaceFileDialog file={file} open={replacing} onOpenChange={setReplacing} />
+            </>
+          )}
+          <DownloadButton
+            file={{ id: file.id, name: file.file_name }}
+            disabled={state === 'scanning' || state === 'risky'}
+          />
+        </Inline>
       </TableCell>
     </TableRow>
   )

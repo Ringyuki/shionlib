@@ -20,6 +20,11 @@
   "history": "履歴",
   "report": "報告",
   "edit": "編集",
+  "addFiles": "ファイルを追加",
+  "addFilesDescription": "アップロードが終わると、このリソースに追加されます。",
+  "replaceFile": "ファイルを差し替え",
+  "replaceDescription": "アップロードが終わると、新しいファイルで {name} を差し替えます。",
+  "replaceReason": "差し替えの理由",
   "delete": "削除",
   "deleteConfirm": "このリソースを削除しますか？",
   "deleteDescription": "ファイルも削除され、元に戻せません。",
@@ -30,7 +35,7 @@
   "reportTitle": "リソースを報告",
   "reportReason": "理由",
   "reportDetail": "詳細",
-  "reportDetailHint": "任意、{max} 文字まで",
+  "optionalHint": "任意、{max} 文字まで",
   "reportSubmit": "報告する",
   "reported": "報告を受け付けました。確認いたします",
   "cancel": "キャンセル",
@@ -59,7 +64,8 @@
   "issue": {
     "platforms": "プラットフォームを 1 つ以上選んでください",
     "languages": "言語を 1 つ以上選んでください",
-    "simulator": "エンジンを選んでください"
+    "simulator": "エンジンを選んでください",
+    "files": "ファイルを選んでください"
   },
   "stateHelp": "説明を見る",
   "updated": "<time></time>に更新",
@@ -69,5 +75,29 @@
     "hash": "チェックサム",
     "download": "ダウンロード"
   },
-  "actions": "リソースの操作"
+  "actions": "リソースの操作",
+  "uploadTitle": "リソースをアップロード",
+  "uploadDescription": "ゲームとファイルを選び、リソースの情報を入力してからアップロードを始めます。アップロードはバックグラウンドで続くので、このページを離れても大丈夫です。",
+  "uploadGame": "ゲーム",
+  "changeGame": "変更",
+  "uploadFiles": "ファイル",
+  "uploadDrop": "クリックしてファイルを選ぶか、ここにドロップしてください",
+  "fileLimit": "1 ファイル {limit} まで",
+  "fileLimitNoQuota": "1 ファイル {limit} まで、保存容量は無制限",
+  "storage": {
+    "label": "保存容量（合計 {limit}）",
+    "stored": "保存済み",
+    "uploading": "アップロード中",
+    "chosen": "今回の選択"
+  },
+  "uploadStart": "アップロードを開始",
+  "uploadStarted": "アップロードを開始しました。右上で進み具合を確認できます",
+  "uploadSignIn": "リソースをアップロードするにはログインしてください",
+  "signIn": "ログイン",
+  "admission": {
+    "full": "保存容量を使い切ったため、新しいファイルはアップロードできません",
+    "empty": "{file} は空のファイルのため、アップロードできません",
+    "tooLarge": "{file} は {size} あります。1 ファイルは {limit} までです",
+    "overQuota": "選んだファイルは合計 {total} ですが、残りは {left} です"
+  }
 }

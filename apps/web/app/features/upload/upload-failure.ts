@@ -92,8 +92,11 @@ function decideApiError(error: ApiError, attempt: number, random: number): Decis
   if (error.status === 401) {
     return { kind: 'retry', reason: 'signedOut', delay: retryCap }
   }
-  if (error.is('UPLOAD_SPOOL_FULL') || error.is('USER_UPLOAD_IN_FLIGHT_EXCEEDED')) {
+  if (error.is('UPLOAD_SPOOL_FULL')) {
     return { kind: 'retry', reason: 'busy', delay: busyDelay }
+  }
+  if (error.is('USER_UPLOAD_IN_FLIGHT_EXCEEDED')) {
+    return { kind: 'retry', reason: 'inFlight', delay: busyDelay }
   }
   if (error.status === 429) {
     const delay =

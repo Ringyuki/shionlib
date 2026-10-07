@@ -29,10 +29,6 @@ export async function restoreUploads(
   return ongoing === undefined ? undefined : restoreState(saved, ongoing)
 }
 
-export function loadAllowance(api: ApiClient) {
-  return api.get('/uploads/quota')
-}
-
 export async function openSession(api: ApiClient, file: FileIdentity): Promise<UploadSession> {
   const opened = await api.post('/uploads/large/init', {
     body: { file_name: file.name, total_size: file.size },
