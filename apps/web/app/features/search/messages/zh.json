@@ -23,8 +23,7 @@
     "prompt": "输入游戏名、开发商或角色名开始搜索。",
     "openPalette": "打开搜索",
     "empty": "没有找到「{query}」。试试日文原名或别名。",
-    "unavailable": "搜索暂时不可用，请稍后再试。",
-    "pages": "搜索结果分页"
+    "unavailable": "搜索暂时不可用，请稍后再试。"
   },
   "pickGame": "搜索游戏名称",
   "released": {

@@ -23,8 +23,7 @@
     "prompt": "Search by game title, developer or character name.",
     "openPalette": "Open search",
     "empty": "Nothing found for “{query}”. Try the original Japanese title or an alias.",
-    "unavailable": "Search is unavailable right now. Please try again later.",
-    "pages": "Search result pages"
+    "unavailable": "Search is unavailable right now. Please try again later."
   },
   "pickGame": "Search for a game",
   "released": {

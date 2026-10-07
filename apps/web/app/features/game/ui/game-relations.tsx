@@ -1,4 +1,4 @@
-import { Section, SimpleGrid, Stack, Text } from '@hina-ui/react'
+import { DataList, Section, Stack, Text } from '@hina-ui/react'
 import { useMessages, useTranslations } from 'use-intl'
 import { labelOf } from '~/shared/i18n/labels'
 import type { GameDetails } from '../game'
@@ -13,16 +13,16 @@ export function GameRelations({
   const labels = useMessages().game.relation
   return (
     <Section title={t('relations')}>
-      <SimpleGrid min="20rem" gap="md">
-        {relations.map(relation => (
-          <Stack key={relation.id} gap="xs">
+      <DataList items={relations} itemKey="id" layout="grid" gridMin="20rem" gridGap="md">
+        {({ item }) => (
+          <Stack gap="xs">
             <Text size="sm" tone="muted">
-              {labelOf(labels, relation.relation)}
+              {labelOf(labels, item.relation)}
             </Text>
-            <GameRow game={relation.to_game} />
+            <GameRow game={item.to_game} />
           </Stack>
-        ))}
-      </SimpleGrid>
+        )}
+      </DataList>
     </Section>
   )
 }

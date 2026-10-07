@@ -1,6 +1,6 @@
-import { Empty, Heading, Pagination, Result, SearchInput, Stack, Text } from '@hina-ui/react'
+import { DataList, Empty, Heading, Result, SearchInput, Stack, Text } from '@hina-ui/react'
 import { SearchX } from 'lucide-react'
-import { Form, useNavigate, useNavigation } from 'react-router'
+import { Form, useLocation, useNavigate, useNavigation } from 'react-router'
 import { useTranslations } from 'use-intl'
 import { GameRow } from '~/features/game'
 import { resultsPageSize, type SearchResults } from '../search'
@@ -16,7 +16,9 @@ export function SearchResultsView({ query, page, games, unavailable }: SearchRes
   const t = useTranslations('search')
   const navigate = useNavigate()
   const navigation = useNavigation()
-  const items = games.items ?? []
+  const location = useLocation()
+  const searching =
+    navigation.state === 'loading' && navigation.location.pathname === location.pathname
 
   const turn = (next: number) => {
     void navigate(`?${new URLSearchParams({ q: query, page: String(next) })}`)
@@ -47,26 +49,24 @@ export function SearchResultsView({ query, page, games, unavailable }: SearchRes
         <Text tone="muted">{t('results.prompt')}</Text>
       ) : unavailable ? (
         <Result status="warning" title={t('results.unavailable')} />
-      ) : items.length === 0 ? (
-        <Empty icon={<SearchX />} title={t('results.empty', { query })} />
       ) : (
-        <Stack gap="sm">
-          {items.map(game => (
-            <GameRow key={game.id} game={game} />
-          ))}
-        </Stack>
-      )}
-      {items.length > 0 && (
-        <Pagination
+        <DataList
+          items={games.items ?? []}
+          itemKey="id"
+          manual
+          pagination
           total={games.total}
+          page={page}
           pageSize={resultsPageSize}
-          value={page}
-          onValueChange={turn}
-          pending={navigation.state === 'loading'}
-          hideSinglePage
-          align="center"
-          label={t('results.pages')}
-        />
+          onPageChange={turn}
+          loading={searching}
+          layout="grid"
+          gridMin="100%"
+          gridGap="sm"
+          renderEmpty={() => <Empty icon={<SearchX />} title={t('results.empty', { query })} />}
+        >
+          {({ item }) => <GameRow game={item} />}
+        </DataList>
       )}
     </Stack>
   )
