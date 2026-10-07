@@ -65,7 +65,7 @@ type GameCardDTO struct {
 	ReleaseDate *time.Time             `json:"release_date"`
 	Developers  []GameCreditDTO        `json:"developers"`
 	Resources   GameResourceSummaryDTO `json:"resources"`
-	Tags        []GameTagRefDTO        `json:"tags" doc:"The game's most used tags, at most three"`
+	Tags        []GameTagRefDTO        `json:"tags" doc:"The tags that tell the game apart, at most three: its most used tags, without those a tenth of all games carry and those that only repeat the release date"`
 }
 
 func toResourceSummaryDTO(summary game.ResourceSummary) GameResourceSummaryDTO {
@@ -136,7 +136,7 @@ type GameListItemDTO struct {
 	ReleaseDate *time.Time             `json:"release_date"`
 	Developers  []GameCreditDTO        `json:"developers"`
 	Resources   GameResourceSummaryDTO `json:"resources"`
-	Tags        []GameTagRefDTO        `json:"tags" doc:"The game's most used tags, at most three"`
+	Tags        []GameTagRefDTO        `json:"tags" doc:"The tags that tell the game apart, at most three: its most used tags, without those a tenth of all games carry and those that only repeat the release date"`
 }
 
 func nonNil(values []string) []string {

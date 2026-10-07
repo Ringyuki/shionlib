@@ -12379,7 +12379,7 @@
             "$ref": "#/components/schemas/GameResourceSummaryDTO"
           },
           "tags": {
-            "description": "The game's most used tags, at most three",
+            "description": "The tags that tell the game apart, at most three: its most used tags, without those a tenth of all games carry and those that only repeat the release date",
             "items": {
               "$ref": "#/components/schemas/GameTagRefDTO"
             },
@@ -13192,7 +13192,7 @@
             "$ref": "#/components/schemas/GameResourceSummaryDTO"
           },
           "tags": {
-            "description": "The game's most used tags, at most three",
+            "description": "The tags that tell the game apart, at most three: its most used tags, without those a tenth of all games carry and those that only repeat the release date",
             "items": {
               "$ref": "#/components/schemas/GameTagRefDTO"
             },

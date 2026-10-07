@@ -78,15 +78,22 @@ func TestCardsSummarizePublicResources(t *testing.T) {
 	}
 }
 
-func TestCardsCarryTheTopThreeTags(t *testing.T) {
+func TestCardsCarryTheTagsThatTellAGameApart(t *testing.T) {
 	f := newFixtures(t)
 	store := gamepg.NewCardStore(f.db.Ent)
 	tagged, other, bare := f.game(), f.game(), f.game()
-	low := f.tag("low", 1, tagged)
-	tieFirst := f.tag("tie-first", 5, tagged)
-	top := f.tag("top", 9, tagged)
-	tieSecond := f.tag("tie-second", 5, tagged, other)
-	elsewhere := f.tag("elsewhere", 20, other)
+	for range 17 {
+		f.game()
+	}
+	f.tag("everywhere", 3, tagged, other)
+	for _, date := range []string{"2019", "2019-09", "2019年", "2019年9月", "2010s"} {
+		f.tag(date, 2, tagged)
+	}
+	rare := f.tag("rare", 1, tagged)
+	tieFirst := f.tag("tie-first", 2, tagged)
+	tieSecond := f.tag("tie-second", 2, tagged, other)
+	numbered := f.tag("20190", 2, tagged)
+	elsewhere := f.tag("elsewhere", 1, other)
 
 	cards, err := store.Cards(f.ctx, []int{tagged, other, bare})
 	if err != nil {
@@ -96,14 +103,28 @@ func TestCardsCarryTheTopThreeTags(t *testing.T) {
 	for _, card := range cards {
 		byID[card.ID] = card.Tags
 	}
-	if want := []game.TagRef{{ID: top, Name: "top"}, {ID: tieFirst, Name: "tie-first"}, {ID: tieSecond, Name: "tie-second"}}; !reflect.DeepEqual(byID[tagged], want) {
-		t.Fatalf("top three tags by count then id (low %d dropped): %+v", low, byID[tagged])
+	if want := []game.TagRef{{ID: tieFirst, Name: "tie-first"}, {ID: tieSecond, Name: "tie-second"}, {ID: numbered, Name: "20190"}}; !reflect.DeepEqual(byID[tagged], want) {
+		t.Fatalf("three most used tags by count then id, without common and date tags (rare %d dropped): %+v", rare, byID[tagged])
 	}
-	if want := []game.TagRef{{ID: elsewhere, Name: "elsewhere"}, {ID: tieSecond, Name: "tie-second"}}; !reflect.DeepEqual(byID[other], want) {
+	if want := []game.TagRef{{ID: tieSecond, Name: "tie-second"}, {ID: elsewhere, Name: "elsewhere"}}; !reflect.DeepEqual(byID[other], want) {
 		t.Fatalf("tags of another game: %+v", byID[other])
 	}
 	if tags, ok := byID[bare]; !ok || tags == nil || len(tags) != 0 {
 		t.Fatalf("untagged games carry an empty list: %#v", tags)
+	}
+}
+
+func TestCardsKeepTagsOfASmallCatalog(t *testing.T) {
+	f := newFixtures(t)
+	only := f.game()
+	own := f.tag("own", 1, only)
+
+	cards, err := gamepg.NewCardStore(f.db.Ent).Cards(f.ctx, []int{only})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := []game.TagRef{{ID: own, Name: "own"}}; len(cards) != 1 || !reflect.DeepEqual(cards[0].Tags, want) {
+		t.Fatalf("a tag one game carries stays however few games there are: %+v", cards)
 	}
 }
 

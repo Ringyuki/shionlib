@@ -26,6 +26,8 @@ FROM (
   FROM game_tag_relations r
   JOIN tags t ON t.id = r.tag_id
   WHERE r.game_id = ANY($1::int[])
+    AND t.count <= CEIL($3::float8 * (SELECT COUNT(*) FROM games))
+    AND t.name !~ $4
 ) ranked
 WHERE ranked.position <= $2
 ORDER BY ranked.game_id, ranked.position`
@@ -67,7 +69,7 @@ func (s *CardStore) Cards(ctx context.Context, ids []int) ([]game.Card, error) {
 	if err != nil {
 		return nil, err
 	}
-	tags, err := s.topTags(ctx, found)
+	tags, err := s.tellingTags(ctx, found)
 	if err != nil {
 		return nil, err
 	}
@@ -119,10 +121,10 @@ func publicFileSize(resources *sql.Selector) sql.Querier {
 	})
 }
 
-func (s *CardStore) topTags(ctx context.Context, gameIDs []int) (map[int][]game.TagRef, error) {
-	rows, err := s.db(ctx).QueryContext(ctx, cardTagsQuery, pgvalue.Ints(gameIDs), game.CardTagLimit)
+func (s *CardStore) tellingTags(ctx context.Context, gameIDs []int) (map[int][]game.TagRef, error) {
+	rows, err := s.db(ctx).QueryContext(ctx, cardTagsQuery, pgvalue.Ints(gameIDs), game.CardTagLimit, game.CommonTagShare, game.DateTagPattern)
 	if err != nil {
-		return nil, fmt.Errorf("load top tags of game cards: %w", err)
+		return nil, fmt.Errorf("load tags of game cards: %w", err)
 	}
 	defer func() {
 		_ = rows.Close()
@@ -134,12 +136,12 @@ func (s *CardStore) topTags(ctx context.Context, gameIDs []int) (map[int][]game.
 			tag    game.TagRef
 		)
 		if err := rows.Scan(&gameID, &tag.ID, &tag.Name); err != nil {
-			return nil, fmt.Errorf("scan top tags of game cards: %w", err)
+			return nil, fmt.Errorf("scan tags of game cards: %w", err)
 		}
 		tags[gameID] = append(tags[gameID], tag)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("read top tags of game cards: %w", err)
+		return nil, fmt.Errorf("read tags of game cards: %w", err)
 	}
 	return tags, nil
 }

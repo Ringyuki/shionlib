@@ -12,6 +12,10 @@ const RecentUpdateRetention = 30 * 24 * time.Hour
 
 const CardTagLimit = 3
 
+const CommonTagShare = 0.1
+
+const DateTagPattern = `^[0-9]{4}([-年][0-9]{1,2}月?|年|s)?$`
+
 type Status int
 
 const (
