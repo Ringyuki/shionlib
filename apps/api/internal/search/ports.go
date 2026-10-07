@@ -18,6 +18,7 @@ type Catalog interface {
 
 type Games interface {
 	Listable(ctx context.Context, ids []int, visibility game.Visibility) ([]int, error)
+	Referenced(ctx context.Context, reference game.Reference) ([]int, error)
 }
 
 type GameCards interface {

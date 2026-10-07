@@ -88,6 +88,11 @@ func TestListResolvesVisibilityAndResourcePreference(t *testing.T) {
 		t.Fatalf("users default to the resource filter: %v %+v", ids(cards), f.catalog.LastFilter)
 	}
 
+	cards, _, _ = f.service.List(ctx, strictUser, game.ListQuery{Page: page, IncludeWithoutResources: true})
+	if !slices.Equal(ids(cards), []int{4, 1}) || f.catalog.LastFilter.OnlyWithResources {
+		t.Fatalf("picking a game to upload to lists games without resources whatever the setting: %v %+v", ids(cards), f.catalog.LastFilter)
+	}
+
 	f.catalog.Put(gametest.Entry{Detail: game.Detail{ID: 9}, DeveloperIDs: []int{7}})
 	cards, _, _ = f.service.List(ctx, guest, game.ListQuery{Page: page, DeveloperID: ptr(7)})
 	if !slices.Equal(ids(cards), []int{9}) || f.catalog.LastFilter.OnlyWithResources {

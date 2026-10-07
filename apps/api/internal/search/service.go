@@ -106,6 +106,9 @@ func collapseSpaces(raw string) string {
 }
 
 func (s *Service) lookup(ctx context.Context, kind catalog.Entity, q string, page, size int) ([]int, int, error) {
+	if reference, ok := ParseReference(q); ok {
+		return s.referenced(ctx, kind, reference, page, size)
+	}
 	found, err := s.upstream(ctx, kind, q, page, size)
 	if err != nil {
 		return nil, 0, err
@@ -121,6 +124,18 @@ func (s *Service) lookup(ctx context.Context, kind catalog.Entity, q string, pag
 		}
 	}
 	return ids, found.Total, nil
+}
+
+func (s *Service) referenced(ctx context.Context, kind catalog.Entity, reference game.Reference, page, size int) ([]int, int, error) {
+	if kind != catalog.EntityGame {
+		return []int{}, 0, nil
+	}
+	ids, err := s.listing.Referenced(ctx, reference)
+	if err != nil {
+		return nil, 0, err
+	}
+	start := min((page-1)*size, len(ids))
+	return ids[start:min(start+size, len(ids))], len(ids), nil
 }
 
 func (s *Service) upstream(ctx context.Context, kind catalog.Entity, q string, page, size int) (UpstreamPage, error) {
@@ -258,6 +273,9 @@ func (s *Service) RecordSearch(ctx context.Context, raw string) error {
 func recordable(raw string) (string, bool) {
 	query := strings.ToLower(collapseSpaces(raw))
 	length := utf8.RuneCountInString(query)
+	if _, reference := ParseReference(query); reference {
+		return query, false
+	}
 	return query, length > 0 && length <= MaxRecordedQueryLength
 }
 

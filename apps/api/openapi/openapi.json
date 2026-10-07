@@ -27605,6 +27605,16 @@
               "description": "Released on or before this date (ISO 8601)",
               "type": "string"
             }
+          },
+          {
+            "description": "Also list games without resources, whatever the viewer's setting, as when picking a game to upload to",
+            "explode": false,
+            "in": "query",
+            "name": "include_without_resources",
+            "schema": {
+              "description": "Also list games without resources, whatever the viewer's setting, as when picking a game to upload to",
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -29136,12 +29146,12 @@
             }
           },
           {
-            "description": "Keyword sent to the catalog source",
+            "description": "Keyword sent to the catalog source; hid:, vid: or bid: followed by an id, or a VNDB id such as v17, finds games by that id instead",
             "explode": false,
             "in": "query",
             "name": "q",
             "schema": {
-              "description": "Keyword sent to the catalog source",
+              "description": "Keyword sent to the catalog source; hid:, vid: or bid: followed by an id, or a VNDB id such as v17, finds games by that id instead",
               "maxLength": 100,
               "type": "string"
             }

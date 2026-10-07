@@ -25,18 +25,19 @@ const (
 )
 
 type ListQuery struct {
-	Page        Page
-	DeveloperID *int
-	CharacterID *int
-	Tags        []string
-	ExcludeTags []string
-	Platforms   []string
-	Years       []int
-	Months      []int
-	SortBy      SortBy
-	SortOrder   SortOrder
-	StartDate   *time.Time
-	EndDate     *time.Time
+	Page                    Page
+	DeveloperID             *int
+	CharacterID             *int
+	Tags                    []string
+	ExcludeTags             []string
+	Platforms               []string
+	Years                   []int
+	Months                  []int
+	SortBy                  SortBy
+	SortOrder               SortOrder
+	StartDate               *time.Time
+	EndDate                 *time.Time
+	IncludeWithoutResources bool
 }
 
 func (q ListQuery) entityPage() bool {

@@ -120,6 +120,11 @@ func TestListShapeAndFilters(t *testing.T) {
 		t.Fatalf("resource_updated lists only games with downloadable resources: %s %+v", resp.Data, e.catalog.LastFilter)
 	}
 
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/list?include_without_resources=true"}), http.StatusOK, 0)
+	if e.catalog.LastFilter.OnlyWithResources {
+		t.Fatalf("include_without_resources lifts the resource filter even for guests: %+v", e.catalog.LastFilter)
+	}
+
 	for _, bad := range []string{"pageSize=101", "filter[years][]=1800", "filter[months][]=13", "filter[sort_by]=title", "filter[start_date]=yesterday", "filter[years][]=x"} {
 		e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/list?" + bad}), http.StatusUnprocessableEntity, 100101)
 	}

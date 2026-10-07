@@ -57,7 +57,7 @@ func (s *Service) List(ctx context.Context, viewer actor.Actor, query ListQuery)
 }
 
 func (s *Service) onlyWithResources(ctx context.Context, viewer actor.Actor, query ListQuery) (bool, error) {
-	if query.entityPage() {
+	if query.entityPage() || query.IncludeWithoutResources {
 		return false, nil
 	}
 	if !viewer.Authenticated() {

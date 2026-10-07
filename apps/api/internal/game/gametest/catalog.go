@@ -3,6 +3,7 @@ package gametest
 import (
 	"context"
 	"slices"
+	"strconv"
 	"sync"
 	"time"
 
@@ -104,6 +105,39 @@ func (c *Catalog) Listable(_ context.Context, ids []int, visibility game.Visibil
 		}
 	}
 	return listable, nil
+}
+
+func (c *Catalog) Referenced(_ context.Context, reference game.Reference) ([]int, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	ids := []int{}
+	for _, id := range c.sortedIDs(false) {
+		if externalID(c.entries[id].Detail, reference.Source) == reference.Key() {
+			ids = append(ids, id)
+		}
+	}
+	return ids, nil
+}
+
+func externalID(detail game.Detail, source game.ReferenceSource) string {
+	switch source {
+	case game.ReferenceVNDB:
+		return valueOf(detail.VID)
+	case game.ReferenceBangumi:
+		return valueOf(detail.BID)
+	default:
+		if detail.HID == nil {
+			return ""
+		}
+		return strconv.Itoa(*detail.HID)
+	}
+}
+
+func valueOf(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return *value
 }
 
 func (c *Catalog) CountListable(ctx context.Context, visibility game.Visibility) (int, error) {

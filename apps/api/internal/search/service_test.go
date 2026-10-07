@@ -124,6 +124,39 @@ func TestSearchMapsUpstreamHitsToLocalEntriesInUpstreamOrder(t *testing.T) {
 	}
 }
 
+func TestSearchFindsGamesByReferenceWithoutTheSource(t *testing.T) {
+	vndb, bangumi := "v17", "42"
+	hikarinagi := 9
+	referenced := entry(1, false, false)
+	referenced.Detail.VID, referenced.Detail.BID, referenced.Detail.HID = &vndb, &bangumi, &hikarinagi
+	rated := entry(2, true, true)
+	rated.Detail.VID = &vndb
+	f := newFixture(referenced, rated, entry(3, false, true))
+
+	for _, q := range []string{"vid:17", "v17"} {
+		results, err := f.service.Search(context.Background(), guest, everything(q))
+		if err != nil || !slices.Equal(gameIDs(results.Games.Items), []int{1}) || results.Games.Total != 2 {
+			t.Fatalf("%s: guests see the safe game of the two sharing the VNDB id: %v total %d %v", q, gameIDs(results.Games.Items), results.Games.Total, err)
+		}
+		if len(results.Developers.Items) != 0 || len(results.Characters.Items) != 0 {
+			t.Fatalf("%s: references only name games: %+v %+v", q, results.Developers, results.Characters)
+		}
+	}
+	for _, q := range []string{"hid:9", "bid:42"} {
+		results, err := f.service.Search(context.Background(), guest, everything(q))
+		if err != nil || !slices.Equal(gameIDs(results.Games.Items), []int{1}) {
+			t.Fatalf("%s: %v %v", q, gameIDs(results.Games.Items), err)
+		}
+	}
+	paged, err := f.service.Search(context.Background(), permissive, search.Query{Q: "v17", Kinds: search.Kinds, Page: 2, Size: 1})
+	if err != nil || !slices.Equal(gameIDs(paged.Games.Items), []int{2}) || paged.Games.Total != 2 {
+		t.Fatalf("references page like any other result: %v %v", gameIDs(paged.Games.Items), err)
+	}
+	if len(f.catalog.Searches) != 0 {
+		t.Fatalf("references never reach the source: %v", f.catalog.Searches)
+	}
+}
+
 func TestSearchOnlyAsksForRequestedKinds(t *testing.T) {
 	f := newFixture(entry(1, false, true))
 	f.catalog.Hits[catalog.EntityGame] = hits("a")
@@ -228,7 +261,7 @@ func TestRecordingFeedsTrending(t *testing.T) {
 	f := newFixture()
 	ctx := context.Background()
 	long := string(make([]rune, search.MaxRecordedQueryLength+1))
-	for _, q := range []string{"  Sakura  No ", "  ", long} {
+	for _, q := range []string{"  Sakura  No ", "  ", long, "vid:17"} {
 		if err := f.service.Record(ctx, q); err != nil {
 			t.Fatal(err)
 		}
