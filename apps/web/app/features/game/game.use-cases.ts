@@ -34,8 +34,3 @@ function settled<Value>(result: PromiseSettledResult<Value | undefined>): Value 
 export async function countView(api: ApiClient, id: number) {
   await api.post('/game/{id}/view', { params: { path: { id } } })
 }
-
-export async function loadLatestGames(api: ApiClient, pageSize: number) {
-  const page = await api.get('/game/list', { params: { query: { pageSize } } })
-  return page.items ?? []
-}

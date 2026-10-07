@@ -2,6 +2,7 @@ import auth from '~/features/auth/messages/en.json'
 import download from '~/features/download/messages/en.json'
 import favorite from '~/features/favorite/messages/en.json'
 import game from '~/features/game/messages/en.json'
+import home from '~/features/home/messages/en.json'
 import resource from '~/features/resource/messages/en.json'
 import search from '~/features/search/messages/en.json'
 import shell from '~/features/shell/messages/en.json'
@@ -18,6 +19,7 @@ export const messages: Messages = {
   favorite,
   form,
   game,
+  home,
   resource,
   search,
   shell,

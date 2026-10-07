@@ -5,6 +5,7 @@
   "noResources": "リソースなし",
   "resources": "リソース {count} 件",
   "downloads": "{count, number} 回ダウンロード",
+  "updated": "<time></time>に更新",
   "platform": {
     "win": "Windows",
     "mac": "macOS",

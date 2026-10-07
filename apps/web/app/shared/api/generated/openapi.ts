@@ -6569,7 +6569,7 @@ export type components = {
             /** Format: date-time */
             release_date: string | null;
             resources: components["schemas"]["GameResourceSummaryDTO"];
-            /** @description The game's most used tags, at most three */
+            /** @description The tags that tell the game apart, at most three: its most used tags, without those a tenth of all games carry and those that only repeat the release date */
             tags: components["schemas"]["GameTagRefDTO"][] | null;
             title_en: string;
             title_jp: string;
@@ -6738,7 +6738,7 @@ export type components = {
             /** Format: date-time */
             release_date: string | null;
             resources: components["schemas"]["GameResourceSummaryDTO"];
-            /** @description The game's most used tags, at most three */
+            /** @description The tags that tell the game apart, at most three: its most used tags, without those a tenth of all games carry and those that only repeat the release date */
             tags: components["schemas"]["GameTagRefDTO"][] | null;
             title_en: string;
             title_jp: string;

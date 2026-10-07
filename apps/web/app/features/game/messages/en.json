@@ -5,6 +5,7 @@
   "noResources": "No resources yet",
   "resources": "{count, plural, one {# resource} other {# resources}}",
   "downloads": "{count, plural, one {# download} other {# downloads}}",
+  "updated": "Updated <time></time>",
   "platform": {
     "win": "Windows",
     "mac": "macOS",

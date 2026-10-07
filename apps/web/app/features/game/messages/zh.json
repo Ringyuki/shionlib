@@ -5,6 +5,7 @@
   "noResources": "暂无资源",
   "resources": "{count} 个资源",
   "downloads": "{count, number} 次下载",
+  "updated": "<time></time>更新",
   "platform": {
     "win": "Windows",
     "mac": "macOS",

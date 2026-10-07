@@ -1,5 +1,5 @@
 import { constraints } from '~/shared/api/generated/constraints'
-import type { Schema } from '~/shared/api/types'
+import type { ApiQuery, Schema } from '~/shared/api/types'
 import type { Locale } from '~/shared/i18n/locale'
 import { bbcodePlainText } from '~/shared/markup/bbcode'
 
@@ -53,6 +53,8 @@ export function releaseDate(game: Dated): Date | undefined {
 
 export type GameHeader = Schema<'GameHeaderDTO'>
 
+export type GameSummary = Schema<'GameCardDTO'>
+
 export type GameDetails = Schema<'GameDetailsDTO'>
 
 export type CharacterCredit = Schema<'GameCharacterCreditDTO'>
@@ -90,6 +92,12 @@ export function gamePath(locale: Locale, id: number, tab: GameTab = 'resources')
 
 export function tagPath(locale: Locale, tag: string): string {
   return `/${locale}/game?${new URLSearchParams({ tag })}`
+}
+
+export type GameSort = NonNullable<ApiQuery<'/game/list', 'get'>['filter[sort_by]']>
+
+export function sortedGamesPath(locale: Locale, sort: GameSort): string {
+  return `/${locale}/game?${new URLSearchParams({ sort })}`
 }
 
 export function introIn(game: Introduced, language: IntroLanguage): string {

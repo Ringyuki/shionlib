@@ -26,6 +26,8 @@ const entry = (key: NavKey, to: string, end = false): NavEntry => ({ key, to, en
 export function sitePaths(locale: Locale) {
   return {
     home: `/${locale}`,
+    games: `/${locale}/game`,
+    releases: `/${locale}/release`,
     upload: `/${locale}/upload`,
     profile: (userId: number) => `/${locale}/user/${userId}`,
     settings: `/${locale}/user/settings`,
@@ -40,8 +42,8 @@ export function navSections(locale: Locale, viewerId: number | null): NavSection
     key: 'discover',
     entries: [
       entry('home', paths.home, true),
-      entry('games', `/${locale}/game`),
-      entry('releases', `/${locale}/release`),
+      entry('games', paths.games),
+      entry('releases', paths.releases),
       entry('developers', `/${locale}/developer`),
     ],
   }
