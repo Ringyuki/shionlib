@@ -31,6 +31,14 @@ func TestToGameRecordLocalizesByOriginLanguage(t *testing.T) {
 	if zhOrigin.TitleZH != "中文原名" || zhOrigin.TitleJP != "" {
 		t.Fatalf("chinese origin falls back to the origin title: %+v", zhOrigin)
 	}
+	blank := catalog.ToGameRecord(catalog.SourceHikarinagi, catalog.GameSnapshot{Title: catalog.Localized{Origin: "中文原名", OriginLang: "zh-Hans", Translated: new(""), English: new(" ")}})
+	if blank.TitleZH != "中文原名" || blank.TitleEN != "" {
+		t.Fatalf("an empty translation never hides the origin title: %+v", blank)
+	}
+	english := catalog.ToGameRecord(catalog.SourceHikarinagi, catalog.GameSnapshot{Title: catalog.Localized{Origin: "Original", OriginLang: "en", Translated: new(""), English: new("")}})
+	if english.TitleEN != "Original" || english.TitleZH != "" {
+		t.Fatalf("an empty english title never hides an english origin: %+v", english)
+	}
 }
 
 func TestToGameRecordMapsCreditsMediaAndIdentifiers(t *testing.T) {

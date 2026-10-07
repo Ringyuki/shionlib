@@ -294,18 +294,22 @@ func localize(value Localized) (string, string, string) {
 		jp = value.Origin
 	}
 	switch {
-	case value.Translated != nil:
+	case given(value.Translated):
 		zh = *value.Translated
 	case zhOrigin:
 		zh = value.Origin
 	}
 	switch {
-	case value.English != nil:
+	case given(value.English):
 		en = *value.English
 	case enOrigin:
 		en = value.Origin
 	}
 	return jp, zh, en
+}
+
+func given(text *string) bool {
+	return text != nil && strings.TrimSpace(*text) != ""
 }
 
 func localizeAsOrigin(value Localized) (string, string, string) {
