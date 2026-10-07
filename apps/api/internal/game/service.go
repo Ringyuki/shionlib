@@ -60,10 +60,7 @@ func (s *Service) onlyWithResources(ctx context.Context, viewer actor.Actor, que
 	if query.entityPage() || query.IncludeWithoutResources {
 		return false, nil
 	}
-	if !viewer.Authenticated() {
-		return true, nil
-	}
-	return s.prefs.OnlyGamesWithResources(ctx, viewer.UserID)
+	return WantsOnlyGamesWithResources(ctx, s.prefs, viewer)
 }
 
 func (s *Service) Random(ctx context.Context, viewer actor.Actor) (int, bool, error) {

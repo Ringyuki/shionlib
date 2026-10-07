@@ -1,10 +1,13 @@
 package game
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"strconv"
 	"time"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 )
 
 type SortBy string
@@ -99,4 +102,11 @@ func uniqueSorted(values []int, keep func(int) bool) []int {
 	kept := slices.DeleteFunc(slices.Clone(values), func(v int) bool { return !keep(v) })
 	slices.Sort(kept)
 	return slices.Compact(kept)
+}
+
+func WantsOnlyGamesWithResources(ctx context.Context, prefs Preferences, viewer actor.Actor) (bool, error) {
+	if !viewer.Authenticated() {
+		return true, nil
+	}
+	return prefs.OnlyGamesWithResources(ctx, viewer.UserID)
 }

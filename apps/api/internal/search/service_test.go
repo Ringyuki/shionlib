@@ -3,6 +3,7 @@ package search_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"slices"
 	"testing"
 
@@ -20,6 +21,7 @@ var (
 )
 
 type fixture struct {
+	prefs     gametest.Preferences
 	catalog   *searchtest.Catalog
 	titles    *searchtest.Titles
 	cache     *gametest.Cache
@@ -31,6 +33,7 @@ type fixture struct {
 func newFixture(entries ...gametest.Entry) fixture {
 	games := gametest.NewCatalog(entries...)
 	f := fixture{
+		prefs:     gametest.Preferences{},
 		catalog:   searchtest.NewCatalog(),
 		titles:    &searchtest.Titles{Known: []string{"サクラノ詩", "サクラノ刻", "千恋＊万花"}},
 		cache:     gametest.NewCache(),
@@ -38,17 +41,18 @@ func newFixture(entries ...gametest.Entry) fixture {
 		analytics: searchtest.NewAnalytics(),
 	}
 	f.service = search.NewService(search.Deps{
-		Source:     catalog.SourceHikarinagi,
-		Catalog:    f.catalog,
-		Games:      games,
-		Cards:      game.NewCardService(games),
-		Developers: searchtest.Developers{50: {ID: 50, Name: "枕", WorksCount: 3}},
-		Characters: searchtest.Characters{90: {ID: 90, NameJP: "御桜稟"}},
-		Titles:     f.titles,
-		Tags:       searchtest.Tags{{ID: 1, Name: "school", Count: 5, Aliases: []string{"学园", "School Life"}}, {ID: 2, Name: "fantasy", Count: 9}},
-		Cache:      f.cache,
-		Queue:      f.queue,
-		Analytics:  f.analytics,
+		Source:      catalog.SourceHikarinagi,
+		Catalog:     f.catalog,
+		Games:       games,
+		Cards:       game.NewCardService(games),
+		Preferences: f.prefs,
+		Developers:  searchtest.Developers{50: {ID: 50, Name: "枕", WorksCount: 3}},
+		Characters:  searchtest.Characters{90: {ID: 90, NameJP: "御桜稟"}},
+		Titles:      f.titles,
+		Tags:        searchtest.Tags{{ID: 1, Name: "school", Count: 5, Aliases: []string{"学园", "School Life"}}, {ID: 2, Name: "fantasy", Count: 9}},
+		Cache:       f.cache,
+		Queue:       f.queue,
+		Analytics:   f.analytics,
 	})
 	return f
 }
@@ -81,6 +85,16 @@ func everything(q string) search.Query {
 	return search.Query{Q: q, Kinds: search.Kinds, Page: 1, Size: 10}
 }
 
+func anyResource(q string) search.Query {
+	query := everything(q)
+	query.IncludeWithoutResources = true
+	return query
+}
+
+func gameQuery(q string, page, size int) search.Query {
+	return search.Query{Q: q, Kinds: []catalog.Entity{catalog.EntityGame}, Page: page, Size: size}
+}
+
 func TestSearchMapsUpstreamHitsToLocalEntriesInUpstreamOrder(t *testing.T) {
 	hidden := entry(4, false, true)
 	hidden.Hidden = true
@@ -92,7 +106,7 @@ func TestSearchMapsUpstreamHitsToLocalEntriesInUpstreamOrder(t *testing.T) {
 	f.catalog.Links[catalog.EntityDeveloper] = map[string]int{"5": 50}
 	f.catalog.Links[catalog.EntityCharacter] = map[string]int{"9": 90}
 
-	results, err := f.service.Search(context.Background(), guest, everything(" サクラ "))
+	results, err := f.service.Search(context.Background(), guest, anyResource(" サクラ "))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -118,7 +132,7 @@ func TestSearchMapsUpstreamHitsToLocalEntriesInUpstreamOrder(t *testing.T) {
 		t.Fatalf("the query is trimmed before reaching the source: %v", f.catalog.Searches)
 	}
 
-	permitted, err := f.service.Search(context.Background(), permissive, everything("サクラ"))
+	permitted, err := f.service.Search(context.Background(), permissive, anyResource("サクラ"))
 	if err != nil || !slices.Equal(gameIDs(permitted.Games.Items), []int{3, 2, 1}) {
 		t.Fatalf("permissive viewers see rated games: %v %v", gameIDs(permitted.Games.Items), err)
 	}
@@ -127,7 +141,7 @@ func TestSearchMapsUpstreamHitsToLocalEntriesInUpstreamOrder(t *testing.T) {
 func TestSearchFindsGamesByReferenceWithoutTheSource(t *testing.T) {
 	vndb, bangumi := "v17", "42"
 	hikarinagi := 9
-	referenced := entry(1, false, false)
+	referenced := entry(1, false, true)
 	referenced.Detail.VID, referenced.Detail.BID, referenced.Detail.HID = &vndb, &bangumi, &hikarinagi
 	rated := entry(2, true, true)
 	rated.Detail.VID = &vndb
@@ -135,8 +149,8 @@ func TestSearchFindsGamesByReferenceWithoutTheSource(t *testing.T) {
 
 	for _, q := range []string{"vid:17", "v17"} {
 		results, err := f.service.Search(context.Background(), guest, everything(q))
-		if err != nil || !slices.Equal(gameIDs(results.Games.Items), []int{1}) || results.Games.Total != 2 {
-			t.Fatalf("%s: guests see the safe game of the two sharing the VNDB id: %v total %d %v", q, gameIDs(results.Games.Items), results.Games.Total, err)
+		if err != nil || !slices.Equal(gameIDs(results.Games.Items), []int{1}) || results.Games.Total != 1 {
+			t.Fatalf("%s: guests see the safe one of the two games sharing the VNDB id: %v total %d %v", q, gameIDs(results.Games.Items), results.Games.Total, err)
 		}
 		if len(results.Developers.Items) != 0 || len(results.Characters.Items) != 0 {
 			t.Fatalf("%s: references only name games: %+v %+v", q, results.Developers, results.Characters)
@@ -157,11 +171,47 @@ func TestSearchFindsGamesByReferenceWithoutTheSource(t *testing.T) {
 	}
 }
 
+func TestSearchKeepsGamesWithResourcesAmongTheSourcesFirstHits(t *testing.T) {
+	entries := make([]gametest.Entry, 0, 150)
+	externalIDs := make([]string, 0, 150)
+	links := map[string]int{}
+	for id := 1; id <= 150; id++ {
+		entries = append(entries, entry(id, false, id == 5 || id == 7 || id == 120))
+		externalIDs = append(externalIDs, fmt.Sprintf("g%d", id))
+		links[externalIDs[id-1]] = id
+	}
+	f := newFixture(entries...)
+	f.catalog.Hits[catalog.EntityGame] = hits(externalIDs...)
+	f.catalog.Links[catalog.EntityGame] = links
+	ctx := context.Background()
+
+	results, err := f.service.Search(ctx, guest, gameQuery("q", 1, 10))
+	if err != nil || !slices.Equal(gameIDs(results.Games.Items), []int{5, 7}) || results.Games.Total != 2 {
+		t.Fatalf("guests get the games with resources among the source's first hits, in its order: %v total %d %v", gameIDs(results.Games.Items), results.Games.Total, err)
+	}
+	if !slices.Equal(f.catalog.Searches, []string{fmt.Sprintf("hikarinagi:game:q:1:%d", search.ResourceWindow)}) {
+		t.Fatalf("one source request covers the window: %v", f.catalog.Searches)
+	}
+	if second, err := f.service.Search(ctx, guest, gameQuery("q", 2, 1)); err != nil || !slices.Equal(gameIDs(second.Games.Items), []int{7}) || len(f.catalog.Searches) != 1 {
+		t.Fatalf("the window is paged locally from the cached source page: %v %v %v", gameIDs(second.Games.Items), f.catalog.Searches, err)
+	}
+
+	f.prefs[permissive.UserID] = false
+	if all, err := f.service.Search(ctx, permissive, gameQuery("q", 1, 10)); err != nil || len(all.Games.Items) != 10 || all.Games.Total != 150 {
+		t.Fatalf("users who turned the setting off page the source directly: %d total %d %v", len(all.Games.Items), all.Games.Total, err)
+	}
+	picking := gameQuery("q", 1, 10)
+	picking.IncludeWithoutResources = true
+	if picked, err := f.service.Search(ctx, guest, picking); err != nil || picked.Games.Total != 150 {
+		t.Fatalf("picking a game to upload to ignores the setting: %d %v", picked.Games.Total, err)
+	}
+}
+
 func TestSearchOnlyAsksForRequestedKinds(t *testing.T) {
 	f := newFixture(entry(1, false, true))
 	f.catalog.Hits[catalog.EntityGame] = hits("a")
 	f.catalog.Links[catalog.EntityGame] = map[string]int{"a": 1}
-	results, err := f.service.Search(context.Background(), guest, search.Query{Q: "a", Kinds: []catalog.Entity{catalog.EntityGame, catalog.EntityGame, "tag"}, Page: 1, Size: 5})
+	results, err := f.service.Search(context.Background(), guest, search.Query{Q: "a", Kinds: []catalog.Entity{catalog.EntityGame, catalog.EntityGame, "tag"}, Page: 1, Size: 5, IncludeWithoutResources: true})
 	if err != nil || len(results.Games.Items) != 1 {
 		t.Fatalf("games %+v %v", results.Games, err)
 	}
@@ -179,7 +229,7 @@ func TestSearchCachesUpstreamPagesPerKeyword(t *testing.T) {
 	f.catalog.Links[catalog.EntityGame] = map[string]int{"a": 1}
 	game := func(q string, page int) search.Results {
 		t.Helper()
-		results, err := f.service.Search(context.Background(), guest, search.Query{Q: q, Kinds: []catalog.Entity{catalog.EntityGame}, Page: page, Size: 1})
+		results, err := f.service.Search(context.Background(), guest, search.Query{Q: q, Kinds: []catalog.Entity{catalog.EntityGame}, Page: page, Size: 1, IncludeWithoutResources: true})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -225,10 +275,15 @@ func TestSuggestMatchesLocalTitles(t *testing.T) {
 	if _, err := f.service.Suggest(ctx, permissive, "千", 1); err != nil {
 		t.Fatal(err)
 	}
-	if !slices.Equal(f.titles.Visibility, []game.Visibility{{ExcludeRated: true}, {ExcludeRated: false}}) {
-		t.Fatalf("visibility follows the viewer: %v", f.titles.Visibility)
+	f.prefs[permissive.UserID] = false
+	if _, err := f.service.Suggest(ctx, permissive, "千", 1); err != nil {
+		t.Fatal(err)
 	}
-	if blank, err := f.service.Suggest(ctx, guest, "  ", 10); err != nil || blank == nil || len(blank) != 0 || len(f.titles.Visibility) != 2 {
+	want := []game.Visibility{{ExcludeRated: true, OnlyWithResources: true}, {OnlyWithResources: true}, {}}
+	if !slices.Equal(f.titles.Visibility, want) {
+		t.Fatalf("visibility follows the viewer's content limit and resource setting: %v", f.titles.Visibility)
+	}
+	if blank, err := f.service.Suggest(ctx, guest, "  ", 10); err != nil || blank == nil || len(blank) != 0 || len(f.titles.Visibility) != 3 {
 		t.Fatalf("blank prefixes skip the store: %v %v", blank, err)
 	}
 }

@@ -43,7 +43,7 @@ func (h *Handler) search(ctx context.Context, in *searchInput) (*response.Output
 			kinds[i] = catalog.Entity(kind)
 		}
 	}
-	results, err := h.service.Search(ctx, actor.From(ctx), search.Query{Q: in.Q, Kinds: kinds, Page: in.Page, Size: in.PageSize})
+	results, err := h.service.Search(ctx, actor.From(ctx), search.Query{Q: in.Q, Kinds: kinds, Page: in.Page, Size: in.PageSize, IncludeWithoutResources: in.IncludeWithoutResources})
 	if err != nil {
 		return nil, err
 	}

@@ -38,17 +38,18 @@ func setup(t *testing.T) env {
 	logo := "m.webp"
 	zh := "稟"
 	service := search.NewService(search.Deps{
-		Source:     catalog.SourceHikarinagi,
-		Catalog:    e.catalog,
-		Games:      games,
-		Cards:      game.NewCardService(games),
-		Developers: searchtest.Developers{50: {ID: 50, Name: "枕", Logo: &logo, WorksCount: 3}},
-		Characters: searchtest.Characters{90: {ID: 90, NameJP: "御桜稟", NameZH: &zh, Game: &character.GameRef{ID: 1, TitleJP: "サクラノ詩"}}},
-		Titles:     &searchtest.Titles{Known: []string{"千恋＊万花", "千の刃濤"}},
-		Tags:       searchtest.Tags{{ID: 1, Name: "school", Count: 5, Aliases: []string{"学园"}}},
-		Cache:      gametest.NewCache(),
-		Queue:      e.queue,
-		Analytics:  e.analytics,
+		Source:      catalog.SourceHikarinagi,
+		Catalog:     e.catalog,
+		Games:       games,
+		Cards:       game.NewCardService(games),
+		Preferences: gametest.Preferences{permissive.UserID: false},
+		Developers:  searchtest.Developers{50: {ID: 50, Name: "枕", Logo: &logo, WorksCount: 3}},
+		Characters:  searchtest.Characters{90: {ID: 90, NameJP: "御桜稟", NameZH: &zh, Game: &character.GameRef{ID: 1, TitleJP: "サクラノ詩"}}},
+		Titles:      &searchtest.Titles{Known: []string{"千恋＊万花", "千の刃濤"}},
+		Tags:        searchtest.Tags{{ID: 1, Name: "school", Count: 5, Aliases: []string{"学园"}}},
+		Cache:       gametest.NewCache(),
+		Queue:       e.queue,
+		Analytics:   e.analytics,
 	})
 	searchhttp.NewHandler(service, server.Builder).Register(server.API)
 	return e
@@ -87,8 +88,8 @@ func TestSearchReturnsOneSectionPerKind(t *testing.T) {
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search?q=%E5%8D%83&types=game&types=developer&types=character&pageSize=5"})
 	e.server.Expect(resp, http.StatusOK, 0)
 	got := decode(t, resp.Data)
-	if len(got.Games.Items) != 1 || got.Games.Items[0].ID != 1 || got.Games.Items[0].TitleJP != "千恋＊万花" || got.Games.Total != 3 {
-		t.Fatalf("guests only get safe games, in source order: %s", resp.Data)
+	if len(got.Games.Items) != 1 || got.Games.Items[0].ID != 1 || got.Games.Items[0].TitleJP != "千恋＊万花" || got.Games.Total != 1 {
+		t.Fatalf("guests only get safe games with resources, in source order: %s", resp.Data)
 	}
 	if string(got.Developers) != `{"items":[{"id":50,"name":"枕","aliases":[],"logo":"m.webp","works_count":3}],"total":1}` {
 		t.Fatalf("developers %s", got.Developers)
@@ -96,11 +97,17 @@ func TestSearchReturnsOneSectionPerKind(t *testing.T) {
 	if string(got.Characters) != `{"items":[{"id":90,"image":null,"name_jp":"御桜稟","name_zh":"稟","name_en":null,"aliases":[],"game":{"id":1,"title_jp":"サクラノ詩","title_zh":"","title_en":""}}],"total":1}` {
 		t.Fatalf("characters %s", got.Characters)
 	}
-	if !slices.Contains(e.catalog.Searches, "hikarinagi:game:千:1:5") {
-		t.Fatalf("paging reaches the source: %v", e.catalog.Searches)
+	if !slices.Contains(e.catalog.Searches, "hikarinagi:game:千:1:100") {
+		t.Fatalf("games with resources are kept from the source's first hits: %v", e.catalog.Searches)
 	}
 	if len(e.queue.Jobs) != 0 {
 		t.Fatalf("live searches are not recorded: %+v", e.queue.Jobs)
+	}
+
+	resp = e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search?q=%E5%8D%83&pageSize=5&include_without_resources=true"})
+	e.server.Expect(resp, http.StatusOK, 0)
+	if got = decode(t, resp.Data); got.Games.Total != 3 || !slices.Contains(e.catalog.Searches, "hikarinagi:game:千:1:5") {
+		t.Fatalf("include_without_resources pages the source directly: %s %v", resp.Data, e.catalog.Searches)
 	}
 
 	resp = e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search?q=%E5%8D%83", As: &permissive})

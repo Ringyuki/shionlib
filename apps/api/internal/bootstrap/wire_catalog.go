@@ -53,17 +53,18 @@ func wireCatalog(infra *Infra, shared *Shared, modules *Modules) {
 	characters := characterpg.NewRepository(infra.Ent)
 	developers := developerpg.NewRepository(infra.Ent)
 	searchService := search.NewService(search.Deps{
-		Source:     cfg.Catalog.Source,
-		Catalog:    shared.Catalog,
-		Games:      games,
-		Cards:      shared.GameCards,
-		Developers: developers,
-		Characters: characters,
-		Titles:     searchpg.NewTitleStore(infra.Ent),
-		Tags:       searchpg.NewTagStore(infra.Ent),
-		Cache:      shared.Cache,
-		Queue:      searchJobQueue{queue: shared.Queue},
-		Analytics:  searchredis.NewAnalytics(infra.Redis),
+		Source:      cfg.Catalog.Source,
+		Catalog:     shared.Catalog,
+		Games:       games,
+		Cards:       shared.GameCards,
+		Preferences: preferences,
+		Developers:  developers,
+		Characters:  characters,
+		Titles:      searchpg.NewTitleStore(infra.Ent),
+		Tags:        searchpg.NewTagStore(infra.Ent),
+		Cache:       shared.Cache,
+		Queue:       searchJobQueue{queue: shared.Queue},
+		Analytics:   searchredis.NewAnalytics(infra.Redis),
 	})
 
 	modules.Handlers = append(modules.Handlers,

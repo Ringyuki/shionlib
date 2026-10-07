@@ -21,6 +21,10 @@ type Games interface {
 	Referenced(ctx context.Context, reference game.Reference) ([]int, error)
 }
 
+type Preferences interface {
+	OnlyGamesWithResources(ctx context.Context, userID int) (bool, error)
+}
+
 type GameCards interface {
 	ByIDs(ctx context.Context, ids []int, viewer actor.Actor) (map[int]game.Card, error)
 }

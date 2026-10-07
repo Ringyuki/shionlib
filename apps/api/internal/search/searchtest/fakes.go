@@ -41,7 +41,10 @@ func (c *Catalog) Search(_ context.Context, sourceName string, entity catalog.En
 	return catalog.SearchResult{Hits: hits[start:end], Total: len(hits)}, nil
 }
 
-func (c *Catalog) Resolve(_ context.Context, sourceName string, entity catalog.Entity, externalIDs []string) (map[string]int, error) {
+func (c *Catalog) Resolve(ctx context.Context, sourceName string, entity catalog.Entity, externalIDs []string) (map[string]int, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	resolved := map[string]int{}

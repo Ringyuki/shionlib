@@ -24,15 +24,17 @@ const (
 	DecayFactor            = 0.9
 	MinScore               = 0.01
 	UpstreamCacheTTL       = time.Minute
+	ResourceWindow         = 100
 )
 
 var Kinds = []catalog.Entity{catalog.EntityGame, catalog.EntityDeveloper, catalog.EntityCharacter}
 
 type Query struct {
-	Q     string
-	Kinds []catalog.Entity
-	Page  int
-	Size  int
+	Q                       string
+	Kinds                   []catalog.Entity
+	Page                    int
+	Size                    int
+	IncludeWithoutResources bool
 }
 
 type Section[T any] struct {

@@ -19,17 +19,18 @@ import (
 )
 
 type Deps struct {
-	Source     string
-	Catalog    Catalog
-	Games      Games
-	Cards      GameCards
-	Developers Developers
-	Characters Characters
-	Titles     Titles
-	Tags       TagStore
-	Cache      Cache
-	Queue      Queue
-	Analytics  Analytics
+	Source      string
+	Catalog     Catalog
+	Games       Games
+	Cards       GameCards
+	Preferences Preferences
+	Developers  Developers
+	Characters  Characters
+	Titles      Titles
+	Tags        TagStore
+	Cache       Cache
+	Queue       Queue
+	Analytics   Analytics
 }
 
 type Service struct {
@@ -37,6 +38,7 @@ type Service struct {
 	catalog    Catalog
 	listing    Games
 	cards      GameCards
+	prefs      Preferences
 	developers Developers
 	characters Characters
 	titles     Titles
@@ -52,6 +54,7 @@ func NewService(deps Deps) *Service {
 		catalog:    deps.Catalog,
 		listing:    deps.Games,
 		cards:      deps.Cards,
+		prefs:      deps.Preferences,
 		developers: deps.Developers,
 		characters: deps.Characters,
 		titles:     deps.Titles,
@@ -72,17 +75,24 @@ func (s *Service) Search(ctx context.Context, viewer actor.Actor, query Query) (
 	if q == "" {
 		return results, nil
 	}
+	visibility, err := s.visibility(ctx, viewer, query.IncludeWithoutResources)
+	if err != nil {
+		return Results{}, err
+	}
 	group, ctx := errgroup.WithContext(ctx)
 	group.SetLimit(len(Kinds))
 	for _, kind := range requested(query.Kinds) {
 		group.Go(func() error {
+			if kind == catalog.EntityGame {
+				games, err := s.games(ctx, viewer, q, query, visibility)
+				results.Games = games
+				return err
+			}
 			ids, total, err := s.lookup(ctx, kind, q, query.Page, query.Size)
 			if err != nil {
 				return err
 			}
 			switch kind {
-			case catalog.EntityGame:
-				results.Games, err = s.gameSection(ctx, viewer, ids, total)
 			case catalog.EntityDeveloper:
 				results.Developers, err = section(ctx, ids, total, s.developers.Summaries)
 			case catalog.EntityCharacter:
@@ -105,37 +115,102 @@ func collapseSpaces(raw string) string {
 	return strings.Join(strings.Fields(raw), " ")
 }
 
+func (s *Service) visibility(ctx context.Context, viewer actor.Actor, includeWithoutResources bool) (game.Visibility, error) {
+	visibility := game.Visibility{ExcludeRated: !viewer.IncludesRated()}
+	if includeWithoutResources {
+		return visibility, nil
+	}
+	only, err := game.WantsOnlyGamesWithResources(ctx, s.prefs, viewer)
+	visibility.OnlyWithResources = only
+	return visibility, err
+}
+
 func (s *Service) lookup(ctx context.Context, kind catalog.Entity, q string, page, size int) ([]int, int, error) {
-	if reference, ok := ParseReference(q); ok {
-		return s.referenced(ctx, kind, reference, page, size)
+	if _, ok := ParseReference(q); ok {
+		return []int{}, 0, nil
 	}
 	found, err := s.upstream(ctx, kind, q, page, size)
 	if err != nil {
 		return nil, 0, err
 	}
-	local, err := s.catalog.Resolve(ctx, s.source, kind, found.ExternalIDs)
+	ids, err := s.resolve(ctx, kind, found.ExternalIDs)
+	return ids, found.Total, err
+}
+
+func (s *Service) resolve(ctx context.Context, kind catalog.Entity, externalIDs []string) ([]int, error) {
+	local, err := s.catalog.Resolve(ctx, s.source, kind, externalIDs)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	ids := make([]int, 0, len(found.ExternalIDs))
-	for _, externalID := range found.ExternalIDs {
-		if id, ok := local[externalID]; ok && !slices.Contains(ids, id) {
+	ids := make([]int, 0, len(externalIDs))
+	seen := map[int]bool{}
+	for _, externalID := range externalIDs {
+		if id, ok := local[externalID]; ok && !seen[id] {
+			seen[id] = true
 			ids = append(ids, id)
 		}
 	}
-	return ids, found.Total, nil
+	return ids, nil
 }
 
-func (s *Service) referenced(ctx context.Context, kind catalog.Entity, reference game.Reference, page, size int) ([]int, int, error) {
-	if kind != catalog.EntityGame {
-		return []int{}, 0, nil
+func (s *Service) games(ctx context.Context, viewer actor.Actor, q string, query Query, visibility game.Visibility) (Section[game.Card], error) {
+	ids, total, err := s.gameIDs(ctx, q, query.Page, query.Size, visibility)
+	if err != nil {
+		return Section[game.Card]{}, err
 	}
-	ids, err := s.listing.Referenced(ctx, reference)
+	cards, err := s.cards.ByIDs(ctx, ids, viewer)
+	if err != nil {
+		return Section[game.Card]{}, err
+	}
+	return Section[game.Card]{Items: inOrder(ids, cards), Total: total}, nil
+}
+
+func (s *Service) gameIDs(ctx context.Context, q string, page, size int, visibility game.Visibility) ([]int, int, error) {
+	reference, referenced := ParseReference(q)
+	if !referenced && !visibility.OnlyWithResources {
+		ids, total, err := s.lookup(ctx, catalog.EntityGame, q, page, size)
+		if err != nil {
+			return nil, 0, err
+		}
+		listed, err := s.listed(ctx, ids, visibility)
+		return listed, total, err
+	}
+	var candidates []int
+	var err error
+	if referenced {
+		candidates, err = s.listing.Referenced(ctx, reference)
+	} else {
+		candidates, err = s.window(ctx, q)
+	}
 	if err != nil {
 		return nil, 0, err
 	}
-	start := min((page-1)*size, len(ids))
-	return ids[start:min(start+size, len(ids))], len(ids), nil
+	listed, err := s.listed(ctx, candidates, visibility)
+	if err != nil {
+		return nil, 0, err
+	}
+	start := min((page-1)*size, len(listed))
+	return listed[start:min(start+size, len(listed))], len(listed), nil
+}
+
+func (s *Service) window(ctx context.Context, q string) ([]int, error) {
+	found, err := s.upstream(ctx, catalog.EntityGame, q, 1, ResourceWindow)
+	if err != nil {
+		return nil, err
+	}
+	return s.resolve(ctx, catalog.EntityGame, found.ExternalIDs)
+}
+
+func (s *Service) listed(ctx context.Context, ids []int, visibility game.Visibility) ([]int, error) {
+	listable, err := s.listing.Listable(ctx, ids, visibility)
+	if err != nil {
+		return nil, err
+	}
+	kept := make(map[int]bool, len(listable))
+	for _, id := range listable {
+		kept[id] = true
+	}
+	return slices.DeleteFunc(slices.Clone(ids), func(id int) bool { return !kept[id] }), nil
 }
 
 func (s *Service) upstream(ctx context.Context, kind catalog.Entity, q string, page, size int) (UpstreamPage, error) {
@@ -154,18 +229,6 @@ func (s *Service) upstream(ctx context.Context, kind catalog.Entity, q string, p
 	}
 	_ = s.cache.Set(ctx, key, fresh, UpstreamCacheTTL)
 	return fresh, nil
-}
-
-func (s *Service) gameSection(ctx context.Context, viewer actor.Actor, ids []int, total int) (Section[game.Card], error) {
-	listable, err := s.listing.Listable(ctx, ids, game.Visibility{ExcludeRated: !viewer.IncludesRated()})
-	if err != nil {
-		return Section[game.Card]{}, err
-	}
-	cards, err := s.cards.ByIDs(ctx, listable, viewer)
-	if err != nil {
-		return Section[game.Card]{}, err
-	}
-	return Section[game.Card]{Items: inOrder(ids, cards), Total: total}, nil
 }
 
 func section[T any](ctx context.Context, ids []int, total int, load func(context.Context, []int) (map[int]T, error)) (Section[T], error) {
@@ -251,7 +314,11 @@ func (s *Service) Suggest(ctx context.Context, viewer actor.Actor, prefix string
 	if normalized == "" || limit <= 0 {
 		return []string{}, nil
 	}
-	return s.titles.Titles(ctx, normalized, game.Visibility{ExcludeRated: !viewer.IncludesRated()}, limit)
+	visibility, err := s.visibility(ctx, viewer, false)
+	if err != nil {
+		return nil, err
+	}
+	return s.titles.Titles(ctx, normalized, visibility, limit)
 }
 
 func (s *Service) Record(ctx context.Context, raw string) error {
