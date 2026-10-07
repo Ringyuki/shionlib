@@ -40,6 +40,14 @@ describe('recent releases', () => {
     })
   })
 
+  it('turns the month over with the site clock', () => {
+    expect(releaseWindow(new Date('2026-10-31T16:00:00Z'))).toMatchObject({
+      start: '2026-10-01',
+      end: '2026-11-30',
+      thisMonth: '2026-11',
+    })
+  })
+
   it('splits games by the month they are released in', () => {
     const game = (id: number, release_date: string | null) => ({ id, release_date })
     const games = [game(1, '2026-10-31T00:00:00Z'), game(2, '2026-09-01T00:00:00Z'), game(3, null)]

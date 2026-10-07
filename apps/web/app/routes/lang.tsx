@@ -5,6 +5,7 @@ import { IntlProvider } from 'use-intl'
 import { loadMessages } from '~/messages'
 import type { Locale } from '~/shared/i18n/locale'
 import { isLocale } from '~/shared/i18n/locale.schema'
+import { siteTimeZone } from '~/shared/i18n/site-time'
 import { ErrorPage } from '~/shared/ui/error-page'
 import type { Route } from './+types/lang'
 
@@ -47,7 +48,7 @@ function LocaleProviders({
   children,
 }: Route.ComponentProps['loaderData'] & { children: ReactNode }) {
   return (
-    <IntlProvider locale={locale} messages={messages} timeZone="Asia/Shanghai">
+    <IntlProvider locale={locale} messages={messages} timeZone={siteTimeZone}>
       <UiLocaleProvider messages={uiMessages[locale]}>{children}</UiLocaleProvider>
     </IntlProvider>
   )

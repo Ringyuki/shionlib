@@ -1,4 +1,5 @@
 import type { ApiData } from '~/shared/api/types'
+import { isoDate, siteMonthStart } from '~/shared/i18n/site-time'
 
 export type SearchResults = ApiData<'/search', 'get'>
 
@@ -41,13 +42,14 @@ export type Picture = { src: string | undefined; shape: PictureShape }
 export type ReleaseMonths<Game = GameHit> = { thisMonth: Game[]; lastMonth: Game[] }
 
 export function releaseWindow(now: Date) {
-  const first = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1))
-  const last = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0))
+  const current = siteMonthStart(now)
+  const first = new Date(Date.UTC(current.getUTCFullYear(), current.getUTCMonth() - 1, 1))
+  const last = new Date(Date.UTC(current.getUTCFullYear(), current.getUTCMonth() + 1, 0))
   return {
-    start: first.toISOString().slice(0, 10),
-    end: last.toISOString().slice(0, 10),
-    lastMonth: first.toISOString().slice(0, 7),
-    thisMonth: last.toISOString().slice(0, 7),
+    start: isoDate(first),
+    end: isoDate(last),
+    lastMonth: isoDate(first).slice(0, 7),
+    thisMonth: isoDate(last).slice(0, 7),
   }
 }
 
