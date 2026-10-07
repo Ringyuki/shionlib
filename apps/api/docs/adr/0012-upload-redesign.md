@@ -59,6 +59,7 @@ Malware scanning streamed whole files to ClamAV. The legacy `clamscan` skipped f
   - `GET /uploads/large/ongoing` also lists finished uploads not yet in a resource (`status: COMPLETED`), and `DELETE /uploads/large/{id}` discards them.
   - A finished upload not yet in a resource is cleaned up six hours after it finished, but only while its uploader has no upload in progress, so the first files of a resource wait for the last one.
   - Completing a session again with the same digest succeeds, so a client can retry a completion whose response it never received.
+  - Removing a file, removing a resource or replacing a file's content retires the sessions it used, so they never come back as finished uploads.
   - An upload starts only if the spool keeps `upload.spool_reserve` (20 GiB) free after the bytes that live uploads have still to write (`UPLOAD_SPOOL_FULL`). Uploads are admitted one at a time under a transaction lock, so concurrent starts cannot overrun these limits.
   - `GET /uploads/quota` returns the tier, the counts behind it, any freeze, and the usage and limits.
 

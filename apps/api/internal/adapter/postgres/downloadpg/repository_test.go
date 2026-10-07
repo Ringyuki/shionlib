@@ -492,6 +492,43 @@ func TestFileNamesAreUniqueWithinAResource(t *testing.T) {
 	}
 }
 
+func TestRemovedOrReplacedFilesRetireTheirSessions(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture(t)
+	creator, gameID := f.db.User(t), f.db.Game(t)
+	resource, other := f.resource(t, gameID, creator), f.resource(t, gameID, creator)
+	attached := func(resourceID int, name string) (int, int) {
+		session := f.session(t, creator, gameuploadsession.StatusCOMPLETED)
+		file := f.file(t, resourceID, creator, name, func(c *ent.GameDownloadResourceFileCreate) { c.SetUploadSessionID(session) })
+		return session, file.ID
+	}
+	deletedSession, deletedFile := attached(resource.ID, "deleted.7z")
+	replacedSession, replacedFile := attached(resource.ID, "replaced.7z")
+	keptSession, _ := attached(resource.ID, "kept.7z")
+	otherSession, _ := attached(other.ID, "other.7z")
+	next := f.session(t, creator, gameuploadsession.StatusCOMPLETED)
+
+	if err := f.repo.DeleteFile(ctx, deletedFile); err != nil {
+		t.Fatal(err)
+	}
+	content := download.FileContent{Path: "/spool/next.sltf", Size: 10, Hash: "h", HashAlgorithm: "blake3", UploadSessionID: next}
+	if err := f.repo.ReplaceFileContent(ctx, replacedFile, content); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.repo.DeleteResource(ctx, other.ID); err != nil {
+		t.Fatal(err)
+	}
+	status := func(id int) gameuploadsession.Status { return f.db.Ent.GameUploadSession.GetX(ctx, id).Status }
+	for _, retired := range []int{deletedSession, replacedSession, otherSession} {
+		if status(retired) != gameuploadsession.StatusEXPIRED {
+			t.Fatalf("session %d of a removed or replaced file is retired: %s", retired, status(retired))
+		}
+	}
+	if status(keptSession) != gameuploadsession.StatusCOMPLETED || status(next) != gameuploadsession.StatusCOMPLETED {
+		t.Fatalf("sessions still in use stay completed: %s %s", status(keptSession), status(next))
+	}
+}
+
 func TestFileOperations(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(t)

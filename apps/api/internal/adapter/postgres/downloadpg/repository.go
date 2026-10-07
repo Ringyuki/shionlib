@@ -305,12 +305,24 @@ func (r *Repository) TouchResource(ctx context.Context, id int, updated time.Tim
 }
 
 func (r *Repository) DeleteResource(ctx context.Context, id int) error {
+	if err := r.retireSessions(ctx, "game_download_resource_id", id); err != nil {
+		return err
+	}
 	err := r.db(ctx).GameDownloadResource.DeleteOneID(id).Exec(ctx)
 	if postgres.IsNotFound(err) {
 		return download.ErrResourceNotFound
 	}
 	if err != nil {
 		return fmt.Errorf("delete download resource %d: %w", id, err)
+	}
+	return nil
+}
+
+func (r *Repository) retireSessions(ctx context.Context, column string, value int) error {
+	query := fmt.Sprintf(`UPDATE game_upload_sessions SET status = 'EXPIRED', updated = $2
+WHERE status = 'COMPLETED' AND id IN (SELECT upload_session_id FROM game_download_resource_files WHERE %s = $1)`, column)
+	if _, err := r.db(ctx).ExecContext(ctx, query, value, time.Now().UTC()); err != nil {
+		return fmt.Errorf("retire upload sessions of %s %d: %w", column, value, err)
 	}
 	return nil
 }

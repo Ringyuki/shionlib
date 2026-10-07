@@ -110,6 +110,9 @@ func (r *Repository) FindFileBySession(ctx context.Context, sessionID int) (down
 }
 
 func (r *Repository) ReplaceFileContent(ctx context.Context, id int, content download.FileContent) error {
+	if err := r.retireSessions(ctx, "id", id); err != nil {
+		return err
+	}
 	update := r.db(ctx).GameDownloadResourceFile.UpdateOneID(id).
 		SetFilePath(content.Path).
 		SetFileSize(content.Size).
@@ -173,6 +176,9 @@ func (r *Repository) updateFile(ctx context.Context, id int, action string, appl
 }
 
 func (r *Repository) DeleteFile(ctx context.Context, id int) error {
+	if err := r.retireSessions(ctx, "id", id); err != nil {
+		return err
+	}
 	err := r.db(ctx).GameDownloadResourceFile.DeleteOneID(id).Exec(ctx)
 	if postgres.IsNotFound(err) {
 		return download.ErrFileNotFound
