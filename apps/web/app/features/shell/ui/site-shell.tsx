@@ -1,4 +1,4 @@
-import { AppShell, Container, ScrollTop, type AppShellHandle } from '@hina-ui/react'
+import { AppShell, Container, ScrollTop, Stack, type AppShellHandle } from '@hina-ui/react'
 import { useRef, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import type { Schema } from '~/shared/api/types'
@@ -43,8 +43,13 @@ export function SiteShell({ viewer, sidebar, children }: SiteShellProps) {
         }
         header={<SiteHeader />}
       >
-        <Container size="xl" className="px-4 py-6 sm:px-6 lg:py-8">
-          {children}
+        <Container
+          size="xl"
+          className="flex min-h-[calc(100vh-3.5rem-1px)] flex-col px-4 py-6 sm:px-6 lg:py-8"
+        >
+          <Stack gap="none" className="flex-1">
+            {children}
+          </Stack>
           <SiteFooter />
         </Container>
       </AppShell>
