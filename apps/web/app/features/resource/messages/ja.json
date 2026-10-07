@@ -99,7 +99,7 @@
   },
   "actions": "リソースの操作",
   "uploadTitle": "リソースをアップロード",
-  "uploadDescription": "ゲームとファイルを選び、リソースの情報を入力して送信します。送信後は、マイアップロードでアップロードとチェックの進み具合を確認できます。",
+  "uploadDescription": "ゲームとファイルを選び、リソースの情報を入力してアップロードを開始します。アップロードとチェックの進み具合は<uploads>マイアップロード</uploads>で確認できます。",
   "uploadGame": "ゲーム",
   "uploadGameHint": "タイトルで検索するか、ID で探せます：vid:17（VNDB）、bid:42（Bangumi）、hid:9（Hikarinagi）",
   "changeGame": "変更",
@@ -115,7 +115,8 @@
     "chosen": "今回の選択"
   },
   "uploadStart": "アップロードを開始",
-  "uploadStarted": "アップロードを開始しました。マイアップロードで進み具合を確認できます",
+  "uploadStarted": "アップロードを開始しました",
+  "viewProgress": "進み具合を見る",
   "uploadSignIn": "リソースをアップロードするにはログインしてください",
   "signIn": "ログイン",
   "admission": {

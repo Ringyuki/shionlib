@@ -65,7 +65,7 @@ test.describe('as an uploader', () => {
       .locator('input[type="file"]')
       .setInputFiles(await sampleFile(testInfo, 'e2e-new-c.7z', 4096))
     await dialog.getByRole('button', { name: '开始上传' }).click()
-    await expectNotice(page, '已开始上传，可以在「我的上传」查看进度')
+    await expectNotice(page, '已开始上传')
     await expect(resource.getByText('e2e-new-c.7z')).toBeVisible({ timeout: 60_000 })
 
     const fileAction = async (file: RegExp, action: string) => {

@@ -2,7 +2,7 @@
   "favorite": "收藏",
   "favorited": "已收藏",
   "chooseLists": "收藏到",
-  "noLists": "还没有收藏夹",
+  "noLists": "暂无收藏夹",
   "defaultList": "默认收藏夹",
   "private": "私密",
   "newList": "新建收藏夹",
@@ -12,10 +12,10 @@
   "create": "创建并收藏",
   "cancel": "取消",
   "created": "已新建「{name}」并收藏",
-  "newListDescription": "新建后会把这个游戏收进去。",
+  "newListDescription": "新建后，这个游戏将加入该收藏夹。",
   "listNameHint": "最多 {max} 字",
   "listDescription": "简介",
   "listDescriptionHint": "选填，最多 {max} 字",
-  "makePrivateHint": "其他人看不到这个收藏夹",
+  "makePrivateHint": "其他人无法查看这个收藏夹",
   "gameCount": "{count} 个游戏"
 }

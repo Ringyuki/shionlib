@@ -3,17 +3,17 @@
   "placeholder": "搜索游戏、开发商、角色",
   "list": "搜索建议与结果",
   "groups": {
-    "suggestions": "联想",
+    "suggestions": "搜索建议",
     "games": "游戏",
     "developers": "开发商",
     "characters": "角色",
     "recent": "最近搜索",
-    "trending": "热搜"
+    "trending": "热门搜索"
   },
   "clearRecent": "清除最近搜索",
   "seeAll": "查看「{query}」的全部 {total, number} 个游戏",
-  "searching": "搜索中…",
-  "empty": "没有找到「{query}」。试试日文原名或别名。",
+  "searching": "正在搜索…",
+  "empty": "没有找到「{query}」。可以尝试使用日文原名或别名搜索。",
   "unavailable": "搜索暂时不可用，请稍后再试。",
   "works": "{count} 部作品",
   "results": {
@@ -23,9 +23,9 @@
     "placeholder": "搜索游戏名称或别名",
     "prompt": "输入游戏名称或别名搜索，也可以按编号查找：vid:17（VNDB）、bid:42（Bangumi）、hid:9（Hikarinagi）",
     "trending": "热门搜索",
-    "onlyWithResources": "只看有资源的游戏",
-    "empty": "没有找到「{query}」。试试日文原名或别名。",
-    "emptyFiltered": "没有资源的游戏默认不显示。关掉「只看有资源的游戏」后可以在全部游戏里查找。",
+    "onlyWithResources": "仅显示有资源的游戏",
+    "empty": "没有找到「{query}」。可以尝试使用日文原名或别名搜索。",
+    "emptyFiltered": "默认不显示没有资源的游戏。关闭「仅显示有资源的游戏」后，可以在全部游戏中查找。",
     "unavailable": "搜索暂时不可用，请稍后再试。"
   },
   "pickGame": "搜索游戏名称",

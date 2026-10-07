@@ -1,6 +1,8 @@
-import { PageHeader, Result, Stack } from '@hina-ui/react'
-import { useTranslations } from 'use-intl'
+import { Link, PageHeader, Result, Stack, Text } from '@hina-ui/react'
+import { Link as RouterLink } from 'react-router'
+import { useLocale, useTranslations } from 'use-intl'
 import type { GameHeader } from '~/features/game'
+import { sitePaths } from '~/features/shell'
 import type { Allowance } from '~/features/upload'
 import { Button } from '~/shared/ui/button'
 import { UploadForm } from './upload-form'
@@ -12,9 +14,20 @@ type UploadPageProps = {
 
 export function UploadPage({ game, allowance }: UploadPageProps) {
   const t = useTranslations('resource')
+  const locale = useLocale()
   return (
     <Stack gap="lg" className="mx-auto w-full max-w-2xl">
-      <PageHeader title={t('uploadTitle')} description={t('uploadDescription')} />
+      <PageHeader title={t('uploadTitle')}>
+        <Text tone="muted">
+          {t.rich('uploadDescription', {
+            uploads: chunks => (
+              <Link asChild>
+                <RouterLink to={sitePaths(locale).uploads}>{chunks}</RouterLink>
+              </Link>
+            ),
+          })}
+        </Text>
+      </PageHeader>
       {allowance === null ? (
         <Result
           status="info"

@@ -1,14 +1,14 @@
 {
   "download": "下载",
   "methods": "其他下载方式",
-  "viaBrowser": "用浏览器下载",
+  "viaBrowser": "通过浏览器下载",
   "viaAria2": "推送到 aria2",
   "copyLink": "复制下载链接",
-  "verifying": "正在确认你不是机器人",
-  "verifyingHint": "通过后会自动开始，不用再点一次。",
+  "verifying": "正在进行人机验证",
+  "verifyingHint": "验证通过后将自动开始下载，无需再次点击。",
   "verification": {
-    "unavailable": "人机验证没有加载出来，请检查网络后重试",
-    "error": "人机验证没有通过，请重试",
+    "unavailable": "人机验证加载失败，请检查网络后重试",
+    "error": "人机验证未通过，请重试",
     "expired": "人机验证已过期，请重试",
     "timeout": "人机验证超时，请重试"
   },
@@ -17,7 +17,7 @@
     "sent": "已推送到 aria2",
     "unreachable": "无法连接 aria2（{endpoint}），请检查设置",
     "unauthorized": "aria2 拒绝了密钥，请检查设置",
-    "rejected": "aria2 没有接受任务：{message}"
+    "rejected": "aria2 未接受任务：{message}"
   },
   "useBrowser": "改用浏览器下载",
   "copied": "链接已复制，{minutes} 分钟内有效",

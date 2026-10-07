@@ -21,5 +21,5 @@ test('leads from a recently updated game to its page', async ({ page }) => {
 test('lists the hot games and says when the month has no releases', async ({ page }) => {
   await page.goto('/zh')
   await expect(block(page, '热门游戏').getByRole('link', { name: seededGame })).toBeVisible()
-  await expect(block(page, /月新作$/).getByText('这个月还没有收录新作')).toBeVisible()
+  await expect(block(page, /月新作$/).getByText('本月暂未收录新作')).toBeVisible()
 })

@@ -1,9 +1,9 @@
 {
   "status": {
     "active": "我的上传：正在上传",
-    "attention": "我的上传：有上传需要处理",
+    "attention": "我的上传：有文件需要处理",
     "finished": "我的上传：上传已完成"
   },
-  "submittedToast": "{label} 上传完成，正在等待检查",
+  "submittedToast": "{label} 已上传完成，正在等待检查",
   "failedToast": "{label} 提交失败"
 }

@@ -99,7 +99,7 @@
   },
   "actions": "Resource actions",
   "uploadTitle": "Upload a resource",
-  "uploadDescription": "Choose the game and the files, describe the resource, then submit. Afterwards My uploads shows how the upload and its checks are going.",
+  "uploadDescription": "Choose the game and the files, describe the resource, then start uploading. <uploads>My uploads</uploads> shows how the upload and its checks are going.",
   "uploadGame": "Game",
   "uploadGameHint": "Search by title, or find a game by ID: vid:17 (VNDB), bid:42 (Bangumi), hid:9 (Hikarinagi)",
   "changeGame": "Change",
@@ -115,7 +115,8 @@
     "chosen": "Chosen"
   },
   "uploadStart": "Start uploading",
-  "uploadStarted": "Upload started; follow it in My uploads",
+  "uploadStarted": "Upload started",
+  "viewProgress": "View progress",
   "uploadSignIn": "Sign in to upload resources",
   "signIn": "Sign in",
   "admission": {

@@ -8,9 +8,9 @@
   "next": "下一组",
   "hot": "热门游戏",
   "library": "游戏库",
-  "failed": "这部分内容没有加载出来",
+  "failed": "这部分内容加载失败",
   "retry": "重试",
-  "noResources": "还没有资源",
+  "noResources": "暂无资源",
   "upload": "上传资源",
-  "noReleases": "这个月还没有收录新作"
+  "noReleases": "本月暂未收录新作"
 }

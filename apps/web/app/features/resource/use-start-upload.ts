@@ -21,7 +21,12 @@ export function useStartUpload() {
   }
   const announce = (target: UploadTarget, label: string, files: readonly File[]) => {
     start(target, label, files)
-    toast.success(t('uploadStarted'))
+    toast.success(t('uploadStarted'), {
+      action: {
+        label: t('viewProgress'),
+        onClick: () => void navigate(sitePaths(locale).uploads),
+      },
+    })
   }
   return {
     create(game: GameHeader, values: UploadValues) {
