@@ -9,32 +9,32 @@ import (
 var (
 	MaxFilesPerResource = setting.Int(setting.Spec[int]{
 		Name:        "download.max_files_per_resource",
-		Label:       "单个资源最多文件数",
-		Description: "一个资源里最多能放的文件数，包括分卷。",
+		Label:       "单个资源的文件数上限",
+		Description: "单个资源最多可包含的文件数量，分卷计入其中。",
 		Default:     100, Min: 1, Max: 1000,
 	})
 	LinkExpiresIn = setting.Duration(setting.Spec[time.Duration]{
 		Name:        "download.link_expires_in",
 		Label:       "下载链接基础有效期",
-		Description: "每个下载链接至少有效这么久，再按文件大小和预估速度延长。",
+		Description: "下载链接的最短有效期，实际有效期会根据文件大小和预估速度延长。",
 		Default:     time.Hour, Min: time.Minute, Max: 7 * 24 * time.Hour,
 	})
 	EstimatedSpeed = setting.Bytes(setting.Spec[int64]{
 		Name:        "download.estimated_speed",
 		Label:       "预估下载速度（字节/秒）",
-		Description: "文件大小除以这个速度，就是链接在基础有效期之外延长的时间。",
+		Description: "链接在基础有效期之外延长的时间，等于文件大小除以该速度。",
 		Default:     1 << 20, Min: 1 << 10, Max: 10 << 30,
 	})
 	LinkMaxExpiresIn = setting.Duration(setting.Spec[time.Duration]{
 		Name:        "download.link_max_expires_in",
 		Label:       "下载链接最长有效期",
-		Description: "延长后的有效期不超过这个值；走下载代理时也是票据的硬性过期时间。",
+		Description: "延长后的有效期不超过该值；使用下载代理时，该值同时是票据的强制过期时间。",
 		Default:     24 * time.Hour, Min: time.Minute, Max: 30 * 24 * time.Hour,
 	})
 	MaxConns = setting.Int(setting.Spec[int]{
 		Name:        "download.max_conns",
-		Label:       "单个下载最多连接数",
-		Description: "走下载代理时，同一个下载链接允许的并发连接数。",
+		Label:       "单个下载的连接数上限",
+		Description: "使用下载代理时，同一个下载链接允许的并发连接数。",
 		Default:     8, Min: 1, Max: 64,
 	})
 )

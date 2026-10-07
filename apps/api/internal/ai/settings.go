@@ -6,7 +6,7 @@ var (
 	RecordPayloads = setting.Flag(setting.Spec[bool]{
 		Name:        "ai.record_payloads",
 		Label:       "记录请求内容",
-		Description: "保存每次 AI 调用的提示词和输出，便于排查；内容包含待审核的用户内容。",
+		Description: "保存每次 AI 调用的提示词和输出，便于排查问题；其中包含待审核的用户内容。",
 		Default:     true,
 	})
 	RequestRetentionDays = setting.Int(setting.Spec[int]{

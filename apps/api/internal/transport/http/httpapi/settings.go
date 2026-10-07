@@ -15,7 +15,7 @@ var (
 	DefaultThrottleLimit = setting.Int(setting.Spec[int]{
 		Name:        "throttle.default_limit",
 		Label:       "全站限流：每窗口请求数",
-		Description: "同一 IP 在一个窗口内对同一个接口最多能发的请求数，未单独设限的接口都按这一档。",
+		Description: "同一 IP 在一个窗口内对同一个接口最多可发送的请求数；未单独设置限制的接口均适用该限制。",
 		Default:     600, Min: 1, Max: 1_000_000,
 	})
 	DefaultThrottleWindow = setting.Duration(setting.Spec[time.Duration]{
@@ -26,13 +26,13 @@ var (
 	DefaultThrottleBlock = setting.Duration(setting.Spec[time.Duration]{
 		Name:        "throttle.default_block",
 		Label:       "全站限流：超限后封禁时长",
-		Description: "超过限制后该 IP 对该接口的请求被拒绝的时长；搜索和上传分片也用这个时长。",
+		Description: "超过限制后，该 IP 对该接口的请求被拒绝的时长；搜索和上传分片同样适用该时长。",
 		Default:     10 * time.Second, Min: 0, Max: week,
 	})
 	DownloadThrottleLimit = setting.Int(setting.Spec[int]{
 		Name:        "throttle.download_limit",
 		Label:       "下载限流：每窗口次数",
-		Description: "同一 IP 在一个窗口内最多能获取的下载链接数。",
+		Description: "同一 IP 在一个窗口内最多可获取的下载链接数。",
 		Default:     60, Min: 1, Max: 100_000,
 	})
 	DownloadThrottleWindow = setting.Duration(setting.Spec[time.Duration]{
@@ -48,7 +48,7 @@ var (
 	AuthThrottleLimit = setting.Int(setting.Spec[int]{
 		Name:        "throttle.auth_limit",
 		Label:       "登录限流：每窗口次数",
-		Description: "登录、注册、验证码、找回密码、改邮箱和改密码等接口，同一 IP 在一个窗口内最多的尝试次数。",
+		Description: "登录、注册、验证码、找回密码、修改邮箱和修改密码等接口，同一 IP 在一个窗口内最多可尝试的次数。",
 		Default:     20, Min: 1, Max: 1_000_000,
 	})
 	AuthThrottleWindow = setting.Duration(setting.Spec[time.Duration]{
@@ -64,7 +64,7 @@ var (
 	SearchThrottleLimit = setting.Int(setting.Spec[int]{
 		Name:        "throttle.search_limit",
 		Label:       "搜索限流：每窗口次数",
-		Description: "同一 IP 在一个窗口内最多的搜索请求数。",
+		Description: "同一 IP 在一个窗口内最多可发送的搜索请求数。",
 		Default:     120, Min: 1, Max: 1_000_000,
 	})
 	SearchThrottleWindow = setting.Duration(setting.Spec[time.Duration]{
@@ -75,7 +75,7 @@ var (
 	UploadChunkThrottleLimit = setting.Int(setting.Spec[int]{
 		Name:        "throttle.upload_chunk_limit",
 		Label:       "上传分片限流：每窗口次数",
-		Description: "同一 IP 在一个窗口内最多能上传的分片数。",
+		Description: "同一 IP 在一个窗口内最多可上传的分片数。",
 		Default:     10_000, Min: 1, Max: 1_000_000,
 	})
 	UploadChunkThrottleWindow = setting.Duration(setting.Spec[time.Duration]{
