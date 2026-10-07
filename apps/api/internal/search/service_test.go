@@ -9,6 +9,7 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
+	"github.com/Ringyuki/shionlib/apps/api/internal/character"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game/gametest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/search"
@@ -46,8 +47,8 @@ func newFixture(entries ...gametest.Entry) fixture {
 		Games:       games,
 		Cards:       game.NewCardService(games),
 		Preferences: f.prefs,
-		Developers:  searchtest.Developers{50: {ID: 50, Name: "枕", WorksCount: 3}},
-		Characters:  searchtest.Characters{90: {ID: 90, NameJP: "御桜稟"}},
+		Developers:  searchtest.Developers{50: {ID: 50, Name: "枕", WorksCount: 3}, 51: {ID: 51, Name: "ノベル専門"}},
+		Characters:  searchtest.Characters{90: {ID: 90, NameJP: "御桜稟", Game: &character.GameRef{ID: 1, TitleJP: "サクラノ詩"}}, 91: {ID: 91, NameJP: "アニメだけ"}},
 		Titles:      f.titles,
 		Tags:        searchtest.Tags{{ID: 1, Name: "school", Count: 5, Aliases: []string{"学园", "School Life"}}, {ID: 2, Name: "fantasy", Count: 9}},
 		Cache:       f.cache,
@@ -100,11 +101,11 @@ func TestSearchMapsUpstreamHitsToLocalEntriesInUpstreamOrder(t *testing.T) {
 	hidden.Hidden = true
 	f := newFixture(entry(1, false, true), entry(2, true, true), entry(3, false, false), hidden)
 	f.catalog.Hits[catalog.EntityGame] = hits("c", "b", "a", "d", "x", "a2")
-	f.catalog.Hits[catalog.EntityDeveloper] = hits("5", "6")
-	f.catalog.Hits[catalog.EntityCharacter] = hits("9")
+	f.catalog.Hits[catalog.EntityDeveloper] = hits("5", "7", "6")
+	f.catalog.Hits[catalog.EntityCharacter] = hits("9", "8")
 	f.catalog.Links[catalog.EntityGame] = map[string]int{"a": 1, "a2": 1, "b": 2, "c": 3, "d": 4}
-	f.catalog.Links[catalog.EntityDeveloper] = map[string]int{"5": 50}
-	f.catalog.Links[catalog.EntityCharacter] = map[string]int{"9": 90}
+	f.catalog.Links[catalog.EntityDeveloper] = map[string]int{"5": 50, "7": 51}
+	f.catalog.Links[catalog.EntityCharacter] = map[string]int{"9": 90, "8": 91}
 
 	results, err := f.service.Search(context.Background(), guest, anyResource(" サクラ "))
 	if err != nil {
@@ -113,11 +114,11 @@ func TestSearchMapsUpstreamHitsToLocalEntriesInUpstreamOrder(t *testing.T) {
 	if ids := gameIDs(results.Games.Items); !slices.Equal(ids, []int{3, 1}) || results.Games.Total != 6 {
 		t.Fatalf("guests skip rated and hidden games, duplicates collapse, games without resources stay: %v total %d", ids, results.Games.Total)
 	}
-	if len(results.Developers.Items) != 1 || results.Developers.Items[0].Name != "枕" || results.Developers.Total != 2 {
-		t.Fatalf("developers %+v", results.Developers)
+	if len(results.Developers.Items) != 1 || results.Developers.Items[0].Name != "枕" || results.Developers.Total != 3 {
+		t.Fatalf("developers without a visible game are left out: %+v", results.Developers)
 	}
-	if len(results.Characters.Items) != 1 || results.Characters.Items[0].NameJP != "御桜稟" || results.Characters.Total != 1 {
-		t.Fatalf("characters %+v", results.Characters)
+	if len(results.Characters.Items) != 1 || results.Characters.Items[0].NameJP != "御桜稟" || results.Characters.Total != 2 {
+		t.Fatalf("characters outside any visible game are left out: %+v", results.Characters)
 	}
 	wantUnknown := []catalog.Ref{
 		{Source: catalog.SourceHikarinagi, Entity: catalog.EntityGame, ExternalID: "x"},

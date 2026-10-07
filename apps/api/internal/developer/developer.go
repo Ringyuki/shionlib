@@ -33,6 +33,10 @@ type Summary struct {
 	WorksCount int
 }
 
+func (s Summary) HasWorks() bool {
+	return s.WorksCount > 0
+}
+
 type Page = paging.Page
 
 type SortField string

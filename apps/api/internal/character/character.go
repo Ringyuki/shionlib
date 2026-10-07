@@ -50,6 +50,10 @@ type Summary struct {
 	Game    *GameRef
 }
 
+func (s Summary) InGame() bool {
+	return s.Game != nil
+}
+
 type Page = paging.Page
 
 type SortField string

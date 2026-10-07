@@ -94,9 +94,9 @@ func (s *Service) Search(ctx context.Context, viewer actor.Actor, query Query) (
 			}
 			switch kind {
 			case catalog.EntityDeveloper:
-				results.Developers, err = section(ctx, ids, total, s.developers.Summaries)
+				results.Developers, err = section(ctx, ids, total, s.developers.Summaries, developer.Summary.HasWorks)
 			case catalog.EntityCharacter:
-				results.Characters, err = section(ctx, ids, total, s.characters.Summaries)
+				results.Characters, err = section(ctx, ids, total, s.characters.Summaries, character.Summary.InGame)
 			}
 			return err
 		})
@@ -231,12 +231,13 @@ func (s *Service) upstream(ctx context.Context, kind catalog.Entity, q string, p
 	return fresh, nil
 }
 
-func section[T any](ctx context.Context, ids []int, total int, load func(context.Context, []int) (map[int]T, error)) (Section[T], error) {
+func section[T any](ctx context.Context, ids []int, total int, load func(context.Context, []int) (map[int]T, error), shown func(T) bool) (Section[T], error) {
 	byID, err := load(ctx, ids)
 	if err != nil {
 		return Section[T]{}, err
 	}
-	return Section[T]{Items: inOrder(ids, byID), Total: total}, nil
+	items := slices.DeleteFunc(inOrder(ids, byID), func(item T) bool { return !shown(item) })
+	return Section[T]{Items: items, Total: total}, nil
 }
 
 func inOrder[T any](ids []int, byID map[int]T) []T {
