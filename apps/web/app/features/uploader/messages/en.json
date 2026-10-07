@@ -1,0 +1,96 @@
+{
+  "title": "My uploads",
+  "description": "Follow your uploads and manage the resources you have uploaded.",
+  "upload": "Upload a resource",
+  "signIn": "Sign in to see your uploads",
+  "signInAction": "Sign in",
+  "list": {
+    "label": "Resources I uploaded",
+    "stageLabel": "Filter by status",
+    "stage": "{stage, select, uploading {Uploading} processing {Processing} other {Published}} {count}",
+    "stageName": {
+      "uploading": "Uploading",
+      "processing": "Processing",
+      "published": "Published"
+    },
+    "search": "Search by game or file name",
+    "orderLabel": "Sort by",
+    "order": {
+      "recent": "Recently updated",
+      "oldest": "Oldest update",
+      "mostDownloaded": "Most downloaded",
+      "leastDownloaded": "Least downloaded"
+    },
+    "downloads": "{count, plural, one {# download} other {# downloads}}",
+    "updated": "Updated <time></time>",
+    "files": "Files",
+    "empty": {
+      "nothing": "Nothing uploaded yet",
+      "unmatched": "No resources match",
+      "uploading": "Nothing is being uploaded at the moment",
+      "processing": "Nothing is being processed at the moment",
+      "published": "Nothing published yet"
+    },
+    "emptyHint": "Pick a game and upload its files; they are published once they pass the check."
+  },
+  "account": {
+    "title": "Storage and downloads",
+    "downloads": "Downloads",
+    "recent": "New in {days} days",
+    "games": "Games",
+    "files": "Files",
+    "storage": "Storage",
+    "unlimited": "No storage limit",
+    "fileLimit": "Up to {size} per file",
+    "tierHelp": "What does this mean?",
+    "tier": {
+      "new": "New uploader",
+      "regular": "Regular uploader",
+      "trusted": "Trusted uploader",
+      "admin": "Administrator"
+    },
+    "frozen": "Because of a violation you have less space until {date}."
+  },
+  "transfers": {
+    "appendsTo": "Adding to the resource that holds {name}",
+    "replaces": "Replacing {name}",
+    "orphan": "Uploads that were not submitted",
+    "orphanHint": "These files reached the server but were not submitted. Cancel the ones you do not need.",
+    "submitting": "Submitting",
+    "submitFailed": "Submission failed",
+    "retry": "Submit again",
+    "cancelAll": "Cancel all",
+    "cancelUpload": "Cancel upload",
+    "cancelAllConfirm": "Cancel the upload of these files?",
+    "cancelConfirm": "Cancel the upload of this file?",
+    "cancelHint": "What has been uploaded will be discarded.",
+    "chooseAgain": "Choose the files again",
+    "chooseAgainHint": "After a reload these files must be chosen again before their upload can continue: {names}",
+    "chooseAgainDrop": "Click to choose files, or drop them here",
+    "unmatched": "These are not the files waiting to continue: {names}",
+    "state": {
+      "queued": "Queued",
+      "waiting": "Waiting",
+      "paused": "Paused",
+      "done": "Uploaded",
+      "failed": "Failed"
+    },
+    "stateHelp": "What does this mean?",
+    "wait": {
+      "network": "Connection lost, retrying shortly",
+      "busy": "The server is busy, retrying shortly",
+      "inFlight": "Uploads in progress have reached the limit; this file starts once earlier ones finish",
+      "signedOut": "Your session expired; uploading resumes after you sign in",
+      "elsewhere": "Uploading in another tab"
+    },
+    "failure": {
+      "differentFile": "The chosen file is not the one uploaded before",
+      "changedFile": "The file changed while it was uploading",
+      "expired": "The upload expired; upload the file again",
+      "rejected": "The upload failed"
+    },
+    "speed": "{speed}/s, {time} left",
+    "pause": "Pause the upload",
+    "resume": "Resume the upload"
+  }
+}

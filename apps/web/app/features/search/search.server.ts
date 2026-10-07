@@ -1,6 +1,7 @@
 import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import { pageParam } from '~/shared/route/params'
 import { readCommand, routeAction, routeLoader } from '~/shared/route/route.server'
-import { pageParam, recordSearchCommand } from './search.schema'
+import { recordSearchCommand } from './search.schema'
 import {
   findGames,
   loadPalette,

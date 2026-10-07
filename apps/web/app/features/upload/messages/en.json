@@ -1,47 +1,9 @@
 {
-  "tray": "Uploads",
-  "total": "{sent} / {size}",
-  "target": {
-    "create": "New resource: {label}",
-    "append": "Adding files: {label}",
-    "replace": "Replacing a file: {label}",
-    "orphan": "Uploads without a resource"
+  "status": {
+    "active": "My uploads: uploading",
+    "attention": "My uploads: an upload needs attention",
+    "finished": "My uploads: uploads finished"
   },
-  "submission": {
-    "submitting": "Submitting",
-    "submitted": "Done",
-    "failed": "Submission failed"
-  },
-  "phase": {
-    "queued": "Waiting",
-    "needsFile": "Choose the file again",
-    "paused": "Paused",
-    "done": "Uploaded"
-  },
-  "wait": {
-    "network": "Connection lost, retrying shortly",
-    "busy": "The server is busy, retrying shortly",
-    "inFlight": "Uploads in progress have reached the limit; this file starts once earlier ones finish",
-    "signedOut": "Your session expired; uploading resumes after you sign in",
-    "elsewhere": "Uploading in another tab"
-  },
-  "failure": {
-    "differentFile": "The chosen file is not the one uploaded before",
-    "changedFile": "The file changed while it was uploading",
-    "expired": "The upload expired; upload the file again",
-    "rejected": "The upload failed"
-  },
-  "speed": "{speed}/s",
-  "remaining": "{time} left",
-  "pause": "Pause",
-  "resume": "Resume",
-  "cancel": "Cancel",
-  "retry": "Submit again",
-  "dismiss": "Remove",
-  "chooseAgain": "Choose files to continue",
-  "chooseAgainHint": "After the page reloaded, choose these files again: {names}",
-  "orphanHint": "These uploads belong to no resource and can be cancelled.",
-  "unmatched": "These files match no upload waiting to continue: {names}",
-  "submittedToast": "{label} is done",
+  "submittedToast": "{label} is uploaded and waiting for its check",
   "failedToast": "{label} could not be submitted"
 }

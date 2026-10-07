@@ -21,6 +21,8 @@ export default [
   route('resources/resource/report', 'routes/resources.resource.report.ts'),
   route('resources/resource/edit', 'routes/resources.resource.edit.ts'),
   route('resources/resource/delete', 'routes/resources.resource.delete.ts'),
+  route('resources/resource/file/rename', 'routes/resources.resource.file-rename.ts'),
+  route('resources/resource/file/remove', 'routes/resources.resource.file-remove.ts'),
   route('resources/upload/allowance', 'routes/resources.upload.allowance.ts'),
   route(':lang', 'routes/lang.tsx', [
     route('login', 'routes/auth-redirect.ts', { id: 'login' }),
@@ -30,6 +32,7 @@ export default [
       route('user/password/forget', 'routes/password-reset.tsx'),
       route('search', 'routes/search.tsx'),
       route('upload', 'routes/upload.tsx'),
+      route('user/uploads', 'routes/uploads.tsx'),
       route('search/game', 'routes/search-legacy.ts'),
       route('game/:id', 'routes/game.tsx', [
         index('routes/game.resources.tsx'),

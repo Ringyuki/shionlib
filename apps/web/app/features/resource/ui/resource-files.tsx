@@ -1,6 +1,5 @@
 import {
   CopyButton,
-  IconButton,
   Inline,
   Stack,
   Table,
@@ -11,14 +10,13 @@ import {
   TableRow,
   Text,
 } from '@hina-ui/react'
-import { FileArchive, FileUp } from 'lucide-react'
-import { useState } from 'react'
+import { FileArchive } from 'lucide-react'
 import { useTranslations } from 'use-intl'
 import { DownloadButton } from '~/features/download'
 import { useBytes } from '~/shared/i18n/use-bytes'
-import { fileState, shortHash, stored, type ResourceFile } from '../resource'
+import { downloadable, shortHash, type ResourceFile } from '../resource'
+import { FileMenu } from './file-menu'
 import { FileState } from './file-state'
-import { ReplaceFileDialog } from './replace-file-dialog'
 
 const wide = 'max-sm:hidden'
 
@@ -41,19 +39,23 @@ export function ResourceFiles({ files, manageable }: ResourceFilesProps) {
       </TableHeader>
       <TableBody>
         {files.map(file => (
-          <FileRow key={file.id} file={file} replaceable={manageable && stored(file)} />
+          <FileRow key={file.id} file={file} manageable={manageable} removable={files.length > 1} />
         ))}
       </TableBody>
     </Table>
   )
 }
 
-function FileRow({ file, replaceable }: { file: ResourceFile; replaceable: boolean }) {
+type FileRowProps = {
+  file: ResourceFile
+  manageable: boolean
+  removable: boolean
+}
+
+function FileRow({ file, manageable, removable }: FileRowProps) {
   const t = useTranslations('resource')
-  const [replacing, setReplacing] = useState(false)
   const bytes = useBytes()
   const sizeText = bytes(file.file_size)
-  const state = fileState(file)
   return (
     <TableRow>
       <TableCell className="w-full max-w-0 ps-0">
@@ -87,18 +89,8 @@ function FileRow({ file, replaceable }: { file: ResourceFile; replaceable: boole
       </TableCell>
       <TableCell align="end" className="pe-0">
         <Inline gap="xs" align="center" justify="end" wrap={false}>
-          {replaceable && (
-            <>
-              <IconButton label={t('replaceFile')} size="sm" onClick={() => setReplacing(true)}>
-                <FileUp />
-              </IconButton>
-              <ReplaceFileDialog file={file} open={replacing} onOpenChange={setReplacing} />
-            </>
-          )}
-          <DownloadButton
-            file={{ id: file.id, name: file.file_name }}
-            disabled={state === 'scanning' || state === 'risky'}
-          />
+          {downloadable(file) && <DownloadButton file={{ id: file.id, name: file.file_name }} />}
+          {manageable && <FileMenu file={file} removable={removable} />}
         </Inline>
       </TableCell>
     </TableRow>

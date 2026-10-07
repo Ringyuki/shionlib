@@ -45,6 +45,20 @@ export const deleteCommand = v.object({ resourceId: id })
 
 export type ResourceDeletion = v.InferOutput<typeof deleteCommand>
 
+export const renameFileCommand = v.object({ fileId: id, name: v.string() })
+
+export type FileRename = v.InferOutput<typeof renameFileCommand>
+
+export const removeFileCommand = v.object({ fileId: id })
+
+export type FileRemoval = v.InferOutput<typeof removeFileCommand>
+
+export function renameFileForm(kit: FormKit) {
+  return v.object({ name: kit.text('RenameDownloadFileInputBody', 'file_name') })
+}
+
+export type RenameFileValues = v.InferInput<ReturnType<typeof renameFileForm>>
+
 export function reportForm(kit: FormKit) {
   return v.object({
     reason: v.picklist(reportReasons),

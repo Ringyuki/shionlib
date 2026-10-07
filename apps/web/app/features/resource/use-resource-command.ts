@@ -1,7 +1,13 @@
 import { useEffect, useEffectEvent } from 'react'
 import { useFetcher } from 'react-router'
 import type { ApiFailure } from '~/shared/api/types'
-import type { ResourceDeletion, ResourceEdit, ResourceReport } from './resource.schema'
+import type {
+  FileRemoval,
+  FileRename,
+  ResourceDeletion,
+  ResourceEdit,
+  ResourceReport,
+} from './resource.schema'
 import type { editResourceAction } from './resource.server'
 
 type CommandAction = typeof editResourceAction
@@ -13,7 +19,7 @@ type CommandOptions = {
 }
 
 export function useResourceCommand<
-  Command extends ResourceReport | ResourceEdit | ResourceDeletion,
+  Command extends ResourceReport | ResourceEdit | ResourceDeletion | FileRename | FileRemoval,
 >(action: string, { onDone, onFailure, revalidate = true }: CommandOptions) {
   const fetcher = useFetcher<CommandAction>()
   const settle = useEffectEvent((result: NonNullable<typeof fetcher.data>) => {
@@ -23,7 +29,7 @@ export function useResourceCommand<
       onFailure?.(result.failure)
     }
   })
-  const settled = fetcher.state === 'idle' ? fetcher.data : undefined
+  const settled = fetcher.state === 'submitting' ? undefined : fetcher.data
   useEffect(() => {
     if (settled !== undefined) {
       settle(settled)

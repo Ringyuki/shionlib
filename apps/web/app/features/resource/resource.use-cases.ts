@@ -1,7 +1,13 @@
 import type { ApiClient } from '~/shared/api/client'
 import { ApiError } from '~/shared/api/error'
 import { needsSimulator } from './resource'
-import type { ResourceDeletion, ResourceEdit, ResourceReport } from './resource.schema'
+import type {
+  FileRemoval,
+  FileRename,
+  ResourceDeletion,
+  ResourceEdit,
+  ResourceReport,
+} from './resource.schema'
 
 export async function loadGameResources(api: ApiClient, gameId: number) {
   const resources = await api.get('/game/{id}/download-source', {
@@ -41,6 +47,19 @@ export async function editResource(api: ApiClient, edit: ResourceEdit) {
 
 export async function deleteResource(api: ApiClient, deletion: ResourceDeletion) {
   await api.delete('/game/download-source/{id}', { params: { path: { id: deletion.resourceId } } })
+}
+
+export async function renameFile(api: ApiClient, rename: FileRename) {
+  await api.patch('/game/download-source/file/{fileId}', {
+    params: { path: { fileId: rename.fileId } },
+    body: { file_name: rename.name.trim() },
+  })
+}
+
+export async function removeFile(api: ApiClient, removal: FileRemoval) {
+  await api.delete('/game/download-source/file/{fileId}', {
+    params: { path: { fileId: removal.fileId } },
+  })
 }
 
 export async function loadUploadPage(api: ApiClient, gameId: number | undefined) {

@@ -2015,6 +2015,40 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/game/download-source/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the caller's download resources with their files and processing stage */
+        get: operations["download.ownResources"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/game/download-source/mine/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Count the caller's download resources and their downloads */
+        get: operations["download.ownSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/game/download-source/{id}": {
         parameters: {
             query?: never;
@@ -4921,7 +4955,17 @@ export type components = {
             is_virus_false_positive: boolean;
             latest_history: components["schemas"]["DownloadHistoryRefDTO"];
             malware_scan_cases: components["schemas"]["DownloadMalwareCaseDTO"][] | null;
+            /**
+             * @description Why a rejected file was rejected; null otherwise
+             * @enum {string|null}
+             */
+            rejection: "truncated" | "unsupported" | "encrypted" | "harmful" | "incomplete_set" | null;
             s3_file_key: string | null;
+            /**
+             * @description Where the file is on its way to being downloadable: checking (waiting for or under its check), storing (passed, moving to object storage), stored, under_review (held for a malware review) or rejected (about to be removed)
+             * @enum {string}
+             */
+            stage: "checking" | "storing" | "stored" | "under_review" | "rejected";
             /** Format: int64 */
             type: number;
         };
@@ -4981,6 +5025,47 @@ export type components = {
             platform: ("win" | "mac" | "ios" | "and" | "lin" | "ps3" | "ps4" | "psv" | "psp" | "swi" | "dvd")[] | null;
             /** @enum {string} */
             simulator?: "KRKR" | "ONS" | "ARTEMIS" | "OTHER";
+        };
+        DownloadOwnResourceDTO: {
+            game: components["schemas"]["GameCardDTO"];
+            resource: components["schemas"]["DownloadResourceDTO"];
+        };
+        DownloadOwnSummaryDTO: {
+            /**
+             * Format: int64
+             * @description Downloads across the caller's resources
+             */
+            downloads: number;
+            /**
+             * Format: int64
+             * @description Files in the caller's resources
+             */
+            files: number;
+            /**
+             * Format: int64
+             * @description Games the caller's resources belong to
+             */
+            games: number;
+            /**
+             * Format: int64
+             * @description Resources not yet published, or with a file that is not stored or is under review
+             */
+            processing: number;
+            /**
+             * Format: int64
+             * @description Every other resource of the caller
+             */
+            published: number;
+            /**
+             * Format: int64
+             * @description Resources the caller created within the last recent_days days
+             */
+            recent: number;
+            /**
+             * Format: int64
+             * @description Length in days of the window recent counts
+             */
+            recent_days: number;
         };
         DownloadReleaseDTO: {
             /** Format: date-time */
@@ -5560,6 +5645,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeDownloadOwnSummaryDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["DownloadOwnSummaryDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeDownloadReleasePageDTO: {
             /** Format: int64 */
             code: number;
@@ -6075,6 +6170,16 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["PageDeveloperListItemDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopePageDownloadOwnResourceDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["PageDownloadOwnResourceDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -7093,6 +7198,10 @@ export type components = {
         };
         PageDeveloperListItemDTO: {
             items: components["schemas"]["DeveloperListItemDTO"][] | null;
+            meta: components["schemas"]["PageMeta"];
+        };
+        PageDownloadOwnResourceDTO: {
+            items: components["schemas"]["DownloadOwnResourceDTO"][] | null;
             meta: components["schemas"]["PageMeta"];
         };
         PageEditRecordDTO: {
@@ -12762,6 +12871,77 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeInt"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "download.ownResources": {
+        parameters: {
+            query?: {
+                /** @description processing: not yet published, or with a file that is not stored or is under review; published: everything else */
+                scope?: "all" | "processing" | "published";
+                /** @description Part of a game title, a game alias or a file name */
+                q?: string;
+                sort_by?: "updated" | "downloads";
+                sort_order?: "asc" | "desc";
+                /** @description 1-based page number */
+                page?: number;
+                /** @description Items per page */
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopePageDownloadOwnResourceDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "download.ownSummary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeDownloadOwnSummaryDTO"];
                 };
             };
             /** @description Error */

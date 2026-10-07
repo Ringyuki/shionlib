@@ -4,10 +4,12 @@ import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { useAuthGate } from '~/shared/ui/auth-gate'
 import { Button } from '~/shared/ui/button'
-import type { Resource, ResourceRights } from '../resource'
+import type { Resource, ResourceFile, ResourceRights } from '../resource'
 import { AddFilesDialog } from './add-files-dialog'
 import { DeleteDialog } from './delete-dialog'
 import { EditDialog } from './edit-dialog'
+import { FileDialogs, type FileDialog } from './file-dialogs'
+import { FilesItems } from './file-items'
 import { HistoryDialog } from './history-dialog'
 import { ReportDialog } from './report-dialog'
 
@@ -16,12 +18,18 @@ type Opened = 'history' | 'report' | 'edit' | 'add' | 'delete' | undefined
 type ResourceMenuProps = {
   resource: Resource
   rights: ResourceRights
+  files?: readonly ResourceFile[]
 }
 
-export function ResourceMenu({ resource, rights }: ResourceMenuProps) {
+type Picked = { id: number; dialog: FileDialog | undefined }
+
+export function ResourceMenu({ resource, rights, files = [] }: ResourceMenuProps) {
   const t = useTranslations('resource')
   const gate = useAuthGate()
   const [opened, setOpened] = useState<Opened>(undefined)
+  const [picked, setPicked] = useState<Picked | undefined>(undefined)
+  const managed = rights.manage ? files : []
+  const pickedFile = managed.find(file => file.id === picked?.id)
   const openWhen = (dialog: Opened) => (open: boolean) => setOpened(open ? dialog : undefined)
   const report = () => {
     if (gate.signedIn) {
@@ -54,6 +62,7 @@ export function ResourceMenu({ resource, rights }: ResourceMenuProps) {
                 {t('report')}
               </DropdownMenuItem>
             )}
+            <FilesItems files={managed} onPick={(id, dialog) => setPicked({ id, dialog })} />
             {rights.remove && (
               <>
                 <DropdownMenuSeparator />
@@ -101,6 +110,13 @@ export function ResourceMenu({ resource, rights }: ResourceMenuProps) {
           resourceId={resource.id}
           open={opened === 'report'}
           onOpenChange={openWhen('report')}
+        />
+      )}
+      {pickedFile !== undefined && (
+        <FileDialogs
+          file={pickedFile}
+          opened={picked?.dialog}
+          onOpenedChange={dialog => setPicked({ id: pickedFile.id, dialog })}
         />
       )}
       {rights.remove && (

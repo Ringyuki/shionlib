@@ -21,8 +21,15 @@ async function uploadResource(page: Page, files: string[]) {
   await page.getByRole('group', { name: '平台' }).getByRole('button', { name: 'Windows' }).click()
   await page.getByRole('group', { name: '语言' }).getByRole('button', { name: '日文' }).click()
   await page.getByRole('button', { name: '开始上传' }).click()
-  await expect(page).toHaveURL(/\/zh\/game\/6$/)
-  await expectNotice(page, '已开始上传，可以在右上角查看进度')
+  await expect(page).toHaveURL(/\/zh\/user\/uploads\?status=uploading$/)
+}
+
+async function showEveryStage(page: Page) {
+  await page
+    .getByLabel('按状态筛选')
+    .getByRole('button', { name: /上传中/ })
+    .click()
+  await expect(page).toHaveURL(/\/zh\/user\/uploads$/)
 }
 
 function resourceWith(page: Page, fileName: string) {
@@ -37,12 +44,19 @@ test.describe('as an uploader', () => {
   test.use({ storageState: sessionFile('owner') })
   test.describe.configure({ mode: 'serial' })
 
-  test('uploads files into a new resource and adds one more', async ({ page }, testInfo) => {
+  test('follows a new resource on the uploads page and manages its files there', async ({
+    page,
+  }, testInfo) => {
     const first = await sampleFile(testInfo, 'e2e-new-a.7z', 2 * mib + 17)
     const second = await sampleFile(testInfo, 'e2e-new-b.7z', 1024)
     await uploadResource(page, [first, second])
+    await showEveryStage(page)
     const resource = resourceWith(page, 'e2e-new-a.7z')
     await expect(resource.getByText('e2e-new-b.7z')).toBeVisible({ timeout: 60_000 })
+    await expect(resource.getByRole('link', { name: 'E2E 管理临时作品 6' })).toHaveAttribute(
+      'href',
+      /\/zh\/game\/6#resource-\d+$/,
+    )
 
     await resource.getByRole('button', { name: '资源操作' }).click()
     await page.getByRole('menuitem', { name: '添加文件' }).click()
@@ -51,7 +65,25 @@ test.describe('as an uploader', () => {
       .locator('input[type="file"]')
       .setInputFiles(await sampleFile(testInfo, 'e2e-new-c.7z', 4096))
     await dialog.getByRole('button', { name: '开始上传' }).click()
+    await expectNotice(page, '已开始上传，可以在「我的上传」查看进度')
     await expect(resource.getByText('e2e-new-c.7z')).toBeVisible({ timeout: 60_000 })
+
+    const fileAction = async (file: RegExp, action: string) => {
+      await resource.getByRole('button', { name: '资源操作' }).click()
+      await page.getByRole('menuitem', { name: file }).click()
+      await page.getByRole('menuitem', { name: action, exact: true }).click()
+    }
+    await fileAction(/e2e-new-c/, '重命名')
+    const rename = page.getByRole('dialog', { name: '重命名文件' })
+    await rename.getByLabel('文件名').fill('e2e-renamed.7z')
+    await rename.getByRole('button', { name: '保存' }).click()
+    await expectNotice(page, '文件名已修改')
+    const renamed = resource.getByRole('listitem').filter({ hasText: 'e2e-renamed' })
+    await expect(renamed).toBeVisible()
+    await fileAction(/e2e-renamed/, '移除')
+    await page.getByRole('alertdialog').getByRole('button', { name: '移除' }).click()
+    await expectNotice(page, '文件已移除')
+    await expect(renamed).toHaveCount(0)
   })
 
   test('resumes after a reload without sending finished chunks again', async ({
@@ -76,11 +108,13 @@ test.describe('as an uploader', () => {
 
     reloaded = true
     await page.reload()
-    await page.getByRole('button', { name: '上传任务' }).click()
-    await expect(page.getByText('需要重新选择文件')).toBeVisible()
-    await page.locator('input[type="file"]').setInputFiles(file)
-    await expect(page.getByText('已完成', { exact: true })).toBeVisible({ timeout: 60_000 })
-    await expect(resourceWith(page, 'e2e-resume.7z')).toBeVisible()
+    await page.getByRole('button', { name: '重新选择文件' }).click()
+    await page
+      .getByRole('dialog', { name: '重新选择文件' })
+      .locator('input[type="file"]')
+      .setInputFiles(file)
+    await showEveryStage(page)
+    await expect(resourceWith(page, 'e2e-resume.7z')).toBeVisible({ timeout: 60_000 })
     expect([...resent].sort()).toEqual(['1', '2', '3'])
   })
 })

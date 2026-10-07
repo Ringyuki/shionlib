@@ -1,0 +1,96 @@
+{
+  "title": "マイアップロード",
+  "description": "アップロードの進み具合を確認し、アップロードしたリソースを管理します。",
+  "upload": "リソースをアップロード",
+  "signIn": "ログインすると自分のアップロードを確認できます",
+  "signInAction": "ログイン",
+  "list": {
+    "label": "アップロードしたリソース",
+    "stageLabel": "状態で絞り込む",
+    "stage": "{stage, select, uploading {アップロード中} processing {処理中} other {公開済み}} {count}",
+    "stageName": {
+      "uploading": "アップロード中",
+      "processing": "処理中",
+      "published": "公開済み"
+    },
+    "search": "ゲーム名またはファイル名で検索",
+    "orderLabel": "並び順",
+    "order": {
+      "recent": "更新が新しい順",
+      "oldest": "更新が古い順",
+      "mostDownloaded": "ダウンロード数が多い順",
+      "leastDownloaded": "ダウンロード数が少ない順"
+    },
+    "downloads": "{count, number} 回ダウンロード",
+    "updated": "<time></time>に更新",
+    "files": "ファイル",
+    "empty": {
+      "nothing": "まだ何もアップロードしていません",
+      "unmatched": "条件に合うリソースはありません",
+      "uploading": "現在アップロード中のファイルはありません",
+      "processing": "現在処理中のリソースはありません",
+      "published": "公開済みのリソースはまだありません"
+    },
+    "emptyHint": "ゲームを選んでファイルをアップロードすると、チェックに合格したあと公開されます。"
+  },
+  "account": {
+    "title": "ストレージとダウンロード数",
+    "downloads": "ダウンロード数",
+    "recent": "直近 {days} 日の追加",
+    "games": "ゲーム数",
+    "files": "ファイル数",
+    "storage": "保存容量",
+    "unlimited": "保存容量の上限なし",
+    "fileLimit": "1 ファイル {size} まで",
+    "tierHelp": "説明を見る",
+    "tier": {
+      "new": "新規アップローダー",
+      "regular": "一般アップローダー",
+      "trusted": "信頼済みアップローダー",
+      "admin": "管理者"
+    },
+    "frozen": "違反があったため、使える容量が {date}まで少なくなっています。"
+  },
+  "transfers": {
+    "appendsTo": "{name} のあるリソースに追加",
+    "replaces": "{name} を置き換え",
+    "orphan": "送信されていないアップロード",
+    "orphanHint": "これらのファイルはサーバーに届いていますが、送信されていません。不要なものはキャンセルできます。",
+    "submitting": "送信中",
+    "submitFailed": "送信に失敗しました",
+    "retry": "もう一度送信",
+    "cancelAll": "すべてキャンセル",
+    "cancelUpload": "アップロードをキャンセル",
+    "cancelAllConfirm": "これらのファイルのアップロードをキャンセルしますか？",
+    "cancelConfirm": "このファイルのアップロードをキャンセルしますか？",
+    "cancelHint": "アップロード済みの部分は破棄されます。",
+    "chooseAgain": "ファイルを選び直す",
+    "chooseAgainHint": "再読み込み後は、次のファイルを選び直すとアップロードを続けられます：{names}",
+    "chooseAgainDrop": "クリックしてファイルを選ぶか、ここにドロップしてください",
+    "unmatched": "続きをアップロードするファイルではありません：{names}",
+    "state": {
+      "queued": "待機中",
+      "waiting": "一時待機",
+      "paused": "一時停止中",
+      "done": "アップロード済み",
+      "failed": "失敗"
+    },
+    "stateHelp": "説明を見る",
+    "wait": {
+      "network": "接続が切れました。まもなく再試行します",
+      "busy": "サーバーが混み合っています。まもなく再試行します",
+      "inFlight": "アップロード中の合計が上限に達しています。前のファイルが終わると自動で始まります",
+      "signedOut": "ログインの有効期限が切れました。ログインし直すと再開します",
+      "elsewhere": "別のタブでアップロード中です"
+    },
+    "failure": {
+      "differentFile": "選んだファイルは前にアップロードしたものと違います",
+      "changedFile": "アップロード中にファイルが変更されました",
+      "expired": "アップロードの期限が切れました。もう一度アップロードしてください",
+      "rejected": "アップロードに失敗しました"
+    },
+    "speed": "{speed}/秒、残り {time}",
+    "pause": "アップロードを一時停止",
+    "resume": "アップロードを再開"
+  }
+}

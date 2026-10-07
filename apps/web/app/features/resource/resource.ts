@@ -16,7 +16,8 @@ type EditFields = Schema<'EditDownloadSourceBodyInput'>
 
 export type Platform = NonNullable<EditFields['platform']>[number]
 
-export type FileState = 'passed' | 'scanning' | 'falsePositive' | 'risky'
+export type FileState =
+  'passed' | 'checking' | 'storing' | 'underReview' | 'rejected' | 'falsePositive' | 'risky'
 
 export type Language = NonNullable<EditFields['language']>[number]
 
@@ -47,8 +48,6 @@ const mobilePlatforms: readonly Platform[] = ['and', 'ios']
 
 export const platformFilterFrom = 4
 
-const fileInObjectStore = 3
-
 const adminRole = 2
 
 const superAdminRole = 3
@@ -64,20 +63,31 @@ export function detections(file: Pick<ResourceFile, 'malware_scan_cases'>): stri
   return [...new Set(names)]
 }
 
-export function stored(file: Pick<ResourceFile, 'file_status'>): boolean {
-  return file.file_status === fileInObjectStore
+export function stored(file: Pick<ResourceFile, 'stage'>): boolean {
+  return file.stage === 'stored'
 }
 
 export function fileState(
-  file: Pick<ResourceFile, 'file_status' | 'malware_scan_cases' | 'is_virus_false_positive'>,
+  file: Pick<ResourceFile, 'stage' | 'malware_scan_cases' | 'is_virus_false_positive'>,
 ): FileState {
-  if (!stored(file)) {
-    return 'scanning'
+  switch (file.stage) {
+    case 'checking':
+    case 'storing':
+    case 'rejected':
+      return file.stage
+    case 'under_review':
+      return 'underReview'
+    case 'stored':
+      if (detections(file).length === 0) {
+        return 'passed'
+      }
+      return file.is_virus_false_positive ? 'falsePositive' : 'risky'
   }
-  if (detections(file).length === 0) {
-    return 'passed'
-  }
-  return file.is_virus_false_positive ? 'falsePositive' : 'risky'
+}
+
+export function downloadable(file: Parameters<typeof fileState>[0]): boolean {
+  const state = fileState(file)
+  return state === 'passed' || state === 'falsePositive'
 }
 
 export function shortHash(hash: string): string {

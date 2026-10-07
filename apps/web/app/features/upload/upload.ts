@@ -63,7 +63,7 @@ export type Admission =
   | { kind: 'tooLarge'; file: string; size: number; limit: number }
   | { kind: 'overQuota'; total: number; left: number }
 
-export type TrayStatus = 'idle' | 'active' | 'attention' | 'finished'
+export type QueueStatus = 'idle' | 'active' | 'attention' | 'finished'
 
 export const activeFiles = 2
 
@@ -163,6 +163,23 @@ export function remainingSeconds(upload: Upload): number | undefined {
   return Math.ceil((upload.file.size - upload.sent) / upload.speed)
 }
 
+export function pausable(upload: Upload): boolean {
+  const { name } = upload.phase
+  return name === 'running' || name === 'queued' || name === 'waiting'
+}
+
+export function progress(upload: Upload): number {
+  return upload.file.size === 0 ? 0 : (upload.sent / upload.file.size) * 100
+}
+
+export function unsubmitted(state: UploadState): Submission[] {
+  return state.submissions.filter(submission => submission.phase.name !== 'submitted')
+}
+
+export function submitted(state: UploadState): Submission[] {
+  return state.submissions.filter(submission => submission.phase.name === 'submitted')
+}
+
 export function settled(upload: Upload): boolean {
   return upload.phase.name === 'done' || upload.phase.name === 'failed'
 }
@@ -174,7 +191,7 @@ export function totals(uploads: readonly Upload[]) {
   return { size, sent, ratio: size === 0 ? 0 : sent / size }
 }
 
-export function trayStatus(state: UploadState): TrayStatus {
+export function queueStatus(state: UploadState): QueueStatus {
   if (state.submissions.length === 0) {
     return 'idle'
   }

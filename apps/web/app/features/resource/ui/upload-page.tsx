@@ -1,4 +1,4 @@
-import { Heading, Result, Stack, Text } from '@hina-ui/react'
+import { PageHeader, Result, Stack } from '@hina-ui/react'
 import { useTranslations } from 'use-intl'
 import type { GameHeader } from '~/features/game'
 import type { Allowance } from '~/features/upload'
@@ -14,14 +14,7 @@ export function UploadPage({ game, allowance }: UploadPageProps) {
   const t = useTranslations('resource')
   return (
     <Stack gap="lg" className="mx-auto w-full max-w-2xl">
-      <Stack gap="sm">
-        <Heading level={1} size="xl" weight="semibold">
-          {t('uploadTitle')}
-        </Heading>
-        <Text size="sm" tone="muted">
-          {t('uploadDescription')}
-        </Text>
-      </Stack>
+      <PageHeader title={t('uploadTitle')} description={t('uploadDescription')} />
       {allowance === null ? (
         <Result
           status="info"

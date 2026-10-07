@@ -29,6 +29,8 @@ export function sitePaths(locale: Locale) {
     games: `/${locale}/game`,
     releases: `/${locale}/release`,
     upload: `/${locale}/upload`,
+    uploads: `/${locale}/user/uploads`,
+    uploading: `/${locale}/user/uploads?status=uploading`,
     profile: (userId: number) => `/${locale}/user/${userId}`,
     settings: `/${locale}/user/settings`,
     friendLinks: `/${locale}/friend-link`,
@@ -56,7 +58,7 @@ export function navSections(locale: Locale, viewerId: number | null): NavSection
       key: 'mine',
       entries: [
         entry('favorites', `${paths.profile(viewerId)}/favorites`),
-        entry('uploads', `${paths.profile(viewerId)}/uploads`),
+        entry('uploads', paths.uploads),
         entry('messages', `/${locale}/message`),
         entry('settings', paths.settings),
       ],

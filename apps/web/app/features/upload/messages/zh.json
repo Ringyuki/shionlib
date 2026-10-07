@@ -1,47 +1,9 @@
 {
-  "tray": "上传任务",
-  "total": "{sent} / {size}",
-  "target": {
-    "create": "新资源：{label}",
-    "append": "添加文件：{label}",
-    "replace": "替换文件：{label}",
-    "orphan": "没有对应资源的上传"
+  "status": {
+    "active": "我的上传：正在上传",
+    "attention": "我的上传：有上传需要处理",
+    "finished": "我的上传：上传已完成"
   },
-  "submission": {
-    "submitting": "正在提交",
-    "submitted": "已完成",
-    "failed": "提交失败"
-  },
-  "phase": {
-    "queued": "等待上传",
-    "needsFile": "需要重新选择文件",
-    "paused": "已暂停",
-    "done": "上传完成"
-  },
-  "wait": {
-    "network": "网络中断，稍后自动重试",
-    "busy": "服务器繁忙，稍后自动重试",
-    "inFlight": "正在上传的文件总量已经达到上限，前面的文件传完后会自动开始",
-    "signedOut": "登录已失效，重新登录后会自动继续",
-    "elsewhere": "正在其他标签页上传"
-  },
-  "failure": {
-    "differentFile": "选择的文件和之前上传的不是同一个",
-    "changedFile": "文件在上传过程中被修改了",
-    "expired": "上传已过期，请重新上传",
-    "rejected": "上传失败"
-  },
-  "speed": "{speed}/秒",
-  "remaining": "还需 {time}",
-  "pause": "暂停",
-  "resume": "继续",
-  "cancel": "取消",
-  "retry": "重新提交",
-  "dismiss": "移除",
-  "chooseAgain": "选择文件继续上传",
-  "chooseAgainHint": "页面刷新后，需要重新选择这些文件：{names}",
-  "orphanHint": "这些上传没有对应的资源，可以取消。",
-  "unmatched": "这些文件和需要继续上传的文件对不上：{names}",
-  "submittedToast": "{label} 已完成",
+  "submittedToast": "{label} 上传完成，正在等待检查",
   "failedToast": "{label} 提交失败"
 }

@@ -2,7 +2,7 @@ import { Inline, SidebarTrigger } from '@hina-ui/react'
 import { Link } from 'react-router'
 import { useLocale } from 'use-intl'
 import { SearchPalette } from '~/features/search'
-import { UploadTray } from '~/features/upload'
+import { UploadIndicator } from '~/features/upload'
 import { BrandLogo, Wordmark } from '~/shared/ui/brand'
 import { sitePaths } from '../shell'
 import { LocaleMenu } from './locale-menu'
@@ -21,7 +21,7 @@ export function SiteHeader() {
       </Link>
       <SearchPalette />
       <Inline gap="xs" align="center" className="md:ms-auto">
-        <UploadTray />
+        <UploadIndicator to={paths.uploading} />
         <ThemeMenu />
         <LocaleMenu />
       </Inline>

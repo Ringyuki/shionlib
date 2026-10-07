@@ -10,7 +10,7 @@ describe('navSections', () => {
     const mine = navSections('en', 7).find(section => section.key === 'mine')
     expect(mine?.entries.map(entry => entry.to)).toEqual([
       '/en/user/7/favorites',
-      '/en/user/7/uploads',
+      '/en/user/uploads',
       '/en/message',
       '/en/user/settings',
     ])

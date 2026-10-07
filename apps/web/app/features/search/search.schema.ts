@@ -10,16 +10,10 @@ const recentSearches = v.fallback(
   [],
 )
 
-const page = v.fallback(v.pipe(v.string(), v.toNumber(), v.safeInteger(), v.minValue(1)), 1)
-
 export function parseRecent(stored: string | null): string[] {
   return v
     .parse(recentSearches, stored)
     .map(entry => normalizeQuery(entry))
     .filter(entry => entry !== '')
     .slice(0, maxRecent)
-}
-
-export function pageParam(raw: string | null): number {
-  return v.parse(page, raw)
 }

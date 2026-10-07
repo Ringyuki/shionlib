@@ -38,7 +38,8 @@ test.describe('as the uploader of the held resource', () => {
   test('blocks the download of the file held for review', async ({ page }) => {
     await page.goto('/zh/game/3')
     const row = page.getByRole('row', { name: /seeded-malware-sample\.zip/ })
-    await expect(row.getByRole('button', { name: '下载', exact: true })).toBeDisabled()
+    await expect(row).toContainText('等待复核')
+    await expect(row.getByRole('button', { name: '下载', exact: true })).toHaveCount(0)
   })
 })
 

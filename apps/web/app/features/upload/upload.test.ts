@@ -4,11 +4,19 @@ import {
   fileLimit,
   matchFiles,
   chunkLength,
+  pausable,
+  progress,
+  queueStatus,
   sameFile,
+  submitted,
   totals,
+  unsubmitted,
   uploadedBytes,
   type Allowance,
+  type Submission,
   type Upload,
+  type UploadPhase,
+  type UploadState,
 } from './upload'
 
 const allowance: Allowance = {
@@ -111,5 +119,67 @@ describe('upload rules', () => {
     const { matches, unmatched } = matchFiles(uploads, chosen)
     expect([...matches.keys()]).toEqual(['a', 'b'])
     expect(unmatched.map(entry => entry.name)).toEqual(['a.rar'])
+  })
+})
+
+describe('the upload queue', () => {
+  const upload = (phase: UploadPhase, sent = 0): Upload => ({
+    id: 'u',
+    submission: 's',
+    file: { name: 'a.rar', size: 8, lastModified: 1 },
+    sent,
+    speed: 0,
+    phase,
+  })
+  const submission = (id: string, phase: Submission['phase']): Submission => ({
+    id,
+    target: { kind: 'append', resourceId: 1 },
+    label: 'a.rar',
+    phase,
+  })
+  const state = (submissions: Submission[], uploads: Upload[] = []): UploadState => ({
+    submissions,
+    uploads,
+  })
+
+  it('can pause what is moving or about to', () => {
+    expect(pausable(upload({ name: 'running' }))).toBe(true)
+    expect(pausable(upload({ name: 'queued' }))).toBe(true)
+    expect(pausable(upload({ name: 'waiting', reason: 'network' }))).toBe(true)
+    expect(pausable(upload({ name: 'paused' }))).toBe(false)
+    expect(pausable(upload({ name: 'needsFile' }))).toBe(false)
+    expect(pausable(upload({ name: 'done' }))).toBe(false)
+  })
+
+  it('measures progress in percent, also for an empty file', () => {
+    expect(progress(upload({ name: 'running' }, 2))).toBe(25)
+    expect(
+      progress({ ...upload({ name: 'done' }), file: { name: 'a', size: 0, lastModified: 0 } }),
+    ).toBe(0)
+  })
+
+  it('splits submissions into those still to submit and those submitted', () => {
+    const queue = state([
+      submission('a', { name: 'uploading' }),
+      submission('b', { name: 'submitted' }),
+      submission('c', { name: 'failed' }),
+      submission('d', { name: 'submitting' }),
+    ])
+    expect(unsubmitted(queue).map(entry => entry.id)).toEqual(['a', 'c', 'd'])
+    expect(submitted(queue).map(entry => entry.id)).toEqual(['b'])
+  })
+
+  it('sums the queue up for the header', () => {
+    expect(queueStatus(state([]))).toBe('idle')
+    expect(
+      queueStatus(state([submission('a', { name: 'uploading' })], [upload({ name: 'running' })])),
+    ).toBe('active')
+    expect(
+      queueStatus(state([submission('a', { name: 'uploading' })], [upload({ name: 'needsFile' })])),
+    ).toBe('attention')
+    expect(queueStatus(state([submission('a', { name: 'failed' })]))).toBe('attention')
+    expect(
+      queueStatus(state([submission('a', { name: 'submitted' })], [upload({ name: 'done' })])),
+    ).toBe('finished')
   })
 })

@@ -4,6 +4,7 @@ import ja from './messages/ja.json'
 import zh from './messages/zh.json'
 import {
   detections,
+  downloadable,
   fileState,
   reportReasons,
   rightsOver,
@@ -15,8 +16,8 @@ import {
   type Resource,
 } from './resource'
 
-const file = {
-  file_status: 3,
+const file: Parameters<typeof fileState>[0] = {
+  stage: 'stored',
   malware_scan_cases: null,
   is_virus_false_positive: false,
 }
@@ -36,12 +37,26 @@ const resource = (id: number, platform: Resource['platform']): Resource => ({
 })
 
 describe('fileState', () => {
-  it('tells stored, scanning, risky and cleared files apart', () => {
+  it('follows the stage of a file on its way to storage', () => {
+    expect(fileState({ ...file, stage: 'checking' })).toBe('checking')
+    expect(fileState({ ...file, stage: 'storing' })).toBe('storing')
+    expect(fileState({ ...file, stage: 'under_review' })).toBe('underReview')
+    expect(fileState({ ...file, stage: 'rejected' })).toBe('rejected')
+  })
+
+  it('tells stored, risky and cleared files apart', () => {
     expect(fileState(file)).toBe('passed')
-    expect(fileState({ ...file, file_status: 2 })).toBe('scanning')
     const infected = { ...file, malware_scan_cases: [{ id: 1, detected_viruses: ['Trojan.X'] }] }
     expect(fileState(infected)).toBe('risky')
     expect(fileState({ ...infected, is_virus_false_positive: true })).toBe('falsePositive')
+  })
+
+  it('offers only stored files that are not blocked', () => {
+    const infected = { ...file, malware_scan_cases: [{ id: 1, detected_viruses: ['Trojan.X'] }] }
+    expect(downloadable(file)).toBe(true)
+    expect(downloadable({ ...infected, is_virus_false_positive: true })).toBe(true)
+    expect(downloadable(infected)).toBe(false)
+    expect(downloadable({ ...file, stage: 'storing' })).toBe(false)
   })
 
   it('lists each detection once', () => {
