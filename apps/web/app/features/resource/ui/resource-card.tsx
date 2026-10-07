@@ -61,7 +61,6 @@ export function ResourceCard({ resource, viewer }: ResourceCardProps) {
                 src={creator.avatar === null ? undefined : resolveImage(creator.avatar, 'image')}
                 name={creator.name}
                 size="sm"
-                className="size-5 shrink-0 text-[0.625rem]"
               />
               <Text size="sm" tone="muted">
                 {creator.name}
