@@ -1,8 +1,9 @@
-import { Combobox, Image, Inline, Stack, Text, type SelectItems } from '@hina-ui/react'
+import { Combobox, type SelectItems } from '@hina-ui/react'
 import { useFormatter, useLocale, useTranslations } from 'use-intl'
 import { developerNames, gameTitle, primaryCover } from '~/features/game'
 import type { GameHit } from '../search'
 import { useGameOptions } from '../use-game-options'
+import { PictureOption } from './picture-option'
 
 type GamePickerProps = {
   onPick: (gameId: number) => void
@@ -47,36 +48,18 @@ export function GamePicker({ onPick, invalid }: GamePickerProps) {
       search={search}
       onSearchChange={setSearch}
       options={options}
-      renderOption={({ option }) => <GameOption choice={option} />}
+      renderOption={({ option }) => (
+        <PictureOption
+          name={option.label}
+          detail={option.developers}
+          picture={{ src: option.cover, shape: 'cover' }}
+        />
+      )}
       loading={loading}
       ignoreFilter
       invalid={invalid}
       placeholder={t('pickGame')}
       aria-label={t('pickGame')}
     />
-  )
-}
-
-function GameOption({ choice }: { choice: GameChoice }) {
-  return (
-    <Inline gap="sm" align="center" wrap={false}>
-      <Image
-        src={choice.cover}
-        alt=""
-        ratio={3 / 4}
-        fit="cover"
-        className="w-9 shrink-0 rounded-sm"
-      />
-      <Stack gap="none" className="min-w-0">
-        <Text size="sm" weight="medium" truncate>
-          {choice.label}
-        </Text>
-        {choice.developers !== '' && (
-          <Text size="xs" tone="muted" truncate>
-            {choice.developers}
-          </Text>
-        )}
-      </Stack>
-    </Inline>
   )
 }

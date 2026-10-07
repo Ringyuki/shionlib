@@ -34,6 +34,10 @@ export const searchDelayMs = 300
 
 export const maxQueryLength = 100
 
+export type PictureShape = 'cover' | 'portrait' | 'logo'
+
+export type Picture = { src: string | undefined; shape: PictureShape }
+
 export type ReleaseMonths<Game = GameHit> = { thisMonth: Game[]; lastMonth: Game[] }
 
 export function releaseWindow(now: Date) {

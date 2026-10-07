@@ -1,15 +1,14 @@
 {
   "label": "Search",
   "placeholder": "Search games, developers, characters",
+  "list": "Suggestions and results",
   "groups": {
     "suggestions": "Suggestions",
     "games": "Games",
     "developers": "Developers",
     "characters": "Characters",
     "recent": "Recent searches",
-    "trending": "Trending",
-    "shortcuts": "Go to",
-    "status": "Status"
+    "trending": "Trending"
   },
   "clearRecent": "Clear recent searches",
   "seeAll": "See all {total, number} games for “{query}”",

@@ -1,17 +1,12 @@
-import { Button, CommandPalette, Kbd, Text } from '@hina-ui/react'
+import { Button, Dialog, Kbd, Text } from '@hina-ui/react'
 import { Search } from 'lucide-react'
 import { useTranslations } from 'use-intl'
-import { usePaletteItems, type SearchShortcut } from '../use-palette-items'
 import { useSearchPalette } from '../use-search-palette'
+import { PalettePanel } from './palette-panel'
 
-type SearchPaletteProps = {
-  shortcuts: readonly SearchShortcut[]
-}
-
-export function SearchPalette({ shortcuts }: SearchPaletteProps) {
+export function SearchPalette() {
   const t = useTranslations('search')
   const palette = useSearchPalette()
-  const items = usePaletteItems(palette, shortcuts)
 
   return (
     <>
@@ -37,16 +32,13 @@ export function SearchPalette({ shortcuts }: SearchPaletteProps) {
       >
         <Search />
       </Button>
-      <CommandPalette
+      <Dialog
+        title={t('label')}
         open={palette.open}
         onOpenChange={palette.setOpen}
-        search={palette.search}
-        onSearchChange={palette.setSearch}
-        items={items}
-        ignoreFilter
-        hotkey="mod+k"
-        label={t('label')}
-        placeholder={t('placeholder')}
+        placement="top"
+        size="xl"
+        renderBody={() => <PalettePanel palette={palette} />}
       />
     </>
   )

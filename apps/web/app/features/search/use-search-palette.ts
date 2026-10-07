@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { href, useFetcher } from 'react-router'
 import { readLocal, writeLocal } from '~/shared/storage/local-storage'
 import { normalizeQuery, recentStorageKey, rememberSearch, searchDelayMs } from './search'
@@ -22,9 +22,13 @@ export function useSearchPalette() {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [recent, setRecent] = useState<string[]>([])
-  const keepOpen = useRef(false)
+  const [idle, setIdle] = useState(fetcher.data)
   const query = normalizeQuery(search)
   const load = fetcher.load
+  const loaded = fetcher.data
+  if (loaded !== undefined && loaded.query === '' && loaded !== idle) {
+    setIdle(loaded)
+  }
 
   useEffect(() => {
     if (!open) {
@@ -37,40 +41,37 @@ export function useSearchPalette() {
     return () => window.clearTimeout(timer)
   }, [open, query, load])
 
+  const show = useCallback(() => {
+    setRecent(readRecent())
+    setSearch('')
+    setOpen(true)
+  }, [])
+
   const changeOpen = (next: boolean) => {
-    if (!next && keepOpen.current) {
-      keepOpen.current = false
-      return
-    }
-    keepOpen.current = false
     if (next) {
-      setRecent(readRecent())
+      show()
+    } else {
+      setOpen(false)
     }
-    setOpen(next)
   }
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (
-        event.key === '/' &&
-        !event.metaKey &&
-        !event.ctrlKey &&
-        !event.altKey &&
-        !editable(event.target)
-      ) {
+      const modified = event.metaKey || event.ctrlKey
+      const slash = event.key === '/' && !modified && !event.altKey && !editable(event.target)
+      const modK = event.key.toLowerCase() === 'k' && modified && !event.altKey && !event.shiftKey
+      if (slash || modK) {
         event.preventDefault()
-        setRecent(readRecent())
-        setOpen(true)
+        if (!open) {
+          show()
+        }
       }
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [])
+  }, [open, show])
 
-  const fill = (term: string) => {
-    keepOpen.current = true
-    setSearch(term)
-  }
+  const fill = (term: string) => setSearch(term)
 
   const remember = () => {
     const next = rememberSearch(recent, query)
@@ -92,22 +93,20 @@ export function useSearchPalette() {
   }
 
   const clearRecent = () => {
-    keepOpen.current = true
     setRecent([])
     writeRecent([])
   }
 
-  const palette = fetcher.data?.query === query ? fetcher.data : undefined
+  const palette = loaded?.query === query ? loaded : query === '' ? idle : undefined
 
   return {
     open,
     setOpen: changeOpen,
-    show: () => changeOpen(true),
+    show,
     search,
     setSearch,
     query,
     palette,
-    loading: palette === undefined,
     recent,
     fill,
     remember,

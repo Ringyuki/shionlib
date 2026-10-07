@@ -1,15 +1,14 @@
 {
   "label": "搜索",
   "placeholder": "搜索游戏、开发商、角色",
+  "list": "搜索建议与结果",
   "groups": {
     "suggestions": "联想",
     "games": "游戏",
     "developers": "开发商",
     "characters": "角色",
     "recent": "最近搜索",
-    "trending": "热搜",
-    "shortcuts": "前往",
-    "status": "状态"
+    "trending": "热搜"
   },
   "clearRecent": "清除最近搜索",
   "seeAll": "查看「{query}」的全部 {total, number} 个游戏",

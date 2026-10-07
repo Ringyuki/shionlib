@@ -1,15 +1,14 @@
 {
   "label": "検索",
   "placeholder": "ゲーム、ブランド、キャラクターを検索",
+  "list": "候補と検索結果",
   "groups": {
     "suggestions": "候補",
     "games": "ゲーム",
     "developers": "ブランド",
     "characters": "キャラクター",
     "recent": "最近の検索",
-    "trending": "人気の検索",
-    "shortcuts": "移動",
-    "status": "状態"
+    "trending": "人気の検索"
   },
   "clearRecent": "最近の検索を消去",
   "seeAll": "「{query}」のゲーム {total, number} 件をすべて表示",
