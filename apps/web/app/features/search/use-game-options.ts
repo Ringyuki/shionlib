@@ -1,23 +1,34 @@
 import { useEffect, useState } from 'react'
 import { href, useFetcher } from 'react-router'
 import { normalizeQuery, searchDelayMs } from './search'
-import type { gameOptionsLoader } from './search.server'
+import type { gameOptionsLoader, recentReleasesLoader } from './search.server'
 
 export function useGameOptions() {
-  const fetcher = useFetcher<typeof gameOptionsLoader>()
+  const found = useFetcher<typeof gameOptionsLoader>()
+  const recent = useFetcher<typeof recentReleasesLoader>()
   const [search, setSearch] = useState('')
   const query = normalizeQuery(search)
-  const load = fetcher.load
+  const { load: find } = found
+  const { load: loadRecent } = recent
+  useEffect(() => {
+    void loadRecent(href('/resources/search/releases'))
+  }, [loadRecent])
   useEffect(() => {
     if (query === '') {
       return
     }
     const timer = window.setTimeout(
-      () => void load(`${href('/resources/search/games')}?${new URLSearchParams({ q: query })}`),
+      () => void find(`${href('/resources/search/games')}?${new URLSearchParams({ q: query })}`),
       searchDelayMs,
     )
     return () => window.clearTimeout(timer)
-  }, [query, load])
-  const games = query === '' ? [] : (fetcher.data ?? [])
-  return { search, setSearch, games, loading: fetcher.state === 'loading' }
+  }, [query, find])
+  return {
+    search,
+    setSearch,
+    searching: query !== '',
+    found: query === '' ? [] : (found.data ?? []),
+    recent: recent.data,
+    loading: (query === '' ? recent : found).state === 'loading',
+  }
 }

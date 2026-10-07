@@ -33,7 +33,12 @@ export function UploadForm({ game, allowance }: { game: GameHeader | null; allow
         }
       }}
     >
-      <FormField name="game" label={t('uploadGame')} required>
+      <FormField
+        name="game"
+        label={t('uploadGame')}
+        description={game === null ? t('uploadGameHint') : undefined}
+        required
+      >
         {game === null ? (
           <GamePicker onPick={id => setSearchParams({ game: String(id) })} />
         ) : (

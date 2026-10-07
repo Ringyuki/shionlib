@@ -79,6 +79,7 @@
   "uploadTitle": "上传资源",
   "uploadDescription": "选好游戏和文件，填写资源信息后开始上传。上传会在后台进行，期间可以离开这个页面。",
   "uploadGame": "游戏",
+  "uploadGameHint": "输入游戏名称搜索，也可以按编号查找：vid:17（VNDB）、bid:42（Bangumi）、hid:9（Hikarinagi）",
   "changeGame": "更换",
   "uploadFiles": "文件",
   "uploadDrop": "点击选择文件，或者把文件拖到这里",

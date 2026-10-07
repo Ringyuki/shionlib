@@ -79,6 +79,7 @@
   "uploadTitle": "リソースをアップロード",
   "uploadDescription": "ゲームとファイルを選び、リソースの情報を入力してからアップロードを始めます。アップロードはバックグラウンドで続くので、このページを離れても大丈夫です。",
   "uploadGame": "ゲーム",
+  "uploadGameHint": "タイトルで検索するか、ID で探せます：vid:17（VNDB）、bid:42（Bangumi）、hid:9（Hikarinagi）",
   "changeGame": "変更",
   "uploadFiles": "ファイル",
   "uploadDrop": "クリックしてファイルを選ぶか、ここにドロップしてください",

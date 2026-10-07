@@ -12979,6 +12979,8 @@ export interface operations {
                 "filter[start_date]"?: string;
                 /** @description Released on or before this date (ISO 8601) */
                 "filter[end_date]"?: string;
+                /** @description Also list games without resources, whatever the viewer's setting, as when picking a game to upload to */
+                include_without_resources?: boolean;
             };
             header?: never;
             path?: never;
@@ -13907,7 +13909,7 @@ export interface operations {
                 page?: number;
                 /** @description Items per page */
                 pageSize?: number;
-                /** @description Keyword sent to the catalog source */
+                /** @description Keyword sent to the catalog source; hid:, vid: or bid: followed by an id, or a VNDB id such as v17, finds games by that id instead */
                 q?: string;
                 /** @description Kinds of entries to search, one parameter per kind; games when omitted */
                 types?: ("game" | "developer" | "character")[] | null;

@@ -1,7 +1,13 @@
 import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import { readCommand, routeAction, routeLoader } from '~/shared/route/route.server'
 import { pageParam, recordSearchCommand } from './search.schema'
-import { findGames, loadPalette, recordSearch, searchGames } from './search.use-cases'
+import {
+  findGames,
+  loadPalette,
+  loadRecentReleases,
+  recordSearch,
+  searchGames,
+} from './search.use-cases'
 
 export function paletteLoader(args: LoaderFunctionArgs) {
   const query = new URL(args.request.url).searchParams.get('q') ?? ''
@@ -11,6 +17,10 @@ export function paletteLoader(args: LoaderFunctionArgs) {
 export function gameOptionsLoader(args: LoaderFunctionArgs) {
   const query = new URL(args.request.url).searchParams.get('q') ?? ''
   return routeLoader(args, api => findGames(api, query))
+}
+
+export function recentReleasesLoader(args: LoaderFunctionArgs) {
+  return routeLoader(args, api => loadRecentReleases(api, new Date()))
 }
 
 export async function recordSearchAction(args: ActionFunctionArgs) {

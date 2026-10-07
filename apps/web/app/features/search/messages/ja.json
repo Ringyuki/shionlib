@@ -27,5 +27,9 @@
     "unavailable": "現在検索を利用できません。しばらくしてからお試しください。",
     "pages": "検索結果のページ"
   },
-  "pickGame": "ゲーム名で検索"
+  "pickGame": "ゲーム名で検索",
+  "released": {
+    "thisMonth": "今月発売",
+    "lastMonth": "先月発売"
+  }
 }

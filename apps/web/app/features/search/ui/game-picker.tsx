@@ -1,6 +1,7 @@
-import { Combobox, Image, Inline, Stack, Text } from '@hina-ui/react'
+import { Combobox, Image, Inline, Stack, Text, type SelectItems } from '@hina-ui/react'
 import { useFormatter, useLocale, useTranslations } from 'use-intl'
 import { developerNames, gameTitle, primaryCover } from '~/features/game'
+import type { GameHit } from '../search'
 import { useGameOptions } from '../use-game-options'
 
 type GamePickerProps = {
@@ -19,25 +20,33 @@ export function GamePicker({ onPick, invalid }: GamePickerProps) {
   const t = useTranslations('search')
   const locale = useLocale()
   const format = useFormatter()
-  const { search, setSearch, games, loading } = useGameOptions()
-  const choices: GameChoice[] = games.map(game => ({
+  const { search, setSearch, searching, found, recent, loading } = useGameOptions()
+  const choice = (game: GameHit): GameChoice => ({
     value: game.id,
     label: gameTitle(game, locale),
     cover: primaryCover(game)?.url,
     developers: format.list(developerNames(game)),
-  }))
+  })
+  const released = [
+    { label: t('released.thisMonth'), games: recent?.thisMonth ?? [] },
+    { label: t('released.lastMonth'), games: recent?.lastMonth ?? [] },
+  ]
+  const options: SelectItems<GameChoice> = searching
+    ? found.map(choice)
+    : released
+        .filter(group => group.games.length > 0)
+        .map(group => ({ label: group.label, options: group.games.map(choice) }))
   return (
     <Combobox
       value={null}
       onValueChange={value => {
-        const choice = choices.find(candidate => candidate.value === value)
-        if (choice !== undefined) {
-          onPick(choice.value)
+        if (typeof value === 'number') {
+          onPick(value)
         }
       }}
       search={search}
       onSearchChange={setSearch}
-      options={choices}
+      options={options}
       renderOption={({ option }) => <GameOption choice={option} />}
       loading={loading}
       ignoreFilter

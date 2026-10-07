@@ -27,5 +27,9 @@
     "unavailable": "Search is unavailable right now. Please try again later.",
     "pages": "Search result pages"
   },
-  "pickGame": "Search for a game"
+  "pickGame": "Search for a game",
+  "released": {
+    "thisMonth": "Released this month",
+    "lastMonth": "Released last month"
+  }
 }

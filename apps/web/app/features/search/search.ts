@@ -18,6 +18,8 @@ export const paletteSize = 5
 
 export const pickerSize = 8
 
+export const recentReleaseSize = 100
+
 export const resultsPageSize = 20
 
 export const trendingSize = 8
@@ -31,6 +33,28 @@ export const recentStorageKey = 'shionlib_recent_searches'
 export const searchDelayMs = 300
 
 export const maxQueryLength = 100
+
+export type ReleaseMonths<Game = GameHit> = { thisMonth: Game[]; lastMonth: Game[] }
+
+export function releaseWindow(now: Date) {
+  const first = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1))
+  const last = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0))
+  return {
+    start: first.toISOString().slice(0, 10),
+    end: last.toISOString().slice(0, 10),
+    lastMonth: first.toISOString().slice(0, 7),
+    thisMonth: last.toISOString().slice(0, 7),
+  }
+}
+
+export function byReleaseMonth<Game extends Pick<GameHit, 'release_date'>>(
+  games: readonly Game[],
+  window: ReturnType<typeof releaseWindow>,
+): ReleaseMonths<Game> {
+  const releasedIn = (month: string) =>
+    games.filter(game => game.release_date?.slice(0, 7) === month)
+  return { thisMonth: releasedIn(window.thisMonth), lastMonth: releasedIn(window.lastMonth) }
+}
 
 export function normalizeQuery(raw: string | null | undefined): string {
   return [...(raw ?? '').trim().split(/\s+/).join(' ')].slice(0, maxQueryLength).join('')

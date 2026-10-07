@@ -27,5 +27,9 @@
     "unavailable": "搜索暂时不可用，请稍后再试。",
     "pages": "搜索结果分页"
   },
-  "pickGame": "搜索游戏名称"
+  "pickGame": "搜索游戏名称",
+  "released": {
+    "thisMonth": "本月发售",
+    "lastMonth": "上月发售"
+  }
 }

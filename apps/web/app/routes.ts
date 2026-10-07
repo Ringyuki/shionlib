@@ -14,6 +14,7 @@ export default [
   route('resources/auth/sign-out', 'routes/resources.auth.sign-out.ts'),
   route('resources/search', 'routes/resources.search.ts'),
   route('resources/search/games', 'routes/resources.search.games.ts'),
+  route('resources/search/releases', 'routes/resources.search.releases.ts'),
   route('resources/game/view', 'routes/resources.game.view.ts'),
   route('resources/download/link', 'routes/resources.download.link.ts'),
   route('resources/resource/history', 'routes/resources.resource.history.ts'),

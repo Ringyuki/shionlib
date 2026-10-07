@@ -4,12 +4,16 @@ import {
   emptyResults,
   normalizeQuery,
   paletteSize,
+  byReleaseMonth,
   pickerSize,
+  recentReleaseSize,
+  releaseWindow,
   resultsPageSize,
   suggestionSize,
   trendingSize,
   type GameHit,
   type Palette,
+  type ReleaseMonths,
   type SearchResults,
 } from './search'
 
@@ -106,4 +110,24 @@ export async function findGames(api: ApiClient, raw: string): Promise<GameHit[]>
     null,
   )
   return found?.games.items ?? []
+}
+
+export async function loadRecentReleases(api: ApiClient, now: Date): Promise<ReleaseMonths> {
+  const window = releaseWindow(now)
+  const page = await quietly(
+    api.get('/game/list', {
+      params: {
+        query: {
+          pageSize: recentReleaseSize,
+          include_without_resources: true,
+          'filter[start_date]': window.start,
+          'filter[end_date]': window.end,
+          'filter[sort_by]': 'release_date',
+          'filter[sort_order]': 'desc',
+        },
+      },
+    }),
+    null,
+  )
+  return byReleaseMonth(page?.items ?? [], window)
 }

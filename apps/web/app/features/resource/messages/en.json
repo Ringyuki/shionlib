@@ -79,6 +79,7 @@
   "uploadTitle": "Upload a resource",
   "uploadDescription": "Choose the game and the files, describe the resource, then start uploading. Uploads continue in the background, so you can leave this page.",
   "uploadGame": "Game",
+  "uploadGameHint": "Search by title, or find a game by ID: vid:17 (VNDB), bid:42 (Bangumi), hid:9 (Hikarinagi)",
   "changeGame": "Change",
   "uploadFiles": "Files",
   "uploadDrop": "Click to choose files, or drop them here",
