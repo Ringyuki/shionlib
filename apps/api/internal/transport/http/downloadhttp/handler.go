@@ -6,6 +6,7 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/gamehttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
 )
@@ -39,6 +40,8 @@ func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "download.reupload", Method: http.MethodPut, Path: "/game/download-source/file/{fileId}/reupload", Summary: "Replace a stored file with a new upload", Tags: tags, Access: httpapi.AccessUser}, h.reupload)
 	httpapi.Register(api, httpapi.Route{ID: "download.history", Method: http.MethodGet, Path: "/game/download-source/file/{fileId}/history", Summary: "List the upload history of a file", Tags: tags}, h.history)
 	httpapi.Register(api, httpapi.Route{ID: "download.historyReason", Method: http.MethodPatch, Path: "/game/download-source/file-history/{historyId}/reason", Summary: "Edit the reason of a file history entry", Tags: tags, Access: httpapi.AccessUser}, h.historyReason)
+	httpapi.Register(api, httpapi.Route{ID: "download.ownSummary", Method: http.MethodGet, Path: "/game/download-source/mine/summary", Summary: "Count the caller's download resources and their downloads", Tags: tags, Access: httpapi.AccessUser}, h.ownSummary)
+	httpapi.Register(api, httpapi.Route{ID: "download.ownResources", Method: http.MethodGet, Path: "/game/download-source/mine", Summary: "List the caller's download resources with their files and processing stage", Tags: tags, Access: httpapi.AccessUser}, h.ownResources)
 	httpapi.Register(api, httpapi.Route{ID: "download.userResources", Method: http.MethodGet, Path: "/user/datas/{id}/game-resources", Summary: "List the download resources uploaded by a user", Tags: tags}, h.userResources)
 	httpapi.Register(api, httpapi.Route{ID: "storage.list", Method: http.MethodGet, Path: "/s3/test/file/list", Summary: "List objects of the game bucket", Tags: storageTags, Access: httpapi.AccessSuperAdmin}, h.listObjects)
 	httpapi.Register(api, httpapi.Route{ID: "storage.delete", Method: http.MethodDelete, Path: "/s3/test/file", Summary: "Delete every version of an object in the game bucket", Tags: storageTags, Access: httpapi.AccessSuperAdmin}, h.deleteObject)
@@ -190,6 +193,27 @@ func (h *Handler) historyReason(ctx context.Context, in *downloadHistoryReasonIn
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil
+}
+
+func (h *Handler) ownSummary(ctx context.Context, _ *struct{}) (*response.Output[downloadOwnSummaryDTO], error) {
+	summary, err := h.service.OwnSummary(ctx, actor.From(ctx))
+	if err != nil {
+		return nil, err
+	}
+	return response.OK(ctx, h.resp, toOwnSummary(summary)), nil
+}
+
+func (h *Handler) ownResources(ctx context.Context, in *ownResourcesInput) (*response.Output[response.Page[downloadOwnResourceDTO]], error) {
+	query := download.OwnQuery{Scope: download.OwnScope(in.Scope), Search: in.Search, Sort: download.OwnSort(in.SortBy), Ascending: in.SortOrder == "asc"}
+	resources, total, err := h.service.OwnResources(ctx, actor.From(ctx), query, download.Page{Number: in.Page, Size: in.PageSize})
+	if err != nil {
+		return nil, err
+	}
+	now := h.resp.Now()
+	page := response.MapPage(resources, total, in.PageSize, in.Page, func(resource download.OwnResource) downloadOwnResourceDTO {
+		return downloadOwnResourceDTO{Resource: toResourceDTO(resource.GameResource, now), Game: gamehttp.ToGameCard(resource.Game)}
+	})
+	return response.OK(ctx, h.resp, page), nil
 }
 
 func (h *Handler) userResources(ctx context.Context, in *userResourcesInput) (*response.Output[downloadUserResourcePageDTO], error) {

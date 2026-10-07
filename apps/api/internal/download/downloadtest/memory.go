@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -25,6 +26,7 @@ type MemoryRepository struct {
 	favorites     map[int][]int
 	uploading     map[int]bool
 	ratedGames    map[int]bool
+	gameTitles    map[int]string
 	Strikes       map[int]int
 	GameDownloads map[int]int
 }
@@ -38,6 +40,7 @@ func NewMemoryRepository(now func() time.Time) *MemoryRepository {
 		favorites:     map[int][]int{},
 		uploading:     map[int]bool{},
 		ratedGames:    map[int]bool{},
+		gameTitles:    map[int]string{},
 		Strikes:       map[int]int{},
 		GameDownloads: map[int]int{},
 	}
@@ -117,6 +120,12 @@ func (r *MemoryRepository) MarkRated(gameID int) {
 	r.ratedGames[gameID] = true
 }
 
+func (r *MemoryRepository) NameGame(gameID int, title string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.gameTitles[gameID] = title
+}
+
 func (r *MemoryRepository) Histories(fileID int) []download.History {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -159,13 +168,83 @@ func (r *MemoryRepository) ListGameResources(_ context.Context, gameID int) ([]d
 		if resource.GameID != gameID || resource.Status != download.ResourceActive {
 			continue
 		}
-		item := download.GameResource{Resource: resource, Creator: r.summary(resource.CreatorID)}
-		for _, file := range r.filesOf(resource.ID) {
-			item.Files = append(item.Files, download.GameFile{File: file, MalwareCases: slices.Clone(r.cases[file.ID]), Creator: r.summary(file.CreatorID), RecentHistory: r.recentHistory(file.ID)})
-		}
-		out = append(out, item)
+		out = append(out, r.gameResource(resource))
 	}
 	return out, nil
+}
+
+func (r *MemoryRepository) gameResource(resource download.Resource) download.GameResource {
+	item := download.GameResource{Resource: resource, Creator: r.summary(resource.CreatorID)}
+	for _, file := range r.filesOf(resource.ID) {
+		item.Files = append(item.Files, download.GameFile{File: file, MalwareCases: slices.Clone(r.cases[file.ID]), Creator: r.summary(file.CreatorID), RecentHistory: r.recentHistory(file.ID)})
+	}
+	return item
+}
+
+func (r *MemoryRepository) ListOwnResources(_ context.Context, creatorID int, query download.OwnQuery, page download.Page) ([]download.GameResource, int, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var own []download.GameResource
+	for _, item := range r.ownResources(creatorID) {
+		if item.In(query.Scope) && (query.Search == "" || r.named(item, query.Search)) {
+			own = append(own, item)
+		}
+	}
+	slices.SortStableFunc(own, func(a, b download.GameResource) int {
+		order := cmp.Or(a.Updated.Compare(b.Updated), cmp.Compare(a.ID, b.ID))
+		if query.Sort == download.OwnSortDownloads {
+			order = cmp.Or(cmp.Compare(a.Downloads, b.Downloads), cmp.Compare(a.ID, b.ID))
+		}
+		if query.Ascending {
+			return order
+		}
+		return -order
+	})
+	total := len(own)
+	start := min(page.Offset(), total)
+	return own[start:min(start+page.Size, total)], total, nil
+}
+
+func (r *MemoryRepository) SummarizeOwnResources(_ context.Context, creatorID int, recentSince time.Time) (download.OwnSummary, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var summary download.OwnSummary
+	games := map[int]bool{}
+	for _, item := range r.ownResources(creatorID) {
+		summary.Downloads += item.Downloads
+		summary.Files += len(item.Files)
+		games[item.GameID] = true
+		if !item.Created.Before(recentSince) {
+			summary.Recent++
+		}
+		if item.Processing() {
+			summary.Processing++
+		} else {
+			summary.Published++
+		}
+	}
+	summary.Games = len(games)
+	return summary, nil
+}
+
+func (r *MemoryRepository) ownResources(creatorID int) []download.GameResource {
+	var own []download.GameResource
+	for _, resource := range r.sortedResources() {
+		if resource.Status == download.ResourceActive && resource.CreatorID == creatorID {
+			own = append(own, r.gameResource(resource))
+		}
+	}
+	return own
+}
+
+func (r *MemoryRepository) named(resource download.GameResource, search string) bool {
+	needle := strings.ToLower(search)
+	if strings.Contains(strings.ToLower(r.gameTitles[resource.GameID]), needle) {
+		return true
+	}
+	return slices.ContainsFunc(resource.Files, func(file download.GameFile) bool {
+		return strings.Contains(strings.ToLower(file.Name), needle)
+	})
 }
 
 func (r *MemoryRepository) recentHistory(fileID int) []download.HistoryRef {

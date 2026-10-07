@@ -47,9 +47,18 @@ func (r *Repository) db(ctx context.Context) *ent.Client {
 }
 
 func (r *Repository) ListGameResources(ctx context.Context, gameID int) ([]download.GameResource, error) {
-	rows, err := r.db(ctx).GameDownloadResource.Query().
+	rows, err := withFileDetails(r.db(ctx).GameDownloadResource.Query().
 		Where(gamedownloadresource.GameID(gameID), gamepg.ActiveResource()).
-		Order(ent.Asc(gamedownloadresource.FieldID)).
+		Order(ent.Asc(gamedownloadresource.FieldID))).
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list download resources of game %d: %w", gameID, err)
+	}
+	return r.gameResources(ctx, rows)
+}
+
+func withFileDetails(query *ent.GameDownloadResourceQuery) *ent.GameDownloadResourceQuery {
+	return query.
 		WithCreator(userpg.SelectSummary).
 		WithFiles(func(q *ent.GameDownloadResourceFileQuery) {
 			q.Order(ent.Asc(gamedownloadresourcefile.FieldID)).
@@ -58,11 +67,10 @@ func (r *Repository) ListGameResources(ctx context.Context, gameID int) ([]downl
 					q.Select(malwarescancase.FieldID, malwarescancase.FieldDetectedViruses, malwarescancase.FieldFileID).
 						Order(ent.Asc(malwarescancase.FieldID))
 				})
-		}).
-		All(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("list download resources of game %d: %w", gameID, err)
-	}
+		})
+}
+
+func (r *Repository) gameResources(ctx context.Context, rows []*ent.GameDownloadResource) ([]download.GameResource, error) {
 	var fileIDs []int
 	for _, row := range rows {
 		for _, file := range row.Edges.Files {

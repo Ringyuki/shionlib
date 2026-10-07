@@ -140,6 +140,14 @@ type userResourcesInput struct {
 	httpapi.PageQuery
 }
 
+type ownResourcesInput struct {
+	Scope     string `query:"scope" enum:"all,processing,published" default:"all" doc:"processing: not yet published, or with a file that is not stored or is under review; published: everything else"`
+	Search    string `query:"q" maxLength:"100" doc:"Part of a game title, a game alias or a file name"`
+	SortBy    string `query:"sort_by" enum:"updated,downloads" default:"updated"`
+	SortOrder string `query:"sort_order" enum:"asc,desc" default:"desc"`
+	httpapi.PageQuery
+}
+
 type objectDeleteInput struct {
 	Key string `query:"key"`
 }

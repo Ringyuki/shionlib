@@ -26,6 +26,8 @@ Malware scanning streamed whole files to ClamAV. The legacy `clamscan` skipped f
   - in recent releases, which are ordered by publication time;
   - on user pages.
   Uploaders always see their own resources and files with their processing state. Files appended to a published resource stay hidden until they are stored.
+  - Every file carries its `stage` (`checking`, `storing`, `stored`, `under_review`, `rejected`), derived from its status and its check, and the `rejection` reason when rejected.
+  - `GET /game/download-source/mine` pages the caller's resources with their game and files. Two scopes split them, `processing` (unpublished, or with a file not stored or under review) and `published`; `all` lists both. It searches game titles, aliases and file names and sorts by last update or downloads. `GET /game/download-source/mine/summary` counts both scopes, the downloads, the games and files covered, and the resources created within a recent window (30 days).
 - **Set-aware checks.**
   - File names are unique within a resource, so the volumes of a set cannot clash.
   - Files whose names form a split archive (`.partN.rar`, `.rar`+`.rNN`, `.NNN`, `.zNN`+`.zip`) are grouped. They are hard-linked under their own names into a scan workspace on the spool and checked together by 7-Zip from the volume it opens (the first one, or the `.zip` of a split zip).

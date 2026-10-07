@@ -3,6 +3,7 @@ package download
 import (
 	"context"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/activity"
@@ -129,6 +130,31 @@ func (s *Service) UserResources(ctx context.Context, viewer actor.Actor, userID 
 		}
 	}
 	return result, nil
+}
+
+func (s *Service) OwnSummary(ctx context.Context, who actor.Actor) (OwnSummary, error) {
+	return s.repo.SummarizeOwnResources(ctx, who.UserID, s.now().Add(-OwnRecentWindow))
+}
+
+func (s *Service) OwnResources(ctx context.Context, who actor.Actor, query OwnQuery, page Page) ([]OwnResource, int, error) {
+	query.Search = strings.TrimSpace(query.Search)
+	resources, total, err := s.repo.ListOwnResources(ctx, who.UserID, query, page)
+	if err != nil {
+		return nil, 0, err
+	}
+	ids := make([]int, len(resources))
+	for i, resource := range resources {
+		ids[i] = resource.GameID
+	}
+	cards, err := s.games.ByIDs(ctx, ids, who)
+	if err != nil {
+		return nil, 0, err
+	}
+	own := make([]OwnResource, len(resources))
+	for i, resource := range resources {
+		own[i] = OwnResource{GameResource: resource, Game: cardOrStub(cards, resource.GameID)}
+	}
+	return own, total, nil
 }
 
 func (s *Service) Create(ctx context.Context, who actor.Actor, gameID int, in CreateInput) (Resource, error) {

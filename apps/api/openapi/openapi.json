@@ -6550,11 +6550,36 @@
               "null"
             ]
           },
+          "rejection": {
+            "description": "Why a rejected file was rejected; null otherwise",
+            "enum": [
+              "truncated",
+              "unsupported",
+              "encrypted",
+              "harmful",
+              "incomplete_set"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "s3_file_key": {
             "type": [
               "string",
               "null"
             ]
+          },
+          "stage": {
+            "description": "Where the file is on its way to being downloadable: checking (waiting for or under its check), storing (passed, moving to object storage), stored, under_review (held for a malware review) or rejected (about to be removed)",
+            "enum": [
+              "checking",
+              "storing",
+              "stored",
+              "under_review",
+              "rejected"
+            ],
+            "type": "string"
           },
           "type": {
             "format": "int64",
@@ -6571,6 +6596,8 @@
           "hash_algorithm",
           "file_hash",
           "file_status",
+          "stage",
+          "rejection",
           "is_virus_false_positive",
           "malware_scan_cases",
           "creator",
@@ -6823,6 +6850,72 @@
         "required": [
           "platform",
           "language"
+        ],
+        "type": "object"
+      },
+      "DownloadOwnResourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "game": {
+            "$ref": "#/components/schemas/GameCardDTO"
+          },
+          "resource": {
+            "$ref": "#/components/schemas/DownloadResourceDTO"
+          }
+        },
+        "required": [
+          "resource",
+          "game"
+        ],
+        "type": "object"
+      },
+      "DownloadOwnSummaryDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "downloads": {
+            "description": "Downloads across the caller's resources",
+            "format": "int64",
+            "type": "integer"
+          },
+          "files": {
+            "description": "Files in the caller's resources",
+            "format": "int64",
+            "type": "integer"
+          },
+          "games": {
+            "description": "Games the caller's resources belong to",
+            "format": "int64",
+            "type": "integer"
+          },
+          "processing": {
+            "description": "Resources not yet published, or with a file that is not stored or is under review",
+            "format": "int64",
+            "type": "integer"
+          },
+          "published": {
+            "description": "Every other resource of the caller",
+            "format": "int64",
+            "type": "integer"
+          },
+          "recent": {
+            "description": "Resources the caller created within the last recent_days days",
+            "format": "int64",
+            "type": "integer"
+          },
+          "recent_days": {
+            "description": "Length in days of the window recent counts",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "processing",
+          "published",
+          "downloads",
+          "games",
+          "files",
+          "recent",
+          "recent_days"
         ],
         "type": "object"
       },
@@ -8879,6 +8972,39 @@
         ],
         "type": "object"
       },
+      "EnvelopeDownloadOwnSummaryDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DownloadOwnSummaryDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeDownloadReleasePageDTO": {
         "additionalProperties": false,
         "properties": {
@@ -10684,6 +10810,39 @@
           },
           "data": {
             "$ref": "#/components/schemas/PageDeveloperListItemDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePageDownloadOwnResourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageDownloadOwnResourceDTO"
           },
           "message": {
             "type": "string"
@@ -14564,6 +14723,28 @@
           "items": {
             "items": {
               "$ref": "#/components/schemas/DeveloperListItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "PageDownloadOwnResourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DownloadOwnResourceDTO"
             },
             "type": [
               "array",
@@ -27095,6 +27276,180 @@
           }
         ],
         "summary": "Import a download resource",
+        "tags": [
+          "download"
+        ]
+      }
+    },
+    "/game/download-source/mine": {
+      "get": {
+        "operationId": "download.ownResources",
+        "parameters": [
+          {
+            "description": "processing: not yet published, or with a file that is not stored or is under review; published: everything else",
+            "explode": false,
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "default": "all",
+              "description": "processing: not yet published, or with a file that is not stored or is under review; published: everything else",
+              "enum": [
+                "all",
+                "processing",
+                "published"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Part of a game title, a game alias or a file name",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Part of a game title, a game alias or a file name",
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sort_by",
+            "schema": {
+              "default": "updated",
+              "enum": [
+                "updated",
+                "downloads"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sort_order",
+            "schema": {
+              "default": "desc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageDownloadOwnResourceDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List the caller's download resources with their files and processing stage",
+        "tags": [
+          "download"
+        ]
+      }
+    },
+    "/game/download-source/mine/summary": {
+      "get": {
+        "operationId": "download.ownSummary",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeDownloadOwnSummaryDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Count the caller's download resources and their downloads",
         "tags": [
           "download"
         ]

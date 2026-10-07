@@ -37,6 +37,8 @@ type downloadFileDTO struct {
 	HashAlgorithm        upload.HashAlgorithm     `json:"hash_algorithm" enum:"sha256,blake3"`
 	FileHash             string                   `json:"file_hash"`
 	FileStatus           int                      `json:"file_status"`
+	Stage                download.Stage           `json:"stage" enum:"checking,storing,stored,under_review,rejected" doc:"Where the file is on its way to being downloadable: checking (waiting for or under its check), storing (passed, moving to object storage), stored, under_review (held for a malware review) or rejected (about to be removed)"`
+	Rejection            *download.Rejection      `json:"rejection" enum:"truncated,unsupported,encrypted,harmful,incomplete_set" doc:"Why a rejected file was rejected; null otherwise"`
 	IsVirusFalsePositive bool                     `json:"is_virus_false_positive"`
 	MalwareScanCases     []downloadMalwareCaseDTO `json:"malware_scan_cases"`
 	Creator              userhttp.UserSummaryDTO  `json:"creator"`
@@ -55,6 +57,33 @@ type downloadResourceDTO struct {
 	Created     time.Time               `json:"created"`
 	Updated     time.Time               `json:"updated"`
 	Files       []downloadFileDTO       `json:"files"`
+}
+
+type downloadOwnSummaryDTO struct {
+	Processing int `json:"processing" doc:"Resources not yet published, or with a file that is not stored or is under review"`
+	Published  int `json:"published" doc:"Every other resource of the caller"`
+	Downloads  int `json:"downloads" doc:"Downloads across the caller's resources"`
+	Games      int `json:"games" doc:"Games the caller's resources belong to"`
+	Files      int `json:"files" doc:"Files in the caller's resources"`
+	Recent     int `json:"recent" doc:"Resources the caller created within the last recent_days days"`
+	RecentDays int `json:"recent_days" doc:"Length in days of the window recent counts"`
+}
+
+func toOwnSummary(summary download.OwnSummary) downloadOwnSummaryDTO {
+	return downloadOwnSummaryDTO{
+		Processing: summary.Processing,
+		Published:  summary.Published,
+		Downloads:  summary.Downloads,
+		Games:      summary.Games,
+		Files:      summary.Files,
+		Recent:     summary.Recent,
+		RecentDays: int(download.OwnRecentWindow / (24 * time.Hour)),
+	}
+}
+
+type downloadOwnResourceDTO struct {
+	Resource downloadResourceDTO  `json:"resource"`
+	Game     gamehttp.GameCardDTO `json:"game"`
 }
 
 type downloadResourceCreatedDTO struct {
@@ -176,9 +205,13 @@ func toResourceDTO(r download.GameResource, now time.Time) downloadResourceDTO {
 			HashAlgorithm:        file.HashAlgorithm,
 			FileHash:             file.Hash,
 			FileStatus:           file.Status,
+			Stage:                file.Stage(),
 			IsVirusFalsePositive: file.FalsePositive,
 			MalwareScanCases:     cases,
 			Creator:              userhttp.ToUserSummary(file.Creator, now),
+		}
+		if rejection, rejected := file.CheckStatus.Rejection(); rejected && dto.Stage == download.StageRejected {
+			dto.Rejection = &rejection
 		}
 		if latest := file.LatestReupload(); latest != nil {
 			dto.LatestHistory = &downloadHistoryRefDTO{ID: latest.ID, Reason: latest.Reason, Created: latest.Created, OperatorID: latest.OperatorID}

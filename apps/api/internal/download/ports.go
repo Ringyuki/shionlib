@@ -15,6 +15,8 @@ type Repository interface {
 	ListGameResources(ctx context.Context, gameID int) ([]GameResource, error)
 	ListReleases(ctx context.Context, excludeRated bool, page Page) ([]Release, int, error)
 	ListUserResources(ctx context.Context, creatorID int, filter UserResourceFilter, page Page) ([]UserResource, int, error)
+	ListOwnResources(ctx context.Context, creatorID int, query OwnQuery, page Page) ([]GameResource, int, error)
+	SummarizeOwnResources(ctx context.Context, creatorID int, recentSince time.Time) (OwnSummary, error)
 	HasUploadingSession(ctx context.Context, userID int) (bool, error)
 	CreateResource(ctx context.Context, in NewResource) (Resource, error)
 	CreateFile(ctx context.Context, in NewFile) (File, error)

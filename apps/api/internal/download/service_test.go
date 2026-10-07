@@ -490,6 +490,73 @@ func TestReleasesAndUserResources(t *testing.T) {
 	}
 }
 
+func TestOwnResourcesFilterSearchAndSortTheCallersResources(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	f.repo.NameGame(10, "Sakura no Uta")
+	f.repo.NameGame(11, "Summer Pockets")
+	older := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, PublishedAt: ptr(now.Add(-time.Hour)), Created: now.Add(-download.OwnRecentWindow - time.Hour), Updated: now.Add(-3 * time.Hour), Downloads: 40})
+	f.repo.SeedFile(download.File{ResourceID: older.ID, Name: "old.7z", Status: download.FileInObjectStore, CheckStatus: download.CheckOK})
+	newer := f.repo.SeedResource(download.Resource{GameID: 11, CreatorID: owner.UserID, PublishedAt: ptr(now), Updated: now.Add(-2 * time.Hour), Downloads: 5})
+	f.repo.SeedFile(download.File{ResourceID: newer.ID, Name: "new.7z", Status: download.FileInObjectStore, CheckStatus: download.CheckOK})
+	growing := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, PublishedAt: ptr(now), Updated: now.Add(-time.Hour), Downloads: 7})
+	f.repo.SeedFile(download.File{ResourceID: growing.ID, Name: "part1.rar", Status: download.FileInObjectStore, CheckStatus: download.CheckOK})
+	f.repo.SeedFile(download.File{ResourceID: growing.ID, Name: "part2.rar", Status: download.FileOnServer})
+	fresh := f.repo.SeedResource(download.Resource{GameID: 11, CreatorID: owner.UserID, Updated: now})
+	f.repo.SeedFile(download.File{ResourceID: fresh.ID, Name: "bad.7z", Status: download.FileOnServer, CheckStatus: download.CheckEncrypted})
+	removed := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, Status: download.ResourceRemoved, Downloads: 900})
+	f.repo.SeedFile(download.File{ResourceID: removed.ID, Name: "gone.7z", Status: download.FileOnServer})
+	theirs := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: other.UserID, Downloads: 900})
+	f.repo.SeedFile(download.File{ResourceID: theirs.ID, Name: "theirs.7z", Status: download.FileOnServer})
+	ids := func(resources []download.OwnResource) []int {
+		out := make([]int, len(resources))
+		for i, resource := range resources {
+			out[i] = resource.ID
+		}
+		return out
+	}
+	list := func(query download.OwnQuery, page download.Page) ([]int, int) {
+		t.Helper()
+		resources, total, err := f.service.OwnResources(ctx, owner, query, page)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return ids(resources), total
+	}
+	ten := download.Page{Number: 1, Size: 10}
+
+	if got, total := list(download.OwnQuery{Scope: download.OwnAll}, ten); total != 4 || !slices.Equal(got, []int{fresh.ID, growing.ID, newer.ID, older.ID}) {
+		t.Fatalf("every active resource of the caller, last updated first: %v %d", got, total)
+	}
+	if got, total := list(download.OwnQuery{Scope: download.OwnProcessing}, ten); total != 2 || !slices.Equal(got, []int{fresh.ID, growing.ID}) {
+		t.Fatalf("resources still on their way: %v %d", got, total)
+	}
+	if got, total := list(download.OwnQuery{Scope: download.OwnPublished}, download.Page{Number: 2, Size: 1}); total != 2 || !slices.Equal(got, []int{older.ID}) {
+		t.Fatalf("second page of the published ones: %v %d", got, total)
+	}
+	if got, _ := list(download.OwnQuery{Scope: download.OwnAll, Sort: download.OwnSortDownloads}, ten); !slices.Equal(got, []int{older.ID, growing.ID, newer.ID, fresh.ID}) {
+		t.Fatalf("most downloaded first: %v", got)
+	}
+	if got, _ := list(download.OwnQuery{Scope: download.OwnAll, Sort: download.OwnSortDownloads, Ascending: true}, ten); !slices.Equal(got, []int{fresh.ID, newer.ID, growing.ID, older.ID}) {
+		t.Fatalf("least downloaded first: %v", got)
+	}
+	if got, total := list(download.OwnQuery{Scope: download.OwnAll, Search: "  sakura "}, ten); total != 2 || !slices.Equal(got, []int{growing.ID, older.ID}) {
+		t.Fatalf("search by game title, trimmed and case-insensitive: %v %d", got, total)
+	}
+	if got, _ := list(download.OwnQuery{Scope: download.OwnAll, Search: "PART2"}, ten); !slices.Equal(got, []int{growing.ID}) {
+		t.Fatalf("search by file name: %v", got)
+	}
+	resources, _, _ := f.service.OwnResources(ctx, owner, download.OwnQuery{Scope: download.OwnProcessing}, ten)
+	if file := resources[0].Files[0]; file.Stage() != download.StageRejected || resources[0].Game.ID != 11 {
+		t.Fatalf("each one carries its files and its game: %+v", resources[0])
+	}
+
+	summary, err := f.service.OwnSummary(ctx, owner)
+	if err != nil || summary != (download.OwnSummary{Processing: 2, Published: 2, Downloads: 52, Games: 2, Files: 5, Recent: 3}) {
+		t.Fatalf("summary of the caller's active resources, with those created within the recent window: %+v %v", summary, err)
+	}
+}
+
 func TestRequeueStoresQueuesApprovedFilesStillOnTheServer(t *testing.T) {
 	f := newFixture()
 	path := "/spool/a.sltf"

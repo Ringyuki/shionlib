@@ -78,7 +78,7 @@ func TestGameResourcesShape(t *testing.T) {
 	e.seedStoredFile()
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/10/download-source"})
 	e.server.Expect(resp, http.StatusOK, 0)
-	want := `[{"id":1,"platform":["win"],"language":["jp"],"simulator":null,"note":"note","downloads":0,"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"published_at":"2026-10-03T01:02:03.000Z","created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","files":[{"id":1,"type":1,"file_name":"game.7z","file_size":2048,"file_url":null,"s3_file_key":"games/10/1/game.7z","hash_algorithm":"blake3","file_hash":"b3","file_status":3,"is_virus_false_positive":false,"malware_scan_cases":[],"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"latest_history":null}]}]`
+	want := `[{"id":1,"platform":["win"],"language":["jp"],"simulator":null,"note":"note","downloads":0,"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"published_at":"2026-10-03T01:02:03.000Z","created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","files":[{"id":1,"type":1,"file_name":"game.7z","file_size":2048,"file_url":null,"s3_file_key":"games/10/1/game.7z","hash_algorithm":"blake3","file_hash":"b3","file_status":3,"stage":"stored","rejection":null,"is_virus_false_positive":false,"malware_scan_cases":[],"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"latest_history":null}]}]`
 	if string(resp.Data) != want {
 		t.Fatalf("game resources\n got %s\nwant %s", resp.Data, want)
 	}
@@ -216,6 +216,53 @@ func TestReleasesAndUserResources(t *testing.T) {
 	theirs := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/user/datas/1/game-resources"})
 	if !strings.HasSuffix(string(theirs.Data), `"is_current_user":false,"has_on_going_session":false,"content_limit":0}}`) {
 		t.Fatalf("guest view %s", theirs.Data)
+	}
+}
+
+func TestOwnResources(t *testing.T) {
+	e := setup(t)
+	e.seedStoredFile()
+	waiting := e.repo.SeedResource(download.Resource{GameID: 10, CreatorID: creator.UserID, Platforms: []string{"win"}, Languages: []string{"jp"}})
+	e.repo.SeedFile(download.File{ResourceID: waiting.ID, Name: "locked.7z", Size: 7, Status: download.FileOnServer, CheckStatus: download.CheckEncrypted, Hash: "b3", CreatorID: creator.UserID})
+	e.repo.SeedFile(download.File{ResourceID: waiting.ID, Name: "fine.7z", Size: 7, Status: download.FileOnServer, CheckStatus: download.CheckOK, Hash: "b3", CreatorID: creator.UserID})
+
+	path := "/game/download-source/mine"
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: path}), http.StatusUnauthorized, 200101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: path + "?scope=everything", As: &creator}), http.StatusUnprocessableEntity, 100101)
+
+	published := e.server.Do(apitest.Request{Method: http.MethodGet, Path: path + "?scope=published", As: &creator})
+	e.server.Expect(published, http.StatusOK, 0)
+	want := `{"items":[{"resource":{"id":1,"platform":["win"],"language":["jp"],"simulator":null,"note":"note","downloads":0,"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"published_at":"2026-10-03T01:02:03.000Z","created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","files":[{"id":1,"type":1,"file_name":"game.7z","file_size":2048,"file_url":null,"s3_file_key":"games/10/1/game.7z","hash_algorithm":"blake3","file_hash":"b3","file_status":3,"stage":"stored","rejection":null,"is_virus_false_positive":false,"malware_scan_cases":[],"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"latest_history":null}]},"game":{"id":10,`
+	if !strings.HasPrefix(string(published.Data), want) || !strings.HasSuffix(string(published.Data), `"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1}}`) {
+		t.Fatalf("published resources of the caller\n got %s\nwant %s", published.Data, want)
+	}
+	if strings.Contains(string(published.Data), "rated.webp") {
+		t.Fatalf("strict viewers never see rated covers: %s", published.Data)
+	}
+
+	processing := e.server.Do(apitest.Request{Method: http.MethodGet, Path: path + "?scope=processing&pageSize=5", As: &creator})
+	e.server.Expect(processing, http.StatusOK, 0)
+	for _, part := range []string{`"published_at":null`, `"file_name":"locked.7z","file_size":7,"file_url":null,"s3_file_key":null,"hash_algorithm":"blake3","file_hash":"b3","file_status":2,"stage":"rejected","rejection":"encrypted"`, `"file_name":"fine.7z","file_size":7,"file_url":null,"s3_file_key":null,"hash_algorithm":"blake3","file_hash":"b3","file_status":2,"stage":"storing","rejection":null`, `"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":5,"totalPages":1,"currentPage":1}}`} {
+		if !strings.Contains(string(processing.Data), part) {
+			t.Fatalf("processing resources miss %s in %s", part, processing.Data)
+		}
+	}
+	nobody := e.server.Do(apitest.Request{Method: http.MethodGet, Path: path, As: &visitor})
+	if !strings.HasPrefix(string(nobody.Data), `{"items":[],`) {
+		t.Fatalf("someone else sees none of them: %s", nobody.Data)
+	}
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: path + "?sort_by=size", As: &creator}), http.StatusUnprocessableEntity, 100101)
+	everything := e.server.Do(apitest.Request{Method: http.MethodGet, Path: path + "?q=LOCKED&sort_by=downloads&sort_order=asc", As: &creator})
+	e.server.Expect(everything, http.StatusOK, 0)
+	if !strings.Contains(string(everything.Data), `"file_name":"locked.7z"`) || !strings.HasSuffix(string(everything.Data), `"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1}}`) {
+		t.Fatalf("search across every scope: %s", everything.Data)
+	}
+
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: path + "/summary"}), http.StatusUnauthorized, 200101)
+	summary := e.server.Do(apitest.Request{Method: http.MethodGet, Path: path + "/summary", As: &creator})
+	e.server.Expect(summary, http.StatusOK, 0)
+	if string(summary.Data) != `{"processing":1,"published":1,"downloads":0,"games":1,"files":3,"recent":2,"recent_days":30}` {
+		t.Fatalf("summary %s", summary.Data)
 	}
 }
 
