@@ -57,7 +57,9 @@ function AddFilesForm({ resource, onDone }: { resource: Resource; onDone: () => 
         <Button variant="ghost" tone="neutral" onClick={onDone}>
           {t('cancel')}
         </Button>
-        <Button type="submit">{t('uploadStart')}</Button>
+        <Button type="submit" disabled={admission !== undefined}>
+          {t('uploadStart')}
+        </Button>
       </Inline>
     </Form>
   )

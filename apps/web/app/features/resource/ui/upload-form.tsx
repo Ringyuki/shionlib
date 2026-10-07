@@ -28,7 +28,7 @@ export function UploadForm({ game, allowance }: { game: GameHeader | null; allow
       values={values}
       rules={uploadForm(kit, issue)}
       onSubmit={() => {
-        if (game !== null && admission === undefined) {
+        if (game !== null && admission === undefined && !start.leaving) {
           start.create(game, values)
         }
       }}
@@ -57,7 +57,11 @@ export function UploadForm({ game, allowance }: { game: GameHeader | null; allow
         onValuesChange={fields => setValues({ ...values, ...fields })}
       />
       <Inline justify="end">
-        <Button type="submit" disabled={game === null}>
+        <Button
+          type="submit"
+          loading={start.leaving}
+          disabled={game === null || admission !== undefined}
+        >
           {t('uploadStart')}
         </Button>
       </Inline>

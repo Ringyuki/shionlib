@@ -72,7 +72,9 @@ function ReplaceFileForm({ file, onDone }: { file: ResourceFile; onDone: () => v
         <Button variant="ghost" tone="neutral" onClick={onDone}>
           {t('cancel')}
         </Button>
-        <Button type="submit">{t('uploadStart')}</Button>
+        <Button type="submit" disabled={admission !== undefined}>
+          {t('uploadStart')}
+        </Button>
       </Inline>
     </Form>
   )

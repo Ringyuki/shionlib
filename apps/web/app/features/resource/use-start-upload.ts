@@ -1,5 +1,5 @@
 import { toast } from '@hina-ui/react'
-import { useNavigate } from 'react-router'
+import { useNavigate, useNavigation } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 import { gameTitle, type GameHeader } from '~/features/game'
 import { sitePaths } from '~/features/shell'
@@ -11,7 +11,9 @@ export function useStartUpload() {
   const t = useTranslations('resource')
   const locale = useLocale()
   const navigate = useNavigate()
+  const navigation = useNavigation()
   const manager = useUploadManager()
+  const { uploads, uploading } = sitePaths(locale)
   const start = (target: UploadTarget, label: string, files: readonly File[]) => {
     manager?.add(
       target,
@@ -24,15 +26,16 @@ export function useStartUpload() {
     toast.success(t('uploadStarted'), {
       action: {
         label: t('viewProgress'),
-        onClick: () => void navigate(sitePaths(locale).uploads),
+        onClick: () => void navigate(uploading),
       },
     })
   }
   return {
+    leaving: navigation.state === 'loading' && navigation.location.pathname === uploads,
     create(game: GameHeader, values: UploadValues) {
       const target = { kind: 'create', gameId: game.id, resource: resourceDraft(values) } as const
       start(target, gameTitle(game, locale), values.files)
-      void navigate(sitePaths(locale).uploading)
+      void navigate(uploading)
     },
     append(resource: Resource, files: readonly File[]) {
       announce(

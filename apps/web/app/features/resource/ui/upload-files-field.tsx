@@ -34,6 +34,7 @@ export function UploadFilesField({
       <FormField name="files" label={t('uploadFiles')} description={rule} required>
         <FileUpload
           multiple={multiple}
+          disabled={admission?.kind === 'full'}
           value={multiple ? files : (files[0] ?? null)}
           onValueChange={value => onFilesChange(chosenFiles(value))}
         >
