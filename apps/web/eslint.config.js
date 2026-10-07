@@ -58,6 +58,12 @@ const nativeDialogs = ['alert', 'confirm', 'prompt'].map(name => ({
   message: 'No native browser dialogs: use hina-ui AlertDialog, Dialog or toast.',
 }))
 
+const hinaInternals = {
+  selector: 'Literal[value=/\\[&[^\\]]*\\.hn-/], TemplateElement[value.raw=/\\[&[^\\]]*\\.hn-/]',
+  message:
+    'Do not restyle hina-ui\'s internal markup ([&>.hn-*]); use a documented pattern instead, such as Card as="button" for a custom clickable surface.',
+}
+
 const mountedFeedback = {
   selector:
     ':matches(LogicalExpression, ConditionalExpression) > JSXElement > JSXOpeningElement > JSXIdentifier[name=/^(Alert|Callout|Banner)$/]',
@@ -194,7 +200,14 @@ export default defineConfig([
           message: dialog.message,
         })),
       ],
-      'no-restricted-syntax': ['error', ...apiShapes, nativeTags, nativeTooltip, mountedFeedback],
+      'no-restricted-syntax': [
+        'error',
+        ...apiShapes,
+        nativeTags,
+        nativeTooltip,
+        mountedFeedback,
+        hinaInternals,
+      ],
       '@typescript-eslint/consistent-type-assertions': ['error', { assertionStyle: 'never' }],
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/no-restricted-imports': restrictedImports(featureEntry),
@@ -234,6 +247,7 @@ export default defineConfig([
         documentShellTags,
         nativeTooltip,
         mountedFeedback,
+        hinaInternals,
       ],
     },
   },

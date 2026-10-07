@@ -1,4 +1,4 @@
-import { Button, cn, Image, Spoiler } from '@hina-ui/react'
+import { Card, cn, Image, Ripple, Spoiler } from '@hina-ui/react'
 import { useTranslations } from 'use-intl'
 
 type GalleryThumbProps = {
@@ -26,17 +26,17 @@ export function GalleryThumb({
 }: GalleryThumbProps) {
   const t = useTranslations('game.cover')
   const thumb = (
-    <Button
-      variant="ghost"
-      tone="neutral"
-      ripple={false}
+    <Card
+      as="button"
+      padded={false}
       aria-label={label}
       onClick={onOpen}
       className={cn(
-        'block h-auto w-full cursor-zoom-in overflow-hidden rounded-lg border-0 p-0 [&>.hn-transition]:size-full',
+        'hn-interactive hn-state-layer hn-press-lg block w-full cursor-zoom-in',
         className,
       )}
     >
+      <Ripple />
       <Image
         src={src}
         alt=""
@@ -47,7 +47,7 @@ export function GalleryThumb({
         imageClass={imageClass}
         {...data}
       />
-    </Button>
+    </Card>
   )
   return masked ? (
     <Spoiler aria-label={t('explicit')} className={cn('block w-full overflow-hidden', className)}>

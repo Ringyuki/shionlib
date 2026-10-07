@@ -11,16 +11,16 @@ export function SearchPalette() {
   return (
     <>
       <Button
-        variant="outline"
+        variant="soft"
         tone="neutral"
         icon={<Search />}
-        trailing={<Kbd>/</Kbd>}
         onClick={palette.show}
-        className="w-full max-w-md justify-start max-md:hidden [&>.hn-transition]:flex-1"
+        className="max-md:hidden"
       >
-        <Text as="span" tone="muted" className="flex-1 text-start font-normal">
+        <Text as="span" tone="muted" className="font-normal">
           {t('placeholder')}
         </Text>
+        <Kbd>/</Kbd>
       </Button>
       <Button
         variant="ghost"
