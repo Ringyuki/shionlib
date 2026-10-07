@@ -60,6 +60,19 @@ export function byReleaseMonth<Game extends Pick<GameHit, 'release_date'>>(
   return { thisMonth: releasedIn(window.thisMonth), lastMonth: releasedIn(window.lastMonth) }
 }
 
+export type ResultsAddress = { query: string; page?: number; everyGame?: boolean }
+
+export function resultsSearch({ query, page = 1, everyGame = false }: ResultsAddress): string {
+  const params = new URLSearchParams({ q: query })
+  if (page > 1) {
+    params.set('page', String(page))
+  }
+  if (everyGame) {
+    params.set('all', '1')
+  }
+  return `?${params}`
+}
+
 export function normalizeQuery(raw: string | null | undefined): string {
   return [...(raw ?? '').trim().split(/\s+/).join(' ')].slice(0, maxQueryLength).join('')
 }
@@ -71,10 +84,6 @@ export function rememberSearch(recent: readonly string[], query: string): string
   }
   const others = recent.filter(entry => entry.toLowerCase() !== normalized.toLowerCase())
   return [normalized, ...others].slice(0, maxRecent)
-}
-
-export function pageCount(total: number, size: number): number {
-  return Math.max(1, Math.ceil(total / size))
 }
 
 export function emptyResults(): SearchResults {

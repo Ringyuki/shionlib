@@ -7,6 +7,12 @@ export function meta({ loaderData }: Route.MetaArgs) {
   return [{ title: loaderData?.query ? `${loaderData.query} | Shionlib` : 'Shionlib' }]
 }
 
-export default function SearchPage({ loaderData }: Route.ComponentProps) {
-  return <SearchResultsView {...loaderData} />
+export default function SearchPage({ loaderData, matches }: Route.ComponentProps) {
+  const [, , site] = matches
+  return (
+    <SearchResultsView
+      {...loaderData}
+      filtered={site.loaderData.viewer?.only_games_with_resources ?? true}
+    />
+  )
 }

@@ -32,7 +32,8 @@ export function searchResultsLoader(args: LoaderFunctionArgs) {
   const params = new URL(args.request.url).searchParams
   const query = params.get('q') ?? ''
   const page = pageParam(params.get('page'))
-  return routeLoader(args, api => searchGames(api, query, page))
+  const everyGame = params.get('all') === '1'
+  return routeLoader(args, api => searchGames(api, query, page, everyGame))
 }
 
 export function legacySearchRedirect({ request, params }: LoaderFunctionArgs) {

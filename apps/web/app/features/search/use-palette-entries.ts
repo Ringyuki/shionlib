@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router'
 import { useFormatter, useLocale, useTranslations } from 'use-intl'
 import { characterName } from '~/features/character'
 import { developerNames, gameTitle, primaryCover } from '~/features/game'
-import type { Palette, Picture } from './search'
+import { resultsSearch, type Palette, type Picture } from './search'
 import type { useSearchPalette } from './use-search-palette'
 
 type EntryBase = {
@@ -49,7 +49,7 @@ export function usePaletteEntries(palette: ReturnType<typeof useSearchPalette>):
       return
     }
     palette.remember()
-    go(`/${locale}/search?${new URLSearchParams({ q: query })}`)
+    go(`/${locale}/search${resultsSearch({ query })}`)
   }
 
   const command = (

@@ -51,7 +51,7 @@ describe('loadPalette', () => {
 describe('searchGames', () => {
   it('records the keyword on the first page only', async () => {
     const first = fakeApi().on('get', '/search', results).on('post', '/search/record', undefined)
-    await expect(searchGames(first.api, 'sakura', 1)).resolves.toMatchObject({
+    await expect(searchGames(first.api, 'sakura', 1, false)).resolves.toMatchObject({
       query: 'sakura',
       games: { total: 12 },
     })
@@ -60,17 +60,30 @@ describe('searchGames', () => {
       '/search/record',
     ])
     const second = fakeApi().on('get', '/search', results)
-    await searchGames(second.api, 'sakura', 2)
+    await searchGames(second.api, 'sakura', 2, false)
     expect(second.requests).toHaveLength(1)
   })
 
-  it('skips the source for an empty query', async () => {
-    const fake = fakeApi()
-    await expect(searchGames(fake.api, ' ', 1)).resolves.toMatchObject({
+  it('asks for games without resources only on request', async () => {
+    const flag = async (everyGame: boolean) => {
+      const fake = fakeApi().on('get', '/search', results).on('post', '/search/record', undefined)
+      await searchGames(fake.api, 'sakura', 1, everyGame)
+      return new URL(fake.requests[0]?.url ?? '').searchParams.get('include_without_resources')
+    }
+    await expect(flag(false)).resolves.toBe('false')
+    await expect(flag(true)).resolves.toBe('true')
+  })
+
+  it('offers trending keywords instead of asking the source for an empty query', async () => {
+    const fake = fakeApi().on('get', '/search/trending', [{ query: 'sakura', score: 3 }])
+    await expect(searchGames(fake.api, ' ', 1, false)).resolves.toMatchObject({
       query: '',
+      trending: ['sakura'],
       unavailable: false,
     })
-    expect(fake.requests).toHaveLength(0)
+    expect(fake.requests.map(request => new URL(request.url).pathname)).toEqual([
+      '/search/trending',
+    ])
   })
 })
 

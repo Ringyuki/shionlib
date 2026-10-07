@@ -1,72 +1,78 @@
-import { DataList, Empty, Heading, Result, SearchInput, Stack, Text } from '@hina-ui/react'
-import { SearchX } from 'lucide-react'
+import { Heading, Result, SearchInput, Stack } from '@hina-ui/react'
 import { Form, useLocation, useNavigate, useNavigation } from 'react-router'
 import { useTranslations } from 'use-intl'
-import { GameRow } from '~/features/game'
-import { resultsPageSize, type SearchResults } from '../search'
+import { resultsSearch, type ResultsAddress, type SearchResults } from '../search'
+import { GameResults } from './game-results'
+import { SearchPrompt } from './search-prompt'
 
 type SearchResultsViewProps = {
   query: string
   page: number
+  everyGame: boolean
+  filtered: boolean
   games: SearchResults['games']
+  trending: readonly string[]
   unavailable: boolean
 }
 
-export function SearchResultsView({ query, page, games, unavailable }: SearchResultsViewProps) {
+export function SearchResultsView({
+  query,
+  page,
+  everyGame,
+  filtered,
+  games,
+  trending,
+  unavailable,
+}: SearchResultsViewProps) {
   const t = useTranslations('search')
   const navigate = useNavigate()
   const navigation = useNavigation()
   const location = useLocation()
   const searching =
     navigation.state === 'loading' && navigation.location.pathname === location.pathname
-
-  const turn = (next: number) => {
-    void navigate(`?${new URLSearchParams({ q: query, page: String(next) })}`)
-  }
+  const go = (address: ResultsAddress) => void navigate(resultsSearch(address))
 
   return (
     <Stack gap="lg">
-      <Stack gap="sm">
+      <Stack gap="md">
         <Heading level={1} size="xl" weight="semibold">
           {query === '' ? t('results.title') : t('results.heading', { query })}
         </Heading>
-        {query !== '' && !unavailable && (
-          <Text size="sm" tone="muted">
-            {t('results.count', { total: games.total })}
-          </Text>
-        )}
+        <Form
+          method="get"
+          role="search"
+          className="w-full max-w-2xl"
+          onSubmit={event => {
+            event.preventDefault()
+            const typed = new FormData(event.currentTarget).get('q')
+            go({ query: typeof typed === 'string' ? typed : '', everyGame })
+          }}
+        >
+          <SearchInput
+            key={query}
+            name="q"
+            size="lg"
+            defaultValue={query}
+            loading={searching}
+            placeholder={t('results.placeholder')}
+            aria-label={t('label')}
+          />
+        </Form>
       </Stack>
-      <Form method="get" role="search" className="w-full max-w-xl">
-        <SearchInput
-          key={query}
-          name="q"
-          defaultValue={query}
-          placeholder={t('placeholder')}
-          aria-label={t('label')}
-        />
-      </Form>
       {query === '' ? (
-        <Text tone="muted">{t('results.prompt')}</Text>
+        <SearchPrompt trending={trending} />
       ) : unavailable ? (
         <Result status="warning" title={t('results.unavailable')} />
       ) : (
-        <DataList
-          items={games.items ?? []}
-          itemKey="id"
-          manual
-          pagination
-          total={games.total}
+        <GameResults
+          query={query}
           page={page}
-          pageSize={resultsPageSize}
-          onPageChange={turn}
+          everyGame={everyGame}
+          filtered={filtered}
+          games={games}
           loading={searching}
-          layout="grid"
-          gridMin="100%"
-          gridGap="sm"
-          renderEmpty={() => <Empty icon={<SearchX />} title={t('results.empty', { query })} />}
-        >
-          {({ item }) => <GameRow game={item} />}
-        </DataList>
+          onGo={go}
+        />
       )}
     </Stack>
   )

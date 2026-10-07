@@ -39,17 +39,21 @@ async function attempt(request: Promise<SearchResults>) {
   }
 }
 
+async function loadTrending(api: ApiClient): Promise<string[]> {
+  const terms = await quietly(
+    api.get('/search/trending', { params: { query: { limit: trendingSize } } }),
+    [],
+  )
+  return (terms ?? []).map(term => term.query)
+}
+
 export async function loadPalette(api: ApiClient, raw: string): Promise<Palette> {
   const query = normalizeQuery(raw)
   if (query === '') {
-    const terms = await quietly(
-      api.get('/search/trending', { params: { query: { limit: trendingSize } } }),
-      [],
-    )
     return {
       query,
       suggestions: [],
-      trending: (terms ?? []).map(term => term.query),
+      trending: await loadTrending(api),
       results: null,
       unavailable: false,
     }
@@ -76,20 +80,42 @@ export async function loadPalette(api: ApiClient, raw: string): Promise<Palette>
   }
 }
 
-export async function searchGames(api: ApiClient, raw: string, page: number) {
+export async function searchGames(api: ApiClient, raw: string, page: number, everyGame: boolean) {
   const query = normalizeQuery(raw)
   if (query === '') {
-    return { query, page, games: emptyResults().games, unavailable: false }
+    return {
+      query,
+      page,
+      everyGame,
+      games: emptyResults().games,
+      trending: await loadTrending(api),
+      unavailable: false,
+    }
   }
   const found = await attempt(
     api.get('/search', {
-      params: { query: { q: query, types: ['game'], page, pageSize: resultsPageSize } },
+      params: {
+        query: {
+          q: query,
+          types: ['game'],
+          page,
+          pageSize: resultsPageSize,
+          include_without_resources: everyGame,
+        },
+      },
     }),
   )
   if (page === 1 && !found.unavailable) {
     await quietly(recordSearch(api, query), null)
   }
-  return { query, page, games: found.results.games, unavailable: found.unavailable }
+  return {
+    query,
+    page,
+    everyGame,
+    games: found.results.games,
+    trending: [],
+    unavailable: found.unavailable,
+  }
 }
 
 export async function recordSearch(api: ApiClient, raw: string) {

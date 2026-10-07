@@ -4,9 +4,9 @@ import {
   maxQueryLength,
   maxRecent,
   normalizeQuery,
-  pageCount,
   releaseWindow,
   rememberSearch,
+  resultsSearch,
 } from './search'
 
 describe('normalizeQuery', () => {
@@ -23,13 +23,6 @@ describe('recent searches', () => {
     expect(rememberSearch(['a'], '  ')).toEqual(['a'])
     const many = Array.from({ length: maxRecent }, (_, index) => `q${index}`)
     expect(rememberSearch(many, 'new')).toHaveLength(maxRecent)
-  })
-})
-
-describe('paging', () => {
-  it('counts at least one page', () => {
-    expect(pageCount(41, 20)).toBe(3)
-    expect(pageCount(0, 20)).toBe(1)
   })
 })
 
@@ -53,5 +46,13 @@ describe('recent releases', () => {
     const months = byReleaseMonth(games, releaseWindow(new Date('2026-10-07T00:00:00Z')))
     expect(months.thisMonth.map(hit => hit.id)).toEqual([1])
     expect(months.lastMonth.map(hit => hit.id)).toEqual([2])
+  })
+})
+
+describe('results address', () => {
+  it('keeps the first page and the default filter out of the URL', () => {
+    expect(resultsSearch({ query: '看星星' })).toBe('?q=%E7%9C%8B%E6%98%9F%E6%98%9F')
+    expect(resultsSearch({ query: 'a b', page: 1, everyGame: false })).toBe('?q=a+b')
+    expect(resultsSearch({ query: 'a', page: 3, everyGame: true })).toBe('?q=a&page=3&all=1')
   })
 })
