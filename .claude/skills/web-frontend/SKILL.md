@@ -81,7 +81,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 - MUST keep the code comment-free (lint enforces; inline lint directives are disabled).
 - MUST keep files short: at most 150 non-blank lines for `.tsx`, 200 for other `.ts`, 300 for tests (lint enforces). When a file grows past that, split it by responsibility (a section, a field group, a hook that builds data), never by cutting it into arbitrary parts; stylesheets follow the same idea, one concern per file (`theme.css` accent roles, `platform.css` platform colours).
 - MUST add Playwright specs in `apps/web/e2e` for every user flow a phase ports, and run them with `pnpm test:e2e:web` before finishing the phase (`references/testing.md`).
-- MUST run `.claude/skills/web-frontend/scripts/verify.sh` before declaring work done.
+- MUST check the work before declaring it done, at the weight of the change: `scripts/check.sh` (typecheck, lint, format and the tests of what changed, about ten seconds) for a small change such as copy, spacing or a few lines of logic; `scripts/verify.sh` (adds generated types and the build) when a phase ends or the API contract changed. The Playwright suite runs when a user flow changed, starting with the specs it touches, never for copy or layout tweaks.
 
 ## MUST NOT
 
@@ -149,6 +149,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 ## Verification
 
 ```bash
+.claude/skills/web-frontend/scripts/check.sh    # small change: typecheck, lint, format, tests of what changed since HEAD (SINCE=<ref> to widen)
 .claude/skills/web-frontend/scripts/verify.sh   # generated types fresh, typecheck, lint, format, tests, build
 ```
 

@@ -47,7 +47,7 @@ cmd/api ──► internal/bootstrap (composition root)
 - MUST add tests at the level of the change: service rules with fakes, repository contract against Postgres, black-box HTTP tests with `apitest`. `X_test.go` tests `X.go`; shared setup goes in `fixture_test.go`; every package has tests.
 - MUST declare every value an operator may tune (limits, sizes, quotas, lifetimes, weights, batch sizes, retention, feature switches) as a setting in the owning package's `settings.go` (`setting.Int/Bytes/Float/Duration/Flag/Text` with name, Chinese label, default and bounds) and read it where it is used with `Key.Read(source)`; never copy it into `Options`/`Policy` at startup (ADR 0011).
 - MUST keep environment variables for what a process needs before it starts or what belongs to the deployment (addresses, secrets, paths, pools, client timeouts); a new numeric, duration or boolean variable needs an entry with its reason in `archtest` `deploymentKnobs`, and every new variable goes through `infra/compose.app.yml` (`devtool deploy env`).
-- MUST run `.claude/skills/go-backend/scripts/verify.sh` before declaring work done.
+- MUST check the work before declaring it done, at the weight of the change: `scripts/check.sh` (gofmt, vet and the tests of the changed packages, seconds) for a small change; `scripts/verify.sh` (everything, minutes) when a phase ends or when the schema, the HTTP contract, business codes, dependencies or generated code changed.
 
 ## MUST NOT
 
@@ -100,7 +100,7 @@ cmd/api ──► internal/bootstrap (composition root)
 3. Check `internal/platform` and existing adapters for the capability you need before adding one.
 4. Implement the minimum coherent change; record unrelated refactors instead of doing them.
 5. Regenerate what you changed: `go run ./cmd/entgen`, `go run ./cmd/devtool migrate diff <name>`, `go run ./cmd/devtool bizcode docs`, `go run ./cmd/api openapi openapi/openapi.json`.
-6. Run `scripts/verify.sh` and fix everything it reports.
+6. Run `scripts/check.sh`, or `scripts/verify.sh` when the change calls for it, and fix everything it reports.
 
 ## References
 
@@ -116,6 +116,7 @@ cmd/api ──► internal/bootstrap (composition root)
 ## Verification
 
 ```bash
+.claude/skills/go-backend/scripts/check.sh             # small change: gofmt, vet and tests of the packages changed since HEAD (SINCE=<ref> to widen, or name packages)
 .claude/skills/go-backend/scripts/verify.sh            # format, tidy, generate, vet, lint, tests, archtest, bizcodes, openapi
 TEST_DATABASE_URL=... TEST_REDIS_ADDR=... DEV_DATABASE_URL=... scripts/verify.sh   # adds integration tests and migration drift
 ```

@@ -14,7 +14,7 @@ Mandatory context for every coding turn in this repository.
 
 - All work for the rewrite happens on branch `major/shionlib-next`.
 - Source code is comment-free. Express intent through names and tests; only compiler directives (`//go:`) are allowed.
-- Go backend: load the `go-backend` skill before touching `apps/api`, follow the golden path in `apps/api/internal/favorite`, and run `.claude/skills/go-backend/scripts/verify.sh` before finishing.
-- Web client: load the `web-frontend` skill before touching `apps/web`, follow the golden path in `apps/web/app/features/favorite`, and run `.claude/skills/web-frontend/scripts/verify.sh` before finishing. API types are generated from `apps/api/openapi/openapi.json`; never write them by hand.
+- Go backend: load the `go-backend` skill before touching `apps/api`, follow the golden path in `apps/api/internal/favorite`, and check the work before finishing: `.claude/skills/go-backend/scripts/check.sh` for a small change, `verify.sh` when a phase ends or when the schema, the contract, the dependencies or generated code changed.
+- Web client: load the `web-frontend` skill before touching `apps/web`, follow the golden path in `apps/web/app/features/favorite`, and check the work before finishing: `.claude/skills/web-frontend/scripts/check.sh` for a small change, `verify.sh` when a phase ends or when the API contract changed. API types are generated from `apps/api/openapi/openapi.json`; never write them by hand.
 - Commit messages are English, imperative, scoped (`feat(api): …`, `feat(web): …`).
 - Never hand-edit generated files: `apps/api/internal/adapter/postgres/ent/**` (except `schema/`), `apps/api/docs/business-codes.md`, `apps/api/openapi/openapi.json`, `apps/web/app/shared/api/generated/**`.
