@@ -106,7 +106,11 @@ export async function findGames(api: ApiClient, raw: string): Promise<GameHit[]>
     return []
   }
   const found = await quietly(
-    api.get('/search', { params: { query: { q: query, types: ['game'], pageSize: pickerSize } } }),
+    api.get('/search', {
+      params: {
+        query: { q: query, types: ['game'], pageSize: pickerSize, include_without_resources: true },
+      },
+    }),
     null,
   )
   return found?.games.items ?? []
