@@ -1,8 +1,12 @@
 import {
   Center,
+  Code,
+  CodeBlock,
   firstPaintRestoreScript,
   Heading,
   ImageResolverProvider,
+  Stack,
+  Text,
   Toaster,
   TooltipProvider,
 } from '@hina-ui/react'
@@ -22,6 +26,8 @@ import { PublicConfigProvider } from '~/shared/config/public-config'
 import { htmlLang } from '~/shared/i18n/locale.schema'
 import { apiMiddleware } from '~/shared/route/api.server'
 import { answerEveryRequest } from '~/shared/route/client-middleware'
+import { describe } from '~/shared/route/refusal'
+import { failureOf } from '~/shared/ui/error-details'
 import { imageResolver } from '~/shared/ui/image-resolver'
 import { darkClass, systemThemeScript } from '~/shared/ui/theme'
 import { themeFrom } from '~/shared/ui/theme.schema'
@@ -87,11 +93,18 @@ export default function App({ loaderData }: Route.ComponentProps) {
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   const status = isRouteErrorResponse(error) ? error.status : 500
+  const failure = failureOf(error)
+  const thrown = error instanceof Error ? error : undefined
   return (
     <Center as="main" className="min-h-dvh p-8">
-      <Heading level={1} size="2xl">
-        {status}
-      </Heading>
+      <Stack gap="md" align="center" className="w-full max-w-2xl">
+        <Heading level={1} size="2xl">
+          {status}
+        </Heading>
+        <Text tone="muted">{failure?.message ?? describe(error)}</Text>
+        {failure !== undefined && <Code>{failure.requestId}</Code>}
+        {thrown?.stack !== undefined && <CodeBlock code={thrown.stack} className="w-full" />}
+      </Stack>
     </Center>
   )
 }

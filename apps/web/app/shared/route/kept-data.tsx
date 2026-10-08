@@ -1,15 +1,17 @@
 import { useEffect, useEffectEvent, useSyncExternalStore } from 'react'
 import { useLocation, useMatches } from 'react-router'
-import { unreachable, useRefusalNotice } from './refusal'
-import { rememberShown, staleReloadCount, subscribeToStaleReloads } from './shown-data'
-
-const none = () => 0
+import { useRefusalNotice } from './refusal'
+import { rememberShown, staleReloadsNoted, subscribeToStaleReloads } from './shown-data'
 
 export function KeptData() {
   const matches = useMatches()
   const location = useLocation()
   const notify = useRefusalNotice()
-  const reloads = useSyncExternalStore(subscribeToStaleReloads, staleReloadCount, none)
+  const reloads = useSyncExternalStore(
+    subscribeToStaleReloads,
+    staleReloadsNoted,
+    staleReloadsNoted,
+  )
   useEffect(() => {
     rememberShown({
       url: location.pathname + location.search,
@@ -20,10 +22,10 @@ export function KeptData() {
       })),
     })
   }, [matches, location])
-  const announce = useEffectEvent(() => notify(unreachable.failure, undefined))
+  const announce = useEffectEvent(notify)
   useEffect(() => {
-    if (reloads > 0) {
-      announce()
+    if (reloads.refusal !== undefined) {
+      announce(reloads.refusal)
     }
   }, [reloads])
   return null

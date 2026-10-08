@@ -17,7 +17,7 @@ export function useCommand<Result>(
   const outcome = fetcher.state === 'submitting' ? undefined : fetcher.data
   const settle = useEffectEvent((settled: Outcome<Result>) => {
     if (!settled.ok && !quiet) {
-      notify(settled.failure, settled.retryAfter)
+      notify(settled)
     }
     const resolve = waiting.current
     waiting.current = undefined

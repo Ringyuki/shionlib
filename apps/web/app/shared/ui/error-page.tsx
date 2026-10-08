@@ -1,6 +1,7 @@
 import { Button, Container, Result } from '@hina-ui/react'
 import { isRouteErrorResponse, Link, useRevalidator } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
+import { ErrorDetails, failureOf } from './error-details'
 
 type ErrorPageProps = {
   error: unknown
@@ -18,7 +19,7 @@ export function ErrorPage({ error }: ErrorPageProps) {
         ? [t('signInTitle'), t('signInDescription')]
         : status === 403
           ? [t('forbiddenTitle'), t('forbiddenDescription')]
-          : [t('errorTitle'), t('errorDescription')]
+          : [t('errorTitle'), failureOf(error)?.message ?? t('errorDescription')]
   return (
     <Container size="sm" className="py-24">
       <Result
@@ -37,7 +38,9 @@ export function ErrorPage({ error }: ErrorPageProps) {
             </Button>
           </>
         }
-      />
+      >
+        <ErrorDetails error={error} />
+      </Result>
     </Container>
   )
 }

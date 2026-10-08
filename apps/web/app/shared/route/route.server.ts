@@ -34,7 +34,12 @@ async function outcomeOf<Result>({ context }: RouteArgs, run: (api: ApiClient) =
   } catch (error) {
     if (error instanceof ApiError) {
       return data(
-        { ok: false as const, failure: error.failure, retryAfter: error.retryAfter },
+        {
+          ok: false as const,
+          failure: error.failure,
+          retryAfter: error.retryAfter,
+          status: error.status,
+        },
         { status: error.status },
       )
     }

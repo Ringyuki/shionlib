@@ -11,7 +11,7 @@ export function useLazyLoad<Result>(fetcher: FetcherWithComponents<Outcome<Resul
   }
   const report = useEffectEvent((loaded: Outcome<Result>) => {
     if (!loaded.ok) {
-      notify(loaded.failure, loaded.retryAfter)
+      notify(loaded)
     }
   })
   useEffect(() => {

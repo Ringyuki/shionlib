@@ -15,5 +15,10 @@
   "catalogCorrection": "Something wrong or missing?",
   "catalogEdit": "Edit it on Hikarinagi",
   "retryAfter": "{message}. Try again in {seconds} s",
-  "retry": "Try again"
+  "retry": "Try again",
+  "requestId": "Request ID: {id}",
+  "copy": "Copy",
+  "status": "Status {status}",
+  "errorCode": "Error code {code}",
+  "errorDetails": "Error details"
 }

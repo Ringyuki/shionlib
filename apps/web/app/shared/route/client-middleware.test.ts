@@ -1,10 +1,14 @@
 import type { DataStrategyResult } from 'react-router'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { answerEveryRequest, unanswered } from './client-middleware'
-import { unreachable } from './refusal'
-import { rememberShown, shownFor, staleReloadCount } from './shown-data'
+import { refusalOf } from './refusal'
+import { rememberShown, shownFor, staleReloadsNoted } from './shown-data'
 
-const offline: DataStrategyResult = { type: 'error', result: new TypeError('Failed to fetch') }
+const lost = new TypeError('Failed to fetch')
+
+const offline: DataStrategyResult = { type: 'error', result: lost }
+
+const unreachable = refusalOf(lost)
 
 const refused = (status: number): DataStrategyResult => ({
   type: 'error',
@@ -56,7 +60,7 @@ describe('shownFor', () => {
 
 describe('answerEveryRequest', () => {
   it('keeps what is shown when a reload gets no answer, and says so once', async () => {
-    const before = staleReloadCount()
+    const before = staleReloadsNoted().count
     const answered = await answer('/zh/game/37?tab=1', 'GET', {
       'routes/site': offline,
       'routes/game.resources': offline,
@@ -65,10 +69,11 @@ describe('answerEveryRequest', () => {
       'routes/site': { type: 'data', result: 'site data' },
       'routes/game.resources': { type: 'data', result: 'resources data' },
     })
-    expect(staleReloadCount()).toBe(before + 1)
+    expect(staleReloadsNoted()).toEqual({ count: before + 1, refusal: unreachable })
   })
 
-  it('keeps the layouts and lets a new page fail', async () => {
+  it('keeps the layouts and lets a new page fail, which its error page reports', async () => {
+    const before = staleReloadsNoted().count
     const answered = await answer('/zh/search?q=a', 'GET', {
       'routes/site': offline,
       'routes/search': offline,
@@ -77,6 +82,7 @@ describe('answerEveryRequest', () => {
       'routes/site': { type: 'data', result: 'site data' },
       'routes/search': offline,
     })
+    expect(staleReloadsNoted().count).toBe(before)
   })
 
   it('answers a submission and a lazy load with a refusal', async () => {
@@ -97,6 +103,35 @@ describe('answerEveryRequest', () => {
       'routes/game.resources': refused(404),
     } satisfies Record<string, DataStrategyResult>
     await expect(answer('/zh/game/37?tab=1', 'GET', results)).resolves.toEqual(results)
+  })
+})
+
+describe('refusalOf', () => {
+  const failure = {
+    code: 500,
+    message: '服务器内部错误',
+    data: { errors: null },
+    requestId: 'ce3174d6',
+    timestamp: '2026-10-08T08:06:28.447Z',
+  }
+
+  it('keeps what the API said about a failure of its own, with the request to look up', () => {
+    expect(refusalOf({ ...thrown(500), data: failure })).toEqual({
+      ok: false,
+      failure,
+      retryAfter: undefined,
+      status: 500,
+    })
+  })
+
+  it('names the error when there was no answer to keep', () => {
+    expect(unreachable).toMatchObject({
+      ok: false,
+      status: 0,
+      failure: { message: 'TypeError: Failed to fetch', requestId: '' },
+    })
+    expect(refusalOf({ type: 'DataWithResponseInit', data: lost, init: null })).toEqual(unreachable)
+    expect(refusalOf(thrown(502)).failure.message).toBe('502')
   })
 })
 

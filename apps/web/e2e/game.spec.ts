@@ -48,8 +48,14 @@ test('renders the page in the visitor language', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('HAMIDASHI CREATIVE Re:Re:call')
 })
 
-test('answers an unknown game with the not-found page', async ({ page }) => {
+test('answers an unknown game with the not-found page, inside the site and with what identifies the failure', async ({
+  page,
+}) => {
   const response = await page.goto('/zh/game/999999')
   expect(response?.status()).toBe(404)
-  await expect(page.getByText('页面不存在')).toBeVisible()
+  const main = page.getByRole('main')
+  await expect(main.getByText('页面不存在')).toBeVisible()
+  await expect(main.getByText('状态码 404')).toBeVisible()
+  await expect(main.getByText(/请求 ID：[0-9a-f-]{36}/)).toBeVisible()
+  await expect(page.getByRole('link', { name: '游戏库' }).first()).toBeVisible()
 })

@@ -3,12 +3,14 @@ import {
   type DataStrategyResult,
   type MiddlewareFunction,
 } from 'react-router'
-import { unreachable } from './refusal'
+import { refusalOf, type Refused } from './refusal'
+import { unwrapped } from './refusal.schema'
 import { noteStaleReload, shownFor } from './shown-data'
 
 const resourceRoutes = 'routes/resources.'
 
-export function unanswered(error: unknown): boolean {
+export function unanswered(thrown: unknown): boolean {
+  const error = unwrapped(thrown)
   return !(error instanceof Response) && !(isRouteErrorResponse(error) && error.status < 500)
 }
 
@@ -22,23 +24,27 @@ export const answerEveryRequest: MiddlewareFunction<Record<string, DataStrategyR
   }
   const asked = new URL(request.url)
   const reads = request.method === 'GET'
-  let stale = false
+  let stale: Refused | undefined
+  let failed = false
   const answered = Object.entries(results).map(([id, result]): [string, DataStrategyResult] => {
     if (result.type !== 'error' || !unanswered(result.result)) {
       return [id, result]
     }
+    console.error(result.result)
+    const refusal = refusalOf(result.result)
     if (!reads || id.startsWith(resourceRoutes)) {
-      return [id, { type: 'data', result: unreachable }]
+      return [id, { type: 'data', result: refusal }]
     }
     const kept = shownFor(id, asked)
     if (kept === undefined) {
+      failed = true
       return [id, result]
     }
-    stale = true
+    stale = refusal
     return [id, { type: 'data', result: kept.data }]
   })
-  if (stale) {
-    noteStaleReload()
+  if (stale !== undefined && !failed) {
+    noteStaleReload(stale)
   }
   return Object.fromEntries(answered)
 }

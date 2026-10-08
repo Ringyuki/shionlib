@@ -1,10 +1,12 @@
+import type { Refused } from './refusal'
+
 type ShownMatch = { id: string; pathname: string; data: unknown }
 
 type Shown = { url: string; matches: readonly ShownMatch[] }
 
 let shown: Shown | undefined
 
-let staleReloads = 0
+let staleReloads: { count: number; refusal: Refused | undefined } = { count: 0, refusal: undefined }
 
 const listeners = new Set<() => void>()
 
@@ -26,8 +28,8 @@ export function shownFor(routeId: string, request: URL): { data: unknown } | und
   return same ? { data: match.data } : undefined
 }
 
-export function noteStaleReload() {
-  staleReloads += 1
+export function noteStaleReload(refusal: Refused) {
+  staleReloads = { count: staleReloads.count + 1, refusal }
   listeners.forEach(listener => listener())
 }
 
@@ -38,7 +40,7 @@ export function subscribeToStaleReloads(listener: () => void) {
   }
 }
 
-export function staleReloadCount(): number {
+export function staleReloadsNoted() {
   return staleReloads
 }
 

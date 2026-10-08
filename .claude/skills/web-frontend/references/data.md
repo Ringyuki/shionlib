@@ -29,7 +29,7 @@ await api.put('/favorites/{id}', { params: { path: { id: listId } }, body: { gam
   - clears both auth cookies when the refresh token is rejected;
   - appends every `Set-Cookie` it received to the page or data response.
 - `routeLoader(args, run)` returns `run(api)`; an `ApiError` becomes `throw data(failure, { status })`, so the nearest `ErrorBoundary` renders 401/403/404/5xx pages with the right HTTP status.
-- `routeAction(args, run)` returns `{ ok: true, result }`, or `data({ ok: false, failure, retryAfter }, { status })` for an `ApiError`. Other errors propagate. `routeLazyLoader(args, run)` answers a loader that a fetcher loads the same way.
+- `routeAction(args, run)` returns `{ ok: true, result }`, or `data({ ok: false, failure, retryAfter, status }, { status })` for an `ApiError`. Other errors propagate. `routeLazyLoader(args, run)` answers a loader that a fetcher loads the same way.
 - `idParam(value)` parses positive integer ids and throws 404 otherwise.
 
 ## Fetchers
@@ -37,14 +37,15 @@ await api.put('/favorites/{id}', { params: { path: { id: listId } }, body: { gam
 The browser has one request tool for everything that does not navigate (`~/shared/route`). It is the client end of `routeAction` and `routeLazyLoader`, and the only place a fetcher is used (lint: `useFetcher<typeof handler>()` appears only as the argument of `useCommand` or `useLazyLoad`).
 
 - **Submitting.** `const command = useCommand(useFetcher<typeof <thing>Action>(), href('/resources/x'), options?)` inside a feature hook, which adds the typed `run`:
-  - `run(payload)` posts JSON and resolves with the outcome, `{ ok: true, result }` or `{ ok: false, failure, retryAfter }`. It never rejects, so it is what a `Form`'s `onSubmit` returns.
+  - `run(payload)` posts JSON and resolves with the outcome, `{ ok: true, result }` or `{ ok: false, failure, retryAfter, status }`. It never rejects, so it is what a `Form`'s `onSubmit` returns.
   - `confirm(payload)` resolves with the result and rejects with a `Refusal`. It is for hina-ui handlers that keep an overlay open while their promise rejects (`AlertDialog` and `Popconfirm` `onConfirm`).
   - `pending`, `settled` (the latest outcome), `failure` (its failure, for `useFormErrors`), `payload` (what is being submitted, for optimistic state).
   - Options: `revalidate: false` for a submission whose result no loader shows (a view counter, issuing a download link); `quiet: true` for one the visitor did not ask for (recording a search term).
 - **Loading lazily.** `const lists = useLazyLoad(useFetcher<typeof <thing>Loader>())`: `load(path)`, `loading`, `result`, `failed`. The loader answers with `routeLazyLoader`. A component shows its spinner while `loading`, not while `result` is undefined, because a failed load has no result either.
 - **Who reports a failure.** The tool does, once and the same way everywhere: a danger toast with the API's message, already localized, with the wait added when the API sent `Retry-After`. A refusal that names fields is not toasted; `useFormErrors(command.failure)` puts those under the fields. Call sites only say what happens on success. No `Alert` shows a request failure, and no hook takes an `onFailure`.
+- **A failure keeps what identifies it.** An outcome carries the HTTP `status` beside the API's `failure`. When the server failed (`status >= 500`) the toast adds the request ID with a copy action and stays ten seconds, because that ID is what finds the request in the API log. When there was no answer the toast names the error (`TypeError: Failed to fetch`), and the middleware writes the error it absorbed to the console with its stack. `ErrorPage` shows the status, the API's error code and the request ID with a copy button, and the stack of a thrown error (`ErrorDetails`); the root boundary shows the same without labels. Never replace an error by a sentence and drop the rest.
 - **A request that gets no answer** (the network is down, the web server is restarting, a handler threw, the API is down and answers 5xx) never replaces the page. The root route's `clientMiddleware`, `answerEveryRequest`, sees the result of every loader and action call before the router does:
-  - a submission, or a lazy load from a `resources.*` route, is answered with the outcome `unreachable`, which the tool shows as 「请求未成功，请稍后再试。」;
+  - a submission, or a lazy load from a `resources.*` route, is answered with a refusal made from the error (`refusalOf`): the API's own failure when it answered 5xx, otherwise one the tool shows as 「请求未成功，请稍后再试。」 with the error named under it;
   - a reload of what is on screen (the reload after an action, `revalidate()`, the periodic refresh of the uploads page) keeps the data that is shown: a page keeps its data for the address it is shown at, a layout wherever the visitor stays inside it. `KeptData` (mounted in `lang.tsx`) mirrors the shown loader data for this and shows the same toast. `useLazyLoad` keeps what it loaded as well;
   - a page the visitor navigates to and that cannot be loaded is an error, rendered by the `ErrorBoundary` of the `routes/pages.tsx` layout inside the site, with a retry.
   - A real answer below 500 (401, 403, 404, 422) is never replaced.
