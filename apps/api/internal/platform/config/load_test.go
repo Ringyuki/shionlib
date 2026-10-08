@@ -30,6 +30,7 @@ func TestAuthSettingsAreValidated(t *testing.T) {
 		"origin with a path":         {"WEBAUTHN_ORIGINS": "https://shionlib.com/app"},
 		"relative oidc origin":       {"OIDC_ALLOWED_ORIGINS": "shionlib.com"},
 		"negative rotation grace":    {"REFRESH_TOKEN_ROTATION_GRACE": "-1s"},
+		"refresh window too short":   {"REFRESH_TOKEN_SHORT_WINDOW": "300s"},
 		"zero challenge ttl":         {"WEBAUTHN_CHALLENGE_TTL": "0s"},
 		"relative email endpoint":    {"EMAIL_PROVIDER_ENDPOINT": "/v2/email/send"},
 		"unknown email provider":     {"EMAIL_PROVIDER": "smtp"},

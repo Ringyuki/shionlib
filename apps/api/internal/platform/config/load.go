@@ -59,6 +59,7 @@ func (c *Config) Validate() error {
 	require(c.Token.RefreshPepper != "", "REFRESH_TOKEN_PEPPER is required")
 	require(c.Token.ExpiresIn > 0, "TOKEN_EXPIRES_IN must be positive")
 	require(c.Token.RefreshShortWindow > 0, "REFRESH_TOKEN_SHORT_WINDOW must be positive")
+	require(c.Token.RefreshShortWindow >= c.Token.ExpiresIn, "REFRESH_TOKEN_SHORT_WINDOW must not be shorter than TOKEN_EXPIRES_IN, or a session ends before its first refresh")
 	require(c.Token.RefreshLongWindow >= c.Token.RefreshShortWindow, "REFRESH_TOKEN_LONG_WINDOW must not be shorter than REFRESH_TOKEN_SHORT_WINDOW")
 	require(c.Token.RefreshAlgorithmVersion != "" && !strings.Contains(c.Token.RefreshAlgorithmVersion, "."), "REFRESH_TOKEN_ALGORITHM_VERSION must be non-empty and must not contain '.'")
 	require(c.Token.RefreshRotationGrace >= 0, "REFRESH_TOKEN_ROTATION_GRACE must not be negative")
