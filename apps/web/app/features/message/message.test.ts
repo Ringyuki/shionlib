@@ -9,7 +9,6 @@ import {
   categoryOf,
   inboxPath,
   inboxRoot,
-  lastPage,
   linkTarget,
   typeOf,
 } from './message'
@@ -67,8 +66,6 @@ describe('inboxPath', () => {
     expect(atInbox('/zh/message', 'zh')).toBe(true)
     expect(atInbox('/zh/message/system', 'zh')).toBe(true)
     expect(atInbox('/zh/messages', 'zh')).toBe(false)
-    expect(lastPage(31)).toBe(2)
-    expect(lastPage(0)).toBe(1)
   })
 })
 

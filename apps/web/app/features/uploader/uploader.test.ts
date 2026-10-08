@@ -6,14 +6,12 @@ import {
   entriesOf,
   firstListing,
   heldSince,
-  lastPage,
   listingSearch,
   matchingTransfers,
   nothingUploaded,
   orderOf,
   orders,
   paceOf,
-  pageSize,
   scopeOf,
   stageOf,
   type Transfer,
@@ -203,14 +201,6 @@ describe('heldSince', () => {
     expect(paths.uploading).toBe(
       `${paths.uploads}${listingSearch({ ...firstListing, stage: 'uploading' })}`,
     )
-  })
-})
-
-describe('lastPage', () => {
-  it('counts the pages the resources fill, at least one', () => {
-    expect(lastPage(0)).toBe(1)
-    expect(lastPage(pageSize)).toBe(1)
-    expect(lastPage(pageSize + 1)).toBe(2)
   })
 })
 

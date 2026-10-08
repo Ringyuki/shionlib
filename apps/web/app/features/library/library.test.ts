@@ -3,7 +3,6 @@ import { sortedGamesPath, tagPath } from '~/features/game'
 import {
   conditionsOf,
   firstAddress,
-  lastPage,
   libraryPath,
   librarySearch,
   listQuery,
@@ -103,14 +102,6 @@ describe('listQuery', () => {
 
   it('never asks for months of the current year alone', () => {
     expect(listQuery(address({ months: [3] }))['filter[months][]']).toEqual([])
-  })
-})
-
-describe('lastPage', () => {
-  it('is at least the first page', () => {
-    expect(lastPage(0)).toBe(1)
-    expect(lastPage(36)).toBe(1)
-    expect(lastPage(37)).toBe(2)
   })
 })
 

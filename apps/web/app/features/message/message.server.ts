@@ -1,9 +1,7 @@
-import { data, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
-import { defaultLocale } from '~/shared/i18n/locale'
-import { isLocale } from '~/shared/i18n/locale.schema'
-import { pageParam } from '~/shared/route/params'
+import { data, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import { keepWithinPages, requestedPage } from '~/shared/route/paging'
 import { routeAction, routeLoader } from '~/shared/route/route.server'
-import { inboxPath, lastPage, openedParam } from './message'
+import { openedParam, pageSize } from './message'
 import { categoryFrom, openedFrom } from './message.schema'
 import { loadInbox, markAllRead } from './message.use-cases'
 
@@ -12,13 +10,11 @@ export async function inboxLoader(args: LoaderFunctionArgs) {
   if (category === undefined) {
     throw data(null, { status: 404 })
   }
-  const params = new URL(args.request.url).searchParams
-  const page = pageParam(params.get('page'))
-  const opened = openedFrom(params.get(openedParam))
+  const page = requestedPage(args.request)
+  const opened = openedFrom(new URL(args.request.url).searchParams.get(openedParam))
   const inbox = await routeLoader(args, api => loadInbox(api, category, page, opened))
-  if (inbox !== null && page > lastPage(inbox.total)) {
-    const locale = isLocale(args.params.lang) ? args.params.lang : defaultLocale
-    throw redirect(inboxPath(locale, { category, page: lastPage(inbox.total), opened }))
+  if (inbox !== null) {
+    keepWithinPages(args.request, inbox.total, pageSize)
   }
   return inbox
 }

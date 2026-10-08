@@ -1,7 +1,8 @@
 import { redirect, type LoaderFunctionArgs } from 'react-router'
+import { keepWithinPages } from '~/shared/route/paging'
 import { pageParam } from '~/shared/route/params'
 import { routeLazyLoader, routeLoader } from '~/shared/route/route.server'
-import { lastPage, librarySearch, yearOptions } from './library'
+import { librarySearch, pageSize, yearOptions } from './library'
 import { addressFrom, legacyParams } from './library.schema'
 import { loadLibrary, searchTags } from './library.use-cases'
 
@@ -16,10 +17,7 @@ export async function libraryLoader(args: LoaderFunctionArgs) {
   }
   const address = read(url.searchParams)
   const content = await routeLoader(args, api => loadLibrary(api, address, years))
-  const last = lastPage(content.total)
-  if (address.page > last) {
-    throw redirect(`${url.pathname}${librarySearch({ ...address, page: last })}`)
-  }
+  keepWithinPages(args.request, content.total, pageSize)
   return content
 }
 

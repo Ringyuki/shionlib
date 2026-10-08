@@ -31,6 +31,7 @@ await api.put('/favorites/{id}', { params: { path: { id: listId } }, body: { gam
 - `routeLoader(args, run)` returns `run(api)`; an `ApiError` becomes `throw data(failure, { status })`, so the nearest `ErrorBoundary` renders 401/403/404/5xx pages with the right HTTP status.
 - `routeAction(args, run)` returns `{ ok: true, result }`, or `data({ ok: false, failure, retryAfter, status }, { status })` for an `ApiError`. Other errors propagate. `routeLazyLoader(args, run)` answers a loader that a fetcher loads the same way.
 - `idParam(value)` parses positive integer ids and throws 404 otherwise.
+- A list with pages keeps its page in the `page` parameter, and one tool reads it and guards it (`~/shared/route/paging`): `requestedPage(request)` gives the page (the first for anything unreadable), and after the use-case answered, `keepWithinPages(request, total, pageSize)` redirects a page past the end to the last one, keeping the rest of the address. In the component, `usePageTurn()` (`~/shared/route/use-page-turn`) gives `turnTo(page)`, which changes only the page of the current address, and `turning`, true while the same path reloads; they go to `DataList`'s `onPageChange` and `loading`. A list whose address holds more than the page and shows the change before it loads (the library, the uploads page) builds its own address hook and still uses `keepWithinPages`. The pure parts, `lastPage(total, pageSize)` and `searchAtPage(search, page)`, live in `~/shared/http/paging`.
 
 ## Fetchers
 

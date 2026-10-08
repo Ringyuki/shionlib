@@ -74,10 +74,6 @@ export function atInbox(pathname: string, locale: Locale): boolean {
   return pathname === root || pathname.startsWith(`${root}/`)
 }
 
-export function lastPage(total: number): number {
-  return Math.max(1, Math.ceil(total / pageSize))
-}
-
 export function linkTarget(
   locale: Locale,
   message: Pick<MessageDetail, 'link_url' | 'external_link'>,

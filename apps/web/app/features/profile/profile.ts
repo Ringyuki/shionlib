@@ -30,14 +30,6 @@ export function uploadPath(locale: Locale, upload: Placed): string {
   return `${gamePath(locale, upload.game.id)}#resource-${upload.id}`
 }
 
-export function uploadsSearch(page: number): string {
-  return page > 1 ? `?${new URLSearchParams({ page: String(page) })}` : ''
-}
-
-export function lastPage(total: number): number {
-  return Math.max(1, Math.ceil(total / uploadsPageSize))
-}
-
 export function otherFiles(upload: Pick<Upload, 'files_count'>): number {
   return Math.max(0, upload.files_count - 1)
 }

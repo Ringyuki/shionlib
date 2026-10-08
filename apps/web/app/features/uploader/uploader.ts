@@ -162,10 +162,6 @@ export function heldSince<Token>(
   return next
 }
 
-export function lastPage(total: number): number {
-  return Math.max(1, Math.ceil(total / pageSize))
-}
-
 export function listingSearch(listing: Listing): string {
   const params = new URLSearchParams()
   if (listing.stage !== undefined) {

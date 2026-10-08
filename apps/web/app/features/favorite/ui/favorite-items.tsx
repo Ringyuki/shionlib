@@ -10,11 +10,12 @@ import {
 } from '@hina-ui/react'
 import { BookmarkMinus, Ellipsis, NotebookPen } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { Link as RouterLink, useLocation, useNavigate, useNavigation } from 'react-router'
+import { Link as RouterLink } from 'react-router'
 import { useFormatter, useLocale, useTranslations } from 'use-intl'
 import { developerNames, gamePath, gameTitle, primaryCover } from '~/features/game'
+import { usePageTurn } from '~/shared/route/use-page-turn'
 import { Button } from '~/shared/ui/button'
-import { itemsPageSize, itemsSearch, type FavoriteItem, type Favorites } from '../favorite'
+import { itemsPageSize, type FavoriteItem, type Favorites } from '../favorite'
 import { useItemRemoval } from '../use-item-removal'
 
 type FavoriteItemsProps = {
@@ -29,12 +30,8 @@ export function FavoriteItems({ favorites, listId, own, header, onEditNote }: Fa
   const t = useTranslations('favorite')
   const locale = useLocale()
   const format = useFormatter()
-  const navigate = useNavigate()
-  const navigation = useNavigation()
-  const location = useLocation()
+  const pages = usePageTurn()
   const removal = useItemRemoval(listId)
-  const turning =
-    navigation.state === 'loading' && navigation.location.pathname === location.pathname
   const remove = async (item: FavoriteItem) => {
     const outcome = await removal.remove(item)
     if (outcome.ok) {
@@ -54,8 +51,8 @@ export function FavoriteItems({ favorites, listId, own, header, onEditNote }: Fa
       total={favorites.total}
       page={favorites.page}
       pageSize={itemsPageSize}
-      onPageChange={page => void navigate({ search: itemsSearch(page) })}
-      loading={turning || removal.pending}
+      onPageChange={pages.turnTo}
+      loading={pages.turning || removal.pending}
       renderHeader={() => header}
       renderMedia={({ item }) => (
         <Image src={primaryCover(item.game)?.url} alt="" fit="cover" className="size-full" />

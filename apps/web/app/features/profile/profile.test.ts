@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { lastPage, otherFiles, profilePath, tabAt, uploadPath, uploadsSearch } from './profile'
+import { otherFiles, profilePath, tabAt, uploadPath } from './profile'
 
 describe('profilePath', () => {
   it('opens the uploads tab at the profile itself', () => {
@@ -20,13 +20,6 @@ describe('tabAt', () => {
 describe('uploads', () => {
   it('leads to the resource on the page of its game', () => {
     expect(uploadPath('zh', { id: 12, game: { id: 5 } })).toBe('/zh/game/5#resource-12')
-  })
-
-  it('keeps the first page out of the address', () => {
-    expect(uploadsSearch(1)).toBe('')
-    expect(uploadsSearch(2)).toBe('?page=2')
-    expect(lastPage(0)).toBe(1)
-    expect(lastPage(25)).toBe(2)
   })
 
   it('counts the files beside the one that is named', () => {

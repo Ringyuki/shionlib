@@ -143,10 +143,6 @@ export function listQuery(address: LibraryAddress): ApiQuery<'/game/list', 'get'
   }
 }
 
-export function lastPage(total: number): number {
-  return Math.max(1, Math.ceil(total / pageSize))
-}
-
 export function listsOnlyDownloadable(address: Pick<LibraryAddress, 'sort'>): boolean {
   return address.sort === 'resource_updated'
 }

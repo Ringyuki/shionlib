@@ -1,7 +1,8 @@
-import { data, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
-import { idParam, optionalIdParam, pageParam } from '~/shared/route/params'
+import { data, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import { keepWithinPages, requestedPage } from '~/shared/route/paging'
+import { idParam, optionalIdParam } from '~/shared/route/params'
 import { readCommand, routeAction, routeLazyLoader, routeLoader } from '~/shared/route/route.server'
-import { itemsSearch, lastPage } from './favorite'
+import { itemsPageSize } from './favorite'
 import {
   listCreationCommand,
   listEditCommand,
@@ -27,15 +28,12 @@ export function favoriteListsLoader(args: LoaderFunctionArgs) {
 export async function favoritesLoader(args: LoaderFunctionArgs) {
   const owner = idParam(args.params.id)
   const listId = optionalIdParam(args.params.listId)
-  const url = new URL(args.request.url)
-  const page = pageParam(url.searchParams.get('page'))
+  const page = requestedPage(args.request)
   const favorites = await routeLoader(args, api => loadFavorites(api, owner, listId, page))
   if (listId !== undefined && favorites.selected === undefined) {
     throw data(null, { status: 404 })
   }
-  if (page > lastPage(favorites.total)) {
-    throw redirect(`${url.pathname}${itemsSearch(lastPage(favorites.total))}`)
-  }
+  keepWithinPages(args.request, favorites.total, itemsPageSize)
   return favorites
 }
 
