@@ -67,7 +67,7 @@ func (t *Transactor) AfterCommit(ctx context.Context, fn func(ctx context.Contex
 			if err := next.Commit(commitCtx, committed); err != nil {
 				return err
 			}
-			fn(context.WithoutCancel(ctx))
+			fn(context.WithoutCancel(ent.NewTxContext(ctx, nil)))
 			return nil
 		})
 	})

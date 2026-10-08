@@ -21,6 +21,13 @@ func TestTransactorCommitsRollsBackAndRunsAfterCommitHooks(t *testing.T) {
 			return err
 		}
 		tx.AfterCommit(ctx, func(context.Context) { fired = append(fired, "commit") })
+		tx.AfterCommit(ctx, func(after context.Context) {
+			got, err := postgres.Client(after, db.Ent).User.Get(after, user)
+			if err != nil || got.Bio == nil || *got.Bio != "committed" {
+				t.Errorf("a hook reads what was committed, outside the finished transaction: %+v %v", got, err)
+			}
+			fired = append(fired, "read")
+		})
 		return tx.WithinTransaction(ctx, func(ctx context.Context) error {
 			tx.AfterCommit(ctx, func(context.Context) { fired = append(fired, "nested") })
 			if len(fired) != 0 {
@@ -32,8 +39,8 @@ func TestTransactorCommitsRollsBackAndRunsAfterCommitHooks(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(fired) != 2 {
-		t.Fatalf("expected both hooks after commit, got %v", fired)
+	if len(fired) != 3 {
+		t.Fatalf("expected every hook after commit, got %v", fired)
 	}
 	if got := db.Ent.User.GetX(ctx, user); got.Bio == nil || *got.Bio != "committed" {
 		t.Fatalf("update was not committed: %+v", got.Bio)
