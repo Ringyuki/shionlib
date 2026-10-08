@@ -1,5 +1,4 @@
 import {
-  Alert,
   Button,
   Checkbox,
   Form,
@@ -15,7 +14,7 @@ import { useLocale, useTranslations } from 'use-intl'
 import { firstIssueMessage } from '~/shared/form/check'
 import { lengthOf } from '~/shared/form/form-kit'
 import { useFormKit } from '~/shared/form/use-form-kit'
-import { useSubmissionFeedback } from '~/shared/form/use-submission-feedback'
+import { useFormErrors } from '~/shared/form/use-form-errors'
 import { codeLength, type AuthView } from '../auth'
 import { codeRequestForm, signUpForm, type SignUpValues } from '../auth.schema'
 import { useSignUp } from '../use-sign-up'
@@ -29,7 +28,7 @@ export function SignUpFormView({ onSwitch }: { onSwitch: (view: AuthView) => voi
   const signUp = useSignUp(locale)
   const issue = useTranslations('auth.issue')
   const kit = useFormKit()
-  const { form, message } = useSubmissionFeedback(signUp.failure ?? signUp.codeFailure)
+  const form = useFormErrors(signUp.failure ?? signUp.codeFailure)
 
   const sendCode = () => {
     const problem = firstIssueMessage(codeRequestForm(kit), { email: values.email })
@@ -45,7 +44,7 @@ export function SignUpFormView({ onSwitch }: { onSwitch: (view: AuthView) => voi
       form.current?.setErrors({ code: t('codeFirst') })
       return
     }
-    await signUp.submit(values)
+    await signUp.run(values)
   }
 
   const codeHint = signUp.sentTo === undefined ? undefined : t('codeSent', { email: signUp.sentTo })
@@ -115,9 +114,6 @@ export function SignUpFormView({ onSwitch }: { onSwitch: (view: AuthView) => voi
               {t('adult')}
             </Checkbox>
           </FormField>
-          <Alert tone="danger" open={message !== undefined}>
-            {message}
-          </Alert>
           <Button type="submit" loading={submitting} block>
             {t('submit')}
           </Button>

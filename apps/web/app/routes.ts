@@ -28,18 +28,20 @@ export default [
     route('login', 'routes/auth-redirect.ts', { id: 'login' }),
     route('register', 'routes/auth-redirect.ts', { id: 'register' }),
     layout('routes/site.tsx', [
-      index('routes/home.tsx'),
-      route('user/password/forget', 'routes/password-reset.tsx'),
-      route('search', 'routes/search.tsx'),
-      route('upload', 'routes/upload.tsx'),
-      route('user/uploads', 'routes/uploads.tsx'),
-      route('search/game', 'routes/search-legacy.ts'),
-      route('game/:id', 'routes/game.tsx', [
-        index('routes/game.resources.tsx'),
-        route('info', 'routes/game.info.tsx'),
-        route('characters', 'routes/game.characters.tsx'),
+      layout('routes/pages.tsx', [
+        index('routes/home.tsx'),
+        route('user/password/forget', 'routes/password-reset.tsx'),
+        route('search', 'routes/search.tsx'),
+        route('upload', 'routes/upload.tsx'),
+        route('user/uploads', 'routes/uploads.tsx'),
+        route('search/game', 'routes/search-legacy.ts'),
+        route('game/:id', 'routes/game.tsx', [
+          index('routes/game.resources.tsx'),
+          route('info', 'routes/game.info.tsx'),
+          route('characters', 'routes/game.characters.tsx'),
+        ]),
+        route('*', 'routes/not-found.ts'),
       ]),
-      route('*', 'routes/not-found.ts'),
     ]),
   ]),
 ] satisfies RouteConfig

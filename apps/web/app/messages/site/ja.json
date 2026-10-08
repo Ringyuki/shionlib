@@ -13,5 +13,7 @@
   "catalogSource": "作品データ提供",
   "catalogEntry": "Hikarinagi で作品を見る",
   "catalogCorrection": "情報に誤りや不足がありますか？",
-  "catalogEdit": "Hikarinagi で編集"
+  "catalogEdit": "Hikarinagi で編集",
+  "retryAfter": "{message}。{seconds} 秒後に再試行してください",
+  "retry": "再試行"
 }

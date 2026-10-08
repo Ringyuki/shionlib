@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { accounts, openSignIn, password, signIn } from './support/accounts'
+import { expectNotice } from './support/notices'
 
 test('signs in from the dialog and signs out from the account menu', async ({ page }) => {
   await openSignIn(page)
@@ -17,7 +18,7 @@ test('keeps the dialog open and explains a wrong password', async ({ page }) => 
   await dialog.getByLabel('用户名或邮箱').fill(accounts.member)
   await dialog.locator('input[type="password"]').fill(`${password}-wrong`)
   await dialog.getByRole('button', { name: '登录', exact: true }).click()
-  await expect(dialog.getByRole('alert')).toBeVisible()
+  await expectNotice(page, '无效的密码')
   await expect(dialog).toBeVisible()
 })
 

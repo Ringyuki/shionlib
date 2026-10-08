@@ -71,6 +71,13 @@ const mountedFeedback = {
     'Feedback stays mounted: show and hide an Alert with `open`; a Callout is static content and is never toggled.',
 }
 
+const directFetcher = {
+  selector:
+    ":not(CallExpression[callee.name=/^use(Command|LazyLoad)$/]) > CallExpression[callee.name='useFetcher']",
+  message:
+    'A fetcher is used only through useCommand or useLazyLoad (~/shared/route): pass useFetcher<typeof handler>() to one of them. They report a refusal themselves, so no call site decides how a failed request is shown.',
+}
+
 const otherValidators = ['zod', 'yup', 'joi', 'ajv', 'superstruct', 'io-ts', 'arktype'].map(
   name => ({
     name,
@@ -207,6 +214,7 @@ export default defineConfig([
         nativeTooltip,
         mountedFeedback,
         hinaInternals,
+        directFetcher,
       ],
       '@typescript-eslint/consistent-type-assertions': ['error', { assertionStyle: 'never' }],
       '@typescript-eslint/consistent-type-imports': 'error',

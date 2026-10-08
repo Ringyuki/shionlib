@@ -12,5 +12,6 @@ export async function <thing>Action(args: ActionFunctionArgs) {
 ```
 
 4. Resource route `app/routes/resources.<name>.ts` re-exporting it as `action` (and a `loader` if the hook loads data), registered in `app/routes.ts` as `resources/<name>`.
-5. Hook `use-<purpose>.ts`: `useFetcher<typeof <thing>Action>()`, submit a `<Thing>` with `encType: 'application/json'` to `href('/resources/<name>')`, derive optimistic state from `parseOptional(<thing>Command, fetcher.json)`, expose `failure` from `fetcher.data`.
-6. Component calls the hook; show `failure.message` (already localized) in an `<Alert open>` or, for a form, through `useSubmissionFeedback` (`recipes/add-form.md`).
+   A loader in a resource route answers with `routeLazyLoader`.
+5. Hook `use-<purpose>.ts`: `const command = useCommand(useFetcher<typeof <thing>Action>(), href('/resources/<name>'))`; expose a typed `run: (change: <Thing>) => command.run(change)` and derive optimistic state from `parseOptional(<thing>Command, command.payload)`.
+6. Component calls the hook and says what happens on success (`const outcome = await run(...)`, then `outcome.ok`). It shows nothing for a failure: the request tool does (`references/data.md`).

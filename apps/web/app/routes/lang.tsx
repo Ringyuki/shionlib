@@ -6,6 +6,7 @@ import { loadMessages } from '~/messages'
 import type { Locale } from '~/shared/i18n/locale'
 import { isLocale } from '~/shared/i18n/locale.schema'
 import { siteTimeZone } from '~/shared/i18n/site-time'
+import { KeptData } from '~/shared/route/kept-data'
 import { ErrorPage } from '~/shared/ui/error-page'
 import type { Route } from './+types/lang'
 
@@ -25,6 +26,7 @@ export function shouldRevalidate({ currentParams, nextParams }: ShouldRevalidate
 export default function LangLayout({ loaderData }: Route.ComponentProps) {
   return (
     <LocaleProviders locale={loaderData.locale} messages={loaderData.messages}>
+      <KeptData />
       <Outlet />
     </LocaleProviders>
   )

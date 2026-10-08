@@ -1,12 +1,12 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from 'react-router'
 import { idParam } from '~/shared/route/params'
-import { readCommand, routeAction, routeLoader } from '~/shared/route/route.server'
+import { readCommand, routeAction, routeLazyLoader } from '~/shared/route/route.server'
 import { listCreationCommand, membershipChangeCommand } from './favorite.schema'
 import { changeMembership, createListWithGame, loadFavoriteLists } from './favorite.use-cases'
 
 export function favoriteListsLoader(args: LoaderFunctionArgs) {
   const gameId = idParam(new URL(args.request.url).searchParams.get('game_id') ?? undefined)
-  return routeLoader(args, api => loadFavoriteLists(api, gameId))
+  return routeLazyLoader(args, api => loadFavoriteLists(api, gameId))
 }
 
 export async function favoriteMembershipAction(args: ActionFunctionArgs) {

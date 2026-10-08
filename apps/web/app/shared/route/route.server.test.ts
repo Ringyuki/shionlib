@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { ApiError } from '~/shared/api/error'
 import { fakeApi } from '~/shared/api/testing'
 import { apiContext } from './api.server'
-import { readCommand, routeAction, routeLoader } from './route.server'
+import { readCommand, routeAction, routeLazyLoader, routeLoader } from './route.server'
 
 const failure = {
   code: 460103,
@@ -55,6 +55,22 @@ describe('routeAction', () => {
 
   it('wraps successful results', async () => {
     await expect(routeAction(args(), async () => 3)).resolves.toEqual({ ok: true, result: 3 })
+  })
+})
+
+describe('routeLazyLoader', () => {
+  it('answers with the failure instead of an error response, so the page that asked stays', async () => {
+    const result = await routeLazyLoader(args(), async () => {
+      throw new ApiError(503, failure)
+    })
+    expect(result).toMatchObject({ init: { status: 503 }, data: { ok: false, failure } })
+  })
+
+  it('wraps what was loaded', async () => {
+    await expect(routeLazyLoader(args(), async () => [1])).resolves.toEqual({
+      ok: true,
+      result: [1],
+    })
   })
 })
 

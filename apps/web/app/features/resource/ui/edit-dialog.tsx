@@ -1,7 +1,7 @@
-import { Alert, Dialog, Form, toast } from '@hina-ui/react'
+import { Dialog, Form, toast } from '@hina-ui/react'
 import { useTranslations } from 'use-intl'
 import { useFormKit } from '~/shared/form/use-form-kit'
-import { useDialogFeedback } from '~/shared/form/use-submission-feedback'
+import { useFormErrors } from '~/shared/form/use-form-errors'
 import { Button } from '~/shared/ui/button'
 import { useOpenState } from '~/shared/ui/use-open-state'
 import type { Resource } from '../resource'
@@ -20,11 +20,8 @@ export function EditDialog({ resource, open, onOpenChange }: EditDialogProps) {
   const issue = useTranslations('resource.issue')
   const kit = useFormKit()
   const [values, setValues] = useOpenState<EditValues>(open, () => editValuesFrom(resource))
-  const edit = useEditResource(() => {
-    onOpenChange(false)
-    toast.success(t('saved'))
-  })
-  const { form, message } = useDialogFeedback(open, edit.failure)
+  const edit = useEditResource()
+  const form = useFormErrors(edit.failure)
   return (
     <Dialog
       title={t('editTitle')}
@@ -36,12 +33,15 @@ export function EditDialog({ resource, open, onOpenChange }: EditDialogProps) {
           ref={form}
           values={values}
           rules={editForm(kit, issue)}
-          onSubmit={() => edit.submit({ resourceId: resource.id, ...values })}
+          onSubmit={async () => {
+            const outcome = await edit.run({ resourceId: resource.id, ...values })
+            if (outcome.ok) {
+              onOpenChange(false)
+              toast.success(t('saved'))
+            }
+          }}
         >
           <ResourceFields values={values} onValuesChange={setValues} />
-          <Alert tone="danger" open={message !== undefined}>
-            {message}
-          </Alert>
         </Form>
       )}
       renderFooter={({ close }) => (

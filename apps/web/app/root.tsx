@@ -21,6 +21,7 @@ import { readServerEnv } from '~/shared/config/env.server'
 import { PublicConfigProvider } from '~/shared/config/public-config'
 import { htmlLang } from '~/shared/i18n/locale.schema'
 import { apiMiddleware } from '~/shared/route/api.server'
+import { answerEveryRequest } from '~/shared/route/client-middleware'
 import { imageResolver } from '~/shared/ui/image-resolver'
 import { darkClass, systemThemeScript } from '~/shared/ui/theme'
 import { themeFrom } from '~/shared/ui/theme.schema'
@@ -29,6 +30,8 @@ import type { Route } from './+types/root'
 import './app.css'
 
 export const middleware: Route.MiddlewareFunction[] = [apiMiddleware]
+
+export const clientMiddleware: Route.ClientMiddlewareFunction[] = [answerEveryRequest]
 
 export function loader({ request }: Route.LoaderArgs) {
   return {

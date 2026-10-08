@@ -1,7 +1,8 @@
 import { toast } from '@hina-ui/react'
-import { useEffect, useEffectEvent, useState } from 'react'
+import { useState } from 'react'
 import { href, useFetcher } from 'react-router'
 import { useTranslations } from 'use-intl'
+import { useCommand } from '~/shared/route/use-command'
 import { pushToAria2 } from '~/shared/vendor/aria2'
 import type { TurnstileFailure } from '~/shared/vendor/turnstile'
 import { validMinutes, type DownloadIntent } from './download'
@@ -22,7 +23,11 @@ type Link = {
 export function useDownload(file: DownloadFile) {
   const t = useTranslations('download')
   const settings = useDownloadSettings()
-  const fetcher = useFetcher<typeof downloadLinkAction>()
+  const issue = useCommand(
+    useFetcher<typeof downloadLinkAction>(),
+    href('/resources/download/link'),
+    { revalidate: false },
+  )
   const [intent, setIntent] = useState<DownloadIntent | undefined>(undefined)
   const [verifying, setVerifying] = useState(false)
 
@@ -36,15 +41,23 @@ export function useDownload(file: DownloadFile) {
     setIntent(undefined)
   }
 
-  const verified = (token: string) => {
+  const verified = async (token: string) => {
     setVerifying(false)
+    const chosen = intent
     const request: IssueLink = { fileId: file.id, token }
-    void fetcher.submit(request, {
-      method: 'post',
-      action: href('/resources/download/link'),
-      encType: 'application/json',
-      defaultShouldRevalidate: false,
-    })
+    const outcome = await issue.run(request)
+    if (!outcome.ok) {
+      return
+    }
+    const { file_url: url, expires_in: expiry } = outcome.result
+    const link = { url, minutes: validMinutes(expiry) }
+    if (chosen === 'copy') {
+      void copy(link)
+    } else if (chosen === 'aria2') {
+      void pushToDownloader(link)
+    } else {
+      openInBrowser(link)
+    }
   }
 
   const failed = (failure: TurnstileFailure) => {
@@ -85,38 +98,10 @@ export function useDownload(file: DownloadFile) {
     }
   }
 
-  const settled = fetcher.state === 'idle' ? fetcher.data : undefined
-
-  const deliver = useEffectEvent((result: NonNullable<typeof settled>) => {
-    const chosen = intent
-    if (!result.ok) {
-      toast.danger(
-        result.retryAfter === undefined
-          ? result.failure.message
-          : t('retryAfter', { message: result.failure.message, seconds: result.retryAfter }),
-      )
-      return
-    }
-    const link = { url: result.result.file_url, minutes: validMinutes(result.result.expires_in) }
-    if (chosen === 'copy') {
-      void copy(link)
-    } else if (chosen === 'aria2') {
-      void pushToDownloader(link)
-    } else {
-      openInBrowser(link)
-    }
-  })
-
-  useEffect(() => {
-    if (settled !== undefined) {
-      deliver(settled)
-    }
-  }, [settled])
-
   return {
     preferred: settings.method,
     verifying,
-    busy: verifying || fetcher.state !== 'idle',
+    busy: verifying || issue.pending,
     start,
     cancel,
     verified,

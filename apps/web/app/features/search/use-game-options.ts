@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { href, useFetcher } from 'react-router'
+import { useLazyLoad } from '~/shared/route/use-lazy-load'
 import { normalizeQuery, searchDelayMs } from './search'
 import type { gameOptionsLoader, recentReleasesLoader } from './search.server'
 
 export function useGameOptions() {
-  const found = useFetcher<typeof gameOptionsLoader>()
-  const recent = useFetcher<typeof recentReleasesLoader>()
+  const found = useLazyLoad(useFetcher<typeof gameOptionsLoader>())
+  const recent = useLazyLoad(useFetcher<typeof recentReleasesLoader>())
   const [search, setSearch] = useState('')
   const query = normalizeQuery(search)
   const { load: find } = found
@@ -27,8 +28,8 @@ export function useGameOptions() {
     search,
     setSearch,
     searching: query !== '',
-    found: query === '' ? [] : (found.data ?? []),
-    recent: recent.data,
-    loading: (query === '' ? recent : found).state === 'loading',
+    found: query === '' ? [] : (found.result ?? []),
+    recent: recent.result,
+    loading: (query === '' ? recent : found).loading,
   }
 }

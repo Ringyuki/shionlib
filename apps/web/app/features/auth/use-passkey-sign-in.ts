@@ -1,17 +1,24 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 import { href, useFetcher } from 'react-router'
+import { useCommand } from '~/shared/route/use-command'
 import type { passkeyOptionsAction, passkeySignInAction } from './auth.server'
 import { assertPasskey, passkeysSupported } from './webauthn'
 
 export type PasskeyProblem = 'unsupported' | 'cancelled'
 
 export function usePasskeySignIn() {
-  const options = useFetcher<typeof passkeyOptionsAction>()
-  const verify = useFetcher<typeof passkeySignInAction>()
+  const options = useCommand(
+    useFetcher<typeof passkeyOptionsAction>(),
+    href('/resources/auth/passkey-options'),
+  )
+  const verify = useCommand(
+    useFetcher<typeof passkeySignInAction>(),
+    href('/resources/auth/passkey-sign-in'),
+  )
   const [problem, setProblem] = useState<PasskeyProblem>()
   const [settledFlow, setSettledFlow] = useState<string>()
-  const flow = options.data?.ok === true ? options.data.result : undefined
-  const submitAssertion = verify.submit
+  const flow = options.settled?.ok === true ? options.settled.result : undefined
+  const submitAssertion = useEffectEvent(verify.run)
 
   useEffect(() => {
     if (flow === undefined) {
@@ -28,14 +35,7 @@ export function usePasskeySignIn() {
             setProblem('cancelled')
             return
           }
-          void submitAssertion(
-            { flowId: flow.flowId, credential: JSON.stringify(credential) },
-            {
-              method: 'post',
-              action: href('/resources/auth/passkey-sign-in'),
-              encType: 'application/json',
-            },
-          )
+          void submitAssertion({ flowId: flow.flowId, credential: JSON.stringify(credential) })
         },
         () => {
           if (active) {
@@ -51,7 +51,7 @@ export function usePasskeySignIn() {
     return () => {
       active = false
     }
-  }, [flow, submitAssertion])
+  }, [flow])
 
   const start = () => {
     setProblem(undefined)
@@ -59,30 +59,13 @@ export function usePasskeySignIn() {
       setProblem('unsupported')
       return
     }
-    void options.submit(
-      {},
-      {
-        method: 'post',
-        action: href('/resources/auth/passkey-options'),
-        encType: 'application/json',
-      },
-    )
+    void options.run({})
   }
-
-  const failure =
-    verify.data?.ok === false
-      ? verify.data.failure
-      : options.data?.ok === false
-        ? options.data.failure
-        : undefined
 
   return {
     start,
     pending:
-      options.state !== 'idle' ||
-      verify.state !== 'idle' ||
-      (flow !== undefined && settledFlow !== flow.flowId),
+      options.pending || verify.pending || (flow !== undefined && settledFlow !== flow.flowId),
     problem,
-    failure,
   }
 }

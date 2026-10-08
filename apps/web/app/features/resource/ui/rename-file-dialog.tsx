@@ -1,7 +1,7 @@
-import { Alert, Dialog, Form, FormField, Input, toast } from '@hina-ui/react'
+import { Dialog, Form, FormField, Input, toast } from '@hina-ui/react'
 import { useTranslations } from 'use-intl'
 import { useFormKit } from '~/shared/form/use-form-kit'
-import { useDialogFeedback } from '~/shared/form/use-submission-feedback'
+import { useFormErrors } from '~/shared/form/use-form-errors'
 import { Button } from '~/shared/ui/button'
 import { useOpenState } from '~/shared/ui/use-open-state'
 import type { ResourceFile } from '../resource'
@@ -20,11 +20,8 @@ export function RenameFileDialog({ file, open, onOpenChange }: RenameFileDialogP
   const [values, setValues] = useOpenState<RenameFileValues>(open, () => ({
     name: file.file_name,
   }))
-  const rename = useRenameFile(() => {
-    onOpenChange(false)
-    toast.success(t('fileRenamed'))
-  })
-  const { form, message } = useDialogFeedback(open, rename.failure)
+  const rename = useRenameFile()
+  const form = useFormErrors(rename.failure)
   return (
     <Dialog
       title={t('renameFileTitle')}
@@ -36,14 +33,17 @@ export function RenameFileDialog({ file, open, onOpenChange }: RenameFileDialogP
           ref={form}
           values={values}
           rules={renameFileForm(kit)}
-          onSubmit={() => rename.submit({ fileId: file.id, name: values.name })}
+          onSubmit={async () => {
+            const outcome = await rename.run({ fileId: file.id, name: values.name })
+            if (outcome.ok) {
+              onOpenChange(false)
+              toast.success(t('fileRenamed'))
+            }
+          }}
         >
           <FormField name="name" label={t('fileName')} required>
             <Input value={values.name} onValueChange={name => setValues({ name })} />
           </FormField>
-          <Alert tone="danger" open={message !== undefined}>
-            {message}
-          </Alert>
         </Form>
       )}
       renderFooter={({ close }) => (

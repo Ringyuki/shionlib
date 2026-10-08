@@ -1,7 +1,16 @@
-import { href } from 'react-router'
+import { href, useFetcher } from 'react-router'
+import { useCommand } from '~/shared/route/use-command'
 import type { ResourceEdit } from './resource.schema'
-import { useResourceCommand } from './use-resource-command'
+import type { editResourceAction } from './resource.server'
 
-export function useEditResource(onDone: () => void) {
-  return useResourceCommand<ResourceEdit>(href('/resources/resource/edit'), { onDone })
+export function useEditResource() {
+  const command = useCommand(
+    useFetcher<typeof editResourceAction>(),
+    href('/resources/resource/edit'),
+  )
+  return {
+    ...command,
+    run: (edit: ResourceEdit) => command.run(edit),
+    confirm: (edit: ResourceEdit) => command.confirm(edit),
+  }
 }

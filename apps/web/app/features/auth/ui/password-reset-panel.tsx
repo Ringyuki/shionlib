@@ -1,5 +1,4 @@
 import {
-  Alert,
   Button,
   Form,
   FormField,
@@ -13,7 +12,7 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { useTranslations } from 'use-intl'
 import { useFormKit } from '~/shared/form/use-form-kit'
-import { useSubmissionFeedback } from '~/shared/form/use-submission-feedback'
+import { useFormErrors } from '~/shared/form/use-form-errors'
 import { authViewParam } from '../auth'
 import { passwordResetForm, type PasswordResetValues } from '../auth.schema'
 import { usePasswordReset } from '../use-password-reset'
@@ -61,7 +60,7 @@ function ResetForm({ token, email }: { token: string; email: string }) {
   const reset = usePasswordReset()
   const issue = useTranslations('auth.issue')
   const kit = useFormKit()
-  const { form, message } = useSubmissionFeedback(reset.failure)
+  const form = useFormErrors(reset.failure)
 
   if (reset.done) {
     return (
@@ -82,7 +81,7 @@ function ResetForm({ token, email }: { token: string; email: string }) {
       ref={form}
       values={values}
       rules={passwordResetForm(kit, issue)}
-      onSubmit={() => reset.submit({ token, email, password: values.password })}
+      onSubmit={() => reset.run({ token, email, password: values.password })}
     >
       {({ submitting }) => (
         <>
@@ -101,9 +100,6 @@ function ResetForm({ token, email }: { token: string; email: string }) {
               autoComplete="new-password"
             />
           </FormField>
-          <Alert tone="danger" open={message !== undefined}>
-            {message}
-          </Alert>
           <Button type="submit" loading={submitting} block>
             {t('submit')}
           </Button>

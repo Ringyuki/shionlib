@@ -1,5 +1,5 @@
 import { data, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
-import { readCommand, routeAction, routeLoader } from '~/shared/route/route.server'
+import { readCommand, routeAction, routeLazyLoader, routeLoader } from '~/shared/route/route.server'
 import {
   deleteCommand,
   editCommand,
@@ -24,7 +24,7 @@ export function fileHistoryLoader(args: LoaderFunctionArgs) {
   if (fileId === undefined) {
     throw data(null, { status: 400 })
   }
-  return routeLoader(args, api => loadFileHistory(api, fileId))
+  return routeLazyLoader(args, api => loadFileHistory(api, fileId))
 }
 
 export function uploadPageLoader(args: LoaderFunctionArgs) {
@@ -33,7 +33,7 @@ export function uploadPageLoader(args: LoaderFunctionArgs) {
 }
 
 export function allowanceLoader(args: LoaderFunctionArgs) {
-  return routeLoader(args, loadAllowance)
+  return routeLazyLoader(args, loadAllowance)
 }
 
 export async function reportResourceAction(args: ActionFunctionArgs) {

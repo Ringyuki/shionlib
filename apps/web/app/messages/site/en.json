@@ -13,5 +13,7 @@
   "catalogSource": "Catalog data from",
   "catalogEntry": "View the entry on Hikarinagi",
   "catalogCorrection": "Something wrong or missing?",
-  "catalogEdit": "Edit it on Hikarinagi"
+  "catalogEdit": "Edit it on Hikarinagi",
+  "retryAfter": "{message}. Try again in {seconds} s",
+  "retry": "Try again"
 }

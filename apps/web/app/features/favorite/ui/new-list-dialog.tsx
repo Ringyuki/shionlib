@@ -1,8 +1,8 @@
-import { Alert, Checkbox, Dialog, Form, FormField, Input, Textarea, toast } from '@hina-ui/react'
+import { Checkbox, Dialog, Form, FormField, Input, Textarea, toast } from '@hina-ui/react'
 import { useTranslations } from 'use-intl'
 import { lengthOf } from '~/shared/form/form-kit'
 import { useFormKit } from '~/shared/form/use-form-kit'
-import { useDialogFeedback } from '~/shared/form/use-submission-feedback'
+import { useFormErrors } from '~/shared/form/use-form-errors'
 import { Button } from '~/shared/ui/button'
 import { useOpenState } from '~/shared/ui/use-open-state'
 import { listCreationForm, type ListCreationValues } from '../favorite.schema'
@@ -20,11 +20,8 @@ export function NewListDialog({ gameId, open, onOpenChange }: NewListDialogProps
   const t = useTranslations('favorite')
   const kit = useFormKit()
   const [values, setValues] = useOpenState(open, () => blank)
-  const creation = useCreateList(name => {
-    onOpenChange(false)
-    toast.success(t('created', { name }))
-  })
-  const { form, message } = useDialogFeedback(open, creation.failure)
+  const creation = useCreateList()
+  const form = useFormErrors(creation.failure)
   return (
     <Dialog
       title={t('newList')}
@@ -37,7 +34,13 @@ export function NewListDialog({ gameId, open, onOpenChange }: NewListDialogProps
           ref={form}
           values={values}
           rules={listCreationForm(kit)}
-          onSubmit={() => creation.submit({ gameId, ...values })}
+          onSubmit={async () => {
+            const outcome = await creation.run({ gameId, ...values })
+            if (outcome.ok) {
+              onOpenChange(false)
+              toast.success(t('created', { name: outcome.result.name }))
+            }
+          }}
         >
           <FormField
             name="name"
@@ -75,9 +78,6 @@ export function NewListDialog({ gameId, open, onOpenChange }: NewListDialogProps
               {t('makePrivate')}
             </Checkbox>
           </FormField>
-          <Alert tone="danger" open={message !== undefined}>
-            {message}
-          </Alert>
         </Form>
       )}
       renderFooter={({ close }) => (

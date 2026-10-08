@@ -1,20 +1,16 @@
 import { href, useFetcher } from 'react-router'
+import { useCommand } from '~/shared/route/use-command'
 import type { EmailOnly } from './auth.schema'
 import type { passwordResetRequestAction } from './auth.server'
 
 export function usePasswordResetRequest() {
-  const fetcher = useFetcher<typeof passwordResetRequestAction>()
-  const submit = (request: EmailOnly) =>
-    fetcher.submit(request, {
-      method: 'post',
-      action: href('/resources/auth/password-reset'),
-      encType: 'application/json',
-    })
-  const done = fetcher.state === 'idle' && fetcher.data?.ok === true
+  const command = useCommand(
+    useFetcher<typeof passwordResetRequestAction>(),
+    href('/resources/auth/password-reset'),
+  )
   return {
-    submit,
-    pending: fetcher.state !== 'idle',
-    failure: fetcher.data?.ok === false ? fetcher.data.failure : undefined,
-    done,
+    ...command,
+    run: (request: EmailOnly) => command.run(request),
+    done: command.settled?.ok === true,
   }
 }

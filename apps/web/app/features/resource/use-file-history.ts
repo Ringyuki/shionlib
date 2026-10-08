@@ -1,10 +1,11 @@
 import { useCallback } from 'react'
 import { href, useFetcher } from 'react-router'
+import { useLazyLoad } from '~/shared/route/use-lazy-load'
 import type { fileHistoryLoader } from './resource.server'
 
 export function useFileHistory(fileId: number) {
-  const fetcher = useFetcher<typeof fileHistoryLoader>()
-  const { load: fetch } = fetcher
+  const history = useLazyLoad(useFetcher<typeof fileHistoryLoader>())
+  const { load: fetch } = history
   const load = useCallback(
     () =>
       void fetch(
@@ -12,5 +13,5 @@ export function useFileHistory(fileId: number) {
       ),
     [fetch, fileId],
   )
-  return { history: fetcher.data, loading: fetcher.state !== 'idle', load }
+  return { history: history.result, loading: history.loading, load }
 }

@@ -1,10 +1,19 @@
-import { href } from 'react-router'
+import { href, useFetcher } from 'react-router'
+import { useCommand } from '~/shared/route/use-command'
 import type { ResourceReport } from './resource.schema'
-import { useResourceCommand } from './use-resource-command'
+import type { reportResourceAction } from './resource.server'
 
-export function useReportResource(onDone: () => void) {
-  return useResourceCommand<ResourceReport>(href('/resources/resource/report'), {
-    onDone,
-    revalidate: false,
-  })
+export function useReportResource() {
+  const command = useCommand(
+    useFetcher<typeof reportResourceAction>(),
+    href('/resources/resource/report'),
+    {
+      revalidate: false,
+    },
+  )
+  return {
+    ...command,
+    run: (report: ResourceReport) => command.run(report),
+    confirm: (report: ResourceReport) => command.confirm(report),
+  }
 }

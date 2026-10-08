@@ -1,8 +1,8 @@
-import { Alert, Dialog, Form, FormField, RadioGroup, Textarea, toast } from '@hina-ui/react'
+import { Dialog, Form, FormField, RadioGroup, Textarea, toast } from '@hina-ui/react'
 import { useMessages, useTranslations } from 'use-intl'
 import { lengthOf } from '~/shared/form/form-kit'
 import { useFormKit } from '~/shared/form/use-form-kit'
-import { useDialogFeedback } from '~/shared/form/use-submission-feedback'
+import { useFormErrors } from '~/shared/form/use-form-errors'
 import { labelOf } from '~/shared/i18n/labels'
 import { Button } from '~/shared/ui/button'
 import { useOpenState } from '~/shared/ui/use-open-state'
@@ -23,11 +23,8 @@ export function ReportDialog({ resourceId, open, onOpenChange }: ReportDialogPro
   const reasons = useMessages().resource.reason
   const kit = useFormKit()
   const [values, setValues] = useOpenState(open, () => blank)
-  const report = useReportResource(() => {
-    onOpenChange(false)
-    toast.success(t('reported'))
-  })
-  const { form, message } = useDialogFeedback(open, report.failure)
+  const report = useReportResource()
+  const form = useFormErrors(report.failure)
   return (
     <Dialog
       title={t('reportTitle')}
@@ -39,7 +36,13 @@ export function ReportDialog({ resourceId, open, onOpenChange }: ReportDialogPro
           ref={form}
           values={values}
           rules={reportForm(kit)}
-          onSubmit={() => report.submit({ resourceId, ...values })}
+          onSubmit={async () => {
+            const outcome = await report.run({ resourceId, ...values })
+            if (outcome.ok) {
+              onOpenChange(false)
+              toast.success(t('reported'))
+            }
+          }}
         >
           <FormField name="reason" label={t('reportReason')} required>
             <RadioGroup
@@ -67,9 +70,6 @@ export function ReportDialog({ resourceId, open, onOpenChange }: ReportDialogPro
               autosize={{ minRows: 3, maxRows: 8 }}
             />
           </FormField>
-          <Alert tone="danger" open={message !== undefined}>
-            {message}
-          </Alert>
         </Form>
       )}
       renderFooter={({ close }) => (

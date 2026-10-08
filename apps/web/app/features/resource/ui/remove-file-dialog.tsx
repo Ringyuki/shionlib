@@ -1,6 +1,5 @@
 import { AlertDialog, toast } from '@hina-ui/react'
 import { useTranslations } from 'use-intl'
-import { isFailure } from '~/shared/api/failure.schema'
 import type { ResourceFile } from '../resource'
 import { useRemoveFile } from '../use-remove-file'
 
@@ -12,7 +11,7 @@ type RemoveFileDialogProps = {
 
 export function RemoveFileDialog({ file, open, onOpenChange }: RemoveFileDialogProps) {
   const t = useTranslations('resource')
-  const removal = useRemoveFile(() => toast.success(t('fileRemoved')))
+  const removal = useRemoveFile()
   return (
     <AlertDialog
       title={t('removeFileConfirm', { name: file.file_name })}
@@ -22,11 +21,9 @@ export function RemoveFileDialog({ file, open, onOpenChange }: RemoveFileDialogP
       tone="danger"
       open={open}
       onOpenChange={onOpenChange}
-      onConfirm={() => removal.confirm({ fileId: file.id })}
-      onError={error => {
-        if (isFailure(error)) {
-          toast.danger(error.message)
-        }
+      onConfirm={async () => {
+        await removal.confirm({ fileId: file.id })
+        toast.success(t('fileRemoved'))
       }}
     />
   )

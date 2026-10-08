@@ -7,7 +7,6 @@ import {
   Spinner,
   Stack,
   Text,
-  toast,
 } from '@hina-ui/react'
 import { Bookmark, Lock, Plus } from 'lucide-react'
 import { useState } from 'react'
@@ -26,7 +25,7 @@ type FavoriteButtonProps = {
 
 export function FavoriteButton({ gameId, favorited }: FavoriteButtonProps) {
   const t = useTranslations('favorite')
-  const { lists, load } = useFavoriteLists(gameId)
+  const { lists, loading, load } = useFavoriteLists(gameId)
   const [open, setOpen] = useState(false)
   const [creating, setCreating] = useState(false)
   const changeOpen = (next: boolean) => {
@@ -47,7 +46,7 @@ export function FavoriteButton({ gameId, favorited }: FavoriteButtonProps) {
             <Text size="sm" weight="semibold" className="px-3 pt-3 pb-2">
               {t('chooseLists')}
             </Text>
-            {lists === undefined && <Spinner size="sm" className="mx-auto my-3" />}
+            {loading && lists === undefined && <Spinner size="sm" className="mx-auto my-3" />}
             {lists?.length === 0 && (
               <Text size="sm" tone="muted" className="px-3 pb-3">
                 {t('noLists')}
@@ -100,9 +99,7 @@ function MembershipOption({
   gameId: number
 }) {
   const t = useTranslations('favorite')
-  const { included, toggle, pending } = useMembershipToggle(list, gameId, failure =>
-    toast.danger(failure.message),
-  )
+  const { included, toggle, pending } = useMembershipToggle(list, gameId)
   return (
     <Checkbox
       block

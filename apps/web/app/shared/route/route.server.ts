@@ -20,10 +20,15 @@ export async function routeLoader<Result>(
   }
 }
 
-export async function routeAction<Result>(
-  { context }: RouteArgs,
-  run: (api: ApiClient) => Promise<Result>,
-) {
+export function routeAction<Result>(args: RouteArgs, run: (api: ApiClient) => Promise<Result>) {
+  return outcomeOf(args, run)
+}
+
+export function routeLazyLoader<Result>(args: RouteArgs, run: (api: ApiClient) => Promise<Result>) {
+  return outcomeOf(args, run)
+}
+
+async function outcomeOf<Result>({ context }: RouteArgs, run: (api: ApiClient) => Promise<Result>) {
   try {
     return { ok: true as const, result: await run(apiFrom(context)) }
   } catch (error) {

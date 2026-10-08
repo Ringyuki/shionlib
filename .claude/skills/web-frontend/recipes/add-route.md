@@ -1,6 +1,6 @@
 # Add a page
 
-1. Add the route to `app/routes.ts` inside the `site` layout (or another layout under `:lang`), pointing at `routes/<page>.tsx`.
+1. Add the route to `app/routes.ts` inside the `pages` layout (under `site`, under `:lang`), pointing at `routes/<page>.tsx`. The `pages` layout is what shows a page that fails to load inside the site.
 2. Run `pnpm typecheck` once so `./+types/<page>` exists.
 3. Write the module:
 

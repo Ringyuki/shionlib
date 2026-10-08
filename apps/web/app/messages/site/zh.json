@@ -13,5 +13,7 @@
   "catalogSource": "条目数据来自",
   "catalogEntry": "在 Hikarinagi 查看条目",
   "catalogCorrection": "资料有误或不全？",
-  "catalogEdit": "前往 Hikarinagi 编辑"
+  "catalogEdit": "前往 Hikarinagi 编辑",
+  "retryAfter": "{message}，请 {seconds} 秒后再试",
+  "retry": "重试"
 }

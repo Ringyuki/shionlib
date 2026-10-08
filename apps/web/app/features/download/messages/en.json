@@ -12,7 +12,6 @@
     "expired": "The verification expired. Try again",
     "timeout": "The verification timed out. Try again"
   },
-  "retryAfter": "{message}. Try again in {seconds} s",
   "aria2": {
     "sent": "Sent to aria2",
     "unreachable": "Cannot reach aria2 ({endpoint}). Check your settings",

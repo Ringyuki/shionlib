@@ -1,6 +1,6 @@
 import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import { pageParam } from '~/shared/route/params'
-import { readCommand, routeAction, routeLoader } from '~/shared/route/route.server'
+import { readCommand, routeAction, routeLazyLoader, routeLoader } from '~/shared/route/route.server'
 import { recordSearchCommand } from './search.schema'
 import {
   findGames,
@@ -12,16 +12,16 @@ import {
 
 export function paletteLoader(args: LoaderFunctionArgs) {
   const query = new URL(args.request.url).searchParams.get('q') ?? ''
-  return routeLoader(args, api => loadPalette(api, query))
+  return routeLazyLoader(args, api => loadPalette(api, query))
 }
 
 export function gameOptionsLoader(args: LoaderFunctionArgs) {
   const query = new URL(args.request.url).searchParams.get('q') ?? ''
-  return routeLoader(args, api => findGames(api, query))
+  return routeLazyLoader(args, api => findGames(api, query))
 }
 
 export function recentReleasesLoader(args: LoaderFunctionArgs) {
-  return routeLoader(args, api => loadRecentReleases(api, new Date()))
+  return routeLazyLoader(args, api => loadRecentReleases(api, new Date()))
 }
 
 export async function recordSearchAction(args: ActionFunctionArgs) {

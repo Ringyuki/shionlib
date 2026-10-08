@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { href, useFetcher } from 'react-router'
+import { useCommand } from '~/shared/route/use-command'
 import { readLocal, writeLocal } from '~/shared/storage/local-storage'
 import { normalizeQuery, recentStorageKey, rememberSearch, searchDelayMs } from './search'
 import { parseRecent, type RecordSearch } from './search.schema'
@@ -11,7 +12,9 @@ const readRecent = () => readLocal(recentStorageKey, parseRecent)
 const writeRecent = (recent: readonly string[]) => writeLocal(recentStorageKey, recent)
 
 export function useSearchPalette(source: PaletteSource, close: () => void) {
-  const recorder = useFetcher<typeof recordSearchAction>()
+  const recorder = useCommand(useFetcher<typeof recordSearchAction>(), href('/resources/search'), {
+    quiet: true,
+  })
   const [search, setSearch] = useState('')
   const [recent, setRecent] = useState(readRecent)
   const query = normalizeQuery(search)
@@ -36,11 +39,7 @@ export function useSearchPalette(source: PaletteSource, close: () => void) {
     }
     remember()
     const record: RecordSearch = { query }
-    void recorder.submit(record, {
-      method: 'post',
-      action: href('/resources/search'),
-      encType: 'application/json',
-    })
+    void recorder.run(record)
   }
 
   const clearRecent = () => {
@@ -54,6 +53,7 @@ export function useSearchPalette(source: PaletteSource, close: () => void) {
     setSearch,
     query,
     palette: source.of(query),
+    unavailable: source.failed,
     recent,
     fill,
     remember,

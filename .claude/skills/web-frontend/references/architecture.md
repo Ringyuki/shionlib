@@ -23,7 +23,7 @@ ui/*.tsx ──► use-*.ts ──► <name>.schema.ts ──► <name>.ts (mode
 - **Schemas** (`<name>.schema.ts`): valibot command schemas (`<thing>Command`), form schemas (`<thing>Form(kit, issue)`) and guards for outside input, with the types inferred from them (`references/forms.md`). No React.
 - **Use-cases** (`<name>.use-cases.ts`): `async (api: ApiClient, input) => result`. They decide which endpoints to call, combine results, and translate expected failures (`ApiError.is(...)`, status) into results. No React, no router.
 - **Server handlers** (`<name>.server.ts`): loader/action functions for resource routes shared across pages. They parse request input with `readCommand`/`idParam`/the feature's schemas, call use-cases inside `routeLoader`/`routeAction`, and are re-exported by `app/routes/resources.*.ts`.
-- **Hooks** (`use-<purpose>.ts`): the only place a feature touches React state or React Router client APIs (`useFetcher`, `href`). They expose plain values and callbacks to components.
+- **Hooks** (`use-<purpose>.ts`): the only place a feature touches React state or React Router client APIs (`href`, and `useFetcher` as the argument of `useCommand` / `useLazyLoad`). They expose plain values and callbacks to components.
 - **Components** (`ui/*.tsx`): hina-ui composition; read data from props, behaviour from hooks, text from `useTranslations('<name>')`.
 - **Public entry** (`index.ts`): exports what routes and other features may use. Never re-export `*.server.ts`.
 

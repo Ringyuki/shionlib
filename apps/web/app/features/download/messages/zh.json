@@ -12,7 +12,6 @@
     "expired": "人机验证已过期，请重试",
     "timeout": "人机验证超时，请重试"
   },
-  "retryAfter": "{message}，请 {seconds} 秒后再试",
   "aria2": {
     "sent": "已推送到 aria2",
     "unreachable": "无法连接 aria2（{endpoint}），请检查设置",

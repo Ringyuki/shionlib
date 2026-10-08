@@ -21,7 +21,7 @@ All validation in `apps/web` uses **valibot**. hina-ui `Form` accepts any Standa
 
 - **Fields with API rules** are built with the form kit: `kit.text('RegisterUserInputBody', 'name')`. Never write the numbers or formats yourself. Hints that mention limits read them too: `t('nameHint', lengthOf('RegisterUserInputBody', 'name'))`.
 - **Rules the API does not declare**:
-  - Rules that exist only in the API's business logic (password policy, whether a code is right) are not repeated. The API answers 422 with field errors in the visitor's language, and `useSubmissionFeedback` puts them under the fields.
+  - Rules that exist only in the API's business logic (password policy, whether a code is right) are not repeated. The API answers 422 with field errors in the visitor's language, and `useFormErrors` puts them under the fields.
   - Rules that exist only in the UI (confirmation matches, age declaration ticked) are written in the form schema with the feature's own messages (`<name>.issue.<key>`).
 - **Choices**: the options of an enum field (report reasons, platforms, languages) come from the same file: `constraints.CreateReportInputBody.reason.enum`, or `.itemEnum` and `.minItems` for arrays, read in the feature model (`reportReasons`, `platformOptions`, `leastPlatforms`). A model may change their display order, never their content.
 - **Generic messages** (required, too short, too long, format, choice) live in `app/messages/form/{zh,en,ja}.json` (namespace `form`). They are produced by `useFormKit()`.
@@ -31,18 +31,17 @@ All validation in `apps/web` uses **valibot**. hina-ui `Form` accepts any Standa
 ```tsx
 const kit = useFormKit()
 const issue = useTranslations('auth.issue')
-const { submit, failure } = useSignUp(locale)
-const { form, message } = useSubmissionFeedback(failure)
+const signUp = useSignUp(locale)
+const form = useFormErrors(signUp.failure)
 
-<Form ref={form} values={values} rules={signUpForm(kit, issue)} onSubmit={() => submit(values)}>
+<Form ref={form} values={values} rules={signUpForm(kit, issue)} onSubmit={() => signUp.run(values)}>
   <FormField name="name" label={t('name')} description={t('nameHint', lengthOf('RegisterUserInputBody', 'name'))} required>…</FormField>
-  <Alert tone="danger" open={message !== undefined}>{message}</Alert>
 </Form>
 ```
 
 - **State and values**: `values` is component state typed with `<Thing>Values`, and the field names match the schema keys. hina reads `rules` through a getter, so building the schema during render is fine and needs no memo.
-- **Submitting**: `onSubmit` returns the fetcher's `submit(...)` promise, so `submitting` covers the round trip. The hook submits a command typed with the command schema's type.
-- **API failures**: `useSubmissionFeedback(failure)` writes the API's field errors (`failure.data.errors`) into the form. It returns the message for failures without fields, which you show in an `<Alert open>`. Never use a conditional `Alert`.
+- **Submitting**: `onSubmit` returns the command's `run(...)` promise, so `submitting` covers the round trip; continue on `outcome.ok`. The hook's `run` takes a command typed with the command schema's type.
+- **API failures**: `useFormErrors(failure)` returns the form ref and writes the API's field errors (`failure.data.errors`) into the form. A failure without fields is shown by the request tool as a toast; a form has no `Alert` for it.
 - **Checking one field outside a submit** (for example "send code"): `firstIssueMessage(codeRequestForm(kit), { email })`, then `form.current?.setErrors(...)`.
 
 ## Parsing commands on the server
@@ -64,7 +63,7 @@ export async function signInAction(args: ActionFunctionArgs) {
 | Cookie                                                        | `readCookie(header, name)` (`~/shared/http/cookie`), then a guard from a `*.schema.ts` (`themeFrom`, `sidebarModeFrom`, `negotiateLocale`) |
 | Query string, history state                                   | a `v.fallback(...)` schema in the feature's `*.schema.ts`, such as `pageParam`                                                             |
 | `localStorage`                                                | `readLocal(key, guard)` / `writeLocal(key, value)` (`~/shared/storage/local-storage`) with a guard such as `parseRecent`                   |
-| Unknown value on the client (`fetcher.json`, browser results) | `parseOptional(schema, value)` from `~/shared/form/check`                                                                                  |
+| Unknown value on the client (a command's `payload`, browser results) | `parseOptional(schema, value)` from `~/shared/form/check`                                                                                  |
 
 ## Tests
 

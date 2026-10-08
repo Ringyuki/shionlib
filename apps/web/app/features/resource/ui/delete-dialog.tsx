@@ -1,6 +1,5 @@
 import { AlertDialog, toast } from '@hina-ui/react'
 import { useTranslations } from 'use-intl'
-import { isFailure } from '~/shared/api/failure.schema'
 import { useDeleteResource } from '../use-delete-resource'
 
 type DeleteDialogProps = {
@@ -11,7 +10,7 @@ type DeleteDialogProps = {
 
 export function DeleteDialog({ resourceId, open, onOpenChange }: DeleteDialogProps) {
   const t = useTranslations('resource')
-  const deletion = useDeleteResource(() => toast.success(t('deleted')))
+  const deletion = useDeleteResource()
   return (
     <AlertDialog
       title={t('deleteConfirm')}
@@ -21,11 +20,9 @@ export function DeleteDialog({ resourceId, open, onOpenChange }: DeleteDialogPro
       tone="danger"
       open={open}
       onOpenChange={onOpenChange}
-      onConfirm={() => deletion.confirm({ resourceId })}
-      onError={error => {
-        if (isFailure(error)) {
-          toast.danger(error.message)
-        }
+      onConfirm={async () => {
+        await deletion.confirm({ resourceId })
+        toast.success(t('deleted'))
       }}
     />
   )

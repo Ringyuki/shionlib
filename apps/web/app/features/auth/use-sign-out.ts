@@ -1,12 +1,8 @@
 import { href, useFetcher } from 'react-router'
+import { useCommand } from '~/shared/route/use-command'
 import type { signOutAction } from './auth.server'
 
 export function useSignOut() {
-  const fetcher = useFetcher<typeof signOutAction>()
-  const signOut = () =>
-    fetcher.submit(
-      {},
-      { method: 'post', action: href('/resources/auth/sign-out'), encType: 'application/json' },
-    )
-  return { signOut, pending: fetcher.state !== 'idle' }
+  const command = useCommand(useFetcher<typeof signOutAction>(), href('/resources/auth/sign-out'))
+  return { signOut: () => command.run({}), pending: command.pending }
 }

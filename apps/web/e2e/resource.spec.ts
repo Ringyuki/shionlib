@@ -21,7 +21,8 @@ test.describe('as a member', () => {
     await page.locator('#resource-1').getByRole('button', { name: '资源操作' }).click()
     await page.getByRole('menuitem', { name: '举报' }).click()
     await dialog.getByRole('button', { name: '提交举报' }).click()
-    await expect(dialog.getByRole('alert')).toBeVisible()
+    await expectNotice(page, '你已举报过该资源，等待审核中')
+    await expect(dialog).toBeVisible()
   })
 })
 

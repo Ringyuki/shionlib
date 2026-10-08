@@ -135,7 +135,8 @@ export function usePaletteEntries(palette: ReturnType<typeof useSearchPalette>):
     (palette.palette?.suggestions ?? []).map(title => fill(`suggest:${title}`, title, Search)),
   )
   if (palette.palette === undefined) {
-    return { entries: suggestions, recentShown: false, status: 'searching', searchAll }
+    const status = palette.unavailable ? 'unavailable' : 'searching'
+    return { entries: suggestions, recentShown: false, status, searchAll }
   }
   if (palette.palette.unavailable) {
     return { entries: suggestions, recentShown: false, status: 'unavailable', searchAll }

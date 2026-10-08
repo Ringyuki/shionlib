@@ -1,14 +1,13 @@
 import { useFetcher } from 'react-router'
+import { useCommand } from '~/shared/route/use-command'
 import type { PasswordReset } from './auth.schema'
 import type { passwordResetAction } from './auth.server'
 
 export function usePasswordReset() {
-  const fetcher = useFetcher<typeof passwordResetAction>()
-  const submit = (reset: PasswordReset) =>
-    fetcher.submit(reset, { method: 'post', encType: 'application/json' })
+  const command = useCommand(useFetcher<typeof passwordResetAction>())
   return {
-    submit,
-    done: fetcher.state === 'idle' && fetcher.data?.ok === true,
-    failure: fetcher.data?.ok === false ? fetcher.data.failure : undefined,
+    ...command,
+    run: (reset: PasswordReset) => command.run(reset),
+    done: command.settled?.ok === true,
   }
 }

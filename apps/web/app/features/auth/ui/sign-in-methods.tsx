@@ -8,8 +8,7 @@ import { usePasskeySignIn } from '../use-passkey-sign-in'
 export function SignInMethods() {
   const t = useTranslations('auth.methods')
   const passkey = usePasskeySignIn()
-  const problem =
-    passkey.failure?.message ?? (passkey.problem === undefined ? undefined : t(passkey.problem))
+  const problem = passkey.problem === undefined ? undefined : t(passkey.problem)
 
   const signInWithHikarinagi = () => {
     const url = new URL(window.location.href)

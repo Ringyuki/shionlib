@@ -1,7 +1,16 @@
-import { href } from 'react-router'
+import { href, useFetcher } from 'react-router'
+import { useCommand } from '~/shared/route/use-command'
 import type { FileRename } from './resource.schema'
-import { useResourceCommand } from './use-resource-command'
+import type { renameFileAction } from './resource.server'
 
-export function useRenameFile(onDone: () => void) {
-  return useResourceCommand<FileRename>(href('/resources/resource/file/rename'), { onDone })
+export function useRenameFile() {
+  const command = useCommand(
+    useFetcher<typeof renameFileAction>(),
+    href('/resources/resource/file/rename'),
+  )
+  return {
+    ...command,
+    run: (rename: FileRename) => command.run(rename),
+    confirm: (rename: FileRename) => command.confirm(rename),
+  }
 }

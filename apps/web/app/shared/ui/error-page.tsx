@@ -1,5 +1,5 @@
 import { Button, Container, Result } from '@hina-ui/react'
-import { isRouteErrorResponse, Link } from 'react-router'
+import { isRouteErrorResponse, Link, useRevalidator } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 
 type ErrorPageProps = {
@@ -9,6 +9,7 @@ type ErrorPageProps = {
 export function ErrorPage({ error }: ErrorPageProps) {
   const t = useTranslations('site')
   const locale = useLocale()
+  const { revalidate, state } = useRevalidator()
   const status = isRouteErrorResponse(error) ? error.status : 500
   const [title, description] =
     status === 404
@@ -25,9 +26,16 @@ export function ErrorPage({ error }: ErrorPageProps) {
         title={title}
         description={description}
         actions={
-          <Button asChild variant="soft">
-            <Link to={`/${locale}`}>{t('backHome')}</Link>
-          </Button>
+          <>
+            {status >= 500 && (
+              <Button loading={state === 'loading'} onClick={() => void revalidate()}>
+                {t('retry')}
+              </Button>
+            )}
+            <Button asChild variant="soft">
+              <Link to={`/${locale}`}>{t('backHome')}</Link>
+            </Button>
+          </>
         }
       />
     </Container>
