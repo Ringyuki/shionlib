@@ -126,8 +126,8 @@ func (s *Service) Delete(ctx context.Context, who actor.Actor, id int) error {
 	})
 }
 
-func (s *Service) ListByGame(ctx context.Context, viewer actor.Actor, gameID int, page Page) ([]Entry, int, error) {
-	return s.repo.ListByGame(ctx, gameID, viewer.UserID, page)
+func (s *Service) ListByGame(ctx context.Context, viewer actor.Actor, gameID int, order Order, page Page) ([]Thread, ThreadTotals, error) {
+	return s.repo.ListThreads(ctx, gameID, viewer.UserID, order, page)
 }
 
 func (s *Service) ListByCreator(ctx context.Context, viewer actor.Actor, creatorID int, page Page) ([]Entry, int, error) {

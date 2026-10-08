@@ -33,6 +33,7 @@ const (
 	typeAutoLink       = "autolink"
 	typeText           = "text"
 	typeHashtag        = "hashtag"
+	typeSpoiler        = "spoiler"
 	typeLineBreak      = "linebreak"
 	typeTab            = "tab"
 	typeCode           = "code"
@@ -46,7 +47,7 @@ const (
 
 var supportedTypes = []string{
 	typeParagraph, typeHeading, typeQuote, typeList, typeListItem, typeLink, typeAutoLink,
-	typeText, typeHashtag, typeLineBreak, typeTab, typeCode, typeCodeHighlight,
+	typeText, typeHashtag, typeSpoiler, typeLineBreak, typeTab, typeCode, typeCodeHighlight,
 	typeHorizontalRule, typeOverflow, typeTable, typeTableRow, typeTableCell,
 }
 

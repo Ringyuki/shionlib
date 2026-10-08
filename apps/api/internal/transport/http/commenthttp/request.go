@@ -47,6 +47,7 @@ func (in *editCommentInput) Resolve(huma.Context) []error {
 type gameCommentsInput struct {
 	GameID int `path:"game_id"`
 	httpapi.PageQuery
+	Order string `query:"order" enum:"newest,oldest" default:"newest" doc:"Order of the threads; the replies of a thread are always oldest first"`
 }
 
 type userCommentsInput struct {

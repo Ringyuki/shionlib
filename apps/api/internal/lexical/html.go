@@ -59,6 +59,10 @@ func (r *renderer) node(n *node, s scope) {
 		r.text(n, s, "")
 	case typeHashtag:
 		r.text(n, s, classHashtag)
+	case typeSpoiler:
+		r.open("span", classSpoiler, "")
+		r.children(n, s)
+		r.close("span")
 	case typeLineBreak:
 		r.b.WriteString("<br />")
 	case typeCode:

@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	"entgo.io/ent/dialect/sql"
+
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	entactivity "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/activity"
@@ -202,6 +204,8 @@ var listFields = []string{
 	entcomment.FieldCreated, entcomment.FieldUpdated,
 }
 
+var threadFields = append(slices.Clone(listFields), entcomment.FieldContent)
+
 type Repository struct {
 	client *ent.Client
 }
@@ -321,12 +325,56 @@ func (r *Repository) Entry(ctx context.Context, id, viewerID int) (comment.Entry
 	return entries[0], nil
 }
 
-func (r *Repository) ListByGame(ctx context.Context, gameID, viewerID int, page comment.Page) ([]comment.Entry, int, error) {
-	query := r.db(ctx).Comment.Query().Where(entcomment.GameID(gameID), entcomment.Or(
+func visibleTo(viewerID int) predicate.Comment {
+	return entcomment.Or(
 		entcomment.Status(int(comment.StatusVisible)),
 		entcomment.And(entcomment.CreatorID(viewerID), entcomment.StatusNEQ(int(comment.StatusBlocked))),
-	))
-	return r.list(ctx, query, viewerID, page, ent.Asc(entcomment.FieldCreated), ent.Asc(entcomment.FieldID))
+	)
+}
+
+func startsThread() predicate.Comment {
+	return func(s *sql.Selector) {
+		s.Where(sql.Or(sql.IsNull(s.C(entcomment.FieldRootID)), sql.ColumnsEQ(s.C(entcomment.FieldRootID), s.C(entcomment.FieldID))))
+	}
+}
+
+func (r *Repository) ListThreads(ctx context.Context, gameID, viewerID int, order comment.Order, page comment.Page) ([]comment.Thread, comment.ThreadTotals, error) {
+	inGame := r.db(ctx).Comment.Query().Where(entcomment.GameID(gameID), visibleTo(viewerID))
+	comments, err := inGame.Clone().Count(ctx)
+	if err != nil {
+		return nil, comment.ThreadTotals{}, fmt.Errorf("count comments of game %d: %w", gameID, err)
+	}
+	direction := ent.Desc
+	if order == comment.OrderOldest {
+		direction = ent.Asc
+	}
+	roots, threads, err := r.list(ctx, inGame.Clone().Where(startsThread()), viewerID, page, direction(entcomment.FieldCreated), direction(entcomment.FieldID))
+	if err != nil {
+		return nil, comment.ThreadTotals{}, err
+	}
+	rootIDs := make([]int, len(roots))
+	for i, root := range roots {
+		rootIDs[i] = root.ID
+	}
+	replies := inGame.Clone().Where(entcomment.RootIDIn(rootIDs...), entcomment.IDNotIn(rootIDs...))
+	replies.Select(threadFields...)
+	rows, err := withThread(replies).Order(ent.Asc(entcomment.FieldCreated), ent.Asc(entcomment.FieldID)).All(ctx)
+	if err != nil {
+		return nil, comment.ThreadTotals{}, fmt.Errorf("list replies of game %d: %w", gameID, err)
+	}
+	entries, err := r.entries(ctx, rows, viewerID)
+	if err != nil {
+		return nil, comment.ThreadTotals{}, err
+	}
+	byRoot := map[int][]comment.Entry{}
+	for _, reply := range entries {
+		byRoot[*reply.RootID] = append(byRoot[*reply.RootID], reply)
+	}
+	out := make([]comment.Thread, len(roots))
+	for i, root := range roots {
+		out[i] = comment.Thread{Entry: root, Replies: byRoot[root.ID]}
+	}
+	return out, comment.ThreadTotals{Threads: threads, Comments: comments}, nil
 }
 
 func (r *Repository) ListByCreator(ctx context.Context, filter comment.CreatorFilter, page comment.Page) ([]comment.Entry, int, error) {
@@ -342,7 +390,7 @@ func (r *Repository) list(ctx context.Context, query *ent.CommentQuery, viewerID
 	if err != nil {
 		return nil, 0, fmt.Errorf("count comments: %w", err)
 	}
-	query.Select(listFields...)
+	query.Select(threadFields...)
 	rows, err := withThread(query).
 		Order(order...).
 		Offset(page.Offset()).

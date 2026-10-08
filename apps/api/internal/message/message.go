@@ -60,8 +60,9 @@ type Message struct {
 }
 
 type CommentRef struct {
-	ID   int
-	HTML *string
+	ID      int
+	Content json.RawMessage
+	HTML    *string
 }
 
 type Detail struct {

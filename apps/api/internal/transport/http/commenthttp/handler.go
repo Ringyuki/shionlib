@@ -23,7 +23,7 @@ func NewHandler(service *comment.Service, resp *response.Builder) *Handler {
 
 func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "comment.create", Method: http.MethodPost, Path: "/comment/game/{game_id}", Summary: "Comment on a game", Tags: tags, Access: httpapi.AccessUser}, h.create)
-	httpapi.Register(api, httpapi.Route{ID: "comment.listByGame", Method: http.MethodGet, Path: "/comment/game/{game_id}", Summary: "List comments of a game", Tags: tags}, h.listByGame)
+	httpapi.Register(api, httpapi.Route{ID: "comment.listByGame", Method: http.MethodGet, Path: "/comment/game/{game_id}", Summary: "List the comment threads of a game", Tags: tags}, h.listByGame)
 	httpapi.Register(api, httpapi.Route{ID: "comment.edit", Method: http.MethodPatch, Path: "/comment/{comment_id}", Summary: "Edit a comment", Tags: tags, Access: httpapi.AccessUser}, h.edit)
 	httpapi.Register(api, httpapi.Route{ID: "comment.raw", Method: http.MethodGet, Path: "/comment/{comment_id}/raw", Summary: "Editor state of a comment", Tags: tags, Access: httpapi.AccessUser}, h.raw)
 	httpapi.Register(api, httpapi.Route{ID: "comment.delete", Method: http.MethodDelete, Path: "/comment/{comment_id}", Summary: "Delete a comment", Tags: tags, Access: httpapi.AccessUser}, h.delete)
@@ -69,15 +69,22 @@ func (h *Handler) like(ctx context.Context, in *commentPathInput) (*response.Emp
 	return response.Empty(ctx, h.resp), nil
 }
 
-func (h *Handler) listByGame(ctx context.Context, in *gameCommentsInput) (*response.Output[response.Page[commentItemDTO]], error) {
-	entries, total, err := h.service.ListByGame(ctx, actor.From(ctx), in.GameID, comment.Page{Number: in.Page, Size: in.PageSize})
+func (h *Handler) listByGame(ctx context.Context, in *gameCommentsInput) (*response.Output[commentThreadPageDTO], error) {
+	threads, totals, err := h.service.ListByGame(ctx, actor.From(ctx), in.GameID, comment.Order(in.Order), comment.Page{Number: in.Page, Size: in.PageSize})
 	if err != nil {
 		return nil, err
 	}
 	now := h.resp.Now()
-	page := response.MapPage(entries, total, in.PageSize, in.Page, func(entry comment.Entry) commentItemDTO {
-		return toItem(entry, now)
-	})
+	page := commentThreadPageDTO{
+		Items: make([]commentThreadDTO, len(threads)),
+		Meta: commentThreadPageMetaDTO{
+			PageMeta: response.NewPageMeta(totals.Threads, len(threads), in.PageSize, in.Page),
+			Comments: totals.Comments,
+		},
+	}
+	for i, thread := range threads {
+		page.Items[i] = toThread(thread, now)
+	}
 	return response.OK(ctx, h.resp, page), nil
 }
 

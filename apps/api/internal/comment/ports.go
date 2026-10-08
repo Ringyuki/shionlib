@@ -20,7 +20,7 @@ type Repository interface {
 	SetStatus(ctx context.Context, id int, status Status) error
 	Delete(ctx context.Context, id int) error
 	Entry(ctx context.Context, id, viewerID int) (Entry, error)
-	ListByGame(ctx context.Context, gameID, viewerID int, page Page) ([]Entry, int, error)
+	ListThreads(ctx context.Context, gameID, viewerID int, order Order, page Page) ([]Thread, ThreadTotals, error)
 	ListByCreator(ctx context.Context, filter CreatorFilter, page Page) ([]Entry, int, error)
 	HasLike(ctx context.Context, commentID, userID int) (bool, error)
 	AddLike(ctx context.Context, commentID, userID int) (bool, error)

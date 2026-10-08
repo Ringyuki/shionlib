@@ -202,20 +202,42 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		elsewhere := create(ctx, t, env.Repo, comment.NewComment{GameID: otherGame, CreatorID: author})
 		_ = env.Repo.SetStatus(ctx, elsewhere.ID, comment.StatusVisible)
 
-		entries, total, err := env.Repo.ListByGame(ctx, gameID, viewer, comment.Page{Number: 1, Size: 10})
+		reply := create(ctx, t, env.Repo, comment.NewComment{GameID: gameID, CreatorID: viewer, ParentID: &visible.ID, RootID: &visible.ID})
+		_ = env.Repo.SetStatus(ctx, reply.ID, comment.StatusVisible)
+		nested := create(ctx, t, env.Repo, comment.NewComment{GameID: gameID, CreatorID: author, ParentID: &reply.ID, RootID: &visible.ID})
+		_ = env.Repo.SetStatus(ctx, nested.ID, comment.StatusVisible)
+		create(ctx, t, env.Repo, comment.NewComment{GameID: gameID, CreatorID: author, ParentID: &visible.ID, RootID: &visible.ID})
+		orphan := create(ctx, t, env.Repo, comment.NewComment{GameID: gameID, CreatorID: author, RootID: &visible.ID})
+		_ = env.Repo.SetStatus(ctx, orphan.ID, comment.StatusVisible)
+		_ = env.Repo.SetRoot(ctx, visible.ID, visible.ID)
+
+		threads, totals, err := env.Repo.ListThreads(ctx, gameID, viewer, comment.OrderNewest, comment.Page{Number: 1, Size: 10})
 		if err != nil {
 			t.Fatal(err)
 		}
-		if total != 2 || len(entries) != 2 || entries[0].ID != visible.ID || entries[1].ID != ownPending.ID {
-			t.Fatalf("unexpected listing total=%d %+v", total, entries)
+		if totals != (comment.ThreadTotals{Threads: 2, Comments: 5}) || len(threads) != 2 || threads[0].ID != ownPending.ID || threads[1].ID != visible.ID {
+			t.Fatalf("unexpected threads totals=%+v %+v", totals, threads)
 		}
-		guest, total, _ := env.Repo.ListByGame(ctx, gameID, 0, comment.Page{Number: 1, Size: 10})
-		if total != 1 || guest[0].ID != visible.ID {
-			t.Fatalf("guests only see visible comments: %+v", guest)
+		if replies := threads[1].Replies; len(replies) != 3 || replies[0].ID != reply.ID || replies[1].ID != nested.ID || replies[2].ID != orphan.ID || len(threads[0].Replies) != 0 {
+			t.Fatalf("a thread holds its visible replies oldest first, also replies to replies and replies whose parent is gone: %+v", threads)
 		}
-		second, total, _ := env.Repo.ListByGame(ctx, gameID, viewer, comment.Page{Number: 2, Size: 1})
-		if total != 2 || len(second) != 1 || second[0].ID != ownPending.ID {
+		if parent := threads[1].Replies[1].Parent; parent == nil || parent.ID != reply.ID || parent.Creator.ID != viewer {
+			t.Fatalf("a reply names the comment it answers: %+v", threads[1].Replies[1])
+		}
+		oldest, _, _ := env.Repo.ListThreads(ctx, gameID, viewer, comment.OrderOldest, comment.Page{Number: 1, Size: 10})
+		if len(oldest) != 2 || oldest[0].ID != visible.ID || oldest[1].ID != ownPending.ID {
+			t.Fatalf("oldest first: %+v", oldest)
+		}
+		guest, totals, _ := env.Repo.ListThreads(ctx, gameID, 0, comment.OrderNewest, comment.Page{Number: 1, Size: 10})
+		if totals != (comment.ThreadTotals{Threads: 1, Comments: 4}) || guest[0].ID != visible.ID || len(guest[0].Replies) != 3 {
+			t.Fatalf("guests only see visible comments: %+v %+v", totals, guest)
+		}
+		second, totals, _ := env.Repo.ListThreads(ctx, gameID, viewer, comment.OrderNewest, comment.Page{Number: 2, Size: 1})
+		if totals.Threads != 2 || len(second) != 1 || second[0].ID != visible.ID || len(second[0].Replies) != 3 {
 			t.Fatalf("unexpected second page %+v", second)
+		}
+		if none, totals, err := env.Repo.ListThreads(ctx, otherGame+gameID+1000, 0, comment.OrderNewest, comment.Page{Number: 1, Size: 10}); err != nil || len(none) != 0 || totals != (comment.ThreadTotals{}) {
+			t.Fatalf("a game without comments: %+v %+v %v", none, totals, err)
 		}
 	})
 

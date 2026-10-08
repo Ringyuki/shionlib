@@ -24,8 +24,9 @@ type messageItemDTO struct {
 }
 
 type messageCommentDTO struct {
-	ID   int     `json:"id"`
-	HTML *string `json:"html"`
+	ID      int             `json:"id"`
+	Content json.RawMessage `json:"content" doc:"Lexical editor state"`
+	HTML    *string         `json:"html"`
 }
 
 type messageDetailDTO struct {
@@ -85,7 +86,7 @@ func toMessageDetail(d message.Detail, text messageTextDTO, now time.Time) messa
 		out.Meta = d.Meta
 	}
 	if d.Comment != nil {
-		out.Comment = &messageCommentDTO{ID: d.Comment.ID, HTML: d.Comment.HTML}
+		out.Comment = &messageCommentDTO{ID: d.Comment.ID, Content: d.Comment.Content, HTML: d.Comment.HTML}
 	}
 	if d.Game != nil {
 		card := gamehttp.ToGameCard(*d.Game)

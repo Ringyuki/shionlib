@@ -119,6 +119,18 @@ func TestRenderMatchesLegacyMarkup(t *testing.T) {
 	}
 }
 
+func TestSpoilersHideWhatTheyHoldAndCountAsText(t *testing.T) {
+	raw := doc(paragraph(text("结局是", 0, ""), element("spoiler", []any{text("她走了", 1, "")}, nil)))
+	want := p + `<span>结局是</span><span class="spoiler"><b><strong class="font-bold">她走了</strong></b></span></p>`
+	if got := render(t, raw); got != want {
+		t.Fatalf("spoiler markup\n got %s\nwant %s", got, want)
+	}
+	document, _ := lexical.Parse(raw)
+	if document.Text() != "结局是她走了" {
+		t.Fatalf("spoiler text: %q", document.Text())
+	}
+}
+
 func TestParseRejectsUnsupportedContent(t *testing.T) {
 	deep := paragraph(text("x", 0, ""))
 	for range 120 {

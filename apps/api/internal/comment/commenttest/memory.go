@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"math"
 	"slices"
 	"sync"
 	"time"
@@ -180,13 +181,26 @@ func (r *MemoryRepository) Entry(_ context.Context, id, viewerID int) (comment.E
 	return r.entry(c, viewerID), nil
 }
 
-func (r *MemoryRepository) ListByGame(_ context.Context, gameID, viewerID int, page comment.Page) ([]comment.Entry, int, error) {
-	return r.list(func(c comment.Comment) bool {
+func (r *MemoryRepository) ListThreads(_ context.Context, gameID, viewerID int, order comment.Order, page comment.Page) ([]comment.Thread, comment.ThreadTotals, error) {
+	visible := func(c comment.Comment) bool {
 		if c.GameID != gameID {
 			return false
 		}
 		return c.Status == comment.StatusVisible || (c.CreatorID == viewerID && c.Status != comment.StatusBlocked)
-	}, false, viewerID, page)
+	}
+	everything := comment.Page{Number: 1, Size: math.MaxInt32}
+	all, comments, _ := r.list(visible, false, viewerID, everything)
+	roots, threads, _ := r.list(func(c comment.Comment) bool { return visible(c) && (c.RootID == nil || *c.RootID == c.ID) }, order != comment.OrderOldest, viewerID, page)
+	out := make([]comment.Thread, len(roots))
+	for i, root := range roots {
+		out[i] = comment.Thread{Entry: root}
+		for _, entry := range all {
+			if entry.RootID != nil && *entry.RootID == root.ID && entry.ID != root.ID {
+				out[i].Replies = append(out[i].Replies, entry)
+			}
+		}
+	}
+	return out, comment.ThreadTotals{Threads: threads, Comments: comments}, nil
 }
 
 func (r *MemoryRepository) ListByCreator(_ context.Context, filter comment.CreatorFilter, page comment.Page) ([]comment.Entry, int, error) {

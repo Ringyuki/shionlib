@@ -55,8 +55,9 @@ type commentItemParentDTO struct {
 	Creator *userhttp.UserSummaryDTO `json:"creator,omitempty"`
 }
 
-type commentItemDTO struct {
+type CommentItemDTO struct {
 	ID         int                     `json:"id"`
+	Content    json.RawMessage         `json:"content" doc:"Lexical editor state"`
 	HTML       *string                 `json:"html"`
 	ParentID   *int                    `json:"parent_id"`
 	RootID     *int                    `json:"root_id"`
@@ -71,8 +72,24 @@ type commentItemDTO struct {
 	Updated    time.Time               `json:"updated"`
 }
 
+type commentThreadDTO struct {
+	CommentItemDTO
+	Replies []CommentItemDTO `json:"replies" doc:"Visible replies of the thread, oldest first, replies to replies included"`
+}
+
+type commentThreadPageMetaDTO struct {
+	response.PageMeta
+	Comments int `json:"comments" doc:"Visible comments of the game, replies included"`
+}
+
+type commentThreadPageDTO struct {
+	Items []commentThreadDTO       `json:"items"`
+	Meta  commentThreadPageMetaDTO `json:"meta"`
+}
+
 type userCommentDTO struct {
 	ID         int                     `json:"id"`
+	Content    json.RawMessage         `json:"content" doc:"Lexical editor state"`
 	HTML       *string                 `json:"html"`
 	ParentID   *int                    `json:"parent_id"`
 	RootID     *int                    `json:"root_id"`
@@ -138,14 +155,15 @@ func toEdited(entry comment.Entry, now time.Time) commentEditedDTO {
 	}
 }
 
-func toItem(entry comment.Entry, now time.Time) commentItemDTO {
+func toItem(entry comment.Entry, now time.Time) CommentItemDTO {
 	parent := commentItemParentDTO{ID: entry.ParentID}
 	if entry.Parent != nil {
 		creator := userhttp.ToUserSummary(entry.Parent.Creator, now)
 		parent.HTML, parent.Creator = entry.Parent.HTML, &creator
 	}
-	return commentItemDTO{
+	return CommentItemDTO{
 		ID:         entry.ID,
+		Content:    entry.Content,
 		HTML:       entry.HTML,
 		ParentID:   entry.ParentID,
 		RootID:     entry.RootID,
@@ -161,9 +179,18 @@ func toItem(entry comment.Entry, now time.Time) commentItemDTO {
 	}
 }
 
+func toThread(thread comment.Thread, now time.Time) commentThreadDTO {
+	replies := make([]CommentItemDTO, len(thread.Replies))
+	for i, reply := range thread.Replies {
+		replies[i] = toItem(reply, now)
+	}
+	return commentThreadDTO{CommentItemDTO: toItem(thread.Entry, now), Replies: replies}
+}
+
 func toUserComment(entry comment.Entry, now time.Time) userCommentDTO {
 	out := userCommentDTO{
 		ID:         entry.ID,
+		Content:    entry.Content,
 		HTML:       entry.HTML,
 		ParentID:   entry.ParentID,
 		RootID:     entry.RootID,

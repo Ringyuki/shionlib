@@ -6026,6 +6026,9 @@
       "CommentItemDTO": {
         "additionalProperties": false,
         "properties": {
+          "content": {
+            "description": "Lexical editor state"
+          },
           "created": {
             "format": "date-time",
             "type": "string"
@@ -6085,6 +6088,7 @@
         },
         "required": [
           "id",
+          "content",
           "html",
           "parent_id",
           "root_id",
@@ -6163,6 +6167,159 @@
           "id",
           "content",
           "creator_id"
+        ],
+        "type": "object"
+      },
+      "CommentThreadDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "description": "Lexical editor state"
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/UserSummaryDTO"
+          },
+          "edited": {
+            "type": "boolean"
+          },
+          "html": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "is_liked": {
+            "type": "boolean"
+          },
+          "like_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/CommentItemParentDTO"
+          },
+          "parent_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "replies": {
+            "description": "Visible replies of the thread, oldest first, replies to replies included",
+            "items": {
+              "$ref": "#/components/schemas/CommentItemDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "reply_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "root_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "status": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "replies",
+          "id",
+          "content",
+          "html",
+          "parent_id",
+          "root_id",
+          "reply_count",
+          "parent",
+          "is_liked",
+          "like_count",
+          "creator",
+          "edited",
+          "status",
+          "created",
+          "updated"
+        ],
+        "type": "object"
+      },
+      "CommentThreadPageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CommentThreadDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/CommentThreadPageMetaDTO"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "CommentThreadPageMetaDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "comments": {
+            "description": "Visible comments of the game, replies included",
+            "format": "int64",
+            "type": "integer"
+          },
+          "currentPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemsPerPage": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalItems": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalPages": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "comments",
+          "totalItems",
+          "itemCount",
+          "itemsPerPage",
+          "totalPages",
+          "currentPage"
         ],
         "type": "object"
       },
@@ -9069,6 +9226,39 @@
         ],
         "type": "object"
       },
+      "EnvelopeCommentThreadPageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CommentThreadPageDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeDeletedCharacterDTO": {
         "additionalProperties": false,
         "properties": {
@@ -10940,39 +11130,6 @@
           },
           "data": {
             "$ref": "#/components/schemas/PageCharacterListItemDTO"
-          },
-          "message": {
-            "type": "string"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/Meta"
-          },
-          "requestId": {
-            "type": "string"
-          },
-          "timestamp": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "code",
-          "message",
-          "data",
-          "requestId",
-          "timestamp"
-        ],
-        "type": "object"
-      },
-      "EnvelopePageCommentItemDTO": {
-        "additionalProperties": false,
-        "properties": {
-          "code": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "data": {
-            "$ref": "#/components/schemas/PageCommentItemDTO"
           },
           "message": {
             "type": "string"
@@ -14462,6 +14619,9 @@
       "MessageCommentDTO": {
         "additionalProperties": false,
         "properties": {
+          "content": {
+            "description": "Lexical editor state"
+          },
           "html": {
             "type": [
               "string",
@@ -14475,6 +14635,7 @@
         },
         "required": [
           "id",
+          "content",
           "html"
         ],
         "type": "object"
@@ -15088,28 +15249,6 @@
           "items": {
             "items": {
               "$ref": "#/components/schemas/CharacterListItemDTO"
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "meta": {
-            "$ref": "#/components/schemas/PageMeta"
-          }
-        },
-        "required": [
-          "items",
-          "meta"
-        ],
-        "type": "object"
-      },
-      "PageCommentItemDTO": {
-        "additionalProperties": false,
-        "properties": {
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/CommentItemDTO"
             },
             "type": [
               "array",
@@ -17452,6 +17591,9 @@
       "UserCommentDTO": {
         "additionalProperties": false,
         "properties": {
+          "content": {
+            "description": "Lexical editor state"
+          },
           "created": {
             "format": "date-time",
             "type": "string"
@@ -17514,6 +17656,7 @@
         },
         "required": [
           "id",
+          "content",
           "html",
           "parent_id",
           "root_id",
@@ -26144,6 +26287,21 @@
               "minimum": 1,
               "type": "integer"
             }
+          },
+          {
+            "description": "Order of the threads; the replies of a thread are always oldest first",
+            "explode": false,
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "default": "newest",
+              "description": "Order of the threads; the replies of a thread are always oldest first",
+              "enum": [
+                "newest",
+                "oldest"
+              ],
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -26151,7 +26309,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopePageCommentItemDTO"
+                  "$ref": "#/components/schemas/EnvelopeCommentThreadPageDTO"
                 }
               }
             },
@@ -26175,7 +26333,7 @@
             "description": "Error"
           }
         },
-        "summary": "List comments of a game",
+        "summary": "List the comment threads of a game",
         "tags": [
           "comment"
         ]

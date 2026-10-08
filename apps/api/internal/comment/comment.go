@@ -58,6 +58,23 @@ type Entry struct {
 	Game      *game.Card
 }
 
+type Order string
+
+const (
+	OrderNewest Order = "newest"
+	OrderOldest Order = "oldest"
+)
+
+type Thread struct {
+	Entry
+	Replies []Entry
+}
+
+type ThreadTotals struct {
+	Threads  int
+	Comments int
+}
+
 type NewComment struct {
 	Content   json.RawMessage
 	HTML      string

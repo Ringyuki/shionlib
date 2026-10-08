@@ -1,6 +1,7 @@
 package commenthttp_test
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
@@ -150,7 +151,7 @@ func TestEditRawDeleteAndLike(t *testing.T) {
 func TestListByGameShape(t *testing.T) {
 	e := setup(t)
 	html := "<p>root</p>"
-	root := e.repo.Seed(comment.Comment{GameID: 10, CreatorID: 1, HTML: &html, Status: comment.StatusVisible})
+	root := e.repo.Seed(comment.Comment{GameID: 10, CreatorID: 1, Content: json.RawMessage(`{"root":{"type":"root"}}`), HTML: &html, Status: comment.StatusVisible})
 	_ = e.repo.SetRoot(t.Context(), root.ID, root.ID)
 	reply := e.repo.Seed(comment.Comment{GameID: 10, CreatorID: 2, HTML: &html, ParentID: &root.ID, RootID: &root.ID, ReplyCount: 0, Status: comment.StatusPending})
 	if _, err := e.repo.AddLike(t.Context(), root.ID, 2); err != nil {
@@ -160,17 +161,19 @@ func TestListByGameShape(t *testing.T) {
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/comment/game/10?page=1&pageSize=5", As: &bob})
 	e.server.Expect(resp, http.StatusOK, 0)
 	want := `{"items":[` +
-		`{"id":1,"html":"<p>root</p>","parent_id":null,"root_id":1,"reply_count":0,"parent":{"id":null},"is_liked":true,"like_count":1,"creator":` + alicePublic + `,"edited":false,"status":1,"created":` + stamp + `,"updated":` + stamp + `},` +
-		`{"id":` + strconv.Itoa(reply.ID) + `,"html":"<p>root</p>","parent_id":1,"root_id":1,"reply_count":0,"parent":{"id":1,"html":"<p>root</p>","creator":` + alicePublic + `},"is_liked":false,"like_count":0,"creator":` + bobPublic + `,"edited":false,"status":2,"created":` + stamp + `,"updated":` + stamp + `}` +
-		`],"meta":{"totalItems":2,"itemCount":2,"itemsPerPage":5,"totalPages":1,"currentPage":1}}`
+		`{"id":1,"content":{"root":{"type":"root"}},"html":"<p>root</p>","parent_id":null,"root_id":1,"reply_count":0,"parent":{"id":null},"is_liked":true,"like_count":1,"creator":` + alicePublic + `,"edited":false,"status":1,"created":` + stamp + `,"updated":` + stamp + `,"replies":[` +
+		`{"id":` + strconv.Itoa(reply.ID) + `,"content":null,"html":"<p>root</p>","parent_id":1,"root_id":1,"reply_count":0,"parent":{"id":1,"html":"<p>root</p>","creator":` + alicePublic + `},"is_liked":false,"like_count":0,"creator":` + bobPublic + `,"edited":false,"status":2,"created":` + stamp + `,"updated":` + stamp + `}` +
+		`]}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":5,"totalPages":1,"currentPage":1,"comments":2}}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected list\n got %s\nwant %s", resp.Data, want)
 	}
 	guest := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/comment/game/10"})
 	e.server.Expect(guest, http.StatusOK, 0)
-	if !strings.Contains(string(guest.Data), `"totalItems":1`) || !strings.Contains(string(guest.Data), `"is_liked":false`) {
+	if !strings.Contains(string(guest.Data), `"comments":1`) || !strings.Contains(string(guest.Data), `"replies":[]`) || !strings.Contains(string(guest.Data), `"is_liked":false`) {
 		t.Fatalf("guests only see visible comments: %s", guest.Data)
 	}
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/comment/game/10?order=oldest"}), http.StatusOK, 0)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/comment/game/10?order=best"}), http.StatusUnprocessableEntity, 100101)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/comment/game/10?pageSize=51"}), http.StatusUnprocessableEntity, 100101)
 }
 
@@ -182,7 +185,7 @@ func TestListByUserShape(t *testing.T) {
 
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/user/datas/1/comments", As: &alice})
 	e.server.Expect(resp, http.StatusOK, 0)
-	want := `{"items":[{"id":1,"html":"<p>mine</p>","parent_id":null,"root_id":null,"reply_count":0,"parent":null,"is_liked":false,"like_count":0,` +
+	want := `{"items":[{"id":1,"content":null,"html":"<p>mine</p>","parent_id":null,"root_id":null,"reply_count":0,"parent":null,"is_liked":false,"like_count":0,` +
 		`"game":{"id":10,"title_jp":"タイトル","title_zh":"","title_en":"","aliases":[],"type":null,"covers":[{"language":"","type":"","url":"a.webp","dims":[],"sexual":0,"violence":0}],"intro_jp":"","intro_zh":"","intro_en":"","release_date":null,"developers":[],"resources":{"count":0,"downloads":0,"platforms":[],"languages":[],"latest":null},"tags":[]},` +
 		`"creator":` + alicePublic + `,"created":` + stamp + `,"updated":` + stamp + `}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1,"is_current_user":true}}`
 	if string(resp.Data) != want {

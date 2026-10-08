@@ -5,6 +5,7 @@ const (
 	classQuote              = "mt-6 border-l-2 pl-6 italic"
 	classLink               = "text-blue-600 hover:underline hover:cursor-pointer"
 	classHashtag            = "text-blue-600 bg-blue-100 rounded-md px-1"
+	classSpoiler            = "spoiler"
 	classCode               = "EditorTheme__code"
 	classTable              = "EditorTheme__table w-fit overflow-scroll border-collapse"
 	classTableCell          = `EditorTheme__tableCell w-24 relative border px-4 py-2 text-left [&[align=center]]:text-center [&[align=right]]:text-right"`
