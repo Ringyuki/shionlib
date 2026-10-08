@@ -18,8 +18,16 @@ func (s *Service) List(ctx context.Context, query string, page Page) ([]Characte
 	return s.repo.List(ctx, strings.TrimSpace(query), page)
 }
 
-func (s *Service) Get(ctx context.Context, id int) (Character, error) {
-	return s.repo.Get(ctx, id)
+func (s *Service) Get(ctx context.Context, id int) (Detail, error) {
+	found, err := s.repo.Get(ctx, id)
+	if err != nil {
+		return Detail{}, err
+	}
+	appearances, err := s.repo.Appearances(ctx, id)
+	if err != nil {
+		return Detail{}, err
+	}
+	return Detail{Character: found, Appearances: appearances}, nil
 }
 
 func (s *Service) Delete(ctx context.Context, id int) (Character, error) {

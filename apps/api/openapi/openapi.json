@@ -5481,6 +5481,36 @@
         ],
         "type": "object"
       },
+      "CharacterAppearanceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "actor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "game_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "role": {
+            "enum": [
+              "main",
+              "primary",
+              "side",
+              "appears"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "game_id",
+          "role",
+          "actor"
+        ],
+        "type": "object"
+      },
       "CharacterDetailDTO": {
         "additionalProperties": false,
         "properties": {
@@ -5494,6 +5524,15 @@
           "aliases": {
             "items": {
               "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "appearances": {
+            "items": {
+              "$ref": "#/components/schemas/CharacterAppearanceDTO"
             },
             "type": [
               "array",
@@ -5628,7 +5667,8 @@
           "cup",
           "age",
           "birthday",
-          "gender"
+          "gender",
+          "appearances"
         ],
         "type": "object"
       },

@@ -38,6 +38,8 @@ func TestListAndDetailShapes(t *testing.T) {
 		Image: ptr("c.webp"), BloodType: ptr("ab"), Height: ptr(150), Cup: ptr("A"), Birthday: []int{3, 14}, Gender: []string{"f"},
 	})
 	repo.Seed(character.Character{NameJP: "other"})
+	repo.Appear(sora.ID, ptr("main"), ptr("田口宏子"), false)
+	repo.Appear(sora.ID, nil, nil, true)
 
 	resp := server.Do(apitest.Request{Method: http.MethodGet, Path: "/character/list?q=sora&pageSize=5"})
 	server.Expect(resp, http.StatusOK, 0)
@@ -48,7 +50,7 @@ func TestListAndDetailShapes(t *testing.T) {
 
 	resp = server.Do(apitest.Request{Method: http.MethodGet, Path: "/character/" + strconv.Itoa(sora.ID)})
 	server.Expect(resp, http.StatusOK, 0)
-	want = `{"id":1,"h_id":77,"name_jp":"穹","name_zh":"","name_en":"Sora","aliases":["ソラ"],"intro_jp":"intro","intro_zh":"","intro_en":"","image":"c.webp","blood_type":"ab","height":150,"weight":null,"bust":null,"waist":null,"hips":null,"cup":"A","age":null,"birthday":[3,14],"gender":["f"]}`
+	want = `{"id":1,"h_id":77,"name_jp":"穹","name_zh":"","name_en":"Sora","aliases":["ソラ"],"intro_jp":"intro","intro_zh":"","intro_en":"","image":"c.webp","blood_type":"ab","height":150,"weight":null,"bust":null,"waist":null,"hips":null,"cup":"A","age":null,"birthday":[3,14],"gender":["f"],"appearances":[{"game_id":1,"role":"main","actor":"田口宏子"}]}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected detail\n got %s\nwant %s", resp.Data, want)
 	}

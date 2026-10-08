@@ -196,6 +196,24 @@ func (r *Repository) Get(ctx context.Context, id int) (character.Character, erro
 	return gamepg.ToCharacter(row), nil
 }
 
+func (r *Repository) Appearances(ctx context.Context, id int) ([]character.Appearance, error) {
+	rows, err := r.db(ctx).GameCharacterRelation.Query().
+		Where(gamecharacterrelation.CharacterID(id), gamecharacterrelation.HasGameWith(gamepg.ListablePredicates(game.Visibility{})...)).
+		Order(gamecharacterrelation.ByID()).
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list appearances of character %d: %w", id, err)
+	}
+	appearances := make([]character.Appearance, len(rows))
+	for i, row := range rows {
+		appearances[i] = character.Appearance{GameID: row.GameID, Role: game.CharacterRoleSide, Actor: row.Actor}
+		if row.Role != nil {
+			appearances[i].Role = string(*row.Role)
+		}
+	}
+	return appearances, nil
+}
+
 func (r *Repository) Lock(ctx context.Context, id int) (character.Character, error) {
 	row, err := r.db(ctx).GameCharacter.Query().Where(gamecharacter.ID(id)).ForUpdate().Only(ctx)
 	if postgres.IsNotFound(err) {

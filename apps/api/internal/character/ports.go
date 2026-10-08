@@ -7,6 +7,7 @@ import (
 type Repository interface {
 	List(ctx context.Context, query string, page Page) ([]Character, int, error)
 	Get(ctx context.Context, id int) (Character, error)
+	Appearances(ctx context.Context, id int) ([]Appearance, error)
 	Lock(ctx context.Context, id int) (Character, error)
 	HasRelations(ctx context.Context, id int) (bool, error)
 	Delete(ctx context.Context, id int) error

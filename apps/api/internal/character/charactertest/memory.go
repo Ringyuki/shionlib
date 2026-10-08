@@ -7,17 +7,25 @@ import (
 	"sync"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/character"
+	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 )
 
+type appearance struct {
+	character.Appearance
+	hidden bool
+}
+
 type MemoryRepository struct {
-	mu         sync.Mutex
-	nextID     int
-	characters map[int]character.Character
-	links      map[int]int
+	mu          sync.Mutex
+	nextID      int
+	nextGameID  int
+	characters  map[int]character.Character
+	links       map[int]int
+	appearances map[int][]appearance
 }
 
 func NewMemoryRepository() *MemoryRepository {
-	return &MemoryRepository{characters: map[int]character.Character{}, links: map[int]int{}}
+	return &MemoryRepository{characters: map[int]character.Character{}, links: map[int]int{}, appearances: map[int][]appearance{}}
 }
 
 func (r *MemoryRepository) Seed(c character.Character) character.Character {
@@ -33,6 +41,31 @@ func (r *MemoryRepository) Link(characterID int) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.links[characterID]++
+}
+
+func (r *MemoryRepository) Appear(characterID int, role, actor *string, hidden bool) int {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.nextGameID++
+	r.links[characterID]++
+	appeared := character.Appearance{GameID: r.nextGameID, Role: game.CharacterRoleSide, Actor: actor}
+	if role != nil {
+		appeared.Role = *role
+	}
+	r.appearances[characterID] = append(r.appearances[characterID], appearance{Appearance: appeared, hidden: hidden})
+	return r.nextGameID
+}
+
+func (r *MemoryRepository) Appearances(_ context.Context, id int) ([]character.Appearance, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	visible := []character.Appearance{}
+	for _, appeared := range r.appearances[id] {
+		if !appeared.hidden {
+			visible = append(visible, appeared.Appearance)
+		}
+	}
+	return visible, nil
 }
 
 func (r *MemoryRepository) List(_ context.Context, query string, page character.Page) ([]character.Character, int, error) {

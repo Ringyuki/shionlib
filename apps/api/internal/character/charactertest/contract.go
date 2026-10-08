@@ -9,9 +9,10 @@ import (
 )
 
 type Env struct {
-	Repo character.Repository
-	Seed func(t *testing.T, c character.Character) int
-	Link func(t *testing.T, characterID int)
+	Repo   character.Repository
+	Seed   func(t *testing.T, c character.Character) int
+	Link   func(t *testing.T, characterID int)
+	Appear func(t *testing.T, characterID int, role, actor *string, hidden bool) int
 }
 
 func ptr[T any](v T) *T {
@@ -77,6 +78,31 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		literal, _, err := env.Repo.List(ctx, "%", character.Page{Number: 1, Size: 10})
 		if err != nil || len(literal) != 0 {
 			t.Fatalf("wildcards must be matched literally: %+v %v", literal, err)
+		}
+	})
+
+	t.Run("appearances name the visible games in the order they were linked, with the role and the voice", func(t *testing.T) {
+		env := newEnv(t)
+		sora := env.Seed(t, character.Character{NameJP: "穹"})
+		other := env.Seed(t, character.Character{NameJP: "other"})
+		first := env.Appear(t, sora, ptr("main"), ptr("田口宏子"), false)
+		env.Appear(t, sora, ptr("primary"), nil, true)
+		third := env.Appear(t, sora, nil, nil, false)
+		env.Appear(t, other, ptr("side"), nil, false)
+
+		got, err := env.Repo.Appearances(ctx, sora)
+		if err != nil || len(got) != 2 {
+			t.Fatalf("appearances: %+v %v", got, err)
+		}
+		if got[0].GameID != first || got[0].Role != "main" || got[0].Actor == nil || *got[0].Actor != "田口宏子" {
+			t.Fatalf("first appearance: %+v", got[0])
+		}
+		if got[1].GameID != third || got[1].Role != "side" || got[1].Actor != nil {
+			t.Fatalf("an appearance without a role is a side role: %+v", got[1])
+		}
+		none, err := env.Repo.Appearances(ctx, env.Seed(t, character.Character{NameJP: "unlinked"}))
+		if err != nil || none == nil || len(none) != 0 {
+			t.Fatalf("no appearances must be an empty list: %+v %v", none, err)
 		}
 	})
 

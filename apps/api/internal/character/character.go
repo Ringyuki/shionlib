@@ -33,6 +33,17 @@ type Character struct {
 	Updated   time.Time
 }
 
+type Appearance struct {
+	GameID int
+	Role   string
+	Actor  *string
+}
+
+type Detail struct {
+	Character
+	Appearances []Appearance
+}
+
 type GameRef struct {
 	ID      int
 	TitleJP string

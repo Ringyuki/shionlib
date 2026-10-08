@@ -9,6 +9,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/characterpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacter"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacterrelation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/character"
@@ -48,6 +49,21 @@ func TestRepositoryContract(t *testing.T) {
 				if err := db.Ent.GameCharacterRelation.Create().SetGameID(db.Game(t)).SetCharacterID(characterID).Exec(t.Context()); err != nil {
 					t.Fatal(err)
 				}
+			},
+			Appear: func(t *testing.T, characterID int, role, actor *string, hidden bool) int {
+				status := 1
+				if hidden {
+					status = 2
+				}
+				gameID := db.Game(t, func(c *ent.GameCreate) { c.SetStatus(status) })
+				create := db.Ent.GameCharacterRelation.Create().SetGameID(gameID).SetCharacterID(characterID).SetNillableActor(actor)
+				if role != nil {
+					create.SetRole(gamecharacterrelation.Role(*role))
+				}
+				if err := create.Exec(t.Context()); err != nil {
+					t.Fatal(err)
+				}
+				return gameID
 			},
 		}
 	})

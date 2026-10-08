@@ -51,6 +51,14 @@ type characterDetailDTO struct {
 	Age       *int     `json:"age"`
 	Birthday  []int    `json:"birthday"`
 	Gender    []string `json:"gender"`
+
+	Appearances []characterAppearanceDTO `json:"appearances"`
+}
+
+type characterAppearanceDTO struct {
+	GameID int     `json:"game_id"`
+	Role   string  `json:"role" enum:"main,primary,side,appears"`
+	Actor  *string `json:"actor"`
 }
 
 type deletedCharacterDTO struct {
@@ -89,9 +97,14 @@ func toListItemDTO(c character.Character) characterListItemDTO {
 	}
 }
 
-func toDetailDTO(c character.Character) characterDetailDTO {
+func toDetailDTO(c character.Detail) characterDetailDTO {
+	appearances := make([]characterAppearanceDTO, len(c.Appearances))
+	for i, appeared := range c.Appearances {
+		appearances[i] = characterAppearanceDTO{GameID: appeared.GameID, Role: appeared.Role, Actor: appeared.Actor}
+	}
 	return characterDetailDTO{
-		ID: c.ID, HID: c.HID, NameJP: c.NameJP, NameZH: valueOrEmpty(c.NameZH), NameEN: valueOrEmpty(c.NameEN), Aliases: nonNil(c.Aliases),
+		Appearances: appearances,
+		ID:          c.ID, HID: c.HID, NameJP: c.NameJP, NameZH: valueOrEmpty(c.NameZH), NameEN: valueOrEmpty(c.NameEN), Aliases: nonNil(c.Aliases),
 		IntroJP: c.IntroJP, IntroZH: c.IntroZH, IntroEN: c.IntroEN, Image: c.Image, BloodType: c.BloodType,
 		Height: c.Height, Weight: c.Weight, Bust: c.Bust, Waist: c.Waist, Hips: c.Hips, Cup: c.Cup, Age: c.Age,
 		Birthday: nonNilInts(c.Birthday), Gender: nonNil(c.Gender),
