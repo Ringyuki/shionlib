@@ -9,12 +9,13 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	entactivity "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacter"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedeveloper"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/walkthrough"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/gamepg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/userpg"
+	commentmodel "github.com/Ringyuki/shionlib/apps/api/internal/comment"
+	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 )
 
 type Repository struct {
@@ -48,17 +49,15 @@ func (r *Repository) Create(ctx context.Context, in activity.NewActivity) error 
 }
 
 func (r *Repository) List(ctx context.Context, filter activity.Filter, page activity.Page) ([]activity.Entry, int, error) {
-	query := postgres.Client(ctx, r.client).Activity.Query()
-	if len(filter.Types) > 0 {
-		types := make([]entactivity.Type, len(filter.Types))
-		for i, kind := range filter.Types {
-			types[i] = entactivity.Type(kind)
-		}
-		query.Where(entactivity.TypeIn(types...))
+	types := make([]entactivity.Type, len(filter.Types))
+	for i, kind := range filter.Types {
+		types[i] = entactivity.Type(kind)
 	}
-	if filter.ExcludeRated {
-		query.Where(entactivity.Or(entactivity.Not(entactivity.HasGame()), entactivity.HasGameWith(gamepg.SafeForStrictViewers())))
-	}
+	query := postgres.Client(ctx, r.client).Activity.Query().Where(
+		entactivity.TypeIn(types...),
+		entactivity.HasGameWith(gamepg.ListablePredicates(game.Visibility{ExcludeRated: filter.ExcludeRated})...),
+		stillPublic(),
+	)
 	total, err := query.Clone().Count(ctx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("count activities: %w", err)
@@ -67,12 +66,8 @@ func (r *Repository) List(ctx context.Context, filter activity.Filter, page acti
 		WithUser(userpg.SelectSummary).
 		WithWalkthrough(func(q *ent.WalkthroughQuery) { q.Select(walkthrough.FieldID, walkthrough.FieldTitle) }).
 		WithComment(func(q *ent.CommentQuery) { q.Select(comment.FieldID, comment.FieldHTML) }).
-		WithDeveloper(func(q *ent.GameDeveloperQuery) { q.Select(gamedeveloper.FieldID, gamedeveloper.FieldName) }).
-		WithCharacter(func(q *ent.GameCharacterQuery) {
-			q.Select(gamecharacter.FieldID, gamecharacter.FieldNameJp, gamecharacter.FieldNameZh, gamecharacter.FieldNameEn)
-		}).
 		WithFile(func(q *ent.GameDownloadResourceFileQuery) {
-			q.Select(gamedownloadresourcefile.FieldID, gamedownloadresourcefile.FieldFileName, gamedownloadresourcefile.FieldFileSize)
+			q.Select(gamedownloadresourcefile.FieldID, gamedownloadresourcefile.FieldGameDownloadResourceID, gamedownloadresourcefile.FieldFileName, gamedownloadresourcefile.FieldFileSize)
 		}).
 		Order(ent.Desc(entactivity.FieldCreated), ent.Desc(entactivity.FieldID)).
 		Offset(page.Offset()).
@@ -86,4 +81,21 @@ func (r *Repository) List(ctx context.Context, filter activity.Filter, page acti
 		entries[i] = toEntry(row)
 	}
 	return entries, total, nil
+}
+
+func stillPublic() predicate.Activity {
+	return entactivity.Or(
+		entactivity.And(
+			entactivity.TypeEQ(entactivity.TypeFILE_UPLOAD_TO_S3),
+			entactivity.HasFileWith(gamepg.PublicFile(), gamedownloadresourcefile.HasGameDownloadResourceWith(gamepg.PublicResource())),
+		),
+		entactivity.And(
+			entactivity.TypeEQ(entactivity.TypeCOMMENT),
+			entactivity.HasCommentWith(comment.Status(int(commentmodel.StatusVisible))),
+		),
+		entactivity.And(
+			entactivity.TypeEQ(entactivity.TypeWALKTHROUGH_CREATE),
+			entactivity.HasWalkthroughWith(walkthrough.StatusEQ(walkthrough.StatusPUBLISHED)),
+		),
+	)
 }

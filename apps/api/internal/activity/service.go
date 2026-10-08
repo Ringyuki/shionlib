@@ -20,7 +20,7 @@ func (s *Service) Record(ctx context.Context, in NewActivity) error {
 }
 
 func (s *Service) Feed(ctx context.Context, viewer actor.Actor, category *Category, page Page) ([]Entry, int, error) {
-	filter := Filter{ExcludeRated: !viewer.IncludesRated()}
+	filter := Filter{Types: FeedTypes(), ExcludeRated: !viewer.IncludesRated()}
 	if category != nil {
 		filter.Types = category.Types()
 	}

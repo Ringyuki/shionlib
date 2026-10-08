@@ -31,22 +31,21 @@ const (
 type Category string
 
 const (
-	CategoryComments           Category = "comments"
-	CategoryGameCreates        Category = "gameCreates"
-	CategoryWalkthroughCreates Category = "walkthroughCreates"
-	CategoryEdits              Category = "edits"
 	CategoryFiles              Category = "files"
+	CategoryComments           Category = "comments"
+	CategoryWalkthroughCreates Category = "walkthroughCreates"
 )
 
+var feedTypes = []Type{TypeFileUploadToS3, TypeComment, TypeWalkthroughCreate}
+
 var categoryTypes = map[Category][]Type{
+	CategoryFiles:              {TypeFileUploadToS3},
 	CategoryComments:           {TypeComment},
-	CategoryGameCreates:        {TypeGameCreate},
 	CategoryWalkthroughCreates: {TypeWalkthroughCreate},
-	CategoryEdits:              {TypeGameEdit, TypeDeveloperEdit, TypeCharacterEdit},
-	CategoryFiles: {
-		TypeFileUploadToServer, TypeFileUploadToS3, TypeFileReupload, TypeFileCheckOK,
-		TypeFileCheckBrokenOrTruncated, TypeFileCheckBrokenOrUnsupported, TypeFileCheckEncrypted, TypeFileCheckHarmful,
-	},
+}
+
+func FeedTypes() []Type {
+	return slices.Clone(feedTypes)
 }
 
 func (c Category) Types() []Type {
@@ -90,24 +89,11 @@ type CommentRef struct {
 	HTML *string
 }
 
-type DeveloperRef struct {
-	ID   int
-	Name string
-}
-
-type CharacterRef struct {
-	ID     int
-	NameJP string
-	NameZH *string
-	NameEN *string
-}
-
 type FileRef struct {
-	ID              int
-	FileName        string
-	FileSize        int64
-	FileStatus      *int
-	FileCheckStatus *int
+	ID         int
+	ResourceID int
+	FileName   string
+	FileSize   int64
 }
 
 type Entry struct {
@@ -118,8 +104,6 @@ type Entry struct {
 	Game        *game.Card
 	Walkthrough *WalkthroughRef
 	Comment     *CommentRef
-	Developer   *DeveloperRef
-	Character   *CharacterRef
 	File        *FileRef
 	Created     time.Time
 	Updated     time.Time

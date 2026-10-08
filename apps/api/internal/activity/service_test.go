@@ -37,11 +37,11 @@ func TestFeedFiltersByCategoryAndViewer(t *testing.T) {
 	service := activity.NewService(repo, cards)
 	strict := actor.Actor{UserID: 1, ContentLimit: actor.ContentLimitNeverShow}
 
-	entries, total, err := service.Feed(context.Background(), strict, ptr(activity.CategoryEdits), activity.Page{Number: 1, Size: 10})
+	entries, total, err := service.Feed(context.Background(), strict, ptr(activity.CategoryFiles), activity.Page{Number: 1, Size: 10})
 	if err != nil || total != 2 {
 		t.Fatalf("feed: %d %v", total, err)
 	}
-	if !repo.filter.ExcludeRated || !slices.Equal(repo.filter.Types, []activity.Type{activity.TypeGameEdit, activity.TypeDeveloperEdit, activity.TypeCharacterEdit}) {
+	if !repo.filter.ExcludeRated || !slices.Equal(repo.filter.Types, []activity.Type{activity.TypeFileUploadToS3}) {
 		t.Fatalf("unexpected filter %+v", repo.filter)
 	}
 	if entries[0].Game == nil || len(entries[0].Game.Covers) != 1 || entries[1].Game != nil {
@@ -51,8 +51,12 @@ func TestFeedFiltersByCategoryAndViewer(t *testing.T) {
 	if _, _, err := service.Feed(context.Background(), actor.Actor{ContentLimit: actor.ContentLimitJustShow}, nil, activity.Page{Number: 1, Size: 10}); err != nil {
 		t.Fatal(err)
 	}
-	if repo.filter.ExcludeRated || repo.filter.Types != nil {
-		t.Fatalf("permissive viewers without a category are unfiltered: %+v", repo.filter)
+	everything := []activity.Type{activity.TypeFileUploadToS3, activity.TypeComment, activity.TypeWalkthroughCreate}
+	if repo.filter.ExcludeRated || !slices.Equal(repo.filter.Types, everything) {
+		t.Fatalf("without a category the feed holds every public kind and nothing else: %+v", repo.filter)
+	}
+	if activity.Category("edits").Valid() || activity.Category("gameCreates").Valid() {
+		t.Fatal("edits and game creation are no longer categories of the feed")
 	}
 }
 

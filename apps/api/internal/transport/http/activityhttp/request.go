@@ -6,5 +6,5 @@ import (
 
 type listActivitiesInput struct {
 	httpapi.PageQuery
-	Category string `query:"category" enum:"comments,gameCreates,walkthroughCreates,edits,files"`
+	Category string `query:"category" enum:"files,comments,walkthroughCreates" doc:"Only one kind of happening; every kind when left out"`
 }
