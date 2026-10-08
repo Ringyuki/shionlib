@@ -7,6 +7,7 @@ import home from '~/features/home/messages/en.json'
 import library from '~/features/library/messages/en.json'
 import message from '~/features/message/messages/en.json'
 import profile from '~/features/profile/messages/en.json'
+import release from '~/features/release/messages/en.json'
 import resource from '~/features/resource/messages/en.json'
 import search from '~/features/search/messages/en.json'
 import settings from '~/features/settings/messages/en.json'
@@ -30,6 +31,7 @@ export const messages: Messages = {
   library,
   message,
   profile,
+  release,
   resource,
   search,
   settings,
