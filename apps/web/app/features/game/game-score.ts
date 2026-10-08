@@ -21,13 +21,16 @@ export function scoreSites(game: Pick<GameHeader, 'b_id' | 'v_id'>): ScoreSite[]
   return sites
 }
 
-export function bangumiScore(data: Schema<'BangumiScoreDTO'>): Score | undefined {
+export function bangumiScore(data: Schema<'BangumiScoreDTO'> | null): Score | undefined {
+  if (data === null) {
+    return undefined
+  }
   const { score, total } = data.rating
   return score > 0 && total > 0 ? { value: score, votes: total } : undefined
 }
 
-export function vndbScore(data: Schema<'VndbScoreDTO'>): Score | undefined {
-  return data.rating === null || data.votecount === 0
+export function vndbScore(data: Schema<'VndbScoreDTO'> | null): Score | undefined {
+  return data === null || data.rating === null || data.votecount === 0
     ? undefined
     : { value: data.rating / 10, votes: data.votecount }
 }

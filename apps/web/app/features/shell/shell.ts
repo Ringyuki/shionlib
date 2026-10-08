@@ -7,6 +7,7 @@ export type NavEntry = {
   key: NavKey
   to: string
   end: boolean
+  count: number
 }
 
 export type NavSection = {
@@ -20,7 +21,12 @@ export type SidebarMode = (typeof sidebarModes)[number]
 
 export const sidebarCookie = 'shionlib_sidebar'
 
-const entry = (key: NavKey, to: string, end = false): NavEntry => ({ key, to, end })
+const entry = (key: NavKey, to: string, end = false, count = 0): NavEntry => ({
+  key,
+  to,
+  end,
+  count,
+})
 
 export function sitePaths(locale: Locale) {
   return {
@@ -37,7 +43,7 @@ export function sitePaths(locale: Locale) {
   }
 }
 
-export function navSections(locale: Locale, viewerId: number | null): NavSection[] {
+export function navSections(locale: Locale, viewerId: number | null, unread = 0): NavSection[] {
   const paths = sitePaths(locale)
   const discover: NavSection = {
     key: 'discover',
@@ -58,7 +64,7 @@ export function navSections(locale: Locale, viewerId: number | null): NavSection
       entries: [
         entry('favorites', `${paths.profile(viewerId)}/favorites`),
         entry('uploads', paths.uploads),
-        entry('messages', `/${locale}/message`),
+        entry('messages', `/${locale}/message`, false, unread),
         entry('settings', paths.settings),
       ],
     },

@@ -1,4 +1,4 @@
-import { Tooltip } from '@hina-ui/react'
+import { Badge, Tooltip } from '@hina-ui/react'
 import { NavLink } from 'react-router'
 import { useTranslations } from 'use-intl'
 import type { NavEntry } from '../shell'
@@ -23,7 +23,9 @@ export function SiteNavLink({ entry, rail }: SiteNavLinkProps) {
         aria-label={rail ? label : undefined}
         className="hn-interactive hn-state-layer hn-press-none text-muted aria-[current=page]:bg-accent-soft aria-[current=page]:text-accent-text relative isolate flex h-10 items-center gap-3 rounded-lg ps-3 pe-2 text-base select-none aria-[current=page]:font-medium [&_svg]:size-5 [&_svg]:shrink-0"
       >
-        <Icon aria-hidden />
+        <Badge content={entry.count} tone="accent" label={t('unreadCount', { count: entry.count })}>
+          <Icon aria-hidden />
+        </Badge>
         <SidebarLabel collapsed={rail}>{label}</SidebarLabel>
       </NavLink>
     </Tooltip>

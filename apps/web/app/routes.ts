@@ -28,6 +28,7 @@ export default [
   route('resources/resource/file/remove', 'routes/resources.resource.file-remove.ts'),
   route('resources/upload/allowance', 'routes/resources.upload.allowance.ts'),
   route('resources/library/tags', 'routes/resources.library.tags.ts'),
+  route('resources/message/read-all', 'routes/resources.message.read-all.ts'),
   route('resources/viewer/preferences', 'routes/resources.viewer.preferences.ts'),
   route('resources/settings/avatar', 'routes/resources.settings.avatar.ts'),
   route('resources/settings/cover', 'routes/resources.settings.cover.ts'),
@@ -70,6 +71,7 @@ export default [
         ]),
         route('search/game', 'routes/search-legacy.ts'),
         route('game', 'routes/library.tsx'),
+        route('message/:category?', 'routes/messages.tsx'),
         route('game/:id', 'routes/game.tsx', [
           index('routes/game.resources.tsx'),
           route('info', 'routes/game.info.tsx'),

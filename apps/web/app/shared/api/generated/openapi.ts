@@ -2391,6 +2391,26 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/message/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Follow the caller's messages as server-sent events
+         * @description Sends message:unread (MessageUnreadEventDTO) on connecting and whenever the count changes, message:new (MessageNewEventDTO) when a message arrives, and ping to keep the connection open.
+         */
+        get: operations["message.stream"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/message/unread": {
         parameters: {
             query?: never;
@@ -3315,20 +3335,20 @@ export type components = {
             id: number;
         };
         ActivityDTO: {
-            character: components["schemas"]["ActivityCharacterDTO"];
-            comment: components["schemas"]["ActivityCommentDTO"];
+            character: components["schemas"]["ActivityCharacterDTO"] | null;
+            comment: components["schemas"]["ActivityCommentDTO"] | null;
             /** Format: date-time */
             created: string;
-            developer: components["schemas"]["ActivityDeveloperDTO"];
+            developer: components["schemas"]["ActivityDeveloperDTO"] | null;
             file?: components["schemas"]["ActivityFileDTO"];
-            game: components["schemas"]["GameCardDTO"];
+            game: components["schemas"]["GameCardDTO"] | null;
             /** Format: int64 */
             id: number;
             type: string;
             /** Format: date-time */
             updated: string;
             user: components["schemas"]["UserSummaryDTO"];
-            walkthrough: components["schemas"]["ActivityWalkthroughDTO"];
+            walkthrough: components["schemas"]["ActivityWalkthroughDTO"] | null;
         };
         ActivityDeveloperDTO: {
             /** Format: int64 */
@@ -3446,7 +3466,7 @@ export type components = {
             /** Format: int64 */
             like_count: number;
             moderations: components["schemas"]["AdminCommentEventDTO"][] | null;
-            parent: components["schemas"]["CommentParentDTO"];
+            parent: components["schemas"]["CommentParentDTO"] | null;
             /** Format: int64 */
             parent_id: number | null;
             /** Format: int64 */
@@ -3495,7 +3515,7 @@ export type components = {
             /** Format: int64 */
             like_count: number;
             moderation?: components["schemas"]["AdminCommentModerationDTO"];
-            parent: components["schemas"]["CommentParentDTO"];
+            parent: components["schemas"]["CommentParentDTO"] | null;
             /** Format: int64 */
             parent_id: number | null;
             /** Format: int64 */
@@ -3690,7 +3710,7 @@ export type components = {
         AdminUserBanDTO: {
             /** Format: date-time */
             banned_at: string;
-            banned_by: components["schemas"]["AdminUserRefDTO"];
+            banned_by: components["schemas"]["AdminUserRefDTO"] | null;
             /** Format: int64 */
             banned_duration_days: number | null;
             banned_reason: string | null;
@@ -3737,7 +3757,7 @@ export type components = {
             lang: string;
             /** Format: date-time */
             last_login_at: string | null;
-            latest_ban: components["schemas"]["AdminUserBanDTO"];
+            latest_ban: components["schemas"]["AdminUserBanDTO"] | null;
             name: string;
             /** Format: int64 */
             role: number;
@@ -4070,7 +4090,7 @@ export type components = {
             updated: number;
         };
         AiCheckDTO: {
-            error: components["schemas"]["AiFailureDTO"];
+            error: components["schemas"]["AiFailureDTO"] | null;
             ok: boolean;
             route: components["schemas"]["AiRouteDTO"];
         };
@@ -4103,7 +4123,7 @@ export type components = {
             vision: boolean;
         };
         AiDiscoveryDTO: {
-            error: components["schemas"]["AiFailureDetailDTO"];
+            error: components["schemas"]["AiFailureDetailDTO"] | null;
             models: components["schemas"]["AiDiscoveredModelDTO"][] | null;
         };
         AiEndpointDTO: {
@@ -4121,7 +4141,7 @@ export type components = {
         AiLastAttemptDTO: {
             /** Format: date-time */
             created: string;
-            error: components["schemas"]["AiFailureDTO"];
+            error: components["schemas"]["AiFailureDTO"] | null;
             /** Format: int64 */
             first_token_ms: number | null;
             id: string;
@@ -4246,7 +4266,7 @@ export type components = {
         };
         AiPlaygroundResultDTO: {
             attempts: components["schemas"]["AiRequestDTO"][] | null;
-            error: components["schemas"]["AiFailureDTO"];
+            error: components["schemas"]["AiFailureDTO"] | null;
             ok: boolean;
             output: string | null;
         };
@@ -4340,12 +4360,12 @@ export type components = {
             id: string;
             /** Format: int64 */
             input_tokens: number;
-            model: components["schemas"]["AiModelRefDTO"];
+            model: components["schemas"]["AiModelRefDTO"] | null;
             ok: boolean;
             /** Format: int64 */
             output_tokens: number;
             protocol: string;
-            provider: components["schemas"]["AiProviderRefDTO"];
+            provider: components["schemas"]["AiProviderRefDTO"] | null;
             /** Format: int64 */
             route_id: number | null;
             scene: string | null;
@@ -4359,7 +4379,7 @@ export type components = {
             cache_write_tokens: number;
             error_detail: string | null;
             finish_reason: string | null;
-            payload: components["schemas"]["AiPayloadDTO"];
+            payload: components["schemas"]["AiPayloadDTO"] | null;
             /** Format: int64 */
             reasoning_tokens: number;
         };
@@ -4400,7 +4420,7 @@ export type components = {
             /** Format: double */
             input_price: number;
             json_mode: boolean;
-            last: components["schemas"]["AiLastAttemptDTO"];
+            last: components["schemas"]["AiLastAttemptDTO"] | null;
             model: components["schemas"]["AiModelRefDTO"];
             offered: boolean | null;
             /** Format: double */
@@ -4441,12 +4461,12 @@ export type components = {
             upstream_id?: string;
         };
         AiSceneDTO: {
-            effective: components["schemas"]["AiModelRefDTO"];
+            effective: components["schemas"]["AiModelRefDTO"] | null;
             key: string;
             label: string;
             /** Format: int64 */
             max_output_tokens: number | null;
-            model: components["schemas"]["AiModelRefDTO"];
+            model: components["schemas"]["AiModelRefDTO"] | null;
             /** @enum {string} */
             output: "object" | "text" | "moderation";
             /** @enum {string|null} */
@@ -4766,7 +4786,7 @@ export type components = {
             id: number;
             /** Format: int64 */
             like_count: number;
-            parent: components["schemas"]["CommentParentDTO"];
+            parent: components["schemas"]["CommentParentDTO"] | null;
             /** Format: int64 */
             parent_id: number | null;
             /** Format: int64 */
@@ -4970,7 +4990,7 @@ export type components = {
             /** Format: int64 */
             id: number;
             is_virus_false_positive: boolean;
-            latest_history: components["schemas"]["DownloadHistoryRefDTO"];
+            latest_history: components["schemas"]["DownloadHistoryRefDTO"] | null;
             malware_scan_cases: components["schemas"]["DownloadMalwareCaseDTO"][] | null;
             /**
              * @description Why a rejected file was rejected; null otherwise
@@ -5545,7 +5565,7 @@ export type components = {
         EnvelopeBangumiScoreDTO: {
             /** Format: int64 */
             code: number;
-            data: components["schemas"]["BangumiScoreDTO"];
+            data: components["schemas"]["BangumiScoreDTO"] | null;
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -6597,7 +6617,7 @@ export type components = {
         EnvelopeVndbScoreDTO: {
             /** Format: int64 */
             code: number;
-            data: components["schemas"]["VndbScoreDTO"];
+            data: components["schemas"]["VndbScoreDTO"] | null;
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -6924,7 +6944,7 @@ export type components = {
             /** @description Languages of the downloadable resources, most common first */
             languages: string[] | null;
             /** @description The newest downloadable resource; null when there is none */
-            latest: components["schemas"]["GameLatestResourceDTO"];
+            latest: components["schemas"]["GameLatestResourceDTO"] | null;
             /** @description Platforms of the downloadable resources, most common first */
             platforms: string[] | null;
         };
@@ -6990,7 +7010,7 @@ export type components = {
             decision_source: string | null;
             detected_viruses: string[] | null;
             detector: string;
-            file: components["schemas"]["MalwareDetailFileDTO"];
+            file: components["schemas"]["MalwareDetailFileDTO"] | null;
             file_hash: string;
             file_name: string;
             /** Format: int64 */
@@ -6999,13 +7019,13 @@ export type components = {
             /** Format: int64 */
             id: number;
             notify_uploader_on_allow: boolean;
-            resource: components["schemas"]["MalwareDetailResourceDTO"];
+            resource: components["schemas"]["MalwareDetailResourceDTO"] | null;
             /** Format: date-time */
             review_deadline: string;
             review_note: string | null;
             /** Format: date-time */
             reviewed_at: string | null;
-            reviewer: components["schemas"]["UserSummaryDTO"];
+            reviewer: components["schemas"]["UserSummaryDTO"] | null;
             scan_log_excerpt: string | null;
             scan_log_path: string | null;
             scan_result: unknown;
@@ -7022,7 +7042,7 @@ export type components = {
             decision_source: string | null;
             detected_viruses: string[] | null;
             detector: string;
-            file: components["schemas"]["MalwareListFileDTO"];
+            file: components["schemas"]["MalwareListFileDTO"] | null;
             file_hash: string;
             file_name: string;
             /** Format: int64 */
@@ -7031,13 +7051,13 @@ export type components = {
             /** Format: int64 */
             id: number;
             notify_uploader_on_allow: boolean;
-            resource: components["schemas"]["MalwareListResourceDTO"];
+            resource: components["schemas"]["MalwareListResourceDTO"] | null;
             /** Format: date-time */
             review_deadline: string;
             review_note: string | null;
             /** Format: date-time */
             reviewed_at: string | null;
-            reviewer: components["schemas"]["UserSummaryDTO"];
+            reviewer: components["schemas"]["UserSummaryDTO"] | null;
             status: string;
             /** Format: date-time */
             updated: string;
@@ -7108,14 +7128,16 @@ export type components = {
             id: number;
         };
         MessageDetailDTO: {
-            comment: components["schemas"]["MessageCommentDTO"];
+            comment: components["schemas"]["MessageCommentDTO"] | null;
+            /** @description Written in the caller's language */
             content: string;
             /** Format: date-time */
             created: string;
             external_link: boolean;
-            game: components["schemas"]["GameCardDTO"];
+            game: components["schemas"]["GameCardDTO"] | null;
             /** Format: int64 */
             id: number;
+            /** @description Written in the caller's language */
             link_text: string | null;
             link_url: string | null;
             meta: unknown;
@@ -7123,7 +7145,8 @@ export type components = {
             /** Format: date-time */
             read_at: string | null;
             receiver: components["schemas"]["UserSummaryDTO"];
-            sender: components["schemas"]["UserSummaryDTO"];
+            sender: components["schemas"]["UserSummaryDTO"] | null;
+            /** @description Written in the caller's language */
             title: string;
             /** @enum {string} */
             tone: "PRIMARY" | "SECONDARY" | "SUCCESS" | "WARNING" | "INFO" | "DESTRUCTIVE" | "NEUTRAL";
@@ -7135,13 +7158,16 @@ export type components = {
         MessageItemDTO: {
             /** Format: date-time */
             created: string;
+            /** @description The beginning of the content, on one line */
+            excerpt: string;
             /** Format: int64 */
             id: number;
             read: boolean;
             /** Format: date-time */
             read_at: string | null;
             receiver: components["schemas"]["UserSummaryDTO"];
-            sender: components["schemas"]["UserSummaryDTO"];
+            sender: components["schemas"]["UserSummaryDTO"] | null;
+            /** @description Written in the caller's language */
             title: string;
             /** @enum {string} */
             tone: "PRIMARY" | "SECONDARY" | "SUCCESS" | "WARNING" | "INFO" | "DESTRUCTIVE" | "NEUTRAL";
@@ -7149,6 +7175,23 @@ export type components = {
             type: "COMMENT_REPLY" | "COMMENT_LIKE" | "SYSTEM";
             /** Format: date-time */
             updated: string;
+        };
+        MessageNewEventDTO: {
+            /** Format: date-time */
+            created: string;
+            /** Format: int64 */
+            id: number;
+            /** @enum {string} */
+            tone: "PRIMARY" | "SECONDARY" | "SUCCESS" | "WARNING" | "INFO" | "DESTRUCTIVE" | "NEUTRAL";
+            /** @enum {string} */
+            type: "COMMENT_REPLY" | "COMMENT_LIKE" | "SYSTEM";
+        };
+        MessageUnreadEventDTO: {
+            /**
+             * Format: int64
+             * @description How many messages the caller has not read
+             */
+            unread: number;
         };
         Meta: {
             auth?: components["schemas"]["AuthMeta"];
@@ -7418,7 +7461,7 @@ export type components = {
             process_note: string | null;
             /** Format: date-time */
             processed_at: string | null;
-            processor: components["schemas"]["UserSummaryDTO"];
+            processor: components["schemas"]["UserSummaryDTO"] | null;
             reason: string;
             reported_penalty_applied: boolean;
             reported_user: components["schemas"]["ReportMemberDTO"];
@@ -7474,7 +7517,7 @@ export type components = {
             process_note: string | null;
             /** Format: date-time */
             processed_at: string | null;
-            processor: components["schemas"]["UserSummaryDTO"];
+            processor: components["schemas"]["UserSummaryDTO"] | null;
             reason: string;
             reported_user: components["schemas"]["UserSummaryDTO"];
             reporter: components["schemas"]["UserSummaryDTO"];
@@ -7531,7 +7574,7 @@ export type components = {
         SearchCharacterDTO: {
             aliases: string[] | null;
             /** @description First visible game the character appears in */
-            game: components["schemas"]["SearchCharacterGameDTO"];
+            game: components["schemas"]["SearchCharacterGameDTO"] | null;
             /** Format: int64 */
             id: number;
             image: string | null;
@@ -7605,7 +7648,7 @@ export type components = {
         SettingChangeDTO: {
             /** Format: date-time */
             created: string;
-            editor: components["schemas"]["SettingEditorDTO"];
+            editor: components["schemas"]["SettingEditorDTO"] | null;
             /** Format: int64 */
             id: number;
             /** @description Null when the default applied before the change */
@@ -7623,7 +7666,7 @@ export type components = {
              */
             kind: "int" | "bytes" | "float" | "duration" | "flag" | "text";
             label: string;
-            last_change: components["schemas"]["SettingChangeDTO"];
+            last_change: components["schemas"]["SettingChangeDTO"] | null;
             max?: unknown;
             /** Format: int64 */
             max_length?: number;
@@ -7668,7 +7711,7 @@ export type components = {
             sponsorName: string | null;
             /** @enum {string} */
             status: "NEW" | "DONE" | "EXPIRED" | "REFUND";
-            user: components["schemas"]["UserSummaryDTO"];
+            user: components["schemas"]["UserSummaryDTO"] | null;
         };
         SponsorPaymentDTO: {
             /** Format: double */
@@ -7699,7 +7742,7 @@ export type components = {
             /** Format: date-time */
             paidAt: string;
             sponsorName: string | null;
-            user: components["schemas"]["UserSummaryDTO"];
+            user: components["schemas"]["UserSummaryDTO"] | null;
         };
         SponsorWebhookDTO: {
             received: boolean;
@@ -7858,7 +7901,7 @@ export type components = {
             is_liked: boolean;
             /** Format: int64 */
             like_count: number;
-            parent: components["schemas"]["CommentParentDTO"];
+            parent: components["schemas"]["CommentParentDTO"] | null;
             /** Format: int64 */
             parent_id: number | null;
             /** Format: int64 */
@@ -13751,6 +13794,35 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopePageMessageItemDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "message.stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Event stream */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": components["schemas"]["MessageUnreadEventDTO"] | components["schemas"]["MessageNewEventDTO"];
                 };
             };
             /** @description Error */

@@ -33,5 +33,6 @@
     "sponsor": "スポンサー",
     "contact": "お問い合わせ"
   },
-  "scrollTop": "トップへ戻る"
+  "scrollTop": "トップへ戻る",
+  "unreadCount": "未読 {count} 件"
 }

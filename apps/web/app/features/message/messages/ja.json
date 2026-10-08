@@ -1,0 +1,24 @@
+{
+  "title": "メッセージ",
+  "signIn": "ログインするとメッセージを確認できます",
+  "signInAction": "ログイン",
+  "unreadCount": "{count, plural, =0 {未読はありません} other {未読 # 件}}",
+  "markAllRead": "すべて既読にする",
+  "categories": "メッセージの種類",
+  "category": {
+    "all": "すべて",
+    "system": "システム",
+    "comment-reply": "返信",
+    "comment-like": "いいね"
+  },
+  "list": "メッセージ一覧",
+  "unread": "未読",
+  "empty": {
+    "all": "メッセージはまだありません。",
+    "system": "システムメッセージはまだありません。",
+    "comment-reply": "返信はまだありません。",
+    "comment-like": "いいねはまだありません。"
+  },
+  "choose": "メッセージを選んで表示",
+  "back": "メッセージ一覧に戻る"
+}

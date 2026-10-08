@@ -1,3 +1,4 @@
+import { localeCookie, localeCookieValue, type Locale } from '~/shared/i18n/locale'
 import { asksForRefresh } from './session'
 import { tokenExpiry } from './token.schema'
 
@@ -16,12 +17,13 @@ export type ApiSession = {
 export type ApiSessionOptions = {
   fetch?: (request: Request) => Promise<Response>
   now?: () => number
+  locale?: Locale
 }
 
 export function createApiSession(
   incoming: Request,
   apiUrl: string,
-  { fetch = globalThis.fetch, now = Date.now }: ApiSessionOptions = {},
+  { fetch = globalThis.fetch, now = Date.now, locale }: ApiSessionOptions = {},
 ): ApiSession {
   const cookies = new CookieJar(incoming.headers.get('cookie') ?? '')
   const issued: string[] = []
@@ -46,6 +48,10 @@ export function createApiSession(
   const keep = (setCookies: readonly string[]) => {
     issued.push(...setCookies)
     cookies.apply(setCookies)
+  }
+
+  if (locale !== undefined && cookies.get(localeCookie) !== locale) {
+    keep([localeCookieValue(locale)])
   }
 
   const send = async (request: Request) => {

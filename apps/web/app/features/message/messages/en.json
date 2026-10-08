@@ -1,0 +1,24 @@
+{
+  "title": "Messages",
+  "signIn": "Sign in to read your messages",
+  "signInAction": "Sign in",
+  "unreadCount": "{count, plural, =0 {No unread messages} one {# unread} other {# unread}}",
+  "markAllRead": "Mark all as read",
+  "categories": "Message categories",
+  "category": {
+    "all": "All",
+    "system": "System",
+    "comment-reply": "Replies",
+    "comment-like": "Likes"
+  },
+  "list": "Messages",
+  "unread": "Unread",
+  "empty": {
+    "all": "No messages yet.",
+    "system": "No system messages yet.",
+    "comment-reply": "No replies yet.",
+    "comment-like": "No likes yet."
+  },
+  "choose": "Choose a message to read",
+  "back": "Back to messages"
+}

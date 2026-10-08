@@ -101,7 +101,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 - MUST NOT use `as` type assertions outside `~/shared/api` (`as const` is fine) (lint).
 - MUST NOT import React state/effects or `ApiClient` into route modules, or call `api.*` there (lint).
 - MUST NOT import another feature's internals, or `*.server` modules from client code (lint).
-- MUST NOT call the API from the browser, except from `features/upload` (the upload endpoints and the calls that turn finished uploads into resource files) and the message SSE stream; those go through `~/shared/api/browser-client` and `~/shared/api/chunk` over the XHR adapter (`references/data.md`, lint).
+- MUST NOT call the API from the browser, except from `features/upload` (the upload endpoints and the calls that turn finished uploads into resource files), which goes through `~/shared/api/browser-client` and `~/shared/api/chunk` over the XHR adapter, and the message stream, which goes through `~/shared/api/event-stream` (`references/data.md`, lint).
 - MUST NOT store server data in global client state; the router's loader data and fetchers are the cache. The one client-side process is the upload manager (`features/upload`), which holds running uploads, not server data for pages.
 
 ## Where things go
@@ -122,6 +122,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 | A navigation list inside a page?                     | hina `NavLink as={InPageLink} href=… active=…` in a `nav` (`~/features/shell`); a `Select` of the same entries on narrow screens                    |
 | A setting of the account or of this browser?         | a `Panel` in a settings section: `features/settings` (profile, downloads, site) or `features/account` (security, connections); preferences through `usePreferences()` / `useLanguage()` from `~/features/viewer` |
 | Sending an avatar or another small image?            | `useCommand(…, { multipart: true })` with a `FormData`, `readUpload` in the action, `fileBody` in the use-case (`references/data.md`)                |
+| Something the server pushes?                         | `followEvents` from `~/shared/api/event-stream` behind a feature hook, parsing each event with a schema typed against its generated DTO (`references/data.md`)    |
 | Who is signed in?                                    | `loadViewer` in the `site` layout loader; pages read it from `matches` (`[root, lang, site, pages, page, …]`)                                      |
 | Action that needs a signed-in user?                  | `Button`/`IconButton` from `~/shared/ui/button` with `loginRequired`: guests get the sign-in dialog, the click replays                             |
 | The current month or a date filter?                 | `siteMonthStart(now)` and `isoDate` from `~/shared/i18n/site-time`; the loader passes `new Date()`, never read the clock in a model or component |

@@ -29,6 +29,35 @@ const incoming = (cookie: string) =>
   })
 
 describe('createApiSession', () => {
+  it('tells the API the language of the page and has the browser remember it', async () => {
+    const api = upstream(() => json(200, { code: 0 }))
+    const session = createApiSession(incoming('shionlib_locale=zh; other=1'), apiUrl, {
+      ...api,
+      now,
+      locale: 'ja',
+    })
+    await session.fetch(new Request(`${apiUrl}/message/list`))
+    expect(api.seen[0]?.headers.get('cookie')).toBe('shionlib_locale=ja; other=1')
+    expect(session.issuedCookies()).toEqual([
+      'shionlib_locale=ja; Path=/; Max-Age=31536000; SameSite=Lax',
+    ])
+  })
+
+  it('leaves the language cookie alone when it already says the page language, or on a request without one', async () => {
+    const api = upstream(() => json(200, { code: 0 }))
+    const same = createApiSession(incoming('shionlib_locale=ja'), apiUrl, {
+      ...api,
+      now,
+      locale: 'ja',
+    })
+    await same.fetch(new Request(`${apiUrl}/message/list`))
+    expect(same.issuedCookies()).toEqual([])
+    const resource = createApiSession(incoming('shionlib_locale=en'), apiUrl, { ...api, now })
+    await resource.fetch(new Request(`${apiUrl}/message/list`))
+    expect(api.seen[1]?.headers.get('cookie')).toBe('shionlib_locale=en')
+    expect(resource.issuedCookies()).toEqual([])
+  })
+
   it('forwards the visitor cookies and client headers', async () => {
     const api = upstream(() => json(200, { code: 0 }))
     const session = createApiSession(incoming('shionlib_access_token=a; other=1'), apiUrl, {

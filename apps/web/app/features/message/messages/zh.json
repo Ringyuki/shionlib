@@ -1,0 +1,24 @@
+{
+  "title": "消息",
+  "signIn": "登录后可以查看消息",
+  "signInAction": "登录",
+  "unreadCount": "{count, plural, =0 {没有未读消息} other {# 条未读}}",
+  "markAllRead": "全部标为已读",
+  "categories": "消息分类",
+  "category": {
+    "all": "全部",
+    "system": "系统",
+    "comment-reply": "回复",
+    "comment-like": "点赞"
+  },
+  "list": "消息列表",
+  "unread": "未读",
+  "empty": {
+    "all": "暂无消息。",
+    "system": "暂无系统消息。",
+    "comment-reply": "暂无回复。",
+    "comment-like": "暂无点赞。"
+  },
+  "choose": "选择一条消息查看",
+  "back": "返回消息列表"
+}

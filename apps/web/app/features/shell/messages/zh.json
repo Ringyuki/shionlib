@@ -33,5 +33,6 @@
     "sponsor": "赞助",
     "contact": "联系我们"
   },
-  "scrollTop": "回到顶部"
+  "scrollTop": "回到顶部",
+  "unreadCount": "{count} 条未读"
 }

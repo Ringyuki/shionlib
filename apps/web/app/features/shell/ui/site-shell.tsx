@@ -12,12 +12,13 @@ import { SiteSidebar } from './site-sidebar'
 type SiteShellProps = {
   viewer: Schema<'UserMeDTO'> | null
   sidebar: SidebarMode
+  unread: number
   children: ReactNode
 }
 
 export const mainScrollKey = 'main'
 
-export function SiteShell({ viewer, sidebar, children }: SiteShellProps) {
+export function SiteShell({ viewer, sidebar, unread, children }: SiteShellProps) {
   const locale = useLocale()
   const t = useTranslations('shell')
   const shell = useRef<AppShellHandle>(null)
@@ -35,7 +36,7 @@ export function SiteShell({ viewer, sidebar, children }: SiteShellProps) {
         onMobileOpenChange={state.setMobileOpen}
         sidebarContent={
           <SiteSidebar
-            sections={navSections(locale, viewer?.id ?? null)}
+            sections={navSections(locale, viewer?.id ?? null, unread)}
             viewer={viewer}
             mode={state.mode}
             onClose={state.closeMobile}

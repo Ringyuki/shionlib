@@ -33,5 +33,6 @@
     "sponsor": "Sponsor",
     "contact": "Contact"
   },
-  "scrollTop": "Back to top"
+  "scrollTop": "Back to top",
+  "unreadCount": "{count} unread"
 }
