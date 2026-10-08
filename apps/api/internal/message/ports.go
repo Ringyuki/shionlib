@@ -21,6 +21,7 @@ type Repository interface {
 type Notifier interface {
 	NewMessage(ctx context.Context, receiverID int, notice Notice)
 	Unread(ctx context.Context, receiverID int, count int)
+	UnreadUnknown(ctx context.Context, receiverID int, cause error)
 }
 
 type GameCards interface {

@@ -2,17 +2,12 @@ package messagehttp
 
 import (
 	"context"
-	"fmt"
-	"io"
 	"net/http"
-	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
-	"github.com/Ringyuki/shionlib/apps/api/internal/platform/jsoncodec"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/realtime"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
-	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/middleware"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
 )
 
@@ -35,8 +30,9 @@ func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "message.readAll", Method: http.MethodPost, Path: "/message/all/read", Summary: "Mark every message read", Tags: tags, Access: httpapi.AccessUser}, h.readAll)
 	httpapi.Register(api, httpapi.Route{ID: "message.unreadAll", Method: http.MethodPost, Path: "/message/all/unread", Summary: "Mark every message unread", Tags: tags, Access: httpapi.AccessUser}, h.unreadAll)
 	httpapi.Register(api, httpapi.Route{ID: "message.read", Method: http.MethodPost, Path: "/message/{id}/read", Summary: "Mark a message read", Tags: tags, Access: httpapi.AccessUser}, h.read)
+	documentStream(api.OpenAPI())
 	if h.hub != nil {
-		api.Router().Get("/message/stream", h.stream(api))
+		api.Router().Get(streamPath, h.stream(api))
 	}
 }
 
@@ -47,7 +43,7 @@ func (h *Handler) list(ctx context.Context, in *listMessagesInput) (*response.Ou
 	}
 	now := h.resp.Now()
 	page := response.MapPage(items, total, in.PageSize, in.Page, func(m message.Message) messageItemDTO {
-		return toMessageItem(m, now)
+		return toMessageItem(m, written(ctx, h.resp, m), now)
 	})
 	return response.OK(ctx, h.resp, page), nil
 }
@@ -65,7 +61,7 @@ func (h *Handler) get(ctx context.Context, in *messagePathInput) (*response.Outp
 	if err != nil {
 		return nil, err
 	}
-	return response.OK(ctx, h.resp, toMessageDetail(detail, h.resp.Now())), nil
+	return response.OK(ctx, h.resp, toMessageDetail(detail, written(ctx, h.resp, detail.Message), h.resp.Now())), nil
 }
 
 func (h *Handler) readAll(ctx context.Context, _ *struct{}) (*response.EmptyOutput, error) {
@@ -87,71 +83,4 @@ func (h *Handler) read(ctx context.Context, in *messagePathInput) (*response.Emp
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil
-}
-
-const keepAliveInterval = 25 * time.Second
-
-func (h *Handler) stream(api *httpapi.API) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		if err := middleware.RequireAuthenticated(ctx); err != nil {
-			api.ErrorWriter().Write(w, r, api.Mapper().FromError(ctx, err))
-			return
-		}
-		who := actor.From(ctx)
-		unread, err := h.service.UnreadCount(ctx, who)
-		if err != nil {
-			api.ErrorWriter().Write(w, r, api.Mapper().FromError(ctx, err))
-			return
-		}
-		controller := http.NewResponseController(w)
-		_ = controller.SetWriteDeadline(time.Time{})
-		header := w.Header()
-		header.Set("Content-Type", "text/event-stream")
-		header.Set("Cache-Control", "no-cache")
-		header.Set("Connection", "keep-alive")
-		header.Set("X-Accel-Buffering", "no")
-		w.WriteHeader(http.StatusOK)
-
-		subscription := h.hub.Subscribe(who.UserID)
-		defer subscription.Close()
-
-		if err := writeEvent(w, "message:unread", unreadEventDTO{Unread: unread}); err != nil {
-			return
-		}
-		if err := controller.Flush(); err != nil {
-			return
-		}
-		ticker := time.NewTicker(keepAliveInterval)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case event, ok := <-subscription.Events():
-				if !ok {
-					return
-				}
-				if _, err := fmt.Fprintf(w, "event: %s\ndata: %s\n\n", event.Name, event.Data); err != nil {
-					return
-				}
-			case <-ticker.C:
-				if _, err := io.WriteString(w, "event: ping\ndata: {}\n\n"); err != nil {
-					return
-				}
-			}
-			if err := controller.Flush(); err != nil {
-				return
-			}
-		}
-	}
-}
-
-func writeEvent(w io.Writer, name string, payload any) error {
-	data, err := jsoncodec.Marshal(payload)
-	if err != nil {
-		return err
-	}
-	_, err = fmt.Fprintf(w, "event: %s\ndata: %s\n\n", name, data)
-	return err
 }

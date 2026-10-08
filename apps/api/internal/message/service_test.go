@@ -56,6 +56,9 @@ func TestSendSkipsSelfNotificationsForCommentEvents(t *testing.T) {
 	if len(f.notifier.Notices) != 1 || f.notifier.Notices[0].Notice.Tone != message.ToneInfo {
 		t.Fatalf("system messages to oneself are delivered with the default tone: %+v", f.notifier.Notices)
 	}
+	if unreads := f.notifier.Unreads; len(unreads) != 1 || unreads[0].UserID != 7 || unreads[0].Count != 1 {
+		t.Fatalf("a new message also tells the receiver how many are unread: %+v", unreads)
+	}
 }
 
 func TestSendNotifiesOnlyAfterCommit(t *testing.T) {

@@ -13,7 +13,8 @@ type messageItemDTO struct {
 	ID       int                      `json:"id"`
 	Type     string                   `json:"type" enum:"COMMENT_REPLY,COMMENT_LIKE,SYSTEM"`
 	Tone     string                   `json:"tone" enum:"PRIMARY,SECONDARY,SUCCESS,WARNING,INFO,DESTRUCTIVE,NEUTRAL"`
-	Title    string                   `json:"title"`
+	Title    string                   `json:"title" doc:"Written in the caller's language"`
+	Excerpt  string                   `json:"excerpt" doc:"The beginning of the content, on one line"`
 	Receiver userhttp.UserSummaryDTO  `json:"receiver"`
 	Sender   *userhttp.UserSummaryDTO `json:"sender"`
 	Read     bool                     `json:"read"`
@@ -31,9 +32,9 @@ type messageDetailDTO struct {
 	ID           int                      `json:"id"`
 	Type         string                   `json:"type" enum:"COMMENT_REPLY,COMMENT_LIKE,SYSTEM"`
 	Tone         string                   `json:"tone" enum:"PRIMARY,SECONDARY,SUCCESS,WARNING,INFO,DESTRUCTIVE,NEUTRAL"`
-	Title        string                   `json:"title"`
-	Content      string                   `json:"content"`
-	LinkText     *string                  `json:"link_text"`
+	Title        string                   `json:"title" doc:"Written in the caller's language"`
+	Content      string                   `json:"content" doc:"Written in the caller's language"`
+	LinkText     *string                  `json:"link_text" doc:"Written in the caller's language"`
 	LinkURL      *string                  `json:"link_url"`
 	ExternalLink bool                     `json:"external_link"`
 	Meta         json.RawMessage          `json:"meta"`
@@ -47,12 +48,13 @@ type messageDetailDTO struct {
 	Updated      time.Time                `json:"updated"`
 }
 
-func toMessageItem(m message.Message, now time.Time) messageItemDTO {
+func toMessageItem(m message.Message, text messageTextDTO, now time.Time) messageItemDTO {
 	return messageItemDTO{
 		ID:       m.ID,
 		Type:     string(m.Type),
 		Tone:     string(m.Tone),
-		Title:    m.Title,
+		Title:    text.Title,
+		Excerpt:  excerpt(text.Content),
 		Receiver: userhttp.ToUserSummary(m.Receiver, now),
 		Sender:   userhttp.ToUserSummaryPtr(m.Sender, now),
 		Read:     m.Read,
@@ -62,14 +64,14 @@ func toMessageItem(m message.Message, now time.Time) messageItemDTO {
 	}
 }
 
-func toMessageDetail(d message.Detail, now time.Time) messageDetailDTO {
+func toMessageDetail(d message.Detail, text messageTextDTO, now time.Time) messageDetailDTO {
 	out := messageDetailDTO{
 		ID:           d.ID,
 		Type:         string(d.Type),
 		Tone:         string(d.Tone),
-		Title:        d.Title,
-		Content:      d.Content,
-		LinkText:     d.LinkText,
+		Title:        text.Title,
+		Content:      text.Content,
+		LinkText:     text.LinkText,
 		LinkURL:      d.LinkURL,
 		ExternalLink: d.ExternalLink,
 		Sender:       userhttp.ToUserSummaryPtr(d.Sender, now),
@@ -92,6 +94,13 @@ func toMessageDetail(d message.Detail, now time.Time) messageDetailDTO {
 	return out
 }
 
-type unreadEventDTO struct {
-	Unread int `json:"unread"`
+type messageUnreadEventDTO struct {
+	Unread int `json:"unread" doc:"How many messages the caller has not read"`
+}
+
+type messageNewEventDTO struct {
+	ID      int       `json:"id"`
+	Type    string    `json:"type" enum:"COMMENT_REPLY,COMMENT_LIKE,SYSTEM"`
+	Tone    string    `json:"tone" enum:"PRIMARY,SECONDARY,SUCCESS,WARNING,INFO,DESTRUCTIVE,NEUTRAL"`
+	Created time.Time `json:"created"`
 }

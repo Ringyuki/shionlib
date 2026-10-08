@@ -32,6 +32,7 @@ func (s *Service) Send(ctx context.Context, in NewMessage) error {
 	}
 	s.tx.AfterCommit(ctx, func(ctx context.Context) {
 		s.notifier.NewMessage(ctx, in.ReceiverID, Notice{ID: created.ID, Title: created.Title, Type: created.Type, Tone: created.Tone, Created: created.Created})
+		s.publishUnread(in.ReceiverID)(ctx)
 	})
 	return nil
 }
@@ -105,6 +106,7 @@ func (s *Service) publishUnread(userID int) func(context.Context) {
 	return func(ctx context.Context) {
 		count, err := s.repo.CountUnread(ctx, userID)
 		if err != nil {
+			s.notifier.UnreadUnknown(ctx, userID, err)
 			return
 		}
 		s.notifier.Unread(ctx, userID, count)

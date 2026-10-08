@@ -71,6 +71,7 @@ func Register[I, O any](api *API, route Route, handler func(context.Context, *I)
 		operation.Middlewares = append(huma.Middlewares{api.throttleMiddleware(throttle, route.Method, route.Path)}, operation.Middlewares...)
 	}
 	huma.Register(api.huma, operation, handler)
+	markNullableObjects(api.huma.OpenAPI().Components.Schemas, reflect.TypeFor[O]())
 }
 
 func (a *API) requireAccess(access Access) func(huma.Context, func(huma.Context)) {

@@ -16,7 +16,6 @@ const (
 
 type newMessageEvent struct {
 	ID      int          `json:"id"`
-	Title   string       `json:"title"`
 	Type    message.Type `json:"type"`
 	Tone    message.Tone `json:"tone"`
 	Created time.Time    `json:"created"`
@@ -36,9 +35,13 @@ func NewMessageNotifier(hub *realtime.Hub, logger *slog.Logger) *MessageNotifier
 }
 
 func (n *MessageNotifier) NewMessage(ctx context.Context, receiverID int, notice message.Notice) {
-	if err := n.hub.Publish(ctx, receiverID, EventNewMessage, newMessageEvent{ID: notice.ID, Title: notice.Title, Type: notice.Type, Tone: notice.Tone, Created: notice.Created}); err != nil {
+	if err := n.hub.Publish(ctx, receiverID, EventNewMessage, newMessageEvent{ID: notice.ID, Type: notice.Type, Tone: notice.Tone, Created: notice.Created}); err != nil {
 		n.logger.WarnContext(ctx, "push new message failed", slog.Int("receiver_id", receiverID), slog.Any("error", err))
 	}
+}
+
+func (n *MessageNotifier) UnreadUnknown(ctx context.Context, receiverID int, cause error) {
+	n.logger.WarnContext(ctx, "count unread messages for push failed", slog.Int("receiver_id", receiverID), slog.Any("error", cause))
 }
 
 func (n *MessageNotifier) Unread(ctx context.Context, receiverID int, count int) {

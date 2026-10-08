@@ -28,11 +28,15 @@ The OpenAPI 3.1 document `apps/api/openapi/openapi.json` is generated from the G
 
 ## Realtime
 
-`GET /message/stream` (login required) is a Server-Sent Events stream. Events: `message:unread` (`{"unread": n}`, sent on connect and on every change), `message:new` (`{id, title, type, tone, created}`, `created` in the same `…sssZ` format as every other time), `ping` (keep-alive every 25 s). The stream is not part of the OpenAPI document; its payloads are `messagehttp.unreadEventDTO` and the records in `internal/adapter/push`.
+`GET /message/stream` (login required) is a Server-Sent Events stream. Events: `message:unread` (`{"unread": n}`, sent on connect and on every change, including when a message arrives), `message:new` (`{id, type, tone, created}`, `created` in the same `…sssZ` format as every other time), `ping` (keep-alive every 25 s). The stream is in the OpenAPI document (`message.stream`) with both payloads as `MessageUnreadEventDTO` and `MessageNewEventDTO`; `internal/adapter/push` publishes the same shapes, and its tests pin them.
 
 ## Message meta
 
-`meta` on a message is a free-form JSON object whose keys the web client reads per message type (`file_name`, `top_category`, `review_deadline`, …). Capabilities build it as `message.Meta`; `messagepg` encodes it with the API JSON format, so times inside meta use the same `…sssZ` format.
+A message is stored as keys and parameters and answered as text. Capabilities send `Title`, `Content` and `LinkText` as keys under `Messages.` with the parameters in `message.Meta` (`file_name`, `top_category`, `review_deadline`, …); `messagehttp` writes them in the caller's language from `internal/platform/i18n/locales/{zh,en,ja}/Messages.json`. In those texts `{name}` is a parameter and `{name, select, none {} other {…}}` leaves a sentence out when the parameter is missing, null, empty, zero or false (`i18n` `format`). Before formatting, codes become words where the catalog has a label (`reason`, `malicious_level`), `review_deadline` is written as `2006-01-02 15:04` in UTC+8, and `game_title` is the title in the caller's language. Text that does not start with `Messages.` is answered as stored. A new kind of message needs its texts in all three languages. `meta` is still answered, as stored, for tools that want the raw parameters; `messagepg` encodes it with the API JSON format, so times inside it use the same `…sssZ` format.
+
+## Objects that may be null
+
+A response field that is a pointer to an object is described as that object or null (`oneOf` of the reference and `null`), so generated clients do not treat it as always present. `httpapi.Register` does this for every output type; nothing is declared per field. A pointer with `omitempty` is optional instead.
 
 ## Idempotency
 

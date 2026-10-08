@@ -1,0 +1,92 @@
+{
+  "Comment": {
+    "Reply": {
+      "Title": "New reply to your comment",
+      "Content": "Someone replied to your comment."
+    },
+    "Like": {
+      "Title": "Your comment was liked",
+      "Content": "Someone liked your comment."
+    }
+  },
+  "System": {
+    "File": {
+      "Upload": {
+        "FileUploadSuccessTitle": "File uploaded",
+        "FileUploadSuccessContent": "Your file {file_name} has been stored. Thank you for sharing.",
+        "ResourcePublishedTitle": "Resource published",
+        "ResourcePublishedContent": "Your resource is published with {file_count} file(s): {file_names}.",
+        "FileUploadFailedTitle": "File did not pass the check",
+        "FileCheckFailedContent": "Your file {file_name} did not pass the check: {reason}. {missing_volumes, select, none {} other {Missing volumes: {missing_volumes}. }}Check the file and upload it again.",
+        "FileVirusReviewPendingTitle": "File is waiting for review",
+        "FileVirusReviewPendingContent": "Your file {file_name} was flagged by the malware scan ({detected_viruses}) and sent to manual review (case #{malware_case_id}), to be finished by {review_deadline}.",
+        "FileVirusReviewRequiredTitle": "A file is waiting for malware review",
+        "FileVirusReviewRequiredContent": "The file {file_name} uploaded by {uploader_name} was flagged by the malware scan ({detected_viruses}), case #{malware_case_id}. Handle it by {review_deadline}.",
+        "FileVirusReviewRequiredLinkText": "Review the case",
+        "FileVirusFalsePositiveReleasedTitle": "File passed the review",
+        "FileVirusFalsePositiveReleasedContent": "Your file {file_name} (case #{malware_case_id}) was reviewed as a false positive and is available again.{review_note, select, none {} other { Reviewer's note: {review_note}}}",
+        "FileVirusConfirmedDeletedTitle": "File deleted after review",
+        "FileVirusConfirmedDeletedContent": "Your file {file_name} (case #{malware_case_id}) was confirmed as harmful and has been deleted. You have uploaded harmful files {upload_injected_file_times} time(s); at {malware_auto_ban_threshold} in a row your account will be banned.{review_note, select, none {} other { Reviewer's note: {review_note}}}"
+      },
+      "Reupload": {
+        "FileReuploadedTitle": "A file of a game you favorited was updated",
+        "FileReuploadedContent": "The file {file_name} of {game_title}, a game you favorited, was updated.{reason, select, none {} other { Note: {reason}}}"
+      }
+    },
+    "Moderation": {
+      "Comment": {
+        "Block": {
+          "Title": "Comment did not pass moderation",
+          "Content": "Your comment did not pass moderation. Reason: {top_category}. Edit it and post it again.",
+          "ReviewContent": "Your comment did not pass moderation. Reason: {top_category}. {reason, select, none {} other {Moderator's note: {reason}. }}{evidence, select, none {} other {Passage: {evidence}. }}Edit it and post it again."
+        }
+      },
+      "Walkthrough": {
+        "Block": {
+          "Title": "Walkthrough did not pass moderation",
+          "ReviewContent": "Your walkthrough \"{walkthrough_title}\" did not pass moderation. Reason: {top_category}. {reason, select, none {} other {Moderator's note: {reason}. }}{evidence, select, none {} other {Passage: {evidence}. }}Edit it and publish it again.",
+          "LinkText": "Open the walkthrough"
+        }
+      }
+    },
+    "Report": {
+      "Valid": {
+        "Title": "Report accepted",
+        "Content": "Your report was confirmed. Violation: {reason}; severity: {malicious_level}.{process_note, select, none {} other { Note: {process_note}}}"
+      },
+      "Invalid": {
+        "Title": "Report rejected",
+        "Content": "Your report was not confirmed. You have made {false_report_count} invalid report(s) in the last 30 days; repeated invalid reports are penalised.{ban_days, select, none {} other { Your account is banned for {ban_days} day(s).}}{process_note, select, none {} other { Note: {process_note}}}"
+      },
+      "Penalty": {
+        "Title": "Resource violation notice",
+        "Content": "A resource you uploaded was confirmed as a violation. Violation: {reason}; severity: {malicious_level}.{upload_tier_demoted, select, true { Your upload tier has been lowered.} other {}}{ban_days, select, none {} other { Your account is banned for {ban_days} day(s).}}{process_note, select, none {} other { Note: {process_note}}}"
+      },
+      "NewReport": {
+        "Title": "New resource report",
+        "Content": "{reporter_name} reported a resource uploaded by {reported_user_name}. Reason: {reason}; severity: {malicious_level}.",
+        "LinkText": "Handle the report"
+      }
+    },
+    "AI": {
+      "RouteSuspended": {
+        "Title": "AI route suspended",
+        "Content": "The model {model} of {provider} ({upstream_id}) was suspended after failed calls.{error_kind, select, none {} other { Error kind: {error_kind}.}}{error_message, select, none {} other { Error: {error_message}}}"
+      },
+      "RouteRecovered": {
+        "Title": "AI route recovered",
+        "Content": "The model {model} of {provider} ({upstream_id}) is available again."
+      }
+    }
+  },
+  "Value": {
+    "reason": {
+      "OK": "no problem found",
+      "BROKEN_OR_TRUNCATED": "the file is damaged or incomplete",
+      "BROKEN_OR_UNSUPPORTED": "the file is damaged or its format is not supported",
+      "ENCRYPTED": "the archive is encrypted and cannot be checked",
+      "INCOMPLETE_SET": "the set of volumes is incomplete",
+      "HARMFUL": "harmful content was detected"
+    }
+  }
+}

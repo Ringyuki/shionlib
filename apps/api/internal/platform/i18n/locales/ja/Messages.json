@@ -1,0 +1,92 @@
+{
+  "Comment": {
+    "Reply": {
+      "Title": "コメントに返信がありました",
+      "Content": "あなたのコメントに返信がありました。"
+    },
+    "Like": {
+      "Title": "コメントにいいねがつきました",
+      "Content": "あなたのコメントにいいねがつきました。"
+    }
+  },
+  "System": {
+    "File": {
+      "Upload": {
+        "FileUploadSuccessTitle": "ファイルのアップロードが完了しました",
+        "FileUploadSuccessContent": "アップロードしたファイル {file_name} を保存しました。共有ありがとうございます。",
+        "ResourcePublishedTitle": "リソースを公開しました",
+        "ResourcePublishedContent": "アップロードしたリソースを公開しました。ファイルは {file_count} 件です：{file_names}。",
+        "FileUploadFailedTitle": "ファイルが検査を通過しませんでした",
+        "FileCheckFailedContent": "アップロードしたファイル {file_name} は検査を通過しませんでした：{reason}。{missing_volumes, select, none {} other {不足している分割ファイル：{missing_volumes}。}}ファイルを確認して、もう一度アップロードしてください。",
+        "FileVirusReviewPendingTitle": "ファイルが審査待ちです",
+        "FileVirusReviewPendingContent": "アップロードしたファイル {file_name} がウイルス検査で検出され（{detected_viruses}）、管理者による審査に回されました（ケース #{malware_case_id}）。{review_deadline} までに完了します。",
+        "FileVirusReviewRequiredTitle": "ウイルス審査待ちのファイルがあります",
+        "FileVirusReviewRequiredContent": "{uploader_name} がアップロードしたファイル {file_name} がウイルス検査で検出されました（{detected_viruses}）。ケース #{malware_case_id}、{review_deadline} までに対応してください。",
+        "FileVirusReviewRequiredLinkText": "審査する",
+        "FileVirusFalsePositiveReleasedTitle": "ファイルが審査を通過しました",
+        "FileVirusFalsePositiveReleasedContent": "あなたのファイル {file_name}（ケース #{malware_case_id}）は誤検知と判定され、利用できるようになりました。{review_note, select, none {} other {審査メモ：{review_note}}}",
+        "FileVirusConfirmedDeletedTitle": "審査の結果、ファイルを削除しました",
+        "FileVirusConfirmedDeletedContent": "あなたのファイル {file_name}（ケース #{malware_case_id}）は有害と判定され、削除されました。有害なファイルのアップロードは累計 {upload_injected_file_times} 回です。連続 {malware_auto_ban_threshold} 回に達するとアカウントが停止されます。{review_note, select, none {} other {審査メモ：{review_note}}}"
+      },
+      "Reupload": {
+        "FileReuploadedTitle": "お気に入りのゲームのファイルが更新されました",
+        "FileReuploadedContent": "お気に入りのゲーム「{game_title}」のファイル {file_name} が更新されました。{reason, select, none {} other {更新内容：{reason}}}"
+      }
+    },
+    "Moderation": {
+      "Comment": {
+        "Block": {
+          "Title": "コメントが審査を通過しませんでした",
+          "Content": "投稿したコメントは審査を通過しませんでした。理由：{top_category}。内容を修正して、もう一度投稿してください。",
+          "ReviewContent": "投稿したコメントは審査を通過しませんでした。理由：{top_category}。{reason, select, none {} other {審査メモ：{reason}。}}{evidence, select, none {} other {該当箇所：{evidence}。}}内容を修正して、もう一度投稿してください。"
+        }
+      },
+      "Walkthrough": {
+        "Block": {
+          "Title": "攻略が審査を通過しませんでした",
+          "ReviewContent": "公開した攻略「{walkthrough_title}」は審査を通過しませんでした。理由：{top_category}。{reason, select, none {} other {審査メモ：{reason}。}}{evidence, select, none {} other {該当箇所：{evidence}。}}内容を修正して、もう一度公開してください。",
+          "LinkText": "攻略を開く"
+        }
+      }
+    },
+    "Report": {
+      "Valid": {
+        "Title": "通報が認められました",
+        "Content": "あなたの通報は確認の結果、認められました。違反の種類：{reason}、深刻度：{malicious_level}。{process_note, select, none {} other {対応メモ：{process_note}}}"
+      },
+      "Invalid": {
+        "Title": "通報は認められませんでした",
+        "Content": "あなたの通報は確認の結果、認められませんでした。直近 30 日間の無効な通報は {false_report_count} 回です。無効な通報を繰り返すとペナルティの対象になります。{ban_days, select, none {} other {アカウントを {ban_days} 日間停止しました。}}{process_note, select, none {} other {対応メモ：{process_note}}}"
+      },
+      "Penalty": {
+        "Title": "リソース違反のお知らせ",
+        "Content": "アップロードしたリソースは確認の結果、違反と判定されました。違反の種類：{reason}、深刻度：{malicious_level}。{upload_tier_demoted, select, true {アップロードのランクを引き下げました。} other {}}{ban_days, select, none {} other {アカウントを {ban_days} 日間停止しました。}}{process_note, select, none {} other {対応メモ：{process_note}}}"
+      },
+      "NewReport": {
+        "Title": "新しいリソース通報があります",
+        "Content": "{reporter_name} が {reported_user_name} のアップロードしたリソースを通報しました。理由：{reason}、深刻度：{malicious_level}。",
+        "LinkText": "対応する"
+      }
+    },
+    "AI": {
+      "RouteSuspended": {
+        "Title": "AI ルートを停止しました",
+        "Content": "{provider} のモデル {model}（{upstream_id}）は呼び出しの失敗により停止されました。{error_kind, select, none {} other {エラーの種類：{error_kind}。}}{error_message, select, none {} other {エラー内容：{error_message}}}"
+      },
+      "RouteRecovered": {
+        "Title": "AI ルートが復旧しました",
+        "Content": "{provider} のモデル {model}（{upstream_id}）は再び利用できます。"
+      }
+    }
+  },
+  "Value": {
+    "reason": {
+      "OK": "問題なし",
+      "BROKEN_OR_TRUNCATED": "ファイルが破損しているか不完全です",
+      "BROKEN_OR_UNSUPPORTED": "ファイルが破損しているか、対応していない形式です",
+      "ENCRYPTED": "アーカイブが暗号化されていて検査できません",
+      "INCOMPLETE_SET": "分割ファイルが揃っていません",
+      "HARMFUL": "有害な内容が検出されました"
+    }
+  }
+}

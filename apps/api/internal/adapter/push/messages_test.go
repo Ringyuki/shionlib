@@ -50,7 +50,7 @@ func TestNewMessageEventsUseTheAPITimeFormat(t *testing.T) {
 	event := receive(t, sub, func() {
 		notifier.NewMessage(t.Context(), 7, message.Notice{ID: 5, Title: "hello", Type: message.TypeSystem, Tone: message.ToneInfo, Created: created})
 	})
-	want := `{"id":5,"title":"hello","type":"SYSTEM","tone":"INFO","created":"2026-10-03T01:02:03.456Z"}`
+	want := `{"id":5,"type":"SYSTEM","tone":"INFO","created":"2026-10-03T01:02:03.456Z"}`
 	if event.Name != push.EventNewMessage || string(event.Data) != want {
 		t.Fatalf("event %s %s", event.Name, event.Data)
 	}

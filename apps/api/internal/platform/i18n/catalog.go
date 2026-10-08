@@ -66,7 +66,7 @@ func (c *Catalog) T(locale Locale, key string, args map[string]any) string {
 	if !ok {
 		return key
 	}
-	return interpolate(message, args)
+	return format(message, args)
 }
 
 func flatten(prefix string, tree map[string]any, out map[string]string) {
@@ -78,47 +78,5 @@ func flatten(prefix string, tree map[string]any, out map[string]string) {
 		case map[string]any:
 			flatten(full, typed, out)
 		}
-	}
-}
-
-func interpolate(message string, args map[string]any) string {
-	if len(args) == 0 || !strings.Contains(message, "{") {
-		return message
-	}
-	var builder strings.Builder
-	builder.Grow(len(message))
-	for {
-		start := strings.IndexByte(message, '{')
-		if start < 0 {
-			builder.WriteString(message)
-			return builder.String()
-		}
-		end := strings.IndexByte(message[start:], '}')
-		if end < 0 {
-			builder.WriteString(message)
-			return builder.String()
-		}
-		end += start
-		name := message[start+1 : end]
-		builder.WriteString(message[:start])
-		if value, ok := args[name]; ok {
-			builder.WriteString(stringify(value))
-		} else {
-			builder.WriteString(message[start : end+1])
-		}
-		message = message[end+1:]
-	}
-}
-
-func stringify(value any) string {
-	switch typed := value.(type) {
-	case string:
-		return typed
-	case []string:
-		return strings.Join(typed, ", ")
-	case fmt.Stringer:
-		return typed.String()
-	default:
-		return fmt.Sprint(typed)
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -61,7 +62,7 @@ func TestListAndDetail(t *testing.T) {
 	server.Expect(server.Do(apitest.Request{Method: http.MethodGet, Path: "/message/list"}), http.StatusUnauthorized, 200101)
 	list := server.Do(apitest.Request{Method: http.MethodGet, Path: "/message/list?page=2&pageSize=2&unread=true&type=COMMENT_REPLY", As: &receiver})
 	server.Expect(list, http.StatusOK, 0)
-	want := `{"items":[{"id":1,"type":"COMMENT_REPLY","tone":"INFO","title":"Messages.Reply","receiver":{"id":7,"name":"receiver","avatar":null,"is_sponsor":false},"sender":{"id":8,"name":"sender","avatar":null,"is_sponsor":true},"read":false,"read_at":null,"created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z"}],"meta":{"totalItems":3,"itemCount":1,"itemsPerPage":2,"totalPages":2,"currentPage":2}}`
+	want := `{"items":[{"id":1,"type":"COMMENT_REPLY","tone":"INFO","title":"Messages.Reply","excerpt":"body","receiver":{"id":7,"name":"receiver","avatar":null,"is_sponsor":false},"sender":{"id":8,"name":"sender","avatar":null,"is_sponsor":true},"read":false,"read_at":null,"created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z"}],"meta":{"totalItems":3,"itemCount":1,"itemsPerPage":2,"totalPages":2,"currentPage":2}}`
 	if string(list.Data) != want {
 		t.Fatalf("unexpected list\n got %s\nwant %s", list.Data, want)
 	}
@@ -186,7 +187,7 @@ func TestStreamDeliversUnreadAndNewMessages(t *testing.T) {
 		t.Fatal(err)
 	}
 	expect("event: message:new")
-	expect(`"title":"hello"`)
+	expect(`"id":1`)
 }
 
 type hubNotifier struct {
@@ -194,14 +195,105 @@ type hubNotifier struct {
 }
 
 type noticeEvent struct {
-	ID    int    `json:"id"`
-	Title string `json:"title"`
+	ID int `json:"id"`
 }
 
 func (n hubNotifier) NewMessage(ctx context.Context, receiverID int, notice message.Notice) {
-	_ = n.hub.Publish(ctx, receiverID, "message:new", noticeEvent{ID: notice.ID, Title: notice.Title})
+	_ = n.hub.Publish(ctx, receiverID, "message:new", noticeEvent{ID: notice.ID})
 }
+
+func (hubNotifier) UnreadUnknown(context.Context, int, error) {}
 
 func (n hubNotifier) Unread(ctx context.Context, receiverID int, count int) {
 	_ = n.hub.Publish(ctx, receiverID, "message:unread", map[string]int{"unread": count})
+}
+
+func TestMessagesAreWrittenInTheCallersLanguage(t *testing.T) {
+	server, service := setup(t, nil, nil)
+	ctx := context.Background()
+	deadline := time.Date(2026, 10, 9, 4, 30, 0, 0, time.UTC)
+	linkText := "Messages.System.Report.NewReport.LinkText"
+	for _, in := range []message.NewMessage{
+		{Title: "Messages.System.Report.NewReport.Title", Content: "Messages.System.Report.NewReport.Content", LinkText: &linkText, LinkURL: ptr("/admin/reports?id=5"), Meta: message.Meta{"reporter_name": "kotori", "reported_user_name": "mikan", "reason": "BROKEN_LINK", "malicious_level": "LOW"}},
+		{Title: "Messages.System.File.Upload.FileVirusReviewPendingTitle", Content: "Messages.System.File.Upload.FileVirusReviewPendingContent", Meta: message.Meta{"file_name": "a.7z", "malware_case_id": 12, "review_deadline": deadline, "detected_viruses": "Eicar"}},
+		{Title: "Messages.System.File.Upload.FileVirusFalsePositiveReleasedTitle", Content: "Messages.System.File.Upload.FileVirusFalsePositiveReleasedContent", Meta: message.Meta{"file_name": "a.7z", "malware_case_id": 12, "review_note": nil}},
+		{Title: "Messages.System.Report.Penalty.Title", Content: "Messages.System.Report.Penalty.Content", Meta: message.Meta{"reason": "MALWARE", "malicious_level": "HIGH", "ban_days": 7, "upload_tier_demoted": true, "process_note": "已核实"}},
+		{Title: "Messages.System.File.Reupload.FileReuploadedTitle", Content: "Messages.System.File.Reupload.FileReuploadedContent", Meta: message.Meta{"file_name": "a.7z", "game_title_jp": "サクラノ詩", "game_title_zh": "", "game_title_en": "Sakura no Uta"}},
+		{Title: "Messages.System.File.Upload.FileUploadFailedTitle", Content: "Messages.System.File.Upload.FileCheckFailedContent", Meta: message.Meta{"file_name": "a.part1.rar", "reason": "INCOMPLETE_SET", "missing_volumes": []string{"a.part2.rar", "a.part3.rar"}}},
+		{Title: "写好的标题", Content: "写好的正文"},
+	} {
+		in.Type, in.Tone, in.ReceiverID = message.TypeSystem, message.ToneInfo, 7
+		if err := service.Send(ctx, in); err != nil {
+			t.Fatal(err)
+		}
+	}
+	type written struct {
+		Title    string  `json:"title"`
+		Content  string  `json:"content"`
+		LinkText *string `json:"link_text"`
+	}
+	open := func(id int, lang string) written {
+		t.Helper()
+		resp := server.Do(apitest.Request{Method: http.MethodGet, Path: "/message/" + strconv.Itoa(id) + "?lang=" + lang, As: &receiver})
+		server.Expect(resp, http.StatusOK, 0)
+		var out written
+		resp.Decode(t, &out)
+		return out
+	}
+	for name, tc := range map[string]struct {
+		id      int
+		lang    string
+		title   string
+		content string
+	}{
+		"codes become words":         {1, "zh", "有新的资源举报", "kotori 举报了 mikan 上传的资源。举报原因：链接失效；严重程度：低。"},
+		"another language":           {1, "en", "New resource report", "kotori reported a resource uploaded by mikan. Reason: Broken Link; severity: Low."},
+		"a time in the site's zone":  {2, "zh", "文件等待人工复核", "你上传的文件 a.7z 在病毒扫描中被标记（Eicar），已转入人工复核（编号 #12），将在 2026-10-09 12:30 前完成。"},
+		"an absent note":             {3, "zh", "文件已通过复核", "你的文件 a.7z（编号 #12）经复核判定为误报，已恢复正常。"},
+		"optional sentences":         {4, "zh", "资源违规处理通知", "你上传的资源经核实违规。违规类型：恶意软件；严重程度：高。你的上传档位已被下调。你的账号已被封禁 7 天。处理说明：已核实"},
+		"the game title of the page": {5, "zh", "你收藏的游戏有文件更新", "你收藏的游戏《サクラノ詩》的文件 a.7z 已更新。"},
+		"the title in English":       {5, "en", "A file of a game you favorited was updated", "The file a.7z of Sakura no Uta, a game you favorited, was updated."},
+		"a list of values":           {6, "zh", "文件未通过检查", "你上传的文件 a.part1.rar 未通过检查：分卷不完整。缺少的分卷：a.part2.rar, a.part3.rar。请确认文件后重新上传。"},
+		"text that is already text":  {7, "ja", "写好的标题", "写好的正文"},
+	} {
+		got := open(tc.id, tc.lang)
+		if got.Title != tc.title || got.Content != tc.content {
+			t.Fatalf("%s:\n got %q / %q\nwant %q / %q", name, got.Title, got.Content, tc.title, tc.content)
+		}
+	}
+	if got := open(1, "ja"); got.LinkText == nil || *got.LinkText != "対応する" {
+		t.Fatalf("link text follows the language: %+v", got.LinkText)
+	}
+
+	list := server.Do(apitest.Request{Method: http.MethodGet, Path: "/message/list?pageSize=10&lang=zh", As: &receiver})
+	var page struct {
+		Items []struct {
+			ID      int    `json:"id"`
+			Title   string `json:"title"`
+			Excerpt string `json:"excerpt"`
+		} `json:"items"`
+	}
+	list.Decode(t, &page)
+	if len(page.Items) != 7 || page.Items[0].Title != "写好的标题" || page.Items[6].Title != "有新的资源举报" || page.Items[6].Excerpt != "kotori 举报了 mikan 上传的资源。举报原因：链接失效；严重程度：低。" {
+		t.Fatalf("the list is written the same way: %+v", page.Items)
+	}
+}
+
+func TestExcerptIsOneShortLine(t *testing.T) {
+	server, service := setup(t, nil, nil)
+	long := strings.Repeat("汐", 130)
+	if err := service.Send(context.Background(), message.NewMessage{Type: message.TypeSystem, Tone: message.ToneInfo, Title: "t", Content: "第一行\n第二行 " + long, ReceiverID: 7}); err != nil {
+		t.Fatal(err)
+	}
+	list := server.Do(apitest.Request{Method: http.MethodGet, Path: "/message/list", As: &receiver})
+	var page struct {
+		Items []struct {
+			Excerpt string `json:"excerpt"`
+		} `json:"items"`
+	}
+	list.Decode(t, &page)
+	want := "第一行 第二行 " + strings.Repeat("汐", 112) + "…"
+	if len(page.Items) != 1 || page.Items[0].Excerpt != want {
+		t.Fatalf("got %q", page.Items[0].Excerpt)
+	}
 }

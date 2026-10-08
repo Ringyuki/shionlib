@@ -30,6 +30,7 @@
 - The service decides atomicity: `s.tx.WithinTransaction(ctx, func(ctx context.Context) error { ... })` where `tx` is the package's `Transactor` port, wired to `postgres.NewTransactor(client)`.
 - Nested calls join the outer transaction. Use `ForUpdate()` reads (`Lock` repository methods) when a check-then-write must be serialized.
 - Do not call external services or enqueue jobs inside a transaction unless the side effect is idempotent; enqueue after commit.
+- `s.tx.AfterCommit(ctx, fn)` runs `fn` once the outermost transaction has committed, with a context that no longer carries the transaction, so the hook reads committed data through the plain client. A hook cannot return an error: give a failure somewhere to go (`Notifier.UnreadUnknown` logs it in the adapter) instead of dropping it. `txtest.Immediate` runs hooks at once and cannot show a hook that depends on the transaction; `postgres_test.go` covers that.
 - Isolation is READ COMMITTED unless a reason is recorded in an ADR.
 
 ## Contract tests

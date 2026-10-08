@@ -1,0 +1,92 @@
+{
+  "Comment": {
+    "Reply": {
+      "Title": "你的评论收到了新回复",
+      "Content": "有人回复了你的评论。"
+    },
+    "Like": {
+      "Title": "你的评论收到了赞",
+      "Content": "有人赞了你的评论。"
+    }
+  },
+  "System": {
+    "File": {
+      "Upload": {
+        "FileUploadSuccessTitle": "文件上传完成",
+        "FileUploadSuccessContent": "你上传的文件 {file_name} 已保存，感谢分享。",
+        "ResourcePublishedTitle": "资源已发布",
+        "ResourcePublishedContent": "你上传的资源已发布，共 {file_count} 个文件：{file_names}。",
+        "FileUploadFailedTitle": "文件未通过检查",
+        "FileCheckFailedContent": "你上传的文件 {file_name} 未通过检查：{reason}。{missing_volumes, select, none {} other {缺少的分卷：{missing_volumes}。}}请确认文件后重新上传。",
+        "FileVirusReviewPendingTitle": "文件等待人工复核",
+        "FileVirusReviewPendingContent": "你上传的文件 {file_name} 在病毒扫描中被标记（{detected_viruses}），已转入人工复核（编号 #{malware_case_id}），将在 {review_deadline} 前完成。",
+        "FileVirusReviewRequiredTitle": "有文件等待报毒复核",
+        "FileVirusReviewRequiredContent": "{uploader_name} 上传的文件 {file_name} 在病毒扫描中被标记（{detected_viruses}），编号 #{malware_case_id}，请在 {review_deadline} 前处理。",
+        "FileVirusReviewRequiredLinkText": "前往复核",
+        "FileVirusFalsePositiveReleasedTitle": "文件已通过复核",
+        "FileVirusFalsePositiveReleasedContent": "你的文件 {file_name}（编号 #{malware_case_id}）经复核判定为误报，已恢复正常。{review_note, select, none {} other {复核说明：{review_note}}}",
+        "FileVirusConfirmedDeletedTitle": "文件经复核后已删除",
+        "FileVirusConfirmedDeletedContent": "你的文件 {file_name}（编号 #{malware_case_id}）经复核判定为有害，已被删除。你已累计 {upload_injected_file_times} 次上传有害文件，连续达到 {malware_auto_ban_threshold} 次时账号将被封禁。{review_note, select, none {} other {复核说明：{review_note}}}"
+      },
+      "Reupload": {
+        "FileReuploadedTitle": "你收藏的游戏有文件更新",
+        "FileReuploadedContent": "你收藏的游戏《{game_title}》的文件 {file_name} 已更新。{reason, select, none {} other {更新说明：{reason}}}"
+      }
+    },
+    "Moderation": {
+      "Comment": {
+        "Block": {
+          "Title": "评论未通过审核",
+          "Content": "你发表的评论未通过审核，原因：{top_category}。请修改后重新发表。",
+          "ReviewContent": "你发表的评论未通过审核，原因：{top_category}。{reason, select, none {} other {审核说明：{reason}。}}{evidence, select, none {} other {相关片段：{evidence}。}}请修改后重新发表。"
+        }
+      },
+      "Walkthrough": {
+        "Block": {
+          "Title": "攻略未通过审核",
+          "ReviewContent": "你发布的攻略《{walkthrough_title}》未通过审核，原因：{top_category}。{reason, select, none {} other {审核说明：{reason}。}}{evidence, select, none {} other {相关片段：{evidence}。}}请修改后重新发布。",
+          "LinkText": "查看攻略"
+        }
+      }
+    },
+    "Report": {
+      "Valid": {
+        "Title": "举报已受理",
+        "Content": "你提交的举报经核实成立。违规类型：{reason}；严重程度：{malicious_level}。{process_note, select, none {} other {处理说明：{process_note}}}"
+      },
+      "Invalid": {
+        "Title": "举报未成立",
+        "Content": "你提交的举报经核实不成立。近 30 天内你已有 {false_report_count} 次无效举报，多次无效举报将受到处罚。{ban_days, select, none {} other {你的账号已被封禁 {ban_days} 天。}}{process_note, select, none {} other {处理说明：{process_note}}}"
+      },
+      "Penalty": {
+        "Title": "资源违规处理通知",
+        "Content": "你上传的资源经核实违规。违规类型：{reason}；严重程度：{malicious_level}。{upload_tier_demoted, select, true {你的上传档位已被下调。} other {}}{ban_days, select, none {} other {你的账号已被封禁 {ban_days} 天。}}{process_note, select, none {} other {处理说明：{process_note}}}"
+      },
+      "NewReport": {
+        "Title": "有新的资源举报",
+        "Content": "{reporter_name} 举报了 {reported_user_name} 上传的资源。举报原因：{reason}；严重程度：{malicious_level}。",
+        "LinkText": "前往处理"
+      }
+    },
+    "AI": {
+      "RouteSuspended": {
+        "Title": "AI 线路已暂停",
+        "Content": "{provider} 的模型 {model}（{upstream_id}）因调用失败已被暂停。{error_kind, select, none {} other {错误类型：{error_kind}。}}{error_message, select, none {} other {错误信息：{error_message}}}"
+      },
+      "RouteRecovered": {
+        "Title": "AI 线路已恢复",
+        "Content": "{provider} 的模型 {model}（{upstream_id}）已恢复可用。"
+      }
+    }
+  },
+  "Value": {
+    "reason": {
+      "OK": "无异常",
+      "BROKEN_OR_TRUNCATED": "文件损坏或不完整",
+      "BROKEN_OR_UNSUPPORTED": "文件损坏或格式不受支持",
+      "ENCRYPTED": "压缩包已加密，无法检查内容",
+      "INCOMPLETE_SET": "分卷不完整",
+      "HARMFUL": "检测到有害内容"
+    }
+  }
+}
