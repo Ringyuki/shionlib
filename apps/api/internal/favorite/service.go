@@ -167,7 +167,7 @@ func (s *Service) Items(ctx context.Context, viewer actor.Actor, favoriteID int,
 		if !ok {
 			card = game.Card{ID: item.GameID}
 		}
-		views[i] = ItemView{ID: item.ID, Note: item.Note, Game: card}
+		views[i] = ItemView{ID: item.ID, Note: item.Note, Added: item.Created, Game: card}
 	}
 	return views, total, nil
 }

@@ -95,7 +95,7 @@ func (h *Handler) items(ctx context.Context, in *favoriteItemsInput) (*response.
 		},
 	}
 	for i, item := range items {
-		page.Items[i] = favoriteItemDTO{ID: item.ID, Note: item.Note, Game: gamehttp.ToGameCard(item.Game)}
+		page.Items[i] = favoriteItemDTO{ID: item.ID, Note: item.Note, AddedAt: item.Added, Game: gamehttp.ToGameCard(item.Game)}
 	}
 	return response.OK(ctx, h.resp, page), nil
 }

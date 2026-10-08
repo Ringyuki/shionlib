@@ -1,6 +1,8 @@
 package favoritehttp
 
 import (
+	"time"
+
 	"github.com/Ringyuki/shionlib/apps/api/internal/favorite"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/gamehttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
@@ -29,9 +31,10 @@ type favoriteSummaryDTO struct {
 }
 
 type favoriteItemDTO struct {
-	ID   int                  `json:"id"`
-	Note *string              `json:"note"`
-	Game gamehttp.GameCardDTO `json:"game"`
+	ID      int                  `json:"id"`
+	Note    *string              `json:"note"`
+	AddedAt time.Time            `json:"added_at" doc:"When the game was added to the list"`
+	Game    gamehttp.GameCardDTO `json:"game"`
 }
 
 type favoriteItemPageDTO struct {

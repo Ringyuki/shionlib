@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
 
@@ -46,6 +47,8 @@ type userProfileDTO struct {
 	Cover            *string    `json:"cover"`
 	Created          time.Time  `json:"created"`
 	Status           int        `json:"status"`
+	IsBanned         bool       `json:"is_banned"`
+	IsAdmin          bool       `json:"is_admin" doc:"Whether the user moderates the site"`
 	SponsorExpiresAt *time.Time `json:"sponsor_expires_at"`
 	IsSponsor        bool       `json:"is_sponsor"`
 	ResourceCount    int        `json:"resource_count"`
@@ -147,6 +150,8 @@ func toProfileDTO(p user.Profile, now time.Time) userProfileDTO {
 		Cover:            p.Cover,
 		Created:          p.Created,
 		Status:           int(p.Status),
+		IsBanned:         p.Banned(),
+		IsAdmin:          p.Role >= actor.RoleAdmin,
 		SponsorExpiresAt: p.SponsorExpiresAt,
 		IsSponsor:        p.IsSponsor(now),
 		ResourceCount:    p.Resources,

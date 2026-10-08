@@ -40,9 +40,10 @@ type Item struct {
 }
 
 type ItemView struct {
-	ID   int
-	Note *string
-	Game game.Card
+	ID    int
+	Note  *string
+	Added time.Time
+	Game  game.Card
 }
 
 type NewFavorite struct {

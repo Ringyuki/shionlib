@@ -138,8 +138,17 @@ func TestMeProfileAndNameCheck(t *testing.T) {
 	}
 	profile := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/user/1"})
 	e.server.Expect(profile, http.StatusOK, 0)
-	if string(profile.Data) != `{"id":1,"name":"alice","avatar":null,"role":1,"bio":null,"cover":null,"created":"2026-10-03T01:02:03.000Z","status":1,"sponsor_expires_at":"2026-10-03T02:02:03.000Z","is_sponsor":true,"resource_count":1,"comment_count":2,"favorite_count":3,"edit_count":4,"walkthrough_count":5}` {
+	if string(profile.Data) != `{"id":1,"name":"alice","avatar":null,"role":1,"bio":null,"cover":null,"created":"2026-10-03T01:02:03.000Z","status":1,"is_banned":false,"is_admin":false,"sponsor_expires_at":"2026-10-03T02:02:03.000Z","is_sponsor":true,"resource_count":1,"comment_count":2,"favorite_count":3,"edit_count":4,"walkthrough_count":5}` {
 		t.Fatalf("unexpected profile %s", profile.Data)
+	}
+	moderator := e.users.Seed(user.User{Name: "moderator", Role: actor.RoleAdmin, Status: user.StatusBanned})
+	var marks struct {
+		IsBanned bool `json:"is_banned"`
+		IsAdmin  bool `json:"is_admin"`
+	}
+	e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/user/" + strconv.Itoa(moderator.ID)}).Decode(t, &marks)
+	if !marks.IsBanned || !marks.IsAdmin {
+		t.Fatalf("a profile says whether the user is banned and whether they moderate: %+v", marks)
 	}
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/user/99"}), http.StatusNotFound, 300101)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/user/abc"}), http.StatusUnprocessableEntity, 100101)

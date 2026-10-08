@@ -12363,6 +12363,11 @@
       "FavoriteItemDTO": {
         "additionalProperties": false,
         "properties": {
+          "added_at": {
+            "description": "When the game was added to the list",
+            "format": "date-time",
+            "type": "string"
+          },
           "game": {
             "$ref": "#/components/schemas/GameCardDTO"
           },
@@ -12380,6 +12385,7 @@
         "required": [
           "id",
           "note",
+          "added_at",
           "game"
         ],
         "type": "object"
@@ -17303,6 +17309,13 @@
             "format": "int64",
             "type": "integer"
           },
+          "is_admin": {
+            "description": "Whether the user moderates the site",
+            "type": "boolean"
+          },
+          "is_banned": {
+            "type": "boolean"
+          },
           "is_sponsor": {
             "type": "boolean"
           },
@@ -17342,6 +17355,8 @@
           "cover",
           "created",
           "status",
+          "is_banned",
+          "is_admin",
           "sponsor_expires_at",
           "is_sponsor",
           "resource_count",

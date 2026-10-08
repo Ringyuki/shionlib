@@ -248,6 +248,9 @@ func TestItemsVisibilityAndCards(t *testing.T) {
 	if err != nil || total != 1 || len(strict) != 1 {
 		t.Fatalf("items: %+v %d %v", strict, total, err)
 	}
+	if strict[0].Added.IsZero() {
+		t.Fatalf("an item says when it was added: %+v", strict[0])
+	}
 	if covers := strict[0].Game.Covers; len(covers) != 1 || covers[0].URL != "safe" {
 		t.Fatalf("strict viewers must not see rated covers: %+v", covers)
 	}
