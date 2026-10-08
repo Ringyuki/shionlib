@@ -1,0 +1,22 @@
+{
+  "title": "动态",
+  "description": "最近公开的资源、评论和攻略。",
+  "kinds": "动态类型",
+  "kind": {
+    "all": "全部",
+    "resources": "资源",
+    "comments": "评论",
+    "walkthroughs": "攻略"
+  },
+  "did": {
+    "resources": "<user></user> 上传了<game></game>的资源",
+    "comments": "<user></user> 评论了<game></game>",
+    "walkthroughs": "<user></user> 发布了<game></game>的攻略<guide></guide>"
+  },
+  "empty": {
+    "all": "暂无动态。",
+    "resources": "暂无新资源。",
+    "comments": "暂无新评论。",
+    "walkthroughs": "暂无新攻略。"
+  }
+}

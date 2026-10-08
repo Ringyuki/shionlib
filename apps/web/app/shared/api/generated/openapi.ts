@@ -3322,49 +3322,37 @@ export type paths = {
 export type webhooks = Record<string, never>;
 export type components = {
     schemas: {
-        ActivityCharacterDTO: {
-            /** Format: int64 */
-            id: number;
-            name_en: string | null;
-            name_jp: string;
-            name_zh: string | null;
-        };
         ActivityCommentDTO: {
             html: string | null;
             /** Format: int64 */
             id: number;
         };
         ActivityDTO: {
-            character: components["schemas"]["ActivityCharacterDTO"] | null;
             comment: components["schemas"]["ActivityCommentDTO"] | null;
             /** Format: date-time */
             created: string;
-            developer: components["schemas"]["ActivityDeveloperDTO"] | null;
-            file?: components["schemas"]["ActivityFileDTO"];
+            file: components["schemas"]["ActivityFileDTO"] | null;
             game: components["schemas"]["GameCardDTO"] | null;
             /** Format: int64 */
             id: number;
-            type: string;
+            /**
+             * @description A file became downloadable, a comment was accepted, or a walkthrough was written
+             * @enum {string}
+             */
+            type: "FILE_UPLOAD_TO_S3" | "COMMENT" | "WALKTHROUGH_CREATE";
             /** Format: date-time */
             updated: string;
             user: components["schemas"]["UserSummaryDTO"];
             walkthrough: components["schemas"]["ActivityWalkthroughDTO"] | null;
         };
-        ActivityDeveloperDTO: {
-            /** Format: int64 */
-            id: number;
-            name: string;
-        };
         ActivityFileDTO: {
-            /** Format: int64 */
-            file_check_status: number | null;
             file_name: string;
             /** Format: int64 */
             file_size: number;
             /** Format: int64 */
-            file_status: number | null;
-            /** Format: int64 */
             id: number;
+            /** Format: int64 */
+            resource_id: number;
         };
         ActivityPageDTO: {
             items: components["schemas"]["ActivityDTO"][] | null;
@@ -8161,7 +8149,8 @@ export interface operations {
                 page?: number;
                 /** @description Items per page */
                 pageSize?: number;
-                category?: "comments" | "gameCreates" | "walkthroughCreates" | "edits" | "files";
+                /** @description Only one kind of happening; every kind when left out */
+                category?: "files" | "comments" | "walkthroughCreates";
             };
             header?: never;
             path?: never;

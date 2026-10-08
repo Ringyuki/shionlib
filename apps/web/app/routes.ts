@@ -77,6 +77,7 @@ export default [
         route('search/game', 'routes/search-legacy.ts'),
         route('game', 'routes/library.tsx'),
         route('release', 'routes/releases.tsx'),
+        route('activity', 'routes/activity.tsx'),
         route('developer', 'routes/developers.tsx'),
         route('developer/:id', 'routes/developer.tsx'),
         route('character/:id', 'routes/character.tsx'),

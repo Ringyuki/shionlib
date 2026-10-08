@@ -1,4 +1,5 @@
 import account from '~/features/account/messages/ja.json'
+import activity from '~/features/activity/messages/ja.json'
 import auth from '~/features/auth/messages/ja.json'
 import character from '~/features/character/messages/ja.json'
 import comment from '~/features/comment/messages/ja.json'
@@ -24,6 +25,7 @@ import type { Messages } from './zh'
 
 export const messages: Messages = {
   account,
+  activity,
   auth,
   bbcode,
   character,

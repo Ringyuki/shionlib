@@ -1,7 +1,15 @@
 import type { Locale } from '~/shared/i18n/locale'
 
 export type NavKey =
-  'home' | 'games' | 'releases' | 'developers' | 'favorites' | 'uploads' | 'messages' | 'settings'
+  | 'home'
+  | 'games'
+  | 'releases'
+  | 'developers'
+  | 'activity'
+  | 'favorites'
+  | 'uploads'
+  | 'messages'
+  | 'settings'
 
 export type NavEntry = {
   key: NavKey
@@ -52,6 +60,7 @@ export function navSections(locale: Locale, viewerId: number | null, unread = 0)
       entry('games', paths.games),
       entry('releases', paths.releases),
       entry('developers', `/${locale}/developer`),
+      entry('activity', `/${locale}/activity`),
     ],
   }
   if (viewerId === null) {
