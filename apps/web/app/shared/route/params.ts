@@ -16,3 +16,7 @@ export function idParam(value: string | undefined): number {
   }
   return parsed.output
 }
+
+export function optionalIdParam(value: string | undefined): number | undefined {
+  return value === undefined ? undefined : idParam(value)
+}

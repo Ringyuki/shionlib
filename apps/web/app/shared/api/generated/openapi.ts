@@ -6647,6 +6647,11 @@ export type components = {
             is_favorite: boolean;
         };
         FavoriteItemDTO: {
+            /**
+             * Format: date-time
+             * @description When the game was added to the list
+             */
+            added_at: string;
             game: components["schemas"]["GameCardDTO"];
             /** Format: int64 */
             id: number;
@@ -7910,6 +7915,9 @@ export type components = {
             favorite_count: number;
             /** Format: int64 */
             id: number;
+            /** @description Whether the user moderates the site */
+            is_admin: boolean;
+            is_banned: boolean;
             is_sponsor: boolean;
             name: string;
             /** Format: int64 */

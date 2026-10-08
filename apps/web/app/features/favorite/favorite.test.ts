@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import type { Schema } from '~/shared/api/types'
-import { isInAnyList, shownGameCount } from './favorite'
+import {
+  chosenList,
+  favoritesPath,
+  isInAnyList,
+  itemsSearch,
+  lastPage,
+  listLabel,
+  shownGameCount,
+} from './favorite'
 
 const list = (id: number, isFavorite?: boolean): Schema<'FavoriteSummaryDTO'> => ({
   default: id === 1,
@@ -25,5 +33,34 @@ describe('shownGameCount', () => {
     expect(shownGameCount(saved, true)).toBe(5)
     expect(shownGameCount(saved, false)).toBe(4)
     expect(shownGameCount({ ...saved, is_favorite: false }, true)).toBe(6)
+  })
+})
+
+describe('favorites page', () => {
+  it('addresses the lists of a user and one list among them', () => {
+    expect(favoritesPath('zh', 3)).toBe('/zh/user/3/favorites')
+    expect(favoritesPath('ja', 3, 8)).toBe('/ja/user/3/favorites/8')
+    expect(itemsSearch(1)).toBe('')
+    expect(itemsSearch(3)).toBe('?page=3')
+  })
+
+  it('opens the named list, or the default one when none is named', () => {
+    const lists = [list(4), list(1)]
+    expect(chosenList(lists, 4)?.id).toBe(4)
+    expect(chosenList(lists, undefined)?.id).toBe(1)
+    expect(chosenList([list(4), list(5)], undefined)?.id).toBe(4)
+    expect(chosenList(lists, 9)).toBeUndefined()
+    expect(chosenList([], undefined)).toBeUndefined()
+  })
+
+  it('names the default list in the language of the page', () => {
+    expect(listLabel(list(1), '默认收藏夹')).toBe('默认收藏夹')
+    expect(listLabel(list(2), '默认收藏夹')).toBe('list 2')
+  })
+
+  it('counts the pages of a list', () => {
+    expect(lastPage(0)).toBe(1)
+    expect(lastPage(20)).toBe(1)
+    expect(lastPage(21)).toBe(2)
   })
 })

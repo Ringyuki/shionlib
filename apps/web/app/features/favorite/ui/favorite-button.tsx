@@ -13,7 +13,7 @@ import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 import type { Schema } from '~/shared/api/types'
 import { IconButton } from '~/shared/ui/button'
-import { shownGameCount } from '../favorite'
+import { listLabel, shownGameCount } from '../favorite'
 import { useFavoriteLists } from '../use-favorite-lists'
 import { useMembershipToggle } from '../use-membership-toggle'
 import { NewListDialog } from './new-list-dialog'
@@ -109,7 +109,7 @@ function MembershipOption({
       description={t('gameCount', { count: shownGameCount(list, included) })}
     >
       <Inline gap="xs" align="center" wrap={false} as="span">
-        {list.default ? t('defaultList') : list.name}
+        {listLabel(list, t('defaultList'))}
         {list.is_private && <Lock aria-label={t('private')} className="size-3.5 text-faint" />}
       </Inline>
     </Checkbox>

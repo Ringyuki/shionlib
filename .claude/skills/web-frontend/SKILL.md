@@ -118,7 +118,8 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 | A form?                                              | `recipes/add-form.md`: `<name>.schema.ts` form schema from `useFormKit()`, `<Form rules>`, `useFormErrors`                                         |
 | Parsing a request body, cookie, param, storage?      | a schema in the nearest `*.schema.ts`; `readCommand`, `idParam`, `readCookie`, `parseOptional` (`references/forms.md`)                             |
 | Form validation errors?                              | `routeAction` returns `failure.data.errors` (field → messages); render them next to the field                                                      |
-| 404 for a bad id?                                    | `idParam(params.id)`; missing records come back from the API as 404 through `routeLoader`                                                          |
+| 404 for a bad id?                                    | `idParam(params.id)` (`optionalIdParam` for an optional segment); missing records come back from the API as 404 through `routeLoader`               |
+| A navigation list inside a page?                     | hina `NavLink as={InPageLink} href=… active=…` in a `nav` (`~/features/shell`); a `Select` of the same entries on narrow screens                    |
 | Who is signed in?                                    | `loadViewer` in the `site` layout loader; pages read it from `matches` (`[root, lang, site, pages, page, …]`)                                      |
 | Action that needs a signed-in user?                  | `Button`/`IconButton` from `~/shared/ui/button` with `loginRequired`: guests get the sign-in dialog, the click replays                             |
 | The current month or a date filter?                 | `siteMonthStart(now)` and `isoDate` from `~/shared/i18n/site-time`; the loader passes `new Date()`, never read the clock in a model or component |

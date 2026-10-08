@@ -5,6 +5,9 @@ export default [
   route('user/password/forget', 'routes/locale-redirect.ts', { id: 'password-reset-locale' }),
   route('resources/favorites', 'routes/resources.favorites.ts'),
   route('resources/favorites/lists', 'routes/resources.favorites.lists.ts'),
+  route('resources/favorites/list-edit', 'routes/resources.favorites.list-edit.ts'),
+  route('resources/favorites/list-remove', 'routes/resources.favorites.list-remove.ts'),
+  route('resources/favorites/item-note', 'routes/resources.favorites.item-note.ts'),
   route('resources/auth/sign-in', 'routes/resources.auth.sign-in.ts'),
   route('resources/auth/sign-up', 'routes/resources.auth.sign-up.ts'),
   route('resources/auth/sign-up-code', 'routes/resources.auth.sign-up-code.ts'),
@@ -35,6 +38,12 @@ export default [
         route('search', 'routes/search.tsx'),
         route('upload', 'routes/upload.tsx'),
         route('user/uploads', 'routes/uploads.tsx'),
+        route('user/:id', 'routes/user.tsx', [
+          index('routes/user.uploads.tsx'),
+          route('favorites/:listId?', 'routes/user.favorites.tsx'),
+          route('uploads', 'routes/user-legacy.ts', { id: 'user-uploads-legacy' }),
+          route('edits', 'routes/user-legacy.ts', { id: 'user-edits-legacy' }),
+        ]),
         route('search/game', 'routes/search-legacy.ts'),
         route('game', 'routes/library.tsx'),
         route('game/:id', 'routes/game.tsx', [

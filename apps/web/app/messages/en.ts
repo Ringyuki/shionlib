@@ -4,6 +4,7 @@ import favorite from '~/features/favorite/messages/en.json'
 import game from '~/features/game/messages/en.json'
 import home from '~/features/home/messages/en.json'
 import library from '~/features/library/messages/en.json'
+import profile from '~/features/profile/messages/en.json'
 import resource from '~/features/resource/messages/en.json'
 import search from '~/features/search/messages/en.json'
 import shell from '~/features/shell/messages/en.json'
@@ -23,6 +24,7 @@ export const messages: Messages = {
   game,
   home,
   library,
+  profile,
   resource,
   search,
   shell,

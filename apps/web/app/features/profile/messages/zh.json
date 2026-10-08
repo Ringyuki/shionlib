@@ -1,0 +1,21 @@
+{
+  "sponsor": "赞助者",
+  "admin": "管理员",
+  "banned": "已封禁",
+  "edit": "编辑资料",
+  "joined": "加入于 {date}",
+  "tabs": {
+    "label": "用户内容",
+    "uploads": "上传",
+    "favorites": "收藏夹"
+  },
+  "uploads": {
+    "label": "上传的资源",
+    "otherFiles": "等 {count, number} 个文件",
+    "downloads": "{count, number} 次下载",
+    "updated": "<time></time>更新",
+    "empty": "该用户尚未上传资源。",
+    "emptyOwn": "你尚未上传资源。",
+    "upload": "上传资源"
+  }
+}

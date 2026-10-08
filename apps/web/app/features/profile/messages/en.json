@@ -1,0 +1,21 @@
+{
+  "sponsor": "Sponsor",
+  "admin": "Admin",
+  "banned": "Banned",
+  "edit": "Edit profile",
+  "joined": "Joined {date}",
+  "tabs": {
+    "label": "User content",
+    "uploads": "Uploads",
+    "favorites": "Favorites"
+  },
+  "uploads": {
+    "label": "Uploaded resources",
+    "otherFiles": "{count, plural, one {and # more file} other {and # more files}}",
+    "downloads": "{count, plural, one {# download} other {# downloads}}",
+    "updated": "Updated <time></time>",
+    "empty": "This user has not uploaded any resources yet.",
+    "emptyOwn": "You have not uploaded any resources yet.",
+    "upload": "Upload a resource"
+  }
+}

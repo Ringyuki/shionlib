@@ -1,0 +1,21 @@
+{
+  "sponsor": "スポンサー",
+  "admin": "管理者",
+  "banned": "利用停止中",
+  "edit": "プロフィールを編集",
+  "joined": "{date}に登録",
+  "tabs": {
+    "label": "ユーザーのコンテンツ",
+    "uploads": "アップロード",
+    "favorites": "お気に入り"
+  },
+  "uploads": {
+    "label": "アップロードしたリソース",
+    "otherFiles": "ほか {count, number} 件",
+    "downloads": "{count, number} 回ダウンロード",
+    "updated": "<time></time>に更新",
+    "empty": "このユーザーはまだリソースをアップロードしていません。",
+    "emptyOwn": "まだリソースをアップロードしていません。",
+    "upload": "リソースをアップロード"
+  }
+}
