@@ -176,15 +176,16 @@ func (r *MemoryRepository) list(match func(walkthrough.Walkthrough) bool, page w
 	summaries := make([]walkthrough.Summary, 0, end-start)
 	for _, w := range matched[start:end] {
 		summaries = append(summaries, walkthrough.Summary{
-			ID:      w.ID,
-			GameID:  w.GameID,
-			Title:   w.Title,
-			Lang:    w.Lang,
-			Created: w.Created,
-			Updated: w.Updated,
-			Edited:  w.Edited,
-			Status:  w.Status,
-			Creator: r.summary(w.CreatorID),
+			ID:            w.ID,
+			GameID:        w.GameID,
+			Title:         w.Title,
+			Lang:          w.Lang,
+			Created:       w.Created,
+			Updated:       w.Updated,
+			Edited:        w.Edited,
+			Status:        w.Status,
+			ReviewPending: w.ReviewPending,
+			Creator:       r.summary(w.CreatorID),
 		})
 	}
 	return summaries, total, nil

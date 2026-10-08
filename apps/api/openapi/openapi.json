@@ -17912,6 +17912,9 @@
               "null"
             ]
           },
+          "review_pending": {
+            "type": "boolean"
+          },
           "status": {
             "enum": [
               "DRAFT",
@@ -17937,6 +17940,7 @@
           "updated",
           "edited",
           "status",
+          "review_pending",
           "game",
           "creator"
         ],
@@ -18076,6 +18080,10 @@
           "edited": {
             "type": "boolean"
           },
+          "game_id": {
+            "format": "int64",
+            "type": "integer"
+          },
           "html": {
             "type": "string"
           },
@@ -18088,6 +18096,10 @@
               "string",
               "null"
             ]
+          },
+          "review_pending": {
+            "description": "True while a walkthrough sent for publication waits for review; it is HIDDEN until then",
+            "type": "boolean"
           },
           "status": {
             "enum": [
@@ -18108,6 +18120,7 @@
         },
         "required": [
           "id",
+          "game_id",
           "title",
           "html",
           "lang",
@@ -18115,6 +18128,7 @@
           "updated",
           "edited",
           "status",
+          "review_pending",
           "creator"
         ],
         "type": "object"
@@ -18142,6 +18156,9 @@
               "null"
             ]
           },
+          "review_pending": {
+            "type": "boolean"
+          },
           "status": {
             "enum": [
               "DRAFT",
@@ -18167,6 +18184,7 @@
           "updated",
           "edited",
           "status",
+          "review_pending",
           "creator"
         ],
         "type": "object"

@@ -65,16 +65,17 @@ type View struct {
 }
 
 type Summary struct {
-	ID      int
-	GameID  int
-	Title   string
-	Lang    *string
-	Created time.Time
-	Updated time.Time
-	Edited  bool
-	Status  Status
-	Creator user.Summary
-	Game    *game.Card
+	ID            int
+	GameID        int
+	Title         string
+	Lang          *string
+	Created       time.Time
+	Updated       time.Time
+	Edited        bool
+	Status        Status
+	ReviewPending bool
+	Creator       user.Summary
+	Game          *game.Card
 }
 
 type NewWalkthrough struct {

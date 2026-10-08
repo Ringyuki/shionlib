@@ -11,27 +11,30 @@ import (
 )
 
 type walkthroughDTO struct {
-	ID      int                     `json:"id"`
-	Title   string                  `json:"title"`
-	HTML    string                  `json:"html"`
-	Lang    *string                 `json:"lang"`
-	Created time.Time               `json:"created"`
-	Updated time.Time               `json:"updated"`
-	Edited  bool                    `json:"edited"`
-	Status  string                  `json:"status" enum:"DRAFT,PUBLISHED,HIDDEN,DELETED"`
-	Creator userhttp.UserSummaryDTO `json:"creator"`
-	Content json.RawMessage         `json:"content,omitempty"`
+	ID            int                     `json:"id"`
+	GameID        int                     `json:"game_id"`
+	Title         string                  `json:"title"`
+	HTML          string                  `json:"html"`
+	Lang          *string                 `json:"lang"`
+	Created       time.Time               `json:"created"`
+	Updated       time.Time               `json:"updated"`
+	Edited        bool                    `json:"edited"`
+	Status        string                  `json:"status" enum:"DRAFT,PUBLISHED,HIDDEN,DELETED"`
+	ReviewPending bool                    `json:"review_pending" doc:"True while a walkthrough sent for publication waits for review; it is HIDDEN until then"`
+	Creator       userhttp.UserSummaryDTO `json:"creator"`
+	Content       json.RawMessage         `json:"content,omitempty"`
 }
 
 type walkthroughItemDTO struct {
-	ID      int                     `json:"id"`
-	Title   string                  `json:"title"`
-	Lang    *string                 `json:"lang"`
-	Created time.Time               `json:"created"`
-	Updated time.Time               `json:"updated"`
-	Edited  bool                    `json:"edited"`
-	Status  string                  `json:"status" enum:"DRAFT,PUBLISHED,HIDDEN,DELETED"`
-	Creator userhttp.UserSummaryDTO `json:"creator"`
+	ID            int                     `json:"id"`
+	Title         string                  `json:"title"`
+	Lang          *string                 `json:"lang"`
+	Created       time.Time               `json:"created"`
+	Updated       time.Time               `json:"updated"`
+	Edited        bool                    `json:"edited"`
+	Status        string                  `json:"status" enum:"DRAFT,PUBLISHED,HIDDEN,DELETED"`
+	ReviewPending bool                    `json:"review_pending"`
+	Creator       userhttp.UserSummaryDTO `json:"creator"`
 }
 
 type walkthroughPageMetaDTO struct {
@@ -45,15 +48,16 @@ type walkthroughPageDTO struct {
 }
 
 type userWalkthroughDTO struct {
-	ID      int                     `json:"id"`
-	Title   string                  `json:"title"`
-	Lang    *string                 `json:"lang"`
-	Created time.Time               `json:"created"`
-	Updated time.Time               `json:"updated"`
-	Edited  bool                    `json:"edited"`
-	Status  string                  `json:"status" enum:"DRAFT,PUBLISHED,HIDDEN,DELETED"`
-	Game    gamehttp.GameCardDTO    `json:"game"`
-	Creator userhttp.UserSummaryDTO `json:"creator"`
+	ID            int                     `json:"id"`
+	Title         string                  `json:"title"`
+	Lang          *string                 `json:"lang"`
+	Created       time.Time               `json:"created"`
+	Updated       time.Time               `json:"updated"`
+	Edited        bool                    `json:"edited"`
+	Status        string                  `json:"status" enum:"DRAFT,PUBLISHED,HIDDEN,DELETED"`
+	ReviewPending bool                    `json:"review_pending"`
+	Game          gamehttp.GameCardDTO    `json:"game"`
+	Creator       userhttp.UserSummaryDTO `json:"creator"`
 }
 
 type userWalkthroughPageMetaDTO struct {
@@ -69,42 +73,46 @@ type userWalkthroughPageDTO struct {
 
 func toWalkthrough(view walkthrough.View, now time.Time) walkthroughDTO {
 	return walkthroughDTO{
-		ID:      view.ID,
-		Title:   view.Title,
-		HTML:    view.HTML,
-		Lang:    view.Lang,
-		Created: view.Created,
-		Updated: view.Updated,
-		Edited:  view.Edited,
-		Status:  string(view.Status),
-		Creator: userhttp.ToUserSummary(view.Creator, now),
-		Content: view.Content,
+		ID:            view.ID,
+		GameID:        view.GameID,
+		Title:         view.Title,
+		HTML:          view.HTML,
+		Lang:          view.Lang,
+		Created:       view.Created,
+		Updated:       view.Updated,
+		Edited:        view.Edited,
+		Status:        string(view.Status),
+		ReviewPending: view.ReviewPending,
+		Creator:       userhttp.ToUserSummary(view.Creator, now),
+		Content:       view.Content,
 	}
 }
 
 func toItem(summary walkthrough.Summary, now time.Time) walkthroughItemDTO {
 	return walkthroughItemDTO{
-		ID:      summary.ID,
-		Title:   summary.Title,
-		Lang:    summary.Lang,
-		Created: summary.Created,
-		Updated: summary.Updated,
-		Edited:  summary.Edited,
-		Status:  string(summary.Status),
-		Creator: userhttp.ToUserSummary(summary.Creator, now),
+		ID:            summary.ID,
+		Title:         summary.Title,
+		Lang:          summary.Lang,
+		Created:       summary.Created,
+		Updated:       summary.Updated,
+		Edited:        summary.Edited,
+		Status:        string(summary.Status),
+		ReviewPending: summary.ReviewPending,
+		Creator:       userhttp.ToUserSummary(summary.Creator, now),
 	}
 }
 
 func toUserItem(summary walkthrough.Summary, now time.Time) userWalkthroughDTO {
 	out := userWalkthroughDTO{
-		ID:      summary.ID,
-		Title:   summary.Title,
-		Lang:    summary.Lang,
-		Created: summary.Created,
-		Updated: summary.Updated,
-		Edited:  summary.Edited,
-		Status:  string(summary.Status),
-		Creator: userhttp.ToUserSummary(summary.Creator, now),
+		ID:            summary.ID,
+		Title:         summary.Title,
+		Lang:          summary.Lang,
+		Created:       summary.Created,
+		Updated:       summary.Updated,
+		Edited:        summary.Edited,
+		Status:        string(summary.Status),
+		ReviewPending: summary.ReviewPending,
+		Creator:       userhttp.ToUserSummary(summary.Creator, now),
 	}
 	if summary.Game != nil {
 		out.Game = gamehttp.ToGameCard(*summary.Game)

@@ -34,7 +34,7 @@ var sortFields = map[walkthrough.SortField]string{
 var adminFields = []string{
 	entwalkthrough.FieldID, entwalkthrough.FieldGameID, entwalkthrough.FieldTitle, entwalkthrough.FieldHTML, entwalkthrough.FieldLang,
 	entwalkthrough.FieldCreated, entwalkthrough.FieldUpdated, entwalkthrough.FieldEdited, entwalkthrough.FieldStatus,
-	entwalkthrough.FieldCreatorID,
+	entwalkthrough.FieldCreatorID, entwalkthrough.FieldReviewPending,
 }
 
 func (r *Repository) Search(ctx context.Context, filter walkthrough.AdminFilter, page walkthrough.Page) ([]walkthrough.AdminEntry, int, error) {
@@ -275,15 +275,16 @@ func (r *Repository) list(ctx context.Context, query *ent.WalkthroughQuery, page
 	summaries := make([]walkthrough.Summary, len(rows))
 	for i, row := range rows {
 		summaries[i] = walkthrough.Summary{
-			ID:      row.ID,
-			GameID:  row.GameID,
-			Title:   row.Title,
-			Lang:    row.Lang,
-			Created: row.Created,
-			Updated: row.Updated,
-			Edited:  row.Edited,
-			Status:  walkthrough.Status(row.Status),
-			Creator: userpg.ToSummary(row.Edges.Creator),
+			ID:            row.ID,
+			GameID:        row.GameID,
+			Title:         row.Title,
+			Lang:          row.Lang,
+			Created:       row.Created,
+			Updated:       row.Updated,
+			Edited:        row.Edited,
+			Status:        walkthrough.Status(row.Status),
+			ReviewPending: row.ReviewPending,
+			Creator:       userpg.ToSummary(row.Edges.Creator),
 		}
 	}
 	return summaries, total, nil
