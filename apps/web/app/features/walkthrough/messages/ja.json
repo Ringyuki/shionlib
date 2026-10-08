@@ -1,0 +1,51 @@
+{
+  "list": "攻略",
+  "count": "{count, number} 件の攻略",
+  "empty": "攻略はまだありません。",
+  "write": "攻略を書く",
+  "updated": "<time></time>に更新",
+  "language": {
+    "zh": "簡体字中国語",
+    "zh-hant": "繁体字中国語",
+    "jp": "日本語",
+    "en": "英語"
+  },
+  "state": {
+    "draft": "下書き",
+    "reviewing": "審査中",
+    "hidden": "非表示"
+  },
+  "back": "『{game}』の攻略",
+  "contents": "目次",
+  "edit": "編集",
+  "remove": "削除",
+  "cancel": "キャンセル",
+  "removeConfirm": "この攻略を削除しますか？",
+  "removeDescription": "削除すると元に戻せません。",
+  "removed": "攻略を削除しました。",
+  "writeTitle": "攻略を書く",
+  "editTitle": "攻略を編集",
+  "for": "『{game}』",
+  "title": "タイトル",
+  "content": "本文",
+  "contentHint": "見出し、リスト、リンク、ネタバレなどの書式を使えます。見出しから目次が作られます。",
+  "saveDraft": "下書きを保存",
+  "backToDraft": "下書きに戻す",
+  "publish": "公開",
+  "draftSaved": "下書きを保存しました。自分だけが閲覧できます。",
+  "published": "攻略を公開しました。",
+  "sentForReview": "攻略を送信しました。審査後に公開されます。",
+  "signIn": "攻略を書くにはログインしてください。",
+  "signInAction": "ログイン",
+  "leaveConfirm": "このページを離れますか？",
+  "leaveDescription": "保存していない変更は失われます。",
+  "leave": "離れる",
+  "stay": "編集を続ける",
+  "userList": "書いた攻略",
+  "userEmpty": "このユーザーはまだ攻略を書いていません。",
+  "userEmptyOwn": "まだ攻略を書いていません。",
+  "of": "<game></game>",
+  "issue": {
+    "empty": "本文を入力してください。"
+  }
+}

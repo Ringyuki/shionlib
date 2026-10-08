@@ -18,6 +18,7 @@ import settings from '~/features/settings/messages/en.json'
 import shell from '~/features/shell/messages/en.json'
 import upload from '~/features/upload/messages/en.json'
 import uploader from '~/features/uploader/messages/en.json'
+import walkthrough from '~/features/walkthrough/messages/en.json'
 import bbcode from './bbcode/en.json'
 import form from './form/en.json'
 import site from './site/en.json'
@@ -47,4 +48,5 @@ export const messages: Messages = {
   site,
   upload,
   uploader,
+  walkthrough,
 }

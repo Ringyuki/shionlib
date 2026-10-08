@@ -30,7 +30,8 @@
     "resources": "ダウンロード",
     "info": "概要",
     "characters": "キャラクター",
-    "comments": "コメント"
+    "comments": "コメント",
+    "walkthrough": "攻略"
   },
   "facts": {
     "aliases": "別名 {names}"

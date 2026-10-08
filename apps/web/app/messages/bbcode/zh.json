@@ -6,6 +6,9 @@
   "link": "链接",
   "quote": "引用",
   "spoiler": "剧透",
+  "heading": "大标题",
+  "subheading": "小标题",
+  "list": "列表",
   "preview": "预览",
   "empty": "暂无可预览的内容"
 }

@@ -1,0 +1,51 @@
+{
+  "list": "攻略",
+  "count": "{count, number} 篇攻略",
+  "empty": "暂无攻略。",
+  "write": "写攻略",
+  "updated": "更新于<time></time>",
+  "language": {
+    "zh": "简体中文",
+    "zh-hant": "繁体中文",
+    "jp": "日语",
+    "en": "英语"
+  },
+  "state": {
+    "draft": "草稿",
+    "reviewing": "审核中",
+    "hidden": "已隐藏"
+  },
+  "back": "《{game}》的攻略",
+  "contents": "目录",
+  "edit": "编辑",
+  "remove": "删除",
+  "cancel": "取消",
+  "removeConfirm": "删除这篇攻略？",
+  "removeDescription": "删除后无法恢复。",
+  "removed": "攻略已删除。",
+  "writeTitle": "写攻略",
+  "editTitle": "编辑攻略",
+  "for": "《{game}》",
+  "title": "标题",
+  "content": "正文",
+  "contentHint": "可使用标题、列表、链接和剧透等格式；标题会生成目录。",
+  "saveDraft": "保存草稿",
+  "backToDraft": "转为草稿",
+  "publish": "发布",
+  "draftSaved": "草稿已保存，仅你可见。",
+  "published": "攻略已发布。",
+  "sentForReview": "攻略已提交，审核通过后公开。",
+  "signIn": "登录后才能写攻略。",
+  "signInAction": "登录",
+  "leaveConfirm": "离开这个页面？",
+  "leaveDescription": "尚未保存的修改将会丢失。",
+  "leave": "离开",
+  "stay": "继续编辑",
+  "userList": "撰写的攻略",
+  "userEmpty": "该用户尚未撰写攻略。",
+  "userEmptyOwn": "你尚未撰写攻略。",
+  "of": "<game></game>",
+  "issue": {
+    "empty": "请输入正文。"
+  }
+}

@@ -6,6 +6,9 @@
   "link": "Link",
   "quote": "Quote",
   "spoiler": "Spoiler",
+  "heading": "Heading",
+  "subheading": "Subheading",
+  "list": "List",
   "preview": "Preview",
   "empty": "Nothing to preview"
 }

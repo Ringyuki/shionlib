@@ -1,0 +1,51 @@
+{
+  "list": "Walkthroughs",
+  "count": "{count, plural, one {# walkthrough} other {# walkthroughs}}",
+  "empty": "No walkthroughs yet.",
+  "write": "Write a walkthrough",
+  "updated": "Updated <time></time>",
+  "language": {
+    "zh": "Simplified Chinese",
+    "zh-hant": "Traditional Chinese",
+    "jp": "Japanese",
+    "en": "English"
+  },
+  "state": {
+    "draft": "Draft",
+    "reviewing": "Under review",
+    "hidden": "Hidden"
+  },
+  "back": "Walkthroughs for {game}",
+  "contents": "Contents",
+  "edit": "Edit",
+  "remove": "Delete",
+  "cancel": "Cancel",
+  "removeConfirm": "Delete this walkthrough?",
+  "removeDescription": "It cannot be restored.",
+  "removed": "Walkthrough deleted.",
+  "writeTitle": "Write a walkthrough",
+  "editTitle": "Edit the walkthrough",
+  "for": "{game}",
+  "title": "Title",
+  "content": "Text",
+  "contentHint": "Headings, lists, links and spoilers are available; headings make the table of contents.",
+  "saveDraft": "Save draft",
+  "backToDraft": "Turn into a draft",
+  "publish": "Publish",
+  "draftSaved": "Draft saved. Only you can see it.",
+  "published": "Walkthrough published.",
+  "sentForReview": "Walkthrough sent. It becomes public after review.",
+  "signIn": "Sign in to write a walkthrough.",
+  "signInAction": "Sign in",
+  "leaveConfirm": "Leave this page?",
+  "leaveDescription": "Changes you have not saved will be lost.",
+  "leave": "Leave",
+  "stay": "Keep editing",
+  "userList": "Walkthroughs",
+  "userEmpty": "This user has not written a walkthrough yet.",
+  "userEmptyOwn": "You have not written a walkthrough yet.",
+  "of": "<game></game>",
+  "issue": {
+    "empty": "Write the text first."
+  }
+}

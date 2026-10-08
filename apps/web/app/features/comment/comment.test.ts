@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { lexicalDocument } from '~/shared/markup/lexical'
+import { lexicalDocument } from '~/shared/markup/lexical-document'
 import { commentAnchor, commentsPath, isPending, likesOf, searchInOrder, sourceOf } from './comment'
 import { commentForm, threadOrderFrom } from './comment.schema'
 

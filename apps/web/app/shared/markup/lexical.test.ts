@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { bbcodeSource, lexicalDocument, type LexicalNode } from './lexical'
+import { bbcodeSource, type LexicalNode } from './lexical'
+import { lexicalDocument } from './lexical-document'
 import { lexicalRootFrom } from './lexical.schema'
 
 const text = (value: string, format = 0) => ({
@@ -85,6 +86,35 @@ describe('lexicalDocument', () => {
     ])
   })
 
+  it('writes headings and lists as blocks of their own, without blank paragraphs around them', () => {
+    expect(
+      lexicalDocument(
+        '前言\n[h2]共通线[/h2]\n[list]\n[*]选 A\n[*][b]选 B[/b]\n[/list]\n[h3]结局[/h3]\n[list=1][*]一[*]二[/list]\n后记',
+      ).root.children,
+    ).toEqual([
+      element('paragraph', [text('前言')]),
+      element('heading', [text('共通线')], { tag: 'h2' }),
+      element(
+        'list',
+        [
+          element('listitem', [text('选 A')], { value: 1 }),
+          element('listitem', [text('选 B', 1)], { value: 2 }),
+        ],
+        { listType: 'bullet', tag: 'ul', start: 1 },
+      ),
+      element('heading', [text('结局')], { tag: 'h3' }),
+      element(
+        'list',
+        [
+          element('listitem', [text('一')], { value: 1 }),
+          element('listitem', [text('二')], { value: 2 }),
+        ],
+        { listType: 'number', tag: 'ol', start: 1 },
+      ),
+      element('paragraph', [text('后记')]),
+    ])
+  })
+
   it('writes an empty paragraph for nothing', () => {
     expect(lexicalDocument('  \n ').root.children).toEqual([element('paragraph', [])])
   })
@@ -100,6 +130,7 @@ describe('bbcodeSource', () => {
       '[url]https://example.com[/url]',
       '结局：[spoiler]她走了[/spoiler]',
       '开头\n[quote]引一\n引二[/quote]\n结尾',
+      '前言\n[h2]共通线[/h2]\n[list]\n[*]选 A\n[*]选 B\n[/list]\n[h3]结局[/h3]\n[list=1]\n[*]一\n[*]二\n[/list]\n后记',
     ]) {
       expect(roundTrip(source)).toBe(source)
     }
@@ -116,8 +147,18 @@ describe('bbcodeSource', () => {
       element('list', [element('listitem', [text('一')]), element('listitem', [text('二')])]),
     ])
     expect(bbcodeSource(root)).toBe(
-      '[b]标题[/b]\n正文\n[b]下一行[/b]\n\n[url]https://example.com[/url]\n一\n二',
+      '[h2]标题[/h2]\n正文\n[b]下一行[/b]\n\n[url]https://example.com[/url]\n[list]\n[*]一\n[*]二\n[/list]',
     )
+  })
+})
+
+describe('a document that went to the API and came back', () => {
+  it('keeps heading levels and the kind of each list', () => {
+    const source =
+      '[h2]共通线[/h2]\n[list=1]\n[*]一\n[*]二\n[/list]\n[h3]分支[/h3]\n[list]\n[*]甲\n[/list]'
+    const stored: unknown = JSON.parse(JSON.stringify(lexicalDocument(source)))
+    const root = lexicalRootFrom(stored)
+    expect(root === undefined ? undefined : bbcodeSource(root)).toBe(source)
   })
 })
 

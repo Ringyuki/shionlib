@@ -8044,6 +8044,7 @@ export type components = {
             /** Format: int64 */
             id: number;
             lang: string | null;
+            review_pending: boolean;
             /** @enum {string} */
             status: "DRAFT" | "PUBLISHED" | "HIDDEN" | "DELETED";
             title: string;
@@ -8091,10 +8092,14 @@ export type components = {
             created: string;
             creator: components["schemas"]["UserSummaryDTO"];
             edited: boolean;
+            /** Format: int64 */
+            game_id: number;
             html: string;
             /** Format: int64 */
             id: number;
             lang: string | null;
+            /** @description True while a walkthrough sent for publication waits for review; it is HIDDEN until then */
+            review_pending: boolean;
             /** @enum {string} */
             status: "DRAFT" | "PUBLISHED" | "HIDDEN" | "DELETED";
             title: string;
@@ -8109,6 +8114,7 @@ export type components = {
             /** Format: int64 */
             id: number;
             lang: string | null;
+            review_pending: boolean;
             /** @enum {string} */
             status: "DRAFT" | "PUBLISHED" | "HIDDEN" | "DELETED";
             title: string;

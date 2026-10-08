@@ -8,7 +8,7 @@ export type Upload = Schema<'DownloadUserResourceDTO'>
 
 export type Uploads = { items: Upload[]; total: number; page: number }
 
-export const profileTabs = ['uploads', 'favorites', 'comments'] as const
+export const profileTabs = ['uploads', 'favorites', 'comments', 'walkthroughs'] as const
 
 export type ProfileTab = (typeof profileTabs)[number]
 

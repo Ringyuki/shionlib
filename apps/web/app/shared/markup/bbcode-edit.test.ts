@@ -41,4 +41,28 @@ describe('applyBBCodeTool', () => {
       end: 9,
     })
   })
+
+  it('wraps the selection in a heading', () => {
+    expect(applyBBCodeTool({ text: '共通线', start: 0, end: 3 }, 'heading')).toEqual({
+      text: '[h2]共通线[/h2]',
+      start: 4,
+      end: 7,
+    })
+    expect(applyBBCodeTool({ text: '结局', start: 0, end: 2 }, 'subheading').text).toBe(
+      '[h3]结局[/h3]',
+    )
+  })
+
+  it('turns the selected lines into the items of a list', () => {
+    expect(applyBBCodeTool({ text: '前\n选 A\n选 B\n后', start: 2, end: 9 }, 'list')).toEqual({
+      text: '前\n[list]\n[*]选 A\n[*]选 B\n[/list]\n后',
+      start: 12,
+      end: 22,
+    })
+    expect(applyBBCodeTool({ text: '', start: 0, end: 0 }, 'list')).toEqual({
+      text: '[list]\n[*]\n[/list]',
+      start: 10,
+      end: 10,
+    })
+  })
 })

@@ -18,6 +18,7 @@ import settings from '~/features/settings/messages/zh.json'
 import shell from '~/features/shell/messages/zh.json'
 import upload from '~/features/upload/messages/zh.json'
 import uploader from '~/features/uploader/messages/zh.json'
+import walkthrough from '~/features/walkthrough/messages/zh.json'
 import bbcode from './bbcode/zh.json'
 import form from './form/zh.json'
 import site from './site/zh.json'
@@ -46,6 +47,7 @@ export const messages = {
   site,
   upload,
   uploader,
+  walkthrough,
 }
 
 export type Messages = typeof messages

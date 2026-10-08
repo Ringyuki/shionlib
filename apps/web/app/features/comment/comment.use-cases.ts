@@ -1,5 +1,5 @@
 import type { ApiClient } from '~/shared/api/client'
-import { lexicalDocument } from '~/shared/markup/lexical'
+import { lexicalDocument } from '~/shared/markup/lexical-document'
 import {
   pageSize,
   userPageSize,

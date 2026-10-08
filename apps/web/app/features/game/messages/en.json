@@ -30,7 +30,8 @@
     "resources": "Downloads",
     "info": "About",
     "characters": "Characters",
-    "comments": "Comments"
+    "comments": "Comments",
+    "walkthrough": "Walkthroughs"
   },
   "facts": {
     "aliases": "Also known as {names}"

@@ -8,7 +8,8 @@
     "label": "User content",
     "uploads": "Uploads",
     "favorites": "Favorites",
-    "comments": "Comments"
+    "comments": "Comments",
+    "walkthroughs": "Walkthroughs"
   },
   "uploads": {
     "label": "Uploaded resources",

@@ -8,7 +8,8 @@
     "label": "用户内容",
     "uploads": "上传",
     "favorites": "收藏夹",
-    "comments": "评论"
+    "comments": "评论",
+    "walkthroughs": "攻略"
   },
   "uploads": {
     "label": "上传的资源",

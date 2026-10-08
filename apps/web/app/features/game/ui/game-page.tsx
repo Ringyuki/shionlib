@@ -13,6 +13,7 @@ type GamePageProps = {
   details: GameDetails
   characterCount: number
   commentCount: number
+  walkthroughCount: number
   scores: Promise<Scores>
   resources: ResourceSummary
   favorite: ReactNode
@@ -24,6 +25,7 @@ export function GamePage({
   details,
   characterCount,
   commentCount,
+  walkthroughCount,
   scores,
   resources,
   favorite,
@@ -38,6 +40,7 @@ export function GamePage({
         resources: resources.count,
         characters: characterCount,
         comments: commentCount,
+        walkthroughs: walkthroughCount,
       }}
       renderHeader={tabs => (
         <Stack gap="xl">

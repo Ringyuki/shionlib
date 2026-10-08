@@ -30,7 +30,8 @@
     "resources": "资源",
     "info": "简介",
     "characters": "角色",
-    "comments": "评论"
+    "comments": "评论",
+    "walkthrough": "攻略"
   },
   "facts": {
     "aliases": "又名 {names}"

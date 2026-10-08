@@ -42,6 +42,12 @@ export function ProfileTabs({ profile, header, children }: ProfileTabsProps) {
                 {format.number(profile.comment_count)}
               </Text>
             </TabsTrigger>
+            <TabsTrigger value="walkthroughs">
+              {t('walkthroughs')}
+              <Text as="span" size="sm" tone="faint" className="ms-1.5 tabular-nums">
+                {format.number(profile.walkthrough_count)}
+              </Text>
+            </TabsTrigger>
           </TabsList>
         </Stack>
         <TabsContent value={current}>{children}</TabsContent>

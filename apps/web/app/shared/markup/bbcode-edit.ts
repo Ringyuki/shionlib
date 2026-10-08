@@ -1,24 +1,45 @@
 import { isWebAddress } from './bbcode'
 
-export type BBCodeTool = 'bold' | 'italic' | 'strike' | 'link' | 'quote' | 'spoiler'
+export type BBCodeTool =
+  'bold' | 'italic' | 'strike' | 'link' | 'quote' | 'spoiler' | 'heading' | 'subheading' | 'list'
 
 export type TextEdit = { text: string; start: number; end: number }
 
-const tags: Record<Exclude<BBCodeTool, 'link'>, string> = {
+const tags: Record<Exclude<BBCodeTool, 'link' | 'list'>, string> = {
   bold: 'b',
   italic: 'i',
   strike: 's',
   quote: 'quote',
   spoiler: 'spoiler',
+  heading: 'h2',
+  subheading: 'h3',
 }
 
 export function applyBBCodeTool(edit: TextEdit, tool: BBCodeTool): TextEdit {
   if (tool === 'link') {
     return linked(edit)
   }
+  if (tool === 'list') {
+    return listed(edit)
+  }
   const open = `[${tags[tool]}]`
   const close = `[/${tags[tool]}]`
   return unwrapped(edit, open, close) ?? wrapped(edit, open, close)
+}
+
+function listed({ text, start, end }: TextEdit): TextEdit {
+  const open = '[list]\n'
+  const items = text
+    .slice(start, end)
+    .split('\n')
+    .map(line => `[*]${line}`)
+    .join('\n')
+  const first = start + open.length + '[*]'.length
+  return {
+    text: `${text.slice(0, start)}${open}${items}\n[/list]${text.slice(end)}`,
+    start: first,
+    end: start + open.length + items.length,
+  }
 }
 
 function linked(edit: TextEdit): TextEdit {

@@ -6,6 +6,8 @@ const node: v.GenericSchema<LexicalNode> = v.object({
   text: v.nullish(v.string()),
   format: v.nullish(v.union([v.number(), v.string()])),
   url: v.nullish(v.string()),
+  tag: v.nullish(v.string()),
+  listType: v.nullish(v.string()),
   children: v.nullish(v.array(v.lazy(() => node))),
 })
 
