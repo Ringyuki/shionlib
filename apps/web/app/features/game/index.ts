@@ -5,16 +5,23 @@ export {
   gameTitle,
   isExplicit,
   originalTitle,
+  platforms,
   primaryCover,
   releaseDate,
+  requiresResources,
+  resourceRuleFor,
   sortedGamesPath,
+  tagPath,
   type CharacterCredit,
   type GameDetails,
   type GameHeader,
+  type GameSort,
   type GameSummary,
   type Platform,
   type ResourceLanguage,
+  type ResourceRule,
 } from './game'
+export { platformFrom, resourceRuleFrom } from './game.schema'
 export { loadGamePage, loadScores } from './game.use-cases'
 export { GameCharacters } from './ui/game-characters'
 export { PlatformIcon } from './ui/platform-icon'

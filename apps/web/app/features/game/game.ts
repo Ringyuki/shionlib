@@ -100,6 +100,21 @@ export function sortedGamesPath(locale: Locale, sort: GameSort): string {
   return `/${locale}/game?${new URLSearchParams({ sort })}`
 }
 
+export type ResourceRule = NonNullable<ApiQuery<'/game/list', 'get'>['resources']>
+
+export const resourceRules = ['any', 'required'] as const satisfies readonly ResourceRule[]
+
+export function requiresResources(rule: ResourceRule | undefined, byDefault: boolean): boolean {
+  return rule === undefined ? byDefault : rule === 'required'
+}
+
+export function resourceRuleFor(required: boolean, byDefault: boolean): ResourceRule | undefined {
+  if (required === byDefault) {
+    return undefined
+  }
+  return required ? 'required' : 'any'
+}
+
 export function introIn(game: Introduced, language: IntroLanguage): string {
   return game[introKey[language]].trim()
 }

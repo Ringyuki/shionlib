@@ -60,7 +60,10 @@ describe('recent releases', () => {
 describe('results address', () => {
   it('keeps the first page and the default filter out of the URL', () => {
     expect(resultsSearch({ query: '看星星' })).toBe('?q=%E7%9C%8B%E6%98%9F%E6%98%9F')
-    expect(resultsSearch({ query: 'a b', page: 1, everyGame: false })).toBe('?q=a+b')
-    expect(resultsSearch({ query: 'a', page: 3, everyGame: true })).toBe('?q=a&page=3&all=1')
+    expect(resultsSearch({ query: 'a b', page: 1 })).toBe('?q=a+b')
+    expect(resultsSearch({ query: 'a', page: 3, resources: 'any' })).toBe(
+      '?q=a&resources=any&page=3',
+    )
+    expect(resultsSearch({ query: 'a', resources: 'required' })).toBe('?q=a&resources=required')
   })
 })

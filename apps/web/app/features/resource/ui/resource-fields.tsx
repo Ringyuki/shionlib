@@ -4,9 +4,9 @@ import { PlatformIcon } from '~/features/game'
 import { lengthOf } from '~/shared/form/form-kit'
 import { labelOf } from '~/shared/i18n/labels'
 import { BBCodeEditor } from '~/shared/ui/bbcode-editor'
+import { ChoiceChips } from '~/shared/ui/choice-chips'
 import { languageOptions, needsSimulator, platformOptions, simulatorOptions } from '../resource'
 import type { EditValues } from '../resource.schema'
-import { ChoiceChips } from './choice-chips'
 
 type ResourceFieldsProps = {
   values: EditValues

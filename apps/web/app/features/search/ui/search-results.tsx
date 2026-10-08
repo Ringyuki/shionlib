@@ -1,6 +1,7 @@
 import { Heading, Result, SearchInput, Stack } from '@hina-ui/react'
 import { Form, useLocation, useNavigate, useNavigation } from 'react-router'
 import { useTranslations } from 'use-intl'
+import type { ResourceRule } from '~/features/game'
 import { resultsSearch, type ResultsAddress, type SearchResults } from '../search'
 import { GameResults } from './game-results'
 import { SearchPrompt } from './search-prompt'
@@ -8,7 +9,7 @@ import { SearchPrompt } from './search-prompt'
 type SearchResultsViewProps = {
   query: string
   page: number
-  everyGame: boolean
+  resources: ResourceRule | undefined
   filtered: boolean
   games: SearchResults['games']
   trending: readonly string[]
@@ -18,7 +19,7 @@ type SearchResultsViewProps = {
 export function SearchResultsView({
   query,
   page,
-  everyGame,
+  resources,
   filtered,
   games,
   trending,
@@ -45,7 +46,7 @@ export function SearchResultsView({
           onSubmit={event => {
             event.preventDefault()
             const typed = new FormData(event.currentTarget).get('q')
-            go({ query: typeof typed === 'string' ? typed : '', everyGame })
+            go({ query: typeof typed === 'string' ? typed : '', resources })
           }}
         >
           <SearchInput
@@ -67,7 +68,7 @@ export function SearchResultsView({
         <GameResults
           query={query}
           page={page}
-          everyGame={everyGame}
+          resources={resources}
           filtered={filtered}
           games={games}
           loading={searching}

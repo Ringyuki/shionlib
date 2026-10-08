@@ -51,7 +51,7 @@ describe('loadPalette', () => {
 describe('searchGames', () => {
   it('records the keyword on the first page only', async () => {
     const first = fakeApi().on('get', '/search', results).on('post', '/search/record', undefined)
-    await expect(searchGames(first.api, 'sakura', 1, false)).resolves.toMatchObject({
+    await expect(searchGames(first.api, 'sakura', 1, undefined)).resolves.toMatchObject({
       query: 'sakura',
       games: { total: 12 },
     })
@@ -60,23 +60,24 @@ describe('searchGames', () => {
       '/search/record',
     ])
     const second = fakeApi().on('get', '/search', results)
-    await searchGames(second.api, 'sakura', 2, false)
+    await searchGames(second.api, 'sakura', 2, undefined)
     expect(second.requests).toHaveLength(1)
   })
 
-  it('asks for games without resources only on request', async () => {
-    const flag = async (everyGame: boolean) => {
+  it('overrides the viewer setting only on request', async () => {
+    const sent = async (resources: 'any' | 'required' | undefined) => {
       const fake = fakeApi().on('get', '/search', results).on('post', '/search/record', undefined)
-      await searchGames(fake.api, 'sakura', 1, everyGame)
-      return new URL(fake.requests[0]?.url ?? '').searchParams.get('include_without_resources')
+      await searchGames(fake.api, 'sakura', 1, resources)
+      return new URL(fake.requests[0]?.url ?? '').searchParams.get('resources')
     }
-    await expect(flag(false)).resolves.toBe('false')
-    await expect(flag(true)).resolves.toBe('true')
+    await expect(sent(undefined)).resolves.toBeNull()
+    await expect(sent('any')).resolves.toBe('any')
+    await expect(sent('required')).resolves.toBe('required')
   })
 
   it('offers trending keywords instead of asking the source for an empty query', async () => {
     const fake = fakeApi().on('get', '/search/trending', [{ query: 'sakura', score: 3 }])
-    await expect(searchGames(fake.api, ' ', 1, false)).resolves.toMatchObject({
+    await expect(searchGames(fake.api, ' ', 1, undefined)).resolves.toMatchObject({
       query: '',
       trending: ['sakura'],
       unavailable: false,

@@ -50,7 +50,7 @@ describe('loadHome', () => {
     expect(recent).toEqual({ pageSize: '12', 'filter[sort_by]': 'resource_updated' })
     expect(releases).toEqual({
       pageSize: '40',
-      include_without_resources: 'true',
+      resources: 'any',
       'filter[start_date]': '2026-10-01',
       'filter[end_date]': '2026-10-31',
       'filter[sort_by]': 'release_date',

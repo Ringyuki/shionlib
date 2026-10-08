@@ -14,7 +14,10 @@ import {
   originalTitle,
   primaryCover,
   releaseDate,
+  requiresResources,
+  resourceRuleFor,
 } from './game'
+import { resourceRuleFrom } from './game.schema'
 
 const cover = (type: Schema<'GameCoverDTO'>['type'], url: string): Schema<'GameCoverDTO'> => ({
   dims: null,
@@ -101,5 +104,28 @@ describe('bannerIndex', () => {
     expect(bannerIndex([image(1), image(0)], 3)).toBe(1)
     expect(bannerIndex([image(1)], 2)).toBeUndefined()
     expect(bannerIndex([], 0)).toBeUndefined()
+  })
+})
+
+describe('resource rule', () => {
+  it('follows the viewer setting unless a rule is given', () => {
+    expect(requiresResources(undefined, true)).toBe(true)
+    expect(requiresResources(undefined, false)).toBe(false)
+    expect(requiresResources('any', true)).toBe(false)
+    expect(requiresResources('required', false)).toBe(true)
+  })
+
+  it('is written only when it differs from the viewer setting', () => {
+    expect(resourceRuleFor(true, true)).toBeUndefined()
+    expect(resourceRuleFor(false, false)).toBeUndefined()
+    expect(resourceRuleFor(false, true)).toBe('any')
+    expect(resourceRuleFor(true, false)).toBe('required')
+  })
+
+  it('is read from an address', () => {
+    expect(resourceRuleFrom('any')).toBe('any')
+    expect(resourceRuleFrom('required')).toBe('required')
+    expect(resourceRuleFrom('1')).toBeUndefined()
+    expect(resourceRuleFrom(null)).toBeUndefined()
   })
 })

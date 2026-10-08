@@ -32,7 +32,7 @@ async function monthReleases(api: ApiClient, start: string, end: string) {
     params: {
       query: {
         pageSize: releasesSize,
-        include_without_resources: true,
+        resources: 'any',
         'filter[start_date]': start,
         'filter[end_date]': end,
         'filter[sort_by]': 'release_date',

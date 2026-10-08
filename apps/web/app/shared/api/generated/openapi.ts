@@ -13203,8 +13203,8 @@ export interface operations {
                 "filter[start_date]"?: string;
                 /** @description Released on or before this date (ISO 8601) */
                 "filter[end_date]"?: string;
-                /** @description Also list games without resources, whatever the viewer's setting, as when picking a game to upload to */
-                include_without_resources?: boolean;
+                /** @description Which games are listed by their resources, whatever the viewer's setting: any also lists games without resources, as when picking a game to upload to, and required lists only games that have one; the viewer's setting decides when omitted */
+                resources?: "any" | "required";
             };
             header?: never;
             path?: never;
@@ -14137,8 +14137,8 @@ export interface operations {
                 q?: string;
                 /** @description Kinds of entries to search, one parameter per kind; games when omitted */
                 types?: ("game" | "developer" | "character")[] | null;
-                /** @description Also find games without resources, whatever the viewer's setting, as when picking a game to upload to */
-                include_without_resources?: boolean;
+                /** @description Which games are found by their resources, whatever the viewer's setting: any also finds games without resources, as when picking a game to upload to, and required finds only games that have one; the viewer's setting decides when omitted */
+                resources?: "any" | "required";
             };
             header?: never;
             path?: never;

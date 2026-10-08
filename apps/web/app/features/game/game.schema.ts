@@ -3,9 +3,11 @@ import {
   gameTabs,
   introLanguages,
   platforms,
+  resourceRules,
   type GameTab,
   type IntroLanguage,
   type Platform,
+  type ResourceRule,
 } from './game'
 
 export const viewCommand = v.object({
@@ -32,5 +34,12 @@ const platform = v.picklist(platforms)
 
 export function platformFrom(value: unknown): Platform | undefined {
   const parsed = v.safeParse(platform, value)
+  return parsed.success ? parsed.output : undefined
+}
+
+const resourceRule = v.picklist(resourceRules)
+
+export function resourceRuleFrom(value: unknown): ResourceRule | undefined {
+  const parsed = v.safeParse(resourceRule, value)
   return parsed.success ? parsed.output : undefined
 }

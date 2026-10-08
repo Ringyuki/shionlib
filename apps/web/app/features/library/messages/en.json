@@ -1,0 +1,43 @@
+{
+  "title": "Library",
+  "label": "Games",
+  "count": "{total, plural, one {# game} other {# games}}",
+  "orderLabel": "Sort by",
+  "order": {
+    "newest": "Newest",
+    "oldest": "Oldest",
+    "updated": "Recently updated",
+    "hot": "Hottest",
+    "views": "Most viewed",
+    "downloads": "Most downloaded"
+  },
+  "empty": "No games match these filters.",
+  "emptyNarrowed": "Games without resources are not shown. Turn off \"Only games with resources\" to look through every game.",
+  "filters": {
+    "title": "Filters",
+    "open": "Filters",
+    "reset": "Reset",
+    "resetAll": "Reset filters",
+    "done": "{total, plural, one {Show # game} other {Show # games}}",
+    "applied": "Applied filters",
+    "tags": "Tags",
+    "tagsHint": "Shows games with any of these tags.",
+    "excluded": "Excluded tags",
+    "excludedHint": "Hides games with any of these tags.",
+    "tagPlaceholder": "Search tags",
+    "platforms": "Platforms",
+    "years": "Release year",
+    "anyYear": "Any year",
+    "months": "Release month",
+    "anyMonth": "Any month",
+    "yearFirst": "Choose a year first",
+    "onlyWithResources": "Only games with resources"
+  },
+  "condition": {
+    "tag": "{value}",
+    "excluded": "Not {value}",
+    "year": "{value}",
+    "any": "Including games without resources",
+    "required": "Only games with resources"
+  }
+}

@@ -24,6 +24,7 @@ export default [
   route('resources/resource/file/rename', 'routes/resources.resource.file-rename.ts'),
   route('resources/resource/file/remove', 'routes/resources.resource.file-remove.ts'),
   route('resources/upload/allowance', 'routes/resources.upload.allowance.ts'),
+  route('resources/library/tags', 'routes/resources.library.tags.ts'),
   route(':lang', 'routes/lang.tsx', [
     route('login', 'routes/auth-redirect.ts', { id: 'login' }),
     route('register', 'routes/auth-redirect.ts', { id: 'register' }),
@@ -35,6 +36,7 @@ export default [
         route('upload', 'routes/upload.tsx'),
         route('user/uploads', 'routes/uploads.tsx'),
         route('search/game', 'routes/search-legacy.ts'),
+        route('game', 'routes/library.tsx'),
         route('game/:id', 'routes/game.tsx', [
           index('routes/game.resources.tsx'),
           route('info', 'routes/game.info.tsx'),

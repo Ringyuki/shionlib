@@ -1,3 +1,4 @@
+import type { ResourceRule } from '~/features/game'
 import type { ApiClient } from '~/shared/api/client'
 import { ApiError } from '~/shared/api/error'
 import {
@@ -80,13 +81,18 @@ export async function loadPalette(api: ApiClient, raw: string): Promise<Palette>
   }
 }
 
-export async function searchGames(api: ApiClient, raw: string, page: number, everyGame: boolean) {
+export async function searchGames(
+  api: ApiClient,
+  raw: string,
+  page: number,
+  resources: ResourceRule | undefined,
+) {
   const query = normalizeQuery(raw)
   if (query === '') {
     return {
       query,
       page,
-      everyGame,
+      resources,
       games: emptyResults().games,
       trending: await loadTrending(api),
       unavailable: false,
@@ -100,7 +106,7 @@ export async function searchGames(api: ApiClient, raw: string, page: number, eve
           types: ['game'],
           page,
           pageSize: resultsPageSize,
-          include_without_resources: everyGame,
+          resources,
         },
       },
     }),
@@ -111,7 +117,7 @@ export async function searchGames(api: ApiClient, raw: string, page: number, eve
   return {
     query,
     page,
-    everyGame,
+    resources,
     games: found.results.games,
     trending: [],
     unavailable: found.unavailable,
@@ -134,7 +140,7 @@ export async function findGames(api: ApiClient, raw: string): Promise<GameHit[]>
   const found = await quietly(
     api.get('/search', {
       params: {
-        query: { q: query, types: ['game'], pageSize: pickerSize, include_without_resources: true },
+        query: { q: query, types: ['game'], pageSize: pickerSize, resources: 'any' },
       },
     }),
     null,
@@ -149,7 +155,7 @@ export async function loadRecentReleases(api: ApiClient, now: Date): Promise<Rel
       params: {
         query: {
           pageSize: recentReleaseSize,
-          include_without_resources: true,
+          resources: 'any',
           'filter[start_date]': window.start,
           'filter[end_date]': window.end,
           'filter[sort_by]': 'release_date',

@@ -1,0 +1,43 @@
+{
+  "title": "ゲームライブラリ",
+  "label": "ゲーム一覧",
+  "count": "全 {total, number} 作品",
+  "orderLabel": "並び順",
+  "order": {
+    "newest": "発売日が新しい順",
+    "oldest": "発売日が古い順",
+    "updated": "リソース更新順",
+    "hot": "人気順",
+    "views": "閲覧数順",
+    "downloads": "ダウンロード数順"
+  },
+  "empty": "条件に一致するゲームはありません。",
+  "emptyNarrowed": "リソースのないゲームは表示されていません。「リソースのあるゲームのみ」をオフにすると、すべてのゲームから探せます。",
+  "filters": {
+    "title": "絞り込み",
+    "open": "絞り込み",
+    "reset": "リセット",
+    "resetAll": "条件をリセット",
+    "done": "{total, number} 作品を表示",
+    "applied": "選択中の条件",
+    "tags": "タグ",
+    "tagsHint": "いずれかのタグが付いたゲームを表示します。",
+    "excluded": "除外するタグ",
+    "excludedHint": "いずれかのタグが付いたゲームを表示しません。",
+    "tagPlaceholder": "タグを検索",
+    "platforms": "プラットフォーム",
+    "years": "発売年",
+    "anyYear": "指定なし",
+    "months": "発売月",
+    "anyMonth": "指定なし",
+    "yearFirst": "先に発売年を選択してください",
+    "onlyWithResources": "リソースのあるゲームのみ"
+  },
+  "condition": {
+    "tag": "{value}",
+    "excluded": "{value} を除く",
+    "year": "{value}年",
+    "any": "リソースのないゲームを含む",
+    "required": "リソースのあるゲームのみ"
+  }
+}

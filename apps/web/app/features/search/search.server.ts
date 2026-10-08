@@ -1,4 +1,5 @@
 import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import { resourceRuleFrom } from '~/features/game'
 import { pageParam } from '~/shared/route/params'
 import { readCommand, routeAction, routeLazyLoader, routeLoader } from '~/shared/route/route.server'
 import { recordSearchCommand } from './search.schema'
@@ -33,8 +34,8 @@ export function searchResultsLoader(args: LoaderFunctionArgs) {
   const params = new URL(args.request.url).searchParams
   const query = params.get('q') ?? ''
   const page = pageParam(params.get('page'))
-  const everyGame = params.get('all') === '1'
-  return routeLoader(args, api => searchGames(api, query, page, everyGame))
+  const resources = resourceRuleFrom(params.get('resources'))
+  return routeLoader(args, api => searchGames(api, query, page, resources))
 }
 
 export function legacySearchRedirect({ request, params }: LoaderFunctionArgs) {

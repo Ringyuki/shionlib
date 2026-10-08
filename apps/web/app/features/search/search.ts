@@ -1,3 +1,4 @@
+import type { ResourceRule } from '~/features/game'
 import type { ApiData } from '~/shared/api/types'
 import { isoDate, siteMonthStart } from '~/shared/i18n/site-time'
 
@@ -62,15 +63,15 @@ export function byReleaseMonth<Game extends Pick<GameHit, 'release_date'>>(
   return { thisMonth: releasedIn(window.thisMonth), lastMonth: releasedIn(window.lastMonth) }
 }
 
-export type ResultsAddress = { query: string; page?: number; everyGame?: boolean }
+export type ResultsAddress = { query: string; page?: number; resources?: ResourceRule }
 
-export function resultsSearch({ query, page = 1, everyGame = false }: ResultsAddress): string {
+export function resultsSearch({ query, page = 1, resources }: ResultsAddress): string {
   const params = new URLSearchParams({ q: query })
+  if (resources !== undefined) {
+    params.set('resources', resources)
+  }
   if (page > 1) {
     params.set('page', String(page))
-  }
-  if (everyGame) {
-    params.set('all', '1')
   }
   return `?${params}`
 }
