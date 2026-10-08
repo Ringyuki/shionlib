@@ -8,6 +8,7 @@ export COMPOSE_PROJECT_NAME="${E2E_COMPOSE_PROJECT_NAME:-shionlib-e2e-web}"
 COMPOSE=(docker compose -f docker/compose.e2e-go.yml)
 
 BACKEND_PORT_VALUE="${BACKEND_PORT:-5201}"
+WEB_PORT_VALUE="${E2E_WEB_PORT:-5330}"
 KEEP_STACK="${E2E_KEEP_STACK:-0}"
 COMPOSE_RETRIES="${E2E_COMPOSE_RETRIES:-3}"
 
@@ -29,7 +30,7 @@ trap cleanup EXIT
 
 echo "[e2e-web] Starting the API stack (migrate, e2e dataset, Go API) on port ${BACKEND_PORT_VALUE}..."
 attempt=1
-until BACKEND_PORT="$BACKEND_PORT_VALUE" "${COMPOSE[@]}" up "${UP_ARGS[@]}" api; do
+until BACKEND_PORT="$BACKEND_PORT_VALUE" FRONTEND_PORT="$WEB_PORT_VALUE" "${COMPOSE[@]}" up "${UP_ARGS[@]}" api; do
   if [[ "$attempt" -ge "$COMPOSE_RETRIES" ]]; then
     echo "[e2e-web] compose up failed after ${COMPOSE_RETRIES} attempts."
     "${COMPOSE[@]}" logs --no-color migrate seed api || true
@@ -43,4 +44,4 @@ done
 
 echo "[e2e-web] Running Playwright..."
 cd apps/web
-E2E_API_URL="http://localhost:${BACKEND_PORT_VALUE}" pnpm exec playwright test "$@"
+E2E_API_URL="http://localhost:${BACKEND_PORT_VALUE}" E2E_WEB_PORT="$WEB_PORT_VALUE" pnpm exec playwright test "$@"

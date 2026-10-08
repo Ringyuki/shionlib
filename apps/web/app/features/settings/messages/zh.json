@@ -1,0 +1,98 @@
+{
+  "title": "设置",
+  "signIn": "登录后可以修改账号设置",
+  "signInAction": "登录",
+  "sectionsLabel": "设置分区",
+  "section": {
+    "personal": "个人资料",
+    "security": "账号安全",
+    "connections": "关联账号",
+    "download": "下载",
+    "site": "站点偏好"
+  },
+  "issue": {
+    "endpoint": "请输入完整的地址，例如 http://127.0.0.1:6800/jsonrpc"
+  },
+  "site": {
+    "language": "界面语言",
+    "languageHint": "同时用于发送给你的邮件。",
+    "theme": "主题",
+    "themeHint": "仅保存在当前浏览器中。",
+    "themes": {
+      "system": "跟随系统",
+      "light": "浅色",
+      "dark": "深色"
+    },
+    "contentLimit": "成人内容",
+    "contentLimitHint": "决定带有成人内容的游戏和图片如何显示。",
+    "contentLimits": {
+      "1": {
+        "label": "隐藏",
+        "description": "不显示带有成人内容的游戏和图片。"
+      },
+      "2": {
+        "label": "遮罩",
+        "description": "显示游戏，图片默认遮住，点击后查看。"
+      },
+      "3": {
+        "label": "显示",
+        "description": "直接显示全部内容。"
+      }
+    },
+    "games": "游戏列表",
+    "onlyWithResources": "仅显示有资源的游戏",
+    "onlyWithResourcesHint": "作为游戏库和搜索的默认设置，可以在每次浏览时临时更改。"
+  },
+  "download": {
+    "local": "下载设置仅保存在当前浏览器中，不随账号同步。",
+    "method": "默认下载方式",
+    "methods": {
+      "browser": {
+        "label": "浏览器下载",
+        "description": "由浏览器直接下载文件。"
+      },
+      "aria2": {
+        "label": "推送到 aria2",
+        "description": "把下载任务发送到本机或局域网中的 aria2。"
+      }
+    },
+    "aria2": "aria2",
+    "aria2Hint": "需要先在 aria2 中启用 RPC，并允许来自本站的跨域请求。",
+    "endpoint": "RPC 地址",
+    "endpointHint": "aria2 的 JSON-RPC 地址。",
+    "secret": "RPC 密钥",
+    "secretHint": "未设置密钥时留空。",
+    "directory": "保存目录",
+    "directoryHint": "选填，留空时使用 aria2 的默认目录。",
+    "test": "测试连接",
+    "save": "保存",
+    "saved": "aria2 设置已保存",
+    "reachable": "连接成功，aria2 版本 {version}。",
+    "unreachable": {
+      "unreachable": "无法连接 aria2，请检查地址，并确认 aria2 正在运行且允许跨域请求。",
+      "unauthorized": "aria2 拒绝了密钥，请检查 RPC 密钥。",
+      "rejected": "aria2 返回了错误：{message}"
+    }
+  },
+  "personal": {
+    "avatar": "头像",
+    "avatarHint": "显示为圆形，建议使用正方形图片。",
+    "changeAvatar": "更换头像",
+    "cover": "主页封面",
+    "coverHint": "显示在个人主页顶部，建议使用横向图片。",
+    "changeCover": "上传封面",
+    "pictureSaved": "图片已更新",
+    "name": "用户名",
+    "nameHint": "用于登录，并显示在你上传的资源和发表的内容旁。",
+    "nameLimit": "最多 {max} 字",
+    "nameAvailable": "该用户名可以使用。",
+    "nameTaken": "该用户名已被使用",
+    "nameSaved": "用户名已修改",
+    "bio": "简介",
+    "bioHint": "显示在个人主页上。",
+    "bioLimit": "选填，最多 {max} 字",
+    "bioSaved": "简介已保存",
+    "save": "保存",
+    "notImage": "请选择图片文件"
+  }
+}

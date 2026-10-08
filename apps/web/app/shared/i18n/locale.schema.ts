@@ -35,3 +35,9 @@ export function negotiateLocale(cookieHeader: string, acceptLanguage: string): L
     .find(isLocale)
   return preferred ?? defaultLocale
 }
+
+export function switchLocale(pathname: string, locale: Locale): string {
+  const [, first = '', ...rest] = pathname.split('/')
+  const tail = isLocale(first) ? rest : [first, ...rest]
+  return ['', locale, ...tail].join('/').replace(/\/$/, '') || `/${locale}`
+}

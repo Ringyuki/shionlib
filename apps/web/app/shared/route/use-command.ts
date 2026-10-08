@@ -5,12 +5,13 @@ import { Refusal, useRefusalNotice, type Outcome } from './refusal'
 type CommandOptions = {
   revalidate?: boolean
   quiet?: boolean
+  multipart?: boolean
 }
 
 export function useCommand<Result>(
   fetcher: FetcherWithComponents<Outcome<Result>>,
   action?: string,
-  { revalidate = true, quiet = false }: CommandOptions = {},
+  { revalidate = true, quiet = false, multipart = false }: CommandOptions = {},
 ) {
   const notify = useRefusalNotice()
   const waiting = useRef<((outcome: Outcome<Result>) => void) | undefined>(undefined)
@@ -34,7 +35,7 @@ export function useCommand<Result>(
       void fetcher.submit(payload, {
         method: 'post',
         action,
-        encType: 'application/json',
+        encType: multipart ? 'multipart/form-data' : 'application/json',
         defaultShouldRevalidate: revalidate,
       })
     })

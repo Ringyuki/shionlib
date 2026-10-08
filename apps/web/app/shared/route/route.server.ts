@@ -57,3 +57,14 @@ export async function readCommand<Schema extends v.GenericSchema>(
   }
   return parsed.output
 }
+
+const upload = v.instance(File)
+
+export async function readUpload({ request }: { request: Request }, field: string): Promise<File> {
+  const form = await request.formData().catch(() => undefined)
+  const parsed = v.safeParse(upload, form?.get(field))
+  if (!parsed.success) {
+    throw data(null, { status: 400 })
+  }
+  return parsed.output
+}

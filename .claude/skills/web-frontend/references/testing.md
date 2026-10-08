@@ -20,6 +20,8 @@ Every user flow a phase ports gets Playwright specs in `apps/web/e2e` in the sam
 - **Run everything:** `pnpm test:e2e:web` at the repository root (`docker/scripts/test-e2e-web.sh`).
   - It starts the API half of `docker/compose.e2e-go.yml`: Postgres, Redis, ClamAV, `migrate up`, the `devtool e2e prepare` dataset and the Go API on `:5201`.
   - Playwright then builds the web app and serves it on `:5330`.
+  - The API is told that the site lives at the web client's own origin (`FRONTEND_PORT` = `E2E_WEB_PORT`, 5330), which is what its CORS, WebAuthn and OIDC checks compare against; a passkey spec fails with any other origin. Passkeys are exercised with Chromium's virtual authenticator (`WebAuthn.addVirtualAuthenticator` over a CDP session).
+  - Image storage has only placeholder credentials there, so specs do not upload avatars or covers.
   - CI runs the same script in `.github/workflows/web-e2e.yml`.
 - **Run against an API that is already up:** reseed it first (`go run ./cmd/devtool e2e prepare` with that API's env), then run `E2E_API_URL=http://localhost:<port> pnpm e2e` in `apps/web`.
 - **Behind an HTTP proxy** (either way), set `NO_PROXY=localhost,127.0.0.1`. Otherwise Playwright's server check goes to the proxy, gets an answer and never starts the web server.

@@ -7754,8 +7754,12 @@ export type components = {
             bio: string;
         };
         UpdateContentLimitInputBody: {
-            /** Format: int64 */
-            content_limit?: number;
+            /**
+             * Format: int64
+             * @description How rated content is shown: 1 hides it, 2 shows it behind a mask, 3 shows it
+             * @enum {integer}
+             */
+            content_limit: 1 | 2 | 3;
         };
         UpdateEmailInputBody: {
             currentCode: string;
@@ -7776,7 +7780,11 @@ export type components = {
             note?: string;
         };
         UpdateLangInputBody: {
-            lang?: string;
+            /**
+             * @description Language of the site and of emails
+             * @enum {string}
+             */
+            lang: "en" | "zh" | "ja";
         };
         UpdateNameInputBody: {
             name: string;

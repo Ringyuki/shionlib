@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { href, useFetcher } from 'react-router'
 import type { Locale } from '~/shared/i18n/locale'
 import { useCommand } from '~/shared/route/use-command'
-import { remainingSeconds } from './auth'
 import type { SignUpValues } from './auth.schema'
 import type { signUpAction, signUpCodeAction } from './auth.server'
+import { useCodeCooldown } from './use-code-cooldown'
 
 export function useSignUp(locale: Locale) {
   const code = useCommand(
@@ -12,24 +12,14 @@ export function useSignUp(locale: Locale) {
     href('/resources/auth/sign-up-code'),
   )
   const account = useCommand(useFetcher<typeof signUpAction>(), href('/resources/auth/sign-up'))
-  const [requested, setRequested] = useState<{ email: string; at: number }>()
-  const [now, setNow] = useState(() => Date.now())
+  const [requested, setRequested] = useState<string>()
+  const resend = useCodeCooldown()
   const sent = code.settled?.ok === true ? code.settled.result : undefined
-  const cooldown = sent === undefined ? 0 : remainingSeconds(requested?.at, now)
-  const counting = cooldown > 0
-
-  useEffect(() => {
-    if (!counting) {
-      return
-    }
-    const timer = window.setInterval(() => setNow(Date.now()), 1000)
-    return () => window.clearInterval(timer)
-  }, [counting])
+  const cooldown = sent === undefined ? 0 : resend.cooldown
 
   const requestCode = (email: string) => {
-    const at = Date.now()
-    setRequested({ email: email.trim(), at })
-    setNow(at)
+    setRequested(email.trim())
+    resend.start()
     return code.run({ email })
   }
 
@@ -51,7 +41,7 @@ export function useSignUp(locale: Locale) {
     requestCode,
     requesting: code.pending,
     codeFailure: code.failure,
-    sentTo: sent === undefined ? undefined : requested?.email,
+    sentTo: sent === undefined ? undefined : requested,
     cooldown,
     run,
     pending: account.pending,

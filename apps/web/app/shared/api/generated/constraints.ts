@@ -1551,9 +1551,14 @@ export const constraints = {
   "UpdateContentLimitInputBody": {
     "content_limit": {
       "type": "integer",
-      "required": false,
+      "required": true,
       "nullable": false,
-      "format": "int64"
+      "format": "int64",
+      "enum": [
+        1,
+        2,
+        3
+      ]
     }
   },
   "UpdateEmailInputBody": {
@@ -1618,8 +1623,13 @@ export const constraints = {
   "UpdateLangInputBody": {
     "lang": {
       "type": "string",
-      "required": false,
-      "nullable": false
+      "required": true,
+      "nullable": false,
+      "enum": [
+        "en",
+        "zh",
+        "ja"
+      ]
     }
   },
   "UpdateNameInputBody": {

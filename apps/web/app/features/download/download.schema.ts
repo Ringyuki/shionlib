@@ -1,5 +1,10 @@
 import * as v from 'valibot'
-import { defaultDownloadSettings, downloadMethods, type DownloadSettings } from './download'
+import {
+  defaultDownloadSettings,
+  downloadMethods,
+  type DownloadMethod,
+  type DownloadSettings,
+} from './download'
 
 export const issueLinkCommand = v.object({
   fileId: v.pipe(v.number(), v.safeInteger(), v.minValue(1)),
@@ -32,3 +37,27 @@ const storedSettings = v.fallback(
 export function downloadSettingsFrom(stored: string | null): DownloadSettings {
   return v.parse(storedSettings, stored)
 }
+
+const method = v.picklist(downloadMethods)
+
+export function downloadMethodFrom(value: unknown): DownloadMethod | undefined {
+  const parsed = v.safeParse(method, value)
+  return parsed.success ? parsed.output : undefined
+}
+
+export type Aria2Issue = 'endpoint'
+
+export function aria2Form(issue: (key: Aria2Issue) => string) {
+  return v.object({
+    endpoint: v.pipe(
+      v.string(),
+      v.trim(),
+      v.url(issue('endpoint')),
+      v.regex(/^https?:\/\//i, issue('endpoint')),
+    ),
+    secret: v.string(),
+    directory: v.string(),
+  })
+}
+
+export type Aria2Values = v.InferInput<ReturnType<typeof aria2Form>>

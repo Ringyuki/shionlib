@@ -24,6 +24,12 @@ export const passkeyCredential = v.looseObject({ id: v.string(), response: v.loo
 
 const passkeyRequestOptions = v.looseObject({ challenge: v.string() })
 
+const passkeyCreationOptions = v.looseObject({
+  challenge: v.string(),
+  rp: v.looseObject({}),
+  user: v.looseObject({ id: v.string() }),
+})
+
 export const passkeyAssertionCommand = v.object({
   flowId: v.string(),
   credential: v.pipe(v.string(), v.parseJson(), passkeyCredential),
@@ -101,4 +107,10 @@ export function isPasskeyRequestOptions(
   value: unknown,
 ): value is PublicKeyCredentialRequestOptionsJSON {
   return v.is(passkeyRequestOptions, value)
+}
+
+export function isPasskeyCreationOptions(
+  value: unknown,
+): value is PublicKeyCredentialCreationOptionsJSON {
+  return v.is(passkeyCreationOptions, value)
 }

@@ -1,5 +1,4 @@
 import type { Locale } from '~/shared/i18n/locale'
-import { isLocale } from '~/shared/i18n/locale.schema'
 
 export type NavKey =
   'home' | 'games' | 'releases' | 'developers' | 'favorites' | 'uploads' | 'messages' | 'settings'
@@ -64,12 +63,6 @@ export function navSections(locale: Locale, viewerId: number | null): NavSection
       ],
     },
   ]
-}
-
-export function switchLocale(pathname: string, locale: Locale): string {
-  const [, first = '', ...rest] = pathname.split('/')
-  const tail = isLocale(first) ? rest : [first, ...rest]
-  return ['', locale, ...tail].join('/').replace(/\/$/, '') || `/${locale}`
 }
 
 export function sidebarCookieValue(mode: SidebarMode): string {

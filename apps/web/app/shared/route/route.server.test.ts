@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { ApiError } from '~/shared/api/error'
 import { fakeApi } from '~/shared/api/testing'
 import { apiContext } from './api.server'
-import { readCommand, routeAction, routeLazyLoader, routeLoader } from './route.server'
+import { readCommand, readUpload, routeAction, routeLazyLoader, routeLoader } from './route.server'
 
 const failure = {
   code: 460103,
@@ -88,6 +88,28 @@ describe('readCommand', () => {
   it('answers 400 for bodies that do not match or are not JSON', async () => {
     for (const body of ['{"listId":"3"}', 'not json']) {
       await expect(readCommand({ request: post(body) }, command)).rejects.toMatchObject({
+        init: { status: 400 },
+      })
+    }
+  })
+})
+
+describe('readUpload', () => {
+  const post = (form: FormData) =>
+    new Request('http://web.test/resources/x', { method: 'POST', body: form })
+
+  it('returns the file sent under the field', async () => {
+    const form = new FormData()
+    form.append('avatar', new File(['image'], 'a.png', { type: 'image/png' }))
+    const file = await readUpload({ request: post(form) }, 'avatar')
+    expect([file.name, file.type, file.size]).toEqual(['a.png', 'image/png', 5])
+  })
+
+  it('answers 400 when the field is missing or is not a file', async () => {
+    const text = new FormData()
+    text.append('avatar', 'not a file')
+    for (const form of [new FormData(), text]) {
+      await expect(readUpload({ request: post(form) }, 'avatar')).rejects.toMatchObject({
         init: { status: 400 },
       })
     }

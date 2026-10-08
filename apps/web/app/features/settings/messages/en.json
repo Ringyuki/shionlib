@@ -1,0 +1,98 @@
+{
+  "title": "Settings",
+  "signIn": "Sign in to change your account settings",
+  "signInAction": "Sign in",
+  "sectionsLabel": "Settings sections",
+  "section": {
+    "personal": "Profile",
+    "security": "Security",
+    "connections": "Connected accounts",
+    "download": "Downloads",
+    "site": "Preferences"
+  },
+  "issue": {
+    "endpoint": "Enter a full address, such as http://127.0.0.1:6800/jsonrpc"
+  },
+  "site": {
+    "language": "Language",
+    "languageHint": "Also used for the emails sent to you.",
+    "theme": "Theme",
+    "themeHint": "Saved in this browser only.",
+    "themes": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "contentLimit": "Adult content",
+    "contentLimitHint": "How games and images with adult content are shown.",
+    "contentLimits": {
+      "1": {
+        "label": "Hide",
+        "description": "Games and images with adult content are not shown."
+      },
+      "2": {
+        "label": "Mask",
+        "description": "Games are shown; images stay covered until you click them."
+      },
+      "3": {
+        "label": "Show",
+        "description": "Everything is shown as it is."
+      }
+    },
+    "games": "Game lists",
+    "onlyWithResources": "Only games with resources",
+    "onlyWithResourcesHint": "The default for the library and search; you can change it for a single visit there."
+  },
+  "download": {
+    "local": "Download settings are saved in this browser only and do not follow your account.",
+    "method": "Default download method",
+    "methods": {
+      "browser": {
+        "label": "Browser",
+        "description": "The browser downloads the file itself."
+      },
+      "aria2": {
+        "label": "Send to aria2",
+        "description": "Sends the download to an aria2 on this computer or your local network."
+      }
+    },
+    "aria2": "aria2",
+    "aria2Hint": "Enable RPC in aria2 first and allow cross-origin requests from this site.",
+    "endpoint": "RPC address",
+    "endpointHint": "The JSON-RPC address of aria2.",
+    "secret": "RPC secret",
+    "secretHint": "Leave empty when no secret is set.",
+    "directory": "Save to",
+    "directoryHint": "Optional; aria2's default directory is used when empty.",
+    "test": "Test connection",
+    "save": "Save",
+    "saved": "aria2 settings saved",
+    "reachable": "Connected. aria2 version {version}.",
+    "unreachable": {
+      "unreachable": "Could not reach aria2. Check the address, and that aria2 is running and allows cross-origin requests.",
+      "unauthorized": "aria2 rejected the secret. Check the RPC secret.",
+      "rejected": "aria2 answered with an error: {message}"
+    }
+  },
+  "personal": {
+    "avatar": "Avatar",
+    "avatarHint": "Shown as a circle; a square image works best.",
+    "changeAvatar": "Change avatar",
+    "cover": "Profile cover",
+    "coverHint": "Shown at the top of your profile; a wide image works best.",
+    "changeCover": "Upload a cover",
+    "pictureSaved": "Picture updated",
+    "name": "User name",
+    "nameHint": "Used to sign in, and shown beside what you upload and write.",
+    "nameLimit": "Up to {max} characters",
+    "nameAvailable": "This user name is available.",
+    "nameTaken": "This user name is taken",
+    "nameSaved": "User name changed",
+    "bio": "Bio",
+    "bioHint": "Shown on your profile.",
+    "bioLimit": "Optional, up to {max} characters",
+    "bioSaved": "Bio saved",
+    "save": "Save",
+    "notImage": "Choose an image file"
+  }
+}

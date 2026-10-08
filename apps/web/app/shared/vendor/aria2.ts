@@ -1,4 +1,4 @@
-import { aria2ReplyFrom } from './aria2.schema'
+import { aria2ReplyFrom, aria2VersionReplyFrom } from './aria2.schema'
 
 export type Aria2Target = {
   endpoint: string
@@ -11,9 +11,45 @@ export type Aria2Download = {
   fileName: string
 }
 
-export type Aria2Outcome =
-  | { ok: true; gid: string }
-  | { ok: false; reason: 'unreachable' | 'unauthorized' | 'rejected'; message: string }
+type Aria2Refusal = {
+  ok: false
+  reason: 'unreachable' | 'unauthorized' | 'rejected'
+  message: string
+}
+
+export type Aria2Outcome = { ok: true; gid: string } | Aria2Refusal
+
+export type Aria2Reach = { ok: true; version: string } | Aria2Refusal
+
+const unreachable: Aria2Refusal = { ok: false, reason: 'unreachable', message: '' }
+
+function refusalOf(message: string): Aria2Refusal {
+  return { ok: false, reason: message === 'Unauthorized' ? 'unauthorized' : 'rejected', message }
+}
+
+async function call(endpoint: string, method: string, params: unknown[]): Promise<unknown> {
+  const body = { jsonrpc: '2.0', id: crypto.randomUUID(), method, params }
+  try {
+    const response = await fetch(endpoint, { method: 'POST', body: JSON.stringify(body) })
+    return await response.json()
+  } catch {
+    return undefined
+  }
+}
+
+export async function reachAria2(
+  target: Pick<Aria2Target, 'endpoint' | 'secret'>,
+): Promise<Aria2Reach> {
+  const reply = aria2VersionReplyFrom(
+    await call(target.endpoint, 'aria2.getVersion', [`token:${target.secret}`]),
+  )
+  if (reply === undefined) {
+    return unreachable
+  }
+  return 'result' in reply
+    ? { ok: true, version: reply.result.version }
+    : refusalOf(reply.error.message)
+}
 
 const unsafeFileName = /[<>:"/\\|?*]/g
 
@@ -30,28 +66,15 @@ export async function pushToAria2(
     out: aria2FileName(download.fileName),
     ...(target.directory.trim() === '' ? {} : { dir: target.directory.trim() }),
   }
-  const body = {
-    jsonrpc: '2.0',
-    id: crypto.randomUUID(),
-    method: 'aria2.addUri',
-    params: [`token:${target.secret}`, [download.url], options],
-  }
-  let response: Response
-  try {
-    response = await fetch(target.endpoint, { method: 'POST', body: JSON.stringify(body) })
-  } catch {
-    return { ok: false, reason: 'unreachable', message: '' }
-  }
-  const reply = aria2ReplyFrom(await response.json().catch(() => undefined))
+  const reply = aria2ReplyFrom(
+    await call(target.endpoint, 'aria2.addUri', [
+      `token:${target.secret}`,
+      [download.url],
+      options,
+    ]),
+  )
   if (reply === undefined) {
-    return { ok: false, reason: 'unreachable', message: '' }
+    return unreachable
   }
-  if ('result' in reply) {
-    return { ok: true, gid: reply.result }
-  }
-  return {
-    ok: false,
-    reason: reply.error.message === 'Unauthorized' ? 'unauthorized' : 'rejected',
-    message: reply.error.message,
-  }
+  return 'result' in reply ? { ok: true, gid: reply.result } : refusalOf(reply.error.message)
 }
