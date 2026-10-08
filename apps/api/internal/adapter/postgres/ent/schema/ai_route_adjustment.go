@@ -21,10 +21,10 @@ func (AIRouteAdjustment) Fields() []ent.Field {
 	return []ent.Field{
 		serialID(),
 		field.Int("route_id").SchemaType(pg("integer")),
-		field.String("kind").MaxLen(16).SchemaType(varchar(16)),
-		field.String("value").MaxLen(200).SchemaType(varchar(200)),
-		field.String("previous").MaxLen(200).SchemaType(varchar(200)).Optional().Nillable(),
-		field.String("error_kind").MaxLen(16).SchemaType(varchar(16)),
+		field.String("kind").MaxRuneLen(16).SchemaType(varchar(16)),
+		field.String("value").MaxRuneLen(200).SchemaType(varchar(200)),
+		field.String("previous").MaxRuneLen(200).SchemaType(varchar(200)).Optional().Nillable(),
+		field.String("error_kind").MaxRuneLen(16).SchemaType(varchar(16)),
 		field.Int64("request_id").Optional().Nillable(),
 		created(),
 	}

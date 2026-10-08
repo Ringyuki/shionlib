@@ -2,6 +2,8 @@ package archtest
 
 import (
 	"go/ast"
+	"go/parser"
+	"go/token"
 	"os"
 	"path"
 	"path/filepath"
@@ -80,6 +82,26 @@ func TestRawSQLStaysInPostgresAdapters(t *testing.T) {
 			return true
 		})
 	})
+}
+
+func TestSchemaLengthsCountCharacters(t *testing.T) {
+	files, err := filepath.Glob(filepath.Join(moduleRoot(t), "internal", "adapter", "postgres", "ent", "schema", "*.go"))
+	if err != nil || len(files) == 0 {
+		t.Fatalf("schema files: %v %v", files, err)
+	}
+	for _, path := range files {
+		file, err := parser.ParseFile(token.NewFileSet(), path, nil, parser.SkipObjectResolution)
+		if err != nil {
+			t.Fatal(err)
+		}
+		ast.Inspect(file, func(node ast.Node) bool {
+			selector, ok := node.(*ast.SelectorExpr)
+			if ok && selector.Sel.Name == "MaxLen" {
+				t.Errorf("%s limits a string with MaxLen, which counts bytes; the column and the API count characters, so use MaxRuneLen", filepath.Base(path))
+			}
+			return true
+		})
+	}
 }
 
 var untestedPackages = map[string]string{

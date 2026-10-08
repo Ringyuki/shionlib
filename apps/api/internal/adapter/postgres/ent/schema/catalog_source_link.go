@@ -19,16 +19,16 @@ func (CatalogSourceLink) Annotations() []schema.Annotation {
 func (CatalogSourceLink) Fields() []ent.Field {
 	return []ent.Field{
 		serialID(),
-		field.String("source").MaxLen(32).SchemaType(varchar(32)),
-		field.String("entity").MaxLen(16).SchemaType(varchar(16)),
-		field.String("external_id").MaxLen(64).SchemaType(varchar(64)),
+		field.String("source").MaxRuneLen(32).SchemaType(varchar(32)),
+		field.String("entity").MaxRuneLen(16).SchemaType(varchar(16)),
+		field.String("external_id").MaxRuneLen(64).SchemaType(varchar(64)),
 		field.Int("local_id").SchemaType(pg("integer")),
-		field.String("revision").MaxLen(64).SchemaType(varchar(64)).Optional().Nillable(),
+		field.String("revision").MaxRuneLen(64).SchemaType(varchar(64)).Optional().Nillable(),
 		field.Time("synced_at").SchemaType(timestamp3).Optional().Nillable(),
 		field.Time("missing_at").SchemaType(timestamp3).Optional().Nillable(),
 		field.Time("excluded_at").SchemaType(timestamp3).Optional().Nillable(),
 		field.Int("failures").SchemaType(pg("integer")).Default(0),
-		field.String("last_error").MaxLen(500).SchemaType(varchar(500)).Optional().Nillable(),
+		field.String("last_error").MaxRuneLen(500).SchemaType(varchar(500)).Optional().Nillable(),
 		created(),
 		updated(),
 	}

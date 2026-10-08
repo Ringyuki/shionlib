@@ -21,9 +21,9 @@ func (OidcIdentity) Fields() []ent.Field {
 	return []ent.Field{
 		serialID(),
 		field.Int("user_id").SchemaType(pg("integer")),
-		field.String("provider").MaxLen(32).SchemaType(varchar(32)),
-		field.String("subject").MaxLen(255).SchemaType(varchar(255)),
-		field.String("email_at_link").MaxLen(255).SchemaType(varchar(255)).Optional().Nillable(),
+		field.String("provider").MaxRuneLen(32).SchemaType(varchar(32)),
+		field.String("subject").MaxRuneLen(255).SchemaType(varchar(255)),
+		field.String("email_at_link").MaxRuneLen(255).SchemaType(varchar(255)).Optional().Nillable(),
 		field.Time("last_login_at").SchemaType(timestamp3).Optional().Nillable(),
 		created(),
 		updated(),

@@ -20,9 +20,9 @@ func (User) Annotations() []schema.Annotation {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		serialID(),
-		field.String("name").MaxLen(20).SchemaType(varchar(20)).Unique(),
-		field.String("email").MaxLen(255).SchemaType(varchar(255)).Unique(),
-		field.String("password").MaxLen(255).SchemaType(varchar(255)).Sensitive().Optional().Nillable(),
+		field.String("name").MaxRuneLen(20).SchemaType(varchar(20)).Unique(),
+		field.String("email").MaxRuneLen(255).SchemaType(varchar(255)).Unique(),
+		field.String("password").MaxRuneLen(255).SchemaType(varchar(255)).Sensitive().Optional().Nillable(),
 		field.Text("avatar").Optional().Nillable(),
 		field.Text("cover").Optional().Nillable(),
 		field.Text("bio").Optional().Nillable(),

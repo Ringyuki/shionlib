@@ -20,7 +20,7 @@ func (AIScene) Annotations() []schema.Annotation {
 func (AIScene) Fields() []ent.Field {
 	return []ent.Field{
 		serialID(),
-		field.String("key").MaxLen(64).SchemaType(varchar(64)),
+		field.String("key").MaxRuneLen(64).SchemaType(varchar(64)),
 		field.Int("model_id").SchemaType(pg("integer")).Optional().Nillable(),
 		field.Float("temperature").Optional().Nillable(),
 		field.Int("max_output_tokens").SchemaType(pg("integer")).Optional().Nillable(),

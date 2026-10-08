@@ -18,8 +18,8 @@ func (CatalogSyncCursor) Annotations() []schema.Annotation {
 func (CatalogSyncCursor) Fields() []ent.Field {
 	return []ent.Field{
 		serialID(),
-		field.String("source").MaxLen(32).SchemaType(varchar(32)).Unique(),
-		field.String("cursor").MaxLen(255).SchemaType(varchar(255)),
+		field.String("source").MaxRuneLen(32).SchemaType(varchar(32)).Unique(),
+		field.String("cursor").MaxRuneLen(255).SchemaType(varchar(255)),
 		created(),
 		updated(),
 	}

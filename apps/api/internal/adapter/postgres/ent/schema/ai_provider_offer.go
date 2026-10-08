@@ -21,10 +21,10 @@ func (AIProviderOffer) Fields() []ent.Field {
 	return []ent.Field{
 		serialID(),
 		field.Int("provider_id").SchemaType(pg("integer")),
-		field.String("upstream_id").MaxLen(200).SchemaType(varchar(200)),
-		field.String("name").MaxLen(200).SchemaType(varchar(200)).Optional().Nillable(),
+		field.String("upstream_id").MaxRuneLen(200).SchemaType(varchar(200)),
+		field.String("name").MaxRuneLen(200).SchemaType(varchar(200)).Optional().Nillable(),
 		field.Other("protocols", stringsType).SchemaType(textArray).Optional().Annotations(emptyArray("text[]")),
-		field.String("canonical_id").MaxLen(200).SchemaType(varchar(200)).Optional().Nillable(),
+		field.String("canonical_id").MaxRuneLen(200).SchemaType(varchar(200)).Optional().Nillable(),
 		field.Time("synced_at").SchemaType(timestamp3),
 	}
 }

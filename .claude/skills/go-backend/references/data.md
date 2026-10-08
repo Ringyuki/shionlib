@@ -9,7 +9,7 @@
 
 ## Schema conventions (mirror the existing database)
 
-- IDs: `serialID()`. Timestamps: `field.Time(...).SchemaType(timestamp3)`, plus `created()`/`updated()` helpers. Strings: `field.Text` for `text`, `field.String(...).MaxLen(n).SchemaType(varchar(n))` for `varchar(n)`. Integers that are `integer` in Postgres: `field.Int(...).SchemaType(pg("integer"))`.
+- IDs: `serialID()`. Timestamps: `field.Time(...).SchemaType(timestamp3)`, plus `created()`/`updated()` helpers. Strings: `field.Text` for `text`, `field.String(...).MaxRuneLen(n).SchemaType(varchar(n))` for `varchar(n)`. Never `MaxLen`: it counts bytes, while `varchar(n)` and the HTTP layer's `maxLength` count characters, so a Chinese or Japanese text a third of the limit long was refused with a 500 (archtest `TestSchemaLengthsCountCharacters`). Integers that are `integer` in Postgres: `field.Int(...).SchemaType(pg("integer"))`.
 - Arrays: `field.Other(name, stringsType|intsType).SchemaType(textArray|intArray)` with `emptyArray("text[]")` defaults. Enums: `field.Enum(...).SchemaType(pgEnum("snake_case_type"))`; new columns prefer `varchar` + Go validation over new Postgres enums.
 - JSON: `field.JSON(name, rawJSON).SchemaType(jsonbType)`; decode into typed structs in the adapter.
 - Name every index and FK explicitly with `StorageKey` using Postgres defaults (`<table>_<cols>_idx`, `_key`, `_fkey`). FK `ON DELETE` via `entsql.OnDelete`; `ON UPDATE CASCADE` is applied by the diff hook for all FKs.

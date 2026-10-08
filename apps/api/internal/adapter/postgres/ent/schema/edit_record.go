@@ -28,7 +28,7 @@ func (EditRecord) Fields() []ent.Field {
 		field.Other("changed_fields", stringsType).SchemaType(textArray).Optional().StorageKey("field_changes"),
 		field.JSON("changes", rawJSON).SchemaType(jsonbType).Optional(),
 		field.Enum("relation_type").Values("cover", "image", "link", "developer", "character", "game_relation").SchemaType(pgEnum("edit_relation_type")).Optional().Nillable(),
-		field.String("note").MaxLen(255).SchemaType(varchar(255)).Optional().Nillable(),
+		field.String("note").MaxRuneLen(255).SchemaType(varchar(255)).Optional().Nillable(),
 		field.Bool("undo").Default(false),
 		field.Int("undo_of_id").SchemaType(pg("integer")).Unique().Optional().Nillable(),
 		created(),

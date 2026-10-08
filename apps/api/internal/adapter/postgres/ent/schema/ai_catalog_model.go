@@ -20,13 +20,13 @@ func (AICatalogModel) Annotations() []schema.Annotation {
 func (AICatalogModel) Fields() []ent.Field {
 	return []ent.Field{
 		serialID(),
-		field.String("provider_id").MaxLen(100).SchemaType(varchar(100)),
-		field.String("model_key").MaxLen(200).SchemaType(varchar(200)),
-		field.String("canonical_id").MaxLen(200).SchemaType(varchar(200)).Optional().Nillable(),
-		field.String("name").MaxLen(200).SchemaType(varchar(200)),
-		field.String("type").MaxLen(32).SchemaType(varchar(32)).Optional().Nillable(),
-		field.String("family").MaxLen(100).SchemaType(varchar(100)).Optional().Nillable(),
-		field.String("npm").MaxLen(200).SchemaType(varchar(200)).Optional().Nillable(),
+		field.String("provider_id").MaxRuneLen(100).SchemaType(varchar(100)),
+		field.String("model_key").MaxRuneLen(200).SchemaType(varchar(200)),
+		field.String("canonical_id").MaxRuneLen(200).SchemaType(varchar(200)).Optional().Nillable(),
+		field.String("name").MaxRuneLen(200).SchemaType(varchar(200)),
+		field.String("type").MaxRuneLen(32).SchemaType(varchar(32)).Optional().Nillable(),
+		field.String("family").MaxRuneLen(100).SchemaType(varchar(100)).Optional().Nillable(),
+		field.String("npm").MaxRuneLen(200).SchemaType(varchar(200)).Optional().Nillable(),
 		field.Other("input_modalities", stringsType).SchemaType(textArray).Optional().Annotations(emptyArray("text[]")),
 		field.Other("output_modalities", stringsType).SchemaType(textArray).Optional().Annotations(emptyArray("text[]")),
 		field.Int("context_limit").SchemaType(pg("integer")).Optional().Nillable(),
@@ -40,7 +40,7 @@ func (AICatalogModel) Fields() []ent.Field {
 		field.Float("cache_read_price").Optional().Nillable(),
 		field.Float("cache_write_price").Optional().Nillable(),
 		field.JSON("price_tiers", rawJSON).SchemaType(jsonbType).Optional(),
-		field.String("release_date").MaxLen(32).SchemaType(varchar(32)).Optional().Nillable(),
+		field.String("release_date").MaxRuneLen(32).SchemaType(varchar(32)).Optional().Nillable(),
 		field.Time("synced_at").SchemaType(timestamp3),
 	}
 }

@@ -25,7 +25,7 @@ func (GameDownloadResource) Fields() []ent.Field {
 		field.Other("platform", stringsType).SchemaType(textArray).Optional().Annotations(emptyArray("text[]")),
 		field.Enum("simulator").Values("KRKR", "ONS", "ARTEMIS", "OTHER").SchemaType(pgEnum("game_download_resource_simulator")).Optional().Nillable(),
 		field.Other("language", stringsType).SchemaType(textArray).Optional().Annotations(emptyArray("text[]")),
-		field.String("note").MaxLen(255).SchemaType(varchar(255)).Optional().Nillable(),
+		field.String("note").MaxRuneLen(255).SchemaType(varchar(255)).Optional().Nillable(),
 		field.Int("downloads").SchemaType(pg("integer")).Default(0),
 		field.Time("published_at").SchemaType(timestamp3).Optional().Nillable(),
 		field.Time("check_retry_at").SchemaType(timestamp3).Optional().Nillable(),

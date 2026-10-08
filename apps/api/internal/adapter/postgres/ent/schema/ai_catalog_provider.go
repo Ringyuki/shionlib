@@ -18,11 +18,11 @@ func (AICatalogProvider) Annotations() []schema.Annotation {
 
 func (AICatalogProvider) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("id").MaxLen(100).SchemaType(varchar(100)).Immutable(),
-		field.String("name").MaxLen(200).SchemaType(varchar(200)),
-		field.String("npm").MaxLen(200).SchemaType(varchar(200)).Optional().Nillable(),
-		field.String("api_url").MaxLen(500).SchemaType(varchar(500)).Optional().Nillable(),
-		field.String("doc_url").MaxLen(500).SchemaType(varchar(500)).Optional().Nillable(),
+		field.String("id").MaxRuneLen(100).SchemaType(varchar(100)).Immutable(),
+		field.String("name").MaxRuneLen(200).SchemaType(varchar(200)),
+		field.String("npm").MaxRuneLen(200).SchemaType(varchar(200)).Optional().Nillable(),
+		field.String("api_url").MaxRuneLen(500).SchemaType(varchar(500)).Optional().Nillable(),
+		field.String("doc_url").MaxRuneLen(500).SchemaType(varchar(500)).Optional().Nillable(),
 		field.Time("synced_at").SchemaType(timestamp3),
 	}
 }

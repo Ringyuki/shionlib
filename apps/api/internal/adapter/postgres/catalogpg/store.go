@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"time"
+	"unicode/utf8"
 
 	"entgo.io/ent/dialect/sql"
 
@@ -249,8 +250,8 @@ func (s *Store) RecordFailure(ctx context.Context, ref catalog.Ref, reason strin
 	if err != nil || row == nil {
 		return err
 	}
-	if len(reason) > maxErrorLength {
-		reason = reason[:maxErrorLength]
+	if utf8.RuneCountInString(reason) > maxErrorLength {
+		reason = string([]rune(reason)[:maxErrorLength])
 	}
 	if err := s.db(ctx).CatalogSourceLink.UpdateOneID(row.ID).AddFailures(1).SetLastError(reason).SetUpdated(at).Exec(ctx); err != nil {
 		return fmt.Errorf("record source failure: %w", err)

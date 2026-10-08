@@ -374,12 +374,12 @@ func TestMarkMissingHidesGamesAndRecordFailureCountsErrors(t *testing.T) {
 		t.Fatal(err)
 	}
 	ref := catalog.Ref{Source: catalog.SourceHikarinagi, Entity: catalog.EntityGame, ExternalID: "77"}
-	if err := store.RecordFailure(ctx, ref, strings.Repeat("x", 900), syncedAt); err != nil {
-		t.Fatal(err)
+	if err := store.RecordFailure(ctx, ref, "x"+strings.Repeat("错", 900), syncedAt); err != nil {
+		t.Fatalf("a long error is cut between characters, never inside one: %v", err)
 	}
 	truncated, err := db.Ent.CatalogSourceLink.Query().Where(catalogsourcelink.LocalID(id), catalogsourcelink.Entity("game")).Only(ctx)
-	if err != nil || len(*truncated.LastError) != 500 {
-		t.Fatalf("errors are truncated: %+v %v", truncated, err)
+	if err != nil || *truncated.LastError != "x"+strings.Repeat("错", 499) {
+		t.Fatalf("errors are truncated to 500 characters: %+v %v", truncated, err)
 	}
 	if err := store.RecordFailure(ctx, ref, "boom", syncedAt); err != nil {
 		t.Fatal(err)

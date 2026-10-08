@@ -20,13 +20,13 @@ func (SponsorOrder) Annotations() []schema.Annotation {
 func (SponsorOrder) Fields() []ent.Field {
 	return []ent.Field{
 		serialID(),
-		field.String("provider_order_id").MaxLen(255).SchemaType(varchar(255)).Unique(),
-		field.String("provider").MaxLen(50).SchemaType(varchar(50)).Default("idatariver"),
+		field.String("provider_order_id").MaxRuneLen(255).SchemaType(varchar(255)).Unique(),
+		field.String("provider").MaxRuneLen(50).SchemaType(varchar(50)).Default("idatariver"),
 		field.String("amount").SchemaType(pg("numeric(10,2)")),
-		field.String("currency").MaxLen(10).SchemaType(varchar(10)).Optional().Nillable(),
-		field.String("payment_method").MaxLen(50).SchemaType(varchar(50)).Optional().Nillable(),
+		field.String("currency").MaxRuneLen(10).SchemaType(varchar(10)).Optional().Nillable(),
+		field.String("payment_method").MaxRuneLen(50).SchemaType(varchar(50)).Optional().Nillable(),
 		field.Enum("status").Values("NEW", "DONE", "EXPIRED", "REFUND").SchemaType(pgEnum("sponsor_order_status")).Default("NEW"),
-		field.String("sponsor_name").MaxLen(100).SchemaType(varchar(100)).Optional().Nillable(),
+		field.String("sponsor_name").MaxRuneLen(100).SchemaType(varchar(100)).Optional().Nillable(),
 		field.Text("sponsor_message").Optional().Nillable(),
 		field.Bool("is_private").Default(false),
 		field.Int("user_id").SchemaType(pg("integer")).Optional().Nillable(),

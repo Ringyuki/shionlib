@@ -25,7 +25,7 @@ func (GameDownloadResourceFileHistory) Fields() []ent.Field {
 		field.Enum("hash_algorithm").Values("sha256", "blake3").SchemaType(pgEnum("hash_algorithm")),
 		field.Text("file_hash"),
 		field.Text("s3_file_key").Optional().Nillable(),
-		field.String("reason").MaxLen(500).SchemaType(varchar(500)).Optional().Nillable(),
+		field.String("reason").MaxRuneLen(500).SchemaType(varchar(500)).Optional().Nillable(),
 		field.Int("upload_session_id").SchemaType(pg("integer")).Optional().Nillable(),
 		field.Int("operator_id").SchemaType(pg("integer")),
 		created(),

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -196,6 +197,14 @@ func TestResourceLifecycle(t *testing.T) {
 	updated, _ = f.repo.GetResource(ctx, created.ID)
 	if updated.Simulator == nil || *updated.Simulator != "ONS" || *updated.Note != "changed" {
 		t.Fatalf("simulator and note update: %+v", updated)
+	}
+	longest := strings.Repeat("说", 255)
+	if err := f.repo.UpdateResource(ctx, created.ID, download.ResourceChanges{Platforms: []string{"ios"}, Languages: []string{"jp"}, Simulator: ptr("ONS"), Note: &longest}); err != nil {
+		t.Fatalf("a note is limited in characters, as the column is, not in bytes: %v", err)
+	}
+	updated, _ = f.repo.GetResource(ctx, created.ID)
+	if updated.Note == nil || *updated.Note != longest {
+		t.Fatalf("the longest note is kept whole: %+v", updated.Note)
 	}
 
 	removedAt := time.Date(2026, 5, 6, 7, 8, 9, 0, time.UTC)

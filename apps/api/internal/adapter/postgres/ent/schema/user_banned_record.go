@@ -22,7 +22,7 @@ func (UserBannedRecord) Fields() []ent.Field {
 		serialID(),
 		field.Int("user_id").SchemaType(pg("integer")),
 		field.Time("banned_at").SchemaType(timestamp3).Default(now).Annotations(entsql.DefaultExpr("CURRENT_TIMESTAMP")),
-		field.String("banned_reason").MaxLen(255).SchemaType(varchar(255)).Optional().Nillable(),
+		field.String("banned_reason").MaxRuneLen(255).SchemaType(varchar(255)).Optional().Nillable(),
 		field.Int("banned_by").SchemaType(pg("integer")).Optional().Nillable(),
 		field.Int("banned_duration_days").SchemaType(pg("integer")).Optional().Nillable(),
 		field.Bool("is_permanent").Default(false),

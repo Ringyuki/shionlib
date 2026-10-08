@@ -20,13 +20,13 @@ func (AIProvider) Annotations() []schema.Annotation {
 func (AIProvider) Fields() []ent.Field {
 	return []ent.Field{
 		serialID(),
-		field.String("name").MaxLen(60).SchemaType(varchar(60)),
-		field.String("kind").MaxLen(16).SchemaType(varchar(16)),
-		field.String("base_url").MaxLen(500).SchemaType(varchar(500)).Optional().Nillable(),
+		field.String("name").MaxRuneLen(60).SchemaType(varchar(60)),
+		field.String("kind").MaxRuneLen(16).SchemaType(varchar(16)),
+		field.String("base_url").MaxRuneLen(500).SchemaType(varchar(500)).Optional().Nillable(),
 		field.Text("api_key").Sensitive(),
-		field.String("key_hint").MaxLen(16).SchemaType(varchar(16)),
+		field.String("key_hint").MaxRuneLen(16).SchemaType(varchar(16)),
 		field.Float("price_multiplier").Default(1),
-		field.String("catalog_provider_id").MaxLen(100).SchemaType(varchar(100)).Optional().Nillable(),
+		field.String("catalog_provider_id").MaxRuneLen(100).SchemaType(varchar(100)).Optional().Nillable(),
 		field.Bool("enabled").Default(true),
 		created(),
 		updated(),

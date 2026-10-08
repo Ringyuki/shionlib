@@ -22,7 +22,7 @@ func (FavoriteItem) Fields() []ent.Field {
 		serialID(),
 		field.Int("favorite_id").SchemaType(pg("integer")),
 		field.Int("game_id").SchemaType(pg("integer")),
-		field.String("note").MaxLen(2000).SchemaType(varchar(2000)).Optional().Nillable(),
+		field.String("note").MaxRuneLen(2000).SchemaType(varchar(2000)).Optional().Nillable(),
 		created(),
 		updated(),
 	}

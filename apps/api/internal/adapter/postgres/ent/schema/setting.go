@@ -18,7 +18,7 @@ func (Setting) Annotations() []schema.Annotation {
 func (Setting) Fields() []ent.Field {
 	return []ent.Field{
 		serialID(),
-		field.String("name").MaxLen(128).SchemaType(varchar(128)).Unique(),
+		field.String("name").MaxRuneLen(128).SchemaType(varchar(128)).Unique(),
 		field.JSON("value", rawJSON).SchemaType(jsonbType),
 		created(),
 		updated(),

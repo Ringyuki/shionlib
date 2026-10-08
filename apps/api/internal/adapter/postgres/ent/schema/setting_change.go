@@ -20,7 +20,7 @@ func (SettingChange) Annotations() []schema.Annotation {
 func (SettingChange) Fields() []ent.Field {
 	return []ent.Field{
 		serialID(),
-		field.String("name").MaxLen(128).SchemaType(varchar(128)),
+		field.String("name").MaxRuneLen(128).SchemaType(varchar(128)),
 		field.JSON("previous", rawJSON).SchemaType(jsonbType).Optional(),
 		field.JSON("value", rawJSON).SchemaType(jsonbType).Optional(),
 		field.Int("actor_id").SchemaType(pg("integer")).Optional().Nillable(),

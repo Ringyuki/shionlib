@@ -21,10 +21,10 @@ func (Walkthrough) Fields() []ent.Field {
 	return []ent.Field{
 		serialID(),
 		field.Int("game_id").SchemaType(pg("integer")),
-		field.String("title").MaxLen(255).SchemaType(varchar(255)),
+		field.String("title").MaxRuneLen(255).SchemaType(varchar(255)),
 		field.JSON("content", rawJSON).SchemaType(jsonbType),
-		field.String("html").MaxLen(100000).SchemaType(varchar(100000)),
-		field.String("lang").MaxLen(16).SchemaType(varchar(16)).Optional().Nillable(),
+		field.String("html").MaxRuneLen(100000).SchemaType(varchar(100000)),
+		field.String("lang").MaxRuneLen(16).SchemaType(varchar(16)).Optional().Nillable(),
 		created(),
 		updated(),
 		field.Bool("edited").Default(false),

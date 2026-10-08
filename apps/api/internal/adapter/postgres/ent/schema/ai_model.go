@@ -20,10 +20,10 @@ func (AIModel) Annotations() []schema.Annotation {
 func (AIModel) Fields() []ent.Field {
 	return []ent.Field{
 		serialID(),
-		field.String("key").MaxLen(200).SchemaType(varchar(200)),
-		field.String("name").MaxLen(100).SchemaType(varchar(100)),
-		field.String("description").MaxLen(500).SchemaType(varchar(500)).Optional().Nillable(),
-		field.String("canonical_id").MaxLen(200).SchemaType(varchar(200)).Optional().Nillable(),
+		field.String("key").MaxRuneLen(200).SchemaType(varchar(200)),
+		field.String("name").MaxRuneLen(100).SchemaType(varchar(100)),
+		field.String("description").MaxRuneLen(500).SchemaType(varchar(500)).Optional().Nillable(),
+		field.String("canonical_id").MaxRuneLen(200).SchemaType(varchar(200)).Optional().Nillable(),
 		field.Bool("vision").Default(false),
 		field.Bool("moderation").Default(false),
 		field.Bool("temperature").Default(true),

@@ -21,8 +21,8 @@ func (Favorite) Fields() []ent.Field {
 	return []ent.Field{
 		serialID(),
 		field.Int("user_id").SchemaType(pg("integer")),
-		field.String("name").MaxLen(255).SchemaType(varchar(255)),
-		field.String("description").MaxLen(2000).SchemaType(varchar(2000)).Optional().Nillable(),
+		field.String("name").MaxRuneLen(255).SchemaType(varchar(255)),
+		field.String("description").MaxRuneLen(2000).SchemaType(varchar(2000)).Optional().Nillable(),
 		field.Bool("is_private").Default(false),
 		field.Bool("default").Default(false),
 		created(),
