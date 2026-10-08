@@ -127,7 +127,7 @@ func (r *Repository) List(ctx context.Context, query string, page developer.Page
 	if err != nil {
 		return nil, 0, fmt.Errorf("count developers: %w", err)
 	}
-	rows, err := q.Order(gamedeveloper.ByName(), gamedeveloper.ByID()).Offset(page.Offset()).Limit(page.Size).All(ctx)
+	rows, err := q.Order(byVisibleWorks(), gamedeveloper.ByName(), gamedeveloper.ByID()).Offset(page.Offset()).Limit(page.Size).All(ctx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("list developers: %w", err)
 	}
@@ -140,6 +140,23 @@ func (r *Repository) List(ctx context.Context, query string, page developer.Page
 		summaries[i] = developer.Summary{ID: row.ID, Name: row.Name, Aliases: nonNil(row.Aliases), Logo: row.Logo, WorksCount: works[row.ID]}
 	}
 	return summaries, total, nil
+}
+
+func byVisibleWorks() gamedeveloper.OrderOption {
+	return func(s *sql.Selector) {
+		relations := sql.Table(gamedeveloperrelation.Table)
+		games := sql.Table(entgame.Table)
+		works := sql.Select(sql.Count("*")).
+			From(relations).
+			Join(games).On(relations.C(gamedeveloperrelation.FieldGameID), games.C(entgame.FieldID)).
+			Where(sql.And(
+				sql.ColumnsEQ(relations.C(gamedeveloperrelation.FieldDeveloperID), s.C(gamedeveloper.FieldID)),
+				sql.EQ(games.C(entgame.FieldStatus), 1),
+			))
+		s.OrderExpr(sql.ExprFunc(func(b *sql.Builder) {
+			b.Wrap(func(b *sql.Builder) { b.Join(works) }).WriteString(" DESC")
+		}))
+	}
 }
 
 func (r *Repository) Summaries(ctx context.Context, ids []int) (map[int]developer.Summary, error) {

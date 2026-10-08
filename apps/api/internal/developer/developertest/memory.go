@@ -51,7 +51,7 @@ func (r *MemoryRepository) List(_ context.Context, query string, page developer.
 		}
 	}
 	slices.SortFunc(matched, func(a, b developer.Developer) int {
-		return cmp.Or(cmp.Compare(a.Name, b.Name), cmp.Compare(a.ID, b.ID))
+		return cmp.Or(cmp.Compare(r.works(b.ID), r.works(a.ID)), cmp.Compare(a.Name, b.Name), cmp.Compare(a.ID, b.ID))
 	})
 	total := len(matched)
 	start := min(max(page.Offset(), 0), total)

@@ -50,19 +50,23 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		}
 	})
 
-	t.Run("list searches names and aliases, orders by name and counts visible works", func(t *testing.T) {
+	t.Run("list searches names and aliases, puts the most visible works first and then orders by name", func(t *testing.T) {
 		env := newEnv(t)
+		lump := env.Seed(t, developer.Developer{Name: "Lump of Sugar"})
 		yuzu := env.Seed(t, developer.Developer{Name: "Yuzusoft", Aliases: []string{"柚子社"}})
 		key := env.Seed(t, developer.Developer{Name: "Key"})
 		env.Link(t, yuzu, false)
 		env.Link(t, yuzu, false)
 		env.Link(t, yuzu, true)
+		env.Link(t, lump, true)
+		env.Link(t, lump, true)
+		env.Link(t, lump, true)
 
 		all, total, err := env.Repo.List(ctx, "", developer.Page{Number: 1, Size: 10})
-		if err != nil || total != 2 || all[0].ID != key || all[1].ID != yuzu {
+		if err != nil || total != 3 || all[0].ID != yuzu || all[1].ID != key || all[2].ID != lump {
 			t.Fatalf("unfiltered list: %+v %d %v", all, total, err)
 		}
-		if all[1].WorksCount != 2 || all[0].WorksCount != 0 {
+		if all[0].WorksCount != 2 || all[1].WorksCount != 0 || all[2].WorksCount != 0 {
 			t.Fatalf("works count must only include visible games: %+v", all)
 		}
 		byAlias, total, err := env.Repo.List(ctx, "柚子", developer.Page{Number: 1, Size: 10})
@@ -74,7 +78,7 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 			t.Fatalf("name search: %+v %v", byName, err)
 		}
 		second, total, err := env.Repo.List(ctx, "", developer.Page{Number: 2, Size: 1})
-		if err != nil || total != 2 || len(second) != 1 || second[0].ID != yuzu {
+		if err != nil || total != 3 || len(second) != 1 || second[0].ID != key {
 			t.Fatalf("second page: %+v %d %v", second, total, err)
 		}
 	})
