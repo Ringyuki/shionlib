@@ -1,5 +1,23 @@
 import { expect, test } from '@playwright/test'
 
+test('knows every route from the first document and asks for none later', async ({ page }) => {
+  const discoveries: string[] = []
+  page.on('request', request => {
+    if (new URL(request.url()).pathname === '/__manifest') {
+      discoveries.push(request.url())
+    }
+  })
+  await page.goto('/zh')
+  const nav = page.getByRole('navigation', { name: '主导航' })
+  await nav.getByRole('link', { name: '游戏库', exact: true }).click()
+  await expect(page).toHaveURL(/\/zh\/game$/)
+  await nav.getByRole('link', { name: '开发商', exact: true }).click()
+  await expect(page).toHaveURL(/\/zh\/developer$/)
+  await page.getByRole('list', { name: '开发商' }).getByRole('link').first().click()
+  await expect(page).toHaveURL(/\/zh\/developer\/\d+$/)
+  expect(discoveries).toEqual([])
+})
+
 test('opens the search palette with the slash key', async ({ page }) => {
   await page.goto('/zh')
   await page.waitForLoadState('networkidle')

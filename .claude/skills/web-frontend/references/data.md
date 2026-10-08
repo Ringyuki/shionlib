@@ -89,3 +89,4 @@ The browser talks to the web server only. The exceptions cannot go through loade
 - `lang.tsx` revalidates only when the locale changes, so messages are sent once per locale.
 - Layout loaders that depend on the viewer (`site.tsx`) revalidate after actions (the default).
 - Use `shouldRevalidate` for expensive loaders whose data a mutation cannot change.
+- Every route is known from the first document: `react-router.config.ts` sets `routeDiscovery: { mode: 'initial' }`, and it stays that way. With lazy discovery a navigation first asks `/__manifest` for its path, and React Router 8.4.0 has a race in that wait: when the reload that follows a command finishes during it, the router completes the navigation with that reload's data, so the address is the new page and the content is the old one (creating a favorites list and opening it showed the default list). A command's outcome arrives before its reload ends, so navigating on an outcome is normal and must stay safe.
