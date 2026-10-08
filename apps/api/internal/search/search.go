@@ -30,11 +30,11 @@ const (
 var Kinds = []catalog.Entity{catalog.EntityGame, catalog.EntityDeveloper, catalog.EntityCharacter}
 
 type Query struct {
-	Q                       string
-	Kinds                   []catalog.Entity
-	Page                    int
-	Size                    int
-	IncludeWithoutResources bool
+	Q         string
+	Kinds     []catalog.Entity
+	Page      int
+	Size      int
+	Resources game.ResourceRule
 }
 
 type Section[T any] struct {

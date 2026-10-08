@@ -88,7 +88,7 @@ func everything(q string) search.Query {
 
 func anyResource(q string) search.Query {
 	query := everything(q)
-	query.IncludeWithoutResources = true
+	query.Resources = game.ResourcesAny
 	return query
 }
 
@@ -202,9 +202,14 @@ func TestSearchKeepsGamesWithResourcesAmongTheSourcesFirstHits(t *testing.T) {
 		t.Fatalf("users who turned the setting off page the source directly: %d total %d %v", len(all.Games.Items), all.Games.Total, err)
 	}
 	picking := gameQuery("q", 1, 10)
-	picking.IncludeWithoutResources = true
+	picking.Resources = game.ResourcesAny
 	if picked, err := f.service.Search(ctx, guest, picking); err != nil || picked.Games.Total != 150 {
 		t.Fatalf("picking a game to upload to ignores the setting: %d %v", picked.Games.Total, err)
+	}
+	narrowed := gameQuery("q", 1, 10)
+	narrowed.Resources = game.ResourcesRequired
+	if kept, err := f.service.Search(ctx, permissive, narrowed); err != nil || !slices.Equal(gameIDs(kept.Games.Items), []int{5, 7}) || kept.Games.Total != 2 {
+		t.Fatalf("a search can require resources although the viewer turned the setting off: %v total %d %v", gameIDs(kept.Games.Items), kept.Games.Total, err)
 	}
 }
 
@@ -212,7 +217,7 @@ func TestSearchOnlyAsksForRequestedKinds(t *testing.T) {
 	f := newFixture(entry(1, false, true))
 	f.catalog.Hits[catalog.EntityGame] = hits("a")
 	f.catalog.Links[catalog.EntityGame] = map[string]int{"a": 1}
-	results, err := f.service.Search(context.Background(), guest, search.Query{Q: "a", Kinds: []catalog.Entity{catalog.EntityGame, catalog.EntityGame, "tag"}, Page: 1, Size: 5, IncludeWithoutResources: true})
+	results, err := f.service.Search(context.Background(), guest, search.Query{Q: "a", Kinds: []catalog.Entity{catalog.EntityGame, catalog.EntityGame, "tag"}, Page: 1, Size: 5, Resources: game.ResourcesAny})
 	if err != nil || len(results.Games.Items) != 1 {
 		t.Fatalf("games %+v %v", results.Games, err)
 	}
@@ -230,7 +235,7 @@ func TestSearchCachesUpstreamPagesPerKeyword(t *testing.T) {
 	f.catalog.Links[catalog.EntityGame] = map[string]int{"a": 1}
 	game := func(q string, page int) search.Results {
 		t.Helper()
-		results, err := f.service.Search(context.Background(), guest, search.Query{Q: q, Kinds: []catalog.Entity{catalog.EntityGame}, Page: page, Size: 1, IncludeWithoutResources: true})
+		results, err := f.service.Search(context.Background(), guest, search.Query{Q: q, Kinds: []catalog.Entity{catalog.EntityGame}, Page: page, Size: 1, Resources: game.ResourcesAny})
 		if err != nil {
 			t.Fatal(err)
 		}

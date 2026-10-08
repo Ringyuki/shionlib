@@ -27,20 +27,28 @@ const (
 	SortDescending SortOrder = "desc"
 )
 
+type ResourceRule string
+
+const (
+	ResourcesByViewer ResourceRule = ""
+	ResourcesAny      ResourceRule = "any"
+	ResourcesRequired ResourceRule = "required"
+)
+
 type ListQuery struct {
-	Page                    Page
-	DeveloperID             *int
-	CharacterID             *int
-	Tags                    []string
-	ExcludeTags             []string
-	Platforms               []string
-	Years                   []int
-	Months                  []int
-	SortBy                  SortBy
-	SortOrder               SortOrder
-	StartDate               *time.Time
-	EndDate                 *time.Time
-	IncludeWithoutResources bool
+	Page        Page
+	DeveloperID *int
+	CharacterID *int
+	Tags        []string
+	ExcludeTags []string
+	Platforms   []string
+	Years       []int
+	Months      []int
+	SortBy      SortBy
+	SortOrder   SortOrder
+	StartDate   *time.Time
+	EndDate     *time.Time
+	Resources   ResourceRule
 }
 
 func (q ListQuery) entityPage() bool {
@@ -104,8 +112,11 @@ func uniqueSorted(values []int, keep func(int) bool) []int {
 	return slices.Compact(kept)
 }
 
-func WantsOnlyGamesWithResources(ctx context.Context, prefs Preferences, viewer actor.Actor) (bool, error) {
-	if !viewer.Authenticated() {
+func OnlyGamesWithResources(ctx context.Context, prefs Preferences, viewer actor.Actor, rule ResourceRule) (bool, error) {
+	switch {
+	case rule == ResourcesAny:
+		return false, nil
+	case rule == ResourcesRequired, !viewer.Authenticated():
 		return true, nil
 	}
 	return prefs.OnlyGamesWithResources(ctx, viewer.UserID)

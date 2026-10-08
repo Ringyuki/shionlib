@@ -57,10 +57,10 @@ func (s *Service) List(ctx context.Context, viewer actor.Actor, query ListQuery)
 }
 
 func (s *Service) onlyWithResources(ctx context.Context, viewer actor.Actor, query ListQuery) (bool, error) {
-	if query.entityPage() || query.IncludeWithoutResources {
+	if query.entityPage() {
 		return false, nil
 	}
-	return WantsOnlyGamesWithResources(ctx, s.prefs, viewer)
+	return OnlyGamesWithResources(ctx, s.prefs, viewer, query.Resources)
 }
 
 func (s *Service) Random(ctx context.Context, viewer actor.Actor) (int, bool, error) {

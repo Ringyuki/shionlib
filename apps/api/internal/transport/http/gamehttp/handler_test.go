@@ -80,7 +80,7 @@ func setup(t *testing.T) env {
 		Resources: map[string][]byte{"subjects/42": []byte(`{"id":42,"name":"x"}`)},
 	}
 	vndb := &gametest.VNDB{Scores: map[string]game.VNDBScore{"v17": {ID: "v17", Rating: ptr(85.2), Average: ptr(8.4), VoteCount: 1200}}}
-	service := game.NewService(catalog, recent, gametest.Preferences{}, game.NewCardService(catalog), func() time.Time { return apitest.Now }, func(int) int { return 0 })
+	service := game.NewService(catalog, recent, gametest.Preferences{permissive.UserID: false}, game.NewCardService(catalog), func() time.Time { return apitest.Now }, func(int) int { return 0 })
 	scores := game.NewScoreService(catalog, bangumi, vndb, gametest.NewCache())
 	gamehttp.NewHandler(service, scores, server.Builder).Register(server.API)
 	return env{server: server, catalog: catalog, recent: recent, bangumi: bangumi}
@@ -120,12 +120,16 @@ func TestListShapeAndFilters(t *testing.T) {
 		t.Fatalf("resource_updated lists only games with downloadable resources: %s %+v", resp.Data, e.catalog.LastFilter)
 	}
 
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/list?include_without_resources=true"}), http.StatusOK, 0)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/list?resources=any"}), http.StatusOK, 0)
 	if e.catalog.LastFilter.OnlyWithResources {
-		t.Fatalf("include_without_resources lifts the resource filter even for guests: %+v", e.catalog.LastFilter)
+		t.Fatalf("resources=any lifts the resource filter even for guests: %+v", e.catalog.LastFilter)
+	}
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/list?resources=required", As: &permissive}), http.StatusOK, 0)
+	if !e.catalog.LastFilter.OnlyWithResources {
+		t.Fatalf("resources=required keeps only games with resources whatever the setting: %+v", e.catalog.LastFilter)
 	}
 
-	for _, bad := range []string{"pageSize=101", "filter[years][]=1800", "filter[months][]=13", "filter[sort_by]=title", "filter[start_date]=yesterday", "filter[years][]=x"} {
+	for _, bad := range []string{"pageSize=101", "filter[years][]=1800", "filter[months][]=13", "filter[sort_by]=title", "filter[start_date]=yesterday", "filter[years][]=x", "resources=some"} {
 		e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/list?" + bad}), http.StatusUnprocessableEntity, 100101)
 	}
 }

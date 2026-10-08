@@ -88,9 +88,19 @@ func TestListResolvesVisibilityAndResourcePreference(t *testing.T) {
 		t.Fatalf("users default to the resource filter: %v %+v", ids(cards), f.catalog.LastFilter)
 	}
 
-	cards, _, _ = f.service.List(ctx, strictUser, game.ListQuery{Page: page, IncludeWithoutResources: true})
+	cards, _, _ = f.service.List(ctx, strictUser, game.ListQuery{Page: page, Resources: game.ResourcesAny})
 	if !slices.Equal(ids(cards), []int{4, 1}) || f.catalog.LastFilter.OnlyWithResources {
 		t.Fatalf("picking a game to upload to lists games without resources whatever the setting: %v %+v", ids(cards), f.catalog.LastFilter)
+	}
+
+	cards, _, _ = f.service.List(ctx, guest, game.ListQuery{Page: page, Resources: game.ResourcesAny})
+	if !slices.Equal(ids(cards), []int{4, 1}) || f.catalog.LastFilter.OnlyWithResources {
+		t.Fatalf("guests can ask for games without resources too: %v %+v", ids(cards), f.catalog.LastFilter)
+	}
+
+	cards, _, _ = f.service.List(ctx, permissive, game.ListQuery{Page: page, Resources: game.ResourcesRequired})
+	if !slices.Equal(ids(cards), []int{3, 2, 1}) || !f.catalog.LastFilter.OnlyWithResources {
+		t.Fatalf("a list can require resources although the viewer turned the setting off: %v %+v", ids(cards), f.catalog.LastFilter)
 	}
 
 	f.catalog.Put(gametest.Entry{Detail: game.Detail{ID: 9}, DeveloperIDs: []int{7}})

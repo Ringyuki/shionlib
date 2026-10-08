@@ -75,7 +75,7 @@ func (s *Service) Search(ctx context.Context, viewer actor.Actor, query Query) (
 	if q == "" {
 		return results, nil
 	}
-	visibility, err := s.visibility(ctx, viewer, query.IncludeWithoutResources)
+	visibility, err := s.visibility(ctx, viewer, query.Resources)
 	if err != nil {
 		return Results{}, err
 	}
@@ -115,14 +115,9 @@ func collapseSpaces(raw string) string {
 	return strings.Join(strings.Fields(raw), " ")
 }
 
-func (s *Service) visibility(ctx context.Context, viewer actor.Actor, includeWithoutResources bool) (game.Visibility, error) {
-	visibility := game.Visibility{ExcludeRated: !viewer.IncludesRated()}
-	if includeWithoutResources {
-		return visibility, nil
-	}
-	only, err := game.WantsOnlyGamesWithResources(ctx, s.prefs, viewer)
-	visibility.OnlyWithResources = only
-	return visibility, err
+func (s *Service) visibility(ctx context.Context, viewer actor.Actor, resources game.ResourceRule) (game.Visibility, error) {
+	only, err := game.OnlyGamesWithResources(ctx, s.prefs, viewer, resources)
+	return game.Visibility{ExcludeRated: !viewer.IncludesRated(), OnlyWithResources: only}, err
 }
 
 func (s *Service) lookup(ctx context.Context, kind catalog.Entity, q string, page, size int) ([]int, int, error) {
@@ -315,7 +310,7 @@ func (s *Service) Suggest(ctx context.Context, viewer actor.Actor, prefix string
 	if normalized == "" || limit <= 0 {
 		return []string{}, nil
 	}
-	visibility, err := s.visibility(ctx, viewer, false)
+	visibility, err := s.visibility(ctx, viewer, game.ResourcesByViewer)
 	if err != nil {
 		return nil, err
 	}

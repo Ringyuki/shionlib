@@ -104,10 +104,10 @@ func TestSearchReturnsOneSectionPerKind(t *testing.T) {
 		t.Fatalf("live searches are not recorded: %+v", e.queue.Jobs)
 	}
 
-	resp = e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search?q=%E5%8D%83&pageSize=5&include_without_resources=true"})
+	resp = e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search?q=%E5%8D%83&pageSize=5&resources=any"})
 	e.server.Expect(resp, http.StatusOK, 0)
 	if got = decode(t, resp.Data); got.Games.Total != 3 || !slices.Contains(e.catalog.Searches, "hikarinagi:game:千:1:5") {
-		t.Fatalf("include_without_resources pages the source directly: %s %v", resp.Data, e.catalog.Searches)
+		t.Fatalf("resources=any pages the source directly: %s %v", resp.Data, e.catalog.Searches)
 	}
 
 	resp = e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/search?q=%E5%8D%83", As: &permissive})

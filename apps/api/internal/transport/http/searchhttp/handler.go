@@ -6,6 +6,7 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
+	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/search"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
@@ -43,7 +44,7 @@ func (h *Handler) search(ctx context.Context, in *searchInput) (*response.Output
 			kinds[i] = catalog.Entity(kind)
 		}
 	}
-	results, err := h.service.Search(ctx, actor.From(ctx), search.Query{Q: in.Q, Kinds: kinds, Page: in.Page, Size: in.PageSize, IncludeWithoutResources: in.IncludeWithoutResources})
+	results, err := h.service.Search(ctx, actor.From(ctx), search.Query{Q: in.Q, Kinds: kinds, Page: in.Page, Size: in.PageSize, Resources: game.ResourceRule(in.Resources)})
 	if err != nil {
 		return nil, err
 	}

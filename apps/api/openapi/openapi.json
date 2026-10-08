@@ -28062,13 +28062,17 @@
             }
           },
           {
-            "description": "Also list games without resources, whatever the viewer's setting, as when picking a game to upload to",
+            "description": "Which games are listed by their resources, whatever the viewer's setting: any also lists games without resources, as when picking a game to upload to, and required lists only games that have one; the viewer's setting decides when omitted",
             "explode": false,
             "in": "query",
-            "name": "include_without_resources",
+            "name": "resources",
             "schema": {
-              "description": "Also list games without resources, whatever the viewer's setting, as when picking a game to upload to",
-              "type": "boolean"
+              "description": "Which games are listed by their resources, whatever the viewer's setting: any also lists games without resources, as when picking a game to upload to, and required lists only games that have one; the viewer's setting decides when omitted",
+              "enum": [
+                "any",
+                "required"
+              ],
+              "type": "string"
             }
           }
         ],
@@ -29633,13 +29637,17 @@
             }
           },
           {
-            "description": "Also find games without resources, whatever the viewer's setting, as when picking a game to upload to",
+            "description": "Which games are found by their resources, whatever the viewer's setting: any also finds games without resources, as when picking a game to upload to, and required finds only games that have one; the viewer's setting decides when omitted",
             "explode": false,
             "in": "query",
-            "name": "include_without_resources",
+            "name": "resources",
             "schema": {
-              "description": "Also find games without resources, whatever the viewer's setting, as when picking a game to upload to",
-              "type": "boolean"
+              "description": "Which games are found by their resources, whatever the viewer's setting: any also finds games without resources, as when picking a game to upload to, and required finds only games that have one; the viewer's setting decides when omitted",
+              "enum": [
+                "any",
+                "required"
+              ],
+              "type": "string"
             }
           }
         ],
