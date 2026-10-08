@@ -1,0 +1,40 @@
+{
+  "list": "コメント",
+  "count": "{count, number} 件のコメント",
+  "orderLabel": "コメントの並び順",
+  "order": {
+    "newest": "新しい順",
+    "oldest": "古い順"
+  },
+  "empty": "コメントはまだありません。",
+  "signInToWrite": "ログインしてコメントする",
+  "write": "コメントを書く",
+  "post": "投稿",
+  "posted": "コメントを投稿しました。",
+  "reply": "返信",
+  "replyTo": "{name} に返信",
+  "answering": "{name} への返信",
+  "editing": "コメントを編集",
+  "edit": "編集",
+  "save": "保存",
+  "saved": "コメントを保存しました。",
+  "cancel": "キャンセル",
+  "edited": "編集済み",
+  "pending": "審査中",
+  "like": "いいね",
+  "unlike": "いいねを取り消す",
+  "actions": "コメントの操作",
+  "remove": "削除",
+  "removeConfirm": "このコメントを削除しますか？",
+  "removeDescription": "削除すると元に戻せません。",
+  "removeWithReplies": "削除すると元に戻せません。返信は残ります。",
+  "removed": "コメントを削除しました。",
+  "issue": {
+    "empty": "コメントを入力してください。"
+  },
+  "userList": "投稿したコメント",
+  "userEmpty": "このユーザーはまだコメントしていません。",
+  "userEmptyOwn": "まだコメントしていません。",
+  "on": "<game></game> へのコメント",
+  "likes": "いいね {count, number} 件"
+}

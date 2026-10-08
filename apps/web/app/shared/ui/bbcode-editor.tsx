@@ -44,9 +44,16 @@ const blockTools: readonly Tool[] = [
 type BBCodeEditorProps = {
   value: string
   onValueChange: (value: string) => void
+  placeholder?: string
+  'aria-label'?: string
 }
 
-export function BBCodeEditor({ value, onValueChange }: BBCodeEditorProps) {
+export function BBCodeEditor({
+  value,
+  onValueChange,
+  placeholder,
+  'aria-label': label,
+}: BBCodeEditorProps) {
   const t = useTranslations('bbcode')
   const { textarea, field, previewing, height, apply, preview } = useBBCodeEditor(
     value,
@@ -76,6 +83,8 @@ export function BBCodeEditor({ value, onValueChange }: BBCodeEditorProps) {
           ref={textarea}
           value={value}
           onValueChange={onValueChange}
+          placeholder={placeholder}
+          aria-label={label}
           autosize={{ minRows: 3, maxRows: 10 }}
         />
       </Stack>

@@ -66,7 +66,7 @@ export const worksPageSize = 36
 
 export type GameImage = Pick<Cover, 'url' | 'dims' | 'sexual' | 'violence'>
 
-export const gameTabs = ['resources', 'info', 'characters'] as const
+export const gameTabs = ['resources', 'info', 'characters', 'comments'] as const
 
 export type GameTab = (typeof gameTabs)[number]
 

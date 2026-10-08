@@ -56,6 +56,8 @@ The browser has one request tool for everything that does not navigate (`~/share
 - After an action, React Router revalidates the page loaders and loaded fetchers; do not refetch by hand.
 - Not covered by this tool: the upload engine, which talks to the API itself and shows what happened to each file in the uploads list.
 
+- The component that runs a command must outlive it. `run` and `confirm` settle when React shows the fetcher's answer; when the reload that follows removes the component first (deleting a comment from a menu inside that comment), the answer is never shown there, the promise never settles and what was to follow (the toast) is lost, depending on timing. A command that removes its own subject belongs to the list or page that stays mounted, which also holds its confirmation dialog; the item only asks for it (`onRemove(comment)`).
+
 ## Browser calls
 
 ### Third-party services

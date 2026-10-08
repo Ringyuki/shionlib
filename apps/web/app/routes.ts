@@ -3,6 +3,10 @@ import { type RouteConfig, index, layout, route } from '@react-router/dev/routes
 export default [
   index('routes/locale-redirect.ts'),
   route('user/password/forget', 'routes/locale-redirect.ts', { id: 'password-reset-locale' }),
+  route('resources/comments', 'routes/resources.comments.ts'),
+  route('resources/comments/edit', 'routes/resources.comments.edit.ts'),
+  route('resources/comments/remove', 'routes/resources.comments.remove.ts'),
+  route('resources/comments/like', 'routes/resources.comments.like.ts'),
   route('resources/favorites', 'routes/resources.favorites.ts'),
   route('resources/favorites/lists', 'routes/resources.favorites.lists.ts'),
   route('resources/favorites/list-edit', 'routes/resources.favorites.list-edit.ts'),
@@ -66,6 +70,7 @@ export default [
         route('user/:id', 'routes/user.tsx', [
           index('routes/user.uploads.tsx'),
           route('favorites/:listId?', 'routes/user.favorites.tsx'),
+          route('comments', 'routes/user.comments.tsx'),
           route('uploads', 'routes/user-legacy.ts', { id: 'user-uploads-legacy' }),
           route('edits', 'routes/user-legacy.ts', { id: 'user-edits-legacy' }),
         ]),
@@ -80,6 +85,7 @@ export default [
           index('routes/game.resources.tsx'),
           route('info', 'routes/game.info.tsx'),
           route('characters', 'routes/game.characters.tsx'),
+          route('comments', 'routes/game.comments.tsx'),
         ]),
         route('*', 'routes/not-found.ts'),
       ]),

@@ -20,5 +20,6 @@
     "comment-like": "暂无点赞。"
   },
   "choose": "选择一条消息查看",
-  "back": "返回消息列表"
+  "back": "返回消息列表",
+  "openComment": "查看评论"
 }

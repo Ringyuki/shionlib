@@ -1691,7 +1691,7 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** List comments of a game */
+        /** List the comment threads of a game */
         get: operations["comment.listByGame"];
         put?: never;
         /** Comment on a game */
@@ -4823,6 +4823,8 @@ export type components = {
             updated: string;
         };
         CommentItemDTO: {
+            /** @description Lexical editor state */
+            content: unknown;
             /** Format: date-time */
             created: string;
             creator: components["schemas"]["UserSummaryDTO"];
@@ -4863,6 +4865,54 @@ export type components = {
             creator_id: number;
             /** Format: int64 */
             id: number;
+        };
+        CommentThreadDTO: {
+            /** @description Lexical editor state */
+            content: unknown;
+            /** Format: date-time */
+            created: string;
+            creator: components["schemas"]["UserSummaryDTO"];
+            edited: boolean;
+            html: string | null;
+            /** Format: int64 */
+            id: number;
+            is_liked: boolean;
+            /** Format: int64 */
+            like_count: number;
+            parent: components["schemas"]["CommentItemParentDTO"];
+            /** Format: int64 */
+            parent_id: number | null;
+            /** @description Visible replies of the thread, oldest first, replies to replies included */
+            replies: components["schemas"]["CommentItemDTO"][] | null;
+            /** Format: int64 */
+            reply_count: number;
+            /** Format: int64 */
+            root_id: number | null;
+            /** Format: int64 */
+            status: number;
+            /** Format: date-time */
+            updated: string;
+        };
+        CommentThreadPageDTO: {
+            items: components["schemas"]["CommentThreadDTO"][] | null;
+            meta: components["schemas"]["CommentThreadPageMetaDTO"];
+        };
+        CommentThreadPageMetaDTO: {
+            /**
+             * Format: int64
+             * @description Visible comments of the game, replies included
+             */
+            comments: number;
+            /** Format: int64 */
+            currentPage: number;
+            /** Format: int64 */
+            itemCount: number;
+            /** Format: int64 */
+            itemsPerPage: number;
+            /** Format: int64 */
+            totalItems: number;
+            /** Format: int64 */
+            totalPages: number;
         };
         CompleteUploadInputBody: {
             /** @description BLAKE3 hex digest of the whole file, computed while uploading */
@@ -5660,6 +5710,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeCommentThreadPageDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["CommentThreadPageDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeDeletedCharacterDTO: {
             /** Format: int64 */
             code: number;
@@ -6195,16 +6255,6 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["PageCharacterListItemDTO"];
-            message: string;
-            meta?: components["schemas"]["Meta"];
-            requestId: string;
-            /** Format: date-time */
-            timestamp: string;
-        };
-        EnvelopePageCommentItemDTO: {
-            /** Format: int64 */
-            code: number;
-            data: components["schemas"]["PageCommentItemDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -7131,6 +7181,8 @@ export type components = {
             status: number;
         };
         MessageCommentDTO: {
+            /** @description Lexical editor state */
+            content: unknown;
             html: string | null;
             /** Format: int64 */
             id: number;
@@ -7279,10 +7331,6 @@ export type components = {
         };
         PageCharacterListItemDTO: {
             items: components["schemas"]["CharacterListItemDTO"][] | null;
-            meta: components["schemas"]["PageMeta"];
-        };
-        PageCommentItemDTO: {
-            items: components["schemas"]["CommentItemDTO"][] | null;
             meta: components["schemas"]["PageMeta"];
         };
         PageDeveloperListItemDTO: {
@@ -7899,6 +7947,8 @@ export type components = {
             bio: string;
         };
         UserCommentDTO: {
+            /** @description Lexical editor state */
+            content: unknown;
             /** Format: date-time */
             created: string;
             creator: components["schemas"]["UserSummaryDTO"];
@@ -12074,6 +12124,8 @@ export interface operations {
                 page?: number;
                 /** @description Items per page */
                 pageSize?: number;
+                /** @description Order of the threads; the replies of a thread are always oldest first */
+                order?: "newest" | "oldest";
             };
             header?: never;
             path: {
@@ -12090,7 +12142,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["EnvelopePageCommentItemDTO"];
+                    "application/json": components["schemas"]["EnvelopeCommentThreadPageDTO"];
                 };
             };
             /** @description Error */

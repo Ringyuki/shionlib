@@ -1,0 +1,40 @@
+{
+  "list": "Comments",
+  "count": "{count, plural, one {# comment} other {# comments}}",
+  "orderLabel": "Order of comments",
+  "order": {
+    "newest": "Newest first",
+    "oldest": "Oldest first"
+  },
+  "empty": "No comments yet.",
+  "signInToWrite": "Sign in to comment",
+  "write": "Write a comment",
+  "post": "Post",
+  "posted": "Comment posted.",
+  "reply": "Reply",
+  "replyTo": "Reply to {name}",
+  "answering": "replying to {name}",
+  "editing": "Edit comment",
+  "edit": "Edit",
+  "save": "Save",
+  "saved": "Comment saved.",
+  "cancel": "Cancel",
+  "edited": "edited",
+  "pending": "Under review",
+  "like": "Like",
+  "unlike": "Remove like",
+  "actions": "Comment actions",
+  "remove": "Delete",
+  "removeConfirm": "Delete this comment?",
+  "removeDescription": "It cannot be restored.",
+  "removeWithReplies": "It cannot be restored. Its replies stay.",
+  "removed": "Comment deleted.",
+  "issue": {
+    "empty": "Write something first."
+  },
+  "userList": "Comments",
+  "userEmpty": "This user has not commented yet.",
+  "userEmptyOwn": "You have not commented yet.",
+  "on": "On <game></game>",
+  "likes": "{count, plural, one {# like} other {# likes}}"
+}

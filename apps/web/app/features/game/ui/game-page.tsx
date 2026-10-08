@@ -12,6 +12,7 @@ type GamePageProps = {
   header: GameHeader
   details: GameDetails
   characterCount: number
+  commentCount: number
   scores: Promise<Scores>
   resources: ResourceSummary
   favorite: ReactNode
@@ -22,6 +23,7 @@ export function GamePage({
   header,
   details,
   characterCount,
+  commentCount,
   scores,
   resources,
   favorite,
@@ -32,7 +34,11 @@ export function GamePage({
   return (
     <GameTabs
       gameId={header.id}
-      counts={{ resources: resources.count, characters: characterCount }}
+      counts={{
+        resources: resources.count,
+        characters: characterCount,
+        comments: commentCount,
+      }}
       renderHeader={tabs => (
         <Stack gap="xl">
           <GameHero

@@ -1,6 +1,7 @@
 import account from '~/features/account/messages/zh.json'
 import auth from '~/features/auth/messages/zh.json'
 import character from '~/features/character/messages/zh.json'
+import comment from '~/features/comment/messages/zh.json'
 import developer from '~/features/developer/messages/zh.json'
 import download from '~/features/download/messages/zh.json'
 import favorite from '~/features/favorite/messages/zh.json'
@@ -25,6 +26,7 @@ export const messages = {
   auth,
   bbcode,
   character,
+  comment,
   developer,
   download,
   favorite,

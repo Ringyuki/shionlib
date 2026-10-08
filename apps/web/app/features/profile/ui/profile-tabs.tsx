@@ -36,6 +36,12 @@ export function ProfileTabs({ profile, header, children }: ProfileTabsProps) {
               </Text>
             </TabsTrigger>
             <TabsTrigger value="favorites">{t('favorites')}</TabsTrigger>
+            <TabsTrigger value="comments">
+              {t('comments')}
+              <Text as="span" size="sm" tone="faint" className="ms-1.5 tabular-nums">
+                {format.number(profile.comment_count)}
+              </Text>
+            </TabsTrigger>
           </TabsList>
         </Stack>
         <TabsContent value={current}>{children}</TabsContent>

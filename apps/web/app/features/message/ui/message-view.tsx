@@ -17,6 +17,7 @@ import { GameRow } from '~/features/game'
 import { keepScroll, sitePaths } from '~/features/shell'
 import { Button } from '~/shared/ui/button'
 import { categoryOf, inboxPath, linkTarget, type Inbox } from '../message'
+import { MessageComment } from './message-comment'
 
 type MessageViewProps = {
   inbox: Inbox
@@ -90,6 +91,9 @@ export function MessageView({ inbox, className }: MessageViewProps) {
           </Inline>
         </Stack>
         <Text className="max-w-prose break-words whitespace-pre-line">{opened.content}</Text>
+        {opened.comment !== null && (
+          <MessageComment comment={opened.comment} gameId={opened.game?.id} />
+        )}
         {opened.game !== null && <GameRow game={opened.game} />}
         {target !== undefined && opened.link_text !== null && (
           <Inline>

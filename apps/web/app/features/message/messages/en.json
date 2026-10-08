@@ -20,5 +20,6 @@
     "comment-like": "No likes yet."
   },
   "choose": "Choose a message to read",
-  "back": "Back to messages"
+  "back": "Back to messages",
+  "openComment": "Open the comment"
 }

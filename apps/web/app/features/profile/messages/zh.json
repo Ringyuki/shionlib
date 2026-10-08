@@ -7,7 +7,8 @@
   "tabs": {
     "label": "用户内容",
     "uploads": "上传",
-    "favorites": "收藏夹"
+    "favorites": "收藏夹",
+    "comments": "评论"
   },
   "uploads": {
     "label": "上传的资源",

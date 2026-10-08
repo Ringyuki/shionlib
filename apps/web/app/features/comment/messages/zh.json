@@ -1,0 +1,40 @@
+{
+  "list": "评论",
+  "count": "{count, number} 条评论",
+  "orderLabel": "评论顺序",
+  "order": {
+    "newest": "最新优先",
+    "oldest": "最早优先"
+  },
+  "empty": "暂无评论。",
+  "signInToWrite": "登录后发表评论",
+  "write": "写评论",
+  "post": "发表",
+  "posted": "评论已发表。",
+  "reply": "回复",
+  "replyTo": "回复 {name}",
+  "answering": "回复 {name}",
+  "editing": "编辑评论",
+  "edit": "编辑",
+  "save": "保存",
+  "saved": "评论已保存。",
+  "cancel": "取消",
+  "edited": "已编辑",
+  "pending": "审核中",
+  "like": "赞",
+  "unlike": "取消赞",
+  "actions": "评论操作",
+  "remove": "删除",
+  "removeConfirm": "删除这条评论？",
+  "removeDescription": "删除后无法恢复。",
+  "removeWithReplies": "删除后无法恢复，它的回复会保留。",
+  "removed": "评论已删除。",
+  "issue": {
+    "empty": "请输入评论内容。"
+  },
+  "userList": "发表的评论",
+  "userEmpty": "该用户尚未发表评论。",
+  "userEmptyOwn": "你尚未发表评论。",
+  "on": "评论于 <game></game>",
+  "likes": "{count, number} 个赞"
+}

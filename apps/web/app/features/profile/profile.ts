@@ -8,7 +8,7 @@ export type Upload = Schema<'DownloadUserResourceDTO'>
 
 export type Uploads = { items: Upload[]; total: number; page: number }
 
-export const profileTabs = ['uploads', 'favorites'] as const
+export const profileTabs = ['uploads', 'favorites', 'comments'] as const
 
 export type ProfileTab = (typeof profileTabs)[number]
 
@@ -20,8 +20,11 @@ export function profilePath(locale: Locale, userId: number, tab: ProfileTab = 'u
 }
 
 export function tabAt(pathname: string, locale: Locale, userId: number): ProfileTab {
-  const favorites = profilePath(locale, userId, 'favorites')
-  return pathname === favorites || pathname.startsWith(`${favorites}/`) ? 'favorites' : 'uploads'
+  const at = (tab: ProfileTab) => {
+    const base = profilePath(locale, userId, tab)
+    return pathname === base || pathname.startsWith(`${base}/`)
+  }
+  return profileTabs.find(tab => tab !== 'uploads' && at(tab)) ?? 'uploads'
 }
 
 type Placed = Pick<Upload, 'id'> & { game: Pick<Upload['game'], 'id'> }

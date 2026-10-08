@@ -29,7 +29,8 @@
     "label": "ゲームページ",
     "resources": "ダウンロード",
     "info": "概要",
-    "characters": "キャラクター"
+    "characters": "キャラクター",
+    "comments": "コメント"
   },
   "facts": {
     "aliases": "別名 {names}"

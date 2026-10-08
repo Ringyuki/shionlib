@@ -14,6 +14,7 @@ describe('tabAt', () => {
     expect(tabAt('/zh/user/3/favorites', 'zh', 3)).toBe('favorites')
     expect(tabAt('/zh/user/3/favorites/8', 'zh', 3)).toBe('favorites')
     expect(tabAt('/zh/user/30/favorites', 'zh', 3)).toBe('uploads')
+    expect(tabAt('/zh/user/3/comments', 'zh', 3)).toBe('comments')
   })
 })
 

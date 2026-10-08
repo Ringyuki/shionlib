@@ -29,7 +29,8 @@
     "label": "Game page",
     "resources": "Downloads",
     "info": "About",
-    "characters": "Characters"
+    "characters": "Characters",
+    "comments": "Comments"
   },
   "facts": {
     "aliases": "Also known as {names}"
