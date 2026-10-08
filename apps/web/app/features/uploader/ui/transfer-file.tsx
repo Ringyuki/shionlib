@@ -15,14 +15,14 @@ const tones = {
   failed: 'danger',
 } as const
 
-export function TransferFile({ upload }: { upload: Upload }) {
+export function TransferFile({ upload, onReselect }: { upload: Upload; onReselect: () => void }) {
   const bytes = useBytes()
   const name = upload.name ?? upload.file.name
   return (
     <FileLine
       name={name}
       size={bytes(upload.file.size)}
-      state={<UploadTag upload={upload} />}
+      state={<UploadTag upload={upload} onReselect={onReselect} />}
       bar={
         <Progress
           size="sm"

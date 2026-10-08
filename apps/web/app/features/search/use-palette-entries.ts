@@ -41,7 +41,7 @@ export function usePaletteEntries(palette: ReturnType<typeof useSearchPalette>):
     if (settled) {
       palette.settle()
     }
-    palette.setOpen(false)
+    palette.close()
     void navigate(to)
   }
 

@@ -21,7 +21,7 @@ type ResourceMenuProps = {
   files?: readonly ResourceFile[]
 }
 
-type Picked = { id: number; dialog: FileDialog | undefined }
+type Picked = { file: ResourceFile; dialog: FileDialog | undefined }
 
 export function ResourceMenu({ resource, rights, files = [] }: ResourceMenuProps) {
   const t = useTranslations('resource')
@@ -29,7 +29,7 @@ export function ResourceMenu({ resource, rights, files = [] }: ResourceMenuProps
   const [opened, setOpened] = useState<Opened>(undefined)
   const [picked, setPicked] = useState<Picked | undefined>(undefined)
   const managed = rights.manage ? files : []
-  const pickedFile = managed.find(file => file.id === picked?.id)
+  const pickedFile = managed.find(file => file.id === picked?.file.id) ?? picked?.file ?? managed[0]
   const openWhen = (dialog: Opened) => (open: boolean) => setOpened(open ? dialog : undefined)
   const report = () => {
     if (gate.signedIn) {
@@ -62,7 +62,7 @@ export function ResourceMenu({ resource, rights, files = [] }: ResourceMenuProps
                 {t('report')}
               </DropdownMenuItem>
             )}
-            <FilesItems files={managed} onPick={(id, dialog) => setPicked({ id, dialog })} />
+            <FilesItems files={managed} onPick={(file, dialog) => setPicked({ file, dialog })} />
             {rights.remove && (
               <>
                 <DropdownMenuSeparator />
@@ -116,7 +116,7 @@ export function ResourceMenu({ resource, rights, files = [] }: ResourceMenuProps
         <FileDialogs
           file={pickedFile}
           opened={picked?.dialog}
-          onOpenedChange={dialog => setPicked({ id: pickedFile.id, dialog })}
+          onOpenedChange={dialog => setPicked({ file: pickedFile, dialog })}
         />
       )}
       {rights.remove && (

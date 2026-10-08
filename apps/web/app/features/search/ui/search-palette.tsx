@@ -1,12 +1,15 @@
 import { Button, Dialog, Kbd, Text } from '@hina-ui/react'
 import { Search } from 'lucide-react'
 import { useTranslations } from 'use-intl'
-import { useSearchPalette } from '../use-search-palette'
+import { usePaletteOpen } from '../use-palette-open'
+import { usePaletteSource } from '../use-palette-source'
 import { PalettePanel } from './palette-panel'
 
 export function SearchPalette() {
   const t = useTranslations('search')
-  const palette = useSearchPalette()
+  const { open, setOpen } = usePaletteOpen()
+  const source = usePaletteSource()
+  const show = () => setOpen(true)
 
   return (
     <>
@@ -14,7 +17,7 @@ export function SearchPalette() {
         variant="soft"
         tone="neutral"
         icon={<Search />}
-        onClick={palette.show}
+        onClick={show}
         className="max-md:hidden"
       >
         <Text as="span" tone="muted" className="font-normal">
@@ -27,18 +30,18 @@ export function SearchPalette() {
         tone="neutral"
         iconOnly
         aria-label={t('label')}
-        onClick={palette.show}
+        onClick={show}
         className="ms-auto md:hidden"
       >
         <Search />
       </Button>
       <Dialog
         title={t('label')}
-        open={palette.open}
-        onOpenChange={palette.setOpen}
+        open={open}
+        onOpenChange={setOpen}
         placement="top"
         size="xl"
-        renderBody={() => <PalettePanel palette={palette} />}
+        renderBody={({ close }) => <PalettePanel source={source} onClose={close} />}
       />
     </>
   )

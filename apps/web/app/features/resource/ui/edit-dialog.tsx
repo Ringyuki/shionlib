@@ -1,9 +1,9 @@
-import { Alert, Dialog, Form, Inline, toast } from '@hina-ui/react'
-import { useState } from 'react'
+import { Alert, Dialog, Form, toast } from '@hina-ui/react'
 import { useTranslations } from 'use-intl'
 import { useFormKit } from '~/shared/form/use-form-kit'
-import { useSubmissionFeedback } from '~/shared/form/use-submission-feedback'
+import { useDialogFeedback } from '~/shared/form/use-submission-feedback'
 import { Button } from '~/shared/ui/button'
+import { useOpenState } from '~/shared/ui/use-open-state'
 import type { Resource } from '../resource'
 import { editForm, editValuesFrom, type EditValues } from '../resource.schema'
 import { useEditResource } from '../use-edit-resource'
@@ -19,47 +19,40 @@ export function EditDialog({ resource, open, onOpenChange }: EditDialogProps) {
   const t = useTranslations('resource')
   const issue = useTranslations('resource.issue')
   const kit = useFormKit()
-  const [values, setValues] = useState<EditValues>(() => editValuesFrom(resource))
+  const [values, setValues] = useOpenState<EditValues>(open, () => editValuesFrom(resource))
   const edit = useEditResource(() => {
     onOpenChange(false)
     toast.success(t('saved'))
   })
-  const { form, message } = useSubmissionFeedback(edit.failure)
-  const changeOpen = (next: boolean) => {
-    if (next) {
-      setValues(editValuesFrom(resource))
-    }
-    onOpenChange(next)
-  }
+  const { form, message } = useDialogFeedback(open, edit.failure)
   return (
     <Dialog
       title={t('editTitle')}
       open={open}
-      onOpenChange={changeOpen}
-      renderContent={({ close }) => (
+      onOpenChange={onOpenChange}
+      locked={edit.pending}
+      renderContent={() => (
         <Form
           ref={form}
           values={values}
           rules={editForm(kit, issue)}
           onSubmit={() => edit.submit({ resourceId: resource.id, ...values })}
         >
-          {({ submitting }) => (
-            <>
-              <ResourceFields values={values} onValuesChange={setValues} />
-              <Alert tone="danger" open={message !== undefined}>
-                {message}
-              </Alert>
-              <Inline gap="sm" justify="end">
-                <Button variant="ghost" tone="neutral" onClick={close}>
-                  {t('cancel')}
-                </Button>
-                <Button type="submit" loading={submitting}>
-                  {t('save')}
-                </Button>
-              </Inline>
-            </>
-          )}
+          <ResourceFields values={values} onValuesChange={setValues} />
+          <Alert tone="danger" open={message !== undefined}>
+            {message}
+          </Alert>
         </Form>
+      )}
+      renderFooter={({ close }) => (
+        <>
+          <Button variant="ghost" tone="neutral" disabled={edit.pending} onClick={close}>
+            {t('cancel')}
+          </Button>
+          <Button loading={edit.pending} onClick={() => void form.current?.submit()}>
+            {t('save')}
+          </Button>
+        </>
       )}
     />
   )

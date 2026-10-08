@@ -14,12 +14,12 @@ const tags = {
   failed: { tone: 'danger', variant: 'soft' },
 } as const
 
-export function UploadTag({ upload }: { upload: Upload }) {
+export function UploadTag({ upload, onReselect }: { upload: Upload; onReselect: () => void }) {
   const t = useTranslations('uploader.transfers')
   const format = useFormatter()
   const { phase } = upload
   if (phase.name === 'needsFile') {
-    return <Reselect />
+    return <Reselect onOpen={onReselect} />
   }
   const percent = (
     <Text as="span" className="inline-block min-w-[4ch] text-center tabular-nums">

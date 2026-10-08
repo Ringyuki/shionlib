@@ -37,7 +37,7 @@ export function FileItems({ file, removable, named = false, onPick }: FileItemsP
 
 type FilesItemsProps = {
   files: readonly ResourceFile[]
-  onPick: (fileId: number, dialog: FileDialog) => void
+  onPick: (file: ResourceFile, dialog: FileDialog) => void
 }
 
 export function FilesItems({ files, onPick }: FilesItemsProps) {
@@ -49,11 +49,11 @@ export function FilesItems({ files, onPick }: FilesItemsProps) {
     <>
       <DropdownMenuSeparator />
       {files.length === 1 ? (
-        <FileItems file={sole} removable={false} named onPick={dialog => onPick(sole.id, dialog)} />
+        <FileItems file={sole} removable={false} named onPick={dialog => onPick(sole, dialog)} />
       ) : (
         files.map(file => (
           <DropdownMenuSub key={file.id} label={file.file_name} icon={<FileArchive />}>
-            <FileItems file={file} removable onPick={dialog => onPick(file.id, dialog)} />
+            <FileItems file={file} removable onPick={dialog => onPick(file, dialog)} />
           </DropdownMenuSub>
         ))
       )}

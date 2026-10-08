@@ -5,7 +5,12 @@ import { pausable, useUploadManager } from '~/features/upload'
 import type { Transfer } from '../uploader'
 import { Reselect } from './reselect'
 
-export function TransferControls({ transfer }: { transfer: Transfer }) {
+type TransferControlsProps = {
+  transfer: Transfer
+  onReselect: () => void
+}
+
+export function TransferControls({ transfer, onReselect }: TransferControlsProps) {
   const t = useTranslations('uploader.transfers')
   const manager = useUploadManager()
   const { submission, uploads } = transfer
@@ -41,7 +46,7 @@ export function TransferControls({ transfer }: { transfer: Transfer }) {
             <Play />
           </IconButton>
         ) : (
-          waiting && <Reselect compact />
+          waiting && <Reselect compact onOpen={onReselect} />
         )}
       </Inline>
       <Inline align="center" justify="center" className="size-7">

@@ -8,6 +8,7 @@ const oidcErrorParam = 'oidc_error'
 export function useAuthDialog(signedIn: boolean) {
   const [params, setParams] = useSearchParams()
   const [requested, setRequested] = useState<AuthView>()
+  const [shown, setShown] = useState<AuthView>('sign-in')
   const [seenSignedIn, setSeenSignedIn] = useState(signedIn)
   const resume = useRef<(() => void) | undefined>(undefined)
 
@@ -21,8 +22,12 @@ export function useAuthDialog(signedIn: boolean) {
   const fromUrl = params.get(authViewParam)
   const oidcFailed = params.has(oidcErrorParam)
   const urlView = isAuthView(fromUrl) ? fromUrl : oidcFailed ? 'sign-in' : undefined
-  const view = requested ?? urlView ?? 'sign-in'
-  const open = !signedIn && (requested !== undefined || urlView !== undefined)
+  const wanted = requested ?? urlView
+  if (wanted !== undefined && wanted !== shown) {
+    setShown(wanted)
+  }
+  const view = wanted ?? shown
+  const open = !signedIn && wanted !== undefined
   const linked = urlView !== undefined
 
   useEffect(() => {

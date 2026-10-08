@@ -1,9 +1,9 @@
-import { Alert, Dialog, Form, FormField, Inline, Input, toast } from '@hina-ui/react'
-import { useState } from 'react'
+import { Alert, Dialog, Form, FormField, Input, toast } from '@hina-ui/react'
 import { useTranslations } from 'use-intl'
 import { useFormKit } from '~/shared/form/use-form-kit'
-import { useSubmissionFeedback } from '~/shared/form/use-submission-feedback'
+import { useDialogFeedback } from '~/shared/form/use-submission-feedback'
 import { Button } from '~/shared/ui/button'
+import { useOpenState } from '~/shared/ui/use-open-state'
 import type { ResourceFile } from '../resource'
 import { renameFileForm, type RenameFileValues } from '../resource.schema'
 import { useRenameFile } from '../use-rename-file'
@@ -17,49 +17,44 @@ type RenameFileDialogProps = {
 export function RenameFileDialog({ file, open, onOpenChange }: RenameFileDialogProps) {
   const t = useTranslations('resource')
   const kit = useFormKit()
-  const [values, setValues] = useState<RenameFileValues>({ name: file.file_name })
+  const [values, setValues] = useOpenState<RenameFileValues>(open, () => ({
+    name: file.file_name,
+  }))
   const rename = useRenameFile(() => {
     onOpenChange(false)
     toast.success(t('fileRenamed'))
   })
-  const { form, message } = useSubmissionFeedback(rename.failure)
-  const changeOpen = (next: boolean) => {
-    if (next) {
-      setValues({ name: file.file_name })
-    }
-    onOpenChange(next)
-  }
+  const { form, message } = useDialogFeedback(open, rename.failure)
   return (
     <Dialog
       title={t('renameFileTitle')}
       open={open}
-      onOpenChange={changeOpen}
-      renderContent={({ close }) => (
+      onOpenChange={onOpenChange}
+      locked={rename.pending}
+      renderContent={() => (
         <Form
           ref={form}
           values={values}
           rules={renameFileForm(kit)}
           onSubmit={() => rename.submit({ fileId: file.id, name: values.name })}
         >
-          {({ submitting }) => (
-            <>
-              <FormField name="name" label={t('fileName')} required>
-                <Input value={values.name} onValueChange={name => setValues({ name })} />
-              </FormField>
-              <Alert tone="danger" open={message !== undefined}>
-                {message}
-              </Alert>
-              <Inline gap="sm" justify="end">
-                <Button variant="ghost" tone="neutral" onClick={close}>
-                  {t('cancel')}
-                </Button>
-                <Button type="submit" loading={submitting}>
-                  {t('save')}
-                </Button>
-              </Inline>
-            </>
-          )}
+          <FormField name="name" label={t('fileName')} required>
+            <Input value={values.name} onValueChange={name => setValues({ name })} />
+          </FormField>
+          <Alert tone="danger" open={message !== undefined}>
+            {message}
+          </Alert>
         </Form>
+      )}
+      renderFooter={({ close }) => (
+        <>
+          <Button variant="ghost" tone="neutral" disabled={rename.pending} onClick={close}>
+            {t('cancel')}
+          </Button>
+          <Button loading={rename.pending} onClick={() => void form.current?.submit()}>
+            {t('save')}
+          </Button>
+        </>
       )}
     />
   )

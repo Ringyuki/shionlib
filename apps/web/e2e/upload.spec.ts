@@ -77,6 +77,11 @@ test.describe('as an uploader', () => {
     }
     await fileAction(/e2e-new-c/, '重命名')
     const rename = page.getByRole('dialog', { name: '重命名文件' })
+    await rename.getByLabel('文件名').fill('e2e-abandoned.7z')
+    await rename.getByRole('button', { name: '取消' }).click()
+    await expect(rename).toBeHidden()
+    await fileAction(/e2e-new-c/, '重命名')
+    await expect(rename.getByLabel('文件名')).toHaveValue('e2e-new-c.7z')
     await rename.getByLabel('文件名').fill('e2e-renamed.7z')
     await rename.getByRole('button', { name: '保存' }).click()
     await expectNotice(page, '文件名已修改')

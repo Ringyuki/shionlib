@@ -16,11 +16,13 @@ import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useTranslations } from 'use-intl'
 import { Button } from '~/shared/ui/button'
 import { usePaletteEntries, type PaletteEntry } from '../use-palette-entries'
-import type { useSearchPalette } from '../use-search-palette'
+import type { PaletteSource } from '../use-palette-source'
+import { useSearchPalette } from '../use-search-palette'
 import { PictureOption } from './picture-option'
 
-export function PalettePanel({ palette }: { palette: ReturnType<typeof useSearchPalette> }) {
+export function PalettePanel({ source, onClose }: { source: PaletteSource; onClose: () => void }) {
   const t = useTranslations('search')
+  const palette = useSearchPalette(source, onClose)
   const { entries, recentShown, status, searchAll } = usePaletteEntries(palette)
   const input = useRef<InputHandle>(null)
   const list = useRef<HTMLElement>(null)

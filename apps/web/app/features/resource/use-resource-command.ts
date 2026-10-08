@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent } from 'react'
+import { useEffect, useEffectEvent, useRef } from 'react'
 import { useFetcher } from 'react-router'
 import type { ApiFailure } from '~/shared/api/types'
 import type {
@@ -14,19 +14,24 @@ type CommandAction = typeof editResourceAction
 
 type CommandOptions = {
   onDone: () => void
-  onFailure?: (failure: ApiFailure) => void
   revalidate?: boolean
 }
 
+type Confirmation = { resolve: () => void; reject: (failure: ApiFailure) => void }
+
 export function useResourceCommand<
   Command extends ResourceReport | ResourceEdit | ResourceDeletion | FileRename | FileRemoval,
->(action: string, { onDone, onFailure, revalidate = true }: CommandOptions) {
+>(action: string, { onDone, revalidate = true }: CommandOptions) {
   const fetcher = useFetcher<CommandAction>()
+  const confirming = useRef<Confirmation | undefined>(undefined)
   const settle = useEffectEvent((result: NonNullable<typeof fetcher.data>) => {
+    const confirmation = confirming.current
+    confirming.current = undefined
     if (result.ok) {
       onDone()
+      confirmation?.resolve()
     } else {
-      onFailure?.(result.failure)
+      confirmation?.reject(result.failure)
     }
   })
   const settled = fetcher.state === 'submitting' ? undefined : fetcher.data
@@ -42,8 +47,14 @@ export function useResourceCommand<
       encType: 'application/json',
       defaultShouldRevalidate: revalidate,
     })
+  const confirm = (command: Command) =>
+    new Promise<void>((resolve, reject) => {
+      confirming.current = { resolve, reject }
+      void submit(command)
+    })
   return {
     submit,
+    confirm,
     pending: fetcher.state !== 'idle',
     failure: fetcher.data?.ok === false ? fetcher.data.failure : undefined,
   }
