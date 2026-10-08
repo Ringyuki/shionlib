@@ -15,6 +15,7 @@ export type RunnerDeps = {
   stored: ReadonlySet<number>
   hasher: { chunkDigest: (index: number) => Promise<string>; fileDigest: () => Promise<string> }
   slots: Slots
+  client: string
   send: (upload: ChunkUpload) => Promise<unknown>
   complete: (digest: string) => Promise<void>
   report: (event: RunnerEvent) => void
@@ -84,6 +85,7 @@ export class UploadRunner {
         try {
           await this.deps.send({
             id: this.deps.session.id,
+            client: this.deps.client,
             index,
             content,
             sha256,

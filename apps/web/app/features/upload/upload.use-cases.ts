@@ -1,36 +1,63 @@
 import type { ApiClient } from '~/shared/api/client'
+import { constraints } from '~/shared/api/generated/constraints'
 import type { Schema } from '~/shared/api/types'
-import type {
-  FileIdentity,
-  OngoingUpload,
-  Upload,
-  UploadSession,
-  UploadState,
-  UploadTarget,
-} from './upload'
+import type { FileIdentity, Picture, Upload, UploadSession, UploadTarget } from './upload'
+import { renewalsPerHold } from './upload'
 import { retrying } from './upload-failure'
-import { restoreState } from './upload-restore'
+import { restoreState, savedSessions } from './upload-restore'
 import type { SavedState } from './upload.schema'
 
 type FileEntry = Schema<'DownloadFileUploadInput'>
 
-export async function loadOngoing(api: ApiClient): Promise<OngoingUpload[]> {
-  return (await api.get('/uploads/large/ongoing')) ?? []
+const holdsPerCall = constraints.HoldUploadsInputBody.upload_session_ids.maxItems
+
+function by(client: string) {
+  return { 'X-Upload-Client': client }
+}
+
+export async function syncSessions(
+  api: ApiClient,
+  client: string,
+  held: readonly number[],
+): Promise<Picture> {
+  const header = by(client)
+  let renewEvery: number | undefined
+  for (let start = 0; start < held.length; start += holdsPerCall) {
+    const hold = await api.post('/uploads/large/hold', {
+      params: { header },
+      body: { upload_session_ids: held.slice(start, start + holdsPerCall) },
+    })
+    renewEvery = (hold.ttl_seconds * 1000) / renewalsPerHold
+  }
+  const ongoing = (await api.get('/uploads/large/ongoing', { params: { header } })) ?? []
+  return { ongoing, renewEvery }
 }
 
 export async function restoreUploads(
   api: ApiClient,
+  client: string,
   saved: SavedState,
   signal: AbortSignal,
   random: () => number,
-): Promise<UploadState | undefined> {
+) {
   const quiet = { wait: () => undefined, resume: () => undefined, random }
-  const ongoing = await retrying(signal, () => loadOngoing(api), quiet).catch(() => undefined)
-  return ongoing === undefined ? undefined : restoreState(saved, ongoing)
+  const picture = await retrying(
+    signal,
+    () => syncSessions(api, client, savedSessions(saved)),
+    quiet,
+  ).catch(() => undefined)
+  return picture === undefined
+    ? undefined
+    : { state: restoreState(saved, picture.ongoing), renewEvery: picture.renewEvery }
 }
 
-export async function openSession(api: ApiClient, file: FileIdentity): Promise<UploadSession> {
+export async function openSession(
+  api: ApiClient,
+  client: string,
+  file: FileIdentity,
+): Promise<UploadSession> {
   const opened = await api.post('/uploads/large/init', {
+    params: { header: by(client) },
     body: { file_name: file.name, total_size: file.size },
   })
   return {
@@ -45,15 +72,22 @@ export async function uploadedChunks(api: ApiClient, session: number): Promise<n
   return status.uploaded_chunks ?? []
 }
 
-export async function completeSession(api: ApiClient, session: number, digest: string) {
+export async function completeSession(
+  api: ApiClient,
+  client: string,
+  session: number,
+  digest: string,
+) {
   await api.patch('/uploads/large/{id}/complete', {
-    params: { path: { id: session } },
+    params: { path: { id: session }, header: by(client) },
     body: { file_sha256: digest },
   })
 }
 
-export async function discardSession(api: ApiClient, session: number) {
-  await api.delete('/uploads/large/{id}', { params: { path: { id: session } } })
+export async function discardSession(api: ApiClient, client: string, session: number) {
+  await api.delete('/uploads/large/{id}', {
+    params: { path: { id: session }, header: by(client) },
+  })
 }
 
 export async function submitUploads(
@@ -82,6 +116,7 @@ export async function submitUploads(
       })
       return
     case 'orphan':
+    case 'heldElsewhere':
       return
   }
 }

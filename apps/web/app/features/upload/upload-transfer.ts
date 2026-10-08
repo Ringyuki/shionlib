@@ -12,6 +12,7 @@ import type { SavedState } from './upload.schema'
 
 export type UploadDeps = {
   api: ApiClient
+  client: string
   send: (upload: ChunkUpload) => Promise<unknown>
   hashWorker: () => HashWorker
   storage: { read: () => SavedState; write: (state: SavedState) => void }
@@ -39,7 +40,8 @@ export async function transfer(
   const waiting = waitingFor(context, upload.id)
   const fresh = upload.session === undefined
   const session =
-    upload.session ?? (await retrying(signal, () => openSession(deps.api, upload.file), waiting))
+    upload.session ??
+    (await retrying(signal, () => openSession(deps.api, deps.client, upload.file), waiting))
   if (fresh) {
     dispatch({ type: 'sessionOpened', upload: upload.id, session, sent: 0 })
   }
@@ -55,8 +57,9 @@ export async function transfer(
       stored: new Set(stored),
       hasher: hasherFor(context, upload.id, file, session),
       slots: context.slots,
+      client: deps.client,
       send: deps.send,
-      complete: digest => completeSession(deps.api, session.id, digest),
+      complete: digest => completeSession(deps.api, deps.client, session.id, digest),
       report: event => dispatch(eventOf(upload.id, event)),
       now: deps.now,
       random: deps.random,

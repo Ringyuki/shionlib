@@ -18,12 +18,13 @@ export type UploadTarget =
   | { kind: 'append'; resourceId: number }
   | { kind: 'replace'; fileId: number; reason?: string }
   | { kind: 'orphan' }
+  | { kind: 'heldElsewhere' }
 
 export type FileIdentity = { name: string; size: number; lastModified: number }
 
 export type UploadSession = { id: number; chunkSize: number; totalChunks: number }
 
-export type WaitReason = 'network' | 'busy' | 'inFlight' | 'signedOut' | 'elsewhere'
+export type WaitReason = 'network' | 'busy' | 'inFlight' | 'signedOut' | 'otherTab'
 
 export type FailureReason = 'differentFile' | 'changedFile' | 'expired' | 'rejected'
 
@@ -33,6 +34,7 @@ export type UploadPhase =
   | { name: 'running' }
   | { name: 'waiting'; reason: WaitReason }
   | { name: 'paused' }
+  | { name: 'heldElsewhere' }
   | { name: 'done' }
   | { name: 'failed'; reason: FailureReason; message?: string }
 
@@ -57,6 +59,8 @@ export type Submission = { id: string; target: UploadTarget; label: string; phas
 
 export type UploadState = { submissions: Submission[]; uploads: Upload[] }
 
+export type Picture = { ongoing: OngoingUpload[]; renewEvery?: number }
+
 export type Admission =
   | { kind: 'full' }
   | { kind: 'empty'; file: string }
@@ -71,10 +75,27 @@ export const chunkSlots = 3
 
 export const stallTimeout = 60_000
 
+export const syncEvery = 30_000
+
+export const renewalsPerHold = 4
+
 export const emptyState: UploadState = { submissions: [], uploads: [] }
+
+export const clientStorageKey = 'shionlib_upload_client'
 
 export function uploadStorageKey(viewer: number): string {
   return `shionlib_uploads_${viewer}`
+}
+
+export function unowned(submission: Pick<Submission, 'target'>): boolean {
+  return submission.target.kind === 'orphan' || submission.target.kind === 'heldElsewhere'
+}
+
+export function lockedElsewhere(submission: Submission, uploads: readonly Upload[]): boolean {
+  return (
+    submission.target.kind === 'heldElsewhere' ||
+    uploads.some(upload => upload.phase.name === 'heldElsewhere')
+  )
 }
 
 export function chosenFiles(value: File | File[] | null): File[] {

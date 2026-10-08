@@ -7,12 +7,12 @@ type EntryShellProps = {
   files: ReactNode
   stage: ReactNode
   controls: ReactNode
-  controlSlots: 1 | 2
+  controlSlots: 0 | 1 | 2
   notice?: ReactNode
   facts: ReactNode
 }
 
-const spare = { 1: 'pe-7', 2: '' } as const
+const spare = { 0: 'pe-16', 1: 'pe-7', 2: '' } as const
 
 export function EntryShell({
   as,

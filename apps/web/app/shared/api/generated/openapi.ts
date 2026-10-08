@@ -2735,6 +2735,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/uploads/large/hold": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Hold the sessions in this client's queue, so that no other client writes, completes or aborts them */
+        post: operations["upload.hold"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/uploads/large/init": {
         parameters: {
             query?: never;
@@ -4636,7 +4653,7 @@ export type components = {
          * Format: int64
          * @enum {integer}
          */
-        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 450101 | 450102 | 450103 | 450104 | 450105 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 610101 | 610102 | 620101 | 620102 | 620103 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102;
+        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 450101 | 450102 | 450103 | 450104 | 450105 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 610101 | 610102 | 620101 | 620102 | 620103 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102;
         CatalogHitDTO: {
             cover: string | null;
             developer: string | null;
@@ -6467,6 +6484,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeUploadHoldDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["UploadHoldDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeUploadStatusDTO: {
             /** Format: int64 */
             code: number;
@@ -6931,6 +6958,10 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        HoldUploadsInputBody: {
+            /** @description Sessions this client has in its queue */
+            upload_session_ids: number[] | null;
+        };
         InitUploadDTO: {
             /** Format: int64 */
             chunk_size: number;
@@ -7135,6 +7166,8 @@ export type components = {
             /** Format: date-time */
             expires_at: string;
             file_name: string;
+            /** @description Another client has this session in its queue; it cannot be written, completed or aborted from here until that hold runs out */
+            held_elsewhere: boolean;
             /**
              * @description COMPLETED sessions are finished uploads not yet in a resource
              * @enum {string}
@@ -7768,6 +7801,17 @@ export type components = {
         };
         UploadCompleteDTO: {
             ok: boolean;
+        };
+        UploadHoldDTO: {
+            /** @description Sessions another client holds */
+            elsewhere: number[] | null;
+            /** @description Sessions this client now holds */
+            held: number[] | null;
+            /**
+             * Format: int64
+             * @description How long a hold lasts without being renewed; sessions in neither list are gone
+             */
+            ttl_seconds: number;
         };
         UploadStatusDTO: {
             /** Format: int64 */
@@ -14494,10 +14538,50 @@ export interface operations {
             };
         };
     };
+    "upload.hold": {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Identifies the browser that uploads */
+                "X-Upload-Client": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HoldUploadsInputBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeUploadHoldDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     "upload.init": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Identifies the browser that uploads; the new session is held by it from the start */
+                "X-Upload-Client"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -14531,7 +14615,10 @@ export interface operations {
     "upload.ongoing": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Identifies the browser that uploads; a session held by one client refuses the others */
+                "X-Upload-Client"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -14561,7 +14648,10 @@ export interface operations {
     "upload.abort": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Identifies the browser that uploads; a session held by one client refuses the others */
+                "X-Upload-Client"?: string;
+            };
             path: {
                 id: number;
             };
@@ -14596,6 +14686,8 @@ export interface operations {
             header: {
                 /** @description Lowercase hex SHA-256 of the chunk bytes */
                 "chunk-sha256": string;
+                /** @description Identifies the browser that uploads; a session held by one client refuses the others */
+                "X-Upload-Client"?: string;
             };
             path: {
                 id: number;
@@ -14632,7 +14724,10 @@ export interface operations {
     "upload.complete": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Identifies the browser that uploads; a session held by one client refuses the others */
+                "X-Upload-Client"?: string;
+            };
             path: {
                 id: number;
             };

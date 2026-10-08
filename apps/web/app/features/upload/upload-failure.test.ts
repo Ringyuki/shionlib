@@ -2,7 +2,14 @@ import { describe, expect, it } from 'vitest'
 import { ApiError } from '~/shared/api/error'
 import { BusinessCode } from '~/shared/api/generated/business-codes'
 import type { BusinessCodeName } from '~/shared/api/types'
-import { backoff, decide, stalledConnection, stopped } from './upload-failure'
+import {
+  backoff,
+  decide,
+  HeldElsewhere,
+  retrying,
+  stalledConnection,
+  stopped,
+} from './upload-failure'
 
 function apiError(status: number, name: BusinessCodeName, retryAfter?: number) {
   return new ApiError(
@@ -65,6 +72,21 @@ describe('decide', () => {
       kind: 'fail',
       reason: 'rejected',
     })
+  })
+})
+
+describe('retrying', () => {
+  it('gives way at once when another browser holds the session', async () => {
+    const refused = apiError(409, 'GAME_UPLOAD_SESSION_HELD_ELSEWHERE')
+    expect(decide(refused, 0, 0)).toEqual({ kind: 'yield' })
+    const waits: string[] = []
+    const attempt = retrying(new AbortController().signal, () => Promise.reject(refused), {
+      wait: reason => void waits.push(reason),
+      resume: () => undefined,
+      random: () => 0,
+    })
+    await expect(attempt).rejects.toBeInstanceOf(HeldElsewhere)
+    expect(waits).toEqual([])
   })
 })
 

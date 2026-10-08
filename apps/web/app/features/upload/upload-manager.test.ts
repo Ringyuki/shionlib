@@ -1,109 +1,32 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { ChunkUpload } from '~/shared/api/chunk'
-import { createApi } from '~/shared/api/client'
-import type { HashWorker } from './file-hasher'
+import { ApiError } from '~/shared/api/error'
+import { BusinessCode } from '~/shared/api/generated/business-codes'
 import type { OngoingUpload } from './upload'
-import { hashFile } from './upload-hash'
-import { UploadManager } from './upload-manager'
-import type { UploadDeps } from './upload-transfer'
-import type { SavedState } from './upload.schema'
+import {
+  fakeServer,
+  hanging,
+  ongoingSession,
+  savedUpload,
+  setupManager,
+  tenBytes,
+} from './upload-testing'
 
-type Call = { method: string; path: string; body: unknown }
-
-const sizeOf = (body: unknown) =>
-  typeof body === 'object' &&
-  body !== null &&
-  'total_size' in body &&
-  typeof body.total_size === 'number'
-    ? body.total_size
-    : 0
-
-function fakeServer(ongoing: OngoingUpload[] = []) {
-  const calls: Call[] = []
-  let next = 1
-  const reply = (data: unknown) => Response.json({ code: 0, message: 'ok', data })
-  const api = createApi({
-    baseUrl: 'http://api.test',
-    fetch: async request => {
-      const path = new URL(request.url).pathname
-      const body: unknown = request.body === null ? undefined : await request.json()
-      calls.push({ method: request.method, path, body })
-      if (path === '/uploads/large/ongoing') return reply(ongoing)
-      if (path === '/uploads/large/init') {
-        const size = sizeOf(body)
-        return reply({
-          upload_session_id: next++,
-          chunk_size: 4,
-          total_chunks: Math.ceil(size / 4),
-          expires_at: '',
-        })
-      }
-      if (path.endsWith('/status')) {
-        const known = ongoing.find(
-          session => path === `/uploads/large/${session.upload_session_id}/status`,
-        )
-        return reply({
-          status: 'UPLOADING',
-          uploaded_chunks: known?.uploaded_chunks ?? [],
-          file_sha256: null,
-        })
-      }
-      if (path === '/game/3/download-source') return reply({ id: 99 })
-      return reply(path.endsWith('/complete') ? { ok: true } : null)
-    },
-  })
-  return {
-    api,
-    calls,
-    called: (method: string, path: string) =>
-      calls.find(call => call.method === method && call.path === path),
-  }
-}
-
-const inProcess = (): HashWorker => ({
-  start: (file, chunkSize, receive) => void hashFile(file, chunkSize, receive),
-  terminate: () => undefined,
+const heldElsewhere = new ApiError(409, {
+  code: BusinessCode.GAME_UPLOAD_SESSION_HELD_ELSEWHERE,
+  message: 'held',
+  data: { errors: null },
+  requestId: '',
+  timestamp: '',
 })
 
-function setup(server: ReturnType<typeof fakeServer>, changes: Partial<UploadDeps> = {}) {
-  const sent: number[][] = []
-  const writes: SavedState[] = []
-  const later: Array<() => void> = []
-  let ids = 0
-  const deps: UploadDeps = {
-    api: server.api,
-    send: async upload => void sent.push([upload.id, upload.index]),
-    hashWorker: inProcess,
-    storage: {
-      read: () => ({ submissions: [], uploads: [] }),
-      write: state => void writes.push(state),
-    },
-    lock: async (_name, task) => {
-      await task()
-      return true
-    },
-    later: task => void later.push(task),
-    now: () => Date.now(),
-    random: () => 0,
-    newId: () => `id${++ids}`,
-    ...changes,
-  }
-  return { manager: new UploadManager(deps), sent, writes, later }
-}
+const kindOf = (submission: { target: { kind: string } }) => submission.target.kind
 
-const tenBytes = () => new File(['0123456789'], 'game.7z', { lastModified: 7 })
-
-function hanging(upload: ChunkUpload): Promise<unknown> {
-  return new Promise((_resolve, reject) => {
-    upload.signal?.throwIfAborted()
-    upload.signal?.addEventListener('abort', () => reject(upload.signal?.reason))
-  })
-}
+const phaseOf = (upload: { phase: { name: string } }) => upload.phase.name
 
 describe('UploadManager', () => {
   it('uploads every file of a resource, then creates it', async () => {
     const server = fakeServer()
-    const { manager, writes } = setup(server)
+    const { manager, writes } = setupManager(server)
     manager.add(
       { kind: 'create', gameId: 3, resource: { platform: ['win'], language: ['jp'] } },
       'ゲーム',
@@ -124,33 +47,9 @@ describe('UploadManager', () => {
   })
 
   it('resumes a restored upload once its file is chosen again', async () => {
-    const session: OngoingUpload = {
-      upload_session_id: 5,
-      status: 'UPLOADING',
-      file_name: 'game.7z',
-      total_size: 10,
-      chunk_size: 4,
-      total_chunks: 3,
-      uploaded_chunks: [0],
-      expires_at: '',
-    }
-    const saved: SavedState = {
-      submissions: [
-        { id: 's', target: { kind: 'append', resourceId: 4 }, label: 'ゲーム', submitting: false },
-      ],
-      uploads: [
-        {
-          id: 'u',
-          submission: 's',
-          file: { name: 'game.7z', size: 10, lastModified: 7 },
-          session: { id: 5, chunkSize: 4, totalChunks: 3 },
-          done: false,
-        },
-      ],
-    }
-    const server = fakeServer([session])
-    const { manager, sent } = setup(server, {
-      storage: { read: () => saved, write: () => undefined },
+    const server = fakeServer([ongoingSession(5, { uploaded_chunks: [0] })])
+    const { manager, sent } = setupManager(server, {
+      storage: { read: () => savedUpload(5), write: () => undefined },
     })
     await manager.start()
     expect(manager.getSnapshot().uploads[0]).toMatchObject({
@@ -172,21 +71,8 @@ describe('UploadManager', () => {
   })
 
   it('restores once even when started twice and stopped in between', async () => {
-    const saved: SavedState = {
-      submissions: [
-        { id: 's', target: { kind: 'append', resourceId: 4 }, label: 'ゲーム', submitting: false },
-      ],
-      uploads: [
-        {
-          id: 'u',
-          submission: 's',
-          file: { name: 'game.7z', size: 10, lastModified: 7 },
-          done: false,
-        },
-      ],
-    }
-    const { manager } = setup(fakeServer(), {
-      storage: { read: () => saved, write: () => undefined },
+    const { manager } = setupManager(fakeServer(), {
+      storage: { read: () => savedUpload(), write: () => undefined },
     })
     const first = manager.start()
     manager.dispose()
@@ -196,7 +82,7 @@ describe('UploadManager', () => {
 
   it('pauses and resumes', async () => {
     let paused = false
-    const { manager } = setup(fakeServer(), {
+    const { manager } = setupManager(fakeServer(), {
       send: upload => (paused ? Promise.resolve() : hanging(upload)),
     })
     manager.add({ kind: 'append', resourceId: 4 }, 'ゲーム', [{ file: tenBytes() }])
@@ -212,7 +98,7 @@ describe('UploadManager', () => {
 
   it('waits while another tab uploads the same session', async () => {
     let taken = true
-    const { manager, later } = setup(fakeServer(), {
+    const { manager, later } = setupManager(fakeServer(), {
       lock: async (_name, task) => {
         if (taken) return false
         await task()
@@ -223,11 +109,11 @@ describe('UploadManager', () => {
     await vi.waitFor(() =>
       expect(manager.getSnapshot().uploads[0]?.phase).toEqual({
         name: 'waiting',
-        reason: 'elsewhere',
+        reason: 'otherTab',
       }),
     )
     taken = false
-    later[0]?.()
+    later[0]?.task()
     await vi.waitFor(() =>
       expect(manager.getSnapshot().uploads[0]?.phase).toEqual({ name: 'done' }),
     )
@@ -235,11 +121,76 @@ describe('UploadManager', () => {
 
   it('discards the session of a cancelled upload', async () => {
     const server = fakeServer()
-    const { manager } = setup(server, { send: hanging })
+    const { manager } = setupManager(server, { send: hanging })
     manager.add({ kind: 'append', resourceId: 4 }, 'ゲーム', [{ file: tenBytes() }])
     await vi.waitFor(() => expect(manager.getSnapshot().uploads[0]?.session?.id).toBe(1))
     manager.cancel('id2')
     await vi.waitFor(() => expect(server.called('DELETE', '/uploads/large/1')).toBeDefined())
     expect(manager.getSnapshot()).toEqual({ submissions: [], uploads: [] })
+  })
+
+  it('holds the sessions in its queue and shows what another browser holds', async () => {
+    const server = fakeServer([
+      ongoingSession(5, { uploaded_chunks: [0] }),
+      ongoingSession(6, { held_elsewhere: true }),
+    ])
+    const { manager, later } = setupManager(server, {
+      storage: { read: () => savedUpload(5), write: () => undefined },
+    })
+    await manager.start()
+    expect(server.called('POST', '/uploads/large/hold')).toMatchObject({
+      body: { upload_session_ids: [5] },
+      client: 'this-browser',
+    })
+    expect(manager.getSnapshot().submissions.map(kindOf)).toEqual(['append', 'heldElsewhere'])
+    expect(manager.getSnapshot().uploads.map(phaseOf)).toEqual(['needsFile', 'heldElsewhere'])
+    expect(later[0]?.milliseconds).toBe(20_000)
+  })
+
+  it('offers a session here once the other browser lets go of it', async () => {
+    const sessions: OngoingUpload[] = [ongoingSession(6, { held_elsewhere: true })]
+    const { manager, later } = setupManager(fakeServer(sessions))
+    await manager.start()
+    expect(manager.getSnapshot().submissions.map(kindOf)).toEqual(['heldElsewhere'])
+    sessions[0] = ongoingSession(6)
+    later[0]?.task()
+    await vi.waitFor(() =>
+      expect(manager.getSnapshot().submissions.map(kindOf)).toEqual(['orphan']),
+    )
+    expect(manager.getSnapshot().uploads.map(phaseOf)).toEqual(['needsFile'])
+  })
+
+  it('yields a session another browser holds and takes it up again when it is free', async () => {
+    const sessions: OngoingUpload[] = []
+    let held = true
+    const server = fakeServer(sessions)
+    const { manager, later } = setupManager(server, {
+      send: () => (held ? Promise.reject(heldElsewhere) : Promise.resolve()),
+    })
+    await manager.start()
+    manager.add({ kind: 'append', resourceId: 4 }, 'ゲーム', [{ file: tenBytes() }])
+    await vi.waitFor(() =>
+      expect(manager.getSnapshot().uploads.map(phaseOf)).toEqual(['heldElsewhere']),
+    )
+    held = false
+    sessions.push(ongoingSession(1))
+    later[0]?.task()
+    await vi.waitFor(() =>
+      expect(manager.getSnapshot().submissions[0]?.phase.name).toBe('submitted'),
+    )
+    expect(server.called('POST', '/uploads/large/hold')?.body).toEqual({ upload_session_ids: [1] })
+  })
+
+  it('does not bring back a session it discarded', async () => {
+    const server = fakeServer([ongoingSession(9), ongoingSession(10)])
+    const { manager, later } = setupManager(server)
+    await manager.start()
+    manager.cancel('session-9')
+    later[0]?.task()
+    await vi.waitFor(() =>
+      expect(server.calls.filter(call => call.path === '/uploads/large/ongoing')).toHaveLength(2),
+    )
+    expect(manager.getSnapshot().uploads.map(upload => upload.id)).toEqual(['session-10'])
+    expect(server.called('DELETE', '/uploads/large/9')?.client).toBe('this-browser')
   })
 })

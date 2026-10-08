@@ -2,6 +2,7 @@ export {
   admit,
   chosenFiles,
   fileLimit,
+  lockedElsewhere,
   pausable,
   progress,
   remainingSeconds,

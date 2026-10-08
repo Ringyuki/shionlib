@@ -14,6 +14,7 @@ export type ChunkTarget = ChunkOperation['parameters']['path']
 export type UploadedChunk = ApiData<typeof chunkPath, 'put'>
 
 export type ChunkUpload = ChunkTarget & {
+  client: string
   content: Blob
   sha256: string
   signal?: AbortSignal
@@ -21,8 +22,11 @@ export type ChunkUpload = ChunkTarget & {
 }
 
 export async function uploadChunk(upload: ChunkUpload): Promise<UploadedChunk> {
-  const hash: ChunkOperation['parameters']['header'] = { 'chunk-sha256': upload.sha256 }
-  const headers = new Headers(hash)
+  const sender: ChunkOperation['parameters']['header'] = {
+    'chunk-sha256': upload.sha256,
+    'X-Upload-Client': upload.client,
+  }
+  const headers = new Headers(sender)
   headers.set('content-type', 'application/octet-stream')
   const url =
     browserApiBase +

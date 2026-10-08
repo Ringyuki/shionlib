@@ -1,5 +1,6 @@
 import type {
   FailureReason,
+  OngoingUpload,
   Submission,
   SubmissionPhase,
   Upload,
@@ -8,11 +9,14 @@ import type {
   UploadState,
   WaitReason,
 } from './upload'
-import { activeFiles, settled } from './upload'
+import { activeFiles, settled, unowned } from './upload'
+import { syncState } from './upload-sync'
 
 export type UploadEvent =
   | { type: 'added'; submission: Submission; uploads: Upload[] }
   | { type: 'restored'; state: UploadState }
+  | { type: 'synced'; ongoing: readonly OngoingUpload[] }
+  | { type: 'heldElsewhere'; upload: string }
   | { type: 'fileFound'; upload: string }
   | { type: 'started'; upload: string }
   | { type: 'sessionOpened'; upload: string; session: UploadSession; sent: number }
@@ -41,6 +45,10 @@ export function reduce(state: UploadState, event: UploadEvent): UploadState {
         ],
         uploads: [...unknownTo(state.uploads, event.state.uploads), ...state.uploads],
       }
+    case 'synced':
+      return syncState(state, event.ongoing)
+    case 'heldElsewhere':
+      return update(state, event.upload, { phase: { name: 'heldElsewhere' }, speed: 0 })
     case 'fileFound':
     case 'resumed':
       return phase(state, event.upload, { name: 'queued' })
@@ -90,7 +98,7 @@ export function nextToStart(state: UploadState, hasFile: (upload: string) => boo
 
 export function readyToSubmit(state: UploadState): Submission[] {
   return state.submissions.filter(submission => {
-    if (submission.phase.name !== 'uploading' || submission.target.kind === 'orphan') {
+    if (submission.phase.name !== 'uploading' || unowned(submission)) {
       return false
     }
     const uploads = uploadsOf(state, submission.id)

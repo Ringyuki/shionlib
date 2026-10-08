@@ -1,12 +1,11 @@
 import type { OngoingUpload, Submission, Upload, UploadState } from './upload'
-import { uploadedBytes } from './upload'
+import { unowned, uploadedBytes } from './upload'
+import { syncState } from './upload-sync'
 import type { SavedState } from './upload.schema'
-
-export const orphanSubmission = 'orphans'
 
 export function savedStateOf(state: UploadState): SavedState {
   const submissions = state.submissions.filter(
-    submission => submission.phase.name !== 'submitted' && submission.target.kind !== 'orphan',
+    submission => submission.phase.name !== 'submitted' && !unowned(submission),
   )
   const kept = new Set(submissions.map(submission => submission.id))
   return {
@@ -29,9 +28,12 @@ export function savedStateOf(state: UploadState): SavedState {
   }
 }
 
+export function savedSessions(saved: SavedState): number[] {
+  return saved.uploads.flatMap(upload => upload.session?.id ?? [])
+}
+
 export function restoreState(saved: SavedState, ongoing: readonly OngoingUpload[]): UploadState {
   const live = new Map(ongoing.map(session => [session.upload_session_id, session]))
-  const claimed = new Set(saved.uploads.flatMap(upload => upload.session?.id ?? []))
   const submitting = new Set(
     saved.submissions.filter(submission => submission.submitting).map(submission => submission.id),
   )
@@ -50,16 +52,7 @@ export function restoreState(saved: SavedState, ongoing: readonly OngoingUpload[
       phase: submission.submitting && consumed ? { name: 'submitted' } : { name: 'uploading' },
     }
   })
-  const orphans = ongoing.filter(session => !claimed.has(session.upload_session_id)).map(orphanOf)
-  if (orphans.length > 0) {
-    submissions.push({
-      id: orphanSubmission,
-      target: { kind: 'orphan' },
-      label: '',
-      phase: { name: 'uploading' },
-    })
-  }
-  return { submissions, uploads: [...uploads, ...orphans] }
+  return syncState({ submissions, uploads }, ongoing)
 }
 
 function restoreUpload(
@@ -90,25 +83,4 @@ function restoreUpload(
   }
   const sent = uploadedBytes(upload.session, upload.file.size, server.uploaded_chunks ?? [])
   return { ...base, sent, phase: { name: 'needsFile' } }
-}
-
-function orphanOf(session: OngoingUpload): Upload {
-  const file = { name: session.file_name, size: session.total_size, lastModified: 0 }
-  const uploadSession = {
-    id: session.upload_session_id,
-    chunkSize: session.chunk_size,
-    totalChunks: session.total_chunks,
-  }
-  const finished = session.status === 'COMPLETED'
-  return {
-    id: `session-${session.upload_session_id}`,
-    submission: orphanSubmission,
-    file,
-    session: uploadSession,
-    sent: finished
-      ? file.size
-      : uploadedBytes(uploadSession, file.size, session.uploaded_chunks ?? []),
-    speed: 0,
-    phase: finished ? { name: 'done' } : { name: 'needsFile' },
-  }
 }

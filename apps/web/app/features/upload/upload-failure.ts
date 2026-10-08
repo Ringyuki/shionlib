@@ -4,6 +4,7 @@ import { sleep } from './upload-slots'
 
 export type Decision =
   | { kind: 'stop' }
+  | { kind: 'yield' }
   | { kind: 'retry'; reason: WaitReason; delay: number }
   | { kind: 'fail'; reason: FailureReason; message?: string }
 
@@ -25,6 +26,8 @@ export class UploadFailure extends Error {
     this.detail = detail
   }
 }
+
+export class HeldElsewhere extends Error {}
 
 export type Waiting = {
   wait: (reason: WaitReason) => void
@@ -48,6 +51,9 @@ export async function retrying<Result>(
       const decision = decide(error, tries, waiting.random())
       if (decision.kind === 'stop') {
         throw error
+      }
+      if (decision.kind === 'yield') {
+        throw new HeldElsewhere()
       }
       if (decision.kind === 'fail') {
         throw new UploadFailure(decision.reason, decision.message)
@@ -91,6 +97,9 @@ export function decide(error: unknown, attempt: number, random: number): Decisio
 function decideApiError(error: ApiError, attempt: number, random: number): Decision {
   if (error.status === 401) {
     return { kind: 'retry', reason: 'signedOut', delay: retryCap }
+  }
+  if (error.is('GAME_UPLOAD_SESSION_HELD_ELSEWHERE')) {
+    return { kind: 'yield' }
   }
   if (error.is('UPLOAD_SPOOL_FULL')) {
     return { kind: 'retry', reason: 'busy', delay: busyDelay }

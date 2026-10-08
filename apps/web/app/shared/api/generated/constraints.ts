@@ -1205,6 +1205,15 @@ export const constraints = {
       "format": "email"
     }
   },
+  "HoldUploadsInputBody": {
+    "upload_session_ids": {
+      "type": "array",
+      "required": true,
+      "nullable": true,
+      "minItems": 1,
+      "maxItems": 100
+    }
+  },
   "InitUploadInputBody": {
     "chunk_size": {
       "type": "integer",

@@ -56,6 +56,11 @@
     "replaces": "Replacing {name}",
     "orphan": "Uploads that were not submitted",
     "orphanHint": "These files reached the server but were not submitted. Cancel the ones you do not need.",
+    "elsewhere": {
+      "title": "Files uploading in another browser or on another device",
+      "hint": "These files are uploading in another browser or on another device. Once the page uploading them is closed, they can be continued or cancelled here shortly afterwards.",
+      "file": "Uploading in another browser or on another device"
+    },
     "submitting": "Submitting",
     "submitFailed": "Submission failed",
     "retry": "Submit again",
@@ -81,7 +86,7 @@
       "busy": "The server is busy, retrying shortly",
       "inFlight": "Uploads in progress have reached the limit; this file starts once earlier ones finish",
       "signedOut": "Your session expired; uploading resumes after you sign in",
-      "elsewhere": "Uploading in another tab"
+      "otherTab": "Uploading in another tab"
     },
     "failure": {
       "differentFile": "The chosen file is not the one uploaded before",

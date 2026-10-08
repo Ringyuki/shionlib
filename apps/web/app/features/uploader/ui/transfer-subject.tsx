@@ -17,6 +17,12 @@ export function TransferSubject({ submission }: { submission: Submission }) {
           {t('orphanHint')}
         </Text>
       )
+    case 'heldElsewhere':
+      return (
+        <Text size="sm" tone="muted">
+          {t('elsewhere.hint')}
+        </Text>
+      )
     case 'append':
       return <Fact icon={FilePlus}>{t('appendsTo', { name: label })}</Fact>
     case 'replace':

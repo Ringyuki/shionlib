@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { OngoingUpload, UploadState } from './upload'
-import { orphanSubmission, restoreState, savedStateOf } from './upload-restore'
+import { restoreState, savedStateOf } from './upload-restore'
+import { orphanSubmission } from './upload-sync'
 import type { SavedState } from './upload.schema'
 
 const session = { id: 7, chunkSize: 4, totalChunks: 3 }
@@ -16,6 +17,7 @@ function ongoing(id: number, status: OngoingUpload['status'], chunks: number[]):
     total_chunks: 3,
     uploaded_chunks: chunks,
     expires_at: '',
+    held_elsewhere: false,
   }
 }
 

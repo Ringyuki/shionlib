@@ -1,7 +1,7 @@
 import { Alert, Inline, Text } from '@hina-ui/react'
 import { Gauge } from 'lucide-react'
 import { useTranslations } from 'use-intl'
-import { useUploadManager } from '~/features/upload'
+import { lockedElsewhere, useUploadManager } from '~/features/upload'
 import { Button } from '~/shared/ui/button'
 import type { Transfer } from '../uploader'
 import { usePace } from '../use-pace'
@@ -18,7 +18,13 @@ export function TransferEntry({ transfer }: { transfer: Transfer }) {
   const pace = usePace(transfer.uploads)
   const { submission, uploads } = transfer
   const { phase, target } = submission
-  const label = target.kind === 'orphan' ? t('orphan') : submission.label
+  const locked = lockedElsewhere(submission, uploads)
+  const label =
+    target.kind === 'orphan'
+      ? t('orphan')
+      : target.kind === 'heldElsewhere'
+        ? t('elsewhere.title')
+        : submission.label
   return (
     <EntryShell
       as="section"
@@ -27,8 +33,8 @@ export function TransferEntry({ transfer }: { transfer: Transfer }) {
         <TransferFile key={upload.id} upload={upload} />
       ))}
       stage={<StageTag stage="uploading" />}
-      controls={<TransferControls transfer={transfer} />}
-      controlSlots={2}
+      controls={locked ? null : <TransferControls transfer={transfer} />}
+      controlSlots={locked ? 0 : 2}
       notice={
         <Alert tone="danger" open={phase.name === 'failed'} className="col-span-2">
           <Inline gap="sm" align="center" justify="between">

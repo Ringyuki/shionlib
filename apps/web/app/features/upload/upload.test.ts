@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   admit,
   fileLimit,
+  lockedElsewhere,
   matchFiles,
   chunkLength,
   pausable,
@@ -149,6 +150,26 @@ describe('the upload queue', () => {
     expect(pausable(upload({ name: 'paused' }))).toBe(false)
     expect(pausable(upload({ name: 'needsFile' }))).toBe(false)
     expect(pausable(upload({ name: 'done' }))).toBe(false)
+  })
+
+  it('locks what another browser is uploading', () => {
+    const queued = submission('a', { name: 'uploading' })
+    expect(pausable(upload({ name: 'heldElsewhere' }))).toBe(false)
+    expect(lockedElsewhere(queued, [upload({ name: 'paused' })])).toBe(false)
+    expect(
+      lockedElsewhere(queued, [upload({ name: 'done' }), upload({ name: 'heldElsewhere' })]),
+    ).toBe(true)
+    expect(
+      lockedElsewhere({ ...queued, target: { kind: 'heldElsewhere' } }, [upload({ name: 'done' })]),
+    ).toBe(true)
+    expect(
+      queueStatus(
+        state(
+          [{ ...queued, target: { kind: 'heldElsewhere' } }],
+          [upload({ name: 'heldElsewhere' })],
+        ),
+      ),
+    ).toBe('active')
   })
 
   it('measures progress in percent, also for an empty file', () => {

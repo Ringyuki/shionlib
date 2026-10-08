@@ -2,14 +2,25 @@ import { createBrowserApi } from '~/shared/api/browser-client'
 import { uploadChunk } from '~/shared/api/chunk'
 import { readLocal, writeLocal } from '~/shared/storage/local-storage'
 import { browserHashWorker } from './file-hasher'
-import { uploadStorageKey } from './upload'
+import { clientStorageKey, uploadStorageKey } from './upload'
 import { UploadManager } from './upload-manager'
-import { savedStateFrom } from './upload.schema'
+import { clientFrom, savedStateFrom } from './upload.schema'
+
+function browserClient(): string {
+  const known = readLocal(clientStorageKey, clientFrom)
+  if (known !== '') {
+    return known
+  }
+  const client = crypto.randomUUID()
+  writeLocal(clientStorageKey, client)
+  return client
+}
 
 export function createUploadManager(viewer: number): UploadManager {
   const key = uploadStorageKey(viewer)
   return new UploadManager({
     api: createBrowserApi(),
+    client: browserClient(),
     send: uploadChunk,
     hashWorker: browserHashWorker,
     storage: {

@@ -25,6 +25,7 @@ describe('uploadChunk', () => {
     const stored = await uploadChunk({
       id: 12,
       index: 3,
+      client: 'this-browser',
       content,
       sha256: 'digest',
       onProgress: sent => progress.push(sent),
@@ -34,7 +35,11 @@ describe('uploadChunk', () => {
     expect(fake.sent[0]).toEqual({
       method: 'PUT',
       url: '/api/uploads/large/12/chunks/3',
-      headers: { 'chunk-sha256': 'digest', 'content-type': 'application/octet-stream' },
+      headers: {
+        'chunk-sha256': 'digest',
+        'content-type': 'application/octet-stream',
+        'x-upload-client': 'this-browser',
+      },
       body: content,
     })
   })
@@ -44,6 +49,7 @@ describe('uploadChunk', () => {
     const error = await uploadChunk({
       id: 1,
       index: 0,
+      client: 'this-browser',
       content: new Blob(['x']),
       sha256: 'x',
     }).catch((caught: unknown) => caught)

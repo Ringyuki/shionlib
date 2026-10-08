@@ -16,6 +16,7 @@ function setup(send: (upload: ChunkUpload) => Promise<unknown>, stored: number[]
     stored: new Set(stored),
     hasher: { chunkDigest: async index => `d${index}`, fileDigest: async () => 'whole' },
     slots: new Slots(2),
+    client: 'this-browser',
     send,
     complete,
     report: event => events.push(event),

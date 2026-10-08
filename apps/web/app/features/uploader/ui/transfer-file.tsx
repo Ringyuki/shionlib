@@ -10,6 +10,7 @@ const tones = {
   running: 'accent',
   waiting: 'warning',
   paused: 'accent',
+  heldElsewhere: 'accent',
   done: 'success',
   failed: 'danger',
 } as const

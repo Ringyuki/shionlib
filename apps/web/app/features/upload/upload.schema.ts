@@ -19,6 +19,7 @@ const target = v.variant('kind', [
   v.object({ kind: v.literal('append'), resourceId: id }),
   v.object({ kind: v.literal('replace'), fileId: id, reason: v.optional(v.string()) }),
   v.object({ kind: v.literal('orphan') }),
+  v.object({ kind: v.literal('heldElsewhere') }),
 ])
 
 const savedUpload = v.object({
@@ -51,6 +52,12 @@ const storedState = v.fallback(v.pipe(v.string(), v.parseJson(), savedState), {
 
 export function savedStateFrom(stored: string | null): SavedState {
   return v.parse(storedState, stored)
+}
+
+const storedClient = v.fallback(v.pipe(v.string(), v.parseJson(), v.string(), v.uuid()), '')
+
+export function clientFrom(stored: string | null): string {
+  return v.parse(storedClient, stored)
 }
 
 const hashJob = v.object({ file: v.instance(Blob), chunkSize: id })

@@ -9,6 +9,7 @@ const tags = {
   running: { tone: 'accent', variant: 'soft' },
   waiting: { tone: 'warning', variant: 'soft' },
   paused: { tone: 'neutral', variant: 'soft' },
+  heldElsewhere: { tone: 'neutral', variant: 'soft' },
   done: { tone: 'success', variant: 'soft' },
   failed: { tone: 'danger', variant: 'soft' },
 } as const
@@ -20,12 +21,15 @@ export function UploadTag({ upload }: { upload: Upload }) {
   if (phase.name === 'needsFile') {
     return <Reselect />
   }
+  const percent = (
+    <Text as="span" className="inline-block min-w-[4ch] text-center tabular-nums">
+      {format.number(progress(upload) / 100, { style: 'percent', maximumFractionDigits: 0 })}
+    </Text>
+  )
   if (phase.name === 'running') {
     return (
       <Tag size="sm" className="shrink-0" {...tags.running}>
-        <Text as="span" className="inline-block min-w-[4ch] text-center tabular-nums">
-          {format.number(progress(upload) / 100, { style: 'percent', maximumFractionDigits: 0 })}
-        </Text>
+        {percent}
       </Tag>
     )
   }
@@ -34,10 +38,12 @@ export function UploadTag({ upload }: { upload: Upload }) {
       ? t(`wait.${phase.reason}`)
       : phase.name === 'failed'
         ? (phase.message ?? t(`failure.${phase.reason}`))
-        : undefined
+        : phase.name === 'heldElsewhere'
+          ? t('elsewhere.file')
+          : undefined
   return (
     <Tag size="sm" className="shrink-0" {...tags[phase.name]}>
-      {t(`state.${phase.name}`)}
+      {phase.name === 'heldElsewhere' ? percent : t(`state.${phase.name}`)}
       {hint !== undefined && (
         <Tooltip content={hint}>
           <CircleHelp role="img" aria-label={t('stateHelp')} tabIndex={0} className="cursor-help" />

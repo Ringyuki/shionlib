@@ -9,6 +9,8 @@ const mib = 1 << 20
 
 const chunkRoute = '**/uploads/large/*/chunks/*'
 
+const clientKey = 'shionlib_upload_client'
+
 async function sampleFile(testInfo: TestInfo, name: string, size: number) {
   const path = testInfo.outputPath(name)
   await writeFile(path, randomBytes(size))
@@ -116,5 +118,39 @@ test.describe('as an uploader', () => {
     await showEveryStage(page)
     await expect(resourceWith(page, 'e2e-resume.7z')).toBeVisible({ timeout: 60_000 })
     expect([...resent].sort()).toEqual(['1', '2', '3'])
+  })
+
+  test('shows an upload running in another browser and offers nothing to do with it', async ({
+    page,
+    secondBrowser,
+  }, testInfo) => {
+    const file = await sampleFile(testInfo, 'e2e-elsewhere.7z', 2 * mib + 9)
+    let held = true
+    await page.route(chunkRoute, async route => {
+      if (!held) {
+        await route.fallback()
+      }
+    })
+    await uploadResource(page, [file])
+    await expect(page.getByRole('button', { name: '暂停上传' })).toBeVisible()
+
+    await secondBrowser.addInitScript(key => window.localStorage.removeItem(key), clientKey)
+    const other = await secondBrowser.newPage()
+    await other.goto('/zh/user/uploads?status=uploading')
+    const elsewhere = other.getByRole('region', { name: '正在其他浏览器或设备中上传的文件' })
+    await expect(elsewhere.getByText('e2e-elsewhere.7z')).toBeVisible()
+    await expect(elsewhere.getByText('这些文件正在其他浏览器或设备中上传。')).toBeVisible()
+    await expect(elsewhere.getByRole('button')).toHaveCount(0)
+    await expect(other.getByRole('button', { name: '重新选择文件' })).toHaveCount(0)
+
+    held = false
+    await page.getByRole('button', { name: '暂停上传' }).click()
+    await page.getByRole('button', { name: '继续上传' }).click()
+    await showEveryStage(page)
+    await expect(resourceWith(page, 'e2e-elsewhere.7z')).toBeVisible({ timeout: 60_000 })
+    await other.reload()
+    await expect(
+      other.getByRole('region', { name: '正在其他浏览器或设备中上传的文件' }),
+    ).toHaveCount(0)
   })
 })
