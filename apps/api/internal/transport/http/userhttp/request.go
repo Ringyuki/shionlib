@@ -82,13 +82,13 @@ type updatePasswordInput struct {
 
 type updateLangInput struct {
 	Body struct {
-		Lang string `json:"lang,omitempty"`
+		Lang string `json:"lang" enum:"en,zh,ja" doc:"Language of the site and of emails"`
 	}
 }
 
 type updateContentLimitInput struct {
 	Body struct {
-		ContentLimit int `json:"content_limit,omitempty"`
+		ContentLimit int `json:"content_limit" enum:"1,2,3" doc:"How rated content is shown: 1 hides it, 2 shows it behind a mask, 3 shows it"`
 	}
 }
 

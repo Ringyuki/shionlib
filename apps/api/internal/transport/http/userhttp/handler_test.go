@@ -198,10 +198,10 @@ func TestProfileSettings(t *testing.T) {
 	if renamed := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/name", As: who, Body: map[string]any{"name": "carol"}}); string(renamed.Data) != `{"name":"carol"}` {
 		t.Fatalf("unexpected rename %s", renamed.Data)
 	}
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/lang", As: who, Body: map[string]any{"lang": "fr"}}), http.StatusUnprocessableEntity, 300107)
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/lang", As: who, Body: map[string]any{}}), http.StatusUnprocessableEntity, 300107)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/lang", As: who, Body: map[string]any{"lang": "fr"}}), http.StatusUnprocessableEntity, 100101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/lang", As: who, Body: map[string]any{}}), http.StatusUnprocessableEntity, 100101)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/lang", As: who, Body: map[string]any{"lang": "zh"}}), http.StatusCreated, 0)
-	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/content-limit", As: who, Body: map[string]any{"content_limit": 4}}), http.StatusUnprocessableEntity, 300108)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/content-limit", As: who, Body: map[string]any{"content_limit": 4}}), http.StatusUnprocessableEntity, 100101)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/content-limit", As: who, Body: map[string]any{"content_limit": 3}}), http.StatusCreated, 0)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/only-games-with-resources", As: who, Body: map[string]any{"only_games_with_resources": "yes"}}), http.StatusUnprocessableEntity, 100101)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/only-games-with-resources", As: who, Body: map[string]any{"only_games_with_resources": true}}), http.StatusCreated, 0)

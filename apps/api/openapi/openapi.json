@@ -16728,10 +16728,19 @@
         "additionalProperties": false,
         "properties": {
           "content_limit": {
+            "description": "How rated content is shown: 1 hides it, 2 shows it behind a mask, 3 shows it",
+            "enum": [
+              1,
+              2,
+              3
+            ],
             "format": "int64",
             "type": "integer"
           }
         },
+        "required": [
+          "content_limit"
+        ],
         "type": "object"
       },
       "UpdateEmailInputBody": {
@@ -16798,9 +16807,18 @@
         "additionalProperties": false,
         "properties": {
           "lang": {
+            "description": "Language of the site and of emails",
+            "enum": [
+              "en",
+              "zh",
+              "ja"
+            ],
             "type": "string"
           }
         },
+        "required": [
+          "lang"
+        ],
         "type": "object"
       },
       "UpdateNameInputBody": {
