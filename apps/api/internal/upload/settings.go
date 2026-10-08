@@ -43,6 +43,12 @@ var (
 		Description: "上传未在该时长内完成即视为过期，已上传的部分将被清理。",
 		Default:     day, Min: time.Hour, Max: 30 * day,
 	})
+	HoldTTL = setting.Duration(setting.Spec[time.Duration]{
+		Name:        "upload.hold_ttl",
+		Label:       "上传占用保留时长",
+		Description: "浏览器停止续期后，其占用的上传在该时长内不能由其他浏览器或设备继续或取消。",
+		Default:     2 * time.Minute, Min: 30 * time.Second, Max: 30 * time.Minute,
+	})
 	NewUploaderQuota = setting.Bytes(setting.Spec[int64]{
 		Name:        "upload.new_uploader_quota",
 		Label:       "新上传者存储上限",

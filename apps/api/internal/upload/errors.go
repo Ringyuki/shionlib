@@ -36,6 +36,8 @@ var ErrInvalidFileStatus = apperror.Define(480115, "GAME_UPLOAD_INVALID_FILE_STA
 
 var ErrInvalidChunkSize = apperror.Define(480116, "GAME_UPLOAD_INVALID_CHUNK_SIZE", apperror.KindInvalidArgument)
 
+var ErrHeldElsewhere = apperror.Define(480117, "GAME_UPLOAD_SESSION_HELD_ELSEWHERE", apperror.KindConflict)
+
 var ErrSmallFileTooLarge = apperror.Define(490101, "SMALL_FILE_UPLOAD_FILE_SIZE_EXCEEDS_LIMIT", apperror.KindPayloadTooLarge)
 
 var ErrSmallFileMissing = apperror.Define(490102, "SMALL_FILE_UPLOAD_FILE_NO_FILE_PROVIDED", apperror.KindInvalidArgument)

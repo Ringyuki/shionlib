@@ -15,6 +15,13 @@ type ongoingUploadDTO struct {
 	UploadedChunks  []int                `json:"uploaded_chunks"`
 	TotalChunks     int                  `json:"total_chunks"`
 	ExpiresAt       time.Time            `json:"expires_at"`
+	HeldElsewhere   bool                 `json:"held_elsewhere" doc:"Another client has this session in its queue; it cannot be written, completed or aborted from here until that hold runs out"`
+}
+
+type uploadHoldDTO struct {
+	Held       []int `json:"held" doc:"Sessions this client now holds"`
+	Elsewhere  []int `json:"elsewhere" doc:"Sessions another client holds"`
+	TTLSeconds int   `json:"ttl_seconds" doc:"How long a hold lasts without being renewed; sessions in neither list are gone"`
 }
 
 type initUploadDTO struct {
@@ -69,7 +76,7 @@ func ToAllowanceDTO(a upload.Allowance) AllowanceDTO {
 	}
 }
 
-func toOngoingUpload(s upload.Session) ongoingUploadDTO {
+func toOngoingUpload(s upload.OngoingSession) ongoingUploadDTO {
 	chunks := s.UploadedChunks
 	if chunks == nil {
 		chunks = []int{}
@@ -83,6 +90,7 @@ func toOngoingUpload(s upload.Session) ongoingUploadDTO {
 		UploadedChunks:  chunks,
 		TotalChunks:     s.TotalChunks,
 		ExpiresAt:       s.ExpiresAt,
+		HeldElsewhere:   s.HeldElsewhere,
 	}
 }
 

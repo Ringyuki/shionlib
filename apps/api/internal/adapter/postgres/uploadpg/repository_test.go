@@ -234,12 +234,12 @@ func TestAdmissionLockKeepsConcurrentInitsWithinTheInFlightLimit(t *testing.T) {
 	settingtest.Set(settings, upload.InFlightLimit, 300)
 	settingtest.Set(settings, upload.SpoolReserve, 0)
 	quota := upload.NewQuotaService(uploadpg.NewQuotaRepository(db.Ent), settings, time.Now)
-	service := upload.NewService(uploadpg.NewRepository(db.Ent), quota, uploadtest.NewMemorySpool(), postgres.NewTransactor(db.Ent), settings, time.Now)
+	service := upload.NewService(uploadpg.NewRepository(db.Ent), quota, uploadtest.NewMemorySpool(), uploadtest.NewMemoryHolds(), postgres.NewTransactor(db.Ent), settings, time.Now)
 	var admitted, refused atomic.Int32
 	var group errgroup.Group
 	for range 8 {
 		group.Go(func() error {
-			_, err := service.Init(ctx, uploader, upload.InitInput{FileName: "game.7z", TotalSize: 100})
+			_, err := service.Init(ctx, uploader, "", upload.InitInput{FileName: "game.7z", TotalSize: 100})
 			switch {
 			case err == nil:
 				admitted.Add(1)

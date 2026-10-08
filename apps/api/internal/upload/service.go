@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"slices"
 	"strconv"
 	"time"
 
@@ -16,24 +17,21 @@ type Service struct {
 	repo     Repository
 	quota    *QuotaService
 	spool    Spool
+	holds    Holds
 	tx       Transactor
 	settings setting.Source
 	now      func() time.Time
 }
 
-func NewService(repo Repository, quota *QuotaService, spool Spool, tx Transactor, settings setting.Source, now func() time.Time) *Service {
-	return &Service{repo: repo, quota: quota, spool: spool, tx: tx, settings: settings, now: now}
+func NewService(repo Repository, quota *QuotaService, spool Spool, holds Holds, tx Transactor, settings setting.Source, now func() time.Time) *Service {
+	return &Service{repo: repo, quota: quota, spool: spool, holds: holds, tx: tx, settings: settings, now: now}
 }
 
 func (s *Service) ChunkLimit() int64 {
 	return ChunkLimit.Read(s.settings)
 }
 
-func (s *Service) Ongoing(ctx context.Context, who actor.Actor) ([]Session, error) {
-	return s.repo.ListOngoing(ctx, who.UserID, s.now(), ongoingSessionLimit)
-}
-
-func (s *Service) Init(ctx context.Context, who actor.Actor, in InitInput) (Session, error) {
+func (s *Service) Init(ctx context.Context, who actor.Actor, holder string, in InitInput) (Session, error) {
 	chunkLimit := ChunkLimit.Read(s.settings)
 	chunkSize := min(ChunkSize.Read(s.settings), chunkLimit)
 	if in.ChunkSize != nil {
@@ -80,6 +78,9 @@ func (s *Service) Init(ctx context.Context, who actor.Actor, in InitInput) (Sess
 		_, markErr := s.repo.SetStatus(ctx, session.ID, StatusUploading, StatusAborted)
 		return Session{}, errors.Join(fmt.Errorf("allocate upload file: %w", err), markErr)
 	}
+	if err := s.keepHold(ctx, session.ID, holder); err != nil {
+		return Session{}, err
+	}
 	return session, nil
 }
 
@@ -116,7 +117,7 @@ func (s *Service) SpoolRoom(ctx context.Context) (int64, error) {
 	return available - pending - SpoolReserve.Read(s.settings), nil
 }
 
-func (s *Service) WriteChunk(ctx context.Context, who actor.Actor, id, index int, chunk Chunk, body io.Reader) error {
+func (s *Service) WriteChunk(ctx context.Context, who actor.Actor, holder string, id, index int, chunk Chunk, body io.Reader) error {
 	session, err := s.repo.GetSession(ctx, id)
 	if err != nil {
 		return err
@@ -132,6 +133,9 @@ func (s *Service) WriteChunk(ctx context.Context, who actor.Actor, id, index int
 	}
 	if session.CreatorID != who.UserID {
 		return ErrSessionNotOwner
+	}
+	if err := s.keepHold(ctx, session.ID, holder); err != nil {
+		return err
 	}
 	expected := session.ChunkLength(index)
 	if expected != chunk.ContentLength {
@@ -172,7 +176,7 @@ func (s *Service) Status(ctx context.Context, who actor.Actor, id int) (Session,
 	return session, nil
 }
 
-func (s *Service) Complete(ctx context.Context, who actor.Actor, id int, fileHash string) error {
+func (s *Service) Complete(ctx context.Context, who actor.Actor, holder string, id int, fileHash string) error {
 	session, err := s.repo.GetSession(ctx, id)
 	if err != nil {
 		return err
@@ -185,6 +189,9 @@ func (s *Service) Complete(ctx context.Context, who actor.Actor, id int, fileHas
 	}
 	if session.Status != StatusUploading {
 		return ErrInvalidSessionStatus
+	}
+	if err := s.keepHold(ctx, session.ID, holder); err != nil {
+		return err
 	}
 	if session.ReceivedChunks() != session.TotalChunks {
 		return ErrIncomplete
@@ -209,7 +216,7 @@ func (s *Service) Complete(ctx context.Context, who actor.Actor, id int, fileHas
 	return nil
 }
 
-func (s *Service) Abort(ctx context.Context, who actor.Actor, id int) error {
+func (s *Service) Abort(ctx context.Context, who actor.Actor, holder string, id int) error {
 	var path string
 	err := s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
 		session, err := s.repo.LockSession(ctx, id)
@@ -220,6 +227,9 @@ func (s *Service) Abort(ctx context.Context, who actor.Actor, id int) error {
 			return ErrSessionNotOwner
 		}
 		if err := s.discardable(ctx, session); err != nil {
+			return err
+		}
+		if err := s.keepHold(ctx, session.ID, holder); err != nil {
 			return err
 		}
 		if _, err := s.repo.SetStatus(ctx, session.ID, session.Status, StatusAborted); err != nil {
@@ -254,6 +264,72 @@ func (s *Service) discardable(ctx context.Context, session Session) error {
 	default:
 		return ErrInvalidSessionStatus
 	}
+}
+
+func (s *Service) Ongoing(ctx context.Context, who actor.Actor, holder string) ([]OngoingSession, error) {
+	sessions, err := s.repo.ListOngoing(ctx, who.UserID, s.now(), ongoingSessionLimit)
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]int, len(sessions))
+	for i, session := range sessions {
+		ids[i] = session.ID
+	}
+	holders, err := s.holds.Holders(ctx, ids)
+	if err != nil {
+		return nil, err
+	}
+	ongoing := make([]OngoingSession, len(sessions))
+	for i, session := range sessions {
+		held := holders[session.ID]
+		ongoing[i] = OngoingSession{Session: session, HeldElsewhere: held != "" && held != holder}
+	}
+	return ongoing, nil
+}
+
+func (s *Service) Hold(ctx context.Context, who actor.Actor, holder string, ids []int) (Holdings, error) {
+	sessions, err := s.repo.ListOngoing(ctx, who.UserID, s.now(), ongoingSessionLimit)
+	if err != nil {
+		return Holdings{}, err
+	}
+	ttl := HoldTTL.Read(s.settings)
+	holdings := Holdings{Held: []int{}, Elsewhere: []int{}, TTL: ttl}
+	for _, session := range sessions {
+		if !slices.Contains(ids, session.ID) {
+			continue
+		}
+		held, err := s.holds.Hold(ctx, session.ID, holder, ttl)
+		if err != nil {
+			return Holdings{}, err
+		}
+		if held {
+			holdings.Held = append(holdings.Held, session.ID)
+		} else {
+			holdings.Elsewhere = append(holdings.Elsewhere, session.ID)
+		}
+	}
+	return holdings, nil
+}
+
+func (s *Service) keepHold(ctx context.Context, sessionID int, holder string) error {
+	if holder == "" {
+		holders, err := s.holds.Holders(ctx, []int{sessionID})
+		if err != nil {
+			return err
+		}
+		if holders[sessionID] != "" {
+			return ErrHeldElsewhere
+		}
+		return nil
+	}
+	held, err := s.holds.Hold(ctx, sessionID, holder, HoldTTL.Read(s.settings))
+	if err != nil {
+		return err
+	}
+	if !held {
+		return ErrHeldElsewhere
+	}
+	return nil
 }
 
 func (s *Service) Claim(ctx context.Context, who actor.Actor, id int) (Session, error) {

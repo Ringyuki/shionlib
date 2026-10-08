@@ -61,11 +61,13 @@ Malware scanning streamed whole files to ClamAV. The legacy `clamscan` skipped f
   - `GET /uploads/large/ongoing` also lists finished uploads not yet in a resource (`status: COMPLETED`), and `DELETE /uploads/large/{id}` discards them.
   - A finished upload not yet in a resource is cleaned up six hours after it finished, but only while its uploader has no upload in progress, so the first files of a resource wait for the last one.
   - Completing a session again with the same digest succeeds, so a client can retry a completion whose response it never received.
+  - A session belongs to the client that has it in its queue. Clients name themselves with the `X-Upload-Client` header. Opening a session, writing a chunk, completing or aborting takes or renews a hold that lasts `upload.hold_ttl` (2 minutes), and `POST /uploads/large/hold` renews it for queued sessions that are not being written (paused, or waiting for their file after a reload). While one client holds a session, those calls from any other client fail with 480117 `GAME_UPLOAD_SESSION_HELD_ELSEWHERE`, and `GET /uploads/large/ongoing` marks the session `held_elsewhere`. The hold is a Redis key with an expiry, so a closed browser lets go of its sessions without any cleanup.
   - Removing a file, removing a resource or replacing a file's content retires the sessions it used, so they never come back as finished uploads.
   - An upload starts only if the spool keeps `upload.spool_reserve` (20 GiB) free after the bytes that live uploads have still to write (`UPLOAD_SPOOL_FULL`). Uploads are admitted one at a time under a transaction lock, so concurrent starts cannot overrun these limits.
   - `GET /uploads/quota` returns the tier, the counts behind it, any freeze, and the usage and limits.
 
 ## Alternatives
+- Lock a session in the browser only (Web Locks): that covers the tabs of one browser. In another browser or on another device the same upload looked abandoned, and cancelling it there aborted it under the browser that was sending it.
 - Keep one file per resource: uploaders keep repacking, and split downloads from other sources cannot be shared as they are.
 - Accept raw disc images now: nobody uploads them, and they download worse than an archive.
 - Defender in a Windows VM, or a commercial Linux engine: better detection, but a new machine or a yearly license plus upkeep, for a threat that has not materialised. Static engines do not stop targeted tampering either.

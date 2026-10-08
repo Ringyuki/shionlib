@@ -22,6 +22,7 @@ import (
 const (
 	chunkPath        = "/uploads/large/{id}/chunks/{index}"
 	chunkHashHeader  = "chunk-sha256"
+	clientHeader     = "X-Upload-Client"
 	authStaleHeader  = "shionlib-auth-stale"
 	jsonContentType  = "application/json; charset=utf-8"
 	octetContentType = "application/octet-stream"
@@ -63,7 +64,7 @@ func (h *Handler) chunk(api *httpapi.API) http.HandlerFunc {
 		}
 		body := &trackedBodyInput{reader: http.MaxBytesReader(w, r.Body, limit)}
 		chunk := upload.Chunk{SHA256: r.Header.Get(chunkHashHeader), ContentLength: max(r.ContentLength, 0)}
-		if err := h.service.WriteChunk(ctx, actor.From(ctx), id, index, chunk, body); err != nil {
+		if err := h.service.WriteChunk(ctx, actor.From(ctx), r.Header.Get(clientHeader), id, index, chunk, body); err != nil {
 			fail(body.classify(err))
 			return
 		}
@@ -93,6 +94,7 @@ func documentChunk(oapi *huma.OpenAPI) {
 			{Name: "id", In: "path", Required: true, Schema: integer},
 			{Name: "index", In: "path", Required: true, Schema: integer},
 			{Name: chunkHashHeader, In: "header", Required: true, Description: "Lowercase hex SHA-256 of the chunk bytes", Schema: &huma.Schema{Type: huma.TypeString}},
+			{Name: clientHeader, In: "header", Description: "Identifies the browser that uploads; a session held by one client refuses the others", Schema: &huma.Schema{Type: huma.TypeString}},
 		},
 		RequestBody: &huma.RequestBody{
 			Required: true,
@@ -124,13 +126,14 @@ func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "upload.init", Method: http.MethodPost, Path: "/uploads/large/init", Summary: "Start a chunked upload session", Tags: tags, Access: httpapi.AccessUser}, h.init)
 	httpapi.Register(api, httpapi.Route{ID: "upload.status", Method: http.MethodGet, Path: "/uploads/large/{id}/status", Summary: "Read an upload session", Tags: tags, Access: httpapi.AccessUser}, h.status)
 	httpapi.Register(api, httpapi.Route{ID: "upload.complete", Method: http.MethodPatch, Path: "/uploads/large/{id}/complete", Summary: "Verify and complete an upload session", Tags: tags, Access: httpapi.AccessUser}, h.complete)
+	httpapi.Register(api, httpapi.Route{ID: "upload.hold", Method: http.MethodPost, Path: "/uploads/large/hold", Summary: "Hold the sessions in this client's queue, so that no other client writes, completes or aborts them", Tags: tags, Access: httpapi.AccessUser}, h.hold)
 	httpapi.Register(api, httpapi.Route{ID: "upload.abort", Method: http.MethodDelete, Path: "/uploads/large/{id}", Summary: "Abort an upload, or discard a finished upload not yet in a resource", Tags: tags, Access: httpapi.AccessUser}, h.abort)
 	httpapi.Register(api, httpapi.Route{ID: "upload.quota", Method: http.MethodGet, Path: "/uploads/quota", Summary: "Read the caller's upload tier and limits", Tags: tags, Access: httpapi.AccessUser}, h.getQuota)
 	h.registerChunk(api)
 }
 
-func (h *Handler) ongoing(ctx context.Context, _ *struct{}) (*response.Output[[]ongoingUploadDTO], error) {
-	sessions, err := h.service.Ongoing(ctx, actor.From(ctx))
+func (h *Handler) ongoing(ctx context.Context, in *uploadClientInput) (*response.Output[[]ongoingUploadDTO], error) {
+	sessions, err := h.service.Ongoing(ctx, actor.From(ctx), in.Client)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +145,7 @@ func (h *Handler) ongoing(ctx context.Context, _ *struct{}) (*response.Output[[]
 }
 
 func (h *Handler) init(ctx context.Context, in *initUploadInput) (*response.Output[initUploadDTO], error) {
-	session, err := h.service.Init(ctx, actor.From(ctx), upload.InitInput{
+	session, err := h.service.Init(ctx, actor.From(ctx), in.Client, upload.InitInput{
 		FileName:  in.Body.FileName,
 		TotalSize: in.Body.TotalSize,
 		ChunkSize: in.Body.ChunkSize,
@@ -167,17 +170,29 @@ func (h *Handler) status(ctx context.Context, in *uploadSessionPathInput) (*resp
 }
 
 func (h *Handler) complete(ctx context.Context, in *completeUploadInput) (*response.Output[uploadCompleteDTO], error) {
-	if err := h.service.Complete(ctx, actor.From(ctx), in.ID, in.Body.FileSHA256); err != nil {
+	if err := h.service.Complete(ctx, actor.From(ctx), in.Client, in.ID, in.Body.FileSHA256); err != nil {
 		return nil, err
 	}
 	return response.OK(ctx, h.resp, uploadCompleteDTO{OK: true}), nil
 }
 
-func (h *Handler) abort(ctx context.Context, in *uploadSessionPathInput) (*response.EmptyOutput, error) {
-	if err := h.service.Abort(ctx, actor.From(ctx), in.ID); err != nil {
+func (h *Handler) abort(ctx context.Context, in *heldSessionInput) (*response.EmptyOutput, error) {
+	if err := h.service.Abort(ctx, actor.From(ctx), in.Client, in.ID); err != nil {
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil
+}
+
+func (h *Handler) hold(ctx context.Context, in *holdUploadsInput) (*response.Output[uploadHoldDTO], error) {
+	holdings, err := h.service.Hold(ctx, actor.From(ctx), in.Client, in.Body.UploadSessionIDs)
+	if err != nil {
+		return nil, err
+	}
+	return response.OK(ctx, h.resp, uploadHoldDTO{
+		Held:       holdings.Held,
+		Elsewhere:  holdings.Elsewhere,
+		TTLSeconds: int(holdings.TTL.Seconds()),
+	}), nil
 }
 
 func (h *Handler) getQuota(ctx context.Context, _ *struct{}) (*response.Output[AllowanceDTO], error) {

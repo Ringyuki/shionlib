@@ -23,6 +23,11 @@ type Repository interface {
 	LockAdmission(ctx context.Context) error
 }
 
+type Holds interface {
+	Hold(ctx context.Context, sessionID int, holder string, ttl time.Duration) (bool, error)
+	Holders(ctx context.Context, sessionIDs []int) (map[int]string, error)
+}
+
 type QuotaRepository interface {
 	Standing(ctx context.Context, userID int) (Standing, error)
 	StoredBytes(ctx context.Context, userID int) (int64, error)

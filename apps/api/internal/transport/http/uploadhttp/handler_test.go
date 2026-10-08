@@ -44,7 +44,7 @@ func setup(t *testing.T) env {
 	settingtest.Set(settings, upload.SpoolReserve, 10)
 	spool := uploadtest.NewMemorySpool()
 	quota := upload.NewQuotaService(quotas, settings, func() time.Time { return apitest.Now })
-	service := upload.NewService(repo, quota, spool, tx, settings, func() time.Time { return apitest.Now })
+	service := upload.NewService(repo, quota, spool, uploadtest.NewMemoryHolds(), tx, settings, func() time.Time { return apitest.Now })
 	uploadhttp.NewHandler(service, quota, server.Builder).Register(server.API)
 	return env{server: server, repo: repo, quotas: quotas, spool: spool}
 }
@@ -85,7 +85,7 @@ func TestChunkedUploadFlow(t *testing.T) {
 	}
 	ongoing := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/uploads/large/ongoing", As: &member})
 	e.server.Expect(ongoing, http.StatusOK, 0)
-	if string(ongoing.Data) != `[{"upload_session_id":1,"status":"UPLOADING","file_name":"game.7z","total_size":10,"chunk_size":4,"uploaded_chunks":[2,0,1],"total_chunks":3,"expires_at":"2026-10-04T01:02:03.000Z"}]` {
+	if string(ongoing.Data) != `[{"upload_session_id":1,"status":"UPLOADING","file_name":"game.7z","total_size":10,"chunk_size":4,"uploaded_chunks":[2,0,1],"total_chunks":3,"expires_at":"2026-10-04T01:02:03.000Z","held_elsewhere":false}]` {
 		t.Fatalf("ongoing %s", ongoing.Data)
 	}
 	status := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/uploads/large/1/status", As: &member})
@@ -178,4 +178,58 @@ func TestUploadRoutesRequireLogin(t *testing.T) {
 		e.server.Expect(e.server.Do(req), http.StatusUnauthorized, 200101)
 	}
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/uploads/large/abc/status", As: &member}), http.StatusUnprocessableEntity, 100101)
+}
+
+func TestASessionHeldByOneClientRefusesTheOthers(t *testing.T) {
+	e := setup(t)
+	content := "0123456789"
+	phone := map[string]string{"X-Upload-Client": "phone-0001"}
+	laptop := map[string]string{"X-Upload-Client": "laptop-0001"}
+	chunk := func(index int, client string) apitest.Request {
+		start := index * 4
+		part := content[start:min(start+4, len(content))]
+		request := chunkRequest("1", strconv.Itoa(index), part, uploadtest.Digest([]byte(part)), &member)
+		if client != "" {
+			request.Header["X-Upload-Client"] = client
+		}
+		return request
+	}
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/uploads/large/init", As: &member, Header: phone, Body: map[string]any{"file_name": "game.7z", "total_size": 10}}), http.StatusCreated, 0)
+
+	e.server.Expect(e.server.Do(chunk(0, "laptop-0001")), http.StatusConflict, 480117)
+	e.server.Expect(e.server.Do(chunk(0, "phone-0001")), http.StatusOK, 0)
+	e.server.Expect(e.server.Do(chunk(1, "laptop-0001")), http.StatusConflict, 480117)
+	e.server.Expect(e.server.Do(chunk(1, "")), http.StatusConflict, 480117)
+
+	theirs := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/uploads/large/ongoing", As: &member, Header: laptop})
+	e.server.Expect(theirs, http.StatusOK, 0)
+	if !strings.Contains(string(theirs.Data), `"held_elsewhere":true`) {
+		t.Fatalf("another client sees the session as held elsewhere: %s", theirs.Data)
+	}
+	mine := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/uploads/large/ongoing", As: &member, Header: phone})
+	if !strings.Contains(string(mine.Data), `"held_elsewhere":false`) {
+		t.Fatalf("the holder does not: %s", mine.Data)
+	}
+
+	path := "/uploads/large/hold"
+	body := map[string]any{"upload_session_ids": []int{1, 99}}
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, Body: body, Header: phone}), http.StatusUnauthorized, 200101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &member, Body: body}), http.StatusUnprocessableEntity, 100101)
+	refused := e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &member, Body: body, Header: laptop})
+	e.server.Expect(refused, http.StatusCreated, 0)
+	if string(refused.Data) != `{"held":[],"elsewhere":[1],"ttl_seconds":120}` {
+		t.Fatalf("holding from another client: %s", refused.Data)
+	}
+	renewed := e.server.Do(apitest.Request{Method: http.MethodPost, Path: path, As: &member, Body: body, Header: phone})
+	if string(renewed.Data) != `{"held":[1],"elsewhere":[],"ttl_seconds":120}` {
+		t.Fatalf("renewing from the holder, sessions that are gone left out: %s", renewed.Data)
+	}
+
+	e.server.Expect(e.server.Do(chunk(1, "phone-0001")), http.StatusOK, 0)
+	e.server.Expect(e.server.Do(chunk(2, "phone-0001")), http.StatusOK, 0)
+	digest := map[string]any{"file_sha256": uploadtest.Digest([]byte(content))}
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPatch, Path: "/uploads/large/1/complete", As: &member, Header: laptop, Body: digest}), http.StatusConflict, 480117)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPatch, Path: "/uploads/large/1/complete", As: &member, Header: phone, Body: digest}), http.StatusOK, 0)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodDelete, Path: "/uploads/large/1", As: &member, Header: laptop}), http.StatusConflict, 480117)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodDelete, Path: "/uploads/large/1", As: &member, Header: phone}), http.StatusOK, 0)
 }

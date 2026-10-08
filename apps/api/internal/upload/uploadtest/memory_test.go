@@ -3,6 +3,8 @@ package uploadtest
 import (
 	"testing"
 	"time"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
 
 func TestMemoryRepositoryContract(t *testing.T) {
@@ -15,4 +17,8 @@ func TestMemoryRepositoryContract(t *testing.T) {
 			AttachFile: func(_ *testing.T, sessionID int, path string) { repo.AttachFile(sessionID, path) },
 		}
 	})
+}
+
+func TestMemoryHoldsContract(t *testing.T) {
+	HoldsContract(t, func(*testing.T) upload.Holds { return NewMemoryHolds() })
 }

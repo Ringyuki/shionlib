@@ -17,6 +17,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/scanpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/uploadpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/queue"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/redis/uploadredis"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/sevenzip"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/turnstile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
@@ -69,7 +70,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 	banner := userPenalties{users: shared.Users}
 
 	quota := newQuotaService(infra, shared)
-	uploads := upload.NewService(uploadpg.NewRepository(infra.Ent), quota, spool, shared.Transactor, shared.Settings, shared.Now)
+	uploads := upload.NewService(uploadpg.NewRepository(infra.Ent), quota, spool, uploadredis.NewHolds(infra.Redis), shared.Transactor, shared.Settings, shared.Now)
 
 	downloadRepo := downloadpg.NewRepository(infra.Ent)
 	downloads := download.NewService(download.Deps{
