@@ -1,5 +1,7 @@
 import account from '~/features/account/messages/en.json'
 import auth from '~/features/auth/messages/en.json'
+import character from '~/features/character/messages/en.json'
+import developer from '~/features/developer/messages/en.json'
 import download from '~/features/download/messages/en.json'
 import favorite from '~/features/favorite/messages/en.json'
 import game from '~/features/game/messages/en.json'
@@ -23,6 +25,8 @@ export const messages: Messages = {
   account,
   auth,
   bbcode,
+  character,
+  developer,
   download,
   favorite,
   form,

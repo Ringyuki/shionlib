@@ -1,0 +1,37 @@
+{
+  "intro": "紹介",
+  "works": "登場作品（{count, number}）",
+  "worksLabel": "登場作品",
+  "noWorks": "このキャラクターの登場作品はまだ登録されていません。",
+  "fact": {
+    "aliases": "別名",
+    "gender": "性別",
+    "age": "年齢",
+    "ageValue": "{age, number}歳",
+    "birthday": "誕生日",
+    "bloodType": "血液型",
+    "bloodTypeValue": "{type}型",
+    "height": "身長",
+    "heightValue": "{value, number} cm",
+    "weight": "体重",
+    "weightValue": "{value, number} kg",
+    "measurements": "スリーサイズ",
+    "cup": "カップ"
+  },
+  "gender": {
+    "m": "男性",
+    "f": "女性",
+    "o": "その他",
+    "a": "なし"
+  },
+  "cast": {
+    "empty": "このゲームにはまだキャラクター情報がありません。",
+    "voice": "CV {name}",
+    "role": {
+      "main": "主人公",
+      "primary": "メインキャラクター",
+      "side": "サブキャラクター",
+      "appears": "登場"
+    }
+  }
+}

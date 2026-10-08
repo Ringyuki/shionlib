@@ -2,15 +2,6 @@
   "title": "Library",
   "label": "Games",
   "count": "{total, plural, one {# game} other {# games}}",
-  "orderLabel": "Sort by",
-  "order": {
-    "newest": "Newest",
-    "oldest": "Oldest",
-    "updated": "Recently updated",
-    "hot": "Hottest",
-    "views": "Most viewed",
-    "downloads": "Most downloaded"
-  },
   "empty": "No games match these filters.",
   "emptyNarrowed": "Games without resources are not shown. Turn off \"Only games with resources\" to look through every game.",
   "filters": {

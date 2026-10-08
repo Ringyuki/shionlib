@@ -72,6 +72,9 @@ export default [
         route('search/game', 'routes/search-legacy.ts'),
         route('game', 'routes/library.tsx'),
         route('release', 'routes/releases.tsx'),
+        route('developer', 'routes/developers.tsx'),
+        route('developer/:id', 'routes/developer.tsx'),
+        route('character/:id', 'routes/character.tsx'),
         route('message/:category?', 'routes/messages.tsx'),
         route('game/:id', 'routes/game.tsx', [
           index('routes/game.resources.tsx'),

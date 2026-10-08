@@ -1,0 +1,15 @@
+{
+  "title": "开发商",
+  "count": "共 {total, number} 个开发商",
+  "found": "找到 {total, number} 个相符的开发商",
+  "search": "搜索开发商名称或别名",
+  "empty": "没有找到与「{query}」相符的开发商。",
+  "none": "暂未收录开发商。",
+  "works": "{count, number} 部作品",
+  "website": "官方网站",
+  "intro": "简介",
+  "extra": "其他信息",
+  "worksTitle": "作品（{count, number}）",
+  "worksLabel": "作品",
+  "noWorks": "暂未收录这个开发商的作品。"
+}

@@ -2,15 +2,6 @@
   "title": "ゲームライブラリ",
   "label": "ゲーム一覧",
   "count": "全 {total, number} 作品",
-  "orderLabel": "並び順",
-  "order": {
-    "newest": "発売日が新しい順",
-    "oldest": "発売日が古い順",
-    "updated": "リソース更新順",
-    "hot": "人気順",
-    "views": "閲覧数順",
-    "downloads": "ダウンロード数順"
-  },
   "empty": "条件に一致するゲームはありません。",
   "emptyNarrowed": "リソースのないゲームは表示されていません。「リソースのあるゲームのみ」をオフにすると、すべてのゲームから探せます。",
   "filters": {

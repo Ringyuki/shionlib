@@ -9,6 +9,7 @@ import {
   type Platform,
   type ResourceRule,
 } from './game'
+import { firstOrder, reversible, sortKeys, type GameOrder } from './game-order'
 
 export const viewCommand = v.object({
   gameId: v.pipe(v.number(), v.safeInteger(), v.minValue(1)),
@@ -42,4 +43,11 @@ const resourceRule = v.picklist(resourceRules)
 export function resourceRuleFrom(value: unknown): ResourceRule | undefined {
   const parsed = v.safeParse(resourceRule, value)
   return parsed.success ? parsed.output : undefined
+}
+
+const sort = v.fallback(v.picklist(sortKeys), firstOrder.sort)
+
+export function orderFrom(params: URLSearchParams): GameOrder {
+  const chosen = v.parse(sort, params.get('sort'))
+  return { sort: chosen, ascending: params.get('order') === 'asc' && reversible(chosen) }
 }

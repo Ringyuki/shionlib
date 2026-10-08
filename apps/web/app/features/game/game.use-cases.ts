@@ -1,5 +1,6 @@
 import type { ApiClient } from '~/shared/api/client'
-import type { GameHeader } from './game'
+import { worksPageSize, type GameHeader, type Works, type WorksOf } from './game'
+import { orderQuery, type GameOrder } from './game-order'
 import { bangumiScore, scoreSites, vndbScore, type Scores } from './game-score'
 
 export async function loadGamePage(api: ApiClient, id: number) {
@@ -29,6 +30,25 @@ export async function loadScores(
 
 function settled<Value>(result: PromiseSettledResult<Value | undefined>): Value | undefined {
   return result.status === 'fulfilled' ? result.value : undefined
+}
+
+export async function loadWorks(
+  api: ApiClient,
+  of: WorksOf,
+  page: number,
+  order: GameOrder,
+): Promise<Works> {
+  const found = await api.get('/game/list', {
+    params: {
+      query: {
+        ...('developer' in of ? { developer_id: of.developer } : { character_id: of.character }),
+        page,
+        pageSize: worksPageSize,
+        ...orderQuery(order),
+      },
+    },
+  })
+  return { games: found.items ?? [], total: found.meta.totalItems, page, order }
 }
 
 export async function countView(api: ApiClient, id: number) {

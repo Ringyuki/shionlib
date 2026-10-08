@@ -4699,10 +4699,18 @@ export type components = {
             /** Format: int64 */
             id: number;
         };
+        CharacterAppearanceDTO: {
+            actor: string | null;
+            /** Format: int64 */
+            game_id: number;
+            /** @enum {string} */
+            role: "main" | "primary" | "side" | "appears";
+        };
         CharacterDetailDTO: {
             /** Format: int64 */
             age: number | null;
             aliases: string[] | null;
+            appearances: components["schemas"]["CharacterAppearanceDTO"][] | null;
             birthday: number[] | null;
             /** @enum {string|null} */
             blood_type: "a" | "b" | "ab" | "o" | null;

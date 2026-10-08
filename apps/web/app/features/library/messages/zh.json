@@ -2,15 +2,6 @@
   "title": "游戏库",
   "label": "游戏列表",
   "count": "共 {total, number} 部游戏",
-  "orderLabel": "排序方式",
-  "order": {
-    "newest": "最新发售",
-    "oldest": "最早发售",
-    "updated": "最近更新资源",
-    "hot": "热度最高",
-    "views": "浏览最多",
-    "downloads": "下载最多"
-  },
   "empty": "没有符合条件的游戏。",
   "emptyNarrowed": "没有资源的游戏未显示。关闭「仅显示有资源的游戏」后，可以在全部游戏中查找。",
   "filters": {

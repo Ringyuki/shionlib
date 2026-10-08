@@ -1,0 +1,37 @@
+{
+  "intro": "About",
+  "works": "Appears in ({count, number})",
+  "worksLabel": "Appears in",
+  "noWorks": "No game with this character is listed yet.",
+  "fact": {
+    "aliases": "Aliases",
+    "gender": "Gender",
+    "age": "Age",
+    "ageValue": "{age, number}",
+    "birthday": "Birthday",
+    "bloodType": "Blood type",
+    "bloodTypeValue": "{type}",
+    "height": "Height",
+    "heightValue": "{value, number} cm",
+    "weight": "Weight",
+    "weightValue": "{value, number} kg",
+    "measurements": "Measurements",
+    "cup": "Cup"
+  },
+  "gender": {
+    "m": "Male",
+    "f": "Female",
+    "o": "Other",
+    "a": "None"
+  },
+  "cast": {
+    "empty": "This game has no characters yet.",
+    "voice": "CV {name}",
+    "role": {
+      "main": "Protagonist",
+      "primary": "Main characters",
+      "side": "Side characters",
+      "appears": "Appearances"
+    }
+  }
+}

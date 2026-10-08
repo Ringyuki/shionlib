@@ -35,7 +35,7 @@ export default function GameRoute({ loaderData }: Route.ComponentProps) {
     <GamePage
       header={header}
       details={details}
-      characters={characters}
+      characterCount={characters.length}
       scores={scores}
       resources={summarizeResources(resources)}
       favorite={<FavoriteButton gameId={header.id} favorited={favorited} />}

@@ -81,20 +81,19 @@
     "SHARED_CHARACTERS": "Shared characters",
     "FAN_DISC": "Fan disc"
   },
-  "characters": {
-    "empty": "This game has no characters yet.",
-    "voice": "CV {name}",
-    "role": {
-      "main": "Protagonist",
-      "primary": "Main characters",
-      "side": "Side characters",
-      "appears": "Appearances"
-    }
-  },
   "meta": {
     "developers": "Developer",
     "released": "Release date",
     "platforms": "Platforms",
     "type": "Type"
+  },
+  "orderLabel": "Sort by",
+  "order": {
+    "newest": "Newest",
+    "oldest": "Oldest",
+    "updated": "Recently updated",
+    "hot": "Hottest",
+    "views": "Most viewed",
+    "downloads": "Most downloaded"
   }
 }

@@ -1,0 +1,15 @@
+{
+  "title": "Developers",
+  "count": "{total, plural, one {# developer} other {# developers}}",
+  "found": "{total, plural, one {# developer matches} other {# developers match}}",
+  "search": "Search developers by name or alias",
+  "empty": "No developer matches \"{query}\".",
+  "none": "No developers are listed yet.",
+  "works": "{count, plural, one {# work} other {# works}}",
+  "website": "Official website",
+  "intro": "About",
+  "extra": "More",
+  "worksTitle": "Works ({count, number})",
+  "worksLabel": "Works",
+  "noWorks": "No works of this developer are listed yet."
+}

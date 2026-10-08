@@ -1,7 +1,10 @@
 import {
+  firstOrder,
+  orderParams,
+  orderQuery,
   requiresResources,
   resourceRuleFor,
-  type GameSort,
+  type GameOrder,
   type GameSummary,
   type Platform,
   type ResourceRule,
@@ -18,11 +21,9 @@ export type LibraryAddress = {
   platforms: Platform[]
   years: number[]
   months: number[]
-  sort: GameSort
-  ascending: boolean
   resources: ResourceRule | undefined
   page: number
-}
+} & GameOrder
 
 export type LibraryContent = {
   address: LibraryAddress
@@ -37,36 +38,16 @@ export type Condition = {
   without: Partial<LibraryAddress>
 }
 
-export const sortKeys = [
-  'release_date',
-  'resource_updated',
-  'hot_score',
-  'views',
-  'downloads',
-] as const satisfies readonly GameSort[]
-
 export const firstAddress: LibraryAddress = {
   tags: [],
   excluded: [],
   platforms: [],
   years: [],
   months: [],
-  sort: 'release_date',
-  ascending: false,
+  ...firstOrder,
   resources: undefined,
   page: 1,
 }
-
-export const orders = [
-  { name: 'newest', sort: 'release_date', ascending: false },
-  { name: 'oldest', sort: 'release_date', ascending: true },
-  { name: 'updated', sort: 'resource_updated', ascending: false },
-  { name: 'hot', sort: 'hot_score', ascending: false },
-  { name: 'views', sort: 'views', ascending: false },
-  { name: 'downloads', sort: 'downloads', ascending: false },
-] as const satisfies readonly (Pick<LibraryAddress, 'sort' | 'ascending'> & { name: string })[]
-
-export type Order = (typeof orders)[number]
 
 export const pageSize = 36
 
@@ -87,15 +68,6 @@ export function yearOptions(now: Date): number[] {
   return Array.from({ length: latest - firstYear + 1 }, (_, index) => latest - index)
 }
 
-export function reversible(sort: GameSort): boolean {
-  return orders.some(order => order.sort === sort && order.ascending)
-}
-
-export function orderOf(address: Pick<LibraryAddress, 'sort' | 'ascending'>): Order {
-  const sorted = orders.filter(order => order.sort === address.sort)
-  return sorted.find(order => order.ascending === address.ascending) ?? sorted[0] ?? orders[0]
-}
-
 export function librarySearch(address: LibraryAddress): string {
   const params = new URLSearchParams()
   const add = (key: string, values: readonly (string | number)[]) => {
@@ -108,12 +80,7 @@ export function librarySearch(address: LibraryAddress): string {
   add('platform', address.platforms)
   add('year', address.years)
   add('month', address.years.length === 0 ? [] : address.months)
-  if (address.sort !== firstAddress.sort) {
-    params.set('sort', address.sort)
-  }
-  if (address.ascending && reversible(address.sort)) {
-    params.set('order', 'asc')
-  }
+  orderParams(params, address)
   if (address.resources !== undefined) {
     params.set('resources', address.resources)
   }
@@ -137,8 +104,7 @@ export function listQuery(address: LibraryAddress): ApiQuery<'/game/list', 'get'
     'filter[platforms][]': address.platforms,
     'filter[years][]': address.years,
     'filter[months][]': address.years.length === 0 ? [] : address.months,
-    'filter[sort_by]': address.sort,
-    'filter[sort_order]': address.ascending ? 'asc' : 'desc',
+    ...orderQuery(address),
     resources: address.resources,
   }
 }

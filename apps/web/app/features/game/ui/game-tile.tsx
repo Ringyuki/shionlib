@@ -1,4 +1,5 @@
 import { Card, Image, Inline, Stack, Tag, Text } from '@hina-ui/react'
+import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { useFormatter, useLocale, useMessages, useTranslations } from 'use-intl'
 import { labelOf } from '~/shared/i18n/labels'
@@ -14,9 +15,10 @@ import {
 type GameTileProps = {
   game: GameSummary
   dated: 'day' | 'year'
+  note?: ReactNode
 }
 
-export function GameTile({ game, dated }: GameTileProps) {
+export function GameTile({ game, dated, note }: GameTileProps) {
   const t = useTranslations('game')
   const labels = useMessages().game
   const locale = useLocale()
@@ -59,6 +61,7 @@ export function GameTile({ game, dated }: GameTileProps) {
               ))}
             </Inline>
           )}
+          {note}
         </Stack>
       </Link>
     </Card>

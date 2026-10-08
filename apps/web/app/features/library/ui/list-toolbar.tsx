@@ -1,7 +1,8 @@
-import { Badge, Button, Inline, Select, Text } from '@hina-ui/react'
+import { Badge, Button, Inline, Text } from '@hina-ui/react'
 import { SlidersHorizontal } from 'lucide-react'
 import { useTranslations } from 'use-intl'
-import { orderOf, orders, type LibraryAddress } from '../library'
+import { OrderSelect } from '~/features/game'
+import type { LibraryAddress } from '../library'
 
 type ListToolbarProps = {
   address: LibraryAddress
@@ -25,17 +26,9 @@ export function ListToolbar({
         {t('count', { total })}
       </Text>
       <Inline gap="sm" align="center" wrap={false}>
-        <Select
-          size="sm"
-          aria-label={t('orderLabel')}
-          value={orderOf(address).name}
-          onValueChange={value => {
-            const chosen = orders.find(order => order.name === value)
-            if (chosen !== undefined) {
-              onChange({ sort: chosen.sort, ascending: chosen.ascending })
-            }
-          }}
-          options={orders.map(order => ({ value: order.name, label: t(`order.${order.name}`) }))}
+        <OrderSelect
+          order={address}
+          onChange={chosen => onChange({ sort: chosen.sort, ascending: chosen.ascending })}
           className="w-44 shrink-0 max-sm:w-40"
         />
         <Badge content={conditions} tone="accent" className="xl:hidden">

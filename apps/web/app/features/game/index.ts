@@ -6,13 +6,14 @@ export {
   isExplicit,
   originalTitle,
   platforms,
+  preferredIntro,
   primaryCover,
   releaseDate,
   requiresResources,
   resourceRuleFor,
   sortedGamesPath,
   tagPath,
-  type CharacterCredit,
+  worksPageSize,
   type GameDetails,
   type GameHeader,
   type GameSort,
@@ -20,14 +21,24 @@ export {
   type Platform,
   type ResourceLanguage,
   type ResourceRule,
+  type Works,
 } from './game'
-export { platformFrom, resourceRuleFrom } from './game.schema'
-export { loadGamePage, loadScores } from './game.use-cases'
-export { GameCharacters } from './ui/game-characters'
+export {
+  firstOrder,
+  orderOf,
+  orderParams,
+  orderQuery,
+  type GameOrder,
+  type Order,
+} from './game-order'
+export { orderFrom, platformFrom, resourceRuleFrom } from './game.schema'
+export { loadGamePage, loadScores, loadWorks } from './game.use-cases'
 export { PlatformIcon } from './ui/platform-icon'
 export { PlatformTag } from './ui/platform-tag'
 export { GameCard } from './ui/game-card'
+export { GameGrid } from './ui/game-grid'
 export { GameInfo } from './ui/game-info'
 export { GamePage } from './ui/game-page'
 export { GameRow } from './ui/game-row'
 export { GameTile } from './ui/game-tile'
+export { OrderSelect } from './ui/order-select'

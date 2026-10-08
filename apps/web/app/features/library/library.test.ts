@@ -7,7 +7,6 @@ import {
   librarySearch,
   listQuery,
   narrowedToResources,
-  orderOf,
   withResourcesOnly,
   withoutConditions,
   yearOptions,
@@ -24,18 +23,6 @@ describe('yearOptions', () => {
     const years = yearOptions(new Date('2026-12-31T16:30:00Z'))
     expect(years.slice(0, 3)).toEqual([2028, 2027, 2026])
     expect(years.at(-1)).toBe(1980)
-  })
-})
-
-describe('orderOf', () => {
-  it('names the order of an address', () => {
-    expect(orderOf(address()).name).toBe('newest')
-    expect(orderOf(address({ ascending: true })).name).toBe('oldest')
-    expect(orderOf(address({ sort: 'resource_updated' })).name).toBe('updated')
-  })
-
-  it('falls back on the only direction a sort has', () => {
-    expect(orderOf(address({ sort: 'views', ascending: true })).name).toBe('views')
   })
 })
 

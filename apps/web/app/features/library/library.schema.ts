@@ -1,20 +1,10 @@
 import * as v from 'valibot'
-import { platformFrom, resourceRuleFrom } from '~/features/game'
-import {
-  firstAddress,
-  maxChosen,
-  maxTagLength,
-  months,
-  reversible,
-  sortKeys,
-  type LibraryAddress,
-} from './library'
+import { orderFrom, platformFrom, resourceRuleFrom } from '~/features/game'
+import { maxChosen, maxTagLength, months, type LibraryAddress } from './library'
 
 const tag = v.pipe(v.string(), v.trim(), v.minLength(1), v.maxLength(maxTagLength))
 
 const whole = v.pipe(v.string(), v.toNumber(), v.safeInteger())
-
-const sort = v.fallback(v.picklist(sortKeys), firstAddress.sort)
 
 const legacyPrefix = 'filter['
 
@@ -50,7 +40,6 @@ export function addressFrom(
   page: number,
   years: readonly number[],
 ): LibraryAddress {
-  const order = v.parse(sort, params.get('sort'))
   const chosenYears = chosen(params.getAll('year'), oneOf(years))
   return {
     tags: chosen(params.getAll('tag'), tagFrom),
@@ -58,8 +47,7 @@ export function addressFrom(
     platforms: chosen(params.getAll('platform'), platformFrom),
     years: chosenYears,
     months: chosenYears.length === 0 ? [] : chosen(params.getAll('month'), oneOf(months)),
-    sort: order,
-    ascending: params.get('order') === 'asc' && reversible(order),
+    ...orderFrom(params),
     resources: resourceRuleFrom(params.get('resources')),
     page,
   }

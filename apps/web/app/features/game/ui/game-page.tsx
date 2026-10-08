@@ -2,7 +2,7 @@ import { Stack } from '@hina-ui/react'
 import type { ReactNode } from 'react'
 import { useLocale } from 'use-intl'
 import type { ResourceSummary } from '~/features/resource'
-import { preferredIntro, type CharacterCredit, type GameDetails, type GameHeader } from '../game'
+import { preferredIntro, type GameDetails, type GameHeader } from '../game'
 import type { Scores } from '../game-score'
 import { useViewCount } from '../use-view-count'
 import { GameHero } from './game-hero'
@@ -11,7 +11,7 @@ import { GameTabs } from './game-tabs'
 type GamePageProps = {
   header: GameHeader
   details: GameDetails
-  characters: readonly CharacterCredit[]
+  characterCount: number
   scores: Promise<Scores>
   resources: ResourceSummary
   favorite: ReactNode
@@ -21,7 +21,7 @@ type GamePageProps = {
 export function GamePage({
   header,
   details,
-  characters,
+  characterCount,
   scores,
   resources,
   favorite,
@@ -32,7 +32,7 @@ export function GamePage({
   return (
     <GameTabs
       gameId={header.id}
-      counts={{ resources: resources.count, characters: characters.length }}
+      counts={{ resources: resources.count, characters: characterCount }}
       renderHeader={tabs => (
         <Stack gap="xl">
           <GameHero

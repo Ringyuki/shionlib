@@ -2,6 +2,7 @@ import { constraints } from '~/shared/api/generated/constraints'
 import type { ApiQuery, Schema } from '~/shared/api/types'
 import type { Locale } from '~/shared/i18n/locale'
 import { bbcodePlainText } from '~/shared/markup/bbcode'
+import type { GameOrder } from './game-order'
 
 type Titled = Pick<Schema<'GameHeaderDTO'>, 'title_zh' | 'title_jp' | 'title_en'>
 
@@ -57,17 +58,17 @@ export type GameSummary = Schema<'GameCardDTO'>
 
 export type GameDetails = Schema<'GameDetailsDTO'>
 
-export type CharacterCredit = Schema<'GameCharacterCreditDTO'>
+export type Works = { games: GameSummary[]; total: number; page: number; order: GameOrder }
 
-export type CharacterRole = CharacterCredit['role']
+export type WorksOf = { developer: number } | { character: number }
+
+export const worksPageSize = 36
 
 export type GameImage = Pick<Cover, 'url' | 'dims' | 'sexual' | 'violence'>
 
 export const gameTabs = ['resources', 'info', 'characters'] as const
 
 export type GameTab = (typeof gameTabs)[number]
-
-export const characterRoles: readonly CharacterRole[] = ['main', 'primary', 'side', 'appears']
 
 export const introLanguages = ['zh', 'jp', 'en'] as const
 
@@ -130,14 +131,6 @@ export function preferredIntro(game: Introduced, locale: Locale): string {
 
 export function masked(image: Pick<Cover, 'sexual' | 'violence'>, contentLimit: number): boolean {
   return contentLimit === contentLimitShowSpoiler && isExplicit(image)
-}
-
-export function groupCharacters(
-  credits: readonly CharacterCredit[],
-): { role: CharacterRole; credits: CharacterCredit[] }[] {
-  return characterRoles
-    .map(role => ({ role, credits: credits.filter(credit => credit.role === role) }))
-    .filter(group => group.credits.length > 0)
 }
 
 export function groupStaff(

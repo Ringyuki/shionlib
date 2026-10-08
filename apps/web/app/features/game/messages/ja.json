@@ -81,20 +81,19 @@
     "SHARED_CHARACTERS": "キャラクター共通",
     "FAN_DISC": "ファンディスク"
   },
-  "characters": {
-    "empty": "このゲームにはまだキャラクター情報がありません。",
-    "voice": "CV {name}",
-    "role": {
-      "main": "主人公",
-      "primary": "メインキャラクター",
-      "side": "サブキャラクター",
-      "appears": "登場"
-    }
-  },
   "meta": {
     "developers": "ブランド",
     "released": "発売日",
     "platforms": "プラットフォーム",
     "type": "ジャンル"
+  },
+  "orderLabel": "並び順",
+  "order": {
+    "newest": "発売日が新しい順",
+    "oldest": "発売日が古い順",
+    "updated": "リソース更新順",
+    "hot": "人気順",
+    "views": "閲覧数順",
+    "downloads": "ダウンロード数順"
   }
 }

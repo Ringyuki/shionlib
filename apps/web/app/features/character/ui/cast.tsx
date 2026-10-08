@@ -1,12 +1,11 @@
 import { Card, Empty, Image, Section, SimpleGrid, Stack, Text } from '@hina-ui/react'
 import { Link } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
-import { characterName } from '~/features/character'
-import { groupCharacters, type CharacterCredit } from '../game'
+import { characterName, characterPath, groupCast, voiceOf, type CastCredit } from '../character'
 
-export function GameCharacters({ characters }: { characters: readonly CharacterCredit[] }) {
-  const t = useTranslations('game.characters')
-  const groups = groupCharacters(characters)
+export function Cast({ credits }: { credits: readonly CastCredit[] }) {
+  const t = useTranslations('character.cast')
+  const groups = groupCast(credits)
   if (groups.length === 0) {
     return <Empty title={t('empty')} />
   }
@@ -16,7 +15,7 @@ export function GameCharacters({ characters }: { characters: readonly CharacterC
         <Section key={group.role} title={t(`role.${group.role}`)}>
           <SimpleGrid min="9rem" gap="md">
             {group.credits.map(credit => (
-              <CharacterCard key={credit.character.id} credit={credit} />
+              <CastCard key={credit.character.id} credit={credit} />
             ))}
           </SimpleGrid>
         </Section>
@@ -25,13 +24,14 @@ export function GameCharacters({ characters }: { characters: readonly CharacterC
   )
 }
 
-function CharacterCard({ credit }: { credit: CharacterCredit }) {
-  const t = useTranslations('game.characters')
+function CastCard({ credit }: { credit: CastCredit }) {
+  const t = useTranslations('character.cast')
   const locale = useLocale()
   const name = characterName(credit.character, locale)
+  const voice = voiceOf(credit)
   return (
     <Card padded={false} className="hn-interactive overflow-hidden">
-      <Link to={`/${locale}/character/${credit.character.id}`} prefetch="intent">
+      <Link to={characterPath(locale, credit.character.id)} prefetch="intent">
         <Image
           src={credit.image ?? credit.character.image ?? undefined}
           alt={name}
@@ -43,9 +43,9 @@ function CharacterCard({ credit }: { credit: CharacterCredit }) {
           <Text size="sm" weight="medium" truncate>
             {name}
           </Text>
-          {credit.actor !== null && credit.actor !== '' && (
+          {voice !== undefined && (
             <Text size="xs" tone="muted" truncate>
-              {t('voice', { name: credit.actor })}
+              {t('voice', { name: voice })}
             </Text>
           )}
         </Stack>

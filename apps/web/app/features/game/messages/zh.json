@@ -81,20 +81,19 @@
     "SHARED_CHARACTERS": "共享角色",
     "FAN_DISC": "Fan Disc"
   },
-  "characters": {
-    "empty": "这个游戏暂无角色信息。",
-    "voice": "CV {name}",
-    "role": {
-      "main": "主角",
-      "primary": "主要角色",
-      "side": "配角",
-      "appears": "登场"
-    }
-  },
   "meta": {
     "developers": "开发商",
     "released": "发售日",
     "platforms": "平台",
     "type": "类型"
+  },
+  "orderLabel": "排序方式",
+  "order": {
+    "newest": "最新发售",
+    "oldest": "最早发售",
+    "updated": "最近更新资源",
+    "hot": "热度最高",
+    "views": "浏览最多",
+    "downloads": "下载最多"
   }
 }
