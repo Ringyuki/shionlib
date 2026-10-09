@@ -13256,7 +13256,7 @@ export interface operations {
     "download.link": {
         parameters: {
             query?: {
-                /** @description Cloudflare Turnstile response token */
+                /** @description Token the visitor got from Cap for solving its challenge; it is spent by this request */
                 token?: string;
             };
             header?: never;

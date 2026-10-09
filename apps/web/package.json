@@ -17,13 +17,16 @@
     "e2e": "playwright test"
   },
   "dependencies": {
+    "@cap.js/wasm": "0.0.8",
     "@hina-ui/react": "^1.7.10",
     "@react-router/node": "^8.4.0",
     "@react-router/serve": "^8.4.0",
+    "cap-widget": "0.1.58",
     "hash-wasm": "^4.12.0",
     "isbot": "^5.2.2",
     "lucide-react": "1.41.0",
     "openapi-fetch": "^0.17.0",
+    "pako": "2.1.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-icons": "^5.7.0",

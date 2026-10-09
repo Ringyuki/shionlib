@@ -48,6 +48,7 @@ Every user flow a phase ports gets Playwright specs in `apps/web/e2e` in the sam
   - Check toasts with `expectNotice` (the 「通知」 region). The toast's `role="alert"` copy is `aria-hidden`.
   - While a modal popover or dialog is open, the rest of the page is outside the accessibility tree. Close it (`Escape`) before asserting on its trigger.
   - `Section title` gives no accessible name, so find a section through its heading.
-- **Turnstile:**
-  - The web server uses the always-pass test site key, and `docker/env/api-e2e.env` the matching test secret.
-  - Seeded files have no stored object, so the download link fails with 「下载资源文件不存在」. The download spec asserts that error, which covers the chain from Turnstile through the action to the API.
+- **Cap:**
+  - `docker/scripts/test-e2e-web.sh` starts a real Cap in the stack, creates a site key for the run (`docker/scripts/cap-site-key.sh`, without instrumentation, without the block on automated browsers and at the lowest difficulty, so Playwright passes and solves it in milliseconds) and hands its secret to the API and its endpoint to the web server (`CAP_ENDPOINT`).
+  - Seeded files have no stored object, so the download link fails with 「下载资源文件不存在」. The download spec waits for Cap to redeem the solution and asserts that error, which covers the chain from Cap through the action to the API. Do not assert on the verification popover: it is gone within a frame or two.
+  - What happens with a link (browser, aria2, a manager's install request, copy) cannot be reached in e2e; the model and vendor tests cover the requests, and a change there is checked in the dev app with the link response stubbed.

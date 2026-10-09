@@ -1,26 +1,91 @@
 {
   "download": "下载",
   "methods": "其他下载方式",
-  "viaBrowser": "通过浏览器下载",
-  "viaAria2": "推送到 aria2",
-  "copyLink": "复制下载链接",
-  "verifying": "正在进行人机验证",
-  "verifyingHint": "验证通过后将自动开始下载，无需再次点击。",
-  "verification": {
-    "unavailable": "人机验证加载失败，请检查网络后重试",
-    "error": "人机验证未通过，请重试",
-    "expired": "人机验证已过期，请重试",
-    "timeout": "人机验证超时，请重试"
+  "via": {
+    "browser": "通过浏览器下载",
+    "aria2": "推送到 aria2",
+    "lunabox": "推送到 LunaBox",
+    "reina": "推送到 ReinaManager",
+    "potatovn": "推送到 PotatoVN"
   },
+  "needsBangumi": "该游戏缺少 Bangumi 编号",
+  "copyLink": "复制下载链接",
+  "openSettings": "下载设置",
+  "verifying": "正在进行人机验证",
+  "verifyingHint": "验证通过后将自动开始下载。",
+  "verification": {
+    "unavailable": "人机验证暂时无法进行，请稍后重试。",
+    "blocked": "当前浏览器环境未通过人机验证。",
+    "failed": "人机验证未通过，请重试。"
+  },
+  "problem": "错误代码：{code}",
   "aria2": {
     "sent": "已推送到 aria2",
     "unreachable": "无法连接 aria2（{endpoint}），请检查设置",
     "unauthorized": "aria2 拒绝了密钥，请检查设置",
     "rejected": "aria2 未接受任务：{message}"
   },
+  "manager": {
+    "sent": "已将下载任务交给 {name}。",
+    "hint": "如果 {name} 没有启动，请确认它已安装。"
+  },
   "useBrowser": "改用浏览器下载",
   "copied": "链接已复制，{minutes} 分钟内有效",
   "copyReady": "链接已生成，{minutes} 分钟内有效",
   "copy": "复制",
-  "asDefault": "{label}（默认）"
+  "asDefault": "{label}（默认）",
+  "preferences": {
+    "title": "下载设置",
+    "done": "完成",
+    "local": "下载设置仅保存在当前浏览器中，不随账号同步。",
+    "method": "默认下载方式",
+    "methods": {
+      "browser": {
+        "label": "浏览器下载",
+        "description": "由浏览器直接下载文件。"
+      },
+      "aria2": {
+        "label": "推送到 aria2",
+        "description": "将下载任务发送到本机或局域网中的 aria2。"
+      },
+      "lunabox": {
+        "label": "推送到 LunaBox",
+        "description": "将下载任务交给 LunaBox。"
+      },
+      "reina": {
+        "label": "推送到 ReinaManager",
+        "description": "将下载任务交给 ReinaManager。没有 Bangumi 编号的游戏改用浏览器下载。"
+      },
+      "potatovn": {
+        "label": "推送到 PotatoVN",
+        "description": "将下载任务交给 PotatoVN。没有 Bangumi 编号的游戏改用浏览器下载。"
+      }
+    },
+    "managers": "游戏管理器",
+    "managersHint": "开启后，下载菜单中会出现对应的管理器。使用前需要先在电脑上安装。",
+    "manager": {
+      "lunabox": "视觉小说管理工具，可下载、校验并解压文件。仅支持 Windows。",
+      "reina": "视觉小说管理工具，可接收下载任务并加入游戏库。仅适用于有 Bangumi 编号的游戏。",
+      "potatovn": "视觉小说管理工具，需要安装 PotatoDownload 插件。仅支持 Windows，且仅适用于有 Bangumi 编号的游戏。"
+    },
+    "showManager": "在下载菜单中显示 {name}",
+    "aria2": "aria2",
+    "aria2Hint": "需要先在 aria2 中启用 RPC，并允许来自本站的跨域请求。修改后立即生效。",
+    "endpoint": "RPC 地址",
+    "endpointHint": "aria2 的 JSON-RPC 地址。",
+    "secret": "RPC 密钥",
+    "secretHint": "未设置密钥时留空。",
+    "directory": "保存目录",
+    "directoryHint": "选填，留空时使用 aria2 的默认目录。",
+    "test": "测试连接",
+    "reachable": "连接成功，aria2 版本 {version}。",
+    "unreachable": {
+      "unreachable": "无法连接 aria2，请检查地址，并确认 aria2 正在运行且允许跨域请求。",
+      "unauthorized": "aria2 拒绝了密钥，请检查 RPC 密钥。",
+      "rejected": "aria2 返回了错误：{message}"
+    },
+    "issue": {
+      "endpoint": "请输入完整的地址，例如 http://127.0.0.1:6800/jsonrpc"
+    }
+  }
 }

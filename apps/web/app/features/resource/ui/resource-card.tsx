@@ -84,7 +84,11 @@ export function ResourceCard({ resource, viewer }: ResourceCardProps) {
           </Stack>
         </Grid>
         {note !== '' && <BBCodeText source={note} size="sm" />}
-        <ResourceFiles files={resource.files ?? []} manageable={rights.manage} />
+        <ResourceFiles
+          resourceId={resource.id}
+          files={resource.files ?? []}
+          manageable={rights.manage}
+        />
       </Stack>
     </Card>
   )

@@ -59,7 +59,7 @@ app/
     config/                    server env (env.server.ts) and the public config sent to the browser
     catalog/                   links back to the catalog source (Hikarinagi entry and editor URLs)
     storage/                   readLocal/writeLocal over localStorage
-    vendor/                    browser clients of third-party services (Turnstile, aria2); the only fetch outside api/
+    vendor/                    browser clients of services that are not our API (Cap, aria2, game managers); the only fetch outside api/
     i18n/  ui/                 <topic>.schema.ts beside a module holds its input guards
 ```
 
@@ -81,7 +81,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 - MUST build UI from `@hina-ui/react` components and tokens; use Tailwind utilities only for layout glue.
 - MUST show the brand with `BrandLogo` and `Wordmark` from `~/shared/ui/brand` (`public/brand/logo.png`, the favicon artwork; the wordmark is `app/shared/ui/wordmark.svg` "Shionlib" or `wordmark-zh.svg` 「书音的图书馆」 by locale, imported as an inline SVG component with `currentColor`, `tone="brand"` for the Shionlib blue or `tone="inherit"` to follow the text), never with live text.
 - MUST pass stored image keys straight to hina-ui `Image` (`<Image src={cover.url}>`): `root.tsx` mounts `ImageResolverProvider` with `imageResolver(IMAGE_BASE_URL)`. Other consumers (an `Avatar` `src`) call hina-ui's `useImageResolver()`.
-- MUST read browser-visible configuration (`IMAGE_BASE_URL`, `TURNSTILE_SITE_KEY`, `HIKARINAGI_SITE_URL`) through `usePublicConfig()` (`~/shared/config/public-config`), filled by the root loader from `readServerEnv().publicConfig`; never read `process.env` or `import.meta.env` in features.
+- MUST read browser-visible configuration (`IMAGE_BASE_URL`, `CAP_ENDPOINT`, `HIKARINAGI_SITE_URL`) through `usePublicConfig()` (`~/shared/config/public-config`), filled by the root loader from `readServerEnv().publicConfig`; never read `process.env` or `import.meta.env` in features.
 - MUST keep the code comment-free (lint enforces; inline lint directives are disabled).
 - MUST keep files short: at most 150 non-blank lines for `.tsx`, 200 for other `.ts`, 300 for tests (lint enforces). When a file grows past that, split it by responsibility (a section, a field group, a hook that builds data), never by cutting it into arbitrary parts; stylesheets follow the same idea, one concern per file (`theme.css` accent roles, `platform.css` platform colours).
 - MUST add Playwright specs in `apps/web/e2e` for every user flow a phase ports, and run them with `pnpm test:e2e:web` before finishing the phase (`references/testing.md`).
@@ -98,7 +98,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 - MUST put a dialog's actions in `renderFooter`, never inside the `Form` in its content: the cancel button calls the footer's `close`, the submit button calls the form handle's `submit()` (`form.current?.submit()`) and takes `loading` from the footer's `submitting`, which also disables the cancel button (`renderFooter={({ close, submitting }) => …}`). A `Dialog`, `Drawer` or `Sheet` locks itself while the `Form` in it is submitting, so the form's `onSubmit` awaits the command and nothing passes `locked` by hand. An `AlertDialog`'s `onConfirm` awaits the command's `confirm(...)`, which rejects when the request is refused, so the dialog stays open.
 - MUST NOT override hina-ui tokens beyond the documented accent roles, or add colours, gradients or shadows of your own; ask before introducing any new token. The one approved exception is the platform brand colours in `app/shared/ui/platform.css`, used only by `PlatformTag` (`references/ui.md`).
 - MUST NOT declare object types with snake_case keys or types named `*DTO`/`*Response`/`*Request`/`*Payload`/`*Body` (lint).
-- MUST NOT use `fetch`, `XMLHttpRequest`, `openapi-fetch`, axios, SWR or React Query outside `~/shared/api`; third-party browser services (Cloudflare Turnstile, the visitor's aria2) are reached only through `~/shared/vendor` (lint).
+- MUST NOT use `fetch`, `XMLHttpRequest`, `openapi-fetch`, axios, SWR or React Query outside `~/shared/api`; third-party browser services (the site's Cap instance, the visitor's aria2 and game managers) are reached only through `~/shared/vendor` (lint).
 - MUST NOT use `as` type assertions outside `~/shared/api` (`as const` is fine) (lint).
 - MUST NOT import React state/effects or `ApiClient` into route modules, or call `api.*` there (lint).
 - MUST NOT import another feature's internals, or `*.server` modules from client code (lint).
@@ -137,10 +137,11 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 | Sign in, sign up, sign out?                          | `features/auth`: the dialog (`?auth=sign-in`/`sign-up`/`forgot-password` opens it), `useSignOut`; no auth pages                                    |
 | Navigation entry or shell change?                    | `features/shell` (`shell.ts` model, `ui/site-sidebar.tsx`, `ui/site-header.tsx`)                                                                   |
 | An image from the API?                               | `<Image src={cover.url}>`; outside `Image`, `useImageResolver()(key, 'image')`                                                                     |
-| Human verification (downloads)?                      | `TurnstileChallenge` from `~/shared/vendor/turnstile-challenge`; the token goes to the API through an action                                       |
+| Human verification (downloads)?                      | `solveCap` from `~/shared/vendor/cap` (the site's own Cap, no widget on the page); the token goes to the API through an action                     |
 | Uploading files?                                     | `features/upload`: `useUploadManager()?.add(target, label, picks)` hands files to the site-wide manager; the header's `UploadIndicator` only links to the uploads page; `useUploads()` reads the queue; never call the upload endpoints elsewhere |
 | Progress, control or management of uploads?          | `features/uploader`: the uploads page (`/:lang/user/uploads`) is the only place that shows transfers, processing stages and the uploader's own resources (`references/ui.md`); forms and dialogs only submit and point there |
-| Downloading a file?                                  | `DownloadButton` from `~/features/download`: Turnstile, then `resources/download/link`, then browser, aria2 or copy by the visitor's local setting |
+| Downloading a file?                                  | `DownloadButton` from `~/features/download` inside a `DownloadArea`: Cap, then `resources/download/link`, then the browser, aria2, a game manager or copy (`references/ui.md`) |
+| A download setting?                                  | `MethodChoice`, `ManagerSwitches`, `Aria2Fields` from `~/features/download`; they apply at once and are shown by the settings section and by the download menu's dialog |
 | Resources of a game (list, report, edit, delete)?    | `features/resource`; the list is rendered by the game page's resources tab                                                                         |
 | A page with tabs (game page)?                        | parent route loads what the tabs share; each tab is a child route reading `matches`; hina `Tabs` driven by the URL (`references/ui.md`)            |
 | Choices of an enum field (platforms, reasons)?       | the model reads `constraints.<Body>.<field>.enum` / `.itemEnum` from `~/shared/api/generated/constraints`; never list them by hand                 |

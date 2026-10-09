@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test'
-import { sessionFile, signIn } from './support/accounts'
+import { openSignIn, sessionFile, signIn } from './support/accounts'
 import { test } from './support/ingress'
 import { expectNotice } from './support/notices'
 
@@ -29,8 +29,9 @@ test.describe('as an administrator', () => {
 
     await secondBrowser.clearCookies()
     const other = await secondBrowser.newPage()
-    await other.goto('/zh/game/1?auth=sign-in')
+    await openSignIn(other)
     await signIn(other, reporter)
+    await other.goto('/zh/game/1')
     await other.locator('#resource-1').getByRole('button', { name: '资源操作' }).click()
     await other.getByRole('menuitem', { name: '举报' }).click()
     await other

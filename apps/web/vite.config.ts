@@ -14,6 +14,10 @@ export default defineConfig({
         target: process.env.API_INTERNAL_URL ?? 'http://localhost:5000',
         rewrite: path => path.replace(/^\/api/, ''),
       },
+      '/cap': {
+        target: process.env.CAP_URL ?? 'http://localhost:5850',
+        rewrite: path => path.replace(/^\/cap/, ''),
+      },
     },
   },
 })

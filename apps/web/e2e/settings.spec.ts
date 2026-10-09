@@ -54,21 +54,30 @@ test('changes the language of the site and remembers it', async ({ page }) => {
   await expect(page).toHaveURL(/\/en$/)
 })
 
-test('keeps download settings in the browser', async ({ page }) => {
+test('keeps download settings in the browser as they are changed', async ({ page }) => {
   await openSettings(page, 'download')
   await page.getByRole('radio', { name: /^推送到 aria2/ }).click()
   const endpoint = page.getByLabel('RPC 地址')
   await endpoint.fill('nas:6800')
-  await page.getByRole('button', { name: '保存' }).click()
   await expect(page.getByText('请输入完整的地址')).toBeVisible()
   await endpoint.fill('http://127.0.0.1:6899/jsonrpc')
+  await expect(page.getByText('请输入完整的地址')).toHaveCount(0)
   await page.getByRole('button', { name: '测试连接' }).click()
   await expect(page.getByRole('alert')).toContainText('无法连接 aria2')
-  await page.getByRole('button', { name: '保存' }).click()
-  await expectNotice(page, 'aria2 设置已保存')
   await page.reload()
   await expect(page.getByRole('radio', { name: /^推送到 aria2/ })).toBeChecked()
   await expect(page.getByLabel('RPC 地址')).toHaveValue('http://127.0.0.1:6899/jsonrpc')
+})
+
+test('offers a game manager as the default only while it is shown', async ({ page }) => {
+  await openSettings(page, 'download')
+  await page.getByRole('radio', { name: /^推送到 LunaBox/ }).click()
+  await page.getByRole('switch', { name: '在下载菜单中显示 LunaBox' }).click()
+  await expect(page.getByRole('radio', { name: /^推送到 LunaBox/ })).toHaveCount(0)
+  await expect(page.getByRole('radio', { name: /^浏览器下载/ })).toBeChecked()
+  await page.reload()
+  await expect(page.getByRole('switch', { name: '在下载菜单中显示 LunaBox' })).not.toBeChecked()
+  await expect(page.getByRole('radio', { name: /^推送到 ReinaManager/ })).toBeVisible()
 })
 
 test('checks a user name while it is typed and saves the bio', async ({ page }) => {

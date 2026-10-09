@@ -3,6 +3,8 @@ import { Upload } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { useLocale, useMessages, useTranslations } from 'use-intl'
+import { DownloadArea } from '~/features/download'
+import { gameTitle, type GameHeader } from '~/features/game'
 import { sitePaths } from '~/features/shell'
 import { labelOf } from '~/shared/i18n/labels'
 import { Button } from '~/shared/ui/button'
@@ -18,12 +20,12 @@ import { ResourceCard } from './resource-card'
 const allPlatforms = 'all'
 
 type ResourceListProps = {
-  gameId: number
+  game: Pick<GameHeader, 'id' | 'title_zh' | 'title_jp' | 'title_en' | 'b_id' | 'v_id' | 'h_id'>
   resources: readonly Resource[]
   viewer: ResourceViewer | null
 }
 
-export function ResourceList({ gameId, resources, viewer }: ResourceListProps) {
+export function ResourceList({ game, resources, viewer }: ResourceListProps) {
   const t = useTranslations('resource')
   const locale = useLocale()
   const labels = useMessages().game.platform
@@ -34,7 +36,7 @@ export function ResourceList({ gameId, resources, viewer }: ResourceListProps) {
         title={t('empty')}
         actions={
           <Button asChild loginRequired>
-            <Link to={`${sitePaths(locale).upload}?game=${gameId}`}>
+            <Link to={`${sitePaths(locale).upload}?game=${game.id}`}>
               <Upload aria-hidden />
               {t('uploadFirst')}
             </Link>
@@ -50,23 +52,32 @@ export function ResourceList({ gameId, resources, viewer }: ResourceListProps) {
     filtering && platform !== allPlatforms ? platform : undefined,
   )
   return (
-    <Stack gap="md">
-      {filtering && (
-        <SegmentedControl
-          size="sm"
-          aria-label={t('filter')}
-          value={platform}
-          onValueChange={value => setPlatform(String(value))}
-          options={[
-            { value: allPlatforms, label: t('all') },
-            ...platforms.map(value => ({ value, label: labelOf(labels, value) })),
-          ]}
-          className="self-start"
-        />
-      )}
-      {shown.map(resource => (
-        <ResourceCard key={resource.id} resource={resource} viewer={viewer} />
-      ))}
-    </Stack>
+    <DownloadArea
+      game={{
+        title: gameTitle(game, locale),
+        b_id: game.b_id,
+        v_id: game.v_id,
+        h_id: game.h_id,
+      }}
+    >
+      <Stack gap="md">
+        {filtering && (
+          <SegmentedControl
+            size="sm"
+            aria-label={t('filter')}
+            value={platform}
+            onValueChange={value => setPlatform(String(value))}
+            options={[
+              { value: allPlatforms, label: t('all') },
+              ...platforms.map(value => ({ value, label: labelOf(labels, value) })),
+            ]}
+            className="self-start"
+          />
+        )}
+        {shown.map(resource => (
+          <ResourceCard key={resource.id} resource={resource} viewer={viewer} />
+        ))}
+      </Stack>
+    </DownloadArea>
   )
 }

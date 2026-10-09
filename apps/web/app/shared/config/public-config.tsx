@@ -3,13 +3,13 @@ import { createContext, useContext, type ReactNode } from 'react'
 export type PublicConfig = {
   imageBaseUrl: string
   hikarinagiSiteUrl: string
-  turnstileSiteKey: string
+  capEndpoint: string
 }
 
 const PublicConfigContext = createContext<PublicConfig>({
   imageBaseUrl: '',
   hikarinagiSiteUrl: '',
-  turnstileSiteKey: '',
+  capEndpoint: '',
 })
 
 export function PublicConfigProvider({

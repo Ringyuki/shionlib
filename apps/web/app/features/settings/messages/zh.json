@@ -10,9 +10,6 @@
     "download": "下载",
     "site": "站点偏好"
   },
-  "issue": {
-    "endpoint": "请输入完整的地址，例如 http://127.0.0.1:6800/jsonrpc"
-  },
   "site": {
     "language": "界面语言",
     "languageHint": "同时用于发送给你的邮件。",
@@ -42,37 +39,6 @@
     "games": "游戏列表",
     "onlyWithResources": "仅显示有资源的游戏",
     "onlyWithResourcesHint": "作为游戏库和搜索的默认设置，可以在每次浏览时临时更改。"
-  },
-  "download": {
-    "local": "下载设置仅保存在当前浏览器中，不随账号同步。",
-    "method": "默认下载方式",
-    "methods": {
-      "browser": {
-        "label": "浏览器下载",
-        "description": "由浏览器直接下载文件。"
-      },
-      "aria2": {
-        "label": "推送到 aria2",
-        "description": "把下载任务发送到本机或局域网中的 aria2。"
-      }
-    },
-    "aria2": "aria2",
-    "aria2Hint": "需要先在 aria2 中启用 RPC，并允许来自本站的跨域请求。",
-    "endpoint": "RPC 地址",
-    "endpointHint": "aria2 的 JSON-RPC 地址。",
-    "secret": "RPC 密钥",
-    "secretHint": "未设置密钥时留空。",
-    "directory": "保存目录",
-    "directoryHint": "选填，留空时使用 aria2 的默认目录。",
-    "test": "测试连接",
-    "save": "保存",
-    "saved": "aria2 设置已保存",
-    "reachable": "连接成功，aria2 版本 {version}。",
-    "unreachable": {
-      "unreachable": "无法连接 aria2，请检查地址，并确认 aria2 正在运行且允许跨域请求。",
-      "unauthorized": "aria2 拒绝了密钥，请检查 RPC 密钥。",
-      "rejected": "aria2 返回了错误：{message}"
-    }
   },
   "personal": {
     "avatar": "头像",

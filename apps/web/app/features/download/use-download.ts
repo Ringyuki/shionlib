@@ -1,110 +1,94 @@
 import { toast } from '@hina-ui/react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { href, useFetcher } from 'react-router'
 import { useTranslations } from 'use-intl'
+import { usePublicConfig } from '~/shared/config/public-config'
 import { useCommand } from '~/shared/route/use-command'
-import { pushToAria2 } from '~/shared/vendor/aria2'
-import type { TurnstileFailure } from '~/shared/vendor/turnstile'
-import { validMinutes, type DownloadIntent } from './download'
+import { solveCap } from '~/shared/vendor/cap'
+import {
+  linkOf,
+  offeredMethods,
+  preferredMethod,
+  usableFor,
+  type DownloadIntent,
+  type DownloadSubject,
+} from './download'
 import type { IssueLink } from './download.schema'
 import type { downloadLinkAction } from './download.server'
+import { useDelivery } from './use-delivery'
+import { useDownloadArea } from './use-download-area'
 import { useDownloadSettings } from './use-download-settings'
 
-type DownloadFile = {
-  id: number
-  name: string
-}
-
-type Link = {
-  url: string
-  minutes: number
-}
-
-export function useDownload(file: DownloadFile) {
+export function useDownload(subject: DownloadSubject) {
   const t = useTranslations('download')
   const settings = useDownloadSettings()
+  const area = useDownloadArea()
+  const { capEndpoint } = usePublicConfig()
   const issue = useCommand(
     useFetcher<typeof downloadLinkAction>(),
     href('/resources/download/link'),
     { revalidate: false },
   )
-  const [intent, setIntent] = useState<DownloadIntent | undefined>(undefined)
-  const [verifying, setVerifying] = useState(false)
-
-  const start = (next: DownloadIntent) => {
-    setIntent(next)
-    setVerifying(true)
-  }
+  const deliver = useDelivery(subject, settings, area?.game)
+  const [preparing, setPreparing] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const running = useRef<AbortController | null>(null)
 
   const cancel = () => {
-    setVerifying(false)
-    setIntent(undefined)
+    running.current?.abort()
+    running.current = null
+    setPreparing(false)
   }
 
-  const verified = async (token: string) => {
-    setVerifying(false)
-    const chosen = intent
-    const request: IssueLink = { fileId: file.id, token }
+  const verifiedLink = async (signal: AbortSignal) => {
+    const solved = await solveCap(capEndpoint, { signal, onProgress: setProgress })
+    if (signal.aborted) {
+      return undefined
+    }
+    if (!solved.ok) {
+      if (solved.failure !== 'stopped') {
+        const code = solved.message === '' ? solved.code : `${solved.code} (${solved.message})`
+        toast.danger(t(`verification.${solved.failure}`), { description: t('problem', { code }) })
+      }
+      return undefined
+    }
+    const request: IssueLink = { fileId: subject.file.id, token: solved.token }
     const outcome = await issue.run(request)
-    if (!outcome.ok) {
+    return outcome.ok
+      ? linkOf(outcome.result.file_url, outcome.result.expires_in, new Date())
+      : undefined
+  }
+
+  const start = async (intent: DownloadIntent) => {
+    running.current?.abort()
+    const control = new AbortController()
+    running.current = control
+    setProgress(0)
+    setPreparing(true)
+    const link = await verifiedLink(control.signal)
+    if (running.current !== control) {
       return
     }
-    const { file_url: url, expires_in: expiry } = outcome.result
-    const link = { url, minutes: validMinutes(expiry) }
-    if (chosen === 'copy') {
-      void copy(link)
-    } else if (chosen === 'aria2') {
-      void pushToDownloader(link)
-    } else {
-      openInBrowser(link)
-    }
-  }
-
-  const failed = (failure: TurnstileFailure) => {
-    cancel()
-    toast.danger(t(`verification.${failure}`))
-  }
-
-  const openInBrowser = (link: Link) => window.location.assign(link.url)
-
-  const pushToDownloader = async (link: Link) => {
-    const { aria2 } = settings
-    const outcome = await pushToAria2(aria2, { url: link.url, fileName: file.name })
-    if (outcome.ok) {
-      toast.success(t('aria2.sent'))
-      return
-    }
-    const message =
-      outcome.reason === 'unreachable'
-        ? t('aria2.unreachable', { endpoint: aria2.endpoint })
-        : outcome.reason === 'unauthorized'
-          ? t('aria2.unauthorized')
-          : t('aria2.rejected', { message: outcome.message })
-    toast.danger(message, {
-      duration: 0,
-      action: { label: t('useBrowser'), onClick: () => openInBrowser(link) },
-    })
-  }
-
-  const copy = async (link: Link) => {
-    try {
-      await navigator.clipboard.writeText(link.url)
-      toast.success(t('copied', { minutes: link.minutes }))
-    } catch {
-      toast(t('copyReady', { minutes: link.minutes }), {
-        duration: 0,
-        action: { label: t('copy'), onClick: () => void copy(link) },
-      })
+    running.current = null
+    setPreparing(false)
+    if (link !== undefined) {
+      deliver(intent, link)
     }
   }
 
   return {
-    preferred: settings.method,
-    verifying,
-    busy: verifying || issue.pending,
-    start,
+    methods: offeredMethods(settings).map(method => ({
+      method,
+      usable: usableFor(method, area?.game),
+    })),
+    preferred: preferredMethod(settings, area?.game),
+    openSettings: area?.openSettings,
+    preparing,
+    progress,
+    busy: preparing || issue.pending,
+    start: (intent: DownloadIntent) => void start(intent),
     cancel,
-    verified,
-    failed,
   }
 }
+
+export type Download = ReturnType<typeof useDownload>

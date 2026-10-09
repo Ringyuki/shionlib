@@ -21,11 +21,12 @@ import { FileState } from './file-state'
 const wide = 'max-sm:hidden'
 
 type ResourceFilesProps = {
+  resourceId: number
   files: readonly ResourceFile[]
   manageable: boolean
 }
 
-export function ResourceFiles({ files, manageable }: ResourceFilesProps) {
+export function ResourceFiles({ resourceId, files, manageable }: ResourceFilesProps) {
   const t = useTranslations('resource.column')
   return (
     <Table variant="secondary" hover={false} className="[&_tbody_tr:last-child]:border-0">
@@ -39,7 +40,13 @@ export function ResourceFiles({ files, manageable }: ResourceFilesProps) {
       </TableHeader>
       <TableBody>
         {files.map(file => (
-          <FileRow key={file.id} file={file} manageable={manageable} removable={files.length > 1} />
+          <FileRow
+            key={file.id}
+            resourceId={resourceId}
+            file={file}
+            manageable={manageable}
+            removable={files.length > 1}
+          />
         ))}
       </TableBody>
     </Table>
@@ -47,12 +54,13 @@ export function ResourceFiles({ files, manageable }: ResourceFilesProps) {
 }
 
 type FileRowProps = {
+  resourceId: number
   file: ResourceFile
   manageable: boolean
   removable: boolean
 }
 
-function FileRow({ file, manageable, removable }: FileRowProps) {
+function FileRow({ resourceId, file, manageable, removable }: FileRowProps) {
   const t = useTranslations('resource')
   const bytes = useBytes()
   const sizeText = bytes(file.file_size)
@@ -89,7 +97,7 @@ function FileRow({ file, manageable, removable }: FileRowProps) {
       </TableCell>
       <TableCell align="end" className="pe-0">
         <Inline gap="xs" align="center" justify="end" wrap={false}>
-          {downloadable(file) && <DownloadButton file={{ id: file.id, name: file.file_name }} />}
+          {downloadable(file) && <DownloadButton resourceId={resourceId} file={file} />}
           {manageable && <FileMenu file={file} removable={removable} />}
         </Inline>
       </TableCell>

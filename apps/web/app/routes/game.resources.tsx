@@ -5,7 +5,7 @@ export default function GameResources({ matches }: Route.ComponentProps) {
   const [, , site, , game] = matches
   return (
     <ResourceList
-      gameId={game.loaderData.header.id}
+      game={game.loaderData.header}
       resources={game.loaderData.resources}
       viewer={site.loaderData.viewer}
     />

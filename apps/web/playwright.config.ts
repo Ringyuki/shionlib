@@ -40,7 +40,7 @@ export default defineConfig<IngressOptions>({
           env: {
             PORT: String(port),
             API_INTERNAL_URL: api,
-            TURNSTILE_SITE_KEY: '1x00000000000000000000AA',
+            CAP_ENDPOINT: process.env.CAP_ENDPOINT ?? '',
             HIKARINAGI_SITE_URL: 'https://www.hikarinagi.org',
           },
         }

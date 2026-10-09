@@ -1,32 +1,17 @@
-import {
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  Inline,
-  Popover,
-  SplitButton,
-  Stack,
-  Text,
-} from '@hina-ui/react'
-import { Copy, Download, Globe, Send } from 'lucide-react'
+import { Inline, Popover, Progress, SplitButton, Stack, Text } from '@hina-ui/react'
+import { Download } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
-import { TurnstileChallenge } from '~/shared/vendor/turnstile-challenge'
-import { turnstileAction, type DownloadMethod } from '../download'
+import type { DownloadSubject } from '../download'
 import { useDownload } from '../use-download'
+import { DownloadMenu } from './download-menu'
 
-type DownloadButtonProps = {
-  file: { id: number; name: string }
-  disabled?: boolean
-}
+type DownloadButtonProps = DownloadSubject & { disabled?: boolean }
 
-export function DownloadButton({ file, disabled = false }: DownloadButtonProps) {
+export function DownloadButton({ resourceId, file, disabled = false }: DownloadButtonProps) {
   const t = useTranslations('download')
-  const download = useDownload(file)
+  const download = useDownload({ resourceId, file })
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
-  const methodLabel = (method: DownloadMethod) => {
-    const label = t(method === 'browser' ? 'viaBrowser' : 'viaAria2')
-    return method === download.preferred ? t('asDefault', { label }) : label
-  }
   return (
     <>
       <Inline ref={setAnchor} className="shrink-0">
@@ -37,27 +22,14 @@ export function DownloadButton({ file, disabled = false }: DownloadButtonProps) 
           menuLabel={t('methods')}
           icon={<Download />}
           onClick={() => download.start(download.preferred)}
-          renderContent={() => (
-            <>
-              <DropdownMenuItem icon={<Globe />} onSelect={() => download.start('browser')}>
-                {methodLabel('browser')}
-              </DropdownMenuItem>
-              <DropdownMenuItem icon={<Send />} onSelect={() => download.start('aria2')}>
-                {methodLabel('aria2')}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem icon={<Copy />} onSelect={() => download.start('copy')}>
-                {t('copyLink')}
-              </DropdownMenuItem>
-            </>
-          )}
+          renderContent={() => <DownloadMenu download={download} />}
         >
           {t('download')}
         </SplitButton>
       </Inline>
       <Popover
         anchor={anchor}
-        open={download.verifying}
+        open={download.preparing}
         onOpenChange={open => {
           if (!open) {
             download.cancel()
@@ -75,11 +47,7 @@ export function DownloadButton({ file, disabled = false }: DownloadButtonProps) 
                 {t('verifyingHint')}
               </Text>
             </Stack>
-            <TurnstileChallenge
-              action={turnstileAction}
-              onToken={download.verified}
-              onFailure={download.failed}
-            />
+            <Progress value={download.progress} size="sm" aria-label={t('verifying')} />
           </Stack>
         }
       />

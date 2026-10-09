@@ -10,9 +10,6 @@
     "download": "ダウンロード",
     "site": "サイトの設定"
   },
-  "issue": {
-    "endpoint": "http://127.0.0.1:6800/jsonrpc のように完全なアドレスを入力してください"
-  },
   "site": {
     "language": "表示言語",
     "languageHint": "お送りするメールにも使用されます。",
@@ -42,37 +39,6 @@
     "games": "ゲーム一覧",
     "onlyWithResources": "リソースのあるゲームのみ",
     "onlyWithResourcesHint": "ライブラリと検索の既定値です。閲覧のたびに一時的に変更できます。"
-  },
-  "download": {
-    "local": "ダウンロード設定はこのブラウザにのみ保存され、アカウントには同期されません。",
-    "method": "既定のダウンロード方法",
-    "methods": {
-      "browser": {
-        "label": "ブラウザ",
-        "description": "ブラウザがファイルを直接ダウンロードします。"
-      },
-      "aria2": {
-        "label": "aria2 に送信",
-        "description": "このパソコンまたはローカルネットワーク上の aria2 にダウンロードを送ります。"
-      }
-    },
-    "aria2": "aria2",
-    "aria2Hint": "あらかじめ aria2 の RPC を有効にし、このサイトからのクロスオリジン要求を許可してください。",
-    "endpoint": "RPC アドレス",
-    "endpointHint": "aria2 の JSON-RPC アドレスです。",
-    "secret": "RPC シークレット",
-    "secretHint": "シークレットを設定していない場合は空欄にします。",
-    "directory": "保存先",
-    "directoryHint": "任意。空欄の場合は aria2 の既定のディレクトリを使用します。",
-    "test": "接続をテスト",
-    "save": "保存",
-    "saved": "aria2 の設定を保存しました",
-    "reachable": "接続できました。aria2 のバージョンは {version} です。",
-    "unreachable": {
-      "unreachable": "aria2 に接続できません。アドレスと、aria2 が起動していてクロスオリジン要求を許可しているかを確認してください。",
-      "unauthorized": "aria2 がシークレットを拒否しました。RPC シークレットを確認してください。",
-      "rejected": "aria2 がエラーを返しました：{message}"
-    }
   },
   "personal": {
     "avatar": "アイコン",
