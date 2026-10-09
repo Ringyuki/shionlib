@@ -12,6 +12,9 @@ func base() map[string]string {
 		"REFRESH_TOKEN_PEPPER":   "pepper",
 		"EMAIL_PROVIDER_API_KEY": "email-key",
 		"EMAIL_SENDER_ADDRESS":   "noreply@shionlib.com",
+		"CAP_URL":                "http://cap:3000",
+		"CAP_SITE_KEY":           "site-key",
+		"CAP_SECRET":             "sk-secret",
 	}
 }
 
@@ -37,6 +40,9 @@ func TestAuthSettingsAreValidated(t *testing.T) {
 		"no email key in production": {"EMAIL_PROVIDER_API_KEY": ""},
 		"no email sender address":    {"EMAIL_SENDER_ADDRESS": ""},
 		"postal without endpoint":    {"EMAIL_PROVIDER": "postal"},
+		"no cap url in production":   {"CAP_URL": ""},
+		"no cap site key":            {"CAP_SITE_KEY": ""},
+		"no cap secret":              {"CAP_SECRET": ""},
 		"refresh version with a dot": {"REFRESH_TOKEN_ALGORITHM_VERSION": "slrt.1"},
 	}
 	for name, overrides := range cases {

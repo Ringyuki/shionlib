@@ -9,6 +9,9 @@ x-api-database: &api-database
   CORS_ORIGIN: http://localhost:${FRONTEND_PORT:-3200}
   WEBAUTHN_ORIGINS: http://localhost:${FRONTEND_PORT:-3200}
   OIDC_ALLOWED_ORIGINS: http://localhost:${FRONTEND_PORT:-3200}
+  CAP_URL: http://cap:3000
+  CAP_SITE_KEY: ${CAP_SITE_KEY:-}
+  CAP_SECRET: ${CAP_SECRET:-}
 
 services:
   postgres:
@@ -34,6 +37,31 @@ services:
       - redis-data:/data
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+
+  cap:
+    image: tiago2/cap:3.1.14
+    restart: unless-stopped
+    environment:
+      ADMIN_KEY: ${CAP_ADMIN_KEY:-e2e-cap-admin-key-not-a-secret}
+      REDIS_URL: redis://redis:6379
+      REDIS_PREFIX: 'cap:'
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports:
+      - '${CAP_PORT:-5231}:3000'
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'bun',
+          '-e',
+          "fetch('http://127.0.0.1:3000/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
       interval: 5s
       timeout: 5s
       retries: 20

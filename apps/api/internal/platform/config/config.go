@@ -21,6 +21,7 @@ type Config struct {
 	Download   Download
 	Catalog    Catalog
 	Cloudflare Cloudflare
+	Cap        Cap
 	Bangumi    Bangumi
 	AI         AI
 	NextMoe    NextMoe
@@ -179,7 +180,12 @@ type Cloudflare struct {
 	AccountID       string `env:"CLOUDFLARE_ACCOUNT_ID"`
 	AnalyticsSecret string `env:"CLOUDFLARE_ANALYTICS_SECRET"`
 	AnalyticsZoneID string `env:"CLOUDFLARE_ANALYTICS_ZONE_ID"`
-	TurnstileSecret string `env:"CLOUDFLARE_TURNSTILE_SECRET"`
+}
+
+type Cap struct {
+	URL     string `env:"CAP_URL"`
+	SiteKey string `env:"CAP_SITE_KEY"`
+	Secret  string `env:"CAP_SECRET"`
 }
 
 type Bangumi struct {

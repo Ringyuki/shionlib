@@ -11,6 +11,7 @@ on:
       - 'docker/api-e2e/**'
       - 'docker/clamav/**'
       - 'docker/scripts/test-e2e-web.sh'
+      - 'docker/scripts/cap-site-key.sh'
       - '.github/workflows/web-e2e.yml'
   push:
     branches: ['main', 'major/shionlib-next']
@@ -22,6 +23,7 @@ on:
       - 'docker/api-e2e/**'
       - 'docker/clamav/**'
       - 'docker/scripts/test-e2e-web.sh'
+      - 'docker/scripts/cap-site-key.sh'
       - '.github/workflows/web-e2e.yml'
   workflow_dispatch:
 

@@ -28369,12 +28369,12 @@
             }
           },
           {
-            "description": "Cloudflare Turnstile response token",
+            "description": "Token the visitor got from Cap for solving its challenge; it is spent by this request",
             "explode": false,
             "in": "query",
             "name": "token",
             "schema": {
-              "description": "Cloudflare Turnstile response token",
+              "description": "Token the visitor got from Cap for solving its challenge; it is spent by this request",
               "type": "string"
             }
           }

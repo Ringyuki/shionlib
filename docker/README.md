@@ -59,3 +59,12 @@ pnpm e2e:go:stack:down
 ```
 
 `docker/scripts/test-e2e-go.sh` excludes the specs that contradict an intentional deviation listed in `apps/api/docs/migration.md` and prints each exclusion. It runs Playwright with two workers like CI (`E2E_WORKERS` overrides it); several UI specs share users and race each other at higher worker counts against either backend.
+
+## E2E of the web client
+
+`docker/scripts/test-e2e-web.sh` (`pnpm test:e2e:web`) uses the same compose file for `apps/web`: it starts `cap` ([Cap](https://github.com/tiagozip/cap) Standalone on port 5231, stored in the stack's Redis under `cap:`), creates a site key for the run with `docker/scripts/cap-site-key.sh` (without instrumentation and without the block on automated browsers, since Playwright is one), starts the API with that key's secret (`CAP_SITE_KEY`, `CAP_SECRET`; `CAP_URL` is `http://cap:3000`), and runs Playwright with `CAP_ENDPOINT` pointing at the key. The legacy frontend's runs leave `cap` off; without a key the API refuses every download link.
+
+```bash
+pnpm test:e2e:web                               # start, seed, run Playwright, tear down
+E2E_NO_BUILD=1 pnpm test:e2e:web e2e/download.spec.ts   # reuse the built API images, run one spec
+```

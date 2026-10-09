@@ -75,6 +75,7 @@ func (c *Config) Validate() error {
 	if c.App.Environment == "production" {
 		require(c.Email.APIKey != "" && c.Email.SenderAddress != "", "EMAIL_PROVIDER_API_KEY and EMAIL_SENDER_ADDRESS are required in production")
 		require(c.Email.Provider != "postal" || c.Email.Endpoint != "", "EMAIL_PROVIDER_ENDPOINT is required when EMAIL_PROVIDER=postal")
+		require(c.Cap.URL != "" && c.Cap.SiteKey != "" && c.Cap.Secret != "", "CAP_URL, CAP_SITE_KEY and CAP_SECRET are required in production: without them no download link is issued")
 	}
 	require(slices.Contains([]string{"hikarinagi"}, c.Catalog.Source), "CATALOG_SOURCE must be hikarinagi")
 	require(c.Catalog.ImportWorkers > 0, "CATALOG_IMPORT_WORKERS must be positive")

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/b2"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/capjs"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/clamd"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/dlticket"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/localfs"
@@ -19,7 +20,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/queue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/redis/uploadredis"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/sevenzip"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/turnstile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/httpclient"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/jobs"
@@ -90,7 +90,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 	links := download.NewLinkService(
 		downloadRepo,
 		shared.Transactor,
-		turnstile.New(cfg.Cloudflare.TurnstileSecret, "", vendorClient),
+		capjs.New(capjs.Options{URL: cfg.Cap.URL, SiteKey: cfg.Cap.SiteKey, Secret: cfg.Cap.Secret, Client: vendorClient}),
 		b2.New(b2.Options{KeyID: cfg.Storage.B2ApplicationKeyID, Key: cfg.Storage.B2ApplicationKey, Client: vendorClient, Cache: shared.Cache}),
 		dlticket.NewSealer(cfg.Download.TicketSecret),
 		shared.Settings,

@@ -36,7 +36,7 @@ type fileHistoryPathInput struct {
 
 type downloadLinkInput struct {
 	ID    int    `path:"id" minimum:"1"`
-	Token string `query:"token" doc:"Cloudflare Turnstile response token"`
+	Token string `query:"token" doc:"Token the visitor got from Cap for solving its challenge; it is spent by this request"`
 }
 
 type downloadFileUploadInput struct {

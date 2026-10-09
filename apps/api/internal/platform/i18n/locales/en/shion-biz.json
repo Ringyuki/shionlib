@@ -55,7 +55,7 @@
   "GAME_DOWNLOAD_RESOURCE_MALWARE_CASE_ALREADY_PROCESSED": "this malware review case has already been processed",
   "GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND": "download resource file not found",
   "GAME_DOWNLOAD_RESOURCE_FILE_TOKEN_REQUIRED": "token is required",
-  "GAME_DOWNLOAD_RESOURCE_FILE_INVALID_TOKEN": "validation failed, error codes: {errorCodes}",
+  "GAME_DOWNLOAD_RESOURCE_FILE_INVALID_TOKEN": "The verification was not accepted ({errorCodes}). Please try again.",
   "GAME_DOWNLOAD_RESOURCE_FILE_NOT_OWNER": "you don't have permission to modify this file",
   "FAVORITE_ALREADY_EXISTS": "favorite already exists",
   "FAVORITE_ITEM_ALREADY_EXISTS": "favorite already contains this game",

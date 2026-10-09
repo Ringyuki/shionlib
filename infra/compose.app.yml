@@ -11,6 +11,9 @@ x-api-environment: &api-environment
   B2_APPLICATION_KEY_ID: ${B2_APPLICATION_KEY_ID:-}
   BANGUMI_CLIENT_ID: ${BANGUMI_CLIENT_ID:-}
   BANGUMI_CLIENT_SECRET: ${BANGUMI_CLIENT_SECRET:-}
+  CAP_SECRET: ${CAP_SECRET:-}
+  CAP_SITE_KEY: ${CAP_SITE_KEY:-}
+  CAP_URL: ${CAP_URL:-}
   CATALOG_IMPORT_CREATOR_ID: ${CATALOG_IMPORT_CREATOR_ID:-}
   CATALOG_IMPORT_WORKERS: ${CATALOG_IMPORT_WORKERS:-}
   CATALOG_SOURCE: ${CATALOG_SOURCE:-}
@@ -20,7 +23,6 @@ x-api-environment: &api-environment
   CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID:-}
   CLOUDFLARE_ANALYTICS_SECRET: ${CLOUDFLARE_ANALYTICS_SECRET:-}
   CLOUDFLARE_ANALYTICS_ZONE_ID: ${CLOUDFLARE_ANALYTICS_ZONE_ID:-}
-  CLOUDFLARE_TURNSTILE_SECRET: ${CLOUDFLARE_TURNSTILE_SECRET:-}
   CORS_METHODS: ${CORS_METHODS:-}
   CORS_ORIGIN: ${CORS_ORIGIN:-}
   DATABASE_BACKUP_PG_DUMP_PATH: ${DATABASE_BACKUP_PG_DUMP_PATH:-}
@@ -186,10 +188,52 @@ services:
       retries: 5
       start_period: 300s
 
+  cap:
+    image: ${CAP_IMAGE:-tiago2/cap:3.1.14}
+    restart: unless-stopped
+    environment:
+      ADMIN_KEY: ${CAP_ADMIN_KEY:?CAP_ADMIN_KEY is required}
+      REDIS_URL: redis://cap-valkey:6379
+      CORS_ORIGIN: ${CAP_CORS_ORIGIN:-}
+      RATELIMIT_IP_HEADER: ${CAP_RATELIMIT_IP_HEADER:-}
+    expose:
+      - '3000'
+    depends_on:
+      cap-valkey:
+        condition: service_healthy
+    networks:
+      - shionlib
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'bun',
+          '-e',
+          "fetch('http://127.0.0.1:3000/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  cap-valkey:
+    image: ${CAP_VALKEY_IMAGE:-valkey/valkey:9-alpine}
+    restart: unless-stopped
+    command: valkey-server --save 60 1 --loglevel warning --maxmemory-policy noeviction
+    volumes:
+      - cap-data:/data
+    networks:
+      - shionlib
+    healthcheck:
+      test: ['CMD', 'valkey-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
 volumes:
   uploads:
   scan-logs:
   clamav-db:
+  cap-data:
 
 networks:
   shionlib:
