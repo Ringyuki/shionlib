@@ -1,5 +1,5 @@
 import { Image, Inline, Link, Skeleton, Stack, Text } from '@hina-ui/react'
-import { Suspense } from 'react'
+import { Suspense, useState } from 'react'
 import { Await } from 'react-router'
 import { useTranslations } from 'use-intl'
 import type { Score, Scores, ScoreSite, ScoreSource } from '../game-score'
@@ -11,12 +11,13 @@ type GameScoresProps = {
 }
 
 export function GameScores({ sites, scores }: GameScoresProps) {
+  const [firstLoaded] = useState(scores)
   if (sites.length === 0) {
     return null
   }
   return (
     <Suspense fallback={<ScoreList sites={sites} />}>
-      <Await resolve={scores} errorElement={<ScoreList sites={sites} scores={{}} />}>
+      <Await resolve={firstLoaded} errorElement={<ScoreList sites={sites} scores={{}} />}>
         {resolved => <ScoreList sites={sites} scores={resolved} />}
       </Await>
     </Suspense>

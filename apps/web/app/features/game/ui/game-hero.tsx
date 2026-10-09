@@ -71,7 +71,7 @@ export function GameHero({ game, images, intro, scores, resources, favorite }: G
               )}
               <GameAliases aliases={game.aliases ?? []} />
             </Stack>
-            <GameScores sites={scoreSites(game)} scores={scores} />
+            <GameScores key={game.id} sites={scoreSites(game)} scores={scores} />
           </Grid>
           <Inline gap="sm" align="center" className="gap-y-2">
             <GameChips game={game} />
