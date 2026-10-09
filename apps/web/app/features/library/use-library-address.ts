@@ -1,11 +1,12 @@
 import { useLocation, useNavigate, useNavigation } from 'react-router'
-import { keepScroll } from '~/features/shell'
 import { pageParam } from '~/shared/route/params'
+import { useInPageNavigate } from '~/shared/route/use-in-page-navigate'
 import { librarySearch, withoutConditions, type LibraryContent } from './library'
 import { addressFrom } from './library.schema'
 
 export function useLibraryAddress({ address, years }: Pick<LibraryContent, 'address' | 'years'>) {
   const navigate = useNavigate()
+  const stay = useInPageNavigate()
   const navigation = useNavigation()
   const location = useLocation()
   const turning =
@@ -17,12 +18,8 @@ export function useLibraryAddress({ address, years }: Pick<LibraryContent, 'addr
     turning,
     shown,
     narrow: (changes: Partial<typeof address>) =>
-      void navigate(
-        { search: librarySearch({ ...shown, ...changes, page: 1 }) },
-        { state: keepScroll },
-      ),
-    reset: () =>
-      void navigate({ search: librarySearch(withoutConditions(shown)) }, { state: keepScroll }),
+      stay({ search: librarySearch({ ...shown, ...changes, page: 1 }) }),
+    reset: () => stay({ search: librarySearch(withoutConditions(shown)) }),
     setPage: (page: number) => void navigate({ search: librarySearch({ ...shown, page }) }),
   }
 }

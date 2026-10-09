@@ -27,7 +27,6 @@ export function RenameFileDialog({ file, open, onOpenChange }: RenameFileDialogP
       title={t('renameFileTitle')}
       open={open}
       onOpenChange={onOpenChange}
-      locked={rename.pending}
       renderContent={() => (
         <Form
           ref={form}
@@ -46,12 +45,12 @@ export function RenameFileDialog({ file, open, onOpenChange }: RenameFileDialogP
           </FormField>
         </Form>
       )}
-      renderFooter={({ close }) => (
+      renderFooter={({ close, submitting }) => (
         <>
-          <Button variant="ghost" tone="neutral" disabled={rename.pending} onClick={close}>
+          <Button variant="ghost" tone="neutral" disabled={submitting} onClick={close}>
             {t('cancel')}
           </Button>
-          <Button loading={rename.pending} onClick={() => void form.current?.submit()}>
+          <Button loading={submitting} onClick={() => void form.current?.submit()}>
             {t('save')}
           </Button>
         </>

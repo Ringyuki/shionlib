@@ -30,7 +30,6 @@ export function EditListDialog({ list, open, onOpenChange }: EditListDialogProps
       title={t('editList')}
       open={open}
       onOpenChange={onOpenChange}
-      locked={edit.pending}
       renderContent={() => (
         <Form
           ref={form}
@@ -47,12 +46,12 @@ export function EditListDialog({ list, open, onOpenChange }: EditListDialogProps
           <ListFields values={values} onValuesChange={setValues} named={!list.default} />
         </Form>
       )}
-      renderFooter={({ close }) => (
+      renderFooter={({ close, submitting }) => (
         <>
-          <Button variant="ghost" tone="neutral" disabled={edit.pending} onClick={close}>
+          <Button variant="ghost" tone="neutral" disabled={submitting} onClick={close}>
             {t('cancel')}
           </Button>
-          <Button loading={edit.pending} onClick={() => void form.current?.submit()}>
+          <Button loading={submitting} onClick={() => void form.current?.submit()}>
             {t('save')}
           </Button>
         </>

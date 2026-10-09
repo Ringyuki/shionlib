@@ -1,5 +1,14 @@
-import { Center, FileUpload, Image, Inline, Panel, Stack, toast } from '@hina-ui/react'
-import { ImageUp, UserRound } from 'lucide-react'
+import {
+  Avatar,
+  FileUpload,
+  Image,
+  Inline,
+  Panel,
+  Stack,
+  toast,
+  useImageResolver,
+} from '@hina-ui/react'
+import { ImageUp } from 'lucide-react'
 import { useTranslations } from 'use-intl'
 import type { Viewer } from '~/features/viewer'
 import { usePictureUpload } from '../use-picture-upload'
@@ -8,6 +17,7 @@ export function PicturePanels({ viewer }: { viewer: Viewer }) {
   const t = useTranslations('settings.personal')
   const avatar = usePictureUpload('avatar')
   const cover = usePictureUpload('cover')
+  const resolveImage = useImageResolver()
   const send = async (upload: (file: File) => ReturnType<typeof avatar.upload>, file: File) => {
     const outcome = await upload(file)
     if (outcome.ok) {
@@ -18,17 +28,11 @@ export function PicturePanels({ viewer }: { viewer: Viewer }) {
     <>
       <Panel title={t('avatar')} description={t('avatarHint')}>
         <Inline gap="lg" align="center" wrap={false}>
-          <Image
-            src={viewer.avatar ?? undefined}
+          <Avatar
+            src={viewer.avatar === null ? undefined : resolveImage(viewer.avatar, 'image')}
+            name={viewer.name}
             alt=""
-            ratio={1}
-            fit="cover"
-            empty={
-              <Center className="size-full text-muted">
-                <UserRound aria-hidden className="size-7" />
-              </Center>
-            }
-            className="size-16 shrink-0 rounded-full bg-inset"
+            className="size-16 text-xl"
           />
           <FileUpload
             aria-label={t('changeAvatar')}

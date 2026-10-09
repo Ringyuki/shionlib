@@ -26,7 +26,6 @@ export function PotatoDialog({ open, onOpenChange }: PotatoDialogProps) {
       description={t('bindDescription')}
       open={open}
       onOpenChange={onOpenChange}
-      locked={binding.pending}
       renderContent={() => (
         <Form
           ref={form}
@@ -57,12 +56,12 @@ export function PotatoDialog({ open, onOpenChange }: PotatoDialogProps) {
           </FormField>
         </Form>
       )}
-      renderFooter={({ close }) => (
+      renderFooter={({ close, submitting }) => (
         <>
-          <Button variant="ghost" tone="neutral" disabled={binding.pending} onClick={close}>
+          <Button variant="ghost" tone="neutral" disabled={submitting} onClick={close}>
             {t('cancel')}
           </Button>
-          <Button loading={binding.pending} onClick={() => void form.current?.submit()}>
+          <Button loading={submitting} onClick={() => void form.current?.submit()}>
             {t('bind')}
           </Button>
         </>

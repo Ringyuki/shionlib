@@ -1,8 +1,8 @@
 import { Inline, NavLink, Select, Stack, Text } from '@hina-ui/react'
 import { Lock, Plus } from 'lucide-react'
-import { useNavigate } from 'react-router'
 import { useFormatter, useLocale, useTranslations } from 'use-intl'
-import { InPageLink, keepScroll } from '~/features/shell'
+import { InPageLink } from '~/shared/route/in-page-link'
+import { useInPageNavigate } from '~/shared/route/use-in-page-navigate'
 import { Button } from '~/shared/ui/button'
 import { favoritesPath, listLabel, type FavoriteList } from '../favorite'
 
@@ -17,7 +17,7 @@ export function ListNav({ owner, lists, selected, onCreate }: ListNavProps) {
   const t = useTranslations('favorite')
   const locale = useLocale()
   const format = useFormatter()
-  const navigate = useNavigate()
+  const stay = useInPageNavigate()
   const label = (list: FavoriteList) => listLabel(list, t('defaultList'))
   return (
     <Stack gap="sm">
@@ -27,7 +27,7 @@ export function ListNav({ owner, lists, selected, onCreate }: ListNavProps) {
         onValueChange={value => {
           const chosen = lists.find(list => list.id === value)
           if (chosen !== undefined) {
-            void navigate(favoritesPath(locale, owner, chosen.id), { state: keepScroll })
+            stay(favoritesPath(locale, owner, chosen.id))
           }
         }}
         options={lists.map(list => ({ value: list.id, label: label(list) }))}

@@ -1,5 +1,15 @@
-import { Center, cn, Heading, Image, Inline, Stack, Tag, Text } from '@hina-ui/react'
-import { Heart, ShieldCheck, UserRound } from 'lucide-react'
+import {
+  Avatar,
+  cn,
+  Heading,
+  Image,
+  Inline,
+  Stack,
+  Tag,
+  Text,
+  useImageResolver,
+} from '@hina-ui/react'
+import { Heart, ShieldCheck } from 'lucide-react'
 import { Link } from 'react-router'
 import { useFormatter, useLocale, useTranslations } from 'use-intl'
 import { sitePaths } from '~/features/shell'
@@ -15,6 +25,7 @@ export function ProfileHeader({ profile, own }: ProfileHeaderProps) {
   const t = useTranslations('profile')
   const locale = useLocale()
   const format = useFormatter()
+  const resolveImage = useImageResolver()
   const staged = profile.cover !== null
   const bio = (profile.bio ?? '').trim()
   return (
@@ -34,19 +45,13 @@ export function ProfileHeader({ profile, own }: ProfileHeaderProps) {
         wrap={false}
         className={cn('max-sm:gap-4', staged && 'px-2 sm:px-6')}
       >
-        <Image
-          src={profile.avatar ?? undefined}
+        <Avatar
+          src={profile.avatar === null ? undefined : resolveImage(profile.avatar, 'image')}
+          name={profile.name}
           alt=""
-          ratio={1}
-          fit="cover"
           eager
-          empty={
-            <Center className="size-full text-muted">
-              <UserRound aria-hidden className="size-9" />
-            </Center>
-          }
           className={cn(
-            'size-20 shrink-0 rounded-full bg-inset sm:size-24',
+            'size-20 text-2xl sm:size-24',
             staged && '-mt-8 ring-4 ring-canvas sm:-mt-10',
           )}
         />

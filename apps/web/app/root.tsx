@@ -2,7 +2,6 @@ import {
   Center,
   Code,
   CodeBlock,
-  firstPaintRestoreScript,
   Heading,
   ImageResolverProvider,
   Stack,
@@ -71,7 +70,6 @@ export function Layout({ children }: { children: ReactNode }) {
           {children}
           <Toaster />
         </TooltipProvider>
-        <script dangerouslySetInnerHTML={{ __html: firstPaintRestoreScript() }} />
         <ScrollRestoration />
         <Scripts />
       </body>

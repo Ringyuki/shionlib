@@ -1,4 +1,5 @@
 import { cn, Tag } from '@hina-ui/react'
+import type { ComponentProps } from 'react'
 import { useMessages } from 'use-intl'
 import { labelOf } from '~/shared/i18n/labels'
 import type { Platform } from '../game'
@@ -21,7 +22,7 @@ const colors: Record<Platform, string> = {
 
 type PlatformTagProps = {
   platform: string
-  size?: 'sm' | 'md'
+  size?: ComponentProps<typeof Tag>['size']
   className?: string
 }
 

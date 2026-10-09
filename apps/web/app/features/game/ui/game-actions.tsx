@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 import type { ResourceSummary } from '~/features/resource'
-import { keepScroll, sitePaths } from '~/features/shell'
+import { sitePaths } from '~/features/shell'
 import { Button } from '~/shared/ui/button'
 import { gamePath, type GameHeader } from '../game'
 
@@ -28,8 +28,6 @@ export function GameActions({ game, resources, favorite }: GameActionsProps) {
               pathname: gamePath(locale, game.id),
               hash: resources.first === undefined ? '' : `resource-${resources.first}`,
             }}
-            state={keepScroll}
-            preventScrollReset
           >
             <Download aria-hidden />
             {t('download', { count: resources.count })}

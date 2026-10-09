@@ -30,7 +30,6 @@ export function NewListDialog({ gameId, open, onOpenChange, onCreated }: NewList
       description={collecting ? t('newListDescription') : undefined}
       open={open}
       onOpenChange={onOpenChange}
-      locked={creation.pending}
       renderContent={() => (
         <Form
           ref={form}
@@ -50,12 +49,12 @@ export function NewListDialog({ gameId, open, onOpenChange, onCreated }: NewList
           <ListFields values={values} onValuesChange={setValues} named />
         </Form>
       )}
-      renderFooter={({ close }) => (
+      renderFooter={({ close, submitting }) => (
         <>
-          <Button variant="ghost" tone="neutral" disabled={creation.pending} onClick={close}>
+          <Button variant="ghost" tone="neutral" disabled={submitting} onClick={close}>
             {t('cancel')}
           </Button>
-          <Button loading={creation.pending} onClick={() => void form.current?.submit()}>
+          <Button loading={submitting} onClick={() => void form.current?.submit()}>
             {t(collecting ? 'create' : 'createEmpty')}
           </Button>
         </>

@@ -18,8 +18,6 @@ import { resourceAnchor, rightsOver, type Resource, type ResourceViewer } from '
 import { ResourceMenu } from './resource-menu'
 import { ResourceFiles } from './resource-files'
 
-const tagClass = 'h-7 px-2.5'
-
 type ResourceCardProps = {
   resource: Resource
   viewer: ResourceViewer | null
@@ -38,15 +36,15 @@ export function ResourceCard({ resource, viewer }: ResourceCardProps) {
         <Grid className="grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
           <Inline gap="xs">
             {(resource.platform ?? []).map(platform => (
-              <PlatformTag key={platform} platform={platform} size="md" className={tagClass} />
+              <PlatformTag key={platform} platform={platform} size="lg" />
             ))}
             {(resource.language ?? []).map(language => (
-              <Tag key={language} size="md" variant="outline" className={tagClass}>
+              <Tag key={language} size="lg" variant="outline">
                 {labelOf(labels.game.language, language)}
               </Tag>
             ))}
             {resource.simulator !== null && (
-              <Tag size="md" variant="outline" className={tagClass}>
+              <Tag size="lg" variant="outline">
                 {labelOf(labels.resource.simulatorName, resource.simulator)}
               </Tag>
             )}

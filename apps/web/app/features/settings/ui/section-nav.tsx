@@ -1,8 +1,9 @@
 import { NavLink, Select, Stack } from '@hina-ui/react'
 import { Download, Link2, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react'
-import { useLocation, useNavigate } from 'react-router'
+import { useLocation } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
-import { InPageLink, keepScroll } from '~/features/shell'
+import { InPageLink } from '~/shared/route/in-page-link'
+import { useInPageNavigate } from '~/shared/route/use-in-page-navigate'
 import { sectionAt, sectionPath, sections } from '../settings'
 import { sectionFrom } from '../settings.schema'
 
@@ -17,7 +18,7 @@ const icons = {
 export function SectionNav() {
   const t = useTranslations('settings')
   const locale = useLocale()
-  const navigate = useNavigate()
+  const stay = useInPageNavigate()
   const { pathname } = useLocation()
   const current = sectionAt(pathname, locale)
   return (
@@ -28,7 +29,7 @@ export function SectionNav() {
         onValueChange={value => {
           const section = sectionFrom(value)
           if (section !== undefined) {
-            void navigate(sectionPath(locale, section), { state: keepScroll })
+            stay(sectionPath(locale, section))
           }
         }}
         options={sections.map(section => ({ value: section, label: t(`section.${section}`) }))}

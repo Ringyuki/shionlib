@@ -26,7 +26,6 @@ export function NoteDialog({ item, open, onOpenChange }: NoteDialogProps) {
       title={t('editNote')}
       open={open}
       onOpenChange={onOpenChange}
-      locked={change.pending}
       renderContent={() => (
         <Form
           ref={form}
@@ -57,12 +56,12 @@ export function NoteDialog({ item, open, onOpenChange }: NoteDialogProps) {
           </FormField>
         </Form>
       )}
-      renderFooter={({ close }) => (
+      renderFooter={({ close, submitting }) => (
         <>
-          <Button variant="ghost" tone="neutral" disabled={change.pending} onClick={close}>
+          <Button variant="ghost" tone="neutral" disabled={submitting} onClick={close}>
             {t('cancel')}
           </Button>
-          <Button loading={change.pending} onClick={() => void form.current?.submit()}>
+          <Button loading={submitting} onClick={() => void form.current?.submit()}>
             {t('save')}
           </Button>
         </>

@@ -2,11 +2,13 @@ import { toast } from '@hina-ui/react'
 import { useEffect, useEffectEvent } from 'react'
 import { useSearchParams } from 'react-router'
 import { useTranslations } from 'use-intl'
+import { useInPageNavigate } from '~/shared/route/use-in-page-navigate'
 import { knownLinkError, linkErrorParam, linkedParam, type LinkResult } from './account'
 
 export function useLinkResult(result: LinkResult | undefined) {
   const t = useTranslations('account.identity')
-  const [, setParams] = useSearchParams()
+  const [params] = useSearchParams()
+  const stay = useInPageNavigate()
   const report = useEffectEvent((settled: LinkResult) => {
     if (settled.linked) {
       toast.success(t('linked'), { id: linkedParam })
@@ -17,15 +19,10 @@ export function useLinkResult(result: LinkResult | undefined) {
         description: t('linkReason', { reason: settled.reason ?? '' }),
       })
     }
-    setParams(
-      current => {
-        const next = new URLSearchParams(current)
-        next.delete(linkedParam)
-        next.delete(linkErrorParam)
-        return next
-      },
-      { replace: true, preventScrollReset: true },
-    )
+    const next = new URLSearchParams(params)
+    next.delete(linkedParam)
+    next.delete(linkErrorParam)
+    stay(`?${next}`, { replace: true })
   })
   useEffect(() => {
     if (result !== undefined) {

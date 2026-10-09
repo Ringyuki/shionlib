@@ -45,7 +45,6 @@ export function LibraryFilters({ address, years, filtered, onChange }: LibraryFi
       </FormField>
       <FormField label={t('years')}>
         <MultiSelect
-          aria-label={t('years')}
           value={address.years}
           onValueChange={chosen => onChange({ years: years.filter(year => chosen.includes(year)) })}
           options={years.map(year => ({ value: year, label: String(year) }))}
@@ -56,7 +55,6 @@ export function LibraryFilters({ address, years, filtered, onChange }: LibraryFi
       </FormField>
       <FormField label={t('months')}>
         <MultiSelect
-          aria-label={t('months')}
           value={address.months}
           onValueChange={chosen =>
             onChange({ months: months.filter(month => chosen.includes(month)) })

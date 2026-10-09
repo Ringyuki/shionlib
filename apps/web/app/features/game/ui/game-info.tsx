@@ -15,9 +15,6 @@ import { GameRelations } from './game-relations'
 import { GameScreenshots } from './game-screenshots'
 import { GameTags } from './game-tags'
 
-const factListClass =
-  'grid grid-cols-[auto_1fr] items-baseline gap-x-6 gap-y-2 [&>dd]:m-0! [&>dt]:m-0!'
-
 export function GameInfo({ details, entry }: { details: GameDetails; entry: number | null }) {
   const tags = details.tags ?? []
   const staff = groupStaff(details.staffs ?? [])
@@ -36,7 +33,7 @@ export function GameInfo({ details, entry }: { details: GameDetails; entry: numb
       )}
       {staff.length > 0 && (
         <Section title={t('staff')}>
-          <DescriptionList className={factListClass}>
+          <DescriptionList orientation="horizontal">
             {staff.map(group => (
               <Facts key={group.role} term={group.role} details={format.list(group.names)} />
             ))}
@@ -46,7 +43,7 @@ export function GameInfo({ details, entry }: { details: GameDetails; entry: numb
       {relations.length > 0 && <GameRelations relations={relations} />}
       {extra.length > 0 && (
         <Section title={t('extra')}>
-          <DescriptionList className={factListClass}>
+          <DescriptionList orientation="horizontal">
             {extra.map(entry => (
               <Facts key={entry.key} term={entry.key} details={entry.value} />
             ))}

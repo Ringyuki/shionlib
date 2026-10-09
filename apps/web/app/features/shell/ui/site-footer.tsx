@@ -7,6 +7,9 @@ import { useLocale, useTranslations } from 'use-intl'
 import { BrandLogo, Wordmark } from '~/shared/ui/brand'
 import { contactEmail, repositoryUrl, sitePaths, telegramUrl } from '../shell'
 
+export const clearOfFooter =
+  '[--clear-of-footer:8.75rem] sm:[--clear-of-footer:5.875rem] md:[--clear-of-footer:3.5rem] lg:[--clear-of-footer:4rem]'
+
 export function SiteFooter() {
   const t = useTranslations('shell.footer')
   const paths = sitePaths(useLocale())

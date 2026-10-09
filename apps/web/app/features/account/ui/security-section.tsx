@@ -34,11 +34,11 @@ export function SecuritySection({ viewer, security }: SecuritySectionProps) {
       <Panel title={t('email.panel')} actions={change('email')}>
         <Text className="break-all">{viewer.email}</Text>
       </Panel>
-      <Panel title={t('password.panel')} actions={change('password')}>
-        <Text size="sm" tone="muted">
-          {t('password.panelHint')}
-        </Text>
-      </Panel>
+      <Panel
+        title={t('password.panel')}
+        description={t('password.panelHint')}
+        actions={change('password')}
+      />
       <Panel
         title={t('passkey.title')}
         description={t('passkey.hint')}
@@ -58,6 +58,7 @@ export function SecuritySection({ viewer, security }: SecuritySectionProps) {
       </Panel>
       <Panel
         title={t('signOut.title')}
+        description={t('signOut.hint')}
         actions={
           <Button
             size="sm"
@@ -70,11 +71,7 @@ export function SecuritySection({ viewer, security }: SecuritySectionProps) {
             {t('signOut.action')}
           </Button>
         }
-      >
-        <Text size="sm" tone="muted">
-          {t('signOut.hint')}
-        </Text>
-      </Panel>
+      />
       <EmailDialog
         current={viewer.email}
         open={opened === 'email'}

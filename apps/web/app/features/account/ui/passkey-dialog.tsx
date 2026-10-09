@@ -29,7 +29,6 @@ export function PasskeyDialog({ open, onOpenChange }: PasskeyDialogProps) {
         registration.forget()
         onOpenChange(next)
       }}
-      locked={registration.pending}
       renderContent={() => (
         <Form
           ref={form}
@@ -59,12 +58,12 @@ export function PasskeyDialog({ open, onOpenChange }: PasskeyDialogProps) {
           </Alert>
         </Form>
       )}
-      renderFooter={({ close }) => (
+      renderFooter={({ close, submitting }) => (
         <>
-          <Button variant="ghost" tone="neutral" disabled={registration.pending} onClick={close}>
+          <Button variant="ghost" tone="neutral" disabled={submitting} onClick={close}>
             {t('cancel')}
           </Button>
-          <Button loading={registration.pending} onClick={() => void form.current?.submit()}>
+          <Button loading={submitting} onClick={() => void form.current?.submit()}>
             {t('continue')}
           </Button>
         </>

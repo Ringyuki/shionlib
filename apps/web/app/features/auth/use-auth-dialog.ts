@@ -1,12 +1,14 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
+import { useInPageNavigate } from '~/shared/route/use-in-page-navigate'
 import { authViewParam, type AuthView } from './auth'
 import { isAuthView } from './auth.schema'
 
 const oidcErrorParam = 'oidc_error'
 
 export function useAuthDialog(signedIn: boolean) {
-  const [params, setParams] = useSearchParams()
+  const [params] = useSearchParams()
+  const stay = useInPageNavigate()
   const [requested, setRequested] = useState<AuthView>()
   const [shown, setShown] = useState<AuthView>('sign-in')
   const [seenSignedIn, setSeenSignedIn] = useState(signedIn)
@@ -39,11 +41,14 @@ export function useAuthDialog(signedIn: boolean) {
     next?.()
   }, [signedIn])
 
+  const unlink = () => stay(`?${withoutDialog(params)}`, { replace: true })
+  const unlinkSignedIn = useEffectEvent(unlink)
+
   useEffect(() => {
     if (signedIn && linked) {
-      setParams(withoutDialog, { replace: true, preventScrollReset: true })
+      unlinkSignedIn()
     }
-  }, [signedIn, linked, setParams])
+  }, [signedIn, linked])
 
   const show = (next: AuthView, then?: () => void) => {
     resume.current = then
@@ -54,7 +59,7 @@ export function useAuthDialog(signedIn: boolean) {
     resume.current = undefined
     setRequested(undefined)
     if (linked) {
-      setParams(withoutDialog, { replace: true, preventScrollReset: true })
+      unlink()
     }
   }
 

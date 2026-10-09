@@ -30,7 +30,6 @@ export function ReportDialog({ resourceId, open, onOpenChange }: ReportDialogPro
       title={t('reportTitle')}
       open={open}
       onOpenChange={onOpenChange}
-      locked={report.pending}
       renderContent={() => (
         <Form
           ref={form}
@@ -72,16 +71,12 @@ export function ReportDialog({ resourceId, open, onOpenChange }: ReportDialogPro
           </FormField>
         </Form>
       )}
-      renderFooter={({ close }) => (
+      renderFooter={({ close, submitting }) => (
         <>
-          <Button variant="ghost" tone="neutral" disabled={report.pending} onClick={close}>
+          <Button variant="ghost" tone="neutral" disabled={submitting} onClick={close}>
             {t('cancel')}
           </Button>
-          <Button
-            tone="danger"
-            loading={report.pending}
-            onClick={() => void form.current?.submit()}
-          >
+          <Button tone="danger" loading={submitting} onClick={() => void form.current?.submit()}>
             {t('reportSubmit')}
           </Button>
         </>

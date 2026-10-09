@@ -22,6 +22,7 @@ export async function signIn(page: Page, name: string) {
   await dialog.locator('input[type="password"]').fill(password)
   await dialog.getByRole('button', { name: '登录', exact: true }).click()
   await dialog.waitFor({ state: 'hidden' })
+  await page.waitForURL(url => !url.searchParams.has('auth'))
 }
 
 export async function openSignIn(page: Page, path = '/zh') {

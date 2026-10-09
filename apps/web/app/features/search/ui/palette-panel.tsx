@@ -72,8 +72,7 @@ export function PalettePanel({ source, onClose }: { source: PaletteSource; onClo
               <Button
                 variant="link"
                 tone="danger"
-                size="sm"
-                className="text-xs"
+                size="xs"
                 icon={<Trash2 />}
                 aria-label={t('clearRecent')}
                 onClick={() => {

@@ -1,7 +1,7 @@
 import { DataList } from '@hina-ui/react'
 import type { ReactNode } from 'react'
-import { useLocation, useNavigate } from 'react-router'
-import { keepScroll } from '~/features/shell'
+import { useLocation } from 'react-router'
+import { useInPageNavigate } from '~/shared/route/use-in-page-navigate'
 import { usePageTurn } from '~/shared/route/use-page-turn'
 import { worksPageSize, type GameSummary, type Works } from '../game'
 import { searchInOrder, workOrders } from '../game-order'
@@ -18,7 +18,7 @@ type GameGridProps = {
 
 export function GameGrid({ label, works, empty, sortable, renderNote }: GameGridProps) {
   const pages = usePageTurn()
-  const navigate = useNavigate()
+  const stay = useInPageNavigate()
   const location = useLocation()
   return (
     <DataList
@@ -41,12 +41,7 @@ export function GameGrid({ label, works, empty, sortable, renderNote }: GameGrid
               <OrderSelect
                 order={works.order}
                 options={workOrders}
-                onChange={chosen =>
-                  void navigate(
-                    { search: searchInOrder(location.search, chosen) },
-                    { state: keepScroll },
-                  )
-                }
+                onChange={chosen => stay({ search: searchInOrder(location.search, chosen) })}
                 className="w-44"
               />
             )

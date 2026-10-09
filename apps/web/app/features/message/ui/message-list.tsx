@@ -1,7 +1,7 @@
 import { cn, DataList, Empty, Flex, Indicator, Inline, Stack, Text } from '@hina-ui/react'
-import { Link, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
 import { useFormatter, useLocale, useTranslations } from 'use-intl'
-import { keepScroll } from '~/features/shell'
+import { InPageLink } from '~/shared/route/in-page-link'
 import { usePageTurn } from '~/shared/route/use-page-turn'
 import { inboxPath, pageSize, type Inbox } from '../message'
 
@@ -36,10 +36,9 @@ export function MessageList({ inbox, className }: MessageListProps) {
       renderEmpty={() => <Empty title={t(`empty.${category}`)} size="sm" />}
     >
       {({ item }) => (
-        <Link
-          to={inboxPath(locale, { category, page, opened: item.id })}
-          state={keepScroll}
-          preventScrollReset
+        <InPageLink
+          href={inboxPath(locale, { category, page, opened: item.id })}
+          prefetch="none"
           aria-current={inbox.opened?.id === item.id ? 'page' : undefined}
           className="hn-interactive hn-state-layer hn-press-none aria-[current=page]:bg-accent-soft relative isolate block rounded-lg px-3 py-2.5"
         >
@@ -70,7 +69,7 @@ export function MessageList({ inbox, className }: MessageListProps) {
               </Text>
             </Stack>
           </Inline>
-        </Link>
+        </InPageLink>
       )}
     </DataList>
   )

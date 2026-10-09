@@ -1,9 +1,9 @@
 import { DataList, Empty, Select, Stack, Text } from '@hina-ui/react'
 import { MessageSquare } from 'lucide-react'
 import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router'
+import { useLocation } from 'react-router'
 import { useTranslations } from 'use-intl'
-import { keepScroll } from '~/features/shell'
+import { useInPageNavigate } from '~/shared/route/use-in-page-navigate'
 import { usePageTurn } from '~/shared/route/use-page-turn'
 import { Button } from '~/shared/ui/button'
 import { pageSize, searchInOrder, threadOrders, type CommentItem, type Comments } from '../comment'
@@ -22,7 +22,7 @@ export function CommentsView({ comments, viewerId }: CommentsViewProps) {
   const pages = usePageTurn()
   const [removed, setRemoved] = useState<CommentItem | undefined>(undefined)
   const [removing, setRemoving] = useState(false)
-  const navigate = useNavigate()
+  const stay = useInPageNavigate()
   const location = useLocation()
   const { gameId, threads, total, count, page, order } = comments
   return (
@@ -61,10 +61,7 @@ export function CommentsView({ comments, viewerId }: CommentsViewProps) {
               aria-label={t('orderLabel')}
               value={order}
               onValueChange={value =>
-                void navigate(
-                  { search: searchInOrder(location.search, threadOrderFrom(value)) },
-                  { state: keepScroll },
-                )
+                stay({ search: searchInOrder(location.search, threadOrderFrom(value)) })
               }
               options={threadOrders.map(value => ({ value, label: t(`order.${value}`) }))}
               className="w-36"

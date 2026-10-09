@@ -66,7 +66,6 @@ export function EmailDialog({ current, open, onOpenChange }: EmailDialogProps) {
       description={t('description')}
       open={open}
       onOpenChange={onOpenChange}
-      locked={change.pending}
       renderContent={() => (
         <Form ref={form} values={values} rules={emailForm(kit)} onSubmit={submit}>
           <EmailFields
@@ -81,12 +80,12 @@ export function EmailDialog({ current, open, onOpenChange }: EmailDialogProps) {
           />
         </Form>
       )}
-      renderFooter={({ close }) => (
+      renderFooter={({ close, submitting }) => (
         <>
-          <Button variant="ghost" tone="neutral" disabled={change.pending} onClick={close}>
+          <Button variant="ghost" tone="neutral" disabled={submitting} onClick={close}>
             {t('cancel')}
           </Button>
-          <Button loading={change.pending} onClick={() => void form.current?.submit()}>
+          <Button loading={submitting} onClick={() => void form.current?.submit()}>
             {t('submit')}
           </Button>
         </>

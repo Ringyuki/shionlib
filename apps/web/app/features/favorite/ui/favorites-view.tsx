@@ -1,9 +1,8 @@
 import { Empty, Grid } from '@hina-ui/react'
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
-import { keepScroll } from '~/features/shell'
+import { useInPageNavigate } from '~/shared/route/use-in-page-navigate'
 import { Button } from '~/shared/ui/button'
 import { favoritesPath, type FavoriteItem, type Favorites } from '../favorite'
 import { EditListDialog } from './edit-list-dialog'
@@ -24,14 +23,13 @@ type FavoritesViewProps = {
 export function FavoritesView({ favorites, own }: FavoritesViewProps) {
   const t = useTranslations('favorite')
   const locale = useLocale()
-  const navigate = useNavigate()
+  const stay = useInPageNavigate()
   const [opened, setOpened] = useState<Opened>()
   const [noted, setNoted] = useState<FavoriteItem>()
   const { owner, lists, selected } = favorites
   const toggle = (dialog: Exclude<Opened, undefined>) => (open: boolean) =>
     setOpened(open ? dialog : undefined)
-  const go = (listId?: number) =>
-    void navigate(favoritesPath(locale, owner, listId), { state: keepScroll })
+  const go = (listId?: number) => stay(favoritesPath(locale, owner, listId))
   const creation = own && (
     <NewListDialog open={opened === 'create'} onOpenChange={toggle('create')} onCreated={go} />
   )

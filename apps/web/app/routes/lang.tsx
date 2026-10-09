@@ -1,4 +1,4 @@
-import { UiLocaleProvider, enUS, zhCN } from '@hina-ui/react'
+import { UiLocaleProvider, enUS, jaJP, zhCN } from '@hina-ui/react'
 import type { ReactNode } from 'react'
 import { data, Outlet, useRouteLoaderData, type ShouldRevalidateFunctionArgs } from 'react-router'
 import { IntlProvider } from 'use-intl'
@@ -10,7 +10,7 @@ import { KeptData } from '~/shared/route/kept-data'
 import { ErrorPage } from '~/shared/ui/error-page'
 import type { Route } from './+types/lang'
 
-const uiMessages = { zh: zhCN, en: enUS, ja: enUS } satisfies Record<Locale, typeof zhCN>
+const uiMessages = { zh: zhCN, en: enUS, ja: jaJP } satisfies Record<Locale, typeof zhCN>
 
 export async function loader({ params }: Route.LoaderArgs) {
   if (!isLocale(params.lang)) {

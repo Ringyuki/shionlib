@@ -17,7 +17,7 @@
     "e2e": "playwright test"
   },
   "dependencies": {
-    "@hina-ui/react": "^1.7.6",
+    "@hina-ui/react": "^1.7.10",
     "@react-router/node": "^8.4.0",
     "@react-router/serve": "^8.4.0",
     "hash-wasm": "^4.12.0",

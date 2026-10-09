@@ -26,7 +26,6 @@ export function PasswordDialog({ open, onOpenChange }: PasswordDialogProps) {
       title={t('title')}
       open={open}
       onOpenChange={onOpenChange}
-      locked={change.pending}
       renderContent={() => (
         <Form
           ref={form}
@@ -67,12 +66,12 @@ export function PasswordDialog({ open, onOpenChange }: PasswordDialogProps) {
           </FormField>
         </Form>
       )}
-      renderFooter={({ close }) => (
+      renderFooter={({ close, submitting }) => (
         <>
-          <Button variant="ghost" tone="neutral" disabled={change.pending} onClick={close}>
+          <Button variant="ghost" tone="neutral" disabled={submitting} onClick={close}>
             {t('cancel')}
           </Button>
-          <Button loading={change.pending} onClick={() => void form.current?.submit()}>
+          <Button loading={submitting} onClick={() => void form.current?.submit()}>
             {t('submit')}
           </Button>
         </>

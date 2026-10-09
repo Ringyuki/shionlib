@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useNavigation } from 'react-router'
-import { keepScroll } from '~/features/shell'
+import { useInPageNavigate } from '~/shared/route/use-in-page-navigate'
 import { listingSearch, searchDelay, type Listing, type Order, type Stage } from './uploader'
 
 export function useListing(listing: Listing) {
   const navigate = useNavigate()
+  const stay = useInPageNavigate()
   const navigation = useNavigation()
   const location = useLocation()
   const [draft, setDraft] = useState(listing.search)
@@ -16,9 +17,9 @@ export function useListing(listing: Listing) {
     }
   }
   const narrow = (changes: Partial<Listing>) =>
-    void navigate(
+    stay(
       { search: listingSearch({ ...listing, page: 1, ...changes }) },
-      { state: keepScroll, replace: 'search' in changes },
+      { replace: 'search' in changes },
     )
   useEffect(() => {
     const wanted = draft.trim()

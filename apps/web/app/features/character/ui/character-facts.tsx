@@ -4,9 +4,6 @@ import { useFormatter, useMessages, useTranslations } from 'use-intl'
 import { labelOf } from '~/shared/i18n/labels'
 import { birthdayOf, gendersOf, measurementsOf, type CharacterDetail } from '../character'
 
-const factListClass =
-  'grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-6 gap-y-2 [&>dd]:m-0! [&>dt]:m-0!'
-
 export function CharacterFacts({ character }: { character: CharacterDetail }) {
   const t = useTranslations('character.fact')
   const labels = useMessages().character
@@ -63,7 +60,7 @@ export function CharacterFacts({ character }: { character: CharacterDetail }) {
     return null
   }
   return (
-    <DescriptionList className={factListClass}>
+    <DescriptionList orientation="horizontal">
       {known.map(([name, value]) => (
         <Fragment key={name}>
           <DescriptionTerm>{t(name)}</DescriptionTerm>

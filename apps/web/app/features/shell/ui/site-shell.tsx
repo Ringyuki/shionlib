@@ -3,9 +3,8 @@ import { useRef, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import type { Schema } from '~/shared/api/types'
 import { navSections, type SidebarMode } from '../shell'
-import { useMainScrollRestore } from '../use-main-scroll-restore'
 import { useShellState } from '../use-shell-state'
-import { SiteFooter } from './site-footer'
+import { clearOfFooter, SiteFooter } from './site-footer'
 import { SiteHeader } from './site-header'
 import { SiteSidebar } from './site-sidebar'
 
@@ -23,7 +22,6 @@ export function SiteShell({ viewer, sidebar, unread, children }: SiteShellProps)
   const t = useTranslations('shell')
   const shell = useRef<AppShellHandle>(null)
   const state = useShellState(sidebar)
-  useMainScrollRestore(shell, mainScrollKey)
   return (
     <>
       <AppShell
@@ -44,17 +42,19 @@ export function SiteShell({ viewer, sidebar, unread, children }: SiteShellProps)
         }
         header={<SiteHeader />}
       >
-        <Container
-          size="xl"
-          className="flex min-h-[calc(100vh-3.5rem-1px)] flex-col px-4 py-6 sm:px-6 lg:py-8"
-        >
+        <Container size="xl" className="flex min-h-full flex-col px-4 py-6 sm:px-6 lg:py-8">
           <Stack gap="none" className="flex-1">
             {children}
           </Stack>
           <SiteFooter />
         </Container>
       </AppShell>
-      <ScrollTop target={() => shell.current?.mainViewport} label={t('scrollTop')} />
+      <ScrollTop
+        target={() => shell.current?.mainViewport}
+        label={t('scrollTop')}
+        offset={{ y: 'var(--clear-of-footer)' }}
+        className={clearOfFooter}
+      />
     </>
   )
 }

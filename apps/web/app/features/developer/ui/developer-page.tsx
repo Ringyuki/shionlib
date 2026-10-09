@@ -5,6 +5,7 @@ import {
   Empty,
   Heading,
   Inline,
+  LineClamp,
   Link,
   Section,
   Stack,
@@ -18,9 +19,6 @@ import { BBCodeText } from '~/shared/ui/bbcode-text'
 import { CatalogAttribution } from '~/shared/ui/catalog-attribution'
 import { extrasOf, websiteOf, type DeveloperContent } from '../developer'
 import { DeveloperLogo } from './developer-logo'
-
-const factListClass =
-  'grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-6 gap-y-2 [&>dd]:m-0! [&>dt]:m-0!'
 
 export function DeveloperPage({ content }: { content: DeveloperContent }) {
   const t = useTranslations('developer')
@@ -61,12 +59,14 @@ export function DeveloperPage({ content }: { content: DeveloperContent }) {
       </Inline>
       {intro !== '' && (
         <Section title={t('intro')}>
-          <BBCodeText source={intro} className="max-w-prose" />
+          <LineClamp lines={6} className="max-w-prose">
+            <BBCodeText source={intro} />
+          </LineClamp>
         </Section>
       )}
       {extras.length > 0 && (
         <Section title={t('extra')}>
-          <DescriptionList className={factListClass}>
+          <DescriptionList orientation="horizontal">
             {extras.map(info => (
               <Fragment key={`${info.key}:${info.value}`}>
                 <DescriptionTerm>{info.key}</DescriptionTerm>

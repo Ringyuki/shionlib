@@ -14,7 +14,8 @@ import { ArrowLeft, ExternalLink, Mail } from 'lucide-react'
 import { Link as RouterLink } from 'react-router'
 import { useFormatter, useLocale, useTranslations } from 'use-intl'
 import { GameRow } from '~/features/game'
-import { keepScroll, sitePaths } from '~/features/shell'
+import { sitePaths } from '~/features/shell'
+import { InPageLink } from '~/shared/route/in-page-link'
 import { Button } from '~/shared/ui/button'
 import { categoryOf, inboxPath, linkTarget, type Inbox } from '../message'
 import { MessageComment } from './message-comment'
@@ -43,14 +44,10 @@ export function MessageView({ inbox, className }: MessageViewProps) {
     <Card as="article" aria-labelledby="opened-message" className={className}>
       <Stack gap="md">
         <Button asChild size="sm" variant="ghost" tone="neutral" className="self-start lg:hidden">
-          <RouterLink
-            to={inboxPath(locale, { category, page })}
-            state={keepScroll}
-            preventScrollReset
-          >
+          <InPageLink href={inboxPath(locale, { category, page })}>
             <ArrowLeft aria-hidden />
             {t('back')}
-          </RouterLink>
+          </InPageLink>
         </Button>
         <Stack gap="sm">
           <Heading

@@ -78,6 +78,27 @@ const directFetcher = {
     'A fetcher is used only through useCommand or useLazyLoad (~/shared/route): pass useFetcher<typeof handler>() to one of them. They report a refusal themselves, so no call site decides how a failed request is shown.',
 }
 
+const heldPosition = {
+  selector:
+    "ImportSpecifier[imported.name='keepScrollPosition'], Property[key.name='preventScrollReset'], JSXAttribute[name.name='preventScrollReset']",
+  message:
+    'A navigation that stays in view goes through useInPageNavigate or InPageLink (~/shared/route): they keep the main area where it is, and only when the page really changes.',
+}
+
+const inPageTools = [
+  'app/shared/route/use-in-page-navigate.ts',
+  'app/shared/route/in-page-link.tsx',
+]
+
+const appSyntax = [
+  ...apiShapes,
+  nativeTags,
+  nativeTooltip,
+  mountedFeedback,
+  hinaInternals,
+  directFetcher,
+]
+
 const otherValidators = ['zod', 'yup', 'joi', 'ajv', 'superstruct', 'io-ts', 'arktype'].map(
   name => ({
     name,
@@ -207,18 +228,16 @@ export default defineConfig([
           message: dialog.message,
         })),
       ],
-      'no-restricted-syntax': [
-        'error',
-        ...apiShapes,
-        nativeTags,
-        nativeTooltip,
-        mountedFeedback,
-        hinaInternals,
-        directFetcher,
-      ],
+      'no-restricted-syntax': ['error', ...appSyntax, heldPosition],
       '@typescript-eslint/consistent-type-assertions': ['error', { assertionStyle: 'never' }],
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/no-restricted-imports': restrictedImports(featureEntry),
+    },
+  },
+  {
+    files: inPageTools,
+    rules: {
+      'no-restricted-syntax': ['error', ...appSyntax],
     },
   },
   {
@@ -347,6 +366,7 @@ export default defineConfig([
         ...apiShapes,
         nativeTags,
         mountedFeedback,
+        heldPosition,
       ],
       '@typescript-eslint/no-restricted-imports': restrictedImports(
         featureEntry,
