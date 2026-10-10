@@ -35,7 +35,7 @@ test('keeps the chosen order of the works in the address', async ({ page }) => {
 
 test('says when no developer matches and keeps to the pages that exist', async ({ page }) => {
   await page.goto('/zh/developer?q=no-such-developer')
-  await expect(page.getByText('没有找到与「no-such-developer」相符的开发商。')).toBeVisible()
+  await expect(page.getByText('没有找到与「no-such-developer」相符的开发商')).toBeVisible()
 
   await page.goto('/zh/developer?page=9')
   await expect(page).toHaveURL(/\/zh\/developer$/)

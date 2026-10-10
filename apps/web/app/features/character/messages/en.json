@@ -2,7 +2,7 @@
   "intro": "About",
   "works": "Appears in ({count, number})",
   "worksLabel": "Appears in",
-  "noWorks": "No game with this character is listed yet.",
+  "noWorks": "No game with this character is listed yet",
   "fact": {
     "aliases": "Aliases",
     "gender": "Gender",
@@ -25,7 +25,7 @@
     "a": "None"
   },
   "cast": {
-    "empty": "This game has no characters yet.",
+    "empty": "This game has no characters yet",
     "voice": "CV {name}",
     "role": {
       "main": "Protagonist",

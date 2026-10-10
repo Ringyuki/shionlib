@@ -1,6 +1,6 @@
 {
   "title": "动态",
-  "description": "最近公开的资源、评论和攻略。",
+  "description": "最近公开的资源、评论和攻略",
   "kinds": "动态类型",
   "kind": {
     "all": "全部",
@@ -14,9 +14,9 @@
     "walkthroughs": "<user></user> 发布了<game></game>的攻略<guide></guide>"
   },
   "empty": {
-    "all": "暂无动态。",
-    "resources": "暂无新资源。",
-    "comments": "暂无新评论。",
-    "walkthroughs": "暂无新攻略。"
+    "all": "暂无动态",
+    "resources": "暂无新资源",
+    "comments": "暂无新评论",
+    "walkthroughs": "暂无新攻略"
   }
 }

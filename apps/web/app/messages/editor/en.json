@@ -81,6 +81,6 @@
     "remove": "Delete"
   },
   "issue": {
-    "address": "Enter an address that starts with http, https or mailto."
+    "address": "Enter an address that starts with http, https or mailto"
   }
 }

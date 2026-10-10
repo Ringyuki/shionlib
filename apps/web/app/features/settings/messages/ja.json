@@ -12,28 +12,28 @@
   },
   "site": {
     "language": "表示言語",
-    "languageHint": "お送りするメールにも使用されます。",
+    "languageHint": "お送りするメールにも使用されます",
     "theme": "テーマ",
-    "themeHint": "このブラウザにのみ保存されます。",
+    "themeHint": "このブラウザにのみ保存されます",
     "themes": {
       "system": "システムに合わせる",
       "light": "ライト",
       "dark": "ダーク"
     },
     "contentLimit": "成人向けコンテンツ",
-    "contentLimitHint": "成人向けコンテンツを含むゲームと画像の表示方法を選びます。",
+    "contentLimitHint": "成人向けコンテンツを含むゲームと画像の表示方法を選びます",
     "contentLimits": {
       "1": {
         "label": "非表示",
-        "description": "成人向けコンテンツを含むゲームと画像を表示しません。"
+        "description": "成人向けコンテンツを含むゲームと画像を表示しません"
       },
       "2": {
         "label": "マスク",
-        "description": "ゲームは表示し、画像はクリックするまで隠します。"
+        "description": "ゲームは表示し、画像はクリックするまで隠します"
       },
       "3": {
         "label": "表示",
-        "description": "すべてそのまま表示します。"
+        "description": "すべてそのまま表示します"
       }
     },
     "games": "ゲーム一覧",
@@ -51,13 +51,13 @@
     "cropCover": "カバーを切り抜く",
     "pictureSaved": "画像を更新しました",
     "name": "ユーザー名",
-    "nameHint": "ログインに使用され、アップロードや投稿の横に表示されます。",
+    "nameHint": "ログインに使用され、アップロードや投稿の横に表示されます",
     "nameLimit": "{max} 文字まで",
-    "nameAvailable": "このユーザー名は使用できます。",
+    "nameAvailable": "このユーザー名は使用できます",
     "nameTaken": "このユーザー名はすでに使われています",
     "nameSaved": "ユーザー名を変更しました",
     "bio": "自己紹介",
-    "bioHint": "プロフィールに表示されます。",
+    "bioHint": "プロフィールに表示されます",
     "bioLimit": "任意、{max} 文字まで",
     "bioSaved": "自己紹介を保存しました",
     "save": "保存",

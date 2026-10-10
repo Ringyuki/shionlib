@@ -16,8 +16,8 @@
     "otherFiles": "ほか {count, number} 件",
     "downloads": "{count, number} 回ダウンロード",
     "updated": "<time></time>に更新",
-    "empty": "このユーザーはまだリソースをアップロードしていません。",
-    "emptyOwn": "まだリソースをアップロードしていません。",
+    "empty": "このユーザーはまだリソースをアップロードしていません",
+    "emptyOwn": "まだリソースをアップロードしていません",
     "upload": "リソースをアップロード"
   }
 }

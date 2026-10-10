@@ -3,7 +3,7 @@
   "artwork": "插图",
   "sign-in": {
     "title": "登录 Shionlib",
-    "description": "登录后可以上传资源、收藏游戏和参与讨论。",
+    "description": "登录后可以上传资源、收藏游戏和参与讨论",
     "identifier": "用户名或邮箱",
     "password": "密码",
     "submit": "登录",
@@ -13,7 +13,7 @@
   },
   "sign-up": {
     "title": "注册 Shionlib",
-    "description": "注册后将自动登录。",
+    "description": "注册后将自动登录",
     "name": "用户名",
     "nameHint": "{min}–{max} 个字符，注册后可以修改",
     "email": "邮箱",
@@ -31,7 +31,7 @@
   },
   "forgot-password": {
     "title": "找回密码",
-    "description": "输入注册时使用的邮箱，我们将向你发送重置密码的邮件。",
+    "description": "输入注册时使用的邮箱，我们将向你发送重置密码的邮件",
     "email": "邮箱",
     "submit": "发送重置邮件",
     "sent": "邮件已发送。重置链接的有效期较短，请尽快查看收件箱。",
@@ -51,13 +51,13 @@
   },
   "reset": {
     "title": "重置密码",
-    "description": "为 {email} 设置新密码，设置后所有已登录的设备都需要重新登录。",
+    "description": "为 {email} 设置新密码，设置后所有已登录的设备都需要重新登录",
     "password": "新密码",
     "confirmation": "再次输入新密码",
     "submit": "重置密码",
-    "done": "密码已重置，请使用新密码登录。",
+    "done": "密码已重置，请使用新密码登录",
     "signIn": "前往登录",
-    "invalid": "这个重置链接无效或已过期。",
+    "invalid": "这个重置链接无效或已过期",
     "requestAgain": "重新发送重置邮件"
   }
 }

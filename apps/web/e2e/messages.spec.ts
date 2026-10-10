@@ -89,7 +89,7 @@ test.describe('as an administrator', () => {
 
   test('keeps the old addresses of the categories', async ({ page }) => {
     await page.goto('/zh/message/comment-reply')
-    await expect(page.getByText('暂无回复。')).toBeVisible()
+    await expect(page.getByText('暂无回复')).toBeVisible()
     await page.getByRole('button', { name: '系统' }).click()
     await expect(page).toHaveURL(/\/zh\/message\/system$/)
     await expect(inbox(page).first()).toBeVisible()

@@ -28,7 +28,7 @@ test('narrows the library by tag and platform and keeps the conditions in the ad
 
   await filters(page).getByRole('button', { name: 'Windows' }).click()
   await expect(page).toHaveURL(/\/zh\/game\?tag=e2e&platform=win&resources=any$/)
-  await expect(page.getByText('没有符合条件的游戏。')).toBeVisible()
+  await expect(page.getByText('没有符合条件的游戏')).toBeVisible()
 
   await page.reload()
   await expect(filters(page).getByRole('button', { name: 'Windows' })).toHaveAttribute(

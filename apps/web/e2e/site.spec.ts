@@ -97,7 +97,7 @@ test('shows a page that cannot be loaded inside the site, and loads it on retry'
   await page.route(pageData, route => route.abort())
   await page.getByRole('link', { name: '游戏库' }).first().click()
   const main = page.getByRole('main')
-  await expect(main.getByText('请求未成功，请稍后再试。')).toBeVisible()
+  await expect(main.getByText('请求未成功，请稍后再试')).toBeVisible()
   await expect(page.getByRole('link', { name: '游戏库' }).first()).toBeVisible()
   await page.unroute(pageData)
   await main.getByRole('button', { name: '重试' }).click()

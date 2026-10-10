@@ -12,7 +12,7 @@
   "create": "Create and save",
   "cancel": "Cancel",
   "created": "Created “{name}” and saved the game",
-  "newListDescription": "The game is saved to the new list right away.",
+  "newListDescription": "The game is saved to the new list right away",
   "listNameHint": "Up to {max} characters",
   "listDescription": "Description",
   "listDescriptionHint": "Optional, up to {max} characters",
@@ -39,7 +39,7 @@
   "itemRemoved": "Removed \"{title}\" from the list",
   "undo": "Undo",
   "added": "Added {date}",
-  "emptyList": "This list has no games yet.",
-  "noListsOwn": "You have not created any lists yet.",
-  "noListsPublic": "This user has no public lists."
+  "emptyList": "This list has no games yet",
+  "noListsOwn": "You have not created any lists yet",
+  "noListsPublic": "This user has no public lists"
 }

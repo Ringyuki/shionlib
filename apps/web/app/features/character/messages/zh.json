@@ -2,7 +2,7 @@
   "intro": "简介",
   "works": "登场作品（{count, number}）",
   "worksLabel": "登场作品",
-  "noWorks": "暂未收录这个角色的登场作品。",
+  "noWorks": "暂未收录这个角色的登场作品",
   "fact": {
     "aliases": "别名",
     "gender": "性别",
@@ -25,7 +25,7 @@
     "a": "无性别"
   },
   "cast": {
-    "empty": "这个游戏暂无角色信息。",
+    "empty": "这个游戏暂无角色信息",
     "voice": "CV {name}",
     "role": {
       "main": "主角",

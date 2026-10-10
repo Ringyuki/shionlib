@@ -1,11 +1,11 @@
 {
   "title": "新作",
-  "description": "按月查看游戏的发售日期。",
+  "description": "按月查看游戏的发售日期",
   "previous": "上个月",
   "next": "下个月",
   "thisMonth": "回到本月",
   "count": "共 {total, number} 部",
   "onlyWithResources": "仅显示有资源的游戏",
-  "empty": "这个月暂未收录新作。",
+  "empty": "这个月暂未收录新作",
   "emptyNarrowed": "没有资源的游戏未显示。关闭「仅显示有资源的游戏」后，可以查看这个月的全部新作。"
 }

@@ -15,7 +15,7 @@
   "seeAll": "查看「{query}」的全部 {total, number} 个游戏",
   "searching": "正在搜索…",
   "empty": "没有找到「{query}」。可以尝试使用日文原名或别名搜索。",
-  "unavailable": "搜索暂时不可用，请稍后再试。",
+  "unavailable": "搜索暂时不可用，请稍后再试",
   "works": "{count} 部作品",
   "results": {
     "title": "搜索",
@@ -27,7 +27,7 @@
     "onlyWithResources": "仅显示有资源的游戏",
     "empty": "没有找到「{query}」。可以尝试使用日文原名或别名搜索。",
     "emptyFiltered": "默认不显示没有资源的游戏。关闭「仅显示有资源的游戏」后，可以在全部游戏中查找。",
-    "unavailable": "搜索暂时不可用，请稍后再试。"
+    "unavailable": "搜索暂时不可用，请稍后再试"
   },
   "pickGame": "搜索游戏名称",
   "released": {

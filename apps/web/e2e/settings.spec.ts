@@ -86,7 +86,7 @@ test('checks a user name while it is typed and saves the bio', async ({ page }) 
   await name.fill('e2e_admin')
   await expect(page.getByText('该用户名已被使用')).toBeVisible()
   await name.fill(`e2e_free_${Date.now() % 100000}`)
-  await expect(page.getByText('该用户名可以使用。')).toBeVisible()
+  await expect(page.getByText('该用户名可以使用')).toBeVisible()
   await name.fill(account)
 
   const bio = `E2E 简介 ${Date.now()}`

@@ -12,10 +12,10 @@
   "copyLink": "ダウンロードリンクをコピー",
   "openSettings": "ダウンロード設定",
   "verifying": "ロボットでないことを確認しています",
-  "verifyingHint": "確認が済むと自動で始まります。",
+  "verifyingHint": "確認が済むと自動で始まります",
   "verification": {
     "unavailable": "現在、確認を行えません。しばらくしてから再試行してください。",
-    "blocked": "このブラウザ環境は確認を通過できませんでした。",
+    "blocked": "このブラウザ環境は確認を通過できませんでした",
     "failed": "確認に失敗しました。再試行してください。"
   },
   "problem": "エラーコード：{code}",
@@ -26,8 +26,8 @@
     "rejected": "aria2 がタスクを受け付けませんでした：{message}"
   },
   "manager": {
-    "sent": "ダウンロードを {name} に渡しました。",
-    "hint": "{name} が起動しない場合は、インストールされているか確認してください。"
+    "sent": "ダウンロードを {name} に渡しました",
+    "hint": "{name} が起動しない場合は、インストールされているか確認してください"
   },
   "useBrowser": "ブラウザでダウンロード",
   "copied": "リンクをコピーしました（{minutes} 分間有効）",
@@ -37,20 +37,20 @@
   "preferences": {
     "title": "ダウンロード設定",
     "done": "完了",
-    "local": "ダウンロード設定はこのブラウザにのみ保存され、アカウントには同期されません。",
+    "local": "ダウンロード設定はこのブラウザにのみ保存され、アカウントには同期されません",
     "method": "既定のダウンロード方法",
     "methods": {
       "browser": {
         "label": "ブラウザ",
-        "description": "ブラウザがファイルを直接ダウンロードします。"
+        "description": "ブラウザがファイルを直接ダウンロードします"
       },
       "aria2": {
         "label": "aria2 に送信",
-        "description": "このパソコンまたはローカルネットワーク上の aria2 にダウンロードを送ります。"
+        "description": "このパソコンまたはローカルネットワーク上の aria2 にダウンロードを送ります"
       },
       "lunabox": {
         "label": "LunaBox に送る",
-        "description": "ダウンロードを LunaBox に渡します。"
+        "description": "ダウンロードを LunaBox に渡します"
       },
       "reina": {
         "label": "ReinaManager に送る",
@@ -72,9 +72,9 @@
     "aria2": "aria2",
     "aria2Hint": "あらかじめ aria2 の RPC を有効にし、このサイトからのクロスオリジン要求を許可してください。変更はすぐに反映されます。",
     "endpoint": "RPC アドレス",
-    "endpointHint": "aria2 の JSON-RPC アドレスです。",
+    "endpointHint": "aria2 の JSON-RPC アドレスです",
     "secret": "RPC シークレット",
-    "secretHint": "シークレットを設定していない場合は空欄にします。",
+    "secretHint": "シークレットを設定していない場合は空欄にします",
     "directory": "保存先",
     "directoryHint": "任意。空欄の場合は aria2 の既定のディレクトリを使用します。",
     "test": "接続をテスト",

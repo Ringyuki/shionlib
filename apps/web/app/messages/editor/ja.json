@@ -81,6 +81,6 @@
     "remove": "削除"
   },
   "issue": {
-    "address": "http、https または mailto で始まるアドレスを入力してください。"
+    "address": "http、https または mailto で始まるアドレスを入力してください"
   }
 }

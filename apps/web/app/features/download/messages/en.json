@@ -12,10 +12,10 @@
   "copyLink": "Copy download link",
   "openSettings": "Download settings",
   "verifying": "Checking that you are human",
-  "verifyingHint": "The download starts by itself once this passes.",
+  "verifyingHint": "The download starts by itself once this passes",
   "verification": {
     "unavailable": "The verification is unavailable right now. Please try again later.",
-    "blocked": "This browser did not pass the verification.",
+    "blocked": "This browser did not pass the verification",
     "failed": "The verification failed. Please try again."
   },
   "problem": "Error code: {code}",
@@ -26,8 +26,8 @@
     "rejected": "aria2 did not accept the task: {message}"
   },
   "manager": {
-    "sent": "The download was handed to {name}.",
-    "hint": "If {name} did not start, check that it is installed."
+    "sent": "The download was handed to {name}",
+    "hint": "If {name} did not start, check that it is installed"
   },
   "useBrowser": "Use the browser instead",
   "copied": "Link copied, valid for {minutes} min",
@@ -37,20 +37,20 @@
   "preferences": {
     "title": "Download settings",
     "done": "Done",
-    "local": "Download settings are saved in this browser only and do not follow your account.",
+    "local": "Download settings are saved in this browser only and do not follow your account",
     "method": "Default download method",
     "methods": {
       "browser": {
         "label": "Browser",
-        "description": "The browser downloads the file itself."
+        "description": "The browser downloads the file itself"
       },
       "aria2": {
         "label": "Send to aria2",
-        "description": "Sends the download to an aria2 on this computer or your local network."
+        "description": "Sends the download to an aria2 on this computer or your local network"
       },
       "lunabox": {
         "label": "Send to LunaBox",
-        "description": "Hands the download to LunaBox."
+        "description": "Hands the download to LunaBox"
       },
       "reina": {
         "label": "Send to ReinaManager",
@@ -72,11 +72,11 @@
     "aria2": "aria2",
     "aria2Hint": "Enable RPC in aria2 first and allow cross-origin requests from this site. Changes apply at once.",
     "endpoint": "RPC address",
-    "endpointHint": "The JSON-RPC address of aria2.",
+    "endpointHint": "The JSON-RPC address of aria2",
     "secret": "RPC secret",
-    "secretHint": "Leave empty when no secret is set.",
+    "secretHint": "Leave empty when no secret is set",
     "directory": "Save to",
-    "directoryHint": "Optional; aria2's default directory is used when empty.",
+    "directoryHint": "Optional; aria2's default directory is used when empty",
     "test": "Test connection",
     "reachable": "Connected. aria2 version {version}.",
     "unreachable": {

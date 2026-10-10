@@ -14,10 +14,10 @@
   "list": "Messages",
   "unread": "Unread",
   "empty": {
-    "all": "No messages yet.",
-    "system": "No system messages yet.",
-    "comment-reply": "No replies yet.",
-    "comment-like": "No likes yet."
+    "all": "No messages yet",
+    "system": "No system messages yet",
+    "comment-reply": "No replies yet",
+    "comment-like": "No likes yet"
   },
   "choose": "Choose a message to read",
   "back": "Back to messages",

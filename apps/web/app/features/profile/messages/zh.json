@@ -16,8 +16,8 @@
     "otherFiles": "等 {count, number} 个文件",
     "downloads": "{count, number} 次下载",
     "updated": "<time></time>更新",
-    "empty": "该用户尚未上传资源。",
-    "emptyOwn": "你尚未上传资源。",
+    "empty": "该用户尚未上传资源",
+    "emptyOwn": "你尚未上传资源",
     "upload": "上传资源"
   }
 }

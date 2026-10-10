@@ -41,7 +41,7 @@ test.describe('as a member', () => {
       route => (route.request().method() === 'GET' ? route.abort() : route.fallback()),
     )
     await list.click()
-    await expectNotice(page, '请求未成功，请稍后再试。')
+    await expectNotice(page, '请求未成功，请稍后再试')
     await expect(list).toBeVisible()
     await page.keyboard.press('Escape')
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(title)

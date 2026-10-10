@@ -41,7 +41,7 @@ test.describe('as a member', () => {
     await expectNotice(page, `已新建「${name}」`)
     await expect(page).toHaveURL(/\/favorites\/\d+$/)
     await expect(page.getByRole('heading', { name, level: 2 })).toBeVisible()
-    await expect(page.getByText('这个收藏夹中暂无游戏。')).toBeVisible()
+    await expect(page.getByText('这个收藏夹中暂无游戏')).toBeVisible()
     const listUrl = page.url()
 
     await page.goto('/zh/game/6')
@@ -65,7 +65,7 @@ test.describe('as a member', () => {
 
     await games.getByRole('button', { name: '收藏操作' }).click()
     await page.getByRole('menuitem', { name: '移出收藏夹' }).click()
-    await expect(page.getByText('这个收藏夹中暂无游戏。')).toBeVisible()
+    await expect(page.getByText('这个收藏夹中暂无游戏')).toBeVisible()
     await page.getByRole('button', { name: '撤销' }).click()
     await expect(games.getByText('等汉化补丁')).toBeVisible()
 

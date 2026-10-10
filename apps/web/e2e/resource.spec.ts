@@ -47,6 +47,6 @@ test.describe('as the uploader', () => {
   test('shows that a file has not been replaced yet', async ({ page }) => {
     await openAction(page, '历史')
     const dialog = page.getByRole('dialog', { name: '替换记录' })
-    await expect(dialog.getByText('这个文件尚未被替换过。')).toBeVisible()
+    await expect(dialog.getByText('这个文件尚未被替换过')).toBeVisible()
   })
 })

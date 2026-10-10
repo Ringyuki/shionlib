@@ -81,6 +81,6 @@
     "remove": "删除"
   },
   "issue": {
-    "address": "请输入以 http、https 或 mailto 开头的地址。"
+    "address": "请输入以 http、https 或 mailto 开头的地址"
   }
 }

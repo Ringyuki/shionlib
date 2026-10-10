@@ -12,33 +12,33 @@
   },
   "site": {
     "language": "Language",
-    "languageHint": "Also used for the emails sent to you.",
+    "languageHint": "Also used for the emails sent to you",
     "theme": "Theme",
-    "themeHint": "Saved in this browser only.",
+    "themeHint": "Saved in this browser only",
     "themes": {
       "system": "System",
       "light": "Light",
       "dark": "Dark"
     },
     "contentLimit": "Adult content",
-    "contentLimitHint": "How games and images with adult content are shown.",
+    "contentLimitHint": "How games and images with adult content are shown",
     "contentLimits": {
       "1": {
         "label": "Hide",
-        "description": "Games and images with adult content are not shown."
+        "description": "Games and images with adult content are not shown"
       },
       "2": {
         "label": "Mask",
-        "description": "Games are shown; images stay covered until you click them."
+        "description": "Games are shown; images stay covered until you click them"
       },
       "3": {
         "label": "Show",
-        "description": "Everything is shown as it is."
+        "description": "Everything is shown as it is"
       }
     },
     "games": "Game lists",
     "onlyWithResources": "Only games with resources",
-    "onlyWithResourcesHint": "The default for the library and search; you can change it for a single visit there."
+    "onlyWithResourcesHint": "The default for the library and search; you can change it for a single visit there"
   },
   "personal": {
     "avatar": "Avatar",
@@ -51,13 +51,13 @@
     "cropCover": "Crop the cover",
     "pictureSaved": "Picture updated",
     "name": "User name",
-    "nameHint": "Used to sign in, and shown beside what you upload and write.",
+    "nameHint": "Used to sign in, and shown beside what you upload and write",
     "nameLimit": "Up to {max} characters",
-    "nameAvailable": "This user name is available.",
+    "nameAvailable": "This user name is available",
     "nameTaken": "This user name is taken",
     "nameSaved": "User name changed",
     "bio": "Bio",
-    "bioHint": "Shown on your profile.",
+    "bioHint": "Shown on your profile",
     "bioLimit": "Optional, up to {max} characters",
     "bioSaved": "Bio saved",
     "save": "Save",

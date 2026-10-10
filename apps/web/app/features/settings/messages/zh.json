@@ -12,52 +12,52 @@
   },
   "site": {
     "language": "界面语言",
-    "languageHint": "同时用于发送给你的邮件。",
+    "languageHint": "同时用于发送给你的邮件",
     "theme": "主题",
-    "themeHint": "仅保存在当前浏览器中。",
+    "themeHint": "仅保存在当前浏览器中",
     "themes": {
       "system": "跟随系统",
       "light": "浅色",
       "dark": "深色"
     },
     "contentLimit": "成人内容",
-    "contentLimitHint": "决定带有成人内容的游戏和图片如何显示。",
+    "contentLimitHint": "决定带有成人内容的游戏和图片如何显示",
     "contentLimits": {
       "1": {
         "label": "隐藏",
-        "description": "不显示带有成人内容的游戏和图片。"
+        "description": "不显示带有成人内容的游戏和图片"
       },
       "2": {
         "label": "遮罩",
-        "description": "显示游戏，图片默认遮住，点击后查看。"
+        "description": "显示游戏，图片默认遮住，点击后查看"
       },
       "3": {
         "label": "显示",
-        "description": "直接显示全部内容。"
+        "description": "直接显示全部内容"
       }
     },
     "games": "游戏列表",
     "onlyWithResources": "仅显示有资源的游戏",
-    "onlyWithResourcesHint": "作为游戏库和搜索的默认设置，可以在每次浏览时临时更改。"
+    "onlyWithResourcesHint": "作为游戏库和搜索的默认设置，可以在每次浏览时临时更改"
   },
   "personal": {
     "avatar": "头像",
-    "avatarHint": "显示为圆形，上传时可以选取范围。",
+    "avatarHint": "显示为圆形，上传时可以选取范围",
     "changeAvatar": "更换头像",
     "cropAvatar": "裁剪头像",
     "cover": "主页封面",
-    "coverHint": "显示在个人主页顶部，上传时可以选取范围。",
+    "coverHint": "显示在个人主页顶部，上传时可以选取范围",
     "changeCover": "上传封面",
     "cropCover": "裁剪封面",
     "pictureSaved": "图片已更新",
     "name": "用户名",
-    "nameHint": "用于登录，并显示在你上传的资源和发表的内容旁。",
+    "nameHint": "用于登录，并显示在你上传的资源和发表的内容旁",
     "nameLimit": "最多 {max} 字",
-    "nameAvailable": "该用户名可以使用。",
+    "nameAvailable": "该用户名可以使用",
     "nameTaken": "该用户名已被使用",
     "nameSaved": "用户名已修改",
     "bio": "简介",
-    "bioHint": "显示在个人主页上。",
+    "bioHint": "显示在个人主页上",
     "bioLimit": "选填，最多 {max} 字",
     "bioSaved": "简介已保存",
     "save": "保存",

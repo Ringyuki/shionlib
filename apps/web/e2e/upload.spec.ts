@@ -144,7 +144,7 @@ test.describe('as an uploader', () => {
     await other.goto('/zh/user/uploads?status=uploading')
     const elsewhere = other.getByRole('region', { name: '正在其他浏览器或设备中上传的文件' })
     await expect(elsewhere.getByText('e2e-elsewhere.7z')).toBeVisible()
-    await expect(elsewhere.getByText('这些文件正在其他浏览器或设备中上传。')).toBeVisible()
+    await expect(elsewhere.getByText('这些文件正在其他浏览器或设备中上传')).toBeVisible()
     await expect(elsewhere.getByRole('button')).toHaveCount(0)
     await expect(other.getByRole('button', { name: '重新选择文件' })).toHaveCount(0)
 

@@ -1,6 +1,6 @@
 {
   "title": "My uploads",
-  "description": "Follow your uploads and manage the resources you have uploaded.",
+  "description": "Follow your uploads and manage the resources you have uploaded",
   "upload": "Upload a resource",
   "signIn": "Sign in to see your uploads",
   "signInAction": "Sign in",
@@ -31,7 +31,7 @@
       "processing": "Nothing is being processed at the moment",
       "published": "Nothing published yet"
     },
-    "emptyHint": "Pick a game and upload its files; they are published once they pass the check."
+    "emptyHint": "Pick a game and upload its files; they are published once they pass the check"
   },
   "account": {
     "title": "Storage and downloads",
@@ -49,7 +49,7 @@
       "trusted": "Trusted uploader",
       "admin": "Administrator"
     },
-    "frozen": "Because of a violation you have less space until {date}."
+    "frozen": "Because of a violation you have less space until {date}"
   },
   "transfers": {
     "appendsTo": "Adding to the resource that holds {name}",
@@ -68,7 +68,7 @@
     "cancelUpload": "Cancel upload",
     "cancelAllConfirm": "Cancel the upload of these files?",
     "cancelConfirm": "Cancel the upload of this file?",
-    "cancelHint": "What has been uploaded will be discarded.",
+    "cancelHint": "What has been uploaded will be discarded",
     "chooseAgain": "Choose the files again",
     "chooseAgainHint": "After a reload these files must be chosen again before their upload can continue: {names}",
     "chooseAgainDrop": "Click to choose files, or drop them here",

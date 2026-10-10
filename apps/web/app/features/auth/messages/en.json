@@ -3,7 +3,7 @@
   "artwork": "Artwork",
   "sign-in": {
     "title": "Sign in to Shionlib",
-    "description": "Sign in to upload resources, keep favorites and join discussions.",
+    "description": "Sign in to upload resources, keep favorites and join discussions",
     "identifier": "Username or email",
     "password": "Password",
     "submit": "Sign in",
@@ -13,7 +13,7 @@
   },
   "sign-up": {
     "title": "Sign up for Shionlib",
-    "description": "You are signed in right after signing up.",
+    "description": "You are signed in right after signing up",
     "name": "Username",
     "nameHint": "{min}–{max} characters, can be changed later",
     "email": "Email",
@@ -31,7 +31,7 @@
   },
   "forgot-password": {
     "title": "Reset your password",
-    "description": "Enter the email you signed up with and we will send you a reset link.",
+    "description": "Enter the email you signed up with and we will send you a reset link",
     "email": "Email",
     "submit": "Send reset email",
     "sent": "Email sent. Check your inbox soon; the link expires quickly.",
@@ -57,7 +57,7 @@
     "submit": "Reset password",
     "done": "Your password was reset. Sign in with the new one.",
     "signIn": "Sign in",
-    "invalid": "This reset link is invalid or has expired.",
+    "invalid": "This reset link is invalid or has expired",
     "requestAgain": "Send a new reset email"
   }
 }

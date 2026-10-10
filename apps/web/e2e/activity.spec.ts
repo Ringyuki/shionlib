@@ -23,5 +23,5 @@ test('narrows the feed to one kind and says when there is nothing', async ({ pag
 
   await page.getByRole('button', { name: '攻略', exact: true }).click()
   await expect(page).toHaveURL(/\/zh\/activity\?kind=walkthroughs$/)
-  await expect(page.getByText('暂无新攻略。')).toBeVisible()
+  await expect(page.getByText('暂无新攻略')).toBeVisible()
 })

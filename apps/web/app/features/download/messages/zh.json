@@ -12,11 +12,11 @@
   "copyLink": "复制下载链接",
   "openSettings": "下载设置",
   "verifying": "正在进行人机验证",
-  "verifyingHint": "验证通过后将自动开始下载。",
+  "verifyingHint": "验证通过后将自动开始下载",
   "verification": {
-    "unavailable": "人机验证暂时无法进行，请稍后重试。",
-    "blocked": "当前浏览器环境未通过人机验证。",
-    "failed": "人机验证未通过，请重试。"
+    "unavailable": "人机验证暂时无法进行，请稍后重试",
+    "blocked": "当前浏览器环境未通过人机验证",
+    "failed": "人机验证未通过，请重试"
   },
   "problem": "错误代码：{code}",
   "aria2": {
@@ -26,8 +26,8 @@
     "rejected": "aria2 未接受任务：{message}"
   },
   "manager": {
-    "sent": "已将下载任务交给 {name}。",
-    "hint": "如果 {name} 没有启动，请确认它已安装。"
+    "sent": "已将下载任务交给 {name}",
+    "hint": "如果 {name} 没有启动，请确认它已安装"
   },
   "useBrowser": "改用浏览器下载",
   "copied": "链接已复制，{minutes} 分钟内有效",
@@ -37,20 +37,20 @@
   "preferences": {
     "title": "下载设置",
     "done": "完成",
-    "local": "下载设置仅保存在当前浏览器中，不随账号同步。",
+    "local": "下载设置仅保存在当前浏览器中，不随账号同步",
     "method": "默认下载方式",
     "methods": {
       "browser": {
         "label": "浏览器下载",
-        "description": "由浏览器直接下载文件。"
+        "description": "由浏览器直接下载文件"
       },
       "aria2": {
         "label": "推送到 aria2",
-        "description": "将下载任务发送到本机或局域网中的 aria2。"
+        "description": "将下载任务发送到本机或局域网中的 aria2"
       },
       "lunabox": {
         "label": "推送到 LunaBox",
-        "description": "将下载任务交给 LunaBox。"
+        "description": "将下载任务交给 LunaBox"
       },
       "reina": {
         "label": "推送到 ReinaManager",
@@ -72,16 +72,16 @@
     "aria2": "aria2",
     "aria2Hint": "需要先在 aria2 中启用 RPC，并允许来自本站的跨域请求。修改后立即生效。",
     "endpoint": "RPC 地址",
-    "endpointHint": "aria2 的 JSON-RPC 地址。",
+    "endpointHint": "aria2 的 JSON-RPC 地址",
     "secret": "RPC 密钥",
-    "secretHint": "未设置密钥时留空。",
+    "secretHint": "未设置密钥时留空",
     "directory": "保存目录",
-    "directoryHint": "选填，留空时使用 aria2 的默认目录。",
+    "directoryHint": "选填，留空时使用 aria2 的默认目录",
     "test": "测试连接",
-    "reachable": "连接成功，aria2 版本 {version}。",
+    "reachable": "连接成功，aria2 版本 {version}",
     "unreachable": {
-      "unreachable": "无法连接 aria2，请检查地址，并确认 aria2 正在运行且允许跨域请求。",
-      "unauthorized": "aria2 拒绝了密钥，请检查 RPC 密钥。",
+      "unreachable": "无法连接 aria2，请检查地址，并确认 aria2 正在运行且允许跨域请求",
+      "unauthorized": "aria2 拒绝了密钥，请检查 RPC 密钥",
       "rejected": "aria2 返回了错误：{message}"
     },
     "issue": {

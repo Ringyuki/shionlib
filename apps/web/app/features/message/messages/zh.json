@@ -14,10 +14,10 @@
   "list": "消息列表",
   "unread": "未读",
   "empty": {
-    "all": "暂无消息。",
-    "system": "暂无系统消息。",
-    "comment-reply": "暂无回复。",
-    "comment-like": "暂无点赞。"
+    "all": "暂无消息",
+    "system": "暂无系统消息",
+    "comment-reply": "暂无回复",
+    "comment-like": "暂无点赞"
   },
   "choose": "选择一条消息查看",
   "back": "返回消息列表",

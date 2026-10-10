@@ -12,7 +12,7 @@
   "create": "作成して保存",
   "cancel": "キャンセル",
   "created": "「{name}」を作成して保存しました",
-  "newListDescription": "作成後、このゲームを追加します。",
+  "newListDescription": "作成後、このゲームを追加します",
   "listNameHint": "{max} 文字まで",
   "listDescription": "説明",
   "listDescriptionHint": "任意、{max} 文字まで",
@@ -39,7 +39,7 @@
   "itemRemoved": "「{title}」をリストから外しました",
   "undo": "元に戻す",
   "added": "{date}に追加",
-  "emptyList": "このリストにはまだゲームがありません。",
-  "noListsOwn": "まだリストを作成していません。",
-  "noListsPublic": "このユーザーには公開中のリストがありません。"
+  "emptyList": "このリストにはまだゲームがありません",
+  "noListsOwn": "まだリストを作成していません",
+  "noListsPublic": "このユーザーには公開中のリストがありません"
 }

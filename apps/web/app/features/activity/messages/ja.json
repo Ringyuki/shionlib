@@ -1,6 +1,6 @@
 {
   "title": "アクティビティ",
-  "description": "最近公開されたリソース、コメント、攻略。",
+  "description": "最近公開されたリソース、コメント、攻略",
   "kinds": "アクティビティの種類",
   "kind": {
     "all": "すべて",
@@ -14,9 +14,9 @@
     "walkthroughs": "<user></user> が<game></game>の攻略<guide></guide>を公開しました"
   },
   "empty": {
-    "all": "アクティビティはまだありません。",
-    "resources": "新しいリソースはありません。",
-    "comments": "新しいコメントはありません。",
-    "walkthroughs": "新しい攻略はありません。"
+    "all": "アクティビティはまだありません",
+    "resources": "新しいリソースはありません",
+    "comments": "新しいコメントはありません",
+    "walkthroughs": "新しい攻略はありません"
   }
 }
