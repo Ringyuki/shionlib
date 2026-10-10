@@ -1,214 +1,160 @@
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import { sessionFile } from './support/accounts'
 import { expectNotice } from './support/notices'
 
-test('lists the walkthroughs of a game on their tab and asks a guest to sign in before writing', async ({
+test('shows an empty walkthrough tab and asks a guest to sign in before writing', async ({
   page,
 }) => {
-  await page.goto('/zh/game/2')
-  await page.getByRole('tab', { name: /攻略/ }).click()
-  await expect(page).toHaveURL(/\/zh\/game\/2\/walkthrough$/)
-  await expect(page.getByText('这个游戏暂无攻略')).toBeVisible()
+  await page.goto('/zh/game/3')
+  await page.getByRole('tab', { name: '攻略' }).click()
+  await expect(page).toHaveURL(/\/zh\/game\/3\/walkthrough$/)
+  await expect(page.getByText('暂无攻略')).toBeVisible()
   await page.getByRole('link', { name: '写攻略' }).click()
   await expect(page.getByRole('dialog', { name: '登录 Shionlib' })).toBeVisible()
 })
 
-test('answers 404 for a walkthrough under the address of another game', async ({ page }) => {
-  const response = await page.goto('/zh/game/2/walkthrough/999999')
+test('answers 404 for a walkthrough that does not exist', async ({ page }) => {
+  const response = await page.goto('/zh/game/3/walkthrough/999999')
   expect(response?.status()).toBe(404)
 })
 
-test('keeps the old address of the writing page', async ({ page }) => {
-  await page.goto('/zh/game/2/walkthrough/edit')
-  await expect(page).toHaveURL(/\/zh\/game\/2\/walkthrough\/new$/)
-  await expect(page.getByText('登录后可以撰写攻略')).toBeVisible()
+test('leads the old addresses of the writing page to the one it has now', async ({ page }) => {
+  await page.goto('/zh/game/3/walkthrough/new')
+  await expect(page).toHaveURL(/\/zh\/game\/3\/walkthrough\/edit$/)
+  await expect(page.getByText('登录后可以编写攻略')).toBeVisible()
+  await page.goto('/zh/game/3/walkthrough/12/edit')
+  await expect(page).toHaveURL(/\/zh\/game\/3\/walkthrough\/edit$/)
 })
-
-const picture = {
-  name: 'map.png',
-  mimeType: 'image/png',
-  buffer: Buffer.from(
-    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
-    'base64',
-  ),
-}
-
-const uploadedPicture = {
-  code: 0,
-  message: '',
-  data: {
-    key: 'richtext/2/0b6f8a52-3c1d-4e8a-9f47-2d5a6c7b8e90.webp',
-    width: 1200,
-    height: 675,
-  },
-  requestId: 'e2e',
-  timestamp: '2026-01-01T00:00:00.000Z',
-}
-
-async function remove(page: Page) {
-  await page.getByRole('button', { name: '更多操作' }).click()
-  await page.getByRole('menuitem', { name: '删除' }).click()
-  const confirm = page.getByRole('alertdialog')
-  await expect(confirm.getByText('攻略删除后无法恢复')).toBeVisible()
-  await confirm.getByRole('button', { name: '删除' }).click()
-  await expectNotice(page, '攻略已删除')
-}
 
 test.describe('as a member', () => {
   test.use({ storageState: sessionFile('member') })
+  test.describe.configure({ mode: 'serial' })
 
-  test('writes a draft, reads it with its contents, publishes and deletes it', async ({ page }) => {
-    const title = `E2E 全线攻略 ${Date.now()}`
-    await page.route('**/api/uploads/small/richtext/image', route =>
-      route.fulfill({ json: uploadedPicture }),
-    )
-    await page.route(`**/${uploadedPicture.data.key}`, route =>
-      route.fulfill({ contentType: picture.mimeType, body: picture.buffer }),
-    )
+  test('writes routes of steps, follows them on the game page, publishes and deletes them', async ({
+    page,
+  }) => {
     await page.goto('/zh/game/2/walkthrough')
-    await page.getByRole('link', { name: '写攻略' }).first().click()
-    await expect(page).toHaveURL(/\/zh\/game\/2\/walkthrough\/new$/)
-    await page.getByRole('textbox', { name: '标题' }).fill(title)
-    await page.keyboard.press('Enter')
-    const content = page.getByRole('textbox', { name: '正文' })
-    const tools = page.getByRole('toolbar', { name: '格式' })
-    await expect(content).toBeFocused()
-    await page.keyboard.type('前言。')
-    await page.keyboard.press('Enter')
-    await tools.getByRole('button', { name: '正文' }).click()
-    await page.getByRole('menuitemradio', { name: /大标题/ }).click()
-    await expect(tools.getByRole('button', { name: '大标题' })).toBeVisible()
-    await page.keyboard.type('共通线')
-    await page.keyboard.press('Enter')
-    await tools.getByRole('button', { name: '无序列表' }).click()
-    await page.keyboard.type('选 A')
-    await page.keyboard.press('Enter')
-    await page.keyboard.type('选 B')
-    await page.keyboard.press('Enter')
-    await page.keyboard.press('Enter')
-    await page.keyboard.type('### 分支')
-    await page.keyboard.press('Enter')
-    await page.keyboard.type('去海边。')
-    await expect(content.getByRole('heading', { name: '分支', level: 3 })).toBeVisible()
-    await page.keyboard.press('Enter')
-    await page.keyboard.type('/表')
-    await page
-      .getByRole('listbox', { name: '插入内容' })
-      .getByRole('option', { name: '表格' })
-      .click()
-    await page.keyboard.type('章节')
-    await page.keyboard.press('Tab')
-    await page.keyboard.type('选项')
-    await content.getByRole('button', { name: '在下方添加一行' }).click()
-    await expect(content.getByRole('row')).toHaveCount(4)
-    await content.getByRole('cell').first().hover()
-    await content.getByRole('button', { name: '选中这一行' }).nth(1).click({ force: true })
-    await page.getByRole('menuitem', { name: '在下方插入行' }).click()
-    await expect(content.getByRole('row')).toHaveCount(5)
-    const chooser = page.waitForEvent('filechooser')
-    await tools.getByRole('button', { name: '图片' }).click()
-    await (await chooser).setFiles(picture)
-    await content.locator('figure img').click()
-    const caption = content.getByRole('textbox', { name: '图片说明' })
-    await caption.fill('分支示意图')
-    await caption.press('Enter')
-    await expect(caption).toHaveValue('分支示意图')
+    await page.getByRole('link', { name: '写攻略' }).click()
+    await expect(page).toHaveURL(/\/zh\/game\/2\/walkthrough\/edit$/)
+    const parts = page.getByRole('navigation', { name: '线路' })
+    const name = page.getByRole('textbox', { name: '线路名称' })
+    const steps = page.getByRole('textbox', { name: '步骤' })
+    const preview = page.getByLabel('预览').getByRole('listitem')
+
+    await parts.getByRole('button', { name: '添加线路' }).click()
+    await page.getByRole('combobox', { name: /角色/ }).click()
+    await page.getByRole('option', { name: 'ルビイ' }).click()
+    await page.keyboard.press('Escape')
+    await expect(name).toHaveValue('ルビイ')
+    await steps.click()
+    await page.keyboard.type('# 【START】\n去天文台\n◆セーブ01')
+    await page.getByRole('button', { name: '存档', exact: true }).click()
+    await page.keyboard.type('\n留下 | 光线')
+    await expect(steps).toHaveValue('# 【START】\n去天文台\n◆セーブ01\n存档 02\n留下 | 光线')
+    await expect(preview).toHaveText(['【START】', '1去天文台', '存档 01', '存档 02', '2留下光线'])
+    await page.getByRole('textbox', { name: /结局/ }).fill('光 END')
+
+    await parts.getByRole('button', { name: '添加线路' }).click()
+    await name.fill('真结局')
+    await steps.fill('读档 02\n离开')
+    await page.getByRole('combobox', { name: '须先通关的线路' }).click()
+    await page.getByRole('option', { name: 'ルビイ' }).click()
+    await page.keyboard.press('Escape')
+    await page.getByRole('textbox', { name: '其他条件' }).fill('二周目')
+    await expect(preview.first()).toHaveText('读取存档 02存于「ルビイ」')
+    await page.getByRole('textbox', { name: '说明' }).click()
+    await page.keyboard.type('开始之前请先安装修正补丁')
 
     await page
       .getByRole('navigation', { name: '主导航' })
       .getByRole('link', { name: '游戏库' })
       .click()
     const leave = page.getByRole('alertdialog')
-    await expect(leave.getByText('尚未保存的修改将会丢失')).toBeVisible()
+    await expect(leave.getByText('要放弃尚未保存的修改吗？')).toBeVisible()
     await leave.getByRole('button', { name: '继续编辑' }).click()
-    await expect(page).toHaveURL(/\/walkthrough\/new$/)
+    await expect(page).toHaveURL(/\/walkthrough\/edit$/)
 
     await page.getByRole('button', { name: '保存草稿' }).click()
-    await expect(page).toHaveURL(/\/zh\/game\/2\/walkthrough\/\d+\/edit$/)
-    await expect(page.getByRole('status').filter({ hasText: '草稿已保存' })).toBeVisible()
-    await expect(page.getByRole('button', { name: '撤销' })).toBeEnabled()
-    await page.getByRole('link', { name: '返回' }).click()
-
-    await expect(page).toHaveURL(/\/zh\/game\/2\/walkthrough\/\d+$/)
-    await expect(page.getByRole('heading', { name: title, level: 1 })).toBeVisible()
-    await expect(page.getByText('这篇攻略尚未发布，仅你可见')).toBeVisible()
-    await expect(page.getByRole('heading', { name: '共通线', level: 2 })).toBeVisible()
-    await expect(page.getByRole('heading', { name: '分支', level: 3 })).toBeVisible()
-    await expect(page.getByRole('listitem').filter({ hasText: '选 B' })).toBeVisible()
-    await expect(page.getByRole('columnheader', { name: '章节' })).toBeVisible()
-    await expect(page.getByRole('article').getByRole('row')).toHaveCount(5)
-    await expect(page.getByRole('article').locator('figcaption')).toHaveText('分支示意图')
-    const contents = page.getByRole('complementary').getByRole('navigation', { name: '目录' })
-    await expect(contents.getByRole('link', { name: '共通线' })).toBeVisible()
-    await expect(contents.getByRole('link', { name: '分支' })).toBeVisible()
-    const reading = new URL(page.url()).pathname
-
-    await page.getByRole('link', { name: '编辑', exact: true }).click()
-    await expect(page).toHaveURL(/\/zh\/game\/2\/walkthrough\/\d+\/edit$/)
-    const reopened = page.getByRole('textbox', { name: '正文' })
-    await expect(reopened.getByRole('heading', { name: '共通线', level: 2 })).toBeVisible()
-    await expect(reopened.getByRole('listitem')).toHaveText(['选 A', '选 B'])
-    await expect(reopened.getByRole('row')).toHaveCount(5)
-    await expect(reopened.getByRole('textbox', { name: '图片说明' })).toHaveValue('分支示意图')
-    await expect(page.getByRole('button', { name: '撤销' })).toBeDisabled()
-    await page.getByRole('textbox', { name: '标题' }).fill(`${title} 改`)
-    await expect(page.getByRole('status').filter({ hasText: '有未保存的修改' })).toBeVisible()
-    await page.getByRole('button', { name: '保存草稿' }).click()
-    await expect(page.getByRole('status').filter({ hasText: '草稿已保存' })).toBeVisible()
-    await expect(page).toHaveURL(/\/edit$/)
+    await expectNotice(page, '草稿已保存')
+    await page.goto('/zh/game/2/walkthrough')
+    const guide = page.getByRole('region', { name: '攻略' })
+    await expect(guide.getByText('草稿', { exact: true })).toBeVisible()
+    await expect(guide.getByText('开始之前请先安装修正补丁')).toBeVisible()
+    await expect(guide.getByRole('heading', { name: 'ルビイ', level: 2 })).toBeVisible()
+    const routes = guide.getByRole('navigation', { name: '线路' })
+    await expect(routes.getByRole('link')).toHaveText([/ルビイ$/, /真结局$/])
+    await routes.getByRole('link', { name: /真结局/ }).click()
+    await expect(page).toHaveURL(/\/zh\/game\/2\/walkthrough\?route=2$/)
+    await expect(guide.getByRole('heading', { name: '真结局', level: 2 })).toBeVisible()
+    await expect(guide.getByText('二周目')).toBeVisible()
+    await expect(guide.getByText('须先通关')).toBeVisible()
+    await guide.getByRole('link', { name: '存于「ルビイ」' }).click()
+    await expect(page).toHaveURL(/\/zh\/game\/2\/walkthrough\?route=1#save-2$/)
+    await expect(guide.getByRole('list', { name: '步骤' }).getByRole('listitem')).toHaveText([
+      '【START】',
+      '1去天文台',
+      '存档 01',
+      '存档 02',
+      '2留下光线',
+      '光 END',
+    ])
 
     await page.goto('/zh/user/2/walkthroughs')
-    const written = page.getByRole('list', { name: '撰写的攻略' })
-    await expect(written.getByRole('link', { name: `${title} 改` })).toHaveAttribute(
-      'href',
-      reading,
-    )
-    const shelves = page.getByRole('group', { name: '攻略状态' })
-    await shelves.getByRole('button', { name: '草稿' }).click()
-    await expect(page).toHaveURL(/\/zh\/user\/2\/walkthroughs\?status=draft$/)
-    await expect(written.getByRole('link', { name: `${title} 改` })).toBeVisible()
-    await shelves.getByRole('button', { name: '已发布' }).click()
-    await expect(page).toHaveURL(/\?status=published$/)
-    await expect(written.getByRole('link', { name: `${title} 改` })).toHaveCount(0)
+    const written = page.getByRole('list', { name: '编写的攻略' })
+    await expect(written.getByRole('listitem')).toHaveCount(1)
+    await expect(written.getByText('草稿', { exact: true })).toBeVisible()
+    await expect(written.getByText(/^2 条线路/)).toBeVisible()
+    await written.getByRole('link').first().click()
+    await expect(page).toHaveURL(/\/zh\/game\/2\/walkthrough\/edit$/)
+    await expect(steps).toHaveValue('# 【START】\n去天文台\n存档 01\n存档 02\n留下 | 光线')
 
-    await page.goto(reading)
     await page.getByRole('button', { name: '发布', exact: true }).click()
     await expectNotice(page, '攻略已')
-    await expect(page.getByText('这篇攻略尚未发布，仅你可见')).toHaveCount(0)
-    await remove(page)
     await expect(page).toHaveURL(/\/zh\/game\/2\/walkthrough$/)
-    await expect(page.getByText(`${title} 改`)).toHaveCount(0)
+    await expect(guide.getByText('草稿', { exact: true })).toHaveCount(0)
+
+    await guide.getByRole('link', { name: '编辑我的攻略' }).click()
+    await page.getByRole('button', { name: '更多操作' }).click()
+    await page.getByRole('menuitem', { name: '删除攻略' }).click()
+    const confirm = page.getByRole('alertdialog')
+    await expect(confirm.getByText('攻略删除后无法恢复')).toBeVisible()
+    await confirm.getByRole('button', { name: '删除' }).click()
+    await expectNotice(page, '攻略已删除')
+    await expect(page).toHaveURL(/\/zh\/game\/2\/walkthrough$/)
+    await expect(page.getByText('暂无攻略')).toBeVisible()
   })
 
-  test('says what is missing and leaves unsaved writing on request', async ({ page }) => {
+  test('says which route is not finished before publishing and lets unsaved writing go', async ({
+    page,
+  }) => {
     await page.goto('/zh/game/2/walkthrough')
-    await page.getByRole('link', { name: '写攻略' }).first().click()
-    await expect(page).toHaveURL(/\/zh\/game\/2\/walkthrough\/new$/)
+    await page.getByRole('link', { name: '写攻略' }).click()
+    await expect(page).toHaveURL(/\/zh\/game\/2\/walkthrough\/edit$/)
+    const parts = page.getByRole('navigation', { name: '线路' })
     await page.getByRole('button', { name: '发布', exact: true }).click()
-    await expect(page.getByText('请输入标题')).toBeVisible()
-    await expect(page.getByText('请输入正文')).toBeVisible()
-    await expect(page.getByRole('textbox', { name: '标题' })).toBeFocused()
+    await expectNotice(page, '攻略须有说明或至少一条线路')
+    await parts.getByRole('button', { name: '添加线路' }).click()
+    await page.getByRole('textbox', { name: '线路名称' }).fill('第一条')
+    await page.getByRole('textbox', { name: '步骤' }).fill('左')
+    await parts.getByRole('button', { name: '添加线路' }).click()
+    await parts.getByRole('button', { name: /第一条/ }).click()
+    await page.getByRole('button', { name: '发布', exact: true }).click()
+    await expect(page.getByText('请填写线路名称')).toBeVisible()
+    await expect(page.getByText('请至少填写一步')).toBeVisible()
+    await expect(parts.getByRole('button', { name: /未命名线路/ })).toHaveAttribute(
+      'aria-current',
+      'true',
+    )
+    await page.getByRole('textbox', { name: '线路名称' }).fill('第二条')
+    await expect(page.getByText('请填写线路名称')).toHaveCount(0)
 
-    await page.getByRole('textbox', { name: '正文' }).click()
-    await page.keyboard.type('写到一半')
-    await expect(page.getByText('有未保存的修改')).toBeVisible()
+    await page.getByRole('button', { name: '删除这条线路' }).click()
+    await expect(parts.getByRole('button', { name: /第二条/ })).toHaveCount(0)
     await page.evaluate(() => history.back())
     const leave = page.getByRole('alertdialog')
-    await expect(leave.getByText('尚未保存的修改将会丢失')).toBeVisible()
-    await leave.getByRole('button', { name: '离开' }).click()
-    await expect(page).toHaveURL(/\/zh\/game\/2\/walkthrough$/)
+    await expect(leave.getByText('要放弃尚未保存的修改吗？')).toBeVisible()
+    await leave.getByRole('button', { name: '放弃修改' }).click()
     await expect(leave).toBeHidden()
-  })
-
-  test('holds a walkthrough sent for publication until it is reviewed', async ({ page }) => {
-    const title = `E2E 待审攻略 ${Date.now()}`
-    await page.goto('/zh/game/2/walkthrough/new')
-    await page.getByRole('textbox', { name: '标题' }).fill(title)
-    await page.getByRole('textbox', { name: '正文' }).fill('只有一句。')
-    await page.getByRole('button', { name: '发布', exact: true }).click()
-    await expect(page).toHaveURL(/\/zh\/game\/2\/walkthrough\/\d+$/)
-    await expectNotice(page, '攻略已')
-    await expect(page.getByText(/这篇攻略(正在审核|未通过审核)/)).toBeVisible()
-    await remove(page)
+    await expect(page).toHaveURL(/\/zh\/game\/2\/walkthrough$/)
   })
 })

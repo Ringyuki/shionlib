@@ -1,77 +1,54 @@
+import { characterName } from '~/features/character'
 import { gamePath } from '~/features/game'
-import type { ApiQuery, Schema } from '~/shared/api/types'
-import { pageKey } from '~/shared/http/paging'
+import type { Schema } from '~/shared/api/types'
 import type { Locale } from '~/shared/i18n/locale'
-import { sameDocument, type RichDocument, type RichSection } from '~/shared/richtext/rich-text'
 
 export type Walkthrough = Schema<'WalkthroughDTO'>
 
-export type WalkthroughItem = Schema<'WalkthroughItemDTO'>
+export type Route = Schema<'WalkthroughRouteDTO'>
+
+export type WalkthroughSummary = Schema<'WalkthroughSummaryDTO'>
 
 export type UserWalkthrough = Schema<'UserWalkthroughDTO'>
 
-export type GameRef = Pick<
-  Schema<'GameHeaderDTO'>,
-  'id' | 'title_jp' | 'title_zh' | 'title_en' | 'covers' | 'developers'
+type Portrayed = Pick<
+  Schema<'GameCharacterDTO'>,
+  'id' | 'name_jp' | 'name_zh' | 'name_en' | 'image'
 >
+
+export type Credit = Pick<Schema<'GameCharacterCreditDTO'>, 'image'> & { character: Portrayed }
+
+export type Face = { id: number; name: string; picture: string | undefined }
+
+export type Portrait = { id: number; picture: string }
 
 export type WalkthroughState = 'published' | 'draft' | 'reviewing' | 'hidden'
 
-export type Shelf = (typeof shelves)[number]
-
-export type Walkthroughs = { gameId: number; items: WalkthroughItem[]; total: number; page: number }
-
-export type UserWalkthroughs = {
-  items: UserWalkthrough[]
-  total: number
-  page: number
-  shelf: Shelf
+export type Guides = {
+  gameId: number
+  summaries: WalkthroughSummary[]
+  shown: Walkthrough | undefined
 }
 
-export type Reading = {
-  game: GameRef
-  resources: number
-  walkthrough: Walkthrough
-  content: RichDocument
-  others: WalkthroughItem[]
-}
+export type UserWalkthroughs = { items: UserWalkthrough[]; total: number; page: number }
 
-export type Writing = { title: string; content: RichDocument }
+export type Linked = { ordinal: number; name: string }
 
-export type Draft = Writing & {
-  game: GameRef
-  walkthroughId: number | undefined
-  authorId: number | undefined
-  state: WalkthroughState
-}
+export type Row =
+  | { kind: 'choice'; number: number; text: string; remark: string }
+  | { kind: 'save'; slot: string }
+  | { kind: 'load'; slot: string; source: Linked | undefined }
+  | { kind: 'note'; text: string }
+  | { kind: 'gap' }
+  | { kind: 'ending'; text: string }
 
-export type Saved = { id: number; state: WalkthroughState }
-
-export type Contents = { id: string; label: string; children: { id: string; label: string }[] }
-
-type Stated = Pick<WalkthroughItem, 'status' | 'review_pending'>
-
-type StoredStatus = NonNullable<ApiQuery<'/user/datas/{id}/walkthroughs', 'get'>['status']>
-
-export const pageSize = 20
+type Stated = Pick<WalkthroughSummary, 'status' | 'review_pending'>
 
 export const userPageSize = 20
 
-export const othersShown = 5
+export const routeKey = 'route'
 
-export const shelves = ['all', 'published', 'draft'] as const
-
-export const shelfKey = 'status'
-
-export const legacyEditedKey = 'walkthrough_id'
-
-export const canvasColumn = 'mx-auto w-full max-w-3xl px-4 sm:px-6'
-
-const shelfStatus: Record<Shelf, StoredStatus | undefined> = {
-  all: undefined,
-  published: 'PUBLISHED',
-  draft: 'DRAFT',
-}
+export const portraitsShown = 2
 
 export function walkthroughsPath(locale: Locale, gameId: number): string {
   return gamePath(locale, gameId, 'walkthrough')
@@ -81,30 +58,16 @@ export function walkthroughPath(locale: Locale, gameId: number, walkthroughId: n
   return `${walkthroughsPath(locale, gameId)}/${walkthroughId}`
 }
 
-export function writingPath(locale: Locale, gameId: number, walkthroughId?: number): string {
-  return walkthroughId === undefined
-    ? `${walkthroughsPath(locale, gameId)}/new`
-    : `${walkthroughPath(locale, gameId, walkthroughId)}/edit`
+export function writingPath(locale: Locale, gameId: number): string {
+  return `${walkthroughsPath(locale, gameId)}/edit`
 }
 
-export function statusOf(shelf: Shelf): StoredStatus | undefined {
-  return shelfStatus[shelf]
+export function routeSearch(index: number): string {
+  return `?${routeKey}=${index + 1}`
 }
 
-export function searchOnShelf(search: string, shelf: Shelf): string {
-  const params = new URLSearchParams(search)
-  params.delete(pageKey)
-  if (shelf === 'all') {
-    params.delete(shelfKey)
-  } else {
-    params.set(shelfKey, shelf)
-  }
-  const kept = params.toString()
-  return kept === '' ? '' : `?${kept}`
-}
-
-export function writtenBy(draft: Pick<Draft, 'authorId'>, viewerId: number): boolean {
-  return draft.authorId === undefined || draft.authorId === viewerId
+export function saveAnchor(slot: string): string {
+  return `save-${numbered(slot)}`
 }
 
 export function stateOf(walkthrough: Stated): WalkthroughState {
@@ -117,23 +80,89 @@ export function stateOf(walkthrough: Stated): WalkthroughState {
   return walkthrough.review_pending ? 'reviewing' : 'hidden'
 }
 
-export function isUnsaved(written: Writing, stored: Writing): boolean {
-  if (written.title !== stored.title) {
-    return true
-  }
-  return written.content !== stored.content && !sameDocument(written.content, stored.content)
+export function writtenBy(
+  summaries: readonly WalkthroughSummary[],
+  viewerId: number | undefined,
+): WalkthroughSummary | undefined {
+  return summaries.find(summary => summary.creator.id === viewerId)
 }
 
-export function contentsOf(sections: readonly RichSection[]): Contents[] {
-  const contents: Contents[] = []
-  for (const section of sections) {
-    const entry = { id: section.id, label: section.title }
-    const chapter = contents.at(-1)
-    if (section.level === 3 && chapter !== undefined) {
-      chapter.children.push(entry)
-    } else {
-      contents.push({ ...entry, children: [] })
-    }
+export function facesOf(credits: readonly Credit[], locale: Locale): Face[] {
+  return credits.map(credit => ({
+    id: credit.character.id,
+    name: characterName(credit.character, locale),
+    picture: credit.image ?? credit.character.image ?? undefined,
+  }))
+}
+
+export function facesIn(route: Pick<Route, 'characters'>, faces: readonly Face[]): Face[] {
+  return (route.characters ?? []).flatMap(id => faces.find(face => face.id === id) ?? [])
+}
+
+export function portraitsIn(route: Pick<Route, 'characters'>, faces: readonly Face[]): Portrait[] {
+  return facesIn(route, faces).flatMap(({ id, picture }) =>
+    picture === undefined ? [] : { id, picture },
+  )
+}
+
+export function shownRoute(
+  routes: readonly Route[],
+  ordinal: number | undefined,
+): number | undefined {
+  if (routes.length === 0) {
+    return undefined
   }
-  return contents
+  return ordinal !== undefined && ordinal <= routes.length ? ordinal - 1 : 0
+}
+
+export function conditioned(route: Pick<Route, 'requires' | 'condition'>): boolean {
+  return (route.requires ?? []).length > 0 || route.condition !== ''
+}
+
+export function requiredBy(routes: readonly Route[], index: number): Linked[] {
+  const required = routes[index]?.requires ?? []
+  return routes.flatMap((route, at) =>
+    required.includes(route.key) ? { ordinal: at + 1, name: route.name } : [],
+  )
+}
+
+export function rowsOf(routes: readonly Route[], index: number): Row[] {
+  const route = routes[index]
+  if (route === undefined) {
+    return []
+  }
+  let choices = 0
+  const rows = (route.steps ?? []).map((step): Row => {
+    switch (step.kind) {
+      case 'choice':
+        choices += 1
+        return { kind: 'choice', number: choices, text: step.text, remark: step.remark }
+      case 'save':
+        return { kind: 'save', slot: step.slot }
+      case 'load':
+        return { kind: 'load', slot: step.slot, source: savedIn(routes, index, step.slot) }
+      case 'note':
+        return { kind: 'note', text: step.text }
+      case 'gap':
+        return { kind: 'gap' }
+    }
+  })
+  return route.ending === '' ? rows : [...rows, { kind: 'ending', text: route.ending }]
+}
+
+function savedIn(routes: readonly Route[], index: number, slot: string): Linked | undefined {
+  const saves = (route: Route) =>
+    (route.steps ?? []).some(step => step.kind === 'save' && numbered(step.slot) === numbered(slot))
+  const here = routes[index]
+  if (here === undefined || saves(here)) {
+    return undefined
+  }
+  const earlier = routes.slice(0, index).findLastIndex(saves)
+  const found = earlier === -1 ? routes.findIndex(saves) : earlier
+  const source = routes[found]
+  return source === undefined ? undefined : { ordinal: found + 1, name: source.name }
+}
+
+function numbered(slot: string): string {
+  return slot.replace(/^0+(?=\d)/, '')
 }

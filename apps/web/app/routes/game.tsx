@@ -3,28 +3,27 @@ import { countComments } from '~/features/comment'
 import { FavoriteButton, isFavorite } from '~/features/favorite'
 import { GamePage, gameDescription, gameTitle, loadGamePage, loadScores } from '~/features/game'
 import { loadGameResources, summarizeResources } from '~/features/resource'
-import { countWalkthroughs } from '~/features/walkthrough'
 import { isLocale } from '~/shared/i18n/locale.schema'
 import { idParam } from '~/shared/route/params'
 import { routeLoader } from '~/shared/route/route.server'
 import type { Route } from './+types/game'
 
+export { keptThroughSearch as shouldRevalidate } from '~/shared/route/revalidation'
+
 export function loader(args: Route.LoaderArgs) {
   const id = idParam(args.params.id)
   return routeLoader(args, async api => {
-    const [page, favorited, resources, commentCount, walkthroughCount] = await Promise.all([
+    const [page, favorited, resources, commentCount] = await Promise.all([
       loadGamePage(api, id),
       isFavorite(api, id),
       loadGameResources(api, id),
       countComments(api, id),
-      countWalkthroughs(api, id),
     ])
     return {
       ...page,
       favorited,
       resources,
       commentCount,
-      walkthroughCount,
       scores: loadScores(api, page.header),
     }
   })
@@ -41,23 +40,13 @@ export function meta({ loaderData, params }: Route.MetaArgs) {
 }
 
 export default function GameRoute({ loaderData }: Route.ComponentProps) {
-  const {
-    header,
-    details,
-    characters,
-    scores,
-    resources,
-    favorited,
-    commentCount,
-    walkthroughCount,
-  } = loaderData
+  const { header, details, characters, scores, resources, favorited, commentCount } = loaderData
   return (
     <GamePage
       header={header}
       details={details}
       characterCount={characters.length}
       commentCount={commentCount}
-      walkthroughCount={walkthroughCount}
       scores={scores}
       resources={summarizeResources(resources)}
       favorite={<FavoriteButton gameId={header.id} favorited={favorited} />}

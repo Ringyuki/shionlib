@@ -20,7 +20,7 @@ type Placed = Pick<Activity, 'id' | 'user' | 'created'> & { game: NonNullable<Ac
 export type Happening =
   | (Placed & { kind: 'resources'; resourceId: number; files: FeedFile[] })
   | (Placed & { kind: 'comments'; commentId: number })
-  | (Placed & { kind: 'walkthroughs'; walkthroughId: number; guide: string })
+  | (Placed & { kind: 'walkthroughs'; walkthroughId: number })
 
 export const feedKinds = ['all', 'resources', 'comments', 'walkthroughs'] as const
 
@@ -94,5 +94,5 @@ function happeningOf(activity: Activity): Happening | undefined {
   }
   return walkthrough === null
     ? undefined
-    : { ...placed, kind: 'walkthroughs', walkthroughId: walkthrough.id, guide: walkthrough.title }
+    : { ...placed, kind: 'walkthroughs', walkthroughId: walkthrough.id }
 }

@@ -9,7 +9,6 @@ export default [
   route('resources/comments/like', 'routes/resources.comments.like.ts'),
   route('resources/favorites', 'routes/resources.favorites.ts'),
   route('resources/walkthroughs', 'routes/resources.walkthroughs.ts'),
-  route('resources/walkthroughs/publish', 'routes/resources.walkthroughs.publish.ts'),
   route('resources/walkthroughs/remove', 'routes/resources.walkthroughs.remove.ts'),
   route('resources/favorites/lists', 'routes/resources.favorites.lists.ts'),
   route('resources/favorites/list-edit', 'routes/resources.favorites.list-edit.ts'),
@@ -86,22 +85,19 @@ export default [
         route('developer/:id', 'routes/developer.tsx'),
         route('character/:id', 'routes/character.tsx'),
         route('message/:category?', 'routes/messages.tsx'),
-        layout('routes/walkthrough.write.tsx', [
-          route('game/:id/walkthrough/new', 'routes/walkthrough.write.address.ts', {
-            id: 'walkthrough-new',
-          }),
-          route('game/:id/walkthrough/:walkthroughId/edit', 'routes/walkthrough.write.address.ts', {
-            id: 'walkthrough-edit',
-          }),
-        ]),
-        route('game/:id/walkthrough/edit', 'routes/walkthrough-legacy.ts'),
-        route('game/:id/walkthrough/:walkthroughId', 'routes/walkthrough.tsx'),
+        route('game/:id/walkthrough/edit', 'routes/walkthrough.write.tsx'),
+        route('game/:id/walkthrough/new', 'routes/walkthrough-legacy.ts', {
+          id: 'walkthrough-new-legacy',
+        }),
+        route('game/:id/walkthrough/:walkthroughId/edit', 'routes/walkthrough-legacy.ts', {
+          id: 'walkthrough-edit-legacy',
+        }),
         route('game/:id', 'routes/game.tsx', [
           index('routes/game.resources.tsx'),
           route('info', 'routes/game.info.tsx'),
           route('characters', 'routes/game.characters.tsx'),
           route('comments', 'routes/game.comments.tsx'),
-          route('walkthrough', 'routes/game.walkthroughs.tsx'),
+          route('walkthrough/:walkthroughId?', 'routes/game.walkthroughs.tsx'),
         ]),
         route('*', 'routes/not-found.ts'),
       ]),

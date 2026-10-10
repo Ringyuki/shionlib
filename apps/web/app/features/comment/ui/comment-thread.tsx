@@ -1,6 +1,7 @@
 import { cn, Collapsible, CollapsibleContent, CollapsibleTrigger, Stack } from '@hina-ui/react'
 import { Fragment, memo, useCallback, useRef, useState } from 'react'
 import { useTranslations } from 'use-intl'
+import { useAimedHash } from '~/shared/route/use-aimed'
 import { Button } from '~/shared/ui/button'
 import { holdInPlace, startsInView } from '~/shared/ui/hold-in-place'
 import {
@@ -10,7 +11,6 @@ import {
   type CommentThread as Thread,
   type Writer,
 } from '../comment'
-import { useAimedHash } from '../use-comment-focus'
 import { CommentEntry } from './comment-entry'
 import { NewComment } from './new-comment'
 import { ReplyBox } from './reply-box'

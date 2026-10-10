@@ -3282,23 +3282,6 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/walkthrough": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Create a walkthrough */
-        post: operations["walkthrough.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/walkthrough/game/{id}": {
         parameters: {
             query?: never;
@@ -3306,9 +3289,26 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** List walkthroughs of a game */
+        /** List the published walkthroughs of a game, the caller's own first even when it is not published, then by latest update */
         get: operations["walkthrough.listByGame"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/walkthrough/game/{id}/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Write the caller's walkthrough of a game, replacing what they wrote before */
+        put: operations["walkthrough.write"];
         post?: never;
         delete?: never;
         options?: never;
@@ -3331,8 +3331,7 @@ export type paths = {
         delete: operations["walkthrough.delete"];
         options?: never;
         head?: never;
-        /** Replace a walkthrough */
-        patch: operations["walkthrough.update"];
+        patch?: never;
         trace?: never;
     };
 };
@@ -3392,7 +3391,6 @@ export type components = {
         ActivityWalkthroughDTO: {
             /** Format: int64 */
             id: number;
-            title: string;
         };
         AdAdminDTO: {
             aspect: string;
@@ -3912,7 +3910,6 @@ export type components = {
             name: string;
         };
         AdminWalkthroughDetailDTO: {
-            content: components["schemas"]["RichTextDocument"];
             /** Format: date-time */
             created: string;
             creator: components["schemas"]["AdminWalkthroughCreatorDTO"];
@@ -3922,10 +3919,11 @@ export type components = {
             id: number;
             lang: string | null;
             moderations: components["schemas"]["AdminWalkthroughEventDTO"][] | null;
+            note?: components["schemas"]["RichTextDocument"];
+            routes: components["schemas"]["WalkthroughRouteDTO"][] | null;
             /** @enum {string} */
             status: "DRAFT" | "PUBLISHED" | "HIDDEN" | "DELETED";
             text: string;
-            title: string;
             /** Format: date-time */
             updated: string;
         };
@@ -3966,8 +3964,8 @@ export type components = {
             moderation?: components["schemas"]["AdminWalkthroughModerationDTO"];
             /** @enum {string} */
             status: "DRAFT" | "PUBLISHED" | "HIDDEN" | "DELETED";
+            /** @description Everything written in it as plain text: the note, then each route's name, condition, steps and ending */
             text: string;
-            title: string;
             /** Format: date-time */
             updated: string;
         };
@@ -4678,7 +4676,7 @@ export type components = {
          * Format: int64
          * @enum {integer}
          */
-        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 450101 | 450102 | 450103 | 450104 | 450105 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 610101 | 610102 | 620101 | 620102 | 620103 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102;
+        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 450101 | 450102 | 450103 | 450104 | 450105 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 610101 | 610102 | 620101 | 620102 | 620103 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102;
         CatalogHitDTO: {
             cover: string | null;
             developer: string | null;
@@ -4962,14 +4960,6 @@ export type components = {
             isPrivate?: boolean;
             message?: string;
             name?: string;
-        };
-        CreateWalkthroughInputBody: {
-            content: components["schemas"]["RichTextDocument"];
-            /** Format: int64 */
-            game_id: number;
-            /** @enum {string} */
-            status: "DRAFT" | "PUBLISHED" | "HIDDEN" | "DELETED";
-            title: string;
         };
         DeletedCharacterDTO: {
             /** Format: int64 */
@@ -6121,6 +6111,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeListWalkthroughSummaryDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["WalkthroughSummaryDTO"][] | null;
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeMalwareCaseDetailDTO: {
             /** Format: int64 */
             code: number;
@@ -6696,16 +6696,6 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["WalkthroughDTO"];
-            message: string;
-            meta?: components["schemas"]["Meta"];
-            requestId: string;
-            /** Format: date-time */
-            timestamp: string;
-        };
-        EnvelopeWalkthroughPageDTO: {
-            /** Format: int64 */
-            code: number;
-            data: components["schemas"]["WalkthroughPageDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -7956,12 +7946,6 @@ export type components = {
             /** @enum {string} */
             status: "NEW" | "DONE" | "EXPIRED" | "REFUND";
         };
-        UpdateWalkthroughInputBody: {
-            content: components["schemas"]["RichTextDocument"];
-            /** @enum {string} */
-            status: "DRAFT" | "PUBLISHED" | "HIDDEN" | "DELETED";
-            title: string;
-        };
         UploadChunkDTO: {
             /** Format: int64 */
             chunk_index: number;
@@ -8111,20 +8095,15 @@ export type components = {
             name: string;
         };
         UserWalkthroughDTO: {
-            /** Format: date-time */
-            created: string;
-            creator: components["schemas"]["UserSummaryDTO"];
-            edited: boolean;
-            /** @description The first words of the text, without what is marked as a spoiler */
-            excerpt: string;
             game: components["schemas"]["GameCardDTO"];
             /** Format: int64 */
             id: number;
             lang: string | null;
             review_pending: boolean;
+            /** Format: int64 */
+            route_count: number;
             /** @enum {string} */
             status: "DRAFT" | "PUBLISHED" | "HIDDEN" | "DELETED";
-            title: string;
             /** Format: date-time */
             updated: string;
         };
@@ -8164,61 +8143,99 @@ export type components = {
             votecount: number;
         };
         WalkthroughDTO: {
-            content?: components["schemas"]["RichTextDocument"];
             /** Format: date-time */
             created: string;
             creator: components["schemas"]["UserSummaryDTO"];
-            edited: boolean;
-            /** @description The first words of the text, without what is marked as a spoiler */
-            excerpt: string;
             /** Format: int64 */
             game_id: number;
             /** Format: int64 */
             id: number;
             lang: string | null;
+            /** @description What belongs to no route; left out when nothing was written */
+            note?: components["schemas"]["RichTextDocument"];
             /** @description True while a walkthrough sent for publication waits for review; it is HIDDEN until then */
             review_pending: boolean;
+            /** @description In the order they are best played */
+            routes: components["schemas"]["WalkthroughRouteDTO"][] | null;
             /** @enum {string} */
             status: "DRAFT" | "PUBLISHED" | "HIDDEN" | "DELETED";
-            text: string;
-            title: string;
             /** Format: date-time */
             updated: string;
         };
-        WalkthroughItemDTO: {
-            /** Format: date-time */
-            created: string;
+        WalkthroughRouteDTO: {
+            /** @description Ids of the game's characters the route is about; one the game no longer lists is to be skipped */
+            characters: number[] | null;
+            /** @description What else opens the route */
+            condition: string;
+            ending: string;
+            key: string;
+            name: string;
+            /** @description Keys of the routes to finish before this one */
+            requires: string[] | null;
+            steps: components["schemas"]["WalkthroughStepDTO"][] | null;
+        };
+        WalkthroughRouteInput: {
+            /** @description Ids of the game's characters the route is about */
+            characters?: number[] | null;
+            /** @description What else opens the route */
+            condition?: string;
+            ending?: string;
+            /** @description Name the client gives the route so that other routes can refer to it; no two routes share one */
+            key: string;
+            name: string;
+            /** @description Keys of the routes to finish before this one; a key of no other route is dropped */
+            requires?: string[] | null;
+            steps: components["schemas"]["WalkthroughStepInput"][] | null;
+        };
+        WalkthroughStepDTO: {
+            /**
+             * @description A choice to pick, a save to make, a save to load, a remark, or a pause between groups of steps
+             * @enum {string}
+             */
+            kind: "choice" | "save" | "load" | "note" | "gap";
+            /** @description What a choice leads to */
+            remark: string;
+            /** @description Number of the save that a save or load step names */
+            slot: string;
+            /** @description What a choice or a note says */
+            text: string;
+        };
+        WalkthroughStepInput: {
+            /**
+             * @description A choice to pick, a save to make, a save to load, a remark, or a pause between groups of steps
+             * @enum {string}
+             */
+            kind: "choice" | "save" | "load" | "note" | "gap";
+            /** @description What a choice leads to */
+            remark?: string;
+            /** @description Number of the save that a save or load step names; required for them */
+            slot?: string;
+            /** @description What a choice or a note says; required for them */
+            text?: string;
+        };
+        WalkthroughSummaryDTO: {
             creator: components["schemas"]["UserSummaryDTO"];
-            edited: boolean;
-            /** @description The first words of the text, without what is marked as a spoiler */
-            excerpt: string;
             /** Format: int64 */
             id: number;
             lang: string | null;
             review_pending: boolean;
+            /** Format: int64 */
+            route_count: number;
             /** @enum {string} */
             status: "DRAFT" | "PUBLISHED" | "HIDDEN" | "DELETED";
-            title: string;
             /** Format: date-time */
             updated: string;
         };
-        WalkthroughPageDTO: {
-            items: components["schemas"]["WalkthroughItemDTO"][] | null;
-            meta: components["schemas"]["WalkthroughPageMetaDTO"];
-        };
-        WalkthroughPageMetaDTO: {
-            /** Format: int64 */
-            content_limit: number;
-            /** Format: int64 */
-            currentPage: number;
-            /** Format: int64 */
-            itemCount: number;
-            /** Format: int64 */
-            itemsPerPage: number;
-            /** Format: int64 */
-            totalItems: number;
-            /** Format: int64 */
-            totalPages: number;
+        WriteWalkthroughInputBody: {
+            /** @description What belongs to no route: paragraphs with bold, links and spoilers */
+            note?: components["schemas"]["RichTextDocument"];
+            /** @description In the order they are best played */
+            routes: components["schemas"]["WalkthroughRouteInput"][] | null;
+            /**
+             * @description PUBLISHED asks for publication, which needs a note or a route, and a name and a step in every route
+             * @enum {string}
+             */
+            status: "DRAFT" | "PUBLISHED";
         };
     };
     responses: never;
@@ -11297,7 +11314,7 @@ export interface operations {
                 /** @description Items per page */
                 pageSize?: number;
                 search?: string;
-                sortBy?: "id" | "title" | "created" | "updated" | "status";
+                sortBy?: "id" | "created" | "updated" | "status";
                 sortOrder?: "asc" | "desc";
                 status?: "DRAFT" | "PUBLISHED" | "HIDDEN" | "DELETED";
                 creatorId?: number;
@@ -15310,7 +15327,6 @@ export interface operations {
                 page?: number;
                 /** @description Items per page */
                 pageSize?: number;
-                status?: "DRAFT" | "PUBLISHED" | "HIDDEN" | "DELETED";
             };
             header?: never;
             path: {
@@ -15848,21 +15864,55 @@ export interface operations {
             };
         };
     };
-    "walkthrough.create": {
+    "walkthrough.listByGame": {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeListWalkthroughSummaryDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "walkthrough.write": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateWalkthroughInputBody"];
+                "application/json": components["schemas"]["WriteWalkthroughInputBody"];
             };
         };
         responses: {
-            /** @description Created */
-            201: {
+            /** @description OK */
+            200: {
                 headers: {
                     "shionlib-auth-stale"?: string;
                     [name: string]: unknown;
@@ -15882,50 +15932,9 @@ export interface operations {
             };
         };
     };
-    "walkthrough.listByGame": {
-        parameters: {
-            query?: {
-                /** @description 1-based page number */
-                page?: number;
-                /** @description Items per page */
-                pageSize?: number;
-                status?: "DRAFT" | "PUBLISHED" | "HIDDEN" | "DELETED";
-            };
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    "shionlib-auth-stale"?: string;
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EnvelopeWalkthroughPageDTO"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
     "walkthrough.get": {
         parameters: {
-            query?: {
-                /** @description Only the literal true includes the editor state */
-                withContent?: string;
-            };
+            query?: never;
             header?: never;
             path: {
                 id: number;
@@ -15974,42 +15983,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EmptyEnvelope"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    "walkthrough.update": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateWalkthroughInputBody"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    "shionlib-auth-stale"?: string;
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EnvelopeWalkthroughDTO"];
                 };
             };
             /** @description Error */

@@ -11,7 +11,7 @@
   "did": {
     "resources": "<user></user> uploaded a resource for <game></game>",
     "comments": "<user></user> commented on <game></game>",
-    "walkthroughs": "<user></user> published <guide></guide>, a walkthrough for <game></game>"
+    "walkthroughs": "<user></user> published <guide>a walkthrough</guide> for <game></game>"
   },
   "empty": {
     "all": "Nothing has happened yet",

@@ -1,7 +1,13 @@
 import { Card, Form, FormField } from '@hina-ui/react'
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'use-intl'
-import { EditorOverlays, EditorSurface, useEditorLinking, useRichEditor } from '~/shared/editor'
+import {
+  EditorOverlays,
+  EditorSurface,
+  fieldFrame,
+  useEditorLinking,
+  useRichEditor,
+} from '~/shared/editor'
 import { useFormErrors } from '~/shared/form/use-form-errors'
 import {
   blankDocument,
@@ -11,7 +17,7 @@ import {
 } from '~/shared/richtext/rich-text'
 import { namesFields, useRefusalText, type Refused } from '~/shared/route/refusal'
 import { commentForm, type CommentValues } from '../comment.schema'
-import { fieldFrame, textArea } from './composer-field'
+import { textArea } from './composer-field'
 import { ComposerTools } from './composer-tools'
 
 type CommentComposerProps = {

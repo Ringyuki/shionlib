@@ -6,7 +6,7 @@ import { useGameTabs } from '../use-game-tabs'
 
 type GameTabsProps = {
   gameId: number
-  counts: { resources: number; characters: number; comments: number; walkthroughs: number }
+  counts: { resources: number; characters: number; comments: number }
   renderHeader: (tabs: ReactNode) => ReactNode
   children: ReactNode
 }
@@ -35,10 +35,7 @@ export function GameTabs({ gameId, counts, renderHeader, children }: GameTabsPro
         {t('comments')}
         <Count value={counts.comments} />
       </TabsTrigger>
-      <TabsTrigger value="walkthrough">
-        {t('walkthrough')}
-        <Count value={counts.walkthroughs} />
-      </TabsTrigger>
+      <TabsTrigger value="walkthrough">{t('walkthrough')}</TabsTrigger>
     </TabsList>
   )
   return (

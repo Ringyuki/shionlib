@@ -7,7 +7,6 @@ export function useWalkthroughSave() {
   const command = useCommand(
     useFetcher<typeof walkthroughSaveAction>(),
     href('/resources/walkthroughs'),
-    { revalidate: false },
   )
   return { ...command, run: (save: WalkthroughSave) => command.run(save) }
 }

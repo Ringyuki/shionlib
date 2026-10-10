@@ -4,88 +4,53 @@ import { isLocale } from '~/shared/i18n/locale.schema'
 import { keepWithinPages, requestedPage } from '~/shared/route/paging'
 import { idParam, optionalIdParam } from '~/shared/route/params'
 import { readCommand, routeAction, routeLoader } from '~/shared/route/route.server'
+import { userPageSize, writingPath } from './walkthrough'
+import { walkthroughRemovalCommand, walkthroughSaveCommand } from './walkthrough.schema'
 import {
-  legacyEditedKey,
-  pageSize,
-  shelfKey,
-  userPageSize,
-  writingPath,
-  writtenBy,
-} from './walkthrough'
-import {
-  shelfFrom,
-  walkthroughPublishCommand,
-  walkthroughRemovalCommand,
-  walkthroughSaveCommand,
-} from './walkthrough.schema'
-import {
-  loadDraft,
-  loadReading,
+  loadGuides,
   loadUserWalkthroughs,
-  loadWalkthroughs,
-  publishWalkthrough,
+  loadWriting,
   removeWalkthrough,
   saveWalkthrough,
 } from './walkthrough.use-cases'
 
-export async function walkthroughsLoader(args: LoaderFunctionArgs) {
+export async function guidesLoader(args: LoaderFunctionArgs) {
   const gameId = idParam(args.params.id)
-  const page = requestedPage(args.url)
-  const walkthroughs = await routeLoader(args, api => loadWalkthroughs(api, gameId, page))
-  keepWithinPages(args.url, walkthroughs.total, pageSize)
-  return walkthroughs
+  const walkthroughId = optionalIdParam(args.params.walkthroughId)
+  const guides = await routeLoader(args, api => loadGuides(api, gameId, walkthroughId))
+  if (guides === undefined) {
+    throw data(null, { status: 404 })
+  }
+  return guides
 }
 
 export async function userWalkthroughsLoader(args: LoaderFunctionArgs) {
   const userId = idParam(args.params.id)
   const page = requestedPage(args.url)
-  const shelf = shelfFrom(args.url.searchParams.get(shelfKey))
-  const walkthroughs = await routeLoader(args, api =>
-    loadUserWalkthroughs(api, userId, page, shelf),
-  )
+  const walkthroughs = await routeLoader(args, api => loadUserWalkthroughs(api, userId, page))
   keepWithinPages(args.url, walkthroughs.total, userPageSize)
   return walkthroughs
 }
 
-export async function readingLoader(args: LoaderFunctionArgs) {
+export function writingLoader(args: LoaderFunctionArgs) {
   const gameId = idParam(args.params.id)
-  const walkthroughId = idParam(args.params.walkthroughId)
-  const reading = await routeLoader(args, api => loadReading(api, gameId, walkthroughId))
-  if (reading === undefined) {
-    throw data(null, { status: 404 })
-  }
-  return reading
+  return routeLoader(args, async api => {
+    const viewer = await loadViewer(api)
+    return loadWriting(api, gameId, viewer?.id)
+  })
 }
 
-export async function writingLoader(args: LoaderFunctionArgs) {
-  const gameId = idParam(args.params.id)
-  const walkthroughId = optionalIdParam(args.params.walkthroughId)
-  const [draft, viewer] = await routeLoader(args, api =>
-    Promise.all([loadDraft(api, gameId, walkthroughId), loadViewer(api)]),
-  )
-  if (draft === undefined || (viewer !== null && !writtenBy(draft, viewer.id))) {
-    throw data(null, { status: 404 })
-  }
-  return draft
-}
-
-export function legacyWritingRedirect({ params, url }: LoaderFunctionArgs) {
+export function legacyWritingRedirect({ params }: LoaderFunctionArgs) {
   const gameId = idParam(params.id)
-  const walkthroughId = optionalIdParam(url.searchParams.get(legacyEditedKey) ?? undefined)
   if (!isLocale(params.lang)) {
     throw data(null, { status: 404 })
   }
-  return redirect(writingPath(params.lang, gameId, walkthroughId), 301)
+  return redirect(writingPath(params.lang, gameId), 301)
 }
 
 export async function walkthroughSaveAction(args: ActionFunctionArgs) {
   const save = await readCommand(args, walkthroughSaveCommand)
   return routeAction(args, api => saveWalkthrough(api, save))
-}
-
-export async function walkthroughPublishAction(args: ActionFunctionArgs) {
-  const publish = await readCommand(args, walkthroughPublishCommand)
-  return routeAction(args, api => publishWalkthrough(api, publish))
 }
 
 export async function walkthroughRemovalAction(args: ActionFunctionArgs) {

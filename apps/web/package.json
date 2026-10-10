@@ -18,6 +18,9 @@
   },
   "dependencies": {
     "@cap.js/wasm": "0.0.8",
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/sortable": "10.0.0",
+    "@dnd-kit/utilities": "3.2.2",
     "@floating-ui/dom": "^1.8.0",
     "@hina-ui/react": "^1.7.10",
     "@react-router/node": "^8.4.0",

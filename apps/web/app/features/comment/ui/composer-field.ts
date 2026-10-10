@@ -1,25 +1,9 @@
 import { cn } from '@hina-ui/react'
 
-export const fieldEdge = 'border-line-strong shadow-none'
-
-const frame = [
-  fieldEdge,
-  'transition-[border-color,box-shadow] duration-(--hn-duration-fast) ease-(--hn-ease-enter)',
-].join(' ')
-
-const calm = [
-  'focus-within:border-accent focus-within:ring-accent/20 focus-within:ring-3',
-  'data-linking:border-accent data-linking:ring-accent/20 data-linking:ring-3',
-].join(' ')
-
 const firstLine = [
   '[--lead:calc((2.75rem-2px-1lh)/2)] ps-3.5 pe-3 pt-(--lead)',
   'transition-[padding-bottom,min-height] duration-(--hn-duration-fast) ease-(--hn-ease-move)',
 ].join(' ')
-
-export function fieldFrame(refused: boolean): string {
-  return cn(frame, refused ? 'border-danger' : calm)
-}
 
 export function textArea(collapsible: boolean, open: boolean): string {
   if (!collapsible) {

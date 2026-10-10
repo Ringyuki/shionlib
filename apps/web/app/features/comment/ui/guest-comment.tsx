@@ -1,7 +1,8 @@
 import { Avatar, Card, cn, Inline, Text } from '@hina-ui/react'
 import { useTranslations } from 'use-intl'
 import { useAuthGate } from '~/shared/ui/auth-gate'
-import { fieldEdge, textArea } from './composer-field'
+import { fieldEdge } from '~/shared/editor'
+import { textArea } from './composer-field'
 
 export function GuestComment({ onSignedIn }: { onSignedIn: () => void }) {
   const t = useTranslations('comment')

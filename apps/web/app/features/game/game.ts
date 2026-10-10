@@ -91,6 +91,12 @@ export function gamePath(locale: Locale, id: number, tab: GameTab = 'resources')
   return tab === 'resources' ? base : `${base}/${tab}`
 }
 
+export function tabAt(pathname: string, pathOf: (tab: GameTab) => string): GameTab {
+  const within = (tab: GameTab) =>
+    pathname === pathOf(tab) || pathname.startsWith(`${pathOf(tab)}/`)
+  return gameTabs.find(tab => tab !== 'resources' && within(tab)) ?? 'resources'
+}
+
 export function tagPath(locale: Locale, tag: string): string {
   return `/${locale}/game?${new URLSearchParams({ tag })}`
 }

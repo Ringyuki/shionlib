@@ -11,7 +11,7 @@
   "did": {
     "resources": "<user></user> が<game></game>のリソースをアップロードしました",
     "comments": "<user></user> が<game></game>にコメントしました",
-    "walkthroughs": "<user></user> が<game></game>の攻略<guide></guide>を公開しました"
+    "walkthroughs": "<user></user> が<game></game>の<guide>攻略</guide>を公開しました"
   },
   "empty": {
     "all": "アクティビティはまだありません",

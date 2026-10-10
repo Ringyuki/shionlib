@@ -48,12 +48,12 @@ describe('happeningsOf', () => {
       happeningsOf([
         stored(3, 11, 5),
         activity(2, { comment: { id: 9, text: '好' } }),
-        activity(1, { type: 'WALKTHROUGH_CREATE', walkthrough: { id: 4, title: '全线攻略' } }),
+        activity(1, { type: 'WALKTHROUGH_CREATE', walkthrough: { id: 4 } }),
       ]),
     ).toMatchObject([
       { id: 3, kind: 'resources', resourceId: 5, files: [{ id: 11 }] },
       { id: 2, kind: 'comments', commentId: 9 },
-      { id: 1, kind: 'walkthroughs', walkthroughId: 4, guide: '全线攻略' },
+      { id: 1, kind: 'walkthroughs', walkthroughId: 4 },
     ])
   })
 

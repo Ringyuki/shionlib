@@ -6,6 +6,7 @@ import { commentPath } from '~/features/comment'
 import { gamePath, gameTitle } from '~/features/game'
 import { profilePath } from '~/features/profile'
 import { resourceAnchor } from '~/features/resource'
+import { walkthroughPath } from '~/features/walkthrough'
 import { useBytes } from '~/shared/i18n/use-bytes'
 import type { Happening } from '../activity'
 
@@ -20,7 +21,7 @@ export function HappeningRow({ happening }: { happening: Happening }) {
       ? { pathname: place, hash: resourceAnchor(happening.resourceId) }
       : happening.kind === 'comments'
         ? commentPath(locale, game.id, happening.commentId)
-        : `${place}/walkthrough/${happening.walkthroughId}`
+        : walkthroughPath(locale, game.id, happening.walkthroughId)
   const linked = (to: Parameters<typeof RouterLink>[0]['to'], label: ReactNode) => (
     <Link asChild>
       <RouterLink to={to} prefetch="intent">
@@ -35,7 +36,7 @@ export function HappeningRow({ happening }: { happening: Happening }) {
           user: () => linked(profilePath(locale, user.id), user.name),
           game: () =>
             linked(happening.kind === 'walkthroughs' ? place : target, gameTitle(game, locale)),
-          guide: () => (happening.kind === 'walkthroughs' ? linked(target, happening.guide) : null),
+          guide: chunks => linked(target, chunks),
         })}
       </Text>
       {happening.kind === 'resources' &&

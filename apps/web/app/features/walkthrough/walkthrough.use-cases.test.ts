@@ -1,51 +1,59 @@
 import { describe, expect, it } from 'vitest'
 import { fakeApi } from '~/shared/api/testing'
 import type { ApiData } from '~/shared/api/types'
-import { blankDocument, type RichDocument } from '~/shared/richtext/rich-text'
+import type { RichDocument } from '~/shared/richtext/rich-text'
+import type { WalkthroughSummary } from './walkthrough'
 import {
-  countWalkthroughs,
-  loadDraft,
-  loadReading,
+  loadGuides,
   loadUserWalkthroughs,
-  publishWalkthrough,
+  loadWriting,
+  removeWalkthrough,
   saveWalkthrough,
 } from './walkthrough.use-cases'
 
-const content: RichDocument = {
+const note: RichDocument = {
   type: 'doc',
-  content: [
-    { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: '共通线' }] },
-    { type: 'paragraph', content: [{ type: 'text', text: '选 A' }] },
-  ],
+  content: [{ type: 'paragraph', content: [{ type: 'text', text: 'セーブ01まで' }] }],
 }
 
 const walkthrough: ApiData<'/walkthrough/{id}', 'get'> = {
   id: 12,
   game_id: 7,
-  title: '全线攻略',
-  text: '共通线\n选 A',
-  excerpt: '共通线 选 A',
-  lang: 'zh',
+  note,
+  routes: [
+    {
+      key: 'a',
+      name: 'むぎ',
+      characters: [3],
+      requires: [],
+      condition: '',
+      ending: 'むぎEND',
+      steps: [{ kind: 'choice', text: '左', remark: '', slot: '' }],
+    },
+  ],
+  lang: 'jp',
   created: '2026-10-09T00:00:00Z',
   updated: '2026-10-09T00:00:00Z',
-  edited: false,
   status: 'PUBLISHED',
   review_pending: false,
   creator: { id: 2, name: 'kotori', avatar: null, is_sponsor: false },
-  content,
 }
 
-const header = {
+const summary = (id: number, creatorId: number): WalkthroughSummary => ({
+  id,
+  route_count: 1,
+  lang: 'jp',
+  updated: walkthrough.updated,
+  status: 'PUBLISHED',
+  review_pending: false,
+  creator: { ...walkthrough.creator, id: creatorId },
+})
+
+const header: ApiData<'/game/{id}/header', 'get'> = {
   id: 7,
   title_jp: 'タイトル',
   title_zh: '标题',
   title_en: '',
-  covers: null,
-  developers: null,
-}
-
-const gameHeader: ApiData<'/game/{id}/header', 'get'> = {
-  ...header,
   v_id: null,
   b_id: null,
   h_id: null,
@@ -60,156 +68,172 @@ const gameHeader: ApiData<'/game/{id}/header', 'get'> = {
   content_limit: 0,
 }
 
-const item = (
-  id: number,
-): NonNullable<ApiData<'/walkthrough/game/{id}', 'get'>['items']>[number] => ({
-  id,
-  title: `攻略 ${id}`,
-  excerpt: '',
-  lang: 'zh',
-  created: walkthrough.created,
-  updated: walkthrough.updated,
-  edited: false,
-  status: 'PUBLISHED',
-  review_pending: false,
-  creator: walkthrough.creator,
-})
+const cast: ApiData<'/game/{id}/characters', 'get'> = { characters: null, content_limit: 0 }
 
-const listed = (ids: number[]): ApiData<'/walkthrough/game/{id}', 'get'> => ({
-  items: ids.map(item),
-  meta: {
-    currentPage: 1,
-    itemCount: ids.length,
-    itemsPerPage: 20,
-    totalItems: ids.length,
-    totalPages: 1,
-    content_limit: 0,
-  },
-})
+const paths = (requests: readonly Request[]) => requests.map(each => new URL(each.url).pathname)
 
-function api() {
-  return fakeApi()
-    .on('get', '/game/{id}/header', gameHeader)
-    .on('get', '/walkthrough/{id}', walkthrough)
-    .on('get', '/walkthrough/game/{id}', listed([12, 13]))
-    .on('get', '/game/{id}/download-source', null)
-}
+describe('loadGuides', () => {
+  it('shows the first walkthrough listed when the address names none', async () => {
+    const { api, requests } = fakeApi()
+      .on('get', '/walkthrough/game/{id}', [summary(12, 2), summary(15, 3)])
+      .on('get', '/walkthrough/{id}', walkthrough)
+    const guides = await loadGuides(api, 7, undefined)
+    expect(guides?.summaries.map(each => each.id)).toEqual([12, 15])
+    expect(guides?.shown).toEqual(walkthrough)
+    expect(paths(requests)).toEqual(['/walkthrough/game/7', '/walkthrough/12'])
+  })
 
-describe('reading', () => {
-  it('loads a walkthrough with its game and the other walkthroughs of that game', async () => {
-    const fake = api()
-    await expect(loadReading(fake.api, 7, 12)).resolves.toEqual({
-      game: header,
-      resources: 0,
-      walkthrough,
-      content,
-      others: [item(13)],
+  it('shows the walkthrough the address names', async () => {
+    const { api, requests } = fakeApi()
+      .on('get', '/walkthrough/game/{id}', [summary(15, 3)])
+      .on('get', '/walkthrough/{id}', walkthrough)
+    expect((await loadGuides(api, 7, 12))?.shown?.id).toBe(12)
+    expect(paths(requests).toSorted()).toEqual(['/walkthrough/12', '/walkthrough/game/7'])
+  })
+
+  it('shows nothing for a game without walkthroughs', async () => {
+    const { api } = fakeApi().on('get', '/walkthrough/game/{id}', null)
+    expect(await loadGuides(api, 7, undefined)).toEqual({
+      gameId: 7,
+      summaries: [],
+      shown: undefined,
     })
-    const asked = fake.requests.find(request => request.url.includes('/walkthrough/12'))
-    expect(new URL(asked?.url ?? '').searchParams.get('withContent')).toBe('true')
-    const others = fake.requests.find(request => request.url.includes('/walkthrough/game/7'))
-    expect(new URL(others?.url ?? '').searchParams.get('status')).toBe('PUBLISHED')
   })
 
-  it('finds nothing under the address of another game', async () => {
-    await expect(loadReading(api().api, 8, 12)).resolves.toBeUndefined()
-    await expect(loadDraft(api().api, 8, 12)).resolves.toBeUndefined()
+  it('knows no walkthrough of another game under this address', async () => {
+    const { api } = fakeApi()
+      .on('get', '/walkthrough/game/{id}', [])
+      .on('get', '/walkthrough/{id}', walkthrough)
+    expect(await loadGuides(api, 8, 12)).toBeUndefined()
   })
 
-  it('counts the walkthroughs of a game', async () => {
-    const fake = fakeApi().on('get', '/walkthrough/game/{id}', listed([1, 2, 3]))
-    await expect(countWalkthroughs(fake.api, 7)).resolves.toBe(3)
+  it('leaves a walkthrough the viewer may not read to the error page', async () => {
+    const { api } = fakeApi()
+      .on('get', '/walkthrough/game/{id}', [])
+      .fail('get', '/walkthrough/{id}', 403, { code: 560102, message: 'not yours' })
+    await expect(loadGuides(api, 7, 12)).rejects.toMatchObject({ status: 403 })
   })
+})
 
-  it('asks for one shelf of what a user wrote', async () => {
-    const fake = fakeApi().on('get', '/user/datas/{id}/walkthroughs', {
+describe('loadUserWalkthroughs', () => {
+  it('asks for one page of what the user wrote', async () => {
+    const { api, requests } = fakeApi().on('get', '/user/datas/{id}/walkthroughs', {
       items: null,
       meta: {
-        currentPage: 1,
+        currentPage: 2,
         itemCount: 0,
         itemsPerPage: 20,
-        totalItems: 0,
-        totalPages: 1,
-        content_limit: 0,
+        totalItems: 21,
+        totalPages: 2,
         is_current_user: true,
+        content_limit: 0,
       },
     })
-    await expect(loadUserWalkthroughs(fake.api, 2, 1, 'draft')).resolves.toMatchObject({
-      shelf: 'draft',
-      total: 0,
-    })
-    await loadUserWalkthroughs(fake.api, 2, 1, 'all')
-    const asked = fake.requests.map(request => new URL(request.url).searchParams.get('status'))
-    expect(asked).toEqual(['DRAFT', null])
+    expect(await loadUserWalkthroughs(api, 5, 2)).toEqual({ items: [], total: 21, page: 2 })
+    expect(new URL(requests[0]?.url ?? '').search).toBe('?page=2&pageSize=20')
   })
 })
 
-describe('writing', () => {
-  it('starts an empty draft for a new walkthrough and fills one from an existing', async () => {
-    await expect(loadDraft(api().api, 7, undefined)).resolves.toEqual({
-      game: header,
-      walkthroughId: undefined,
-      authorId: undefined,
-      title: '',
-      content: blankDocument,
-      state: 'draft',
-    })
-    await expect(loadDraft(api().api, 7, 12)).resolves.toMatchObject({
-      walkthroughId: 12,
-      authorId: 2,
-      title: '全线攻略',
-      content,
-      state: 'published',
-    })
+describe('loadWriting', () => {
+  it('opens what the writer wrote before', async () => {
+    const { api } = fakeApi()
+      .on('get', '/game/{id}/header', header)
+      .on('get', '/game/{id}/characters', cast)
+      .on('get', '/walkthrough/game/{id}', [summary(15, 3), summary(12, 2)])
+      .on('get', '/walkthrough/{id}', walkthrough)
+    const writing = await loadWriting(api, 7, 2)
+    expect(writing.game).toEqual({ id: 7, title_jp: 'タイトル', title_zh: '标题', title_en: '' })
+    expect(writing.credits).toEqual([])
+    expect(writing.stored).toEqual(walkthrough)
   })
 
-  it('creates a walkthrough for the game and tells what it became', async () => {
-    const fake = fakeApi().on('post', '/walkthrough', { ...walkthrough, status: 'DRAFT' })
-    await expect(
-      saveWalkthrough(fake.api, { gameId: 7, title: ' 全线攻略 ', content, publish: false }),
-    ).resolves.toEqual({ id: 12, state: 'draft' })
-    await expect(fake.requests[0]?.json()).resolves.toMatchObject({
-      game_id: 7,
-      title: '全线攻略',
-      status: 'DRAFT',
-      content,
-    })
+  it('starts from nothing for a writer without a walkthrough and for a guest', async () => {
+    const fake = fakeApi()
+      .on('get', '/game/{id}/header', header)
+      .on('get', '/game/{id}/characters', cast)
+      .on('get', '/walkthrough/game/{id}', [summary(15, 3)])
+    expect((await loadWriting(fake.api, 7, 2)).stored).toBeUndefined()
+    expect((await loadWriting(fake.api, 7, undefined)).stored).toBeUndefined()
+    expect(paths(fake.requests).filter(path => path === '/walkthrough/game/7')).toHaveLength(1)
   })
+})
 
-  it('replaces an existing walkthrough', async () => {
-    const fake = fakeApi().on('patch', '/walkthrough/{id}', {
+describe('saveWalkthrough', () => {
+  const routes = [
+    {
+      key: 'a',
+      name: 'むぎ',
+      characters: [3],
+      requires: [],
+      condition: '',
+      ending: 'むぎEND',
+      steps: [
+        { kind: 'note' as const, text: '【START】', remark: '', slot: '' },
+        { kind: 'choice' as const, text: '左', remark: '', slot: '' },
+        { kind: 'choice' as const, text: 'メイド', remark: 'むぎ＆緋華', slot: '' },
+        { kind: 'save' as const, text: '', remark: '', slot: '01' },
+        { kind: 'gap' as const, text: '', remark: '', slot: '' },
+        { kind: 'load' as const, text: '', remark: '', slot: '01' },
+      ],
+    },
+  ]
+
+  it('sends each step with the fields of its kind and asks for publication', async () => {
+    const { api, requests } = fakeApi().on('put', '/walkthrough/game/{id}/mine', {
       ...walkthrough,
       status: 'HIDDEN',
       review_pending: true,
     })
-    await expect(
-      saveWalkthrough(fake.api, {
-        gameId: 7,
-        walkthroughId: 12,
-        title: '全线攻略',
-        content,
-        publish: true,
-      }),
-    ).resolves.toEqual({ id: 12, state: 'reviewing' })
-    const sent = fake.requests[0]
-    expect(`${sent?.method} ${new URL(sent?.url ?? '').pathname}`).toBe('PATCH /walkthrough/12')
-    const body: unknown = await sent?.json()
-    expect(body).toMatchObject({ status: 'PUBLISHED' })
-    expect(body).not.toHaveProperty('game_id')
-  })
-
-  it('publishes a draft with what is stored', async () => {
-    const fake = fakeApi()
-      .on('get', '/walkthrough/{id}', { ...walkthrough, status: 'DRAFT' })
-      .on('patch', '/walkthrough/{id}', walkthrough)
-    await expect(publishWalkthrough(fake.api, { walkthroughId: 12 })).resolves.toEqual({
-      id: 12,
-      state: 'published',
-    })
-    await expect(fake.requests[1]?.json()).resolves.toEqual({
-      title: '全线攻略',
-      content,
+    const saved = await saveWalkthrough(api, { gameId: 7, note, routes, publish: true })
+    expect(saved).toEqual({ id: 12, state: 'reviewing' })
+    expect(new URL(requests[0]?.url ?? '').pathname).toBe('/walkthrough/game/7/mine')
+    expect(await requests[0]?.json()).toEqual({
+      note,
+      routes: [
+        {
+          ...routes[0],
+          steps: [
+            { kind: 'note', text: '【START】' },
+            { kind: 'choice', text: '左' },
+            { kind: 'choice', text: 'メイド', remark: 'むぎ＆緋華' },
+            { kind: 'save', slot: '01' },
+            { kind: 'gap' },
+            { kind: 'load', slot: '01' },
+          ],
+        },
+      ],
       status: 'PUBLISHED',
     })
+  })
+
+  it('saves a draft without a note', async () => {
+    const { api, requests } = fakeApi().on('put', '/walkthrough/game/{id}/mine', {
+      ...walkthrough,
+      status: 'DRAFT',
+    })
+    expect(await saveWalkthrough(api, { gameId: 7, routes: [], publish: false })).toEqual({
+      id: 12,
+      state: 'draft',
+    })
+    expect(await requests[0]?.json()).toEqual({ routes: [], status: 'DRAFT' })
+  })
+
+  it('lets the refusal of the API through', async () => {
+    const { api } = fakeApi().fail('put', '/walkthrough/game/{id}/mine', 422, {
+      code: 560105,
+      message: '每条线路须有名称和至少一步',
+    })
+    await expect(
+      saveWalkthrough(api, { gameId: 7, routes: [], publish: true }),
+    ).rejects.toMatchObject({ status: 422, code: 560105 })
+  })
+})
+
+describe('removeWalkthrough', () => {
+  it('deletes the walkthrough', async () => {
+    const { api, requests } = fakeApi().on('delete', '/walkthrough/{id}', undefined)
+    await removeWalkthrough(api, { walkthroughId: 12 })
+    expect(requests[0]?.method).toBe('DELETE')
+    expect(new URL(requests[0]?.url ?? '').pathname).toBe('/walkthrough/12')
   })
 })

@@ -1057,37 +1057,6 @@ export const constraints = {
       "maxLength": 100
     }
   },
-  "CreateWalkthroughInputBody": {
-    "content": {
-      "type": "unknown",
-      "required": true,
-      "nullable": false
-    },
-    "game_id": {
-      "type": "integer",
-      "required": true,
-      "nullable": false,
-      "format": "int64"
-    },
-    "status": {
-      "type": "string",
-      "required": true,
-      "nullable": false,
-      "enum": [
-        "DRAFT",
-        "PUBLISHED",
-        "HIDDEN",
-        "DELETED"
-      ]
-    },
-    "title": {
-      "type": "string",
-      "required": true,
-      "nullable": false,
-      "minLength": 1,
-      "maxLength": 255
-    }
-  },
   "DownloadFileUploadInput": {
     "file_name": {
       "type": "string",
@@ -1965,31 +1934,6 @@ export const constraints = {
       ]
     }
   },
-  "UpdateWalkthroughInputBody": {
-    "content": {
-      "type": "unknown",
-      "required": true,
-      "nullable": false
-    },
-    "status": {
-      "type": "string",
-      "required": true,
-      "nullable": false,
-      "enum": [
-        "DRAFT",
-        "PUBLISHED",
-        "HIDDEN",
-        "DELETED"
-      ]
-    },
-    "title": {
-      "type": "string",
-      "required": true,
-      "nullable": false,
-      "minLength": 1,
-      "maxLength": 255
-    }
-  },
   "VerifyCodeInputBody": {
     "code": {
       "type": "string",
@@ -2008,6 +1952,104 @@ export const constraints = {
       "required": true,
       "nullable": false,
       "format": "uuid"
+    }
+  },
+  "WalkthroughRouteInput": {
+    "characters": {
+      "type": "array",
+      "required": false,
+      "nullable": true,
+      "maxItems": 12
+    },
+    "condition": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "maxLength": 300
+    },
+    "ending": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "maxLength": 100
+    },
+    "key": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "pattern": "^[a-z0-9]{1,16}$"
+    },
+    "name": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "maxLength": 80
+    },
+    "requires": {
+      "type": "array",
+      "required": false,
+      "nullable": true,
+      "maxItems": 60
+    },
+    "steps": {
+      "type": "array",
+      "required": true,
+      "nullable": true,
+      "maxItems": 500
+    }
+  },
+  "WalkthroughStepInput": {
+    "kind": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "enum": [
+        "choice",
+        "save",
+        "load",
+        "note",
+        "gap"
+      ]
+    },
+    "remark": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "maxLength": 100
+    },
+    "slot": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "pattern": "^[0-9]{1,3}$"
+    },
+    "text": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "maxLength": 300
+    }
+  },
+  "WriteWalkthroughInputBody": {
+    "note": {
+      "type": "unknown",
+      "required": false,
+      "nullable": false
+    },
+    "routes": {
+      "type": "array",
+      "required": true,
+      "nullable": true,
+      "maxItems": 60
+    },
+    "status": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "enum": [
+        "DRAFT",
+        "PUBLISHED"
+      ]
     }
   }
 } as const
