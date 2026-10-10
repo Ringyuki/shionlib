@@ -21,7 +21,7 @@ func (Comment) Fields() []ent.Field {
 	return []ent.Field{
 		serialID(),
 		field.JSON("content", rawJSON).SchemaType(jsonbType),
-		field.String("html").MaxRuneLen(100000).SchemaType(varchar(100000)).Optional().Nillable(),
+		field.Text("text").Default(""),
 		field.Int("game_id").SchemaType(pg("integer")),
 		field.Int("parent_id").SchemaType(pg("integer")).Optional().Nillable(),
 		field.Int("root_id").SchemaType(pg("integer")).Optional().Nillable(),

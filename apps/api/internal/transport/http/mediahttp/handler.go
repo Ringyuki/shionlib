@@ -51,6 +51,19 @@ func NewHandler(service *media.Service, resp *response.Builder) *Handler {
 
 func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "upload.adImage", Method: http.MethodPut, Path: "/uploads/small/ad/image", Summary: "Upload an advertisement image", Tags: tags, Access: httpapi.AccessAdmin, MaxBodyBytes: BodyLimit(media.AdImageMaxBytes)}, h.adImage)
+	httpapi.Register(api, httpapi.Route{ID: "upload.richTextImage", Method: http.MethodPut, Path: "/uploads/small/richtext/image", Summary: "Upload a picture for a rich text document", Tags: tags, Access: httpapi.AccessUser, MaxBodyBytes: BodyLimit(media.RichTextImageMaxBytes)}, h.richTextImage)
+}
+
+func (h *Handler) richTextImage(ctx context.Context, in *richTextImageInput) (*response.Output[UploadedPictureDTO], error) {
+	upload, err := ReadUpload(in.RawBody.Data().File, media.RichTextImageMaxBytes)
+	if err != nil {
+		return nil, err
+	}
+	picture, err := h.service.StoreRichTextImage(ctx, actor.From(ctx).UserID, upload)
+	if err != nil {
+		return nil, err
+	}
+	return response.OK(ctx, h.resp, UploadedPictureDTO{Key: picture.Key, Width: picture.Width, Height: picture.Height}), nil
 }
 
 func (h *Handler) adImage(ctx context.Context, in *adImageInput) (*response.Output[UploadedImageDTO], error) {

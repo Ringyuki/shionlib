@@ -23,10 +23,10 @@ func instructions(specific []string) string {
 
 func commentReview(subject CommentSubject) ReviewRequest {
 	lines := []string{"Game: " + subject.Game.label()}
-	if parent := PlainText(subject.ParentHTML); subject.ParentID != nil && parent != "" {
+	if parent := OneLine(subject.ParentText); subject.ParentID != nil && parent != "" {
 		lines = append(lines, quoted("Replying to", parent))
 	}
-	lines = append(lines, quoted("Comment", PlainText(subject.HTML)))
+	lines = append(lines, quoted("Comment", OneLine(subject.Text)))
 	return ReviewRequest{Instructions: instructions(commentRules), Input: strings.Join(lines, "\n")}
 }
 
@@ -34,7 +34,7 @@ func walkthroughReview(subject WalkthroughSubject) ReviewRequest {
 	lines := []string{
 		"Game: " + subject.Game.label(),
 		quoted("Walkthrough title", subject.Title),
-		quoted("Walkthrough content", PlainText(subject.HTML)),
+		quoted("Walkthrough content", OneLine(subject.Text)),
 	}
 	return ReviewRequest{Instructions: instructions(walkthroughRules), Input: strings.Join(lines, "\n")}
 }
@@ -67,7 +67,7 @@ func (s *Service) ScreenComment(ctx context.Context, commentID int) error {
 	if !subject.Pending {
 		return nil
 	}
-	text := PlainText(subject.HTML)
+	text := OneLine(subject.Text)
 	if text == "" {
 		return s.approveUnreviewed(ctx, subject)
 	}
@@ -213,7 +213,7 @@ func (s *Service) lockUnchangedComment(ctx context.Context, screened CommentSubj
 	if err != nil {
 		return nil, err
 	}
-	if !current.Pending || current.HTML != screened.HTML {
+	if !current.Pending || current.Text != screened.Text {
 		return nil, nil
 	}
 	return &current, nil
@@ -227,7 +227,7 @@ func (s *Service) lockUnchangedWalkthrough(ctx context.Context, reviewed Walkthr
 	if err != nil {
 		return nil, err
 	}
-	if current.Deleted || !current.ReviewPending || current.HTML != reviewed.HTML || current.Title != reviewed.Title {
+	if current.Deleted || !current.ReviewPending || current.Text != reviewed.Text || current.Title != reviewed.Title {
 		return nil, nil
 	}
 	return &current, nil

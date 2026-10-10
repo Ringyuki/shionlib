@@ -6,6 +6,7 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moderation"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/richtexthttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/userhttp"
 )
 
@@ -48,7 +49,7 @@ type adminCommentEventDTO struct {
 
 type adminCommentItemDTO struct {
 	ID         int                        `json:"id"`
-	HTML       *string                    `json:"html"`
+	Text       string                     `json:"text"`
 	ParentID   *int                       `json:"parent_id"`
 	RootID     *int                       `json:"root_id"`
 	ReplyCount int                        `json:"reply_count"`
@@ -65,8 +66,8 @@ type adminCommentItemDTO struct {
 
 type adminCommentDetailDTO struct {
 	ID          int                    `json:"id"`
-	HTML        *string                `json:"html"`
-	Content     json.RawMessage        `json:"content"`
+	Text        string                 `json:"text"`
+	Content     richtexthttp.Content   `json:"content"`
 	ParentID    *int                   `json:"parent_id"`
 	RootID      *int                   `json:"root_id"`
 	ReplyCount  int                    `json:"reply_count"`
@@ -124,7 +125,7 @@ func toAdminCommentEvent(event moderation.Event) adminCommentEventDTO {
 func toAdminCommentItem(entry comment.AdminEntry, now time.Time) adminCommentItemDTO {
 	return adminCommentItemDTO{
 		ID:         entry.ID,
-		HTML:       entry.HTML,
+		Text:       entry.Text,
 		ParentID:   entry.ParentID,
 		RootID:     entry.RootID,
 		ReplyCount: entry.ReplyCount,
@@ -147,8 +148,8 @@ func toAdminCommentDetail(detail comment.AdminDetail, now time.Time) adminCommen
 	}
 	return adminCommentDetailDTO{
 		ID:          detail.ID,
-		HTML:        detail.HTML,
-		Content:     detail.Content,
+		Text:        detail.Text,
+		Content:     richtexthttp.Content(detail.Content),
 		ParentID:    detail.ParentID,
 		RootID:      detail.RootID,
 		ReplyCount:  detail.ReplyCount,

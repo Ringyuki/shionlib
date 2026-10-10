@@ -48,23 +48,17 @@ func (_u *CommentUpdate) AppendContent(v jsontext.Value) *CommentUpdate {
 	return _u
 }
 
-// SetHTML sets the "html" field.
-func (_u *CommentUpdate) SetHTML(v string) *CommentUpdate {
-	_u.mutation.SetHTML(v)
+// SetText sets the "text" field.
+func (_u *CommentUpdate) SetText(v string) *CommentUpdate {
+	_u.mutation.SetText(v)
 	return _u
 }
 
-// SetNillableHTML sets the "html" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillableHTML(v *string) *CommentUpdate {
+// SetNillableText sets the "text" field if the given value is not nil.
+func (_u *CommentUpdate) SetNillableText(v *string) *CommentUpdate {
 	if v != nil {
-		_u.SetHTML(*v)
+		_u.SetText(*v)
 	}
-	return _u
-}
-
-// ClearHTML clears the value of the "html" field.
-func (_u *CommentUpdate) ClearHTML() *CommentUpdate {
-	_u.mutation.ClearHTML()
 	return _u
 }
 
@@ -501,11 +495,6 @@ func (_u *CommentUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *CommentUpdate) check() error {
-	if v, ok := _u.mutation.HTML(); ok {
-		if err := comment.HTMLValidator(v); err != nil {
-			return &ValidationError{Name: "html", err: fmt.Errorf(`ent: validator failed for field "Comment.html": %w`, err)}
-		}
-	}
 	if _u.mutation.GameCleared() && len(_u.mutation.GameIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Comment.game"`)
 	}
@@ -541,11 +530,8 @@ func (_u *CommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			sqljson.Append(u, comment.FieldContent, value)
 		})
 	}
-	if value, ok := _u.mutation.HTML(); ok {
-		_spec.SetField(comment.FieldHTML, field.TypeString, value)
-	}
-	if _u.mutation.HTMLCleared() {
-		_spec.ClearField(comment.FieldHTML, field.TypeString)
+	if value, ok := _u.mutation.Text(); ok {
+		_spec.SetField(comment.FieldText, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.ReplyCount(); ok {
 		_spec.SetField(comment.FieldReplyCount, field.TypeInt, value)
@@ -985,23 +971,17 @@ func (_u *CommentUpdateOne) AppendContent(v jsontext.Value) *CommentUpdateOne {
 	return _u
 }
 
-// SetHTML sets the "html" field.
-func (_u *CommentUpdateOne) SetHTML(v string) *CommentUpdateOne {
-	_u.mutation.SetHTML(v)
+// SetText sets the "text" field.
+func (_u *CommentUpdateOne) SetText(v string) *CommentUpdateOne {
+	_u.mutation.SetText(v)
 	return _u
 }
 
-// SetNillableHTML sets the "html" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillableHTML(v *string) *CommentUpdateOne {
+// SetNillableText sets the "text" field if the given value is not nil.
+func (_u *CommentUpdateOne) SetNillableText(v *string) *CommentUpdateOne {
 	if v != nil {
-		_u.SetHTML(*v)
+		_u.SetText(*v)
 	}
-	return _u
-}
-
-// ClearHTML clears the value of the "html" field.
-func (_u *CommentUpdateOne) ClearHTML() *CommentUpdateOne {
-	_u.mutation.ClearHTML()
 	return _u
 }
 
@@ -1451,11 +1431,6 @@ func (_u *CommentUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *CommentUpdateOne) check() error {
-	if v, ok := _u.mutation.HTML(); ok {
-		if err := comment.HTMLValidator(v); err != nil {
-			return &ValidationError{Name: "html", err: fmt.Errorf(`ent: validator failed for field "Comment.html": %w`, err)}
-		}
-	}
 	if _u.mutation.GameCleared() && len(_u.mutation.GameIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Comment.game"`)
 	}
@@ -1508,11 +1483,8 @@ func (_u *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err er
 			sqljson.Append(u, comment.FieldContent, value)
 		})
 	}
-	if value, ok := _u.mutation.HTML(); ok {
-		_spec.SetField(comment.FieldHTML, field.TypeString, value)
-	}
-	if _u.mutation.HTMLCleared() {
-		_spec.ClearField(comment.FieldHTML, field.TypeString)
+	if value, ok := _u.mutation.Text(); ok {
+		_spec.SetField(comment.FieldText, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.ReplyCount(); ok {
 		_spec.SetField(comment.FieldReplyCount, field.TypeInt, value)

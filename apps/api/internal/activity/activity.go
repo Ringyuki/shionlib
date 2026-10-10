@@ -86,7 +86,7 @@ type WalkthroughRef struct {
 
 type CommentRef struct {
 	ID   int
-	HTML *string
+	Text string
 }
 
 type FileRef struct {

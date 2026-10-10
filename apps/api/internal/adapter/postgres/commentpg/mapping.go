@@ -9,7 +9,7 @@ func toComment(row *ent.Comment) comment.Comment {
 	return comment.Comment{
 		ID:         row.ID,
 		Content:    row.Content,
-		HTML:       row.HTML,
+		Text:       row.Text,
 		GameID:     row.GameID,
 		ParentID:   row.ParentID,
 		RootID:     row.RootID,

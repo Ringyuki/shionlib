@@ -105,7 +105,7 @@ func TestE2EPrepareReproducesTheLegacyDatasetIdempotently(t *testing.T) {
 	if db.Ent.CatalogSourceLink.Query().Where(catalogsourcelink.Source("hikarinagi"), catalogsourcelink.ExternalID("1"), catalogsourcelink.LocalID(1)).CountX(ctx) != 1 {
 		t.Fatal("games are linked to their source like the cutover backfill")
 	}
-	root := db.Ent.Comment.Query().Where(comment.HTML("<p>Seeded root comment for E2E.</p>")).OnlyX(ctx)
+	root := db.Ent.Comment.Query().Where(comment.Text("Seeded root comment for E2E.")).OnlyX(ctx)
 	if root.ReplyCount != 1 || root.GameID != 1 {
 		t.Fatalf("root comment: %+v", root)
 	}

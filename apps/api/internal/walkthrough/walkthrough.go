@@ -6,22 +6,22 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
-	"github.com/Ringyuki/shionlib/apps/api/internal/lexical"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moderation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/paging"
+	"github.com/Ringyuki/shionlib/apps/api/internal/richtext"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
 
 type CreateInput struct {
 	GameID  int
 	Title   string
-	Content lexical.Document
+	Content richtext.Document
 	Status  Status
 }
 
 type UpdateInput struct {
 	Title   string
-	Content lexical.Document
+	Content richtext.Document
 	Status  Status
 }
 
@@ -41,7 +41,7 @@ func (s Status) Valid() bool {
 const (
 	MaxTitleLength   = 255
 	MaxContentLength = 50000
-	MaxHTMLLength    = 100000
+	ExcerptLength    = 200
 )
 
 type Walkthrough struct {
@@ -49,7 +49,8 @@ type Walkthrough struct {
 	GameID        int
 	Title         string
 	Content       json.RawMessage
-	HTML          string
+	Text          string
+	Excerpt       string
 	Lang          *string
 	Created       time.Time
 	Updated       time.Time
@@ -68,6 +69,7 @@ type Summary struct {
 	ID            int
 	GameID        int
 	Title         string
+	Excerpt       string
 	Lang          *string
 	Created       time.Time
 	Updated       time.Time
@@ -82,7 +84,8 @@ type NewWalkthrough struct {
 	GameID        int
 	Title         string
 	Content       json.RawMessage
-	HTML          string
+	Text          string
+	Excerpt       string
 	Lang          *string
 	Status        Status
 	CreatorID     int
@@ -92,7 +95,8 @@ type NewWalkthrough struct {
 type Changes struct {
 	Title         string
 	Content       json.RawMessage
-	HTML          string
+	Text          string
+	Excerpt       string
 	Lang          *string
 	Status        Status
 	ReviewPending bool

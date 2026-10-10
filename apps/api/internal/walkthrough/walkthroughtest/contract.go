@@ -34,7 +34,7 @@ func sameJSON(t *testing.T, a, b json.RawMessage) bool {
 
 func create(ctx context.Context, t *testing.T, repo walkthrough.Repository, gameID, creatorID int, status walkthrough.Status) walkthrough.Walkthrough {
 	t.Helper()
-	created, err := repo.Create(ctx, walkthrough.NewWalkthrough{GameID: gameID, Title: "Guide", Content: content, HTML: "<p>guide</p>", Status: status, CreatorID: creatorID})
+	created, err := repo.Create(ctx, walkthrough.NewWalkthrough{GameID: gameID, Title: "Guide", Content: content, Text: "guide", Excerpt: "the first words", Status: status, CreatorID: creatorID})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,13 +63,13 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if _, err := env.Repo.View(ctx, 987654); !errors.Is(err, walkthrough.ErrNotFound) {
 			t.Fatalf("view: %v", err)
 		}
-		if err := env.Repo.Update(ctx, 987654, walkthrough.Changes{Title: "x", Content: content, HTML: "x", Status: walkthrough.StatusDraft}); !errors.Is(err, walkthrough.ErrNotFound) {
+		if err := env.Repo.Update(ctx, 987654, walkthrough.Changes{Title: "x", Content: content, Text: "x", Status: walkthrough.StatusDraft}); !errors.Is(err, walkthrough.ErrNotFound) {
 			t.Fatalf("update: %v", err)
 		}
 		if err := env.Repo.SetStatus(ctx, 987654, walkthrough.StatusDeleted); !errors.Is(err, walkthrough.ErrNotFound) {
 			t.Fatalf("set status: %v", err)
 		}
-		if _, err := env.Repo.Create(ctx, walkthrough.NewWalkthrough{GameID: 987654, Title: "x", Content: content, HTML: "x", Status: walkthrough.StatusDraft, CreatorID: env.NewUser(t)}); !errors.Is(err, game.ErrNotFound) {
+		if _, err := env.Repo.Create(ctx, walkthrough.NewWalkthrough{GameID: 987654, Title: "x", Content: content, Text: "x", Status: walkthrough.StatusDraft, CreatorID: env.NewUser(t)}); !errors.Is(err, game.ErrNotFound) {
 			t.Fatalf("create for missing game: %v", err)
 		}
 	})
@@ -78,7 +78,7 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		env := newEnv(t)
 		author, gameID := env.NewUser(t), env.NewGame(t)
 		lang := "jp"
-		created, err := env.Repo.Create(ctx, walkthrough.NewWalkthrough{GameID: gameID, Title: "攻略", Content: content, HTML: "<p>guide</p>", Lang: &lang, Status: walkthrough.StatusHidden, CreatorID: author})
+		created, err := env.Repo.Create(ctx, walkthrough.NewWalkthrough{GameID: gameID, Title: "攻略", Content: content, Text: "guide", Excerpt: "gui", Lang: &lang, Status: walkthrough.StatusHidden, CreatorID: author})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -86,19 +86,19 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if view.ID != created.ID || view.GameID != gameID || view.Title != "攻略" || view.HTML != "<p>guide</p>" || view.Lang == nil || *view.Lang != "jp" ||
+		if view.ID != created.ID || view.GameID != gameID || view.Title != "攻略" || view.Text != "guide" || view.Excerpt != "gui" || view.Lang == nil || *view.Lang != "jp" ||
 			view.Status != walkthrough.StatusHidden || view.Edited || view.CreatorID != author || view.Creator.ID != author || !sameJSON(t, view.Content, content) || view.Created.IsZero() {
 			t.Fatalf("unexpected view %+v", view)
 		}
 		edited := json.RawMessage(`{"root":{"type":"root","children":[]}}`)
-		if err := env.Repo.Update(ctx, created.ID, walkthrough.Changes{Title: "New", Content: edited, HTML: "<p>new</p>", Status: walkthrough.StatusDraft}); err != nil {
+		if err := env.Repo.Update(ctx, created.ID, walkthrough.Changes{Title: "New", Content: edited, Text: "new", Excerpt: "ne", Status: walkthrough.StatusDraft}); err != nil {
 			t.Fatal(err)
 		}
 		got, err := env.Repo.Lock(ctx, created.ID)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if got.Title != "New" || got.HTML != "<p>new</p>" || got.Lang != nil || got.Status != walkthrough.StatusDraft || !got.Edited || !sameJSON(t, got.Content, edited) {
+		if got.Title != "New" || got.Text != "new" || got.Excerpt != "ne" || got.Lang != nil || got.Status != walkthrough.StatusDraft || !got.Edited || !sameJSON(t, got.Content, edited) {
 			t.Fatalf("unexpected walkthrough after update %+v", got)
 		}
 		if err := env.Repo.SetStatus(ctx, created.ID, walkthrough.StatusDeleted); err != nil {
@@ -138,7 +138,7 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 			t.Fatalf("status filter %v", ids(filtered))
 		}
 		second, total, _ := env.Repo.ListByGame(ctx, walkthrough.GameFilter{GameID: gameID, Public: []walkthrough.Status{walkthrough.StatusPublished}, ViewerID: viewer}, walkthrough.Page{Number: 2, Size: 1})
-		if total != 2 || !reflect.DeepEqual(ids(second), []int{published.ID}) || second[0].Creator.ID != author || second[0].Title != "Guide" {
+		if total != 2 || !reflect.DeepEqual(ids(second), []int{published.ID}) || second[0].Creator.ID != author || second[0].Title != "Guide" || second[0].Excerpt != "the first words" {
 			t.Fatalf("second page %+v", second)
 		}
 	})

@@ -15,14 +15,14 @@ func TestMemoryRepositoryContract(t *testing.T) {
 			NewComment: func(t *testing.T, fixture CommentFixture) moderation.CommentSubject {
 				users++
 				games++
-				subject := moderation.CommentSubject{CreatorID: users, GameID: games, HTML: fixture.HTML, ParentID: fixture.ParentID, Game: moderation.GameTitles{JP: "ゲーム"}}
+				subject := moderation.CommentSubject{CreatorID: users, GameID: games, Text: fixture.Text, ParentID: fixture.ParentID, Game: moderation.GameTitles{JP: "ゲーム"}}
 				if fixture.ParentID != nil {
 					parent, err := repo.CommentSubject(t.Context(), *fixture.ParentID)
 					if err != nil {
 						t.Fatal(err)
 					}
 					subject.ParentCreatorID = &parent.CreatorID
-					subject.ParentHTML = parent.HTML
+					subject.ParentText = parent.Text
 				}
 				return repo.SeedComment(subject, fixture.Status)
 			},
@@ -30,7 +30,7 @@ func TestMemoryRepositoryContract(t *testing.T) {
 			NewWalkthrough: func(_ *testing.T, status string, reviewPending bool) moderation.WalkthroughSubject {
 				users++
 				games++
-				return repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: users, GameID: games, Title: "guide", HTML: "<p>guide</p>", ReviewPending: reviewPending, Game: moderation.GameTitles{JP: "ゲーム"}}, status)
+				return repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: users, GameID: games, Title: "guide", Text: "guide", ReviewPending: reviewPending, Game: moderation.GameTitles{JP: "ゲーム"}}, status)
 			},
 			WalkthroughStatus: func(_ *testing.T, id int) string { return repo.WalkthroughStatus(id) },
 			EventCount:        func(*testing.T) int { return len(repo.Events()) },

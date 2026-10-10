@@ -37,8 +37,8 @@ func create(ctx context.Context, t *testing.T, repo comment.Repository, in comme
 	if in.Content == nil {
 		in.Content = content
 	}
-	if in.HTML == "" {
-		in.HTML = "<p>hi</p>"
+	if in.Text == "" {
+		in.Text = "hi"
 	}
 	created, err := repo.Create(ctx, in)
 	if err != nil {
@@ -61,7 +61,7 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if _, err := env.Repo.Entry(ctx, 987654, 0); !errors.Is(err, comment.ErrNotFound) {
 			t.Fatalf("entry: %v", err)
 		}
-		if err := env.Repo.UpdateContent(ctx, 987654, content, "<p></p>"); !errors.Is(err, comment.ErrNotFound) {
+		if err := env.Repo.UpdateContent(ctx, 987654, content, ""); !errors.Is(err, comment.ErrNotFound) {
 			t.Fatalf("update content: %v", err)
 		}
 		if err := env.Repo.SetStatus(ctx, 987654, comment.StatusVisible); !errors.Is(err, comment.ErrNotFound) {
@@ -77,10 +77,10 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 			t.Fatalf("adjusting a vanished parent is a no-op: %v", err)
 		}
 		missing := 987654
-		if _, err := env.Repo.Create(ctx, comment.NewComment{Content: content, HTML: "<p></p>", GameID: env.NewGame(t), CreatorID: env.NewUser(t), ParentID: &missing, RootID: &missing}); !errors.Is(err, comment.ErrNotFound) {
+		if _, err := env.Repo.Create(ctx, comment.NewComment{Content: content, Text: "", GameID: env.NewGame(t), CreatorID: env.NewUser(t), ParentID: &missing, RootID: &missing}); !errors.Is(err, comment.ErrNotFound) {
 			t.Fatalf("create under missing parent: %v", err)
 		}
-		if _, err := env.Repo.Create(ctx, comment.NewComment{Content: content, HTML: "<p></p>", GameID: 987654, CreatorID: env.NewUser(t)}); !errors.Is(err, game.ErrNotFound) {
+		if _, err := env.Repo.Create(ctx, comment.NewComment{Content: content, Text: "", GameID: 987654, CreatorID: env.NewUser(t)}); !errors.Is(err, game.ErrNotFound) {
 			t.Fatalf("create for missing game: %v", err)
 		}
 	})
@@ -88,13 +88,13 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 	t.Run("create stores a pending comment", func(t *testing.T) {
 		env := newEnv(t)
 		author, gameID := env.NewUser(t), env.NewGame(t)
-		created := create(ctx, t, env.Repo, comment.NewComment{GameID: gameID, CreatorID: author, HTML: "<p>hi</p>"})
+		created := create(ctx, t, env.Repo, comment.NewComment{GameID: gameID, CreatorID: author, Text: "hi"})
 		got, err := env.Repo.Get(ctx, created.ID)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if got.ID != created.ID || got.GameID != gameID || got.CreatorID != author || got.Status != comment.StatusPending || got.Edited || got.ReplyCount != 0 ||
-			got.ParentID != nil || got.RootID != nil || got.HTML == nil || *got.HTML != "<p>hi</p>" || !sameJSON(t, got.Content, content) || got.Created.IsZero() {
+			got.ParentID != nil || got.RootID != nil || got.Text != "hi" || !sameJSON(t, got.Content, content) || got.Created.IsZero() {
 			t.Fatalf("unexpected comment %+v", got)
 		}
 	})
@@ -126,7 +126,7 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if entry.Creator.ID != replier || entry.Parent == nil || entry.Parent.ID != root.ID || entry.Parent.Creator.ID != author || entry.Parent.HTML == nil || *entry.Parent.HTML != "<p>hi</p>" {
+		if entry.Creator.ID != replier || entry.Parent == nil || entry.Parent.ID != root.ID || entry.Parent.Creator.ID != author || entry.Parent.Text != "hi" {
 			t.Fatalf("unexpected entry %+v", entry)
 		}
 		if err := env.Repo.Delete(ctx, root.ID); err != nil {
@@ -148,11 +148,11 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 			t.Fatal(err)
 		}
 		edited := json.RawMessage(`{"root":{"type":"root","children":[]}}`)
-		if err := env.Repo.UpdateContent(ctx, created.ID, edited, "<p>new</p>"); err != nil {
+		if err := env.Repo.UpdateContent(ctx, created.ID, edited, "new"); err != nil {
 			t.Fatal(err)
 		}
 		got, _ := env.Repo.Get(ctx, created.ID)
-		if !got.Edited || got.Status != comment.StatusPending || *got.HTML != "<p>new</p>" || !sameJSON(t, got.Content, edited) {
+		if !got.Edited || got.Status != comment.StatusPending || got.Text != "new" || !sameJSON(t, got.Content, edited) {
 			t.Fatalf("unexpected edited comment %+v", got)
 		}
 	})

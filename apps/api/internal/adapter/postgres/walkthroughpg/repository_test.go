@@ -36,11 +36,11 @@ func TestAdminStore(t *testing.T) {
 	gameID := db.Game(t, func(c *ent.GameCreate) { c.SetTitleEn("English Title") })
 	content := json.RawMessage(`{"root":{"type":"root","children":[]}}`)
 
-	first, err := repo.Create(ctx, walkthrough.NewWalkthrough{GameID: gameID, Title: "Alpha route", Content: content, HTML: "<p>alpha</p>", Status: walkthrough.StatusPublished, CreatorID: author})
+	first, err := repo.Create(ctx, walkthrough.NewWalkthrough{GameID: gameID, Title: "Alpha route", Content: content, Text: "alpha", Status: walkthrough.StatusPublished, CreatorID: author})
 	if err != nil {
 		t.Fatal(err)
 	}
-	second, err := repo.Create(ctx, walkthrough.NewWalkthrough{GameID: gameID, Title: "Beta route", Content: content, HTML: "<p>needle</p>", Status: walkthrough.StatusHidden, CreatorID: author})
+	second, err := repo.Create(ctx, walkthrough.NewWalkthrough{GameID: gameID, Title: "Beta route", Content: content, Text: "needle", Status: walkthrough.StatusHidden, CreatorID: author})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +79,7 @@ func TestAdminStore(t *testing.T) {
 	}
 	entries, _, _ := repo.Search(ctx, walkthrough.AdminFilter{Search: "needle"}, page)
 	entry := entries[0]
-	if entry.CreatorEmail != authorRow.Email || entry.Game.TitleEN != "English Title" || entry.HTML != "<p>needle</p>" || entry.Content != nil ||
+	if entry.CreatorEmail != authorRow.Email || entry.Game.TitleEN != "English Title" || entry.Text != "needle" || entry.Content != nil ||
 		entry.Moderation == nil || entry.Moderation.Decision != moderation.DecisionBlock || *entry.Moderation.Reason != "ads" {
 		t.Fatalf("unexpected admin entry %+v", entry)
 	}

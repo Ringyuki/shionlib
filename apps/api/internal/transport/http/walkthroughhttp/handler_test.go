@@ -29,8 +29,8 @@ var (
 const (
 	authorPublic = `{"id":1,"name":"alice","avatar":null,"is_sponsor":false}`
 	stamp        = `"2026-10-03T01:02:03.000Z"`
-	contentJSON  = `{"root":{"type":"root","children":[{"type":"paragraph","children":[{"type":"text","text":"Choose option A first then go to the beach"}]}]}}`
-	renderedHTML = `<p class=\"[&amp;:not(:first-child)]:mt-6\"><span>Choose option A first then go to the beach</span></p>`
+	contentJSON  = `{"type":"doc","content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"text","text":"Route"}]},{"type":"paragraph","content":[{"type":"text","text":"Choose option A first then go to the beach"}]}]}`
+	contentText  = `Route\nChoose option A first then go to the beach`
 )
 
 type env struct {
@@ -60,7 +60,7 @@ func TestCreateAndUpdate(t *testing.T) {
 	e := setup(t)
 	resp := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/walkthrough", As: &author, Body: createBody("PUBLISHED")})
 	e.server.Expect(resp, http.StatusCreated, 0)
-	want := `{"id":1,"game_id":10,"title":"Route guide","html":"` + renderedHTML + `","lang":"en","created":` + stamp + `,"updated":` + stamp + `,"edited":false,"status":"HIDDEN","review_pending":true,"creator":` + authorPublic + `}`
+	want := `{"id":1,"game_id":10,"title":"Route guide","text":"` + contentText + `","excerpt":"Route Choose option A first then go to the beach","lang":"en","created":` + stamp + `,"updated":` + stamp + `,"edited":false,"status":"HIDDEN","review_pending":true,"creator":` + authorPublic + `}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected body\n got %s\nwant %s", resp.Data, want)
 	}
@@ -105,7 +105,7 @@ func TestCreateValidation(t *testing.T) {
 func TestGetAndDelete(t *testing.T) {
 	e := setup(t)
 	content := json.RawMessage(contentJSON)
-	e.repo.Seed(walkthrough.Walkthrough{GameID: 10, CreatorID: 1, Title: "h", HTML: "<p>h</p>", Content: content, Status: walkthrough.StatusHidden})
+	e.repo.Seed(walkthrough.Walkthrough{GameID: 10, CreatorID: 1, Title: "h", Text: "h", Content: content, Status: walkthrough.StatusHidden})
 
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/walkthrough/1"}), http.StatusForbidden, 560102)
 	plain := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/walkthrough/1", As: &author})
@@ -133,12 +133,12 @@ func TestGetAndDelete(t *testing.T) {
 
 func TestListByGameAndUser(t *testing.T) {
 	e := setup(t)
-	e.repo.Seed(walkthrough.Walkthrough{GameID: 10, CreatorID: 1, Title: "published", Status: walkthrough.StatusPublished})
+	e.repo.Seed(walkthrough.Walkthrough{GameID: 10, CreatorID: 1, Title: "published", Excerpt: "First words", Status: walkthrough.StatusPublished})
 	e.repo.Seed(walkthrough.Walkthrough{GameID: 10, CreatorID: 1, Title: "draft", Status: walkthrough.StatusDraft})
 
 	guest := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/walkthrough/game/10?pageSize=5"})
 	e.server.Expect(guest, http.StatusOK, 0)
-	want := `{"items":[{"id":1,"title":"published","lang":null,"created":` + stamp + `,"updated":` + stamp + `,"edited":false,"status":"PUBLISHED","review_pending":false,"creator":` + authorPublic + `}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":5,"totalPages":1,"currentPage":1,"content_limit":0}}`
+	want := `{"items":[{"id":1,"title":"published","excerpt":"First words","lang":null,"created":` + stamp + `,"updated":` + stamp + `,"edited":false,"status":"PUBLISHED","review_pending":false,"creator":` + authorPublic + `}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":5,"totalPages":1,"currentPage":1,"content_limit":0}}`
 	if string(guest.Data) != want {
 		t.Fatalf("unexpected game listing\n got %s\nwant %s", guest.Data, want)
 	}
@@ -151,8 +151,8 @@ func TestListByGameAndUser(t *testing.T) {
 	own := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/user/datas/1/walkthroughs", As: &author})
 	e.server.Expect(own, http.StatusOK, 0)
 	wantOwn := `{"items":[` +
-		`{"id":2,"title":"draft","lang":null,"created":` + stamp + `,"updated":` + stamp + `,"edited":false,"status":"DRAFT","review_pending":false,"game":{"id":10,"title_jp":"タイトル","title_zh":"","title_en":"","aliases":[],"type":null,"covers":[{"language":"","type":"","url":"a.webp","dims":[],"sexual":0,"violence":0}],"intro_jp":"","intro_zh":"","intro_en":"","release_date":null,"developers":[],"resources":{"count":0,"downloads":0,"platforms":[],"languages":[],"latest":null},"tags":[]},"creator":` + authorPublic + `},` +
-		`{"id":1,"title":"published","lang":null,"created":` + stamp + `,"updated":` + stamp + `,"edited":false,"status":"PUBLISHED","review_pending":false,"game":{"id":10,"title_jp":"タイトル","title_zh":"","title_en":"","aliases":[],"type":null,"covers":[{"language":"","type":"","url":"a.webp","dims":[],"sexual":0,"violence":0}],"intro_jp":"","intro_zh":"","intro_en":"","release_date":null,"developers":[],"resources":{"count":0,"downloads":0,"platforms":[],"languages":[],"latest":null},"tags":[]},"creator":` + authorPublic + `}` +
+		`{"id":2,"title":"draft","excerpt":"","lang":null,"created":` + stamp + `,"updated":` + stamp + `,"edited":false,"status":"DRAFT","review_pending":false,"game":{"id":10,"title_jp":"タイトル","title_zh":"","title_en":"","aliases":[],"type":null,"covers":[{"language":"","type":"","url":"a.webp","dims":[],"sexual":0,"violence":0}],"intro_jp":"","intro_zh":"","intro_en":"","release_date":null,"developers":[],"resources":{"count":0,"downloads":0,"platforms":[],"languages":[],"latest":null},"tags":[]},"creator":` + authorPublic + `},` +
+		`{"id":1,"title":"published","excerpt":"First words","lang":null,"created":` + stamp + `,"updated":` + stamp + `,"edited":false,"status":"PUBLISHED","review_pending":false,"game":{"id":10,"title_jp":"タイトル","title_zh":"","title_en":"","aliases":[],"type":null,"covers":[{"language":"","type":"","url":"a.webp","dims":[],"sexual":0,"violence":0}],"intro_jp":"","intro_zh":"","intro_en":"","release_date":null,"developers":[],"resources":{"count":0,"downloads":0,"platforms":[],"languages":[],"latest":null},"tags":[]},"creator":` + authorPublic + `}` +
 		`],"meta":{"totalItems":2,"itemCount":2,"itemsPerPage":10,"totalPages":1,"currentPage":1,"is_current_user":true,"content_limit":1}}`
 	if string(own.Data) != wantOwn {
 		t.Fatalf("unexpected user listing\n got %s\nwant %s", own.Data, wantOwn)

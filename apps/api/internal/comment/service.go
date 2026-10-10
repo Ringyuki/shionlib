@@ -2,13 +2,12 @@ package comment
 
 import (
 	"context"
-	"unicode/utf8"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
-	"github.com/Ringyuki/shionlib/apps/api/internal/lexical"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moderation"
+	"github.com/Ringyuki/shionlib/apps/api/internal/richtext"
 )
 
 type Service struct {
@@ -24,16 +23,15 @@ func NewService(repo Repository, games GameCards, messages Messages, queue Queue
 }
 
 func (s *Service) Create(ctx context.Context, who actor.Actor, gameID int, in CreateInput) (Entry, error) {
-	html, err := render(in.Content)
-	if err != nil {
-		return Entry{}, err
+	if in.Content.TextLength() > MaxContentLength {
+		return Entry{}, ErrContentTooLong
 	}
 	parentID := in.ParentID
 	if parentID != nil && *parentID == 0 {
 		parentID = nil
 	}
 	var id int
-	err = s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
+	err := s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
 		var rootID *int
 		if parentID != nil {
 			parent, err := s.repo.Get(ctx, *parentID)
@@ -51,7 +49,7 @@ func (s *Service) Create(ctx context.Context, who actor.Actor, gameID int, in Cr
 		}
 		created, err := s.repo.Create(ctx, NewComment{
 			Content:   in.Content.Raw(),
-			HTML:      html,
+			Text:      in.Content.Text(),
 			GameID:    gameID,
 			CreatorID: who.UserID,
 			ParentID:  parentID,
@@ -81,16 +79,15 @@ func (s *Service) Create(ctx context.Context, who actor.Actor, gameID int, in Cr
 	return s.repo.Entry(ctx, id, who.UserID)
 }
 
-func (s *Service) Edit(ctx context.Context, who actor.Actor, id int, content lexical.Document) (Entry, error) {
+func (s *Service) Edit(ctx context.Context, who actor.Actor, id int, content richtext.Document) (Entry, error) {
+	if content.TextLength() > MaxContentLength {
+		return Entry{}, ErrContentTooLong
+	}
 	err := s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
 		if _, err := s.managed(ctx, who, id, true); err != nil {
 			return err
 		}
-		html, err := render(content)
-		if err != nil {
-			return err
-		}
-		return s.repo.UpdateContent(ctx, id, content.Raw(), html)
+		return s.repo.UpdateContent(ctx, id, content.Raw(), content.Text())
 	})
 	if err != nil {
 		return Entry{}, err
@@ -191,14 +188,6 @@ func (s *Service) managed(ctx context.Context, who actor.Actor, id int, lock boo
 		return Comment{}, ErrNotOwner
 	}
 	return existing, nil
-}
-
-func render(content lexical.Document) (string, error) {
-	html := content.HTML()
-	if utf8.RuneCountInString(html) > MaxHTMLLength {
-		return "", ErrContentTooLong
-	}
-	return html, nil
 }
 
 func likeMessage(target Comment, senderID int) message.NewMessage {

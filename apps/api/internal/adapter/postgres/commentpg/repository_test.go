@@ -39,11 +39,11 @@ func TestAdminStore(t *testing.T) {
 	gameID := db.Game(t, func(c *ent.GameCreate) { c.SetTitleZh("中文标题") })
 	content := json.RawMessage(`{"root":{"type":"root","children":[]}}`)
 
-	parent, err := repo.Create(ctx, comment.NewComment{Content: content, HTML: "<p>parent</p>", GameID: gameID, CreatorID: other})
+	parent, err := repo.Create(ctx, comment.NewComment{Content: content, Text: "parent", GameID: gameID, CreatorID: other})
 	if err != nil {
 		t.Fatal(err)
 	}
-	reply, err := repo.Create(ctx, comment.NewComment{Content: content, HTML: "<p>needle reply</p>", GameID: gameID, CreatorID: author, ParentID: &parent.ID, RootID: &parent.ID})
+	reply, err := repo.Create(ctx, comment.NewComment{Content: content, Text: "needle reply", GameID: gameID, CreatorID: author, ParentID: &parent.ID, RootID: &parent.ID})
 	if err != nil {
 		t.Fatal(err)
 	}

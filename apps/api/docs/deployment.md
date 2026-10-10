@@ -70,9 +70,9 @@ Cap is one layer, not the whole defence: it keeps plain scripts out and makes ev
 1. Register a Hikarinagi Open API client for Shionlib and deploy the Hikarinagi change feed (`GET /api/v3/open/catalog/changes`).
 2. Take a database backup.
 3. Stop the legacy backend (pm2 `shionlib-backend`); the frontend can show a maintenance page.
-4. Deploy the compose. `migrate` adopts the Prisma history, renames legacy enum types and columns, creates the catalog link tables, links rows that carry `h_id`, carries the Hikarinagi cursor over and builds the search indexes.
+4. Deploy the compose. `migrate` adopts the Prisma history, renames legacy enum types and columns, creates the catalog link tables, links rows that carry `h_id`, carries the Hikarinagi cursor over, builds the search indexes and converts the content of comments and walkthroughs from the legacy editor's state to rich text documents (ADR 0013), keeping every original in `legacy_editor_contents`.
 5. Copy Redis state that changed keys (see "Redis" in `migration.md`): the recent-update sorted set and the Bangumi tokens.
 6. Let `worker` follow the change feed from the carried cursor and refresh linked entries (`catalog_refresh` queues the never-synced links first). Watch `catalog_source_links.failures`.
 7. Switch traffic to `api` and smoke-test login, game pages, downloads (they need Cap, see above), uploads and search.
 
-Rollback before step 7: stop the compose and start the legacy backend; the forward migrations are additive except for the enum/column renames and the `hikarinagi_sync_state` replacement, which have down migrations (`shionlib-api migrate` has no `down` subcommand; run golang-migrate manually if needed).
+Rollback before step 7: stop the compose and start the legacy backend; the forward migrations are additive except for the enum/column renames, the `hikarinagi_sync_state` replacement and the conversion of editor content (its down migration puts the kept `content` and `html` back), which have down migrations (`shionlib-api migrate` has no `down` subcommand; run golang-migrate manually if needed).

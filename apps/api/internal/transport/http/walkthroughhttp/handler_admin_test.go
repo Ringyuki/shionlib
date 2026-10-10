@@ -63,7 +63,7 @@ func optional[T any](value T) *T {
 func sampleEntry() walkthrough.AdminEntry {
 	return walkthrough.AdminEntry{
 		Walkthrough: walkthrough.Walkthrough{
-			ID: 4, GameID: 10, Title: "Route guide", HTML: "<p>guide</p>", Lang: optional("zh"),
+			ID: 4, GameID: 10, Title: "Route guide", Text: "guide", Lang: optional("zh"),
 			Created: apitest.Now, Updated: apitest.Now, Edited: true, Status: walkthrough.StatusHidden, CreatorID: 1,
 		},
 		Creator:      user.Summary{ID: 1, Name: "alice"},
@@ -90,9 +90,9 @@ func TestAdminListShapeAndFilters(t *testing.T) {
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/walkthroughs?pageSize=5&search=guide&sortBy=title&sortOrder=asc&status=HIDDEN&creatorId=1&gameId=10", As: &admin})
 	e.server.Expect(resp, http.StatusOK, 0)
 	want := `{"items":[` +
-		`{"id":4,"title":"Route guide","html":"<p>guide</p>","lang":"zh","edited":true,"status":"HIDDEN","created":` + stamp + `,"updated":` + stamp + `,"creator":` + adminCreator + `,"game":` + adminGame + `,` +
+		`{"id":4,"title":"Route guide","text":"guide","lang":"zh","edited":true,"status":"HIDDEN","created":` + stamp + `,"updated":` + stamp + `,"creator":` + adminCreator + `,"game":` + adminGame + `,` +
 		`"moderation":{"id":2,"decision":"BLOCK","model":"gpt","top_category":"SPAM","max_score":0.75,"reason":"ads","created_at":` + stamp + `}},` +
-		`{"id":5,"title":"Route guide","html":"<p>guide</p>","lang":null,"edited":false,"status":"PUBLISHED","created":` + stamp + `,"updated":` + stamp + `,"creator":` + adminCreator + `,"game":` + adminGame + `}` +
+		`{"id":5,"title":"Route guide","text":"guide","lang":null,"edited":false,"status":"PUBLISHED","created":` + stamp + `,"updated":` + stamp + `,"creator":` + adminCreator + `,"game":` + adminGame + `}` +
 		`],"meta":{"totalItems":2,"itemCount":2,"itemsPerPage":5,"totalPages":1,"currentPage":1}}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected page\n got %s\nwant %s", resp.Data, want)
@@ -130,14 +130,14 @@ func TestAdminRoutesRequireAdmins(t *testing.T) {
 func TestAdminDetailShape(t *testing.T) {
 	e := setupAdmin(t)
 	entry := sampleEntry()
-	entry.Content = json.RawMessage(`{"root":{"type":"root","children":[]}}`)
+	entry.Content = json.RawMessage(`{"type":"doc","content":[{"type":"paragraph"}]}`)
 	e.store.details[4] = walkthrough.AdminDetail{AdminEntry: entry, Moderations: []moderation.Event{{
 		ID: 2, Auditor: moderation.AuditorReview, Model: "gpt", Decision: moderation.DecisionBlock, TopCategory: moderation.CategorySpam,
 		Categories: json.RawMessage(`{"spam":true}`), MaxScore: optional(0.0), Evidence: optional("link"), Created: apitest.Now,
 	}}}
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/walkthroughs/4", As: &admin})
 	e.server.Expect(resp, http.StatusOK, 0)
-	want := `{"id":4,"title":"Route guide","html":"<p>guide</p>","content":{"root":{"type":"root","children":[]}},"lang":"zh","edited":true,"status":"HIDDEN",` +
+	want := `{"id":4,"title":"Route guide","text":"guide","content":{"type":"doc","content":[{"type":"paragraph"}]},"lang":"zh","edited":true,"status":"HIDDEN",` +
 		`"created":` + stamp + `,"updated":` + stamp + `,"creator":` + adminCreator + `,"game":` + adminGame + `,"moderations":[` +
 		`{"id":2,"audit_by":2,"model":"gpt","decision":"BLOCK","top_category":"SPAM","categories_json":{"spam":true},"scores_json":null,"max_score":0,"evidence":"link","created_at":` + stamp + `}]}`
 	if string(resp.Data) != want {

@@ -85,12 +85,12 @@ func sampleEntries() []comment.AdminEntry {
 	return []comment.AdminEntry{
 		{
 			Comment: comment.Comment{
-				ID: 5, HTML: text("<p>reply</p>"), GameID: 10, ParentID: &parentID, RootID: &parentID, CreatorID: 1,
+				ID: 5, Text: "reply", GameID: 10, ParentID: &parentID, RootID: &parentID, CreatorID: 1,
 				Status: comment.StatusPending, Edited: true, Created: apitest.Now, Updated: apitest.Now,
 			},
 			Creator:      user.Summary{ID: 1, Name: "alice"},
 			CreatorEmail: "alice@example.test",
-			Parent:       &comment.ParentRef{ID: 4, HTML: text("<p>root</p>"), Creator: user.Summary{ID: 2, Name: "bob", SponsorExpiresAt: &sponsorUntil}},
+			Parent:       &comment.ParentRef{ID: 4, Text: "root", Creator: user.Summary{ID: 2, Name: "bob", SponsorExpiresAt: &sponsorUntil}},
 			Game:         comment.GameRef{ID: 10, TitleJP: "タイトル"},
 			LikeCount:    3,
 			Moderation: &moderation.Event{
@@ -108,12 +108,12 @@ func sampleEntries() []comment.AdminEntry {
 }
 
 const (
-	adminReplyItem = `{"id":5,"html":"<p>reply</p>","parent_id":4,"root_id":4,"reply_count":0,"like_count":3,` +
+	adminReplyItem = `{"id":5,"text":"reply","parent_id":4,"root_id":4,"reply_count":0,"like_count":3,` +
 		`"creator":{"id":1,"name":"alice","avatar":null,"is_sponsor":false,"email":"alice@example.test"},` +
-		`"parent":{"id":4,"html":"<p>root</p>","creator":{"id":2,"name":"bob","avatar":null,"is_sponsor":true}},` +
+		`"parent":{"id":4,"text":"root","creator":{"id":2,"name":"bob","avatar":null,"is_sponsor":true}},` +
 		`"game":{"id":10,"title_jp":"タイトル","title_zh":"","title_en":""},"edited":true,"status":2,"created":` + stamp + `,"updated":` + stamp + `,` +
 		`"moderation":{"id":7,"decision":"REVIEW","model":"omni","top_category":"HATE","max_score":0,"evidence":"","created_at":` + stamp + `}}`
-	adminRootItem = `{"id":4,"html":null,"parent_id":null,"root_id":null,"reply_count":1,"like_count":0,` +
+	adminRootItem = `{"id":4,"text":"","parent_id":null,"root_id":null,"reply_count":1,"like_count":0,` +
 		`"creator":{"id":2,"name":"bob","avatar":null,"is_sponsor":false,"email":"bob@example.test"},"parent":null,` +
 		`"game":{"id":10,"title_jp":"タイトル","title_zh":"标题","title_en":"Title"},"edited":false,"status":1,"created":` + stamp + `,"updated":` + stamp + `}`
 )
@@ -164,7 +164,7 @@ func TestAdminRoutesRequireAdmins(t *testing.T) {
 func TestAdminDetailShape(t *testing.T) {
 	e := setupAdmin(t)
 	entry := sampleEntries()[0]
-	entry.Content = json.RawMessage(`{"root":{"type":"root","children":[]}}`)
+	entry.Content = json.RawMessage(`{"type":"doc","content":[{"type":"paragraph"}]}`)
 	e.store.details[5] = comment.AdminDetail{AdminEntry: entry, Moderations: []moderation.Event{
 		{
 			ID: 8, Auditor: moderation.AuditorReview, Model: "gpt", Decision: moderation.DecisionBlock, TopCategory: moderation.CategorySpam,
@@ -174,9 +174,9 @@ func TestAdminDetailShape(t *testing.T) {
 	}}
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/comments/5", As: &moderator})
 	e.server.Expect(resp, http.StatusOK, 0)
-	want := `{"id":5,"html":"<p>reply</p>","content":{"root":{"type":"root","children":[]}},"parent_id":4,"root_id":4,"reply_count":0,"like_count":3,` +
+	want := `{"id":5,"text":"reply","content":{"type":"doc","content":[{"type":"paragraph"}]},"parent_id":4,"root_id":4,"reply_count":0,"like_count":3,` +
 		`"creator":{"id":1,"name":"alice","avatar":null,"is_sponsor":false,"email":"alice@example.test"},` +
-		`"parent":{"id":4,"html":"<p>root</p>","creator":{"id":2,"name":"bob","avatar":null,"is_sponsor":true}},` +
+		`"parent":{"id":4,"text":"root","creator":{"id":2,"name":"bob","avatar":null,"is_sponsor":true}},` +
 		`"game":{"id":10,"title_jp":"タイトル","title_zh":"","title_en":""},"edited":true,"status":2,"created":` + stamp + `,"updated":` + stamp + `,"moderations":[` +
 		`{"id":8,"audit_by":2,"model":"gpt","decision":"BLOCK","top_category":"SPAM","categories_json":{"spam":true},"scores_json":{"spam":0.9},"max_score":0.9,"reason":"ads","evidence":"link","created_at":` + stamp + `},` +
 		`{"id":7,"audit_by":1,"model":"omni","decision":"REVIEW","top_category":"HATE","categories_json":{},"scores_json":null,"max_score":null,"created_at":` + stamp + `}]}`

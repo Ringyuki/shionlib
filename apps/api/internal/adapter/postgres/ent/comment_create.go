@@ -34,16 +34,16 @@ func (_c *CommentCreate) SetContent(v jsontext.Value) *CommentCreate {
 	return _c
 }
 
-// SetHTML sets the "html" field.
-func (_c *CommentCreate) SetHTML(v string) *CommentCreate {
-	_c.mutation.SetHTML(v)
+// SetText sets the "text" field.
+func (_c *CommentCreate) SetText(v string) *CommentCreate {
+	_c.mutation.SetText(v)
 	return _c
 }
 
-// SetNillableHTML sets the "html" field if the given value is not nil.
-func (_c *CommentCreate) SetNillableHTML(v *string) *CommentCreate {
+// SetNillableText sets the "text" field if the given value is not nil.
+func (_c *CommentCreate) SetNillableText(v *string) *CommentCreate {
 	if v != nil {
-		_c.SetHTML(*v)
+		_c.SetText(*v)
 	}
 	return _c
 }
@@ -309,6 +309,10 @@ func (_c *CommentCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *CommentCreate) defaults() {
+	if _, ok := _c.mutation.Text(); !ok {
+		v := comment.DefaultText
+		_c.mutation.SetText(v)
+	}
 	if _, ok := _c.mutation.ReplyCount(); !ok {
 		v := comment.DefaultReplyCount
 		_c.mutation.SetReplyCount(v)
@@ -336,10 +340,8 @@ func (_c *CommentCreate) check() error {
 	if _, ok := _c.mutation.Content(); !ok {
 		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "Comment.content"`)}
 	}
-	if v, ok := _c.mutation.HTML(); ok {
-		if err := comment.HTMLValidator(v); err != nil {
-			return &ValidationError{Name: "html", err: fmt.Errorf(`ent: validator failed for field "Comment.html": %w`, err)}
-		}
+	if _, ok := _c.mutation.Text(); !ok {
+		return &ValidationError{Name: "text", err: errors.New(`ent: missing required field "Comment.text"`)}
 	}
 	if _, ok := _c.mutation.GameID(); !ok {
 		return &ValidationError{Name: "game_id", err: errors.New(`ent: missing required field "Comment.game_id"`)}
@@ -402,9 +404,9 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		_spec.SetField(comment.FieldContent, field.TypeJSON, value)
 		_node.Content = value
 	}
-	if value, ok := _c.mutation.HTML(); ok {
-		_spec.SetField(comment.FieldHTML, field.TypeString, value)
-		_node.HTML = &value
+	if value, ok := _c.mutation.Text(); ok {
+		_spec.SetField(comment.FieldText, field.TypeString, value)
+		_node.Text = value
 	}
 	if value, ok := _c.mutation.ReplyCount(); ok {
 		_spec.SetField(comment.FieldReplyCount, field.TypeInt, value)
@@ -654,21 +656,15 @@ func (u *CommentUpsert) UpdateContent() *CommentUpsert {
 	return u
 }
 
-// SetHTML sets the "html" field.
-func (u *CommentUpsert) SetHTML(v string) *CommentUpsert {
-	u.Set(comment.FieldHTML, v)
+// SetText sets the "text" field.
+func (u *CommentUpsert) SetText(v string) *CommentUpsert {
+	u.Set(comment.FieldText, v)
 	return u
 }
 
-// UpdateHTML sets the "html" field to the value that was provided on create.
-func (u *CommentUpsert) UpdateHTML() *CommentUpsert {
-	u.SetExcluded(comment.FieldHTML)
-	return u
-}
-
-// ClearHTML clears the value of the "html" field.
-func (u *CommentUpsert) ClearHTML() *CommentUpsert {
-	u.SetNull(comment.FieldHTML)
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *CommentUpsert) UpdateText() *CommentUpsert {
+	u.SetExcluded(comment.FieldText)
 	return u
 }
 
@@ -857,24 +853,17 @@ func (u *CommentUpsertOne) UpdateContent() *CommentUpsertOne {
 	})
 }
 
-// SetHTML sets the "html" field.
-func (u *CommentUpsertOne) SetHTML(v string) *CommentUpsertOne {
+// SetText sets the "text" field.
+func (u *CommentUpsertOne) SetText(v string) *CommentUpsertOne {
 	return u.Update(func(s *CommentUpsert) {
-		s.SetHTML(v)
+		s.SetText(v)
 	})
 }
 
-// UpdateHTML sets the "html" field to the value that was provided on create.
-func (u *CommentUpsertOne) UpdateHTML() *CommentUpsertOne {
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *CommentUpsertOne) UpdateText() *CommentUpsertOne {
 	return u.Update(func(s *CommentUpsert) {
-		s.UpdateHTML()
-	})
-}
-
-// ClearHTML clears the value of the "html" field.
-func (u *CommentUpsertOne) ClearHTML() *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.ClearHTML()
+		s.UpdateText()
 	})
 }
 
@@ -1249,24 +1238,17 @@ func (u *CommentUpsertBulk) UpdateContent() *CommentUpsertBulk {
 	})
 }
 
-// SetHTML sets the "html" field.
-func (u *CommentUpsertBulk) SetHTML(v string) *CommentUpsertBulk {
+// SetText sets the "text" field.
+func (u *CommentUpsertBulk) SetText(v string) *CommentUpsertBulk {
 	return u.Update(func(s *CommentUpsert) {
-		s.SetHTML(v)
+		s.SetText(v)
 	})
 }
 
-// UpdateHTML sets the "html" field to the value that was provided on create.
-func (u *CommentUpsertBulk) UpdateHTML() *CommentUpsertBulk {
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *CommentUpsertBulk) UpdateText() *CommentUpsertBulk {
 	return u.Update(func(s *CommentUpsert) {
-		s.UpdateHTML()
-	})
-}
-
-// ClearHTML clears the value of the "html" field.
-func (u *CommentUpsertBulk) ClearHTML() *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.ClearHTML()
+		s.UpdateText()
 	})
 }
 

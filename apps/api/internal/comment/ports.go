@@ -16,7 +16,7 @@ type Repository interface {
 	Create(ctx context.Context, in NewComment) (Comment, error)
 	SetRoot(ctx context.Context, id, rootID int) error
 	AdjustReplyCount(ctx context.Context, id, delta int) error
-	UpdateContent(ctx context.Context, id int, content json.RawMessage, html string) error
+	UpdateContent(ctx context.Context, id int, content json.RawMessage, text string) error
 	SetStatus(ctx context.Context, id int, status Status) error
 	Delete(ctx context.Context, id int) error
 	Entry(ctx context.Context, id, viewerID int) (Entry, error)

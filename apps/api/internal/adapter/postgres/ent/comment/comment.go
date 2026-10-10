@@ -16,8 +16,8 @@ const (
 	FieldID = "id"
 	// FieldContent holds the string denoting the content field in the database.
 	FieldContent = "content"
-	// FieldHTML holds the string denoting the html field in the database.
-	FieldHTML = "html"
+	// FieldText holds the string denoting the text field in the database.
+	FieldText = "text"
 	// FieldGameID holds the string denoting the game_id field in the database.
 	FieldGameID = "game_id"
 	// FieldParentID holds the string denoting the parent_id field in the database.
@@ -129,7 +129,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldContent,
-	FieldHTML,
+	FieldText,
 	FieldGameID,
 	FieldParentID,
 	FieldRootID,
@@ -158,8 +158,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// HTMLValidator is a validator for the "html" field. It is called by the builders before save.
-	HTMLValidator func(string) error
+	// DefaultText holds the default value on creation for the "text" field.
+	DefaultText string
 	// DefaultReplyCount holds the default value on creation for the "reply_count" field.
 	DefaultReplyCount int
 	// DefaultStatus holds the default value on creation for the "status" field.
@@ -182,9 +182,9 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByHTML orders the results by the html field.
-func ByHTML(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldHTML, opts...).ToFunc()
+// ByText orders the results by the text field.
+func ByText(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldText, opts...).ToFunc()
 }
 
 // ByGameID orders the results by the game_id field.

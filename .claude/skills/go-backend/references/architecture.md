@@ -5,12 +5,12 @@
 | Path | Role | May import |
 |---|---|---|
 | `internal/apperror`, `internal/actor` | Kernel: error definitions, caller identity | stdlib |
-| `internal/lexical`, `internal/paging`, `internal/patch`, `internal/txtest` | Libraries shared by capabilities: Lexical document format, `paging.Page` (capabilities alias it as `Page`), `patch.Clearable[T]` for set/clear/untouched updates, immediate transactor for tests; exempt from the capability file layout | kernel, business |
+| `internal/richtext`, `internal/paging`, `internal/patch`, `internal/txtest` | Libraries shared by capabilities: the rich text document format and its schemas (ADR 0013), `paging.Page` (capabilities alias it as `Page`), `patch.Clearable[T]` for set/clear/untouched updates, immediate transactor for tests; exempt from the capability file layout | kernel, business |
 | `internal/<capability>` | Business capability: models, services, ports, errors, job args | kernel, other business packages, allow-listed modules (`golang.org/x/sync`, `golang.org/x/text`, `github.com/google/uuid`) |
 | `internal/<capability>/<capability>test` | Memory fakes and contract suites for that capability | same as business + `testing` |
 | `internal/platform/*` | Cross-cutting infrastructure (config, logger, telemetry, database, redis, jobs, cache, ratelimit, realtime, i18n, jsoncodec, httpclient, runtime, server) | kernel, platform, generated code |
 | `internal/adapter/*` | Implementations of business ports (Postgres, Redis, vendors, queue, push) | kernel, business, platform, generated code |
-| `internal/transport/http/*` | HTTP handlers and HTTP infrastructure (`httpapi`, `errmap`, `response`, `middleware`, `reqstate`, `clientinfo`, `apitest`, `lexicalhttp`) | kernel, business, platform, transport |
+| `internal/transport/http/*` | HTTP handlers and HTTP infrastructure (`httpapi`, `errmap`, `response`, `middleware`, `reqstate`, `clientinfo`, `apitest`, `richtexthttp`) | kernel, business, platform, transport |
 | `internal/transport/jobs/*` | River workers and scheduled tasks that call business services | kernel, business, platform, transport |
 | `internal/bootstrap` | Composition root | everything except `cmd` |
 | `cmd/api` | Process entrypoint: `serve`, `worker`, `migrate`, `openapi`, `health` | everything |

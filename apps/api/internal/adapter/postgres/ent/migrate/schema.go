@@ -635,7 +635,7 @@ var (
 	CommentsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "content", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
-		{Name: "html", Type: field.TypeString, Nullable: true, Size: 100000, SchemaType: map[string]string{"postgres": "character varying(100000)"}},
+		{Name: "text", Type: field.TypeString, Size: 2147483647, Default: ""},
 		{Name: "reply_count", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "status", Type: field.TypeInt, Default: 1, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "edited", Type: field.TypeBool, Default: false},
@@ -2446,7 +2446,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "title", Type: field.TypeString, Size: 255, SchemaType: map[string]string{"postgres": "character varying(255)"}},
 		{Name: "content", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
-		{Name: "html", Type: field.TypeString, Size: 100000, SchemaType: map[string]string{"postgres": "character varying(100000)"}},
+		{Name: "text", Type: field.TypeString, Size: 2147483647, Default: ""},
+		{Name: "excerpt", Type: field.TypeString, Size: 2147483647, Default: ""},
 		{Name: "lang", Type: field.TypeString, Nullable: true, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
 		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
@@ -2464,13 +2465,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "walkthroughs_game_id_fkey",
-				Columns:    []*schema.Column{WalkthroughsColumns[10]},
+				Columns:    []*schema.Column{WalkthroughsColumns[11]},
 				RefColumns: []*schema.Column{GamesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "walkthroughs_creator_id_fkey",
-				Columns:    []*schema.Column{WalkthroughsColumns[11]},
+				Columns:    []*schema.Column{WalkthroughsColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -2479,12 +2480,12 @@ var (
 			{
 				Name:    "walkthroughs_game_id_created_idx",
 				Unique:  false,
-				Columns: []*schema.Column{WalkthroughsColumns[10], WalkthroughsColumns[5]},
+				Columns: []*schema.Column{WalkthroughsColumns[11], WalkthroughsColumns[6]},
 			},
 			{
 				Name:    "walkthroughs_creator_id_created_idx",
 				Unique:  false,
-				Columns: []*schema.Column{WalkthroughsColumns[11], WalkthroughsColumns[5]},
+				Columns: []*schema.Column{WalkthroughsColumns[12], WalkthroughsColumns[6]},
 			},
 		},
 	}

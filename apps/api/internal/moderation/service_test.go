@@ -50,9 +50,9 @@ func scores(values map[string]float64) moderation.Screening {
 }
 
 func (f fixture) reply(html string) moderation.CommentSubject {
-	parent := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 9, GameID: 5, HTML: "<p>parent</p>"}, moderationtest.CommentVisible)
+	parent := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 9, GameID: 5, Text: "parent"}, moderationtest.CommentVisible)
 	return f.repo.SeedComment(moderation.CommentSubject{
-		CreatorID: 3, GameID: 5, HTML: html, ParentID: &parent.ID, ParentCreatorID: &parent.CreatorID, ParentHTML: parent.HTML,
+		CreatorID: 3, GameID: 5, Text: html, ParentID: &parent.ID, ParentCreatorID: &parent.CreatorID, ParentText: parent.Text,
 		Game: moderation.GameTitles{JP: "タイトル", ZH: "标题", EN: "Title"},
 	}, moderationtest.CommentPending)
 }
@@ -60,7 +60,7 @@ func (f fixture) reply(html string) moderation.CommentSubject {
 func TestScreenCommentApprovesLowScores(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()
-	comment := f.reply("<p>Hello<br/>World</p>")
+	comment := f.reply("Hello\nWorld")
 	f.classifier.Screening = scores(map[string]float64{"hate": 0.001, "harassment": 0.01})
 
 	if err := f.service.ScreenComment(ctx, comment.ID); err != nil {
@@ -92,7 +92,7 @@ func TestScreenCommentApprovesLowScores(t *testing.T) {
 func TestScreenCommentEscalatesTheReviewBand(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()
-	comment := f.reply("<p>hmm</p>")
+	comment := f.reply("hmm")
 	f.classifier.Screening = scores(map[string]float64{"harassment": 0.01, "hate": 0.2})
 
 	if err := f.service.ScreenComment(ctx, comment.ID); err != nil {
@@ -114,7 +114,7 @@ func TestScreenCommentEscalatesTheReviewBand(t *testing.T) {
 func TestScreenCommentBlocksHighScores(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()
-	comment := f.reply("<p>bad</p>")
+	comment := f.reply("bad")
 	f.classifier.Screening = scores(map[string]float64{"violence": 0.95, "hate/threatening": 0.4})
 
 	if err := f.service.ScreenComment(ctx, comment.ID); err != nil {
@@ -148,7 +148,7 @@ func TestScreenCommentSkipsAndRetries(t *testing.T) {
 
 	t.Run("already decided", func(t *testing.T) {
 		f := newFixture()
-		comment := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 1, GameID: 1, HTML: "<p>x</p>"}, moderationtest.CommentBlocked)
+		comment := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 1, GameID: 1, Text: "x"}, moderationtest.CommentBlocked)
 		if err := f.service.ScreenComment(ctx, comment.ID); err != nil {
 			t.Fatal(err)
 		}
@@ -159,7 +159,7 @@ func TestScreenCommentSkipsAndRetries(t *testing.T) {
 
 	t.Run("classifier failure leaves the comment pending for a retry", func(t *testing.T) {
 		f := newFixture()
-		comment := f.reply("<p>x</p>")
+		comment := f.reply("x")
 		f.classifier.ScreenErr = errors.New("upstream 503")
 		if err := f.service.ScreenComment(ctx, comment.ID); err == nil {
 			t.Fatal("the job must fail so it is retried")
@@ -171,7 +171,7 @@ func TestScreenCommentSkipsAndRetries(t *testing.T) {
 
 	t.Run("disabled classifier approves without an event", func(t *testing.T) {
 		f := newFixture()
-		comment := f.reply("<p>x</p>")
+		comment := f.reply("x")
 		f.classifier.ScreenErr = moderation.ErrClassifierDisabled
 		if err := f.service.ScreenComment(ctx, comment.ID); err != nil {
 			t.Fatal(err)
@@ -183,7 +183,7 @@ func TestScreenCommentSkipsAndRetries(t *testing.T) {
 
 	t.Run("comments without text are approved without the classifier", func(t *testing.T) {
 		f := newFixture()
-		comment := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 1, GameID: 1, HTML: "<hr />"}, moderationtest.CommentPending)
+		comment := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 1, GameID: 1, Text: " \n "}, moderationtest.CommentPending)
 		if err := f.service.ScreenComment(ctx, comment.ID); err != nil {
 			t.Fatal(err)
 		}
@@ -194,7 +194,7 @@ func TestScreenCommentSkipsAndRetries(t *testing.T) {
 
 	t.Run("edits during screening win", func(t *testing.T) {
 		f := newFixture()
-		comment := f.reply("<p>before</p>")
+		comment := f.reply("before")
 		editing := &editingClassifier{repo: f.repo, commentID: comment.ID, screening: scores(map[string]float64{"hate": 0.99})}
 		service := moderation.NewService(f.repo, editing, f.messages, f.activities, f.queue, &txtest.Immediate{})
 		if err := service.ScreenComment(ctx, comment.ID); err != nil {
@@ -207,8 +207,8 @@ func TestScreenCommentSkipsAndRetries(t *testing.T) {
 
 	t.Run("self replies do not notify", func(t *testing.T) {
 		f := newFixture()
-		parent := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 3, GameID: 5, HTML: "<p>p</p>"}, moderationtest.CommentVisible)
-		comment := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 3, GameID: 5, HTML: "<p>c</p>", ParentID: &parent.ID, ParentCreatorID: &parent.CreatorID}, moderationtest.CommentPending)
+		parent := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 3, GameID: 5, Text: "p"}, moderationtest.CommentVisible)
+		comment := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 3, GameID: 5, Text: "c", ParentID: &parent.ID, ParentCreatorID: &parent.CreatorID}, moderationtest.CommentPending)
 		f.classifier.Screening = scores(map[string]float64{"hate": 0})
 		if err := f.service.ScreenComment(ctx, comment.ID); err != nil {
 			t.Fatal(err)
@@ -226,7 +226,7 @@ type editingClassifier struct {
 }
 
 func (c *editingClassifier) Screen(context.Context, string) (moderation.Screening, error) {
-	c.repo.SetCommentHTML(c.commentID, "<p>after</p>")
+	c.repo.SetCommentText(c.commentID, "after")
 	return c.screening, nil
 }
 
@@ -239,7 +239,7 @@ func TestReviewComment(t *testing.T) {
 
 	t.Run("allow publishes with context about the thread", func(t *testing.T) {
 		f := newFixture()
-		comment := f.reply("<p>Hi <b>there</b></p>")
+		comment := f.reply("Hi  there")
 		f.classifier.Verdict = moderation.Verdict{Model: "gpt-5-mini", Decision: moderation.DecisionAllow, TopCategory: moderation.CategoryHarassment, Categories: json.RawMessage(`{"harassment":false}`)}
 		if err := f.service.ReviewComment(ctx, comment.ID); err != nil {
 			t.Fatal(err)
@@ -262,7 +262,7 @@ func TestReviewComment(t *testing.T) {
 
 	t.Run("block notifies with the review reason", func(t *testing.T) {
 		f := newFixture()
-		comment := f.reply("<p>x</p>")
+		comment := f.reply("x")
 		f.classifier.Verdict = moderation.Verdict{Model: "gpt-5-mini", Decision: moderation.DecisionBlock, Reason: "abuse", Evidence: "x", TopCategory: moderation.CategoryHarassment, Categories: json.RawMessage(`{}`)}
 		if err := f.service.ReviewComment(ctx, comment.ID); err != nil {
 			t.Fatal(err)
@@ -276,7 +276,7 @@ func TestReviewComment(t *testing.T) {
 
 	t.Run("failures stay pending and are retried", func(t *testing.T) {
 		f := newFixture()
-		comment := f.reply("<p>x</p>")
+		comment := f.reply("x")
 		f.classifier.ReviewErr = errors.New("invalid structured output")
 		if err := f.service.ReviewComment(ctx, comment.ID); err == nil {
 			t.Fatal("the job must fail so it is retried")
@@ -291,7 +291,7 @@ func TestReviewComment(t *testing.T) {
 		if err := f.service.ReviewComment(ctx, 404); err != nil {
 			t.Fatal(err)
 		}
-		comment := f.reply("<p>x</p>")
+		comment := f.reply("x")
 		f.classifier.ReviewErr = moderation.ErrClassifierDisabled
 		if err := f.service.ReviewComment(ctx, comment.ID); err != nil {
 			t.Fatal(err)
@@ -303,7 +303,7 @@ func TestReviewComment(t *testing.T) {
 }
 
 func (f fixture) walkthrough(status string) moderation.WalkthroughSubject {
-	return f.repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: 4, GameID: 81, Title: "Route guide", HTML: "<p>Pick <b>A</b></p>", ReviewPending: true, Game: moderation.GameTitles{JP: "ゲーム"}}, status)
+	return f.repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: 4, GameID: 81, Title: "Route guide", Text: "Pick\nA", ReviewPending: true, Game: moderation.GameTitles{JP: "ゲーム"}}, status)
 }
 
 func TestReviewWalkthrough(t *testing.T) {
@@ -359,7 +359,7 @@ func TestReviewWalkthrough(t *testing.T) {
 
 	t.Run("walkthroughs no longer awaiting review are skipped", func(t *testing.T) {
 		f := newFixture()
-		hidden := f.repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: 4, GameID: 81, Title: "Route guide", HTML: "<p>x</p>"}, moderationtest.WalkthroughHidden)
+		hidden := f.repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: 4, GameID: 81, Title: "Route guide", Text: "x"}, moderationtest.WalkthroughHidden)
 		f.classifier.Verdict = moderation.Verdict{Decision: moderation.DecisionAllow, TopCategory: moderation.CategoryHarassment}
 		if err := f.service.ReviewWalkthrough(ctx, hidden.ID); err != nil {
 			t.Fatal(err)
@@ -426,23 +426,23 @@ func TestScreeningHelpers(t *testing.T) {
 			t.Fatalf("%v: got %v %v %v", c.scores, screening.MaxScore(), screening.TopCategory(), screening.Decision())
 		}
 	}
-	if got := moderation.PlainText(" <p>Hi<br/>  <b>there</b> </p> "); got != "Hi there" {
-		t.Fatalf("plain text %q", got)
+	if got := moderation.OneLine(" Hi\n  there\t "); got != "Hi there" {
+		t.Fatalf("one line %q", got)
 	}
-	if got := moderation.PlainText("<p>a<BR >b　c&amp;</p>"); got != "a b c&amp;" {
-		t.Fatalf("plain text %q", got)
+	if got := moderation.OneLine("a\r\nb　c<&>"); got != "a b c<&>" {
+		t.Fatalf("one line %q", got)
 	}
-	if moderation.PlainText("") != "" {
-		t.Fatal("empty html")
+	if moderation.OneLine(" \n ") != "" {
+		t.Fatal("text of nothing but spaces is empty")
 	}
 }
 
 func TestRequeueStaleReviews(t *testing.T) {
 	f := newFixture()
 	stuck := f.walkthrough(moderationtest.WalkthroughHidden)
-	f.repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: 4, GameID: 81, Title: "done", HTML: "<p>x</p>"}, moderationtest.WalkthroughPublished)
-	pending := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 1, GameID: 81, HTML: "<p>a</p>"}, moderationtest.CommentPending)
-	f.repo.SeedComment(moderation.CommentSubject{CreatorID: 1, GameID: 81, HTML: "<p>b</p>"}, moderationtest.CommentVisible)
+	f.repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: 4, GameID: 81, Title: "done", Text: "x"}, moderationtest.WalkthroughPublished)
+	pending := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 1, GameID: 81, Text: "a"}, moderationtest.CommentPending)
+	f.repo.SeedComment(moderation.CommentSubject{CreatorID: 1, GameID: 81, Text: "b"}, moderationtest.CommentVisible)
 	if err := f.service.RequeueStaleReviews(context.Background(), time.Now().Add(-time.Hour)); err != nil {
 		t.Fatal(err)
 	}

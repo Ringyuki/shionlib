@@ -3,12 +3,10 @@ package walkthrough
 import (
 	"context"
 	"slices"
-	"unicode/utf8"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
-	"github.com/Ringyuki/shionlib/apps/api/internal/lexical"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moderation"
 )
 
@@ -32,9 +30,8 @@ func (s *Service) Create(ctx context.Context, who actor.Actor, in CreateInput) (
 	if !exists {
 		return View{}, game.ErrNotFound
 	}
-	html, err := render(in.Content)
-	if err != nil {
-		return View{}, err
+	if in.Content.TextLength() > MaxContentLength {
+		return View{}, ErrContentTooLong
 	}
 	var id int
 	err = s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
@@ -42,7 +39,8 @@ func (s *Service) Create(ctx context.Context, who actor.Actor, in CreateInput) (
 			GameID:        in.GameID,
 			Title:         in.Title,
 			Content:       in.Content.Raw(),
-			HTML:          html,
+			Text:          in.Content.Text(),
+			Excerpt:       in.Content.Excerpt(ExcerptLength),
 			Lang:          DetectLanguage("", in.Content.Text()).Stored(),
 			Status:        heldForReview(in.Status),
 			CreatorID:     who.UserID,
@@ -65,18 +63,18 @@ func (s *Service) Create(ctx context.Context, who actor.Actor, in CreateInput) (
 }
 
 func (s *Service) Update(ctx context.Context, who actor.Actor, id int, in UpdateInput) (View, error) {
+	if in.Content.TextLength() > MaxContentLength {
+		return View{}, ErrContentTooLong
+	}
 	err := s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
 		if _, err := s.managed(ctx, who, id); err != nil {
-			return err
-		}
-		html, err := render(in.Content)
-		if err != nil {
 			return err
 		}
 		return s.repo.Update(ctx, id, Changes{
 			Title:         in.Title,
 			Content:       in.Content.Raw(),
-			HTML:          html,
+			Text:          in.Content.Text(),
+			Excerpt:       in.Content.Excerpt(ExcerptLength),
 			Lang:          DetectLanguage(in.Title, in.Content.Text()).Stored(),
 			Status:        heldForReview(in.Status),
 			ReviewPending: in.Status == StatusPublished,
@@ -184,12 +182,4 @@ func heldForReview(requested Status) Status {
 		return StatusHidden
 	}
 	return requested
-}
-
-func render(content lexical.Document) (string, error) {
-	html := content.HTML()
-	if utf8.RuneCountInString(html) > MaxHTMLLength {
-		return "", ErrContentTooLong
-	}
-	return html, nil
 }

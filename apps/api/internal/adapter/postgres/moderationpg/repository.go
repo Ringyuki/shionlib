@@ -52,7 +52,7 @@ func (r *Repository) commentSubject(ctx context.Context, id int, lock bool) (mod
 		Where(entcomment.ID(id)).
 		WithGame(selectTitles).
 		WithParent(func(q *ent.CommentQuery) {
-			q.Select(entcomment.FieldID, entcomment.FieldHTML, entcomment.FieldCreatorID)
+			q.Select(entcomment.FieldID, entcomment.FieldText, entcomment.FieldCreatorID)
 		})
 	if lock {
 		query.ForUpdate()
@@ -68,7 +68,7 @@ func (r *Repository) commentSubject(ctx context.Context, id int, lock bool) (mod
 		ID:        row.ID,
 		CreatorID: row.CreatorID,
 		GameID:    row.GameID,
-		HTML:      deref(row.HTML),
+		Text:      row.Text,
 		Pending:   comment.Status(row.Status) == comment.StatusPending,
 		ParentID:  row.ParentID,
 		Game:      titles(row.Edges.Game),
@@ -76,7 +76,7 @@ func (r *Repository) commentSubject(ctx context.Context, id int, lock bool) (mod
 	if parent := row.Edges.Parent; parent != nil {
 		creatorID := parent.CreatorID
 		subject.ParentCreatorID = &creatorID
-		subject.ParentHTML = deref(parent.HTML)
+		subject.ParentText = parent.Text
 	}
 	return subject, nil
 }
@@ -125,7 +125,7 @@ func (r *Repository) walkthroughSubject(ctx context.Context, id int, lock bool) 
 		CreatorID:     row.CreatorID,
 		GameID:        row.GameID,
 		Title:         row.Title,
-		HTML:          row.HTML,
+		Text:          row.Text,
 		Deleted:       walkthrough.Status(row.Status) == walkthrough.StatusDeleted,
 		ReviewPending: row.ReviewPending,
 		Game:          titles(row.Edges.Game),
@@ -220,11 +220,4 @@ func titles(row *ent.Game) moderation.GameTitles {
 		return moderation.GameTitles{}
 	}
 	return moderation.GameTitles{JP: row.TitleJp, ZH: row.TitleZh, EN: row.TitleEn}
-}
-
-func deref(value *string) string {
-	if value == nil {
-		return ""
-	}
-	return *value
 }

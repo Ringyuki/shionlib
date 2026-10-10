@@ -75,16 +75,30 @@ func (_u *WalkthroughUpdate) AppendContent(v jsontext.Value) *WalkthroughUpdate 
 	return _u
 }
 
-// SetHTML sets the "html" field.
-func (_u *WalkthroughUpdate) SetHTML(v string) *WalkthroughUpdate {
-	_u.mutation.SetHTML(v)
+// SetText sets the "text" field.
+func (_u *WalkthroughUpdate) SetText(v string) *WalkthroughUpdate {
+	_u.mutation.SetText(v)
 	return _u
 }
 
-// SetNillableHTML sets the "html" field if the given value is not nil.
-func (_u *WalkthroughUpdate) SetNillableHTML(v *string) *WalkthroughUpdate {
+// SetNillableText sets the "text" field if the given value is not nil.
+func (_u *WalkthroughUpdate) SetNillableText(v *string) *WalkthroughUpdate {
 	if v != nil {
-		_u.SetHTML(*v)
+		_u.SetText(*v)
+	}
+	return _u
+}
+
+// SetExcerpt sets the "excerpt" field.
+func (_u *WalkthroughUpdate) SetExcerpt(v string) *WalkthroughUpdate {
+	_u.mutation.SetExcerpt(v)
+	return _u
+}
+
+// SetNillableExcerpt sets the "excerpt" field if the given value is not nil.
+func (_u *WalkthroughUpdate) SetNillableExcerpt(v *string) *WalkthroughUpdate {
+	if v != nil {
+		_u.SetExcerpt(*v)
 	}
 	return _u
 }
@@ -313,11 +327,6 @@ func (_u *WalkthroughUpdate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Walkthrough.title": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.HTML(); ok {
-		if err := walkthrough.HTMLValidator(v); err != nil {
-			return &ValidationError{Name: "html", err: fmt.Errorf(`ent: validator failed for field "Walkthrough.html": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Lang(); ok {
 		if err := walkthrough.LangValidator(v); err != nil {
 			return &ValidationError{Name: "lang", err: fmt.Errorf(`ent: validator failed for field "Walkthrough.lang": %w`, err)}
@@ -366,8 +375,11 @@ func (_u *WalkthroughUpdate) sqlSave(ctx context.Context) (_node int, err error)
 			sqljson.Append(u, walkthrough.FieldContent, value)
 		})
 	}
-	if value, ok := _u.mutation.HTML(); ok {
-		_spec.SetField(walkthrough.FieldHTML, field.TypeString, value)
+	if value, ok := _u.mutation.Text(); ok {
+		_spec.SetField(walkthrough.FieldText, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Excerpt(); ok {
+		_spec.SetField(walkthrough.FieldExcerpt, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Lang(); ok {
 		_spec.SetField(walkthrough.FieldLang, field.TypeString, value)
@@ -597,16 +609,30 @@ func (_u *WalkthroughUpdateOne) AppendContent(v jsontext.Value) *WalkthroughUpda
 	return _u
 }
 
-// SetHTML sets the "html" field.
-func (_u *WalkthroughUpdateOne) SetHTML(v string) *WalkthroughUpdateOne {
-	_u.mutation.SetHTML(v)
+// SetText sets the "text" field.
+func (_u *WalkthroughUpdateOne) SetText(v string) *WalkthroughUpdateOne {
+	_u.mutation.SetText(v)
 	return _u
 }
 
-// SetNillableHTML sets the "html" field if the given value is not nil.
-func (_u *WalkthroughUpdateOne) SetNillableHTML(v *string) *WalkthroughUpdateOne {
+// SetNillableText sets the "text" field if the given value is not nil.
+func (_u *WalkthroughUpdateOne) SetNillableText(v *string) *WalkthroughUpdateOne {
 	if v != nil {
-		_u.SetHTML(*v)
+		_u.SetText(*v)
+	}
+	return _u
+}
+
+// SetExcerpt sets the "excerpt" field.
+func (_u *WalkthroughUpdateOne) SetExcerpt(v string) *WalkthroughUpdateOne {
+	_u.mutation.SetExcerpt(v)
+	return _u
+}
+
+// SetNillableExcerpt sets the "excerpt" field if the given value is not nil.
+func (_u *WalkthroughUpdateOne) SetNillableExcerpt(v *string) *WalkthroughUpdateOne {
+	if v != nil {
+		_u.SetExcerpt(*v)
 	}
 	return _u
 }
@@ -848,11 +874,6 @@ func (_u *WalkthroughUpdateOne) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Walkthrough.title": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.HTML(); ok {
-		if err := walkthrough.HTMLValidator(v); err != nil {
-			return &ValidationError{Name: "html", err: fmt.Errorf(`ent: validator failed for field "Walkthrough.html": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Lang(); ok {
 		if err := walkthrough.LangValidator(v); err != nil {
 			return &ValidationError{Name: "lang", err: fmt.Errorf(`ent: validator failed for field "Walkthrough.lang": %w`, err)}
@@ -918,8 +939,11 @@ func (_u *WalkthroughUpdateOne) sqlSave(ctx context.Context) (_node *Walkthrough
 			sqljson.Append(u, walkthrough.FieldContent, value)
 		})
 	}
-	if value, ok := _u.mutation.HTML(); ok {
-		_spec.SetField(walkthrough.FieldHTML, field.TypeString, value)
+	if value, ok := _u.mutation.Text(); ok {
+		_spec.SetField(walkthrough.FieldText, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Excerpt(); ok {
+		_spec.SetField(walkthrough.FieldExcerpt, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Lang(); ok {
 		_spec.SetField(walkthrough.FieldLang, field.TypeString, value)

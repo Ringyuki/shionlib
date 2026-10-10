@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -12,9 +13,9 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game/gametest"
-	"github.com/Ringyuki/shionlib/apps/api/internal/lexical"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moderation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moderation/moderationtest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/richtext"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/walkthrough"
 	"github.com/Ringyuki/shionlib/apps/api/internal/walkthrough/walkthroughtest"
@@ -51,14 +52,14 @@ func newFixture(cards ...game.Card) fixture {
 	return f
 }
 
-func document(t *testing.T, texts ...string) lexical.Document {
+func document(t *testing.T, texts ...string) richtext.Document {
 	t.Helper()
-	children := make([]any, len(texts))
+	blocks := make([]any, len(texts))
 	for i, text := range texts {
-		children[i] = map[string]any{"type": "paragraph", "children": []any{map[string]any{"type": "text", "text": text}}}
+		blocks[i] = map[string]any{"type": "paragraph", "content": []any{map[string]any{"type": "text", "text": text}}}
 	}
-	raw, _ := json.Marshal(map[string]any{"root": map[string]any{"type": "root", "children": children}})
-	doc, err := lexical.Parse(raw)
+	raw, _ := json.Marshal(map[string]any{"type": "doc", "content": blocks})
+	doc, err := richtext.Parse(raw, richtext.Article)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +74,7 @@ func TestCreateHoldsPublishedWalkthroughsForReview(t *testing.T) {
 		t.Fatal(err)
 	}
 	if created.Status != walkthrough.StatusHidden || !created.ReviewPending || created.CreatorID != author.UserID || created.Lang == nil || *created.Lang != "jp" || created.Creator.ID != author.UserID ||
-		created.HTML != `<p class="[&amp;:not(:first-child)]:mt-6"><span>この攻略では、はじめに共通ルートを進めて、三日目の選択肢でヒロイン分岐に入ります。</span></p>` {
+		created.Text != "この攻略では、はじめに共通ルートを進めて、三日目の選択肢でヒロイン分岐に入ります。" || created.Excerpt != created.Text {
 		t.Fatalf("unexpected walkthrough %+v", created)
 	}
 	if jobs := f.queue.All(); len(jobs) != 1 || jobs[0] != (moderation.ReviewWalkthrough{WalkthroughID: created.ID}) {
@@ -94,12 +95,9 @@ func TestCreateHoldsPublishedWalkthroughsForReview(t *testing.T) {
 	if _, err := f.service.Create(ctx, author, walkthrough.CreateInput{GameID: 404, Title: "x", Content: document(t, "x"), Status: walkthrough.StatusDraft}); !errors.Is(err, game.ErrNotFound) {
 		t.Fatalf("missing game: %v", err)
 	}
-	texts := make([]string, 2000)
-	for i := range texts {
-		texts[i] = "x"
-	}
-	if _, err := f.service.Create(ctx, author, walkthrough.CreateInput{GameID: gameID, Title: "x", Content: document(t, texts...), Status: walkthrough.StatusDraft}); !errors.Is(err, walkthrough.ErrContentTooLong) {
-		t.Fatalf("rendered html beyond the column size: %v", err)
+	overlong := strings.Repeat("x", walkthrough.MaxContentLength+1)
+	if _, err := f.service.Create(ctx, author, walkthrough.CreateInput{GameID: gameID, Title: "x", Content: document(t, overlong), Status: walkthrough.StatusDraft}); !errors.Is(err, walkthrough.ErrContentTooLong) {
+		t.Fatalf("text beyond the limit: %v", err)
 	}
 }
 

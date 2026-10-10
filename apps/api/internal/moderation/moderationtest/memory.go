@@ -55,10 +55,10 @@ func (r *MemoryRepository) SeedComment(subject moderation.CommentSubject, status
 	return subject
 }
 
-func (r *MemoryRepository) SetCommentHTML(id int, html string) {
+func (r *MemoryRepository) SetCommentText(id int, html string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	r.comments[id].subject.HTML = html
+	r.comments[id].subject.Text = html
 }
 
 func (r *MemoryRepository) CommentStatus(id int) string {

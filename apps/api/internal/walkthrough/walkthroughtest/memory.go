@@ -92,7 +92,8 @@ func (r *MemoryRepository) Create(_ context.Context, in walkthrough.NewWalkthrou
 		GameID:        in.GameID,
 		Title:         in.Title,
 		Content:       slices.Clone(in.Content),
-		HTML:          in.HTML,
+		Text:          in.Text,
+		Excerpt:       in.Excerpt,
 		Lang:          in.Lang,
 		Created:       r.now(),
 		Updated:       r.now(),
@@ -108,7 +109,8 @@ func (r *MemoryRepository) Update(_ context.Context, id int, changes walkthrough
 	return r.update(id, func(w *walkthrough.Walkthrough) {
 		w.Title = changes.Title
 		w.Content = slices.Clone(changes.Content)
-		w.HTML = changes.HTML
+		w.Text = changes.Text
+		w.Excerpt = changes.Excerpt
 		w.Lang = changes.Lang
 		w.Status = changes.Status
 		w.ReviewPending = changes.ReviewPending
@@ -179,6 +181,7 @@ func (r *MemoryRepository) list(match func(walkthrough.Walkthrough) bool, page w
 			ID:            w.ID,
 			GameID:        w.GameID,
 			Title:         w.Title,
+			Excerpt:       w.Excerpt,
 			Lang:          w.Lang,
 			Created:       w.Created,
 			Updated:       w.Updated,

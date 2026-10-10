@@ -17323,7 +17323,7 @@ type CommentMutation struct {
 	id                      *int
 	content                 *jsontext.Value
 	appendcontent           jsontext.Value
-	html                    *string
+	text                    *string
 	reply_count             *int
 	addreply_count          *int
 	status                  *int
@@ -17518,53 +17518,40 @@ func (m *CommentMutation) ResetContent() {
 	m.appendcontent = nil
 }
 
-// SetHTML sets the "html" field.
-func (m *CommentMutation) SetHTML(s string) {
-	m.html = &s
+// SetText sets the "text" field.
+func (m *CommentMutation) SetText(s string) {
+	m.text = &s
 }
 
-// HTML returns the value of the "html" field in the mutation.
-func (m *CommentMutation) HTML() (r string, exists bool) {
-	v := m.html
+// Text returns the value of the "text" field in the mutation.
+func (m *CommentMutation) Text() (r string, exists bool) {
+	v := m.text
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldHTML returns the old "html" field's value of the Comment entity.
+// OldText returns the old "text" field's value of the Comment entity.
 // If the Comment object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CommentMutation) OldHTML(ctx context.Context) (v *string, err error) {
+func (m *CommentMutation) OldText(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHTML is only allowed on UpdateOne operations")
+		return v, errors.New("OldText is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHTML requires an ID field in the mutation")
+		return v, errors.New("OldText requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHTML: %w", err)
+		return v, fmt.Errorf("querying old value for OldText: %w", err)
 	}
-	return oldValue.HTML, nil
+	return oldValue.Text, nil
 }
 
-// ClearHTML clears the value of the "html" field.
-func (m *CommentMutation) ClearHTML() {
-	m.html = nil
-	m.clearedFields[comment.FieldHTML] = struct{}{}
-}
-
-// HTMLCleared returns if the "html" field was cleared in this mutation.
-func (m *CommentMutation) HTMLCleared() bool {
-	_, ok := m.clearedFields[comment.FieldHTML]
-	return ok
-}
-
-// ResetHTML resets all changes to the "html" field.
-func (m *CommentMutation) ResetHTML() {
-	m.html = nil
-	delete(m.clearedFields, comment.FieldHTML)
+// ResetText resets all changes to the "text" field.
+func (m *CommentMutation) ResetText() {
+	m.text = nil
 }
 
 // SetGameID sets the "game_id" field.
@@ -18427,8 +18414,8 @@ func (m *CommentMutation) Fields() []string {
 	if m.content != nil {
 		fields = append(fields, comment.FieldContent)
 	}
-	if m.html != nil {
-		fields = append(fields, comment.FieldHTML)
+	if m.text != nil {
+		fields = append(fields, comment.FieldText)
 	}
 	if m.game != nil {
 		fields = append(fields, comment.FieldGameID)
@@ -18467,8 +18454,8 @@ func (m *CommentMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case comment.FieldContent:
 		return m.Content()
-	case comment.FieldHTML:
-		return m.HTML()
+	case comment.FieldText:
+		return m.Text()
 	case comment.FieldGameID:
 		return m.GameID()
 	case comment.FieldParentID:
@@ -18498,8 +18485,8 @@ func (m *CommentMutation) OldField(ctx context.Context, name string) (ent.Value,
 	switch name {
 	case comment.FieldContent:
 		return m.OldContent(ctx)
-	case comment.FieldHTML:
-		return m.OldHTML(ctx)
+	case comment.FieldText:
+		return m.OldText(ctx)
 	case comment.FieldGameID:
 		return m.OldGameID(ctx)
 	case comment.FieldParentID:
@@ -18534,12 +18521,12 @@ func (m *CommentMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetContent(v)
 		return nil
-	case comment.FieldHTML:
+	case comment.FieldText:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetHTML(v)
+		m.SetText(v)
 		return nil
 	case comment.FieldGameID:
 		v, ok := value.(int)
@@ -18661,9 +18648,6 @@ func (m *CommentMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *CommentMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(comment.FieldHTML) {
-		fields = append(fields, comment.FieldHTML)
-	}
 	if m.FieldCleared(comment.FieldParentID) {
 		fields = append(fields, comment.FieldParentID)
 	}
@@ -18684,9 +18668,6 @@ func (m *CommentMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *CommentMutation) ClearField(name string) error {
 	switch name {
-	case comment.FieldHTML:
-		m.ClearHTML()
-		return nil
 	case comment.FieldParentID:
 		m.ClearParentID()
 		return nil
@@ -18704,8 +18685,8 @@ func (m *CommentMutation) ResetField(name string) error {
 	case comment.FieldContent:
 		m.ResetContent()
 		return nil
-	case comment.FieldHTML:
-		m.ResetHTML()
+	case comment.FieldText:
+		m.ResetText()
 		return nil
 	case comment.FieldGameID:
 		m.ResetGameID()
@@ -62754,7 +62735,8 @@ type WalkthroughMutation struct {
 	title             *string
 	content           *jsontext.Value
 	appendcontent     jsontext.Value
-	html              *string
+	text              *string
+	excerpt           *string
 	lang              *string
 	created           *time.Time
 	updated           *time.Time
@@ -63004,40 +62986,76 @@ func (m *WalkthroughMutation) ResetContent() {
 	m.appendcontent = nil
 }
 
-// SetHTML sets the "html" field.
-func (m *WalkthroughMutation) SetHTML(s string) {
-	m.html = &s
+// SetText sets the "text" field.
+func (m *WalkthroughMutation) SetText(s string) {
+	m.text = &s
 }
 
-// HTML returns the value of the "html" field in the mutation.
-func (m *WalkthroughMutation) HTML() (r string, exists bool) {
-	v := m.html
+// Text returns the value of the "text" field in the mutation.
+func (m *WalkthroughMutation) Text() (r string, exists bool) {
+	v := m.text
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldHTML returns the old "html" field's value of the Walkthrough entity.
+// OldText returns the old "text" field's value of the Walkthrough entity.
 // If the Walkthrough object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *WalkthroughMutation) OldHTML(ctx context.Context) (v string, err error) {
+func (m *WalkthroughMutation) OldText(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHTML is only allowed on UpdateOne operations")
+		return v, errors.New("OldText is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHTML requires an ID field in the mutation")
+		return v, errors.New("OldText requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHTML: %w", err)
+		return v, fmt.Errorf("querying old value for OldText: %w", err)
 	}
-	return oldValue.HTML, nil
+	return oldValue.Text, nil
 }
 
-// ResetHTML resets all changes to the "html" field.
-func (m *WalkthroughMutation) ResetHTML() {
-	m.html = nil
+// ResetText resets all changes to the "text" field.
+func (m *WalkthroughMutation) ResetText() {
+	m.text = nil
+}
+
+// SetExcerpt sets the "excerpt" field.
+func (m *WalkthroughMutation) SetExcerpt(s string) {
+	m.excerpt = &s
+}
+
+// Excerpt returns the value of the "excerpt" field in the mutation.
+func (m *WalkthroughMutation) Excerpt() (r string, exists bool) {
+	v := m.excerpt
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExcerpt returns the old "excerpt" field's value of the Walkthrough entity.
+// If the Walkthrough object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WalkthroughMutation) OldExcerpt(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExcerpt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExcerpt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExcerpt: %w", err)
+	}
+	return oldValue.Excerpt, nil
+}
+
+// ResetExcerpt resets all changes to the "excerpt" field.
+func (m *WalkthroughMutation) ResetExcerpt() {
+	m.excerpt = nil
 }
 
 // SetLang sets the "lang" field.
@@ -63501,7 +63519,7 @@ func (m *WalkthroughMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *WalkthroughMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.game != nil {
 		fields = append(fields, walkthrough.FieldGameID)
 	}
@@ -63511,8 +63529,11 @@ func (m *WalkthroughMutation) Fields() []string {
 	if m.content != nil {
 		fields = append(fields, walkthrough.FieldContent)
 	}
-	if m.html != nil {
-		fields = append(fields, walkthrough.FieldHTML)
+	if m.text != nil {
+		fields = append(fields, walkthrough.FieldText)
+	}
+	if m.excerpt != nil {
+		fields = append(fields, walkthrough.FieldExcerpt)
 	}
 	if m.lang != nil {
 		fields = append(fields, walkthrough.FieldLang)
@@ -63549,8 +63570,10 @@ func (m *WalkthroughMutation) Field(name string) (ent.Value, bool) {
 		return m.Title()
 	case walkthrough.FieldContent:
 		return m.Content()
-	case walkthrough.FieldHTML:
-		return m.HTML()
+	case walkthrough.FieldText:
+		return m.Text()
+	case walkthrough.FieldExcerpt:
+		return m.Excerpt()
 	case walkthrough.FieldLang:
 		return m.Lang()
 	case walkthrough.FieldCreated:
@@ -63580,8 +63603,10 @@ func (m *WalkthroughMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldTitle(ctx)
 	case walkthrough.FieldContent:
 		return m.OldContent(ctx)
-	case walkthrough.FieldHTML:
-		return m.OldHTML(ctx)
+	case walkthrough.FieldText:
+		return m.OldText(ctx)
+	case walkthrough.FieldExcerpt:
+		return m.OldExcerpt(ctx)
 	case walkthrough.FieldLang:
 		return m.OldLang(ctx)
 	case walkthrough.FieldCreated:
@@ -63626,12 +63651,19 @@ func (m *WalkthroughMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetContent(v)
 		return nil
-	case walkthrough.FieldHTML:
+	case walkthrough.FieldText:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetHTML(v)
+		m.SetText(v)
+		return nil
+	case walkthrough.FieldExcerpt:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExcerpt(v)
 		return nil
 	case walkthrough.FieldLang:
 		v, ok := value.(string)
@@ -63752,8 +63784,11 @@ func (m *WalkthroughMutation) ResetField(name string) error {
 	case walkthrough.FieldContent:
 		m.ResetContent()
 		return nil
-	case walkthrough.FieldHTML:
-		m.ResetHTML()
+	case walkthrough.FieldText:
+		m.ResetText()
+		return nil
+	case walkthrough.FieldExcerpt:
+		m.ResetExcerpt()
 		return nil
 	case walkthrough.FieldLang:
 		m.ResetLang()

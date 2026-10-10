@@ -659,17 +659,17 @@ func (s *e2eSeeder) seedPostGameContent(ctx context.Context, tx *ent.Client, con
 }
 
 func (s *e2eSeeder) seedComments(ctx context.Context, tx *ent.Client, content e2ePostGameContent) (int, error) {
-	rootContent, err := e2eLexicalParagraph(e2eRootCommentText)
+	rootContent, err := e2eParagraph(e2eRootCommentText)
 	if err != nil {
 		return 0, fmt.Errorf("encode root comment: %w", err)
 	}
-	replyContent, err := e2eLexicalParagraph(e2eReplyCommentText)
+	replyContent, err := e2eParagraph(e2eReplyCommentText)
 	if err != nil {
 		return 0, fmt.Errorf("encode reply comment: %w", err)
 	}
 	root, err := tx.Comment.Create().
 		SetContent(rootContent).
-		SetHTML(e2eRootCommentHTML).
+		SetText(e2eRootCommentText).
 		SetGameID(content.primaryGameID).
 		SetCreatorID(content.memberID).
 		SetStatus(1).
@@ -679,7 +679,7 @@ func (s *e2eSeeder) seedComments(ctx context.Context, tx *ent.Client, content e2
 	}
 	err = tx.Comment.Create().
 		SetContent(replyContent).
-		SetHTML(e2eReplyCommentHTML).
+		SetText(e2eReplyCommentText).
 		SetGameID(content.primaryGameID).
 		SetCreatorID(content.adminID).
 		SetParentID(root.ID).

@@ -92,11 +92,10 @@ func (r *MemoryRepository) Create(_ context.Context, in comment.NewComment) (com
 		}
 	}
 	r.nextID++
-	html := in.HTML
 	c := comment.Comment{
 		ID:        r.nextID,
 		Content:   slices.Clone(in.Content),
-		HTML:      &html,
+		Text:      in.Text,
 		GameID:    in.GameID,
 		ParentID:  in.ParentID,
 		RootID:    in.RootID,
@@ -134,10 +133,10 @@ func (r *MemoryRepository) AdjustReplyCount(_ context.Context, id, delta int) er
 	return err
 }
 
-func (r *MemoryRepository) UpdateContent(_ context.Context, id int, content json.RawMessage, html string) error {
+func (r *MemoryRepository) UpdateContent(_ context.Context, id int, content json.RawMessage, text string) error {
 	return r.update(id, func(c *comment.Comment) {
 		c.Content = slices.Clone(content)
-		c.HTML = &html
+		c.Text = text
 		c.Edited = true
 		c.Status = comment.StatusPending
 	})
@@ -244,7 +243,7 @@ func (r *MemoryRepository) entry(c comment.Comment, viewerID int) comment.Entry 
 	}
 	if c.ParentID != nil {
 		if parent, ok := r.comments[*c.ParentID]; ok {
-			entry.Parent = &comment.ParentRef{ID: parent.ID, HTML: parent.HTML, Creator: r.summary(parent.CreatorID)}
+			entry.Parent = &comment.ParentRef{ID: parent.ID, Text: parent.Text, Creator: r.summary(parent.CreatorID)}
 		}
 	}
 	return entry

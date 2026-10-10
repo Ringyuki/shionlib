@@ -15,9 +15,9 @@ import (
 	"unicode"
 )
 
-var libraryPackages = []string{"apperror", "actor", "lexical", "paging", "patch", "txtest"}
+var libraryPackages = []string{"apperror", "actor", "paging", "patch", "richtext", "txtest"}
 
-var transportInfrastructure = []string{"httpapi", "middleware", "response", "errmap", "reqstate", "clientinfo", "apitest", "lexicalhttp"}
+var transportInfrastructure = []string{"httpapi", "middleware", "response", "errmap", "reqstate", "clientinfo", "apitest", "richtexthttp"}
 
 var bannedTypeSuffixes = []string{"Manager", "Processor", "Usecase", "UseCase", "Interactor", "Coordinator", "Facade", "Helper", "Util", "Utils", "Impl", "Controller"}
 

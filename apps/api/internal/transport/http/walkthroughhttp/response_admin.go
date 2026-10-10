@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/moderation"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/richtexthttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/userhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/walkthrough"
 )
@@ -49,7 +50,7 @@ type adminWalkthroughEventDTO struct {
 type adminWalkthroughItemDTO struct {
 	ID         int                            `json:"id"`
 	Title      string                         `json:"title"`
-	HTML       string                         `json:"html"`
+	Text       string                         `json:"text"`
 	Lang       *string                        `json:"lang"`
 	Edited     bool                           `json:"edited"`
 	Status     string                         `json:"status" enum:"DRAFT,PUBLISHED,HIDDEN,DELETED"`
@@ -63,8 +64,8 @@ type adminWalkthroughItemDTO struct {
 type adminWalkthroughDetailDTO struct {
 	ID          int                        `json:"id"`
 	Title       string                     `json:"title"`
-	HTML        string                     `json:"html"`
-	Content     json.RawMessage            `json:"content"`
+	Text        string                     `json:"text"`
+	Content     richtexthttp.Content       `json:"content"`
 	Lang        *string                    `json:"lang"`
 	Edited      bool                       `json:"edited"`
 	Status      string                     `json:"status" enum:"DRAFT,PUBLISHED,HIDDEN,DELETED"`
@@ -119,7 +120,7 @@ func toAdminWalkthroughItem(entry walkthrough.AdminEntry, now time.Time) adminWa
 	return adminWalkthroughItemDTO{
 		ID:         entry.ID,
 		Title:      entry.Title,
-		HTML:       entry.HTML,
+		Text:       entry.Text,
 		Lang:       entry.Lang,
 		Edited:     entry.Edited,
 		Status:     string(entry.Status),
@@ -139,8 +140,8 @@ func toAdminWalkthroughDetail(detail walkthrough.AdminDetail, now time.Time) adm
 	return adminWalkthroughDetailDTO{
 		ID:          detail.ID,
 		Title:       detail.Title,
-		HTML:        detail.HTML,
-		Content:     detail.Content,
+		Text:        detail.Text,
+		Content:     richtexthttp.Content(detail.Content),
 		Lang:        detail.Lang,
 		Edited:      detail.Edited,
 		Status:      string(detail.Status),

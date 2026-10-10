@@ -55,9 +55,9 @@ func IDLTE(id int) predicate.Comment {
 	return predicate.Comment(sql.FieldLTE(FieldID, id))
 }
 
-// HTML applies equality check predicate on the "html" field. It's identical to HTMLEQ.
-func HTML(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldEQ(FieldHTML, v))
+// Text applies equality check predicate on the "text" field. It's identical to TextEQ.
+func Text(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldText, v))
 }
 
 // GameID applies equality check predicate on the "game_id" field. It's identical to GameIDEQ.
@@ -105,79 +105,69 @@ func Updated(v time.Time) predicate.Comment {
 	return predicate.Comment(sql.FieldEQ(FieldUpdated, v))
 }
 
-// HTMLEQ applies the EQ predicate on the "html" field.
-func HTMLEQ(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldEQ(FieldHTML, v))
+// TextEQ applies the EQ predicate on the "text" field.
+func TextEQ(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldText, v))
 }
 
-// HTMLNEQ applies the NEQ predicate on the "html" field.
-func HTMLNEQ(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldNEQ(FieldHTML, v))
+// TextNEQ applies the NEQ predicate on the "text" field.
+func TextNEQ(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldNEQ(FieldText, v))
 }
 
-// HTMLIn applies the In predicate on the "html" field.
-func HTMLIn(vs ...string) predicate.Comment {
-	return predicate.Comment(sql.FieldIn(FieldHTML, vs...))
+// TextIn applies the In predicate on the "text" field.
+func TextIn(vs ...string) predicate.Comment {
+	return predicate.Comment(sql.FieldIn(FieldText, vs...))
 }
 
-// HTMLNotIn applies the NotIn predicate on the "html" field.
-func HTMLNotIn(vs ...string) predicate.Comment {
-	return predicate.Comment(sql.FieldNotIn(FieldHTML, vs...))
+// TextNotIn applies the NotIn predicate on the "text" field.
+func TextNotIn(vs ...string) predicate.Comment {
+	return predicate.Comment(sql.FieldNotIn(FieldText, vs...))
 }
 
-// HTMLGT applies the GT predicate on the "html" field.
-func HTMLGT(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldGT(FieldHTML, v))
+// TextGT applies the GT predicate on the "text" field.
+func TextGT(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldGT(FieldText, v))
 }
 
-// HTMLGTE applies the GTE predicate on the "html" field.
-func HTMLGTE(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldGTE(FieldHTML, v))
+// TextGTE applies the GTE predicate on the "text" field.
+func TextGTE(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldGTE(FieldText, v))
 }
 
-// HTMLLT applies the LT predicate on the "html" field.
-func HTMLLT(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldLT(FieldHTML, v))
+// TextLT applies the LT predicate on the "text" field.
+func TextLT(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldLT(FieldText, v))
 }
 
-// HTMLLTE applies the LTE predicate on the "html" field.
-func HTMLLTE(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldLTE(FieldHTML, v))
+// TextLTE applies the LTE predicate on the "text" field.
+func TextLTE(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldLTE(FieldText, v))
 }
 
-// HTMLContains applies the Contains predicate on the "html" field.
-func HTMLContains(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldContains(FieldHTML, v))
+// TextContains applies the Contains predicate on the "text" field.
+func TextContains(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldContains(FieldText, v))
 }
 
-// HTMLHasPrefix applies the HasPrefix predicate on the "html" field.
-func HTMLHasPrefix(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldHasPrefix(FieldHTML, v))
+// TextHasPrefix applies the HasPrefix predicate on the "text" field.
+func TextHasPrefix(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldHasPrefix(FieldText, v))
 }
 
-// HTMLHasSuffix applies the HasSuffix predicate on the "html" field.
-func HTMLHasSuffix(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldHasSuffix(FieldHTML, v))
+// TextHasSuffix applies the HasSuffix predicate on the "text" field.
+func TextHasSuffix(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldHasSuffix(FieldText, v))
 }
 
-// HTMLIsNil applies the IsNil predicate on the "html" field.
-func HTMLIsNil() predicate.Comment {
-	return predicate.Comment(sql.FieldIsNull(FieldHTML))
+// TextEqualFold applies the EqualFold predicate on the "text" field.
+func TextEqualFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldEqualFold(FieldText, v))
 }
 
-// HTMLNotNil applies the NotNil predicate on the "html" field.
-func HTMLNotNil() predicate.Comment {
-	return predicate.Comment(sql.FieldNotNull(FieldHTML))
-}
-
-// HTMLEqualFold applies the EqualFold predicate on the "html" field.
-func HTMLEqualFold(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldEqualFold(FieldHTML, v))
-}
-
-// HTMLContainsFold applies the ContainsFold predicate on the "html" field.
-func HTMLContainsFold(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldContainsFold(FieldHTML, v))
+// TextContainsFold applies the ContainsFold predicate on the "text" field.
+func TextContainsFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldContainsFold(FieldText, v))
 }
 
 // GameIDEQ applies the EQ predicate on the "game_id" field.

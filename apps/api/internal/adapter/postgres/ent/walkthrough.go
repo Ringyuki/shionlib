@@ -27,8 +27,10 @@ type Walkthrough struct {
 	Title string `json:"title,omitempty"`
 	// Content holds the value of the "content" field.
 	Content jsontext.Value `json:"content,omitempty"`
-	// HTML holds the value of the "html" field.
-	HTML string `json:"html,omitempty"`
+	// Text holds the value of the "text" field.
+	Text string `json:"text,omitempty"`
+	// Excerpt holds the value of the "excerpt" field.
+	Excerpt string `json:"excerpt,omitempty"`
 	// Lang holds the value of the "lang" field.
 	Lang *string `json:"lang,omitempty"`
 	// Created holds the value of the "created" field.
@@ -115,7 +117,7 @@ func (*Walkthrough) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case walkthrough.FieldID, walkthrough.FieldGameID, walkthrough.FieldCreatorID:
 			values[i] = new(sql.NullInt64)
-		case walkthrough.FieldTitle, walkthrough.FieldHTML, walkthrough.FieldLang, walkthrough.FieldStatus:
+		case walkthrough.FieldTitle, walkthrough.FieldText, walkthrough.FieldExcerpt, walkthrough.FieldLang, walkthrough.FieldStatus:
 			values[i] = new(sql.NullString)
 		case walkthrough.FieldCreated, walkthrough.FieldUpdated:
 			values[i] = new(sql.NullTime)
@@ -160,11 +162,17 @@ func (_m *Walkthrough) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field content: %w", err)
 				}
 			}
-		case walkthrough.FieldHTML:
+		case walkthrough.FieldText:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field html", values[i])
+				return fmt.Errorf("unexpected type %T for field text", values[i])
 			} else if value.Valid {
-				_m.HTML = value.String
+				_m.Text = value.String
+			}
+		case walkthrough.FieldExcerpt:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field excerpt", values[i])
+			} else if value.Valid {
+				_m.Excerpt = value.String
 			}
 		case walkthrough.FieldLang:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -274,8 +282,11 @@ func (_m *Walkthrough) String() string {
 	builder.WriteString("content=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Content))
 	builder.WriteString(", ")
-	builder.WriteString("html=")
-	builder.WriteString(_m.HTML)
+	builder.WriteString("text=")
+	builder.WriteString(_m.Text)
+	builder.WriteString(", ")
+	builder.WriteString("excerpt=")
+	builder.WriteString(_m.Excerpt)
 	builder.WriteString(", ")
 	if v := _m.Lang; v != nil {
 		builder.WriteString("lang=")

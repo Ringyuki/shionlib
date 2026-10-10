@@ -65,9 +65,14 @@ func Title(v string) predicate.Walkthrough {
 	return predicate.Walkthrough(sql.FieldEQ(FieldTitle, v))
 }
 
-// HTML applies equality check predicate on the "html" field. It's identical to HTMLEQ.
-func HTML(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldEQ(FieldHTML, v))
+// Text applies equality check predicate on the "text" field. It's identical to TextEQ.
+func Text(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldEQ(FieldText, v))
+}
+
+// Excerpt applies equality check predicate on the "excerpt" field. It's identical to ExcerptEQ.
+func Excerpt(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldEQ(FieldExcerpt, v))
 }
 
 // Lang applies equality check predicate on the "lang" field. It's identical to LangEQ.
@@ -185,69 +190,134 @@ func TitleContainsFold(v string) predicate.Walkthrough {
 	return predicate.Walkthrough(sql.FieldContainsFold(FieldTitle, v))
 }
 
-// HTMLEQ applies the EQ predicate on the "html" field.
-func HTMLEQ(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldEQ(FieldHTML, v))
+// TextEQ applies the EQ predicate on the "text" field.
+func TextEQ(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldEQ(FieldText, v))
 }
 
-// HTMLNEQ applies the NEQ predicate on the "html" field.
-func HTMLNEQ(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldNEQ(FieldHTML, v))
+// TextNEQ applies the NEQ predicate on the "text" field.
+func TextNEQ(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldNEQ(FieldText, v))
 }
 
-// HTMLIn applies the In predicate on the "html" field.
-func HTMLIn(vs ...string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldIn(FieldHTML, vs...))
+// TextIn applies the In predicate on the "text" field.
+func TextIn(vs ...string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldIn(FieldText, vs...))
 }
 
-// HTMLNotIn applies the NotIn predicate on the "html" field.
-func HTMLNotIn(vs ...string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldNotIn(FieldHTML, vs...))
+// TextNotIn applies the NotIn predicate on the "text" field.
+func TextNotIn(vs ...string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldNotIn(FieldText, vs...))
 }
 
-// HTMLGT applies the GT predicate on the "html" field.
-func HTMLGT(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldGT(FieldHTML, v))
+// TextGT applies the GT predicate on the "text" field.
+func TextGT(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldGT(FieldText, v))
 }
 
-// HTMLGTE applies the GTE predicate on the "html" field.
-func HTMLGTE(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldGTE(FieldHTML, v))
+// TextGTE applies the GTE predicate on the "text" field.
+func TextGTE(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldGTE(FieldText, v))
 }
 
-// HTMLLT applies the LT predicate on the "html" field.
-func HTMLLT(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldLT(FieldHTML, v))
+// TextLT applies the LT predicate on the "text" field.
+func TextLT(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldLT(FieldText, v))
 }
 
-// HTMLLTE applies the LTE predicate on the "html" field.
-func HTMLLTE(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldLTE(FieldHTML, v))
+// TextLTE applies the LTE predicate on the "text" field.
+func TextLTE(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldLTE(FieldText, v))
 }
 
-// HTMLContains applies the Contains predicate on the "html" field.
-func HTMLContains(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldContains(FieldHTML, v))
+// TextContains applies the Contains predicate on the "text" field.
+func TextContains(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldContains(FieldText, v))
 }
 
-// HTMLHasPrefix applies the HasPrefix predicate on the "html" field.
-func HTMLHasPrefix(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldHasPrefix(FieldHTML, v))
+// TextHasPrefix applies the HasPrefix predicate on the "text" field.
+func TextHasPrefix(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldHasPrefix(FieldText, v))
 }
 
-// HTMLHasSuffix applies the HasSuffix predicate on the "html" field.
-func HTMLHasSuffix(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldHasSuffix(FieldHTML, v))
+// TextHasSuffix applies the HasSuffix predicate on the "text" field.
+func TextHasSuffix(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldHasSuffix(FieldText, v))
 }
 
-// HTMLEqualFold applies the EqualFold predicate on the "html" field.
-func HTMLEqualFold(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldEqualFold(FieldHTML, v))
+// TextEqualFold applies the EqualFold predicate on the "text" field.
+func TextEqualFold(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldEqualFold(FieldText, v))
 }
 
-// HTMLContainsFold applies the ContainsFold predicate on the "html" field.
-func HTMLContainsFold(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldContainsFold(FieldHTML, v))
+// TextContainsFold applies the ContainsFold predicate on the "text" field.
+func TextContainsFold(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldContainsFold(FieldText, v))
+}
+
+// ExcerptEQ applies the EQ predicate on the "excerpt" field.
+func ExcerptEQ(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldEQ(FieldExcerpt, v))
+}
+
+// ExcerptNEQ applies the NEQ predicate on the "excerpt" field.
+func ExcerptNEQ(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldNEQ(FieldExcerpt, v))
+}
+
+// ExcerptIn applies the In predicate on the "excerpt" field.
+func ExcerptIn(vs ...string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldIn(FieldExcerpt, vs...))
+}
+
+// ExcerptNotIn applies the NotIn predicate on the "excerpt" field.
+func ExcerptNotIn(vs ...string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldNotIn(FieldExcerpt, vs...))
+}
+
+// ExcerptGT applies the GT predicate on the "excerpt" field.
+func ExcerptGT(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldGT(FieldExcerpt, v))
+}
+
+// ExcerptGTE applies the GTE predicate on the "excerpt" field.
+func ExcerptGTE(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldGTE(FieldExcerpt, v))
+}
+
+// ExcerptLT applies the LT predicate on the "excerpt" field.
+func ExcerptLT(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldLT(FieldExcerpt, v))
+}
+
+// ExcerptLTE applies the LTE predicate on the "excerpt" field.
+func ExcerptLTE(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldLTE(FieldExcerpt, v))
+}
+
+// ExcerptContains applies the Contains predicate on the "excerpt" field.
+func ExcerptContains(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldContains(FieldExcerpt, v))
+}
+
+// ExcerptHasPrefix applies the HasPrefix predicate on the "excerpt" field.
+func ExcerptHasPrefix(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldHasPrefix(FieldExcerpt, v))
+}
+
+// ExcerptHasSuffix applies the HasSuffix predicate on the "excerpt" field.
+func ExcerptHasSuffix(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldHasSuffix(FieldExcerpt, v))
+}
+
+// ExcerptEqualFold applies the EqualFold predicate on the "excerpt" field.
+func ExcerptEqualFold(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldEqualFold(FieldExcerpt, v))
+}
+
+// ExcerptContainsFold applies the ContainsFold predicate on the "excerpt" field.
+func ExcerptContainsFold(v string) predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldContainsFold(FieldExcerpt, v))
 }
 
 // LangEQ applies the EQ predicate on the "lang" field.

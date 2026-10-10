@@ -15,8 +15,8 @@ type activityWalkthroughDTO struct {
 }
 
 type activityCommentDTO struct {
-	ID   int     `json:"id"`
-	HTML *string `json:"html"`
+	ID   int    `json:"id"`
+	Text string `json:"text"`
 }
 
 type activityFileDTO struct {
@@ -64,7 +64,7 @@ func toActivityDTO(entry activity.Entry, now time.Time) activityDTO {
 		out.Walkthrough = &activityWalkthroughDTO{ID: ref.ID, Title: ref.Title}
 	}
 	if ref := entry.Comment; ref != nil {
-		out.Comment = &activityCommentDTO{ID: ref.ID, HTML: ref.HTML}
+		out.Comment = &activityCommentDTO{ID: ref.ID, Text: ref.Text}
 	}
 	if ref := entry.File; ref != nil {
 		out.File = &activityFileDTO{ID: ref.ID, ResourceID: ref.ResourceID, FileName: ref.FileName, FileSize: ref.FileSize}

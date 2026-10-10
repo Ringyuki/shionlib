@@ -6,15 +6,9 @@ import (
 	"strings"
 )
 
-var breakTags = regexp.MustCompile(`(?i)<\s*br\s*/?\s*>`)
-
-var anyTag = regexp.MustCompile(`<[^>]*>`)
-
 var whitespace = regexp.MustCompile(`[\s\v\x{00a0}\x{1680}\x{2000}-\x{200a}\x{2028}\x{2029}\x{202f}\x{205f}\x{3000}\x{feff}]+`)
 
-func PlainText(html string) string {
-	text := breakTags.ReplaceAllString(html, " ")
-	text = anyTag.ReplaceAllString(text, "")
+func OneLine(text string) string {
 	return strings.TrimSpace(whitespace.ReplaceAllString(text, " "))
 }
 

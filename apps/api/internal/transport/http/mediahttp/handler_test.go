@@ -22,7 +22,7 @@ var (
 type transcoder struct{}
 
 func (transcoder) ToWebP(_ context.Context, data []byte, _ media.Bounds) (media.Encoded, error) {
-	return media.Encoded{Data: data, ContentType: "image/webp", Extension: ".webp"}, nil
+	return media.Encoded{Data: data, ContentType: "image/webp", Extension: ".webp", Width: 320, Height: 200}, nil
 }
 
 type bucket struct {
@@ -62,6 +62,11 @@ func upload(t *testing.T, field, contentType string, size int) apitest.Request {
 	return apitest.Request{Method: http.MethodPut, Path: "/uploads/small/ad/image", Body: body.String(), Header: map[string]string{"Content-Type": writer.FormDataContentType()}}
 }
 
+func to(req apitest.Request, path string) apitest.Request {
+	req.Path = path
+	return req
+}
+
 func as(req apitest.Request, who actor.Actor) apitest.Request {
 	req.As = &who
 	return req
@@ -84,6 +89,22 @@ func TestAdImageUploadRejectsBadFiles(t *testing.T) {
 	server.Expect(server.Do(as(upload(t, "file", "image/gif", 10), admin)), http.StatusUnsupportedMediaType, 490103)
 	server.Expect(server.Do(as(upload(t, "file", "image/webp", media.AdImageMaxBytes+1), admin)), http.StatusRequestEntityTooLarge, http.StatusRequestEntityTooLarge)
 	if len(store.keys) != 0 {
+		t.Fatalf("rejected uploads must not be stored: %v", store.keys)
+	}
+}
+
+func TestRichTextImageUploadIsForSignedInUsers(t *testing.T) {
+	const path = "/uploads/small/richtext/image"
+	server, store := setup(t)
+	server.Expect(server.Do(to(upload(t, "file", "image/png", 10), path)), http.StatusUnauthorized, 200101)
+	resp := server.Do(as(to(upload(t, "file", "image/png", 10), path), member))
+	server.Expect(resp, http.StatusOK, 0)
+	if string(resp.Data) != `{"key":"richtext/2/uuid.webp","width":320,"height":200}` || len(store.keys) != 1 {
+		t.Fatalf("picture %s stored %v", resp.Data, store.keys)
+	}
+	server.Expect(server.Do(as(to(upload(t, "file", "image/gif", 10), path), member)), http.StatusUnsupportedMediaType, 490103)
+	server.Expect(server.Do(as(to(upload(t, "file", "image/png", media.RichTextImageMaxBytes+1), path), member)), http.StatusRequestEntityTooLarge, http.StatusRequestEntityTooLarge)
+	if len(store.keys) != 1 {
 		t.Fatalf("rejected uploads must not be stored: %v", store.keys)
 	}
 }

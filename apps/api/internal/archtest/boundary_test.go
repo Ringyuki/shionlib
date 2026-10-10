@@ -13,7 +13,7 @@ import (
 )
 
 var taggedBusinessFiles = map[string]string{
-	"internal/lexical/document.go": "lexical decodes the Lexical editor's JSON format; the tags are that format",
+	"internal/richtext/document.go": "richtext owns the stored form of rich text documents; the tags are that form",
 }
 
 var rawSQLMethods = []string{"ExecContext", "QueryContext", "QueryRowContext"}

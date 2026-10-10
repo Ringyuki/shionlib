@@ -32,7 +32,7 @@ var sortFields = map[walkthrough.SortField]string{
 }
 
 var adminFields = []string{
-	entwalkthrough.FieldID, entwalkthrough.FieldGameID, entwalkthrough.FieldTitle, entwalkthrough.FieldHTML, entwalkthrough.FieldLang,
+	entwalkthrough.FieldID, entwalkthrough.FieldGameID, entwalkthrough.FieldTitle, entwalkthrough.FieldText, entwalkthrough.FieldExcerpt, entwalkthrough.FieldLang,
 	entwalkthrough.FieldCreated, entwalkthrough.FieldUpdated, entwalkthrough.FieldEdited, entwalkthrough.FieldStatus,
 	entwalkthrough.FieldCreatorID, entwalkthrough.FieldReviewPending,
 }
@@ -103,7 +103,7 @@ func searchPredicates(keyword string) []predicate.Walkthrough {
 	}
 	return append(predicates,
 		entwalkthrough.TitleContainsFold(keyword),
-		entwalkthrough.HTMLContainsFold(keyword),
+		entwalkthrough.TextContainsFold(keyword),
 		entwalkthrough.HasCreatorWith(entuser.Or(entuser.NameContainsFold(keyword), entuser.EmailContainsFold(keyword))),
 		entwalkthrough.HasGameWith(entgame.Or(entgame.TitleZhContainsFold(keyword), entgame.TitleEnContainsFold(keyword), entgame.TitleJpContainsFold(keyword))),
 	)
@@ -127,7 +127,7 @@ func withAdminEdges(query *ent.WalkthroughQuery, allEvents bool) *ent.Walkthroug
 const gameFK = "walkthroughs_game_id_fkey"
 
 var summaryFields = []string{
-	entwalkthrough.FieldID, entwalkthrough.FieldGameID, entwalkthrough.FieldTitle, entwalkthrough.FieldLang,
+	entwalkthrough.FieldID, entwalkthrough.FieldGameID, entwalkthrough.FieldTitle, entwalkthrough.FieldExcerpt, entwalkthrough.FieldLang,
 	entwalkthrough.FieldCreated, entwalkthrough.FieldUpdated, entwalkthrough.FieldEdited, entwalkthrough.FieldStatus,
 	entwalkthrough.FieldCreatorID,
 }
@@ -182,7 +182,8 @@ func (r *Repository) Create(ctx context.Context, in walkthrough.NewWalkthrough) 
 		SetGameID(in.GameID).
 		SetTitle(in.Title).
 		SetContent(in.Content).
-		SetHTML(in.HTML).
+		SetText(in.Text).
+		SetExcerpt(in.Excerpt).
 		SetNillableLang(in.Lang).
 		SetStatus(entwalkthrough.Status(in.Status)).
 		SetCreatorID(in.CreatorID).
@@ -201,7 +202,8 @@ func (r *Repository) Update(ctx context.Context, id int, changes walkthrough.Cha
 	update := r.db(ctx).Walkthrough.UpdateOneID(id).
 		SetTitle(changes.Title).
 		SetContent(changes.Content).
-		SetHTML(changes.HTML).
+		SetText(changes.Text).
+		SetExcerpt(changes.Excerpt).
 		SetStatus(entwalkthrough.Status(changes.Status)).
 		SetReviewPending(changes.ReviewPending).
 		SetEdited(true)
@@ -278,6 +280,7 @@ func (r *Repository) list(ctx context.Context, query *ent.WalkthroughQuery, page
 			ID:            row.ID,
 			GameID:        row.GameID,
 			Title:         row.Title,
+			Excerpt:       row.Excerpt,
 			Lang:          row.Lang,
 			Created:       row.Created,
 			Updated:       row.Updated,

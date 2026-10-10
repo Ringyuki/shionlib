@@ -21,8 +21,10 @@ const (
 	FieldTitle = "title"
 	// FieldContent holds the string denoting the content field in the database.
 	FieldContent = "content"
-	// FieldHTML holds the string denoting the html field in the database.
-	FieldHTML = "html"
+	// FieldText holds the string denoting the text field in the database.
+	FieldText = "text"
+	// FieldExcerpt holds the string denoting the excerpt field in the database.
+	FieldExcerpt = "excerpt"
 	// FieldLang holds the string denoting the lang field in the database.
 	FieldLang = "lang"
 	// FieldCreated holds the string denoting the created field in the database.
@@ -83,7 +85,8 @@ var Columns = []string{
 	FieldGameID,
 	FieldTitle,
 	FieldContent,
-	FieldHTML,
+	FieldText,
+	FieldExcerpt,
 	FieldLang,
 	FieldCreated,
 	FieldUpdated,
@@ -106,8 +109,10 @@ func ValidColumn(column string) bool {
 var (
 	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	TitleValidator func(string) error
-	// HTMLValidator is a validator for the "html" field. It is called by the builders before save.
-	HTMLValidator func(string) error
+	// DefaultText holds the default value on creation for the "text" field.
+	DefaultText string
+	// DefaultExcerpt holds the default value on creation for the "excerpt" field.
+	DefaultExcerpt string
 	// LangValidator is a validator for the "lang" field. It is called by the builders before save.
 	LangValidator func(string) error
 	// DefaultCreated holds the default value on creation for the "created" field.
@@ -168,9 +173,14 @@ func ByTitle(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTitle, opts...).ToFunc()
 }
 
-// ByHTML orders the results by the html field.
-func ByHTML(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldHTML, opts...).ToFunc()
+// ByText orders the results by the text field.
+func ByText(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldText, opts...).ToFunc()
+}
+
+// ByExcerpt orders the results by the excerpt field.
+func ByExcerpt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExcerpt, opts...).ToFunc()
 }
 
 // ByLang orders the results by the lang field.

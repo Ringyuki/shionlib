@@ -6,6 +6,7 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/gamehttp"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/richtexthttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/userhttp"
 )
 
@@ -24,9 +25,9 @@ type messageItemDTO struct {
 }
 
 type messageCommentDTO struct {
-	ID      int             `json:"id"`
-	Content json.RawMessage `json:"content" doc:"Lexical editor state"`
-	HTML    *string         `json:"html"`
+	ID      int                  `json:"id"`
+	Content richtexthttp.Content `json:"content"`
+	Text    string               `json:"text"`
 }
 
 type messageDetailDTO struct {
@@ -86,7 +87,7 @@ func toMessageDetail(d message.Detail, text messageTextDTO, now time.Time) messa
 		out.Meta = d.Meta
 	}
 	if d.Comment != nil {
-		out.Comment = &messageCommentDTO{ID: d.Comment.ID, Content: d.Comment.Content, HTML: d.Comment.HTML}
+		out.Comment = &messageCommentDTO{ID: d.Comment.ID, Content: richtexthttp.Content(d.Comment.Content), Text: d.Comment.Text}
 	}
 	if d.Game != nil {
 		card := gamehttp.ToGameCard(*d.Game)

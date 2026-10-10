@@ -1,25 +1,25 @@
 package commenthttp
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/gamehttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/richtexthttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/userhttp"
 )
 
 type commentParentDTO struct {
 	ID      int                     `json:"id"`
-	HTML    *string                 `json:"html"`
+	Text    string                  `json:"text"`
 	Creator userhttp.UserSummaryDTO `json:"creator"`
 }
 
 type commentCreatedDTO struct {
 	ID        int                     `json:"id"`
-	Content   json.RawMessage         `json:"content"`
-	HTML      *string                 `json:"html"`
+	Content   richtexthttp.Content    `json:"content"`
+	Text      string                  `json:"text"`
 	ParentID  *int                    `json:"parent_id"`
 	Parent    *commentParentDTO       `json:"parent"`
 	RootID    *int                    `json:"root_id"`
@@ -32,8 +32,8 @@ type commentCreatedDTO struct {
 
 type commentEditedDTO struct {
 	ID       int                     `json:"id"`
-	Content  json.RawMessage         `json:"content"`
-	HTML     *string                 `json:"html"`
+	Content  richtexthttp.Content    `json:"content"`
+	Text     string                  `json:"text"`
 	ParentID *int                    `json:"parent_id"`
 	RootID   *int                    `json:"root_id"`
 	Creator  userhttp.UserSummaryDTO `json:"creator"`
@@ -44,21 +44,21 @@ type commentEditedDTO struct {
 }
 
 type commentRawDTO struct {
-	ID        int             `json:"id"`
-	Content   json.RawMessage `json:"content"`
-	CreatorID int             `json:"creator_id"`
+	ID        int                  `json:"id"`
+	Content   richtexthttp.Content `json:"content"`
+	CreatorID int                  `json:"creator_id"`
 }
 
 type commentItemParentDTO struct {
 	ID      *int                     `json:"id"`
-	HTML    *string                  `json:"html,omitempty"`
+	Text    string                   `json:"text,omitempty"`
 	Creator *userhttp.UserSummaryDTO `json:"creator,omitempty"`
 }
 
 type CommentItemDTO struct {
 	ID         int                     `json:"id"`
-	Content    json.RawMessage         `json:"content" doc:"Lexical editor state"`
-	HTML       *string                 `json:"html"`
+	Content    richtexthttp.Content    `json:"content"`
+	Text       string                  `json:"text"`
 	ParentID   *int                    `json:"parent_id"`
 	RootID     *int                    `json:"root_id"`
 	ReplyCount int                     `json:"reply_count"`
@@ -89,8 +89,8 @@ type commentThreadPageDTO struct {
 
 type userCommentDTO struct {
 	ID         int                     `json:"id"`
-	Content    json.RawMessage         `json:"content" doc:"Lexical editor state"`
-	HTML       *string                 `json:"html"`
+	Content    richtexthttp.Content    `json:"content"`
+	Text       string                  `json:"text"`
 	ParentID   *int                    `json:"parent_id"`
 	RootID     *int                    `json:"root_id"`
 	ReplyCount int                     `json:"reply_count"`
@@ -117,7 +117,7 @@ func toParent(ref *comment.ParentRef, now time.Time) *commentParentDTO {
 	if ref == nil {
 		return nil
 	}
-	return &commentParentDTO{ID: ref.ID, HTML: ref.HTML, Creator: userhttp.ToUserSummary(ref.Creator, now)}
+	return &commentParentDTO{ID: ref.ID, Text: ref.Text, Creator: userhttp.ToUserSummary(ref.Creator, now)}
 }
 
 func toCreated(entry comment.Entry, now time.Time) commentCreatedDTO {
@@ -127,8 +127,8 @@ func toCreated(entry comment.Entry, now time.Time) commentCreatedDTO {
 	}
 	return commentCreatedDTO{
 		ID:        entry.ID,
-		Content:   entry.Content,
-		HTML:      entry.HTML,
+		Content:   richtexthttp.Content(entry.Content),
+		Text:      entry.Text,
 		ParentID:  entry.ParentID,
 		Parent:    toParent(entry.Parent, now),
 		RootID:    rootID,
@@ -143,8 +143,8 @@ func toCreated(entry comment.Entry, now time.Time) commentCreatedDTO {
 func toEdited(entry comment.Entry, now time.Time) commentEditedDTO {
 	return commentEditedDTO{
 		ID:       entry.ID,
-		Content:  entry.Content,
-		HTML:     entry.HTML,
+		Content:  richtexthttp.Content(entry.Content),
+		Text:     entry.Text,
 		ParentID: entry.ParentID,
 		RootID:   entry.RootID,
 		Creator:  userhttp.ToUserSummary(entry.Creator, now),
@@ -159,12 +159,12 @@ func toItem(entry comment.Entry, now time.Time) CommentItemDTO {
 	parent := commentItemParentDTO{ID: entry.ParentID}
 	if entry.Parent != nil {
 		creator := userhttp.ToUserSummary(entry.Parent.Creator, now)
-		parent.HTML, parent.Creator = entry.Parent.HTML, &creator
+		parent.Text, parent.Creator = entry.Parent.Text, &creator
 	}
 	return CommentItemDTO{
 		ID:         entry.ID,
-		Content:    entry.Content,
-		HTML:       entry.HTML,
+		Content:    richtexthttp.Content(entry.Content),
+		Text:       entry.Text,
 		ParentID:   entry.ParentID,
 		RootID:     entry.RootID,
 		ReplyCount: entry.ReplyCount,
@@ -190,8 +190,8 @@ func toThread(thread comment.Thread, now time.Time) commentThreadDTO {
 func toUserComment(entry comment.Entry, now time.Time) userCommentDTO {
 	out := userCommentDTO{
 		ID:         entry.ID,
-		Content:    entry.Content,
-		HTML:       entry.HTML,
+		Content:    richtexthttp.Content(entry.Content),
+		Text:       entry.Text,
 		ParentID:   entry.ParentID,
 		RootID:     entry.RootID,
 		ReplyCount: entry.ReplyCount,

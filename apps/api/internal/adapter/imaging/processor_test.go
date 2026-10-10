@@ -61,6 +61,8 @@ func TestResizesInsideTheBounds(t *testing.T) {
 	}{
 		{media.Bounds{MaxWidth: 233, MaxHeight: 233}, 233, 175},
 		{media.Bounds{MaxWidth: 1500}, 1500, 1125},
+		{media.Bounds{MaxWidth: 1500, KeepSmaller: true}, 400, 300},
+		{media.Bounds{MaxWidth: 200, KeepSmaller: true}, 200, 150},
 		{media.Bounds{}, 400, 300},
 	}
 	for _, tc := range cases {
@@ -70,6 +72,9 @@ func TestResizesInsideTheBounds(t *testing.T) {
 		}
 		if got := decodeWebP(t, encoded).Bounds(); got.Dx() != tc.width || got.Dy() != tc.height {
 			t.Fatalf("bounds %+v: got %dx%d want %dx%d", tc.bounds, got.Dx(), got.Dy(), tc.width, tc.height)
+		}
+		if encoded.Width != tc.width || encoded.Height != tc.height {
+			t.Fatalf("bounds %+v: reported %dx%d want %dx%d", tc.bounds, encoded.Width, encoded.Height, tc.width, tc.height)
 		}
 	}
 }

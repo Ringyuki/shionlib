@@ -14,11 +14,11 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/comment/commenttest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game/gametest"
-	"github.com/Ringyuki/shionlib/apps/api/internal/lexical"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message/messagetest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moderation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moderation/moderationtest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/richtext"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 )
 
@@ -49,14 +49,14 @@ func newFixture(cards ...game.Card) fixture {
 	return f
 }
 
-func document(t *testing.T, texts ...string) lexical.Document {
+func document(t *testing.T, texts ...string) richtext.Document {
 	t.Helper()
-	children := make([]any, len(texts))
+	blocks := make([]any, len(texts))
 	for i, text := range texts {
-		children[i] = map[string]any{"type": "paragraph", "children": []any{map[string]any{"type": "text", "text": text, "format": 0}}}
+		blocks[i] = map[string]any{"type": "paragraph", "content": []any{map[string]any{"type": "text", "text": text}}}
 	}
-	raw, _ := json.Marshal(map[string]any{"root": map[string]any{"type": "root", "children": children}})
-	doc, err := lexical.Parse(raw)
+	raw, _ := json.Marshal(map[string]any{"type": "doc", "content": blocks})
+	doc, err := richtext.Parse(raw, richtext.Comment)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,7 +84,7 @@ func TestCreateRootComment(t *testing.T) {
 		t.Fatal(err)
 	}
 	if created.Status != comment.StatusPending || created.CreatorID != alice.UserID || created.GameID != gameID || created.RootID == nil || *created.RootID != created.ID ||
-		created.Parent != nil || created.LikeCount != 0 || *created.HTML != `<p class="[&amp;:not(:first-child)]:mt-6"><span>hello</span></p>` {
+		created.Parent != nil || created.LikeCount != 0 || created.Text != "hello" {
 		t.Fatalf("unexpected comment %+v", created)
 	}
 	if jobs := f.queue.All(); len(jobs) != 1 || jobs[0] != (moderation.ScreenComment{CommentID: created.ID}) {
@@ -146,12 +146,9 @@ func TestCreateValidatesTheParentAndContent(t *testing.T) {
 	if _, err := f.service.Create(ctx, alice, 404, comment.CreateInput{Content: document(t, "x")}); !errors.Is(err, game.ErrNotFound) {
 		t.Fatalf("missing game: %v", err)
 	}
-	texts := make([]string, 2000)
-	for i := range texts {
-		texts[i] = "x"
-	}
-	if _, err := f.service.Create(ctx, alice, gameID, comment.CreateInput{Content: document(t, texts...)}); !errors.Is(err, comment.ErrContentTooLong) {
-		t.Fatalf("rendered html beyond the column size: %v", err)
+	overlong := strings.Repeat("x", comment.MaxContentLength+1)
+	if _, err := f.service.Create(ctx, alice, gameID, comment.CreateInput{Content: document(t, overlong)}); !errors.Is(err, comment.ErrContentTooLong) {
+		t.Fatalf("text beyond the limit: %v", err)
 	}
 	f.queue.Err = errors.New("queue down")
 	if _, err := f.service.Create(ctx, alice, gameID, comment.CreateInput{Content: document(t, "x")}); err == nil {
@@ -175,7 +172,7 @@ func TestEditRawAndDeleteRequireOwnership(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !edited.Edited || edited.Status != comment.StatusPending || !strings.Contains(*edited.HTML, "after") || edited.Creator.ID != alice.UserID {
+	if !edited.Edited || edited.Status != comment.StatusPending || edited.Text != "after" || edited.Creator.ID != alice.UserID {
 		t.Fatalf("unexpected edited comment %+v", edited)
 	}
 	if jobs := f.queue.All(); len(jobs) != 2 || jobs[1] != (moderation.ScreenComment{CommentID: created.ID}) {

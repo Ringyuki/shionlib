@@ -38,7 +38,7 @@ func TestRepositoryContract(t *testing.T) {
 				}
 				row, err := db.Ent.Comment.Create().
 					SetContent(json.RawMessage(`{}`)).
-					SetHTML(fixture.HTML).
+					SetText(fixture.Text).
 					SetGameID(gameID).
 					SetCreatorID(creator).
 					SetNillableParentID(fixture.ParentID).
@@ -47,7 +47,7 @@ func TestRepositoryContract(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				return moderation.CommentSubject{ID: row.ID, CreatorID: creator, GameID: gameID, HTML: fixture.HTML, ParentID: fixture.ParentID, Game: gameTitles(gameID)}
+				return moderation.CommentSubject{ID: row.ID, CreatorID: creator, GameID: gameID, Text: fixture.Text, ParentID: fixture.ParentID, Game: gameTitles(gameID)}
 			},
 			CommentStatus: func(t *testing.T, id int) string {
 				status := comment.Status(db.Ent.Comment.GetX(ctx, id).Status)
@@ -65,14 +65,14 @@ func TestRepositoryContract(t *testing.T) {
 					SetCreatorID(creator).
 					SetTitle("guide").
 					SetContent(json.RawMessage(`{}`)).
-					SetHTML("<p>guide</p>").
+					SetText("guide").
 					SetStatus(entwalkthrough.Status(status)).
 					SetReviewPending(reviewPending).
 					Save(ctx)
 				if err != nil {
 					t.Fatal(err)
 				}
-				return moderation.WalkthroughSubject{ID: row.ID, CreatorID: creator, GameID: gameID, Title: "guide", HTML: "<p>guide</p>", Game: gameTitles(gameID)}
+				return moderation.WalkthroughSubject{ID: row.ID, CreatorID: creator, GameID: gameID, Title: "guide", Text: "guide", Game: gameTitles(gameID)}
 			},
 			WalkthroughStatus: func(t *testing.T, id int) string {
 				return string(db.Ent.Walkthrough.GetX(ctx, id).Status)
@@ -90,7 +90,7 @@ func TestEventsRoundTrip(t *testing.T) {
 	repo := moderationpg.NewRepository(db.Ent)
 	newUser, newGame := db.User, db.Game
 	creator, gameID := newUser(t), newGame(t)
-	row := db.Ent.Comment.Create().SetContent(json.RawMessage(`{}`)).SetHTML("<p>x</p>").SetGameID(gameID).SetCreatorID(creator).SaveX(ctx)
+	row := db.Ent.Comment.Create().SetContent(json.RawMessage(`{}`)).SetText("x").SetGameID(gameID).SetCreatorID(creator).SaveX(ctx)
 	score := 0.123456
 	if err := repo.RecordEvent(ctx, moderation.NewEvent{
 		CommentID:   &row.ID,

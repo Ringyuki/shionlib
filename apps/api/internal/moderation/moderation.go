@@ -173,11 +173,11 @@ type CommentSubject struct {
 	ID              int
 	CreatorID       int
 	GameID          int
-	HTML            string
+	Text            string
 	Pending         bool
 	ParentID        *int
 	ParentCreatorID *int
-	ParentHTML      string
+	ParentText      string
 	Game            GameTitles
 }
 
@@ -186,7 +186,7 @@ type WalkthroughSubject struct {
 	CreatorID     int
 	GameID        int
 	Title         string
-	HTML          string
+	Text          string
 	Deleted       bool
 	ReviewPending bool
 	Game          GameTitles

@@ -19,7 +19,7 @@ func toEntry(row *ent.Activity) activity.Entry {
 		entry.Walkthrough = &activity.WalkthroughRef{ID: ref.ID, Title: ref.Title}
 	}
 	if ref := row.Edges.Comment; ref != nil {
-		entry.Comment = &activity.CommentRef{ID: ref.ID, HTML: ref.HTML}
+		entry.Comment = &activity.CommentRef{ID: ref.ID, Text: ref.Text}
 	}
 	if ref := row.Edges.File; ref != nil {
 		entry.File = &activity.FileRef{ID: ref.ID, ResourceID: ref.GameDownloadResourceID, FileName: ref.FileName, FileSize: ref.FileSize}

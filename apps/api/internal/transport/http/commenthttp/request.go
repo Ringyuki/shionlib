@@ -1,14 +1,12 @@
 package commenthttp
 
 import (
-	"encoding/json"
-
 	"github.com/danielgtaylor/huma/v2"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/comment"
-	"github.com/Ringyuki/shionlib/apps/api/internal/lexical"
+	"github.com/Ringyuki/shionlib/apps/api/internal/richtext"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
-	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/lexicalhttp"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/richtexthttp"
 )
 
 type commentPathInput struct {
@@ -18,29 +16,29 @@ type commentPathInput struct {
 type createCommentInput struct {
 	GameID int `path:"game_id"`
 	Body   struct {
-		Content  json.RawMessage `json:"content" doc:"Lexical editor state"`
-		ParentID *int            `json:"parent_id,omitempty"`
+		Content  richtexthttp.Content `json:"content"`
+		ParentID *int                 `json:"parent_id,omitempty"`
 	}
-	document lexical.Document
+	document richtext.Document
 }
 
 func (in *createCommentInput) Resolve(huma.Context) []error {
 	var errs []error
-	in.document, errs = lexicalhttp.Parse(in.Body.Content, comment.MaxContentLength)
+	in.document, errs = richtexthttp.Parse(in.Body.Content, richtext.Comment, comment.MaxContentLength)
 	return errs
 }
 
 type editCommentInput struct {
 	CommentID int `path:"comment_id"`
 	Body      struct {
-		Content json.RawMessage `json:"content" doc:"Lexical editor state"`
+		Content richtexthttp.Content `json:"content"`
 	}
-	document lexical.Document
+	document richtext.Document
 }
 
 func (in *editCommentInput) Resolve(huma.Context) []error {
 	var errs []error
-	in.document, errs = lexicalhttp.Parse(in.Body.Content, comment.MaxContentLength)
+	in.document, errs = richtexthttp.Parse(in.Body.Content, richtext.Comment, comment.MaxContentLength)
 	return errs
 }
 

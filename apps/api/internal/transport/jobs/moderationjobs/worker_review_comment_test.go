@@ -12,7 +12,7 @@ import (
 
 func TestReviewCommentWorkerRunsTheService(t *testing.T) {
 	f := newFixture(t)
-	comment := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 1, GameID: 1, HTML: "<p>b</p>"}, moderationtest.CommentPending)
+	comment := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 1, GameID: 1, Text: "b"}, moderationtest.CommentPending)
 	if err := NewReviewCommentWorker(f.service).Work(t.Context(), &river.Job[moderation.ReviewComment]{Args: moderation.ReviewComment{CommentID: comment.ID}}); err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +24,7 @@ func TestReviewCommentWorkerRunsTheService(t *testing.T) {
 func TestReviewCommentWorkerReturnsFailuresForRetry(t *testing.T) {
 	f := newFixture(t)
 	f.classifier.ReviewErr = errors.New("upstream down")
-	comment := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 1, GameID: 1, HTML: "<p>d</p>"}, moderationtest.CommentPending)
+	comment := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 1, GameID: 1, Text: "d"}, moderationtest.CommentPending)
 	if err := NewReviewCommentWorker(f.service).Work(t.Context(), &river.Job[moderation.ReviewComment]{Args: moderation.ReviewComment{CommentID: comment.ID}}); err == nil {
 		t.Fatal("failures are returned so River retries the job")
 	}

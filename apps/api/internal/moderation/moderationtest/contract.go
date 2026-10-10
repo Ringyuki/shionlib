@@ -14,7 +14,7 @@ import (
 type CommentFixture struct {
 	ParentID *int
 	Status   string
-	HTML     string
+	Text     string
 }
 
 type Env struct {
@@ -51,24 +51,24 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 
 	t.Run("comment subjects describe the thread and move between states", func(t *testing.T) {
 		env := newEnv(t)
-		parent := env.NewComment(t, CommentFixture{Status: CommentVisible, HTML: "<p>parent</p>"})
-		child := env.NewComment(t, CommentFixture{ParentID: &parent.ID, Status: CommentPending, HTML: "<p>child</p>"})
+		parent := env.NewComment(t, CommentFixture{Status: CommentVisible, Text: "parent"})
+		child := env.NewComment(t, CommentFixture{ParentID: &parent.ID, Status: CommentPending, Text: "child"})
 
 		got, err := env.Repo.CommentSubject(ctx, child.ID)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !got.Pending || got.HTML != "<p>child</p>" || got.CreatorID != child.CreatorID || got.GameID != child.GameID || got.Game != child.Game {
+		if !got.Pending || got.Text != "child" || got.CreatorID != child.CreatorID || got.GameID != child.GameID || got.Game != child.Game {
 			t.Fatalf("unexpected subject %+v, want %+v", got, child)
 		}
-		if got.ParentID == nil || *got.ParentID != parent.ID || got.ParentCreatorID == nil || *got.ParentCreatorID != parent.CreatorID || got.ParentHTML != "<p>parent</p>" {
+		if got.ParentID == nil || *got.ParentID != parent.ID || got.ParentCreatorID == nil || *got.ParentCreatorID != parent.CreatorID || got.ParentText != "parent" {
 			t.Fatalf("parent not described: %+v", got)
 		}
 		root, err := env.Repo.LockCommentSubject(ctx, parent.ID)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if root.Pending || root.ParentID != nil || root.ParentCreatorID != nil || root.ParentHTML != "" {
+		if root.Pending || root.ParentID != nil || root.ParentCreatorID != nil || root.ParentText != "" {
 			t.Fatalf("unexpected root subject %+v", root)
 		}
 		if err := env.Repo.ApproveComment(ctx, child.ID); err != nil {
@@ -90,8 +90,8 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 
 	t.Run("pending comments older than the cutoff are listed", func(t *testing.T) {
 		env := newEnv(t)
-		pending := env.NewComment(t, CommentFixture{Status: CommentPending, HTML: "<p>a</p>"})
-		env.NewComment(t, CommentFixture{Status: CommentVisible, HTML: "<p>b</p>"})
+		pending := env.NewComment(t, CommentFixture{Status: CommentPending, Text: "a"})
+		env.NewComment(t, CommentFixture{Status: CommentVisible, Text: "b"})
 		if ids, err := env.Repo.PendingComments(ctx, time.Now().Add(time.Hour), 10); err != nil || !slices.Equal(ids, []int{pending.ID}) {
 			t.Fatalf("pending comments %v %v", ids, err)
 		}
@@ -111,7 +111,7 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if got.Deleted || !got.ReviewPending || got.Title != pending.Title || got.HTML != pending.HTML || got.CreatorID != pending.CreatorID || got.GameID != pending.GameID || got.Game != pending.Game {
+		if got.Deleted || !got.ReviewPending || got.Title != pending.Title || got.Text != pending.Text || got.CreatorID != pending.CreatorID || got.GameID != pending.GameID || got.Game != pending.Game {
 			t.Fatalf("unexpected walkthrough subject %+v, want %+v", got, pending)
 		}
 		if got, err := env.Repo.WalkthroughSubject(ctx, hidden.ID); err != nil || got.ReviewPending {
@@ -153,7 +153,7 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 
 	t.Run("events are recorded for comments and walkthroughs", func(t *testing.T) {
 		env := newEnv(t)
-		comment := env.NewComment(t, CommentFixture{Status: CommentPending, HTML: "<p>x</p>"})
+		comment := env.NewComment(t, CommentFixture{Status: CommentPending, Text: "x"})
 		walkthrough := env.NewWalkthrough(t, WalkthroughHidden, false)
 		score, reason, evidence := 0.12345, "reason", "evidence"
 		if err := env.Repo.RecordEvent(ctx, moderation.NewEvent{

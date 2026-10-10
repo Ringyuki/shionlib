@@ -519,10 +519,10 @@ func init() {
 	catalogsynccursor.UpdateDefaultUpdated = catalogsynccursorDescUpdated.UpdateDefault.(func() time.Time)
 	commentFields := schema.Comment{}.Fields()
 	_ = commentFields
-	// commentDescHTML is the schema descriptor for html field.
-	commentDescHTML := commentFields[2].Descriptor()
-	// comment.HTMLValidator is a validator for the "html" field. It is called by the builders before save.
-	comment.HTMLValidator = commentDescHTML.Validators[0].(func(string) error)
+	// commentDescText is the schema descriptor for text field.
+	commentDescText := commentFields[2].Descriptor()
+	// comment.DefaultText holds the default value on creation for the text field.
+	comment.DefaultText = commentDescText.Default.(string)
 	// commentDescReplyCount is the schema descriptor for reply_count field.
 	commentDescReplyCount := commentFields[6].Descriptor()
 	// comment.DefaultReplyCount holds the default value on creation for the reply_count field.
@@ -1373,30 +1373,34 @@ func init() {
 	walkthroughDescTitle := walkthroughFields[2].Descriptor()
 	// walkthrough.TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	walkthrough.TitleValidator = walkthroughDescTitle.Validators[0].(func(string) error)
-	// walkthroughDescHTML is the schema descriptor for html field.
-	walkthroughDescHTML := walkthroughFields[4].Descriptor()
-	// walkthrough.HTMLValidator is a validator for the "html" field. It is called by the builders before save.
-	walkthrough.HTMLValidator = walkthroughDescHTML.Validators[0].(func(string) error)
+	// walkthroughDescText is the schema descriptor for text field.
+	walkthroughDescText := walkthroughFields[4].Descriptor()
+	// walkthrough.DefaultText holds the default value on creation for the text field.
+	walkthrough.DefaultText = walkthroughDescText.Default.(string)
+	// walkthroughDescExcerpt is the schema descriptor for excerpt field.
+	walkthroughDescExcerpt := walkthroughFields[5].Descriptor()
+	// walkthrough.DefaultExcerpt holds the default value on creation for the excerpt field.
+	walkthrough.DefaultExcerpt = walkthroughDescExcerpt.Default.(string)
 	// walkthroughDescLang is the schema descriptor for lang field.
-	walkthroughDescLang := walkthroughFields[5].Descriptor()
+	walkthroughDescLang := walkthroughFields[6].Descriptor()
 	// walkthrough.LangValidator is a validator for the "lang" field. It is called by the builders before save.
 	walkthrough.LangValidator = walkthroughDescLang.Validators[0].(func(string) error)
 	// walkthroughDescCreated is the schema descriptor for created field.
-	walkthroughDescCreated := walkthroughFields[6].Descriptor()
+	walkthroughDescCreated := walkthroughFields[7].Descriptor()
 	// walkthrough.DefaultCreated holds the default value on creation for the created field.
 	walkthrough.DefaultCreated = walkthroughDescCreated.Default.(func() time.Time)
 	// walkthroughDescUpdated is the schema descriptor for updated field.
-	walkthroughDescUpdated := walkthroughFields[7].Descriptor()
+	walkthroughDescUpdated := walkthroughFields[8].Descriptor()
 	// walkthrough.DefaultUpdated holds the default value on creation for the updated field.
 	walkthrough.DefaultUpdated = walkthroughDescUpdated.Default.(func() time.Time)
 	// walkthrough.UpdateDefaultUpdated holds the default value on update for the updated field.
 	walkthrough.UpdateDefaultUpdated = walkthroughDescUpdated.UpdateDefault.(func() time.Time)
 	// walkthroughDescEdited is the schema descriptor for edited field.
-	walkthroughDescEdited := walkthroughFields[8].Descriptor()
+	walkthroughDescEdited := walkthroughFields[9].Descriptor()
 	// walkthrough.DefaultEdited holds the default value on creation for the edited field.
 	walkthrough.DefaultEdited = walkthroughDescEdited.Default.(bool)
 	// walkthroughDescReviewPending is the schema descriptor for review_pending field.
-	walkthroughDescReviewPending := walkthroughFields[11].Descriptor()
+	walkthroughDescReviewPending := walkthroughFields[12].Descriptor()
 	// walkthrough.DefaultReviewPending holds the default value on creation for the review_pending field.
 	walkthrough.DefaultReviewPending = walkthroughDescReviewPending.Default.(bool)
 }

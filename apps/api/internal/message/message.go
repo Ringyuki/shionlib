@@ -62,7 +62,7 @@ type Message struct {
 type CommentRef struct {
 	ID      int
 	Content json.RawMessage
-	HTML    *string
+	Text    string
 }
 
 type Detail struct {

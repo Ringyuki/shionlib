@@ -11,7 +11,7 @@ import (
 
 func TestScreenCommentWorkerRunsTheService(t *testing.T) {
 	f := newFixture(t)
-	comment := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 1, GameID: 1, HTML: "<p>a</p>"}, moderationtest.CommentPending)
+	comment := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 1, GameID: 1, Text: "a"}, moderationtest.CommentPending)
 	if err := NewScreenCommentWorker(f.service).Work(t.Context(), &river.Job[moderation.ScreenComment]{Args: moderation.ScreenComment{CommentID: comment.ID}}); err != nil {
 		t.Fatal(err)
 	}

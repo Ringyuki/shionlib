@@ -23,8 +23,8 @@ type Comment struct {
 	ID int `json:"id,omitempty"`
 	// Content holds the value of the "content" field.
 	Content jsontext.Value `json:"content,omitempty"`
-	// HTML holds the value of the "html" field.
-	HTML *string `json:"html,omitempty"`
+	// Text holds the value of the "text" field.
+	Text string `json:"text,omitempty"`
 	// GameID holds the value of the "game_id" field.
 	GameID int `json:"game_id,omitempty"`
 	// ParentID holds the value of the "parent_id" field.
@@ -196,7 +196,7 @@ func (*Comment) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case comment.FieldID, comment.FieldGameID, comment.FieldParentID, comment.FieldRootID, comment.FieldReplyCount, comment.FieldCreatorID, comment.FieldStatus:
 			values[i] = new(sql.NullInt64)
-		case comment.FieldHTML:
+		case comment.FieldText:
 			values[i] = new(sql.NullString)
 		case comment.FieldCreated, comment.FieldUpdated:
 			values[i] = new(sql.NullTime)
@@ -229,12 +229,11 @@ func (_m *Comment) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field content: %w", err)
 				}
 			}
-		case comment.FieldHTML:
+		case comment.FieldText:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field html", values[i])
+				return fmt.Errorf("unexpected type %T for field text", values[i])
 			} else if value.Valid {
-				_m.HTML = new(string)
-				*_m.HTML = value.String
+				_m.Text = value.String
 			}
 		case comment.FieldGameID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -386,10 +385,8 @@ func (_m *Comment) String() string {
 	builder.WriteString("content=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Content))
 	builder.WriteString(", ")
-	if v := _m.HTML; v != nil {
-		builder.WriteString("html=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("text=")
+	builder.WriteString(_m.Text)
 	builder.WriteString(", ")
 	builder.WriteString("game_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.GameID))

@@ -8,6 +8,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/richtexthttp"
 )
 
 var tags = []string{"comment"}
@@ -52,7 +53,7 @@ func (h *Handler) raw(ctx context.Context, in *commentPathInput) (*response.Outp
 	if err != nil {
 		return nil, err
 	}
-	return response.OK(ctx, h.resp, commentRawDTO{ID: found.ID, Content: found.Content, CreatorID: found.CreatorID}), nil
+	return response.OK(ctx, h.resp, commentRawDTO{ID: found.ID, Content: richtexthttp.Content(found.Content), CreatorID: found.CreatorID}), nil
 }
 
 func (h *Handler) delete(ctx context.Context, in *commentPathInput) (*response.EmptyOutput, error) {

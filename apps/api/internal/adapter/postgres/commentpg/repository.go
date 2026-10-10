@@ -121,7 +121,7 @@ func searchPredicates(keyword string) []predicate.Comment {
 		predicates = append(predicates, entcomment.ID(id), entcomment.CreatorID(id), entcomment.GameID(id))
 	}
 	return append(predicates,
-		entcomment.HTMLContainsFold(keyword),
+		entcomment.TextContainsFold(keyword),
 		entcomment.HasCreatorWith(entuser.Or(entuser.NameContainsFold(keyword), entuser.EmailContainsFold(keyword))),
 		entcomment.HasGameWith(entgame.Or(entgame.TitleZhContainsFold(keyword), entgame.TitleEnContainsFold(keyword), entgame.TitleJpContainsFold(keyword))),
 	)
@@ -142,7 +142,7 @@ func withAdminEdges(query *ent.CommentQuery, allEvents bool) *ent.CommentQuery {
 	return query.
 		WithCreator(func(q *ent.UserQuery) { q.Select(slices.Concat(userpg.SummaryFields, []string{entuser.FieldEmail})...) }).
 		WithParent(func(q *ent.CommentQuery) {
-			q.Select(entcomment.FieldID, entcomment.FieldHTML, entcomment.FieldCreatorID).WithCreator(userpg.SelectSummary)
+			q.Select(entcomment.FieldID, entcomment.FieldText, entcomment.FieldCreatorID).WithCreator(userpg.SelectSummary)
 		}).
 		WithGame(func(q *ent.GameQuery) {
 			q.Select(entgame.FieldID, entgame.FieldTitleJp, entgame.FieldTitleZh, entgame.FieldTitleEn)
@@ -199,7 +199,7 @@ const (
 )
 
 var listFields = []string{
-	entcomment.FieldID, entcomment.FieldHTML, entcomment.FieldGameID, entcomment.FieldParentID, entcomment.FieldRootID,
+	entcomment.FieldID, entcomment.FieldText, entcomment.FieldGameID, entcomment.FieldParentID, entcomment.FieldRootID,
 	entcomment.FieldReplyCount, entcomment.FieldCreatorID, entcomment.FieldStatus, entcomment.FieldEdited,
 	entcomment.FieldCreated, entcomment.FieldUpdated,
 }
@@ -243,7 +243,7 @@ func (r *Repository) Lock(ctx context.Context, id int) (comment.Comment, error) 
 func (r *Repository) Create(ctx context.Context, in comment.NewComment) (comment.Comment, error) {
 	row, err := r.db(ctx).Comment.Create().
 		SetContent(in.Content).
-		SetHTML(in.HTML).
+		SetText(in.Text).
 		SetGameID(in.GameID).
 		SetCreatorID(in.CreatorID).
 		SetNillableParentID(in.ParentID).
@@ -276,10 +276,10 @@ func (r *Repository) AdjustReplyCount(ctx context.Context, id, delta int) error 
 	return nil
 }
 
-func (r *Repository) UpdateContent(ctx context.Context, id int, content json.RawMessage, html string) error {
+func (r *Repository) UpdateContent(ctx context.Context, id int, content json.RawMessage, text string) error {
 	return r.updateOne(ctx, id, r.db(ctx).Comment.UpdateOneID(id).
 		SetContent(content).
-		SetHTML(html).
+		SetText(text).
 		SetEdited(true).
 		SetStatus(int(comment.StatusPending)))
 }
@@ -410,7 +410,7 @@ func withThread(query *ent.CommentQuery) *ent.CommentQuery {
 	return query.
 		WithCreator(userpg.SelectSummary).
 		WithParent(func(q *ent.CommentQuery) {
-			q.Select(entcomment.FieldID, entcomment.FieldHTML, entcomment.FieldCreatorID).WithCreator(userpg.SelectSummary)
+			q.Select(entcomment.FieldID, entcomment.FieldText, entcomment.FieldCreatorID).WithCreator(userpg.SelectSummary)
 		})
 }
 
@@ -508,5 +508,5 @@ func parentRef(row *ent.Comment) *comment.ParentRef {
 	if row == nil {
 		return nil
 	}
-	return &comment.ParentRef{ID: row.ID, HTML: row.HTML, Creator: userpg.ToSummary(row.Edges.Creator)}
+	return &comment.ParentRef{ID: row.ID, Text: row.Text, Creator: userpg.ToSummary(row.Edges.Creator)}
 }

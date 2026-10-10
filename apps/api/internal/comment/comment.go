@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
-	"github.com/Ringyuki/shionlib/apps/api/internal/lexical"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moderation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/paging"
+	"github.com/Ringyuki/shionlib/apps/api/internal/richtext"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
 
@@ -23,15 +23,12 @@ func (s Status) Valid() bool {
 	return s == StatusVisible || s == StatusPending || s == StatusBlocked
 }
 
-const (
-	MaxContentLength = 10000
-	MaxHTMLLength    = 100000
-)
+const MaxContentLength = 10000
 
 type Comment struct {
 	ID         int
 	Content    json.RawMessage
-	HTML       *string
+	Text       string
 	GameID     int
 	ParentID   *int
 	RootID     *int
@@ -45,7 +42,7 @@ type Comment struct {
 
 type ParentRef struct {
 	ID      int
-	HTML    *string
+	Text    string
 	Creator user.Summary
 }
 
@@ -77,7 +74,7 @@ type ThreadTotals struct {
 
 type NewComment struct {
 	Content   json.RawMessage
-	HTML      string
+	Text      string
 	GameID    int
 	CreatorID int
 	ParentID  *int
@@ -141,6 +138,6 @@ type StatusChange struct {
 }
 
 type CreateInput struct {
-	Content  lexical.Document
+	Content  richtext.Document
 	ParentID *int
 }

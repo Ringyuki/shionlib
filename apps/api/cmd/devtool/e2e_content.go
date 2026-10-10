@@ -17,9 +17,7 @@ const (
 	e2eDefaultFavoriteName   = "default"
 	e2eFavoriteItemNote      = "Seeded favorite item for E2E tests."
 	e2eRootCommentText       = "Seeded root comment for E2E."
-	e2eRootCommentHTML       = "<p>Seeded root comment for E2E.</p>"
 	e2eReplyCommentText      = "Seeded reply comment for E2E."
-	e2eReplyCommentHTML      = "<p>Seeded reply comment for E2E.</p>"
 	e2eMalwareReviewDeadline = 24 * time.Hour
 )
 
@@ -118,46 +116,16 @@ var e2eSeededMalwareCase = e2eMalwareCase{
 	NotifyUploaderOnAllow: true,
 }
 
-func e2eLexicalParagraph(text string) (json.RawMessage, error) {
-	type textNode struct {
+func e2eParagraph(text string) (json.RawMessage, error) {
+	type node struct {
 		Type    string `json:"type"`
-		Version int    `json:"version"`
-		Text    string `json:"text"`
-		Mode    string `json:"mode"`
-		Style   string `json:"style"`
-		Detail  int    `json:"detail"`
-		Format  int    `json:"format"`
+		Text    string `json:"text,omitempty"`
+		Content []node `json:"content,omitempty"`
 	}
-	type blockNode struct {
-		Type      string     `json:"type"`
-		Version   int        `json:"version"`
-		Format    string     `json:"format"`
-		Indent    int        `json:"indent"`
-		Direction *string    `json:"direction"`
-		Children  []textNode `json:"children"`
-	}
-	type rootNode struct {
-		Type      string      `json:"type"`
-		Version   int         `json:"version"`
-		Format    string      `json:"format"`
-		Indent    int         `json:"indent"`
-		Direction *string     `json:"direction"`
-		Children  []blockNode `json:"children"`
-	}
-	document := struct {
-		Root rootNode `json:"root"`
-	}{
-		Root: rootNode{
-			Type:    "root",
-			Version: 1,
-			Children: []blockNode{{
-				Type:     "paragraph",
-				Version:  1,
-				Children: []textNode{{Type: "text", Version: 1, Text: text, Mode: "normal"}},
-			}},
-		},
-	}
-	return json.Marshal(document)
+	return json.Marshal(node{Type: "doc", Content: []node{{
+		Type:    "paragraph",
+		Content: []node{{Type: "text", Text: text}},
+	}}})
 }
 
 func e2ePtr[T any](value T) *T {

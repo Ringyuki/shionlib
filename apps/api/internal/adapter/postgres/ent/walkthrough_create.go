@@ -45,9 +45,31 @@ func (_c *WalkthroughCreate) SetContent(v jsontext.Value) *WalkthroughCreate {
 	return _c
 }
 
-// SetHTML sets the "html" field.
-func (_c *WalkthroughCreate) SetHTML(v string) *WalkthroughCreate {
-	_c.mutation.SetHTML(v)
+// SetText sets the "text" field.
+func (_c *WalkthroughCreate) SetText(v string) *WalkthroughCreate {
+	_c.mutation.SetText(v)
+	return _c
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (_c *WalkthroughCreate) SetNillableText(v *string) *WalkthroughCreate {
+	if v != nil {
+		_c.SetText(*v)
+	}
+	return _c
+}
+
+// SetExcerpt sets the "excerpt" field.
+func (_c *WalkthroughCreate) SetExcerpt(v string) *WalkthroughCreate {
+	_c.mutation.SetExcerpt(v)
+	return _c
+}
+
+// SetNillableExcerpt sets the "excerpt" field if the given value is not nil.
+func (_c *WalkthroughCreate) SetNillableExcerpt(v *string) *WalkthroughCreate {
+	if v != nil {
+		_c.SetExcerpt(*v)
+	}
 	return _c
 }
 
@@ -222,6 +244,14 @@ func (_c *WalkthroughCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *WalkthroughCreate) defaults() {
+	if _, ok := _c.mutation.Text(); !ok {
+		v := walkthrough.DefaultText
+		_c.mutation.SetText(v)
+	}
+	if _, ok := _c.mutation.Excerpt(); !ok {
+		v := walkthrough.DefaultExcerpt
+		_c.mutation.SetExcerpt(v)
+	}
 	if _, ok := _c.mutation.Created(); !ok {
 		v := walkthrough.DefaultCreated()
 		_c.mutation.SetCreated(v)
@@ -260,13 +290,11 @@ func (_c *WalkthroughCreate) check() error {
 	if _, ok := _c.mutation.Content(); !ok {
 		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "Walkthrough.content"`)}
 	}
-	if _, ok := _c.mutation.HTML(); !ok {
-		return &ValidationError{Name: "html", err: errors.New(`ent: missing required field "Walkthrough.html"`)}
+	if _, ok := _c.mutation.Text(); !ok {
+		return &ValidationError{Name: "text", err: errors.New(`ent: missing required field "Walkthrough.text"`)}
 	}
-	if v, ok := _c.mutation.HTML(); ok {
-		if err := walkthrough.HTMLValidator(v); err != nil {
-			return &ValidationError{Name: "html", err: fmt.Errorf(`ent: validator failed for field "Walkthrough.html": %w`, err)}
-		}
+	if _, ok := _c.mutation.Excerpt(); !ok {
+		return &ValidationError{Name: "excerpt", err: errors.New(`ent: missing required field "Walkthrough.excerpt"`)}
 	}
 	if v, ok := _c.mutation.Lang(); ok {
 		if err := walkthrough.LangValidator(v); err != nil {
@@ -340,9 +368,13 @@ func (_c *WalkthroughCreate) createSpec() (*Walkthrough, *sqlgraph.CreateSpec) {
 		_spec.SetField(walkthrough.FieldContent, field.TypeJSON, value)
 		_node.Content = value
 	}
-	if value, ok := _c.mutation.HTML(); ok {
-		_spec.SetField(walkthrough.FieldHTML, field.TypeString, value)
-		_node.HTML = value
+	if value, ok := _c.mutation.Text(); ok {
+		_spec.SetField(walkthrough.FieldText, field.TypeString, value)
+		_node.Text = value
+	}
+	if value, ok := _c.mutation.Excerpt(); ok {
+		_spec.SetField(walkthrough.FieldExcerpt, field.TypeString, value)
+		_node.Excerpt = value
 	}
 	if value, ok := _c.mutation.Lang(); ok {
 		_spec.SetField(walkthrough.FieldLang, field.TypeString, value)
@@ -522,15 +554,27 @@ func (u *WalkthroughUpsert) UpdateContent() *WalkthroughUpsert {
 	return u
 }
 
-// SetHTML sets the "html" field.
-func (u *WalkthroughUpsert) SetHTML(v string) *WalkthroughUpsert {
-	u.Set(walkthrough.FieldHTML, v)
+// SetText sets the "text" field.
+func (u *WalkthroughUpsert) SetText(v string) *WalkthroughUpsert {
+	u.Set(walkthrough.FieldText, v)
 	return u
 }
 
-// UpdateHTML sets the "html" field to the value that was provided on create.
-func (u *WalkthroughUpsert) UpdateHTML() *WalkthroughUpsert {
-	u.SetExcluded(walkthrough.FieldHTML)
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *WalkthroughUpsert) UpdateText() *WalkthroughUpsert {
+	u.SetExcluded(walkthrough.FieldText)
+	return u
+}
+
+// SetExcerpt sets the "excerpt" field.
+func (u *WalkthroughUpsert) SetExcerpt(v string) *WalkthroughUpsert {
+	u.Set(walkthrough.FieldExcerpt, v)
+	return u
+}
+
+// UpdateExcerpt sets the "excerpt" field to the value that was provided on create.
+func (u *WalkthroughUpsert) UpdateExcerpt() *WalkthroughUpsert {
+	u.SetExcluded(walkthrough.FieldExcerpt)
 	return u
 }
 
@@ -705,17 +749,31 @@ func (u *WalkthroughUpsertOne) UpdateContent() *WalkthroughUpsertOne {
 	})
 }
 
-// SetHTML sets the "html" field.
-func (u *WalkthroughUpsertOne) SetHTML(v string) *WalkthroughUpsertOne {
+// SetText sets the "text" field.
+func (u *WalkthroughUpsertOne) SetText(v string) *WalkthroughUpsertOne {
 	return u.Update(func(s *WalkthroughUpsert) {
-		s.SetHTML(v)
+		s.SetText(v)
 	})
 }
 
-// UpdateHTML sets the "html" field to the value that was provided on create.
-func (u *WalkthroughUpsertOne) UpdateHTML() *WalkthroughUpsertOne {
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *WalkthroughUpsertOne) UpdateText() *WalkthroughUpsertOne {
 	return u.Update(func(s *WalkthroughUpsert) {
-		s.UpdateHTML()
+		s.UpdateText()
+	})
+}
+
+// SetExcerpt sets the "excerpt" field.
+func (u *WalkthroughUpsertOne) SetExcerpt(v string) *WalkthroughUpsertOne {
+	return u.Update(func(s *WalkthroughUpsert) {
+		s.SetExcerpt(v)
+	})
+}
+
+// UpdateExcerpt sets the "excerpt" field to the value that was provided on create.
+func (u *WalkthroughUpsertOne) UpdateExcerpt() *WalkthroughUpsertOne {
+	return u.Update(func(s *WalkthroughUpsert) {
+		s.UpdateExcerpt()
 	})
 }
 
@@ -1069,17 +1127,31 @@ func (u *WalkthroughUpsertBulk) UpdateContent() *WalkthroughUpsertBulk {
 	})
 }
 
-// SetHTML sets the "html" field.
-func (u *WalkthroughUpsertBulk) SetHTML(v string) *WalkthroughUpsertBulk {
+// SetText sets the "text" field.
+func (u *WalkthroughUpsertBulk) SetText(v string) *WalkthroughUpsertBulk {
 	return u.Update(func(s *WalkthroughUpsert) {
-		s.SetHTML(v)
+		s.SetText(v)
 	})
 }
 
-// UpdateHTML sets the "html" field to the value that was provided on create.
-func (u *WalkthroughUpsertBulk) UpdateHTML() *WalkthroughUpsertBulk {
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *WalkthroughUpsertBulk) UpdateText() *WalkthroughUpsertBulk {
 	return u.Update(func(s *WalkthroughUpsert) {
-		s.UpdateHTML()
+		s.UpdateText()
+	})
+}
+
+// SetExcerpt sets the "excerpt" field.
+func (u *WalkthroughUpsertBulk) SetExcerpt(v string) *WalkthroughUpsertBulk {
+	return u.Update(func(s *WalkthroughUpsert) {
+		s.SetExcerpt(v)
+	})
+}
+
+// UpdateExcerpt sets the "excerpt" field to the value that was provided on create.
+func (u *WalkthroughUpsertBulk) UpdateExcerpt() *WalkthroughUpsertBulk {
+	return u.Update(func(s *WalkthroughUpsert) {
+		s.UpdateExcerpt()
 	})
 }
 

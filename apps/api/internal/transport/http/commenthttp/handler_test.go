@@ -29,8 +29,8 @@ var (
 const (
 	alicePublic = `{"id":1,"name":"alice","avatar":null,"is_sponsor":false}`
 	bobPublic   = `{"id":2,"name":"bob","avatar":null,"is_sponsor":false}`
-	paragraph   = `<p class=\"[&amp;:not(:first-child)]:mt-6\"><span>hello</span></p>`
-	contentJSON = `{"root":{"type":"root","children":[{"type":"paragraph","children":[{"type":"text","text":"hello","format":0}]}]}}`
+	paragraph   = `hello`
+	contentJSON = `{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"hello"}]}]}`
 	stamp       = `"2026-10-03T01:02:03.000Z"`
 )
 
@@ -62,7 +62,7 @@ func TestCreateReturnsThePendingComment(t *testing.T) {
 	e := setup(t)
 	resp := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/comment/game/10", As: &alice, Body: body(contentJSON, "")})
 	e.server.Expect(resp, http.StatusCreated, 0)
-	want := `{"id":1,"content":` + contentJSON + `,"html":"` + paragraph + `","parent_id":null,"parent":null,"root_id":1,"creator":` + alicePublic + `,"status":2,"created":` + stamp + `,"updated":` + stamp + `,"like_count":0}`
+	want := `{"id":1,"content":` + contentJSON + `,"text":"` + paragraph + `","parent_id":null,"parent":null,"root_id":1,"creator":` + alicePublic + `,"status":2,"created":` + stamp + `,"updated":` + stamp + `,"like_count":0}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected body\n got %s\nwant %s", resp.Data, want)
 	}
@@ -72,14 +72,14 @@ func TestCreateReturnsThePendingComment(t *testing.T) {
 
 	reply := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/comment/game/10", As: &bob, Body: body(contentJSON, `,"parent_id":1`)})
 	e.server.Expect(reply, http.StatusCreated, 0)
-	if !strings.Contains(string(reply.Data), `"parent_id":1,"parent":{"id":1,"html":"`+paragraph+`","creator":`+alicePublic+`},"root_id":1,"creator":`+bobPublic) {
+	if !strings.Contains(string(reply.Data), `"parent_id":1,"parent":{"id":1,"text":"`+paragraph+`","creator":`+alicePublic+`},"root_id":1,"creator":`+bobPublic) {
 		t.Fatalf("unexpected reply %s", reply.Data)
 	}
 }
 
 func TestCreateValidation(t *testing.T) {
 	e := setup(t)
-	long := `{"root":{"type":"root","children":[{"type":"paragraph","children":[{"type":"text","text":"` + strings.Repeat("a", 10001) + `"}]}]}}`
+	long := `{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"` + strings.Repeat("a", 10001) + `"}]}]}`
 	cases := []struct {
 		name    string
 		as      *actor.Actor
@@ -92,7 +92,11 @@ func TestCreateValidation(t *testing.T) {
 		{"unauthenticated", nil, "/comment/game/10", body(contentJSON, ""), http.StatusUnauthorized, 200101, ""},
 		{"missing content", &alice, "/comment/game/10", `{}`, http.StatusUnprocessableEntity, 100101, ""},
 		{"content is not an object", &alice, "/comment/game/10", body(`"text"`, ""), http.StatusUnprocessableEntity, 100101, "content 必须是对象"},
-		{"unsupported node", &alice, "/comment/game/10", body(`{"root":{"type":"root","children":[{"type":"image","src":"x"}]}}`, ""), http.StatusUnprocessableEntity, 100101, `content contains an unsupported node type \"image\"`},
+		{"legacy editor state", &alice, "/comment/game/10", body(`{"root":{"type":"root","children":[]}}`, ""), http.StatusUnprocessableEntity, 100101, ""},
+		{"unknown node", &alice, "/comment/game/10", body(`{"type":"doc","content":[{"type":"image"}]}`, ""), http.StatusUnprocessableEntity, 100101, `"field":"content.content[0].type"`},
+		{"node comments do not take", &alice, "/comment/game/10", body(`{"type":"doc","content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"text","text":"x"}]}]}`, ""), http.StatusUnprocessableEntity, 100101, `content contains an unsupported node type \"heading\"`},
+		{"script link", &alice, "/comment/game/10", body(`{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"x","marks":[{"type":"link","attrs":{"href":"javascript:alert(1)"}}]}]}]}`, ""), http.StatusUnprocessableEntity, 100101, "not an http, https or mailto address"},
+		{"nothing written", &alice, "/comment/game/10", body(`{"type":"doc","content":[{"type":"paragraph"}]}`, ""), http.StatusUnprocessableEntity, 100101, `"field":"content","messages":["content 不能为空"]`},
 		{"too long", &alice, "/comment/game/10", body(long, ""), http.StatusUnprocessableEntity, 100101, "10000"},
 		{"unknown property", &alice, "/comment/game/10", body(contentJSON, `,"extra":1`), http.StatusUnprocessableEntity, 100101, ""},
 		{"non integer game", &alice, "/comment/game/abc", body(contentJSON, ""), http.StatusUnprocessableEntity, 100101, ""},
@@ -117,7 +121,7 @@ func TestEditRawDeleteAndLike(t *testing.T) {
 
 	edited := e.server.Do(apitest.Request{Method: http.MethodPatch, Path: "/comment/1", As: &alice, Body: body(contentJSON, "")})
 	e.server.Expect(edited, http.StatusOK, 0)
-	want := `{"id":1,"content":` + contentJSON + `,"html":"` + paragraph + `","parent_id":null,"root_id":1,"creator":` + alicePublic + `,"edited":true,"status":2,"created":` + stamp + `,"updated":` + stamp + `}`
+	want := `{"id":1,"content":` + contentJSON + `,"text":"` + paragraph + `","parent_id":null,"root_id":1,"creator":` + alicePublic + `,"edited":true,"status":2,"created":` + stamp + `,"updated":` + stamp + `}`
 	if string(edited.Data) != want {
 		t.Fatalf("unexpected edit\n got %s\nwant %s", edited.Data, want)
 	}
@@ -150,10 +154,10 @@ func TestEditRawDeleteAndLike(t *testing.T) {
 
 func TestListByGameShape(t *testing.T) {
 	e := setup(t)
-	html := "<p>root</p>"
-	root := e.repo.Seed(comment.Comment{GameID: 10, CreatorID: 1, Content: json.RawMessage(`{"root":{"type":"root"}}`), HTML: &html, Status: comment.StatusVisible})
+	html := "root"
+	root := e.repo.Seed(comment.Comment{GameID: 10, CreatorID: 1, Content: json.RawMessage(`{"type":"doc","content":[{"type":"paragraph"}]}`), Text: html, Status: comment.StatusVisible})
 	_ = e.repo.SetRoot(t.Context(), root.ID, root.ID)
-	reply := e.repo.Seed(comment.Comment{GameID: 10, CreatorID: 2, HTML: &html, ParentID: &root.ID, RootID: &root.ID, ReplyCount: 0, Status: comment.StatusPending})
+	reply := e.repo.Seed(comment.Comment{GameID: 10, CreatorID: 2, Text: html, ParentID: &root.ID, RootID: &root.ID, ReplyCount: 0, Status: comment.StatusPending})
 	if _, err := e.repo.AddLike(t.Context(), root.ID, 2); err != nil {
 		t.Fatal(err)
 	}
@@ -161,8 +165,8 @@ func TestListByGameShape(t *testing.T) {
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/comment/game/10?page=1&pageSize=5", As: &bob})
 	e.server.Expect(resp, http.StatusOK, 0)
 	want := `{"items":[` +
-		`{"id":1,"content":{"root":{"type":"root"}},"html":"<p>root</p>","parent_id":null,"root_id":1,"reply_count":0,"parent":{"id":null},"is_liked":true,"like_count":1,"creator":` + alicePublic + `,"edited":false,"status":1,"created":` + stamp + `,"updated":` + stamp + `,"replies":[` +
-		`{"id":` + strconv.Itoa(reply.ID) + `,"content":null,"html":"<p>root</p>","parent_id":1,"root_id":1,"reply_count":0,"parent":{"id":1,"html":"<p>root</p>","creator":` + alicePublic + `},"is_liked":false,"like_count":0,"creator":` + bobPublic + `,"edited":false,"status":2,"created":` + stamp + `,"updated":` + stamp + `}` +
+		`{"id":1,"content":{"type":"doc","content":[{"type":"paragraph"}]},"text":"root","parent_id":null,"root_id":1,"reply_count":0,"parent":{"id":null},"is_liked":true,"like_count":1,"creator":` + alicePublic + `,"edited":false,"status":1,"created":` + stamp + `,"updated":` + stamp + `,"replies":[` +
+		`{"id":` + strconv.Itoa(reply.ID) + `,"content":null,"text":"root","parent_id":1,"root_id":1,"reply_count":0,"parent":{"id":1,"text":"root","creator":` + alicePublic + `},"is_liked":false,"like_count":0,"creator":` + bobPublic + `,"edited":false,"status":2,"created":` + stamp + `,"updated":` + stamp + `}` +
 		`]}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":5,"totalPages":1,"currentPage":1,"comments":2}}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected list\n got %s\nwant %s", resp.Data, want)
@@ -179,13 +183,13 @@ func TestListByGameShape(t *testing.T) {
 
 func TestListByUserShape(t *testing.T) {
 	e := setup(t)
-	html := "<p>mine</p>"
-	e.repo.Seed(comment.Comment{GameID: 10, CreatorID: 1, HTML: &html, Status: comment.StatusVisible})
-	e.repo.Seed(comment.Comment{GameID: 10, CreatorID: 1, HTML: &html, Status: comment.StatusPending})
+	html := "mine"
+	e.repo.Seed(comment.Comment{GameID: 10, CreatorID: 1, Text: html, Status: comment.StatusVisible})
+	e.repo.Seed(comment.Comment{GameID: 10, CreatorID: 1, Text: html, Status: comment.StatusPending})
 
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/user/datas/1/comments", As: &alice})
 	e.server.Expect(resp, http.StatusOK, 0)
-	want := `{"items":[{"id":1,"content":null,"html":"<p>mine</p>","parent_id":null,"root_id":null,"reply_count":0,"parent":null,"is_liked":false,"like_count":0,` +
+	want := `{"items":[{"id":1,"content":null,"text":"mine","parent_id":null,"root_id":null,"reply_count":0,"parent":null,"is_liked":false,"like_count":0,` +
 		`"game":{"id":10,"title_jp":"タイトル","title_zh":"","title_en":"","aliases":[],"type":null,"covers":[{"language":"","type":"","url":"a.webp","dims":[],"sexual":0,"violence":0}],"intro_jp":"","intro_zh":"","intro_en":"","release_date":null,"developers":[],"resources":{"count":0,"downloads":0,"platforms":[],"languages":[],"latest":null},"tags":[]},` +
 		`"creator":` + alicePublic + `,"created":` + stamp + `,"updated":` + stamp + `}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1,"is_current_user":true}}`
 	if string(resp.Data) != want {

@@ -56,12 +56,12 @@ func (f fixture) file(gameID, fileStatus int, published bool) (resourceID, fileI
 
 func (f fixture) comment(gameID int, status comment.Status) int {
 	f.t.Helper()
-	return f.db.Ent.Comment.Create().SetGameID(gameID).SetCreatorID(f.user).SetContent([]byte(`{}`)).SetHTML("<p>hi</p>").SetStatus(int(status)).SaveX(f.ctx).ID
+	return f.db.Ent.Comment.Create().SetGameID(gameID).SetCreatorID(f.user).SetContent([]byte(`{}`)).SetText("hi").SetStatus(int(status)).SaveX(f.ctx).ID
 }
 
 func (f fixture) walkthrough(gameID int, status entwalkthrough.Status) int {
 	f.t.Helper()
-	return f.db.Ent.Walkthrough.Create().SetGameID(gameID).SetCreatorID(f.user).SetTitle("Route guide").SetContent([]byte(`{}`)).SetHTML("<p>guide</p>").SetStatus(status).SaveX(f.ctx).ID
+	return f.db.Ent.Walkthrough.Create().SetGameID(gameID).SetCreatorID(f.user).SetTitle("Route guide").SetContent([]byte(`{}`)).SetText("guide").SetStatus(status).SaveX(f.ctx).ID
 }
 
 func (f fixture) list(filter activity.Filter, page activity.Page) ([]activity.Entry, int) {

@@ -4,12 +4,15 @@ import (
 	"slices"
 	"strconv"
 
+	"github.com/Ringyuki/shionlib/apps/api/internal/richtext"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
 
 const (
-	ProfileImageMaxBytes = 5 << 20
-	AdImageMaxBytes      = 15 << 20
+	ProfileImageMaxBytes  = 5 << 20
+	AdImageMaxBytes       = 15 << 20
+	RichTextImageMaxBytes = 10 << 20
+	RichTextImageMaxWidth = 1600
 )
 
 var acceptedContentTypes = []string{"image/jpeg", "image/png", "image/webp", "image/avif"}
@@ -24,14 +27,23 @@ type Upload struct {
 }
 
 type Bounds struct {
-	MaxWidth  int
-	MaxHeight int
+	MaxWidth    int
+	MaxHeight   int
+	KeepSmaller bool
 }
 
 type Encoded struct {
 	Data        []byte
 	ContentType string
 	Extension   string
+	Width       int
+	Height      int
+}
+
+type Picture struct {
+	Key    string
+	Width  int
+	Height int
 }
 
 func Validate(file *Upload, maxBytes int) error {
@@ -70,6 +82,16 @@ func cover(userID int) kind {
 		maxBytes: ProfileImageMaxBytes,
 		bounds:   Bounds{MaxWidth: 1500},
 		key:      func(id string) string { return "user/" + owner + "/cover/" + id },
+		metadata: map[string]string{"user_id": owner},
+	}
+}
+
+func richTextImage(userID int) kind {
+	owner := strconv.Itoa(userID)
+	return kind{
+		maxBytes: RichTextImageMaxBytes,
+		bounds:   Bounds{MaxWidth: RichTextImageMaxWidth, KeepSmaller: true},
+		key:      func(id string) string { return richtext.ImageKey(userID, id) },
 		metadata: map[string]string{"user_id": owner},
 	}
 }
