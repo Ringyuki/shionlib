@@ -110,20 +110,6 @@ func (d Document) Text() string {
 	return strings.TrimRight(b.String(), "\n")
 }
 
-func (d Document) Excerpt(limit int) string {
-	if d.root == nil || limit <= 0 {
-		return ""
-	}
-	var b strings.Builder
-	d.root.writeOpenText(&b)
-	words := strings.Fields(b.String())
-	runes := []rune(strings.Join(words, " "))
-	if len(runes) > limit {
-		runes = runes[:limit]
-	}
-	return strings.TrimSpace(string(runes))
-}
-
 func (d Document) TextLength() int {
 	if d.root == nil {
 		return 0
@@ -172,32 +158,6 @@ func (n *node) writeText(b *strings.Builder) {
 	if specs[n.Type].content == inlineContent {
 		b.WriteByte('\n')
 	}
-}
-
-func (n *node) writeOpenText(b *strings.Builder) {
-	switch n.Type {
-	case nodeText:
-		if !n.hidden() {
-			b.WriteString(n.Text)
-		}
-		return
-	case nodeHardBreak, nodeImage:
-		b.WriteByte(' ')
-		return
-	}
-	for _, child := range n.Content {
-		child.writeOpenText(b)
-	}
-	b.WriteByte(' ')
-}
-
-func (n *node) hidden() bool {
-	for _, m := range n.Marks {
-		if m.Type == markSpoiler {
-			return true
-		}
-	}
-	return false
 }
 
 func (n *node) textLength() int {

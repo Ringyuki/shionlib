@@ -2,7 +2,9 @@ package walkthrough
 
 import (
 	"context"
+	"errors"
 	"slices"
+	"unicode/utf8"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
@@ -22,7 +24,7 @@ func NewService(repo Repository, games GameCards, activities Activities, queue Q
 	return &Service{repo: repo, games: games, activities: activities, queue: queue, tx: tx}
 }
 
-func (s *Service) Create(ctx context.Context, who actor.Actor, in CreateInput) (View, error) {
+func (s *Service) Write(ctx context.Context, who actor.Actor, in WriteInput) (View, error) {
 	exists, err := s.games.Exists(ctx, in.GameID)
 	if err != nil {
 		return View{}, err
@@ -30,66 +32,35 @@ func (s *Service) Create(ctx context.Context, who actor.Actor, in CreateInput) (
 	if !exists {
 		return View{}, game.ErrNotFound
 	}
-	if in.Content.TextLength() > MaxContentLength {
-		return View{}, ErrContentTooLong
+	written, err := compose(in)
+	if err != nil {
+		return View{}, err
 	}
 	var id int
 	err = s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
-		created, err := s.repo.Create(ctx, NewWalkthrough{
-			GameID:        in.GameID,
-			Title:         in.Title,
-			Content:       in.Content.Raw(),
-			Text:          in.Content.Text(),
-			Excerpt:       in.Content.Excerpt(ExcerptLength),
-			Lang:          DetectLanguage("", in.Content.Text()).Stored(),
-			Status:        heldForReview(in.Status),
-			CreatorID:     who.UserID,
-			ReviewPending: in.Status == StatusPublished,
-		})
+		existing, err := s.repo.LockWritten(ctx, in.GameID, who.UserID)
+		if errors.Is(err, ErrNotFound) {
+			id, err = s.start(ctx, who, in.GameID, written)
+			return err
+		}
 		if err != nil {
 			return err
 		}
-		id = created.ID
-		gameID := in.GameID
-		return s.activities.Record(ctx, activity.NewActivity{Type: activity.TypeWalkthroughCreate, UserID: who.UserID, GameID: &gameID, WalkthroughID: &id})
+		id = existing.ID
+		return s.repo.Update(ctx, id, written)
 	})
 	if err != nil {
 		return View{}, err
 	}
-	if err := s.requestReview(ctx, id, in.Status); err != nil {
-		return View{}, err
-	}
-	return s.repo.View(ctx, id)
-}
-
-func (s *Service) Update(ctx context.Context, who actor.Actor, id int, in UpdateInput) (View, error) {
-	if in.Content.TextLength() > MaxContentLength {
-		return View{}, ErrContentTooLong
-	}
-	err := s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
-		if _, err := s.managed(ctx, who, id); err != nil {
-			return err
+	if in.Publish {
+		if err := s.queue.Enqueue(ctx, moderation.ReviewWalkthrough{WalkthroughID: id}); err != nil {
+			return View{}, err
 		}
-		return s.repo.Update(ctx, id, Changes{
-			Title:         in.Title,
-			Content:       in.Content.Raw(),
-			Text:          in.Content.Text(),
-			Excerpt:       in.Content.Excerpt(ExcerptLength),
-			Lang:          DetectLanguage(in.Title, in.Content.Text()).Stored(),
-			Status:        heldForReview(in.Status),
-			ReviewPending: in.Status == StatusPublished,
-		})
-	})
-	if err != nil {
-		return View{}, err
-	}
-	if err := s.requestReview(ctx, id, in.Status); err != nil {
-		return View{}, err
 	}
 	return s.repo.View(ctx, id)
 }
 
-func (s *Service) Get(ctx context.Context, viewer actor.Actor, id int, withContent bool) (View, error) {
+func (s *Service) Get(ctx context.Context, viewer actor.Actor, id int) (View, error) {
 	view, err := s.repo.View(ctx, id)
 	if err != nil {
 		return View{}, err
@@ -99,9 +70,6 @@ func (s *Service) Get(ctx context.Context, viewer actor.Actor, id int, withConte
 	}
 	if view.Status != StatusPublished && view.CreatorID != viewer.UserID && !viewer.AtLeast(actor.RoleAdmin) {
 		return View{}, ErrNotOwner
-	}
-	if !withContent {
-		view.Content = nil
 	}
 	return view, nil
 }
@@ -115,24 +83,26 @@ func (s *Service) Delete(ctx context.Context, who actor.Actor, id int) error {
 	})
 }
 
-func (s *Service) ListByGame(ctx context.Context, viewer actor.Actor, gameID int, status *Status, page Page) ([]Summary, int, error) {
-	filter := GameFilter{GameID: gameID, Status: status, Public: []Status{StatusPublished}}
-	if viewer.Authenticated() {
-		filter.ViewerID = viewer.UserID
-		if viewer.AtLeast(actor.RoleAdmin) {
-			filter.Public = []Status{StatusPublished, StatusDraft}
-		}
+func (s *Service) ListByGame(ctx context.Context, viewer actor.Actor, gameID int) ([]Summary, error) {
+	published, err := s.repo.ListPublished(ctx, gameID, GameListLimit)
+	if err != nil || !viewer.Authenticated() {
+		return published, err
 	}
-	return s.repo.ListByGame(ctx, filter, page)
+	own, err := s.repo.Written(ctx, gameID, viewer.UserID)
+	if errors.Is(err, ErrNotFound) {
+		return published, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	others := slices.DeleteFunc(published, func(summary Summary) bool { return summary.ID == own.ID })
+	return append([]Summary{own}, others...), nil
 }
 
-func (s *Service) ListByCreator(ctx context.Context, viewer actor.Actor, creatorID int, status *Status, page Page) ([]Summary, int, error) {
+func (s *Service) ListByCreator(ctx context.Context, viewer actor.Actor, creatorID int, page Page) ([]Summary, int, error) {
 	visible := []Status{StatusPublished}
 	if creatorID == viewer.UserID {
 		visible = []Status{StatusPublished, StatusDraft, StatusHidden}
-	}
-	if status != nil && slices.Contains(visible, *status) {
-		visible = []Status{*status}
 	}
 	summaries, total, err := s.repo.ListByCreator(ctx, CreatorFilter{CreatorID: creatorID, Statuses: visible, ExcludeRated: !viewer.IncludesRated()}, page)
 	if err != nil {
@@ -156,6 +126,24 @@ func (s *Service) ListByCreator(ctx context.Context, viewer actor.Actor, creator
 	return summaries, total, nil
 }
 
+func (s *Service) start(ctx context.Context, who actor.Actor, gameID int, written Changes) (int, error) {
+	created, err := s.repo.Create(ctx, NewWalkthrough{
+		GameID:        gameID,
+		Note:          written.Note,
+		Routes:        written.Routes,
+		Text:          written.Text,
+		Lang:          written.Lang,
+		Status:        written.Status,
+		CreatorID:     who.UserID,
+		ReviewPending: written.ReviewPending,
+	})
+	if err != nil {
+		return 0, err
+	}
+	id := created.ID
+	return id, s.activities.Record(ctx, activity.NewActivity{Type: activity.TypeWalkthroughCreate, UserID: who.UserID, GameID: &gameID, WalkthroughID: &id})
+}
+
 func (s *Service) managed(ctx context.Context, who actor.Actor, id int) (Walkthrough, error) {
 	existing, err := s.repo.Lock(ctx, id)
 	if err != nil {
@@ -170,16 +158,23 @@ func (s *Service) managed(ctx context.Context, who actor.Actor, id int) (Walkthr
 	return existing, nil
 }
 
-func (s *Service) requestReview(ctx context.Context, id int, requested Status) error {
-	if requested != StatusPublished {
-		return nil
+func compose(in WriteInput) (Changes, error) {
+	routes := Tidy(in.Routes)
+	written := Changes{Routes: routes, Status: StatusDraft}
+	said := ""
+	if in.Note != nil {
+		written.Note, said = in.Note.Raw(), in.Note.Text()
 	}
-	return s.queue.Enqueue(ctx, moderation.ReviewWalkthrough{WalkthroughID: id})
-}
-
-func heldForReview(requested Status) Status {
-	if requested == StatusPublished {
-		return StatusHidden
+	if in.Publish {
+		if err := Publishable(in.Note != nil, routes); err != nil {
+			return Changes{}, err
+		}
+		written.Status, written.ReviewPending = StatusHidden, true
 	}
-	return requested
+	written.Text = Text(said, routes)
+	if utf8.RuneCountInString(written.Text) > MaxTextLength {
+		return Changes{}, ErrContentTooLong
+	}
+	written.Lang = DetectLanguage(written.Text).Stored()
+	return written, nil
 }

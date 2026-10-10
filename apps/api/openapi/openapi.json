@@ -192,14 +192,10 @@
           "id": {
             "format": "int64",
             "type": "integer"
-          },
-          "title": {
-            "type": "string"
           }
         },
         "required": [
-          "id",
-          "title"
+          "id"
         ],
         "type": "object"
       },
@@ -2015,9 +2011,6 @@
       "AdminWalkthroughDetailDTO": {
         "additionalProperties": false,
         "properties": {
-          "content": {
-            "$ref": "#/components/schemas/RichTextDocument"
-          },
           "created": {
             "format": "date-time",
             "type": "string"
@@ -2050,6 +2043,18 @@
               "null"
             ]
           },
+          "note": {
+            "$ref": "#/components/schemas/RichTextDocument"
+          },
+          "routes": {
+            "items": {
+              "$ref": "#/components/schemas/WalkthroughRouteDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "status": {
             "enum": [
               "DRAFT",
@@ -2062,9 +2067,6 @@
           "text": {
             "type": "string"
           },
-          "title": {
-            "type": "string"
-          },
           "updated": {
             "format": "date-time",
             "type": "string"
@@ -2072,9 +2074,8 @@
         },
         "required": [
           "id",
-          "title",
           "text",
-          "content",
+          "routes",
           "lang",
           "edited",
           "status",
@@ -2208,9 +2209,7 @@
             "type": "string"
           },
           "text": {
-            "type": "string"
-          },
-          "title": {
+            "description": "Everything written in it as plain text: the note, then each route's name, condition, steps and ending",
             "type": "string"
           },
           "updated": {
@@ -2220,7 +2219,6 @@
         },
         "required": [
           "id",
-          "title",
           "text",
           "lang",
           "edited",
@@ -5140,6 +5138,9 @@
           560101,
           560102,
           560103,
+          560104,
+          560105,
+          560106,
           570101,
           570102,
           570103,
@@ -5289,6 +5290,9 @@
           "WALKTHROUGH_NOT_FOUND",
           "WALKTHROUGH_NOT_OWNER",
           "WALKTHROUGH_CONTENT_TOO_LONG",
+          "WALKTHROUGH_EMPTY",
+          "WALKTHROUGH_ROUTE_INCOMPLETE",
+          "WALKTHROUGH_ALREADY_WRITTEN",
           "SPONSOR_ORDER_NOT_FOUND",
           "SPONSOR_ORDER_ALREADY_PAID",
           "SPONSOR_ORDER_EXPIRED",
@@ -6413,39 +6417,6 @@
         },
         "required": [
           "amount"
-        ],
-        "type": "object"
-      },
-      "CreateWalkthroughInputBody": {
-        "additionalProperties": false,
-        "properties": {
-          "content": {
-            "$ref": "#/components/schemas/RichTextDocument"
-          },
-          "game_id": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "status": {
-            "enum": [
-              "DRAFT",
-              "PUBLISHED",
-              "HIDDEN",
-              "DELETED"
-            ],
-            "type": "string"
-          },
-          "title": {
-            "maxLength": 255,
-            "minLength": 1,
-            "type": "string"
-          }
-        },
-        "required": [
-          "game_id",
-          "title",
-          "content",
-          "status"
         ],
         "type": "object"
       },
@@ -10611,6 +10582,45 @@
         ],
         "type": "object"
       },
+      "EnvelopeListWalkthroughSummaryDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/WalkthroughSummaryDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeMalwareCaseDetailDTO": {
         "additionalProperties": false,
         "properties": {
@@ -12510,39 +12520,6 @@
           },
           "data": {
             "$ref": "#/components/schemas/WalkthroughDTO"
-          },
-          "message": {
-            "type": "string"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/Meta"
-          },
-          "requestId": {
-            "type": "string"
-          },
-          "timestamp": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "code",
-          "message",
-          "data",
-          "requestId",
-          "timestamp"
-        ],
-        "type": "object"
-      },
-      "EnvelopeWalkthroughPageDTO": {
-        "additionalProperties": false,
-        "properties": {
-          "code": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "data": {
-            "$ref": "#/components/schemas/WalkthroughPageDTO"
           },
           "message": {
             "type": "string"
@@ -17538,34 +17515,6 @@
         ],
         "type": "object"
       },
-      "UpdateWalkthroughInputBody": {
-        "additionalProperties": false,
-        "properties": {
-          "content": {
-            "$ref": "#/components/schemas/RichTextDocument"
-          },
-          "status": {
-            "enum": [
-              "DRAFT",
-              "PUBLISHED",
-              "HIDDEN",
-              "DELETED"
-            ],
-            "type": "string"
-          },
-          "title": {
-            "maxLength": 255,
-            "minLength": 1,
-            "type": "string"
-          }
-        },
-        "required": [
-          "title",
-          "content",
-          "status"
-        ],
-        "type": "object"
-      },
       "UploadChunkDTO": {
         "additionalProperties": false,
         "properties": {
@@ -18102,20 +18051,6 @@
       "UserWalkthroughDTO": {
         "additionalProperties": false,
         "properties": {
-          "created": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "creator": {
-            "$ref": "#/components/schemas/UserSummaryDTO"
-          },
-          "edited": {
-            "type": "boolean"
-          },
-          "excerpt": {
-            "description": "The first words of the text, without what is marked as a spoiler",
-            "type": "string"
-          },
           "game": {
             "$ref": "#/components/schemas/GameCardDTO"
           },
@@ -18132,6 +18067,10 @@
           "review_pending": {
             "type": "boolean"
           },
+          "route_count": {
+            "format": "int64",
+            "type": "integer"
+          },
           "status": {
             "enum": [
               "DRAFT",
@@ -18141,9 +18080,6 @@
             ],
             "type": "string"
           },
-          "title": {
-            "type": "string"
-          },
           "updated": {
             "format": "date-time",
             "type": "string"
@@ -18151,16 +18087,12 @@
         },
         "required": [
           "id",
-          "title",
-          "excerpt",
+          "route_count",
           "lang",
-          "created",
           "updated",
-          "edited",
           "status",
           "review_pending",
-          "game",
-          "creator"
+          "game"
         ],
         "type": "object"
       },
@@ -18287,22 +18219,12 @@
       "WalkthroughDTO": {
         "additionalProperties": false,
         "properties": {
-          "content": {
-            "$ref": "#/components/schemas/RichTextDocument"
-          },
           "created": {
             "format": "date-time",
             "type": "string"
           },
           "creator": {
             "$ref": "#/components/schemas/UserSummaryDTO"
-          },
-          "edited": {
-            "type": "boolean"
-          },
-          "excerpt": {
-            "description": "The first words of the text, without what is marked as a spoiler",
-            "type": "string"
           },
           "game_id": {
             "format": "int64",
@@ -18318,9 +18240,23 @@
               "null"
             ]
           },
+          "note": {
+            "$ref": "#/components/schemas/RichTextDocument",
+            "description": "What belongs to no route; left out when nothing was written"
+          },
           "review_pending": {
             "description": "True while a walkthrough sent for publication waits for review; it is HIDDEN until then",
             "type": "boolean"
+          },
+          "routes": {
+            "description": "In the order they are best played",
+            "items": {
+              "$ref": "#/components/schemas/WalkthroughRouteDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "status": {
             "enum": [
@@ -18331,12 +18267,6 @@
             ],
             "type": "string"
           },
-          "text": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
           "updated": {
             "format": "date-time",
             "type": "string"
@@ -18345,35 +18275,211 @@
         "required": [
           "id",
           "game_id",
-          "title",
-          "text",
-          "excerpt",
+          "routes",
           "lang",
           "created",
           "updated",
-          "edited",
           "status",
           "review_pending",
           "creator"
         ],
         "type": "object"
       },
-      "WalkthroughItemDTO": {
+      "WalkthroughRouteDTO": {
         "additionalProperties": false,
         "properties": {
-          "created": {
-            "format": "date-time",
+          "characters": {
+            "description": "Ids of the game's characters the route is about; one the game no longer lists is to be skipped",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "condition": {
+            "description": "What else opens the route",
             "type": "string"
           },
+          "ending": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "requires": {
+            "description": "Keys of the routes to finish before this one",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/WalkthroughStepDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "characters",
+          "requires",
+          "condition",
+          "ending",
+          "steps"
+        ],
+        "type": "object"
+      },
+      "WalkthroughRouteInput": {
+        "additionalProperties": false,
+        "properties": {
+          "characters": {
+            "description": "Ids of the game's characters the route is about",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "maxItems": 12,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "condition": {
+            "description": "What else opens the route",
+            "maxLength": 300,
+            "type": "string"
+          },
+          "ending": {
+            "maxLength": 100,
+            "type": "string"
+          },
+          "key": {
+            "description": "Name the client gives the route so that other routes can refer to it; no two routes share one",
+            "pattern": "^[a-z0-9]{1,16}$",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 80,
+            "type": "string"
+          },
+          "requires": {
+            "description": "Keys of the routes to finish before this one; a key of no other route is dropped",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 60,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/WalkthroughStepInput"
+            },
+            "maxItems": 500,
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "steps"
+        ],
+        "type": "object"
+      },
+      "WalkthroughStepDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "description": "A choice to pick, a save to make, a save to load, a remark, or a pause between groups of steps",
+            "enum": [
+              "choice",
+              "save",
+              "load",
+              "note",
+              "gap"
+            ],
+            "type": "string"
+          },
+          "remark": {
+            "description": "What a choice leads to",
+            "type": "string"
+          },
+          "slot": {
+            "description": "Number of the save that a save or load step names",
+            "type": "string"
+          },
+          "text": {
+            "description": "What a choice or a note says",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "text",
+          "remark",
+          "slot"
+        ],
+        "type": "object"
+      },
+      "WalkthroughStepInput": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "description": "A choice to pick, a save to make, a save to load, a remark, or a pause between groups of steps",
+            "enum": [
+              "choice",
+              "save",
+              "load",
+              "note",
+              "gap"
+            ],
+            "type": "string"
+          },
+          "remark": {
+            "description": "What a choice leads to",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "slot": {
+            "description": "Number of the save that a save or load step names; required for them",
+            "pattern": "^[0-9]{1,3}$",
+            "type": "string"
+          },
+          "text": {
+            "description": "What a choice or a note says; required for them",
+            "maxLength": 300,
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "type": "object"
+      },
+      "WalkthroughSummaryDTO": {
+        "additionalProperties": false,
+        "properties": {
           "creator": {
             "$ref": "#/components/schemas/UserSummaryDTO"
-          },
-          "edited": {
-            "type": "boolean"
-          },
-          "excerpt": {
-            "description": "The first words of the text, without what is marked as a spoiler",
-            "type": "string"
           },
           "id": {
             "format": "int64",
@@ -18388,6 +18494,10 @@
           "review_pending": {
             "type": "boolean"
           },
+          "route_count": {
+            "format": "int64",
+            "type": "integer"
+          },
           "status": {
             "enum": [
               "DRAFT",
@@ -18397,9 +18507,6 @@
             ],
             "type": "string"
           },
-          "title": {
-            "type": "string"
-          },
           "updated": {
             "format": "date-time",
             "type": "string"
@@ -18407,75 +18514,45 @@
         },
         "required": [
           "id",
-          "title",
-          "excerpt",
+          "route_count",
           "lang",
-          "created",
           "updated",
-          "edited",
           "status",
           "review_pending",
           "creator"
         ],
         "type": "object"
       },
-      "WalkthroughPageDTO": {
+      "WriteWalkthroughInputBody": {
         "additionalProperties": false,
         "properties": {
-          "items": {
+          "note": {
+            "$ref": "#/components/schemas/RichTextDocument",
+            "description": "What belongs to no route: paragraphs with bold, links and spoilers"
+          },
+          "routes": {
+            "description": "In the order they are best played",
             "items": {
-              "$ref": "#/components/schemas/WalkthroughItemDTO"
+              "$ref": "#/components/schemas/WalkthroughRouteInput"
             },
+            "maxItems": 60,
             "type": [
               "array",
               "null"
             ]
           },
-          "meta": {
-            "$ref": "#/components/schemas/WalkthroughPageMetaDTO"
+          "status": {
+            "description": "PUBLISHED asks for publication, which needs a note or a route, and a name and a step in every route",
+            "enum": [
+              "DRAFT",
+              "PUBLISHED"
+            ],
+            "type": "string"
           }
         },
         "required": [
-          "items",
-          "meta"
-        ],
-        "type": "object"
-      },
-      "WalkthroughPageMetaDTO": {
-        "additionalProperties": false,
-        "properties": {
-          "content_limit": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "currentPage": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "itemCount": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "itemsPerPage": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "totalItems": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "totalPages": {
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "content_limit",
-          "totalItems",
-          "itemCount",
-          "itemsPerPage",
-          "totalPages",
-          "currentPage"
+          "routes",
+          "status"
         ],
         "type": "object"
       }
@@ -24905,7 +24982,6 @@
               "default": "created",
               "enum": [
                 "id",
-                "title",
                 "created",
                 "updated",
                 "status"
@@ -32172,20 +32248,6 @@
               "minimum": 1,
               "type": "integer"
             }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "status",
-            "schema": {
-              "enum": [
-                "DRAFT",
-                "PUBLISHED",
-                "HIDDEN",
-                "DELETED"
-              ],
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -33072,21 +33134,81 @@
         ]
       }
     },
-    "/walkthrough": {
-      "post": {
-        "operationId": "walkthrough.create",
+    "/walkthrough/game/{id}": {
+      "get": {
+        "operationId": "walkthrough.listByGame",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListWalkthroughSummaryDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List the published walkthroughs of a game, the caller's own first even when it is not published, then by latest update",
+        "tags": [
+          "walkthrough"
+        ]
+      }
+    },
+    "/walkthrough/game/{id}/mine": {
+      "put": {
+        "operationId": "walkthrough.write",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateWalkthroughInputBody"
+                "$ref": "#/components/schemas/WriteWalkthroughInputBody"
               }
             }
           },
           "required": true
         },
         "responses": {
-          "201": {
+          "200": {
             "content": {
               "application/json": {
                 "schema": {
@@ -33094,7 +33216,7 @@
                 }
               }
             },
-            "description": "Created",
+            "description": "OK",
             "headers": {
               "shionlib-auth-stale": {
                 "schema": {
@@ -33122,97 +33244,7 @@
             "accessCookie": []
           }
         ],
-        "summary": "Create a walkthrough",
-        "tags": [
-          "walkthrough"
-        ]
-      }
-    },
-    "/walkthrough/game/{id}": {
-      "get": {
-        "operationId": "walkthrough.listByGame",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "format": "int64",
-              "type": "integer"
-            }
-          },
-          {
-            "description": "1-based page number",
-            "explode": false,
-            "in": "query",
-            "name": "page",
-            "schema": {
-              "default": 1,
-              "description": "1-based page number",
-              "format": "int64",
-              "minimum": 1,
-              "type": "integer"
-            }
-          },
-          {
-            "description": "Items per page",
-            "explode": false,
-            "in": "query",
-            "name": "pageSize",
-            "schema": {
-              "default": 10,
-              "description": "Items per page",
-              "format": "int64",
-              "maximum": 50,
-              "minimum": 1,
-              "type": "integer"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "status",
-            "schema": {
-              "enum": [
-                "DRAFT",
-                "PUBLISHED",
-                "HIDDEN",
-                "DELETED"
-              ],
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EnvelopeWalkthroughPageDTO"
-                }
-              }
-            },
-            "description": "OK",
-            "headers": {
-              "shionlib-auth-stale": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "List walkthroughs of a game",
+        "summary": "Write the caller's walkthrough of a game, replacing what they wrote before",
         "tags": [
           "walkthrough"
         ]
@@ -33285,16 +33317,6 @@
               "format": "int64",
               "type": "integer"
             }
-          },
-          {
-            "description": "Only the literal true includes the editor state",
-            "explode": false,
-            "in": "query",
-            "name": "withContent",
-            "schema": {
-              "description": "Only the literal true includes the editor state",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -33327,71 +33349,6 @@
           }
         },
         "summary": "Get a walkthrough",
-        "tags": [
-          "walkthrough"
-        ]
-      },
-      "patch": {
-        "operationId": "walkthrough.update",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "format": "int64",
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateWalkthroughInputBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EnvelopeWalkthroughDTO"
-                }
-              }
-            },
-            "description": "OK",
-            "headers": {
-              "shionlib-auth-stale": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "accessToken": []
-          },
-          {
-            "accessCookie": []
-          }
-        ],
-        "summary": "Replace a walkthrough",
         "tags": [
           "walkthrough"
         ]

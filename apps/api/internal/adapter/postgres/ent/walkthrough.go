@@ -23,14 +23,12 @@ type Walkthrough struct {
 	ID int `json:"id,omitempty"`
 	// GameID holds the value of the "game_id" field.
 	GameID int `json:"game_id,omitempty"`
-	// Title holds the value of the "title" field.
-	Title string `json:"title,omitempty"`
-	// Content holds the value of the "content" field.
-	Content jsontext.Value `json:"content,omitempty"`
+	// Note holds the value of the "note" field.
+	Note jsontext.Value `json:"note,omitempty"`
+	// Routes holds the value of the "routes" field.
+	Routes jsontext.Value `json:"routes,omitempty"`
 	// Text holds the value of the "text" field.
 	Text string `json:"text,omitempty"`
-	// Excerpt holds the value of the "excerpt" field.
-	Excerpt string `json:"excerpt,omitempty"`
 	// Lang holds the value of the "lang" field.
 	Lang *string `json:"lang,omitempty"`
 	// Created holds the value of the "created" field.
@@ -111,13 +109,13 @@ func (*Walkthrough) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case walkthrough.FieldContent:
+		case walkthrough.FieldNote, walkthrough.FieldRoutes:
 			values[i] = new([]byte)
 		case walkthrough.FieldEdited, walkthrough.FieldReviewPending:
 			values[i] = new(sql.NullBool)
 		case walkthrough.FieldID, walkthrough.FieldGameID, walkthrough.FieldCreatorID:
 			values[i] = new(sql.NullInt64)
-		case walkthrough.FieldTitle, walkthrough.FieldText, walkthrough.FieldExcerpt, walkthrough.FieldLang, walkthrough.FieldStatus:
+		case walkthrough.FieldText, walkthrough.FieldLang, walkthrough.FieldStatus:
 			values[i] = new(sql.NullString)
 		case walkthrough.FieldCreated, walkthrough.FieldUpdated:
 			values[i] = new(sql.NullTime)
@@ -148,18 +146,20 @@ func (_m *Walkthrough) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.GameID = int(value.Int64)
 			}
-		case walkthrough.FieldTitle:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field title", values[i])
-			} else if value.Valid {
-				_m.Title = value.String
-			}
-		case walkthrough.FieldContent:
+		case walkthrough.FieldNote:
 			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field content", values[i])
+				return fmt.Errorf("unexpected type %T for field note", values[i])
 			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &_m.Content); err != nil {
-					return fmt.Errorf("unmarshal field content: %w", err)
+				if err := json.Unmarshal(*value, &_m.Note); err != nil {
+					return fmt.Errorf("unmarshal field note: %w", err)
+				}
+			}
+		case walkthrough.FieldRoutes:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field routes", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Routes); err != nil {
+					return fmt.Errorf("unmarshal field routes: %w", err)
 				}
 			}
 		case walkthrough.FieldText:
@@ -167,12 +167,6 @@ func (_m *Walkthrough) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field text", values[i])
 			} else if value.Valid {
 				_m.Text = value.String
-			}
-		case walkthrough.FieldExcerpt:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field excerpt", values[i])
-			} else if value.Valid {
-				_m.Excerpt = value.String
 			}
 		case walkthrough.FieldLang:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -276,17 +270,14 @@ func (_m *Walkthrough) String() string {
 	builder.WriteString("game_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.GameID))
 	builder.WriteString(", ")
-	builder.WriteString("title=")
-	builder.WriteString(_m.Title)
+	builder.WriteString("note=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Note))
 	builder.WriteString(", ")
-	builder.WriteString("content=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Content))
+	builder.WriteString("routes=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Routes))
 	builder.WriteString(", ")
 	builder.WriteString("text=")
 	builder.WriteString(_m.Text)
-	builder.WriteString(", ")
-	builder.WriteString("excerpt=")
-	builder.WriteString(_m.Excerpt)
 	builder.WriteString(", ")
 	if v := _m.Lang; v != nil {
 		builder.WriteString("lang=")

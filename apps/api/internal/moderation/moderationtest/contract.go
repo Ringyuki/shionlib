@@ -111,7 +111,7 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if got.Deleted || !got.ReviewPending || got.Title != pending.Title || got.Text != pending.Text || got.CreatorID != pending.CreatorID || got.GameID != pending.GameID || got.Game != pending.Game {
+		if got.Deleted || !got.ReviewPending || got.Text != pending.Text || got.CreatorID != pending.CreatorID || got.GameID != pending.GameID || got.Game != pending.Game {
 			t.Fatalf("unexpected walkthrough subject %+v, want %+v", got, pending)
 		}
 		if got, err := env.Repo.WalkthroughSubject(ctx, hidden.ID); err != nil || got.ReviewPending {

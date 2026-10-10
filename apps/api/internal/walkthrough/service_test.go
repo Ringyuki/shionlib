@@ -52,97 +52,121 @@ func newFixture(cards ...game.Card) fixture {
 	return f
 }
 
-func document(t *testing.T, texts ...string) richtext.Document {
+func note(t *testing.T, text string) *richtext.Document {
 	t.Helper()
-	blocks := make([]any, len(texts))
-	for i, text := range texts {
-		blocks[i] = map[string]any{"type": "paragraph", "content": []any{map[string]any{"type": "text", "text": text}}}
-	}
-	raw, _ := json.Marshal(map[string]any{"type": "doc", "content": blocks})
-	doc, err := richtext.Parse(raw, richtext.Article)
+	raw, _ := json.Marshal(map[string]any{"type": "doc", "content": []any{
+		map[string]any{"type": "paragraph", "content": []any{map[string]any{"type": "text", "text": text}}},
+	}})
+	doc, err := richtext.Parse(raw, richtext.Comment)
 	if err != nil {
 		t.Fatal(err)
 	}
-	return doc
+	return &doc
 }
 
-func TestCreateHoldsPublishedWalkthroughsForReview(t *testing.T) {
+func route(key, name string, steps ...walkthrough.Step) walkthrough.Route {
+	return walkthrough.Route{Key: key, Name: name, Steps: steps}
+}
+
+func choice(text string) walkthrough.Step {
+	return walkthrough.Step{Kind: walkthrough.StepChoice, Text: text}
+}
+
+func TestWriteStartsAWalkthroughThenReplacesIt(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()
-	created, err := f.service.Create(ctx, author, walkthrough.CreateInput{GameID: gameID, Title: "共通ルート攻略", Content: document(t, "この攻略では、はじめに共通ルートを進めて、三日目の選択肢でヒロイン分岐に入ります。"), Status: walkthrough.StatusPublished})
+	first, err := f.service.Write(ctx, author, walkthrough.WriteInput{GameID: gameID, Routes: []walkthrough.Route{
+		{Key: "a", Name: " むぎ ", Requires: []string{"gone"}, Steps: []walkthrough.Step{{Kind: walkthrough.StepGap}, choice(" 左 ")}},
+	}})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if created.Status != walkthrough.StatusHidden || !created.ReviewPending || created.CreatorID != author.UserID || created.Lang == nil || *created.Lang != "jp" || created.Creator.ID != author.UserID ||
-		created.Text != "この攻略では、はじめに共通ルートを進めて、三日目の選択肢でヒロイン分岐に入ります。" || created.Excerpt != created.Text {
-		t.Fatalf("unexpected walkthrough %+v", created)
-	}
-	if jobs := f.queue.All(); len(jobs) != 1 || jobs[0] != (moderation.ReviewWalkthrough{WalkthroughID: created.ID}) {
-		t.Fatalf("expected a review job, got %+v", jobs)
+	want := []walkthrough.Route{{Key: "a", Name: "むぎ", Characters: []int{}, Requires: []string{}, Steps: []walkthrough.Step{choice("左")}}}
+	if first.Status != walkthrough.StatusDraft || first.ReviewPending || first.Edited || first.CreatorID != author.UserID || first.Creator.ID != author.UserID ||
+		first.Note != nil || first.Text != "むぎ\n左" || !reflect.DeepEqual(first.Routes, want) || len(f.queue.All()) != 0 {
+		t.Fatalf("a draft is stored tidy and is not reviewed: %+v", first)
 	}
 	recorded := f.activities.All()
-	if len(recorded) != 1 || recorded[0].Type != activity.TypeWalkthroughCreate || recorded[0].UserID != author.UserID || *recorded[0].GameID != gameID || *recorded[0].WalkthroughID != created.ID {
+	if len(recorded) != 1 || recorded[0].Type != activity.TypeWalkthroughCreate || recorded[0].UserID != author.UserID || *recorded[0].GameID != gameID || *recorded[0].WalkthroughID != first.ID {
 		t.Fatalf("unexpected activity %+v", recorded)
 	}
 
-	draft, err := f.service.Create(ctx, author, walkthrough.CreateInput{GameID: gameID, Title: "x", Content: document(t, "Guide"), Status: walkthrough.StatusDraft})
+	second, err := f.service.Write(ctx, author, walkthrough.WriteInput{GameID: gameID, Note: note(t, "セーブ01までの選択肢は分岐に影響無いかも？")})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if draft.Status != walkthrough.StatusDraft || draft.ReviewPending || draft.Lang != nil || len(f.queue.All()) != 1 {
-		t.Fatalf("drafts are stored as is and not reviewed: %+v", draft)
+	if second.ID != first.ID || !second.Edited || len(second.Routes) != 0 || second.Note == nil || second.Text != "セーブ01までの選択肢は分岐に影響無いかも？" || second.Lang == nil || *second.Lang != "jp" {
+		t.Fatalf("writing again replaces what was written: %+v", second)
 	}
-	if _, err := f.service.Create(ctx, author, walkthrough.CreateInput{GameID: 404, Title: "x", Content: document(t, "x"), Status: walkthrough.StatusDraft}); !errors.Is(err, game.ErrNotFound) {
+	if len(f.activities.All()) != 1 {
+		t.Fatal("replacing a walkthrough records no activity")
+	}
+
+	other, err := f.service.Write(ctx, stranger, walkthrough.WriteInput{GameID: gameID, Note: note(t, "mine")})
+	if err != nil || other.ID == first.ID || other.CreatorID != stranger.UserID {
+		t.Fatalf("every author has a walkthrough of their own: %+v %v", other, err)
+	}
+	if _, err := f.service.Write(ctx, author, walkthrough.WriteInput{GameID: 404}); !errors.Is(err, game.ErrNotFound) {
 		t.Fatalf("missing game: %v", err)
 	}
-	overlong := strings.Repeat("x", walkthrough.MaxContentLength+1)
-	if _, err := f.service.Create(ctx, author, walkthrough.CreateInput{GameID: gameID, Title: "x", Content: document(t, overlong), Status: walkthrough.StatusDraft}); !errors.Is(err, walkthrough.ErrContentTooLong) {
+}
+
+func TestPublishingHoldsAWalkthroughForReview(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	routes := []walkthrough.Route{route("a", "共通ルート", choice("この攻略では、はじめに共通ルートを進めます"))}
+	published, err := f.service.Write(ctx, author, walkthrough.WriteInput{GameID: gameID, Routes: routes, Publish: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if published.Status != walkthrough.StatusHidden || !published.ReviewPending || published.Lang == nil || *published.Lang != "jp" {
+		t.Fatalf("unexpected walkthrough %+v", published)
+	}
+	if jobs := f.queue.All(); len(jobs) != 1 || jobs[0] != (moderation.ReviewWalkthrough{WalkthroughID: published.ID}) {
+		t.Fatalf("expected a review job, got %+v", jobs)
+	}
+	draft, err := f.service.Write(ctx, author, walkthrough.WriteInput{GameID: gameID, Routes: routes})
+	if err != nil || draft.Status != walkthrough.StatusDraft || draft.ReviewPending || len(f.queue.All()) != 1 {
+		t.Fatalf("saving a draft takes the walkthrough back: %+v %v", draft, err)
+	}
+	if _, err := f.service.Write(ctx, author, walkthrough.WriteInput{GameID: gameID, Routes: routes, Publish: true}); err != nil || len(f.queue.All()) != 2 {
+		t.Fatalf("publishing again asks for another review: %v %+v", err, f.queue.All())
+	}
+}
+
+func TestPublishingRefusesWhatIsNotFinished(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	unnamed := []walkthrough.Route{route("a", "むぎ", choice("左")), route("b", "  ", choice("右"))}
+	if _, err := f.service.Write(ctx, author, walkthrough.WriteInput{GameID: gameID, Publish: true}); !errors.Is(err, walkthrough.ErrEmpty) {
+		t.Fatalf("nothing written: %v", err)
+	}
+	if _, err := f.service.Write(ctx, author, walkthrough.WriteInput{GameID: gameID, Note: note(t, "x"), Routes: unnamed, Publish: true}); !errors.Is(err, walkthrough.ErrRouteIncomplete) {
+		t.Fatalf("a route without a name: %v", err)
+	}
+	if _, err := f.repo.Written(ctx, gameID, author.UserID); !errors.Is(err, walkthrough.ErrNotFound) {
+		t.Fatalf("a refused walkthrough is not stored: %v", err)
+	}
+	if draft, err := f.service.Write(ctx, author, walkthrough.WriteInput{GameID: gameID, Routes: unnamed}); err != nil || len(draft.Routes) != 2 {
+		t.Fatalf("a draft may be unfinished: %+v %v", draft, err)
+	}
+	overlong := []walkthrough.Route{route("a", "x")}
+	for range walkthrough.MaxTextLength/250 + 1 {
+		overlong[0].Steps = append(overlong[0].Steps, choice(strings.Repeat("x", 250)))
+	}
+	if _, err := f.service.Write(ctx, author, walkthrough.WriteInput{GameID: gameID, Routes: overlong}); !errors.Is(err, walkthrough.ErrContentTooLong) {
 		t.Fatalf("text beyond the limit: %v", err)
 	}
 }
 
-func TestHidingAWalkthroughCancelsItsPendingReview(t *testing.T) {
+func TestDeleteRequiresOwnershipAndFreesTheAuthor(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()
-	created, err := f.service.Create(ctx, author, walkthrough.CreateInput{GameID: gameID, Title: "Guide", Content: document(t, "x"), Status: walkthrough.StatusPublished})
-	if err != nil {
-		t.Fatal(err)
-	}
-	hidden, err := f.service.Update(ctx, author, created.ID, walkthrough.UpdateInput{Title: "Guide", Content: document(t, "x"), Status: walkthrough.StatusHidden})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if hidden.Status != walkthrough.StatusHidden || hidden.ReviewPending {
-		t.Fatalf("hiding by the author cancels the review: %+v", hidden)
-	}
-}
+	created, _ := f.service.Write(ctx, author, walkthrough.WriteInput{GameID: gameID, Note: note(t, "x")})
 
-func TestUpdateAndDeleteRequireOwnership(t *testing.T) {
-	ctx := context.Background()
-	f := newFixture()
-	created, _ := f.service.Create(ctx, author, walkthrough.CreateInput{GameID: gameID, Title: "Guide", Content: document(t, "x"), Status: walkthrough.StatusDraft})
-	input := walkthrough.UpdateInput{Title: "這篇攻略會說明遊戲流程", Content: document(t, "與結局條件，請依照步驟選擇。"), Status: walkthrough.StatusPublished}
-
-	if _, err := f.service.Update(ctx, author, 999, input); !errors.Is(err, walkthrough.ErrNotFound) {
-		t.Fatalf("update missing: %v", err)
+	if err := f.service.Delete(ctx, author, 999); !errors.Is(err, walkthrough.ErrNotFound) {
+		t.Fatalf("delete missing: %v", err)
 	}
-	if _, err := f.service.Update(ctx, stranger, created.ID, input); !errors.Is(err, walkthrough.ErrNotOwner) {
-		t.Fatalf("update by stranger: %v", err)
-	}
-	updated, err := f.service.Update(ctx, admin, created.ID, input)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if updated.Status != walkthrough.StatusHidden || !updated.ReviewPending || !updated.Edited || updated.Title != input.Title || *updated.Lang != "zh-hant" {
-		t.Fatalf("unexpected update %+v", updated)
-	}
-	if jobs := f.queue.All(); len(jobs) != 1 || jobs[0] != (moderation.ReviewWalkthrough{WalkthroughID: created.ID}) {
-		t.Fatalf("publishing an update requests a review: %+v", jobs)
-	}
-	if len(f.activities.All()) != 1 {
-		t.Fatal("updates do not record activities")
-	}
-
 	if err := f.service.Delete(ctx, stranger, created.ID); !errors.Is(err, walkthrough.ErrNotOwner) {
 		t.Fatalf("delete by stranger: %v", err)
 	}
@@ -155,37 +179,41 @@ func TestUpdateAndDeleteRequireOwnership(t *testing.T) {
 	if err := f.service.Delete(ctx, author, created.ID); !errors.Is(err, walkthrough.ErrNotFound) {
 		t.Fatalf("deleted walkthroughs are gone: %v", err)
 	}
-	if _, err := f.service.Update(ctx, author, created.ID, input); !errors.Is(err, walkthrough.ErrNotFound) {
-		t.Fatalf("deleted walkthroughs cannot be edited: %v", err)
+	again, err := f.service.Write(ctx, author, walkthrough.WriteInput{GameID: gameID, Note: note(t, "y")})
+	if err != nil || again.ID == created.ID || again.Edited || len(f.activities.All()) != 2 {
+		t.Fatalf("an author may start over after deleting: %+v %v", again, err)
+	}
+	if err := f.service.Delete(ctx, admin, again.ID); err != nil {
+		t.Fatalf("admins may delete: %v", err)
 	}
 }
 
 func TestGetHidesUnpublishedWalkthroughs(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()
-	hidden := f.repo.Seed(walkthrough.Walkthrough{GameID: gameID, CreatorID: author.UserID, Title: "h", Content: json.RawMessage(`{"root":{}}`), Status: walkthrough.StatusHidden})
-	published := f.repo.Seed(walkthrough.Walkthrough{GameID: gameID, CreatorID: author.UserID, Title: "p", Content: json.RawMessage(`{"root":{}}`), Status: walkthrough.StatusPublished})
-	deleted := f.repo.Seed(walkthrough.Walkthrough{GameID: gameID, CreatorID: author.UserID, Status: walkthrough.StatusDeleted})
+	hidden := f.repo.Seed(walkthrough.Walkthrough{GameID: gameID, CreatorID: author.UserID, Status: walkthrough.StatusHidden})
+	published := f.repo.Seed(walkthrough.Walkthrough{GameID: 90, CreatorID: author.UserID, Routes: []walkthrough.Route{route("a", "むぎ", choice("左"))}, Status: walkthrough.StatusPublished})
+	deleted := f.repo.Seed(walkthrough.Walkthrough{GameID: 91, CreatorID: author.UserID, Status: walkthrough.StatusDeleted})
 
-	if _, err := f.service.Get(ctx, stranger, hidden.ID, false); !errors.Is(err, walkthrough.ErrNotOwner) {
+	if _, err := f.service.Get(ctx, stranger, hidden.ID); !errors.Is(err, walkthrough.ErrNotOwner) {
 		t.Fatalf("hidden for stranger: %v", err)
 	}
-	if _, err := f.service.Get(ctx, guest, hidden.ID, false); !errors.Is(err, walkthrough.ErrNotOwner) {
+	if _, err := f.service.Get(ctx, guest, hidden.ID); !errors.Is(err, walkthrough.ErrNotOwner) {
 		t.Fatalf("hidden for guest: %v", err)
 	}
-	if view, err := f.service.Get(ctx, author, hidden.ID, true); err != nil || view.Content == nil {
-		t.Fatalf("owner sees hidden with content: %+v %v", view, err)
+	if _, err := f.service.Get(ctx, author, hidden.ID); err != nil {
+		t.Fatalf("owner sees hidden: %v", err)
 	}
-	if _, err := f.service.Get(ctx, admin, hidden.ID, false); err != nil {
+	if _, err := f.service.Get(ctx, admin, hidden.ID); err != nil {
 		t.Fatalf("admins see hidden: %v", err)
 	}
-	if view, err := f.service.Get(ctx, guest, published.ID, false); err != nil || view.Content != nil {
-		t.Fatalf("guests see published without content: %+v %v", view, err)
+	if view, err := f.service.Get(ctx, guest, published.ID); err != nil || len(view.Routes) != 1 || view.Creator.ID != author.UserID {
+		t.Fatalf("guests read what is published: %+v %v", view, err)
 	}
-	if _, err := f.service.Get(ctx, author, deleted.ID, false); !errors.Is(err, walkthrough.ErrNotFound) {
+	if _, err := f.service.Get(ctx, author, deleted.ID); !errors.Is(err, walkthrough.ErrNotFound) {
 		t.Fatalf("deleted: %v", err)
 	}
-	if _, err := f.service.Get(ctx, author, 999, false); !errors.Is(err, walkthrough.ErrNotFound) {
+	if _, err := f.service.Get(ctx, author, 999); !errors.Is(err, walkthrough.ErrNotFound) {
 		t.Fatalf("missing: %v", err)
 	}
 }
@@ -198,57 +226,53 @@ func summaryIDs(summaries []walkthrough.Summary) []int {
 	return out
 }
 
-func TestListByGameAppliesRoleVisibility(t *testing.T) {
+func TestListByGamePutsTheViewersOwnFirst(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()
-	published := f.repo.Seed(walkthrough.Walkthrough{GameID: gameID, CreatorID: author.UserID, Status: walkthrough.StatusPublished})
-	draft := f.repo.Seed(walkthrough.Walkthrough{GameID: gameID, CreatorID: author.UserID, Status: walkthrough.StatusDraft})
-	hidden := f.repo.Seed(walkthrough.Walkthrough{GameID: gameID, CreatorID: author.UserID, Status: walkthrough.StatusHidden})
-	page := walkthrough.Page{Number: 1, Size: 10}
+	older := f.repo.Seed(walkthrough.Walkthrough{GameID: gameID, CreatorID: author.UserID, Status: walkthrough.StatusPublished})
+	draft := f.repo.Seed(walkthrough.Walkthrough{GameID: gameID, CreatorID: stranger.UserID, Status: walkthrough.StatusDraft})
+	newer := f.repo.Seed(walkthrough.Walkthrough{GameID: gameID, CreatorID: admin.UserID, Status: walkthrough.StatusPublished})
+	f.repo.Seed(walkthrough.Walkthrough{GameID: gameID, CreatorID: 9, Status: walkthrough.StatusHidden})
 
 	cases := []struct {
 		viewer actor.Actor
 		want   []int
 	}{
-		{guest, []int{published.ID}},
-		{stranger, []int{published.ID}},
-		{admin, []int{draft.ID, published.ID}},
-		{author, []int{hidden.ID, draft.ID, published.ID}},
+		{guest, []int{newer.ID, older.ID}},
+		{actor.Actor{UserID: 8, Role: actor.RoleUser}, []int{newer.ID, older.ID}},
+		{author, []int{older.ID, newer.ID}},
+		{stranger, []int{draft.ID, newer.ID, older.ID}},
+		{admin, []int{newer.ID, older.ID}},
 	}
 	for _, c := range cases {
-		got, _, err := f.service.ListByGame(ctx, c.viewer, gameID, nil, page)
+		got, err := f.service.ListByGame(ctx, c.viewer, gameID)
 		if err != nil || !reflect.DeepEqual(summaryIDs(got), c.want) {
 			t.Fatalf("viewer %d: %v %v", c.viewer.UserID, summaryIDs(got), err)
 		}
 	}
-	status := walkthrough.StatusDraft
-	if got, _, _ := f.service.ListByGame(ctx, stranger, gameID, &status, page); len(got) != 0 {
-		t.Fatalf("strangers cannot filter into drafts: %v", summaryIDs(got))
+	if got, err := f.service.ListByGame(ctx, guest, 404); err != nil || len(got) != 0 {
+		t.Fatalf("a game without walkthroughs: %v %v", got, err)
 	}
 }
 
-func TestListByCreatorFiltersStatusesAndAttachesCards(t *testing.T) {
+func TestListByCreatorShowsOwnersTheirUnpublishedAndAttachesCards(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(game.Card{ID: 90, Covers: []game.Cover{{URL: "safe"}, {URL: "rated", Sexual: 2}}})
-	published := f.repo.Seed(walkthrough.Walkthrough{GameID: 90, CreatorID: author.UserID, Status: walkthrough.StatusPublished})
+	published := f.repo.Seed(walkthrough.Walkthrough{GameID: 90, CreatorID: author.UserID, Routes: []walkthrough.Route{route("a", "x"), route("b", "y")}, Status: walkthrough.StatusPublished})
 	hidden := f.repo.Seed(walkthrough.Walkthrough{GameID: gameID, CreatorID: author.UserID, Status: walkthrough.StatusHidden})
-	f.repo.Seed(walkthrough.Walkthrough{GameID: gameID, CreatorID: author.UserID, Status: walkthrough.StatusDeleted})
+	f.repo.Seed(walkthrough.Walkthrough{GameID: 91, CreatorID: author.UserID, Status: walkthrough.StatusDeleted})
 	page := walkthrough.Page{Number: 1, Size: 10}
 
-	own, total, err := f.service.ListByCreator(ctx, author, author.UserID, nil, page)
+	own, total, err := f.service.ListByCreator(ctx, author, author.UserID, page)
 	if err != nil || total != 2 || !reflect.DeepEqual(summaryIDs(own), []int{hidden.ID, published.ID}) {
 		t.Fatalf("own listing %v %v", summaryIDs(own), err)
 	}
-	if own[1].Game == nil || own[1].Game.ID != 90 || len(own[1].Game.Covers) != 1 {
-		t.Fatalf("strict viewers get safe covers: %+v", own[1].Game)
+	if own[1].Game == nil || own[1].Game.ID != 90 || len(own[1].Game.Covers) != 1 || own[1].RouteCount != 2 {
+		t.Fatalf("strict viewers get safe covers: %+v", own[1])
 	}
-	status := walkthrough.StatusHidden
-	if filtered, _, _ := f.service.ListByCreator(ctx, author, author.UserID, &status, page); !reflect.DeepEqual(summaryIDs(filtered), []int{hidden.ID}) {
-		t.Fatalf("owners may filter by hidden: %v", summaryIDs(filtered))
-	}
-	others, _, _ := f.service.ListByCreator(ctx, stranger, author.UserID, &status, page)
-	if !reflect.DeepEqual(summaryIDs(others), []int{published.ID}) || len(others[0].Game.Covers) != 2 {
-		t.Fatalf("others only see published walkthroughs and ignore the hidden filter: %v", summaryIDs(others))
+	others, total, _ := f.service.ListByCreator(ctx, stranger, author.UserID, page)
+	if total != 1 || !reflect.DeepEqual(summaryIDs(others), []int{published.ID}) || len(others[0].Game.Covers) != 2 {
+		t.Fatalf("others only see published walkthroughs: %v", summaryIDs(others))
 	}
 }
 
@@ -267,7 +291,7 @@ func TestAdminStatusAndRescan(t *testing.T) {
 	f := newFixture()
 	service := walkthrough.NewAdminService(f.repo, stubStore{}, f.queue, &txtest.Immediate{})
 	hidden := f.repo.Seed(walkthrough.Walkthrough{GameID: gameID, CreatorID: author.UserID, Status: walkthrough.StatusHidden})
-	deleted := f.repo.Seed(walkthrough.Walkthrough{GameID: gameID, CreatorID: author.UserID, Status: walkthrough.StatusDeleted})
+	deleted := f.repo.Seed(walkthrough.Walkthrough{GameID: 90, CreatorID: author.UserID, Status: walkthrough.StatusDeleted})
 
 	if err := service.SetStatus(ctx, 999, walkthrough.StatusPublished); !errors.Is(err, walkthrough.ErrNotFound) {
 		t.Fatalf("missing: %v", err)

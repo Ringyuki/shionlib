@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	"entgo.io/ent/dialect/sql"
+
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	entgame "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
@@ -25,16 +27,9 @@ import (
 
 var sortFields = map[walkthrough.SortField]string{
 	walkthrough.SortByID:      entwalkthrough.FieldID,
-	walkthrough.SortByTitle:   entwalkthrough.FieldTitle,
 	walkthrough.SortByCreated: entwalkthrough.FieldCreated,
 	walkthrough.SortByUpdated: entwalkthrough.FieldUpdated,
 	walkthrough.SortByStatus:  entwalkthrough.FieldStatus,
-}
-
-var adminFields = []string{
-	entwalkthrough.FieldID, entwalkthrough.FieldGameID, entwalkthrough.FieldTitle, entwalkthrough.FieldText, entwalkthrough.FieldExcerpt, entwalkthrough.FieldLang,
-	entwalkthrough.FieldCreated, entwalkthrough.FieldUpdated, entwalkthrough.FieldEdited, entwalkthrough.FieldStatus,
-	entwalkthrough.FieldCreatorID, entwalkthrough.FieldReviewPending,
 }
 
 func (r *Repository) Search(ctx context.Context, filter walkthrough.AdminFilter, page walkthrough.Page) ([]walkthrough.AdminEntry, int, error) {
@@ -63,7 +58,6 @@ func (r *Repository) Search(ctx context.Context, filter walkthrough.AdminFilter,
 	if filter.Descending {
 		order = ent.Desc
 	}
-	query.Select(adminFields...)
 	rows, err := withAdminEdges(query, false).
 		Order(order(field), order(entwalkthrough.FieldID)).
 		Offset(page.Offset()).
@@ -74,7 +68,9 @@ func (r *Repository) Search(ctx context.Context, filter walkthrough.AdminFilter,
 	}
 	entries := make([]walkthrough.AdminEntry, len(rows))
 	for i, row := range rows {
-		entries[i] = toAdminEntry(row)
+		if entries[i], err = toAdminEntry(row); err != nil {
+			return nil, 0, err
+		}
 	}
 	return entries, total, nil
 }
@@ -87,7 +83,11 @@ func (r *Repository) Detail(ctx context.Context, id int) (walkthrough.AdminDetai
 	if len(rows) == 0 {
 		return walkthrough.AdminDetail{}, walkthrough.ErrNotFound
 	}
-	detail := walkthrough.AdminDetail{AdminEntry: toAdminEntry(rows[0]), Moderations: make([]moderation.Event, len(rows[0].Edges.Moderates))}
+	entry, err := toAdminEntry(rows[0])
+	if err != nil {
+		return walkthrough.AdminDetail{}, err
+	}
+	detail := walkthrough.AdminDetail{AdminEntry: entry, Moderations: make([]moderation.Event, len(rows[0].Edges.Moderates))}
 	for i, event := range rows[0].Edges.Moderates {
 		detail.Moderations[i] = moderationpg.ToEvent(event)
 	}
@@ -102,7 +102,6 @@ func searchPredicates(keyword string) []predicate.Walkthrough {
 		}
 	}
 	return append(predicates,
-		entwalkthrough.TitleContainsFold(keyword),
 		entwalkthrough.TextContainsFold(keyword),
 		entwalkthrough.HasCreatorWith(entuser.Or(entuser.NameContainsFold(keyword), entuser.EmailContainsFold(keyword))),
 		entwalkthrough.HasGameWith(entgame.Or(entgame.TitleZhContainsFold(keyword), entgame.TitleEnContainsFold(keyword), entgame.TitleJpContainsFold(keyword))),
@@ -124,12 +123,14 @@ func withAdminEdges(query *ent.WalkthroughQuery, allEvents bool) *ent.Walkthroug
 		})
 }
 
-const gameFK = "walkthroughs_game_id_fkey"
+const (
+	gameFK     = "walkthroughs_game_id_fkey"
+	writtenKey = "walkthroughs_game_id_creator_id_key"
+)
 
 var summaryFields = []string{
-	entwalkthrough.FieldID, entwalkthrough.FieldGameID, entwalkthrough.FieldTitle, entwalkthrough.FieldExcerpt, entwalkthrough.FieldLang,
-	entwalkthrough.FieldCreated, entwalkthrough.FieldUpdated, entwalkthrough.FieldEdited, entwalkthrough.FieldStatus,
-	entwalkthrough.FieldCreatorID,
+	entwalkthrough.FieldID, entwalkthrough.FieldGameID, entwalkthrough.FieldLang, entwalkthrough.FieldCreated, entwalkthrough.FieldUpdated,
+	entwalkthrough.FieldStatus, entwalkthrough.FieldCreatorID, entwalkthrough.FieldReviewPending,
 }
 
 type Repository struct {
@@ -145,25 +146,26 @@ func (r *Repository) db(ctx context.Context) *ent.Client {
 }
 
 func (r *Repository) Get(ctx context.Context, id int) (walkthrough.Walkthrough, error) {
-	row, err := r.db(ctx).Walkthrough.Get(ctx, id)
-	if postgres.IsNotFound(err) {
-		return walkthrough.Walkthrough{}, walkthrough.ErrNotFound
-	}
-	if err != nil {
-		return walkthrough.Walkthrough{}, fmt.Errorf("get walkthrough %d: %w", id, err)
-	}
-	return toWalkthrough(row), nil
+	return r.one(ctx, r.db(ctx).Walkthrough.Query().Where(entwalkthrough.ID(id)))
 }
 
 func (r *Repository) Lock(ctx context.Context, id int) (walkthrough.Walkthrough, error) {
-	row, err := r.db(ctx).Walkthrough.Query().Where(entwalkthrough.ID(id)).ForUpdate().Only(ctx)
+	return r.one(ctx, r.db(ctx).Walkthrough.Query().Where(entwalkthrough.ID(id)).ForUpdate())
+}
+
+func (r *Repository) LockWritten(ctx context.Context, gameID, creatorID int) (walkthrough.Walkthrough, error) {
+	return r.one(ctx, r.db(ctx).Walkthrough.Query().Where(written(gameID, creatorID)).ForUpdate())
+}
+
+func (r *Repository) one(ctx context.Context, query *ent.WalkthroughQuery) (walkthrough.Walkthrough, error) {
+	row, err := query.Only(ctx)
 	if postgres.IsNotFound(err) {
 		return walkthrough.Walkthrough{}, walkthrough.ErrNotFound
 	}
 	if err != nil {
-		return walkthrough.Walkthrough{}, fmt.Errorf("lock walkthrough %d: %w", id, err)
+		return walkthrough.Walkthrough{}, fmt.Errorf("load walkthrough: %w", err)
 	}
-	return toWalkthrough(row), nil
+	return toWalkthrough(row)
 }
 
 func (r *Repository) View(ctx context.Context, id int) (walkthrough.View, error) {
@@ -174,39 +176,57 @@ func (r *Repository) View(ctx context.Context, id int) (walkthrough.View, error)
 	if err != nil {
 		return walkthrough.View{}, fmt.Errorf("view walkthrough %d: %w", id, err)
 	}
-	return walkthrough.View{Walkthrough: toWalkthrough(row), Creator: userpg.ToSummary(row.Edges.Creator)}, nil
+	stored, err := toWalkthrough(row)
+	if err != nil {
+		return walkthrough.View{}, err
+	}
+	return walkthrough.View{Walkthrough: stored, Creator: userpg.ToSummary(row.Edges.Creator)}, nil
 }
 
 func (r *Repository) Create(ctx context.Context, in walkthrough.NewWalkthrough) (walkthrough.Walkthrough, error) {
-	row, err := r.db(ctx).Walkthrough.Create().
+	routes, err := encodeRoutes(in.Routes)
+	if err != nil {
+		return walkthrough.Walkthrough{}, err
+	}
+	create := r.db(ctx).Walkthrough.Create().
 		SetGameID(in.GameID).
-		SetTitle(in.Title).
-		SetContent(in.Content).
+		SetRoutes(routes).
 		SetText(in.Text).
-		SetExcerpt(in.Excerpt).
 		SetNillableLang(in.Lang).
 		SetStatus(entwalkthrough.Status(in.Status)).
 		SetCreatorID(in.CreatorID).
-		SetReviewPending(in.ReviewPending).
-		Save(ctx)
-	if postgres.IsForeignKeyViolation(err, gameFK) {
-		return walkthrough.Walkthrough{}, game.ErrNotFound
+		SetReviewPending(in.ReviewPending)
+	if in.Note != nil {
+		create.SetNote(in.Note)
 	}
-	if err != nil {
+	row, err := create.Save(ctx)
+	switch {
+	case postgres.IsForeignKeyViolation(err, gameFK):
+		return walkthrough.Walkthrough{}, game.ErrNotFound
+	case postgres.IsUniqueViolation(err, writtenKey):
+		return walkthrough.Walkthrough{}, walkthrough.ErrAlreadyWritten
+	case err != nil:
 		return walkthrough.Walkthrough{}, fmt.Errorf("create walkthrough: %w", err)
 	}
-	return toWalkthrough(row), nil
+	return toWalkthrough(row)
 }
 
 func (r *Repository) Update(ctx context.Context, id int, changes walkthrough.Changes) error {
+	routes, err := encodeRoutes(changes.Routes)
+	if err != nil {
+		return err
+	}
 	update := r.db(ctx).Walkthrough.UpdateOneID(id).
-		SetTitle(changes.Title).
-		SetContent(changes.Content).
+		SetRoutes(routes).
 		SetText(changes.Text).
-		SetExcerpt(changes.Excerpt).
 		SetStatus(entwalkthrough.Status(changes.Status)).
 		SetReviewPending(changes.ReviewPending).
 		SetEdited(true)
+	if changes.Note != nil {
+		update.SetNote(changes.Note)
+	} else {
+		update.ClearNote()
+	}
 	if changes.Lang != nil {
 		update.SetLang(*changes.Lang)
 	} else {
@@ -234,21 +254,23 @@ func (r *Repository) exec(ctx context.Context, id int, update *ent.WalkthroughUp
 	return nil
 }
 
-func (r *Repository) ListByGame(ctx context.Context, filter walkthrough.GameFilter, page walkthrough.Page) ([]walkthrough.Summary, int, error) {
-	query := r.db(ctx).Walkthrough.Query().Where(entwalkthrough.GameID(filter.GameID))
-	if filter.Status != nil {
-		query.Where(entwalkthrough.StatusEQ(entwalkthrough.Status(*filter.Status)))
+func (r *Repository) Written(ctx context.Context, gameID, creatorID int) (walkthrough.Summary, error) {
+	summaries, err := r.summaries(ctx, r.db(ctx).Walkthrough.Query().Where(written(gameID, creatorID)))
+	if err != nil {
+		return walkthrough.Summary{}, err
 	}
-	public := statuses(filter.Public)
-	if filter.ViewerID == 0 {
-		query.Where(entwalkthrough.StatusIn(public...))
-	} else {
-		query.Where(
-			entwalkthrough.StatusNEQ(entwalkthrough.StatusDELETED),
-			entwalkthrough.Or(entwalkthrough.StatusIn(public...), entwalkthrough.CreatorID(filter.ViewerID)),
-		)
+	if len(summaries) == 0 {
+		return walkthrough.Summary{}, walkthrough.ErrNotFound
 	}
-	return r.list(ctx, query, page)
+	return summaries[0], nil
+}
+
+func (r *Repository) ListPublished(ctx context.Context, gameID, limit int) ([]walkthrough.Summary, error) {
+	query := r.db(ctx).Walkthrough.Query().
+		Where(entwalkthrough.GameID(gameID), entwalkthrough.StatusEQ(entwalkthrough.StatusPUBLISHED)).
+		Order(ent.Desc(entwalkthrough.FieldUpdated), ent.Desc(entwalkthrough.FieldID)).
+		Limit(limit)
+	return r.summaries(ctx, query)
 }
 
 func (r *Repository) ListByCreator(ctx context.Context, filter walkthrough.CreatorFilter, page walkthrough.Page) ([]walkthrough.Summary, int, error) {
@@ -256,41 +278,45 @@ func (r *Repository) ListByCreator(ctx context.Context, filter walkthrough.Creat
 	if filter.ExcludeRated {
 		query.Where(entwalkthrough.HasGameWith(gamepg.SafeForStrictViewers()))
 	}
-	return r.list(ctx, query, page)
-}
-
-func (r *Repository) list(ctx context.Context, query *ent.WalkthroughQuery, page walkthrough.Page) ([]walkthrough.Summary, int, error) {
 	total, err := query.Clone().Count(ctx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("count walkthroughs: %w", err)
 	}
-	query.Select(summaryFields...)
-	rows, err := query.
-		WithCreator(userpg.SelectSummary).
-		Order(ent.Desc(entwalkthrough.FieldCreated), ent.Desc(entwalkthrough.FieldID)).
+	query.Order(unpublishedFirst, ent.Desc(entwalkthrough.FieldUpdated), ent.Desc(entwalkthrough.FieldID)).
 		Offset(page.Offset()).
-		Limit(page.Size).
-		All(ctx)
+		Limit(page.Size)
+	summaries, err := r.summaries(ctx, query)
+	return summaries, total, err
+}
+
+func (r *Repository) summaries(ctx context.Context, query *ent.WalkthroughQuery) ([]walkthrough.Summary, error) {
+	query.Select(summaryFields...)
+	query.Modify(func(s *sql.Selector) {
+		s.AppendSelectExprAs(sql.ExprFunc(func(b *sql.Builder) {
+			b.WriteString("jsonb_array_length(").Ident(s.C(entwalkthrough.FieldRoutes)).WriteString(")")
+		}), routeCount)
+	})
+	rows, err := query.WithCreator(userpg.SelectSummary).All(ctx)
 	if err != nil {
-		return nil, 0, fmt.Errorf("list walkthroughs: %w", err)
+		return nil, fmt.Errorf("list walkthroughs: %w", err)
 	}
 	summaries := make([]walkthrough.Summary, len(rows))
 	for i, row := range rows {
-		summaries[i] = walkthrough.Summary{
-			ID:            row.ID,
-			GameID:        row.GameID,
-			Title:         row.Title,
-			Excerpt:       row.Excerpt,
-			Lang:          row.Lang,
-			Created:       row.Created,
-			Updated:       row.Updated,
-			Edited:        row.Edited,
-			Status:        walkthrough.Status(row.Status),
-			ReviewPending: row.ReviewPending,
-			Creator:       userpg.ToSummary(row.Edges.Creator),
+		if summaries[i], err = toSummary(row); err != nil {
+			return nil, err
 		}
 	}
-	return summaries, total, nil
+	return summaries, nil
+}
+
+func written(gameID, creatorID int) predicate.Walkthrough {
+	return entwalkthrough.And(entwalkthrough.GameID(gameID), entwalkthrough.CreatorID(creatorID), entwalkthrough.StatusNEQ(entwalkthrough.StatusDELETED))
+}
+
+func unpublishedFirst(s *sql.Selector) {
+	s.OrderExpr(sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(s.C(entwalkthrough.FieldStatus)).WriteString(" = ").Arg(string(entwalkthrough.StatusPUBLISHED))
+	}))
 }
 
 func statuses(values []walkthrough.Status) []entwalkthrough.Status {

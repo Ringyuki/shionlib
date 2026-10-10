@@ -44,7 +44,7 @@
       "Walkthrough": {
         "Block": {
           "Title": "Walkthrough did not pass moderation",
-          "ReviewContent": "Your walkthrough \"{walkthrough_title}\" did not pass moderation. Reason: {top_category}. {reason, select, none {} other {Moderator's note: {reason}. }}{evidence, select, none {} other {Passage: {evidence}. }}Edit it and publish it again.",
+          "ReviewContent": "Your walkthrough for \"{game_title}\" did not pass moderation. Reason: {top_category}. {reason, select, none {} other {Moderator's note: {reason}. }}{evidence, select, none {} other {Passage: {evidence}. }}Edit it and publish it again.",
           "LinkText": "Open the walkthrough"
         }
       }

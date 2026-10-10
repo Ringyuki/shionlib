@@ -26,6 +26,7 @@ func TestMemoryRepositoryContract(t *testing.T) {
 				repo.AddGame(games, true)
 				return games
 			},
+			SetUpdated: func(_ *testing.T, id int, at time.Time) { repo.SetUpdated(id, at) },
 		}
 	})
 }

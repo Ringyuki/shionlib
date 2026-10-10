@@ -21,10 +21,9 @@ func (Walkthrough) Fields() []ent.Field {
 	return []ent.Field{
 		serialID(),
 		field.Int("game_id").SchemaType(pg("integer")),
-		field.String("title").MaxRuneLen(255).SchemaType(varchar(255)),
-		field.JSON("content", rawJSON).SchemaType(jsonbType),
+		field.JSON("note", rawJSON).SchemaType(jsonbType).Optional(),
+		field.JSON("routes", rawJSON).SchemaType(jsonbType).Annotations(entsql.DefaultExpr("'[]'::jsonb")),
 		field.Text("text").Default(""),
-		field.Text("excerpt").Default(""),
 		field.String("lang").MaxRuneLen(16).SchemaType(varchar(16)).Optional().Nillable(),
 		created(),
 		updated(),
@@ -48,5 +47,6 @@ func (Walkthrough) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("game_id", "created").StorageKey("walkthroughs_game_id_created_idx"),
 		index.Fields("creator_id", "created").StorageKey("walkthroughs_creator_id_created_idx"),
+		index.Fields("game_id", "creator_id").Unique().Annotations(entsql.IndexWhere("status <> 'DELETED'")).StorageKey("walkthroughs_game_id_creator_id_key"),
 	}
 }

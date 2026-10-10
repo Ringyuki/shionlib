@@ -11,7 +11,7 @@ import (
 
 func TestReviewWalkthroughWorkerRunsTheService(t *testing.T) {
 	f := newFixture(t)
-	walkthrough := f.repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: 1, GameID: 1, Title: "t", Text: "c", ReviewPending: true}, moderationtest.WalkthroughHidden)
+	walkthrough := f.repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: 1, GameID: 1, Text: "c", ReviewPending: true}, moderationtest.WalkthroughHidden)
 	if err := NewReviewWalkthroughWorker(f.service).Work(t.Context(), &river.Job[moderation.ReviewWalkthrough]{Args: moderation.ReviewWalkthrough{WalkthroughID: walkthrough.ID}}); err != nil {
 		t.Fatal(err)
 	}

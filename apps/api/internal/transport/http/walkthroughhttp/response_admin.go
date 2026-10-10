@@ -49,8 +49,7 @@ type adminWalkthroughEventDTO struct {
 
 type adminWalkthroughItemDTO struct {
 	ID         int                            `json:"id"`
-	Title      string                         `json:"title"`
-	Text       string                         `json:"text"`
+	Text       string                         `json:"text" doc:"Everything written in it as plain text: the note, then each route's name, condition, steps and ending"`
 	Lang       *string                        `json:"lang"`
 	Edited     bool                           `json:"edited"`
 	Status     string                         `json:"status" enum:"DRAFT,PUBLISHED,HIDDEN,DELETED"`
@@ -63,9 +62,9 @@ type adminWalkthroughItemDTO struct {
 
 type adminWalkthroughDetailDTO struct {
 	ID          int                        `json:"id"`
-	Title       string                     `json:"title"`
 	Text        string                     `json:"text"`
-	Content     richtexthttp.Content       `json:"content"`
+	Note        richtexthttp.Content       `json:"note,omitempty"`
+	Routes      []walkthroughRouteDTO      `json:"routes"`
 	Lang        *string                    `json:"lang"`
 	Edited      bool                       `json:"edited"`
 	Status      string                     `json:"status" enum:"DRAFT,PUBLISHED,HIDDEN,DELETED"`
@@ -119,7 +118,6 @@ func toAdminWalkthroughEvent(event moderation.Event) adminWalkthroughEventDTO {
 func toAdminWalkthroughItem(entry walkthrough.AdminEntry, now time.Time) adminWalkthroughItemDTO {
 	return adminWalkthroughItemDTO{
 		ID:         entry.ID,
-		Title:      entry.Title,
 		Text:       entry.Text,
 		Lang:       entry.Lang,
 		Edited:     entry.Edited,
@@ -139,9 +137,9 @@ func toAdminWalkthroughDetail(detail walkthrough.AdminDetail, now time.Time) adm
 	}
 	return adminWalkthroughDetailDTO{
 		ID:          detail.ID,
-		Title:       detail.Title,
 		Text:        detail.Text,
-		Content:     richtexthttp.Content(detail.Content),
+		Note:        richtexthttp.Content(detail.Note),
+		Routes:      toRoutes(detail.Routes),
 		Lang:        detail.Lang,
 		Edited:      detail.Edited,
 		Status:      string(detail.Status),

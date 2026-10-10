@@ -56,6 +56,14 @@ func (r *MemoryRepository) Seed(w walkthrough.Walkthrough) walkthrough.Walkthrou
 	return w
 }
 
+func (r *MemoryRepository) SetUpdated(id int, at time.Time) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	w := r.walkthroughs[id]
+	w.Updated = at
+	r.walkthroughs[id] = w
+}
+
 func (r *MemoryRepository) Get(_ context.Context, id int) (walkthrough.Walkthrough, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -80,20 +88,51 @@ func (r *MemoryRepository) View(ctx context.Context, id int) (walkthrough.View, 
 	return walkthrough.View{Walkthrough: w, Creator: r.summary(w.CreatorID)}, nil
 }
 
+func (r *MemoryRepository) LockWritten(_ context.Context, gameID, creatorID int) (walkthrough.Walkthrough, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	w, ok := r.written(gameID, creatorID)
+	if !ok {
+		return walkthrough.Walkthrough{}, walkthrough.ErrNotFound
+	}
+	return w, nil
+}
+
+func (r *MemoryRepository) Written(_ context.Context, gameID, creatorID int) (walkthrough.Summary, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	w, ok := r.written(gameID, creatorID)
+	if !ok {
+		return walkthrough.Summary{}, walkthrough.ErrNotFound
+	}
+	return r.summarize(w), nil
+}
+
+func (r *MemoryRepository) written(gameID, creatorID int) (walkthrough.Walkthrough, bool) {
+	for _, w := range r.walkthroughs {
+		if w.GameID == gameID && w.CreatorID == creatorID && w.Status != walkthrough.StatusDeleted {
+			return w, true
+		}
+	}
+	return walkthrough.Walkthrough{}, false
+}
+
 func (r *MemoryRepository) Create(_ context.Context, in walkthrough.NewWalkthrough) (walkthrough.Walkthrough, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if !r.games[in.GameID] {
 		return walkthrough.Walkthrough{}, game.ErrNotFound
 	}
+	if _, taken := r.written(in.GameID, in.CreatorID); taken && in.Status != walkthrough.StatusDeleted {
+		return walkthrough.Walkthrough{}, walkthrough.ErrAlreadyWritten
+	}
 	r.nextID++
 	w := walkthrough.Walkthrough{
 		ID:            r.nextID,
 		GameID:        in.GameID,
-		Title:         in.Title,
-		Content:       slices.Clone(in.Content),
+		Note:          slices.Clone(in.Note),
+		Routes:        cloneRoutes(in.Routes),
 		Text:          in.Text,
-		Excerpt:       in.Excerpt,
 		Lang:          in.Lang,
 		Created:       r.now(),
 		Updated:       r.now(),
@@ -107,10 +146,9 @@ func (r *MemoryRepository) Create(_ context.Context, in walkthrough.NewWalkthrou
 
 func (r *MemoryRepository) Update(_ context.Context, id int, changes walkthrough.Changes) error {
 	return r.update(id, func(w *walkthrough.Walkthrough) {
-		w.Title = changes.Title
-		w.Content = slices.Clone(changes.Content)
+		w.Note = slices.Clone(changes.Note)
+		w.Routes = cloneRoutes(changes.Routes)
 		w.Text = changes.Text
-		w.Excerpt = changes.Excerpt
 		w.Lang = changes.Lang
 		w.Status = changes.Status
 		w.ReviewPending = changes.ReviewPending
@@ -142,27 +180,39 @@ func (r *MemoryRepository) update(id int, fn func(w *walkthrough.Walkthrough)) e
 	return nil
 }
 
-func (r *MemoryRepository) ListByGame(_ context.Context, filter walkthrough.GameFilter, page walkthrough.Page) ([]walkthrough.Summary, int, error) {
-	return r.list(func(w walkthrough.Walkthrough) bool {
-		if w.GameID != filter.GameID || (filter.Status != nil && w.Status != *filter.Status) {
-			return false
-		}
-		if filter.ViewerID == 0 {
-			return slices.Contains(filter.Public, w.Status)
-		}
-		return w.Status != walkthrough.StatusDeleted && (slices.Contains(filter.Public, w.Status) || w.CreatorID == filter.ViewerID)
-	}, page)
+func (r *MemoryRepository) ListPublished(_ context.Context, gameID, limit int) ([]walkthrough.Summary, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	matched := r.newestFirst(func(w walkthrough.Walkthrough) bool {
+		return w.GameID == gameID && w.Status == walkthrough.StatusPublished
+	})
+	summaries := make([]walkthrough.Summary, 0, min(limit, len(matched)))
+	for _, w := range matched[:min(limit, len(matched))] {
+		summaries = append(summaries, r.summarize(w))
+	}
+	return summaries, nil
 }
 
 func (r *MemoryRepository) ListByCreator(_ context.Context, filter walkthrough.CreatorFilter, page walkthrough.Page) ([]walkthrough.Summary, int, error) {
-	return r.list(func(w walkthrough.Walkthrough) bool {
-		return w.CreatorID == filter.CreatorID && slices.Contains(filter.Statuses, w.Status) && (!filter.ExcludeRated || !r.rated[w.GameID])
-	}, page)
-}
-
-func (r *MemoryRepository) list(match func(walkthrough.Walkthrough) bool, page walkthrough.Page) ([]walkthrough.Summary, int, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	matched := r.newestFirst(func(w walkthrough.Walkthrough) bool {
+		return w.CreatorID == filter.CreatorID && slices.Contains(filter.Statuses, w.Status) && (!filter.ExcludeRated || !r.rated[w.GameID])
+	})
+	slices.SortStableFunc(matched, func(a, b walkthrough.Walkthrough) int {
+		return cmp.Compare(public(a), public(b))
+	})
+	total := len(matched)
+	start := min(page.Offset(), total)
+	end := min(start+page.Size, total)
+	summaries := make([]walkthrough.Summary, 0, end-start)
+	for _, w := range matched[start:end] {
+		summaries = append(summaries, r.summarize(w))
+	}
+	return summaries, total, nil
+}
+
+func (r *MemoryRepository) newestFirst(match func(walkthrough.Walkthrough) bool) []walkthrough.Walkthrough {
 	var matched []walkthrough.Walkthrough
 	for _, w := range r.walkthroughs {
 		if match(w) {
@@ -170,28 +220,23 @@ func (r *MemoryRepository) list(match func(walkthrough.Walkthrough) bool, page w
 		}
 	}
 	slices.SortFunc(matched, func(a, b walkthrough.Walkthrough) int {
-		return -cmp.Or(a.Created.Compare(b.Created), cmp.Compare(a.ID, b.ID))
+		return -cmp.Or(a.Updated.Compare(b.Updated), cmp.Compare(a.ID, b.ID))
 	})
-	total := len(matched)
-	start := min(page.Offset(), total)
-	end := min(start+page.Size, total)
-	summaries := make([]walkthrough.Summary, 0, end-start)
-	for _, w := range matched[start:end] {
-		summaries = append(summaries, walkthrough.Summary{
-			ID:            w.ID,
-			GameID:        w.GameID,
-			Title:         w.Title,
-			Excerpt:       w.Excerpt,
-			Lang:          w.Lang,
-			Created:       w.Created,
-			Updated:       w.Updated,
-			Edited:        w.Edited,
-			Status:        w.Status,
-			ReviewPending: w.ReviewPending,
-			Creator:       r.summary(w.CreatorID),
-		})
+	return matched
+}
+
+func (r *MemoryRepository) summarize(w walkthrough.Walkthrough) walkthrough.Summary {
+	return walkthrough.Summary{
+		ID:            w.ID,
+		GameID:        w.GameID,
+		RouteCount:    len(w.Routes),
+		Lang:          w.Lang,
+		Created:       w.Created,
+		Updated:       w.Updated,
+		Status:        w.Status,
+		ReviewPending: w.ReviewPending,
+		Creator:       r.summary(w.CreatorID),
 	}
-	return summaries, total, nil
 }
 
 func (r *MemoryRepository) summary(id int) user.Summary {
@@ -199,4 +244,22 @@ func (r *MemoryRepository) summary(id int) user.Summary {
 		return summary
 	}
 	return user.Summary{ID: id}
+}
+
+func public(w walkthrough.Walkthrough) int {
+	if w.Status == walkthrough.StatusPublished {
+		return 1
+	}
+	return 0
+}
+
+func cloneRoutes(routes []walkthrough.Route) []walkthrough.Route {
+	cloned := make([]walkthrough.Route, len(routes))
+	for i, route := range routes {
+		cloned[i] = route
+		cloned[i].Characters = slices.Clone(route.Characters)
+		cloned[i].Requires = slices.Clone(route.Requires)
+		cloned[i].Steps = slices.Clone(route.Steps)
+	}
+	return cloned
 }

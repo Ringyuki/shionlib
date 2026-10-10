@@ -80,8 +80,7 @@ type NewActivity struct {
 }
 
 type WalkthroughRef struct {
-	ID    int
-	Title string
+	ID int
 }
 
 type CommentRef struct {

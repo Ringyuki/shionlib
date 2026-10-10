@@ -75,6 +75,25 @@ func TestADocumentWithoutTextCountsAsMissing(t *testing.T) {
 	}
 }
 
+func TestAnOptionalDocumentMayBeLeftOut(t *testing.T) {
+	for name, raw := range map[string]richtexthttp.Content{
+		"left out":        nil,
+		"nothing written": richtexthttp.Content(`{"type":"doc","content":[{"type":"paragraph"}]}`),
+	} {
+		if document, errs := richtexthttp.ParseOptional(raw, "note", richtext.Comment, 10); document != nil || errs != nil {
+			t.Errorf("%s: document %+v errors %v", name, document, errs)
+		}
+	}
+	document, errs := richtexthttp.ParseOptional(paragraph("hello"), "note", richtext.Comment, 10)
+	if errs != nil || document == nil || document.Text() != "hello" {
+		t.Fatalf("document %+v errors %v", document, errs)
+	}
+	got := detail(t, second(richtexthttp.ParseOptional(paragraph(strings.Repeat("a", 11)), "note", richtext.Comment, 10)))
+	if got.Location != "body.note" || got.Message != "expected length <= 10" {
+		t.Fatalf("%q at %q", got.Message, got.Location)
+	}
+}
+
 func TestContentTravelsAsTheStoredJSON(t *testing.T) {
 	type envelope struct {
 		Content richtexthttp.Content `json:"content"`

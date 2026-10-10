@@ -17,14 +17,12 @@ const (
 	FieldID = "id"
 	// FieldGameID holds the string denoting the game_id field in the database.
 	FieldGameID = "game_id"
-	// FieldTitle holds the string denoting the title field in the database.
-	FieldTitle = "title"
-	// FieldContent holds the string denoting the content field in the database.
-	FieldContent = "content"
+	// FieldNote holds the string denoting the note field in the database.
+	FieldNote = "note"
+	// FieldRoutes holds the string denoting the routes field in the database.
+	FieldRoutes = "routes"
 	// FieldText holds the string denoting the text field in the database.
 	FieldText = "text"
-	// FieldExcerpt holds the string denoting the excerpt field in the database.
-	FieldExcerpt = "excerpt"
 	// FieldLang holds the string denoting the lang field in the database.
 	FieldLang = "lang"
 	// FieldCreated holds the string denoting the created field in the database.
@@ -83,10 +81,9 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldGameID,
-	FieldTitle,
-	FieldContent,
+	FieldNote,
+	FieldRoutes,
 	FieldText,
-	FieldExcerpt,
 	FieldLang,
 	FieldCreated,
 	FieldUpdated,
@@ -107,12 +104,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
-	TitleValidator func(string) error
 	// DefaultText holds the default value on creation for the "text" field.
 	DefaultText string
-	// DefaultExcerpt holds the default value on creation for the "excerpt" field.
-	DefaultExcerpt string
 	// LangValidator is a validator for the "lang" field. It is called by the builders before save.
 	LangValidator func(string) error
 	// DefaultCreated holds the default value on creation for the "created" field.
@@ -168,19 +161,9 @@ func ByGameID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldGameID, opts...).ToFunc()
 }
 
-// ByTitle orders the results by the title field.
-func ByTitle(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldTitle, opts...).ToFunc()
-}
-
 // ByText orders the results by the text field.
 func ByText(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldText, opts...).ToFunc()
-}
-
-// ByExcerpt orders the results by the excerpt field.
-func ByExcerpt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldExcerpt, opts...).ToFunc()
 }
 
 // ByLang orders the results by the lang field.

@@ -11,12 +11,14 @@ import (
 type Repository interface {
 	Get(ctx context.Context, id int) (Walkthrough, error)
 	Lock(ctx context.Context, id int) (Walkthrough, error)
+	LockWritten(ctx context.Context, gameID, creatorID int) (Walkthrough, error)
 	View(ctx context.Context, id int) (View, error)
 	Create(ctx context.Context, in NewWalkthrough) (Walkthrough, error)
 	Update(ctx context.Context, id int, changes Changes) error
 	SetStatus(ctx context.Context, id int, status Status) error
 	MarkReviewPending(ctx context.Context, id int) error
-	ListByGame(ctx context.Context, filter GameFilter, page Page) ([]Summary, int, error)
+	Written(ctx context.Context, gameID, creatorID int) (Summary, error)
+	ListPublished(ctx context.Context, gameID, limit int) ([]Summary, error)
 	ListByCreator(ctx context.Context, filter CreatorFilter, page Page) ([]Summary, int, error)
 }
 

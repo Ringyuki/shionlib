@@ -63,8 +63,6 @@ func TestRepositoryContract(t *testing.T) {
 				row, err := db.Ent.Walkthrough.Create().
 					SetGameID(gameID).
 					SetCreatorID(creator).
-					SetTitle("guide").
-					SetContent(json.RawMessage(`{}`)).
 					SetText("guide").
 					SetStatus(entwalkthrough.Status(status)).
 					SetReviewPending(reviewPending).
@@ -72,7 +70,7 @@ func TestRepositoryContract(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				return moderation.WalkthroughSubject{ID: row.ID, CreatorID: creator, GameID: gameID, Title: "guide", Text: "guide", Game: gameTitles(gameID)}
+				return moderation.WalkthroughSubject{ID: row.ID, CreatorID: creator, GameID: gameID, Text: "guide", Game: gameTitles(gameID)}
 			},
 			WalkthroughStatus: func(t *testing.T, id int) string {
 				return string(db.Ent.Walkthrough.GetX(ctx, id).Status)

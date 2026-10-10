@@ -112,35 +112,6 @@ func TestADocumentKeepsWhatTheSchemaAllows(t *testing.T) {
 	}
 }
 
-func TestAnExcerptLeavesOutWhatIsHidden(t *testing.T) {
-	raw := doc(
-		heading(2, text("Common route")),
-		block("paragraph", text("Pick A, then "), text("she leaves", mark("spoiler")), text(" in chapter two.")),
-		image(obj{"src": picture, "caption": "The map", "width": 800, "height": 600}),
-		block("bullet_list", block("list_item", block("paragraph", text("Save"), block("hard_break"), text("often")))),
-	)
-	document, err := richtext.Parse(raw, richtext.Article)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got, want := document.Excerpt(200), "Common route Pick A, then in chapter two. Save often"; got != want {
-		t.Fatalf("excerpt %q, want %q", got, want)
-	}
-	if got, want := document.Excerpt(12), "Common route"; got != want {
-		t.Fatalf("short excerpt %q, want %q", got, want)
-	}
-	if got := document.Excerpt(0); got != "" {
-		t.Fatalf("excerpt of no length %q", got)
-	}
-	wide, err := richtext.Parse(doc(block("paragraph", text("攻略按章节列出全部选项"))), richtext.Article)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got, want := wide.Excerpt(4), "攻略按章"; got != want {
-		t.Fatalf("excerpt %q, want %q", got, want)
-	}
-}
-
 func TestTheStoredFormIsCanonical(t *testing.T) {
 	raw := []byte(` { "content" : [ { "content": [ { "text": "hi", "marks": [], "type": "text" } ], "type": "paragraph", "attrs": null }, { "type": "paragraph", "attrs": {} } ], "type": "doc" } `)
 	document, err := richtext.Parse(raw, richtext.Comment)

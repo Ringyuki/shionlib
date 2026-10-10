@@ -124,7 +124,6 @@ func (r *Repository) walkthroughSubject(ctx context.Context, id int, lock bool) 
 		ID:            row.ID,
 		CreatorID:     row.CreatorID,
 		GameID:        row.GameID,
-		Title:         row.Title,
 		Text:          row.Text,
 		Deleted:       walkthrough.Status(row.Status) == walkthrough.StatusDeleted,
 		ReviewPending: row.ReviewPending,

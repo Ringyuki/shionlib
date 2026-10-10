@@ -16,7 +16,7 @@ func toEntry(row *ent.Activity) activity.Entry {
 		Updated: row.Updated,
 	}
 	if ref := row.Edges.Walkthrough; ref != nil {
-		entry.Walkthrough = &activity.WalkthroughRef{ID: ref.ID, Title: ref.Title}
+		entry.Walkthrough = &activity.WalkthroughRef{ID: ref.ID}
 	}
 	if ref := row.Edges.Comment; ref != nil {
 		entry.Comment = &activity.CommentRef{ID: ref.ID, Text: ref.Text}

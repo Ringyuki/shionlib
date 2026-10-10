@@ -84,11 +84,13 @@ func walkthroughBlockMessage(subject WalkthroughSubject, verdict Verdict) messag
 		ReceiverID: subject.CreatorID,
 		GameID:     &gameID,
 		Meta: message.Meta{
-			"top_category":      verdict.TopCategory,
-			"reason":            verdict.Reason,
-			"evidence":          verdict.Evidence,
-			"walkthrough_title": subject.Title,
-			"walkthrough_id":    subject.ID,
+			"top_category":   verdict.TopCategory,
+			"reason":         verdict.Reason,
+			"evidence":       verdict.Evidence,
+			"walkthrough_id": subject.ID,
+			"game_title_jp":  subject.Game.JP,
+			"game_title_zh":  subject.Game.ZH,
+			"game_title_en":  subject.Game.EN,
 		},
 	}
 }

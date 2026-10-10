@@ -33,7 +33,6 @@ func commentReview(subject CommentSubject) ReviewRequest {
 func walkthroughReview(subject WalkthroughSubject) ReviewRequest {
 	lines := []string{
 		"Game: " + subject.Game.label(),
-		quoted("Walkthrough title", subject.Title),
 		quoted("Walkthrough content", OneLine(subject.Text)),
 	}
 	return ReviewRequest{Instructions: instructions(walkthroughRules), Input: strings.Join(lines, "\n")}
@@ -227,7 +226,7 @@ func (s *Service) lockUnchangedWalkthrough(ctx context.Context, reviewed Walkthr
 	if err != nil {
 		return nil, err
 	}
-	if current.Deleted || !current.ReviewPending || current.Text != reviewed.Text || current.Title != reviewed.Title {
+	if current.Deleted || !current.ReviewPending || current.Text != reviewed.Text {
 		return nil, nil
 	}
 	return &current, nil

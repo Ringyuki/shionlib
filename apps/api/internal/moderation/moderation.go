@@ -185,7 +185,6 @@ type WalkthroughSubject struct {
 	ID            int
 	CreatorID     int
 	GameID        int
-	Title         string
 	Text          string
 	Deleted       bool
 	ReviewPending bool

@@ -70,9 +70,9 @@ func TestStatsCountWhatTheViewerIsListed(t *testing.T) {
 	}
 	db.Ent.Comment.Create().SetGameID(rated).SetCreatorID(owner).SetContent(json.RawMessage(`{}`)).SetText("hi").SetStatus(int(comment.StatusVisible)).SaveX(ctx)
 	for _, status := range []entwalkthrough.Status{entwalkthrough.StatusPUBLISHED, entwalkthrough.StatusDRAFT, entwalkthrough.StatusHIDDEN, entwalkthrough.StatusDELETED} {
-		db.Ent.Walkthrough.Create().SetGameID(game).SetCreatorID(owner).SetTitle("Route guide").SetContent(json.RawMessage(`{}`)).SetText("guide").SetStatus(status).SaveX(ctx)
+		db.Ent.Walkthrough.Create().SetGameID(db.Game(t)).SetCreatorID(owner).SetText("guide").SetStatus(status).SaveX(ctx)
 	}
-	db.Ent.Walkthrough.Create().SetGameID(rated).SetCreatorID(owner).SetTitle("Route guide").SetContent(json.RawMessage(`{}`)).SetText("guide").SetStatus(entwalkthrough.StatusPUBLISHED).SaveX(ctx)
+	db.Ent.Walkthrough.Create().SetGameID(rated).SetCreatorID(owner).SetText("guide").SetStatus(entwalkthrough.StatusPUBLISHED).SaveX(ctx)
 	cases := []struct {
 		name  string
 		scope user.StatsScope

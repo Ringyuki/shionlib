@@ -64,7 +64,7 @@ func (r *Repository) List(ctx context.Context, filter activity.Filter, page acti
 	}
 	rows, err := query.
 		WithUser(userpg.SelectSummary).
-		WithWalkthrough(func(q *ent.WalkthroughQuery) { q.Select(walkthrough.FieldID, walkthrough.FieldTitle) }).
+		WithWalkthrough(func(q *ent.WalkthroughQuery) { q.Select(walkthrough.FieldID) }).
 		WithComment(func(q *ent.CommentQuery) { q.Select(comment.FieldID, comment.FieldText) }).
 		WithFile(func(q *ent.GameDownloadResourceFileQuery) {
 			q.Select(gamedownloadresourcefile.FieldID, gamedownloadresourcefile.FieldGameDownloadResourceID, gamedownloadresourcefile.FieldFileName, gamedownloadresourcefile.FieldFileSize)

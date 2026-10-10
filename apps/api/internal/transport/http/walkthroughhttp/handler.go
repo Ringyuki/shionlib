@@ -22,43 +22,23 @@ func NewHandler(service *walkthrough.Service, resp *response.Builder) *Handler {
 }
 
 func (h *Handler) Register(api *httpapi.API) {
-	httpapi.Register(api, httpapi.Route{ID: "walkthrough.create", Method: http.MethodPost, Path: "/walkthrough", Summary: "Create a walkthrough", Tags: tags, Access: httpapi.AccessUser}, h.create)
-	httpapi.Register(api, httpapi.Route{ID: "walkthrough.update", Method: http.MethodPatch, Path: "/walkthrough/{id}", Summary: "Replace a walkthrough", Tags: tags, Access: httpapi.AccessUser}, h.update)
+	httpapi.Register(api, httpapi.Route{ID: "walkthrough.write", Method: http.MethodPut, Path: "/walkthrough/game/{id}/mine", Summary: "Write the caller's walkthrough of a game, replacing what they wrote before", Tags: tags, Access: httpapi.AccessUser}, h.write)
 	httpapi.Register(api, httpapi.Route{ID: "walkthrough.get", Method: http.MethodGet, Path: "/walkthrough/{id}", Summary: "Get a walkthrough", Tags: tags}, h.get)
 	httpapi.Register(api, httpapi.Route{ID: "walkthrough.delete", Method: http.MethodDelete, Path: "/walkthrough/{id}", Summary: "Delete a walkthrough", Tags: tags, Access: httpapi.AccessUser}, h.delete)
-	httpapi.Register(api, httpapi.Route{ID: "walkthrough.listByGame", Method: http.MethodGet, Path: "/walkthrough/game/{id}", Summary: "List walkthroughs of a game", Tags: tags}, h.listByGame)
+	httpapi.Register(api, httpapi.Route{ID: "walkthrough.listByGame", Method: http.MethodGet, Path: "/walkthrough/game/{id}", Summary: "List the published walkthroughs of a game, the caller's own first even when it is not published, then by latest update", Tags: tags}, h.listByGame)
 	httpapi.Register(api, httpapi.Route{ID: "walkthrough.listByUser", Method: http.MethodGet, Path: "/user/datas/{id}/walkthroughs", Summary: "List walkthroughs of a user", Tags: tags}, h.listByUser)
 }
 
-func (h *Handler) create(ctx context.Context, in *createWalkthroughInput) (*response.Output[walkthroughDTO], error) {
-	created, err := h.service.Create(ctx, actor.From(ctx), walkthrough.CreateInput{
-		GameID:  in.Body.GameID,
-		Title:   in.Body.Title,
-		Content: in.document,
-		Status:  walkthrough.Status(in.Body.Status),
-	})
+func (h *Handler) write(ctx context.Context, in *writeWalkthroughInput) (*response.Output[walkthroughDTO], error) {
+	written, err := h.service.Write(ctx, actor.From(ctx), in.written())
 	if err != nil {
 		return nil, err
 	}
-	created.Content = nil
-	return response.OK(ctx, h.resp, toWalkthrough(created, h.resp.Now())), nil
+	return response.OK(ctx, h.resp, toWalkthrough(written, h.resp.Now())), nil
 }
 
-func (h *Handler) update(ctx context.Context, in *updateWalkthroughInput) (*response.Output[walkthroughDTO], error) {
-	updated, err := h.service.Update(ctx, actor.From(ctx), in.ID, walkthrough.UpdateInput{
-		Title:   in.Body.Title,
-		Content: in.document,
-		Status:  walkthrough.Status(in.Body.Status),
-	})
-	if err != nil {
-		return nil, err
-	}
-	updated.Content = nil
-	return response.OK(ctx, h.resp, toWalkthrough(updated, h.resp.Now())), nil
-}
-
-func (h *Handler) get(ctx context.Context, in *getWalkthroughInput) (*response.Output[walkthroughDTO], error) {
-	view, err := h.service.Get(ctx, actor.From(ctx), in.ID, in.WithContent == "true")
+func (h *Handler) get(ctx context.Context, in *walkthroughPathInput) (*response.Output[walkthroughDTO], error) {
+	view, err := h.service.Get(ctx, actor.From(ctx), in.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -72,30 +52,25 @@ func (h *Handler) delete(ctx context.Context, in *walkthroughPathInput) (*respon
 	return response.Empty(ctx, h.resp), nil
 }
 
-func (h *Handler) listByGame(ctx context.Context, in *gameWalkthroughsInput) (*response.Output[walkthroughPageDTO], error) {
-	viewer := actor.From(ctx)
-	summaries, total, err := h.service.ListByGame(ctx, viewer, in.ID, statusFilter(in.Status), walkthrough.Page{Number: in.Page, Size: in.PageSize})
+func (h *Handler) listByGame(ctx context.Context, in *walkthroughPathInput) (*response.Output[[]walkthroughSummaryDTO], error) {
+	summaries, err := h.service.ListByGame(ctx, actor.From(ctx), in.ID)
 	if err != nil {
 		return nil, err
 	}
 	now := h.resp.Now()
-	page := walkthroughPageDTO{
-		Items: make([]walkthroughItemDTO, len(summaries)),
-		Meta:  walkthroughPageMetaDTO{PageMeta: response.NewPageMeta(total, len(summaries), in.PageSize, in.Page), ContentLimit: int(viewer.ContentLimit)},
-	}
+	items := make([]walkthroughSummaryDTO, len(summaries))
 	for i, summary := range summaries {
-		page.Items[i] = toItem(summary, now)
+		items[i] = toSummary(summary, now)
 	}
-	return response.OK(ctx, h.resp, page), nil
+	return response.OK(ctx, h.resp, items), nil
 }
 
 func (h *Handler) listByUser(ctx context.Context, in *userWalkthroughsInput) (*response.Output[userWalkthroughPageDTO], error) {
 	viewer := actor.From(ctx)
-	summaries, total, err := h.service.ListByCreator(ctx, viewer, in.ID, statusFilter(in.Status), walkthrough.Page{Number: in.Page, Size: in.PageSize})
+	summaries, total, err := h.service.ListByCreator(ctx, viewer, in.ID, walkthrough.Page{Number: in.Page, Size: in.PageSize})
 	if err != nil {
 		return nil, err
 	}
-	now := h.resp.Now()
 	page := userWalkthroughPageDTO{
 		Items: make([]userWalkthroughDTO, len(summaries)),
 		Meta: userWalkthroughPageMetaDTO{
@@ -105,15 +80,7 @@ func (h *Handler) listByUser(ctx context.Context, in *userWalkthroughsInput) (*r
 		},
 	}
 	for i, summary := range summaries {
-		page.Items[i] = toUserItem(summary, now)
+		page.Items[i] = toUserItem(summary)
 	}
 	return response.OK(ctx, h.resp, page), nil
-}
-
-func statusFilter(value string) *walkthrough.Status {
-	if value == "" {
-		return nil
-	}
-	status := walkthrough.Status(value)
-	return &status
 }

@@ -303,7 +303,7 @@ func TestReviewComment(t *testing.T) {
 }
 
 func (f fixture) walkthrough(status string) moderation.WalkthroughSubject {
-	return f.repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: 4, GameID: 81, Title: "Route guide", Text: "Pick\nA", ReviewPending: true, Game: moderation.GameTitles{JP: "ゲーム"}}, status)
+	return f.repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: 4, GameID: 81, Text: "Pick\nA", ReviewPending: true, Game: moderation.GameTitles{JP: "ゲーム"}}, status)
 }
 
 func TestReviewWalkthrough(t *testing.T) {
@@ -320,7 +320,7 @@ func TestReviewWalkthrough(t *testing.T) {
 			t.Fatal("allowed walkthroughs are published without notices")
 		}
 		request := f.classifier.Reviewed[0]
-		if request.Input != "Game:   ゲーム\nWalkthrough title: \"Route guide\"\nWalkthrough content: \"Pick A\"" || !strings.HasSuffix(request.Instructions, "Default to ALLOW unless there is unmistakable evidence of real-world harm promotion.") {
+		if request.Input != "Game:   ゲーム\nWalkthrough content: \"Pick A\"" || !strings.HasSuffix(request.Instructions, "Default to ALLOW unless there is unmistakable evidence of real-world harm promotion.") {
 			t.Fatalf("unexpected review request %+v", request)
 		}
 	})
@@ -352,14 +352,14 @@ func TestReviewWalkthrough(t *testing.T) {
 		if notice.Type != message.TypeSystem || notice.Tone != message.ToneDestructive || notice.ReceiverID != 4 || *notice.GameID != 81 || notice.CommentID != nil ||
 			notice.Title != "Messages.System.Moderation.Walkthrough.Block.Title" || notice.Content != "Messages.System.Moderation.Walkthrough.Block.ReviewContent" ||
 			*notice.LinkText != "Messages.System.Moderation.Walkthrough.Block.LinkText" || *notice.LinkURL != "/game/81/walkthrough/"+strconv.Itoa(published.ID) ||
-			!maps.Equal(notice.Meta, message.Meta{"top_category": moderation.CategoryIllicit, "reason": "real harm", "evidence": "quote", "walkthrough_title": "Route guide", "walkthrough_id": published.ID}) {
+			!maps.Equal(notice.Meta, message.Meta{"top_category": moderation.CategoryIllicit, "reason": "real harm", "evidence": "quote", "walkthrough_id": published.ID, "game_title_jp": "ゲーム", "game_title_zh": "", "game_title_en": ""}) {
 			t.Fatalf("unexpected notice %+v %v", notice, notice.Meta)
 		}
 	})
 
 	t.Run("walkthroughs no longer awaiting review are skipped", func(t *testing.T) {
 		f := newFixture()
-		hidden := f.repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: 4, GameID: 81, Title: "Route guide", Text: "x"}, moderationtest.WalkthroughHidden)
+		hidden := f.repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: 4, GameID: 81, Text: "x"}, moderationtest.WalkthroughHidden)
 		f.classifier.Verdict = moderation.Verdict{Decision: moderation.DecisionAllow, TopCategory: moderation.CategoryHarassment}
 		if err := f.service.ReviewWalkthrough(ctx, hidden.ID); err != nil {
 			t.Fatal(err)
@@ -440,7 +440,7 @@ func TestScreeningHelpers(t *testing.T) {
 func TestRequeueStaleReviews(t *testing.T) {
 	f := newFixture()
 	stuck := f.walkthrough(moderationtest.WalkthroughHidden)
-	f.repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: 4, GameID: 81, Title: "done", Text: "x"}, moderationtest.WalkthroughPublished)
+	f.repo.SeedWalkthrough(moderation.WalkthroughSubject{CreatorID: 4, GameID: 81, Text: "x"}, moderationtest.WalkthroughPublished)
 	pending := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 1, GameID: 81, Text: "a"}, moderationtest.CommentPending)
 	f.repo.SeedComment(moderation.CommentSubject{CreatorID: 1, GameID: 81, Text: "b"}, moderationtest.CommentVisible)
 	if err := f.service.RequeueStaleReviews(context.Background(), time.Now().Add(-time.Hour)); err != nil {

@@ -63,7 +63,7 @@ func optional[T any](value T) *T {
 func sampleEntry() walkthrough.AdminEntry {
 	return walkthrough.AdminEntry{
 		Walkthrough: walkthrough.Walkthrough{
-			ID: 4, GameID: 10, Title: "Route guide", Text: "guide", Lang: optional("zh"),
+			ID: 4, GameID: 10, Text: "guide", Lang: optional("zh"),
 			Created: apitest.Now, Updated: apitest.Now, Edited: true, Status: walkthrough.StatusHidden, CreatorID: 1,
 		},
 		Creator:      user.Summary{ID: 1, Name: "alice"},
@@ -87,18 +87,18 @@ func TestAdminListShapeAndFilters(t *testing.T) {
 	plain.ID, plain.Lang, plain.Edited, plain.Status, plain.Moderation = 5, nil, false, walkthrough.StatusPublished, nil
 	e.store.entries, e.store.total = []walkthrough.AdminEntry{sampleEntry(), plain}, 2
 
-	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/walkthroughs?pageSize=5&search=guide&sortBy=title&sortOrder=asc&status=HIDDEN&creatorId=1&gameId=10", As: &admin})
+	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/walkthroughs?pageSize=5&search=guide&sortBy=updated&sortOrder=asc&status=HIDDEN&creatorId=1&gameId=10", As: &admin})
 	e.server.Expect(resp, http.StatusOK, 0)
 	want := `{"items":[` +
-		`{"id":4,"title":"Route guide","text":"guide","lang":"zh","edited":true,"status":"HIDDEN","created":` + stamp + `,"updated":` + stamp + `,"creator":` + adminCreator + `,"game":` + adminGame + `,` +
+		`{"id":4,"text":"guide","lang":"zh","edited":true,"status":"HIDDEN","created":` + stamp + `,"updated":` + stamp + `,"creator":` + adminCreator + `,"game":` + adminGame + `,` +
 		`"moderation":{"id":2,"decision":"BLOCK","model":"gpt","top_category":"SPAM","max_score":0.75,"reason":"ads","created_at":` + stamp + `}},` +
-		`{"id":5,"title":"Route guide","text":"guide","lang":null,"edited":false,"status":"PUBLISHED","created":` + stamp + `,"updated":` + stamp + `,"creator":` + adminCreator + `,"game":` + adminGame + `}` +
+		`{"id":5,"text":"guide","lang":null,"edited":false,"status":"PUBLISHED","created":` + stamp + `,"updated":` + stamp + `,"creator":` + adminCreator + `,"game":` + adminGame + `}` +
 		`],"meta":{"totalItems":2,"itemCount":2,"itemsPerPage":5,"totalPages":1,"currentPage":1}}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected page\n got %s\nwant %s", resp.Data, want)
 	}
 	filter := e.store.filter
-	if filter.Search != "guide" || filter.SortBy != walkthrough.SortByTitle || filter.Descending || filter.Status == nil || *filter.Status != walkthrough.StatusHidden ||
+	if filter.Search != "guide" || filter.SortBy != walkthrough.SortByUpdated || filter.Descending || filter.Status == nil || *filter.Status != walkthrough.StatusHidden ||
 		filter.CreatorID == nil || *filter.CreatorID != 1 || filter.GameID == nil || *filter.GameID != 10 || e.store.page != (walkthrough.Page{Number: 1, Size: 5}) {
 		t.Fatalf("unexpected filter %+v page %+v", filter, e.store.page)
 	}
@@ -107,7 +107,7 @@ func TestAdminListShapeAndFilters(t *testing.T) {
 	if filter := e.store.filter; filter.SortBy != walkthrough.SortByCreated || !filter.Descending || filter.Status != nil || filter.CreatorID != nil || filter.GameID != nil {
 		t.Fatalf("unexpected defaults %+v", filter)
 	}
-	for _, query := range []string{"status=GONE", "sortBy=lang", "sortOrder=DESC", "page=0"} {
+	for _, query := range []string{"status=GONE", "sortBy=title", "sortOrder=DESC", "page=0"} {
 		e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/walkthroughs?" + query, As: &admin}), http.StatusUnprocessableEntity, 100101)
 	}
 }
@@ -130,14 +130,16 @@ func TestAdminRoutesRequireAdmins(t *testing.T) {
 func TestAdminDetailShape(t *testing.T) {
 	e := setupAdmin(t)
 	entry := sampleEntry()
-	entry.Content = json.RawMessage(`{"type":"doc","content":[{"type":"paragraph"}]}`)
+	entry.Note = json.RawMessage(`{"type":"doc","content":[{"type":"paragraph"}]}`)
+	entry.Routes = []walkthrough.Route{{Key: "a", Name: "Mugi", Requires: []string{"b"}, Steps: []walkthrough.Step{{Kind: walkthrough.StepSave, Slot: "01"}}}}
 	e.store.details[4] = walkthrough.AdminDetail{AdminEntry: entry, Moderations: []moderation.Event{{
 		ID: 2, Auditor: moderation.AuditorReview, Model: "gpt", Decision: moderation.DecisionBlock, TopCategory: moderation.CategorySpam,
 		Categories: json.RawMessage(`{"spam":true}`), MaxScore: optional(0.0), Evidence: optional("link"), Created: apitest.Now,
 	}}}
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/walkthroughs/4", As: &admin})
 	e.server.Expect(resp, http.StatusOK, 0)
-	want := `{"id":4,"title":"Route guide","text":"guide","content":{"type":"doc","content":[{"type":"paragraph"}]},"lang":"zh","edited":true,"status":"HIDDEN",` +
+	want := `{"id":4,"text":"guide","note":{"type":"doc","content":[{"type":"paragraph"}]},` +
+		`"routes":[{"key":"a","name":"Mugi","characters":[],"requires":["b"],"condition":"","ending":"","steps":[{"kind":"save","text":"","remark":"","slot":"01"}]}],"lang":"zh","edited":true,"status":"HIDDEN",` +
 		`"created":` + stamp + `,"updated":` + stamp + `,"creator":` + adminCreator + `,"game":` + adminGame + `,"moderations":[` +
 		`{"id":2,"audit_by":2,"model":"gpt","decision":"BLOCK","top_category":"SPAM","categories_json":{"spam":true},"scores_json":null,"max_score":0,"evidence":"link","created_at":` + stamp + `}]}`
 	if string(resp.Data) != want {
@@ -148,8 +150,8 @@ func TestAdminDetailShape(t *testing.T) {
 
 func TestAdminStatusAndRescan(t *testing.T) {
 	e := setupAdmin(t)
-	published := e.repo.Seed(walkthrough.Walkthrough{GameID: 10, Title: "guide", CreatorID: 1, Status: walkthrough.StatusPublished})
-	deleted := e.repo.Seed(walkthrough.Walkthrough{GameID: 10, Title: "gone", CreatorID: 1, Status: walkthrough.StatusDeleted})
+	published := e.repo.Seed(walkthrough.Walkthrough{GameID: 10, CreatorID: 1, Status: walkthrough.StatusPublished})
+	deleted := e.repo.Seed(walkthrough.Walkthrough{GameID: 10, CreatorID: 1, Status: walkthrough.StatusDeleted})
 	path := "/admin/walkthroughs/" + strconv.Itoa(published.ID)
 
 	resp := e.server.Do(apitest.Request{Method: http.MethodPatch, Path: path + "/status", As: &admin, Body: map[string]any{"status": "HIDDEN"}})

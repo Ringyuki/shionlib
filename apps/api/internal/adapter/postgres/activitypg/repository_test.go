@@ -61,7 +61,7 @@ func (f fixture) comment(gameID int, status comment.Status) int {
 
 func (f fixture) walkthrough(gameID int, status entwalkthrough.Status) int {
 	f.t.Helper()
-	return f.db.Ent.Walkthrough.Create().SetGameID(gameID).SetCreatorID(f.user).SetTitle("Route guide").SetContent([]byte(`{}`)).SetText("guide").SetStatus(status).SaveX(f.ctx).ID
+	return f.db.Ent.Walkthrough.Create().SetGameID(gameID).SetCreatorID(f.user).SetText("guide").SetStatus(status).SaveX(f.ctx).ID
 }
 
 func (f fixture) list(filter activity.Filter, page activity.Page) ([]activity.Entry, int) {
@@ -83,7 +83,7 @@ func TestFeedHoldsWhatIsPublicNow(t *testing.T) {
 	_, onServer := f.file(gameID, download.FileOnServer, true)
 	_, unpublished := f.file(gameID, download.FileInObjectStore, false)
 	accepted, pending := f.comment(gameID, comment.StatusVisible), f.comment(gameID, comment.StatusPending)
-	published, draft := f.walkthrough(gameID, entwalkthrough.StatusPUBLISHED), f.walkthrough(gameID, entwalkthrough.StatusDRAFT)
+	published, draft := f.walkthrough(gameID, entwalkthrough.StatusPUBLISHED), f.walkthrough(f.db.Game(t), entwalkthrough.StatusDRAFT)
 
 	f.record(activity.NewActivity{Type: activity.TypeFileUploadToServer, GameID: &gameID, FileID: &stored})
 	f.record(activity.NewActivity{Type: activity.TypeFileCheckOK, GameID: &gameID, FileID: &stored})
@@ -101,7 +101,7 @@ func TestFeedHoldsWhatIsPublicNow(t *testing.T) {
 		t.Fatalf("only a stored file of a published resource, an accepted comment and a published walkthrough belong in the feed: total=%d %+v", total, entries)
 	}
 	newest, comments, files := entries[0], entries[1], entries[2]
-	if newest.Type != activity.TypeWalkthroughCreate || newest.Walkthrough == nil || newest.Walkthrough.ID != published || newest.Walkthrough.Title != "Route guide" || newest.User.ID != f.user {
+	if newest.Type != activity.TypeWalkthroughCreate || newest.Walkthrough == nil || newest.Walkthrough.ID != published || newest.User.ID != f.user {
 		t.Fatalf("walkthrough entry: %+v", newest)
 	}
 	if comments.Type != activity.TypeComment || comments.Comment == nil || comments.Comment.ID != accepted {

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/walkthrough"
@@ -16,9 +17,37 @@ type Env struct {
 	NewUser      func(t *testing.T) int
 	NewGame      func(t *testing.T) int
 	NewRatedGame func(t *testing.T) int
+	SetUpdated   func(t *testing.T, id int, at time.Time)
 }
 
-var content = json.RawMessage(`{"root":{"type":"root","children":[{"type":"paragraph","children":[{"type":"text","text":"guide"}]}]}}`)
+var note = json.RawMessage(`{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"guide"}]}]}`)
+
+var routes = []walkthrough.Route{
+	{
+		Key:        "a1",
+		Name:       "むぎ",
+		Characters: []int{7, 9},
+		Requires:   []string{},
+		Steps: []walkthrough.Step{
+			{Kind: walkthrough.StepNote, Text: "【START】"},
+			{Kind: walkthrough.StepChoice, Text: "左"},
+			{Kind: walkthrough.StepSave, Slot: "01"},
+			{Kind: walkthrough.StepGap},
+			{Kind: walkthrough.StepChoice, Text: "メイド", Remark: "むぎ＆緋華"},
+		},
+		Ending: "むぎEND",
+	},
+	{
+		Key:        "b2",
+		Name:       "ハーレム",
+		Characters: []int{},
+		Requires:   []string{"a1"},
+		Condition:  "共通終了時",
+		Steps:      []walkthrough.Step{{Kind: walkthrough.StepLoad, Slot: "01"}},
+	},
+}
+
+var day = time.Date(2026, 3, 1, 0, 0, 0, 0, time.UTC)
 
 func sameJSON(t *testing.T, a, b json.RawMessage) bool {
 	t.Helper()
@@ -32,12 +61,13 @@ func sameJSON(t *testing.T, a, b json.RawMessage) bool {
 	return reflect.DeepEqual(left, right)
 }
 
-func create(ctx context.Context, t *testing.T, repo walkthrough.Repository, gameID, creatorID int, status walkthrough.Status) walkthrough.Walkthrough {
+func create(ctx context.Context, t *testing.T, env Env, gameID, creatorID int, status walkthrough.Status, updated time.Time) walkthrough.Walkthrough {
 	t.Helper()
-	created, err := repo.Create(ctx, walkthrough.NewWalkthrough{GameID: gameID, Title: "Guide", Content: content, Text: "guide", Excerpt: "the first words", Status: status, CreatorID: creatorID})
+	created, err := env.Repo.Create(ctx, walkthrough.NewWalkthrough{GameID: gameID, Note: note, Routes: routes, Text: "guide", Status: status, CreatorID: creatorID})
 	if err != nil {
 		t.Fatal(err)
 	}
+	env.SetUpdated(t, created.ID, updated)
 	return created
 }
 
@@ -60,16 +90,22 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if _, err := env.Repo.Lock(ctx, 987654); !errors.Is(err, walkthrough.ErrNotFound) {
 			t.Fatalf("lock: %v", err)
 		}
+		if _, err := env.Repo.LockWritten(ctx, 987654, 987654); !errors.Is(err, walkthrough.ErrNotFound) {
+			t.Fatalf("lock written: %v", err)
+		}
+		if _, err := env.Repo.Written(ctx, 987654, 987654); !errors.Is(err, walkthrough.ErrNotFound) {
+			t.Fatalf("written: %v", err)
+		}
 		if _, err := env.Repo.View(ctx, 987654); !errors.Is(err, walkthrough.ErrNotFound) {
 			t.Fatalf("view: %v", err)
 		}
-		if err := env.Repo.Update(ctx, 987654, walkthrough.Changes{Title: "x", Content: content, Text: "x", Status: walkthrough.StatusDraft}); !errors.Is(err, walkthrough.ErrNotFound) {
+		if err := env.Repo.Update(ctx, 987654, walkthrough.Changes{Text: "x", Status: walkthrough.StatusDraft}); !errors.Is(err, walkthrough.ErrNotFound) {
 			t.Fatalf("update: %v", err)
 		}
 		if err := env.Repo.SetStatus(ctx, 987654, walkthrough.StatusDeleted); !errors.Is(err, walkthrough.ErrNotFound) {
 			t.Fatalf("set status: %v", err)
 		}
-		if _, err := env.Repo.Create(ctx, walkthrough.NewWalkthrough{GameID: 987654, Title: "x", Content: content, Text: "x", Status: walkthrough.StatusDraft, CreatorID: env.NewUser(t)}); !errors.Is(err, game.ErrNotFound) {
+		if _, err := env.Repo.Create(ctx, walkthrough.NewWalkthrough{GameID: 987654, Text: "x", Status: walkthrough.StatusDraft, CreatorID: env.NewUser(t)}); !errors.Is(err, game.ErrNotFound) {
 			t.Fatalf("create for missing game: %v", err)
 		}
 	})
@@ -78,7 +114,7 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		env := newEnv(t)
 		author, gameID := env.NewUser(t), env.NewGame(t)
 		lang := "jp"
-		created, err := env.Repo.Create(ctx, walkthrough.NewWalkthrough{GameID: gameID, Title: "攻略", Content: content, Text: "guide", Excerpt: "gui", Lang: &lang, Status: walkthrough.StatusHidden, CreatorID: author})
+		created, err := env.Repo.Create(ctx, walkthrough.NewWalkthrough{GameID: gameID, Note: note, Routes: routes, Text: "guide", Lang: &lang, Status: walkthrough.StatusHidden, CreatorID: author, ReviewPending: true})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -86,78 +122,117 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if view.ID != created.ID || view.GameID != gameID || view.Title != "攻略" || view.Text != "guide" || view.Excerpt != "gui" || view.Lang == nil || *view.Lang != "jp" ||
-			view.Status != walkthrough.StatusHidden || view.Edited || view.CreatorID != author || view.Creator.ID != author || !sameJSON(t, view.Content, content) || view.Created.IsZero() {
+		if view.ID != created.ID || view.GameID != gameID || view.Text != "guide" || view.Lang == nil || *view.Lang != "jp" || view.Status != walkthrough.StatusHidden ||
+			!view.ReviewPending || view.Edited || view.CreatorID != author || view.Creator.ID != author || !sameJSON(t, view.Note, note) || view.Created.IsZero() {
 			t.Fatalf("unexpected view %+v", view)
 		}
-		edited := json.RawMessage(`{"root":{"type":"root","children":[]}}`)
-		if err := env.Repo.Update(ctx, created.ID, walkthrough.Changes{Title: "New", Content: edited, Text: "new", Excerpt: "ne", Status: walkthrough.StatusDraft}); err != nil {
+		if !reflect.DeepEqual(view.Routes, routes) {
+			t.Fatalf("routes are stored as written\n got %+v\nwant %+v", view.Routes, routes)
+		}
+		shorter := routes[1:]
+		if err := env.Repo.Update(ctx, created.ID, walkthrough.Changes{Routes: shorter, Text: "new", Status: walkthrough.StatusDraft}); err != nil {
 			t.Fatal(err)
 		}
 		got, err := env.Repo.Lock(ctx, created.ID)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if got.Title != "New" || got.Text != "new" || got.Excerpt != "ne" || got.Lang != nil || got.Status != walkthrough.StatusDraft || !got.Edited || !sameJSON(t, got.Content, edited) {
+		if got.Text != "new" || got.Lang != nil || got.Note != nil || got.Status != walkthrough.StatusDraft || got.ReviewPending || !got.Edited || !reflect.DeepEqual(got.Routes, shorter) {
 			t.Fatalf("unexpected walkthrough after update %+v", got)
+		}
+		if err := env.Repo.Update(ctx, created.ID, walkthrough.Changes{Note: note, Status: walkthrough.StatusDraft}); err != nil {
+			t.Fatal(err)
+		}
+		if bare, _ := env.Repo.Get(ctx, created.ID); len(bare.Routes) != 0 || !sameJSON(t, bare.Note, note) {
+			t.Fatalf("a walkthrough may hold a note alone: %+v", bare)
+		}
+		if err := env.Repo.MarkReviewPending(ctx, created.ID); err != nil {
+			t.Fatal(err)
 		}
 		if err := env.Repo.SetStatus(ctx, created.ID, walkthrough.StatusDeleted); err != nil {
 			t.Fatal(err)
 		}
-		if got, _ := env.Repo.Get(ctx, created.ID); got.Status != walkthrough.StatusDeleted {
+		if got, _ := env.Repo.Get(ctx, created.ID); got.Status != walkthrough.StatusDeleted || got.ReviewPending {
 			t.Fatalf("status not updated: %+v", got)
 		}
 	})
 
-	t.Run("game listings apply visibility newest first", func(t *testing.T) {
+	t.Run("an author has one walkthrough per game", func(t *testing.T) {
 		env := newEnv(t)
-		gameID, author, viewer := env.NewGame(t), env.NewUser(t), env.NewUser(t)
-		published := create(ctx, t, env.Repo, gameID, author, walkthrough.StatusPublished)
-		draft := create(ctx, t, env.Repo, gameID, author, walkthrough.StatusDraft)
-		create(ctx, t, env.Repo, gameID, author, walkthrough.StatusHidden)
-		ownHidden := create(ctx, t, env.Repo, gameID, viewer, walkthrough.StatusHidden)
-		create(ctx, t, env.Repo, gameID, viewer, walkthrough.StatusDeleted)
-		create(ctx, t, env.Repo, env.NewGame(t), author, walkthrough.StatusPublished)
+		author, other, gameID := env.NewUser(t), env.NewUser(t), env.NewGame(t)
+		first := create(ctx, t, env, gameID, author, walkthrough.StatusDraft, day)
+		if _, err := env.Repo.Create(ctx, walkthrough.NewWalkthrough{GameID: gameID, Text: "again", Status: walkthrough.StatusDraft, CreatorID: author}); !errors.Is(err, walkthrough.ErrAlreadyWritten) {
+			t.Fatalf("second walkthrough of the same author: %v", err)
+		}
+		create(ctx, t, env, gameID, other, walkthrough.StatusDraft, day)
+		create(ctx, t, env, env.NewGame(t), author, walkthrough.StatusDraft, day)
 
-		page := walkthrough.Page{Number: 1, Size: 10}
-		guest, total, err := env.Repo.ListByGame(ctx, walkthrough.GameFilter{GameID: gameID, Public: []walkthrough.Status{walkthrough.StatusPublished}}, page)
-		if err != nil || total != 1 || !reflect.DeepEqual(ids(guest), []int{published.ID}) {
-			t.Fatalf("guest listing %v %d %v", ids(guest), total, err)
+		locked, err := env.Repo.LockWritten(ctx, gameID, author)
+		if err != nil || locked.ID != first.ID || !reflect.DeepEqual(locked.Routes, routes) {
+			t.Fatalf("lock written %+v %v", locked, err)
 		}
-		own, total, _ := env.Repo.ListByGame(ctx, walkthrough.GameFilter{GameID: gameID, Public: []walkthrough.Status{walkthrough.StatusPublished}, ViewerID: viewer}, page)
-		if total != 2 || !reflect.DeepEqual(ids(own), []int{ownHidden.ID, published.ID}) {
-			t.Fatalf("viewer listing %v", ids(own))
+		written, err := env.Repo.Written(ctx, gameID, author)
+		if err != nil || written.ID != first.ID || written.RouteCount != len(routes) || written.Status != walkthrough.StatusDraft || written.Creator.ID != author || written.GameID != gameID {
+			t.Fatalf("written %+v %v", written, err)
 		}
-		staff, total, _ := env.Repo.ListByGame(ctx, walkthrough.GameFilter{GameID: gameID, Public: []walkthrough.Status{walkthrough.StatusPublished, walkthrough.StatusDraft}, ViewerID: 987654}, page)
-		if total != 2 || !reflect.DeepEqual(ids(staff), []int{draft.ID, published.ID}) {
-			t.Fatalf("staff listing %v", ids(staff))
+
+		if err := env.Repo.SetStatus(ctx, first.ID, walkthrough.StatusDeleted); err != nil {
+			t.Fatal(err)
 		}
-		hidden := walkthrough.StatusHidden
-		filtered, total, _ := env.Repo.ListByGame(ctx, walkthrough.GameFilter{GameID: gameID, Status: &hidden, Public: []walkthrough.Status{walkthrough.StatusPublished}, ViewerID: viewer}, page)
-		if total != 1 || !reflect.DeepEqual(ids(filtered), []int{ownHidden.ID}) {
-			t.Fatalf("status filter %v", ids(filtered))
+		if _, err := env.Repo.Written(ctx, gameID, author); !errors.Is(err, walkthrough.ErrNotFound) {
+			t.Fatalf("a deleted walkthrough is not the written one: %v", err)
 		}
-		second, total, _ := env.Repo.ListByGame(ctx, walkthrough.GameFilter{GameID: gameID, Public: []walkthrough.Status{walkthrough.StatusPublished}, ViewerID: viewer}, walkthrough.Page{Number: 2, Size: 1})
-		if total != 2 || !reflect.DeepEqual(ids(second), []int{published.ID}) || second[0].Creator.ID != author || second[0].Title != "Guide" || second[0].Excerpt != "the first words" {
-			t.Fatalf("second page %+v", second)
+		again := create(ctx, t, env, gameID, author, walkthrough.StatusDraft, day)
+		if locked, err := env.Repo.LockWritten(ctx, gameID, author); err != nil || locked.ID != again.ID {
+			t.Fatalf("a new walkthrough may follow a deleted one: %+v %v", locked, err)
 		}
 	})
 
-	t.Run("creator listings filter statuses and rated games", func(t *testing.T) {
+	t.Run("game listings hold what is published, latest update first", func(t *testing.T) {
+		env := newEnv(t)
+		gameID := env.NewGame(t)
+		old := create(ctx, t, env, gameID, env.NewUser(t), walkthrough.StatusPublished, day)
+		latest := create(ctx, t, env, gameID, env.NewUser(t), walkthrough.StatusPublished, day.Add(2*time.Hour))
+		middle := create(ctx, t, env, gameID, env.NewUser(t), walkthrough.StatusPublished, day.Add(time.Hour))
+		create(ctx, t, env, gameID, env.NewUser(t), walkthrough.StatusDraft, day.Add(3*time.Hour))
+		create(ctx, t, env, gameID, env.NewUser(t), walkthrough.StatusHidden, day.Add(3*time.Hour))
+		create(ctx, t, env, gameID, env.NewUser(t), walkthrough.StatusDeleted, day.Add(3*time.Hour))
+		create(ctx, t, env, env.NewGame(t), env.NewUser(t), walkthrough.StatusPublished, day.Add(3*time.Hour))
+
+		listed, err := env.Repo.ListPublished(ctx, gameID, 10)
+		if err != nil || !reflect.DeepEqual(ids(listed), []int{latest.ID, middle.ID, old.ID}) {
+			t.Fatalf("listing %v %v", ids(listed), err)
+		}
+		if listed[0].RouteCount != len(routes) || listed[0].Creator.ID == 0 || !listed[0].Updated.Equal(day.Add(2*time.Hour)) || listed[0].GameID != gameID {
+			t.Fatalf("unexpected summary %+v", listed[0])
+		}
+		if capped, _ := env.Repo.ListPublished(ctx, gameID, 2); !reflect.DeepEqual(ids(capped), []int{latest.ID, middle.ID}) {
+			t.Fatalf("capped listing %v", ids(capped))
+		}
+	})
+
+	t.Run("creator listings filter statuses and rated games, unpublished first", func(t *testing.T) {
 		env := newEnv(t)
 		author := env.NewUser(t)
-		safe, rated := env.NewGame(t), env.NewRatedGame(t)
-		first := create(ctx, t, env.Repo, safe, author, walkthrough.StatusPublished)
-		onRated := create(ctx, t, env.Repo, rated, author, walkthrough.StatusPublished)
-		draft := create(ctx, t, env.Repo, safe, author, walkthrough.StatusDraft)
+		first := create(ctx, t, env, env.NewGame(t), author, walkthrough.StatusPublished, day)
+		onRated := create(ctx, t, env, env.NewRatedGame(t), author, walkthrough.StatusPublished, day.Add(time.Hour))
+		draft := create(ctx, t, env, env.NewGame(t), author, walkthrough.StatusDraft, day.Add(-time.Hour))
+		hidden := create(ctx, t, env, env.NewGame(t), author, walkthrough.StatusHidden, day.Add(-2*time.Hour))
+		create(ctx, t, env, env.NewGame(t), author, walkthrough.StatusDeleted, day)
+		create(ctx, t, env, env.NewGame(t), env.NewUser(t), walkthrough.StatusPublished, day)
 
 		page := walkthrough.Page{Number: 1, Size: 10}
 		public, total, err := env.Repo.ListByCreator(ctx, walkthrough.CreatorFilter{CreatorID: author, Statuses: []walkthrough.Status{walkthrough.StatusPublished}}, page)
 		if err != nil || total != 2 || !reflect.DeepEqual(ids(public), []int{onRated.ID, first.ID}) {
 			t.Fatalf("public listing %v %v", ids(public), err)
 		}
-		strict, total, _ := env.Repo.ListByCreator(ctx, walkthrough.CreatorFilter{CreatorID: author, Statuses: []walkthrough.Status{walkthrough.StatusPublished, walkthrough.StatusDraft}, ExcludeRated: true}, page)
-		if total != 2 || !reflect.DeepEqual(ids(strict), []int{draft.ID, first.ID}) {
+		own := []walkthrough.Status{walkthrough.StatusPublished, walkthrough.StatusDraft, walkthrough.StatusHidden}
+		all, total, _ := env.Repo.ListByCreator(ctx, walkthrough.CreatorFilter{CreatorID: author, Statuses: own}, page)
+		if total != 4 || !reflect.DeepEqual(ids(all), []int{draft.ID, hidden.ID, onRated.ID, first.ID}) {
+			t.Fatalf("own listing %v", ids(all))
+		}
+		strict, total, _ := env.Repo.ListByCreator(ctx, walkthrough.CreatorFilter{CreatorID: author, Statuses: own, ExcludeRated: true}, walkthrough.Page{Number: 2, Size: 2})
+		if total != 3 || !reflect.DeepEqual(ids(strict), []int{first.ID}) || strict[0].RouteCount != len(routes) || strict[0].Creator.ID != author {
 			t.Fatalf("strict listing %v", ids(strict))
 		}
 	})

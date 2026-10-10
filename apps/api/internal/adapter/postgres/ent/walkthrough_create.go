@@ -33,15 +33,15 @@ func (_c *WalkthroughCreate) SetGameID(v int) *WalkthroughCreate {
 	return _c
 }
 
-// SetTitle sets the "title" field.
-func (_c *WalkthroughCreate) SetTitle(v string) *WalkthroughCreate {
-	_c.mutation.SetTitle(v)
+// SetNote sets the "note" field.
+func (_c *WalkthroughCreate) SetNote(v jsontext.Value) *WalkthroughCreate {
+	_c.mutation.SetNote(v)
 	return _c
 }
 
-// SetContent sets the "content" field.
-func (_c *WalkthroughCreate) SetContent(v jsontext.Value) *WalkthroughCreate {
-	_c.mutation.SetContent(v)
+// SetRoutes sets the "routes" field.
+func (_c *WalkthroughCreate) SetRoutes(v jsontext.Value) *WalkthroughCreate {
+	_c.mutation.SetRoutes(v)
 	return _c
 }
 
@@ -55,20 +55,6 @@ func (_c *WalkthroughCreate) SetText(v string) *WalkthroughCreate {
 func (_c *WalkthroughCreate) SetNillableText(v *string) *WalkthroughCreate {
 	if v != nil {
 		_c.SetText(*v)
-	}
-	return _c
-}
-
-// SetExcerpt sets the "excerpt" field.
-func (_c *WalkthroughCreate) SetExcerpt(v string) *WalkthroughCreate {
-	_c.mutation.SetExcerpt(v)
-	return _c
-}
-
-// SetNillableExcerpt sets the "excerpt" field if the given value is not nil.
-func (_c *WalkthroughCreate) SetNillableExcerpt(v *string) *WalkthroughCreate {
-	if v != nil {
-		_c.SetExcerpt(*v)
 	}
 	return _c
 }
@@ -248,10 +234,6 @@ func (_c *WalkthroughCreate) defaults() {
 		v := walkthrough.DefaultText
 		_c.mutation.SetText(v)
 	}
-	if _, ok := _c.mutation.Excerpt(); !ok {
-		v := walkthrough.DefaultExcerpt
-		_c.mutation.SetExcerpt(v)
-	}
 	if _, ok := _c.mutation.Created(); !ok {
 		v := walkthrough.DefaultCreated()
 		_c.mutation.SetCreated(v)
@@ -279,22 +261,8 @@ func (_c *WalkthroughCreate) check() error {
 	if _, ok := _c.mutation.GameID(); !ok {
 		return &ValidationError{Name: "game_id", err: errors.New(`ent: missing required field "Walkthrough.game_id"`)}
 	}
-	if _, ok := _c.mutation.Title(); !ok {
-		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Walkthrough.title"`)}
-	}
-	if v, ok := _c.mutation.Title(); ok {
-		if err := walkthrough.TitleValidator(v); err != nil {
-			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Walkthrough.title": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Content(); !ok {
-		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "Walkthrough.content"`)}
-	}
 	if _, ok := _c.mutation.Text(); !ok {
 		return &ValidationError{Name: "text", err: errors.New(`ent: missing required field "Walkthrough.text"`)}
-	}
-	if _, ok := _c.mutation.Excerpt(); !ok {
-		return &ValidationError{Name: "excerpt", err: errors.New(`ent: missing required field "Walkthrough.excerpt"`)}
 	}
 	if v, ok := _c.mutation.Lang(); ok {
 		if err := walkthrough.LangValidator(v); err != nil {
@@ -360,21 +328,17 @@ func (_c *WalkthroughCreate) createSpec() (*Walkthrough, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := _c.mutation.Title(); ok {
-		_spec.SetField(walkthrough.FieldTitle, field.TypeString, value)
-		_node.Title = value
+	if value, ok := _c.mutation.Note(); ok {
+		_spec.SetField(walkthrough.FieldNote, field.TypeJSON, value)
+		_node.Note = value
 	}
-	if value, ok := _c.mutation.Content(); ok {
-		_spec.SetField(walkthrough.FieldContent, field.TypeJSON, value)
-		_node.Content = value
+	if value, ok := _c.mutation.Routes(); ok {
+		_spec.SetField(walkthrough.FieldRoutes, field.TypeJSON, value)
+		_node.Routes = value
 	}
 	if value, ok := _c.mutation.Text(); ok {
 		_spec.SetField(walkthrough.FieldText, field.TypeString, value)
 		_node.Text = value
-	}
-	if value, ok := _c.mutation.Excerpt(); ok {
-		_spec.SetField(walkthrough.FieldExcerpt, field.TypeString, value)
-		_node.Excerpt = value
 	}
 	if value, ok := _c.mutation.Lang(); ok {
 		_spec.SetField(walkthrough.FieldLang, field.TypeString, value)
@@ -530,27 +494,33 @@ func (u *WalkthroughUpsert) UpdateGameID() *WalkthroughUpsert {
 	return u
 }
 
-// SetTitle sets the "title" field.
-func (u *WalkthroughUpsert) SetTitle(v string) *WalkthroughUpsert {
-	u.Set(walkthrough.FieldTitle, v)
+// SetNote sets the "note" field.
+func (u *WalkthroughUpsert) SetNote(v jsontext.Value) *WalkthroughUpsert {
+	u.Set(walkthrough.FieldNote, v)
 	return u
 }
 
-// UpdateTitle sets the "title" field to the value that was provided on create.
-func (u *WalkthroughUpsert) UpdateTitle() *WalkthroughUpsert {
-	u.SetExcluded(walkthrough.FieldTitle)
+// UpdateNote sets the "note" field to the value that was provided on create.
+func (u *WalkthroughUpsert) UpdateNote() *WalkthroughUpsert {
+	u.SetExcluded(walkthrough.FieldNote)
 	return u
 }
 
-// SetContent sets the "content" field.
-func (u *WalkthroughUpsert) SetContent(v jsontext.Value) *WalkthroughUpsert {
-	u.Set(walkthrough.FieldContent, v)
+// ClearNote clears the value of the "note" field.
+func (u *WalkthroughUpsert) ClearNote() *WalkthroughUpsert {
+	u.SetNull(walkthrough.FieldNote)
 	return u
 }
 
-// UpdateContent sets the "content" field to the value that was provided on create.
-func (u *WalkthroughUpsert) UpdateContent() *WalkthroughUpsert {
-	u.SetExcluded(walkthrough.FieldContent)
+// SetRoutes sets the "routes" field.
+func (u *WalkthroughUpsert) SetRoutes(v jsontext.Value) *WalkthroughUpsert {
+	u.Set(walkthrough.FieldRoutes, v)
+	return u
+}
+
+// UpdateRoutes sets the "routes" field to the value that was provided on create.
+func (u *WalkthroughUpsert) UpdateRoutes() *WalkthroughUpsert {
+	u.SetExcluded(walkthrough.FieldRoutes)
 	return u
 }
 
@@ -563,18 +533,6 @@ func (u *WalkthroughUpsert) SetText(v string) *WalkthroughUpsert {
 // UpdateText sets the "text" field to the value that was provided on create.
 func (u *WalkthroughUpsert) UpdateText() *WalkthroughUpsert {
 	u.SetExcluded(walkthrough.FieldText)
-	return u
-}
-
-// SetExcerpt sets the "excerpt" field.
-func (u *WalkthroughUpsert) SetExcerpt(v string) *WalkthroughUpsert {
-	u.Set(walkthrough.FieldExcerpt, v)
-	return u
-}
-
-// UpdateExcerpt sets the "excerpt" field to the value that was provided on create.
-func (u *WalkthroughUpsert) UpdateExcerpt() *WalkthroughUpsert {
-	u.SetExcluded(walkthrough.FieldExcerpt)
 	return u
 }
 
@@ -721,31 +679,38 @@ func (u *WalkthroughUpsertOne) UpdateGameID() *WalkthroughUpsertOne {
 	})
 }
 
-// SetTitle sets the "title" field.
-func (u *WalkthroughUpsertOne) SetTitle(v string) *WalkthroughUpsertOne {
+// SetNote sets the "note" field.
+func (u *WalkthroughUpsertOne) SetNote(v jsontext.Value) *WalkthroughUpsertOne {
 	return u.Update(func(s *WalkthroughUpsert) {
-		s.SetTitle(v)
+		s.SetNote(v)
 	})
 }
 
-// UpdateTitle sets the "title" field to the value that was provided on create.
-func (u *WalkthroughUpsertOne) UpdateTitle() *WalkthroughUpsertOne {
+// UpdateNote sets the "note" field to the value that was provided on create.
+func (u *WalkthroughUpsertOne) UpdateNote() *WalkthroughUpsertOne {
 	return u.Update(func(s *WalkthroughUpsert) {
-		s.UpdateTitle()
+		s.UpdateNote()
 	})
 }
 
-// SetContent sets the "content" field.
-func (u *WalkthroughUpsertOne) SetContent(v jsontext.Value) *WalkthroughUpsertOne {
+// ClearNote clears the value of the "note" field.
+func (u *WalkthroughUpsertOne) ClearNote() *WalkthroughUpsertOne {
 	return u.Update(func(s *WalkthroughUpsert) {
-		s.SetContent(v)
+		s.ClearNote()
 	})
 }
 
-// UpdateContent sets the "content" field to the value that was provided on create.
-func (u *WalkthroughUpsertOne) UpdateContent() *WalkthroughUpsertOne {
+// SetRoutes sets the "routes" field.
+func (u *WalkthroughUpsertOne) SetRoutes(v jsontext.Value) *WalkthroughUpsertOne {
 	return u.Update(func(s *WalkthroughUpsert) {
-		s.UpdateContent()
+		s.SetRoutes(v)
+	})
+}
+
+// UpdateRoutes sets the "routes" field to the value that was provided on create.
+func (u *WalkthroughUpsertOne) UpdateRoutes() *WalkthroughUpsertOne {
+	return u.Update(func(s *WalkthroughUpsert) {
+		s.UpdateRoutes()
 	})
 }
 
@@ -760,20 +725,6 @@ func (u *WalkthroughUpsertOne) SetText(v string) *WalkthroughUpsertOne {
 func (u *WalkthroughUpsertOne) UpdateText() *WalkthroughUpsertOne {
 	return u.Update(func(s *WalkthroughUpsert) {
 		s.UpdateText()
-	})
-}
-
-// SetExcerpt sets the "excerpt" field.
-func (u *WalkthroughUpsertOne) SetExcerpt(v string) *WalkthroughUpsertOne {
-	return u.Update(func(s *WalkthroughUpsert) {
-		s.SetExcerpt(v)
-	})
-}
-
-// UpdateExcerpt sets the "excerpt" field to the value that was provided on create.
-func (u *WalkthroughUpsertOne) UpdateExcerpt() *WalkthroughUpsertOne {
-	return u.Update(func(s *WalkthroughUpsert) {
-		s.UpdateExcerpt()
 	})
 }
 
@@ -1099,31 +1050,38 @@ func (u *WalkthroughUpsertBulk) UpdateGameID() *WalkthroughUpsertBulk {
 	})
 }
 
-// SetTitle sets the "title" field.
-func (u *WalkthroughUpsertBulk) SetTitle(v string) *WalkthroughUpsertBulk {
+// SetNote sets the "note" field.
+func (u *WalkthroughUpsertBulk) SetNote(v jsontext.Value) *WalkthroughUpsertBulk {
 	return u.Update(func(s *WalkthroughUpsert) {
-		s.SetTitle(v)
+		s.SetNote(v)
 	})
 }
 
-// UpdateTitle sets the "title" field to the value that was provided on create.
-func (u *WalkthroughUpsertBulk) UpdateTitle() *WalkthroughUpsertBulk {
+// UpdateNote sets the "note" field to the value that was provided on create.
+func (u *WalkthroughUpsertBulk) UpdateNote() *WalkthroughUpsertBulk {
 	return u.Update(func(s *WalkthroughUpsert) {
-		s.UpdateTitle()
+		s.UpdateNote()
 	})
 }
 
-// SetContent sets the "content" field.
-func (u *WalkthroughUpsertBulk) SetContent(v jsontext.Value) *WalkthroughUpsertBulk {
+// ClearNote clears the value of the "note" field.
+func (u *WalkthroughUpsertBulk) ClearNote() *WalkthroughUpsertBulk {
 	return u.Update(func(s *WalkthroughUpsert) {
-		s.SetContent(v)
+		s.ClearNote()
 	})
 }
 
-// UpdateContent sets the "content" field to the value that was provided on create.
-func (u *WalkthroughUpsertBulk) UpdateContent() *WalkthroughUpsertBulk {
+// SetRoutes sets the "routes" field.
+func (u *WalkthroughUpsertBulk) SetRoutes(v jsontext.Value) *WalkthroughUpsertBulk {
 	return u.Update(func(s *WalkthroughUpsert) {
-		s.UpdateContent()
+		s.SetRoutes(v)
+	})
+}
+
+// UpdateRoutes sets the "routes" field to the value that was provided on create.
+func (u *WalkthroughUpsertBulk) UpdateRoutes() *WalkthroughUpsertBulk {
+	return u.Update(func(s *WalkthroughUpsert) {
+		s.UpdateRoutes()
 	})
 }
 
@@ -1138,20 +1096,6 @@ func (u *WalkthroughUpsertBulk) SetText(v string) *WalkthroughUpsertBulk {
 func (u *WalkthroughUpsertBulk) UpdateText() *WalkthroughUpsertBulk {
 	return u.Update(func(s *WalkthroughUpsert) {
 		s.UpdateText()
-	})
-}
-
-// SetExcerpt sets the "excerpt" field.
-func (u *WalkthroughUpsertBulk) SetExcerpt(v string) *WalkthroughUpsertBulk {
-	return u.Update(func(s *WalkthroughUpsert) {
-		s.SetExcerpt(v)
-	})
-}
-
-// UpdateExcerpt sets the "excerpt" field to the value that was provided on create.
-func (u *WalkthroughUpsertBulk) UpdateExcerpt() *WalkthroughUpsertBulk {
-	return u.Update(func(s *WalkthroughUpsert) {
-		s.UpdateExcerpt()
 	})
 }
 

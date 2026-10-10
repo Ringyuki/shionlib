@@ -44,7 +44,7 @@
       "Walkthrough": {
         "Block": {
           "Title": "攻略未通过审核",
-          "ReviewContent": "你发布的攻略《{walkthrough_title}》未通过审核，原因：{top_category}。{reason, select, none {} other {审核说明：{reason}。}}{evidence, select, none {} other {相关片段：{evidence}。}}请修改后重新发布。",
+          "ReviewContent": "你为《{game_title}》发布的攻略未通过审核，原因：{top_category}。{reason, select, none {} other {审核说明：{reason}。}}{evidence, select, none {} other {相关片段：{evidence}。}}请修改后重新发布。",
           "LinkText": "查看攻略"
         }
       }

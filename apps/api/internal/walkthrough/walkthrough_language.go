@@ -27,14 +27,8 @@ func (l Language) Stored() *string {
 	return &value
 }
 
-func DetectLanguage(title, content string) Language {
-	parts := make([]string, 0, 2)
-	for _, part := range []string{title, content} {
-		if trimmed := strings.TrimSpace(part); trimmed != "" {
-			parts = append(parts, trimmed)
-		}
-	}
-	text := strings.Join(parts, "\n")
+func DetectLanguage(written string) Language {
+	text := strings.TrimSpace(written)
 	if text == "" {
 		return LanguageUnknown
 	}

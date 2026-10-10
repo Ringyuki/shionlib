@@ -60,19 +60,9 @@ func GameID(v int) predicate.Walkthrough {
 	return predicate.Walkthrough(sql.FieldEQ(FieldGameID, v))
 }
 
-// Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
-func Title(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldEQ(FieldTitle, v))
-}
-
 // Text applies equality check predicate on the "text" field. It's identical to TextEQ.
 func Text(v string) predicate.Walkthrough {
 	return predicate.Walkthrough(sql.FieldEQ(FieldText, v))
-}
-
-// Excerpt applies equality check predicate on the "excerpt" field. It's identical to ExcerptEQ.
-func Excerpt(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldEQ(FieldExcerpt, v))
 }
 
 // Lang applies equality check predicate on the "lang" field. It's identical to LangEQ.
@@ -125,69 +115,14 @@ func GameIDNotIn(vs ...int) predicate.Walkthrough {
 	return predicate.Walkthrough(sql.FieldNotIn(FieldGameID, vs...))
 }
 
-// TitleEQ applies the EQ predicate on the "title" field.
-func TitleEQ(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldEQ(FieldTitle, v))
+// NoteIsNil applies the IsNil predicate on the "note" field.
+func NoteIsNil() predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldIsNull(FieldNote))
 }
 
-// TitleNEQ applies the NEQ predicate on the "title" field.
-func TitleNEQ(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldNEQ(FieldTitle, v))
-}
-
-// TitleIn applies the In predicate on the "title" field.
-func TitleIn(vs ...string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldIn(FieldTitle, vs...))
-}
-
-// TitleNotIn applies the NotIn predicate on the "title" field.
-func TitleNotIn(vs ...string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldNotIn(FieldTitle, vs...))
-}
-
-// TitleGT applies the GT predicate on the "title" field.
-func TitleGT(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldGT(FieldTitle, v))
-}
-
-// TitleGTE applies the GTE predicate on the "title" field.
-func TitleGTE(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldGTE(FieldTitle, v))
-}
-
-// TitleLT applies the LT predicate on the "title" field.
-func TitleLT(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldLT(FieldTitle, v))
-}
-
-// TitleLTE applies the LTE predicate on the "title" field.
-func TitleLTE(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldLTE(FieldTitle, v))
-}
-
-// TitleContains applies the Contains predicate on the "title" field.
-func TitleContains(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldContains(FieldTitle, v))
-}
-
-// TitleHasPrefix applies the HasPrefix predicate on the "title" field.
-func TitleHasPrefix(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldHasPrefix(FieldTitle, v))
-}
-
-// TitleHasSuffix applies the HasSuffix predicate on the "title" field.
-func TitleHasSuffix(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldHasSuffix(FieldTitle, v))
-}
-
-// TitleEqualFold applies the EqualFold predicate on the "title" field.
-func TitleEqualFold(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldEqualFold(FieldTitle, v))
-}
-
-// TitleContainsFold applies the ContainsFold predicate on the "title" field.
-func TitleContainsFold(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldContainsFold(FieldTitle, v))
+// NoteNotNil applies the NotNil predicate on the "note" field.
+func NoteNotNil() predicate.Walkthrough {
+	return predicate.Walkthrough(sql.FieldNotNull(FieldNote))
 }
 
 // TextEQ applies the EQ predicate on the "text" field.
@@ -253,71 +188,6 @@ func TextEqualFold(v string) predicate.Walkthrough {
 // TextContainsFold applies the ContainsFold predicate on the "text" field.
 func TextContainsFold(v string) predicate.Walkthrough {
 	return predicate.Walkthrough(sql.FieldContainsFold(FieldText, v))
-}
-
-// ExcerptEQ applies the EQ predicate on the "excerpt" field.
-func ExcerptEQ(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldEQ(FieldExcerpt, v))
-}
-
-// ExcerptNEQ applies the NEQ predicate on the "excerpt" field.
-func ExcerptNEQ(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldNEQ(FieldExcerpt, v))
-}
-
-// ExcerptIn applies the In predicate on the "excerpt" field.
-func ExcerptIn(vs ...string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldIn(FieldExcerpt, vs...))
-}
-
-// ExcerptNotIn applies the NotIn predicate on the "excerpt" field.
-func ExcerptNotIn(vs ...string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldNotIn(FieldExcerpt, vs...))
-}
-
-// ExcerptGT applies the GT predicate on the "excerpt" field.
-func ExcerptGT(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldGT(FieldExcerpt, v))
-}
-
-// ExcerptGTE applies the GTE predicate on the "excerpt" field.
-func ExcerptGTE(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldGTE(FieldExcerpt, v))
-}
-
-// ExcerptLT applies the LT predicate on the "excerpt" field.
-func ExcerptLT(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldLT(FieldExcerpt, v))
-}
-
-// ExcerptLTE applies the LTE predicate on the "excerpt" field.
-func ExcerptLTE(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldLTE(FieldExcerpt, v))
-}
-
-// ExcerptContains applies the Contains predicate on the "excerpt" field.
-func ExcerptContains(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldContains(FieldExcerpt, v))
-}
-
-// ExcerptHasPrefix applies the HasPrefix predicate on the "excerpt" field.
-func ExcerptHasPrefix(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldHasPrefix(FieldExcerpt, v))
-}
-
-// ExcerptHasSuffix applies the HasSuffix predicate on the "excerpt" field.
-func ExcerptHasSuffix(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldHasSuffix(FieldExcerpt, v))
-}
-
-// ExcerptEqualFold applies the EqualFold predicate on the "excerpt" field.
-func ExcerptEqualFold(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldEqualFold(FieldExcerpt, v))
-}
-
-// ExcerptContainsFold applies the ContainsFold predicate on the "excerpt" field.
-func ExcerptContainsFold(v string) predicate.Walkthrough {
-	return predicate.Walkthrough(sql.FieldContainsFold(FieldExcerpt, v))
 }
 
 // LangEQ applies the EQ predicate on the "lang" field.

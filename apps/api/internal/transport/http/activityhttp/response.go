@@ -10,8 +10,7 @@ import (
 )
 
 type activityWalkthroughDTO struct {
-	ID    int    `json:"id"`
-	Title string `json:"title"`
+	ID int `json:"id"`
 }
 
 type activityCommentDTO struct {
@@ -61,7 +60,7 @@ func toActivityDTO(entry activity.Entry, now time.Time) activityDTO {
 		out.Game = &card
 	}
 	if ref := entry.Walkthrough; ref != nil {
-		out.Walkthrough = &activityWalkthroughDTO{ID: ref.ID, Title: ref.Title}
+		out.Walkthrough = &activityWalkthroughDTO{ID: ref.ID}
 	}
 	if ref := entry.Comment; ref != nil {
 		out.Comment = &activityCommentDTO{ID: ref.ID, Text: ref.Text}

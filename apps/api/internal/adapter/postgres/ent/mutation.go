@@ -62732,11 +62732,11 @@ type WalkthroughMutation struct {
 	op                Op
 	typ               string
 	id                *int
-	title             *string
-	content           *jsontext.Value
-	appendcontent     jsontext.Value
+	note              *jsontext.Value
+	appendnote        jsontext.Value
+	routes            *jsontext.Value
+	appendroutes      jsontext.Value
 	text              *string
-	excerpt           *string
 	lang              *string
 	created           *time.Time
 	updated           *time.Time
@@ -62899,91 +62899,120 @@ func (m *WalkthroughMutation) ResetGameID() {
 	m.game = nil
 }
 
-// SetTitle sets the "title" field.
-func (m *WalkthroughMutation) SetTitle(s string) {
-	m.title = &s
+// SetNote sets the "note" field.
+func (m *WalkthroughMutation) SetNote(j jsontext.Value) {
+	m.note = &j
+	m.appendnote = nil
 }
 
-// Title returns the value of the "title" field in the mutation.
-func (m *WalkthroughMutation) Title() (r string, exists bool) {
-	v := m.title
+// Note returns the value of the "note" field in the mutation.
+func (m *WalkthroughMutation) Note() (r jsontext.Value, exists bool) {
+	v := m.note
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldTitle returns the old "title" field's value of the Walkthrough entity.
+// OldNote returns the old "note" field's value of the Walkthrough entity.
 // If the Walkthrough object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *WalkthroughMutation) OldTitle(ctx context.Context) (v string, err error) {
+func (m *WalkthroughMutation) OldNote(ctx context.Context) (v jsontext.Value, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+		return v, errors.New("OldNote is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTitle requires an ID field in the mutation")
+		return v, errors.New("OldNote requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+		return v, fmt.Errorf("querying old value for OldNote: %w", err)
 	}
-	return oldValue.Title, nil
+	return oldValue.Note, nil
 }
 
-// ResetTitle resets all changes to the "title" field.
-func (m *WalkthroughMutation) ResetTitle() {
-	m.title = nil
+// AppendNote adds j to the "note" field.
+func (m *WalkthroughMutation) AppendNote(j jsontext.Value) {
+	m.appendnote = append(m.appendnote, j...)
 }
 
-// SetContent sets the "content" field.
-func (m *WalkthroughMutation) SetContent(j jsontext.Value) {
-	m.content = &j
-	m.appendcontent = nil
-}
-
-// Content returns the value of the "content" field in the mutation.
-func (m *WalkthroughMutation) Content() (r jsontext.Value, exists bool) {
-	v := m.content
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldContent returns the old "content" field's value of the Walkthrough entity.
-// If the Walkthrough object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *WalkthroughMutation) OldContent(ctx context.Context) (v jsontext.Value, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldContent is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldContent requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldContent: %w", err)
-	}
-	return oldValue.Content, nil
-}
-
-// AppendContent adds j to the "content" field.
-func (m *WalkthroughMutation) AppendContent(j jsontext.Value) {
-	m.appendcontent = append(m.appendcontent, j...)
-}
-
-// AppendedContent returns the list of values that were appended to the "content" field in this mutation.
-func (m *WalkthroughMutation) AppendedContent() (jsontext.Value, bool) {
-	if len(m.appendcontent) == 0 {
+// AppendedNote returns the list of values that were appended to the "note" field in this mutation.
+func (m *WalkthroughMutation) AppendedNote() (jsontext.Value, bool) {
+	if len(m.appendnote) == 0 {
 		return nil, false
 	}
-	return m.appendcontent, true
+	return m.appendnote, true
 }
 
-// ResetContent resets all changes to the "content" field.
-func (m *WalkthroughMutation) ResetContent() {
-	m.content = nil
-	m.appendcontent = nil
+// ClearNote clears the value of the "note" field.
+func (m *WalkthroughMutation) ClearNote() {
+	m.note = nil
+	m.appendnote = nil
+	m.clearedFields[walkthrough.FieldNote] = struct{}{}
+}
+
+// NoteCleared returns if the "note" field was cleared in this mutation.
+func (m *WalkthroughMutation) NoteCleared() bool {
+	_, ok := m.clearedFields[walkthrough.FieldNote]
+	return ok
+}
+
+// ResetNote resets all changes to the "note" field.
+func (m *WalkthroughMutation) ResetNote() {
+	m.note = nil
+	m.appendnote = nil
+	delete(m.clearedFields, walkthrough.FieldNote)
+}
+
+// SetRoutes sets the "routes" field.
+func (m *WalkthroughMutation) SetRoutes(j jsontext.Value) {
+	m.routes = &j
+	m.appendroutes = nil
+}
+
+// Routes returns the value of the "routes" field in the mutation.
+func (m *WalkthroughMutation) Routes() (r jsontext.Value, exists bool) {
+	v := m.routes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRoutes returns the old "routes" field's value of the Walkthrough entity.
+// If the Walkthrough object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WalkthroughMutation) OldRoutes(ctx context.Context) (v jsontext.Value, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRoutes is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRoutes requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRoutes: %w", err)
+	}
+	return oldValue.Routes, nil
+}
+
+// AppendRoutes adds j to the "routes" field.
+func (m *WalkthroughMutation) AppendRoutes(j jsontext.Value) {
+	m.appendroutes = append(m.appendroutes, j...)
+}
+
+// AppendedRoutes returns the list of values that were appended to the "routes" field in this mutation.
+func (m *WalkthroughMutation) AppendedRoutes() (jsontext.Value, bool) {
+	if len(m.appendroutes) == 0 {
+		return nil, false
+	}
+	return m.appendroutes, true
+}
+
+// ResetRoutes resets all changes to the "routes" field.
+func (m *WalkthroughMutation) ResetRoutes() {
+	m.routes = nil
+	m.appendroutes = nil
 }
 
 // SetText sets the "text" field.
@@ -63020,42 +63049,6 @@ func (m *WalkthroughMutation) OldText(ctx context.Context) (v string, err error)
 // ResetText resets all changes to the "text" field.
 func (m *WalkthroughMutation) ResetText() {
 	m.text = nil
-}
-
-// SetExcerpt sets the "excerpt" field.
-func (m *WalkthroughMutation) SetExcerpt(s string) {
-	m.excerpt = &s
-}
-
-// Excerpt returns the value of the "excerpt" field in the mutation.
-func (m *WalkthroughMutation) Excerpt() (r string, exists bool) {
-	v := m.excerpt
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldExcerpt returns the old "excerpt" field's value of the Walkthrough entity.
-// If the Walkthrough object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *WalkthroughMutation) OldExcerpt(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldExcerpt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldExcerpt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldExcerpt: %w", err)
-	}
-	return oldValue.Excerpt, nil
-}
-
-// ResetExcerpt resets all changes to the "excerpt" field.
-func (m *WalkthroughMutation) ResetExcerpt() {
-	m.excerpt = nil
 }
 
 // SetLang sets the "lang" field.
@@ -63519,21 +63512,18 @@ func (m *WalkthroughMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *WalkthroughMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 11)
 	if m.game != nil {
 		fields = append(fields, walkthrough.FieldGameID)
 	}
-	if m.title != nil {
-		fields = append(fields, walkthrough.FieldTitle)
+	if m.note != nil {
+		fields = append(fields, walkthrough.FieldNote)
 	}
-	if m.content != nil {
-		fields = append(fields, walkthrough.FieldContent)
+	if m.routes != nil {
+		fields = append(fields, walkthrough.FieldRoutes)
 	}
 	if m.text != nil {
 		fields = append(fields, walkthrough.FieldText)
-	}
-	if m.excerpt != nil {
-		fields = append(fields, walkthrough.FieldExcerpt)
 	}
 	if m.lang != nil {
 		fields = append(fields, walkthrough.FieldLang)
@@ -63566,14 +63556,12 @@ func (m *WalkthroughMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case walkthrough.FieldGameID:
 		return m.GameID()
-	case walkthrough.FieldTitle:
-		return m.Title()
-	case walkthrough.FieldContent:
-		return m.Content()
+	case walkthrough.FieldNote:
+		return m.Note()
+	case walkthrough.FieldRoutes:
+		return m.Routes()
 	case walkthrough.FieldText:
 		return m.Text()
-	case walkthrough.FieldExcerpt:
-		return m.Excerpt()
 	case walkthrough.FieldLang:
 		return m.Lang()
 	case walkthrough.FieldCreated:
@@ -63599,14 +63587,12 @@ func (m *WalkthroughMutation) OldField(ctx context.Context, name string) (ent.Va
 	switch name {
 	case walkthrough.FieldGameID:
 		return m.OldGameID(ctx)
-	case walkthrough.FieldTitle:
-		return m.OldTitle(ctx)
-	case walkthrough.FieldContent:
-		return m.OldContent(ctx)
+	case walkthrough.FieldNote:
+		return m.OldNote(ctx)
+	case walkthrough.FieldRoutes:
+		return m.OldRoutes(ctx)
 	case walkthrough.FieldText:
 		return m.OldText(ctx)
-	case walkthrough.FieldExcerpt:
-		return m.OldExcerpt(ctx)
 	case walkthrough.FieldLang:
 		return m.OldLang(ctx)
 	case walkthrough.FieldCreated:
@@ -63637,19 +63623,19 @@ func (m *WalkthroughMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetGameID(v)
 		return nil
-	case walkthrough.FieldTitle:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTitle(v)
-		return nil
-	case walkthrough.FieldContent:
+	case walkthrough.FieldNote:
 		v, ok := value.(jsontext.Value)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetContent(v)
+		m.SetNote(v)
+		return nil
+	case walkthrough.FieldRoutes:
+		v, ok := value.(jsontext.Value)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRoutes(v)
 		return nil
 	case walkthrough.FieldText:
 		v, ok := value.(string)
@@ -63657,13 +63643,6 @@ func (m *WalkthroughMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetText(v)
-		return nil
-	case walkthrough.FieldExcerpt:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetExcerpt(v)
 		return nil
 	case walkthrough.FieldLang:
 		v, ok := value.(string)
@@ -63747,6 +63726,9 @@ func (m *WalkthroughMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *WalkthroughMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(walkthrough.FieldNote) {
+		fields = append(fields, walkthrough.FieldNote)
+	}
 	if m.FieldCleared(walkthrough.FieldLang) {
 		fields = append(fields, walkthrough.FieldLang)
 	}
@@ -63764,6 +63746,9 @@ func (m *WalkthroughMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *WalkthroughMutation) ClearField(name string) error {
 	switch name {
+	case walkthrough.FieldNote:
+		m.ClearNote()
+		return nil
 	case walkthrough.FieldLang:
 		m.ClearLang()
 		return nil
@@ -63778,17 +63763,14 @@ func (m *WalkthroughMutation) ResetField(name string) error {
 	case walkthrough.FieldGameID:
 		m.ResetGameID()
 		return nil
-	case walkthrough.FieldTitle:
-		m.ResetTitle()
+	case walkthrough.FieldNote:
+		m.ResetNote()
 		return nil
-	case walkthrough.FieldContent:
-		m.ResetContent()
+	case walkthrough.FieldRoutes:
+		m.ResetRoutes()
 		return nil
 	case walkthrough.FieldText:
 		m.ResetText()
-		return nil
-	case walkthrough.FieldExcerpt:
-		m.ResetExcerpt()
 		return nil
 	case walkthrough.FieldLang:
 		m.ResetLang()

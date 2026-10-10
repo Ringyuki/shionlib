@@ -12,17 +12,11 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
 
-type CreateInput struct {
+type WriteInput struct {
 	GameID  int
-	Title   string
-	Content richtext.Document
-	Status  Status
-}
-
-type UpdateInput struct {
-	Title   string
-	Content richtext.Document
-	Status  Status
+	Note    *richtext.Document
+	Routes  []Route
+	Publish bool
 }
 
 type Status string
@@ -39,18 +33,17 @@ func (s Status) Valid() bool {
 }
 
 const (
-	MaxTitleLength   = 255
-	MaxContentLength = 50000
-	ExcerptLength    = 200
+	MaxNoteLength = 10000
+	MaxTextLength = 50000
+	GameListLimit = 50
 )
 
 type Walkthrough struct {
 	ID            int
 	GameID        int
-	Title         string
-	Content       json.RawMessage
+	Note          json.RawMessage
+	Routes        []Route
 	Text          string
-	Excerpt       string
 	Lang          *string
 	Created       time.Time
 	Updated       time.Time
@@ -68,12 +61,10 @@ type View struct {
 type Summary struct {
 	ID            int
 	GameID        int
-	Title         string
-	Excerpt       string
+	RouteCount    int
 	Lang          *string
 	Created       time.Time
 	Updated       time.Time
-	Edited        bool
 	Status        Status
 	ReviewPending bool
 	Creator       user.Summary
@@ -82,10 +73,9 @@ type Summary struct {
 
 type NewWalkthrough struct {
 	GameID        int
-	Title         string
-	Content       json.RawMessage
+	Note          json.RawMessage
+	Routes        []Route
 	Text          string
-	Excerpt       string
 	Lang          *string
 	Status        Status
 	CreatorID     int
@@ -93,20 +83,12 @@ type NewWalkthrough struct {
 }
 
 type Changes struct {
-	Title         string
-	Content       json.RawMessage
+	Note          json.RawMessage
+	Routes        []Route
 	Text          string
-	Excerpt       string
 	Lang          *string
 	Status        Status
 	ReviewPending bool
-}
-
-type GameFilter struct {
-	GameID   int
-	Status   *Status
-	Public   []Status
-	ViewerID int
 }
 
 type CreatorFilter struct {
@@ -121,7 +103,6 @@ type SortField string
 
 const (
 	SortByID      SortField = "id"
-	SortByTitle   SortField = "title"
 	SortByCreated SortField = "created"
 	SortByUpdated SortField = "updated"
 	SortByStatus  SortField = "status"

@@ -44,7 +44,7 @@
       "Walkthrough": {
         "Block": {
           "Title": "攻略が審査を通過しませんでした",
-          "ReviewContent": "公開した攻略「{walkthrough_title}」は審査を通過しませんでした。理由：{top_category}。{reason, select, none {} other {審査メモ：{reason}。}}{evidence, select, none {} other {該当箇所：{evidence}。}}内容を修正して、もう一度公開してください。",
+          "ReviewContent": "「{game_title}」に公開した攻略は審査を通過しませんでした。理由：{top_category}。{reason, select, none {} other {審査メモ：{reason}。}}{evidence, select, none {} other {該当箇所：{evidence}。}}内容を修正して、もう一度公開してください。",
           "LinkText": "攻略を開く"
         }
       }

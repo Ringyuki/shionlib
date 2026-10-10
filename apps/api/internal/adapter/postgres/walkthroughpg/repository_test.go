@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"reflect"
 	"testing"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
@@ -23,6 +25,11 @@ func TestRepositoryContract(t *testing.T) {
 			NewUser:      db.User,
 			NewGame:      func(t *testing.T) int { return db.Game(t) },
 			NewRatedGame: func(t *testing.T) int { return db.Game(t, func(c *ent.GameCreate) { c.SetNsfw(true) }) },
+			SetUpdated: func(t *testing.T, id int, at time.Time) {
+				if err := db.Ent.Walkthrough.UpdateOneID(id).SetUpdated(at).Exec(context.Background()); err != nil {
+					t.Fatal(err)
+				}
+			},
 		}
 	})
 }
@@ -34,13 +41,14 @@ func TestAdminStore(t *testing.T) {
 	author := db.User(t)
 	authorRow := db.Ent.User.GetX(ctx, author)
 	gameID := db.Game(t, func(c *ent.GameCreate) { c.SetTitleEn("English Title") })
-	content := json.RawMessage(`{"root":{"type":"root","children":[]}}`)
+	note := json.RawMessage(`{"type":"doc","content":[{"type":"paragraph"}]}`)
+	routes := []walkthrough.Route{{Key: "a", Name: "Beta", Characters: []int{}, Requires: []string{}, Steps: []walkthrough.Step{{Kind: walkthrough.StepChoice, Text: "needle"}}}}
 
-	first, err := repo.Create(ctx, walkthrough.NewWalkthrough{GameID: gameID, Title: "Alpha route", Content: content, Text: "alpha", Status: walkthrough.StatusPublished, CreatorID: author})
+	first, err := repo.Create(ctx, walkthrough.NewWalkthrough{GameID: gameID, Text: "alpha", Status: walkthrough.StatusPublished, CreatorID: author})
 	if err != nil {
 		t.Fatal(err)
 	}
-	second, err := repo.Create(ctx, walkthrough.NewWalkthrough{GameID: gameID, Title: "Beta route", Content: content, Text: "needle", Status: walkthrough.StatusHidden, CreatorID: author})
+	second, err := repo.Create(ctx, walkthrough.NewWalkthrough{GameID: gameID, Note: note, Routes: routes, Text: "needle", Status: walkthrough.StatusHidden, CreatorID: db.User(t)})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,12 +62,11 @@ func TestAdminStore(t *testing.T) {
 		filter walkthrough.AdminFilter
 		want   []int
 	}{
-		{"title", walkthrough.AdminFilter{Search: "alpha"}, []int{first.ID}},
-		{"html", walkthrough.AdminFilter{Search: "NEEDLE"}, []int{second.ID}},
-		{"game title", walkthrough.AdminFilter{Search: "english", SortBy: walkthrough.SortByTitle}, []int{first.ID, second.ID}},
-		{"creator email", walkthrough.AdminFilter{Search: authorRow.Email, SortBy: walkthrough.SortByID, Descending: true}, []int{second.ID, first.ID}},
+		{"text", walkthrough.AdminFilter{Search: "NEEDLE"}, []int{second.ID}},
+		{"game title", walkthrough.AdminFilter{Search: "english", SortBy: walkthrough.SortByID, Descending: true}, []int{second.ID, first.ID}},
+		{"creator email", walkthrough.AdminFilter{Search: authorRow.Email, SortBy: walkthrough.SortByID}, []int{first.ID}},
 		{"status", walkthrough.AdminFilter{Status: &hidden}, []int{second.ID}},
-		{"game", walkthrough.AdminFilter{GameID: &gameID, CreatorID: &author, SortBy: walkthrough.SortByCreated}, []int{first.ID, second.ID}},
+		{"game and creator", walkthrough.AdminFilter{GameID: &gameID, CreatorID: &author, SortBy: walkthrough.SortByCreated}, []int{first.ID}},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -79,7 +86,7 @@ func TestAdminStore(t *testing.T) {
 	}
 	entries, _, _ := repo.Search(ctx, walkthrough.AdminFilter{Search: "needle"}, page)
 	entry := entries[0]
-	if entry.CreatorEmail != authorRow.Email || entry.Game.TitleEN != "English Title" || entry.Text != "needle" || entry.Content != nil ||
+	if entry.CreatorEmail == "" || entry.Game.TitleEN != "English Title" || entry.Text != "needle" || !reflect.DeepEqual(entry.Routes, routes) ||
 		entry.Moderation == nil || entry.Moderation.Decision != moderation.DecisionBlock || *entry.Moderation.Reason != "ads" {
 		t.Fatalf("unexpected admin entry %+v", entry)
 	}
@@ -87,7 +94,7 @@ func TestAdminStore(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(detail.Moderations) != 1 || detail.Content == nil || detail.Moderations[0].Auditor != moderation.AuditorReview {
+	if len(detail.Moderations) != 1 || detail.Note == nil || !reflect.DeepEqual(detail.Routes, routes) || detail.Moderations[0].Auditor != moderation.AuditorReview {
 		t.Fatalf("unexpected detail %+v", detail)
 	}
 	if _, err := repo.Detail(ctx, 987654); !errors.Is(err, walkthrough.ErrNotFound) {

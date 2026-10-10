@@ -49,29 +49,33 @@ func (_u *WalkthroughUpdate) SetNillableGameID(v *int) *WalkthroughUpdate {
 	return _u
 }
 
-// SetTitle sets the "title" field.
-func (_u *WalkthroughUpdate) SetTitle(v string) *WalkthroughUpdate {
-	_u.mutation.SetTitle(v)
+// SetNote sets the "note" field.
+func (_u *WalkthroughUpdate) SetNote(v jsontext.Value) *WalkthroughUpdate {
+	_u.mutation.SetNote(v)
 	return _u
 }
 
-// SetNillableTitle sets the "title" field if the given value is not nil.
-func (_u *WalkthroughUpdate) SetNillableTitle(v *string) *WalkthroughUpdate {
-	if v != nil {
-		_u.SetTitle(*v)
-	}
+// AppendNote appends value to the "note" field.
+func (_u *WalkthroughUpdate) AppendNote(v jsontext.Value) *WalkthroughUpdate {
+	_u.mutation.AppendNote(v)
 	return _u
 }
 
-// SetContent sets the "content" field.
-func (_u *WalkthroughUpdate) SetContent(v jsontext.Value) *WalkthroughUpdate {
-	_u.mutation.SetContent(v)
+// ClearNote clears the value of the "note" field.
+func (_u *WalkthroughUpdate) ClearNote() *WalkthroughUpdate {
+	_u.mutation.ClearNote()
 	return _u
 }
 
-// AppendContent appends value to the "content" field.
-func (_u *WalkthroughUpdate) AppendContent(v jsontext.Value) *WalkthroughUpdate {
-	_u.mutation.AppendContent(v)
+// SetRoutes sets the "routes" field.
+func (_u *WalkthroughUpdate) SetRoutes(v jsontext.Value) *WalkthroughUpdate {
+	_u.mutation.SetRoutes(v)
+	return _u
+}
+
+// AppendRoutes appends value to the "routes" field.
+func (_u *WalkthroughUpdate) AppendRoutes(v jsontext.Value) *WalkthroughUpdate {
+	_u.mutation.AppendRoutes(v)
 	return _u
 }
 
@@ -85,20 +89,6 @@ func (_u *WalkthroughUpdate) SetText(v string) *WalkthroughUpdate {
 func (_u *WalkthroughUpdate) SetNillableText(v *string) *WalkthroughUpdate {
 	if v != nil {
 		_u.SetText(*v)
-	}
-	return _u
-}
-
-// SetExcerpt sets the "excerpt" field.
-func (_u *WalkthroughUpdate) SetExcerpt(v string) *WalkthroughUpdate {
-	_u.mutation.SetExcerpt(v)
-	return _u
-}
-
-// SetNillableExcerpt sets the "excerpt" field if the given value is not nil.
-func (_u *WalkthroughUpdate) SetNillableExcerpt(v *string) *WalkthroughUpdate {
-	if v != nil {
-		_u.SetExcerpt(*v)
 	}
 	return _u
 }
@@ -322,11 +312,6 @@ func (_u *WalkthroughUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *WalkthroughUpdate) check() error {
-	if v, ok := _u.mutation.Title(); ok {
-		if err := walkthrough.TitleValidator(v); err != nil {
-			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Walkthrough.title": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Lang(); ok {
 		if err := walkthrough.LangValidator(v); err != nil {
 			return &ValidationError{Name: "lang", err: fmt.Errorf(`ent: validator failed for field "Walkthrough.lang": %w`, err)}
@@ -364,22 +349,27 @@ func (_u *WalkthroughUpdate) sqlSave(ctx context.Context) (_node int, err error)
 			}
 		}
 	}
-	if value, ok := _u.mutation.Title(); ok {
-		_spec.SetField(walkthrough.FieldTitle, field.TypeString, value)
+	if value, ok := _u.mutation.Note(); ok {
+		_spec.SetField(walkthrough.FieldNote, field.TypeJSON, value)
 	}
-	if value, ok := _u.mutation.Content(); ok {
-		_spec.SetField(walkthrough.FieldContent, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedContent(); ok {
+	if value, ok := _u.mutation.AppendedNote(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, walkthrough.FieldContent, value)
+			sqljson.Append(u, walkthrough.FieldNote, value)
+		})
+	}
+	if _u.mutation.NoteCleared() {
+		_spec.ClearField(walkthrough.FieldNote, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.Routes(); ok {
+		_spec.SetField(walkthrough.FieldRoutes, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedRoutes(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, walkthrough.FieldRoutes, value)
 		})
 	}
 	if value, ok := _u.mutation.Text(); ok {
 		_spec.SetField(walkthrough.FieldText, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Excerpt(); ok {
-		_spec.SetField(walkthrough.FieldExcerpt, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Lang(); ok {
 		_spec.SetField(walkthrough.FieldLang, field.TypeString, value)
@@ -583,29 +573,33 @@ func (_u *WalkthroughUpdateOne) SetNillableGameID(v *int) *WalkthroughUpdateOne 
 	return _u
 }
 
-// SetTitle sets the "title" field.
-func (_u *WalkthroughUpdateOne) SetTitle(v string) *WalkthroughUpdateOne {
-	_u.mutation.SetTitle(v)
+// SetNote sets the "note" field.
+func (_u *WalkthroughUpdateOne) SetNote(v jsontext.Value) *WalkthroughUpdateOne {
+	_u.mutation.SetNote(v)
 	return _u
 }
 
-// SetNillableTitle sets the "title" field if the given value is not nil.
-func (_u *WalkthroughUpdateOne) SetNillableTitle(v *string) *WalkthroughUpdateOne {
-	if v != nil {
-		_u.SetTitle(*v)
-	}
+// AppendNote appends value to the "note" field.
+func (_u *WalkthroughUpdateOne) AppendNote(v jsontext.Value) *WalkthroughUpdateOne {
+	_u.mutation.AppendNote(v)
 	return _u
 }
 
-// SetContent sets the "content" field.
-func (_u *WalkthroughUpdateOne) SetContent(v jsontext.Value) *WalkthroughUpdateOne {
-	_u.mutation.SetContent(v)
+// ClearNote clears the value of the "note" field.
+func (_u *WalkthroughUpdateOne) ClearNote() *WalkthroughUpdateOne {
+	_u.mutation.ClearNote()
 	return _u
 }
 
-// AppendContent appends value to the "content" field.
-func (_u *WalkthroughUpdateOne) AppendContent(v jsontext.Value) *WalkthroughUpdateOne {
-	_u.mutation.AppendContent(v)
+// SetRoutes sets the "routes" field.
+func (_u *WalkthroughUpdateOne) SetRoutes(v jsontext.Value) *WalkthroughUpdateOne {
+	_u.mutation.SetRoutes(v)
+	return _u
+}
+
+// AppendRoutes appends value to the "routes" field.
+func (_u *WalkthroughUpdateOne) AppendRoutes(v jsontext.Value) *WalkthroughUpdateOne {
+	_u.mutation.AppendRoutes(v)
 	return _u
 }
 
@@ -619,20 +613,6 @@ func (_u *WalkthroughUpdateOne) SetText(v string) *WalkthroughUpdateOne {
 func (_u *WalkthroughUpdateOne) SetNillableText(v *string) *WalkthroughUpdateOne {
 	if v != nil {
 		_u.SetText(*v)
-	}
-	return _u
-}
-
-// SetExcerpt sets the "excerpt" field.
-func (_u *WalkthroughUpdateOne) SetExcerpt(v string) *WalkthroughUpdateOne {
-	_u.mutation.SetExcerpt(v)
-	return _u
-}
-
-// SetNillableExcerpt sets the "excerpt" field if the given value is not nil.
-func (_u *WalkthroughUpdateOne) SetNillableExcerpt(v *string) *WalkthroughUpdateOne {
-	if v != nil {
-		_u.SetExcerpt(*v)
 	}
 	return _u
 }
@@ -869,11 +849,6 @@ func (_u *WalkthroughUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *WalkthroughUpdateOne) check() error {
-	if v, ok := _u.mutation.Title(); ok {
-		if err := walkthrough.TitleValidator(v); err != nil {
-			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Walkthrough.title": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Lang(); ok {
 		if err := walkthrough.LangValidator(v); err != nil {
 			return &ValidationError{Name: "lang", err: fmt.Errorf(`ent: validator failed for field "Walkthrough.lang": %w`, err)}
@@ -928,22 +903,27 @@ func (_u *WalkthroughUpdateOne) sqlSave(ctx context.Context) (_node *Walkthrough
 			}
 		}
 	}
-	if value, ok := _u.mutation.Title(); ok {
-		_spec.SetField(walkthrough.FieldTitle, field.TypeString, value)
+	if value, ok := _u.mutation.Note(); ok {
+		_spec.SetField(walkthrough.FieldNote, field.TypeJSON, value)
 	}
-	if value, ok := _u.mutation.Content(); ok {
-		_spec.SetField(walkthrough.FieldContent, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedContent(); ok {
+	if value, ok := _u.mutation.AppendedNote(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, walkthrough.FieldContent, value)
+			sqljson.Append(u, walkthrough.FieldNote, value)
+		})
+	}
+	if _u.mutation.NoteCleared() {
+		_spec.ClearField(walkthrough.FieldNote, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.Routes(); ok {
+		_spec.SetField(walkthrough.FieldRoutes, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedRoutes(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, walkthrough.FieldRoutes, value)
 		})
 	}
 	if value, ok := _u.mutation.Text(); ok {
 		_spec.SetField(walkthrough.FieldText, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Excerpt(); ok {
-		_spec.SetField(walkthrough.FieldExcerpt, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Lang(); ok {
 		_spec.SetField(walkthrough.FieldLang, field.TypeString, value)
