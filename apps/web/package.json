@@ -47,6 +47,7 @@
     "openapi-fetch": "^0.17.0",
     "pako": "2.1.0",
     "react": "^19.3.0",
+    "react-advanced-cropper": "0.20.1",
     "react-dom": "^19.3.0",
     "react-icons": "^5.7.0",
     "react-router": "^8.4.0",

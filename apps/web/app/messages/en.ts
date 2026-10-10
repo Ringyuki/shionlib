@@ -22,6 +22,7 @@ import walkthrough from '~/features/walkthrough/messages/en.json'
 import bbcode from './bbcode/en.json'
 import editor from './editor/en.json'
 import form from './form/en.json'
+import picture from './picture/en.json'
 import site from './site/en.json'
 import type { Messages } from './zh'
 
@@ -41,6 +42,7 @@ export const messages: Messages = {
   home,
   library,
   message,
+  picture,
   profile,
   release,
   resource,

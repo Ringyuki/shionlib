@@ -15,3 +15,12 @@ export function sectionAt(pathname: string, locale: Locale): Section {
 }
 
 export const nameCheckDelay = 400
+
+export const pictureKinds = ['avatar', 'cover'] as const
+
+export type PictureKind = (typeof pictureKinds)[number]
+
+export const pictureShapes = {
+  avatar: { aspect: 1, width: 512, height: 512, round: true },
+  cover: { aspect: 3, width: 1500, height: 500, round: false },
+} as const satisfies Record<PictureKind, object>

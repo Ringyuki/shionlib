@@ -22,6 +22,7 @@ import walkthrough from '~/features/walkthrough/messages/zh.json'
 import bbcode from './bbcode/zh.json'
 import editor from './editor/zh.json'
 import form from './form/zh.json'
+import picture from './picture/zh.json'
 import site from './site/zh.json'
 
 export const messages = {
@@ -40,6 +41,7 @@ export const messages = {
   home,
   library,
   message,
+  picture,
   profile,
   release,
   resource,

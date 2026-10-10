@@ -146,3 +146,45 @@ test('offers to link accounts and says why linking failed', async ({ page }) => 
   await expectNotice(page, '这个 Hikarinagi ID 已关联到其他账号')
   await expect(page).toHaveURL(/\/zh\/user\/settings\/connections$/)
 })
+
+test('lets the area of an avatar be chosen before it is uploaded', async ({ page }) => {
+  const onePixel =
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+  const picture = {
+    name: 'avatar.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from(onePixel, 'base64'),
+  }
+  let uploads = 0
+  await page.route('**/resources/settings/avatar.data', route => {
+    uploads += 1
+    return route.fulfill({
+      status: 200,
+      contentType: 'text/x-script',
+      body: '[{"_1":2},"data",{"_3":4,"_5":6},"ok",true,"result",{}]',
+    })
+  })
+  await openSettings(page, 'personal')
+  const choose = async () => {
+    const chooser = page.waitForEvent('filechooser')
+    await page.getByRole('button', { name: '更换头像' }).click()
+    await (await chooser).setFiles(picture)
+  }
+
+  await choose()
+  const dialog = page.getByRole('dialog', { name: '裁剪头像' })
+  const confirm = dialog.getByRole('button', { name: '确认' })
+  await expect(dialog.locator('.advanced-cropper-circle-stencil')).toBeVisible()
+  await expect(confirm).toBeEnabled()
+  await expect(dialog.getByRole('button', { name: '重置' })).toBeEnabled()
+  await dialog.getByRole('button', { name: '取消' }).click()
+  await expect(dialog).toBeHidden()
+  expect(uploads).toBe(0)
+
+  await choose()
+  await expect(confirm).toBeEnabled()
+  await confirm.click()
+  await expectNotice(page, '图片已更新')
+  await expect(dialog).toBeHidden()
+  expect(uploads).toBe(1)
+})
