@@ -15,7 +15,7 @@ type Repository interface {
 	NameExists(ctx context.Context, name string) (bool, error)
 	Create(ctx context.Context, in NewUser) (User, error)
 	Update(ctx context.Context, id int, changes Changes) error
-	Stats(ctx context.Context, id int) (Stats, error)
+	Stats(ctx context.Context, id int, scope StatsScope) (Stats, error)
 	CreateBan(ctx context.Context, in NewBan) error
 	CloseLatestBan(ctx context.Context, userID int, at time.Time) error
 	ActiveBans(ctx context.Context) ([]Ban, error)

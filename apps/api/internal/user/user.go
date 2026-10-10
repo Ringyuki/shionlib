@@ -134,6 +134,11 @@ type Stats struct {
 	Walkthroughs  int
 }
 
+type StatsScope struct {
+	Own          bool
+	ExcludeRated bool
+}
+
 type Profile struct {
 	User
 	Stats

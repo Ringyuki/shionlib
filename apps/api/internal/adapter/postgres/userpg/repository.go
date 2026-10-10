@@ -16,6 +16,8 @@ import (
 	entuser "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/userbannedrecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/walkthrough"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/gamepg"
+	commentmodel "github.com/Ringyuki/shionlib/apps/api/internal/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
 
@@ -165,9 +167,19 @@ func (r *Repository) Update(ctx context.Context, id int, c user.Changes) error {
 	return nil
 }
 
-func (r *Repository) Stats(ctx context.Context, id int) (user.Stats, error) {
+func (r *Repository) Stats(ctx context.Context, id int, scope user.StatsScope) (user.Stats, error) {
 	db := r.db(ctx)
 	var stats user.Stats
+	comments := []predicate.Comment{comment.CreatorID(id), comment.Status(int(commentmodel.StatusVisible))}
+	statuses := []walkthrough.Status{walkthrough.StatusPUBLISHED}
+	if scope.Own {
+		statuses = append(statuses, walkthrough.StatusDRAFT, walkthrough.StatusHIDDEN)
+	}
+	walkthroughs := []predicate.Walkthrough{walkthrough.CreatorID(id), walkthrough.StatusIn(statuses...)}
+	if scope.ExcludeRated {
+		comments = append(comments, comment.HasGameWith(gamepg.SafeForStrictViewers()))
+		walkthroughs = append(walkthroughs, walkthrough.HasGameWith(gamepg.SafeForStrictViewers()))
+	}
 	counts := []struct {
 		target *int
 		count  func() (int, error)
@@ -175,12 +187,12 @@ func (r *Repository) Stats(ctx context.Context, id int) (user.Stats, error) {
 		{&stats.Resources, func() (int, error) {
 			return db.GameDownloadResource.Query().Where(gamedownloadresource.CreatorID(id)).Count(ctx)
 		}},
-		{&stats.Comments, func() (int, error) { return db.Comment.Query().Where(comment.CreatorID(id)).Count(ctx) }},
+		{&stats.Comments, func() (int, error) { return db.Comment.Query().Where(comments...).Count(ctx) }},
 		{&stats.FavoriteItems, func() (int, error) {
 			return db.FavoriteItem.Query().Where(favoriteitem.HasFavoriteWith(entfavorite.UserID(id))).Count(ctx)
 		}},
 		{&stats.Edits, func() (int, error) { return db.EditRecord.Query().Where(editrecord.ActorID(id)).Count(ctx) }},
-		{&stats.Walkthroughs, func() (int, error) { return db.Walkthrough.Query().Where(walkthrough.CreatorID(id)).Count(ctx) }},
+		{&stats.Walkthroughs, func() (int, error) { return db.Walkthrough.Query().Where(walkthroughs...).Count(ctx) }},
 	}
 	for _, c := range counts {
 		value, err := c.count()

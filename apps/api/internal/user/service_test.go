@@ -189,11 +189,20 @@ func TestProfileAndMe(t *testing.T) {
 	f := newFixture(true)
 	u := f.repo.Seed(user.User{Name: "alice", Status: user.StatusBanned})
 	f.repo.SetStats(u.ID, user.Stats{Resources: 1, Comments: 2, FavoriteItems: 3, Edits: 4, Walkthroughs: 5})
-	profile, err := f.service.Profile(ctx, u.ID)
+	profile, err := f.service.Profile(ctx, actor.Actor{}, u.ID)
 	if err != nil || profile.Name != "alice" || profile.Walkthroughs != 5 || profile.Comments != 2 {
 		t.Fatalf("banned users still have public profiles: %+v %v", profile, err)
 	}
-	if _, err := f.service.Profile(ctx, 999); !errors.Is(err, user.ErrNotFound) {
+	if scope := f.repo.StatsScope(u.ID); scope != (user.StatsScope{ExcludeRated: true}) {
+		t.Fatalf("a guest is counted what a guest is listed: %+v", scope)
+	}
+	if _, err := f.service.Profile(ctx, actor.Actor{UserID: u.ID, ContentLimit: actor.ContentLimitJustShow}, u.ID); err != nil {
+		t.Fatal(err)
+	}
+	if scope := f.repo.StatsScope(u.ID); scope != (user.StatsScope{Own: true}) {
+		t.Fatalf("the user is counted what they are listed themself: %+v", scope)
+	}
+	if _, err := f.service.Profile(ctx, actor.Actor{}, 999); !errors.Is(err, user.ErrNotFound) {
 		t.Fatalf("missing profile: %v", err)
 	}
 	if _, err := f.service.Me(ctx, actor.Actor{UserID: 999}); !errors.Is(err, user.ErrNotFound) {

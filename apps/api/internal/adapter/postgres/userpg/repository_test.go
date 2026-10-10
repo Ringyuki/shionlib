@@ -9,8 +9,10 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/editrecord"
 	entfavorite "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favorite"
+	entwalkthrough "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/walkthrough"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/userpg"
+	"github.com/Ringyuki/shionlib/apps/api/internal/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user/usertest"
 )
@@ -47,12 +49,47 @@ func TestStatsCountsEveryContribution(t *testing.T) {
 	if err := db.Ent.EditRecord.Create().SetEntity(editrecord.EntityGame).SetTargetID(game).SetAction(editrecord.ActionUPDATE_SCALAR).SetActorID(owner).SetActorRole(1).Exec(ctx); err != nil {
 		t.Fatal(err)
 	}
-	stats, err := repo.Stats(ctx, owner)
+	stats, err := repo.Stats(ctx, owner, user.StatsScope{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if stats != (user.Stats{FavoriteItems: 1, Edits: 1}) {
 		t.Fatalf("unexpected stats %+v", stats)
+	}
+}
+
+func TestStatsCountWhatTheViewerIsListed(t *testing.T) {
+	ctx := context.Background()
+	db := pgtest.New(t)
+	repo := userpg.NewRepository(db.Ent)
+	owner := db.User(t)
+	game := db.Game(t)
+	rated := db.Game(t, func(c *ent.GameCreate) { c.SetNsfw(true) })
+	for _, status := range []comment.Status{comment.StatusVisible, comment.StatusPending, comment.StatusBlocked} {
+		db.Ent.Comment.Create().SetGameID(game).SetCreatorID(owner).SetContent(json.RawMessage(`{}`)).SetText("hi").SetStatus(int(status)).SaveX(ctx)
+	}
+	db.Ent.Comment.Create().SetGameID(rated).SetCreatorID(owner).SetContent(json.RawMessage(`{}`)).SetText("hi").SetStatus(int(comment.StatusVisible)).SaveX(ctx)
+	for _, status := range []entwalkthrough.Status{entwalkthrough.StatusPUBLISHED, entwalkthrough.StatusDRAFT, entwalkthrough.StatusHIDDEN, entwalkthrough.StatusDELETED} {
+		db.Ent.Walkthrough.Create().SetGameID(game).SetCreatorID(owner).SetTitle("Route guide").SetContent(json.RawMessage(`{}`)).SetText("guide").SetStatus(status).SaveX(ctx)
+	}
+	db.Ent.Walkthrough.Create().SetGameID(rated).SetCreatorID(owner).SetTitle("Route guide").SetContent(json.RawMessage(`{}`)).SetText("guide").SetStatus(entwalkthrough.StatusPUBLISHED).SaveX(ctx)
+	cases := []struct {
+		name  string
+		scope user.StatsScope
+		want  user.Stats
+	}{
+		{"a visitor is counted what is public", user.StatsScope{}, user.Stats{Comments: 2, Walkthroughs: 2}},
+		{"a strict visitor is not counted what belongs to a rated game", user.StatsScope{ExcludeRated: true}, user.Stats{Comments: 1, Walkthroughs: 1}},
+		{"the user is counted their drafts and hidden walkthroughs too", user.StatsScope{Own: true}, user.Stats{Comments: 2, Walkthroughs: 4}},
+	}
+	for _, c := range cases {
+		stats, err := repo.Stats(ctx, owner, c.scope)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if stats != c.want {
+			t.Fatalf("%s: %+v", c.name, stats)
+		}
 	}
 }
 

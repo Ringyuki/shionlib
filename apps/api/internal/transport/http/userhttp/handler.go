@@ -84,7 +84,7 @@ func (h *Handler) me(ctx context.Context, _ *struct{}) (*response.Output[userMeD
 }
 
 func (h *Handler) profile(ctx context.Context, in *userPathInput) (*response.Output[userProfileDTO], error) {
-	profile, err := h.service.Profile(ctx, in.ID)
+	profile, err := h.service.Profile(ctx, actor.From(ctx), in.ID)
 	if err != nil {
 		return nil, err
 	}

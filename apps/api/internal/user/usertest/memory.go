@@ -28,6 +28,7 @@ type MemoryRepository struct {
 	users            map[int]user.User
 	lastLogin        map[int]time.Time
 	stats            map[int]user.Stats
+	scopes           map[int]user.StatsScope
 	bans             []banRecord
 	defaultFavorites map[int]bool
 	deletedComments  map[int]bool
@@ -39,6 +40,7 @@ func NewMemoryRepository(now func() time.Time) *MemoryRepository {
 		users:            map[int]user.User{},
 		lastLogin:        map[int]time.Time{},
 		stats:            map[int]user.Stats{},
+		scopes:           map[int]user.StatsScope{},
 		defaultFavorites: map[int]bool{},
 		deletedComments:  map[int]bool{},
 	}
@@ -255,10 +257,17 @@ func setPtr[T any](dst **T, value *T) {
 	}
 }
 
-func (r *MemoryRepository) Stats(_ context.Context, id int) (user.Stats, error) {
+func (r *MemoryRepository) Stats(_ context.Context, id int, scope user.StatsScope) (user.Stats, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	r.scopes[id] = scope
 	return r.stats[id], nil
+}
+
+func (r *MemoryRepository) StatsScope(id int) user.StatsScope {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.scopes[id]
 }
 
 func (r *MemoryRepository) CreateBan(_ context.Context, in user.NewBan) error {

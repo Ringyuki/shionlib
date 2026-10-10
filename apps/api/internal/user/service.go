@@ -74,12 +74,12 @@ func (s *Service) Me(ctx context.Context, who actor.Actor) (User, error) {
 	return s.repo.Get(ctx, who.UserID)
 }
 
-func (s *Service) Profile(ctx context.Context, id int) (Profile, error) {
+func (s *Service) Profile(ctx context.Context, viewer actor.Actor, id int) (Profile, error) {
 	found, err := s.repo.Get(ctx, id)
 	if err != nil {
 		return Profile{}, err
 	}
-	stats, err := s.repo.Stats(ctx, id)
+	stats, err := s.repo.Stats(ctx, id, StatsScope{Own: viewer.UserID == id, ExcludeRated: !viewer.IncludesRated()})
 	if err != nil {
 		return Profile{}, err
 	}
