@@ -13,6 +13,7 @@ import type { ReactNode } from 'react'
 import { Link as RouterLink } from 'react-router'
 import { useFormatter, useLocale, useTranslations } from 'use-intl'
 import { developerNames, gamePath, gameTitle, primaryCover } from '~/features/game'
+import { listStart } from '~/shared/http/paging'
 import { usePageTurn } from '~/shared/route/use-page-turn'
 import { Button } from '~/shared/ui/button'
 import { itemsPageSize, type FavoriteItem, type Favorites } from '../favorite'
@@ -43,6 +44,8 @@ export function FavoriteItems({ favorites, listId, own, header, onEditNote }: Fa
   return (
     <DataList
       label={t('items')}
+      id={listStart}
+      className="scroll-mt-4"
       items={favorites.items}
       itemKey="id"
       mediaRatio={3 / 4}

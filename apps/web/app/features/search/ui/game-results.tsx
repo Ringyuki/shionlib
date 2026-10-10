@@ -2,7 +2,9 @@ import { DataList, Empty, Switch, Text } from '@hina-ui/react'
 import { SearchX } from 'lucide-react'
 import { useTranslations } from 'use-intl'
 import { GameRow, requiresResources, resourceRuleFor, type ResourceRule } from '~/features/game'
-import { resultsPageSize, type ResultsAddress, type SearchResults } from '../search'
+import { listStart } from '~/shared/http/paging'
+import { usePageTurn } from '~/shared/route/use-page-turn'
+import { resultsPageSize, resultsSearch, type ResultsAddress, type SearchResults } from '../search'
 
 type GameResultsProps = {
   query: string
@@ -24,9 +26,12 @@ export function GameResults({
   onGo,
 }: GameResultsProps) {
   const t = useTranslations('search.results')
+  const pages = usePageTurn()
   const narrowed = requiresResources(resources, filtered)
   return (
     <DataList
+      id={listStart}
+      className="scroll-mt-4"
       items={games.items ?? []}
       itemKey="id"
       layout="grid"
@@ -37,7 +42,7 @@ export function GameResults({
       total={games.total}
       page={page}
       pageSize={resultsPageSize}
-      onPageChange={next => onGo({ query, page: next, resources })}
+      onPageChange={next => pages.turn(resultsSearch({ query, page: next, resources }))}
       loading={loading}
       renderHeader={() => (
         <>

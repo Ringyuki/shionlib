@@ -3,6 +3,7 @@ import { Link as RouterLink } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 import { gamePath, gameTitle } from '~/features/game'
 import { publicText } from '~/shared/richtext/rich-text'
+import { listStart } from '~/shared/http/paging'
 import { usePageTurn } from '~/shared/route/use-page-turn'
 import { commentPath, userPageSize, type UserComments } from '../comment'
 
@@ -13,9 +14,10 @@ export function UserCommentList({ comments }: { comments: UserComments }) {
   return (
     <DataList
       label={t('userList')}
+      id={listStart}
       items={comments.items}
       itemKey="id"
-      className="mx-auto max-w-3xl"
+      className="mx-auto max-w-3xl scroll-mt-4"
       minHeight={0}
       manual
       pagination

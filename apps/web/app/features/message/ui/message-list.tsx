@@ -1,6 +1,6 @@
 import { cn, DataList, Empty, Flex, Indicator, Inline, Stack, Text } from '@hina-ui/react'
-import { useNavigate } from 'react-router'
 import { useFormatter, useLocale, useTranslations } from 'use-intl'
+import { listStart } from '~/shared/http/paging'
 import { InPageLink } from '~/shared/route/in-page-link'
 import { usePageTurn } from '~/shared/route/use-page-turn'
 import { inboxPath, pageSize, type Inbox } from '../message'
@@ -14,12 +14,12 @@ export function MessageList({ inbox, className }: MessageListProps) {
   const t = useTranslations('message')
   const locale = useLocale()
   const format = useFormatter()
-  const navigate = useNavigate()
   const pages = usePageTurn()
   const { category, page } = inbox
   return (
     <DataList
       label={t('list')}
+      id={listStart}
       items={inbox.items}
       itemKey="id"
       size="sm"
@@ -29,9 +29,9 @@ export function MessageList({ inbox, className }: MessageListProps) {
       total={inbox.total}
       page={page}
       pageSize={pageSize}
-      onPageChange={next => void navigate(inboxPath(locale, { category, page: next }))}
+      onPageChange={next => pages.turn(inboxPath(locale, { category, page: next }))}
       loading={pages.turning}
-      className={className}
+      className={cn('scroll-mt-4', className)}
       itemClass="py-0.5"
       renderEmpty={() => <Empty title={t(`empty.${category}`)} size="sm" />}
     >

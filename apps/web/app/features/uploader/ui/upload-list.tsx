@@ -1,6 +1,7 @@
 import { DataList, Empty } from '@hina-ui/react'
 import { useTranslations } from 'use-intl'
 import type { ResourceViewer } from '~/features/resource'
+import { listStart } from '~/shared/http/paging'
 import { emptinessOf, entriesOf, pageSize, type Transfer, type UploaderContent } from '../uploader'
 import { useListing } from '../use-listing'
 import { ListToolbar } from './list-toolbar'
@@ -21,6 +22,8 @@ export function UploadList({ content, transfers, viewer }: UploadListProps) {
   return (
     <DataList
       label={t('label')}
+      id={listStart}
+      className="scroll-mt-4 xl:scroll-mt-6"
       items={entriesOf(listing, transfers, resources)}
       itemKey="key"
       manual

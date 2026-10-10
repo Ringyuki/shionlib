@@ -2,6 +2,7 @@ import { Button, DataList, Empty } from '@hina-ui/react'
 import { SearchX } from 'lucide-react'
 import { useTranslations } from 'use-intl'
 import { GameTile } from '~/features/game'
+import { listStart } from '~/shared/http/paging'
 import {
   narrowedToResources,
   pageSize,
@@ -34,6 +35,8 @@ export function LibraryList({
   return (
     <DataList
       label={t('label')}
+      id={listStart}
+      className="scroll-mt-4 xl:scroll-mt-6"
       items={content.games}
       itemKey="id"
       layout="grid"

@@ -2,6 +2,7 @@ import { DataList, Empty, Inline, Link, Text } from '@hina-ui/react'
 import { Plus } from 'lucide-react'
 import { Link as RouterLink } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
+import { listStart } from '~/shared/http/paging'
 import { usePageTurn } from '~/shared/route/use-page-turn'
 import { Button } from '~/shared/ui/button'
 import { pageSize, walkthroughPath, writingPath, type Walkthroughs } from '../walkthrough'
@@ -22,9 +23,10 @@ export function WalkthroughList({ walkthroughs }: { walkthroughs: Walkthroughs }
   return (
     <DataList
       label={t('list')}
+      id={listStart}
       items={items}
       itemKey="id"
-      className="mx-auto max-w-3xl"
+      className="mx-auto max-w-3xl scroll-mt-4"
       minHeight={0}
       manual
       pagination

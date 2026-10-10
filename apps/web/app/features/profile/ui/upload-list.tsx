@@ -3,6 +3,7 @@ import { Upload as UploadIcon } from 'lucide-react'
 import { Link } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 import { sitePaths } from '~/features/shell'
+import { listStart } from '~/shared/http/paging'
 import { usePageTurn } from '~/shared/route/use-page-turn'
 import { Button } from '~/shared/ui/button'
 import { uploadsPageSize, type Uploads } from '../profile'
@@ -20,6 +21,8 @@ export function UploadList({ uploads, own }: UploadListProps) {
   return (
     <DataList
       label={t('label')}
+      id={listStart}
+      className="scroll-mt-4"
       items={uploads.items}
       itemKey="id"
       layout="grid"

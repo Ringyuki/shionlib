@@ -3,6 +3,7 @@ import { Link as RouterLink, useLocation } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 import { gamePath, gameTitle } from '~/features/game'
 import { useInPageNavigate } from '~/shared/route/use-in-page-navigate'
+import { listStart } from '~/shared/http/paging'
 import { usePageTurn } from '~/shared/route/use-page-turn'
 import { Button } from '~/shared/ui/button'
 import {
@@ -31,9 +32,10 @@ export function UserWalkthroughList({ walkthroughs, own }: UserWalkthroughListPr
   return (
     <DataList
       label={t('userList')}
+      id={listStart}
       items={walkthroughs.items}
       itemKey="id"
-      className="mx-auto max-w-3xl"
+      className="mx-auto max-w-3xl scroll-mt-4"
       minHeight={0}
       manual
       pagination

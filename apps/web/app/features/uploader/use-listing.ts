@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react'
-import { useLocation, useNavigate, useNavigation } from 'react-router'
 import { useInPageNavigate } from '~/shared/route/use-in-page-navigate'
+import { usePageTurn } from '~/shared/route/use-page-turn'
 import { listingSearch, searchDelay, type Listing, type Order, type Stage } from './uploader'
 
 export function useListing(listing: Listing) {
-  const navigate = useNavigate()
   const stay = useInPageNavigate()
-  const navigation = useNavigation()
-  const location = useLocation()
+  const { turning, turn } = usePageTurn()
   const [draft, setDraft] = useState(listing.search)
   const [known, setKnown] = useState(listing.search)
   if (known !== listing.search) {
@@ -32,9 +30,9 @@ export function useListing(listing: Listing) {
   return {
     draft,
     setDraft,
-    turning: navigation.state === 'loading' && navigation.location.pathname === location.pathname,
+    turning,
     setStage: (stage: Stage | undefined) => narrow({ stage }),
     setOrder: ({ sort, ascending }: Order) => narrow({ sort, ascending }),
-    setPage: (page: number) => void navigate({ search: listingSearch({ ...listing, page }) }),
+    setPage: (page: number) => turn({ search: listingSearch({ ...listing, page }) }),
   }
 }

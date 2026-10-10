@@ -2,6 +2,7 @@ import { DataList } from '@hina-ui/react'
 import type { ReactNode } from 'react'
 import { useLocation } from 'react-router'
 import { useInPageNavigate } from '~/shared/route/use-in-page-navigate'
+import { listStart } from '~/shared/http/paging'
 import { usePageTurn } from '~/shared/route/use-page-turn'
 import { worksPageSize, type GameSummary, type Works } from '../game'
 import { searchInOrder, workOrders } from '../game-order'
@@ -23,6 +24,8 @@ export function GameGrid({ label, works, empty, sortable, renderNote }: GameGrid
   return (
     <DataList
       label={label}
+      id={listStart}
+      className="scroll-mt-4"
       items={works.games}
       itemKey="id"
       layout="grid"

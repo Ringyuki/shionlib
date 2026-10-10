@@ -11,6 +11,7 @@ import {
 import { History } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router'
 import { useTranslations } from 'use-intl'
+import { listStart } from '~/shared/http/paging'
 import { usePageTurn } from '~/shared/route/use-page-turn'
 import { feedKinds, pageSize, searchOfKind, type Feed } from '../activity'
 import { feedKindFrom } from '../activity.schema'
@@ -39,6 +40,8 @@ export function ActivityPage({ feed }: { feed: Feed }) {
       ) : (
         <Timeline
           aria-label={t('title')}
+          id={listStart}
+          className="scroll-mt-4"
           items={feed.happenings}
           renderMarker={({ item }) => (
             <Avatar

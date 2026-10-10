@@ -1,5 +1,7 @@
 export const pageKey = 'page'
 
+export const listStart = 'list'
+
 export function lastPage(total: number, pageSize: number): number {
   return Math.max(1, Math.ceil(total / pageSize))
 }

@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react'
 import { useLocation } from 'react-router'
 import { useTranslations } from 'use-intl'
 import { useInPageNavigate } from '~/shared/route/use-in-page-navigate'
+import { listStart } from '~/shared/http/paging'
 import { usePageTurn } from '~/shared/route/use-page-turn'
 import {
   pageSize,
@@ -45,6 +46,8 @@ export function CommentsView({ comments, writer }: CommentsViewProps) {
       )}
       <DataList
         label={t('list')}
+        id={listStart}
+        className="scroll-mt-4"
         items={threads}
         itemKey="id"
         divided={false}

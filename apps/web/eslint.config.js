@@ -92,6 +92,13 @@ const rawAddress = {
     'A loader or action reads its address from args.url: request.url is the raw request, which carries the .data suffix and the _routes parameter when the browser asks for data.',
 }
 
+const pagedListStart = {
+  selector:
+    "JSXOpeningElement[name.name='DataList']:has(JSXAttribute[name.name='pagination']):not(:has(JSXAttribute[name.name='id'][value.expression.name='listStart']))",
+  message:
+    'A list with pages carries id={listStart} (~/shared/http/paging) and a scroll margin: turning a page through usePageTurn (~/shared/route/use-page-turn) lands at that element.',
+}
+
 const inPageTools = [
   'app/shared/route/use-in-page-navigate.ts',
   'app/shared/route/in-page-link.tsx',
@@ -105,6 +112,7 @@ const appSyntax = [
   hinaInternals,
   directFetcher,
   rawAddress,
+  pagedListStart,
 ]
 
 const otherValidators = ['zod', 'yup', 'joi', 'ajv', 'superstruct', 'io-ts', 'arktype'].map(
