@@ -2,84 +2,14 @@
   "toolbar": "Formatting",
   "tool": {
     "bold": "Bold",
-    "italic": "Italic",
-    "strike": "Strikethrough",
     "spoiler": "Spoiler",
-    "heading": "Text style",
-    "bulletList": "Bulleted list",
-    "orderedList": "Numbered list",
-    "blockquote": "Quote",
-    "horizontalRule": "Divider",
-    "link": "Link",
-    "image": "Picture",
-    "table": "Table"
+    "link": "Link"
   },
-  "choice": {
-    "paragraph": "Body text",
-    "heading2": "Heading",
-    "heading3": "Subheading"
-  },
-  "command": {
-    "paragraph": "Body text",
-    "heading2": "Heading",
-    "heading3": "Subheading",
-    "bulletList": "Bulleted list",
-    "orderedList": "Numbered list",
-    "blockquote": "Quote",
-    "horizontalRule": "Divider",
-    "image": "Picture",
-    "table": "Table"
-  },
-  "commands": "Insert",
-  "noCommand": "Nothing matches",
-  "undo": "Undo",
-  "redo": "Redo",
   "confirm": "Confirm",
-  "retry": "Retry",
-  "remove": "Remove",
   "linkAddress": "Link address",
   "linkAddressHint": "Enter the link address",
   "linkOpen": "Open in a new tab",
   "linkRemove": "Remove link",
-  "removePicture": "Delete picture",
-  "pictureCaption": "Caption",
-  "pictureCaptionHint": "Add a caption",
-  "pictureSize": {
-    "small": "Small",
-    "medium": "Medium",
-    "large": "Large"
-  },
-  "uploading": "Uploading {percent, number}%",
-  "uploadFailed": "Upload failed",
-  "table": {
-    "rowMenu": "Row actions",
-    "columnMenu": "Column actions",
-    "selectRow": "Select this row",
-    "selectColumn": "Select this column",
-    "appendRow": "Add a row below",
-    "appendColumn": "Add a column to the right",
-    "rowAbove": "Insert row above",
-    "rowBelow": "Insert row below",
-    "columnLeft": "Insert column to the left",
-    "columnRight": "Insert column to the right",
-    "align": "Alignment",
-    "aligned": {
-      "left": "Align left",
-      "center": "Centre",
-      "right": "Align right"
-    },
-    "headerRow": "Header row",
-    "deleteRow": "Delete row",
-    "deleteColumn": "Delete column"
-  },
-  "block": {
-    "drag": "Drag to reorder, click for the menu",
-    "add": "Add below",
-    "menu": "Block actions",
-    "turnInto": "Turn into",
-    "duplicate": "Duplicate",
-    "remove": "Delete"
-  },
   "issue": {
     "address": "Enter an address that starts with http, https or mailto"
   }

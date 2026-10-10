@@ -28,7 +28,7 @@ export function ComposerTools({
     <Grid gap="none" inert={!shown} className={toolsReveal(shown)}>
       <Stack gap="none" className={toolsClip}>
         <Inline justify="between" align="center" wrap={false} className={toolsInset(collapsible)}>
-          <EditorToolbar handle={handle} flat />
+          <EditorToolbar handle={handle} />
           <Inline gap="none" align="center" wrap={false} className="gap-0.5">
             <Button
               size="sm"

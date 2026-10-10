@@ -60,7 +60,7 @@ app/
     catalog/                   links back to the catalog source (Hikarinagi entry and editor URLs)
     storage/                   readLocal/writeLocal over localStorage
     vendor/                    browser clients of services that are not our API (Cap, aria2, game managers); the only fetch outside api/
-    richtext/                  rich text documents (what comments and the note of a walkthrough store): model, guards, text, sections; no editor
+    richtext/                  rich text documents (what comments and the note of a walkthrough store): model, guards, text; no editor
     editor/                    the rich text editor on Tiptap: plugins, profiles, a session per editor, parts built from hina-ui (ui/);
                                its engine (engine/) is loaded on demand
     i18n/  ui/                 <topic>.schema.ts beside a module holds its input guards
@@ -108,7 +108,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 - MUST NOT import React state/effects or `ApiClient` into route modules, or call `api.*` there (lint).
 - MUST NOT import another feature's internals, or `*.server` modules from client code (lint).
 - MUST NOT import `@tiptap/*` outside `~/shared/editor`, load the editor's engine statically (`~/shared/editor/engine/**` is reached only through `import('./engine')`; the rest of the editor imports Tiptap's types), or import `~/shared/editor` from `~/shared/richtext` or `RichText`: a page that only shows documents never downloads the editor (lint).
-- MUST NOT call the API from the browser, except for uploads that show their progress: `features/upload` (the upload endpoints and the calls that turn finished uploads into resource files) and `features/media` (a picture for a document), which go through `~/shared/api/browser-client` and `~/shared/api/chunk` over the XHR adapter, and the message stream, which goes through `~/shared/api/event-stream` (`references/data.md`, lint).
+- MUST NOT call the API from the browser, except from `features/upload` (the upload endpoints and the calls that turn finished uploads into resource files), which goes through `~/shared/api/browser-client` and `~/shared/api/chunk` over the XHR adapter, and the message stream, which goes through `~/shared/api/event-stream` (`references/data.md`, lint).
 - MUST NOT store server data in global client state; the router's loader data and fetchers are the cache. The one client-side process is the upload manager (`features/upload`), which holds running uploads, not server data for pages.
 
 ## Where things go
@@ -152,11 +152,10 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 | A page with tabs (game page)?                        | parent route loads what the tabs share; each tab is a child route reading `matches`; hina `Tabs` driven by the URL (`references/ui.md`)            |
 | Choices of an enum field (platforms, reasons)?       | the model reads `constraints.<Body>.<field>.enum` / `.itemEnum` from `~/shared/api/generated/constraints`; never list them by hand                 |
 | Catalog data on a page (game, character, developer)? | `CatalogAttribution` from `~/shared/ui/catalog-attribution` with the entry's `h_id`; it is required by Hikarinagi's terms                          |
-| A document a user writes (comments, a walkthrough's note)? | a rich text document, the API's `RichTextDocument`: `useRichEditor({ profile, value, onValueChange, placeholder, upload })` from `~/shared/editor` gives a handle; the caller lays out the parts it wants around it (`EditorSurface`, `EditorToolbar`, `EditorBubbleMenu`, `EditorTableMenu`, `EditorBlockHandle` with `EditorBlockMenu`, and always `EditorOverlays`); `RichText` (`~/shared/ui/rich-text`) shows it (`references/ui.md`) |
-| Text, length, sections or emptiness of a document?   | `plainText`, `publicText`, `textLength`, `sectionsOf`, `isBlank`, `sameDocument` from `~/shared/richtext/rich-text`; `richDocument` (`rich-text.schema.ts`) in command and form schemas |
+| A document a user writes (comments, a walkthrough's note)? | a rich text document, the API's `RichTextDocument`: `useRichEditor({ profile, value, onValueChange, placeholder })` from `~/shared/editor` gives a handle; the caller lays out the parts around it (`EditorSurface`, `EditorToolbar`, and always `EditorOverlays`); `RichText` (`~/shared/ui/rich-text`) shows it (`references/ui.md`) |
+| Text or emptiness of a document?                     | `plainText`, `publicText`, `isBlank`, `sameDocument` from `~/shared/richtext/rich-text`; `richDocument` (`rich-text.schema.ts`) in command and form schemas |
 | A new node, mark, attribute or tool for the editor?  | the API first (`internal/richtext`, ADR 0013), then `pnpm api:generate`, then a plugin in `~/shared/editor/plugins`, its extension in `engine/extensions.ts`, its place in a profile (`profiles.ts`), its texts (`messages/editor`) and the tag in `RichText`; the compiler and `engine.test.ts` point at each place |
 | Choosing the area of a picture before upload?        | `usePictureCrop()` and `ImageCropDialog` (`~/shared/ui`): `pick(file)` opens the dialog, `onCrop(file)` uploads the result (`references/ui.md`) |
-| A picture inside a document?                         | `useDocumentPicture()` from `~/features/media`, passed to `useRichEditor` as `upload`; the document stores the key the API answers with |
 | A page that must not be left with unsaved work?      | `useLeaveGuard(dirty)` (`~/shared/route/use-leave-guard`): an `AlertDialog` shown while `leaving`; `release()` lets the one navigation that follows a save through |
 | Reordering a list by dragging?                       | `Sortable` around the rows and `useSortableRow(id, role)` in each (`~/shared/ui/sortable`, the one place that imports dnd-kit); the feature gives the texts it speaks |
 | A loader that must not run again when only the query changes? | the route exports `keptThroughSearch` as `shouldRevalidate` (`~/shared/route/revalidation`); what the query selects is then read on the client in a hook (`useShownRoute`) |

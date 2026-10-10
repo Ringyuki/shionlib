@@ -44,7 +44,7 @@ export function NoteField({ value, error, onValueChange }: NoteFieldProps) {
             contentClassName="min-h-[calc(3lh+0.5rem)] ps-3 pe-2.5 pt-2"
           />
           <Inline className="ps-1.5 pe-2.5 pb-2">
-            <EditorToolbar handle={handle} flat />
+            <EditorToolbar handle={handle} />
           </Inline>
         </Card>
         <EditorOverlays handle={handle} />

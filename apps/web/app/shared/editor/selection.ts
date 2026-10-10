@@ -13,18 +13,13 @@ export function rangeRect(editor: RichEditor, from: number, to: number): DOMRect
   return new DOMRect(left, top, right - left, bottom - top)
 }
 
-export function selectionRect(editor: RichEditor): DOMRect {
+function selectionRect(editor: RichEditor): DOMRect {
   const { from, to } = editor.state.selection
   return rangeRect(editor, from, to)
 }
 
 export function selectionAnchor(editor: RichEditor): OverlayAnchor {
   return { contextElement: editor.view.dom, getBoundingClientRect: () => selectionRect(editor) }
-}
-
-export function selectedText(editor: RichEditor): string {
-  const { from, to } = editor.state.selection
-  return editor.state.doc.textBetween(from, to, ' ')
 }
 
 export function linkAtSelection(editor: RichEditor): string {

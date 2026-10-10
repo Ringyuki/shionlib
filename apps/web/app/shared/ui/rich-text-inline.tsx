@@ -34,7 +34,5 @@ function Leaf({ node }: { node: RichNode }) {
   if (node.type === 'hard_break') {
     return <br />
   }
-  const struck = hasMark(node.marks, 'strike') ? <s>{node.text}</s> : node.text
-  const slanted = hasMark(node.marks, 'italic') ? <em>{struck}</em> : struck
-  return hasMark(node.marks, 'bold') ? <strong>{slanted}</strong> : slanted
+  return hasMark(node.marks, 'bold') ? <strong>{node.text}</strong> : node.text
 }

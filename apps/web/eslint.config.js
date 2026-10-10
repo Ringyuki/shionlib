@@ -138,7 +138,7 @@ const clientSafe = {
 const browserCalls = {
   regex: '^~/shared/api/(browser-client|chunk|xhr)$',
   message:
-    'Only uploads call the API from the browser, for their progress (features/upload, features/media); everything else goes through loaders and actions.',
+    'Only uploads call the API from the browser, for their progress (features/upload); everything else goes through loaders and actions.',
 }
 
 const importRules = patterns => [
@@ -475,7 +475,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['app/features/upload/**/*.{ts,tsx}', 'app/features/media/**/*.{ts,tsx}'],
+    files: ['app/features/upload/**/*.{ts,tsx}'],
     rules: {
       '@typescript-eslint/no-restricted-imports': uploadImports(
         featureEntry,
@@ -485,7 +485,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['app/features/upload/*.ts', 'app/features/media/*.ts'],
+    files: ['app/features/upload/*.ts'],
     ignores: [...pureIgnores, '**/*.test.ts'],
     rules: {
       '@typescript-eslint/no-restricted-imports': uploadImports(

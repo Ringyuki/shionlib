@@ -8,13 +8,8 @@ const refreshPath = '/auth/token/refresh' satisfies ApiPath<'post'>
 
 let refreshing: Promise<boolean> | undefined
 
-export type UploadWatch = (sent: number, total: number) => void
-
-export function createBrowserApi(origin: string = location.origin, watch?: UploadWatch): ApiClient {
-  return createApi({
-    baseUrl: origin + browserApiBase,
-    fetch: request => browserFetch(request, watch),
-  })
+export function createBrowserApi(origin: string = location.origin): ApiClient {
+  return createApi({ baseUrl: origin + browserApiBase, fetch: browserFetch })
 }
 
 export async function sendWithSession(request: XhrRequest): Promise<XhrResponse> {
@@ -33,7 +28,7 @@ export function jsonOf(response: XhrResponse): unknown {
   }
 }
 
-async function browserFetch(request: Request, watch: UploadWatch | undefined): Promise<Response> {
+async function browserFetch(request: Request): Promise<Response> {
   const body = request.body === null ? null : await request.blob()
   const response = await sendWithSession({
     method: request.method,
@@ -41,8 +36,6 @@ async function browserFetch(request: Request, watch: UploadWatch | undefined): P
     headers: request.headers,
     body,
     signal: request.signal,
-    onUploadProgress:
-      watch === undefined || body === null ? undefined : sent => watch(sent, body.size),
   })
   return toResponse(response)
 }

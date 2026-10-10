@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { useStore, type LinkOverlay } from '../session'
 import type { EditorHandle } from '../use-rich-editor'
-import { CommandMenu } from './command-menu'
 import { LinkForm } from './link-form'
 import { useNarrow } from './use-narrow'
 
@@ -66,7 +65,6 @@ export function EditorOverlays({ handle }: { handle: EditorHandle }) {
         title={t('tool.link')}
         renderContent={() => form}
       />
-      <CommandMenu handle={handle} />
     </>
   )
 }

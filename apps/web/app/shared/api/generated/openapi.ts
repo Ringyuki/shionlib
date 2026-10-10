@@ -2908,23 +2908,6 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/uploads/small/richtext/image": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Upload a picture for a rich text document */
-        put: operations["upload.richTextImage"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/user": {
         parameters: {
             query?: never;
@@ -6592,16 +6575,6 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
-        EnvelopeUploadedPictureDTO: {
-            /** Format: int64 */
-            code: number;
-            data: components["schemas"]["UploadedPictureDTO"];
-            message: string;
-            meta?: components["schemas"]["Meta"];
-            requestId: string;
-            /** Format: date-time */
-            timestamp: string;
-        };
         EnvelopeUserBioDTO: {
             /** Format: int64 */
             code: number;
@@ -7626,7 +7599,7 @@ export type components = {
             /** @enum {string} */
             verdict: "VALID" | "INVALID";
         };
-        /** @description A rich text document: what the editor stores for comments and walkthroughs */
+        /** @description A rich text document: what the editor stores for a comment and for the note of a walkthrough */
         RichTextDocument: {
             content: components["schemas"]["RichTextNode"][];
             /** @enum {string} */
@@ -7639,40 +7612,16 @@ export type components = {
                 href?: string;
             };
             /** @enum {string} */
-            type: "bold" | "italic" | "strike" | "link" | "spoiler";
+            type: "bold" | "link" | "spoiler";
         };
-        /** @description A block or inline node; which nodes a field accepts depends on the field */
+        /** @description A paragraph, or what stands in one: text or a line break */
         RichTextNode: {
-            attrs?: {
-                /**
-                 * @description Text alignment of a table cell; null follows the reading direction
-                 * @enum {string|null}
-                 */
-                align?: "left" | "center" | "right" | null;
-                alt?: string;
-                caption?: string;
-                colspan?: number;
-                /** @description Column widths of a table cell in pixels, one per column it spans; null when none was set */
-                colwidth?: number[] | null;
-                height?: number;
-                /**
-                 * @description Heading level
-                 * @enum {integer}
-                 */
-                level?: 2 | 3;
-                rowspan?: number;
-                /** @description Key of an image_block, as returned by the rich text picture upload */
-                src?: string;
-                width?: number;
-                /** @description Share of the text column an image_block is shown at; it is never shown wider than it is */
-                width_percent?: number;
-            };
             content?: components["schemas"]["RichTextNode"][];
             marks?: components["schemas"]["RichTextMark"][];
             /** @description Text of a text node */
             text?: string;
             /** @enum {string} */
-            type: "paragraph" | "heading" | "blockquote" | "bullet_list" | "ordered_list" | "list_item" | "horizontal_rule" | "image_block" | "table" | "table_row" | "table_header" | "table_cell" | "hard_break" | "text";
+            type: "paragraph" | "hard_break" | "text";
         };
         SearchCharacterDTO: {
             aliases: string[] | null;
@@ -7982,14 +7931,6 @@ export type components = {
         };
         UploadedImageDTO: {
             key: string;
-        };
-        UploadedPictureDTO: {
-            /** Format: int64 */
-            height: number;
-            /** @description What an image_block node takes as src */
-            key: string;
-            /** Format: int64 */
-            width: number;
         };
         UserBioDTO: {
             bio: string;
@@ -15089,43 +15030,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeUploadedImageDTO"];
-                };
-            };
-            /** @description Error */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    "upload.richTextImage": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "multipart/form-data": {
-                    /** Format: binary */
-                    file?: string;
-                };
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    "shionlib-auth-stale"?: string;
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EnvelopeUploadedPictureDTO"];
                 };
             };
             /** @description Error */

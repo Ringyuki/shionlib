@@ -2,84 +2,14 @@
   "toolbar": "書式",
   "tool": {
     "bold": "太字",
-    "italic": "斜体",
-    "strike": "取り消し線",
     "spoiler": "ネタバレ",
-    "heading": "段落スタイル",
-    "bulletList": "箇条書き",
-    "orderedList": "番号付きリスト",
-    "blockquote": "引用",
-    "horizontalRule": "区切り線",
-    "link": "リンク",
-    "image": "画像",
-    "table": "表"
+    "link": "リンク"
   },
-  "choice": {
-    "paragraph": "本文",
-    "heading2": "見出し",
-    "heading3": "小見出し"
-  },
-  "command": {
-    "paragraph": "本文",
-    "heading2": "見出し",
-    "heading3": "小見出し",
-    "bulletList": "箇条書き",
-    "orderedList": "番号付きリスト",
-    "blockquote": "引用",
-    "horizontalRule": "区切り線",
-    "image": "画像",
-    "table": "表"
-  },
-  "commands": "挿入",
-  "noCommand": "一致する項目がありません",
-  "undo": "元に戻す",
-  "redo": "やり直す",
   "confirm": "確定",
-  "retry": "再試行",
-  "remove": "取り除く",
   "linkAddress": "リンク先",
   "linkAddressHint": "リンク先を入力",
   "linkOpen": "新しいタブで開く",
   "linkRemove": "リンクを解除",
-  "removePicture": "画像を削除",
-  "pictureCaption": "キャプション",
-  "pictureCaptionHint": "キャプションを追加",
-  "pictureSize": {
-    "small": "小",
-    "medium": "中",
-    "large": "大"
-  },
-  "uploading": "アップロード中 {percent, number}%",
-  "uploadFailed": "アップロードに失敗しました",
-  "table": {
-    "rowMenu": "行の操作",
-    "columnMenu": "列の操作",
-    "selectRow": "この行を選択",
-    "selectColumn": "この列を選択",
-    "appendRow": "下に行を追加",
-    "appendColumn": "右に列を追加",
-    "rowAbove": "上に行を挿入",
-    "rowBelow": "下に行を挿入",
-    "columnLeft": "左に列を挿入",
-    "columnRight": "右に列を挿入",
-    "align": "配置",
-    "aligned": {
-      "left": "左揃え",
-      "center": "中央揃え",
-      "right": "右揃え"
-    },
-    "headerRow": "見出し行にする",
-    "deleteRow": "行を削除",
-    "deleteColumn": "列を削除"
-  },
-  "block": {
-    "drag": "ドラッグで並べ替え、クリックでメニュー",
-    "add": "下に追加",
-    "menu": "ブロックの操作",
-    "turnInto": "変換",
-    "duplicate": "複製",
-    "remove": "削除"
-  },
   "issue": {
     "address": "http、https または mailto で始まるアドレスを入力してください"
   }

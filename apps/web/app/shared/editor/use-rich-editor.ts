@@ -1,4 +1,3 @@
-import { useImageResolver } from '@hina-ui/react'
 import {
   useCallback,
   useEffect,
@@ -8,19 +7,12 @@ import {
   useSyncExternalStore,
   type ComponentType,
 } from 'react'
-import { useTranslations } from 'use-intl'
 import type { RichDocument } from '~/shared/richtext/rich-text'
 import type { EditorPlugin, RichEditor } from './plugin'
-import { commandsOf, movesBlocks, pluginsOf, type Profile } from './profiles'
-import {
-  createSession,
-  useStore,
-  type EditorSession,
-  type EngineLabels,
-  type PictureUpload,
-} from './session'
+import { pluginsOf, type Profile } from './profiles'
+import { createSession, useStore, type EditorSession } from './session'
 
-export type EditorContent = ComponentType<{ editor: RichEditor | null; className?: string }>
+export type EditorContent = ComponentType<{ editor: RichEditor | null }>
 
 export type EditorHandle = {
   editor: RichEditor | null
@@ -35,7 +27,6 @@ type RichEditorOptions = {
   value: RichDocument
   onValueChange: (value: RichDocument) => void
   placeholder?: string
-  upload?: PictureUpload
 }
 
 type Engine = { editor: RichEditor; Content: EditorContent }
@@ -45,32 +36,15 @@ export function useRichEditor({
   value,
   onValueChange,
   placeholder = '',
-  upload,
 }: RichEditorOptions): EditorHandle {
-  const t = useTranslations('editor')
-  const resolveImage = useImageResolver()
   const plugins = useMemo(() => pluginsOf(profile), [profile])
   const [engine, setEngine] = useState<Engine | null>(null)
   const [failure, setFailure] = useState<unknown>(undefined)
   const shown = useRef(value)
-  const labels: EngineLabels = {
-    selectRow: t('table.selectRow'),
-    selectColumn: t('table.selectColumn'),
-    appendRow: t('table.appendRow'),
-    appendColumn: t('table.appendColumn'),
-    dragBlock: t('block.drag'),
-    addBlock: t('block.add'),
-    uploading: percent => t('uploading', { percent }),
-    uploadFailed: t('uploadFailed'),
-    retryUpload: t('retry'),
-    dropUpload: t('remove'),
-  }
-  const latest = useRef({ value, onValueChange, labels })
+  const latest = useRef({ value, onValueChange })
   const [session] = useState(createSession)
   useEffect(() => {
-    latest.current = { value, onValueChange, labels }
-    session.upload.set(upload)
-    session.resolvePicture.set(key => resolveImage(key, 'image'))
+    latest.current = { value, onValueChange }
   })
   useEffect(() => {
     let created: RichEditor | undefined
@@ -82,10 +56,7 @@ export function useRichEditor({
       shown.current = latest.current.value
       created = createEditor({
         plugins,
-        commands: commandsOf(profile),
-        blocks: movesBlocks(profile),
         session,
-        labels: latest.current.labels,
         placeholder,
         content: latest.current.value,
         onChange: next => {
@@ -100,7 +71,7 @@ export function useRichEditor({
       created?.destroy()
       setEngine(null)
     }
-  }, [profile, plugins, session, placeholder])
+  }, [plugins, session, placeholder])
   const editor = engine?.editor ?? null
   useEffect(() => {
     if (editor !== null && value !== shown.current) {
@@ -112,10 +83,6 @@ export function useRichEditor({
     throw failure
   }
   return { editor, Content: engine?.Content ?? null, plugins, session, placeholder }
-}
-
-export function useEditorUploading(handle: EditorHandle): boolean {
-  return useStore(handle.session.uploading) > 0
 }
 
 export function useEditorLinking(handle: EditorHandle): boolean {

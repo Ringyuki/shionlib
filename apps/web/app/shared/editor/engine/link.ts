@@ -3,7 +3,7 @@ import { Link } from '@tiptap/extension-link'
 import { Plugin, PluginKey, type EditorState } from '@tiptap/pm/state'
 import { Decoration, DecorationSet } from '@tiptap/pm/view'
 import { linkAddressFrom } from '~/shared/richtext/rich-text.schema'
-import { openLink } from '../plugins/inserts'
+import { openLink } from '../plugins/link'
 import { rangeRect } from '../selection'
 import type { EditorSession } from '../session'
 

@@ -1,45 +1,19 @@
 import { cn, Prose, Stack, Text } from '@hina-ui/react'
-import { useLayoutEffect, type ReactNode } from 'react'
+import { useLayoutEffect } from 'react'
 import type { EditorHandle } from '../use-rich-editor'
-import { SessionContext } from './session-context'
 
-export type Clearance = { top: number; bottom: number }
-
-type EditorSurfaceProps = {
-  handle: EditorHandle
-  label: string
-  clearance?: Clearance
-  className?: string
-  contentClassName?: string
-  children?: ReactNode
-}
+type EditorSurfaceProps = { handle: EditorHandle; label: string; contentClassName?: string }
 
 const scrollEdge = 5
 
-const noClearance: Clearance = { top: 0, bottom: 0 }
-
-export function EditorSurface({
-  handle,
-  label,
-  clearance = noClearance,
-  className,
-  contentClassName,
-  children,
-}: EditorSurfaceProps) {
-  const { editor, Content, session, placeholder } = handle
+export function EditorSurface({ handle, label, contentClassName }: EditorSurfaceProps) {
+  const { editor, Content, placeholder } = handle
   const content = cn('rich-editor hn-prose', contentClassName)
-  const { top, bottom } = clearance
   useLayoutEffect(() => {
-    const edges = {
-      top: top + scrollEdge,
-      right: scrollEdge,
-      bottom: bottom + scrollEdge,
-      left: scrollEdge,
-    }
     editor?.setOptions({
       editorProps: {
-        scrollMargin: edges,
-        scrollThreshold: edges,
+        scrollMargin: scrollEdge,
+        scrollThreshold: scrollEdge,
         attributes: {
           class: content,
           role: 'textbox',
@@ -48,10 +22,10 @@ export function EditorSurface({
         },
       },
     })
-  }, [editor, label, content, top, bottom])
+  }, [editor, label, content])
   if (Content === null) {
     return (
-      <Stack gap="none" className={className}>
+      <Stack gap="none">
         <Prose className={content}>
           <Text as="p" size="inherit" tone="faint">
             {placeholder}
@@ -60,12 +34,5 @@ export function EditorSurface({
       </Stack>
     )
   }
-  return (
-    <SessionContext value={session}>
-      <Stack gap="none" className="relative">
-        <Content editor={editor} className={className} />
-        {children}
-      </Stack>
-    </SessionContext>
-  )
+  return <Content editor={editor} />
 }

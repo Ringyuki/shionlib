@@ -1581,97 +1581,12 @@ export const constraints = {
       "nullable": false,
       "enum": [
         "bold",
-        "italic",
-        "strike",
         "link",
         "spoiler"
       ]
     }
   },
   "RichTextNode": {
-    "attrs": {
-      "type": "object",
-      "required": false,
-      "nullable": false,
-      "fields": {
-        "align": {
-          "type": "string",
-          "required": false,
-          "nullable": true,
-          "enum": [
-            "left",
-            "center",
-            "right"
-          ]
-        },
-        "alt": {
-          "type": "string",
-          "required": false,
-          "nullable": false,
-          "maxLength": 200
-        },
-        "caption": {
-          "type": "string",
-          "required": false,
-          "nullable": false,
-          "maxLength": 500
-        },
-        "colspan": {
-          "type": "integer",
-          "required": false,
-          "nullable": false,
-          "minimum": 1,
-          "maximum": 50
-        },
-        "colwidth": {
-          "type": "array",
-          "required": false,
-          "nullable": true
-        },
-        "height": {
-          "type": "integer",
-          "required": false,
-          "nullable": false,
-          "minimum": 1,
-          "maximum": 10000
-        },
-        "level": {
-          "type": "integer",
-          "required": false,
-          "nullable": false,
-          "enum": [
-            2,
-            3
-          ]
-        },
-        "rowspan": {
-          "type": "integer",
-          "required": false,
-          "nullable": false,
-          "minimum": 1,
-          "maximum": 50
-        },
-        "src": {
-          "type": "string",
-          "required": false,
-          "nullable": false
-        },
-        "width": {
-          "type": "integer",
-          "required": false,
-          "nullable": false,
-          "minimum": 1,
-          "maximum": 10000
-        },
-        "width_percent": {
-          "type": "integer",
-          "required": false,
-          "nullable": false,
-          "minimum": 20,
-          "maximum": 100
-        }
-      }
-    },
     "content": {
       "type": "array",
       "required": false,
@@ -1694,17 +1609,6 @@ export const constraints = {
       "nullable": false,
       "enum": [
         "paragraph",
-        "heading",
-        "blockquote",
-        "bullet_list",
-        "ordered_list",
-        "list_item",
-        "horizontal_rule",
-        "image_block",
-        "table",
-        "table_row",
-        "table_header",
-        "table_cell",
         "hard_break",
         "text"
       ]

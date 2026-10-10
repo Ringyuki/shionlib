@@ -71,13 +71,13 @@ The visitor's browser also talks to services that are not ours. Each has one cli
 
 ### Our API from the browser
 
-The browser talks to the web server only. The exceptions cannot go through loaders and actions: uploads, which run for hours across pages or show how much has been sent, and the `GET /message/stream` SSE stream. They use the same-origin `/api` prefix (proxied to the API by the ingress, and by Vite in development).
+The browser talks to the web server only. The exceptions cannot go through loaders and actions: uploads, which run for hours across pages, and the `GET /message/stream` SSE stream. They use the same-origin `/api` prefix (proxied to the API by the ingress, and by Vite in development).
 
 - **Event streams.** `followEvents(path, handlers, { probe })` (`~/shared/api/event-stream`) is the only place an `EventSource` is made. It first asks `probe` (a cheap authenticated `GET`) through the session-refreshing transport, so an expired session is renewed before the stream opens and a guest gets no stream; it hands each named event's data to its handler as a string, which the feature parses with a schema typed against the generated event DTO (`unreadFrom`); it reopens the stream after a pause when the server closes it; it returns the function that stops it. `features/message` is its one user (`useUnreadMessages`).
 
-- **Transport.** `~/shared/api/xhr.ts` is the only place that uses `XMLHttpRequest`; it gives upload progress, which `fetch` cannot. `browser-client.ts` builds a typed `ApiClient` over it (`createBrowserApi(origin, watch)`: `watch(sent, total)` follows the body of each request, which is how a picture for a document reports its percentage), and `chunk.ts` puts one upload chunk with progress (`uploadChunk`), its path, header and result typed from the generated contract.
+- **Transport.** `~/shared/api/xhr.ts` is the only place that uses `XMLHttpRequest`; it gives upload progress, which `fetch` cannot. `browser-client.ts` builds a typed `ApiClient` over it (`createBrowserApi(origin)`), and `chunk.ts` puts one upload chunk with progress (`uploadChunk`), its path, header and result typed from the generated contract.
 - **Session.** Both refresh an expired session once (`POST /auth/token/refresh`, shared by concurrent requests) and repeat the request, on 401 `AUTH_UNAUTHORIZED`/`AUTH_INVALID_TOKEN` or the `shionlib-auth-stale` header, the same rule as `session.server.ts` (`~/shared/api/session.ts`).
-- **Who may use it.** Only `features/upload` and `features/media` import `browser-client`, `chunk` or `xhr` (lint). `useDocumentPicture()` (`features/media`) sends one picture at a time through `createBrowserApi`, reports `percentSent` (never the whole until the API has answered) and turns whatever went wrong into the text of `useRefusalText(refusalFrom(error))`.
+- **Who may use it.** Only `features/upload` imports `browser-client`, `chunk` or `xhr` (lint).
 
 ### The upload manager (`features/upload`)
 
