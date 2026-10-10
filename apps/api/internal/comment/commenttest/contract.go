@@ -239,6 +239,20 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if none, totals, err := env.Repo.ListThreads(ctx, otherGame+gameID+1000, 0, comment.OrderNewest, comment.Page{Number: 1, Size: 10}); err != nil || len(none) != 0 || totals != (comment.ThreadTotals{}) {
 			t.Fatalf("a game without comments: %+v %+v %v", none, totals, err)
 		}
+		for aimed, want := range map[int]int{ownPending.ID: 0, visible.ID: 1, nested.ID: 1} {
+			if index, found, err := env.Repo.ThreadIndex(ctx, gameID, viewer, aimed, comment.OrderNewest); err != nil || !found || index != want {
+				t.Fatalf("comment %d sits in thread %d: %d %v %v", aimed, want, index, found, err)
+			}
+		}
+		if index, found, _ := env.Repo.ThreadIndex(ctx, gameID, viewer, nested.ID, comment.OrderOldest); !found || index != 0 {
+			t.Fatalf("oldest first puts the first thread first: %d %v", index, found)
+		}
+		if _, found, err := env.Repo.ThreadIndex(ctx, gameID, 0, ownPending.ID, comment.OrderNewest); err != nil || found {
+			t.Fatalf("a comment the viewer cannot see has no place: %v %v", found, err)
+		}
+		if _, found, err := env.Repo.ThreadIndex(ctx, otherGame, viewer, visible.ID, comment.OrderNewest); err != nil || found {
+			t.Fatalf("a comment of another game has no place: %v %v", found, err)
+		}
 	})
 
 	t.Run("creator listings show visible comments newest first and can exclude rated games", func(t *testing.T) {

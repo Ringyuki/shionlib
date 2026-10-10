@@ -377,6 +377,38 @@ func (r *Repository) ListThreads(ctx context.Context, gameID, viewerID int, orde
 	return out, comment.ThreadTotals{Threads: threads, Comments: comments}, nil
 }
 
+func (r *Repository) ThreadIndex(ctx context.Context, gameID, viewerID, commentID int, order comment.Order) (int, bool, error) {
+	inGame := r.db(ctx).Comment.Query().Where(entcomment.GameID(gameID), visibleTo(viewerID))
+	aimed, err := inGame.Clone().Where(entcomment.ID(commentID)).Select(entcomment.FieldID, entcomment.FieldRootID).Only(ctx)
+	if postgres.IsNotFound(err) {
+		return 0, false, nil
+	}
+	if err != nil {
+		return 0, false, fmt.Errorf("find comment %d of game %d: %w", commentID, gameID, err)
+	}
+	rootID := aimed.ID
+	if aimed.RootID != nil {
+		rootID = *aimed.RootID
+	}
+	threads := inGame.Clone().Where(startsThread())
+	root, err := threads.Clone().Where(entcomment.ID(rootID)).Select(entcomment.FieldID, entcomment.FieldCreated).Only(ctx)
+	if postgres.IsNotFound(err) {
+		return 0, false, nil
+	}
+	if err != nil {
+		return 0, false, fmt.Errorf("find thread %d of game %d: %w", rootID, gameID, err)
+	}
+	earlier := entcomment.Or(entcomment.CreatedGT(root.Created), entcomment.And(entcomment.CreatedEQ(root.Created), entcomment.IDGT(root.ID)))
+	if order == comment.OrderOldest {
+		earlier = entcomment.Or(entcomment.CreatedLT(root.Created), entcomment.And(entcomment.CreatedEQ(root.Created), entcomment.IDLT(root.ID)))
+	}
+	index, err := threads.Where(earlier).Count(ctx)
+	if err != nil {
+		return 0, false, fmt.Errorf("place thread %d of game %d: %w", rootID, gameID, err)
+	}
+	return index, true, nil
+}
+
 func (r *Repository) ListByCreator(ctx context.Context, filter comment.CreatorFilter, page comment.Page) ([]comment.Entry, int, error) {
 	query := r.db(ctx).Comment.Query().Where(entcomment.CreatorID(filter.CreatorID), entcomment.Status(int(comment.StatusVisible)))
 	if filter.ExcludeRated {

@@ -178,7 +178,31 @@ func TestListByGameShape(t *testing.T) {
 	}
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/comment/game/10?order=oldest"}), http.StatusOK, 0)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/comment/game/10?order=best"}), http.StatusUnprocessableEntity, 100101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/comment/game/10?focus=0"}), http.StatusUnprocessableEntity, 100101)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/comment/game/10?pageSize=51"}), http.StatusUnprocessableEntity, 100101)
+}
+
+func TestListByGameOpensThePageOfAFocusedComment(t *testing.T) {
+	e := setup(t)
+	var roots []comment.Comment
+	for range 3 {
+		root := e.repo.Seed(comment.Comment{GameID: 10, CreatorID: 1, Text: "root", Status: comment.StatusVisible})
+		_ = e.repo.SetRoot(t.Context(), root.ID, root.ID)
+		roots = append(roots, root)
+	}
+	reply := e.repo.Seed(comment.Comment{GameID: 10, CreatorID: 2, Text: "reply", ParentID: &roots[0].ID, RootID: &roots[0].ID, Status: comment.StatusVisible})
+	hidden := e.repo.Seed(comment.Comment{GameID: 10, CreatorID: 2, Text: "pending", Status: comment.StatusPending})
+
+	focused := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/comment/game/10?pageSize=1&focus=" + strconv.Itoa(reply.ID)})
+	e.server.Expect(focused, http.StatusOK, 0)
+	if !strings.Contains(string(focused.Data), `"currentPage":3`) || !strings.HasPrefix(string(focused.Data), `{"items":[{"id":`+strconv.Itoa(roots[0].ID)+`,`) {
+		t.Fatalf("the page of the thread that holds the reply is answered: %s", focused.Data)
+	}
+	unseen := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/comment/game/10?pageSize=1&page=2&focus=" + strconv.Itoa(hidden.ID)})
+	e.server.Expect(unseen, http.StatusOK, 0)
+	if !strings.Contains(string(unseen.Data), `"currentPage":2`) {
+		t.Fatalf("a comment the viewer cannot see leaves the requested page: %s", unseen.Data)
+	}
 }
 
 func TestListByUserShape(t *testing.T) {

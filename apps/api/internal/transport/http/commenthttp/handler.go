@@ -71,19 +71,24 @@ func (h *Handler) like(ctx context.Context, in *commentPathInput) (*response.Emp
 }
 
 func (h *Handler) listByGame(ctx context.Context, in *gameCommentsInput) (*response.Output[commentThreadPageDTO], error) {
-	threads, totals, err := h.service.ListByGame(ctx, actor.From(ctx), in.GameID, comment.Order(in.Order), comment.Page{Number: in.Page, Size: in.PageSize})
+	list, err := h.service.ListByGame(ctx, actor.From(ctx), comment.ThreadQuery{
+		GameID: in.GameID,
+		Order:  comment.Order(in.Order),
+		Page:   comment.Page{Number: in.Page, Size: in.PageSize},
+		Focus:  in.Focus,
+	})
 	if err != nil {
 		return nil, err
 	}
 	now := h.resp.Now()
 	page := commentThreadPageDTO{
-		Items: make([]commentThreadDTO, len(threads)),
+		Items: make([]commentThreadDTO, len(list.Threads)),
 		Meta: commentThreadPageMetaDTO{
-			PageMeta: response.NewPageMeta(totals.Threads, len(threads), in.PageSize, in.Page),
-			Comments: totals.Comments,
+			PageMeta: response.NewPageMeta(list.Totals.Threads, len(list.Threads), in.PageSize, list.Page),
+			Comments: list.Totals.Comments,
 		},
 	}
-	for i, thread := range threads {
+	for i, thread := range list.Threads {
 		page.Items[i] = toThread(thread, now)
 	}
 	return response.OK(ctx, h.resp, page), nil

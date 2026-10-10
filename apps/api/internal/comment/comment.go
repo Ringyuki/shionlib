@@ -72,6 +72,19 @@ type ThreadTotals struct {
 	Comments int
 }
 
+type ThreadQuery struct {
+	GameID int
+	Order  Order
+	Page   Page
+	Focus  int
+}
+
+type ThreadList struct {
+	Threads []Thread
+	Totals  ThreadTotals
+	Page    int
+}
+
 type NewComment struct {
 	Content   json.RawMessage
 	Text      string

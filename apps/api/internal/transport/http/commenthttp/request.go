@@ -46,6 +46,7 @@ type gameCommentsInput struct {
 	GameID int `path:"game_id"`
 	httpapi.PageQuery
 	Order string `query:"order" enum:"newest,oldest" default:"newest" doc:"Order of the threads; the replies of a thread are always oldest first"`
+	Focus int    `query:"focus" minimum:"1" doc:"A comment of this game: the page that holds its thread is answered instead of the requested one; ignored when the viewer cannot see the comment"`
 }
 
 type userCommentsInput struct {

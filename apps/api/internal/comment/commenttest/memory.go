@@ -202,6 +202,25 @@ func (r *MemoryRepository) ListThreads(_ context.Context, gameID, viewerID int, 
 	return out, comment.ThreadTotals{Threads: threads, Comments: comments}, nil
 }
 
+func (r *MemoryRepository) ThreadIndex(ctx context.Context, gameID, viewerID, commentID int, order comment.Order) (int, bool, error) {
+	everything := comment.Page{Number: 1, Size: math.MaxInt32}
+	threads, _, err := r.ListThreads(ctx, gameID, viewerID, order, everything)
+	if err != nil {
+		return 0, false, err
+	}
+	for index, thread := range threads {
+		if thread.ID == commentID {
+			return index, true, nil
+		}
+		for _, reply := range thread.Replies {
+			if reply.ID == commentID {
+				return index, true, nil
+			}
+		}
+	}
+	return 0, false, nil
+}
+
 func (r *MemoryRepository) ListByCreator(_ context.Context, filter comment.CreatorFilter, page comment.Page) ([]comment.Entry, int, error) {
 	return r.list(func(c comment.Comment) bool {
 		return c.CreatorID == filter.CreatorID && c.Status == comment.StatusVisible && (!filter.ExcludeRated || !r.rated[c.GameID])

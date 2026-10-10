@@ -26483,6 +26483,18 @@
               ],
               "type": "string"
             }
+          },
+          {
+            "description": "A comment of this game: the page that holds its thread is answered instead of the requested one; ignored when the viewer cannot see the comment",
+            "explode": false,
+            "in": "query",
+            "name": "focus",
+            "schema": {
+              "description": "A comment of this game: the page that holds its thread is answered instead of the requested one; ignored when the viewer cannot see the comment",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
           }
         ],
         "responses": {
