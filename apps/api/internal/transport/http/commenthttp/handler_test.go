@@ -94,7 +94,7 @@ func TestCreateValidation(t *testing.T) {
 		{"content is not an object", &alice, "/comment/game/10", body(`"text"`, ""), http.StatusUnprocessableEntity, 100101, "content 必须是对象"},
 		{"legacy editor state", &alice, "/comment/game/10", body(`{"root":{"type":"root","children":[]}}`, ""), http.StatusUnprocessableEntity, 100101, ""},
 		{"unknown node", &alice, "/comment/game/10", body(`{"type":"doc","content":[{"type":"image"}]}`, ""), http.StatusUnprocessableEntity, 100101, `"field":"content.content[0].type"`},
-		{"node comments do not take", &alice, "/comment/game/10", body(`{"type":"doc","content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"text","text":"x"}]}]}`, ""), http.StatusUnprocessableEntity, 100101, `content contains an unsupported node type \"heading\"`},
+		{"text outside a paragraph", &alice, "/comment/game/10", body(`{"type":"doc","content":[{"type":"text","text":"x"}]}`, ""), http.StatusUnprocessableEntity, 100101, `a \"text\" node cannot be placed there`},
 		{"script link", &alice, "/comment/game/10", body(`{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"x","marks":[{"type":"link","attrs":{"href":"javascript:alert(1)"}}]}]}]}`, ""), http.StatusUnprocessableEntity, 100101, "not an http, https or mailto address"},
 		{"nothing written", &alice, "/comment/game/10", body(`{"type":"doc","content":[{"type":"paragraph"}]}`, ""), http.StatusUnprocessableEntity, 100101, `"field":"content","messages":["content 不能为空"]`},
 		{"too long", &alice, "/comment/game/10", body(long, ""), http.StatusUnprocessableEntity, 100101, "10000"},

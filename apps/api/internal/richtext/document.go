@@ -10,8 +10,6 @@ import (
 	"unicode/utf16"
 )
 
-const maxDepth = 32
-
 var ErrNotDocument = errors.New("content is not a rich text document")
 
 type ContentError struct {
@@ -23,25 +21,10 @@ func (e *ContentError) Error() string {
 }
 
 type node struct {
-	Type    string     `json:"type"`
-	Attrs   *nodeAttrs `json:"attrs,omitempty"`
-	Content []*node    `json:"content,omitempty"`
-	Marks   []mark     `json:"marks,omitempty"`
-	Text    string     `json:"text,omitempty"`
-}
-
-type nodeAttrs struct {
-	Level        int    `json:"level,omitempty"`
-	Src          string `json:"src,omitempty"`
-	Alt          string `json:"alt,omitempty"`
-	Caption      string `json:"caption,omitempty"`
-	Width        int    `json:"width,omitempty"`
-	Height       int    `json:"height,omitempty"`
-	WidthPercent int    `json:"width_percent,omitempty"`
-	Colspan      int    `json:"colspan,omitempty"`
-	Rowspan      int    `json:"rowspan,omitempty"`
-	Colwidth     []int  `json:"colwidth,omitempty"`
-	Align        string `json:"align,omitempty"`
+	Type    string  `json:"type"`
+	Content []*node `json:"content,omitempty"`
+	Marks   []mark  `json:"marks,omitempty"`
+	Text    string  `json:"text,omitempty"`
 }
 
 type mark struct {
@@ -117,26 +100,6 @@ func (d Document) TextLength() int {
 	return d.root.textLength()
 }
 
-func (d Document) Images() []string {
-	if d.root == nil {
-		return nil
-	}
-	var sources []string
-	d.root.walk(func(n *node) {
-		if n.Type == nodeImage && n.Attrs != nil {
-			sources = append(sources, n.Attrs.Src)
-		}
-	})
-	return sources
-}
-
-func (n *node) walk(visit func(*node)) {
-	visit(n)
-	for _, child := range n.Content {
-		child.walk(visit)
-	}
-}
-
 func (n *node) writeText(b *strings.Builder) {
 	switch n.Type {
 	case nodeText:
@@ -144,12 +107,6 @@ func (n *node) writeText(b *strings.Builder) {
 		return
 	case nodeHardBreak:
 		b.WriteByte('\n')
-		return
-	case nodeImage:
-		if n.Attrs != nil && n.Attrs.Caption != "" {
-			b.WriteString(n.Attrs.Caption)
-			b.WriteByte('\n')
-		}
 		return
 	}
 	for _, child := range n.Content {

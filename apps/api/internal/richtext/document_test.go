@@ -11,8 +11,6 @@ import (
 
 type obj = map[string]any
 
-const picture = "richtext/7/0b6f8a52-3c1d-4e8a-9f47-2d5a6c7b8e90.webp"
-
 func text(value string, marks ...any) obj {
 	n := obj{"type": "text", "text": value}
 	if len(marks) > 0 {
@@ -37,23 +35,6 @@ func block(kind string, children ...any) obj {
 	return n
 }
 
-func with(n obj, attrs obj) obj {
-	n["attrs"] = attrs
-	return n
-}
-
-func heading(level int, children ...any) obj {
-	return with(block("heading", children...), obj{"level": level})
-}
-
-func image(attrs obj) obj {
-	return with(block("image_block"), attrs)
-}
-
-func cell(kind string, children ...any) obj {
-	return with(block(kind, children...), obj{"colspan": 1, "rowspan": 1, "colwidth": nil})
-}
-
 func doc(children ...any) []byte {
 	raw, err := json.Marshal(block("doc", children...))
 	if err != nil {
@@ -62,9 +43,9 @@ func doc(children ...any) []byte {
 	return raw
 }
 
-func reason(t *testing.T, raw []byte, schema richtext.Schema) string {
+func reason(t *testing.T, raw []byte) string {
 	t.Helper()
-	_, err := richtext.Parse(raw, schema)
+	_, err := richtext.Parse(raw, richtext.Comment)
 	var refused *richtext.ContentError
 	if !errors.As(err, &refused) {
 		t.Fatalf("parse %s: want a content error, got %v", raw, err)
@@ -74,59 +55,37 @@ func reason(t *testing.T, raw []byte, schema richtext.Schema) string {
 
 func TestADocumentKeepsWhatTheSchemaAllows(t *testing.T) {
 	raw := doc(
-		heading(2, text("Route")),
-		block("paragraph", text("Pick "), text("A", mark("bold"), mark("italic")), block("hard_break"), text("then B", mark("strike"))),
-		block("blockquote", block("paragraph", text("quoted", link("https://example.com/a?b=1")))),
-		block("ordered_list",
-			block("list_item", block("paragraph", text("first")), block("bullet_list", block("list_item", block("paragraph", text("nested"))))),
-			block("list_item", block("paragraph", text("hidden", mark("spoiler")))),
-		),
-		block("horizontal_rule"),
-		image(obj{"src": picture, "alt": "map", "caption": "The map", "width": 800, "height": 600, "width_percent": 50}),
-		block("table",
-			block("table_row", cell("table_header", block("paragraph", text("Choice"))), cell("table_header", block("paragraph", text("Route")))),
-			block("table_row",
-				with(block("table_cell", block("paragraph", text("A"))), obj{"colspan": 1, "rowspan": 1, "colwidth": nil, "align": "center"}),
-				with(block("table_cell", block("paragraph")), obj{"colspan": 1, "rowspan": 1, "colwidth": nil, "align": nil}),
-			),
-		),
+		block("paragraph", text("Pick "), text("A", mark("bold")), block("hard_break"), text("then B")),
+		block("paragraph", text("see ", mark("bold")), text("the guide", mark("bold"), link("https://example.com/a?b=1"))),
+		block("paragraph", text("hidden", mark("spoiler"))),
 		block("paragraph"),
 	)
-	document, err := richtext.Parse(raw, richtext.Article)
+	document, err := richtext.Parse(raw, richtext.Comment)
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := "Route\nPick A\nthen B\nquoted\nfirst\nnested\nhidden\nThe map\nChoice\nRoute\nA"
-	if got := document.Text(); got != want {
+	if got, want := document.Text(), "Pick A\nthen B\nsee the guide\nhidden"; got != want {
 		t.Fatalf("text %q, want %q", got, want)
 	}
-	if got := document.TextLength(); got != len("RoutePick Athen BquotedfirstnestedhiddenChoiceRouteA") {
+	if got := document.TextLength(); got != len("Pick Athen Bsee the guidehidden") {
 		t.Fatalf("length %d", got)
 	}
-	if got := document.Images(); len(got) != 1 || got[0] != picture {
-		t.Fatalf("images %v", got)
+	if document.Empty() || !(richtext.Document{}).Empty() {
+		t.Fatal("only a document that was never parsed is empty")
 	}
-	again, err := richtext.Parse(document.Raw(), richtext.Article)
+	again, err := richtext.Parse(document.Raw(), richtext.Comment)
 	if err != nil || string(again.Raw()) != string(document.Raw()) {
 		t.Fatalf("the stored form does not parse to itself: %v\n%s\n%s", err, document.Raw(), again.Raw())
 	}
 }
 
 func TestTheStoredFormIsCanonical(t *testing.T) {
-	raw := []byte(` { "content" : [ { "content": [ { "text": "hi", "marks": [], "type": "text" } ], "type": "paragraph", "attrs": null }, { "type": "paragraph", "attrs": {} } ], "type": "doc" } `)
+	raw := []byte(` { "content" : [ { "content": [ { "text": "hi", "marks": [], "type": "text" } ], "type": "paragraph" }, { "type": "paragraph", "content": [] } ], "type": "doc" } `)
 	document, err := richtext.Parse(raw, richtext.Comment)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if got, want := string(document.Raw()), `{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"hi"}]},{"type":"paragraph"}]}`; got != want {
-		t.Fatalf("stored %s, want %s", got, want)
-	}
-	table := doc(block("table", block("table_row", cell("table_cell", block("paragraph")))))
-	stored, err := richtext.Parse(table, richtext.Article)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got, want := string(stored.Raw()), `{"type":"doc","content":[{"type":"table","content":[{"type":"table_row","content":[{"type":"table_cell","attrs":{"colspan":1,"rowspan":1},"content":[{"type":"paragraph"}]}]}]}]}`; got != want {
 		t.Fatalf("stored %s, want %s", got, want)
 	}
 }
@@ -151,7 +110,7 @@ func TestWhatIsNotADocumentIsRejected(t *testing.T) {
 		"wrong field types":   `{"type":"doc","content":{}}`,
 		"legacy editor state": `{"root":{"type":"root","children":[]}}`,
 	} {
-		_, err := richtext.Parse([]byte(raw), richtext.Article)
+		_, err := richtext.Parse([]byte(raw), richtext.Comment)
 		var refused *richtext.ContentError
 		if name == "legacy editor state" && errors.As(err, &refused) {
 			continue
@@ -163,87 +122,41 @@ func TestWhatIsNotADocumentIsRejected(t *testing.T) {
 }
 
 func TestContentOutsideTheSchemaIsRefusedWithAReason(t *testing.T) {
-	item := block("list_item", block("paragraph"))
-	row := block("table_row", cell("table_cell", block("paragraph")))
 	cases := []struct {
-		name   string
-		raw    []byte
-		schema richtext.Schema
-		want   string
+		name string
+		raw  []byte
+		want string
 	}{
-		{"empty document", doc(), richtext.Article, "content is empty"},
-		{"unknown node", doc(block("code_block")), richtext.Article, `unsupported node type "code_block"`},
-		{"camel case name", doc(block("bulletList", item)), richtext.Article, `unsupported node type "bulletList"`},
-		{"heading in a comment", doc(heading(2, text("x"))), richtext.Comment, `unsupported node type "heading"`},
-		{"list in a comment", doc(block("bullet_list", item)), richtext.Comment, `unsupported node type "bullet_list"`},
-		{"quote in a comment", doc(block("blockquote", block("paragraph"))), richtext.Comment, `unsupported node type "blockquote"`},
-		{"italic in a comment", doc(block("paragraph", text("x", mark("italic")))), richtext.Comment, `unsupported mark "italic"`},
-		{"nested document", doc(block("doc", block("paragraph"))), richtext.Article, `"doc" node cannot be placed there`},
-		{"heading level", doc(heading(1, text("x"))), richtext.Article, "unsupported heading level"},
-		{"heading without a level", doc(block("heading", text("x"))), richtext.Article, "unsupported heading level"},
-		{"attributes on a paragraph", doc(with(block("paragraph"), obj{"level": 2})), richtext.Article, `"paragraph" node takes no attributes`},
-		{"attributes of another node", doc(with(block("heading"), obj{"level": 2, "src": picture})), richtext.Article, `"heading" node carries attributes of another node`},
-		{"unknown attribute", doc(with(block("paragraph"), obj{"textAlign": "center"})), richtext.Article, `unsupported field "textAlign"`},
-		{"unknown node field", doc(obj{"type": "paragraph", "style": "color:red"}), richtext.Article, `unsupported field "style"`},
-		{"text at the top", doc(text("x")), richtext.Article, `"text" node cannot be placed there`},
-		{"block in a paragraph", doc(block("paragraph", block("paragraph"))), richtext.Article, `"paragraph" node cannot be placed there`},
-		{"empty text", doc(block("paragraph", obj{"type": "text", "text": ""})), richtext.Article, "empty text node"},
-		{"text on a block", doc(obj{"type": "paragraph", "text": "x"}), richtext.Article, `"paragraph" node takes no text`},
-		{"content in a break", doc(block("paragraph", block("hard_break", text("x")))), richtext.Article, `"hard_break" node takes no content`},
-		{"content in a rule", doc(block("horizontal_rule", block("paragraph"))), richtext.Article, `"horizontal_rule" node takes no content`},
-		{"empty quote", doc(block("blockquote")), richtext.Article, `"blockquote" node needs content`},
-		{"list without items", doc(block("bullet_list")), richtext.Article, `"bullet_list" node needs content`},
-		{"paragraph in a list", doc(block("bullet_list", block("paragraph"))), richtext.Article, `"paragraph" node cannot be placed there`},
-		{"item outside a list", doc(item), richtext.Article, `"list_item" node cannot be placed there`},
-		{"item starting with a list", doc(block("ordered_list", block("list_item", block("bullet_list", item)))), richtext.Article, `"bullet_list" node cannot be placed there`},
-		{"row outside a table", doc(row), richtext.Article, `"table_row" node cannot be placed there`},
-		{"table without rows", doc(block("table")), richtext.Article, `"table" node needs content`},
-		{"paragraph in a table", doc(block("table", block("paragraph"))), richtext.Article, `"paragraph" node cannot be placed there`},
-		{"list in a cell", doc(block("table", block("table_row", cell("table_cell", block("bullet_list", item))))), richtext.Article, `"bullet_list" node cannot be placed there`},
-		{"cell without a span", doc(block("table", block("table_row", block("table_cell", block("paragraph"))))), richtext.Article, "invalid span"},
-		{"cell widths against its span", doc(block("table", block("table_row", with(block("table_cell", block("paragraph")), obj{"colspan": 2, "rowspan": 1, "colwidth": []int{120}})))), richtext.Article, "widths do not match"},
-		{"image from elsewhere", doc(image(obj{"src": "https://example.com/a.png", "width": 10, "height": 10})), richtext.Article, "not uploaded here"},
-		{"image of another kind of key", doc(image(obj{"src": "user/7/avatar/0b6f8a52-3c1d-4e8a-9f47-2d5a6c7b8e90.webp", "width": 10, "height": 10})), richtext.Article, "not uploaded here"},
-		{"image without a size", doc(image(obj{"src": picture})), richtext.Article, "without a valid size"},
-		{"image shown too narrow", doc(image(obj{"src": picture, "width": 10, "height": 10, "width_percent": 10})), richtext.Article, "invalid display width"},
-		{"image shown wider than the column", doc(image(obj{"src": picture, "width": 10, "height": 10, "width_percent": 101})), richtext.Article, "invalid display width"},
-		{"cell aligned to nowhere", doc(block("table", block("table_row", with(block("table_cell", block("paragraph")), obj{"colspan": 1, "rowspan": 1, "colwidth": nil, "align": "justify"})))), richtext.Article, "invalid alignment"},
-		{"image with a long description", doc(image(obj{"src": picture, "width": 10, "height": 10, "alt": strings.Repeat("a", richtext.MaxAltLength+1)})), richtext.Article, "description is too long"},
-		{"image in a comment", doc(image(obj{"src": picture, "width": 10, "height": 10})), richtext.Comment, `unsupported node type "image_block"`},
-		{"unknown mark", doc(block("paragraph", text("x", mark("underline")))), richtext.Article, `unsupported mark "underline"`},
-		{"repeated mark", doc(block("paragraph", text("x", mark("bold"), mark("bold")))), richtext.Article, `repeats the mark "bold"`},
-		{"mark on a block", doc(obj{"type": "paragraph", "marks": []any{mark("bold")}}), richtext.Article, `"paragraph" node takes no marks`},
-		{"attributes on a plain mark", doc(block("paragraph", text("x", obj{"type": "bold", "attrs": obj{"href": "https://a.example"}}))), richtext.Article, `"bold" mark takes no attributes`},
-		{"link without an address", doc(block("paragraph", text("x", mark("link")))), richtext.Article, "not an http, https or mailto address"},
-		{"script link", doc(block("paragraph", text("x", link("javascript:alert(1)")))), richtext.Article, "not an http, https or mailto address"},
-		{"disguised script link", doc(block("paragraph", text("x", link("java\tscript:alert(1)")))), richtext.Article, "not an http, https or mailto address"},
-		{"relative link", doc(block("paragraph", text("x", link("/zh/game/1")))), richtext.Article, "not an http, https or mailto address"},
-		{"overlong link", doc(block("paragraph", text("x", link("https://a.example/"+strings.Repeat("a", richtext.MaxLinkLength))))), richtext.Article, "not an http, https or mailto address"},
+		{"empty document", doc(), "content is empty"},
+		{"unknown node", doc(block("code_block")), `unsupported node type "code_block"`},
+		{"heading", doc(obj{"type": "heading", "content": []any{text("x")}}), `unsupported node type "heading"`},
+		{"list", doc(block("bullet_list", block("list_item", block("paragraph")))), `unsupported node type "bullet_list"`},
+		{"picture", doc(block("image_block")), `unsupported node type "image_block"`},
+		{"camel case name", doc(block("paragraph", block("hardBreak"))), `unsupported node type "hardBreak"`},
+		{"nested document", doc(block("doc", block("paragraph"))), `"doc" node cannot be placed there`},
+		{"attributes on a node", doc(obj{"type": "paragraph", "attrs": obj{"level": 2}}), `unsupported field "attrs"`},
+		{"unknown node field", doc(obj{"type": "paragraph", "style": "color:red"}), `unsupported field "style"`},
+		{"text at the top", doc(text("x")), `"text" node cannot be placed there`},
+		{"block in a paragraph", doc(block("paragraph", block("paragraph"))), `"paragraph" node cannot be placed there`},
+		{"empty text", doc(block("paragraph", obj{"type": "text", "text": ""})), "empty text node"},
+		{"text on a block", doc(obj{"type": "paragraph", "text": "x"}), `"paragraph" node takes no text`},
+		{"content in a break", doc(block("paragraph", block("hard_break", text("x")))), `"hard_break" node takes no content`},
+		{"italic", doc(block("paragraph", text("x", mark("italic")))), `unsupported mark "italic"`},
+		{"unknown mark", doc(block("paragraph", text("x", mark("underline")))), `unsupported mark "underline"`},
+		{"repeated mark", doc(block("paragraph", text("x", mark("bold"), mark("bold")))), `repeats the mark "bold"`},
+		{"mark on a block", doc(obj{"type": "paragraph", "marks": []any{mark("bold")}}), `"paragraph" node takes no marks`},
+		{"attributes on a plain mark", doc(block("paragraph", text("x", obj{"type": "bold", "attrs": obj{"href": "https://a.example"}}))), `"bold" mark takes no attributes`},
+		{"unknown mark attribute", doc(block("paragraph", text("x", obj{"type": "link", "attrs": obj{"href": "https://a.example", "target": "_blank"}}))), `unsupported field "target"`},
+		{"link without an address", doc(block("paragraph", text("x", mark("link")))), "not an http, https or mailto address"},
+		{"script link", doc(block("paragraph", text("x", link("javascript:alert(1)")))), "not an http, https or mailto address"},
+		{"disguised script link", doc(block("paragraph", text("x", link("java\tscript:alert(1)")))), "not an http, https or mailto address"},
+		{"relative link", doc(block("paragraph", text("x", link("/zh/game/1")))), "not an http, https or mailto address"},
+		{"overlong link", doc(block("paragraph", text("x", link("https://a.example/"+strings.Repeat("a", richtext.MaxLinkLength))))), "not an http, https or mailto address"},
 	}
 	for _, c := range cases {
-		if got := reason(t, c.raw, c.schema); !strings.Contains(got, c.want) {
+		if got := reason(t, c.raw); !strings.Contains(got, c.want) {
 			t.Errorf("%s: reason %q, want it to contain %q", c.name, got, c.want)
 		}
-	}
-}
-
-func TestASchemaLimitsImagesAndTables(t *testing.T) {
-	images := make([]any, 51)
-	for i := range images {
-		images[i] = image(obj{"src": picture, "width": 10, "height": 10})
-	}
-	if got := reason(t, doc(images...), richtext.Article); got != "content holds more than 50 images" {
-		t.Fatalf("reason %q", got)
-	}
-	if _, err := richtext.Parse(doc(images[:50]...), richtext.Article); err != nil {
-		t.Fatal(err)
-	}
-	tables := make([]any, 21)
-	for i := range tables {
-		tables[i] = block("table", block("table_row", cell("table_cell", block("paragraph"))))
-	}
-	if got := reason(t, doc(tables...), richtext.Article); got != "content holds more than 20 tables" {
-		t.Fatalf("reason %q", got)
 	}
 }
 
@@ -262,31 +175,9 @@ func TestLinksMayBeHTTPOrMail(t *testing.T) {
 	}
 }
 
-func TestDeepNestingIsRefused(t *testing.T) {
-	inner := block("paragraph", text("x"))
-	for range 40 {
-		inner = block("blockquote", inner)
-	}
-	if got := reason(t, doc(inner), richtext.Article); got != "content is nested too deeply" {
-		t.Fatalf("reason %q", got)
-	}
-}
-
-func TestImageKeysNameTheirOwner(t *testing.T) {
-	key := richtext.ImageKey(7, "0b6f8a52-3c1d-4e8a-9f47-2d5a6c7b8e90.webp")
-	if key != picture || !richtext.IsImageKey(key) {
-		t.Fatalf("key %q", key)
-	}
-	for _, other := range []string{"", "richtext/0/x.webp", "richtext/7/../x.webp", picture + "?x", "https://cdn.example/" + picture} {
-		if richtext.IsImageKey(other) {
-			t.Errorf("%q passes for an image key", other)
-		}
-	}
-}
-
 func TestVocabularyIsExposedForTheContract(t *testing.T) {
 	nodes, marks := richtext.NodeTypes(), richtext.MarkTypes()
-	if len(nodes) != 14 || len(marks) != 5 {
+	if len(nodes) != 3 || len(marks) != 3 {
 		t.Fatalf("nodes %v marks %v", nodes, marks)
 	}
 	nodes[0] = "changed"

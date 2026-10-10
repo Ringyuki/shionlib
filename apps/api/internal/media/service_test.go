@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/media"
-	"github.com/Ringyuki/shionlib/apps/api/internal/richtext"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
 
@@ -21,7 +20,7 @@ func (p *processor) ToWebP(_ context.Context, data []byte, bounds media.Bounds) 
 	if p.fail != nil {
 		return media.Encoded{}, p.fail
 	}
-	return media.Encoded{Data: append([]byte("webp:"), data...), ContentType: "image/webp", Extension: ".webp", Width: 640, Height: 360}, nil
+	return media.Encoded{Data: append([]byte("webp:"), data...), ContentType: "image/webp", Extension: ".webp"}, nil
 }
 
 type object struct {
@@ -60,27 +59,6 @@ func TestStoreUsesLegacyKeysBoundsAndMetadata(t *testing.T) {
 	}
 	if s.objects[0].metadata["user_id"] != "7" || s.objects[2].metadata["uploader_id"] != "2" || s.objects[0].contentType != "image/webp" || s.objects[0].data != "webp:raw" {
 		t.Fatalf("unexpected objects %+v", s.objects)
-	}
-}
-
-func TestRichTextImagesKeepTheirSizeAndNameTheirOwner(t *testing.T) {
-	ctx := context.Background()
-	p, s := &processor{}, &store{}
-	const id = "0b6f8a52-3c1d-4e8a-9f47-2d5a6c7b8e90"
-	service := media.NewService(p, s, func() string { return id })
-	picture, err := service.StoreRichTextImage(ctx, 7, &media.Upload{ContentType: "image/png", Data: []byte("raw")})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if picture != (media.Picture{Key: "richtext/7/" + id + ".webp", Width: 640, Height: 360}) || !richtext.IsImageKey(picture.Key) {
-		t.Fatalf("picture %+v", picture)
-	}
-	if p.bounds != (media.Bounds{MaxWidth: media.RichTextImageMaxWidth, KeepSmaller: true}) || s.objects[0].metadata["user_id"] != "7" {
-		t.Fatalf("bounds %+v objects %+v", p.bounds, s.objects)
-	}
-	large := &media.Upload{ContentType: "image/png", Data: make([]byte, media.RichTextImageMaxBytes+1)}
-	if _, err := service.StoreRichTextImage(ctx, 7, large); !errors.Is(err, upload.ErrSmallFileTooLarge) {
-		t.Fatalf("oversized picture: %v", err)
 	}
 }
 

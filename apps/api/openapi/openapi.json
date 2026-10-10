@@ -12176,39 +12176,6 @@
         ],
         "type": "object"
       },
-      "EnvelopeUploadedPictureDTO": {
-        "additionalProperties": false,
-        "properties": {
-          "code": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "data": {
-            "$ref": "#/components/schemas/UploadedPictureDTO"
-          },
-          "message": {
-            "type": "string"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/Meta"
-          },
-          "requestId": {
-            "type": "string"
-          },
-          "timestamp": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "code",
-          "message",
-          "data",
-          "requestId",
-          "timestamp"
-        ],
-        "type": "object"
-      },
       "EnvelopeUserBioDTO": {
         "additionalProperties": false,
         "properties": {
@@ -16343,7 +16310,7 @@
       },
       "RichTextDocument": {
         "additionalProperties": false,
-        "description": "A rich text document: what the editor stores for comments and walkthroughs",
+        "description": "A rich text document: what the editor stores for a comment and for the note of a walkthrough",
         "properties": {
           "content": {
             "items": {
@@ -16383,8 +16350,6 @@
           "type": {
             "enum": [
               "bold",
-              "italic",
-              "strike",
               "link",
               "spoiler"
             ],
@@ -16398,84 +16363,8 @@
       },
       "RichTextNode": {
         "additionalProperties": false,
-        "description": "A block or inline node; which nodes a field accepts depends on the field",
+        "description": "A paragraph, or what stands in one: text or a line break",
         "properties": {
-          "attrs": {
-            "additionalProperties": false,
-            "properties": {
-              "align": {
-                "description": "Text alignment of a table cell; null follows the reading direction",
-                "enum": [
-                  "left",
-                  "center",
-                  "right"
-                ],
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "alt": {
-                "maxLength": 200,
-                "type": "string"
-              },
-              "caption": {
-                "maxLength": 500,
-                "type": "string"
-              },
-              "colspan": {
-                "maximum": 50,
-                "minimum": 1,
-                "type": "integer"
-              },
-              "colwidth": {
-                "description": "Column widths of a table cell in pixels, one per column it spans; null when none was set",
-                "items": {
-                  "maximum": 2000,
-                  "minimum": 0,
-                  "type": "integer"
-                },
-                "type": [
-                  "array",
-                  "null"
-                ]
-              },
-              "height": {
-                "maximum": 10000,
-                "minimum": 1,
-                "type": "integer"
-              },
-              "level": {
-                "description": "Heading level",
-                "enum": [
-                  2,
-                  3
-                ],
-                "type": "integer"
-              },
-              "rowspan": {
-                "maximum": 50,
-                "minimum": 1,
-                "type": "integer"
-              },
-              "src": {
-                "description": "Key of an image_block, as returned by the rich text picture upload",
-                "type": "string"
-              },
-              "width": {
-                "maximum": 10000,
-                "minimum": 1,
-                "type": "integer"
-              },
-              "width_percent": {
-                "description": "Share of the text column an image_block is shown at; it is never shown wider than it is",
-                "maximum": 100,
-                "minimum": 20,
-                "type": "integer"
-              }
-            },
-            "type": "object"
-          },
           "content": {
             "items": {
               "$ref": "#/components/schemas/RichTextNode"
@@ -16496,17 +16385,6 @@
           "type": {
             "enum": [
               "paragraph",
-              "heading",
-              "blockquote",
-              "bullet_list",
-              "ordered_list",
-              "list_item",
-              "horizontal_rule",
-              "image_block",
-              "table",
-              "table_row",
-              "table_header",
-              "table_cell",
               "hard_break",
               "text"
             ],
@@ -17648,29 +17526,6 @@
         },
         "required": [
           "key"
-        ],
-        "type": "object"
-      },
-      "UploadedPictureDTO": {
-        "additionalProperties": false,
-        "properties": {
-          "height": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "key": {
-            "description": "What an image_block node takes as src",
-            "type": "string"
-          },
-          "width": {
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "key",
-          "width",
-          "height"
         ],
         "type": "object"
       },
@@ -31801,74 +31656,6 @@
           }
         ],
         "summary": "Upload an advertisement image",
-        "tags": [
-          "upload"
-        ]
-      }
-    },
-    "/uploads/small/richtext/image": {
-      "put": {
-        "operationId": "upload.richTextImage",
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "encoding": {
-                "file": {
-                  "contentType": "application/octet-stream"
-                }
-              },
-              "schema": {
-                "properties": {
-                  "file": {
-                    "contentEncoding": "binary",
-                    "contentMediaType": "application/octet-stream",
-                    "format": "binary",
-                    "type": "string"
-                  }
-                },
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EnvelopeUploadedPictureDTO"
-                }
-              }
-            },
-            "description": "OK",
-            "headers": {
-              "shionlib-auth-stale": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "accessToken": []
-          },
-          {
-            "accessCookie": []
-          }
-        ],
-        "summary": "Upload a picture for a rich text document",
         "tags": [
           "upload"
         ]

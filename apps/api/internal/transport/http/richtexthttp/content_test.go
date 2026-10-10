@@ -150,20 +150,16 @@ func TestRequestsAreCheckedAgainstTheContract(t *testing.T) {
 		return result.Errors
 	}
 	valid := `{"type":"doc","content":[` +
-		`{"type":"heading","attrs":{"level":2},"content":[{"type":"text","text":"a","marks":[{"type":"link","attrs":{"href":"https://a.example"}}]}]},` +
-		`{"type":"image_block","attrs":{"src":"richtext/7/0b6f8a52-3c1d-4e8a-9f47-2d5a6c7b8e90.webp","alt":"","caption":"","width":800,"height":600}},` +
-		`{"type":"table","content":[{"type":"table_row","content":[{"type":"table_cell","attrs":{"colspan":1,"rowspan":1,"colwidth":null},"content":[{"type":"paragraph"}]},` +
-		`{"type":"table_header","attrs":{"colspan":2,"rowspan":1,"colwidth":[120,0]},"content":[{"type":"paragraph"}]}]}]}]}`
+		`{"type":"paragraph","content":[{"type":"text","text":"a","marks":[{"type":"bold"},{"type":"link","attrs":{"href":"https://a.example"}}]},{"type":"hard_break"}]},` +
+		`{"type":"paragraph","content":[{"type":"text","text":"b","marks":[{"type":"spoiler"}]}]},{"type":"paragraph"}]}`
 	if errs := check(valid); len(errs) != 0 {
 		t.Fatalf("a valid document is refused: %v", errs)
 	}
 	for name, raw := range map[string]string{
-		"unknown node":        `{"type":"doc","content":[{"type":"image"}]}`,
+		"unknown node":        `{"type":"doc","content":[{"type":"image_block"}]}`,
 		"unknown mark":        `{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"a","marks":[{"type":"underline"}]}]}]}`,
-		"unknown attribute":   `{"type":"doc","content":[{"type":"paragraph","attrs":{"textAlign":"center"}}]}`,
-		"heading level":       `{"type":"doc","content":[{"type":"heading","attrs":{"level":1}}]}`,
-		"image size":          `{"type":"doc","content":[{"type":"image_block","attrs":{"src":"x","width":0,"height":10}}]}`,
-		"cell span":           `{"type":"doc","content":[{"type":"table","content":[{"type":"table_row","content":[{"type":"table_cell","attrs":{"colspan":0,"rowspan":1}}]}]}]}`,
+		"node attributes":     `{"type":"doc","content":[{"type":"paragraph","attrs":{"textAlign":"center"}}]}`,
+		"mark attribute":      `{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"a","marks":[{"type":"link","attrs":{"href":"https://a.example","target":"_blank"}}]}]}]}`,
 		"camel case node":     `{"type":"doc","content":[{"type":"hardBreak"}]}`,
 		"empty document":      `{"type":"doc","content":[]}`,
 		"legacy editor state": `{"root":{"type":"root","children":[]}}`,
