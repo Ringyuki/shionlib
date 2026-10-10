@@ -5,7 +5,7 @@ import { monthFrom } from './release.schema'
 import { loadReleases } from './release.use-cases'
 
 export function releasesLoader(args: LoaderFunctionArgs) {
-  const params = new URL(args.request.url).searchParams
+  const params = args.url.searchParams
   const now = new Date()
   const month = monthFrom(params.get('month'), now)
   const resources = resourceRuleFrom(params.get('resources'))

@@ -7,7 +7,7 @@ import { addressFrom, legacyParams } from './library.schema'
 import { loadLibrary, searchTags } from './library.use-cases'
 
 export async function libraryLoader(args: LoaderFunctionArgs) {
-  const url = new URL(args.request.url)
+  const url = args.url
   const years = yearOptions(new Date())
   const read = (params: URLSearchParams) =>
     addressFrom(params, pageParam(params.get('page')), years)
@@ -17,11 +17,11 @@ export async function libraryLoader(args: LoaderFunctionArgs) {
   }
   const address = read(url.searchParams)
   const content = await routeLoader(args, api => loadLibrary(api, address, years))
-  keepWithinPages(args.request, content.total, pageSize)
+  keepWithinPages(args.url, content.total, pageSize)
   return content
 }
 
 export function tagOptionsLoader(args: LoaderFunctionArgs) {
-  const query = new URL(args.request.url).searchParams.get('q') ?? ''
+  const query = args.url.searchParams.get('q') ?? ''
   return routeLazyLoader(args, api => searchTags(api, query))
 }

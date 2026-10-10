@@ -20,7 +20,7 @@ import {
 } from './resource.use-cases'
 
 export function fileHistoryLoader(args: LoaderFunctionArgs) {
-  const fileId = queryId(new URL(args.request.url).searchParams.get('file'))
+  const fileId = queryId(args.url.searchParams.get('file'))
   if (fileId === undefined) {
     throw data(null, { status: 400 })
   }
@@ -28,7 +28,7 @@ export function fileHistoryLoader(args: LoaderFunctionArgs) {
 }
 
 export function uploadPageLoader(args: LoaderFunctionArgs) {
-  const gameId = queryId(new URL(args.request.url).searchParams.get('game'))
+  const gameId = queryId(args.url.searchParams.get('game'))
   return routeLoader(args, api => loadUploadPage(api, gameId))
 }
 

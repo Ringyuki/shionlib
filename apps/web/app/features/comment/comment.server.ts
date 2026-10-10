@@ -22,8 +22,8 @@ import {
 
 export async function commentsLoader(args: LoaderFunctionArgs) {
   const gameId = idParam(args.params.id)
-  const url = new URL(args.request.url)
-  const page = requestedPage(args.request)
+  const { url } = args
+  const page = requestedPage(url)
   const order = threadOrderFrom(url.searchParams.get('order'))
   const focus = focusFrom(url.searchParams.get(focusKey))
   const comments = await routeLoader(args, api => loadComments(api, gameId, page, order, focus))
@@ -31,15 +31,15 @@ export async function commentsLoader(args: LoaderFunctionArgs) {
     const search = searchOfFocused(url.search, comments.page)
     throw redirect(`${url.pathname}${search}#${commentAnchor(focus)}`)
   }
-  keepWithinPages(args.request, comments.total, pageSize)
+  keepWithinPages(args.url, comments.total, pageSize)
   return comments
 }
 
 export async function userCommentsLoader(args: LoaderFunctionArgs) {
   const userId = idParam(args.params.id)
-  const page = requestedPage(args.request)
+  const page = requestedPage(args.url)
   const comments = await routeLoader(args, api => loadUserComments(api, userId, page))
-  keepWithinPages(args.request, comments.total, userPageSize)
+  keepWithinPages(args.url, comments.total, userPageSize)
   return comments
 }
 

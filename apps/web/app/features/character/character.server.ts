@@ -7,8 +7,8 @@ import { loadCharacter } from './character.use-cases'
 
 export async function characterLoader(args: LoaderFunctionArgs) {
   const id = idParam(args.params.id)
-  const page = requestedPage(args.request)
+  const page = requestedPage(args.url)
   const content = await routeLoader(args, api => loadCharacter(api, id, page))
-  keepWithinPages(args.request, content.works.total, worksPageSize)
+  keepWithinPages(args.url, content.works.total, worksPageSize)
   return content
 }

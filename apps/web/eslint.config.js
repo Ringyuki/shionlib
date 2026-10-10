@@ -85,6 +85,13 @@ const heldPosition = {
     'A navigation that stays in view goes through useInPageNavigate or InPageLink (~/shared/route): they keep the main area where it is, and only when the page really changes.',
 }
 
+const rawAddress = {
+  selector:
+    "NewExpression[callee.name='URL'] > MemberExpression[property.name='url']:matches([object.name='request'], [object.property.name='request'])",
+  message:
+    'A loader or action reads its address from args.url: request.url is the raw request, which carries the .data suffix and the _routes parameter when the browser asks for data.',
+}
+
 const inPageTools = [
   'app/shared/route/use-in-page-navigate.ts',
   'app/shared/route/in-page-link.tsx',
@@ -97,6 +104,7 @@ const appSyntax = [
   mountedFeedback,
   hinaInternals,
   directFetcher,
+  rawAddress,
 ]
 
 const otherValidators = ['zod', 'yup', 'joi', 'ajv', 'superstruct', 'io-ts', 'arktype'].map(
@@ -417,6 +425,7 @@ export default defineConfig([
         nativeTags,
         mountedFeedback,
         heldPosition,
+        rawAddress,
       ],
       '@typescript-eslint/no-restricted-imports': restrictedImports(
         featureEntry,

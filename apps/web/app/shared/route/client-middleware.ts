@@ -15,14 +15,13 @@ export function unanswered(thrown: unknown): boolean {
 }
 
 export const answerEveryRequest: MiddlewareFunction<Record<string, DataStrategyResult>> = async (
-  { request },
+  { request, url: asked },
   next,
 ) => {
   const results = await next()
   if (request.signal.aborted) {
     return results
   }
-  const asked = new URL(request.url)
   const reads = request.method === 'GET'
   let stale: Refused | undefined
   let failed = false

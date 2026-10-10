@@ -6,9 +6,9 @@ import type { Route } from './+types/user.uploads'
 
 export async function loader(args: Route.LoaderArgs) {
   const id = idParam(args.params.id)
-  const page = requestedPage(args.request)
+  const page = requestedPage(args.url)
   const uploads = await routeLoader(args, api => loadUploads(api, id, page))
-  keepWithinPages(args.request, uploads.total, uploadsPageSize)
+  keepWithinPages(args.url, uploads.total, uploadsPageSize)
   return uploads
 }
 

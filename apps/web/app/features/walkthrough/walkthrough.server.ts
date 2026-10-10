@@ -30,20 +30,20 @@ import {
 
 export async function walkthroughsLoader(args: LoaderFunctionArgs) {
   const gameId = idParam(args.params.id)
-  const page = requestedPage(args.request)
+  const page = requestedPage(args.url)
   const walkthroughs = await routeLoader(args, api => loadWalkthroughs(api, gameId, page))
-  keepWithinPages(args.request, walkthroughs.total, pageSize)
+  keepWithinPages(args.url, walkthroughs.total, pageSize)
   return walkthroughs
 }
 
 export async function userWalkthroughsLoader(args: LoaderFunctionArgs) {
   const userId = idParam(args.params.id)
-  const page = requestedPage(args.request)
-  const shelf = shelfFrom(new URL(args.request.url).searchParams.get(shelfKey))
+  const page = requestedPage(args.url)
+  const shelf = shelfFrom(args.url.searchParams.get(shelfKey))
   const walkthroughs = await routeLoader(args, api =>
     loadUserWalkthroughs(api, userId, page, shelf),
   )
-  keepWithinPages(args.request, walkthroughs.total, userPageSize)
+  keepWithinPages(args.url, walkthroughs.total, userPageSize)
   return walkthroughs
 }
 
@@ -69,11 +69,9 @@ export async function writingLoader(args: LoaderFunctionArgs) {
   return draft
 }
 
-export function legacyWritingRedirect({ params, request }: LoaderFunctionArgs) {
+export function legacyWritingRedirect({ params, url }: LoaderFunctionArgs) {
   const gameId = idParam(params.id)
-  const walkthroughId = optionalIdParam(
-    new URL(request.url).searchParams.get(legacyEditedKey) ?? undefined,
-  )
+  const walkthroughId = optionalIdParam(url.searchParams.get(legacyEditedKey) ?? undefined)
   if (!isLocale(params.lang)) {
     throw data(null, { status: 404 })
   }

@@ -4,10 +4,10 @@ import { routeLoader } from '~/shared/route/route.server'
 import type { Route } from './+types/uploads'
 
 export async function loader(args: Route.LoaderArgs) {
-  const listing = listingFrom(new URL(args.request.url).searchParams, requestedPage(args.request))
+  const listing = listingFrom(args.url.searchParams, requestedPage(args.url))
   const content = await routeLoader(args, api => loadUploader(api, listing))
   if (content !== null) {
-    keepWithinPages(args.request, content.total, pageSize)
+    keepWithinPages(args.url, content.total, pageSize)
   }
   return content
 }

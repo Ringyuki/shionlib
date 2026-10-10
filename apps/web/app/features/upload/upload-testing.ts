@@ -23,14 +23,14 @@ export function fakeServer(ongoing: OngoingUpload[] = []) {
   const reply = (data: unknown) => Response.json({ code: 0, message: 'ok', data })
   const api = createApi({
     baseUrl: 'http://api.test',
-    fetch: async request => {
-      const path = new URL(request.url).pathname
-      const body: unknown = request.body === null ? undefined : await request.json()
+    fetch: async sent => {
+      const path = new URL(sent.url).pathname
+      const body: unknown = sent.body === null ? undefined : await sent.json()
       calls.push({
-        method: request.method,
+        method: sent.method,
         path,
         body,
-        client: request.headers.get('X-Upload-Client'),
+        client: sent.headers.get('X-Upload-Client'),
       })
       if (path === '/uploads/large/ongoing') return reply(ongoing)
       if (path === '/uploads/large/hold') return reply({ held: [], elsewhere: [], ttl_seconds: 80 })

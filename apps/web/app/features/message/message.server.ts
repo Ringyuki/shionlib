@@ -10,11 +10,11 @@ export async function inboxLoader(args: LoaderFunctionArgs) {
   if (category === undefined) {
     throw data(null, { status: 404 })
   }
-  const page = requestedPage(args.request)
-  const opened = openedFrom(new URL(args.request.url).searchParams.get(openedParam))
+  const page = requestedPage(args.url)
+  const opened = openedFrom(args.url.searchParams.get(openedParam))
   const inbox = await routeLoader(args, api => loadInbox(api, category, page, opened))
   if (inbox !== null) {
-    keepWithinPages(args.request, inbox.total, pageSize)
+    keepWithinPages(args.url, inbox.total, pageSize)
   }
   return inbox
 }

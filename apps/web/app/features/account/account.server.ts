@@ -30,7 +30,7 @@ export function securityLoader(args: LoaderFunctionArgs) {
 }
 
 export function connectionsLoader(args: LoaderFunctionArgs) {
-  const result = linkResultFrom(new URL(args.request.url).searchParams)
+  const result = linkResultFrom(args.url.searchParams)
   return routeLoader(args, api => loadConnections(api, result))
 }
 

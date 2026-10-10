@@ -53,7 +53,7 @@ export function signOutAction(args: ActionFunctionArgs) {
 }
 
 export function passwordResetLoader(args: LoaderFunctionArgs) {
-  const query = new URL(args.request.url).searchParams
+  const query = args.url.searchParams
   const token = query.get('token') ?? ''
   const email = query.get('email') ?? ''
   return routeLoader(args, async api => ({

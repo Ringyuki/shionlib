@@ -21,19 +21,19 @@ import {
 } from './favorite.use-cases'
 
 export function favoriteListsLoader(args: LoaderFunctionArgs) {
-  const gameId = idParam(new URL(args.request.url).searchParams.get('game_id') ?? undefined)
+  const gameId = idParam(args.url.searchParams.get('game_id') ?? undefined)
   return routeLazyLoader(args, api => loadFavoriteLists(api, gameId))
 }
 
 export async function favoritesLoader(args: LoaderFunctionArgs) {
   const owner = idParam(args.params.id)
   const listId = optionalIdParam(args.params.listId)
-  const page = requestedPage(args.request)
+  const page = requestedPage(args.url)
   const favorites = await routeLoader(args, api => loadFavorites(api, owner, listId, page))
   if (listId !== undefined && favorites.selected === undefined) {
     throw data(null, { status: 404 })
   }
-  keepWithinPages(args.request, favorites.total, itemsPageSize)
+  keepWithinPages(args.url, favorites.total, itemsPageSize)
   return favorites
 }
 

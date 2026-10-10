@@ -12,12 +12,12 @@ import {
 } from './search.use-cases'
 
 export function paletteLoader(args: LoaderFunctionArgs) {
-  const query = new URL(args.request.url).searchParams.get('q') ?? ''
+  const query = args.url.searchParams.get('q') ?? ''
   return routeLazyLoader(args, api => loadPalette(api, query))
 }
 
 export function gameOptionsLoader(args: LoaderFunctionArgs) {
-  const query = new URL(args.request.url).searchParams.get('q') ?? ''
+  const query = args.url.searchParams.get('q') ?? ''
   return routeLazyLoader(args, api => findGames(api, query))
 }
 
@@ -31,15 +31,15 @@ export async function recordSearchAction(args: ActionFunctionArgs) {
 }
 
 export function searchResultsLoader(args: LoaderFunctionArgs) {
-  const params = new URL(args.request.url).searchParams
+  const params = args.url.searchParams
   const query = params.get('q') ?? ''
   const page = pageParam(params.get('page'))
   const resources = resourceRuleFrom(params.get('resources'))
   return routeLoader(args, api => searchGames(api, query, page, resources))
 }
 
-export function legacySearchRedirect({ request, params }: LoaderFunctionArgs) {
-  const query = new URL(request.url).searchParams.get('q') ?? ''
+export function legacySearchRedirect({ url, params }: LoaderFunctionArgs) {
+  const query = url.searchParams.get('q') ?? ''
   const search = query === '' ? '' : `?${new URLSearchParams({ q: query })}`
   return redirect(`/${params.lang ?? ''}/search${search}`, 301)
 }

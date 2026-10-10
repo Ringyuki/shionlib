@@ -62,6 +62,7 @@ A route module may export `loader`, `action`, `meta`, `headers`, `shouldRevalida
 | the engine is never imported statically, only through `import('./engine')` (type imports are fine)                             | `app/shared/editor`                                        |
 | `~/shared/editor` is never imported by the reading side                                                                        | `app/shared/richtext`, `app/shared/ui/rich-text*.tsx`      |
 | native JSX tags only in the document shell and in `RichText`                                                                   | `app/root.tsx`, `app/shared/ui/rich-text*.tsx`             |
+| a loader or action never builds a `URL` from `request.url`; its address is `args.url`                                          | everything except `app/shared/api` and tests               |
 | no comments, no inline lint directives                                                                                         | everything                                                 |
 | at most 150 non-blank lines per `.tsx`, 200 per `.ts`, 300 per test                                                            | `app/**`, `scripts/**`                                     |
 
