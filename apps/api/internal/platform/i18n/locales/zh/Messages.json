@@ -2,26 +2,26 @@
   "Comment": {
     "Reply": {
       "Title": "你的评论收到了新回复",
-      "Content": "有人回复了你的评论。"
+      "Content": "有人回复了你的评论"
     },
     "Like": {
       "Title": "你的评论收到了赞",
-      "Content": "有人赞了你的评论。"
+      "Content": "有人赞了你的评论"
     }
   },
   "System": {
     "File": {
       "Upload": {
         "FileUploadSuccessTitle": "文件上传完成",
-        "FileUploadSuccessContent": "你上传的文件 {file_name} 已保存，感谢分享。",
+        "FileUploadSuccessContent": "你上传的文件 {file_name} 已保存，感谢分享",
         "ResourcePublishedTitle": "资源已发布",
-        "ResourcePublishedContent": "你上传的资源已发布，共 {file_count} 个文件：{file_names}。",
+        "ResourcePublishedContent": "你上传的资源已发布，共 {file_count} 个文件：{file_names}",
         "FileUploadFailedTitle": "文件未通过检查",
         "FileCheckFailedContent": "你上传的文件 {file_name} 未通过检查：{reason}。{missing_volumes, select, none {} other {缺少的分卷：{missing_volumes}。}}请确认文件后重新上传。",
         "FileVirusReviewPendingTitle": "文件等待人工复核",
-        "FileVirusReviewPendingContent": "你上传的文件 {file_name} 在病毒扫描中被标记（{detected_viruses}），已转入人工复核（编号 #{malware_case_id}），将在 {review_deadline} 前完成。",
+        "FileVirusReviewPendingContent": "你上传的文件 {file_name} 在病毒扫描中被标记（{detected_viruses}），已转入人工复核（编号 #{malware_case_id}），将在 {review_deadline} 前完成",
         "FileVirusReviewRequiredTitle": "有文件等待报毒复核",
-        "FileVirusReviewRequiredContent": "{uploader_name} 上传的文件 {file_name} 在病毒扫描中被标记（{detected_viruses}），编号 #{malware_case_id}，请在 {review_deadline} 前处理。",
+        "FileVirusReviewRequiredContent": "{uploader_name} 上传的文件 {file_name} 在病毒扫描中被标记（{detected_viruses}），编号 #{malware_case_id}，请在 {review_deadline} 前处理",
         "FileVirusReviewRequiredLinkText": "前往复核",
         "FileVirusFalsePositiveReleasedTitle": "文件已通过复核",
         "FileVirusFalsePositiveReleasedContent": "你的文件 {file_name}（编号 #{malware_case_id}）经复核判定为误报，已恢复正常。{review_note, select, none {} other {复核说明：{review_note}}}",
@@ -75,7 +75,7 @@
       },
       "RouteRecovered": {
         "Title": "AI 线路已恢复",
-        "Content": "{provider} 的模型 {model}（{upstream_id}）已恢复可用。"
+        "Content": "{provider} 的模型 {model}（{upstream_id}）已恢复可用"
       }
     }
   },

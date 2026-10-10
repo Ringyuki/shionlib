@@ -16,6 +16,7 @@
 - Define codes in `<capability>/errors.go`: `ErrX = apperror.Define(4601xx, "FAVORITE_X", apperror.KindConflict)`.
 - Codes are six digits `DDDSNN`; the first three digits are a range owned by one package in `internal/apperror/ranges.go`. Add a range there before using it. `go run ./cmd/devtool bizcode check` rejects duplicates, unknown ranges and foreign owners.
 - After adding codes run `go run ./cmd/devtool bizcode docs` and add messages for `shion-biz.<NAME>` in `internal/platform/i18n/locales/{zh,en,ja}/shion-biz.json`.
+- Messages in the locale files are written in the formal register of their language (standard written Chinese for `zh`). A message of one sentence takes no full stop; only a text of several sentences is punctuated as a paragraph. The email texts in `message.json` are paragraphs and keep their punctuation.
 - Business code returns definitions or `*apperror.Error`; `errors.Is(err, favorite.ErrNotFound)` works for both.
 - Adapters translate: `ent` not found → capability `ErrNotFound`; unique violation on a named constraint → `ErrAlreadyExists`-style error; FK violation → the missing parent's `ErrNotFound`. Use `postgres.IsNotFound`, `IsUniqueViolation(err, "<constraint>")`, `IsForeignKeyViolation`.
 - Any error that is not an `apperror` becomes HTTP 500 with code 500 and message `common.error`; its text is logged, never returned.

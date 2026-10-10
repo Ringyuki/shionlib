@@ -2,11 +2,11 @@
   "Comment": {
     "Reply": {
       "Title": "New reply to your comment",
-      "Content": "Someone replied to your comment."
+      "Content": "Someone replied to your comment"
     },
     "Like": {
       "Title": "Your comment was liked",
-      "Content": "Someone liked your comment."
+      "Content": "Someone liked your comment"
     }
   },
   "System": {
@@ -15,11 +15,11 @@
         "FileUploadSuccessTitle": "File uploaded",
         "FileUploadSuccessContent": "Your file {file_name} has been stored. Thank you for sharing.",
         "ResourcePublishedTitle": "Resource published",
-        "ResourcePublishedContent": "Your resource is published with {file_count} file(s): {file_names}.",
+        "ResourcePublishedContent": "Your resource is published with {file_count} file(s): {file_names}",
         "FileUploadFailedTitle": "File did not pass the check",
         "FileCheckFailedContent": "Your file {file_name} did not pass the check: {reason}. {missing_volumes, select, none {} other {Missing volumes: {missing_volumes}. }}Check the file and upload it again.",
         "FileVirusReviewPendingTitle": "File is waiting for review",
-        "FileVirusReviewPendingContent": "Your file {file_name} was flagged by the malware scan ({detected_viruses}) and sent to manual review (case #{malware_case_id}), to be finished by {review_deadline}.",
+        "FileVirusReviewPendingContent": "Your file {file_name} was flagged by the malware scan ({detected_viruses}) and sent to manual review (case #{malware_case_id}), to be finished by {review_deadline}",
         "FileVirusReviewRequiredTitle": "A file is waiting for malware review",
         "FileVirusReviewRequiredContent": "The file {file_name} uploaded by {uploader_name} was flagged by the malware scan ({detected_viruses}), case #{malware_case_id}. Handle it by {review_deadline}.",
         "FileVirusReviewRequiredLinkText": "Review the case",
@@ -75,7 +75,7 @@
       },
       "RouteRecovered": {
         "Title": "AI route recovered",
-        "Content": "The model {model} of {provider} ({upstream_id}) is available again."
+        "Content": "The model {model} of {provider} ({upstream_id}) is available again"
       }
     }
   },

@@ -248,7 +248,7 @@ func TestMessagesAreWrittenInTheCallersLanguage(t *testing.T) {
 	}{
 		"codes become words":         {1, "zh", "有新的资源举报", "kotori 举报了 mikan 上传的资源。举报原因：链接失效；严重程度：低。"},
 		"another language":           {1, "en", "New resource report", "kotori reported a resource uploaded by mikan. Reason: Broken Link; severity: Low."},
-		"a time in the site's zone":  {2, "zh", "文件等待人工复核", "你上传的文件 a.7z 在病毒扫描中被标记（Eicar），已转入人工复核（编号 #12），将在 2026-10-09 12:30 前完成。"},
+		"a time in the site's zone":  {2, "zh", "文件等待人工复核", "你上传的文件 a.7z 在病毒扫描中被标记（Eicar），已转入人工复核（编号 #12），将在 2026-10-09 12:30 前完成"},
 		"an absent note":             {3, "zh", "文件已通过复核", "你的文件 a.7z（编号 #12）经复核判定为误报，已恢复正常。"},
 		"optional sentences":         {4, "zh", "资源违规处理通知", "你上传的资源经核实违规。违规类型：恶意软件；严重程度：高。你的上传档位已被下调。你的账号已被封禁 7 天。处理说明：已核实"},
 		"the game title of the page": {5, "zh", "你收藏的游戏有文件更新", "你收藏的游戏《サクラノ詩》的文件 a.7z 已更新。"},

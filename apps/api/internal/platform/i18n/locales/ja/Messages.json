@@ -2,11 +2,11 @@
   "Comment": {
     "Reply": {
       "Title": "コメントに返信がありました",
-      "Content": "あなたのコメントに返信がありました。"
+      "Content": "あなたのコメントに返信がありました"
     },
     "Like": {
       "Title": "コメントにいいねがつきました",
-      "Content": "あなたのコメントにいいねがつきました。"
+      "Content": "あなたのコメントにいいねがつきました"
     }
   },
   "System": {
@@ -75,7 +75,7 @@
       },
       "RouteRecovered": {
         "Title": "AI ルートが復旧しました",
-        "Content": "{provider} のモデル {model}（{upstream_id}）は再び利用できます。"
+        "Content": "{provider} のモデル {model}（{upstream_id}）は再び利用できます"
       }
     }
   },
