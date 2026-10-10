@@ -1,81 +1,44 @@
-import { AlertDialog, Anchor, Grid, Heading, Inline, Link, Stack, toast } from '@hina-ui/react'
-import { ArrowLeft, PencilLine, Trash2 } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { Link as RouterLink, useNavigate } from 'react-router'
-import { useLocale, useTranslations } from 'use-intl'
-import { gameTitle } from '~/features/game'
-import { bbcodeSections, parseBBCode } from '~/shared/markup/bbcode'
-import { BBCodeText } from '~/shared/ui/bbcode-text'
-import { Button } from '~/shared/ui/button'
-import { useWalkthroughRemoval } from '../use-walkthrough-removal'
-import { contentsOf, editorPath, walkthroughsPath, type Reading } from '../walkthrough'
-import { WalkthroughFacts } from './walkthrough-facts'
+import { Anchor, Divider, Grid, Heading, Inline, Stack } from '@hina-ui/react'
+import { useMemo } from 'react'
+import { useTranslations } from 'use-intl'
+import { sectionsOf } from '~/shared/richtext/rich-text'
+import { RichText } from '~/shared/ui/rich-text'
+import { contentsOf, type Reading } from '../walkthrough'
+import { WalkthroughByline } from './walkthrough-byline'
+import { WalkthroughContents } from './walkthrough-contents'
+import { WalkthroughGame } from './walkthrough-game'
+import { WalkthroughNotice } from './walkthrough-notice'
+import { WalkthroughOthers } from './walkthrough-others'
+import { WalkthroughOwnerActions } from './walkthrough-owner-actions'
+import { WalkthroughTrail } from './walkthrough-trail'
 
 export function WalkthroughPage({ reading, own }: { reading: Reading; own: boolean }) {
   const t = useTranslations('walkthrough')
-  const locale = useLocale()
-  const navigate = useNavigate()
-  const removal = useWalkthroughRemoval()
-  const [removing, setRemoving] = useState(false)
-  const { game, walkthrough, source } = reading
-  const contents = useMemo(() => contentsOf(bbcodeSections(parseBBCode(source))), [source])
-  const list = walkthroughsPath(locale, game.id)
+  const { game, resources, walkthrough, content, others } = reading
+  const contents = useMemo(() => contentsOf(sectionsOf(content)), [content])
   return (
-    <Grid className="items-start gap-8 lg:grid-cols-[minmax(0,1fr)_14rem]">
-      <Stack as="article" gap="lg" className="mx-auto w-full max-w-prose min-w-0">
-        <Stack as="header" gap="sm">
-          <Link asChild tone="neutral" className="self-start text-sm">
-            <RouterLink to={list}>
-              <Inline as="span" gap="xs" align="center" wrap={false}>
-                <ArrowLeft aria-hidden className="size-3.5" />
-                {t('back', { game: gameTitle(game, locale) })}
-              </Inline>
-            </RouterLink>
-          </Link>
-          <Heading level={1} size="2xl" weight="semibold" className="text-balance break-words">
+    <Grid className="items-start justify-center gap-10 lg:grid-cols-[minmax(0,48rem)_15rem]">
+      <Stack as="article" gap="xl" className="min-w-0">
+        <Stack as="header" gap="lg">
+          <WalkthroughTrail game={game} />
+          <Heading level={1} className="text-3xl tracking-tight text-balance break-words">
             {walkthrough.title}
           </Heading>
-          <WalkthroughFacts walkthrough={walkthrough} />
-          {own && (
-            <Inline gap="sm">
-              <Button asChild size="sm" variant="outline" tone="neutral" icon={<PencilLine />}>
-                <RouterLink to={editorPath(locale, game.id, walkthrough.id)}>
-                  {t('edit')}
-                </RouterLink>
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                tone="danger"
-                icon={<Trash2 />}
-                onClick={() => setRemoving(true)}
-              >
-                {t('remove')}
-              </Button>
-            </Inline>
-          )}
+          <Inline justify="between" align="center" gap="md" wrap={false}>
+            <WalkthroughByline walkthrough={walkthrough} />
+            {own && <WalkthroughOwnerActions gameId={game.id} walkthroughId={walkthrough.id} />}
+          </Inline>
+          {own && <WalkthroughNotice walkthrough={walkthrough} />}
+          <WalkthroughContents contents={contents} className="lg:hidden" />
+          <Divider className="max-lg:hidden" />
         </Stack>
-        <BBCodeText source={source} />
+        <RichText document={content} anchored />
+        <WalkthroughOthers gameId={game.id} others={others} />
       </Stack>
-      {contents.length > 0 && (
-        <Stack as="aside" className="sticky top-4 max-lg:hidden">
-          <Anchor label={t('contents')} items={contents} />
-        </Stack>
-      )}
-      <AlertDialog
-        title={t('removeConfirm')}
-        description={t('removeDescription')}
-        confirmText={t('remove')}
-        cancelText={t('cancel')}
-        tone="danger"
-        open={removing}
-        onOpenChange={setRemoving}
-        onConfirm={async () => {
-          await removal.confirm({ walkthroughId: walkthrough.id })
-          toast.success(t('removed'))
-          void navigate(list)
-        }}
-      />
+      <Stack as="aside" gap="lg" className="sticky top-6 max-lg:hidden">
+        <WalkthroughGame game={game} resources={resources} />
+        {contents.length > 0 && <Anchor label={t('contents')} items={contents} />}
+      </Stack>
     </Grid>
   )
 }

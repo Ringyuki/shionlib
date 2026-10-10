@@ -1,14 +1,29 @@
-import { data, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import { data, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
+import { loadViewer } from '~/features/viewer'
+import { isLocale } from '~/shared/i18n/locale.schema'
 import { keepWithinPages, requestedPage } from '~/shared/route/paging'
 import { idParam, optionalIdParam } from '~/shared/route/params'
 import { readCommand, routeAction, routeLoader } from '~/shared/route/route.server'
-import { editedParam, pageSize, userPageSize } from './walkthrough'
-import { walkthroughRemovalCommand, walkthroughSaveCommand } from './walkthrough.schema'
+import {
+  legacyEditedKey,
+  pageSize,
+  shelfKey,
+  userPageSize,
+  writingPath,
+  writtenBy,
+} from './walkthrough'
+import {
+  shelfFrom,
+  walkthroughPublishCommand,
+  walkthroughRemovalCommand,
+  walkthroughSaveCommand,
+} from './walkthrough.schema'
 import {
   loadDraft,
   loadReading,
   loadUserWalkthroughs,
   loadWalkthroughs,
+  publishWalkthrough,
   removeWalkthrough,
   saveWalkthrough,
 } from './walkthrough.use-cases'
@@ -24,7 +39,10 @@ export async function walkthroughsLoader(args: LoaderFunctionArgs) {
 export async function userWalkthroughsLoader(args: LoaderFunctionArgs) {
   const userId = idParam(args.params.id)
   const page = requestedPage(args.request)
-  const walkthroughs = await routeLoader(args, api => loadUserWalkthroughs(api, userId, page))
+  const shelf = shelfFrom(new URL(args.request.url).searchParams.get(shelfKey))
+  const walkthroughs = await routeLoader(args, api =>
+    loadUserWalkthroughs(api, userId, page, shelf),
+  )
   keepWithinPages(args.request, walkthroughs.total, userPageSize)
   return walkthroughs
 }
@@ -39,23 +57,37 @@ export async function readingLoader(args: LoaderFunctionArgs) {
   return reading
 }
 
-export async function editorLoader(args: LoaderFunctionArgs) {
+export async function writingLoader(args: LoaderFunctionArgs) {
   const gameId = idParam(args.params.id)
-  const edited = new URL(args.request.url).searchParams.get(editedParam) ?? undefined
-  const walkthroughId = optionalIdParam(edited)
-  const draft = await routeLoader(args, api => loadDraft(api, gameId, walkthroughId))
-  if (draft === undefined) {
+  const walkthroughId = optionalIdParam(args.params.walkthroughId)
+  const [draft, viewer] = await routeLoader(args, api =>
+    Promise.all([loadDraft(api, gameId, walkthroughId), loadViewer(api)]),
+  )
+  if (draft === undefined || (viewer !== null && !writtenBy(draft, viewer.id))) {
     throw data(null, { status: 404 })
   }
   return draft
 }
 
+export function legacyWritingRedirect({ params, request }: LoaderFunctionArgs) {
+  const gameId = idParam(params.id)
+  const walkthroughId = optionalIdParam(
+    new URL(request.url).searchParams.get(legacyEditedKey) ?? undefined,
+  )
+  if (!isLocale(params.lang)) {
+    throw data(null, { status: 404 })
+  }
+  return redirect(writingPath(params.lang, gameId, walkthroughId), 301)
+}
+
 export async function walkthroughSaveAction(args: ActionFunctionArgs) {
   const save = await readCommand(args, walkthroughSaveCommand)
-  return routeAction(args, async api => {
-    const saved = await saveWalkthrough(api, save)
-    return { id: saved.id, status: saved.status, reviewPending: saved.review_pending }
-  })
+  return routeAction(args, api => saveWalkthrough(api, save))
+}
+
+export async function walkthroughPublishAction(args: ActionFunctionArgs) {
+  const publish = await readCommand(args, walkthroughPublishCommand)
+  return routeAction(args, api => publishWalkthrough(api, publish))
 }
 
 export async function walkthroughRemovalAction(args: ActionFunctionArgs) {

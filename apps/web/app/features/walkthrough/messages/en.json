@@ -1,7 +1,6 @@
 {
   "list": "Walkthroughs",
-  "count": "{count, plural, one {# walkthrough} other {# walkthroughs}}",
-  "empty": "No walkthroughs yet.",
+  "empty": "This game has no walkthroughs yet",
   "write": "Write a walkthrough",
   "updated": "Updated <time></time>",
   "language": {
@@ -13,39 +12,55 @@
   "state": {
     "draft": "Draft",
     "reviewing": "Under review",
-    "hidden": "Hidden"
+    "hidden": "Not approved"
   },
-  "back": "Walkthroughs for {game}",
+  "notice": {
+    "draft": "This walkthrough is not published and only you can see it",
+    "reviewing": "This walkthrough is under review and only you can see it until it is approved",
+    "hidden": "This walkthrough was not approved and only you can see it; it can be published again after it is revised"
+  },
   "contents": "Contents",
+  "others": "Other walkthroughs for this game",
+  "resources": "{count, plural, one {# resource} other {# resources}}",
   "edit": "Edit",
+  "more": "More actions",
   "remove": "Delete",
   "cancel": "Cancel",
   "removeConfirm": "Delete this walkthrough?",
-  "removeDescription": "It cannot be restored.",
-  "removed": "Walkthrough deleted.",
+  "removeDescription": "A deleted walkthrough cannot be restored",
+  "removed": "Walkthrough deleted",
   "writeTitle": "Write a walkthrough",
-  "editTitle": "Edit the walkthrough",
-  "for": "{game}",
+  "editTitle": "Edit walkthrough",
+  "back": "Back",
   "title": "Title",
-  "content": "Text",
-  "contentHint": "Headings, lists, links and spoilers are available; headings make the table of contents.",
+  "content": "Body",
+  "contentHint": "Write the body, or press / to insert a heading, list, picture or table",
+  "characters": "{count, plural, one {# character} other {# characters}}",
+  "unsaved": "Unsaved",
+  "draftSaved": "Draft saved",
   "saveDraft": "Save draft",
-  "backToDraft": "Turn into a draft",
+  "backToDraft": "Revert to draft",
   "publish": "Publish",
-  "draftSaved": "Draft saved. Only you can see it.",
-  "published": "Walkthrough published.",
-  "sentForReview": "Walkthrough sent. It becomes public after review.",
-  "signIn": "Sign in to write a walkthrough.",
+  "save": "Save",
+  "published": "Walkthrough published",
+  "saved": "Walkthrough saved",
+  "sentForReview": "Walkthrough submitted for review",
+  "signIn": "Sign in to write a walkthrough",
   "signInAction": "Sign in",
   "leaveConfirm": "Leave this page?",
-  "leaveDescription": "Changes you have not saved will be lost.",
+  "leaveDescription": "Unsaved changes will be lost",
   "leave": "Leave",
   "stay": "Keep editing",
+  "shelfLabel": "Walkthrough status",
+  "shelf": {
+    "all": "All",
+    "published": "Published",
+    "draft": "Drafts"
+  },
   "userList": "Walkthroughs",
-  "userEmpty": "This user has not written a walkthrough yet.",
-  "userEmptyOwn": "You have not written a walkthrough yet.",
-  "of": "<game></game>",
+  "userEmpty": "No walkthroughs yet",
   "issue": {
-    "empty": "Write the text first."
+    "title": "Enter a title",
+    "content": "Enter the body"
   }
 }

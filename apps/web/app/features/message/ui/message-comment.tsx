@@ -1,9 +1,9 @@
 import { Blockquote, Inline, Stack } from '@hina-ui/react'
 import { Link as RouterLink } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
-import { commentAnchor, commentsPath, sourceOf } from '~/features/comment'
-import { BBCodeText } from '~/shared/ui/bbcode-text'
+import { commentPath } from '~/features/comment'
 import { Button } from '~/shared/ui/button'
+import { RichText } from '~/shared/ui/rich-text'
 import type { MessageDetail } from '../message'
 
 type MessageCommentProps = {
@@ -17,14 +17,12 @@ export function MessageComment({ comment, gameId }: MessageCommentProps) {
   return (
     <Stack gap="sm">
       <Blockquote>
-        <BBCodeText source={sourceOf(comment)} />
+        <RichText document={comment.content} />
       </Blockquote>
       {gameId !== undefined && (
         <Inline>
           <Button asChild size="sm" variant="outline" tone="neutral">
-            <RouterLink to={`${commentsPath(locale, gameId)}#${commentAnchor(comment.id)}`}>
-              {t('openComment')}
-            </RouterLink>
+            <RouterLink to={commentPath(locale, gameId, comment.id)}>{t('openComment')}</RouterLink>
           </Button>
         </Inline>
       )}

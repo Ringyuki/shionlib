@@ -17,13 +17,14 @@ All validation in `apps/web` uses **valibot**. hina-ui `Form` accepts any Standa
 
 ## One source of truth for API constraints
 
-`pnpm api:generate` writes `app/shared/api/generated/constraints.ts`. It holds every request body's fields with `required`, `minLength`, `maxLength`, `format`, `pattern`, `enum`, `minimum` and `maximum`, taken from `apps/api/openapi/openapi.json`.
+`pnpm api:generate` writes `app/shared/api/generated/constraints.ts`. It holds the fields of every request body and of every schema a request body refers to (`RichTextNode`, `RichTextMark`), with `required`, `minLength`, `maxLength`, `format`, `pattern`, `enum`, `minimum` and `maximum`, taken from `apps/api/openapi/openapi.json`; a field that is an object lists its own under `fields`.
 
 - **Fields with API rules** are built with the form kit: `kit.text('RegisterUserInputBody', 'name')`. Never write the numbers or formats yourself. Hints that mention limits read them too: `t('nameHint', lengthOf('RegisterUserInputBody', 'name'))`.
 - **Rules the API does not declare**:
   - Rules that exist only in the API's business logic (password policy, whether a code is right) are not repeated. The API answers 422 with field errors in the visitor's language, and `useFormErrors` puts them under the fields.
   - Rules that exist only in the UI (confirmation matches, age declaration ticked) are written in the form schema with the feature's own messages (`<name>.issue.<key>`).
 - **Choices**: the options of an enum field (report reasons, platforms, languages) come from the same file: `constraints.CreateReportInputBody.reason.enum`, or `.itemEnum` and `.minItems` for arrays, read in the feature model (`reportReasons`, `platformOptions`, `leastPlatforms`). A model may change their display order, never their content.
+- **Documents**: a command or form field that carries a rich text document uses `richDocument` from `~/shared/richtext/rich-text.schema` (a form adds `v.check(document => !isBlank(document), issue('empty'))`); the node, mark and attribute names in it come from the constraints, so a document the contract does not describe never reaches a use-case. The editor is not a hina-ui control: it sits inside a `FormField name` for the message under it, and the rest of the form (buttons, other fields) is arranged by the caller.
 - **Generic messages** (required, too short, too long, format, choice) live in `app/messages/form/{zh,en,ja}.json` (namespace `form`). They are produced by `useFormKit()`.
 
 ## Building a form

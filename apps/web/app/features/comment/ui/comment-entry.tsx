@@ -1,26 +1,42 @@
-import { Avatar, Inline, Link, Stack, Tag, Text, Time, useImageResolver } from '@hina-ui/react'
-import { useState, type ReactNode } from 'react'
+import {
+  Avatar,
+  cn,
+  Inline,
+  Link,
+  Stack,
+  Tag,
+  Text,
+  Time,
+  Tooltip,
+  useImageResolver,
+} from '@hina-ui/react'
+import { memo, useState, type ReactNode } from 'react'
 import { Link as RouterLink } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 import { profilePath } from '~/features/profile'
-import { BBCodeText } from '~/shared/ui/bbcode-text'
-import { commentAnchor, isPending, sourceOf, type CommentItem } from '../comment'
+import { RichText } from '~/shared/ui/rich-text'
+import { commentAnchor, isPending, type CommentItem } from '../comment'
+import { useCommentFocus } from '../use-comment-focus'
 import { CommentActions } from './comment-actions'
-import { CommentEditor } from './comment-composer'
+import { EditComment } from './edit-comment'
 
 type CommentEntryProps = {
   comment: CommentItem
   own: boolean
-  answering?: boolean
-  onReply: () => void
+  answered?: string
+  nested?: boolean
+  replying: boolean
+  onReply: (comment: CommentItem) => void
   onRemove: (comment: CommentItem) => void
   children?: ReactNode
 }
 
-export function CommentEntry({
+export const CommentEntry = memo(function CommentEntry({
   comment,
   own,
-  answering,
+  answered,
+  nested = false,
+  replying,
   onReply,
   onRemove,
   children,
@@ -29,65 +45,84 @@ export function CommentEntry({
   const locale = useLocale()
   const resolveImage = useImageResolver()
   const [editing, setEditing] = useState(false)
-  const { creator, parent } = comment
-  const source = sourceOf(comment)
+  const { entry, focused } = useCommentFocus(comment.id)
+  const { creator } = comment
   const profile = profilePath(locale, creator.id)
   return (
     <Inline
       as="article"
+      ref={entry}
       id={commentAnchor(comment.id)}
-      gap="md"
+      gap={nested ? 'sm' : 'md'}
       align="start"
       wrap={false}
-      className="scroll-mt-4"
+      className={cn(
+        '-mx-2 scroll-mt-24 rounded-lg px-2 pt-2 transition-colors duration-700',
+        nested && 'pb-2',
+        focused && 'bg-accent-soft',
+      )}
     >
       <RouterLink to={profile} aria-hidden tabIndex={-1} className="shrink-0">
         <Avatar
-          size={answering === true ? 'sm' : 'md'}
+          size={nested ? 'sm' : 'md'}
           name={creator.name}
           src={creator.avatar === null ? undefined : resolveImage(creator.avatar, 'image')}
+          className={nested ? 'sm:size-7' : 'sm:size-9'}
         />
       </RouterLink>
-      <Stack gap="xs" className="min-w-0 flex-1">
-        <Inline gap="sm" align="center" className="gap-y-0.5">
-          <Link asChild tone="neutral" className="font-medium">
-            <RouterLink to={profile}>{creator.name}</RouterLink>
-          </Link>
-          {answering === true && parent.creator != null && (
-            <Text size="sm" tone="muted">
-              {t('answering', { name: parent.creator.name })}
-            </Text>
-          )}
-          <Text size="sm" tone="faint">
-            <Time value={comment.created} format="relative" />
-          </Text>
-          {comment.edited && (
+      <Stack gap="none" className="min-w-0 flex-1">
+        <Stack gap="xs">
+          <Inline
+            gap="sm"
+            align="center"
+            className={cn('gap-y-0.5', !nested && 'min-h-8 sm:min-h-9')}
+          >
+            <Link asChild tone="neutral" className="font-medium">
+              <RouterLink to={profile}>{creator.name}</RouterLink>
+            </Link>
             <Text size="sm" tone="faint">
-              {t('edited')}
+              <Time value={comment.created} format="relative" />
             </Text>
+            {comment.edited && (
+              <Text size="sm" tone="faint">
+                {t('edited')}
+              </Text>
+            )}
+            {isPending(comment) && (
+              <Tooltip content={t('pendingHint')}>
+                <Tag size="sm" tone="warning" tabIndex={0}>
+                  {t('pending')}
+                </Tag>
+              </Tooltip>
+            )}
+          </Inline>
+          {editing ? (
+            <EditComment comment={comment} onDone={() => setEditing(false)} />
+          ) : (
+            <>
+              <RichText
+                document={comment.content}
+                lead={
+                  answered === undefined ? undefined : (
+                    <Text as="span" tone="faint">
+                      {t('answering', { name: answered })}
+                    </Text>
+                  )
+                }
+              />
+              <CommentActions
+                comment={comment}
+                own={own}
+                replying={replying}
+                onReply={() => onReply(comment)}
+                onRemove={() => onRemove(comment)}
+                onEdit={() => setEditing(true)}
+              />
+            </>
           )}
-          {isPending(comment) && (
-            <Tag size="sm" tone="warning">
-              {t('pending')}
-            </Tag>
-          )}
-        </Inline>
-        {editing ? (
-          <CommentEditor comment={comment} source={source} onDone={() => setEditing(false)} />
-        ) : (
-          <>
-            <BBCodeText source={source} className="max-w-prose" />
-            <CommentActions
-              comment={comment}
-              own={own}
-              onReply={onReply}
-              onRemove={() => onRemove(comment)}
-              onEdit={() => setEditing(true)}
-            />
-          </>
-        )}
+        </Stack>
         {children}
       </Stack>
     </Inline>
   )
-}
+})

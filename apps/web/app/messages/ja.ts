@@ -20,6 +20,7 @@ import upload from '~/features/upload/messages/ja.json'
 import uploader from '~/features/uploader/messages/ja.json'
 import walkthrough from '~/features/walkthrough/messages/ja.json'
 import bbcode from './bbcode/ja.json'
+import editor from './editor/ja.json'
 import form from './form/ja.json'
 import site from './site/ja.json'
 import type { Messages } from './zh'
@@ -33,6 +34,7 @@ export const messages: Messages = {
   comment,
   developer,
   download,
+  editor,
   favorite,
   form,
   game,

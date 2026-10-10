@@ -1,5 +1,4 @@
 import type { ApiClient } from '~/shared/api/client'
-import { lexicalDocument } from '~/shared/markup/lexical-document'
 import {
   pageSize,
   userPageSize,
@@ -14,16 +13,20 @@ export async function loadComments(
   gameId: number,
   page: number,
   order: ThreadOrder,
+  focus?: number,
 ): Promise<Comments> {
   const found = await api.get('/comment/game/{game_id}', {
-    params: { path: { game_id: gameId }, query: { page, pageSize, order } },
+    params: {
+      path: { game_id: gameId },
+      query: { page, pageSize, order, ...(focus === undefined ? {} : { focus }) },
+    },
   })
   return {
     gameId,
     threads: found.items ?? [],
     total: found.meta.totalItems,
     count: found.meta.comments,
-    page,
+    page: found.meta.currentPage,
     order,
   }
 }
@@ -46,20 +49,21 @@ export async function loadUserComments(
   return { items: found.items ?? [], total: found.meta.totalItems, page }
 }
 
-export async function postComment(api: ApiClient, post: CommentPost): Promise<void> {
-  await api.post('/comment/game/{game_id}', {
+export async function postComment(api: ApiClient, post: CommentPost): Promise<number> {
+  const created = await api.post('/comment/game/{game_id}', {
     params: { path: { game_id: post.gameId } },
     body: {
-      content: lexicalDocument(post.content),
+      content: post.content,
       ...(post.parentId === undefined ? {} : { parent_id: post.parentId }),
     },
   })
+  return created.id
 }
 
 export async function editComment(api: ApiClient, edit: CommentEdit): Promise<void> {
   await api.patch('/comment/{comment_id}', {
     params: { path: { comment_id: edit.commentId } },
-    body: { content: lexicalDocument(edit.content) },
+    body: { content: edit.content },
   })
 }
 

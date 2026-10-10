@@ -76,6 +76,18 @@ export const constraints = {
       ]
     }
   },
+  "AdminGameExtraInfoDTO": {
+    "key": {
+      "type": "string",
+      "required": true,
+      "nullable": false
+    },
+    "value": {
+      "type": "string",
+      "required": true,
+      "nullable": false
+    }
+  },
   "AdminGameScalarInputBody": {
     "aliases": {
       "type": "array",
@@ -173,6 +185,18 @@ export const constraints = {
       "type": "string",
       "required": false,
       "nullable": true
+    }
+  },
+  "AdminGameStaffDTO": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "nullable": false
+    },
+    "role": {
+      "type": "string",
+      "required": true,
+      "nullable": false
     }
   },
   "AdminGameStatusInputBody": {
@@ -415,6 +439,34 @@ export const constraints = {
       "maxItems": 50
     }
   },
+  "AiModelRouteInput": {
+    "protocol": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "enum": [
+        "chat",
+        "responses",
+        "messages",
+        "gemini",
+        "moderation"
+      ]
+    },
+    "provider_id": {
+      "type": "integer",
+      "required": true,
+      "nullable": false,
+      "format": "int64",
+      "minimum": 1
+    },
+    "upstream_id": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "minLength": 1,
+      "maxLength": 200
+    }
+  },
   "AiModelUpdateInputBody": {
     "canonical_id": {
       "type": "string",
@@ -492,6 +544,43 @@ export const constraints = {
       "format": "double",
       "minimum": 0,
       "maximum": 2
+    }
+  },
+  "AiPlaygroundMessageInput": {
+    "content": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "minLength": 1,
+      "maxLength": 200000
+    },
+    "role": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "enum": [
+        "user",
+        "assistant"
+      ]
+    }
+  },
+  "AiPlaygroundTargetInput": {
+    "id": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "kind": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "enum": [
+        "scene",
+        "model",
+        "route"
+      ]
     }
   },
   "AiProviderCreateInputBody": {
@@ -610,6 +699,27 @@ export const constraints = {
       "nullable": true,
       "minItems": 1,
       "maxItems": 500
+    }
+  },
+  "AiRouteItemInput": {
+    "protocol": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "enum": [
+        "chat",
+        "responses",
+        "messages",
+        "gemini",
+        "moderation"
+      ]
+    },
+    "upstream_id": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "minLength": 1,
+      "maxLength": 200
     }
   },
   "AiRouteUpdateInputBody": {
@@ -976,6 +1086,21 @@ export const constraints = {
       "nullable": false,
       "minLength": 1,
       "maxLength": 255
+    }
+  },
+  "DownloadFileUploadInput": {
+    "file_name": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "maxLength": 255
+    },
+    "upload_session_id": {
+      "type": "integer",
+      "required": true,
+      "nullable": false,
+      "format": "int64",
+      "minimum": 1
     }
   },
   "DownloadHistoryReasonInputBody": {
@@ -1448,6 +1573,171 @@ export const constraints = {
       "enum": [
         "VALID",
         "INVALID"
+      ]
+    }
+  },
+  "RichTextDocument": {
+    "content": {
+      "type": "array",
+      "required": true,
+      "nullable": false,
+      "minItems": 1
+    },
+    "type": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "enum": [
+        "doc"
+      ]
+    }
+  },
+  "RichTextMark": {
+    "attrs": {
+      "type": "object",
+      "required": false,
+      "nullable": false,
+      "fields": {
+        "href": {
+          "type": "string",
+          "required": false,
+          "nullable": false,
+          "maxLength": 2000
+        }
+      }
+    },
+    "type": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "enum": [
+        "bold",
+        "italic",
+        "strike",
+        "link",
+        "spoiler"
+      ]
+    }
+  },
+  "RichTextNode": {
+    "attrs": {
+      "type": "object",
+      "required": false,
+      "nullable": false,
+      "fields": {
+        "align": {
+          "type": "string",
+          "required": false,
+          "nullable": true,
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ]
+        },
+        "alt": {
+          "type": "string",
+          "required": false,
+          "nullable": false,
+          "maxLength": 200
+        },
+        "caption": {
+          "type": "string",
+          "required": false,
+          "nullable": false,
+          "maxLength": 500
+        },
+        "colspan": {
+          "type": "integer",
+          "required": false,
+          "nullable": false,
+          "minimum": 1,
+          "maximum": 50
+        },
+        "colwidth": {
+          "type": "array",
+          "required": false,
+          "nullable": true
+        },
+        "height": {
+          "type": "integer",
+          "required": false,
+          "nullable": false,
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "level": {
+          "type": "integer",
+          "required": false,
+          "nullable": false,
+          "enum": [
+            2,
+            3
+          ]
+        },
+        "rowspan": {
+          "type": "integer",
+          "required": false,
+          "nullable": false,
+          "minimum": 1,
+          "maximum": 50
+        },
+        "src": {
+          "type": "string",
+          "required": false,
+          "nullable": false
+        },
+        "width": {
+          "type": "integer",
+          "required": false,
+          "nullable": false,
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "width_percent": {
+          "type": "integer",
+          "required": false,
+          "nullable": false,
+          "minimum": 20,
+          "maximum": 100
+        }
+      }
+    },
+    "content": {
+      "type": "array",
+      "required": false,
+      "nullable": false
+    },
+    "marks": {
+      "type": "array",
+      "required": false,
+      "nullable": false
+    },
+    "text": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "minLength": 1
+    },
+    "type": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "enum": [
+        "paragraph",
+        "heading",
+        "blockquote",
+        "bullet_list",
+        "ordered_list",
+        "list_item",
+        "horizontal_rule",
+        "image_block",
+        "table",
+        "table_row",
+        "table_header",
+        "table_cell",
+        "hard_break",
+        "text"
       ]
     }
   },

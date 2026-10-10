@@ -122,7 +122,7 @@ const clientSafe = {
 const browserCalls = {
   regex: '^~/shared/api/(browser-client|chunk|xhr)$',
   message:
-    'Only the upload manager (features/upload) calls the API from the browser; everything else goes through loaders and actions.',
+    'Only uploads call the API from the browser, for their progress (features/upload, features/media); everything else goes through loaders and actions.',
 }
 
 const importRules = patterns => [
@@ -139,9 +139,45 @@ const importRules = patterns => [
   },
 ]
 
-const restrictedImports = (...patterns) => importRules([...patterns, browserCalls])
+const editorEngine = {
+  regex: '^@tiptap/',
+  message: 'Tiptap stays inside ~/shared/editor; everything else uses its hooks and tools.',
+}
 
-const uploadImports = (...patterns) => importRules(patterns)
+const engineTypes = {
+  regex: '^@tiptap/',
+  allowTypeImports: true,
+  message:
+    'Only the engine (app/shared/editor/engine) loads Tiptap at run time; the rest of ~/shared/editor imports its types.',
+}
+
+const engineModules = {
+  regex: '^\\.{1,2}/engine(/|$)',
+  allowTypeImports: true,
+  message:
+    'The engine is loaded on demand with import("./engine"), so pages that only read never download it.',
+}
+
+const engineFiles = ['app/shared/editor/engine/**/*.{ts,tsx}', 'app/shared/editor/**/*.test.ts']
+
+const editorFree = {
+  regex: '^~/shared/editor(/|$)',
+  message:
+    'Reading rich text never loads the editor: ~/shared/richtext and RichText stay free of ~/shared/editor.',
+}
+
+const sharedOnly = {
+  regex: '^~/(features|routes|messages)(/|$)',
+  message: 'shared is the platform layer; it never depends on features, routes or messages.',
+}
+
+const restrictedImports = (...patterns) => importRules([...patterns, browserCalls, editorEngine])
+
+const uploadImports = (...patterns) => importRules([...patterns, editorEngine])
+
+const editorImports = (...patterns) => importRules([...patterns, browserCalls])
+
+const richTextView = ['app/shared/ui/rich-text*.tsx']
 
 const withoutRoutes = {
   regex: '^~/(routes|messages)(/|$)',
@@ -290,23 +326,37 @@ export default defineConfig([
   {
     files: ['app/shared/**/*.{ts,tsx}'],
     rules: {
-      '@typescript-eslint/no-restricted-imports': restrictedImports(
-        {
-          regex: '^~/(features|routes|messages)(/|$)',
-          message:
-            'shared is the platform layer; it never depends on features, routes or messages.',
-        },
-        clientSafe,
-      ),
+      '@typescript-eslint/no-restricted-imports': restrictedImports(sharedOnly, clientSafe),
     },
   },
   {
     files: ['app/shared/**/*.server.ts'],
     rules: {
-      '@typescript-eslint/no-restricted-imports': restrictedImports({
-        regex: '^~/(features|routes|messages)(/|$)',
-        message: 'shared is the platform layer; it never depends on features, routes or messages.',
-      }),
+      '@typescript-eslint/no-restricted-imports': restrictedImports(sharedOnly),
+    },
+  },
+  {
+    files: ['app/shared/richtext/**/*.ts', ...richTextView],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': restrictedImports(
+        sharedOnly,
+        clientSafe,
+        editorFree,
+      ),
+    },
+  },
+  {
+    files: richTextView,
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        ...apiShapes,
+        nativeTooltip,
+        mountedFeedback,
+        hinaInternals,
+        directFetcher,
+        heldPosition,
+      ],
     },
   },
   {
@@ -391,7 +441,24 @@ export default defineConfig([
     },
   },
   {
-    files: ['app/features/upload/**/*.{ts,tsx}'],
+    files: ['app/shared/editor/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': editorImports(
+        sharedOnly,
+        clientSafe,
+        engineTypes,
+        engineModules,
+      ),
+    },
+  },
+  {
+    files: engineFiles,
+    rules: {
+      '@typescript-eslint/no-restricted-imports': editorImports(sharedOnly, clientSafe),
+    },
+  },
+  {
+    files: ['app/features/upload/**/*.{ts,tsx}', 'app/features/media/**/*.{ts,tsx}'],
     rules: {
       '@typescript-eslint/no-restricted-imports': uploadImports(
         featureEntry,
@@ -401,7 +468,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['app/features/upload/*.ts'],
+    files: ['app/features/upload/*.ts', 'app/features/media/*.ts'],
     ignores: [...pureIgnores, '**/*.test.ts'],
     rules: {
       '@typescript-eslint/no-restricted-imports': uploadImports(

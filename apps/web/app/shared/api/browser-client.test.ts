@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createBrowserApi } from './browser-client'
 import { ApiError } from './error'
+import { fileBody } from './file-body'
 import { fakeXhr, type SentXhr } from './xhr-testing'
 
 const me = { code: 0, message: 'ok', data: { id: 1 } }
@@ -23,6 +24,25 @@ describe('createBrowserApi', () => {
     const fake = install(() => ({ status: 200, text: JSON.stringify(me) }))
     await expect(createBrowserApi('http://web.test').get('/user/me')).resolves.toEqual({ id: 1 })
     expect(fake.sent[0]).toMatchObject({ method: 'GET', url: 'http://web.test/api/user/me' })
+  })
+
+  it('tells how much of a body has been sent, out of its size', async () => {
+    const stored = { key: 'richtext/1/a.webp', width: 4, height: 3 }
+    const fake = install(() => ({
+      status: 200,
+      text: JSON.stringify({ code: 0, message: 'ok', data: stored }),
+      progress: [3, 5],
+    }))
+    const seen: [number, number][] = []
+    const api = createBrowserApi('http://web.test', (sent, total) => seen.push([sent, total]))
+    const body = fileBody('file', new File(['image'], 'a.png', { type: 'image/png' }))
+    await expect(api.put('/uploads/small/richtext/image', body)).resolves.toEqual(stored)
+    const size = fake.sent[0]?.body?.size ?? 0
+    expect(size).toBeGreaterThan(0)
+    expect(seen).toEqual([
+      [3, size],
+      [5, size],
+    ])
   })
 
   it('refreshes an expired session once and repeats the request', async () => {

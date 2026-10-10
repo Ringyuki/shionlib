@@ -1,7 +1,7 @@
 import { toast } from '@hina-ui/react'
 import { isRouteErrorResponse } from 'react-router'
 import { useTranslations } from 'use-intl'
-import { fieldMessages } from '~/shared/api/error'
+import { ApiError, fieldMessages } from '~/shared/api/error'
 import { isFailure } from '~/shared/api/failure.schema'
 import type { ApiFailure } from '~/shared/api/types'
 import { unwrapped } from './refusal.schema'
@@ -51,16 +51,58 @@ export function describe(error: unknown): string {
   return isRouteErrorResponse(error) ? `${error.status} ${error.statusText}`.trim() : String(error)
 }
 
+export function refusedOf<Result>(outcome: Outcome<Result> | undefined): Refused | undefined {
+  return outcome?.ok === false ? outcome : undefined
+}
+
+export function namesFields(refused: Refused): boolean {
+  return Object.keys(fieldMessages(refused.failure)).length > 0
+}
+
+export function refusalFrom(thrown: unknown): Refused {
+  if (thrown instanceof ApiError) {
+    return {
+      ok: false,
+      failure: thrown.failure,
+      retryAfter: thrown.retryAfter,
+      status: thrown.status,
+    }
+  }
+  return refusalOf(thrown)
+}
+
+function usePhrase() {
+  const t = useTranslations('site')
+  return ({ failure, retryAfter }: Refused) => {
+    const message = failure.code === unreachableCode ? t('errorDescription') : failure.message
+    return retryAfter === undefined ? message : t('retryAfter', { message, seconds: retryAfter })
+  }
+}
+
+export function useRefusalText() {
+  const t = useTranslations('site')
+  const phrase = usePhrase()
+  return (refused: Refused): string => {
+    const { failure, status } = refused
+    if (failure.code === unreachableCode) {
+      return `${phrase(refused)}（${failure.message}）`
+    }
+    const traceable = status >= 500 && failure.requestId !== ''
+    const text = phrase(refused)
+    return traceable ? `${text}（${t('requestId', { id: failure.requestId })}）` : text
+  }
+}
+
 export function useRefusalNotice() {
   const t = useTranslations('site')
-  return ({ failure, retryAfter, status }: Refused) => {
-    if (Object.keys(fieldMessages(failure)).length > 0) {
+  const phrase = usePhrase()
+  return (refused: Refused) => {
+    const { failure, status } = refused
+    if (namesFields(refused)) {
       return
     }
     const unanswered = failure.code === unreachableCode
-    const message = unanswered ? t('errorDescription') : failure.message
-    const text =
-      retryAfter === undefined ? message : t('retryAfter', { message, seconds: retryAfter })
+    const text = phrase(refused)
     if (status >= 500 && failure.requestId !== '') {
       toast.danger(text, {
         id: text,

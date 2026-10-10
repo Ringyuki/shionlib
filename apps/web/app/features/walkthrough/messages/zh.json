@@ -1,7 +1,6 @@
 {
   "list": "攻略",
-  "count": "{count, number} 篇攻略",
-  "empty": "暂无攻略。",
+  "empty": "这个游戏暂无攻略",
   "write": "写攻略",
   "updated": "更新于<time></time>",
   "language": {
@@ -13,39 +12,55 @@
   "state": {
     "draft": "草稿",
     "reviewing": "审核中",
-    "hidden": "已隐藏"
+    "hidden": "未通过审核"
   },
-  "back": "《{game}》的攻略",
+  "notice": {
+    "draft": "这篇攻略尚未发布，仅你可见",
+    "reviewing": "这篇攻略正在审核，审核通过前仅你可见",
+    "hidden": "这篇攻略未通过审核，目前仅你可见，修改后可以重新发布"
+  },
   "contents": "目录",
+  "others": "这个游戏的其他攻略",
+  "resources": "{count, number} 个资源",
   "edit": "编辑",
+  "more": "更多操作",
   "remove": "删除",
   "cancel": "取消",
-  "removeConfirm": "删除这篇攻略？",
-  "removeDescription": "删除后无法恢复。",
-  "removed": "攻略已删除。",
+  "removeConfirm": "确定要删除这篇攻略吗？",
+  "removeDescription": "攻略删除后无法恢复",
+  "removed": "攻略已删除",
   "writeTitle": "写攻略",
   "editTitle": "编辑攻略",
-  "for": "《{game}》",
+  "back": "返回",
   "title": "标题",
   "content": "正文",
-  "contentHint": "可使用标题、列表、链接和剧透等格式；标题会生成目录。",
+  "contentHint": "输入正文，按 / 可插入标题、列表、图片或表格",
+  "characters": "{count, number} 字",
+  "unsaved": "有未保存的修改",
+  "draftSaved": "草稿已保存",
   "saveDraft": "保存草稿",
   "backToDraft": "转为草稿",
   "publish": "发布",
-  "draftSaved": "草稿已保存，仅你可见。",
-  "published": "攻略已发布。",
-  "sentForReview": "攻略已提交，审核通过后公开。",
-  "signIn": "登录后才能写攻略。",
+  "save": "保存",
+  "published": "攻略已发布",
+  "saved": "攻略已保存",
+  "sentForReview": "攻略已提交审核",
+  "signIn": "登录后可以撰写攻略",
   "signInAction": "登录",
-  "leaveConfirm": "离开这个页面？",
-  "leaveDescription": "尚未保存的修改将会丢失。",
+  "leaveConfirm": "确定要离开这个页面吗？",
+  "leaveDescription": "尚未保存的修改将会丢失",
   "leave": "离开",
   "stay": "继续编辑",
+  "shelfLabel": "攻略状态",
+  "shelf": {
+    "all": "全部",
+    "published": "已发布",
+    "draft": "草稿"
+  },
   "userList": "撰写的攻略",
-  "userEmpty": "该用户尚未撰写攻略。",
-  "userEmptyOwn": "你尚未撰写攻略。",
-  "of": "<game></game>",
+  "userEmpty": "暂无攻略",
   "issue": {
-    "empty": "请输入正文。"
+    "title": "请输入标题",
+    "content": "请输入正文"
   }
 }

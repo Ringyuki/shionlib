@@ -12,7 +12,7 @@ test('tells what became public lately and leads to it', async ({ page }) => {
   )
   await expect(
     commented.getByRole('link', { name: '常轨脱离Creative Re:Re:call' }),
-  ).toHaveAttribute('href', /^\/zh\/game\/1\/comments#comment-\d+$/)
+  ).toHaveAttribute('href', /^\/zh\/game\/1\/comments\?comment=\d+$/)
 })
 
 test('narrows the feed to one kind and says when there is nothing', async ({ page }) => {

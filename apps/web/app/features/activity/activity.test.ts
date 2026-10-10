@@ -47,7 +47,7 @@ describe('happeningsOf', () => {
     expect(
       happeningsOf([
         stored(3, 11, 5),
-        activity(2, { comment: { id: 9, html: null } }),
+        activity(2, { comment: { id: 9, text: '好' } }),
         activity(1, { type: 'WALKTHROUGH_CREATE', walkthrough: { id: 4, title: '全线攻略' } }),
       ]),
     ).toMatchObject([
@@ -69,7 +69,7 @@ describe('happeningsOf', () => {
     expect(
       happeningsOf([
         stored(3, 12, 5),
-        activity(2, { comment: { id: 9, html: null } }),
+        activity(2, { comment: { id: 9, text: '好' } }),
         stored(1, 11, 5),
       ]),
     ).toHaveLength(3)
@@ -78,7 +78,7 @@ describe('happeningsOf', () => {
   it('leaves out what has lost its subject', () => {
     expect(
       happeningsOf([
-        activity(1, { game: null, comment: { id: 9, html: null } }),
+        activity(1, { game: null, comment: { id: 9, text: '好' } }),
         activity(2, {}),
         activity(3, { type: 'FILE_UPLOAD_TO_S3' }),
         activity(4, { type: 'WALKTHROUGH_CREATE' }),

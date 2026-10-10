@@ -1,44 +1,50 @@
-import { DropdownMenu, DropdownMenuItem, Inline, Text, Toggle } from '@hina-ui/react'
-import { Ellipsis, MessageSquareReply, PencilLine, ThumbsUp, Trash2 } from 'lucide-react'
+import { DropdownMenu, DropdownMenuItem, Inline } from '@hina-ui/react'
+import { Ellipsis, PencilLine, ThumbsUp, Trash2 } from 'lucide-react'
 import { useFormatter, useTranslations } from 'use-intl'
-import { Button } from '~/shared/ui/button'
+import { Button, IconButton } from '~/shared/ui/button'
 import type { CommentItem } from '../comment'
 import { useCommentLike } from '../use-comment-like'
 
 type CommentActionsProps = {
   comment: CommentItem
   own: boolean
+  replying: boolean
   onReply: () => void
   onEdit: () => void
   onRemove: () => void
 }
 
-export function CommentActions({ comment, own, onReply, onEdit, onRemove }: CommentActionsProps) {
+export function CommentActions({
+  comment,
+  own,
+  replying,
+  onReply,
+  onEdit,
+  onRemove,
+}: CommentActionsProps) {
   const t = useTranslations('comment')
   const format = useFormatter()
   const like = useCommentLike(comment)
   return (
     <Inline gap="xs" align="center" className="-ms-2">
-      <Toggle
+      <Button
         size="sm"
-        tooltip={false}
-        label={t(like.liked ? 'unlike' : 'like')}
-        value={like.liked}
-        onValueChange={like.toggle}
+        variant="ghost"
+        tone={like.liked ? 'accent' : 'neutral'}
+        aria-label={t(like.liked ? 'unlike' : 'like')}
+        aria-pressed={like.liked}
+        icon={<ThumbsUp fill={like.liked ? 'currentColor' : 'none'} />}
+        className="tabular-nums"
+        onClick={like.toggle}
       >
-        <ThumbsUp aria-hidden />
-        {like.count > 0 && (
-          <Text as="span" size="inherit" className="text-inherit tabular-nums">
-            {format.number(like.count)}
-          </Text>
-        )}
-      </Toggle>
+        {like.count > 0 ? format.number(like.count) : undefined}
+      </Button>
       <Button
         size="sm"
         variant="ghost"
         tone="neutral"
         loginRequired
-        icon={<MessageSquareReply />}
+        aria-expanded={replying}
         onClick={onReply}
       >
         {t('reply')}
@@ -58,9 +64,9 @@ export function CommentActions({ comment, own, onReply, onEdit, onRemove }: Comm
             </>
           }
         >
-          <Button size="sm" variant="ghost" tone="neutral" iconOnly aria-label={t('actions')}>
-            <Ellipsis aria-hidden />
-          </Button>
+          <IconButton size="sm" label={t('actions')} tooltip={false}>
+            <Ellipsis />
+          </IconButton>
         </DropdownMenu>
       )}
     </Inline>

@@ -1,0 +1,86 @@
+{
+  "toolbar": "格式",
+  "tool": {
+    "bold": "粗体",
+    "italic": "斜体",
+    "strike": "删除线",
+    "spoiler": "剧透",
+    "heading": "段落样式",
+    "bulletList": "无序列表",
+    "orderedList": "有序列表",
+    "blockquote": "引用",
+    "horizontalRule": "分隔线",
+    "link": "链接",
+    "image": "图片",
+    "table": "表格"
+  },
+  "choice": {
+    "paragraph": "正文",
+    "heading2": "大标题",
+    "heading3": "小标题"
+  },
+  "command": {
+    "paragraph": "正文",
+    "heading2": "大标题",
+    "heading3": "小标题",
+    "bulletList": "无序列表",
+    "orderedList": "有序列表",
+    "blockquote": "引用",
+    "horizontalRule": "分隔线",
+    "image": "图片",
+    "table": "表格"
+  },
+  "commands": "插入内容",
+  "noCommand": "没有匹配的内容",
+  "undo": "撤销",
+  "redo": "重做",
+  "confirm": "确定",
+  "retry": "重试",
+  "remove": "移除",
+  "linkAddress": "链接地址",
+  "linkAddressHint": "输入链接地址",
+  "linkOpen": "在新标签页中打开",
+  "linkRemove": "移除链接",
+  "removePicture": "删除图片",
+  "pictureCaption": "图片说明",
+  "pictureCaptionHint": "添加图片说明",
+  "pictureSize": {
+    "small": "小",
+    "medium": "中",
+    "large": "大"
+  },
+  "uploading": "正在上传 {percent, number}%",
+  "uploadFailed": "上传失败",
+  "table": {
+    "rowMenu": "行操作",
+    "columnMenu": "列操作",
+    "selectRow": "选中这一行",
+    "selectColumn": "选中这一列",
+    "appendRow": "在下方添加一行",
+    "appendColumn": "在右侧添加一列",
+    "rowAbove": "在上方插入行",
+    "rowBelow": "在下方插入行",
+    "columnLeft": "在左侧插入列",
+    "columnRight": "在右侧插入列",
+    "align": "对齐",
+    "aligned": {
+      "left": "左对齐",
+      "center": "居中",
+      "right": "右对齐"
+    },
+    "headerRow": "设为表头",
+    "deleteRow": "删除行",
+    "deleteColumn": "删除列"
+  },
+  "block": {
+    "drag": "拖动可调整顺序，点击打开菜单",
+    "add": "在下方添加",
+    "menu": "段落操作",
+    "turnInto": "转换为",
+    "duplicate": "创建副本",
+    "remove": "删除"
+  },
+  "issue": {
+    "address": "请输入以 http、https 或 mailto 开头的地址。"
+  }
+}

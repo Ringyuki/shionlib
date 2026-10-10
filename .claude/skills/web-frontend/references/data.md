@@ -5,9 +5,10 @@
 `apps/api/openapi/openapi.json` (generated from the Go routes) is the only source of API types. `pnpm api:generate` writes:
 
 - `app/shared/api/generated/openapi.ts` — `paths`, `components`, `operations` (openapi-typescript);
-- `app/shared/api/generated/business-codes.ts` — `BusinessCode`, built from `components.schemas.BusinessCode` (`x-enum-varnames`).
+- `app/shared/api/generated/business-codes.ts` — `BusinessCode`, built from `components.schemas.BusinessCode` (`x-enum-varnames`);
+- `app/shared/api/generated/constraints.ts` — the limits and choices of request bodies and of the schemas they refer to (`references/forms.md`).
 
-Both are committed and checked by `verify.sh`. When the API changes, regenerate and fix the type errors; never patch the generated files.
+All three are committed and checked by `verify.sh`. When the API changes, regenerate and fix the type errors; never patch the generated files.
 
 ## Request tool
 
@@ -41,7 +42,7 @@ The browser has one request tool for everything that does not navigate (`~/share
   - `run(payload)` posts JSON and resolves with the outcome, `{ ok: true, result }` or `{ ok: false, failure, retryAfter, status }`. It never rejects, so it is what a `Form`'s `onSubmit` returns.
   - `confirm(payload)` resolves with the result and rejects with a `Refusal`. It is for hina-ui handlers that keep an overlay open while their promise rejects (`AlertDialog` and `Popconfirm` `onConfirm`).
   - `pending`, `settled` (the latest outcome), `failure` (its failure, for `useFormErrors`), `payload` (what is being submitted, for optimistic state).
-  - Options: `revalidate: false` for a submission whose result no loader shows (a view counter, issuing a download link); `quiet: true` for one the visitor did not ask for (recording a search term).
+  - Options: `revalidate: false` for a submission whose result no loader shows (a view counter, issuing a download link); `quiet: true` for one the visitor did not ask for (recording a search term) and for one whose refusal is shown where it happened (posting a comment: `refusedOf(command.settled)` is handed to the composer, which phrases it with `useRefusalText()` under the text; `namesFields` tells a refusal that `useFormErrors` already shows).
 - **Sending a small file** (an avatar, a profile cover; never a resource, which belongs to the upload engine). The same tool, end to end: the hook passes `multipart: true` and runs with a `FormData` (`form.append('<field>', file)`); the action reads it with `readUpload(args, '<field>')` (`~/shared/route/route.server`, 400 when the field is not a file); the use-case hands it to the API with `api.post('/user/info/avatar', fileBody('avatar', file))` (`~/shared/api/file-body`). The picker is hina-ui `FileUpload variant="button" list={false}` with `loading` while the command runs, its `accept` is only a hint (`image/*`), and what the API allows (types, size) is not restated: its refusal reaches the visitor as the tool's toast. `onReject` says so when the browser itself refused the file.
 - **Loading lazily.** `const lists = useLazyLoad(useFetcher<typeof <thing>Loader>())`: `load(path)`, `loading`, `result`, `failed`. The loader answers with `routeLazyLoader`. A component shows its spinner while `loading`, not while `result` is undefined, because a failed load has no result either.
 - **Who reports a failure.** The tool does, once and the same way everywhere: a danger toast with the API's message, already localized, with the wait added when the API sent `Retry-After`. A refusal that names fields is not toasted; `useFormErrors(command.failure)` puts those under the fields. Call sites only say what happens on success. No `Alert` shows a request failure, and no hook takes an `onFailure`.
@@ -70,13 +71,13 @@ The visitor's browser also talks to services that are not ours. Each has one cli
 
 ### Our API from the browser
 
-The browser talks to the web server only. The exceptions cannot go through loaders and actions: uploads, which run for hours across pages, and the `GET /message/stream` SSE stream. They use the same-origin `/api` prefix (proxied to the API by the ingress, and by Vite in development).
+The browser talks to the web server only. The exceptions cannot go through loaders and actions: uploads, which run for hours across pages or show how much has been sent, and the `GET /message/stream` SSE stream. They use the same-origin `/api` prefix (proxied to the API by the ingress, and by Vite in development).
 
 - **Event streams.** `followEvents(path, handlers, { probe })` (`~/shared/api/event-stream`) is the only place an `EventSource` is made. It first asks `probe` (a cheap authenticated `GET`) through the session-refreshing transport, so an expired session is renewed before the stream opens and a guest gets no stream; it hands each named event's data to its handler as a string, which the feature parses with a schema typed against the generated event DTO (`unreadFrom`); it reopens the stream after a pause when the server closes it; it returns the function that stops it. `features/message` is its one user (`useUnreadMessages`).
 
-- **Transport.** `~/shared/api/xhr.ts` is the only place that uses `XMLHttpRequest`; it gives upload progress, which `fetch` cannot. `browser-client.ts` builds a typed `ApiClient` over it (`createBrowserApi()`), and `chunk.ts` puts one upload chunk with progress (`uploadChunk`), its path, header and result typed from the generated contract.
+- **Transport.** `~/shared/api/xhr.ts` is the only place that uses `XMLHttpRequest`; it gives upload progress, which `fetch` cannot. `browser-client.ts` builds a typed `ApiClient` over it (`createBrowserApi(origin, watch)`: `watch(sent, total)` follows the body of each request, which is how a picture for a document reports its percentage), and `chunk.ts` puts one upload chunk with progress (`uploadChunk`), its path, header and result typed from the generated contract.
 - **Session.** Both refresh an expired session once (`POST /auth/token/refresh`, shared by concurrent requests) and repeat the request, on 401 `AUTH_UNAUTHORIZED`/`AUTH_INVALID_TOKEN` or the `shionlib-auth-stale` header, the same rule as `session.server.ts` (`~/shared/api/session.ts`).
-- **Who may use it.** Only `features/upload` imports `browser-client`, `chunk` or `xhr` (lint).
+- **Who may use it.** Only `features/upload` and `features/media` import `browser-client`, `chunk` or `xhr` (lint). `useDocumentPicture()` (`features/media`) sends one picture at a time through `createBrowserApi`, reports `percentSent` (never the whole until the API has answered) and turns whatever went wrong into the text of `useRefusalText(refusalFrom(error))`.
 
 ### The upload manager (`features/upload`)
 

@@ -11,7 +11,7 @@ export function usePaletteOpen() {
   const [open, setOpen] = useState(false)
   useEffect(() => {
     const onKey = (event: Event) => {
-      if (!(event instanceof KeyboardEvent)) {
+      if (!(event instanceof KeyboardEvent) || event.defaultPrevented) {
         return
       }
       const modified = event.metaKey || event.ctrlKey

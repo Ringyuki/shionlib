@@ -5,5 +5,5 @@ export { commentsLoader as loader } from '~/features/comment/comment.server'
 
 export default function GameCommentsRoute({ loaderData, matches }: Route.ComponentProps) {
   const [, , site] = matches
-  return <CommentsView comments={loaderData} viewerId={site.loaderData.viewer?.id} />
+  return <CommentsView comments={loaderData} writer={site.loaderData.viewer ?? undefined} />
 }

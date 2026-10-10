@@ -45,21 +45,25 @@ A route module may export `loader`, `action`, `meta`, `headers`, `shouldRevalida
 
 ## Dependency rules (enforced by ESLint)
 
-| Rule                                                                                                                      | Scope                                                      |
-| ------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `~/features/<name>/<file>` is forbidden; use `~/features/<name>` (or `<name>.server` from routes)                         | everywhere except `app/messages`                           |
-| `*.server` modules only in routes, root, other `*.server.ts` files and tests (type imports are fine)                      | features, shared                                           |
-| `shared` never imports `features`, `routes` or `messages`                                                                 | `app/shared`                                               |
-| features never import `routes` or `messages`                                                                              | `app/features`                                             |
-| model and use-case files never import React, React Router, use-intl, hina-ui, `~/shared/route`, `~/shared/ui`             | `app/features/*/*.ts` except hooks, server files and index |
-| routes never import React (types excepted), `ApiClient` or the session, and never call `api.*`                            | `app/routes`                                               |
-| no `fetch`                                                                                                                | everything except `app/shared/api` and `app/shared/vendor` |
-| no `openapi-fetch`, axios, ky, SWR, React Query                                                                           | everything except `app/shared/api`                         |
-| no `as` assertions (`as const` allowed)                                                                                   | everything except `app/shared/api`                         |
-| no type members with snake_case keys, no types named `*DTO`/`*Response`/`*Request`/`*Payload`/`*Body`                     | everything except `app/shared/api` and tests               |
-| valibot only in `*.schema.ts`, `~/shared/form`, `~/shared/route`; zod, yup, joi, ajv, superstruct, io-ts, arktype nowhere | everything                                                 |
-| no comments, no inline lint directives                                                                                    | everything                                                 |
-| at most 150 non-blank lines per `.tsx`, 200 per `.ts`, 300 per test                                                       | `app/**`, `scripts/**`                                     |
+| Rule                                                                                                                           | Scope                                                      |
+| ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
+| `~/features/<name>/<file>` is forbidden; use `~/features/<name>` (or `<name>.server` from routes)                              | everywhere except `app/messages`                           |
+| `*.server` modules only in routes, root, other `*.server.ts` files and tests (type imports are fine)                           | features, shared                                           |
+| `shared` never imports `features`, `routes` or `messages`                                                                      | `app/shared`                                               |
+| features never import `routes` or `messages`                                                                                   | `app/features`                                             |
+| model and use-case files never import React, React Router, use-intl, hina-ui, `~/shared/route`, `~/shared/ui`                  | `app/features/*/*.ts` except hooks, server files and index |
+| routes never import React (types excepted), `ApiClient` or the session, and never call `api.*`                                 | `app/routes`                                               |
+| no `fetch`                                                                                                                     | everything except `app/shared/api` and `app/shared/vendor` |
+| no `openapi-fetch`, axios, ky, SWR, React Query                                                                                | everything except `app/shared/api`                         |
+| no `as` assertions (`as const` allowed)                                                                                        | everything except `app/shared/api`                         |
+| no type members with snake_case keys, no types named `*DTO`/`*Response`/`*Request`/`*Payload`/`*Body`                          | everything except `app/shared/api` and tests               |
+| valibot only in `*.schema.ts`, `~/shared/form`, `~/shared/route`; zod, yup, joi, ajv, superstruct, io-ts, arktype nowhere      | everything                                                 |
+| `@tiptap/*` only in `~/shared/editor`; there, only `engine/**` imports it at run time                                          | everything                                                 |
+| the engine is never imported statically, only through `import('./engine')` (type imports are fine)                             | `app/shared/editor`                                        |
+| `~/shared/editor` is never imported by the reading side                                                                        | `app/shared/richtext`, `app/shared/ui/rich-text*.tsx`      |
+| native JSX tags only in the document shell and in `RichText`                                                                   | `app/root.tsx`, `app/shared/ui/rich-text*.tsx`             |
+| no comments, no inline lint directives                                                                                         | everything                                                 |
+| at most 150 non-blank lines per `.tsx`, 200 per `.ts`, 300 per test                                                            | `app/**`, `scripts/**`                                     |
 
 ## Naming
 

@@ -13,11 +13,8 @@ import {
   Bold,
   Eye,
   EyeOff,
-  Heading2,
-  Heading3,
   Italic,
   Link,
-  List,
   Quote,
   Strikethrough,
   type LucideIcon,
@@ -44,19 +41,11 @@ const blockTools: readonly Tool[] = [
   { tool: 'spoiler', icon: EyeOff },
 ]
 
-const documentTools: readonly Tool[] = [
-  { tool: 'heading', icon: Heading2 },
-  { tool: 'subheading', icon: Heading3 },
-  { tool: 'list', icon: List },
-]
-
 type BBCodeEditorProps = {
   value: string
   onValueChange: (value: string) => void
   placeholder?: string
   'aria-label'?: string
-  document?: boolean
-  rows?: number
 }
 
 export function BBCodeEditor({
@@ -64,8 +53,6 @@ export function BBCodeEditor({
   onValueChange,
   placeholder,
   'aria-label': label,
-  document = false,
-  rows = 3,
 }: BBCodeEditorProps) {
   const t = useTranslations('bbcode')
   const { textarea, field, previewing, height, apply, preview } = useBBCodeEditor(
@@ -75,12 +62,6 @@ export function BBCodeEditor({
   return (
     <Stack gap="xs">
       <Toolbar label={t('toolbar')} variant="bare" size="sm" className="w-full">
-        {document && (
-          <>
-            <ToolButtons tools={documentTools} disabled={previewing} onApply={apply} />
-            <ToolbarSeparator />
-          </>
-        )}
         <ToolButtons tools={inlineTools} disabled={previewing} onApply={apply} />
         <ToolbarSeparator />
         <ToolButtons tools={blockTools} disabled={previewing} onApply={apply} />
@@ -104,7 +85,7 @@ export function BBCodeEditor({
           onValueChange={onValueChange}
           placeholder={placeholder}
           aria-label={label}
-          autosize={{ minRows: rows, maxRows: Math.max(rows * 2, 10) }}
+          autosize={{ minRows: 3, maxRows: 10 }}
         />
       </Stack>
       {previewing && (

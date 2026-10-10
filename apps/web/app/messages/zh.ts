@@ -20,6 +20,7 @@ import upload from '~/features/upload/messages/zh.json'
 import uploader from '~/features/uploader/messages/zh.json'
 import walkthrough from '~/features/walkthrough/messages/zh.json'
 import bbcode from './bbcode/zh.json'
+import editor from './editor/zh.json'
 import form from './form/zh.json'
 import site from './site/zh.json'
 
@@ -32,6 +33,7 @@ export const messages = {
   comment,
   developer,
   download,
+  editor,
   favorite,
   form,
   game,

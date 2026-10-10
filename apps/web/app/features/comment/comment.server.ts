@@ -1,13 +1,14 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from 'react-router'
+import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router'
 import { keepWithinPages, requestedPage } from '~/shared/route/paging'
 import { idParam } from '~/shared/route/params'
 import { readCommand, routeAction, routeLoader } from '~/shared/route/route.server'
-import { pageSize, userPageSize } from './comment'
+import { commentAnchor, focusKey, pageSize, searchOfFocused, userPageSize } from './comment'
 import {
   commentEditCommand,
   commentLikeCommand,
   commentPostCommand,
   commentRemovalCommand,
+  focusFrom,
   threadOrderFrom,
 } from './comment.schema'
 import {
@@ -21,9 +22,15 @@ import {
 
 export async function commentsLoader(args: LoaderFunctionArgs) {
   const gameId = idParam(args.params.id)
+  const url = new URL(args.request.url)
   const page = requestedPage(args.request)
-  const order = threadOrderFrom(new URL(args.request.url).searchParams.get('order'))
-  const comments = await routeLoader(args, api => loadComments(api, gameId, page, order))
+  const order = threadOrderFrom(url.searchParams.get('order'))
+  const focus = focusFrom(url.searchParams.get(focusKey))
+  const comments = await routeLoader(args, api => loadComments(api, gameId, page, order, focus))
+  if (focus !== undefined) {
+    const search = searchOfFocused(url.search, comments.page)
+    throw redirect(`${url.pathname}${search}#${commentAnchor(focus)}`)
+  }
   keepWithinPages(args.request, comments.total, pageSize)
   return comments
 }

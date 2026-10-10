@@ -34,6 +34,7 @@ type JsonSchema = {
   items?: JsonSchema
   properties?: Record<string, JsonSchema>
   required?: string[]
+  $ref?: string
 }
 
 type Operation = {
@@ -43,11 +44,30 @@ type Operation = {
 const schemas: Record<string, JsonSchema> = document.components.schemas
 const paths: Record<string, Record<string, Operation>> = document.paths
 const bodies = new Set<string>()
+
+function nameOf(reference: string): string {
+  return reference.split('/').at(-1) ?? ''
+}
+
+function addWithParts(name: string): void {
+  if (bodies.has(name)) {
+    return
+  }
+  bodies.add(name)
+  const pending = Object.values(schemas[name]?.properties ?? {})
+  for (let field = pending.pop(); field !== undefined; field = pending.pop()) {
+    if (field.$ref !== undefined) {
+      addWithParts(nameOf(field.$ref))
+    }
+    pending.push(...Object.values(field.properties ?? {}), ...(field.items ? [field.items] : []))
+  }
+}
+
 for (const operations of Object.values(paths)) {
   for (const operation of Object.values(operations)) {
     const reference = operation.requestBody?.content?.['application/json']?.schema?.$ref
     if (reference !== undefined) {
-      bodies.add(reference.split('/').at(-1) ?? '')
+      addWithParts(nameOf(reference))
     }
   }
 }
@@ -79,18 +99,22 @@ function fieldConstraint(field: JsonSchema, required: boolean) {
   if (field.items?.enum !== undefined) {
     constraint.itemEnum = field.items.enum
   }
+  if (field.properties !== undefined) {
+    constraint.fields = fieldConstraints(field)
+  }
   return constraint
 }
 
+function fieldConstraints(schema: JsonSchema): Record<string, unknown> {
+  const required = new Set(schema.required ?? [])
+  const fields = Object.entries(schema.properties ?? {})
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([name, field]) => [name, fieldConstraint(field, required.has(name))])
+  return Object.fromEntries(fields)
+}
+
 const constraints = Object.fromEntries(
-  [...bodies].sort().map(body => {
-    const schema = schemas[body] ?? {}
-    const required = new Set(schema.required ?? [])
-    const fields = Object.entries(schema.properties ?? {})
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([name, field]) => [name, fieldConstraint(field, required.has(name))])
-    return [body, Object.fromEntries(fields)]
-  }),
+  [...bodies].sort().map(body => [body, fieldConstraints(schemas[body] ?? {})]),
 )
 
 await writeFile(

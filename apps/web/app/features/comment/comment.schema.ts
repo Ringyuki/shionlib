@@ -1,4 +1,6 @@
 import * as v from 'valibot'
+import { isBlank } from '~/shared/richtext/rich-text'
+import { richDocument } from '~/shared/richtext/rich-text.schema'
 import { firstOrder, threadOrders, type ThreadOrder } from './comment'
 
 export type CommentIssue = 'empty'
@@ -10,12 +12,12 @@ const id = v.pipe(v.number(), v.safeInteger(), v.minValue(1))
 export const commentPostCommand = v.object({
   gameId: id,
   parentId: v.optional(id),
-  content: v.string(),
+  content: richDocument,
 })
 
 export type CommentPost = v.InferOutput<typeof commentPostCommand>
 
-export const commentEditCommand = v.object({ commentId: id, content: v.string() })
+export const commentEditCommand = v.object({ commentId: id, content: richDocument })
 
 export type CommentEdit = v.InferOutput<typeof commentEditCommand>
 
@@ -28,10 +30,24 @@ export const commentLikeCommand = v.object({ commentId: id })
 export type CommentLike = v.InferOutput<typeof commentLikeCommand>
 
 export function commentForm(issue: CommentIssueMessage) {
-  return v.object({ content: v.pipe(v.string(), v.trim(), v.minLength(1, issue('empty'))) })
+  return v.object({
+    content: v.pipe(
+      richDocument,
+      v.check(document => !isBlank(document), issue('empty')),
+    ),
+  })
 }
 
 export type CommentValues = v.InferInput<ReturnType<typeof commentForm>>
+
+const focus = v.fallback(
+  v.optional(v.pipe(v.string(), v.toNumber(), v.safeInteger(), v.minValue(1))),
+  undefined,
+)
+
+export function focusFrom(raw: string | null): number | undefined {
+  return v.parse(focus, raw ?? undefined)
+}
 
 const threadOrder = v.fallback(v.picklist(threadOrders), firstOrder)
 

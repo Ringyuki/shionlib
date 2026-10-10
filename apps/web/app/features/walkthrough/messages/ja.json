@@ -1,7 +1,6 @@
 {
   "list": "攻略",
-  "count": "{count, number} 件の攻略",
-  "empty": "攻略はまだありません。",
+  "empty": "このゲームの攻略はまだありません",
   "write": "攻略を書く",
   "updated": "<time></time>に更新",
   "language": {
@@ -13,39 +12,55 @@
   "state": {
     "draft": "下書き",
     "reviewing": "審査中",
-    "hidden": "非表示"
+    "hidden": "審査不通過"
   },
-  "back": "『{game}』の攻略",
+  "notice": {
+    "draft": "この攻略は未公開で、あなたにのみ表示されています",
+    "reviewing": "この攻略は審査中で、審査が完了するまであなたにのみ表示されます",
+    "hidden": "この攻略は審査を通過しなかったためあなたにのみ表示されており、修正後に再度公開できます"
+  },
   "contents": "目次",
+  "others": "このゲームのほかの攻略",
+  "resources": "リソース {count, number} 件",
   "edit": "編集",
+  "more": "その他の操作",
   "remove": "削除",
   "cancel": "キャンセル",
   "removeConfirm": "この攻略を削除しますか？",
-  "removeDescription": "削除すると元に戻せません。",
-  "removed": "攻略を削除しました。",
+  "removeDescription": "削除した攻略は元に戻せません",
+  "removed": "攻略を削除しました",
   "writeTitle": "攻略を書く",
   "editTitle": "攻略を編集",
-  "for": "『{game}』",
+  "back": "戻る",
   "title": "タイトル",
   "content": "本文",
-  "contentHint": "見出し、リスト、リンク、ネタバレなどの書式を使えます。見出しから目次が作られます。",
+  "contentHint": "本文を入力するか、/ で見出し、リスト、画像、表を挿入",
+  "characters": "{count, number} 文字",
+  "unsaved": "未保存",
+  "draftSaved": "保存済み",
   "saveDraft": "下書きを保存",
   "backToDraft": "下書きに戻す",
   "publish": "公開",
-  "draftSaved": "下書きを保存しました。自分だけが閲覧できます。",
-  "published": "攻略を公開しました。",
-  "sentForReview": "攻略を送信しました。審査後に公開されます。",
-  "signIn": "攻略を書くにはログインしてください。",
+  "save": "保存",
+  "published": "攻略を公開しました",
+  "saved": "攻略を保存しました",
+  "sentForReview": "攻略を審査に提出しました",
+  "signIn": "ログインすると攻略を書けます",
   "signInAction": "ログイン",
   "leaveConfirm": "このページを離れますか？",
-  "leaveDescription": "保存していない変更は失われます。",
+  "leaveDescription": "未保存の変更は失われます",
   "leave": "離れる",
   "stay": "編集を続ける",
+  "shelfLabel": "攻略の状態",
+  "shelf": {
+    "all": "すべて",
+    "published": "公開済み",
+    "draft": "下書き"
+  },
   "userList": "書いた攻略",
-  "userEmpty": "このユーザーはまだ攻略を書いていません。",
-  "userEmptyOwn": "まだ攻略を書いていません。",
-  "of": "<game></game>",
+  "userEmpty": "攻略はまだありません",
   "issue": {
-    "empty": "本文を入力してください。"
+    "title": "タイトルを入力してください",
+    "content": "本文を入力してください"
   }
 }

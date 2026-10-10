@@ -1,49 +1,54 @@
-import { DataList, Empty, Select, Stack, Text } from '@hina-ui/react'
-import { MessageSquare } from 'lucide-react'
-import { useState } from 'react'
+import { DataList, Empty, SegmentedControl, Stack } from '@hina-ui/react'
+import { useCallback, useState } from 'react'
 import { useLocation } from 'react-router'
 import { useTranslations } from 'use-intl'
 import { useInPageNavigate } from '~/shared/route/use-in-page-navigate'
 import { usePageTurn } from '~/shared/route/use-page-turn'
-import { Button } from '~/shared/ui/button'
-import { pageSize, searchInOrder, threadOrders, type CommentItem, type Comments } from '../comment'
+import {
+  pageSize,
+  searchInOrder,
+  threadOrders,
+  type CommentItem,
+  type Comments,
+  type Writer,
+} from '../comment'
 import { threadOrderFrom } from '../comment.schema'
-import { NewComment } from './comment-composer'
 import { CommentThread } from './comment-thread'
+import { GuestComment } from './guest-comment'
+import { NewComment } from './new-comment'
 import { RemoveCommentDialog } from './remove-comment-dialog'
 
 type CommentsViewProps = {
   comments: Comments
-  viewerId: number | undefined
+  writer: Writer | undefined
 }
 
-export function CommentsView({ comments, viewerId }: CommentsViewProps) {
+export function CommentsView({ comments, writer }: CommentsViewProps) {
   const t = useTranslations('comment')
   const pages = usePageTurn()
+  const [invited, setInvited] = useState(false)
   const [removed, setRemoved] = useState<CommentItem | undefined>(undefined)
   const [removing, setRemoving] = useState(false)
   const stay = useInPageNavigate()
+  const ask = useCallback((comment: CommentItem) => {
+    setRemoved(comment)
+    setRemoving(true)
+  }, [])
   const location = useLocation()
-  const { gameId, threads, total, count, page, order } = comments
+  const { gameId, threads, total, page, order } = comments
   return (
-    <Stack gap="lg">
-      {viewerId === undefined ? (
-        <Button
-          loginRequired
-          variant="outline"
-          tone="neutral"
-          icon={<MessageSquare />}
-          className="self-start"
-        >
-          {t('signInToWrite')}
-        </Button>
+    <Stack as="section" gap="xl" className="mx-auto w-full max-w-3xl">
+      {writer === undefined ? (
+        <GuestComment onSignedIn={() => setInvited(true)} />
       ) : (
-        <NewComment gameId={gameId} />
+        <NewComment gameId={gameId} writer={writer} autoFocus={invited} />
       )}
       <DataList
         label={t('list')}
         items={threads}
         itemKey="id"
+        divided={false}
+        itemClass="py-1"
         manual
         pagination
         total={total}
@@ -51,35 +56,25 @@ export function CommentsView({ comments, viewerId }: CommentsViewProps) {
         pageSize={pageSize}
         onPageChange={pages.turnTo}
         loading={pages.turning}
-        renderHeader={() => (
-          <>
-            <Text size="sm" tone="muted" className="tabular-nums">
-              {t('count', { count })}
-            </Text>
-            <Select
-              size="sm"
-              aria-label={t('orderLabel')}
-              value={order}
-              onValueChange={value =>
-                stay({ search: searchInOrder(location.search, threadOrderFrom(value)) })
-              }
-              options={threadOrders.map(value => ({ value, label: t(`order.${value}`) }))}
-              className="w-36"
-            />
-          </>
-        )}
-        renderEmpty={() => <Empty icon={<MessageSquare />} title={t('empty')} size="sm" />}
+        renderHeader={
+          total > 1
+            ? () => (
+                <SegmentedControl
+                  size="sm"
+                  aria-label={t('orderLabel')}
+                  value={order}
+                  onValueChange={value =>
+                    stay({ search: searchInOrder(location.search, threadOrderFrom(value)) })
+                  }
+                  options={threadOrders.map(value => ({ value, label: t(`order.${value}`) }))}
+                />
+              )
+            : undefined
+        }
+        renderEmpty={() => <Empty title={t('empty')} />}
       >
         {({ item }) => (
-          <CommentThread
-            gameId={gameId}
-            thread={item}
-            viewerId={viewerId}
-            onRemove={comment => {
-              setRemoved(comment)
-              setRemoving(true)
-            }}
-          />
+          <CommentThread gameId={gameId} thread={item} writer={writer} onRemove={ask} />
         )}
       </DataList>
       <RemoveCommentDialog comment={removed} open={removing} onOpenChange={setRemoving} />

@@ -2,7 +2,7 @@ import { Inline, Link, Stack, Text, Time } from '@hina-ui/react'
 import type { ReactNode } from 'react'
 import { Link as RouterLink } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
-import { commentAnchor, commentsPath } from '~/features/comment'
+import { commentPath } from '~/features/comment'
 import { gamePath, gameTitle } from '~/features/game'
 import { profilePath } from '~/features/profile'
 import { resourceAnchor } from '~/features/resource'
@@ -19,7 +19,7 @@ export function HappeningRow({ happening }: { happening: Happening }) {
     happening.kind === 'resources'
       ? { pathname: place, hash: resourceAnchor(happening.resourceId) }
       : happening.kind === 'comments'
-        ? { pathname: commentsPath(locale, game.id), hash: commentAnchor(happening.commentId) }
+        ? commentPath(locale, game.id, happening.commentId)
         : `${place}/walkthrough/${happening.walkthroughId}`
   const linked = (to: Parameters<typeof RouterLink>[0]['to'], label: ReactNode) => (
     <Link asChild>

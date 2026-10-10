@@ -1,7 +1,17 @@
 import { describe, expect, it } from 'vitest'
-import { lexicalDocument } from '~/shared/markup/lexical-document'
-import { commentAnchor, commentsPath, isPending, likesOf, searchInOrder, sourceOf } from './comment'
-import { commentForm, threadOrderFrom } from './comment.schema'
+import { blankDocument, type RichDocument } from '~/shared/richtext/rich-text'
+import {
+  aimsAt,
+  commentAnchor,
+  commentPath,
+  commentsPath,
+  isPending,
+  likesOf,
+  searchFocusing,
+  searchInOrder,
+  searchOfFocused,
+} from './comment'
+import { commentForm, focusFrom, threadOrderFrom } from './comment.schema'
 
 describe('addresses', () => {
   it('places the comments on a tab of the game and names each comment', () => {
@@ -14,21 +24,26 @@ describe('addresses', () => {
     expect(searchInOrder('?order=oldest&page=2', 'newest')).toBe('')
   })
 
+  it('asks for the page of a comment and then names the comment on that page', () => {
+    expect(commentPath('zh', 7, 12)).toBe('/zh/game/7/comments?comment=12')
+    expect(searchFocusing('?order=oldest&page=3', 12)).toBe('?order=oldest&comment=12')
+    expect(searchOfFocused('?order=oldest&comment=12', 3)).toBe('?order=oldest&page=3')
+    expect(searchOfFocused('?comment=12', 1)).toBe('')
+    expect(aimsAt('#comment-12', 12)).toBe(true)
+    expect(aimsAt('#comment-120', 12)).toBe(false)
+  })
+
+  it('reads the comment an address asks for and ignores anything else', () => {
+    expect(focusFrom('12')).toBe(12)
+    expect(focusFrom('0')).toBeUndefined()
+    expect(focusFrom('abc')).toBeUndefined()
+    expect(focusFrom(null)).toBeUndefined()
+  })
+
   it('reads the order and falls back on the newest', () => {
     expect(threadOrderFrom('oldest')).toBe('oldest')
     expect(threadOrderFrom('best')).toBe('newest')
     expect(threadOrderFrom(null)).toBe('newest')
-  })
-})
-
-describe('sourceOf', () => {
-  it('gives the text of a comment the way it is written and edited', () => {
-    expect(sourceOf({ content: lexicalDocument('[b]好[/b]\n第二行') })).toBe('[b]好[/b]\n第二行')
-  })
-
-  it('is empty for content it cannot read', () => {
-    expect(sourceOf({ content: null })).toBe('')
-    expect(sourceOf({ content: 'text' })).toBe('')
   })
 })
 
@@ -58,9 +73,25 @@ describe('likesOf', () => {
 })
 
 describe('commentForm', () => {
+  const written: RichDocument = {
+    type: 'doc',
+    content: [{ type: 'paragraph', content: [{ type: 'text', text: '好' }] }],
+  }
+
+  const spaces: RichDocument = {
+    type: 'doc',
+    content: [
+      { type: 'paragraph', content: [{ type: 'text', text: '  ' }] },
+      { type: 'paragraph' },
+    ],
+  }
+
   it('asks for something to be written', () => {
     const rules = commentForm(issue => issue)
-    expect(rules['~run']({ value: { content: '  \n ' } }, {}).issues?.[0]?.message).toBe('empty')
-    expect(rules['~run']({ value: { content: '好' } }, {}).issues).toBeUndefined()
+    expect(rules['~run']({ value: { content: blankDocument } }, {}).issues?.[0]?.message).toBe(
+      'empty',
+    )
+    expect(rules['~run']({ value: { content: spaces } }, {}).issues?.[0]?.message).toBe('empty')
+    expect(rules['~run']({ value: { content: written } }, {}).issues).toBeUndefined()
   })
 })

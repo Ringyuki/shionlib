@@ -2908,6 +2908,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/uploads/small/richtext/image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Upload a picture for a rich text document */
+        put: operations["upload.richTextImage"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/user": {
         parameters: {
             query?: never;
@@ -3323,9 +3340,9 @@ export type webhooks = Record<string, never>;
 export type components = {
     schemas: {
         ActivityCommentDTO: {
-            html: string | null;
             /** Format: int64 */
             id: number;
+            text: string;
         };
         ActivityDTO: {
             comment: components["schemas"]["ActivityCommentDTO"] | null;
@@ -3442,13 +3459,12 @@ export type components = {
             name: string;
         };
         AdminCommentDetailDTO: {
-            content: unknown;
+            content: components["schemas"]["RichTextDocument"];
             /** Format: date-time */
             created: string;
             creator: components["schemas"]["AdminCommentCreatorDTO"];
             edited: boolean;
             game: components["schemas"]["AdminCommentGameDTO"];
-            html: string | null;
             /** Format: int64 */
             id: number;
             /** Format: int64 */
@@ -3463,6 +3479,7 @@ export type components = {
             root_id: number | null;
             /** Format: int64 */
             status: number;
+            text: string;
             /** Format: date-time */
             updated: string;
         };
@@ -3497,7 +3514,6 @@ export type components = {
             creator: components["schemas"]["AdminCommentCreatorDTO"];
             edited: boolean;
             game: components["schemas"]["AdminCommentGameDTO"];
-            html: string | null;
             /** Format: int64 */
             id: number;
             /** Format: int64 */
@@ -3512,6 +3528,7 @@ export type components = {
             root_id: number | null;
             /** Format: int64 */
             status: number;
+            text: string;
             /** Format: date-time */
             updated: string;
         };
@@ -3895,19 +3912,19 @@ export type components = {
             name: string;
         };
         AdminWalkthroughDetailDTO: {
-            content: unknown;
+            content: components["schemas"]["RichTextDocument"];
             /** Format: date-time */
             created: string;
             creator: components["schemas"]["AdminWalkthroughCreatorDTO"];
             edited: boolean;
             game: components["schemas"]["AdminWalkthroughGameDTO"];
-            html: string;
             /** Format: int64 */
             id: number;
             lang: string | null;
             moderations: components["schemas"]["AdminWalkthroughEventDTO"][] | null;
             /** @enum {string} */
             status: "DRAFT" | "PUBLISHED" | "HIDDEN" | "DELETED";
+            text: string;
             title: string;
             /** Format: date-time */
             updated: string;
@@ -3943,13 +3960,13 @@ export type components = {
             creator: components["schemas"]["AdminWalkthroughCreatorDTO"];
             edited: boolean;
             game: components["schemas"]["AdminWalkthroughGameDTO"];
-            html: string;
             /** Format: int64 */
             id: number;
             lang: string | null;
             moderation?: components["schemas"]["AdminWalkthroughModerationDTO"];
             /** @enum {string} */
             status: "DRAFT" | "PUBLISHED" | "HIDDEN" | "DELETED";
+            text: string;
             title: string;
             /** Format: date-time */
             updated: string;
@@ -4773,11 +4790,10 @@ export type components = {
             verified: boolean;
         };
         CommentCreatedDTO: {
-            content: unknown;
+            content: components["schemas"]["RichTextDocument"];
             /** Format: date-time */
             created: string;
             creator: components["schemas"]["UserSummaryDTO"];
-            html: string | null;
             /** Format: int64 */
             id: number;
             /** Format: int64 */
@@ -4789,16 +4805,16 @@ export type components = {
             root_id: number | null;
             /** Format: int64 */
             status: number;
+            text: string;
             /** Format: date-time */
             updated: string;
         };
         CommentEditedDTO: {
-            content: unknown;
+            content: components["schemas"]["RichTextDocument"];
             /** Format: date-time */
             created: string;
             creator: components["schemas"]["UserSummaryDTO"];
             edited: boolean;
-            html: string | null;
             /** Format: int64 */
             id: number;
             /** Format: int64 */
@@ -4807,17 +4823,16 @@ export type components = {
             root_id: number | null;
             /** Format: int64 */
             status: number;
+            text: string;
             /** Format: date-time */
             updated: string;
         };
         CommentItemDTO: {
-            /** @description Lexical editor state */
-            content: unknown;
+            content: components["schemas"]["RichTextDocument"];
             /** Format: date-time */
             created: string;
             creator: components["schemas"]["UserSummaryDTO"];
             edited: boolean;
-            html: string | null;
             /** Format: int64 */
             id: number;
             is_liked: boolean;
@@ -4832,36 +4847,35 @@ export type components = {
             root_id: number | null;
             /** Format: int64 */
             status: number;
+            text: string;
             /** Format: date-time */
             updated: string;
         };
         CommentItemParentDTO: {
             creator?: components["schemas"]["UserSummaryDTO"];
-            html?: string;
             /** Format: int64 */
             id: number | null;
+            text?: string;
         };
         CommentParentDTO: {
             creator: components["schemas"]["UserSummaryDTO"];
-            html: string | null;
             /** Format: int64 */
             id: number;
+            text: string;
         };
         CommentRawDTO: {
-            content: unknown;
+            content: components["schemas"]["RichTextDocument"];
             /** Format: int64 */
             creator_id: number;
             /** Format: int64 */
             id: number;
         };
         CommentThreadDTO: {
-            /** @description Lexical editor state */
-            content: unknown;
+            content: components["schemas"]["RichTextDocument"];
             /** Format: date-time */
             created: string;
             creator: components["schemas"]["UserSummaryDTO"];
             edited: boolean;
-            html: string | null;
             /** Format: int64 */
             id: number;
             is_liked: boolean;
@@ -4878,6 +4892,7 @@ export type components = {
             root_id: number | null;
             /** Format: int64 */
             status: number;
+            text: string;
             /** Format: date-time */
             updated: string;
         };
@@ -4924,8 +4939,7 @@ export type components = {
             start_at?: string;
         };
         CreateCommentInputBody: {
-            /** @description Lexical editor state */
-            content: unknown;
+            content: components["schemas"]["RichTextDocument"];
             /** Format: int64 */
             parent_id?: number;
         };
@@ -4950,8 +4964,7 @@ export type components = {
             name?: string;
         };
         CreateWalkthroughInputBody: {
-            /** @description Lexical editor state */
-            content: unknown;
+            content: components["schemas"]["RichTextDocument"];
             /** Format: int64 */
             game_id: number;
             /** @enum {string} */
@@ -5270,8 +5283,7 @@ export type components = {
             meta: components["schemas"]["DownloadUserResourceMetaDTO"];
         };
         EditCommentInputBody: {
-            /** @description Lexical editor state */
-            content: unknown;
+            content: components["schemas"]["RichTextDocument"];
         };
         EditDownloadSourceBodyInput: {
             language: ("en" | "zh" | "zh-hant" | "jp")[] | null;
@@ -6580,6 +6592,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeUploadedPictureDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["UploadedPictureDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeUserBioDTO: {
             /** Format: int64 */
             code: number;
@@ -7169,11 +7191,10 @@ export type components = {
             status: number;
         };
         MessageCommentDTO: {
-            /** @description Lexical editor state */
-            content: unknown;
-            html: string | null;
+            content: components["schemas"]["RichTextDocument"];
             /** Format: int64 */
             id: number;
+            text: string;
         };
         MessageDetailDTO: {
             comment: components["schemas"]["MessageCommentDTO"] | null;
@@ -7615,6 +7636,54 @@ export type components = {
             /** @enum {string} */
             verdict: "VALID" | "INVALID";
         };
+        /** @description A rich text document: what the editor stores for comments and walkthroughs */
+        RichTextDocument: {
+            content: components["schemas"]["RichTextNode"][];
+            /** @enum {string} */
+            type: "doc";
+        };
+        /** @description Formatting of an inline node */
+        RichTextMark: {
+            attrs?: {
+                /** @description Address of a link: http, https or mailto */
+                href?: string;
+            };
+            /** @enum {string} */
+            type: "bold" | "italic" | "strike" | "link" | "spoiler";
+        };
+        /** @description A block or inline node; which nodes a field accepts depends on the field */
+        RichTextNode: {
+            attrs?: {
+                /**
+                 * @description Text alignment of a table cell; null follows the reading direction
+                 * @enum {string|null}
+                 */
+                align?: "left" | "center" | "right" | null;
+                alt?: string;
+                caption?: string;
+                colspan?: number;
+                /** @description Column widths of a table cell in pixels, one per column it spans; null when none was set */
+                colwidth?: number[] | null;
+                height?: number;
+                /**
+                 * @description Heading level
+                 * @enum {integer}
+                 */
+                level?: 2 | 3;
+                rowspan?: number;
+                /** @description Key of an image_block, as returned by the rich text picture upload */
+                src?: string;
+                width?: number;
+                /** @description Share of the text column an image_block is shown at; it is never shown wider than it is */
+                width_percent?: number;
+            };
+            content?: components["schemas"]["RichTextNode"][];
+            marks?: components["schemas"]["RichTextMark"][];
+            /** @description Text of a text node */
+            text?: string;
+            /** @enum {string} */
+            type: "paragraph" | "heading" | "blockquote" | "bullet_list" | "ordered_list" | "list_item" | "horizontal_rule" | "image_block" | "table" | "table_row" | "table_header" | "table_cell" | "hard_break" | "text";
+        };
         SearchCharacterDTO: {
             aliases: string[] | null;
             /** @description First visible game the character appears in */
@@ -7888,8 +7957,7 @@ export type components = {
             status: "NEW" | "DONE" | "EXPIRED" | "REFUND";
         };
         UpdateWalkthroughInputBody: {
-            /** @description Lexical editor state */
-            content: unknown;
+            content: components["schemas"]["RichTextDocument"];
             /** @enum {string} */
             status: "DRAFT" | "PUBLISHED" | "HIDDEN" | "DELETED";
             title: string;
@@ -7931,17 +7999,23 @@ export type components = {
         UploadedImageDTO: {
             key: string;
         };
+        UploadedPictureDTO: {
+            /** Format: int64 */
+            height: number;
+            /** @description What an image_block node takes as src */
+            key: string;
+            /** Format: int64 */
+            width: number;
+        };
         UserBioDTO: {
             bio: string;
         };
         UserCommentDTO: {
-            /** @description Lexical editor state */
-            content: unknown;
+            content: components["schemas"]["RichTextDocument"];
             /** Format: date-time */
             created: string;
             creator: components["schemas"]["UserSummaryDTO"];
             game: components["schemas"]["GameCardDTO"];
-            html: string | null;
             /** Format: int64 */
             id: number;
             is_liked: boolean;
@@ -7954,6 +8028,7 @@ export type components = {
             reply_count: number;
             /** Format: int64 */
             root_id: number | null;
+            text: string;
             /** Format: date-time */
             updated: string;
         };
@@ -8040,6 +8115,8 @@ export type components = {
             created: string;
             creator: components["schemas"]["UserSummaryDTO"];
             edited: boolean;
+            /** @description The first words of the text, without what is marked as a spoiler */
+            excerpt: string;
             game: components["schemas"]["GameCardDTO"];
             /** Format: int64 */
             id: number;
@@ -8087,14 +8164,15 @@ export type components = {
             votecount: number;
         };
         WalkthroughDTO: {
-            content?: unknown;
+            content?: components["schemas"]["RichTextDocument"];
             /** Format: date-time */
             created: string;
             creator: components["schemas"]["UserSummaryDTO"];
             edited: boolean;
+            /** @description The first words of the text, without what is marked as a spoiler */
+            excerpt: string;
             /** Format: int64 */
             game_id: number;
-            html: string;
             /** Format: int64 */
             id: number;
             lang: string | null;
@@ -8102,6 +8180,7 @@ export type components = {
             review_pending: boolean;
             /** @enum {string} */
             status: "DRAFT" | "PUBLISHED" | "HIDDEN" | "DELETED";
+            text: string;
             title: string;
             /** Format: date-time */
             updated: string;
@@ -8111,6 +8190,8 @@ export type components = {
             created: string;
             creator: components["schemas"]["UserSummaryDTO"];
             edited: boolean;
+            /** @description The first words of the text, without what is marked as a spoiler */
+            excerpt: string;
             /** Format: int64 */
             id: number;
             lang: string | null;
@@ -12121,6 +12202,8 @@ export interface operations {
                 pageSize?: number;
                 /** @description Order of the threads; the replies of a thread are always oldest first */
                 order?: "newest" | "oldest";
+                /** @description A comment of this game: the page that holds its thread is answered instead of the requested one; ignored when the viewer cannot see the comment */
+                focus?: number;
             };
             header?: never;
             path: {
@@ -14989,6 +15072,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeUploadedImageDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "upload.richTextImage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeUploadedPictureDTO"];
                 };
             };
             /** @description Error */

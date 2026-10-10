@@ -1,4 +1,5 @@
 import { href, useFetcher } from 'react-router'
+import { refusedOf } from '~/shared/route/refusal'
 import { useCommand } from '~/shared/route/use-command'
 import type { CommentEdit } from './comment.schema'
 import type { commentEditAction } from './comment.server'
@@ -7,6 +8,11 @@ export function useCommentEdit() {
   const command = useCommand(
     useFetcher<typeof commentEditAction>(),
     href('/resources/comments/edit'),
+    { quiet: true },
   )
-  return { ...command, run: (edit: CommentEdit) => command.run(edit) }
+  return {
+    run: (edit: CommentEdit) => command.run(edit),
+    pending: command.pending,
+    refused: refusedOf(command.settled),
+  }
 }

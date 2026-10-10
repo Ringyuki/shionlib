@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { fakeApi } from '~/shared/api/testing'
 import type { ApiData } from '~/shared/api/types'
+import type { RichDocument } from '~/shared/richtext/rich-text'
 import {
   countComments,
   editComment,
@@ -12,17 +13,25 @@ import {
 const threads = (
   totalItems: number,
   comments: number,
+  currentPage = 1,
 ): ApiData<'/comment/game/{game_id}', 'get'> => ({
   items: null,
-  meta: { currentPage: 1, itemCount: 0, itemsPerPage: 20, totalItems, totalPages: 1, comments },
+  meta: { currentPage, itemCount: 0, itemsPerPage: 20, totalItems, totalPages: 1, comments },
 })
 
 const creator = { id: 2, name: 'kotori', avatar: null, is_sponsor: false }
 
+const written: RichDocument = {
+  type: 'doc',
+  content: [
+    { type: 'paragraph', content: [{ type: 'text', text: '好', marks: [{ type: 'bold' }] }] },
+  ],
+}
+
 const stored = {
   id: 9,
-  content: null,
-  html: null,
+  content: written,
+  text: '好',
   parent_id: null,
   root_id: 9,
   creator,
@@ -41,7 +50,7 @@ const edited: ApiData<'/comment/{comment_id}', 'patch'> = { ...stored, edited: t
 
 describe('loadComments', () => {
   it('asks for a page of threads in the chosen order', async () => {
-    const fake = fakeApi().on('get', '/comment/game/{game_id}', threads(12, 30))
+    const fake = fakeApi().on('get', '/comment/game/{game_id}', threads(12, 30, 2))
     await expect(loadComments(fake.api, 7, 2, 'oldest')).resolves.toEqual({
       gameId: 7,
       threads: [],
@@ -59,6 +68,12 @@ describe('loadComments', () => {
     })
   })
 
+  it('opens the page that holds a comment, whichever page was asked for', async () => {
+    const fake = fakeApi().on('get', '/comment/game/{game_id}', threads(64, 90, 3))
+    await expect(loadComments(fake.api, 7, 1, 'newest', 41)).resolves.toMatchObject({ page: 3 })
+    expect(new URL(fake.requests[0]?.url ?? '').searchParams.get('focus')).toBe('41')
+  })
+
   it('counts every comment of a game, replies included', async () => {
     const fake = fakeApi().on('get', '/comment/game/{game_id}', threads(12, 30))
     await expect(countComments(fake.api, 7)).resolves.toBe(30)
@@ -67,25 +82,19 @@ describe('loadComments', () => {
 })
 
 describe('writing', () => {
-  it('posts what was written as an editor document, under the comment it answers', async () => {
+  it('posts the document under the comment it answers and tells which comment it became', async () => {
     const fake = fakeApi().on('post', '/comment/game/{game_id}', created)
-    await postComment(fake.api, { gameId: 7, parentId: 3, content: '[b]好[/b]' })
+    await expect(postComment(fake.api, { gameId: 7, parentId: 3, content: written })).resolves.toBe(
+      9,
+    )
     const sent = fake.requests[0]
     expect(new URL(sent?.url ?? '').pathname).toBe('/comment/game/7')
-    await expect(sent?.json()).resolves.toMatchObject({
-      parent_id: 3,
-      content: {
-        root: {
-          type: 'root',
-          children: [{ type: 'paragraph', children: [{ text: '好', format: 1 }] }],
-        },
-      },
-    })
+    await expect(sent?.json()).resolves.toEqual({ parent_id: 3, content: written })
   })
 
   it('leaves the parent out of a comment that starts a thread', async () => {
     const fake = fakeApi().on('post', '/comment/game/{game_id}', created)
-    await postComment(fake.api, { gameId: 7, content: '好' })
+    await postComment(fake.api, { gameId: 7, content: written })
     await expect(fake.requests[0]?.json()).resolves.not.toHaveProperty('parent_id')
   })
 
@@ -93,7 +102,7 @@ describe('writing', () => {
     const fake = fakeApi()
       .on('patch', '/comment/{comment_id}', edited)
       .on('post', '/comment/{comment_id}/like', undefined)
-    await editComment(fake.api, { commentId: 9, content: '改' })
+    await editComment(fake.api, { commentId: 9, content: written })
     await toggleLike(fake.api, { commentId: 9 })
     expect(
       fake.requests.map(request => `${request.method} ${new URL(request.url).pathname}`),

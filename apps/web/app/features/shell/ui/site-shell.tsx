@@ -2,6 +2,7 @@ import { AppShell, Container, ScrollTop, Stack, type AppShellHandle } from '@hin
 import { useRef, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import type { Schema } from '~/shared/api/types'
+import { useFrame } from '~/shared/route/frame'
 import { navSections, type SidebarMode } from '../shell'
 import { useShellState } from '../use-shell-state'
 import { clearOfFooter, SiteFooter } from './site-footer'
@@ -22,6 +23,7 @@ export function SiteShell({ viewer, sidebar, unread, children }: SiteShellProps)
   const t = useTranslations('shell')
   const shell = useRef<AppShellHandle>(null)
   const state = useShellState(sidebar)
+  const canvas = useFrame() === 'canvas'
   return (
     <>
       <AppShell
@@ -42,19 +44,27 @@ export function SiteShell({ viewer, sidebar, unread, children }: SiteShellProps)
         }
         header={<SiteHeader />}
       >
-        <Container size="xl" className="flex min-h-full flex-col px-4 py-6 sm:px-6 lg:py-8">
-          <Stack gap="none" className="flex-1">
+        {canvas ? (
+          <Stack gap="none" className="min-h-full">
             {children}
           </Stack>
-          <SiteFooter />
-        </Container>
+        ) : (
+          <Container size="xl" className="flex min-h-full flex-col px-4 py-6 sm:px-6 lg:py-8">
+            <Stack gap="none" className="flex-1">
+              {children}
+            </Stack>
+            <SiteFooter />
+          </Container>
+        )}
       </AppShell>
-      <ScrollTop
-        target={() => shell.current?.mainViewport}
-        label={t('scrollTop')}
-        offset={{ y: 'var(--clear-of-footer)' }}
-        className={clearOfFooter}
-      />
+      {!canvas && (
+        <ScrollTop
+          target={() => shell.current?.mainViewport}
+          label={t('scrollTop')}
+          offset={{ y: 'var(--clear-of-footer)' }}
+          className={clearOfFooter}
+        />
+      )}
     </>
   )
 }
