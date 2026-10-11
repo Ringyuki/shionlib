@@ -5,6 +5,7 @@ import type { Schema } from '~/shared/api/types'
 import { BackdropSlot } from '~/shared/ui/backdrop'
 import { navSections, type SidebarMode } from '../shell'
 import { useShellState } from '../use-shell-state'
+import { NavigationProgress } from './navigation-progress'
 import { clearOfFooter, SiteFooter } from './site-footer'
 import { SiteHeader } from './site-header'
 import { SiteSidebar } from './site-sidebar'
@@ -26,6 +27,7 @@ export function SiteShell({ viewer, sidebar, unread, children }: SiteShellProps)
   const [backdrop, setBackdrop] = useState<HTMLElement | null>(null)
   return (
     <>
+      <NavigationProgress />
       <AppShell
         ref={shell}
         restoreKey={mainScrollKey}

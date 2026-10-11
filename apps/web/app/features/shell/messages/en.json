@@ -35,5 +35,6 @@
     "contact": "Contact"
   },
   "scrollTop": "Back to top",
+  "navigating": "Loading the page",
   "unreadCount": "{count} unread"
 }

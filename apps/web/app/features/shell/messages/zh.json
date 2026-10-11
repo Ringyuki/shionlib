@@ -35,5 +35,6 @@
     "contact": "联系我们"
   },
   "scrollTop": "回到顶部",
+  "navigating": "页面加载中",
   "unreadCount": "{count} 条未读"
 }

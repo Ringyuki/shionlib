@@ -3,4 +3,5 @@
 @import './shared/ui/theme.css';
 @import './shared/ui/platform.css';
 @import './shared/ui/backdrop.css';
+@import './features/shell/ui/navigation-progress.css';
 @import './shared/editor/editor.css';

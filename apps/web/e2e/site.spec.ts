@@ -104,3 +104,18 @@ test('shows a page that cannot be loaded inside the site, and loads it on retry'
   await expect(main.getByRole('button', { name: '重试' })).toHaveCount(0)
   await expect(page).toHaveURL(/\/zh\/game$/)
 })
+
+test('shows a bar at the top while a page takes long to load', async ({ page }) => {
+  await page.goto('/zh')
+  await page.waitForLoadState('networkidle')
+  await page.route('**/*.data*', async route => {
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    await route.continue()
+  })
+  const bar = page.getByRole('progressbar', { name: '页面加载中' })
+  await expect(bar).toHaveCount(0)
+  await page.getByRole('link', { name: '游戏库', exact: true }).first().click()
+  await expect(bar).toBeVisible()
+  await expect(page).toHaveURL(/\/zh\/game$/)
+  await expect(bar).toHaveCount(0)
+})
