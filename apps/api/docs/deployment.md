@@ -72,9 +72,11 @@ Cap is one layer, not the whole defence: it keeps plain scripts out and makes ev
 
 `https://staging.shionlib.com` runs on the staging host as the Dokploy project `shionlib`, environment `staging`, with two compose projects from branch `dev`: `data` (`infra/compose.data.yml`) and `app` (`infra/compose.app.yml`). It follows the staging instance of Hikarinagi for the catalog (`HIKARINAGI_API_BASE_URL`, `HIKARINAGI_TOKEN_URL`) and runs with `APP_ENV=staging`.
 
-- **Deploys.** Work happens on `major/shionlib-next`; pushing that branch to `dev` (`git push origin major/shionlib-next:dev`) builds both images and deploys them. A push that changes nothing under `apps/api`, `apps/web` or `infra` deploys nothing.
+- **Deploys.** Work happens on `major/shionlib-next`; pushing that branch to `dev` (`git push origin major/shionlib-next:dev`) builds both images and deploys them. A push that changes nothing under `apps/api`, `apps/web` or `infra`, or only Markdown files, deploys nothing.
 - **Disk.** The host has a 512G data disk as the LVM volume group `shionlib`: `uploads` (400G, `/srv/shionlib/uploads`, the spool in `spool/`) and `postgres` (40G, `/srv/shionlib/postgres`, the cluster in `data/`); the rest is unallocated for growing either (`lvextend -r`). The mount points are immutable while unmounted, so a missing disk stops the containers instead of filling the system disk. `UPLOADS_VOLUME` and `POSTGRES_VOLUME` point the composes at those directories.
 - **Ingress.** Public traffic reaches the host through the gateway's nginx, which forwards `staging.shionlib.com` to the host's Traefik over HTTPS; Dokploy's three domains route by path from there. Traefik must trust the gateway (`forwardedHeaders.trustedIPs` on its entry points), or every visitor arrives with the gateway's address and shares one rate limit.
+- **Search engines.** A Cloudflare response header rule on the zone (`http_response_headers_transform`, rule `staging_noindex`) adds `X-Robots-Tag: noindex, nofollow` to everything the staging host answers.
+- **Verification.** The Cap site key was created with `docker/scripts/cap-site-key.sh https://staging.shionlib.com/cap <admin key>`, so it refuses automated browsers like production will.
 
 ## Cutover from the NestJS backend
 

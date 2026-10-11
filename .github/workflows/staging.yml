@@ -8,6 +8,7 @@ on:
       - 'apps/web/**'
       - 'infra/**'
       - '.github/workflows/staging.yml'
+      - '!**/*.md'
   workflow_dispatch:
 
 run-name: staging ${{ github.sha }}
