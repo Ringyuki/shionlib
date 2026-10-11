@@ -20,6 +20,7 @@
         "FileUploadSuccessContent": "你上传的文件 {file_name} 已保存，感谢分享",
         "ResourcePublishedTitle": "资源已发布",
         "ResourcePublishedContent": "你上传的资源已发布，共 {file_count} 个文件：{file_names}",
+        "ResourceLinkText": "查看资源",
         "FileUploadFailedTitle": "文件未通过检查",
         "FileCheckFailedContent": "你上传的文件 {file_name} 未通过检查：{reason}。{missing_volumes, select, none {} other {缺少的分卷：{missing_volumes}。}}请确认文件后重新上传。",
         "FileVirusReviewPendingTitle": "文件等待人工复核",

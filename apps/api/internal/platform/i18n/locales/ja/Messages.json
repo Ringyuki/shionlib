@@ -20,6 +20,7 @@
         "FileUploadSuccessContent": "アップロードしたファイル {file_name} を保存しました。共有ありがとうございます。",
         "ResourcePublishedTitle": "リソースを公開しました",
         "ResourcePublishedContent": "アップロードしたリソースを公開しました。ファイルは {file_count} 件です：{file_names}。",
+        "ResourceLinkText": "リソースを見る",
         "FileUploadFailedTitle": "ファイルが検査を通過しませんでした",
         "FileCheckFailedContent": "アップロードしたファイル {file_name} は検査を通過しませんでした：{reason}。{missing_volumes, select, none {} other {不足している分割ファイル：{missing_volumes}。}}ファイルを確認して、もう一度アップロードしてください。",
         "FileVirusReviewPendingTitle": "ファイルが審査待ちです",

@@ -20,7 +20,11 @@ const (
 	EventReviewCleared EventKind = "review_cleared"
 )
 
-const EventListLimit = 200
+const (
+	EventListLimit   = 200
+	resourceLinkText = "Messages.System.File.Upload.ResourceLinkText"
+	resourcePagePath = "/resource/%d"
+)
 
 type EventFile struct {
 	Name string

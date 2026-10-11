@@ -20,6 +20,7 @@
         "FileUploadSuccessContent": "Your file {file_name} has been stored. Thank you for sharing.",
         "ResourcePublishedTitle": "Resource published",
         "ResourcePublishedContent": "Your resource is published with {file_count} file(s): {file_names}",
+        "ResourceLinkText": "View the resource",
         "FileUploadFailedTitle": "File did not pass the check",
         "FileCheckFailedContent": "Your file {file_name} did not pass the check: {reason}. {missing_volumes, select, none {} other {Missing volumes: {missing_volumes}. }}Check the file and upload it again.",
         "FileVirusReviewPendingTitle": "File is waiting for review",

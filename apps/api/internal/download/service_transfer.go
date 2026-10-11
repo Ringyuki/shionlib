@@ -104,7 +104,7 @@ func (t *TransferService) announce(ctx context.Context, file File) error {
 				return err
 			}
 		}
-		return t.messages.Send(ctx, uploadMessage(file.CreatorID, file.GameID, "FileUploadSuccess", message.Meta{"file_id": file.ID, "file_name": file.Name, "file_size": file.Size}))
+		return t.messages.Send(ctx, uploadMessage(file.CreatorID, file.GameID, file.ResourceID, "FileUploadSuccess", message.Meta{"file_id": file.ID, "file_name": file.Name, "file_size": file.Size}))
 	}
 	return publishResource(ctx, t.repo, t.messages, file.ResourceID, t.now())
 }
@@ -133,15 +133,19 @@ func publishResource(ctx context.Context, repo Repository, messages Messenger, r
 	if err := repo.CreateEvent(ctx, NewEvent{ResourceID: resource.ID, Kind: EventPublished, ActorID: &resource.CreatorID, Data: EventData{Files: listed}}); err != nil {
 		return err
 	}
-	return messages.Send(ctx, uploadMessage(resource.CreatorID, resource.GameID, "ResourcePublished", message.Meta{"resource_id": resource.ID, "file_names": names, "file_count": len(files), "file_size": size}))
+	return messages.Send(ctx, uploadMessage(resource.CreatorID, resource.GameID, resource.ID, "ResourcePublished", message.Meta{"resource_id": resource.ID, "file_names": names, "file_count": len(files), "file_size": size}))
 }
 
-func uploadMessage(receiverID, gameID int, key string, meta message.Meta) message.NewMessage {
+func uploadMessage(receiverID, gameID, resourceID int, key string, meta message.Meta) message.NewMessage {
+	linkText := resourceLinkText
+	linkURL := fmt.Sprintf(resourcePagePath, resourceID)
 	return message.NewMessage{
 		Type:       message.TypeSystem,
 		Tone:       message.ToneSuccess,
 		Title:      "Messages.System.File.Upload." + key + "Title",
 		Content:    "Messages.System.File.Upload." + key + "Content",
+		LinkText:   &linkText,
+		LinkURL:    &linkURL,
 		GameID:     &gameID,
 		Meta:       meta,
 		ReceiverID: receiverID,

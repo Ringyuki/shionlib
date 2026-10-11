@@ -3,6 +3,7 @@ package download_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"slices"
 	"testing"
 	"time"
@@ -81,6 +82,9 @@ func TestStoreUploadsAndFinalizes(t *testing.T) {
 	messages := f.events.Messages()
 	if len(messages) != 1 || messages[0].ReceiverID != 1 || messages[0].Title != "Messages.System.File.Upload.ResourcePublishedTitle" || messages[0].Meta["file_count"] != 1 {
 		t.Fatalf("storing the only file publishes the resource with one message: %+v", messages)
+	}
+	if link := messages[0]; link.LinkURL == nil || link.LinkText == nil || *link.LinkText != "Messages.System.File.Upload.ResourceLinkText" || *link.LinkURL != fmt.Sprintf("/resource/%d", link.Meta["resource_id"]) {
+		t.Fatalf("the notice leads to the page of the resource: %+v", link)
 	}
 	if f.repo.Strikes[1] != 0 {
 		t.Fatal("a successful upload resets malware strikes")
