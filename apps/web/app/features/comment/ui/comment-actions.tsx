@@ -2,6 +2,7 @@ import { DropdownMenu, DropdownMenuItem, Inline } from '@hina-ui/react'
 import { Ellipsis, PencilLine, ThumbsUp, Trash2 } from 'lucide-react'
 import { useFormatter, useTranslations } from 'use-intl'
 import { Button, IconButton } from '~/shared/ui/button'
+import { flushStart } from '~/shared/ui/flush'
 import type { CommentItem } from '../comment'
 import { useCommentLike } from '../use-comment-like'
 
@@ -26,7 +27,7 @@ export function CommentActions({
   const format = useFormatter()
   const like = useCommentLike(comment)
   return (
-    <Inline gap="xs" align="center" className="-ms-2">
+    <Inline gap="xs" align="center" className={flushStart.sm}>
       <Button
         size="sm"
         variant="ghost"

@@ -12,6 +12,7 @@ import { ChevronDown, Languages } from 'lucide-react'
 import { useId, useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { BBCodeText } from '~/shared/ui/bbcode-text'
+import { flushEnd } from '~/shared/ui/flush'
 import { introIn, writtenIntros, type GameDetails, type IntroLanguage } from '../game'
 import { introLanguageFrom } from '../game.schema'
 
@@ -50,6 +51,7 @@ export function GameIntro({ details }: { details: GameDetails }) {
               size="sm"
               icon={<Languages />}
               trailing={<ChevronDown />}
+              className={flushEnd.sm}
             >
               {t(`introLanguage.${language}`)}
             </Button>

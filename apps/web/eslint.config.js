@@ -71,6 +71,13 @@ const nativeScroll = {
     "A region that scrolls is a hina-ui ScrollArea with a height or a max height; overflow-auto and overflow-scroll bring the browser's own scrollbar.",
 }
 
+const ghostOnEdge = {
+  selector:
+    "JSXOpeningElement:has(JSXAttribute[name.name='variant'][value.value='ghost']):has(JSXAttribute[name.name='className'][value.value=/(?:^|\\s)(?:self|place-self|justify-self)-(?:start|end)(?:\\s|$)/])",
+  message:
+    'A ghost button on an edge shows its padding as a misalignment: use outline for an action that stands alone, a hina-ui Link for a way back, or add flushStart / flushEnd (~/shared/ui/flush) through cn so its content meets the edge.',
+}
+
 const mountedFeedback = {
   selector:
     ':matches(LogicalExpression, ConditionalExpression) > JSXElement > JSXOpeningElement > JSXIdentifier[name=/^(Alert|Callout|Banner)$/]',
@@ -118,6 +125,7 @@ const appSyntax = [
   mountedFeedback,
   hinaInternals,
   nativeScroll,
+  ghostOnEdge,
   directFetcher,
   rawAddress,
   pagedListStart,
@@ -336,6 +344,7 @@ export default defineConfig([
         mountedFeedback,
         hinaInternals,
         nativeScroll,
+        ghostOnEdge,
       ],
     },
   },
@@ -380,6 +389,7 @@ export default defineConfig([
         mountedFeedback,
         hinaInternals,
         nativeScroll,
+        ghostOnEdge,
         directFetcher,
         heldPosition,
       ],
@@ -443,6 +453,7 @@ export default defineConfig([
         nativeTags,
         mountedFeedback,
         nativeScroll,
+        ghostOnEdge,
         heldPosition,
         rawAddress,
       ],

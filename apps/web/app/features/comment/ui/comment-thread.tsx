@@ -3,6 +3,7 @@ import { Fragment, memo, useCallback, useRef, useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { useAimedHash } from '~/shared/route/use-aimed'
 import { Button } from '~/shared/ui/button'
+import { flushStart } from '~/shared/ui/flush'
 import { holdInPlace, startsInView } from '~/shared/ui/hold-in-place'
 import {
   aimsAt,
@@ -104,7 +105,7 @@ export const CommentThread = memo(function CommentThread({
                 size="sm"
                 variant="ghost"
                 tone="accent"
-                className="my-2 -ms-2 self-start"
+                className={cn('my-2 self-start', flushStart.sm)}
               >
                 {unfolded ? t('foldReplies') : t('moreReplies', { count: rest.length })}
               </Button>

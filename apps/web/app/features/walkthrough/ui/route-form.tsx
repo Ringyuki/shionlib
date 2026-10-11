@@ -1,9 +1,10 @@
-import { Form, FormField, Grid, Input, Stack, Text, type FormHandle } from '@hina-ui/react'
+import { cn, Form, FormField, Grid, Input, Stack, Text, type FormHandle } from '@hina-ui/react'
 import { Trash2 } from 'lucide-react'
 import { useEffect, useId, useRef } from 'react'
 import { useTranslations } from 'use-intl'
 import { lengthOf } from '~/shared/form/form-kit'
 import { Button } from '~/shared/ui/button'
+import { flushEnd } from '~/shared/ui/flush'
 import type { Flagged } from '../use-walkthrough-writing'
 import type { Route } from '../walkthrough'
 import { cast, named, type Naming, type RouteDraft } from '../walkthrough-draft'
@@ -95,7 +96,7 @@ export function RouteForm(props: RouteFormProps) {
         variant="ghost"
         tone="danger"
         icon={<Trash2 />}
-        className="place-self-end text-sm max-md:order-6"
+        className={cn('place-self-end text-sm max-md:order-6', flushEnd.md)}
         onClick={onRemove}
       >
         {t('removeRoute')}

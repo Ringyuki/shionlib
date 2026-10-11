@@ -50,10 +50,12 @@ export function WritingParts(props: WritingPartsProps) {
         ))}
       </Sortable>
       <Button
-        variant="ghost"
+        variant="outline"
+        tone="neutral"
+        size={roomy ? 'md' : 'sm'}
         icon={<Plus />}
         disabled={full}
-        className="mt-2 self-start text-sm"
+        className="mt-2 self-start"
         onClick={onAdd}
       >
         {t('addRoute')}

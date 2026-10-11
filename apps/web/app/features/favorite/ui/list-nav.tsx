@@ -53,11 +53,12 @@ export function ListNav({ owner, lists, selected, onCreate }: ListNavProps) {
       </Stack>
       {onCreate !== undefined && (
         <Button
-          variant="ghost"
+          variant="outline"
           tone="neutral"
+          size="sm"
           icon={<Plus />}
           onClick={onCreate}
-          className="justify-start"
+          className="self-start"
         >
           {t('newList')}
         </Button>

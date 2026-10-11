@@ -1,8 +1,9 @@
-import { FormField, Inline, Text, Textarea, type TextareaHandle } from '@hina-ui/react'
+import { cn, FormField, Inline, Text, Textarea, type TextareaHandle } from '@hina-ui/react'
 import { FolderOpen, MessageSquare, Save } from 'lucide-react'
 import { useId, useLayoutEffect, useRef, type ReactNode } from 'react'
 import { useTranslations } from 'use-intl'
 import { Button } from '~/shared/ui/button'
+import { flushEnd } from '~/shared/ui/flush'
 import { nextSlot, withLine, type StepWords } from '../walkthrough-steps'
 
 type StepsFieldProps = {
@@ -33,7 +34,7 @@ export function StepsField({ value, words, saves, className, onValueChange }: St
   }
   return (
     <FormField name="steps" description={t('stepsHint')} className={className}>
-      <Inline gap="xs" align="center" wrap={false} className="mb-1.5 min-h-8">
+      <Inline gap="xs" align="center" wrap={false} className={cn('mb-1.5 min-h-8', flushEnd.sm)}>
         <Text as="span" id={label} size="sm" weight="medium" className="me-auto">
           {t('steps')}
         </Text>

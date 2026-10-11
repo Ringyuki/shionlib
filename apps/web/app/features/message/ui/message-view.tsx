@@ -43,12 +43,16 @@ export function MessageView({ inbox, className }: MessageViewProps) {
   return (
     <Card as="article" aria-labelledby="opened-message" className={className}>
       <Stack gap="md">
-        <Button asChild size="sm" variant="ghost" tone="neutral" className="self-start lg:hidden">
+        <Link
+          asChild
+          tone="neutral"
+          className="text-muted inline-flex min-h-8 items-center gap-1.5 self-start lg:hidden"
+        >
           <InPageLink href={inboxPath(locale, { category, page })}>
-            <ArrowLeft aria-hidden />
+            <ArrowLeft aria-hidden className="size-4" />
             {t('back')}
           </InPageLink>
-        </Button>
+        </Link>
         <Stack gap="sm">
           <Heading
             id="opened-message"

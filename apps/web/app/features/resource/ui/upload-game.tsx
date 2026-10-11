@@ -1,6 +1,7 @@
 import { Button, Image, Inline, Stack, Text } from '@hina-ui/react'
 import { useLocale, useTranslations } from 'use-intl'
 import { gameTitle, originalTitle, primaryCover, type GameHeader } from '~/features/game'
+import { flushEnd } from '~/shared/ui/flush'
 
 export function UploadGame({ game, onChange }: { game: GameHeader; onChange: () => void }) {
   const t = useTranslations('resource')
@@ -26,7 +27,7 @@ export function UploadGame({ game, onChange }: { game: GameHeader; onChange: () 
           </Text>
         )}
       </Stack>
-      <Button size="sm" variant="ghost" tone="neutral" onClick={onChange}>
+      <Button size="sm" variant="ghost" tone="neutral" className={flushEnd.sm} onClick={onChange}>
         {t('changeGame')}
       </Button>
     </Inline>
