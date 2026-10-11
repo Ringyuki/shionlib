@@ -14,7 +14,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 )
 
-func TestAlertWorkerNotifiesTheAdmins(t *testing.T) {
+func TestWorkersMessageAndMailTheAdmins(t *testing.T) {
 	now := time.Date(2026, 10, 3, 12, 0, 0, 0, time.UTC)
 	repo := reporttest.NewMemoryRepository(func() time.Time { return now })
 	resources := reporttest.NewResources()
@@ -43,10 +43,13 @@ func TestAlertWorkerNotifiesTheAdmins(t *testing.T) {
 	if err := reportjobs.NewAlertWorker(service).Work(t.Context(), &river.Job[report.AlertAdmins]{Args: report.AlertAdmins{ReportID: created.ID}}); err != nil {
 		t.Fatal(err)
 	}
-	if messages := events.Messages(); len(messages) != 1 || messages[0].ReceiverID != 2 {
-		t.Fatalf("admins are messaged: %+v", messages)
+	if messages := events.Messages(); len(messages) != 1 || messages[0].ReceiverID != 2 || len(mailer.Alerts) != 0 {
+		t.Fatalf("admins are messaged: %+v %+v", messages, mailer.Alerts)
 	}
-	if len(mailer.Alerts) != 1 {
+	if err := reportjobs.NewMailWorker(service).Work(t.Context(), &river.Job[report.MailAdmins]{Args: report.MailAdmins{ReportID: created.ID}}); err != nil {
+		t.Fatal(err)
+	}
+	if len(mailer.Alerts) != 1 || len(events.Messages()) != 1 {
 		t.Fatalf("admins are mailed: %+v", mailer.Alerts)
 	}
 }

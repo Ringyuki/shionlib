@@ -11,3 +11,15 @@ func (AlertAdmins) Kind() string {
 func (AlertAdmins) MaxAttempts() int {
 	return 5
 }
+
+type MailAdmins struct {
+	ReportID int `json:"report_id"`
+}
+
+func (MailAdmins) Kind() string {
+	return "report_mail_admins"
+}
+
+func (MailAdmins) MaxAttempts() int {
+	return 5
+}

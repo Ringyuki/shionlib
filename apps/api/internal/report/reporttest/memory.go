@@ -237,9 +237,13 @@ func (b *Banner) Ban(_ context.Context, userID int, _ *int, reason string, days 
 
 type Mailer struct {
 	Alerts []report.ReportAlert
+	Err    error
 }
 
 func (m *Mailer) ReportFiled(_ context.Context, _ []string, alert report.ReportAlert) error {
+	if m.Err != nil {
+		return m.Err
+	}
 	m.Alerts = append(m.Alerts, alert)
 	return nil
 }

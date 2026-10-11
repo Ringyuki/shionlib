@@ -114,8 +114,8 @@ func TestCreateValidationOrder(t *testing.T) {
 	if created.Status != report.StatusPending || created.Level != report.LevelHigh || created.ReportedUserID != uploaderID {
 		t.Fatalf("created %+v", created)
 	}
-	if jobs := f.events.Jobs(); len(jobs) != 1 || jobs[0] != (report.AlertAdmins{ReportID: created.ID}) {
-		t.Fatalf("admins are alerted in the background: %+v", jobs)
+	if jobs := f.events.Jobs(); len(jobs) != 2 || jobs[0] != (report.AlertAdmins{ReportID: created.ID}) || jobs[1] != (report.MailAdmins{ReportID: created.ID}) {
+		t.Fatalf("admins are messaged and mailed in the background, each by its own job: %+v", jobs)
 	}
 	_, err = f.service.Create(ctx, reporterAct, resourceID, in)
 	expectCode(t, err, report.ErrDuplicated)
@@ -143,7 +143,7 @@ func TestDefaultLevels(t *testing.T) {
 	}
 }
 
-func TestAlertAdminsSendsMessagesAndMail(t *testing.T) {
+func TestAdminsAreMessagedAndMailedSeparately(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()
 	created := f.repo.Seed(report.Report{ResourceID: resourceID, ReporterID: reporterID, ReportedUserID: uploaderID, Reason: report.ReasonMalware, Level: report.LevelCritical})
@@ -158,11 +158,31 @@ func TestAlertAdminsSendsMessagesAndMail(t *testing.T) {
 	if got := meta(t, messages[0]); got["reporter_name"] != "reporter" || got["reported_user_name"] != "uploader" || got["malicious_level"] != "CRITICAL" {
 		t.Fatalf("meta %v", got)
 	}
+	if len(f.mailer.Alerts) != 0 {
+		t.Fatalf("messaging does not mail: %+v", f.mailer.Alerts)
+	}
+	f.mailer.Err = errors.New("mail provider down")
+	if err := f.service.MailAdmins(ctx, created.ID); err == nil {
+		t.Fatal("a refused mail fails its own job")
+	}
+	if len(f.events.Messages()) != 2 {
+		t.Fatalf("a failed mail repeats no message: %+v", f.events.Messages())
+	}
+	f.mailer.Err = nil
+	if err := f.service.MailAdmins(ctx, created.ID); err != nil {
+		t.Fatal(err)
+	}
 	if len(f.mailer.Alerts) != 1 || f.mailer.Alerts[0].ReviewURL != "https://shionlib.example/admin/reports?id=1" || f.mailer.Alerts[0].GameTitle != "ゲーム" {
 		t.Fatalf("mail %+v", f.mailer.Alerts)
 	}
-	if err := f.service.AlertAdmins(ctx, 999); err != nil {
-		t.Fatalf("deleted reports are skipped: %v", err)
+	for _, skipped := range []func(context.Context, int) error{f.service.AlertAdmins, f.service.MailAdmins} {
+		if err := skipped(ctx, 999); err != nil {
+			t.Fatalf("deleted reports are skipped: %v", err)
+		}
+	}
+	f.repo.Admins = []report.Admin{{ID: 3}}
+	if err := f.service.MailAdmins(ctx, created.ID); err != nil || len(f.mailer.Alerts) != 1 {
+		t.Fatalf("admins without an address are not mailed: %v %+v", err, f.mailer.Alerts)
 	}
 }
 

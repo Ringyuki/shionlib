@@ -90,22 +90,18 @@ func (s *Service) Create(ctx context.Context, who actor.Actor, resourceID int, i
 	if err := s.queue.Enqueue(ctx, AlertAdmins{ReportID: created.ID}); err != nil {
 		return Report{}, err
 	}
+	if err := s.queue.Enqueue(ctx, MailAdmins{ReportID: created.ID}); err != nil {
+		return Report{}, err
+	}
 	return created, nil
 }
 
 func (s *Service) AlertAdmins(ctx context.Context, reportID int) error {
-	view, err := s.repo.Get(ctx, reportID)
-	if errors.Is(err, ErrNotFound) {
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-	admins, err := s.repo.ActiveAdmins(ctx)
+	view, admins, err := s.alerted(ctx, reportID)
 	if err != nil || len(admins) == 0 {
 		return err
 	}
-	reviewPath := adminReviewPrefix + strconv.Itoa(view.ID)
+	reviewPath := reviewPathOf(view)
 	meta := message.Meta{
 		"report_id":          view.ID,
 		"reporter_name":      displayName(view.Reporter),
@@ -116,7 +112,6 @@ func (s *Service) AlertAdmins(ctx context.Context, reportID int) error {
 	linkText := "Messages.System.Report.NewReport.LinkText"
 	gameID := view.Resource.GameID
 	var errs []error
-	var recipients []string
 	for _, admin := range admins {
 		if err := s.messages.Send(ctx, message.NewMessage{
 			Type:       message.TypeSystem,
@@ -131,25 +126,50 @@ func (s *Service) AlertAdmins(ctx context.Context, reportID int) error {
 		}); err != nil {
 			errs = append(errs, err)
 		}
+	}
+	return errors.Join(errs...)
+}
+
+func (s *Service) MailAdmins(ctx context.Context, reportID int) error {
+	view, admins, err := s.alerted(ctx, reportID)
+	if err != nil || s.mailer == nil {
+		return err
+	}
+	var recipients []string
+	for _, admin := range admins {
 		if admin.Email != "" {
 			recipients = append(recipients, admin.Email)
 		}
 	}
-	if s.mailer != nil && len(recipients) > 0 {
-		if err := s.mailer.ReportFiled(ctx, recipients, ReportAlert{
-			ReportID:         view.ID,
-			ReporterName:     displayName(view.Reporter),
-			ReportedUserName: displayName(view.ReportedUser),
-			Reason:           view.Reason,
-			Level:            view.Level,
-			GameTitle:        view.Resource.Game.Display(),
-			Detail:           view.Detail,
-			ReviewURL:        strings.TrimSuffix(s.siteURL, "/") + reviewPath,
-		}); err != nil {
-			errs = append(errs, err)
-		}
+	if len(recipients) == 0 {
+		return nil
 	}
-	return errors.Join(errs...)
+	return s.mailer.ReportFiled(ctx, recipients, ReportAlert{
+		ReportID:         view.ID,
+		ReporterName:     displayName(view.Reporter),
+		ReportedUserName: displayName(view.ReportedUser),
+		Reason:           view.Reason,
+		Level:            view.Level,
+		GameTitle:        view.Resource.Game.Display(),
+		Detail:           view.Detail,
+		ReviewURL:        strings.TrimSuffix(s.siteURL, "/") + reviewPathOf(view),
+	})
+}
+
+func (s *Service) alerted(ctx context.Context, reportID int) (View, []Admin, error) {
+	view, err := s.repo.Get(ctx, reportID)
+	if errors.Is(err, ErrNotFound) {
+		return View{}, nil, nil
+	}
+	if err != nil {
+		return View{}, nil, err
+	}
+	admins, err := s.repo.ActiveAdmins(ctx)
+	return view, admins, err
+}
+
+func reviewPathOf(view View) string {
+	return adminReviewPrefix + strconv.Itoa(view.ID)
 }
 
 func displayName(member Member) string {
