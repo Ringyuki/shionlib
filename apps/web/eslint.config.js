@@ -64,6 +64,13 @@ const hinaInternals = {
     'Do not restyle hina-ui\'s internal markup ([&>.hn-*]); use a documented pattern instead, such as Card as="button" for a custom clickable surface.',
 }
 
+const nativeScroll = {
+  selector:
+    'Literal[value=/(?:^|[\\s:])overflow(?:-[xy])?-(?:auto|scroll)(?:!|\\s|$)/], TemplateElement[value.raw=/(?:^|[\\s:])overflow(?:-[xy])?-(?:auto|scroll)(?:!|\\s|$)/], Property[key.name=/^overflow[XY]?$/][value.value=/^(auto|scroll)$/]',
+  message:
+    "A region that scrolls is a hina-ui ScrollArea with a height or a max height; overflow-auto and overflow-scroll bring the browser's own scrollbar.",
+}
+
 const mountedFeedback = {
   selector:
     ':matches(LogicalExpression, ConditionalExpression) > JSXElement > JSXOpeningElement > JSXIdentifier[name=/^(Alert|Callout|Banner)$/]',
@@ -110,6 +117,7 @@ const appSyntax = [
   nativeTooltip,
   mountedFeedback,
   hinaInternals,
+  nativeScroll,
   directFetcher,
   rawAddress,
   pagedListStart,
@@ -327,6 +335,7 @@ export default defineConfig([
         nativeTooltip,
         mountedFeedback,
         hinaInternals,
+        nativeScroll,
       ],
     },
   },
@@ -370,6 +379,7 @@ export default defineConfig([
         nativeTooltip,
         mountedFeedback,
         hinaInternals,
+        nativeScroll,
         directFetcher,
         heldPosition,
       ],
@@ -432,6 +442,7 @@ export default defineConfig([
         ...apiShapes,
         nativeTags,
         mountedFeedback,
+        nativeScroll,
         heldPosition,
         rawAddress,
       ],

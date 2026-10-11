@@ -4,6 +4,7 @@ import {
   Divider,
   Inline,
   Popover,
+  ScrollArea,
   Spinner,
   Stack,
   Text,
@@ -53,11 +54,13 @@ export function FavoriteButton({ gameId, favorited }: FavoriteButtonProps) {
               </Text>
             )}
             {lists !== undefined && lists.length > 0 && (
-              <Stack gap="sm" className="max-h-72 overflow-y-auto px-3 pt-1 pb-3">
-                {lists.map(list => (
-                  <MembershipOption key={list.id} list={list} gameId={gameId} />
-                ))}
-              </Stack>
+              <ScrollArea className="max-h-72">
+                <Stack gap="sm" className="px-3 pt-1 pb-3">
+                  {lists.map(list => (
+                    <MembershipOption key={list.id} list={list} gameId={gameId} />
+                  ))}
+                </Stack>
+              </ScrollArea>
             )}
             <Divider />
             <HinaButton
