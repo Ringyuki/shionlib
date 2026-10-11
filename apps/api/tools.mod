@@ -1,6 +1,6 @@
 module github.com/Ringyuki/shionlib/apps/api
 
-go 1.27.1
+go 1.27.2
 
 tool github.com/air-verse/air
 
