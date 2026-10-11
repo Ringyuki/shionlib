@@ -282,5 +282,14 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if total != 2 || strict[0].ID != last.ID || strict[1].ID != first.ID {
 			t.Fatalf("rated games must be excluded: %+v", strict)
 		}
+		answer := create(ctx, t, env.Repo, comment.NewComment{GameID: safe, CreatorID: author, ParentID: &first.ID, RootID: &first.ID})
+		_ = env.Repo.SetStatus(ctx, answer.ID, comment.StatusVisible)
+		answered, _, err := env.Repo.ListByCreator(ctx, comment.CreatorFilter{CreatorID: author}, comment.Page{Number: 1, Size: 1})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if quoted := answered[0].Parent; answered[0].ID != answer.ID || quoted == nil || quoted.ID != first.ID || !sameJSON(t, quoted.Content, content) {
+			t.Fatalf("a reply carries the document of the comment it answers: %+v", answered[0])
+		}
 	})
 }

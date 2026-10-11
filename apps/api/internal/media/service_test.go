@@ -53,11 +53,15 @@ func TestStoreUsesLegacyKeysBoundsAndMetadata(t *testing.T) {
 	if err != nil || key != "user/7/cover/uuid.webp" || p.bounds != (media.Bounds{MaxWidth: 1500}) {
 		t.Fatalf("cover: %s %v %+v", key, err, p.bounds)
 	}
+	key, err = service.StoreBackground(ctx, 7, upload)
+	if err != nil || key != "user/7/background/uuid.webp" || p.bounds != (media.Bounds{MaxWidth: 2560}) {
+		t.Fatalf("background: %s %v %+v", key, err, p.bounds)
+	}
 	key, err = service.StoreAdImage(ctx, 2, upload)
 	if err != nil || key != "ad/image/uuid.webp" || p.bounds != (media.Bounds{}) {
 		t.Fatalf("ad: %s %v %+v", key, err, p.bounds)
 	}
-	if s.objects[0].metadata["user_id"] != "7" || s.objects[2].metadata["uploader_id"] != "2" || s.objects[0].contentType != "image/webp" || s.objects[0].data != "webp:raw" {
+	if s.objects[0].metadata["user_id"] != "7" || s.objects[2].metadata["user_id"] != "7" || s.objects[3].metadata["uploader_id"] != "2" || s.objects[0].contentType != "image/webp" || s.objects[0].data != "webp:raw" {
 		t.Fatalf("unexpected objects %+v", s.objects)
 	}
 }

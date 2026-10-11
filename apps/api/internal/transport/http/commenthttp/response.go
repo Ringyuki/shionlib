@@ -16,6 +16,13 @@ type commentParentDTO struct {
 	Creator userhttp.UserSummaryDTO `json:"creator"`
 }
 
+type userCommentParentDTO struct {
+	ID      int                     `json:"id"`
+	Content richtexthttp.Content    `json:"content"`
+	Text    string                  `json:"text"`
+	Creator userhttp.UserSummaryDTO `json:"creator"`
+}
+
 type commentCreatedDTO struct {
 	ID        int                     `json:"id"`
 	Content   richtexthttp.Content    `json:"content"`
@@ -94,7 +101,7 @@ type userCommentDTO struct {
 	ParentID   *int                    `json:"parent_id"`
 	RootID     *int                    `json:"root_id"`
 	ReplyCount int                     `json:"reply_count"`
-	Parent     *commentParentDTO       `json:"parent"`
+	Parent     *userCommentParentDTO   `json:"parent"`
 	IsLiked    bool                    `json:"is_liked"`
 	LikeCount  int                     `json:"like_count"`
 	Game       gamehttp.GameCardDTO    `json:"game"`
@@ -187,6 +194,13 @@ func toThread(thread comment.Thread, now time.Time) commentThreadDTO {
 	return commentThreadDTO{CommentItemDTO: toItem(thread.Entry, now), Replies: replies}
 }
 
+func toQuotedParent(ref *comment.ParentRef, now time.Time) *userCommentParentDTO {
+	if ref == nil {
+		return nil
+	}
+	return &userCommentParentDTO{ID: ref.ID, Content: richtexthttp.Content(ref.Content), Text: ref.Text, Creator: userhttp.ToUserSummary(ref.Creator, now)}
+}
+
 func toUserComment(entry comment.Entry, now time.Time) userCommentDTO {
 	out := userCommentDTO{
 		ID:         entry.ID,
@@ -195,7 +209,7 @@ func toUserComment(entry comment.Entry, now time.Time) userCommentDTO {
 		ParentID:   entry.ParentID,
 		RootID:     entry.RootID,
 		ReplyCount: entry.ReplyCount,
-		Parent:     toParent(entry.Parent, now),
+		Parent:     toQuotedParent(entry.Parent, now),
 		IsLiked:    entry.Liked,
 		LikeCount:  entry.LikeCount,
 		Creator:    userhttp.ToUserSummary(entry.Creator, now),

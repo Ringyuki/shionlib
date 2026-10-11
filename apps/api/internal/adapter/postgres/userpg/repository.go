@@ -133,6 +133,15 @@ func (r *Repository) Update(ctx context.Context, id int, c user.Changes) error {
 	if c.Cover != nil {
 		update.SetCover(*c.Cover)
 	}
+	if c.ClearCover {
+		update.ClearCover()
+	}
+	if c.Background != nil {
+		update.SetBackground(*c.Background)
+	}
+	if c.ClearBackground {
+		update.ClearBackground()
+	}
 	if c.Bio != nil {
 		update.SetBio(*c.Bio)
 	}
@@ -144,6 +153,9 @@ func (r *Repository) Update(ctx context.Context, id int, c user.Changes) error {
 	}
 	if c.OnlyGamesWithResources != nil {
 		update.SetOnlyGamesWithResources(*c.OnlyGamesWithResources)
+	}
+	if c.ShowProfileBackgrounds != nil {
+		update.SetShowProfileBackgrounds(*c.ShowProfileBackgrounds)
 	}
 	if c.Status != nil {
 		update.SetStatus(int(*c.Status))
@@ -176,20 +188,26 @@ func (r *Repository) Stats(ctx context.Context, id int, scope user.StatsScope) (
 		statuses = append(statuses, walkthrough.StatusDRAFT, walkthrough.StatusHIDDEN)
 	}
 	walkthroughs := []predicate.Walkthrough{walkthrough.CreatorID(id), walkthrough.StatusIn(statuses...)}
+	resources := []predicate.GameDownloadResource{gamedownloadresource.CreatorID(id), gamepg.ActiveResource()}
+	lists := []predicate.Favorite{entfavorite.UserID(id), entfavorite.IsPrivate(false)}
+	if !scope.Own {
+		resources = append(resources, gamepg.PublicResource())
+	}
 	if scope.ExcludeRated {
 		comments = append(comments, comment.HasGameWith(gamepg.SafeForStrictViewers()))
 		walkthroughs = append(walkthroughs, walkthrough.HasGameWith(gamepg.SafeForStrictViewers()))
+		resources = append(resources, gamedownloadresource.HasGameWith(gamepg.SafeForStrictViewers()))
 	}
 	counts := []struct {
 		target *int
 		count  func() (int, error)
 	}{
 		{&stats.Resources, func() (int, error) {
-			return db.GameDownloadResource.Query().Where(gamedownloadresource.CreatorID(id)).Count(ctx)
+			return db.GameDownloadResource.Query().Where(resources...).Count(ctx)
 		}},
 		{&stats.Comments, func() (int, error) { return db.Comment.Query().Where(comments...).Count(ctx) }},
 		{&stats.FavoriteItems, func() (int, error) {
-			return db.FavoriteItem.Query().Where(favoriteitem.HasFavoriteWith(entfavorite.UserID(id))).Count(ctx)
+			return db.FavoriteItem.Query().Where(favoriteitem.HasFavoriteWith(lists...)).Count(ctx)
 		}},
 		{&stats.Edits, func() (int, error) { return db.EditRecord.Query().Where(editrecord.ActorID(id)).Count(ctx) }},
 		{&stats.Walkthroughs, func() (int, error) { return db.Walkthrough.Query().Where(walkthroughs...).Count(ctx) }},

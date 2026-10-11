@@ -98,6 +98,20 @@ func (_c *UserCreate) SetNillableCover(v *string) *UserCreate {
 	return _c
 }
 
+// SetBackground sets the "background" field.
+func (_c *UserCreate) SetBackground(v string) *UserCreate {
+	_c.mutation.SetBackground(v)
+	return _c
+}
+
+// SetNillableBackground sets the "background" field if the given value is not nil.
+func (_c *UserCreate) SetNillableBackground(v *string) *UserCreate {
+	if v != nil {
+		_c.SetBackground(*v)
+	}
+	return _c
+}
+
 // SetBio sets the "bio" field.
 func (_c *UserCreate) SetBio(v string) *UserCreate {
 	_c.mutation.SetBio(v)
@@ -150,6 +164,20 @@ func (_c *UserCreate) SetOnlyGamesWithResources(v bool) *UserCreate {
 func (_c *UserCreate) SetNillableOnlyGamesWithResources(v *bool) *UserCreate {
 	if v != nil {
 		_c.SetOnlyGamesWithResources(*v)
+	}
+	return _c
+}
+
+// SetShowProfileBackgrounds sets the "show_profile_backgrounds" field.
+func (_c *UserCreate) SetShowProfileBackgrounds(v bool) *UserCreate {
+	_c.mutation.SetShowProfileBackgrounds(v)
+	return _c
+}
+
+// SetNillableShowProfileBackgrounds sets the "show_profile_backgrounds" field if the given value is not nil.
+func (_c *UserCreate) SetNillableShowProfileBackgrounds(v *bool) *UserCreate {
+	if v != nil {
+		_c.SetShowProfileBackgrounds(*v)
 	}
 	return _c
 }
@@ -771,6 +799,10 @@ func (_c *UserCreate) defaults() {
 		v := user.DefaultOnlyGamesWithResources
 		_c.mutation.SetOnlyGamesWithResources(v)
 	}
+	if _, ok := _c.mutation.ShowProfileBackgrounds(); !ok {
+		v := user.DefaultShowProfileBackgrounds
+		_c.mutation.SetShowProfileBackgrounds(v)
+	}
 	if _, ok := _c.mutation.Role(); !ok {
 		v := user.DefaultRole
 		_c.mutation.SetRole(v)
@@ -837,6 +869,9 @@ func (_c *UserCreate) check() error {
 	}
 	if _, ok := _c.mutation.OnlyGamesWithResources(); !ok {
 		return &ValidationError{Name: "only_games_with_resources", err: errors.New(`ent: missing required field "User.only_games_with_resources"`)}
+	}
+	if _, ok := _c.mutation.ShowProfileBackgrounds(); !ok {
+		return &ValidationError{Name: "show_profile_backgrounds", err: errors.New(`ent: missing required field "User.show_profile_backgrounds"`)}
 	}
 	if _, ok := _c.mutation.Role(); !ok {
 		return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "User.role"`)}
@@ -909,6 +944,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldCover, field.TypeString, value)
 		_node.Cover = &value
 	}
+	if value, ok := _c.mutation.Background(); ok {
+		_spec.SetField(user.FieldBackground, field.TypeString, value)
+		_node.Background = &value
+	}
 	if value, ok := _c.mutation.Bio(); ok {
 		_spec.SetField(user.FieldBio, field.TypeString, value)
 		_node.Bio = &value
@@ -924,6 +963,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.OnlyGamesWithResources(); ok {
 		_spec.SetField(user.FieldOnlyGamesWithResources, field.TypeBool, value)
 		_node.OnlyGamesWithResources = value
+	}
+	if value, ok := _c.mutation.ShowProfileBackgrounds(); ok {
+		_spec.SetField(user.FieldShowProfileBackgrounds, field.TypeBool, value)
+		_node.ShowProfileBackgrounds = value
 	}
 	if value, ok := _c.mutation.Role(); ok {
 		_spec.SetField(user.FieldRole, field.TypeInt, value)
@@ -1543,6 +1586,24 @@ func (u *UserUpsert) ClearCover() *UserUpsert {
 	return u
 }
 
+// SetBackground sets the "background" field.
+func (u *UserUpsert) SetBackground(v string) *UserUpsert {
+	u.Set(user.FieldBackground, v)
+	return u
+}
+
+// UpdateBackground sets the "background" field to the value that was provided on create.
+func (u *UserUpsert) UpdateBackground() *UserUpsert {
+	u.SetExcluded(user.FieldBackground)
+	return u
+}
+
+// ClearBackground clears the value of the "background" field.
+func (u *UserUpsert) ClearBackground() *UserUpsert {
+	u.SetNull(user.FieldBackground)
+	return u
+}
+
 // SetBio sets the "bio" field.
 func (u *UserUpsert) SetBio(v string) *UserUpsert {
 	u.Set(user.FieldBio, v)
@@ -1600,6 +1661,18 @@ func (u *UserUpsert) SetOnlyGamesWithResources(v bool) *UserUpsert {
 // UpdateOnlyGamesWithResources sets the "only_games_with_resources" field to the value that was provided on create.
 func (u *UserUpsert) UpdateOnlyGamesWithResources() *UserUpsert {
 	u.SetExcluded(user.FieldOnlyGamesWithResources)
+	return u
+}
+
+// SetShowProfileBackgrounds sets the "show_profile_backgrounds" field.
+func (u *UserUpsert) SetShowProfileBackgrounds(v bool) *UserUpsert {
+	u.Set(user.FieldShowProfileBackgrounds, v)
+	return u
+}
+
+// UpdateShowProfileBackgrounds sets the "show_profile_backgrounds" field to the value that was provided on create.
+func (u *UserUpsert) UpdateShowProfileBackgrounds() *UserUpsert {
+	u.SetExcluded(user.FieldShowProfileBackgrounds)
 	return u
 }
 
@@ -1889,6 +1962,27 @@ func (u *UserUpsertOne) ClearCover() *UserUpsertOne {
 	})
 }
 
+// SetBackground sets the "background" field.
+func (u *UserUpsertOne) SetBackground(v string) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetBackground(v)
+	})
+}
+
+// UpdateBackground sets the "background" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateBackground() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateBackground()
+	})
+}
+
+// ClearBackground clears the value of the "background" field.
+func (u *UserUpsertOne) ClearBackground() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearBackground()
+	})
+}
+
 // SetBio sets the "bio" field.
 func (u *UserUpsertOne) SetBio(v string) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
@@ -1956,6 +2050,20 @@ func (u *UserUpsertOne) SetOnlyGamesWithResources(v bool) *UserUpsertOne {
 func (u *UserUpsertOne) UpdateOnlyGamesWithResources() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateOnlyGamesWithResources()
+	})
+}
+
+// SetShowProfileBackgrounds sets the "show_profile_backgrounds" field.
+func (u *UserUpsertOne) SetShowProfileBackgrounds(v bool) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetShowProfileBackgrounds(v)
+	})
+}
+
+// UpdateShowProfileBackgrounds sets the "show_profile_backgrounds" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateShowProfileBackgrounds() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateShowProfileBackgrounds()
 	})
 }
 
@@ -2435,6 +2543,27 @@ func (u *UserUpsertBulk) ClearCover() *UserUpsertBulk {
 	})
 }
 
+// SetBackground sets the "background" field.
+func (u *UserUpsertBulk) SetBackground(v string) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetBackground(v)
+	})
+}
+
+// UpdateBackground sets the "background" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateBackground() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateBackground()
+	})
+}
+
+// ClearBackground clears the value of the "background" field.
+func (u *UserUpsertBulk) ClearBackground() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearBackground()
+	})
+}
+
 // SetBio sets the "bio" field.
 func (u *UserUpsertBulk) SetBio(v string) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
@@ -2502,6 +2631,20 @@ func (u *UserUpsertBulk) SetOnlyGamesWithResources(v bool) *UserUpsertBulk {
 func (u *UserUpsertBulk) UpdateOnlyGamesWithResources() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateOnlyGamesWithResources()
+	})
+}
+
+// SetShowProfileBackgrounds sets the "show_profile_backgrounds" field.
+func (u *UserUpsertBulk) SetShowProfileBackgrounds(v bool) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetShowProfileBackgrounds(v)
+	})
+}
+
+// UpdateShowProfileBackgrounds sets the "show_profile_backgrounds" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateShowProfileBackgrounds() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateShowProfileBackgrounds()
 	})
 }
 

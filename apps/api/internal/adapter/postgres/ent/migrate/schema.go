@@ -2130,10 +2130,12 @@ var (
 		{Name: "password", Type: field.TypeString, Nullable: true, Size: 255, SchemaType: map[string]string{"postgres": "character varying(255)"}},
 		{Name: "avatar", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "cover", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "background", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "bio", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "lang", Type: field.TypeEnum, Enums: []string{"en", "zh", "ja"}, Default: "en", SchemaType: map[string]string{"postgres": "user_lang"}},
 		{Name: "content_limit", Type: field.TypeInt, Default: 2, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "only_games_with_resources", Type: field.TypeBool, Default: true},
+		{Name: "show_profile_backgrounds", Type: field.TypeBool, Default: true},
 		{Name: "role", Type: field.TypeInt, Default: 1, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "status", Type: field.TypeInt, Default: 1, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "upload_injected_file_times", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
@@ -2164,12 +2166,12 @@ var (
 			{
 				Name:    "users_created_idx",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[18]},
+				Columns: []*schema.Column{UsersColumns[20]},
 			},
 			{
 				Name:    "users_role_idx",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[10]},
+				Columns: []*schema.Column{UsersColumns[12]},
 			},
 		},
 	}

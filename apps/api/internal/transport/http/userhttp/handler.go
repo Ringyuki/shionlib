@@ -40,6 +40,9 @@ func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "user.unban", Method: http.MethodPost, Path: "/user/{id}/unban", Summary: "Lift a ban", Tags: tags, Access: httpapi.AccessAdmin}, h.unban)
 	httpapi.Register(api, httpapi.Route{ID: "user.info.avatar", Method: http.MethodPost, Path: "/user/info/avatar", Summary: "Upload an avatar", Tags: tags, Access: httpapi.AccessUser, MaxBodyBytes: mediahttp.BodyLimit(media.ProfileImageMaxBytes)}, h.avatar)
 	httpapi.Register(api, httpapi.Route{ID: "user.info.cover", Method: http.MethodPost, Path: "/user/info/cover", Summary: "Upload a profile cover", Tags: tags, Access: httpapi.AccessUser, MaxBodyBytes: mediahttp.BodyLimit(media.ProfileImageMaxBytes)}, h.cover)
+	httpapi.Register(api, httpapi.Route{ID: "user.info.removeCover", Method: http.MethodDelete, Path: "/user/info/cover", Summary: "Remove the profile cover", Tags: tags, Access: httpapi.AccessUser}, h.removeCover)
+	httpapi.Register(api, httpapi.Route{ID: "user.info.background", Method: http.MethodPost, Path: "/user/info/background", Summary: "Upload a profile background", Tags: tags, Access: httpapi.AccessUser, MaxBodyBytes: mediahttp.BodyLimit(media.ProfileImageMaxBytes)}, h.background)
+	httpapi.Register(api, httpapi.Route{ID: "user.info.removeBackground", Method: http.MethodDelete, Path: "/user/info/background", Summary: "Remove the profile background", Tags: tags, Access: httpapi.AccessUser}, h.removeBackground)
 	httpapi.Register(api, httpapi.Route{ID: "user.info.bio", Method: http.MethodPost, Path: "/user/info/bio", Summary: "Update the bio", Tags: tags, Access: httpapi.AccessUser}, h.bio)
 	httpapi.Register(api, httpapi.Route{ID: "user.info.name", Method: http.MethodPost, Path: "/user/info/name", Summary: "Rename the account", Tags: tags, Access: httpapi.AccessUser}, h.name)
 	httpapi.Register(api, httpapi.Route{ID: "user.info.emailCode", Method: http.MethodPost, Path: "/user/info/email/request", Summary: "Email a code to the current address", Tags: tags, Access: httpapi.AccessUser, Throttle: throttleAuth}, h.emailCode)
@@ -48,6 +51,7 @@ func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "user.info.lang", Method: http.MethodPost, Path: "/user/info/lang", Summary: "Change the preferred language", Tags: tags, Access: httpapi.AccessUser}, h.lang)
 	httpapi.Register(api, httpapi.Route{ID: "user.info.contentLimit", Method: http.MethodPost, Path: "/user/info/content-limit", Summary: "Change the content limit", Tags: tags, Access: httpapi.AccessUser}, h.contentLimit)
 	httpapi.Register(api, httpapi.Route{ID: "user.info.onlyGamesWithResources", Method: http.MethodPost, Path: "/user/info/only-games-with-resources", Summary: "Only list games with download resources", Tags: tags, Access: httpapi.AccessUser}, h.onlyGamesWithResources)
+	httpapi.Register(api, httpapi.Route{ID: "user.info.showProfileBackgrounds", Method: http.MethodPost, Path: "/user/info/profile-backgrounds", Summary: "Show or hide the backgrounds of other users' profiles", Tags: tags, Access: httpapi.AccessUser}, h.showProfileBackgrounds)
 	httpapi.Register(api, httpapi.Route{ID: "user.editRecords", Method: http.MethodGet, Path: "/user/datas/{id}/edit-records", Summary: "List a user's catalog edits", Tags: tags}, h.editRecords)
 }
 
@@ -145,6 +149,32 @@ func (h *Handler) cover(ctx context.Context, in *coverUploadInput) (*response.Ou
 	return response.OK(ctx, h.resp, mediahttp.UploadedImageDTO{Key: key}), nil
 }
 
+func (h *Handler) removeCover(ctx context.Context, _ *struct{}) (*response.EmptyOutput, error) {
+	if err := h.service.RemoveCover(ctx, actor.From(ctx)); err != nil {
+		return nil, err
+	}
+	return response.Empty(ctx, h.resp), nil
+}
+
+func (h *Handler) background(ctx context.Context, in *backgroundUploadInput) (*response.Output[mediahttp.UploadedImageDTO], error) {
+	upload, err := mediahttp.ReadUpload(in.RawBody.Data().Background, media.ProfileImageMaxBytes)
+	if err != nil {
+		return nil, err
+	}
+	key, err := h.service.UpdateBackground(ctx, actor.From(ctx), upload)
+	if err != nil {
+		return nil, err
+	}
+	return response.OK(ctx, h.resp, mediahttp.UploadedImageDTO{Key: key}), nil
+}
+
+func (h *Handler) removeBackground(ctx context.Context, _ *struct{}) (*response.EmptyOutput, error) {
+	if err := h.service.RemoveBackground(ctx, actor.From(ctx)); err != nil {
+		return nil, err
+	}
+	return response.Empty(ctx, h.resp), nil
+}
+
 func (h *Handler) bio(ctx context.Context, in *updateBioInput) (*response.Output[userBioDTO], error) {
 	if err := h.service.UpdateBio(ctx, actor.From(ctx), in.Body.Bio); err != nil {
 		return nil, err
@@ -204,6 +234,13 @@ func (h *Handler) contentLimit(ctx context.Context, in *updateContentLimitInput)
 
 func (h *Handler) onlyGamesWithResources(ctx context.Context, in *updateOnlyGamesWithResourcesInput) (*response.EmptyOutput, error) {
 	if err := h.service.UpdateOnlyGamesWithResources(ctx, actor.From(ctx), in.Body.OnlyGamesWithResources); err != nil {
+		return nil, err
+	}
+	return response.Empty(ctx, h.resp), nil
+}
+
+func (h *Handler) showProfileBackgrounds(ctx context.Context, in *updateShowProfileBackgroundsInput) (*response.EmptyOutput, error) {
+	if err := h.service.UpdateShowProfileBackgrounds(ctx, actor.From(ctx), in.Body.ShowProfileBackgrounds); err != nil {
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil

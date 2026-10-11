@@ -25,6 +25,8 @@ const (
 	FieldAvatar = "avatar"
 	// FieldCover holds the string denoting the cover field in the database.
 	FieldCover = "cover"
+	// FieldBackground holds the string denoting the background field in the database.
+	FieldBackground = "background"
 	// FieldBio holds the string denoting the bio field in the database.
 	FieldBio = "bio"
 	// FieldLang holds the string denoting the lang field in the database.
@@ -33,6 +35,8 @@ const (
 	FieldContentLimit = "content_limit"
 	// FieldOnlyGamesWithResources holds the string denoting the only_games_with_resources field in the database.
 	FieldOnlyGamesWithResources = "only_games_with_resources"
+	// FieldShowProfileBackgrounds holds the string denoting the show_profile_backgrounds field in the database.
+	FieldShowProfileBackgrounds = "show_profile_backgrounds"
 	// FieldRole holds the string denoting the role field in the database.
 	FieldRole = "role"
 	// FieldStatus holds the string denoting the status field in the database.
@@ -324,10 +328,12 @@ var Columns = []string{
 	FieldPassword,
 	FieldAvatar,
 	FieldCover,
+	FieldBackground,
 	FieldBio,
 	FieldLang,
 	FieldContentLimit,
 	FieldOnlyGamesWithResources,
+	FieldShowProfileBackgrounds,
 	FieldRole,
 	FieldStatus,
 	FieldUploadInjectedFileTimes,
@@ -367,6 +373,8 @@ var (
 	DefaultContentLimit int
 	// DefaultOnlyGamesWithResources holds the default value on creation for the "only_games_with_resources" field.
 	DefaultOnlyGamesWithResources bool
+	// DefaultShowProfileBackgrounds holds the default value on creation for the "show_profile_backgrounds" field.
+	DefaultShowProfileBackgrounds bool
 	// DefaultRole holds the default value on creation for the "role" field.
 	DefaultRole int
 	// DefaultStatus holds the default value on creation for the "status" field.
@@ -445,6 +453,11 @@ func ByCover(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCover, opts...).ToFunc()
 }
 
+// ByBackground orders the results by the background field.
+func ByBackground(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBackground, opts...).ToFunc()
+}
+
 // ByBio orders the results by the bio field.
 func ByBio(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBio, opts...).ToFunc()
@@ -463,6 +476,11 @@ func ByContentLimit(opts ...sql.OrderTermOption) OrderOption {
 // ByOnlyGamesWithResources orders the results by the only_games_with_resources field.
 func ByOnlyGamesWithResources(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOnlyGamesWithResources, opts...).ToFunc()
+}
+
+// ByShowProfileBackgrounds orders the results by the show_profile_backgrounds field.
+func ByShowProfileBackgrounds(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldShowProfileBackgrounds, opts...).ToFunc()
 }
 
 // ByRole orders the results by the role field.

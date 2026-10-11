@@ -28,6 +28,8 @@ type User struct {
 	Avatar *string `json:"avatar,omitempty"`
 	// Cover holds the value of the "cover" field.
 	Cover *string `json:"cover,omitempty"`
+	// Background holds the value of the "background" field.
+	Background *string `json:"background,omitempty"`
 	// Bio holds the value of the "bio" field.
 	Bio *string `json:"bio,omitempty"`
 	// Lang holds the value of the "lang" field.
@@ -36,6 +38,8 @@ type User struct {
 	ContentLimit int `json:"content_limit,omitempty"`
 	// OnlyGamesWithResources holds the value of the "only_games_with_resources" field.
 	OnlyGamesWithResources bool `json:"only_games_with_resources,omitempty"`
+	// ShowProfileBackgrounds holds the value of the "show_profile_backgrounds" field.
+	ShowProfileBackgrounds bool `json:"show_profile_backgrounds,omitempty"`
 	// Role holds the value of the "role" field.
 	Role int `json:"role,omitempty"`
 	// Status holds the value of the "status" field.
@@ -395,11 +399,11 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldOnlyGamesWithResources, user.FieldTwoFactorEnabled, user.FieldUploadTrusted:
+		case user.FieldOnlyGamesWithResources, user.FieldShowProfileBackgrounds, user.FieldTwoFactorEnabled, user.FieldUploadTrusted:
 			values[i] = new(sql.NullBool)
 		case user.FieldID, user.FieldContentLimit, user.FieldRole, user.FieldStatus, user.FieldUploadInjectedFileTimes:
 			values[i] = new(sql.NullInt64)
-		case user.FieldName, user.FieldEmail, user.FieldPassword, user.FieldAvatar, user.FieldCover, user.FieldBio, user.FieldLang:
+		case user.FieldName, user.FieldEmail, user.FieldPassword, user.FieldAvatar, user.FieldCover, user.FieldBackground, user.FieldBio, user.FieldLang:
 			values[i] = new(sql.NullString)
 		case user.FieldEmailVerifiedAt, user.FieldLastLoginAt, user.FieldSponsorExpiresAt, user.FieldCreated, user.FieldUpdated:
 			values[i] = new(sql.NullTime)
@@ -457,6 +461,13 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				_m.Cover = new(string)
 				*_m.Cover = value.String
 			}
+		case user.FieldBackground:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field background", values[i])
+			} else if value.Valid {
+				_m.Background = new(string)
+				*_m.Background = value.String
+			}
 		case user.FieldBio:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field bio", values[i])
@@ -481,6 +492,12 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field only_games_with_resources", values[i])
 			} else if value.Valid {
 				_m.OnlyGamesWithResources = value.Bool
+			}
+		case user.FieldShowProfileBackgrounds:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field show_profile_backgrounds", values[i])
+			} else if value.Valid {
+				_m.ShowProfileBackgrounds = value.Bool
 			}
 		case user.FieldRole:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -744,6 +761,11 @@ func (_m *User) String() string {
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
+	if v := _m.Background; v != nil {
+		builder.WriteString("background=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
 	if v := _m.Bio; v != nil {
 		builder.WriteString("bio=")
 		builder.WriteString(*v)
@@ -757,6 +779,9 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("only_games_with_resources=")
 	builder.WriteString(fmt.Sprintf("%v", _m.OnlyGamesWithResources))
+	builder.WriteString(", ")
+	builder.WriteString("show_profile_backgrounds=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ShowProfileBackgrounds))
 	builder.WriteString(", ")
 	builder.WriteString("role=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Role))

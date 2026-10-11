@@ -52654,11 +52654,13 @@ type UserMutation struct {
 	password                                     *string
 	avatar                                       *string
 	cover                                        *string
+	background                                   *string
 	bio                                          *string
 	lang                                         *user.Lang
 	content_limit                                *int
 	addcontent_limit                             *int
 	only_games_with_resources                    *bool
+	show_profile_backgrounds                     *bool
 	role                                         *int
 	addrole                                      *int
 	status                                       *int
@@ -53084,6 +53086,55 @@ func (m *UserMutation) ResetCover() {
 	delete(m.clearedFields, user.FieldCover)
 }
 
+// SetBackground sets the "background" field.
+func (m *UserMutation) SetBackground(s string) {
+	m.background = &s
+}
+
+// Background returns the value of the "background" field in the mutation.
+func (m *UserMutation) Background() (r string, exists bool) {
+	v := m.background
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBackground returns the old "background" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldBackground(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBackground is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBackground requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBackground: %w", err)
+	}
+	return oldValue.Background, nil
+}
+
+// ClearBackground clears the value of the "background" field.
+func (m *UserMutation) ClearBackground() {
+	m.background = nil
+	m.clearedFields[user.FieldBackground] = struct{}{}
+}
+
+// BackgroundCleared returns if the "background" field was cleared in this mutation.
+func (m *UserMutation) BackgroundCleared() bool {
+	_, ok := m.clearedFields[user.FieldBackground]
+	return ok
+}
+
+// ResetBackground resets all changes to the "background" field.
+func (m *UserMutation) ResetBackground() {
+	m.background = nil
+	delete(m.clearedFields, user.FieldBackground)
+}
+
 // SetBio sets the "bio" field.
 func (m *UserMutation) SetBio(s string) {
 	m.bio = &s
@@ -53259,6 +53310,42 @@ func (m *UserMutation) OldOnlyGamesWithResources(ctx context.Context) (v bool, e
 // ResetOnlyGamesWithResources resets all changes to the "only_games_with_resources" field.
 func (m *UserMutation) ResetOnlyGamesWithResources() {
 	m.only_games_with_resources = nil
+}
+
+// SetShowProfileBackgrounds sets the "show_profile_backgrounds" field.
+func (m *UserMutation) SetShowProfileBackgrounds(b bool) {
+	m.show_profile_backgrounds = &b
+}
+
+// ShowProfileBackgrounds returns the value of the "show_profile_backgrounds" field in the mutation.
+func (m *UserMutation) ShowProfileBackgrounds() (r bool, exists bool) {
+	v := m.show_profile_backgrounds
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldShowProfileBackgrounds returns the old "show_profile_backgrounds" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldShowProfileBackgrounds(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldShowProfileBackgrounds is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldShowProfileBackgrounds requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldShowProfileBackgrounds: %w", err)
+	}
+	return oldValue.ShowProfileBackgrounds, nil
+}
+
+// ResetShowProfileBackgrounds resets all changes to the "show_profile_backgrounds" field.
+func (m *UserMutation) ResetShowProfileBackgrounds() {
+	m.show_profile_backgrounds = nil
 }
 
 // SetRole sets the "role" field.
@@ -55251,7 +55338,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 19)
+	fields := make([]string, 0, 21)
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
 	}
@@ -55267,6 +55354,9 @@ func (m *UserMutation) Fields() []string {
 	if m.cover != nil {
 		fields = append(fields, user.FieldCover)
 	}
+	if m.background != nil {
+		fields = append(fields, user.FieldBackground)
+	}
 	if m.bio != nil {
 		fields = append(fields, user.FieldBio)
 	}
@@ -55278,6 +55368,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.only_games_with_resources != nil {
 		fields = append(fields, user.FieldOnlyGamesWithResources)
+	}
+	if m.show_profile_backgrounds != nil {
+		fields = append(fields, user.FieldShowProfileBackgrounds)
 	}
 	if m.role != nil {
 		fields = append(fields, user.FieldRole)
@@ -55327,6 +55420,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Avatar()
 	case user.FieldCover:
 		return m.Cover()
+	case user.FieldBackground:
+		return m.Background()
 	case user.FieldBio:
 		return m.Bio()
 	case user.FieldLang:
@@ -55335,6 +55430,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.ContentLimit()
 	case user.FieldOnlyGamesWithResources:
 		return m.OnlyGamesWithResources()
+	case user.FieldShowProfileBackgrounds:
+		return m.ShowProfileBackgrounds()
 	case user.FieldRole:
 		return m.Role()
 	case user.FieldStatus:
@@ -55374,6 +55471,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldAvatar(ctx)
 	case user.FieldCover:
 		return m.OldCover(ctx)
+	case user.FieldBackground:
+		return m.OldBackground(ctx)
 	case user.FieldBio:
 		return m.OldBio(ctx)
 	case user.FieldLang:
@@ -55382,6 +55481,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldContentLimit(ctx)
 	case user.FieldOnlyGamesWithResources:
 		return m.OldOnlyGamesWithResources(ctx)
+	case user.FieldShowProfileBackgrounds:
+		return m.OldShowProfileBackgrounds(ctx)
 	case user.FieldRole:
 		return m.OldRole(ctx)
 	case user.FieldStatus:
@@ -55446,6 +55547,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCover(v)
 		return nil
+	case user.FieldBackground:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBackground(v)
+		return nil
 	case user.FieldBio:
 		v, ok := value.(string)
 		if !ok {
@@ -55473,6 +55581,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetOnlyGamesWithResources(v)
+		return nil
+	case user.FieldShowProfileBackgrounds:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetShowProfileBackgrounds(v)
 		return nil
 	case user.FieldRole:
 		v, ok := value.(int)
@@ -55634,6 +55749,9 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldCover) {
 		fields = append(fields, user.FieldCover)
 	}
+	if m.FieldCleared(user.FieldBackground) {
+		fields = append(fields, user.FieldBackground)
+	}
 	if m.FieldCleared(user.FieldBio) {
 		fields = append(fields, user.FieldBio)
 	}
@@ -55668,6 +55786,9 @@ func (m *UserMutation) ClearField(name string) error {
 		return nil
 	case user.FieldCover:
 		m.ClearCover()
+		return nil
+	case user.FieldBackground:
+		m.ClearBackground()
 		return nil
 	case user.FieldBio:
 		m.ClearBio()
@@ -55704,6 +55825,9 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldCover:
 		m.ResetCover()
 		return nil
+	case user.FieldBackground:
+		m.ResetBackground()
+		return nil
 	case user.FieldBio:
 		m.ResetBio()
 		return nil
@@ -55715,6 +55839,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldOnlyGamesWithResources:
 		m.ResetOnlyGamesWithResources()
+		return nil
+	case user.FieldShowProfileBackgrounds:
+		m.ResetShowProfileBackgrounds()
 		return nil
 	case user.FieldRole:
 		m.ResetRole()

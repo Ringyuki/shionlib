@@ -25,7 +25,7 @@ httpapi.Register(api, httpapi.Route{
 - Input structs are named `<action><Thing>Input` and live in `request*.go`.
 - Path, query, header and cookie params are fields with `path:`, `query:`, `header:`, `cookie:` tags. Body is a `Body` field.
 - Optional body fields are pointers with `json:",omitempty"`; required fields have no `omitempty`.
-- Validate shape with Huma tags: `minLength`, `maxLength`, `minimum`, `maximum`, `enum`, `pattern`, `format`. Unknown body properties are rejected.
+- Validate shape with Huma tags: `minLength`, `maxLength`, `minimum`, `maximum`, `enum`, `pattern`, `format`. Unknown body properties are rejected. A text field that may be sent empty says so with `minLength:"0"` (the bio): the web client reads a required text field without it as one that needs content.
 - Pagination: embed `httpapi.PageQuery` (`page` ≥ 1, `pageSize` 1..50, defaults 1/10). Endpoints with other limits declare their own fields.
 
 ## Outputs

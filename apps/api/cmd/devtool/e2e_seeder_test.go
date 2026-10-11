@@ -93,6 +93,10 @@ func TestE2EPrepareReproducesTheLegacyDatasetIdempotently(t *testing.T) {
 	if ok, err := hasher.Verify(*admin.Password, e2eDefaultPassword); err != nil || !ok {
 		t.Fatalf("seeded password verifies: %v %v", ok, err)
 	}
+	decorated := db.Ent.User.Query().Where(user.Name("e2e_mutable_user")).OnlyX(ctx)
+	if decorated.Background == nil || *decorated.Background != e2eProfileBackground || admin.Background != nil {
+		t.Fatalf("one profile has a page background: %+v", decorated)
+	}
 	listAll := db.Ent.User.Query().Where(user.Name("e2e_list_all_user")).OnlyX(ctx)
 	if listAll.OnlyGamesWithResources || listAll.ContentLimit != 3 {
 		t.Fatalf("list-all user sees every game: %+v", listAll)

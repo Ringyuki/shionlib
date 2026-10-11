@@ -262,7 +262,7 @@ func (r *MemoryRepository) entry(c comment.Comment, viewerID int) comment.Entry 
 	}
 	if c.ParentID != nil {
 		if parent, ok := r.comments[*c.ParentID]; ok {
-			entry.Parent = &comment.ParentRef{ID: parent.ID, Text: parent.Text, Creator: r.summary(parent.CreatorID)}
+			entry.Parent = &comment.ParentRef{ID: parent.ID, Text: parent.Text, Content: parent.Content, Creator: r.summary(parent.CreatorID)}
 		}
 	}
 	return entry

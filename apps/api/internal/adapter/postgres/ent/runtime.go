@@ -1184,39 +1184,43 @@ func init() {
 	// user.PasswordValidator is a validator for the "password" field. It is called by the builders before save.
 	user.PasswordValidator = userDescPassword.Validators[0].(func(string) error)
 	// userDescContentLimit is the schema descriptor for content_limit field.
-	userDescContentLimit := userFields[8].Descriptor()
+	userDescContentLimit := userFields[9].Descriptor()
 	// user.DefaultContentLimit holds the default value on creation for the content_limit field.
 	user.DefaultContentLimit = userDescContentLimit.Default.(int)
 	// userDescOnlyGamesWithResources is the schema descriptor for only_games_with_resources field.
-	userDescOnlyGamesWithResources := userFields[9].Descriptor()
+	userDescOnlyGamesWithResources := userFields[10].Descriptor()
 	// user.DefaultOnlyGamesWithResources holds the default value on creation for the only_games_with_resources field.
 	user.DefaultOnlyGamesWithResources = userDescOnlyGamesWithResources.Default.(bool)
+	// userDescShowProfileBackgrounds is the schema descriptor for show_profile_backgrounds field.
+	userDescShowProfileBackgrounds := userFields[11].Descriptor()
+	// user.DefaultShowProfileBackgrounds holds the default value on creation for the show_profile_backgrounds field.
+	user.DefaultShowProfileBackgrounds = userDescShowProfileBackgrounds.Default.(bool)
 	// userDescRole is the schema descriptor for role field.
-	userDescRole := userFields[10].Descriptor()
+	userDescRole := userFields[12].Descriptor()
 	// user.DefaultRole holds the default value on creation for the role field.
 	user.DefaultRole = userDescRole.Default.(int)
 	// userDescStatus is the schema descriptor for status field.
-	userDescStatus := userFields[11].Descriptor()
+	userDescStatus := userFields[13].Descriptor()
 	// user.DefaultStatus holds the default value on creation for the status field.
 	user.DefaultStatus = userDescStatus.Default.(int)
 	// userDescUploadInjectedFileTimes is the schema descriptor for upload_injected_file_times field.
-	userDescUploadInjectedFileTimes := userFields[12].Descriptor()
+	userDescUploadInjectedFileTimes := userFields[14].Descriptor()
 	// user.DefaultUploadInjectedFileTimes holds the default value on creation for the upload_injected_file_times field.
 	user.DefaultUploadInjectedFileTimes = userDescUploadInjectedFileTimes.Default.(int)
 	// userDescTwoFactorEnabled is the schema descriptor for two_factor_enabled field.
-	userDescTwoFactorEnabled := userFields[15].Descriptor()
+	userDescTwoFactorEnabled := userFields[17].Descriptor()
 	// user.DefaultTwoFactorEnabled holds the default value on creation for the two_factor_enabled field.
 	user.DefaultTwoFactorEnabled = userDescTwoFactorEnabled.Default.(bool)
 	// userDescUploadTrusted is the schema descriptor for upload_trusted field.
-	userDescUploadTrusted := userFields[16].Descriptor()
+	userDescUploadTrusted := userFields[18].Descriptor()
 	// user.DefaultUploadTrusted holds the default value on creation for the upload_trusted field.
 	user.DefaultUploadTrusted = userDescUploadTrusted.Default.(bool)
 	// userDescCreated is the schema descriptor for created field.
-	userDescCreated := userFields[18].Descriptor()
+	userDescCreated := userFields[20].Descriptor()
 	// user.DefaultCreated holds the default value on creation for the created field.
 	user.DefaultCreated = userDescCreated.Default.(func() time.Time)
 	// userDescUpdated is the schema descriptor for updated field.
-	userDescUpdated := userFields[19].Descriptor()
+	userDescUpdated := userFields[21].Descriptor()
 	// user.DefaultUpdated holds the default value on creation for the updated field.
 	user.DefaultUpdated = userDescUpdated.Default.(func() time.Time)
 	// user.UpdateDefaultUpdated holds the default value on update for the updated field.

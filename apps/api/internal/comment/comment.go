@@ -43,6 +43,7 @@ type Comment struct {
 type ParentRef struct {
 	ID      int
 	Text    string
+	Content json.RawMessage
 	Creator user.Summary
 }
 

@@ -124,6 +124,10 @@ func (s *Service) UpdateOnlyGamesWithResources(ctx context.Context, who actor.Ac
 	return s.repo.Update(ctx, who.UserID, Changes{OnlyGamesWithResources: &enabled})
 }
 
+func (s *Service) UpdateShowProfileBackgrounds(ctx context.Context, who actor.Actor, enabled bool) error {
+	return s.repo.Update(ctx, who.UserID, Changes{ShowProfileBackgrounds: &enabled})
+}
+
 func (s *Service) RequestEmailChangeCode(ctx context.Context, who actor.Actor) (string, error) {
 	current, err := s.repo.Get(ctx, who.UserID)
 	if err != nil {
@@ -196,6 +200,18 @@ func (s *Service) UpdateAvatar(ctx context.Context, who actor.Actor, upload *med
 
 func (s *Service) UpdateCover(ctx context.Context, who actor.Actor, upload *media.Upload) (string, error) {
 	return s.updateImage(ctx, who, upload, s.images.StoreCover, func(key string) Changes { return Changes{Cover: &key} })
+}
+
+func (s *Service) RemoveCover(ctx context.Context, who actor.Actor) error {
+	return s.repo.Update(ctx, who.UserID, Changes{ClearCover: true})
+}
+
+func (s *Service) UpdateBackground(ctx context.Context, who actor.Actor, upload *media.Upload) (string, error) {
+	return s.updateImage(ctx, who, upload, s.images.StoreBackground, func(key string) Changes { return Changes{Background: &key} })
+}
+
+func (s *Service) RemoveBackground(ctx context.Context, who actor.Actor) error {
+	return s.repo.Update(ctx, who.UserID, Changes{ClearBackground: true})
 }
 
 func (s *Service) updateImage(ctx context.Context, who actor.Actor, upload *media.Upload, store func(context.Context, int, *media.Upload) (string, error), changes func(string) Changes) (string, error) {

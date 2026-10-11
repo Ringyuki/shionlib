@@ -77,10 +77,12 @@ type User struct {
 	PasswordHash           *string
 	Avatar                 *string
 	Cover                  *string
+	Background             *string
 	Bio                    *string
 	Lang                   Lang
 	ContentLimit           actor.ContentLimit
 	OnlyGamesWithResources bool
+	ShowProfileBackgrounds bool
 	Role                   actor.Role
 	Status                 Status
 	EmailVerifiedAt        *time.Time
@@ -116,10 +118,14 @@ type Changes struct {
 	PasswordHash           *string
 	Avatar                 *string
 	Cover                  *string
+	ClearCover             bool
+	Background             *string
+	ClearBackground        bool
 	Bio                    *string
 	Lang                   *Lang
 	ContentLimit           *actor.ContentLimit
 	OnlyGamesWithResources *bool
+	ShowProfileBackgrounds *bool
 	Status                 *Status
 	EmailVerifiedAt        *time.Time
 	LastLoginAt            *time.Time

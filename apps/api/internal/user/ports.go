@@ -44,6 +44,7 @@ type PasswordHasher interface {
 type Images interface {
 	StoreAvatar(ctx context.Context, userID int, upload *media.Upload) (string, error)
 	StoreCover(ctx context.Context, userID int, upload *media.Upload) (string, error)
+	StoreBackground(ctx context.Context, userID int, upload *media.Upload) (string, error)
 }
 
 type Transactor interface {

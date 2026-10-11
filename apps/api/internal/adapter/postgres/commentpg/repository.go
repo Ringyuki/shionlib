@@ -348,7 +348,7 @@ func (r *Repository) ListThreads(ctx context.Context, gameID, viewerID int, orde
 	if order == comment.OrderOldest {
 		direction = ent.Asc
 	}
-	roots, threads, err := r.list(ctx, inGame.Clone().Where(startsThread()), viewerID, page, direction(entcomment.FieldCreated), direction(entcomment.FieldID))
+	roots, threads, err := r.list(ctx, inGame.Clone().Where(startsThread()), withThread, viewerID, page, direction(entcomment.FieldCreated), direction(entcomment.FieldID))
 	if err != nil {
 		return nil, comment.ThreadTotals{}, err
 	}
@@ -414,16 +414,16 @@ func (r *Repository) ListByCreator(ctx context.Context, filter comment.CreatorFi
 	if filter.ExcludeRated {
 		query.Where(entcomment.HasGameWith(gamepg.SafeForStrictViewers()))
 	}
-	return r.list(ctx, query, filter.ViewerID, page, ent.Desc(entcomment.FieldCreated), ent.Desc(entcomment.FieldID))
+	return r.list(ctx, query, withQuotedParent, filter.ViewerID, page, ent.Desc(entcomment.FieldCreated), ent.Desc(entcomment.FieldID))
 }
 
-func (r *Repository) list(ctx context.Context, query *ent.CommentQuery, viewerID int, page comment.Page, order ...entcomment.OrderOption) ([]comment.Entry, int, error) {
+func (r *Repository) list(ctx context.Context, query *ent.CommentQuery, related func(*ent.CommentQuery) *ent.CommentQuery, viewerID int, page comment.Page, order ...entcomment.OrderOption) ([]comment.Entry, int, error) {
 	total, err := query.Clone().Count(ctx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("count comments: %w", err)
 	}
 	query.Select(threadFields...)
-	rows, err := withThread(query).
+	rows, err := related(query).
 		Order(order...).
 		Offset(page.Offset()).
 		Limit(page.Size).
@@ -439,10 +439,18 @@ func (r *Repository) list(ctx context.Context, query *ent.CommentQuery, viewerID
 }
 
 func withThread(query *ent.CommentQuery) *ent.CommentQuery {
+	return withParent(query, entcomment.FieldID, entcomment.FieldText, entcomment.FieldCreatorID)
+}
+
+func withQuotedParent(query *ent.CommentQuery) *ent.CommentQuery {
+	return withParent(query, entcomment.FieldID, entcomment.FieldText, entcomment.FieldContent, entcomment.FieldCreatorID)
+}
+
+func withParent(query *ent.CommentQuery, fields ...string) *ent.CommentQuery {
 	return query.
 		WithCreator(userpg.SelectSummary).
 		WithParent(func(q *ent.CommentQuery) {
-			q.Select(entcomment.FieldID, entcomment.FieldText, entcomment.FieldCreatorID).WithCreator(userpg.SelectSummary)
+			q.Select(fields...).WithCreator(userpg.SelectSummary)
 		})
 }
 
@@ -540,5 +548,5 @@ func parentRef(row *ent.Comment) *comment.ParentRef {
 	if row == nil {
 		return nil
 	}
-	return &comment.ParentRef{ID: row.ID, Text: row.Text, Creator: userpg.ToSummary(row.Edges.Creator)}
+	return &comment.ParentRef{ID: row.ID, Text: row.Text, Content: row.Content, Creator: userpg.ToSummary(row.Edges.Creator)}
 }

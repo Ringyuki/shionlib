@@ -193,6 +193,7 @@ func (r *MemoryRepository) Create(_ context.Context, in user.NewUser) (user.User
 		Lang:                   in.Lang,
 		ContentLimit:           in.ContentLimit,
 		OnlyGamesWithResources: true,
+		ShowProfileBackgrounds: true,
 		Role:                   actor.RoleUser,
 		Status:                 user.StatusActive,
 		EmailVerifiedAt:        in.EmailVerifiedAt,
@@ -235,10 +236,18 @@ func apply(u *user.User, c user.Changes) {
 	setPtr(&u.PasswordHash, c.PasswordHash)
 	setPtr(&u.Avatar, c.Avatar)
 	setPtr(&u.Cover, c.Cover)
+	if c.ClearCover {
+		u.Cover = nil
+	}
+	setPtr(&u.Background, c.Background)
+	if c.ClearBackground {
+		u.Background = nil
+	}
 	setPtr(&u.Bio, c.Bio)
 	set(&u.Lang, c.Lang)
 	set(&u.ContentLimit, c.ContentLimit)
 	set(&u.OnlyGamesWithResources, c.OnlyGamesWithResources)
+	set(&u.ShowProfileBackgrounds, c.ShowProfileBackgrounds)
 	set(&u.Status, c.Status)
 	setPtr(&u.EmailVerifiedAt, c.EmailVerifiedAt)
 	set(&u.TwoFactorEnabled, c.TwoFactorEnabled)

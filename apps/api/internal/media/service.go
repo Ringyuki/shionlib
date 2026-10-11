@@ -28,6 +28,10 @@ func (s *Service) StoreCover(ctx context.Context, userID int, file *Upload) (str
 	return s.save(ctx, cover(userID), file)
 }
 
+func (s *Service) StoreBackground(ctx context.Context, userID int, file *Upload) (string, error) {
+	return s.save(ctx, background(userID), file)
+}
+
 func (s *Service) StoreAdImage(ctx context.Context, uploaderID int, file *Upload) (string, error) {
 	return s.save(ctx, adImage(uploaderID), file)
 }

@@ -133,12 +133,12 @@ func TestMeProfileAndNameCheck(t *testing.T) {
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/user/me"}), http.StatusUnauthorized, 200101)
 	me := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/user/me", As: as(alice)})
 	e.server.Expect(me, http.StatusOK, 0)
-	if string(me.Data) != `{"id":1,"name":"alice","email":"alice@example.test","avatar":null,"cover":null,"bio":null,"role":1,"lang":"en","content_limit":1,"only_games_with_resources":false,"sponsor_expires_at":"2026-10-03T02:02:03.000Z","is_sponsor":true}` {
+	if string(me.Data) != `{"id":1,"name":"alice","email":"alice@example.test","avatar":null,"cover":null,"background":null,"bio":null,"role":1,"lang":"en","content_limit":1,"only_games_with_resources":false,"show_profile_backgrounds":false,"sponsor_expires_at":"2026-10-03T02:02:03.000Z","is_sponsor":true}` {
 		t.Fatalf("unexpected me %s", me.Data)
 	}
 	profile := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/user/1"})
 	e.server.Expect(profile, http.StatusOK, 0)
-	if string(profile.Data) != `{"id":1,"name":"alice","avatar":null,"role":1,"bio":null,"cover":null,"created":"2026-10-03T01:02:03.000Z","status":1,"is_banned":false,"is_admin":false,"sponsor_expires_at":"2026-10-03T02:02:03.000Z","is_sponsor":true,"resource_count":1,"comment_count":2,"favorite_count":3,"edit_count":4,"walkthrough_count":5}` {
+	if string(profile.Data) != `{"id":1,"name":"alice","avatar":null,"role":1,"bio":null,"cover":null,"background":null,"created":"2026-10-03T01:02:03.000Z","status":1,"is_banned":false,"is_admin":false,"sponsor_expires_at":"2026-10-03T02:02:03.000Z","is_sponsor":true,"resource_count":1,"comment_count":2,"favorite_count":3,"edit_count":4,"walkthrough_count":5}` {
 		t.Fatalf("unexpected profile %s", profile.Data)
 	}
 	moderator := e.users.Seed(user.User{Name: "moderator", Role: actor.RoleAdmin, Status: user.StatusBanned})
@@ -205,8 +205,11 @@ func TestProfileSettings(t *testing.T) {
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/content-limit", As: who, Body: map[string]any{"content_limit": 3}}), http.StatusCreated, 0)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/only-games-with-resources", As: who, Body: map[string]any{"only_games_with_resources": "yes"}}), http.StatusUnprocessableEntity, 100101)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/only-games-with-resources", As: who, Body: map[string]any{"only_games_with_resources": true}}), http.StatusCreated, 0)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/profile-backgrounds", Body: map[string]any{"show_profile_backgrounds": true}}), http.StatusUnauthorized, 200101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/profile-backgrounds", As: who, Body: map[string]any{}}), http.StatusUnprocessableEntity, 100101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/profile-backgrounds", As: who, Body: map[string]any{"show_profile_backgrounds": true}}), http.StatusCreated, 0)
 	got := e.users.User(alice.ID)
-	if got.Lang != user.LangZH || got.ContentLimit != actor.ContentLimitJustShow || !got.OnlyGamesWithResources || got.Name != "carol" {
+	if got.Lang != user.LangZH || got.ContentLimit != actor.ContentLimitJustShow || !got.OnlyGamesWithResources || !got.ShowProfileBackgrounds || got.Name != "carol" {
 		t.Fatalf("settings not stored %+v", got)
 	}
 
@@ -279,7 +282,39 @@ func TestImageUploads(t *testing.T) {
 	if string(cover.Data) != `{"key":"user/1/cover/uuid.webp"}` {
 		t.Fatalf("unexpected cover %s", cover.Data)
 	}
+	body, contentType = upload(t, "background", "image/gif", 10)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/background", As: as(alice), Body: body, Header: map[string]string{"Content-Type": contentType}}), http.StatusUnsupportedMediaType, 490103)
+	body, contentType = upload(t, "background", "image/png", 10)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/background", Body: body, Header: map[string]string{"Content-Type": contentType}}), http.StatusUnauthorized, 200101)
+	background := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/user/info/background", As: as(alice), Body: body, Header: map[string]string{"Content-Type": contentType}})
+	e.server.Expect(background, http.StatusCreated, 0)
+	if string(background.Data) != `{"key":"user/1/background/uuid.webp"}` || *e.users.User(alice.ID).Background != "user/1/background/uuid.webp" {
+		t.Fatalf("unexpected background %s", background.Data)
+	}
+	var shown struct {
+		Background *string `json:"background"`
+	}
+	e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/user/1"}).Decode(t, &shown)
+	if shown.Background == nil || *shown.Background != "user/1/background/uuid.webp" {
+		t.Fatalf("a profile carries the background: %+v", shown)
+	}
+}
 
+func TestPicturesAreRemoved(t *testing.T) {
+	e := setup(t)
+	cover, background, avatar := "user/1/cover/a.webp", "user/1/background/b.webp", "user/1/avatar/c.webp"
+	alice := e.users.Seed(user.User{Name: "alice", Cover: &cover, Background: &background, Avatar: &avatar})
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodDelete, Path: "/user/info/cover"}), http.StatusUnauthorized, 200101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodDelete, Path: "/user/info/background"}), http.StatusUnauthorized, 200101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodDelete, Path: "/user/info/cover", As: as(alice)}), http.StatusOK, 0)
+	if got := e.users.User(alice.ID); got.Cover != nil || got.Background == nil || got.Avatar == nil {
+		t.Fatalf("only the cover is removed: %+v", got)
+	}
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodDelete, Path: "/user/info/background", As: as(alice)}), http.StatusOK, 0)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodDelete, Path: "/user/info/background", As: as(alice)}), http.StatusOK, 0)
+	if got := e.users.User(alice.ID); got.Background != nil || got.Avatar == nil {
+		t.Fatalf("only the background is removed: %+v", got)
+	}
 }
 
 func TestEditRecords(t *testing.T) {

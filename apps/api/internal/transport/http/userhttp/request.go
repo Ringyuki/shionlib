@@ -51,9 +51,15 @@ type coverUploadInput struct {
 	}]
 }
 
+type backgroundUploadInput struct {
+	RawBody huma.MultipartFormFiles[struct {
+		Background huma.FormFile `form:"background" required:"false"`
+	}]
+}
+
 type updateBioInput struct {
 	Body struct {
-		Bio string `json:"bio" maxLength:"500"`
+		Bio string `json:"bio" minLength:"0" maxLength:"500"`
 	}
 }
 
@@ -95,6 +101,12 @@ type updateContentLimitInput struct {
 type updateOnlyGamesWithResourcesInput struct {
 	Body struct {
 		OnlyGamesWithResources bool `json:"only_games_with_resources"`
+	}
+}
+
+type updateShowProfileBackgroundsInput struct {
+	Body struct {
+		ShowProfileBackgrounds bool `json:"show_profile_backgrounds"`
 	}
 }
 

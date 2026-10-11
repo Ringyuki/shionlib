@@ -219,6 +219,12 @@ func TestListByUserShape(t *testing.T) {
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected user comments\n got %s\nwant %s", resp.Data, want)
 	}
+	answered := e.repo.Seed(comment.Comment{GameID: 10, CreatorID: 2, Text: "asked", Content: json.RawMessage(`{"type":"doc","content":[{"type":"paragraph"}]}`), Status: comment.StatusVisible})
+	e.repo.Seed(comment.Comment{GameID: 10, CreatorID: 1, Text: "answer", ParentID: &answered.ID, RootID: &answered.ID, Status: comment.StatusVisible})
+	replies := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/user/datas/1/comments?pageSize=1", As: &alice})
+	if !strings.Contains(string(replies.Data), `"parent":{"id":`+strconv.Itoa(answered.ID)+`,"content":{"type":"doc","content":[{"type":"paragraph"}]},"text":"asked","creator":`+bobPublic+`}`) {
+		t.Fatalf("a reply carries the document of the comment it answers: %s", replies.Data)
+	}
 	other := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/user/datas/1/comments", As: &bob})
 	if !strings.Contains(string(other.Data), `"is_current_user":false`) || !strings.Contains(string(other.Data), `"url":"b.webp"`) {
 		t.Fatalf("rated viewers see every cover and are not the owner: %s", other.Data)

@@ -80,6 +80,11 @@ func Cover(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldCover, v))
 }
 
+// Background applies equality check predicate on the "background" field. It's identical to BackgroundEQ.
+func Background(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldBackground, v))
+}
+
 // Bio applies equality check predicate on the "bio" field. It's identical to BioEQ.
 func Bio(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldBio, v))
@@ -93,6 +98,11 @@ func ContentLimit(v int) predicate.User {
 // OnlyGamesWithResources applies equality check predicate on the "only_games_with_resources" field. It's identical to OnlyGamesWithResourcesEQ.
 func OnlyGamesWithResources(v bool) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldOnlyGamesWithResources, v))
+}
+
+// ShowProfileBackgrounds applies equality check predicate on the "show_profile_backgrounds" field. It's identical to ShowProfileBackgroundsEQ.
+func ShowProfileBackgrounds(v bool) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldShowProfileBackgrounds, v))
 }
 
 // Role applies equality check predicate on the "role" field. It's identical to RoleEQ.
@@ -500,6 +510,81 @@ func CoverContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldCover, v))
 }
 
+// BackgroundEQ applies the EQ predicate on the "background" field.
+func BackgroundEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldBackground, v))
+}
+
+// BackgroundNEQ applies the NEQ predicate on the "background" field.
+func BackgroundNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldBackground, v))
+}
+
+// BackgroundIn applies the In predicate on the "background" field.
+func BackgroundIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldBackground, vs...))
+}
+
+// BackgroundNotIn applies the NotIn predicate on the "background" field.
+func BackgroundNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldBackground, vs...))
+}
+
+// BackgroundGT applies the GT predicate on the "background" field.
+func BackgroundGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldBackground, v))
+}
+
+// BackgroundGTE applies the GTE predicate on the "background" field.
+func BackgroundGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldBackground, v))
+}
+
+// BackgroundLT applies the LT predicate on the "background" field.
+func BackgroundLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldBackground, v))
+}
+
+// BackgroundLTE applies the LTE predicate on the "background" field.
+func BackgroundLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldBackground, v))
+}
+
+// BackgroundContains applies the Contains predicate on the "background" field.
+func BackgroundContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldBackground, v))
+}
+
+// BackgroundHasPrefix applies the HasPrefix predicate on the "background" field.
+func BackgroundHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldBackground, v))
+}
+
+// BackgroundHasSuffix applies the HasSuffix predicate on the "background" field.
+func BackgroundHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldBackground, v))
+}
+
+// BackgroundIsNil applies the IsNil predicate on the "background" field.
+func BackgroundIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldBackground))
+}
+
+// BackgroundNotNil applies the NotNil predicate on the "background" field.
+func BackgroundNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldBackground))
+}
+
+// BackgroundEqualFold applies the EqualFold predicate on the "background" field.
+func BackgroundEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldBackground, v))
+}
+
+// BackgroundContainsFold applies the ContainsFold predicate on the "background" field.
+func BackgroundContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldBackground, v))
+}
+
 // BioEQ applies the EQ predicate on the "bio" field.
 func BioEQ(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldBio, v))
@@ -643,6 +728,16 @@ func OnlyGamesWithResourcesEQ(v bool) predicate.User {
 // OnlyGamesWithResourcesNEQ applies the NEQ predicate on the "only_games_with_resources" field.
 func OnlyGamesWithResourcesNEQ(v bool) predicate.User {
 	return predicate.User(sql.FieldNEQ(FieldOnlyGamesWithResources, v))
+}
+
+// ShowProfileBackgroundsEQ applies the EQ predicate on the "show_profile_backgrounds" field.
+func ShowProfileBackgroundsEQ(v bool) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldShowProfileBackgrounds, v))
+}
+
+// ShowProfileBackgroundsNEQ applies the NEQ predicate on the "show_profile_backgrounds" field.
+func ShowProfileBackgroundsNEQ(v bool) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldShowProfileBackgrounds, v))
 }
 
 // RoleEQ applies the EQ predicate on the "role" field.

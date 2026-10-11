@@ -139,6 +139,26 @@ func (_u *UserUpdate) ClearCover() *UserUpdate {
 	return _u
 }
 
+// SetBackground sets the "background" field.
+func (_u *UserUpdate) SetBackground(v string) *UserUpdate {
+	_u.mutation.SetBackground(v)
+	return _u
+}
+
+// SetNillableBackground sets the "background" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableBackground(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetBackground(*v)
+	}
+	return _u
+}
+
+// ClearBackground clears the value of the "background" field.
+func (_u *UserUpdate) ClearBackground() *UserUpdate {
+	_u.mutation.ClearBackground()
+	return _u
+}
+
 // SetBio sets the "bio" field.
 func (_u *UserUpdate) SetBio(v string) *UserUpdate {
 	_u.mutation.SetBio(v)
@@ -204,6 +224,20 @@ func (_u *UserUpdate) SetOnlyGamesWithResources(v bool) *UserUpdate {
 func (_u *UserUpdate) SetNillableOnlyGamesWithResources(v *bool) *UserUpdate {
 	if v != nil {
 		_u.SetOnlyGamesWithResources(*v)
+	}
+	return _u
+}
+
+// SetShowProfileBackgrounds sets the "show_profile_backgrounds" field.
+func (_u *UserUpdate) SetShowProfileBackgrounds(v bool) *UserUpdate {
+	_u.mutation.SetShowProfileBackgrounds(v)
+	return _u
+}
+
+// SetNillableShowProfileBackgrounds sets the "show_profile_backgrounds" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableShowProfileBackgrounds(v *bool) *UserUpdate {
+	if v != nil {
+		_u.SetShowProfileBackgrounds(*v)
 	}
 	return _u
 }
@@ -1470,6 +1504,12 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.CoverCleared() {
 		_spec.ClearField(user.FieldCover, field.TypeString)
 	}
+	if value, ok := _u.mutation.Background(); ok {
+		_spec.SetField(user.FieldBackground, field.TypeString, value)
+	}
+	if _u.mutation.BackgroundCleared() {
+		_spec.ClearField(user.FieldBackground, field.TypeString)
+	}
 	if value, ok := _u.mutation.Bio(); ok {
 		_spec.SetField(user.FieldBio, field.TypeString, value)
 	}
@@ -1487,6 +1527,9 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.OnlyGamesWithResources(); ok {
 		_spec.SetField(user.FieldOnlyGamesWithResources, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.ShowProfileBackgrounds(); ok {
+		_spec.SetField(user.FieldShowProfileBackgrounds, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Role(); ok {
 		_spec.SetField(user.FieldRole, field.TypeInt, value)
@@ -2887,6 +2930,26 @@ func (_u *UserUpdateOne) ClearCover() *UserUpdateOne {
 	return _u
 }
 
+// SetBackground sets the "background" field.
+func (_u *UserUpdateOne) SetBackground(v string) *UserUpdateOne {
+	_u.mutation.SetBackground(v)
+	return _u
+}
+
+// SetNillableBackground sets the "background" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableBackground(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetBackground(*v)
+	}
+	return _u
+}
+
+// ClearBackground clears the value of the "background" field.
+func (_u *UserUpdateOne) ClearBackground() *UserUpdateOne {
+	_u.mutation.ClearBackground()
+	return _u
+}
+
 // SetBio sets the "bio" field.
 func (_u *UserUpdateOne) SetBio(v string) *UserUpdateOne {
 	_u.mutation.SetBio(v)
@@ -2952,6 +3015,20 @@ func (_u *UserUpdateOne) SetOnlyGamesWithResources(v bool) *UserUpdateOne {
 func (_u *UserUpdateOne) SetNillableOnlyGamesWithResources(v *bool) *UserUpdateOne {
 	if v != nil {
 		_u.SetOnlyGamesWithResources(*v)
+	}
+	return _u
+}
+
+// SetShowProfileBackgrounds sets the "show_profile_backgrounds" field.
+func (_u *UserUpdateOne) SetShowProfileBackgrounds(v bool) *UserUpdateOne {
+	_u.mutation.SetShowProfileBackgrounds(v)
+	return _u
+}
+
+// SetNillableShowProfileBackgrounds sets the "show_profile_backgrounds" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableShowProfileBackgrounds(v *bool) *UserUpdateOne {
+	if v != nil {
+		_u.SetShowProfileBackgrounds(*v)
 	}
 	return _u
 }
@@ -4248,6 +4325,12 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	if _u.mutation.CoverCleared() {
 		_spec.ClearField(user.FieldCover, field.TypeString)
 	}
+	if value, ok := _u.mutation.Background(); ok {
+		_spec.SetField(user.FieldBackground, field.TypeString, value)
+	}
+	if _u.mutation.BackgroundCleared() {
+		_spec.ClearField(user.FieldBackground, field.TypeString)
+	}
 	if value, ok := _u.mutation.Bio(); ok {
 		_spec.SetField(user.FieldBio, field.TypeString, value)
 	}
@@ -4265,6 +4348,9 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.OnlyGamesWithResources(); ok {
 		_spec.SetField(user.FieldOnlyGamesWithResources, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.ShowProfileBackgrounds(); ok {
+		_spec.SetField(user.FieldShowProfileBackgrounds, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Role(); ok {
 		_spec.SetField(user.FieldRole, field.TypeInt, value)

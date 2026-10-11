@@ -74,6 +74,16 @@ func cover(userID int) kind {
 	}
 }
 
+func background(userID int) kind {
+	owner := strconv.Itoa(userID)
+	return kind{
+		maxBytes: ProfileImageMaxBytes,
+		bounds:   Bounds{MaxWidth: 2560},
+		key:      func(id string) string { return "user/" + owner + "/background/" + id },
+		metadata: map[string]string{"user_id": owner},
+	}
+}
+
 func adImage(uploaderID int) kind {
 	return kind{
 		maxBytes: AdImageMaxBytes,

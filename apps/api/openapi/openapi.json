@@ -17226,6 +17226,7 @@
         "properties": {
           "bio": {
             "maxLength": 500,
+            "minLength": 0,
             "type": "string"
           }
         },
@@ -17372,6 +17373,18 @@
         "required": [
           "password",
           "old_password"
+        ],
+        "type": "object"
+      },
+      "UpdateShowProfileBackgroundsInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "show_profile_backgrounds": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "show_profile_backgrounds"
         ],
         "type": "object"
       },
@@ -17571,7 +17584,7 @@
           "parent": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/CommentParentDTO"
+                "$ref": "#/components/schemas/UserCommentParentDTO"
               },
               {
                 "type": "null"
@@ -17680,10 +17693,41 @@
         ],
         "type": "object"
       },
+      "UserCommentParentDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "$ref": "#/components/schemas/RichTextDocument"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/UserSummaryDTO"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "content",
+          "text",
+          "creator"
+        ],
+        "type": "object"
+      },
       "UserMeDTO": {
         "additionalProperties": false,
         "properties": {
           "avatar": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "background": {
             "type": [
               "string",
               "null"
@@ -17728,6 +17772,9 @@
             "format": "int64",
             "type": "integer"
           },
+          "show_profile_backgrounds": {
+            "type": "boolean"
+          },
           "sponsor_expires_at": {
             "format": "date-time",
             "type": [
@@ -17742,11 +17789,13 @@
           "email",
           "avatar",
           "cover",
+          "background",
           "bio",
           "role",
           "lang",
           "content_limit",
           "only_games_with_resources",
+          "show_profile_backgrounds",
           "sponsor_expires_at",
           "is_sponsor"
         ],
@@ -17780,6 +17829,12 @@
         "additionalProperties": false,
         "properties": {
           "avatar": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "background": {
             "type": [
               "string",
               "null"
@@ -17861,6 +17916,7 @@
           "role",
           "bio",
           "cover",
+          "background",
           "created",
           "status",
           "is_banned",
@@ -32140,6 +32196,118 @@
         ]
       }
     },
+    "/user/info/background": {
+      "delete": {
+        "operationId": "user.info.removeBackground",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Remove the profile background",
+        "tags": [
+          "user"
+        ]
+      },
+      "post": {
+        "operationId": "user.info.background",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "background": {
+                  "contentType": "application/octet-stream"
+                }
+              },
+              "schema": {
+                "properties": {
+                  "background": {
+                    "contentEncoding": "binary",
+                    "contentMediaType": "application/octet-stream",
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeUploadedImageDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Upload a profile background",
+        "tags": [
+          "user"
+        ]
+      }
+    },
     "/user/info/bio": {
       "post": {
         "operationId": "user.info.bio",
@@ -32253,6 +32421,50 @@
       }
     },
     "/user/info/cover": {
+      "delete": {
+        "operationId": "user.info.removeCover",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Remove the profile cover",
+        "tags": [
+          "user"
+        ]
+      },
       "post": {
         "operationId": "user.info.cover",
         "requestBody": {
@@ -32641,6 +32853,62 @@
           }
         ],
         "summary": "Change the password",
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/user/info/profile-backgrounds": {
+      "post": {
+        "operationId": "user.info.showProfileBackgrounds",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateShowProfileBackgroundsInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Show or hide the backgrounds of other users' profiles",
         "tags": [
           "user"
         ]

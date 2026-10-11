@@ -96,6 +96,14 @@ func (i *fakeImages) StoreCover(_ context.Context, userID int, upload *media.Upl
 	return "user/" + strconv.Itoa(userID) + "/cover/x.webp", nil
 }
 
+func (i *fakeImages) StoreBackground(_ context.Context, userID int, upload *media.Upload) (string, error) {
+	if err := media.Validate(upload, media.ProfileImageMaxBytes); err != nil {
+		return "", err
+	}
+	i.stored = append(i.stored, "background")
+	return "user/" + strconv.Itoa(userID) + "/background/x.webp", nil
+}
+
 type fixture struct {
 	clock    time.Time
 	repo     *usertest.MemoryRepository
@@ -242,9 +250,15 @@ func TestProfileUpdates(t *testing.T) {
 	if err := f.service.UpdateOnlyGamesWithResources(ctx, who(alice), false); err != nil {
 		t.Fatal(err)
 	}
+	if err := f.service.UpdateShowProfileBackgrounds(ctx, who(alice), true); err != nil {
+		t.Fatal(err)
+	}
 	got := f.repo.User(alice.ID)
-	if got.Name != "carol" || got.ContentLimit != actor.ContentLimitJustShow || got.Bio == nil || *got.Bio != "" || got.OnlyGamesWithResources {
+	if got.Name != "carol" || got.ContentLimit != actor.ContentLimitJustShow || got.Bio == nil || *got.Bio != "" || got.OnlyGamesWithResources || !got.ShowProfileBackgrounds {
 		t.Fatalf("unexpected user %+v", got)
+	}
+	if err := f.service.UpdateShowProfileBackgrounds(ctx, who(alice), false); err != nil || f.repo.User(alice.ID).ShowProfileBackgrounds {
+		t.Fatalf("hiding backgrounds: %v", err)
 	}
 	if err := f.service.UpdateBio(ctx, actor.Actor{UserID: 999}, "x"); !errors.Is(err, user.ErrNotFound) {
 		t.Fatalf("missing user: %v", err)
@@ -274,6 +288,42 @@ func TestImagesUpdateTheProfile(t *testing.T) {
 	}
 	if len(f.images.stored) != 2 {
 		t.Fatalf("missing users must not upload: %v", f.images.stored)
+	}
+}
+
+func TestTheCoverAndTheBackgroundCanBeRemoved(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture(true)
+	alice := f.repo.Seed(user.User{Name: "alice"})
+	picture := &media.Upload{ContentType: "image/webp", Data: []byte{1}}
+	if _, err := f.service.UpdateBackground(ctx, who(alice), nil); !errors.Is(err, upload.ErrSmallFileMissing) {
+		t.Fatalf("missing file: %v", err)
+	}
+	key, err := f.service.UpdateBackground(ctx, who(alice), picture)
+	if err != nil || key != "user/1/background/x.webp" || f.repo.User(alice.ID).Background == nil || *f.repo.User(alice.ID).Background != key {
+		t.Fatalf("background: %s %v", key, err)
+	}
+	if _, err := f.service.UpdateCover(ctx, who(alice), picture); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.service.RemoveBackground(ctx, who(alice)); err != nil {
+		t.Fatal(err)
+	}
+	if got := f.repo.User(alice.ID); got.Background != nil || got.Cover == nil {
+		t.Fatalf("removing the background must leave the cover: %+v", got)
+	}
+	if err := f.service.RemoveCover(ctx, who(alice)); err != nil || f.repo.User(alice.ID).Cover != nil {
+		t.Fatalf("removing the cover: %v", err)
+	}
+	if err := f.service.RemoveCover(ctx, who(alice)); err != nil {
+		t.Fatalf("removing a cover that is not there: %v", err)
+	}
+	missing := actor.Actor{UserID: 999}
+	if _, err := f.service.UpdateBackground(ctx, missing, picture); !errors.Is(err, user.ErrNotFound) {
+		t.Fatalf("background of a missing user: %v", err)
+	}
+	if err := f.service.RemoveBackground(ctx, missing); !errors.Is(err, user.ErrNotFound) {
+		t.Fatalf("removing from a missing user: %v", err)
 	}
 }
 

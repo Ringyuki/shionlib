@@ -29,11 +29,13 @@ type userMeDTO struct {
 	Email                  string     `json:"email"`
 	Avatar                 *string    `json:"avatar"`
 	Cover                  *string    `json:"cover"`
+	Background             *string    `json:"background"`
 	Bio                    *string    `json:"bio"`
 	Role                   int        `json:"role"`
 	Lang                   string     `json:"lang"`
 	ContentLimit           int        `json:"content_limit"`
 	OnlyGamesWithResources bool       `json:"only_games_with_resources"`
+	ShowProfileBackgrounds bool       `json:"show_profile_backgrounds"`
 	SponsorExpiresAt       *time.Time `json:"sponsor_expires_at"`
 	IsSponsor              bool       `json:"is_sponsor"`
 }
@@ -45,6 +47,7 @@ type userProfileDTO struct {
 	Role             int        `json:"role"`
 	Bio              *string    `json:"bio"`
 	Cover            *string    `json:"cover"`
+	Background       *string    `json:"background"`
 	Created          time.Time  `json:"created"`
 	Status           int        `json:"status"`
 	IsBanned         bool       `json:"is_banned"`
@@ -130,11 +133,13 @@ func toMeDTO(u user.User, now time.Time) userMeDTO {
 		Email:                  u.Email,
 		Avatar:                 u.Avatar,
 		Cover:                  u.Cover,
+		Background:             u.Background,
 		Bio:                    u.Bio,
 		Role:                   int(u.Role),
 		Lang:                   string(u.Lang),
 		ContentLimit:           int(u.ContentLimit),
 		OnlyGamesWithResources: u.OnlyGamesWithResources,
+		ShowProfileBackgrounds: u.ShowProfileBackgrounds,
 		SponsorExpiresAt:       u.SponsorExpiresAt,
 		IsSponsor:              u.IsSponsor(now),
 	}
@@ -148,6 +153,7 @@ func toProfileDTO(p user.Profile, now time.Time) userProfileDTO {
 		Role:             int(p.Role),
 		Bio:              p.Bio,
 		Cover:            p.Cover,
+		Background:       p.Background,
 		Created:          p.Created,
 		Status:           int(p.Status),
 		IsBanned:         p.Banned(),

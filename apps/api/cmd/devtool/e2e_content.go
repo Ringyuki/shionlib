@@ -27,12 +27,15 @@ type e2eSeedUser struct {
 	Role                   int
 	ContentLimit           int
 	OnlyGamesWithResources bool
+	Background             *string
 }
+
+var e2eProfileBackground = "user/e2e/background/seeded.webp"
 
 var e2eSeedUsers = []e2eSeedUser{
 	{Name: "e2e_admin", Email: "e2e_admin@shionlib.local", Role: 3, ContentLimit: 3, OnlyGamesWithResources: true},
 	{Name: "e2e_user", Email: "e2e_user@shionlib.local", Role: 1, ContentLimit: 2, OnlyGamesWithResources: true},
-	{Name: "e2e_mutable_user", Email: "e2e_mutable_user@shionlib.local", Role: 1, ContentLimit: 2, OnlyGamesWithResources: true},
+	{Name: "e2e_mutable_user", Email: "e2e_mutable_user@shionlib.local", Role: 1, ContentLimit: 2, OnlyGamesWithResources: true, Background: &e2eProfileBackground},
 	{Name: "e2e_permission_user", Email: "e2e_permission_user@shionlib.local", Role: 1, ContentLimit: 2, OnlyGamesWithResources: true},
 	{Name: "e2e_relation_user", Email: "e2e_relation_user@shionlib.local", Role: 1, ContentLimit: 2, OnlyGamesWithResources: true},
 	{Name: "e2e_admin_ops_user", Email: "e2e_admin_ops_user@shionlib.local", Role: 1, ContentLimit: 2, OnlyGamesWithResources: true},

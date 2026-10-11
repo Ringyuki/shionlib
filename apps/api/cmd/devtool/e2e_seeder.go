@@ -264,6 +264,7 @@ func (s *e2eSeeder) seedUsers(ctx context.Context, tx *ent.Client, passwordHash 
 			SetLang(user.LangEn).
 			SetContentLimit(seed.ContentLimit).
 			SetOnlyGamesWithResources(seed.OnlyGamesWithResources).
+			SetNillableBackground(seed.Background).
 			Save(ctx)
 		if err != nil {
 			return nil, nil, fmt.Errorf("create user %s: %w", seed.Name, err)

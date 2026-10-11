@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
@@ -13,6 +14,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/userpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/comment"
+	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user/usertest"
 )
@@ -81,6 +83,43 @@ func TestStatsCountWhatTheViewerIsListed(t *testing.T) {
 		{"a visitor is counted what is public", user.StatsScope{}, user.Stats{Comments: 2, Walkthroughs: 2}},
 		{"a strict visitor is not counted what belongs to a rated game", user.StatsScope{ExcludeRated: true}, user.Stats{Comments: 1, Walkthroughs: 1}},
 		{"the user is counted their drafts and hidden walkthroughs too", user.StatsScope{Own: true}, user.Stats{Comments: 2, Walkthroughs: 4}},
+	}
+	for _, c := range cases {
+		stats, err := repo.Stats(ctx, owner, c.scope)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if stats != c.want {
+			t.Fatalf("%s: %+v", c.name, stats)
+		}
+	}
+}
+
+func TestStatsCountTheUploadsAndFavoritesTheViewerIsListed(t *testing.T) {
+	ctx := context.Background()
+	db := pgtest.New(t)
+	repo := userpg.NewRepository(db.Ent)
+	owner := db.User(t)
+	game := db.Game(t)
+	rated := db.Game(t, func(c *ent.GameCreate) { c.SetNsfw(true) })
+	published := time.Now()
+	db.Ent.GameDownloadResource.Create().SetGameID(game).SetCreatorID(owner).SetPublishedAt(published).SaveX(ctx)
+	db.Ent.GameDownloadResource.Create().SetGameID(rated).SetCreatorID(owner).SetPublishedAt(published).SaveX(ctx)
+	db.Ent.GameDownloadResource.Create().SetGameID(game).SetCreatorID(owner).SaveX(ctx)
+	db.Ent.GameDownloadResource.Create().SetGameID(game).SetCreatorID(owner).SetPublishedAt(published).SetStatus(download.ResourceRemoved).SaveX(ctx)
+	shown := db.Ent.Favorite.Create().SetUserID(owner).SetName("shown").SaveX(ctx)
+	kept := db.Ent.Favorite.Create().SetUserID(owner).SetName("kept").SetIsPrivate(true).SaveX(ctx)
+	db.Ent.FavoriteItem.Create().SetFavoriteID(shown.ID).SetGameID(game).ExecX(ctx)
+	db.Ent.FavoriteItem.Create().SetFavoriteID(kept.ID).SetGameID(game).ExecX(ctx)
+	db.Ent.FavoriteItem.Create().SetFavoriteID(kept.ID).SetGameID(rated).ExecX(ctx)
+	cases := []struct {
+		name  string
+		scope user.StatsScope
+		want  user.Stats
+	}{
+		{"a visitor is counted the published uploads and the public lists", user.StatsScope{}, user.Stats{Resources: 2, FavoriteItems: 1}},
+		{"a strict visitor is not counted the uploads of a rated game", user.StatsScope{ExcludeRated: true}, user.Stats{Resources: 1, FavoriteItems: 1}},
+		{"the user is counted their unpublished uploads too, and still only their public lists", user.StatsScope{Own: true}, user.Stats{Resources: 3, FavoriteItems: 1}},
 	}
 	for _, c := range cases {
 		stats, err := repo.Stats(ctx, owner, c.scope)

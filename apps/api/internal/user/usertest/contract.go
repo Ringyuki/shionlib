@@ -120,6 +120,42 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if err := env.Repo.Update(ctx, 987654, user.Changes{Bio: &bio}); !errors.Is(err, user.ErrNotFound) {
 			t.Fatalf("update missing: %v", err)
 		}
+	})
+
+	t.Run("pictures are set and cleared one by one and backgrounds show by default", func(t *testing.T) {
+		env := newEnv(t)
+		created, err := env.Repo.Create(ctx, user.NewUser{Name: "pic", Email: "pic@example.test", Lang: user.LangEN, ContentLimit: actor.ContentLimitNeverShow})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if created.Background != nil || !created.ShowProfileBackgrounds {
+			t.Fatalf("unexpected defaults %+v", created)
+		}
+		cover, background, hidden := "user/1/cover/c.webp", "user/1/background/b.webp", false
+		if err := env.Repo.Update(ctx, created.ID, user.Changes{Cover: &cover, Background: &background, ShowProfileBackgrounds: &hidden}); err != nil {
+			t.Fatal(err)
+		}
+		got, _ := env.Repo.Get(ctx, created.ID)
+		if got.Cover == nil || *got.Cover != cover || got.Background == nil || *got.Background != background || got.ShowProfileBackgrounds {
+			t.Fatalf("unexpected user after pictures %+v", got)
+		}
+		if err := env.Repo.Update(ctx, created.ID, user.Changes{ClearBackground: true}); err != nil {
+			t.Fatal(err)
+		}
+		got, _ = env.Repo.Get(ctx, created.ID)
+		if got.Background != nil || got.Cover == nil {
+			t.Fatalf("clearing the background must leave the cover %+v", got)
+		}
+		if err := env.Repo.Update(ctx, created.ID, user.Changes{ClearCover: true}); err != nil {
+			t.Fatal(err)
+		}
+		got, _ = env.Repo.Get(ctx, created.ID)
+		if got.Cover != nil || got.ShowProfileBackgrounds {
+			t.Fatalf("clearing the cover must leave the rest %+v", got)
+		}
+		if err := env.Repo.Update(ctx, 987654, user.Changes{ClearCover: true}); !errors.Is(err, user.ErrNotFound) {
+			t.Fatalf("clear on a missing user: %v", err)
+		}
 		if _, err := env.Repo.Get(ctx, 987654); !errors.Is(err, user.ErrNotFound) {
 			t.Fatalf("get missing: %v", err)
 		}
