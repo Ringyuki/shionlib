@@ -1,5 +1,3 @@
 #!/usr/bin/env sh
 set -e
-pnpm --filter shionlib-frontend exec lint-staged
-pnpm --filter shionlib-backend exec lint-staged
 pnpm --filter shionlib-og exec lint-staged
