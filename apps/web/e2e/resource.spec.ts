@@ -30,7 +30,7 @@ test.describe('as the uploader', () => {
   test.use({ storageState: sessionFile('owner') })
 
   test('edits the note with the BBCode editor and previews it', async ({ page }) => {
-    await openAction(page, '编辑')
+    await openAction(page, '编辑资源')
     const dialog = page.getByRole('dialog', { name: '编辑资源' })
     const note = dialog.getByRole('textbox', { name: '说明' })
     await note.fill('Edited by E2E')

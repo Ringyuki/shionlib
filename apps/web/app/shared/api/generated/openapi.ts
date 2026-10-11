@@ -1702,6 +1702,24 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/comment/resource/{resource_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the comment threads of a download resource, the pinned one first */
+        get: operations["comment.listByResource"];
+        put?: never;
+        /** Comment on a download resource */
+        post: operations["comment.createOnResource"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/comment/{comment_id}": {
         parameters: {
             query?: never;
@@ -1732,6 +1750,24 @@ export type paths = {
         /** Toggle a like on a comment */
         post: operations["comment.like"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comment/{comment_id}/pin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Pin a comment on a download resource, replacing the pinned one */
+        put: operations["comment.pin"];
+        post?: never;
+        /** Unpin a comment on a download resource */
+        delete: operations["comment.unpin"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2056,7 +2092,8 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Show a download resource with its game and files */
+        get: operations["download.detail"];
         put?: never;
         post?: never;
         /** Delete a download resource and its stored objects */
@@ -2065,6 +2102,23 @@ export type paths = {
         head?: never;
         /** Edit a download resource */
         patch: operations["download.edit"];
+        trace?: never;
+    };
+    "/game/download-source/{id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List what changed on a download resource since it was published, newest first */
+        get: operations["download.events"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/game/download-source/{id}/files": {
@@ -4695,7 +4749,7 @@ export type components = {
          * Format: int64
          * @enum {integer}
          */
-        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 450101 | 450102 | 450103 | 450104 | 450105 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 610101 | 610102 | 620101 | 620102 | 620103 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102;
+        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 450101 | 450102 | 450103 | 450104 | 450105 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 610101 | 610102 | 620101 | 620102 | 620103 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102;
         CatalogHitDTO: {
             cover: string | null;
             developer: string | null;
@@ -4858,6 +4912,8 @@ export type components = {
             parent: components["schemas"]["CommentItemParentDTO"];
             /** Format: int64 */
             parent_id: number | null;
+            /** @description The publisher of the resource pinned this comment; it leads the list whatever the order. Always false for comments on a game. */
+            pinned: boolean;
             /** Format: int64 */
             reply_count: number;
             /** Format: int64 */
@@ -4901,6 +4957,8 @@ export type components = {
             parent: components["schemas"]["CommentItemParentDTO"];
             /** Format: int64 */
             parent_id: number | null;
+            /** @description The publisher of the resource pinned this comment; it leads the list whatever the order. Always false for comments on a game. */
+            pinned: boolean;
             /** @description Visible replies of the thread, oldest first, replies to replies included */
             replies: components["schemas"]["CommentItemDTO"][] | null;
             /** Format: int64 */
@@ -4920,7 +4978,7 @@ export type components = {
         CommentThreadPageMetaDTO: {
             /**
              * Format: int64
-             * @description Visible comments of the game, replies included
+             * @description Visible comments of the game or of the resource, replies included
              */
             comments: number;
             /** Format: int64 */
@@ -4929,6 +4987,11 @@ export type components = {
             itemCount: number;
             /** Format: int64 */
             itemsPerPage: number;
+            /**
+             * Format: int64
+             * @description The pinned comment of the resource, whichever page it is on and whether or not the viewer sees it; null when there is none, and always for a game
+             */
+            pinned: number | null;
             /** Format: int64 */
             totalItems: number;
             /** Format: int64 */
@@ -4969,6 +5032,11 @@ export type components = {
             detail?: string;
             /** @enum {string} */
             reason: "MALWARE" | "IRRELEVANT" | "BROKEN_LINK" | "MISLEADING_CONTENT" | "OTHER";
+        };
+        CreateResourceCommentInputBody: {
+            content: components["schemas"]["RichTextDocument"];
+            /** Format: int64 */
+            parent_id?: number;
         };
         CreateSponsorOrderInputBody: {
             /**
@@ -5044,6 +5112,52 @@ export type components = {
             /** Format: int64 */
             works_count: number;
         };
+        DownloadEventChangeDTO: {
+            /** @enum {string} */
+            field: "platforms" | "languages" | "simulator" | "note";
+            /** @description Values after the edit; empty when the field was cleared */
+            new: string[] | null;
+            /** @description Values before the edit; empty when the field was unset */
+            old: string[] | null;
+        };
+        DownloadEventDTO: {
+            /** @description Who did it; null when the account no longer exists */
+            actor: components["schemas"]["UserSummaryDTO"] | null;
+            /** @description Fields changed by an edit */
+            changes: components["schemas"]["DownloadEventChangeDTO"][] | null;
+            /** Format: date-time */
+            created: string;
+            /** @description Files the resource was published with, or the file added or removed */
+            files: components["schemas"]["DownloadEventFileDTO"][] | null;
+            /** Format: int64 */
+            id: number;
+            /**
+             * @description What happened: the resource was published, a file was replaced, renamed, added or removed, the resource's fields were edited, or an admin cleared a file flagged by the malware scan
+             * @enum {string}
+             */
+            kind: "published" | "file_replaced" | "file_renamed" | "file_added" | "file_removed" | "edited" | "review_cleared";
+            /** @description The file replaced or cleared, or the new name of a renamed file */
+            name: string | null;
+            /**
+             * Format: int64
+             * @description Size of a replaced file after the change
+             */
+            new_size: number | null;
+            /** @description Name of a renamed file before the change */
+            old_name: string | null;
+            /**
+             * Format: int64
+             * @description Size of a replaced file before the change
+             */
+            old_size: number | null;
+            /** @description Reason given for replacing a file */
+            reason: string | null;
+        };
+        DownloadEventFileDTO: {
+            name: string;
+            /** Format: int64 */
+            size: number;
+        };
         DownloadFileDTO: {
             creator: components["schemas"]["UserSummaryDTO"];
             file_hash: string;
@@ -5073,6 +5187,11 @@ export type components = {
             stage: "checking" | "storing" | "stored" | "under_review" | "rejected";
             /** Format: int64 */
             type: number;
+            /**
+             * Format: date-time
+             * @description When the content the file holds now was uploaded: its latest replacement, or its first upload
+             */
+            uploaded: string;
         };
         DownloadFileUploadInput: {
             /** @description Shown name; defaults to the uploaded file's name */
@@ -5213,6 +5332,11 @@ export type components = {
             id: number;
         };
         DownloadResourceDTO: {
+            /**
+             * Format: int64
+             * @description Visible comments made on the resource, replies included
+             */
+            comments: number;
             /** Format: date-time */
             created: string;
             creator: components["schemas"]["UserSummaryDTO"];
@@ -5232,6 +5356,10 @@ export type components = {
             simulator: string | null;
             /** Format: date-time */
             updated: string;
+        };
+        DownloadResourceDetailDTO: {
+            game: components["schemas"]["GameCardDTO"];
+            resource: components["schemas"]["DownloadResourceDTO"];
         };
         DownloadReuploadDTO: {
             ok: boolean;
@@ -5789,6 +5917,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeDownloadResourceDetailDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["DownloadResourceDetailDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeDownloadReuploadDTO: {
             /** Format: int64 */
             code: number;
@@ -6024,6 +6162,16 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["AiSceneDTO"][] | null;
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeListDownloadEventDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["DownloadEventDTO"][] | null;
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -7193,6 +7341,11 @@ export type components = {
             content: components["schemas"]["RichTextDocument"];
             /** Format: int64 */
             id: number;
+            /**
+             * Format: int64
+             * @description The download resource the comment was made on; null for a comment on the game itself
+             */
+            resource_id: number | null;
             text: string;
         };
         MessageDetailDTO: {
@@ -7990,6 +8143,8 @@ export type components = {
             parent_id: number | null;
             /** Format: int64 */
             reply_count: number;
+            /** @description The download resource the comment was made on; null for a comment on the game itself */
+            resource: components["schemas"]["UserCommentResourceDTO"] | null;
             /** Format: int64 */
             root_id: number | null;
             text: string;
@@ -8019,6 +8174,14 @@ export type components = {
             /** Format: int64 */
             id: number;
             text: string;
+        };
+        UserCommentResourceDTO: {
+            /** @description Name of the first file of the resource */
+            file_name: string;
+            /** Format: int64 */
+            files_count: number;
+            /** Format: int64 */
+            id: number;
         };
         UserMeDTO: {
             avatar: string | null;
@@ -12277,6 +12440,83 @@ export interface operations {
             };
         };
     };
+    "comment.listByResource": {
+        parameters: {
+            query?: {
+                /** @description 1-based page number */
+                page?: number;
+                /** @description Items per page */
+                pageSize?: number;
+                /** @description Order of the threads after the pinned one; the replies of a thread are always oldest first */
+                order?: "newest" | "oldest";
+                /** @description A comment of this resource: the page that holds its thread is answered instead of the requested one; ignored when the viewer cannot see the comment */
+                focus?: number;
+            };
+            header?: never;
+            path: {
+                resource_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeCommentThreadPageDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "comment.createOnResource": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                resource_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateResourceCommentInputBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeCommentCreatedDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     "comment.delete": {
         parameters: {
             query?: never;
@@ -12358,6 +12598,70 @@ export interface operations {
         responses: {
             /** @description Created */
             201: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "comment.pin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                comment_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "comment.unpin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                comment_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
                 headers: {
                     "shionlib-auth-stale"?: string;
                     [name: string]: unknown;
@@ -13203,6 +13507,38 @@ export interface operations {
             };
         };
     };
+    "download.detail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeDownloadResourceDetailDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     "download.delete": {
         parameters: {
             query?: never;
@@ -13258,6 +13594,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EmptyEnvelope"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "download.events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeListDownloadEventDTO"];
                 };
             };
             /** @description Error */

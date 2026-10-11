@@ -23,22 +23,32 @@ import { EditComment } from './edit-comment'
 type CommentEntryProps = {
   comment: CommentItem
   own: boolean
+  publisher: boolean
+  canPin?: boolean
+  canUnpin?: boolean
   answered?: string
   nested?: boolean
   replying: boolean
   onReply: (comment: CommentItem) => void
   onRemove: (comment: CommentItem) => void
+  onPin?: (comment: CommentItem) => void
+  onUnpin?: (comment: CommentItem) => void
   children?: ReactNode
 }
 
 export const CommentEntry = memo(function CommentEntry({
   comment,
   own,
+  publisher,
+  canPin = false,
+  canUnpin = false,
   answered,
   nested = false,
   replying,
   onReply,
   onRemove,
+  onPin,
+  onUnpin,
   children,
 }: CommentEntryProps) {
   const t = useTranslations('comment')
@@ -80,6 +90,11 @@ export const CommentEntry = memo(function CommentEntry({
             <Link asChild tone="neutral" className="font-medium">
               <RouterLink to={profile}>{creator.name}</RouterLink>
             </Link>
+            {publisher && (
+              <Tag size="sm" tone="accent">
+                {t('publisher')}
+              </Tag>
+            )}
             <Text size="sm" tone="faint">
               <Time value={comment.created} format="relative" />
             </Text>
@@ -113,10 +128,13 @@ export const CommentEntry = memo(function CommentEntry({
               <CommentActions
                 comment={comment}
                 own={own}
+                pinning={{ pin: canPin, unpin: canUnpin }}
                 replying={replying}
                 onReply={() => onReply(comment)}
                 onRemove={() => onRemove(comment)}
                 onEdit={() => setEditing(true)}
+                onPin={() => onPin?.(comment)}
+                onUnpin={() => onUnpin?.(comment)}
               />
             </>
           )}

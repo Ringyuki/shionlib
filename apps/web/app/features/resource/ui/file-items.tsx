@@ -45,18 +45,18 @@ export function FilesItems({ files, onPick }: FilesItemsProps) {
   if (sole === undefined) {
     return null
   }
+  if (files.length === 1) {
+    return <FileItems file={sole} removable={false} named onPick={dialog => onPick(sole, dialog)} />
+  }
   return (
     <>
       <DropdownMenuSeparator />
-      {files.length === 1 ? (
-        <FileItems file={sole} removable={false} named onPick={dialog => onPick(sole, dialog)} />
-      ) : (
-        files.map(file => (
-          <DropdownMenuSub key={file.id} label={file.file_name} icon={<FileArchive />}>
-            <FileItems file={file} removable onPick={dialog => onPick(file, dialog)} />
-          </DropdownMenuSub>
-        ))
-      )}
+      {files.map(file => (
+        <DropdownMenuSub key={file.id} label={file.file_name} icon={<FileArchive />}>
+          <FileItems file={file} removable onPick={dialog => onPick(file, dialog)} />
+        </DropdownMenuSub>
+      ))}
+      <DropdownMenuSeparator />
     </>
   )
 }

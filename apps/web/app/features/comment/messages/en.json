@@ -40,5 +40,15 @@
   "userComment": "Comment on {game}",
   "userReply": "Reply to {name} on {game}",
   "replyCount": "{count, plural, one {# reply} other {# replies}}",
-  "likes": "{count, plural, one {# like} other {# likes}}"
+  "likes": "{count, plural, one {# like} other {# likes}}",
+  "pin": "Pin",
+  "unpin": "Unpin",
+  "pinned": "Comment pinned",
+  "unpinned": "Comment unpinned",
+  "pinnedBy": "Pinned by the publisher",
+  "publisher": "Publisher",
+  "replacePin": "Replace the pinned comment?",
+  "replacePinDescription": "The comment pinned now will be unpinned",
+  "userResourceComment": "Comment on {file}, a resource of {game}",
+  "userResourceReply": "Reply to {name} on {file}, a resource of {game}"
 }

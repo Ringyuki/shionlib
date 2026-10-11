@@ -1,21 +1,21 @@
 import { Avatar, cn, Inline, toast, useImageResolver } from '@hina-ui/react'
 import { useTranslations } from 'use-intl'
-import type { CommentItem, Writer } from '../comment'
+import type { CommentItem, CommentPlace, Writer } from '../comment'
 import { useCommentPost } from '../use-comment-post'
 import { CommentComposer } from './comment-composer'
 
 type NewCommentProps = {
-  gameId: number
+  place: CommentPlace
   writer: Writer
   parent?: Pick<CommentItem, 'id' | 'creator'>
   autoFocus?: boolean
   onDone?: () => void
 }
 
-export function NewComment({ gameId, writer, parent, autoFocus = false, onDone }: NewCommentProps) {
+export function NewComment({ place, writer, parent, autoFocus = false, onDone }: NewCommentProps) {
   const t = useTranslations('comment')
   const resolveImage = useImageResolver()
-  const comment = useCommentPost(gameId, parent?.id)
+  const comment = useCommentPost(place, parent?.id)
   const answering = parent !== undefined
   return (
     <Inline gap="md" align="start" wrap={false} className={answering ? 'gap-2.5' : undefined}>

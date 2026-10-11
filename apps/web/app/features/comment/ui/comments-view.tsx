@@ -14,17 +14,20 @@ import {
   type Writer,
 } from '../comment'
 import { threadOrderFrom } from '../comment.schema'
+import { usePinning } from '../use-pinning'
 import { CommentThread } from './comment-thread'
 import { GuestComment } from './guest-comment'
 import { NewComment } from './new-comment'
 import { RemoveCommentDialog } from './remove-comment-dialog'
+import { ReplacePinDialog } from './replace-pin-dialog'
 
 type CommentsViewProps = {
   comments: Comments
   writer: Writer | undefined
+  publisherId?: number
 }
 
-export function CommentsView({ comments, writer }: CommentsViewProps) {
+export function CommentsView({ comments, writer, publisherId }: CommentsViewProps) {
   const t = useTranslations('comment')
   const pages = usePageTurn()
   const [invited, setInvited] = useState(false)
@@ -36,13 +39,14 @@ export function CommentsView({ comments, writer }: CommentsViewProps) {
     setRemoving(true)
   }, [])
   const location = useLocation()
-  const { gameId, threads, total, page, order } = comments
+  const { place, threads, total, page, order } = comments
+  const pinning = usePinning(comments.pinned)
   return (
     <Stack as="section" gap="xl">
       {writer === undefined ? (
         <GuestComment onSignedIn={() => setInvited(true)} />
       ) : (
-        <NewComment gameId={gameId} writer={writer} autoFocus={invited} />
+        <NewComment place={place} writer={writer} autoFocus={invited} />
       )}
       <DataList
         label={t('list')}
@@ -77,10 +81,23 @@ export function CommentsView({ comments, writer }: CommentsViewProps) {
         renderEmpty={() => <Empty title={t('empty')} />}
       >
         {({ item }) => (
-          <CommentThread gameId={gameId} thread={item} writer={writer} onRemove={ask} />
+          <CommentThread
+            place={place}
+            publisherId={publisherId}
+            thread={item}
+            writer={writer}
+            onRemove={ask}
+            onPin={pinning.pin}
+            onUnpin={pinning.unpin}
+          />
         )}
       </DataList>
       <RemoveCommentDialog comment={removed} open={removing} onOpenChange={setRemoving} />
+      <ReplacePinDialog
+        open={pinning.asking}
+        onOpenChange={pinning.setAsking}
+        onConfirm={pinning.replace}
+      />
     </Stack>
   )
 }

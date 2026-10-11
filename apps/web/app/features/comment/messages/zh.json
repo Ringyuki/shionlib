@@ -40,5 +40,15 @@
   "userComment": "评论《{game}》",
   "userReply": "在《{game}》回复 {name}",
   "replyCount": "{count, number} 条回复",
-  "likes": "{count, number} 个赞"
+  "likes": "{count, number} 个赞",
+  "pin": "置顶",
+  "unpin": "取消置顶",
+  "pinned": "评论已置顶",
+  "unpinned": "已取消置顶",
+  "pinnedBy": "发布者置顶",
+  "publisher": "发布者",
+  "replacePin": "确定要更换置顶评论吗？",
+  "replacePinDescription": "当前置顶的评论将取消置顶",
+  "userResourceComment": "评论《{game}》的资源 {file}",
+  "userResourceReply": "在《{game}》的资源 {file} 下回复 {name}"
 }

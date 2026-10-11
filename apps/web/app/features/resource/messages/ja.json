@@ -4,6 +4,7 @@
   "filter": "プラットフォームで絞り込む",
   "all": "すべて",
   "downloads": "{count, number} 回ダウンロード",
+  "comments": "コメント {count, number} 件",
   "files": "ファイル",
   "hash": "{algorithm}：{hash}",
   "copyHash": "チェックサムをコピー",
@@ -32,7 +33,7 @@
   },
   "history": "履歴",
   "report": "報告",
-  "edit": "編集",
+  "edit": "リソースを編集",
   "addFiles": "ファイルを追加",
   "addFilesDescription": "アップロードが終わると、このリソースに追加されます",
   "replaceFile": "ファイルを差し替え",
@@ -48,6 +49,7 @@
   "removeFileDescription": "ファイルはこのリソースから削除され、元に戻せません",
   "fileRemoved": "ファイルを削除しました",
   "delete": "削除",
+  "deleteResource": "リソースを削除",
   "deleteConfirm": "このリソースを削除しますか？",
   "deleteDescription": "ファイルも削除され、元に戻せません",
   "deleted": "リソースを削除しました",
@@ -124,5 +126,48 @@
     "empty": "{file} は空のファイルのため、アップロードできません",
     "tooLarge": "{file} は {size} あります。1 ファイルは {limit} までです",
     "overQuota": "選んだファイルは合計 {total} ですが、残りは {left} です"
+  },
+  "page": {
+    "uploaded": "{date} にアップロード",
+    "published": "{date} に公開",
+    "tabs": {
+      "label": "リソース",
+      "contents": "内容",
+      "details": "詳細情報",
+      "history": "変更履歴",
+      "comments": "コメント"
+    },
+    "contents": {
+      "pending": "このファイルの内容はまだ読み取られていません",
+      "pendingHint": "以前にアップロードされたファイルを順に処理しています"
+    },
+    "details": {
+      "file": "ファイル",
+      "name": "ファイル名",
+      "size": "サイズ",
+      "bytes": "{size}（{bytes, number} バイト）",
+      "uploaded": "アップロード日時"
+    },
+    "history": {
+      "label": "変更履歴",
+      "empty": "変更履歴はまだありません",
+      "someone": "退会したユーザー",
+      "none": "なし",
+      "did": {
+        "published": "<actor></actor> がリソースを公開しました",
+        "file_replaced": "<actor></actor> がファイルを差し替えました",
+        "file_renamed": "<actor></actor> がファイル名を変更しました",
+        "file_added": "<actor></actor> がファイルを追加しました",
+        "file_removed": "<actor></actor> がファイルを削除しました",
+        "edited": "<actor></actor> がリソース情報を編集しました",
+        "review_cleared": "<actor></actor> が審査のうえファイルを公開しました"
+      },
+      "field": {
+        "platforms": "プラットフォーム",
+        "languages": "言語",
+        "simulator": "エンジン",
+        "note": "説明"
+      }
+    }
   }
 }

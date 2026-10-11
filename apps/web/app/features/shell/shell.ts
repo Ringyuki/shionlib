@@ -16,6 +16,7 @@ export type NavEntry = {
   to: string
   end: boolean
   count: number
+  also: readonly string[]
 }
 
 export type NavSection = {
@@ -29,12 +30,23 @@ export type SidebarMode = (typeof sidebarModes)[number]
 
 export const sidebarCookie = 'shionlib_sidebar'
 
-const entry = (key: NavKey, to: string, end = false, count = 0): NavEntry => ({
+const entry = (
+  key: NavKey,
+  to: string,
+  end = false,
+  count = 0,
+  also: readonly string[] = [],
+): NavEntry => ({
   key,
   to,
   end,
   count,
+  also,
 })
+
+export function alsoWithin(entry: Pick<NavEntry, 'also'>, pathname: string): boolean {
+  return entry.also.some(place => pathname === place || pathname.startsWith(`${place}/`))
+}
 
 export function sitePaths(locale: Locale) {
   return {
@@ -58,7 +70,7 @@ export function navSections(locale: Locale, viewerId: number | null, unread = 0)
     key: 'discover',
     entries: [
       entry('home', paths.home, true),
-      entry('games', paths.games),
+      entry('games', paths.games, false, 0, [`/${locale}/resource`]),
       entry('releases', paths.releases),
       entry('developers', `/${locale}/developer`),
       entry('activity', `/${locale}/activity`),

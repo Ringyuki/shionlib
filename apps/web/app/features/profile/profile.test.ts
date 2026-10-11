@@ -9,6 +9,7 @@ import {
   tabAt,
   uploadPath,
 } from './profile'
+import { resourcePath } from '~/features/resource'
 import { parseOptional } from '~/shared/form/check'
 import { profileEdit, removed } from './profile.schema'
 
@@ -91,8 +92,8 @@ describe('backgroundFor', () => {
 })
 
 describe('uploads', () => {
-  it('leads to the resource on the page of its game', () => {
-    expect(uploadPath('zh', { id: 12, game: { id: 5 } })).toBe('/zh/game/5#resource-12')
+  it('leads to the page of the resource', () => {
+    expect(uploadPath('zh', { id: 12 })).toBe(resourcePath('zh', 12))
   })
 
   it('counts the files beside the one that is named', () => {

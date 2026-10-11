@@ -4,6 +4,7 @@
   "filter": "Filter by platform",
   "all": "All",
   "downloads": "{count, plural, one {# download} other {# downloads}}",
+  "comments": "{count, plural, one {# comment} other {# comments}}",
   "files": "Files",
   "hash": "{algorithm}: {hash}",
   "copyHash": "Copy the full checksum",
@@ -32,7 +33,7 @@
   },
   "history": "History",
   "report": "Report",
-  "edit": "Edit",
+  "edit": "Edit resource",
   "addFiles": "Add files",
   "addFilesDescription": "Once uploaded, these files join this resource",
   "replaceFile": "Replace file",
@@ -48,6 +49,7 @@
   "removeFileDescription": "The file is deleted from this resource and cannot be restored",
   "fileRemoved": "File removed",
   "delete": "Delete",
+  "deleteResource": "Delete resource",
   "deleteConfirm": "Delete this resource?",
   "deleteDescription": "Its files are deleted too. This cannot be undone.",
   "deleted": "Resource deleted",
@@ -124,5 +126,48 @@
     "empty": "{file} is empty and cannot be uploaded",
     "tooLarge": "{file} is {size}, but each file can be up to {limit}",
     "overQuota": "The chosen files add up to {total}, but only {left} is left"
+  },
+  "page": {
+    "uploaded": "Uploaded on {date}",
+    "published": "Published on {date}",
+    "tabs": {
+      "label": "Resource",
+      "contents": "Contents",
+      "details": "Details",
+      "history": "History",
+      "comments": "Comments"
+    },
+    "contents": {
+      "pending": "The contents of this file have not been read yet",
+      "pendingHint": "Files uploaded earlier are being processed one after another"
+    },
+    "details": {
+      "file": "File",
+      "name": "File name",
+      "size": "Size",
+      "bytes": "{size} ({bytes, number} bytes)",
+      "uploaded": "Uploaded"
+    },
+    "history": {
+      "label": "History",
+      "empty": "No changes yet",
+      "someone": "A deleted user",
+      "none": "None",
+      "did": {
+        "published": "<actor></actor> published the resource",
+        "file_replaced": "<actor></actor> replaced a file",
+        "file_renamed": "<actor></actor> renamed a file",
+        "file_added": "<actor></actor> added a file",
+        "file_removed": "<actor></actor> removed a file",
+        "edited": "<actor></actor> edited the resource",
+        "review_cleared": "<actor></actor> cleared a file after review"
+      },
+      "field": {
+        "platforms": "Platforms",
+        "languages": "Languages",
+        "simulator": "Engine",
+        "note": "Note"
+      }
+    }
   }
 }

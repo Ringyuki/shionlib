@@ -1,4 +1,3 @@
-import { gamePath } from '~/features/game'
 import type { Viewer } from '~/features/viewer'
 import type { Schema } from '~/shared/api/types'
 import type { Locale } from '~/shared/i18n/locale'
@@ -79,10 +78,8 @@ export function backgroundFor(
   return declined ? null : profile.background
 }
 
-type Placed = Pick<Upload, 'id'> & { game: Pick<Upload['game'], 'id'> }
-
-export function uploadPath(locale: Locale, upload: Placed): string {
-  return `${gamePath(locale, upload.game.id)}#resource-${upload.id}`
+export function uploadPath(locale: Locale, upload: Pick<Upload, 'id'>): string {
+  return `/${locale}/resource/${upload.id}`
 }
 
 export function otherFiles(upload: Pick<Upload, 'files_count'>): number {

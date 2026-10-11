@@ -19,11 +19,12 @@ type ResourceMenuProps = {
   resource: Resource
   rights: ResourceRights
   files?: readonly ResourceFile[]
+  history?: boolean
 }
 
 type Picked = { file: ResourceFile; dialog: FileDialog | undefined }
 
-export function ResourceMenu({ resource, rights, files = [] }: ResourceMenuProps) {
+export function ResourceMenu({ resource, rights, files = [], history = true }: ResourceMenuProps) {
   const t = useTranslations('resource')
   const gate = useAuthGate()
   const [opened, setOpened] = useState<Opened>(undefined)
@@ -45,14 +46,20 @@ export function ResourceMenu({ resource, rights, files = [] }: ResourceMenuProps
         align="end"
         content={
           <>
-            <DropdownMenuItem icon={<History />} onSelect={() => setOpened('history')}>
-              {t('history')}
-            </DropdownMenuItem>
+            {history && (
+              <DropdownMenuItem icon={<History />} onSelect={() => setOpened('history')}>
+                {t('history')}
+              </DropdownMenuItem>
+            )}
             {rights.manage ? (
               <>
                 <DropdownMenuItem icon={<PencilLine />} onSelect={() => setOpened('edit')}>
                   {t('edit')}
                 </DropdownMenuItem>
+                <FilesItems
+                  files={managed}
+                  onPick={(file, dialog) => setPicked({ file, dialog })}
+                />
                 <DropdownMenuItem icon={<FilePlus />} onSelect={() => setOpened('add')}>
                   {t('addFiles')}
                 </DropdownMenuItem>
@@ -62,7 +69,6 @@ export function ResourceMenu({ resource, rights, files = [] }: ResourceMenuProps
                 {t('report')}
               </DropdownMenuItem>
             )}
-            <FilesItems files={managed} onPick={(file, dialog) => setPicked({ file, dialog })} />
             {rights.remove && (
               <>
                 <DropdownMenuSeparator />
@@ -71,7 +77,7 @@ export function ResourceMenu({ resource, rights, files = [] }: ResourceMenuProps
                   tone="danger"
                   onSelect={() => setOpened('delete')}
                 >
-                  {t('delete')}
+                  {t('deleteResource')}
                 </DropdownMenuItem>
               </>
             )}

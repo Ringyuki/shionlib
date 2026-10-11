@@ -1030,6 +1030,19 @@ export const constraints = {
       ]
     }
   },
+  "CreateResourceCommentInputBody": {
+    "content": {
+      "type": "unknown",
+      "required": true,
+      "nullable": false
+    },
+    "parent_id": {
+      "type": "integer",
+      "required": false,
+      "nullable": false,
+      "format": "int64"
+    }
+  },
   "CreateSponsorOrderInputBody": {
     "amount": {
       "type": "number",

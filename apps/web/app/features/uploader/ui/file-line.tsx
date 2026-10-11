@@ -1,23 +1,33 @@
-import { Inline, Stack, Text } from '@hina-ui/react'
+import { Inline, Link, Stack, Text } from '@hina-ui/react'
 import { FileArchive } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { Link as RouterLink } from 'react-router'
 
 type FileLineProps = {
   name: string
   size: string
+  to?: string
   state?: ReactNode
   bar?: ReactNode
 }
 
-export function FileLine({ name, size, state, bar }: FileLineProps) {
+export function FileLine({ name, size, to, state, bar }: FileLineProps) {
   return (
     <Stack as="li" gap="none" className="gap-0.5">
       <Inline gap="sm" align="start" wrap={false}>
         <FileArchive aria-hidden className="mt-1.5 size-4 shrink-0 text-muted" />
         <Inline gap="sm" align="center" className="min-h-7 min-w-0 gap-y-0.5">
-          <Text weight="medium" className="max-w-full break-words">
-            {name}
-          </Text>
+          {to === undefined ? (
+            <Text weight="medium" className="max-w-full break-words">
+              {name}
+            </Text>
+          ) : (
+            <Link asChild tone="neutral" className="max-w-full font-medium break-words">
+              <RouterLink to={to} prefetch="intent">
+                {name}
+              </RouterLink>
+            </Link>
+          )}
           <Text size="sm" tone="muted" className="whitespace-nowrap tabular-nums">
             {size}
           </Text>

@@ -6,6 +6,7 @@ import {
   countComments,
   editComment,
   loadComments,
+  pinComment,
   postComment,
   toggleLike,
 } from './comment.use-cases'
@@ -14,9 +15,18 @@ const threads = (
   totalItems: number,
   comments: number,
   currentPage = 1,
+  pinned: number | null = null,
 ): ApiData<'/comment/game/{game_id}', 'get'> => ({
   items: null,
-  meta: { currentPage, itemCount: 0, itemsPerPage: 20, totalItems, totalPages: 1, comments },
+  meta: {
+    currentPage,
+    itemCount: 0,
+    itemsPerPage: 20,
+    totalItems,
+    totalPages: 1,
+    comments,
+    pinned,
+  },
 })
 
 const creator = { id: 2, name: 'kotori', avatar: null, is_sponsor: false }
@@ -51,8 +61,9 @@ const edited: ApiData<'/comment/{comment_id}', 'patch'> = { ...stored, edited: t
 describe('loadComments', () => {
   it('asks for a page of threads in the chosen order', async () => {
     const fake = fakeApi().on('get', '/comment/game/{game_id}', threads(12, 30, 2))
-    await expect(loadComments(fake.api, 7, 2, 'oldest')).resolves.toEqual({
-      gameId: 7,
+    await expect(loadComments(fake.api, { kind: 'game', id: 7 }, 2, 'oldest')).resolves.toEqual({
+      place: { kind: 'game', id: 7 },
+      pinned: undefined,
       threads: [],
       total: 12,
       count: 30,
@@ -70,8 +81,18 @@ describe('loadComments', () => {
 
   it('opens the page that holds a comment, whichever page was asked for', async () => {
     const fake = fakeApi().on('get', '/comment/game/{game_id}', threads(64, 90, 3))
-    await expect(loadComments(fake.api, 7, 1, 'newest', 41)).resolves.toMatchObject({ page: 3 })
+    await expect(
+      loadComments(fake.api, { kind: 'game', id: 7 }, 1, 'newest', 41),
+    ).resolves.toMatchObject({ page: 3 })
     expect(new URL(fake.requests[0]?.url ?? '').searchParams.get('focus')).toBe('41')
+  })
+
+  it('reads the comments of a resource from its own list and learns which one is pinned', async () => {
+    const fake = fakeApi().on('get', '/comment/resource/{resource_id}', threads(3, 4, 1, 15))
+    await expect(
+      loadComments(fake.api, { kind: 'resource', id: 31 }, 1, 'newest'),
+    ).resolves.toMatchObject({ place: { kind: 'resource', id: 31 }, pinned: 15, count: 4 })
+    expect(new URL(fake.requests[0]?.url ?? '').pathname).toBe('/comment/resource/31')
   })
 
   it('counts every comment of a game, replies included', async () => {
@@ -84,9 +105,9 @@ describe('loadComments', () => {
 describe('writing', () => {
   it('posts the document under the comment it answers and tells which comment it became', async () => {
     const fake = fakeApi().on('post', '/comment/game/{game_id}', created)
-    await expect(postComment(fake.api, { gameId: 7, parentId: 3, content: written })).resolves.toBe(
-      9,
-    )
+    await expect(
+      postComment(fake.api, { place: { kind: 'game', id: 7 }, parentId: 3, content: written }),
+    ).resolves.toBe(9)
     const sent = fake.requests[0]
     expect(new URL(sent?.url ?? '').pathname).toBe('/comment/game/7')
     await expect(sent?.json()).resolves.toEqual({ parent_id: 3, content: written })
@@ -94,8 +115,25 @@ describe('writing', () => {
 
   it('leaves the parent out of a comment that starts a thread', async () => {
     const fake = fakeApi().on('post', '/comment/game/{game_id}', created)
-    await postComment(fake.api, { gameId: 7, content: written })
+    await postComment(fake.api, { place: { kind: 'game', id: 7 }, content: written })
     await expect(fake.requests[0]?.json()).resolves.not.toHaveProperty('parent_id')
+  })
+
+  it('posts a comment on a resource to the resource', async () => {
+    const fake = fakeApi().on('post', '/comment/resource/{resource_id}', created)
+    await postComment(fake.api, { place: { kind: 'resource', id: 31 }, content: written })
+    expect(new URL(fake.requests[0]?.url ?? '').pathname).toBe('/comment/resource/31')
+  })
+
+  it('pins with a put and unpins with a delete', async () => {
+    const fake = fakeApi()
+      .on('put', '/comment/{comment_id}/pin', undefined)
+      .on('delete', '/comment/{comment_id}/pin', undefined)
+    await pinComment(fake.api, { commentId: 9, pinned: true })
+    await pinComment(fake.api, { commentId: 9, pinned: false })
+    expect(
+      fake.requests.map(request => `${request.method} ${new URL(request.url).pathname}`),
+    ).toEqual(['PUT /comment/9/pin', 'DELETE /comment/9/pin'])
   })
 
   it('saves an edit and toggles a like on the comment', async () => {

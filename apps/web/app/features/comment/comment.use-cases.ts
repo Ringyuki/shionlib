@@ -2,27 +2,38 @@ import type { ApiClient } from '~/shared/api/client'
 import {
   pageSize,
   userPageSize,
+  type CommentPlace,
   type Comments,
   type ThreadOrder,
   type UserComments,
 } from './comment'
-import type { CommentEdit, CommentLike, CommentPost, CommentRemoval } from './comment.schema'
+import type {
+  CommentEdit,
+  CommentLike,
+  CommentPin,
+  CommentPost,
+  CommentRemoval,
+} from './comment.schema'
 
 export async function loadComments(
   api: ApiClient,
-  gameId: number,
+  place: CommentPlace,
   page: number,
   order: ThreadOrder,
   focus?: number,
 ): Promise<Comments> {
-  const found = await api.get('/comment/game/{game_id}', {
-    params: {
-      path: { game_id: gameId },
-      query: { page, pageSize, order, ...(focus === undefined ? {} : { focus }) },
-    },
-  })
+  const query = { page, pageSize, order, ...(focus === undefined ? {} : { focus }) }
+  const found =
+    place.kind === 'game'
+      ? await api.get('/comment/game/{game_id}', {
+          params: { path: { game_id: place.id }, query },
+        })
+      : await api.get('/comment/resource/{resource_id}', {
+          params: { path: { resource_id: place.id }, query },
+        })
   return {
-    gameId,
+    place,
+    pinned: found.meta.pinned ?? undefined,
     threads: found.items ?? [],
     total: found.meta.totalItems,
     count: found.meta.comments,
@@ -50,14 +61,30 @@ export async function loadUserComments(
 }
 
 export async function postComment(api: ApiClient, post: CommentPost): Promise<number> {
-  const created = await api.post('/comment/game/{game_id}', {
-    params: { path: { game_id: post.gameId } },
-    body: {
-      content: post.content,
-      ...(post.parentId === undefined ? {} : { parent_id: post.parentId }),
-    },
-  })
+  const body = {
+    content: post.content,
+    ...(post.parentId === undefined ? {} : { parent_id: post.parentId }),
+  }
+  const created =
+    post.place.kind === 'game'
+      ? await api.post('/comment/game/{game_id}', {
+          params: { path: { game_id: post.place.id } },
+          body,
+        })
+      : await api.post('/comment/resource/{resource_id}', {
+          params: { path: { resource_id: post.place.id } },
+          body,
+        })
   return created.id
+}
+
+export async function pinComment(api: ApiClient, pin: CommentPin): Promise<void> {
+  const params = { path: { comment_id: pin.commentId } }
+  if (pin.pinned) {
+    await api.put('/comment/{comment_id}/pin', { params })
+  } else {
+    await api.delete('/comment/{comment_id}/pin', { params })
+  }
 }
 
 export async function editComment(api: ApiClient, edit: CommentEdit): Promise<void> {

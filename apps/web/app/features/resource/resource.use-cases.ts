@@ -1,6 +1,7 @@
 import type { ApiClient } from '~/shared/api/client'
 import { ApiError } from '~/shared/api/error'
 import { needsSimulator } from './resource'
+import type { ResourcePage } from './resource-page'
 import type {
   FileRemoval,
   FileRename,
@@ -14,6 +15,19 @@ export async function loadGameResources(api: ApiClient, gameId: number) {
     params: { path: { id: gameId } },
   })
   return resources ?? []
+}
+
+export async function loadResourcePage(api: ApiClient, id: number): Promise<ResourcePage> {
+  const { resource, game } = await api.get('/game/download-source/{id}', {
+    params: { path: { id } },
+  })
+  const header = await api.get('/game/{id}/header', { params: { path: { id: game.id } } })
+  return { resource, game: header }
+}
+
+export async function loadResourceEvents(api: ApiClient, id: number) {
+  const events = await api.get('/game/download-source/{id}/events', { params: { path: { id } } })
+  return events ?? []
 }
 
 export async function loadFileHistory(api: ApiClient, fileId: number) {

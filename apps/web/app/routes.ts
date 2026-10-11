@@ -7,6 +7,7 @@ export default [
   route('resources/comments/edit', 'routes/resources.comments.edit.ts'),
   route('resources/comments/remove', 'routes/resources.comments.remove.ts'),
   route('resources/comments/like', 'routes/resources.comments.like.ts'),
+  route('resources/comments/pin', 'routes/resources.comments.pin.ts'),
   route('resources/favorites', 'routes/resources.favorites.ts'),
   route('resources/walkthroughs', 'routes/resources.walkthroughs.ts'),
   route('resources/walkthroughs/remove', 'routes/resources.walkthroughs.remove.ts'),
@@ -91,6 +92,12 @@ export default [
         route('game/:id/walkthrough/:walkthroughId/edit', 'routes/walkthrough-legacy.ts', {
           id: 'walkthrough-edit-legacy',
         }),
+        route('resource/:id', 'routes/resource.tsx', [
+          index('routes/resource.contents.tsx'),
+          route('details', 'routes/resource.details.tsx'),
+          route('history', 'routes/resource.history.tsx'),
+          route('comments', 'routes/resource.comments.tsx'),
+        ]),
         route('game/:id', 'routes/game.tsx', [
           index('routes/game.resources.tsx'),
           route('info', 'routes/game.info.tsx'),

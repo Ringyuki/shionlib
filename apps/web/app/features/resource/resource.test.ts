@@ -33,6 +33,7 @@ const resource = (id: number, platform: Resource['platform']): Resource => ({
   published_at: '2026-10-01T00:00:00Z',
   created: '2026-10-01T00:00:00Z',
   updated: '2026-10-01T00:00:00Z',
+  comments: 0,
   files: [],
 })
 

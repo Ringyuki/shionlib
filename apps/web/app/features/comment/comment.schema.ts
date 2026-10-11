@@ -9,8 +9,10 @@ export type CommentIssueMessage = (issue: CommentIssue) => string
 
 const id = v.pipe(v.number(), v.safeInteger(), v.minValue(1))
 
+const place = v.object({ kind: v.picklist(['game', 'resource']), id })
+
 export const commentPostCommand = v.object({
-  gameId: id,
+  place,
   parentId: v.optional(id),
   content: richDocument,
 })
@@ -28,6 +30,10 @@ export type CommentRemoval = v.InferOutput<typeof commentRemovalCommand>
 export const commentLikeCommand = v.object({ commentId: id })
 
 export type CommentLike = v.InferOutput<typeof commentLikeCommand>
+
+export const commentPinCommand = v.object({ commentId: id, pinned: v.boolean() })
+
+export type CommentPin = v.InferOutput<typeof commentPinCommand>
 
 export function commentForm(issue: CommentIssueMessage) {
   return v.object({

@@ -27,7 +27,7 @@ test('shows what a user uploaded, each entry one link to the resource', async ({
   await expect(page.getByRole('link', { name: '管理我的上传' })).toHaveCount(0)
   const uploads = page.getByRole('list', { name: '上传的资源' })
   const entry = uploads.getByRole('link').filter({ hasText: 'seeded-reportable-sample.zip' })
-  await expect(entry).toHaveAttribute('href', '/zh/game/1#resource-1')
+  await expect(entry).toHaveAttribute('href', '/zh/resource/1')
   await expect(uploads.getByRole('listitem').first().getByRole('link')).toHaveCount(1)
   const [row, list] = [await entry.boundingBox(), await uploads.boundingBox()]
   expect(row?.width).toBe(list?.width)

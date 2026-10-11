@@ -8,13 +8,64 @@ import {
   firstLine,
   isPending,
   likesOf,
+  pathOfComment,
+  pinRightsOver,
+  resourceCommentPath,
   searchFocusing,
   searchInOrder,
   searchOfFocused,
 } from './comment'
 import { commentForm, focusFrom, threadOrderFrom } from './comment.schema'
 
+describe('pinning', () => {
+  const resource = { kind: 'resource', id: 31 } as const
+  const thread = { parent_id: null, status: 1, pinned: false }
+  const publisher = { id: 5, role: 1 }
+
+  it('lets the publisher pin a visible comment that starts a thread and unpin the pinned one', () => {
+    expect(pinRightsOver(thread, resource, 5, publisher)).toEqual({ pin: true, unpin: false })
+    expect(pinRightsOver({ ...thread, pinned: true }, resource, 5, publisher)).toEqual({
+      pin: false,
+      unpin: true,
+    })
+  })
+
+  it('offers nothing on a reply, a comment under review or a comment on a game', () => {
+    const nothing = { pin: false, unpin: false }
+    expect(pinRightsOver({ ...thread, parent_id: 2 }, resource, 5, publisher)).toEqual(nothing)
+    expect(pinRightsOver({ ...thread, status: 2 }, resource, 5, publisher)).toEqual(nothing)
+    expect(pinRightsOver(thread, { kind: 'game', id: 7 }, 5, publisher)).toEqual(nothing)
+    expect(pinRightsOver(thread, resource, 5, undefined)).toEqual(nothing)
+  })
+
+  it('lets an admin unpin but never pin, and gives other users nothing', () => {
+    const pinned = { ...thread, pinned: true }
+    expect(pinRightsOver(pinned, resource, 5, { id: 8, role: 2 })).toEqual({
+      pin: false,
+      unpin: true,
+    })
+    expect(pinRightsOver(thread, resource, 5, { id: 8, role: 2 })).toEqual({
+      pin: false,
+      unpin: false,
+    })
+    expect(pinRightsOver(pinned, resource, 5, { id: 8, role: 1 })).toEqual({
+      pin: false,
+      unpin: false,
+    })
+  })
+})
+
 describe('addresses', () => {
+  it('leads to a comment on the page of what it was made on', () => {
+    expect(resourceCommentPath('zh', 31, 12)).toBe('/zh/resource/31/comments?comment=12')
+    expect(pathOfComment('zh', { id: 12, game: { id: 7 }, resource: null })).toBe(
+      '/zh/game/7/comments?comment=12',
+    )
+    expect(pathOfComment('zh', { id: 12, game: { id: 7 }, resource: { id: 31 } })).toBe(
+      '/zh/resource/31/comments?comment=12',
+    )
+  })
+
   it('places the comments on a tab of the game and names each comment', () => {
     expect(commentsPath('zh', 7)).toBe('/zh/game/7/comments')
     expect(commentAnchor(12)).toBe('comment-12')

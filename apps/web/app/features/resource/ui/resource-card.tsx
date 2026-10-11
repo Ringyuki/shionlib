@@ -3,18 +3,21 @@ import {
   Card,
   Grid,
   Inline,
+  Link,
   Stack,
   Tag,
   Text,
   Time,
   useImageResolver,
 } from '@hina-ui/react'
-import { Clock, Download } from 'lucide-react'
-import { useMessages, useTranslations } from 'use-intl'
+import { Clock, Download, MessageCircle } from 'lucide-react'
+import { Link as RouterLink } from 'react-router'
+import { useFormatter, useLocale, useMessages, useTranslations } from 'use-intl'
 import { PlatformTag } from '~/features/game'
 import { labelOf } from '~/shared/i18n/labels'
 import { BBCodeText } from '~/shared/ui/bbcode-text'
 import { resourceAnchor, rightsOver, type Resource, type ResourceViewer } from '../resource'
+import { resourcePath } from '../resource-page'
 import { ResourceMenu } from './resource-menu'
 import { ResourceFiles } from './resource-files'
 
@@ -26,6 +29,8 @@ type ResourceCardProps = {
 export function ResourceCard({ resource, viewer }: ResourceCardProps) {
   const t = useTranslations('resource')
   const labels = useMessages()
+  const locale = useLocale()
+  const format = useFormatter()
   const resolveImage = useImageResolver()
   const { creator } = resource
   const note = resource.note?.trim() ?? ''
@@ -78,6 +83,20 @@ export function ResourceCard({ resource, viewer }: ResourceCardProps) {
                 {t('downloads', { count: resource.downloads })}
               </Text>
             </Inline>
+            {resource.comments > 0 && (
+              <Link asChild tone="neutral" className="text-muted inline-flex items-center gap-1">
+                <RouterLink
+                  to={resourcePath(locale, resource.id, 'comments')}
+                  prefetch="intent"
+                  aria-label={t('comments', { count: resource.comments })}
+                >
+                  <MessageCircle aria-hidden />
+                  <Text as="span" size="sm" tone="muted" className="tabular-nums">
+                    {format.number(resource.comments)}
+                  </Text>
+                </RouterLink>
+              </Link>
+            )}
           </Inline>
           <Stack className="col-start-2 row-start-1 sm:col-start-3">
             <ResourceMenu resource={resource} rights={rights} />

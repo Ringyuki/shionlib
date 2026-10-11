@@ -40,5 +40,15 @@
   "userComment": "『{game}』へのコメント",
   "userReply": "『{game}』で {name} さんに返信",
   "replyCount": "返信 {count, number} 件",
-  "likes": "いいね {count, number} 件"
+  "likes": "いいね {count, number} 件",
+  "pin": "固定",
+  "unpin": "固定を解除",
+  "pinned": "コメントを固定しました",
+  "unpinned": "固定を解除しました",
+  "pinnedBy": "公開者が固定",
+  "publisher": "公開者",
+  "replacePin": "固定するコメントを入れ替えますか？",
+  "replacePinDescription": "現在固定されているコメントは固定が解除されます",
+  "userResourceComment": "『{game}』のリソース {file} へのコメント",
+  "userResourceReply": "『{game}』のリソース {file} で {name} さんに返信"
 }

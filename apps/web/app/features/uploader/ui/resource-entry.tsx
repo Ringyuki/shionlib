@@ -3,7 +3,13 @@ import { Clock, Download, Gamepad2 } from 'lucide-react'
 import { Link as RouterLink } from 'react-router'
 import { useLocale, useMessages, useTranslations } from 'use-intl'
 import { gamePath, gameTitle, PlatformTag } from '~/features/game'
-import { ResourceMenu, resourceAnchor, rightsOver, type ResourceViewer } from '~/features/resource'
+import {
+  ResourceMenu,
+  resourceAnchor,
+  resourcePath,
+  rightsOver,
+  type ResourceViewer,
+} from '~/features/resource'
 import { labelOf } from '~/shared/i18n/labels'
 import { stageOf, type OwnResource } from '../uploader'
 import { EntryShell } from './entry-shell'
@@ -22,11 +28,12 @@ export function ResourceEntry({ own, viewer }: ResourceEntryProps) {
   const labels = useMessages()
   const { game, resource } = own
   const files = resource.files ?? []
+  const page = resource.published_at === null ? undefined : resourcePath(locale, resource.id)
   return (
     <EntryShell
       as="article"
       files={files.map(file => (
-        <ResourceFileLine key={file.id} file={file} />
+        <ResourceFileLine key={file.id} file={file} to={page} />
       ))}
       stage={<StageTag stage={stageOf(resource)} />}
       controlSlots={1}

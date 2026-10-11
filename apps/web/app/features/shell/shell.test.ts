@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { navSections, sidebarCookieValue, sitePaths } from './shell'
+import { alsoWithin, navSections, sidebarCookieValue, sitePaths } from './shell'
 
 describe('navSections', () => {
   it('shows only discovery to guests', () => {
@@ -19,6 +19,20 @@ describe('navSections', () => {
   it('matches only the home entry exactly so game pages keep the library active', () => {
     const [discover] = navSections('zh', null)
     expect(discover?.entries.filter(entry => entry.end).map(entry => entry.key)).toEqual(['home'])
+  })
+})
+
+describe('alsoWithin', () => {
+  it('keeps the library active on the page of a resource, which has no address under it', () => {
+    const games = navSections('zh', null)[0]?.entries.find(entry => entry.key === 'games')
+    expect(games).toBeDefined()
+    if (games === undefined) {
+      return
+    }
+    expect(alsoWithin(games, '/zh/resource/12')).toBe(true)
+    expect(alsoWithin(games, '/zh/resource/12/comments')).toBe(true)
+    expect(alsoWithin(games, '/zh/resources')).toBe(false)
+    expect(alsoWithin(games, '/zh/release')).toBe(false)
   })
 })
 

@@ -5,24 +5,26 @@ import { useFormatter, useLocale, useTranslations } from 'use-intl'
 import { gameTitle } from '~/features/game'
 import { publicText } from '~/shared/richtext/rich-text'
 import { entryLink } from '~/shared/ui/entry-link'
-import { commentPath, firstLine, type UserComment } from '../comment'
+import { firstLine, pathOfComment, type UserComment } from '../comment'
 
 export function UserCommentRow({ comment }: { comment: UserComment }) {
   const t = useTranslations('comment')
   const locale = useLocale()
   const format = useFormatter()
   const game = gameTitle(comment.game, locale)
-  const { parent } = comment
+  const { parent, resource } = comment
+  const where = resource === null ? 'user' : 'userResource'
+  const file = resource?.file_name ?? ''
   return (
     <Link
-      to={commentPath(locale, comment.game.id, comment.id)}
+      to={pathOfComment(locale, comment)}
       prefetch="intent"
       className={cn(entryLink, 'flex flex-col gap-1 p-3')}
     >
       <Text size="xs" tone="faint" className="break-words">
         {parent === null
-          ? t('userComment', { game })
-          : t('userReply', { game, name: parent.creator.name })}
+          ? t(`${where}Comment`, { game, file })
+          : t(`${where}Reply`, { game, file, name: parent.creator.name })}
       </Text>
       {parent !== null && (
         <Text size="sm" tone="faint" truncate>

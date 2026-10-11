@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from 'use-intl'
 import { commentPath } from '~/features/comment'
 import { gamePath, gameTitle } from '~/features/game'
 import { profilePath } from '~/features/profile'
-import { resourceAnchor } from '~/features/resource'
+import { resourcePath } from '~/features/resource'
 import { walkthroughPath } from '~/features/walkthrough'
 import { useBytes } from '~/shared/i18n/use-bytes'
 import type { Happening } from '../activity'
@@ -18,7 +18,7 @@ export function HappeningRow({ happening }: { happening: Happening }) {
   const place = gamePath(locale, game.id)
   const target =
     happening.kind === 'resources'
-      ? { pathname: place, hash: resourceAnchor(happening.resourceId) }
+      ? resourcePath(locale, happening.resourceId)
       : happening.kind === 'comments'
         ? commentPath(locale, game.id, happening.commentId)
         : walkthroughPath(locale, game.id, happening.walkthroughId)

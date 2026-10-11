@@ -4,6 +4,7 @@
   "filter": "按平台筛选",
   "all": "全部",
   "downloads": "{count, number} 次下载",
+  "comments": "{count, number} 条评论",
   "files": "文件",
   "hash": "{algorithm}：{hash}",
   "copyHash": "复制完整校验值",
@@ -32,7 +33,7 @@
   },
   "history": "历史",
   "report": "举报",
-  "edit": "编辑",
+  "edit": "编辑资源",
   "addFiles": "添加文件",
   "addFilesDescription": "上传完成后，这些文件将加入这个资源",
   "replaceFile": "替换文件",
@@ -48,6 +49,7 @@
   "removeFileDescription": "文件将从这个资源中删除，无法恢复",
   "fileRemoved": "文件已移除",
   "delete": "删除",
+  "deleteResource": "删除资源",
   "deleteConfirm": "确定要删除这个资源吗？",
   "deleteDescription": "资源中的文件将一并删除，无法恢复",
   "deleted": "资源已删除",
@@ -124,5 +126,48 @@
     "empty": "{file} 是空文件，无法上传",
     "tooLarge": "{file} 的大小为 {size}，单个文件不能超过 {limit}",
     "overQuota": "所选文件共 {total}，超出了剩余的 {left} 空间"
+  },
+  "page": {
+    "uploaded": "上传于 {date}",
+    "published": "发布于 {date}",
+    "tabs": {
+      "label": "资源",
+      "contents": "内容",
+      "details": "详细信息",
+      "history": "变更历史",
+      "comments": "评论"
+    },
+    "contents": {
+      "pending": "尚未读取这个文件的内容",
+      "pendingHint": "较早上传的文件正在依次处理"
+    },
+    "details": {
+      "file": "文件",
+      "name": "文件名",
+      "size": "大小",
+      "bytes": "{size}（{bytes, number} 字节）",
+      "uploaded": "上传时间"
+    },
+    "history": {
+      "label": "变更历史",
+      "empty": "暂无变更记录",
+      "someone": "已注销的用户",
+      "none": "无",
+      "did": {
+        "published": "<actor></actor> 发布了资源",
+        "file_replaced": "<actor></actor> 替换了文件",
+        "file_renamed": "<actor></actor> 重命名了文件",
+        "file_added": "<actor></actor> 添加了文件",
+        "file_removed": "<actor></actor> 移除了文件",
+        "edited": "<actor></actor> 修改了资源信息",
+        "review_cleared": "<actor></actor> 复核后放行了文件"
+      },
+      "field": {
+        "platforms": "平台",
+        "languages": "语言",
+        "simulator": "引擎",
+        "note": "说明"
+      }
+    }
   }
 }
