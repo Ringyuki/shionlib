@@ -38,29 +38,21 @@
     },
     "games": "游戏列表",
     "onlyWithResources": "仅显示有资源的游戏",
-    "onlyWithResourcesHint": "作为游戏库和搜索的默认设置，可以在每次浏览时临时更改"
+    "onlyWithResourcesHint": "作为游戏库和搜索的默认设置，可以在每次浏览时临时更改",
+    "profiles": "个人主页",
+    "showBackgrounds": "显示其他用户的页面背景",
+    "showBackgroundsHint": "关闭后，其他用户的个人主页使用站点的默认背景"
   },
   "personal": {
-    "avatar": "头像",
-    "avatarHint": "显示为圆形，上传时可以选取范围",
-    "changeAvatar": "更换头像",
-    "cropAvatar": "裁剪头像",
-    "cover": "主页封面",
-    "coverHint": "显示在个人主页顶部，上传时可以选取范围",
-    "changeCover": "上传封面",
-    "cropCover": "裁剪封面",
-    "pictureSaved": "图片已更新",
     "name": "用户名",
     "nameHint": "用于登录，并显示在你上传的资源和发表的内容旁",
     "nameLimit": "最多 {max} 字",
     "nameAvailable": "该用户名可以使用",
     "nameTaken": "该用户名已被使用",
     "nameSaved": "用户名已修改",
-    "bio": "简介",
-    "bioHint": "显示在个人主页上",
-    "bioLimit": "选填，最多 {max} 字",
-    "bioSaved": "简介已保存",
-    "save": "保存",
-    "notImage": "请选择图片文件"
+    "profile": "个人主页",
+    "profileHint": "头像、头图、简介和页面背景在个人主页上修改",
+    "openProfile": "前往个人主页",
+    "save": "保存"
   }
 }

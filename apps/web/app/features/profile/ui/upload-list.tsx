@@ -6,15 +6,11 @@ import { sitePaths } from '~/features/shell'
 import { listStart } from '~/shared/http/paging'
 import { usePageTurn } from '~/shared/route/use-page-turn'
 import { Button } from '~/shared/ui/button'
+import { entryList } from '~/shared/ui/entry-link'
 import { uploadsPageSize, type Uploads } from '../profile'
-import { UploadCard } from './upload-card'
+import { UploadRow } from './upload-row'
 
-type UploadListProps = {
-  uploads: Uploads
-  own: boolean
-}
-
-export function UploadList({ uploads, own }: UploadListProps) {
+export function UploadList({ uploads }: { uploads: Uploads }) {
   const t = useTranslations('profile.uploads')
   const locale = useLocale()
   const pages = usePageTurn()
@@ -22,12 +18,12 @@ export function UploadList({ uploads, own }: UploadListProps) {
     <DataList
       label={t('label')}
       id={listStart}
-      className="scroll-mt-4"
+      className={entryList.frame}
       items={uploads.items}
       itemKey="id"
-      layout="grid"
-      gridMin="22rem"
-      gridGap="md"
+      divided={false}
+      itemClass={entryList.item}
+      minHeight={0}
       manual
       pagination
       total={uploads.total}
@@ -37,9 +33,10 @@ export function UploadList({ uploads, own }: UploadListProps) {
       loading={pages.turning}
       renderEmpty={() => (
         <Empty
-          title={t(own ? 'emptyOwn' : 'empty')}
+          title={t(uploads.own ? 'emptyOwn' : 'empty')}
+          size="sm"
           actions={
-            own && (
+            uploads.own && (
               <Button asChild>
                 <Link to={sitePaths(locale).upload}>
                   <UploadIcon aria-hidden />
@@ -51,7 +48,7 @@ export function UploadList({ uploads, own }: UploadListProps) {
         />
       )}
     >
-      {({ item }) => <UploadCard upload={item} />}
+      {({ item }) => <UploadRow upload={item} />}
     </DataList>
   )
 }

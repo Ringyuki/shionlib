@@ -26,6 +26,10 @@ test('saves each site preference on its own', async ({ page }) => {
   await expect(onlyWithResources).toBeChecked()
   await onlyWithResources.click()
   await expect(onlyWithResources).not.toBeChecked()
+  const backgrounds = page.getByRole('switch', { name: /显示其他用户的页面背景/ })
+  await expect(backgrounds).toBeChecked()
+  await backgrounds.click()
+  await expect(backgrounds).not.toBeChecked()
   await page.getByText('深色', { exact: true }).click()
   await expect(page.locator('html')).toHaveClass(/dark/)
 
@@ -35,6 +39,7 @@ test('saves each site preference on its own', async ({ page }) => {
   ).toBeChecked()
   await expect(page.locator('html')).toHaveClass(/dark/)
   await expect(page.getByRole('switch', { name: /仅显示有资源的游戏/ })).not.toBeChecked()
+  await expect(page.getByRole('switch', { name: /显示其他用户的页面背景/ })).not.toBeChecked()
 
   await page.goto('/zh/game')
   await expect(
@@ -42,6 +47,18 @@ test('saves each site preference on its own', async ({ page }) => {
       .getByRole('complementary', { name: '筛选' })
       .getByRole('switch', { name: '仅显示有资源的游戏' }),
   ).not.toBeChecked()
+
+  let asked = 0
+  await page.route('**/user/e2e/background/**', route => {
+    asked += 1
+    return route.abort()
+  })
+  await page.goto('/zh/user/3')
+  await expect(page.getByRole('article', { name: 'e2e_mutable_user' })).toHaveCSS(
+    'backdrop-filter',
+    'none',
+  )
+  expect(asked).toBe(0)
 })
 
 test('changes the language of the site and remembers it', async ({ page }) => {
@@ -80,7 +97,9 @@ test('offers a game manager as the default only while it is shown', async ({ pag
   await expect(page.getByRole('radio', { name: /^推送到 ReinaManager/ })).toBeVisible()
 })
 
-test('checks a user name while it is typed and saves the bio', async ({ page }) => {
+test('checks a user name while it is typed and leads to the profile for the rest', async ({
+  page,
+}) => {
   await openSettings(page, 'personal')
   const name = page.getByRole('textbox', { name: '用户名' })
   await name.fill('e2e_admin')
@@ -89,12 +108,11 @@ test('checks a user name while it is typed and saves the bio', async ({ page }) 
   await expect(page.getByText('该用户名可以使用')).toBeVisible()
   await name.fill(account)
 
-  const bio = `E2E 简介 ${Date.now()}`
-  await page.getByRole('textbox', { name: '简介' }).fill(bio)
-  await page.getByRole('button', { name: '保存' }).nth(1).click()
-  await expectNotice(page, '简介已保存')
-  await page.getByRole('link', { name: '收藏', exact: true }).click()
-  await expect(page.getByText(bio)).toBeVisible()
+  await expect(page.getByRole('textbox', { name: '简介' })).toHaveCount(0)
+  await page.getByRole('link', { name: '前往个人主页' }).click()
+  await expect(page).toHaveURL(/\/zh\/user\/\d+$/)
+  await expect(page.getByRole('heading', { name: account, level: 1 })).toBeVisible()
+  await expect(page.getByRole('button', { name: '编辑资料' })).toBeVisible()
 })
 
 test('guards the password and manages passkeys', async ({ page, context }) => {
@@ -145,46 +163,4 @@ test('offers to link accounts and says why linking failed', async ({ page }) => 
   await page.goto('/zh/user/settings/connections?oidc_error=link_conflict')
   await expectNotice(page, '这个 Hikarinagi ID 已关联到其他账号')
   await expect(page).toHaveURL(/\/zh\/user\/settings\/connections$/)
-})
-
-test('lets the area of an avatar be chosen before it is uploaded', async ({ page }) => {
-  const onePixel =
-    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
-  const picture = {
-    name: 'avatar.png',
-    mimeType: 'image/png',
-    buffer: Buffer.from(onePixel, 'base64'),
-  }
-  let uploads = 0
-  await page.route('**/resources/settings/avatar.data', route => {
-    uploads += 1
-    return route.fulfill({
-      status: 200,
-      contentType: 'text/x-script',
-      body: '[{"_1":2},"data",{"_3":4,"_5":6},"ok",true,"result",{}]',
-    })
-  })
-  await openSettings(page, 'personal')
-  const choose = async () => {
-    const chooser = page.waitForEvent('filechooser')
-    await page.getByRole('button', { name: '更换头像' }).click()
-    await (await chooser).setFiles(picture)
-  }
-
-  await choose()
-  const dialog = page.getByRole('dialog', { name: '裁剪头像' })
-  const confirm = dialog.getByRole('button', { name: '确认' })
-  await expect(dialog.locator('.advanced-cropper-circle-stencil')).toBeVisible()
-  await expect(confirm).toBeEnabled()
-  await expect(dialog.getByRole('button', { name: '重置' })).toBeEnabled()
-  await dialog.getByRole('button', { name: '取消' }).click()
-  await expect(dialog).toBeHidden()
-  expect(uploads).toBe(0)
-
-  await choose()
-  await expect(confirm).toBeEnabled()
-  await confirm.click()
-  await expectNotice(page, '图片已更新')
-  await expect(dialog).toBeHidden()
-  expect(uploads).toBe(1)
 })

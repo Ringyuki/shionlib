@@ -1,13 +1,7 @@
 import type { ApiClient } from '~/shared/api/client'
 import { ApiError } from '~/shared/api/error'
 import { chosenList, itemsPageSize, type Favorites } from './favorite'
-import type {
-  ListCreation,
-  ListEdit,
-  ListRemoval,
-  MembershipChange,
-  NoteChange,
-} from './favorite.schema'
+import type { ListCreation, ListEdit, ListRemoval, MembershipChange } from './favorite.schema'
 
 export async function loadFavoriteLists(api: ApiClient, gameId: number) {
   const lists = await api.get('/favorites', { params: { query: { game_id: gameId } } })
@@ -89,13 +83,5 @@ export async function editList(api: ApiClient, edit: ListEdit) {
 
 export async function removeList(api: ApiClient, removal: ListRemoval) {
   await api.delete('/favorites/{id}', { params: { path: { id: removal.listId } } })
-  return null
-}
-
-export async function changeNote(api: ApiClient, change: NoteChange) {
-  await api.patch('/favorites/items/{item_id}', {
-    params: { path: { item_id: change.itemId } },
-    body: { note: change.note.trim() },
-  })
   return null
 }

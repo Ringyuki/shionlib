@@ -38,7 +38,7 @@ Every user flow a phase ports gets Playwright specs in `apps/web/e2e` in the sam
   - Specs reuse them with `test.use({ storageState: sessionFile('member') })`.
   - A spec that signs out uses its own account, so it never revokes a shared session.
 - **Isolation:**
-  - Specs run in parallel on one dataset. Each mutation touches a game or account that no other spec reads: favorites on games 2, 4 and 5, reports by the member, edits by the owner, uploads by the owner on game 6.
+  - Specs run in parallel on one dataset. Each mutation touches a game or account that no other spec reads: favorites on games 2, 4 and 5, reports by the member, edits by the owner, uploads by the owner on game 6. Profiles are read as they are seeded: user 3 has uploads and a page background (its picture, `user/e2e/background/seeded.webp`, exists nowhere, so a spec answers it itself), user 4 has nothing public, and the profile dialog is tried on `e2e_admin_ops_user`.
   - The member writes walkthroughs on game 2 only, in tests that run serially: an author has one walkthrough per game, and each test deletes what it wrote. The guest's tests read game 3, which has none.
   - Upload specs run serially (`mode: 'serial'`): the server lists every unfinished upload of the account, so parallel uploads would show up on each other's uploads page.
   - Files of random bytes named `.7z` fail the archive check about a minute after they are uploaded and are then removed, so upload specs assert that the files appear, never that they are published.

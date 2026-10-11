@@ -3,6 +3,7 @@ import { useFormatter, useLocale, useTranslations } from 'use-intl'
 import { listStart } from '~/shared/http/paging'
 import { InPageLink } from '~/shared/route/in-page-link'
 import { usePageTurn } from '~/shared/route/use-page-turn'
+import { entryLink } from '~/shared/ui/entry-link'
 import { inboxPath, pageSize, type Inbox } from '../message'
 
 type MessageListProps = {
@@ -40,7 +41,7 @@ export function MessageList({ inbox, className }: MessageListProps) {
           href={inboxPath(locale, { category, page, opened: item.id })}
           prefetch="none"
           aria-current={inbox.opened?.id === item.id ? 'page' : undefined}
-          className="hn-interactive hn-state-layer hn-press-none aria-[current=page]:bg-accent-soft relative isolate block rounded-lg px-3 py-2.5"
+          className={cn(entryLink, 'aria-[current=page]:bg-accent-soft block px-3 py-2.5')}
         >
           <Inline gap="sm" align="start" wrap={false}>
             <Flex align="center" justify="center" className="h-lh w-2 shrink-0">

@@ -62,6 +62,10 @@ export function commentPath(locale: Locale, gameId: number, commentId: number): 
   return `${commentsPath(locale, gameId)}${searchFocusing('', commentId)}`
 }
 
+export function firstLine(text: string): string {
+  return text.trim().split('\n', 1)[0] ?? ''
+}
+
 export function aimsAt(hash: string, commentId: number): boolean {
   return hash === `#${commentAnchor(commentId)}`
 }

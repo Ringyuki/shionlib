@@ -38,29 +38,21 @@
     },
     "games": "ゲーム一覧",
     "onlyWithResources": "リソースのあるゲームのみ",
-    "onlyWithResourcesHint": "ライブラリと検索の既定値です。閲覧のたびに一時的に変更できます。"
+    "onlyWithResourcesHint": "ライブラリと検索の既定値です。閲覧のたびに一時的に変更できます。",
+    "profiles": "プロフィール",
+    "showBackgrounds": "他のユーザーのページ背景を表示する",
+    "showBackgroundsHint": "オフにすると、他のユーザーのプロフィールページはサイトの標準の背景で表示されます"
   },
   "personal": {
-    "avatar": "アイコン",
-    "avatarHint": "円形で表示されます。アップロード時に範囲を選べます。",
-    "changeAvatar": "アイコンを変更",
-    "cropAvatar": "アイコンを切り抜く",
-    "cover": "プロフィールのカバー",
-    "coverHint": "プロフィールの上部に表示されます。アップロード時に範囲を選べます。",
-    "changeCover": "カバーをアップロード",
-    "cropCover": "カバーを切り抜く",
-    "pictureSaved": "画像を更新しました",
     "name": "ユーザー名",
     "nameHint": "ログインに使用され、アップロードや投稿の横に表示されます",
     "nameLimit": "{max} 文字まで",
     "nameAvailable": "このユーザー名は使用できます",
     "nameTaken": "このユーザー名はすでに使われています",
     "nameSaved": "ユーザー名を変更しました",
-    "bio": "自己紹介",
-    "bioHint": "プロフィールに表示されます",
-    "bioLimit": "任意、{max} 文字まで",
-    "bioSaved": "自己紹介を保存しました",
-    "save": "保存",
-    "notImage": "画像ファイルを選択してください"
+    "profile": "プロフィール",
+    "profileHint": "アイコン、ヘッダー画像、自己紹介、ページの背景はプロフィールページで変更します",
+    "openProfile": "プロフィールページへ",
+    "save": "保存"
   }
 }

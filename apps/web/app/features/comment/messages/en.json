@@ -36,5 +36,9 @@
   },
   "userList": "Comments",
   "userEmpty": "No comments yet",
+  "userEmptyOwn": "You have not posted any comments yet",
+  "userComment": "Comment on {game}",
+  "userReply": "Reply to {name} on {game}",
+  "replyCount": "{count, plural, one {# reply} other {# replies}}",
   "likes": "{count, plural, one {# like} other {# likes}}"
 }

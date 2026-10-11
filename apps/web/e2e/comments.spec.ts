@@ -23,12 +23,10 @@ test('lists what a user wrote on their page and opens the page that holds a comm
   await page.getByRole('tab', { name: /评论/ }).click()
   await expect(page).toHaveURL(/\/zh\/user\/2\/comments$/)
   const list = page.getByRole('list', { name: '发表的评论' })
-  await expect(list.getByRole('link', { name: '常轨脱离Creative Re:Re:call' })).toHaveAttribute(
-    'href',
-    '/zh/game/1',
-  )
-  const written = list.getByRole('link', { name: 'Seeded root comment for E2E.' })
+  const written = list.getByRole('link').filter({ hasText: 'Seeded root comment for E2E.' }).first()
+  await expect(written).toContainText('评论《常轨脱离Creative Re:Re:call》')
   await expect(written).toHaveAttribute('href', /^\/zh\/game\/1\/comments\?comment=\d+$/)
+  await expect(list.getByRole('listitem').first().getByRole('link')).toHaveCount(1)
   await written.click()
   await expect(page).toHaveURL(/\/zh\/game\/1\/comments#comment-\d+$/)
   await expect(

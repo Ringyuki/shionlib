@@ -17,7 +17,7 @@ All validation in `apps/web` uses **valibot**. hina-ui `Form` accepts any Standa
 
 ## One source of truth for API constraints
 
-`pnpm api:generate` writes `app/shared/api/generated/constraints.ts`. It holds the fields of every request body and of every schema a request body refers to (`RichTextNode`, `RichTextMark`), with `required`, `minLength`, `maxLength`, `format`, `pattern`, `enum`, `minimum` and `maximum`, taken from `apps/api/openapi/openapi.json`; a field that is an object lists its own under `fields`.
+`pnpm api:generate` writes `app/shared/api/generated/constraints.ts`. It holds the fields of every request body and of every schema a request body refers to (`RichTextNode`, `RichTextMark`), with `required`, `minLength`, `maxLength`, `format`, `pattern`, `enum`, `minimum` and `maximum`, taken from `apps/api/openapi/openapi.json`; a field that is an object lists its own under `fields`. A required text field must have content, except where the contract says `minLength: 0`: that is how the API states that an empty text is a value (a bio can be cleared), and `kit.text` then lets it pass.
 
 - **Fields with API rules** are built with the form kit: `kit.text('RegisterUserInputBody', 'name')`. Never write the numbers or formats yourself. Hints that mention limits read them too: `t('nameHint', lengthOf('RegisterUserInputBody', 'name'))`.
 - **Rules the API does not declare**:

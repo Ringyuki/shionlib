@@ -1708,6 +1708,7 @@ export const constraints = {
       "type": "string",
       "required": true,
       "nullable": false,
+      "minLength": 0,
       "maxLength": 500
     }
   },
@@ -1823,6 +1824,13 @@ export const constraints = {
       "required": true,
       "nullable": false,
       "minLength": 1
+    }
+  },
+  "UpdateShowProfileBackgroundsInputBody": {
+    "show_profile_backgrounds": {
+      "type": "boolean",
+      "required": true,
+      "nullable": false
     }
   },
   "UpdateSponsorOrderStatusInputBody": {

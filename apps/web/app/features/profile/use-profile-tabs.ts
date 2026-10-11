@@ -1,17 +1,17 @@
 import { useLocation } from 'react-router'
 import { useLocale } from 'use-intl'
 import { useInPageNavigate } from '~/shared/route/use-in-page-navigate'
-import { profilePath, tabAt, type ProfileTab } from './profile'
+import { profilePath, shownTabs, tabAt, type Profile, type ProfileTab } from './profile'
 
-export function useProfileTabs(userId: number) {
+export function useProfileTabs(profile: Profile, own: boolean) {
   const locale = useLocale()
   const { pathname } = useLocation()
   const stay = useInPageNavigate()
-  const current = tabAt(pathname, locale, userId)
+  const current = tabAt(pathname, locale, profile.id)
   const select = (tab: ProfileTab) => {
     if (tab !== current) {
-      stay(profilePath(locale, userId, tab))
+      stay(profilePath(locale, profile.id, tab))
     }
   }
-  return { current, select }
+  return { current, shown: shownTabs(profile, own, current), select }
 }

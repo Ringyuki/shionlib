@@ -1,23 +1,25 @@
-import { DataList, Empty, Link, Text, Time } from '@hina-ui/react'
-import { Link as RouterLink } from 'react-router'
-import { useLocale, useTranslations } from 'use-intl'
-import { gamePath, gameTitle } from '~/features/game'
-import { publicText } from '~/shared/richtext/rich-text'
+import { DataList, Empty } from '@hina-ui/react'
+import { useTranslations } from 'use-intl'
 import { listStart } from '~/shared/http/paging'
 import { usePageTurn } from '~/shared/route/use-page-turn'
-import { commentPath, userPageSize, type UserComments } from '../comment'
+import { entryList } from '~/shared/ui/entry-link'
+import { userPageSize, type UserComments } from '../comment'
+import { UserCommentRow } from './user-comment-row'
 
-export function UserCommentList({ comments }: { comments: UserComments }) {
+type UserCommentListProps = { comments: UserComments; own: boolean }
+
+export function UserCommentList({ comments, own }: UserCommentListProps) {
   const t = useTranslations('comment')
-  const locale = useLocale()
   const pages = usePageTurn()
   return (
     <DataList
       label={t('userList')}
       id={listStart}
+      className={entryList.frame}
       items={comments.items}
       itemKey="id"
-      className="mx-auto max-w-3xl scroll-mt-4"
+      divided={false}
+      itemClass={entryList.item}
       minHeight={0}
       manual
       pagination
@@ -26,31 +28,9 @@ export function UserCommentList({ comments }: { comments: UserComments }) {
       pageSize={userPageSize}
       onPageChange={pages.turnTo}
       loading={pages.turning}
-      renderTitle={({ item }) => (
-        <Link asChild tone="neutral" className="line-clamp-3 font-normal break-words">
-          <RouterLink to={commentPath(locale, item.game.id, item.id)} prefetch="intent">
-            {item.parent !== null && (
-              <Text as="span" tone="faint">
-                {t('answering', { name: item.parent.creator.name })}
-              </Text>
-            )}
-            {publicText(item.content)}
-          </RouterLink>
-        </Link>
-      )}
-      renderMeta={({ item }) => (
-        <Text as="span" size="sm" tone="faint">
-          <Link asChild>
-            <RouterLink to={gamePath(locale, item.game.id)} prefetch="intent">
-              {gameTitle(item.game, locale)}
-            </RouterLink>
-          </Link>
-          {' · '}
-          <Time value={item.created} format="relative" />
-          {item.like_count > 0 && ` · ${t('likes', { count: item.like_count })}`}
-        </Text>
-      )}
-      renderEmpty={() => <Empty title={t('userEmpty')} />}
-    />
+      renderEmpty={() => <Empty title={t(own ? 'userEmptyOwn' : 'userEmpty')} size="sm" />}
+    >
+      {({ item }) => <UserCommentRow comment={item} />}
+    </DataList>
   )
 }

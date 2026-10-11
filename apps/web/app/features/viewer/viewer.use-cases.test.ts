@@ -21,6 +21,7 @@ describe('savePreferences', () => {
       .on('post', '/user/info/lang', undefined)
       .on('post', '/user/info/content-limit', undefined)
       .on('post', '/user/info/only-games-with-resources', undefined)
+      .on('post', '/user/info/profile-backgrounds', undefined)
     await savePreferences(fake.api, { contentLimit: 2 })
     expect(fake.requests.map(request => new URL(request.url).pathname)).toEqual([
       '/user/info/content-limit',
@@ -29,6 +30,8 @@ describe('savePreferences', () => {
     await expect(fake.requests[0]?.json()).resolves.toEqual({ content_limit: 2 })
     await expect(fake.requests[1]?.json()).resolves.toEqual({ lang: 'ja' })
     await expect(fake.requests[2]?.json()).resolves.toEqual({ only_games_with_resources: false })
+    await savePreferences(fake.api, { showProfileBackgrounds: false })
+    await expect(fake.requests[3]?.json()).resolves.toEqual({ show_profile_backgrounds: false })
   })
 })
 

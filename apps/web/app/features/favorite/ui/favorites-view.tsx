@@ -1,19 +1,18 @@
-import { Empty, Grid } from '@hina-ui/react'
+import { Empty, Stack, Text } from '@hina-ui/react'
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { useInPageNavigate } from '~/shared/route/use-in-page-navigate'
 import { Button } from '~/shared/ui/button'
-import { favoritesPath, type FavoriteItem, type Favorites } from '../favorite'
+import { favoritesPath, type Favorites } from '../favorite'
 import { EditListDialog } from './edit-list-dialog'
 import { FavoriteItems } from './favorite-items'
-import { ListHeading } from './list-heading'
-import { ListNav } from './list-nav'
+import { ListActions } from './list-actions'
+import { ListChips } from './list-chips'
 import { NewListDialog } from './new-list-dialog'
-import { NoteDialog } from './note-dialog'
 import { RemoveListDialog } from './remove-list-dialog'
 
-type Opened = 'create' | 'edit' | 'remove' | 'note' | undefined
+type Opened = 'create' | 'edit' | 'remove' | undefined
 
 type FavoritesViewProps = {
   favorites: Favorites
@@ -25,8 +24,8 @@ export function FavoritesView({ favorites, own }: FavoritesViewProps) {
   const locale = useLocale()
   const stay = useInPageNavigate()
   const [opened, setOpened] = useState<Opened>()
-  const [noted, setNoted] = useState<FavoriteItem>()
   const { owner, lists, selected } = favorites
+  const description = (selected?.description ?? '').trim()
   const toggle = (dialog: Exclude<Opened, undefined>) => (open: boolean) =>
     setOpened(open ? dialog : undefined)
   const go = (listId?: number) => stay(favoritesPath(locale, owner, listId))
@@ -38,6 +37,8 @@ export function FavoritesView({ favorites, own }: FavoritesViewProps) {
       <>
         <Empty
           title={t(own ? 'noListsOwn' : 'noListsPublic')}
+          size="sm"
+          className="py-10"
           actions={
             own && (
               <Button icon={<Plus />} onClick={() => setOpened('create')}>
@@ -52,31 +53,30 @@ export function FavoritesView({ favorites, own }: FavoritesViewProps) {
   }
   return (
     <>
-      <Grid className="items-start gap-6 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-8">
-        <ListNav
-          owner={owner}
-          lists={lists}
-          selected={selected}
-          onCreate={own ? () => setOpened('create') : undefined}
-        />
-        <FavoriteItems
-          favorites={favorites}
-          listId={selected.id}
-          own={own}
-          header={
-            <ListHeading
-              list={selected}
-              total={favorites.total}
-              onEdit={own ? () => setOpened('edit') : undefined}
-              onRemove={own && !selected.default ? () => setOpened('remove') : undefined}
-            />
-          }
-          onEditNote={item => {
-            setNoted(item)
-            setOpened('note')
-          }}
-        />
-      </Grid>
+      <Stack gap="sm" className="px-2.5 pt-4 pb-5 md:px-4.5">
+        <Stack gap="sm" className="px-1.5">
+          <ListChips
+            owner={owner}
+            lists={lists}
+            selected={selected}
+            actions={
+              own && (
+                <ListActions
+                  onCreate={() => setOpened('create')}
+                  onEdit={() => setOpened('edit')}
+                  onRemove={selected.default ? undefined : () => setOpened('remove')}
+                />
+              )
+            }
+          />
+          {description !== '' && (
+            <Text tone="muted" className="break-words whitespace-pre-line">
+              {description}
+            </Text>
+          )}
+        </Stack>
+        <FavoriteItems favorites={favorites} listId={selected.id} own={own} />
+      </Stack>
       {creation}
       {own && (
         <>
@@ -87,7 +87,6 @@ export function FavoritesView({ favorites, own }: FavoritesViewProps) {
             onOpenChange={toggle('remove')}
             onRemoved={() => go()}
           />
-          <NoteDialog item={noted} open={opened === 'note'} onOpenChange={toggle('note')} />
         </>
       )}
     </>

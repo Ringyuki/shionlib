@@ -13,6 +13,7 @@ describe('textIssue', () => {
   it('follows the constraints the API declares', () => {
     expect(textIssue(text({}), '  ')).toEqual({ kind: 'required' })
     expect(textIssue(text({ required: false }), '')).toBeUndefined()
+    expect(textIssue(text({ minLength: 0 }), ' ')).toBeUndefined()
     expect(textIssue(text({ minLength: 2 }), '汐')).toEqual({ kind: 'minLength', min: 2 })
     expect(textIssue(text({ minLength: 2 }), '汐音')).toBeUndefined()
     expect(textIssue(text({ maxLength: 3 }), 'abcd')).toEqual({ kind: 'maxLength', max: 3 })

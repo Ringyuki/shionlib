@@ -38,29 +38,21 @@
     },
     "games": "Game lists",
     "onlyWithResources": "Only games with resources",
-    "onlyWithResourcesHint": "The default for the library and search; you can change it for a single visit there"
+    "onlyWithResourcesHint": "The default for the library and search; you can change it for a single visit there",
+    "profiles": "Profiles",
+    "showBackgrounds": "Show the page backgrounds of other users",
+    "showBackgroundsHint": "When off, the profiles of other users use the default background of the site"
   },
   "personal": {
-    "avatar": "Avatar",
-    "avatarHint": "Shown as a circle. You choose the area when you upload.",
-    "changeAvatar": "Change avatar",
-    "cropAvatar": "Crop the avatar",
-    "cover": "Profile cover",
-    "coverHint": "Shown at the top of your profile. You choose the area when you upload.",
-    "changeCover": "Upload a cover",
-    "cropCover": "Crop the cover",
-    "pictureSaved": "Picture updated",
     "name": "User name",
     "nameHint": "Used to sign in, and shown beside what you upload and write",
     "nameLimit": "Up to {max} characters",
     "nameAvailable": "This user name is available",
     "nameTaken": "This user name is taken",
     "nameSaved": "User name changed",
-    "bio": "Bio",
-    "bioHint": "Shown on your profile",
-    "bioLimit": "Optional, up to {max} characters",
-    "bioSaved": "Bio saved",
-    "save": "Save",
-    "notImage": "Choose an image file"
+    "profile": "Profile",
+    "profileHint": "Your avatar, banner, bio and page background are changed on your profile",
+    "openProfile": "Go to your profile",
+    "save": "Save"
   }
 }

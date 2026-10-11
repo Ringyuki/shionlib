@@ -1,38 +1,26 @@
-import { DataList, Empty, Image, Inline, Link, Text } from '@hina-ui/react'
-import { Link as RouterLink } from 'react-router'
-import { useLocale, useTranslations } from 'use-intl'
-import { gameTitle, primaryCover } from '~/features/game'
+import { DataList, Empty } from '@hina-ui/react'
+import { useTranslations } from 'use-intl'
 import { listStart } from '~/shared/http/paging'
 import { usePageTurn } from '~/shared/route/use-page-turn'
-import {
-  stateOf,
-  userPageSize,
-  walkthroughPath,
-  writingPath,
-  type UserWalkthrough,
-  type UserWalkthroughs,
-} from '../walkthrough'
-import { WalkthroughState } from './walkthrough-state'
+import { entryList } from '~/shared/ui/entry-link'
+import { userPageSize, type UserWalkthroughs } from '../walkthrough'
+import { UserWalkthroughRow } from './user-walkthrough-row'
 
 type UserWalkthroughListProps = { walkthroughs: UserWalkthroughs; own: boolean }
 
 export function UserWalkthroughList({ walkthroughs, own }: UserWalkthroughListProps) {
   const t = useTranslations('walkthrough')
-  const locale = useLocale()
   const pages = usePageTurn()
-  const target = (item: UserWalkthrough) =>
-    own && stateOf(item) !== 'published'
-      ? writingPath(locale, item.game.id)
-      : walkthroughPath(locale, item.game.id, item.id)
   return (
     <DataList
       label={t('userList')}
       id={listStart}
+      className={entryList.frame}
       items={walkthroughs.items}
       itemKey="id"
-      className="scroll-mt-4"
+      divided={false}
+      itemClass={entryList.item}
       minHeight={0}
-      mediaRatio={3 / 4}
       manual
       pagination
       total={walkthroughs.total}
@@ -40,25 +28,9 @@ export function UserWalkthroughList({ walkthroughs, own }: UserWalkthroughListPr
       pageSize={userPageSize}
       onPageChange={pages.turnTo}
       loading={pages.turning}
-      renderMedia={({ item }) => (
-        <Image src={primaryCover(item.game)?.url} alt="" fit="cover" className="size-full" />
-      )}
-      renderTitle={({ item }) => (
-        <Inline as="span" gap="sm" align="center">
-          <Link asChild tone="neutral">
-            <RouterLink to={target(item)} prefetch="intent">
-              {gameTitle(item.game, locale)}
-            </RouterLink>
-          </Link>
-          <WalkthroughState walkthrough={item} />
-        </Inline>
-      )}
-      renderMeta={({ item }) => (
-        <Text as="span" size="xs" tone="muted">
-          {t('summary', { count: item.route_count, date: new Date(item.updated) })}
-        </Text>
-      )}
-      renderEmpty={() => <Empty title={t('empty')} />}
-    />
+      renderEmpty={() => <Empty title={t(own ? 'userEmptyOwn' : 'empty')} size="sm" />}
+    >
+      {({ item }) => <UserWalkthroughRow walkthrough={item} own={own} />}
+    </DataList>
   )
 }

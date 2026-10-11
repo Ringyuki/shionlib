@@ -19,6 +19,8 @@
   },
   "summary": "{count, number} 条线路，更新于 {date, date, long}",
   "summaryIn": "{language}，{count, number} 条线路，更新于 {date, date, long}",
+  "routeCount": "{count, number} 条线路",
+  "userEmptyOwn": "你尚未编写攻略",
   "note": "说明",
   "routes": "线路",
   "unnamed": "未命名线路",

@@ -2,4 +2,5 @@
 @import '@hina-ui/react/styles/tokens.css';
 @import './shared/ui/theme.css';
 @import './shared/ui/platform.css';
+@import './shared/ui/backdrop.css';
 @import './shared/editor/editor.css';

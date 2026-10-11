@@ -8,11 +8,9 @@ import {
   listEditCommand,
   listRemovalCommand,
   membershipChangeCommand,
-  noteChangeCommand,
 } from './favorite.schema'
 import {
   changeMembership,
-  changeNote,
   createList,
   editList,
   loadFavoriteLists,
@@ -55,9 +53,4 @@ export async function editFavoriteListAction(args: ActionFunctionArgs) {
 export async function removeFavoriteListAction(args: ActionFunctionArgs) {
   const removal = await readCommand(args, listRemovalCommand)
   return routeAction(args, api => removeList(api, removal))
-}
-
-export async function favoriteNoteAction(args: ActionFunctionArgs) {
-  const change = await readCommand(args, noteChangeCommand)
-  return routeAction(args, api => changeNote(api, change))
 }

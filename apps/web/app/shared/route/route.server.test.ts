@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { ApiError } from '~/shared/api/error'
 import { fakeApi } from '~/shared/api/testing'
 import { apiContext } from './api.server'
-import { readCommand, readUpload, routeAction, routeLazyLoader, routeLoader } from './route.server'
+import { readCommand, readForm, routeAction, routeLazyLoader, routeLoader } from './route.server'
 
 const failure = {
   code: 460103,
@@ -94,24 +94,35 @@ describe('readCommand', () => {
   })
 })
 
-describe('readUpload', () => {
+describe('readForm', () => {
   const post = (form: FormData) =>
     new Request('http://web.test/resources/x', { method: 'POST', body: form })
+  const pictures = v.object({ avatar: v.instance(File), note: v.optional(v.string()) })
 
-  it('returns the file sent under the field', async () => {
+  it('returns the files and texts the form carries', async () => {
     const form = new FormData()
     form.append('avatar', new File(['image'], 'a.png', { type: 'image/png' }))
-    const file = await readUpload({ request: post(form) }, 'avatar')
-    expect([file.name, file.type, file.size]).toEqual(['a.png', 'image/png', 5])
+    form.append('note', 'spring')
+    const read = await readForm({ request: post(form) }, pictures)
+    expect([read.avatar.name, read.avatar.type, read.avatar.size]).toEqual([
+      'a.png',
+      'image/png',
+      5,
+    ])
+    expect(read.note).toBe('spring')
   })
 
-  it('answers 400 when the field is missing or is not a file', async () => {
+  it('answers 400 when the form does not match or is not a form', async () => {
     const text = new FormData()
     text.append('avatar', 'not a file')
     for (const form of [new FormData(), text]) {
-      await expect(readUpload({ request: post(form) }, 'avatar')).rejects.toMatchObject({
+      await expect(readForm({ request: post(form) }, pictures)).rejects.toMatchObject({
         init: { status: 400 },
       })
     }
+    const json = new Request('http://web.test/resources/x', { method: 'POST', body: '{}' })
+    await expect(readForm({ request: json }, pictures)).rejects.toMatchObject({
+      init: { status: 400 },
+    })
   })
 })

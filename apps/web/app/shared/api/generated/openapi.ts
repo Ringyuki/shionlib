@@ -3027,6 +3027,24 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/user/info/background": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload a profile background */
+        post: operations["user.info.background"];
+        /** Remove the profile background */
+        delete: operations["user.info.removeBackground"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/user/info/bio": {
         parameters: {
             query?: never;
@@ -3072,7 +3090,8 @@ export type paths = {
         put?: never;
         /** Upload a profile cover */
         post: operations["user.info.cover"];
-        delete?: never;
+        /** Remove the profile cover */
+        delete: operations["user.info.removeCover"];
         options?: never;
         head?: never;
         patch?: never;
@@ -3174,6 +3193,23 @@ export type paths = {
         put?: never;
         /** Change the password */
         post: operations["user.info.password"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/info/profile-backgrounds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Show or hide the backgrounds of other users' profiles */
+        post: operations["user.info.showProfileBackgrounds"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7891,6 +7927,9 @@ export type components = {
             old_password: string;
             password: string;
         };
+        UpdateShowProfileBackgroundsInputBody: {
+            show_profile_backgrounds: boolean;
+        };
         UpdateSponsorOrderStatusInputBody: {
             /** @enum {string} */
             status: "NEW" | "DONE" | "EXPIRED" | "REFUND";
@@ -7946,7 +7985,7 @@ export type components = {
             is_liked: boolean;
             /** Format: int64 */
             like_count: number;
-            parent: components["schemas"]["CommentParentDTO"] | null;
+            parent: components["schemas"]["UserCommentParentDTO"] | null;
             /** Format: int64 */
             parent_id: number | null;
             /** Format: int64 */
@@ -7974,8 +8013,16 @@ export type components = {
             /** Format: int64 */
             totalPages: number;
         };
+        UserCommentParentDTO: {
+            content: components["schemas"]["RichTextDocument"];
+            creator: components["schemas"]["UserSummaryDTO"];
+            /** Format: int64 */
+            id: number;
+            text: string;
+        };
         UserMeDTO: {
             avatar: string | null;
+            background: string | null;
             bio: string | null;
             /** Format: int64 */
             content_limit: number;
@@ -7989,6 +8036,7 @@ export type components = {
             only_games_with_resources: boolean;
             /** Format: int64 */
             role: number;
+            show_profile_backgrounds: boolean;
             /** Format: date-time */
             sponsor_expires_at: string | null;
         };
@@ -8000,6 +8048,7 @@ export type components = {
         };
         UserProfileDTO: {
             avatar: string | null;
+            background: string | null;
             bio: string | null;
             /** Format: int64 */
             comment_count: number;
@@ -15298,6 +15347,73 @@ export interface operations {
             };
         };
     };
+    "user.info.background": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    background?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeUploadedImageDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "user.info.removeBackground": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     "user.info.bio": {
         parameters: {
             query?: never;
@@ -15390,6 +15506,36 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeUploadedImageDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "user.info.removeCover": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
                 };
             };
             /** @description Error */
@@ -15579,6 +15725,40 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["UpdatePasswordInputBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "user.info.showProfileBackgrounds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateShowProfileBackgroundsInputBody"];
             };
         };
         responses: {

@@ -19,6 +19,7 @@ export function SiteSection({ viewer }: { viewer: Viewer }) {
   const theme = useTheme()
   const limit = usePreferences()
   const resources = usePreferences()
+  const backgrounds = usePreferences()
   return (
     <>
       <Panel title={t('language')} description={t('languageHint')}>
@@ -75,6 +76,16 @@ export function SiteSection({ viewer }: { viewer: Viewer }) {
           description={t('onlyWithResourcesHint')}
         >
           {t('onlyWithResources')}
+        </Switch>
+      </Panel>
+      <Panel title={t('profiles')}>
+        <Switch
+          checked={backgrounds.saving?.showProfileBackgrounds ?? viewer.show_profile_backgrounds}
+          disabled={backgrounds.pending}
+          onCheckedChange={shown => void backgrounds.save({ showProfileBackgrounds: shown })}
+          description={t('showBackgroundsHint')}
+        >
+          {t('showBackgrounds')}
         </Switch>
       </Panel>
     </>

@@ -61,7 +61,7 @@ export function lengthOf<Body extends BodyName>(
 
 export function textIssue(constraint: FieldConstraint, value: string): FieldIssue | undefined {
   if (value.trim() === '') {
-    return constraint.required ? { kind: 'required' } : undefined
+    return constraint.required && constraint.minLength !== 0 ? { kind: 'required' } : undefined
   }
   const length = [...value].length
   if (constraint.minLength !== undefined && length < constraint.minLength) {

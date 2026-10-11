@@ -36,5 +36,9 @@
   },
   "userList": "投稿したコメント",
   "userEmpty": "コメントはまだありません",
+  "userEmptyOwn": "コメントをまだ投稿していません",
+  "userComment": "『{game}』へのコメント",
+  "userReply": "『{game}』で {name} さんに返信",
+  "replyCount": "返信 {count, number} 件",
   "likes": "いいね {count, number} 件"
 }

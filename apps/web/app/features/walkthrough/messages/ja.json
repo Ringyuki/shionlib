@@ -19,6 +19,8 @@
   },
   "summary": "{count, number} ルート、{date, date, long}更新",
   "summaryIn": "{language}、{count, number} ルート、{date, date, long}更新",
+  "routeCount": "ルート {count, number} 本",
+  "userEmptyOwn": "攻略をまだ書いていません",
   "note": "説明",
   "routes": "ルート",
   "unnamed": "名前のないルート",

@@ -1,23 +1,8 @@
-import { UploadList, loadUploads, uploadsPageSize } from '~/features/profile'
-import { keepWithinPages, requestedPage } from '~/shared/route/paging'
-import { idParam } from '~/shared/route/params'
-import { routeLoader } from '~/shared/route/route.server'
+import { UploadList } from '~/features/profile'
 import type { Route } from './+types/user.uploads'
 
-export async function loader(args: Route.LoaderArgs) {
-  const id = idParam(args.params.id)
-  const page = requestedPage(args.url)
-  const uploads = await routeLoader(args, api => loadUploads(api, id, page))
-  keepWithinPages(args.url, uploads.total, uploadsPageSize)
-  return uploads
-}
+export { uploadsLoader as loader } from '~/features/profile/profile.server'
 
-export default function UserUploadsRoute({ loaderData, matches }: Route.ComponentProps) {
-  const [, , site, , user] = matches
-  return (
-    <UploadList
-      uploads={loaderData}
-      own={site.loaderData.viewer?.id === user.loaderData.profile.id}
-    />
-  )
+export default function UserUploadsRoute({ loaderData }: Route.ComponentProps) {
+  return <UploadList uploads={loaderData} />
 }

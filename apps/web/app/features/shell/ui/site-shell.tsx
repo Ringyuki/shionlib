@@ -1,7 +1,8 @@
-import { AppShell, Container, ScrollTop, Stack, type AppShellHandle } from '@hina-ui/react'
-import { useRef, type ReactNode } from 'react'
+import { AppShell, Container, Flex, ScrollTop, Stack, type AppShellHandle } from '@hina-ui/react'
+import { useRef, useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import type { Schema } from '~/shared/api/types'
+import { BackdropSlot } from '~/shared/ui/backdrop'
 import { navSections, type SidebarMode } from '../shell'
 import { useShellState } from '../use-shell-state'
 import { clearOfFooter, SiteFooter } from './site-footer'
@@ -22,6 +23,7 @@ export function SiteShell({ viewer, sidebar, unread, children }: SiteShellProps)
   const t = useTranslations('shell')
   const shell = useRef<AppShellHandle>(null)
   const state = useShellState(sidebar)
+  const [backdrop, setBackdrop] = useState<HTMLElement | null>(null)
   return (
     <>
       <AppShell
@@ -42,12 +44,26 @@ export function SiteShell({ viewer, sidebar, unread, children }: SiteShellProps)
         }
         header={<SiteHeader />}
       >
-        <Container size="xl" className="flex min-h-full flex-col px-4 py-6 sm:px-6 lg:py-8">
-          <Stack gap="none" className="flex-1">
-            {children}
-          </Stack>
-          <SiteFooter />
-        </Container>
+        <BackdropSlot value={backdrop}>
+          <Flex aria-hidden className="sticky top-0 h-0 max-md:hidden">
+            <Flex
+              ref={setBackdrop}
+              className="absolute inset-x-0 top-0 h-[calc(100dvh-var(--hn-app-shell-header-h))] overflow-hidden"
+            />
+          </Flex>
+          <Flex className="relative min-h-full flex-col">
+            <Container size="xl" className="flex flex-1 flex-col px-4 pt-6 sm:px-6 lg:pt-8">
+              <Stack gap="none" className="flex-1">
+                {children}
+              </Stack>
+            </Container>
+            <Flex className="bg-canvas mt-10">
+              <Container size="xl" className="px-4 pt-6 pb-6 sm:px-6 lg:pb-8">
+                <SiteFooter />
+              </Container>
+            </Flex>
+          </Flex>
+        </BackdropSlot>
       </AppShell>
       <ScrollTop
         target={() => shell.current?.mainViewport}

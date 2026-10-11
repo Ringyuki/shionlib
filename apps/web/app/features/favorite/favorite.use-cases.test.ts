@@ -3,7 +3,6 @@ import { fakeApi } from '~/shared/api/testing'
 import type { ApiData, Schema } from '~/shared/api/types'
 import {
   changeMembership,
-  changeNote,
   createList,
   editList,
   isFavorite,
@@ -95,7 +94,7 @@ describe('loadFavorites', () => {
     const [lists, items] = fake.requests.map(request => new URL(request.url))
     expect(lists?.searchParams.get('user_id')).toBe('3')
     expect(items?.pathname).toBe('/favorites/4/items')
-    expect(Object.fromEntries(items?.searchParams ?? [])).toEqual({ page: '2', pageSize: '20' })
+    expect(Object.fromEntries(items?.searchParams ?? [])).toEqual({ page: '2', pageSize: '24' })
   })
 
   it('opens the default list when none is named', async () => {
@@ -169,15 +168,6 @@ describe('removeList', () => {
       'DELETE',
       '/favorites/4',
     ])
-  })
-})
-
-describe('changeNote', () => {
-  it('saves the note of an item', async () => {
-    const fake = fakeApi().on('patch', '/favorites/items/{item_id}', undefined)
-    await changeNote(fake.api, { itemId: 12, note: ' 等汉化补丁 ' })
-    expect(new URL(fake.requests[0]?.url ?? '').pathname).toBe('/favorites/items/12')
-    await expect(fake.requests[0]?.json()).resolves.toEqual({ note: '等汉化补丁' })
   })
 })
 

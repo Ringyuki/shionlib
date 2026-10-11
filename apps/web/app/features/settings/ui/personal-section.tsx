@@ -1,14 +1,22 @@
+import { Panel } from '@hina-ui/react'
+import { Link } from 'react-router'
+import { useLocale, useTranslations } from 'use-intl'
+import { profilePath } from '~/features/profile'
 import type { Viewer } from '~/features/viewer'
-import { BioPanel } from './bio-panel'
+import { Button } from '~/shared/ui/button'
 import { NamePanel } from './name-panel'
-import { PicturePanels } from './picture-panels'
 
 export function PersonalSection({ viewer }: { viewer: Viewer }) {
+  const t = useTranslations('settings.personal')
+  const locale = useLocale()
   return (
     <>
-      <PicturePanels viewer={viewer} />
       <NamePanel key={viewer.name} current={viewer.name} />
-      <BioPanel key={viewer.bio ?? ''} current={(viewer.bio ?? '').trim()} />
+      <Panel title={t('profile')} description={t('profileHint')}>
+        <Button asChild variant="outline" tone="neutral">
+          <Link to={profilePath(locale, viewer.id)}>{t('openProfile')}</Link>
+        </Button>
+      </Panel>
     </>
   )
 }

@@ -1,57 +1,54 @@
-import { Stack, Tabs, TabsContent, TabsList, TabsTrigger, Text } from '@hina-ui/react'
+import { Flex, Inline, Link, Tabs, TabsContent, TabsList, TabsTrigger, Text } from '@hina-ui/react'
 import type { ReactNode } from 'react'
-import { useFormatter, useTranslations } from 'use-intl'
-import type { Profile } from '../profile'
+import { Link as RouterLink } from 'react-router'
+import { useFormatter, useLocale, useTranslations } from 'use-intl'
+import { sitePaths } from '~/features/shell'
+import { countOf, type Profile, type ProfileTab } from '../profile'
 import { profileTabFrom } from '../profile.schema'
-import { useProfileTabs } from '../use-profile-tabs'
 
 type ProfileTabsProps = {
   profile: Profile
-  header: ReactNode
+  own: boolean
+  tabs: { current: ProfileTab; shown: ProfileTab[]; select: (tab: ProfileTab) => void }
   children: ReactNode
 }
 
-export function ProfileTabs({ profile, header, children }: ProfileTabsProps) {
+export function ProfileTabs({ profile, own, tabs, children }: ProfileTabsProps) {
   const t = useTranslations('profile.tabs')
+  const locale = useLocale()
   const format = useFormatter()
-  const { current, select } = useProfileTabs(profile.id)
   return (
     <Tabs
-      value={current}
+      value={tabs.current}
       onValueChange={value => {
         const tab = profileTabFrom(value)
         if (tab !== undefined) {
-          select(tab)
+          tabs.select(tab)
         }
       }}
+      size="lg"
+      className="mt-5"
     >
-      <Stack gap="lg">
-        <Stack gap="xl">
-          {header}
-          <TabsList label={t('label')}>
-            <TabsTrigger value="uploads">
-              {t('uploads')}
-              <Text as="span" size="sm" tone="faint" className="ms-1.5 tabular-nums">
-                {format.number(profile.resource_count)}
+      <Inline gap="none" align="stretch" wrap={false}>
+        <TabsList label={t('label')} className="min-w-0 flex-1">
+          {tabs.shown.map(tab => (
+            <TabsTrigger key={tab} value={tab} className="first:ms-0.5 sm:first:ms-2.5">
+              {t(tab)}
+              <Text as="span" size="sm" tone="faint" className="ms-2 font-normal tabular-nums">
+                {format.number(countOf(profile, tab))}
               </Text>
             </TabsTrigger>
-            <TabsTrigger value="favorites">{t('favorites')}</TabsTrigger>
-            <TabsTrigger value="comments">
-              {t('comments')}
-              <Text as="span" size="sm" tone="faint" className="ms-1.5 tabular-nums">
-                {format.number(profile.comment_count)}
-              </Text>
-            </TabsTrigger>
-            <TabsTrigger value="walkthroughs">
-              {t('walkthroughs')}
-              <Text as="span" size="sm" tone="faint" className="ms-1.5 tabular-nums">
-                {format.number(profile.walkthrough_count)}
-              </Text>
-            </TabsTrigger>
-          </TabsList>
-        </Stack>
-        <TabsContent value={current}>{children}</TabsContent>
-      </Stack>
+          ))}
+        </TabsList>
+        {own && tabs.current === 'uploads' && (
+          <Flex align="center" className="border-line shrink-0 border-b pe-4 sm:pe-6">
+            <Link asChild className="text-sm">
+              <RouterLink to={sitePaths(locale).uploads}>{t('manageUploads')}</RouterLink>
+            </Link>
+          </Flex>
+        )}
+      </Inline>
+      <TabsContent value={tabs.current}>{children}</TabsContent>
     </Tabs>
   )
 }

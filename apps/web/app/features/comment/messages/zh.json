@@ -36,5 +36,9 @@
   },
   "userList": "发表的评论",
   "userEmpty": "暂无评论",
+  "userEmptyOwn": "你尚未发表评论",
+  "userComment": "评论《{game}》",
+  "userReply": "在《{game}》回复 {name}",
+  "replyCount": "{count, number} 条回复",
   "likes": "{count, number} 个赞"
 }

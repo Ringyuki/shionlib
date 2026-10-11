@@ -25,5 +25,10 @@ export async function savePreferences(api: ApiClient, change: PreferenceChange) 
       body: { only_games_with_resources: change.onlyGamesWithResources },
     })
   }
+  if (change.showProfileBackgrounds !== undefined) {
+    await api.post('/user/info/profile-backgrounds', {
+      body: { show_profile_backgrounds: change.showProfileBackgrounds },
+    })
+  }
   return null
 }

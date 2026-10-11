@@ -2,22 +2,64 @@
   "sponsor": "Sponsor",
   "admin": "Admin",
   "banned": "Banned",
-  "edit": "Edit profile",
   "joined": "Joined {date}",
+  "coverOf": "Banner of {name}",
+  "avatarOf": "Avatar of {name}",
+  "nothing": "Nothing public yet",
   "tabs": {
     "label": "User content",
     "uploads": "Uploads",
     "favorites": "Favorites",
     "comments": "Comments",
-    "walkthroughs": "Walkthroughs"
+    "walkthroughs": "Walkthroughs",
+    "manageUploads": "Manage my uploads"
   },
   "uploads": {
     "label": "Uploaded resources",
     "otherFiles": "{count, plural, one {and # more file} other {and # more files}}",
     "downloads": "{count, plural, one {# download} other {# downloads}}",
-    "updated": "Updated <time></time>",
     "empty": "This user has not uploaded any resources yet",
     "emptyOwn": "You have not uploaded any resources yet",
     "upload": "Upload a resource"
+  },
+  "edit": {
+    "open": "Edit profile",
+    "title": "Edit profile",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saved": "Profile saved",
+    "cover": {
+      "current": "Current banner",
+      "upload": "Upload a banner",
+      "change": "Change the banner",
+      "remove": "Remove the banner"
+    },
+    "avatar": {
+      "current": "Current avatar",
+      "upload": "Upload an avatar",
+      "change": "Change the avatar"
+    },
+    "bio": "Bio",
+    "bioCount": "{count, number} / {max, number}",
+    "background": {
+      "label": "Page background",
+      "hint": "Shown behind the content of your profile, not on phones",
+      "current": "Current page background",
+      "upload": "Upload a picture",
+      "change": "Change",
+      "remove": "Remove"
+    },
+    "account": "Your user name, email and password are changed in <link>account settings</link>",
+    "crop": {
+      "avatar": "Crop the avatar",
+      "cover": "Crop the banner",
+      "background": "Crop the page background"
+    },
+    "unsupported": "Only JPEG, PNG, WebP and AVIF pictures are supported",
+    "discard": {
+      "title": "Discard the changes you have not saved?",
+      "confirm": "Discard changes",
+      "cancel": "Keep editing"
+    }
   }
 }

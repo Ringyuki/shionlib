@@ -19,6 +19,8 @@
   },
   "summary": "{count, plural, one {# route} other {# routes}}, updated {date, date, long}",
   "summaryIn": "{language}, {count, plural, one {# route} other {# routes}}, updated {date, date, long}",
+  "routeCount": "{count, plural, one {# route} other {# routes}}",
+  "userEmptyOwn": "You have not written any walkthroughs yet",
   "note": "Notes",
   "routes": "Routes",
   "unnamed": "Unnamed route",

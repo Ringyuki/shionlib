@@ -15,9 +15,8 @@ export function meta({ loaderData }: Route.MetaArgs) {
 
 export default function UserRoute({ loaderData, matches }: Route.ComponentProps) {
   const [, , site] = matches
-  const { profile } = loaderData
   return (
-    <ProfilePage profile={profile} own={site.loaderData.viewer?.id === profile.id}>
+    <ProfilePage profile={loaderData.profile} viewer={site.loaderData.viewer}>
       <Outlet />
     </ProfilePage>
   )

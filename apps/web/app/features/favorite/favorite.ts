@@ -14,7 +14,7 @@ export type Favorites = {
   page: number
 }
 
-export const itemsPageSize = 20
+export const itemsPageSize = 24
 
 export function isInAnyList(lists: readonly FavoriteList[]): boolean {
   return lists.some(list => list.is_favorite === true)

@@ -1,0 +1,27 @@
+@utility frosted {
+  @media (min-width: 48rem) {
+    --hn-fg-muted: var(--color-neutral-700);
+    --hn-fg-subtle: var(--color-neutral-600);
+
+    background-color: color-mix(in srgb, var(--hn-bg-canvas) 85%, transparent);
+    backdrop-filter: blur(24px);
+
+    :where(.dark) & {
+      --hn-fg-muted: var(--color-neutral-300);
+      --hn-fg-subtle: var(--color-neutral-400);
+
+      background-color: color-mix(in srgb, var(--hn-bg-canvas) 72%, transparent);
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    background-color: var(--hn-bg-canvas);
+    backdrop-filter: none;
+  }
+}
+
+@utility backdrop-scrim {
+  :where(.dark) & {
+    background-color: rgb(0 0 0 / 0.45);
+  }
+}

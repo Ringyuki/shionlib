@@ -5,6 +5,7 @@ import {
   commentAnchor,
   commentPath,
   commentsPath,
+  firstLine,
   isPending,
   likesOf,
   searchFocusing,
@@ -44,6 +45,14 @@ describe('addresses', () => {
     expect(threadOrderFrom('oldest')).toBe('oldest')
     expect(threadOrderFrom('best')).toBe('newest')
     expect(threadOrderFrom(null)).toBe('newest')
+  })
+})
+
+describe('firstLine', () => {
+  it('quotes the first line of a comment', () => {
+    expect(firstLine('  解压失败\n第二行')).toBe('解压失败')
+    expect(firstLine('一行')).toBe('一行')
+    expect(firstLine('')).toBe('')
   })
 })
 
