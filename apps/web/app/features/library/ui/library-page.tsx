@@ -1,7 +1,8 @@
-import { Card, Grid, Heading, Inline, PageHeader, Stack } from '@hina-ui/react'
+import { Affix, Card, Grid, Heading, Inline, PageHeader, Stack } from '@hina-ui/react'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { Button } from '~/shared/ui/button'
+import { sideOffset } from '~/shared/ui/side-column'
 import { conditionsOf, type LibraryContent } from '../library'
 import { useLibraryAddress } from '../use-library-address'
 import { FilterSheet } from './filter-sheet'
@@ -30,33 +31,31 @@ export function LibraryPage({ content, filtered }: LibraryPageProps) {
           filtered={filtered}
           onOpenFilters={() => setSheetOpen(true)}
         />
-        <Card
-          as="aside"
-          aria-labelledby="library-filters"
-          className="max-xl:hidden xl:sticky xl:top-6"
-        >
-          <Stack gap="md">
-            <Inline align="center" justify="between" wrap={false}>
-              <Heading id="library-filters" level={2} size="sm" weight="semibold">
-                {t('filters.title')}
-              </Heading>
-              <Button
-                size="sm"
-                variant="link"
-                disabled={conditions.length === 0}
-                onClick={controls.reset}
-              >
-                {t('filters.reset')}
-              </Button>
-            </Inline>
-            <LibraryFilters
-              address={controls.shown}
-              years={content.years}
-              filtered={filtered}
-              onChange={controls.narrow}
-            />
-          </Stack>
-        </Card>
+        <Affix offset={sideOffset} className="max-xl:hidden">
+          <Card as="aside" aria-labelledby="library-filters">
+            <Stack gap="md">
+              <Inline align="center" justify="between" wrap={false}>
+                <Heading id="library-filters" level={2} size="sm" weight="semibold">
+                  {t('filters.title')}
+                </Heading>
+                <Button
+                  size="sm"
+                  variant="link"
+                  disabled={conditions.length === 0}
+                  onClick={controls.reset}
+                >
+                  {t('filters.reset')}
+                </Button>
+              </Inline>
+              <LibraryFilters
+                address={controls.shown}
+                years={content.years}
+                filtered={filtered}
+                onChange={controls.narrow}
+              />
+            </Stack>
+          </Card>
+        </Affix>
       </Grid>
       <FilterSheet
         open={sheetOpen}

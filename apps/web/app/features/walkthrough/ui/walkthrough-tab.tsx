@@ -1,6 +1,7 @@
 import { Empty, LineClamp, Stack } from '@hina-ui/react'
 import { useLocale, useTranslations } from 'use-intl'
 import { RichText } from '~/shared/ui/rich-text'
+import { SideColumn } from '~/shared/ui/side-column'
 import { useShownRoute } from '../use-shown-route'
 import {
   facesOf,
@@ -79,9 +80,9 @@ function Routes({ routes, credits }: { routes: readonly Route[]; credits: readon
               />
             )}
           />
-          <Stack gap="none" className="w-70 shrink-0 max-lg:hidden">
+          <SideColumn className="w-70 shrink-0 max-lg:hidden">
             <RouteNav routes={routes} faces={faces} index={index} hrefOf={hrefOf} />
-          </Stack>
+          </SideColumn>
         </>
       )}
       <Stack gap="none" className="min-w-0 flex-1">

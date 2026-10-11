@@ -1,10 +1,11 @@
-import { Grid, PageHeader, Result, Stack } from '@hina-ui/react'
+import { Affix, Grid, PageHeader, Result, Stack } from '@hina-ui/react'
 import { Upload } from 'lucide-react'
 import { Link } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 import type { ResourceViewer } from '~/features/resource'
 import { sitePaths } from '~/features/shell'
 import { Button } from '~/shared/ui/button'
+import { sideOffset } from '~/shared/ui/side-column'
 import type { UploaderContent } from '../uploader'
 import { useLiveRefresh } from '../use-live-refresh'
 import { useTransfers } from '../use-transfers'
@@ -61,7 +62,9 @@ function Workspace({
   return (
     <Grid className="items-start gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
       <UploadList content={content} transfers={transfers} viewer={viewer} />
-      <Account allowance={allowance} summary={summary} className="xl:sticky xl:top-6" />
+      <Affix offset={sideOffset}>
+        <Account allowance={allowance} summary={summary} />
+      </Affix>
     </Grid>
   )
 }

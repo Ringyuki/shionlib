@@ -1,6 +1,7 @@
-import { cn, Inline, SegmentedControl, Stack, Text } from '@hina-ui/react'
+import { Affix, cn, SegmentedControl, Stack, Text } from '@hina-ui/react'
 import { useState } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
+import { SideColumn } from '~/shared/ui/side-column'
 import { useWalkthroughWriting } from '../use-walkthrough-writing'
 import { facesOf, portraitsIn } from '../walkthrough'
 import { routesOf, savesOf } from '../walkthrough-draft'
@@ -75,9 +76,9 @@ export function WritingDesk({ writing }: { writing: Writing }) {
               renderRoutes={close => parts(true, close)}
             />
           )}
-          <Stack gap="none" className={cn('w-70 shrink-0', route !== undefined && 'max-lg:hidden')}>
+          <SideColumn className={cn('w-70 shrink-0', route !== undefined && 'max-lg:hidden')}>
             {parts(false)}
-          </Stack>
+          </SideColumn>
           {route !== undefined && (
             <Stack gap="none" className="min-w-0 flex-1 gap-4">
               <SegmentedControl
@@ -109,9 +110,12 @@ export function WritingDesk({ writing }: { writing: Writing }) {
           )}
         </Stack>
       </Stack>
-      <Inline className="bg-canvas border-line sticky bottom-0 z-10 -mx-4 mt-auto border-t px-4 py-3 sm:-mx-6 sm:px-6 md:hidden">
+      <Affix
+        position="bottom"
+        className="bg-canvas border-line -mx-4 mt-auto border-t px-4 py-3 sm:-mx-6 sm:px-6 md:hidden"
+      >
         <SaveButtons block className="w-full" {...saving} />
-      </Inline>
+      </Affix>
       <LeaveDialog guard={writer.guard} />
       <RemoveDialog
         walkthroughId={writer.walkthroughId}

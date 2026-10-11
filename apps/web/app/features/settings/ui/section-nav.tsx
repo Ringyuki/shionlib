@@ -4,6 +4,7 @@ import { useLocation } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 import { InPageLink } from '~/shared/route/in-page-link'
 import { useInPageNavigate } from '~/shared/route/use-in-page-navigate'
+import { SideColumn } from '~/shared/ui/side-column'
 import { sectionAt, sectionPath, sections } from '../settings'
 import { sectionFrom } from '../settings.schema'
 
@@ -35,22 +36,24 @@ export function SectionNav() {
         options={sections.map(section => ({ value: section, label: t(`section.${section}`) }))}
         className="lg:hidden"
       />
-      <Stack as="nav" gap="xs" aria-label={t('sectionsLabel')} className="max-lg:hidden">
-        {sections.map(section => {
-          const Icon = icons[section]
-          return (
-            <NavLink
-              key={section}
-              as={InPageLink}
-              href={sectionPath(locale, section)}
-              active={section === current}
-              icon={<Icon />}
-            >
-              {t(`section.${section}`)}
-            </NavLink>
-          )
-        })}
-      </Stack>
+      <SideColumn className="max-lg:hidden">
+        <Stack as="nav" gap="xs" aria-label={t('sectionsLabel')}>
+          {sections.map(section => {
+            const Icon = icons[section]
+            return (
+              <NavLink
+                key={section}
+                as={InPageLink}
+                href={sectionPath(locale, section)}
+                active={section === current}
+                icon={<Icon />}
+              >
+                {t(`section.${section}`)}
+              </NavLink>
+            )
+          })}
+        </Stack>
+      </SideColumn>
     </>
   )
 }

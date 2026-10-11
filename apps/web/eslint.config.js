@@ -78,6 +78,15 @@ const ghostOnEdge = {
     'A ghost button on an edge shows its padding as a misalignment: use outline for an action that stands alone, a hina-ui Link for a way back, or add flushStart / flushEnd (~/shared/ui/flush) through cn so its content meets the edge.',
 }
 
+const rawSticky = {
+  selector:
+    'Literal[value=/(?:^|[\\s:])sticky(?:!|\\s|$)/], TemplateElement[value.raw=/(?:^|[\\s:])sticky(?:!|\\s|$)/]',
+  message:
+    'What stays in view while the page scrolls is a hina-ui Affix; a column beside the content is SideColumn (~/shared/ui/side-column).',
+}
+
+const shellGeometry = ['app/features/shell/ui/site-shell.tsx']
+
 const ownWidth = {
   selector:
     'Literal[value=/(?=.*(?:^|[\\s:])mx-auto(?:\\s|$))(?=.*(?:^|[\\s:])max-w-)/], TemplateElement[value.raw=/(?=.*(?:^|[\\s:])mx-auto(?:\\s|$))(?=.*(?:^|[\\s:])max-w-)/]',
@@ -140,6 +149,7 @@ const appSyntax = [
   nativeScroll,
   ghostOnEdge,
   ownWidth,
+  rawSticky,
   directFetcher,
   rawAddress,
   pagedListStart,
@@ -537,6 +547,12 @@ export default defineConfig([
     files: ownWidthPages,
     rules: {
       'no-restricted-syntax': ['error', ...appSyntax.filter(rule => rule !== ownWidth)],
+    },
+  },
+  {
+    files: shellGeometry,
+    rules: {
+      'no-restricted-syntax': ['error', ...appSyntax.filter(rule => rule !== rawSticky)],
     },
   },
 ])

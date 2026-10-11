@@ -20,17 +20,16 @@ import type { Summary } from '../uploader'
 type AccountProps = {
   allowance: Allowance
   summary: Summary
-  className?: string
 }
 
-export function Account({ allowance, summary, className }: AccountProps) {
+export function Account({ allowance, summary }: AccountProps) {
   const t = useTranslations('uploader.account')
   const format = useFormatter()
   const bytes = useBytes()
   const limit = allowance.stored_limit
   const frozen = allowance.frozen_until
   return (
-    <Card as="aside" aria-label={t('title')} className={className}>
+    <Card as="aside" aria-label={t('title')}>
       <Stack gap="md">
         {limit === null ? (
           <Inline gap="md" align="baseline" justify="between" wrap={false}>
