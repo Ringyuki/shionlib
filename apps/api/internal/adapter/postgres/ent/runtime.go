@@ -40,6 +40,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamerelation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadchunk"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspection"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspectionentry"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
@@ -857,11 +859,11 @@ func init() {
 	// gamedownloadresourcefile.DefaultIsVirusFalsePositive holds the default value on creation for the is_virus_false_positive field.
 	gamedownloadresourcefile.DefaultIsVirusFalsePositive = gamedownloadresourcefileDescIsVirusFalsePositive.Default.(bool)
 	// gamedownloadresourcefileDescCreated is the schema descriptor for created field.
-	gamedownloadresourcefileDescCreated := gamedownloadresourcefileFields[16].Descriptor()
+	gamedownloadresourcefileDescCreated := gamedownloadresourcefileFields[18].Descriptor()
 	// gamedownloadresourcefile.DefaultCreated holds the default value on creation for the created field.
 	gamedownloadresourcefile.DefaultCreated = gamedownloadresourcefileDescCreated.Default.(func() time.Time)
 	// gamedownloadresourcefileDescUpdated is the schema descriptor for updated field.
-	gamedownloadresourcefileDescUpdated := gamedownloadresourcefileFields[17].Descriptor()
+	gamedownloadresourcefileDescUpdated := gamedownloadresourcefileFields[19].Descriptor()
 	// gamedownloadresourcefile.DefaultUpdated holds the default value on creation for the updated field.
 	gamedownloadresourcefile.DefaultUpdated = gamedownloadresourcefileDescUpdated.Default.(func() time.Time)
 	// gamedownloadresourcefile.UpdateDefaultUpdated holds the default value on update for the updated field.
@@ -964,6 +966,128 @@ func init() {
 	gameuploadsession.DefaultUpdated = gameuploadsessionDescUpdated.Default.(func() time.Time)
 	// gameuploadsession.UpdateDefaultUpdated holds the default value on update for the updated field.
 	gameuploadsession.UpdateDefaultUpdated = gameuploadsessionDescUpdated.UpdateDefault.(func() time.Time)
+	inspectionFields := schema.Inspection{}.Fields()
+	_ = inspectionFields
+	// inspectionDescStatus is the schema descriptor for status field.
+	inspectionDescStatus := inspectionFields[2].Descriptor()
+	// inspection.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	inspection.StatusValidator = inspectionDescStatus.Validators[0].(func(string) error)
+	// inspectionDescArchiveFormat is the schema descriptor for archive_format field.
+	inspectionDescArchiveFormat := inspectionFields[3].Descriptor()
+	// inspection.DefaultArchiveFormat holds the default value on creation for the archive_format field.
+	inspection.DefaultArchiveFormat = inspectionDescArchiveFormat.Default.(string)
+	// inspection.ArchiveFormatValidator is a validator for the "archive_format" field. It is called by the builders before save.
+	inspection.ArchiveFormatValidator = inspectionDescArchiveFormat.Validators[0].(func(string) error)
+	// inspectionDescSolid is the schema descriptor for solid field.
+	inspectionDescSolid := inspectionFields[4].Descriptor()
+	// inspection.DefaultSolid holds the default value on creation for the solid field.
+	inspection.DefaultSolid = inspectionDescSolid.Default.(bool)
+	// inspectionDescVolumes is the schema descriptor for volumes field.
+	inspectionDescVolumes := inspectionFields[5].Descriptor()
+	// inspection.DefaultVolumes holds the default value on creation for the volumes field.
+	inspection.DefaultVolumes = inspectionDescVolumes.Default.(int)
+	// inspectionDescRecovery is the schema descriptor for recovery field.
+	inspectionDescRecovery := inspectionFields[6].Descriptor()
+	// inspection.DefaultRecovery holds the default value on creation for the recovery field.
+	inspection.DefaultRecovery = inspectionDescRecovery.Default.(bool)
+	// inspectionDescRecoveryPercent is the schema descriptor for recovery_percent field.
+	inspectionDescRecoveryPercent := inspectionFields[7].Descriptor()
+	// inspection.DefaultRecoveryPercent holds the default value on creation for the recovery_percent field.
+	inspection.DefaultRecoveryPercent = inspectionDescRecoveryPercent.Default.(int)
+	// inspectionDescNameEncoding is the schema descriptor for name_encoding field.
+	inspectionDescNameEncoding := inspectionFields[8].Descriptor()
+	// inspection.DefaultNameEncoding holds the default value on creation for the name_encoding field.
+	inspection.DefaultNameEncoding = inspectionDescNameEncoding.Default.(string)
+	// inspection.NameEncodingValidator is a validator for the "name_encoding" field. It is called by the builders before save.
+	inspection.NameEncodingValidator = inspectionDescNameEncoding.Validators[0].(func(string) error)
+	// inspectionDescFileCount is the schema descriptor for file_count field.
+	inspectionDescFileCount := inspectionFields[9].Descriptor()
+	// inspection.DefaultFileCount holds the default value on creation for the file_count field.
+	inspection.DefaultFileCount = inspectionDescFileCount.Default.(int)
+	// inspectionDescFolderCount is the schema descriptor for folder_count field.
+	inspectionDescFolderCount := inspectionFields[10].Descriptor()
+	// inspection.DefaultFolderCount holds the default value on creation for the folder_count field.
+	inspection.DefaultFolderCount = inspectionDescFolderCount.Default.(int)
+	// inspectionDescUnpackedSize is the schema descriptor for unpacked_size field.
+	inspectionDescUnpackedSize := inspectionFields[11].Descriptor()
+	// inspection.DefaultUnpackedSize holds the default value on creation for the unpacked_size field.
+	inspection.DefaultUnpackedSize = inspectionDescUnpackedSize.Default.(int64)
+	// inspectionDescDiscCount is the schema descriptor for disc_count field.
+	inspectionDescDiscCount := inspectionFields[12].Descriptor()
+	// inspection.DefaultDiscCount holds the default value on creation for the disc_count field.
+	inspection.DefaultDiscCount = inspectionDescDiscCount.Default.(int)
+	// inspectionDescDiscFileCount is the schema descriptor for disc_file_count field.
+	inspectionDescDiscFileCount := inspectionFields[13].Descriptor()
+	// inspection.DefaultDiscFileCount holds the default value on creation for the disc_file_count field.
+	inspection.DefaultDiscFileCount = inspectionDescDiscFileCount.Default.(int)
+	// inspectionDescTruncated is the schema descriptor for truncated field.
+	inspectionDescTruncated := inspectionFields[14].Descriptor()
+	// inspection.DefaultTruncated holds the default value on creation for the truncated field.
+	inspection.DefaultTruncated = inspectionDescTruncated.Default.(bool)
+	// inspectionDescVerified is the schema descriptor for verified field.
+	inspectionDescVerified := inspectionFields[15].Descriptor()
+	// inspection.DefaultVerified holds the default value on creation for the verified field.
+	inspection.DefaultVerified = inspectionDescVerified.Default.(bool)
+	// inspectionDescScanEngine is the schema descriptor for scan_engine field.
+	inspectionDescScanEngine := inspectionFields[16].Descriptor()
+	// inspection.DefaultScanEngine holds the default value on creation for the scan_engine field.
+	inspection.DefaultScanEngine = inspectionDescScanEngine.Default.(string)
+	// inspection.ScanEngineValidator is a validator for the "scan_engine" field. It is called by the builders before save.
+	inspection.ScanEngineValidator = inspectionDescScanEngine.Validators[0].(func(string) error)
+	// inspectionDescScannedCount is the schema descriptor for scanned_count field.
+	inspectionDescScannedCount := inspectionFields[18].Descriptor()
+	// inspection.DefaultScannedCount holds the default value on creation for the scanned_count field.
+	inspection.DefaultScannedCount = inspectionDescScannedCount.Default.(int)
+	// inspectionDescScanLimit is the schema descriptor for scan_limit field.
+	inspectionDescScanLimit := inspectionFields[20].Descriptor()
+	// inspection.DefaultScanLimit holds the default value on creation for the scan_limit field.
+	inspection.DefaultScanLimit = inspectionDescScanLimit.Default.(int64)
+	// inspectionDescCreated is the schema descriptor for created field.
+	inspectionDescCreated := inspectionFields[24].Descriptor()
+	// inspection.DefaultCreated holds the default value on creation for the created field.
+	inspection.DefaultCreated = inspectionDescCreated.Default.(func() time.Time)
+	// inspectionDescUpdated is the schema descriptor for updated field.
+	inspectionDescUpdated := inspectionFields[25].Descriptor()
+	// inspection.DefaultUpdated holds the default value on creation for the updated field.
+	inspection.DefaultUpdated = inspectionDescUpdated.Default.(func() time.Time)
+	// inspection.UpdateDefaultUpdated holds the default value on update for the updated field.
+	inspection.UpdateDefaultUpdated = inspectionDescUpdated.UpdateDefault.(func() time.Time)
+	inspectionentryFields := schema.InspectionEntry{}.Fields()
+	_ = inspectionentryFields
+	// inspectionentryDescPosition is the schema descriptor for position field.
+	inspectionentryDescPosition := inspectionentryFields[3].Descriptor()
+	// inspectionentry.DefaultPosition holds the default value on creation for the position field.
+	inspectionentry.DefaultPosition = inspectionentryDescPosition.Default.(int)
+	// inspectionentryDescKind is the schema descriptor for kind field.
+	inspectionentryDescKind := inspectionentryFields[5].Descriptor()
+	// inspectionentry.KindValidator is a validator for the "kind" field. It is called by the builders before save.
+	inspectionentry.KindValidator = inspectionentryDescKind.Validators[0].(func(string) error)
+	// inspectionentryDescSize is the schema descriptor for size field.
+	inspectionentryDescSize := inspectionentryFields[6].Descriptor()
+	// inspectionentry.DefaultSize holds the default value on creation for the size field.
+	inspectionentry.DefaultSize = inspectionentryDescSize.Default.(int64)
+	// inspectionentryDescItems is the schema descriptor for items field.
+	inspectionentryDescItems := inspectionentryFields[8].Descriptor()
+	// inspectionentry.DefaultItems holds the default value on creation for the items field.
+	inspectionentry.DefaultItems = inspectionentryDescItems.Default.(int)
+	// inspectionentryDescChildren is the schema descriptor for children field.
+	inspectionentryDescChildren := inspectionentryFields[9].Descriptor()
+	// inspectionentry.DefaultChildren holds the default value on creation for the children field.
+	inspectionentry.DefaultChildren = inspectionentryDescChildren.Default.(int)
+	// inspectionentryDescEncrypted is the schema descriptor for encrypted field.
+	inspectionentryDescEncrypted := inspectionentryFields[10].Descriptor()
+	// inspectionentry.DefaultEncrypted holds the default value on creation for the encrypted field.
+	inspectionentry.DefaultEncrypted = inspectionentryDescEncrypted.Default.(bool)
+	// inspectionentryDescUnreadable is the schema descriptor for unreadable field.
+	inspectionentryDescUnreadable := inspectionentryFields[11].Descriptor()
+	// inspectionentry.DefaultUnreadable holds the default value on creation for the unreadable field.
+	inspectionentry.DefaultUnreadable = inspectionentryDescUnreadable.Default.(bool)
+	// inspectionentryDescPreview is the schema descriptor for preview field.
+	inspectionentryDescPreview := inspectionentryFields[12].Descriptor()
+	// inspectionentry.DefaultPreview holds the default value on creation for the preview field.
+	inspectionentry.DefaultPreview = inspectionentryDescPreview.Default.(string)
+	// inspectionentry.PreviewValidator is a validator for the "preview" field. It is called by the builders before save.
+	inspectionentry.PreviewValidator = inspectionentryDescPreview.Validators[0].(func(string) error)
 	malwarescancaseFields := schema.MalwareScanCase{}.Fields()
 	_ = malwarescancaseFields
 	// malwarescancaseDescReviewNote is the schema descriptor for review_note field.

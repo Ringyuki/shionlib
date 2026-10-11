@@ -51,6 +51,8 @@ const (
 	EdgeCreator = "creator"
 	// EdgeComments holds the string denoting the comments edge name in mutations.
 	EdgeComments = "comments"
+	// EdgeInspections holds the string denoting the inspections edge name in mutations.
+	EdgeInspections = "inspections"
 	// EdgeEvents holds the string denoting the events edge name in mutations.
 	EdgeEvents = "events"
 	// Table holds the table name of the gamedownloadresource in the database.
@@ -97,6 +99,13 @@ const (
 	CommentsInverseTable = "comments"
 	// CommentsColumn is the table column denoting the comments relation/edge.
 	CommentsColumn = "resource_id"
+	// InspectionsTable is the table that holds the inspections relation/edge.
+	InspectionsTable = "file_inspections"
+	// InspectionsInverseTable is the table name for the Inspection entity.
+	// It exists in this package in order to avoid circular dependency with the "inspection" package.
+	InspectionsInverseTable = "file_inspections"
+	// InspectionsColumn is the table column denoting the inspections relation/edge.
+	InspectionsColumn = "resource_id"
 	// EventsTable is the table that holds the events relation/edge.
 	EventsTable = "game_download_resource_events"
 	// EventsInverseTable is the table name for the GameDownloadResourceEvent entity.
@@ -311,6 +320,20 @@ func ByComments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByInspectionsCount orders the results by inspections count.
+func ByInspectionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newInspectionsStep(), opts...)
+	}
+}
+
+// ByInspections orders the results by inspections terms.
+func ByInspections(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newInspectionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByEventsCount orders the results by events count.
 func ByEventsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -364,6 +387,13 @@ func newCommentsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CommentsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, CommentsTable, CommentsColumn),
+	)
+}
+func newInspectionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(InspectionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, InspectionsTable, InspectionsColumn),
 	)
 }
 func newEventsStep() *sqlgraph.Step {

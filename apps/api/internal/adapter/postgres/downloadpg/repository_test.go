@@ -516,6 +516,11 @@ func TestRemovedOrReplacedFilesRetireTheirSessions(t *testing.T) {
 	keptSession, _ := attached(resource.ID, "kept.7z")
 	otherSession, _ := attached(other.ID, "other.7z")
 	next := f.session(t, creator, gameuploadsession.StatusCOMPLETED)
+	record := f.db.Ent.Inspection.Create().SetResourceID(resource.ID).SetStatus("ready").SaveX(ctx)
+	f.db.Ent.GameDownloadResourceFile.UpdateOneID(replacedFile).SetInspectionID(record.ID).SetFileSha256("old digest").ExecX(ctx)
+	if read, err := f.repo.GetGameResource(ctx, resource.ID, false); err != nil || read.Files[1].InspectionID == nil || *read.Files[1].InspectionID != record.ID || read.Files[1].SHA256 == nil || *read.Files[1].SHA256 != "old digest" || read.Files[0].InspectionID != nil || read.Files[0].SHA256 != nil {
+		t.Fatalf("a file carries its inspection and digest once it was checked: %+v %v", read.Files, err)
+	}
 
 	if err := f.repo.DeleteFile(ctx, deletedFile); err != nil {
 		t.Fatal(err)
@@ -523,6 +528,9 @@ func TestRemovedOrReplacedFilesRetireTheirSessions(t *testing.T) {
 	content := download.FileContent{Path: "/spool/next.sltf", Size: 10, Hash: "h", HashAlgorithm: "blake3", UploadSessionID: next}
 	if err := f.repo.ReplaceFileContent(ctx, replacedFile, content); err != nil {
 		t.Fatal(err)
+	}
+	if row := f.db.Ent.GameDownloadResourceFile.GetX(ctx, replacedFile); row.InspectionID != nil || row.FileSha256 != nil {
+		t.Fatalf("new content has not been inspected yet: %+v", row)
 	}
 	if err := f.repo.DeleteResource(ctx, other.ID); err != nil {
 		t.Fatal(err)

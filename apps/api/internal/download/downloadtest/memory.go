@@ -573,6 +573,8 @@ func (r *MemoryRepository) ReplaceFileContent(_ context.Context, id int, content
 		f.CheckStatus = download.CheckPending
 		f.FalsePositive = false
 		f.StorageKey = nil
+		f.SHA256 = nil
+		f.InspectionID = nil
 		f.UploadSessionID = &session
 	})
 }

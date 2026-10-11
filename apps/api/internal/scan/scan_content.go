@@ -5,6 +5,9 @@ import (
 	"path"
 	"slices"
 	"strings"
+	"time"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
 )
 
 var executableExtensions = []string{
@@ -22,20 +25,62 @@ func Executable(name string) bool {
 	return slices.Contains(executableExtensions, extension(name))
 }
 
-func extractionPlan(entries []ArchiveEntry, limit int64) ([]string, int64) {
-	var skip []string
-	var size int64
+type Selection struct {
+	Extensions []string
+	Paths      []string
+	Skip       []string
+}
+
+type LegacyNames struct {
+	Encoding string
+	Names    []string
+}
+
+type Engine struct {
+	Name         string
+	SignaturesAt *time.Time
+}
+
+type ScanTarget struct {
+	Name string
+	Path string
+}
+
+type PreviewSource struct {
+	Entry int
+	Kind  inspection.Preview
+	Path  string
+}
+
+type Contents struct {
+	Draft        inspection.Draft
+	NameEncoding string
+	Targets      []ScanTarget
+	Skipped      []string
+	Previews     []PreviewSource
+}
+
+func Executables(entries []EntryReport) int {
+	count := 0
 	for _, entry := range entries {
-		if entry.Folder || !Scanned(entry.Path) {
-			continue
+		if Executable(entry.Name) {
+			count++
 		}
-		if entry.Size > limit {
-			skip = append(skip, entry.Path)
-			continue
-		}
-		size += entry.Size
 	}
-	return skip, size
+	return count
+}
+
+func Detections(entries []EntryReport) []inspection.Detection {
+	detections := []inspection.Detection{}
+	for _, entry := range entries {
+		if !entry.Report.Infected {
+			continue
+		}
+		for _, virus := range NormalizeViruses(entry.Report.Viruses) {
+			detections = append(detections, inspection.Detection{Path: entry.Name, Signature: virus})
+		}
+	}
+	return detections
 }
 
 func extension(name string) string {

@@ -14,6 +14,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/scanpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
+	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/scan"
 )
 
@@ -154,6 +155,24 @@ func TestPendingFiles(t *testing.T) {
 	}
 	if err := f.repo.SetCheckStatus(ctx, 987654, download.CheckOK, false); !errors.Is(err, download.ErrFileNotFound) {
 		t.Fatalf("missing file update: %v", err)
+	}
+
+	record := f.db.Ent.Inspection.Create().SetResourceID(resource.ID).SetStatus("ready").SaveX(ctx)
+	if err := f.repo.SetInspection(ctx, pending.ID, record.ID, "0f3a"); err != nil {
+		t.Fatal(err)
+	}
+	row, _ = f.db.Ent.GameDownloadResourceFile.Get(ctx, pending.ID)
+	if row.InspectionID == nil || *row.InspectionID != record.ID || row.FileSha256 == nil || *row.FileSha256 != "0f3a" {
+		t.Fatalf("inspection not attached: %+v", row)
+	}
+	if again, _ := f.repo.ResourceFiles(ctx, resource.ID); again[0].InspectionID == nil || *again[0].InspectionID != record.ID || again[1].InspectionID != nil {
+		t.Fatalf("a pending file tells which inspection it has: %+v", again[:2])
+	}
+	if err := f.repo.SetInspection(ctx, 987654, record.ID, "0f3a"); !errors.Is(err, download.ErrFileNotFound) {
+		t.Fatalf("missing file: %v", err)
+	}
+	if err := f.repo.SetInspection(ctx, pending.ID, 987654, "0f3a"); !errors.Is(err, inspection.ErrNotFound) {
+		t.Fatalf("missing inspection: %v", err)
 	}
 }
 

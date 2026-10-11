@@ -180,3 +180,55 @@ func TestUnexpectedReply(t *testing.T) {
 		t.Fatal("unexpected replies must fail")
 	}
 }
+
+func at(year int, month time.Month, day, hour, minute, second int) *time.Time {
+	value := time.Date(year, month, day, hour, minute, second, 0, time.UTC)
+	return &value
+}
+
+func TestEngineReportsTheVersionAndTheDateOfTheSignatures(t *testing.T) {
+	for reply, want := range map[string]scan.Engine{
+		"ClamAV 1.4.3/27800/Wed Nov 26 09:30:45 2025": {Name: "ClamAV 1.4.3", SignaturesAt: at(2025, 11, 26, 9, 30, 45)},
+		"ClamAV 1.4.3/27712/Sat Oct  4 08:25:01 2025": {Name: "ClamAV 1.4.3", SignaturesAt: at(2025, 10, 4, 8, 25, 1)},
+		"ClamAV 1.0.9": {Name: "ClamAV 1.0.9"},
+	} {
+		listener, err := net.Listen("tcp", "127.0.0.1:0")
+		if err != nil {
+			t.Fatal(err)
+		}
+		commands := make(chan string, 1)
+		go func() {
+			conn, err := listener.Accept()
+			if err != nil {
+				return
+			}
+			defer func() { _ = conn.Close() }()
+			command, _ := bufio.NewReader(conn).ReadString(0)
+			commands <- command
+			_, _ = conn.Write([]byte(reply + "\x00"))
+		}()
+		got, err := clamd.New(clamd.Options{Address: listener.Addr().String(), Timeout: 5 * time.Second}).Engine(t.Context())
+		_ = listener.Close()
+		if err != nil {
+			t.Fatalf("%s: %v", reply, err)
+		}
+		if command := <-commands; command != "zVERSION\x00" {
+			t.Fatalf("unexpected command %q", command)
+		}
+		if got.Name != want.Name || (got.SignaturesAt == nil) != (want.SignaturesAt == nil) || (want.SignaturesAt != nil && !got.SignaturesAt.Equal(*want.SignaturesAt)) {
+			t.Fatalf("%s: got %+v", reply, got)
+		}
+	}
+}
+
+func TestEngineReportsAScannerThatDoesNotAnswer(t *testing.T) {
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	address := listener.Addr().String()
+	_ = listener.Close()
+	if _, err := clamd.New(clamd.Options{Address: address, Timeout: time.Second}).Engine(t.Context()); err == nil {
+		t.Fatal("expected a failure")
+	}
+}

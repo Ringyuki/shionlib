@@ -41,6 +41,10 @@ const (
 	FieldFileCheckStatus = "file_check_status"
 	// FieldIsVirusFalsePositive holds the string denoting the is_virus_false_positive field in the database.
 	FieldIsVirusFalsePositive = "is_virus_false_positive"
+	// FieldFileSha256 holds the string denoting the file_sha256 field in the database.
+	FieldFileSha256 = "file_sha256"
+	// FieldInspectionID holds the string denoting the inspection_id field in the database.
+	FieldInspectionID = "inspection_id"
 	// FieldGameDownloadResourceID holds the string denoting the game_download_resource_id field in the database.
 	FieldGameDownloadResourceID = "game_download_resource_id"
 	// FieldCreatorID holds the string denoting the creator_id field in the database.
@@ -59,6 +63,8 @@ const (
 	EdgeUploadSession = "upload_session"
 	// EdgeCreator holds the string denoting the creator edge name in mutations.
 	EdgeCreator = "creator"
+	// EdgeInspection holds the string denoting the inspection edge name in mutations.
+	EdgeInspection = "inspection"
 	// EdgeHistories holds the string denoting the histories edge name in mutations.
 	EdgeHistories = "histories"
 	// Table holds the table name of the gamedownloadresourcefile in the database.
@@ -98,6 +104,13 @@ const (
 	CreatorInverseTable = "users"
 	// CreatorColumn is the table column denoting the creator relation/edge.
 	CreatorColumn = "creator_id"
+	// InspectionTable is the table that holds the inspection relation/edge.
+	InspectionTable = "game_download_resource_files"
+	// InspectionInverseTable is the table name for the Inspection entity.
+	// It exists in this package in order to avoid circular dependency with the "inspection" package.
+	InspectionInverseTable = "file_inspections"
+	// InspectionColumn is the table column denoting the inspection relation/edge.
+	InspectionColumn = "inspection_id"
 	// HistoriesTable is the table that holds the histories relation/edge.
 	HistoriesTable = "game_download_resource_file_histories"
 	// HistoriesInverseTable is the table name for the GameDownloadResourceFileHistory entity.
@@ -123,6 +136,8 @@ var Columns = []string{
 	FieldFileStatus,
 	FieldFileCheckStatus,
 	FieldIsVirusFalsePositive,
+	FieldFileSha256,
+	FieldInspectionID,
 	FieldGameDownloadResourceID,
 	FieldCreatorID,
 	FieldCreated,
@@ -253,6 +268,16 @@ func ByIsVirusFalsePositive(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIsVirusFalsePositive, opts...).ToFunc()
 }
 
+// ByFileSha256 orders the results by the file_sha256 field.
+func ByFileSha256(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFileSha256, opts...).ToFunc()
+}
+
+// ByInspectionID orders the results by the inspection_id field.
+func ByInspectionID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldInspectionID, opts...).ToFunc()
+}
+
 // ByGameDownloadResourceID orders the results by the game_download_resource_id field.
 func ByGameDownloadResourceID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldGameDownloadResourceID, opts...).ToFunc()
@@ -322,6 +347,13 @@ func ByCreatorField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
+// ByInspectionField orders the results by inspection field.
+func ByInspectionField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newInspectionStep(), sql.OrderByField(field, opts...))
+	}
+}
+
 // ByHistoriesCount orders the results by histories count.
 func ByHistoriesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -368,6 +400,13 @@ func newCreatorStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CreatorInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, CreatorTable, CreatorColumn),
+	)
+}
+func newInspectionStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(InspectionInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, InspectionTable, InspectionColumn),
 	)
 }
 func newHistoriesStep() *sqlgraph.Step {

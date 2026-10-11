@@ -29,6 +29,7 @@ const (
 	maxReplyBytes    = 64 << 10
 	streamLimit      = 4000 << 20
 	scanBytesPerSec  = 5 << 20
+	signaturesLayout = "Mon Jan _2 15:04:05 2006"
 )
 
 var foundPattern = regexp.MustCompile(`(?i)FOUND`)
@@ -88,6 +89,40 @@ func (s *Scanner) Scan(ctx context.Context, name string, content io.Reader) (sca
 
 func (s *Scanner) MaxSize() int64 {
 	return streamLimit
+}
+
+func (s *Scanner) Engine(ctx context.Context) (scan.Engine, error) {
+	dialer := net.Dialer{Timeout: s.timeout}
+	conn, err := dialer.DialContext(ctx, "tcp", s.address)
+	if err != nil {
+		return scan.Engine{}, fmt.Errorf("dial clamd: %w", err)
+	}
+	defer func() { _ = conn.Close() }()
+	stop := context.AfterFunc(ctx, func() { _ = conn.Close() })
+	defer stop()
+	if err := s.write(conn, []byte("zVERSION\x00")); err != nil {
+		return scan.Engine{}, err
+	}
+	reply, err := s.readReply(conn, s.timeout)
+	if err != nil {
+		if ctxErr := ctx.Err(); ctxErr != nil {
+			return scan.Engine{}, ctxErr
+		}
+		return scan.Engine{}, err
+	}
+	return parseVersion(reply), nil
+}
+
+func parseVersion(reply string) scan.Engine {
+	name, rest, _ := strings.Cut(reply, "/")
+	engine := scan.Engine{Name: strings.TrimSpace(name)}
+	if _, built, found := strings.Cut(rest, "/"); found {
+		if at, err := time.Parse(signaturesLayout, strings.TrimSpace(built)); err == nil {
+			utc := at.UTC()
+			engine.SignaturesAt = &utc
+		}
+	}
+	return engine
 }
 
 func (s *Scanner) stream(ctx context.Context, content io.Reader) (string, error) {

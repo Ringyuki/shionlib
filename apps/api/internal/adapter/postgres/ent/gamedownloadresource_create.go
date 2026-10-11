@@ -17,6 +17,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourceevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
@@ -240,6 +241,21 @@ func (_c *GameDownloadResourceCreate) AddComments(v ...*Comment) *GameDownloadRe
 		ids[i] = v[i].ID
 	}
 	return _c.AddCommentIDs(ids...)
+}
+
+// AddInspectionIDs adds the "inspections" edge to the Inspection entity by IDs.
+func (_c *GameDownloadResourceCreate) AddInspectionIDs(ids ...int) *GameDownloadResourceCreate {
+	_c.mutation.AddInspectionIDs(ids...)
+	return _c
+}
+
+// AddInspections adds the "inspections" edges to the Inspection entity.
+func (_c *GameDownloadResourceCreate) AddInspections(v ...*Inspection) *GameDownloadResourceCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddInspectionIDs(ids...)
 }
 
 // AddEventIDs adds the "events" edge to the GameDownloadResourceEvent entity by IDs.
@@ -507,6 +523,22 @@ func (_c *GameDownloadResourceCreate) createSpec() (*GameDownloadResource, *sqlg
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.InspectionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.InspectionsTable,
+			Columns: []string{gamedownloadresource.InspectionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(inspection.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -19,6 +19,7 @@ const (
 	testTimeout     = 10 * time.Minute
 	extractTimeout  = 30 * time.Minute
 	outputLimit     = 64 << 20
+	utcTimes        = "TZ=UTC"
 )
 
 type Tool struct {
@@ -41,12 +42,15 @@ func (t *Tool) Test(ctx context.Context, path string) (scan.ToolRun, error) {
 	return t.run(ctx, testTimeout, "t", "-bb0", "-bd", "-y", "-p-", path)
 }
 
-func (t *Tool) Extract(ctx context.Context, path, destination string, extensions, skip []string) (scan.ToolRun, error) {
+func (t *Tool) Extract(ctx context.Context, path, destination string, selection scan.Selection) (scan.ToolRun, error) {
 	args := []string{"x", "-y", "-bd", "-bb0", "-p-", "-ssc-", "-o" + destination}
-	for _, extension := range extensions {
+	for _, extension := range selection.Extensions {
 		args = append(args, "-ir!*."+extension)
 	}
-	for _, name := range skip {
+	for _, name := range selection.Paths {
+		args = append(args, "-i!"+name)
+	}
+	for _, name := range selection.Skip {
 		args = append(args, "-x!"+name)
 	}
 	return t.run(ctx, extractTimeout, append(args, path)...)
@@ -85,6 +89,7 @@ func execute(ctx context.Context, timeout time.Duration, binary string, args []s
 	stdout := &cappedBuffer{limit: outputLimit, overflow: cancel}
 	stderr := &cappedBuffer{limit: outputLimit, overflow: cancel}
 	cmd := exec.CommandContext(runCtx, binary, args...)
+	cmd.Env = append(cmd.Environ(), utcTimes)
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 	if err := cmd.Start(); err != nil {

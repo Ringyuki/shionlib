@@ -49,6 +49,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gametagrelation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadchunk"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspection"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspectionentry"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
@@ -163,6 +165,8 @@ func checkColumn(t, c string) error {
 			gametagrelation.Table:                 gametagrelation.ValidColumn,
 			gameuploadchunk.Table:                 gameuploadchunk.ValidColumn,
 			gameuploadsession.Table:               gameuploadsession.ValidColumn,
+			inspection.Table:                      inspection.ValidColumn,
+			inspectionentry.Table:                 inspectionentry.ValidColumn,
 			malwarescancase.Table:                 malwarescancase.ValidColumn,
 			message.Table:                         message.ValidColumn,
 			moderationevent.Table:                 moderationevent.ValidColumn,

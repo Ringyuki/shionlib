@@ -7,6 +7,7 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
+	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
 )
 
@@ -16,6 +17,7 @@ type Repository interface {
 	ResourceFiles(ctx context.Context, resourceID int) ([]PendingFile, error)
 	LockFile(ctx context.Context, fileID int) (PendingFile, bool, error)
 	SetCheckStatus(ctx context.Context, fileID int, status download.CheckStatus, falsePositive bool) error
+	SetInspection(ctx context.Context, fileID, inspectionID int, sha256 string) error
 	CreateCase(ctx context.Context, in NewCase) (Case, error)
 	LockCase(ctx context.Context, id int) (Target, error)
 	ResolveCase(ctx context.Context, id int, resolution Resolution) error
@@ -31,12 +33,29 @@ type Repository interface {
 type ArchiveTool interface {
 	List(ctx context.Context, path string) (ToolRun, error)
 	Test(ctx context.Context, path string) (ToolRun, error)
-	Extract(ctx context.Context, path, destination string, extensions, skip []string) (ToolRun, error)
+	Extract(ctx context.Context, path, destination string, selection Selection) (ToolRun, error)
+}
+
+type NameReader interface {
+	LegacyNames(ctx context.Context, path string) (LegacyNames, error)
+}
+
+type DiscReader interface {
+	Probe(ctx context.Context, path string) (DiscVolume, error)
+	Cook(ctx context.Context, path, target string) error
+	Sheet(ctx context.Context, path string, imageBytes int64) (DiscSheet, error)
 }
 
 type VirusScanner interface {
 	Scan(ctx context.Context, name string, content io.Reader) (Report, error)
 	MaxSize() int64
+	Engine(ctx context.Context) (Engine, error)
+}
+
+type Inspections interface {
+	Record(ctx context.Context, draft inspection.Draft) (inspection.Recorded, error)
+	KeepPreview(ctx context.Context, inspectionID, entryID int, kind inspection.Preview, content io.Reader) error
+	Cleared(ctx context.Context, ids []int) error
 }
 
 type Spool interface {

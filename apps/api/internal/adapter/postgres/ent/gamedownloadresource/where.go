@@ -754,6 +754,29 @@ func HasCommentsWith(preds ...predicate.Comment) predicate.GameDownloadResource 
 	})
 }
 
+// HasInspections applies the HasEdge predicate on the "inspections" edge.
+func HasInspections() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, InspectionsTable, InspectionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasInspectionsWith applies the HasEdge predicate on the "inspections" edge with a given conditions (other predicates).
+func HasInspectionsWith(preds ...predicate.Inspection) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(func(s *sql.Selector) {
+		step := newInspectionsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasEvents applies the HasEdge predicate on the "events" edge.
 func HasEvents() predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(func(s *sql.Selector) {

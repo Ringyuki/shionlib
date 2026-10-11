@@ -16,6 +16,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefilehistory"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
@@ -275,6 +276,46 @@ func (_u *GameDownloadResourceFileUpdate) SetNillableIsVirusFalsePositive(v *boo
 	return _u
 }
 
+// SetFileSha256 sets the "file_sha256" field.
+func (_u *GameDownloadResourceFileUpdate) SetFileSha256(v string) *GameDownloadResourceFileUpdate {
+	_u.mutation.SetFileSha256(v)
+	return _u
+}
+
+// SetNillableFileSha256 sets the "file_sha256" field if the given value is not nil.
+func (_u *GameDownloadResourceFileUpdate) SetNillableFileSha256(v *string) *GameDownloadResourceFileUpdate {
+	if v != nil {
+		_u.SetFileSha256(*v)
+	}
+	return _u
+}
+
+// ClearFileSha256 clears the value of the "file_sha256" field.
+func (_u *GameDownloadResourceFileUpdate) ClearFileSha256() *GameDownloadResourceFileUpdate {
+	_u.mutation.ClearFileSha256()
+	return _u
+}
+
+// SetInspectionID sets the "inspection_id" field.
+func (_u *GameDownloadResourceFileUpdate) SetInspectionID(v int) *GameDownloadResourceFileUpdate {
+	_u.mutation.SetInspectionID(v)
+	return _u
+}
+
+// SetNillableInspectionID sets the "inspection_id" field if the given value is not nil.
+func (_u *GameDownloadResourceFileUpdate) SetNillableInspectionID(v *int) *GameDownloadResourceFileUpdate {
+	if v != nil {
+		_u.SetInspectionID(*v)
+	}
+	return _u
+}
+
+// ClearInspectionID clears the value of the "inspection_id" field.
+func (_u *GameDownloadResourceFileUpdate) ClearInspectionID() *GameDownloadResourceFileUpdate {
+	_u.mutation.ClearInspectionID()
+	return _u
+}
+
 // SetGameDownloadResourceID sets the "game_download_resource_id" field.
 func (_u *GameDownloadResourceFileUpdate) SetGameDownloadResourceID(v int) *GameDownloadResourceFileUpdate {
 	_u.mutation.SetGameDownloadResourceID(v)
@@ -354,6 +395,11 @@ func (_u *GameDownloadResourceFileUpdate) SetCreator(v *User) *GameDownloadResou
 	return _u.SetCreatorID(v.ID)
 }
 
+// SetInspection sets the "inspection" edge to the Inspection entity.
+func (_u *GameDownloadResourceFileUpdate) SetInspection(v *Inspection) *GameDownloadResourceFileUpdate {
+	return _u.SetInspectionID(v.ID)
+}
+
 // AddHistoryIDs adds the "histories" edge to the GameDownloadResourceFileHistory entity by IDs.
 func (_u *GameDownloadResourceFileUpdate) AddHistoryIDs(ids ...int) *GameDownloadResourceFileUpdate {
 	_u.mutation.AddHistoryIDs(ids...)
@@ -431,6 +477,12 @@ func (_u *GameDownloadResourceFileUpdate) ClearUploadSession() *GameDownloadReso
 // ClearCreator clears the "creator" edge to the User entity.
 func (_u *GameDownloadResourceFileUpdate) ClearCreator() *GameDownloadResourceFileUpdate {
 	_u.mutation.ClearCreator()
+	return _u
+}
+
+// ClearInspection clears the "inspection" edge to the Inspection entity.
+func (_u *GameDownloadResourceFileUpdate) ClearInspection() *GameDownloadResourceFileUpdate {
+	_u.mutation.ClearInspection()
 	return _u
 }
 
@@ -584,6 +636,12 @@ func (_u *GameDownloadResourceFileUpdate) sqlSave(ctx context.Context) (_node in
 	}
 	if value, ok := _u.mutation.IsVirusFalsePositive(); ok {
 		_spec.SetField(gamedownloadresourcefile.FieldIsVirusFalsePositive, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.FileSha256(); ok {
+		_spec.SetField(gamedownloadresourcefile.FieldFileSha256, field.TypeString, value)
+	}
+	if _u.mutation.FileSha256Cleared() {
+		_spec.ClearField(gamedownloadresourcefile.FieldFileSha256, field.TypeString)
 	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(gamedownloadresourcefile.FieldUpdated, field.TypeTime, value)
@@ -758,6 +816,35 @@ func (_u *GameDownloadResourceFileUpdate) sqlSave(ctx context.Context) (_node in
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.InspectionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   gamedownloadresourcefile.InspectionTable,
+			Columns: []string{gamedownloadresourcefile.InspectionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(inspection.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.InspectionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   gamedownloadresourcefile.InspectionTable,
+			Columns: []string{gamedownloadresourcefile.InspectionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(inspection.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1072,6 +1159,46 @@ func (_u *GameDownloadResourceFileUpdateOne) SetNillableIsVirusFalsePositive(v *
 	return _u
 }
 
+// SetFileSha256 sets the "file_sha256" field.
+func (_u *GameDownloadResourceFileUpdateOne) SetFileSha256(v string) *GameDownloadResourceFileUpdateOne {
+	_u.mutation.SetFileSha256(v)
+	return _u
+}
+
+// SetNillableFileSha256 sets the "file_sha256" field if the given value is not nil.
+func (_u *GameDownloadResourceFileUpdateOne) SetNillableFileSha256(v *string) *GameDownloadResourceFileUpdateOne {
+	if v != nil {
+		_u.SetFileSha256(*v)
+	}
+	return _u
+}
+
+// ClearFileSha256 clears the value of the "file_sha256" field.
+func (_u *GameDownloadResourceFileUpdateOne) ClearFileSha256() *GameDownloadResourceFileUpdateOne {
+	_u.mutation.ClearFileSha256()
+	return _u
+}
+
+// SetInspectionID sets the "inspection_id" field.
+func (_u *GameDownloadResourceFileUpdateOne) SetInspectionID(v int) *GameDownloadResourceFileUpdateOne {
+	_u.mutation.SetInspectionID(v)
+	return _u
+}
+
+// SetNillableInspectionID sets the "inspection_id" field if the given value is not nil.
+func (_u *GameDownloadResourceFileUpdateOne) SetNillableInspectionID(v *int) *GameDownloadResourceFileUpdateOne {
+	if v != nil {
+		_u.SetInspectionID(*v)
+	}
+	return _u
+}
+
+// ClearInspectionID clears the value of the "inspection_id" field.
+func (_u *GameDownloadResourceFileUpdateOne) ClearInspectionID() *GameDownloadResourceFileUpdateOne {
+	_u.mutation.ClearInspectionID()
+	return _u
+}
+
 // SetGameDownloadResourceID sets the "game_download_resource_id" field.
 func (_u *GameDownloadResourceFileUpdateOne) SetGameDownloadResourceID(v int) *GameDownloadResourceFileUpdateOne {
 	_u.mutation.SetGameDownloadResourceID(v)
@@ -1151,6 +1278,11 @@ func (_u *GameDownloadResourceFileUpdateOne) SetCreator(v *User) *GameDownloadRe
 	return _u.SetCreatorID(v.ID)
 }
 
+// SetInspection sets the "inspection" edge to the Inspection entity.
+func (_u *GameDownloadResourceFileUpdateOne) SetInspection(v *Inspection) *GameDownloadResourceFileUpdateOne {
+	return _u.SetInspectionID(v.ID)
+}
+
 // AddHistoryIDs adds the "histories" edge to the GameDownloadResourceFileHistory entity by IDs.
 func (_u *GameDownloadResourceFileUpdateOne) AddHistoryIDs(ids ...int) *GameDownloadResourceFileUpdateOne {
 	_u.mutation.AddHistoryIDs(ids...)
@@ -1228,6 +1360,12 @@ func (_u *GameDownloadResourceFileUpdateOne) ClearUploadSession() *GameDownloadR
 // ClearCreator clears the "creator" edge to the User entity.
 func (_u *GameDownloadResourceFileUpdateOne) ClearCreator() *GameDownloadResourceFileUpdateOne {
 	_u.mutation.ClearCreator()
+	return _u
+}
+
+// ClearInspection clears the "inspection" edge to the Inspection entity.
+func (_u *GameDownloadResourceFileUpdateOne) ClearInspection() *GameDownloadResourceFileUpdateOne {
+	_u.mutation.ClearInspection()
 	return _u
 }
 
@@ -1412,6 +1550,12 @@ func (_u *GameDownloadResourceFileUpdateOne) sqlSave(ctx context.Context) (_node
 	if value, ok := _u.mutation.IsVirusFalsePositive(); ok {
 		_spec.SetField(gamedownloadresourcefile.FieldIsVirusFalsePositive, field.TypeBool, value)
 	}
+	if value, ok := _u.mutation.FileSha256(); ok {
+		_spec.SetField(gamedownloadresourcefile.FieldFileSha256, field.TypeString, value)
+	}
+	if _u.mutation.FileSha256Cleared() {
+		_spec.ClearField(gamedownloadresourcefile.FieldFileSha256, field.TypeString)
+	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(gamedownloadresourcefile.FieldUpdated, field.TypeTime, value)
 	}
@@ -1585,6 +1729,35 @@ func (_u *GameDownloadResourceFileUpdateOne) sqlSave(ctx context.Context) (_node
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.InspectionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   gamedownloadresourcefile.InspectionTable,
+			Columns: []string{gamedownloadresourcefile.InspectionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(inspection.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.InspectionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   gamedownloadresourcefile.InspectionTable,
+			Columns: []string{gamedownloadresourcefile.InspectionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(inspection.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

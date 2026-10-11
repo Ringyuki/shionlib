@@ -4,11 +4,14 @@ import (
 	"cmp"
 	"context"
 	"io"
+	"path/filepath"
 	"slices"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
+	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/scan"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
@@ -29,6 +32,7 @@ type MemoryRepository struct {
 	TakenDown []int
 	Purged    []string
 	Cleared   []ClearedReview
+	Digests   map[int]string
 }
 
 type ClearedReview struct {
@@ -48,6 +52,7 @@ func NewMemoryRepository(now func() time.Time) *MemoryRepository {
 		Names:     map[int]string{},
 		Titles:    map[int]scan.GameTitles{},
 		Keys:      map[int][]string{},
+		Digests:   map[int]string{},
 	}
 }
 
@@ -127,6 +132,16 @@ func (r *MemoryRepository) SetCheckStatus(_ context.Context, fileID int, status 
 	file := r.files[fileID]
 	file.CheckStatus = status
 	r.files[fileID] = file
+	return nil
+}
+
+func (r *MemoryRepository) SetInspection(_ context.Context, fileID, inspectionID int, sha256 string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	file := r.files[fileID]
+	file.InspectionID = &inspectionID
+	r.files[fileID] = file
+	r.Digests[fileID] = sha256
 	return nil
 }
 
@@ -316,13 +331,14 @@ func (r *MemoryRepository) PurgeLater(_ context.Context, keys []string) error {
 }
 
 type ArchiveTool struct {
-	Listings  map[string]scan.ToolRun
-	Tests     map[string]scan.ToolRun
-	Contents  map[string][]string
-	Extracts  map[string]scan.ToolRun
-	Workspace *Workspace
-	Inspected []string
-	Extracted []string
+	Listings   map[string]scan.ToolRun
+	Tests      map[string]scan.ToolRun
+	Contents   map[string][]string
+	Extracts   map[string]scan.ToolRun
+	Workspace  *Workspace
+	Inspected  []string
+	Extracted  []string
+	Selections []scan.Selection
 }
 
 func (a *ArchiveTool) List(_ context.Context, path string) (scan.ToolRun, error) {
@@ -334,14 +350,93 @@ func (a *ArchiveTool) Test(_ context.Context, path string) (scan.ToolRun, error)
 	return a.Tests[path], nil
 }
 
-func (a *ArchiveTool) Extract(_ context.Context, path, destination string, _, skip []string) (scan.ToolRun, error) {
+func (a *ArchiveTool) Extract(_ context.Context, path, destination string, selection scan.Selection) (scan.ToolRun, error) {
 	a.Extracted = append(a.Extracted, path)
+	a.Selections = append(a.Selections, selection)
 	for _, entry := range a.Contents[path] {
-		if scan.Scanned(entry) && !slices.Contains(skip, entry) {
+		wanted := slices.Contains(selection.Paths, entry) || slices.Contains(selection.Extensions, strings.TrimPrefix(strings.ToLower(filepath.Ext(entry)), "."))
+		if wanted && !slices.Contains(selection.Skip, entry) {
 			a.Workspace.Put(destination, entry)
 		}
 	}
 	return a.Extracts[path], nil
+}
+
+type NameReader struct {
+	Names map[string]scan.LegacyNames
+	Err   error
+}
+
+func (n *NameReader) LegacyNames(_ context.Context, path string) (scan.LegacyNames, error) {
+	return n.Names[path], n.Err
+}
+
+type DiscReader struct {
+	Volumes map[string]scan.DiscVolume
+	Sheets  map[string]scan.DiscSheet
+	Cooked  map[string]string
+}
+
+func (d *DiscReader) Probe(_ context.Context, path string) (scan.DiscVolume, error) {
+	return d.Volumes[path], nil
+}
+
+func (d *DiscReader) Cook(_ context.Context, path, target string) error {
+	if d.Cooked == nil {
+		d.Cooked = map[string]string{}
+	}
+	d.Cooked[target] = path
+	return nil
+}
+
+func (d *DiscReader) Sheet(_ context.Context, path string, _ int64) (scan.DiscSheet, error) {
+	return d.Sheets[path], nil
+}
+
+type KeptPreview struct {
+	InspectionID int
+	EntryID      int
+	Kind         inspection.Preview
+	Content      string
+}
+
+type Inspections struct {
+	Drafts       []inspection.Draft
+	Previews     []KeptPreview
+	ClearedIDs   []int
+	Err          error
+	PreviewErr   error
+	PreviewCalls int
+}
+
+func (i *Inspections) Record(_ context.Context, draft inspection.Draft) (inspection.Recorded, error) {
+	if i.Err != nil {
+		return inspection.Recorded{}, i.Err
+	}
+	i.Drafts = append(i.Drafts, draft)
+	entries := make([]int, min(len(draft.Entries), inspection.EntryLimit))
+	for index := range entries {
+		entries[index] = len(i.Drafts)*1000 + index
+	}
+	return inspection.Recorded{ID: len(i.Drafts), Entries: entries}, nil
+}
+
+func (i *Inspections) KeepPreview(_ context.Context, inspectionID, entryID int, kind inspection.Preview, content io.Reader) error {
+	i.PreviewCalls++
+	if i.PreviewErr != nil {
+		return i.PreviewErr
+	}
+	data, err := io.ReadAll(content)
+	if err != nil {
+		return err
+	}
+	i.Previews = append(i.Previews, KeptPreview{InspectionID: inspectionID, EntryID: entryID, Kind: kind, Content: string(data)})
+	return nil
+}
+
+func (i *Inspections) Cleared(_ context.Context, ids []int) error {
+	i.ClearedIDs = append(i.ClearedIDs, ids...)
+	return nil
 }
 
 type Spool struct {
@@ -357,10 +452,15 @@ type Scanner struct {
 	Scanned []string
 	Limit   int64
 	Err     error
+	Version scan.Engine
 }
 
 func (s *Scanner) MaxSize() int64 {
 	return s.Limit
+}
+
+func (s *Scanner) Engine(context.Context) (scan.Engine, error) {
+	return s.Version, s.Err
 }
 
 func (s *Scanner) Scan(_ context.Context, name string, content io.Reader) (scan.Report, error) {

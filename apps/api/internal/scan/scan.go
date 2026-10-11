@@ -56,6 +56,7 @@ type PendingFile struct {
 	Hash            string
 	HashAlgorithm   string
 	UploadSessionID *int
+	InspectionID    *int
 	CreatorID       int
 	Created         time.Time
 }

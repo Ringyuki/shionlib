@@ -49,6 +49,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gametagrelation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadchunk"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspection"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspectionentry"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
@@ -116,6 +118,8 @@ const (
 	TypeGameTagRelation                 = "GameTagRelation"
 	TypeGameUploadChunk                 = "GameUploadChunk"
 	TypeGameUploadSession               = "GameUploadSession"
+	TypeInspection                      = "Inspection"
+	TypeInspectionEntry                 = "InspectionEntry"
 	TypeMalwareScanCase                 = "MalwareScanCase"
 	TypeMessage                         = "Message"
 	TypeModerationEvent                 = "ModerationEvent"
@@ -33009,6 +33013,9 @@ type GameDownloadResourceMutation struct {
 	comments                  map[int]struct{}
 	removedcomments           map[int]struct{}
 	clearedcomments           bool
+	inspections               map[int]struct{}
+	removedinspections        map[int]struct{}
+	clearedinspections        bool
 	events                    map[int]struct{}
 	removedevents             map[int]struct{}
 	clearedevents             bool
@@ -33941,6 +33948,60 @@ func (m *GameDownloadResourceMutation) ResetComments() {
 	m.removedcomments = nil
 }
 
+// AddInspectionIDs adds the "inspections" edge to the Inspection entity by ids.
+func (m *GameDownloadResourceMutation) AddInspectionIDs(ids ...int) {
+	if m.inspections == nil {
+		m.inspections = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.inspections[ids[i]] = struct{}{}
+	}
+}
+
+// ClearInspections clears the "inspections" edge to the Inspection entity.
+func (m *GameDownloadResourceMutation) ClearInspections() {
+	m.clearedinspections = true
+}
+
+// InspectionsCleared reports if the "inspections" edge to the Inspection entity was cleared.
+func (m *GameDownloadResourceMutation) InspectionsCleared() bool {
+	return m.clearedinspections
+}
+
+// RemoveInspectionIDs removes the "inspections" edge to the Inspection entity by IDs.
+func (m *GameDownloadResourceMutation) RemoveInspectionIDs(ids ...int) {
+	if m.removedinspections == nil {
+		m.removedinspections = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.inspections, ids[i])
+		m.removedinspections[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedInspections returns the removed IDs of the "inspections" edge to the Inspection entity.
+func (m *GameDownloadResourceMutation) RemovedInspectionsIDs() (ids []int) {
+	for id := range m.removedinspections {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// InspectionsIDs returns the "inspections" edge IDs in the mutation.
+func (m *GameDownloadResourceMutation) InspectionsIDs() (ids []int) {
+	for id := range m.inspections {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetInspections resets all changes to the "inspections" edge.
+func (m *GameDownloadResourceMutation) ResetInspections() {
+	m.inspections = nil
+	m.clearedinspections = false
+	m.removedinspections = nil
+}
+
 // AddEventIDs adds the "events" edge to the GameDownloadResourceEvent entity by ids.
 func (m *GameDownloadResourceMutation) AddEventIDs(ids ...int) {
 	if m.events == nil {
@@ -34381,7 +34442,7 @@ func (m *GameDownloadResourceMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *GameDownloadResourceMutation) AddedEdges() []string {
-	edges := make([]string, 0, 7)
+	edges := make([]string, 0, 8)
 	if m.game != nil {
 		edges = append(edges, gamedownloadresource.EdgeGame)
 	}
@@ -34399,6 +34460,9 @@ func (m *GameDownloadResourceMutation) AddedEdges() []string {
 	}
 	if m.comments != nil {
 		edges = append(edges, gamedownloadresource.EdgeComments)
+	}
+	if m.inspections != nil {
+		edges = append(edges, gamedownloadresource.EdgeInspections)
 	}
 	if m.events != nil {
 		edges = append(edges, gamedownloadresource.EdgeEvents)
@@ -34442,6 +34506,12 @@ func (m *GameDownloadResourceMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case gamedownloadresource.EdgeInspections:
+		ids := make([]ent.Value, 0, len(m.inspections))
+		for id := range m.inspections {
+			ids = append(ids, id)
+		}
+		return ids
 	case gamedownloadresource.EdgeEvents:
 		ids := make([]ent.Value, 0, len(m.events))
 		for id := range m.events {
@@ -34454,7 +34524,7 @@ func (m *GameDownloadResourceMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *GameDownloadResourceMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 7)
+	edges := make([]string, 0, 8)
 	if m.removedfiles != nil {
 		edges = append(edges, gamedownloadresource.EdgeFiles)
 	}
@@ -34466,6 +34536,9 @@ func (m *GameDownloadResourceMutation) RemovedEdges() []string {
 	}
 	if m.removedcomments != nil {
 		edges = append(edges, gamedownloadresource.EdgeComments)
+	}
+	if m.removedinspections != nil {
+		edges = append(edges, gamedownloadresource.EdgeInspections)
 	}
 	if m.removedevents != nil {
 		edges = append(edges, gamedownloadresource.EdgeEvents)
@@ -34501,6 +34574,12 @@ func (m *GameDownloadResourceMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case gamedownloadresource.EdgeInspections:
+		ids := make([]ent.Value, 0, len(m.removedinspections))
+		for id := range m.removedinspections {
+			ids = append(ids, id)
+		}
+		return ids
 	case gamedownloadresource.EdgeEvents:
 		ids := make([]ent.Value, 0, len(m.removedevents))
 		for id := range m.removedevents {
@@ -34513,7 +34592,7 @@ func (m *GameDownloadResourceMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *GameDownloadResourceMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 7)
+	edges := make([]string, 0, 8)
 	if m.clearedgame {
 		edges = append(edges, gamedownloadresource.EdgeGame)
 	}
@@ -34531,6 +34610,9 @@ func (m *GameDownloadResourceMutation) ClearedEdges() []string {
 	}
 	if m.clearedcomments {
 		edges = append(edges, gamedownloadresource.EdgeComments)
+	}
+	if m.clearedinspections {
+		edges = append(edges, gamedownloadresource.EdgeInspections)
 	}
 	if m.clearedevents {
 		edges = append(edges, gamedownloadresource.EdgeEvents)
@@ -34554,6 +34636,8 @@ func (m *GameDownloadResourceMutation) EdgeCleared(name string) bool {
 		return m.clearedcreator
 	case gamedownloadresource.EdgeComments:
 		return m.clearedcomments
+	case gamedownloadresource.EdgeInspections:
+		return m.clearedinspections
 	case gamedownloadresource.EdgeEvents:
 		return m.clearedevents
 	}
@@ -34595,6 +34679,9 @@ func (m *GameDownloadResourceMutation) ResetEdge(name string) error {
 		return nil
 	case gamedownloadresource.EdgeComments:
 		m.ResetComments()
+		return nil
+	case gamedownloadresource.EdgeInspections:
+		m.ResetInspections()
 		return nil
 	case gamedownloadresource.EdgeEvents:
 		m.ResetEvents()
@@ -35334,6 +35421,7 @@ type GameDownloadResourceFileMutation struct {
 	file_check_status             *int
 	addfile_check_status          *int
 	is_virus_false_positive       *bool
+	file_sha256                   *string
 	created                       *time.Time
 	updated                       *time.Time
 	clearedFields                 map[string]struct{}
@@ -35349,6 +35437,8 @@ type GameDownloadResourceFileMutation struct {
 	clearedupload_session         bool
 	creator                       *int
 	clearedcreator                bool
+	inspection                    *int
+	clearedinspection             bool
 	histories                     map[int]struct{}
 	removedhistories              map[int]struct{}
 	clearedhistories              bool
@@ -36074,6 +36164,104 @@ func (m *GameDownloadResourceFileMutation) ResetIsVirusFalsePositive() {
 	m.is_virus_false_positive = nil
 }
 
+// SetFileSha256 sets the "file_sha256" field.
+func (m *GameDownloadResourceFileMutation) SetFileSha256(s string) {
+	m.file_sha256 = &s
+}
+
+// FileSha256 returns the value of the "file_sha256" field in the mutation.
+func (m *GameDownloadResourceFileMutation) FileSha256() (r string, exists bool) {
+	v := m.file_sha256
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFileSha256 returns the old "file_sha256" field's value of the GameDownloadResourceFile entity.
+// If the GameDownloadResourceFile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceFileMutation) OldFileSha256(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFileSha256 is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFileSha256 requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFileSha256: %w", err)
+	}
+	return oldValue.FileSha256, nil
+}
+
+// ClearFileSha256 clears the value of the "file_sha256" field.
+func (m *GameDownloadResourceFileMutation) ClearFileSha256() {
+	m.file_sha256 = nil
+	m.clearedFields[gamedownloadresourcefile.FieldFileSha256] = struct{}{}
+}
+
+// FileSha256Cleared returns if the "file_sha256" field was cleared in this mutation.
+func (m *GameDownloadResourceFileMutation) FileSha256Cleared() bool {
+	_, ok := m.clearedFields[gamedownloadresourcefile.FieldFileSha256]
+	return ok
+}
+
+// ResetFileSha256 resets all changes to the "file_sha256" field.
+func (m *GameDownloadResourceFileMutation) ResetFileSha256() {
+	m.file_sha256 = nil
+	delete(m.clearedFields, gamedownloadresourcefile.FieldFileSha256)
+}
+
+// SetInspectionID sets the "inspection_id" field.
+func (m *GameDownloadResourceFileMutation) SetInspectionID(i int) {
+	m.inspection = &i
+}
+
+// InspectionID returns the value of the "inspection_id" field in the mutation.
+func (m *GameDownloadResourceFileMutation) InspectionID() (r int, exists bool) {
+	v := m.inspection
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInspectionID returns the old "inspection_id" field's value of the GameDownloadResourceFile entity.
+// If the GameDownloadResourceFile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceFileMutation) OldInspectionID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInspectionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInspectionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInspectionID: %w", err)
+	}
+	return oldValue.InspectionID, nil
+}
+
+// ClearInspectionID clears the value of the "inspection_id" field.
+func (m *GameDownloadResourceFileMutation) ClearInspectionID() {
+	m.inspection = nil
+	m.clearedFields[gamedownloadresourcefile.FieldInspectionID] = struct{}{}
+}
+
+// InspectionIDCleared returns if the "inspection_id" field was cleared in this mutation.
+func (m *GameDownloadResourceFileMutation) InspectionIDCleared() bool {
+	_, ok := m.clearedFields[gamedownloadresourcefile.FieldInspectionID]
+	return ok
+}
+
+// ResetInspectionID resets all changes to the "inspection_id" field.
+func (m *GameDownloadResourceFileMutation) ResetInspectionID() {
+	m.inspection = nil
+	delete(m.clearedFields, gamedownloadresourcefile.FieldInspectionID)
+}
+
 // SetGameDownloadResourceID sets the "game_download_resource_id" field.
 func (m *GameDownloadResourceFileMutation) SetGameDownloadResourceID(i int) {
 	m.game_download_resource = &i
@@ -36407,6 +36595,33 @@ func (m *GameDownloadResourceFileMutation) ResetCreator() {
 	m.clearedcreator = false
 }
 
+// ClearInspection clears the "inspection" edge to the Inspection entity.
+func (m *GameDownloadResourceFileMutation) ClearInspection() {
+	m.clearedinspection = true
+	m.clearedFields[gamedownloadresourcefile.FieldInspectionID] = struct{}{}
+}
+
+// InspectionCleared reports if the "inspection" edge to the Inspection entity was cleared.
+func (m *GameDownloadResourceFileMutation) InspectionCleared() bool {
+	return m.InspectionIDCleared() || m.clearedinspection
+}
+
+// InspectionIDs returns the "inspection" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// InspectionID instead. It exists only for internal usage by the builders.
+func (m *GameDownloadResourceFileMutation) InspectionIDs() (ids []int) {
+	if id := m.inspection; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetInspection resets all changes to the "inspection" edge.
+func (m *GameDownloadResourceFileMutation) ResetInspection() {
+	m.inspection = nil
+	m.clearedinspection = false
+}
+
 // AddHistoryIDs adds the "histories" edge to the GameDownloadResourceFileHistory entity by ids.
 func (m *GameDownloadResourceFileMutation) AddHistoryIDs(ids ...int) {
 	if m.histories == nil {
@@ -36495,7 +36710,7 @@ func (m *GameDownloadResourceFileMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GameDownloadResourceFileMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 19)
 	if m._type != nil {
 		fields = append(fields, gamedownloadresourcefile.FieldType)
 	}
@@ -36534,6 +36749,12 @@ func (m *GameDownloadResourceFileMutation) Fields() []string {
 	}
 	if m.is_virus_false_positive != nil {
 		fields = append(fields, gamedownloadresourcefile.FieldIsVirusFalsePositive)
+	}
+	if m.file_sha256 != nil {
+		fields = append(fields, gamedownloadresourcefile.FieldFileSha256)
+	}
+	if m.inspection != nil {
+		fields = append(fields, gamedownloadresourcefile.FieldInspectionID)
 	}
 	if m.game_download_resource != nil {
 		fields = append(fields, gamedownloadresourcefile.FieldGameDownloadResourceID)
@@ -36581,6 +36802,10 @@ func (m *GameDownloadResourceFileMutation) Field(name string) (ent.Value, bool) 
 		return m.FileCheckStatus()
 	case gamedownloadresourcefile.FieldIsVirusFalsePositive:
 		return m.IsVirusFalsePositive()
+	case gamedownloadresourcefile.FieldFileSha256:
+		return m.FileSha256()
+	case gamedownloadresourcefile.FieldInspectionID:
+		return m.InspectionID()
 	case gamedownloadresourcefile.FieldGameDownloadResourceID:
 		return m.GameDownloadResourceID()
 	case gamedownloadresourcefile.FieldCreatorID:
@@ -36624,6 +36849,10 @@ func (m *GameDownloadResourceFileMutation) OldField(ctx context.Context, name st
 		return m.OldFileCheckStatus(ctx)
 	case gamedownloadresourcefile.FieldIsVirusFalsePositive:
 		return m.OldIsVirusFalsePositive(ctx)
+	case gamedownloadresourcefile.FieldFileSha256:
+		return m.OldFileSha256(ctx)
+	case gamedownloadresourcefile.FieldInspectionID:
+		return m.OldInspectionID(ctx)
 	case gamedownloadresourcefile.FieldGameDownloadResourceID:
 		return m.OldGameDownloadResourceID(ctx)
 	case gamedownloadresourcefile.FieldCreatorID:
@@ -36731,6 +36960,20 @@ func (m *GameDownloadResourceFileMutation) SetField(name string, value ent.Value
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetIsVirusFalsePositive(v)
+		return nil
+	case gamedownloadresourcefile.FieldFileSha256:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFileSha256(v)
+		return nil
+	case gamedownloadresourcefile.FieldInspectionID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInspectionID(v)
 		return nil
 	case gamedownloadresourcefile.FieldGameDownloadResourceID:
 		v, ok := value.(int)
@@ -36856,6 +37099,12 @@ func (m *GameDownloadResourceFileMutation) ClearedFields() []string {
 	if m.FieldCleared(gamedownloadresourcefile.FieldUploadSessionID) {
 		fields = append(fields, gamedownloadresourcefile.FieldUploadSessionID)
 	}
+	if m.FieldCleared(gamedownloadresourcefile.FieldFileSha256) {
+		fields = append(fields, gamedownloadresourcefile.FieldFileSha256)
+	}
+	if m.FieldCleared(gamedownloadresourcefile.FieldInspectionID) {
+		fields = append(fields, gamedownloadresourcefile.FieldInspectionID)
+	}
 	return fields
 }
 
@@ -36884,6 +37133,12 @@ func (m *GameDownloadResourceFileMutation) ClearField(name string) error {
 		return nil
 	case gamedownloadresourcefile.FieldUploadSessionID:
 		m.ClearUploadSessionID()
+		return nil
+	case gamedownloadresourcefile.FieldFileSha256:
+		m.ClearFileSha256()
+		return nil
+	case gamedownloadresourcefile.FieldInspectionID:
+		m.ClearInspectionID()
 		return nil
 	}
 	return fmt.Errorf("unknown GameDownloadResourceFile nullable field %s", name)
@@ -36932,6 +37187,12 @@ func (m *GameDownloadResourceFileMutation) ResetField(name string) error {
 	case gamedownloadresourcefile.FieldIsVirusFalsePositive:
 		m.ResetIsVirusFalsePositive()
 		return nil
+	case gamedownloadresourcefile.FieldFileSha256:
+		m.ResetFileSha256()
+		return nil
+	case gamedownloadresourcefile.FieldInspectionID:
+		m.ResetInspectionID()
+		return nil
 	case gamedownloadresourcefile.FieldGameDownloadResourceID:
 		m.ResetGameDownloadResourceID()
 		return nil
@@ -36950,7 +37211,7 @@ func (m *GameDownloadResourceFileMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *GameDownloadResourceFileMutation) AddedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.activities != nil {
 		edges = append(edges, gamedownloadresourcefile.EdgeActivities)
 	}
@@ -36965,6 +37226,9 @@ func (m *GameDownloadResourceFileMutation) AddedEdges() []string {
 	}
 	if m.creator != nil {
 		edges = append(edges, gamedownloadresourcefile.EdgeCreator)
+	}
+	if m.inspection != nil {
+		edges = append(edges, gamedownloadresourcefile.EdgeInspection)
 	}
 	if m.histories != nil {
 		edges = append(edges, gamedownloadresourcefile.EdgeHistories)
@@ -37000,6 +37264,10 @@ func (m *GameDownloadResourceFileMutation) AddedIDs(name string) []ent.Value {
 		if id := m.creator; id != nil {
 			return []ent.Value{*id}
 		}
+	case gamedownloadresourcefile.EdgeInspection:
+		if id := m.inspection; id != nil {
+			return []ent.Value{*id}
+		}
 	case gamedownloadresourcefile.EdgeHistories:
 		ids := make([]ent.Value, 0, len(m.histories))
 		for id := range m.histories {
@@ -37012,7 +37280,7 @@ func (m *GameDownloadResourceFileMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *GameDownloadResourceFileMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.removedactivities != nil {
 		edges = append(edges, gamedownloadresourcefile.EdgeActivities)
 	}
@@ -37053,7 +37321,7 @@ func (m *GameDownloadResourceFileMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *GameDownloadResourceFileMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.clearedactivities {
 		edges = append(edges, gamedownloadresourcefile.EdgeActivities)
 	}
@@ -37068,6 +37336,9 @@ func (m *GameDownloadResourceFileMutation) ClearedEdges() []string {
 	}
 	if m.clearedcreator {
 		edges = append(edges, gamedownloadresourcefile.EdgeCreator)
+	}
+	if m.clearedinspection {
+		edges = append(edges, gamedownloadresourcefile.EdgeInspection)
 	}
 	if m.clearedhistories {
 		edges = append(edges, gamedownloadresourcefile.EdgeHistories)
@@ -37089,6 +37360,8 @@ func (m *GameDownloadResourceFileMutation) EdgeCleared(name string) bool {
 		return m.clearedupload_session
 	case gamedownloadresourcefile.EdgeCreator:
 		return m.clearedcreator
+	case gamedownloadresourcefile.EdgeInspection:
+		return m.clearedinspection
 	case gamedownloadresourcefile.EdgeHistories:
 		return m.clearedhistories
 	}
@@ -37107,6 +37380,9 @@ func (m *GameDownloadResourceFileMutation) ClearEdge(name string) error {
 		return nil
 	case gamedownloadresourcefile.EdgeCreator:
 		m.ClearCreator()
+		return nil
+	case gamedownloadresourcefile.EdgeInspection:
+		m.ClearInspection()
 		return nil
 	}
 	return fmt.Errorf("unknown GameDownloadResourceFile unique edge %s", name)
@@ -37130,6 +37406,9 @@ func (m *GameDownloadResourceFileMutation) ResetEdge(name string) error {
 		return nil
 	case gamedownloadresourcefile.EdgeCreator:
 		m.ResetCreator()
+		return nil
+	case gamedownloadresourcefile.EdgeInspection:
+		m.ResetInspection()
 		return nil
 	case gamedownloadresourcefile.EdgeHistories:
 		m.ResetHistories()
@@ -44320,6 +44599,3551 @@ func (m *GameUploadSessionMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown GameUploadSession edge %s", name)
+}
+
+// InspectionMutation represents an operation that mutates the Inspection nodes in the graph.
+type InspectionMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *int
+	status              *string
+	archive_format      *string
+	solid               *bool
+	volumes             *int
+	addvolumes          *int
+	recovery            *bool
+	recovery_percent    *int
+	addrecovery_percent *int
+	name_encoding       *string
+	file_count          *int
+	addfile_count       *int
+	folder_count        *int
+	addfolder_count     *int
+	unpacked_size       *int64
+	addunpacked_size    *int64
+	disc_count          *int
+	adddisc_count       *int
+	disc_file_count     *int
+	adddisc_file_count  *int
+	truncated           *bool
+	verified            *bool
+	scan_engine         *string
+	signatures_at       *time.Time
+	scanned_count       *int
+	addscanned_count    *int
+	scan_skipped        *pgvalue.Strings
+	scan_limit          *int64
+	addscan_limit       *int64
+	detections          *jsontext.Value
+	appenddetections    jsontext.Value
+	scanned_at          *time.Time
+	cleared_at          *time.Time
+	created             *time.Time
+	updated             *time.Time
+	clearedFields       map[string]struct{}
+	resource            *int
+	clearedresource     bool
+	entries             map[int]struct{}
+	removedentries      map[int]struct{}
+	clearedentries      bool
+	files               map[int]struct{}
+	removedfiles        map[int]struct{}
+	clearedfiles        bool
+	done                bool
+	oldValue            func(context.Context) (*Inspection, error)
+	predicates          []predicate.Inspection
+}
+
+var _ ent.Mutation = (*InspectionMutation)(nil)
+
+// inspectionOption allows management of the mutation configuration using functional options.
+type inspectionOption func(*InspectionMutation)
+
+// newInspectionMutation creates new mutation for the Inspection entity.
+func newInspectionMutation(c config, op Op, opts ...inspectionOption) *InspectionMutation {
+	m := &InspectionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeInspection,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withInspectionID sets the ID field of the mutation.
+func withInspectionID(id int) inspectionOption {
+	return func(m *InspectionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Inspection
+		)
+		m.oldValue = func(ctx context.Context) (*Inspection, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Inspection.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withInspection sets the old Inspection of the mutation.
+func withInspection(node *Inspection) inspectionOption {
+	return func(m *InspectionMutation) {
+		m.oldValue = func(context.Context) (*Inspection, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m InspectionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m InspectionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Inspection entities.
+func (m *InspectionMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *InspectionMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *InspectionMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Inspection.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetResourceID sets the "resource_id" field.
+func (m *InspectionMutation) SetResourceID(i int) {
+	m.resource = &i
+}
+
+// ResourceID returns the value of the "resource_id" field in the mutation.
+func (m *InspectionMutation) ResourceID() (r int, exists bool) {
+	v := m.resource
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResourceID returns the old "resource_id" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldResourceID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResourceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResourceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResourceID: %w", err)
+	}
+	return oldValue.ResourceID, nil
+}
+
+// ResetResourceID resets all changes to the "resource_id" field.
+func (m *InspectionMutation) ResetResourceID() {
+	m.resource = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *InspectionMutation) SetStatus(s string) {
+	m.status = &s
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *InspectionMutation) Status() (r string, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldStatus(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *InspectionMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetArchiveFormat sets the "archive_format" field.
+func (m *InspectionMutation) SetArchiveFormat(s string) {
+	m.archive_format = &s
+}
+
+// ArchiveFormat returns the value of the "archive_format" field in the mutation.
+func (m *InspectionMutation) ArchiveFormat() (r string, exists bool) {
+	v := m.archive_format
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldArchiveFormat returns the old "archive_format" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldArchiveFormat(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldArchiveFormat is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldArchiveFormat requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldArchiveFormat: %w", err)
+	}
+	return oldValue.ArchiveFormat, nil
+}
+
+// ResetArchiveFormat resets all changes to the "archive_format" field.
+func (m *InspectionMutation) ResetArchiveFormat() {
+	m.archive_format = nil
+}
+
+// SetSolid sets the "solid" field.
+func (m *InspectionMutation) SetSolid(b bool) {
+	m.solid = &b
+}
+
+// Solid returns the value of the "solid" field in the mutation.
+func (m *InspectionMutation) Solid() (r bool, exists bool) {
+	v := m.solid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSolid returns the old "solid" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldSolid(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSolid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSolid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSolid: %w", err)
+	}
+	return oldValue.Solid, nil
+}
+
+// ResetSolid resets all changes to the "solid" field.
+func (m *InspectionMutation) ResetSolid() {
+	m.solid = nil
+}
+
+// SetVolumes sets the "volumes" field.
+func (m *InspectionMutation) SetVolumes(i int) {
+	m.volumes = &i
+	m.addvolumes = nil
+}
+
+// Volumes returns the value of the "volumes" field in the mutation.
+func (m *InspectionMutation) Volumes() (r int, exists bool) {
+	v := m.volumes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVolumes returns the old "volumes" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldVolumes(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVolumes is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVolumes requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVolumes: %w", err)
+	}
+	return oldValue.Volumes, nil
+}
+
+// AddVolumes adds i to the "volumes" field.
+func (m *InspectionMutation) AddVolumes(i int) {
+	if m.addvolumes != nil {
+		*m.addvolumes += i
+	} else {
+		m.addvolumes = &i
+	}
+}
+
+// AddedVolumes returns the value that was added to the "volumes" field in this mutation.
+func (m *InspectionMutation) AddedVolumes() (r int, exists bool) {
+	v := m.addvolumes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetVolumes resets all changes to the "volumes" field.
+func (m *InspectionMutation) ResetVolumes() {
+	m.volumes = nil
+	m.addvolumes = nil
+}
+
+// SetRecovery sets the "recovery" field.
+func (m *InspectionMutation) SetRecovery(b bool) {
+	m.recovery = &b
+}
+
+// Recovery returns the value of the "recovery" field in the mutation.
+func (m *InspectionMutation) Recovery() (r bool, exists bool) {
+	v := m.recovery
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRecovery returns the old "recovery" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldRecovery(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRecovery is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRecovery requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRecovery: %w", err)
+	}
+	return oldValue.Recovery, nil
+}
+
+// ResetRecovery resets all changes to the "recovery" field.
+func (m *InspectionMutation) ResetRecovery() {
+	m.recovery = nil
+}
+
+// SetRecoveryPercent sets the "recovery_percent" field.
+func (m *InspectionMutation) SetRecoveryPercent(i int) {
+	m.recovery_percent = &i
+	m.addrecovery_percent = nil
+}
+
+// RecoveryPercent returns the value of the "recovery_percent" field in the mutation.
+func (m *InspectionMutation) RecoveryPercent() (r int, exists bool) {
+	v := m.recovery_percent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRecoveryPercent returns the old "recovery_percent" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldRecoveryPercent(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRecoveryPercent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRecoveryPercent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRecoveryPercent: %w", err)
+	}
+	return oldValue.RecoveryPercent, nil
+}
+
+// AddRecoveryPercent adds i to the "recovery_percent" field.
+func (m *InspectionMutation) AddRecoveryPercent(i int) {
+	if m.addrecovery_percent != nil {
+		*m.addrecovery_percent += i
+	} else {
+		m.addrecovery_percent = &i
+	}
+}
+
+// AddedRecoveryPercent returns the value that was added to the "recovery_percent" field in this mutation.
+func (m *InspectionMutation) AddedRecoveryPercent() (r int, exists bool) {
+	v := m.addrecovery_percent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetRecoveryPercent resets all changes to the "recovery_percent" field.
+func (m *InspectionMutation) ResetRecoveryPercent() {
+	m.recovery_percent = nil
+	m.addrecovery_percent = nil
+}
+
+// SetNameEncoding sets the "name_encoding" field.
+func (m *InspectionMutation) SetNameEncoding(s string) {
+	m.name_encoding = &s
+}
+
+// NameEncoding returns the value of the "name_encoding" field in the mutation.
+func (m *InspectionMutation) NameEncoding() (r string, exists bool) {
+	v := m.name_encoding
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNameEncoding returns the old "name_encoding" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldNameEncoding(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNameEncoding is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNameEncoding requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNameEncoding: %w", err)
+	}
+	return oldValue.NameEncoding, nil
+}
+
+// ResetNameEncoding resets all changes to the "name_encoding" field.
+func (m *InspectionMutation) ResetNameEncoding() {
+	m.name_encoding = nil
+}
+
+// SetFileCount sets the "file_count" field.
+func (m *InspectionMutation) SetFileCount(i int) {
+	m.file_count = &i
+	m.addfile_count = nil
+}
+
+// FileCount returns the value of the "file_count" field in the mutation.
+func (m *InspectionMutation) FileCount() (r int, exists bool) {
+	v := m.file_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFileCount returns the old "file_count" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldFileCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFileCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFileCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFileCount: %w", err)
+	}
+	return oldValue.FileCount, nil
+}
+
+// AddFileCount adds i to the "file_count" field.
+func (m *InspectionMutation) AddFileCount(i int) {
+	if m.addfile_count != nil {
+		*m.addfile_count += i
+	} else {
+		m.addfile_count = &i
+	}
+}
+
+// AddedFileCount returns the value that was added to the "file_count" field in this mutation.
+func (m *InspectionMutation) AddedFileCount() (r int, exists bool) {
+	v := m.addfile_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetFileCount resets all changes to the "file_count" field.
+func (m *InspectionMutation) ResetFileCount() {
+	m.file_count = nil
+	m.addfile_count = nil
+}
+
+// SetFolderCount sets the "folder_count" field.
+func (m *InspectionMutation) SetFolderCount(i int) {
+	m.folder_count = &i
+	m.addfolder_count = nil
+}
+
+// FolderCount returns the value of the "folder_count" field in the mutation.
+func (m *InspectionMutation) FolderCount() (r int, exists bool) {
+	v := m.folder_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFolderCount returns the old "folder_count" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldFolderCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFolderCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFolderCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFolderCount: %w", err)
+	}
+	return oldValue.FolderCount, nil
+}
+
+// AddFolderCount adds i to the "folder_count" field.
+func (m *InspectionMutation) AddFolderCount(i int) {
+	if m.addfolder_count != nil {
+		*m.addfolder_count += i
+	} else {
+		m.addfolder_count = &i
+	}
+}
+
+// AddedFolderCount returns the value that was added to the "folder_count" field in this mutation.
+func (m *InspectionMutation) AddedFolderCount() (r int, exists bool) {
+	v := m.addfolder_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetFolderCount resets all changes to the "folder_count" field.
+func (m *InspectionMutation) ResetFolderCount() {
+	m.folder_count = nil
+	m.addfolder_count = nil
+}
+
+// SetUnpackedSize sets the "unpacked_size" field.
+func (m *InspectionMutation) SetUnpackedSize(i int64) {
+	m.unpacked_size = &i
+	m.addunpacked_size = nil
+}
+
+// UnpackedSize returns the value of the "unpacked_size" field in the mutation.
+func (m *InspectionMutation) UnpackedSize() (r int64, exists bool) {
+	v := m.unpacked_size
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUnpackedSize returns the old "unpacked_size" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldUnpackedSize(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUnpackedSize is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUnpackedSize requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUnpackedSize: %w", err)
+	}
+	return oldValue.UnpackedSize, nil
+}
+
+// AddUnpackedSize adds i to the "unpacked_size" field.
+func (m *InspectionMutation) AddUnpackedSize(i int64) {
+	if m.addunpacked_size != nil {
+		*m.addunpacked_size += i
+	} else {
+		m.addunpacked_size = &i
+	}
+}
+
+// AddedUnpackedSize returns the value that was added to the "unpacked_size" field in this mutation.
+func (m *InspectionMutation) AddedUnpackedSize() (r int64, exists bool) {
+	v := m.addunpacked_size
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetUnpackedSize resets all changes to the "unpacked_size" field.
+func (m *InspectionMutation) ResetUnpackedSize() {
+	m.unpacked_size = nil
+	m.addunpacked_size = nil
+}
+
+// SetDiscCount sets the "disc_count" field.
+func (m *InspectionMutation) SetDiscCount(i int) {
+	m.disc_count = &i
+	m.adddisc_count = nil
+}
+
+// DiscCount returns the value of the "disc_count" field in the mutation.
+func (m *InspectionMutation) DiscCount() (r int, exists bool) {
+	v := m.disc_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDiscCount returns the old "disc_count" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldDiscCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDiscCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDiscCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDiscCount: %w", err)
+	}
+	return oldValue.DiscCount, nil
+}
+
+// AddDiscCount adds i to the "disc_count" field.
+func (m *InspectionMutation) AddDiscCount(i int) {
+	if m.adddisc_count != nil {
+		*m.adddisc_count += i
+	} else {
+		m.adddisc_count = &i
+	}
+}
+
+// AddedDiscCount returns the value that was added to the "disc_count" field in this mutation.
+func (m *InspectionMutation) AddedDiscCount() (r int, exists bool) {
+	v := m.adddisc_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDiscCount resets all changes to the "disc_count" field.
+func (m *InspectionMutation) ResetDiscCount() {
+	m.disc_count = nil
+	m.adddisc_count = nil
+}
+
+// SetDiscFileCount sets the "disc_file_count" field.
+func (m *InspectionMutation) SetDiscFileCount(i int) {
+	m.disc_file_count = &i
+	m.adddisc_file_count = nil
+}
+
+// DiscFileCount returns the value of the "disc_file_count" field in the mutation.
+func (m *InspectionMutation) DiscFileCount() (r int, exists bool) {
+	v := m.disc_file_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDiscFileCount returns the old "disc_file_count" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldDiscFileCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDiscFileCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDiscFileCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDiscFileCount: %w", err)
+	}
+	return oldValue.DiscFileCount, nil
+}
+
+// AddDiscFileCount adds i to the "disc_file_count" field.
+func (m *InspectionMutation) AddDiscFileCount(i int) {
+	if m.adddisc_file_count != nil {
+		*m.adddisc_file_count += i
+	} else {
+		m.adddisc_file_count = &i
+	}
+}
+
+// AddedDiscFileCount returns the value that was added to the "disc_file_count" field in this mutation.
+func (m *InspectionMutation) AddedDiscFileCount() (r int, exists bool) {
+	v := m.adddisc_file_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDiscFileCount resets all changes to the "disc_file_count" field.
+func (m *InspectionMutation) ResetDiscFileCount() {
+	m.disc_file_count = nil
+	m.adddisc_file_count = nil
+}
+
+// SetTruncated sets the "truncated" field.
+func (m *InspectionMutation) SetTruncated(b bool) {
+	m.truncated = &b
+}
+
+// Truncated returns the value of the "truncated" field in the mutation.
+func (m *InspectionMutation) Truncated() (r bool, exists bool) {
+	v := m.truncated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTruncated returns the old "truncated" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldTruncated(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTruncated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTruncated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTruncated: %w", err)
+	}
+	return oldValue.Truncated, nil
+}
+
+// ResetTruncated resets all changes to the "truncated" field.
+func (m *InspectionMutation) ResetTruncated() {
+	m.truncated = nil
+}
+
+// SetVerified sets the "verified" field.
+func (m *InspectionMutation) SetVerified(b bool) {
+	m.verified = &b
+}
+
+// Verified returns the value of the "verified" field in the mutation.
+func (m *InspectionMutation) Verified() (r bool, exists bool) {
+	v := m.verified
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVerified returns the old "verified" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldVerified(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVerified is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVerified requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVerified: %w", err)
+	}
+	return oldValue.Verified, nil
+}
+
+// ResetVerified resets all changes to the "verified" field.
+func (m *InspectionMutation) ResetVerified() {
+	m.verified = nil
+}
+
+// SetScanEngine sets the "scan_engine" field.
+func (m *InspectionMutation) SetScanEngine(s string) {
+	m.scan_engine = &s
+}
+
+// ScanEngine returns the value of the "scan_engine" field in the mutation.
+func (m *InspectionMutation) ScanEngine() (r string, exists bool) {
+	v := m.scan_engine
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScanEngine returns the old "scan_engine" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldScanEngine(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScanEngine is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScanEngine requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScanEngine: %w", err)
+	}
+	return oldValue.ScanEngine, nil
+}
+
+// ResetScanEngine resets all changes to the "scan_engine" field.
+func (m *InspectionMutation) ResetScanEngine() {
+	m.scan_engine = nil
+}
+
+// SetSignaturesAt sets the "signatures_at" field.
+func (m *InspectionMutation) SetSignaturesAt(t time.Time) {
+	m.signatures_at = &t
+}
+
+// SignaturesAt returns the value of the "signatures_at" field in the mutation.
+func (m *InspectionMutation) SignaturesAt() (r time.Time, exists bool) {
+	v := m.signatures_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSignaturesAt returns the old "signatures_at" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldSignaturesAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSignaturesAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSignaturesAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSignaturesAt: %w", err)
+	}
+	return oldValue.SignaturesAt, nil
+}
+
+// ClearSignaturesAt clears the value of the "signatures_at" field.
+func (m *InspectionMutation) ClearSignaturesAt() {
+	m.signatures_at = nil
+	m.clearedFields[inspection.FieldSignaturesAt] = struct{}{}
+}
+
+// SignaturesAtCleared returns if the "signatures_at" field was cleared in this mutation.
+func (m *InspectionMutation) SignaturesAtCleared() bool {
+	_, ok := m.clearedFields[inspection.FieldSignaturesAt]
+	return ok
+}
+
+// ResetSignaturesAt resets all changes to the "signatures_at" field.
+func (m *InspectionMutation) ResetSignaturesAt() {
+	m.signatures_at = nil
+	delete(m.clearedFields, inspection.FieldSignaturesAt)
+}
+
+// SetScannedCount sets the "scanned_count" field.
+func (m *InspectionMutation) SetScannedCount(i int) {
+	m.scanned_count = &i
+	m.addscanned_count = nil
+}
+
+// ScannedCount returns the value of the "scanned_count" field in the mutation.
+func (m *InspectionMutation) ScannedCount() (r int, exists bool) {
+	v := m.scanned_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScannedCount returns the old "scanned_count" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldScannedCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScannedCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScannedCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScannedCount: %w", err)
+	}
+	return oldValue.ScannedCount, nil
+}
+
+// AddScannedCount adds i to the "scanned_count" field.
+func (m *InspectionMutation) AddScannedCount(i int) {
+	if m.addscanned_count != nil {
+		*m.addscanned_count += i
+	} else {
+		m.addscanned_count = &i
+	}
+}
+
+// AddedScannedCount returns the value that was added to the "scanned_count" field in this mutation.
+func (m *InspectionMutation) AddedScannedCount() (r int, exists bool) {
+	v := m.addscanned_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetScannedCount resets all changes to the "scanned_count" field.
+func (m *InspectionMutation) ResetScannedCount() {
+	m.scanned_count = nil
+	m.addscanned_count = nil
+}
+
+// SetScanSkipped sets the "scan_skipped" field.
+func (m *InspectionMutation) SetScanSkipped(pg pgvalue.Strings) {
+	m.scan_skipped = &pg
+}
+
+// ScanSkipped returns the value of the "scan_skipped" field in the mutation.
+func (m *InspectionMutation) ScanSkipped() (r pgvalue.Strings, exists bool) {
+	v := m.scan_skipped
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScanSkipped returns the old "scan_skipped" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldScanSkipped(ctx context.Context) (v pgvalue.Strings, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScanSkipped is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScanSkipped requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScanSkipped: %w", err)
+	}
+	return oldValue.ScanSkipped, nil
+}
+
+// ClearScanSkipped clears the value of the "scan_skipped" field.
+func (m *InspectionMutation) ClearScanSkipped() {
+	m.scan_skipped = nil
+	m.clearedFields[inspection.FieldScanSkipped] = struct{}{}
+}
+
+// ScanSkippedCleared returns if the "scan_skipped" field was cleared in this mutation.
+func (m *InspectionMutation) ScanSkippedCleared() bool {
+	_, ok := m.clearedFields[inspection.FieldScanSkipped]
+	return ok
+}
+
+// ResetScanSkipped resets all changes to the "scan_skipped" field.
+func (m *InspectionMutation) ResetScanSkipped() {
+	m.scan_skipped = nil
+	delete(m.clearedFields, inspection.FieldScanSkipped)
+}
+
+// SetScanLimit sets the "scan_limit" field.
+func (m *InspectionMutation) SetScanLimit(i int64) {
+	m.scan_limit = &i
+	m.addscan_limit = nil
+}
+
+// ScanLimit returns the value of the "scan_limit" field in the mutation.
+func (m *InspectionMutation) ScanLimit() (r int64, exists bool) {
+	v := m.scan_limit
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScanLimit returns the old "scan_limit" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldScanLimit(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScanLimit is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScanLimit requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScanLimit: %w", err)
+	}
+	return oldValue.ScanLimit, nil
+}
+
+// AddScanLimit adds i to the "scan_limit" field.
+func (m *InspectionMutation) AddScanLimit(i int64) {
+	if m.addscan_limit != nil {
+		*m.addscan_limit += i
+	} else {
+		m.addscan_limit = &i
+	}
+}
+
+// AddedScanLimit returns the value that was added to the "scan_limit" field in this mutation.
+func (m *InspectionMutation) AddedScanLimit() (r int64, exists bool) {
+	v := m.addscan_limit
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetScanLimit resets all changes to the "scan_limit" field.
+func (m *InspectionMutation) ResetScanLimit() {
+	m.scan_limit = nil
+	m.addscan_limit = nil
+}
+
+// SetDetections sets the "detections" field.
+func (m *InspectionMutation) SetDetections(j jsontext.Value) {
+	m.detections = &j
+	m.appenddetections = nil
+}
+
+// Detections returns the value of the "detections" field in the mutation.
+func (m *InspectionMutation) Detections() (r jsontext.Value, exists bool) {
+	v := m.detections
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDetections returns the old "detections" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldDetections(ctx context.Context) (v jsontext.Value, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDetections is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDetections requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDetections: %w", err)
+	}
+	return oldValue.Detections, nil
+}
+
+// AppendDetections adds j to the "detections" field.
+func (m *InspectionMutation) AppendDetections(j jsontext.Value) {
+	m.appenddetections = append(m.appenddetections, j...)
+}
+
+// AppendedDetections returns the list of values that were appended to the "detections" field in this mutation.
+func (m *InspectionMutation) AppendedDetections() (jsontext.Value, bool) {
+	if len(m.appenddetections) == 0 {
+		return nil, false
+	}
+	return m.appenddetections, true
+}
+
+// ClearDetections clears the value of the "detections" field.
+func (m *InspectionMutation) ClearDetections() {
+	m.detections = nil
+	m.appenddetections = nil
+	m.clearedFields[inspection.FieldDetections] = struct{}{}
+}
+
+// DetectionsCleared returns if the "detections" field was cleared in this mutation.
+func (m *InspectionMutation) DetectionsCleared() bool {
+	_, ok := m.clearedFields[inspection.FieldDetections]
+	return ok
+}
+
+// ResetDetections resets all changes to the "detections" field.
+func (m *InspectionMutation) ResetDetections() {
+	m.detections = nil
+	m.appenddetections = nil
+	delete(m.clearedFields, inspection.FieldDetections)
+}
+
+// SetScannedAt sets the "scanned_at" field.
+func (m *InspectionMutation) SetScannedAt(t time.Time) {
+	m.scanned_at = &t
+}
+
+// ScannedAt returns the value of the "scanned_at" field in the mutation.
+func (m *InspectionMutation) ScannedAt() (r time.Time, exists bool) {
+	v := m.scanned_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScannedAt returns the old "scanned_at" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldScannedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScannedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScannedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScannedAt: %w", err)
+	}
+	return oldValue.ScannedAt, nil
+}
+
+// ClearScannedAt clears the value of the "scanned_at" field.
+func (m *InspectionMutation) ClearScannedAt() {
+	m.scanned_at = nil
+	m.clearedFields[inspection.FieldScannedAt] = struct{}{}
+}
+
+// ScannedAtCleared returns if the "scanned_at" field was cleared in this mutation.
+func (m *InspectionMutation) ScannedAtCleared() bool {
+	_, ok := m.clearedFields[inspection.FieldScannedAt]
+	return ok
+}
+
+// ResetScannedAt resets all changes to the "scanned_at" field.
+func (m *InspectionMutation) ResetScannedAt() {
+	m.scanned_at = nil
+	delete(m.clearedFields, inspection.FieldScannedAt)
+}
+
+// SetClearedAt sets the "cleared_at" field.
+func (m *InspectionMutation) SetClearedAt(t time.Time) {
+	m.cleared_at = &t
+}
+
+// ClearedAt returns the value of the "cleared_at" field in the mutation.
+func (m *InspectionMutation) ClearedAt() (r time.Time, exists bool) {
+	v := m.cleared_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClearedAt returns the old "cleared_at" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldClearedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldClearedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldClearedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClearedAt: %w", err)
+	}
+	return oldValue.ClearedAt, nil
+}
+
+// ClearClearedAt clears the value of the "cleared_at" field.
+func (m *InspectionMutation) ClearClearedAt() {
+	m.cleared_at = nil
+	m.clearedFields[inspection.FieldClearedAt] = struct{}{}
+}
+
+// ClearedAtCleared returns if the "cleared_at" field was cleared in this mutation.
+func (m *InspectionMutation) ClearedAtCleared() bool {
+	_, ok := m.clearedFields[inspection.FieldClearedAt]
+	return ok
+}
+
+// ResetClearedAt resets all changes to the "cleared_at" field.
+func (m *InspectionMutation) ResetClearedAt() {
+	m.cleared_at = nil
+	delete(m.clearedFields, inspection.FieldClearedAt)
+}
+
+// SetCreated sets the "created" field.
+func (m *InspectionMutation) SetCreated(t time.Time) {
+	m.created = &t
+}
+
+// Created returns the value of the "created" field in the mutation.
+func (m *InspectionMutation) Created() (r time.Time, exists bool) {
+	v := m.created
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreated returns the old "created" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldCreated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreated: %w", err)
+	}
+	return oldValue.Created, nil
+}
+
+// ResetCreated resets all changes to the "created" field.
+func (m *InspectionMutation) ResetCreated() {
+	m.created = nil
+}
+
+// SetUpdated sets the "updated" field.
+func (m *InspectionMutation) SetUpdated(t time.Time) {
+	m.updated = &t
+}
+
+// Updated returns the value of the "updated" field in the mutation.
+func (m *InspectionMutation) Updated() (r time.Time, exists bool) {
+	v := m.updated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdated returns the old "updated" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdated: %w", err)
+	}
+	return oldValue.Updated, nil
+}
+
+// ResetUpdated resets all changes to the "updated" field.
+func (m *InspectionMutation) ResetUpdated() {
+	m.updated = nil
+}
+
+// ClearResource clears the "resource" edge to the GameDownloadResource entity.
+func (m *InspectionMutation) ClearResource() {
+	m.clearedresource = true
+	m.clearedFields[inspection.FieldResourceID] = struct{}{}
+}
+
+// ResourceCleared reports if the "resource" edge to the GameDownloadResource entity was cleared.
+func (m *InspectionMutation) ResourceCleared() bool {
+	return m.clearedresource
+}
+
+// ResourceIDs returns the "resource" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ResourceID instead. It exists only for internal usage by the builders.
+func (m *InspectionMutation) ResourceIDs() (ids []int) {
+	if id := m.resource; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetResource resets all changes to the "resource" edge.
+func (m *InspectionMutation) ResetResource() {
+	m.resource = nil
+	m.clearedresource = false
+}
+
+// AddEntryIDs adds the "entries" edge to the InspectionEntry entity by ids.
+func (m *InspectionMutation) AddEntryIDs(ids ...int) {
+	if m.entries == nil {
+		m.entries = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.entries[ids[i]] = struct{}{}
+	}
+}
+
+// ClearEntries clears the "entries" edge to the InspectionEntry entity.
+func (m *InspectionMutation) ClearEntries() {
+	m.clearedentries = true
+}
+
+// EntriesCleared reports if the "entries" edge to the InspectionEntry entity was cleared.
+func (m *InspectionMutation) EntriesCleared() bool {
+	return m.clearedentries
+}
+
+// RemoveEntryIDs removes the "entries" edge to the InspectionEntry entity by IDs.
+func (m *InspectionMutation) RemoveEntryIDs(ids ...int) {
+	if m.removedentries == nil {
+		m.removedentries = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.entries, ids[i])
+		m.removedentries[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedEntries returns the removed IDs of the "entries" edge to the InspectionEntry entity.
+func (m *InspectionMutation) RemovedEntriesIDs() (ids []int) {
+	for id := range m.removedentries {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// EntriesIDs returns the "entries" edge IDs in the mutation.
+func (m *InspectionMutation) EntriesIDs() (ids []int) {
+	for id := range m.entries {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetEntries resets all changes to the "entries" edge.
+func (m *InspectionMutation) ResetEntries() {
+	m.entries = nil
+	m.clearedentries = false
+	m.removedentries = nil
+}
+
+// AddFileIDs adds the "files" edge to the GameDownloadResourceFile entity by ids.
+func (m *InspectionMutation) AddFileIDs(ids ...int) {
+	if m.files == nil {
+		m.files = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.files[ids[i]] = struct{}{}
+	}
+}
+
+// ClearFiles clears the "files" edge to the GameDownloadResourceFile entity.
+func (m *InspectionMutation) ClearFiles() {
+	m.clearedfiles = true
+}
+
+// FilesCleared reports if the "files" edge to the GameDownloadResourceFile entity was cleared.
+func (m *InspectionMutation) FilesCleared() bool {
+	return m.clearedfiles
+}
+
+// RemoveFileIDs removes the "files" edge to the GameDownloadResourceFile entity by IDs.
+func (m *InspectionMutation) RemoveFileIDs(ids ...int) {
+	if m.removedfiles == nil {
+		m.removedfiles = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.files, ids[i])
+		m.removedfiles[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedFiles returns the removed IDs of the "files" edge to the GameDownloadResourceFile entity.
+func (m *InspectionMutation) RemovedFilesIDs() (ids []int) {
+	for id := range m.removedfiles {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// FilesIDs returns the "files" edge IDs in the mutation.
+func (m *InspectionMutation) FilesIDs() (ids []int) {
+	for id := range m.files {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetFiles resets all changes to the "files" edge.
+func (m *InspectionMutation) ResetFiles() {
+	m.files = nil
+	m.clearedfiles = false
+	m.removedfiles = nil
+}
+
+// Where appends a list predicates to the InspectionMutation builder.
+func (m *InspectionMutation) Where(ps ...predicate.Inspection) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the InspectionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *InspectionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Inspection, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *InspectionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *InspectionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Inspection).
+func (m *InspectionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *InspectionMutation) Fields() []string {
+	fields := make([]string, 0, 25)
+	if m.resource != nil {
+		fields = append(fields, inspection.FieldResourceID)
+	}
+	if m.status != nil {
+		fields = append(fields, inspection.FieldStatus)
+	}
+	if m.archive_format != nil {
+		fields = append(fields, inspection.FieldArchiveFormat)
+	}
+	if m.solid != nil {
+		fields = append(fields, inspection.FieldSolid)
+	}
+	if m.volumes != nil {
+		fields = append(fields, inspection.FieldVolumes)
+	}
+	if m.recovery != nil {
+		fields = append(fields, inspection.FieldRecovery)
+	}
+	if m.recovery_percent != nil {
+		fields = append(fields, inspection.FieldRecoveryPercent)
+	}
+	if m.name_encoding != nil {
+		fields = append(fields, inspection.FieldNameEncoding)
+	}
+	if m.file_count != nil {
+		fields = append(fields, inspection.FieldFileCount)
+	}
+	if m.folder_count != nil {
+		fields = append(fields, inspection.FieldFolderCount)
+	}
+	if m.unpacked_size != nil {
+		fields = append(fields, inspection.FieldUnpackedSize)
+	}
+	if m.disc_count != nil {
+		fields = append(fields, inspection.FieldDiscCount)
+	}
+	if m.disc_file_count != nil {
+		fields = append(fields, inspection.FieldDiscFileCount)
+	}
+	if m.truncated != nil {
+		fields = append(fields, inspection.FieldTruncated)
+	}
+	if m.verified != nil {
+		fields = append(fields, inspection.FieldVerified)
+	}
+	if m.scan_engine != nil {
+		fields = append(fields, inspection.FieldScanEngine)
+	}
+	if m.signatures_at != nil {
+		fields = append(fields, inspection.FieldSignaturesAt)
+	}
+	if m.scanned_count != nil {
+		fields = append(fields, inspection.FieldScannedCount)
+	}
+	if m.scan_skipped != nil {
+		fields = append(fields, inspection.FieldScanSkipped)
+	}
+	if m.scan_limit != nil {
+		fields = append(fields, inspection.FieldScanLimit)
+	}
+	if m.detections != nil {
+		fields = append(fields, inspection.FieldDetections)
+	}
+	if m.scanned_at != nil {
+		fields = append(fields, inspection.FieldScannedAt)
+	}
+	if m.cleared_at != nil {
+		fields = append(fields, inspection.FieldClearedAt)
+	}
+	if m.created != nil {
+		fields = append(fields, inspection.FieldCreated)
+	}
+	if m.updated != nil {
+		fields = append(fields, inspection.FieldUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *InspectionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case inspection.FieldResourceID:
+		return m.ResourceID()
+	case inspection.FieldStatus:
+		return m.Status()
+	case inspection.FieldArchiveFormat:
+		return m.ArchiveFormat()
+	case inspection.FieldSolid:
+		return m.Solid()
+	case inspection.FieldVolumes:
+		return m.Volumes()
+	case inspection.FieldRecovery:
+		return m.Recovery()
+	case inspection.FieldRecoveryPercent:
+		return m.RecoveryPercent()
+	case inspection.FieldNameEncoding:
+		return m.NameEncoding()
+	case inspection.FieldFileCount:
+		return m.FileCount()
+	case inspection.FieldFolderCount:
+		return m.FolderCount()
+	case inspection.FieldUnpackedSize:
+		return m.UnpackedSize()
+	case inspection.FieldDiscCount:
+		return m.DiscCount()
+	case inspection.FieldDiscFileCount:
+		return m.DiscFileCount()
+	case inspection.FieldTruncated:
+		return m.Truncated()
+	case inspection.FieldVerified:
+		return m.Verified()
+	case inspection.FieldScanEngine:
+		return m.ScanEngine()
+	case inspection.FieldSignaturesAt:
+		return m.SignaturesAt()
+	case inspection.FieldScannedCount:
+		return m.ScannedCount()
+	case inspection.FieldScanSkipped:
+		return m.ScanSkipped()
+	case inspection.FieldScanLimit:
+		return m.ScanLimit()
+	case inspection.FieldDetections:
+		return m.Detections()
+	case inspection.FieldScannedAt:
+		return m.ScannedAt()
+	case inspection.FieldClearedAt:
+		return m.ClearedAt()
+	case inspection.FieldCreated:
+		return m.Created()
+	case inspection.FieldUpdated:
+		return m.Updated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *InspectionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case inspection.FieldResourceID:
+		return m.OldResourceID(ctx)
+	case inspection.FieldStatus:
+		return m.OldStatus(ctx)
+	case inspection.FieldArchiveFormat:
+		return m.OldArchiveFormat(ctx)
+	case inspection.FieldSolid:
+		return m.OldSolid(ctx)
+	case inspection.FieldVolumes:
+		return m.OldVolumes(ctx)
+	case inspection.FieldRecovery:
+		return m.OldRecovery(ctx)
+	case inspection.FieldRecoveryPercent:
+		return m.OldRecoveryPercent(ctx)
+	case inspection.FieldNameEncoding:
+		return m.OldNameEncoding(ctx)
+	case inspection.FieldFileCount:
+		return m.OldFileCount(ctx)
+	case inspection.FieldFolderCount:
+		return m.OldFolderCount(ctx)
+	case inspection.FieldUnpackedSize:
+		return m.OldUnpackedSize(ctx)
+	case inspection.FieldDiscCount:
+		return m.OldDiscCount(ctx)
+	case inspection.FieldDiscFileCount:
+		return m.OldDiscFileCount(ctx)
+	case inspection.FieldTruncated:
+		return m.OldTruncated(ctx)
+	case inspection.FieldVerified:
+		return m.OldVerified(ctx)
+	case inspection.FieldScanEngine:
+		return m.OldScanEngine(ctx)
+	case inspection.FieldSignaturesAt:
+		return m.OldSignaturesAt(ctx)
+	case inspection.FieldScannedCount:
+		return m.OldScannedCount(ctx)
+	case inspection.FieldScanSkipped:
+		return m.OldScanSkipped(ctx)
+	case inspection.FieldScanLimit:
+		return m.OldScanLimit(ctx)
+	case inspection.FieldDetections:
+		return m.OldDetections(ctx)
+	case inspection.FieldScannedAt:
+		return m.OldScannedAt(ctx)
+	case inspection.FieldClearedAt:
+		return m.OldClearedAt(ctx)
+	case inspection.FieldCreated:
+		return m.OldCreated(ctx)
+	case inspection.FieldUpdated:
+		return m.OldUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown Inspection field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *InspectionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case inspection.FieldResourceID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResourceID(v)
+		return nil
+	case inspection.FieldStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case inspection.FieldArchiveFormat:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetArchiveFormat(v)
+		return nil
+	case inspection.FieldSolid:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSolid(v)
+		return nil
+	case inspection.FieldVolumes:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVolumes(v)
+		return nil
+	case inspection.FieldRecovery:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRecovery(v)
+		return nil
+	case inspection.FieldRecoveryPercent:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRecoveryPercent(v)
+		return nil
+	case inspection.FieldNameEncoding:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNameEncoding(v)
+		return nil
+	case inspection.FieldFileCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFileCount(v)
+		return nil
+	case inspection.FieldFolderCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFolderCount(v)
+		return nil
+	case inspection.FieldUnpackedSize:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUnpackedSize(v)
+		return nil
+	case inspection.FieldDiscCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDiscCount(v)
+		return nil
+	case inspection.FieldDiscFileCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDiscFileCount(v)
+		return nil
+	case inspection.FieldTruncated:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTruncated(v)
+		return nil
+	case inspection.FieldVerified:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVerified(v)
+		return nil
+	case inspection.FieldScanEngine:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScanEngine(v)
+		return nil
+	case inspection.FieldSignaturesAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSignaturesAt(v)
+		return nil
+	case inspection.FieldScannedCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScannedCount(v)
+		return nil
+	case inspection.FieldScanSkipped:
+		v, ok := value.(pgvalue.Strings)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScanSkipped(v)
+		return nil
+	case inspection.FieldScanLimit:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScanLimit(v)
+		return nil
+	case inspection.FieldDetections:
+		v, ok := value.(jsontext.Value)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDetections(v)
+		return nil
+	case inspection.FieldScannedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScannedAt(v)
+		return nil
+	case inspection.FieldClearedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClearedAt(v)
+		return nil
+	case inspection.FieldCreated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreated(v)
+		return nil
+	case inspection.FieldUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Inspection field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *InspectionMutation) AddedFields() []string {
+	var fields []string
+	if m.addvolumes != nil {
+		fields = append(fields, inspection.FieldVolumes)
+	}
+	if m.addrecovery_percent != nil {
+		fields = append(fields, inspection.FieldRecoveryPercent)
+	}
+	if m.addfile_count != nil {
+		fields = append(fields, inspection.FieldFileCount)
+	}
+	if m.addfolder_count != nil {
+		fields = append(fields, inspection.FieldFolderCount)
+	}
+	if m.addunpacked_size != nil {
+		fields = append(fields, inspection.FieldUnpackedSize)
+	}
+	if m.adddisc_count != nil {
+		fields = append(fields, inspection.FieldDiscCount)
+	}
+	if m.adddisc_file_count != nil {
+		fields = append(fields, inspection.FieldDiscFileCount)
+	}
+	if m.addscanned_count != nil {
+		fields = append(fields, inspection.FieldScannedCount)
+	}
+	if m.addscan_limit != nil {
+		fields = append(fields, inspection.FieldScanLimit)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *InspectionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case inspection.FieldVolumes:
+		return m.AddedVolumes()
+	case inspection.FieldRecoveryPercent:
+		return m.AddedRecoveryPercent()
+	case inspection.FieldFileCount:
+		return m.AddedFileCount()
+	case inspection.FieldFolderCount:
+		return m.AddedFolderCount()
+	case inspection.FieldUnpackedSize:
+		return m.AddedUnpackedSize()
+	case inspection.FieldDiscCount:
+		return m.AddedDiscCount()
+	case inspection.FieldDiscFileCount:
+		return m.AddedDiscFileCount()
+	case inspection.FieldScannedCount:
+		return m.AddedScannedCount()
+	case inspection.FieldScanLimit:
+		return m.AddedScanLimit()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *InspectionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case inspection.FieldVolumes:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddVolumes(v)
+		return nil
+	case inspection.FieldRecoveryPercent:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRecoveryPercent(v)
+		return nil
+	case inspection.FieldFileCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddFileCount(v)
+		return nil
+	case inspection.FieldFolderCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddFolderCount(v)
+		return nil
+	case inspection.FieldUnpackedSize:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUnpackedSize(v)
+		return nil
+	case inspection.FieldDiscCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDiscCount(v)
+		return nil
+	case inspection.FieldDiscFileCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDiscFileCount(v)
+		return nil
+	case inspection.FieldScannedCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddScannedCount(v)
+		return nil
+	case inspection.FieldScanLimit:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddScanLimit(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Inspection numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *InspectionMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(inspection.FieldSignaturesAt) {
+		fields = append(fields, inspection.FieldSignaturesAt)
+	}
+	if m.FieldCleared(inspection.FieldScanSkipped) {
+		fields = append(fields, inspection.FieldScanSkipped)
+	}
+	if m.FieldCleared(inspection.FieldDetections) {
+		fields = append(fields, inspection.FieldDetections)
+	}
+	if m.FieldCleared(inspection.FieldScannedAt) {
+		fields = append(fields, inspection.FieldScannedAt)
+	}
+	if m.FieldCleared(inspection.FieldClearedAt) {
+		fields = append(fields, inspection.FieldClearedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *InspectionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *InspectionMutation) ClearField(name string) error {
+	switch name {
+	case inspection.FieldSignaturesAt:
+		m.ClearSignaturesAt()
+		return nil
+	case inspection.FieldScanSkipped:
+		m.ClearScanSkipped()
+		return nil
+	case inspection.FieldDetections:
+		m.ClearDetections()
+		return nil
+	case inspection.FieldScannedAt:
+		m.ClearScannedAt()
+		return nil
+	case inspection.FieldClearedAt:
+		m.ClearClearedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown Inspection nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *InspectionMutation) ResetField(name string) error {
+	switch name {
+	case inspection.FieldResourceID:
+		m.ResetResourceID()
+		return nil
+	case inspection.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case inspection.FieldArchiveFormat:
+		m.ResetArchiveFormat()
+		return nil
+	case inspection.FieldSolid:
+		m.ResetSolid()
+		return nil
+	case inspection.FieldVolumes:
+		m.ResetVolumes()
+		return nil
+	case inspection.FieldRecovery:
+		m.ResetRecovery()
+		return nil
+	case inspection.FieldRecoveryPercent:
+		m.ResetRecoveryPercent()
+		return nil
+	case inspection.FieldNameEncoding:
+		m.ResetNameEncoding()
+		return nil
+	case inspection.FieldFileCount:
+		m.ResetFileCount()
+		return nil
+	case inspection.FieldFolderCount:
+		m.ResetFolderCount()
+		return nil
+	case inspection.FieldUnpackedSize:
+		m.ResetUnpackedSize()
+		return nil
+	case inspection.FieldDiscCount:
+		m.ResetDiscCount()
+		return nil
+	case inspection.FieldDiscFileCount:
+		m.ResetDiscFileCount()
+		return nil
+	case inspection.FieldTruncated:
+		m.ResetTruncated()
+		return nil
+	case inspection.FieldVerified:
+		m.ResetVerified()
+		return nil
+	case inspection.FieldScanEngine:
+		m.ResetScanEngine()
+		return nil
+	case inspection.FieldSignaturesAt:
+		m.ResetSignaturesAt()
+		return nil
+	case inspection.FieldScannedCount:
+		m.ResetScannedCount()
+		return nil
+	case inspection.FieldScanSkipped:
+		m.ResetScanSkipped()
+		return nil
+	case inspection.FieldScanLimit:
+		m.ResetScanLimit()
+		return nil
+	case inspection.FieldDetections:
+		m.ResetDetections()
+		return nil
+	case inspection.FieldScannedAt:
+		m.ResetScannedAt()
+		return nil
+	case inspection.FieldClearedAt:
+		m.ResetClearedAt()
+		return nil
+	case inspection.FieldCreated:
+		m.ResetCreated()
+		return nil
+	case inspection.FieldUpdated:
+		m.ResetUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown Inspection field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *InspectionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.resource != nil {
+		edges = append(edges, inspection.EdgeResource)
+	}
+	if m.entries != nil {
+		edges = append(edges, inspection.EdgeEntries)
+	}
+	if m.files != nil {
+		edges = append(edges, inspection.EdgeFiles)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *InspectionMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case inspection.EdgeResource:
+		if id := m.resource; id != nil {
+			return []ent.Value{*id}
+		}
+	case inspection.EdgeEntries:
+		ids := make([]ent.Value, 0, len(m.entries))
+		for id := range m.entries {
+			ids = append(ids, id)
+		}
+		return ids
+	case inspection.EdgeFiles:
+		ids := make([]ent.Value, 0, len(m.files))
+		for id := range m.files {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *InspectionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.removedentries != nil {
+		edges = append(edges, inspection.EdgeEntries)
+	}
+	if m.removedfiles != nil {
+		edges = append(edges, inspection.EdgeFiles)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *InspectionMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case inspection.EdgeEntries:
+		ids := make([]ent.Value, 0, len(m.removedentries))
+		for id := range m.removedentries {
+			ids = append(ids, id)
+		}
+		return ids
+	case inspection.EdgeFiles:
+		ids := make([]ent.Value, 0, len(m.removedfiles))
+		for id := range m.removedfiles {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *InspectionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.clearedresource {
+		edges = append(edges, inspection.EdgeResource)
+	}
+	if m.clearedentries {
+		edges = append(edges, inspection.EdgeEntries)
+	}
+	if m.clearedfiles {
+		edges = append(edges, inspection.EdgeFiles)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *InspectionMutation) EdgeCleared(name string) bool {
+	switch name {
+	case inspection.EdgeResource:
+		return m.clearedresource
+	case inspection.EdgeEntries:
+		return m.clearedentries
+	case inspection.EdgeFiles:
+		return m.clearedfiles
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *InspectionMutation) ClearEdge(name string) error {
+	switch name {
+	case inspection.EdgeResource:
+		m.ClearResource()
+		return nil
+	}
+	return fmt.Errorf("unknown Inspection unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *InspectionMutation) ResetEdge(name string) error {
+	switch name {
+	case inspection.EdgeResource:
+		m.ResetResource()
+		return nil
+	case inspection.EdgeEntries:
+		m.ResetEntries()
+		return nil
+	case inspection.EdgeFiles:
+		m.ResetFiles()
+		return nil
+	}
+	return fmt.Errorf("unknown Inspection edge %s", name)
+}
+
+// InspectionEntryMutation represents an operation that mutates the InspectionEntry nodes in the graph.
+type InspectionEntryMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *int
+	parent_id         *int
+	addparent_id      *int
+	position          *int
+	addposition       *int
+	name              *string
+	kind              *string
+	size              *int64
+	addsize           *int64
+	modified          *time.Time
+	items             *int
+	additems          *int
+	children          *int
+	addchildren       *int
+	encrypted         *bool
+	unreadable        *bool
+	preview           *string
+	detail            *jsontext.Value
+	appenddetail      jsontext.Value
+	clearedFields     map[string]struct{}
+	inspection        *int
+	clearedinspection bool
+	done              bool
+	oldValue          func(context.Context) (*InspectionEntry, error)
+	predicates        []predicate.InspectionEntry
+}
+
+var _ ent.Mutation = (*InspectionEntryMutation)(nil)
+
+// inspectionentryOption allows management of the mutation configuration using functional options.
+type inspectionentryOption func(*InspectionEntryMutation)
+
+// newInspectionEntryMutation creates new mutation for the InspectionEntry entity.
+func newInspectionEntryMutation(c config, op Op, opts ...inspectionentryOption) *InspectionEntryMutation {
+	m := &InspectionEntryMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeInspectionEntry,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withInspectionEntryID sets the ID field of the mutation.
+func withInspectionEntryID(id int) inspectionentryOption {
+	return func(m *InspectionEntryMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *InspectionEntry
+		)
+		m.oldValue = func(ctx context.Context) (*InspectionEntry, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().InspectionEntry.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withInspectionEntry sets the old InspectionEntry of the mutation.
+func withInspectionEntry(node *InspectionEntry) inspectionentryOption {
+	return func(m *InspectionEntryMutation) {
+		m.oldValue = func(context.Context) (*InspectionEntry, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m InspectionEntryMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m InspectionEntryMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of InspectionEntry entities.
+func (m *InspectionEntryMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *InspectionEntryMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *InspectionEntryMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().InspectionEntry.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetInspectionID sets the "inspection_id" field.
+func (m *InspectionEntryMutation) SetInspectionID(i int) {
+	m.inspection = &i
+}
+
+// InspectionID returns the value of the "inspection_id" field in the mutation.
+func (m *InspectionEntryMutation) InspectionID() (r int, exists bool) {
+	v := m.inspection
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInspectionID returns the old "inspection_id" field's value of the InspectionEntry entity.
+// If the InspectionEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionEntryMutation) OldInspectionID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInspectionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInspectionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInspectionID: %w", err)
+	}
+	return oldValue.InspectionID, nil
+}
+
+// ResetInspectionID resets all changes to the "inspection_id" field.
+func (m *InspectionEntryMutation) ResetInspectionID() {
+	m.inspection = nil
+}
+
+// SetParentID sets the "parent_id" field.
+func (m *InspectionEntryMutation) SetParentID(i int) {
+	m.parent_id = &i
+	m.addparent_id = nil
+}
+
+// ParentID returns the value of the "parent_id" field in the mutation.
+func (m *InspectionEntryMutation) ParentID() (r int, exists bool) {
+	v := m.parent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldParentID returns the old "parent_id" field's value of the InspectionEntry entity.
+// If the InspectionEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionEntryMutation) OldParentID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldParentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldParentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldParentID: %w", err)
+	}
+	return oldValue.ParentID, nil
+}
+
+// AddParentID adds i to the "parent_id" field.
+func (m *InspectionEntryMutation) AddParentID(i int) {
+	if m.addparent_id != nil {
+		*m.addparent_id += i
+	} else {
+		m.addparent_id = &i
+	}
+}
+
+// AddedParentID returns the value that was added to the "parent_id" field in this mutation.
+func (m *InspectionEntryMutation) AddedParentID() (r int, exists bool) {
+	v := m.addparent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (m *InspectionEntryMutation) ClearParentID() {
+	m.parent_id = nil
+	m.addparent_id = nil
+	m.clearedFields[inspectionentry.FieldParentID] = struct{}{}
+}
+
+// ParentIDCleared returns if the "parent_id" field was cleared in this mutation.
+func (m *InspectionEntryMutation) ParentIDCleared() bool {
+	_, ok := m.clearedFields[inspectionentry.FieldParentID]
+	return ok
+}
+
+// ResetParentID resets all changes to the "parent_id" field.
+func (m *InspectionEntryMutation) ResetParentID() {
+	m.parent_id = nil
+	m.addparent_id = nil
+	delete(m.clearedFields, inspectionentry.FieldParentID)
+}
+
+// SetPosition sets the "position" field.
+func (m *InspectionEntryMutation) SetPosition(i int) {
+	m.position = &i
+	m.addposition = nil
+}
+
+// Position returns the value of the "position" field in the mutation.
+func (m *InspectionEntryMutation) Position() (r int, exists bool) {
+	v := m.position
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPosition returns the old "position" field's value of the InspectionEntry entity.
+// If the InspectionEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionEntryMutation) OldPosition(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPosition is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPosition requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPosition: %w", err)
+	}
+	return oldValue.Position, nil
+}
+
+// AddPosition adds i to the "position" field.
+func (m *InspectionEntryMutation) AddPosition(i int) {
+	if m.addposition != nil {
+		*m.addposition += i
+	} else {
+		m.addposition = &i
+	}
+}
+
+// AddedPosition returns the value that was added to the "position" field in this mutation.
+func (m *InspectionEntryMutation) AddedPosition() (r int, exists bool) {
+	v := m.addposition
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPosition resets all changes to the "position" field.
+func (m *InspectionEntryMutation) ResetPosition() {
+	m.position = nil
+	m.addposition = nil
+}
+
+// SetName sets the "name" field.
+func (m *InspectionEntryMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *InspectionEntryMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the InspectionEntry entity.
+// If the InspectionEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionEntryMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *InspectionEntryMutation) ResetName() {
+	m.name = nil
+}
+
+// SetKind sets the "kind" field.
+func (m *InspectionEntryMutation) SetKind(s string) {
+	m.kind = &s
+}
+
+// Kind returns the value of the "kind" field in the mutation.
+func (m *InspectionEntryMutation) Kind() (r string, exists bool) {
+	v := m.kind
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKind returns the old "kind" field's value of the InspectionEntry entity.
+// If the InspectionEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionEntryMutation) OldKind(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKind is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKind requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKind: %w", err)
+	}
+	return oldValue.Kind, nil
+}
+
+// ResetKind resets all changes to the "kind" field.
+func (m *InspectionEntryMutation) ResetKind() {
+	m.kind = nil
+}
+
+// SetSize sets the "size" field.
+func (m *InspectionEntryMutation) SetSize(i int64) {
+	m.size = &i
+	m.addsize = nil
+}
+
+// Size returns the value of the "size" field in the mutation.
+func (m *InspectionEntryMutation) Size() (r int64, exists bool) {
+	v := m.size
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSize returns the old "size" field's value of the InspectionEntry entity.
+// If the InspectionEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionEntryMutation) OldSize(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSize is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSize requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSize: %w", err)
+	}
+	return oldValue.Size, nil
+}
+
+// AddSize adds i to the "size" field.
+func (m *InspectionEntryMutation) AddSize(i int64) {
+	if m.addsize != nil {
+		*m.addsize += i
+	} else {
+		m.addsize = &i
+	}
+}
+
+// AddedSize returns the value that was added to the "size" field in this mutation.
+func (m *InspectionEntryMutation) AddedSize() (r int64, exists bool) {
+	v := m.addsize
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSize resets all changes to the "size" field.
+func (m *InspectionEntryMutation) ResetSize() {
+	m.size = nil
+	m.addsize = nil
+}
+
+// SetModified sets the "modified" field.
+func (m *InspectionEntryMutation) SetModified(t time.Time) {
+	m.modified = &t
+}
+
+// Modified returns the value of the "modified" field in the mutation.
+func (m *InspectionEntryMutation) Modified() (r time.Time, exists bool) {
+	v := m.modified
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldModified returns the old "modified" field's value of the InspectionEntry entity.
+// If the InspectionEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionEntryMutation) OldModified(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldModified is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldModified requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldModified: %w", err)
+	}
+	return oldValue.Modified, nil
+}
+
+// ClearModified clears the value of the "modified" field.
+func (m *InspectionEntryMutation) ClearModified() {
+	m.modified = nil
+	m.clearedFields[inspectionentry.FieldModified] = struct{}{}
+}
+
+// ModifiedCleared returns if the "modified" field was cleared in this mutation.
+func (m *InspectionEntryMutation) ModifiedCleared() bool {
+	_, ok := m.clearedFields[inspectionentry.FieldModified]
+	return ok
+}
+
+// ResetModified resets all changes to the "modified" field.
+func (m *InspectionEntryMutation) ResetModified() {
+	m.modified = nil
+	delete(m.clearedFields, inspectionentry.FieldModified)
+}
+
+// SetItems sets the "items" field.
+func (m *InspectionEntryMutation) SetItems(i int) {
+	m.items = &i
+	m.additems = nil
+}
+
+// Items returns the value of the "items" field in the mutation.
+func (m *InspectionEntryMutation) Items() (r int, exists bool) {
+	v := m.items
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldItems returns the old "items" field's value of the InspectionEntry entity.
+// If the InspectionEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionEntryMutation) OldItems(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldItems is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldItems requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldItems: %w", err)
+	}
+	return oldValue.Items, nil
+}
+
+// AddItems adds i to the "items" field.
+func (m *InspectionEntryMutation) AddItems(i int) {
+	if m.additems != nil {
+		*m.additems += i
+	} else {
+		m.additems = &i
+	}
+}
+
+// AddedItems returns the value that was added to the "items" field in this mutation.
+func (m *InspectionEntryMutation) AddedItems() (r int, exists bool) {
+	v := m.additems
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetItems resets all changes to the "items" field.
+func (m *InspectionEntryMutation) ResetItems() {
+	m.items = nil
+	m.additems = nil
+}
+
+// SetChildren sets the "children" field.
+func (m *InspectionEntryMutation) SetChildren(i int) {
+	m.children = &i
+	m.addchildren = nil
+}
+
+// Children returns the value of the "children" field in the mutation.
+func (m *InspectionEntryMutation) Children() (r int, exists bool) {
+	v := m.children
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChildren returns the old "children" field's value of the InspectionEntry entity.
+// If the InspectionEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionEntryMutation) OldChildren(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChildren is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChildren requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChildren: %w", err)
+	}
+	return oldValue.Children, nil
+}
+
+// AddChildren adds i to the "children" field.
+func (m *InspectionEntryMutation) AddChildren(i int) {
+	if m.addchildren != nil {
+		*m.addchildren += i
+	} else {
+		m.addchildren = &i
+	}
+}
+
+// AddedChildren returns the value that was added to the "children" field in this mutation.
+func (m *InspectionEntryMutation) AddedChildren() (r int, exists bool) {
+	v := m.addchildren
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetChildren resets all changes to the "children" field.
+func (m *InspectionEntryMutation) ResetChildren() {
+	m.children = nil
+	m.addchildren = nil
+}
+
+// SetEncrypted sets the "encrypted" field.
+func (m *InspectionEntryMutation) SetEncrypted(b bool) {
+	m.encrypted = &b
+}
+
+// Encrypted returns the value of the "encrypted" field in the mutation.
+func (m *InspectionEntryMutation) Encrypted() (r bool, exists bool) {
+	v := m.encrypted
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEncrypted returns the old "encrypted" field's value of the InspectionEntry entity.
+// If the InspectionEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionEntryMutation) OldEncrypted(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEncrypted is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEncrypted requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEncrypted: %w", err)
+	}
+	return oldValue.Encrypted, nil
+}
+
+// ResetEncrypted resets all changes to the "encrypted" field.
+func (m *InspectionEntryMutation) ResetEncrypted() {
+	m.encrypted = nil
+}
+
+// SetUnreadable sets the "unreadable" field.
+func (m *InspectionEntryMutation) SetUnreadable(b bool) {
+	m.unreadable = &b
+}
+
+// Unreadable returns the value of the "unreadable" field in the mutation.
+func (m *InspectionEntryMutation) Unreadable() (r bool, exists bool) {
+	v := m.unreadable
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUnreadable returns the old "unreadable" field's value of the InspectionEntry entity.
+// If the InspectionEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionEntryMutation) OldUnreadable(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUnreadable is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUnreadable requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUnreadable: %w", err)
+	}
+	return oldValue.Unreadable, nil
+}
+
+// ResetUnreadable resets all changes to the "unreadable" field.
+func (m *InspectionEntryMutation) ResetUnreadable() {
+	m.unreadable = nil
+}
+
+// SetPreview sets the "preview" field.
+func (m *InspectionEntryMutation) SetPreview(s string) {
+	m.preview = &s
+}
+
+// Preview returns the value of the "preview" field in the mutation.
+func (m *InspectionEntryMutation) Preview() (r string, exists bool) {
+	v := m.preview
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPreview returns the old "preview" field's value of the InspectionEntry entity.
+// If the InspectionEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionEntryMutation) OldPreview(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPreview is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPreview requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPreview: %w", err)
+	}
+	return oldValue.Preview, nil
+}
+
+// ResetPreview resets all changes to the "preview" field.
+func (m *InspectionEntryMutation) ResetPreview() {
+	m.preview = nil
+}
+
+// SetDetail sets the "detail" field.
+func (m *InspectionEntryMutation) SetDetail(j jsontext.Value) {
+	m.detail = &j
+	m.appenddetail = nil
+}
+
+// Detail returns the value of the "detail" field in the mutation.
+func (m *InspectionEntryMutation) Detail() (r jsontext.Value, exists bool) {
+	v := m.detail
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDetail returns the old "detail" field's value of the InspectionEntry entity.
+// If the InspectionEntry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionEntryMutation) OldDetail(ctx context.Context) (v jsontext.Value, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDetail is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDetail requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDetail: %w", err)
+	}
+	return oldValue.Detail, nil
+}
+
+// AppendDetail adds j to the "detail" field.
+func (m *InspectionEntryMutation) AppendDetail(j jsontext.Value) {
+	m.appenddetail = append(m.appenddetail, j...)
+}
+
+// AppendedDetail returns the list of values that were appended to the "detail" field in this mutation.
+func (m *InspectionEntryMutation) AppendedDetail() (jsontext.Value, bool) {
+	if len(m.appenddetail) == 0 {
+		return nil, false
+	}
+	return m.appenddetail, true
+}
+
+// ClearDetail clears the value of the "detail" field.
+func (m *InspectionEntryMutation) ClearDetail() {
+	m.detail = nil
+	m.appenddetail = nil
+	m.clearedFields[inspectionentry.FieldDetail] = struct{}{}
+}
+
+// DetailCleared returns if the "detail" field was cleared in this mutation.
+func (m *InspectionEntryMutation) DetailCleared() bool {
+	_, ok := m.clearedFields[inspectionentry.FieldDetail]
+	return ok
+}
+
+// ResetDetail resets all changes to the "detail" field.
+func (m *InspectionEntryMutation) ResetDetail() {
+	m.detail = nil
+	m.appenddetail = nil
+	delete(m.clearedFields, inspectionentry.FieldDetail)
+}
+
+// ClearInspection clears the "inspection" edge to the Inspection entity.
+func (m *InspectionEntryMutation) ClearInspection() {
+	m.clearedinspection = true
+	m.clearedFields[inspectionentry.FieldInspectionID] = struct{}{}
+}
+
+// InspectionCleared reports if the "inspection" edge to the Inspection entity was cleared.
+func (m *InspectionEntryMutation) InspectionCleared() bool {
+	return m.clearedinspection
+}
+
+// InspectionIDs returns the "inspection" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// InspectionID instead. It exists only for internal usage by the builders.
+func (m *InspectionEntryMutation) InspectionIDs() (ids []int) {
+	if id := m.inspection; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetInspection resets all changes to the "inspection" edge.
+func (m *InspectionEntryMutation) ResetInspection() {
+	m.inspection = nil
+	m.clearedinspection = false
+}
+
+// Where appends a list predicates to the InspectionEntryMutation builder.
+func (m *InspectionEntryMutation) Where(ps ...predicate.InspectionEntry) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the InspectionEntryMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *InspectionEntryMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.InspectionEntry, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *InspectionEntryMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *InspectionEntryMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (InspectionEntry).
+func (m *InspectionEntryMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *InspectionEntryMutation) Fields() []string {
+	fields := make([]string, 0, 13)
+	if m.inspection != nil {
+		fields = append(fields, inspectionentry.FieldInspectionID)
+	}
+	if m.parent_id != nil {
+		fields = append(fields, inspectionentry.FieldParentID)
+	}
+	if m.position != nil {
+		fields = append(fields, inspectionentry.FieldPosition)
+	}
+	if m.name != nil {
+		fields = append(fields, inspectionentry.FieldName)
+	}
+	if m.kind != nil {
+		fields = append(fields, inspectionentry.FieldKind)
+	}
+	if m.size != nil {
+		fields = append(fields, inspectionentry.FieldSize)
+	}
+	if m.modified != nil {
+		fields = append(fields, inspectionentry.FieldModified)
+	}
+	if m.items != nil {
+		fields = append(fields, inspectionentry.FieldItems)
+	}
+	if m.children != nil {
+		fields = append(fields, inspectionentry.FieldChildren)
+	}
+	if m.encrypted != nil {
+		fields = append(fields, inspectionentry.FieldEncrypted)
+	}
+	if m.unreadable != nil {
+		fields = append(fields, inspectionentry.FieldUnreadable)
+	}
+	if m.preview != nil {
+		fields = append(fields, inspectionentry.FieldPreview)
+	}
+	if m.detail != nil {
+		fields = append(fields, inspectionentry.FieldDetail)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *InspectionEntryMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case inspectionentry.FieldInspectionID:
+		return m.InspectionID()
+	case inspectionentry.FieldParentID:
+		return m.ParentID()
+	case inspectionentry.FieldPosition:
+		return m.Position()
+	case inspectionentry.FieldName:
+		return m.Name()
+	case inspectionentry.FieldKind:
+		return m.Kind()
+	case inspectionentry.FieldSize:
+		return m.Size()
+	case inspectionentry.FieldModified:
+		return m.Modified()
+	case inspectionentry.FieldItems:
+		return m.Items()
+	case inspectionentry.FieldChildren:
+		return m.Children()
+	case inspectionentry.FieldEncrypted:
+		return m.Encrypted()
+	case inspectionentry.FieldUnreadable:
+		return m.Unreadable()
+	case inspectionentry.FieldPreview:
+		return m.Preview()
+	case inspectionentry.FieldDetail:
+		return m.Detail()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *InspectionEntryMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case inspectionentry.FieldInspectionID:
+		return m.OldInspectionID(ctx)
+	case inspectionentry.FieldParentID:
+		return m.OldParentID(ctx)
+	case inspectionentry.FieldPosition:
+		return m.OldPosition(ctx)
+	case inspectionentry.FieldName:
+		return m.OldName(ctx)
+	case inspectionentry.FieldKind:
+		return m.OldKind(ctx)
+	case inspectionentry.FieldSize:
+		return m.OldSize(ctx)
+	case inspectionentry.FieldModified:
+		return m.OldModified(ctx)
+	case inspectionentry.FieldItems:
+		return m.OldItems(ctx)
+	case inspectionentry.FieldChildren:
+		return m.OldChildren(ctx)
+	case inspectionentry.FieldEncrypted:
+		return m.OldEncrypted(ctx)
+	case inspectionentry.FieldUnreadable:
+		return m.OldUnreadable(ctx)
+	case inspectionentry.FieldPreview:
+		return m.OldPreview(ctx)
+	case inspectionentry.FieldDetail:
+		return m.OldDetail(ctx)
+	}
+	return nil, fmt.Errorf("unknown InspectionEntry field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *InspectionEntryMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case inspectionentry.FieldInspectionID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInspectionID(v)
+		return nil
+	case inspectionentry.FieldParentID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetParentID(v)
+		return nil
+	case inspectionentry.FieldPosition:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPosition(v)
+		return nil
+	case inspectionentry.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case inspectionentry.FieldKind:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKind(v)
+		return nil
+	case inspectionentry.FieldSize:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSize(v)
+		return nil
+	case inspectionentry.FieldModified:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetModified(v)
+		return nil
+	case inspectionentry.FieldItems:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetItems(v)
+		return nil
+	case inspectionentry.FieldChildren:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChildren(v)
+		return nil
+	case inspectionentry.FieldEncrypted:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEncrypted(v)
+		return nil
+	case inspectionentry.FieldUnreadable:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUnreadable(v)
+		return nil
+	case inspectionentry.FieldPreview:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPreview(v)
+		return nil
+	case inspectionentry.FieldDetail:
+		v, ok := value.(jsontext.Value)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDetail(v)
+		return nil
+	}
+	return fmt.Errorf("unknown InspectionEntry field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *InspectionEntryMutation) AddedFields() []string {
+	var fields []string
+	if m.addparent_id != nil {
+		fields = append(fields, inspectionentry.FieldParentID)
+	}
+	if m.addposition != nil {
+		fields = append(fields, inspectionentry.FieldPosition)
+	}
+	if m.addsize != nil {
+		fields = append(fields, inspectionentry.FieldSize)
+	}
+	if m.additems != nil {
+		fields = append(fields, inspectionentry.FieldItems)
+	}
+	if m.addchildren != nil {
+		fields = append(fields, inspectionentry.FieldChildren)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *InspectionEntryMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case inspectionentry.FieldParentID:
+		return m.AddedParentID()
+	case inspectionentry.FieldPosition:
+		return m.AddedPosition()
+	case inspectionentry.FieldSize:
+		return m.AddedSize()
+	case inspectionentry.FieldItems:
+		return m.AddedItems()
+	case inspectionentry.FieldChildren:
+		return m.AddedChildren()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *InspectionEntryMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case inspectionentry.FieldParentID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddParentID(v)
+		return nil
+	case inspectionentry.FieldPosition:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPosition(v)
+		return nil
+	case inspectionentry.FieldSize:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSize(v)
+		return nil
+	case inspectionentry.FieldItems:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddItems(v)
+		return nil
+	case inspectionentry.FieldChildren:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddChildren(v)
+		return nil
+	}
+	return fmt.Errorf("unknown InspectionEntry numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *InspectionEntryMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(inspectionentry.FieldParentID) {
+		fields = append(fields, inspectionentry.FieldParentID)
+	}
+	if m.FieldCleared(inspectionentry.FieldModified) {
+		fields = append(fields, inspectionentry.FieldModified)
+	}
+	if m.FieldCleared(inspectionentry.FieldDetail) {
+		fields = append(fields, inspectionentry.FieldDetail)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *InspectionEntryMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *InspectionEntryMutation) ClearField(name string) error {
+	switch name {
+	case inspectionentry.FieldParentID:
+		m.ClearParentID()
+		return nil
+	case inspectionentry.FieldModified:
+		m.ClearModified()
+		return nil
+	case inspectionentry.FieldDetail:
+		m.ClearDetail()
+		return nil
+	}
+	return fmt.Errorf("unknown InspectionEntry nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *InspectionEntryMutation) ResetField(name string) error {
+	switch name {
+	case inspectionentry.FieldInspectionID:
+		m.ResetInspectionID()
+		return nil
+	case inspectionentry.FieldParentID:
+		m.ResetParentID()
+		return nil
+	case inspectionentry.FieldPosition:
+		m.ResetPosition()
+		return nil
+	case inspectionentry.FieldName:
+		m.ResetName()
+		return nil
+	case inspectionentry.FieldKind:
+		m.ResetKind()
+		return nil
+	case inspectionentry.FieldSize:
+		m.ResetSize()
+		return nil
+	case inspectionentry.FieldModified:
+		m.ResetModified()
+		return nil
+	case inspectionentry.FieldItems:
+		m.ResetItems()
+		return nil
+	case inspectionentry.FieldChildren:
+		m.ResetChildren()
+		return nil
+	case inspectionentry.FieldEncrypted:
+		m.ResetEncrypted()
+		return nil
+	case inspectionentry.FieldUnreadable:
+		m.ResetUnreadable()
+		return nil
+	case inspectionentry.FieldPreview:
+		m.ResetPreview()
+		return nil
+	case inspectionentry.FieldDetail:
+		m.ResetDetail()
+		return nil
+	}
+	return fmt.Errorf("unknown InspectionEntry field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *InspectionEntryMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.inspection != nil {
+		edges = append(edges, inspectionentry.EdgeInspection)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *InspectionEntryMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case inspectionentry.EdgeInspection:
+		if id := m.inspection; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *InspectionEntryMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *InspectionEntryMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *InspectionEntryMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedinspection {
+		edges = append(edges, inspectionentry.EdgeInspection)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *InspectionEntryMutation) EdgeCleared(name string) bool {
+	switch name {
+	case inspectionentry.EdgeInspection:
+		return m.clearedinspection
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *InspectionEntryMutation) ClearEdge(name string) error {
+	switch name {
+	case inspectionentry.EdgeInspection:
+		m.ClearInspection()
+		return nil
+	}
+	return fmt.Errorf("unknown InspectionEntry unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *InspectionEntryMutation) ResetEdge(name string) error {
+	switch name {
+	case inspectionentry.EdgeInspection:
+		m.ResetInspection()
+		return nil
+	}
+	return fmt.Errorf("unknown InspectionEntry edge %s", name)
 }
 
 // MalwareScanCaseMutation represents an operation that mutates the MalwareScanCase nodes in the graph.

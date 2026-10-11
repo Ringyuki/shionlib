@@ -37,6 +37,7 @@ func toPendingFile(row *ent.GameDownloadResourceFile) scan.PendingFile {
 		Hash:            row.FileHash,
 		HashAlgorithm:   string(row.HashAlgorithm),
 		UploadSessionID: row.UploadSessionID,
+		InspectionID:    row.InspectionID,
 		CreatorID:       row.CreatorID,
 		Created:         row.Created,
 	}

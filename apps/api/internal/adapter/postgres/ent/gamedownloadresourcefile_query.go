@@ -18,6 +18,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefilehistory"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
@@ -35,6 +36,7 @@ type GameDownloadResourceFileQuery struct {
 	withMalwareScanCases     *MalwareScanCaseQuery
 	withUploadSession        *GameUploadSessionQuery
 	withCreator              *UserQuery
+	withInspection           *InspectionQuery
 	withHistories            *GameDownloadResourceFileHistoryQuery
 	modifiers                []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
@@ -176,6 +178,28 @@ func (_q *GameDownloadResourceFileQuery) QueryCreator() *UserQuery {
 			sqlgraph.From(gamedownloadresourcefile.Table, gamedownloadresourcefile.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, gamedownloadresourcefile.CreatorTable, gamedownloadresourcefile.CreatorColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryInspection chains the current query on the "inspection" edge.
+func (_q *GameDownloadResourceFileQuery) QueryInspection() *InspectionQuery {
+	query := (&InspectionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(gamedownloadresourcefile.Table, gamedownloadresourcefile.FieldID, selector),
+			sqlgraph.To(inspection.Table, inspection.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, gamedownloadresourcefile.InspectionTable, gamedownloadresourcefile.InspectionColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -402,6 +426,7 @@ func (_q *GameDownloadResourceFileQuery) Clone() *GameDownloadResourceFileQuery 
 		withMalwareScanCases:     _q.withMalwareScanCases.Clone(),
 		withUploadSession:        _q.withUploadSession.Clone(),
 		withCreator:              _q.withCreator.Clone(),
+		withInspection:           _q.withInspection.Clone(),
 		withHistories:            _q.withHistories.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
@@ -462,6 +487,17 @@ func (_q *GameDownloadResourceFileQuery) WithCreator(opts ...func(*UserQuery)) *
 		opt(query)
 	}
 	_q.withCreator = query
+	return _q
+}
+
+// WithInspection tells the query-builder to eager-load the nodes that are connected to
+// the "inspection" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *GameDownloadResourceFileQuery) WithInspection(opts ...func(*InspectionQuery)) *GameDownloadResourceFileQuery {
+	query := (&InspectionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withInspection = query
 	return _q
 }
 
@@ -554,12 +590,13 @@ func (_q *GameDownloadResourceFileQuery) sqlAll(ctx context.Context, hooks ...qu
 	var (
 		nodes       = []*GameDownloadResourceFile{}
 		_spec       = _q.querySpec()
-		loadedTypes = [6]bool{
+		loadedTypes = [7]bool{
 			_q.withActivities != nil,
 			_q.withGameDownloadResource != nil,
 			_q.withMalwareScanCases != nil,
 			_q.withUploadSession != nil,
 			_q.withCreator != nil,
+			_q.withInspection != nil,
 			_q.withHistories != nil,
 		}
 	)
@@ -615,6 +652,12 @@ func (_q *GameDownloadResourceFileQuery) sqlAll(ctx context.Context, hooks ...qu
 	if query := _q.withCreator; query != nil {
 		if err := _q.loadCreator(ctx, query, nodes, nil,
 			func(n *GameDownloadResourceFile, e *User) { n.Edges.Creator = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withInspection; query != nil {
+		if err := _q.loadInspection(ctx, query, nodes, nil,
+			func(n *GameDownloadResourceFile, e *Inspection) { n.Edges.Inspection = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -786,6 +829,38 @@ func (_q *GameDownloadResourceFileQuery) loadCreator(ctx context.Context, query 
 	}
 	return nil
 }
+func (_q *GameDownloadResourceFileQuery) loadInspection(ctx context.Context, query *InspectionQuery, nodes []*GameDownloadResourceFile, init func(*GameDownloadResourceFile), assign func(*GameDownloadResourceFile, *Inspection)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*GameDownloadResourceFile)
+	for i := range nodes {
+		if nodes[i].InspectionID == nil {
+			continue
+		}
+		fk := *nodes[i].InspectionID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(inspection.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "inspection_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 func (_q *GameDownloadResourceFileQuery) loadHistories(ctx context.Context, query *GameDownloadResourceFileHistoryQuery, nodes []*GameDownloadResourceFile, init func(*GameDownloadResourceFile), assign func(*GameDownloadResourceFile, *GameDownloadResourceFileHistory)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*GameDownloadResourceFile)
@@ -853,6 +928,9 @@ func (_q *GameDownloadResourceFileQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if _q.withCreator != nil {
 			_spec.Node.AddColumnOnce(gamedownloadresourcefile.FieldCreatorID)
+		}
+		if _q.withInspection != nil {
+			_spec.Node.AddColumnOnce(gamedownloadresourcefile.FieldInspectionID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

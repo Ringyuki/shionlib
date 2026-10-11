@@ -17,13 +17,15 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/userpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
+	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/scan"
 )
 
 const (
-	roleAdmin      = 2
-	userActive     = 1
-	defaultSortKey = "created"
+	roleAdmin        = 2
+	userActive       = 1
+	defaultSortKey   = "created"
+	fileInspectionFK = "game_download_resource_files_inspection_id_fkey"
 )
 
 type Repository struct {
@@ -107,6 +109,22 @@ func (r *Repository) SetCheckStatus(ctx context.Context, fileID int, status down
 	}
 	if err != nil {
 		return fmt.Errorf("set check status of file %d: %w", fileID, err)
+	}
+	return nil
+}
+
+func (r *Repository) SetInspection(ctx context.Context, fileID, inspectionID int, sha256 string) error {
+	err := r.db(ctx).GameDownloadResourceFile.UpdateOneID(fileID).
+		SetInspectionID(inspectionID).
+		SetFileSha256(sha256).
+		Exec(ctx)
+	switch {
+	case postgres.IsNotFound(err):
+		return download.ErrFileNotFound
+	case postgres.IsForeignKeyViolation(err, fileInspectionFK):
+		return inspection.ErrNotFound
+	case err != nil:
+		return fmt.Errorf("attach inspection %d to file %d: %w", inspectionID, fileID, err)
 	}
 	return nil
 }

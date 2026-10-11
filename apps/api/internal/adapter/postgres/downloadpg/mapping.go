@@ -56,6 +56,8 @@ func toFile(row *ent.GameDownloadResourceFile, resource *ent.GameDownloadResourc
 		Status:          row.FileStatus,
 		CheckStatus:     download.CheckStatus(row.FileCheckStatus),
 		FalsePositive:   row.IsVirusFalsePositive,
+		SHA256:          row.FileSha256,
+		InspectionID:    row.InspectionID,
 		CreatorID:       row.CreatorID,
 		Created:         row.Created,
 		Updated:         row.Updated,

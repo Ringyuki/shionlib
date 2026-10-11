@@ -64,11 +64,13 @@ type GameDownloadResourceEdges struct {
 	Creator *User `json:"creator,omitempty"`
 	// Comments holds the value of the comments edge.
 	Comments []*Comment `json:"comments,omitempty"`
+	// Inspections holds the value of the inspections edge.
+	Inspections []*Inspection `json:"inspections,omitempty"`
 	// Events holds the value of the events edge.
 	Events []*GameDownloadResourceEvent `json:"events,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [7]bool
+	loadedTypes [8]bool
 }
 
 // GameOrErr returns the Game value or an error if the edge
@@ -129,10 +131,19 @@ func (e GameDownloadResourceEdges) CommentsOrErr() ([]*Comment, error) {
 	return nil, &NotLoadedError{edge: "comments"}
 }
 
+// InspectionsOrErr returns the Inspections value or an error if the edge
+// was not loaded in eager-loading.
+func (e GameDownloadResourceEdges) InspectionsOrErr() ([]*Inspection, error) {
+	if e.loadedTypes[6] {
+		return e.Inspections, nil
+	}
+	return nil, &NotLoadedError{edge: "inspections"}
+}
+
 // EventsOrErr returns the Events value or an error if the edge
 // was not loaded in eager-loading.
 func (e GameDownloadResourceEdges) EventsOrErr() ([]*GameDownloadResourceEvent, error) {
-	if e.loadedTypes[6] {
+	if e.loadedTypes[7] {
 		return e.Events, nil
 	}
 	return nil, &NotLoadedError{edge: "events"}
@@ -289,6 +300,11 @@ func (_m *GameDownloadResource) QueryCreator() *UserQuery {
 // QueryComments queries the "comments" edge of the GameDownloadResource entity.
 func (_m *GameDownloadResource) QueryComments() *CommentQuery {
 	return NewGameDownloadResourceClient(_m.config).QueryComments(_m)
+}
+
+// QueryInspections queries the "inspections" edge of the GameDownloadResource entity.
+func (_m *GameDownloadResource) QueryInspections() *InspectionQuery {
+	return NewGameDownloadResourceClient(_m.config).QueryInspections(_m)
 }
 
 // QueryEvents queries the "events" edge of the GameDownloadResource entity.

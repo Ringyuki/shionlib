@@ -40,6 +40,20 @@ func (s *DetailService) Events(ctx context.Context, viewer actor.Actor, id int) 
 	return s.repo.ListEvents(ctx, id, EventListLimit)
 }
 
+func (s *DetailService) Inspections(ctx context.Context, viewer actor.Actor, id int) ([]int, error) {
+	resource, err := s.visibleResource(ctx, viewer, id)
+	if err != nil {
+		return nil, err
+	}
+	ids := []int{}
+	for _, file := range resource.Files {
+		if file.InspectionID != nil && !slices.Contains(ids, *file.InspectionID) {
+			ids = append(ids, *file.InspectionID)
+		}
+	}
+	return ids, nil
+}
+
 func (s *DetailService) Viewable(ctx context.Context, viewer actor.Actor, id int) (Resource, error) {
 	resource, err := s.visibleResource(ctx, viewer, id)
 	if err != nil {

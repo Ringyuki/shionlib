@@ -1379,10 +1379,12 @@ var (
 		{Name: "file_status", Type: field.TypeInt, Default: 1, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "file_check_status", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "is_virus_false_positive", Type: field.TypeBool, Default: false},
+		{Name: "file_sha256", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "game_download_resource_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "upload_session_id", Type: field.TypeInt, Unique: true, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "inspection_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "creator_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
 	}
 	// GameDownloadResourceFilesTable holds the schema information for the "game_download_resource_files" table.
@@ -1393,19 +1395,25 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "game_download_resource_files_game_download_resource_id_fkey",
-				Columns:    []*schema.Column{GameDownloadResourceFilesColumns[15]},
+				Columns:    []*schema.Column{GameDownloadResourceFilesColumns[16]},
 				RefColumns: []*schema.Column{GameDownloadResourcesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "game_download_resource_files_upload_session_id_fkey",
-				Columns:    []*schema.Column{GameDownloadResourceFilesColumns[16]},
+				Columns:    []*schema.Column{GameDownloadResourceFilesColumns[17]},
 				RefColumns: []*schema.Column{GameUploadSessionsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
+				Symbol:     "game_download_resource_files_inspection_id_fkey",
+				Columns:    []*schema.Column{GameDownloadResourceFilesColumns[18]},
+				RefColumns: []*schema.Column{FileInspectionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
 				Symbol:     "game_download_resource_files_creator_id_fkey",
-				Columns:    []*schema.Column{GameDownloadResourceFilesColumns[17]},
+				Columns:    []*schema.Column{GameDownloadResourceFilesColumns[19]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Restrict,
 			},
@@ -1414,7 +1422,7 @@ var (
 			{
 				Name:    "game_download_resource_files_upload_session_id_key",
 				Unique:  true,
-				Columns: []*schema.Column{GameDownloadResourceFilesColumns[16]},
+				Columns: []*schema.Column{GameDownloadResourceFilesColumns[17]},
 			},
 			{
 				Name:    "game_download_resource_files_file_path_key",
@@ -1424,12 +1432,17 @@ var (
 			{
 				Name:    "game_download_resource_files_resource_file_name_key",
 				Unique:  true,
-				Columns: []*schema.Column{GameDownloadResourceFilesColumns[15], GameDownloadResourceFilesColumns[2]},
+				Columns: []*schema.Column{GameDownloadResourceFilesColumns[16], GameDownloadResourceFilesColumns[2]},
 			},
 			{
 				Name:    "game_download_resource_files_file_path_idx",
 				Unique:  false,
 				Columns: []*schema.Column{GameDownloadResourceFilesColumns[3]},
+			},
+			{
+				Name:    "game_download_resource_files_inspection_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{GameDownloadResourceFilesColumns[18]},
 			},
 		},
 	}
@@ -1782,6 +1795,94 @@ var (
 				Name:    "game_upload_sessions_status_idx",
 				Unique:  false,
 				Columns: []*schema.Column{GameUploadSessionsColumns[9]},
+			},
+		},
+	}
+	// FileInspectionsColumns holds the columns for the "file_inspections" table.
+	FileInspectionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "status", Type: field.TypeString, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "archive_format", Type: field.TypeString, Size: 32, Default: "", SchemaType: map[string]string{"postgres": "character varying(32)"}},
+		{Name: "solid", Type: field.TypeBool, Default: false},
+		{Name: "volumes", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "recovery", Type: field.TypeBool, Default: false},
+		{Name: "recovery_percent", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "name_encoding", Type: field.TypeString, Size: 32, Default: "", SchemaType: map[string]string{"postgres": "character varying(32)"}},
+		{Name: "file_count", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "folder_count", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "unpacked_size", Type: field.TypeInt64, Default: 0},
+		{Name: "disc_count", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "disc_file_count", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "truncated", Type: field.TypeBool, Default: false},
+		{Name: "verified", Type: field.TypeBool, Default: false},
+		{Name: "scan_engine", Type: field.TypeString, Size: 64, Default: "", SchemaType: map[string]string{"postgres": "character varying(64)"}},
+		{Name: "signatures_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "scanned_count", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "scan_skipped", Type: field.TypeOther, Nullable: true, Default: schema.Expr("ARRAY[]::text[]"), SchemaType: map[string]string{"postgres": "text[]"}},
+		{Name: "scan_limit", Type: field.TypeInt64, Default: 0},
+		{Name: "detections", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "scanned_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "cleared_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "resource_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// FileInspectionsTable holds the schema information for the "file_inspections" table.
+	FileInspectionsTable = &schema.Table{
+		Name:       "file_inspections",
+		Columns:    FileInspectionsColumns,
+		PrimaryKey: []*schema.Column{FileInspectionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "file_inspections_resource_id_fkey",
+				Columns:    []*schema.Column{FileInspectionsColumns[25]},
+				RefColumns: []*schema.Column{GameDownloadResourcesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "file_inspections_resource_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{FileInspectionsColumns[25]},
+			},
+		},
+	}
+	// FileInspectionEntriesColumns holds the columns for the "file_inspection_entries" table.
+	FileInspectionEntriesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "parent_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "position", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "name", Type: field.TypeString, Size: 2147483647},
+		{Name: "kind", Type: field.TypeString, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "size", Type: field.TypeInt64, Default: 0},
+		{Name: "modified", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "items", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "children", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "encrypted", Type: field.TypeBool, Default: false},
+		{Name: "unreadable", Type: field.TypeBool, Default: false},
+		{Name: "preview", Type: field.TypeString, Size: 8, Default: "", SchemaType: map[string]string{"postgres": "character varying(8)"}},
+		{Name: "detail", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "inspection_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// FileInspectionEntriesTable holds the schema information for the "file_inspection_entries" table.
+	FileInspectionEntriesTable = &schema.Table{
+		Name:       "file_inspection_entries",
+		Columns:    FileInspectionEntriesColumns,
+		PrimaryKey: []*schema.Column{FileInspectionEntriesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "file_inspection_entries_inspection_id_fkey",
+				Columns:    []*schema.Column{FileInspectionEntriesColumns[13]},
+				RefColumns: []*schema.Column{FileInspectionsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "file_inspection_entries_inspection_id_parent_id_position_idx",
+				Unique:  false,
+				Columns: []*schema.Column{FileInspectionEntriesColumns[13], FileInspectionEntriesColumns[1], FileInspectionEntriesColumns[2]},
 			},
 		},
 	}
@@ -2594,6 +2695,8 @@ var (
 		GameTagRelationsTable,
 		GameUploadChunksTable,
 		GameUploadSessionsTable,
+		FileInspectionsTable,
+		FileInspectionEntriesTable,
 		MalwareScanCasesTable,
 		MessagesTable,
 		ModerationEventsTable,
@@ -2744,7 +2847,8 @@ func init() {
 	}
 	GameDownloadResourceFilesTable.ForeignKeys[0].RefTable = GameDownloadResourcesTable
 	GameDownloadResourceFilesTable.ForeignKeys[1].RefTable = GameUploadSessionsTable
-	GameDownloadResourceFilesTable.ForeignKeys[2].RefTable = UsersTable
+	GameDownloadResourceFilesTable.ForeignKeys[2].RefTable = FileInspectionsTable
+	GameDownloadResourceFilesTable.ForeignKeys[3].RefTable = UsersTable
 	GameDownloadResourceFilesTable.Annotation = &entsql.Annotation{
 		Table: "game_download_resource_files",
 	}
@@ -2785,6 +2889,14 @@ func init() {
 	GameUploadSessionsTable.ForeignKeys[0].RefTable = UsersTable
 	GameUploadSessionsTable.Annotation = &entsql.Annotation{
 		Table: "game_upload_sessions",
+	}
+	FileInspectionsTable.ForeignKeys[0].RefTable = GameDownloadResourcesTable
+	FileInspectionsTable.Annotation = &entsql.Annotation{
+		Table: "file_inspections",
+	}
+	FileInspectionEntriesTable.ForeignKeys[0].RefTable = FileInspectionsTable
+	FileInspectionEntriesTable.Annotation = &entsql.Annotation{
+		Table: "file_inspection_entries",
 	}
 	MalwareScanCasesTable.ForeignKeys[0].RefTable = GamesTable
 	MalwareScanCasesTable.ForeignKeys[1].RefTable = GameDownloadResourcesTable

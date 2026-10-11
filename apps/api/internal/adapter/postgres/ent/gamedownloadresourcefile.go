@@ -12,6 +12,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 )
 
@@ -46,6 +47,10 @@ type GameDownloadResourceFile struct {
 	FileCheckStatus int `json:"file_check_status,omitempty"`
 	// IsVirusFalsePositive holds the value of the "is_virus_false_positive" field.
 	IsVirusFalsePositive bool `json:"is_virus_false_positive,omitempty"`
+	// FileSha256 holds the value of the "file_sha256" field.
+	FileSha256 *string `json:"file_sha256,omitempty"`
+	// InspectionID holds the value of the "inspection_id" field.
+	InspectionID *int `json:"inspection_id,omitempty"`
 	// GameDownloadResourceID holds the value of the "game_download_resource_id" field.
 	GameDownloadResourceID int `json:"game_download_resource_id,omitempty"`
 	// CreatorID holds the value of the "creator_id" field.
@@ -72,11 +77,13 @@ type GameDownloadResourceFileEdges struct {
 	UploadSession *GameUploadSession `json:"upload_session,omitempty"`
 	// Creator holds the value of the creator edge.
 	Creator *User `json:"creator,omitempty"`
+	// Inspection holds the value of the inspection edge.
+	Inspection *Inspection `json:"inspection,omitempty"`
 	// Histories holds the value of the histories edge.
 	Histories []*GameDownloadResourceFileHistory `json:"histories,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [7]bool
 }
 
 // ActivitiesOrErr returns the Activities value or an error if the edge
@@ -130,10 +137,21 @@ func (e GameDownloadResourceFileEdges) CreatorOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "creator"}
 }
 
+// InspectionOrErr returns the Inspection value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e GameDownloadResourceFileEdges) InspectionOrErr() (*Inspection, error) {
+	if e.Inspection != nil {
+		return e.Inspection, nil
+	} else if e.loadedTypes[5] {
+		return nil, &NotFoundError{label: inspection.Label}
+	}
+	return nil, &NotLoadedError{edge: "inspection"}
+}
+
 // HistoriesOrErr returns the Histories value or an error if the edge
 // was not loaded in eager-loading.
 func (e GameDownloadResourceFileEdges) HistoriesOrErr() ([]*GameDownloadResourceFileHistory, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[6] {
 		return e.Histories, nil
 	}
 	return nil, &NotLoadedError{edge: "histories"}
@@ -146,9 +164,9 @@ func (*GameDownloadResourceFile) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case gamedownloadresourcefile.FieldIsVirusFalsePositive:
 			values[i] = new(sql.NullBool)
-		case gamedownloadresourcefile.FieldID, gamedownloadresourcefile.FieldType, gamedownloadresourcefile.FieldFileSize, gamedownloadresourcefile.FieldUploadSessionID, gamedownloadresourcefile.FieldFileStatus, gamedownloadresourcefile.FieldFileCheckStatus, gamedownloadresourcefile.FieldGameDownloadResourceID, gamedownloadresourcefile.FieldCreatorID:
+		case gamedownloadresourcefile.FieldID, gamedownloadresourcefile.FieldType, gamedownloadresourcefile.FieldFileSize, gamedownloadresourcefile.FieldUploadSessionID, gamedownloadresourcefile.FieldFileStatus, gamedownloadresourcefile.FieldFileCheckStatus, gamedownloadresourcefile.FieldInspectionID, gamedownloadresourcefile.FieldGameDownloadResourceID, gamedownloadresourcefile.FieldCreatorID:
 			values[i] = new(sql.NullInt64)
-		case gamedownloadresourcefile.FieldFileName, gamedownloadresourcefile.FieldFilePath, gamedownloadresourcefile.FieldFileURL, gamedownloadresourcefile.FieldS3FileKey, gamedownloadresourcefile.FieldFileContentType, gamedownloadresourcefile.FieldHashAlgorithm, gamedownloadresourcefile.FieldFileHash:
+		case gamedownloadresourcefile.FieldFileName, gamedownloadresourcefile.FieldFilePath, gamedownloadresourcefile.FieldFileURL, gamedownloadresourcefile.FieldS3FileKey, gamedownloadresourcefile.FieldFileContentType, gamedownloadresourcefile.FieldHashAlgorithm, gamedownloadresourcefile.FieldFileHash, gamedownloadresourcefile.FieldFileSha256:
 			values[i] = new(sql.NullString)
 		case gamedownloadresourcefile.FieldCreated, gamedownloadresourcefile.FieldUpdated:
 			values[i] = new(sql.NullTime)
@@ -256,6 +274,20 @@ func (_m *GameDownloadResourceFile) assignValues(columns []string, values []any)
 			} else if value.Valid {
 				_m.IsVirusFalsePositive = value.Bool
 			}
+		case gamedownloadresourcefile.FieldFileSha256:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field file_sha256", values[i])
+			} else if value.Valid {
+				_m.FileSha256 = new(string)
+				*_m.FileSha256 = value.String
+			}
+		case gamedownloadresourcefile.FieldInspectionID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field inspection_id", values[i])
+			} else if value.Valid {
+				_m.InspectionID = new(int)
+				*_m.InspectionID = int(value.Int64)
+			}
 		case gamedownloadresourcefile.FieldGameDownloadResourceID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field game_download_resource_id", values[i])
@@ -316,6 +348,11 @@ func (_m *GameDownloadResourceFile) QueryUploadSession() *GameUploadSessionQuery
 // QueryCreator queries the "creator" edge of the GameDownloadResourceFile entity.
 func (_m *GameDownloadResourceFile) QueryCreator() *UserQuery {
 	return NewGameDownloadResourceFileClient(_m.config).QueryCreator(_m)
+}
+
+// QueryInspection queries the "inspection" edge of the GameDownloadResourceFile entity.
+func (_m *GameDownloadResourceFile) QueryInspection() *InspectionQuery {
+	return NewGameDownloadResourceFileClient(_m.config).QueryInspection(_m)
 }
 
 // QueryHistories queries the "histories" edge of the GameDownloadResourceFile entity.
@@ -394,6 +431,16 @@ func (_m *GameDownloadResourceFile) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("is_virus_false_positive=")
 	builder.WriteString(fmt.Sprintf("%v", _m.IsVirusFalsePositive))
+	builder.WriteString(", ")
+	if v := _m.FileSha256; v != nil {
+		builder.WriteString("file_sha256=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.InspectionID; v != nil {
+		builder.WriteString("inspection_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("game_download_resource_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.GameDownloadResourceID))

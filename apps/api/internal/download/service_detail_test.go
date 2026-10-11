@@ -55,3 +55,26 @@ func TestDetailFollowsWhatTheViewerMaySee(t *testing.T) {
 	_, err = f.details.Events(ctx, other, pending.ID)
 	expectCode(t, err, download.ErrResourceNotFound)
 }
+
+func TestInspectionsAreThoseOfTheFilesTheViewerMaySee(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	published := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, PublishedAt: ptr(now)})
+	f.repo.SeedFile(download.File{ResourceID: published.ID, Name: "game.part1.rar", Status: download.FileInObjectStore, CreatorID: owner.UserID, InspectionID: ptr(7)})
+	f.repo.SeedFile(download.File{ResourceID: published.ID, Name: "game.part2.rar", Status: download.FileInObjectStore, CreatorID: owner.UserID, InspectionID: ptr(7)})
+	f.repo.SeedFile(download.File{ResourceID: published.ID, Name: "old.7z", Status: download.FileInObjectStore, CreatorID: owner.UserID})
+	f.repo.SeedFile(download.File{ResourceID: published.ID, Name: "new.7z", Status: download.FileOnServer, CreatorID: owner.UserID, InspectionID: ptr(9)})
+	if got, err := f.details.Inspections(ctx, other, published.ID); err != nil || len(got) != 1 || got[0] != 7 {
+		t.Fatalf("a visitor gets each inspection of the stored files once: %v %v", got, err)
+	}
+	if got, err := f.details.Inspections(ctx, owner, published.ID); err != nil || len(got) != 2 || got[0] != 7 || got[1] != 9 {
+		t.Fatalf("the uploader also gets the one of the file still being processed: %v %v", got, err)
+	}
+	unread := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, PublishedAt: ptr(now)})
+	f.repo.SeedFile(download.File{ResourceID: unread.ID, Name: "old.7z", Status: download.FileInObjectStore, CreatorID: owner.UserID})
+	if got, err := f.details.Inspections(ctx, other, unread.ID); err != nil || got == nil || len(got) != 0 {
+		t.Fatalf("a resource whose files were never read has none: %v %v", got, err)
+	}
+	_, err := f.details.Inspections(ctx, other, 999)
+	expectCode(t, err, download.ErrResourceNotFound)
+}

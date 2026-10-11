@@ -453,6 +453,30 @@ func (f GameUploadSessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GameUploadSessionMutation", m)
 }
 
+// The InspectionFunc type is an adapter to allow the use of ordinary
+// function as Inspection mutator.
+type InspectionFunc func(context.Context, *ent.InspectionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f InspectionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.InspectionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.InspectionMutation", m)
+}
+
+// The InspectionEntryFunc type is an adapter to allow the use of ordinary
+// function as InspectionEntry mutator.
+type InspectionEntryFunc func(context.Context, *ent.InspectionEntryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f InspectionEntryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.InspectionEntryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.InspectionEntryMutation", m)
+}
+
 // The MalwareScanCaseFunc type is an adapter to allow the use of ordinary
 // function as MalwareScanCase mutator.
 type MalwareScanCaseFunc func(context.Context, *ent.MalwareScanCaseMutation) (ent.Value, error)

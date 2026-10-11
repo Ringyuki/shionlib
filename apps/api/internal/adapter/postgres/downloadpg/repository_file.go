@@ -122,6 +122,8 @@ func (r *Repository) ReplaceFileContent(ctx context.Context, id int, content dow
 		SetFileCheckStatus(int(download.CheckPending)).
 		SetIsVirusFalsePositive(false).
 		ClearS3FileKey().
+		ClearFileSha256().
+		ClearInspectionID().
 		SetUploadSessionID(content.UploadSessionID)
 	if content.ContentType != nil {
 		update.SetFileContentType(*content.ContentType)

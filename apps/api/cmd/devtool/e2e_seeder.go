@@ -32,6 +32,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/ai"
 	"github.com/Ringyuki/shionlib/apps/api/internal/bootstrap"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
+	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/redis"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/refresh"
 	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
@@ -629,11 +630,14 @@ func (s *e2eSeeder) seedPostGameContent(ctx context.Context, tx *ent.Client, con
 	if err := tx.FavoriteItem.Create().SetFavoriteID(content.memberFavorite).SetGameID(content.primaryGameID).SetNote(e2eFavoriteItemNote).Exec(ctx); err != nil {
 		return fmt.Errorf("create favorite item: %w", err)
 	}
-	reportableID, _, err := s.createResource(ctx, tx, content.primaryGameID, content.mutableMemberID, e2eReportableResource, e2eReportableFile)
+	reportableID, reportable, err := s.createResource(ctx, tx, content.primaryGameID, content.mutableMemberID, e2eReportableResource, e2eReportableFile)
 	if err != nil {
 		return err
 	}
 	if err := s.seedResourceComments(ctx, tx, content, reportableID); err != nil {
+		return err
+	}
+	if err := s.seedInspection(ctx, tx, reportableID, reportable.ID); err != nil {
 		return err
 	}
 	resourceID, file, err := s.createResource(ctx, tx, content.malwareGameID, content.adminID, e2eMalwareResource, e2eMalwareFile)
@@ -793,6 +797,62 @@ func (s *e2eSeeder) createResource(ctx context.Context, tx *ent.Client, gameID, 
 		return 0, nil, fmt.Errorf("record publication of resource %d: %w", row.ID, err)
 	}
 	return row.ID, created, nil
+}
+
+func (s *e2eSeeder) seedInspection(ctx context.Context, tx *ent.Client, resourceID, fileID int) error {
+	checked := s.now().UTC()
+	record, err := tx.Inspection.Create().
+		SetResourceID(resourceID).
+		SetStatus(string(inspection.StatusReady)).
+		SetArchiveFormat("zip").
+		SetVolumes(1).
+		SetNameEncoding(string(inspection.EncodingShiftJIS)).
+		SetFileCount(e2eInspectedFiles).
+		SetFolderCount(e2eInspectedFolders).
+		SetUnpackedSize(e2eInspectedSize).
+		SetDiscCount(e2eInspectedDiscs).
+		SetDiscFileCount(e2eDiscFiles).
+		SetVerified(true).
+		SetScanEngine(e2eScanEngine).
+		SetSignaturesAt(checked.Add(-e2eSignatureAge)).
+		SetScannedCount(1).
+		SetScanLimit(e2eScanLimit).
+		SetScannedAt(checked).
+		Save(ctx)
+	if err != nil {
+		return fmt.Errorf("create inspection of resource %d: %w", resourceID, err)
+	}
+	ids := make([]int, len(e2eInspectedEntries))
+	for index, entry := range e2eInspectedEntries {
+		create := tx.InspectionEntry.Create().
+			SetInspectionID(record.ID).
+			SetPosition(entry.Position).
+			SetName(entry.Name).
+			SetKind(string(entry.Kind)).
+			SetSize(entry.Size).
+			SetModified(checked.Add(-e2eInspectedAge)).
+			SetItems(entry.Items).
+			SetChildren(entry.Children).
+			SetEncrypted(entry.Encrypted).
+			SetUnreadable(entry.Unreadable).
+			SetPreview(string(entry.Preview))
+		if entry.Detail != "" {
+			create.SetDetail(json.RawMessage(entry.Detail))
+		}
+		if entry.Parent >= 0 {
+			create.SetParentID(ids[entry.Parent])
+		}
+		row, err := create.Save(ctx)
+		if err != nil {
+			return fmt.Errorf("create inspection entry %s: %w", entry.Name, err)
+		}
+		ids[index] = row.ID
+	}
+	err = tx.GameDownloadResourceFile.UpdateOneID(fileID).SetInspectionID(record.ID).SetFileSha256(e2eReportableSHA256).Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("attach inspection to file %d: %w", fileID, err)
+	}
+	return nil
 }
 
 func (s *e2eSeeder) primeRecentUpdates(ctx context.Context, gameIDs []int) error {

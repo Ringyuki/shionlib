@@ -72,6 +72,8 @@ func TestE2EPrepareReproducesTheLegacyDatasetIdempotently(t *testing.T) {
 		"game_download_resources":       2,
 		"game_download_resource_files":  2,
 		"game_download_resource_events": 2,
+		"file_inspections":              1,
+		"file_inspection_entries":       12,
 		"malware_scan_cases":            1,
 		"catalog_source_links":          6,
 		"settings":                      3,

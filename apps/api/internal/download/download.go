@@ -92,6 +92,8 @@ type File struct {
 	Status          int
 	CheckStatus     CheckStatus
 	FalsePositive   bool
+	SHA256          *string
+	InspectionID    *int
 	CreatorID       int
 	Created         time.Time
 	Updated         time.Time

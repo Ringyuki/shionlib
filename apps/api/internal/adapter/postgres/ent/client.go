@@ -52,6 +52,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gametagrelation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadchunk"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspection"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspectionentry"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
@@ -152,6 +154,10 @@ type Client struct {
 	GameUploadChunk *GameUploadChunkClient
 	// GameUploadSession is the client for interacting with the GameUploadSession builders.
 	GameUploadSession *GameUploadSessionClient
+	// Inspection is the client for interacting with the Inspection builders.
+	Inspection *InspectionClient
+	// InspectionEntry is the client for interacting with the InspectionEntry builders.
+	InspectionEntry *InspectionEntryClient
 	// MalwareScanCase is the client for interacting with the MalwareScanCase builders.
 	MalwareScanCase *MalwareScanCaseClient
 	// Message is the client for interacting with the Message builders.
@@ -234,6 +240,8 @@ func (c *Client) init() {
 	c.GameTagRelation = NewGameTagRelationClient(c.config)
 	c.GameUploadChunk = NewGameUploadChunkClient(c.config)
 	c.GameUploadSession = NewGameUploadSessionClient(c.config)
+	c.Inspection = NewInspectionClient(c.config)
+	c.InspectionEntry = NewInspectionEntryClient(c.config)
 	c.MalwareScanCase = NewMalwareScanCaseClient(c.config)
 	c.Message = NewMessageClient(c.config)
 	c.ModerationEvent = NewModerationEventClient(c.config)
@@ -380,6 +388,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		GameTagRelation:                 NewGameTagRelationClient(cfg),
 		GameUploadChunk:                 NewGameUploadChunkClient(cfg),
 		GameUploadSession:               NewGameUploadSessionClient(cfg),
+		Inspection:                      NewInspectionClient(cfg),
+		InspectionEntry:                 NewInspectionEntryClient(cfg),
 		MalwareScanCase:                 NewMalwareScanCaseClient(cfg),
 		Message:                         NewMessageClient(cfg),
 		ModerationEvent:                 NewModerationEventClient(cfg),
@@ -453,6 +463,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		GameTagRelation:                 NewGameTagRelationClient(cfg),
 		GameUploadChunk:                 NewGameUploadChunkClient(cfg),
 		GameUploadSession:               NewGameUploadSessionClient(cfg),
+		Inspection:                      NewInspectionClient(cfg),
+		InspectionEntry:                 NewInspectionEntryClient(cfg),
 		MalwareScanCase:                 NewMalwareScanCaseClient(cfg),
 		Message:                         NewMessageClient(cfg),
 		ModerationEvent:                 NewModerationEventClient(cfg),
@@ -508,11 +520,12 @@ func (c *Client) Use(hooks ...Hook) {
 		c.GameDownloadResource, c.GameDownloadResourceEvent,
 		c.GameDownloadResourceFile, c.GameDownloadResourceFileHistory,
 		c.GameDownloadResourceReport, c.GameImage, c.GameLink, c.GameRelation,
-		c.GameTagRelation, c.GameUploadChunk, c.GameUploadSession, c.MalwareScanCase,
-		c.Message, c.ModerationEvent, c.OidcIdentity, c.RoleFieldPermission, c.Setting,
-		c.SettingChange, c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord,
-		c.UserFieldPermission, c.UserGamePvnMapping, c.UserLoginSession,
-		c.UserPasskeyCredential, c.UserPvnBinding, c.Walkthrough,
+		c.GameTagRelation, c.GameUploadChunk, c.GameUploadSession, c.Inspection,
+		c.InspectionEntry, c.MalwareScanCase, c.Message, c.ModerationEvent,
+		c.OidcIdentity, c.RoleFieldPermission, c.Setting, c.SettingChange,
+		c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord, c.UserFieldPermission,
+		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
+		c.UserPvnBinding, c.Walkthrough,
 	} {
 		n.Use(hooks...)
 	}
@@ -531,11 +544,12 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.GameDownloadResource, c.GameDownloadResourceEvent,
 		c.GameDownloadResourceFile, c.GameDownloadResourceFileHistory,
 		c.GameDownloadResourceReport, c.GameImage, c.GameLink, c.GameRelation,
-		c.GameTagRelation, c.GameUploadChunk, c.GameUploadSession, c.MalwareScanCase,
-		c.Message, c.ModerationEvent, c.OidcIdentity, c.RoleFieldPermission, c.Setting,
-		c.SettingChange, c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord,
-		c.UserFieldPermission, c.UserGamePvnMapping, c.UserLoginSession,
-		c.UserPasskeyCredential, c.UserPvnBinding, c.Walkthrough,
+		c.GameTagRelation, c.GameUploadChunk, c.GameUploadSession, c.Inspection,
+		c.InspectionEntry, c.MalwareScanCase, c.Message, c.ModerationEvent,
+		c.OidcIdentity, c.RoleFieldPermission, c.Setting, c.SettingChange,
+		c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord, c.UserFieldPermission,
+		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
+		c.UserPvnBinding, c.Walkthrough,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -618,6 +632,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.GameUploadChunk.mutate(ctx, m)
 	case *GameUploadSessionMutation:
 		return c.GameUploadSession.mutate(ctx, m)
+	case *InspectionMutation:
+		return c.Inspection.mutate(ctx, m)
+	case *InspectionEntryMutation:
+		return c.InspectionEntry.mutate(ctx, m)
 	case *MalwareScanCaseMutation:
 		return c.MalwareScanCase.mutate(ctx, m)
 	case *MessageMutation:
@@ -5598,6 +5616,22 @@ func (c *GameDownloadResourceClient) QueryComments(_m *GameDownloadResource) *Co
 	return query
 }
 
+// QueryInspections queries the inspections edge of a GameDownloadResource.
+func (c *GameDownloadResourceClient) QueryInspections(_m *GameDownloadResource) *InspectionQuery {
+	query := (&InspectionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(gamedownloadresource.Table, gamedownloadresource.FieldID, id),
+			sqlgraph.To(inspection.Table, inspection.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, gamedownloadresource.InspectionsTable, gamedownloadresource.InspectionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryEvents queries the events edge of a GameDownloadResource.
 func (c *GameDownloadResourceClient) QueryEvents(_m *GameDownloadResource) *GameDownloadResourceEventQuery {
 	query := (&GameDownloadResourceEventClient{config: c.config}).Query()
@@ -5985,6 +6019,22 @@ func (c *GameDownloadResourceFileClient) QueryCreator(_m *GameDownloadResourceFi
 			sqlgraph.From(gamedownloadresourcefile.Table, gamedownloadresourcefile.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, gamedownloadresourcefile.CreatorTable, gamedownloadresourcefile.CreatorColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryInspection queries the inspection edge of a GameDownloadResourceFile.
+func (c *GameDownloadResourceFileClient) QueryInspection(_m *GameDownloadResourceFile) *InspectionQuery {
+	query := (&InspectionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(gamedownloadresourcefile.Table, gamedownloadresourcefile.FieldID, id),
+			sqlgraph.To(inspection.Table, inspection.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, gamedownloadresourcefile.InspectionTable, gamedownloadresourcefile.InspectionColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -7301,6 +7351,336 @@ func (c *GameUploadSessionClient) mutate(ctx context.Context, m *GameUploadSessi
 		return (&GameUploadSessionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown GameUploadSession mutation op: %q", m.Op())
+	}
+}
+
+// InspectionClient is a client for the Inspection schema.
+type InspectionClient struct {
+	config
+}
+
+// NewInspectionClient returns a client for the Inspection from the given config.
+func NewInspectionClient(c config) *InspectionClient {
+	return &InspectionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `inspection.Hooks(f(g(h())))`.
+func (c *InspectionClient) Use(hooks ...Hook) {
+	c.hooks.Inspection = append(c.hooks.Inspection, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `inspection.Intercept(f(g(h())))`.
+func (c *InspectionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Inspection = append(c.inters.Inspection, interceptors...)
+}
+
+// Create returns a builder for creating a Inspection entity.
+func (c *InspectionClient) Create() *InspectionCreate {
+	mutation := newInspectionMutation(c.config, OpCreate)
+	return &InspectionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Inspection entities.
+func (c *InspectionClient) CreateBulk(builders ...*InspectionCreate) *InspectionCreateBulk {
+	return &InspectionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *InspectionClient) MapCreateBulk(slice any, setFunc func(*InspectionCreate, int)) *InspectionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &InspectionCreateBulk{err: fmt.Errorf("calling to InspectionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*InspectionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &InspectionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Inspection.
+func (c *InspectionClient) Update() *InspectionUpdate {
+	mutation := newInspectionMutation(c.config, OpUpdate)
+	return &InspectionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *InspectionClient) UpdateOne(_m *Inspection) *InspectionUpdateOne {
+	mutation := newInspectionMutation(c.config, OpUpdateOne, withInspection(_m))
+	return &InspectionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *InspectionClient) UpdateOneID(id int) *InspectionUpdateOne {
+	mutation := newInspectionMutation(c.config, OpUpdateOne, withInspectionID(id))
+	return &InspectionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Inspection.
+func (c *InspectionClient) Delete() *InspectionDelete {
+	mutation := newInspectionMutation(c.config, OpDelete)
+	return &InspectionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *InspectionClient) DeleteOne(_m *Inspection) *InspectionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *InspectionClient) DeleteOneID(id int) *InspectionDeleteOne {
+	builder := c.Delete().Where(inspection.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &InspectionDeleteOne{builder}
+}
+
+// Query returns a query builder for Inspection.
+func (c *InspectionClient) Query() *InspectionQuery {
+	return &InspectionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeInspection},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Inspection entity by its id.
+func (c *InspectionClient) Get(ctx context.Context, id int) (*Inspection, error) {
+	return c.Query().Where(inspection.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *InspectionClient) GetX(ctx context.Context, id int) *Inspection {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryResource queries the resource edge of a Inspection.
+func (c *InspectionClient) QueryResource(_m *Inspection) *GameDownloadResourceQuery {
+	query := (&GameDownloadResourceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(inspection.Table, inspection.FieldID, id),
+			sqlgraph.To(gamedownloadresource.Table, gamedownloadresource.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, inspection.ResourceTable, inspection.ResourceColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryEntries queries the entries edge of a Inspection.
+func (c *InspectionClient) QueryEntries(_m *Inspection) *InspectionEntryQuery {
+	query := (&InspectionEntryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(inspection.Table, inspection.FieldID, id),
+			sqlgraph.To(inspectionentry.Table, inspectionentry.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, inspection.EntriesTable, inspection.EntriesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFiles queries the files edge of a Inspection.
+func (c *InspectionClient) QueryFiles(_m *Inspection) *GameDownloadResourceFileQuery {
+	query := (&GameDownloadResourceFileClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(inspection.Table, inspection.FieldID, id),
+			sqlgraph.To(gamedownloadresourcefile.Table, gamedownloadresourcefile.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, inspection.FilesTable, inspection.FilesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *InspectionClient) Hooks() []Hook {
+	return c.hooks.Inspection
+}
+
+// Interceptors returns the client interceptors.
+func (c *InspectionClient) Interceptors() []Interceptor {
+	return c.inters.Inspection
+}
+
+func (c *InspectionClient) mutate(ctx context.Context, m *InspectionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&InspectionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&InspectionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&InspectionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&InspectionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Inspection mutation op: %q", m.Op())
+	}
+}
+
+// InspectionEntryClient is a client for the InspectionEntry schema.
+type InspectionEntryClient struct {
+	config
+}
+
+// NewInspectionEntryClient returns a client for the InspectionEntry from the given config.
+func NewInspectionEntryClient(c config) *InspectionEntryClient {
+	return &InspectionEntryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `inspectionentry.Hooks(f(g(h())))`.
+func (c *InspectionEntryClient) Use(hooks ...Hook) {
+	c.hooks.InspectionEntry = append(c.hooks.InspectionEntry, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `inspectionentry.Intercept(f(g(h())))`.
+func (c *InspectionEntryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.InspectionEntry = append(c.inters.InspectionEntry, interceptors...)
+}
+
+// Create returns a builder for creating a InspectionEntry entity.
+func (c *InspectionEntryClient) Create() *InspectionEntryCreate {
+	mutation := newInspectionEntryMutation(c.config, OpCreate)
+	return &InspectionEntryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of InspectionEntry entities.
+func (c *InspectionEntryClient) CreateBulk(builders ...*InspectionEntryCreate) *InspectionEntryCreateBulk {
+	return &InspectionEntryCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *InspectionEntryClient) MapCreateBulk(slice any, setFunc func(*InspectionEntryCreate, int)) *InspectionEntryCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &InspectionEntryCreateBulk{err: fmt.Errorf("calling to InspectionEntryClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*InspectionEntryCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &InspectionEntryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for InspectionEntry.
+func (c *InspectionEntryClient) Update() *InspectionEntryUpdate {
+	mutation := newInspectionEntryMutation(c.config, OpUpdate)
+	return &InspectionEntryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *InspectionEntryClient) UpdateOne(_m *InspectionEntry) *InspectionEntryUpdateOne {
+	mutation := newInspectionEntryMutation(c.config, OpUpdateOne, withInspectionEntry(_m))
+	return &InspectionEntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *InspectionEntryClient) UpdateOneID(id int) *InspectionEntryUpdateOne {
+	mutation := newInspectionEntryMutation(c.config, OpUpdateOne, withInspectionEntryID(id))
+	return &InspectionEntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for InspectionEntry.
+func (c *InspectionEntryClient) Delete() *InspectionEntryDelete {
+	mutation := newInspectionEntryMutation(c.config, OpDelete)
+	return &InspectionEntryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *InspectionEntryClient) DeleteOne(_m *InspectionEntry) *InspectionEntryDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *InspectionEntryClient) DeleteOneID(id int) *InspectionEntryDeleteOne {
+	builder := c.Delete().Where(inspectionentry.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &InspectionEntryDeleteOne{builder}
+}
+
+// Query returns a query builder for InspectionEntry.
+func (c *InspectionEntryClient) Query() *InspectionEntryQuery {
+	return &InspectionEntryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeInspectionEntry},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a InspectionEntry entity by its id.
+func (c *InspectionEntryClient) Get(ctx context.Context, id int) (*InspectionEntry, error) {
+	return c.Query().Where(inspectionentry.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *InspectionEntryClient) GetX(ctx context.Context, id int) *InspectionEntry {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryInspection queries the inspection edge of a InspectionEntry.
+func (c *InspectionEntryClient) QueryInspection(_m *InspectionEntry) *InspectionQuery {
+	query := (&InspectionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(inspectionentry.Table, inspectionentry.FieldID, id),
+			sqlgraph.To(inspection.Table, inspection.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, inspectionentry.InspectionTable, inspectionentry.InspectionColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *InspectionEntryClient) Hooks() []Hook {
+	return c.hooks.InspectionEntry
+}
+
+// Interceptors returns the client interceptors.
+func (c *InspectionEntryClient) Interceptors() []Interceptor {
+	return c.inters.InspectionEntry
+}
+
+func (c *InspectionEntryClient) mutate(ctx context.Context, m *InspectionEntryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&InspectionEntryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&InspectionEntryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&InspectionEntryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&InspectionEntryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown InspectionEntry mutation op: %q", m.Op())
 	}
 }
 
@@ -10536,10 +10916,10 @@ type (
 		GameDownloadResource, GameDownloadResourceEvent, GameDownloadResourceFile,
 		GameDownloadResourceFileHistory, GameDownloadResourceReport, GameImage,
 		GameLink, GameRelation, GameTagRelation, GameUploadChunk, GameUploadSession,
-		MalwareScanCase, Message, ModerationEvent, OidcIdentity, RoleFieldPermission,
-		Setting, SettingChange, SponsorOrder, Tag, User, UserBannedRecord,
-		UserFieldPermission, UserGamePvnMapping, UserLoginSession,
-		UserPasskeyCredential, UserPvnBinding, Walkthrough []ent.Hook
+		Inspection, InspectionEntry, MalwareScanCase, Message, ModerationEvent,
+		OidcIdentity, RoleFieldPermission, Setting, SettingChange, SponsorOrder, Tag,
+		User, UserBannedRecord, UserFieldPermission, UserGamePvnMapping,
+		UserLoginSession, UserPasskeyCredential, UserPvnBinding, Walkthrough []ent.Hook
 	}
 	inters struct {
 		AICatalogModel, AICatalogProvider, AIModel, AIProvider, AIProviderOffer,
@@ -10550,10 +10930,11 @@ type (
 		GameDownloadResource, GameDownloadResourceEvent, GameDownloadResourceFile,
 		GameDownloadResourceFileHistory, GameDownloadResourceReport, GameImage,
 		GameLink, GameRelation, GameTagRelation, GameUploadChunk, GameUploadSession,
-		MalwareScanCase, Message, ModerationEvent, OidcIdentity, RoleFieldPermission,
-		Setting, SettingChange, SponsorOrder, Tag, User, UserBannedRecord,
-		UserFieldPermission, UserGamePvnMapping, UserLoginSession,
-		UserPasskeyCredential, UserPvnBinding, Walkthrough []ent.Interceptor
+		Inspection, InspectionEntry, MalwareScanCase, Message, ModerationEvent,
+		OidcIdentity, RoleFieldPermission, Setting, SettingChange, SponsorOrder, Tag,
+		User, UserBannedRecord, UserFieldPermission, UserGamePvnMapping,
+		UserLoginSession, UserPasskeyCredential, UserPvnBinding,
+		Walkthrough []ent.Interceptor
 	}
 )
 

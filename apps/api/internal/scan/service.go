@@ -2,8 +2,11 @@ package scan
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"io"
 	"path/filepath"
 	"slices"
 	"strconv"
@@ -13,6 +16,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
+	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
 )
@@ -40,58 +44,61 @@ func checkReason(status download.CheckStatus) string {
 }
 
 type Deps struct {
-	Repo       Repository
-	Archives   ArchiveTool
-	Scanner    VirusScanner
-	Workspace  Workspace
-	Spool      Spool
-	Files      Files
-	Activities Activities
-	Messages   Messenger
-	Banner     Banner
-	Mailer     AdminMailer
-	Queue      Queue
-	Tx         Transactor
-	Settings   setting.Source
-	Options    Options
-	Now        func() time.Time
+	Repo        Repository
+	Archives    ArchiveTool
+	Scanner     VirusScanner
+	Workspace   Workspace
+	Contents    *ContentService
+	Inspections Inspections
+	Files       Files
+	Activities  Activities
+	Messages    Messenger
+	Banner      Banner
+	Mailer      AdminMailer
+	Queue       Queue
+	Tx          Transactor
+	Settings    setting.Source
+	Options     Options
+	Now         func() time.Time
 }
 
 type Service struct {
-	repo       Repository
-	archives   ArchiveTool
-	scanner    VirusScanner
-	workspace  Workspace
-	spool      Spool
-	files      Files
-	activities Activities
-	messages   Messenger
-	banner     Banner
-	mailer     AdminMailer
-	queue      Queue
-	tx         Transactor
-	settings   setting.Source
-	options    Options
-	now        func() time.Time
+	repo        Repository
+	archives    ArchiveTool
+	scanner     VirusScanner
+	workspace   Workspace
+	contents    *ContentService
+	inspections Inspections
+	files       Files
+	activities  Activities
+	messages    Messenger
+	banner      Banner
+	mailer      AdminMailer
+	queue       Queue
+	tx          Transactor
+	settings    setting.Source
+	options     Options
+	now         func() time.Time
 }
 
 func NewService(deps Deps) *Service {
 	return &Service{
-		repo:       deps.Repo,
-		archives:   deps.Archives,
-		scanner:    deps.Scanner,
-		workspace:  deps.Workspace,
-		spool:      deps.Spool,
-		files:      deps.Files,
-		activities: deps.Activities,
-		messages:   deps.Messages,
-		banner:     deps.Banner,
-		mailer:     deps.Mailer,
-		queue:      deps.Queue,
-		tx:         deps.Tx,
-		settings:   deps.Settings,
-		options:    deps.Options,
-		now:        deps.Now,
+		repo:        deps.Repo,
+		archives:    deps.Archives,
+		scanner:     deps.Scanner,
+		workspace:   deps.Workspace,
+		contents:    deps.Contents,
+		inspections: deps.Inspections,
+		files:       deps.Files,
+		activities:  deps.Activities,
+		messages:    deps.Messages,
+		banner:      deps.Banner,
+		mailer:      deps.Mailer,
+		queue:       deps.Queue,
+		tx:          deps.Tx,
+		settings:    deps.Settings,
+		options:     deps.Options,
+		now:         deps.Now,
 	}
 }
 
@@ -154,14 +161,31 @@ func (s *Service) check(ctx context.Context, unit Unit) error {
 	if archive.Status != download.CheckOK {
 		return s.reject(ctx, unit, archive.Status)
 	}
-	report, err := s.scanContents(ctx, unit, entry, workspace, archive.Entries)
+	contents, err := s.contents.Read(ctx, Source{Path: entry, Workspace: workspace, Archive: archive})
+	if err != nil {
+		return err
+	}
+	reports, err := s.scanTargets(ctx, unit, entry, contents.Targets)
+	if err != nil {
+		return err
+	}
+	report, err := MergeReports(reports)
+	if err != nil {
+		return err
+	}
+	result, err := s.record(ctx, unit, archive, contents, reports)
 	if err != nil {
 		return err
 	}
 	if report.Infected {
-		return s.quarantine(ctx, unit, report)
+		err = s.quarantine(ctx, unit, report, result)
+	} else {
+		err = s.approve(ctx, unit, result)
 	}
-	return s.approve(ctx, unit)
+	if err != nil {
+		return err
+	}
+	return s.keepPreviews(ctx, result.recorded, contents.Previews)
 }
 
 func (s *Service) stage(ctx context.Context, unit Unit, workspace string) (string, error) {
@@ -177,48 +201,102 @@ func (s *Service) stage(ctx context.Context, unit Unit, workspace string) (strin
 	return filepath.Join(volumes, filepath.Base(unit.Entry().Name)), nil
 }
 
-func (s *Service) scanContents(ctx context.Context, unit Unit, entry, workspace string, listed []ArchiveEntry) (Report, error) {
-	limit := s.scanner.MaxSize()
+func (s *Service) scanTargets(ctx context.Context, unit Unit, entry string, targets []ScanTarget) ([]EntryReport, error) {
 	var entries []EntryReport
-	if whole := unit.Entry(); !unit.Set() && Executable(whole.Name) && whole.Size <= limit {
+	if whole := unit.Entry(); !unit.Set() && Executable(whole.Name) && whole.Size <= s.scanner.MaxSize() {
 		report, err := s.scanFile(ctx, whole.Name, entry)
 		if err != nil {
-			return Report{}, err
+			return nil, err
 		}
 		entries = append(entries, EntryReport{Name: whole.Name, Report: report})
 	}
-	skip, size := extractionPlan(listed, limit)
-	room, err := s.spool.SpoolRoom(ctx)
-	if err != nil {
-		return Report{}, err
-	}
-	if size > room {
-		return Report{}, fmt.Errorf("extracting %d bytes needs more than the %d bytes the spool can spare", size, room)
-	}
-	extracted := filepath.Join(workspace, "contents")
-	run, err := s.archives.Extract(ctx, entry, extracted, ScannedExtensions, skip)
-	if err != nil {
-		return Report{}, err
-	}
-	if run.Failed && !run.Killed {
-		return Report{}, fmt.Errorf("extract executables: %s", strings.TrimSpace(run.blob()))
-	}
-	paths, err := s.workspace.Files(ctx, extracted)
-	if err != nil {
-		return Report{}, err
-	}
-	for _, path := range paths {
-		name, err := filepath.Rel(extracted, path)
+	for _, target := range targets {
+		report, err := s.scanFile(ctx, target.Name, target.Path)
 		if err != nil {
-			return Report{}, err
+			return nil, err
 		}
-		report, err := s.scanFile(ctx, name, path)
-		if err != nil {
-			return Report{}, err
-		}
-		entries = append(entries, EntryReport{Name: name, Report: report})
+		entries = append(entries, EntryReport{Name: target.Name, Report: report})
 	}
-	return MergeReports(entries)
+	return entries, nil
+}
+
+func (s *Service) record(ctx context.Context, unit Unit, archive Archive, contents Contents, reports []EntryReport) (checked, error) {
+	engine, err := s.scanner.Engine(ctx)
+	if err != nil {
+		return checked{}, err
+	}
+	now := s.now()
+	draft := contents.Draft
+	draft.ResourceID = unit.Entry().ResourceID
+	draft.Status = inspection.StatusPlain
+	draft.Verified = archive.Verified
+	if Container(archive.Facts.Format) {
+		draft.Status = inspection.StatusReady
+		draft.Archive = inspection.Archive{
+			Format:          archive.Facts.Format,
+			Solid:           archive.Facts.Solid,
+			Volumes:         archive.Facts.Volumes,
+			Recovery:        archive.Facts.Recovery,
+			RecoveryPercent: archive.Facts.RecoveryPercent,
+			NameEncoding:    contents.NameEncoding,
+		}
+	}
+	draft.Scan = inspection.Scan{
+		Engine:       engine.Name,
+		SignaturesAt: engine.SignaturesAt,
+		Scanned:      Executables(reports),
+		Skipped:      contents.Skipped,
+		Limit:        s.scanner.MaxSize(),
+		Detections:   Detections(reports),
+		At:           &now,
+	}
+	recorded, err := s.inspections.Record(ctx, draft)
+	if err != nil {
+		return checked{}, err
+	}
+	result := checked{recorded: recorded, digests: map[int]string{}}
+	for _, file := range unit.Files {
+		digest, err := s.digest(ctx, file.Path)
+		if err != nil {
+			return checked{}, err
+		}
+		result.digests[file.ID] = digest
+	}
+	return result, nil
+}
+
+func (s *Service) keepPreviews(ctx context.Context, recorded inspection.Recorded, previews []PreviewSource) error {
+	for _, preview := range previews {
+		if preview.Entry >= len(recorded.Entries) {
+			continue
+		}
+		if err := s.keepPreview(ctx, recorded.ID, recorded.Entries[preview.Entry], preview); err != nil {
+			return fmt.Errorf("keep the previews of inspection %d: %w", recorded.ID, err)
+		}
+	}
+	return nil
+}
+
+func (s *Service) keepPreview(ctx context.Context, inspectionID, entryID int, preview PreviewSource) error {
+	content, err := s.workspace.Open(ctx, preview.Path)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = content.Close() }()
+	return s.inspections.KeepPreview(ctx, inspectionID, entryID, preview.Kind, content)
+}
+
+func (s *Service) digest(ctx context.Context, path string) (string, error) {
+	content, err := s.workspace.Open(ctx, path)
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = content.Close() }()
+	hash := sha256.New()
+	if _, err := io.Copy(hash, content); err != nil {
+		return "", fmt.Errorf("digest %s: %w", filepath.Base(path), err)
+	}
+	return hex.EncodeToString(hash.Sum(nil)), nil
 }
 
 func (s *Service) scanFile(ctx context.Context, name, path string) (Report, error) {
@@ -294,11 +372,14 @@ func rejectionActivity(status download.CheckStatus) activity.Type {
 	}
 }
 
-func (s *Service) approve(ctx context.Context, unit Unit) error {
+func (s *Service) approve(ctx context.Context, unit Unit, result checked) error {
 	var approved []int
 	err := s.withPending(ctx, unit, func(ctx context.Context, current []PendingFile) error {
 		for _, file := range current {
 			if err := s.repo.SetCheckStatus(ctx, file.ID, download.CheckOK, false); err != nil {
+				return err
+			}
+			if err := s.repo.SetInspection(ctx, file.ID, result.recorded.ID, result.digests[file.ID]); err != nil {
 				return err
 			}
 			if err := s.activities.Record(ctx, checkActivity(activity.TypeFileCheckOK, file, download.CheckOK)); err != nil {
@@ -319,7 +400,7 @@ func (s *Service) approve(ctx context.Context, unit Unit) error {
 	return nil
 }
 
-func (s *Service) quarantine(ctx context.Context, unit Unit, report Report) error {
+func (s *Service) quarantine(ctx context.Context, unit Unit, report Report, result checked) error {
 	viruses := NormalizeViruses(report.Viruses)
 	deadline := s.now().Add(ReviewTimeout.Read(s.settings))
 	var created *Case
@@ -327,6 +408,9 @@ func (s *Service) quarantine(ctx context.Context, unit Unit, report Report) erro
 		var size int64
 		for _, file := range current {
 			if err := s.repo.SetCheckStatus(ctx, file.ID, download.CheckHarmfulPendingReview, false); err != nil {
+				return err
+			}
+			if err := s.repo.SetInspection(ctx, file.ID, result.recorded.ID, result.digests[file.ID]); err != nil {
 				return err
 			}
 			if err := s.activities.Record(ctx, checkActivity(activity.TypeFileCheckHarmful, file, download.CheckHarmful)); err != nil {
@@ -511,6 +595,7 @@ func (s *Service) allow(ctx context.Context, id int, note *string, notify bool, 
 		if err != nil {
 			return err
 		}
+		var inspections []int
 		for _, file := range held {
 			if err := s.repo.SetCheckStatus(ctx, file.ID, download.CheckOK, true); err != nil {
 				return err
@@ -519,6 +604,12 @@ func (s *Service) allow(ctx context.Context, id int, note *string, notify bool, 
 				return err
 			}
 			released = append(released, file.ID)
+			if file.InspectionID != nil && !slices.Contains(inspections, *file.InspectionID) {
+				inspections = append(inspections, *file.InspectionID)
+			}
+		}
+		if err := s.inspections.Cleared(ctx, inspections); err != nil {
+			return err
 		}
 		now := s.now()
 		resolution := Resolution{Status: CaseReleased, Source: source, ReviewedBy: reviewer, ReviewedAt: now, Note: note, NotifyOnAllow: &notify}

@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"time"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
 )
 
 const (
@@ -85,6 +87,48 @@ var e2eReportableFile = e2eSeededFile{
 	FileHash:        "e2e-seeded-reportable-hash",
 	FileStatus:      3,
 	FileCheckStatus: 1,
+}
+
+const (
+	e2eReportableSHA256 = "0c1f4a5d9e7b3a62c8d1f0e4b6a79325d4c8e1f7a0b2c3d4e5f60718293a4b5c"
+	e2eScanEngine       = "ClamAV 1.4.3"
+	e2eScanLimit        = 4000 << 20
+	e2eSignatureAge     = 24 * time.Hour
+	e2eInspectedAge     = 30 * 24 * time.Hour
+	e2eInspectedFiles   = 8
+	e2eInspectedFolders = 2
+	e2eInspectedSize    = 4_008_153_084
+	e2eInspectedDiscs   = 2
+	e2eDiscFiles        = 2
+)
+
+type e2eInspectedEntry struct {
+	Parent     int
+	Position   int
+	Name       string
+	Kind       inspection.Kind
+	Size       int64
+	Items      int
+	Children   int
+	Preview    inspection.Preview
+	Encrypted  bool
+	Unreadable bool
+	Detail     string
+}
+
+var e2eInspectedEntries = []e2eInspectedEntry{
+	{Parent: -1, Name: "seeded-sample", Kind: inspection.KindFolder, Size: e2eInspectedSize, Items: 8, Children: 8},
+	{Parent: 0, Position: 0, Name: "docs", Kind: inspection.KindFolder, Size: 1024, Items: 1, Children: 1},
+	{Parent: 0, Position: 1, Name: "bonus.zip", Kind: inspection.KindArchive, Size: 2048, Encrypted: true, Unreadable: true},
+	{Parent: 0, Position: 2, Name: "cover.png", Kind: inspection.KindFile, Size: 4096, Preview: inspection.PreviewImage},
+	{Parent: 0, Position: 3, Name: "DISC2.mdx", Kind: inspection.KindDisc, Size: 3_242_352_640, Unreadable: true},
+	{Parent: 0, Position: 4, Name: "GAME.bin", Kind: inspection.KindDisc, Size: 759_983_712, Items: 2, Children: 2, Detail: `{"format":"iso9660+joliet","label":"SEEDED_GAME","files":1,"signals":["audio"]}`},
+	{Parent: 0, Position: 5, Name: "GAME.cue", Kind: inspection.KindFile, Size: 412, Preview: inspection.PreviewText},
+	{Parent: 0, Position: 6, Name: "readme.txt", Kind: inspection.KindFile, Size: 26, Preview: inspection.PreviewText},
+	{Parent: 0, Position: 7, Name: "setup.exe", Kind: inspection.KindFile, Size: 5_809_126},
+	{Parent: 1, Position: 0, Name: "manual.txt", Kind: inspection.KindFile, Size: 1024},
+	{Parent: 5, Position: 0, Name: "SETUP.EXE", Kind: inspection.KindFile, Size: 274_432},
+	{Parent: 5, Position: 1, Name: "Track 02", Kind: inspection.KindTrack, Size: 47_839_680, Detail: `{"track":2,"seconds":271}`},
 }
 
 var e2eMalwareResource = e2eSeededResource{

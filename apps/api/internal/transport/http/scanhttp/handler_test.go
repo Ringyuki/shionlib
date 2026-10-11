@@ -36,17 +36,18 @@ func setup(t *testing.T) env {
 	repo := scantest.NewMemoryRepository(now)
 	events := &downloadtest.Recorder{}
 	service := scan.NewService(scan.Deps{
-		Repo:       repo,
-		Archives:   &scantest.ArchiveTool{},
-		Scanner:    &scantest.Scanner{},
-		Files:      repo,
-		Activities: events,
-		Messages:   events,
-		Banner:     &scantest.Banner{},
-		Queue:      events,
-		Tx:         &txtest.Immediate{},
-		Settings:   settingtest.Source{},
-		Now:        now,
+		Repo:        repo,
+		Archives:    &scantest.ArchiveTool{},
+		Scanner:     &scantest.Scanner{},
+		Inspections: &scantest.Inspections{},
+		Files:       repo,
+		Activities:  events,
+		Messages:    events,
+		Banner:      &scantest.Banner{},
+		Queue:       events,
+		Tx:          &txtest.Immediate{},
+		Settings:    settingtest.Source{},
+		Now:         now,
 	})
 	scanhttp.NewHandler(service, server.Builder).Register(server.API)
 	return env{server: server, repo: repo, events: events}

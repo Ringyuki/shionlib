@@ -117,6 +117,12 @@ type GameUploadChunk func(*sql.Selector)
 // GameUploadSession is the predicate function for gameuploadsession builders.
 type GameUploadSession func(*sql.Selector)
 
+// Inspection is the predicate function for inspection builders.
+type Inspection func(*sql.Selector)
+
+// InspectionEntry is the predicate function for inspectionentry builders.
+type InspectionEntry func(*sql.Selector)
+
 // MalwareScanCase is the predicate function for malwarescancase builders.
 type MalwareScanCase func(*sql.Selector)
 

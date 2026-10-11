@@ -10,23 +10,29 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/b2"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/capjs"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/clamd"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/discimage"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/dlticket"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/imaging"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/localfs"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/objectstore"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/commentpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/downloadpg"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/inspectionpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/reportpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/scanpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/uploadpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/queue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/redis/uploadredis"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/sevenzip"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/zipnames"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
+	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/httpclient"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/jobs"
 	"github.com/Ringyuki/shionlib/apps/api/internal/report"
 	"github.com/Ringyuki/shionlib/apps/api/internal/scan"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/downloadhttp"
+	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/inspectionhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/reporthttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/scanhttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/uploadhttp"
@@ -66,6 +72,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		Endpoint:        cfg.Storage.Game.Endpoint,
 		AccessKeyID:     cfg.Storage.Game.AccessKeyID,
 		SecretAccessKey: cfg.Storage.Game.SecretAccessKey,
+		PathStyle:       cfg.Storage.Game.ForcePathStyle,
 		HTTPClient:      httpclient.New(httpclient.Options{Timeout: objectStoreTimeout}),
 	})
 	banner := userPenalties{users: shared.Users}
@@ -107,24 +114,34 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 	)
 	transfers := download.NewTransferService(downloadRepo, store, spool, shared.Activities, shared.Messages, shared.Transactor, shared.Now)
 
+	inspectionRepo := inspectionpg.NewRepository(infra.Ent)
+	previews := objectstore.NewPreviewStore(store)
+	inspections := inspection.NewService(inspectionRepo, resourceDetails)
+	inspectionRecords := inspection.NewRecordService(inspectionRepo, previews, imaging.NewTranscoder(), shared.Transactor, shared.Now)
+	inspectionPreviews := inspection.NewPreviewService(inspectionRepo, resourceDetails, previews)
+
+	archives := sevenzip.New(cfg.FileScan.ArchiveToolPath)
+	scanner := clamd.New(clamd.Options{
+		Address: net.JoinHostPort(cfg.FileScan.ClamdHost, strconv.Itoa(cfg.FileScan.ClamdPort)),
+		Timeout: cfg.FileScan.ClamdTimeout,
+		LogDir:  cfg.FileScan.ScanLogDir,
+	})
+	workspace := localfs.NewWorkspace(filepath.Join(cfg.Upload.RootDir, scanWorkspaceDir))
 	scans := scan.NewService(scan.Deps{
-		Repo:     scanpg.NewRepository(infra.Ent),
-		Archives: sevenzip.New(cfg.FileScan.ArchiveToolPath),
-		Scanner: clamd.New(clamd.Options{
-			Address: net.JoinHostPort(cfg.FileScan.ClamdHost, strconv.Itoa(cfg.FileScan.ClamdPort)),
-			Timeout: cfg.FileScan.ClamdTimeout,
-			LogDir:  cfg.FileScan.ScanLogDir,
-		}),
-		Workspace:  localfs.NewWorkspace(filepath.Join(cfg.Upload.RootDir, scanWorkspaceDir)),
-		Spool:      uploads,
-		Files:      downloads,
-		Activities: shared.Activities,
-		Messages:   shared.Messages,
-		Banner:     banner,
-		Mailer:     shared.Mailer,
-		Queue:      jobQueue,
-		Tx:         shared.Transactor,
-		Settings:   shared.Settings,
+		Repo:        scanpg.NewRepository(infra.Ent),
+		Archives:    archives,
+		Scanner:     scanner,
+		Workspace:   workspace,
+		Contents:    scan.NewContentService(scan.ContentDeps{Archives: archives, Names: zipnames.NewReader(), Discs: discimage.NewReader(), Workspace: workspace, Spool: uploads, Scanner: scanner}),
+		Inspections: inspectionRecords,
+		Files:       downloads,
+		Activities:  shared.Activities,
+		Messages:    shared.Messages,
+		Banner:      banner,
+		Mailer:      shared.Mailer,
+		Queue:       jobQueue,
+		Tx:          shared.Transactor,
+		Settings:    shared.Settings,
 		Options: scan.Options{
 			Enabled: cfg.FileScan.Enabled,
 			SiteURL: cfg.App.SiteURL,
@@ -149,6 +166,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		downloadhttp.NewHandler(downloads, resourceDetails, links, shared.Builder),
 		reporthttp.NewHandler(reports, shared.Builder),
 		scanhttp.NewHandler(scans, shared.Builder),
+		inspectionhttp.NewHandler(inspections, inspectionPreviews, shared.Builder),
 	)
 
 	modules.Jobs.Register = append(modules.Jobs.Register, downloadjobs.Register(transfers), reportjobs.Register(reports))
@@ -156,6 +174,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 	modules.Jobs.Tasks = append(modules.Jobs.Tasks,
 		jobs.Task{Name: "file_scan_pending", Schedule: everyMinute, Timeout: scanTaskTimeout, Run: scans.ScanPending},
 		jobs.Task{Name: "malware_case_timeout", Schedule: everyMinute, Timeout: shortTaskTimeout, Run: scans.ExpireOverdue},
+		jobs.Task{Name: "inspection_sweep", Schedule: everyTenMinutes, Timeout: shortTaskTimeout, Run: inspectionRecords.Sweep},
 		jobs.Task{Name: "upload_session_cleanup", Schedule: everyMinute, Timeout: shortTaskTimeout, Run: func(ctx context.Context) error {
 			if err := uploads.CleanStaleSessions(ctx); err != nil {
 				return err

@@ -44,6 +44,8 @@ type downloadFileDTO struct {
 	Creator              userhttp.UserSummaryDTO  `json:"creator"`
 	LatestHistory        *downloadHistoryRefDTO   `json:"latest_history"`
 	Uploaded             time.Time                `json:"uploaded" doc:"When the content the file holds now was uploaded: its latest replacement, or its first upload"`
+	SHA256               *string                  `json:"sha256" doc:"SHA-256 of the file, computed while it is checked; null until then"`
+	InspectionID         *int                     `json:"inspection_id" doc:"The record of what the check found in the file; volumes of one archive share it. Null until the file has been read"`
 }
 
 type downloadResourceDTO struct {
@@ -273,6 +275,8 @@ func toResourceDTO(r download.GameResource, now time.Time) downloadResourceDTO {
 			MalwareScanCases:     cases,
 			Creator:              userhttp.ToUserSummary(file.Creator, now),
 			Uploaded:             file.Uploaded(),
+			SHA256:               file.SHA256,
+			InspectionID:         file.InspectionID,
 		}
 		if rejection, rejected := file.CheckStatus.Rejection(); rejected && dto.Stage == download.StageRejected {
 			dto.Rejection = &rejection

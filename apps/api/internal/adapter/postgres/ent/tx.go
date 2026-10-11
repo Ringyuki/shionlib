@@ -88,6 +88,10 @@ type Tx struct {
 	GameUploadChunk *GameUploadChunkClient
 	// GameUploadSession is the client for interacting with the GameUploadSession builders.
 	GameUploadSession *GameUploadSessionClient
+	// Inspection is the client for interacting with the Inspection builders.
+	Inspection *InspectionClient
+	// InspectionEntry is the client for interacting with the InspectionEntry builders.
+	InspectionEntry *InspectionEntryClient
 	// MalwareScanCase is the client for interacting with the MalwareScanCase builders.
 	MalwareScanCase *MalwareScanCaseClient
 	// Message is the client for interacting with the Message builders.
@@ -290,6 +294,8 @@ func (tx *Tx) init() {
 	tx.GameTagRelation = NewGameTagRelationClient(tx.config)
 	tx.GameUploadChunk = NewGameUploadChunkClient(tx.config)
 	tx.GameUploadSession = NewGameUploadSessionClient(tx.config)
+	tx.Inspection = NewInspectionClient(tx.config)
+	tx.InspectionEntry = NewInspectionEntryClient(tx.config)
 	tx.MalwareScanCase = NewMalwareScanCaseClient(tx.config)
 	tx.Message = NewMessageClient(tx.config)
 	tx.ModerationEvent = NewModerationEventClient(tx.config)

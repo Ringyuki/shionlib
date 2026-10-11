@@ -19,6 +19,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourceevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
@@ -37,6 +38,7 @@ type GameDownloadResourceQuery struct {
 	withMalwareScanCases *MalwareScanCaseQuery
 	withCreator          *UserQuery
 	withComments         *CommentQuery
+	withInspections      *InspectionQuery
 	withEvents           *GameDownloadResourceEventQuery
 	modifiers            []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
@@ -200,6 +202,28 @@ func (_q *GameDownloadResourceQuery) QueryComments() *CommentQuery {
 			sqlgraph.From(gamedownloadresource.Table, gamedownloadresource.FieldID, selector),
 			sqlgraph.To(comment.Table, comment.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, gamedownloadresource.CommentsTable, gamedownloadresource.CommentsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryInspections chains the current query on the "inspections" edge.
+func (_q *GameDownloadResourceQuery) QueryInspections() *InspectionQuery {
+	query := (&InspectionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(gamedownloadresource.Table, gamedownloadresource.FieldID, selector),
+			sqlgraph.To(inspection.Table, inspection.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, gamedownloadresource.InspectionsTable, gamedownloadresource.InspectionsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -427,6 +451,7 @@ func (_q *GameDownloadResourceQuery) Clone() *GameDownloadResourceQuery {
 		withMalwareScanCases: _q.withMalwareScanCases.Clone(),
 		withCreator:          _q.withCreator.Clone(),
 		withComments:         _q.withComments.Clone(),
+		withInspections:      _q.withInspections.Clone(),
 		withEvents:           _q.withEvents.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
@@ -498,6 +523,17 @@ func (_q *GameDownloadResourceQuery) WithComments(opts ...func(*CommentQuery)) *
 		opt(query)
 	}
 	_q.withComments = query
+	return _q
+}
+
+// WithInspections tells the query-builder to eager-load the nodes that are connected to
+// the "inspections" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *GameDownloadResourceQuery) WithInspections(opts ...func(*InspectionQuery)) *GameDownloadResourceQuery {
+	query := (&InspectionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withInspections = query
 	return _q
 }
 
@@ -590,13 +626,14 @@ func (_q *GameDownloadResourceQuery) sqlAll(ctx context.Context, hooks ...queryH
 	var (
 		nodes       = []*GameDownloadResource{}
 		_spec       = _q.querySpec()
-		loadedTypes = [7]bool{
+		loadedTypes = [8]bool{
 			_q.withGame != nil,
 			_q.withFiles != nil,
 			_q.withReports != nil,
 			_q.withMalwareScanCases != nil,
 			_q.withCreator != nil,
 			_q.withComments != nil,
+			_q.withInspections != nil,
 			_q.withEvents != nil,
 		}
 	)
@@ -662,6 +699,13 @@ func (_q *GameDownloadResourceQuery) sqlAll(ctx context.Context, hooks ...queryH
 		if err := _q.loadComments(ctx, query, nodes,
 			func(n *GameDownloadResource) { n.Edges.Comments = []*Comment{} },
 			func(n *GameDownloadResource, e *Comment) { n.Edges.Comments = append(n.Edges.Comments, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withInspections; query != nil {
+		if err := _q.loadInspections(ctx, query, nodes,
+			func(n *GameDownloadResource) { n.Edges.Inspections = []*Inspection{} },
+			func(n *GameDownloadResource, e *Inspection) { n.Edges.Inspections = append(n.Edges.Inspections, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -856,6 +900,36 @@ func (_q *GameDownloadResourceQuery) loadComments(ctx context.Context, query *Co
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "resource_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *GameDownloadResourceQuery) loadInspections(ctx context.Context, query *InspectionQuery, nodes []*GameDownloadResource, init func(*GameDownloadResource), assign func(*GameDownloadResource, *Inspection)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*GameDownloadResource)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(inspection.FieldResourceID)
+	}
+	query.Where(predicate.Inspection(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(gamedownloadresource.InspectionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ResourceID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "resource_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

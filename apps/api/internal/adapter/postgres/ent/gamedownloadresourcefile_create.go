@@ -16,6 +16,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefilehistory"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gameuploadsession"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 )
@@ -178,6 +179,34 @@ func (_c *GameDownloadResourceFileCreate) SetNillableIsVirusFalsePositive(v *boo
 	return _c
 }
 
+// SetFileSha256 sets the "file_sha256" field.
+func (_c *GameDownloadResourceFileCreate) SetFileSha256(v string) *GameDownloadResourceFileCreate {
+	_c.mutation.SetFileSha256(v)
+	return _c
+}
+
+// SetNillableFileSha256 sets the "file_sha256" field if the given value is not nil.
+func (_c *GameDownloadResourceFileCreate) SetNillableFileSha256(v *string) *GameDownloadResourceFileCreate {
+	if v != nil {
+		_c.SetFileSha256(*v)
+	}
+	return _c
+}
+
+// SetInspectionID sets the "inspection_id" field.
+func (_c *GameDownloadResourceFileCreate) SetInspectionID(v int) *GameDownloadResourceFileCreate {
+	_c.mutation.SetInspectionID(v)
+	return _c
+}
+
+// SetNillableInspectionID sets the "inspection_id" field if the given value is not nil.
+func (_c *GameDownloadResourceFileCreate) SetNillableInspectionID(v *int) *GameDownloadResourceFileCreate {
+	if v != nil {
+		_c.SetInspectionID(*v)
+	}
+	return _c
+}
+
 // SetGameDownloadResourceID sets the "game_download_resource_id" field.
 func (_c *GameDownloadResourceFileCreate) SetGameDownloadResourceID(v int) *GameDownloadResourceFileCreate {
 	_c.mutation.SetGameDownloadResourceID(v)
@@ -267,6 +296,11 @@ func (_c *GameDownloadResourceFileCreate) SetUploadSession(v *GameUploadSession)
 // SetCreator sets the "creator" edge to the User entity.
 func (_c *GameDownloadResourceFileCreate) SetCreator(v *User) *GameDownloadResourceFileCreate {
 	return _c.SetCreatorID(v.ID)
+}
+
+// SetInspection sets the "inspection" edge to the Inspection entity.
+func (_c *GameDownloadResourceFileCreate) SetInspection(v *Inspection) *GameDownloadResourceFileCreate {
+	return _c.SetInspectionID(v.ID)
 }
 
 // AddHistoryIDs adds the "histories" edge to the GameDownloadResourceFileHistory entity by IDs.
@@ -472,6 +506,10 @@ func (_c *GameDownloadResourceFileCreate) createSpec() (*GameDownloadResourceFil
 		_spec.SetField(gamedownloadresourcefile.FieldIsVirusFalsePositive, field.TypeBool, value)
 		_node.IsVirusFalsePositive = value
 	}
+	if value, ok := _c.mutation.FileSha256(); ok {
+		_spec.SetField(gamedownloadresourcefile.FieldFileSha256, field.TypeString, value)
+		_node.FileSha256 = &value
+	}
 	if value, ok := _c.mutation.Created(); ok {
 		_spec.SetField(gamedownloadresourcefile.FieldCreated, field.TypeTime, value)
 		_node.Created = value
@@ -561,6 +599,23 @@ func (_c *GameDownloadResourceFileCreate) createSpec() (*GameDownloadResourceFil
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.CreatorID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.InspectionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   gamedownloadresourcefile.InspectionTable,
+			Columns: []string{gamedownloadresourcefile.InspectionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(inspection.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.InspectionID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.HistoriesIDs(); len(nodes) > 0 {
@@ -838,6 +893,42 @@ func (u *GameDownloadResourceFileUpsert) SetIsVirusFalsePositive(v bool) *GameDo
 // UpdateIsVirusFalsePositive sets the "is_virus_false_positive" field to the value that was provided on create.
 func (u *GameDownloadResourceFileUpsert) UpdateIsVirusFalsePositive() *GameDownloadResourceFileUpsert {
 	u.SetExcluded(gamedownloadresourcefile.FieldIsVirusFalsePositive)
+	return u
+}
+
+// SetFileSha256 sets the "file_sha256" field.
+func (u *GameDownloadResourceFileUpsert) SetFileSha256(v string) *GameDownloadResourceFileUpsert {
+	u.Set(gamedownloadresourcefile.FieldFileSha256, v)
+	return u
+}
+
+// UpdateFileSha256 sets the "file_sha256" field to the value that was provided on create.
+func (u *GameDownloadResourceFileUpsert) UpdateFileSha256() *GameDownloadResourceFileUpsert {
+	u.SetExcluded(gamedownloadresourcefile.FieldFileSha256)
+	return u
+}
+
+// ClearFileSha256 clears the value of the "file_sha256" field.
+func (u *GameDownloadResourceFileUpsert) ClearFileSha256() *GameDownloadResourceFileUpsert {
+	u.SetNull(gamedownloadresourcefile.FieldFileSha256)
+	return u
+}
+
+// SetInspectionID sets the "inspection_id" field.
+func (u *GameDownloadResourceFileUpsert) SetInspectionID(v int) *GameDownloadResourceFileUpsert {
+	u.Set(gamedownloadresourcefile.FieldInspectionID, v)
+	return u
+}
+
+// UpdateInspectionID sets the "inspection_id" field to the value that was provided on create.
+func (u *GameDownloadResourceFileUpsert) UpdateInspectionID() *GameDownloadResourceFileUpsert {
+	u.SetExcluded(gamedownloadresourcefile.FieldInspectionID)
+	return u
+}
+
+// ClearInspectionID clears the value of the "inspection_id" field.
+func (u *GameDownloadResourceFileUpsert) ClearInspectionID() *GameDownloadResourceFileUpsert {
+	u.SetNull(gamedownloadresourcefile.FieldInspectionID)
 	return u
 }
 
@@ -1170,6 +1261,48 @@ func (u *GameDownloadResourceFileUpsertOne) SetIsVirusFalsePositive(v bool) *Gam
 func (u *GameDownloadResourceFileUpsertOne) UpdateIsVirusFalsePositive() *GameDownloadResourceFileUpsertOne {
 	return u.Update(func(s *GameDownloadResourceFileUpsert) {
 		s.UpdateIsVirusFalsePositive()
+	})
+}
+
+// SetFileSha256 sets the "file_sha256" field.
+func (u *GameDownloadResourceFileUpsertOne) SetFileSha256(v string) *GameDownloadResourceFileUpsertOne {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.SetFileSha256(v)
+	})
+}
+
+// UpdateFileSha256 sets the "file_sha256" field to the value that was provided on create.
+func (u *GameDownloadResourceFileUpsertOne) UpdateFileSha256() *GameDownloadResourceFileUpsertOne {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.UpdateFileSha256()
+	})
+}
+
+// ClearFileSha256 clears the value of the "file_sha256" field.
+func (u *GameDownloadResourceFileUpsertOne) ClearFileSha256() *GameDownloadResourceFileUpsertOne {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.ClearFileSha256()
+	})
+}
+
+// SetInspectionID sets the "inspection_id" field.
+func (u *GameDownloadResourceFileUpsertOne) SetInspectionID(v int) *GameDownloadResourceFileUpsertOne {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.SetInspectionID(v)
+	})
+}
+
+// UpdateInspectionID sets the "inspection_id" field to the value that was provided on create.
+func (u *GameDownloadResourceFileUpsertOne) UpdateInspectionID() *GameDownloadResourceFileUpsertOne {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.UpdateInspectionID()
+	})
+}
+
+// ClearInspectionID clears the value of the "inspection_id" field.
+func (u *GameDownloadResourceFileUpsertOne) ClearInspectionID() *GameDownloadResourceFileUpsertOne {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.ClearInspectionID()
 	})
 }
 
@@ -1674,6 +1807,48 @@ func (u *GameDownloadResourceFileUpsertBulk) SetIsVirusFalsePositive(v bool) *Ga
 func (u *GameDownloadResourceFileUpsertBulk) UpdateIsVirusFalsePositive() *GameDownloadResourceFileUpsertBulk {
 	return u.Update(func(s *GameDownloadResourceFileUpsert) {
 		s.UpdateIsVirusFalsePositive()
+	})
+}
+
+// SetFileSha256 sets the "file_sha256" field.
+func (u *GameDownloadResourceFileUpsertBulk) SetFileSha256(v string) *GameDownloadResourceFileUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.SetFileSha256(v)
+	})
+}
+
+// UpdateFileSha256 sets the "file_sha256" field to the value that was provided on create.
+func (u *GameDownloadResourceFileUpsertBulk) UpdateFileSha256() *GameDownloadResourceFileUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.UpdateFileSha256()
+	})
+}
+
+// ClearFileSha256 clears the value of the "file_sha256" field.
+func (u *GameDownloadResourceFileUpsertBulk) ClearFileSha256() *GameDownloadResourceFileUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.ClearFileSha256()
+	})
+}
+
+// SetInspectionID sets the "inspection_id" field.
+func (u *GameDownloadResourceFileUpsertBulk) SetInspectionID(v int) *GameDownloadResourceFileUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.SetInspectionID(v)
+	})
+}
+
+// UpdateInspectionID sets the "inspection_id" field to the value that was provided on create.
+func (u *GameDownloadResourceFileUpsertBulk) UpdateInspectionID() *GameDownloadResourceFileUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.UpdateInspectionID()
+	})
+}
+
+// ClearInspectionID clears the value of the "inspection_id" field.
+func (u *GameDownloadResourceFileUpsertBulk) ClearInspectionID() *GameDownloadResourceFileUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.ClearInspectionID()
 	})
 }
 

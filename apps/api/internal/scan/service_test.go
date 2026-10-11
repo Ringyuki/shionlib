@@ -2,6 +2,8 @@ package scan_test
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,6 +15,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download/downloadtest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/scan"
 	"github.com/Ringyuki/shionlib/apps/api/internal/scan/scantest"
@@ -21,50 +24,58 @@ import (
 )
 
 var (
-	now      = time.Date(2026, 10, 3, 12, 0, 0, 0, time.UTC)
-	reviewer = actor.Actor{UserID: 50, Role: actor.RoleAdmin}
+	now        = time.Date(2026, 10, 3, 12, 0, 0, 0, time.UTC)
+	signatures = time.Date(2026, 10, 2, 9, 30, 45, 0, time.UTC)
+	reviewer   = actor.Actor{UserID: 50, Role: actor.RoleAdmin}
 )
 
 type fixture struct {
-	repo      *scantest.MemoryRepository
-	workspace *scantest.Workspace
-	tool      *scantest.ArchiveTool
-	scanner   *scantest.Scanner
-	room      *scantest.Spool
-	events    *downloadtest.Recorder
-	banner    *scantest.Banner
-	mailer    *scantest.Mailer
-	service   *scan.Service
+	repo        *scantest.MemoryRepository
+	workspace   *scantest.Workspace
+	tool        *scantest.ArchiveTool
+	names       *scantest.NameReader
+	discs       *scantest.DiscReader
+	scanner     *scantest.Scanner
+	room        *scantest.Spool
+	inspections *scantest.Inspections
+	events      *downloadtest.Recorder
+	banner      *scantest.Banner
+	mailer      *scantest.Mailer
+	service     *scan.Service
 }
 
 func newFixture(enabled bool) fixture {
 	workspace := scantest.NewWorkspace()
 	f := fixture{
-		repo:      scantest.NewMemoryRepository(func() time.Time { return now }),
-		workspace: workspace,
-		tool:      &scantest.ArchiveTool{Listings: map[string]scan.ToolRun{}, Tests: map[string]scan.ToolRun{}, Contents: map[string][]string{}, Workspace: workspace},
-		scanner:   &scantest.Scanner{Reports: map[string]scan.Report{}, Limit: 1 << 20},
-		room:      &scantest.Spool{Room: 1 << 30},
-		events:    &downloadtest.Recorder{},
-		banner:    &scantest.Banner{Applied: true},
-		mailer:    &scantest.Mailer{},
+		repo:        scantest.NewMemoryRepository(func() time.Time { return now }),
+		workspace:   workspace,
+		tool:        &scantest.ArchiveTool{Listings: map[string]scan.ToolRun{}, Tests: map[string]scan.ToolRun{}, Contents: map[string][]string{}, Workspace: workspace},
+		names:       &scantest.NameReader{Names: map[string]scan.LegacyNames{}},
+		discs:       &scantest.DiscReader{Volumes: map[string]scan.DiscVolume{}, Sheets: map[string]scan.DiscSheet{}},
+		scanner:     &scantest.Scanner{Reports: map[string]scan.Report{}, Limit: 1 << 20, Version: scan.Engine{Name: "ClamAV 1.4.3", SignaturesAt: &signatures}},
+		room:        &scantest.Spool{Room: 1 << 30},
+		inspections: &scantest.Inspections{},
+		events:      &downloadtest.Recorder{},
+		banner:      &scantest.Banner{Applied: true},
+		mailer:      &scantest.Mailer{},
 	}
 	f.service = scan.NewService(scan.Deps{
-		Repo:       f.repo,
-		Archives:   f.tool,
-		Scanner:    f.scanner,
-		Workspace:  f.workspace,
-		Spool:      f.room,
-		Files:      f.repo,
-		Activities: f.events,
-		Messages:   f.events,
-		Banner:     f.banner,
-		Mailer:     f.mailer,
-		Queue:      f.events,
-		Tx:         &txtest.Immediate{},
-		Settings:   settingtest.Set(settingtest.Source{}, scan.AutoBanThreshold, 2),
-		Options:    scan.Options{Enabled: enabled, SiteURL: "https://shionlib.example/"},
-		Now:        func() time.Time { return now },
+		Repo:        f.repo,
+		Archives:    f.tool,
+		Scanner:     f.scanner,
+		Workspace:   f.workspace,
+		Contents:    scan.NewContentService(scan.ContentDeps{Archives: f.tool, Names: f.names, Discs: f.discs, Workspace: f.workspace, Spool: f.room, Scanner: f.scanner}),
+		Inspections: f.inspections,
+		Files:       f.repo,
+		Activities:  f.events,
+		Messages:    f.events,
+		Banner:      f.banner,
+		Mailer:      f.mailer,
+		Queue:       f.events,
+		Tx:          &txtest.Immediate{},
+		Settings:    settingtest.Set(settingtest.Source{}, scan.AutoBanThreshold, 2),
+		Options:     scan.Options{Enabled: enabled, SiteURL: "https://shionlib.example/"},
+		Now:         func() time.Time { return now },
 	})
 	return f
 }
@@ -499,4 +510,178 @@ func TestExpireOverdueAutoDeletes(t *testing.T) {
 
 func ptr[T any](v T) *T {
 	return &v
+}
+
+func digestOf(path string) string {
+	sum := sha256.Sum256([]byte(path))
+	return hex.EncodeToString(sum[:])
+}
+
+func TestAnApprovedFileGetsTheRecordOfWhatTheCheckFound(t *testing.T) {
+	f := newFixture(true)
+	f.repo.SeedFile(pending(1, "/spool/1.part"))
+	f.tool.Listings["/spool/1.part"] = listing("Rar5", "Solid = +\nVolumes = 1\nCharacteristics = Solid Recovery Locator QuickOpen:900 Recovery:971\n",
+		file("Game/game.exe", 400), file("Game/readme.txt", 16), file("Game/huge.dll", 2<<20))
+	f.tool.Contents["/spool/1.part"] = []string{"Game/game.exe", "Game/readme.txt", "Game/huge.dll"}
+	if err := f.service.ScanPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if len(f.inspections.Drafts) != 1 {
+		t.Fatalf("recorded %d inspections", len(f.inspections.Drafts))
+	}
+	draft := f.inspections.Drafts[0]
+	if draft.ResourceID != 10 || draft.Status != inspection.StatusReady || !draft.Verified {
+		t.Fatalf("unexpected draft %+v", draft)
+	}
+	if draft.Archive != (inspection.Archive{Format: "rar5", Solid: true, Volumes: 1, Recovery: true, RecoveryPercent: 3}) {
+		t.Fatalf("unexpected archive %+v", draft.Archive)
+	}
+	if got := tree(draft); !slices.Equal(got, []string{"folder Game", "file Game/game.exe", "file Game/readme.txt", "file Game/huge.dll"}) {
+		t.Fatalf("unexpected tree %v", got)
+	}
+	found := draft.Scan
+	if found.Engine != "ClamAV 1.4.3" || found.SignaturesAt == nil || !found.SignaturesAt.Equal(signatures) || found.Scanned != 1 || found.Limit != 1<<20 || found.At == nil || !found.At.Equal(now) || found.ClearedAt != nil {
+		t.Fatalf("unexpected scan %+v", found)
+	}
+	if !slices.Equal(found.Skipped, []string{"Game/huge.dll"}) || len(found.Detections) != 0 {
+		t.Fatalf("unexpected scan lists %+v", found)
+	}
+	if len(f.inspections.Previews) != 1 || f.inspections.Previews[0] != (scantest.KeptPreview{InspectionID: 1, EntryID: 1002, Kind: inspection.PreviewText, Content: "/work/scan-1/contents/Game/readme.txt"}) {
+		t.Fatalf("unexpected previews %+v", f.inspections.Previews)
+	}
+	checked, _ := f.repo.File(1)
+	if checked.CheckStatus != download.CheckOK || checked.InspectionID == nil || *checked.InspectionID != 1 || f.repo.Digests[1] != digestOf("/spool/1.part") {
+		t.Fatalf("unexpected file %+v digest %q", checked, f.repo.Digests[1])
+	}
+}
+
+func TestAFileThatIsNotAnArchiveIsRecordedAsPlain(t *testing.T) {
+	f := newFixture(true)
+	patch := pending(1, "/spool/1.part")
+	patch.Name = "Patch.EXE"
+	f.repo.SeedFile(patch)
+	f.tool.Listings["/spool/1.part"] = listing("PE", "", file(".text", 100), file(".rsrc/1.ico", 10))
+	if err := f.service.ScanPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	draft := f.inspections.Drafts[0]
+	if draft.Status != inspection.StatusPlain || len(draft.Entries) != 0 || draft.Archive != (inspection.Archive{}) || draft.Scan.Scanned != 1 {
+		t.Fatalf("unexpected draft %+v", draft)
+	}
+}
+
+func TestAnUnverifiedTestIsRecordedAsSuch(t *testing.T) {
+	f := newFixture(true)
+	f.repo.SeedFile(pending(1, "/spool/1.part"))
+	f.tool.Listings["/spool/1.part"] = listing("7z", "", file("game.exe", 4))
+	f.tool.Tests["/spool/1.part"] = scan.ToolRun{Failed: true, Killed: true, Message: "command timeout"}
+	if err := f.service.ScanPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if draft := f.inspections.Drafts[0]; draft.Verified || draft.Status != inspection.StatusReady {
+		t.Fatalf("a test that did not finish is not a passed test: %+v", draft)
+	}
+}
+
+func TestEveryVolumeOfASetSharesOneRecordAndHasItsOwnDigest(t *testing.T) {
+	f := newFixture(true)
+	f.repo.SeedFile(volume(2, "game.part2.rar", now))
+	f.repo.SeedFile(volume(1, "game.part1.rar", now))
+	first := "/work/scan-1/volumes/game.part1.rar"
+	f.tool.Listings[first] = listing("Rar5", "Multivolume = +\nVolumes = 2\n", file("setup.exe", 5))
+	f.tool.Contents[first] = []string{"setup.exe"}
+	if err := f.service.ScanPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if len(f.inspections.Drafts) != 1 || f.inspections.Drafts[0].Archive.Volumes != 2 {
+		t.Fatalf("unexpected drafts %+v", f.inspections.Drafts)
+	}
+	for id, path := range map[int]string{1: "/spool/1.part", 2: "/spool/2.part"} {
+		checked, _ := f.repo.File(id)
+		if checked.InspectionID == nil || *checked.InspectionID != 1 || f.repo.Digests[id] != digestOf(path) {
+			t.Fatalf("volume %d: %+v digest %q", id, checked, f.repo.Digests[id])
+		}
+	}
+}
+
+func TestAHeldFileKeepsTheRecordOfWhatWasDetected(t *testing.T) {
+	f := newFixture(true)
+	f.repo.SeedFile(pending(1, "/spool/1.part"))
+	f.tool.Listings["/spool/1.part"] = listing("zip", "", file("bin/setup.exe", 5), file("bin/clean.dll", 5))
+	f.tool.Contents["/spool/1.part"] = []string{"bin/setup.exe", "bin/clean.dll"}
+	f.scanner.Reports["bin/setup.exe"] = scan.Report{Infected: true, Viruses: []string{" Eicar ", "Trojan"}}
+	if err := f.service.ScanPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	want := []inspection.Detection{{Path: "bin/setup.exe", Signature: "Eicar"}, {Path: "bin/setup.exe", Signature: "Trojan"}}
+	if draft := f.inspections.Drafts[0]; !slices.Equal(draft.Scan.Detections, want) || draft.Scan.Scanned != 2 {
+		t.Fatalf("unexpected scan %+v", draft.Scan)
+	}
+	heldFile, _ := f.repo.File(1)
+	if heldFile.CheckStatus != download.CheckHarmfulPendingReview || heldFile.InspectionID == nil || *heldFile.InspectionID != 1 {
+		t.Fatalf("unexpected file %+v", heldFile)
+	}
+}
+
+func TestReviewAllowMarksTheRecordsOfTheReleasedFilesAsCleared(t *testing.T) {
+	f := newFixture(true)
+	first, second := held(1), held(2)
+	record := 77
+	first.InspectionID, second.InspectionID = &record, &record
+	f.repo.SeedFile(first)
+	f.repo.SeedFile(second)
+	fileID, resourceID, gameID := 1, 10, 7
+	scanCase := f.repo.SeedCase(scan.Case{FileID: &fileID, ResourceID: &resourceID, GameID: &gameID, UploaderID: 9})
+	if _, err := f.service.Review(context.Background(), reviewer, scanCase.ID, scan.ReviewInput{Decision: scan.DecisionAllow}); err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(f.inspections.ClearedIDs, []int{77}) {
+		t.Fatalf("cleared %v", f.inspections.ClearedIDs)
+	}
+}
+
+func TestACheckWhoseRecordCannotBeSavedIsRetried(t *testing.T) {
+	f := newFixture(true)
+	f.repo.SeedFile(pending(1, "/spool/1.part"))
+	f.tool.Listings["/spool/1.part"] = listing("7z", "", file("game.exe", 4))
+	f.inspections.Err = errors.New("database unavailable")
+	if err := f.service.ScanPending(context.Background()); err == nil {
+		t.Fatal("expected a failure")
+	}
+	waiting, _ := f.repo.File(1)
+	if waiting.CheckStatus != download.CheckPending || waiting.InspectionID != nil || len(f.events.Jobs()) != 0 || f.repo.RetryAt(10).IsZero() {
+		t.Fatalf("the file waits for another try: %+v", waiting)
+	}
+}
+
+func TestAScannerThatCannotNameItselfFailsTheCheck(t *testing.T) {
+	f := newFixture(true)
+	f.repo.SeedFile(pending(1, "/spool/1.part"))
+	f.tool.Listings["/spool/1.part"] = listing("7z", "", file("readme.txt", 4))
+	f.scanner.Err = errors.New("clamd is down")
+	if err := f.service.ScanPending(context.Background()); err == nil {
+		t.Fatal("expected a failure")
+	}
+	if len(f.inspections.Drafts) != 0 {
+		t.Fatalf("nothing is recorded without the scanner: %+v", f.inspections.Drafts)
+	}
+}
+
+func TestAFileIsReleasedEvenWhenItsPreviewsCannotBeKept(t *testing.T) {
+	f := newFixture(true)
+	f.repo.SeedFile(pending(1, "/spool/1.part"))
+	f.tool.Listings["/spool/1.part"] = listing("7z", "", file("readme.txt", 4), file("notes.txt", 4), file("game.exe", 4))
+	f.tool.Contents["/spool/1.part"] = []string{"readme.txt", "notes.txt", "game.exe"}
+	down := errors.New("bucket unavailable")
+	f.inspections.PreviewErr = down
+	if err := f.service.ScanPending(context.Background()); !errors.Is(err, down) {
+		t.Fatalf("the failure is reported: %v", err)
+	}
+	released, _ := f.repo.File(1)
+	if released.CheckStatus != download.CheckOK || released.InspectionID == nil || len(f.events.Jobs()) != 1 {
+		t.Fatalf("the file goes on to be stored: %+v %+v", released, f.events.Jobs())
+	}
+	if f.inspections.PreviewCalls != 1 {
+		t.Fatalf("a store that fails is not asked again for the same file: %d calls", f.inspections.PreviewCalls)
+	}
 }

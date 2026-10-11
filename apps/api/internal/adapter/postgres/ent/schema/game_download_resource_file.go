@@ -33,6 +33,8 @@ func (GameDownloadResourceFile) Fields() []ent.Field {
 		field.Int("file_status").SchemaType(pg("integer")).Default(1),
 		field.Int("file_check_status").SchemaType(pg("integer")).Default(0),
 		field.Bool("is_virus_false_positive").Default(false),
+		field.Text("file_sha256").Optional().Nillable(),
+		field.Int("inspection_id").SchemaType(pg("integer")).Optional().Nillable(),
 		field.Int("game_download_resource_id").SchemaType(pg("integer")),
 		field.Int("creator_id").SchemaType(pg("integer")),
 		created(),
@@ -47,6 +49,7 @@ func (GameDownloadResourceFile) Edges() []ent.Edge {
 		edge.To("malware_scan_cases", MalwareScanCase.Type).StorageKey(edge.Symbol("malware_scan_cases_file_id_fkey")).Annotations(entsql.OnDelete(entsql.SetNull)),
 		edge.From("upload_session", GameUploadSession.Type).Ref("game_download_resource_file").Field("upload_session_id").Unique(),
 		edge.From("creator", User.Type).Ref("game_download_resource_files").Field("creator_id").Unique().Required(),
+		edge.From("inspection", Inspection.Type).Ref("files").Field("inspection_id").Unique(),
 		edge.To("histories", GameDownloadResourceFileHistory.Type).StorageKey(edge.Symbol("game_download_resource_file_histories_file_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
@@ -57,5 +60,6 @@ func (GameDownloadResourceFile) Indexes() []ent.Index {
 		index.Fields("file_path").Unique().StorageKey("game_download_resource_files_file_path_key"),
 		index.Fields("game_download_resource_id", "file_name").Unique().StorageKey("game_download_resource_files_resource_file_name_key"),
 		index.Fields("file_path").StorageKey("game_download_resource_files_file_path_idx"),
+		index.Fields("inspection_id").StorageKey("game_download_resource_files_inspection_id_idx"),
 	}
 }

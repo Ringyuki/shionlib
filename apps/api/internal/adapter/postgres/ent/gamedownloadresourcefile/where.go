@@ -115,6 +115,16 @@ func IsVirusFalsePositive(v bool) predicate.GameDownloadResourceFile {
 	return predicate.GameDownloadResourceFile(sql.FieldEQ(FieldIsVirusFalsePositive, v))
 }
 
+// FileSha256 applies equality check predicate on the "file_sha256" field. It's identical to FileSha256EQ.
+func FileSha256(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldEQ(FieldFileSha256, v))
+}
+
+// InspectionID applies equality check predicate on the "inspection_id" field. It's identical to InspectionIDEQ.
+func InspectionID(v int) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldEQ(FieldInspectionID, v))
+}
+
 // GameDownloadResourceID applies equality check predicate on the "game_download_resource_id" field. It's identical to GameDownloadResourceIDEQ.
 func GameDownloadResourceID(v int) predicate.GameDownloadResourceFile {
 	return predicate.GameDownloadResourceFile(sql.FieldEQ(FieldGameDownloadResourceID, v))
@@ -785,6 +795,111 @@ func IsVirusFalsePositiveNEQ(v bool) predicate.GameDownloadResourceFile {
 	return predicate.GameDownloadResourceFile(sql.FieldNEQ(FieldIsVirusFalsePositive, v))
 }
 
+// FileSha256EQ applies the EQ predicate on the "file_sha256" field.
+func FileSha256EQ(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldEQ(FieldFileSha256, v))
+}
+
+// FileSha256NEQ applies the NEQ predicate on the "file_sha256" field.
+func FileSha256NEQ(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldNEQ(FieldFileSha256, v))
+}
+
+// FileSha256In applies the In predicate on the "file_sha256" field.
+func FileSha256In(vs ...string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldIn(FieldFileSha256, vs...))
+}
+
+// FileSha256NotIn applies the NotIn predicate on the "file_sha256" field.
+func FileSha256NotIn(vs ...string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldNotIn(FieldFileSha256, vs...))
+}
+
+// FileSha256GT applies the GT predicate on the "file_sha256" field.
+func FileSha256GT(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldGT(FieldFileSha256, v))
+}
+
+// FileSha256GTE applies the GTE predicate on the "file_sha256" field.
+func FileSha256GTE(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldGTE(FieldFileSha256, v))
+}
+
+// FileSha256LT applies the LT predicate on the "file_sha256" field.
+func FileSha256LT(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldLT(FieldFileSha256, v))
+}
+
+// FileSha256LTE applies the LTE predicate on the "file_sha256" field.
+func FileSha256LTE(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldLTE(FieldFileSha256, v))
+}
+
+// FileSha256Contains applies the Contains predicate on the "file_sha256" field.
+func FileSha256Contains(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldContains(FieldFileSha256, v))
+}
+
+// FileSha256HasPrefix applies the HasPrefix predicate on the "file_sha256" field.
+func FileSha256HasPrefix(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldHasPrefix(FieldFileSha256, v))
+}
+
+// FileSha256HasSuffix applies the HasSuffix predicate on the "file_sha256" field.
+func FileSha256HasSuffix(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldHasSuffix(FieldFileSha256, v))
+}
+
+// FileSha256IsNil applies the IsNil predicate on the "file_sha256" field.
+func FileSha256IsNil() predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldIsNull(FieldFileSha256))
+}
+
+// FileSha256NotNil applies the NotNil predicate on the "file_sha256" field.
+func FileSha256NotNil() predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldNotNull(FieldFileSha256))
+}
+
+// FileSha256EqualFold applies the EqualFold predicate on the "file_sha256" field.
+func FileSha256EqualFold(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldEqualFold(FieldFileSha256, v))
+}
+
+// FileSha256ContainsFold applies the ContainsFold predicate on the "file_sha256" field.
+func FileSha256ContainsFold(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldContainsFold(FieldFileSha256, v))
+}
+
+// InspectionIDEQ applies the EQ predicate on the "inspection_id" field.
+func InspectionIDEQ(v int) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldEQ(FieldInspectionID, v))
+}
+
+// InspectionIDNEQ applies the NEQ predicate on the "inspection_id" field.
+func InspectionIDNEQ(v int) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldNEQ(FieldInspectionID, v))
+}
+
+// InspectionIDIn applies the In predicate on the "inspection_id" field.
+func InspectionIDIn(vs ...int) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldIn(FieldInspectionID, vs...))
+}
+
+// InspectionIDNotIn applies the NotIn predicate on the "inspection_id" field.
+func InspectionIDNotIn(vs ...int) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldNotIn(FieldInspectionID, vs...))
+}
+
+// InspectionIDIsNil applies the IsNil predicate on the "inspection_id" field.
+func InspectionIDIsNil() predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldIsNull(FieldInspectionID))
+}
+
+// InspectionIDNotNil applies the NotNil predicate on the "inspection_id" field.
+func InspectionIDNotNil() predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldNotNull(FieldInspectionID))
+}
+
 // GameDownloadResourceIDEQ applies the EQ predicate on the "game_download_resource_id" field.
 func GameDownloadResourceIDEQ(v int) predicate.GameDownloadResourceFile {
 	return predicate.GameDownloadResourceFile(sql.FieldEQ(FieldGameDownloadResourceID, v))
@@ -1012,6 +1127,29 @@ func HasCreator() predicate.GameDownloadResourceFile {
 func HasCreatorWith(preds ...predicate.User) predicate.GameDownloadResourceFile {
 	return predicate.GameDownloadResourceFile(func(s *sql.Selector) {
 		step := newCreatorStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasInspection applies the HasEdge predicate on the "inspection" edge.
+func HasInspection() predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, InspectionTable, InspectionColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasInspectionWith applies the HasEdge predicate on the "inspection" edge with a given conditions (other predicates).
+func HasInspectionWith(preds ...predicate.Inspection) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(func(s *sql.Selector) {
+		step := newInspectionStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
