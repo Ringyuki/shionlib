@@ -170,7 +170,7 @@ func (s *Spool) Available(context.Context) (int64, error) {
 		var stat unix.Statfs_t
 		err := unix.Statfs(dir, &stat)
 		if err == nil {
-			return int64(stat.Bavail) * int64(stat.Bsize), nil
+			return int64(stat.Bavail * uint64(stat.Bsize)), nil
 		}
 		parent := filepath.Dir(dir)
 		if !errors.Is(err, unix.ENOENT) || parent == dir {
