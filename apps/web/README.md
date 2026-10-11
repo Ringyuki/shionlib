@@ -22,4 +22,4 @@ API_INTERNAL_URL=http://localhost:5000 pnpm dev
 
 ## Production
 
-`apps/web/Dockerfile` (build context: `apps/web`) produces an image serving on port 3000. The ingress routes `/api/*` (prefix stripped) to the API, `/cap/*` (prefix stripped) to Cap and everything else to the web container; the web container needs `API_INTERNAL_URL` pointing at the API service, `IMAGE_BASE_URL`, `IMAGE_BUCKET_URL` and `IMAGE_PROCESSOR_URL` for images, `CAP_ENDPOINT` and `HIKARINAGI_SITE_URL` (Cap itself is set up as `apps/api/docs/deployment.md` describes).
+`apps/web/Dockerfile` (build context: `apps/web`) produces an image serving on port 3000; it runs as service `web` of `infra/compose.app.yml`, and `.github/workflows/staging.yml` builds and deploys it with the API on every push to `dev`. The ingress routes `/api/*` (prefix stripped) to the API, `/cap/*` (prefix stripped) to Cap and everything else to the web container; the web container needs `API_INTERNAL_URL` pointing at the API service, `IMAGE_BASE_URL`, `IMAGE_BUCKET_URL` and `IMAGE_PROCESSOR_URL` for images, `CAP_ENDPOINT` and `HIKARINAGI_SITE_URL` (Cap itself is set up as `apps/api/docs/deployment.md` describes).

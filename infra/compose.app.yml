@@ -129,7 +129,7 @@ x-api-service: &api-service
   restart: unless-stopped
   stop_grace_period: 40s
   volumes:
-    - uploads:/var/lib/shionlib/upload
+    - ${UPLOADS_VOLUME:-uploads}:/var/lib/shionlib/upload
     - scan-logs:/var/lib/shionlib/scan-logs
   networks:
     - shionlib
@@ -172,6 +172,36 @@ services:
         condition: service_completed_successfully
       clamav:
         condition: service_healthy
+
+  web:
+    image: ${WEB_IMAGE:?WEB_IMAGE is required}
+    restart: unless-stopped
+    environment:
+      API_INTERNAL_URL: http://api:5000
+      CAP_ENDPOINT: ${CAP_ENDPOINT:-}
+      HIKARINAGI_SITE_URL: ${HIKARINAGI_SITE_URL:?HIKARINAGI_SITE_URL is required}
+      IMAGE_BASE_URL: ${IMAGE_BASE_URL:?IMAGE_BASE_URL is required}
+      IMAGE_BUCKET_URL: ${IMAGE_BUCKET_URL?IMAGE_BUCKET_URL must be set, empty to show catalog pictures uncut}
+      IMAGE_PROCESSOR_URL: ${IMAGE_PROCESSOR_URL?IMAGE_PROCESSOR_URL must be set, empty to show catalog pictures uncut}
+    expose:
+      - '3000'
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - shionlib
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/favicon.ico').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   clamav:
     image: ${CLAMAV_IMAGE:-clamav/clamav:stable}

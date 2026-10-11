@@ -1,6 +1,6 @@
 # Deployment
 
-The API ships as one container image and runs as a Dokploy compose project defined in `infra/compose.app.yml`.
+The API and the web client each ship as one container image and run together as a Dokploy compose project defined in `infra/compose.app.yml`.
 
 ## Image
 
@@ -15,7 +15,9 @@ The image runs as the unprivileged `shionlib` user. `/var/lib/shionlib/upload` a
 
 Subcommands: `serve` (HTTP; also runs jobs when `WORKERS_ENABLED=true`), `worker` (jobs only), `migrate up|status`, `health` (liveness probe against `127.0.0.1:$PORT/health/live`), `openapi [file]`.
 
-`.github/workflows/api-image.yml` pushes `ghcr.io/<owner>/shionlib-api` for `linux/amd64` and `linux/arm64` on every push to `major/shionlib-next` (`sha-<short>`, `major-shionlib-next`) and on `api-v<version>` tags (`<version>`).
+`apps/web/Dockerfile` builds the web client into a `node:24` image that serves on port 3000 (see `apps/web/README.md`).
+
+`.github/workflows/staging.yml` pushes `ghcr.io/<owner>/shionlib-api` and `ghcr.io/<owner>/shionlib-web` for `linux/amd64` on every push to `dev` (`sha-<short>`, `dev`) and deploys them to staging (see Staging below). `.github/workflows/api-image.yml` pushes the API image for `linux/amd64` and `linux/arm64` on `api-v<version>` tags (`<version>`).
 
 ## Compose services
 
@@ -24,13 +26,14 @@ Subcommands: `serve` (HTTP; also runs jobs when `WORKERS_ENABLED=true`), `worker
 | `migrate` | `migrate up` | runs once per deploy; applies SQL migrations (adopting a Prisma database on the first run) and River's tables |
 | `api` | `serve` | `WORKERS_ENABLED=false`; serves HTTP on port 5000; starts after `migrate` succeeded |
 | `worker` | `worker` | River workers and leader-elected scheduled tasks; starts after `migrate` and a healthy `clamav` |
+| `web` | image default | the web client on port 3000; reaches the API at `http://api:5000` and starts after a healthy `api` |
 | `clamav` | image default | `clamd` on `clamav:3310` with `infra/clamav/clamd.conf` mounted (4000M stream and scan limits), signatures in the `clamav-db` volume |
 | `cap` | image default (`tiago2/cap`, pinned) | [Cap](https://github.com/tiagozip/cap) Standalone on `cap:3000`: issues the proof-of-work challenge a visitor solves before a download link and tells the API whether a token is good; its dashboard signs in with `CAP_ADMIN_KEY` |
 | `cap-valkey` | `valkey-server` | Cap's own store (site keys, their secrets and settings, statistics) in the `cap-data` volume; losing it means creating a new site key |
 
-`api` and `worker` share the `uploads` and `scan-logs` volumes: chunked uploads land on disk through `api` and are scanned and transferred to object storage by `worker`. Both must run on the same Docker host. Size the host disk for concurrent uploads (up to the `upload.max_file_size` setting each).
+`api` and `worker` share the `uploads` and `scan-logs` volumes: chunked uploads land on disk through `api` and are scanned and transferred to object storage by `worker`. Both must run on the same Docker host. Size the host disk for concurrent uploads (up to the `upload.max_file_size` setting each). `UPLOADS_VOLUME` puts the upload spool somewhere else than the `uploads` volume: set it to a host directory owned by uid `10001` (the image's `shionlib` user) to keep the spool on a disk of its own.
 
-Postgres and Redis are external. Point `DATABASE_URL`, `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`, `REDIS_DB` at them.
+Postgres and Redis are external. Point `DATABASE_URL`, `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`, `REDIS_DB` at them. An environment that has none of its own runs `infra/compose.data.yml` as a second compose project: Postgres 16 and Redis 7, published on `DATA_BIND_ADDRESS` only (the host's private address, never `0.0.0.0`), with `POSTGRES_PASSWORD` and `REDIS_PASSWORD` required and `POSTGRES_VOLUME`/`REDIS_VOLUME` to keep the data in a host directory.
 
 ## Environment
 
@@ -38,7 +41,7 @@ The compose file passes every variable the API reads through `${VAR}` substituti
 
 Values live in the Dokploy compose env field. Setting a variable there does nothing unless the compose file references it.
 
-Required: `API_IMAGE`, `DATABASE_URL`, `TOKEN_SECRET` (16+ characters), `REFRESH_TOKEN_PEPPER`. Production also needs at least `SITE_URL`, `REDIS_*`, `S3_FILE_*`, `S3_IMAGE_*`, `HIKARINAGI_CLIENT_ID`/`HIKARINAGI_CLIENT_SECRET` (an Open API client with `catalog:full catalog:sync`), `OIDC_CLIENT_SECRET`, `EMAIL_PROVIDER_API_KEY` and `EMAIL_SENDER_ADDRESS` (checked at startup when `APP_ENV=production`; `EMAIL_PROVIDER_ENDPOINT` defaults to Elastic Email's v2 send URL and is required for `postal`, where the server's base URL is enough and `/api/v1/send/message` is added), optionally `OTEL_EXPORTER_OTLP_ENDPOINT`/`OTEL_EXPORTER_OTLP_HEADERS` to export traces (see `observability.md`), `FILE_DOWNLOAD_TICKET_SECRET` when `FILE_DOWNLOAD_MODE=worker`, and Cap (below).
+Required: `API_IMAGE`, `WEB_IMAGE`, `DATABASE_URL`, `TOKEN_SECRET` (16+ characters), `REFRESH_TOKEN_PEPPER`, and for the web client `IMAGE_BASE_URL`, `HIKARINAGI_SITE_URL`, `IMAGE_BUCKET_URL` and `IMAGE_PROCESSOR_URL` (the last two may be empty, which shows catalog pictures uncut; unset is refused so a deployment always states them). Production also needs at least `SITE_URL`, `REDIS_*`, `S3_FILE_*`, `S3_IMAGE_*`, `HIKARINAGI_CLIENT_ID`/`HIKARINAGI_CLIENT_SECRET` (an Open API client with `catalog:full catalog:sync`), `OIDC_CLIENT_SECRET`, `EMAIL_PROVIDER_API_KEY` and `EMAIL_SENDER_ADDRESS` (checked at startup when `APP_ENV=production`; `EMAIL_PROVIDER_ENDPOINT` defaults to Elastic Email's v2 send URL and is required for `postal`, where the server's base URL is enough and `/api/v1/send/message` is added), optionally `OTEL_EXPORTER_OTLP_ENDPOINT`/`OTEL_EXPORTER_OTLP_HEADERS` to export traces (see `observability.md`), `FILE_DOWNLOAD_TICKET_SECRET` when `FILE_DOWNLOAD_MODE=worker`, and Cap (below).
 
 ## Cap
 
@@ -58,12 +61,20 @@ Cap is one layer, not the whole defence: it keeps plain scripts out and makes ev
 
 ## Dokploy setup
 
-1. Create a compose project with source GitHub, repository `Ringyuki/shionlib`, branch `major/shionlib-next` (later `main`), compose path `infra/compose.app.yml`.
-2. Fill the env field. `API_IMAGE` and `APP_VERSION` are managed by the deploy workflow.
-3. Add the domain for service `api`, port `5000`, and the path `/cap` of the site's domain for service `cap`, port `3000`, prefix stripped (see Cap above).
-4. Configure the GitHub environments `staging` and `production` with secrets `DOKPLOY_URL`, `DOKPLOY_TOKEN` and `DOKPLOY_API_COMPOSE_ID`.
+1. Create a compose project with source GitHub, repository `Ringyuki/shionlib`, the environment's branch (`dev` for staging, later `main` for production), compose path `infra/compose.app.yml`, automatic deploys off.
+2. Fill the env field. `API_IMAGE`, `WEB_IMAGE` and `APP_VERSION` are managed by the deploy script.
+3. Add three domains on the site's host: `/` for service `web`, port `3000`; `/api` for service `api`, port `5000`, prefix stripped; `/cap` for service `cap`, port `3000`, prefix stripped (see Cap above).
+4. Configure the GitHub environment (`staging`, `production`) with secrets `DOKPLOY_URL`, `DOKPLOY_TOKEN` and `DOKPLOY_COMPOSE_ID`.
 
-`.github/workflows/deploy-api.yml` (manual) rewrites `API_IMAGE`/`APP_VERSION` in the compose env through `compose.update` and triggers `compose.deploy`. Dokploy's API needs `accept: application/json` on mutations. Compose changes are read from git at deploy time, so commit and push them first.
+`infra/scripts/dokploy-deploy.sh` rewrites `API_IMAGE`, `WEB_IMAGE` and `APP_VERSION` in the compose env through `compose.update`, triggers `compose.deploy` and waits for Dokploy to report the deployment done or failed. `.github/workflows/staging.yml` runs it after building both images; `.github/workflows/deploy.yml` (manual) runs it for a tag that already exists, on staging or production. Dokploy's API needs `accept: application/json` on mutations. Compose changes are read from git at deploy time, so commit and push them first.
+
+## Staging
+
+`https://staging.shionlib.com` runs on the staging host as the Dokploy project `shionlib`, environment `staging`, with two compose projects from branch `dev`: `data` (`infra/compose.data.yml`) and `app` (`infra/compose.app.yml`). It follows the staging instance of Hikarinagi for the catalog (`HIKARINAGI_API_BASE_URL`, `HIKARINAGI_TOKEN_URL`) and runs with `APP_ENV=staging`.
+
+- **Deploys.** Work happens on `major/shionlib-next`; pushing that branch to `dev` (`git push origin major/shionlib-next:dev`) builds both images and deploys them. A push that changes nothing under `apps/api`, `apps/web` or `infra` deploys nothing.
+- **Disk.** The host has a 512G data disk as the LVM volume group `shionlib`: `uploads` (400G, `/srv/shionlib/uploads`, the spool in `spool/`) and `postgres` (40G, `/srv/shionlib/postgres`, the cluster in `data/`); the rest is unallocated for growing either (`lvextend -r`). The mount points are immutable while unmounted, so a missing disk stops the containers instead of filling the system disk. `UPLOADS_VOLUME` and `POSTGRES_VOLUME` point the composes at those directories.
+- **Ingress.** Public traffic reaches the host through the gateway's nginx, which forwards `staging.shionlib.com` to the host's Traefik over HTTPS; Dokploy's three domains route by path from there. Traefik must trust the gateway (`forwardedHeaders.trustedIPs` on its entry points), or every visitor arrives with the gateway's address and shares one rate limit.
 
 ## Cutover from the NestJS backend
 

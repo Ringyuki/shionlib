@@ -1,0 +1,43 @@
+name: deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Target environment
+        type: choice
+        options:
+          - staging
+          - production
+        default: staging
+        required: true
+      image_tag:
+        description: Image tag to deploy (sha-<short>, dev or a release version)
+        type: string
+        required: true
+
+run-name: ${{ inputs.image_tag }} to ${{ inputs.target }}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ inputs.target == 'staging' && 'staging' || 'deploy-production' }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy through Dokploy
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy
+        env:
+          DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
+          DOKPLOY_TOKEN: ${{ secrets.DOKPLOY_TOKEN }}
+          DOKPLOY_COMPOSE_ID: ${{ secrets.DOKPLOY_COMPOSE_ID }}
+          IMAGE_OWNER: ${{ github.repository_owner }}
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        run: infra/scripts/dokploy-deploy.sh

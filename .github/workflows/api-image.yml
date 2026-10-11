@@ -2,11 +2,7 @@ name: api image
 
 on:
   push:
-    branches: ['major/shionlib-next']
     tags: ['api-v*']
-    paths:
-      - 'apps/api/**'
-      - '.github/workflows/api-image.yml'
   workflow_dispatch:
 
 permissions:
