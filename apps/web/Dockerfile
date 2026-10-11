@@ -19,8 +19,9 @@ WORKDIR /app
 COPY --from=runtime-deps /app/package.json ./package.json
 COPY --from=runtime-deps /app/node_modules ./node_modules
 COPY --from=build /app/build ./build
+COPY server.js ./server.js
 ARG VERSION=dev
 ENV APP_VERSION=$VERSION
 USER node
 EXPOSE 3000
-CMD ["node", "node_modules/@react-router/serve/bin.cjs", "build/server/index.js"]
+CMD ["node", "server.js"]
