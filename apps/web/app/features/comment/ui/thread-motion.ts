@@ -1,5 +1,5 @@
 const pace = [
-  'overflow-clip! [overflow-anchor:none]',
+  '[overflow-anchor:none]',
   '[animation-duration:var(--hn-duration-fast)]!',
   'transition-opacity ease-(--hn-ease-enter)',
 ].join(' ')
