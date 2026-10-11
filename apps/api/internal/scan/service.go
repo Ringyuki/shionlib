@@ -150,42 +150,50 @@ func (s *Service) check(ctx context.Context, unit Unit) error {
 		return err
 	}
 	defer func() { _ = s.workspace.Discard(context.WithoutCancel(ctx), workspace) }()
-	entry, err := s.stage(ctx, unit, workspace)
+	found, err := s.examine(ctx, unit, workspace)
 	if err != nil {
 		return err
 	}
-	archive, err := InspectArchive(ctx, s.archives, entry)
+	if found.archive.Status != download.CheckOK {
+		return s.reject(ctx, unit, found.archive.Status)
+	}
+	result, err := s.record(ctx, unit, found.archive, found.contents, found.reports)
 	if err != nil {
 		return err
 	}
-	if archive.Status != download.CheckOK {
-		return s.reject(ctx, unit, archive.Status)
-	}
-	contents, err := s.contents.Read(ctx, Source{Path: entry, Workspace: workspace, Archive: archive})
-	if err != nil {
-		return err
-	}
-	reports, err := s.scanTargets(ctx, unit, entry, contents.Targets)
-	if err != nil {
-		return err
-	}
-	report, err := MergeReports(reports)
-	if err != nil {
-		return err
-	}
-	result, err := s.record(ctx, unit, archive, contents, reports)
-	if err != nil {
-		return err
-	}
-	if report.Infected {
-		err = s.quarantine(ctx, unit, report, result)
+	if found.report.Infected {
+		err = s.quarantine(ctx, unit, found.report, result, awaitingSameUpload)
 	} else {
 		err = s.approve(ctx, unit, result)
 	}
 	if err != nil {
 		return err
 	}
-	return s.keepPreviews(ctx, result.recorded, contents.Previews)
+	return s.keepPreviews(ctx, result.recorded, found.contents.Previews)
+}
+
+func (s *Service) examine(ctx context.Context, unit Unit, workspace string) (examined, error) {
+	entry, err := s.stage(ctx, unit, workspace)
+	if err != nil {
+		return examined{}, err
+	}
+	archive, err := InspectArchive(ctx, s.archives, entry)
+	if err != nil || archive.Status != download.CheckOK {
+		return examined{archive: archive}, err
+	}
+	contents, err := s.contents.Read(ctx, Source{Path: entry, Workspace: workspace, Archive: archive})
+	if err != nil {
+		return examined{}, err
+	}
+	reports, err := s.scanTargets(ctx, unit, entry, contents.Targets)
+	if err != nil {
+		return examined{}, err
+	}
+	report, err := MergeReports(reports)
+	if err != nil {
+		return examined{}, err
+	}
+	return examined{archive: archive, contents: contents, reports: reports, report: report}, nil
 }
 
 func (s *Service) stage(ctx context.Context, unit Unit, workspace string) (string, error) {
@@ -254,15 +262,32 @@ func (s *Service) record(ctx context.Context, unit Unit, archive Archive, conten
 	if err != nil {
 		return checked{}, err
 	}
-	result := checked{recorded: recorded, digests: map[int]string{}}
+	digests, err := s.digests(ctx, unit)
+	if err != nil {
+		return checked{}, err
+	}
+	return checked{recorded: recorded, digests: digests}, nil
+}
+
+func (s *Service) digests(ctx context.Context, unit Unit) (map[int]string, error) {
+	digests := map[int]string{}
 	for _, file := range unit.Files {
 		digest, err := s.digest(ctx, file.Path)
 		if err != nil {
-			return checked{}, err
+			return nil, err
 		}
-		result.digests[file.ID] = digest
+		digests[file.ID] = digest
 	}
-	return result, nil
+	return digests, nil
+}
+
+func (s *Service) attachTo(ctx context.Context, files []PendingFile, result checked) error {
+	for _, file := range files {
+		if err := s.repo.SetInspection(ctx, file.ID, result.recorded.ID, result.digests[file.ID]); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (s *Service) keepPreviews(ctx context.Context, recorded inspection.Recorded, previews []PreviewSource) error {
@@ -309,6 +334,10 @@ func (s *Service) scanFile(ctx context.Context, name, path string) (Report, erro
 }
 
 func (s *Service) withPending(ctx context.Context, unit Unit, fn func(ctx context.Context, current []PendingFile) error) error {
+	return s.withUnchanged(ctx, unit, awaitingSameUpload, fn)
+}
+
+func (s *Service) withUnchanged(ctx context.Context, unit Unit, unchanged func(now, seen PendingFile) bool, fn func(ctx context.Context, current []PendingFile) error) error {
 	return s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
 		current := make([]PendingFile, 0, len(unit.Files))
 		for _, file := range unit.Files {
@@ -316,7 +345,7 @@ func (s *Service) withPending(ctx context.Context, unit Unit, fn func(ctx contex
 			if err != nil {
 				return err
 			}
-			if !found || !locked.awaitingCheck() || locked.Path != file.Path {
+			if !found || !unchanged(locked, file) {
 				return nil
 			}
 			current = append(current, locked)
@@ -400,11 +429,11 @@ func (s *Service) approve(ctx context.Context, unit Unit, result checked) error 
 	return nil
 }
 
-func (s *Service) quarantine(ctx context.Context, unit Unit, report Report, result checked) error {
+func (s *Service) quarantine(ctx context.Context, unit Unit, report Report, result checked, unchanged func(now, seen PendingFile) bool) error {
 	viruses := NormalizeViruses(report.Viruses)
 	deadline := s.now().Add(ReviewTimeout.Read(s.settings))
 	var created *Case
-	err := s.withPending(ctx, unit, func(ctx context.Context, current []PendingFile) error {
+	err := s.withUnchanged(ctx, unit, unchanged, func(ctx context.Context, current []PendingFile) error {
 		var size int64
 		for _, file := range current {
 			if err := s.repo.SetCheckStatus(ctx, file.ID, download.CheckHarmfulPendingReview, false); err != nil {
@@ -603,7 +632,9 @@ func (s *Service) allow(ctx context.Context, id int, note *string, notify bool, 
 			if err := s.activities.Record(ctx, checkActivity(activity.TypeFileCheckOK, file, download.CheckOK)); err != nil {
 				return err
 			}
-			released = append(released, file.ID)
+			if file.Status == download.FileOnServer {
+				released = append(released, file.ID)
+			}
 			if file.InspectionID != nil && !slices.Contains(inspections, *file.InspectionID) {
 				inspections = append(inspections, *file.InspectionID)
 			}
@@ -653,7 +684,7 @@ func (s *Service) heldFiles(ctx context.Context, target Target) ([]PendingFile, 
 		return nil, err
 	}
 	return slices.DeleteFunc(files, func(file PendingFile) bool {
-		return file.Status != download.FileOnServer || file.CheckStatus != download.CheckHarmfulPendingReview
+		return file.CheckStatus != download.CheckHarmfulPendingReview
 	}), nil
 }
 
@@ -718,7 +749,7 @@ func (s *Service) notifyUploader(ctx context.Context, target Target, tone messag
 }
 
 func checkActivity(kind activity.Type, file PendingFile, check download.CheckStatus) activity.NewActivity {
-	fileID, status, checkValue := file.ID, download.FileOnServer, int(check)
+	fileID, status, checkValue := file.ID, file.Status, int(check)
 	return activity.NewActivity{
 		Type:            kind,
 		UserID:          file.CreatorID,

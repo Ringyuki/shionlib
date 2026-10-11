@@ -27,6 +27,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/realtime"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/redis"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/refresh"
+	"github.com/Ringyuki/shionlib/apps/api/internal/scan"
 	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
@@ -47,6 +48,7 @@ type Modules struct {
 	SettingsWatcher *refresh.Watcher
 	Handlers        []Registrar
 	Jobs            Jobs
+	Backfill        *scan.BackfillService
 }
 
 type Shared struct {

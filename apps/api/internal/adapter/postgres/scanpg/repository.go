@@ -66,6 +66,34 @@ func (r *Repository) PendingResources(ctx context.Context, now time.Time) ([]int
 	return ids, nil
 }
 
+func (r *Repository) NextUninspected(ctx context.Context, skip []int) (int, bool, error) {
+	query := r.db(ctx).GameDownloadResource.Query().
+		Where(
+			gamedownloadresource.Status(download.ResourceActive),
+			gamedownloadresource.HasFilesWith(
+				gamedownloadresourcefile.Type(download.FileTypeObjectStore),
+				gamedownloadresourcefile.FileStatus(download.FileInObjectStore),
+				gamedownloadresourcefile.FileCheckStatus(int(download.CheckOK)),
+				gamedownloadresourcefile.S3FileKeyNotNil(),
+				gamedownloadresourcefile.InspectionIDIsNil(),
+			),
+		)
+	if len(skip) > 0 {
+		query.Where(gamedownloadresource.IDNotIn(skip...))
+	}
+	ids, err := query.
+		Order(ent.Desc(gamedownloadresource.FieldDownloads), ent.Asc(gamedownloadresource.FieldID)).
+		Limit(1).
+		IDs(ctx)
+	if err != nil {
+		return 0, false, fmt.Errorf("find a resource whose files were not inspected: %w", err)
+	}
+	if len(ids) == 0 {
+		return 0, false, nil
+	}
+	return ids[0], true, nil
+}
+
 func (r *Repository) DelayCheck(ctx context.Context, resourceID int, until time.Time) error {
 	if err := r.db(ctx).GameDownloadResource.UpdateOneID(resourceID).SetCheckRetryAt(until.UTC()).Exec(ctx); err != nil {
 		return fmt.Errorf("delay check of resource %d: %w", resourceID, err)
@@ -114,10 +142,11 @@ func (r *Repository) SetCheckStatus(ctx context.Context, fileID int, status down
 }
 
 func (r *Repository) SetInspection(ctx context.Context, fileID, inspectionID int, sha256 string) error {
-	err := r.db(ctx).GameDownloadResourceFile.UpdateOneID(fileID).
-		SetInspectionID(inspectionID).
-		SetFileSha256(sha256).
-		Exec(ctx)
+	update := r.db(ctx).GameDownloadResourceFile.UpdateOneID(fileID).SetInspectionID(inspectionID)
+	if sha256 != "" {
+		update.SetFileSha256(sha256)
+	}
+	err := update.Exec(ctx)
 	switch {
 	case postgres.IsNotFound(err):
 		return download.ErrFileNotFound
@@ -226,7 +255,11 @@ func (r *Repository) ResolveCase(ctx context.Context, id int, resolution scan.Re
 
 func (r *Repository) ExpiredCases(ctx context.Context, now time.Time, limit int) ([]int, error) {
 	ids, err := r.db(ctx).MalwareScanCase.Query().
-		Where(malwarescancase.StatusEQ(malwarescancase.StatusPENDING), malwarescancase.ReviewDeadlineLTE(now.UTC())).
+		Where(
+			malwarescancase.StatusEQ(malwarescancase.StatusPENDING),
+			malwarescancase.ReviewDeadlineLTE(now.UTC()),
+			malwarescancase.Not(malwarescancase.HasFileWith(gamedownloadresourcefile.FileStatus(download.FileInObjectStore))),
+		).
 		Order(ent.Asc(malwarescancase.FieldReviewDeadline), ent.Asc(malwarescancase.FieldID)).
 		Limit(limit).
 		IDs(ctx)

@@ -33,6 +33,7 @@ type MemoryRepository struct {
 	Purged    []string
 	Cleared   []ClearedReview
 	Digests   map[int]string
+	Downloads map[int]int
 }
 
 type ClearedReview struct {
@@ -53,6 +54,7 @@ func NewMemoryRepository(now func() time.Time) *MemoryRepository {
 		Titles:    map[int]scan.GameTitles{},
 		Keys:      map[int][]string{},
 		Digests:   map[int]string{},
+		Downloads: map[int]int{},
 	}
 }
 
@@ -112,6 +114,25 @@ func (r *MemoryRepository) PendingResources(_ context.Context, now time.Time) ([
 	}
 	slices.Sort(out)
 	return out, nil
+}
+
+func (r *MemoryRepository) NextUninspected(_ context.Context, skip []int) (int, bool, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var waiting []int
+	for _, file := range r.files {
+		stored := file.Type == download.FileTypeObjectStore && file.Status == download.FileInObjectStore && file.CheckStatus == download.CheckOK
+		if r.resources[file.ResourceID] && stored && file.StorageKey != "" && file.InspectionID == nil && !slices.Contains(skip, file.ResourceID) && !slices.Contains(waiting, file.ResourceID) {
+			waiting = append(waiting, file.ResourceID)
+		}
+	}
+	if len(waiting) == 0 {
+		return 0, false, nil
+	}
+	slices.SortFunc(waiting, func(a, b int) int {
+		return cmp.Or(cmp.Compare(r.Downloads[b], r.Downloads[a]), cmp.Compare(a, b))
+	})
+	return waiting[0], true, nil
 }
 
 func (r *MemoryRepository) DelayCheck(_ context.Context, resourceID int, until time.Time) error {
@@ -224,7 +245,8 @@ func (r *MemoryRepository) ExpiredCases(_ context.Context, now time.Time, limit 
 	defer r.mu.Unlock()
 	var ids []int
 	for _, c := range r.cases {
-		if c.Status == scan.CasePending && !c.ReviewDeadline.After(now) {
+		published := c.FileID != nil && r.files[*c.FileID].Status == download.FileInObjectStore
+		if c.Status == scan.CasePending && !c.ReviewDeadline.After(now) && !published {
 			ids = append(ids, c.ID)
 		}
 	}
@@ -369,6 +391,23 @@ type NameReader struct {
 
 func (n *NameReader) LegacyNames(_ context.Context, path string) (scan.LegacyNames, error) {
 	return n.Names[path], n.Err
+}
+
+type Objects struct {
+	Fetched []string
+	Missing map[string]bool
+	Err     error
+}
+
+func (o *Objects) Fetch(_ context.Context, key, path string) error {
+	if o.Err != nil {
+		return o.Err
+	}
+	if o.Missing[key] {
+		return scan.ErrObjectMissing
+	}
+	o.Fetched = append(o.Fetched, key+" -> "+path)
+	return nil
 }
 
 type DiscReader struct {

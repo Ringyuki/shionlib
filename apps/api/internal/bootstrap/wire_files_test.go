@@ -97,8 +97,27 @@ func serveClamd(t *testing.T) string {
 	return listener.Addr().String()
 }
 
+type bucket map[string]string
+
+func (b bucket) Fetch(_ context.Context, key, path string) error {
+	source, stored := b[key]
+	if !stored {
+		return scan.ErrObjectMissing
+	}
+	content, err := os.ReadFile(source)
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
+		return err
+	}
+	return os.WriteFile(path, content, 0o600)
+}
+
 type checkLine struct {
 	db          *pgtest.DB
+	objects     bucket
+	backfill    *scan.BackfillService
 	scans       *scan.Service
 	inspections *inspection.Service
 	previews    *inspection.PreviewService
@@ -137,8 +156,11 @@ func newCheckLine(t *testing.T, binary string) checkLine {
 		Options:     scan.Options{Enabled: true},
 		Now:         clock,
 	})
+	objects := bucket{}
 	return checkLine{
 		db:          db,
+		objects:     objects,
+		backfill:    scan.NewBackfillService(scans, objects, &scantest.Spool{Room: 1 << 30}),
 		scans:       scans,
 		inspections: inspection.NewService(inspectionRepo, visible),
 		previews:    inspection.NewPreviewService(inspectionRepo, visible, stored),
@@ -475,4 +497,98 @@ func TestDiscImagesInsideAnUploadAreReadLikeFolders(t *testing.T) {
 
 func ptr[T any](value T) *T {
 	return &value
+}
+
+func (l checkLine) publish(t *testing.T, path string, downloads int) (int, int) {
+	t.Helper()
+	ctx := context.Background()
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	creator := l.db.User(t)
+	resource := l.db.Ent.GameDownloadResource.Create().SetGameID(l.db.Game(t)).SetCreatorID(creator).SetDownloads(downloads).SetPublishedAt(l.now).SaveX(ctx)
+	key := fmt.Sprintf("games/%d/%s", resource.ID, filepath.Base(path))
+	stored := l.db.Ent.GameDownloadResourceFile.Create().
+		SetGameDownloadResourceID(resource.ID).
+		SetType(download.FileTypeObjectStore).
+		SetFileName(filepath.Base(path)).
+		SetS3FileKey(key).
+		SetFileSize(info.Size()).
+		SetFileHash("legacy").
+		SetFileStatus(download.FileInObjectStore).
+		SetFileCheckStatus(int(download.CheckOK)).
+		SetCreatorID(creator).
+		SaveX(ctx)
+	l.objects[key] = path
+	return resource.ID, stored.ID
+}
+
+func TestFilesPublishedBeforeAreInspectedFromTheBucket(t *testing.T) {
+	binary := sevenZip(t)
+	line := newCheckLine(t, binary)
+	clean := pack(t, binary, t.TempDir(), "game.7z", map[string][]byte{
+		"Game/game.exe":   []byte("MZ game"),
+		"Game/readme.txt": []byte("read me"),
+	})
+	flagged := pack(t, binary, t.TempDir(), "patch.zip", map[string][]byte{"Game/patch.exe": []byte("MZ " + eicarMarker)})
+	quietID, quietFile := line.publish(t, clean, 3)
+	popularID, popularFile := line.publish(t, flagged, 900)
+	goneID, goneFile := line.publish(t, clean, 1)
+	delete(line.objects, fmt.Sprintf("games/%d/game.7z", goneID))
+	ctx := context.Background()
+
+	outcomes := map[int]scan.BackfillOutcome{}
+	var order []int
+	var seen []int
+	for {
+		done, found, err := line.backfill.Next(ctx, seen)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !found {
+			break
+		}
+		seen = append(seen, done.ResourceID)
+		order = append(order, done.ResourceID)
+		outcomes[done.ResourceID] = done.Units[0].Outcome
+	}
+	if !slices.Equal(order, []int{popularID, quietID, goneID}) {
+		t.Fatalf("resources are taken by downloads: %v", order)
+	}
+	if outcomes[popularID] != scan.BackfillHeld || outcomes[quietID] != scan.BackfillInspected || outcomes[goneID] != scan.BackfillMissing {
+		t.Fatalf("unexpected outcomes %v", outcomes)
+	}
+
+	inspected := line.db.Ent.GameDownloadResourceFile.GetX(ctx, quietFile)
+	raw, err := os.ReadFile(clean)
+	if err != nil {
+		t.Fatal(err)
+	}
+	digest := sha256.Sum256(raw)
+	if inspected.FileStatus != download.FileInObjectStore || inspected.FileCheckStatus != int(download.CheckOK) || inspected.InspectionID == nil || inspected.FileSha256 == nil || *inspected.FileSha256 != hex.EncodeToString(digest[:]) {
+		t.Fatalf("unexpected inspected file %+v", inspected)
+	}
+	line.visible.Visible[quietID] = []int{*inspected.InspectionID}
+	top := listed(t, line, *inspected.InspectionID, nil)
+	if !slices.Equal(named(top), []string{"folder Game"}) {
+		t.Fatalf("unexpected listing %v", named(top))
+	}
+	inside := listed(t, line, *inspected.InspectionID, &top[0].ID)
+	if !slices.Equal(named(inside), []string{"file game.exe", "file readme.txt"}) || inside[1].Preview != inspection.PreviewText {
+		t.Fatalf("unexpected entries %+v", inside)
+	}
+
+	held := line.db.Ent.GameDownloadResourceFile.GetX(ctx, popularFile)
+	if held.FileStatus != download.FileInObjectStore || held.FileCheckStatus != int(download.CheckHarmfulPendingReview) || held.InspectionID == nil {
+		t.Fatalf("unexpected held file %+v", held)
+	}
+	cases, total, err := line.scans.List(ctx, scan.ListFilter{ResourceID: popularID, SortBy: "created"}, scan.Page{Number: 1, Size: 10})
+	if err != nil || total != 1 || cases[0].Status != scan.CasePending {
+		t.Fatalf("cases: %+v %v", cases, err)
+	}
+
+	if gone := line.db.Ent.GameDownloadResourceFile.GetX(ctx, goneFile); gone.InspectionID != nil || gone.FileSha256 != nil {
+		t.Fatalf("a file the bucket does not hold is left as it was: %+v", gone)
+	}
 }

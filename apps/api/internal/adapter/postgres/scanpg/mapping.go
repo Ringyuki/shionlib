@@ -44,6 +44,9 @@ func toPendingFile(row *ent.GameDownloadResourceFile) scan.PendingFile {
 	if row.FilePath != nil {
 		file.Path = *row.FilePath
 	}
+	if row.S3FileKey != nil {
+		file.StorageKey = *row.S3FileKey
+	}
 	if resource := row.Edges.GameDownloadResource; resource != nil {
 		file.GameID = resource.GameID
 	}

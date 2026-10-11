@@ -47,6 +47,7 @@ const (
 	vendorTimeout       = 15 * time.Second
 	scanWorkspaceDir    = ".work"
 	objectStoreTimeout  = 10 * time.Minute
+	objectFetchTimeout  = 6 * time.Hour
 	everyMinute         = "* * * * *"
 	everyTenMinutes     = "*/10 * * * *"
 	shortTaskTimeout    = 10 * time.Minute
@@ -148,6 +149,16 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		},
 		Now: shared.Now,
 	})
+
+	modules.Backfill = scan.NewBackfillService(scans, objectstore.New(objectstore.Options{
+		Bucket:          cfg.Storage.Game.Bucket,
+		Region:          cfg.Storage.Game.Region,
+		Endpoint:        cfg.Storage.Game.Endpoint,
+		AccessKeyID:     cfg.Storage.Game.AccessKeyID,
+		SecretAccessKey: cfg.Storage.Game.SecretAccessKey,
+		PathStyle:       cfg.Storage.Game.ForcePathStyle,
+		HTTPClient:      httpclient.New(httpclient.Options{Timeout: objectFetchTimeout}),
+	}), uploads)
 
 	reports := report.NewService(report.Deps{
 		Repo:      reportpg.NewRepository(infra.Ent),

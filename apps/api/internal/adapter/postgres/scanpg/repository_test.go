@@ -168,6 +168,14 @@ func TestPendingFiles(t *testing.T) {
 	if again, _ := f.repo.ResourceFiles(ctx, resource.ID); again[0].InspectionID == nil || *again[0].InspectionID != record.ID || again[1].InspectionID != nil {
 		t.Fatalf("a pending file tells which inspection it has: %+v", again[:2])
 	}
+	other := f.db.Ent.Inspection.Create().SetResourceID(resource.ID).SetStatus("failed").SaveX(ctx)
+	if err := f.repo.SetInspection(ctx, pending.ID, other.ID, ""); err != nil {
+		t.Fatal(err)
+	}
+	row, _ = f.db.Ent.GameDownloadResourceFile.Get(ctx, pending.ID)
+	if *row.InspectionID != other.ID || row.FileSha256 == nil || *row.FileSha256 != "0f3a" {
+		t.Fatalf("an inspection without a digest leaves the digest alone: %+v", row)
+	}
 	if err := f.repo.SetInspection(ctx, 987654, record.ID, "0f3a"); !errors.Is(err, download.ErrFileNotFound) {
 		t.Fatalf("missing file: %v", err)
 	}
@@ -294,6 +302,9 @@ func TestExpiredAndListedCases(t *testing.T) {
 	later := f.newCase(t, f.file(t, resource.ID, alice, named("later.7z")), gameID, now.Add(-2*time.Hour))
 	f.newCase(t, f.file(t, resource.ID, bob, named("future.7z")), gameID, now.Add(time.Hour))
 	done := f.newCase(t, f.file(t, resource.ID, bob, named("done.7z")), gameID, now.Add(-3*time.Hour))
+	f.newCase(t, f.file(t, resource.ID, bob, func(c *ent.GameDownloadResourceFileCreate) {
+		c.SetFileName("published.7z").SetFileStatus(download.FileInObjectStore).SetS3FileKey("games/published.7z")
+	}), gameID, now.Add(-4*time.Hour))
 	if err := f.repo.ResolveCase(ctx, done.ID, scan.Resolution{Status: scan.CaseDeleted, Source: scan.SourceAdminDelete, ReviewedBy: &reviewer, ReviewedAt: now}); err != nil {
 		t.Fatal(err)
 	}
@@ -307,7 +318,7 @@ func TestExpiredAndListedCases(t *testing.T) {
 	}
 
 	all, total, err := f.repo.ListCases(ctx, scan.ListFilter{SortBy: "review_deadline"}, scan.Page{Number: 1, Size: 10})
-	if err != nil || total != 4 || len(all) != 4 || all[0].ID != done.ID || all[3].Uploader.ID != bob {
+	if err != nil || total != 5 || len(all) != 5 || all[1].ID != done.ID || all[4].Uploader.ID != bob {
 		t.Fatalf("ascending deadline order: %d %+v %v", total, all, err)
 	}
 	pending := scan.CasePending
@@ -361,5 +372,45 @@ func TestUsersAndGames(t *testing.T) {
 	}
 	if _, found, _ := f.repo.GameTitles(ctx, 987654); found {
 		t.Fatal("missing game titles")
+	}
+}
+
+func TestNextUninspectedTakesPublishedFilesByDownloads(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture(t)
+	creator, gameID := f.db.User(t), f.db.Game(t)
+	stored := func(name string) func(*ent.GameDownloadResourceFileCreate) {
+		return func(c *ent.GameDownloadResourceFileCreate) {
+			c.SetFileName(name).SetFileStatus(download.FileInObjectStore).SetFileCheckStatus(int(download.CheckOK)).SetS3FileKey("games/" + name)
+		}
+	}
+	quiet, popular, known, waiting, held, removed := f.resource(t, gameID, creator), f.resource(t, gameID, creator), f.resource(t, gameID, creator), f.resource(t, gameID, creator), f.resource(t, gameID, creator), f.resource(t, gameID, creator)
+	f.db.Ent.GameDownloadResource.UpdateOneID(popular.ID).SetDownloads(571).ExecX(ctx)
+	f.db.Ent.GameDownloadResource.UpdateOneID(removed.ID).SetStatus(download.ResourceRemoved).ExecX(ctx)
+	f.file(t, quiet.ID, creator, stored("quiet.7z"))
+	kept := f.file(t, popular.ID, creator, stored("popular.7z"))
+	record := f.db.Ent.Inspection.Create().SetResourceID(known.ID).SetStatus("ready").SaveX(ctx)
+	f.file(t, known.ID, creator, func(c *ent.GameDownloadResourceFileCreate) { stored("known.7z")(c); c.SetInspectionID(record.ID) })
+	f.file(t, waiting.ID, creator, func(c *ent.GameDownloadResourceFileCreate) { c.SetFileName("waiting.7z").SetFilePath("/spool/w.sltf") })
+	f.file(t, held.ID, creator, func(c *ent.GameDownloadResourceFileCreate) {
+		stored("held.7z")(c)
+		c.SetFileCheckStatus(int(download.CheckHarmfulPendingReview))
+	})
+	f.file(t, removed.ID, creator, stored("removed.7z"))
+
+	first, found, err := f.repo.NextUninspected(ctx, nil)
+	if err != nil || !found || first != popular.ID {
+		t.Fatalf("the most downloaded resource comes first: %d %v %v", first, found, err)
+	}
+	second, found, err := f.repo.NextUninspected(ctx, []int{popular.ID})
+	if err != nil || !found || second != quiet.ID {
+		t.Fatalf("a skipped resource is left out: %d %v %v", second, found, err)
+	}
+	if _, found, err := f.repo.NextUninspected(ctx, []int{popular.ID, quiet.ID}); err != nil || found {
+		t.Fatalf("inspected, unpublished, held and removed files are not taken: %v %v", found, err)
+	}
+	files, err := f.repo.ResourceFiles(ctx, popular.ID)
+	if err != nil || len(files) != 1 || files[0].ID != kept.ID || files[0].StorageKey != "games/popular.7z" {
+		t.Fatalf("a published file tells where it is stored: %+v %v", files, err)
 	}
 }

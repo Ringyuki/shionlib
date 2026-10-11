@@ -41,7 +41,9 @@ type fixture struct {
 	events      *downloadtest.Recorder
 	banner      *scantest.Banner
 	mailer      *scantest.Mailer
+	objects     *scantest.Objects
 	service     *scan.Service
+	backfill    *scan.BackfillService
 }
 
 func newFixture(enabled bool) fixture {
@@ -58,6 +60,7 @@ func newFixture(enabled bool) fixture {
 		events:      &downloadtest.Recorder{},
 		banner:      &scantest.Banner{Applied: true},
 		mailer:      &scantest.Mailer{},
+		objects:     &scantest.Objects{Missing: map[string]bool{}},
 	}
 	f.service = scan.NewService(scan.Deps{
 		Repo:        f.repo,
@@ -77,6 +80,7 @@ func newFixture(enabled bool) fixture {
 		Options:     scan.Options{Enabled: enabled, SiteURL: "https://shionlib.example/"},
 		Now:         func() time.Time { return now },
 	})
+	f.backfill = scan.NewBackfillService(f.service, f.objects, f.room)
 	return f
 }
 

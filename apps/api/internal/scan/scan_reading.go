@@ -7,6 +7,7 @@ import (
 const (
 	contentsDir     = "contents"
 	nestedDir       = "nested"
+	storedDir       = "stored"
 	restoredImage   = ".iso"
 	trackName       = "Track %02d"
 	draftEntryRoom  = 2 * inspection.EntryLimit
@@ -44,6 +45,13 @@ type container struct {
 type checked struct {
 	recorded inspection.Recorded
 	digests  map[int]string
+}
+
+type examined struct {
+	archive  Archive
+	contents Contents
+	reports  []EntryReport
+	report   Report
 }
 
 type discPlan struct {

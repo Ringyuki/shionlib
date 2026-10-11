@@ -13,6 +13,7 @@ import (
 
 type Repository interface {
 	PendingResources(ctx context.Context, now time.Time) ([]int, error)
+	NextUninspected(ctx context.Context, skip []int) (int, bool, error)
 	DelayCheck(ctx context.Context, resourceID int, until time.Time) error
 	ResourceFiles(ctx context.Context, resourceID int) ([]PendingFile, error)
 	LockFile(ctx context.Context, fileID int) (PendingFile, bool, error)
@@ -56,6 +57,10 @@ type Inspections interface {
 	Record(ctx context.Context, draft inspection.Draft) (inspection.Recorded, error)
 	KeepPreview(ctx context.Context, inspectionID, entryID int, kind inspection.Preview, content io.Reader) error
 	Cleared(ctx context.Context, ids []int) error
+}
+
+type Objects interface {
+	Fetch(ctx context.Context, key, path string) error
 }
 
 type Spool interface {

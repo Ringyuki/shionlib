@@ -55,6 +55,7 @@ type PendingFile struct {
 	Size            int64
 	Hash            string
 	HashAlgorithm   string
+	StorageKey      string
 	UploadSessionID *int
 	InspectionID    *int
 	CreatorID       int
@@ -63,6 +64,37 @@ type PendingFile struct {
 
 func (f PendingFile) awaitingCheck() bool {
 	return f.Type == download.FileTypeObjectStore && f.Status == download.FileOnServer && f.CheckStatus == download.CheckPending && f.Path != ""
+}
+
+func (f PendingFile) awaitingInspection() bool {
+	return f.Type == download.FileTypeObjectStore && f.Status == download.FileInObjectStore && f.CheckStatus == download.CheckOK && f.StorageKey != "" && f.InspectionID == nil
+}
+
+func awaitingSameUpload(now, seen PendingFile) bool {
+	return now.awaitingCheck() && now.Path == seen.Path
+}
+
+func storedUnchanged(now, seen PendingFile) bool {
+	return now.awaitingInspection() && now.StorageKey == seen.StorageKey
+}
+
+type BackfillOutcome string
+
+const (
+	BackfillInspected  BackfillOutcome = "inspected"
+	BackfillHeld       BackfillOutcome = "held"
+	BackfillUnreadable BackfillOutcome = "unreadable"
+	BackfillMissing    BackfillOutcome = "missing"
+)
+
+type BackfilledUnit struct {
+	Files   []string
+	Outcome BackfillOutcome
+}
+
+type Backfilled struct {
+	ResourceID int
+	Units      []BackfilledUnit
 }
 
 type Report struct {

@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/bootstrap"
@@ -49,8 +51,10 @@ func run(ctx context.Context, args []string) error {
 		return openapi(args[1:])
 	case "health":
 		return health(ctx)
+	case "inspect":
+		return inspect(ctx, args[1:])
 	default:
-		return fmt.Errorf("unknown command %q (expected serve, worker, migrate up|status, openapi, health)", command)
+		return fmt.Errorf("unknown command %q (expected serve, worker, migrate up|status, openapi, health, inspect [limit])", command)
 	}
 }
 
@@ -90,6 +94,58 @@ func serve(ctx context.Context, withHTTP bool) error {
 		ShutdownTimeout:   cfg.App.ShutdownTimeout,
 	}, logger))
 	return app.Start(ctx)
+}
+
+func inspect(ctx context.Context, args []string) error {
+	limit := 0
+	if len(args) > 0 {
+		parsed, err := strconv.Atoi(args[0])
+		if err != nil || parsed < 1 {
+			return fmt.Errorf("inspect takes the number of resources to go through, got %q", args[0])
+		}
+		limit = parsed
+	}
+	cfg, err := config.Load()
+	if err != nil {
+		return err
+	}
+	logger := bootstrap.NewLogger(cfg)
+	infra, err := bootstrap.OpenInfra(ctx, cfg, logger)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = infra.Close(context.WithoutCancel(ctx)) }()
+	modules := bootstrap.BuildModules(infra)
+	if err := modules.Settings.Reload(ctx); err != nil {
+		return err
+	}
+	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	var seen []int
+	failed := 0
+	for limit == 0 || len(seen) < limit {
+		result, found, err := modules.Backfill.Next(ctx, seen)
+		if ctx.Err() != nil {
+			break
+		}
+		if !found {
+			if err != nil {
+				return err
+			}
+			break
+		}
+		seen = append(seen, result.ResourceID)
+		if err != nil {
+			failed++
+			logger.Error("inspection failed", "resource_id", result.ResourceID, "error", err)
+			continue
+		}
+		for _, unit := range result.Units {
+			logger.Info("inspected", "resource_id", result.ResourceID, "files", unit.Files, "outcome", string(unit.Outcome))
+		}
+	}
+	logger.Info("inspection finished", "resources", len(seen), "failed", failed, "stopped", ctx.Err() != nil)
+	return nil
 }
 
 func migrate(ctx context.Context, sub string) error {

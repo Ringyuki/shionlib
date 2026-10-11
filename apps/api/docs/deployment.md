@@ -13,7 +13,7 @@ The API and the web client each ship as one container image and run together as 
 
 The image runs as the unprivileged `shionlib` user. `/var/lib/shionlib/upload` and `/var/lib/shionlib/scan-logs` are the upload spool and scan log directories.
 
-Subcommands: `serve` (HTTP; also runs jobs when `WORKERS_ENABLED=true`), `worker` (jobs only), `migrate up|status`, `health` (liveness probe against `127.0.0.1:$PORT/health/live`), `openapi [file]`.
+Subcommands: `serve` (HTTP; also runs jobs when `WORKERS_ENABLED=true`), `worker` (jobs only), `migrate up|status`, `health` (liveness probe against `127.0.0.1:$PORT/health/live`), `openapi [file]`, `inspect [limit]` (see Inspecting files published before).
 
 `apps/web/Dockerfile` builds the web client into a `node:24` image that serves on port 3000 (see `apps/web/README.md`).
 
@@ -78,6 +78,21 @@ Cap is one layer, not the whole defence: it keeps plain scripts out and makes ev
 - **Search engines.** A Cloudflare response header rule on the zone (`http_response_headers_transform`, rule `staging_noindex`) adds `X-Robots-Tag: noindex, nofollow` to everything the staging host answers.
 - **Downloads.** Staging issues worker links (`FILE_DOWNLOAD_MODE=worker`) to its own download worker, `shionlib-download-worker-staging` at `https://dl-staging.hikarifallback.uk` (`env.staging` in `apps/download-worker/wrangler.jsonc`). The worker's `TICKET_SECRET` and the API's `FILE_DOWNLOAD_TICKET_SECRET` hold the same value; files live in the B2 bucket `shionlib-test`. `.github/workflows/staging-download-worker.yml` deploys it on a push to `dev` that changes `apps/download-worker`; by hand it is `npx wrangler deploy --env staging` in that directory, and the secret is set with `npx wrangler secret put TICKET_SECRET --env staging`.
 - **Verification.** The Cap site key was created with `docker/scripts/cap-site-key.sh https://staging.shionlib.com/cap <admin key>`, so it refuses automated browsers like production will.
+
+## Inspecting files published before
+
+A file gets its inspection (what it holds, its checks, its previews, its SHA-256; ADR 0014) when it is checked after its upload. Files stored before that have none, and the resource page says 「尚未读取这个文件的内容」 for them. One command gives them theirs:
+
+```bash
+docker exec <worker container> shionlib-api inspect        # until nothing is left
+docker exec <worker container> shionlib-api inspect 50     # at most 50 resources
+```
+
+- Run it in the worker container: it needs `7zz`, clamd, the spool volume and the bucket credentials, all of which the worker already has.
+- It takes the resources with uninspected files, most downloaded first, one at a time: it fetches the file (or every volume of a set) from the bucket into the scan workspace on the spool, runs the steps of a check (test, listing, nested archives and disc images, scan, previews) and attaches the result. Nothing changes for a clean file besides that.
+- It can be stopped at any time (`Ctrl-C`, `docker stop`) and run again: what has an inspection is done. Each run goes through a resource once; one that failed (logged as `inspection failed` with its id) is tried again by the next run.
+- Every line it logs names the resource, its files and the outcome: `inspected`, `unreadable` (the archive can no longer be opened; recorded, the file stays published), `held` (the scan detected something: the file is put under review like an upload and the resource is hidden until an admin decides; unlike an upload, a published file is never removed when the review deadline passes) or `missing` (the bucket does not hold the object; nothing is recorded).
+- It downloads every file once: the whole catalogue is the size of the bucket. The spool needs room for the largest file and what is extracted from it.
 
 ## Cutover from the NestJS backend
 
