@@ -1,7 +1,11 @@
 package downloadpg
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/userpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
@@ -76,4 +80,63 @@ func toHistory(row *ent.GameDownloadResourceFileHistory) download.History {
 		OperatorID:      row.OperatorID,
 		Created:         row.Created,
 	}
+}
+
+type eventFileRow struct {
+	Name string `json:"name"`
+	Size int64  `json:"size"`
+}
+
+type fieldChangeRow struct {
+	Field string   `json:"field"`
+	Old   []string `json:"old"`
+	New   []string `json:"new"`
+}
+
+type eventRow struct {
+	Files   []eventFileRow   `json:"files,omitempty"`
+	Name    string           `json:"name,omitempty"`
+	OldName string           `json:"old_name,omitempty"`
+	Reason  *string          `json:"reason,omitempty"`
+	OldSize *int64           `json:"old_size,omitempty"`
+	NewSize *int64           `json:"new_size,omitempty"`
+	Changes []fieldChangeRow `json:"changes,omitempty"`
+}
+
+func toEventRow(data download.EventData) eventRow {
+	row := eventRow{Name: data.Name, OldName: data.OldName, OldSize: data.OldSize, NewSize: data.NewSize}
+	if data.Reason != nil && *data.Reason != "" {
+		row.Reason = data.Reason
+	}
+	for _, file := range data.Files {
+		row.Files = append(row.Files, eventFileRow{Name: file.Name, Size: file.Size})
+	}
+	for _, change := range data.Changes {
+		row.Changes = append(row.Changes, fieldChangeRow{Field: string(change.Field), Old: nonNilStrings(change.Old), New: nonNilStrings(change.New)})
+	}
+	return row
+}
+
+func toEvent(row *ent.GameDownloadResourceEvent) (download.Event, error) {
+	var stored eventRow
+	if len(row.Data) > 0 {
+		if err := json.Unmarshal(row.Data, &stored); err != nil {
+			return download.Event{}, fmt.Errorf("decode event %d of download resource %d: %w", row.ID, row.ResourceID, err)
+		}
+	}
+	data := download.EventData{Name: stored.Name, OldName: stored.OldName, Reason: stored.Reason, OldSize: stored.OldSize, NewSize: stored.NewSize}
+	for _, file := range stored.Files {
+		data.Files = append(data.Files, download.EventFile{Name: file.Name, Size: file.Size})
+	}
+	for _, change := range stored.Changes {
+		data.Changes = append(data.Changes, download.FieldChange{Field: download.EventField(change.Field), Old: nonNilStrings(change.Old), New: nonNilStrings(change.New)})
+	}
+	return download.Event{
+		ID:         row.ID,
+		ResourceID: row.ResourceID,
+		Kind:       download.EventKind(row.Kind),
+		Actor:      userpg.ToSummaryPtr(row.Edges.Actor),
+		Data:       data,
+		Created:    row.Created,
+	}, nil
 }

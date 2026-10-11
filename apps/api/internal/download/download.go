@@ -134,6 +134,13 @@ type GameFile struct {
 	RecentHistory []HistoryRef
 }
 
+func (f GameFile) Uploaded() time.Time {
+	if len(f.RecentHistory) > 0 {
+		return f.RecentHistory[0].Created
+	}
+	return f.Created
+}
+
 func (f GameFile) LatestReupload() *HistoryRef {
 	if len(f.RecentHistory) < 2 {
 		return nil
@@ -144,8 +151,9 @@ func (f GameFile) LatestReupload() *HistoryRef {
 
 type GameResource struct {
 	Resource
-	Creator user.Summary
-	Files   []GameFile
+	Creator  user.Summary
+	Files    []GameFile
+	Comments int
 }
 
 func (r GameResource) UnderReview() bool {

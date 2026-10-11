@@ -79,6 +79,8 @@ const (
 	EdgeGameDownloadResourceFiles = "game_download_resource_files"
 	// EdgeGameDownloadResourceFileHistories holds the string denoting the game_download_resource_file_histories edge name in mutations.
 	EdgeGameDownloadResourceFileHistories = "game_download_resource_file_histories"
+	// EdgeGameDownloadResourceEvents holds the string denoting the game_download_resource_events edge name in mutations.
+	EdgeGameDownloadResourceEvents = "game_download_resource_events"
 	// EdgeFieldPermissions holds the string denoting the field_permissions edge name in mutations.
 	EdgeFieldPermissions = "field_permissions"
 	// EdgeEditRecords holds the string denoting the edit_records edge name in mutations.
@@ -192,6 +194,13 @@ const (
 	GameDownloadResourceFileHistoriesInverseTable = "game_download_resource_file_histories"
 	// GameDownloadResourceFileHistoriesColumn is the table column denoting the game_download_resource_file_histories relation/edge.
 	GameDownloadResourceFileHistoriesColumn = "operator_id"
+	// GameDownloadResourceEventsTable is the table that holds the game_download_resource_events relation/edge.
+	GameDownloadResourceEventsTable = "game_download_resource_events"
+	// GameDownloadResourceEventsInverseTable is the table name for the GameDownloadResourceEvent entity.
+	// It exists in this package in order to avoid circular dependency with the "gamedownloadresourceevent" package.
+	GameDownloadResourceEventsInverseTable = "game_download_resource_events"
+	// GameDownloadResourceEventsColumn is the table column denoting the game_download_resource_events relation/edge.
+	GameDownloadResourceEventsColumn = "actor_id"
 	// FieldPermissionsTable is the table that holds the field_permissions relation/edge.
 	FieldPermissionsTable = "user_field_permissions"
 	// FieldPermissionsInverseTable is the table name for the UserFieldPermission entity.
@@ -687,6 +696,20 @@ func ByGameDownloadResourceFileHistories(term sql.OrderTerm, terms ...sql.OrderT
 	}
 }
 
+// ByGameDownloadResourceEventsCount orders the results by game_download_resource_events count.
+func ByGameDownloadResourceEventsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newGameDownloadResourceEventsStep(), opts...)
+	}
+}
+
+// ByGameDownloadResourceEvents orders the results by game_download_resource_events terms.
+func ByGameDownloadResourceEvents(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newGameDownloadResourceEventsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByFieldPermissionsCount orders the results by field_permissions count.
 func ByFieldPermissionsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -1006,6 +1029,13 @@ func newGameDownloadResourceFileHistoriesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(GameDownloadResourceFileHistoriesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, GameDownloadResourceFileHistoriesTable, GameDownloadResourceFileHistoriesColumn),
+	)
+}
+func newGameDownloadResourceEventsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(GameDownloadResourceEventsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, GameDownloadResourceEventsTable, GameDownloadResourceEventsColumn),
 	)
 }
 func newFieldPermissionsStep() *sqlgraph.Step {

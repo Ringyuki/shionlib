@@ -10,19 +10,41 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/richtext"
 )
 
-type Service struct {
-	repo     Repository
-	games    GameCards
-	messages Messages
-	queue    Queue
-	tx       Transactor
+type Deps struct {
+	Repo      Repository
+	Games     GameCards
+	Resources Resources
+	Messages  Messages
+	Queue     Queue
+	Tx        Transactor
 }
 
-func NewService(repo Repository, games GameCards, messages Messages, queue Queue, tx Transactor) *Service {
-	return &Service{repo: repo, games: games, messages: messages, queue: queue, tx: tx}
+type Service struct {
+	repo      Repository
+	games     GameCards
+	resources Resources
+	messages  Messages
+	queue     Queue
+	tx        Transactor
+}
+
+func NewService(deps Deps) *Service {
+	return &Service{repo: deps.Repo, games: deps.Games, resources: deps.Resources, messages: deps.Messages, queue: deps.Queue, tx: deps.Tx}
 }
 
 func (s *Service) Create(ctx context.Context, who actor.Actor, gameID int, in CreateInput) (Entry, error) {
+	return s.create(ctx, who, Subject{GameID: gameID}, in)
+}
+
+func (s *Service) CreateOnResource(ctx context.Context, who actor.Actor, resourceID int, in CreateInput) (Entry, error) {
+	resource, err := s.resources.Viewable(ctx, who, resourceID)
+	if err != nil {
+		return Entry{}, err
+	}
+	return s.create(ctx, who, Subject{GameID: resource.GameID, ResourceID: resource.ID}, in)
+}
+
+func (s *Service) create(ctx context.Context, who actor.Actor, subject Subject, in CreateInput) (Entry, error) {
 	if in.Content.TextLength() > MaxContentLength {
 		return Entry{}, ErrContentTooLong
 	}
@@ -38,7 +60,7 @@ func (s *Service) Create(ctx context.Context, who actor.Actor, gameID int, in Cr
 			if err != nil {
 				return err
 			}
-			if parent.GameID != gameID {
+			if !subject.Holds(parent) {
 				return ErrNotFound
 			}
 			root := parent.ID
@@ -48,12 +70,13 @@ func (s *Service) Create(ctx context.Context, who actor.Actor, gameID int, in Cr
 			rootID = &root
 		}
 		created, err := s.repo.Create(ctx, NewComment{
-			Content:   in.Content.Raw(),
-			Text:      in.Content.Text(),
-			GameID:    gameID,
-			CreatorID: who.UserID,
-			ParentID:  parentID,
-			RootID:    rootID,
+			Content:    in.Content.Raw(),
+			Text:       in.Content.Text(),
+			GameID:     subject.GameID,
+			ResourceID: subject.resource(),
+			CreatorID:  who.UserID,
+			ParentID:   parentID,
+			RootID:     rootID,
 		})
 		if err != nil {
 			return err
@@ -123,10 +146,19 @@ func (s *Service) Delete(ctx context.Context, who actor.Actor, id int) error {
 	})
 }
 
+func (s *Service) ListByResource(ctx context.Context, viewer actor.Actor, resourceID int, query ThreadQuery) (ThreadList, error) {
+	resource, err := s.resources.Viewable(ctx, viewer, resourceID)
+	if err != nil {
+		return ThreadList{}, err
+	}
+	query.Subject = Subject{GameID: resource.GameID, ResourceID: resource.ID}
+	return s.ListByGame(ctx, viewer, query)
+}
+
 func (s *Service) ListByGame(ctx context.Context, viewer actor.Actor, query ThreadQuery) (ThreadList, error) {
 	page := query.Page
 	if query.Focus > 0 {
-		index, found, err := s.repo.ThreadIndex(ctx, query.GameID, viewer.UserID, query.Focus, query.Order)
+		index, found, err := s.repo.ThreadIndex(ctx, query.Subject, viewer.UserID, query.Focus, query.Order)
 		if err != nil {
 			return ThreadList{}, err
 		}
@@ -134,7 +166,7 @@ func (s *Service) ListByGame(ctx context.Context, viewer actor.Actor, query Thre
 			page.Number = index/page.Size + 1
 		}
 	}
-	threads, totals, err := s.repo.ListThreads(ctx, query.GameID, viewer.UserID, query.Order, page)
+	threads, totals, err := s.repo.ListThreads(ctx, query.Subject, viewer.UserID, query.Order, page)
 	if err != nil {
 		return ThreadList{}, err
 	}

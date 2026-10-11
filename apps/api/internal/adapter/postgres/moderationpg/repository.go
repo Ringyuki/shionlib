@@ -11,6 +11,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	entcomment "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
 	entgame "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
 	entwalkthrough "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/walkthrough"
 	"github.com/Ringyuki/shionlib/apps/api/internal/comment"
@@ -51,6 +52,9 @@ func (r *Repository) commentSubject(ctx context.Context, id int, lock bool) (mod
 	query := r.db(ctx).Comment.Query().
 		Where(entcomment.ID(id)).
 		WithGame(selectTitles).
+		WithResource(func(q *ent.GameDownloadResourceQuery) {
+			q.Select(gamedownloadresource.FieldID, gamedownloadresource.FieldCreatorID)
+		}).
 		WithParent(func(q *ent.CommentQuery) {
 			q.Select(entcomment.FieldID, entcomment.FieldText, entcomment.FieldCreatorID)
 		})
@@ -65,13 +69,18 @@ func (r *Repository) commentSubject(ctx context.Context, id int, lock bool) (mod
 		return moderation.CommentSubject{}, fmt.Errorf("load comment %d for moderation: %w", id, err)
 	}
 	subject := moderation.CommentSubject{
-		ID:        row.ID,
-		CreatorID: row.CreatorID,
-		GameID:    row.GameID,
-		Text:      row.Text,
-		Pending:   comment.Status(row.Status) == comment.StatusPending,
-		ParentID:  row.ParentID,
-		Game:      titles(row.Edges.Game),
+		ID:         row.ID,
+		CreatorID:  row.CreatorID,
+		GameID:     row.GameID,
+		Text:       row.Text,
+		Pending:    comment.Status(row.Status) == comment.StatusPending,
+		ParentID:   row.ParentID,
+		ResourceID: row.ResourceID,
+		Game:       titles(row.Edges.Game),
+	}
+	if resource := row.Edges.Resource; resource != nil {
+		publisherID := resource.CreatorID
+		subject.PublisherID = &publisherID
 	}
 	if parent := row.Edges.Parent; parent != nil {
 		creatorID := parent.CreatorID

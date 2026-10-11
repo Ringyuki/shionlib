@@ -15,6 +15,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
@@ -51,6 +52,34 @@ func (_c *CommentCreate) SetNillableText(v *string) *CommentCreate {
 // SetGameID sets the "game_id" field.
 func (_c *CommentCreate) SetGameID(v int) *CommentCreate {
 	_c.mutation.SetGameID(v)
+	return _c
+}
+
+// SetResourceID sets the "resource_id" field.
+func (_c *CommentCreate) SetResourceID(v int) *CommentCreate {
+	_c.mutation.SetResourceID(v)
+	return _c
+}
+
+// SetNillableResourceID sets the "resource_id" field if the given value is not nil.
+func (_c *CommentCreate) SetNillableResourceID(v *int) *CommentCreate {
+	if v != nil {
+		_c.SetResourceID(*v)
+	}
+	return _c
+}
+
+// SetPinnedAt sets the "pinned_at" field.
+func (_c *CommentCreate) SetPinnedAt(v time.Time) *CommentCreate {
+	_c.mutation.SetPinnedAt(v)
+	return _c
+}
+
+// SetNillablePinnedAt sets the "pinned_at" field if the given value is not nil.
+func (_c *CommentCreate) SetNillablePinnedAt(v *time.Time) *CommentCreate {
+	if v != nil {
+		_c.SetPinnedAt(*v)
+	}
 	return _c
 }
 
@@ -182,6 +211,11 @@ func (_c *CommentCreate) AddActivities(v ...*Activity) *CommentCreate {
 // SetGame sets the "game" edge to the Game entity.
 func (_c *CommentCreate) SetGame(v *Game) *CommentCreate {
 	return _c.SetGameID(v.ID)
+}
+
+// SetResource sets the "resource" edge to the GameDownloadResource entity.
+func (_c *CommentCreate) SetResource(v *GameDownloadResource) *CommentCreate {
+	return _c.SetResourceID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the Comment entity by IDs.
@@ -408,6 +442,10 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		_spec.SetField(comment.FieldText, field.TypeString, value)
 		_node.Text = value
 	}
+	if value, ok := _c.mutation.PinnedAt(); ok {
+		_spec.SetField(comment.FieldPinnedAt, field.TypeTime, value)
+		_node.PinnedAt = &value
+	}
 	if value, ok := _c.mutation.ReplyCount(); ok {
 		_spec.SetField(comment.FieldReplyCount, field.TypeInt, value)
 		_node.ReplyCount = value
@@ -459,6 +497,23 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.GameID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ResourceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   comment.ResourceTable,
+			Columns: []string{comment.ResourceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresource.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ResourceID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.ChildrenIDs(); len(nodes) > 0 {
@@ -680,6 +735,42 @@ func (u *CommentUpsert) UpdateGameID() *CommentUpsert {
 	return u
 }
 
+// SetResourceID sets the "resource_id" field.
+func (u *CommentUpsert) SetResourceID(v int) *CommentUpsert {
+	u.Set(comment.FieldResourceID, v)
+	return u
+}
+
+// UpdateResourceID sets the "resource_id" field to the value that was provided on create.
+func (u *CommentUpsert) UpdateResourceID() *CommentUpsert {
+	u.SetExcluded(comment.FieldResourceID)
+	return u
+}
+
+// ClearResourceID clears the value of the "resource_id" field.
+func (u *CommentUpsert) ClearResourceID() *CommentUpsert {
+	u.SetNull(comment.FieldResourceID)
+	return u
+}
+
+// SetPinnedAt sets the "pinned_at" field.
+func (u *CommentUpsert) SetPinnedAt(v time.Time) *CommentUpsert {
+	u.Set(comment.FieldPinnedAt, v)
+	return u
+}
+
+// UpdatePinnedAt sets the "pinned_at" field to the value that was provided on create.
+func (u *CommentUpsert) UpdatePinnedAt() *CommentUpsert {
+	u.SetExcluded(comment.FieldPinnedAt)
+	return u
+}
+
+// ClearPinnedAt clears the value of the "pinned_at" field.
+func (u *CommentUpsert) ClearPinnedAt() *CommentUpsert {
+	u.SetNull(comment.FieldPinnedAt)
+	return u
+}
+
 // SetParentID sets the "parent_id" field.
 func (u *CommentUpsert) SetParentID(v int) *CommentUpsert {
 	u.Set(comment.FieldParentID, v)
@@ -878,6 +969,48 @@ func (u *CommentUpsertOne) SetGameID(v int) *CommentUpsertOne {
 func (u *CommentUpsertOne) UpdateGameID() *CommentUpsertOne {
 	return u.Update(func(s *CommentUpsert) {
 		s.UpdateGameID()
+	})
+}
+
+// SetResourceID sets the "resource_id" field.
+func (u *CommentUpsertOne) SetResourceID(v int) *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.SetResourceID(v)
+	})
+}
+
+// UpdateResourceID sets the "resource_id" field to the value that was provided on create.
+func (u *CommentUpsertOne) UpdateResourceID() *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.UpdateResourceID()
+	})
+}
+
+// ClearResourceID clears the value of the "resource_id" field.
+func (u *CommentUpsertOne) ClearResourceID() *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.ClearResourceID()
+	})
+}
+
+// SetPinnedAt sets the "pinned_at" field.
+func (u *CommentUpsertOne) SetPinnedAt(v time.Time) *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.SetPinnedAt(v)
+	})
+}
+
+// UpdatePinnedAt sets the "pinned_at" field to the value that was provided on create.
+func (u *CommentUpsertOne) UpdatePinnedAt() *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.UpdatePinnedAt()
+	})
+}
+
+// ClearPinnedAt clears the value of the "pinned_at" field.
+func (u *CommentUpsertOne) ClearPinnedAt() *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.ClearPinnedAt()
 	})
 }
 
@@ -1263,6 +1396,48 @@ func (u *CommentUpsertBulk) SetGameID(v int) *CommentUpsertBulk {
 func (u *CommentUpsertBulk) UpdateGameID() *CommentUpsertBulk {
 	return u.Update(func(s *CommentUpsert) {
 		s.UpdateGameID()
+	})
+}
+
+// SetResourceID sets the "resource_id" field.
+func (u *CommentUpsertBulk) SetResourceID(v int) *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.SetResourceID(v)
+	})
+}
+
+// UpdateResourceID sets the "resource_id" field to the value that was provided on create.
+func (u *CommentUpsertBulk) UpdateResourceID() *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.UpdateResourceID()
+	})
+}
+
+// ClearResourceID clears the value of the "resource_id" field.
+func (u *CommentUpsertBulk) ClearResourceID() *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.ClearResourceID()
+	})
+}
+
+// SetPinnedAt sets the "pinned_at" field.
+func (u *CommentUpsertBulk) SetPinnedAt(v time.Time) *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.SetPinnedAt(v)
+	})
+}
+
+// UpdatePinnedAt sets the "pinned_at" field to the value that was provided on create.
+func (u *CommentUpsertBulk) UpdatePinnedAt() *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.UpdatePinnedAt()
+	})
+}
+
+// ClearPinnedAt clears the value of the "pinned_at" field.
+func (u *CommentUpsertBulk) ClearPinnedAt() *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.ClearPinnedAt()
 	})
 }
 

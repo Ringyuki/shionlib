@@ -60,9 +60,10 @@ type Message struct {
 }
 
 type CommentRef struct {
-	ID      int
-	Content json.RawMessage
-	Text    string
+	ID         int
+	Content    json.RawMessage
+	Text       string
+	ResourceID *int
 }
 
 type Detail struct {

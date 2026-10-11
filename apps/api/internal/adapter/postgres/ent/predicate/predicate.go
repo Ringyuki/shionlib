@@ -87,6 +87,9 @@ type GameDeveloperRelation func(*sql.Selector)
 // GameDownloadResource is the predicate function for gamedownloadresource builders.
 type GameDownloadResource func(*sql.Selector)
 
+// GameDownloadResourceEvent is the predicate function for gamedownloadresourceevent builders.
+type GameDownloadResourceEvent func(*sql.Selector)
+
 // GameDownloadResourceFile is the predicate function for gamedownloadresourcefile builders.
 type GameDownloadResourceFile func(*sql.Selector)
 

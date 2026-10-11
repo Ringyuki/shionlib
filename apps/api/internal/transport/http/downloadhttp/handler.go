@@ -17,12 +17,13 @@ var storageTags = []string{"storage"}
 
 type Handler struct {
 	service *download.Service
+	details *download.DetailService
 	links   *download.LinkService
 	resp    *response.Builder
 }
 
-func NewHandler(service *download.Service, links *download.LinkService, resp *response.Builder) *Handler {
-	return &Handler{service: service, links: links, resp: resp}
+func NewHandler(service *download.Service, details *download.DetailService, links *download.LinkService, resp *response.Builder) *Handler {
+	return &Handler{service: service, details: details, links: links, resp: resp}
 }
 
 func (h *Handler) Register(api *httpapi.API) {
@@ -35,6 +36,8 @@ func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "download.releases", Method: http.MethodGet, Path: "/game/download-source/list", Summary: "List recently released download resources", Tags: tags}, h.releases)
 	httpapi.Register(api, httpapi.Route{ID: "download.delete", Method: http.MethodDelete, Path: "/game/download-source/{id}", Summary: "Delete a download resource and its stored objects", Tags: tags, Access: httpapi.AccessSuperAdmin}, h.delete)
 	httpapi.Register(api, httpapi.Route{ID: "download.edit", Method: http.MethodPatch, Path: "/game/download-source/{id}", Summary: "Edit a download resource", Tags: tags, Access: httpapi.AccessUser}, h.edit)
+	httpapi.Register(api, httpapi.Route{ID: "download.detail", Method: http.MethodGet, Path: "/game/download-source/{id}", Summary: "Show a download resource with its game and files", Tags: tags}, h.detail)
+	httpapi.Register(api, httpapi.Route{ID: "download.events", Method: http.MethodGet, Path: "/game/download-source/{id}/events", Summary: "List what changed on a download resource since it was published, newest first", Tags: tags}, h.events)
 	httpapi.Register(api, httpapi.Route{ID: "download.migrateResource", Method: http.MethodPost, Path: "/game/download-source/migrate/{gameId}", Summary: "Import a download resource", Tags: tags, Access: httpapi.AccessSuperAdmin}, h.migrateResource)
 	httpapi.Register(api, httpapi.Route{ID: "download.migrateFile", Method: http.MethodPost, Path: "/game/download-source/migrate/file/{downloadSourceId}", Summary: "Import a stored file into a download resource", Tags: tags, Access: httpapi.AccessSuperAdmin}, h.migrateFile)
 	httpapi.Register(api, httpapi.Route{ID: "download.reupload", Method: http.MethodPut, Path: "/game/download-source/file/{fileId}/reupload", Summary: "Replace a stored file with a new upload", Tags: tags, Access: httpapi.AccessUser}, h.reupload)
@@ -138,6 +141,27 @@ func (h *Handler) edit(ctx context.Context, in *editDownloadSourceInput) (*respo
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil
+}
+
+func (h *Handler) detail(ctx context.Context, in *downloadResourcePathInput) (*response.Output[downloadResourceDetailDTO], error) {
+	detail, err := h.details.Detail(ctx, actor.From(ctx), in.ID)
+	if err != nil {
+		return nil, err
+	}
+	return response.OK(ctx, h.resp, downloadResourceDetailDTO{Resource: toResourceDTO(detail.GameResource, h.resp.Now()), Game: gamehttp.ToGameCard(detail.Game)}), nil
+}
+
+func (h *Handler) events(ctx context.Context, in *downloadResourcePathInput) (*response.Output[[]downloadEventDTO], error) {
+	events, err := h.details.Events(ctx, actor.From(ctx), in.ID)
+	if err != nil {
+		return nil, err
+	}
+	now := h.resp.Now()
+	out := make([]downloadEventDTO, len(events))
+	for i, event := range events {
+		out[i] = toEventDTO(event, now)
+	}
+	return response.OK(ctx, h.resp, out), nil
 }
 
 func (h *Handler) migrateResource(ctx context.Context, in *downloadMigrateResourceInput) (*response.Output[int], error) {

@@ -3,6 +3,7 @@ package comment
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
@@ -20,8 +21,10 @@ type Repository interface {
 	SetStatus(ctx context.Context, id int, status Status) error
 	Delete(ctx context.Context, id int) error
 	Entry(ctx context.Context, id, viewerID int) (Entry, error)
-	ListThreads(ctx context.Context, gameID, viewerID int, order Order, page Page) ([]Thread, ThreadTotals, error)
-	ThreadIndex(ctx context.Context, gameID, viewerID, commentID int, order Order) (int, bool, error)
+	ListThreads(ctx context.Context, subject Subject, viewerID int, order Order, page Page) ([]Thread, ThreadTotals, error)
+	ThreadIndex(ctx context.Context, subject Subject, viewerID, commentID int, order Order) (int, bool, error)
+	ClearPin(ctx context.Context, resourceID int) error
+	SetPin(ctx context.Context, id int, at time.Time) error
 	ListByCreator(ctx context.Context, filter CreatorFilter, page Page) ([]Entry, int, error)
 	HasLike(ctx context.Context, commentID, userID int) (bool, error)
 	AddLike(ctx context.Context, commentID, userID int) (bool, error)
@@ -33,6 +36,10 @@ type AdminStore interface {
 	Detail(ctx context.Context, id int) (AdminDetail, error)
 	HasActivity(ctx context.Context, commentID int) (bool, error)
 	HasReplyNotice(ctx context.Context, commentID, receiverID int) (bool, error)
+}
+
+type Resources interface {
+	Viewable(ctx context.Context, viewer actor.Actor, id int) (ResourceRef, error)
 }
 
 type GameCards interface {

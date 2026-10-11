@@ -20,6 +20,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favorite"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourceevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefilehistory"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
@@ -58,6 +59,7 @@ type UserQuery struct {
 	withMalwareScanCaseReviews            *MalwareScanCaseQuery
 	withGameDownloadResourceFiles         *GameDownloadResourceFileQuery
 	withGameDownloadResourceFileHistories *GameDownloadResourceFileHistoryQuery
+	withGameDownloadResourceEvents        *GameDownloadResourceEventQuery
 	withFieldPermissions                  *UserFieldPermissionQuery
 	withEditRecords                       *EditRecordQuery
 	withSettingChanges                    *SettingChangeQuery
@@ -348,6 +350,28 @@ func (_q *UserQuery) QueryGameDownloadResourceFileHistories() *GameDownloadResou
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(gamedownloadresourcefilehistory.Table, gamedownloadresourcefilehistory.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.GameDownloadResourceFileHistoriesTable, user.GameDownloadResourceFileHistoriesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryGameDownloadResourceEvents chains the current query on the "game_download_resource_events" edge.
+func (_q *UserQuery) QueryGameDownloadResourceEvents() *GameDownloadResourceEventQuery {
+	query := (&GameDownloadResourceEventClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(gamedownloadresourceevent.Table, gamedownloadresourceevent.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.GameDownloadResourceEventsTable, user.GameDownloadResourceEventsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -954,6 +978,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		withMalwareScanCaseReviews:            _q.withMalwareScanCaseReviews.Clone(),
 		withGameDownloadResourceFiles:         _q.withGameDownloadResourceFiles.Clone(),
 		withGameDownloadResourceFileHistories: _q.withGameDownloadResourceFileHistories.Clone(),
+		withGameDownloadResourceEvents:        _q.withGameDownloadResourceEvents.Clone(),
 		withFieldPermissions:                  _q.withFieldPermissions.Clone(),
 		withEditRecords:                       _q.withEditRecords.Clone(),
 		withSettingChanges:                    _q.withSettingChanges.Clone(),
@@ -1097,6 +1122,17 @@ func (_q *UserQuery) WithGameDownloadResourceFileHistories(opts ...func(*GameDow
 		opt(query)
 	}
 	_q.withGameDownloadResourceFileHistories = query
+	return _q
+}
+
+// WithGameDownloadResourceEvents tells the query-builder to eager-load the nodes that are connected to
+// the "game_download_resource_events" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithGameDownloadResourceEvents(opts ...func(*GameDownloadResourceEventQuery)) *UserQuery {
+	query := (&GameDownloadResourceEventClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withGameDownloadResourceEvents = query
 	return _q
 }
 
@@ -1376,7 +1412,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [29]bool{
+		loadedTypes = [30]bool{
 			_q.withActivities != nil,
 			_q.withComments != nil,
 			_q.withLikedComments != nil,
@@ -1388,6 +1424,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			_q.withMalwareScanCaseReviews != nil,
 			_q.withGameDownloadResourceFiles != nil,
 			_q.withGameDownloadResourceFileHistories != nil,
+			_q.withGameDownloadResourceEvents != nil,
 			_q.withFieldPermissions != nil,
 			_q.withEditRecords != nil,
 			_q.withSettingChanges != nil,
@@ -1516,6 +1553,15 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			func(n *User) { n.Edges.GameDownloadResourceFileHistories = []*GameDownloadResourceFileHistory{} },
 			func(n *User, e *GameDownloadResourceFileHistory) {
 				n.Edges.GameDownloadResourceFileHistories = append(n.Edges.GameDownloadResourceFileHistories, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withGameDownloadResourceEvents; query != nil {
+		if err := _q.loadGameDownloadResourceEvents(ctx, query, nodes,
+			func(n *User) { n.Edges.GameDownloadResourceEvents = []*GameDownloadResourceEvent{} },
+			func(n *User, e *GameDownloadResourceEvent) {
+				n.Edges.GameDownloadResourceEvents = append(n.Edges.GameDownloadResourceEvents, e)
 			}); err != nil {
 			return nil, err
 		}
@@ -2012,6 +2058,39 @@ func (_q *UserQuery) loadGameDownloadResourceFileHistories(ctx context.Context, 
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "operator_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadGameDownloadResourceEvents(ctx context.Context, query *GameDownloadResourceEventQuery, nodes []*User, init func(*User), assign func(*User, *GameDownloadResourceEvent)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(gamedownloadresourceevent.FieldActorID)
+	}
+	query.Where(predicate.GameDownloadResourceEvent(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.GameDownloadResourceEventsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ActorID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "actor_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "actor_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

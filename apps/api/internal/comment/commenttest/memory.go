@@ -29,6 +29,7 @@ type MemoryRepository struct {
 	users    map[int]user.Summary
 	games    map[int]bool
 	rated    map[int]bool
+	public   map[int]bool
 }
 
 func NewMemoryRepository(now func() time.Time) *MemoryRepository {
@@ -39,6 +40,7 @@ func NewMemoryRepository(now func() time.Time) *MemoryRepository {
 		users:    map[int]user.Summary{},
 		games:    map[int]bool{},
 		rated:    map[int]bool{},
+		public:   map[int]bool{},
 	}
 }
 
@@ -53,6 +55,12 @@ func (r *MemoryRepository) AddGame(id int, rated bool) {
 	defer r.mu.Unlock()
 	r.games[id] = true
 	r.rated[id] = rated
+}
+
+func (r *MemoryRepository) AddResource(id int, public bool) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.public[id] = public
 }
 
 func (r *MemoryRepository) Seed(c comment.Comment) comment.Comment {
@@ -93,16 +101,17 @@ func (r *MemoryRepository) Create(_ context.Context, in comment.NewComment) (com
 	}
 	r.nextID++
 	c := comment.Comment{
-		ID:        r.nextID,
-		Content:   slices.Clone(in.Content),
-		Text:      in.Text,
-		GameID:    in.GameID,
-		ParentID:  in.ParentID,
-		RootID:    in.RootID,
-		CreatorID: in.CreatorID,
-		Status:    comment.StatusPending,
-		Created:   r.now(),
-		Updated:   r.now(),
+		ID:         r.nextID,
+		Content:    slices.Clone(in.Content),
+		Text:       in.Text,
+		GameID:     in.GameID,
+		ResourceID: in.ResourceID,
+		ParentID:   in.ParentID,
+		RootID:     in.RootID,
+		CreatorID:  in.CreatorID,
+		Status:     comment.StatusPending,
+		Created:    r.now(),
+		Updated:    r.now(),
 	}
 	r.comments[c.ID] = c
 	return c, nil
@@ -180,16 +189,21 @@ func (r *MemoryRepository) Entry(_ context.Context, id, viewerID int) (comment.E
 	return r.entry(c, viewerID), nil
 }
 
-func (r *MemoryRepository) ListThreads(_ context.Context, gameID, viewerID int, order comment.Order, page comment.Page) ([]comment.Thread, comment.ThreadTotals, error) {
+func (r *MemoryRepository) ListThreads(_ context.Context, subject comment.Subject, viewerID int, order comment.Order, page comment.Page) ([]comment.Thread, comment.ThreadTotals, error) {
 	visible := func(c comment.Comment) bool {
-		if c.GameID != gameID {
+		if !subject.Holds(c) {
 			return false
 		}
 		return c.Status == comment.StatusVisible || (c.CreatorID == viewerID && c.Status != comment.StatusBlocked)
 	}
 	everything := comment.Page{Number: 1, Size: math.MaxInt32}
 	all, comments, _ := r.list(visible, false, viewerID, everything)
-	roots, threads, _ := r.list(func(c comment.Comment) bool { return visible(c) && (c.RootID == nil || *c.RootID == c.ID) }, order != comment.OrderOldest, viewerID, page)
+	sorted, threads, _ := r.list(func(c comment.Comment) bool { return visible(c) && (c.RootID == nil || *c.RootID == c.ID) }, order != comment.OrderOldest, viewerID, everything)
+	slices.SortStableFunc(sorted, func(a, b comment.Entry) int {
+		return cmp.Compare(rank(a.Comment), rank(b.Comment))
+	})
+	start := min(page.Offset(), len(sorted))
+	roots := sorted[start:min(start+page.Size, len(sorted))]
 	out := make([]comment.Thread, len(roots))
 	for i, root := range roots {
 		out[i] = comment.Thread{Entry: root}
@@ -199,12 +213,43 @@ func (r *MemoryRepository) ListThreads(_ context.Context, gameID, viewerID int, 
 			}
 		}
 	}
-	return out, comment.ThreadTotals{Threads: threads, Comments: comments}, nil
+	totals := comment.ThreadTotals{Threads: threads, Comments: comments}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	for id, c := range r.comments {
+		if subject.ResourceID != 0 && c.ResourceID != nil && *c.ResourceID == subject.ResourceID && c.Pinned() {
+			totals.PinnedID = id
+		}
+	}
+	return out, totals, nil
 }
 
-func (r *MemoryRepository) ThreadIndex(ctx context.Context, gameID, viewerID, commentID int, order comment.Order) (int, bool, error) {
+func rank(c comment.Comment) int {
+	if c.Pinned() {
+		return 0
+	}
+	return 1
+}
+
+func (r *MemoryRepository) ClearPin(_ context.Context, resourceID int) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	for id, c := range r.comments {
+		if c.ResourceID != nil && *c.ResourceID == resourceID && c.Pinned() {
+			c.PinnedAt = nil
+			r.comments[id] = c
+		}
+	}
+	return nil
+}
+
+func (r *MemoryRepository) SetPin(_ context.Context, id int, at time.Time) error {
+	return r.update(id, func(c *comment.Comment) { c.PinnedAt = &at })
+}
+
+func (r *MemoryRepository) ThreadIndex(ctx context.Context, subject comment.Subject, viewerID, commentID int, order comment.Order) (int, bool, error) {
 	everything := comment.Page{Number: 1, Size: math.MaxInt32}
-	threads, _, err := r.ListThreads(ctx, gameID, viewerID, order, everything)
+	threads, _, err := r.ListThreads(ctx, subject, viewerID, order, everything)
 	if err != nil {
 		return 0, false, err
 	}
@@ -223,7 +268,8 @@ func (r *MemoryRepository) ThreadIndex(ctx context.Context, gameID, viewerID, co
 
 func (r *MemoryRepository) ListByCreator(_ context.Context, filter comment.CreatorFilter, page comment.Page) ([]comment.Entry, int, error) {
 	return r.list(func(c comment.Comment) bool {
-		return c.CreatorID == filter.CreatorID && c.Status == comment.StatusVisible && (!filter.ExcludeRated || !r.rated[c.GameID])
+		listed := c.ResourceID == nil || r.public[*c.ResourceID]
+		return c.CreatorID == filter.CreatorID && c.Status == comment.StatusVisible && listed && (!filter.ExcludeRated || !r.rated[c.GameID])
 	}, true, filter.ViewerID, page)
 }
 
@@ -264,6 +310,9 @@ func (r *MemoryRepository) entry(c comment.Comment, viewerID int) comment.Entry 
 		if parent, ok := r.comments[*c.ParentID]; ok {
 			entry.Parent = &comment.ParentRef{ID: parent.ID, Text: parent.Text, Content: parent.Content, Creator: r.summary(parent.CreatorID)}
 		}
+	}
+	if c.ResourceID != nil {
+		entry.Resource = &comment.ResourceRef{ID: *c.ResourceID, GameID: c.GameID}
 	}
 	return entry
 }

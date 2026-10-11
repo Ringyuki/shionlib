@@ -636,6 +636,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "content", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
 		{Name: "text", Type: field.TypeString, Size: 2147483647, Default: ""},
+		{Name: "pinned_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "reply_count", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "status", Type: field.TypeInt, Default: 1, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "edited", Type: field.TypeBool, Default: false},
@@ -644,6 +645,7 @@ var (
 		{Name: "parent_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "root_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "game_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "resource_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
 		{Name: "creator_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
 	}
 	// CommentsTable holds the schema information for the "comments" table.
@@ -654,25 +656,31 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "comments_parent_id_fkey",
-				Columns:    []*schema.Column{CommentsColumns[8]},
-				RefColumns: []*schema.Column{CommentsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "comments_root_id_fkey",
 				Columns:    []*schema.Column{CommentsColumns[9]},
 				RefColumns: []*schema.Column{CommentsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "comments_game_id_fkey",
+				Symbol:     "comments_root_id_fkey",
 				Columns:    []*schema.Column{CommentsColumns[10]},
+				RefColumns: []*schema.Column{CommentsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "comments_game_id_fkey",
+				Columns:    []*schema.Column{CommentsColumns[11]},
 				RefColumns: []*schema.Column{GamesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
+				Symbol:     "comments_resource_id_fkey",
+				Columns:    []*schema.Column{CommentsColumns[12]},
+				RefColumns: []*schema.Column{GameDownloadResourcesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
 				Symbol:     "comments_creator_id_fkey",
-				Columns:    []*schema.Column{CommentsColumns[11]},
+				Columns:    []*schema.Column{CommentsColumns[13]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Restrict,
 			},
@@ -681,17 +689,30 @@ var (
 			{
 				Name:    "comments_game_id_created_idx",
 				Unique:  false,
-				Columns: []*schema.Column{CommentsColumns[10], CommentsColumns[6]},
+				Columns: []*schema.Column{CommentsColumns[11], CommentsColumns[7]},
+			},
+			{
+				Name:    "comments_resource_id_created_idx",
+				Unique:  false,
+				Columns: []*schema.Column{CommentsColumns[12], CommentsColumns[7]},
+			},
+			{
+				Name:    "comments_resource_id_pinned_key",
+				Unique:  true,
+				Columns: []*schema.Column{CommentsColumns[12]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "pinned_at IS NOT NULL",
+				},
 			},
 			{
 				Name:    "comments_parent_id_created_idx",
 				Unique:  false,
-				Columns: []*schema.Column{CommentsColumns[8], CommentsColumns[6]},
+				Columns: []*schema.Column{CommentsColumns[9], CommentsColumns[7]},
 			},
 			{
 				Name:    "comments_creator_id_created_idx",
 				Unique:  false,
-				Columns: []*schema.Column{CommentsColumns[11], CommentsColumns[6]},
+				Columns: []*schema.Column{CommentsColumns[13], CommentsColumns[7]},
 			},
 		},
 	}
@@ -1304,6 +1325,42 @@ var (
 				Name:    "game_download_resources_game_id_status_idx",
 				Unique:  false,
 				Columns: []*schema.Column{GameDownloadResourcesColumns[11], GameDownloadResourcesColumns[1]},
+			},
+		},
+	}
+	// GameDownloadResourceEventsColumns holds the columns for the "game_download_resource_events" table.
+	GameDownloadResourceEventsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "kind", Type: field.TypeString, Size: 32, SchemaType: map[string]string{"postgres": "character varying(32)"}},
+		{Name: "data", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "resource_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "actor_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// GameDownloadResourceEventsTable holds the schema information for the "game_download_resource_events" table.
+	GameDownloadResourceEventsTable = &schema.Table{
+		Name:       "game_download_resource_events",
+		Columns:    GameDownloadResourceEventsColumns,
+		PrimaryKey: []*schema.Column{GameDownloadResourceEventsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "game_download_resource_events_resource_id_fkey",
+				Columns:    []*schema.Column{GameDownloadResourceEventsColumns[4]},
+				RefColumns: []*schema.Column{GameDownloadResourcesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "game_download_resource_events_actor_id_fkey",
+				Columns:    []*schema.Column{GameDownloadResourceEventsColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Restrict,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "game_download_resource_events_resource_id_created_idx",
+				Unique:  false,
+				Columns: []*schema.Column{GameDownloadResourceEventsColumns[4], GameDownloadResourceEventsColumns[3]},
 			},
 		},
 	}
@@ -2527,6 +2584,7 @@ var (
 		GameDevelopersTable,
 		GameDeveloperRelationsTable,
 		GameDownloadResourcesTable,
+		GameDownloadResourceEventsTable,
 		GameDownloadResourceFilesTable,
 		GameDownloadResourceFileHistoriesTable,
 		GameDownloadResourceReportsTable,
@@ -2622,7 +2680,8 @@ func init() {
 	CommentsTable.ForeignKeys[0].RefTable = CommentsTable
 	CommentsTable.ForeignKeys[1].RefTable = CommentsTable
 	CommentsTable.ForeignKeys[2].RefTable = GamesTable
-	CommentsTable.ForeignKeys[3].RefTable = UsersTable
+	CommentsTable.ForeignKeys[3].RefTable = GameDownloadResourcesTable
+	CommentsTable.ForeignKeys[4].RefTable = UsersTable
 	CommentsTable.Annotation = &entsql.Annotation{
 		Table: "comments",
 	}
@@ -2677,6 +2736,11 @@ func init() {
 	GameDownloadResourcesTable.ForeignKeys[1].RefTable = UsersTable
 	GameDownloadResourcesTable.Annotation = &entsql.Annotation{
 		Table: "game_download_resources",
+	}
+	GameDownloadResourceEventsTable.ForeignKeys[0].RefTable = GameDownloadResourcesTable
+	GameDownloadResourceEventsTable.ForeignKeys[1].RefTable = UsersTable
+	GameDownloadResourceEventsTable.Annotation = &entsql.Annotation{
+		Table: "game_download_resource_events",
 	}
 	GameDownloadResourceFilesTable.ForeignKeys[0].RefTable = GameDownloadResourcesTable
 	GameDownloadResourceFilesTable.ForeignKeys[1].RefTable = GameUploadSessionsTable

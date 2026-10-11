@@ -528,6 +528,11 @@ func (s *Service) allow(ctx context.Context, id int, note *string, notify bool, 
 		if err := s.repo.ResolveCase(ctx, target.ID, resolution); err != nil {
 			return err
 		}
+		if target.ResourceID != nil {
+			if err := s.files.ReviewCleared(ctx, *target.ResourceID, target.FileName, reviewer); err != nil && !errors.Is(err, download.ErrResourceNotFound) {
+				return err
+			}
+		}
 		if !notify {
 			return nil
 		}

@@ -424,6 +424,9 @@ func TestReviewAllowReleasesTheWholeResource(t *testing.T) {
 	if jobs := f.events.Jobs(); len(jobs) != 2 || jobs[0] != (download.StoreFile{FileID: 1}) || jobs[1] != (download.StoreFile{FileID: 2}) {
 		t.Fatalf("released files are stored: %+v", jobs)
 	}
+	if cleared := f.repo.Cleared; len(cleared) != 1 || cleared[0].ResourceID != resourceID || cleared[0].FileName != "game.part1.rar, game.part2.rar" || *cleared[0].ReviewerID != reviewer.UserID {
+		t.Fatalf("the resource's history learns that the review cleared its files: %+v", cleared)
+	}
 	messages := f.events.Messages()
 	if len(messages) != 1 || messages[0].Tone != message.ToneSuccess || decodeMeta(t, messages[0])["review_note"] != "false positive" {
 		t.Fatalf("message %+v", messages)

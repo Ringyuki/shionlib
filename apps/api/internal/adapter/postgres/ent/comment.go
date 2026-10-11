@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 )
 
@@ -27,6 +28,10 @@ type Comment struct {
 	Text string `json:"text,omitempty"`
 	// GameID holds the value of the "game_id" field.
 	GameID int `json:"game_id,omitempty"`
+	// ResourceID holds the value of the "resource_id" field.
+	ResourceID *int `json:"resource_id,omitempty"`
+	// PinnedAt holds the value of the "pinned_at" field.
+	PinnedAt *time.Time `json:"pinned_at,omitempty"`
 	// ParentID holds the value of the "parent_id" field.
 	ParentID *int `json:"parent_id,omitempty"`
 	// RootID holds the value of the "root_id" field.
@@ -55,6 +60,8 @@ type CommentEdges struct {
 	Activities []*Activity `json:"activities,omitempty"`
 	// Game holds the value of the game edge.
 	Game *Game `json:"game,omitempty"`
+	// Resource holds the value of the resource edge.
+	Resource *GameDownloadResource `json:"resource,omitempty"`
 	// Children holds the value of the children edge.
 	Children []*Comment `json:"children,omitempty"`
 	// Parent holds the value of the parent edge.
@@ -75,7 +82,7 @@ type CommentEdges struct {
 	Likes []*CommentLike `json:"likes,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [11]bool
+	loadedTypes [12]bool
 }
 
 // ActivitiesOrErr returns the Activities value or an error if the edge
@@ -98,10 +105,21 @@ func (e CommentEdges) GameOrErr() (*Game, error) {
 	return nil, &NotLoadedError{edge: "game"}
 }
 
+// ResourceOrErr returns the Resource value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e CommentEdges) ResourceOrErr() (*GameDownloadResource, error) {
+	if e.Resource != nil {
+		return e.Resource, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: gamedownloadresource.Label}
+	}
+	return nil, &NotLoadedError{edge: "resource"}
+}
+
 // ChildrenOrErr returns the Children value or an error if the edge
 // was not loaded in eager-loading.
 func (e CommentEdges) ChildrenOrErr() ([]*Comment, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.Children, nil
 	}
 	return nil, &NotLoadedError{edge: "children"}
@@ -112,7 +130,7 @@ func (e CommentEdges) ChildrenOrErr() ([]*Comment, error) {
 func (e CommentEdges) ParentOrErr() (*Comment, error) {
 	if e.Parent != nil {
 		return e.Parent, nil
-	} else if e.loadedTypes[3] {
+	} else if e.loadedTypes[4] {
 		return nil, &NotFoundError{label: comment.Label}
 	}
 	return nil, &NotLoadedError{edge: "parent"}
@@ -121,7 +139,7 @@ func (e CommentEdges) ParentOrErr() (*Comment, error) {
 // RootDescendantsOrErr returns the RootDescendants value or an error if the edge
 // was not loaded in eager-loading.
 func (e CommentEdges) RootDescendantsOrErr() ([]*Comment, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.RootDescendants, nil
 	}
 	return nil, &NotLoadedError{edge: "root_descendants"}
@@ -132,7 +150,7 @@ func (e CommentEdges) RootDescendantsOrErr() ([]*Comment, error) {
 func (e CommentEdges) RootOrErr() (*Comment, error) {
 	if e.Root != nil {
 		return e.Root, nil
-	} else if e.loadedTypes[5] {
+	} else if e.loadedTypes[6] {
 		return nil, &NotFoundError{label: comment.Label}
 	}
 	return nil, &NotLoadedError{edge: "root"}
@@ -143,7 +161,7 @@ func (e CommentEdges) RootOrErr() (*Comment, error) {
 func (e CommentEdges) CreatorOrErr() (*User, error) {
 	if e.Creator != nil {
 		return e.Creator, nil
-	} else if e.loadedTypes[6] {
+	} else if e.loadedTypes[7] {
 		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "creator"}
@@ -152,7 +170,7 @@ func (e CommentEdges) CreatorOrErr() (*User, error) {
 // LikedUsersOrErr returns the LikedUsers value or an error if the edge
 // was not loaded in eager-loading.
 func (e CommentEdges) LikedUsersOrErr() ([]*User, error) {
-	if e.loadedTypes[7] {
+	if e.loadedTypes[8] {
 		return e.LikedUsers, nil
 	}
 	return nil, &NotLoadedError{edge: "liked_users"}
@@ -161,7 +179,7 @@ func (e CommentEdges) LikedUsersOrErr() ([]*User, error) {
 // MessagesOrErr returns the Messages value or an error if the edge
 // was not loaded in eager-loading.
 func (e CommentEdges) MessagesOrErr() ([]*Message, error) {
-	if e.loadedTypes[8] {
+	if e.loadedTypes[9] {
 		return e.Messages, nil
 	}
 	return nil, &NotLoadedError{edge: "messages"}
@@ -170,7 +188,7 @@ func (e CommentEdges) MessagesOrErr() ([]*Message, error) {
 // ModeratesOrErr returns the Moderates value or an error if the edge
 // was not loaded in eager-loading.
 func (e CommentEdges) ModeratesOrErr() ([]*ModerationEvent, error) {
-	if e.loadedTypes[9] {
+	if e.loadedTypes[10] {
 		return e.Moderates, nil
 	}
 	return nil, &NotLoadedError{edge: "moderates"}
@@ -179,7 +197,7 @@ func (e CommentEdges) ModeratesOrErr() ([]*ModerationEvent, error) {
 // LikesOrErr returns the Likes value or an error if the edge
 // was not loaded in eager-loading.
 func (e CommentEdges) LikesOrErr() ([]*CommentLike, error) {
-	if e.loadedTypes[10] {
+	if e.loadedTypes[11] {
 		return e.Likes, nil
 	}
 	return nil, &NotLoadedError{edge: "likes"}
@@ -194,11 +212,11 @@ func (*Comment) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case comment.FieldEdited:
 			values[i] = new(sql.NullBool)
-		case comment.FieldID, comment.FieldGameID, comment.FieldParentID, comment.FieldRootID, comment.FieldReplyCount, comment.FieldCreatorID, comment.FieldStatus:
+		case comment.FieldID, comment.FieldGameID, comment.FieldResourceID, comment.FieldParentID, comment.FieldRootID, comment.FieldReplyCount, comment.FieldCreatorID, comment.FieldStatus:
 			values[i] = new(sql.NullInt64)
 		case comment.FieldText:
 			values[i] = new(sql.NullString)
-		case comment.FieldCreated, comment.FieldUpdated:
+		case comment.FieldPinnedAt, comment.FieldCreated, comment.FieldUpdated:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -240,6 +258,20 @@ func (_m *Comment) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field game_id", values[i])
 			} else if value.Valid {
 				_m.GameID = int(value.Int64)
+			}
+		case comment.FieldResourceID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field resource_id", values[i])
+			} else if value.Valid {
+				_m.ResourceID = new(int)
+				*_m.ResourceID = int(value.Int64)
+			}
+		case comment.FieldPinnedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field pinned_at", values[i])
+			} else if value.Valid {
+				_m.PinnedAt = new(time.Time)
+				*_m.PinnedAt = value.Time
 			}
 		case comment.FieldParentID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -312,6 +344,11 @@ func (_m *Comment) QueryActivities() *ActivityQuery {
 // QueryGame queries the "game" edge of the Comment entity.
 func (_m *Comment) QueryGame() *GameQuery {
 	return NewCommentClient(_m.config).QueryGame(_m)
+}
+
+// QueryResource queries the "resource" edge of the Comment entity.
+func (_m *Comment) QueryResource() *GameDownloadResourceQuery {
+	return NewCommentClient(_m.config).QueryResource(_m)
 }
 
 // QueryChildren queries the "children" edge of the Comment entity.
@@ -390,6 +427,16 @@ func (_m *Comment) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("game_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.GameID))
+	builder.WriteString(", ")
+	if v := _m.ResourceID; v != nil {
+		builder.WriteString("resource_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.PinnedAt; v != nil {
+		builder.WriteString("pinned_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	if v := _m.ParentID; v != nil {
 		builder.WriteString("parent_id=")

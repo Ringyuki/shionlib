@@ -11,8 +11,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourceevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
@@ -223,6 +225,36 @@ func (_c *GameDownloadResourceCreate) AddMalwareScanCases(v ...*MalwareScanCase)
 // SetCreator sets the "creator" edge to the User entity.
 func (_c *GameDownloadResourceCreate) SetCreator(v *User) *GameDownloadResourceCreate {
 	return _c.SetCreatorID(v.ID)
+}
+
+// AddCommentIDs adds the "comments" edge to the Comment entity by IDs.
+func (_c *GameDownloadResourceCreate) AddCommentIDs(ids ...int) *GameDownloadResourceCreate {
+	_c.mutation.AddCommentIDs(ids...)
+	return _c
+}
+
+// AddComments adds the "comments" edges to the Comment entity.
+func (_c *GameDownloadResourceCreate) AddComments(v ...*Comment) *GameDownloadResourceCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddCommentIDs(ids...)
+}
+
+// AddEventIDs adds the "events" edge to the GameDownloadResourceEvent entity by IDs.
+func (_c *GameDownloadResourceCreate) AddEventIDs(ids ...int) *GameDownloadResourceCreate {
+	_c.mutation.AddEventIDs(ids...)
+	return _c
+}
+
+// AddEvents adds the "events" edges to the GameDownloadResourceEvent entity.
+func (_c *GameDownloadResourceCreate) AddEvents(v ...*GameDownloadResourceEvent) *GameDownloadResourceCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddEventIDs(ids...)
 }
 
 // Mutation returns the GameDownloadResourceMutation object of the builder.
@@ -464,6 +496,38 @@ func (_c *GameDownloadResourceCreate) createSpec() (*GameDownloadResource, *sqlg
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.CreatorID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.CommentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.CommentsTable,
+			Columns: []string{gamedownloadresource.CommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.EventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.EventsTable,
+			Columns: []string{gamedownloadresource.EventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourceevent.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

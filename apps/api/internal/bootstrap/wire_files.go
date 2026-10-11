@@ -13,6 +13,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/dlticket"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/localfs"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/objectstore"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/commentpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/downloadpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/reportpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/scanpg"
@@ -76,6 +77,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 	downloads := download.NewService(download.Deps{
 		Repo:       downloadRepo,
 		Games:      shared.GameCards,
+		Comments:   commentpg.NewRepository(infra.Ent),
 		Sessions:   uploads,
 		Activities: shared.Activities,
 		Messages:   shared.Messages,
@@ -86,6 +88,8 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		Settings:   shared.Settings,
 		Now:        shared.Now,
 	})
+	resourceDetails := download.NewDetailService(downloadRepo, shared.GameCards, commentpg.NewRepository(infra.Ent))
+	shared.Resources = resourceDetails
 	vendorClient := httpclient.New(httpclient.Options{Timeout: vendorTimeout})
 	links := download.NewLinkService(
 		downloadRepo,
@@ -142,7 +146,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 
 	modules.Handlers = append(modules.Handlers,
 		uploadhttp.NewHandler(uploads, quota, shared.Builder),
-		downloadhttp.NewHandler(downloads, links, shared.Builder),
+		downloadhttp.NewHandler(downloads, resourceDetails, links, shared.Builder),
 		reporthttp.NewHandler(reports, shared.Builder),
 		scanhttp.NewHandler(scans, shared.Builder),
 	)

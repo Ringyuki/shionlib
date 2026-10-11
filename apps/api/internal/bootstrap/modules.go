@@ -18,6 +18,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/ai"
 	"github.com/Ringyuki/shionlib/apps/api/internal/auth"
 	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
+	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/cache"
@@ -71,6 +72,7 @@ type Shared struct {
 	Sessions   *auth.SessionService
 	Users      *user.Service
 	AI         *ai.Service
+	Resources  *download.DetailService
 }
 
 type wiring func(infra *Infra, shared *Shared, modules *Modules)
@@ -82,8 +84,8 @@ var wirings = []wiring{
 	wireActivity,
 	wireAuth,
 	wireAI,
-	wireContent,
 	wireFiles,
+	wireContent,
 	wireCatalog,
 	wireCatalogSync,
 	wireCommunity,

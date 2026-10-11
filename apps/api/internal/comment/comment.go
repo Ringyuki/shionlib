@@ -30,6 +30,8 @@ type Comment struct {
 	Content    json.RawMessage
 	Text       string
 	GameID     int
+	ResourceID *int
+	PinnedAt   *time.Time
 	ParentID   *int
 	RootID     *int
 	ReplyCount int
@@ -38,6 +40,44 @@ type Comment struct {
 	Edited     bool
 	Created    time.Time
 	Updated    time.Time
+}
+
+func (c Comment) Pinned() bool {
+	return c.PinnedAt != nil
+}
+
+func (c Comment) Pinnable() bool {
+	return c.ResourceID != nil && c.ParentID == nil && c.Status == StatusVisible
+}
+
+type Subject struct {
+	GameID     int
+	ResourceID int
+}
+
+func (s Subject) Holds(c Comment) bool {
+	if c.GameID != s.GameID {
+		return false
+	}
+	if s.ResourceID == 0 {
+		return c.ResourceID == nil
+	}
+	return c.ResourceID != nil && *c.ResourceID == s.ResourceID
+}
+
+func (s Subject) resource() *int {
+	if s.ResourceID == 0 {
+		return nil
+	}
+	id := s.ResourceID
+	return &id
+}
+
+type ResourceRef struct {
+	ID        int
+	GameID    int
+	CreatorID int
+	FileNames []string
 }
 
 type ParentRef struct {
@@ -54,6 +94,7 @@ type Entry struct {
 	LikeCount int
 	Liked     bool
 	Game      *game.Card
+	Resource  *ResourceRef
 }
 
 type Order string
@@ -71,13 +112,14 @@ type Thread struct {
 type ThreadTotals struct {
 	Threads  int
 	Comments int
+	PinnedID int
 }
 
 type ThreadQuery struct {
-	GameID int
-	Order  Order
-	Page   Page
-	Focus  int
+	Subject Subject
+	Order   Order
+	Page    Page
+	Focus   int
 }
 
 type ThreadList struct {
@@ -87,12 +129,13 @@ type ThreadList struct {
 }
 
 type NewComment struct {
-	Content   json.RawMessage
-	Text      string
-	GameID    int
-	CreatorID int
-	ParentID  *int
-	RootID    *int
+	Content    json.RawMessage
+	Text       string
+	GameID     int
+	ResourceID *int
+	CreatorID  int
+	ParentID   *int
+	RootID     *int
 }
 
 type CreatorFilter struct {

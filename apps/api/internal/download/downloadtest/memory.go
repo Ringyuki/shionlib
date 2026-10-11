@@ -19,9 +19,11 @@ type MemoryRepository struct {
 	nextResource  int
 	nextFile      int
 	nextHistory   int
+	nextEvent     int
 	resources     map[int]download.Resource
 	files         map[int]download.File
 	histories     []download.History
+	events        []download.Event
 	cases         map[int][]download.MalwareCaseRef
 	favorites     map[int][]int
 	uploading     map[int]bool

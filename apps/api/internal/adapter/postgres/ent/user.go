@@ -90,6 +90,8 @@ type UserEdges struct {
 	GameDownloadResourceFiles []*GameDownloadResourceFile `json:"game_download_resource_files,omitempty"`
 	// GameDownloadResourceFileHistories holds the value of the game_download_resource_file_histories edge.
 	GameDownloadResourceFileHistories []*GameDownloadResourceFileHistory `json:"game_download_resource_file_histories,omitempty"`
+	// GameDownloadResourceEvents holds the value of the game_download_resource_events edge.
+	GameDownloadResourceEvents []*GameDownloadResourceEvent `json:"game_download_resource_events,omitempty"`
 	// FieldPermissions holds the value of the field_permissions edge.
 	FieldPermissions []*UserFieldPermission `json:"field_permissions,omitempty"`
 	// EditRecords holds the value of the edit_records edge.
@@ -128,7 +130,7 @@ type UserEdges struct {
 	CommentLikes []*CommentLike `json:"comment_likes,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [29]bool
+	loadedTypes [30]bool
 }
 
 // ActivitiesOrErr returns the Activities value or an error if the edge
@@ -230,10 +232,19 @@ func (e UserEdges) GameDownloadResourceFileHistoriesOrErr() ([]*GameDownloadReso
 	return nil, &NotLoadedError{edge: "game_download_resource_file_histories"}
 }
 
+// GameDownloadResourceEventsOrErr returns the GameDownloadResourceEvents value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) GameDownloadResourceEventsOrErr() ([]*GameDownloadResourceEvent, error) {
+	if e.loadedTypes[11] {
+		return e.GameDownloadResourceEvents, nil
+	}
+	return nil, &NotLoadedError{edge: "game_download_resource_events"}
+}
+
 // FieldPermissionsOrErr returns the FieldPermissions value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) FieldPermissionsOrErr() ([]*UserFieldPermission, error) {
-	if e.loadedTypes[11] {
+	if e.loadedTypes[12] {
 		return e.FieldPermissions, nil
 	}
 	return nil, &NotLoadedError{edge: "field_permissions"}
@@ -242,7 +253,7 @@ func (e UserEdges) FieldPermissionsOrErr() ([]*UserFieldPermission, error) {
 // EditRecordsOrErr returns the EditRecords value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) EditRecordsOrErr() ([]*EditRecord, error) {
-	if e.loadedTypes[12] {
+	if e.loadedTypes[13] {
 		return e.EditRecords, nil
 	}
 	return nil, &NotLoadedError{edge: "edit_records"}
@@ -251,7 +262,7 @@ func (e UserEdges) EditRecordsOrErr() ([]*EditRecord, error) {
 // SettingChangesOrErr returns the SettingChanges value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) SettingChangesOrErr() ([]*SettingChange, error) {
-	if e.loadedTypes[13] {
+	if e.loadedTypes[14] {
 		return e.SettingChanges, nil
 	}
 	return nil, &NotLoadedError{edge: "setting_changes"}
@@ -260,7 +271,7 @@ func (e UserEdges) SettingChangesOrErr() ([]*SettingChange, error) {
 // FavoritesOrErr returns the Favorites value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) FavoritesOrErr() ([]*Favorite, error) {
-	if e.loadedTypes[14] {
+	if e.loadedTypes[15] {
 		return e.Favorites, nil
 	}
 	return nil, &NotLoadedError{edge: "favorites"}
@@ -269,7 +280,7 @@ func (e UserEdges) FavoritesOrErr() ([]*Favorite, error) {
 // GamesOrErr returns the Games value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) GamesOrErr() ([]*Game, error) {
-	if e.loadedTypes[15] {
+	if e.loadedTypes[16] {
 		return e.Games, nil
 	}
 	return nil, &NotLoadedError{edge: "games"}
@@ -278,7 +289,7 @@ func (e UserEdges) GamesOrErr() ([]*Game, error) {
 // MessagesSentOrErr returns the MessagesSent value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) MessagesSentOrErr() ([]*Message, error) {
-	if e.loadedTypes[16] {
+	if e.loadedTypes[17] {
 		return e.MessagesSent, nil
 	}
 	return nil, &NotLoadedError{edge: "messages_sent"}
@@ -287,7 +298,7 @@ func (e UserEdges) MessagesSentOrErr() ([]*Message, error) {
 // MessagesOrErr returns the Messages value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) MessagesOrErr() ([]*Message, error) {
-	if e.loadedTypes[17] {
+	if e.loadedTypes[18] {
 		return e.Messages, nil
 	}
 	return nil, &NotLoadedError{edge: "messages"}
@@ -296,7 +307,7 @@ func (e UserEdges) MessagesOrErr() ([]*Message, error) {
 // SponsorOrdersOrErr returns the SponsorOrders value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) SponsorOrdersOrErr() ([]*SponsorOrder, error) {
-	if e.loadedTypes[18] {
+	if e.loadedTypes[19] {
 		return e.SponsorOrders, nil
 	}
 	return nil, &NotLoadedError{edge: "sponsor_orders"}
@@ -305,7 +316,7 @@ func (e UserEdges) SponsorOrdersOrErr() ([]*SponsorOrder, error) {
 // GamePvnMappingsOrErr returns the GamePvnMappings value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) GamePvnMappingsOrErr() ([]*UserGamePvnMapping, error) {
-	if e.loadedTypes[19] {
+	if e.loadedTypes[20] {
 		return e.GamePvnMappings, nil
 	}
 	return nil, &NotLoadedError{edge: "game_pvn_mappings"}
@@ -316,7 +327,7 @@ func (e UserEdges) GamePvnMappingsOrErr() ([]*UserGamePvnMapping, error) {
 func (e UserEdges) PotatovnBindingOrErr() (*UserPvnBinding, error) {
 	if e.PotatovnBinding != nil {
 		return e.PotatovnBinding, nil
-	} else if e.loadedTypes[20] {
+	} else if e.loadedTypes[21] {
 		return nil, &NotFoundError{label: userpvnbinding.Label}
 	}
 	return nil, &NotLoadedError{edge: "potatovn_binding"}
@@ -325,7 +336,7 @@ func (e UserEdges) PotatovnBindingOrErr() (*UserPvnBinding, error) {
 // GameUploadSessionsOrErr returns the GameUploadSessions value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) GameUploadSessionsOrErr() ([]*GameUploadSession, error) {
-	if e.loadedTypes[21] {
+	if e.loadedTypes[22] {
 		return e.GameUploadSessions, nil
 	}
 	return nil, &NotLoadedError{edge: "game_upload_sessions"}
@@ -334,7 +345,7 @@ func (e UserEdges) GameUploadSessionsOrErr() ([]*GameUploadSession, error) {
 // WalkthroughsOrErr returns the Walkthroughs value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) WalkthroughsOrErr() ([]*Walkthrough, error) {
-	if e.loadedTypes[22] {
+	if e.loadedTypes[23] {
 		return e.Walkthroughs, nil
 	}
 	return nil, &NotLoadedError{edge: "walkthroughs"}
@@ -343,7 +354,7 @@ func (e UserEdges) WalkthroughsOrErr() ([]*Walkthrough, error) {
 // BannedRecordsOrErr returns the BannedRecords value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) BannedRecordsOrErr() ([]*UserBannedRecord, error) {
-	if e.loadedTypes[23] {
+	if e.loadedTypes[24] {
 		return e.BannedRecords, nil
 	}
 	return nil, &NotLoadedError{edge: "banned_records"}
@@ -352,7 +363,7 @@ func (e UserEdges) BannedRecordsOrErr() ([]*UserBannedRecord, error) {
 // BannedByRecordsOrErr returns the BannedByRecords value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) BannedByRecordsOrErr() ([]*UserBannedRecord, error) {
-	if e.loadedTypes[24] {
+	if e.loadedTypes[25] {
 		return e.BannedByRecords, nil
 	}
 	return nil, &NotLoadedError{edge: "banned_by_records"}
@@ -361,7 +372,7 @@ func (e UserEdges) BannedByRecordsOrErr() ([]*UserBannedRecord, error) {
 // SessionsOrErr returns the Sessions value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) SessionsOrErr() ([]*UserLoginSession, error) {
-	if e.loadedTypes[25] {
+	if e.loadedTypes[26] {
 		return e.Sessions, nil
 	}
 	return nil, &NotLoadedError{edge: "sessions"}
@@ -370,7 +381,7 @@ func (e UserEdges) SessionsOrErr() ([]*UserLoginSession, error) {
 // PasskeysOrErr returns the Passkeys value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) PasskeysOrErr() ([]*UserPasskeyCredential, error) {
-	if e.loadedTypes[26] {
+	if e.loadedTypes[27] {
 		return e.Passkeys, nil
 	}
 	return nil, &NotLoadedError{edge: "passkeys"}
@@ -379,7 +390,7 @@ func (e UserEdges) PasskeysOrErr() ([]*UserPasskeyCredential, error) {
 // OidcIdentitiesOrErr returns the OidcIdentities value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) OidcIdentitiesOrErr() ([]*OidcIdentity, error) {
-	if e.loadedTypes[27] {
+	if e.loadedTypes[28] {
 		return e.OidcIdentities, nil
 	}
 	return nil, &NotLoadedError{edge: "oidc_identities"}
@@ -388,7 +399,7 @@ func (e UserEdges) OidcIdentitiesOrErr() ([]*OidcIdentity, error) {
 // CommentLikesOrErr returns the CommentLikes value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) CommentLikesOrErr() ([]*CommentLike, error) {
-	if e.loadedTypes[28] {
+	if e.loadedTypes[29] {
 		return e.CommentLikes, nil
 	}
 	return nil, &NotLoadedError{edge: "comment_likes"}
@@ -628,6 +639,11 @@ func (_m *User) QueryGameDownloadResourceFiles() *GameDownloadResourceFileQuery 
 // QueryGameDownloadResourceFileHistories queries the "game_download_resource_file_histories" edge of the User entity.
 func (_m *User) QueryGameDownloadResourceFileHistories() *GameDownloadResourceFileHistoryQuery {
 	return NewUserClient(_m.config).QueryGameDownloadResourceFileHistories(_m)
+}
+
+// QueryGameDownloadResourceEvents queries the "game_download_resource_events" edge of the User entity.
+func (_m *User) QueryGameDownloadResourceEvents() *GameDownloadResourceEventQuery {
+	return NewUserClient(_m.config).QueryGameDownloadResourceEvents(_m)
 }
 
 // QueryFieldPermissions queries the "field_permissions" edge of the User entity.

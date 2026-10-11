@@ -5104,6 +5104,8 @@
           470102,
           470103,
           470104,
+          470105,
+          470106,
           480101,
           480102,
           480103,
@@ -5256,6 +5258,8 @@
           "COMMENT_NOT_OWNER",
           "COMMENT_TOO_DEEP",
           "COMMENT_CONTENT_TOO_LONG",
+          "COMMENT_NOT_PINNABLE",
+          "COMMENT_PIN_NOT_PUBLISHER",
           "GAME_UPLOAD_INVALID_TOTAL_SIZE",
           "GAME_UPLOAD_TOO_MANY_CHUNKS",
           "GAME_UPLOAD_TOO_LARGE",
@@ -5990,6 +5994,10 @@
               "null"
             ]
           },
+          "pinned": {
+            "description": "The publisher of the resource pinned this comment; it leads the list whatever the order. Always false for comments on a game.",
+            "type": "boolean"
+          },
           "reply_count": {
             "format": "int64",
             "type": "integer"
@@ -6026,6 +6034,7 @@
           "creator",
           "edited",
           "status",
+          "pinned",
           "created",
           "updated"
         ],
@@ -6133,6 +6142,10 @@
               "null"
             ]
           },
+          "pinned": {
+            "description": "The publisher of the resource pinned this comment; it leads the list whatever the order. Always false for comments on a game.",
+            "type": "boolean"
+          },
           "replies": {
             "description": "Visible replies of the thread, oldest first, replies to replies included",
             "items": {
@@ -6180,6 +6193,7 @@
           "creator",
           "edited",
           "status",
+          "pinned",
           "created",
           "updated"
         ],
@@ -6211,7 +6225,7 @@
         "additionalProperties": false,
         "properties": {
           "comments": {
-            "description": "Visible comments of the game, replies included",
+            "description": "Visible comments of the game or of the resource, replies included",
             "format": "int64",
             "type": "integer"
           },
@@ -6227,6 +6241,14 @@
             "format": "int64",
             "type": "integer"
           },
+          "pinned": {
+            "description": "The pinned comment of the resource, whichever page it is on and whether or not the viewer sees it; null when there is none, and always for a game",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "totalItems": {
             "format": "int64",
             "type": "integer"
@@ -6238,6 +6260,7 @@
         },
         "required": [
           "comments",
+          "pinned",
           "totalItems",
           "itemCount",
           "itemsPerPage",
@@ -6390,6 +6413,22 @@
         },
         "required": [
           "reason"
+        ],
+        "type": "object"
+      },
+      "CreateResourceCommentInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "$ref": "#/components/schemas/RichTextDocument"
+          },
+          "parent_id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "content"
         ],
         "type": "object"
       },
@@ -6727,6 +6766,171 @@
         ],
         "type": "object"
       },
+      "DownloadEventChangeDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "enum": [
+              "platforms",
+              "languages",
+              "simulator",
+              "note"
+            ],
+            "type": "string"
+          },
+          "new": {
+            "description": "Values after the edit; empty when the field was cleared",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "old": {
+            "description": "Values before the edit; empty when the field was unset",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "field",
+          "old",
+          "new"
+        ],
+        "type": "object"
+      },
+      "DownloadEventDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "actor": {
+            "description": "Who did it; null when the account no longer exists",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/UserSummaryDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "changes": {
+            "description": "Fields changed by an edit",
+            "items": {
+              "$ref": "#/components/schemas/DownloadEventChangeDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "files": {
+            "description": "Files the resource was published with, or the file added or removed",
+            "items": {
+              "$ref": "#/components/schemas/DownloadEventFileDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "kind": {
+            "description": "What happened: the resource was published, a file was replaced, renamed, added or removed, the resource's fields were edited, or an admin cleared a file flagged by the malware scan",
+            "enum": [
+              "published",
+              "file_replaced",
+              "file_renamed",
+              "file_added",
+              "file_removed",
+              "edited",
+              "review_cleared"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "The file replaced or cleared, or the new name of a renamed file",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "new_size": {
+            "description": "Size of a replaced file after the change",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "old_name": {
+            "description": "Name of a renamed file before the change",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "old_size": {
+            "description": "Size of a replaced file before the change",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "reason": {
+            "description": "Reason given for replacing a file",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "actor",
+          "created",
+          "files",
+          "name",
+          "old_name",
+          "reason",
+          "old_size",
+          "new_size",
+          "changes"
+        ],
+        "type": "object"
+      },
+      "DownloadEventFileDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "size"
+        ],
+        "type": "object"
+      },
       "DownloadFileDTO": {
         "additionalProperties": false,
         "properties": {
@@ -6820,6 +7024,11 @@
           "type": {
             "format": "int64",
             "type": "integer"
+          },
+          "uploaded": {
+            "description": "When the content the file holds now was uploaded: its latest replacement, or its first upload",
+            "format": "date-time",
+            "type": "string"
           }
         },
         "required": [
@@ -6837,7 +7046,8 @@
           "is_virus_false_positive",
           "malware_scan_cases",
           "creator",
-          "latest_history"
+          "latest_history",
+          "uploaded"
         ],
         "type": "object"
       },
@@ -7312,6 +7522,11 @@
       "DownloadResourceDTO": {
         "additionalProperties": false,
         "properties": {
+          "comments": {
+            "description": "Visible comments made on the resource, replies included",
+            "format": "int64",
+            "type": "integer"
+          },
           "created": {
             "format": "date-time",
             "type": "string"
@@ -7390,7 +7605,24 @@
           "published_at",
           "created",
           "updated",
+          "comments",
           "files"
+        ],
+        "type": "object"
+      },
+      "DownloadResourceDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "game": {
+            "$ref": "#/components/schemas/GameCardDTO"
+          },
+          "resource": {
+            "$ref": "#/components/schemas/DownloadResourceDTO"
+          }
+        },
+        "required": [
+          "resource",
+          "game"
         ],
         "type": "object"
       },
@@ -9347,6 +9579,39 @@
         ],
         "type": "object"
       },
+      "EnvelopeDownloadResourceDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DownloadResourceDetailDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeDownloadReuploadDTO": {
         "additionalProperties": false,
         "properties": {
@@ -10165,6 +10430,45 @@
           "data": {
             "items": {
               "$ref": "#/components/schemas/AiSceneDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeListDownloadEventDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/DownloadEventDTO"
             },
             "type": [
               "array",
@@ -14522,6 +14826,14 @@
             "format": "int64",
             "type": "integer"
           },
+          "resource_id": {
+            "description": "The download resource the comment was made on; null for a comment on the game itself",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "text": {
             "type": "string"
           }
@@ -14529,7 +14841,8 @@
         "required": [
           "id",
           "content",
-          "text"
+          "text",
+          "resource_id"
         ],
         "type": "object"
       },
@@ -17602,6 +17915,17 @@
             "format": "int64",
             "type": "integer"
           },
+          "resource": {
+            "description": "The download resource the comment was made on; null for a comment on the game itself",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/UserCommentResourceDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "root_id": {
             "format": "int64",
             "type": [
@@ -17628,6 +17952,7 @@
           "is_liked",
           "like_count",
           "game",
+          "resource",
           "creator",
           "created",
           "updated"
@@ -17715,6 +18040,29 @@
           "content",
           "text",
           "creator"
+        ],
+        "type": "object"
+      },
+      "UserCommentResourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "file_name": {
+            "description": "Name of the first file of the resource",
+            "type": "string"
+          },
+          "files_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "file_name",
+          "files_count"
         ],
         "type": "object"
       },
@@ -26584,6 +26932,176 @@
         ]
       }
     },
+    "/comment/resource/{resource_id}": {
+      "get": {
+        "operationId": "comment.listByResource",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resource_id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Order of the threads after the pinned one; the replies of a thread are always oldest first",
+            "explode": false,
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "default": "newest",
+              "description": "Order of the threads after the pinned one; the replies of a thread are always oldest first",
+              "enum": [
+                "newest",
+                "oldest"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A comment of this resource: the page that holds its thread is answered instead of the requested one; ignored when the viewer cannot see the comment",
+            "explode": false,
+            "in": "query",
+            "name": "focus",
+            "schema": {
+              "description": "A comment of this resource: the page that holds its thread is answered instead of the requested one; ignored when the viewer cannot see the comment",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeCommentThreadPageDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List the comment threads of a download resource, the pinned one first",
+        "tags": [
+          "comment"
+        ]
+      },
+      "post": {
+        "operationId": "comment.createOnResource",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resource_id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateResourceCommentInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeCommentCreatedDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Comment on a download resource",
+        "tags": [
+          "comment"
+        ]
+      }
+    },
     "/comment/{comment_id}": {
       "delete": {
         "operationId": "comment.delete",
@@ -26758,6 +27276,118 @@
           }
         ],
         "summary": "Toggle a like on a comment",
+        "tags": [
+          "comment"
+        ]
+      }
+    },
+    "/comment/{comment_id}/pin": {
+      "delete": {
+        "operationId": "comment.unpin",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "comment_id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Unpin a comment on a download resource",
+        "tags": [
+          "comment"
+        ]
+      },
+      "put": {
+        "operationId": "comment.pin",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "comment_id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Pin a comment on a download resource, replacing the pinned one",
         "tags": [
           "comment"
         ]
@@ -28380,6 +29010,54 @@
           "download"
         ]
       },
+      "get": {
+        "operationId": "download.detail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeDownloadResourceDetailDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Show a download resource with its game and files",
+        "tags": [
+          "download"
+        ]
+      },
       "patch": {
         "operationId": "download.edit",
         "parameters": [
@@ -28442,6 +29120,56 @@
           }
         ],
         "summary": "Edit a download resource",
+        "tags": [
+          "download"
+        ]
+      }
+    },
+    "/game/download-source/{id}/events": {
+      "get": {
+        "operationId": "download.events",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListDownloadEventDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List what changed on a download resource since it was published, newest first",
         "tags": [
           "download"
         ]

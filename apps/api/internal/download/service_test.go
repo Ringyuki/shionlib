@@ -53,6 +53,7 @@ type fixture struct {
 	events   *downloadtest.Recorder
 	store    *downloadtest.ObjectStore
 	service  *download.Service
+	details  *download.DetailService
 }
 
 func newFixture() fixture {
@@ -64,10 +65,12 @@ func newFixture() fixture {
 		events:   &downloadtest.Recorder{},
 		store:    downloadtest.NewObjectStore(),
 	}
+	discussions := downloadtest.Discussions{Counts: map[int]int{1: 4}}
 	cards := gametest.NewCards(game.Card{ID: 10, TitleJP: "ゲーム", TitleZH: "游戏", TitleEN: "Game"}, game.Card{ID: 11})
 	f.service = download.NewService(download.Deps{
 		Repo:       repo,
 		Games:      cards,
+		Comments:   discussions,
 		Sessions:   f.sessions,
 		Activities: f.events,
 		Messages:   f.events,
@@ -78,6 +81,7 @@ func newFixture() fixture {
 		Settings:   settingtest.Set(settingtest.Source{}, download.MaxFilesPerResource, 3),
 		Now:        func() time.Time { return now },
 	})
+	f.details = download.NewDetailService(repo, cards, discussions)
 	return f
 }
 
@@ -113,6 +117,9 @@ func TestGameResourcesHidesUnfinishedFilesFromOthers(t *testing.T) {
 	if seen[0].Files[0].LatestReupload() != nil {
 		t.Fatal("a single history entry is the original upload, not a re-upload")
 	}
+	if uploaded := seen[0].Files[0].Uploaded(); !uploaded.Equal(now.Add(-time.Hour)) {
+		t.Fatalf("the content dates from its history entry: %s", uploaded)
+	}
 	mine, _ := f.service.GameResources(ctx, owner, 10)
 	if len(mine) != 2 {
 		t.Fatalf("creators see their unpublished resources: %+v", mine)
@@ -121,6 +128,9 @@ func TestGameResourcesHidesUnfinishedFilesFromOthers(t *testing.T) {
 	again, _ := f.service.GameResources(ctx, other, 10)
 	if latest := again[0].Files[0].LatestReupload(); latest == nil || latest.OperatorID != admin.UserID || *latest.Reason != "fix" {
 		t.Fatalf("latest re-upload: %+v", latest)
+	}
+	if uploaded := again[0].Files[0].Uploaded(); !uploaded.Equal(now) {
+		t.Fatalf("a replacement moves the upload date: %s", uploaded)
 	}
 }
 
@@ -597,5 +607,92 @@ func TestResourcesUnderMalwareReviewAreHiddenFromOthers(t *testing.T) {
 	}
 	if mine, _ := f.service.GameResources(ctx, owner, 10); len(mine) != 1 || len(mine[0].Files) != 2 {
 		t.Fatalf("its uploader still sees it with the held file: %+v", mine)
+	}
+}
+
+func kinds(events []download.Event) []download.EventKind {
+	out := make([]download.EventKind, len(events))
+	for i, event := range events {
+		out[i] = event.Kind
+	}
+	return out
+}
+
+func TestChangesAreRecordedOnceTheResourceIsPublished(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	resource := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, Platforms: []string{"win"}, Languages: []string{"jp"}})
+	stored := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "game.7z", Size: 100, Status: download.FileInObjectStore, StorageKey: ptr("games/10/1/game.7z"), CreatorID: owner.UserID})
+	pending := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "broken.7z", Status: download.FileOnServer, CreatorID: owner.UserID})
+
+	if err := f.service.RenameFile(ctx, owner, stored.ID, "本体.7z"); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.service.Edit(ctx, owner, resource.ID, download.ResourceChanges{Platforms: []string{"win"}, Languages: []string{"jp", "zh"}}); err != nil {
+		t.Fatal(err)
+	}
+	if recorded := f.repo.Events(resource.ID); len(recorded) != 0 {
+		t.Fatalf("nothing is recorded before publication: %+v", recorded)
+	}
+
+	if err := f.service.DeleteFile(ctx, owner, pending.ID); err != nil {
+		t.Fatal(err)
+	}
+	recorded := f.repo.Events(resource.ID)
+	if !slices.Equal(kinds(recorded), []download.EventKind{download.EventPublished}) {
+		t.Fatalf("publication opens the history, and a file nobody could see leaves no entry: %v", kinds(recorded))
+	}
+	if files := recorded[0].Data.Files; len(files) != 1 || files[0] != (download.EventFile{Name: "本体.7z", Size: 100}) || recorded[0].Actor.ID != owner.UserID {
+		t.Fatalf("published event: %+v", recorded[0])
+	}
+
+	if err := f.service.RenameFile(ctx, admin, stored.ID, "本体.7z"); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.service.RenameFile(ctx, admin, stored.ID, "game v2.7z"); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.service.Edit(ctx, owner, resource.ID, download.ResourceChanges{Platforms: []string{"win"}, Languages: []string{"jp", "zh"}}); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.service.Edit(ctx, owner, resource.ID, download.ResourceChanges{Platforms: []string{"win"}, Languages: []string{"zh"}, Note: ptr("官方中文")}); err != nil {
+		t.Fatal(err)
+	}
+	f.sessions.byID[42] = upload.Session{ID: 42, Status: upload.StatusCompleted, CreatorID: owner.UserID, StoragePath: "/spool/42.part", TotalSize: 120, FileHash: "new", HashAlgorithm: upload.HashSHA256}
+	if err := f.service.Reupload(ctx, owner, stored.ID, download.ReuploadInput{UploadSessionID: 42, Reason: ptr("更新crack")}); err != nil {
+		t.Fatal(err)
+	}
+	extra := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "特典.zip", Size: 7, Status: download.FileInObjectStore, CreatorID: owner.UserID})
+	if err := f.service.DeleteFile(ctx, owner, extra.ID); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.service.ReviewCleared(ctx, resource.ID, "game v2.7z", &admin.UserID); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := f.details.Events(ctx, other, resource.ID)
+	expectCode(t, err, download.ErrResourceNotFound)
+	events, err := f.details.Events(ctx, owner, resource.ID)
+	if err != nil {
+		t.Fatalf("while the only file is checked again, the history stays open to the uploader: %v", err)
+	}
+	want := []download.EventKind{download.EventReviewCleared, download.EventFileRemoved, download.EventFileReplaced, download.EventEdited, download.EventFileRenamed, download.EventPublished}
+	if !slices.Equal(kinds(events), want) {
+		t.Fatalf("newest first, and an edit or a rename that changes nothing is skipped: %v", kinds(events))
+	}
+	if cleared := events[0]; cleared.Actor.ID != admin.UserID || cleared.Data.Name != "game v2.7z" {
+		t.Fatalf("review cleared: %+v", cleared)
+	}
+	if gone := events[1].Data.Files; len(gone) != 1 || gone[0].Name != "特典.zip" {
+		t.Fatalf("removed file: %+v", events[1].Data)
+	}
+	if replaced := events[2].Data; replaced.Name != "game v2.7z" || *replaced.Reason != "更新crack" || *replaced.OldSize != 100 || *replaced.NewSize != 120 {
+		t.Fatalf("replaced file: %+v", replaced)
+	}
+	if edited := events[3].Data.Changes; len(edited) != 2 || edited[0].Field != download.FieldLanguages || !slices.Equal(edited[0].Old, []string{"jp", "zh"}) || !slices.Equal(edited[0].New, []string{"zh"}) || edited[1].Field != download.FieldNote {
+		t.Fatalf("edited fields: %+v", edited)
+	}
+	if renamed := events[4]; renamed.Actor.ID != admin.UserID || renamed.Data.OldName != "本体.7z" || renamed.Data.Name != "game v2.7z" {
+		t.Fatalf("renamed file: %+v", renamed)
 	}
 }

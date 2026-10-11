@@ -65,6 +65,16 @@ func GameID(v int) predicate.Comment {
 	return predicate.Comment(sql.FieldEQ(FieldGameID, v))
 }
 
+// ResourceID applies equality check predicate on the "resource_id" field. It's identical to ResourceIDEQ.
+func ResourceID(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldResourceID, v))
+}
+
+// PinnedAt applies equality check predicate on the "pinned_at" field. It's identical to PinnedAtEQ.
+func PinnedAt(v time.Time) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldPinnedAt, v))
+}
+
 // ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
 func ParentID(v int) predicate.Comment {
 	return predicate.Comment(sql.FieldEQ(FieldParentID, v))
@@ -188,6 +198,86 @@ func GameIDIn(vs ...int) predicate.Comment {
 // GameIDNotIn applies the NotIn predicate on the "game_id" field.
 func GameIDNotIn(vs ...int) predicate.Comment {
 	return predicate.Comment(sql.FieldNotIn(FieldGameID, vs...))
+}
+
+// ResourceIDEQ applies the EQ predicate on the "resource_id" field.
+func ResourceIDEQ(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldResourceID, v))
+}
+
+// ResourceIDNEQ applies the NEQ predicate on the "resource_id" field.
+func ResourceIDNEQ(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldNEQ(FieldResourceID, v))
+}
+
+// ResourceIDIn applies the In predicate on the "resource_id" field.
+func ResourceIDIn(vs ...int) predicate.Comment {
+	return predicate.Comment(sql.FieldIn(FieldResourceID, vs...))
+}
+
+// ResourceIDNotIn applies the NotIn predicate on the "resource_id" field.
+func ResourceIDNotIn(vs ...int) predicate.Comment {
+	return predicate.Comment(sql.FieldNotIn(FieldResourceID, vs...))
+}
+
+// ResourceIDIsNil applies the IsNil predicate on the "resource_id" field.
+func ResourceIDIsNil() predicate.Comment {
+	return predicate.Comment(sql.FieldIsNull(FieldResourceID))
+}
+
+// ResourceIDNotNil applies the NotNil predicate on the "resource_id" field.
+func ResourceIDNotNil() predicate.Comment {
+	return predicate.Comment(sql.FieldNotNull(FieldResourceID))
+}
+
+// PinnedAtEQ applies the EQ predicate on the "pinned_at" field.
+func PinnedAtEQ(v time.Time) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldPinnedAt, v))
+}
+
+// PinnedAtNEQ applies the NEQ predicate on the "pinned_at" field.
+func PinnedAtNEQ(v time.Time) predicate.Comment {
+	return predicate.Comment(sql.FieldNEQ(FieldPinnedAt, v))
+}
+
+// PinnedAtIn applies the In predicate on the "pinned_at" field.
+func PinnedAtIn(vs ...time.Time) predicate.Comment {
+	return predicate.Comment(sql.FieldIn(FieldPinnedAt, vs...))
+}
+
+// PinnedAtNotIn applies the NotIn predicate on the "pinned_at" field.
+func PinnedAtNotIn(vs ...time.Time) predicate.Comment {
+	return predicate.Comment(sql.FieldNotIn(FieldPinnedAt, vs...))
+}
+
+// PinnedAtGT applies the GT predicate on the "pinned_at" field.
+func PinnedAtGT(v time.Time) predicate.Comment {
+	return predicate.Comment(sql.FieldGT(FieldPinnedAt, v))
+}
+
+// PinnedAtGTE applies the GTE predicate on the "pinned_at" field.
+func PinnedAtGTE(v time.Time) predicate.Comment {
+	return predicate.Comment(sql.FieldGTE(FieldPinnedAt, v))
+}
+
+// PinnedAtLT applies the LT predicate on the "pinned_at" field.
+func PinnedAtLT(v time.Time) predicate.Comment {
+	return predicate.Comment(sql.FieldLT(FieldPinnedAt, v))
+}
+
+// PinnedAtLTE applies the LTE predicate on the "pinned_at" field.
+func PinnedAtLTE(v time.Time) predicate.Comment {
+	return predicate.Comment(sql.FieldLTE(FieldPinnedAt, v))
+}
+
+// PinnedAtIsNil applies the IsNil predicate on the "pinned_at" field.
+func PinnedAtIsNil() predicate.Comment {
+	return predicate.Comment(sql.FieldIsNull(FieldPinnedAt))
+}
+
+// PinnedAtNotNil applies the NotNil predicate on the "pinned_at" field.
+func PinnedAtNotNil() predicate.Comment {
+	return predicate.Comment(sql.FieldNotNull(FieldPinnedAt))
 }
 
 // ParentIDEQ applies the EQ predicate on the "parent_id" field.
@@ -478,6 +568,29 @@ func HasGame() predicate.Comment {
 func HasGameWith(preds ...predicate.Game) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		step := newGameStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasResource applies the HasEdge predicate on the "resource" edge.
+func HasResource() predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ResourceTable, ResourceColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasResourceWith applies the HasEdge predicate on the "resource" edge with a given conditions (other predicates).
+func HasResourceWith(preds ...predicate.GameDownloadResource) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		step := newResourceStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

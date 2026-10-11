@@ -70,6 +70,8 @@
   "COMMENT_NOT_OWNER": "comment not owner",
   "COMMENT_TOO_DEEP": "comment too deep",
   "COMMENT_CONTENT_TOO_LONG": "comment content is too long",
+  "COMMENT_NOT_PINNABLE": "this comment cannot be pinned",
+  "COMMENT_PIN_NOT_PUBLISHER": "only the publisher of the resource can pin a comment",
   "GAME_UPLOAD_INVALID_TOTAL_SIZE": "invalid total size",
   "GAME_UPLOAD_TOO_MANY_CHUNKS": "too many chunks",
   "GAME_UPLOAD_TOO_LARGE": "upload file size exceeds limit",

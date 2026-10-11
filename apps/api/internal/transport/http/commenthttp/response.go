@@ -75,6 +75,7 @@ type CommentItemDTO struct {
 	Creator    userhttp.UserSummaryDTO `json:"creator"`
 	Edited     bool                    `json:"edited"`
 	Status     int                     `json:"status"`
+	Pinned     bool                    `json:"pinned" doc:"The publisher of the resource pinned this comment; it leads the list whatever the order. Always false for comments on a game."`
 	Created    time.Time               `json:"created"`
 	Updated    time.Time               `json:"updated"`
 }
@@ -86,12 +87,19 @@ type commentThreadDTO struct {
 
 type commentThreadPageMetaDTO struct {
 	response.PageMeta
-	Comments int `json:"comments" doc:"Visible comments of the game, replies included"`
+	Comments int  `json:"comments" doc:"Visible comments of the game or of the resource, replies included"`
+	Pinned   *int `json:"pinned" doc:"The pinned comment of the resource, whichever page it is on and whether or not the viewer sees it; null when there is none, and always for a game"`
 }
 
 type commentThreadPageDTO struct {
 	Items []commentThreadDTO       `json:"items"`
 	Meta  commentThreadPageMetaDTO `json:"meta"`
+}
+
+type userCommentResourceDTO struct {
+	ID         int    `json:"id"`
+	FileName   string `json:"file_name" doc:"Name of the first file of the resource"`
+	FilesCount int    `json:"files_count"`
 }
 
 type userCommentDTO struct {
@@ -105,6 +113,7 @@ type userCommentDTO struct {
 	IsLiked    bool                    `json:"is_liked"`
 	LikeCount  int                     `json:"like_count"`
 	Game       gamehttp.GameCardDTO    `json:"game"`
+	Resource   *userCommentResourceDTO `json:"resource" doc:"The download resource the comment was made on; null for a comment on the game itself"`
 	Creator    userhttp.UserSummaryDTO `json:"creator"`
 	Created    time.Time               `json:"created"`
 	Updated    time.Time               `json:"updated"`
@@ -181,6 +190,7 @@ func toItem(entry comment.Entry, now time.Time) CommentItemDTO {
 		Creator:    userhttp.ToUserSummary(entry.Creator, now),
 		Edited:     entry.Edited,
 		Status:     int(entry.Status),
+		Pinned:     entry.Pinned(),
 		Created:    entry.Created,
 		Updated:    entry.Updated,
 	}
@@ -192,6 +202,23 @@ func toThread(thread comment.Thread, now time.Time) commentThreadDTO {
 		replies[i] = toItem(reply, now)
 	}
 	return commentThreadDTO{CommentItemDTO: toItem(thread.Entry, now), Replies: replies}
+}
+
+func toThreadPage(list comment.ThreadList, pageSize int, now time.Time) commentThreadPageDTO {
+	page := commentThreadPageDTO{
+		Items: make([]commentThreadDTO, len(list.Threads)),
+		Meta: commentThreadPageMetaDTO{
+			PageMeta: response.NewPageMeta(list.Totals.Threads, len(list.Threads), pageSize, list.Page),
+			Comments: list.Totals.Comments,
+		},
+	}
+	if list.Totals.PinnedID != 0 {
+		page.Meta.Pinned = &list.Totals.PinnedID
+	}
+	for i, thread := range list.Threads {
+		page.Items[i] = toThread(thread, now)
+	}
+	return page
 }
 
 func toQuotedParent(ref *comment.ParentRef, now time.Time) *userCommentParentDTO {
@@ -218,6 +245,12 @@ func toUserComment(entry comment.Entry, now time.Time) userCommentDTO {
 	}
 	if entry.Game != nil {
 		out.Game = gamehttp.ToGameCard(*entry.Game)
+	}
+	if resource := entry.Resource; resource != nil {
+		out.Resource = &userCommentResourceDTO{ID: resource.ID, FilesCount: len(resource.FileNames)}
+		if len(resource.FileNames) > 0 {
+			out.Resource.FileName = resource.FileNames[0]
+		}
 	}
 	return out
 }

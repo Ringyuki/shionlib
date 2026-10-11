@@ -13,6 +13,7 @@ import (
 
 type Repository interface {
 	ListGameResources(ctx context.Context, gameID int) ([]GameResource, error)
+	GetGameResource(ctx context.Context, id int, excludeRated bool) (GameResource, error)
 	ListReleases(ctx context.Context, excludeRated bool, page Page) ([]Release, int, error)
 	ListUserResources(ctx context.Context, creatorID int, filter UserResourceFilter, page Page) ([]UserResource, int, error)
 	ListOwnResources(ctx context.Context, creatorID int, query OwnQuery, page Page) ([]GameResource, int, error)
@@ -48,6 +49,8 @@ type Repository interface {
 	ListHistory(ctx context.Context, fileID int) ([]HistoryEntry, error)
 	GetHistory(ctx context.Context, id int) (History, error)
 	SetHistoryReason(ctx context.Context, id int, reason *string) error
+	CreateEvent(ctx context.Context, in NewEvent) error
+	ListEvents(ctx context.Context, resourceID, limit int) ([]Event, error)
 	FavoriteReceivers(ctx context.Context, gameID, excludeUserID int) ([]int, error)
 	ResetMalwareStrikes(ctx context.Context, userID int) error
 }
@@ -55,6 +58,10 @@ type Repository interface {
 type GameCards interface {
 	Exists(ctx context.Context, id int) (bool, error)
 	ByIDs(ctx context.Context, ids []int, viewer actor.Actor) (map[int]game.Card, error)
+}
+
+type Discussions interface {
+	CountByResource(ctx context.Context, resourceIDs []int) (map[int]int, error)
 }
 
 type Sessions interface {

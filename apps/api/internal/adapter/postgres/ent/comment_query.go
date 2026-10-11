@@ -17,6 +17,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/commentlike"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
@@ -32,6 +33,7 @@ type CommentQuery struct {
 	predicates          []predicate.Comment
 	withActivities      *ActivityQuery
 	withGame            *GameQuery
+	withResource        *GameDownloadResourceQuery
 	withChildren        *CommentQuery
 	withParent          *CommentQuery
 	withRootDescendants *CommentQuery
@@ -115,6 +117,28 @@ func (_q *CommentQuery) QueryGame() *GameQuery {
 			sqlgraph.From(comment.Table, comment.FieldID, selector),
 			sqlgraph.To(game.Table, game.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, comment.GameTable, comment.GameColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryResource chains the current query on the "resource" edge.
+func (_q *CommentQuery) QueryResource() *GameDownloadResourceQuery {
+	query := (&GameDownloadResourceClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, selector),
+			sqlgraph.To(gamedownloadresource.Table, gamedownloadresource.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, comment.ResourceTable, comment.ResourceColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -514,6 +538,7 @@ func (_q *CommentQuery) Clone() *CommentQuery {
 		predicates:          append([]predicate.Comment{}, _q.predicates...),
 		withActivities:      _q.withActivities.Clone(),
 		withGame:            _q.withGame.Clone(),
+		withResource:        _q.withResource.Clone(),
 		withChildren:        _q.withChildren.Clone(),
 		withParent:          _q.withParent.Clone(),
 		withRootDescendants: _q.withRootDescendants.Clone(),
@@ -549,6 +574,17 @@ func (_q *CommentQuery) WithGame(opts ...func(*GameQuery)) *CommentQuery {
 		opt(query)
 	}
 	_q.withGame = query
+	return _q
+}
+
+// WithResource tells the query-builder to eager-load the nodes that are connected to
+// the "resource" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *CommentQuery) WithResource(opts ...func(*GameDownloadResourceQuery)) *CommentQuery {
+	query := (&GameDownloadResourceClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withResource = query
 	return _q
 }
 
@@ -729,9 +765,10 @@ func (_q *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 	var (
 		nodes       = []*Comment{}
 		_spec       = _q.querySpec()
-		loadedTypes = [11]bool{
+		loadedTypes = [12]bool{
 			_q.withActivities != nil,
 			_q.withGame != nil,
+			_q.withResource != nil,
 			_q.withChildren != nil,
 			_q.withParent != nil,
 			_q.withRootDescendants != nil,
@@ -774,6 +811,12 @@ func (_q *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 	if query := _q.withGame; query != nil {
 		if err := _q.loadGame(ctx, query, nodes, nil,
 			func(n *Comment, e *Game) { n.Edges.Game = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withResource; query != nil {
+		if err := _q.loadResource(ctx, query, nodes, nil,
+			func(n *Comment, e *GameDownloadResource) { n.Edges.Resource = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -895,6 +938,38 @@ func (_q *CommentQuery) loadGame(ctx context.Context, query *GameQuery, nodes []
 		nodes, ok := nodeids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "game_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *CommentQuery) loadResource(ctx context.Context, query *GameDownloadResourceQuery, nodes []*Comment, init func(*Comment), assign func(*Comment, *GameDownloadResource)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Comment)
+	for i := range nodes {
+		if nodes[i].ResourceID == nil {
+			continue
+		}
+		fk := *nodes[i].ResourceID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(gamedownloadresource.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "resource_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -1249,6 +1324,9 @@ func (_q *CommentQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if _q.withGame != nil {
 			_spec.Node.AddColumnOnce(comment.FieldGameID)
+		}
+		if _q.withResource != nil {
+			_spec.Node.AddColumnOnce(comment.FieldResourceID)
 		}
 		if _q.withParent != nil {
 			_spec.Node.AddColumnOnce(comment.FieldParentID)

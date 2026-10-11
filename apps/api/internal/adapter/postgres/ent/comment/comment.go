@@ -20,6 +20,10 @@ const (
 	FieldText = "text"
 	// FieldGameID holds the string denoting the game_id field in the database.
 	FieldGameID = "game_id"
+	// FieldResourceID holds the string denoting the resource_id field in the database.
+	FieldResourceID = "resource_id"
+	// FieldPinnedAt holds the string denoting the pinned_at field in the database.
+	FieldPinnedAt = "pinned_at"
 	// FieldParentID holds the string denoting the parent_id field in the database.
 	FieldParentID = "parent_id"
 	// FieldRootID holds the string denoting the root_id field in the database.
@@ -40,6 +44,8 @@ const (
 	EdgeActivities = "activities"
 	// EdgeGame holds the string denoting the game edge name in mutations.
 	EdgeGame = "game"
+	// EdgeResource holds the string denoting the resource edge name in mutations.
+	EdgeResource = "resource"
 	// EdgeChildren holds the string denoting the children edge name in mutations.
 	EdgeChildren = "children"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
@@ -74,6 +80,13 @@ const (
 	GameInverseTable = "games"
 	// GameColumn is the table column denoting the game relation/edge.
 	GameColumn = "game_id"
+	// ResourceTable is the table that holds the resource relation/edge.
+	ResourceTable = "comments"
+	// ResourceInverseTable is the table name for the GameDownloadResource entity.
+	// It exists in this package in order to avoid circular dependency with the "gamedownloadresource" package.
+	ResourceInverseTable = "game_download_resources"
+	// ResourceColumn is the table column denoting the resource relation/edge.
+	ResourceColumn = "resource_id"
 	// ChildrenTable is the table that holds the children relation/edge.
 	ChildrenTable = "comments"
 	// ChildrenColumn is the table column denoting the children relation/edge.
@@ -131,6 +144,8 @@ var Columns = []string{
 	FieldContent,
 	FieldText,
 	FieldGameID,
+	FieldResourceID,
+	FieldPinnedAt,
 	FieldParentID,
 	FieldRootID,
 	FieldReplyCount,
@@ -192,6 +207,16 @@ func ByGameID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldGameID, opts...).ToFunc()
 }
 
+// ByResourceID orders the results by the resource_id field.
+func ByResourceID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResourceID, opts...).ToFunc()
+}
+
+// ByPinnedAt orders the results by the pinned_at field.
+func ByPinnedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPinnedAt, opts...).ToFunc()
+}
+
 // ByParentID orders the results by the parent_id field.
 func ByParentID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldParentID, opts...).ToFunc()
@@ -250,6 +275,13 @@ func ByActivities(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 func ByGameField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newGameStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByResourceField orders the results by resource field.
+func ByResourceField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newResourceStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -369,6 +401,13 @@ func newGameStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(GameInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, GameTable, GameColumn),
+	)
+}
+func newResourceStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ResourceInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, ResourceTable, ResourceColumn),
 	)
 }
 func newChildrenStep() *sqlgraph.Step {

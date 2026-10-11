@@ -23,6 +23,8 @@ func (Comment) Fields() []ent.Field {
 		field.JSON("content", rawJSON).SchemaType(jsonbType),
 		field.Text("text").Default(""),
 		field.Int("game_id").SchemaType(pg("integer")),
+		field.Int("resource_id").SchemaType(pg("integer")).Optional().Nillable(),
+		field.Time("pinned_at").SchemaType(timestamp3).Optional().Nillable(),
 		field.Int("parent_id").SchemaType(pg("integer")).Optional().Nillable(),
 		field.Int("root_id").SchemaType(pg("integer")).Optional().Nillable(),
 		field.Int("reply_count").SchemaType(pg("integer")).Default(0),
@@ -38,6 +40,7 @@ func (Comment) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("activities", Activity.Type).StorageKey(edge.Symbol("activities_comment_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.From("game", Game.Type).Ref("comments").Field("game_id").Unique().Required(),
+		edge.From("resource", GameDownloadResource.Type).Ref("comments").Field("resource_id").Unique(),
 		edge.To("children", Comment.Type).StorageKey(edge.Symbol("comments_parent_id_fkey")).Annotations(entsql.OnDelete(entsql.SetNull)),
 		edge.From("parent", Comment.Type).Ref("children").Field("parent_id").Unique(),
 		edge.To("root_descendants", Comment.Type).StorageKey(edge.Symbol("comments_root_id_fkey")).Annotations(entsql.OnDelete(entsql.SetNull)),
@@ -52,6 +55,8 @@ func (Comment) Edges() []ent.Edge {
 func (Comment) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("game_id", "created").StorageKey("comments_game_id_created_idx"),
+		index.Fields("resource_id", "created").StorageKey("comments_resource_id_created_idx"),
+		index.Fields("resource_id").Unique().Annotations(entsql.IndexWhere("pinned_at IS NOT NULL")).StorageKey("comments_resource_id_pinned_key"),
 		index.Fields("parent_id", "created").StorageKey("comments_parent_id_created_idx"),
 		index.Fields("creator_id", "created").StorageKey("comments_creator_id_created_idx"),
 	}

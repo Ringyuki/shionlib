@@ -28,6 +28,13 @@ type MemoryRepository struct {
 	Keys      map[int][]string
 	TakenDown []int
 	Purged    []string
+	Cleared   []ClearedReview
+}
+
+type ClearedReview struct {
+	ResourceID int
+	FileName   string
+	ReviewerID *int
 }
 
 func NewMemoryRepository(now func() time.Time) *MemoryRepository {
@@ -287,6 +294,16 @@ func (r *MemoryRepository) TakeDown(_ context.Context, resourceID int) ([]string
 	r.resources[resourceID] = false
 	r.TakenDown = append(r.TakenDown, resourceID)
 	return r.Keys[resourceID], nil
+}
+
+func (r *MemoryRepository) ReviewCleared(_ context.Context, resourceID int, fileName string, reviewerID *int) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if !r.resources[resourceID] {
+		return download.ErrResourceNotFound
+	}
+	r.Cleared = append(r.Cleared, ClearedReview{ResourceID: resourceID, FileName: fileName, ReviewerID: reviewerID})
+	return nil
 }
 
 func (r *MemoryRepository) PurgeLater(_ context.Context, keys []string) error {

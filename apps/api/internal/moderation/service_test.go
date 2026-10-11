@@ -219,6 +219,55 @@ func TestScreenCommentSkipsAndRetries(t *testing.T) {
 	})
 }
 
+func TestApprovedCommentsOnAResourceReachItsPublisher(t *testing.T) {
+	ctx := context.Background()
+	resourceID, publisher := 40, 9
+	for name, tc := range map[string]struct {
+		author   int
+		receiver int
+		title    string
+	}{
+		"a visitor's comment":     {author: 3, receiver: publisher, title: "Messages.Comment.Resource.Title"},
+		"the publisher's comment": {author: publisher},
+	} {
+		t.Run(name, func(t *testing.T) {
+			f := newFixture()
+			comment := f.repo.SeedComment(moderation.CommentSubject{CreatorID: tc.author, GameID: 5, Text: "c", ResourceID: &resourceID, PublisherID: &publisher}, moderationtest.CommentPending)
+			f.classifier.Screening = scores(map[string]float64{"hate": 0})
+			if err := f.service.ScreenComment(ctx, comment.ID); err != nil {
+				t.Fatal(err)
+			}
+			if len(f.activities.All()) != 0 {
+				t.Fatalf("comments on resources stay out of the activity feed: %+v", f.activities.All())
+			}
+			sent := f.messages.All()
+			if tc.receiver == 0 {
+				if len(sent) != 0 {
+					t.Fatalf("nobody is told about their own comment: %+v", sent)
+				}
+				return
+			}
+			if len(sent) != 1 || sent[0].ReceiverID != tc.receiver || sent[0].Title != tc.title || sent[0].Type != message.TypeCommentReply || *sent[0].CommentID != comment.ID || *sent[0].SenderID != tc.author {
+				t.Fatalf("the publisher hears about the comment: %+v", sent)
+			}
+		})
+	}
+
+	t.Run("a reply notifies the author it answers, not the publisher", func(t *testing.T) {
+		f := newFixture()
+		parent := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 4, GameID: 5, Text: "p", ResourceID: &resourceID, PublisherID: &publisher}, moderationtest.CommentVisible)
+		reply := f.repo.SeedComment(moderation.CommentSubject{CreatorID: 3, GameID: 5, Text: "c", ParentID: &parent.ID, ParentCreatorID: &parent.CreatorID, ResourceID: &resourceID, PublisherID: &publisher}, moderationtest.CommentPending)
+		f.classifier.Screening = scores(map[string]float64{"hate": 0})
+		if err := f.service.ScreenComment(ctx, reply.ID); err != nil {
+			t.Fatal(err)
+		}
+		sent := f.messages.All()
+		if len(sent) != 1 || sent[0].ReceiverID != 4 || sent[0].Title != "Messages.Comment.Reply.Title" {
+			t.Fatalf("reply notice: %+v", sent)
+		}
+	})
+}
+
 type editingClassifier struct {
 	repo      *moderationtest.MemoryRepository
 	commentID int

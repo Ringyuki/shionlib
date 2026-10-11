@@ -54,6 +54,7 @@ type Workspace interface {
 type Files interface {
 	TakeDown(ctx context.Context, resourceID int) ([]string, error)
 	PurgeLater(ctx context.Context, keys []string) error
+	ReviewCleared(ctx context.Context, resourceID int, fileName string, reviewerID *int) error
 }
 
 type Activities interface {

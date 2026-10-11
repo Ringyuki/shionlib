@@ -70,6 +70,8 @@
   "COMMENT_NOT_OWNER": "コメントが現在のユーザーに属していません",
   "COMMENT_TOO_DEEP": "コメントが深すぎます",
   "COMMENT_CONTENT_TOO_LONG": "コメントの内容が長すぎます",
+  "COMMENT_NOT_PINNABLE": "このコメントは固定できません",
+  "COMMENT_PIN_NOT_PUBLISHER": "コメントを固定できるのはリソースの公開者のみです",
   "GAME_UPLOAD_INVALID_TOTAL_SIZE": "無効な総サイズ",
   "GAME_UPLOAD_TOO_MANY_CHUNKS": "分片数が多すぎます",
   "GAME_UPLOAD_TOO_LARGE": "アップロードファイルサイズが制限を超えています",

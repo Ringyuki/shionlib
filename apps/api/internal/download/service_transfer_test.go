@@ -93,6 +93,29 @@ func TestStoreUploadsAndFinalizes(t *testing.T) {
 	}
 }
 
+func TestStoringAFileAddedAfterPublicationIsRecorded(t *testing.T) {
+	ctx := context.Background()
+	f := newTransferFixture()
+	published := now.Add(-time.Hour)
+	resource := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: 1, PublishedAt: &published})
+	f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "game.7z", Status: download.FileInObjectStore, CreatorID: 1, Created: published.Add(-time.Minute)})
+	replacedPath, addedPath := f.spool.Path("7"), f.spool.Path("8")
+	f.spool.Put(replacedPath, []byte("x"), now)
+	f.spool.Put(addedPath, []byte("xy"), now)
+	replaced := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "patch.7z", Path: &replacedPath, Status: download.FileOnServer, CheckStatus: download.CheckOK, CreatorID: 1, Created: published.Add(-time.Minute)})
+	added := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "特典.zip", Size: 2, Path: &addedPath, Status: download.FileOnServer, CheckStatus: download.CheckOK, CreatorID: 1, Created: now})
+
+	for _, id := range []int{replaced.ID, added.ID} {
+		if err := f.transfers.Store(ctx, id); err != nil {
+			t.Fatal(err)
+		}
+	}
+	events := f.repo.Events(resource.ID)
+	if len(events) != 1 || events[0].Kind != download.EventFileAdded || events[0].Actor.ID != 1 || events[0].Data.Files[0] != (download.EventFile{Name: "特典.zip", Size: 2}) {
+		t.Fatalf("only the file that joined after publication counts as added: %+v", events)
+	}
+}
+
 func TestStoreUpdatesTheLatestHistoryOnReupload(t *testing.T) {
 	ctx := context.Background()
 	f := newTransferFixture()

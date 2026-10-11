@@ -7,6 +7,10 @@
     "Like": {
       "Title": "你的评论收到了赞",
       "Content": "有人赞了你的评论"
+    },
+    "Resource": {
+      "Title": "你发布的资源收到了新评论",
+      "Content": "有人评论了你发布的资源"
     }
   },
   "System": {

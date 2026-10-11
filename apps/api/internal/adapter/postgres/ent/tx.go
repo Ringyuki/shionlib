@@ -68,6 +68,8 @@ type Tx struct {
 	GameDeveloperRelation *GameDeveloperRelationClient
 	// GameDownloadResource is the client for interacting with the GameDownloadResource builders.
 	GameDownloadResource *GameDownloadResourceClient
+	// GameDownloadResourceEvent is the client for interacting with the GameDownloadResourceEvent builders.
+	GameDownloadResourceEvent *GameDownloadResourceEventClient
 	// GameDownloadResourceFile is the client for interacting with the GameDownloadResourceFile builders.
 	GameDownloadResourceFile *GameDownloadResourceFileClient
 	// GameDownloadResourceFileHistory is the client for interacting with the GameDownloadResourceFileHistory builders.
@@ -278,6 +280,7 @@ func (tx *Tx) init() {
 	tx.GameDeveloper = NewGameDeveloperClient(tx.config)
 	tx.GameDeveloperRelation = NewGameDeveloperRelationClient(tx.config)
 	tx.GameDownloadResource = NewGameDownloadResourceClient(tx.config)
+	tx.GameDownloadResourceEvent = NewGameDownloadResourceEventClient(tx.config)
 	tx.GameDownloadResourceFile = NewGameDownloadResourceFileClient(tx.config)
 	tx.GameDownloadResourceFileHistory = NewGameDownloadResourceFileHistoryClient(tx.config)
 	tx.GameDownloadResourceReport = NewGameDownloadResourceReportClient(tx.config)

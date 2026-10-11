@@ -7,6 +7,10 @@
     "Like": {
       "Title": "Your comment was liked",
       "Content": "Someone liked your comment"
+    },
+    "Resource": {
+      "Title": "New comment on your resource",
+      "Content": "Someone commented on a resource you published"
     }
   },
   "System": {

@@ -16,6 +16,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
@@ -73,6 +74,46 @@ func (_u *CommentUpdate) SetNillableGameID(v *int) *CommentUpdate {
 	if v != nil {
 		_u.SetGameID(*v)
 	}
+	return _u
+}
+
+// SetResourceID sets the "resource_id" field.
+func (_u *CommentUpdate) SetResourceID(v int) *CommentUpdate {
+	_u.mutation.SetResourceID(v)
+	return _u
+}
+
+// SetNillableResourceID sets the "resource_id" field if the given value is not nil.
+func (_u *CommentUpdate) SetNillableResourceID(v *int) *CommentUpdate {
+	if v != nil {
+		_u.SetResourceID(*v)
+	}
+	return _u
+}
+
+// ClearResourceID clears the value of the "resource_id" field.
+func (_u *CommentUpdate) ClearResourceID() *CommentUpdate {
+	_u.mutation.ClearResourceID()
+	return _u
+}
+
+// SetPinnedAt sets the "pinned_at" field.
+func (_u *CommentUpdate) SetPinnedAt(v time.Time) *CommentUpdate {
+	_u.mutation.SetPinnedAt(v)
+	return _u
+}
+
+// SetNillablePinnedAt sets the "pinned_at" field if the given value is not nil.
+func (_u *CommentUpdate) SetNillablePinnedAt(v *time.Time) *CommentUpdate {
+	if v != nil {
+		_u.SetPinnedAt(*v)
+	}
+	return _u
+}
+
+// ClearPinnedAt clears the value of the "pinned_at" field.
+func (_u *CommentUpdate) ClearPinnedAt() *CommentUpdate {
+	_u.mutation.ClearPinnedAt()
 	return _u
 }
 
@@ -212,6 +253,11 @@ func (_u *CommentUpdate) SetGame(v *Game) *CommentUpdate {
 	return _u.SetGameID(v.ID)
 }
 
+// SetResource sets the "resource" edge to the GameDownloadResource entity.
+func (_u *CommentUpdate) SetResource(v *GameDownloadResource) *CommentUpdate {
+	return _u.SetResourceID(v.ID)
+}
+
 // AddChildIDs adds the "children" edge to the Comment entity by IDs.
 func (_u *CommentUpdate) AddChildIDs(ids ...int) *CommentUpdate {
 	_u.mutation.AddChildIDs(ids...)
@@ -331,6 +377,12 @@ func (_u *CommentUpdate) RemoveActivities(v ...*Activity) *CommentUpdate {
 // ClearGame clears the "game" edge to the Game entity.
 func (_u *CommentUpdate) ClearGame() *CommentUpdate {
 	_u.mutation.ClearGame()
+	return _u
+}
+
+// ClearResource clears the "resource" edge to the GameDownloadResource entity.
+func (_u *CommentUpdate) ClearResource() *CommentUpdate {
+	_u.mutation.ClearResource()
 	return _u
 }
 
@@ -533,6 +585,12 @@ func (_u *CommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Text(); ok {
 		_spec.SetField(comment.FieldText, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.PinnedAt(); ok {
+		_spec.SetField(comment.FieldPinnedAt, field.TypeTime, value)
+	}
+	if _u.mutation.PinnedAtCleared() {
+		_spec.ClearField(comment.FieldPinnedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.ReplyCount(); ok {
 		_spec.SetField(comment.FieldReplyCount, field.TypeInt, value)
 	}
@@ -618,6 +676,35 @@ func (_u *CommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ResourceCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   comment.ResourceTable,
+			Columns: []string{comment.ResourceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresource.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ResourceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   comment.ResourceTable,
+			Columns: []string{comment.ResourceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresource.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -999,6 +1086,46 @@ func (_u *CommentUpdateOne) SetNillableGameID(v *int) *CommentUpdateOne {
 	return _u
 }
 
+// SetResourceID sets the "resource_id" field.
+func (_u *CommentUpdateOne) SetResourceID(v int) *CommentUpdateOne {
+	_u.mutation.SetResourceID(v)
+	return _u
+}
+
+// SetNillableResourceID sets the "resource_id" field if the given value is not nil.
+func (_u *CommentUpdateOne) SetNillableResourceID(v *int) *CommentUpdateOne {
+	if v != nil {
+		_u.SetResourceID(*v)
+	}
+	return _u
+}
+
+// ClearResourceID clears the value of the "resource_id" field.
+func (_u *CommentUpdateOne) ClearResourceID() *CommentUpdateOne {
+	_u.mutation.ClearResourceID()
+	return _u
+}
+
+// SetPinnedAt sets the "pinned_at" field.
+func (_u *CommentUpdateOne) SetPinnedAt(v time.Time) *CommentUpdateOne {
+	_u.mutation.SetPinnedAt(v)
+	return _u
+}
+
+// SetNillablePinnedAt sets the "pinned_at" field if the given value is not nil.
+func (_u *CommentUpdateOne) SetNillablePinnedAt(v *time.Time) *CommentUpdateOne {
+	if v != nil {
+		_u.SetPinnedAt(*v)
+	}
+	return _u
+}
+
+// ClearPinnedAt clears the value of the "pinned_at" field.
+func (_u *CommentUpdateOne) ClearPinnedAt() *CommentUpdateOne {
+	_u.mutation.ClearPinnedAt()
+	return _u
+}
+
 // SetParentID sets the "parent_id" field.
 func (_u *CommentUpdateOne) SetParentID(v int) *CommentUpdateOne {
 	_u.mutation.SetParentID(v)
@@ -1135,6 +1262,11 @@ func (_u *CommentUpdateOne) SetGame(v *Game) *CommentUpdateOne {
 	return _u.SetGameID(v.ID)
 }
 
+// SetResource sets the "resource" edge to the GameDownloadResource entity.
+func (_u *CommentUpdateOne) SetResource(v *GameDownloadResource) *CommentUpdateOne {
+	return _u.SetResourceID(v.ID)
+}
+
 // AddChildIDs adds the "children" edge to the Comment entity by IDs.
 func (_u *CommentUpdateOne) AddChildIDs(ids ...int) *CommentUpdateOne {
 	_u.mutation.AddChildIDs(ids...)
@@ -1254,6 +1386,12 @@ func (_u *CommentUpdateOne) RemoveActivities(v ...*Activity) *CommentUpdateOne {
 // ClearGame clears the "game" edge to the Game entity.
 func (_u *CommentUpdateOne) ClearGame() *CommentUpdateOne {
 	_u.mutation.ClearGame()
+	return _u
+}
+
+// ClearResource clears the "resource" edge to the GameDownloadResource entity.
+func (_u *CommentUpdateOne) ClearResource() *CommentUpdateOne {
+	_u.mutation.ClearResource()
 	return _u
 }
 
@@ -1486,6 +1624,12 @@ func (_u *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err er
 	if value, ok := _u.mutation.Text(); ok {
 		_spec.SetField(comment.FieldText, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.PinnedAt(); ok {
+		_spec.SetField(comment.FieldPinnedAt, field.TypeTime, value)
+	}
+	if _u.mutation.PinnedAtCleared() {
+		_spec.ClearField(comment.FieldPinnedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.ReplyCount(); ok {
 		_spec.SetField(comment.FieldReplyCount, field.TypeInt, value)
 	}
@@ -1571,6 +1715,35 @@ func (_u *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err er
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(game.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ResourceCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   comment.ResourceTable,
+			Columns: []string{comment.ResourceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresource.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ResourceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   comment.ResourceTable,
+			Columns: []string{comment.ResourceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresource.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

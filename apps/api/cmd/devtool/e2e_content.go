@@ -18,6 +18,9 @@ const (
 	e2eFavoriteItemNote      = "Seeded favorite item for E2E tests."
 	e2eRootCommentText       = "Seeded root comment for E2E."
 	e2eReplyCommentText      = "Seeded reply comment for E2E."
+	e2eResourceQuestionText  = "Seeded question about the resource for E2E."
+	e2eResourceAnswerText    = "Seeded answer from the publisher for E2E."
+	e2eResourceNoticeText    = "Seeded notice from the publisher for E2E."
 	e2eMalwareReviewDeadline = 24 * time.Hour
 )
 

@@ -333,6 +333,18 @@ func (f GameDownloadResourceFunc) Mutate(ctx context.Context, m ent.Mutation) (e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GameDownloadResourceMutation", m)
 }
 
+// The GameDownloadResourceEventFunc type is an adapter to allow the use of ordinary
+// function as GameDownloadResourceEvent mutator.
+type GameDownloadResourceEventFunc func(context.Context, *ent.GameDownloadResourceEventMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f GameDownloadResourceEventFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.GameDownloadResourceEventMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GameDownloadResourceEventMutation", m)
+}
+
 // The GameDownloadResourceFileFunc type is an adapter to allow the use of ordinary
 // function as GameDownloadResourceFile mutator.
 type GameDownloadResourceFileFunc func(context.Context, *ent.GameDownloadResourceFileMutation) (ent.Value, error)

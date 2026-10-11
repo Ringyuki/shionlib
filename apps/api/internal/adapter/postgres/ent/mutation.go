@@ -39,6 +39,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedeveloper"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedeveloperrelation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourceevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefilehistory"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
@@ -105,6 +106,7 @@ const (
 	TypeGameDeveloper                   = "GameDeveloper"
 	TypeGameDeveloperRelation           = "GameDeveloperRelation"
 	TypeGameDownloadResource            = "GameDownloadResource"
+	TypeGameDownloadResourceEvent       = "GameDownloadResourceEvent"
 	TypeGameDownloadResourceFile        = "GameDownloadResourceFile"
 	TypeGameDownloadResourceFileHistory = "GameDownloadResourceFileHistory"
 	TypeGameDownloadResourceReport      = "GameDownloadResourceReport"
@@ -17324,6 +17326,7 @@ type CommentMutation struct {
 	content                 *jsontext.Value
 	appendcontent           jsontext.Value
 	text                    *string
+	pinned_at               *time.Time
 	reply_count             *int
 	addreply_count          *int
 	status                  *int
@@ -17337,6 +17340,8 @@ type CommentMutation struct {
 	clearedactivities       bool
 	game                    *int
 	clearedgame             bool
+	resource                *int
+	clearedresource         bool
 	children                map[int]struct{}
 	removedchildren         map[int]struct{}
 	clearedchildren         bool
@@ -17588,6 +17593,104 @@ func (m *CommentMutation) OldGameID(ctx context.Context) (v int, err error) {
 // ResetGameID resets all changes to the "game_id" field.
 func (m *CommentMutation) ResetGameID() {
 	m.game = nil
+}
+
+// SetResourceID sets the "resource_id" field.
+func (m *CommentMutation) SetResourceID(i int) {
+	m.resource = &i
+}
+
+// ResourceID returns the value of the "resource_id" field in the mutation.
+func (m *CommentMutation) ResourceID() (r int, exists bool) {
+	v := m.resource
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResourceID returns the old "resource_id" field's value of the Comment entity.
+// If the Comment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CommentMutation) OldResourceID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResourceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResourceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResourceID: %w", err)
+	}
+	return oldValue.ResourceID, nil
+}
+
+// ClearResourceID clears the value of the "resource_id" field.
+func (m *CommentMutation) ClearResourceID() {
+	m.resource = nil
+	m.clearedFields[comment.FieldResourceID] = struct{}{}
+}
+
+// ResourceIDCleared returns if the "resource_id" field was cleared in this mutation.
+func (m *CommentMutation) ResourceIDCleared() bool {
+	_, ok := m.clearedFields[comment.FieldResourceID]
+	return ok
+}
+
+// ResetResourceID resets all changes to the "resource_id" field.
+func (m *CommentMutation) ResetResourceID() {
+	m.resource = nil
+	delete(m.clearedFields, comment.FieldResourceID)
+}
+
+// SetPinnedAt sets the "pinned_at" field.
+func (m *CommentMutation) SetPinnedAt(t time.Time) {
+	m.pinned_at = &t
+}
+
+// PinnedAt returns the value of the "pinned_at" field in the mutation.
+func (m *CommentMutation) PinnedAt() (r time.Time, exists bool) {
+	v := m.pinned_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPinnedAt returns the old "pinned_at" field's value of the Comment entity.
+// If the Comment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CommentMutation) OldPinnedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPinnedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPinnedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPinnedAt: %w", err)
+	}
+	return oldValue.PinnedAt, nil
+}
+
+// ClearPinnedAt clears the value of the "pinned_at" field.
+func (m *CommentMutation) ClearPinnedAt() {
+	m.pinned_at = nil
+	m.clearedFields[comment.FieldPinnedAt] = struct{}{}
+}
+
+// PinnedAtCleared returns if the "pinned_at" field was cleared in this mutation.
+func (m *CommentMutation) PinnedAtCleared() bool {
+	_, ok := m.clearedFields[comment.FieldPinnedAt]
+	return ok
+}
+
+// ResetPinnedAt resets all changes to the "pinned_at" field.
+func (m *CommentMutation) ResetPinnedAt() {
+	m.pinned_at = nil
+	delete(m.clearedFields, comment.FieldPinnedAt)
 }
 
 // SetParentID sets the "parent_id" field.
@@ -18025,6 +18128,33 @@ func (m *CommentMutation) ResetGame() {
 	m.clearedgame = false
 }
 
+// ClearResource clears the "resource" edge to the GameDownloadResource entity.
+func (m *CommentMutation) ClearResource() {
+	m.clearedresource = true
+	m.clearedFields[comment.FieldResourceID] = struct{}{}
+}
+
+// ResourceCleared reports if the "resource" edge to the GameDownloadResource entity was cleared.
+func (m *CommentMutation) ResourceCleared() bool {
+	return m.ResourceIDCleared() || m.clearedresource
+}
+
+// ResourceIDs returns the "resource" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ResourceID instead. It exists only for internal usage by the builders.
+func (m *CommentMutation) ResourceIDs() (ids []int) {
+	if id := m.resource; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetResource resets all changes to the "resource" edge.
+func (m *CommentMutation) ResetResource() {
+	m.resource = nil
+	m.clearedresource = false
+}
+
 // AddChildIDs adds the "children" edge to the Comment entity by ids.
 func (m *CommentMutation) AddChildIDs(ids ...int) {
 	if m.children == nil {
@@ -18410,7 +18540,7 @@ func (m *CommentMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CommentMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 13)
 	if m.content != nil {
 		fields = append(fields, comment.FieldContent)
 	}
@@ -18419,6 +18549,12 @@ func (m *CommentMutation) Fields() []string {
 	}
 	if m.game != nil {
 		fields = append(fields, comment.FieldGameID)
+	}
+	if m.resource != nil {
+		fields = append(fields, comment.FieldResourceID)
+	}
+	if m.pinned_at != nil {
+		fields = append(fields, comment.FieldPinnedAt)
 	}
 	if m.parent != nil {
 		fields = append(fields, comment.FieldParentID)
@@ -18458,6 +18594,10 @@ func (m *CommentMutation) Field(name string) (ent.Value, bool) {
 		return m.Text()
 	case comment.FieldGameID:
 		return m.GameID()
+	case comment.FieldResourceID:
+		return m.ResourceID()
+	case comment.FieldPinnedAt:
+		return m.PinnedAt()
 	case comment.FieldParentID:
 		return m.ParentID()
 	case comment.FieldRootID:
@@ -18489,6 +18629,10 @@ func (m *CommentMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldText(ctx)
 	case comment.FieldGameID:
 		return m.OldGameID(ctx)
+	case comment.FieldResourceID:
+		return m.OldResourceID(ctx)
+	case comment.FieldPinnedAt:
+		return m.OldPinnedAt(ctx)
 	case comment.FieldParentID:
 		return m.OldParentID(ctx)
 	case comment.FieldRootID:
@@ -18534,6 +18678,20 @@ func (m *CommentMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetGameID(v)
+		return nil
+	case comment.FieldResourceID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResourceID(v)
+		return nil
+	case comment.FieldPinnedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPinnedAt(v)
 		return nil
 	case comment.FieldParentID:
 		v, ok := value.(int)
@@ -18648,6 +18806,12 @@ func (m *CommentMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *CommentMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(comment.FieldResourceID) {
+		fields = append(fields, comment.FieldResourceID)
+	}
+	if m.FieldCleared(comment.FieldPinnedAt) {
+		fields = append(fields, comment.FieldPinnedAt)
+	}
 	if m.FieldCleared(comment.FieldParentID) {
 		fields = append(fields, comment.FieldParentID)
 	}
@@ -18668,6 +18832,12 @@ func (m *CommentMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *CommentMutation) ClearField(name string) error {
 	switch name {
+	case comment.FieldResourceID:
+		m.ClearResourceID()
+		return nil
+	case comment.FieldPinnedAt:
+		m.ClearPinnedAt()
+		return nil
 	case comment.FieldParentID:
 		m.ClearParentID()
 		return nil
@@ -18690,6 +18860,12 @@ func (m *CommentMutation) ResetField(name string) error {
 		return nil
 	case comment.FieldGameID:
 		m.ResetGameID()
+		return nil
+	case comment.FieldResourceID:
+		m.ResetResourceID()
+		return nil
+	case comment.FieldPinnedAt:
+		m.ResetPinnedAt()
 		return nil
 	case comment.FieldParentID:
 		m.ResetParentID()
@@ -18721,12 +18897,15 @@ func (m *CommentMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *CommentMutation) AddedEdges() []string {
-	edges := make([]string, 0, 10)
+	edges := make([]string, 0, 11)
 	if m.activities != nil {
 		edges = append(edges, comment.EdgeActivities)
 	}
 	if m.game != nil {
 		edges = append(edges, comment.EdgeGame)
+	}
+	if m.resource != nil {
+		edges = append(edges, comment.EdgeResource)
 	}
 	if m.children != nil {
 		edges = append(edges, comment.EdgeChildren)
@@ -18767,6 +18946,10 @@ func (m *CommentMutation) AddedIDs(name string) []ent.Value {
 		return ids
 	case comment.EdgeGame:
 		if id := m.game; id != nil {
+			return []ent.Value{*id}
+		}
+	case comment.EdgeResource:
+		if id := m.resource; id != nil {
 			return []ent.Value{*id}
 		}
 	case comment.EdgeChildren:
@@ -18817,7 +19000,7 @@ func (m *CommentMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *CommentMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 10)
+	edges := make([]string, 0, 11)
 	if m.removedactivities != nil {
 		edges = append(edges, comment.EdgeActivities)
 	}
@@ -18885,12 +19068,15 @@ func (m *CommentMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *CommentMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 10)
+	edges := make([]string, 0, 11)
 	if m.clearedactivities {
 		edges = append(edges, comment.EdgeActivities)
 	}
 	if m.clearedgame {
 		edges = append(edges, comment.EdgeGame)
+	}
+	if m.clearedresource {
+		edges = append(edges, comment.EdgeResource)
 	}
 	if m.clearedchildren {
 		edges = append(edges, comment.EdgeChildren)
@@ -18927,6 +19113,8 @@ func (m *CommentMutation) EdgeCleared(name string) bool {
 		return m.clearedactivities
 	case comment.EdgeGame:
 		return m.clearedgame
+	case comment.EdgeResource:
+		return m.clearedresource
 	case comment.EdgeChildren:
 		return m.clearedchildren
 	case comment.EdgeParent:
@@ -18954,6 +19142,9 @@ func (m *CommentMutation) ClearEdge(name string) error {
 	case comment.EdgeGame:
 		m.ClearGame()
 		return nil
+	case comment.EdgeResource:
+		m.ClearResource()
+		return nil
 	case comment.EdgeParent:
 		m.ClearParent()
 		return nil
@@ -18976,6 +19167,9 @@ func (m *CommentMutation) ResetEdge(name string) error {
 		return nil
 	case comment.EdgeGame:
 		m.ResetGame()
+		return nil
+	case comment.EdgeResource:
+		m.ResetResource()
 		return nil
 	case comment.EdgeChildren:
 		m.ResetChildren()
@@ -32812,6 +33006,12 @@ type GameDownloadResourceMutation struct {
 	clearedmalware_scan_cases bool
 	creator                   *int
 	clearedcreator            bool
+	comments                  map[int]struct{}
+	removedcomments           map[int]struct{}
+	clearedcomments           bool
+	events                    map[int]struct{}
+	removedevents             map[int]struct{}
+	clearedevents             bool
 	done                      bool
 	oldValue                  func(context.Context) (*GameDownloadResource, error)
 	predicates                []predicate.GameDownloadResource
@@ -33687,6 +33887,114 @@ func (m *GameDownloadResourceMutation) ResetCreator() {
 	m.clearedcreator = false
 }
 
+// AddCommentIDs adds the "comments" edge to the Comment entity by ids.
+func (m *GameDownloadResourceMutation) AddCommentIDs(ids ...int) {
+	if m.comments == nil {
+		m.comments = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.comments[ids[i]] = struct{}{}
+	}
+}
+
+// ClearComments clears the "comments" edge to the Comment entity.
+func (m *GameDownloadResourceMutation) ClearComments() {
+	m.clearedcomments = true
+}
+
+// CommentsCleared reports if the "comments" edge to the Comment entity was cleared.
+func (m *GameDownloadResourceMutation) CommentsCleared() bool {
+	return m.clearedcomments
+}
+
+// RemoveCommentIDs removes the "comments" edge to the Comment entity by IDs.
+func (m *GameDownloadResourceMutation) RemoveCommentIDs(ids ...int) {
+	if m.removedcomments == nil {
+		m.removedcomments = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.comments, ids[i])
+		m.removedcomments[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedComments returns the removed IDs of the "comments" edge to the Comment entity.
+func (m *GameDownloadResourceMutation) RemovedCommentsIDs() (ids []int) {
+	for id := range m.removedcomments {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// CommentsIDs returns the "comments" edge IDs in the mutation.
+func (m *GameDownloadResourceMutation) CommentsIDs() (ids []int) {
+	for id := range m.comments {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetComments resets all changes to the "comments" edge.
+func (m *GameDownloadResourceMutation) ResetComments() {
+	m.comments = nil
+	m.clearedcomments = false
+	m.removedcomments = nil
+}
+
+// AddEventIDs adds the "events" edge to the GameDownloadResourceEvent entity by ids.
+func (m *GameDownloadResourceMutation) AddEventIDs(ids ...int) {
+	if m.events == nil {
+		m.events = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.events[ids[i]] = struct{}{}
+	}
+}
+
+// ClearEvents clears the "events" edge to the GameDownloadResourceEvent entity.
+func (m *GameDownloadResourceMutation) ClearEvents() {
+	m.clearedevents = true
+}
+
+// EventsCleared reports if the "events" edge to the GameDownloadResourceEvent entity was cleared.
+func (m *GameDownloadResourceMutation) EventsCleared() bool {
+	return m.clearedevents
+}
+
+// RemoveEventIDs removes the "events" edge to the GameDownloadResourceEvent entity by IDs.
+func (m *GameDownloadResourceMutation) RemoveEventIDs(ids ...int) {
+	if m.removedevents == nil {
+		m.removedevents = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.events, ids[i])
+		m.removedevents[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedEvents returns the removed IDs of the "events" edge to the GameDownloadResourceEvent entity.
+func (m *GameDownloadResourceMutation) RemovedEventsIDs() (ids []int) {
+	for id := range m.removedevents {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// EventsIDs returns the "events" edge IDs in the mutation.
+func (m *GameDownloadResourceMutation) EventsIDs() (ids []int) {
+	for id := range m.events {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetEvents resets all changes to the "events" edge.
+func (m *GameDownloadResourceMutation) ResetEvents() {
+	m.events = nil
+	m.clearedevents = false
+	m.removedevents = nil
+}
+
 // Where appends a list predicates to the GameDownloadResourceMutation builder.
 func (m *GameDownloadResourceMutation) Where(ps ...predicate.GameDownloadResource) {
 	m.predicates = append(m.predicates, ps...)
@@ -34073,7 +34381,7 @@ func (m *GameDownloadResourceMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *GameDownloadResourceMutation) AddedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 7)
 	if m.game != nil {
 		edges = append(edges, gamedownloadresource.EdgeGame)
 	}
@@ -34088,6 +34396,12 @@ func (m *GameDownloadResourceMutation) AddedEdges() []string {
 	}
 	if m.creator != nil {
 		edges = append(edges, gamedownloadresource.EdgeCreator)
+	}
+	if m.comments != nil {
+		edges = append(edges, gamedownloadresource.EdgeComments)
+	}
+	if m.events != nil {
+		edges = append(edges, gamedownloadresource.EdgeEvents)
 	}
 	return edges
 }
@@ -34122,13 +34436,25 @@ func (m *GameDownloadResourceMutation) AddedIDs(name string) []ent.Value {
 		if id := m.creator; id != nil {
 			return []ent.Value{*id}
 		}
+	case gamedownloadresource.EdgeComments:
+		ids := make([]ent.Value, 0, len(m.comments))
+		for id := range m.comments {
+			ids = append(ids, id)
+		}
+		return ids
+	case gamedownloadresource.EdgeEvents:
+		ids := make([]ent.Value, 0, len(m.events))
+		for id := range m.events {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *GameDownloadResourceMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 7)
 	if m.removedfiles != nil {
 		edges = append(edges, gamedownloadresource.EdgeFiles)
 	}
@@ -34137,6 +34463,12 @@ func (m *GameDownloadResourceMutation) RemovedEdges() []string {
 	}
 	if m.removedmalware_scan_cases != nil {
 		edges = append(edges, gamedownloadresource.EdgeMalwareScanCases)
+	}
+	if m.removedcomments != nil {
+		edges = append(edges, gamedownloadresource.EdgeComments)
+	}
+	if m.removedevents != nil {
+		edges = append(edges, gamedownloadresource.EdgeEvents)
 	}
 	return edges
 }
@@ -34163,13 +34495,25 @@ func (m *GameDownloadResourceMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case gamedownloadresource.EdgeComments:
+		ids := make([]ent.Value, 0, len(m.removedcomments))
+		for id := range m.removedcomments {
+			ids = append(ids, id)
+		}
+		return ids
+	case gamedownloadresource.EdgeEvents:
+		ids := make([]ent.Value, 0, len(m.removedevents))
+		for id := range m.removedevents {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *GameDownloadResourceMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 7)
 	if m.clearedgame {
 		edges = append(edges, gamedownloadresource.EdgeGame)
 	}
@@ -34184,6 +34528,12 @@ func (m *GameDownloadResourceMutation) ClearedEdges() []string {
 	}
 	if m.clearedcreator {
 		edges = append(edges, gamedownloadresource.EdgeCreator)
+	}
+	if m.clearedcomments {
+		edges = append(edges, gamedownloadresource.EdgeComments)
+	}
+	if m.clearedevents {
+		edges = append(edges, gamedownloadresource.EdgeEvents)
 	}
 	return edges
 }
@@ -34202,6 +34552,10 @@ func (m *GameDownloadResourceMutation) EdgeCleared(name string) bool {
 		return m.clearedmalware_scan_cases
 	case gamedownloadresource.EdgeCreator:
 		return m.clearedcreator
+	case gamedownloadresource.EdgeComments:
+		return m.clearedcomments
+	case gamedownloadresource.EdgeEvents:
+		return m.clearedevents
 	}
 	return false
 }
@@ -34239,8 +34593,723 @@ func (m *GameDownloadResourceMutation) ResetEdge(name string) error {
 	case gamedownloadresource.EdgeCreator:
 		m.ResetCreator()
 		return nil
+	case gamedownloadresource.EdgeComments:
+		m.ResetComments()
+		return nil
+	case gamedownloadresource.EdgeEvents:
+		m.ResetEvents()
+		return nil
 	}
 	return fmt.Errorf("unknown GameDownloadResource edge %s", name)
+}
+
+// GameDownloadResourceEventMutation represents an operation that mutates the GameDownloadResourceEvent nodes in the graph.
+type GameDownloadResourceEventMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *int
+	kind            *string
+	data            *jsontext.Value
+	appenddata      jsontext.Value
+	created         *time.Time
+	clearedFields   map[string]struct{}
+	resource        *int
+	clearedresource bool
+	actor           *int
+	clearedactor    bool
+	done            bool
+	oldValue        func(context.Context) (*GameDownloadResourceEvent, error)
+	predicates      []predicate.GameDownloadResourceEvent
+}
+
+var _ ent.Mutation = (*GameDownloadResourceEventMutation)(nil)
+
+// gamedownloadresourceeventOption allows management of the mutation configuration using functional options.
+type gamedownloadresourceeventOption func(*GameDownloadResourceEventMutation)
+
+// newGameDownloadResourceEventMutation creates new mutation for the GameDownloadResourceEvent entity.
+func newGameDownloadResourceEventMutation(c config, op Op, opts ...gamedownloadresourceeventOption) *GameDownloadResourceEventMutation {
+	m := &GameDownloadResourceEventMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeGameDownloadResourceEvent,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withGameDownloadResourceEventID sets the ID field of the mutation.
+func withGameDownloadResourceEventID(id int) gamedownloadresourceeventOption {
+	return func(m *GameDownloadResourceEventMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *GameDownloadResourceEvent
+		)
+		m.oldValue = func(ctx context.Context) (*GameDownloadResourceEvent, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().GameDownloadResourceEvent.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withGameDownloadResourceEvent sets the old GameDownloadResourceEvent of the mutation.
+func withGameDownloadResourceEvent(node *GameDownloadResourceEvent) gamedownloadresourceeventOption {
+	return func(m *GameDownloadResourceEventMutation) {
+		m.oldValue = func(context.Context) (*GameDownloadResourceEvent, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m GameDownloadResourceEventMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m GameDownloadResourceEventMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of GameDownloadResourceEvent entities.
+func (m *GameDownloadResourceEventMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *GameDownloadResourceEventMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *GameDownloadResourceEventMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().GameDownloadResourceEvent.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetResourceID sets the "resource_id" field.
+func (m *GameDownloadResourceEventMutation) SetResourceID(i int) {
+	m.resource = &i
+}
+
+// ResourceID returns the value of the "resource_id" field in the mutation.
+func (m *GameDownloadResourceEventMutation) ResourceID() (r int, exists bool) {
+	v := m.resource
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResourceID returns the old "resource_id" field's value of the GameDownloadResourceEvent entity.
+// If the GameDownloadResourceEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceEventMutation) OldResourceID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResourceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResourceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResourceID: %w", err)
+	}
+	return oldValue.ResourceID, nil
+}
+
+// ResetResourceID resets all changes to the "resource_id" field.
+func (m *GameDownloadResourceEventMutation) ResetResourceID() {
+	m.resource = nil
+}
+
+// SetKind sets the "kind" field.
+func (m *GameDownloadResourceEventMutation) SetKind(s string) {
+	m.kind = &s
+}
+
+// Kind returns the value of the "kind" field in the mutation.
+func (m *GameDownloadResourceEventMutation) Kind() (r string, exists bool) {
+	v := m.kind
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKind returns the old "kind" field's value of the GameDownloadResourceEvent entity.
+// If the GameDownloadResourceEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceEventMutation) OldKind(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKind is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKind requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKind: %w", err)
+	}
+	return oldValue.Kind, nil
+}
+
+// ResetKind resets all changes to the "kind" field.
+func (m *GameDownloadResourceEventMutation) ResetKind() {
+	m.kind = nil
+}
+
+// SetActorID sets the "actor_id" field.
+func (m *GameDownloadResourceEventMutation) SetActorID(i int) {
+	m.actor = &i
+}
+
+// ActorID returns the value of the "actor_id" field in the mutation.
+func (m *GameDownloadResourceEventMutation) ActorID() (r int, exists bool) {
+	v := m.actor
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldActorID returns the old "actor_id" field's value of the GameDownloadResourceEvent entity.
+// If the GameDownloadResourceEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceEventMutation) OldActorID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldActorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldActorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldActorID: %w", err)
+	}
+	return oldValue.ActorID, nil
+}
+
+// ClearActorID clears the value of the "actor_id" field.
+func (m *GameDownloadResourceEventMutation) ClearActorID() {
+	m.actor = nil
+	m.clearedFields[gamedownloadresourceevent.FieldActorID] = struct{}{}
+}
+
+// ActorIDCleared returns if the "actor_id" field was cleared in this mutation.
+func (m *GameDownloadResourceEventMutation) ActorIDCleared() bool {
+	_, ok := m.clearedFields[gamedownloadresourceevent.FieldActorID]
+	return ok
+}
+
+// ResetActorID resets all changes to the "actor_id" field.
+func (m *GameDownloadResourceEventMutation) ResetActorID() {
+	m.actor = nil
+	delete(m.clearedFields, gamedownloadresourceevent.FieldActorID)
+}
+
+// SetData sets the "data" field.
+func (m *GameDownloadResourceEventMutation) SetData(j jsontext.Value) {
+	m.data = &j
+	m.appenddata = nil
+}
+
+// Data returns the value of the "data" field in the mutation.
+func (m *GameDownloadResourceEventMutation) Data() (r jsontext.Value, exists bool) {
+	v := m.data
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldData returns the old "data" field's value of the GameDownloadResourceEvent entity.
+// If the GameDownloadResourceEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceEventMutation) OldData(ctx context.Context) (v jsontext.Value, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldData is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldData requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldData: %w", err)
+	}
+	return oldValue.Data, nil
+}
+
+// AppendData adds j to the "data" field.
+func (m *GameDownloadResourceEventMutation) AppendData(j jsontext.Value) {
+	m.appenddata = append(m.appenddata, j...)
+}
+
+// AppendedData returns the list of values that were appended to the "data" field in this mutation.
+func (m *GameDownloadResourceEventMutation) AppendedData() (jsontext.Value, bool) {
+	if len(m.appenddata) == 0 {
+		return nil, false
+	}
+	return m.appenddata, true
+}
+
+// ClearData clears the value of the "data" field.
+func (m *GameDownloadResourceEventMutation) ClearData() {
+	m.data = nil
+	m.appenddata = nil
+	m.clearedFields[gamedownloadresourceevent.FieldData] = struct{}{}
+}
+
+// DataCleared returns if the "data" field was cleared in this mutation.
+func (m *GameDownloadResourceEventMutation) DataCleared() bool {
+	_, ok := m.clearedFields[gamedownloadresourceevent.FieldData]
+	return ok
+}
+
+// ResetData resets all changes to the "data" field.
+func (m *GameDownloadResourceEventMutation) ResetData() {
+	m.data = nil
+	m.appenddata = nil
+	delete(m.clearedFields, gamedownloadresourceevent.FieldData)
+}
+
+// SetCreated sets the "created" field.
+func (m *GameDownloadResourceEventMutation) SetCreated(t time.Time) {
+	m.created = &t
+}
+
+// Created returns the value of the "created" field in the mutation.
+func (m *GameDownloadResourceEventMutation) Created() (r time.Time, exists bool) {
+	v := m.created
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreated returns the old "created" field's value of the GameDownloadResourceEvent entity.
+// If the GameDownloadResourceEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceEventMutation) OldCreated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreated: %w", err)
+	}
+	return oldValue.Created, nil
+}
+
+// ResetCreated resets all changes to the "created" field.
+func (m *GameDownloadResourceEventMutation) ResetCreated() {
+	m.created = nil
+}
+
+// ClearResource clears the "resource" edge to the GameDownloadResource entity.
+func (m *GameDownloadResourceEventMutation) ClearResource() {
+	m.clearedresource = true
+	m.clearedFields[gamedownloadresourceevent.FieldResourceID] = struct{}{}
+}
+
+// ResourceCleared reports if the "resource" edge to the GameDownloadResource entity was cleared.
+func (m *GameDownloadResourceEventMutation) ResourceCleared() bool {
+	return m.clearedresource
+}
+
+// ResourceIDs returns the "resource" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ResourceID instead. It exists only for internal usage by the builders.
+func (m *GameDownloadResourceEventMutation) ResourceIDs() (ids []int) {
+	if id := m.resource; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetResource resets all changes to the "resource" edge.
+func (m *GameDownloadResourceEventMutation) ResetResource() {
+	m.resource = nil
+	m.clearedresource = false
+}
+
+// ClearActor clears the "actor" edge to the User entity.
+func (m *GameDownloadResourceEventMutation) ClearActor() {
+	m.clearedactor = true
+	m.clearedFields[gamedownloadresourceevent.FieldActorID] = struct{}{}
+}
+
+// ActorCleared reports if the "actor" edge to the User entity was cleared.
+func (m *GameDownloadResourceEventMutation) ActorCleared() bool {
+	return m.ActorIDCleared() || m.clearedactor
+}
+
+// ActorIDs returns the "actor" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ActorID instead. It exists only for internal usage by the builders.
+func (m *GameDownloadResourceEventMutation) ActorIDs() (ids []int) {
+	if id := m.actor; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetActor resets all changes to the "actor" edge.
+func (m *GameDownloadResourceEventMutation) ResetActor() {
+	m.actor = nil
+	m.clearedactor = false
+}
+
+// Where appends a list predicates to the GameDownloadResourceEventMutation builder.
+func (m *GameDownloadResourceEventMutation) Where(ps ...predicate.GameDownloadResourceEvent) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the GameDownloadResourceEventMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *GameDownloadResourceEventMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.GameDownloadResourceEvent, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *GameDownloadResourceEventMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *GameDownloadResourceEventMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (GameDownloadResourceEvent).
+func (m *GameDownloadResourceEventMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *GameDownloadResourceEventMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.resource != nil {
+		fields = append(fields, gamedownloadresourceevent.FieldResourceID)
+	}
+	if m.kind != nil {
+		fields = append(fields, gamedownloadresourceevent.FieldKind)
+	}
+	if m.actor != nil {
+		fields = append(fields, gamedownloadresourceevent.FieldActorID)
+	}
+	if m.data != nil {
+		fields = append(fields, gamedownloadresourceevent.FieldData)
+	}
+	if m.created != nil {
+		fields = append(fields, gamedownloadresourceevent.FieldCreated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *GameDownloadResourceEventMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case gamedownloadresourceevent.FieldResourceID:
+		return m.ResourceID()
+	case gamedownloadresourceevent.FieldKind:
+		return m.Kind()
+	case gamedownloadresourceevent.FieldActorID:
+		return m.ActorID()
+	case gamedownloadresourceevent.FieldData:
+		return m.Data()
+	case gamedownloadresourceevent.FieldCreated:
+		return m.Created()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *GameDownloadResourceEventMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case gamedownloadresourceevent.FieldResourceID:
+		return m.OldResourceID(ctx)
+	case gamedownloadresourceevent.FieldKind:
+		return m.OldKind(ctx)
+	case gamedownloadresourceevent.FieldActorID:
+		return m.OldActorID(ctx)
+	case gamedownloadresourceevent.FieldData:
+		return m.OldData(ctx)
+	case gamedownloadresourceevent.FieldCreated:
+		return m.OldCreated(ctx)
+	}
+	return nil, fmt.Errorf("unknown GameDownloadResourceEvent field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *GameDownloadResourceEventMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case gamedownloadresourceevent.FieldResourceID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResourceID(v)
+		return nil
+	case gamedownloadresourceevent.FieldKind:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKind(v)
+		return nil
+	case gamedownloadresourceevent.FieldActorID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetActorID(v)
+		return nil
+	case gamedownloadresourceevent.FieldData:
+		v, ok := value.(jsontext.Value)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetData(v)
+		return nil
+	case gamedownloadresourceevent.FieldCreated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown GameDownloadResourceEvent field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *GameDownloadResourceEventMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *GameDownloadResourceEventMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *GameDownloadResourceEventMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown GameDownloadResourceEvent numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *GameDownloadResourceEventMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(gamedownloadresourceevent.FieldActorID) {
+		fields = append(fields, gamedownloadresourceevent.FieldActorID)
+	}
+	if m.FieldCleared(gamedownloadresourceevent.FieldData) {
+		fields = append(fields, gamedownloadresourceevent.FieldData)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *GameDownloadResourceEventMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *GameDownloadResourceEventMutation) ClearField(name string) error {
+	switch name {
+	case gamedownloadresourceevent.FieldActorID:
+		m.ClearActorID()
+		return nil
+	case gamedownloadresourceevent.FieldData:
+		m.ClearData()
+		return nil
+	}
+	return fmt.Errorf("unknown GameDownloadResourceEvent nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *GameDownloadResourceEventMutation) ResetField(name string) error {
+	switch name {
+	case gamedownloadresourceevent.FieldResourceID:
+		m.ResetResourceID()
+		return nil
+	case gamedownloadresourceevent.FieldKind:
+		m.ResetKind()
+		return nil
+	case gamedownloadresourceevent.FieldActorID:
+		m.ResetActorID()
+		return nil
+	case gamedownloadresourceevent.FieldData:
+		m.ResetData()
+		return nil
+	case gamedownloadresourceevent.FieldCreated:
+		m.ResetCreated()
+		return nil
+	}
+	return fmt.Errorf("unknown GameDownloadResourceEvent field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *GameDownloadResourceEventMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.resource != nil {
+		edges = append(edges, gamedownloadresourceevent.EdgeResource)
+	}
+	if m.actor != nil {
+		edges = append(edges, gamedownloadresourceevent.EdgeActor)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *GameDownloadResourceEventMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case gamedownloadresourceevent.EdgeResource:
+		if id := m.resource; id != nil {
+			return []ent.Value{*id}
+		}
+	case gamedownloadresourceevent.EdgeActor:
+		if id := m.actor; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *GameDownloadResourceEventMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *GameDownloadResourceEventMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *GameDownloadResourceEventMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedresource {
+		edges = append(edges, gamedownloadresourceevent.EdgeResource)
+	}
+	if m.clearedactor {
+		edges = append(edges, gamedownloadresourceevent.EdgeActor)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *GameDownloadResourceEventMutation) EdgeCleared(name string) bool {
+	switch name {
+	case gamedownloadresourceevent.EdgeResource:
+		return m.clearedresource
+	case gamedownloadresourceevent.EdgeActor:
+		return m.clearedactor
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *GameDownloadResourceEventMutation) ClearEdge(name string) error {
+	switch name {
+	case gamedownloadresourceevent.EdgeResource:
+		m.ClearResource()
+		return nil
+	case gamedownloadresourceevent.EdgeActor:
+		m.ClearActor()
+		return nil
+	}
+	return fmt.Errorf("unknown GameDownloadResourceEvent unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *GameDownloadResourceEventMutation) ResetEdge(name string) error {
+	switch name {
+	case gamedownloadresourceevent.EdgeResource:
+		m.ResetResource()
+		return nil
+	case gamedownloadresourceevent.EdgeActor:
+		m.ResetActor()
+		return nil
+	}
+	return fmt.Errorf("unknown GameDownloadResourceEvent edge %s", name)
 }
 
 // GameDownloadResourceFileMutation represents an operation that mutates the GameDownloadResourceFile nodes in the graph.
@@ -52708,6 +53777,9 @@ type UserMutation struct {
 	game_download_resource_file_histories        map[int]struct{}
 	removedgame_download_resource_file_histories map[int]struct{}
 	clearedgame_download_resource_file_histories bool
+	game_download_resource_events                map[int]struct{}
+	removedgame_download_resource_events         map[int]struct{}
+	clearedgame_download_resource_events         bool
 	field_permissions                            map[int]struct{}
 	removedfield_permissions                     map[int]struct{}
 	clearedfield_permissions                     bool
@@ -54401,6 +55473,60 @@ func (m *UserMutation) ResetGameDownloadResourceFileHistories() {
 	m.removedgame_download_resource_file_histories = nil
 }
 
+// AddGameDownloadResourceEventIDs adds the "game_download_resource_events" edge to the GameDownloadResourceEvent entity by ids.
+func (m *UserMutation) AddGameDownloadResourceEventIDs(ids ...int) {
+	if m.game_download_resource_events == nil {
+		m.game_download_resource_events = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.game_download_resource_events[ids[i]] = struct{}{}
+	}
+}
+
+// ClearGameDownloadResourceEvents clears the "game_download_resource_events" edge to the GameDownloadResourceEvent entity.
+func (m *UserMutation) ClearGameDownloadResourceEvents() {
+	m.clearedgame_download_resource_events = true
+}
+
+// GameDownloadResourceEventsCleared reports if the "game_download_resource_events" edge to the GameDownloadResourceEvent entity was cleared.
+func (m *UserMutation) GameDownloadResourceEventsCleared() bool {
+	return m.clearedgame_download_resource_events
+}
+
+// RemoveGameDownloadResourceEventIDs removes the "game_download_resource_events" edge to the GameDownloadResourceEvent entity by IDs.
+func (m *UserMutation) RemoveGameDownloadResourceEventIDs(ids ...int) {
+	if m.removedgame_download_resource_events == nil {
+		m.removedgame_download_resource_events = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.game_download_resource_events, ids[i])
+		m.removedgame_download_resource_events[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedGameDownloadResourceEvents returns the removed IDs of the "game_download_resource_events" edge to the GameDownloadResourceEvent entity.
+func (m *UserMutation) RemovedGameDownloadResourceEventsIDs() (ids []int) {
+	for id := range m.removedgame_download_resource_events {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// GameDownloadResourceEventsIDs returns the "game_download_resource_events" edge IDs in the mutation.
+func (m *UserMutation) GameDownloadResourceEventsIDs() (ids []int) {
+	for id := range m.game_download_resource_events {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetGameDownloadResourceEvents resets all changes to the "game_download_resource_events" edge.
+func (m *UserMutation) ResetGameDownloadResourceEvents() {
+	m.game_download_resource_events = nil
+	m.clearedgame_download_resource_events = false
+	m.removedgame_download_resource_events = nil
+}
+
 // AddFieldPermissionIDs adds the "field_permissions" edge to the UserFieldPermission entity by ids.
 func (m *UserMutation) AddFieldPermissionIDs(ids ...int) {
 	if m.field_permissions == nil {
@@ -55879,7 +57005,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 28)
+	edges := make([]string, 0, 29)
 	if m.activities != nil {
 		edges = append(edges, user.EdgeActivities)
 	}
@@ -55912,6 +57038,9 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.game_download_resource_file_histories != nil {
 		edges = append(edges, user.EdgeGameDownloadResourceFileHistories)
+	}
+	if m.game_download_resource_events != nil {
+		edges = append(edges, user.EdgeGameDownloadResourceEvents)
 	}
 	if m.field_permissions != nil {
 		edges = append(edges, user.EdgeFieldPermissions)
@@ -56037,6 +57166,12 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeGameDownloadResourceEvents:
+		ids := make([]ent.Value, 0, len(m.game_download_resource_events))
+		for id := range m.game_download_resource_events {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeFieldPermissions:
 		ids := make([]ent.Value, 0, len(m.field_permissions))
 		for id := range m.field_permissions {
@@ -56143,7 +57278,7 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 28)
+	edges := make([]string, 0, 29)
 	if m.removedactivities != nil {
 		edges = append(edges, user.EdgeActivities)
 	}
@@ -56176,6 +57311,9 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removedgame_download_resource_file_histories != nil {
 		edges = append(edges, user.EdgeGameDownloadResourceFileHistories)
+	}
+	if m.removedgame_download_resource_events != nil {
+		edges = append(edges, user.EdgeGameDownloadResourceEvents)
 	}
 	if m.removedfield_permissions != nil {
 		edges = append(edges, user.EdgeFieldPermissions)
@@ -56298,6 +57436,12 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeGameDownloadResourceEvents:
+		ids := make([]ent.Value, 0, len(m.removedgame_download_resource_events))
+		for id := range m.removedgame_download_resource_events {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeFieldPermissions:
 		ids := make([]ent.Value, 0, len(m.removedfield_permissions))
 		for id := range m.removedfield_permissions {
@@ -56400,7 +57544,7 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 28)
+	edges := make([]string, 0, 29)
 	if m.clearedactivities {
 		edges = append(edges, user.EdgeActivities)
 	}
@@ -56433,6 +57577,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	}
 	if m.clearedgame_download_resource_file_histories {
 		edges = append(edges, user.EdgeGameDownloadResourceFileHistories)
+	}
+	if m.clearedgame_download_resource_events {
+		edges = append(edges, user.EdgeGameDownloadResourceEvents)
 	}
 	if m.clearedfield_permissions {
 		edges = append(edges, user.EdgeFieldPermissions)
@@ -56514,6 +57661,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedgame_download_resource_files
 	case user.EdgeGameDownloadResourceFileHistories:
 		return m.clearedgame_download_resource_file_histories
+	case user.EdgeGameDownloadResourceEvents:
+		return m.clearedgame_download_resource_events
 	case user.EdgeFieldPermissions:
 		return m.clearedfield_permissions
 	case user.EdgeEditRecords:
@@ -56599,6 +57748,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgeGameDownloadResourceFileHistories:
 		m.ResetGameDownloadResourceFileHistories()
+		return nil
+	case user.EdgeGameDownloadResourceEvents:
+		m.ResetGameDownloadResourceEvents()
 		return nil
 	case user.EdgeFieldPermissions:
 		m.ResetFieldPermissions()

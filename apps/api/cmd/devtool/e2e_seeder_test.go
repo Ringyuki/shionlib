@@ -55,26 +55,27 @@ func TestE2EPrepareReproducesTheLegacyDatasetIdempotently(t *testing.T) {
 	}
 
 	counts := map[string]int{
-		"users":                        8,
-		"favorites":                    8,
-		"favorite_items":               1,
-		"field_permission_mappings":    34,
-		"game_developers":              3,
-		"game_characters":              48,
-		"games":                        6,
-		"game_covers":                  4,
-		"game_images":                  30,
-		"game_links":                   14,
-		"game_developer_relations":     3,
-		"game_character_relations":     48,
-		"comments":                     2,
-		"activities":                   3,
-		"game_download_resources":      2,
-		"game_download_resource_files": 2,
-		"malware_scan_cases":           1,
-		"catalog_source_links":         6,
-		"settings":                     3,
-		"setting_changes":              3,
+		"users":                         8,
+		"favorites":                     8,
+		"favorite_items":                1,
+		"field_permission_mappings":     34,
+		"game_developers":               3,
+		"game_characters":               48,
+		"games":                         6,
+		"game_covers":                   4,
+		"game_images":                   30,
+		"game_links":                    14,
+		"game_developer_relations":      3,
+		"game_character_relations":      48,
+		"comments":                      5,
+		"activities":                    3,
+		"game_download_resources":       2,
+		"game_download_resource_files":  2,
+		"game_download_resource_events": 2,
+		"malware_scan_cases":            1,
+		"catalog_source_links":          6,
+		"settings":                      3,
+		"setting_changes":               3,
 	}
 	for table, want := range counts {
 		var got int
@@ -110,8 +111,13 @@ func TestE2EPrepareReproducesTheLegacyDatasetIdempotently(t *testing.T) {
 		t.Fatal("games are linked to their source like the cutover backfill")
 	}
 	root := db.Ent.Comment.Query().Where(comment.Text("Seeded root comment for E2E.")).OnlyX(ctx)
-	if root.ReplyCount != 1 || root.GameID != 1 {
+	if root.ReplyCount != 1 || root.GameID != 1 || root.ResourceID != nil {
 		t.Fatalf("root comment: %+v", root)
+	}
+	question := db.Ent.Comment.Query().Where(comment.Text(e2eResourceQuestionText)).OnlyX(ctx)
+	answer := db.Ent.Comment.Query().Where(comment.Text(e2eResourceAnswerText)).OnlyX(ctx)
+	if question.ResourceID == nil || question.ReplyCount != 1 || *question.RootID != question.ID || *answer.RootID != question.ID || *answer.ResourceID != *question.ResourceID || question.PinnedAt != nil {
+		t.Fatalf("a resource has a thread of its own: %+v %+v", question, answer)
 	}
 
 	var tags []string

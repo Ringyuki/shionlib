@@ -12,7 +12,7 @@ func TestMemoryRepositoryContract(t *testing.T) {
 			clock = clock.Add(time.Second)
 			return clock
 		})
-		users, games := 0, 0
+		users, games, resources := 0, 0, 0
 		return Env{
 			Repo:    repo,
 			NewUser: func(*testing.T) int { users++; return users },
@@ -25,6 +25,11 @@ func TestMemoryRepositoryContract(t *testing.T) {
 				games++
 				repo.AddGame(games, true)
 				return games
+			},
+			NewResource: func(_ *testing.T, _, _ int, public bool) int {
+				resources++
+				repo.AddResource(resources, public)
+				return resources
 			},
 		}
 	})

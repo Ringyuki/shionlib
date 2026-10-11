@@ -70,6 +70,8 @@
   "COMMENT_NOT_OWNER": "评论不属于当前用户",
   "COMMENT_TOO_DEEP": "评论层级过深",
   "COMMENT_CONTENT_TOO_LONG": "评论内容过长",
+  "COMMENT_NOT_PINNABLE": "这条评论不能置顶",
+  "COMMENT_PIN_NOT_PUBLISHER": "只有资源的发布者可以置顶评论",
   "GAME_UPLOAD_INVALID_TOTAL_SIZE": "上传文件大小无效",
   "GAME_UPLOAD_TOO_MANY_CHUNKS": "上传文件分片数过多",
   "GAME_UPLOAD_TOO_LARGE": "上传文件大小超出限制",

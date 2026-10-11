@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -56,10 +57,11 @@ func setup(t *testing.T) env {
 	store := downloadtest.NewObjectStore()
 	cards := gametest.NewCards(game.Card{ID: 10, TitleJP: "ゲーム", Covers: []game.Cover{{URL: "safe.webp"}, {URL: "rated.webp", Sexual: 1}}})
 	settings := settingtest.Set(settingtest.Source{}, download.MaxFilesPerResource, 3)
-	service := download.NewService(download.Deps{Repo: repo, Games: cards, Sessions: sessions{}, Activities: events, Messages: events, Tx: &txtest.Immediate{}, Queue: events, Store: store, Local: uploadtest.NewMemorySpool(), Settings: settings, Now: now})
+	discussions := downloadtest.Discussions{Counts: map[int]int{1: 3}}
+	service := download.NewService(download.Deps{Repo: repo, Games: cards, Comments: discussions, Sessions: sessions{}, Activities: events, Messages: events, Tx: &txtest.Immediate{}, Queue: events, Store: store, Local: uploadtest.NewMemorySpool(), Settings: settings, Now: now})
 	challenge := &downloadtest.Challenge{Verdict: download.Verdict{Success: true}}
 	links := download.NewLinkService(repo, &txtest.Immediate{}, challenge, &downloadtest.Authorizer{}, &downloadtest.Sealer{}, settingtest.Source{}, download.LinkOptions{Mode: download.ModeDirect, CDNHost: "https://cdn.example.com/"}, now)
-	downloadhttp.NewHandler(service, links, server.Builder).Register(server.API)
+	downloadhttp.NewHandler(service, download.NewDetailService(repo, cards, discussions), links, server.Builder).Register(server.API)
 	return env{server: server, repo: repo, store: store, challenge: challenge}
 }
 
@@ -78,7 +80,7 @@ func TestGameResourcesShape(t *testing.T) {
 	e.seedStoredFile()
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/10/download-source"})
 	e.server.Expect(resp, http.StatusOK, 0)
-	want := `[{"id":1,"platform":["win"],"language":["jp"],"simulator":null,"note":"note","downloads":0,"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"published_at":"2026-10-03T01:02:03.000Z","created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","files":[{"id":1,"type":1,"file_name":"game.7z","file_size":2048,"file_url":null,"s3_file_key":"games/10/1/game.7z","hash_algorithm":"blake3","file_hash":"b3","file_status":3,"stage":"stored","rejection":null,"is_virus_false_positive":false,"malware_scan_cases":[],"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"latest_history":null}]}]`
+	want := `[{"id":1,"platform":["win"],"language":["jp"],"simulator":null,"note":"note","downloads":0,"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"published_at":"2026-10-03T01:02:03.000Z","created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","comments":3,"files":[{"id":1,"type":1,"file_name":"game.7z","file_size":2048,"file_url":null,"s3_file_key":"games/10/1/game.7z","hash_algorithm":"blake3","file_hash":"b3","file_status":3,"stage":"stored","rejection":null,"is_virus_false_positive":false,"malware_scan_cases":[],"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"latest_history":null,"uploaded":"2026-10-03T01:02:03.000Z"}]}]`
 	if string(resp.Data) != want {
 		t.Fatalf("game resources\n got %s\nwant %s", resp.Data, want)
 	}
@@ -232,7 +234,7 @@ func TestOwnResources(t *testing.T) {
 
 	published := e.server.Do(apitest.Request{Method: http.MethodGet, Path: path + "?scope=published", As: &creator})
 	e.server.Expect(published, http.StatusOK, 0)
-	want := `{"items":[{"resource":{"id":1,"platform":["win"],"language":["jp"],"simulator":null,"note":"note","downloads":0,"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"published_at":"2026-10-03T01:02:03.000Z","created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","files":[{"id":1,"type":1,"file_name":"game.7z","file_size":2048,"file_url":null,"s3_file_key":"games/10/1/game.7z","hash_algorithm":"blake3","file_hash":"b3","file_status":3,"stage":"stored","rejection":null,"is_virus_false_positive":false,"malware_scan_cases":[],"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"latest_history":null}]},"game":{"id":10,`
+	want := `{"items":[{"resource":{"id":1,"platform":["win"],"language":["jp"],"simulator":null,"note":"note","downloads":0,"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"published_at":"2026-10-03T01:02:03.000Z","created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","comments":3,"files":[{"id":1,"type":1,"file_name":"game.7z","file_size":2048,"file_url":null,"s3_file_key":"games/10/1/game.7z","hash_algorithm":"blake3","file_hash":"b3","file_status":3,"stage":"stored","rejection":null,"is_virus_false_positive":false,"malware_scan_cases":[],"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"latest_history":null,"uploaded":"2026-10-03T01:02:03.000Z"}]},"game":{"id":10,`
 	if !strings.HasPrefix(string(published.Data), want) || !strings.HasSuffix(string(published.Data), `"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1}}`) {
 		t.Fatalf("published resources of the caller\n got %s\nwant %s", published.Data, want)
 	}
@@ -320,5 +322,47 @@ func TestStorageTestRoutes(t *testing.T) {
 	e.server.Expect(resp, http.StatusOK, 0)
 	if resp.HasData || len(e.store.Deleted) != 1 || e.store.Deleted[0] != "a/b/c.txt" {
 		t.Fatalf("delete %s %v", resp.Body, e.store.Deleted)
+	}
+}
+
+func TestResourceDetailAndItsHistory(t *testing.T) {
+	e := setup(t)
+	resource, file := e.seedStoredFile()
+	path := "/game/download-source/" + strconv.Itoa(resource.ID)
+
+	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: path})
+	e.server.Expect(resp, http.StatusOK, 0)
+	body := string(resp.Data)
+	for _, part := range []string{`{"resource":{"id":1,"platform":["win"]`, `"comments":3,"files":[{"id":1,"type":1,"file_name":"game.7z"`, `"game":{"id":10,"title_jp":"ゲーム"`, `"covers":[{"language":"","type":"","url":"safe.webp"`} {
+		if !strings.Contains(body, part) {
+			t.Fatalf("detail is missing %s in %s", part, body)
+		}
+	}
+	if strings.Contains(body, "rated.webp") {
+		t.Fatalf("a guest never gets the rated cover: %s", body)
+	}
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/download-source/999"}), http.StatusNotFound, 440101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/download-source/abc"}), http.StatusUnprocessableEntity, 100101)
+
+	hidden := e.repo.SeedResource(download.Resource{GameID: 10, CreatorID: creator.UserID})
+	e.repo.SeedFile(download.File{ResourceID: hidden.ID, Name: "new.7z", Status: download.FileOnServer, CreatorID: creator.UserID})
+	hiddenPath := "/game/download-source/" + strconv.Itoa(hidden.ID)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: hiddenPath}), http.StatusNotFound, 440101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: hiddenPath, As: &creator}), http.StatusOK, 0)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: hiddenPath + "/events"}), http.StatusNotFound, 440101)
+
+	rename := e.server.Do(apitest.Request{Method: http.MethodPatch, Path: "/game/download-source/file/" + strconv.Itoa(file.ID), As: &creator, Body: `{"file_name":"本体.7z"}`})
+	e.server.Expect(rename, http.StatusOK, 0)
+	edit := e.server.Do(apitest.Request{Method: http.MethodPatch, Path: path, As: &creator, Body: `{"platform":["win"],"language":["jp","zh"],"note":"官方中文"}`})
+	e.server.Expect(edit, http.StatusOK, 0)
+
+	events := e.server.Do(apitest.Request{Method: http.MethodGet, Path: path + "/events"})
+	e.server.Expect(events, http.StatusOK, 0)
+	actor := `{"id":1,"name":"user1","avatar":null,"is_sponsor":false}`
+	want := `[{"id":2,"kind":"edited","actor":` + actor + `,"created":"2026-10-03T01:02:03.000Z","files":[],"name":null,"old_name":null,"reason":null,"old_size":null,"new_size":null,` +
+		`"changes":[{"field":"languages","old":["jp"],"new":["jp","zh"]},{"field":"note","old":["note"],"new":["官方中文"]}]},` +
+		`{"id":1,"kind":"file_renamed","actor":` + actor + `,"created":"2026-10-03T01:02:03.000Z","files":[],"name":"本体.7z","old_name":"game.7z","reason":null,"old_size":null,"new_size":null,"changes":[]}]`
+	if string(events.Data) != want {
+		t.Fatalf("events\n got %s\nwant %s", events.Data, want)
 	}
 }

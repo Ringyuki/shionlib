@@ -731,6 +731,52 @@ func HasCreatorWith(preds ...predicate.User) predicate.GameDownloadResource {
 	})
 }
 
+// HasComments applies the HasEdge predicate on the "comments" edge.
+func HasComments() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CommentsTable, CommentsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCommentsWith applies the HasEdge predicate on the "comments" edge with a given conditions (other predicates).
+func HasCommentsWith(preds ...predicate.Comment) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(func(s *sql.Selector) {
+		step := newCommentsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasEvents applies the HasEdge predicate on the "events" edge.
+func HasEvents() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, EventsTable, EventsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasEventsWith applies the HasEdge predicate on the "events" edge with a given conditions (other predicates).
+func HasEventsWith(preds ...predicate.GameDownloadResourceEvent) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(func(s *sql.Selector) {
+		step := newEventsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.GameDownloadResource) predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(sql.AndPredicates(predicates...))

@@ -42,6 +42,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedeveloper"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedeveloperrelation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourceevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefilehistory"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
@@ -131,6 +132,8 @@ type Client struct {
 	GameDeveloperRelation *GameDeveloperRelationClient
 	// GameDownloadResource is the client for interacting with the GameDownloadResource builders.
 	GameDownloadResource *GameDownloadResourceClient
+	// GameDownloadResourceEvent is the client for interacting with the GameDownloadResourceEvent builders.
+	GameDownloadResourceEvent *GameDownloadResourceEventClient
 	// GameDownloadResourceFile is the client for interacting with the GameDownloadResourceFile builders.
 	GameDownloadResourceFile *GameDownloadResourceFileClient
 	// GameDownloadResourceFileHistory is the client for interacting with the GameDownloadResourceFileHistory builders.
@@ -221,6 +224,7 @@ func (c *Client) init() {
 	c.GameDeveloper = NewGameDeveloperClient(c.config)
 	c.GameDeveloperRelation = NewGameDeveloperRelationClient(c.config)
 	c.GameDownloadResource = NewGameDownloadResourceClient(c.config)
+	c.GameDownloadResourceEvent = NewGameDownloadResourceEventClient(c.config)
 	c.GameDownloadResourceFile = NewGameDownloadResourceFileClient(c.config)
 	c.GameDownloadResourceFileHistory = NewGameDownloadResourceFileHistoryClient(c.config)
 	c.GameDownloadResourceReport = NewGameDownloadResourceReportClient(c.config)
@@ -366,6 +370,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		GameDeveloper:                   NewGameDeveloperClient(cfg),
 		GameDeveloperRelation:           NewGameDeveloperRelationClient(cfg),
 		GameDownloadResource:            NewGameDownloadResourceClient(cfg),
+		GameDownloadResourceEvent:       NewGameDownloadResourceEventClient(cfg),
 		GameDownloadResourceFile:        NewGameDownloadResourceFileClient(cfg),
 		GameDownloadResourceFileHistory: NewGameDownloadResourceFileHistoryClient(cfg),
 		GameDownloadResourceReport:      NewGameDownloadResourceReportClient(cfg),
@@ -438,6 +443,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		GameDeveloper:                   NewGameDeveloperClient(cfg),
 		GameDeveloperRelation:           NewGameDeveloperRelationClient(cfg),
 		GameDownloadResource:            NewGameDownloadResourceClient(cfg),
+		GameDownloadResourceEvent:       NewGameDownloadResourceEventClient(cfg),
 		GameDownloadResourceFile:        NewGameDownloadResourceFileClient(cfg),
 		GameDownloadResourceFileHistory: NewGameDownloadResourceFileHistoryClient(cfg),
 		GameDownloadResourceReport:      NewGameDownloadResourceReportClient(cfg),
@@ -499,14 +505,14 @@ func (c *Client) Use(hooks ...Hook) {
 		c.CatalogSyncCursor, c.Comment, c.CommentLike, c.EditRecord, c.Favorite,
 		c.FavoriteItem, c.FieldPermissionMapping, c.Game, c.GameCharacter,
 		c.GameCharacterRelation, c.GameCover, c.GameDeveloper, c.GameDeveloperRelation,
-		c.GameDownloadResource, c.GameDownloadResourceFile,
-		c.GameDownloadResourceFileHistory, c.GameDownloadResourceReport, c.GameImage,
-		c.GameLink, c.GameRelation, c.GameTagRelation, c.GameUploadChunk,
-		c.GameUploadSession, c.MalwareScanCase, c.Message, c.ModerationEvent,
-		c.OidcIdentity, c.RoleFieldPermission, c.Setting, c.SettingChange,
-		c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord, c.UserFieldPermission,
-		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
-		c.UserPvnBinding, c.Walkthrough,
+		c.GameDownloadResource, c.GameDownloadResourceEvent,
+		c.GameDownloadResourceFile, c.GameDownloadResourceFileHistory,
+		c.GameDownloadResourceReport, c.GameImage, c.GameLink, c.GameRelation,
+		c.GameTagRelation, c.GameUploadChunk, c.GameUploadSession, c.MalwareScanCase,
+		c.Message, c.ModerationEvent, c.OidcIdentity, c.RoleFieldPermission, c.Setting,
+		c.SettingChange, c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord,
+		c.UserFieldPermission, c.UserGamePvnMapping, c.UserLoginSession,
+		c.UserPasskeyCredential, c.UserPvnBinding, c.Walkthrough,
 	} {
 		n.Use(hooks...)
 	}
@@ -522,14 +528,14 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.CatalogSyncCursor, c.Comment, c.CommentLike, c.EditRecord, c.Favorite,
 		c.FavoriteItem, c.FieldPermissionMapping, c.Game, c.GameCharacter,
 		c.GameCharacterRelation, c.GameCover, c.GameDeveloper, c.GameDeveloperRelation,
-		c.GameDownloadResource, c.GameDownloadResourceFile,
-		c.GameDownloadResourceFileHistory, c.GameDownloadResourceReport, c.GameImage,
-		c.GameLink, c.GameRelation, c.GameTagRelation, c.GameUploadChunk,
-		c.GameUploadSession, c.MalwareScanCase, c.Message, c.ModerationEvent,
-		c.OidcIdentity, c.RoleFieldPermission, c.Setting, c.SettingChange,
-		c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord, c.UserFieldPermission,
-		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
-		c.UserPvnBinding, c.Walkthrough,
+		c.GameDownloadResource, c.GameDownloadResourceEvent,
+		c.GameDownloadResourceFile, c.GameDownloadResourceFileHistory,
+		c.GameDownloadResourceReport, c.GameImage, c.GameLink, c.GameRelation,
+		c.GameTagRelation, c.GameUploadChunk, c.GameUploadSession, c.MalwareScanCase,
+		c.Message, c.ModerationEvent, c.OidcIdentity, c.RoleFieldPermission, c.Setting,
+		c.SettingChange, c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord,
+		c.UserFieldPermission, c.UserGamePvnMapping, c.UserLoginSession,
+		c.UserPasskeyCredential, c.UserPvnBinding, c.Walkthrough,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -592,6 +598,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.GameDeveloperRelation.mutate(ctx, m)
 	case *GameDownloadResourceMutation:
 		return c.GameDownloadResource.mutate(ctx, m)
+	case *GameDownloadResourceEventMutation:
+		return c.GameDownloadResourceEvent.mutate(ctx, m)
 	case *GameDownloadResourceFileMutation:
 		return c.GameDownloadResourceFile.mutate(ctx, m)
 	case *GameDownloadResourceFileHistoryMutation:
@@ -3163,6 +3171,22 @@ func (c *CommentClient) QueryGame(_m *Comment) *GameQuery {
 	return query
 }
 
+// QueryResource queries the resource edge of a Comment.
+func (c *CommentClient) QueryResource(_m *Comment) *GameDownloadResourceQuery {
+	query := (&GameDownloadResourceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, id),
+			sqlgraph.To(gamedownloadresource.Table, gamedownloadresource.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, comment.ResourceTable, comment.ResourceColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryChildren queries the children edge of a Comment.
 func (c *CommentClient) QueryChildren(_m *Comment) *CommentQuery {
 	query := (&CommentClient{config: c.config}).Query()
@@ -5558,6 +5582,38 @@ func (c *GameDownloadResourceClient) QueryCreator(_m *GameDownloadResource) *Use
 	return query
 }
 
+// QueryComments queries the comments edge of a GameDownloadResource.
+func (c *GameDownloadResourceClient) QueryComments(_m *GameDownloadResource) *CommentQuery {
+	query := (&CommentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(gamedownloadresource.Table, gamedownloadresource.FieldID, id),
+			sqlgraph.To(comment.Table, comment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, gamedownloadresource.CommentsTable, gamedownloadresource.CommentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryEvents queries the events edge of a GameDownloadResource.
+func (c *GameDownloadResourceClient) QueryEvents(_m *GameDownloadResource) *GameDownloadResourceEventQuery {
+	query := (&GameDownloadResourceEventClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(gamedownloadresource.Table, gamedownloadresource.FieldID, id),
+			sqlgraph.To(gamedownloadresourceevent.Table, gamedownloadresourceevent.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, gamedownloadresource.EventsTable, gamedownloadresource.EventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *GameDownloadResourceClient) Hooks() []Hook {
 	return c.hooks.GameDownloadResource
@@ -5580,6 +5636,171 @@ func (c *GameDownloadResourceClient) mutate(ctx context.Context, m *GameDownload
 		return (&GameDownloadResourceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown GameDownloadResource mutation op: %q", m.Op())
+	}
+}
+
+// GameDownloadResourceEventClient is a client for the GameDownloadResourceEvent schema.
+type GameDownloadResourceEventClient struct {
+	config
+}
+
+// NewGameDownloadResourceEventClient returns a client for the GameDownloadResourceEvent from the given config.
+func NewGameDownloadResourceEventClient(c config) *GameDownloadResourceEventClient {
+	return &GameDownloadResourceEventClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `gamedownloadresourceevent.Hooks(f(g(h())))`.
+func (c *GameDownloadResourceEventClient) Use(hooks ...Hook) {
+	c.hooks.GameDownloadResourceEvent = append(c.hooks.GameDownloadResourceEvent, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `gamedownloadresourceevent.Intercept(f(g(h())))`.
+func (c *GameDownloadResourceEventClient) Intercept(interceptors ...Interceptor) {
+	c.inters.GameDownloadResourceEvent = append(c.inters.GameDownloadResourceEvent, interceptors...)
+}
+
+// Create returns a builder for creating a GameDownloadResourceEvent entity.
+func (c *GameDownloadResourceEventClient) Create() *GameDownloadResourceEventCreate {
+	mutation := newGameDownloadResourceEventMutation(c.config, OpCreate)
+	return &GameDownloadResourceEventCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of GameDownloadResourceEvent entities.
+func (c *GameDownloadResourceEventClient) CreateBulk(builders ...*GameDownloadResourceEventCreate) *GameDownloadResourceEventCreateBulk {
+	return &GameDownloadResourceEventCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *GameDownloadResourceEventClient) MapCreateBulk(slice any, setFunc func(*GameDownloadResourceEventCreate, int)) *GameDownloadResourceEventCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &GameDownloadResourceEventCreateBulk{err: fmt.Errorf("calling to GameDownloadResourceEventClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*GameDownloadResourceEventCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &GameDownloadResourceEventCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for GameDownloadResourceEvent.
+func (c *GameDownloadResourceEventClient) Update() *GameDownloadResourceEventUpdate {
+	mutation := newGameDownloadResourceEventMutation(c.config, OpUpdate)
+	return &GameDownloadResourceEventUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *GameDownloadResourceEventClient) UpdateOne(_m *GameDownloadResourceEvent) *GameDownloadResourceEventUpdateOne {
+	mutation := newGameDownloadResourceEventMutation(c.config, OpUpdateOne, withGameDownloadResourceEvent(_m))
+	return &GameDownloadResourceEventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *GameDownloadResourceEventClient) UpdateOneID(id int) *GameDownloadResourceEventUpdateOne {
+	mutation := newGameDownloadResourceEventMutation(c.config, OpUpdateOne, withGameDownloadResourceEventID(id))
+	return &GameDownloadResourceEventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for GameDownloadResourceEvent.
+func (c *GameDownloadResourceEventClient) Delete() *GameDownloadResourceEventDelete {
+	mutation := newGameDownloadResourceEventMutation(c.config, OpDelete)
+	return &GameDownloadResourceEventDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *GameDownloadResourceEventClient) DeleteOne(_m *GameDownloadResourceEvent) *GameDownloadResourceEventDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *GameDownloadResourceEventClient) DeleteOneID(id int) *GameDownloadResourceEventDeleteOne {
+	builder := c.Delete().Where(gamedownloadresourceevent.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &GameDownloadResourceEventDeleteOne{builder}
+}
+
+// Query returns a query builder for GameDownloadResourceEvent.
+func (c *GameDownloadResourceEventClient) Query() *GameDownloadResourceEventQuery {
+	return &GameDownloadResourceEventQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeGameDownloadResourceEvent},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a GameDownloadResourceEvent entity by its id.
+func (c *GameDownloadResourceEventClient) Get(ctx context.Context, id int) (*GameDownloadResourceEvent, error) {
+	return c.Query().Where(gamedownloadresourceevent.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GameDownloadResourceEventClient) GetX(ctx context.Context, id int) *GameDownloadResourceEvent {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryResource queries the resource edge of a GameDownloadResourceEvent.
+func (c *GameDownloadResourceEventClient) QueryResource(_m *GameDownloadResourceEvent) *GameDownloadResourceQuery {
+	query := (&GameDownloadResourceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(gamedownloadresourceevent.Table, gamedownloadresourceevent.FieldID, id),
+			sqlgraph.To(gamedownloadresource.Table, gamedownloadresource.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, gamedownloadresourceevent.ResourceTable, gamedownloadresourceevent.ResourceColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryActor queries the actor edge of a GameDownloadResourceEvent.
+func (c *GameDownloadResourceEventClient) QueryActor(_m *GameDownloadResourceEvent) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(gamedownloadresourceevent.Table, gamedownloadresourceevent.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, gamedownloadresourceevent.ActorTable, gamedownloadresourceevent.ActorColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *GameDownloadResourceEventClient) Hooks() []Hook {
+	return c.hooks.GameDownloadResourceEvent
+}
+
+// Interceptors returns the client interceptors.
+func (c *GameDownloadResourceEventClient) Interceptors() []Interceptor {
+	return c.inters.GameDownloadResourceEvent
+}
+
+func (c *GameDownloadResourceEventClient) mutate(ctx context.Context, m *GameDownloadResourceEventMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&GameDownloadResourceEventCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&GameDownloadResourceEventUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&GameDownloadResourceEventUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&GameDownloadResourceEventDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown GameDownloadResourceEvent mutation op: %q", m.Op())
 	}
 }
 
@@ -8820,6 +9041,22 @@ func (c *UserClient) QueryGameDownloadResourceFileHistories(_m *User) *GameDownl
 	return query
 }
 
+// QueryGameDownloadResourceEvents queries the game_download_resource_events edge of a User.
+func (c *UserClient) QueryGameDownloadResourceEvents(_m *User) *GameDownloadResourceEventQuery {
+	query := (&GameDownloadResourceEventClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(gamedownloadresourceevent.Table, gamedownloadresourceevent.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.GameDownloadResourceEventsTable, user.GameDownloadResourceEventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryFieldPermissions queries the field_permissions edge of a User.
 func (c *UserClient) QueryFieldPermissions(_m *User) *UserFieldPermissionQuery {
 	query := (&UserFieldPermissionClient{config: c.config}).Query()
@@ -10296,7 +10533,7 @@ type (
 		CatalogSourceLink, CatalogSyncCursor, Comment, CommentLike, EditRecord,
 		Favorite, FavoriteItem, FieldPermissionMapping, Game, GameCharacter,
 		GameCharacterRelation, GameCover, GameDeveloper, GameDeveloperRelation,
-		GameDownloadResource, GameDownloadResourceFile,
+		GameDownloadResource, GameDownloadResourceEvent, GameDownloadResourceFile,
 		GameDownloadResourceFileHistory, GameDownloadResourceReport, GameImage,
 		GameLink, GameRelation, GameTagRelation, GameUploadChunk, GameUploadSession,
 		MalwareScanCase, Message, ModerationEvent, OidcIdentity, RoleFieldPermission,
@@ -10310,7 +10547,7 @@ type (
 		CatalogSourceLink, CatalogSyncCursor, Comment, CommentLike, EditRecord,
 		Favorite, FavoriteItem, FieldPermissionMapping, Game, GameCharacter,
 		GameCharacterRelation, GameCover, GameDeveloper, GameDeveloperRelation,
-		GameDownloadResource, GameDownloadResourceFile,
+		GameDownloadResource, GameDownloadResourceEvent, GameDownloadResourceFile,
 		GameDownloadResourceFileHistory, GameDownloadResourceReport, GameImage,
 		GameLink, GameRelation, GameTagRelation, GameUploadChunk, GameUploadSession,
 		MalwareScanCase, Message, ModerationEvent, OidcIdentity, RoleFieldPermission,

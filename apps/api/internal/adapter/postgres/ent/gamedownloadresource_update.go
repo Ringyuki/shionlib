@@ -11,8 +11,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourceevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
@@ -270,6 +272,36 @@ func (_u *GameDownloadResourceUpdate) SetCreator(v *User) *GameDownloadResourceU
 	return _u.SetCreatorID(v.ID)
 }
 
+// AddCommentIDs adds the "comments" edge to the Comment entity by IDs.
+func (_u *GameDownloadResourceUpdate) AddCommentIDs(ids ...int) *GameDownloadResourceUpdate {
+	_u.mutation.AddCommentIDs(ids...)
+	return _u
+}
+
+// AddComments adds the "comments" edges to the Comment entity.
+func (_u *GameDownloadResourceUpdate) AddComments(v ...*Comment) *GameDownloadResourceUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddCommentIDs(ids...)
+}
+
+// AddEventIDs adds the "events" edge to the GameDownloadResourceEvent entity by IDs.
+func (_u *GameDownloadResourceUpdate) AddEventIDs(ids ...int) *GameDownloadResourceUpdate {
+	_u.mutation.AddEventIDs(ids...)
+	return _u
+}
+
+// AddEvents adds the "events" edges to the GameDownloadResourceEvent entity.
+func (_u *GameDownloadResourceUpdate) AddEvents(v ...*GameDownloadResourceEvent) *GameDownloadResourceUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddEventIDs(ids...)
+}
+
 // Mutation returns the GameDownloadResourceMutation object of the builder.
 func (_u *GameDownloadResourceUpdate) Mutation() *GameDownloadResourceMutation {
 	return _u.mutation
@@ -348,6 +380,48 @@ func (_u *GameDownloadResourceUpdate) RemoveMalwareScanCases(v ...*MalwareScanCa
 func (_u *GameDownloadResourceUpdate) ClearCreator() *GameDownloadResourceUpdate {
 	_u.mutation.ClearCreator()
 	return _u
+}
+
+// ClearComments clears all "comments" edges to the Comment entity.
+func (_u *GameDownloadResourceUpdate) ClearComments() *GameDownloadResourceUpdate {
+	_u.mutation.ClearComments()
+	return _u
+}
+
+// RemoveCommentIDs removes the "comments" edge to Comment entities by IDs.
+func (_u *GameDownloadResourceUpdate) RemoveCommentIDs(ids ...int) *GameDownloadResourceUpdate {
+	_u.mutation.RemoveCommentIDs(ids...)
+	return _u
+}
+
+// RemoveComments removes "comments" edges to Comment entities.
+func (_u *GameDownloadResourceUpdate) RemoveComments(v ...*Comment) *GameDownloadResourceUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveCommentIDs(ids...)
+}
+
+// ClearEvents clears all "events" edges to the GameDownloadResourceEvent entity.
+func (_u *GameDownloadResourceUpdate) ClearEvents() *GameDownloadResourceUpdate {
+	_u.mutation.ClearEvents()
+	return _u
+}
+
+// RemoveEventIDs removes the "events" edge to GameDownloadResourceEvent entities by IDs.
+func (_u *GameDownloadResourceUpdate) RemoveEventIDs(ids ...int) *GameDownloadResourceUpdate {
+	_u.mutation.RemoveEventIDs(ids...)
+	return _u
+}
+
+// RemoveEvents removes "events" edges to GameDownloadResourceEvent entities.
+func (_u *GameDownloadResourceUpdate) RemoveEvents(v ...*GameDownloadResourceEvent) *GameDownloadResourceUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveEventIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -669,6 +743,96 @@ func (_u *GameDownloadResourceUpdate) sqlSave(ctx context.Context) (_node int, e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.CommentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.CommentsTable,
+			Columns: []string{gamedownloadresource.CommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedCommentsIDs(); len(nodes) > 0 && !_u.mutation.CommentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.CommentsTable,
+			Columns: []string{gamedownloadresource.CommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CommentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.CommentsTable,
+			Columns: []string{gamedownloadresource.CommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.EventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.EventsTable,
+			Columns: []string{gamedownloadresource.EventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourceevent.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedEventsIDs(); len(nodes) > 0 && !_u.mutation.EventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.EventsTable,
+			Columns: []string{gamedownloadresource.EventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourceevent.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.EventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.EventsTable,
+			Columns: []string{gamedownloadresource.EventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourceevent.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -926,6 +1090,36 @@ func (_u *GameDownloadResourceUpdateOne) SetCreator(v *User) *GameDownloadResour
 	return _u.SetCreatorID(v.ID)
 }
 
+// AddCommentIDs adds the "comments" edge to the Comment entity by IDs.
+func (_u *GameDownloadResourceUpdateOne) AddCommentIDs(ids ...int) *GameDownloadResourceUpdateOne {
+	_u.mutation.AddCommentIDs(ids...)
+	return _u
+}
+
+// AddComments adds the "comments" edges to the Comment entity.
+func (_u *GameDownloadResourceUpdateOne) AddComments(v ...*Comment) *GameDownloadResourceUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddCommentIDs(ids...)
+}
+
+// AddEventIDs adds the "events" edge to the GameDownloadResourceEvent entity by IDs.
+func (_u *GameDownloadResourceUpdateOne) AddEventIDs(ids ...int) *GameDownloadResourceUpdateOne {
+	_u.mutation.AddEventIDs(ids...)
+	return _u
+}
+
+// AddEvents adds the "events" edges to the GameDownloadResourceEvent entity.
+func (_u *GameDownloadResourceUpdateOne) AddEvents(v ...*GameDownloadResourceEvent) *GameDownloadResourceUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddEventIDs(ids...)
+}
+
 // Mutation returns the GameDownloadResourceMutation object of the builder.
 func (_u *GameDownloadResourceUpdateOne) Mutation() *GameDownloadResourceMutation {
 	return _u.mutation
@@ -1004,6 +1198,48 @@ func (_u *GameDownloadResourceUpdateOne) RemoveMalwareScanCases(v ...*MalwareSca
 func (_u *GameDownloadResourceUpdateOne) ClearCreator() *GameDownloadResourceUpdateOne {
 	_u.mutation.ClearCreator()
 	return _u
+}
+
+// ClearComments clears all "comments" edges to the Comment entity.
+func (_u *GameDownloadResourceUpdateOne) ClearComments() *GameDownloadResourceUpdateOne {
+	_u.mutation.ClearComments()
+	return _u
+}
+
+// RemoveCommentIDs removes the "comments" edge to Comment entities by IDs.
+func (_u *GameDownloadResourceUpdateOne) RemoveCommentIDs(ids ...int) *GameDownloadResourceUpdateOne {
+	_u.mutation.RemoveCommentIDs(ids...)
+	return _u
+}
+
+// RemoveComments removes "comments" edges to Comment entities.
+func (_u *GameDownloadResourceUpdateOne) RemoveComments(v ...*Comment) *GameDownloadResourceUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveCommentIDs(ids...)
+}
+
+// ClearEvents clears all "events" edges to the GameDownloadResourceEvent entity.
+func (_u *GameDownloadResourceUpdateOne) ClearEvents() *GameDownloadResourceUpdateOne {
+	_u.mutation.ClearEvents()
+	return _u
+}
+
+// RemoveEventIDs removes the "events" edge to GameDownloadResourceEvent entities by IDs.
+func (_u *GameDownloadResourceUpdateOne) RemoveEventIDs(ids ...int) *GameDownloadResourceUpdateOne {
+	_u.mutation.RemoveEventIDs(ids...)
+	return _u
+}
+
+// RemoveEvents removes "events" edges to GameDownloadResourceEvent entities.
+func (_u *GameDownloadResourceUpdateOne) RemoveEvents(v ...*GameDownloadResourceEvent) *GameDownloadResourceUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveEventIDs(ids...)
 }
 
 // Where appends a list predicates to the GameDownloadResourceUpdate builder.
@@ -1348,6 +1584,96 @@ func (_u *GameDownloadResourceUpdateOne) sqlSave(ctx context.Context) (_node *Ga
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.CommentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.CommentsTable,
+			Columns: []string{gamedownloadresource.CommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedCommentsIDs(); len(nodes) > 0 && !_u.mutation.CommentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.CommentsTable,
+			Columns: []string{gamedownloadresource.CommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CommentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.CommentsTable,
+			Columns: []string{gamedownloadresource.CommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.EventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.EventsTable,
+			Columns: []string{gamedownloadresource.EventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourceevent.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedEventsIDs(); len(nodes) > 0 && !_u.mutation.EventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.EventsTable,
+			Columns: []string{gamedownloadresource.EventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourceevent.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.EventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.EventsTable,
+			Columns: []string{gamedownloadresource.EventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourceevent.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

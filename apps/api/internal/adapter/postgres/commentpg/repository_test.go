@@ -6,6 +6,7 @@ import (
 	"errors"
 	"slices"
 	"testing"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/commentpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
@@ -15,6 +16,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/comment/commenttest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moderation"
 )
 
@@ -26,6 +28,23 @@ func TestRepositoryContract(t *testing.T) {
 			NewUser:      db.User,
 			NewGame:      func(t *testing.T) int { return db.Game(t) },
 			NewRatedGame: func(t *testing.T) int { return db.Game(t, func(c *ent.GameCreate) { c.SetNsfw(true) }) },
+			NewResource: func(t *testing.T, gameID, creatorID int, public bool) int {
+				create := db.Ent.GameDownloadResource.Create().SetGameID(gameID).SetCreatorID(creatorID)
+				if public {
+					create.SetPublishedAt(time.Date(2026, 10, 11, 0, 0, 0, 0, time.UTC))
+				}
+				resource := create.SaveX(context.Background())
+				db.Ent.GameDownloadResourceFile.Create().
+					SetGameDownloadResourceID(resource.ID).
+					SetType(download.FileTypeObjectStore).
+					SetFileName("game.7z").
+					SetFileSize(1).
+					SetFileHash("hash").
+					SetFileStatus(download.FileInObjectStore).
+					SetCreatorID(creatorID).
+					SaveX(context.Background())
+				return resource.ID
+			},
 		}
 	})
 }

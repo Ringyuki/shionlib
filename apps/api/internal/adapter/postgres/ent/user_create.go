@@ -17,6 +17,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favorite"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourceevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefilehistory"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
@@ -491,6 +492,21 @@ func (_c *UserCreate) AddGameDownloadResourceFileHistories(v ...*GameDownloadRes
 		ids[i] = v[i].ID
 	}
 	return _c.AddGameDownloadResourceFileHistoryIDs(ids...)
+}
+
+// AddGameDownloadResourceEventIDs adds the "game_download_resource_events" edge to the GameDownloadResourceEvent entity by IDs.
+func (_c *UserCreate) AddGameDownloadResourceEventIDs(ids ...int) *UserCreate {
+	_c.mutation.AddGameDownloadResourceEventIDs(ids...)
+	return _c
+}
+
+// AddGameDownloadResourceEvents adds the "game_download_resource_events" edges to the GameDownloadResourceEvent entity.
+func (_c *UserCreate) AddGameDownloadResourceEvents(v ...*GameDownloadResourceEvent) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddGameDownloadResourceEventIDs(ids...)
 }
 
 // AddFieldPermissionIDs adds the "field_permissions" edge to the UserFieldPermission entity by IDs.
@@ -1177,6 +1193,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourcefilehistory.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.GameDownloadResourceEventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.GameDownloadResourceEventsTable,
+			Columns: []string{user.GameDownloadResourceEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourceevent.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

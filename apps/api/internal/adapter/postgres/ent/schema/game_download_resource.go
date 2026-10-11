@@ -42,6 +42,8 @@ func (GameDownloadResource) Edges() []ent.Edge {
 		edge.To("reports", GameDownloadResourceReport.Type).StorageKey(edge.Symbol("game_download_resource_reports_resource_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("malware_scan_cases", MalwareScanCase.Type).StorageKey(edge.Symbol("malware_scan_cases_resource_id_fkey")).Annotations(entsql.OnDelete(entsql.SetNull)),
 		edge.From("creator", User.Type).Ref("game_download_resources").Field("creator_id").Unique().Required(),
+		edge.To("comments", Comment.Type).StorageKey(edge.Symbol("comments_resource_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("events", GameDownloadResourceEvent.Type).StorageKey(edge.Symbol("game_download_resource_events_resource_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
 

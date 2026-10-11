@@ -25,9 +25,10 @@ type messageItemDTO struct {
 }
 
 type messageCommentDTO struct {
-	ID      int                  `json:"id"`
-	Content richtexthttp.Content `json:"content"`
-	Text    string               `json:"text"`
+	ID         int                  `json:"id"`
+	Content    richtexthttp.Content `json:"content"`
+	Text       string               `json:"text"`
+	ResourceID *int                 `json:"resource_id" doc:"The download resource the comment was made on; null for a comment on the game itself"`
 }
 
 type messageDetailDTO struct {
@@ -87,7 +88,7 @@ func toMessageDetail(d message.Detail, text messageTextDTO, now time.Time) messa
 		out.Meta = d.Meta
 	}
 	if d.Comment != nil {
-		out.Comment = &messageCommentDTO{ID: d.Comment.ID, Content: richtexthttp.Content(d.Comment.Content), Text: d.Comment.Text}
+		out.Comment = &messageCommentDTO{ID: d.Comment.ID, Content: richtexthttp.Content(d.Comment.Content), Text: d.Comment.Text, ResourceID: d.Comment.ResourceID}
 	}
 	if d.Game != nil {
 		card := gamehttp.ToGameCard(*d.Game)

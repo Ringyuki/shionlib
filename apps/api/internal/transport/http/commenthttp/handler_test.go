@@ -1,6 +1,7 @@
 package commenthttp_test
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -11,6 +12,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/comment/commenttest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game/gametest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moderation"
@@ -34,6 +36,16 @@ const (
 	stamp       = `"2026-10-03T01:02:03.000Z"`
 )
 
+type resources map[int]comment.ResourceRef
+
+func (r resources) Viewable(_ context.Context, _ actor.Actor, id int) (comment.ResourceRef, error) {
+	ref, ok := r[id]
+	if !ok {
+		return comment.ResourceRef{}, download.ErrResourceNotFound
+	}
+	return ref, nil
+}
+
 type env struct {
 	server *apitest.Server
 	repo   *commenttest.MemoryRepository
@@ -49,8 +61,17 @@ func setup(t *testing.T) env {
 	repo.AddGame(10, false)
 	cards := gametest.NewCards(game.Card{ID: 10, TitleJP: "タイトル", Covers: []game.Cover{{URL: "a.webp"}, {URL: "b.webp", Sexual: 1}}})
 	queue := &moderationtest.Queue{}
-	service := comment.NewService(repo, cards, &moderationtest.Messages{}, queue, &txtest.Immediate{})
-	commenthttp.NewHandler(service, server.Builder).Register(server.API)
+	commented := resources{20: {ID: 20, GameID: 10, CreatorID: alice.UserID}}
+	service := comment.NewService(comment.Deps{
+		Repo:      repo,
+		Games:     cards,
+		Resources: commented,
+		Messages:  &moderationtest.Messages{},
+		Queue:     queue,
+		Tx:        &txtest.Immediate{},
+	})
+	pins := comment.NewPinService(repo, commented, &txtest.Immediate{}, func() time.Time { return apitest.Now })
+	commenthttp.NewHandler(service, pins, server.Builder).Register(server.API)
 	return env{server: server, repo: repo, queue: queue}
 }
 
@@ -165,9 +186,9 @@ func TestListByGameShape(t *testing.T) {
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/comment/game/10?page=1&pageSize=5", As: &bob})
 	e.server.Expect(resp, http.StatusOK, 0)
 	want := `{"items":[` +
-		`{"id":1,"content":{"type":"doc","content":[{"type":"paragraph"}]},"text":"root","parent_id":null,"root_id":1,"reply_count":0,"parent":{"id":null},"is_liked":true,"like_count":1,"creator":` + alicePublic + `,"edited":false,"status":1,"created":` + stamp + `,"updated":` + stamp + `,"replies":[` +
-		`{"id":` + strconv.Itoa(reply.ID) + `,"content":null,"text":"root","parent_id":1,"root_id":1,"reply_count":0,"parent":{"id":1,"text":"root","creator":` + alicePublic + `},"is_liked":false,"like_count":0,"creator":` + bobPublic + `,"edited":false,"status":2,"created":` + stamp + `,"updated":` + stamp + `}` +
-		`]}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":5,"totalPages":1,"currentPage":1,"comments":2}}`
+		`{"id":1,"content":{"type":"doc","content":[{"type":"paragraph"}]},"text":"root","parent_id":null,"root_id":1,"reply_count":0,"parent":{"id":null},"is_liked":true,"like_count":1,"creator":` + alicePublic + `,"edited":false,"status":1,"pinned":false,"created":` + stamp + `,"updated":` + stamp + `,"replies":[` +
+		`{"id":` + strconv.Itoa(reply.ID) + `,"content":null,"text":"root","parent_id":1,"root_id":1,"reply_count":0,"parent":{"id":1,"text":"root","creator":` + alicePublic + `},"is_liked":false,"like_count":0,"creator":` + bobPublic + `,"edited":false,"status":2,"pinned":false,"created":` + stamp + `,"updated":` + stamp + `}` +
+		`]}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":5,"totalPages":1,"currentPage":1,"comments":2,"pinned":null}}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected list\n got %s\nwant %s", resp.Data, want)
 	}
@@ -215,7 +236,7 @@ func TestListByUserShape(t *testing.T) {
 	e.server.Expect(resp, http.StatusOK, 0)
 	want := `{"items":[{"id":1,"content":null,"text":"mine","parent_id":null,"root_id":null,"reply_count":0,"parent":null,"is_liked":false,"like_count":0,` +
 		`"game":{"id":10,"title_jp":"タイトル","title_zh":"","title_en":"","aliases":[],"type":null,"covers":[{"language":"","type":"","url":"a.webp","dims":[],"sexual":0,"violence":0}],"intro_jp":"","intro_zh":"","intro_en":"","release_date":null,"developers":[],"resources":{"count":0,"downloads":0,"platforms":[],"languages":[],"latest":null},"tags":[]},` +
-		`"creator":` + alicePublic + `,"created":` + stamp + `,"updated":` + stamp + `}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1,"is_current_user":true}}`
+		`"resource":null,"creator":` + alicePublic + `,"created":` + stamp + `,"updated":` + stamp + `}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1,"is_current_user":true}}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected user comments\n got %s\nwant %s", resp.Data, want)
 	}
@@ -229,4 +250,62 @@ func TestListByUserShape(t *testing.T) {
 	if !strings.Contains(string(other.Data), `"is_current_user":false`) || !strings.Contains(string(other.Data), `"url":"b.webp"`) {
 		t.Fatalf("rated viewers see every cover and are not the owner: %s", other.Data)
 	}
+}
+
+func TestCommentsOnAResourceAndThePinnedOne(t *testing.T) {
+	e := setup(t)
+	e.repo.AddResource(20, true)
+	missing := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/comment/resource/99", As: &bob, Body: body(contentJSON, "")})
+	e.server.Expect(missing, http.StatusNotFound, 440101)
+	guest := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/comment/resource/20", Body: body(contentJSON, "")})
+	e.server.Expect(guest, http.StatusUnauthorized, 200101)
+
+	first := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/comment/resource/20", As: &bob, Body: body(contentJSON, "")})
+	e.server.Expect(first, http.StatusCreated, 0)
+	second := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/comment/resource/20", As: &alice, Body: body(contentJSON, "")})
+	e.server.Expect(second, http.StatusCreated, 0)
+	onGame := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/comment/game/10", As: &bob, Body: body(contentJSON, "")})
+	e.server.Expect(onGame, http.StatusCreated, 0)
+	for _, id := range []int{1, 2, 3} {
+		if err := e.repo.SetStatus(context.Background(), id, comment.StatusVisible); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPut, Path: "/comment/1/pin"}), http.StatusUnauthorized, 200101)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPut, Path: "/comment/1/pin", As: &bob}), http.StatusForbidden, 470106)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPut, Path: "/comment/3/pin", As: &alice}), http.StatusBadRequest, 470105)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPut, Path: "/comment/1/pin", As: &alice}), http.StatusOK, 0)
+
+	list := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/comment/resource/20?order=newest"})
+	e.server.Expect(list, http.StatusOK, 0)
+	var page struct {
+		Items []struct {
+			ID     int  `json:"id"`
+			Pinned bool `json:"pinned"`
+		} `json:"items"`
+		Meta struct {
+			Comments   int  `json:"comments"`
+			TotalItems int  `json:"totalItems"`
+			Pinned     *int `json:"pinned"`
+		} `json:"meta"`
+	}
+	if err := json.Unmarshal(list.Data, &page); err != nil {
+		t.Fatal(err)
+	}
+	if page.Meta.Pinned == nil || *page.Meta.Pinned != 1 || page.Meta.Comments != 2 || page.Meta.TotalItems != 2 || len(page.Items) != 2 || page.Items[0].ID != 1 || !page.Items[0].Pinned || page.Items[1].ID != 2 || page.Items[1].Pinned {
+		t.Fatalf("the pinned comment leads the resource's own threads: %s", list.Data)
+	}
+	ofGame := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/comment/game/10"})
+	if !strings.Contains(string(ofGame.Data), `"totalItems":1`) || !strings.Contains(string(ofGame.Data), `"pinned":false`) {
+		t.Fatalf("the game lists only its own comments: %s", ofGame.Data)
+	}
+
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodDelete, Path: "/comment/1/pin", As: &bob}), http.StatusForbidden, 470106)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodDelete, Path: "/comment/1/pin", As: &alice}), http.StatusOK, 0)
+	after := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/comment/resource/20"})
+	if strings.Contains(string(after.Data), `"pinned":true`) {
+		t.Fatalf("unpinned: %s", after.Data)
+	}
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/comment/resource/99"}), http.StatusNotFound, 440101)
 }

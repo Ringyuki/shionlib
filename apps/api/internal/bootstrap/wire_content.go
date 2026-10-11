@@ -1,7 +1,11 @@
 package bootstrap
 
 import (
+	"context"
 	"fmt"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
+	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/aimoderation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/commentpg"
@@ -15,17 +19,39 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/walkthrough"
 )
 
+type commentedResources struct {
+	details *download.DetailService
+}
+
+func (r commentedResources) Viewable(ctx context.Context, viewer actor.Actor, id int) (comment.ResourceRef, error) {
+	resource, err := r.details.Viewable(ctx, viewer, id)
+	if err != nil {
+		return comment.ResourceRef{}, err
+	}
+	return comment.ResourceRef{ID: resource.ID, GameID: resource.GameID, CreatorID: resource.CreatorID}, nil
+}
+
 func wireContent(infra *Infra, shared *Shared, modules *Modules) {
 	classifier, err := aimoderation.NewClassifier(shared.AI)
 	if err != nil {
 		panic(fmt.Errorf("wire moderation: %w", err))
 	}
 	moderations := moderation.NewService(moderationpg.NewRepository(infra.Ent), classifier, shared.Messages, shared.Activities, shared.Queue, shared.Transactor)
-	comments := comment.NewService(commentpg.NewRepository(infra.Ent), shared.GameCards, shared.Messages, shared.Queue, shared.Transactor)
+	commentRepo := commentpg.NewRepository(infra.Ent)
+	commented := commentedResources{details: shared.Resources}
+	comments := comment.NewService(comment.Deps{
+		Repo:      commentRepo,
+		Games:     shared.GameCards,
+		Resources: commented,
+		Messages:  shared.Messages,
+		Queue:     shared.Queue,
+		Tx:        shared.Transactor,
+	})
+	pins := comment.NewPinService(commentRepo, commented, shared.Transactor, shared.Now)
 	walkthroughs := walkthrough.NewService(walkthroughpg.NewRepository(infra.Ent), shared.GameCards, shared.Activities, shared.Queue, shared.Transactor)
 
 	modules.Handlers = append(modules.Handlers,
-		commenthttp.NewHandler(comments, shared.Builder),
+		commenthttp.NewHandler(comments, pins, shared.Builder),
 		walkthroughhttp.NewHandler(walkthroughs, shared.Builder),
 	)
 	modules.Jobs.Register = append(modules.Jobs.Register, moderationjobs.Register(moderations))

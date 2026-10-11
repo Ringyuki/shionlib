@@ -28,6 +28,28 @@ func (in *createCommentInput) Resolve(huma.Context) []error {
 	return errs
 }
 
+type createResourceCommentInput struct {
+	ResourceID int `path:"resource_id" minimum:"1"`
+	Body       struct {
+		Content  richtexthttp.Content `json:"content"`
+		ParentID *int                 `json:"parent_id,omitempty"`
+	}
+	document richtext.Document
+}
+
+func (in *createResourceCommentInput) Resolve(huma.Context) []error {
+	var errs []error
+	in.document, errs = richtexthttp.Parse(in.Body.Content, richtext.Comment, comment.MaxContentLength)
+	return errs
+}
+
+type resourceCommentsInput struct {
+	ResourceID int `path:"resource_id" minimum:"1"`
+	httpapi.PageQuery
+	Order string `query:"order" enum:"newest,oldest" default:"newest" doc:"Order of the threads after the pinned one; the replies of a thread are always oldest first"`
+	Focus int    `query:"focus" minimum:"1" doc:"A comment of this resource: the page that holds its thread is answered instead of the requested one; ignored when the viewer cannot see the comment"`
+}
+
 type editCommentInput struct {
 	CommentID int `path:"comment_id"`
 	Body      struct {

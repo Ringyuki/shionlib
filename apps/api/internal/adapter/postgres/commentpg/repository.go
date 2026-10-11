@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 
@@ -17,6 +18,8 @@ import (
 	entcomment "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/commentlike"
 	entgame "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	entmessage "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
@@ -25,6 +28,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/moderationpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/userpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/comment"
+	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moderation"
 )
@@ -193,13 +197,14 @@ func (r *Repository) adminEntries(ctx context.Context, rows []*ent.Comment) ([]c
 
 const (
 	gameFK        = "comments_game_id_fkey"
+	resourceFK    = "comments_resource_id_fkey"
 	parentFK      = "comments_parent_id_fkey"
 	rootFK        = "comments_root_id_fkey"
 	likeCommentFK = "comment_likes_comment_id_fkey"
 )
 
 var listFields = []string{
-	entcomment.FieldID, entcomment.FieldText, entcomment.FieldGameID, entcomment.FieldParentID, entcomment.FieldRootID,
+	entcomment.FieldID, entcomment.FieldText, entcomment.FieldGameID, entcomment.FieldResourceID, entcomment.FieldPinnedAt, entcomment.FieldParentID, entcomment.FieldRootID,
 	entcomment.FieldReplyCount, entcomment.FieldCreatorID, entcomment.FieldStatus, entcomment.FieldEdited,
 	entcomment.FieldCreated, entcomment.FieldUpdated,
 }
@@ -245,6 +250,7 @@ func (r *Repository) Create(ctx context.Context, in comment.NewComment) (comment
 		SetContent(in.Content).
 		SetText(in.Text).
 		SetGameID(in.GameID).
+		SetNillableResourceID(in.ResourceID).
 		SetCreatorID(in.CreatorID).
 		SetNillableParentID(in.ParentID).
 		SetNillableRootID(in.RootID).
@@ -253,6 +259,8 @@ func (r *Repository) Create(ctx context.Context, in comment.NewComment) (comment
 	switch {
 	case postgres.IsForeignKeyViolation(err, gameFK):
 		return comment.Comment{}, game.ErrNotFound
+	case postgres.IsForeignKeyViolation(err, resourceFK):
+		return comment.Comment{}, download.ErrResourceNotFound
 	case postgres.IsForeignKeyViolation(err, parentFK), postgres.IsForeignKeyViolation(err, rootFK):
 		return comment.Comment{}, comment.ErrNotFound
 	case err != nil:
@@ -338,17 +346,32 @@ func startsThread() predicate.Comment {
 	}
 }
 
-func (r *Repository) ListThreads(ctx context.Context, gameID, viewerID int, order comment.Order, page comment.Page) ([]comment.Thread, comment.ThreadTotals, error) {
-	inGame := r.db(ctx).Comment.Query().Where(entcomment.GameID(gameID), visibleTo(viewerID))
+func within(subject comment.Subject) predicate.Comment {
+	if subject.ResourceID == 0 {
+		return entcomment.And(entcomment.GameID(subject.GameID), entcomment.ResourceIDIsNil())
+	}
+	return entcomment.ResourceID(subject.ResourceID)
+}
+
+func pinnedFirst() entcomment.OrderOption {
+	return func(s *sql.Selector) {
+		s.OrderExprFunc(func(b *sql.Builder) {
+			b.Ident(s.C(entcomment.FieldPinnedAt)).WriteString(" IS NULL")
+		})
+	}
+}
+
+func (r *Repository) ListThreads(ctx context.Context, subject comment.Subject, viewerID int, order comment.Order, page comment.Page) ([]comment.Thread, comment.ThreadTotals, error) {
+	inGame := r.db(ctx).Comment.Query().Where(within(subject), visibleTo(viewerID))
 	comments, err := inGame.Clone().Count(ctx)
 	if err != nil {
-		return nil, comment.ThreadTotals{}, fmt.Errorf("count comments of game %d: %w", gameID, err)
+		return nil, comment.ThreadTotals{}, fmt.Errorf("count comments of %+v: %w", subject, err)
 	}
 	direction := ent.Desc
 	if order == comment.OrderOldest {
 		direction = ent.Asc
 	}
-	roots, threads, err := r.list(ctx, inGame.Clone().Where(startsThread()), withThread, viewerID, page, direction(entcomment.FieldCreated), direction(entcomment.FieldID))
+	roots, threads, err := r.list(ctx, inGame.Clone().Where(startsThread()), withThread, viewerID, page, pinnedFirst(), direction(entcomment.FieldCreated), direction(entcomment.FieldID))
 	if err != nil {
 		return nil, comment.ThreadTotals{}, err
 	}
@@ -360,7 +383,7 @@ func (r *Repository) ListThreads(ctx context.Context, gameID, viewerID int, orde
 	replies.Select(threadFields...)
 	rows, err := withThread(replies).Order(ent.Asc(entcomment.FieldCreated), ent.Asc(entcomment.FieldID)).All(ctx)
 	if err != nil {
-		return nil, comment.ThreadTotals{}, fmt.Errorf("list replies of game %d: %w", gameID, err)
+		return nil, comment.ThreadTotals{}, fmt.Errorf("list replies of %+v: %w", subject, err)
 	}
 	entries, err := r.entries(ctx, rows, viewerID)
 	if err != nil {
@@ -374,47 +397,113 @@ func (r *Repository) ListThreads(ctx context.Context, gameID, viewerID int, orde
 	for i, root := range roots {
 		out[i] = comment.Thread{Entry: root, Replies: byRoot[root.ID]}
 	}
-	return out, comment.ThreadTotals{Threads: threads, Comments: comments}, nil
+	pinned, err := r.pinnedID(ctx, subject)
+	if err != nil {
+		return nil, comment.ThreadTotals{}, err
+	}
+	return out, comment.ThreadTotals{Threads: threads, Comments: comments, PinnedID: pinned}, nil
 }
 
-func (r *Repository) ThreadIndex(ctx context.Context, gameID, viewerID, commentID int, order comment.Order) (int, bool, error) {
-	inGame := r.db(ctx).Comment.Query().Where(entcomment.GameID(gameID), visibleTo(viewerID))
+func (r *Repository) pinnedID(ctx context.Context, subject comment.Subject) (int, error) {
+	if subject.ResourceID == 0 {
+		return 0, nil
+	}
+	id, err := r.db(ctx).Comment.Query().
+		Where(entcomment.ResourceID(subject.ResourceID), entcomment.PinnedAtNotNil()).
+		OnlyID(ctx)
+	if postgres.IsNotFound(err) {
+		return 0, nil
+	}
+	if err != nil {
+		return 0, fmt.Errorf("find the pinned comment of download resource %d: %w", subject.ResourceID, err)
+	}
+	return id, nil
+}
+
+func (r *Repository) ThreadIndex(ctx context.Context, subject comment.Subject, viewerID, commentID int, order comment.Order) (int, bool, error) {
+	inGame := r.db(ctx).Comment.Query().Where(within(subject), visibleTo(viewerID))
 	aimed, err := inGame.Clone().Where(entcomment.ID(commentID)).Select(entcomment.FieldID, entcomment.FieldRootID).Only(ctx)
 	if postgres.IsNotFound(err) {
 		return 0, false, nil
 	}
 	if err != nil {
-		return 0, false, fmt.Errorf("find comment %d of game %d: %w", commentID, gameID, err)
+		return 0, false, fmt.Errorf("find comment %d of %+v: %w", commentID, subject, err)
 	}
 	rootID := aimed.ID
 	if aimed.RootID != nil {
 		rootID = *aimed.RootID
 	}
 	threads := inGame.Clone().Where(startsThread())
-	root, err := threads.Clone().Where(entcomment.ID(rootID)).Select(entcomment.FieldID, entcomment.FieldCreated).Only(ctx)
+	root, err := threads.Clone().Where(entcomment.ID(rootID)).Select(entcomment.FieldID, entcomment.FieldCreated, entcomment.FieldPinnedAt).Only(ctx)
 	if postgres.IsNotFound(err) {
 		return 0, false, nil
 	}
 	if err != nil {
-		return 0, false, fmt.Errorf("find thread %d of game %d: %w", rootID, gameID, err)
+		return 0, false, fmt.Errorf("find thread %d of %+v: %w", rootID, subject, err)
+	}
+	if root.PinnedAt != nil {
+		return 0, true, nil
+	}
+	pinned, err := threads.Clone().Where(entcomment.PinnedAtNotNil()).Count(ctx)
+	if err != nil {
+		return 0, false, fmt.Errorf("count pinned threads of %+v: %w", subject, err)
 	}
 	earlier := entcomment.Or(entcomment.CreatedGT(root.Created), entcomment.And(entcomment.CreatedEQ(root.Created), entcomment.IDGT(root.ID)))
 	if order == comment.OrderOldest {
 		earlier = entcomment.Or(entcomment.CreatedLT(root.Created), entcomment.And(entcomment.CreatedEQ(root.Created), entcomment.IDLT(root.ID)))
 	}
-	index, err := threads.Where(earlier).Count(ctx)
+	index, err := threads.Where(earlier, entcomment.PinnedAtIsNil()).Count(ctx)
 	if err != nil {
-		return 0, false, fmt.Errorf("place thread %d of game %d: %w", rootID, gameID, err)
+		return 0, false, fmt.Errorf("place thread %d of %+v: %w", rootID, subject, err)
 	}
-	return index, true, nil
+	return pinned + index, true, nil
+}
+
+func (r *Repository) ClearPin(ctx context.Context, resourceID int) error {
+	err := r.db(ctx).Comment.Update().
+		Where(entcomment.ResourceID(resourceID), entcomment.PinnedAtNotNil()).
+		ClearPinnedAt().
+		Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("unpin the comment of download resource %d: %w", resourceID, err)
+	}
+	return nil
+}
+
+func (r *Repository) SetPin(ctx context.Context, id int, at time.Time) error {
+	return r.updateOne(ctx, id, r.db(ctx).Comment.UpdateOneID(id).SetPinnedAt(at.UTC()))
+}
+
+func (r *Repository) CountByResource(ctx context.Context, resourceIDs []int) (map[int]int, error) {
+	counts := map[int]int{}
+	if len(resourceIDs) == 0 {
+		return counts, nil
+	}
+	var rows []struct {
+		ResourceID int `json:"resource_id"`
+		Count      int `json:"count"`
+	}
+	err := r.db(ctx).Comment.Query().
+		Where(entcomment.ResourceIDIn(resourceIDs...), entcomment.Status(int(comment.StatusVisible))).
+		GroupBy(entcomment.FieldResourceID).
+		Aggregate(ent.Count()).
+		Scan(ctx, &rows)
+	if err != nil {
+		return nil, fmt.Errorf("count comments of download resources: %w", err)
+	}
+	for _, row := range rows {
+		counts[row.ResourceID] = row.Count
+	}
+	return counts, nil
 }
 
 func (r *Repository) ListByCreator(ctx context.Context, filter comment.CreatorFilter, page comment.Page) ([]comment.Entry, int, error) {
 	query := r.db(ctx).Comment.Query().Where(entcomment.CreatorID(filter.CreatorID), entcomment.Status(int(comment.StatusVisible)))
+	query.Where(entcomment.Or(entcomment.ResourceIDIsNil(), entcomment.HasResourceWith(gamepg.PublicResource())))
 	if filter.ExcludeRated {
 		query.Where(entcomment.HasGameWith(gamepg.SafeForStrictViewers()))
 	}
-	return r.list(ctx, query, withQuotedParent, filter.ViewerID, page, ent.Desc(entcomment.FieldCreated), ent.Desc(entcomment.FieldID))
+	return r.list(ctx, query, withQuotedParentAndResource, filter.ViewerID, page, ent.Desc(entcomment.FieldCreated), ent.Desc(entcomment.FieldID))
 }
 
 func (r *Repository) list(ctx context.Context, query *ent.CommentQuery, related func(*ent.CommentQuery) *ent.CommentQuery, viewerID int, page comment.Page, order ...entcomment.OrderOption) ([]comment.Entry, int, error) {
@@ -444,6 +533,17 @@ func withThread(query *ent.CommentQuery) *ent.CommentQuery {
 
 func withQuotedParent(query *ent.CommentQuery) *ent.CommentQuery {
 	return withParent(query, entcomment.FieldID, entcomment.FieldText, entcomment.FieldContent, entcomment.FieldCreatorID)
+}
+
+func withQuotedParentAndResource(query *ent.CommentQuery) *ent.CommentQuery {
+	return withQuotedParent(query).WithResource(func(q *ent.GameDownloadResourceQuery) {
+		q.Select(gamedownloadresource.FieldID, gamedownloadresource.FieldGameID, gamedownloadresource.FieldCreatorID).
+			WithFiles(func(q *ent.GameDownloadResourceFileQuery) {
+				q.Select(gamedownloadresourcefile.FieldID, gamedownloadresourcefile.FieldFileName, gamedownloadresourcefile.FieldGameDownloadResourceID).
+					Where(gamepg.PublicFile()).
+					Order(ent.Asc(gamedownloadresourcefile.FieldID))
+			})
+	})
 }
 
 func withParent(query *ent.CommentQuery, fields ...string) *ent.CommentQuery {
@@ -487,6 +587,7 @@ func (r *Repository) entries(ctx context.Context, rows []*ent.Comment, viewerID 
 			Parent:    parentRef(row.Edges.Parent),
 			LikeCount: counts[row.ID],
 			Liked:     liked[row.ID],
+			Resource:  toResourceRef(row.Edges.Resource),
 		}
 	}
 	return entries, nil

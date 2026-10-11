@@ -258,16 +258,24 @@ func (s *Service) approveComment(ctx context.Context, subject CommentSubject) er
 	if err := s.repo.ApproveComment(ctx, subject.ID); err != nil {
 		return err
 	}
-	commentID, gameID := subject.ID, subject.GameID
-	if err := s.activities.Record(ctx, activity.NewActivity{
-		Type:      activity.TypeComment,
-		UserID:    subject.CreatorID,
-		GameID:    &gameID,
-		CommentID: &commentID,
-	}); err != nil {
-		return err
+	if subject.ResourceID == nil {
+		commentID, gameID := subject.ID, subject.GameID
+		if err := s.activities.Record(ctx, activity.NewActivity{
+			Type:      activity.TypeComment,
+			UserID:    subject.CreatorID,
+			GameID:    &gameID,
+			CommentID: &commentID,
+		}); err != nil {
+			return err
+		}
 	}
-	if subject.ParentID == nil || subject.ParentCreatorID == nil || *subject.ParentCreatorID == subject.CreatorID {
+	if subject.ParentID == nil {
+		if subject.PublisherID == nil || *subject.PublisherID == subject.CreatorID {
+			return nil
+		}
+		return s.messages.Send(ctx, ResourceCommentMessage(notice(subject)))
+	}
+	if subject.ParentCreatorID == nil || *subject.ParentCreatorID == subject.CreatorID {
 		return nil
 	}
 	return s.messages.Send(ctx, CommentReplyMessage(notice(subject)))
@@ -284,6 +292,9 @@ func notice(subject CommentSubject) CommentNotice {
 	n := CommentNotice{CommentID: subject.ID, GameID: subject.GameID, AuthorID: subject.CreatorID}
 	if subject.ParentCreatorID != nil {
 		n.ParentAuthorID = *subject.ParentCreatorID
+	}
+	if subject.PublisherID != nil {
+		n.PublisherID = *subject.PublisherID
 	}
 	return n
 }

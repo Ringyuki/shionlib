@@ -629,7 +629,11 @@ func (s *e2eSeeder) seedPostGameContent(ctx context.Context, tx *ent.Client, con
 	if err := tx.FavoriteItem.Create().SetFavoriteID(content.memberFavorite).SetGameID(content.primaryGameID).SetNote(e2eFavoriteItemNote).Exec(ctx); err != nil {
 		return fmt.Errorf("create favorite item: %w", err)
 	}
-	if _, _, err := s.createResource(ctx, tx, content.primaryGameID, content.mutableMemberID, e2eReportableResource, e2eReportableFile); err != nil {
+	reportableID, _, err := s.createResource(ctx, tx, content.primaryGameID, content.mutableMemberID, e2eReportableResource, e2eReportableFile)
+	if err != nil {
+		return err
+	}
+	if err := s.seedResourceComments(ctx, tx, content, reportableID); err != nil {
 		return err
 	}
 	resourceID, file, err := s.createResource(ctx, tx, content.malwareGameID, content.adminID, e2eMalwareResource, e2eMalwareFile)
@@ -696,6 +700,47 @@ func (s *e2eSeeder) seedComments(ctx context.Context, tx *ent.Client, content e2
 	return root.ID, nil
 }
 
+func (s *e2eSeeder) seedResourceComments(ctx context.Context, tx *ent.Client, content e2ePostGameContent, resourceID int) error {
+	written := func(text string, creatorID int, parentID *int) (*ent.Comment, error) {
+		document, err := e2eParagraph(text)
+		if err != nil {
+			return nil, fmt.Errorf("encode resource comment: %w", err)
+		}
+		create := tx.Comment.Create().
+			SetContent(document).
+			SetText(text).
+			SetGameID(content.primaryGameID).
+			SetResourceID(resourceID).
+			SetCreatorID(creatorID).
+			SetStatus(1)
+		if parentID != nil {
+			create.SetParentID(*parentID).SetRootID(*parentID)
+		}
+		row, err := create.Save(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("create resource comment: %w", err)
+		}
+		if parentID == nil {
+			if err := tx.Comment.UpdateOneID(row.ID).SetRootID(row.ID).Exec(ctx); err != nil {
+				return nil, fmt.Errorf("root resource comment: %w", err)
+			}
+		}
+		return row, nil
+	}
+	question, err := written(e2eResourceQuestionText, content.memberID, nil)
+	if err != nil {
+		return err
+	}
+	if _, err := written(e2eResourceAnswerText, content.mutableMemberID, &question.ID); err != nil {
+		return err
+	}
+	if err := tx.Comment.UpdateOneID(question.ID).SetReplyCount(1).Exec(ctx); err != nil {
+		return fmt.Errorf("count resource comment replies: %w", err)
+	}
+	_, err = written(e2eResourceNoticeText, content.mutableMemberID, nil)
+	return err
+}
+
 func (s *e2eSeeder) createResource(ctx context.Context, tx *ent.Client, gameID, creatorID int, resource e2eSeededResource, file e2eSeededFile) (int, *ent.GameDownloadResourceFile, error) {
 	var publishedAt *time.Time
 	if file.FileStatus == download.FileInObjectStore {
@@ -730,6 +775,22 @@ func (s *e2eSeeder) createResource(ctx context.Context, tx *ent.Client, gameID, 
 		Save(ctx)
 	if err != nil {
 		return 0, nil, fmt.Errorf("create download file %s: %w", file.FileName, err)
+	}
+	if publishedAt == nil {
+		return row.ID, created, nil
+	}
+	published, err := json.Marshal(map[string]any{"files": []map[string]any{{"name": created.FileName, "size": created.FileSize}}})
+	if err != nil {
+		return 0, nil, fmt.Errorf("encode publication of resource %d: %w", row.ID, err)
+	}
+	err = tx.GameDownloadResourceEvent.Create().
+		SetResourceID(row.ID).
+		SetKind(string(download.EventPublished)).
+		SetActorID(creatorID).
+		SetData(published).
+		Exec(ctx)
+	if err != nil {
+		return 0, nil, fmt.Errorf("record publication of resource %d: %w", row.ID, err)
 	}
 	return row.ID, created, nil
 }

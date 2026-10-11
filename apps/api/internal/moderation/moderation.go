@@ -178,6 +178,8 @@ type CommentSubject struct {
 	ParentID        *int
 	ParentCreatorID *int
 	ParentText      string
+	ResourceID      *int
+	PublisherID     *int
 	Game            GameTitles
 }
 

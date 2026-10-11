@@ -31,6 +31,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedeveloper"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedeveloperrelation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourceevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefilehistory"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
@@ -524,23 +525,23 @@ func init() {
 	// comment.DefaultText holds the default value on creation for the text field.
 	comment.DefaultText = commentDescText.Default.(string)
 	// commentDescReplyCount is the schema descriptor for reply_count field.
-	commentDescReplyCount := commentFields[6].Descriptor()
+	commentDescReplyCount := commentFields[8].Descriptor()
 	// comment.DefaultReplyCount holds the default value on creation for the reply_count field.
 	comment.DefaultReplyCount = commentDescReplyCount.Default.(int)
 	// commentDescStatus is the schema descriptor for status field.
-	commentDescStatus := commentFields[8].Descriptor()
+	commentDescStatus := commentFields[10].Descriptor()
 	// comment.DefaultStatus holds the default value on creation for the status field.
 	comment.DefaultStatus = commentDescStatus.Default.(int)
 	// commentDescEdited is the schema descriptor for edited field.
-	commentDescEdited := commentFields[9].Descriptor()
+	commentDescEdited := commentFields[11].Descriptor()
 	// comment.DefaultEdited holds the default value on creation for the edited field.
 	comment.DefaultEdited = commentDescEdited.Default.(bool)
 	// commentDescCreated is the schema descriptor for created field.
-	commentDescCreated := commentFields[10].Descriptor()
+	commentDescCreated := commentFields[12].Descriptor()
 	// comment.DefaultCreated holds the default value on creation for the created field.
 	comment.DefaultCreated = commentDescCreated.Default.(func() time.Time)
 	// commentDescUpdated is the schema descriptor for updated field.
-	commentDescUpdated := commentFields[11].Descriptor()
+	commentDescUpdated := commentFields[13].Descriptor()
 	// comment.DefaultUpdated holds the default value on creation for the updated field.
 	comment.DefaultUpdated = commentDescUpdated.Default.(func() time.Time)
 	// comment.UpdateDefaultUpdated holds the default value on update for the updated field.
@@ -831,6 +832,16 @@ func init() {
 	gamedownloadresource.DefaultUpdated = gamedownloadresourceDescUpdated.Default.(func() time.Time)
 	// gamedownloadresource.UpdateDefaultUpdated holds the default value on update for the updated field.
 	gamedownloadresource.UpdateDefaultUpdated = gamedownloadresourceDescUpdated.UpdateDefault.(func() time.Time)
+	gamedownloadresourceeventFields := schema.GameDownloadResourceEvent{}.Fields()
+	_ = gamedownloadresourceeventFields
+	// gamedownloadresourceeventDescKind is the schema descriptor for kind field.
+	gamedownloadresourceeventDescKind := gamedownloadresourceeventFields[2].Descriptor()
+	// gamedownloadresourceevent.KindValidator is a validator for the "kind" field. It is called by the builders before save.
+	gamedownloadresourceevent.KindValidator = gamedownloadresourceeventDescKind.Validators[0].(func(string) error)
+	// gamedownloadresourceeventDescCreated is the schema descriptor for created field.
+	gamedownloadresourceeventDescCreated := gamedownloadresourceeventFields[5].Descriptor()
+	// gamedownloadresourceevent.DefaultCreated holds the default value on creation for the created field.
+	gamedownloadresourceevent.DefaultCreated = gamedownloadresourceeventDescCreated.Default.(func() time.Time)
 	gamedownloadresourcefileFields := schema.GameDownloadResourceFile{}.Fields()
 	_ = gamedownloadresourcefileFields
 	// gamedownloadresourcefileDescFileStatus is the schema descriptor for file_status field.

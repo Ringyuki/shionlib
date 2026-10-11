@@ -6,6 +6,7 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
@@ -16,6 +17,7 @@ type Env struct {
 	NewUser      func(t *testing.T) int
 	NewGame      func(t *testing.T) int
 	NewRatedGame func(t *testing.T) int
+	NewResource  func(t *testing.T, gameID, creatorID int, public bool) int
 }
 
 var content = json.RawMessage(`{"root":{"type":"root","children":[{"type":"paragraph","children":[{"type":"text","text":"hi"}]}]}}`)
@@ -211,7 +213,7 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		_ = env.Repo.SetStatus(ctx, orphan.ID, comment.StatusVisible)
 		_ = env.Repo.SetRoot(ctx, visible.ID, visible.ID)
 
-		threads, totals, err := env.Repo.ListThreads(ctx, gameID, viewer, comment.OrderNewest, comment.Page{Number: 1, Size: 10})
+		threads, totals, err := env.Repo.ListThreads(ctx, comment.Subject{GameID: gameID}, viewer, comment.OrderNewest, comment.Page{Number: 1, Size: 10})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -224,34 +226,129 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if parent := threads[1].Replies[1].Parent; parent == nil || parent.ID != reply.ID || parent.Creator.ID != viewer {
 			t.Fatalf("a reply names the comment it answers: %+v", threads[1].Replies[1])
 		}
-		oldest, _, _ := env.Repo.ListThreads(ctx, gameID, viewer, comment.OrderOldest, comment.Page{Number: 1, Size: 10})
+		oldest, _, _ := env.Repo.ListThreads(ctx, comment.Subject{GameID: gameID}, viewer, comment.OrderOldest, comment.Page{Number: 1, Size: 10})
 		if len(oldest) != 2 || oldest[0].ID != visible.ID || oldest[1].ID != ownPending.ID {
 			t.Fatalf("oldest first: %+v", oldest)
 		}
-		guest, totals, _ := env.Repo.ListThreads(ctx, gameID, 0, comment.OrderNewest, comment.Page{Number: 1, Size: 10})
+		guest, totals, _ := env.Repo.ListThreads(ctx, comment.Subject{GameID: gameID}, 0, comment.OrderNewest, comment.Page{Number: 1, Size: 10})
 		if totals != (comment.ThreadTotals{Threads: 1, Comments: 4}) || guest[0].ID != visible.ID || len(guest[0].Replies) != 3 {
 			t.Fatalf("guests only see visible comments: %+v %+v", totals, guest)
 		}
-		second, totals, _ := env.Repo.ListThreads(ctx, gameID, viewer, comment.OrderNewest, comment.Page{Number: 2, Size: 1})
+		second, totals, _ := env.Repo.ListThreads(ctx, comment.Subject{GameID: gameID}, viewer, comment.OrderNewest, comment.Page{Number: 2, Size: 1})
 		if totals.Threads != 2 || len(second) != 1 || second[0].ID != visible.ID || len(second[0].Replies) != 3 {
 			t.Fatalf("unexpected second page %+v", second)
 		}
-		if none, totals, err := env.Repo.ListThreads(ctx, otherGame+gameID+1000, 0, comment.OrderNewest, comment.Page{Number: 1, Size: 10}); err != nil || len(none) != 0 || totals != (comment.ThreadTotals{}) {
+		if none, totals, err := env.Repo.ListThreads(ctx, comment.Subject{GameID: otherGame + gameID + 1000}, 0, comment.OrderNewest, comment.Page{Number: 1, Size: 10}); err != nil || len(none) != 0 || totals != (comment.ThreadTotals{}) {
 			t.Fatalf("a game without comments: %+v %+v %v", none, totals, err)
 		}
 		for aimed, want := range map[int]int{ownPending.ID: 0, visible.ID: 1, nested.ID: 1} {
-			if index, found, err := env.Repo.ThreadIndex(ctx, gameID, viewer, aimed, comment.OrderNewest); err != nil || !found || index != want {
+			if index, found, err := env.Repo.ThreadIndex(ctx, comment.Subject{GameID: gameID}, viewer, aimed, comment.OrderNewest); err != nil || !found || index != want {
 				t.Fatalf("comment %d sits in thread %d: %d %v %v", aimed, want, index, found, err)
 			}
 		}
-		if index, found, _ := env.Repo.ThreadIndex(ctx, gameID, viewer, nested.ID, comment.OrderOldest); !found || index != 0 {
+		if index, found, _ := env.Repo.ThreadIndex(ctx, comment.Subject{GameID: gameID}, viewer, nested.ID, comment.OrderOldest); !found || index != 0 {
 			t.Fatalf("oldest first puts the first thread first: %d %v", index, found)
 		}
-		if _, found, err := env.Repo.ThreadIndex(ctx, gameID, 0, ownPending.ID, comment.OrderNewest); err != nil || found {
+		if _, found, err := env.Repo.ThreadIndex(ctx, comment.Subject{GameID: gameID}, 0, ownPending.ID, comment.OrderNewest); err != nil || found {
 			t.Fatalf("a comment the viewer cannot see has no place: %v %v", found, err)
 		}
-		if _, found, err := env.Repo.ThreadIndex(ctx, otherGame, viewer, visible.ID, comment.OrderNewest); err != nil || found {
+		if _, found, err := env.Repo.ThreadIndex(ctx, comment.Subject{GameID: otherGame}, viewer, visible.ID, comment.OrderNewest); err != nil || found {
 			t.Fatalf("a comment of another game has no place: %v %v", found, err)
+		}
+	})
+
+	t.Run("a resource has its own threads with the pinned one first", func(t *testing.T) {
+		env := newEnv(t)
+		gameID := env.NewGame(t)
+		publisher, visitor := env.NewUser(t), env.NewUser(t)
+		resourceID, sibling := env.NewResource(t, gameID, publisher, true), env.NewResource(t, gameID, publisher, true)
+		subject := comment.Subject{GameID: gameID, ResourceID: resourceID}
+		everything := comment.Page{Number: 1, Size: 10}
+		shown := func(in comment.NewComment) comment.Comment {
+			created := create(ctx, t, env.Repo, in)
+			_ = env.Repo.SetStatus(ctx, created.ID, comment.StatusVisible)
+			_ = env.Repo.SetRoot(ctx, created.ID, created.ID)
+			return created
+		}
+		onGame := shown(comment.NewComment{GameID: gameID, CreatorID: visitor})
+		first := shown(comment.NewComment{GameID: gameID, ResourceID: &resourceID, CreatorID: visitor})
+		second := shown(comment.NewComment{GameID: gameID, ResourceID: &resourceID, CreatorID: publisher})
+		third := shown(comment.NewComment{GameID: gameID, ResourceID: &resourceID, CreatorID: visitor})
+		elsewhere := shown(comment.NewComment{GameID: gameID, ResourceID: &sibling, CreatorID: visitor})
+		answer := create(ctx, t, env.Repo, comment.NewComment{GameID: gameID, ResourceID: &resourceID, CreatorID: publisher, ParentID: &first.ID, RootID: &first.ID})
+		_ = env.Repo.SetStatus(ctx, answer.ID, comment.StatusVisible)
+
+		if stored, _ := env.Repo.Get(ctx, first.ID); stored.ResourceID == nil || *stored.ResourceID != resourceID || stored.Pinned() {
+			t.Fatalf("a comment remembers its resource: %+v", stored)
+		}
+		ofGame, totals, err := env.Repo.ListThreads(ctx, comment.Subject{GameID: gameID}, 0, comment.OrderNewest, everything)
+		if err != nil || totals != (comment.ThreadTotals{Threads: 1, Comments: 1}) || ofGame[0].ID != onGame.ID {
+			t.Fatalf("the game's own comments leave out those of its resources: %+v %+v %v", totals, ofGame, err)
+		}
+		ofResource, totals, err := env.Repo.ListThreads(ctx, subject, 0, comment.OrderNewest, everything)
+		if err != nil || totals != (comment.ThreadTotals{Threads: 3, Comments: 4}) || ofResource[0].ID != third.ID || ofResource[2].ID != first.ID || len(ofResource[2].Replies) != 1 {
+			t.Fatalf("a resource lists only its own threads: %+v %+v %v", totals, ofResource, err)
+		}
+
+		pinnedAt := first.Created.Add(time.Hour)
+		if err := env.Repo.SetPin(ctx, first.ID, pinnedAt); err != nil {
+			t.Fatal(err)
+		}
+		if err := env.Repo.SetPin(ctx, elsewhere.ID, pinnedAt); err != nil {
+			t.Fatalf("each resource has its own pinned comment: %v", err)
+		}
+		for _, order := range []comment.Order{comment.OrderNewest, comment.OrderOldest} {
+			threads, totals, _ := env.Repo.ListThreads(ctx, subject, 0, order, everything)
+			if threads[0].ID != first.ID || !threads[0].Pinned() || threads[1].Pinned() || totals.PinnedID != first.ID {
+				t.Fatalf("%s: the pinned thread comes first whatever the order: %+v %+v", order, totals, threads)
+			}
+		}
+		paged, totals, _ := env.Repo.ListThreads(ctx, subject, 0, comment.OrderNewest, comment.Page{Number: 2, Size: 1})
+		if len(paged) != 1 || paged[0].ID != third.ID || totals.PinnedID != first.ID {
+			t.Fatalf("pages follow the same order and every page names the pinned comment: %+v %+v", totals, paged)
+		}
+		if _, ofGame, _ := env.Repo.ListThreads(ctx, comment.Subject{GameID: gameID}, 0, comment.OrderNewest, everything); ofGame.PinnedID != 0 {
+			t.Fatalf("a game has no pinned comment: %+v", ofGame)
+		}
+		for aimed, want := range map[int]int{first.ID: 0, answer.ID: 0, third.ID: 1, second.ID: 2} {
+			if index, found, err := env.Repo.ThreadIndex(ctx, subject, 0, aimed, comment.OrderNewest); err != nil || !found || index != want {
+				t.Fatalf("comment %d sits in thread %d: %d %v %v", aimed, want, index, found, err)
+			}
+		}
+		if _, found, _ := env.Repo.ThreadIndex(ctx, subject, 0, onGame.ID, comment.OrderNewest); found {
+			t.Fatal("a comment of the game has no place among the comments of its resource")
+		}
+
+		if err := env.Repo.ClearPin(ctx, resourceID); err != nil {
+			t.Fatal(err)
+		}
+		cleared, _ := env.Repo.Get(ctx, first.ID)
+		kept, _ := env.Repo.Get(ctx, elsewhere.ID)
+		if cleared.Pinned() || !kept.Pinned() {
+			t.Fatalf("unpinning touches one resource only: %+v %+v", cleared, kept)
+		}
+	})
+
+	t.Run("creator listings name the resource and skip resources that are not public", func(t *testing.T) {
+		env := newEnv(t)
+		gameID := env.NewGame(t)
+		author := env.NewUser(t)
+		open, hidden := env.NewResource(t, gameID, author, true), env.NewResource(t, gameID, author, false)
+		onGame := create(ctx, t, env.Repo, comment.NewComment{GameID: gameID, CreatorID: author})
+		onOpen := create(ctx, t, env.Repo, comment.NewComment{GameID: gameID, ResourceID: &open, CreatorID: author})
+		onHidden := create(ctx, t, env.Repo, comment.NewComment{GameID: gameID, ResourceID: &hidden, CreatorID: author})
+		for _, id := range []int{onGame.ID, onOpen.ID, onHidden.ID} {
+			_ = env.Repo.SetStatus(ctx, id, comment.StatusVisible)
+		}
+		listed, total, err := env.Repo.ListByCreator(ctx, comment.CreatorFilter{CreatorID: author}, comment.Page{Number: 1, Size: 10})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if total != 2 || listed[0].ID != onOpen.ID || listed[1].ID != onGame.ID {
+			t.Fatalf("comments on a resource nobody else can open are left out: %+v", listed)
+		}
+		if ref := listed[0].Resource; ref == nil || ref.ID != open || ref.GameID != gameID || listed[1].Resource != nil {
+			t.Fatalf("a comment on a resource names it: %+v %+v", listed[0].Resource, listed[1].Resource)
 		}
 	})
 

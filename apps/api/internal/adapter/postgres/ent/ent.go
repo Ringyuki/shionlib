@@ -39,6 +39,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedeveloper"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedeveloperrelation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourceevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefilehistory"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
@@ -152,6 +153,7 @@ func checkColumn(t, c string) error {
 			gamedeveloper.Table:                   gamedeveloper.ValidColumn,
 			gamedeveloperrelation.Table:           gamedeveloperrelation.ValidColumn,
 			gamedownloadresource.Table:            gamedownloadresource.ValidColumn,
+			gamedownloadresourceevent.Table:       gamedownloadresourceevent.ValidColumn,
 			gamedownloadresourcefile.Table:        gamedownloadresourcefile.ValidColumn,
 			gamedownloadresourcefilehistory.Table: gamedownloadresourcefilehistory.ValidColumn,
 			gamedownloadresourcereport.Table:      gamedownloadresourcereport.ValidColumn,

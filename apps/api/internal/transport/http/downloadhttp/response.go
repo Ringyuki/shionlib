@@ -43,6 +43,7 @@ type downloadFileDTO struct {
 	MalwareScanCases     []downloadMalwareCaseDTO `json:"malware_scan_cases"`
 	Creator              userhttp.UserSummaryDTO  `json:"creator"`
 	LatestHistory        *downloadHistoryRefDTO   `json:"latest_history"`
+	Uploaded             time.Time                `json:"uploaded" doc:"When the content the file holds now was uploaded: its latest replacement, or its first upload"`
 }
 
 type downloadResourceDTO struct {
@@ -56,7 +57,68 @@ type downloadResourceDTO struct {
 	PublishedAt *time.Time              `json:"published_at" doc:"Null while the resource is still being checked; only its uploader sees it then"`
 	Created     time.Time               `json:"created"`
 	Updated     time.Time               `json:"updated"`
+	Comments    int                     `json:"comments" doc:"Visible comments made on the resource, replies included"`
 	Files       []downloadFileDTO       `json:"files"`
+}
+
+type downloadResourceDetailDTO struct {
+	Resource downloadResourceDTO  `json:"resource"`
+	Game     gamehttp.GameCardDTO `json:"game"`
+}
+
+type downloadEventFileDTO struct {
+	Name string `json:"name"`
+	Size int64  `json:"size"`
+}
+
+type downloadEventChangeDTO struct {
+	Field download.EventField `json:"field" enum:"platforms,languages,simulator,note"`
+	Old   []string            `json:"old" doc:"Values before the edit; empty when the field was unset"`
+	New   []string            `json:"new" doc:"Values after the edit; empty when the field was cleared"`
+}
+
+type downloadEventDTO struct {
+	ID      int                      `json:"id"`
+	Kind    download.EventKind       `json:"kind" enum:"published,file_replaced,file_renamed,file_added,file_removed,edited,review_cleared" doc:"What happened: the resource was published, a file was replaced, renamed, added or removed, the resource's fields were edited, or an admin cleared a file flagged by the malware scan"`
+	Actor   *userhttp.UserSummaryDTO `json:"actor" doc:"Who did it; null when the account no longer exists"`
+	Created time.Time                `json:"created"`
+	Files   []downloadEventFileDTO   `json:"files" doc:"Files the resource was published with, or the file added or removed"`
+	Name    *string                  `json:"name" doc:"The file replaced or cleared, or the new name of a renamed file"`
+	OldName *string                  `json:"old_name" doc:"Name of a renamed file before the change"`
+	Reason  *string                  `json:"reason" doc:"Reason given for replacing a file"`
+	OldSize *int64                   `json:"old_size" doc:"Size of a replaced file before the change"`
+	NewSize *int64                   `json:"new_size" doc:"Size of a replaced file after the change"`
+	Changes []downloadEventChangeDTO `json:"changes" doc:"Fields changed by an edit"`
+}
+
+func toEventDTO(event download.Event, now time.Time) downloadEventDTO {
+	out := downloadEventDTO{
+		ID:      event.ID,
+		Kind:    event.Kind,
+		Created: event.Created,
+		Files:   make([]downloadEventFileDTO, len(event.Data.Files)),
+		Reason:  event.Data.Reason,
+		OldSize: event.Data.OldSize,
+		NewSize: event.Data.NewSize,
+		Changes: make([]downloadEventChangeDTO, len(event.Data.Changes)),
+	}
+	if event.Actor != nil {
+		actor := userhttp.ToUserSummary(*event.Actor, now)
+		out.Actor = &actor
+	}
+	if event.Data.Name != "" {
+		out.Name = &event.Data.Name
+	}
+	if event.Data.OldName != "" {
+		out.OldName = &event.Data.OldName
+	}
+	for i, file := range event.Data.Files {
+		out.Files[i] = downloadEventFileDTO{Name: file.Name, Size: file.Size}
+	}
+	for i, change := range event.Data.Changes {
+		out.Changes[i] = downloadEventChangeDTO{Field: change.Field, Old: nonNil(change.Old), New: nonNil(change.New)}
+	}
+	return out
 }
 
 type downloadOwnSummaryDTO struct {
@@ -188,6 +250,7 @@ func toResourceDTO(r download.GameResource, now time.Time) downloadResourceDTO {
 		PublishedAt: r.PublishedAt,
 		Created:     r.Created,
 		Updated:     r.Updated,
+		Comments:    r.Comments,
 		Files:       make([]downloadFileDTO, len(r.Files)),
 	}
 	for i, file := range r.Files {
@@ -209,6 +272,7 @@ func toResourceDTO(r download.GameResource, now time.Time) downloadResourceDTO {
 			IsVirusFalsePositive: file.FalsePositive,
 			MalwareScanCases:     cases,
 			Creator:              userhttp.ToUserSummary(file.Creator, now),
+			Uploaded:             file.Uploaded(),
 		}
 		if rejection, rejected := file.CheckStatus.Rejection(); rejected && dto.Stage == download.StageRejected {
 			dto.Rejection = &rejection

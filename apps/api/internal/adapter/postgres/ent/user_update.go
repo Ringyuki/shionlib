@@ -17,6 +17,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favorite"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourceevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefilehistory"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
@@ -564,6 +565,21 @@ func (_u *UserUpdate) AddGameDownloadResourceFileHistories(v ...*GameDownloadRes
 	return _u.AddGameDownloadResourceFileHistoryIDs(ids...)
 }
 
+// AddGameDownloadResourceEventIDs adds the "game_download_resource_events" edge to the GameDownloadResourceEvent entity by IDs.
+func (_u *UserUpdate) AddGameDownloadResourceEventIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddGameDownloadResourceEventIDs(ids...)
+	return _u
+}
+
+// AddGameDownloadResourceEvents adds the "game_download_resource_events" edges to the GameDownloadResourceEvent entity.
+func (_u *UserUpdate) AddGameDownloadResourceEvents(v ...*GameDownloadResourceEvent) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddGameDownloadResourceEventIDs(ids...)
+}
+
 // AddFieldPermissionIDs adds the "field_permissions" edge to the UserFieldPermission entity by IDs.
 func (_u *UserUpdate) AddFieldPermissionIDs(ids ...int) *UserUpdate {
 	_u.mutation.AddFieldPermissionIDs(ids...)
@@ -1057,6 +1073,27 @@ func (_u *UserUpdate) RemoveGameDownloadResourceFileHistories(v ...*GameDownload
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveGameDownloadResourceFileHistoryIDs(ids...)
+}
+
+// ClearGameDownloadResourceEvents clears all "game_download_resource_events" edges to the GameDownloadResourceEvent entity.
+func (_u *UserUpdate) ClearGameDownloadResourceEvents() *UserUpdate {
+	_u.mutation.ClearGameDownloadResourceEvents()
+	return _u
+}
+
+// RemoveGameDownloadResourceEventIDs removes the "game_download_resource_events" edge to GameDownloadResourceEvent entities by IDs.
+func (_u *UserUpdate) RemoveGameDownloadResourceEventIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveGameDownloadResourceEventIDs(ids...)
+	return _u
+}
+
+// RemoveGameDownloadResourceEvents removes "game_download_resource_events" edges to GameDownloadResourceEvent entities.
+func (_u *UserUpdate) RemoveGameDownloadResourceEvents(v ...*GameDownloadResourceEvent) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveGameDownloadResourceEventIDs(ids...)
 }
 
 // ClearFieldPermissions clears all "field_permissions" edges to the UserFieldPermission entity.
@@ -2064,6 +2101,51 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourcefilehistory.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.GameDownloadResourceEventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.GameDownloadResourceEventsTable,
+			Columns: []string{user.GameDownloadResourceEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourceevent.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedGameDownloadResourceEventsIDs(); len(nodes) > 0 && !_u.mutation.GameDownloadResourceEventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.GameDownloadResourceEventsTable,
+			Columns: []string{user.GameDownloadResourceEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourceevent.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.GameDownloadResourceEventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.GameDownloadResourceEventsTable,
+			Columns: []string{user.GameDownloadResourceEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourceevent.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -3355,6 +3437,21 @@ func (_u *UserUpdateOne) AddGameDownloadResourceFileHistories(v ...*GameDownload
 	return _u.AddGameDownloadResourceFileHistoryIDs(ids...)
 }
 
+// AddGameDownloadResourceEventIDs adds the "game_download_resource_events" edge to the GameDownloadResourceEvent entity by IDs.
+func (_u *UserUpdateOne) AddGameDownloadResourceEventIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddGameDownloadResourceEventIDs(ids...)
+	return _u
+}
+
+// AddGameDownloadResourceEvents adds the "game_download_resource_events" edges to the GameDownloadResourceEvent entity.
+func (_u *UserUpdateOne) AddGameDownloadResourceEvents(v ...*GameDownloadResourceEvent) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddGameDownloadResourceEventIDs(ids...)
+}
+
 // AddFieldPermissionIDs adds the "field_permissions" edge to the UserFieldPermission entity by IDs.
 func (_u *UserUpdateOne) AddFieldPermissionIDs(ids ...int) *UserUpdateOne {
 	_u.mutation.AddFieldPermissionIDs(ids...)
@@ -3848,6 +3945,27 @@ func (_u *UserUpdateOne) RemoveGameDownloadResourceFileHistories(v ...*GameDownl
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveGameDownloadResourceFileHistoryIDs(ids...)
+}
+
+// ClearGameDownloadResourceEvents clears all "game_download_resource_events" edges to the GameDownloadResourceEvent entity.
+func (_u *UserUpdateOne) ClearGameDownloadResourceEvents() *UserUpdateOne {
+	_u.mutation.ClearGameDownloadResourceEvents()
+	return _u
+}
+
+// RemoveGameDownloadResourceEventIDs removes the "game_download_resource_events" edge to GameDownloadResourceEvent entities by IDs.
+func (_u *UserUpdateOne) RemoveGameDownloadResourceEventIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveGameDownloadResourceEventIDs(ids...)
+	return _u
+}
+
+// RemoveGameDownloadResourceEvents removes "game_download_resource_events" edges to GameDownloadResourceEvent entities.
+func (_u *UserUpdateOne) RemoveGameDownloadResourceEvents(v ...*GameDownloadResourceEvent) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveGameDownloadResourceEventIDs(ids...)
 }
 
 // ClearFieldPermissions clears all "field_permissions" edges to the UserFieldPermission entity.
@@ -4885,6 +5003,51 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourcefilehistory.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.GameDownloadResourceEventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.GameDownloadResourceEventsTable,
+			Columns: []string{user.GameDownloadResourceEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourceevent.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedGameDownloadResourceEventsIDs(); len(nodes) > 0 && !_u.mutation.GameDownloadResourceEventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.GameDownloadResourceEventsTable,
+			Columns: []string{user.GameDownloadResourceEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourceevent.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.GameDownloadResourceEventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.GameDownloadResourceEventsTable,
+			Columns: []string{user.GameDownloadResourceEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourceevent.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

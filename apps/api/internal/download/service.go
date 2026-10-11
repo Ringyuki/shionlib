@@ -18,6 +18,7 @@ import (
 type Deps struct {
 	Repo       Repository
 	Games      GameCards
+	Comments   Discussions
 	Sessions   Sessions
 	Activities Activities
 	Messages   Messenger
@@ -32,6 +33,7 @@ type Deps struct {
 type Service struct {
 	repo       Repository
 	games      GameCards
+	comments   Discussions
 	sessions   Sessions
 	activities Activities
 	messages   Messenger
@@ -47,6 +49,7 @@ func NewService(deps Deps) *Service {
 	return &Service{
 		repo:       deps.Repo,
 		games:      deps.Games,
+		comments:   deps.Comments,
 		sessions:   deps.Sessions,
 		activities: deps.Activities,
 		messages:   deps.Messages,
@@ -82,6 +85,9 @@ func (s *Service) GameResources(ctx context.Context, viewer actor.Actor, gameID 
 		if len(resource.Files) > 0 {
 			visible = append(visible, resource)
 		}
+	}
+	if err := countComments(ctx, s.comments, visible); err != nil {
+		return nil, err
 	}
 	return visible, nil
 }
@@ -140,6 +146,9 @@ func (s *Service) OwnResources(ctx context.Context, who actor.Actor, query OwnQu
 	query.Search = strings.TrimSpace(query.Search)
 	resources, total, err := s.repo.ListOwnResources(ctx, who.UserID, query, page)
 	if err != nil {
+		return nil, 0, err
+	}
+	if err := countComments(ctx, s.comments, resources); err != nil {
 		return nil, 0, err
 	}
 	ids := make([]int, len(resources))
@@ -284,7 +293,13 @@ func (s *Service) RenameFile(ctx context.Context, who actor.Actor, fileID int, n
 		if err := s.repo.RenameFile(ctx, file.ID, name); err != nil {
 			return err
 		}
-		return s.repo.TouchResource(ctx, file.ResourceID, s.now())
+		if err := s.repo.TouchResource(ctx, file.ResourceID, s.now()); err != nil {
+			return err
+		}
+		if name == file.Name {
+			return nil
+		}
+		return recordEvent(ctx, s.repo, who, file.ResourceID, EventFileRenamed, EventData{Name: name, OldName: file.Name})
 	})
 }
 
@@ -312,6 +327,11 @@ func (s *Service) DeleteFile(ctx context.Context, who actor.Actor, fileID int) e
 			return err
 		}
 		removed = file
+		if file.Status == FileInObjectStore {
+			if err := recordEvent(ctx, s.repo, who, file.ResourceID, EventFileRemoved, EventData{Files: []EventFile{{Name: file.Name, Size: file.Size}}}); err != nil {
+				return err
+			}
+		}
 		return publishResource(ctx, s.repo, s.messages, file.ResourceID, s.now())
 	})
 	if err != nil {
@@ -327,10 +347,18 @@ func (s *Service) DeleteFile(ctx context.Context, who actor.Actor, fileID int) e
 
 func (s *Service) Edit(ctx context.Context, who actor.Actor, id int, changes ResourceChanges) error {
 	return s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
-		if _, err := s.ownedResource(ctx, who, id); err != nil {
+		resource, err := s.ownedResource(ctx, who, id)
+		if err != nil {
 			return err
 		}
-		return s.repo.UpdateResource(ctx, id, changes)
+		if err := s.repo.UpdateResource(ctx, id, changes); err != nil {
+			return err
+		}
+		changed := resource.ChangesTo(changes)
+		if len(changed) == 0 {
+			return nil
+		}
+		return recordEvent(ctx, s.repo, who, id, EventEdited, EventData{Changes: changed})
 	})
 }
 
@@ -490,6 +518,9 @@ func (s *Service) Reupload(ctx context.Context, who actor.Actor, fileID int, in 
 		if err := s.activities.Record(ctx, fileActivity(activity.TypeFileReupload, who.UserID, file.GameID, file.ID, FileOnServer, CheckPending, &session.TotalSize, &file.Name)); err != nil {
 			return err
 		}
+		if err := recordEvent(ctx, s.repo, who, file.ResourceID, EventFileReplaced, EventData{Name: file.Name, Reason: in.Reason, OldSize: &file.Size, NewSize: &session.TotalSize}); err != nil {
+			return err
+		}
 		if file.StorageKey != nil {
 			purge = []string{*file.StorageKey}
 		}
@@ -556,6 +587,46 @@ func (s *Service) EditHistoryReason(ctx context.Context, who actor.Actor, histor
 		reason = nil
 	}
 	return s.repo.SetHistoryReason(ctx, history.ID, reason)
+}
+
+func (s *Service) ReviewCleared(ctx context.Context, resourceID int, fileName string, reviewerID *int) error {
+	resource, err := s.repo.GetResource(ctx, resourceID)
+	if err != nil {
+		return err
+	}
+	if !resource.Published() {
+		return nil
+	}
+	return s.repo.CreateEvent(ctx, NewEvent{ResourceID: resourceID, Kind: EventReviewCleared, ActorID: reviewerID, Data: EventData{Name: fileName}})
+}
+
+func recordEvent(ctx context.Context, repo Repository, who actor.Actor, resourceID int, kind EventKind, data EventData) error {
+	resource, err := repo.GetResource(ctx, resourceID)
+	if err != nil {
+		return err
+	}
+	if !resource.Published() {
+		return nil
+	}
+	return repo.CreateEvent(ctx, NewEvent{ResourceID: resourceID, Kind: kind, ActorID: &who.UserID, Data: data})
+}
+
+func countComments(ctx context.Context, comments Discussions, resources []GameResource) error {
+	if len(resources) == 0 {
+		return nil
+	}
+	ids := make([]int, len(resources))
+	for i, resource := range resources {
+		ids[i] = resource.ID
+	}
+	counts, err := comments.CountByResource(ctx, ids)
+	if err != nil {
+		return err
+	}
+	for i, resource := range resources {
+		resources[i].Comments = counts[resource.ID]
+	}
+	return nil
 }
 
 func storageKeys(files []File) []string {

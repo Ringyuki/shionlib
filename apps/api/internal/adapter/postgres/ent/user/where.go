@@ -1363,6 +1363,29 @@ func HasGameDownloadResourceFileHistoriesWith(preds ...predicate.GameDownloadRes
 	})
 }
 
+// HasGameDownloadResourceEvents applies the HasEdge predicate on the "game_download_resource_events" edge.
+func HasGameDownloadResourceEvents() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, GameDownloadResourceEventsTable, GameDownloadResourceEventsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasGameDownloadResourceEventsWith applies the HasEdge predicate on the "game_download_resource_events" edge with a given conditions (other predicates).
+func HasGameDownloadResourceEventsWith(preds ...predicate.GameDownloadResourceEvent) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newGameDownloadResourceEventsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasFieldPermissions applies the HasEdge predicate on the "field_permissions" edge.
 func HasFieldPermissions() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

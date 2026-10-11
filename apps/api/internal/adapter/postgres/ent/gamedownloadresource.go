@@ -62,9 +62,13 @@ type GameDownloadResourceEdges struct {
 	MalwareScanCases []*MalwareScanCase `json:"malware_scan_cases,omitempty"`
 	// Creator holds the value of the creator edge.
 	Creator *User `json:"creator,omitempty"`
+	// Comments holds the value of the comments edge.
+	Comments []*Comment `json:"comments,omitempty"`
+	// Events holds the value of the events edge.
+	Events []*GameDownloadResourceEvent `json:"events,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [7]bool
 }
 
 // GameOrErr returns the Game value or an error if the edge
@@ -114,6 +118,24 @@ func (e GameDownloadResourceEdges) CreatorOrErr() (*User, error) {
 		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "creator"}
+}
+
+// CommentsOrErr returns the Comments value or an error if the edge
+// was not loaded in eager-loading.
+func (e GameDownloadResourceEdges) CommentsOrErr() ([]*Comment, error) {
+	if e.loadedTypes[5] {
+		return e.Comments, nil
+	}
+	return nil, &NotLoadedError{edge: "comments"}
+}
+
+// EventsOrErr returns the Events value or an error if the edge
+// was not loaded in eager-loading.
+func (e GameDownloadResourceEdges) EventsOrErr() ([]*GameDownloadResourceEvent, error) {
+	if e.loadedTypes[6] {
+		return e.Events, nil
+	}
+	return nil, &NotLoadedError{edge: "events"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -262,6 +284,16 @@ func (_m *GameDownloadResource) QueryMalwareScanCases() *MalwareScanCaseQuery {
 // QueryCreator queries the "creator" edge of the GameDownloadResource entity.
 func (_m *GameDownloadResource) QueryCreator() *UserQuery {
 	return NewGameDownloadResourceClient(_m.config).QueryCreator(_m)
+}
+
+// QueryComments queries the "comments" edge of the GameDownloadResource entity.
+func (_m *GameDownloadResource) QueryComments() *CommentQuery {
+	return NewGameDownloadResourceClient(_m.config).QueryComments(_m)
+}
+
+// QueryEvents queries the "events" edge of the GameDownloadResource entity.
+func (_m *GameDownloadResource) QueryEvents() *GameDownloadResourceEventQuery {
+	return NewGameDownloadResourceClient(_m.config).QueryEvents(_m)
 }
 
 // Update returns a builder for updating this GameDownloadResource.

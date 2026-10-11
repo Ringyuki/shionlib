@@ -9,6 +9,8 @@ import (
 const (
 	commentReplyTitle         = "Messages.Comment.Reply.Title"
 	commentReplyContent       = "Messages.Comment.Reply.Content"
+	resourceCommentTitle      = "Messages.Comment.Resource.Title"
+	resourceCommentContent    = "Messages.Comment.Resource.Content"
 	commentBlockTitle         = "Messages.System.Moderation.Comment.Block.Title"
 	commentBlockContent       = "Messages.System.Moderation.Comment.Block.Content"
 	commentBlockReviewContent = "Messages.System.Moderation.Comment.Block.ReviewContent"
@@ -22,7 +24,21 @@ type CommentNotice struct {
 	GameID          int
 	AuthorID        int
 	ParentAuthorID  int
+	PublisherID     int
 	ModeratorUserID *int
+}
+
+func ResourceCommentMessage(n CommentNotice) message.NewMessage {
+	return message.NewMessage{
+		Type:       message.TypeCommentReply,
+		Tone:       message.ToneInfo,
+		Title:      resourceCommentTitle,
+		Content:    resourceCommentContent,
+		ReceiverID: n.PublisherID,
+		CommentID:  &n.CommentID,
+		GameID:     &n.GameID,
+		SenderID:   &n.AuthorID,
+	}
 }
 
 func CommentReplyMessage(n CommentNotice) message.NewMessage {

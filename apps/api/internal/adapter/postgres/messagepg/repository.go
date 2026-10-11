@@ -59,7 +59,7 @@ func (r *Repository) Get(ctx context.Context, id int) (message.Stored, error) {
 		WithSender(userpg.SelectSummary).
 		WithReceiver(userpg.SelectSummary).
 		WithComment(func(q *ent.CommentQuery) {
-			q.Select(comment.FieldID, comment.FieldContent, comment.FieldText)
+			q.Select(comment.FieldID, comment.FieldContent, comment.FieldText, comment.FieldResourceID)
 		}).
 		Only(ctx)
 	if postgres.IsNotFound(err) {
@@ -70,7 +70,7 @@ func (r *Repository) Get(ctx context.Context, id int) (message.Stored, error) {
 	}
 	stored := message.Stored{Message: toMessage(row)}
 	if ref := row.Edges.Comment; ref != nil {
-		stored.Comment = &message.CommentRef{ID: ref.ID, Content: ref.Content, Text: ref.Text}
+		stored.Comment = &message.CommentRef{ID: ref.ID, Content: ref.Content, Text: ref.Text, ResourceID: ref.ResourceID}
 	}
 	return stored, nil
 }

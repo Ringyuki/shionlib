@@ -57,6 +57,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("malware_scan_case_reviews", MalwareScanCase.Type).StorageKey(edge.Symbol("malware_scan_cases_reviewed_by_fkey")).Annotations(entsql.OnDelete(entsql.SetNull)),
 		edge.To("game_download_resource_files", GameDownloadResourceFile.Type).StorageKey(edge.Symbol("game_download_resource_files_creator_id_fkey")).Annotations(entsql.OnDelete(entsql.Restrict)),
 		edge.To("game_download_resource_file_histories", GameDownloadResourceFileHistory.Type).StorageKey(edge.Symbol("game_download_resource_file_histories_operator_id_fkey")).Annotations(entsql.OnDelete(entsql.Restrict)),
+		edge.To("game_download_resource_events", GameDownloadResourceEvent.Type).StorageKey(edge.Symbol("game_download_resource_events_actor_id_fkey")).Annotations(entsql.OnDelete(entsql.Restrict)),
 		edge.To("field_permissions", UserFieldPermission.Type).StorageKey(edge.Symbol("user_field_permissions_user_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("edit_records", EditRecord.Type).StorageKey(edge.Symbol("edit_records_actor_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("setting_changes", SettingChange.Type).StorageKey(edge.Symbol("setting_changes_actor_id_fkey")).Annotations(entsql.OnDelete(entsql.SetNull)),

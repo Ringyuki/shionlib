@@ -99,6 +99,11 @@ func (t *TransferService) announce(ctx context.Context, file File) error {
 		return err
 	}
 	if resource.Published() {
+		if file.Created.After(*resource.PublishedAt) {
+			if err := t.repo.CreateEvent(ctx, NewEvent{ResourceID: resource.ID, Kind: EventFileAdded, ActorID: &file.CreatorID, Data: EventData{Files: []EventFile{{Name: file.Name, Size: file.Size}}}}); err != nil {
+				return err
+			}
+		}
 		return t.messages.Send(ctx, uploadMessage(file.CreatorID, file.GameID, "FileUploadSuccess", message.Meta{"file_id": file.ID, "file_name": file.Name, "file_size": file.Size}))
 	}
 	return publishResource(ctx, t.repo, t.messages, file.ResourceID, t.now())
@@ -118,10 +123,15 @@ func publishResource(ctx context.Context, repo Repository, messages Messenger, r
 		return err
 	}
 	names := make([]string, len(files))
+	listed := make([]EventFile, len(files))
 	var size int64
 	for i, stored := range files {
 		names[i] = stored.Name
+		listed[i] = EventFile{Name: stored.Name, Size: stored.Size}
 		size += stored.Size
+	}
+	if err := repo.CreateEvent(ctx, NewEvent{ResourceID: resource.ID, Kind: EventPublished, ActorID: &resource.CreatorID, Data: EventData{Files: listed}}); err != nil {
+		return err
 	}
 	return messages.Send(ctx, uploadMessage(resource.CreatorID, resource.GameID, "ResourcePublished", message.Meta{"resource_id": resource.ID, "file_names": names, "file_count": len(files), "file_size": size}))
 }

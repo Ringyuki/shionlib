@@ -12,6 +12,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/comment/commenttest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game/gametest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
@@ -30,11 +31,24 @@ var (
 
 const gameID = 7
 
+type resources map[int]comment.ResourceRef
+
+func (r resources) Viewable(_ context.Context, viewer actor.Actor, id int) (comment.ResourceRef, error) {
+	ref, ok := r[id]
+	if !ok || len(ref.FileNames) == 0 && ref.CreatorID != viewer.UserID {
+		return comment.ResourceRef{}, download.ErrResourceNotFound
+	}
+	return ref, nil
+}
+
 type fixture struct {
-	repo     *commenttest.MemoryRepository
-	queue    *moderationtest.Queue
-	messages *moderationtest.Messages
-	service  *comment.Service
+	repo      *commenttest.MemoryRepository
+	queue     *moderationtest.Queue
+	messages  *moderationtest.Messages
+	resources resources
+	now       time.Time
+	service   *comment.Service
+	pins      *comment.PinService
 }
 
 func newFixture(cards ...game.Card) fixture {
@@ -44,8 +58,16 @@ func newFixture(cards ...game.Card) fixture {
 		return clock
 	})
 	repo.AddGame(gameID, false)
-	f := fixture{repo: repo, queue: &moderationtest.Queue{}, messages: &moderationtest.Messages{}}
-	f.service = comment.NewService(repo, gametest.NewCards(cards...), f.messages, f.queue, &txtest.Immediate{})
+	f := fixture{repo: repo, queue: &moderationtest.Queue{}, messages: &moderationtest.Messages{}, resources: resources{}, now: time.Date(2026, 10, 11, 12, 0, 0, 0, time.UTC)}
+	f.service = comment.NewService(comment.Deps{
+		Repo:      repo,
+		Games:     gametest.NewCards(cards...),
+		Resources: f.resources,
+		Messages:  f.messages,
+		Queue:     f.queue,
+		Tx:        &txtest.Immediate{},
+	})
+	f.pins = comment.NewPinService(repo, f.resources, &txtest.Immediate{}, func() time.Time { return f.now })
 	return f
 }
 
@@ -247,7 +269,7 @@ func TestToggleLikeNotifiesAfterCommit(t *testing.T) {
 	tracker := &commitTracker{notifier: notifier}
 	inbox := messagetest.NewMemoryRepository(now)
 	messages := message.NewService(inbox, notifier, gametest.NewCards(), tracker, now)
-	service := comment.NewService(repo, gametest.NewCards(), messages, &moderationtest.Queue{}, tracker)
+	service := comment.NewService(comment.Deps{Repo: repo, Games: gametest.NewCards(), Messages: messages, Queue: &moderationtest.Queue{}, Tx: tracker})
 
 	target := repo.Seed(comment.Comment{GameID: gameID, CreatorID: alice.UserID, Status: comment.StatusVisible})
 	if err := service.ToggleLike(ctx, bob, 999); !errors.Is(err, comment.ErrNotFound) {
@@ -406,4 +428,66 @@ func TestAdminStatusChanges(t *testing.T) {
 			t.Fatalf("unexpected jobs %+v", jobs)
 		}
 	})
+}
+
+const (
+	resourceID   = 31
+	unpublished  = 32
+	otherGameRes = 33
+)
+
+func resourceFixture() fixture {
+	f := newFixture()
+	f.resources[resourceID] = comment.ResourceRef{ID: resourceID, GameID: gameID, CreatorID: alice.UserID, FileNames: []string{"game.7z"}}
+	f.resources[unpublished] = comment.ResourceRef{ID: unpublished, GameID: gameID, CreatorID: alice.UserID}
+	f.resources[otherGameRes] = comment.ResourceRef{ID: otherGameRes, GameID: gameID, CreatorID: bob.UserID, FileNames: []string{"other.7z"}}
+	return f
+}
+
+func TestCommentsOnAResourceStayWithIt(t *testing.T) {
+	ctx := context.Background()
+	f := resourceFixture()
+
+	if _, err := f.service.CreateOnResource(ctx, bob, 404, comment.CreateInput{Content: document(t, "hi")}); !errors.Is(err, download.ErrResourceNotFound) {
+		t.Fatalf("an unknown resource: %v", err)
+	}
+	if _, err := f.service.CreateOnResource(ctx, bob, unpublished, comment.CreateInput{Content: document(t, "hi")}); !errors.Is(err, download.ErrResourceNotFound) {
+		t.Fatalf("a resource the viewer cannot open takes no comments: %v", err)
+	}
+	created, err := f.service.CreateOnResource(ctx, bob, resourceID, comment.CreateInput{Content: document(t, "在哪个目录？")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if created.GameID != gameID || created.ResourceID == nil || *created.ResourceID != resourceID || created.Status != comment.StatusPending {
+		t.Fatalf("the comment belongs to the resource and its game: %+v", created.Comment)
+	}
+	if len(f.queue.Jobs) != 1 {
+		t.Fatalf("resource comments are screened like any other: %+v", f.queue.Jobs)
+	}
+	onGame := f.repo.Seed(comment.Comment{GameID: gameID, CreatorID: bob.UserID, Status: comment.StatusVisible})
+	elsewhere := f.repo.Seed(comment.Comment{GameID: gameID, ResourceID: ptr(otherGameRes), CreatorID: bob.UserID, Status: comment.StatusVisible})
+	for name, parent := range map[string]int{"the game": onGame.ID, "another resource": elsewhere.ID} {
+		if _, err := f.service.CreateOnResource(ctx, alice, resourceID, comment.CreateInput{Content: document(t, "re"), ParentID: &parent}); !errors.Is(err, comment.ErrNotFound) {
+			t.Fatalf("a reply cannot answer a comment of %s: %v", name, err)
+		}
+	}
+	if _, err := f.service.Create(ctx, alice, gameID, comment.CreateInput{Content: document(t, "re"), ParentID: &created.ID}); !errors.Is(err, comment.ErrNotFound) {
+		t.Fatalf("a comment on the game cannot answer a comment of a resource: %v", err)
+	}
+	reply, err := f.service.CreateOnResource(ctx, alice, resourceID, comment.CreateInput{Content: document(t, "在特典文件夹中"), ParentID: &created.ID})
+	if err != nil || *reply.ResourceID != resourceID || *reply.RootID != created.ID {
+		t.Fatalf("replies stay in the thread of the resource: %+v %v", reply.Comment, err)
+	}
+
+	list, err := f.service.ListByResource(ctx, bob, resourceID, comment.ThreadQuery{Order: comment.OrderNewest, Page: comment.Page{Number: 1, Size: 10}})
+	if err != nil || list.Totals.Threads != 1 || list.Threads[0].ID != created.ID {
+		t.Fatalf("the resource lists its own threads: %+v %v", list, err)
+	}
+	ofGame, _ := f.service.ListByGame(ctx, bob, comment.ThreadQuery{Subject: comment.Subject{GameID: gameID}, Order: comment.OrderNewest, Page: comment.Page{Number: 1, Size: 10}})
+	if ofGame.Totals.Threads != 1 || ofGame.Threads[0].ID != onGame.ID {
+		t.Fatalf("the game keeps only its own: %+v", ofGame)
+	}
+	if _, err := f.service.ListByResource(ctx, bob, unpublished, comment.ThreadQuery{Page: comment.Page{Number: 1, Size: 10}}); !errors.Is(err, download.ErrResourceNotFound) {
+		t.Fatalf("comments of a resource the viewer cannot open: %v", err)
+	}
 }
