@@ -137,10 +137,6 @@
       "history": "变更历史",
       "comments": "评论"
     },
-    "contents": {
-      "pending": "尚未读取这个文件的内容",
-      "pendingHint": "较早上传的文件正在依次处理"
-    },
     "details": {
       "file": "文件",
       "name": "文件名",

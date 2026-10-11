@@ -8,6 +8,7 @@ import download from '~/features/download/messages/ja.json'
 import favorite from '~/features/favorite/messages/ja.json'
 import game from '~/features/game/messages/ja.json'
 import home from '~/features/home/messages/ja.json'
+import inspection from '~/features/inspection/messages/ja.json'
 import library from '~/features/library/messages/ja.json'
 import message from '~/features/message/messages/ja.json'
 import profile from '~/features/profile/messages/ja.json'
@@ -40,6 +41,7 @@ export const messages: Messages = {
   form,
   game,
   home,
+  inspection,
   library,
   message,
   picture,

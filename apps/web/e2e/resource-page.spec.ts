@@ -26,12 +26,35 @@ test('opens a resource from its game and reads its tabs', async ({ page }) => {
     'href',
     '/zh/user/3',
   )
-  await expect(page.getByText('尚未读取这个文件的内容')).toBeVisible()
+  await expect(page.getByText('病毒扫描未发现威胁')).toBeVisible()
+  await expect(page.getByRole('tree', { name: '压缩包内的文件' })).toBeVisible()
 
   await page.getByRole('tab', { name: '详细信息' }).click()
   await expect(page).toHaveURL(/\/zh\/resource\/1\/details$/)
-  await expect(page.getByText('e2e-seeded-reportable-hash')).toBeVisible()
   await expect(page.getByText('2 KB（2,048 字节）')).toBeVisible()
+  await expect(
+    page.getByText('0c1f4a5d9e7b3a62c8d1f0e4b6a79325d4c8e1f7a0b2c3d4e5f60718293a4b5c'),
+  ).toBeVisible()
+  const archive = page.getByRole('region', { name: '压缩包' })
+  await expect(archive).toContainText('ZIP')
+  await expect(archive).toContainText('8 个文件，2 个文件夹')
+  await expect(archive).toContainText('3.73 GB')
+  await expect(archive).toContainText('Shift_JIS')
+  await expect(archive).toContainText('解压时需选择日文编码，否则文件名将显示为乱码')
+  const check = page.getByRole('region', { name: '检查' })
+  await expect(check).toContainText('已通过 7-Zip 测试')
+  await expect(check).toContainText('未发现威胁')
+  await expect(check).toContainText('压缩包与光盘映像内的 1 个可执行文件')
+  await expect(check).toContainText('ClamAV 1.4.3，病毒库更新于')
+  const discs = page.getByRole('region', { name: '光盘映像' })
+  await expect(discs).toHaveCount(2)
+  await expect(discs.first()).toContainText('DISC2.mdx')
+  await expect(discs.first()).toContainText('无法识别')
+  await expect(discs.first()).toContainText('无法读取')
+  await expect(discs.last()).toContainText('GAME.bin')
+  await expect(discs.last()).toContainText('ISO 9660，含 Joliet 扩展')
+  await expect(discs.last()).toContainText('SEEDED_GAME')
+  await expect(discs.last()).toContainText('1 个文件')
 
   await page.getByRole('tab', { name: '变更历史' }).click()
   await expect(page).toHaveURL(/\/zh\/resource\/1\/history$/)
@@ -41,6 +64,144 @@ test('opens a resource from its game and reads its tabs', async ({ page }) => {
     .filter({ hasText: '发布了资源' })
   await expect(published).toContainText('e2e_mutable_user')
   await expect(published).toContainText(fileName)
+})
+
+const textAnswer = (content: string) =>
+  JSON.stringify([
+    { _1: 2 },
+    'routes/resources.inspection.text',
+    { _3: 4 },
+    'data',
+    { _5: 6, _7: 8 },
+    'ok',
+    true,
+    'result',
+    { _9: 10, _11: 12, _13: 14, _15: 16, _17: 18 },
+    'id',
+    8,
+    'name',
+    'readme.txt',
+    'size',
+    26,
+    'encoding',
+    'shift_jis',
+    'content',
+    content,
+  ])
+
+const shiftJisReadme = Buffer.from([
+  0x82, 0xb1, 0x82, 0xcc, 0x83, 0x74, 0x83, 0x40, 0x83, 0x43, 0x83, 0x8b, 0x82, 0xcd, 0x90, 0xe0,
+  0x96, 0xbe, 0x8f, 0x91, 0x82, 0xc5, 0x82, 0xb7, 0x81, 0x42,
+]).toString('base64')
+
+const pixel = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+  'base64',
+)
+
+test('browses what a file holds, one folder at a time, and filters it by name', async ({
+  page,
+}) => {
+  await page.goto('/zh/resource/1')
+  await expect(
+    page.getByText('8 个文件，2 个文件夹，解压后 3.73 GB；光盘映像内另有 2 个文件'),
+  ).toBeVisible()
+  const tree = page.getByRole('tree', { name: '压缩包内的文件' })
+  const rows = tree.getByRole('treeitem')
+  await expect(rows).toHaveText([
+    /^seeded-sample/,
+    /^docs/,
+    /^bonus\.zip/,
+    /^cover\.png/,
+    /^DISC2\.mdx/,
+    /^GAME\.bin/,
+    /^GAME\.cue/,
+    /^readme\.txt/,
+    /^setup\.exe/,
+  ])
+  await expect(rows.nth(0)).toContainText('8 项')
+  await expect(rows.nth(2)).toContainText('压缩包')
+  await expect(rows.nth(2)).toContainText('已加密')
+  await expect(rows.nth(2)).toContainText('无法读取')
+  await expect(rows.nth(4)).toContainText('光盘映像')
+  await expect(rows.nth(4)).toContainText('无法读取')
+  await expect(rows.nth(8)).toContainText('5.54 MB')
+
+  await rows.nth(1).click()
+  await expect(tree.getByRole('treeitem', { name: /^manual\.txt/ })).toBeVisible()
+  await expect(rows).toHaveCount(10)
+  await rows.nth(1).click()
+  await expect(rows).toHaveCount(9)
+
+  await tree.getByRole('treeitem', { name: /^GAME\.bin/ }).click()
+  await expect(rows).toHaveCount(11)
+  await expect(tree.getByRole('treeitem', { name: /^SETUP\.EXE/ })).toContainText('268 KB')
+  const track = tree.getByRole('treeitem', { name: /^音轨 02/ })
+  await expect(track).toContainText('4 分 31 秒')
+  await expect(track).toContainText('45.6 MB')
+  await tree.getByRole('treeitem', { name: /^GAME\.bin/ }).click()
+  await expect(rows).toHaveCount(9)
+
+  const filter = page.getByRole('searchbox', { name: '筛选文件名' })
+  await filter.fill('EXE')
+  await expect(page).toHaveURL(/\/zh\/resource\/1\?q=EXE$/)
+  await expect(page.getByText('2 项匹配')).toBeVisible()
+  await expect(rows).toHaveCount(2)
+  await expect(rows.first()).toContainText('setup.exe')
+  await expect(rows.first()).toContainText('seeded-sample')
+  await expect(rows.last()).toContainText('SETUP.EXE')
+  await expect(rows.last()).toContainText('seeded-sample/GAME.bin')
+
+  await filter.fill('nothing-like-this')
+  await expect(page.getByText('没有名称包含“nothing-like-this”的文件')).toBeVisible()
+  await filter.fill('')
+  await expect(page).toHaveURL(/\/zh\/resource\/1$/)
+  await expect(rows).toHaveCount(9)
+})
+
+test('previews a text file in the encoding it was written in, and a picture', async ({ page }) => {
+  await page.route(
+    url => url.pathname === '/resources/inspection/text.data',
+    route =>
+      route.fulfill({
+        status: 200,
+        contentType: 'text/x-script',
+        body: textAnswer(shiftJisReadme),
+      }),
+  )
+  await page.route(
+    url => url.pathname === '/resources/inspection/image',
+    route => route.fulfill({ status: 200, contentType: 'image/png', body: pixel }),
+  )
+  await page.goto('/zh/resource/1')
+  const tree = page.getByRole('tree', { name: '压缩包内的文件' })
+  await tree.getByRole('treeitem', { name: /^readme\.txt/ }).click()
+  const text = page.getByRole('dialog', { name: 'readme.txt' })
+  await expect(text).toContainText('seeded-sample/readme.txt · 26 B · 1 行')
+  await expect(text).toContainText('このファイルは説明書です。')
+  await text.getByRole('combobox', { name: '编码' }).click()
+  await page.getByRole('option', { name: 'GBK' }).click()
+  await expect(text).not.toContainText('説明書')
+  await text.getByRole('button', { name: '关闭' }).click()
+  await expect(text).toBeHidden()
+
+  await tree.getByRole('treeitem', { name: /^cover\.png/ }).click()
+  const picture = page.getByRole('img', { name: 'cover.png' })
+  await expect(picture).toBeVisible()
+  await expect(picture).toHaveAttribute('src', '/resources/inspection/image?entry=4')
+  await page.keyboard.press('Escape')
+  await expect(picture).toBeHidden()
+})
+
+test.describe('as the uploader of a file that was never read', () => {
+  test.use({ storageState: sessionFile('admin') })
+
+  test('says so instead of listing anything', async ({ page }) => {
+    await page.goto('/zh/resource/2')
+    await expect(page.getByText('尚未读取这个文件的内容')).toBeVisible()
+    await page.getByRole('tab', { name: '详细信息' }).click()
+    await expect(page.getByRole('region', { name: '压缩包' })).toContainText('尚未读取')
+  })
 })
 
 test('keeps the comments of a resource apart from those of its game', async ({ page }) => {

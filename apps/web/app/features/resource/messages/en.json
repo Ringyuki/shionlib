@@ -137,10 +137,6 @@
       "history": "History",
       "comments": "Comments"
     },
-    "contents": {
-      "pending": "The contents of this file have not been read yet",
-      "pendingHint": "Files uploaded earlier are being processed one after another"
-    },
     "details": {
       "file": "File",
       "name": "File name",

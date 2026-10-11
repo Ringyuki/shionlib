@@ -11,3 +11,10 @@ export function byteSize(bytes: number): ByteSize {
   }
   return { value, unit: byteUnits[unit] ?? 'B' }
 }
+
+export function shortFractionDigits(value: number): number {
+  if (value >= 100) {
+    return 0
+  }
+  return value >= 10 ? 1 : 2
+}

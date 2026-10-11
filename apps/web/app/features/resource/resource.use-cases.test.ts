@@ -62,17 +62,20 @@ const header: ApiData<'/game/{id}/header', 'get'> = {
 }
 
 describe('loadResourcePage', () => {
-  it('reads the resource and then the header of its game, which names the game to a manager', async () => {
+  it('reads the resource, then the header of its game and what its files were found to hold', async () => {
     const fake = fakeApi()
       .on('get', '/game/download-source/{id}', detail)
       .on('get', '/game/{id}/header', header)
+      .on('get', '/inspection/resource/{resource_id}', null)
     await expect(loadResourcePage(fake.api, 31)).resolves.toEqual({
       resource: detail.resource,
       game: header,
+      inspections: [],
     })
     expect(fake.requests.map(request => new URL(request.url).pathname)).toEqual([
       '/game/download-source/31',
       '/game/7/header',
+      '/inspection/resource/31',
     ])
   })
 

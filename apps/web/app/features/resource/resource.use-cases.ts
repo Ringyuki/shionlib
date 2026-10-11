@@ -1,3 +1,4 @@
+import { loadInspections } from '~/features/inspection'
 import type { ApiClient } from '~/shared/api/client'
 import { ApiError } from '~/shared/api/error'
 import { needsSimulator } from './resource'
@@ -21,8 +22,11 @@ export async function loadResourcePage(api: ApiClient, id: number): Promise<Reso
   const { resource, game } = await api.get('/game/download-source/{id}', {
     params: { path: { id } },
   })
-  const header = await api.get('/game/{id}/header', { params: { path: { id: game.id } } })
-  return { resource, game: header }
+  const [header, inspections] = await Promise.all([
+    api.get('/game/{id}/header', { params: { path: { id: game.id } } }),
+    loadInspections(api, id),
+  ])
+  return { resource, game: header, inspections }
 }
 
 export async function loadResourceEvents(api: ApiClient, id: number) {

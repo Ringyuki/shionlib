@@ -16,12 +16,18 @@ type Call<Method extends HttpMethod> = <Path extends ApiPath<Method>, I extends 
   ...init: InitArgs<I>
 ) => Promise<ApiData<Path, Method>>
 
+type FileCall = <Path extends ApiPath<'get'>, I extends Init<Path, 'get'>>(
+  path: Path,
+  ...init: InitArgs<I>
+) => Promise<Response>
+
 export type ApiClient = {
   get: Call<'get'>
   post: Call<'post'>
   put: Call<'put'>
   patch: Call<'patch'>
   delete: Call<'delete'>
+  file: FileCall
 }
 
 export type ApiOptions = {
@@ -45,6 +51,13 @@ export function createApi(options: ApiOptions): ApiClient {
     }
     return data?.data
   }
+  const file = async (path: string, init?: object) => {
+    const { error, response } = await request('get', path, { ...init, parseAs: 'stream' })
+    if (error !== undefined || !response.ok) {
+      throw ApiError.fromResponse(response, error)
+    }
+    return response
+  }
   const call = <Method extends HttpMethod>(method: Method) =>
     ((path: string, init?: object) => send(method, path, init)) as Call<Method>
   return {
@@ -53,5 +66,6 @@ export function createApi(options: ApiOptions): ApiClient {
     put: call('put'),
     patch: call('patch'),
     delete: call('delete'),
+    file: file as FileCall,
   }
 }

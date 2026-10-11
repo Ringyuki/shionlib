@@ -2394,6 +2394,91 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/inspection/entry/{entry_id}/image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** An image kept for preview, as WebP */
+        get: operations["inspection.image"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/inspection/entry/{entry_id}/text": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The bytes of a text file kept for preview */
+        get: operations["inspection.text"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/inspection/resource/{resource_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What the checks found in the files of a download resource */
+        get: operations["inspection.ofResource"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/inspection/{id}/entries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the entries inside a folder, archive or disc image of an inspected file */
+        get: operations["inspection.entries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/inspection/{id}/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Find files of an inspected file by name */
+        get: operations["inspection.search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/message/all/read": {
         parameters: {
             query?: never;
@@ -4749,7 +4834,7 @@ export type components = {
          * Format: int64
          * @enum {integer}
          */
-        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 450101 | 450102 | 450103 | 450104 | 450105 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 610101 | 610102 | 620101 | 620102 | 620103 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102;
+        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 450101 | 450102 | 450103 | 450104 | 450105 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 610101 | 610102 | 620101 | 620102 | 620103 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103;
         CatalogHitDTO: {
             cover: string | null;
             developer: string | null;
@@ -5171,6 +5256,11 @@ export type components = {
             hash_algorithm: "sha256" | "blake3";
             /** Format: int64 */
             id: number;
+            /**
+             * Format: int64
+             * @description The record of what the check found in the file; volumes of one archive share it. Null until the file has been read
+             */
+            inspection_id: number | null;
             is_virus_false_positive: boolean;
             latest_history: components["schemas"]["DownloadHistoryRefDTO"] | null;
             malware_scan_cases: components["schemas"]["DownloadMalwareCaseDTO"][] | null;
@@ -5180,6 +5270,8 @@ export type components = {
              */
             rejection: "truncated" | "unsupported" | "encrypted" | "harmful" | "incomplete_set" | null;
             s3_file_key: string | null;
+            /** @description SHA-256 of the file, computed while it is checked; null until then */
+            sha256: string | null;
             /**
              * @description Where the file is on its way to being downloadable: checking (waiting for or under its check), storing (passed, moving to object storage), stored, under_review (held for a malware review) or rejected (about to be removed)
              * @enum {string}
@@ -6067,6 +6159,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeInspectionTextDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["InspectionTextDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeInt: {
             /** Format: int64 */
             code: number;
@@ -6202,6 +6304,16 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["FavoriteSummaryDTO"][] | null;
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeListInspectionDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["InspectionDTO"][] | null;
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -6462,6 +6574,26 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["PageGameListItemDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopePageInspectionEntryDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["PageInspectionEntryDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopePageInspectionFoundDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["PageInspectionFoundDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -7219,6 +7351,190 @@ export type components = {
             /** Format: int64 */
             total_size: number;
         };
+        InspectionArchiveDTO: {
+            /** @description The container format as 7-Zip names it, in lower case (zip, rar, rar5, 7z, iso); empty when the file is not an archive */
+            format: string;
+            /** @description The legacy encoding its file names were stored in (shift_jis, gbk, big5); empty when they are Unicode */
+            name_encoding: string;
+            /** @description Whether the archive carries a recovery record */
+            recovery: boolean;
+            /**
+             * Format: int64
+             * @description Size of the recovery record relative to the data, in percent; 0 when the format does not tell
+             */
+            recovery_percent: number;
+            solid: boolean;
+            /**
+             * Format: int64
+             * @description How many volumes the archive is split into; 0 or 1 for a single file
+             */
+            volumes: number;
+        };
+        InspectionDTO: {
+            archive: components["schemas"]["InspectionArchiveDTO"];
+            /** Format: date-time */
+            created: string;
+            /**
+             * Format: int64
+             * @description Files inside the disc images the archive holds
+             */
+            disc_files: number;
+            discs: components["schemas"]["InspectionDiscDTO"][] | null;
+            /**
+             * Format: int64
+             * @description Files the archive holds, not counting what is inside nested archives and disc images
+             */
+            files: number;
+            /** Format: int64 */
+            folders: number;
+            /** Format: int64 */
+            id: number;
+            scan: components["schemas"]["InspectionScanDTO"];
+            /**
+             * Format: int64
+             * @description Size of those files once unpacked, in bytes
+             */
+            size: number;
+            /**
+             * @description ready: the contents were read; plain: the file is not an archive; failed: the contents could not be read
+             * @enum {string}
+             */
+            status: "ready" | "plain" | "failed";
+            /** @description Whether the listing was cut at the entry limit */
+            truncated: boolean;
+            /** @description Whether the archive passed the integrity test */
+            verified: boolean;
+        };
+        InspectionDetectionDTO: {
+            path: string;
+            signature: string;
+        };
+        InspectionDiscDTO: {
+            /** Format: int64 */
+            entry_id: number;
+            /** Format: int64 */
+            files: number;
+            /** Format: int64 */
+            folders: number;
+            /** @description The file system that was read (iso9660, iso9660+joliet, udf); empty when the image could not be read */
+            format: string;
+            label: string;
+            name: string;
+            /** @description What the image shows about how the disc is meant to be used */
+            signals: string[] | null;
+            /** Format: int64 */
+            size: number;
+            unreadable: boolean;
+        };
+        InspectionEntryDTO: {
+            /**
+             * Format: int64
+             * @description Entries directly inside
+             */
+            children: number;
+            encrypted: boolean;
+            /** Format: int64 */
+            id: number;
+            /**
+             * Format: int64
+             * @description Files below a folder, or inside an archive or disc image
+             */
+            items: number;
+            /** @enum {string} */
+            kind: "folder" | "file" | "archive" | "disc" | "track";
+            /** Format: date-time */
+            modified: string | null;
+            name: string;
+            /** Format: int64 */
+            parent_id: number | null;
+            /**
+             * @description The kind of preview kept for the file; null when there is none
+             * @enum {string|null}
+             */
+            preview: "text" | "image" | null;
+            /**
+             * Format: int64
+             * @description Bytes; for a folder, the sum of the files below it
+             */
+            size: number;
+            /** @description Set for an audio track of a disc image */
+            track: components["schemas"]["InspectionTrackDTO"] | null;
+            /** @description A nested archive or disc image whose contents could not be read */
+            unreadable: boolean;
+        };
+        InspectionFoundDTO: {
+            /** Format: int64 */
+            children: number;
+            encrypted: boolean;
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            items: number;
+            /** @enum {string} */
+            kind: "folder" | "file" | "archive" | "disc" | "track";
+            /** @description Path of the folder that holds the file; empty at the top level */
+            location: string;
+            /** Format: date-time */
+            modified: string | null;
+            name: string;
+            /** Format: int64 */
+            parent_id: number | null;
+            /** @enum {string|null} */
+            preview: "text" | "image" | null;
+            /** Format: int64 */
+            size: number;
+            track: components["schemas"]["InspectionTrackDTO"] | null;
+            unreadable: boolean;
+        };
+        InspectionScanDTO: {
+            /** Format: date-time */
+            at: string | null;
+            /**
+             * Format: date-time
+             * @description When a reviewer released the file after a detection
+             */
+            cleared_at: string | null;
+            detections: components["schemas"]["InspectionDetectionDTO"][] | null;
+            /** @description Name and version of the virus scanner; empty when the file was not scanned */
+            engine: string;
+            /**
+             * Format: int64
+             * @description The largest file the scanner takes, in bytes
+             */
+            limit: number;
+            /**
+             * Format: int64
+             * @description How many executables and scripts were scanned, nested archives and disc images included
+             */
+            scanned: number;
+            /**
+             * Format: date-time
+             * @description When the scanner's signatures were last updated
+             */
+            signatures_at: string | null;
+            /** @description Paths left unscanned because they exceed the limit */
+            skipped: string[] | null;
+        };
+        InspectionTextDTO: {
+            /** @description The bytes of the file as they are, base64-encoded */
+            content: string;
+            /**
+             * @description The encoding the bytes look like, as a TextDecoder label
+             * @enum {string}
+             */
+            encoding: "utf-8" | "utf-16le" | "utf-16be" | "shift_jis" | "gbk" | "big5" | "euc-jp";
+            /** Format: int64 */
+            id: number;
+            name: string;
+            /** Format: int64 */
+            size: number;
+        };
+        InspectionTrackDTO: {
+            /** Format: int64 */
+            number: number;
+            /** Format: int64 */
+            seconds: number;
+        };
         MalwareCaseDetailDTO: {
             /** Format: date-time */
             created: string;
@@ -7508,6 +7824,14 @@ export type components = {
         };
         PageGameListItemDTO: {
             items: components["schemas"]["GameListItemDTO"][] | null;
+            meta: components["schemas"]["PageMeta"];
+        };
+        PageInspectionEntryDTO: {
+            items: components["schemas"]["InspectionEntryDTO"][] | null;
+            meta: components["schemas"]["PageMeta"];
+        };
+        PageInspectionFoundDTO: {
+            items: components["schemas"]["InspectionFoundDTO"][] | null;
             meta: components["schemas"]["PageMeta"];
         };
         PageMalwareCaseItemDTO: {
@@ -14209,6 +14533,183 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeHealthLivenessDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "inspection.image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "Cache-Control"?: string;
+                    "Content-Security-Policy"?: string;
+                    "Content-Type"?: string;
+                    "X-Content-Type-Options"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "inspection.text": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeInspectionTextDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "inspection.ofResource": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                resource_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeListInspectionDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "inspection.entries": {
+        parameters: {
+            query?: {
+                /** @description The folder, archive or disc image whose entries are listed; left out for the top level */
+                parent_id?: number;
+                /** @description 1-based page number */
+                page?: number;
+                /** @description Items per page */
+                pageSize?: number;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopePageInspectionEntryDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "inspection.search": {
+        parameters: {
+            query: {
+                /** @description Part of a file name, matched without regard to case */
+                q: string;
+                /** @description 1-based page number */
+                page?: number;
+                /** @description Items per page */
+                pageSize?: number;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopePageInspectionFoundDTO"];
                 };
             };
             /** @description Error */

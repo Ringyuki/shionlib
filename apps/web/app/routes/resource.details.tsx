@@ -3,5 +3,6 @@ import type { Route } from './+types/resource.details'
 
 export default function ResourceDetailsRoute({ matches }: Route.ComponentProps) {
   const [, , , , resource] = matches
-  return <ResourceDetails resource={resource.loaderData.resource} />
+  const { resource: shown, inspections } = resource.loaderData
+  return <ResourceDetails resource={shown} inspections={inspections} />
 }

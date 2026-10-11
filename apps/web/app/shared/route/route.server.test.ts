@@ -4,7 +4,14 @@ import { describe, expect, it } from 'vitest'
 import { ApiError } from '~/shared/api/error'
 import { fakeApi } from '~/shared/api/testing'
 import { apiContext } from './api.server'
-import { readCommand, readForm, routeAction, routeLazyLoader, routeLoader } from './route.server'
+import {
+  readCommand,
+  readForm,
+  routeAction,
+  routeFile,
+  routeLazyLoader,
+  routeLoader,
+} from './route.server'
 
 const failure = {
   code: 460103,
@@ -71,6 +78,49 @@ describe('routeLazyLoader', () => {
       ok: true,
       result: [1],
     })
+  })
+})
+
+describe('routeFile', () => {
+  it('passes the file on with the headers that say what it is and how to treat it', async () => {
+    const answer = await routeFile(
+      args(),
+      async () =>
+        new Response('webp-bytes', {
+          headers: {
+            'content-type': 'image/webp',
+            'cache-control': 'private, max-age=86400',
+            'x-content-type-options': 'nosniff',
+            'content-security-policy': "default-src 'none'; sandbox",
+            'content-length': '999',
+            'set-cookie': 'session=leaked',
+            'shionlib-request-id': 'r',
+          },
+        }),
+    )
+    expect(Object.fromEntries(answer.headers)).toEqual({
+      'content-type': 'image/webp',
+      'cache-control': 'private, max-age=86400',
+      'x-content-type-options': 'nosniff',
+      'content-security-policy': "default-src 'none'; sandbox",
+    })
+    await expect(answer.text()).resolves.toBe('webp-bytes')
+  })
+
+  it('answers with the status of the API and no body when the file is refused', async () => {
+    const thrown = await routeFile(args(), async () => {
+      throw new ApiError(404, failure)
+    }).catch((error: unknown) => error)
+    expect(thrown).toMatchObject({ init: { status: 404 }, data: null })
+  })
+
+  it('lets other errors through', async () => {
+    const bug = new Error('bug')
+    await expect(
+      routeFile(args(), async () => {
+        throw bug
+      }),
+    ).rejects.toBe(bug)
   })
 })
 

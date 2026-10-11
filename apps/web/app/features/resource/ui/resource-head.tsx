@@ -5,7 +5,7 @@ import { useLocale } from 'use-intl'
 import { gamePath, gameTitle } from '~/features/game'
 import { BBCodeText } from '~/shared/ui/bbcode-text'
 import { rightsOver, type ResourceViewer } from '../resource'
-import type { ResourcePage } from '../resource-page'
+import { inspectionOf, type ResourcePage } from '../resource-page'
 import { PageFile } from './page-file'
 import { ResourceFacts } from './resource-facts'
 import { ResourceMenu } from './resource-menu'
@@ -36,7 +36,13 @@ export function ResourceHead({ page, viewer }: ResourceHeadProps) {
         </Link>
         <Stack gap="md">
           {files.map((file, index) => (
-            <PageFile key={file.id} resourceId={resource.id} file={file} leading={index === 0} />
+            <PageFile
+              key={file.id}
+              resourceId={resource.id}
+              file={file}
+              inspection={inspectionOf(file, page.inspections)}
+              leading={index === 0}
+            />
           ))}
         </Stack>
       </Stack>

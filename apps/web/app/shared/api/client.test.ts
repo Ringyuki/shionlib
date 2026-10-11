@@ -48,4 +48,30 @@ describe('createApi', () => {
     })
     await expect(api.get('/user/me')).rejects.toMatchObject({ status: 502, code: 502 })
   })
+
+  it('hands on a file as it is served, without reading it as an envelope', async () => {
+    const fake = fakeApi().serve('/inspection/entry/{entry_id}/image', 'webp-bytes', {
+      'content-type': 'image/webp',
+      'cache-control': 'private, max-age=86400',
+    })
+    const answer = await fake.api.file('/inspection/entry/{entry_id}/image', {
+      params: { path: { entry_id: 17 } },
+    })
+    expect(answer.headers.get('content-type')).toBe('image/webp')
+    expect(answer.bodyUsed).toBe(false)
+    await expect(answer.text()).resolves.toBe('webp-bytes')
+    expect(new URL(fake.requests[0]?.url ?? '').pathname).toBe('/inspection/entry/17/image')
+  })
+
+  it('throws the business failure when a file is refused', async () => {
+    const fake = fakeApi().fail('get', '/inspection/entry/{entry_id}/image', 404, {
+      code: 650103,
+      message: '这一项没有可用的预览',
+    })
+    const error = await fake.api
+      .file('/inspection/entry/{entry_id}/image', { params: { path: { entry_id: 17 } } })
+      .catch((caught: unknown) => caught)
+    expect(error).toBeInstanceOf(ApiError)
+    expect(error).toMatchObject({ status: 404, code: 650103 })
+  })
 })

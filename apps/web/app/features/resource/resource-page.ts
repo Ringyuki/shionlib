@@ -1,4 +1,5 @@
 import type { GameHeader } from '~/features/game'
+import type { Inspection } from '~/features/inspection'
 import type { Schema } from '~/shared/api/types'
 import type { Locale } from '~/shared/i18n/locale'
 import type { Resource, ResourceFile } from './resource'
@@ -7,7 +8,7 @@ export type ResourceEvent = Schema<'DownloadEventDTO'>
 
 export type EventChange = NonNullable<ResourceEvent['changes']>[number]
 
-export type ResourcePage = { resource: Resource; game: GameHeader }
+export type ResourcePage = { resource: Resource; game: GameHeader; inspections: Inspection[] }
 
 export const resourceTabs = ['contents', 'details', 'history', 'comments'] as const
 
@@ -32,8 +33,53 @@ export function headlineOf(files: readonly Pick<ResourceFile, 'file_name'>[]): H
   return { name: files[0]?.file_name ?? '', others: Math.max(0, files.length - 1) }
 }
 
-export function hashName(algorithm: ResourceFile['hash_algorithm']): string {
-  return algorithm === 'sha256' ? 'SHA-256' : 'BLAKE3'
+export type Digest = { name: 'SHA-256' | 'BLAKE3'; value: string }
+
+export function digestsOf(
+  file: Pick<ResourceFile, 'hash_algorithm' | 'file_hash' | 'sha256'>,
+): Digest[] {
+  const digests: Digest[] = []
+  const sha256 = file.sha256 ?? (file.hash_algorithm === 'sha256' ? file.file_hash : null)
+  if (sha256 !== null) {
+    digests.push({ name: 'SHA-256', value: sha256 })
+  }
+  if (file.hash_algorithm === 'blake3') {
+    digests.push({ name: 'BLAKE3', value: file.file_hash })
+  }
+  return digests
+}
+
+type Inspected = Pick<ResourceFile, 'inspection_id'>
+
+export type FileGroup<File extends Inspected = ResourceFile> = {
+  files: File[]
+  inspection: Inspection | undefined
+}
+
+export function inspectionOf(
+  file: Inspected,
+  inspections: readonly Inspection[],
+): Inspection | undefined {
+  return inspections.find(inspection => inspection.id === file.inspection_id)
+}
+
+export function fileGroups<File extends Inspected>(
+  files: readonly File[],
+  inspections: readonly Inspection[],
+): FileGroup<File>[] {
+  const groups: FileGroup<File>[] = []
+  for (const file of files) {
+    const inspection = inspectionOf(file, inspections)
+    const shared = groups.find(
+      group => inspection !== undefined && group.inspection?.id === inspection.id,
+    )
+    if (shared === undefined) {
+      groups.push({ files: [file], inspection })
+    } else {
+      shared.files.push(file)
+    }
+  }
+  return groups
 }
 
 export function eventFiles(event: Pick<ResourceEvent, 'files'>) {

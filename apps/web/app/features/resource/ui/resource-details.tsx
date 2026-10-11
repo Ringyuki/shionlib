@@ -1,59 +1,57 @@
+import { Divider, Grid, Stack } from '@hina-ui/react'
+import { Fragment } from 'react'
+import { useTranslations } from 'use-intl'
 import {
-  CopyButton,
-  DescriptionDetails,
-  DescriptionList,
-  DescriptionTerm,
-  Heading,
-  Inline,
-  Stack,
-  Text,
-} from '@hina-ui/react'
-import { useFormatter, useTranslations } from 'use-intl'
-import { useBytes } from '~/shared/i18n/use-bytes'
-import type { Resource, ResourceFile } from '../resource'
-import { hashName } from '../resource-page'
+  ArchiveSection,
+  CheckSection,
+  DiscSections,
+  FactsPart,
+  earlierCheck,
+  type Inspection,
+} from '~/features/inspection'
+import type { Resource } from '../resource'
+import { fileGroups, type FileGroup } from '../resource-page'
+import { FileFacts } from './file-facts'
 
-export function ResourceDetails({ resource }: { resource: Resource }) {
-  const t = useTranslations('resource.page.details')
+type ResourceDetailsProps = {
+  resource: Resource
+  inspections: readonly Inspection[]
+}
+
+export function ResourceDetails({ resource, inspections }: ResourceDetailsProps) {
   return (
-    <Stack as="section" gap="md">
-      <Heading level={2} size="md">
-        {t('file')}
-      </Heading>
-      <Stack gap="xl">
-        {(resource.files ?? []).map(file => (
-          <FileFacts key={file.id} file={file} />
-        ))}
-      </Stack>
+    <Stack gap="xl">
+      {fileGroups(resource.files ?? [], inspections).map((group, index) => (
+        <Fragment key={group.files[0]?.id}>
+          {index > 0 && <Divider />}
+          <GroupFacts group={group} />
+        </Fragment>
+      ))}
     </Stack>
   )
 }
 
-function FileFacts({ file }: { file: ResourceFile }) {
-  const t = useTranslations('resource')
-  const format = useFormatter()
-  const bytes = useBytes()
+function GroupFacts({ group: { files, inspection } }: { group: FileGroup }) {
+  const t = useTranslations('resource.page.details')
+  const withDiscs = (inspection?.discs ?? []).length > 0
+  const check = <CheckSection inspection={inspection} earlier={earlierCheck(files)} />
   return (
-    <DescriptionList orientation="horizontal">
-      <DescriptionTerm>{t('page.details.name')}</DescriptionTerm>
-      <DescriptionDetails className="break-all">{file.file_name}</DescriptionDetails>
-      <DescriptionTerm>{t('page.details.size')}</DescriptionTerm>
-      <DescriptionDetails className="tabular-nums">
-        {t('page.details.bytes', { size: bytes(file.file_size), bytes: file.file_size })}
-      </DescriptionDetails>
-      <DescriptionTerm>{hashName(file.hash_algorithm)}</DescriptionTerm>
-      <DescriptionDetails>
-        <Inline gap="xs" align="start" wrap={false}>
-          <Text as="span" size="sm" className="font-mono break-all">
-            {file.file_hash}
-          </Text>
-          <CopyButton text={file.file_hash} label={t('copyHash')} size="sm" />
-        </Inline>
-      </DescriptionDetails>
-      <DescriptionTerm>{t('page.details.uploaded')}</DescriptionTerm>
-      <DescriptionDetails>
-        {format.dateTime(new Date(file.uploaded), { dateStyle: 'long', timeStyle: 'short' })}
-      </DescriptionDetails>
-    </DescriptionList>
+    <Grid className="items-start gap-x-12 gap-y-8 md:grid-cols-2">
+      <Stack gap="xl">
+        <FactsPart heading={t('file')}>
+          <Stack gap="lg">
+            {files.map(file => (
+              <FileFacts key={file.id} file={file} />
+            ))}
+          </Stack>
+        </FactsPart>
+        <ArchiveSection inspection={inspection} />
+        {withDiscs && check}
+      </Stack>
+      <Stack gap="xl">
+        {!withDiscs && check}
+        <DiscSections inspection={inspection} />
+      </Stack>
+    </Grid>
   )
 }

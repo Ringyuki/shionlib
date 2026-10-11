@@ -1,16 +1,18 @@
 import { Heading, Inline, Stack, Text } from '@hina-ui/react'
 import { DownloadButton } from '~/features/download'
+import { ScanNote, type Inspection } from '~/features/inspection'
 import { useBytes } from '~/shared/i18n/use-bytes'
-import { downloadable, type ResourceFile } from '../resource'
+import { downloadable, fileState, type ResourceFile } from '../resource'
 import { FileState } from './file-state'
 
 type PageFileProps = {
   resourceId: number
   file: ResourceFile
+  inspection: Inspection | undefined
   leading: boolean
 }
 
-export function PageFile({ resourceId, file, leading }: PageFileProps) {
+export function PageFile({ resourceId, file, inspection, leading }: PageFileProps) {
   const bytes = useBytes()
   return (
     <Stack gap="sm" className="sm:flex-row sm:items-start sm:gap-4">
@@ -23,6 +25,7 @@ export function PageFile({ resourceId, file, leading }: PageFileProps) {
             {bytes(file.file_size)}
           </Text>
           <FileState file={file} />
+          {fileState(file) === 'passed' && <ScanNote inspection={inspection} />}
         </Inline>
       </Stack>
       {downloadable(file) && (

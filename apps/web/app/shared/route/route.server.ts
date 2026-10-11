@@ -47,6 +47,35 @@ async function outcomeOf<Result>({ context }: RouteArgs, run: (api: ApiClient) =
   }
 }
 
+const fileHeaders = [
+  'content-type',
+  'cache-control',
+  'x-content-type-options',
+  'content-security-policy',
+]
+
+export async function routeFile(
+  { context }: RouteArgs,
+  run: (api: ApiClient) => Promise<Response>,
+): Promise<Response> {
+  try {
+    const answer = await run(apiFrom(context))
+    const headers = new Headers()
+    for (const name of fileHeaders) {
+      const value = answer.headers.get(name)
+      if (value !== null) {
+        headers.set(name, value)
+      }
+    }
+    return new Response(answer.body, { headers })
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw data(null, { status: error.status })
+    }
+    throw error
+  }
+}
+
 export async function readCommand<Schema extends v.GenericSchema>(
   { request }: { request: Request },
   schema: Schema,

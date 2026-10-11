@@ -14,6 +14,11 @@ export type FakeApi = {
     path: Path,
     data: ApiData<Path, Method>,
   ) => FakeApi
+  serve: <Path extends ApiPath<'get'>>(
+    path: Path,
+    body: string,
+    headers: Record<string, string>,
+  ) => FakeApi
   fail: <Method extends HttpMethod, Path extends ApiPath<Method>>(
     method: Method,
     path: Path,
@@ -45,6 +50,10 @@ export function fakeApi(): FakeApi {
     requests,
     on(method, path, data) {
       register(method, path, () => envelope(200, { code: 0, message: '', data }))
+      return fake
+    },
+    serve(path, body, headers) {
+      register('get', path, () => new Response(body, { status: 200, headers }))
       return fake
     },
     fail(method, path, status, failure) {

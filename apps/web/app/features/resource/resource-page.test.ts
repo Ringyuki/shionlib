@@ -1,14 +1,17 @@
 import { describe, expect, it } from 'vitest'
 import {
   changedValues,
+  digestsOf,
   eventChanges,
   eventFiles,
-  hashName,
+  fileGroups,
   headlineOf,
   resourcePath,
   resourceTabAt,
 } from './resource-page'
 import { resourceTabFrom } from './resource-page.schema'
+
+type Inspections = Parameters<typeof fileGroups>[1]
 
 describe('addresses', () => {
   const pathOf = (tab: Parameters<typeof resourcePath>[2]) => resourcePath('zh', 12, tab)
@@ -50,8 +53,75 @@ describe('what an event carries', () => {
     expect(changedValues(['win'])).toEqual(['win'])
   })
 
-  it('writes the name of a checksum the way its tools do', () => {
-    expect(hashName('sha256')).toBe('SHA-256')
-    expect(hashName('blake3')).toBe('BLAKE3')
+  it('lists the checksums a file has, the one computed by the check first', () => {
+    expect(digestsOf({ hash_algorithm: 'blake3', file_hash: 'b3', sha256: 'computed' })).toEqual([
+      { name: 'SHA-256', value: 'computed' },
+      { name: 'BLAKE3', value: 'b3' },
+    ])
+    expect(digestsOf({ hash_algorithm: 'sha256', file_hash: 'uploaded', sha256: null })).toEqual([
+      { name: 'SHA-256', value: 'uploaded' },
+    ])
+    expect(digestsOf({ hash_algorithm: 'blake3', file_hash: 'b3', sha256: null })).toEqual([
+      { name: 'BLAKE3', value: 'b3' },
+    ])
+  })
+})
+
+describe('fileGroups', () => {
+  const inspected = (id: number): Inspections[number] => ({
+    id,
+    status: 'ready',
+    archive: {
+      format: 'rar5',
+      solid: false,
+      volumes: 2,
+      recovery: false,
+      recovery_percent: 0,
+      name_encoding: '',
+    },
+    files: 1,
+    folders: 0,
+    size: 1,
+    disc_files: 0,
+    truncated: false,
+    verified: true,
+    scan: {
+      engine: '',
+      signatures_at: null,
+      scanned: 0,
+      skipped: null,
+      limit: 0,
+      detections: null,
+      at: null,
+      cleared_at: null,
+    },
+    discs: null,
+    created: '2026-10-11T00:00:00.000Z',
+  })
+
+  it('keeps the volumes of one archive together and every other file by itself', () => {
+    const files = [
+      { name: 'game.part1.rar', inspection_id: 7 },
+      { name: 'bonus.zip', inspection_id: 8 },
+      { name: 'game.part2.rar', inspection_id: 7 },
+      { name: 'old.7z', inspection_id: null },
+      { name: 'older.7z', inspection_id: null },
+      { name: 'swept.7z', inspection_id: 99 },
+    ]
+    const groups = fileGroups(files, [inspected(7), inspected(8)])
+    expect(groups.map(group => group.files.map(file => file.name))).toEqual([
+      ['game.part1.rar', 'game.part2.rar'],
+      ['bonus.zip'],
+      ['old.7z'],
+      ['older.7z'],
+      ['swept.7z'],
+    ])
+    expect(groups.map(group => group.inspection?.id)).toEqual([
+      7,
+      8,
+      undefined,
+      undefined,
+      undefined,
+    ])
   })
 })
