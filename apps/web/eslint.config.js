@@ -78,6 +78,19 @@ const ghostOnEdge = {
     'A ghost button on an edge shows its padding as a misalignment: use outline for an action that stands alone, a hina-ui Link for a way back, or add flushStart / flushEnd (~/shared/ui/flush) through cn so its content meets the edge.',
 }
 
+const ownWidth = {
+  selector:
+    'Literal[value=/(?=.*(?:^|[\\s:])mx-auto(?:\\s|$))(?=.*(?:^|[\\s:])max-w-)/], TemplateElement[value.raw=/(?=.*(?:^|[\\s:])mx-auto(?:\\s|$))(?=.*(?:^|[\\s:])max-w-)/]',
+  message:
+    "A page fills the shell's container. Only the pages listed in ownWidthPages set a width of their own and centre it.",
+}
+
+const ownWidthPages = [
+  'app/features/resource/ui/upload-page.tsx',
+  'app/features/profile/ui/profile-page.tsx',
+  'app/features/auth/ui/password-reset-panel.tsx',
+]
+
 const mountedFeedback = {
   selector:
     ':matches(LogicalExpression, ConditionalExpression) > JSXElement > JSXOpeningElement > JSXIdentifier[name=/^(Alert|Callout|Banner)$/]',
@@ -126,6 +139,7 @@ const appSyntax = [
   hinaInternals,
   nativeScroll,
   ghostOnEdge,
+  ownWidth,
   directFetcher,
   rawAddress,
   pagedListStart,
@@ -517,6 +531,12 @@ export default defineConfig([
         pureShared,
         withoutRoutes,
       ),
+    },
+  },
+  {
+    files: ownWidthPages,
+    rules: {
+      'no-restricted-syntax': ['error', ...appSyntax.filter(rule => rule !== ownWidth)],
     },
   },
 ])

@@ -38,7 +38,7 @@ export function CommentsView({ comments, writer }: CommentsViewProps) {
   const location = useLocation()
   const { gameId, threads, total, page, order } = comments
   return (
-    <Stack as="section" gap="xl" className="mx-auto w-full max-w-3xl">
+    <Stack as="section" gap="xl">
       {writer === undefined ? (
         <GuestComment onSignedIn={() => setInvited(true)} />
       ) : (

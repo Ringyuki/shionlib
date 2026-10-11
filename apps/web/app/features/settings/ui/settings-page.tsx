@@ -12,7 +12,7 @@ type SettingsPageProps = {
 export function SettingsPage({ signedIn, children }: SettingsPageProps) {
   const t = useTranslations('settings')
   return (
-    <Stack gap="lg" className="mx-auto w-full max-w-4xl">
+    <Stack gap="lg">
       <PageHeader title={t('title')} />
       {signedIn ? (
         <Grid className="items-start gap-6 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-8">

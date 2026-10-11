@@ -48,7 +48,7 @@ export function WritingDesk({ writing }: { writing: Writing }) {
     onPublish: () => void writer.publish(),
   }
   return (
-    <Stack gap="lg" className="mx-auto w-full max-w-284 flex-1">
+    <Stack gap="lg" className="flex-1">
       <WritingHeader
         game={writing.game}
         stored={writer.walkthroughId !== undefined}
