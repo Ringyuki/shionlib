@@ -12,7 +12,8 @@
     "favorites": "Favorites",
     "comments": "Comments",
     "walkthroughs": "Walkthroughs",
-    "manageUploads": "Manage my uploads"
+    "manageUploads": "Manage my uploads",
+    "manageFavorites": "Manage my favorites"
   },
   "uploads": {
     "label": "Uploaded resources",

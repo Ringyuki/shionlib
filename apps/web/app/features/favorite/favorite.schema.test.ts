@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { firstIssueMessage, parseOptional } from '~/shared/form/check'
 import { createFormKit } from '~/shared/form/form-kit'
-import { listForm, membershipChangeCommand } from './favorite.schema'
+import { listForm, membershipChangeCommand, noteForm } from './favorite.schema'
 
 describe('membershipChangeCommand', () => {
   it('accepts a complete change', () => {
@@ -31,5 +31,15 @@ describe('listForm', () => {
     expect(firstIssueMessage(form, { ...valid, name: '  ' })).toBe('required')
     expect(firstIssueMessage(form, { ...valid, name: '汐'.repeat(300) })).toBe('maxLength')
     expect(firstIssueMessage(form, { ...valid, description: '汐'.repeat(2001) })).toBe('maxLength')
+  })
+})
+
+describe('noteForm', () => {
+  const form = noteForm(createFormKit(issue => issue.kind))
+
+  it('takes an empty note and one within the API limit', () => {
+    expect(firstIssueMessage(form, { note: '' })).toBeUndefined()
+    expect(firstIssueMessage(form, { note: '等汉化补丁' })).toBeUndefined()
+    expect(firstIssueMessage(form, { note: '汐'.repeat(2001) })).toBe('maxLength')
   })
 })

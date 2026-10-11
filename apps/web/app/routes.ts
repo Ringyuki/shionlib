@@ -13,6 +13,7 @@ export default [
   route('resources/favorites/lists', 'routes/resources.favorites.lists.ts'),
   route('resources/favorites/list-edit', 'routes/resources.favorites.list-edit.ts'),
   route('resources/favorites/list-remove', 'routes/resources.favorites.list-remove.ts'),
+  route('resources/favorites/item-note', 'routes/resources.favorites.item-note.ts'),
   route('resources/auth/sign-in', 'routes/resources.auth.sign-in.ts'),
   route('resources/auth/sign-up', 'routes/resources.auth.sign-up.ts'),
   route('resources/auth/sign-up-code', 'routes/resources.auth.sign-up-code.ts'),
@@ -58,6 +59,7 @@ export default [
         route('search', 'routes/search.tsx'),
         route('upload', 'routes/upload.tsx'),
         route('user/uploads', 'routes/uploads.tsx'),
+        route('user/favorites/:listId?', 'routes/favorites.tsx'),
         route('user/settings', 'routes/settings.tsx', [
           index('routes/settings.index.ts'),
           route('personal', 'routes/settings.personal.tsx'),

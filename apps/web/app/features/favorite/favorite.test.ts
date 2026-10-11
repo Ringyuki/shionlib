@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import type { Schema } from '~/shared/api/types'
-import { chosenList, favoritesPath, isInAnyList, listLabel, shownGameCount } from './favorite'
+import {
+  chosenList,
+  favoritesPath,
+  isInAnyList,
+  listLabel,
+  publicLists,
+  showcasePath,
+  shownGameCount,
+} from './favorite'
 
 const list = (id: number, isFavorite?: boolean): Schema<'FavoriteSummaryDTO'> => ({
   default: id === 1,
@@ -29,9 +37,16 @@ describe('shownGameCount', () => {
 })
 
 describe('favorites page', () => {
-  it('addresses the lists of a user and one list among them', () => {
-    expect(favoritesPath('zh', 3)).toBe('/zh/user/3/favorites')
-    expect(favoritesPath('ja', 3, 8)).toBe('/ja/user/3/favorites/8')
+  it('addresses the viewer own lists apart from the lists a profile shows', () => {
+    expect(favoritesPath('zh')).toBe('/zh/user/favorites')
+    expect(favoritesPath('ja', 8)).toBe('/ja/user/favorites/8')
+    expect(showcasePath('zh', 3)).toBe('/zh/user/3/favorites')
+    expect(showcasePath('ja', 3, 8)).toBe('/ja/user/3/favorites/8')
+  })
+
+  it('shows only the public lists on a profile', () => {
+    const lists = [list(1), { ...list(4), is_private: true }, list(7)]
+    expect(publicLists(lists).map(shown => shown.id)).toEqual([1, 7])
   })
 
   it('opens the named list, or the default one when none is named', () => {

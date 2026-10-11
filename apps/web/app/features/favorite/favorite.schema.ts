@@ -26,6 +26,10 @@ export const listRemovalCommand = v.object({ listId: id })
 
 export type ListRemoval = v.InferOutput<typeof listRemovalCommand>
 
+export const noteChangeCommand = v.object({ itemId: id, note: v.string() })
+
+export type NoteChange = v.InferOutput<typeof noteChangeCommand>
+
 export function listForm(kit: FormKit) {
   return v.object({
     name: kit.text('CreateFavoriteInputBody', 'name'),
@@ -35,3 +39,9 @@ export function listForm(kit: FormKit) {
 }
 
 export type ListValues = v.InferInput<ReturnType<typeof listForm>>
+
+export function noteForm(kit: FormKit) {
+  return v.object({ note: kit.text('UpdateFavoriteItemInputBody', 'note') })
+}
+
+export type NoteValues = v.InferInput<ReturnType<typeof noteForm>>

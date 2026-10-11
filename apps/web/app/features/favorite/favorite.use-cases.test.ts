@@ -3,11 +3,13 @@ import { fakeApi } from '~/shared/api/testing'
 import type { ApiData, Schema } from '~/shared/api/types'
 import {
   changeMembership,
+  changeNote,
   createList,
   editList,
   isFavorite,
   loadFavoriteLists,
   loadFavorites,
+  loadShowcase,
   removeList,
 } from './favorite.use-cases'
 
@@ -80,40 +82,74 @@ describe('changeMembership', () => {
 })
 
 describe('loadFavorites', () => {
-  it('loads the lists of the owner and the games of the chosen one', async () => {
+  it('loads the lists of the viewer and the games of the chosen one', async () => {
     const fake = fakeApi()
       .on('get', '/favorites', [list(4), list(7, true)])
       .on('get', '/favorites/{id}/items', page)
-    await expect(loadFavorites(fake.api, 3, 4, 2)).resolves.toMatchObject({
-      owner: 3,
+    await expect(loadFavorites(fake.api, 4, 2)).resolves.toMatchObject({
       selected: { id: 4 },
       items: [],
       total: 21,
       page: 2,
     })
     const [lists, items] = fake.requests.map(request => new URL(request.url))
-    expect(lists?.searchParams.get('user_id')).toBe('3')
+    expect(lists?.search).toBe('')
     expect(items?.pathname).toBe('/favorites/4/items')
-    expect(Object.fromEntries(items?.searchParams ?? [])).toEqual({ page: '2', pageSize: '24' })
+    expect(Object.fromEntries(items?.searchParams ?? [])).toEqual({ page: '2', pageSize: '20' })
   })
 
   it('opens the default list when none is named', async () => {
     const fake = fakeApi()
       .on('get', '/favorites', [list(4), list(7, true)])
       .on('get', '/favorites/{id}/items', page)
-    await expect(loadFavorites(fake.api, 3, undefined, 1)).resolves.toMatchObject({
+    await expect(loadFavorites(fake.api, undefined, 1)).resolves.toMatchObject({
       selected: { id: 7 },
     })
   })
 
-  it('asks for no games when the list is not among those the viewer may see', async () => {
+  it('asks for no games when the list is not one of the viewer', async () => {
     const fake = fakeApi().on('get', '/favorites', [list(4)])
-    await expect(loadFavorites(fake.api, 3, 9, 1)).resolves.toMatchObject({
+    await expect(loadFavorites(fake.api, 9, 1)).resolves.toMatchObject({
       selected: undefined,
       items: [],
       total: 0,
     })
     expect(fake.requests).toHaveLength(1)
+  })
+})
+
+describe('loadShowcase', () => {
+  const secret = { ...list(5), is_private: true }
+
+  it('shows the public lists of a user, also to the user themself', async () => {
+    const fake = fakeApi()
+      .on('get', '/favorites', [list(7, true), secret, list(4)])
+      .on('get', '/favorites/{id}/items', page)
+    const showcase = await loadShowcase(fake.api, 3, undefined, 1)
+    expect(showcase.owner).toBe(3)
+    expect(showcase.lists.map(shown => shown.id)).toEqual([7, 4])
+    expect(showcase.selected?.id).toBe(7)
+    const [lists, items] = fake.requests.map(request => new URL(request.url))
+    expect(lists?.searchParams.get('user_id')).toBe('3')
+    expect(Object.fromEntries(items?.searchParams ?? [])).toEqual({ page: '1', pageSize: '24' })
+  })
+
+  it('does not open a private list by its address', async () => {
+    const fake = fakeApi().on('get', '/favorites', [list(7, true), secret])
+    await expect(loadShowcase(fake.api, 3, 5, 1)).resolves.toMatchObject({
+      selected: undefined,
+      items: [],
+    })
+    expect(fake.requests).toHaveLength(1)
+  })
+})
+
+describe('changeNote', () => {
+  it('saves the note of an item', async () => {
+    const fake = fakeApi().on('patch', '/favorites/items/{item_id}', undefined)
+    await changeNote(fake.api, { itemId: 12, note: ' 等汉化补丁 ' })
+    expect(new URL(fake.requests[0]?.url ?? '').pathname).toBe('/favorites/items/12')
+    await expect(fake.requests[0]?.json()).resolves.toEqual({ note: '等汉化补丁' })
   })
 })
 

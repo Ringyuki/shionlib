@@ -12,7 +12,8 @@
     "favorites": "お気に入り",
     "comments": "コメント",
     "walkthroughs": "攻略",
-    "manageUploads": "アップロードを管理"
+    "manageUploads": "アップロードを管理",
+    "manageFavorites": "お気に入りを管理"
   },
   "uploads": {
     "label": "アップロードしたリソース",

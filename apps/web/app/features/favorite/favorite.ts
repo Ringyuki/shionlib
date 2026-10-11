@@ -6,7 +6,6 @@ export type FavoriteList = Schema<'FavoriteSummaryDTO'>
 export type FavoriteItem = Schema<'FavoriteItemDTO'>
 
 export type Favorites = {
-  owner: number
   lists: FavoriteList[]
   selected: FavoriteList | undefined
   items: FavoriteItem[]
@@ -14,7 +13,11 @@ export type Favorites = {
   page: number
 }
 
-export const itemsPageSize = 24
+export type Showcase = Favorites & { owner: number }
+
+export const itemsPageSize = 20
+
+export const showcasePageSize = 24
 
 export function isInAnyList(lists: readonly FavoriteList[]): boolean {
   return lists.some(list => list.is_favorite === true)
@@ -25,9 +28,18 @@ export function shownGameCount(list: FavoriteList, included: boolean): number {
   return list.game_count + (included === was ? 0 : included ? 1 : -1)
 }
 
-export function favoritesPath(locale: Locale, userId: number, listId?: number): string {
+export function favoritesPath(locale: Locale, listId?: number): string {
+  const base = `/${locale}/user/favorites`
+  return listId === undefined ? base : `${base}/${listId}`
+}
+
+export function showcasePath(locale: Locale, userId: number, listId?: number): string {
   const base = `/${locale}/user/${userId}/favorites`
   return listId === undefined ? base : `${base}/${listId}`
+}
+
+export function publicLists(lists: readonly FavoriteList[]): FavoriteList[] {
+  return lists.filter(list => !list.is_private)
 }
 
 export function chosenList(

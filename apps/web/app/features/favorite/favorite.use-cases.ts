@@ -1,28 +1,62 @@
 import type { ApiClient } from '~/shared/api/client'
 import { ApiError } from '~/shared/api/error'
-import { chosenList, itemsPageSize, type Favorites } from './favorite'
-import type { ListCreation, ListEdit, ListRemoval, MembershipChange } from './favorite.schema'
+import {
+  chosenList,
+  itemsPageSize,
+  publicLists,
+  showcasePageSize,
+  type FavoriteList,
+  type Favorites,
+  type Showcase,
+} from './favorite'
+import type {
+  ListCreation,
+  ListEdit,
+  ListRemoval,
+  MembershipChange,
+  NoteChange,
+} from './favorite.schema'
 
 export async function loadFavoriteLists(api: ApiClient, gameId: number) {
   const lists = await api.get('/favorites', { params: { query: { game_id: gameId } } })
   return lists ?? []
 }
 
+async function listContent(
+  api: ApiClient,
+  lists: FavoriteList[],
+  listId: number | undefined,
+  page: number,
+  pageSize: number,
+): Promise<Favorites> {
+  const selected = chosenList(lists, listId)
+  if (selected === undefined) {
+    return { lists, selected, items: [], total: 0, page }
+  }
+  const found = await api.get('/favorites/{id}/items', {
+    params: { path: { id: selected.id }, query: { page, pageSize } },
+  })
+  return { lists, selected, items: found.items ?? [], total: found.meta.totalItems, page }
+}
+
 export async function loadFavorites(
+  api: ApiClient,
+  listId: number | undefined,
+  page: number,
+): Promise<Favorites> {
+  const lists = (await api.get('/favorites')) ?? []
+  return listContent(api, lists, listId, page, itemsPageSize)
+}
+
+export async function loadShowcase(
   api: ApiClient,
   owner: number,
   listId: number | undefined,
   page: number,
-): Promise<Favorites> {
+): Promise<Showcase> {
   const lists = (await api.get('/favorites', { params: { query: { user_id: owner } } })) ?? []
-  const selected = chosenList(lists, listId)
-  if (selected === undefined) {
-    return { owner, lists, selected, items: [], total: 0, page }
-  }
-  const found = await api.get('/favorites/{id}/items', {
-    params: { path: { id: selected.id }, query: { page, pageSize: itemsPageSize } },
-  })
-  return { owner, lists, selected, items: found.items ?? [], total: found.meta.totalItems, page }
+  const shown = await listContent(api, publicLists(lists), listId, page, showcasePageSize)
+  return { ...shown, owner }
 }
 
 export async function isFavorite(api: ApiClient, gameId: number): Promise<boolean> {
@@ -83,5 +117,13 @@ export async function editList(api: ApiClient, edit: ListEdit) {
 
 export async function removeList(api: ApiClient, removal: ListRemoval) {
   await api.delete('/favorites/{id}', { params: { path: { id: removal.listId } } })
+  return null
+}
+
+export async function changeNote(api: ApiClient, change: NoteChange) {
+  await api.patch('/favorites/items/{item_id}', {
+    params: { path: { item_id: change.itemId } },
+    body: { note: change.note.trim() },
+  })
   return null
 }

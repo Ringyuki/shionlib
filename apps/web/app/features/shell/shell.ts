@@ -43,6 +43,7 @@ export function sitePaths(locale: Locale) {
     releases: `/${locale}/release`,
     upload: `/${locale}/upload`,
     uploads: `/${locale}/user/uploads`,
+    favorites: `/${locale}/user/favorites`,
     uploading: `/${locale}/user/uploads?status=uploading`,
     profile: (userId: number) => `/${locale}/user/${userId}`,
     settings: `/${locale}/user/settings`,
@@ -71,7 +72,7 @@ export function navSections(locale: Locale, viewerId: number | null, unread = 0)
     {
       key: 'mine',
       entries: [
-        entry('favorites', `${paths.profile(viewerId)}/favorites`),
+        entry('favorites', paths.favorites),
         entry('uploads', paths.uploads),
         entry('messages', `/${locale}/message`, false, unread),
         entry('settings', paths.settings),

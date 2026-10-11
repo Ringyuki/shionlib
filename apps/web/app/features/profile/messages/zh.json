@@ -12,7 +12,8 @@
     "favorites": "收藏夹",
     "comments": "评论",
     "walkthroughs": "攻略",
-    "manageUploads": "管理我的上传"
+    "manageUploads": "管理我的上传",
+    "manageFavorites": "管理我的收藏"
   },
   "uploads": {
     "label": "上传的资源",

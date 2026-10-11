@@ -13,10 +13,21 @@ type ProfileTabsProps = {
   children: ReactNode
 }
 
+type Paths = ReturnType<typeof sitePaths>
+
+const managedFrom: Partial<
+  Record<ProfileTab, (paths: Paths) => { to: string; label: 'manageUploads' | 'manageFavorites' }>
+> = {
+  uploads: paths => ({ to: paths.uploads, label: 'manageUploads' }),
+  favorites: paths => ({ to: paths.favorites, label: 'manageFavorites' }),
+}
+
 export function ProfileTabs({ profile, own, tabs, children }: ProfileTabsProps) {
   const t = useTranslations('profile.tabs')
   const locale = useLocale()
   const format = useFormatter()
+  const paths = sitePaths(locale)
+  const managed = managedFrom[tabs.current]?.(paths)
   return (
     <Tabs
       value={tabs.current}
@@ -40,10 +51,10 @@ export function ProfileTabs({ profile, own, tabs, children }: ProfileTabsProps) 
             </TabsTrigger>
           ))}
         </TabsList>
-        {own && tabs.current === 'uploads' && (
+        {own && managed !== undefined && (
           <Flex align="center" className="border-line shrink-0 border-b pe-4 sm:pe-6">
             <Link asChild className="text-sm">
-              <RouterLink to={sitePaths(locale).uploads}>{t('manageUploads')}</RouterLink>
+              <RouterLink to={managed.to}>{t(managed.label)}</RouterLink>
             </Link>
           </Flex>
         )}

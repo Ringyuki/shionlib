@@ -1,19 +1,22 @@
 import { DataList, Empty, toast } from '@hina-ui/react'
+import type { ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import { gameTitle } from '~/features/game'
 import { listStart } from '~/shared/http/paging'
 import { usePageTurn } from '~/shared/route/use-page-turn'
+import { entryList } from '~/shared/ui/entry-link'
 import { itemsPageSize, type FavoriteItem, type Favorites } from '../favorite'
 import { useItemRemoval } from '../use-item-removal'
-import { FavoriteTile } from './favorite-tile'
+import { FavoriteEntry } from './favorite-entry'
 
 type FavoriteItemsProps = {
   favorites: Favorites
   listId: number
-  own: boolean
+  header: ReactNode
+  onEditNote: (item: FavoriteItem) => void
 }
 
-export function FavoriteItems({ favorites, listId, own }: FavoriteItemsProps) {
+export function FavoriteItems({ favorites, listId, header, onEditNote }: FavoriteItemsProps) {
   const t = useTranslations('favorite')
   const locale = useLocale()
   const pages = usePageTurn()
@@ -33,9 +36,8 @@ export function FavoriteItems({ favorites, listId, own }: FavoriteItemsProps) {
       className="scroll-mt-4"
       items={favorites.items}
       itemKey="id"
-      layout="grid"
-      contentClass="grid-cols-3 gap-x-1 gap-y-3 sm:grid-cols-4 xl:grid-cols-6"
-      minHeight={0}
+      divided={false}
+      itemClass={entryList.item}
       manual
       pagination
       total={favorites.total}
@@ -43,10 +45,15 @@ export function FavoriteItems({ favorites, listId, own }: FavoriteItemsProps) {
       pageSize={itemsPageSize}
       onPageChange={pages.turnTo}
       loading={pages.turning || removal.pending}
+      renderHeader={() => header}
       renderEmpty={() => <Empty title={t('emptyList')} size="sm" />}
     >
       {({ item }) => (
-        <FavoriteTile item={item} onRemove={own ? () => void remove(item) : undefined} />
+        <FavoriteEntry
+          item={item}
+          onEditNote={() => onEditNote(item)}
+          onRemove={() => void remove(item)}
+        />
       )}
     </DataList>
   )

@@ -9,7 +9,7 @@ describe('navSections', () => {
   it('adds the viewer library for signed-in users', () => {
     const mine = navSections('en', 7).find(section => section.key === 'mine')
     expect(mine?.entries.map(entry => entry.to)).toEqual([
-      '/en/user/7/favorites',
+      '/en/user/favorites',
       '/en/user/uploads',
       '/en/message',
       '/en/user/settings',

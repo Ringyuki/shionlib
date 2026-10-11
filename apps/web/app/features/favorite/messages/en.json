@@ -31,10 +31,19 @@
   "listRemoved": "List deleted",
   "listActions": "List actions",
   "itemActionsOf": "Actions for {title}",
+  "editNote": "Edit note",
+  "note": "Note",
+  "noteHint": "Optional, up to {max} characters",
+  "noteSaved": "Note saved",
   "removeItem": "Remove from list",
   "itemRemoved": "Removed \"{title}\" from the list",
   "undo": "Undo",
+  "added": "Added {date}",
   "emptyList": "This list has no games yet",
   "noListsOwn": "You have not created any lists yet",
-  "noListsPublic": "This user has no public lists"
+  "noListsPublic": "This user has no public lists",
+  "mine": "My favorites",
+  "signIn": "Sign in to see and manage your favorites",
+  "signInAction": "Sign in",
+  "noListsPublicOwn": "You have no public lists yet"
 }
