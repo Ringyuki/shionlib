@@ -4,7 +4,7 @@ Go backend for Shionlib. See [docs/architecture.md](docs/architecture.md) for th
 
 ## Requirements
 
-Go 1.27, PostgreSQL 16+, Redis 7+, golangci-lint v2.14.
+Go 1.27, PostgreSQL 17, Redis 7+, golangci-lint v2.14.
 
 ## Run locally
 

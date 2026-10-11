@@ -33,7 +33,7 @@ Subcommands: `serve` (HTTP; also runs jobs when `WORKERS_ENABLED=true`), `worker
 
 `api` and `worker` share the `uploads` and `scan-logs` volumes: chunked uploads land on disk through `api` and are scanned and transferred to object storage by `worker`. Both must run on the same Docker host. Size the host disk for concurrent uploads (up to the `upload.max_file_size` setting each). `UPLOADS_VOLUME` puts the upload spool somewhere else than the `uploads` volume: set it to a host directory owned by uid `10001` (the image's `shionlib` user) to keep the spool on a disk of its own.
 
-Postgres and Redis are external. Point `DATABASE_URL`, `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`, `REDIS_DB` at them. An environment that has none of its own runs `infra/compose.data.yml` as a second compose project: Postgres 16 and Redis 7, published on `DATA_BIND_ADDRESS` only (the host's private address, never `0.0.0.0`), with `POSTGRES_PASSWORD` and `REDIS_PASSWORD` required and `POSTGRES_VOLUME`/`REDIS_VOLUME` to keep the data in a host directory.
+Postgres and Redis are external. Point `DATABASE_URL`, `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`, `REDIS_DB` at them. Production runs PostgreSQL 17, and so do CI, the e2e stack and staging: the image's `pg_dump` is version 17 and cannot back up a newer server, and a version 16 `pg_restore` cannot read the backups it writes. An environment that has none of its own runs `infra/compose.data.yml` as a second compose project: Postgres 17 and Redis 7, published on `DATA_BIND_ADDRESS` only (the host's private address, never `0.0.0.0`), with `POSTGRES_PASSWORD` and `REDIS_PASSWORD` required and `POSTGRES_VOLUME`/`REDIS_VOLUME` to keep the data in a host directory.
 
 ## Environment
 

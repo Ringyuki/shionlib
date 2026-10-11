@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: ${POSTGRES_IMAGE:-postgres:16}
+    image: ${POSTGRES_IMAGE:-postgres:17}
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-shionlib}
