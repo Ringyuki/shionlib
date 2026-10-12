@@ -161,6 +161,20 @@ func (_u *InspectionUpdate) SetNillableNameEncoding(v *string) *InspectionUpdate
 	return _u
 }
 
+// SetUnsupportedMethod sets the "unsupported_method" field.
+func (_u *InspectionUpdate) SetUnsupportedMethod(v bool) *InspectionUpdate {
+	_u.mutation.SetUnsupportedMethod(v)
+	return _u
+}
+
+// SetNillableUnsupportedMethod sets the "unsupported_method" field if the given value is not nil.
+func (_u *InspectionUpdate) SetNillableUnsupportedMethod(v *bool) *InspectionUpdate {
+	if v != nil {
+		_u.SetUnsupportedMethod(*v)
+	}
+	return _u
+}
+
 // SetFileCount sets the "file_count" field.
 func (_u *InspectionUpdate) SetFileCount(v int) *InspectionUpdate {
 	_u.mutation.ResetFileCount()
@@ -643,6 +657,9 @@ func (_u *InspectionUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	if value, ok := _u.mutation.NameEncoding(); ok {
 		_spec.SetField(inspection.FieldNameEncoding, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.UnsupportedMethod(); ok {
+		_spec.SetField(inspection.FieldUnsupportedMethod, field.TypeBool, value)
+	}
 	if value, ok := _u.mutation.FileCount(); ok {
 		_spec.SetField(inspection.FieldFileCount, field.TypeInt, value)
 	}
@@ -995,6 +1012,20 @@ func (_u *InspectionUpdateOne) SetNameEncoding(v string) *InspectionUpdateOne {
 func (_u *InspectionUpdateOne) SetNillableNameEncoding(v *string) *InspectionUpdateOne {
 	if v != nil {
 		_u.SetNameEncoding(*v)
+	}
+	return _u
+}
+
+// SetUnsupportedMethod sets the "unsupported_method" field.
+func (_u *InspectionUpdateOne) SetUnsupportedMethod(v bool) *InspectionUpdateOne {
+	_u.mutation.SetUnsupportedMethod(v)
+	return _u
+}
+
+// SetNillableUnsupportedMethod sets the "unsupported_method" field if the given value is not nil.
+func (_u *InspectionUpdateOne) SetNillableUnsupportedMethod(v *bool) *InspectionUpdateOne {
+	if v != nil {
+		_u.SetUnsupportedMethod(*v)
 	}
 	return _u
 }
@@ -1510,6 +1541,9 @@ func (_u *InspectionUpdateOne) sqlSave(ctx context.Context) (_node *Inspection, 
 	}
 	if value, ok := _u.mutation.NameEncoding(); ok {
 		_spec.SetField(inspection.FieldNameEncoding, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.UnsupportedMethod(); ok {
+		_spec.SetField(inspection.FieldUnsupportedMethod, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.FileCount(); ok {
 		_spec.SetField(inspection.FieldFileCount, field.TypeInt, value)

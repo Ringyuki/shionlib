@@ -32,3 +32,11 @@ func TestContainersAreArchivesAndDiscImages(t *testing.T) {
 		}
 	}
 }
+
+func TestADraftHoldsOnlyNamesThatAreText(t *testing.T) {
+	var draft inspection.Draft
+	index := draft.AddTop(inspection.DraftEntry{Name: "DISC\x00\xb2\xdd.BIN", Kind: inspection.KindFile})
+	if got := draft.Entries[index].Name; got != "DISC\uFFFD.BIN" {
+		t.Fatalf("got %q", got)
+	}
+}

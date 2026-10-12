@@ -13,6 +13,7 @@ type inspectionArchiveDTO struct {
 	Recovery        bool   `json:"recovery" doc:"Whether the archive carries a recovery record"`
 	RecoveryPercent int    `json:"recovery_percent" doc:"Size of the recovery record relative to the data, in percent; 0 when the format does not tell"`
 	NameEncoding    string `json:"name_encoding" doc:"The legacy encoding its file names were stored in (shift_jis, gbk, big5); empty when they are Unicode"`
+	Unsupported     bool   `json:"unsupported" doc:"7-Zip cannot unpack the compression method the archive uses: what it holds is listed, but was neither tested nor scanned"`
 }
 
 type inspectionDetectionDTO struct {
@@ -146,6 +147,7 @@ func toInspectionDTO(view inspection.View) inspectionDTO {
 			Recovery:        view.Archive.Recovery,
 			RecoveryPercent: view.Archive.RecoveryPercent,
 			NameEncoding:    view.Archive.NameEncoding,
+			Unsupported:     view.Archive.Unsupported,
 		},
 		Files:     view.Totals.Files,
 		Folders:   view.Totals.Folders,

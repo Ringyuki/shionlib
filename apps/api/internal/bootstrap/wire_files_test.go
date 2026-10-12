@@ -417,6 +417,42 @@ func TestAHeldUploadKeepsWhatWasDetectedUntilItIsCleared(t *testing.T) {
 	}
 }
 
+func TestNamesOnADiscThatAreNotUnicodeAreReadAsJapanese(t *testing.T) {
+	binary := sevenZip(t)
+	line := newCheckLine(t, binary)
+	disc := discimagetest.Build(discimagetest.Options{Label: "RURIIRO", PrimaryOnly: true},
+		discimagetest.File{Path: "RURIIRO/\x82\x78\x82\x74\x82\x79\x82\x6e.\x93\xc7", Data: []byte("yuzo")},
+		discimagetest.File{Path: "\xb2\xdd\xbd\xc4\xb0\xd7.PIF", Data: []byte("installer")},
+		discimagetest.File{Path: "SETUP.EXE", Data: []byte("MZ setup")},
+	)
+	archive := pack(t, binary, t.TempDir(), "game.7z", map[string][]byte{"Game/RURI.iso": disc})
+	resourceID, fileID := line.upload(t, archive)
+	ctx := context.Background()
+	if err := line.scans.ScanPending(ctx); err != nil {
+		t.Fatal(err)
+	}
+	row := line.db.Ent.GameDownloadResourceFile.GetX(ctx, fileID)
+	if row.FileCheckStatus != int(download.CheckOK) || row.InspectionID == nil {
+		t.Fatalf("unexpected file row %+v", row)
+	}
+	line.visible.Visible[resourceID] = []int{*row.InspectionID}
+	views, err := line.inspections.OfResource(ctx, actor.Actor{}, resourceID)
+	if err != nil || len(views) != 1 || len(views[0].Discs) != 1 {
+		t.Fatalf("views: %+v %v", views, err)
+	}
+	image := views[0].Discs[0]
+	if image.Unreadable || image.Detail.Format != "iso9660" || image.Detail.Files != 3 || image.Detail.Folders != 1 || views[0].Scan.Scanned != 1 {
+		t.Fatalf("unexpected image %+v scan %+v", image, views[0].Scan)
+	}
+	inside := listed(t, line, views[0].ID, &image.ID)
+	if !slices.Equal(named(inside), []string{"folder RURIIRO", "file SETUP.EXE", "file ｲﾝｽﾄｰﾗ.PIF"}) {
+		t.Fatalf("unexpected entries of the image %q", named(inside))
+	}
+	if deeper := listed(t, line, views[0].ID, &inside[0].ID); !slices.Equal(named(deeper), []string{"file ＹＵＺＯ.読"}) {
+		t.Fatalf("unexpected folder inside the image %q", named(deeper))
+	}
+}
+
 func TestDiscImagesInsideAnUploadAreReadLikeFolders(t *testing.T) {
 	binary := sevenZip(t)
 	line := newCheckLine(t, binary)

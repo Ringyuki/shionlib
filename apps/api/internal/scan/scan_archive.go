@@ -7,11 +7,17 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 )
 
-const listedTimeLayout = "2006-01-02 15:04:05"
+const (
+	listedTimeLayout = "2006-01-02 15:04:05"
+	escapedByteBase  = 0xEF00
+	escapedByteFirst = 0xEF80
+	escapedByteLast  = 0xEFFF
+)
 
 type ToolRun struct {
 	Stdout   string
@@ -52,10 +58,11 @@ var bufferOverflow = regexp.MustCompile(`(?i)maxBuffer|stdout maxBuffer exceeded
 var timedOut = regexp.MustCompile(`(?i)ETIMEDOUT|timeout`)
 
 type Archive struct {
-	Status   download.CheckStatus
-	Facts    ArchiveFacts
-	Entries  []ArchiveEntry
-	Verified bool
+	Status      download.CheckStatus
+	Facts       ArchiveFacts
+	Entries     []ArchiveEntry
+	Verified    bool
+	Unsupported bool
 }
 
 type ArchiveFacts struct {
@@ -87,7 +94,13 @@ func InspectArchive(ctx context.Context, tool ArchiveTool, path string) (Archive
 		return Archive{}, err
 	}
 	status, verified := classifyTest(test)
-	return Archive{Status: status, Facts: listedFacts(listing.Stdout), Entries: listedEntries(listing.Stdout), Verified: verified}, nil
+	return Archive{
+		Status:      status,
+		Facts:       listedFacts(listing.Stdout),
+		Entries:     listedEntries(listing.Stdout),
+		Verified:    verified,
+		Unsupported: status == download.CheckOK && test.Failed && (unsupported.MatchString(test.Stdout) || unsupported.MatchString(test.Stderr)),
+	}, nil
 }
 
 func InspectNested(ctx context.Context, tool ArchiveTool, path string) (Archive, error) {
@@ -99,6 +112,18 @@ func InspectNested(ctx context.Context, tool ArchiveTool, path string) (Archive,
 		return Archive{Status: status}, nil
 	}
 	return Archive{Status: download.CheckOK, Facts: listedFacts(listing.Stdout), Entries: listedEntries(listing.Stdout)}, nil
+}
+
+func InspectDisc(ctx context.Context, tool ArchiveTool, path string) (Archive, error) {
+	listing, err := tool.List(ctx, path)
+	if err != nil {
+		return Archive{}, err
+	}
+	entries := listedEntries(listing.Stdout)
+	if status, decided := classifyListing(listing); decided && (status == download.CheckEncrypted || len(entries) == 0) {
+		return Archive{Status: status}, nil
+	}
+	return Archive{Status: download.CheckOK, Facts: listedFacts(listing.Stdout), Entries: entries}, nil
 }
 
 func properties(block string) func(yield func(key, value string) bool) {
@@ -146,6 +171,20 @@ func listedFacts(stdout string) ArchiveFacts {
 		}
 	}
 	return facts
+}
+
+func writtenName(listed string) string {
+	var out strings.Builder
+	for at := 0; at < len(listed); {
+		char, size := utf8.DecodeRuneInString(listed[at:])
+		if char >= escapedByteFirst && char <= escapedByteLast {
+			out.WriteByte(byte(char - escapedByteBase))
+		} else {
+			out.WriteString(listed[at : at+size])
+		}
+		at += size
+	}
+	return out.String()
 }
 
 func listedEntries(stdout string) []ArchiveEntry {

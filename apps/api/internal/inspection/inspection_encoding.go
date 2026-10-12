@@ -63,6 +63,25 @@ func DetectEncoding(sample []byte) Encoding {
 	return best
 }
 
+func DetectEncodingExpecting(sample []byte, expected Encoding) Encoding {
+	detected := DetectEncoding(sample)
+	if detected == EncodingUTF8 || detected == EncodingUTF16LE || detected == EncodingUTF16BE {
+		return detected
+	}
+	if len(sample) > EncodingSampleBytes {
+		sample = sample[:EncodingSampleBytes]
+	}
+	for _, candidate := range legacyEncodings {
+		if candidate.encoding != expected {
+			continue
+		}
+		if _, valid := candidate.score(sample); valid {
+			return expected
+		}
+	}
+	return detected
+}
+
 func validUTF8(data []byte) bool {
 	for cut := 0; cut < utf8.UTFMax && cut <= len(data); cut++ {
 		if utf8.Valid(data[:len(data)-cut]) {

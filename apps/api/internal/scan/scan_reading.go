@@ -1,6 +1,8 @@
 package scan
 
 import (
+	"path/filepath"
+
 	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
 )
 
@@ -30,6 +32,7 @@ type reading struct {
 	images    int
 	nested    int
 	listed    bool
+	opaque    bool
 }
 
 type container struct {
@@ -67,6 +70,7 @@ type extraction struct {
 	nested    map[string]int
 	discs     map[string]discPlan
 	shown     map[string]string
+	targets   []string
 }
 
 func (r *reading) plan(c container, tree planted) extraction {
@@ -94,6 +98,7 @@ func (r *reading) plan(c container, tree planted) extraction {
 				r.contents.Skipped = append(r.contents.Skipped, c.label+tree.paths[i])
 			} else {
 				plan.size += entry.Size
+				plan.targets = append(plan.targets, key)
 			}
 		}
 		if !r.listed || tree.indexes[i] == inspection.TopLevel {
@@ -157,4 +162,28 @@ func (r *reading) plan(c container, tree planted) extraction {
 		plan.previews[cleanPath(entry.Path)] = PreviewSource{Entry: tree.indexes[candidate.Index], Kind: candidate.Kind}
 	}
 	return plan
+}
+
+func (r *reading) missing(c container, plan extraction, extracted []string) {
+	came := map[string]bool{}
+	for _, path := range extracted {
+		if relative, err := filepath.Rel(c.dir, path); err == nil {
+			came[cleanPath(filepath.ToSlash(relative))] = true
+		}
+	}
+	for _, key := range plan.targets {
+		if !came[key] && c.depth == 0 {
+			r.contents.Skipped = append(r.contents.Skipped, c.label+plan.shown[key])
+		}
+	}
+	for key, index := range plan.nested {
+		if !came[key] {
+			r.contents.Draft.Entries[index].Unreadable = true
+		}
+	}
+	for key, disc := range plan.discs {
+		if !came[key] {
+			r.contents.Draft.Entries[disc.index].Unreadable = true
+		}
+	}
 }

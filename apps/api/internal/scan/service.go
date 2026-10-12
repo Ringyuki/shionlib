@@ -247,6 +247,7 @@ func (s *Service) record(ctx context.Context, unit Unit, archive Archive, conten
 			Recovery:        archive.Facts.Recovery,
 			RecoveryPercent: archive.Facts.RecoveryPercent,
 			NameEncoding:    contents.NameEncoding,
+			Unsupported:     archive.Unsupported,
 		}
 	}
 	draft.Scan = inspection.Scan{

@@ -41,7 +41,7 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		id, err := env.Repo.Create(ctx, inspection.NewInspection{
 			ResourceID: resource,
 			Status:     inspection.StatusReady,
-			Archive:    inspection.Archive{Format: "rar5", Solid: true, Volumes: 3, Recovery: true, RecoveryPercent: 3, NameEncoding: "shift_jis"},
+			Archive:    inspection.Archive{Format: "rar5", Solid: true, Volumes: 3, Recovery: true, RecoveryPercent: 3, NameEncoding: "shift_jis", Unsupported: true},
 			Totals:     inspection.Totals{Files: 6, Folders: 2, Size: 2_480_000_000, Discs: 1, DiscFiles: 23},
 			Truncated:  true,
 			Verified:   true,
@@ -65,7 +65,7 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if got.ID != id || got.ResourceID != resource || got.Status != inspection.StatusReady || !got.Truncated || !got.Verified || got.Created.IsZero() {
 			t.Fatalf("unexpected inspection %+v", got)
 		}
-		if got.Archive != (inspection.Archive{Format: "rar5", Solid: true, Volumes: 3, Recovery: true, RecoveryPercent: 3, NameEncoding: "shift_jis"}) {
+		if got.Archive != (inspection.Archive{Format: "rar5", Solid: true, Volumes: 3, Recovery: true, RecoveryPercent: 3, NameEncoding: "shift_jis", Unsupported: true}) {
 			t.Fatalf("unexpected archive %+v", got.Archive)
 		}
 		if got.Totals != (inspection.Totals{Files: 6, Folders: 2, Size: 2_480_000_000, Discs: 1, DiscFiles: 23}) {

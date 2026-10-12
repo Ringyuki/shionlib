@@ -1000,54 +1000,58 @@ func init() {
 	inspection.DefaultNameEncoding = inspectionDescNameEncoding.Default.(string)
 	// inspection.NameEncodingValidator is a validator for the "name_encoding" field. It is called by the builders before save.
 	inspection.NameEncodingValidator = inspectionDescNameEncoding.Validators[0].(func(string) error)
+	// inspectionDescUnsupportedMethod is the schema descriptor for unsupported_method field.
+	inspectionDescUnsupportedMethod := inspectionFields[9].Descriptor()
+	// inspection.DefaultUnsupportedMethod holds the default value on creation for the unsupported_method field.
+	inspection.DefaultUnsupportedMethod = inspectionDescUnsupportedMethod.Default.(bool)
 	// inspectionDescFileCount is the schema descriptor for file_count field.
-	inspectionDescFileCount := inspectionFields[9].Descriptor()
+	inspectionDescFileCount := inspectionFields[10].Descriptor()
 	// inspection.DefaultFileCount holds the default value on creation for the file_count field.
 	inspection.DefaultFileCount = inspectionDescFileCount.Default.(int)
 	// inspectionDescFolderCount is the schema descriptor for folder_count field.
-	inspectionDescFolderCount := inspectionFields[10].Descriptor()
+	inspectionDescFolderCount := inspectionFields[11].Descriptor()
 	// inspection.DefaultFolderCount holds the default value on creation for the folder_count field.
 	inspection.DefaultFolderCount = inspectionDescFolderCount.Default.(int)
 	// inspectionDescUnpackedSize is the schema descriptor for unpacked_size field.
-	inspectionDescUnpackedSize := inspectionFields[11].Descriptor()
+	inspectionDescUnpackedSize := inspectionFields[12].Descriptor()
 	// inspection.DefaultUnpackedSize holds the default value on creation for the unpacked_size field.
 	inspection.DefaultUnpackedSize = inspectionDescUnpackedSize.Default.(int64)
 	// inspectionDescDiscCount is the schema descriptor for disc_count field.
-	inspectionDescDiscCount := inspectionFields[12].Descriptor()
+	inspectionDescDiscCount := inspectionFields[13].Descriptor()
 	// inspection.DefaultDiscCount holds the default value on creation for the disc_count field.
 	inspection.DefaultDiscCount = inspectionDescDiscCount.Default.(int)
 	// inspectionDescDiscFileCount is the schema descriptor for disc_file_count field.
-	inspectionDescDiscFileCount := inspectionFields[13].Descriptor()
+	inspectionDescDiscFileCount := inspectionFields[14].Descriptor()
 	// inspection.DefaultDiscFileCount holds the default value on creation for the disc_file_count field.
 	inspection.DefaultDiscFileCount = inspectionDescDiscFileCount.Default.(int)
 	// inspectionDescTruncated is the schema descriptor for truncated field.
-	inspectionDescTruncated := inspectionFields[14].Descriptor()
+	inspectionDescTruncated := inspectionFields[15].Descriptor()
 	// inspection.DefaultTruncated holds the default value on creation for the truncated field.
 	inspection.DefaultTruncated = inspectionDescTruncated.Default.(bool)
 	// inspectionDescVerified is the schema descriptor for verified field.
-	inspectionDescVerified := inspectionFields[15].Descriptor()
+	inspectionDescVerified := inspectionFields[16].Descriptor()
 	// inspection.DefaultVerified holds the default value on creation for the verified field.
 	inspection.DefaultVerified = inspectionDescVerified.Default.(bool)
 	// inspectionDescScanEngine is the schema descriptor for scan_engine field.
-	inspectionDescScanEngine := inspectionFields[16].Descriptor()
+	inspectionDescScanEngine := inspectionFields[17].Descriptor()
 	// inspection.DefaultScanEngine holds the default value on creation for the scan_engine field.
 	inspection.DefaultScanEngine = inspectionDescScanEngine.Default.(string)
 	// inspection.ScanEngineValidator is a validator for the "scan_engine" field. It is called by the builders before save.
 	inspection.ScanEngineValidator = inspectionDescScanEngine.Validators[0].(func(string) error)
 	// inspectionDescScannedCount is the schema descriptor for scanned_count field.
-	inspectionDescScannedCount := inspectionFields[18].Descriptor()
+	inspectionDescScannedCount := inspectionFields[19].Descriptor()
 	// inspection.DefaultScannedCount holds the default value on creation for the scanned_count field.
 	inspection.DefaultScannedCount = inspectionDescScannedCount.Default.(int)
 	// inspectionDescScanLimit is the schema descriptor for scan_limit field.
-	inspectionDescScanLimit := inspectionFields[20].Descriptor()
+	inspectionDescScanLimit := inspectionFields[21].Descriptor()
 	// inspection.DefaultScanLimit holds the default value on creation for the scan_limit field.
 	inspection.DefaultScanLimit = inspectionDescScanLimit.Default.(int64)
 	// inspectionDescCreated is the schema descriptor for created field.
-	inspectionDescCreated := inspectionFields[24].Descriptor()
+	inspectionDescCreated := inspectionFields[25].Descriptor()
 	// inspection.DefaultCreated holds the default value on creation for the created field.
 	inspection.DefaultCreated = inspectionDescCreated.Default.(func() time.Time)
 	// inspectionDescUpdated is the schema descriptor for updated field.
-	inspectionDescUpdated := inspectionFields[25].Descriptor()
+	inspectionDescUpdated := inspectionFields[26].Descriptor()
 	// inspection.DefaultUpdated holds the default value on creation for the updated field.
 	inspection.DefaultUpdated = inspectionDescUpdated.Default.(func() time.Time)
 	// inspection.UpdateDefaultUpdated holds the default value on update for the updated field.

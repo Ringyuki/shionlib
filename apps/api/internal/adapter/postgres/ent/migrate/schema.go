@@ -1808,6 +1808,7 @@ var (
 		{Name: "recovery", Type: field.TypeBool, Default: false},
 		{Name: "recovery_percent", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "name_encoding", Type: field.TypeString, Size: 32, Default: "", SchemaType: map[string]string{"postgres": "character varying(32)"}},
+		{Name: "unsupported_method", Type: field.TypeBool, Default: false},
 		{Name: "file_count", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "folder_count", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "unpacked_size", Type: field.TypeInt64, Default: 0},
@@ -1835,7 +1836,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "file_inspections_resource_id_fkey",
-				Columns:    []*schema.Column{FileInspectionsColumns[25]},
+				Columns:    []*schema.Column{FileInspectionsColumns[26]},
 				RefColumns: []*schema.Column{GameDownloadResourcesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -1844,7 +1845,7 @@ var (
 			{
 				Name:    "file_inspections_resource_id_idx",
 				Unique:  false,
-				Columns: []*schema.Column{FileInspectionsColumns[25]},
+				Columns: []*schema.Column{FileInspectionsColumns[26]},
 			},
 		},
 	}

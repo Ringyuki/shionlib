@@ -10,12 +10,15 @@ const (
 	SignalAudio      = "audio"
 	SignalSubchannel = "subchannel"
 	SignalDPM        = "dpm"
+	DiscFormatAudio  = "audio"
 	bootFolder       = "[BOOT]"
 	audioSectorBytes = 2352
 	framesPerSecond  = 75
 )
 
 var discExtensions = []string{"iso", "mdf", "nrg", "cdi", "mdx", "isz"}
+
+var discFileSystems = []string{"iso", "udf"}
 
 var sheetOf = map[string][]string{
 	"bin": {"cue"},
@@ -52,6 +55,10 @@ type DiscSheet struct {
 	DPM    bool
 }
 
+func (s DiscSheet) Audio() bool {
+	return slices.ContainsFunc(s.Tracks, func(track DiscTrack) bool { return track.Audio })
+}
+
 type discCandidate struct {
 	sheet string
 	sub   bool
@@ -82,11 +89,12 @@ func discCandidates(entries []ArchiveEntry) map[int]discCandidate {
 				break
 			}
 		}
-		if !slices.Contains(discExtensions, kind) && candidate.sheet == "" {
-			continue
-		}
 		if at, paired := byName[withoutExtension(name)+".sub"]; paired && entries[at].Size > 0 {
 			candidate.sub = true
+		}
+		_, companioned := sheetOf[kind]
+		if !slices.Contains(discExtensions, kind) && candidate.sheet == "" && (!companioned || !candidate.sub) {
+			continue
 		}
 		found[i] = candidate
 	}
@@ -95,7 +103,7 @@ func discCandidates(entries []ArchiveEntry) map[int]discCandidate {
 
 func discSignals(volume DiscVolume, sheet DiscSheet, candidate discCandidate) []string {
 	var signals []string
-	if slices.ContainsFunc(sheet.Tracks, func(track DiscTrack) bool { return track.Audio }) {
+	if sheet.Audio() {
 		signals = append(signals, SignalAudio)
 	}
 	if volume.Subchannel || candidate.sub {

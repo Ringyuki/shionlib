@@ -28,6 +28,7 @@ func (Inspection) Fields() []ent.Field {
 		field.Bool("recovery").Default(false),
 		field.Int("recovery_percent").SchemaType(pg("integer")).Default(0),
 		field.String("name_encoding").MaxRuneLen(32).SchemaType(varchar(32)).Default(""),
+		field.Bool("unsupported_method").Default(false),
 		field.Int("file_count").SchemaType(pg("integer")).Default(0),
 		field.Int("folder_count").SchemaType(pg("integer")).Default(0),
 		field.Int64("unpacked_size").Default(0),

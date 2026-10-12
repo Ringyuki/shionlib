@@ -31,6 +31,7 @@ type DraftEntry struct {
 }
 
 func (d *Draft) Add(entry DraftEntry) int {
+	entry.Name = ReadableText(entry.Name)
 	d.Entries = append(d.Entries, entry)
 	return len(d.Entries) - 1
 }

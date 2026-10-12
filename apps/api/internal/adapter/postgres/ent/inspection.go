@@ -37,6 +37,8 @@ type Inspection struct {
 	RecoveryPercent int `json:"recovery_percent,omitempty"`
 	// NameEncoding holds the value of the "name_encoding" field.
 	NameEncoding string `json:"name_encoding,omitempty"`
+	// UnsupportedMethod holds the value of the "unsupported_method" field.
+	UnsupportedMethod bool `json:"unsupported_method,omitempty"`
 	// FileCount holds the value of the "file_count" field.
 	FileCount int `json:"file_count,omitempty"`
 	// FolderCount holds the value of the "folder_count" field.
@@ -128,7 +130,7 @@ func (*Inspection) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case inspection.FieldScanSkipped:
 			values[i] = new(pgvalue.Strings)
-		case inspection.FieldSolid, inspection.FieldRecovery, inspection.FieldTruncated, inspection.FieldVerified:
+		case inspection.FieldSolid, inspection.FieldRecovery, inspection.FieldUnsupportedMethod, inspection.FieldTruncated, inspection.FieldVerified:
 			values[i] = new(sql.NullBool)
 		case inspection.FieldID, inspection.FieldResourceID, inspection.FieldVolumes, inspection.FieldRecoveryPercent, inspection.FieldFileCount, inspection.FieldFolderCount, inspection.FieldUnpackedSize, inspection.FieldDiscCount, inspection.FieldDiscFileCount, inspection.FieldScannedCount, inspection.FieldScanLimit:
 			values[i] = new(sql.NullInt64)
@@ -204,6 +206,12 @@ func (_m *Inspection) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name_encoding", values[i])
 			} else if value.Valid {
 				_m.NameEncoding = value.String
+			}
+		case inspection.FieldUnsupportedMethod:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field unsupported_method", values[i])
+			} else if value.Valid {
+				_m.UnsupportedMethod = value.Bool
 			}
 		case inspection.FieldFileCount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -386,6 +394,9 @@ func (_m *Inspection) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("name_encoding=")
 	builder.WriteString(_m.NameEncoding)
+	builder.WriteString(", ")
+	builder.WriteString("unsupported_method=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UnsupportedMethod))
 	builder.WriteString(", ")
 	builder.WriteString("file_count=")
 	builder.WriteString(fmt.Sprintf("%v", _m.FileCount))

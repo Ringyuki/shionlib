@@ -30,6 +30,8 @@ const (
 	FieldRecoveryPercent = "recovery_percent"
 	// FieldNameEncoding holds the string denoting the name_encoding field in the database.
 	FieldNameEncoding = "name_encoding"
+	// FieldUnsupportedMethod holds the string denoting the unsupported_method field in the database.
+	FieldUnsupportedMethod = "unsupported_method"
 	// FieldFileCount holds the string denoting the file_count field in the database.
 	FieldFileCount = "file_count"
 	// FieldFolderCount holds the string denoting the folder_count field in the database.
@@ -106,6 +108,7 @@ var Columns = []string{
 	FieldRecovery,
 	FieldRecoveryPercent,
 	FieldNameEncoding,
+	FieldUnsupportedMethod,
 	FieldFileCount,
 	FieldFolderCount,
 	FieldUnpackedSize,
@@ -154,6 +157,8 @@ var (
 	DefaultNameEncoding string
 	// NameEncodingValidator is a validator for the "name_encoding" field. It is called by the builders before save.
 	NameEncodingValidator func(string) error
+	// DefaultUnsupportedMethod holds the default value on creation for the "unsupported_method" field.
+	DefaultUnsupportedMethod bool
 	// DefaultFileCount holds the default value on creation for the "file_count" field.
 	DefaultFileCount int
 	// DefaultFolderCount holds the default value on creation for the "folder_count" field.
@@ -230,6 +235,11 @@ func ByRecoveryPercent(opts ...sql.OrderTermOption) OrderOption {
 // ByNameEncoding orders the results by the name_encoding field.
 func ByNameEncoding(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNameEncoding, opts...).ToFunc()
+}
+
+// ByUnsupportedMethod orders the results by the unsupported_method field.
+func ByUnsupportedMethod(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUnsupportedMethod, opts...).ToFunc()
 }
 
 // ByFileCount orders the results by the file_count field.

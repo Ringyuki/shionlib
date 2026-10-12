@@ -3,10 +3,12 @@ package discimage_test
 import (
 	"bytes"
 	"context"
+	"encoding/binary"
 	"errors"
 	"os"
 	"path/filepath"
 	"testing"
+	"unicode/utf16"
 
 	"golang.org/x/text/encoding/japanese"
 
@@ -132,6 +134,43 @@ func TestProbeRecognisesUniversalDiskFormat(t *testing.T) {
 	}
 	if got := probe(t, stored(t, "udf.iso", only)); !got.Readable || got.Format != discimage.FormatUDF || got.Raw {
 		t.Fatalf("unexpected volume %+v", got)
+	}
+}
+
+func universal(name []byte) []byte {
+	image := make([]byte, 300*discimagetest.Sector)
+	for i, mark := range []string{"BEA01", "NSR02", "TEA01"} {
+		copy(image[(16+i)*discimagetest.Sector+1:], mark)
+	}
+	anchor := image[256*discimagetest.Sector:]
+	binary.LittleEndian.PutUint16(anchor, 2)
+	binary.LittleEndian.PutUint32(anchor[16:], 16*discimagetest.Sector)
+	binary.LittleEndian.PutUint32(anchor[20:], 32)
+	binary.LittleEndian.PutUint16(image[32*discimagetest.Sector:], 1)
+	logical := image[33*discimagetest.Sector:]
+	binary.LittleEndian.PutUint16(logical, 6)
+	copy(logical[84:], name)
+	logical[84+127] = byte(len(name))
+	binary.LittleEndian.PutUint16(image[34*discimagetest.Sector:], 8)
+	return image
+}
+
+func TestProbeReadsTheLabelOfAUniversalDiskFormatVolume(t *testing.T) {
+	wide := []byte{16}
+	for _, unit := range utf16.Encode([]rune("女装して女湯に")) {
+		wide = binary.BigEndian.AppendUint16(wide, unit)
+	}
+	if got := probe(t, stored(t, "wide.iso", universal(wide))); got.Format != discimage.FormatUDF || got.Label != "女装して女湯に" {
+		t.Fatalf("unexpected volume %+v", got)
+	}
+	if got := probe(t, stored(t, "narrow.iso", universal(append([]byte{8}, "GAME_DVD"...)))); got.Label != "GAME_DVD" {
+		t.Fatalf("unexpected volume %+v", got)
+	}
+	if got := probe(t, stored(t, "raw.bin", discimagetest.Raw(universal(append([]byte{8}, "GAME_DVD"...)), 2352, 16))); !got.Raw || got.Label != "GAME_DVD" {
+		t.Fatalf("unexpected raw volume %+v", got)
+	}
+	if got := probe(t, stored(t, "blank.iso", universal(nil))); !got.Readable || got.Label != "" {
+		t.Fatalf("unexpected volume without a name %+v", got)
 	}
 }
 

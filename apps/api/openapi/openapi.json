@@ -14524,6 +14524,10 @@
           "solid": {
             "type": "boolean"
           },
+          "unsupported": {
+            "description": "7-Zip cannot unpack the compression method the archive uses: what it holds is listed, but was neither tested nor scanned",
+            "type": "boolean"
+          },
           "volumes": {
             "description": "How many volumes the archive is split into; 0 or 1 for a single file",
             "format": "int64",
@@ -14536,7 +14540,8 @@
           "volumes",
           "recovery",
           "recovery_percent",
-          "name_encoding"
+          "name_encoding",
+          "unsupported"
         ],
         "type": "object"
       },

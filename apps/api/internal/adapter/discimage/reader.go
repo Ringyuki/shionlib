@@ -13,11 +13,6 @@ import (
 	"strings"
 	"unicode/utf16"
 
-	"golang.org/x/text/encoding"
-	"golang.org/x/text/encoding/japanese"
-	"golang.org/x/text/encoding/simplifiedchinese"
-	"golang.org/x/text/encoding/traditionalchinese"
-
 	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/scan"
 )
@@ -33,6 +28,15 @@ const (
 	labelLength      = 32
 	blocksOffset     = 80
 	escapesOffset    = 88
+	anchorSector     = 256
+	anchorTag        = 2
+	logicalVolumeTag = 6
+	sequenceEndTag   = 8
+	sequenceExtent   = 16
+	logicalNameAt    = 84
+	logicalNameSize  = 128
+	narrowText       = 8
+	wideText         = 16
 	subchannelSector = 2448
 	cookBuffer       = 1 << 20
 	dirMode          = 0o750
@@ -63,13 +67,6 @@ var layouts = []layout{
 	{sector: subchannelSector, data: 16},
 	{sector: subchannelSector, data: 24},
 	{sector: 2048, lead: 307200},
-}
-
-var labelDecoders = map[inspection.Encoding]encoding.Encoding{
-	inspection.EncodingShiftJIS: japanese.ShiftJIS,
-	inspection.EncodingGBK:      simplifiedchinese.GBK,
-	inspection.EncodingBig5:     traditionalchinese.Big5,
-	inspection.EncodingEUCJP:    japanese.EUCJP,
 }
 
 type Reader struct{}
@@ -149,10 +146,55 @@ func (r *Reader) Probe(ctx context.Context, path string) (scan.DiscVolume, error
 	switch {
 	case universal:
 		volume.Format = FormatUDF
+		if label := universalLabel(file, shape); label != "" {
+			volume.Label = label
+		}
 	case joliet:
 		volume.Format = FormatJoliet
 	}
 	return volume, nil
+}
+
+func universalLabel(file io.ReaderAt, shape layout) string {
+	anchor, ok := block(file, shape, anchorSector)
+	if !ok || binary.LittleEndian.Uint16(anchor) != anchorTag {
+		return ""
+	}
+	length := int64(binary.LittleEndian.Uint32(anchor[sequenceExtent:])) / cookedSector
+	start := int64(binary.LittleEndian.Uint32(anchor[sequenceExtent+4:]))
+	for number := start; number < start+min(length, descriptorLimit); number++ {
+		descriptor, ok := block(file, shape, number)
+		if !ok {
+			return ""
+		}
+		switch binary.LittleEndian.Uint16(descriptor) {
+		case logicalVolumeTag:
+			return compressedText(descriptor[logicalNameAt : logicalNameAt+logicalNameSize])
+		case sequenceEndTag:
+			return ""
+		}
+	}
+	return ""
+}
+
+func compressedText(field []byte) string {
+	length := int(field[len(field)-1])
+	if length < 2 || length >= len(field) {
+		return ""
+	}
+	body := field[1:length]
+	switch field[0] {
+	case narrowText:
+		chars := make([]rune, len(body))
+		for i, char := range body {
+			chars[i] = rune(char)
+		}
+		return strings.TrimRight(string(chars), " \x00")
+	case wideText:
+		return wideLabel(body)
+	default:
+		return ""
+	}
 }
 
 func slicesContain(candidates [][]byte, value []byte) bool {
@@ -166,10 +208,8 @@ func slicesContain(candidates [][]byte, value []byte) bool {
 
 func primaryLabel(raw []byte) string {
 	trimmed := bytes.TrimRight(raw, " \x00")
-	if decoder, legacy := labelDecoders[inspection.DetectEncoding(trimmed)]; legacy {
-		if decoded, err := decoder.NewDecoder().Bytes(trimmed); err == nil {
-			return strings.TrimSpace(string(decoded))
-		}
+	if decoded, legacy := inspection.Decode(trimmed, inspection.DetectEncodingExpecting(trimmed, inspection.EncodingShiftJIS)); legacy {
+		return strings.TrimSpace(decoded)
 	}
 	return strings.TrimSpace(strings.ToValidUTF8(string(trimmed), ""))
 }

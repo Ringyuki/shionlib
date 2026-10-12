@@ -36,6 +36,19 @@ type LegacyNames struct {
 	Names    []string
 }
 
+func listedNames(c container) LegacyNames {
+	paths := make([]string, len(c.entries))
+	for i, entry := range c.entries {
+		paths[i] = writtenName(entry.Path)
+	}
+	expected := inspection.EncodingUnknown
+	if slices.Contains(discFileSystems, c.format) {
+		expected = inspection.EncodingShiftJIS
+	}
+	names, encoding := inspection.ReadableNames(paths, expected)
+	return LegacyNames{Encoding: string(encoding), Names: names}
+}
+
 type Engine struct {
 	Name         string
 	SignaturesAt *time.Time

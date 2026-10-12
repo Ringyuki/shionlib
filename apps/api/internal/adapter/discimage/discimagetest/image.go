@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 	"unicode/utf16"
+	"unicode/utf8"
 )
 
 const (
@@ -62,7 +63,10 @@ func wide(text string) []byte {
 }
 
 func plainName(name string, dir bool) []byte {
-	upper := strings.ToUpper(name)
+	upper := name
+	if utf8.ValidString(name) {
+		upper = strings.ToUpper(name)
+	}
 	if dir {
 		return []byte(upper)
 	}

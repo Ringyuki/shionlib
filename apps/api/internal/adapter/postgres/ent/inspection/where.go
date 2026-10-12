@@ -96,6 +96,11 @@ func NameEncoding(v string) predicate.Inspection {
 	return predicate.Inspection(sql.FieldEQ(FieldNameEncoding, v))
 }
 
+// UnsupportedMethod applies equality check predicate on the "unsupported_method" field. It's identical to UnsupportedMethodEQ.
+func UnsupportedMethod(v bool) predicate.Inspection {
+	return predicate.Inspection(sql.FieldEQ(FieldUnsupportedMethod, v))
+}
+
 // FileCount applies equality check predicate on the "file_count" field. It's identical to FileCountEQ.
 func FileCount(v int) predicate.Inspection {
 	return predicate.Inspection(sql.FieldEQ(FieldFileCount, v))
@@ -489,6 +494,16 @@ func NameEncodingEqualFold(v string) predicate.Inspection {
 // NameEncodingContainsFold applies the ContainsFold predicate on the "name_encoding" field.
 func NameEncodingContainsFold(v string) predicate.Inspection {
 	return predicate.Inspection(sql.FieldContainsFold(FieldNameEncoding, v))
+}
+
+// UnsupportedMethodEQ applies the EQ predicate on the "unsupported_method" field.
+func UnsupportedMethodEQ(v bool) predicate.Inspection {
+	return predicate.Inspection(sql.FieldEQ(FieldUnsupportedMethod, v))
+}
+
+// UnsupportedMethodNEQ applies the NEQ predicate on the "unsupported_method" field.
+func UnsupportedMethodNEQ(v bool) predicate.Inspection {
+	return predicate.Inspection(sql.FieldNEQ(FieldUnsupportedMethod, v))
 }
 
 // FileCountEQ applies the EQ predicate on the "file_count" field.

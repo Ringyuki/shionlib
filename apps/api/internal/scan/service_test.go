@@ -587,6 +587,31 @@ func TestAnUnverifiedTestIsRecordedAsSuch(t *testing.T) {
 	}
 }
 
+func TestAnArchiveSevenZipCannotUnpackPassesWithWhatCouldNotBeScanned(t *testing.T) {
+	f := newFixture(true)
+	f.repo.SeedFile(pending(1, "/spool/1.part"))
+	f.tool.Listings["/spool/1.part"] = listing("7z", "Method = 04F71101\nSolid = +\n",
+		file("game.exe", 400), file("disc.iso", 5000), file("disc.mds", 90), file("bonus.zip", 30), file("readme.txt", 16))
+	f.tool.Tests["/spool/1.part"] = scan.ToolRun{Failed: true, ExitCode: 2, Stderr: "ERROR: Unsupported Method : game.exe"}
+	f.tool.Extracts = map[string]scan.ToolRun{"/spool/1.part": {Failed: true, ExitCode: 2, Stderr: "ERROR: Unsupported Method : game.exe"}}
+	if err := f.service.ScanPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if file, _ := f.repo.File(1); file.CheckStatus != download.CheckOK {
+		t.Fatalf("a method 7-Zip cannot unpack does not make the archive damaged: %+v", file)
+	}
+	draft := f.inspections.Drafts[0]
+	if !draft.Archive.Unsupported || draft.Verified || draft.Scan.Scanned != 0 {
+		t.Fatalf("unexpected draft %+v", draft)
+	}
+	if !slices.Equal(draft.Scan.Skipped, []string{"game.exe", "bonus.zip"}) {
+		t.Fatalf("what could not be taken out is named as not scanned: %v", draft.Scan.Skipped)
+	}
+	if !entryNamed(draft, "disc.iso").Unreadable || !entryNamed(draft, "bonus.zip").Unreadable || len(f.inspections.Previews) != 0 {
+		t.Fatalf("what could not be taken out is not read: %v %v", tree(draft), f.inspections.Previews)
+	}
+}
+
 func TestEveryVolumeOfASetSharesOneRecordAndHasItsOwnDigest(t *testing.T) {
 	f := newFixture(true)
 	f.repo.SeedFile(volume(2, "game.part2.rar", now))

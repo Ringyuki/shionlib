@@ -7,21 +7,9 @@ import (
 	"fmt"
 	"io/fs"
 
-	"golang.org/x/text/encoding"
-	"golang.org/x/text/encoding/japanese"
-	"golang.org/x/text/encoding/simplifiedchinese"
-	"golang.org/x/text/encoding/traditionalchinese"
-
 	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/scan"
 )
-
-var decoders = map[inspection.Encoding]encoding.Encoding{
-	inspection.EncodingShiftJIS: japanese.ShiftJIS,
-	inspection.EncodingGBK:      simplifiedchinese.GBK,
-	inspection.EncodingBig5:     traditionalchinese.Big5,
-	inspection.EncodingEUCJP:    japanese.EUCJP,
-}
 
 type Reader struct{}
 
@@ -52,8 +40,7 @@ func (r *Reader) LegacyNames(ctx context.Context, path string) (scan.LegacyNames
 		return scan.LegacyNames{}, nil
 	}
 	detected := inspection.DetectEncoding(sample)
-	decoder, legacy := decoders[detected]
-	if !legacy {
+	if !detected.Legacy() {
 		return scan.LegacyNames{}, nil
 	}
 	names := make([]string, len(archive.File))
@@ -62,7 +49,7 @@ func (r *Reader) LegacyNames(ctx context.Context, path string) (scan.LegacyNames
 		if !file.NonUTF8 {
 			continue
 		}
-		if decoded, err := decoder.NewDecoder().String(file.Name); err == nil {
+		if decoded, ok := inspection.Decode([]byte(file.Name), detected); ok {
 			names[i] = decoded
 		}
 	}

@@ -56,6 +56,7 @@ func (r *Repository) Create(ctx context.Context, in inspection.NewInspection) (i
 		SetRecovery(in.Archive.Recovery).
 		SetRecoveryPercent(in.Archive.RecoveryPercent).
 		SetNameEncoding(in.Archive.NameEncoding).
+		SetUnsupportedMethod(in.Archive.Unsupported).
 		SetFileCount(in.Totals.Files).
 		SetFolderCount(in.Totals.Folders).
 		SetUnpackedSize(in.Totals.Size).

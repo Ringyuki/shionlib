@@ -75,6 +75,7 @@ func toInspection(row *ent.Inspection) (inspection.Inspection, error) {
 			Recovery:        row.Recovery,
 			RecoveryPercent: row.RecoveryPercent,
 			NameEncoding:    row.NameEncoding,
+			Unsupported:     row.UnsupportedMethod,
 		},
 		Totals: inspection.Totals{
 			Files:     row.FileCount,

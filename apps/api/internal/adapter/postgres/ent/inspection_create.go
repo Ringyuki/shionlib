@@ -123,6 +123,20 @@ func (_c *InspectionCreate) SetNillableNameEncoding(v *string) *InspectionCreate
 	return _c
 }
 
+// SetUnsupportedMethod sets the "unsupported_method" field.
+func (_c *InspectionCreate) SetUnsupportedMethod(v bool) *InspectionCreate {
+	_c.mutation.SetUnsupportedMethod(v)
+	return _c
+}
+
+// SetNillableUnsupportedMethod sets the "unsupported_method" field if the given value is not nil.
+func (_c *InspectionCreate) SetNillableUnsupportedMethod(v *bool) *InspectionCreate {
+	if v != nil {
+		_c.SetUnsupportedMethod(*v)
+	}
+	return _c
+}
+
 // SetFileCount sets the "file_count" field.
 func (_c *InspectionCreate) SetFileCount(v int) *InspectionCreate {
 	_c.mutation.SetFileCount(v)
@@ -445,6 +459,10 @@ func (_c *InspectionCreate) defaults() {
 		v := inspection.DefaultNameEncoding
 		_c.mutation.SetNameEncoding(v)
 	}
+	if _, ok := _c.mutation.UnsupportedMethod(); !ok {
+		v := inspection.DefaultUnsupportedMethod
+		_c.mutation.SetUnsupportedMethod(v)
+	}
 	if _, ok := _c.mutation.FileCount(); !ok {
 		v := inspection.DefaultFileCount
 		_c.mutation.SetFileCount(v)
@@ -535,6 +553,9 @@ func (_c *InspectionCreate) check() error {
 		if err := inspection.NameEncodingValidator(v); err != nil {
 			return &ValidationError{Name: "name_encoding", err: fmt.Errorf(`ent: validator failed for field "Inspection.name_encoding": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.UnsupportedMethod(); !ok {
+		return &ValidationError{Name: "unsupported_method", err: errors.New(`ent: missing required field "Inspection.unsupported_method"`)}
 	}
 	if _, ok := _c.mutation.FileCount(); !ok {
 		return &ValidationError{Name: "file_count", err: errors.New(`ent: missing required field "Inspection.file_count"`)}
@@ -637,6 +658,10 @@ func (_c *InspectionCreate) createSpec() (*Inspection, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.NameEncoding(); ok {
 		_spec.SetField(inspection.FieldNameEncoding, field.TypeString, value)
 		_node.NameEncoding = value
+	}
+	if value, ok := _c.mutation.UnsupportedMethod(); ok {
+		_spec.SetField(inspection.FieldUnsupportedMethod, field.TypeBool, value)
+		_node.UnsupportedMethod = value
 	}
 	if value, ok := _c.mutation.FileCount(); ok {
 		_spec.SetField(inspection.FieldFileCount, field.TypeInt, value)
@@ -912,6 +937,18 @@ func (u *InspectionUpsert) SetNameEncoding(v string) *InspectionUpsert {
 // UpdateNameEncoding sets the "name_encoding" field to the value that was provided on create.
 func (u *InspectionUpsert) UpdateNameEncoding() *InspectionUpsert {
 	u.SetExcluded(inspection.FieldNameEncoding)
+	return u
+}
+
+// SetUnsupportedMethod sets the "unsupported_method" field.
+func (u *InspectionUpsert) SetUnsupportedMethod(v bool) *InspectionUpsert {
+	u.Set(inspection.FieldUnsupportedMethod, v)
+	return u
+}
+
+// UpdateUnsupportedMethod sets the "unsupported_method" field to the value that was provided on create.
+func (u *InspectionUpsert) UpdateUnsupportedMethod() *InspectionUpsert {
+	u.SetExcluded(inspection.FieldUnsupportedMethod)
 	return u
 }
 
@@ -1353,6 +1390,20 @@ func (u *InspectionUpsertOne) SetNameEncoding(v string) *InspectionUpsertOne {
 func (u *InspectionUpsertOne) UpdateNameEncoding() *InspectionUpsertOne {
 	return u.Update(func(s *InspectionUpsert) {
 		s.UpdateNameEncoding()
+	})
+}
+
+// SetUnsupportedMethod sets the "unsupported_method" field.
+func (u *InspectionUpsertOne) SetUnsupportedMethod(v bool) *InspectionUpsertOne {
+	return u.Update(func(s *InspectionUpsert) {
+		s.SetUnsupportedMethod(v)
+	})
+}
+
+// UpdateUnsupportedMethod sets the "unsupported_method" field to the value that was provided on create.
+func (u *InspectionUpsertOne) UpdateUnsupportedMethod() *InspectionUpsertOne {
+	return u.Update(func(s *InspectionUpsert) {
+		s.UpdateUnsupportedMethod()
 	})
 }
 
@@ -2004,6 +2055,20 @@ func (u *InspectionUpsertBulk) SetNameEncoding(v string) *InspectionUpsertBulk {
 func (u *InspectionUpsertBulk) UpdateNameEncoding() *InspectionUpsertBulk {
 	return u.Update(func(s *InspectionUpsert) {
 		s.UpdateNameEncoding()
+	})
+}
+
+// SetUnsupportedMethod sets the "unsupported_method" field.
+func (u *InspectionUpsertBulk) SetUnsupportedMethod(v bool) *InspectionUpsertBulk {
+	return u.Update(func(s *InspectionUpsert) {
+		s.SetUnsupportedMethod(v)
+	})
+}
+
+// UpdateUnsupportedMethod sets the "unsupported_method" field to the value that was provided on create.
+func (u *InspectionUpsertBulk) UpdateUnsupportedMethod() *InspectionUpsertBulk {
+	return u.Update(func(s *InspectionUpsert) {
+		s.UpdateUnsupportedMethod()
 	})
 }
 

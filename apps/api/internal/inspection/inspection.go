@@ -53,6 +53,7 @@ type Archive struct {
 	Recovery        bool
 	RecoveryPercent int
 	NameEncoding    string
+	Unsupported     bool
 }
 
 type Detection struct {

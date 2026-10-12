@@ -297,6 +297,31 @@ func TestContentsIgnoreLegacyNamesThatDoNotLineUpWithTheListing(t *testing.T) {
 	}
 }
 
+func TestContentsReadTheNamesOfAnyArchiveThatAreNotUnicode(t *testing.T) {
+	f := newFixture(true)
+	chinese := "\xba\xba\xbb\xaf\xb2\xb9\xb6\xa1/\xca\xb9\xd3\xc3\xcb\xb5\xc3\xf7.txt"
+	f.stock(spooled, "Rar", file(chinese, 5), file("setup.exe", 10))
+	contents, err := f.read(t)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := tree(contents.Draft); !slices.Equal(got, []string{"folder 汉化补丁", "file 汉化补丁/使用说明.txt", "file setup.exe"}) {
+		t.Fatalf("unexpected tree %q", got)
+	}
+	if contents.NameEncoding != "gbk" {
+		t.Fatalf("the encoding the names were read in is reported: %q", contents.NameEncoding)
+	}
+	mixed := newFixture(true)
+	mixed.stock(spooled, "Rar", file(chinese, 5), file("broken\xff\x00.dat", 1))
+	contents, err = mixed.read(t)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := tree(contents.Draft); !slices.Equal(got, []string{"folder 汉化补丁", "file 汉化补丁/使用说明.txt", "file broken\uFFFD.dat"}) || contents.NameEncoding != "" {
+		t.Fatalf("a name no encoding explains does not spoil the others: %q %q", got, contents.NameEncoding)
+	}
+}
+
 func TestContentsShareThePreviewAllowanceAcrossNestedArchives(t *testing.T) {
 	f := newFixture(true)
 	entries := []listed{file("bonus.zip", 10)}
@@ -343,7 +368,7 @@ func TestContentsFailWhenTheUploadedArchiveCannotBeExtracted(t *testing.T) {
 	}
 	scanned := targetNames(contents)
 	slices.Sort(scanned)
-	if !slices.Equal(scanned, []string{"bonus.zip", "game.exe"}) || entryNamed(contents.Draft, "setup.exe").Name == "" {
-		t.Fatalf("a nested archive that cannot be extracted is still listed and scanned whole: %v %v", scanned, tree(contents.Draft))
+	if !slices.Equal(scanned, []string{"bonus.zip", "bonus.zip/setup.exe", "game.exe"}) || entryNamed(contents.Draft, "setup.exe").Name == "" {
+		t.Fatalf("a nested archive whose extraction fails is still listed and scanned, whole and in what came out: %v %v", scanned, tree(contents.Draft))
 	}
 }

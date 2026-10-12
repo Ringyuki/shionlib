@@ -44616,6 +44616,7 @@ type InspectionMutation struct {
 	recovery_percent    *int
 	addrecovery_percent *int
 	name_encoding       *string
+	unsupported_method  *bool
 	file_count          *int
 	addfile_count       *int
 	folder_count        *int
@@ -45085,6 +45086,42 @@ func (m *InspectionMutation) OldNameEncoding(ctx context.Context) (v string, err
 // ResetNameEncoding resets all changes to the "name_encoding" field.
 func (m *InspectionMutation) ResetNameEncoding() {
 	m.name_encoding = nil
+}
+
+// SetUnsupportedMethod sets the "unsupported_method" field.
+func (m *InspectionMutation) SetUnsupportedMethod(b bool) {
+	m.unsupported_method = &b
+}
+
+// UnsupportedMethod returns the value of the "unsupported_method" field in the mutation.
+func (m *InspectionMutation) UnsupportedMethod() (r bool, exists bool) {
+	v := m.unsupported_method
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUnsupportedMethod returns the old "unsupported_method" field's value of the Inspection entity.
+// If the Inspection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InspectionMutation) OldUnsupportedMethod(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUnsupportedMethod is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUnsupportedMethod requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUnsupportedMethod: %w", err)
+	}
+	return oldValue.UnsupportedMethod, nil
+}
+
+// ResetUnsupportedMethod resets all changes to the "unsupported_method" field.
+func (m *InspectionMutation) ResetUnsupportedMethod() {
+	m.unsupported_method = nil
 }
 
 // SetFileCount sets the "file_count" field.
@@ -46089,7 +46126,7 @@ func (m *InspectionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *InspectionMutation) Fields() []string {
-	fields := make([]string, 0, 25)
+	fields := make([]string, 0, 26)
 	if m.resource != nil {
 		fields = append(fields, inspection.FieldResourceID)
 	}
@@ -46113,6 +46150,9 @@ func (m *InspectionMutation) Fields() []string {
 	}
 	if m.name_encoding != nil {
 		fields = append(fields, inspection.FieldNameEncoding)
+	}
+	if m.unsupported_method != nil {
+		fields = append(fields, inspection.FieldUnsupportedMethod)
 	}
 	if m.file_count != nil {
 		fields = append(fields, inspection.FieldFileCount)
@@ -46189,6 +46229,8 @@ func (m *InspectionMutation) Field(name string) (ent.Value, bool) {
 		return m.RecoveryPercent()
 	case inspection.FieldNameEncoding:
 		return m.NameEncoding()
+	case inspection.FieldUnsupportedMethod:
+		return m.UnsupportedMethod()
 	case inspection.FieldFileCount:
 		return m.FileCount()
 	case inspection.FieldFolderCount:
@@ -46248,6 +46290,8 @@ func (m *InspectionMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldRecoveryPercent(ctx)
 	case inspection.FieldNameEncoding:
 		return m.OldNameEncoding(ctx)
+	case inspection.FieldUnsupportedMethod:
+		return m.OldUnsupportedMethod(ctx)
 	case inspection.FieldFileCount:
 		return m.OldFileCount(ctx)
 	case inspection.FieldFolderCount:
@@ -46346,6 +46390,13 @@ func (m *InspectionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetNameEncoding(v)
+		return nil
+	case inspection.FieldUnsupportedMethod:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUnsupportedMethod(v)
 		return nil
 	case inspection.FieldFileCount:
 		v, ok := value.(int)
@@ -46682,6 +46733,9 @@ func (m *InspectionMutation) ResetField(name string) error {
 		return nil
 	case inspection.FieldNameEncoding:
 		m.ResetNameEncoding()
+		return nil
+	case inspection.FieldUnsupportedMethod:
+		m.ResetUnsupportedMethod()
 		return nil
 	case inspection.FieldFileCount:
 		m.ResetFileCount()

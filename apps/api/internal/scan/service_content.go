@@ -52,6 +52,7 @@ func (s *ContentService) Read(ctx context.Context, source Source) (Contents, err
 		texts:     inspection.TextPreviewLimit,
 		images:    inspection.ImagePreviewLimit,
 		listed:    Container(source.Archive.Facts.Format),
+		opaque:    source.Archive.Unsupported,
 	}
 	top := container{
 		path:    source.Path,
@@ -91,16 +92,16 @@ func (s *ContentService) unpack(ctx context.Context, r *reading, c container) er
 	if err != nil {
 		return err
 	}
-	if run.Failed && !run.Killed {
-		if c.depth == 0 {
-			return fmt.Errorf("extract executables: %s", strings.TrimSpace(run.blob()))
-		}
-		return nil
+	if run.Failed && !run.Killed && c.depth == 0 && !r.opaque {
+		return fmt.Errorf("extract executables: %s", strings.TrimSpace(run.blob()))
 	}
 	r.room -= plan.size
 	paths, err := s.workspace.Files(ctx, c.dir)
 	if err != nil {
 		return err
+	}
+	if run.Failed {
+		r.missing(c, plan, paths)
 	}
 	for _, path := range paths {
 		relative, err := filepath.Rel(c.dir, path)
@@ -146,7 +147,9 @@ func (s *ContentService) mount(ctx context.Context, r *reading, outer container,
 		}
 	}
 	r.contents.Draft.Entries[disc.index].Detail.Signals = discSignals(volume, sheet, disc.candidate)
-	if err := s.list(ctx, r, outer, path, disc, shown, volume); err != nil {
+	if !volume.Readable && sheet.Audio() {
+		r.contents.Draft.Entries[disc.index].Detail.Format = DiscFormatAudio
+	} else if err := s.list(ctx, r, outer, path, disc, shown, volume); err != nil {
 		return err
 	}
 	for _, track := range sheet.Tracks {
@@ -178,7 +181,7 @@ func (s *ContentService) list(ctx context.Context, r *reading, outer container, 
 		}
 		r.room -= volume.Bytes
 	}
-	listing, err := InspectNested(ctx, s.archives, image)
+	listing, err := InspectDisc(ctx, s.archives, image)
 	if err != nil {
 		return err
 	}
@@ -231,18 +234,21 @@ func (s *ContentService) descend(ctx context.Context, r *reading, outer containe
 }
 
 func (s *ContentService) shownNames(ctx context.Context, r *reading, c container) ([]string, error) {
-	if c.format != zipFormat {
-		return nil, nil
+	shown := LegacyNames{}
+	if c.format == zipFormat {
+		legacy, err := s.names.LegacyNames(ctx, c.path)
+		if err != nil {
+			return nil, err
+		}
+		if len(legacy.Names) == len(c.entries) {
+			shown = legacy
+		}
 	}
-	legacy, err := s.names.LegacyNames(ctx, c.path)
-	if err != nil {
-		return nil, err
-	}
-	if len(legacy.Names) != len(c.entries) {
-		return nil, nil
+	if shown.Names == nil {
+		shown = listedNames(c)
 	}
 	if c.depth == 0 {
-		r.contents.NameEncoding = legacy.Encoding
+		r.contents.NameEncoding = shown.Encoding
 	}
-	return legacy.Names, nil
+	return shown.Names, nil
 }

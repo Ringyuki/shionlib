@@ -84,7 +84,7 @@ func TestOfResourceReturnsWhatTheChecksFound(t *testing.T) {
 	f.record(t)
 	resp := f.server.Do(apitest.Request{Method: http.MethodGet, Path: "/inspection/resource/" + itoa(f.resource)})
 	f.server.Expect(resp, http.StatusOK, 0)
-	want := `[{"id":1,"status":"ready","archive":{"format":"rar5","solid":false,"volumes":1,"recovery":true,"recovery_percent":3,"name_encoding":""},` +
+	want := `[{"id":1,"status":"ready","archive":{"format":"rar5","solid":false,"volumes":1,"recovery":true,"recovery_percent":3,"name_encoding":"","unsupported":false},` +
 		`"files":4,"folders":1,"size":1018,"disc_files":2,"truncated":false,"verified":true,` +
 		`"scan":{"engine":"ClamAV 1.4.3","signatures_at":"2025-11-26T09:30:45.000Z","scanned":2,"skipped":["Game/huge.dll"],"limit":4194304000,"detections":[],"at":"2025-11-27T14:31:00.000Z","cleared_at":null},` +
 		`"discs":[{"entry_id":2,"name":"ANNA.iso","size":1000,"format":"iso9660+joliet","label":"ANNA","files":2,"folders":0,"unreadable":false,"signals":[]}],`

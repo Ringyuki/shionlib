@@ -151,3 +151,109 @@ func TestDiscTracksKnowTheirLengthAndSize(t *testing.T) {
 		t.Fatalf("got %d seconds and %d bytes", track.Seconds(), track.Bytes())
 	}
 }
+
+func TestNamesInsideAnImageThatAreNotUnicodeAreReadAsJapanese(t *testing.T) {
+	f := newFixture(true)
+	f.stock(spooled, "Rar", file("Ruriiro no Yuki.img", 9000), file("Ruriiro no Yuki.ccd", 700), file("Ruriiro no Yuki.sub", 300))
+	f.discs.Volumes[contents+"Ruriiro no Yuki.img"] = scan.DiscVolume{Readable: true, Raw: true, Format: "iso9660", Label: "RURIIRO", Bytes: 4096}
+	f.stock(work+"/nested/1.iso", "Iso",
+		file("RURIIRO/\x82\x78\x82\x74\x82\x79\x82\x6e.\x93\xc7", 40),
+		file("\xb2\xdd\xbd\xc4\xb0\xd7.PIF", 545),
+		file("\xbe\xaf\xc4\xb1\xaf\xcc\xdf.EXE", 100),
+		file("\x90\xe0\x96\xbe.TXT", 12),
+		file("SUB/\uefb2\u077d\u0130\uefd7.PIF", 545))
+	got, err := f.read(t)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{
+		"disc Ruriiro no Yuki.img", "file Ruriiro no Yuki.ccd", "file Ruriiro no Yuki.sub",
+		"folder Ruriiro no Yuki.img/RURIIRO", "file Ruriiro no Yuki.img/RURIIRO/ＹＵＺＯ.読",
+		"file Ruriiro no Yuki.img/ｲﾝｽﾄｰﾗ.PIF", "file Ruriiro no Yuki.img/ｾｯﾄｱｯﾌﾟ.EXE", "file Ruriiro no Yuki.img/説明.TXT",
+		"folder Ruriiro no Yuki.img/SUB", "file Ruriiro no Yuki.img/SUB/ｲﾝｽﾄｰﾗ.PIF",
+	}
+	if listing := tree(got.Draft); !slices.Equal(listing, want) {
+		t.Fatalf("unexpected tree %q", listing)
+	}
+	if got.NameEncoding != "" {
+		t.Fatalf("the uploaded archive names its files in unicode: %q", got.NameEncoding)
+	}
+	if scanned := targetNames(got); !slices.Equal(scanned, []string{"Ruriiro no Yuki.img/ｾｯﾄｱｯﾌﾟ.EXE"}) {
+		t.Fatalf("a scanned file is named as it is shown: %q", scanned)
+	}
+	if !slices.Contains(f.tool.Selections[1].Paths, "\x90\xe0\x96\xbe.TXT") {
+		t.Fatalf("7-Zip is asked for a file by the bytes it listed: %q", f.tool.Selections[1].Paths)
+	}
+	if len(got.Previews) != 1 || got.Draft.Entries[got.Previews[0].Entry].Name != "説明.TXT" {
+		t.Fatalf("unexpected previews %+v", got.Previews)
+	}
+}
+
+func TestAnImageWithDamagedHeadersIsListedAsFarAsItCanBeRead(t *testing.T) {
+	f := newFixture(true)
+	f.stock(spooled, "Rar", file("IZAYOI.cdi", 9000), file("EMPTY.iso", 500), file("eshi.iso", 700))
+	f.discs.Volumes[contents+"IZAYOI.cdi"] = scan.DiscVolume{Readable: true, Raw: true, Format: "iso9660", Label: "IZAYOI", Bytes: 4096}
+	f.discs.Volumes[contents+"EMPTY.iso"] = scan.DiscVolume{Readable: true, Format: "iso9660", Bytes: 500}
+	f.discs.Volumes[contents+"eshi.iso"] = scan.DiscVolume{Readable: true, Format: "udf", Bytes: 700}
+	restored := work + "/nested/1.iso"
+	damaged := listing("Iso", "ERRORS:\nHeaders Error", file("Bpc/IzWBGM.Paq", 3000), file("DirectX/DXDIAG.EXE", 100))
+	damaged.Failed, damaged.ExitCode = true, 2
+	f.tool.Listings[restored] = damaged
+	f.tool.Contents[restored] = []string{"Bpc/IzWBGM.Paq", "DirectX/DXDIAG.EXE"}
+	short := listing("Iso", "ERRORS:\nUnexpected end of archive", file("Data/eshi.exe", 40), file("Data/movie.dat", 600))
+	short.Failed, short.ExitCode = true, 2
+	f.tool.Listings[contents+"eshi.iso"] = short
+	f.tool.Extracts = map[string]scan.ToolRun{restored: {Failed: true, ExitCode: 2, Message: "exit status 2"}, contents + "eshi.iso": {Failed: true, ExitCode: 2, Message: "exit status 2"}}
+	nothing := listing("Iso", "ERRORS:\nHeaders Error")
+	nothing.Failed, nothing.ExitCode = true, 2
+	f.tool.Listings[contents+"EMPTY.iso"] = nothing
+	got, err := f.read(t)
+	if err != nil {
+		t.Fatal(err)
+	}
+	image := entryNamed(got.Draft, "IZAYOI.cdi")
+	if image.Unreadable || image.Detail.Files != 2 || image.Detail.Folders != 2 {
+		t.Fatalf("what 7-Zip could list of the image is kept: %+v", image)
+	}
+	if scanned := targetNames(got); !slices.Equal(scanned, []string{"IZAYOI.cdi/DirectX/DXDIAG.EXE"}) {
+		t.Fatalf("what came out of the image is scanned: %v", scanned)
+	}
+	if empty := entryNamed(got.Draft, "EMPTY.iso"); !empty.Unreadable {
+		t.Fatalf("an image nothing could be listed of is not read: %+v", empty)
+	}
+	if cut := entryNamed(got.Draft, "eshi.iso"); cut.Unreadable || cut.Detail.Files != 2 || len(got.Skipped) != 0 {
+		t.Fatalf("an image that ends early is listed, and what it lacks is not counted against the scan: %+v %v", cut, got.Skipped)
+	}
+}
+
+func TestAnImageOfOnlyAudioTracksIsAnAudioDisc(t *testing.T) {
+	f := newFixture(true)
+	f.stock(spooled, "Rar", file("Music.img", 9000), file("Music.ccd", 700), file("Music.sub", 300), file("Game.img", 8000), file("Game.sub", 200), file("movie.img", 100))
+	f.discs.Sheets[contents+"Music.ccd"] = scan.DiscSheet{Tracks: []scan.DiscTrack{{Number: 1, Audio: true, Frames: 24_406}, {Number: 2, Audio: true, Frames: 24_241}}}
+	f.discs.Volumes[contents+"Game.img"] = scan.DiscVolume{Readable: true, Raw: true, Subchannel: true, Format: "iso9660", Label: "GAME", Bytes: 4096}
+	f.stock(work+"/nested/1.iso", "Iso", file("SETUP.EXE", 268))
+	got, err := f.read(t)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{
+		"disc Music.img", "file Music.ccd", "file Music.sub", "disc Game.img", "file Game.sub", "file movie.img",
+		"file Game.img/SETUP.EXE", "track Music.img/Track 01", "track Music.img/Track 02",
+	}
+	listing := tree(got.Draft)
+	slices.Sort(listing)
+	slices.Sort(want)
+	if !slices.Equal(listing, want) {
+		t.Fatalf("unexpected tree %v", listing)
+	}
+	music := entryNamed(got.Draft, "Music.img")
+	if music.Unreadable || music.Detail.Format != scan.DiscFormatAudio || !slices.Equal(music.Detail.Signals, []string{scan.SignalAudio, scan.SignalSubchannel}) {
+		t.Fatalf("a disc of audio tracks has nothing to list and is not a failure: %+v", music)
+	}
+	if track := entryNamed(got.Draft, "Track 01"); track.Detail.Seconds != 325 {
+		t.Fatalf("unexpected track %+v", track)
+	}
+	if game := entryNamed(got.Draft, "Game.img"); game.Kind != inspection.KindDisc || game.Unreadable || game.Detail.Files != 1 {
+		t.Fatalf("an .img beside its subchannel data is an image even without a sheet: %+v", game)
+	}
+}
