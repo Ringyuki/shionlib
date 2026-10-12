@@ -1,17 +1,5 @@
-import { useSyncExternalStore } from 'react'
-
-const query = '(min-width: 1024px)'
-
-function subscribe(onChange: () => void) {
-  const media = window.matchMedia(query)
-  media.addEventListener('change', onChange)
-  return () => media.removeEventListener('change', onChange)
-}
+import { useMedia } from '~/shared/ui/use-media'
 
 export function useDesktop(): boolean {
-  return useSyncExternalStore(
-    subscribe,
-    () => window.matchMedia(query).matches,
-    () => true,
-  )
+  return useMedia('(min-width: 1024px)', true)
 }

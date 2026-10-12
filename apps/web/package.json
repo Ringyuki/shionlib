@@ -37,6 +37,7 @@
     "@tiptap/react": "3.31.4",
     "cap-widget": "0.1.58",
     "compression": "^1.8.2",
+    "echarts": "^6.1.0",
     "express": "^5.2.1",
     "hash-wasm": "^4.12.0",
     "isbot": "^5.2.2",

@@ -25,6 +25,11 @@ export type NavSection = {
   entries: NavEntry[]
 }
 
+export type ShellArea<Content> = {
+  title: Content
+  navigation: (rail: boolean) => Content
+}
+
 export const sidebarModes = ['expanded', 'rail'] as const
 
 export type SidebarMode = (typeof sidebarModes)[number]
@@ -62,8 +67,13 @@ export function sitePaths(locale: Locale) {
     settings: `/${locale}/user/settings`,
     friendLinks: `/${locale}/friend-link`,
     sponsor: `/${locale}/sponsor`,
+    messages: `/${locale}/message`,
   }
 }
+
+export const adminPath = '/zh/admin'
+
+export const sitePath = '/'
 
 export function navSections(locale: Locale, viewerId: number | null, unread = 0): NavSection[] {
   const paths = sitePaths(locale)
@@ -88,7 +98,7 @@ export function navSections(locale: Locale, viewerId: number | null, unread = 0)
       entries: [
         entry('favorites', paths.favorites),
         entry('uploads', paths.uploads),
-        entry('messages', `/${locale}/message`, false, unread),
+        entry('messages', paths.messages, false, unread),
         entry('settings', paths.settings),
       ],
     },

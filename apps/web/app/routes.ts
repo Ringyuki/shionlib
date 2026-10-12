@@ -3,6 +3,10 @@ import { type RouteConfig, index, layout, route } from '@react-router/dev/routes
 export default [
   index('routes/locale-redirect.ts'),
   route('user/password/forget', 'routes/locale-redirect.ts', { id: 'password-reset-locale' }),
+  route('admin/*', 'routes/locale-redirect.ts', { id: 'admin-locale' }),
+  route('resources/admin/reports/review', 'routes/resources.admin.reports.review.ts'),
+  route('resources/admin/checks/review', 'routes/resources.admin.checks.review.ts'),
+  route('resources/admin/checks/stalled', 'routes/resources.admin.checks.stalled.ts'),
   route('resources/comments', 'routes/resources.comments.ts'),
   route('resources/comments/edit', 'routes/resources.comments.edit.ts'),
   route('resources/comments/remove', 'routes/resources.comments.remove.ts'),
@@ -91,6 +95,12 @@ export default [
         route('docs', 'routes/docs.tsx'),
         route('docs/:category/:name', 'routes/doc.tsx'),
         route('friend-link', 'routes/friend-link.tsx'),
+        route('admin', 'routes/admin.tsx', [
+          index('routes/admin.overview.tsx'),
+          route('reports', 'routes/admin.reports.tsx'),
+          route('checks', 'routes/admin.checks.tsx'),
+          route('malware-scans', 'routes/admin.malware-scans.ts'),
+        ]),
         route('game/:id/walkthrough/edit', 'routes/walkthrough.write.tsx'),
         route('game/:id/walkthrough/new', 'routes/walkthrough-legacy.ts', {
           id: 'walkthrough-new-legacy',

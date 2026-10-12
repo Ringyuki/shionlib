@@ -11,13 +11,14 @@ import {
   Tooltip,
   useImageResolver,
 } from '@hina-ui/react'
-import { Bookmark, ChevronsUpDown, LogIn, LogOut, Settings, UserRound } from 'lucide-react'
+import { Bookmark, ChevronsUpDown, LogIn, LogOut, Settings, Shield, UserRound } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 import { useSignOut } from '~/features/auth'
+import { isStaff } from '~/features/viewer'
 import type { Schema } from '~/shared/api/types'
 import { useAuthGate } from '~/shared/ui/auth-gate'
-import { sitePaths } from '../shell'
+import { adminPath, sitePaths } from '../shell'
 import { SidebarLabel } from './sidebar-label'
 
 type AccountMenuProps = {
@@ -75,6 +76,11 @@ export function AccountMenu({ viewer, rail }: AccountMenuProps) {
           <DropdownMenuItem icon={<Settings />} onSelect={() => navigate(paths.settings)}>
             {t('nav.settings')}
           </DropdownMenuItem>
+          {isStaff(viewer) && (
+            <DropdownMenuItem icon={<Shield />} onSelect={() => navigate(adminPath)}>
+              {t('admin')}
+            </DropdownMenuItem>
+          )}
           <DropdownMenuSeparator />
           <DropdownMenuItem icon={<LogOut />} onSelect={() => void signOut()}>
             {t('signOut')}

@@ -3,7 +3,7 @@ import { useRef, useState, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'use-intl'
 import type { Schema } from '~/shared/api/types'
 import { BackdropSlot } from '~/shared/ui/backdrop'
-import { navSections, type SidebarMode } from '../shell'
+import { navSections, type ShellArea, type SidebarMode } from '../shell'
 import { useShellState } from '../use-shell-state'
 import { NavigationProgress } from './navigation-progress'
 import { clearOfFooter, SiteFooter } from './site-footer'
@@ -14,12 +14,13 @@ type SiteShellProps = {
   viewer: Schema<'UserMeDTO'> | null
   sidebar: SidebarMode
   unread: number
+  area?: ShellArea<ReactNode>
   children: ReactNode
 }
 
 export const mainScrollKey = 'main'
 
-export function SiteShell({ viewer, sidebar, unread, children }: SiteShellProps) {
+export function SiteShell({ viewer, sidebar, unread, area, children }: SiteShellProps) {
   const locale = useLocale()
   const t = useTranslations('shell')
   const shell = useRef<AppShellHandle>(null)
@@ -39,12 +40,13 @@ export function SiteShell({ viewer, sidebar, unread, children }: SiteShellProps)
         sidebarContent={
           <SiteSidebar
             sections={navSections(locale, viewer?.id ?? null, unread)}
+            area={area}
             viewer={viewer}
             mode={state.mode}
             onClose={state.closeMobile}
           />
         }
-        header={<SiteHeader />}
+        header={<SiteHeader area={area?.title} unread={unread} />}
       >
         <BackdropSlot value={backdrop}>
           <Flex aria-hidden className="sticky top-0 h-0 max-md:hidden">
@@ -59,11 +61,15 @@ export function SiteShell({ viewer, sidebar, unread, children }: SiteShellProps)
                 {children}
               </Stack>
             </Container>
-            <Flex className="bg-canvas mt-10">
-              <Container size="xl" className="px-4 pt-6 pb-6 sm:px-6 lg:pb-8">
-                <SiteFooter />
-              </Container>
-            </Flex>
+            {area === undefined ? (
+              <Flex className="bg-canvas mt-10">
+                <Container size="xl" className="px-4 pt-6 pb-6 sm:px-6 lg:pb-8">
+                  <SiteFooter />
+                </Container>
+              </Flex>
+            ) : (
+              <Flex className="h-6 shrink-0 lg:h-8" />
+            )}
           </Flex>
         </BackdropSlot>
       </AppShell>

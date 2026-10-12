@@ -1,8 +1,9 @@
 import { CloseButton, cn, Flex, Inline, ScrollArea, Stack } from '@hina-ui/react'
+import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 import type { Schema } from '~/shared/api/types'
-import { sitePaths, type NavSection, type SidebarMode } from '../shell'
+import { sitePaths, type NavSection, type ShellArea, type SidebarMode } from '../shell'
 import { useDesktop } from '../use-desktop'
 import { AccountMenu } from './account-menu'
 import { BrandLogo, Wordmark } from '~/shared/ui/brand'
@@ -11,12 +12,13 @@ import { UploadAction } from './upload-action'
 
 type SiteSidebarProps = {
   sections: NavSection[]
+  area: ShellArea<ReactNode> | undefined
   viewer: Schema<'UserMeDTO'> | null
   mode: SidebarMode
   onClose: () => void
 }
 
-export function SiteSidebar({ sections, viewer, mode, onClose }: SiteSidebarProps) {
+export function SiteSidebar({ sections, area, viewer, mode, onClose }: SiteSidebarProps) {
   const t = useTranslations('shell')
   const locale = useLocale()
   const desktop = useDesktop()
@@ -54,9 +56,11 @@ export function SiteSidebar({ sections, viewer, mode, onClose }: SiteSidebarProp
         </Link>
         {!desktop && <CloseButton className="ms-auto" onClick={onClose} />}
       </Flex>
-      <Stack gap="none" className={cn('shrink-0 pt-3', desktop && 'px-3')}>
-        <UploadAction rail={rail} />
-      </Stack>
+      {area === undefined && (
+        <Stack gap="none" className={cn('shrink-0 pt-3', desktop && 'px-3')}>
+          <UploadAction rail={rail} />
+        </Stack>
+      )}
       <ScrollArea shadow={false} className="min-h-0 flex-1">
         <Stack
           as="nav"
@@ -64,9 +68,11 @@ export function SiteSidebar({ sections, viewer, mode, onClose }: SiteSidebarProp
           aria-label={t('navigation')}
           className={cn('py-4', desktop && 'px-3')}
         >
-          {sections.map(section => (
-            <SidebarSection key={section.key} section={section} rail={rail} />
-          ))}
+          {area === undefined
+            ? sections.map(section => (
+                <SidebarSection key={section.key} section={section} rail={rail} />
+              ))
+            : area.navigation(rail)}
         </Stack>
       </ScrollArea>
       <Stack gap="none" className={cn('border-line shrink-0 border-t py-2', desktop && 'px-3')}>

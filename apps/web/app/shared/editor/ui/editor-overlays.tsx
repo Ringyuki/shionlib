@@ -1,10 +1,10 @@
 import { Popover, Sheet } from '@hina-ui/react'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
+import { useNarrow } from '~/shared/ui/use-media'
 import { useStore, type LinkOverlay } from '../session'
 import type { EditorHandle } from '../use-rich-editor'
 import { LinkForm } from './link-form'
-import { useNarrow } from './use-narrow'
 
 const keep = (event: { preventDefault: () => void }) => event.preventDefault()
 

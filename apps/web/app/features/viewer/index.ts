@@ -1,4 +1,4 @@
-export { contentLimits, type ContentLimit, type Viewer } from './viewer'
+export { contentLimits, isStaff, isSuperAdmin, type ContentLimit, type Viewer } from './viewer'
 export { contentLimitFrom } from './viewer.schema'
 export { loadViewer } from './viewer.use-cases'
 export { useShowsExplicit } from './use-explicit'

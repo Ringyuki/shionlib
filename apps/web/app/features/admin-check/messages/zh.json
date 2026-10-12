@@ -1,0 +1,90 @@
+{
+  "title": "文件检查",
+  "fileFacts": "{size} · {game}",
+  "separator": "，",
+  "system": "系统",
+  "column": {
+    "file": "文件",
+    "found": "检出",
+    "reason": "原因",
+    "uploader": "上传者",
+    "scanned": "扫描时间",
+    "uploaded": "上传时间",
+    "deadline": "期限",
+    "actions": "操作",
+    "outcome": "结果",
+    "reviewer": "处理人",
+    "time": "时间"
+  },
+  "decision": {
+    "ALLOW": "放行",
+    "DELETE": "删除"
+  },
+  "outcome": {
+    "PENDING": "等待复核",
+    "ADMIN_ALLOW": "管理员放行",
+    "ADMIN_DELETE": "管理员删除",
+    "TIMEOUT_AUTO_DELETE": "超时自动删除"
+  },
+  "reviewed": "{decision, select, ALLOW {文件已放行} other {文件已删除}}",
+  "issue": {
+    "decision": "请选择复核结果"
+  },
+  "waiting": {
+    "title": "等待复核",
+    "description": "病毒扫描标记的文件，复核结束前整个资源仅上传者可见",
+    "empty": "没有等待复核的文件"
+  },
+  "quick": {
+    "title": "{decision, select, ALLOW {确定要放行「{name}」吗？} other {确定要删除「{name}」吗？}}",
+    "description": "{decision, select, ALLOW {判定为误报，资源恢复公开，文件带有「可能存在病毒」标记} other {确认含有病毒，资源下架并清除文件，上传者记一次违规}}"
+  },
+  "stalled": {
+    "title": "检查未完成",
+    "description": "连续失败后暂停检查的文件",
+    "empty": "没有暂停检查的文件",
+    "attempts": "已尝试 {count, number} 次{known, select, true {，最近一次在 <time></time>} other {}}",
+    "recheck": "重新检查",
+    "remove": "移除",
+    "confirm": "{action, select, recheck {确定要重新检查「{name}」吗？} other {确定要移除「{name}」吗？}}",
+    "confirmHint": "{action, select, recheck {失败次数清零，文件及其同组的分卷重新排队检查} other {文件及其同组的分卷判为未通过并清除，无法恢复}}",
+    "done": "{action, select, recheck {已重新开始检查} other {文件已移除}}"
+  },
+  "records": {
+    "title": "复核记录",
+    "filter": "结果",
+    "every": "全部结果",
+    "empty": "{filtered, select, true {没有符合条件的记录} other {暂无复核记录}}"
+  },
+  "pane": {
+    "title": "复核文件",
+    "viewTitle": "复核记录",
+    "number": "病毒复核 #{id}",
+    "deadline": "<time></time>仍未复核的，文件将被自动删除，并按「确认含有病毒」处理",
+    "file": "文件",
+    "name": "文件名",
+    "openResource": "打开资源页",
+    "size": "大小",
+    "hash": "{algorithm, select, sha256 {SHA-256} blake3 {BLAKE3} other {校验值}}",
+    "uploader": "上传者",
+    "uploaderFacts": "{tier, select, new {，新上传者} trusted {，可信上传者} admin {，管理员} other {，普通上传者}}，已发布 {approved, number} 个资源，{violations, plural, =0 {没有违规记录} other {# 次违规}}",
+    "found": "检出内容",
+    "review": "复核",
+    "decision": {
+      "ALLOW": "放行",
+      "DELETE": "删除"
+    },
+    "decisionHint": {
+      "ALLOW": "判定为误报。资源恢复公开，文件带有「可能存在病毒」标记，并注明检出的名称。",
+      "DELETE": "确认含有病毒。资源下架并清除文件，上传者记一次违规；累计 {threshold, number} 次时自动封禁 {days, number} 天。"
+    },
+    "note": "复核说明",
+    "notePlaceholder": "选填",
+    "noNote": "未填写",
+    "notify": "通知上传者",
+    "outcome": "结果",
+    "reviewer": "处理人",
+    "system": "系统",
+    "reviewed": "处理时间"
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "title": "管理后台",
+  "back": "返回站点",
+  "nav": {
+    "overview": "概览",
+    "reports": "举报",
+    "checks": "文件检查"
+  },
+  "group": {
+    "review": "审核"
+  },
+  "pendingCount": "{count, number} 项待处理",
+  "total": "共 {count, number} 条",
+  "cancel": "取消",
+  "submit": "提交",
+  "overview": {
+    "title": "概览",
+    "pending": {
+      "title": "待处理",
+      "empty": "没有待处理的事项",
+      "column": {
+        "kind": "类型",
+        "content": "内容",
+        "submitter": "提交者",
+        "submitted": "提交时间",
+        "deadline": "期限"
+      },
+      "kind": {
+        "malware": "病毒复核",
+        "stalled": "检查未完成",
+        "report": "举报"
+      },
+      "detected": "病毒扫描检出 {names}",
+      "stalled": "{reason}，已尝试 {count, number} 次",
+      "reported": "{reason}：{detail}",
+      "autoDelete": "<time></time>自动删除",
+      "autoRemove": "<time></time>清除",
+      "order": "按期限和提交时间排列",
+      "rest": "按期限和提交时间排列，另有 {items} 未列出",
+      "restOf": {
+        "malware": "{count, number} 个等待复核的文件",
+        "stalled": "{count, number} 个检查未完成的文件",
+        "report": "{count, number} 条举报"
+      },
+      "separator": "、",
+      "all": {
+        "malware": "查看全部文件检查",
+        "stalled": "查看全部文件检查",
+        "report": "查看全部举报"
+      }
+    },
+    "site": {
+      "title": "站点数据",
+      "range": "时间范围",
+      "days": "{count, number} 天",
+      "games": "游戏",
+      "resources": "资源",
+      "users": "用户",
+      "comments": "评论",
+      "downloads": "累计下载",
+      "views": "累计浏览",
+      "added": "今天新增 {count, number}",
+      "today": "今天 {count, number}",
+      "chart": "每日下载与浏览",
+      "series": {
+        "downloads": "下载",
+        "views": "浏览"
+      }
+    },
+    "storage": {
+      "title": "上传与存储",
+      "spool": "暂存盘",
+      "usage": "{used} / {total}",
+      "reserve": "可用空间低于 {size} 时不再接受新的上传",
+      "uploading": "正在上传",
+      "awaitingCheck": "等待检查",
+      "awaitingStore": "等待保存",
+      "stored": "已存储",
+      "files": "{count, number} 个文件",
+      "filesOf": "{count, number} 个文件，{size}",
+      "sizeOf": "{size}，{count, number} 个文件"
+    }
+  }
+}

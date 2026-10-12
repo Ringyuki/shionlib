@@ -30,6 +30,7 @@ Every user flow a phase ports gets Playwright specs in `apps/web/e2e` in the sam
   - Games 1 to 6.
   - Resource 1 on game 1, uploaded by `e2e_mutable_user`, can be reported.
   - The file on game 3 is held for malware review, so its resource shows only to its uploader, `e2e_admin`.
+  - That resource also carries a report from `e2e_user` awaiting review (「Seeded report for the admin review flow.」), and game 3 has a second, unpublished resource whose file `seeded-stalled-sample.7z` is paused after six failed checks. Both are for `admin.spec.ts`: it reviews the report (valid, lowest level, nothing removed, nobody notified) and starts the stalled check again, but only opens and cancels the review of the held file, which `game.spec.ts` needs to stay held.
   - The default upload chunk size is 1 MiB, so a file of a few MiB uploads in several chunks.
   - Accounts are `e2e_user` (member), `e2e_mutable_user` (owner of resource 1) and `e2e_admin`. All use the password `ShionlibE2E123!` (`E2E_USER_PASSWORD`).
   - Other seeded accounts serve specs that sign in or out on their own.

@@ -16,3 +16,17 @@ export function showsExplicit(viewer: Pick<Viewer, 'content_limit'> | null): boo
 export const languages = constraints.UpdateLangInputBody.lang.enum
 
 export type Language = (typeof languages)[number]
+
+const adminRole = 2
+
+const superAdminRole = 3
+
+type Ranked = Pick<Viewer, 'role'> | null
+
+export function isStaff(viewer: Ranked): boolean {
+  return (viewer?.role ?? 0) >= adminRole
+}
+
+export function isSuperAdmin(viewer: Ranked): boolean {
+  return (viewer?.role ?? 0) >= superAdminRole
+}
