@@ -158,6 +158,7 @@ type GameResource struct {
 	Creator  user.Summary
 	Files    []GameFile
 	Comments int
+	Awaited  *AwaitedVolumes
 }
 
 func (r GameResource) UnderReview() bool {

@@ -96,7 +96,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		Settings:   shared.Settings,
 		Now:        shared.Now,
 	})
-	resourceDetails := download.NewDetailService(downloadRepo, shared.GameCards, commentpg.NewRepository(infra.Ent))
+	resourceDetails := download.NewDetailService(downloadRepo, shared.GameCards, commentpg.NewRepository(infra.Ent), shared.Settings)
 	shared.Resources = resourceDetails
 	vendorClient := httpclient.New(httpclient.Options{Timeout: vendorTimeout})
 	links := download.NewLinkService(

@@ -61,7 +61,7 @@ func (s *BackfillService) inspect(ctx context.Context, unit Unit) (BackfillOutco
 		return "", err
 	}
 	defer func() { _ = checks.workspace.Discard(context.WithoutCancel(ctx), workspace) }()
-	local := Unit{Scheme: unit.Scheme, Missing: unit.Missing, Files: slices.Clone(unit.Files)}
+	local := Unit{Scheme: unit.Scheme, Missing: unit.Missing, Absent: unit.Absent, Files: slices.Clone(unit.Files)}
 	for i, file := range local.Files {
 		local.Files[i].Path = filepath.Join(workspace, storedDir, strconv.Itoa(file.ID))
 		err := s.objects.Fetch(ctx, file.StorageKey, local.Files[i].Path)

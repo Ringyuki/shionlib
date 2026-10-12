@@ -270,7 +270,7 @@ func (s *Service) alertStalled(ctx context.Context, unit Unit, failure CheckFail
 
 func (s *Service) check(ctx context.Context, unit Unit) error {
 	if !unit.Complete() {
-		if s.now().Before(unit.Oldest().Add(IncompleteSetTimeout.Read(s.settings))) {
+		if s.now().Before(unit.Oldest().Add(download.IncompleteSetTimeout.Read(s.settings))) {
 			return nil
 		}
 		return s.reject(ctx, unit, download.CheckIncompleteSet)
@@ -510,8 +510,8 @@ func (s *Service) rejectWhen(ctx context.Context, unit Unit, status download.Che
 			"file_check_status": int(status),
 			"reason":            checkReason(status),
 		}
-		if len(unit.Missing) > 0 {
-			meta["missing_volumes"] = unit.Missing
+		if len(unit.Absent) > 0 {
+			meta["missing_volumes"] = unit.Absent
 		}
 		return s.messages.Send(ctx, message.NewMessage{
 			Type:       message.TypeSystem,

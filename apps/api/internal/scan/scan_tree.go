@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 )
 
 const MaxNestingDepth = 3
@@ -22,8 +24,8 @@ func NestedArchive(name string) bool {
 	if !slices.Contains(nestedArchiveExtensions, extension(name)) {
 		return false
 	}
-	volume, numbered := ParseVolume(path.Base(name))
-	return !numbered || volume.Scheme != SchemeRarParts || volume.Index == 1
+	volume, numbered := download.ParseVolume(path.Base(name))
+	return !numbered || volume.Scheme != download.SchemeRarParts || volume.Index == 1
 }
 
 func cleanPath(raw string) string {

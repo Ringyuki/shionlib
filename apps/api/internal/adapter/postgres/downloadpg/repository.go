@@ -104,6 +104,7 @@ func (r *Repository) gameResources(ctx context.Context, rows []*ent.GameDownload
 				RecentHistory: history,
 			}
 		}
+		resource.Files = download.Arranged(resource.Files, func(file download.GameFile) string { return file.Name })
 		resources[i] = resource
 	}
 	return resources, nil

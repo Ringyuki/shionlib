@@ -13,6 +13,12 @@ var (
 		Description: "单个资源最多可包含的文件数量，分卷计入其中。",
 		Default:     100, Min: 1, Max: 1000,
 	})
+	IncompleteSetTimeout = setting.Duration(setting.Spec[time.Duration]{
+		Name:        "scan.incomplete_set_timeout",
+		Label:       "等待补齐分卷的时长",
+		Description: "分卷压缩包缺少分卷时，等待上传者补充上传的时长。超时后仍不完整的，整组文件将被移除。",
+		Default:     24 * time.Hour, Min: time.Hour, Max: 30 * 24 * time.Hour,
+	})
 	LinkExpiresIn = setting.Duration(setting.Spec[time.Duration]{
 		Name:        "download.link_expires_in",
 		Label:       "下载链接基础有效期",

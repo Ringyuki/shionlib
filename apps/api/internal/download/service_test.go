@@ -81,7 +81,7 @@ func newFixture() fixture {
 		Settings:   settingtest.Set(settingtest.Source{}, download.MaxFilesPerResource, 3),
 		Now:        func() time.Time { return now },
 	})
-	f.details = download.NewDetailService(repo, cards, discussions)
+	f.details = download.NewDetailService(repo, cards, discussions, settingtest.Source{})
 	return f
 }
 
@@ -131,6 +131,65 @@ func TestGameResourcesHidesUnfinishedFilesFromOthers(t *testing.T) {
 	}
 	if uploaded := again[0].Files[0].Uploaded(); !uploaded.Equal(now) {
 		t.Fatalf("a replacement moves the upload date: %s", uploaded)
+	}
+}
+
+func TestFilesWaitingForAVolumeSayWhichOneAndUntilWhen(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	uploaded := now.Add(-time.Hour)
+	pending := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID})
+	third := f.repo.SeedFile(download.File{ResourceID: pending.ID, Name: "ゲーム.part3.rar", Status: download.FileOnServer, CreatorID: owner.UserID, Created: now})
+	first := f.repo.SeedFile(download.File{ResourceID: pending.ID, Name: "ゲーム.part1.rar", Status: download.FileOnServer, CreatorID: owner.UserID, Created: uploaded})
+	extra := f.repo.SeedFile(download.File{ResourceID: pending.ID, Name: "patch.zip", Status: download.FileOnServer, CreatorID: owner.UserID, Created: uploaded})
+
+	mine, err := f.service.GameResources(ctx, owner, 10)
+	if err != nil || len(mine) != 1 {
+		t.Fatalf("the uploader sees the resource: %+v %v", mine, err)
+	}
+	resource := mine[0]
+	if names := []string{resource.Files[0].Name, resource.Files[1].Name, resource.Files[2].Name}; !slices.Equal(names, []string{"ゲーム.part1.rar", "ゲーム.part3.rar", "patch.zip"}) {
+		t.Fatalf("the volumes come together and in their order, before what was added after the first of them: %v", names)
+	}
+	awaited := resource.Awaited
+	if awaited == nil || !slices.Equal(awaited.Names, []string{"ゲーム.part2.rar"}) || !awaited.Deadline.Equal(uploaded.Add(24*time.Hour)) {
+		t.Fatalf("the missing volume and the day the set is removed: %+v", awaited)
+	}
+	stages := map[int]download.Stage{}
+	for _, file := range resource.Files {
+		stages[file.ID] = resource.StageOf(file)
+	}
+	if stages[first.ID] != download.StageAwaitingVolumes || stages[third.ID] != download.StageAwaitingVolumes || stages[extra.ID] != download.StageChecking {
+		t.Fatalf("only the volumes of the incomplete set wait: %v", stages)
+	}
+	own, _, err := f.service.OwnResources(ctx, owner, download.OwnQuery{Scope: download.OwnAll}, download.Page{Number: 1, Size: 10})
+	if err != nil || len(own) != 1 || own[0].Awaited == nil || !slices.Equal(own[0].Awaited.Names, awaited.Names) {
+		t.Fatalf("the uploads list says it too: %+v %v", own, err)
+	}
+	detail, err := f.details.Detail(ctx, owner, pending.ID)
+	if err != nil || detail.Awaited == nil || !detail.Awaited.Deadline.Equal(awaited.Deadline) {
+		t.Fatalf("and the page of the resource: %+v %v", detail.Awaited, err)
+	}
+
+	f.repo.SeedFile(download.File{ResourceID: pending.ID, Name: "ゲーム.part2.rar", Status: download.FileOnServer, CreatorID: owner.UserID, Created: now})
+	completed, _ := f.service.GameResources(ctx, owner, 10)
+	if completed[0].Awaited != nil || completed[0].StageOf(completed[0].Files[0]) != download.StageChecking {
+		t.Fatalf("a completed set waits for nothing: %+v", completed[0].Awaited)
+	}
+	if names := []string{completed[0].Files[0].Name, completed[0].Files[1].Name, completed[0].Files[2].Name}; !slices.Equal(names, []string{"ゲーム.part1.rar", "ゲーム.part2.rar", "ゲーム.part3.rar"}) {
+		t.Fatalf("the volume added last takes its place: %v", names)
+	}
+}
+
+func TestStoredVolumesDoNotCountAsWaiting(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	published := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID, PublishedAt: ptr(now)})
+	f.repo.SeedFile(download.File{ResourceID: published.ID, Name: "g.part1.rar", Status: download.FileInObjectStore, CheckStatus: download.CheckOK, CreatorID: owner.UserID})
+	f.repo.SeedFile(download.File{ResourceID: published.ID, Name: "g.part3.rar", Status: download.FileInObjectStore, CheckStatus: download.CheckOK, CreatorID: owner.UserID})
+	seen, err := f.service.GameResources(ctx, other, 10)
+	if err != nil || len(seen) != 1 || seen[0].Awaited != nil {
+		t.Fatalf("what is stored was checked as it is: %+v %v", seen, err)
 	}
 }
 

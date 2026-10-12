@@ -26,12 +26,6 @@ var (
 		Label:   "自动封禁天数",
 		Default: 30, Min: 1, Max: 3650,
 	})
-	IncompleteSetTimeout = setting.Duration(setting.Spec[time.Duration]{
-		Name:        "scan.incomplete_set_timeout",
-		Label:       "等待补齐分卷的时长",
-		Description: "分卷压缩包缺少分卷时，等待上传者补充上传的时长。超时后仍不完整的，整组文件将被移除。",
-		Default:     day, Min: time.Hour, Max: 30 * day,
-	})
 	CheckAttempts = setting.Int(setting.Spec[int]{
 		Name:        "scan.check_attempts",
 		Label:       "检查失败的次数上限",

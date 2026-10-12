@@ -8,32 +8,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/scan"
 )
 
-func TestParseVolume(t *testing.T) {
-	cases := map[string]scan.Volume{
-		"Game.part1.rar":   {Scheme: scan.SchemeRarParts, Base: "game", Index: 1},
-		"Game.PART012.RAR": {Scheme: scan.SchemeRarParts, Base: "game", Index: 12},
-		"ゲーム.rar":          {Scheme: scan.SchemeRarLegacy, Base: "ゲーム", Index: 1},
-		"ゲーム.r00":          {Scheme: scan.SchemeRarLegacy, Base: "ゲーム", Index: 2},
-		"ゲーム.r09":          {Scheme: scan.SchemeRarLegacy, Base: "ゲーム", Index: 11},
-		"game.7z.001":      {Scheme: scan.SchemeSplit, Base: "game.7z", Index: 1},
-		"game.iso.010":     {Scheme: scan.SchemeSplit, Base: "game.iso", Index: 10},
-		"game.z01":         {Scheme: scan.SchemeZipSplit, Base: "game", Index: 1},
-	}
-	for name, want := range cases {
-		if got, ok := scan.ParseVolume(name); !ok || got != want {
-			t.Fatalf("%s: got %+v %v, want %+v", name, got, ok, want)
-		}
-	}
-	if got, ok := scan.ParseVolume("game.zip"); !ok || got.Scheme != scan.SchemeZipSplit || got.Base != "game" {
-		t.Fatalf("a zip may close a split zip: %+v %v", got, ok)
-	}
-	for _, name := range []string{"game.7z", "readme.txt", "game.000", "setup.exe"} {
-		if got, ok := scan.ParseVolume(name); ok {
-			t.Fatalf("%s is not a volume: %+v", name, got)
-		}
-	}
-}
-
 func files(names ...string) []scan.PendingFile {
 	out := make([]scan.PendingFile, len(names))
 	for i, name := range names {
@@ -85,7 +59,7 @@ func TestUnitsReportMissingVolumes(t *testing.T) {
 	}
 	for name, tc := range cases {
 		units := scan.Units(files(tc.names...))
-		if len(units) != 1 || units[0].Complete() || !slices.Equal(units[0].Missing, tc.missing) {
+		if len(units) != 1 || units[0].Complete() || !slices.Equal(units[0].Missing, tc.missing) || len(units[0].Absent) != len(tc.missing) {
 			t.Fatalf("%s: %+v", name, units)
 		}
 	}

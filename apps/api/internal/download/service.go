@@ -83,6 +83,7 @@ func (s *Service) GameResources(ctx context.Context, viewer actor.Actor, gameID 
 			return f.Status != FileInObjectStore && f.CreatorID != viewer.UserID
 		})
 		if len(resource.Files) > 0 {
+			resource.Awaited = resource.awaiting(IncompleteSetTimeout.Read(s.settings))
 			visible = append(visible, resource)
 		}
 	}
@@ -161,6 +162,7 @@ func (s *Service) OwnResources(ctx context.Context, who actor.Actor, query OwnQu
 	}
 	own := make([]OwnResource, len(resources))
 	for i, resource := range resources {
+		resource.Awaited = resource.awaiting(IncompleteSetTimeout.Read(s.settings))
 		own[i] = OwnResource{GameResource: resource, Game: cardOrStub(cards, resource.GameID)}
 	}
 	return own, total, nil

@@ -10,12 +10,13 @@ import (
 type Stage string
 
 const (
-	StageChecking    Stage = "checking"
-	StageStoring     Stage = "storing"
-	StageStored      Stage = "stored"
-	StageUnderReview Stage = "under_review"
-	StageStalled     Stage = "stalled"
-	StageRejected    Stage = "rejected"
+	StageChecking        Stage = "checking"
+	StageAwaitingVolumes Stage = "awaiting_volumes"
+	StageStoring         Stage = "storing"
+	StageStored          Stage = "stored"
+	StageUnderReview     Stage = "under_review"
+	StageStalled         Stage = "stalled"
+	StageRejected        Stage = "rejected"
 )
 
 type Rejection string

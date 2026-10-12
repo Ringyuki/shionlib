@@ -180,6 +180,7 @@ func (r *MemoryRepository) gameResource(resource download.Resource) download.Gam
 	for _, file := range r.filesOf(resource.ID) {
 		item.Files = append(item.Files, download.GameFile{File: file, MalwareCases: slices.Clone(r.cases[file.ID]), Creator: r.summary(file.CreatorID), RecentHistory: r.recentHistory(file.ID)})
 	}
+	item.Files = download.Arranged(item.Files, func(file download.GameFile) string { return file.Name })
 	return item
 }
 
@@ -511,7 +512,7 @@ func (r *MemoryRepository) CountDownload(_ context.Context, resourceID, gameID i
 func (r *MemoryRepository) ListFiles(_ context.Context, resourceID int) ([]download.File, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	return r.filesOf(resourceID), nil
+	return download.Arranged(r.filesOf(resourceID), func(file download.File) string { return file.Name }), nil
 }
 
 func (r *MemoryRepository) CountFiles(_ context.Context, resourceID int) (int, error) {

@@ -52,7 +52,7 @@ func (r *Repository) ListFiles(ctx context.Context, resourceID int) ([]download.
 	if err != nil {
 		return nil, fmt.Errorf("list files of download resource %d: %w", resourceID, err)
 	}
-	return toFiles(rows), nil
+	return download.Arranged(toFiles(rows), func(file download.File) string { return file.Name }), nil
 }
 
 func (r *Repository) CountFiles(ctx context.Context, resourceID int) (int, error) {

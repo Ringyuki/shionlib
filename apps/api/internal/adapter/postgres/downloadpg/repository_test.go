@@ -745,6 +745,39 @@ func TestUsersAndSessions(t *testing.T) {
 	}
 }
 
+func TestFilesOfAResourceComeInVolumeOrder(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture(t)
+	gameID, creator := f.db.Game(t), f.db.User(t)
+	resource := f.resource(t, gameID, creator)
+	for _, name := range []string{"ゲーム.r01", "patch.zip", "ゲーム.r00", "ゲーム.rar"} {
+		f.file(t, resource.ID, creator, name)
+	}
+	want := []string{"ゲーム.rar", "ゲーム.r00", "ゲーム.r01", "patch.zip"}
+	files, err := f.repo.ListFiles(ctx, resource.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	listed := make([]string, len(files))
+	for i, file := range files {
+		listed[i] = file.Name
+	}
+	if !slices.Equal(listed, want) {
+		t.Fatalf("listed %v, want %v", listed, want)
+	}
+	resources, err := f.repo.ListGameResources(ctx, gameID)
+	if err != nil || len(resources) != 1 {
+		t.Fatalf("resources %+v %v", resources, err)
+	}
+	shown := make([]string, len(resources[0].Files))
+	for i, file := range resources[0].Files {
+		shown[i] = file.Name
+	}
+	if !slices.Equal(shown, want) {
+		t.Fatalf("shown %v, want %v", shown, want)
+	}
+}
+
 func TestListAwaitingStore(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(t)

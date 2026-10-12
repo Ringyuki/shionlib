@@ -61,7 +61,7 @@ func setup(t *testing.T) env {
 	service := download.NewService(download.Deps{Repo: repo, Games: cards, Comments: discussions, Sessions: sessions{}, Activities: events, Messages: events, Tx: &txtest.Immediate{}, Queue: events, Store: store, Local: uploadtest.NewMemorySpool(), Settings: settings, Now: now})
 	challenge := &downloadtest.Challenge{Verdict: download.Verdict{Success: true}}
 	links := download.NewLinkService(repo, &txtest.Immediate{}, challenge, &downloadtest.Authorizer{}, &downloadtest.Sealer{}, settingtest.Source{}, download.LinkOptions{Mode: download.ModeDirect, CDNHost: "https://cdn.example.com/"}, now)
-	downloadhttp.NewHandler(service, download.NewDetailService(repo, cards, discussions), links, server.Builder).Register(server.API)
+	downloadhttp.NewHandler(service, download.NewDetailService(repo, cards, discussions, settings), links, server.Builder).Register(server.API)
 	return env{server: server, repo: repo, store: store, challenge: challenge}
 }
 
@@ -80,7 +80,7 @@ func TestGameResourcesShape(t *testing.T) {
 	e.seedStoredFile()
 	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/10/download-source"})
 	e.server.Expect(resp, http.StatusOK, 0)
-	want := `[{"id":1,"platform":["win"],"language":["jp"],"simulator":null,"note":"note","downloads":0,"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"published_at":"2026-10-03T01:02:03.000Z","created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","comments":3,"files":[{"id":1,"type":1,"file_name":"game.7z","file_size":2048,"file_url":null,"s3_file_key":"games/10/1/game.7z","hash_algorithm":"blake3","file_hash":"b3","file_status":3,"stage":"stored","rejection":null,"is_virus_false_positive":false,"malware_scan_cases":[],"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"latest_history":null,"uploaded":"2026-10-03T01:02:03.000Z","sha256":null,"inspection_id":null}]}]`
+	want := `[{"id":1,"platform":["win"],"language":["jp"],"simulator":null,"note":"note","downloads":0,"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"published_at":"2026-10-03T01:02:03.000Z","created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","comments":3,"files":[{"id":1,"type":1,"file_name":"game.7z","file_size":2048,"file_url":null,"s3_file_key":"games/10/1/game.7z","hash_algorithm":"blake3","file_hash":"b3","file_status":3,"stage":"stored","rejection":null,"is_virus_false_positive":false,"malware_scan_cases":[],"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"latest_history":null,"uploaded":"2026-10-03T01:02:03.000Z","sha256":null,"inspection_id":null}],"missing_volumes":[],"volumes_deadline":null}]`
 	if string(resp.Data) != want {
 		t.Fatalf("game resources\n got %s\nwant %s", resp.Data, want)
 	}
@@ -106,6 +106,32 @@ func TestDownloadLink(t *testing.T) {
 		t.Fatalf("link %s", resp.Data)
 	}
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/download/999/link?token=t"}), http.StatusNotFound, 450101)
+}
+
+func TestAnIncompleteSetTellsItsUploaderWhatIsMissing(t *testing.T) {
+	e := setup(t)
+	resource := e.repo.SeedResource(download.Resource{GameID: 10, CreatorID: creator.UserID, Platforms: []string{"win"}, Languages: []string{"jp"}})
+	e.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "game.r00", Status: download.FileOnServer, CreatorID: creator.UserID})
+	e.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "game.rar", Status: download.FileOnServer, CreatorID: creator.UserID})
+	e.repo.SeedFile(download.File{ResourceID: resource.ID, Name: "game.r02", Status: download.FileOnServer, CreatorID: creator.UserID})
+	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/game/10/download-source", As: &creator})
+	e.server.Expect(resp, http.StatusOK, 0)
+	body := string(resp.Data)
+	for _, part := range []string{
+		`"missing_volumes":["game.r01"],"volumes_deadline":"2026-10-04T01:02:03.000Z"`,
+		`"file_name":"game.rar"`,
+		`"stage":"awaiting_volumes"`,
+	} {
+		if !strings.Contains(body, part) {
+			t.Fatalf("missing %s in %s", part, body)
+		}
+	}
+	if first, second, third := strings.Index(body, `"file_name":"game.rar"`), strings.Index(body, `"file_name":"game.r00"`), strings.Index(body, `"file_name":"game.r02"`); first > second || second > third {
+		t.Fatalf("the volume that opens the set comes first: %s", body)
+	}
+	if strings.Contains(body, `"stage":"checking"`) {
+		t.Fatalf("every volume of the set waits: %s", body)
+	}
 }
 
 func TestCreateDownloadSource(t *testing.T) {
@@ -234,7 +260,7 @@ func TestOwnResources(t *testing.T) {
 
 	published := e.server.Do(apitest.Request{Method: http.MethodGet, Path: path + "?scope=published", As: &creator})
 	e.server.Expect(published, http.StatusOK, 0)
-	want := `{"items":[{"resource":{"id":1,"platform":["win"],"language":["jp"],"simulator":null,"note":"note","downloads":0,"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"published_at":"2026-10-03T01:02:03.000Z","created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","comments":3,"files":[{"id":1,"type":1,"file_name":"game.7z","file_size":2048,"file_url":null,"s3_file_key":"games/10/1/game.7z","hash_algorithm":"blake3","file_hash":"b3","file_status":3,"stage":"stored","rejection":null,"is_virus_false_positive":false,"malware_scan_cases":[],"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"latest_history":null,"uploaded":"2026-10-03T01:02:03.000Z","sha256":null,"inspection_id":null}]},"game":{"id":10,`
+	want := `{"items":[{"resource":{"id":1,"platform":["win"],"language":["jp"],"simulator":null,"note":"note","downloads":0,"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"published_at":"2026-10-03T01:02:03.000Z","created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","comments":3,"files":[{"id":1,"type":1,"file_name":"game.7z","file_size":2048,"file_url":null,"s3_file_key":"games/10/1/game.7z","hash_algorithm":"blake3","file_hash":"b3","file_status":3,"stage":"stored","rejection":null,"is_virus_false_positive":false,"malware_scan_cases":[],"creator":{"id":1,"name":"user1","avatar":null,"is_sponsor":false},"latest_history":null,"uploaded":"2026-10-03T01:02:03.000Z","sha256":null,"inspection_id":null}],"missing_volumes":[],"volumes_deadline":null},"game":{"id":10,`
 	if !strings.HasPrefix(string(published.Data), want) || !strings.HasSuffix(string(published.Data), `"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1}}`) {
 		t.Fatalf("published resources of the caller\n got %s\nwant %s", published.Data, want)
 	}

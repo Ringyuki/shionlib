@@ -365,7 +365,7 @@ func TestIncompleteSetsWaitForTheirMissingVolumes(t *testing.T) {
 	}
 	messages := late.events.Messages()
 	meta := decodeMeta(t, messages[0])
-	if len(messages) != 1 || meta["reason"] != "INCOMPLETE_SET" || fmt.Sprint(meta["missing_volumes"]) != "[2]" || meta["file_name"] != "game.part1.rar, game.part3.rar" {
+	if len(messages) != 1 || meta["reason"] != "INCOMPLETE_SET" || fmt.Sprint(meta["missing_volumes"]) != "[game.part2.rar]" || meta["file_name"] != "game.part1.rar, game.part3.rar" {
 		t.Fatalf("one message names the missing volumes: %+v %v", messages, meta)
 	}
 }

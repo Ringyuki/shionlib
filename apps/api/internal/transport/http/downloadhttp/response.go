@@ -37,7 +37,7 @@ type downloadFileDTO struct {
 	HashAlgorithm        upload.HashAlgorithm     `json:"hash_algorithm" enum:"sha256,blake3"`
 	FileHash             string                   `json:"file_hash"`
 	FileStatus           int                      `json:"file_status"`
-	Stage                download.Stage           `json:"stage" enum:"checking,storing,stored,under_review,stalled,rejected" doc:"Where the file is on its way to being downloadable: checking (waiting for or under its check), storing (passed, moving to object storage), stored, under_review (held for a malware review), stalled (its check kept failing and waits for an operator) or rejected (about to be removed)"`
+	Stage                download.Stage           `json:"stage" enum:"checking,awaiting_volumes,storing,stored,under_review,stalled,rejected" doc:"Where the file is on its way to being downloadable: checking (waiting for or under its check), awaiting_volumes (a volume of a set that lacks the volumes named in missing_volumes; checked once they are added), storing (passed, moving to object storage), stored, under_review (held for a malware review), stalled (its check kept failing and waits for an operator) or rejected (about to be removed)"`
 	Rejection            *download.Rejection      `json:"rejection" enum:"truncated,unsupported,encrypted,harmful,incomplete_set,abandoned" doc:"Why a rejected file was rejected (abandoned: its check could never be completed); null otherwise"`
 	IsVirusFalsePositive bool                     `json:"is_virus_false_positive"`
 	MalwareScanCases     []downloadMalwareCaseDTO `json:"malware_scan_cases"`
@@ -49,18 +49,20 @@ type downloadFileDTO struct {
 }
 
 type downloadResourceDTO struct {
-	ID          int                     `json:"id"`
-	Platform    []string                `json:"platform"`
-	Language    []string                `json:"language"`
-	Simulator   *string                 `json:"simulator"`
-	Note        *string                 `json:"note"`
-	Downloads   int                     `json:"downloads"`
-	Creator     userhttp.UserSummaryDTO `json:"creator"`
-	PublishedAt *time.Time              `json:"published_at" doc:"Null while the resource is still being checked; only its uploader sees it then"`
-	Created     time.Time               `json:"created"`
-	Updated     time.Time               `json:"updated"`
-	Comments    int                     `json:"comments" doc:"Visible comments made on the resource, replies included"`
-	Files       []downloadFileDTO       `json:"files"`
+	ID              int                     `json:"id"`
+	Platform        []string                `json:"platform"`
+	Language        []string                `json:"language"`
+	Simulator       *string                 `json:"simulator"`
+	Note            *string                 `json:"note"`
+	Downloads       int                     `json:"downloads"`
+	Creator         userhttp.UserSummaryDTO `json:"creator"`
+	PublishedAt     *time.Time              `json:"published_at" doc:"Null while the resource is still being checked; only its uploader sees it then"`
+	Created         time.Time               `json:"created"`
+	Updated         time.Time               `json:"updated"`
+	Comments        int                     `json:"comments" doc:"Visible comments made on the resource, replies included"`
+	Files           []downloadFileDTO       `json:"files" doc:"The files in the order they are read: the volumes of a set together and in their own order, sets and single files by the first of their files that was added"`
+	MissingVolumes  []string                `json:"missing_volumes" doc:"File names of the volumes that the sets still waiting for their check lack, as their siblings are named; empty when nothing is missing"`
+	VolumesDeadline *time.Time              `json:"volumes_deadline" doc:"When the files waiting for those volumes are removed if their set is still incomplete; null when nothing is missing"`
 }
 
 type downloadResourceDetailDTO struct {
@@ -242,18 +244,22 @@ type storageListingDTO struct {
 
 func toResourceDTO(r download.GameResource, now time.Time) downloadResourceDTO {
 	out := downloadResourceDTO{
-		ID:          r.ID,
-		Platform:    nonNil(r.Platforms),
-		Language:    nonNil(r.Languages),
-		Simulator:   r.Simulator,
-		Note:        r.Note,
-		Downloads:   r.Downloads,
-		Creator:     userhttp.ToUserSummary(r.Creator, now),
-		PublishedAt: r.PublishedAt,
-		Created:     r.Created,
-		Updated:     r.Updated,
-		Comments:    r.Comments,
-		Files:       make([]downloadFileDTO, len(r.Files)),
+		ID:             r.ID,
+		Platform:       nonNil(r.Platforms),
+		Language:       nonNil(r.Languages),
+		Simulator:      r.Simulator,
+		Note:           r.Note,
+		Downloads:      r.Downloads,
+		Creator:        userhttp.ToUserSummary(r.Creator, now),
+		PublishedAt:    r.PublishedAt,
+		Created:        r.Created,
+		Updated:        r.Updated,
+		Comments:       r.Comments,
+		Files:          make([]downloadFileDTO, len(r.Files)),
+		MissingVolumes: []string{},
+	}
+	if r.Awaited != nil {
+		out.MissingVolumes, out.VolumesDeadline = r.Awaited.Names, &r.Awaited.Deadline
 	}
 	for i, file := range r.Files {
 		cases := make([]downloadMalwareCaseDTO, len(file.MalwareCases))
@@ -270,7 +276,7 @@ func toResourceDTO(r download.GameResource, now time.Time) downloadResourceDTO {
 			HashAlgorithm:        file.HashAlgorithm,
 			FileHash:             file.Hash,
 			FileStatus:           file.Status,
-			Stage:                file.Stage(),
+			Stage:                r.StageOf(file),
 			IsVirusFalsePositive: file.FalsePositive,
 			MalwareScanCases:     cases,
 			Creator:              userhttp.ToUserSummary(file.Creator, now),

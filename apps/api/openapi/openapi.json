@@ -7033,9 +7033,10 @@
             ]
           },
           "stage": {
-            "description": "Where the file is on its way to being downloadable: checking (waiting for or under its check), storing (passed, moving to object storage), stored, under_review (held for a malware review), stalled (its check kept failing and waits for an operator) or rejected (about to be removed)",
+            "description": "Where the file is on its way to being downloadable: checking (waiting for or under its check), awaiting_volumes (a volume of a set that lacks the volumes named in missing_volumes; checked once they are added), storing (passed, moving to object storage), stored, under_review (held for a malware review), stalled (its check kept failing and waits for an operator) or rejected (about to be removed)",
             "enum": [
               "checking",
+              "awaiting_volumes",
               "storing",
               "stored",
               "under_review",
@@ -7564,6 +7565,7 @@
             "type": "integer"
           },
           "files": {
+            "description": "The files in the order they are read: the volumes of a set together and in their own order, sets and single files by the first of their files that was added",
             "items": {
               "$ref": "#/components/schemas/DownloadFileDTO"
             },
@@ -7577,6 +7579,16 @@
             "type": "integer"
           },
           "language": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "missing_volumes": {
+            "description": "File names of the volumes that the sets still waiting for their check lack, as their siblings are named; empty when nothing is missing",
             "items": {
               "type": "string"
             },
@@ -7617,6 +7629,14 @@
           "updated": {
             "format": "date-time",
             "type": "string"
+          },
+          "volumes_deadline": {
+            "description": "When the files waiting for those volumes are removed if their set is still incomplete; null when nothing is missing",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
@@ -7631,7 +7651,9 @@
           "created",
           "updated",
           "comments",
-          "files"
+          "files",
+          "missing_volumes",
+          "volumes_deadline"
         ],
         "type": "object"
       },

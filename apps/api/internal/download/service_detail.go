@@ -5,16 +5,18 @@ import (
 	"slices"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
 )
 
 type DetailService struct {
 	repo     Repository
 	games    GameCards
 	comments Discussions
+	settings setting.Source
 }
 
-func NewDetailService(repo Repository, games GameCards, comments Discussions) *DetailService {
-	return &DetailService{repo: repo, games: games, comments: comments}
+func NewDetailService(repo Repository, games GameCards, comments Discussions, settings setting.Source) *DetailService {
+	return &DetailService{repo: repo, games: games, comments: comments, settings: settings}
 }
 
 func (s *DetailService) Detail(ctx context.Context, viewer actor.Actor, id int) (ResourceDetail, error) {
@@ -77,5 +79,6 @@ func (s *DetailService) visibleResource(ctx context.Context, viewer actor.Actor,
 	if len(resource.Files) == 0 {
 		return GameResource{}, ErrResourceNotFound
 	}
+	resource.Awaited = resource.awaiting(IncompleteSetTimeout.Read(s.settings))
 	return resource, nil
 }
