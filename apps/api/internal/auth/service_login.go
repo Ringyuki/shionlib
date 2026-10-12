@@ -44,7 +44,7 @@ func (l *LoginService) Login(ctx context.Context, identifier, password string, d
 }
 
 func issueLogin(ctx context.Context, sessions *SessionService, accounts Accounts, account user.User, device Device, at time.Time) (Tokens, error) {
-	tokens, err := sessions.Issue(ctx, PrincipalOf(account), device)
+	tokens, err := sessions.Issue(ctx, account.ID, device)
 	if err != nil {
 		return Tokens{}, err
 	}

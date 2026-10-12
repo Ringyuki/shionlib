@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
-	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
 
 type SessionStatus int
@@ -49,14 +48,9 @@ type LiveFamily struct {
 	ExpiresAt time.Time
 }
 
-type Principal struct {
-	UserID       int
+type Standing struct {
 	Role         actor.Role
 	ContentLimit actor.ContentLimit
-}
-
-func PrincipalOf(u user.User) Principal {
-	return Principal{UserID: u.ID, Role: u.Role, ContentLimit: u.ContentLimit}
 }
 
 type Tokens struct {
@@ -89,13 +83,11 @@ type SessionPolicy struct {
 const TokenTypeAccess = "access"
 
 type AccessClaims struct {
-	UserID       int
-	SessionID    int
-	FamilyID     string
-	Role         actor.Role
-	ContentLimit actor.ContentLimit
-	IssuedAt     time.Time
-	ExpiresAt    time.Time
+	UserID    int
+	SessionID int
+	FamilyID  string
+	IssuedAt  time.Time
+	ExpiresAt time.Time
 }
 
 func (t refreshToken) format(version string) string {

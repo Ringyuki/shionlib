@@ -104,6 +104,10 @@ type AccessTokenCodec interface {
 	Verify(token string) (AccessClaims, error)
 }
 
+type Standings interface {
+	Standing(ctx context.Context, userID int) (Standing, bool, error)
+}
+
 type FamilyBlocklist interface {
 	Blocked(ctx context.Context, familyID string) (bool, error)
 	Block(ctx context.Context, familyID string, ttl time.Duration) error

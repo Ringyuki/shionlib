@@ -4,9 +4,11 @@ import { expectNotice } from './support/notices'
 
 const account = 'e2e_relation_user'
 
-async function openSettings(page: Page, section: string) {
+const untouched = 'e2e_permission_user'
+
+async function openSettings(page: Page, section: string, name = account) {
   await openSignIn(page, `/zh/user/settings/${section}`)
-  await signIn(page, account)
+  await signIn(page, name)
 }
 
 test('asks a guest to sign in before any setting', async ({ page }) => {
@@ -17,18 +19,26 @@ test('asks a guest to sign in before any setting', async ({ page }) => {
   await expect(page.getByText('登录后可以修改账号设置')).toBeVisible()
 })
 
+async function saved(page: Page, change: () => Promise<void>) {
+  const answered = page.waitForResponse(
+    response => response.url().includes('/resources/viewer/preferences') && response.ok(),
+  )
+  await change()
+  await answered
+}
+
 test('saves each site preference on its own', async ({ page }) => {
   await openSettings(page, 'site')
   const limits = page.getByRole('radiogroup', { name: '成人内容' })
-  await limits.getByRole('radio', { name: /^显示/ }).click()
+  await saved(page, () => limits.getByRole('radio', { name: /^显示/ }).click())
   await expect(limits.getByRole('radio', { name: /^显示/ })).toBeChecked()
   const onlyWithResources = page.getByRole('switch', { name: /仅显示有资源的游戏/ })
   await expect(onlyWithResources).toBeChecked()
-  await onlyWithResources.click()
+  await saved(page, () => onlyWithResources.click())
   await expect(onlyWithResources).not.toBeChecked()
   const backgrounds = page.getByRole('switch', { name: /显示其他用户的页面背景/ })
   await expect(backgrounds).toBeChecked()
-  await backgrounds.click()
+  await saved(page, () => backgrounds.click())
   await expect(backgrounds).not.toBeChecked()
   await page.getByText('深色', { exact: true }).click()
   await expect(page.locator('html')).toHaveClass(/dark/)
@@ -59,6 +69,35 @@ test('saves each site preference on its own', async ({ page }) => {
     'none',
   )
   expect(asked).toBe(0)
+})
+
+test('applies the adult content setting at once, in the session that changed it', async ({
+  page,
+}) => {
+  await openSettings(page, 'site', untouched)
+  const screenshots = page.getByRole('region', { name: '截图' })
+  const masks = screenshots.getByRole('button', { name: '成人内容，点击显示' })
+  const choose = async (label: RegExp) => {
+    await page.goto('/zh/user/settings/site')
+    const choice = page
+      .getByRole('radiogroup', { name: '成人内容' })
+      .getByRole('radio', { name: label })
+    await saved(page, () =>
+      expect(async () => {
+        await choice.click()
+        await expect(choice).toBeChecked({ timeout: 1000 })
+      }).toPass(),
+    )
+    await page.goto('/zh/game/1/info')
+  }
+  await choose(/^隐藏/)
+  await expect(screenshots.getByRole('button')).toHaveCount(9)
+  await choose(/^遮罩/)
+  await expect(screenshots.getByRole('button')).toHaveCount(10)
+  await expect(masks).toHaveCount(1)
+  await choose(/^显示/)
+  await expect(screenshots.getByRole('button')).toHaveCount(10)
+  await expect(masks).toHaveCount(0)
 })
 
 test('changes the language of the site and remembers it', async ({ page }) => {

@@ -36,7 +36,7 @@ func TestPasswordReset(t *testing.T) {
 	if ok, _ := f.reset.Check(ctx, token, "alice@example.test"); !ok {
 		t.Fatal("valid token rejected")
 	}
-	issued, _ := f.sessions.Issue(ctx, auth.PrincipalOf(alice), auth.Device{})
+	issued, _ := f.sessions.Issue(ctx, alice.ID, auth.Device{})
 	if err := f.reset.Reset(ctx, token, "alice@example.test", "NewSecret1"); err != nil {
 		t.Fatal(err)
 	}

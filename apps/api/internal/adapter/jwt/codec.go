@@ -7,19 +7,16 @@ import (
 
 	gojwt "github.com/golang-jwt/jwt/v5"
 
-	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/auth"
 )
 
 type claims struct {
-	Sub          int    `json:"sub"`
-	Sid          int    `json:"sid"`
-	Fid          string `json:"fid"`
-	Role         int    `json:"role"`
-	ContentLimit int    `json:"content_limit"`
-	Type         string `json:"type"`
-	Iat          int64  `json:"iat"`
-	Exp          int64  `json:"exp"`
+	Sub  int    `json:"sub"`
+	Sid  int    `json:"sid"`
+	Fid  string `json:"fid"`
+	Type string `json:"type"`
+	Iat  int64  `json:"iat"`
+	Exp  int64  `json:"exp"`
 }
 
 func (c claims) GetExpirationTime() (*gojwt.NumericDate, error) {
@@ -66,14 +63,12 @@ func (c *Codec) Sign(in auth.AccessClaims) (string, error) {
 		expires = issued.Add(c.ttl)
 	}
 	token := gojwt.NewWithClaims(gojwt.SigningMethodHS256, claims{
-		Sub:          in.UserID,
-		Sid:          in.SessionID,
-		Fid:          in.FamilyID,
-		Role:         int(in.Role),
-		ContentLimit: int(in.ContentLimit),
-		Type:         auth.TokenTypeAccess,
-		Iat:          issued.Unix(),
-		Exp:          expires.Unix(),
+		Sub:  in.UserID,
+		Sid:  in.SessionID,
+		Fid:  in.FamilyID,
+		Type: auth.TokenTypeAccess,
+		Iat:  issued.Unix(),
+		Exp:  expires.Unix(),
 	})
 	signed, err := token.SignedString(c.secret)
 	if err != nil {
@@ -97,12 +92,10 @@ func (c *Codec) Verify(raw string) (auth.AccessClaims, error) {
 		return auth.AccessClaims{}, errors.New("verify access token: unexpected token type")
 	}
 	return auth.AccessClaims{
-		UserID:       parsed.Sub,
-		SessionID:    parsed.Sid,
-		FamilyID:     parsed.Fid,
-		Role:         actor.Role(parsed.Role),
-		ContentLimit: actor.ContentLimit(parsed.ContentLimit),
-		IssuedAt:     time.Unix(parsed.Iat, 0).UTC(),
-		ExpiresAt:    time.Unix(parsed.Exp, 0).UTC(),
+		UserID:    parsed.Sub,
+		SessionID: parsed.Sid,
+		FamilyID:  parsed.Fid,
+		IssuedAt:  time.Unix(parsed.Iat, 0).UTC(),
+		ExpiresAt: time.Unix(parsed.Exp, 0).UTC(),
 	}, nil
 }

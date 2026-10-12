@@ -47,6 +47,7 @@ One word per concept. `internal/archtest` rejects the banned words below; review
 | `Meta` (`message.Meta`) | the free-form key/value document attached to a message; the web client reads its keys |
 | Actor | The caller (`actor.Actor`); the guest actor has `UserID == 0`. |
 | Content limit | The viewer's NSFW preference: 0 guest, 1 never show, 2 show with spoiler, 3 just show. "Includes rated" means 2 or 3. |
+| Standing | What a user is right now: role and content limit (`auth.Standing`). It is read for every authenticated request and never taken from a token, so a change applies to the next request. |
 | Catalog source | A pluggable provider of game, developer and character metadata (Hikarinagi Open API by default). |
 | AI provider | An upstream AI account configured in the admin panel: kind, base URL, API key, price multiplier (`ai.Provider`). |
 | AI model | The site's name for a model and its capabilities, optionally linked to a models.dev catalog entry (`ai.Model`). |

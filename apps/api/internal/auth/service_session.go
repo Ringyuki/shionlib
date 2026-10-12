@@ -56,7 +56,7 @@ func NewSessionService(repo SessionRepository, accounts Accounts, codec AccessTo
 	return &SessionService{repo: repo, accounts: accounts, codec: codec, hasher: hasher, families: families, replays: replays, tx: tx, now: now, policy: policy}
 }
 
-func (s *SessionService) Issue(ctx context.Context, who Principal, device Device) (Tokens, error) {
+func (s *SessionService) Issue(ctx context.Context, userID int, device Device) (Tokens, error) {
 	now := s.now()
 	token, hash, err := s.newSecret()
 	if err != nil {
@@ -65,7 +65,7 @@ func (s *SessionService) Issue(ctx context.Context, who Principal, device Device
 	familyID := uuid.NewString()
 	expires := s.refreshExpiry(now, now)
 	session, err := s.repo.CreateSession(ctx, NewSession{
-		UserID:      who.UserID,
+		UserID:      userID,
 		RefreshHash: hash,
 		Prefix:      token.prefix,
 		FamilyID:    familyID,
@@ -77,7 +77,7 @@ func (s *SessionService) Issue(ctx context.Context, who Principal, device Device
 	if err != nil {
 		return Tokens{}, err
 	}
-	return s.sign(who, session.ID, familyID, token, expires, now)
+	return s.sign(userID, session.ID, familyID, token, expires, now)
 }
 
 func (s *SessionService) Refresh(ctx context.Context, raw string, device Device) (Tokens, error) {
@@ -136,7 +136,7 @@ func (s *SessionService) Refresh(ctx context.Context, raw string, device Device)
 			outcome = user.ErrBanned
 			return s.blockFamily(ctx, old, []SessionStatus{SessionActive, SessionRotated}, reasonUserBanned, now)
 		}
-		result, err = s.rotate(ctx, old, PrincipalOf(account), device, now)
+		result, err = s.rotate(ctx, old, device, now)
 		return err
 	})
 	if err != nil {
@@ -188,7 +188,7 @@ func (s *SessionService) CleanupStale(ctx context.Context) error {
 	return err
 }
 
-func (s *SessionService) rotate(ctx context.Context, old Session, who Principal, device Device, now time.Time) (Tokens, error) {
+func (s *SessionService) rotate(ctx context.Context, old Session, device Device, now time.Time) (Tokens, error) {
 	started, found, err := s.repo.FamilyStartedAt(ctx, old.FamilyID)
 	if err != nil {
 		return Tokens{}, err
@@ -217,7 +217,7 @@ func (s *SessionService) rotate(ctx context.Context, old Session, who Principal,
 	if err := s.repo.MarkSessionRotated(ctx, old.ID, newer.ID, now); err != nil {
 		return Tokens{}, err
 	}
-	tokens, err := s.sign(who, newer.ID, old.FamilyID, token, expires, now)
+	tokens, err := s.sign(old.UserID, newer.ID, old.FamilyID, token, expires, now)
 	if err != nil {
 		return Tokens{}, err
 	}
@@ -281,16 +281,14 @@ func (s *SessionService) newSecret() (refreshToken, string, error) {
 	return token, hash, nil
 }
 
-func (s *SessionService) sign(who Principal, sessionID int, familyID string, token refreshToken, refreshExpires, now time.Time) (Tokens, error) {
+func (s *SessionService) sign(userID, sessionID int, familyID string, token refreshToken, refreshExpires, now time.Time) (Tokens, error) {
 	accessExpires := now.Add(s.policy.AccessTTL).Truncate(time.Second)
 	access, err := s.codec.Sign(AccessClaims{
-		UserID:       who.UserID,
-		SessionID:    sessionID,
-		FamilyID:     familyID,
-		Role:         who.Role,
-		ContentLimit: who.ContentLimit,
-		IssuedAt:     now,
-		ExpiresAt:    accessExpires,
+		UserID:    userID,
+		SessionID: sessionID,
+		FamilyID:  familyID,
+		IssuedAt:  now,
+		ExpiresAt: accessExpires,
 	})
 	if err != nil {
 		return Tokens{}, err

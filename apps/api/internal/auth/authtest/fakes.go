@@ -35,11 +35,64 @@ func (Hasher) Verify(hash, secret string) (bool, error) {
 type Codec struct{}
 
 func (Codec) Sign(claims auth.AccessClaims) (string, error) {
-	return fmt.Sprintf("access:%d:%d:%s:%d:%d:%d", claims.UserID, claims.SessionID, claims.FamilyID, claims.Role, claims.ContentLimit, claims.ExpiresAt.Unix()), nil
+	return fmt.Sprintf("access:%d:%d:%s:%d", claims.UserID, claims.SessionID, claims.FamilyID, claims.ExpiresAt.Unix()), nil
 }
 
-func (Codec) Verify(string) (auth.AccessClaims, error) {
-	return auth.AccessClaims{}, errors.New("not implemented")
+func (Codec) Verify(token string) (auth.AccessClaims, error) {
+	var (
+		claims  auth.AccessClaims
+		expires int64
+	)
+	parts := strings.Split(token, ":")
+	if len(parts) != 5 || parts[0] != "access" {
+		return auth.AccessClaims{}, errors.New("malformed access token")
+	}
+	if _, err := fmt.Sscan(parts[1], &claims.UserID); err != nil {
+		return auth.AccessClaims{}, err
+	}
+	if _, err := fmt.Sscan(parts[2], &claims.SessionID); err != nil {
+		return auth.AccessClaims{}, err
+	}
+	if _, err := fmt.Sscan(parts[4], &expires); err != nil {
+		return auth.AccessClaims{}, err
+	}
+	claims.FamilyID = parts[3]
+	claims.ExpiresAt = time.Unix(expires, 0).UTC()
+	return claims, nil
+}
+
+type Standings struct {
+	mu     sync.Mutex
+	known  map[int]auth.Standing
+	Fail   error
+	Lookup int
+}
+
+func NewStandings() *Standings {
+	return &Standings{known: map[int]auth.Standing{}}
+}
+
+func (s *Standings) Set(userID int, standing auth.Standing) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.known[userID] = standing
+}
+
+func (s *Standings) Remove(userID int) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.known, userID)
+}
+
+func (s *Standings) Standing(_ context.Context, userID int) (auth.Standing, bool, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.Lookup++
+	if s.Fail != nil {
+		return auth.Standing{}, false, s.Fail
+	}
+	standing, ok := s.known[userID]
+	return standing, ok, nil
 }
 
 type Blocklist struct {

@@ -127,7 +127,7 @@ func TestLoginErrors(t *testing.T) {
 func TestRefreshRotatesAndDetectsReuse(t *testing.T) {
 	e := setup(t, false)
 	alice := e.seed()
-	issued, err := e.sessions.Issue(context.Background(), auth.PrincipalOf(alice), auth.Device{})
+	issued, err := e.sessions.Issue(context.Background(), alice.ID, auth.Device{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -148,7 +148,7 @@ func TestRefreshRotatesAndDetectsReuse(t *testing.T) {
 func TestLogoutClearsCookies(t *testing.T) {
 	e := setup(t, true)
 	alice := e.seed()
-	issued, _ := e.sessions.Issue(context.Background(), auth.PrincipalOf(alice), auth.Device{})
+	issued, _ := e.sessions.Issue(context.Background(), alice.ID, auth.Device{})
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/auth/logout", Header: map[string]string{"Cookie": "shionlib_refresh_token=garbage"}}), http.StatusUnauthorized, 200103)
 	resp := e.server.Do(apitest.Request{Method: http.MethodPost, Path: "/auth/logout", Header: map[string]string{"Cookie": "shionlib_refresh_token=" + issued.RefreshToken}})
 	e.server.Expect(resp, http.StatusOK, 0)

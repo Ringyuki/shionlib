@@ -10,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/auth"
 )
 
@@ -38,14 +37,14 @@ func TestVerifyAcceptsTokensIssuedByLegacyBackend(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if claims.UserID != 42 || claims.SessionID != 7 || claims.FamilyID != "2b3c-family" || claims.Role != actor.RoleAdmin || claims.ContentLimit != actor.ContentLimitJustShow {
+	if claims.UserID != 42 || claims.SessionID != 7 || claims.FamilyID != "2b3c-family" {
 		t.Fatalf("unexpected claims %+v", claims)
 	}
 }
 
-func TestSignProducesLegacyCompatiblePayload(t *testing.T) {
+func TestSignSaysWhoTheTokenIsForAndNothingThatCanChange(t *testing.T) {
 	codec := NewCodec(secret, time.Hour, fixedNow)
-	token, err := codec.Sign(auth.AccessClaims{UserID: 5, SessionID: 9, FamilyID: "fam", Role: actor.RoleUser, ContentLimit: actor.ContentLimitNeverShow})
+	token, err := codec.Sign(auth.AccessClaims{UserID: 5, SessionID: 9, FamilyID: "fam"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -57,9 +56,14 @@ func TestSignProducesLegacyCompatiblePayload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{`"sub":5`, `"sid":9`, `"fid":"fam"`, `"role":1`, `"content_limit":1`, `"type":"access"`, `"exp":` + itoa(fixedNow().Add(time.Hour).Unix())} {
+	for _, want := range []string{`"sub":5`, `"sid":9`, `"fid":"fam"`, `"type":"access"`, `"exp":` + itoa(fixedNow().Add(time.Hour).Unix())} {
 		if !strings.Contains(string(payload), want) {
 			t.Fatalf("payload %s missing %s", payload, want)
+		}
+	}
+	for _, changeable := range []string{`"role"`, `"content_limit"`} {
+		if strings.Contains(string(payload), changeable) {
+			t.Fatalf("payload %s carries %s", payload, changeable)
 		}
 	}
 	claims, err := codec.Verify(token)

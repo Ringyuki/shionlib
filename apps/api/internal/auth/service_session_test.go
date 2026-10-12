@@ -9,18 +9,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/auth"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
 
 var refreshFormat = regexp.MustCompile(`^slrt1\.[A-Za-z0-9_-]{16}\.[A-Za-z0-9_-]{43}$`)
 
-func TestIssueCreatesAnActiveSessionAndSignsClaims(t *testing.T) {
+func TestIssueCreatesAnActiveSessionAndSignsWhoItIsFor(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(t)
 	alice := f.seedUser()
-	tokens, err := f.sessions.Issue(ctx, auth.PrincipalOf(alice), auth.Device{IP: "198.51.100.1", UserAgent: "test"})
+	tokens, err := f.sessions.Issue(ctx, alice.ID, auth.Device{IP: "198.51.100.1", UserAgent: "test"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,9 +29,9 @@ func TestIssueCreatesAnActiveSessionAndSignsClaims(t *testing.T) {
 	if !tokens.AccessExpiresAt.Equal(f.clock.Now().Add(time.Hour)) || !tokens.RefreshExpiresAt.Equal(f.clock.Now().Add(7*24*time.Hour)) {
 		t.Fatalf("unexpected expiries %+v", tokens)
 	}
-	want := "access:" + strconv.Itoa(alice.ID) + ":" + strconv.Itoa(tokens.SessionID) + ":" + tokens.FamilyID + ":1:2:"
-	if !strings.HasPrefix(tokens.AccessToken, want) {
-		t.Fatalf("claims %s do not start with %s", tokens.AccessToken, want)
+	want := "access:" + strconv.Itoa(alice.ID) + ":" + strconv.Itoa(tokens.SessionID) + ":" + tokens.FamilyID + ":" + strconv.FormatInt(tokens.AccessExpiresAt.Unix(), 10)
+	if tokens.AccessToken != want {
+		t.Fatalf("access token %s is not %s", tokens.AccessToken, want)
 	}
 	session, _, ok := f.repo.Session(tokens.SessionID)
 	if !ok || session.Status != auth.SessionActive || session.UserID != alice.ID || session.RefreshHash != "hash:"+strings.Split(tokens.RefreshToken, ".")[2]+"pepper" {
@@ -44,12 +43,8 @@ func TestRefreshRotatesAndReplaysWithinGrace(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(t)
 	alice := f.seedUser()
-	issued, err := f.sessions.Issue(ctx, auth.PrincipalOf(alice), auth.Device{})
+	issued, err := f.sessions.Issue(ctx, alice.ID, auth.Device{})
 	if err != nil {
-		t.Fatal(err)
-	}
-	limit := actor.ContentLimitJustShow
-	if err := f.users.Update(ctx, alice.ID, user.Changes{ContentLimit: &limit}); err != nil {
 		t.Fatal(err)
 	}
 	f.clock.Advance(time.Minute)
@@ -60,8 +55,8 @@ func TestRefreshRotatesAndReplaysWithinGrace(t *testing.T) {
 	if rotated.FamilyID != issued.FamilyID || rotated.SessionID == issued.SessionID || rotated.RefreshToken == issued.RefreshToken {
 		t.Fatalf("rotation must keep the family and issue a new pair: %+v", rotated)
 	}
-	if !strings.Contains(rotated.AccessToken, ":1:3:") {
-		t.Fatalf("claims must be reloaded from the account: %s", rotated.AccessToken)
+	if want := "access:" + strconv.Itoa(alice.ID) + ":" + strconv.Itoa(rotated.SessionID) + ":" + issued.FamilyID + ":"; !strings.HasPrefix(rotated.AccessToken, want) {
+		t.Fatalf("the access token %s is not for the new session %s", rotated.AccessToken, want)
 	}
 	old, _, _ := f.repo.Session(issued.SessionID)
 	if old.Status != auth.SessionRotated {
@@ -83,7 +78,7 @@ func TestRefreshKeepsTheFamilyHardCap(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(t)
 	alice := f.seedUser()
-	issued, _ := f.sessions.Issue(ctx, auth.PrincipalOf(alice), auth.Device{})
+	issued, _ := f.sessions.Issue(ctx, alice.ID, auth.Device{})
 	start := f.clock.Now()
 	current := issued
 	for range 4 {
@@ -103,7 +98,7 @@ func TestRefreshReuseBlocksTheFamily(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(t)
 	alice := f.seedUser()
-	issued, _ := f.sessions.Issue(ctx, auth.PrincipalOf(alice), auth.Device{})
+	issued, _ := f.sessions.Issue(ctx, alice.ID, auth.Device{})
 	rotated, err := f.sessions.Refresh(ctx, issued.RefreshToken, auth.Device{})
 	if err != nil {
 		t.Fatal(err)
@@ -133,7 +128,7 @@ func TestRefreshRejections(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(t)
 	alice := f.seedUser()
-	issued, _ := f.sessions.Issue(ctx, auth.PrincipalOf(alice), auth.Device{})
+	issued, _ := f.sessions.Issue(ctx, alice.ID, auth.Device{})
 	parts := strings.Split(issued.RefreshToken, ".")
 	cases := map[string]string{
 		"empty":         "",
@@ -158,7 +153,7 @@ func TestRefreshBlocksFamiliesOfMissingOrBannedUsers(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(t)
 	banned := f.seedUser()
-	issued, _ := f.sessions.Issue(ctx, auth.PrincipalOf(banned), auth.Device{})
+	issued, _ := f.sessions.Issue(ctx, banned.ID, auth.Device{})
 	status := user.StatusBanned
 	if err := f.users.Update(ctx, banned.ID, user.Changes{Status: &status}); err != nil {
 		t.Fatal(err)
@@ -174,7 +169,7 @@ func TestRefreshBlocksFamiliesOfMissingOrBannedUsers(t *testing.T) {
 		t.Fatal("family block missing")
 	}
 
-	ghost, _ := f.sessions.Issue(ctx, auth.Principal{UserID: 9999, Role: actor.RoleUser}, auth.Device{})
+	ghost, _ := f.sessions.Issue(ctx, 9999, auth.Device{})
 	if _, err := f.sessions.Refresh(ctx, ghost.RefreshToken, auth.Device{}); !errors.Is(err, user.ErrNotFound) {
 		t.Fatalf("missing user: %v", err)
 	}
@@ -187,11 +182,11 @@ func TestRefreshWaitsForAConcurrentRotation(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(t)
 	alice := f.seedUser()
-	issued, _ := f.sessions.Issue(ctx, auth.PrincipalOf(alice), auth.Device{})
+	issued, _ := f.sessions.Issue(ctx, alice.ID, auth.Device{})
 	if err := f.repo.MarkSessionRotated(ctx, issued.SessionID, issued.SessionID, f.clock.Now()); err != nil {
 		t.Fatal(err)
 	}
-	other, _ := f.sessions.Issue(ctx, auth.PrincipalOf(alice), auth.Device{})
+	other, _ := f.sessions.Issue(ctx, alice.ID, auth.Device{})
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
@@ -225,7 +220,7 @@ func TestLogoutBlocksTheFamily(t *testing.T) {
 	if err := f.sessions.Logout(ctx, "garbage"); !errors.Is(err, auth.ErrInvalidRefreshToken) {
 		t.Fatalf("malformed token: %v", err)
 	}
-	issued, _ := f.sessions.Issue(ctx, auth.PrincipalOf(alice), auth.Device{})
+	issued, _ := f.sessions.Issue(ctx, alice.ID, auth.Device{})
 	parts := strings.Split(issued.RefreshToken, ".")
 	if err := f.sessions.Logout(ctx, "slrt1."+parts[1]+".forged"); !errors.Is(err, auth.ErrInvalidRefreshToken) {
 		t.Fatalf("logout must verify the secret: %v", err)
@@ -246,9 +241,9 @@ func TestRevokeUserBlocksLiveFamilies(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(t)
 	alice := f.seedUser()
-	stale, _ := f.sessions.Issue(ctx, auth.PrincipalOf(alice), auth.Device{})
+	stale, _ := f.sessions.Issue(ctx, alice.ID, auth.Device{})
 	f.clock.Advance(2 * time.Hour)
-	live, _ := f.sessions.Issue(ctx, auth.PrincipalOf(alice), auth.Device{})
+	live, _ := f.sessions.Issue(ctx, alice.ID, auth.Device{})
 	if err := f.sessions.RevokeUser(ctx, alice.ID, "user_password_changed"); err != nil {
 		t.Fatal(err)
 	}
@@ -269,8 +264,8 @@ func TestCleanupStaleRemovesOldInactiveSessions(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(t)
 	alice := f.seedUser()
-	issued, _ := f.sessions.Issue(ctx, auth.PrincipalOf(alice), auth.Device{})
-	kept, _ := f.sessions.Issue(ctx, auth.PrincipalOf(alice), auth.Device{})
+	issued, _ := f.sessions.Issue(ctx, alice.ID, auth.Device{})
+	kept, _ := f.sessions.Issue(ctx, alice.ID, auth.Device{})
 	if err := f.sessions.Logout(ctx, issued.RefreshToken); err != nil {
 		t.Fatal(err)
 	}

@@ -9,6 +9,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/jwt"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/activitypg"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/authpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/gamepg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/messagepg"
@@ -99,7 +100,7 @@ func BuildModules(infra *Infra) *Modules {
 	shared := buildShared(infra)
 	modules := &Modules{
 		Builder:         shared.Builder,
-		Authenticator:   auth.NewAuthenticationService(shared.Tokens, shared.Families),
+		Authenticator:   auth.NewAuthenticationService(shared.Tokens, shared.Families, authpg.NewStandingStore(infra.Ent)),
 		Realtime:        shared.Realtime,
 		Settings:        shared.Settings,
 		SettingsWatcher: shared.Watcher,
