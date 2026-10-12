@@ -87,24 +87,24 @@ func TestAdminListShapeAndFilters(t *testing.T) {
 	plain.ID, plain.Lang, plain.Edited, plain.Status, plain.Moderation = 5, nil, false, walkthrough.StatusPublished, nil
 	e.store.entries, e.store.total = []walkthrough.AdminEntry{sampleEntry(), plain}, 2
 
-	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/walkthroughs?pageSize=5&search=guide&sortBy=updated&sortOrder=asc&status=HIDDEN&creatorId=1&gameId=10", As: &admin})
+	resp := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/walkthroughs?pageSize=5&search=guide&sortBy=updated&sortOrder=asc&status=HIDDEN&held=true&creatorId=1&gameId=10", As: &admin})
 	e.server.Expect(resp, http.StatusOK, 0)
 	want := `{"items":[` +
-		`{"id":4,"text":"guide","lang":"zh","edited":true,"status":"HIDDEN","created":` + stamp + `,"updated":` + stamp + `,"creator":` + adminCreator + `,"game":` + adminGame + `,` +
+		`{"id":4,"text":"guide","lang":"zh","edited":true,"status":"HIDDEN","held":false,"created":` + stamp + `,"updated":` + stamp + `,"creator":` + adminCreator + `,"game":` + adminGame + `,` +
 		`"moderation":{"id":2,"decision":"BLOCK","model":"gpt","top_category":"SPAM","max_score":0.75,"reason":"ads","created_at":` + stamp + `}},` +
-		`{"id":5,"text":"guide","lang":null,"edited":false,"status":"PUBLISHED","created":` + stamp + `,"updated":` + stamp + `,"creator":` + adminCreator + `,"game":` + adminGame + `}` +
+		`{"id":5,"text":"guide","lang":null,"edited":false,"status":"PUBLISHED","held":false,"created":` + stamp + `,"updated":` + stamp + `,"creator":` + adminCreator + `,"game":` + adminGame + `}` +
 		`],"meta":{"totalItems":2,"itemCount":2,"itemsPerPage":5,"totalPages":1,"currentPage":1}}`
 	if string(resp.Data) != want {
 		t.Fatalf("unexpected page\n got %s\nwant %s", resp.Data, want)
 	}
 	filter := e.store.filter
-	if filter.Search != "guide" || filter.SortBy != walkthrough.SortByUpdated || filter.Descending || filter.Status == nil || *filter.Status != walkthrough.StatusHidden ||
+	if filter.Search != "guide" || filter.SortBy != walkthrough.SortByUpdated || filter.Descending || filter.Status == nil || *filter.Status != walkthrough.StatusHidden || !filter.ReviewPending ||
 		filter.CreatorID == nil || *filter.CreatorID != 1 || filter.GameID == nil || *filter.GameID != 10 || e.store.page != (walkthrough.Page{Number: 1, Size: 5}) {
 		t.Fatalf("unexpected filter %+v page %+v", filter, e.store.page)
 	}
 
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/walkthroughs", As: &admin}), http.StatusOK, 0)
-	if filter := e.store.filter; filter.SortBy != walkthrough.SortByCreated || !filter.Descending || filter.Status != nil || filter.CreatorID != nil || filter.GameID != nil {
+	if filter := e.store.filter; filter.SortBy != walkthrough.SortByCreated || !filter.Descending || filter.Status != nil || filter.ReviewPending || filter.CreatorID != nil || filter.GameID != nil {
 		t.Fatalf("unexpected defaults %+v", filter)
 	}
 	for _, query := range []string{"status=GONE", "sortBy=title", "sortOrder=DESC", "page=0"} {

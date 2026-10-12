@@ -2198,6 +2198,19 @@ var (
 			},
 		},
 	}
+	// SiteDailyStatsColumns holds the columns for the "site_daily_stats" table.
+	SiteDailyStatsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "day", Type: field.TypeTime, Unique: true, SchemaType: map[string]string{"postgres": "date"}},
+		{Name: "views", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "downloads", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+	}
+	// SiteDailyStatsTable holds the schema information for the "site_daily_stats" table.
+	SiteDailyStatsTable = &schema.Table{
+		Name:       "site_daily_stats",
+		Columns:    SiteDailyStatsColumns,
+		PrimaryKey: []*schema.Column{SiteDailyStatsColumns[0]},
+	}
 	// SponsorOrdersColumns holds the columns for the "sponsor_orders" table.
 	SponsorOrdersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -2708,6 +2721,7 @@ var (
 		RoleFieldPermissionsTable,
 		SettingsTable,
 		SettingChangesTable,
+		SiteDailyStatsTable,
 		SponsorOrdersTable,
 		TagsTable,
 		UsersTable,
@@ -2935,6 +2949,9 @@ func init() {
 	SettingChangesTable.ForeignKeys[0].RefTable = UsersTable
 	SettingChangesTable.Annotation = &entsql.Annotation{
 		Table: "setting_changes",
+	}
+	SiteDailyStatsTable.Annotation = &entsql.Annotation{
+		Table: "site_daily_stats",
 	}
 	SponsorOrdersTable.ForeignKeys[0].RefTable = UsersTable
 	SponsorOrdersTable.Annotation = &entsql.Annotation{

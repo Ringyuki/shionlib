@@ -37,6 +37,9 @@ func (r *Repository) Search(ctx context.Context, filter walkthrough.AdminFilter,
 	if filter.Status != nil {
 		query.Where(entwalkthrough.StatusEQ(entwalkthrough.Status(*filter.Status)))
 	}
+	if filter.ReviewPending {
+		query.Where(entwalkthrough.ReviewPending(true), entwalkthrough.StatusNEQ(entwalkthrough.StatusDELETED))
+	}
 	if filter.CreatorID != nil {
 		query.Where(entwalkthrough.CreatorID(*filter.CreatorID))
 	}

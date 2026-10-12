@@ -15,6 +15,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
 	"github.com/Ringyuki/shionlib/apps/api/internal/report"
 	"github.com/Ringyuki/shionlib/apps/api/internal/report/reporttest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 )
 
@@ -64,6 +65,7 @@ func newFixture() fixture {
 		Mailer:    f.mailer,
 		Queue:     f.events,
 		Tx:        &txtest.Immediate{},
+		Settings:  settingtest.Source{},
 		SiteURL:   "https://shionlib.example",
 		Now:       func() time.Time { return now },
 	})
@@ -312,5 +314,63 @@ func TestReviewInvalidSkipsBannedReporters(t *testing.T) {
 	view, err := f.service.Review(ctx, adminAct, created.ID, report.ReviewInput{Verdict: report.VerdictInvalid})
 	if err != nil || view.ReporterPenaltyApplied || len(f.banner.Bans) != 0 {
 		t.Fatalf("already banned reporters are not banned again: %+v %v", view.Report, err)
+	}
+}
+
+func TestADetailTellsWhatTheReporterFiledBefore(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	f.repo.Seed(report.Report{ResourceID: 99, ReporterID: reporterID, Status: report.StatusInvalid, Created: now.Add(-24 * time.Hour)})
+	f.repo.Seed(report.Report{ResourceID: 99, ReporterID: reporterID, Status: report.StatusInvalid, Created: now.Add(-40 * 24 * time.Hour)})
+	f.repo.Seed(report.Report{ResourceID: 99, ReporterID: reporterID, Status: report.StatusValid, Created: now.Add(-24 * time.Hour)})
+	f.repo.Seed(report.Report{ResourceID: 99, ReporterID: uploaderID, Status: report.StatusInvalid, Created: now.Add(-24 * time.Hour)})
+	pending := f.repo.Seed(report.Report{ResourceID: resourceID, ReporterID: reporterID, ReportedUserID: uploaderID, Reason: report.ReasonOther, Level: report.LevelMedium, Created: now})
+
+	detail, err := f.service.Get(ctx, pending.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := (report.ReporterRecord{Filed: 4, Invalid: 2, NextInvalid: 2}); detail.ReporterRecord != want {
+		t.Fatalf("a pending report counts as the next invalid one within the window: %+v", detail.ReporterRecord)
+	}
+	reviewed, err := f.service.Review(ctx, adminAct, pending.ID, report.ReviewInput{Verdict: report.VerdictInvalid})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := (report.ReporterRecord{Filed: 4, Invalid: 3, NextInvalid: 2}); reviewed.ReporterRecord != want {
+		t.Fatalf("once dismissed it is among the invalid ones: %+v", reviewed.ReporterRecord)
+	}
+	if _, err := f.service.Get(ctx, 404); !errors.Is(err, report.ErrNotFound) {
+		t.Fatalf("unexpected result for a missing report: %v", err)
+	}
+}
+
+func TestThePolicyListsEveryLevelAndStep(t *testing.T) {
+	f := newFixture()
+	policy := f.service.Policy()
+	if len(policy.Levels) != 4 || policy.FalseReportWindowDays != 30 || policy.ViolationFreeze != 30*24*time.Hour {
+		t.Fatalf("unexpected policy %+v", policy)
+	}
+	for _, rule := range policy.Levels {
+		if rule.Penalty != report.TargetPenalty(rule.Level) {
+			t.Fatalf("level %s: %+v", rule.Level, rule.Penalty)
+		}
+		for _, reason := range rule.Reasons {
+			if report.DefaultLevel(reason) != rule.Level {
+				t.Fatalf("reason %s is not at level %s by default", reason, rule.Level)
+			}
+		}
+	}
+	critical := policy.Levels[3]
+	if critical.Level != report.LevelCritical || len(critical.Reasons) != 1 || critical.Reasons[0] != report.ReasonMalware {
+		t.Fatalf("levels come lowest first, each with the reasons that start there: %+v", critical)
+	}
+	for _, step := range policy.FalseReportSteps {
+		if report.FalseReportPenalty(step.Count).BanDays != step.BanDays {
+			t.Fatalf("step %+v", step)
+		}
+	}
+	if len(policy.FalseReportSteps) != 2 || report.FalseReportPenalty(6) != (report.Penalty{}) {
+		t.Fatalf("a count between the steps brings no penalty: %+v", policy.FalseReportSteps)
 	}
 }

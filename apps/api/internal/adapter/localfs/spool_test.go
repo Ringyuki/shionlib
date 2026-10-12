@@ -190,4 +190,8 @@ func TestAvailableReadsTheFreeSpaceOfTheRoot(t *testing.T) {
 	if err != nil || free <= 0 {
 		t.Fatalf("a root that does not exist yet reports its nearest parent: %d %v", free, err)
 	}
+	total, err := missing.Capacity(t.Context())
+	if err != nil || total < free {
+		t.Fatalf("the volume holds at least what is free on it: %d %d %v", total, free, err)
+	}
 }

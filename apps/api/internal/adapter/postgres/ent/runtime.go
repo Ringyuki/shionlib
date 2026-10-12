@@ -50,6 +50,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/schema"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/setting"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/settingchange"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sitedailystat"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
@@ -1254,6 +1255,16 @@ func init() {
 	settingchangeDescCreated := settingchangeFields[5].Descriptor()
 	// settingchange.DefaultCreated holds the default value on creation for the created field.
 	settingchange.DefaultCreated = settingchangeDescCreated.Default.(func() time.Time)
+	sitedailystatFields := schema.SiteDailyStat{}.Fields()
+	_ = sitedailystatFields
+	// sitedailystatDescViews is the schema descriptor for views field.
+	sitedailystatDescViews := sitedailystatFields[2].Descriptor()
+	// sitedailystat.DefaultViews holds the default value on creation for the views field.
+	sitedailystat.DefaultViews = sitedailystatDescViews.Default.(int)
+	// sitedailystatDescDownloads is the schema descriptor for downloads field.
+	sitedailystatDescDownloads := sitedailystatFields[3].Descriptor()
+	// sitedailystat.DefaultDownloads holds the default value on creation for the downloads field.
+	sitedailystat.DefaultDownloads = sitedailystatDescDownloads.Default.(int)
 	sponsororderFields := schema.SponsorOrder{}.Fields()
 	_ = sponsororderFields
 	// sponsororderDescProviderOrderID is the schema descriptor for provider_order_id field.

@@ -15,15 +15,17 @@ type adminWalkthroughListInput struct {
 	SortBy    string `query:"sortBy" default:"created" enum:"id,created,updated,status"`
 	SortOrder string `query:"sortOrder" default:"desc" enum:"asc,desc"`
 	Status    string `query:"status" enum:"DRAFT,PUBLISHED,HIDDEN,DELETED"`
+	Held      bool   `query:"held" doc:"Only walkthroughs that wait for review"`
 	CreatorID int    `query:"creatorId"`
 	GameID    int    `query:"gameId"`
 }
 
 func (in *adminWalkthroughListInput) filter() walkthrough.AdminFilter {
 	filter := walkthrough.AdminFilter{
-		Search:     in.Search,
-		SortBy:     walkthrough.SortField(in.SortBy),
-		Descending: in.SortOrder != "asc",
+		Search:        in.Search,
+		ReviewPending: in.Held,
+		SortBy:        walkthrough.SortField(in.SortBy),
+		Descending:    in.SortOrder != "asc",
 	}
 	if in.Status != "" {
 		status := walkthrough.Status(in.Status)

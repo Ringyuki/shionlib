@@ -11,6 +11,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/download/downloadtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/report"
 	"github.com/Ringyuki/shionlib/apps/api/internal/report/reporttest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting/settingtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/apitest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/reporthttp"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
@@ -46,6 +47,7 @@ func setup(t *testing.T) env {
 		Messages:  events,
 		Queue:     events,
 		Tx:        &txtest.Immediate{},
+		Settings:  settingtest.Source{},
 		Now:       func() time.Time { return apitest.Now },
 	})
 	reporthttp.NewHandler(service, server.Builder).Register(server.API)
@@ -83,6 +85,16 @@ func TestAdminReportRoutes(t *testing.T) {
 	e.server.Expect(detail, http.StatusOK, 0)
 	if !strings.Contains(string(detail.Data), `"reporter":{"id":20,"name":"reporter","avatar":null,"is_sponsor":false,"role":1,"status":1}`) || !strings.Contains(string(detail.Data), `"reporter_penalty_applied":false`) {
 		t.Fatalf("detail %s", detail.Data)
+	}
+	if !strings.Contains(string(detail.Data), `"reporter_record":{"filed":1,"invalid":0,"next_invalid":1}`) {
+		t.Fatalf("the detail tells what the reporter filed before: %s", detail.Data)
+	}
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/content/download-resource-report-policy", As: &reporter}), http.StatusForbidden, 403)
+	policy := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/content/download-resource-report-policy", As: &admin})
+	e.server.Expect(policy, http.StatusOK, 0)
+	wantPolicy := `{"levels":[{"level":"LOW","penalty":{"ban_days":0,"violation":false},"reasons":["BROKEN_LINK"]},{"level":"MEDIUM","penalty":{"ban_days":0,"violation":true},"reasons":["IRRELEVANT","OTHER"]},{"level":"HIGH","penalty":{"ban_days":7,"violation":true},"reasons":["MISLEADING_CONTENT"]},{"level":"CRITICAL","penalty":{"ban_days":30,"violation":true},"reasons":["MALWARE"]}],"false_report_steps":[{"count":5,"ban_days":3},{"count":8,"ban_days":14}],"false_report_window_days":30,"violation_freeze_seconds":2592000}`
+	if string(policy.Data) != wantPolicy {
+		t.Fatalf("policy\n got %s\nwant %s", policy.Data, wantPolicy)
 	}
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/content/download-resource-reports/9", As: &admin}), http.StatusNotFound, 440203)
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodPatch, Path: "/admin/content/download-resource-reports/1/review", As: &admin, Body: map[string]any{"verdict": "MAYBE"}}), http.StatusUnprocessableEntity, 100101)

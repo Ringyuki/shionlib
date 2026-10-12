@@ -170,6 +170,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		Messages:  shared.Messages,
 		Queue:     jobQueue,
 		Tx:        shared.Transactor,
+		Settings:  shared.Settings,
 		SiteURL:   cfg.App.SiteURL,
 		Now:       shared.Now,
 	})
@@ -179,6 +180,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		downloadhttp.NewHandler(downloads, resourceDetails, links, shared.Builder),
 		reporthttp.NewHandler(reports, shared.Builder),
 		scanhttp.NewHandler(scans, shared.Builder),
+		scanhttp.NewStalledHandler(stalled, shared.Builder),
 		inspectionhttp.NewHandler(inspections, inspectionPreviews, shared.Builder),
 	)
 

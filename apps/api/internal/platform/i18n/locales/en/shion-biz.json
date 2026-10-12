@@ -53,6 +53,7 @@
   "GAME_DOWNLOAD_RESOURCE_REPORT_SUSPENDED": "your report capability is temporarily suspended",
   "GAME_DOWNLOAD_RESOURCE_MALWARE_CASE_NOT_FOUND": "malware review case not found",
   "GAME_DOWNLOAD_RESOURCE_MALWARE_CASE_ALREADY_PROCESSED": "this malware review case has already been processed",
+  "GAME_DOWNLOAD_RESOURCE_CHECK_NOT_STALLED": "this file has no paused check",
   "GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND": "download resource file not found",
   "GAME_DOWNLOAD_RESOURCE_FILE_TOKEN_REQUIRED": "token is required",
   "GAME_DOWNLOAD_RESOURCE_FILE_INVALID_TOKEN": "The verification was not accepted ({errorCodes}). Please try again.",

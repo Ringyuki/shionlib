@@ -106,6 +106,8 @@ type Tx struct {
 	Setting *SettingClient
 	// SettingChange is the client for interacting with the SettingChange builders.
 	SettingChange *SettingChangeClient
+	// SiteDailyStat is the client for interacting with the SiteDailyStat builders.
+	SiteDailyStat *SiteDailyStatClient
 	// SponsorOrder is the client for interacting with the SponsorOrder builders.
 	SponsorOrder *SponsorOrderClient
 	// Tag is the client for interacting with the Tag builders.
@@ -303,6 +305,7 @@ func (tx *Tx) init() {
 	tx.RoleFieldPermission = NewRoleFieldPermissionClient(tx.config)
 	tx.Setting = NewSettingClient(tx.config)
 	tx.SettingChange = NewSettingChangeClient(tx.config)
+	tx.SiteDailyStat = NewSiteDailyStatClient(tx.config)
 	tx.SponsorOrder = NewSponsorOrderClient(tx.config)
 	tx.Tag = NewTagClient(tx.config)
 	tx.User = NewUserClient(tx.config)

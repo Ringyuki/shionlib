@@ -53,6 +53,20 @@ func (r *Repository) CountInvalidSince(ctx context.Context, reporterID int, sinc
 	return count, nil
 }
 
+func (r *Repository) CountFiled(ctx context.Context, reporterID int) (int, int, error) {
+	filed, err := r.db(ctx).GameDownloadResourceReport.Query().Where(entreport.ReporterID(reporterID)).Count(ctx)
+	if err != nil {
+		return 0, 0, fmt.Errorf("count reports of user %d: %w", reporterID, err)
+	}
+	invalid, err := r.db(ctx).GameDownloadResourceReport.Query().
+		Where(entreport.ReporterID(reporterID), entreport.StatusEQ(entreport.StatusINVALID)).
+		Count(ctx)
+	if err != nil {
+		return 0, 0, fmt.Errorf("count invalid reports of user %d: %w", reporterID, err)
+	}
+	return filed, invalid, nil
+}
+
 func (r *Repository) HasPending(ctx context.Context, resourceID, reporterID int) (bool, error) {
 	exists, err := r.db(ctx).GameDownloadResourceReport.Query().
 		Where(

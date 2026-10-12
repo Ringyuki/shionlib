@@ -24,7 +24,12 @@ func NewHandler(service *scan.Service, resp *response.Builder) *Handler {
 func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "adminMalware.list", Method: http.MethodGet, Path: "/admin/content/malware-scan-cases", Summary: "List malware scan cases", Tags: tags, Access: httpapi.AccessAdmin}, h.list)
 	httpapi.Register(api, httpapi.Route{ID: "adminMalware.get", Method: http.MethodGet, Path: "/admin/content/malware-scan-cases/{id}", Summary: "Read a malware scan case", Tags: tags, Access: httpapi.AccessAdmin}, h.get)
+	httpapi.Register(api, httpapi.Route{ID: "adminMalware.policy", Method: http.MethodGet, Path: "/admin/content/malware-scan-policy", Summary: "What confirming a detection does to the uploader", Tags: tags, Access: httpapi.AccessAdmin}, h.policy)
 	httpapi.Register(api, httpapi.Route{ID: "adminMalware.review", Method: http.MethodPatch, Path: "/admin/content/malware-scan-cases/{id}/review", Summary: "Allow or delete a quarantined file", Tags: tags, Access: httpapi.AccessAdmin}, h.review)
+}
+
+func (h *Handler) policy(ctx context.Context, _ *struct{}) (*response.Output[malwarePolicyDTO], error) {
+	return response.OK(ctx, h.resp, malwarePolicyDTO(h.service.ReviewPolicy())), nil
 }
 
 func (h *Handler) list(ctx context.Context, in *listMalwareCasesInput) (*response.Output[response.Page[malwareCaseItemDTO]], error) {

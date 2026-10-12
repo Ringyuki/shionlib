@@ -26,6 +26,7 @@ func NewHandler(service *report.Service, resp *response.Builder) *Handler {
 func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "report.create", Method: http.MethodPost, Path: "/game/download-source/{id}/report", Summary: "Report a download resource", Tags: tags, Access: httpapi.AccessUser}, h.create)
 	httpapi.Register(api, httpapi.Route{ID: "adminReport.list", Method: http.MethodGet, Path: "/admin/content/download-resource-reports", Summary: "List download resource reports", Tags: adminTags, Access: httpapi.AccessAdmin}, h.list)
+	httpapi.Register(api, httpapi.Route{ID: "adminReport.policy", Method: http.MethodGet, Path: "/admin/content/download-resource-report-policy", Summary: "What each verdict and level does to the uploader and the reporter", Tags: adminTags, Access: httpapi.AccessAdmin}, h.policy)
 	httpapi.Register(api, httpapi.Route{ID: "adminReport.get", Method: http.MethodGet, Path: "/admin/content/download-resource-reports/{id}", Summary: "Read a download resource report", Tags: adminTags, Access: httpapi.AccessAdmin}, h.get)
 	httpapi.Register(api, httpapi.Route{ID: "adminReport.review", Method: http.MethodPatch, Path: "/admin/content/download-resource-reports/{id}/review", Summary: "Review a download resource report", Tags: adminTags, Access: httpapi.AccessAdmin}, h.review)
 }
@@ -53,6 +54,10 @@ func (h *Handler) list(ctx context.Context, in *listReportsInput) (*response.Out
 	return response.OK(ctx, h.resp, response.MapPage(views, total, in.PageSize, in.Page, func(v report.View) reportListItemDTO {
 		return toListItemDTO(v, now)
 	})), nil
+}
+
+func (h *Handler) policy(ctx context.Context, _ *struct{}) (*response.Output[reportPolicyDTO], error) {
+	return response.OK(ctx, h.resp, toPolicyDTO(h.service.Policy())), nil
 }
 
 func (h *Handler) get(ctx context.Context, in *reportPathInput) (*response.Output[reportDetailDTO], error) {

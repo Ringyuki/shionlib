@@ -201,6 +201,25 @@ func (r *MemoryRepository) StalledFiles(_ context.Context, since *time.Time, lim
 	return out, nil
 }
 
+func (r *MemoryRepository) StalledEntries(ctx context.Context, limit int) ([]scan.StalledEntry, error) {
+	files, err := r.StalledFiles(ctx, nil, limit)
+	if err != nil {
+		return nil, err
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	entries := make([]scan.StalledEntry, len(files))
+	for i, file := range files {
+		entries[i] = scan.StalledEntry{
+			File:     file,
+			Reason:   r.reasons[file.ID],
+			Game:     r.Titles[file.GameID],
+			Uploader: user.Summary{ID: file.CreatorID, Name: r.Names[file.CreatorID]},
+		}
+	}
+	return entries, nil
+}
+
 func (r *MemoryRepository) LockFile(_ context.Context, fileID int) (scan.PendingFile, bool, error) {
 	file, ok := r.File(fileID)
 	return file, ok, nil

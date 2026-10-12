@@ -55,6 +55,23 @@ func toPendingFile(row *ent.GameDownloadResourceFile) scan.PendingFile {
 	return file
 }
 
+func toStalledEntry(row *ent.GameDownloadResourceFile) scan.StalledEntry {
+	entry := scan.StalledEntry{File: toPendingFile(row)}
+	if row.CheckError != nil {
+		entry.Reason = *row.CheckError
+	}
+	if resource := row.Edges.GameDownloadResource; resource != nil {
+		entry.Game = scan.GameTitles{ID: resource.GameID}
+		if gameRow := resource.Edges.Game; gameRow != nil {
+			entry.Game = toTitles(gameRow)
+		}
+	}
+	if creator := row.Edges.Creator; creator != nil {
+		entry.Uploader = userpg.ToSummary(creator)
+	}
+	return entry
+}
+
 func toCaseFile(row *ent.GameDownloadResourceFile) *scan.CaseFile {
 	return &scan.CaseFile{
 		ID:              row.ID,

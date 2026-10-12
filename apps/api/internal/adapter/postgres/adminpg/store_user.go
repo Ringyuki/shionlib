@@ -113,6 +113,9 @@ func (s *UserStore) UserDetail(ctx context.Context, id int) (admin.UserDetail, e
 		return admin.UserDetail{}, err
 	}
 	detail := admin.UserDetail{UserEntry: toEntry(row, counts[id]), Cover: row.Cover}
+	if err := s.scalar(ctx, &detail.Violations, violationsQuery, id); err != nil {
+		return admin.UserDetail{}, fmt.Errorf("count violations of user %d: %w", id, err)
+	}
 	ban, err := db.UserBannedRecord.Query().
 		Where(userbannedrecord.UserID(id)).
 		WithBannedByUser(func(q *ent.UserQuery) { q.Select(entuser.FieldID, entuser.FieldName) }).
@@ -125,6 +128,28 @@ func (s *UserStore) UserDetail(ctx context.Context, id int) (admin.UserDetail, e
 		return admin.UserDetail{}, fmt.Errorf("load latest ban of user %d: %w", id, err)
 	}
 	return detail, nil
+}
+
+const violationsQuery = `
+SELECT
+  (SELECT COUNT(*) FROM malware_scan_cases WHERE uploader_id = $1 AND status = 'DELETED' AND decision_source = 'ADMIN_DELETE')
+  +
+  (SELECT COUNT(*) FROM game_download_resource_reports WHERE reported_user_id = $1 AND status = 'VALID' AND malicious_level <> 'LOW')`
+
+func (s *UserStore) scalar(ctx context.Context, dest any, query string, args ...any) error {
+	rows, err := s.db(ctx).QueryContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = rows.Close()
+	}()
+	if rows.Next() {
+		if err := rows.Scan(dest); err != nil {
+			return err
+		}
+	}
+	return rows.Err()
 }
 
 const countsQuery = `

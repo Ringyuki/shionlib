@@ -55,7 +55,14 @@ type Transactor interface {
 
 type StatsStore interface {
 	Overview(ctx context.Context, since time.Time) (Overview, error)
-	DailyCreations(ctx context.Context, since time.Time, offset time.Duration) (DailyCounts, error)
+	Daily(ctx context.Context, since time.Time, offset time.Duration) (DailyCounts, error)
+	Pending(ctx context.Context) (Pending, error)
+	FileCounts(ctx context.Context, now time.Time) (FileCounts, error)
+}
+
+type Spool interface {
+	Capacity(ctx context.Context) (int64, error)
+	Available(ctx context.Context) (int64, error)
 }
 
 type Cache interface {

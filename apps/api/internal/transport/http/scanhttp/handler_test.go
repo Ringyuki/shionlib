@@ -50,6 +50,7 @@ func setup(t *testing.T) env {
 		Now:         now,
 	})
 	scanhttp.NewHandler(service, server.Builder).Register(server.API)
+	scanhttp.NewStalledHandler(scan.NewStalledService(service), server.Builder).Register(server.API)
 	return env{server: server, repo: repo, events: events}
 }
 
@@ -84,6 +85,14 @@ func TestMalwareCaseRoutes(t *testing.T) {
 	want := `{"items":[{"id":1,"status":"PENDING","decision_source":null,"review_note":null,"review_deadline":"2026-10-04T01:02:03.000Z","reviewed_at":null,"detector":"clamscan","detected_viruses":["Eicar"],"file_name":"a.7z","file_size":3,"file_hash":"h","hash_algorithm":null,"notify_uploader_on_allow":true,"uploader_notified_at":null,"created":"2026-10-03T01:02:03.000Z","updated":"2026-10-03T01:02:03.000Z","file":{"id":1,"file_status":2,"file_check_status":6,"is_virus_false_positive":false},"resource":null,"uploader":{"id":9,"name":"uploader","avatar":null,"is_sponsor":false},"reviewer":null}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1}}`
 	if string(list.Data) != want {
 		t.Fatalf("list\n got %s\nwant %s", list.Data, want)
+	}
+	decided := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/content/malware-scan-cases?reviewed=true", As: &admin})
+	e.server.Expect(decided, http.StatusOK, 0)
+	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/content/malware-scan-policy", As: &member}), http.StatusForbidden, 403)
+	policy := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/content/malware-scan-policy", As: &admin})
+	e.server.Expect(policy, http.StatusOK, 0)
+	if string(policy.Data) != `{"auto_ban_threshold":3,"auto_ban_days":30}` {
+		t.Fatalf("policy %s", policy.Data)
 	}
 	detail := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/content/malware-scan-cases/1", As: &admin})
 	e.server.Expect(detail, http.StatusOK, 0)

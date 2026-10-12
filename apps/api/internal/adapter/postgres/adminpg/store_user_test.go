@@ -13,6 +13,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/adminpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/editrecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/fieldpermissionmapping"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/rolefieldpermission"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/admin"
@@ -85,8 +87,33 @@ func TestUserDetailLoadsLatestBan(t *testing.T) {
 		t.Fatalf("missing user: %v", err)
 	}
 	detail, err := store.UserDetail(ctx, target)
-	if err != nil || detail.LatestBan != nil || detail.ID != target {
+	if err != nil || detail.LatestBan != nil || detail.ID != target || detail.Violations != 0 {
 		t.Fatalf("bare user: %+v %v", detail, err)
+	}
+	gameID := db.Game(t)
+	resource := db.Ent.GameDownloadResource.Create().SetGameID(gameID).SetCreatorID(target).SaveX(ctx)
+	reported := func(status, level string) {
+		db.Ent.GameDownloadResourceReport.Create().SetResourceID(resource.ID).SetReporterID(moderator).SetReportedUserID(target).
+			SetReason("OTHER").SetStatus(gamedownloadresourcereport.Status(status)).SetMaliciousLevel(gamedownloadresourcereport.MaliciousLevel(level)).SaveX(ctx)
+	}
+	reported("VALID", "MEDIUM")
+	reported("VALID", "LOW")
+	reported("INVALID", "HIGH")
+	reported("PENDING", "CRITICAL")
+	flagged := func(status, source string) {
+		create := db.Ent.MalwareScanCase.Create().SetUploaderID(target).SetReviewDeadline(time.Now()).SetDetector("clamscan").
+			SetFileName("m.7z").SetFileSize(1).SetFileHash("h").SetStatus(malwarescancase.Status(status))
+		if source != "" {
+			create.SetDecisionSource(malwarescancase.DecisionSource(source))
+		}
+		create.SaveX(ctx)
+	}
+	flagged("DELETED", "ADMIN_DELETE")
+	flagged("DELETED", "TIMEOUT_AUTO_DELETE")
+	flagged("RELEASED_FALSE_POSITIVE", "ADMIN_ALLOW")
+	flagged("PENDING", "")
+	if detail, err = store.UserDetail(ctx, target); err != nil || detail.Violations != 2 {
+		t.Fatalf("a violation is a file an admin confirmed as malware or a valid report above the lowest level: %d %v", detail.Violations, err)
 	}
 	older := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 	newer := older.Add(time.Hour)

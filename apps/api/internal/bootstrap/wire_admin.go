@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/argon2hash"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/localfs"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/adminpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/characterpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/commentpg"
@@ -67,7 +68,13 @@ func wireAdmin(infra *Infra, shared *Shared, modules *Modules) {
 		gamehttp.NewAdminHandler(games, shared.Builder),
 		characterhttp.NewAdminHandler(character.NewAdminService(characterpg.NewRepository(infra.Ent)), shared.Builder),
 		developerhttp.NewAdminHandler(developer.NewAdminService(developerpg.NewRepository(infra.Ent)), shared.Builder),
-		adminhttp.NewStatsHandler(admin.NewStatsService(adminpg.NewStatsStore(infra.Ent), shared.Cache, shared.Now), shared.Builder),
+		adminhttp.NewStatsHandler(admin.NewStatsService(admin.StatsDeps{
+			Store:    adminpg.NewStatsStore(infra.Ent),
+			Cache:    shared.Cache,
+			Spool:    localfs.NewSpool(shared.Config.Upload.RootDir, shared.Config.Upload.TempFileSuffix),
+			Settings: shared.Settings,
+			Now:      shared.Now,
+		}), shared.Builder),
 		adminhttp.NewUserHandler(users, shared.Builder),
 		commenthttp.NewAdminHandler(comment.NewAdminService(comments, comments, shared.Messages, shared.Activities, shared.Queue, shared.Transactor), shared.Builder),
 		walkthroughhttp.NewAdminHandler(walkthrough.NewAdminService(walkthroughs, walkthroughs, shared.Queue, shared.Transactor), shared.Builder),

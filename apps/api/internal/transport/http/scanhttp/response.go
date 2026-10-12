@@ -183,3 +183,8 @@ func toCaseDetail(v scan.CaseView, now time.Time) malwareCaseDetailDTO {
 	}
 	return out
 }
+
+type malwarePolicyDTO struct {
+	AutoBanThreshold int `json:"auto_ban_threshold" doc:"Confirmed detections after which the uploader is banned"`
+	AutoBanDays      int `json:"auto_ban_days"`
+}

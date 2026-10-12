@@ -58,6 +58,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/rolefieldpermission"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/setting"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/settingchange"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sitedailystat"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
@@ -174,6 +175,7 @@ func checkColumn(t, c string) error {
 			rolefieldpermission.Table:             rolefieldpermission.ValidColumn,
 			setting.Table:                         setting.ValidColumn,
 			settingchange.Table:                   settingchange.ValidColumn,
+			sitedailystat.Table:                   sitedailystat.ValidColumn,
 			sponsororder.Table:                    sponsororder.ValidColumn,
 			tag.Table:                             tag.ValidColumn,
 			user.Table:                            user.ValidColumn,

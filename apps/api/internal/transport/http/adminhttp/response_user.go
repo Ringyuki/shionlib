@@ -81,6 +81,7 @@ type adminUserDetailDTO struct {
 	TwoFactorEnabled bool                    `json:"two_factor_enabled"`
 	SponsorExpiresAt *time.Time              `json:"sponsor_expires_at"`
 	Upload           uploadhttp.AllowanceDTO `json:"upload"`
+	Violations       int                     `json:"violations" doc:"Files an admin confirmed as malware plus reports found valid above the lowest level"`
 	Counts           adminUserCountsDTO      `json:"counts"`
 	LatestBan        *adminUserBanDTO        `json:"latest_ban"`
 }
@@ -105,6 +106,7 @@ func toAdminUserDetail(detail admin.UserDetail) adminUserDetailDTO {
 		Counts:           item.Counts,
 	}
 	out.Upload = uploadhttp.ToAllowanceDTO(detail.Upload)
+	out.Violations = detail.Violations
 	if ban := detail.LatestBan; ban != nil {
 		out.LatestBan = &adminUserBanDTO{
 			BannedAt:           ban.BannedAt,

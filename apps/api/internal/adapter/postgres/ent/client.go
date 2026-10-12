@@ -61,6 +61,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/rolefieldpermission"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/setting"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/settingchange"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sitedailystat"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
@@ -172,6 +173,8 @@ type Client struct {
 	Setting *SettingClient
 	// SettingChange is the client for interacting with the SettingChange builders.
 	SettingChange *SettingChangeClient
+	// SiteDailyStat is the client for interacting with the SiteDailyStat builders.
+	SiteDailyStat *SiteDailyStatClient
 	// SponsorOrder is the client for interacting with the SponsorOrder builders.
 	SponsorOrder *SponsorOrderClient
 	// Tag is the client for interacting with the Tag builders.
@@ -249,6 +252,7 @@ func (c *Client) init() {
 	c.RoleFieldPermission = NewRoleFieldPermissionClient(c.config)
 	c.Setting = NewSettingClient(c.config)
 	c.SettingChange = NewSettingChangeClient(c.config)
+	c.SiteDailyStat = NewSiteDailyStatClient(c.config)
 	c.SponsorOrder = NewSponsorOrderClient(c.config)
 	c.Tag = NewTagClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -397,6 +401,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		RoleFieldPermission:             NewRoleFieldPermissionClient(cfg),
 		Setting:                         NewSettingClient(cfg),
 		SettingChange:                   NewSettingChangeClient(cfg),
+		SiteDailyStat:                   NewSiteDailyStatClient(cfg),
 		SponsorOrder:                    NewSponsorOrderClient(cfg),
 		Tag:                             NewTagClient(cfg),
 		User:                            NewUserClient(cfg),
@@ -472,6 +477,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		RoleFieldPermission:             NewRoleFieldPermissionClient(cfg),
 		Setting:                         NewSettingClient(cfg),
 		SettingChange:                   NewSettingChangeClient(cfg),
+		SiteDailyStat:                   NewSiteDailyStatClient(cfg),
 		SponsorOrder:                    NewSponsorOrderClient(cfg),
 		Tag:                             NewTagClient(cfg),
 		User:                            NewUserClient(cfg),
@@ -523,9 +529,9 @@ func (c *Client) Use(hooks ...Hook) {
 		c.GameTagRelation, c.GameUploadChunk, c.GameUploadSession, c.Inspection,
 		c.InspectionEntry, c.MalwareScanCase, c.Message, c.ModerationEvent,
 		c.OidcIdentity, c.RoleFieldPermission, c.Setting, c.SettingChange,
-		c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord, c.UserFieldPermission,
-		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
-		c.UserPvnBinding, c.Walkthrough,
+		c.SiteDailyStat, c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord,
+		c.UserFieldPermission, c.UserGamePvnMapping, c.UserLoginSession,
+		c.UserPasskeyCredential, c.UserPvnBinding, c.Walkthrough,
 	} {
 		n.Use(hooks...)
 	}
@@ -547,9 +553,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.GameTagRelation, c.GameUploadChunk, c.GameUploadSession, c.Inspection,
 		c.InspectionEntry, c.MalwareScanCase, c.Message, c.ModerationEvent,
 		c.OidcIdentity, c.RoleFieldPermission, c.Setting, c.SettingChange,
-		c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord, c.UserFieldPermission,
-		c.UserGamePvnMapping, c.UserLoginSession, c.UserPasskeyCredential,
-		c.UserPvnBinding, c.Walkthrough,
+		c.SiteDailyStat, c.SponsorOrder, c.Tag, c.User, c.UserBannedRecord,
+		c.UserFieldPermission, c.UserGamePvnMapping, c.UserLoginSession,
+		c.UserPasskeyCredential, c.UserPvnBinding, c.Walkthrough,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -650,6 +656,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Setting.mutate(ctx, m)
 	case *SettingChangeMutation:
 		return c.SettingChange.mutate(ctx, m)
+	case *SiteDailyStatMutation:
+		return c.SiteDailyStat.mutate(ctx, m)
 	case *SponsorOrderMutation:
 		return c.SponsorOrder.mutate(ctx, m)
 	case *TagMutation:
@@ -8823,6 +8831,139 @@ func (c *SettingChangeClient) mutate(ctx context.Context, m *SettingChangeMutati
 	}
 }
 
+// SiteDailyStatClient is a client for the SiteDailyStat schema.
+type SiteDailyStatClient struct {
+	config
+}
+
+// NewSiteDailyStatClient returns a client for the SiteDailyStat from the given config.
+func NewSiteDailyStatClient(c config) *SiteDailyStatClient {
+	return &SiteDailyStatClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `sitedailystat.Hooks(f(g(h())))`.
+func (c *SiteDailyStatClient) Use(hooks ...Hook) {
+	c.hooks.SiteDailyStat = append(c.hooks.SiteDailyStat, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `sitedailystat.Intercept(f(g(h())))`.
+func (c *SiteDailyStatClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SiteDailyStat = append(c.inters.SiteDailyStat, interceptors...)
+}
+
+// Create returns a builder for creating a SiteDailyStat entity.
+func (c *SiteDailyStatClient) Create() *SiteDailyStatCreate {
+	mutation := newSiteDailyStatMutation(c.config, OpCreate)
+	return &SiteDailyStatCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SiteDailyStat entities.
+func (c *SiteDailyStatClient) CreateBulk(builders ...*SiteDailyStatCreate) *SiteDailyStatCreateBulk {
+	return &SiteDailyStatCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SiteDailyStatClient) MapCreateBulk(slice any, setFunc func(*SiteDailyStatCreate, int)) *SiteDailyStatCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SiteDailyStatCreateBulk{err: fmt.Errorf("calling to SiteDailyStatClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SiteDailyStatCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SiteDailyStatCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SiteDailyStat.
+func (c *SiteDailyStatClient) Update() *SiteDailyStatUpdate {
+	mutation := newSiteDailyStatMutation(c.config, OpUpdate)
+	return &SiteDailyStatUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SiteDailyStatClient) UpdateOne(_m *SiteDailyStat) *SiteDailyStatUpdateOne {
+	mutation := newSiteDailyStatMutation(c.config, OpUpdateOne, withSiteDailyStat(_m))
+	return &SiteDailyStatUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SiteDailyStatClient) UpdateOneID(id int) *SiteDailyStatUpdateOne {
+	mutation := newSiteDailyStatMutation(c.config, OpUpdateOne, withSiteDailyStatID(id))
+	return &SiteDailyStatUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SiteDailyStat.
+func (c *SiteDailyStatClient) Delete() *SiteDailyStatDelete {
+	mutation := newSiteDailyStatMutation(c.config, OpDelete)
+	return &SiteDailyStatDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SiteDailyStatClient) DeleteOne(_m *SiteDailyStat) *SiteDailyStatDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SiteDailyStatClient) DeleteOneID(id int) *SiteDailyStatDeleteOne {
+	builder := c.Delete().Where(sitedailystat.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SiteDailyStatDeleteOne{builder}
+}
+
+// Query returns a query builder for SiteDailyStat.
+func (c *SiteDailyStatClient) Query() *SiteDailyStatQuery {
+	return &SiteDailyStatQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSiteDailyStat},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SiteDailyStat entity by its id.
+func (c *SiteDailyStatClient) Get(ctx context.Context, id int) (*SiteDailyStat, error) {
+	return c.Query().Where(sitedailystat.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SiteDailyStatClient) GetX(ctx context.Context, id int) *SiteDailyStat {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SiteDailyStatClient) Hooks() []Hook {
+	return c.hooks.SiteDailyStat
+}
+
+// Interceptors returns the client interceptors.
+func (c *SiteDailyStatClient) Interceptors() []Interceptor {
+	return c.inters.SiteDailyStat
+}
+
+func (c *SiteDailyStatClient) mutate(ctx context.Context, m *SiteDailyStatMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SiteDailyStatCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SiteDailyStatUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SiteDailyStatUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SiteDailyStatDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SiteDailyStat mutation op: %q", m.Op())
+	}
+}
+
 // SponsorOrderClient is a client for the SponsorOrder schema.
 type SponsorOrderClient struct {
 	config
@@ -10917,9 +11058,10 @@ type (
 		GameDownloadResourceFileHistory, GameDownloadResourceReport, GameImage,
 		GameLink, GameRelation, GameTagRelation, GameUploadChunk, GameUploadSession,
 		Inspection, InspectionEntry, MalwareScanCase, Message, ModerationEvent,
-		OidcIdentity, RoleFieldPermission, Setting, SettingChange, SponsorOrder, Tag,
-		User, UserBannedRecord, UserFieldPermission, UserGamePvnMapping,
-		UserLoginSession, UserPasskeyCredential, UserPvnBinding, Walkthrough []ent.Hook
+		OidcIdentity, RoleFieldPermission, Setting, SettingChange, SiteDailyStat,
+		SponsorOrder, Tag, User, UserBannedRecord, UserFieldPermission,
+		UserGamePvnMapping, UserLoginSession, UserPasskeyCredential, UserPvnBinding,
+		Walkthrough []ent.Hook
 	}
 	inters struct {
 		AICatalogModel, AICatalogProvider, AIModel, AIProvider, AIProviderOffer,
@@ -10931,9 +11073,9 @@ type (
 		GameDownloadResourceFileHistory, GameDownloadResourceReport, GameImage,
 		GameLink, GameRelation, GameTagRelation, GameUploadChunk, GameUploadSession,
 		Inspection, InspectionEntry, MalwareScanCase, Message, ModerationEvent,
-		OidcIdentity, RoleFieldPermission, Setting, SettingChange, SponsorOrder, Tag,
-		User, UserBannedRecord, UserFieldPermission, UserGamePvnMapping,
-		UserLoginSession, UserPasskeyCredential, UserPvnBinding,
+		OidcIdentity, RoleFieldPermission, Setting, SettingChange, SiteDailyStat,
+		SponsorOrder, Tag, User, UserBannedRecord, UserFieldPermission,
+		UserGamePvnMapping, UserLoginSession, UserPasskeyCredential, UserPvnBinding,
 		Walkthrough []ent.Interceptor
 	}
 )

@@ -305,10 +305,10 @@ func TestScanQuarantinesInfectedFiles(t *testing.T) {
 	if meta := decodeMeta(t, messages[0]); meta["detected_viruses"] != "Eicar (bin/setup.exe), Trojan (bin/setup.exe)" || meta["review_deadline"] != "2026-10-04T12:00:00Z" {
 		t.Fatalf("uploader meta %v", meta)
 	}
-	if *messages[1].LinkURL != "/admin/malware-scans?id=1" || decodeMeta(t, messages[1])["uploader_name"] != "uploader" {
+	if *messages[1].LinkURL != "/admin/checks?case=1" || decodeMeta(t, messages[1])["uploader_name"] != "uploader" {
 		t.Fatalf("admin message %+v", messages[1])
 	}
-	if len(f.mailer.Alerts) != 1 || !slices.Equal(f.mailer.Recipients[0], []string{"a@example.com"}) || f.mailer.Alerts[0].ReviewURL != "https://shionlib.example/admin/malware-scans?id=1" || f.mailer.Alerts[0].GameTitle != "ゲーム" {
+	if len(f.mailer.Alerts) != 1 || !slices.Equal(f.mailer.Recipients[0], []string{"a@example.com"}) || f.mailer.Alerts[0].ReviewURL != "https://shionlib.example/admin/checks?case=1" || f.mailer.Alerts[0].GameTitle != "ゲーム" {
 		t.Fatalf("mail %+v %+v", f.mailer.Recipients, f.mailer.Alerts)
 	}
 	if len(f.events.Jobs()) != 0 {

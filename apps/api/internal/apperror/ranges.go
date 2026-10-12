@@ -19,6 +19,7 @@ var Ranges = []Range{
 	{Prefix: 4402, Owner: "internal/report", Domain: "download resource report"},
 	{Prefix: 440206, Owner: "internal/scan", Domain: "malware scan case"},
 	{Prefix: 440207, Owner: "internal/scan", Domain: "malware scan case"},
+	{Prefix: 440208, Owner: "internal/scan", Domain: "stalled file check"},
 	{Prefix: 450, Owner: "internal/download", Domain: "download file"},
 	{Prefix: 460, Owner: "internal/favorite", Domain: "favorite"},
 	{Prefix: 470, Owner: "internal/comment", Domain: "comment"},

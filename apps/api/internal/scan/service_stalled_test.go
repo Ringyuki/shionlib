@@ -2,6 +2,7 @@ package scan_test
 
 import (
 	"context"
+	"errors"
 	"slices"
 	"testing"
 	"time"
@@ -77,5 +78,68 @@ func TestAStalledCheckNobodyHandledIsAbandonedAtItsDeadline(t *testing.T) {
 	}
 	if err := f.stalled.Abandon(ctx); err != nil || len(f.events.Messages()) != 1 {
 		t.Fatalf("an abandoned check is left to the cleanup: %v", err)
+	}
+}
+
+func TestStalledChecksAreListedWithTheirDeadline(t *testing.T) {
+	f := newFixture(true)
+	ctx := context.Background()
+	at := now.Add(-3 * 24 * time.Hour)
+	f.repo.SeedFile(stalledFile(1, "/spool/1.part", at))
+	f.repo.SeedFile(pending(2, "/spool/2.part"))
+	f.repo.Names[9] = "uploader"
+	f.repo.Titles[7] = scan.GameTitles{ID: 7, TitleJP: "ゲーム"}
+	if err := f.repo.RecordCheckFailure(ctx, 1, scan.CheckFailure{Failures: 6, Reason: "clamd is down", StalledAt: &at}); err != nil {
+		t.Fatal(err)
+	}
+	entries, err := f.stalled.List(ctx)
+	if err != nil || len(entries) != 1 {
+		t.Fatalf("only stalled checks are listed: %+v %v", entries, err)
+	}
+	entry := entries[0]
+	if entry.File.ID != 1 || entry.Reason != "clamd is down" || entry.Uploader.Name != "uploader" || entry.Game.TitleJP != "ゲーム" {
+		t.Fatalf("unexpected entry %+v", entry)
+	}
+	if !entry.Deadline.Equal(at.Add(7 * 24 * time.Hour)) {
+		t.Fatalf("the deadline is the kept time after the check stalled: %s", entry.Deadline)
+	}
+}
+
+func TestAnAdminRechecksOrRemovesOneStalledFile(t *testing.T) {
+	f := newFixture(true)
+	ctx := context.Background()
+	f.repo.SeedFile(stalledFile(1, "/spool/1.part", now.Add(-time.Hour)))
+	f.repo.SeedFile(stalledFile(2, "/spool/2.part", now.Add(-time.Hour)))
+	f.repo.SeedFile(pending(3, "/spool/3.part"))
+
+	if err := f.stalled.Recheck(ctx, 1); err != nil {
+		t.Fatal(err)
+	}
+	if again, _ := f.repo.File(1); again.CheckStatus != download.CheckPending || again.CheckFailures != 0 {
+		t.Fatalf("the file is checked again from the start: %+v", again)
+	}
+	if err := f.stalled.Recheck(ctx, 1); !errors.Is(err, scan.ErrCheckNotStalled) {
+		t.Fatalf("a file that no longer waits cannot be rechecked: %v", err)
+	}
+	if err := f.stalled.Recheck(ctx, 3); !errors.Is(err, scan.ErrCheckNotStalled) {
+		t.Fatalf("a file whose check never stalled cannot be rechecked: %v", err)
+	}
+
+	if err := f.stalled.Remove(ctx, 2); err != nil {
+		t.Fatal(err)
+	}
+	gone, _ := f.repo.File(2)
+	if gone.CheckStatus != download.CheckAbandoned {
+		t.Fatalf("a removed file is given up: %+v", gone)
+	}
+	messages := f.events.Messages()
+	if len(messages) != 1 || messages[0].ReceiverID != 9 || decodeMeta(t, messages[0])["reason"] != "ABANDONED" {
+		t.Fatalf("the uploader is told: %+v", messages)
+	}
+	if err := f.stalled.Remove(ctx, 2); !errors.Is(err, scan.ErrCheckNotStalled) {
+		t.Fatalf("a file that was removed cannot be removed again: %v", err)
+	}
+	if err := f.stalled.Remove(ctx, 404); !errors.Is(err, scan.ErrCheckNotStalled) {
+		t.Fatalf("unexpected result for an unknown file: %v", err)
 	}
 }

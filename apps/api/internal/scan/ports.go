@@ -18,6 +18,7 @@ type Repository interface {
 	RecordCheckFailure(ctx context.Context, fileID int, failure CheckFailure) error
 	ResumeCheck(ctx context.Context, fileID int) error
 	StalledFiles(ctx context.Context, since *time.Time, limit int) ([]PendingFile, error)
+	StalledEntries(ctx context.Context, limit int) ([]StalledEntry, error)
 	ResourceFiles(ctx context.Context, resourceID int) ([]PendingFile, error)
 	LockFile(ctx context.Context, fileID int) (PendingFile, bool, error)
 	SetCheckStatus(ctx context.Context, fileID int, status download.CheckStatus, falsePositive bool) error

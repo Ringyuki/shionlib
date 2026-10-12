@@ -218,6 +218,8 @@ type StatsStore struct {
 	mu        sync.Mutex
 	overview  admin.Overview
 	daily     admin.DailyCounts
+	pending   admin.Pending
+	files     admin.FileCounts
 	since     []time.Time
 	offset    time.Duration
 	overviews int
@@ -225,6 +227,13 @@ type StatsStore struct {
 
 func NewStatsStore(overview admin.Overview, daily admin.DailyCounts) *StatsStore {
 	return &StatsStore{overview: overview, daily: daily}
+}
+
+func (s *StatsStore) Seed(pending admin.Pending, files admin.FileCounts) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.pending = pending
+	s.files = files
 }
 
 func (s *StatsStore) Overview(_ context.Context, since time.Time) (admin.Overview, error) {
@@ -235,18 +244,48 @@ func (s *StatsStore) Overview(_ context.Context, since time.Time) (admin.Overvie
 	return s.overview, nil
 }
 
-func (s *StatsStore) DailyCreations(_ context.Context, since time.Time, offset time.Duration) (admin.DailyCounts, error) {
+func (s *StatsStore) Daily(_ context.Context, since time.Time, offset time.Duration) (admin.DailyCounts, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.since = append(s.since, since)
 	s.offset = offset
-	return admin.DailyCounts{Games: maps.Clone(s.daily.Games), Users: maps.Clone(s.daily.Users)}, nil
+	return admin.DailyCounts{
+		Games:     maps.Clone(s.daily.Games),
+		Users:     maps.Clone(s.daily.Users),
+		Downloads: maps.Clone(s.daily.Downloads),
+		Views:     maps.Clone(s.daily.Views),
+	}, nil
+}
+
+func (s *StatsStore) Pending(context.Context) (admin.Pending, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.pending, nil
+}
+
+func (s *StatsStore) FileCounts(context.Context, time.Time) (admin.FileCounts, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.files, nil
 }
 
 func (s *StatsStore) Calls() ([]time.Time, time.Duration) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return slices.Clone(s.since), s.offset
+}
+
+type Spool struct {
+	Total int64
+	Free  int64
+}
+
+func (s Spool) Capacity(context.Context) (int64, error) {
+	return s.Total, nil
+}
+
+func (s Spool) Available(context.Context) (int64, error) {
+	return s.Free, nil
 }
 
 type Cache struct {

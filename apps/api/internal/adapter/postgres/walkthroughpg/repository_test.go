@@ -55,6 +55,15 @@ func TestAdminStore(t *testing.T) {
 	db.Ent.ModerationEvent.Create().SetWalkthroughID(second.ID).SetAuditBy(2).SetDecision(moderationevent.DecisionBLOCK).
 		SetTopCategory(moderationevent.TopCategorySPAM).SetCategoriesJSON(json.RawMessage(`{}`)).SetModel("gpt-5-mini").SetReason("ads").ExecX(ctx)
 
+	held, err := repo.Create(ctx, walkthrough.NewWalkthrough{GameID: db.Game(t), Text: "waiting", Status: walkthrough.StatusHidden, ReviewPending: true, CreatorID: db.User(t)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	gone, err := repo.Create(ctx, walkthrough.NewWalkthrough{GameID: db.Game(t), Text: "withdrawn", Status: walkthrough.StatusDeleted, ReviewPending: true, CreatorID: db.User(t)})
+	if err != nil || gone.ID == held.ID {
+		t.Fatal(err)
+	}
+
 	page := walkthrough.Page{Number: 1, Size: 10}
 	hidden := walkthrough.StatusHidden
 	cases := []struct {
@@ -65,7 +74,8 @@ func TestAdminStore(t *testing.T) {
 		{"text", walkthrough.AdminFilter{Search: "NEEDLE"}, []int{second.ID}},
 		{"game title", walkthrough.AdminFilter{Search: "english", SortBy: walkthrough.SortByID, Descending: true}, []int{second.ID, first.ID}},
 		{"creator email", walkthrough.AdminFilter{Search: authorRow.Email, SortBy: walkthrough.SortByID}, []int{first.ID}},
-		{"status", walkthrough.AdminFilter{Status: &hidden}, []int{second.ID}},
+		{"status", walkthrough.AdminFilter{Status: &hidden, SortBy: walkthrough.SortByID}, []int{second.ID, held.ID}},
+		{"held for review", walkthrough.AdminFilter{ReviewPending: true}, []int{held.ID}},
 		{"game and creator", walkthrough.AdminFilter{GameID: &gameID, CreatorID: &author, SortBy: walkthrough.SortByCreated}, []int{first.ID}},
 	}
 	for _, c := range cases {

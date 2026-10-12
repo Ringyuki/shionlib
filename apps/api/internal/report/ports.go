@@ -10,6 +10,7 @@ import (
 
 type Repository interface {
 	CountInvalidSince(ctx context.Context, reporterID int, since time.Time) (int, error)
+	CountFiled(ctx context.Context, reporterID int) (filed, invalid int, err error)
 	HasPending(ctx context.Context, resourceID, reporterID int) (bool, error)
 	Create(ctx context.Context, in NewReport) (Report, error)
 	Lock(ctx context.Context, id int) (Report, error)

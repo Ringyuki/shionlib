@@ -165,16 +165,32 @@ func (s *Spool) Stale(ctx context.Context, before time.Time) ([]string, error) {
 }
 
 func (s *Spool) Available(context.Context) (int64, error) {
+	stat, err := s.volume()
+	if err != nil {
+		return 0, err
+	}
+	return int64(stat.Bavail * uint64(stat.Bsize)), nil
+}
+
+func (s *Spool) Capacity(context.Context) (int64, error) {
+	stat, err := s.volume()
+	if err != nil {
+		return 0, err
+	}
+	return int64(stat.Blocks * uint64(stat.Bsize)), nil
+}
+
+func (s *Spool) volume() (unix.Statfs_t, error) {
 	dir := s.root
 	for {
 		var stat unix.Statfs_t
 		err := unix.Statfs(dir, &stat)
 		if err == nil {
-			return int64(stat.Bavail * uint64(stat.Bsize)), nil
+			return stat, nil
 		}
 		parent := filepath.Dir(dir)
 		if !errors.Is(err, unix.ENOENT) || parent == dir {
-			return 0, fmt.Errorf("read free space of the upload root: %w", err)
+			return unix.Statfs_t{}, fmt.Errorf("read the volume of the upload root: %w", err)
 		}
 		dir = parent
 	}

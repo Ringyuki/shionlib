@@ -7,6 +7,7 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
+	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
 
 func (f PendingFile) stalled() bool {
@@ -50,6 +51,14 @@ func (f CheckFailure) Excerpt() string {
 type Resumed struct {
 	ResourceID int
 	Files      []string
+}
+
+type StalledEntry struct {
+	File     PendingFile
+	Reason   string
+	Game     GameTitles
+	Uploader user.Summary
+	Deadline time.Time
 }
 
 func stalledUnits(files []PendingFile) []Unit {

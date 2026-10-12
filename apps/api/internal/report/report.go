@@ -1,6 +1,7 @@
 package report
 
 import (
+	"slices"
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/paging"
@@ -84,15 +85,71 @@ func TargetPenalty(level Level) Penalty {
 	return targetPenalties[level]
 }
 
+type FalseReportStep struct {
+	Count   int
+	BanDays int
+}
+
+var falseReportSteps = []FalseReportStep{
+	{Count: 5, BanDays: 3},
+	{Count: 8, BanDays: 14},
+}
+
 func FalseReportPenalty(count int) Penalty {
-	switch count {
-	case 5:
-		return Penalty{BanDays: 3}
-	case 8:
-		return Penalty{BanDays: 14}
-	default:
-		return Penalty{}
+	for _, step := range falseReportSteps {
+		if step.Count == count {
+			return Penalty{BanDays: step.BanDays}
+		}
 	}
+	return Penalty{}
+}
+
+type LevelRule struct {
+	Level   Level
+	Penalty Penalty
+	Reasons []Reason
+}
+
+type Policy struct {
+	Levels                []LevelRule
+	FalseReportSteps      []FalseReportStep
+	FalseReportWindowDays int
+	ViolationFreeze       time.Duration
+}
+
+var (
+	levelOrder  = []Level{LevelLow, LevelMedium, LevelHigh, LevelCritical}
+	reasonOrder = []Reason{ReasonMalware, ReasonIrrelevant, ReasonBrokenLink, ReasonMisleadingContent, ReasonOther}
+)
+
+func policyOf(freeze time.Duration) Policy {
+	rules := make([]LevelRule, len(levelOrder))
+	for i, level := range levelOrder {
+		rule := LevelRule{Level: level, Penalty: targetPenalties[level], Reasons: []Reason{}}
+		for _, reason := range reasonOrder {
+			if defaultLevels[reason] == level {
+				rule.Reasons = append(rule.Reasons, reason)
+			}
+		}
+		rules[i] = rule
+	}
+	return Policy{
+		Levels:                rules,
+		FalseReportSteps:      slices.Clone(falseReportSteps),
+		FalseReportWindowDays: FalseReportWindowDays,
+		ViolationFreeze:       freeze,
+	}
+}
+
+type ReporterRecord struct {
+	Filed       int
+	Invalid     int
+	NextInvalid int
+}
+
+type Detail struct {
+	View
+	ReporterRecord ReporterRecord
 }
 
 type Report struct {

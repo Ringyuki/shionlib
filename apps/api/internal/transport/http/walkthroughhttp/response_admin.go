@@ -53,6 +53,7 @@ type adminWalkthroughItemDTO struct {
 	Lang       *string                        `json:"lang"`
 	Edited     bool                           `json:"edited"`
 	Status     string                         `json:"status" enum:"DRAFT,PUBLISHED,HIDDEN,DELETED"`
+	Held       bool                           `json:"held" doc:"True while it waits for review"`
 	Created    time.Time                      `json:"created"`
 	Updated    time.Time                      `json:"updated"`
 	Creator    adminWalkthroughCreatorDTO     `json:"creator"`
@@ -122,6 +123,7 @@ func toAdminWalkthroughItem(entry walkthrough.AdminEntry, now time.Time) adminWa
 		Lang:       entry.Lang,
 		Edited:     entry.Edited,
 		Status:     string(entry.Status),
+		Held:       entry.ReviewPending,
 		Created:    entry.Created,
 		Updated:    entry.Updated,
 		Creator:    toAdminWalkthroughCreator(entry, now),

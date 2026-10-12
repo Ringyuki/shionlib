@@ -709,6 +709,10 @@ func (s *Service) ExpireOverdue(ctx context.Context) error {
 	return errors.Join(errs...)
 }
 
+func (s *Service) ReviewPolicy() ReviewPolicy {
+	return ReviewPolicy{AutoBanThreshold: AutoBanThreshold.Read(s.settings), AutoBanDays: AutoBanDays.Read(s.settings)}
+}
+
 func (s *Service) List(ctx context.Context, filter ListFilter, page Page) ([]CaseView, int, error) {
 	return s.repo.ListCases(ctx, filter, page)
 }

@@ -69,6 +69,22 @@ func (r *MemoryRepository) CountInvalidSince(_ context.Context, reporterID int, 
 	return count, nil
 }
 
+func (r *MemoryRepository) CountFiled(_ context.Context, reporterID int) (int, int, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	filed, invalid := 0, 0
+	for _, rep := range r.reports {
+		if rep.ReporterID != reporterID {
+			continue
+		}
+		filed++
+		if rep.Status == report.StatusInvalid {
+			invalid++
+		}
+	}
+	return filed, invalid, nil
+}
+
 func (r *MemoryRepository) HasPending(_ context.Context, resourceID, reporterID int) (bool, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()

@@ -144,6 +144,9 @@ type Setting func(*sql.Selector)
 // SettingChange is the predicate function for settingchange builders.
 type SettingChange func(*sql.Selector)
 
+// SiteDailyStat is the predicate function for sitedailystat builders.
+type SiteDailyStat func(*sql.Selector)
+
 // SponsorOrder is the predicate function for sponsororder builders.
 type SponsorOrder func(*sql.Selector)
 

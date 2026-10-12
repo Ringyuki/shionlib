@@ -1233,10 +1233,60 @@
         ],
         "type": "object"
       },
+      "AdminPendingDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "comments": {
+            "description": "Comments held for review",
+            "format": "int64",
+            "type": "integer"
+          },
+          "malware_cases": {
+            "description": "Files the virus scan flagged, waiting for review",
+            "format": "int64",
+            "type": "integer"
+          },
+          "reports": {
+            "description": "Reports waiting for a verdict",
+            "format": "int64",
+            "type": "integer"
+          },
+          "stalled_files": {
+            "description": "Files whose check was paused after repeated failures",
+            "format": "int64",
+            "type": "integer"
+          },
+          "walkthroughs": {
+            "description": "Walkthroughs held for review",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "reports",
+          "malware_cases",
+          "stalled_files",
+          "comments",
+          "walkthroughs"
+        ],
+        "type": "object"
+      },
       "AdminStatsOverviewDTO": {
         "additionalProperties": false,
         "properties": {
+          "downloadsToday": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "newCommentsToday": {
+            "format": "int64",
+            "type": "integer"
+          },
           "newGamesToday": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "newResourcesToday": {
             "format": "int64",
             "type": "integer"
           },
@@ -1264,11 +1314,20 @@
             "format": "int64",
             "type": "integer"
           },
+          "totalResources": {
+            "description": "Published resources",
+            "format": "int64",
+            "type": "integer"
+          },
           "totalUsers": {
             "format": "int64",
             "type": "integer"
           },
           "totalViews": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "viewsToday": {
             "format": "int64",
             "type": "integer"
           }
@@ -1281,8 +1340,13 @@
           "totalCharacters",
           "totalDevelopers",
           "totalComments",
+          "totalResources",
           "newGamesToday",
-          "newUsersToday"
+          "newUsersToday",
+          "newResourcesToday",
+          "newCommentsToday",
+          "downloadsToday",
+          "viewsToday"
         ],
         "type": "object"
       },
@@ -1294,7 +1358,7 @@
             "type": "string"
           },
           "downloads": {
-            "description": "Always 0; daily downloads are not tracked",
+            "description": "Download links issued that day; counted since the daily counters exist",
             "format": "int64",
             "type": "integer"
           },
@@ -1307,7 +1371,7 @@
             "type": "integer"
           },
           "views": {
-            "description": "Always 0; daily views are not tracked",
+            "description": "Game page views that day; counted since the daily counters exist",
             "format": "int64",
             "type": "integer"
           }
@@ -1318,6 +1382,72 @@
           "users",
           "downloads",
           "views"
+        ],
+        "type": "object"
+      },
+      "AdminStorageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "awaiting_check": {
+            "description": "Uploaded files not yet checked",
+            "format": "int64",
+            "type": "integer"
+          },
+          "awaiting_store": {
+            "description": "Checked files not yet in the object store",
+            "format": "int64",
+            "type": "integer"
+          },
+          "spool_available": {
+            "description": "Free bytes on that volume",
+            "format": "int64",
+            "type": "integer"
+          },
+          "spool_capacity": {
+            "description": "Bytes of the volume uploads are staged on",
+            "format": "int64",
+            "type": "integer"
+          },
+          "spool_reserve": {
+            "description": "Free bytes below which no new upload is accepted",
+            "format": "int64",
+            "type": "integer"
+          },
+          "stored": {
+            "$ref": "#/components/schemas/AdminTallyDTO",
+            "description": "Files of active resources in the object store"
+          },
+          "uploading": {
+            "$ref": "#/components/schemas/AdminTallyDTO",
+            "description": "Uploads in progress and their declared sizes"
+          }
+        },
+        "required": [
+          "spool_capacity",
+          "spool_available",
+          "spool_reserve",
+          "uploading",
+          "awaiting_check",
+          "awaiting_store",
+          "stored"
+        ],
+        "type": "object"
+      },
+      "AdminTallyDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "files": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "files",
+          "bytes"
         ],
         "type": "object"
       },
@@ -1521,6 +1651,11 @@
           },
           "upload": {
             "$ref": "#/components/schemas/AllowanceDTO"
+          },
+          "violations": {
+            "description": "Files an admin confirmed as malware plus reports found valid above the lowest level",
+            "format": "int64",
+            "type": "integer"
           }
         },
         "required": [
@@ -1539,6 +1674,7 @@
           "two_factor_enabled",
           "sponsor_expires_at",
           "upload",
+          "violations",
           "counts",
           "latest_ban"
         ],
@@ -2186,6 +2322,10 @@
           "game": {
             "$ref": "#/components/schemas/AdminWalkthroughGameDTO"
           },
+          "held": {
+            "description": "True while it waits for review",
+            "type": "boolean"
+          },
           "id": {
             "format": "int64",
             "type": "integer"
@@ -2223,6 +2363,7 @@
           "lang",
           "edited",
           "status",
+          "held",
           "created",
           "updated",
           "creator",
@@ -5086,6 +5227,7 @@
           440205,
           440206,
           440207,
+          440208,
           450101,
           450102,
           450103,
@@ -5243,6 +5385,7 @@
           "GAME_DOWNLOAD_RESOURCE_REPORT_SUSPENDED",
           "GAME_DOWNLOAD_RESOURCE_MALWARE_CASE_NOT_FOUND",
           "GAME_DOWNLOAD_RESOURCE_MALWARE_CASE_ALREADY_PROCESSED",
+          "GAME_DOWNLOAD_RESOURCE_CHECK_NOT_STALLED",
           "GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND",
           "GAME_DOWNLOAD_RESOURCE_FILE_TOKEN_REQUIRED",
           "GAME_DOWNLOAD_RESOURCE_FILE_INVALID_TOKEN",
@@ -8233,6 +8376,39 @@
         ],
         "type": "object"
       },
+      "EnvelopeAdminPendingDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminPendingDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeAdminStatsOverviewDTO": {
         "additionalProperties": false,
         "properties": {
@@ -8242,6 +8418,39 @@
           },
           "data": {
             "$ref": "#/components/schemas/AdminStatsOverviewDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeAdminStorageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminStorageDTO"
           },
           "message": {
             "type": "string"
@@ -10929,6 +11138,45 @@
         ],
         "type": "object"
       },
+      "EnvelopeListStalledCheckDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/StalledCheckDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeListString": {
         "additionalProperties": false,
         "properties": {
@@ -11053,6 +11301,39 @@
           },
           "data": {
             "$ref": "#/components/schemas/MalwareCaseDetailDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeMalwarePolicyDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/MalwarePolicyDTO"
           },
           "message": {
             "type": "string"
@@ -12212,6 +12493,39 @@
           },
           "data": {
             "$ref": "#/components/schemas/ReportDetailDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeReportPolicyDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ReportPolicyDTO"
           },
           "message": {
             "type": "string"
@@ -15517,6 +15831,25 @@
         ],
         "type": "object"
       },
+      "MalwarePolicyDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "auto_ban_days": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "auto_ban_threshold": {
+            "description": "Confirmed detections after which the uploader is banned",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "auto_ban_threshold",
+          "auto_ban_days"
+        ],
+        "type": "object"
+      },
       "MessageCommentDTO": {
         "additionalProperties": false,
         "properties": {
@@ -16967,6 +17300,9 @@
           "reporter_penalty_applied": {
             "type": "boolean"
           },
+          "reporter_record": {
+            "$ref": "#/components/schemas/ReporterRecordDTO"
+          },
           "resource": {
             "$ref": "#/components/schemas/ReportDetailResourceDTO"
           },
@@ -16992,6 +17328,7 @@
           "updated",
           "resource",
           "reporter",
+          "reporter_record",
           "reported_user",
           "processor"
         ],
@@ -17033,6 +17370,25 @@
           "note",
           "game",
           "files"
+        ],
+        "type": "object"
+      },
+      "ReportFalseStepDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "ban_days": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "count": {
+            "description": "Invalid reports within the window",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count",
+          "ban_days"
         ],
         "type": "object"
       },
@@ -17119,6 +17475,39 @@
           "title_jp",
           "title_zh",
           "title_en"
+        ],
+        "type": "object"
+      },
+      "ReportLevelRuleDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "level": {
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH",
+              "CRITICAL"
+            ],
+            "type": "string"
+          },
+          "penalty": {
+            "$ref": "#/components/schemas/ReportPenaltyDTO"
+          },
+          "reasons": {
+            "description": "Reasons whose reports start at this level",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "level",
+          "penalty",
+          "reasons"
         ],
         "type": "object"
       },
@@ -17269,6 +17658,90 @@
           "name",
           "avatar",
           "is_sponsor"
+        ],
+        "type": "object"
+      },
+      "ReportPenaltyDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "ban_days": {
+            "description": "0 when the uploader is not banned",
+            "format": "int64",
+            "type": "integer"
+          },
+          "violation": {
+            "description": "Whether a violation is recorded against the uploader",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ban_days",
+          "violation"
+        ],
+        "type": "object"
+      },
+      "ReportPolicyDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "false_report_steps": {
+            "items": {
+              "$ref": "#/components/schemas/ReportFalseStepDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "false_report_window_days": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "levels": {
+            "items": {
+              "$ref": "#/components/schemas/ReportLevelRuleDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "violation_freeze_seconds": {
+            "description": "How long a violation keeps the uploader one tier down",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "levels",
+          "false_report_steps",
+          "false_report_window_days",
+          "violation_freeze_seconds"
+        ],
+        "type": "object"
+      },
+      "ReporterRecordDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "filed": {
+            "description": "Reports this user filed, this one included",
+            "format": "int64",
+            "type": "integer"
+          },
+          "invalid": {
+            "description": "Of those, found invalid",
+            "format": "int64",
+            "type": "integer"
+          },
+          "next_invalid": {
+            "description": "Invalid reports in the penalty window, this one counted while it is pending",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "filed",
+          "invalid",
+          "next_invalid"
         ],
         "type": "object"
       },
@@ -18122,6 +18595,71 @@
         },
         "required": [
           "received"
+        ],
+        "type": "object"
+      },
+      "StalledCheckDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "deadline": {
+            "description": "When the file is given up and removed if nobody handles it",
+            "format": "date-time",
+            "type": "string"
+          },
+          "failures": {
+            "description": "Checks that failed in a row",
+            "format": "int64",
+            "type": "integer"
+          },
+          "file_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "file_size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "game": {
+            "$ref": "#/components/schemas/MalwareGameDTO"
+          },
+          "reason": {
+            "description": "What the last failed check reported",
+            "type": "string"
+          },
+          "resource_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "stalled_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "uploaded": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "uploader": {
+            "$ref": "#/components/schemas/UserSummaryDTO"
+          }
+        },
+        "required": [
+          "file_id",
+          "file_name",
+          "file_size",
+          "resource_id",
+          "game",
+          "uploader",
+          "failures",
+          "reason",
+          "uploaded",
+          "stalled_at",
+          "deadline"
         ],
         "type": "object"
       },
@@ -23199,6 +23737,52 @@
         ]
       }
     },
+    "/admin/content/download-resource-report-policy": {
+      "get": {
+        "operationId": "adminReport.policy",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeReportPolicyDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "What each verdict and level does to the uploader and the reporter",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/admin/content/download-resource-reports": {
       "get": {
         "operationId": "adminReport.list",
@@ -24052,6 +24636,16 @@
             }
           },
           {
+            "description": "Only the cases that have been decided",
+            "explode": false,
+            "in": "query",
+            "name": "reviewed",
+            "schema": {
+              "description": "Only the cases that have been decided",
+              "type": "boolean"
+            }
+          },
+          {
             "explode": false,
             "in": "query",
             "name": "file_id",
@@ -24285,6 +24879,260 @@
           }
         ],
         "summary": "Allow or delete a quarantined file",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/malware-scan-policy": {
+      "get": {
+        "operationId": "adminMalware.policy",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeMalwarePolicyDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "What confirming a detection does to the uploader",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/stalled-checks": {
+      "get": {
+        "operationId": "adminStalledCheck.list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListStalledCheckDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List the files whose check was paused after repeated failures",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/stalled-checks/{file_id}": {
+      "delete": {
+        "operationId": "adminStalledCheck.remove",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "file_id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Give up the check of a paused file and remove it, with the volumes of its set",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/content/stalled-checks/{file_id}/recheck": {
+      "post": {
+        "operationId": "adminStalledCheck.recheck",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "file_id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Check a paused file again, with the volumes of its set",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/pending": {
+      "get": {
+        "operationId": "adminStats.pending",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdminPendingDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "How much waits for an admin, by kind",
         "tags": [
           "admin"
         ]
@@ -24916,6 +25764,52 @@
         ]
       }
     },
+    "/admin/stats/storage": {
+      "get": {
+        "operationId": "adminStats.storage",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeAdminStorageDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "The staging volume and files by stage",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/admin/stats/trends": {
       "get": {
         "operationId": "adminStats.trends",
@@ -24972,7 +25866,7 @@
             "accessCookie": []
           }
         ],
-        "summary": "Daily new games and users",
+        "summary": "Daily new games and users, downloads and views",
         "tags": [
           "admin"
         ]
@@ -26018,6 +26912,16 @@
                 "DELETED"
               ],
               "type": "string"
+            }
+          },
+          {
+            "description": "Only walkthroughs that wait for review",
+            "explode": false,
+            "in": "query",
+            "name": "held",
+            "schema": {
+              "description": "Only walkthroughs that wait for review",
+              "type": "boolean"
             }
           },
           {

@@ -148,6 +148,30 @@ var e2eMalwareFile = e2eSeededFile{
 	FileCheckStatus: 6,
 }
 
+var e2eStalledResource = e2eSeededResource{
+	Platform: []string{"win"},
+	Language: []string{"en"},
+	Note:     "Seeded resource whose check stalled, for the admin E2E tests.",
+}
+
+var e2eStalledFile = e2eSeededFile{
+	Type:            1,
+	FileName:        "seeded-stalled-sample.7z",
+	FilePath:        e2ePtr("/tmp/e2e/seeded-stalled-sample.7z"),
+	FileSize:        4096,
+	FileContentType: "application/x-7z-compressed",
+	FileHash:        "e2e-seeded-stalled-hash",
+	FileStatus:      2,
+	FileCheckStatus: 8,
+}
+
+const (
+	e2eStalledFailures  = 6
+	e2eStalledReason    = "scan service did not answer"
+	e2eStalledFor       = 3 * 24 * time.Hour
+	e2eSeededReportText = "Seeded report for the admin review flow."
+)
+
 type e2eMalwareCase struct {
 	Detector              string
 	DetectedViruses       []string

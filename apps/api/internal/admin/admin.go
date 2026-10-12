@@ -78,9 +78,10 @@ type BanRecord struct {
 
 type UserDetail struct {
 	UserEntry
-	Cover     *string
-	Upload    upload.Allowance
-	LatestBan *BanRecord
+	Cover      *string
+	Upload     upload.Allowance
+	Violations int
+	LatestBan  *BanRecord
 }
 
 type SessionFilter struct {

@@ -183,6 +183,13 @@ func TestCountInvalidSince(t *testing.T) {
 	if err != nil || count != 2 {
 		t.Fatalf("invalid reports in window: %d %v", count, err)
 	}
+	filed, invalid, err := f.repo.CountFiled(ctx, reporter)
+	if err != nil || filed != 5 || invalid != 3 {
+		t.Fatalf("everything the reporter filed, and what was invalid of it: %d %d %v", filed, invalid, err)
+	}
+	if filed, invalid, err := f.repo.CountFiled(ctx, uploader); err != nil || filed != 0 || invalid != 0 {
+		t.Fatalf("someone who never reported: %d %d %v", filed, invalid, err)
+	}
 }
 
 func TestListFiltersAndSorts(t *testing.T) {

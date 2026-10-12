@@ -59,6 +59,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/rolefieldpermission"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/setting"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/settingchange"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sitedailystat"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
@@ -127,6 +128,7 @@ const (
 	TypeRoleFieldPermission             = "RoleFieldPermission"
 	TypeSetting                         = "Setting"
 	TypeSettingChange                   = "SettingChange"
+	TypeSiteDailyStat                   = "SiteDailyStat"
 	TypeSponsorOrder                    = "SponsorOrder"
 	TypeTag                             = "Tag"
 	TypeUser                            = "User"
@@ -55841,6 +55843,515 @@ func (m *SettingChangeMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown SettingChange edge %s", name)
+}
+
+// SiteDailyStatMutation represents an operation that mutates the SiteDailyStat nodes in the graph.
+type SiteDailyStatMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	day           *time.Time
+	views         *int
+	addviews      *int
+	downloads     *int
+	adddownloads  *int
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*SiteDailyStat, error)
+	predicates    []predicate.SiteDailyStat
+}
+
+var _ ent.Mutation = (*SiteDailyStatMutation)(nil)
+
+// sitedailystatOption allows management of the mutation configuration using functional options.
+type sitedailystatOption func(*SiteDailyStatMutation)
+
+// newSiteDailyStatMutation creates new mutation for the SiteDailyStat entity.
+func newSiteDailyStatMutation(c config, op Op, opts ...sitedailystatOption) *SiteDailyStatMutation {
+	m := &SiteDailyStatMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSiteDailyStat,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSiteDailyStatID sets the ID field of the mutation.
+func withSiteDailyStatID(id int) sitedailystatOption {
+	return func(m *SiteDailyStatMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SiteDailyStat
+		)
+		m.oldValue = func(ctx context.Context) (*SiteDailyStat, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SiteDailyStat.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSiteDailyStat sets the old SiteDailyStat of the mutation.
+func withSiteDailyStat(node *SiteDailyStat) sitedailystatOption {
+	return func(m *SiteDailyStatMutation) {
+		m.oldValue = func(context.Context) (*SiteDailyStat, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SiteDailyStatMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SiteDailyStatMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of SiteDailyStat entities.
+func (m *SiteDailyStatMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SiteDailyStatMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SiteDailyStatMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().SiteDailyStat.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetDay sets the "day" field.
+func (m *SiteDailyStatMutation) SetDay(t time.Time) {
+	m.day = &t
+}
+
+// Day returns the value of the "day" field in the mutation.
+func (m *SiteDailyStatMutation) Day() (r time.Time, exists bool) {
+	v := m.day
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDay returns the old "day" field's value of the SiteDailyStat entity.
+// If the SiteDailyStat object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SiteDailyStatMutation) OldDay(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDay is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDay requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDay: %w", err)
+	}
+	return oldValue.Day, nil
+}
+
+// ResetDay resets all changes to the "day" field.
+func (m *SiteDailyStatMutation) ResetDay() {
+	m.day = nil
+}
+
+// SetViews sets the "views" field.
+func (m *SiteDailyStatMutation) SetViews(i int) {
+	m.views = &i
+	m.addviews = nil
+}
+
+// Views returns the value of the "views" field in the mutation.
+func (m *SiteDailyStatMutation) Views() (r int, exists bool) {
+	v := m.views
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldViews returns the old "views" field's value of the SiteDailyStat entity.
+// If the SiteDailyStat object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SiteDailyStatMutation) OldViews(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldViews is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldViews requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldViews: %w", err)
+	}
+	return oldValue.Views, nil
+}
+
+// AddViews adds i to the "views" field.
+func (m *SiteDailyStatMutation) AddViews(i int) {
+	if m.addviews != nil {
+		*m.addviews += i
+	} else {
+		m.addviews = &i
+	}
+}
+
+// AddedViews returns the value that was added to the "views" field in this mutation.
+func (m *SiteDailyStatMutation) AddedViews() (r int, exists bool) {
+	v := m.addviews
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetViews resets all changes to the "views" field.
+func (m *SiteDailyStatMutation) ResetViews() {
+	m.views = nil
+	m.addviews = nil
+}
+
+// SetDownloads sets the "downloads" field.
+func (m *SiteDailyStatMutation) SetDownloads(i int) {
+	m.downloads = &i
+	m.adddownloads = nil
+}
+
+// Downloads returns the value of the "downloads" field in the mutation.
+func (m *SiteDailyStatMutation) Downloads() (r int, exists bool) {
+	v := m.downloads
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDownloads returns the old "downloads" field's value of the SiteDailyStat entity.
+// If the SiteDailyStat object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SiteDailyStatMutation) OldDownloads(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDownloads is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDownloads requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDownloads: %w", err)
+	}
+	return oldValue.Downloads, nil
+}
+
+// AddDownloads adds i to the "downloads" field.
+func (m *SiteDailyStatMutation) AddDownloads(i int) {
+	if m.adddownloads != nil {
+		*m.adddownloads += i
+	} else {
+		m.adddownloads = &i
+	}
+}
+
+// AddedDownloads returns the value that was added to the "downloads" field in this mutation.
+func (m *SiteDailyStatMutation) AddedDownloads() (r int, exists bool) {
+	v := m.adddownloads
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDownloads resets all changes to the "downloads" field.
+func (m *SiteDailyStatMutation) ResetDownloads() {
+	m.downloads = nil
+	m.adddownloads = nil
+}
+
+// Where appends a list predicates to the SiteDailyStatMutation builder.
+func (m *SiteDailyStatMutation) Where(ps ...predicate.SiteDailyStat) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SiteDailyStatMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SiteDailyStatMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SiteDailyStat, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SiteDailyStatMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SiteDailyStatMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (SiteDailyStat).
+func (m *SiteDailyStatMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SiteDailyStatMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.day != nil {
+		fields = append(fields, sitedailystat.FieldDay)
+	}
+	if m.views != nil {
+		fields = append(fields, sitedailystat.FieldViews)
+	}
+	if m.downloads != nil {
+		fields = append(fields, sitedailystat.FieldDownloads)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SiteDailyStatMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case sitedailystat.FieldDay:
+		return m.Day()
+	case sitedailystat.FieldViews:
+		return m.Views()
+	case sitedailystat.FieldDownloads:
+		return m.Downloads()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SiteDailyStatMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case sitedailystat.FieldDay:
+		return m.OldDay(ctx)
+	case sitedailystat.FieldViews:
+		return m.OldViews(ctx)
+	case sitedailystat.FieldDownloads:
+		return m.OldDownloads(ctx)
+	}
+	return nil, fmt.Errorf("unknown SiteDailyStat field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SiteDailyStatMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case sitedailystat.FieldDay:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDay(v)
+		return nil
+	case sitedailystat.FieldViews:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetViews(v)
+		return nil
+	case sitedailystat.FieldDownloads:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDownloads(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SiteDailyStat field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SiteDailyStatMutation) AddedFields() []string {
+	var fields []string
+	if m.addviews != nil {
+		fields = append(fields, sitedailystat.FieldViews)
+	}
+	if m.adddownloads != nil {
+		fields = append(fields, sitedailystat.FieldDownloads)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SiteDailyStatMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case sitedailystat.FieldViews:
+		return m.AddedViews()
+	case sitedailystat.FieldDownloads:
+		return m.AddedDownloads()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SiteDailyStatMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case sitedailystat.FieldViews:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddViews(v)
+		return nil
+	case sitedailystat.FieldDownloads:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDownloads(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SiteDailyStat numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SiteDailyStatMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SiteDailyStatMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SiteDailyStatMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown SiteDailyStat nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SiteDailyStatMutation) ResetField(name string) error {
+	switch name {
+	case sitedailystat.FieldDay:
+		m.ResetDay()
+		return nil
+	case sitedailystat.FieldViews:
+		m.ResetViews()
+		return nil
+	case sitedailystat.FieldDownloads:
+		m.ResetDownloads()
+		return nil
+	}
+	return fmt.Errorf("unknown SiteDailyStat field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SiteDailyStatMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SiteDailyStatMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SiteDailyStatMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SiteDailyStatMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SiteDailyStatMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SiteDailyStatMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SiteDailyStatMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown SiteDailyStat unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SiteDailyStatMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown SiteDailyStat edge %s", name)
 }
 
 // SponsorOrderMutation represents an operation that mutates the SponsorOrder nodes in the graph.

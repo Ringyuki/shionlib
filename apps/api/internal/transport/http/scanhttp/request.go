@@ -13,6 +13,7 @@ type listMalwareCasesInput struct {
 	httpapi.PageQuery
 	Status         string `query:"status" enum:"PENDING,RELEASED_FALSE_POSITIVE,DELETED"`
 	DecisionSource string `query:"decision_source" enum:"ADMIN_ALLOW,ADMIN_DELETE,TIMEOUT_AUTO_DELETE"`
+	Reviewed       bool   `query:"reviewed" doc:"Only the cases that have been decided"`
 	FileID         int    `query:"file_id" minimum:"0"`
 	ResourceID     int    `query:"resource_id" minimum:"0"`
 	UploaderID     int    `query:"uploader_id" minimum:"0"`
@@ -27,6 +28,7 @@ func (in *listMalwareCasesInput) filter() scan.ListFilter {
 		ResourceID: in.ResourceID,
 		UploaderID: in.UploaderID,
 		ReviewerID: in.ReviewerID,
+		Reviewed:   in.Reviewed,
 		SortBy:     in.SortBy,
 		Descending: in.SortOrder != "asc",
 	}

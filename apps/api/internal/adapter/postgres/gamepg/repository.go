@@ -3,6 +3,7 @@ package gamepg
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 
@@ -314,7 +315,7 @@ func (r *Repository) IncreaseViews(ctx context.Context, id int) error {
 	if err != nil {
 		return fmt.Errorf("increase views of game %d: %w", id, err)
 	}
-	return nil
+	return postgres.CountDailyView(ctx, r.db(ctx), time.Now())
 }
 
 func (r *Repository) ExternalIDs(ctx context.Context, id int) (game.ExternalIDs, error) {

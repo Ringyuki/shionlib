@@ -106,19 +106,20 @@ func TestAdminUserListShape(t *testing.T) {
 func TestAdminUserDetailShape(t *testing.T) {
 	env := newUserEnv(t)
 	env.store.AddDetail(admin.UserDetail{
-		UserEntry: admin.UserEntry{ID: 5, Name: "five", Email: "five@example.test", Role: actor.RoleUser, Status: user.StatusBanned, Lang: user.LangEN, ContentLimit: actor.ContentLimitNeverShow, Created: stamp, Updated: stamp},
-		LatestBan: &admin.BanRecord{BannedAt: stamp, Reason: ptr("spam"), DurationDays: ptr(3), BannedBy: &admin.UserRef{ID: 1, Name: "root"}},
+		UserEntry:  admin.UserEntry{ID: 5, Name: "five", Email: "five@example.test", Role: actor.RoleUser, Status: user.StatusBanned, Lang: user.LangEN, ContentLimit: actor.ContentLimitNeverShow, Created: stamp, Updated: stamp},
+		Violations: 2,
+		LatestBan:  &admin.BanRecord{BannedAt: stamp, Reason: ptr("spam"), DurationDays: ptr(3), BannedBy: &admin.UserRef{ID: 1, Name: "root"}},
 	})
 	env.quotas.SeedUsage(5, 7, 3)
 	env.store.AddDetail(admin.UserDetail{UserEntry: admin.UserEntry{ID: 6, Name: "six", Email: "six@example.test", Role: actor.RoleUser, Status: user.StatusActive, Lang: user.LangJA, ContentLimit: actor.ContentLimitNeverShow, Created: stamp, Updated: stamp}})
 	resp := env.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/users/5", As: &env.staff})
 	env.server.Expect(resp, http.StatusOK, 0)
-	want := `{"id":5,"name":"five","email":"five@example.test","avatar":null,"cover":null,"role":1,"status":2,"lang":"en","content_limit":1,"created":"2026-01-02T03:04:05.000Z","updated":"2026-01-02T03:04:05.000Z","last_login_at":null,"two_factor_enabled":false,"sponsor_expires_at":null,"upload":{"tier":"new","approved":0,"trusted":false,"frozen_until":null,"stored":7,"stored_limit":100,"in_flight":3,"in_flight_limit":50,"max_file_size":16},"counts":{"comments":0,"resources":0,"favorites":0,"edits":0},"latest_ban":{"banned_at":"2026-01-02T03:04:05.000Z","banned_reason":"spam","banned_duration_days":3,"is_permanent":false,"unbanned_at":null,"banned_by":{"id":1,"name":"root"}}}`
+	want := `{"id":5,"name":"five","email":"five@example.test","avatar":null,"cover":null,"role":1,"status":2,"lang":"en","content_limit":1,"created":"2026-01-02T03:04:05.000Z","updated":"2026-01-02T03:04:05.000Z","last_login_at":null,"two_factor_enabled":false,"sponsor_expires_at":null,"upload":{"tier":"new","approved":0,"trusted":false,"frozen_until":null,"stored":7,"stored_limit":100,"in_flight":3,"in_flight_limit":50,"max_file_size":16},"violations":2,"counts":{"comments":0,"resources":0,"favorites":0,"edits":0},"latest_ban":{"banned_at":"2026-01-02T03:04:05.000Z","banned_reason":"spam","banned_duration_days":3,"is_permanent":false,"unbanned_at":null,"banned_by":{"id":1,"name":"root"}}}`
 	if string(resp.Data) != want {
 		t.Fatalf("detail\n got %s\nwant %s", resp.Data, want)
 	}
 	resp = env.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/users/6", As: &env.staff})
-	want = `{"id":6,"name":"six","email":"six@example.test","avatar":null,"cover":null,"role":1,"status":1,"lang":"ja","content_limit":1,"created":"2026-01-02T03:04:05.000Z","updated":"2026-01-02T03:04:05.000Z","last_login_at":null,"two_factor_enabled":false,"sponsor_expires_at":null,"upload":{"tier":"new","approved":0,"trusted":false,"frozen_until":null,"stored":0,"stored_limit":100,"in_flight":0,"in_flight_limit":50,"max_file_size":16},"counts":{"comments":0,"resources":0,"favorites":0,"edits":0},"latest_ban":null}`
+	want = `{"id":6,"name":"six","email":"six@example.test","avatar":null,"cover":null,"role":1,"status":1,"lang":"ja","content_limit":1,"created":"2026-01-02T03:04:05.000Z","updated":"2026-01-02T03:04:05.000Z","last_login_at":null,"two_factor_enabled":false,"sponsor_expires_at":null,"upload":{"tier":"new","approved":0,"trusted":false,"frozen_until":null,"stored":0,"stored_limit":100,"in_flight":0,"in_flight_limit":50,"max_file_size":16},"violations":0,"counts":{"comments":0,"resources":0,"favorites":0,"edits":0},"latest_ban":null}`
 	if string(resp.Data) != want {
 		t.Fatalf("detail without uploads\n got %s\nwant %s", resp.Data, want)
 	}

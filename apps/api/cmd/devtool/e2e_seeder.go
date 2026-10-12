@@ -23,6 +23,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacter"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecharacterrelation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
@@ -663,6 +664,29 @@ func (s *e2eSeeder) seedPostGameContent(ctx context.Context, tx *ent.Client, con
 		Exec(ctx)
 	if err != nil {
 		return fmt.Errorf("create malware scan case: %w", err)
+	}
+	err = tx.GameDownloadResourceReport.Create().
+		SetResourceID(resourceID).
+		SetReporterID(content.memberID).
+		SetReportedUserID(content.adminID).
+		SetReason(gamedownloadresourcereport.ReasonBROKEN_LINK).
+		SetDetail(e2eSeededReportText).
+		SetMaliciousLevel(gamedownloadresourcereport.MaliciousLevelLOW).
+		Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("create the report awaiting review: %w", err)
+	}
+	_, stalled, err := s.createResource(ctx, tx, content.malwareGameID, content.adminID, e2eStalledResource, e2eStalledFile)
+	if err != nil {
+		return err
+	}
+	err = tx.GameDownloadResourceFile.UpdateOneID(stalled.ID).
+		SetCheckFailures(e2eStalledFailures).
+		SetCheckError(e2eStalledReason).
+		SetCheckStalledAt(s.now().UTC().Add(-e2eStalledFor)).
+		Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("mark the stalled check: %w", err)
 	}
 	return nil
 }

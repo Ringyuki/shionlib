@@ -89,8 +89,55 @@ type reportDetailDTO struct {
 	Updated                time.Time                `json:"updated"`
 	Resource               reportDetailResourceDTO  `json:"resource"`
 	Reporter               reportMemberDTO          `json:"reporter"`
+	ReporterRecord         reporterRecordDTO        `json:"reporter_record"`
 	ReportedUser           reportMemberDTO          `json:"reported_user"`
 	Processor              *userhttp.UserSummaryDTO `json:"processor"`
+}
+
+type reporterRecordDTO struct {
+	Filed       int `json:"filed" doc:"Reports this user filed, this one included"`
+	Invalid     int `json:"invalid" doc:"Of those, found invalid"`
+	NextInvalid int `json:"next_invalid" doc:"Invalid reports in the penalty window, this one counted while it is pending"`
+}
+
+type reportPenaltyDTO struct {
+	BanDays   int  `json:"ban_days" doc:"0 when the uploader is not banned"`
+	Violation bool `json:"violation" doc:"Whether a violation is recorded against the uploader"`
+}
+
+type reportLevelRuleDTO struct {
+	Level   report.Level     `json:"level" enum:"LOW,MEDIUM,HIGH,CRITICAL"`
+	Penalty reportPenaltyDTO `json:"penalty"`
+	Reasons []report.Reason  `json:"reasons" doc:"Reasons whose reports start at this level"`
+}
+
+type reportFalseStepDTO struct {
+	Count   int `json:"count" doc:"Invalid reports within the window"`
+	BanDays int `json:"ban_days"`
+}
+
+type reportPolicyDTO struct {
+	Levels                 []reportLevelRuleDTO `json:"levels"`
+	FalseReportSteps       []reportFalseStepDTO `json:"false_report_steps"`
+	FalseReportWindowDays  int                  `json:"false_report_window_days"`
+	ViolationFreezeSeconds int64                `json:"violation_freeze_seconds" doc:"How long a violation keeps the uploader one tier down"`
+}
+
+func toPolicyDTO(policy report.Policy) reportPolicyDTO {
+	levels := make([]reportLevelRuleDTO, len(policy.Levels))
+	for i, rule := range policy.Levels {
+		levels[i] = reportLevelRuleDTO{Level: rule.Level, Penalty: reportPenaltyDTO(rule.Penalty), Reasons: rule.Reasons}
+	}
+	steps := make([]reportFalseStepDTO, len(policy.FalseReportSteps))
+	for i, step := range policy.FalseReportSteps {
+		steps[i] = reportFalseStepDTO(step)
+	}
+	return reportPolicyDTO{
+		Levels:                 levels,
+		FalseReportSteps:       steps,
+		FalseReportWindowDays:  policy.FalseReportWindowDays,
+		ViolationFreezeSeconds: int64(policy.ViolationFreeze.Seconds()),
+	}
 }
 
 func toGameDTO(t report.GameTitles) reportGameDTO {
@@ -123,7 +170,8 @@ func toListItemDTO(v report.View, now time.Time) reportListItemDTO {
 	}
 }
 
-func toDetailDTO(v report.View, now time.Time) reportDetailDTO {
+func toDetailDTO(detail report.Detail, now time.Time) reportDetailDTO {
+	v := detail.View
 	files := make([]reportFileDTO, len(v.Resource.Files))
 	for i, file := range v.Resource.Files {
 		files[i] = reportFileDTO{
@@ -150,6 +198,7 @@ func toDetailDTO(v report.View, now time.Time) reportDetailDTO {
 		Updated:                v.Updated,
 		Resource:               reportDetailResourceDTO{ID: v.Resource.ID, GameID: v.Resource.GameID, Note: v.Resource.Note, Game: toGameDTO(v.Resource.Game), Files: files},
 		Reporter:               toMemberDTO(v.Reporter, now),
+		ReporterRecord:         reporterRecordDTO(detail.ReporterRecord),
 		ReportedUser:           toMemberDTO(v.ReportedUser, now),
 		Processor:              userhttp.ToUserSummaryPtr(v.Processor, now),
 	}

@@ -244,6 +244,17 @@ func TestAFailingCheckIsCountedStalledAndResumed(t *testing.T) {
 	if one, err := f.repo.StalledFiles(ctx, nil, 1); err != nil || len(one) != 1 {
 		t.Fatalf("the limit applies: %+v %v", one, err)
 	}
+	entries, err := f.repo.StalledEntries(ctx, 10)
+	if err != nil || len(entries) != 2 {
+		t.Fatalf("unexpected stalled entries %+v %v", entries, err)
+	}
+	oldest := entries[0]
+	if oldest.File.ID != first.ID || oldest.Reason != "still down" || oldest.File.CheckFailures != 6 || oldest.Game.ID != gameID || oldest.Uploader.ID != creator || oldest.Uploader.Name == "" {
+		t.Fatalf("an entry names what failed, the game and the uploader, the longest waiting first: %+v", oldest)
+	}
+	if limited, err := f.repo.StalledEntries(ctx, 1); err != nil || len(limited) != 1 {
+		t.Fatalf("the limit applies to entries: %+v %v", limited, err)
+	}
 	if err := f.repo.ResumeCheck(ctx, first.ID); err != nil {
 		t.Fatal(err)
 	}
@@ -387,6 +398,15 @@ func TestExpiredAndListedCases(t *testing.T) {
 	reviewed, total, err := f.repo.ListCases(ctx, scan.ListFilter{Source: &source, ReviewerID: reviewer, ResourceID: resource.ID, FileID: *done.FileID, SortBy: "unknown"}, scan.Page{Number: 1, Size: 10})
 	if err != nil || total != 1 || len(reviewed) != 1 || reviewed[0].ID != done.ID || reviewed[0].Reviewer == nil || reviewed[0].Reviewer.ID != reviewer {
 		t.Fatalf("reviewer filter: %d %+v %v", total, reviewed, err)
+	}
+	decided, total, err := f.repo.ListCases(ctx, scan.ListFilter{Reviewed: true, SortBy: "id"}, scan.Page{Number: 1, Size: 10})
+	if err != nil || total != len(decided) || total == 0 || total == 5 {
+		t.Fatalf("decided cases: %d %+v %v", total, decided, err)
+	}
+	for _, item := range decided {
+		if item.Status == scan.CasePending {
+			t.Fatalf("a pending case among the decided ones: %+v", item)
+		}
 	}
 }
 

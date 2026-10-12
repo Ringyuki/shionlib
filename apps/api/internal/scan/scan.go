@@ -38,11 +38,12 @@ const (
 	Detector          = "clamscan"
 	expiredCaseBatch  = 20
 	stalledCheckBatch = 50
+	stalledListLimit  = 100
 	checkRetryDelay   = 30 * time.Minute
 	checkRetryLimit   = 8 * time.Hour
 	checkReasonLimit  = 2000
 	checkExcerptLimit = 300
-	adminReviewPrefix = "/admin/malware-scans?id="
+	adminReviewPrefix = "/admin/checks?case="
 	resourcePagePath  = "/resource/%d"
 )
 
@@ -250,9 +251,15 @@ type MalwareAlert struct {
 	ReviewURL    string
 }
 
+type ReviewPolicy struct {
+	AutoBanThreshold int
+	AutoBanDays      int
+}
+
 type ListFilter struct {
 	Status     *CaseStatus
 	Source     *DecisionSource
+	Reviewed   bool
 	FileID     int
 	ResourceID int
 	UploaderID int

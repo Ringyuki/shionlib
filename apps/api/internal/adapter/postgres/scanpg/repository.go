@@ -159,6 +159,33 @@ func (r *Repository) StalledFiles(ctx context.Context, since *time.Time, limit i
 	return files, nil
 }
 
+func (r *Repository) StalledEntries(ctx context.Context, limit int) ([]scan.StalledEntry, error) {
+	rows, err := r.db(ctx).GameDownloadResourceFile.Query().
+		Where(
+			gamedownloadresourcefile.Type(download.FileTypeObjectStore),
+			gamedownloadresourcefile.FileStatus(download.FileOnServer),
+			gamedownloadresourcefile.FileCheckStatus(int(download.CheckStalled)),
+		).
+		WithGameDownloadResource(func(q *ent.GameDownloadResourceQuery) {
+			q.Select(gamedownloadresource.FieldID, gamedownloadresource.FieldGameID).
+				WithGame(func(q *ent.GameQuery) {
+					q.Select(entgame.FieldID, entgame.FieldTitleJp, entgame.FieldTitleZh, entgame.FieldTitleEn)
+				})
+		}).
+		WithCreator(userpg.SelectSummary).
+		Order(ent.Asc(gamedownloadresourcefile.FieldCheckStalledAt), ent.Asc(gamedownloadresourcefile.FieldID)).
+		Limit(limit).
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list the files whose check stalled with their uploaders: %w", err)
+	}
+	entries := make([]scan.StalledEntry, len(rows))
+	for i, row := range rows {
+		entries[i] = toStalledEntry(row)
+	}
+	return entries, nil
+}
+
 func (r *Repository) ResourceFiles(ctx context.Context, resourceID int) ([]scan.PendingFile, error) {
 	rows, err := r.pendingQuery(ctx).
 		Where(gamedownloadresourcefile.GameDownloadResourceID(resourceID)).
@@ -334,6 +361,9 @@ func (r *Repository) ListCases(ctx context.Context, filter scan.ListFilter, page
 	}
 	if filter.Source != nil {
 		predicates = append(predicates, malwarescancase.DecisionSourceEQ(malwarescancase.DecisionSource(*filter.Source)))
+	}
+	if filter.Reviewed {
+		predicates = append(predicates, malwarescancase.StatusNEQ(malwarescancase.Status(scan.CasePending)))
 	}
 	if filter.FileID != 0 {
 		predicates = append(predicates, malwarescancase.FileID(filter.FileID))

@@ -11,6 +11,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
+	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
 
 type Deps struct {
@@ -21,6 +23,7 @@ type Deps struct {
 	Mailer    AdminMailer
 	Queue     Queue
 	Tx        Transactor
+	Settings  setting.Source
 	SiteURL   string
 	Now       func() time.Time
 }
@@ -33,6 +36,7 @@ type Service struct {
 	mailer    AdminMailer
 	queue     Queue
 	tx        Transactor
+	settings  setting.Source
 	siteURL   string
 	now       func() time.Time
 }
@@ -46,6 +50,7 @@ func NewService(deps Deps) *Service {
 		mailer:    deps.Mailer,
 		queue:     deps.Queue,
 		tx:        deps.Tx,
+		settings:  deps.Settings,
 		siteURL:   deps.SiteURL,
 		now:       deps.Now,
 	}
@@ -183,11 +188,31 @@ func (s *Service) List(ctx context.Context, filter ListFilter, page Page) ([]Vie
 	return s.repo.List(ctx, filter, page)
 }
 
-func (s *Service) Get(ctx context.Context, id int) (View, error) {
-	return s.repo.Get(ctx, id)
+func (s *Service) Get(ctx context.Context, id int) (Detail, error) {
+	view, err := s.repo.Get(ctx, id)
+	if err != nil {
+		return Detail{}, err
+	}
+	filed, invalid, err := s.repo.CountFiled(ctx, view.ReporterID)
+	if err != nil {
+		return Detail{}, err
+	}
+	since := s.now().Add(-FalseReportWindow)
+	recent, err := s.repo.CountInvalidSince(ctx, view.ReporterID, since)
+	if err != nil {
+		return Detail{}, err
+	}
+	if view.Status == StatusPending && !view.Created.Before(since) {
+		recent++
+	}
+	return Detail{View: view, ReporterRecord: ReporterRecord{Filed: filed, Invalid: invalid, NextInvalid: recent}}, nil
 }
 
-func (s *Service) Review(ctx context.Context, who actor.Actor, id int, in ReviewInput) (View, error) {
+func (s *Service) Policy() Policy {
+	return policyOf(upload.ViolationFreeze.Read(s.settings))
+}
+
+func (s *Service) Review(ctx context.Context, who actor.Actor, id int, in ReviewInput) (Detail, error) {
 	notify := in.Notify == nil || *in.Notify
 	remove := in.Verdict == VerdictValid && (in.RemoveResource == nil || *in.RemoveResource)
 	var purge []string
@@ -231,12 +256,12 @@ func (s *Service) Review(ctx context.Context, who actor.Actor, id int, in Review
 		return err
 	})
 	if err != nil {
-		return View{}, err
+		return Detail{}, err
 	}
 	if err := s.resources.PurgeLater(ctx, purge); err != nil {
-		return View{}, err
+		return Detail{}, err
 	}
-	return s.repo.Get(ctx, id)
+	return s.Get(ctx, id)
 }
 
 func (s *Service) settleValid(ctx context.Context, who actor.Actor, report Report, level Level, gameID int, note *string, notify bool) error {

@@ -692,6 +692,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/admin/content/download-resource-report-policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What each verdict and level does to the uploader and the reporter */
+        get: operations["adminReport.policy"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/content/download-resource-reports": {
         parameters: {
             query?: never;
@@ -881,6 +898,91 @@ export type paths = {
         patch: operations["adminMalware.review"];
         trace?: never;
     };
+    "/admin/content/malware-scan-policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What confirming a detection does to the uploader */
+        get: operations["adminMalware.policy"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/content/stalled-checks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the files whose check was paused after repeated failures */
+        get: operations["adminStalledCheck.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/content/stalled-checks/{file_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Give up the check of a paused file and remove it, with the volumes of its set */
+        delete: operations["adminStalledCheck.remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/content/stalled-checks/{file_id}/recheck": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check a paused file again, with the volumes of its set */
+        post: operations["adminStalledCheck.recheck"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/pending": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** How much waits for an admin, by kind */
+        get: operations["adminStats.pending"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/settings": {
         parameters: {
             query?: never;
@@ -1019,6 +1121,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/admin/stats/storage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The staging volume and files by stage */
+        get: operations["adminStats.storage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/stats/trends": {
         parameters: {
             query?: never;
@@ -1026,7 +1145,7 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** Daily new games and users */
+        /** Daily new games and users, downloads and views */
         get: operations["adminStats.trends"];
         put?: never;
         post?: never;
@@ -3826,9 +3945,42 @@ export type components = {
              */
             status: 1 | 2;
         };
+        AdminPendingDTO: {
+            /**
+             * Format: int64
+             * @description Comments held for review
+             */
+            comments: number;
+            /**
+             * Format: int64
+             * @description Files the virus scan flagged, waiting for review
+             */
+            malware_cases: number;
+            /**
+             * Format: int64
+             * @description Reports waiting for a verdict
+             */
+            reports: number;
+            /**
+             * Format: int64
+             * @description Files whose check was paused after repeated failures
+             */
+            stalled_files: number;
+            /**
+             * Format: int64
+             * @description Walkthroughs held for review
+             */
+            walkthroughs: number;
+        };
         AdminStatsOverviewDTO: {
             /** Format: int64 */
+            downloadsToday: number;
+            /** Format: int64 */
+            newCommentsToday: number;
+            /** Format: int64 */
             newGamesToday: number;
+            /** Format: int64 */
+            newResourcesToday: number;
             /** Format: int64 */
             newUsersToday: number;
             /** Format: int64 */
@@ -3841,17 +3993,24 @@ export type components = {
             totalDownloads: number;
             /** Format: int64 */
             totalGames: number;
+            /**
+             * Format: int64
+             * @description Published resources
+             */
+            totalResources: number;
             /** Format: int64 */
             totalUsers: number;
             /** Format: int64 */
             totalViews: number;
+            /** Format: int64 */
+            viewsToday: number;
         };
         AdminStatsTrendDTO: {
             /** @description YYYY-MM-DD in UTC+8 */
             date: string;
             /**
              * Format: int64
-             * @description Always 0; daily downloads are not tracked
+             * @description Download links issued that day; counted since the daily counters exist
              */
             downloads: number;
             /** Format: int64 */
@@ -3860,9 +4019,46 @@ export type components = {
             users: number;
             /**
              * Format: int64
-             * @description Always 0; daily views are not tracked
+             * @description Game page views that day; counted since the daily counters exist
              */
             views: number;
+        };
+        AdminStorageDTO: {
+            /**
+             * Format: int64
+             * @description Uploaded files not yet checked
+             */
+            awaiting_check: number;
+            /**
+             * Format: int64
+             * @description Checked files not yet in the object store
+             */
+            awaiting_store: number;
+            /**
+             * Format: int64
+             * @description Free bytes on that volume
+             */
+            spool_available: number;
+            /**
+             * Format: int64
+             * @description Bytes of the volume uploads are staged on
+             */
+            spool_capacity: number;
+            /**
+             * Format: int64
+             * @description Free bytes below which no new upload is accepted
+             */
+            spool_reserve: number;
+            /** @description Files of active resources in the object store */
+            stored: components["schemas"]["AdminTallyDTO"];
+            /** @description Uploads in progress and their declared sizes */
+            uploading: components["schemas"]["AdminTallyDTO"];
+        };
+        AdminTallyDTO: {
+            /** Format: int64 */
+            bytes: number;
+            /** Format: int64 */
+            files: number;
         };
         AdminUserAllowMaskDTO: {
             /** @description Decimal string of the user's own grants */
@@ -3930,6 +4126,11 @@ export type components = {
             /** Format: date-time */
             updated: string;
             upload: components["schemas"]["AllowanceDTO"];
+            /**
+             * Format: int64
+             * @description Files an admin confirmed as malware plus reports found valid above the lowest level
+             */
+            violations: number;
         };
         AdminUserItemDTO: {
             avatar: string | null;
@@ -4116,6 +4317,8 @@ export type components = {
             creator: components["schemas"]["AdminWalkthroughCreatorDTO"];
             edited: boolean;
             game: components["schemas"]["AdminWalkthroughGameDTO"];
+            /** @description True while it waits for review */
+            held: boolean;
             /** Format: int64 */
             id: number;
             lang: string | null;
@@ -4834,7 +5037,7 @@ export type components = {
          * Format: int64
          * @enum {integer}
          */
-        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 450101 | 450102 | 450103 | 450104 | 450105 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 610101 | 610102 | 620101 | 620102 | 620103 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103;
+        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 610101 | 610102 | 620101 | 620102 | 620103 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103;
         CatalogHitDTO: {
             cover: string | null;
             developer: string | null;
@@ -5597,10 +5800,30 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeAdminPendingDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["AdminPendingDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeAdminStatsOverviewDTO: {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["AdminStatsOverviewDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeAdminStorageDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["AdminStorageDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -6378,6 +6601,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeListStalledCheckDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["StalledCheckDTO"][] | null;
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeListString: {
             /** Format: int64 */
             code: number;
@@ -6412,6 +6645,16 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["MalwareCaseDetailDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeMalwarePolicyDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["MalwarePolicyDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -6763,6 +7006,16 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["ReportDetailDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeReportPolicyDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["ReportPolicyDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -7663,6 +7916,15 @@ export type components = {
             /** Format: int64 */
             status: number;
         };
+        MalwarePolicyDTO: {
+            /** Format: int64 */
+            auto_ban_days: number;
+            /**
+             * Format: int64
+             * @description Confirmed detections after which the uploader is banned
+             */
+            auto_ban_threshold: number;
+        };
         MessageCommentDTO: {
             content: components["schemas"]["RichTextDocument"];
             /** Format: int64 */
@@ -8018,6 +8280,7 @@ export type components = {
             reported_user: components["schemas"]["ReportMemberDTO"];
             reporter: components["schemas"]["ReportMemberDTO"];
             reporter_penalty_applied: boolean;
+            reporter_record: components["schemas"]["ReporterRecordDTO"];
             resource: components["schemas"]["ReportDetailResourceDTO"];
             status: string;
             /** Format: date-time */
@@ -8031,6 +8294,15 @@ export type components = {
             /** Format: int64 */
             id: number;
             note: string | null;
+        };
+        ReportFalseStepDTO: {
+            /** Format: int64 */
+            ban_days: number;
+            /**
+             * Format: int64
+             * @description Invalid reports within the window
+             */
+            count: number;
         };
         ReportFileDTO: {
             /** Format: int64 */
@@ -8057,6 +8329,13 @@ export type components = {
             title_en: string;
             title_jp: string;
             title_zh: string;
+        };
+        ReportLevelRuleDTO: {
+            /** @enum {string} */
+            level: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+            penalty: components["schemas"]["ReportPenaltyDTO"];
+            /** @description Reasons whose reports start at this level */
+            reasons: string[] | null;
         };
         ReportListItemDTO: {
             /** Format: date-time */
@@ -8095,6 +8374,43 @@ export type components = {
             role: number;
             /** Format: int64 */
             status: number;
+        };
+        ReportPenaltyDTO: {
+            /**
+             * Format: int64
+             * @description 0 when the uploader is not banned
+             */
+            ban_days: number;
+            /** @description Whether a violation is recorded against the uploader */
+            violation: boolean;
+        };
+        ReportPolicyDTO: {
+            false_report_steps: components["schemas"]["ReportFalseStepDTO"][] | null;
+            /** Format: int64 */
+            false_report_window_days: number;
+            levels: components["schemas"]["ReportLevelRuleDTO"][] | null;
+            /**
+             * Format: int64
+             * @description How long a violation keeps the uploader one tier down
+             */
+            violation_freeze_seconds: number;
+        };
+        ReporterRecordDTO: {
+            /**
+             * Format: int64
+             * @description Reports this user filed, this one included
+             */
+            filed: number;
+            /**
+             * Format: int64
+             * @description Of those, found invalid
+             */
+            invalid: number;
+            /**
+             * Format: int64
+             * @description Invalid reports in the penalty window, this one counted while it is pending
+             */
+            next_invalid: number;
         };
         RequestCodeInputBody: {
             /** Format: email */
@@ -8321,6 +8637,33 @@ export type components = {
         };
         SponsorWebhookDTO: {
             received: boolean;
+        };
+        StalledCheckDTO: {
+            /**
+             * Format: date-time
+             * @description When the file is given up and removed if nobody handles it
+             */
+            deadline: string;
+            /**
+             * Format: int64
+             * @description Checks that failed in a row
+             */
+            failures: number;
+            /** Format: int64 */
+            file_id: number;
+            file_name: string;
+            /** Format: int64 */
+            file_size: number;
+            game: components["schemas"]["MalwareGameDTO"];
+            /** @description What the last failed check reported */
+            reason: string;
+            /** Format: int64 */
+            resource_id: number;
+            /** Format: date-time */
+            stalled_at: string | null;
+            /** Format: date-time */
+            uploaded: string;
+            uploader: components["schemas"]["UserSummaryDTO"];
         };
         StorageListingDTO: {
             Contents: components["schemas"]["StorageObjectDTO"][] | null;
@@ -10504,6 +10847,36 @@ export interface operations {
             };
         };
     };
+    "adminReport.policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeReportPolicyDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     "adminReport.list": {
         parameters: {
             query?: {
@@ -10865,6 +11238,8 @@ export interface operations {
                 pageSize?: number;
                 status?: "PENDING" | "RELEASED_FALSE_POSITIVE" | "DELETED";
                 decision_source?: "ADMIN_ALLOW" | "ADMIN_DELETE" | "TIMEOUT_AUTO_DELETE";
+                /** @description Only the cases that have been decided */
+                reviewed?: boolean;
                 file_id?: number;
                 resource_id?: number;
                 uploader_id?: number;
@@ -10954,6 +11329,160 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeMalwareCaseDetailDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminMalware.policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeMalwarePolicyDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminStalledCheck.list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeListStalledCheckDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminStalledCheck.remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                file_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminStalledCheck.recheck": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                file_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminStats.pending": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeAdminPendingDTO"];
                 };
             };
             /** @description Error */
@@ -11285,6 +11814,36 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeAdminStatsOverviewDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminStats.storage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeAdminStorageDTO"];
                 };
             };
             /** @description Error */
@@ -11804,6 +12363,8 @@ export interface operations {
                 sortBy?: "id" | "created" | "updated" | "status";
                 sortOrder?: "asc" | "desc";
                 status?: "DRAFT" | "PUBLISHED" | "HIDDEN" | "DELETED";
+                /** @description Only walkthroughs that wait for review */
+                held?: boolean;
                 creatorId?: number;
                 gameId?: number;
             };

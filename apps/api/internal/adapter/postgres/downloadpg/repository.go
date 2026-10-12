@@ -344,10 +344,11 @@ func (r *Repository) CountDownload(ctx context.Context, resourceID, gameID int) 
 	if affected, err := result.RowsAffected(); err == nil && affected == 0 {
 		return download.ErrResourceNotFound
 	}
-	if _, err := r.db(ctx).ExecContext(ctx, `UPDATE games SET downloads = downloads + 1, updated = $2 WHERE id = $1`, gameID, time.Now().UTC()); err != nil {
+	now := time.Now()
+	if _, err := r.db(ctx).ExecContext(ctx, `UPDATE games SET downloads = downloads + 1, updated = $2 WHERE id = $1`, gameID, now.UTC()); err != nil {
 		return fmt.Errorf("count download of game %d: %w", gameID, err)
 	}
-	return nil
+	return postgres.CountDailyDownload(ctx, r.db(ctx), now)
 }
 
 func (r *Repository) FavoriteReceivers(ctx context.Context, gameID, excludeUserID int) ([]int, error) {

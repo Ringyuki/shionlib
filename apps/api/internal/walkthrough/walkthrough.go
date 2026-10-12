@@ -109,12 +109,13 @@ const (
 )
 
 type AdminFilter struct {
-	Search     string
-	Status     *Status
-	CreatorID  *int
-	GameID     *int
-	SortBy     SortField
-	Descending bool
+	Search        string
+	Status        *Status
+	ReviewPending bool
+	CreatorID     *int
+	GameID        *int
+	SortBy        SortField
+	Descending    bool
 }
 
 type GameRef struct {

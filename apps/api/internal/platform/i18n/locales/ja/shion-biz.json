@@ -53,6 +53,7 @@
   "GAME_DOWNLOAD_RESOURCE_REPORT_SUSPENDED": "通報機能が一時的に制限されています",
   "GAME_DOWNLOAD_RESOURCE_MALWARE_CASE_NOT_FOUND": "マルウェア審査記録が見つかりません",
   "GAME_DOWNLOAD_RESOURCE_MALWARE_CASE_ALREADY_PROCESSED": "このマルウェア審査記録はすでに処理済みです",
+  "GAME_DOWNLOAD_RESOURCE_CHECK_NOT_STALLED": "このファイルには一時停止中のチェックがありません",
   "GAME_DOWNLOAD_RESOURCE_FILE_NOT_FOUND": "ダウンロードリソースファイルが見つかりません",
   "GAME_DOWNLOAD_RESOURCE_FILE_TOKEN_REQUIRED": "token が必要です",
   "GAME_DOWNLOAD_RESOURCE_FILE_INVALID_TOKEN": "確認に失敗しました（{errorCodes}）。もう一度お試しください。",
