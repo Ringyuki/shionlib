@@ -24,11 +24,15 @@ func TestDeclaredKeysAreListedWithTheirBounds(t *testing.T) {
 	if note.Kind != setting.KindText || note.MaxLength != 4 || string(note.Default) != `"默认"` || note.Min != nil {
 		t.Fatalf("note definition: %+v", note)
 	}
+	secret, _ := setting.Find("fixture.secret")
+	if secret.Kind != setting.KindSecret || secret.MaxLength != 40 || string(secret.Default) != `""` {
+		t.Fatalf("secret definition: %+v", secret)
+	}
 	var names []string
 	for _, def := range setting.Definitions() {
 		names = append(names, def.Name)
 	}
-	want := []string{"fixture.limit", "fixture.note", "fixture.open", "fixture.quota", "fixture.weight", "fixture.window"}
+	want := []string{"fixture.limit", "fixture.note", "fixture.open", "fixture.quota", "fixture.secret", "fixture.weight", "fixture.window"}
 	if len(names) != len(want) {
 		t.Fatalf("definitions: %v", names)
 	}
@@ -62,6 +66,10 @@ func TestDeclarationsRejectInconsistentSpecs(t *testing.T) {
 			setting.Duration(setting.Spec[time.Duration]{Name: "fixture.fraction", Label: "x", Default: time.Millisecond, Max: time.Second})
 		},
 		"text without max length": func() { setting.Text(setting.Spec[string]{Name: "fixture.free", Label: "x"}) },
+		"secret with a default": func() {
+			setting.Secret(setting.Spec[string]{Name: "fixture.known", Label: "x", Default: "x", MaxLength: 9})
+		},
+		"secret without length": func() { setting.Secret(setting.Spec[string]{Name: "fixture.endless", Label: "x"}) },
 	}
 	for name, declare := range cases {
 		t.Run(name, func(t *testing.T) {

@@ -103,7 +103,11 @@ func (p *provider) sign(t *testing.T) string {
 }
 
 func (p *provider) client() *Client {
-	return New(Options{Issuer: p.issuer, ClientID: "shionlib", ClientSecret: "s3cr&t", Scopes: []string{"openid", "profile", "email"}}, httpclient.New(httpclient.Options{Timeout: 5 * time.Second}), func() time.Time { return now })
+	return p.clientOf(func() auth.ClientCredentials { return auth.ClientCredentials{ID: "shionlib", Secret: "s3cr&t"} })
+}
+
+func (p *provider) clientOf(credentials func() auth.ClientCredentials) *Client {
+	return New(Options{Issuer: p.issuer, Credentials: credentials, Scopes: []string{"openid", "profile", "email"}}, httpclient.New(httpclient.Options{Timeout: 5 * time.Second}), func() time.Time { return now })
 }
 
 var exchange = auth.CodeExchange{Code: "code-1", Verifier: "verifier-1", RedirectURI: "https://shionlib.com/api/auth/oidc/callback", Nonce: "nonce-1"}
@@ -130,6 +134,29 @@ func TestExchangeVerifiesTheIDToken(t *testing.T) {
 	}
 	if p.basic != "Basic "+base64.StdEncoding.EncodeToString([]byte("shionlib:s3cr%26t")) {
 		t.Fatalf("client_secret_basic must url-encode the credentials: %s", p.basic)
+	}
+}
+
+func TestCredentialsAreReadForEveryRequest(t *testing.T) {
+	p := newProvider(t)
+	current := auth.ClientCredentials{ID: "shionlib", Secret: "first"}
+	client := p.clientOf(func() auth.ClientCredentials { return current })
+	if _, err := client.Exchange(context.Background(), exchange); err != nil {
+		t.Fatal(err)
+	}
+	current = auth.ClientCredentials{ID: "shionlib-next", Secret: "second"}
+	if raw := client.AuthorizeURL(auth.AuthorizeRequest{RedirectURI: exchange.RedirectURI}); !strings.Contains(raw, "client_id=shionlib-next&") {
+		t.Fatalf("the authorize url names the current client: %s", raw)
+	}
+	if _, err := client.Exchange(context.Background(), exchange); err == nil {
+		t.Fatal("a token issued to the previous client must not pass for the new one")
+	}
+	if p.basic != "Basic "+base64.StdEncoding.EncodeToString([]byte("shionlib-next:second")) {
+		t.Fatalf("the token request carries the current credentials: %s", p.basic)
+	}
+	p.claims["aud"] = "shionlib-next"
+	if _, err := client.Exchange(context.Background(), exchange); err != nil {
+		t.Fatalf("a token issued to the new client: %v", err)
 	}
 }
 

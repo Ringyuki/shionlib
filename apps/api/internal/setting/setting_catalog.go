@@ -89,6 +89,19 @@ func Text(spec Spec[string]) Key[string] {
 	})
 }
 
+func Secret(spec Spec[string]) Key[string] {
+	if spec.MaxLength <= 0 || spec.Default != "" {
+		panic(fmt.Sprintf("setting: %s needs a max length and no default", spec.Name))
+	}
+	return register(spec, Definition{
+		Kind:      KindSecret,
+		MaxLength: spec.MaxLength,
+		parse: func(raw json.RawMessage) (any, error) {
+			return parseText(raw, spec.MaxLength)
+		},
+	})
+}
+
 func Definitions() []Definition {
 	catalog.mu.Lock()
 	defer catalog.mu.Unlock()

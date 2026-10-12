@@ -18295,14 +18295,15 @@
             "type": "string"
           },
           "kind": {
-            "description": "Durations are in seconds, bytes in bytes",
+            "description": "Durations are in seconds, bytes in bytes. A secret is never returned: its value is an empty string, and overridden tells whether one is set",
             "enum": [
               "int",
               "bytes",
               "float",
               "duration",
               "flag",
-              "text"
+              "text",
+              "secret"
             ],
             "type": "string"
           },

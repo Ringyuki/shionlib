@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
 )
 
 const OIDCProvider = "hikarinagi"
@@ -194,3 +196,19 @@ const (
 	nameAttempts      = 50
 	nameSuffixedRunes = 15
 )
+
+type ClientCredentials struct {
+	ID     string
+	Secret string
+}
+
+func OIDCCredentials(source setting.Source, fallback ClientCredentials) ClientCredentials {
+	credentials := ClientCredentials{ID: OIDCClientID.Read(source), Secret: OIDCClientSecret.Read(source)}
+	if credentials.ID == "" {
+		credentials.ID = fallback.ID
+	}
+	if credentials.Secret == "" {
+		credentials.Secret = fallback.Secret
+	}
+	return credentials
+}

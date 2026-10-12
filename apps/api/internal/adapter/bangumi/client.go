@@ -35,13 +35,12 @@ type TokenStore interface {
 }
 
 type Options struct {
-	HTTP         *http.Client
-	APIBaseURL   string
-	TokenURL     string
-	ClientID     string
-	ClientSecret string
-	Tokens       TokenStore
-	Now          func() time.Time
+	HTTP        *http.Client
+	APIBaseURL  string
+	TokenURL    string
+	Credentials func() (clientID, clientSecret string)
+	Tokens      TokenStore
+	Now         func() time.Time
 }
 
 type tokens struct {
@@ -224,10 +223,11 @@ func (c *Client) refresh(ctx context.Context, refreshToken string) (*tokens, err
 	if refreshToken == "" {
 		return nil, ErrTokensMissing
 	}
+	clientID, clientSecret := c.opts.Credentials()
 	form := url.Values{
 		"grant_type":    {"refresh_token"},
-		"client_id":     {c.opts.ClientID},
-		"client_secret": {c.opts.ClientSecret},
+		"client_id":     {clientID},
+		"client_secret": {clientSecret},
 		"refresh_token": {refreshToken},
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.opts.TokenURL, strings.NewReader(form.Encode()))

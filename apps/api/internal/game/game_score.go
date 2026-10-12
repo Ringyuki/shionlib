@@ -3,6 +3,8 @@ package game
 import (
 	"slices"
 	"time"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/setting"
 )
 
 const ScoreCacheTTL = 7 * 24 * time.Hour
@@ -60,4 +62,15 @@ func digitsOnly(value string) bool {
 		}
 	}
 	return true
+}
+
+func BangumiCredentials(source setting.Source, fallbackID, fallbackSecret string) (string, string) {
+	id, secret := BangumiClientID.Read(source), BangumiClientSecret.Read(source)
+	if id == "" {
+		id = fallbackID
+	}
+	if secret == "" {
+		secret = fallbackSecret
+	}
+	return id, secret
 }

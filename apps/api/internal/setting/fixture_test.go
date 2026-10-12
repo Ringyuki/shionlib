@@ -17,6 +17,7 @@ var (
 	testWindow = setting.Duration(setting.Spec[time.Duration]{Name: "fixture.window", Label: "窗口", Default: time.Hour, Min: time.Second, Max: 48 * time.Hour})
 	testOpen   = setting.Flag(setting.Spec[bool]{Name: "fixture.open", Label: "开关", Default: true})
 	testNote   = setting.Text(setting.Spec[string]{Name: "fixture.note", Label: "备注", Default: "默认", MaxLength: 4})
+	testSecret = setting.Secret(setting.Spec[string]{Name: "fixture.secret", Label: "密钥", MaxLength: 40})
 )
 
 var superAdmin = actor.Actor{UserID: 7, Role: actor.RoleSuperAdmin}

@@ -3,6 +3,7 @@ package settinghttp_test
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -15,6 +16,8 @@ import (
 )
 
 var maxConns = setting.Int(setting.Spec[int]{Name: "fixture.max_conns", Label: "连接数", Default: 8, Min: 1, Max: 64})
+
+var apiSecret = setting.Secret(setting.Spec[string]{Name: "fixture.api_secret", Label: "密钥", MaxLength: 64})
 
 var (
 	member     = actor.Actor{UserID: 1, Role: actor.RoleUser}
@@ -125,6 +128,35 @@ func TestSuperAdminsChangeAndResetSettings(t *testing.T) {
 	history.Decode(t, &page)
 	if len(page.Items) != 1 || string(page.Items[0].Previous) != "false" || page.Meta.TotalItems != 2 {
 		t.Fatalf("history: %s", history.Data)
+	}
+}
+
+func TestSecretsAreWrittenButNeverReturned(t *testing.T) {
+	e := setup(t)
+	path := "/admin/settings/fixture.api_secret"
+	resp := e.server.Do(apitest.Request{Method: http.MethodPatch, Path: path, As: &superAdmin, Body: map[string]any{"value": "hunter2"}})
+	e.server.Expect(resp, http.StatusOK, 0)
+	var changed settingShape
+	resp.Decode(t, &changed)
+	if changed.Kind != "secret" || string(changed.Value) != `""` || !changed.Overridden || strings.Contains(string(resp.Data), "hunter2") {
+		t.Fatalf("changed: %s", resp.Data)
+	}
+	if apiSecret.Read(e.service) != "hunter2" {
+		t.Fatalf("the secret is served to the application: %q", apiSecret.Read(e.service))
+	}
+	for _, read := range []string{"/admin/settings", path + "/history?page=1&pageSize=10"} {
+		listed := e.server.Do(apitest.Request{Method: http.MethodGet, Path: read, As: &admin})
+		e.server.Expect(listed, http.StatusOK, 0)
+		if strings.Contains(string(listed.Data), "hunter2") {
+			t.Fatalf("%s leaks the secret: %s", read, listed.Data)
+		}
+	}
+	cleared := e.server.Do(apitest.Request{Method: http.MethodPatch, Path: path, As: &superAdmin, Body: map[string]any{"value": ""}})
+	e.server.Expect(cleared, http.StatusOK, 0)
+	var restored settingShape
+	cleared.Decode(t, &restored)
+	if restored.Overridden || apiSecret.Read(e.service) != "" {
+		t.Fatalf("an empty value clears the secret: %s", cleared.Data)
 	}
 }
 

@@ -3,6 +3,7 @@ package setting_test
 import (
 	"encoding/json"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -142,6 +143,52 @@ func TestListShowsEveryDeclaredKey(t *testing.T) {
 	}
 	if note := byName["fixture.note"]; note.Overridden || note.LastChange != nil || string(note.Value) != `"默认"` {
 		t.Fatalf("note: %+v", note)
+	}
+}
+
+func TestSecretsAreServedButNeverShown(t *testing.T) {
+	f := newFixture(t)
+	ctx := t.Context()
+	entry, err := f.service.Update(ctx, superAdmin, "fixture.secret", json.RawMessage(`"hunter2"`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !entry.Overridden || string(entry.Value) != `""` || testSecret.Read(f.service) != "hunter2" {
+		t.Fatalf("a set secret is served and hidden: %+v read=%q", entry, testSecret.Read(f.service))
+	}
+	if entry.LastChange == nil || entry.LastChange.Previous != nil || string(entry.LastChange.Value) != `""` {
+		t.Fatalf("the change says a value was set without keeping it: %+v", entry.LastChange)
+	}
+	if _, err := f.service.Update(ctx, superAdmin, "fixture.secret", json.RawMessage(`"correct horse"`)); err != nil {
+		t.Fatal(err)
+	}
+	changes, total, err := f.service.History(ctx, "fixture.secret", paging.Page{Number: 1, Size: 10})
+	if err != nil || total != 2 {
+		t.Fatalf("history: %d %v", total, err)
+	}
+	for _, change := range changes {
+		if strings.Contains(string(change.Previous)+string(change.Value), "hunter") || strings.Contains(string(change.Value), "horse") {
+			t.Fatalf("a secret leaked into the history: %+v", change)
+		}
+	}
+	listed, err := f.service.List(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, listedEntry := range listed {
+		if listedEntry.Name == "fixture.secret" && (string(listedEntry.Value) != `""` || !listedEntry.Overridden) {
+			t.Fatalf("listed secret: %+v", listedEntry)
+		}
+	}
+	cleared, err := f.service.Update(ctx, superAdmin, "fixture.secret", json.RawMessage(`""`))
+	if err != nil || cleared.Overridden || testSecret.Read(f.service) != "" {
+		t.Fatalf("an empty secret clears it: %+v read=%q err=%v", cleared, testSecret.Read(f.service), err)
+	}
+	if cleared.LastChange == nil || cleared.LastChange.Value != nil || string(cleared.LastChange.Previous) != `""` {
+		t.Fatalf("the change says the value was cleared: %+v", cleared.LastChange)
+	}
+	if _, err := f.service.Update(ctx, superAdmin, "fixture.secret", json.RawMessage(`"`+strings.Repeat("x", 41)+`"`)); !errors.Is(err, setting.ErrInvalidValue) {
+		t.Fatalf("too long: %v", err)
 	}
 }
 

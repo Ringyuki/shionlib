@@ -8579,10 +8579,10 @@ export type components = {
             description: string;
             group: string;
             /**
-             * @description Durations are in seconds, bytes in bytes
+             * @description Durations are in seconds, bytes in bytes. A secret is never returned: its value is an empty string, and overridden tells whether one is set
              * @enum {string}
              */
-            kind: "int" | "bytes" | "float" | "duration" | "flag" | "text";
+            kind: "int" | "bytes" | "float" | "duration" | "flag" | "text" | "secret";
             label: string;
             last_change: components["schemas"]["SettingChangeDTO"] | null;
             max?: unknown;

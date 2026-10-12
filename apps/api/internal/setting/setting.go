@@ -15,6 +15,7 @@ const (
 	KindDuration Kind = "duration"
 	KindFlag     Kind = "flag"
 	KindText     Kind = "text"
+	KindSecret   Kind = "secret"
 )
 
 type Key[T Scalar] struct {
@@ -70,6 +71,13 @@ func (d Definition) Parse(raw json.RawMessage) (any, error) {
 	return d.parse(raw)
 }
 
+func (d Definition) recorded(raw json.RawMessage) json.RawMessage {
+	if d.Kind != KindSecret || len(raw) == 0 {
+		return raw
+	}
+	return d.Default
+}
+
 func (d Definition) Normalize(raw json.RawMessage) (json.RawMessage, error) {
 	value, err := d.parse(raw)
 	if err != nil {
@@ -121,7 +129,7 @@ func newEntry(def Definition, row *StoredValue, last *Change) Entry {
 		return entry
 	}
 	if value, err := def.Normalize(row.Value); err == nil {
-		entry.Value, entry.Overridden = value, true
+		entry.Value, entry.Overridden = def.recorded(value), true
 	}
 	return entry
 }

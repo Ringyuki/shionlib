@@ -12,7 +12,7 @@ import (
 type settingDTO struct {
 	Name        string            `json:"name"`
 	Group       string            `json:"group"`
-	Kind        string            `json:"kind" enum:"int,bytes,float,duration,flag,text" doc:"Durations are in seconds, bytes in bytes"`
+	Kind        string            `json:"kind" enum:"int,bytes,float,duration,flag,text,secret" doc:"Durations are in seconds, bytes in bytes. A secret is never returned: its value is an empty string, and overridden tells whether one is set"`
 	Label       string            `json:"label"`
 	Description string            `json:"description"`
 	Value       json.RawMessage   `json:"value"`

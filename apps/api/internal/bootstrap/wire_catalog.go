@@ -42,11 +42,12 @@ func wireCatalog(infra *Infra, shared *Shared, modules *Modules) {
 
 	gameService := game.NewService(games, gameredis.NewRecentUpdates(infra.Redis), preferences, shared.GameCards, shared.Now, randomIndex)
 	scores := game.NewScoreService(games, bangumi.NewClient(bangumi.Options{
-		HTTP:         outbound,
-		ClientID:     cfg.Bangumi.ClientID,
-		ClientSecret: cfg.Bangumi.ClientSecret,
-		Tokens:       bangumiredis.NewTokenStore(infra.Redis),
-		Now:          shared.Now,
+		HTTP: outbound,
+		Credentials: func() (string, string) {
+			return game.BangumiCredentials(shared.Settings, cfg.Bangumi.ClientID, cfg.Bangumi.ClientSecret)
+		},
+		Tokens: bangumiredis.NewTokenStore(infra.Redis),
+		Now:    shared.Now,
 	}), vndb.NewClient(outbound, vndb.DefaultBaseURL), shared.Cache)
 	hotScore := game.NewHotScoreService(games, shared.Settings)
 

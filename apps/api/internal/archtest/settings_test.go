@@ -15,7 +15,7 @@ import (
 
 const settingsFile = "settings.go"
 
-var settingConstructors = []string{"Int", "Bytes", "Float", "Duration", "Flag", "Text"}
+var settingConstructors = []string{"Int", "Bytes", "Float", "Duration", "Flag", "Text", "Secret"}
 
 var deploymentKnobs = map[string]string{
 	"SHUTDOWN_TIMEOUT":                 "bounds process shutdown before the runtime starts",

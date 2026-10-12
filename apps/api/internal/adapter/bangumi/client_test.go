@@ -68,7 +68,7 @@ func upstream(t *testing.T, refreshes *atomic.Int32) *httptest.Server {
 func newClient(server *httptest.Server, store *memoryTokens) *bangumi.Client {
 	return bangumi.NewClient(bangumi.Options{
 		HTTP: server.Client(), APIBaseURL: server.URL, TokenURL: server.URL + "/oauth/access_token",
-		ClientID: "id", ClientSecret: "secret", Tokens: store, Now: func() time.Time { return now },
+		Credentials: func() (string, string) { return "id", "secret" }, Tokens: store, Now: func() time.Time { return now },
 	})
 }
 

@@ -54,3 +54,18 @@ var (
 		Default: 15, Min: 1, Max: 3650,
 	})
 )
+
+var (
+	BangumiClientID = setting.Text(setting.Spec[string]{
+		Name:        "bangumi.client_id",
+		Label:       "Bangumi 应用 ID",
+		Description: "读取 Bangumi 评分所用的应用。留空时使用环境变量 BANGUMI_CLIENT_ID 的值。",
+		MaxLength:   200,
+	})
+	BangumiClientSecret = setting.Secret(setting.Spec[string]{
+		Name:        "bangumi.client_secret",
+		Label:       "Bangumi 应用密钥",
+		Description: "与应用 ID 对应的密钥，用于续期访问令牌。未设置时使用环境变量 BANGUMI_CLIENT_SECRET 的值。",
+		MaxLength:   500,
+	})
+)

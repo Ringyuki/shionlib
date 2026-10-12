@@ -110,6 +110,9 @@ func (s *Service) Update(ctx context.Context, who actor.Actor, name string, raw 
 	if err != nil {
 		return Entry{}, err
 	}
+	if def.Kind == KindSecret && bytes.Equal(value, def.Default) {
+		return s.Reset(ctx, who, name)
+	}
 	changed := false
 	err = s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
 		current, found, err := s.repo.Value(ctx, name)
@@ -127,7 +130,7 @@ func (s *Service) Update(ctx context.Context, who actor.Actor, name string, raw 
 			return err
 		}
 		changed = true
-		return s.repo.Record(ctx, NewChange{Name: name, Previous: previous, Value: value, EditorID: who.UserID})
+		return s.repo.Record(ctx, NewChange{Name: name, Previous: def.recorded(previous), Value: def.recorded(value), EditorID: who.UserID})
 	})
 	if err != nil {
 		return Entry{}, err
@@ -136,7 +139,8 @@ func (s *Service) Update(ctx context.Context, who actor.Actor, name string, raw 
 }
 
 func (s *Service) Reset(ctx context.Context, who actor.Actor, name string) (Entry, error) {
-	if _, ok := Find(name); !ok {
+	def, ok := Find(name)
+	if !ok {
 		return Entry{}, ErrNotFound
 	}
 	changed := false
@@ -149,7 +153,7 @@ func (s *Service) Reset(ctx context.Context, who actor.Actor, name string) (Entr
 			return err
 		}
 		changed = true
-		return s.repo.Record(ctx, NewChange{Name: name, Previous: current.Value, EditorID: who.UserID})
+		return s.repo.Record(ctx, NewChange{Name: name, Previous: def.recorded(current.Value), EditorID: who.UserID})
 	})
 	if err != nil {
 		return Entry{}, err

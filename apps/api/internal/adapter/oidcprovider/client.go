@@ -21,28 +21,28 @@ import (
 const maxTokenResponse = 1 << 20
 
 type Options struct {
-	Issuer       string
-	ClientID     string
-	ClientSecret string
-	Scopes       []string
+	Issuer      string
+	Credentials func() auth.ClientCredentials
+	Scopes      []string
 }
 
 type Client struct {
-	settings Options
-	http     *http.Client
-	now      func() time.Time
-	mu       sync.Mutex
-	verifier *gooidc.IDTokenVerifier
+	settings  Options
+	http      *http.Client
+	now       func() time.Time
+	mu        sync.Mutex
+	provider  *gooidc.Provider
+	verifiers map[string]*gooidc.IDTokenVerifier
 }
 
 func New(settings Options, client *http.Client, now func() time.Time) *Client {
 	settings.Issuer = strings.TrimSuffix(settings.Issuer, "/")
-	return &Client{settings: settings, http: client, now: now}
+	return &Client{settings: settings, http: client, now: now, verifiers: map[string]*gooidc.IDTokenVerifier{}}
 }
 
 func (c *Client) AuthorizeURL(req auth.AuthorizeRequest) string {
 	params := []struct{ key, value string }{
-		{"client_id", c.settings.ClientID},
+		{"client_id", c.settings.Credentials().ID},
 		{"redirect_uri", req.RedirectURI},
 		{"response_type", "code"},
 		{"scope", strings.Join(c.settings.Scopes, " ")},
@@ -71,11 +71,12 @@ type idClaims struct {
 }
 
 func (c *Client) Exchange(ctx context.Context, req auth.CodeExchange) (auth.IdentityClaims, error) {
-	raw, err := c.requestIDToken(ctx, req)
+	credentials := c.settings.Credentials()
+	raw, err := c.requestIDToken(ctx, req, credentials)
 	if err != nil {
 		return auth.IdentityClaims{}, err
 	}
-	verifier, err := c.idTokenVerifier(ctx)
+	verifier, err := c.idTokenVerifier(ctx, credentials.ID)
 	if err != nil {
 		return auth.IdentityClaims{}, err
 	}
@@ -100,7 +101,7 @@ func (c *Client) Exchange(ctx context.Context, req auth.CodeExchange) (auth.Iden
 	}, nil
 }
 
-func (c *Client) requestIDToken(ctx context.Context, req auth.CodeExchange) (string, error) {
+func (c *Client) requestIDToken(ctx context.Context, req auth.CodeExchange, client auth.ClientCredentials) (string, error) {
 	form := url.Values{}
 	form.Set("grant_type", "authorization_code")
 	form.Set("code", req.Code)
@@ -110,7 +111,7 @@ func (c *Client) requestIDToken(ctx context.Context, req auth.CodeExchange) (str
 	if err != nil {
 		return "", fmt.Errorf("build token request: %w", err)
 	}
-	credentials := url.QueryEscape(c.settings.ClientID) + ":" + url.QueryEscape(c.settings.ClientSecret)
+	credentials := url.QueryEscape(client.ID) + ":" + url.QueryEscape(client.Secret)
 	httpReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	httpReq.Header.Set("Accept", "application/json")
 	httpReq.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(credentials)))
@@ -138,16 +139,20 @@ func (c *Client) requestIDToken(ctx context.Context, req auth.CodeExchange) (str
 	return decoded.IDToken, nil
 }
 
-func (c *Client) idTokenVerifier(ctx context.Context) (*gooidc.IDTokenVerifier, error) {
+func (c *Client) idTokenVerifier(ctx context.Context, clientID string) (*gooidc.IDTokenVerifier, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if c.verifier != nil {
-		return c.verifier, nil
+	if verifier, ok := c.verifiers[clientID]; ok {
+		return verifier, nil
 	}
-	provider, err := gooidc.NewProvider(gooidc.ClientContext(ctx, c.http), c.settings.Issuer)
-	if err != nil {
-		return nil, fmt.Errorf("discover oidc provider: %w", err)
+	if c.provider == nil {
+		provider, err := gooidc.NewProvider(gooidc.ClientContext(context.WithoutCancel(ctx), c.http), c.settings.Issuer)
+		if err != nil {
+			return nil, fmt.Errorf("discover oidc provider: %w", err)
+		}
+		c.provider = provider
 	}
-	c.verifier = provider.VerifierContext(gooidc.ClientContext(context.WithoutCancel(ctx), c.http), &gooidc.Config{ClientID: c.settings.ClientID, Now: c.now})
-	return c.verifier, nil
+	verifier := c.provider.VerifierContext(gooidc.ClientContext(context.WithoutCancel(ctx), c.http), &gooidc.Config{ClientID: clientID, Now: c.now})
+	c.verifiers = map[string]*gooidc.IDTokenVerifier{clientID: verifier}
+	return verifier, nil
 }

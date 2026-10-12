@@ -46,10 +46,11 @@ func wireAuth(infra *Infra, shared *Shared, modules *Modules) {
 		panic(fmt.Errorf("wire passkeys: %w", err))
 	}
 	identityProvider := oidcprovider.New(oidcprovider.Options{
-		Issuer:       cfg.OIDC.Issuer,
-		ClientID:     cfg.OIDC.ClientID,
-		ClientSecret: cfg.OIDC.ClientSecret,
-		Scopes:       cfg.OIDC.Scopes,
+		Issuer: cfg.OIDC.Issuer,
+		Credentials: func() auth.ClientCredentials {
+			return auth.OIDCCredentials(shared.Settings, auth.ClientCredentials{ID: cfg.OIDC.ClientID, Secret: cfg.OIDC.ClientSecret})
+		},
+		Scopes: cfg.OIDC.Scopes,
 	}, httpclient.New(httpclient.Options{Timeout: 10 * time.Second}), infra.Now)
 	images := media.NewService(imaging.NewTranscoder(), objectstore.New(objectstore.Options{
 		Bucket:          cfg.Storage.Image.Bucket,
