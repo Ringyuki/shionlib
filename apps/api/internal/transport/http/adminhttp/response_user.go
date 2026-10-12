@@ -6,6 +6,7 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/admin"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/uploadhttp"
+	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 )
 
 type adminUserCountsDTO struct {
@@ -208,4 +209,24 @@ func toAdminUserPermissions(view admin.Permissions) adminUserPermissionsDTO {
 
 type adminUserAllowMaskDTO struct {
 	AllowMask string `json:"allowMask" doc:"Decimal string of the user's own grants"`
+}
+
+type uploadTierDTO struct {
+	Tier        upload.Tier `json:"tier" enum:"new,regular,trusted"`
+	After       int         `json:"after" doc:"Published resources that earn the tier"`
+	StoredLimit *int64      `json:"stored_limit" doc:"Null when unlimited"`
+	MaxFileSize *int64      `json:"max_file_size" doc:"Null when unlimited"`
+}
+
+type uploadLadderDTO struct {
+	Tiers         []uploadTierDTO `json:"tiers"`
+	InFlightLimit int64           `json:"in_flight_limit"`
+}
+
+func toUploadLadder(ladder upload.Ladder) uploadLadderDTO {
+	tiers := make([]uploadTierDTO, len(ladder.Steps))
+	for i, step := range ladder.Steps {
+		tiers[i] = uploadTierDTO(step)
+	}
+	return uploadLadderDTO{Tiers: tiers, InFlightLimit: ladder.InFlightLimit}
 }

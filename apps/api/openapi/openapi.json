@@ -12913,6 +12913,39 @@
         ],
         "type": "object"
       },
+      "EnvelopeUploadLadderDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UploadLadderDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeUploadStatusDTO": {
         "additionalProperties": false,
         "properties": {
@@ -19069,6 +19102,29 @@
         ],
         "type": "object"
       },
+      "UploadLadderDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "in_flight_limit": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "tiers": {
+            "items": {
+              "$ref": "#/components/schemas/UploadTierDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "tiers",
+          "in_flight_limit"
+        ],
+        "type": "object"
+      },
       "UploadStatusDTO": {
         "additionalProperties": false,
         "properties": {
@@ -19123,6 +19179,47 @@
           "chunk_size",
           "total_chunks",
           "expires_at"
+        ],
+        "type": "object"
+      },
+      "UploadTierDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "after": {
+            "description": "Published resources that earn the tier",
+            "format": "int64",
+            "type": "integer"
+          },
+          "max_file_size": {
+            "description": "Null when unlimited",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "stored_limit": {
+            "description": "Null when unlimited",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "tier": {
+            "enum": [
+              "new",
+              "regular",
+              "trusted"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "tier",
+          "after",
+          "stored_limit",
+          "max_file_size"
         ],
         "type": "object"
       },
@@ -25872,6 +25969,52 @@
         ]
       }
     },
+    "/admin/upload-tiers": {
+      "get": {
+        "operationId": "adminUser.uploadTiers",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeUploadLadderDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "What each upload tier takes and allows",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/admin/users": {
       "get": {
         "operationId": "adminUser.list",
@@ -26593,6 +26736,16 @@
               "maximum": 4,
               "minimum": 1,
               "type": "integer"
+            }
+          },
+          {
+            "description": "Only the sessions that can still be used: active and not expired",
+            "explode": false,
+            "in": "query",
+            "name": "live",
+            "schema": {
+              "description": "Only the sessions that can still be used: active and not expired",
+              "type": "boolean"
             }
           }
         ],

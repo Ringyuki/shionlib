@@ -1155,6 +1155,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/admin/upload-tiers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What each upload tier takes and allows */
+        get: operations["adminUser.uploadTiers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/users": {
         parameters: {
             query?: never;
@@ -7132,6 +7149,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeUploadLadderDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["UploadLadderDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeUploadStatusDTO: {
             /** Format: int64 */
             code: number;
@@ -8783,6 +8810,11 @@ export type components = {
              */
             ttl_seconds: number;
         };
+        UploadLadderDTO: {
+            /** Format: int64 */
+            in_flight_limit: number;
+            tiers: components["schemas"]["UploadTierDTO"][] | null;
+        };
         UploadStatusDTO: {
             /** Format: int64 */
             chunk_size: number;
@@ -8797,6 +8829,25 @@ export type components = {
             /** Format: int64 */
             total_size: number;
             uploaded_chunks: number[] | null;
+        };
+        UploadTierDTO: {
+            /**
+             * Format: int64
+             * @description Published resources that earn the tier
+             */
+            after: number;
+            /**
+             * Format: int64
+             * @description Null when unlimited
+             */
+            max_file_size: number | null;
+            /**
+             * Format: int64
+             * @description Null when unlimited
+             */
+            stored_limit: number | null;
+            /** @enum {string} */
+            tier: "new" | "regular" | "trusted";
         };
         UploadedImageDTO: {
             key: string;
@@ -11890,6 +11941,36 @@ export interface operations {
             };
         };
     };
+    "adminUser.uploadTiers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeUploadLadderDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     "adminUser.list": {
         parameters: {
             query?: {
@@ -12218,6 +12299,8 @@ export interface operations {
                 pageSize?: number;
                 /** @description 1 active, 2 rotated, 3 reused, 4 blocked */
                 status?: number;
+                /** @description Only the sessions that can still be used: active and not expired */
+                live?: boolean;
             };
             header?: never;
             path: {

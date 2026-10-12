@@ -47,6 +47,7 @@ type PasswordHasher interface {
 type Quotas interface {
 	Allowance(ctx context.Context, userID int) (upload.Allowance, error)
 	SetTrusted(ctx context.Context, userID int, trusted bool) error
+	Ladder() upload.Ladder
 }
 
 type Transactor interface {

@@ -10,6 +10,7 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/admin"
+	"github.com/Ringyuki/shionlib/apps/api/internal/auth"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
 
@@ -105,6 +106,9 @@ func (s *UserStore) Sessions(_ context.Context, filter admin.SessionFilter, page
 	var matched []admin.Session
 	for _, session := range s.sessions {
 		if filter.Status != nil && session.Status != *filter.Status {
+			continue
+		}
+		if filter.LiveAt != nil && (session.Status != auth.SessionActive || !session.ExpiresAt.After(*filter.LiveAt)) {
 			continue
 		}
 		matched = append(matched, session)

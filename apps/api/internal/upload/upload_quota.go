@@ -62,6 +62,18 @@ func demote(tier Tier) Tier {
 	return TierNew
 }
 
+type TierStep struct {
+	Tier        Tier
+	After       int
+	StoredLimit *int64
+	MaxFileSize *int64
+}
+
+type Ladder struct {
+	Steps         []TierStep
+	InFlightLimit int64
+}
+
 type Allowance struct {
 	Tier          Tier
 	Approved      int

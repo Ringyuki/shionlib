@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
+
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
@@ -72,7 +74,15 @@ func (s *UserStore) SearchUsers(ctx context.Context, filter admin.UserFilter, pa
 	if filter.Descending {
 		order = ent.Desc
 	}
-	rows, err := query.Select(entryFields...).Order(order(field), order(entuser.FieldID)).Offset(page.Offset()).Limit(page.Size).All(ctx)
+	ordered := order(field)
+	if field == entuser.FieldLastLoginAt {
+		direction := sql.OrderAsc()
+		if filter.Descending {
+			direction = sql.OrderDesc()
+		}
+		ordered = sql.OrderByField(field, direction, sql.OrderNullsLast()).ToFunc()
+	}
+	rows, err := query.Select(entryFields...).Order(ordered, order(entuser.FieldID)).Offset(page.Offset()).Limit(page.Size).All(ctx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("search users: %w", err)
 	}
@@ -230,6 +240,9 @@ func (s *UserStore) Sessions(ctx context.Context, filter admin.SessionFilter, pa
 	query := s.db(ctx).UserLoginSession.Query().Where(userloginsession.UserID(filter.UserID))
 	if filter.Status != nil {
 		query.Where(userloginsession.Status(int(*filter.Status)))
+	}
+	if filter.LiveAt != nil {
+		query.Where(userloginsession.Status(int(auth.SessionActive)), userloginsession.ExpiresAtGT(*filter.LiveAt))
 	}
 	total, err := query.Clone().Count(ctx)
 	if err != nil {

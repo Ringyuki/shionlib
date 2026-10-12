@@ -1,6 +1,7 @@
 package adminhttp_test
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"testing"
@@ -258,6 +259,20 @@ func TestAdminUserUploadTrust(t *testing.T) {
 		t.Fatalf("withdrawn: %+v", standing)
 	}
 	env.server.Expect(env.server.Do(apitest.Request{Method: http.MethodPatch, Path: env.path(env.peer.ID, "/upload-trust"), As: &env.staff, Body: map[string]any{"trusted": true}}), http.StatusUnauthorized, 200101)
+}
+
+func TestAdminUploadTiers(t *testing.T) {
+	env := newUserEnv(t)
+	member := actor.Actor{UserID: env.member.ID, Role: actor.RoleUser, ContentLimit: actor.ContentLimitNeverShow}
+	env.server.Expect(env.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/upload-tiers", As: &member}), http.StatusForbidden, 403)
+	listed := env.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/upload-tiers", As: &env.staff})
+	env.server.Expect(listed, http.StatusOK, 0)
+	defaults := settingtest.Source{}
+	want := fmt.Sprintf(`{"tiers":[{"tier":"new","after":0,"stored_limit":100,"max_file_size":16},{"tier":"regular","after":%d,"stored_limit":%d,"max_file_size":16},{"tier":"trusted","after":%d,"stored_limit":%d,"max_file_size":null}],"in_flight_limit":50}`,
+		upload.RegularAfter.Read(defaults), upload.RegularQuota.Read(defaults), upload.TrustedAfter.Read(defaults), upload.TrustedQuota.Read(defaults))
+	if string(listed.Data) != want {
+		t.Fatalf("tiers\n got %s\nwant %s", listed.Data, want)
+	}
 }
 
 func uploadSettings() settingtest.Source {

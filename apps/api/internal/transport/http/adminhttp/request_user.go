@@ -85,8 +85,9 @@ type adminUserPasswordInput struct {
 
 type adminUserSessionsInput struct {
 	httpapi.PageQuery
-	ID     int `path:"id"`
-	Status int `query:"status" minimum:"1" maximum:"4" doc:"1 active, 2 rotated, 3 reused, 4 blocked"`
+	ID     int  `path:"id"`
+	Status int  `query:"status" minimum:"1" maximum:"4" doc:"1 active, 2 rotated, 3 reused, 4 blocked"`
+	Live   bool `query:"live" doc:"Only the sessions that can still be used: active and not expired"`
 }
 
 type adminUserPermissionsInput struct {

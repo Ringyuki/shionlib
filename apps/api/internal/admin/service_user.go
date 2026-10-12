@@ -9,6 +9,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/apperror"
 	"github.com/Ringyuki/shionlib/apps/api/internal/auth"
+	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
 
@@ -243,6 +244,10 @@ func (s *UserService) ForceLogout(ctx context.Context, who actor.Actor, id int) 
 
 func (s *UserService) Sessions(ctx context.Context, filter SessionFilter, page Page) ([]Session, int, error) {
 	return s.store.Sessions(ctx, filter, page)
+}
+
+func (s *UserService) UploadLadder() upload.Ladder {
+	return s.quotas.Ladder()
 }
 
 func (s *UserService) SetUploadTrust(ctx context.Context, who actor.Actor, id int, trusted bool) error {

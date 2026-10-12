@@ -41,6 +41,7 @@ func (h *UserHandler) Register(api *httpapi.API) {
 	httpapi.Register(api, route("adminUser.permissions", http.MethodGet, "/admin/users/{id}/permissions", "Read a user's edit permissions"), h.permissions)
 	httpapi.Register(api, route("adminUser.setPermissions", http.MethodPatch, "/admin/users/{id}/permissions", "Replace a user's edit permissions"), h.setPermissions)
 	httpapi.Register(api, route("adminUser.setUploadTrust", http.MethodPatch, "/admin/users/{id}/upload-trust", "Grant or withdraw the trusted upload tier"), h.setUploadTrust)
+	httpapi.Register(api, route("adminUser.uploadTiers", http.MethodGet, "/admin/upload-tiers", "What each upload tier takes and allows"), h.uploadTiers)
 	httpapi.Register(api, route("adminUser.setSponsor", http.MethodPatch, "/admin/users/{id}/sponsor", "Set or clear the sponsor badge"), h.setSponsor)
 }
 
@@ -123,6 +124,10 @@ func (h *UserHandler) sessions(ctx context.Context, in *adminUserSessionsInput) 
 		status := auth.SessionStatus(in.Status)
 		filter.Status = &status
 	}
+	if in.Live {
+		now := h.resp.Now()
+		filter.LiveAt = &now
+	}
 	sessions, total, err := h.service.Sessions(ctx, filter, admin.Page{Number: in.Page, Size: in.PageSize})
 	if err != nil {
 		return nil, err
@@ -151,6 +156,10 @@ func (h *UserHandler) setUploadTrust(ctx context.Context, in *adminUserUploadTru
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil
+}
+
+func (h *UserHandler) uploadTiers(ctx context.Context, _ *struct{}) (*response.Output[uploadLadderDTO], error) {
+	return response.OK(ctx, h.resp, toUploadLadder(h.service.UploadLadder())), nil
 }
 
 func (h *UserHandler) setSponsor(ctx context.Context, in *adminUserSponsorInput) (*response.EmptyOutput, error) {

@@ -71,6 +71,15 @@ func TestSearchUsersFiltersAndCounts(t *testing.T) {
 	if entries, total, _ := store.SearchUsers(ctx, admin.UserFilter{Status: &banned}, page); total != 1 || entries[0].ID != carol.ID {
 		t.Fatalf("status filter: %+v", entries)
 	}
+	seen := time.Date(2026, 3, 1, 0, 0, 0, 0, time.UTC)
+	db.Ent.User.UpdateOneID(bob.ID).SetLastLoginAt(seen).ExecX(ctx)
+	db.Ent.User.UpdateOneID(carol.ID).SetLastLoginAt(seen.Add(time.Hour)).ExecX(ctx)
+	for _, descending := range []bool{true, false} {
+		entries, _, err := store.SearchUsers(ctx, admin.UserFilter{Search: "mail.test", SortBy: admin.UserSortByLastLoginAt, Descending: descending}, page)
+		if err != nil || entryIDs(entries)[len(entries)-1] != alice.ID {
+			t.Fatalf("users who never signed in come last (descending %v): %v %v", descending, entryIDs(entries), err)
+		}
+	}
 	entries, total, _ = store.SearchUsers(ctx, admin.UserFilter{SortBy: admin.UserSortByID, Descending: true}, admin.Page{Number: 1, Size: 2})
 	creator := db.Ent.Game.GetX(ctx, gameID).CreatorID
 	if total != 4 || !slices.Equal(entryIDs(entries), []int{creator, carol.ID}) {
@@ -168,6 +177,13 @@ func TestRoleSponsorAndSessions(t *testing.T) {
 	sessions, total, _ = store.Sessions(ctx, admin.SessionFilter{UserID: target, Status: &blocked}, admin.Page{Number: 1, Size: 10})
 	if total != 1 || sessions[0].Status != blocked {
 		t.Fatalf("status filter: %+v", sessions)
+	}
+	early, late := base.Add(time.Hour), base.Add(72*time.Hour)
+	if live, total, _ := store.Sessions(ctx, admin.SessionFilter{UserID: target, LiveAt: &early}, admin.Page{Number: 1, Size: 10}); total != 2 || live[0].Status != auth.SessionActive || live[1].Status != auth.SessionActive {
+		t.Fatalf("live sessions: %d %+v", total, live)
+	}
+	if _, total, _ := store.Sessions(ctx, admin.SessionFilter{UserID: target, LiveAt: &late}, admin.Page{Number: 1, Size: 10}); total != 0 {
+		t.Fatalf("expired sessions are not live: %d", total)
 	}
 	if _, total, _ := store.Sessions(ctx, admin.SessionFilter{UserID: 987654}, admin.Page{Number: 1, Size: 10}); total != 0 {
 		t.Fatalf("unknown users have no sessions: %d", total)

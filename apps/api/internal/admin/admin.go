@@ -87,6 +87,7 @@ type UserDetail struct {
 type SessionFilter struct {
 	UserID int
 	Status *auth.SessionStatus
+	LiveAt *time.Time
 }
 
 type Session struct {

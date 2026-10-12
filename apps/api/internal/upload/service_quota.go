@@ -58,6 +58,18 @@ func (q *QuotaService) Allowance(ctx context.Context, userID int) (Allowance, er
 	return allowance, nil
 }
 
+func (q *QuotaService) Ladder() Ladder {
+	maxFileSize := MaxFileSize.Read(q.settings)
+	return Ladder{
+		Steps: []TierStep{
+			{Tier: TierNew, StoredLimit: bytes(NewUploaderQuota.Read(q.settings)), MaxFileSize: &maxFileSize},
+			{Tier: TierRegular, After: RegularAfter.Read(q.settings), StoredLimit: bytes(RegularQuota.Read(q.settings)), MaxFileSize: &maxFileSize},
+			{Tier: TierTrusted, After: TrustedAfter.Read(q.settings), StoredLimit: bytes(TrustedQuota.Read(q.settings))},
+		},
+		InFlightLimit: InFlightLimit.Read(q.settings),
+	}
+}
+
 func (q *QuotaService) SetTrusted(ctx context.Context, userID int, trusted bool) error {
 	return q.repo.SetTrusted(ctx, userID, trusted)
 }
