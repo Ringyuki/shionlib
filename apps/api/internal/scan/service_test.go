@@ -696,7 +696,7 @@ func TestAFailingCheckIsRetriedLessOftenAndThenWaitsForAPerson(t *testing.T) {
 	f.repo.Names[9] = "kotori"
 	f.repo.SeedFile(pending(1, "/spool/1.part"))
 	f.tool.Listings["/spool/1.part"] = listing("7z", "", file("game.exe", 4))
-	f.inspections.Err = errors.New("the record of \xb2\xdd cannot be saved")
+	f.inspections.Err = errors.New("the record of \xb2\xdd\n\ncannot be saved " + strings.Repeat("x", 400))
 	ctx := context.Background()
 	for attempt, wait := range []time.Duration{30 * time.Minute, time.Hour, 2 * time.Hour, 4 * time.Hour, 8 * time.Hour} {
 		if err := f.service.ScanPending(ctx); err == nil {
@@ -731,8 +731,12 @@ func TestAFailingCheckIsRetriedLessOftenAndThenWaitsForAPerson(t *testing.T) {
 		t.Fatalf("the uploader and the admins are told: %+v", messages)
 	}
 	told := decodeMeta(t, messages[1])
-	if told["failures"] != float64(6) || told["uploader_name"] != "kotori" || !strings.Contains(told["last_error"].(string), "cannot be saved") || *messages[1].LinkURL != "/resource/10" {
-		t.Fatalf("unexpected admin message %+v", told)
+	short, _ := told["last_error"].(string)
+	if told["failures"] != float64(6) || told["uploader_name"] != "kotori" || !strings.Contains(short, "cannot be saved xxx") || strings.Contains(short, "\n") || utf8.RuneCountInString(short) != 301 || *messages[1].LinkURL != "/resource/10" {
+		t.Fatalf("the message carries one short line of the error: %+v", told)
+	}
+	if full := f.mailer.Stalled; len(full) != 1 || !strings.Contains(full[0].Reason, "\n\ncannot be saved") || utf8.RuneCountInString(full[0].Reason) < 400 {
+		t.Fatalf("the mail carries the error as it was: %+v", full)
 	}
 	deadline := f.clock.Add(7 * 24 * time.Hour)
 	if len(f.mailer.Stalled) != 1 || f.mailer.Stalled[0].Failures != 6 || !f.mailer.Stalled[0].Deadline.Equal(deadline) || f.mailer.Stalled[0].ResourceURL != "https://shionlib.example/resource/10" || !slices.Equal(f.mailer.Recipients[0], []string{"root@example.test"}) {

@@ -2,6 +2,7 @@ package scan
 
 import (
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
@@ -36,6 +37,14 @@ func failureReason(cause error) string {
 		reason = reason[:checkReasonLimit]
 	}
 	return string(reason)
+}
+
+func (f CheckFailure) Excerpt() string {
+	line := []rune(strings.Join(strings.Fields(f.Reason), " "))
+	if len(line) <= checkExcerptLimit {
+		return string(line)
+	}
+	return string(line[:checkExcerptLimit]) + "…"
 }
 
 type Resumed struct {

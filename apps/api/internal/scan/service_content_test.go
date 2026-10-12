@@ -353,9 +353,9 @@ func TestContentsShareThePreviewAllowanceAcrossNestedArchives(t *testing.T) {
 func TestContentsFailWhenTheUploadedArchiveCannotBeExtracted(t *testing.T) {
 	f := newFixture(true)
 	f.stock(spooled, "7z", file("game.exe", 10), file("bonus.zip", 10))
-	f.tool.Extracts = map[string]scan.ToolRun{spooled: {Failed: true, ExitCode: 2, Message: "exit status 2"}}
-	if _, err := f.read(t); err == nil {
-		t.Fatal("expected a failure")
+	f.tool.Extracts = map[string]scan.ToolRun{spooled: {Failed: true, ExitCode: 2, Stdout: "7-Zip (z) 26.02\nExtracting archive: game.part\nSub items Errors: 1", Stderr: "ERROR: Cannot open output file : errno=36 : File name too long : game.exe\n", Message: "exit status 2"}}
+	if _, err := f.read(t); err == nil || err.Error() != "extract executables: ERROR: Cannot open output file : errno=36 : File name too long : game.exe\nexit status 2" {
+		t.Fatalf("the failure is told in the words of the tool, without what it printed before: %v", err)
 	}
 	nested := newFixture(true)
 	nested.stock(spooled, "7z", file("game.exe", 10), file("bonus.zip", 10))

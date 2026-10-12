@@ -41,6 +41,7 @@ const (
 	checkRetryDelay   = 30 * time.Minute
 	checkRetryLimit   = 8 * time.Hour
 	checkReasonLimit  = 2000
+	checkExcerptLimit = 300
 	adminReviewPrefix = "/admin/malware-scans?id="
 	resourcePagePath  = "/resource/%d"
 )

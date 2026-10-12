@@ -225,7 +225,7 @@ func (s *Service) alertStalled(ctx context.Context, unit Unit, failure CheckFail
 		"file_name":       name,
 		"uploader_name":   uploaderName,
 		"failures":        failure.Failures,
-		"last_error":      failure.Reason,
+		"last_error":      failure.Excerpt(),
 		"review_deadline": deadline,
 	}
 	var errs []error

@@ -33,6 +33,14 @@ func (r ToolRun) blob() string {
 	return r.Stdout + "\n" + r.Stderr + "\n" + r.Message
 }
 
+func (r ToolRun) failure() string {
+	told := strings.TrimSpace(r.Stderr)
+	if told == "" {
+		told = strings.TrimSpace(r.Stdout)
+	}
+	return strings.TrimSpace(told + "\n" + r.Message)
+}
+
 var wrongPassword = regexp.MustCompile(`(?i)Wrong password|Can not open encrypted archive|Can not decrypt`)
 
 var listBroken = regexp.MustCompile(`(?i)Headers Error|Data Error|Unexpected end of (?:file|data)|CRC Failed|Data is corrupted|Can not open file as archive`)

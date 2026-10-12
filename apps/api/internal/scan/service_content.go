@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"strconv"
-	"strings"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
@@ -93,7 +92,7 @@ func (s *ContentService) unpack(ctx context.Context, r *reading, c container) er
 		return err
 	}
 	if run.Failed && !run.Killed && c.depth == 0 && !r.opaque {
-		return fmt.Errorf("extract executables: %s", strings.TrimSpace(run.blob()))
+		return fmt.Errorf("extract executables: %s", run.failure())
 	}
 	r.room -= plan.size
 	paths, err := s.workspace.Files(ctx, c.dir)
