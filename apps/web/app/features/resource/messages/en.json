@@ -14,6 +14,7 @@
     "storing": "Saving",
     "underReview": "Awaiting review",
     "stalled": "Check not finished",
+    "awaitingVolumes": "Waiting for volumes",
     "rejected": "Failed the check",
     "falsePositive": "May contain malware",
     "risky": "Blocked"
@@ -23,6 +24,7 @@
     "storing": "The check passed and the file is being saved; it can be downloaded afterwards. Only you can see this file for now.",
     "underReview": "The malware scan found something suspicious and an administrator will review it. Until then only you can see the whole resource.",
     "stalled": "The check of this file could not be completed and an administrator has been told. Only you can see this file for now.",
+    "awaitingVolumes": "This set is missing {names}{more, plural, =0 {} one { and # more file} other { and # more files}} and is checked once it is complete. Add them through “Add files” before {deadline}, or the set will be removed. For now only you can see these files.",
     "rejected": "{reason}. This file will be removed automatically.",
     "falsePositive": "The malware scan flagged this file, but an administrator released it. Detected: {names}.",
     "risky": "The malware scan detected {names}; the file is blocked and cannot be downloaded"
@@ -139,6 +141,7 @@
       "storing": "The check passed and the file is being saved; until {published, select, true {that is done} other {the resource is published}}, only {viewer, select, uploader {you} other {its uploader}} can see it",
       "underReview": "The malware scan found something suspicious and an administrator will review it. Until then only {viewer, select, uploader {you} other {the uploader}} can see the whole resource.",
       "stalled": "{viewer, select, uploader {The check of this file could not be completed and an administrator has been told; nothing is needed from you for now} other {The check of this file could not be completed and is waiting for an administrator}}",
+      "awaitingVolumes": "{viewer, select, uploader {This set is missing {names}{more, plural, =0 {} one { and # more file} other { and # more files}} and is checked once it is complete. Add them through “Add files” before {deadline}, or the set will be removed.} other {This set is missing {names}{more, plural, =0 {} one { and # more file} other { and # more files}} and waits for its uploader to add them. If it is still incomplete at {deadline}, the set will be removed.}}",
       "rejected": "{reason}. This file will be removed automatically."
     },
     "tabs": {

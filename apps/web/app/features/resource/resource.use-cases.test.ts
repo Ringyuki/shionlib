@@ -23,6 +23,8 @@ const detail: ApiData<'/game/download-source/{id}', 'get'> = {
     updated: '2026-09-25T02:25:43Z',
     comments: 4,
     files: null,
+    missing_volumes: [],
+    volumes_deadline: null,
   },
   game: {
     id: 7,

@@ -4,6 +4,7 @@ import { Link as RouterLink } from 'react-router'
 import { useLocale, useMessages, useTranslations } from 'use-intl'
 import { gamePath, gameTitle, PlatformTag } from '~/features/game'
 import {
+  awaitedVolumes,
   ResourceMenu,
   resourceAnchor,
   resourcePath,
@@ -29,11 +30,12 @@ export function ResourceEntry({ own, viewer }: ResourceEntryProps) {
   const { game, resource } = own
   const files = resource.files ?? []
   const page = resource.published_at === null ? undefined : resourcePath(locale, resource.id)
+  const awaited = awaitedVolumes(resource)
   return (
     <EntryShell
       as="article"
       files={files.map(file => (
-        <ResourceFileLine key={file.id} file={file} to={page} />
+        <ResourceFileLine key={file.id} file={file} awaited={awaited} to={page} />
       ))}
       stage={<StageTag stage={stageOf(resource)} />}
       controlSlots={1}

@@ -24,7 +24,7 @@ export type Place = { parent: number | null; page: number }
 
 export type InspectedFile = Pick<Schema<'DownloadFileDTO'>, 'file_name' | 'inspection_id' | 'stage'>
 
-export type Unread = 'reading' | 'failed' | 'unread'
+export type Unread = 'reading' | 'waiting' | 'failed' | 'unread'
 
 export type EntryNode = { value: number | string; label: string; children?: EntryNode[] }
 
@@ -181,6 +181,9 @@ export function notedOf(entry: Pick<Entry, 'kind' | 'track' | 'items'>, say: Wor
 export function unreadState(files: readonly Pick<InspectedFile, 'stage'>[]): Unread {
   if (files.some(file => file.stage === 'checking')) {
     return 'reading'
+  }
+  if (files.some(file => file.stage === 'awaiting_volumes')) {
+    return 'waiting'
   }
   const unreadable = files.every(file => file.stage === 'rejected' || file.stage === 'stalled')
   return files.length > 0 && unreadable ? 'failed' : 'unread'

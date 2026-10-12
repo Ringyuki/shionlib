@@ -148,9 +148,20 @@ describe('what the page tells about files that are not ready', () => {
     const checking = { ...stored, stage: 'checking' as const }
     const stalled = { ...stored, stage: 'stalled' as const }
     const rejected = { ...stored, stage: 'rejected' as const, rejection: 'encrypted' as const }
-    expect(noticeOf([stored, checking])).toEqual({ state: 'checking', rejection: null })
-    expect(noticeOf([checking, stalled])).toEqual({ state: 'stalled', rejection: null })
-    expect(noticeOf([checking, stalled, rejected])).toEqual({
+    const waiting = { ...stored, stage: 'awaiting_volumes' as const }
+    const awaited = { names: ['g.part2.rar'], more: 0, deadline: new Date('2026-10-13T09:45:00Z') }
+    expect(noticeOf([stored, checking])).toEqual({
+      state: 'checking',
+      rejection: null,
+      awaited: undefined,
+    })
+    expect(noticeOf([checking, waiting], awaited)).toEqual({
+      state: 'awaitingVolumes',
+      rejection: null,
+      awaited,
+    })
+    expect(noticeOf([checking, stalled])).toMatchObject({ state: 'stalled', rejection: null })
+    expect(noticeOf([checking, stalled, rejected])).toMatchObject({
       state: 'rejected',
       rejection: 'encrypted',
     })

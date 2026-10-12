@@ -93,6 +93,46 @@ test.describe('as an uploader', () => {
     await expect(renamed).toHaveCount(0)
   })
 
+  test('names the missing volume of a set until it is added and lists the set in its order', async ({
+    page,
+  }, testInfo) => {
+    const third = await sampleFile(testInfo, 'e2e-set.part3.rar', 2048)
+    const first = await sampleFile(testInfo, 'e2e-set.part1.rar', 2048)
+    await uploadResource(page, [third, first])
+    await showEveryStage(page)
+    const resource = resourceWith(page, 'e2e-set.part1.rar')
+    await expect(resource.getByText('等待分卷')).toHaveCount(2, { timeout: 60_000 })
+    await expect(resource.getByRole('listitem')).toHaveText([
+      /e2e-set\.part1\.rar/,
+      /e2e-set\.part3\.rar/,
+    ])
+    const game = resource.getByRole('link', { name: 'E2E 管理临时作品 6' })
+    const id = (await game.getAttribute('href'))?.split('#resource-')[1] ?? ''
+    await page.goto(`/zh/resource/${id}`)
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('e2e-set.part1.rar')
+    await expect(
+      page.getByText(
+        /这组分卷缺少 e2e-set\.part2\.rar，补齐后才会检查。请在 .+ 前通过“添加文件”补传/,
+      ),
+    ).toBeVisible()
+    await expect(page.getByText('分卷补齐后才会读取文件内容')).toBeVisible()
+
+    await page.goto('/zh/user/uploads')
+    await resource.getByRole('button', { name: '资源操作' }).click()
+    await page.getByRole('menuitem', { name: '添加文件' }).click()
+    const dialog = page.getByRole('dialog', { name: '添加文件' })
+    await dialog
+      .locator('input[type="file"]')
+      .setInputFiles(await sampleFile(testInfo, 'e2e-set.part2.rar', 2048))
+    await dialog.getByRole('button', { name: '开始上传' }).click()
+    await expectNotice(page, '已开始上传')
+    await expect(resource.getByRole('listitem')).toHaveText(
+      [/e2e-set\.part1\.rar/, /e2e-set\.part2\.rar/, /e2e-set\.part3\.rar/],
+      { timeout: 60_000 },
+    )
+    await expect(resource.getByText('等待分卷')).toHaveCount(0)
+  })
+
   test('tells on the page of a resource why it cannot be downloaded yet', async ({
     page,
   }, testInfo) => {

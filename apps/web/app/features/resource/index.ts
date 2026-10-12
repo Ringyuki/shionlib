@@ -1,8 +1,10 @@
 export {
+  awaitedVolumes,
   fileState,
   resourceAnchor,
   rightsOver,
   summarizeResources,
+  type AwaitedVolumes,
   type Resource,
   type ResourceFile,
   type ResourceSummary,

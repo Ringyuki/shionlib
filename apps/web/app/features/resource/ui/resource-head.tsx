@@ -4,7 +4,7 @@ import { Link as RouterLink } from 'react-router'
 import { useLocale } from 'use-intl'
 import { gamePath, gameTitle } from '~/features/game'
 import { BBCodeText } from '~/shared/ui/bbcode-text'
-import { rightsOver, type ResourceViewer } from '../resource'
+import { awaitedVolumes, rightsOver, type ResourceViewer } from '../resource'
 import { inspectionOf, noticeOf, type ResourcePage } from '../resource-page'
 import { PageFile } from './page-file'
 import { PageNotice } from './page-notice'
@@ -22,7 +22,7 @@ export function ResourceHead({ page, viewer }: ResourceHeadProps) {
   const files = resource.files ?? []
   const note = resource.note?.trim() ?? ''
   const rights = rightsOver(resource, viewer)
-  const notice = noticeOf(files)
+  const notice = noticeOf(files, awaitedVolumes(resource))
   return (
     <Stack as="header" gap="md">
       <Stack gap="sm">

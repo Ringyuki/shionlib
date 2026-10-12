@@ -3,6 +3,7 @@ import en from './messages/en.json'
 import ja from './messages/ja.json'
 import zh from './messages/zh.json'
 import {
+  awaitedVolumes,
   detections,
   downloadable,
   fileState,
@@ -35,11 +36,14 @@ const resource = (id: number, platform: Resource['platform']): Resource => ({
   updated: '2026-10-01T00:00:00Z',
   comments: 0,
   files: [],
+  missing_volumes: [],
+  volumes_deadline: null,
 })
 
 describe('fileState', () => {
   it('follows the stage of a file on its way to storage', () => {
     expect(fileState({ ...file, stage: 'checking' })).toBe('checking')
+    expect(fileState({ ...file, stage: 'awaiting_volumes' })).toBe('awaitingVolumes')
     expect(fileState({ ...file, stage: 'storing' })).toBe('storing')
     expect(fileState({ ...file, stage: 'under_review' })).toBe('underReview')
     expect(fileState({ ...file, stage: 'stalled' })).toBe('stalled')
@@ -51,6 +55,21 @@ describe('fileState', () => {
     const infected = { ...file, malware_scan_cases: [{ id: 1, detected_viruses: ['Trojan.X'] }] }
     expect(fileState(infected)).toBe('risky')
     expect(fileState({ ...infected, is_virus_false_positive: true })).toBe('falsePositive')
+  })
+
+  it('names the volumes a set waits for, the first three of many', () => {
+    expect(awaitedVolumes({ missing_volumes: [], volumes_deadline: null })).toBeUndefined()
+    expect(awaitedVolumes({ missing_volumes: null, volumes_deadline: null })).toBeUndefined()
+    const deadline = '2026-10-13T09:45:00.000Z'
+    expect(
+      awaitedVolumes({ missing_volumes: ['g.part2.rar'], volumes_deadline: deadline }),
+    ).toEqual({ names: ['g.part2.rar'], more: 0, deadline: new Date(deadline) })
+    const many = ['g.r01', 'g.r02', 'g.r03', 'g.r04', 'g.r05']
+    expect(awaitedVolumes({ missing_volumes: many, volumes_deadline: deadline })).toEqual({
+      names: ['g.r01', 'g.r02', 'g.r03'],
+      more: 2,
+      deadline: new Date(deadline),
+    })
   })
 
   it('offers only stored files that are not blocked', () => {

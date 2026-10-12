@@ -14,7 +14,7 @@ import { FileArchive } from 'lucide-react'
 import { useTranslations } from 'use-intl'
 import { DownloadButton } from '~/features/download'
 import { useBytes } from '~/shared/i18n/use-bytes'
-import { downloadable, shortHash, type ResourceFile } from '../resource'
+import { downloadable, shortHash, type AwaitedVolumes, type ResourceFile } from '../resource'
 import { FileMenu } from './file-menu'
 import { FileState } from './file-state'
 
@@ -23,10 +23,11 @@ const wide = 'max-sm:hidden'
 type ResourceFilesProps = {
   resourceId: number
   files: readonly ResourceFile[]
+  awaited: AwaitedVolumes | undefined
   manageable: boolean
 }
 
-export function ResourceFiles({ resourceId, files, manageable }: ResourceFilesProps) {
+export function ResourceFiles({ resourceId, files, awaited, manageable }: ResourceFilesProps) {
   const t = useTranslations('resource.column')
   return (
     <Table variant="secondary" hover={false} className="[&_tbody_tr:last-child]:border-0">
@@ -44,6 +45,7 @@ export function ResourceFiles({ resourceId, files, manageable }: ResourceFilesPr
             key={file.id}
             resourceId={resourceId}
             file={file}
+            awaited={awaited}
             manageable={manageable}
             removable={files.length > 1}
           />
@@ -56,11 +58,12 @@ export function ResourceFiles({ resourceId, files, manageable }: ResourceFilesPr
 type FileRowProps = {
   resourceId: number
   file: ResourceFile
+  awaited: AwaitedVolumes | undefined
   manageable: boolean
   removable: boolean
 }
 
-function FileRow({ resourceId, file, manageable, removable }: FileRowProps) {
+function FileRow({ resourceId, file, awaited, manageable, removable }: FileRowProps) {
   const t = useTranslations('resource')
   const bytes = useBytes()
   const sizeText = bytes(file.file_size)
@@ -79,7 +82,7 @@ function FileRow({ resourceId, file, manageable, removable }: FileRowProps) {
               </Text>
             </Stack>
           </Inline>
-          <FileState file={file} className="pointer-events-auto" />
+          <FileState file={file} awaited={awaited} className="pointer-events-auto" />
         </Inline>
       </TableCell>
       <TableCell align="end" className={`${wide} whitespace-nowrap`}>

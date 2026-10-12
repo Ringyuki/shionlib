@@ -22,6 +22,9 @@ export function ContentsTab({ inspections, files, contents }: ContentsTabProps) 
     if (state === 'reading') {
       return <Empty icon={<LoaderCircle />} title={t('reading')} />
     }
+    if (state === 'waiting') {
+      return <Empty icon={<Clock />} title={t('waiting')} />
+    }
     return state === 'failed' ? (
       <Empty icon={<TriangleAlert />} title={t('failed')} />
     ) : (

@@ -160,6 +160,10 @@ describe('what a row shows', () => {
 
   it('says why nothing is listed yet', () => {
     expect(unreadState([{ stage: 'stored' }, { stage: 'checking' }])).toBe('reading')
+    expect(unreadState([{ stage: 'awaiting_volumes' }, { stage: 'awaiting_volumes' }])).toBe(
+      'waiting',
+    )
+    expect(unreadState([{ stage: 'awaiting_volumes' }, { stage: 'checking' }])).toBe('reading')
     expect(unreadState([{ stage: 'stalled' }])).toBe('failed')
     expect(unreadState([{ stage: 'rejected' }])).toBe('failed')
     expect(unreadState([{ stage: 'stored' }, { stage: 'rejected' }])).toBe('unread')

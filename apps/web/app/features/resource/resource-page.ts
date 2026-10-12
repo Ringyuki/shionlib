@@ -2,7 +2,13 @@ import type { GameHeader } from '~/features/game'
 import type { Inspection } from '~/features/inspection'
 import type { Schema } from '~/shared/api/types'
 import type { Locale } from '~/shared/i18n/locale'
-import { fileState, type FileState, type Resource, type ResourceFile } from './resource'
+import {
+  fileState,
+  type AwaitedVolumes,
+  type FileState,
+  type Resource,
+  type ResourceFile,
+} from './resource'
 
 export type ResourceEvent = Schema<'DownloadEventDTO'>
 
@@ -27,11 +33,22 @@ export function resourceTabAt(pathname: string, pathOf: (tab: ResourceTab) => st
   return resourceTabs.find(tab => tab !== firstTab && within(tab)) ?? firstTab
 }
 
-export const pendingStates = ['rejected', 'underReview', 'stalled', 'checking', 'storing'] as const
+export const pendingStates = [
+  'rejected',
+  'underReview',
+  'stalled',
+  'awaitingVolumes',
+  'checking',
+  'storing',
+] as const
 
 export type PendingState = Extract<FileState, (typeof pendingStates)[number]>
 
-export type PageNotice = { state: PendingState; rejection: ResourceFile['rejection'] }
+export type PageNotice = {
+  state: PendingState
+  rejection: ResourceFile['rejection']
+  awaited: AwaitedVolumes | undefined
+}
 
 export function pendingState(file: Parameters<typeof fileState>[0]): PendingState | undefined {
   const state = fileState(file)
@@ -40,11 +57,12 @@ export function pendingState(file: Parameters<typeof fileState>[0]): PendingStat
 
 export function noticeOf(
   files: readonly (Parameters<typeof fileState>[0] & Pick<ResourceFile, 'rejection'>)[],
+  awaited?: AwaitedVolumes,
 ): PageNotice | undefined {
   for (const state of pendingStates) {
     const file = files.find(candidate => pendingState(candidate) === state)
     if (file !== undefined) {
-      return { state, rejection: file.rejection }
+      return { state, rejection: file.rejection, awaited }
     }
   }
   return undefined

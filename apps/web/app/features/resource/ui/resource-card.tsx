@@ -18,7 +18,13 @@ import { PlatformTag } from '~/features/game'
 import { labelOf } from '~/shared/i18n/labels'
 import { BBCodeText } from '~/shared/ui/bbcode-text'
 import { entryLink } from '~/shared/ui/entry-link'
-import { resourceAnchor, rightsOver, type Resource, type ResourceViewer } from '../resource'
+import {
+  awaitedVolumes,
+  resourceAnchor,
+  rightsOver,
+  type Resource,
+  type ResourceViewer,
+} from '../resource'
 import { resourcePath } from '../resource-page'
 import { ResourceMenu } from './resource-menu'
 import { ResourceFiles } from './resource-files'
@@ -123,7 +129,12 @@ export function ResourceCard({ resource, viewer }: ResourceCardProps) {
           </Stack>
         </Grid>
         {note !== '' && <BBCodeText source={note} size="sm" className="pointer-events-auto" />}
-        <ResourceFiles resourceId={resource.id} files={files} manageable={rights.manage} />
+        <ResourceFiles
+          resourceId={resource.id}
+          files={files}
+          awaited={awaitedVolumes(resource)}
+          manageable={rights.manage}
+        />
       </Stack>
     </Card>
   )

@@ -5273,10 +5273,10 @@ export type components = {
             /** @description SHA-256 of the file, computed while it is checked; null until then */
             sha256: string | null;
             /**
-             * @description Where the file is on its way to being downloadable: checking (waiting for or under its check), storing (passed, moving to object storage), stored, under_review (held for a malware review), stalled (its check kept failing and waits for an operator) or rejected (about to be removed)
+             * @description Where the file is on its way to being downloadable: checking (waiting for or under its check), awaiting_volumes (a volume of a set that lacks the volumes named in missing_volumes; checked once they are added), storing (passed, moving to object storage), stored, under_review (held for a malware review), stalled (its check kept failing and waits for an operator) or rejected (about to be removed)
              * @enum {string}
              */
-            stage: "checking" | "storing" | "stored" | "under_review" | "stalled" | "rejected";
+            stage: "checking" | "awaiting_volumes" | "storing" | "stored" | "under_review" | "stalled" | "rejected";
             /** Format: int64 */
             type: number;
             /**
@@ -5434,10 +5434,13 @@ export type components = {
             creator: components["schemas"]["UserSummaryDTO"];
             /** Format: int64 */
             downloads: number;
+            /** @description The files in the order they are read: the volumes of a set together and in their own order, sets and single files by the first of their files that was added */
             files: components["schemas"]["DownloadFileDTO"][] | null;
             /** Format: int64 */
             id: number;
             language: string[] | null;
+            /** @description File names of the volumes that the sets still waiting for their check lack, as their siblings are named; empty when nothing is missing */
+            missing_volumes: string[] | null;
             note: string | null;
             platform: string[] | null;
             /**
@@ -5448,6 +5451,11 @@ export type components = {
             simulator: string | null;
             /** Format: date-time */
             updated: string;
+            /**
+             * Format: date-time
+             * @description When the files waiting for those volumes are removed if their set is still incomplete; null when nothing is missing
+             */
+            volumes_deadline: string | null;
         };
         DownloadResourceDetailDTO: {
             game: components["schemas"]["GameCardDTO"];

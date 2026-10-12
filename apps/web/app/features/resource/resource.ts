@@ -19,6 +19,7 @@ export type Platform = NonNullable<EditFields['platform']>[number]
 export type FileState =
   | 'passed'
   | 'checking'
+  | 'awaitingVolumes'
   | 'storing'
   | 'underReview'
   | 'stalled'
@@ -85,11 +86,31 @@ export function fileState(
       return file.stage
     case 'under_review':
       return 'underReview'
+    case 'awaiting_volumes':
+      return 'awaitingVolumes'
     case 'stored':
       if (detections(file).length === 0) {
         return 'passed'
       }
       return file.is_virus_false_positive ? 'falsePositive' : 'risky'
+  }
+}
+
+export type AwaitedVolumes = { names: string[]; more: number; deadline: Date }
+
+const namedVolumes = 3
+
+export function awaitedVolumes(
+  resource: Pick<Resource, 'missing_volumes' | 'volumes_deadline'>,
+): AwaitedVolumes | undefined {
+  const names = resource.missing_volumes ?? []
+  if (names.length === 0 || resource.volumes_deadline === null) {
+    return undefined
+  }
+  return {
+    names: names.slice(0, namedVolumes),
+    more: Math.max(0, names.length - namedVolumes),
+    deadline: new Date(resource.volumes_deadline),
   }
 }
 

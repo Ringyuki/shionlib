@@ -1,10 +1,11 @@
 import { cn, Tag, Tooltip } from '@hina-ui/react'
 import { CircleHelp } from 'lucide-react'
-import { useTranslations } from 'use-intl'
-import { detections, fileState, type ResourceFile } from '../resource'
+import { useFormatter, useTranslations } from 'use-intl'
+import { detections, fileState, type AwaitedVolumes, type ResourceFile } from '../resource'
 
 const tags = {
   checking: { tone: 'neutral', variant: 'outline' },
+  awaitingVolumes: { tone: 'warning', variant: 'soft' },
   storing: { tone: 'neutral', variant: 'outline' },
   underReview: { tone: 'warning', variant: 'soft' },
   stalled: { tone: 'warning', variant: 'soft' },
@@ -19,10 +20,16 @@ const explainedTags = {
   storing: { tone: 'accent', variant: 'soft' },
 } as const
 
-type FileStateProps = { file: ResourceFile; explained?: boolean; className?: string }
+type FileStateProps = {
+  file: ResourceFile
+  explained?: boolean
+  awaited?: AwaitedVolumes
+  className?: string
+}
 
-export function FileState({ file, explained = false, className }: FileStateProps) {
+export function FileState({ file, explained = false, awaited, className }: FileStateProps) {
   const t = useTranslations('resource')
+  const format = useFormatter()
   const state = fileState(file)
   if (state === 'passed') {
     return null
@@ -35,7 +42,15 @@ export function FileState({ file, explained = false, className }: FileStateProps
     )
   }
   const hint = t(`stateHint.${state}`, {
-    names: detections(file).join(', '),
+    names:
+      state === 'awaitingVolumes'
+        ? format.list(awaited?.names ?? [], { style: 'narrow' })
+        : detections(file).join(', '),
+    more: awaited?.more ?? 0,
+    deadline:
+      awaited === undefined
+        ? ''
+        : format.dateTime(awaited.deadline, { dateStyle: 'medium', timeStyle: 'short' }),
     reason: file.rejection === null ? '' : t(`rejection.${file.rejection}`),
   })
   return (
