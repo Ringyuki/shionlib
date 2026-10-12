@@ -14,9 +14,29 @@ async function openMenu(page: Page, text: string) {
   await threadOf(page, text).getByRole('button', { name: '更多操作' }).first().click()
 }
 
+test('opens a resource from anywhere on its card but the controls in it', async ({ page }) => {
+  await page.goto('/zh/game/1')
+  const card = page.locator('#resource-1')
+  const whole = card.getByRole('link', { name: `查看 ${fileName} 的详情` })
+  await expect(whole).toHaveAttribute('href', '/zh/resource/1')
+  await card.getByRole('button', { name: '复制完整校验值' }).click()
+  await card.getByRole('button', { name: '资源操作' }).click()
+  await expect(page.getByRole('menu')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(page).toHaveURL(/\/zh\/game\/1$/)
+  const name = await card.getByText(fileName).boundingBox()
+  await page.mouse.click((name?.x ?? 0) + 8, (name?.y ?? 0) + 8)
+  await expect(page).toHaveURL(/\/zh\/resource\/1$/)
+})
+
 test('opens a resource from its game and reads its tabs', async ({ page }) => {
   await page.goto('/zh/game/1')
-  await page.locator('#resource-1').getByRole('link', { name: fileName }).click()
+  await page
+    .locator('#resource-1')
+    .getByRole('link', { name: fileName })
+    .click({
+      position: { x: 24, y: 24 },
+    })
   await expect(page).toHaveURL(/\/zh\/resource\/1$/)
   await expect(page).toHaveTitle(`${fileName} | 常轨脱离Creative Re:Re:call | Shionlib`)
   await expect(page.getByRole('heading', { level: 1, name: fileName })).toBeVisible()

@@ -1,6 +1,7 @@
 import {
   Avatar,
   Card,
+  cn,
   Grid,
   Inline,
   Link,
@@ -16,6 +17,7 @@ import { useFormatter, useLocale, useMessages, useTranslations } from 'use-intl'
 import { PlatformTag } from '~/features/game'
 import { labelOf } from '~/shared/i18n/labels'
 import { BBCodeText } from '~/shared/ui/bbcode-text'
+import { entryLink } from '~/shared/ui/entry-link'
 import { resourceAnchor, rightsOver, type Resource, type ResourceViewer } from '../resource'
 import { resourcePath } from '../resource-page'
 import { ResourceMenu } from './resource-menu'
@@ -35,9 +37,23 @@ export function ResourceCard({ resource, viewer }: ResourceCardProps) {
   const { creator } = resource
   const note = resource.note?.trim() ?? ''
   const rights = rightsOver(resource, viewer)
+  const files = resource.files ?? []
   return (
-    <Card as="article" padded={false} id={resourceAnchor(resource.id)} className="scroll-mt-24">
-      <Stack gap="sm" className="p-4">
+    <Card
+      as="article"
+      padded={false}
+      id={resourceAnchor(resource.id)}
+      className="relative scroll-mt-24 overflow-visible"
+    >
+      <Stack className="absolute inset-0 rounded-[inherit]">
+        <RouterLink
+          to={resourcePath(locale, resource.id)}
+          prefetch="intent"
+          aria-label={t('open', { name: files[0]?.file_name ?? '', others: files.length - 1 })}
+          className={cn(entryLink, 'size-full rounded-[inherit]')}
+        />
+      </Stack>
+      <Stack gap="sm" className="pointer-events-none relative p-4">
         <Grid className="grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
           <Inline gap="xs">
             {(resource.platform ?? []).map(platform => (
@@ -84,7 +100,11 @@ export function ResourceCard({ resource, viewer }: ResourceCardProps) {
               </Text>
             </Inline>
             {resource.comments > 0 && (
-              <Link asChild tone="neutral" className="text-muted inline-flex items-center gap-1">
+              <Link
+                asChild
+                tone="neutral"
+                className="text-muted pointer-events-auto inline-flex items-center gap-1"
+              >
                 <RouterLink
                   to={resourcePath(locale, resource.id, 'comments')}
                   prefetch="intent"
@@ -98,16 +118,12 @@ export function ResourceCard({ resource, viewer }: ResourceCardProps) {
               </Link>
             )}
           </Inline>
-          <Stack className="col-start-2 row-start-1 sm:col-start-3">
+          <Stack className="pointer-events-auto col-start-2 row-start-1 sm:col-start-3">
             <ResourceMenu resource={resource} rights={rights} />
           </Stack>
         </Grid>
-        {note !== '' && <BBCodeText source={note} size="sm" />}
-        <ResourceFiles
-          resourceId={resource.id}
-          files={resource.files ?? []}
-          manageable={rights.manage}
-        />
+        {note !== '' && <BBCodeText source={note} size="sm" className="pointer-events-auto" />}
+        <ResourceFiles resourceId={resource.id} files={files} manageable={rights.manage} />
       </Stack>
     </Card>
   )

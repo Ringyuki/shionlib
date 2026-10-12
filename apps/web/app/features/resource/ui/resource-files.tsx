@@ -1,7 +1,6 @@
 import {
   CopyButton,
   Inline,
-  Link,
   Stack,
   Table,
   TableBody,
@@ -12,12 +11,10 @@ import {
   Text,
 } from '@hina-ui/react'
 import { FileArchive } from 'lucide-react'
-import { Link as RouterLink } from 'react-router'
-import { useLocale, useTranslations } from 'use-intl'
+import { useTranslations } from 'use-intl'
 import { DownloadButton } from '~/features/download'
 import { useBytes } from '~/shared/i18n/use-bytes'
 import { downloadable, shortHash, type ResourceFile } from '../resource'
-import { resourcePath } from '../resource-page'
 import { FileMenu } from './file-menu'
 import { FileState } from './file-state'
 
@@ -66,7 +63,6 @@ type FileRowProps = {
 function FileRow({ resourceId, file, manageable, removable }: FileRowProps) {
   const t = useTranslations('resource')
   const bytes = useBytes()
-  const locale = useLocale()
   const sizeText = bytes(file.file_size)
   return (
     <TableRow>
@@ -75,17 +71,15 @@ function FileRow({ resourceId, file, manageable, removable }: FileRowProps) {
           <Inline gap="xs" align="start" wrap={false} className="max-w-full min-w-0">
             <FileArchive aria-hidden className="mt-0.5 size-4 shrink-0 text-faint" />
             <Stack gap="none" className="min-w-0">
-              <Link asChild tone="neutral" className="text-sm break-words">
-                <RouterLink to={resourcePath(locale, resourceId)} prefetch="intent">
-                  {file.file_name}
-                </RouterLink>
-              </Link>
+              <Text size="sm" className="break-words">
+                {file.file_name}
+              </Text>
               <Text size="xs" tone="muted" className="sm:hidden">
                 {sizeText}
               </Text>
             </Stack>
           </Inline>
-          <FileState file={file} />
+          <FileState file={file} className="pointer-events-auto" />
         </Inline>
       </TableCell>
       <TableCell align="end" className={`${wide} whitespace-nowrap`}>
@@ -94,7 +88,7 @@ function FileRow({ resourceId, file, manageable, removable }: FileRowProps) {
         </Text>
       </TableCell>
       <TableCell className={`${wide} whitespace-nowrap`}>
-        <Inline gap="none" align="center" wrap={false}>
+        <Inline gap="none" align="center" wrap={false} className="pointer-events-auto">
           <Text as="span" size="xs" tone="faint" className="font-mono">
             {shortHash(file.file_hash)}
           </Text>
@@ -102,7 +96,7 @@ function FileRow({ resourceId, file, manageable, removable }: FileRowProps) {
         </Inline>
       </TableCell>
       <TableCell align="end" className="pe-0">
-        <Inline gap="xs" align="center" justify="end" wrap={false}>
+        <Inline gap="xs" align="center" justify="end" wrap={false} className="pointer-events-auto">
           {downloadable(file) && <DownloadButton resourceId={resourceId} file={file} />}
           {manageable && <FileMenu file={file} removable={removable} />}
         </Inline>

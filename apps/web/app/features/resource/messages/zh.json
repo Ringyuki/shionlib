@@ -5,6 +5,7 @@
   "all": "全部",
   "downloads": "{count, number} 次下载",
   "comments": "{count, number} 条评论",
+  "open": "{others, plural, =0 {查看 {name} 的详情} other {查看 {name} 等 # 个文件的详情}}",
   "files": "文件",
   "hash": "{algorithm}：{hash}",
   "copyHash": "复制完整校验值",

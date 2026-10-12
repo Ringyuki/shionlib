@@ -1,4 +1,4 @@
-import { Tag, Tooltip } from '@hina-ui/react'
+import { cn, Tag, Tooltip } from '@hina-ui/react'
 import { CircleHelp } from 'lucide-react'
 import { useTranslations } from 'use-intl'
 import { detections, fileState, type ResourceFile } from '../resource'
@@ -19,9 +19,9 @@ const explainedTags = {
   storing: { tone: 'accent', variant: 'soft' },
 } as const
 
-type FileStateProps = { file: ResourceFile; explained?: boolean }
+type FileStateProps = { file: ResourceFile; explained?: boolean; className?: string }
 
-export function FileState({ file, explained = false }: FileStateProps) {
+export function FileState({ file, explained = false, className }: FileStateProps) {
   const t = useTranslations('resource')
   const state = fileState(file)
   if (state === 'passed') {
@@ -29,7 +29,7 @@ export function FileState({ file, explained = false }: FileStateProps) {
   }
   if (explained) {
     return (
-      <Tag size="sm" className="shrink-0" {...explainedTags[state]}>
+      <Tag size="sm" className={cn('shrink-0', className)} {...explainedTags[state]}>
         {t(`state.${state}`)}
       </Tag>
     )
@@ -39,7 +39,7 @@ export function FileState({ file, explained = false }: FileStateProps) {
     reason: file.rejection === null ? '' : t(`rejection.${file.rejection}`),
   })
   return (
-    <Tag size="sm" className="shrink-0" {...tags[state]}>
+    <Tag size="sm" className={cn('shrink-0', className)} {...tags[state]}>
       {t(`state.${state}`)}
       <Tooltip content={hint}>
         <CircleHelp role="img" aria-label={t('stateHelp')} tabIndex={0} className="cursor-help" />

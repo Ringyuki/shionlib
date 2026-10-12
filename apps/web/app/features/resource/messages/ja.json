@@ -5,6 +5,7 @@
   "all": "すべて",
   "downloads": "{count, number} 回ダウンロード",
   "comments": "コメント {count, number} 件",
+  "open": "{others, plural, =0 {{name} の詳細を見る} other {{name} ほか # 件の詳細を見る}}",
   "files": "ファイル",
   "hash": "{algorithm}：{hash}",
   "copyHash": "チェックサムをコピー",

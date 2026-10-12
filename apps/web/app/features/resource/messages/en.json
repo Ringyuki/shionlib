@@ -5,6 +5,7 @@
   "all": "All",
   "downloads": "{count, plural, one {# download} other {# downloads}}",
   "comments": "{count, plural, one {# comment} other {# comments}}",
+  "open": "{others, plural, =0 {Details of {name}} one {Details of {name} and # other file} other {Details of {name} and # other files}}",
   "files": "Files",
   "hash": "{algorithm}: {hash}",
   "copyHash": "Copy the full checksum",
