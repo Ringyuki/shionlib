@@ -107,7 +107,7 @@ docker exec <worker container> shionlib-api recheck          # every stalled che
 docker exec <worker container> shionlib-api recheck 8817 8819  # the checks of these files
 ```
 
-- A file nobody wants can be removed by its uploader or an admin at any time. A stalled check nobody resumed within `scan.stalled_check_timeout` (7 days) is given up: the file is rejected, its uploader is told and the file is removed with the other rejected files.
+- An admin can remove the resource at any time; its uploader can remove the file only while the resource holds another one (the last file of a resource cannot be removed). A stalled check nobody resumed within `scan.stalled_check_timeout` (7 days) is given up: the file is rejected, its uploader is told and the file is removed with the other rejected files.
 - A check cut short because the worker stops (a deploy) is not counted. One that is still running when the run of the task ends (one hour for everything waiting) is.
 
 ## Cutover from the NestJS backend
