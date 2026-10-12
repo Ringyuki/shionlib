@@ -1,7 +1,7 @@
-import { Inline, Input, NumberInput, Select, Switch, Textarea } from '@hina-ui/react'
+import { Inline, Input, NumberInput, PasswordInput, Select, Switch, Textarea } from '@hina-ui/react'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
-import { fittingUnit, unitsOf, type Setting, type Value } from '../admin-setting'
+import { fittingUnit, hiddenValue, unitsOf, type Setting, type Value } from '../admin-setting'
 
 type SettingControlProps = {
   setting: Setting
@@ -56,6 +56,29 @@ function Amount({
   )
 }
 
+function Secret({
+  setting,
+  value,
+  disabled,
+  invalid,
+  onChange,
+}: SettingControlProps & { value: string }) {
+  const t = useTranslations('adminSetting.secret')
+  const kept = setting.value === hiddenValue
+  return (
+    <PasswordInput
+      aria-label={setting.label}
+      className="w-64 max-w-full"
+      autoComplete="off"
+      disabled={disabled}
+      invalid={invalid}
+      placeholder={t(kept ? 'replace' : 'enter')}
+      value={value === hiddenValue ? '' : value}
+      onValueChange={typed => onChange(typed === '' ? setting.value : typed)}
+    />
+  )
+}
+
 export function SettingControl(props: SettingControlProps) {
   const { setting, value, disabled, invalid, onChange } = props
   if (typeof value === 'boolean') {
@@ -67,6 +90,9 @@ export function SettingControl(props: SettingControlProps) {
         onCheckedChange={onChange}
       />
     )
+  }
+  if (setting.kind === 'secret' && typeof value === 'string') {
+    return <Secret {...props} value={value} />
   }
   if (typeof value === 'string') {
     return (setting.maxLength ?? 0) > longText ? (

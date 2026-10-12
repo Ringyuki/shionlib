@@ -1,8 +1,10 @@
-export const kinds = ['int', 'bytes', 'float', 'duration', 'flag', 'text'] as const
+export const kinds = ['int', 'bytes', 'float', 'duration', 'flag', 'text', 'secret'] as const
 
 export type Kind = (typeof kinds)[number]
 
 export type Value = number | boolean | string
+
+export const hiddenValue = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022'
 
 export type LastChange = {
   editor: string | undefined
@@ -41,6 +43,7 @@ export const sections = [
   { key: 'hot_score', groups: ['hot_score'] },
   { key: 'catalog', groups: ['catalog'] },
   { key: 'ai', groups: ['ai'] },
+  { key: 'credentials', groups: ['oidc', 'bangumi'] },
 ] as const
 
 export type SectionKey = (typeof sections)[number]['key'] | 'other'

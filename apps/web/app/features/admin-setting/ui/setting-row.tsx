@@ -2,7 +2,7 @@ import { Flex, Inline, Stack, Tag, Text, Tooltip } from '@hina-ui/react'
 import { History } from 'lucide-react'
 import { useFormatter, useTranslations } from 'use-intl'
 import { Button } from '~/shared/ui/button'
-import { problemOf, type Setting, type Value } from '../admin-setting'
+import { hiddenValue, problemOf, type Setting, type Value } from '../admin-setting'
 import { SettingControl } from './setting-control'
 import { useShownValue } from './use-shown-value'
 
@@ -12,6 +12,32 @@ type SettingRowProps = {
   editable: boolean
   onChange: (value: Value) => void
   onHistory: () => void
+}
+
+type SecretStateProps = Pick<SettingRowProps, 'setting' | 'value' | 'editable' | 'onChange'>
+
+function SecretState({ setting, value, editable, onChange }: SecretStateProps) {
+  const t = useTranslations('adminSetting.secret')
+  if (setting.value !== hiddenValue) {
+    return (
+      <Text as="span" size="sm" tone="muted">
+        {t('unset')}
+      </Text>
+    )
+  }
+  return (
+    <>
+      <Tag tone="success">{t('set')}</Tag>
+      <Button
+        size="sm"
+        variant="link"
+        disabled={!editable || value === ''}
+        onClick={() => onChange('')}
+      >
+        {t('clear')}
+      </Button>
+    </>
+  )
 }
 
 export function SettingRow({ setting, value, editable, onChange, onHistory }: SettingRowProps) {
@@ -67,11 +93,17 @@ export function SettingRow({ setting, value, editable, onChange, onHistory }: Se
           </Text>
         )}
         <Inline gap="sm" align="center" className="md:justify-end">
-          <Text as="span" size="sm" tone="muted">
-            {t('fallback', { value: shown(setting.kind, setting.fallback) })}
-          </Text>
+          {setting.kind === 'secret' ? (
+            <SecretState setting={setting} value={value} editable={editable} onChange={onChange} />
+          ) : (
+            <Text as="span" size="sm" tone="muted">
+              {setting.fallback === ''
+                ? t('fallbackBlank')
+                : t('fallback', { value: shown(setting.kind, setting.fallback) })}
+            </Text>
+          )}
           {unsaved && <Tag tone="warning">{t('unsaved')}</Tag>}
-          {!unsaved && setting.overridden && (
+          {!unsaved && setting.overridden && setting.kind !== 'secret' && (
             <>
               <Tag tone="accent">{t('overridden')}</Tag>
               {last !== undefined && (

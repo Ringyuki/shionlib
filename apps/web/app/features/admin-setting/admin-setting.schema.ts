@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 import type { Schema } from '~/shared/api/types'
-import { kinds, type Change, type Setting, type Value } from './admin-setting'
+import { hiddenValue, kinds, type Change, type Setting, type Value } from './admin-setting'
 
 const scalar = v.union([v.number(), v.boolean(), v.string()])
 
@@ -17,7 +17,9 @@ function fits(kind: Setting['kind'], value: Value): boolean {
   if (kind === 'flag') {
     return typeof value === 'boolean'
   }
-  return kind === 'text' ? typeof value === 'string' : typeof value === 'number'
+  return kind === 'text' || kind === 'secret'
+    ? typeof value === 'string'
+    : typeof value === 'number'
 }
 
 export function settingFrom(raw: Schema<'SettingDTO'>): Setting | undefined {
@@ -31,13 +33,14 @@ export function settingFrom(raw: Schema<'SettingDTO'>): Setting | undefined {
     return undefined
   }
   const last = raw.last_change
+  const hidden = kind === 'secret' && raw.overridden
   return {
     name: raw.name,
     group: raw.group,
     label: raw.label,
     description: raw.description,
     kind,
-    value,
+    value: hidden ? hiddenValue : value,
     fallback,
     min: v.parse(bound, raw.min ?? undefined),
     max: v.parse(bound, raw.max ?? undefined),

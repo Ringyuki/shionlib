@@ -13,7 +13,8 @@
     "hot_score": "热度",
     "catalog": "条目同步",
     "ai": "AI",
-    "other": "其他"
+    "other": "其他",
+    "credentials": "第三方服务"
   },
   "on": "开启",
   "off": "关闭",
@@ -57,5 +58,15 @@
     "subject": "{label} · {name}",
     "loading": "正在加载",
     "empty": "暂无修改记录"
+  },
+  "fallbackBlank": "默认为空",
+  "secret": {
+    "set": "已设置",
+    "unset": "未设置",
+    "clear": "清除",
+    "enter": "输入密钥",
+    "replace": "输入新的密钥以替换",
+    "replaced": "设置了新的密钥",
+    "cleared": "清除了密钥"
   }
 }

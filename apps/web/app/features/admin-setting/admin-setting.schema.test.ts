@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { parseOptional } from '~/shared/form/check'
 import type { Schema } from '~/shared/api/types'
+import { hiddenValue } from './admin-setting'
 import { changeFrom, settingCommand, settingFrom, settingNameFrom } from './admin-setting.schema'
 
 const raw: Schema<'SettingDTO'> = {
@@ -65,6 +66,28 @@ describe('settingFrom', () => {
       },
     })
     expect(seeded?.lastChange).toEqual({ editor: undefined, at: 'x' })
+  })
+
+  it('shows a secret that is set as hidden and one that is not as empty', () => {
+    const secret = {
+      ...raw,
+      kind: 'secret' as const,
+      value: '',
+      default: '',
+      min: undefined,
+      max: undefined,
+      max_length: 500,
+    }
+    expect(settingFrom({ ...secret, overridden: true })).toMatchObject({
+      kind: 'secret',
+      value: hiddenValue,
+      fallback: '',
+    })
+    expect(settingFrom({ ...secret, overridden: false })).toMatchObject({
+      kind: 'secret',
+      value: '',
+      fallback: '',
+    })
   })
 
   it('leaves out a setting whose value does not fit its kind', () => {

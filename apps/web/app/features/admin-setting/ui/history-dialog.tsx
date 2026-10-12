@@ -24,22 +24,34 @@ function Entry({ setting, change }: { setting: Setting; change: Change }) {
           {change.editor ?? t('system')}
         </Text>
         <Time value={change.at} className="text-muted text-sm" />
-        {change.value === undefined && (
+        {change.value === undefined && setting.kind !== 'secret' && (
           <Text as="span" size="sm" tone="muted">
             {t('restore')}
           </Text>
         )}
       </Inline>
-      <Inline gap="sm" align="center" className="tabular-nums">
-        <Text as="span" size="sm" tone="muted" className="break-all line-through">
-          {shown(setting.kind, before)}
+      {setting.kind === 'secret' ? (
+        <Text as="span" size="sm">
+          {t(change.value === undefined ? 'secret.cleared' : 'secret.replaced')}
         </Text>
-        <ArrowRight aria-hidden className="text-muted size-3.5 shrink-0" />
-        <Text as="span" size="sm" className="break-all">
-          {shown(setting.kind, after)}
-        </Text>
-      </Inline>
+      ) : (
+        <Values before={shown(setting.kind, before)} after={shown(setting.kind, after)} />
+      )}
     </Stack>
+  )
+}
+
+function Values({ before, after }: { before: string; after: string }) {
+  return (
+    <Inline gap="sm" align="center" className="tabular-nums">
+      <Text as="span" size="sm" tone="muted" className="break-all line-through">
+        {before}
+      </Text>
+      <ArrowRight aria-hidden className="text-muted size-3.5 shrink-0" />
+      <Text as="span" size="sm" className="break-all">
+        {after}
+      </Text>
+    </Inline>
   )
 }
 

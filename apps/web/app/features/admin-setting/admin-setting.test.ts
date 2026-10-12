@@ -5,6 +5,7 @@ import {
   durationUnits,
   edited,
   fittingUnit,
+  hiddenValue,
   matching,
   problemOf,
   savesOf,
@@ -106,6 +107,39 @@ describe('drafts', () => {
       { name: 'upload.trusted_quota', value: quota.fallback, restore: true },
       { name: 'user.registration', value: false, restore: false },
     ])
+  })
+})
+
+describe('secrets', () => {
+  const kept = setting('bangumi.client_secret', {
+    kind: 'secret',
+    value: hiddenValue,
+    fallback: '',
+    overridden: true,
+    maxLength: 500,
+  })
+  const unset = setting('oidc.client_secret', {
+    kind: 'secret',
+    value: '',
+    fallback: '',
+    maxLength: 500,
+  })
+
+  it('are grouped with the services they belong to', () => {
+    expect(sectioned([kept, unset]).map(section => section.key)).toEqual(['credentials'])
+  })
+
+  it('are saved when typed and dropped when cleared, and left alone otherwise', () => {
+    expect(savesOf([kept, unset], {})).toEqual([])
+    expect(savesOf([kept, unset], { 'oidc.client_secret': 'typed' })).toEqual([
+      { name: 'oidc.client_secret', value: 'typed', restore: false },
+    ])
+    expect(savesOf([kept, unset], { 'bangumi.client_secret': '' })).toEqual([
+      { name: 'bangumi.client_secret', value: '', restore: true },
+    ])
+    expect(
+      savesOf([kept, unset], drafted({ 'bangumi.client_secret': 'x' }, kept, hiddenValue)),
+    ).toEqual([])
   })
 })
 
