@@ -28,6 +28,7 @@ describe('navigationOf', () => {
     const { lead, groups } = navigationOf(pending)
     expect(lead).toEqual([{ key: 'overview', to: adminPaths.overview, end: true, count: 0 }])
     expect(groups.flatMap(group => group.entries).every(entry => !entry.end)).toBe(true)
+    expect(groups.map(group => group.key)).toEqual(['review', 'manage'])
   })
 })
 
@@ -56,5 +57,7 @@ describe('adminPaths', () => {
     expect(adminPaths.report(7)).toBe('/zh/admin/reports?id=7')
     expect(adminPaths.scanCase(3)).toBe('/zh/admin/checks?case=3')
     expect(adminPaths.user(12)).toBe('/zh/admin/users/12')
+    expect(adminPaths.reportsBy(12)).toBe('/zh/admin/reports?status=ALL&reporter=12')
+    expect(adminPaths.reportsAgainst(12)).toBe('/zh/admin/reports?status=ALL&uploader=12')
   })
 })

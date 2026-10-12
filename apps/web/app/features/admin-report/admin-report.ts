@@ -48,35 +48,40 @@ export type Verdict = (typeof verdicts)[number]
 export type Filter = {
   status: StatusFilter
   reason: Reason | undefined
+  reporter: number | undefined
+  uploader: number | undefined
   page: number
   opened: number | undefined
 }
+
+export type Narrowing = Pick<Filter, 'status' | 'reason' | 'reporter' | 'uploader'>
 
 export const defaultStatus: StatusFilter = 'PENDING'
 
 export const openedKey = 'id'
 
-export function searchOf(filter: Pick<Filter, 'status' | 'reason'>, opened?: number): string {
-  const search = new URLSearchParams()
-  if (filter.status !== defaultStatus) {
-    search.set('status', filter.status)
-  }
-  if (filter.reason !== undefined) {
-    search.set('reason', filter.reason)
-  }
-  if (opened !== undefined) {
-    search.set(openedKey, String(opened))
-  }
-  const text = search.toString()
-  return text === '' ? '' : `?${text}`
+export function searchOf(filter: Narrowing, opened?: number): string {
+  const entries: [string, string | undefined][] = [
+    ['status', filter.status === defaultStatus ? undefined : filter.status],
+    ['reason', filter.reason],
+    ['reporter', filter.reporter?.toString()],
+    ['uploader', filter.uploader?.toString()],
+    [openedKey, opened?.toString()],
+  ]
+  return entries.reduce((search, [key, value]) => searchSet(search, key, value), '')
 }
 
 export function searchWith(search: string, opened: number | undefined): string {
   return searchSet(search, openedKey, opened?.toString())
 }
 
-export function narrowed(filter: Pick<Filter, 'status' | 'reason'>): boolean {
-  return filter.status !== defaultStatus || filter.reason !== undefined
+export function narrowed(filter: Narrowing): boolean {
+  return (
+    filter.status !== defaultStatus ||
+    filter.reason !== undefined ||
+    filter.reporter !== undefined ||
+    filter.uploader !== undefined
+  )
 }
 
 export function defaultLevel(policy: Policy, reason: string): Level {

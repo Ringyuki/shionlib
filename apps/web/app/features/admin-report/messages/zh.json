@@ -87,5 +87,7 @@
       "reporter": "举报人因多次无效举报被封禁",
       "none": "无"
     }
-  }
+  },
+  "byReporter": "举报人：{name}",
+  "againstUploader": "上传者：{name}"
 }

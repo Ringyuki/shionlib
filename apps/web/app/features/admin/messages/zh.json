@@ -4,10 +4,12 @@
   "nav": {
     "overview": "概览",
     "reports": "举报",
-    "checks": "文件检查"
+    "checks": "文件检查",
+    "users": "用户"
   },
   "group": {
-    "review": "审核"
+    "review": "审核",
+    "manage": "管理"
   },
   "pendingCount": "{count, number} 项待处理",
   "total": "共 {count, number} 条",

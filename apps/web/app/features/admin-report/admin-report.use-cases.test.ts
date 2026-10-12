@@ -71,7 +71,14 @@ const policy: Schema<'ReportPolicyDTO'> = {
   violation_freeze_seconds: 0,
 }
 
-const filter: Filter = { status: 'PENDING', reason: undefined, page: 1, opened: undefined }
+const filter: Filter = {
+  status: 'PENDING',
+  reason: undefined,
+  reporter: undefined,
+  uploader: undefined,
+  page: 1,
+  opened: undefined,
+}
 
 const listed = () =>
   fakeApi().on('get', '/admin/content/download-resource-reports', { items: null, meta })
@@ -82,7 +89,11 @@ const queryOf = (requests: Request[], path: string) =>
 describe('loadReports', () => {
   it('asks for one page of the chosen status and reason', async () => {
     const fake = listed()
-    const listing = await loadReports(fake.api, { ...filter, reason: 'MALWARE', page: 2 }, 20)
+    const listing = await loadReports(
+      fake.api,
+      { ...filter, reason: 'MALWARE', reporter: 7, uploader: 9, page: 2 },
+      20,
+    )
     expect(listing).toMatchObject({ reports: [], total: 46, opened: undefined })
     const query = queryOf(fake.requests, '/admin/content/download-resource-reports')
     expect(Object.fromEntries(query ?? [])).toEqual({
@@ -90,6 +101,8 @@ describe('loadReports', () => {
       pageSize: '20',
       status: 'PENDING',
       reason: 'MALWARE',
+      reporter_id: '7',
+      reported_user_id: '9',
     })
   })
 

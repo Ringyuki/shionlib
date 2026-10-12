@@ -1,4 +1,4 @@
-import { Card, Inline, PageHeader, SegmentedControl, Select, Stack } from '@hina-ui/react'
+import { Card, Chip, Inline, PageHeader, SegmentedControl, Select, Stack } from '@hina-ui/react'
 import { useLocation } from 'react-router'
 import { useMessages, useTranslations } from 'use-intl'
 import { pageSize, usePending } from '~/features/admin'
@@ -10,8 +10,7 @@ import {
   searchOf,
   searchWith,
   statusFilters,
-  type Reason,
-  type StatusFilter,
+  type Narrowing,
 } from '../admin-report'
 import type { Listing } from '../admin-report.use-cases'
 import { ReportPane } from './report-pane'
@@ -25,8 +24,7 @@ export function ReportsPage({ filter, reports, total, opened }: Listing) {
   const waiting = usePending()?.reports ?? 0
   const location = useLocation()
   const navigate = useInPageNavigate()
-  const show = (next: { status?: StatusFilter; reason?: Reason | undefined }) =>
-    navigate({ search: searchOf({ ...filter, ...next }) })
+  const show = (next: Partial<Narrowing>) => navigate({ search: searchOf({ ...filter, ...next }) })
   return (
     <Stack gap="lg">
       <PageHeader title={t('title')} />
@@ -58,6 +56,18 @@ export function ReportsPage({ filter, reports, total, opened }: Listing) {
             ]}
             onValueChange={value => show({ reason: reasons.find(reason => reason === value) })}
           />
+          {filter.reporter !== undefined && (
+            <Chip removable onRemove={() => show({ reporter: undefined })}>
+              {t('byReporter', { name: reports[0]?.reporter.name ?? `#${filter.reporter}` })}
+            </Chip>
+          )}
+          {filter.uploader !== undefined && (
+            <Chip removable onRemove={() => show({ uploader: undefined })}>
+              {t('againstUploader', {
+                name: reports[0]?.reported_user.name ?? `#${filter.uploader}`,
+              })}
+            </Chip>
+          )}
         </Inline>
         <ReportTable
           reports={reports}

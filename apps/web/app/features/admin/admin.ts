@@ -8,8 +8,11 @@ export const adminPaths = {
   overview: adminRoot,
   reports: `${adminRoot}/reports`,
   checks: `${adminRoot}/checks`,
+  users: `${adminRoot}/users`,
   user: (id: number) => `${adminRoot}/users/${id}`,
   report: (id: number) => `${adminRoot}/reports?id=${id}`,
+  reportsBy: (userId: number) => `${adminRoot}/reports?status=ALL&reporter=${userId}`,
+  reportsAgainst: (userId: number) => `${adminRoot}/reports?status=ALL&uploader=${userId}`,
   scanCase: (id: number) => `${adminRoot}/checks?case=${id}`,
 } as const
 
@@ -23,7 +26,7 @@ export function adminAddress(pathname: string, search: string): string | undefin
 
 export type Pending = Schema<'AdminPendingDTO'>
 
-export type NavKey = 'overview' | 'reports' | 'checks'
+export type NavKey = 'overview' | 'reports' | 'checks' | 'users'
 
 export type NavEntry = {
   key: NavKey
@@ -33,7 +36,7 @@ export type NavEntry = {
 }
 
 export type NavGroup = {
-  key: 'review'
+  key: 'review' | 'manage'
   entries: NavEntry[]
 }
 
@@ -57,6 +60,10 @@ export function navigationOf(pending: Pending): Navigation {
             count: pending.malware_cases + pending.stalled_files,
           },
         ],
+      },
+      {
+        key: 'manage',
+        entries: [{ key: 'users', to: adminPaths.users, end: false, count: 0 }],
       },
     ],
   }

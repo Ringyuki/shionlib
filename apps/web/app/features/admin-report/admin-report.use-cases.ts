@@ -47,6 +47,8 @@ export async function loadReports(
           pageSize,
           ...(filter.status === everyStatus ? {} : { status: filter.status }),
           ...(filter.reason === undefined ? {} : { reason: filter.reason }),
+          ...(filter.reporter === undefined ? {} : { reporter_id: filter.reporter }),
+          ...(filter.uploader === undefined ? {} : { reported_user_id: filter.uploader }),
         },
       },
     }),

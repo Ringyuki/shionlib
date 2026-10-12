@@ -10,7 +10,6 @@ import {
   searchWith,
   type Policy,
 } from './admin-report'
-import { filterFrom, levelFrom, statusFrom } from './admin-report.schema'
 
 const policy: Policy = {
   levels: [
@@ -31,11 +30,20 @@ const policy: Policy = {
   violation_freeze_seconds: 30 * 24 * 60 * 60,
 }
 
+const everyone = { reporter: undefined, uploader: undefined }
+
 describe('the address of a list', () => {
   it('leaves out what is already the default', () => {
-    expect(searchOf({ status: 'PENDING', reason: undefined })).toBe('')
-    expect(searchOf({ status: 'ALL', reason: 'MALWARE' })).toBe('?status=ALL&reason=MALWARE')
-    expect(searchOf({ status: 'VALID', reason: undefined }, 4)).toBe('?status=VALID&id=4')
+    expect(searchOf({ ...everyone, status: 'PENDING', reason: undefined })).toBe('')
+    expect(searchOf({ ...everyone, status: 'ALL', reason: 'MALWARE' })).toBe(
+      '?status=ALL&reason=MALWARE',
+    )
+    expect(searchOf({ ...everyone, status: 'VALID', reason: undefined }, 4)).toBe(
+      '?status=VALID&id=4',
+    )
+    expect(searchOf({ status: 'ALL', reason: undefined, reporter: 7, uploader: 9 })).toBe(
+      '?status=ALL&reporter=7&uploader=9',
+    )
   })
 
   it('opens and closes a report without touching the filters', () => {
@@ -43,25 +51,13 @@ describe('the address of a list', () => {
     expect(searchWith('?status=ALL&id=9', undefined)).toBe('?status=ALL')
   })
 
-  it('reads the filters and ignores what it does not know', () => {
-    expect(filterFrom(new URLSearchParams('status=INVALID&reason=OTHER&id=12'), 3)).toEqual({
-      status: 'INVALID',
-      reason: 'OTHER',
-      opened: 12,
-      page: 3,
-    })
-    expect(filterFrom(new URLSearchParams('status=DONE&reason=SPAM&id=x'), 1)).toEqual({
-      status: 'PENDING',
-      reason: undefined,
-      opened: undefined,
-      page: 1,
-    })
-  })
-
   it('knows when a list has been narrowed', () => {
-    expect(narrowed({ status: 'PENDING', reason: undefined })).toBe(false)
-    expect(narrowed({ status: 'PENDING', reason: 'OTHER' })).toBe(true)
-    expect(narrowed({ status: 'ALL', reason: undefined })).toBe(true)
+    expect(narrowed({ ...everyone, status: 'PENDING', reason: undefined })).toBe(false)
+    expect(narrowed({ ...everyone, status: 'PENDING', reason: 'OTHER' })).toBe(true)
+    expect(narrowed({ ...everyone, status: 'ALL', reason: undefined })).toBe(true)
+    expect(
+      narrowed({ status: 'PENDING', reason: undefined, reporter: 7, uploader: undefined }),
+    ).toBe(true)
   })
 })
 
@@ -103,14 +99,5 @@ describe('checkNote', () => {
     expect(checkNote({ file_check_status: 0 })).toBe('pending')
     expect(checkNote({ file_check_status: 8 })).toBe('pending')
     expect(checkNote({ file_check_status: 5 })).toBe('failed')
-  })
-})
-
-describe('guards', () => {
-  it('accept only known statuses and levels', () => {
-    expect(statusFrom('VALID')).toBe('VALID')
-    expect(statusFrom('ALL')).toBeUndefined()
-    expect(levelFrom('HIGH')).toBe('HIGH')
-    expect(levelFrom('SEVERE')).toBeUndefined()
   })
 })

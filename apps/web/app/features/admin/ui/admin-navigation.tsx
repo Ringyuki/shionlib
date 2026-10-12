@@ -1,5 +1,5 @@
 import { Stack } from '@hina-ui/react'
-import { ArrowLeft, FileCheck, Flag, House, type LucideIcon } from 'lucide-react'
+import { ArrowLeft, FileCheck, Flag, House, Users, type LucideIcon } from 'lucide-react'
 import { useTranslations } from 'use-intl'
 import { SidebarGroup, SidebarLink, sitePath } from '~/features/shell'
 import { navigationOf, type NavEntry, type NavKey } from '../admin'
@@ -9,6 +9,7 @@ const icons: Record<NavKey, LucideIcon> = {
   overview: House,
   reports: Flag,
   checks: FileCheck,
+  users: Users,
 }
 
 type AdminNavigationProps = {

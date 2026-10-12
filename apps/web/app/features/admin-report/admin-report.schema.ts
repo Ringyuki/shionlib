@@ -27,6 +27,8 @@ export function filterFrom(search: URLSearchParams, page: number): Filter {
   return {
     status: v.parse(status, search.get('status') ?? defaultStatus),
     reason: v.parse(reason, search.get('reason') ?? undefined),
+    reporter: v.parse(opened, search.get('reporter') ?? undefined),
+    uploader: v.parse(opened, search.get('uploader') ?? undefined),
     opened: v.parse(opened, search.get(openedKey) ?? undefined),
     page,
   }

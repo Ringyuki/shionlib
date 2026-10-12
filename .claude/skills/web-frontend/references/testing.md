@@ -34,6 +34,7 @@ Every user flow a phase ports gets Playwright specs in `apps/web/e2e` in the sam
   - The default upload chunk size is 1 MiB, so a file of a few MiB uploads in several chunks.
   - Accounts are `e2e_user` (member), `e2e_mutable_user` (owner of resource 1) and `e2e_admin`. All use the password `ShionlibE2E123!` (`E2E_USER_PASSWORD`).
   - Other seeded accounts serve specs that sign in or out on their own.
+  - `e2e_managed_user` belongs to `admin-users.spec.ts`, which bans it, resets its password and changes its role; no other spec signs in as it or reads it.
 - **Sessions:**
   - `sessions.setup.ts` signs in member, owner and admin once.
   - Specs reuse them with `test.use({ storageState: sessionFile('member') })`.
