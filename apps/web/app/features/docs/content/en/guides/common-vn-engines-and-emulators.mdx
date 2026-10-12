@@ -1,0 +1,65 @@
+---
+title: Common Engines and Emulator Mapping
+banner: 'https://t.shionlib.com/game/1114/image/00d13d84-7c1c-4113-babd-7f11d9fdb676.webp'
+description: 'A practical guide to common VN engines like KRKR, ONS, and Artemis, with recommended emulators/runtimes by platform.'
+date: 2026-02-27
+author_uid: 1
+author_name: 'ringyuki'
+author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
+---
+
+## Before You Start
+
+This guide answers one practical question: after downloading a game package, which emulator/runtime should you use?
+
+Two core rules:
+
+- If a native build is available (for example, a Windows executable), prefer native first.
+- If you need an emulator, prioritize projects with public source code and active maintenance.
+
+## Quick Mapping
+
+Android / iOS resources are labeled with a **Simulator Engine** tag.  
+Current tag values are: `KRKR` / `ONS` / `ARTEMIS` / `OTHER`.
+
+This tag describes the engine type of the package; it is not always a single mandatory app name.
+
+- KRKR / ONS / ARTEMIS (Android): start with the latest Tyranor package  
+  [Tyranor 2.3.3 APK](https://t.shionlib.com/tools/Tyranor%202.3.3.APK)
+- KRKR / ONS (iOS): install the corresponding emulators directly from the App Store.
+- OTHER: follow release-page notes for the runtime method.
+
+Recent Tyranor builds can cover common KRKR, ONS, and Artemis scenarios. If a release page requires a specific patch or runtime method, follow that release note first.
+
+## Platform Recommendations
+
+### Windows
+
+- Prefer native launchers first.
+- If a release explicitly requires a specific environment/patch, follow the release instructions.
+
+### Android
+
+- Check the resource card's Simulator Engine tag first (KRKR / ONS / ARTEMIS / OTHER).
+- KRKR / ONS / ARTEMIS: use Tyranor 2.3.3 first.
+- OTHER or compatibility issues: switch according to the release-page note.
+
+### iOS
+
+- Tyranor is currently not available on iOS.
+- iOS users should install KRKR / ONS emulators from the App Store based on the engine tag.
+- For ARTEMIS or OTHER tags, prioritize the release-page compatibility note.
+
+## FAQ
+
+### The game launches but shows black screen / crashes
+
+Try another emulator version for the same engine first, then check whether the release notes require a specific patch or a specific emulator version.
+
+### I cannot identify the engine
+
+Check the release-page notes first. If it is not specified, inspect the folder structure and launcher filename. If still unclear, ask the uploader in comments.
+
+## Tool Download
+
+- [Tyranor 2.3.3 APK](https://t.shionlib.com/tools/Tyranor%202.3.3.APK)

@@ -88,6 +88,9 @@ export default [
         route('developer/:id', 'routes/developer.tsx'),
         route('character/:id', 'routes/character.tsx'),
         route('message/:category?', 'routes/messages.tsx'),
+        route('docs', 'routes/docs.tsx'),
+        route('docs/:category/:name', 'routes/doc.tsx'),
+        route('friend-link', 'routes/friend-link.tsx'),
         route('game/:id/walkthrough/edit', 'routes/walkthrough.write.tsx'),
         route('game/:id/walkthrough/new', 'routes/walkthrough-legacy.ts', {
           id: 'walkthrough-new-legacy',

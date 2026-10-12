@@ -1,10 +1,17 @@
+import mdx from '@mdx-js/rollup'
 import { reactRouter } from '@react-router/dev/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 import svgr from 'vite-plugin-svgr'
+import { mdxOptions } from './mdx/options.ts'
 
 export default defineConfig({
-  plugins: [svgr({ svgrOptions: { dimensions: false } }), tailwindcss(), reactRouter()],
+  plugins: [
+    svgr({ svgrOptions: { dimensions: false } }),
+    tailwindcss(),
+    mdx(mdxOptions),
+    reactRouter(),
+  ],
   resolve: {
     tsconfigPaths: true,
   },

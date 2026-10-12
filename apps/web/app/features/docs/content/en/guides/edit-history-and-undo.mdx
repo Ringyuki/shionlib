@@ -1,0 +1,55 @@
+---
+title: Edit History & Undo
+banner: 'https://images.yurari.moe/galgame/11042/s9n7toqi_2.jpg'
+description: 'Learn how to view edit history records on Shionlib, and how administrators can undo incorrect edits using strict or cascade mode.'
+date: 2026-02-27
+author_uid: 1
+author_name: 'ringyuki'
+author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
+---
+
+## Viewing Edit History
+
+Game, character, and developer entries all provide an edit history entry point, visible to everyone.
+
+Each history record includes:
+
+- Editor's avatar and username
+- List of fields modified (shown as tags)
+- Edit note (if provided — click to expand)
+- Edit timestamp
+- Edit record number (e.g. `#123`)
+
+If a record has been undone by an administrator, it will show a red **Undone** badge. If a record is itself an undo operation, the title will show **Undid #number**, referencing the original record.
+
+## Change Comparison
+
+Click a history record to expand and view the specific changes:
+
+- **Text fields**: Character-level highlighted diff between before and after content — green for additions, red for deletions
+- **Relations** (covers, images, developers, characters, etc.): Separate lists of added and removed entries, along with a before/after comparison
+
+## Undoing Edits (Administrators)
+
+Administrators can undo any edit in the history that has not already been undone. Click the **Undo this edit** button on a record, select the undo mode in the dialog, and confirm.
+
+### Strict Mode
+
+Undoes only the target record without touching other edits.
+
+- If a later edit modified the same fields, the system detects a conflict and refuses the operation
+- Enabling the **Force** option bypasses conflict detection and forces execution, but may cause data inconsistencies — use with caution
+
+Best for: recent edits with no dependent follow-up edits.
+
+### Cascade Mode
+
+Before undoing the target record, automatically undoes all conflicting follow-up edits in reverse chronological order, then undoes the target itself. The entire process runs in a database transaction to ensure atomicity.
+
+Best for: older edits that have dependent follow-up edits that need to be cleaned up together.
+
+### Undo Record Entry
+
+After a successful undo, the system writes a new record to the edit history labeled **Undid #number**, and marks the original record with an **Undone** badge, forming a complete audit trail.
+
+> Each edit record can only be undone once.

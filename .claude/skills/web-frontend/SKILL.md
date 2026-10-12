@@ -49,6 +49,7 @@ app/
     <purpose>.worker.ts        Web Worker entry: a thin message adapter over a function in a plain module
     ui/<component>.tsx         components (hina-ui based)
     messages/{zh,en,ja}.json   the feature's messages (namespace <name>)
+    content/<locale>/…/*.mdx   documents kept in the repository (features/docs), one file per document and language
     index.ts                   public, client-safe entry
   shared/                      platform: never imports features, routes or messages
     api/                       request tool, generated types, session forwarding, the browser transport
@@ -66,6 +67,7 @@ app/
     editor/                    the rich text editor on Tiptap: plugins, profiles, a session per editor, parts built from hina-ui (ui/);
                                its engine (engine/) is loaded on demand
     i18n/  ui/                 <topic>.schema.ts beside a module holds its input guards
+mdx/                           build-time options for MDX: frontmatter, GFM tables and the `sections` plugin (heading anchors and the table of contents)
 ```
 
 Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules end in `.server.ts`.
@@ -98,7 +100,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 
 ## MUST NOT
 
-- MUST NOT write native JSX tags outside the document shell in `root.tsx` (lint). The one other place is `RichText` (`~/shared/ui/rich-text*.tsx`), which writes the tags of a rich text document inside hina-ui `Prose`, the component that styles tags.
+- MUST NOT write native JSX tags outside the document shell in `root.tsx` (lint). The one other place is `RichText` (`~/shared/ui/rich-text*.tsx`), which writes the tags of a rich text document inside hina-ui `Prose`, the component that styles tags. A document of the docs (`features/docs/content/**.mdx`) is Markdown, not JSX: its tags are produced by MDX and also land inside `Prose`.
 - MUST NOT fall back on the browser's own UI: no `title` tooltips (wrap the trigger in hina-ui `Tooltip`, or show the text in full; `title` is allowed only as the prop of `Dialog`, `Section`, `Empty`, `Result` and the other titled hina-ui components), no `alert`/`confirm`/`prompt` (`AlertDialog`, `Dialog`, `toast`), no native validation bubbles (hina-ui `Form` sets `noValidate`; errors show under the fields), no native scrollbars (a region that scrolls is a hina-ui `ScrollArea` given a height or a max height, as every hina-ui component does inside; `overflow-auto` and `overflow-scroll`, as classes or styles, are refused) (lint).
 - MUST NOT hand-write input validation (`typeof`, `Array.isArray`, `JSON.parse`, `Number(...)`, regexes over input), restate API limits as numbers, import valibot outside `*.schema.ts`/`~/shared/form`/`~/shared/route`, or use another validation library (lint).
 - MUST NOT build look-alikes or wrappers of hina-ui components (custom placeholders, skeletons, spinners, alert wrappers, loading states): use the component and its own states (`Image` skeleton and fade, `Spinner`, `Alert open`). Project components exist only for Shionlib behaviour hina-ui cannot know (`Button` with `loginRequired`).
@@ -134,6 +136,9 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 | A list with pages?                                   | the page is the `page` of the address: `requestedPage(args.url)` and `keepWithinPages(args.url, total, pageSize)` in the loader (`~/shared/route/paging`), `usePageTurn()` (`~/shared/route/use-page-turn`) for `DataList`'s `onPageChange` and `loading`; no feature writes its own last page or page address |
 | Games someone is credited in (developer, character)? | `loadWorks(api, { developer } or { character }, page, order)` and `GameGrid` from `~/features/game`                                                 |
 | Letting a visitor reorder a list of games?           | `OrderSelect` with `orderFrom`, `orderParams` / `searchInOrder` and `orderQuery` from `~/features/game`; never a second list of orders              |
+| A document of the docs, new or changed?              | `recipes/add-doc.md`: one MDX file per language under `features/docs/content/<locale>/<category>/`, with its head (title, description, banner, date, author); nothing else to register |
+| A link from a page to a document?                    | `docPath(locale, { category, name })` or `docsPath(locale)` from `~/features/docs`; never a path written by hand                                  |
+| A hina component that renders through `as` and opens another page? | `as={PageLink} href=…` (`~/shared/route/page-link`); `InPageLink` only when the navigation stays in view                                |
 | A navigation list inside a page?                     | hina `NavLink as={InPageLink} href=… active=…` in a `nav` (`~/shared/route/in-page-link`); a `Select` of the same entries on narrow screens, navigating with `useInPageNavigate()` |
 | A navigation that stays in view (tab, filter, order)? | `useInPageNavigate()` or `InPageLink` (`~/shared/route`); never `keepScrollPosition` or `preventScrollReset` at a call site (`references/ui.md`)   |
 | A setting of the account or of this browser?         | a `Panel` in a settings section: `features/settings` (user name, downloads, site) or `features/account` (security, connections); how a user appears (pictures, bio, page background) is edited on the profile (`features/profile`); preferences through `usePreferences()` / `useLanguage()` from `~/features/viewer` |
@@ -191,7 +196,7 @@ Files are kebab-case. `X.test.ts` tests `X.ts` next to it. Server-only modules e
 - references/ui.md — hina-ui, accent customisation, shell and sidebar, brand, images, messages and locales, SEO metadata
 - references/forms.md — valibot schemas, generated API constraints, form kit, command parsing, input guards
 - references/testing.md — test levels and fakes
-- recipes/add-feature.md, add-route.md, add-mutation.md, add-form.md
+- recipes/add-feature.md, add-route.md, add-mutation.md, add-form.md, add-doc.md
 
 ## Verification
 

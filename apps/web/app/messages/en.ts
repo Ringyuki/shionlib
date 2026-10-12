@@ -4,8 +4,10 @@ import auth from '~/features/auth/messages/en.json'
 import character from '~/features/character/messages/en.json'
 import comment from '~/features/comment/messages/en.json'
 import developer from '~/features/developer/messages/en.json'
+import docs from '~/features/docs/messages/en.json'
 import download from '~/features/download/messages/en.json'
 import favorite from '~/features/favorite/messages/en.json'
+import friends from '~/features/friends/messages/en.json'
 import game from '~/features/game/messages/en.json'
 import home from '~/features/home/messages/en.json'
 import inspection from '~/features/inspection/messages/en.json'
@@ -35,10 +37,12 @@ export const messages: Messages = {
   character,
   comment,
   developer,
+  docs,
   download,
   editor,
   favorite,
   form,
+  friends,
   game,
   home,
   inspection,

@@ -1,0 +1,45 @@
+---
+title: 文件解压指南
+banner: 'https://t.shionlib.com/game/1876/image/a757bf6a-77c6-459b-a418-8c0939b5d0d2.webp'
+description: 'Shionlib 的下载资源会逐步使用 zstd 压缩。本文介绍如何选择支持 zstd 的解压软件，并提供 PC 与移动端推荐及下载链接。'
+date: 2026-02-27
+author_uid: 1
+author_name: 'ringyuki'
+author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
+---
+
+## 为什么我们会使用 zstd 压缩
+
+为了在下载速度、文件体积和服务器成本之间取得更好的平衡，Shionlib 的资源会逐步使用 zstd（Zstandard）压缩。
+
+在多数情况下，zstd 相比传统格式可以提供更好的压缩率，并在解压速度上保持良好表现。
+
+## 解压前请先确认这几点
+
+- 请使用支持 `zstd` 的解压软件，否则可能出现“无法识别格式”或“文件损坏”的提示。
+- 我们不会使用 `.zst` 作为文件后缀。即使文件后缀是其他常见压缩格式，也请确认解压软件支持 `zstd` 算法。
+- 请尽量通过软件官方渠道下载安装，避免来源不明的第三方打包版本。
+
+## 我们推荐的解压软件
+
+### PC
+
+- [7-Zip（Windows）](https://www.7-zip.org/)
+- [Bandizip（Windows / macOS）](https://www.bandisoft.com/bandizip/)
+
+### 移动端
+
+- [ZArchiver（Android）](https://play.google.com/store/apps/details?id=ru.zdevs.zarchiver)
+- [Keka（iOS / iPadOS）](https://ios.keka.io/)
+
+> 不同版本的格式支持可能会调整。如果你的当前版本无法解压 `zst/tar.zst`，请先升级到最新版后重试。
+
+## 常见问题
+
+### 提示文件损坏怎么办？
+
+先确认下载是否完整，再重新下载一次。如果仍然失败，优先尝试 7-Zip 或 Bandizip 的最新版。
+
+### 手机解压失败怎么办？
+
+先确认 App 已升级到较新版本；如果仍无法解压，建议先在 PC 端完成解压后再传回手机。

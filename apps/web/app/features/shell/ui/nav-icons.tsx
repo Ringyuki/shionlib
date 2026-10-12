@@ -1,5 +1,6 @@
 import {
   Bell,
+  BookOpen,
   Bookmark,
   Building2,
   CalendarDays,
@@ -18,6 +19,7 @@ export const navIcons: Record<NavKey, LucideIcon> = {
   releases: CalendarDays,
   developers: Building2,
   activity: History,
+  docs: BookOpen,
   favorites: Bookmark,
   uploads: UploadCloud,
   messages: Bell,

@@ -16,6 +16,11 @@ describe('navSections', () => {
     ])
   })
 
+  it('ends discovery with the docs, which every visitor can read', () => {
+    const [discover] = navSections('ja', null)
+    expect(discover?.entries.at(-1)).toMatchObject({ key: 'docs', to: '/ja/docs' })
+  })
+
   it('matches only the home entry exactly so game pages keep the library active', () => {
     const [discover] = navSections('zh', null)
     expect(discover?.entries.filter(entry => entry.end).map(entry => entry.key)).toEqual(['home'])

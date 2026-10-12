@@ -6,6 +6,7 @@ export type NavKey =
   | 'releases'
   | 'developers'
   | 'activity'
+  | 'docs'
   | 'favorites'
   | 'uploads'
   | 'messages'
@@ -74,6 +75,7 @@ export function navSections(locale: Locale, viewerId: number | null, unread = 0)
       entry('releases', paths.releases),
       entry('developers', `/${locale}/developer`),
       entry('activity', `/${locale}/activity`),
+      entry('docs', `/${locale}/docs`),
     ],
   }
   if (viewerId === null) {

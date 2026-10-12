@@ -1,0 +1,11 @@
+{
+  "title": "文档",
+  "shelf": "文档目录",
+  "category": {
+    "guides": "指南",
+    "about": "关于",
+    "dev": "开发"
+  },
+  "source": "在 GitHub 上编辑此页",
+  "menu": "更多操作"
+}

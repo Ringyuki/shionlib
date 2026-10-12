@@ -1,0 +1,119 @@
+import { expect, type Page } from '@playwright/test'
+import { test } from './support/ingress'
+
+function shelf(page: Page) {
+  return page.getByRole('navigation', { name: '文档目录' })
+}
+
+function title(page: Page) {
+  return page.getByRole('heading', { level: 1 }).first()
+}
+
+test('lists the documents by category and opens one from its card', async ({ page }) => {
+  await page.goto('/zh')
+  await page.getByRole('navigation', { name: '主导航' }).getByRole('link', { name: '文档' }).click()
+  await expect(page).toHaveURL(/\/zh\/docs$/)
+  await expect(page).toHaveTitle('文档 | Shionlib')
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(['指南', '关于', '开发'])
+  await expect(page.locator('section a')).toHaveCount(17)
+
+  await page.getByRole('link', { name: /如何下载游戏/ }).click()
+  await expect(page).toHaveURL(/\/zh\/docs\/guides\/download-games$/)
+  await expect(title(page)).toHaveText('如何下载游戏')
+  await expect(page).toHaveTitle('如何下载游戏 | Shionlib')
+  await expect(shelf(page).getByRole('link', { name: '如何下载游戏' })).toHaveAttribute(
+    'aria-current',
+    'page',
+  )
+  await expect(page.getByRole('article').getByRole('link', { name: 'ringyuki' })).toHaveAttribute(
+    'href',
+    '/zh/user/1',
+  )
+  await expect(page.getByRole('link', { name: '在 GitHub 上编辑此页' })).toHaveAttribute(
+    'href',
+    /apps\/web\/app\/features\/docs\/content\/zh\/guides\/download-games\.mdx$/,
+  )
+})
+
+test.describe('on a wide screen', () => {
+  test.use({ viewport: { width: 1600, height: 900 } })
+
+  test('goes to a section from the table of contents and on to the next document', async ({
+    page,
+  }) => {
+    await page.goto('/zh/docs/guides/download-games')
+    await page.waitForLoadState('networkidle')
+    const contents = page.getByRole('navigation', { name: '本页目录' })
+    await contents.getByRole('link', { name: '校验文件哈希' }).click()
+    await expect(page).toHaveURL(/#%E6%A0%A1%E9%AA%8C%E6%96%87%E4%BB%B6%E5%93%88%E5%B8%8C$/)
+    await expect(page.getByRole('heading', { name: '校验文件哈希' })).toBeInViewport()
+
+    await shelf(page).getByRole('link', { name: '资源维护指南' }).click()
+    await expect(page).toHaveURL(/\/zh\/docs\/guides\/resource-maintenance$/)
+    await expect(title(page)).toHaveText('资源维护指南')
+    await expect(title(page)).toBeInViewport()
+  })
+
+  test('opens at the heading its address names, in any language', async ({ page }) => {
+    await page.goto(`/zh/docs/guides/download-games#${encodeURIComponent('校验文件哈希')}`)
+    await expect(page.getByRole('heading', { name: '校验文件哈希' })).toBeInViewport()
+    await page.goto('/en/docs/guides/lunabox')
+    await expect(title(page)).toHaveText('Downloading with LunaBox')
+    await page.goto('/ja/docs/about/about-shionlib')
+    await expect(page.getByRole('article')).toContainText('Shionlib')
+  })
+})
+
+test('follows a link from one document to another and walks to its neighbours', async ({
+  page,
+}) => {
+  await page.goto('/zh/docs/guides/download-games')
+  await page.waitForLoadState('networkidle')
+  await page.getByRole('article').getByRole('link', { name: '常见引擎与模拟器对照' }).click()
+  await expect(page).toHaveURL(/\/zh\/docs\/guides\/common-vn-engines-and-emulators$/)
+  const walk = page.getByRole('article').locator('a[rel="prev"], a[rel="next"]')
+  await expect(walk).toHaveCount(2)
+  const next = page.getByRole('article').locator('a[rel="next"]')
+  const target = (await next.getAttribute('href')) ?? ''
+  await next.click()
+  await expect(page).toHaveURL(new RegExp(`${target}$`))
+  await expect(page.getByRole('article').locator('a[rel="prev"]')).toHaveAttribute(
+    'href',
+    '/zh/docs/guides/common-vn-engines-and-emulators',
+  )
+})
+
+test.describe('on a phone', () => {
+  test.use({ viewport: { width: 390, height: 844 } })
+
+  test('picks a document from a list', async ({ page }) => {
+    await page.goto('/zh/docs/guides/download-games')
+    await page.waitForLoadState('networkidle')
+    await expect(shelf(page)).toBeHidden()
+    await page.getByRole('combobox', { name: '文档目录' }).click()
+    await page.getByRole('option', { name: '关于 Shionlib' }).click()
+    await expect(page).toHaveURL(/\/zh\/docs\/about\/about-shionlib$/)
+    await expect(title(page)).toHaveText('关于 Shionlib')
+  })
+})
+
+test('answers an address no document has with the not found page', async ({ page }) => {
+  const missing = await page.goto('/zh/docs/guides/never-written')
+  expect(missing?.status()).toBe(404)
+  await expect(page.getByText('页面不存在')).toBeVisible()
+  const elsewhere = await page.goto('/zh/docs/faq/download-games')
+  expect(elsewhere?.status()).toBe(404)
+})
+
+test('lists the friend sites on a page of their own', async ({ page }) => {
+  await page.goto('/zh')
+  await page.getByLabel('站点信息').getByRole('link', { name: '友情链接' }).click()
+  await expect(page).toHaveURL(/\/zh\/friend-link$/)
+  await expect(title(page)).toHaveText('友情链接')
+  await expect(page).toHaveTitle('友情链接 | Shionlib')
+  const sites = page.getByRole('main').getByRole('listitem')
+  await expect(sites).toHaveCount(7)
+  const first = sites.first().getByRole('link')
+  await expect(first).toHaveAttribute('href', 'https://www.kungal.com')
+  await expect(first).toHaveAttribute('target', '_blank')
+})
