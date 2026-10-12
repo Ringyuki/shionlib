@@ -67,11 +67,12 @@ func (s *DetailService) visibleResource(ctx context.Context, viewer actor.Actor,
 	if err != nil {
 		return GameResource{}, err
 	}
-	if resource.Status != ResourceActive || !resource.VisibleTo(viewer.UserID) {
+	oversees := viewer.AtLeast(actor.RoleAdmin)
+	if resource.Status != ResourceActive || (!oversees && !resource.VisibleTo(viewer.UserID)) {
 		return GameResource{}, ErrResourceNotFound
 	}
 	resource.Files = slices.DeleteFunc(resource.Files, func(f GameFile) bool {
-		return f.Status != FileInObjectStore && f.CreatorID != viewer.UserID
+		return f.Status != FileInObjectStore && f.CreatorID != viewer.UserID && !oversees
 	})
 	if len(resource.Files) == 0 {
 		return GameResource{}, ErrResourceNotFound

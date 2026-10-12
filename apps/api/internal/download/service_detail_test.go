@@ -46,6 +46,12 @@ func TestDetailFollowsWhatTheViewerMaySee(t *testing.T) {
 		if _, err := f.details.Detail(ctx, owner, id); err != nil {
 			t.Fatalf("the uploader opens resource %d: %v", id, err)
 		}
+		if overseen, err := f.details.Detail(ctx, admin, id); err != nil || len(overseen.Files) != 1 {
+			t.Fatalf("an admin opens resource %d with the file that is not stored yet: %+v %v", id, overseen.Files, err)
+		}
+	}
+	if _, err := f.details.Detail(ctx, admin, removed.ID); err == nil {
+		t.Fatal("a removed resource is gone for an admin too")
 	}
 	if _, err := f.details.Detail(ctx, other, rated.ID); err != nil {
 		t.Fatalf("a viewer who sees rated games opens their resources: %v", err)
