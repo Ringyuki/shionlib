@@ -1,30 +1,33 @@
 import { expect, type Page } from '@playwright/test'
 import { test } from './support/ingress'
 
-function shelf(page: Page) {
-  return page.getByRole('navigation', { name: '文档目录' })
-}
-
 function title(page: Page) {
   return page.getByRole('heading', { level: 1 }).first()
 }
 
-test('lists the documents by category and opens one from its card', async ({ page }) => {
+function contents(page: Page) {
+  return page.getByRole('navigation', { name: '本页目录' })
+}
+
+test('lists the documents in the order they are read and opens one from its row', async ({
+  page,
+}) => {
   await page.goto('/zh')
   await page.getByRole('navigation', { name: '主导航' }).getByRole('link', { name: '文档' }).click()
   await expect(page).toHaveURL(/\/zh\/docs$/)
   await expect(page).toHaveTitle('文档 | Shionlib')
   await expect(page.getByRole('heading', { level: 2 })).toHaveText(['指南', '关于', '开发'])
+  const guides = page.getByRole('region', { name: '指南' }).getByRole('link')
+  await expect(guides).toHaveCount(12)
+  await expect(guides.nth(0)).toContainText('如何下载游戏')
+  await expect(guides.nth(1)).toContainText('文件解压指南')
+  await expect(guides.nth(11)).toContainText('设置编辑指南')
   await expect(page.locator('section a')).toHaveCount(14)
 
-  await page.getByRole('link', { name: /如何下载游戏/ }).click()
+  await guides.nth(0).click()
   await expect(page).toHaveURL(/\/zh\/docs\/guides\/download-games$/)
   await expect(title(page)).toHaveText('如何下载游戏')
   await expect(page).toHaveTitle('如何下载游戏 | Shionlib')
-  await expect(shelf(page).getByRole('link', { name: '如何下载游戏' })).toHaveAttribute(
-    'aria-current',
-    'page',
-  )
   await expect(page.getByRole('article').getByRole('link', { name: 'ringyuki' })).toHaveAttribute(
     'href',
     '/zh/user/1',
@@ -33,25 +36,21 @@ test('lists the documents by category and opens one from its card', async ({ pag
     'href',
     /apps\/web\/app\/features\/docs\/content\/zh\/guides\/download-games\.mdx$/,
   )
+  await page.getByRole('main').getByRole('link', { name: '文档', exact: true }).click()
+  await expect(page).toHaveURL(/\/zh\/docs$/)
+  await expect(title(page)).toHaveText('文档')
 })
 
 test.describe('on a wide screen', () => {
   test.use({ viewport: { width: 1600, height: 900 } })
 
-  test('goes to a section from the table of contents and on to the next document', async ({
-    page,
-  }) => {
+  test('goes to a section from the table of contents beside the document', async ({ page }) => {
     await page.goto('/zh/docs/guides/download-games')
     await page.waitForLoadState('networkidle')
-    const contents = page.getByRole('navigation', { name: '本页目录' })
-    await contents.getByRole('link', { name: '校验文件哈希' }).click()
+    await expect(page.getByRole('button', { name: '本页目录' })).toBeHidden()
+    await contents(page).getByRole('link', { name: '校验文件哈希' }).click()
     await expect(page).toHaveURL(/#%E6%A0%A1%E9%AA%8C%E6%96%87%E4%BB%B6%E5%93%88%E5%B8%8C$/)
     await expect(page.getByRole('heading', { name: '校验文件哈希' })).toBeInViewport()
-
-    await shelf(page).getByRole('link', { name: '资源维护指南' }).click()
-    await expect(page).toHaveURL(/\/zh\/docs\/guides\/resource-maintenance$/)
-    await expect(title(page)).toHaveText('资源维护指南')
-    await expect(title(page)).toBeInViewport()
   })
 
   test('opens at the heading its address names, in any language', async ({ page }) => {
@@ -78,6 +77,7 @@ test('follows a link from one document to another and walks to its neighbours', 
   const target = (await next.getAttribute('href')) ?? ''
   await next.click()
   await expect(page).toHaveURL(new RegExp(`${target}$`))
+  await expect(page).toHaveURL(/\/zh\/docs\/guides\/lunabox$/)
   await expect(page.getByRole('article').locator('a[rel="prev"]')).toHaveAttribute(
     'href',
     '/zh/docs/guides/common-vn-engines-and-emulators',
@@ -87,14 +87,13 @@ test('follows a link from one document to another and walks to its neighbours', 
 test.describe('on a phone', () => {
   test.use({ viewport: { width: 390, height: 844 } })
 
-  test('picks a document from a list', async ({ page }) => {
+  test('keeps the table of contents folded above the document', async ({ page }) => {
     await page.goto('/zh/docs/guides/download-games')
     await page.waitForLoadState('networkidle')
-    await expect(shelf(page)).toBeHidden()
-    await page.getByRole('combobox', { name: '文档目录' }).click()
-    await page.getByRole('option', { name: '关于 Shionlib' }).click()
-    await expect(page).toHaveURL(/\/zh\/docs\/about\/about-shionlib$/)
-    await expect(title(page)).toHaveText('关于 Shionlib')
+    await expect(contents(page)).toBeHidden()
+    await page.getByRole('button', { name: '本页目录' }).click()
+    await contents(page).getByRole('link', { name: '校验文件哈希' }).click()
+    await expect(page.getByRole('heading', { name: '校验文件哈希' })).toBeInViewport()
   })
 })
 

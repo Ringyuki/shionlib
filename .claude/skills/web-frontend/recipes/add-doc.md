@@ -13,13 +13,14 @@ title: 如何下载游戏
 banner: 'https://images.yurari.moe/…'
 description: '一两句话的摘要，显示在标题下方和文档列表中，也用作页面描述。'
 date: 2026-02-27
+order: 1
 author_uid: 1
 author_name: 'ringyuki'
 author_avatar: 'https://t.shionlib.com/user/1/avatar/….webp'
 ---
 ```
 
-`title` and `date` are required. The document appears in the index, the shelf and the previous and next links by itself: guides first, the newest first inside a category.
+`title` and `date` are required. The document appears in the list and in the previous and next links by itself. `order` is its place among the documents of its category, the smaller first: give a new document the number of the place it should be read at and move the later ones up in the three languages; without `order` it comes after the ordered ones, the newest first. `banner` is the cover, a 16:9 picture, shown small in the list and beside the title.
 
 ## Writing
 

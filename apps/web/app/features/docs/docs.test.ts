@@ -13,15 +13,20 @@ import {
   type DocRef,
 } from './docs'
 
-const doc = (category: DocRef['category'], name: string, date: string) => ({ category, name, date })
+const doc = (category: DocRef['category'], name: string, date: string, order?: number) => ({
+  category,
+  name,
+  date,
+  order,
+})
 
-const shelf = inOrder([
+const list = inOrder([
   doc('dev', 'dev-overview', '2025-10-28'),
-  doc('guides', 'upload-game-files', '2025-10-30'),
+  doc('guides', 'upload-game-files', '2025-10-30', 8),
   doc('about', 'about-shionlib', '2025-10-28'),
   doc('guides', 'lunabox', '2026-03-11'),
   doc('guides', 'favorites', '2026-02-27'),
-  doc('guides', 'download-games', '2026-02-27'),
+  doc('guides', 'download-games', '2026-02-27', 1),
 ])
 
 describe('addresses', () => {
@@ -47,39 +52,49 @@ describe('addresses', () => {
   })
 })
 
-describe('the shelf', () => {
-  it('puts guides first, then the newest document of a category first, then by name', () => {
-    expect(shelf.map(entry => entry.name)).toEqual([
-      'lunabox',
+describe('the list', () => {
+  it('puts guides first and reads a category in the order its documents give', () => {
+    expect(list.map(entry => entry.name)).toEqual([
       'download-games',
-      'favorites',
       'upload-game-files',
+      'lunabox',
+      'favorites',
       'about-shionlib',
       'dev-overview',
     ])
   })
 
+  it('puts documents without an order after the ordered ones, the newest first, then by name', () => {
+    const loose = inOrder([
+      doc('guides', 'b', '2026-02-27'),
+      doc('guides', 'a', '2026-02-27'),
+      doc('guides', 'newer', '2026-03-01'),
+      doc('guides', 'placed', '2020-01-01', 30),
+    ])
+    expect(loose.map(entry => entry.name)).toEqual(['placed', 'newer', 'a', 'b'])
+  })
+
   it('groups documents by category and leaves out an empty one', () => {
-    expect(grouped(shelf).map(group => [group.category, group.docs.length])).toEqual([
+    expect(grouped(list).map(group => [group.category, group.docs.length])).toEqual([
       ['guides', 4],
       ['about', 1],
       ['dev', 1],
     ])
-    expect(grouped(shelf.filter(entry => entry.category !== 'about'))).toHaveLength(2)
+    expect(grouped(list.filter(entry => entry.category !== 'about'))).toHaveLength(2)
   })
 
   it('leads to the documents before and after one, across categories', () => {
-    const at = (name: string) => shelf.find(entry => entry.name === name) ?? shelf[0]
-    expect(neighboursOf(shelf, { category: 'guides', name: 'lunabox' })).toEqual({
+    const at = (name: string) => list.find(entry => entry.name === name) ?? list[0]
+    expect(neighboursOf(list, { category: 'guides', name: 'download-games' })).toEqual({
       previous: undefined,
-      next: at('download-games'),
+      next: at('upload-game-files'),
     })
-    expect(neighboursOf(shelf, { category: 'about', name: 'about-shionlib' })).toEqual({
-      previous: at('upload-game-files'),
+    expect(neighboursOf(list, { category: 'about', name: 'about-shionlib' })).toEqual({
+      previous: at('favorites'),
       next: at('dev-overview'),
     })
-    expect(neighboursOf(shelf, { category: 'dev', name: 'dev-overview' }).next).toBeUndefined()
-    expect(neighboursOf(shelf, { category: 'dev', name: 'unknown' })).toEqual({
+    expect(neighboursOf(list, { category: 'dev', name: 'dev-overview' }).next).toBeUndefined()
+    expect(neighboursOf(list, { category: 'dev', name: 'unknown' })).toEqual({
       previous: undefined,
       next: undefined,
     })

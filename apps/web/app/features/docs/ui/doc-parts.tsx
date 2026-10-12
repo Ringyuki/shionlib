@@ -60,6 +60,7 @@ function DocImage({ src, alt = '', width, height }: ComponentProps<'img'>) {
       alt={alt}
       ratio={size === undefined ? undefined : size.width / size.height}
       style={size === undefined ? undefined : { maxWidth: size.width }}
+      className="border-line rounded-lg border"
       preview
     />
   )

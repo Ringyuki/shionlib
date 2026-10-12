@@ -1,11 +1,13 @@
 {
   "title": "ドキュメント",
-  "shelf": "ドキュメント一覧",
+  "contents": "このページの目次",
   "category": {
     "guides": "ガイド",
     "about": "このサイトについて",
     "dev": "開発"
   },
   "source": "GitHub でこのページを編集",
+  "previous": "前の記事",
+  "next": "次の記事",
   "menu": "その他の操作"
 }

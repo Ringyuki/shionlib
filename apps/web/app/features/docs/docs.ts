@@ -20,6 +20,7 @@ export type Doc = DocRef & {
   description: string
   banner: string | undefined
   date: string
+  order: number | undefined
   author: DocAuthor | undefined
 }
 
@@ -54,10 +55,14 @@ export function isRetired(doc: DocRef): boolean {
   return retired.some(entry => sameDoc(entry, doc))
 }
 
-export function inOrder<Entry extends DocRef & { date: string }>(docs: readonly Entry[]): Entry[] {
+type Placed = DocRef & { date: string; order: number | undefined }
+
+export function inOrder<Entry extends Placed>(docs: readonly Entry[]): Entry[] {
+  const place = (doc: Entry) => doc.order ?? Number.POSITIVE_INFINITY
   return docs.toSorted(
     (a, b) =>
       categories.indexOf(a.category) - categories.indexOf(b.category) ||
+      Math.sign(place(a) - place(b)) ||
       b.date.localeCompare(a.date) ||
       a.name.localeCompare(b.name),
   )

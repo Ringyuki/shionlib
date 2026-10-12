@@ -1,11 +1,13 @@
 {
   "title": "Docs",
-  "shelf": "Documents",
+  "contents": "On this page",
   "category": {
     "guides": "Guides",
     "about": "About",
     "dev": "Development"
   },
   "source": "Edit this page on GitHub",
+  "previous": "Previous",
+  "next": "Next",
   "menu": "More actions"
 }

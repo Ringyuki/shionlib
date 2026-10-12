@@ -54,9 +54,24 @@ beforeAll(async () => {
 })
 
 describe('the documents in the repository', () => {
-  it('are the same ones in every language, in the same order', () => {
+  it('are the same ones in every language, in the order they are read', () => {
     const names = (locale: Locale) => docsIn(locale).map(doc => `${doc.category}/${doc.name}`)
-    expect(names('zh')).toHaveLength(14)
+    expect(names('zh')).toEqual([
+      'guides/download-games',
+      'guides/decompress-zstd-files',
+      'guides/how-to-play-raw-galgame',
+      'guides/common-vn-engines-and-emulators',
+      'guides/lunabox',
+      'guides/reina',
+      'guides/potatovn-download',
+      'guides/upload-game-files',
+      'guides/resource-maintenance',
+      'guides/walkthrough',
+      'guides/favorites',
+      'guides/account-settings',
+      'about/about-shionlib',
+      'dev/dev-overview',
+    ])
     expect(names('en')).toEqual(names('zh'))
     expect(names('ja')).toEqual(names('zh'))
   })

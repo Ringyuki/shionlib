@@ -11,6 +11,7 @@ describe('docFrom', () => {
         banner: 'https://images.yurari.moe/galgame/10702/8hxs6nc5_2.jpg',
         description: '了解 Shionlib 下载系统',
         date: '2026-02-27',
+        order: 1,
         author_uid: 1,
         author_name: 'ringyuki',
         author_avatar: 'https://t.shionlib.com/user/1/avatar/a.webp',
@@ -22,6 +23,7 @@ describe('docFrom', () => {
       banner: 'https://images.yurari.moe/galgame/10702/8hxs6nc5_2.jpg',
       description: '了解 Shionlib 下载系统',
       date: '2026-02-27',
+      order: 1,
       author: { id: 1, name: 'ringyuki', avatar: 'https://t.shionlib.com/user/1/avatar/a.webp' },
     })
   })
@@ -34,6 +36,7 @@ describe('docFrom', () => {
       banner: undefined,
       description: '',
       date: '2025-10-28',
+      order: undefined,
       author: undefined,
     })
   })
@@ -41,6 +44,7 @@ describe('docFrom', () => {
   it('refuses a head without a title or with a date that is none', () => {
     expect(docFrom(ref, { date: '2026-02-27' })).toBeUndefined()
     expect(docFrom(ref, { title: 'Title', date: 'soon' })).toBeUndefined()
+    expect(docFrom(ref, { title: 'Title', date: '2026-02-27', order: 'first' })).toBeUndefined()
     expect(docFrom(ref, undefined)).toBeUndefined()
   })
 })

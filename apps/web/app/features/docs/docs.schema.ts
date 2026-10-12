@@ -19,6 +19,7 @@ const head = v.object({
   description: v.optional(v.string(), ''),
   banner: v.optional(v.string()),
   date: day,
+  order: v.optional(v.pipe(v.number(), v.finite())),
   author_uid: v.optional(v.number()),
   author_name: v.optional(v.string()),
   author_avatar: v.optional(v.string()),
@@ -36,6 +37,7 @@ export function docFrom(ref: DocRef, value: unknown): Doc | undefined {
     description: output.description,
     banner: output.banner,
     date: output.date,
+    order: output.order,
     author:
       output.author_name === undefined
         ? undefined

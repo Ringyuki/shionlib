@@ -72,7 +72,6 @@ export function docLoader(args: LoaderFunctionArgs) {
   const { previous, next } = neighboursOf(docs, doc)
   return {
     doc,
-    shelf: docs.map(linkOf),
     previous: previous === undefined ? undefined : linkOf(previous),
     next: next === undefined ? undefined : linkOf(next),
   }
