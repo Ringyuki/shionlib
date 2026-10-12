@@ -5,16 +5,21 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
+	"strconv"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsourcelink"
 	entgame "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamecover"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefilehistory"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	entuser "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
+	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
+	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/patch"
 )
@@ -54,11 +59,15 @@ func (s *AdminStore) Search(ctx context.Context, filter game.AdminFilter, page g
 		query.Where(entgame.Status(int(*filter.Status)))
 	}
 	if filter.Search != "" {
-		query.Where(entgame.Or(
+		matches := []predicate.Game{
 			entgame.TitleJpContainsFold(filter.Search),
 			entgame.TitleZhContainsFold(filter.Search),
 			entgame.TitleEnContainsFold(filter.Search),
-		))
+		}
+		if id, err := strconv.Atoi(filter.Search); err == nil && id > 0 {
+			matches = append(matches, entgame.ID(id))
+		}
+		query.Where(entgame.Or(matches...))
 	}
 	total, err := query.Clone().Count(ctx)
 	if err != nil {
@@ -82,7 +91,19 @@ func (s *AdminStore) Search(ctx context.Context, filter game.AdminFilter, page g
 	if err != nil {
 		return nil, 0, fmt.Errorf("search games: %w", err)
 	}
-	covers, err := s.firstCovers(ctx, rows)
+	ids := make([]int, len(rows))
+	for i, row := range rows {
+		ids[i] = row.ID
+	}
+	covers, err := s.firstCovers(ctx, ids)
+	if err != nil {
+		return nil, 0, err
+	}
+	resources, err := s.publishedResources(ctx, ids)
+	if err != nil {
+		return nil, 0, err
+	}
+	sources, err := s.sourceRefs(ctx, ids)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -96,6 +117,7 @@ func (s *AdminStore) Search(ctx context.Context, filter game.AdminFilter, page g
 			Status:    game.Status(row.Status),
 			Views:     row.Views,
 			Downloads: row.Downloads,
+			Resources: resources[row.ID],
 			NSFW:      row.Nsfw,
 			Created:   row.Created,
 			Updated:   row.Updated,
@@ -104,26 +126,76 @@ func (s *AdminStore) Search(ctx context.Context, filter game.AdminFilter, page g
 		if creator := row.Edges.Creator; creator != nil {
 			entry.Creator.Name = creator.Name
 		}
-		if url, ok := covers[row.ID]; ok {
-			entry.CoverURL = &url
+		if cover, ok := covers[row.ID]; ok {
+			entry.Cover = &cover
+		}
+		if ref, ok := sources[row.ID]; ok {
+			entry.Source = &ref
 		}
 		entries[i] = entry
 	}
 	return entries, total, nil
 }
 
-func (s *AdminStore) firstCovers(ctx context.Context, rows []*ent.Game) (map[int]string, error) {
-	covers := map[int]string{}
-	if len(rows) == 0 {
-		return covers, nil
+func (s *AdminStore) publishedResources(ctx context.Context, gameIDs []int) (map[int]int, error) {
+	counts := map[int]int{}
+	if len(gameIDs) == 0 {
+		return counts, nil
 	}
-	ids := make([]int, len(rows))
-	for i, row := range rows {
-		ids[i] = row.ID
+	var rows []struct {
+		GameID int `json:"game_id"`
+		Count  int `json:"count"`
+	}
+	err := s.db(ctx).GameDownloadResource.Query().
+		Where(
+			gamedownloadresource.GameIDIn(gameIDs...),
+			gamedownloadresource.Status(download.ResourceActive),
+			gamedownloadresource.PublishedAtNotNil(),
+		).
+		GroupBy(gamedownloadresource.FieldGameID).
+		Aggregate(ent.Count()).
+		Scan(ctx, &rows)
+	if err != nil {
+		return nil, fmt.Errorf("count published resources: %w", err)
+	}
+	for _, row := range rows {
+		counts[row.GameID] = row.Count
+	}
+	return counts, nil
+}
+
+func (s *AdminStore) sourceRefs(ctx context.Context, gameIDs []int) (map[int]game.SourceRef, error) {
+	refs := map[int]game.SourceRef{}
+	if len(gameIDs) == 0 {
+		return refs, nil
+	}
+	links, err := s.db(ctx).CatalogSourceLink.Query().
+		Where(
+			catalogsourcelink.Entity(string(catalog.EntityGame)),
+			catalogsourcelink.LocalIDIn(gameIDs...),
+			catalogsourcelink.ExcludedAtIsNil(),
+		).
+		Order(ent.Asc(catalogsourcelink.FieldID)).
+		All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("load game sources: %w", err)
+	}
+	for _, link := range links {
+		if _, seen := refs[link.LocalID]; !seen {
+			refs[link.LocalID] = game.SourceRef{Source: link.Source, ExternalID: link.ExternalID}
+		}
+	}
+	return refs, nil
+}
+
+func (s *AdminStore) firstCovers(ctx context.Context, ids []int) (map[int]game.AdminCover, error) {
+	covers := map[int]game.AdminCover{}
+	if len(ids) == 0 {
+		return covers, nil
 	}
 	found, err := s.db(ctx).GameCover.Query().
 		Where(gamecover.GameIDIn(ids...)).
-		Select(gamecover.FieldGameID, gamecover.FieldURL).
+		Select(gamecover.FieldGameID, gamecover.FieldURL, gamecover.FieldDims, gamecover.FieldSexual, gamecover.FieldViolence).
 		Order(ent.Asc(gamecover.FieldGameID), ent.Asc(gamecover.FieldID)).
 		All(ctx)
 	if err != nil {
@@ -131,7 +203,7 @@ func (s *AdminStore) firstCovers(ctx context.Context, rows []*ent.Game) (map[int
 	}
 	for _, cover := range found {
 		if _, seen := covers[cover.GameID]; !seen {
-			covers[cover.GameID] = cover.URL
+			covers[cover.GameID] = game.AdminCover{URL: cover.URL, Dims: cover.Dims, Sexual: cover.Sexual, Violence: cover.Violence}
 		}
 	}
 	return covers, nil

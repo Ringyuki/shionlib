@@ -18,7 +18,10 @@ type adminGameStaffDTO struct {
 }
 
 type adminGameCoverDTO struct {
-	URL string `json:"url"`
+	URL      string `json:"url"`
+	Dims     []int  `json:"dims" doc:"Width and height in pixels, empty when unknown"`
+	Sexual   int    `json:"sexual"`
+	Violence int    `json:"violence"`
 }
 
 type adminGameCreatorDTO struct {
@@ -26,42 +29,62 @@ type adminGameCreatorDTO struct {
 	Name string `json:"name"`
 }
 
+type adminGameSourceDTO struct {
+	Name       string `json:"name"`
+	ExternalID string `json:"external_id"`
+}
+
 type adminGameItemDTO struct {
-	ID        int                 `json:"id"`
-	TitleJP   string              `json:"title_jp"`
-	TitleZH   string              `json:"title_zh"`
-	TitleEN   string              `json:"title_en"`
-	Status    int                 `json:"status"`
-	Views     int                 `json:"views"`
-	Downloads int                 `json:"downloads"`
-	NSFW      bool                `json:"nsfw"`
-	Created   time.Time           `json:"created"`
-	Updated   time.Time           `json:"updated"`
-	Covers    []adminGameCoverDTO `json:"covers" doc:"At most one cover, kept for compatibility"`
-	Creator   adminGameCreatorDTO `json:"creator"`
-	Cover     *string             `json:"cover,omitempty"`
+	ID              int                 `json:"id"`
+	TitleJP         string              `json:"title_jp"`
+	TitleZH         string              `json:"title_zh"`
+	TitleEN         string              `json:"title_en"`
+	Status          int                 `json:"status"`
+	Views           int                 `json:"views"`
+	Downloads       int                 `json:"downloads"`
+	Resources       int                 `json:"resources" doc:"Published resources of the game"`
+	NSFW            bool                `json:"nsfw"`
+	RecentlyUpdated bool                `json:"recently_updated" doc:"Whether the game is listed among the recent updates"`
+	Created         time.Time           `json:"created"`
+	Updated         time.Time           `json:"updated"`
+	Covers          []adminGameCoverDTO `json:"covers" doc:"At most one cover, kept for compatibility"`
+	Creator         adminGameCreatorDTO `json:"creator"`
+	Cover           *string             `json:"cover,omitempty"`
+	Source          *adminGameSourceDTO `json:"source" doc:"The catalog entry the game was imported from"`
 }
 
 func toAdminGameItem(entry game.AdminEntry) adminGameItemDTO {
 	covers := []adminGameCoverDTO{}
-	if entry.CoverURL != nil {
-		covers = append(covers, adminGameCoverDTO{URL: *entry.CoverURL})
+	var coverURL *string
+	if cover := entry.Cover; cover != nil {
+		dims := cover.Dims
+		if dims == nil {
+			dims = []int{}
+		}
+		covers = append(covers, adminGameCoverDTO{URL: cover.URL, Dims: dims, Sexual: cover.Sexual, Violence: cover.Violence})
+		coverURL = &cover.URL
 	}
-	return adminGameItemDTO{
-		ID:        entry.ID,
-		TitleJP:   entry.TitleJP,
-		TitleZH:   entry.TitleZH,
-		TitleEN:   entry.TitleEN,
-		Status:    int(entry.Status),
-		Views:     entry.Views,
-		Downloads: entry.Downloads,
-		NSFW:      entry.NSFW,
-		Created:   entry.Created,
-		Updated:   entry.Updated,
-		Covers:    covers,
-		Creator:   adminGameCreatorDTO{ID: entry.Creator.ID, Name: entry.Creator.Name},
-		Cover:     entry.CoverURL,
+	dto := adminGameItemDTO{
+		ID:              entry.ID,
+		TitleJP:         entry.TitleJP,
+		TitleZH:         entry.TitleZH,
+		TitleEN:         entry.TitleEN,
+		Status:          int(entry.Status),
+		Views:           entry.Views,
+		Downloads:       entry.Downloads,
+		Resources:       entry.Resources,
+		NSFW:            entry.NSFW,
+		RecentlyUpdated: entry.RecentlyUpdated,
+		Created:         entry.Created,
+		Updated:         entry.Updated,
+		Covers:          covers,
+		Creator:         adminGameCreatorDTO{ID: entry.Creator.ID, Name: entry.Creator.Name},
+		Cover:           coverURL,
 	}
+	if source := entry.Source; source != nil {
+		dto.Source = &adminGameSourceDTO{Name: source.Source, ExternalID: source.ExternalID}
+	}
+	return dto
 }
 
 type adminGameScalarDTO struct {
@@ -111,4 +134,15 @@ func nonNilStrings(values []string) []string {
 		return []string{}
 	}
 	return values
+}
+
+type bangumiAuthorizationDTO struct {
+	Configured  bool       `json:"configured" doc:"Whether the application id and secret are set"`
+	Authorized  bool       `json:"authorized" doc:"Whether tokens are stored and can be renewed"`
+	ExpiresAt   *time.Time `json:"expires_at" doc:"When the current access token expires; it is renewed by itself"`
+	CallbackURL string     `json:"callback_url" doc:"The callback address to register for the application at Bangumi"`
+}
+
+type bangumiRedirectDTO struct {
+	Location string `header:"Location"`
 }

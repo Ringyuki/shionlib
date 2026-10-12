@@ -22,15 +22,20 @@ type Store interface {
 	ApplyDeveloper(ctx context.Context, source string, record DeveloperRecord, at time.Time) (int, error)
 	ApplyCharacter(ctx context.Context, source string, record CharacterRecord, at time.Time) (int, error)
 	MarkMissing(ctx context.Context, ref Ref, hide bool, at time.Time) error
-	Exclude(ctx context.Context, entity Entity, localID int, at time.Time) error
+	Exclude(ctx context.Context, entity Entity, localID int, by Exclusion, at time.Time) error
 	Include(ctx context.Context, ref Ref) error
 	Excluded(ctx context.Context, ref Ref) (bool, error)
+	ExcludedEntries(ctx context.Context, offset, limit int) ([]ExcludedEntry, int, error)
 	RecordFailure(ctx context.Context, ref Ref, reason string, at time.Time) error
 	Stale(ctx context.Context, source string, before time.Time, limit int) ([]Ref, error)
 	LocalID(ctx context.Context, ref Ref) (int, bool, error)
 	Links(ctx context.Context, source string, entity Entity, externalIDs []string) (map[string]SourceLink, error)
 	Cursor(ctx context.Context, source string) (string, error)
 	SaveCursor(ctx context.Context, source, cursor string) error
+	SyncState(ctx context.Context, source string) (SyncState, error)
+	RecordPull(ctx context.Context, source string, changes int, at time.Time) error
+	RecordPullFailure(ctx context.Context, source, reason string, at time.Time) error
+	LinkCounts(ctx context.Context, source string) (LinkCounts, error)
 }
 
 type Queue interface {

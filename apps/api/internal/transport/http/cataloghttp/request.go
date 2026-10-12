@@ -12,6 +12,14 @@ type catalogSearchInput struct {
 	Query  string `query:"q" required:"true" minLength:"1" maxLength:"100" doc:"Search keyword"`
 }
 
+type catalogSourceInput struct {
+	Source string `path:"source" maxLength:"32" doc:"Catalog source name"`
+}
+
+type catalogExcludedInput struct {
+	httpapi.PageQuery
+}
+
 type catalogImportInput struct {
 	Body struct {
 		Source     string `json:"source,omitempty" default:"hikarinagi" doc:"Catalog source name"`

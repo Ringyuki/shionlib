@@ -29,6 +29,10 @@ const (
 	FieldMissingAt = "missing_at"
 	// FieldExcludedAt holds the string denoting the excluded_at field in the database.
 	FieldExcludedAt = "excluded_at"
+	// FieldExcludedBy holds the string denoting the excluded_by field in the database.
+	FieldExcludedBy = "excluded_by"
+	// FieldTitle holds the string denoting the title field in the database.
+	FieldTitle = "title"
 	// FieldFailures holds the string denoting the failures field in the database.
 	FieldFailures = "failures"
 	// FieldLastError holds the string denoting the last_error field in the database.
@@ -52,6 +56,8 @@ var Columns = []string{
 	FieldSyncedAt,
 	FieldMissingAt,
 	FieldExcludedAt,
+	FieldExcludedBy,
+	FieldTitle,
 	FieldFailures,
 	FieldLastError,
 	FieldCreated,
@@ -77,6 +83,8 @@ var (
 	ExternalIDValidator func(string) error
 	// RevisionValidator is a validator for the "revision" field. It is called by the builders before save.
 	RevisionValidator func(string) error
+	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	TitleValidator func(string) error
 	// DefaultFailures holds the default value on creation for the "failures" field.
 	DefaultFailures int
 	// LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
@@ -135,6 +143,16 @@ func ByMissingAt(opts ...sql.OrderTermOption) OrderOption {
 // ByExcludedAt orders the results by the excluded_at field.
 func ByExcludedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExcludedAt, opts...).ToFunc()
+}
+
+// ByExcludedBy orders the results by the excluded_by field.
+func ByExcludedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExcludedBy, opts...).ToFunc()
+}
+
+// ByTitle orders the results by the title field.
+func ByTitle(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTitle, opts...).ToFunc()
 }
 
 // ByFailures orders the results by the failures field.

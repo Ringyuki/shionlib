@@ -32,6 +32,8 @@
   "GAME_DATA_CONSISTENCY_CHECK_FAILED": "ゲームデータの一貫性チェックに失敗しました",
   "GAME_MISSING_BANGUMI_OR_VNDB_ID": "bangumi idまたはvndb idが不足しています",
   "GAME_ENTRY_MIRRORED": "作品データは hikarinagi で一元管理されています。編集は hikarinagi でお願いします",
+  "GAME_BANGUMI_NOT_CONFIGURED": "Bangumi アプリの ID とシークレットが設定されていません",
+  "GAME_BANGUMI_AUTHORIZATION_INVALID": "Bangumi の認可リクエストが無効か期限切れです。もう一度やり直してください",
   "GAME_DEVELOPER_NOT_FOUND": "開発者が見つかりません",
   "GAME_DEVELOPER_ALREADY_EXISTS": "開発者がすでに存在します",
   "GAME_DEVELOPER_MIN_ONE_REQUIRED": "少なくとも1つの開発者が必須です",
@@ -156,5 +158,9 @@
   "GAME_DOWNLOAD_RESOURCE_DUPLICATE_FILE_NAME": "このリソースには同じ名前のファイルがすでにあります",
   "INSPECTION_NOT_FOUND": "ファイルの内容の記録が見つかりません",
   "INSPECTION_ENTRY_NOT_FOUND": "ファイル内にこの項目は見つかりません",
-  "INSPECTION_ENTRY_NO_PREVIEW": "この項目のプレビューはありません"
+  "INSPECTION_ENTRY_NO_PREVIEW": "この項目のプレビューはありません",
+  "CATALOG_SOURCE_UNAVAILABLE": "データソースに接続できません",
+  "CATALOG_UNKNOWN_SOURCE": "不明なデータソース {source}",
+  "CATALOG_ENTRY_NOT_FOUND": "データソースにこの項目はありません",
+  "CATALOG_NO_CHANGE_FEED": "データソース {source} は変更履歴を提供していないため、差分同期できません"
 }

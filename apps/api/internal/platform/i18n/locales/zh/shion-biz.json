@@ -32,6 +32,8 @@
   "GAME_DATA_CONSISTENCY_CHECK_FAILED": "游戏数据一致性检查失败",
   "GAME_MISSING_BANGUMI_OR_VNDB_ID": "缺少bangumi id或vndb id",
   "GAME_ENTRY_MIRRORED": "条目资料已由 hikarinagi 统一维护，请前往 hikarinagi 编辑",
+  "GAME_BANGUMI_NOT_CONFIGURED": "尚未设置 Bangumi 应用的 ID 和密钥",
+  "GAME_BANGUMI_AUTHORIZATION_INVALID": "Bangumi 授权请求无效或已过期，请重新发起授权",
   "GAME_DEVELOPER_NOT_FOUND": "开发商不存在",
   "GAME_DEVELOPER_ALREADY_EXISTS": "开发商已存在",
   "GAME_DEVELOPER_MIN_ONE_REQUIRED": "至少需要保留一个开发商",
@@ -156,5 +158,9 @@
   "GAME_DOWNLOAD_RESOURCE_DUPLICATE_FILE_NAME": "该资源中已存在同名文件",
   "INSPECTION_NOT_FOUND": "文件的内容记录不存在",
   "INSPECTION_ENTRY_NOT_FOUND": "文件中没有这一项",
-  "INSPECTION_ENTRY_NO_PREVIEW": "这一项没有可用的预览"
+  "INSPECTION_ENTRY_NO_PREVIEW": "这一项没有可用的预览",
+  "CATALOG_SOURCE_UNAVAILABLE": "数据源暂时无法访问",
+  "CATALOG_UNKNOWN_SOURCE": "未知的数据源 {source}",
+  "CATALOG_ENTRY_NOT_FOUND": "数据源中没有这个条目",
+  "CATALOG_NO_CHANGE_FEED": "数据源 {source} 不提供变更记录，无法增量同步"
 }

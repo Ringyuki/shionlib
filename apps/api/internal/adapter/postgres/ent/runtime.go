@@ -483,20 +483,24 @@ func init() {
 	catalogsourcelinkDescRevision := catalogsourcelinkFields[5].Descriptor()
 	// catalogsourcelink.RevisionValidator is a validator for the "revision" field. It is called by the builders before save.
 	catalogsourcelink.RevisionValidator = catalogsourcelinkDescRevision.Validators[0].(func(string) error)
+	// catalogsourcelinkDescTitle is the schema descriptor for title field.
+	catalogsourcelinkDescTitle := catalogsourcelinkFields[10].Descriptor()
+	// catalogsourcelink.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	catalogsourcelink.TitleValidator = catalogsourcelinkDescTitle.Validators[0].(func(string) error)
 	// catalogsourcelinkDescFailures is the schema descriptor for failures field.
-	catalogsourcelinkDescFailures := catalogsourcelinkFields[9].Descriptor()
+	catalogsourcelinkDescFailures := catalogsourcelinkFields[11].Descriptor()
 	// catalogsourcelink.DefaultFailures holds the default value on creation for the failures field.
 	catalogsourcelink.DefaultFailures = catalogsourcelinkDescFailures.Default.(int)
 	// catalogsourcelinkDescLastError is the schema descriptor for last_error field.
-	catalogsourcelinkDescLastError := catalogsourcelinkFields[10].Descriptor()
+	catalogsourcelinkDescLastError := catalogsourcelinkFields[12].Descriptor()
 	// catalogsourcelink.LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
 	catalogsourcelink.LastErrorValidator = catalogsourcelinkDescLastError.Validators[0].(func(string) error)
 	// catalogsourcelinkDescCreated is the schema descriptor for created field.
-	catalogsourcelinkDescCreated := catalogsourcelinkFields[11].Descriptor()
+	catalogsourcelinkDescCreated := catalogsourcelinkFields[13].Descriptor()
 	// catalogsourcelink.DefaultCreated holds the default value on creation for the created field.
 	catalogsourcelink.DefaultCreated = catalogsourcelinkDescCreated.Default.(func() time.Time)
 	// catalogsourcelinkDescUpdated is the schema descriptor for updated field.
-	catalogsourcelinkDescUpdated := catalogsourcelinkFields[12].Descriptor()
+	catalogsourcelinkDescUpdated := catalogsourcelinkFields[14].Descriptor()
 	// catalogsourcelink.DefaultUpdated holds the default value on creation for the updated field.
 	catalogsourcelink.DefaultUpdated = catalogsourcelinkDescUpdated.Default.(func() time.Time)
 	// catalogsourcelink.UpdateDefaultUpdated holds the default value on update for the updated field.
@@ -511,12 +515,20 @@ func init() {
 	catalogsynccursorDescCursor := catalogsynccursorFields[2].Descriptor()
 	// catalogsynccursor.CursorValidator is a validator for the "cursor" field. It is called by the builders before save.
 	catalogsynccursor.CursorValidator = catalogsynccursorDescCursor.Validators[0].(func(string) error)
+	// catalogsynccursorDescChanges is the schema descriptor for changes field.
+	catalogsynccursorDescChanges := catalogsynccursorFields[4].Descriptor()
+	// catalogsynccursor.DefaultChanges holds the default value on creation for the changes field.
+	catalogsynccursor.DefaultChanges = catalogsynccursorDescChanges.Default.(int)
+	// catalogsynccursorDescLastError is the schema descriptor for last_error field.
+	catalogsynccursorDescLastError := catalogsynccursorFields[6].Descriptor()
+	// catalogsynccursor.LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
+	catalogsynccursor.LastErrorValidator = catalogsynccursorDescLastError.Validators[0].(func(string) error)
 	// catalogsynccursorDescCreated is the schema descriptor for created field.
-	catalogsynccursorDescCreated := catalogsynccursorFields[3].Descriptor()
+	catalogsynccursorDescCreated := catalogsynccursorFields[7].Descriptor()
 	// catalogsynccursor.DefaultCreated holds the default value on creation for the created field.
 	catalogsynccursor.DefaultCreated = catalogsynccursorDescCreated.Default.(func() time.Time)
 	// catalogsynccursorDescUpdated is the schema descriptor for updated field.
-	catalogsynccursorDescUpdated := catalogsynccursorFields[4].Descriptor()
+	catalogsynccursorDescUpdated := catalogsynccursorFields[8].Descriptor()
 	// catalogsynccursor.DefaultUpdated holds the default value on creation for the updated field.
 	catalogsynccursor.DefaultUpdated = catalogsynccursorDescUpdated.Default.(func() time.Time)
 	// catalogsynccursor.UpdateDefaultUpdated holds the default value on update for the updated field.

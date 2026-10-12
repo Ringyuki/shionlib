@@ -33,6 +33,10 @@ type CatalogSourceLink struct {
 	MissingAt *time.Time `json:"missing_at,omitempty"`
 	// ExcludedAt holds the value of the "excluded_at" field.
 	ExcludedAt *time.Time `json:"excluded_at,omitempty"`
+	// ExcludedBy holds the value of the "excluded_by" field.
+	ExcludedBy *int `json:"excluded_by,omitempty"`
+	// Title holds the value of the "title" field.
+	Title *string `json:"title,omitempty"`
 	// Failures holds the value of the "failures" field.
 	Failures int `json:"failures,omitempty"`
 	// LastError holds the value of the "last_error" field.
@@ -49,9 +53,9 @@ func (*CatalogSourceLink) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case catalogsourcelink.FieldID, catalogsourcelink.FieldLocalID, catalogsourcelink.FieldFailures:
+		case catalogsourcelink.FieldID, catalogsourcelink.FieldLocalID, catalogsourcelink.FieldExcludedBy, catalogsourcelink.FieldFailures:
 			values[i] = new(sql.NullInt64)
-		case catalogsourcelink.FieldSource, catalogsourcelink.FieldEntity, catalogsourcelink.FieldExternalID, catalogsourcelink.FieldRevision, catalogsourcelink.FieldLastError:
+		case catalogsourcelink.FieldSource, catalogsourcelink.FieldEntity, catalogsourcelink.FieldExternalID, catalogsourcelink.FieldRevision, catalogsourcelink.FieldTitle, catalogsourcelink.FieldLastError:
 			values[i] = new(sql.NullString)
 		case catalogsourcelink.FieldSyncedAt, catalogsourcelink.FieldMissingAt, catalogsourcelink.FieldExcludedAt, catalogsourcelink.FieldCreated, catalogsourcelink.FieldUpdated:
 			values[i] = new(sql.NullTime)
@@ -127,6 +131,20 @@ func (_m *CatalogSourceLink) assignValues(columns []string, values []any) error 
 			} else if value.Valid {
 				_m.ExcludedAt = new(time.Time)
 				*_m.ExcludedAt = value.Time
+			}
+		case catalogsourcelink.FieldExcludedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field excluded_by", values[i])
+			} else if value.Valid {
+				_m.ExcludedBy = new(int)
+				*_m.ExcludedBy = int(value.Int64)
+			}
+		case catalogsourcelink.FieldTitle:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field title", values[i])
+			} else if value.Valid {
+				_m.Title = new(string)
+				*_m.Title = value.String
 			}
 		case catalogsourcelink.FieldFailures:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -219,6 +237,16 @@ func (_m *CatalogSourceLink) String() string {
 	if v := _m.ExcludedAt; v != nil {
 		builder.WriteString("excluded_at=")
 		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.ExcludedBy; v != nil {
+		builder.WriteString("excluded_by=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.Title; v != nil {
+		builder.WriteString("title=")
+		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
 	builder.WriteString("failures=")

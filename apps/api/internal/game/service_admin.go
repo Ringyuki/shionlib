@@ -1,11 +1,13 @@
 package game
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"strings"
 	"time"
 
+	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
 )
 
@@ -33,7 +35,22 @@ func NewAdminService(deps AdminDeps) *AdminService {
 
 func (s *AdminService) Search(ctx context.Context, filter AdminFilter, page Page) ([]AdminEntry, int, error) {
 	filter.Search = strings.TrimSpace(filter.Search)
-	return s.store.Search(ctx, filter, page)
+	entries, total, err := s.store.Search(ctx, filter, page)
+	if err != nil {
+		return nil, 0, err
+	}
+	ids := make([]int, len(entries))
+	for i, entry := range entries {
+		ids[i] = entry.ID
+	}
+	marked, err := s.recent.Marked(ctx, ids)
+	if err != nil {
+		return nil, 0, err
+	}
+	for i := range entries {
+		entries[i].RecentlyUpdated = marked[entries[i].ID]
+	}
+	return entries, total, nil
 }
 
 func (s *AdminService) Scalar(ctx context.Context, id int) (Scalar, error) {
@@ -56,20 +73,24 @@ func (s *AdminService) EditScalar(ctx context.Context, id int, changes ScalarCha
 	})
 }
 
-func (s *AdminService) Delete(ctx context.Context, id int) error {
+func (s *AdminService) Delete(ctx context.Context, who actor.Actor, id int) error {
 	var keys []string
 	err := s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
 		if err := s.store.Lock(ctx, id); err != nil {
 			return err
 		}
-		var err error
+		scalar, err := s.store.Scalar(ctx, id)
+		if err != nil {
+			return err
+		}
 		if keys, err = s.store.StorageKeys(ctx, id); err != nil {
 			return err
 		}
 		if err := s.store.Delete(ctx, id); err != nil {
 			return err
 		}
-		return s.catalog.Exclude(ctx, catalog.EntityGame, id)
+		title := cmp.Or(scalar.TitleJP, scalar.TitleZH, scalar.TitleEN)
+		return s.catalog.Exclude(ctx, catalog.EntityGame, id, catalog.Exclusion{Title: title, UserID: who.UserID})
 	})
 	if err != nil {
 		return err

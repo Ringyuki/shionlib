@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game/gametest"
@@ -40,6 +41,8 @@ func newAdminFixture(games ...gametest.AdminGame) adminFixture {
 	return f
 }
 
+var remover = actor.Actor{UserID: 4, Role: actor.RoleAdmin}
+
 func adminGame(id int, title string, status game.Status) gametest.AdminGame {
 	return gametest.AdminGame{Entry: game.AdminEntry{ID: id, TitleJP: title, Status: status}}
 }
@@ -49,6 +52,22 @@ func TestAdminSearchTrimsTheKeyword(t *testing.T) {
 	entries, total, err := f.service.Search(context.Background(), game.AdminFilter{Search: "  pockets "}, game.Page{Number: 1, Size: 10})
 	if err != nil || total != 1 || entries[0].ID != 1 {
 		t.Fatalf("search: %+v %d %v", entries, total, err)
+	}
+}
+
+func TestAdminSearchFindsAGameByItsNumberAndTellsWhichAreRecentlyUpdated(t *testing.T) {
+	f := newAdminFixture(adminGame(7, "Summer Pockets", game.StatusVisible), adminGame(70, "Winter", game.StatusVisible))
+	ctx := context.Background()
+	if err := f.service.MarkRecentlyUpdated(ctx, 70); err != nil {
+		t.Fatal(err)
+	}
+	entries, total, err := f.service.Search(ctx, game.AdminFilter{Search: "7", SortBy: game.AdminSortByID}, game.Page{Number: 1, Size: 10})
+	if err != nil || total != 1 || entries[0].ID != 7 || entries[0].RecentlyUpdated {
+		t.Fatalf("search by number: %+v %d %v", entries, total, err)
+	}
+	entries, _, err = f.service.Search(ctx, game.AdminFilter{SortBy: game.AdminSortByID}, game.Page{Number: 1, Size: 10})
+	if err != nil || len(entries) != 2 || entries[0].RecentlyUpdated || !entries[1].RecentlyUpdated {
+		t.Fatalf("recent marks: %+v %v", entries, err)
 	}
 }
 
@@ -103,14 +122,14 @@ func TestAdminDeleteExcludesFromCatalogAndPurgesObjects(t *testing.T) {
 	if err := f.service.MarkRecentlyUpdated(ctx, 1); err != nil {
 		t.Fatal(err)
 	}
-	if err := f.service.Delete(ctx, 1); err != nil {
+	if err := f.service.Delete(ctx, remover, 1); err != nil {
 		t.Fatal(err)
 	}
 	if _, ok := f.store.Game(1); ok {
 		t.Fatal("game still stored")
 	}
-	if got := f.exclusions.Excluded(); !slices.Equal(got, []gametest.Exclusion{{Entity: catalog.EntityGame, ID: 1}}) {
-		t.Fatalf("catalog exclusion: %+v", got)
+	if got := f.exclusions.Excluded(); !slices.Equal(got, []gametest.Exclusion{{Entity: catalog.EntityGame, ID: 1, By: catalog.Exclusion{Title: "a", UserID: 4}}}) {
+		t.Fatalf("the exclusion keeps the title and who removed the game: %+v", got)
 	}
 	if _, marked := f.recent.MarkedAt(1); marked {
 		t.Fatal("deleted games leave the recent-update set")
@@ -118,7 +137,7 @@ func TestAdminDeleteExcludesFromCatalogAndPurgesObjects(t *testing.T) {
 	if got := f.purger.Purged(); len(got) != 1 || !slices.Equal(got[0], doomed.Keys) {
 		t.Fatalf("stored objects are purged: %v", got)
 	}
-	if err := f.service.Delete(ctx, 1); !errors.Is(err, game.ErrNotFound) {
+	if err := f.service.Delete(ctx, remover, 1); !errors.Is(err, game.ErrNotFound) {
 		t.Fatalf("second delete: %v", err)
 	}
 	if len(f.exclusions.Excluded()) != 1 || len(f.purger.Purged()) != 1 {

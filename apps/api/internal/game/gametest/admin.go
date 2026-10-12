@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -71,6 +72,9 @@ func (s *AdminStore) Search(_ context.Context, filter game.AdminFilter, page gam
 }
 
 func matchesTitle(entry game.AdminEntry, search string) bool {
+	if id, err := strconv.Atoi(search); err == nil && id == entry.ID {
+		return true
+	}
 	needle := strings.ToLower(search)
 	for _, title := range []string{entry.TitleJP, entry.TitleZH, entry.TitleEN} {
 		if strings.Contains(strings.ToLower(title), needle) {
@@ -232,6 +236,18 @@ func (r *RecentMarks) Remove(_ context.Context, gameID int) error {
 	return nil
 }
 
+func (r *RecentMarks) Marked(_ context.Context, gameIDs []int) (map[int]bool, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	marked := map[int]bool{}
+	for _, id := range gameIDs {
+		if _, ok := r.marked[id]; ok {
+			marked[id] = true
+		}
+	}
+	return marked, nil
+}
+
 func (r *RecentMarks) MarkedAt(gameID int) (time.Time, bool) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -242,6 +258,7 @@ func (r *RecentMarks) MarkedAt(gameID int) (time.Time, bool) {
 type Exclusion struct {
 	Entity catalog.Entity
 	ID     int
+	By     catalog.Exclusion
 }
 
 type Exclusions struct {
@@ -249,10 +266,10 @@ type Exclusions struct {
 	excluded []Exclusion
 }
 
-func (e *Exclusions) Exclude(_ context.Context, entity catalog.Entity, localID int) error {
+func (e *Exclusions) Exclude(_ context.Context, entity catalog.Entity, localID int, by catalog.Exclusion) error {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	e.excluded = append(e.excluded, Exclusion{Entity: entity, ID: localID})
+	e.excluded = append(e.excluded, Exclusion{Entity: entity, ID: localID, By: by})
 	return nil
 }
 

@@ -110,3 +110,12 @@ type adminGameNullableStaffsInput struct {
 	Set   bool
 	Value []adminGameStaffDTO
 }
+
+type bangumiStartInput struct {
+	ReturnTo string `query:"returnTo" maxLength:"500" doc:"Path of the site to come back to"`
+}
+
+type bangumiCallbackInput struct {
+	Code  string `query:"code" maxLength:"500"`
+	State string `query:"state" maxLength:"100"`
+}

@@ -70,10 +70,11 @@ type AdminStore interface {
 type RecentUpdateMarks interface {
 	Add(ctx context.Context, gameID int, at time.Time) error
 	Remove(ctx context.Context, gameID int) error
+	Marked(ctx context.Context, gameIDs []int) (map[int]bool, error)
 }
 
 type CatalogExclusions interface {
-	Exclude(ctx context.Context, entity catalog.Entity, localID int) error
+	Exclude(ctx context.Context, entity catalog.Entity, localID int, by catalog.Exclusion) error
 }
 
 type ObjectPurger interface {
@@ -82,4 +83,15 @@ type ObjectPurger interface {
 
 type Transactor interface {
 	WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error
+}
+
+type BangumiAuthorizer interface {
+	AuthorizeURL(redirectURI, state string) (string, bool)
+	Exchange(ctx context.Context, code, redirectURI string) error
+	Authorization(ctx context.Context) (BangumiAuthorization, error)
+}
+
+type BangumiStates interface {
+	Save(ctx context.Context, state, returnTo string, ttl time.Duration) error
+	Take(ctx context.Context, state string) (returnTo string, known bool, err error)
 }

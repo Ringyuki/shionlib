@@ -128,6 +128,57 @@ func TestValidTokensAndErrors(t *testing.T) {
 	}
 }
 
+func TestAuthorizationIsStartedExchangedAndReported(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("POST /oauth/access_token", func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		form := r.PostForm
+		if form.Get("grant_type") != "authorization_code" || form.Get("client_id") != "id" || form.Get("client_secret") != "secret" || form.Get("redirect_uri") != "https://shionlib.test/callback" || form.Get("code") != "good" {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		_, _ = w.Write([]byte(`{"access_token":"first","refresh_token":"refresh-1","token_type":"Bearer","expires_in":604800}`))
+	})
+	server := httptest.NewServer(mux)
+	t.Cleanup(server.Close)
+	store := &memoryTokens{}
+	client := newClient(server, store)
+	ctx := context.Background()
+
+	before, err := client.Authorization(ctx)
+	if err != nil || !before.Configured || before.Authorized || before.ExpiresAt != nil {
+		t.Fatalf("before authorizing: %+v %v", before, err)
+	}
+	location, configured := client.AuthorizeURL("https://shionlib.test/callback", "state-1")
+	want := bangumi.DefaultAuthorizeEndpoint + "?client_id=id&redirect_uri=https%3A%2F%2Fshionlib.test%2Fcallback&response_type=code&state=state-1"
+	if !configured || location != want {
+		t.Fatalf("authorize url %q %v", location, configured)
+	}
+	if err := client.Exchange(ctx, "bad", "https://shionlib.test/callback"); !errors.Is(err, game.ErrBangumiRequestFailed) || store.raw != nil {
+		t.Fatalf("a refused code stores nothing: %v %s", err, store.raw)
+	}
+	if err := client.Exchange(ctx, "good", "https://shionlib.test/callback"); err != nil {
+		t.Fatal(err)
+	}
+	after, err := client.Authorization(ctx)
+	if err != nil || !after.Authorized || after.ExpiresAt == nil || !after.ExpiresAt.Equal(now.Add(7*24*time.Hour)) {
+		t.Fatalf("after authorizing: %+v %v", after, err)
+	}
+
+	unset := bangumi.NewClient(bangumi.Options{
+		HTTP: server.Client(), Credentials: func() (string, string) { return "id", "" }, Tokens: &memoryTokens{}, Now: func() time.Time { return now },
+	})
+	if _, configured := unset.AuthorizeURL("https://shionlib.test/callback", "state-1"); configured {
+		t.Fatal("authorization needs both the id and the secret")
+	}
+	if status, err := unset.Authorization(ctx); err != nil || status.Configured || status.Authorized {
+		t.Fatalf("without credentials: %+v %v", status, err)
+	}
+}
+
 func jsonInt(v int64) string {
 	raw, _ := json.Marshal(v)
 	return string(raw)

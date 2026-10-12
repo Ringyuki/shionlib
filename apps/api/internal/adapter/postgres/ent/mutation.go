@@ -15739,27 +15739,30 @@ func (m *AdMutation) ResetEdge(name string) error {
 // CatalogSourceLinkMutation represents an operation that mutates the CatalogSourceLink nodes in the graph.
 type CatalogSourceLinkMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	source        *string
-	entity        *string
-	external_id   *string
-	local_id      *int
-	addlocal_id   *int
-	revision      *string
-	synced_at     *time.Time
-	missing_at    *time.Time
-	excluded_at   *time.Time
-	failures      *int
-	addfailures   *int
-	last_error    *string
-	created       *time.Time
-	updated       *time.Time
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*CatalogSourceLink, error)
-	predicates    []predicate.CatalogSourceLink
+	op             Op
+	typ            string
+	id             *int
+	source         *string
+	entity         *string
+	external_id    *string
+	local_id       *int
+	addlocal_id    *int
+	revision       *string
+	synced_at      *time.Time
+	missing_at     *time.Time
+	excluded_at    *time.Time
+	excluded_by    *int
+	addexcluded_by *int
+	title          *string
+	failures       *int
+	addfailures    *int
+	last_error     *string
+	created        *time.Time
+	updated        *time.Time
+	clearedFields  map[string]struct{}
+	done           bool
+	oldValue       func(context.Context) (*CatalogSourceLink, error)
+	predicates     []predicate.CatalogSourceLink
 }
 
 var _ ent.Mutation = (*CatalogSourceLinkMutation)(nil)
@@ -16226,6 +16229,125 @@ func (m *CatalogSourceLinkMutation) ResetExcludedAt() {
 	delete(m.clearedFields, catalogsourcelink.FieldExcludedAt)
 }
 
+// SetExcludedBy sets the "excluded_by" field.
+func (m *CatalogSourceLinkMutation) SetExcludedBy(i int) {
+	m.excluded_by = &i
+	m.addexcluded_by = nil
+}
+
+// ExcludedBy returns the value of the "excluded_by" field in the mutation.
+func (m *CatalogSourceLinkMutation) ExcludedBy() (r int, exists bool) {
+	v := m.excluded_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExcludedBy returns the old "excluded_by" field's value of the CatalogSourceLink entity.
+// If the CatalogSourceLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSourceLinkMutation) OldExcludedBy(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExcludedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExcludedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExcludedBy: %w", err)
+	}
+	return oldValue.ExcludedBy, nil
+}
+
+// AddExcludedBy adds i to the "excluded_by" field.
+func (m *CatalogSourceLinkMutation) AddExcludedBy(i int) {
+	if m.addexcluded_by != nil {
+		*m.addexcluded_by += i
+	} else {
+		m.addexcluded_by = &i
+	}
+}
+
+// AddedExcludedBy returns the value that was added to the "excluded_by" field in this mutation.
+func (m *CatalogSourceLinkMutation) AddedExcludedBy() (r int, exists bool) {
+	v := m.addexcluded_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearExcludedBy clears the value of the "excluded_by" field.
+func (m *CatalogSourceLinkMutation) ClearExcludedBy() {
+	m.excluded_by = nil
+	m.addexcluded_by = nil
+	m.clearedFields[catalogsourcelink.FieldExcludedBy] = struct{}{}
+}
+
+// ExcludedByCleared returns if the "excluded_by" field was cleared in this mutation.
+func (m *CatalogSourceLinkMutation) ExcludedByCleared() bool {
+	_, ok := m.clearedFields[catalogsourcelink.FieldExcludedBy]
+	return ok
+}
+
+// ResetExcludedBy resets all changes to the "excluded_by" field.
+func (m *CatalogSourceLinkMutation) ResetExcludedBy() {
+	m.excluded_by = nil
+	m.addexcluded_by = nil
+	delete(m.clearedFields, catalogsourcelink.FieldExcludedBy)
+}
+
+// SetTitle sets the "title" field.
+func (m *CatalogSourceLinkMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *CatalogSourceLinkMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the CatalogSourceLink entity.
+// If the CatalogSourceLink object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSourceLinkMutation) OldTitle(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ClearTitle clears the value of the "title" field.
+func (m *CatalogSourceLinkMutation) ClearTitle() {
+	m.title = nil
+	m.clearedFields[catalogsourcelink.FieldTitle] = struct{}{}
+}
+
+// TitleCleared returns if the "title" field was cleared in this mutation.
+func (m *CatalogSourceLinkMutation) TitleCleared() bool {
+	_, ok := m.clearedFields[catalogsourcelink.FieldTitle]
+	return ok
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *CatalogSourceLinkMutation) ResetTitle() {
+	m.title = nil
+	delete(m.clearedFields, catalogsourcelink.FieldTitle)
+}
+
 // SetFailures sets the "failures" field.
 func (m *CatalogSourceLinkMutation) SetFailures(i int) {
 	m.failures = &i
@@ -16437,7 +16559,7 @@ func (m *CatalogSourceLinkMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CatalogSourceLinkMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 14)
 	if m.source != nil {
 		fields = append(fields, catalogsourcelink.FieldSource)
 	}
@@ -16461,6 +16583,12 @@ func (m *CatalogSourceLinkMutation) Fields() []string {
 	}
 	if m.excluded_at != nil {
 		fields = append(fields, catalogsourcelink.FieldExcludedAt)
+	}
+	if m.excluded_by != nil {
+		fields = append(fields, catalogsourcelink.FieldExcludedBy)
+	}
+	if m.title != nil {
+		fields = append(fields, catalogsourcelink.FieldTitle)
 	}
 	if m.failures != nil {
 		fields = append(fields, catalogsourcelink.FieldFailures)
@@ -16498,6 +16626,10 @@ func (m *CatalogSourceLinkMutation) Field(name string) (ent.Value, bool) {
 		return m.MissingAt()
 	case catalogsourcelink.FieldExcludedAt:
 		return m.ExcludedAt()
+	case catalogsourcelink.FieldExcludedBy:
+		return m.ExcludedBy()
+	case catalogsourcelink.FieldTitle:
+		return m.Title()
 	case catalogsourcelink.FieldFailures:
 		return m.Failures()
 	case catalogsourcelink.FieldLastError:
@@ -16531,6 +16663,10 @@ func (m *CatalogSourceLinkMutation) OldField(ctx context.Context, name string) (
 		return m.OldMissingAt(ctx)
 	case catalogsourcelink.FieldExcludedAt:
 		return m.OldExcludedAt(ctx)
+	case catalogsourcelink.FieldExcludedBy:
+		return m.OldExcludedBy(ctx)
+	case catalogsourcelink.FieldTitle:
+		return m.OldTitle(ctx)
 	case catalogsourcelink.FieldFailures:
 		return m.OldFailures(ctx)
 	case catalogsourcelink.FieldLastError:
@@ -16604,6 +16740,20 @@ func (m *CatalogSourceLinkMutation) SetField(name string, value ent.Value) error
 		}
 		m.SetExcludedAt(v)
 		return nil
+	case catalogsourcelink.FieldExcludedBy:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExcludedBy(v)
+		return nil
+	case catalogsourcelink.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
 	case catalogsourcelink.FieldFailures:
 		v, ok := value.(int)
 		if !ok {
@@ -16643,6 +16793,9 @@ func (m *CatalogSourceLinkMutation) AddedFields() []string {
 	if m.addlocal_id != nil {
 		fields = append(fields, catalogsourcelink.FieldLocalID)
 	}
+	if m.addexcluded_by != nil {
+		fields = append(fields, catalogsourcelink.FieldExcludedBy)
+	}
 	if m.addfailures != nil {
 		fields = append(fields, catalogsourcelink.FieldFailures)
 	}
@@ -16656,6 +16809,8 @@ func (m *CatalogSourceLinkMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case catalogsourcelink.FieldLocalID:
 		return m.AddedLocalID()
+	case catalogsourcelink.FieldExcludedBy:
+		return m.AddedExcludedBy()
 	case catalogsourcelink.FieldFailures:
 		return m.AddedFailures()
 	}
@@ -16673,6 +16828,13 @@ func (m *CatalogSourceLinkMutation) AddField(name string, value ent.Value) error
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddLocalID(v)
+		return nil
+	case catalogsourcelink.FieldExcludedBy:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddExcludedBy(v)
 		return nil
 	case catalogsourcelink.FieldFailures:
 		v, ok := value.(int)
@@ -16700,6 +16862,12 @@ func (m *CatalogSourceLinkMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(catalogsourcelink.FieldExcludedAt) {
 		fields = append(fields, catalogsourcelink.FieldExcludedAt)
+	}
+	if m.FieldCleared(catalogsourcelink.FieldExcludedBy) {
+		fields = append(fields, catalogsourcelink.FieldExcludedBy)
+	}
+	if m.FieldCleared(catalogsourcelink.FieldTitle) {
+		fields = append(fields, catalogsourcelink.FieldTitle)
 	}
 	if m.FieldCleared(catalogsourcelink.FieldLastError) {
 		fields = append(fields, catalogsourcelink.FieldLastError)
@@ -16729,6 +16897,12 @@ func (m *CatalogSourceLinkMutation) ClearField(name string) error {
 		return nil
 	case catalogsourcelink.FieldExcludedAt:
 		m.ClearExcludedAt()
+		return nil
+	case catalogsourcelink.FieldExcludedBy:
+		m.ClearExcludedBy()
+		return nil
+	case catalogsourcelink.FieldTitle:
+		m.ClearTitle()
 		return nil
 	case catalogsourcelink.FieldLastError:
 		m.ClearLastError()
@@ -16764,6 +16938,12 @@ func (m *CatalogSourceLinkMutation) ResetField(name string) error {
 		return nil
 	case catalogsourcelink.FieldExcludedAt:
 		m.ResetExcludedAt()
+		return nil
+	case catalogsourcelink.FieldExcludedBy:
+		m.ResetExcludedBy()
+		return nil
+	case catalogsourcelink.FieldTitle:
+		m.ResetTitle()
 		return nil
 	case catalogsourcelink.FieldFailures:
 		m.ResetFailures()
@@ -16837,6 +17017,11 @@ type CatalogSyncCursorMutation struct {
 	id            *int
 	source        *string
 	cursor        *string
+	pulled_at     *time.Time
+	changes       *int
+	addchanges    *int
+	failed_at     *time.Time
+	last_error    *string
 	created       *time.Time
 	updated       *time.Time
 	clearedFields map[string]struct{}
@@ -17021,6 +17206,209 @@ func (m *CatalogSyncCursorMutation) ResetCursor() {
 	m.cursor = nil
 }
 
+// SetPulledAt sets the "pulled_at" field.
+func (m *CatalogSyncCursorMutation) SetPulledAt(t time.Time) {
+	m.pulled_at = &t
+}
+
+// PulledAt returns the value of the "pulled_at" field in the mutation.
+func (m *CatalogSyncCursorMutation) PulledAt() (r time.Time, exists bool) {
+	v := m.pulled_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPulledAt returns the old "pulled_at" field's value of the CatalogSyncCursor entity.
+// If the CatalogSyncCursor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSyncCursorMutation) OldPulledAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPulledAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPulledAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPulledAt: %w", err)
+	}
+	return oldValue.PulledAt, nil
+}
+
+// ClearPulledAt clears the value of the "pulled_at" field.
+func (m *CatalogSyncCursorMutation) ClearPulledAt() {
+	m.pulled_at = nil
+	m.clearedFields[catalogsynccursor.FieldPulledAt] = struct{}{}
+}
+
+// PulledAtCleared returns if the "pulled_at" field was cleared in this mutation.
+func (m *CatalogSyncCursorMutation) PulledAtCleared() bool {
+	_, ok := m.clearedFields[catalogsynccursor.FieldPulledAt]
+	return ok
+}
+
+// ResetPulledAt resets all changes to the "pulled_at" field.
+func (m *CatalogSyncCursorMutation) ResetPulledAt() {
+	m.pulled_at = nil
+	delete(m.clearedFields, catalogsynccursor.FieldPulledAt)
+}
+
+// SetChanges sets the "changes" field.
+func (m *CatalogSyncCursorMutation) SetChanges(i int) {
+	m.changes = &i
+	m.addchanges = nil
+}
+
+// Changes returns the value of the "changes" field in the mutation.
+func (m *CatalogSyncCursorMutation) Changes() (r int, exists bool) {
+	v := m.changes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChanges returns the old "changes" field's value of the CatalogSyncCursor entity.
+// If the CatalogSyncCursor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSyncCursorMutation) OldChanges(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChanges is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChanges requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChanges: %w", err)
+	}
+	return oldValue.Changes, nil
+}
+
+// AddChanges adds i to the "changes" field.
+func (m *CatalogSyncCursorMutation) AddChanges(i int) {
+	if m.addchanges != nil {
+		*m.addchanges += i
+	} else {
+		m.addchanges = &i
+	}
+}
+
+// AddedChanges returns the value that was added to the "changes" field in this mutation.
+func (m *CatalogSyncCursorMutation) AddedChanges() (r int, exists bool) {
+	v := m.addchanges
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetChanges resets all changes to the "changes" field.
+func (m *CatalogSyncCursorMutation) ResetChanges() {
+	m.changes = nil
+	m.addchanges = nil
+}
+
+// SetFailedAt sets the "failed_at" field.
+func (m *CatalogSyncCursorMutation) SetFailedAt(t time.Time) {
+	m.failed_at = &t
+}
+
+// FailedAt returns the value of the "failed_at" field in the mutation.
+func (m *CatalogSyncCursorMutation) FailedAt() (r time.Time, exists bool) {
+	v := m.failed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFailedAt returns the old "failed_at" field's value of the CatalogSyncCursor entity.
+// If the CatalogSyncCursor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSyncCursorMutation) OldFailedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFailedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFailedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFailedAt: %w", err)
+	}
+	return oldValue.FailedAt, nil
+}
+
+// ClearFailedAt clears the value of the "failed_at" field.
+func (m *CatalogSyncCursorMutation) ClearFailedAt() {
+	m.failed_at = nil
+	m.clearedFields[catalogsynccursor.FieldFailedAt] = struct{}{}
+}
+
+// FailedAtCleared returns if the "failed_at" field was cleared in this mutation.
+func (m *CatalogSyncCursorMutation) FailedAtCleared() bool {
+	_, ok := m.clearedFields[catalogsynccursor.FieldFailedAt]
+	return ok
+}
+
+// ResetFailedAt resets all changes to the "failed_at" field.
+func (m *CatalogSyncCursorMutation) ResetFailedAt() {
+	m.failed_at = nil
+	delete(m.clearedFields, catalogsynccursor.FieldFailedAt)
+}
+
+// SetLastError sets the "last_error" field.
+func (m *CatalogSyncCursorMutation) SetLastError(s string) {
+	m.last_error = &s
+}
+
+// LastError returns the value of the "last_error" field in the mutation.
+func (m *CatalogSyncCursorMutation) LastError() (r string, exists bool) {
+	v := m.last_error
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastError returns the old "last_error" field's value of the CatalogSyncCursor entity.
+// If the CatalogSyncCursor object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CatalogSyncCursorMutation) OldLastError(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastError is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastError requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastError: %w", err)
+	}
+	return oldValue.LastError, nil
+}
+
+// ClearLastError clears the value of the "last_error" field.
+func (m *CatalogSyncCursorMutation) ClearLastError() {
+	m.last_error = nil
+	m.clearedFields[catalogsynccursor.FieldLastError] = struct{}{}
+}
+
+// LastErrorCleared returns if the "last_error" field was cleared in this mutation.
+func (m *CatalogSyncCursorMutation) LastErrorCleared() bool {
+	_, ok := m.clearedFields[catalogsynccursor.FieldLastError]
+	return ok
+}
+
+// ResetLastError resets all changes to the "last_error" field.
+func (m *CatalogSyncCursorMutation) ResetLastError() {
+	m.last_error = nil
+	delete(m.clearedFields, catalogsynccursor.FieldLastError)
+}
+
 // SetCreated sets the "created" field.
 func (m *CatalogSyncCursorMutation) SetCreated(t time.Time) {
 	m.created = &t
@@ -17127,12 +17515,24 @@ func (m *CatalogSyncCursorMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CatalogSyncCursorMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 8)
 	if m.source != nil {
 		fields = append(fields, catalogsynccursor.FieldSource)
 	}
 	if m.cursor != nil {
 		fields = append(fields, catalogsynccursor.FieldCursor)
+	}
+	if m.pulled_at != nil {
+		fields = append(fields, catalogsynccursor.FieldPulledAt)
+	}
+	if m.changes != nil {
+		fields = append(fields, catalogsynccursor.FieldChanges)
+	}
+	if m.failed_at != nil {
+		fields = append(fields, catalogsynccursor.FieldFailedAt)
+	}
+	if m.last_error != nil {
+		fields = append(fields, catalogsynccursor.FieldLastError)
 	}
 	if m.created != nil {
 		fields = append(fields, catalogsynccursor.FieldCreated)
@@ -17152,6 +17552,14 @@ func (m *CatalogSyncCursorMutation) Field(name string) (ent.Value, bool) {
 		return m.Source()
 	case catalogsynccursor.FieldCursor:
 		return m.Cursor()
+	case catalogsynccursor.FieldPulledAt:
+		return m.PulledAt()
+	case catalogsynccursor.FieldChanges:
+		return m.Changes()
+	case catalogsynccursor.FieldFailedAt:
+		return m.FailedAt()
+	case catalogsynccursor.FieldLastError:
+		return m.LastError()
 	case catalogsynccursor.FieldCreated:
 		return m.Created()
 	case catalogsynccursor.FieldUpdated:
@@ -17169,6 +17577,14 @@ func (m *CatalogSyncCursorMutation) OldField(ctx context.Context, name string) (
 		return m.OldSource(ctx)
 	case catalogsynccursor.FieldCursor:
 		return m.OldCursor(ctx)
+	case catalogsynccursor.FieldPulledAt:
+		return m.OldPulledAt(ctx)
+	case catalogsynccursor.FieldChanges:
+		return m.OldChanges(ctx)
+	case catalogsynccursor.FieldFailedAt:
+		return m.OldFailedAt(ctx)
+	case catalogsynccursor.FieldLastError:
+		return m.OldLastError(ctx)
 	case catalogsynccursor.FieldCreated:
 		return m.OldCreated(ctx)
 	case catalogsynccursor.FieldUpdated:
@@ -17196,6 +17612,34 @@ func (m *CatalogSyncCursorMutation) SetField(name string, value ent.Value) error
 		}
 		m.SetCursor(v)
 		return nil
+	case catalogsynccursor.FieldPulledAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPulledAt(v)
+		return nil
+	case catalogsynccursor.FieldChanges:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChanges(v)
+		return nil
+	case catalogsynccursor.FieldFailedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFailedAt(v)
+		return nil
+	case catalogsynccursor.FieldLastError:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastError(v)
+		return nil
 	case catalogsynccursor.FieldCreated:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -17217,13 +17661,21 @@ func (m *CatalogSyncCursorMutation) SetField(name string, value ent.Value) error
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *CatalogSyncCursorMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addchanges != nil {
+		fields = append(fields, catalogsynccursor.FieldChanges)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *CatalogSyncCursorMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case catalogsynccursor.FieldChanges:
+		return m.AddedChanges()
+	}
 	return nil, false
 }
 
@@ -17232,6 +17684,13 @@ func (m *CatalogSyncCursorMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *CatalogSyncCursorMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case catalogsynccursor.FieldChanges:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddChanges(v)
+		return nil
 	}
 	return fmt.Errorf("unknown CatalogSyncCursor numeric field %s", name)
 }
@@ -17239,7 +17698,17 @@ func (m *CatalogSyncCursorMutation) AddField(name string, value ent.Value) error
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *CatalogSyncCursorMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(catalogsynccursor.FieldPulledAt) {
+		fields = append(fields, catalogsynccursor.FieldPulledAt)
+	}
+	if m.FieldCleared(catalogsynccursor.FieldFailedAt) {
+		fields = append(fields, catalogsynccursor.FieldFailedAt)
+	}
+	if m.FieldCleared(catalogsynccursor.FieldLastError) {
+		fields = append(fields, catalogsynccursor.FieldLastError)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -17252,6 +17721,17 @@ func (m *CatalogSyncCursorMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *CatalogSyncCursorMutation) ClearField(name string) error {
+	switch name {
+	case catalogsynccursor.FieldPulledAt:
+		m.ClearPulledAt()
+		return nil
+	case catalogsynccursor.FieldFailedAt:
+		m.ClearFailedAt()
+		return nil
+	case catalogsynccursor.FieldLastError:
+		m.ClearLastError()
+		return nil
+	}
 	return fmt.Errorf("unknown CatalogSyncCursor nullable field %s", name)
 }
 
@@ -17264,6 +17744,18 @@ func (m *CatalogSyncCursorMutation) ResetField(name string) error {
 		return nil
 	case catalogsynccursor.FieldCursor:
 		m.ResetCursor()
+		return nil
+	case catalogsynccursor.FieldPulledAt:
+		m.ResetPulledAt()
+		return nil
+	case catalogsynccursor.FieldChanges:
+		m.ResetChanges()
+		return nil
+	case catalogsynccursor.FieldFailedAt:
+		m.ResetFailedAt()
+		return nil
+	case catalogsynccursor.FieldLastError:
+		m.ResetLastError()
 		return nil
 	case catalogsynccursor.FieldCreated:
 		m.ResetCreated()

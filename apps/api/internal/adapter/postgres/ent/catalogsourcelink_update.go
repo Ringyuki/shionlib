@@ -172,6 +172,53 @@ func (_u *CatalogSourceLinkUpdate) ClearExcludedAt() *CatalogSourceLinkUpdate {
 	return _u
 }
 
+// SetExcludedBy sets the "excluded_by" field.
+func (_u *CatalogSourceLinkUpdate) SetExcludedBy(v int) *CatalogSourceLinkUpdate {
+	_u.mutation.ResetExcludedBy()
+	_u.mutation.SetExcludedBy(v)
+	return _u
+}
+
+// SetNillableExcludedBy sets the "excluded_by" field if the given value is not nil.
+func (_u *CatalogSourceLinkUpdate) SetNillableExcludedBy(v *int) *CatalogSourceLinkUpdate {
+	if v != nil {
+		_u.SetExcludedBy(*v)
+	}
+	return _u
+}
+
+// AddExcludedBy adds value to the "excluded_by" field.
+func (_u *CatalogSourceLinkUpdate) AddExcludedBy(v int) *CatalogSourceLinkUpdate {
+	_u.mutation.AddExcludedBy(v)
+	return _u
+}
+
+// ClearExcludedBy clears the value of the "excluded_by" field.
+func (_u *CatalogSourceLinkUpdate) ClearExcludedBy() *CatalogSourceLinkUpdate {
+	_u.mutation.ClearExcludedBy()
+	return _u
+}
+
+// SetTitle sets the "title" field.
+func (_u *CatalogSourceLinkUpdate) SetTitle(v string) *CatalogSourceLinkUpdate {
+	_u.mutation.SetTitle(v)
+	return _u
+}
+
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (_u *CatalogSourceLinkUpdate) SetNillableTitle(v *string) *CatalogSourceLinkUpdate {
+	if v != nil {
+		_u.SetTitle(*v)
+	}
+	return _u
+}
+
+// ClearTitle clears the value of the "title" field.
+func (_u *CatalogSourceLinkUpdate) ClearTitle() *CatalogSourceLinkUpdate {
+	_u.mutation.ClearTitle()
+	return _u
+}
+
 // SetFailures sets the "failures" field.
 func (_u *CatalogSourceLinkUpdate) SetFailures(v int) *CatalogSourceLinkUpdate {
 	_u.mutation.ResetFailures()
@@ -282,6 +329,11 @@ func (_u *CatalogSourceLinkUpdate) check() error {
 			return &ValidationError{Name: "revision", err: fmt.Errorf(`ent: validator failed for field "CatalogSourceLink.revision": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Title(); ok {
+		if err := catalogsourcelink.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "CatalogSourceLink.title": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.LastError(); ok {
 		if err := catalogsourcelink.LastErrorValidator(v); err != nil {
 			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "CatalogSourceLink.last_error": %w`, err)}
@@ -346,6 +398,21 @@ func (_u *CatalogSourceLinkUpdate) sqlSave(ctx context.Context) (_node int, err 
 	}
 	if _u.mutation.ExcludedAtCleared() {
 		_spec.ClearField(catalogsourcelink.FieldExcludedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ExcludedBy(); ok {
+		_spec.SetField(catalogsourcelink.FieldExcludedBy, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedExcludedBy(); ok {
+		_spec.AddField(catalogsourcelink.FieldExcludedBy, field.TypeInt, value)
+	}
+	if _u.mutation.ExcludedByCleared() {
+		_spec.ClearField(catalogsourcelink.FieldExcludedBy, field.TypeInt)
+	}
+	if value, ok := _u.mutation.Title(); ok {
+		_spec.SetField(catalogsourcelink.FieldTitle, field.TypeString, value)
+	}
+	if _u.mutation.TitleCleared() {
+		_spec.ClearField(catalogsourcelink.FieldTitle, field.TypeString)
 	}
 	if value, ok := _u.mutation.Failures(); ok {
 		_spec.SetField(catalogsourcelink.FieldFailures, field.TypeInt, value)
@@ -527,6 +594,53 @@ func (_u *CatalogSourceLinkUpdateOne) ClearExcludedAt() *CatalogSourceLinkUpdate
 	return _u
 }
 
+// SetExcludedBy sets the "excluded_by" field.
+func (_u *CatalogSourceLinkUpdateOne) SetExcludedBy(v int) *CatalogSourceLinkUpdateOne {
+	_u.mutation.ResetExcludedBy()
+	_u.mutation.SetExcludedBy(v)
+	return _u
+}
+
+// SetNillableExcludedBy sets the "excluded_by" field if the given value is not nil.
+func (_u *CatalogSourceLinkUpdateOne) SetNillableExcludedBy(v *int) *CatalogSourceLinkUpdateOne {
+	if v != nil {
+		_u.SetExcludedBy(*v)
+	}
+	return _u
+}
+
+// AddExcludedBy adds value to the "excluded_by" field.
+func (_u *CatalogSourceLinkUpdateOne) AddExcludedBy(v int) *CatalogSourceLinkUpdateOne {
+	_u.mutation.AddExcludedBy(v)
+	return _u
+}
+
+// ClearExcludedBy clears the value of the "excluded_by" field.
+func (_u *CatalogSourceLinkUpdateOne) ClearExcludedBy() *CatalogSourceLinkUpdateOne {
+	_u.mutation.ClearExcludedBy()
+	return _u
+}
+
+// SetTitle sets the "title" field.
+func (_u *CatalogSourceLinkUpdateOne) SetTitle(v string) *CatalogSourceLinkUpdateOne {
+	_u.mutation.SetTitle(v)
+	return _u
+}
+
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (_u *CatalogSourceLinkUpdateOne) SetNillableTitle(v *string) *CatalogSourceLinkUpdateOne {
+	if v != nil {
+		_u.SetTitle(*v)
+	}
+	return _u
+}
+
+// ClearTitle clears the value of the "title" field.
+func (_u *CatalogSourceLinkUpdateOne) ClearTitle() *CatalogSourceLinkUpdateOne {
+	_u.mutation.ClearTitle()
+	return _u
+}
+
 // SetFailures sets the "failures" field.
 func (_u *CatalogSourceLinkUpdateOne) SetFailures(v int) *CatalogSourceLinkUpdateOne {
 	_u.mutation.ResetFailures()
@@ -650,6 +764,11 @@ func (_u *CatalogSourceLinkUpdateOne) check() error {
 			return &ValidationError{Name: "revision", err: fmt.Errorf(`ent: validator failed for field "CatalogSourceLink.revision": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Title(); ok {
+		if err := catalogsourcelink.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "CatalogSourceLink.title": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.LastError(); ok {
 		if err := catalogsourcelink.LastErrorValidator(v); err != nil {
 			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "CatalogSourceLink.last_error": %w`, err)}
@@ -731,6 +850,21 @@ func (_u *CatalogSourceLinkUpdateOne) sqlSave(ctx context.Context) (_node *Catal
 	}
 	if _u.mutation.ExcludedAtCleared() {
 		_spec.ClearField(catalogsourcelink.FieldExcludedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ExcludedBy(); ok {
+		_spec.SetField(catalogsourcelink.FieldExcludedBy, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedExcludedBy(); ok {
+		_spec.AddField(catalogsourcelink.FieldExcludedBy, field.TypeInt, value)
+	}
+	if _u.mutation.ExcludedByCleared() {
+		_spec.ClearField(catalogsourcelink.FieldExcludedBy, field.TypeInt)
+	}
+	if value, ok := _u.mutation.Title(); ok {
+		_spec.SetField(catalogsourcelink.FieldTitle, field.TypeString, value)
+	}
+	if _u.mutation.TitleCleared() {
+		_spec.ClearField(catalogsourcelink.FieldTitle, field.TypeString)
 	}
 	if value, ok := _u.mutation.Failures(); ok {
 		_spec.SetField(catalogsourcelink.FieldFailures, field.TypeInt, value)

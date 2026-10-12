@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"slices"
+	"strconv"
 	"testing"
 	"time"
 
@@ -11,6 +12,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/gamepg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgtest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/catalog"
+	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/patch"
 )
@@ -37,10 +40,10 @@ func TestAdminSearchFiltersSortsAndPicksTheFirstCover(t *testing.T) {
 		t.Fatalf("sorted page: %+v %d %v", entries, total, err)
 	}
 	hidden := entries[0]
-	if hidden.CoverURL == nil || *hidden.CoverURL != "b-first.webp" || !hidden.NSFW || hidden.Status != game.StatusHidden || hidden.Creator.ID == 0 || hidden.Creator.Name == "" {
+	if hidden.Cover == nil || hidden.Cover.URL != "b-first.webp" || !hidden.NSFW || hidden.Status != game.StatusHidden || hidden.Creator.ID == 0 || hidden.Creator.Name == "" {
 		t.Fatalf("entry fields: %+v", hidden)
 	}
-	if entries[1].CoverURL != nil {
+	if entries[1].Cover != nil {
 		t.Fatalf("games without covers have no cover: %+v", entries[1])
 	}
 
@@ -52,6 +55,58 @@ func TestAdminSearchFiltersSortsAndPicksTheFirstCover(t *testing.T) {
 	entries, total, err = store.Search(ctx, game.AdminFilter{Status: &visible, SortBy: game.AdminSortByID, Descending: true}, game.Page{Number: 1, Size: 10})
 	if err != nil || total != 2 || !slices.Equal(entryIDs(entries), []int{third, first}) {
 		t.Fatalf("status filter: %v %d %v", entryIDs(entries), total, err)
+	}
+	entries, total, err = store.Search(ctx, game.AdminFilter{Search: strconv.Itoa(third), SortBy: game.AdminSortByID}, game.Page{Number: 1, Size: 10})
+	if err != nil || total != 1 || entries[0].ID != third {
+		t.Fatalf("a number finds the game with that id: %v %d %v", entryIDs(entries), total, err)
+	}
+}
+
+func TestAdminSearchCountsPublishedResourcesAndNamesTheSource(t *testing.T) {
+	db := pgtest.New(t)
+	ctx := context.Background()
+	store := gamepg.NewAdminStore(db.Ent)
+	sourced := db.Game(t, func(c *ent.GameCreate) { c.SetTitleJp("sourced") })
+	bare := db.Game(t, func(c *ent.GameCreate) { c.SetTitleJp("bare") })
+	published := time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC)
+	creator := db.User(t)
+	resource := func(status int, publishedAt *time.Time) {
+		t.Helper()
+		db.Ent.GameDownloadResource.Create().
+			SetGameID(sourced).
+			SetCreatorID(creator).
+			SetPlatform([]string{"win"}).
+			SetLanguage([]string{"zh"}).
+			SetStatus(status).
+			SetNillablePublishedAt(publishedAt).
+			ExecX(ctx)
+	}
+	resource(download.ResourceActive, &published)
+	resource(download.ResourceActive, &published)
+	resource(download.ResourceActive, nil)
+	resource(download.ResourceActive+1, &published)
+	link := func(source, externalID string, excludedAt *time.Time) {
+		t.Helper()
+		db.Ent.CatalogSourceLink.Create().
+			SetSource(source).
+			SetEntity(string(catalog.EntityGame)).
+			SetExternalID(externalID).
+			SetLocalID(sourced).
+			SetNillableExcludedAt(excludedAt).
+			ExecX(ctx)
+	}
+	link("retired", "9", &published)
+	link("hikarinagi", "18342", nil)
+
+	entries, _, err := store.Search(ctx, game.AdminFilter{SortBy: game.AdminSortByID}, game.Page{Number: 1, Size: 10})
+	if err != nil || len(entries) != 2 || entries[0].ID != sourced || entries[1].ID != bare {
+		t.Fatalf("entries: %+v %v", entries, err)
+	}
+	if entries[0].Resources != 2 || entries[0].Source == nil || *entries[0].Source != (game.SourceRef{Source: "hikarinagi", ExternalID: "18342"}) {
+		t.Fatalf("published resources and the source still in use: %+v", entries[0])
+	}
+	if entries[1].Resources != 0 || entries[1].Source != nil {
+		t.Fatalf("a game without resources or source: %+v", entries[1])
 	}
 }
 

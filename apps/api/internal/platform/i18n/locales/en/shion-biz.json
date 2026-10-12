@@ -32,6 +32,8 @@
   "GAME_DATA_CONSISTENCY_CHECK_FAILED": "game data consistency check failed",
   "GAME_MISSING_BANGUMI_OR_VNDB_ID": "missing bangumi id or vndb id",
   "GAME_ENTRY_MIRRORED": "Entry data is maintained on hikarinagi; please edit it there",
+  "GAME_BANGUMI_NOT_CONFIGURED": "the Bangumi application id and secret are not set",
+  "GAME_BANGUMI_AUTHORIZATION_INVALID": "the Bangumi authorization request is invalid or has expired, start it again",
   "GAME_DEVELOPER_NOT_FOUND": "developer not found",
   "GAME_DEVELOPER_ALREADY_EXISTS": "developer already exists",
   "GAME_DEVELOPER_MIN_ONE_REQUIRED": "at least one developer is required",
@@ -156,5 +158,9 @@
   "GAME_DOWNLOAD_RESOURCE_DUPLICATE_FILE_NAME": "This resource already has a file with the same name",
   "INSPECTION_NOT_FOUND": "the record of the file contents was not found",
   "INSPECTION_ENTRY_NOT_FOUND": "the entry was not found in the file",
-  "INSPECTION_ENTRY_NO_PREVIEW": "no preview is kept for this entry"
+  "INSPECTION_ENTRY_NO_PREVIEW": "no preview is kept for this entry",
+  "CATALOG_SOURCE_UNAVAILABLE": "the catalog source is unavailable",
+  "CATALOG_UNKNOWN_SOURCE": "unknown catalog source {source}",
+  "CATALOG_ENTRY_NOT_FOUND": "the catalog source has no such entry",
+  "CATALOG_NO_CHANGE_FEED": "the catalog source {source} reports no changes to pull"
 }

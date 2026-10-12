@@ -34,6 +34,62 @@ func (_c *CatalogSyncCursorCreate) SetCursor(v string) *CatalogSyncCursorCreate 
 	return _c
 }
 
+// SetPulledAt sets the "pulled_at" field.
+func (_c *CatalogSyncCursorCreate) SetPulledAt(v time.Time) *CatalogSyncCursorCreate {
+	_c.mutation.SetPulledAt(v)
+	return _c
+}
+
+// SetNillablePulledAt sets the "pulled_at" field if the given value is not nil.
+func (_c *CatalogSyncCursorCreate) SetNillablePulledAt(v *time.Time) *CatalogSyncCursorCreate {
+	if v != nil {
+		_c.SetPulledAt(*v)
+	}
+	return _c
+}
+
+// SetChanges sets the "changes" field.
+func (_c *CatalogSyncCursorCreate) SetChanges(v int) *CatalogSyncCursorCreate {
+	_c.mutation.SetChanges(v)
+	return _c
+}
+
+// SetNillableChanges sets the "changes" field if the given value is not nil.
+func (_c *CatalogSyncCursorCreate) SetNillableChanges(v *int) *CatalogSyncCursorCreate {
+	if v != nil {
+		_c.SetChanges(*v)
+	}
+	return _c
+}
+
+// SetFailedAt sets the "failed_at" field.
+func (_c *CatalogSyncCursorCreate) SetFailedAt(v time.Time) *CatalogSyncCursorCreate {
+	_c.mutation.SetFailedAt(v)
+	return _c
+}
+
+// SetNillableFailedAt sets the "failed_at" field if the given value is not nil.
+func (_c *CatalogSyncCursorCreate) SetNillableFailedAt(v *time.Time) *CatalogSyncCursorCreate {
+	if v != nil {
+		_c.SetFailedAt(*v)
+	}
+	return _c
+}
+
+// SetLastError sets the "last_error" field.
+func (_c *CatalogSyncCursorCreate) SetLastError(v string) *CatalogSyncCursorCreate {
+	_c.mutation.SetLastError(v)
+	return _c
+}
+
+// SetNillableLastError sets the "last_error" field if the given value is not nil.
+func (_c *CatalogSyncCursorCreate) SetNillableLastError(v *string) *CatalogSyncCursorCreate {
+	if v != nil {
+		_c.SetLastError(*v)
+	}
+	return _c
+}
+
 // SetCreated sets the "created" field.
 func (_c *CatalogSyncCursorCreate) SetCreated(v time.Time) *CatalogSyncCursorCreate {
 	_c.mutation.SetCreated(v)
@@ -103,6 +159,10 @@ func (_c *CatalogSyncCursorCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *CatalogSyncCursorCreate) defaults() {
+	if _, ok := _c.mutation.Changes(); !ok {
+		v := catalogsynccursor.DefaultChanges
+		_c.mutation.SetChanges(v)
+	}
 	if _, ok := _c.mutation.Created(); !ok {
 		v := catalogsynccursor.DefaultCreated()
 		_c.mutation.SetCreated(v)
@@ -129,6 +189,14 @@ func (_c *CatalogSyncCursorCreate) check() error {
 	if v, ok := _c.mutation.Cursor(); ok {
 		if err := catalogsynccursor.CursorValidator(v); err != nil {
 			return &ValidationError{Name: "cursor", err: fmt.Errorf(`ent: validator failed for field "CatalogSyncCursor.cursor": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Changes(); !ok {
+		return &ValidationError{Name: "changes", err: errors.New(`ent: missing required field "CatalogSyncCursor.changes"`)}
+	}
+	if v, ok := _c.mutation.LastError(); ok {
+		if err := catalogsynccursor.LastErrorValidator(v); err != nil {
+			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "CatalogSyncCursor.last_error": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Updated(); !ok {
@@ -174,6 +242,22 @@ func (_c *CatalogSyncCursorCreate) createSpec() (*CatalogSyncCursor, *sqlgraph.C
 	if value, ok := _c.mutation.Cursor(); ok {
 		_spec.SetField(catalogsynccursor.FieldCursor, field.TypeString, value)
 		_node.Cursor = value
+	}
+	if value, ok := _c.mutation.PulledAt(); ok {
+		_spec.SetField(catalogsynccursor.FieldPulledAt, field.TypeTime, value)
+		_node.PulledAt = &value
+	}
+	if value, ok := _c.mutation.Changes(); ok {
+		_spec.SetField(catalogsynccursor.FieldChanges, field.TypeInt, value)
+		_node.Changes = value
+	}
+	if value, ok := _c.mutation.FailedAt(); ok {
+		_spec.SetField(catalogsynccursor.FieldFailedAt, field.TypeTime, value)
+		_node.FailedAt = &value
+	}
+	if value, ok := _c.mutation.LastError(); ok {
+		_spec.SetField(catalogsynccursor.FieldLastError, field.TypeString, value)
+		_node.LastError = &value
 	}
 	if value, ok := _c.mutation.Created(); ok {
 		_spec.SetField(catalogsynccursor.FieldCreated, field.TypeTime, value)
@@ -256,6 +340,78 @@ func (u *CatalogSyncCursorUpsert) SetCursor(v string) *CatalogSyncCursorUpsert {
 // UpdateCursor sets the "cursor" field to the value that was provided on create.
 func (u *CatalogSyncCursorUpsert) UpdateCursor() *CatalogSyncCursorUpsert {
 	u.SetExcluded(catalogsynccursor.FieldCursor)
+	return u
+}
+
+// SetPulledAt sets the "pulled_at" field.
+func (u *CatalogSyncCursorUpsert) SetPulledAt(v time.Time) *CatalogSyncCursorUpsert {
+	u.Set(catalogsynccursor.FieldPulledAt, v)
+	return u
+}
+
+// UpdatePulledAt sets the "pulled_at" field to the value that was provided on create.
+func (u *CatalogSyncCursorUpsert) UpdatePulledAt() *CatalogSyncCursorUpsert {
+	u.SetExcluded(catalogsynccursor.FieldPulledAt)
+	return u
+}
+
+// ClearPulledAt clears the value of the "pulled_at" field.
+func (u *CatalogSyncCursorUpsert) ClearPulledAt() *CatalogSyncCursorUpsert {
+	u.SetNull(catalogsynccursor.FieldPulledAt)
+	return u
+}
+
+// SetChanges sets the "changes" field.
+func (u *CatalogSyncCursorUpsert) SetChanges(v int) *CatalogSyncCursorUpsert {
+	u.Set(catalogsynccursor.FieldChanges, v)
+	return u
+}
+
+// UpdateChanges sets the "changes" field to the value that was provided on create.
+func (u *CatalogSyncCursorUpsert) UpdateChanges() *CatalogSyncCursorUpsert {
+	u.SetExcluded(catalogsynccursor.FieldChanges)
+	return u
+}
+
+// AddChanges adds v to the "changes" field.
+func (u *CatalogSyncCursorUpsert) AddChanges(v int) *CatalogSyncCursorUpsert {
+	u.Add(catalogsynccursor.FieldChanges, v)
+	return u
+}
+
+// SetFailedAt sets the "failed_at" field.
+func (u *CatalogSyncCursorUpsert) SetFailedAt(v time.Time) *CatalogSyncCursorUpsert {
+	u.Set(catalogsynccursor.FieldFailedAt, v)
+	return u
+}
+
+// UpdateFailedAt sets the "failed_at" field to the value that was provided on create.
+func (u *CatalogSyncCursorUpsert) UpdateFailedAt() *CatalogSyncCursorUpsert {
+	u.SetExcluded(catalogsynccursor.FieldFailedAt)
+	return u
+}
+
+// ClearFailedAt clears the value of the "failed_at" field.
+func (u *CatalogSyncCursorUpsert) ClearFailedAt() *CatalogSyncCursorUpsert {
+	u.SetNull(catalogsynccursor.FieldFailedAt)
+	return u
+}
+
+// SetLastError sets the "last_error" field.
+func (u *CatalogSyncCursorUpsert) SetLastError(v string) *CatalogSyncCursorUpsert {
+	u.Set(catalogsynccursor.FieldLastError, v)
+	return u
+}
+
+// UpdateLastError sets the "last_error" field to the value that was provided on create.
+func (u *CatalogSyncCursorUpsert) UpdateLastError() *CatalogSyncCursorUpsert {
+	u.SetExcluded(catalogsynccursor.FieldLastError)
+	return u
+}
+
+// ClearLastError clears the value of the "last_error" field.
+func (u *CatalogSyncCursorUpsert) ClearLastError() *CatalogSyncCursorUpsert {
+	u.SetNull(catalogsynccursor.FieldLastError)
 	return u
 }
 
@@ -347,6 +503,90 @@ func (u *CatalogSyncCursorUpsertOne) SetCursor(v string) *CatalogSyncCursorUpser
 func (u *CatalogSyncCursorUpsertOne) UpdateCursor() *CatalogSyncCursorUpsertOne {
 	return u.Update(func(s *CatalogSyncCursorUpsert) {
 		s.UpdateCursor()
+	})
+}
+
+// SetPulledAt sets the "pulled_at" field.
+func (u *CatalogSyncCursorUpsertOne) SetPulledAt(v time.Time) *CatalogSyncCursorUpsertOne {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.SetPulledAt(v)
+	})
+}
+
+// UpdatePulledAt sets the "pulled_at" field to the value that was provided on create.
+func (u *CatalogSyncCursorUpsertOne) UpdatePulledAt() *CatalogSyncCursorUpsertOne {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.UpdatePulledAt()
+	})
+}
+
+// ClearPulledAt clears the value of the "pulled_at" field.
+func (u *CatalogSyncCursorUpsertOne) ClearPulledAt() *CatalogSyncCursorUpsertOne {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.ClearPulledAt()
+	})
+}
+
+// SetChanges sets the "changes" field.
+func (u *CatalogSyncCursorUpsertOne) SetChanges(v int) *CatalogSyncCursorUpsertOne {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.SetChanges(v)
+	})
+}
+
+// AddChanges adds v to the "changes" field.
+func (u *CatalogSyncCursorUpsertOne) AddChanges(v int) *CatalogSyncCursorUpsertOne {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.AddChanges(v)
+	})
+}
+
+// UpdateChanges sets the "changes" field to the value that was provided on create.
+func (u *CatalogSyncCursorUpsertOne) UpdateChanges() *CatalogSyncCursorUpsertOne {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.UpdateChanges()
+	})
+}
+
+// SetFailedAt sets the "failed_at" field.
+func (u *CatalogSyncCursorUpsertOne) SetFailedAt(v time.Time) *CatalogSyncCursorUpsertOne {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.SetFailedAt(v)
+	})
+}
+
+// UpdateFailedAt sets the "failed_at" field to the value that was provided on create.
+func (u *CatalogSyncCursorUpsertOne) UpdateFailedAt() *CatalogSyncCursorUpsertOne {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.UpdateFailedAt()
+	})
+}
+
+// ClearFailedAt clears the value of the "failed_at" field.
+func (u *CatalogSyncCursorUpsertOne) ClearFailedAt() *CatalogSyncCursorUpsertOne {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.ClearFailedAt()
+	})
+}
+
+// SetLastError sets the "last_error" field.
+func (u *CatalogSyncCursorUpsertOne) SetLastError(v string) *CatalogSyncCursorUpsertOne {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.SetLastError(v)
+	})
+}
+
+// UpdateLastError sets the "last_error" field to the value that was provided on create.
+func (u *CatalogSyncCursorUpsertOne) UpdateLastError() *CatalogSyncCursorUpsertOne {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.UpdateLastError()
+	})
+}
+
+// ClearLastError clears the value of the "last_error" field.
+func (u *CatalogSyncCursorUpsertOne) ClearLastError() *CatalogSyncCursorUpsertOne {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.ClearLastError()
 	})
 }
 
@@ -606,6 +846,90 @@ func (u *CatalogSyncCursorUpsertBulk) SetCursor(v string) *CatalogSyncCursorUpse
 func (u *CatalogSyncCursorUpsertBulk) UpdateCursor() *CatalogSyncCursorUpsertBulk {
 	return u.Update(func(s *CatalogSyncCursorUpsert) {
 		s.UpdateCursor()
+	})
+}
+
+// SetPulledAt sets the "pulled_at" field.
+func (u *CatalogSyncCursorUpsertBulk) SetPulledAt(v time.Time) *CatalogSyncCursorUpsertBulk {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.SetPulledAt(v)
+	})
+}
+
+// UpdatePulledAt sets the "pulled_at" field to the value that was provided on create.
+func (u *CatalogSyncCursorUpsertBulk) UpdatePulledAt() *CatalogSyncCursorUpsertBulk {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.UpdatePulledAt()
+	})
+}
+
+// ClearPulledAt clears the value of the "pulled_at" field.
+func (u *CatalogSyncCursorUpsertBulk) ClearPulledAt() *CatalogSyncCursorUpsertBulk {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.ClearPulledAt()
+	})
+}
+
+// SetChanges sets the "changes" field.
+func (u *CatalogSyncCursorUpsertBulk) SetChanges(v int) *CatalogSyncCursorUpsertBulk {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.SetChanges(v)
+	})
+}
+
+// AddChanges adds v to the "changes" field.
+func (u *CatalogSyncCursorUpsertBulk) AddChanges(v int) *CatalogSyncCursorUpsertBulk {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.AddChanges(v)
+	})
+}
+
+// UpdateChanges sets the "changes" field to the value that was provided on create.
+func (u *CatalogSyncCursorUpsertBulk) UpdateChanges() *CatalogSyncCursorUpsertBulk {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.UpdateChanges()
+	})
+}
+
+// SetFailedAt sets the "failed_at" field.
+func (u *CatalogSyncCursorUpsertBulk) SetFailedAt(v time.Time) *CatalogSyncCursorUpsertBulk {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.SetFailedAt(v)
+	})
+}
+
+// UpdateFailedAt sets the "failed_at" field to the value that was provided on create.
+func (u *CatalogSyncCursorUpsertBulk) UpdateFailedAt() *CatalogSyncCursorUpsertBulk {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.UpdateFailedAt()
+	})
+}
+
+// ClearFailedAt clears the value of the "failed_at" field.
+func (u *CatalogSyncCursorUpsertBulk) ClearFailedAt() *CatalogSyncCursorUpsertBulk {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.ClearFailedAt()
+	})
+}
+
+// SetLastError sets the "last_error" field.
+func (u *CatalogSyncCursorUpsertBulk) SetLastError(v string) *CatalogSyncCursorUpsertBulk {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.SetLastError(v)
+	})
+}
+
+// UpdateLastError sets the "last_error" field to the value that was provided on create.
+func (u *CatalogSyncCursorUpsertBulk) UpdateLastError() *CatalogSyncCursorUpsertBulk {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.UpdateLastError()
+	})
+}
+
+// ClearLastError clears the value of the "last_error" field.
+func (u *CatalogSyncCursorUpsertBulk) ClearLastError() *CatalogSyncCursorUpsertBulk {
+	return u.Update(func(s *CatalogSyncCursorUpsert) {
+		s.ClearLastError()
 	})
 }
 

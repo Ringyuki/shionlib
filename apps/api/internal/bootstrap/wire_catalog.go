@@ -6,6 +6,8 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/bangumi"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/characterpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/developerpg"
@@ -41,14 +43,16 @@ func wireCatalog(infra *Infra, shared *Shared, modules *Modules) {
 	preferences := gamepg.NewPreferenceStore(infra.Ent)
 
 	gameService := game.NewService(games, gameredis.NewRecentUpdates(infra.Redis), preferences, shared.GameCards, shared.Now, randomIndex)
-	scores := game.NewScoreService(games, bangumi.NewClient(bangumi.Options{
+	bangumiClient := bangumi.NewClient(bangumi.Options{
 		HTTP: outbound,
 		Credentials: func() (string, string) {
 			return game.BangumiCredentials(shared.Settings, cfg.Bangumi.ClientID, cfg.Bangumi.ClientSecret)
 		},
 		Tokens: bangumiredis.NewTokenStore(infra.Redis),
 		Now:    shared.Now,
-	}), vndb.NewClient(outbound, vndb.DefaultBaseURL), shared.Cache)
+	})
+	scores := game.NewScoreService(games, bangumiClient, vndb.NewClient(outbound, vndb.DefaultBaseURL), shared.Cache)
+	bangumiLink := game.NewBangumiLinkService(bangumiClient, bangumiredis.NewStateStore(infra.Redis), cfg.App.SiteURL, uuid.NewString)
 	hotScore := game.NewHotScoreService(games, shared.Settings)
 
 	characters := characterpg.NewRepository(infra.Ent)
@@ -70,6 +74,7 @@ func wireCatalog(infra *Infra, shared *Shared, modules *Modules) {
 
 	modules.Handlers = append(modules.Handlers,
 		gamehttp.NewHandler(gameService, scores, shared.Builder),
+		gamehttp.NewBangumiHandler(bangumiLink, shared.Builder, cfg.App.SiteURL, shared.Logger),
 		characterhttp.NewHandler(character.NewService(characters, shared.Transactor), shared.Builder),
 		developerhttp.NewHandler(developer.NewService(developers, shared.Transactor), shared.Builder),
 		searchhttp.NewHandler(searchService, shared.Builder),

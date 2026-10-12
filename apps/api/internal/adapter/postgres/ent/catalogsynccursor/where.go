@@ -64,6 +64,26 @@ func Cursor(v string) predicate.CatalogSyncCursor {
 	return predicate.CatalogSyncCursor(sql.FieldEQ(FieldCursor, v))
 }
 
+// PulledAt applies equality check predicate on the "pulled_at" field. It's identical to PulledAtEQ.
+func PulledAt(v time.Time) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldEQ(FieldPulledAt, v))
+}
+
+// Changes applies equality check predicate on the "changes" field. It's identical to ChangesEQ.
+func Changes(v int) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldEQ(FieldChanges, v))
+}
+
+// FailedAt applies equality check predicate on the "failed_at" field. It's identical to FailedAtEQ.
+func FailedAt(v time.Time) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldEQ(FieldFailedAt, v))
+}
+
+// LastError applies equality check predicate on the "last_error" field. It's identical to LastErrorEQ.
+func LastError(v string) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldEQ(FieldLastError, v))
+}
+
 // Created applies equality check predicate on the "created" field. It's identical to CreatedEQ.
 func Created(v time.Time) predicate.CatalogSyncCursor {
 	return predicate.CatalogSyncCursor(sql.FieldEQ(FieldCreated, v))
@@ -202,6 +222,221 @@ func CursorEqualFold(v string) predicate.CatalogSyncCursor {
 // CursorContainsFold applies the ContainsFold predicate on the "cursor" field.
 func CursorContainsFold(v string) predicate.CatalogSyncCursor {
 	return predicate.CatalogSyncCursor(sql.FieldContainsFold(FieldCursor, v))
+}
+
+// PulledAtEQ applies the EQ predicate on the "pulled_at" field.
+func PulledAtEQ(v time.Time) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldEQ(FieldPulledAt, v))
+}
+
+// PulledAtNEQ applies the NEQ predicate on the "pulled_at" field.
+func PulledAtNEQ(v time.Time) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldNEQ(FieldPulledAt, v))
+}
+
+// PulledAtIn applies the In predicate on the "pulled_at" field.
+func PulledAtIn(vs ...time.Time) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldIn(FieldPulledAt, vs...))
+}
+
+// PulledAtNotIn applies the NotIn predicate on the "pulled_at" field.
+func PulledAtNotIn(vs ...time.Time) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldNotIn(FieldPulledAt, vs...))
+}
+
+// PulledAtGT applies the GT predicate on the "pulled_at" field.
+func PulledAtGT(v time.Time) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldGT(FieldPulledAt, v))
+}
+
+// PulledAtGTE applies the GTE predicate on the "pulled_at" field.
+func PulledAtGTE(v time.Time) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldGTE(FieldPulledAt, v))
+}
+
+// PulledAtLT applies the LT predicate on the "pulled_at" field.
+func PulledAtLT(v time.Time) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldLT(FieldPulledAt, v))
+}
+
+// PulledAtLTE applies the LTE predicate on the "pulled_at" field.
+func PulledAtLTE(v time.Time) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldLTE(FieldPulledAt, v))
+}
+
+// PulledAtIsNil applies the IsNil predicate on the "pulled_at" field.
+func PulledAtIsNil() predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldIsNull(FieldPulledAt))
+}
+
+// PulledAtNotNil applies the NotNil predicate on the "pulled_at" field.
+func PulledAtNotNil() predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldNotNull(FieldPulledAt))
+}
+
+// ChangesEQ applies the EQ predicate on the "changes" field.
+func ChangesEQ(v int) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldEQ(FieldChanges, v))
+}
+
+// ChangesNEQ applies the NEQ predicate on the "changes" field.
+func ChangesNEQ(v int) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldNEQ(FieldChanges, v))
+}
+
+// ChangesIn applies the In predicate on the "changes" field.
+func ChangesIn(vs ...int) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldIn(FieldChanges, vs...))
+}
+
+// ChangesNotIn applies the NotIn predicate on the "changes" field.
+func ChangesNotIn(vs ...int) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldNotIn(FieldChanges, vs...))
+}
+
+// ChangesGT applies the GT predicate on the "changes" field.
+func ChangesGT(v int) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldGT(FieldChanges, v))
+}
+
+// ChangesGTE applies the GTE predicate on the "changes" field.
+func ChangesGTE(v int) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldGTE(FieldChanges, v))
+}
+
+// ChangesLT applies the LT predicate on the "changes" field.
+func ChangesLT(v int) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldLT(FieldChanges, v))
+}
+
+// ChangesLTE applies the LTE predicate on the "changes" field.
+func ChangesLTE(v int) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldLTE(FieldChanges, v))
+}
+
+// FailedAtEQ applies the EQ predicate on the "failed_at" field.
+func FailedAtEQ(v time.Time) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldEQ(FieldFailedAt, v))
+}
+
+// FailedAtNEQ applies the NEQ predicate on the "failed_at" field.
+func FailedAtNEQ(v time.Time) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldNEQ(FieldFailedAt, v))
+}
+
+// FailedAtIn applies the In predicate on the "failed_at" field.
+func FailedAtIn(vs ...time.Time) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldIn(FieldFailedAt, vs...))
+}
+
+// FailedAtNotIn applies the NotIn predicate on the "failed_at" field.
+func FailedAtNotIn(vs ...time.Time) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldNotIn(FieldFailedAt, vs...))
+}
+
+// FailedAtGT applies the GT predicate on the "failed_at" field.
+func FailedAtGT(v time.Time) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldGT(FieldFailedAt, v))
+}
+
+// FailedAtGTE applies the GTE predicate on the "failed_at" field.
+func FailedAtGTE(v time.Time) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldGTE(FieldFailedAt, v))
+}
+
+// FailedAtLT applies the LT predicate on the "failed_at" field.
+func FailedAtLT(v time.Time) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldLT(FieldFailedAt, v))
+}
+
+// FailedAtLTE applies the LTE predicate on the "failed_at" field.
+func FailedAtLTE(v time.Time) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldLTE(FieldFailedAt, v))
+}
+
+// FailedAtIsNil applies the IsNil predicate on the "failed_at" field.
+func FailedAtIsNil() predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldIsNull(FieldFailedAt))
+}
+
+// FailedAtNotNil applies the NotNil predicate on the "failed_at" field.
+func FailedAtNotNil() predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldNotNull(FieldFailedAt))
+}
+
+// LastErrorEQ applies the EQ predicate on the "last_error" field.
+func LastErrorEQ(v string) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldEQ(FieldLastError, v))
+}
+
+// LastErrorNEQ applies the NEQ predicate on the "last_error" field.
+func LastErrorNEQ(v string) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldNEQ(FieldLastError, v))
+}
+
+// LastErrorIn applies the In predicate on the "last_error" field.
+func LastErrorIn(vs ...string) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldIn(FieldLastError, vs...))
+}
+
+// LastErrorNotIn applies the NotIn predicate on the "last_error" field.
+func LastErrorNotIn(vs ...string) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldNotIn(FieldLastError, vs...))
+}
+
+// LastErrorGT applies the GT predicate on the "last_error" field.
+func LastErrorGT(v string) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldGT(FieldLastError, v))
+}
+
+// LastErrorGTE applies the GTE predicate on the "last_error" field.
+func LastErrorGTE(v string) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldGTE(FieldLastError, v))
+}
+
+// LastErrorLT applies the LT predicate on the "last_error" field.
+func LastErrorLT(v string) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldLT(FieldLastError, v))
+}
+
+// LastErrorLTE applies the LTE predicate on the "last_error" field.
+func LastErrorLTE(v string) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldLTE(FieldLastError, v))
+}
+
+// LastErrorContains applies the Contains predicate on the "last_error" field.
+func LastErrorContains(v string) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldContains(FieldLastError, v))
+}
+
+// LastErrorHasPrefix applies the HasPrefix predicate on the "last_error" field.
+func LastErrorHasPrefix(v string) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldHasPrefix(FieldLastError, v))
+}
+
+// LastErrorHasSuffix applies the HasSuffix predicate on the "last_error" field.
+func LastErrorHasSuffix(v string) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldHasSuffix(FieldLastError, v))
+}
+
+// LastErrorIsNil applies the IsNil predicate on the "last_error" field.
+func LastErrorIsNil() predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldIsNull(FieldLastError))
+}
+
+// LastErrorNotNil applies the NotNil predicate on the "last_error" field.
+func LastErrorNotNil() predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldNotNull(FieldLastError))
+}
+
+// LastErrorEqualFold applies the EqualFold predicate on the "last_error" field.
+func LastErrorEqualFold(v string) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldEqualFold(FieldLastError, v))
+}
+
+// LastErrorContainsFold applies the ContainsFold predicate on the "last_error" field.
+func LastErrorContainsFold(v string) predicate.CatalogSyncCursor {
+	return predicate.CatalogSyncCursor(sql.FieldContainsFold(FieldLastError, v))
 }
 
 // CreatedEQ applies the EQ predicate on the "created" field.

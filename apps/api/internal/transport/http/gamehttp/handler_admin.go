@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/httpapi"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/http/response"
@@ -61,7 +62,7 @@ func (h *AdminHandler) editScalar(ctx context.Context, in *adminGameScalarInput)
 }
 
 func (h *AdminHandler) delete(ctx context.Context, in *adminGamePathInput) (*response.EmptyOutput, error) {
-	if err := h.service.Delete(ctx, in.ID); err != nil {
+	if err := h.service.Delete(ctx, actor.From(ctx), in.ID); err != nil {
 		return nil, err
 	}
 	return response.Empty(ctx, h.resp), nil

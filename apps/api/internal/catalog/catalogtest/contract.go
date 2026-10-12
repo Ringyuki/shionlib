@@ -83,7 +83,7 @@ func StoreContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err := env.Store.Exclude(ctx, catalog.EntityGame, second, at); err != nil {
+		if err := env.Store.Exclude(ctx, catalog.EntityGame, second, catalog.Exclusion{}, at); err != nil {
 			t.Fatal(err)
 		}
 		links, err := env.Store.Links(ctx, contractSource, catalog.EntityGame, []string{"11", "12", "13"})
@@ -167,7 +167,7 @@ func StoreContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if _, _, err := env.Store.ApplyGame(ctx, contractSource, GameRecord("7", nil, nil), creator, at); err != nil {
 			t.Fatal(err)
 		}
-		if err := env.Store.Exclude(ctx, catalog.EntityGame, id, at); err != nil {
+		if err := env.Store.Exclude(ctx, catalog.EntityGame, id, catalog.Exclusion{}, at); err != nil {
 			t.Fatal(err)
 		}
 		if excluded, err := env.Store.Excluded(ctx, ref(catalog.EntityGame, "6")); err != nil || !excluded {
@@ -220,6 +220,101 @@ func StoreContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		}
 		if cursor, err := env.Store.Cursor(ctx, "elsewhere"); err != nil || cursor != "" {
 			t.Fatalf("cursors are scoped per source: %q %v", cursor, err)
+		}
+	})
+
+	t.Run("excluded entries are listed newest first with their title and who removed them", func(t *testing.T) {
+		env := newEnv(t)
+		creator := env.CreatorID(t)
+		var ids []int
+		for _, externalID := range []string{"11", "12", "13"} {
+			id, _, err := env.Store.ApplyGame(ctx, contractSource, GameRecord(externalID, nil, nil), creator, at)
+			if err != nil {
+				t.Fatal(err)
+			}
+			ids = append(ids, id)
+		}
+		if err := env.Store.Exclude(ctx, catalog.EntityGame, ids[0], catalog.Exclusion{Title: "ゲーム11", UserID: creator}, at); err != nil {
+			t.Fatal(err)
+		}
+		if err := env.Store.Exclude(ctx, catalog.EntityGame, ids[1], catalog.Exclusion{}, at.Add(time.Hour)); err != nil {
+			t.Fatal(err)
+		}
+		entries, total, err := env.Store.ExcludedEntries(ctx, 0, 10)
+		if err != nil || total != 2 || len(entries) != 2 {
+			t.Fatalf("excluded entries %+v %d %v", entries, total, err)
+		}
+		if entries[0].Ref != ref(catalog.EntityGame, "12") || entries[0].Title != nil || entries[0].ExcludedBy != nil || !entries[0].ExcludedAt.Equal(at.Add(time.Hour)) {
+			t.Fatalf("an exclusion without details: %+v", entries[0])
+		}
+		named := entries[1]
+		if named.Ref != ref(catalog.EntityGame, "11") || named.Title == nil || *named.Title != "ゲーム11" || named.ExcludedBy == nil || named.ExcludedBy.ID != creator {
+			t.Fatalf("an exclusion with its title and remover: %+v", named)
+		}
+		paged, total, err := env.Store.ExcludedEntries(ctx, 1, 1)
+		if err != nil || total != 2 || len(paged) != 1 || paged[0].Ref != ref(catalog.EntityGame, "11") {
+			t.Fatalf("second page %+v %d %v", paged, total, err)
+		}
+		if err := env.Store.Include(ctx, ref(catalog.EntityGame, "11")); err != nil {
+			t.Fatal(err)
+		}
+		entries, total, err = env.Store.ExcludedEntries(ctx, 0, 10)
+		if err != nil || total != 1 || entries[0].Ref != ref(catalog.EntityGame, "12") {
+			t.Fatalf("an included entry leaves the list: %+v %d %v", entries, total, err)
+		}
+	})
+
+	t.Run("link counts cover the entries one source still provides", func(t *testing.T) {
+		env := newEnv(t)
+		creator := env.CreatorID(t)
+		kept, _, err := env.Store.ApplyGame(ctx, contractSource, GameRecord("21", []string{"801"}, []string{"701", "702"}), creator, at)
+		if err != nil {
+			t.Fatal(err)
+		}
+		removed, _, err := env.Store.ApplyGame(ctx, contractSource, GameRecord("22", nil, nil), creator, at)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := env.Store.Exclude(ctx, catalog.EntityGame, removed, catalog.Exclusion{}, at); err != nil {
+			t.Fatal(err)
+		}
+		counts, err := env.Store.LinkCounts(ctx, contractSource)
+		if err != nil || counts != (catalog.LinkCounts{Games: 1, Developers: 1, Characters: 2}) {
+			t.Fatalf("counts %+v %v (kept game %d)", counts, err, kept)
+		}
+		if elsewhere, err := env.Store.LinkCounts(ctx, "elsewhere"); err != nil || elsewhere != (catalog.LinkCounts{}) {
+			t.Fatalf("counts are scoped per source: %+v %v", elsewhere, err)
+		}
+	})
+
+	t.Run("the sync state keeps the last pull and the last failure", func(t *testing.T) {
+		env := newEnv(t)
+		if state, err := env.Store.SyncState(ctx, contractSource); err != nil || state != (catalog.SyncState{}) {
+			t.Fatalf("initial state %+v %v", state, err)
+		}
+		if err := env.Store.RecordPullFailure(ctx, contractSource, "connection refused", at); err != nil {
+			t.Fatal(err)
+		}
+		state, err := env.Store.SyncState(ctx, contractSource)
+		if err != nil || state.Cursor != "" || state.PulledAt != nil || state.FailedAt == nil || !state.FailedAt.Equal(at) || state.LastError == nil || *state.LastError != "connection refused" {
+			t.Fatalf("a failure before any pull: %+v %v", state, err)
+		}
+		if err := env.Store.SaveCursor(ctx, contractSource, "42"); err != nil {
+			t.Fatal(err)
+		}
+		if err := env.Store.RecordPull(ctx, contractSource, 14, at.Add(time.Minute)); err != nil {
+			t.Fatal(err)
+		}
+		state, err = env.Store.SyncState(ctx, contractSource)
+		if err != nil || state.Cursor != "42" || state.Changes != 14 || state.PulledAt == nil || !state.PulledAt.Equal(at.Add(time.Minute)) || state.FailedAt != nil || state.LastError != nil {
+			t.Fatalf("a pull clears the failure: %+v %v", state, err)
+		}
+		if err := env.Store.RecordPullFailure(ctx, contractSource, "timeout", at.Add(time.Hour)); err != nil {
+			t.Fatal(err)
+		}
+		state, err = env.Store.SyncState(ctx, contractSource)
+		if err != nil || state.Cursor != "42" || state.Changes != 14 || state.PulledAt == nil || state.FailedAt == nil || *state.LastError != "timeout" {
+			t.Fatalf("a later failure keeps the last pull: %+v %v", state, err)
 		}
 	})
 }

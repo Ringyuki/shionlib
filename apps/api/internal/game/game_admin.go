@@ -31,19 +31,34 @@ type CreatorRef struct {
 	Name string
 }
 
+type SourceRef struct {
+	Source     string
+	ExternalID string
+}
+
+type AdminCover struct {
+	URL      string
+	Dims     []int
+	Sexual   int
+	Violence int
+}
+
 type AdminEntry struct {
-	ID        int
-	TitleJP   string
-	TitleZH   string
-	TitleEN   string
-	Status    Status
-	Views     int
-	Downloads int
-	NSFW      bool
-	Created   time.Time
-	Updated   time.Time
-	CoverURL  *string
-	Creator   CreatorRef
+	ID              int
+	TitleJP         string
+	TitleZH         string
+	TitleEN         string
+	Status          Status
+	Views           int
+	Downloads       int
+	Resources       int
+	NSFW            bool
+	RecentlyUpdated bool
+	Created         time.Time
+	Updated         time.Time
+	Cover           *AdminCover
+	Creator         CreatorRef
+	Source          *SourceRef
 }
 
 type Scalar struct {

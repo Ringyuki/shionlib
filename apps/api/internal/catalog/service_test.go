@@ -130,8 +130,8 @@ func TestImportFailuresAreRecordedExceptRateLimits(t *testing.T) {
 	f := setup()
 	f.store.Seed(ref(catalog.EntityGame, "77"), nil)
 	f.source.Err = errors.New("upstream exploded")
-	if _, err := f.service.Import(context.Background(), ref(catalog.EntityGame, "77")); err == nil {
-		t.Fatal("expected an error")
+	if _, err := f.service.Import(context.Background(), ref(catalog.EntityGame, "77")); !errors.Is(err, catalog.ErrSourceUnavailable) {
+		t.Fatalf("expected source unavailable, got %v", err)
 	}
 	link, _ := f.store.Link(ref(catalog.EntityGame, "77"))
 	if link.Failures != 1 || link.LastError != "upstream exploded" {
@@ -139,8 +139,8 @@ func TestImportFailuresAreRecordedExceptRateLimits(t *testing.T) {
 	}
 
 	f.source.Err = catalog.ErrRateLimited
-	if _, err := f.service.Import(context.Background(), ref(catalog.EntityGame, "77")); !errors.Is(err, catalog.ErrRateLimited) {
-		t.Fatalf("expected rate limit, got %v", err)
+	if _, err := f.service.Import(context.Background(), ref(catalog.EntityGame, "77")); !errors.Is(err, catalog.ErrRateLimited) || !errors.Is(err, catalog.ErrSourceUnavailable) {
+		t.Fatalf("expected a rate limit reported as the source being unavailable, got %v", err)
 	}
 	if link, _ := f.store.Link(ref(catalog.EntityGame, "77")); link.Failures != 1 {
 		t.Fatalf("rate limits are not failures %+v", link)
@@ -301,7 +301,7 @@ func TestExcludedEntriesAreOnlyImportedOnRequest(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := f.service.Exclude(context.Background(), catalog.EntityGame, id); err != nil {
+	if err := f.service.Exclude(context.Background(), catalog.EntityGame, id, catalog.Exclusion{}); err != nil {
 		t.Fatal(err)
 	}
 	requests := len(f.source.Requests)
@@ -318,7 +318,7 @@ func TestExcludedEntriesAreOnlyImportedOnRequest(t *testing.T) {
 	if excluded, _ := f.store.Excluded(context.Background(), ref(catalog.EntityGame, "77")); excluded {
 		t.Fatal("explicit import must include the entry again")
 	}
-	if err := f.service.Exclude(context.Background(), catalog.EntityGame, id); err != nil {
+	if err := f.service.Exclude(context.Background(), catalog.EntityGame, id, catalog.Exclusion{}); err != nil {
 		t.Fatal(err)
 	}
 	if err := f.service.Request(context.Background(), ref(catalog.EntityGame, "77")); err != nil {
@@ -326,6 +326,33 @@ func TestExcludedEntriesAreOnlyImportedOnRequest(t *testing.T) {
 	}
 	if excluded, _ := f.store.Excluded(context.Background(), ref(catalog.EntityGame, "77")); excluded {
 		t.Fatal("queued imports include the entry again")
+	}
+}
+
+func TestARequestedImportThatFailsLeavesTheEntryExcluded(t *testing.T) {
+	f := setup()
+	f.source.Games["77"] = gameSnapshot("77")
+	id, err := f.service.Import(context.Background(), ref(catalog.EntityGame, "77"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := f.service.Exclude(context.Background(), catalog.EntityGame, id, catalog.Exclusion{Title: "game 77", UserID: 4}); err != nil {
+		t.Fatal(err)
+	}
+	f.source.Err = errors.New("timeout")
+	if _, err := f.service.ImportNow(context.Background(), ref(catalog.EntityGame, "77")); !errors.Is(err, catalog.ErrSourceUnavailable) {
+		t.Fatalf("expected source unavailable, got %v", err)
+	}
+	entries, total, err := f.service.ExcludedEntries(context.Background(), 1, 10)
+	if err != nil || total != 1 || entries[0].Title == nil || *entries[0].Title != "game 77" {
+		t.Fatalf("the entry stays excluded as it was: %+v %d %v", entries, total, err)
+	}
+	f.source.Err = nil
+	if _, err := f.service.ImportNow(context.Background(), ref(catalog.EntityGame, "77")); err != nil {
+		t.Fatal(err)
+	}
+	if _, total, err := f.service.ExcludedEntries(context.Background(), 1, 10); err != nil || total != 0 {
+		t.Fatalf("the entry is kept again: %d %v", total, err)
 	}
 }
 
@@ -341,7 +368,7 @@ func TestResolveMapsLinkedEntriesAndQueuesUnknownOnes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := f.service.Exclude(context.Background(), catalog.EntityGame, excluded); err != nil {
+	if err := f.service.Exclude(context.Background(), catalog.EntityGame, excluded, catalog.Exclusion{}); err != nil {
 		t.Fatal(err)
 	}
 	queued := len(f.queue.Refs())
@@ -362,4 +389,169 @@ func catalogSettings() settingtest.Source {
 	settingtest.Set(settings, catalog.RefreshInterval, 24*time.Hour)
 	settingtest.Set(settings, catalog.RefreshBatch, 2)
 	return settingtest.Set(settings, catalog.ChangesBatch, 10)
+}
+
+func TestSearchTellsWhichHitsAreAlreadyHere(t *testing.T) {
+	f := setup()
+	f.source.Hits[catalog.EntityGame] = []catalog.SearchHit{{ExternalID: "1", Title: "a"}, {ExternalID: "2", Title: "b"}, {ExternalID: "3", Title: "c"}}
+	linked := f.store.Seed(ref(catalog.EntityGame, "1"), &now)
+	removed := f.store.Seed(ref(catalog.EntityGame, "2"), &now)
+	if err := f.service.Exclude(context.Background(), catalog.EntityGame, removed, catalog.Exclusion{}); err != nil {
+		t.Fatal(err)
+	}
+	result, err := f.service.Search(context.Background(), catalog.SourceHikarinagi, catalog.EntityGame, "a", 1, 10)
+	if err != nil || len(result.Hits) != 3 {
+		t.Fatalf("search %+v %v", result, err)
+	}
+	here, gone, absent := result.Hits[0].Link, result.Hits[1].Link, result.Hits[2].Link
+	if here == nil || here.LocalID != linked || here.Excluded {
+		t.Fatalf("a linked hit names its local entry: %+v", here)
+	}
+	if gone == nil || !gone.Excluded {
+		t.Fatalf("an excluded hit says so: %+v", gone)
+	}
+	if absent != nil {
+		t.Fatalf("an unknown hit has no link: %+v", absent)
+	}
+	if f.source.Hits[catalog.EntityGame][0].Link != nil {
+		t.Fatal("the hits of the source must not be changed")
+	}
+}
+
+func TestFindOffersAnEntryByItsNumberWhenTheSearchDoesNotListIt(t *testing.T) {
+	f := setup()
+	f.source.Hits[catalog.EntityGame] = []catalog.SearchHit{{ExternalID: "1", Title: "a"}}
+	linked := f.store.Seed(ref(catalog.EntityGame, "25085"), &now)
+	found, err := f.service.Find(context.Background(), catalog.SourceHikarinagi, catalog.EntityGame, " 25085 ", 1, 10)
+	if err != nil || len(found.Hits) != 2 || found.Total != 1 {
+		t.Fatalf("find %+v %v", found, err)
+	}
+	numbered := found.Hits[0]
+	if numbered.ExternalID != "25085" || numbered.Title != "" || numbered.Link == nil || numbered.Link.LocalID != linked {
+		t.Fatalf("the number leads and says it is here: %+v", numbered)
+	}
+	unknown, err := f.service.Find(context.Background(), catalog.SourceHikarinagi, catalog.EntityGame, "404", 1, 10)
+	if err != nil || len(unknown.Hits) != 2 || unknown.Hits[0].ExternalID != "404" || unknown.Hits[0].Link != nil {
+		t.Fatalf("a number that is not here is offered without a link: %+v %v", unknown, err)
+	}
+	for _, query := range []string{"1", "a1", ""} {
+		plain, err := f.service.Find(context.Background(), catalog.SourceHikarinagi, catalog.EntityGame, query, 1, 10)
+		if err != nil || len(plain.Hits) != 1 {
+			t.Fatalf("%q adds nothing to the hits: %+v %v", query, plain, err)
+		}
+	}
+	if later, err := f.service.Find(context.Background(), catalog.SourceHikarinagi, catalog.EntityGame, "404", 2, 10); err != nil || len(later.Hits) != 0 {
+		t.Fatalf("later pages are the hits alone: %+v %v", later, err)
+	}
+}
+
+func TestSyncPullsOneSourceNowAndReportsItsState(t *testing.T) {
+	f := setup()
+	f.store.Seed(ref(catalog.EntityGame, "10"), &now)
+	f.store.Seed(ref(catalog.EntityDeveloper, "5"), &now)
+	f.source.Feed[""] = catalog.ChangeBatch{
+		Changes: []catalog.Change{
+			{Entity: catalog.EntityGame, ExternalID: "10", Kind: catalog.ChangeUpsert},
+			{Entity: catalog.EntityGame, ExternalID: "11", Kind: catalog.ChangeUpsert},
+		},
+		Cursor: "7",
+	}
+	status, err := f.service.Sync(context.Background(), catalog.SourceHikarinagi)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !status.Incremental || status.Counts != (catalog.LinkCounts{Games: 1, Developers: 1}) {
+		t.Fatalf("status %+v", status)
+	}
+	if status.Sync.Cursor != "7" || status.Sync.Changes != 2 || status.Sync.PulledAt == nil || !status.Sync.PulledAt.Equal(now) || status.Sync.FailedAt != nil {
+		t.Fatalf("sync state %+v", status.Sync)
+	}
+	listed, err := f.service.Status(context.Background())
+	if err != nil || len(listed) != 1 || listed[0].Name != catalog.SourceHikarinagi || listed[0].Sync.Changes != 2 || listed[0].Refreshes != 24*time.Hour {
+		t.Fatalf("listed %+v %v", listed, err)
+	}
+	if _, err := f.service.Sync(context.Background(), "elsewhere"); !errors.Is(err, catalog.ErrUnknownSource) {
+		t.Fatalf("an unknown source: %v", err)
+	}
+}
+
+func TestAFailedPullIsRecordedAndReportedAsTheSourceBeingUnavailable(t *testing.T) {
+	f := setup()
+	f.source.Err = errors.New("connection refused")
+	if _, err := f.service.Sync(context.Background(), catalog.SourceHikarinagi); !errors.Is(err, catalog.ErrSourceUnavailable) {
+		t.Fatalf("expected source unavailable, got %v", err)
+	}
+	if err := f.service.PullChanges(context.Background()); !errors.Is(err, catalog.ErrSourceUnavailable) {
+		t.Fatalf("the scheduled pull fails the same way: %v", err)
+	}
+	listed, err := f.service.Status(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	state := listed[0].Sync
+	if state.FailedAt == nil || !state.FailedAt.Equal(now) || state.LastError == nil || *state.LastError != "connection refused" || state.PulledAt != nil {
+		t.Fatalf("sync state %+v", state)
+	}
+}
+
+func TestASourceWithoutAChangeFeedCannotBePulled(t *testing.T) {
+	f := setup()
+	plain := plainSource{name: "plain"}
+	service := catalog.NewService(catalog.Deps{
+		Sources:  []catalog.Source{plain},
+		Store:    f.store,
+		Tx:       f.tx,
+		Queue:    f.queue,
+		Now:      func() time.Time { return now },
+		Settings: catalogSettings(),
+	})
+	if _, err := service.Sync(context.Background(), "plain"); !errors.Is(err, catalog.ErrNoChangeFeed) {
+		t.Fatalf("expected no change feed, got %v", err)
+	}
+	listed, err := service.Status(context.Background())
+	if err != nil || len(listed) != 1 || listed[0].Incremental {
+		t.Fatalf("listed %+v %v", listed, err)
+	}
+	if err := service.PullChanges(context.Background()); err != nil {
+		t.Fatalf("the scheduled pull skips it: %v", err)
+	}
+}
+
+func TestExcludedEntriesArePaged(t *testing.T) {
+	f := setup()
+	for _, externalID := range []string{"1", "2", "3"} {
+		id := f.store.Seed(ref(catalog.EntityGame, externalID), &now)
+		if err := f.service.Exclude(context.Background(), catalog.EntityGame, id, catalog.Exclusion{Title: "game " + externalID, UserID: 4}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	entries, total, err := f.service.ExcludedEntries(context.Background(), 2, 2)
+	if err != nil || total != 3 || len(entries) != 1 {
+		t.Fatalf("second page %+v %d %v", entries, total, err)
+	}
+	if entries[0].Title == nil || entries[0].ExcludedBy == nil || entries[0].ExcludedBy.ID != 4 {
+		t.Fatalf("entry %+v", entries[0])
+	}
+}
+
+type plainSource struct {
+	name string
+}
+
+func (s plainSource) Name() string { return s.name }
+
+func (plainSource) Game(context.Context, string) (catalog.GameSnapshot, error) {
+	return catalog.GameSnapshot{}, catalog.ErrNotFound
+}
+
+func (plainSource) Developer(context.Context, string) (catalog.DeveloperSnapshot, error) {
+	return catalog.DeveloperSnapshot{}, catalog.ErrNotFound
+}
+
+func (plainSource) Character(context.Context, string) (catalog.CharacterSnapshot, error) {
+	return catalog.CharacterSnapshot{}, catalog.ErrNotFound
+}
+
+func (plainSource) Search(context.Context, catalog.Entity, string, int, int) ([]catalog.SearchHit, int, error) {
+	return nil, 0, nil
 }

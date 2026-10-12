@@ -76,3 +76,24 @@ func (r *RecentUpdates) Remove(ctx context.Context, gameID int) error {
 	}
 	return nil
 }
+
+func (r *RecentUpdates) Marked(ctx context.Context, gameIDs []int) (map[int]bool, error) {
+	marked := make(map[int]bool, len(gameIDs))
+	if len(gameIDs) == 0 {
+		return marked, nil
+	}
+	members := make([]string, len(gameIDs))
+	for i, id := range gameIDs {
+		members[i] = strconv.Itoa(id)
+	}
+	scores, err := r.client.ZMScore(ctx, r.key(), members...).Result()
+	if err != nil {
+		return nil, fmt.Errorf("read recent update marks: %w", err)
+	}
+	for i, id := range gameIDs {
+		if i < len(scores) && scores[i] != 0 {
+			marked[id] = true
+		}
+	}
+	return marked, nil
+}

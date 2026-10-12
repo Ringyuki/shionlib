@@ -94,6 +94,16 @@ func ExcludedAt(v time.Time) predicate.CatalogSourceLink {
 	return predicate.CatalogSourceLink(sql.FieldEQ(FieldExcludedAt, v))
 }
 
+// ExcludedBy applies equality check predicate on the "excluded_by" field. It's identical to ExcludedByEQ.
+func ExcludedBy(v int) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldEQ(FieldExcludedBy, v))
+}
+
+// Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
+func Title(v string) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldEQ(FieldTitle, v))
+}
+
 // Failures applies equality check predicate on the "failures" field. It's identical to FailuresEQ.
 func Failures(v int) predicate.CatalogSourceLink {
 	return predicate.CatalogSourceLink(sql.FieldEQ(FieldFailures, v))
@@ -572,6 +582,131 @@ func ExcludedAtIsNil() predicate.CatalogSourceLink {
 // ExcludedAtNotNil applies the NotNil predicate on the "excluded_at" field.
 func ExcludedAtNotNil() predicate.CatalogSourceLink {
 	return predicate.CatalogSourceLink(sql.FieldNotNull(FieldExcludedAt))
+}
+
+// ExcludedByEQ applies the EQ predicate on the "excluded_by" field.
+func ExcludedByEQ(v int) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldEQ(FieldExcludedBy, v))
+}
+
+// ExcludedByNEQ applies the NEQ predicate on the "excluded_by" field.
+func ExcludedByNEQ(v int) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldNEQ(FieldExcludedBy, v))
+}
+
+// ExcludedByIn applies the In predicate on the "excluded_by" field.
+func ExcludedByIn(vs ...int) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldIn(FieldExcludedBy, vs...))
+}
+
+// ExcludedByNotIn applies the NotIn predicate on the "excluded_by" field.
+func ExcludedByNotIn(vs ...int) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldNotIn(FieldExcludedBy, vs...))
+}
+
+// ExcludedByGT applies the GT predicate on the "excluded_by" field.
+func ExcludedByGT(v int) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldGT(FieldExcludedBy, v))
+}
+
+// ExcludedByGTE applies the GTE predicate on the "excluded_by" field.
+func ExcludedByGTE(v int) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldGTE(FieldExcludedBy, v))
+}
+
+// ExcludedByLT applies the LT predicate on the "excluded_by" field.
+func ExcludedByLT(v int) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldLT(FieldExcludedBy, v))
+}
+
+// ExcludedByLTE applies the LTE predicate on the "excluded_by" field.
+func ExcludedByLTE(v int) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldLTE(FieldExcludedBy, v))
+}
+
+// ExcludedByIsNil applies the IsNil predicate on the "excluded_by" field.
+func ExcludedByIsNil() predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldIsNull(FieldExcludedBy))
+}
+
+// ExcludedByNotNil applies the NotNil predicate on the "excluded_by" field.
+func ExcludedByNotNil() predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldNotNull(FieldExcludedBy))
+}
+
+// TitleEQ applies the EQ predicate on the "title" field.
+func TitleEQ(v string) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldEQ(FieldTitle, v))
+}
+
+// TitleNEQ applies the NEQ predicate on the "title" field.
+func TitleNEQ(v string) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldNEQ(FieldTitle, v))
+}
+
+// TitleIn applies the In predicate on the "title" field.
+func TitleIn(vs ...string) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldIn(FieldTitle, vs...))
+}
+
+// TitleNotIn applies the NotIn predicate on the "title" field.
+func TitleNotIn(vs ...string) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldNotIn(FieldTitle, vs...))
+}
+
+// TitleGT applies the GT predicate on the "title" field.
+func TitleGT(v string) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldGT(FieldTitle, v))
+}
+
+// TitleGTE applies the GTE predicate on the "title" field.
+func TitleGTE(v string) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldGTE(FieldTitle, v))
+}
+
+// TitleLT applies the LT predicate on the "title" field.
+func TitleLT(v string) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldLT(FieldTitle, v))
+}
+
+// TitleLTE applies the LTE predicate on the "title" field.
+func TitleLTE(v string) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldLTE(FieldTitle, v))
+}
+
+// TitleContains applies the Contains predicate on the "title" field.
+func TitleContains(v string) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldContains(FieldTitle, v))
+}
+
+// TitleHasPrefix applies the HasPrefix predicate on the "title" field.
+func TitleHasPrefix(v string) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldHasPrefix(FieldTitle, v))
+}
+
+// TitleHasSuffix applies the HasSuffix predicate on the "title" field.
+func TitleHasSuffix(v string) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldHasSuffix(FieldTitle, v))
+}
+
+// TitleIsNil applies the IsNil predicate on the "title" field.
+func TitleIsNil() predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldIsNull(FieldTitle))
+}
+
+// TitleNotNil applies the NotNil predicate on the "title" field.
+func TitleNotNil() predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldNotNull(FieldTitle))
+}
+
+// TitleEqualFold applies the EqualFold predicate on the "title" field.
+func TitleEqualFold(v string) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldEqualFold(FieldTitle, v))
+}
+
+// TitleContainsFold applies the ContainsFold predicate on the "title" field.
+func TitleContainsFold(v string) predicate.CatalogSourceLink {
+	return predicate.CatalogSourceLink(sql.FieldContainsFold(FieldTitle, v))
 }
 
 // FailuresEQ applies the EQ predicate on the "failures" field.

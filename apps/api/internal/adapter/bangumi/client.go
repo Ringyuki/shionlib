@@ -19,12 +19,13 @@ import (
 )
 
 const (
-	DefaultAPIBaseURL      = "https://api.bgm.tv"
-	DefaultRefreshEndpoint = "https://bgm.tv/oauth/access_token"
-	apiUserAgent           = "shionlib/shionlib-backend"
-	oauthUserAgent         = "Mozilla/5.0 (compatible; ShionLib/1.0)"
-	refreshMargin          = 5 * time.Minute
-	maxBodyBytes           = 4 << 20
+	DefaultAPIBaseURL        = "https://api.bgm.tv"
+	DefaultRefreshEndpoint   = "https://bgm.tv/oauth/access_token"
+	DefaultAuthorizeEndpoint = "https://bgm.tv/oauth/authorize"
+	apiUserAgent             = "shionlib/shionlib-backend"
+	oauthUserAgent           = "Mozilla/5.0 (compatible; ShionLib/1.0)"
+	refreshMargin            = 5 * time.Minute
+	maxBodyBytes             = 4 << 20
 )
 
 var ErrTokensMissing = errors.New("bangumi tokens are not provisioned; store them before requesting bangumi")
@@ -35,12 +36,13 @@ type TokenStore interface {
 }
 
 type Options struct {
-	HTTP        *http.Client
-	APIBaseURL  string
-	TokenURL    string
-	Credentials func() (clientID, clientSecret string)
-	Tokens      TokenStore
-	Now         func() time.Time
+	HTTP         *http.Client
+	APIBaseURL   string
+	TokenURL     string
+	AuthorizeURL string
+	Credentials  func() (clientID, clientSecret string)
+	Tokens       TokenStore
+	Now          func() time.Time
 }
 
 type tokens struct {
@@ -76,6 +78,9 @@ func NewClient(opts Options) *Client {
 	}
 	if opts.TokenURL == "" {
 		opts.TokenURL = DefaultRefreshEndpoint
+	}
+	if opts.AuthorizeURL == "" {
+		opts.AuthorizeURL = DefaultAuthorizeEndpoint
 	}
 	opts.APIBaseURL = strings.TrimSuffix(opts.APIBaseURL, "/")
 	return &Client{opts: opts}
@@ -212,7 +217,7 @@ func (c *Client) remember(t *tokens) {
 	c.cached = t
 }
 
-type refreshResponse struct {
+type tokenResponse struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 	TokenType    string `json:"token_type"`
@@ -224,36 +229,86 @@ func (c *Client) refresh(ctx context.Context, refreshToken string) (*tokens, err
 		return nil, ErrTokensMissing
 	}
 	clientID, clientSecret := c.opts.Credentials()
-	form := url.Values{
+	return c.requestTokens(ctx, "refresh", url.Values{
 		"grant_type":    {"refresh_token"},
 		"client_id":     {clientID},
 		"client_secret": {clientSecret},
 		"refresh_token": {refreshToken},
+	}, refreshToken)
+}
+
+func (c *Client) AuthorizeURL(redirectURI, state string) (string, bool) {
+	clientID, clientSecret := c.opts.Credentials()
+	if clientID == "" || clientSecret == "" {
+		return "", false
 	}
+	query := url.Values{
+		"client_id":     {clientID},
+		"response_type": {"code"},
+		"redirect_uri":  {redirectURI},
+		"state":         {state},
+	}
+	return c.opts.AuthorizeURL + "?" + query.Encode(), true
+}
+
+func (c *Client) Exchange(ctx context.Context, code, redirectURI string) error {
+	clientID, clientSecret := c.opts.Credentials()
+	_, err := c.requestTokens(ctx, "exchange", url.Values{
+		"grant_type":    {"authorization_code"},
+		"client_id":     {clientID},
+		"client_secret": {clientSecret},
+		"code":          {code},
+		"redirect_uri":  {redirectURI},
+	}, "")
+	if err != nil {
+		return requestFailed(err, "authorization failed")
+	}
+	return nil
+}
+
+func (c *Client) Authorization(ctx context.Context) (game.BangumiAuthorization, error) {
+	clientID, clientSecret := c.opts.Credentials()
+	authorization := game.BangumiAuthorization{Configured: clientID != "" && clientSecret != ""}
+	stored, err := c.load(ctx)
+	if errors.Is(err, ErrTokensMissing) {
+		return authorization, nil
+	}
+	if err != nil {
+		return game.BangumiAuthorization{}, err
+	}
+	authorization.Authorized = stored.RefreshToken != "" || !c.expired(stored)
+	if stored.ExpiresAt != 0 {
+		expires := time.UnixMilli(stored.ExpiresAt).UTC()
+		authorization.ExpiresAt = &expires
+	}
+	return authorization, nil
+}
+
+func (c *Client) requestTokens(ctx context.Context, purpose string, form url.Values, keptRefreshToken string) (*tokens, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.opts.TokenURL, strings.NewReader(form.Encode()))
 	if err != nil {
-		return nil, fmt.Errorf("build bangumi token refresh: %w", err)
+		return nil, fmt.Errorf("build bangumi token %s: %w", purpose, err)
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("User-Agent", oauthUserAgent)
 	resp, err := c.opts.HTTP.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("refresh bangumi token: %w", err)
+		return nil, fmt.Errorf("%s bangumi token: %w", purpose, err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("refresh bangumi token: status %d", resp.StatusCode)
+		return nil, fmt.Errorf("%s bangumi token: status %d", purpose, resp.StatusCode)
 	}
-	var body refreshResponse
+	var body tokenResponse
 	if err := json.NewDecoder(io.LimitReader(resp.Body, maxBodyBytes)).Decode(&body); err != nil {
-		return nil, fmt.Errorf("decode bangumi token refresh: %w", err)
+		return nil, fmt.Errorf("decode bangumi token %s: %w", purpose, err)
 	}
 	if body.AccessToken == "" {
-		return nil, errors.New("refresh bangumi token: empty access token")
+		return nil, fmt.Errorf("%s bangumi token: empty access token", purpose)
 	}
 	now := c.opts.Now()
-	refreshed := &tokens{
+	issued := &tokens{
 		AccessToken:  body.AccessToken,
 		RefreshToken: body.RefreshToken,
 		TokenType:    body.TokenType,
@@ -261,19 +316,19 @@ func (c *Client) refresh(ctx context.Context, refreshToken string) (*tokens, err
 		ExpiresAt:    now.Add(time.Duration(body.ExpiresIn) * time.Second).UnixMilli(),
 		SavedAt:      now.UnixMilli(),
 	}
-	if refreshed.TokenType == "" {
-		refreshed.TokenType = "Bearer"
+	if issued.TokenType == "" {
+		issued.TokenType = "Bearer"
 	}
-	if refreshed.RefreshToken == "" {
-		refreshed.RefreshToken = refreshToken
+	if issued.RefreshToken == "" {
+		issued.RefreshToken = keptRefreshToken
 	}
-	raw, err := json.Marshal(refreshed.persisted())
+	raw, err := json.Marshal(issued.persisted())
 	if err != nil {
 		return nil, fmt.Errorf("encode bangumi tokens: %w", err)
 	}
 	if err := c.opts.Tokens.Save(ctx, raw); err != nil {
 		return nil, err
 	}
-	c.remember(refreshed)
-	return refreshed, nil
+	c.remember(issued)
+	return issued, nil
 }

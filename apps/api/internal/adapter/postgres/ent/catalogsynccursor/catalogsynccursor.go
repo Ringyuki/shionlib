@@ -17,6 +17,14 @@ const (
 	FieldSource = "source"
 	// FieldCursor holds the string denoting the cursor field in the database.
 	FieldCursor = "cursor"
+	// FieldPulledAt holds the string denoting the pulled_at field in the database.
+	FieldPulledAt = "pulled_at"
+	// FieldChanges holds the string denoting the changes field in the database.
+	FieldChanges = "changes"
+	// FieldFailedAt holds the string denoting the failed_at field in the database.
+	FieldFailedAt = "failed_at"
+	// FieldLastError holds the string denoting the last_error field in the database.
+	FieldLastError = "last_error"
 	// FieldCreated holds the string denoting the created field in the database.
 	FieldCreated = "created"
 	// FieldUpdated holds the string denoting the updated field in the database.
@@ -30,6 +38,10 @@ var Columns = []string{
 	FieldID,
 	FieldSource,
 	FieldCursor,
+	FieldPulledAt,
+	FieldChanges,
+	FieldFailedAt,
+	FieldLastError,
 	FieldCreated,
 	FieldUpdated,
 }
@@ -49,6 +61,10 @@ var (
 	SourceValidator func(string) error
 	// CursorValidator is a validator for the "cursor" field. It is called by the builders before save.
 	CursorValidator func(string) error
+	// DefaultChanges holds the default value on creation for the "changes" field.
+	DefaultChanges int
+	// LastErrorValidator is a validator for the "last_error" field. It is called by the builders before save.
+	LastErrorValidator func(string) error
 	// DefaultCreated holds the default value on creation for the "created" field.
 	DefaultCreated func() time.Time
 	// DefaultUpdated holds the default value on creation for the "updated" field.
@@ -73,6 +89,26 @@ func BySource(opts ...sql.OrderTermOption) OrderOption {
 // ByCursor orders the results by the cursor field.
 func ByCursor(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCursor, opts...).ToFunc()
+}
+
+// ByPulledAt orders the results by the pulled_at field.
+func ByPulledAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPulledAt, opts...).ToFunc()
+}
+
+// ByChanges orders the results by the changes field.
+func ByChanges(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldChanges, opts...).ToFunc()
+}
+
+// ByFailedAt orders the results by the failed_at field.
+func ByFailedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFailedAt, opts...).ToFunc()
+}
+
+// ByLastError orders the results by the last_error field.
+func ByLastError(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastError, opts...).ToFunc()
 }
 
 // ByCreated orders the results by the created field.

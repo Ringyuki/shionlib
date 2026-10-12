@@ -21,6 +21,14 @@ type CatalogSyncCursor struct {
 	Source string `json:"source,omitempty"`
 	// Cursor holds the value of the "cursor" field.
 	Cursor string `json:"cursor,omitempty"`
+	// PulledAt holds the value of the "pulled_at" field.
+	PulledAt *time.Time `json:"pulled_at,omitempty"`
+	// Changes holds the value of the "changes" field.
+	Changes int `json:"changes,omitempty"`
+	// FailedAt holds the value of the "failed_at" field.
+	FailedAt *time.Time `json:"failed_at,omitempty"`
+	// LastError holds the value of the "last_error" field.
+	LastError *string `json:"last_error,omitempty"`
 	// Created holds the value of the "created" field.
 	Created time.Time `json:"created,omitempty"`
 	// Updated holds the value of the "updated" field.
@@ -33,11 +41,11 @@ func (*CatalogSyncCursor) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case catalogsynccursor.FieldID:
+		case catalogsynccursor.FieldID, catalogsynccursor.FieldChanges:
 			values[i] = new(sql.NullInt64)
-		case catalogsynccursor.FieldSource, catalogsynccursor.FieldCursor:
+		case catalogsynccursor.FieldSource, catalogsynccursor.FieldCursor, catalogsynccursor.FieldLastError:
 			values[i] = new(sql.NullString)
-		case catalogsynccursor.FieldCreated, catalogsynccursor.FieldUpdated:
+		case catalogsynccursor.FieldPulledAt, catalogsynccursor.FieldFailedAt, catalogsynccursor.FieldCreated, catalogsynccursor.FieldUpdated:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -71,6 +79,33 @@ func (_m *CatalogSyncCursor) assignValues(columns []string, values []any) error 
 				return fmt.Errorf("unexpected type %T for field cursor", values[i])
 			} else if value.Valid {
 				_m.Cursor = value.String
+			}
+		case catalogsynccursor.FieldPulledAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field pulled_at", values[i])
+			} else if value.Valid {
+				_m.PulledAt = new(time.Time)
+				*_m.PulledAt = value.Time
+			}
+		case catalogsynccursor.FieldChanges:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field changes", values[i])
+			} else if value.Valid {
+				_m.Changes = int(value.Int64)
+			}
+		case catalogsynccursor.FieldFailedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field failed_at", values[i])
+			} else if value.Valid {
+				_m.FailedAt = new(time.Time)
+				*_m.FailedAt = value.Time
+			}
+		case catalogsynccursor.FieldLastError:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field last_error", values[i])
+			} else if value.Valid {
+				_m.LastError = new(string)
+				*_m.LastError = value.String
 			}
 		case catalogsynccursor.FieldCreated:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -125,6 +160,24 @@ func (_m *CatalogSyncCursor) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("cursor=")
 	builder.WriteString(_m.Cursor)
+	builder.WriteString(", ")
+	if v := _m.PulledAt; v != nil {
+		builder.WriteString("pulled_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("changes=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Changes))
+	builder.WriteString(", ")
+	if v := _m.FailedAt; v != nil {
+		builder.WriteString("failed_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.LastError; v != nil {
+		builder.WriteString("last_error=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("created=")
 	builder.WriteString(_m.Created.Format(time.ANSIC))

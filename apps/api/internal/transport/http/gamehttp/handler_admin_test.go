@@ -32,9 +32,9 @@ type adminEnv struct {
 
 func newAdminEnv(t *testing.T) adminEnv {
 	t.Helper()
-	cover := "cover.webp"
+	cover := game.AdminCover{URL: "cover.webp", Dims: []int{600, 800}, Sexual: 1}
 	first := gametest.AdminGame{
-		Entry:  game.AdminEntry{ID: 1, TitleJP: "サマポケ", TitleZH: "夏日口袋", Status: game.StatusVisible, Views: 9, Downloads: 3, Created: created, Updated: created, CoverURL: &cover, Creator: game.CreatorRef{ID: 7, Name: "importer"}},
+		Entry:  game.AdminEntry{ID: 1, TitleJP: "サマポケ", TitleZH: "夏日口袋", Status: game.StatusVisible, Views: 9, Downloads: 3, Resources: 4, Created: created, Updated: created, Cover: &cover, Creator: game.CreatorRef{ID: 7, Name: "importer"}, Source: &game.SourceRef{Source: "hikarinagi", ExternalID: "100"}},
 		Scalar: game.Scalar{BID: ptr("100"), VID: ptr("v100"), Aliases: []string{"SP"}, ReleaseDate: &released, ExtraInfo: json.RawMessage(`[{"key":"k","value":"v"}]`), Platform: []string{"win"}, Type: ptr("ADV")},
 		Keys:   []string{"games/1/1/a.7z"},
 	}
@@ -71,12 +71,13 @@ func TestAdminGameListShape(t *testing.T) {
 	env := newAdminEnv(t)
 	resp := env.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/content/games?pageSize=1", As: &staff})
 	env.server.Expect(resp, http.StatusOK, 0)
-	want := `{"items":[{"id":2,"title_jp":"Hidden","title_zh":"","title_en":"","status":2,"views":0,"downloads":0,"nsfw":true,"created":"2025-01-02T03:04:05.000Z","updated":"2025-01-02T03:04:05.000Z","covers":[],"creator":{"id":7,"name":"importer"}}],"meta":{"totalItems":2,"itemCount":1,"itemsPerPage":1,"totalPages":2,"currentPage":1}}`
+	want := `{"items":[{"id":2,"title_jp":"Hidden","title_zh":"","title_en":"","status":2,"views":0,"downloads":0,"resources":0,"nsfw":true,"recently_updated":false,"created":"2025-01-02T03:04:05.000Z","updated":"2025-01-02T03:04:05.000Z","covers":[],"creator":{"id":7,"name":"importer"},"source":null}],"meta":{"totalItems":2,"itemCount":1,"itemsPerPage":1,"totalPages":2,"currentPage":1}}`
 	if string(resp.Data) != want {
 		t.Fatalf("default order is id desc\n got %s\nwant %s", resp.Data, want)
 	}
+	env.server.Expect(env.server.Do(apitest.Request{Method: http.MethodPut, Path: "/admin/content/games/1/recent-update", As: &staff}), http.StatusOK, 0)
 	resp = env.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/content/games?status=1&search=%E5%A4%8F&sortBy=views&sortOrder=asc", As: &staff})
-	want = `{"items":[{"id":1,"title_jp":"サマポケ","title_zh":"夏日口袋","title_en":"","status":1,"views":9,"downloads":3,"nsfw":false,"created":"2025-01-02T03:04:05.000Z","updated":"2025-01-02T03:04:05.000Z","covers":[{"url":"cover.webp"}],"creator":{"id":7,"name":"importer"},"cover":"cover.webp"}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1}}`
+	want = `{"items":[{"id":1,"title_jp":"サマポケ","title_zh":"夏日口袋","title_en":"","status":1,"views":9,"downloads":3,"resources":4,"nsfw":false,"recently_updated":true,"created":"2025-01-02T03:04:05.000Z","updated":"2025-01-02T03:04:05.000Z","covers":[{"url":"cover.webp","dims":[600,800],"sexual":1,"violence":0}],"creator":{"id":7,"name":"importer"},"cover":"cover.webp","source":{"name":"hikarinagi","external_id":"100"}}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1}}`
 	if string(resp.Data) != want {
 		t.Fatalf("filtered\n got %s\nwant %s", resp.Data, want)
 	}
@@ -169,7 +170,7 @@ func TestAdminGameDelete(t *testing.T) {
 	if _, ok := env.store.Game(1); ok {
 		t.Fatal("game not deleted")
 	}
-	if got := env.exclusions.Excluded(); !slices.Equal(got, []gametest.Exclusion{{Entity: catalog.EntityGame, ID: 1}}) {
+	if got := env.exclusions.Excluded(); !slices.Equal(got, []gametest.Exclusion{{Entity: catalog.EntityGame, ID: 1, By: catalog.Exclusion{Title: "サマポケ", UserID: staff.UserID}}}) {
 		t.Fatalf("catalog exclusion: %+v", got)
 	}
 	if _, marked := env.recent.MarkedAt(1); marked {

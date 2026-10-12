@@ -57,6 +57,87 @@ func (_u *CatalogSyncCursorUpdate) SetNillableCursor(v *string) *CatalogSyncCurs
 	return _u
 }
 
+// SetPulledAt sets the "pulled_at" field.
+func (_u *CatalogSyncCursorUpdate) SetPulledAt(v time.Time) *CatalogSyncCursorUpdate {
+	_u.mutation.SetPulledAt(v)
+	return _u
+}
+
+// SetNillablePulledAt sets the "pulled_at" field if the given value is not nil.
+func (_u *CatalogSyncCursorUpdate) SetNillablePulledAt(v *time.Time) *CatalogSyncCursorUpdate {
+	if v != nil {
+		_u.SetPulledAt(*v)
+	}
+	return _u
+}
+
+// ClearPulledAt clears the value of the "pulled_at" field.
+func (_u *CatalogSyncCursorUpdate) ClearPulledAt() *CatalogSyncCursorUpdate {
+	_u.mutation.ClearPulledAt()
+	return _u
+}
+
+// SetChanges sets the "changes" field.
+func (_u *CatalogSyncCursorUpdate) SetChanges(v int) *CatalogSyncCursorUpdate {
+	_u.mutation.ResetChanges()
+	_u.mutation.SetChanges(v)
+	return _u
+}
+
+// SetNillableChanges sets the "changes" field if the given value is not nil.
+func (_u *CatalogSyncCursorUpdate) SetNillableChanges(v *int) *CatalogSyncCursorUpdate {
+	if v != nil {
+		_u.SetChanges(*v)
+	}
+	return _u
+}
+
+// AddChanges adds value to the "changes" field.
+func (_u *CatalogSyncCursorUpdate) AddChanges(v int) *CatalogSyncCursorUpdate {
+	_u.mutation.AddChanges(v)
+	return _u
+}
+
+// SetFailedAt sets the "failed_at" field.
+func (_u *CatalogSyncCursorUpdate) SetFailedAt(v time.Time) *CatalogSyncCursorUpdate {
+	_u.mutation.SetFailedAt(v)
+	return _u
+}
+
+// SetNillableFailedAt sets the "failed_at" field if the given value is not nil.
+func (_u *CatalogSyncCursorUpdate) SetNillableFailedAt(v *time.Time) *CatalogSyncCursorUpdate {
+	if v != nil {
+		_u.SetFailedAt(*v)
+	}
+	return _u
+}
+
+// ClearFailedAt clears the value of the "failed_at" field.
+func (_u *CatalogSyncCursorUpdate) ClearFailedAt() *CatalogSyncCursorUpdate {
+	_u.mutation.ClearFailedAt()
+	return _u
+}
+
+// SetLastError sets the "last_error" field.
+func (_u *CatalogSyncCursorUpdate) SetLastError(v string) *CatalogSyncCursorUpdate {
+	_u.mutation.SetLastError(v)
+	return _u
+}
+
+// SetNillableLastError sets the "last_error" field if the given value is not nil.
+func (_u *CatalogSyncCursorUpdate) SetNillableLastError(v *string) *CatalogSyncCursorUpdate {
+	if v != nil {
+		_u.SetLastError(*v)
+	}
+	return _u
+}
+
+// ClearLastError clears the value of the "last_error" field.
+func (_u *CatalogSyncCursorUpdate) ClearLastError() *CatalogSyncCursorUpdate {
+	_u.mutation.ClearLastError()
+	return _u
+}
+
 // SetUpdated sets the "updated" field.
 func (_u *CatalogSyncCursorUpdate) SetUpdated(v time.Time) *CatalogSyncCursorUpdate {
 	_u.mutation.SetUpdated(v)
@@ -116,6 +197,11 @@ func (_u *CatalogSyncCursorUpdate) check() error {
 			return &ValidationError{Name: "cursor", err: fmt.Errorf(`ent: validator failed for field "CatalogSyncCursor.cursor": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.LastError(); ok {
+		if err := catalogsynccursor.LastErrorValidator(v); err != nil {
+			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "CatalogSyncCursor.last_error": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -142,6 +228,30 @@ func (_u *CatalogSyncCursorUpdate) sqlSave(ctx context.Context) (_node int, err 
 	}
 	if value, ok := _u.mutation.Cursor(); ok {
 		_spec.SetField(catalogsynccursor.FieldCursor, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.PulledAt(); ok {
+		_spec.SetField(catalogsynccursor.FieldPulledAt, field.TypeTime, value)
+	}
+	if _u.mutation.PulledAtCleared() {
+		_spec.ClearField(catalogsynccursor.FieldPulledAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Changes(); ok {
+		_spec.SetField(catalogsynccursor.FieldChanges, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedChanges(); ok {
+		_spec.AddField(catalogsynccursor.FieldChanges, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.FailedAt(); ok {
+		_spec.SetField(catalogsynccursor.FieldFailedAt, field.TypeTime, value)
+	}
+	if _u.mutation.FailedAtCleared() {
+		_spec.ClearField(catalogsynccursor.FieldFailedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.LastError(); ok {
+		_spec.SetField(catalogsynccursor.FieldLastError, field.TypeString, value)
+	}
+	if _u.mutation.LastErrorCleared() {
+		_spec.ClearField(catalogsynccursor.FieldLastError, field.TypeString)
 	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(catalogsynccursor.FieldUpdated, field.TypeTime, value)
@@ -193,6 +303,87 @@ func (_u *CatalogSyncCursorUpdateOne) SetNillableCursor(v *string) *CatalogSyncC
 	if v != nil {
 		_u.SetCursor(*v)
 	}
+	return _u
+}
+
+// SetPulledAt sets the "pulled_at" field.
+func (_u *CatalogSyncCursorUpdateOne) SetPulledAt(v time.Time) *CatalogSyncCursorUpdateOne {
+	_u.mutation.SetPulledAt(v)
+	return _u
+}
+
+// SetNillablePulledAt sets the "pulled_at" field if the given value is not nil.
+func (_u *CatalogSyncCursorUpdateOne) SetNillablePulledAt(v *time.Time) *CatalogSyncCursorUpdateOne {
+	if v != nil {
+		_u.SetPulledAt(*v)
+	}
+	return _u
+}
+
+// ClearPulledAt clears the value of the "pulled_at" field.
+func (_u *CatalogSyncCursorUpdateOne) ClearPulledAt() *CatalogSyncCursorUpdateOne {
+	_u.mutation.ClearPulledAt()
+	return _u
+}
+
+// SetChanges sets the "changes" field.
+func (_u *CatalogSyncCursorUpdateOne) SetChanges(v int) *CatalogSyncCursorUpdateOne {
+	_u.mutation.ResetChanges()
+	_u.mutation.SetChanges(v)
+	return _u
+}
+
+// SetNillableChanges sets the "changes" field if the given value is not nil.
+func (_u *CatalogSyncCursorUpdateOne) SetNillableChanges(v *int) *CatalogSyncCursorUpdateOne {
+	if v != nil {
+		_u.SetChanges(*v)
+	}
+	return _u
+}
+
+// AddChanges adds value to the "changes" field.
+func (_u *CatalogSyncCursorUpdateOne) AddChanges(v int) *CatalogSyncCursorUpdateOne {
+	_u.mutation.AddChanges(v)
+	return _u
+}
+
+// SetFailedAt sets the "failed_at" field.
+func (_u *CatalogSyncCursorUpdateOne) SetFailedAt(v time.Time) *CatalogSyncCursorUpdateOne {
+	_u.mutation.SetFailedAt(v)
+	return _u
+}
+
+// SetNillableFailedAt sets the "failed_at" field if the given value is not nil.
+func (_u *CatalogSyncCursorUpdateOne) SetNillableFailedAt(v *time.Time) *CatalogSyncCursorUpdateOne {
+	if v != nil {
+		_u.SetFailedAt(*v)
+	}
+	return _u
+}
+
+// ClearFailedAt clears the value of the "failed_at" field.
+func (_u *CatalogSyncCursorUpdateOne) ClearFailedAt() *CatalogSyncCursorUpdateOne {
+	_u.mutation.ClearFailedAt()
+	return _u
+}
+
+// SetLastError sets the "last_error" field.
+func (_u *CatalogSyncCursorUpdateOne) SetLastError(v string) *CatalogSyncCursorUpdateOne {
+	_u.mutation.SetLastError(v)
+	return _u
+}
+
+// SetNillableLastError sets the "last_error" field if the given value is not nil.
+func (_u *CatalogSyncCursorUpdateOne) SetNillableLastError(v *string) *CatalogSyncCursorUpdateOne {
+	if v != nil {
+		_u.SetLastError(*v)
+	}
+	return _u
+}
+
+// ClearLastError clears the value of the "last_error" field.
+func (_u *CatalogSyncCursorUpdateOne) ClearLastError() *CatalogSyncCursorUpdateOne {
+	_u.mutation.ClearLastError()
 	return _u
 }
 
@@ -268,6 +459,11 @@ func (_u *CatalogSyncCursorUpdateOne) check() error {
 			return &ValidationError{Name: "cursor", err: fmt.Errorf(`ent: validator failed for field "CatalogSyncCursor.cursor": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.LastError(); ok {
+		if err := catalogsynccursor.LastErrorValidator(v); err != nil {
+			return &ValidationError{Name: "last_error", err: fmt.Errorf(`ent: validator failed for field "CatalogSyncCursor.last_error": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -311,6 +507,30 @@ func (_u *CatalogSyncCursorUpdateOne) sqlSave(ctx context.Context) (_node *Catal
 	}
 	if value, ok := _u.mutation.Cursor(); ok {
 		_spec.SetField(catalogsynccursor.FieldCursor, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.PulledAt(); ok {
+		_spec.SetField(catalogsynccursor.FieldPulledAt, field.TypeTime, value)
+	}
+	if _u.mutation.PulledAtCleared() {
+		_spec.ClearField(catalogsynccursor.FieldPulledAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Changes(); ok {
+		_spec.SetField(catalogsynccursor.FieldChanges, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedChanges(); ok {
+		_spec.AddField(catalogsynccursor.FieldChanges, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.FailedAt(); ok {
+		_spec.SetField(catalogsynccursor.FieldFailedAt, field.TypeTime, value)
+	}
+	if _u.mutation.FailedAtCleared() {
+		_spec.ClearField(catalogsynccursor.FieldFailedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.LastError(); ok {
+		_spec.SetField(catalogsynccursor.FieldLastError, field.TypeString, value)
+	}
+	if _u.mutation.LastErrorCleared() {
+		_spec.ClearField(catalogsynccursor.FieldLastError, field.TypeString)
 	}
 	if value, ok := _u.mutation.Updated(); ok {
 		_spec.SetField(catalogsynccursor.FieldUpdated, field.TypeTime, value)

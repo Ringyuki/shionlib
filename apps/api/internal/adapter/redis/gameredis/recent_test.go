@@ -40,6 +40,13 @@ func TestRecentUpdatesPagesByScoreAndPurgesExpired(t *testing.T) {
 	if exists, _ := client.ZScore(ctx, client.Key("game:recent_update"), "5").Result(); exists != 0 {
 		t.Fatalf("expired entries are purged: %v", exists)
 	}
+	marked, err := recent.Marked(ctx, []int{9, 5, 77})
+	if err != nil || !marked[9] || marked[5] || marked[77] {
+		t.Fatalf("marked games: %v %v", marked, err)
+	}
+	if none, err := recent.Marked(ctx, nil); err != nil || len(none) != 0 {
+		t.Fatalf("no games asked: %v %v", none, err)
+	}
 	if err := recent.Remove(ctx, 9); err != nil {
 		t.Fatal(err)
 	}

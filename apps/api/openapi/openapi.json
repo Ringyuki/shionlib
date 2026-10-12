@@ -875,12 +875,34 @@
       "AdminGameCoverDTO": {
         "additionalProperties": false,
         "properties": {
+          "dims": {
+            "description": "Width and height in pixels, empty when unknown",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "sexual": {
+            "format": "int64",
+            "type": "integer"
+          },
           "url": {
             "type": "string"
+          },
+          "violence": {
+            "format": "int64",
+            "type": "integer"
           }
         },
         "required": [
-          "url"
+          "url",
+          "dims",
+          "sexual",
+          "violence"
         ],
         "type": "object"
       },
@@ -951,6 +973,26 @@
           "nsfw": {
             "type": "boolean"
           },
+          "recently_updated": {
+            "description": "Whether the game is listed among the recent updates",
+            "type": "boolean"
+          },
+          "resources": {
+            "description": "Published resources of the game",
+            "format": "int64",
+            "type": "integer"
+          },
+          "source": {
+            "description": "The catalog entry the game was imported from",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AdminGameSourceDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "status": {
             "format": "int64",
             "type": "integer"
@@ -981,11 +1023,14 @@
           "status",
           "views",
           "downloads",
+          "resources",
           "nsfw",
+          "recently_updated",
           "created",
           "updated",
           "covers",
-          "creator"
+          "creator",
+          "source"
         ],
         "type": "object"
       },
@@ -1197,6 +1242,22 @@
             ]
           }
         },
+        "type": "object"
+      },
+      "AdminGameSourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "external_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "external_id"
+        ],
         "type": "object"
       },
       "AdminGameStaffDTO": {
@@ -5336,6 +5397,38 @@
         },
         "type": "object"
       },
+      "BangumiAuthorizationDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "authorized": {
+            "description": "Whether tokens are stored and can be renewed",
+            "type": "boolean"
+          },
+          "callback_url": {
+            "description": "The callback address to register for the application at Bangumi",
+            "type": "string"
+          },
+          "configured": {
+            "description": "Whether the application id and secret are set",
+            "type": "boolean"
+          },
+          "expires_at": {
+            "description": "When the current access token expires; it is renewed by itself",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "configured",
+          "authorized",
+          "expires_at",
+          "callback_url"
+        ],
+        "type": "object"
+      },
       "BangumiRatingDTO": {
         "additionalProperties": false,
         "properties": {
@@ -5438,6 +5531,8 @@
           400106,
           400107,
           400108,
+          400109,
+          400110,
           410101,
           410102,
           410103,
@@ -5531,6 +5626,7 @@
           620101,
           620102,
           620103,
+          620104,
           630101,
           630102,
           630103,
@@ -5596,6 +5692,8 @@
           "GAME_DATA_CONSISTENCY_CHECK_FAILED",
           "GAME_MISSING_BANGUMI_OR_VNDB_ID",
           "GAME_ENTRY_MIRRORED",
+          "GAME_BANGUMI_NOT_CONFIGURED",
+          "GAME_BANGUMI_AUTHORIZATION_INVALID",
           "GAME_DEVELOPER_NOT_FOUND",
           "GAME_DEVELOPER_ALREADY_EXISTS",
           "GAME_DEVELOPER_MIN_ONE_REQUIRED",
@@ -5689,6 +5787,7 @@
           "CATALOG_SOURCE_UNAVAILABLE",
           "CATALOG_UNKNOWN_SOURCE",
           "CATALOG_ENTRY_NOT_FOUND",
+          "CATALOG_NO_CHANGE_FEED",
           "AI_PROVIDER_NOT_FOUND",
           "AI_PROVIDER_NAME_TAKEN",
           "AI_PROVIDER_BASE_URL_REQUIRED",
@@ -5719,6 +5818,55 @@
           "INSPECTION_ENTRY_NO_PREVIEW"
         ]
       },
+      "CatalogExcludedDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "entity": {
+            "enum": [
+              "game",
+              "developer",
+              "character"
+            ],
+            "type": "string"
+          },
+          "excluded_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "excluded_by": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CatalogRemoverDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "external_id": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "title": {
+            "description": "The name of the entry when it was removed",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "source",
+          "entity",
+          "external_id",
+          "title",
+          "excluded_at",
+          "excluded_by"
+        ],
+        "type": "object"
+      },
       "CatalogHitDTO": {
         "additionalProperties": false,
         "properties": {
@@ -5734,8 +5882,20 @@
               "null"
             ]
           },
+          "excluded": {
+            "description": "Whether the entry is kept out of imports",
+            "type": "boolean"
+          },
           "external_id": {
             "type": "string"
+          },
+          "local_id": {
+            "description": "The entry here, when it was imported",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
           },
           "subtitle": {
             "type": [
@@ -5744,6 +5904,7 @@
             ]
           },
           "title": {
+            "description": "Empty for an entry that is offered by its number alone, because the search did not list it",
             "type": "string"
           }
         },
@@ -5752,7 +5913,9 @@
           "title",
           "subtitle",
           "developer",
-          "cover"
+          "cover",
+          "local_id",
+          "excluded"
         ],
         "type": "object"
       },
@@ -5796,6 +5959,98 @@
         },
         "required": [
           "id"
+        ],
+        "type": "object"
+      },
+      "CatalogRemoverDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
+      "CatalogSourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "changes": {
+            "description": "Changes the last pull applied",
+            "format": "int64",
+            "type": "integer"
+          },
+          "characters": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "cursor": {
+            "description": "Position in the change feed of the source; empty before the first pull",
+            "type": "string"
+          },
+          "developers": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failed_at": {
+            "description": "When a pull failed since the last one that worked",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "games": {
+            "description": "Games of the source that are kept here",
+            "format": "int64",
+            "type": "integer"
+          },
+          "incremental": {
+            "description": "Whether the source reports its changes, so they can be pulled",
+            "type": "boolean"
+          },
+          "last_error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "pulled_at": {
+            "description": "When the changes were last pulled",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "refresh_seconds": {
+            "description": "Entries that were not synced for this long are fetched again",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "incremental",
+          "games",
+          "developers",
+          "characters",
+          "cursor",
+          "pulled_at",
+          "changes",
+          "failed_at",
+          "last_error",
+          "refresh_seconds"
         ],
         "type": "object"
       },
@@ -9533,6 +9788,39 @@
         ],
         "type": "object"
       },
+      "EnvelopeBangumiAuthorizationDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/BangumiAuthorizationDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeBangumiScoreDTO": {
         "additionalProperties": false,
         "properties": {
@@ -9615,6 +9903,39 @@
           },
           "data": {
             "$ref": "#/components/schemas/CatalogImportedDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeCatalogSourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CatalogSourceDTO"
           },
           "message": {
             "type": "string"
@@ -10981,6 +11302,45 @@
         ],
         "type": "object"
       },
+      "EnvelopeListCatalogSourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogSourceDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeListDownloadEventDTO": {
         "additionalProperties": false,
         "properties": {
@@ -11930,6 +12290,39 @@
           },
           "data": {
             "$ref": "#/components/schemas/PageAiRequestDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopePageCatalogExcludedDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageCatalogExcludedDTO"
           },
           "message": {
             "type": "string"
@@ -16711,6 +17104,28 @@
           "items": {
             "items": {
               "$ref": "#/components/schemas/AiRequestDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMeta"
+          }
+        },
+        "required": [
+          "items",
+          "meta"
+        ],
+        "type": "object"
+      },
+      "PageCatalogExcludedDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogExcludedDTO"
             },
             "type": [
               "array",
@@ -23243,6 +23658,241 @@
         ]
       }
     },
+    "/admin/bangumi/authorization": {
+      "get": {
+        "operationId": "adminBangumi.authorization",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeBangumiAuthorizationDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Whether the site may call Bangumi",
+        "tags": [
+          "admin",
+          "bangumi"
+        ]
+      }
+    },
+    "/admin/bangumi/authorization/callback": {
+      "get": {
+        "operationId": "adminBangumi.callback",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "code",
+            "schema": {
+              "maxLength": 500,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "maxLength": 100,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Found",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Complete the Bangumi authorization",
+        "tags": [
+          "admin",
+          "bangumi"
+        ]
+      }
+    },
+    "/admin/bangumi/authorization/start": {
+      "get": {
+        "operationId": "adminBangumi.start",
+        "parameters": [
+          {
+            "description": "Path of the site to come back to",
+            "explode": false,
+            "in": "query",
+            "name": "returnTo",
+            "schema": {
+              "description": "Path of the site to come back to",
+              "maxLength": 500,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Found",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Redirect to Bangumi to authorize the site",
+        "tags": [
+          "admin",
+          "bangumi"
+        ]
+      }
+    },
+    "/admin/catalog/excluded": {
+      "get": {
+        "operationId": "catalog.excluded",
+        "parameters": [
+          {
+            "description": "1-based page number",
+            "explode": false,
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Items per page",
+            "explode": false,
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 10,
+              "description": "Items per page",
+              "format": "int64",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopePageCatalogExcludedDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List the entries kept out of catalog imports",
+        "tags": [
+          "admin-catalog"
+        ]
+      }
+    },
     "/admin/catalog/import": {
       "post": {
         "operationId": "catalog.import",
@@ -23478,7 +24128,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopeListString"
+                  "$ref": "#/components/schemas/EnvelopeListCatalogSourceDTO"
                 }
               }
             },
@@ -23510,7 +24160,66 @@
             "accessCookie": []
           }
         ],
-        "summary": "List configured catalog sources",
+        "summary": "List the catalog sources with what they provide and their last pull",
+        "tags": [
+          "admin-catalog"
+        ]
+      }
+    },
+    "/admin/catalog/sources/{source}/sync": {
+      "post": {
+        "operationId": "catalog.sync",
+        "parameters": [
+          {
+            "description": "Catalog source name",
+            "in": "path",
+            "name": "source",
+            "required": true,
+            "schema": {
+              "description": "Catalog source name",
+              "maxLength": 32,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeCatalogSourceDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Pull the changes of a catalog source now",
         "tags": [
           "admin-catalog"
         ]

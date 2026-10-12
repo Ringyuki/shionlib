@@ -102,6 +102,34 @@ func (_c *CatalogSourceLinkCreate) SetNillableExcludedAt(v *time.Time) *CatalogS
 	return _c
 }
 
+// SetExcludedBy sets the "excluded_by" field.
+func (_c *CatalogSourceLinkCreate) SetExcludedBy(v int) *CatalogSourceLinkCreate {
+	_c.mutation.SetExcludedBy(v)
+	return _c
+}
+
+// SetNillableExcludedBy sets the "excluded_by" field if the given value is not nil.
+func (_c *CatalogSourceLinkCreate) SetNillableExcludedBy(v *int) *CatalogSourceLinkCreate {
+	if v != nil {
+		_c.SetExcludedBy(*v)
+	}
+	return _c
+}
+
+// SetTitle sets the "title" field.
+func (_c *CatalogSourceLinkCreate) SetTitle(v string) *CatalogSourceLinkCreate {
+	_c.mutation.SetTitle(v)
+	return _c
+}
+
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (_c *CatalogSourceLinkCreate) SetNillableTitle(v *string) *CatalogSourceLinkCreate {
+	if v != nil {
+		_c.SetTitle(*v)
+	}
+	return _c
+}
+
 // SetFailures sets the "failures" field.
 func (_c *CatalogSourceLinkCreate) SetFailures(v int) *CatalogSourceLinkCreate {
 	_c.mutation.SetFailures(v)
@@ -247,6 +275,11 @@ func (_c *CatalogSourceLinkCreate) check() error {
 			return &ValidationError{Name: "revision", err: fmt.Errorf(`ent: validator failed for field "CatalogSourceLink.revision": %w`, err)}
 		}
 	}
+	if v, ok := _c.mutation.Title(); ok {
+		if err := catalogsourcelink.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "CatalogSourceLink.title": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.Failures(); !ok {
 		return &ValidationError{Name: "failures", err: errors.New(`ent: missing required field "CatalogSourceLink.failures"`)}
 	}
@@ -322,6 +355,14 @@ func (_c *CatalogSourceLinkCreate) createSpec() (*CatalogSourceLink, *sqlgraph.C
 	if value, ok := _c.mutation.ExcludedAt(); ok {
 		_spec.SetField(catalogsourcelink.FieldExcludedAt, field.TypeTime, value)
 		_node.ExcludedAt = &value
+	}
+	if value, ok := _c.mutation.ExcludedBy(); ok {
+		_spec.SetField(catalogsourcelink.FieldExcludedBy, field.TypeInt, value)
+		_node.ExcludedBy = &value
+	}
+	if value, ok := _c.mutation.Title(); ok {
+		_spec.SetField(catalogsourcelink.FieldTitle, field.TypeString, value)
+		_node.Title = &value
 	}
 	if value, ok := _c.mutation.Failures(); ok {
 		_spec.SetField(catalogsourcelink.FieldFailures, field.TypeInt, value)
@@ -514,6 +555,48 @@ func (u *CatalogSourceLinkUpsert) UpdateExcludedAt() *CatalogSourceLinkUpsert {
 // ClearExcludedAt clears the value of the "excluded_at" field.
 func (u *CatalogSourceLinkUpsert) ClearExcludedAt() *CatalogSourceLinkUpsert {
 	u.SetNull(catalogsourcelink.FieldExcludedAt)
+	return u
+}
+
+// SetExcludedBy sets the "excluded_by" field.
+func (u *CatalogSourceLinkUpsert) SetExcludedBy(v int) *CatalogSourceLinkUpsert {
+	u.Set(catalogsourcelink.FieldExcludedBy, v)
+	return u
+}
+
+// UpdateExcludedBy sets the "excluded_by" field to the value that was provided on create.
+func (u *CatalogSourceLinkUpsert) UpdateExcludedBy() *CatalogSourceLinkUpsert {
+	u.SetExcluded(catalogsourcelink.FieldExcludedBy)
+	return u
+}
+
+// AddExcludedBy adds v to the "excluded_by" field.
+func (u *CatalogSourceLinkUpsert) AddExcludedBy(v int) *CatalogSourceLinkUpsert {
+	u.Add(catalogsourcelink.FieldExcludedBy, v)
+	return u
+}
+
+// ClearExcludedBy clears the value of the "excluded_by" field.
+func (u *CatalogSourceLinkUpsert) ClearExcludedBy() *CatalogSourceLinkUpsert {
+	u.SetNull(catalogsourcelink.FieldExcludedBy)
+	return u
+}
+
+// SetTitle sets the "title" field.
+func (u *CatalogSourceLinkUpsert) SetTitle(v string) *CatalogSourceLinkUpsert {
+	u.Set(catalogsourcelink.FieldTitle, v)
+	return u
+}
+
+// UpdateTitle sets the "title" field to the value that was provided on create.
+func (u *CatalogSourceLinkUpsert) UpdateTitle() *CatalogSourceLinkUpsert {
+	u.SetExcluded(catalogsourcelink.FieldTitle)
+	return u
+}
+
+// ClearTitle clears the value of the "title" field.
+func (u *CatalogSourceLinkUpsert) ClearTitle() *CatalogSourceLinkUpsert {
+	u.SetNull(catalogsourcelink.FieldTitle)
 	return u
 }
 
@@ -760,6 +843,55 @@ func (u *CatalogSourceLinkUpsertOne) UpdateExcludedAt() *CatalogSourceLinkUpsert
 func (u *CatalogSourceLinkUpsertOne) ClearExcludedAt() *CatalogSourceLinkUpsertOne {
 	return u.Update(func(s *CatalogSourceLinkUpsert) {
 		s.ClearExcludedAt()
+	})
+}
+
+// SetExcludedBy sets the "excluded_by" field.
+func (u *CatalogSourceLinkUpsertOne) SetExcludedBy(v int) *CatalogSourceLinkUpsertOne {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.SetExcludedBy(v)
+	})
+}
+
+// AddExcludedBy adds v to the "excluded_by" field.
+func (u *CatalogSourceLinkUpsertOne) AddExcludedBy(v int) *CatalogSourceLinkUpsertOne {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.AddExcludedBy(v)
+	})
+}
+
+// UpdateExcludedBy sets the "excluded_by" field to the value that was provided on create.
+func (u *CatalogSourceLinkUpsertOne) UpdateExcludedBy() *CatalogSourceLinkUpsertOne {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.UpdateExcludedBy()
+	})
+}
+
+// ClearExcludedBy clears the value of the "excluded_by" field.
+func (u *CatalogSourceLinkUpsertOne) ClearExcludedBy() *CatalogSourceLinkUpsertOne {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.ClearExcludedBy()
+	})
+}
+
+// SetTitle sets the "title" field.
+func (u *CatalogSourceLinkUpsertOne) SetTitle(v string) *CatalogSourceLinkUpsertOne {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.SetTitle(v)
+	})
+}
+
+// UpdateTitle sets the "title" field to the value that was provided on create.
+func (u *CatalogSourceLinkUpsertOne) UpdateTitle() *CatalogSourceLinkUpsertOne {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.UpdateTitle()
+	})
+}
+
+// ClearTitle clears the value of the "title" field.
+func (u *CatalogSourceLinkUpsertOne) ClearTitle() *CatalogSourceLinkUpsertOne {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.ClearTitle()
 	})
 }
 
@@ -1180,6 +1312,55 @@ func (u *CatalogSourceLinkUpsertBulk) UpdateExcludedAt() *CatalogSourceLinkUpser
 func (u *CatalogSourceLinkUpsertBulk) ClearExcludedAt() *CatalogSourceLinkUpsertBulk {
 	return u.Update(func(s *CatalogSourceLinkUpsert) {
 		s.ClearExcludedAt()
+	})
+}
+
+// SetExcludedBy sets the "excluded_by" field.
+func (u *CatalogSourceLinkUpsertBulk) SetExcludedBy(v int) *CatalogSourceLinkUpsertBulk {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.SetExcludedBy(v)
+	})
+}
+
+// AddExcludedBy adds v to the "excluded_by" field.
+func (u *CatalogSourceLinkUpsertBulk) AddExcludedBy(v int) *CatalogSourceLinkUpsertBulk {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.AddExcludedBy(v)
+	})
+}
+
+// UpdateExcludedBy sets the "excluded_by" field to the value that was provided on create.
+func (u *CatalogSourceLinkUpsertBulk) UpdateExcludedBy() *CatalogSourceLinkUpsertBulk {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.UpdateExcludedBy()
+	})
+}
+
+// ClearExcludedBy clears the value of the "excluded_by" field.
+func (u *CatalogSourceLinkUpsertBulk) ClearExcludedBy() *CatalogSourceLinkUpsertBulk {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.ClearExcludedBy()
+	})
+}
+
+// SetTitle sets the "title" field.
+func (u *CatalogSourceLinkUpsertBulk) SetTitle(v string) *CatalogSourceLinkUpsertBulk {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.SetTitle(v)
+	})
+}
+
+// UpdateTitle sets the "title" field to the value that was provided on create.
+func (u *CatalogSourceLinkUpsertBulk) UpdateTitle() *CatalogSourceLinkUpsertBulk {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.UpdateTitle()
+	})
+}
+
+// ClearTitle clears the value of the "title" field.
+func (u *CatalogSourceLinkUpsertBulk) ClearTitle() *CatalogSourceLinkUpsertBulk {
+	return u.Update(func(s *CatalogSourceLinkUpsert) {
+		s.ClearTitle()
 	})
 }
 

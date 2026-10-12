@@ -81,6 +81,7 @@ type e2eSeeder struct {
 type e2eSeedResult struct {
 	UserIDs       []int
 	GameIDs       []int
+	ShownGameIDs  []int
 	PrimaryGameID int
 	MalwareGameID int
 }
@@ -213,7 +214,11 @@ func (s *e2eSeeder) Seed(ctx context.Context) (e2eSeedResult, error) {
 		if err != nil {
 			return err
 		}
+		if err := s.seedCatalogSync(ctx, tx, users[e2eAdminIndex]); err != nil {
+			return err
+		}
 		result.GameIDs = graph.gameIDs
+		result.ShownGameIDs = graph.shownGameIDs
 		result.PrimaryGameID = graph.primaryGameID
 		result.MalwareGameID = graph.malwareGameID
 		return s.seedPostGameContent(ctx, tx, e2ePostGameContent{
@@ -230,7 +235,7 @@ func (s *e2eSeeder) Seed(ctx context.Context) (e2eSeedResult, error) {
 	if err != nil {
 		return e2eSeedResult{}, err
 	}
-	if err := s.primeRecentUpdates(ctx, result.GameIDs); err != nil {
+	if err := s.primeRecentUpdates(ctx, result.ShownGameIDs); err != nil {
 		return e2eSeedResult{}, err
 	}
 	refresh.NewWatcher(s.redis, slog.New(slog.NewTextHandler(s.out, nil)), refresh.Options{Topic: bootstrap.SettingsTopic}).Announce(ctx)
@@ -319,6 +324,7 @@ func (s *e2eSeeder) seedPermissionMappings(ctx context.Context, tx *ent.Client, 
 
 type e2eGameGraph struct {
 	gameIDs       []int
+	shownGameIDs  []int
 	primaryGameID int
 	malwareGameID int
 }
@@ -366,6 +372,9 @@ func (s *e2eSeeder) seedGameGraph(ctx context.Context, tx *ent.Client, data e2eD
 		}
 		gameIDs[game.ID] = id
 		graph.gameIDs = append(graph.gameIDs, id)
+		if e2eValueOr(game.Status, e2eGameShown) == e2eGameShown {
+			graph.shownGameIDs = append(graph.shownGameIDs, id)
+		}
 	}
 	primary, ok := gameIDs[e2ePrimaryFixtureGameID]
 	if !ok {
@@ -469,7 +478,7 @@ func (s *e2eSeeder) createGame(ctx context.Context, tx *ent.Client, game e2eGame
 		SetNsfw(game.NSFW != nil && *game.NSFW).
 		SetNillableType(game.Type).
 		SetPlatform(pgvalue.Strings(e2eNonNilStrings(game.Platform))).
-		SetStatus(e2eValueOr(game.Status, 1)).
+		SetStatus(e2eValueOr(game.Status, e2eGameShown)).
 		SetHotScore(e2eValueOr(game.HotScore, 0)).
 		SetViews(e2eValueOr(game.Views, 0)).
 		SetDownloads(e2eValueOr(game.Downloads, 0))

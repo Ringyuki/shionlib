@@ -15,6 +15,7 @@ type LinkState struct {
 	SyncedAt  *time.Time
 	MissingAt *time.Time
 	Excluded  *time.Time
+	Exclusion catalog.Exclusion
 	Failures  int
 	LastError string
 	order     int
@@ -25,6 +26,7 @@ type Store struct {
 	seq        int
 	links      map[catalog.Ref]*LinkState
 	cursors    map[string]string
+	syncs      map[string]catalog.SyncState
 	Games      map[int]catalog.GameRecord
 	Developers map[int]catalog.DeveloperRecord
 	Characters map[int]catalog.CharacterRecord
@@ -36,6 +38,7 @@ func NewStore() *Store {
 	return &Store{
 		links:      map[catalog.Ref]*LinkState{},
 		cursors:    map[string]string{},
+		syncs:      map[string]catalog.SyncState{},
 		Games:      map[int]catalog.GameRecord{},
 		Developers: map[int]catalog.DeveloperRecord{},
 		Characters: map[int]catalog.CharacterRecord{},
@@ -152,12 +155,13 @@ func (s *Store) MarkMissing(_ context.Context, ref catalog.Ref, hide bool, at ti
 	return nil
 }
 
-func (s *Store) Exclude(_ context.Context, entity catalog.Entity, localID int, at time.Time) error {
+func (s *Store) Exclude(_ context.Context, entity catalog.Entity, localID int, by catalog.Exclusion, at time.Time) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	for ref, state := range s.links {
 		if ref.Entity == entity && state.LocalID == localID {
 			state.Excluded = &at
+			state.Exclusion = by
 		}
 	}
 	return nil
@@ -168,8 +172,61 @@ func (s *Store) Include(_ context.Context, ref catalog.Ref) error {
 	defer s.mu.Unlock()
 	if state, ok := s.links[ref]; ok {
 		state.Excluded = nil
+		state.Exclusion = catalog.Exclusion{}
 	}
 	return nil
+}
+
+func (s *Store) ExcludedEntries(_ context.Context, offset, limit int) ([]catalog.ExcludedEntry, int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	type excluded struct {
+		entry catalog.ExcludedEntry
+		order int
+	}
+	var all []excluded
+	for ref, state := range s.links {
+		if state.Excluded == nil {
+			continue
+		}
+		entry := catalog.ExcludedEntry{Ref: ref, ExcludedAt: *state.Excluded}
+		if state.Exclusion.Title != "" {
+			title := state.Exclusion.Title
+			entry.Title = &title
+		}
+		if state.Exclusion.UserID != 0 {
+			entry.ExcludedBy = &catalog.Remover{ID: state.Exclusion.UserID}
+		}
+		all = append(all, excluded{entry: entry, order: state.order})
+	}
+	slices.SortFunc(all, func(a, b excluded) int {
+		return cmp.Or(b.entry.ExcludedAt.Compare(a.entry.ExcludedAt), cmp.Compare(b.order, a.order))
+	})
+	entries := make([]catalog.ExcludedEntry, 0, limit)
+	for i := offset; i < len(all) && len(entries) < limit; i++ {
+		entries = append(entries, all[i].entry)
+	}
+	return entries, len(all), nil
+}
+
+func (s *Store) LinkCounts(_ context.Context, source string) (catalog.LinkCounts, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var counts catalog.LinkCounts
+	for ref, state := range s.links {
+		if ref.Source != source || state.Excluded != nil {
+			continue
+		}
+		switch ref.Entity {
+		case catalog.EntityGame:
+			counts.Games++
+		case catalog.EntityDeveloper:
+			counts.Developers++
+		case catalog.EntityCharacter:
+			counts.Characters++
+		}
+	}
+	return counts, nil
 }
 
 func (s *Store) Excluded(_ context.Context, ref catalog.Ref) (bool, error) {
@@ -258,6 +315,30 @@ func (s *Store) SaveCursor(_ context.Context, source, cursor string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.cursors[source] = cursor
+	return nil
+}
+
+func (s *Store) SyncState(_ context.Context, source string) (catalog.SyncState, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	state := s.syncs[source]
+	state.Cursor = s.cursors[source]
+	return state, nil
+}
+
+func (s *Store) RecordPull(_ context.Context, source string, changes int, at time.Time) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.syncs[source] = catalog.SyncState{PulledAt: &at, Changes: changes}
+	return nil
+}
+
+func (s *Store) RecordPullFailure(_ context.Context, source, reason string, at time.Time) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	state := s.syncs[source]
+	state.FailedAt, state.LastError = &at, &reason
+	s.syncs[source] = state
 	return nil
 }
 

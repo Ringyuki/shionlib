@@ -19,3 +19,7 @@ var ErrDataConsistencyCheck = apperror.Define(400106, "GAME_DATA_CONSISTENCY_CHE
 var ErrMissingBangumiOrVNDBID = apperror.Define(400107, "GAME_MISSING_BANGUMI_OR_VNDB_ID", apperror.KindInvalidArgument)
 
 var ErrEntryMaintainedByCatalog = apperror.Define(400108, "GAME_ENTRY_MIRRORED", apperror.KindPermissionDenied)
+
+var ErrBangumiNotConfigured = apperror.Define(400109, "GAME_BANGUMI_NOT_CONFIGURED", apperror.KindConflict)
+
+var ErrBangumiAuthorizationInvalid = apperror.Define(400110, "GAME_BANGUMI_AUTHORIZATION_INVALID", apperror.KindInvalidArgument)

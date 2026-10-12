@@ -179,6 +179,7 @@ type SearchHit struct {
 	Subtitle   *string
 	Developer  *string
 	CoverURL   *string
+	Link       *SourceLink
 }
 
 type writeFunc func(ctx context.Context) (int, []Ref, error)

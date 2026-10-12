@@ -522,6 +522,74 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/admin/bangumi/authorization": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Whether the site may call Bangumi */
+        get: operations["adminBangumi.authorization"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/bangumi/authorization/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Complete the Bangumi authorization */
+        get: operations["adminBangumi.callback"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/bangumi/authorization/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Redirect to Bangumi to authorize the site */
+        get: operations["adminBangumi.start"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/catalog/excluded": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the entries kept out of catalog imports */
+        get: operations["catalog.excluded"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/catalog/import": {
         parameters: {
             query?: never;
@@ -580,10 +648,27 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** List configured catalog sources */
+        /** List the catalog sources with what they provide and their last pull */
         get: operations["catalog.sources"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/catalog/sources/{source}/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pull the changes of a catalog source now */
+        post: operations["catalog.sync"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3865,7 +3950,13 @@ export type components = {
             updated: string;
         };
         AdminGameCoverDTO: {
+            /** @description Width and height in pixels, empty when unknown */
+            dims: number[] | null;
+            /** Format: int64 */
+            sexual: number;
             url: string;
+            /** Format: int64 */
+            violence: number;
         };
         AdminGameCreatorDTO: {
             /** Format: int64 */
@@ -3888,6 +3979,15 @@ export type components = {
             /** Format: int64 */
             id: number;
             nsfw: boolean;
+            /** @description Whether the game is listed among the recent updates */
+            recently_updated: boolean;
+            /**
+             * Format: int64
+             * @description Published resources of the game
+             */
+            resources: number;
+            /** @description The catalog entry the game was imported from */
+            source: components["schemas"]["AdminGameSourceDTO"] | null;
             /** Format: int64 */
             status: number;
             title_en: string;
@@ -3949,6 +4049,10 @@ export type components = {
             v_id?: string | null;
         } & {
             [key: string]: unknown;
+        };
+        AdminGameSourceDTO: {
+            external_id: string;
+            name: string;
         };
         AdminGameStaffDTO: {
             name: string;
@@ -5086,6 +5190,19 @@ export type components = {
             delete_user_comments?: boolean;
             is_permanent?: boolean;
         };
+        BangumiAuthorizationDTO: {
+            /** @description Whether tokens are stored and can be renewed */
+            authorized: boolean;
+            /** @description The callback address to register for the application at Bangumi */
+            callback_url: string;
+            /** @description Whether the application id and secret are set */
+            configured: boolean;
+            /**
+             * Format: date-time
+             * @description When the current access token expires; it is renewed by itself
+             */
+            expires_at: string | null;
+        };
         BangumiRatingDTO: {
             count: {
                 [key: string]: number;
@@ -5110,12 +5227,31 @@ export type components = {
          * Format: int64
          * @enum {integer}
          */
-        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 610101 | 610102 | 620101 | 620102 | 620103 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103;
+        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 400109 | 400110 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 610101 | 610102 | 620101 | 620102 | 620103 | 620104 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103;
+        CatalogExcludedDTO: {
+            /** @enum {string} */
+            entity: "game" | "developer" | "character";
+            /** Format: date-time */
+            excluded_at: string;
+            excluded_by: components["schemas"]["CatalogRemoverDTO"] | null;
+            external_id: string;
+            source: string;
+            /** @description The name of the entry when it was removed */
+            title: string | null;
+        };
         CatalogHitDTO: {
             cover: string | null;
             developer: string | null;
+            /** @description Whether the entry is kept out of imports */
+            excluded: boolean;
             external_id: string;
+            /**
+             * Format: int64
+             * @description The entry here, when it was imported
+             */
+            local_id: number | null;
             subtitle: string | null;
+            /** @description Empty for an entry that is offered by its number alone, because the search did not list it */
             title: string;
         };
         CatalogImportInputBody: {
@@ -5135,6 +5271,48 @@ export type components = {
         CatalogImportedDTO: {
             /** Format: int64 */
             id: number;
+        };
+        CatalogRemoverDTO: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+        };
+        CatalogSourceDTO: {
+            /**
+             * Format: int64
+             * @description Changes the last pull applied
+             */
+            changes: number;
+            /** Format: int64 */
+            characters: number;
+            /** @description Position in the change feed of the source; empty before the first pull */
+            cursor: string;
+            /** Format: int64 */
+            developers: number;
+            /**
+             * Format: date-time
+             * @description When a pull failed since the last one that worked
+             */
+            failed_at: string | null;
+            /**
+             * Format: int64
+             * @description Games of the source that are kept here
+             */
+            games: number;
+            /** @description Whether the source reports its changes, so they can be pulled */
+            incremental: boolean;
+            last_error: string | null;
+            name: string;
+            /**
+             * Format: date-time
+             * @description When the changes were last pulled
+             */
+            pulled_at: string | null;
+            /**
+             * Format: int64
+             * @description Entries that were not synced for this long are fetched again
+             */
+            refresh_seconds: number;
         };
         CharacterAppearanceDTO: {
             actor: string | null;
@@ -6153,6 +6331,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeBangumiAuthorizationDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["BangumiAuthorizationDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeBangumiScoreDTO: {
             /** Format: int64 */
             code: number;
@@ -6177,6 +6365,16 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["CatalogImportedDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeCatalogSourceDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["CatalogSourceDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -6574,6 +6772,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeListCatalogSourceDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["CatalogSourceDTO"][] | null;
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeListDownloadEventDTO: {
             /** Format: int64 */
             code: number;
@@ -6838,6 +7046,16 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["PageAiRequestDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopePageCatalogExcludedDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["PageCatalogExcludedDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -8155,6 +8373,10 @@ export type components = {
         };
         PageAiRequestDTO: {
             items: components["schemas"]["AiRequestDTO"][] | null;
+            meta: components["schemas"]["PageMeta"];
+        };
+        PageCatalogExcludedDTO: {
+            items: components["schemas"]["CatalogExcludedDTO"][] | null;
             meta: components["schemas"]["PageMeta"];
         };
         PageCatalogHitDTO: {
@@ -10595,6 +10817,133 @@ export interface operations {
             };
         };
     };
+    "adminBangumi.authorization": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeBangumiAuthorizationDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminBangumi.callback": {
+        parameters: {
+            query?: {
+                code?: string;
+                state?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Found */
+            302: {
+                headers: {
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminBangumi.start": {
+        parameters: {
+            query?: {
+                /** @description Path of the site to come back to */
+                returnTo?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Found */
+            302: {
+                headers: {
+                    Location?: string;
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "catalog.excluded": {
+        parameters: {
+            query?: {
+                /** @description 1-based page number */
+                page?: number;
+                /** @description Items per page */
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopePageCatalogExcludedDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     "catalog.import": {
         parameters: {
             query?: never;
@@ -10720,7 +11069,40 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["EnvelopeListString"];
+                    "application/json": components["schemas"]["EnvelopeListCatalogSourceDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "catalog.sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Catalog source name */
+                source: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeCatalogSourceDTO"];
                 };
             };
             /** @description Error */

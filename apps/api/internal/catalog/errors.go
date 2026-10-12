@@ -12,6 +12,8 @@ var ErrUnknownSource = apperror.Define(620102, "CATALOG_UNKNOWN_SOURCE", apperro
 
 var ErrEntryNotFound = apperror.Define(620103, "CATALOG_ENTRY_NOT_FOUND", apperror.KindNotFound)
 
+var ErrNoChangeFeed = apperror.Define(620104, "CATALOG_NO_CHANGE_FEED", apperror.KindInvalidArgument)
+
 var ErrNotFound = errors.New("catalog entry not found at source")
 
 var ErrRateLimited = errors.New("catalog source rate limited")

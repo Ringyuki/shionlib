@@ -2116,6 +2116,58 @@
       "hot_score": 0,
       "views": 0,
       "downloads": 0
+    },
+    {
+      "id": 7,
+      "v_id": "v900007",
+      "b_id": "900007",
+      "title_jp": "E2E 管理画面用エントリ 7",
+      "title_zh": "E2E 后台作品 7",
+      "title_en": "E2E Backstage 7",
+      "aliases": [],
+      "intro_jp": "",
+      "intro_zh": "",
+      "intro_en": "Hidden row for the admin games page.",
+      "release_date": null,
+      "release_date_tba": false,
+      "extra_info": [],
+      "tags": [],
+      "staffs": [],
+      "nsfw": false,
+      "type": "ADV",
+      "platform": [
+        "pc"
+      ],
+      "status": 2,
+      "hot_score": 0,
+      "views": 0,
+      "downloads": 0
+    },
+    {
+      "id": 8,
+      "v_id": "v900008",
+      "b_id": "900008",
+      "title_jp": "E2E 管理画面用エントリ 8",
+      "title_zh": "E2E 后台作品 8",
+      "title_en": "E2E Backstage 8",
+      "aliases": [],
+      "intro_jp": "",
+      "intro_zh": "",
+      "intro_en": "Hidden row for the admin games page.",
+      "release_date": null,
+      "release_date_tba": false,
+      "extra_info": [],
+      "tags": [],
+      "staffs": [],
+      "nsfw": true,
+      "type": "ADV",
+      "platform": [
+        "pc"
+      ],
+      "status": 2,
+      "hot_score": 0,
+      "views": 0,
+      "downloads": 0
     }
   ],
   "game_covers": [
