@@ -7364,6 +7364,8 @@ export type components = {
              */
             recovery_percent: number;
             solid: boolean;
+            /** @description 7-Zip cannot unpack the compression method the archive uses: what it holds is listed, but was neither tested nor scanned */
+            unsupported: boolean;
             /**
              * Format: int64
              * @description How many volumes the archive is split into; 0 or 1 for a single file

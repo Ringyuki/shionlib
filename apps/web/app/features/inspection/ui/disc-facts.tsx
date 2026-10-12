@@ -7,6 +7,7 @@ import { discFormat } from '../inspection-facts'
 export function DiscFacts({ disc }: { disc: Disc }) {
   const t = useTranslations('inspection.facts')
   const bytes = useBytes()
+  const format = discFormat(disc)
   return (
     <DescriptionList orientation="horizontal" className="[--hn-dl-term-width:8.25rem]">
       <DescriptionTerm>{t('discFile')}</DescriptionTerm>
@@ -14,7 +15,7 @@ export function DiscFacts({ disc }: { disc: Disc }) {
       <DescriptionTerm>{t('format')}</DescriptionTerm>
       <DescriptionDetails>
         <Text as="span" tone={disc.unreadable ? 'muted' : undefined}>
-          {t('discFormat', { format: discFormat(disc) })}
+          {t('discFormat', { format })}
         </Text>
       </DescriptionDetails>
       {disc.label !== '' && (
@@ -25,14 +26,18 @@ export function DiscFacts({ disc }: { disc: Disc }) {
       )}
       <DescriptionTerm>{t('size')}</DescriptionTerm>
       <DescriptionDetails className="tabular-nums">{bytes(disc.size)}</DescriptionDetails>
-      <DescriptionTerm>{t('contents')}</DescriptionTerm>
-      <DescriptionDetails className="tabular-nums">
-        <Text as="span" tone={disc.unreadable ? 'muted' : undefined}>
-          {disc.unreadable
-            ? t('unreadable')
-            : t('contentsValue', { files: disc.files, folders: disc.folders })}
-        </Text>
-      </DescriptionDetails>
+      {format !== 'audio' && (
+        <>
+          <DescriptionTerm>{t('contents')}</DescriptionTerm>
+          <DescriptionDetails className="tabular-nums">
+            <Text as="span" tone={disc.unreadable ? 'muted' : undefined}>
+              {disc.unreadable
+                ? t('unreadable')
+                : t('contentsValue', { files: disc.files, folders: disc.folders })}
+            </Text>
+          </DescriptionDetails>
+        </>
+      )}
     </DescriptionList>
   )
 }

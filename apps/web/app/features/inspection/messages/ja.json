@@ -50,23 +50,24 @@
     "nameEncoding": "ファイル名の文字コード",
     "nameEncodingHint": "展開時に{encoding, select, gbk {簡体字中国語} big5 {繁体字中国語} other {日本語}}の文字コードを選択しないと、ファイル名が文字化けします",
     "integrity": "整合性",
-    "integrityValue": "{verified, select, true {7-Zip のテストに合格} other {7-Zip のテストを完了できませんでした}}",
+    "integrityValue": "{integrity, select, verified {7-Zip のテストに合格} unsupported {7-Zip が対応していない圧縮方式のため、テストできませんでした} other {7-Zip のテストを完了できませんでした}}",
     "scan": "ウイルススキャン",
     "scanValue": "{verdict, select, clean {脅威は見つかりませんでした} cleared {{count, number} 件を検出、{date} に管理者が確認のうえ公開} other {{count, number} 件を検出、管理者の確認待ち}}",
     "detections": "検出内容",
     "scope": "スキャン範囲",
     "scopeValue": "{status, select, plain {ファイル自体} other {{discs, plural, =0 {アーカイブ内の実行ファイル {count, number} 個} other {アーカイブとディスクイメージ内の実行ファイル {count, number} 個}}}}",
     "skipped": "未スキャン",
-    "skippedHint": "スキャン上限の {limit} MB を超えています",
+    "skippedHint": "{unsupported, select, true {7-Zip が対応していない圧縮方式のため、展開できませんでした} other {スキャン上限の {limit} MB を超えています}}",
     "engine": "スキャンエンジン",
     "engineValue": "{engine}、定義ファイルの更新日 {date}",
     "checked": "チェック日時",
     "discFile": "ファイル",
     "label": "ボリュームラベル",
     "size": "サイズ",
-    "discFormat": "{format, select, iso9660 {ISO 9660} udf {UDF} unknown {認識できません} other {ISO 9660（Joliet 拡張）}}",
+    "discFormat": "{format, select, iso9660 {ISO 9660} udf {UDF} audio {音楽 CD} unknown {認識できません} other {ISO 9660（Joliet 拡張）}}",
     "unreadable": "読み取り不可",
     "earlier": "{check, select, released {ウイルススキャンで検出されましたが、管理者が確認のうえ公開しました} pending {チェックはまだ完了していません} other {アップロード時のチェックに合格しています}}",
-    "clean": "ウイルススキャンで脅威は見つかりませんでした"
+    "clean": "ウイルススキャンで脅威は見つかりませんでした",
+    "incomplete": "7-Zip が対応していない圧縮方式のため、スキャンは完全ではありません"
   }
 }

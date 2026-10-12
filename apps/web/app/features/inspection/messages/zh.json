@@ -50,23 +50,24 @@
     "nameEncoding": "文件名编码",
     "nameEncodingHint": "解压时需选择{encoding, select, gbk {简体中文} big5 {繁体中文} other {日文}}编码，否则文件名将显示为乱码",
     "integrity": "完整性",
-    "integrityValue": "{verified, select, true {已通过 7-Zip 测试} other {未能完成 7-Zip 测试}}",
+    "integrityValue": "{integrity, select, verified {已通过 7-Zip 测试} unsupported {压缩方法不受 7-Zip 支持，未能测试} other {未能完成 7-Zip 测试}}",
     "scan": "病毒扫描",
     "scanValue": "{verdict, select, clean {未发现威胁} cleared {检出 {count, number} 项，管理员于 {date} 复核后放行} other {检出 {count, number} 项，等待管理员复核}}",
     "detections": "检出内容",
     "scope": "扫描范围",
     "scopeValue": "{status, select, plain {文件本身} other {{discs, plural, =0 {压缩包内的 {count, number} 个可执行文件} other {压缩包与光盘映像内的 {count, number} 个可执行文件}}}}",
     "skipped": "未扫描",
-    "skippedHint": "超过 {limit} MB 的扫描上限",
+    "skippedHint": "{unsupported, select, true {压缩方法不受 7-Zip 支持，未能解压} other {超过 {limit} MB 的扫描上限}}",
     "engine": "扫描引擎",
     "engineValue": "{engine}，病毒库更新于 {date}",
     "checked": "检查时间",
     "discFile": "文件",
     "label": "卷标",
     "size": "大小",
-    "discFormat": "{format, select, iso9660 {ISO 9660} udf {UDF} unknown {无法识别} other {ISO 9660，含 Joliet 扩展}}",
+    "discFormat": "{format, select, iso9660 {ISO 9660} udf {UDF} audio {音频 CD} unknown {无法识别} other {ISO 9660，含 Joliet 扩展}}",
     "unreadable": "无法读取",
     "earlier": "{check, select, released {病毒扫描曾标记这个文件，管理员已复核并放行} pending {检查尚未完成} other {上传时已通过检查}}",
-    "clean": "病毒扫描未发现威胁"
+    "clean": "病毒扫描未发现威胁",
+    "incomplete": "压缩方法不受 7-Zip 支持，未能完整扫描"
   }
 }

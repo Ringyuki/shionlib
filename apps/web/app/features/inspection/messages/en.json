@@ -50,23 +50,24 @@
     "nameEncoding": "File name encoding",
     "nameEncodingHint": "Choose the {encoding, select, gbk {Simplified Chinese} big5 {Traditional Chinese} other {Japanese}} encoding when extracting, or the file names will be garbled",
     "integrity": "Integrity",
-    "integrityValue": "{verified, select, true {Passed the 7-Zip test} other {The 7-Zip test could not be completed}}",
+    "integrityValue": "{integrity, select, verified {Passed the 7-Zip test} unsupported {7-Zip does not support the compression method, so the archive could not be tested} other {The 7-Zip test could not be completed}}",
     "scan": "Virus scan",
     "scanValue": "{verdict, select, clean {No threats found} cleared {{count, plural, one {# detection} other {# detections}}, released after an administrator's review on {date}} other {{count, plural, one {# detection} other {# detections}}, waiting for an administrator's review}}",
     "detections": "Detected",
     "scope": "Scanned",
     "scopeValue": "{status, select, plain {The file itself} other {{discs, plural, =0 {{count, plural, one {# executable} other {# executables}} in the archive} other {{count, plural, one {# executable} other {# executables}} in the archive and its disc images}}}}",
     "skipped": "Not scanned",
-    "skippedHint": "Over the scan limit of {limit} MB",
+    "skippedHint": "{unsupported, select, true {7-Zip does not support the compression method, so these could not be unpacked} other {Over the scan limit of {limit} MB}}",
     "engine": "Scan engine",
     "engineValue": "{engine}, signatures updated on {date}",
     "checked": "Checked at",
     "discFile": "File",
     "label": "Volume label",
     "size": "Size",
-    "discFormat": "{format, select, iso9660 {ISO 9660} udf {UDF} unknown {Unrecognised} other {ISO 9660 with Joliet}}",
+    "discFormat": "{format, select, iso9660 {ISO 9660} udf {UDF} audio {Audio CD} unknown {Unrecognised} other {ISO 9660 with Joliet}}",
     "unreadable": "Unreadable",
     "earlier": "{check, select, released {The virus scan flagged this file; an administrator reviewed and released it} pending {The check has not finished yet} other {Passed the check when it was uploaded}}",
-    "clean": "The virus scan found no threats"
+    "clean": "The virus scan found no threats",
+    "incomplete": "7-Zip does not support the compression method, so the scan is incomplete"
   }
 }

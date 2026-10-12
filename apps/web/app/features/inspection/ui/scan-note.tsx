@@ -19,6 +19,16 @@ export function ScanNote({ inspection }: { inspection: Inspection | undefined })
   if (scanVerdict(inspection) !== 'clean') {
     return null
   }
+  if (inspection.archive.unsupported) {
+    return (
+      <Inline as="span" gap="xs" align="center" wrap={false}>
+        <Shield aria-hidden className="text-muted size-4 shrink-0" />
+        <Text as="span" size="sm" tone="muted">
+          {t('incomplete')}
+        </Text>
+      </Inline>
+    )
+  }
   return (
     <Inline as="span" gap="xs" align="center" wrap={false}>
       <ShieldCheck aria-hidden className="text-success-text size-4 shrink-0" />

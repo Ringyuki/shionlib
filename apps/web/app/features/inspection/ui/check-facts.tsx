@@ -1,7 +1,7 @@
 import { DescriptionDetails, DescriptionList, DescriptionTerm, Stack, Text } from '@hina-ui/react'
 import { useFormatter, useTranslations } from 'use-intl'
 import type { Inspection } from '../inspection'
-import { scanLimitMegabytes, scanVerdict } from '../inspection-facts'
+import { integrityOf, scanLimitMegabytes, scanVerdict } from '../inspection-facts'
 
 export function CheckFacts({ inspection }: { inspection: Inspection }) {
   const t = useTranslations('inspection.facts')
@@ -15,7 +15,7 @@ export function CheckFacts({ inspection }: { inspection: Inspection }) {
     <DescriptionList orientation="horizontal" className="[--hn-dl-term-width:8.25rem]">
       <DescriptionTerm>{t('integrity')}</DescriptionTerm>
       <DescriptionDetails>
-        {t('integrityValue', { verified: String(inspection.verified) })}
+        {t('integrityValue', { integrity: integrityOf(inspection) })}
       </DescriptionDetails>
       <DescriptionTerm>{t('scan')}</DescriptionTerm>
       <DescriptionDetails>
@@ -63,7 +63,10 @@ export function CheckFacts({ inspection }: { inspection: Inspection }) {
                 </Text>
               ))}
               <Text as="span" size="sm" tone="muted" className="tabular-nums">
-                {t('skippedHint', { limit: format.number(scanLimitMegabytes(inspection)) })}
+                {t('skippedHint', {
+                  unsupported: String(inspection.archive.unsupported),
+                  limit: format.number(scanLimitMegabytes(inspection)),
+                })}
               </Text>
             </Stack>
           </DescriptionDetails>

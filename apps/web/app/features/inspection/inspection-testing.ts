@@ -33,6 +33,7 @@ export function inspection(id: number, changes: Partial<Inspection> = {}): Inspe
       recovery: false,
       recovery_percent: 0,
       name_encoding: '',
+      unsupported: false,
     },
     files: 2,
     folders: 1,

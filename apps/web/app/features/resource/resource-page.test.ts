@@ -78,6 +78,7 @@ describe('fileGroups', () => {
       recovery: false,
       recovery_percent: 0,
       name_encoding: '',
+      unsupported: false,
     },
     files: 1,
     folders: 0,

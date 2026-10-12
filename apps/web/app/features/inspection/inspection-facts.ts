@@ -27,7 +27,9 @@ export type ScanVerdict = 'clean' | 'cleared' | 'held'
 
 export type EarlierCheck = 'passed' | 'released' | 'pending'
 
-export type DiscFormat = 'iso9660' | 'iso9660+joliet' | 'udf' | 'unknown'
+export type DiscFormat = 'iso9660' | 'iso9660+joliet' | 'udf' | 'audio' | 'unknown'
+
+export type Integrity = 'verified' | 'unsupported' | 'untested'
 
 export function formatName(format: string): string {
   return formatNames[format] ?? format.toUpperCase()
@@ -54,13 +56,20 @@ export function scanVerdict(inspection: Pick<Inspection, 'scan'>): ScanVerdict {
   return inspection.scan.cleared_at === null ? 'held' : 'cleared'
 }
 
+export function integrityOf(inspection: Pick<Inspection, 'verified' | 'archive'>): Integrity {
+  if (inspection.verified) {
+    return 'verified'
+  }
+  return inspection.archive.unsupported ? 'unsupported' : 'untested'
+}
+
 export function scanLimitMegabytes(inspection: Pick<Inspection, 'scan'>): number {
   return Math.round(inspection.scan.limit / megabyte)
 }
 
 export function discFormat(disc: Pick<Disc, 'format'>): DiscFormat {
   return (
-    (['iso9660', 'iso9660+joliet', 'udf'] as const).find(known => known === disc.format) ??
+    (['iso9660', 'iso9660+joliet', 'udf', 'audio'] as const).find(known => known === disc.format) ??
     'unknown'
   )
 }

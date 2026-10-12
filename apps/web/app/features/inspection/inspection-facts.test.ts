@@ -3,6 +3,7 @@ import {
   discFormat,
   earlierCheck,
   formatName,
+  integrityOf,
   nameEncoding,
   scanLimitMegabytes,
   scanVerdict,
@@ -55,6 +56,15 @@ describe('scan facts', () => {
   it('gives the scan limit in megabytes', () => {
     expect(scanLimitMegabytes(inspection(1))).toBe(4000)
   })
+
+  it('tells an archive that was not tested from one 7-Zip cannot unpack', () => {
+    const { archive } = inspection(1)
+    expect(integrityOf(inspection(1))).toBe('verified')
+    expect(integrityOf({ verified: false, archive })).toBe('untested')
+    expect(integrityOf({ verified: false, archive: { ...archive, unsupported: true } })).toBe(
+      'unsupported',
+    )
+  })
 })
 
 describe('a file without a recorded scan', () => {
@@ -71,6 +81,7 @@ describe('disc facts', () => {
   it('knows the file systems that are read', () => {
     expect(discFormat({ format: 'iso9660+joliet' })).toBe('iso9660+joliet')
     expect(discFormat({ format: 'udf' })).toBe('udf')
+    expect(discFormat({ format: 'audio' })).toBe('audio')
     expect(discFormat({ format: '' })).toBe('unknown')
   })
 })
