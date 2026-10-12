@@ -76,6 +76,7 @@ type Shared struct {
 	Sessions   *auth.SessionService
 	Users      *user.Service
 	AI         *ai.Service
+	AIScenes   *ai.SceneService
 	Resources  *download.DetailService
 }
 

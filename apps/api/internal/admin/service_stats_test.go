@@ -15,7 +15,7 @@ import (
 func TestOverviewUsesTheUTC8DayAndCaches(t *testing.T) {
 	store := admintest.NewStatsStore(admin.Overview{TotalGames: 3, TotalDownloads: 1 << 40}, admin.DailyCounts{})
 	cache := admintest.NewCache()
-	service := admin.NewStatsService(admin.StatsDeps{Store: store, Cache: cache, Spool: admintest.Spool{}, Settings: settingtest.Source{}, Now: clock})
+	service := admin.NewStatsService(admin.StatsDeps{Store: store, Cache: cache, Spool: admintest.Spool{}, AI: admintest.AIGateway(0), Settings: settingtest.Source{}, Now: clock})
 	ctx := context.Background()
 	first, err := service.Overview(ctx)
 	if err != nil || first.TotalGames != 3 || first.TotalDownloads != 1<<40 {
@@ -42,7 +42,7 @@ func TestTrendsAreZeroFilledOldestFirst(t *testing.T) {
 		Views:     map[string]int{"2026-02-18": 90},
 	})
 	cache := admintest.NewCache()
-	service := admin.NewStatsService(admin.StatsDeps{Store: store, Cache: cache, Spool: admintest.Spool{}, Settings: settingtest.Source{}, Now: clock})
+	service := admin.NewStatsService(admin.StatsDeps{Store: store, Cache: cache, Spool: admintest.Spool{}, AI: admintest.AIGateway(0), Settings: settingtest.Source{}, Now: clock})
 	points, err := service.Trends(context.Background(), 3)
 	if err != nil {
 		t.Fatal(err)
@@ -72,14 +72,14 @@ func TestTrendsAreZeroFilledOldestFirst(t *testing.T) {
 
 func TestPendingIsReadEveryTime(t *testing.T) {
 	store := admintest.NewStatsStore(admin.Overview{}, admin.DailyCounts{})
-	service := admin.NewStatsService(admin.StatsDeps{Store: store, Cache: admintest.NewCache(), Spool: admintest.Spool{}, Settings: settingtest.Source{}, Now: clock})
+	service := admin.NewStatsService(admin.StatsDeps{Store: store, Cache: admintest.NewCache(), Spool: admintest.Spool{}, AI: admintest.AIGateway(4), Settings: settingtest.Source{}, Now: clock})
 	store.Seed(admin.Pending{Reports: 2, Comments: 9}, admin.FileCounts{})
 	first, err := service.Pending(context.Background())
-	if err != nil || first != (admin.Pending{Reports: 2, Comments: 9}) {
+	if err != nil || first != (admin.Pending{Reports: 2, Comments: 9, AIAlerts: 4}) {
 		t.Fatalf("pending: %+v %v", first, err)
 	}
 	store.Seed(admin.Pending{Reports: 1}, admin.FileCounts{})
-	if second, _ := service.Pending(context.Background()); second != (admin.Pending{Reports: 1}) {
+	if second, _ := service.Pending(context.Background()); second != (admin.Pending{Reports: 1, AIAlerts: 4}) {
 		t.Fatalf("a handled report leaves the count at once: %+v", second)
 	}
 }
@@ -90,7 +90,7 @@ func TestStorageJoinsTheVolumeTheFilesAndTheReserve(t *testing.T) {
 	store.Seed(admin.Pending{}, files)
 	settings := settingtest.Source{}
 	settingtest.Set(settings, upload.SpoolReserve, 5<<30)
-	service := admin.NewStatsService(admin.StatsDeps{Store: store, Cache: admintest.NewCache(), Spool: admintest.Spool{Total: 120 << 30, Free: 79 << 30}, Settings: settings, Now: clock})
+	service := admin.NewStatsService(admin.StatsDeps{Store: store, Cache: admintest.NewCache(), Spool: admintest.Spool{Total: 120 << 30, Free: 79 << 30}, AI: admintest.AIGateway(0), Settings: settings, Now: clock})
 	storage, err := service.Storage(context.Background())
 	if err != nil {
 		t.Fatal(err)

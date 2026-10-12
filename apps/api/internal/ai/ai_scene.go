@@ -79,3 +79,33 @@ func refOf(model SceneModel) *ModelRef {
 	ref := model.ModelRef
 	return &ref
 }
+
+type configuredScenes struct {
+	byKey     map[string]SceneConfig
+	models    map[int]SceneModel
+	defaultID *int
+}
+
+func (c configuredScenes) chosen(key string) *SceneModel {
+	config := c.byKey[key]
+	if config.ModelID == nil {
+		return nil
+	}
+	if model, ok := c.models[*config.ModelID]; ok {
+		return &model
+	}
+	return nil
+}
+
+func (c configuredScenes) effective(key string) *SceneModel {
+	if c.byKey[key].ModelID != nil {
+		return c.chosen(key)
+	}
+	if c.defaultID == nil {
+		return nil
+	}
+	if model, ok := c.models[*c.defaultID]; ok {
+		return &model
+	}
+	return nil
+}

@@ -61,6 +61,10 @@ type StatsStore interface {
 	FileCounts(ctx context.Context, now time.Time) (FileCounts, error)
 }
 
+type AIGateway interface {
+	Alerts(ctx context.Context) (int, error)
+}
+
 type Spool interface {
 	Capacity(ctx context.Context) (int64, error)
 	Available(ctx context.Context) (int64, error)

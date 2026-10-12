@@ -65,6 +65,31 @@ func TestBusinessTypesCarryNoTags(t *testing.T) {
 	})
 }
 
+func TestResponseShapesEmbedOnlyExportedTypes(t *testing.T) {
+	walkProductionFiles(t, func(rel string, file *ast.File) {
+		if !strings.HasPrefix(rel, "internal/transport/http/") {
+			return
+		}
+		ast.Inspect(file, func(node ast.Node) bool {
+			typeSpec, ok := node.(*ast.TypeSpec)
+			if !ok || !strings.HasSuffix(typeSpec.Name.Name, "DTO") {
+				return true
+			}
+			structure, ok := typeSpec.Type.(*ast.StructType)
+			if !ok {
+				return true
+			}
+			for _, field := range structure.Fields.List {
+				embedded, local := field.Type.(*ast.Ident)
+				if len(field.Names) == 0 && local && !embedded.IsExported() {
+					t.Errorf("%s: %s embeds the unexported %s, whose fields the contract generator leaves out of the schema; list the fields", rel, typeSpec.Name.Name, embedded.Name)
+				}
+			}
+			return true
+		})
+	})
+}
+
 func TestRawSQLStaysInPostgresAdapters(t *testing.T) {
 	walkProductionFiles(t, func(rel string, file *ast.File) {
 		if slices.ContainsFunc(rawSQLOwners, func(prefix string) bool { return strings.HasPrefix(rel, prefix) }) {

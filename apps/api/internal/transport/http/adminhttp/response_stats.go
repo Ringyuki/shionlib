@@ -35,6 +35,7 @@ type adminPendingDTO struct {
 	StalledFiles int `json:"stalled_files" doc:"Files whose check was paused after repeated failures"`
 	Comments     int `json:"comments" doc:"Comments held for review"`
 	Walkthroughs int `json:"walkthroughs" doc:"Walkthroughs held for review"`
+	AIAlerts     int `json:"ai_alerts" doc:"Scenes without a usable model plus suspended routes of the AI gateway"`
 }
 
 type adminTallyDTO struct {

@@ -14,9 +14,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/aimoderation"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
-	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/aipg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/fieldpermissionmapping"
@@ -32,7 +30,6 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/settingpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/redis/gameredis"
-	"github.com/Ringyuki/shionlib/apps/api/internal/ai"
 	"github.com/Ringyuki/shionlib/apps/api/internal/bootstrap"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
@@ -197,7 +194,7 @@ func (s *e2eSeeder) Seed(ctx context.Context) (e2eSeedResult, error) {
 		return e2eSeedResult{}, fmt.Errorf("hash e2e password: %w", err)
 	}
 	var result e2eSeedResult
-	err = s.inTransaction(ctx, func(tx *ent.Client) error {
+	err = s.inTransaction(ctx, func(ctx context.Context, tx *ent.Client) error {
 		users, favorites, err := s.seedUsers(ctx, tx, passwordHash)
 		if err != nil {
 			return err
@@ -206,7 +203,7 @@ func (s *e2eSeeder) Seed(ctx context.Context) (e2eSeedResult, error) {
 		if err := s.seedPermissionMappings(ctx, tx, data.FieldPermissionMappings); err != nil {
 			return err
 		}
-		if err := s.seedModeration(ctx, tx); err != nil {
+		if err := s.seedAIGateway(ctx, tx); err != nil {
 			return err
 		}
 		if err := s.seedSettings(ctx, tx, users[e2eAdminIndex]); err != nil {
@@ -243,12 +240,12 @@ func (s *e2eSeeder) Seed(ctx context.Context) (e2eSeedResult, error) {
 	return result, nil
 }
 
-func (s *e2eSeeder) inTransaction(ctx context.Context, fn func(tx *ent.Client) error) error {
+func (s *e2eSeeder) inTransaction(ctx context.Context, fn func(ctx context.Context, tx *ent.Client) error) error {
 	tx, err := s.ent.Tx(ctx)
 	if err != nil {
 		return fmt.Errorf("begin seed transaction: %w", err)
 	}
-	if err := fn(tx.Client()); err != nil {
+	if err := fn(ent.NewTxContext(ctx, tx), tx.Client()); err != nil {
 		return errors.Join(err, tx.Rollback())
 	}
 	if err := tx.Commit(); err != nil {
@@ -282,37 +279,6 @@ func (s *e2eSeeder) seedUsers(ctx context.Context, tx *ent.Client, passwordHash 
 		favoriteIDs = append(favoriteIDs, favorite.ID)
 	}
 	return userIDs, favoriteIDs, nil
-}
-
-func (s *e2eSeeder) seedModeration(ctx context.Context, tx *ent.Client) error {
-	repo := aipg.NewRepository(tx)
-	baseURL := e2eUnreachableAIBaseURL
-	provider, err := repo.CreateProvider(ctx, ai.NewProvider{Name: "e2e-unreachable", Kind: ai.KindCompatible, BaseURL: &baseURL, APIKey: e2eUnreachableAIKey, PriceMultiplier: 1})
-	if err != nil {
-		return fmt.Errorf("seed ai provider: %w", err)
-	}
-	scenes := []struct {
-		scene      string
-		model      string
-		protocol   ai.Protocol
-		moderation bool
-	}{
-		{scene: aimoderation.ScreenScene, model: "omni-moderation-latest", protocol: ai.ProtocolModeration, moderation: true},
-		{scene: aimoderation.ReviewScene, model: "gpt-5-mini", protocol: ai.ProtocolChat},
-	}
-	for _, item := range scenes {
-		modelID, err := repo.CreateModel(ctx, ai.NewModel{Key: item.model, Name: item.model, Capabilities: ai.Capabilities{Moderation: item.moderation, Temperature: !item.moderation}})
-		if err != nil {
-			return fmt.Errorf("seed ai model %s: %w", item.model, err)
-		}
-		if _, err := repo.CreateRoute(ctx, ai.NewRoute{ModelID: modelID, ProviderID: provider, UpstreamID: item.model, Protocol: item.protocol}); err != nil {
-			return fmt.Errorf("seed ai route %s: %w", item.model, err)
-		}
-		if err := repo.SaveSceneConfig(ctx, ai.SceneConfig{Key: item.scene, ModelID: &modelID}); err != nil {
-			return fmt.Errorf("seed ai scene %s: %w", item.scene, err)
-		}
-	}
-	return nil
 }
 
 func (s *e2eSeeder) seedSettings(ctx context.Context, tx *ent.Client, adminID int) error {

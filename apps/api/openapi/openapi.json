@@ -1236,6 +1236,11 @@
       "AdminPendingDTO": {
         "additionalProperties": false,
         "properties": {
+          "ai_alerts": {
+            "description": "Scenes without a usable model plus suspended routes of the AI gateway",
+            "format": "int64",
+            "type": "integer"
+          },
           "comments": {
             "description": "Comments held for review",
             "format": "int64",
@@ -1267,7 +1272,8 @@
           "malware_cases",
           "stalled_files",
           "comments",
-          "walkthroughs"
+          "walkthroughs",
+          "ai_alerts"
         ],
         "type": "object"
       },
@@ -3912,6 +3918,67 @@
       "AiProviderDetailDTO": {
         "additionalProperties": false,
         "properties": {
+          "base_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "catalog_provider_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "key_hint": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "compatible",
+              "openai",
+              "anthropic",
+              "google"
+            ],
+            "type": "string"
+          },
+          "last_used_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "price_multiplier": {
+            "format": "double",
+            "type": "number"
+          },
+          "protocols": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "route_counts": {
+            "$ref": "#/components/schemas/AiRouteCountsDTO"
+          },
           "routes": {
             "items": {
               "$ref": "#/components/schemas/AiRouteDTO"
@@ -3920,9 +3987,50 @@
               "array",
               "null"
             ]
+          },
+          "stats": {
+            "$ref": "#/components/schemas/AiStatsDTO"
+          },
+          "suspended_kinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "upstream_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           }
         },
         "required": [
+          "id",
+          "name",
+          "kind",
+          "base_url",
+          "key_hint",
+          "price_multiplier",
+          "catalog_provider_id",
+          "enabled",
+          "protocols",
+          "route_counts",
+          "suspended_kinds",
+          "upstream_ids",
+          "stats",
+          "last_used_at",
+          "created",
+          "updated",
           "routes"
         ],
         "type": "object"
@@ -4140,6 +4248,12 @@
       "AiRequestDetailDTO": {
         "additionalProperties": false,
         "properties": {
+          "adaptation": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "attempts": {
             "items": {
               "$ref": "#/components/schemas/AiRequestDTO"
@@ -4149,11 +4263,42 @@
               "null"
             ]
           },
+          "cache_read_tokens": {
+            "format": "int64",
+            "type": "integer"
+          },
           "cache_write_tokens": {
             "format": "int64",
             "type": "integer"
           },
+          "call_id": {
+            "type": "string"
+          },
+          "cost_usd": {
+            "format": "double",
+            "type": "number"
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "duration_ms": {
+            "format": "int64",
+            "type": "integer"
+          },
           "error_detail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "error_kind": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "error_message": {
             "type": [
               "string",
               "null"
@@ -4165,6 +4310,37 @@
               "null"
             ]
           },
+          "first_token_ms": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "input_tokens": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "model": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AiModelRefDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "output_tokens": {
+            "format": "int64",
+            "type": "integer"
+          },
           "payload": {
             "oneOf": [
               {
@@ -4175,12 +4351,69 @@
               }
             ]
           },
+          "protocol": {
+            "type": "string"
+          },
+          "provider": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AiProviderRefDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "reasoning_tokens": {
             "format": "int64",
             "type": "integer"
+          },
+          "route_id": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "scene": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source": {
+            "enum": [
+              "scene",
+              "check",
+              "playground"
+            ],
+            "type": "string"
+          },
+          "upstream_id": {
+            "type": "string"
           }
         },
         "required": [
+          "id",
+          "call_id",
+          "source",
+          "scene",
+          "model",
+          "route_id",
+          "provider",
+          "upstream_id",
+          "protocol",
+          "ok",
+          "error_kind",
+          "error_message",
+          "adaptation",
+          "first_token_ms",
+          "duration_ms",
+          "input_tokens",
+          "output_tokens",
+          "cache_read_tokens",
+          "cost_usd",
+          "created",
           "error_detail",
           "finish_reason",
           "cache_write_tokens",

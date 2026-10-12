@@ -16,10 +16,10 @@ func NewSceneService(gateway *Service, repo Repository, stats StatsStore, now fu
 	return &SceneService{gateway: gateway, repo: repo, stats: stats, now: now}
 }
 
-func (s *SceneService) List(ctx context.Context) ([]Scene, error) {
+func (s *SceneService) configured(ctx context.Context) (configuredScenes, error) {
 	configs, err := s.repo.ListSceneConfigs(ctx)
 	if err != nil {
-		return nil, err
+		return configuredScenes{}, err
 	}
 	byKey := make(map[string]SceneConfig, len(configs))
 	ids := make([]int, 0, len(configs)+1)
@@ -31,12 +31,20 @@ func (s *SceneService) List(ctx context.Context) ([]Scene, error) {
 	}
 	defaultID, err := s.repo.DefaultModelID(ctx)
 	if err != nil {
-		return nil, err
+		return configuredScenes{}, err
 	}
 	if defaultID != nil {
 		ids = append(ids, *defaultID)
 	}
 	models, err := s.sceneModels(ctx, ids)
+	if err != nil {
+		return configuredScenes{}, err
+	}
+	return configuredScenes{byKey: byKey, models: models, defaultID: defaultID}, nil
+}
+
+func (s *SceneService) List(ctx context.Context) ([]Scene, error) {
+	configured, err := s.configured(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +55,7 @@ func (s *SceneService) List(ctx context.Context) ([]Scene, error) {
 	definitions := s.gateway.Scenes()
 	scenes := make([]Scene, len(definitions))
 	for i, definition := range definitions {
-		config := byKey[definition.Key]
+		config := configured.byKey[definition.Key]
 		scene := Scene{
 			SceneDefinition: definition,
 			Temperature:     config.Temperature,
@@ -55,16 +63,10 @@ func (s *SceneService) List(ctx context.Context) ([]Scene, error) {
 			Timeout:         config.Timeout,
 			Stats:           stats[definition.Key],
 		}
-		var effective *SceneModel
-		if config.ModelID != nil {
-			if model, ok := models[*config.ModelID]; ok {
-				scene.Model, effective = refOf(model), &model
-			}
-		} else if defaultID != nil {
-			if model, ok := models[*defaultID]; ok {
-				effective = &model
-			}
+		if chosen := configured.chosen(definition.Key); chosen != nil {
+			scene.Model = refOf(*chosen)
 		}
+		effective := configured.effective(definition.Key)
 		if effective != nil {
 			scene.Effective = refOf(*effective)
 		}
@@ -72,6 +74,29 @@ func (s *SceneService) List(ctx context.Context) ([]Scene, error) {
 		scenes[i] = scene
 	}
 	return scenes, nil
+}
+
+func (s *SceneService) Alerts(ctx context.Context) (int, error) {
+	scenes, err := s.configured(ctx)
+	if err != nil {
+		return 0, err
+	}
+	alerts := 0
+	for _, definition := range s.gateway.Scenes() {
+		if sceneProblem(definition, scenes.effective(definition.Key)) != nil {
+			alerts++
+		}
+	}
+	providers, err := s.repo.ListProviders(ctx)
+	if err != nil {
+		return 0, err
+	}
+	for _, provider := range providers {
+		if provider.Enabled {
+			alerts += provider.Routes.Suspended
+		}
+	}
+	return alerts, nil
 }
 
 func (s *SceneService) Update(ctx context.Context, key string, settings SceneSettings) (Scene, error) {

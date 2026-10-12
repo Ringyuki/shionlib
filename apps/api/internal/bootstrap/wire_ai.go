@@ -60,13 +60,15 @@ func wireAI(infra *Infra, shared *Shared, modules *Modules) {
 		Now:      infra.Now,
 		Options:  ai.UsageOptions{BreakdownLimit: aiBreakdownLimit, CostSeries: aiCostSeries},
 	})
+	scenes := ai.NewSceneService(gateway, repo, stats, infra.Now)
 	shared.AI = gateway
+	shared.AIScenes = scenes
 
 	modules.Handlers = append(modules.Handlers,
 		aihttp.NewProviderHandler(providers, shared.Builder),
 		aihttp.NewModelHandler(models, shared.Builder),
 		aihttp.NewRouteHandler(routes, shared.Builder),
-		aihttp.NewSceneHandler(ai.NewSceneService(gateway, repo, stats, infra.Now), shared.Builder),
+		aihttp.NewSceneHandler(scenes, shared.Builder),
 		aihttp.NewCatalogHandler(catalog, shared.Builder),
 		aihttp.NewUsageHandler(usage, shared.Builder),
 		aihttp.NewPlaygroundHandler(ai.NewPlaygroundService(gateway, requests, uuid.NewString), shared.Builder),

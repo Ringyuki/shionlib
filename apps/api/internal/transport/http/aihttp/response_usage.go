@@ -88,13 +88,32 @@ type aiPayloadDTO struct {
 }
 
 type aiRequestDetailDTO struct {
-	aiRequestDTO
-	ErrorDetail      *string        `json:"error_detail"`
-	FinishReason     *string        `json:"finish_reason"`
-	CacheWriteTokens int            `json:"cache_write_tokens"`
-	ReasoningTokens  int            `json:"reasoning_tokens"`
-	Payload          *aiPayloadDTO  `json:"payload"`
-	Attempts         []aiRequestDTO `json:"attempts"`
+	ID               string            `json:"id"`
+	CallID           string            `json:"call_id"`
+	Source           string            `json:"source" enum:"scene,check,playground"`
+	Scene            *string           `json:"scene"`
+	Model            *aiModelRefDTO    `json:"model"`
+	RouteID          *int              `json:"route_id"`
+	Provider         *aiProviderRefDTO `json:"provider"`
+	UpstreamID       string            `json:"upstream_id"`
+	Protocol         string            `json:"protocol"`
+	OK               bool              `json:"ok"`
+	ErrorKind        *string           `json:"error_kind"`
+	ErrorMessage     *string           `json:"error_message"`
+	Adaptation       *string           `json:"adaptation"`
+	FirstTokenMS     *int              `json:"first_token_ms"`
+	DurationMS       int               `json:"duration_ms"`
+	InputTokens      int               `json:"input_tokens"`
+	OutputTokens     int               `json:"output_tokens"`
+	CacheReadTokens  int               `json:"cache_read_tokens"`
+	CostUSD          float64           `json:"cost_usd"`
+	Created          time.Time         `json:"created"`
+	ErrorDetail      *string           `json:"error_detail"`
+	FinishReason     *string           `json:"finish_reason"`
+	CacheWriteTokens int               `json:"cache_write_tokens"`
+	ReasoningTokens  int               `json:"reasoning_tokens"`
+	Payload          *aiPayloadDTO     `json:"payload"`
+	Attempts         []aiRequestDTO    `json:"attempts"`
 }
 
 func toSeriesDTO(buckets []ai.SeriesBucket) []aiSeriesBucketDTO {
@@ -173,8 +192,28 @@ func toRequestDTOs(requests []ai.Request) []aiRequestDTO {
 }
 
 func toRequestDetailDTO(detail ai.RequestDetail) aiRequestDetailDTO {
+	request := toRequestDTO(detail.Request)
 	dto := aiRequestDetailDTO{
-		aiRequestDTO:     toRequestDTO(detail.Request),
+		ID:               request.ID,
+		CallID:           request.CallID,
+		Source:           request.Source,
+		Scene:            request.Scene,
+		Model:            request.Model,
+		RouteID:          request.RouteID,
+		Provider:         request.Provider,
+		UpstreamID:       request.UpstreamID,
+		Protocol:         request.Protocol,
+		OK:               request.OK,
+		ErrorKind:        request.ErrorKind,
+		ErrorMessage:     request.ErrorMessage,
+		Adaptation:       request.Adaptation,
+		FirstTokenMS:     request.FirstTokenMS,
+		DurationMS:       request.DurationMS,
+		InputTokens:      request.InputTokens,
+		OutputTokens:     request.OutputTokens,
+		CacheReadTokens:  request.CacheReadTokens,
+		CostUSD:          request.CostUSD,
+		Created:          request.Created,
 		ErrorDetail:      detail.ErrorDetail,
 		FinishReason:     detail.FinishReason,
 		CacheWriteTokens: detail.Usage.CacheWriteTokens,

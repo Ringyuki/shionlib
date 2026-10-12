@@ -3965,6 +3965,11 @@ export type components = {
         AdminPendingDTO: {
             /**
              * Format: int64
+             * @description Scenes without a usable model plus suspended routes of the AI gateway
+             */
+            ai_alerts: number;
+            /**
+             * Format: int64
              * @description Comments held for review
              */
             comments: number;
@@ -4701,7 +4706,29 @@ export type components = {
             upstream_ids: string[] | null;
         };
         AiProviderDetailDTO: {
+            base_url: string | null;
+            catalog_provider_id: string | null;
+            /** Format: date-time */
+            created: string;
+            enabled: boolean;
+            /** Format: int64 */
+            id: number;
+            key_hint: string;
+            /** @enum {string} */
+            kind: "compatible" | "openai" | "anthropic" | "google";
+            /** Format: date-time */
+            last_used_at: string | null;
+            name: string;
+            /** Format: double */
+            price_multiplier: number;
+            protocols: string[] | null;
+            route_counts: components["schemas"]["AiRouteCountsDTO"];
             routes: components["schemas"]["AiRouteDTO"][] | null;
+            stats: components["schemas"]["AiStatsDTO"];
+            suspended_kinds: string[] | null;
+            /** Format: date-time */
+            updated: string;
+            upstream_ids: string[] | null;
         };
         AiProviderRefDTO: {
             /** Format: int64 */
@@ -4755,14 +4782,43 @@ export type components = {
             upstream_id: string;
         };
         AiRequestDetailDTO: {
+            adaptation: string | null;
             attempts: components["schemas"]["AiRequestDTO"][] | null;
             /** Format: int64 */
+            cache_read_tokens: number;
+            /** Format: int64 */
             cache_write_tokens: number;
+            call_id: string;
+            /** Format: double */
+            cost_usd: number;
+            /** Format: date-time */
+            created: string;
+            /** Format: int64 */
+            duration_ms: number;
             error_detail: string | null;
+            error_kind: string | null;
+            error_message: string | null;
             finish_reason: string | null;
+            /** Format: int64 */
+            first_token_ms: number | null;
+            id: string;
+            /** Format: int64 */
+            input_tokens: number;
+            model: components["schemas"]["AiModelRefDTO"] | null;
+            ok: boolean;
+            /** Format: int64 */
+            output_tokens: number;
             payload: components["schemas"]["AiPayloadDTO"] | null;
+            protocol: string;
+            provider: components["schemas"]["AiProviderRefDTO"] | null;
             /** Format: int64 */
             reasoning_tokens: number;
+            /** Format: int64 */
+            route_id: number | null;
+            scene: string | null;
+            /** @enum {string} */
+            source: "scene" | "check" | "playground";
+            upstream_id: string;
         };
         AiResolvedModelDTO: {
             canonical_id: string | null;

@@ -13,6 +13,7 @@ type StatsDeps struct {
 	Store    StatsStore
 	Cache    Cache
 	Spool    Spool
+	AI       AIGateway
 	Settings setting.Source
 	Now      func() time.Time
 }
@@ -21,12 +22,13 @@ type StatsService struct {
 	store    StatsStore
 	cache    Cache
 	spool    Spool
+	ai       AIGateway
 	settings setting.Source
 	now      func() time.Time
 }
 
 func NewStatsService(deps StatsDeps) *StatsService {
-	return &StatsService{store: deps.Store, cache: deps.Cache, spool: deps.Spool, settings: deps.Settings, now: deps.Now}
+	return &StatsService{store: deps.Store, cache: deps.Cache, spool: deps.Spool, ai: deps.AI, settings: deps.Settings, now: deps.Now}
 }
 
 func (s *StatsService) Overview(ctx context.Context) (Overview, error) {
@@ -67,7 +69,15 @@ func (s *StatsService) Trends(ctx context.Context, days int) ([]TrendPoint, erro
 }
 
 func (s *StatsService) Pending(ctx context.Context) (Pending, error) {
-	return s.store.Pending(ctx)
+	pending, err := s.store.Pending(ctx)
+	if err != nil {
+		return Pending{}, err
+	}
+	pending.AIAlerts, err = s.ai.Alerts(ctx)
+	if err != nil {
+		return Pending{}, err
+	}
+	return pending, nil
 }
 
 func (s *StatsService) Storage(ctx context.Context) (Storage, error) {

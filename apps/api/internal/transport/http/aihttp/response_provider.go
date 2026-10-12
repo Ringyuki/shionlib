@@ -33,8 +33,23 @@ type aiProviderDTO struct {
 }
 
 type aiProviderDetailDTO struct {
-	aiProviderDTO
-	Routes []aiRouteDTO `json:"routes"`
+	ID                int              `json:"id"`
+	Name              string           `json:"name"`
+	Kind              string           `json:"kind" enum:"compatible,openai,anthropic,google"`
+	BaseURL           *string          `json:"base_url"`
+	KeyHint           string           `json:"key_hint"`
+	PriceMultiplier   float64          `json:"price_multiplier"`
+	CatalogProviderID *string          `json:"catalog_provider_id"`
+	Enabled           bool             `json:"enabled"`
+	Protocols         []string         `json:"protocols"`
+	RouteCounts       aiRouteCountsDTO `json:"route_counts"`
+	SuspendedKinds    []string         `json:"suspended_kinds"`
+	UpstreamIDs       []string         `json:"upstream_ids"`
+	Stats             aiStatsDTO       `json:"stats"`
+	LastUsedAt        *time.Time       `json:"last_used_at"`
+	Created           time.Time        `json:"created"`
+	Updated           time.Time        `json:"updated"`
+	Routes            []aiRouteDTO     `json:"routes"`
 }
 
 type aiFailureDetailDTO struct {
@@ -112,7 +127,26 @@ func toProviderDTO(view ai.ProviderView) aiProviderDTO {
 }
 
 func toProviderDetailDTO(detail ai.ProviderDetail) aiProviderDetailDTO {
-	return aiProviderDetailDTO{aiProviderDTO: toProviderDTO(detail.ProviderView), Routes: toRouteDTOs(detail.RouteViews)}
+	provider := toProviderDTO(detail.ProviderView)
+	return aiProviderDetailDTO{
+		ID:                provider.ID,
+		Name:              provider.Name,
+		Kind:              provider.Kind,
+		BaseURL:           provider.BaseURL,
+		KeyHint:           provider.KeyHint,
+		PriceMultiplier:   provider.PriceMultiplier,
+		CatalogProviderID: provider.CatalogProviderID,
+		Enabled:           provider.Enabled,
+		Protocols:         provider.Protocols,
+		RouteCounts:       provider.RouteCounts,
+		SuspendedKinds:    provider.SuspendedKinds,
+		UpstreamIDs:       provider.UpstreamIDs,
+		Stats:             provider.Stats,
+		LastUsedAt:        provider.LastUsedAt,
+		Created:           provider.Created,
+		Updated:           provider.Updated,
+		Routes:            toRouteDTOs(detail.RouteViews),
+	}
 }
 
 func toDiscoveryDTO(discovery ai.Discovery) aiDiscoveryDTO {

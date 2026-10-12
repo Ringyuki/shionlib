@@ -53,6 +53,7 @@ type Pending struct {
 	StalledFiles int
 	Comments     int
 	Walkthroughs int
+	AIAlerts     int
 }
 
 type Tally struct {

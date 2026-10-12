@@ -29,6 +29,7 @@ func newStatsServer(t *testing.T) *apitest.Server {
 		Store:    store,
 		Cache:    admintest.NewCache(),
 		Spool:    admintest.Spool{Total: 4000, Free: 2500},
+		AI:       admintest.AIGateway(2),
 		Settings: settingtest.Source{},
 		Now:      func() time.Time { return apitest.Now },
 	})
@@ -74,7 +75,7 @@ func TestAdminPendingAndStorageShapes(t *testing.T) {
 
 	resp := server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/pending", As: &staff})
 	server.Expect(resp, http.StatusOK, 0)
-	want := `{"reports":2,"malware_cases":1,"stalled_files":1,"comments":9,"walkthroughs":3}`
+	want := `{"reports":2,"malware_cases":1,"stalled_files":1,"comments":9,"walkthroughs":3,"ai_alerts":2}`
 	if string(resp.Data) != want {
 		t.Fatalf("pending\n got %s\nwant %s", resp.Data, want)
 	}

@@ -45,3 +45,23 @@ func TestScenesReportTheirEffectiveModelAndProblems(t *testing.T) {
 		t.Fatalf("the default model applies to unassigned scenes: %+v", listed[1])
 	}
 }
+
+func TestAlertsCountBrokenScenesAndSuspendedRoutes(t *testing.T) {
+	f := newFixture(t)
+	if alerts := must(f.scenes.Alerts(t.Context())); alerts != 3 {
+		t.Fatalf("three scenes without a model: %d", alerts)
+	}
+	setup := f.twoRoutes(t, objectScene)
+	if _, err := f.scenes.Update(t.Context(), objectScene, ai.SceneSettings{ModelID: &setup.modelID}); err != nil {
+		t.Fatal(err)
+	}
+	if alerts := must(f.scenes.Alerts(t.Context())); alerts != 2 {
+		t.Fatalf("one scene is served now: %d", alerts)
+	}
+	if _, err := f.repo.SetRouteStatus(t.Context(), []int{setup.backup}, ai.RouteSuspended, f.clock.Now()); err != nil {
+		t.Fatal(err)
+	}
+	if alerts := must(f.scenes.Alerts(t.Context())); alerts != 3 {
+		t.Fatalf("a suspended route of an enabled provider counts: %d", alerts)
+	}
+}

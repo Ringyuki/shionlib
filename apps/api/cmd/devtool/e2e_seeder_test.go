@@ -81,6 +81,16 @@ func TestE2EPrepareReproducesTheLegacyDatasetIdempotently(t *testing.T) {
 		"catalog_source_links":           6,
 		"settings":                       3,
 		"setting_changes":                3,
+		"ai_providers":                   2,
+		"ai_models":                      2,
+		"ai_routes":                      3,
+		"ai_route_adjustments":           1,
+		"ai_provider_offers":             3,
+		"ai_scenes":                      2,
+		"ai_requests":                    6,
+		"ai_request_payloads":            3,
+		"ai_catalog_providers":           3,
+		"ai_catalog_models":              3,
 	}
 	for table, want := range counts {
 		var got int

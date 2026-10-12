@@ -218,6 +218,12 @@ func (Hasher) Verify(hash, secret string) (bool, error) {
 	return hash == "hash:"+secret, nil
 }
 
+type AIGateway int
+
+func (g AIGateway) Alerts(context.Context) (int, error) {
+	return int(g), nil
+}
+
 type StatsStore struct {
 	mu        sync.Mutex
 	overview  admin.Overview

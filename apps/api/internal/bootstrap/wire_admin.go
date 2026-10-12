@@ -72,6 +72,7 @@ func wireAdmin(infra *Infra, shared *Shared, modules *Modules) {
 			Store:    adminpg.NewStatsStore(infra.Ent),
 			Cache:    shared.Cache,
 			Spool:    localfs.NewSpool(shared.Config.Upload.RootDir, shared.Config.Upload.TempFileSuffix),
+			AI:       shared.AIScenes,
 			Settings: shared.Settings,
 			Now:      shared.Now,
 		}), shared.Builder),
