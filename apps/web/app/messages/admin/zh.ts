@@ -10,6 +10,7 @@ import adminComment from '~/features/admin-comment/messages/zh.json'
 import adminGame from '~/features/admin-game/messages/zh.json'
 import adminReport from '~/features/admin-report/messages/zh.json'
 import adminSetting from '~/features/admin-setting/messages/zh.json'
+import adminSponsor from '~/features/admin-sponsor/messages/zh.json'
 import adminUser from '~/features/admin-user/messages/zh.json'
 import adminWalkthrough from '~/features/admin-walkthrough/messages/zh.json'
 import admin from '~/features/admin/messages/zh.json'
@@ -28,6 +29,7 @@ export const adminMessages = {
   adminGame,
   adminReport,
   adminSetting,
+  adminSponsor,
   adminUser,
   adminWalkthrough,
 }

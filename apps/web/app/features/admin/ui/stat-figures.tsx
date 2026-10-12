@@ -1,9 +1,10 @@
 import { Card, Grid, Statistic, Text } from '@hina-ui/react'
+import type { ReactNode } from 'react'
 
 export type Figure = {
   label: string
   value: string
-  note?: string
+  note?: ReactNode
   worse?: boolean
 }
 

@@ -1,8 +1,8 @@
 import { useTranslations } from 'use-intl'
+import { StatFigures } from '~/features/admin'
 import { failureRate, type Range } from '../admin-ai'
 import { changeOf, type Usage } from '../admin-ai-overview'
 import { useAiFormat } from '../use-ai-format'
-import { StatFigures } from './stat-figures'
 
 type OverviewFiguresProps = {
   usage: Usage

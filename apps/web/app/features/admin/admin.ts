@@ -12,6 +12,7 @@ export const adminPaths = {
   walkthroughs: `${adminRoot}/walkthroughs`,
   games: `${adminRoot}/games`,
   users: `${adminRoot}/users`,
+  sponsors: `${adminRoot}/sponsors`,
   catalog: `${adminRoot}/catalog`,
   ai: `${adminRoot}/ai`,
   settings: `${adminRoot}/settings`,
@@ -43,6 +44,7 @@ export type NavKey =
   | 'walkthroughs'
   | 'games'
   | 'users'
+  | 'sponsors'
   | 'catalog'
   | 'ai'
   | 'settings'
@@ -84,7 +86,11 @@ export function navigationOf(pending: Pending): Navigation {
       },
       {
         key: 'manage',
-        entries: [entry('games', adminPaths.games), entry('users', adminPaths.users)],
+        entries: [
+          entry('games', adminPaths.games),
+          entry('users', adminPaths.users),
+          entry('sponsors', adminPaths.sponsors),
+        ],
       },
       {
         key: 'system',

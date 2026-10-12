@@ -38,6 +38,7 @@ describe('navigationOf', () => {
     expect(manage?.entries.map(entry => [entry.key, entry.to])).toEqual([
       ['games', adminPaths.games],
       ['users', adminPaths.users],
+      ['sponsors', adminPaths.sponsors],
     ])
     expect(system?.entries.map(entry => entry.key)).toEqual(['catalog', 'ai', 'settings'])
   })
