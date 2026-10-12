@@ -13,18 +13,10 @@ RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache
 FROM --platform=$BUILDPLATFORM debian:trixie-slim AS sevenzip
 ARG TARGETARCH
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends ca-certificates curl xz-utils \
+  && apt-get install -y --no-install-recommends ca-certificates curl unzip \
   && rm -rf /var/lib/apt/lists/*
-RUN set -eu; \
-    case "$TARGETARCH" in \
-      amd64) arch=x64; sum=4ca3b7c6f2f67866b92622818b58233dc70367be2f36b498eb0bdeaaa44b53f4 ;; \
-      arm64) arch=arm64; sum=39c5140f02ce4436599303c59a149f654cb1bbc47cdc105a942120d747ae040d ;; \
-      *) echo "unsupported architecture $TARGETARCH" >&2; exit 1 ;; \
-    esac; \
-    curl -fsSLo /tmp/7z.tar.xz "https://www.7-zip.org/a/7z2501-linux-${arch}.tar.xz"; \
-    echo "$sum  /tmp/7z.tar.xz" | sha256sum -c -; \
-    tar -xJf /tmp/7z.tar.xz -C /tmp 7zzs; \
-    install -D -m 0755 /tmp/7zzs /out/7zz
+COPY scripts/install-7zip.sh /tmp/install-7zip.sh
+RUN TARGETARCH="$TARGETARCH" /tmp/install-7zip.sh /out
 
 FROM debian:trixie-slim
 RUN apt-get update \

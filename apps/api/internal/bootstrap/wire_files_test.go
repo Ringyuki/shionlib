@@ -417,6 +417,63 @@ func TestAHeldUploadKeepsWhatWasDetectedUntilItIsCleared(t *testing.T) {
 	}
 }
 
+func unpacksZstandard(t *testing.T, binary string) bool {
+	t.Helper()
+	codecs, err := exec.CommandContext(t.Context(), binary, "i").Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return bytes.Contains(codecs, []byte("4F71101"))
+}
+
+func TestAnArchiveWrittenWithZstandardIsReadByABuildThatKnowsTheMethod(t *testing.T) {
+	binary := sevenZip(t)
+	line := newCheckLine(t, binary)
+	raw, err := os.ReadFile(filepath.Join("testdata", "zstandard.7z"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	archive := filepath.Join(t.TempDir(), "game.7z")
+	if err := os.WriteFile(archive, raw, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	resourceID, fileID := line.upload(t, archive)
+	ctx := context.Background()
+	if err := line.scans.ScanPending(ctx); err != nil {
+		t.Fatal(err)
+	}
+	row := line.db.Ent.GameDownloadResourceFile.GetX(ctx, fileID)
+	if row.FileCheckStatus != int(download.CheckOK) || row.InspectionID == nil {
+		t.Fatalf("unexpected file row %+v", row)
+	}
+	line.visible.Visible[resourceID] = []int{*row.InspectionID}
+	views, err := line.inspections.OfResource(ctx, actor.Actor{}, resourceID)
+	if err != nil || len(views) != 1 {
+		t.Fatalf("views: %+v %v", views, err)
+	}
+	found := views[0]
+	if found.Status != inspection.StatusReady || found.Archive.Format != "7z" || found.Totals.Files != 3 || found.Totals.Folders != 1 {
+		t.Fatalf("the listing does not depend on the method: %+v", found.Inspection)
+	}
+	if !unpacksZstandard(t, binary) {
+		if !found.Archive.Unsupported || found.Verified || found.Scan.Scanned != 0 || !slices.Equal(found.Scan.Skipped, []string{"Game/setup.exe"}) {
+			t.Fatalf("a build without the method records what it could not unpack: %+v", found.Inspection)
+		}
+		return
+	}
+	if found.Archive.Unsupported || !found.Verified || found.Scan.Scanned != 1 || len(found.Scan.Skipped) != 0 {
+		t.Fatalf("unexpected inspection %+v", found.Inspection)
+	}
+	top := listed(t, line, found.ID, nil)
+	inside := listed(t, line, found.ID, &top[0].ID)
+	if !slices.Equal(named(inside), []string{"file data.bin", "file readme.txt", "file setup.exe"}) || inside[1].Preview != inspection.PreviewText {
+		t.Fatalf("unexpected entries %+v", inside)
+	}
+	if text, err := line.previews.Text(ctx, actor.Actor{}, inside[1].ID); err != nil || string(text.Data) != "read me first" {
+		t.Fatalf("text inside the archive: %+v %v", text, err)
+	}
+}
+
 func TestNamesOnADiscThatAreNotUnicodeAreReadAsJapanese(t *testing.T) {
 	binary := sevenZip(t)
 	line := newCheckLine(t, binary)

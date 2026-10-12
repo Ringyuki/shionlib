@@ -8,7 +8,7 @@ The API and the web client each ship as one container image and run together as 
 
 | Tool | Used by | Setting |
 |---|---|---|
-| `7zz` 25.01, the official static build from 7-zip.org (pinned by SHA-256; Debian's `7zip` package lacks `7zz` and RAR) | archive inspection before scans | `ARCHIVE_TOOL_PATH` |
+| `7zz` from 7-Zip ZS 26.02 (v1.5.7 R2), the Linux build of the [7-Zip-zstd](https://github.com/mcmilk/7-Zip-zstd) releases, installed by `scripts/install-7zip.sh` (release and SHA-256 pinned there; CI installs the same build). It is 7-Zip with the Zstandard, Brotli, LZ4, LZ5, Lizard and Fast LZMA2 codecs, which a sixth of the catalogue's 7z archives need; the official build and Debian's `7zip` package cannot unpack them | archive inspection before scans | `ARCHIVE_TOOL_PATH` |
 | `pg_dump` (package `postgresql-client`) | database backups (`ENABLE_BACKUP=true`) | `DATABASE_BACKUP_PG_DUMP_PATH` |
 
 The image runs as the unprivileged `shionlib` user. `/var/lib/shionlib/upload` and `/var/lib/shionlib/scan-logs` are the upload spool and scan log directories.
