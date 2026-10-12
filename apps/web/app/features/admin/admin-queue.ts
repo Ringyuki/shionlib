@@ -1,9 +1,15 @@
 import type { Schema } from '~/shared/api/types'
 import { adminPaths, type Pending } from './admin'
 
-export type QueueKind = 'malware' | 'stalled' | 'report'
+export type QueueKind = 'malware' | 'stalled' | 'report' | 'comment' | 'walkthrough'
 
-export const queueKinds = ['malware', 'stalled', 'report'] as const satisfies readonly QueueKind[]
+export const queueKinds = [
+  'malware',
+  'stalled',
+  'report',
+  'comment',
+  'walkthrough',
+] as const satisfies readonly QueueKind[]
 
 export type ScanCase = Schema<'MalwareCaseItemDTO'>
 
@@ -11,10 +17,16 @@ export type StalledCheck = Schema<'StalledCheckDTO'>
 
 export type Report = Schema<'ReportListItemDTO'>
 
+export type HeldComment = Schema<'AdminCommentItemDTO'>
+
+export type HeldWalkthrough = Schema<'AdminWalkthroughItemDTO'>
+
 export type QueueSources = {
   cases: ScanCase[]
   stalled: StalledCheck[]
   reports: Report[]
+  comments: HeldComment[]
+  walkthroughs: HeldWalkthrough[]
 }
 
 export type QueueEntry =
@@ -28,8 +40,26 @@ export type QueueEntry =
       subject: StalledCheck
     }
   | { kind: 'report'; key: string; at: string; deadline: undefined; to: string; subject: Report }
+  | {
+      kind: 'comment'
+      key: string
+      at: string
+      deadline: undefined
+      to: string
+      subject: HeldComment
+    }
+  | {
+      kind: 'walkthrough'
+      key: string
+      at: string
+      deadline: undefined
+      to: string
+      subject: HeldWalkthrough
+    }
 
 export const queueLength = 10
+
+export const heldComment = 2
 
 function byUrgency(a: QueueEntry, b: QueueEntry): number {
   if (a.deadline !== undefined && b.deadline !== undefined) {
@@ -67,6 +97,22 @@ export function queueOf(sources: QueueSources): QueueEntry[] {
       to: adminPaths.report(subject.id),
       subject,
     })),
+    ...sources.comments.map((subject): QueueEntry => ({
+      kind: 'comment',
+      key: `comment-${subject.id}`,
+      at: subject.created,
+      deadline: undefined,
+      to: adminPaths.comment(subject.id),
+      subject,
+    })),
+    ...sources.walkthroughs.map((subject): QueueEntry => ({
+      kind: 'walkthrough',
+      key: `walkthrough-${subject.id}`,
+      at: subject.updated,
+      deadline: undefined,
+      to: adminPaths.walkthrough(subject.id),
+      subject,
+    })),
   ]
   return entries.toSorted(byUrgency).slice(0, queueLength)
 }
@@ -76,6 +122,8 @@ export function pendingOf(kind: QueueKind, pending: Pending): number {
     malware: pending.malware_cases,
     stalled: pending.stalled_files,
     report: pending.reports,
+    comment: pending.comments,
+    walkthrough: pending.walkthroughs,
   }
   return counts[kind]
 }

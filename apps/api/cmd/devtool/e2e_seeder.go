@@ -25,8 +25,10 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcefile"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourcereport"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/malwarescancase"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/moderationevent"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/tag"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/walkthrough"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/settingpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/redis/gameredis"
@@ -221,6 +223,7 @@ func (s *e2eSeeder) Seed(ctx context.Context) (e2eSeedResult, error) {
 			adminID:         users[e2eAdminIndex],
 			memberID:        users[e2eMemberIndex],
 			mutableMemberID: users[e2eMutableIndex],
+			managedID:       users[e2eManagedIndex],
 			memberFavorite:  favorites[e2eMemberIndex],
 			primaryGameID:   graph.primaryGameID,
 			malwareGameID:   graph.malwareGameID,
@@ -605,6 +608,7 @@ type e2ePostGameContent struct {
 	adminID         int
 	memberID        int
 	mutableMemberID int
+	managedID       int
 	memberFavorite  int
 	primaryGameID   int
 	malwareGameID   int
@@ -687,6 +691,85 @@ func (s *e2eSeeder) seedPostGameContent(ctx context.Context, tx *ent.Client, con
 		Exec(ctx)
 	if err != nil {
 		return fmt.Errorf("mark the stalled check: %w", err)
+	}
+	return s.seedHeldContent(ctx, tx, content)
+}
+
+func (s *e2eSeeder) seedHeldContent(ctx context.Context, tx *ent.Client, content e2ePostGameContent) error {
+	gameID := content.gameIDs[min(e2eHeldGame, len(content.gameIDs)-1)]
+	document, err := e2eParagraph(e2eHeldCommentText)
+	if err != nil {
+		return fmt.Errorf("encode the held comment: %w", err)
+	}
+	held, err := tx.Comment.Create().
+		SetContent(document).
+		SetText(e2eHeldCommentText).
+		SetGameID(gameID).
+		SetCreatorID(content.managedID).
+		SetStatus(2).
+		Save(ctx)
+	if err != nil {
+		return fmt.Errorf("create the held comment: %w", err)
+	}
+	judged := s.now().UTC().Add(-time.Hour)
+	err = tx.ModerationEvent.CreateBulk(
+		tx.ModerationEvent.Create().
+			SetCommentID(held.ID).
+			SetAuditBy(1).
+			SetModel(e2eScreeningModel).
+			SetDecision(moderationevent.DecisionREVIEW).
+			SetTopCategory(moderationevent.TopCategoryHARASSMENT).
+			SetCategoriesJSON(json.RawMessage(`{"HARASSMENT":true}`)).
+			SetMaxScore("0.12000").
+			SetScoresJSON(json.RawMessage(`{"HARASSMENT":0.12,"VIOLENCE":0.02}`)).
+			SetCreatedAt(judged),
+		tx.ModerationEvent.Create().
+			SetCommentID(held.ID).
+			SetAuditBy(2).
+			SetModel(e2eReviewModel).
+			SetDecision(moderationevent.DecisionREVIEW).
+			SetTopCategory(moderationevent.TopCategorySPAM).
+			SetCategoriesJSON(json.RawMessage(`{"SPAM":true}`)).
+			SetMaxScore("0.71000").
+			SetScoresJSON(json.RawMessage(`{"SPAM":0.71,"MEANINGLESS":0.22,"HARASSMENT":0.03}`)).
+			SetReason("Leads readers to a group outside the site.").
+			SetEvidence("join the group for save files").
+			SetCreatedAt(judged.Add(time.Minute)),
+	).Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("record the reviews of the held comment: %w", err)
+	}
+	note, err := e2eParagraph(e2eHeldWalkthroughNote)
+	if err != nil {
+		return fmt.Errorf("encode the held walkthrough: %w", err)
+	}
+	guide, err := tx.Walkthrough.Create().
+		SetGameID(gameID).
+		SetCreatorID(content.managedID).
+		SetNote(note).
+		SetRoutes(e2eHeldWalkthroughRoutes).
+		SetText(e2eHeldWalkthroughText).
+		SetLang("en").
+		SetStatus(walkthrough.StatusDRAFT).
+		SetReviewPending(true).
+		Save(ctx)
+	if err != nil {
+		return fmt.Errorf("create the held walkthrough: %w", err)
+	}
+	err = tx.ModerationEvent.Create().
+		SetWalkthroughID(guide.ID).
+		SetAuditBy(2).
+		SetModel(e2eReviewModel).
+		SetDecision(moderationevent.DecisionREVIEW).
+		SetTopCategory(moderationevent.TopCategoryMEANINGLESS).
+		SetCategoriesJSON(json.RawMessage(`{"MEANINGLESS":true}`)).
+		SetMaxScore("0.41000").
+		SetScoresJSON(json.RawMessage(`{"MEANINGLESS":0.41,"SPAM":0.08}`)).
+		SetReason("Too short to tell whether it is a walkthrough.").
+		SetCreatedAt(judged).
+		Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("record the review of the held walkthrough: %w", err)
 	}
 	return nil
 }

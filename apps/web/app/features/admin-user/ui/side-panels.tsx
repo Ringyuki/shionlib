@@ -34,8 +34,10 @@ export function RecordsPanel({ detail, records }: RecordsPanelProps) {
         </DescriptionDetails>
         <DescriptionTerm>{t('comments')}</DescriptionTerm>
         <DescriptionDetails>
-          <Link href={profilePath(locale, detail.id, 'comments')} target="_blank" rel="noreferrer">
-            {t('commentsValue', { count: detail.counts.comments })}
+          <Link asChild>
+            <RouterLink to={adminPaths.commentsBy(detail.id)}>
+              {t('commentsValue', { count: detail.counts.comments })}
+            </RouterLink>
           </Link>
         </DescriptionDetails>
         <DescriptionTerm>{t('reports')}</DescriptionTerm>

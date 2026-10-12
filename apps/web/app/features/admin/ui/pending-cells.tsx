@@ -1,8 +1,10 @@
 import { Tag } from '@hina-ui/react'
-import { useMessages, useTranslations } from 'use-intl'
+import { useFormatter, useMessages, useTranslations } from 'use-intl'
 import { labelOf } from '~/shared/i18n/labels'
 import { titleOf } from '../admin'
+import type { Verdict } from '../admin-moderation'
 import type { QueueEntry, QueueKind } from '../admin-queue'
+import { useCategoryLabel } from './moderation-verdict'
 import { TwoLines } from './two-lines'
 import { UserRef } from './user-ref'
 
@@ -10,6 +12,8 @@ const tones = {
   malware: 'danger',
   stalled: 'warning',
   report: 'accent',
+  comment: 'neutral',
+  walkthrough: 'neutral',
 } as const satisfies Record<QueueKind, string>
 
 export function KindTag({ kind }: { kind: QueueKind }) {
@@ -49,7 +53,29 @@ export function QueueContent({ entry }: { entry: QueueEntry }) {
         />
       )
     }
+    case 'comment':
+    case 'walkthrough':
+      return (
+        <TwoLines
+          first={entry.subject.text === '' ? titleOf(entry.subject.game) : entry.subject.text}
+          second={<Judged game={titleOf(entry.subject.game)} verdict={entry.subject.moderation} />}
+        />
+      )
   }
+}
+
+function Judged({ game, verdict }: { game: string; verdict: Verdict | undefined }) {
+  const t = useTranslations('admin.overview.pending')
+  const format = useFormatter()
+  const label = useCategoryLabel()
+  if (verdict === undefined || verdict.max_score === null || verdict.top_category === '') {
+    return t('unjudged', { game })
+  }
+  return t('judged', {
+    game,
+    category: label(verdict.top_category),
+    score: format.number(verdict.max_score, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+  })
 }
 
 export function QueueSubmitter({ entry }: { entry: QueueEntry }) {
@@ -59,5 +85,8 @@ export function QueueSubmitter({ entry }: { entry: QueueEntry }) {
       return <UserRef user={entry.subject.uploader} />
     case 'report':
       return <UserRef user={entry.subject.reporter} />
+    case 'comment':
+    case 'walkthrough':
+      return <UserRef user={entry.subject.creator} />
   }
 }

@@ -66,7 +66,9 @@ const report = (id: number, created: string): Report => ({
   processor: null,
 })
 
-const pending = { reports: 12, malware_cases: 1, stalled_files: 1, comments: 0, walkthroughs: 0 }
+const pending = { reports: 12, malware_cases: 1, stalled_files: 1, comments: 2, walkthroughs: 0 }
+
+const nothingHeld = { comments: [], walkthroughs: [] }
 
 describe('queueOf', () => {
   it('puts what has a deadline first, the nearest on top, then the newest reports', () => {
@@ -74,6 +76,7 @@ describe('queueOf', () => {
       cases: [scanCase(1, '2026-10-12T10:00:00.000Z')],
       stalled: [stalled(2, '2026-10-12T08:00:00.000Z')],
       reports: [report(3, '2026-10-10T00:00:00.000Z'), report(4, '2026-10-11T00:00:00.000Z')],
+      ...nothingHeld,
     })
     expect(queue.map(entry => entry.key)).toEqual([
       'stalled-2',
@@ -93,7 +96,7 @@ describe('queueOf', () => {
     const reports = Array.from({ length: queueLength + 2 }, (_, index) =>
       report(index + 1, `2026-10-${String(index + 1).padStart(2, '0')}T00:00:00.000Z`),
     )
-    expect(queueOf({ cases: [], stalled: [], reports })).toHaveLength(queueLength)
+    expect(queueOf({ cases: [], stalled: [], reports, ...nothingHeld })).toHaveLength(queueLength)
   })
 })
 
@@ -103,8 +106,12 @@ describe('unlisted', () => {
       cases: [scanCase(1, '2026-10-12T10:00:00.000Z')],
       stalled: [stalled(2, '2026-10-12T08:00:00.000Z')],
       reports: [report(3, '2026-10-10T00:00:00.000Z')],
+      ...nothingHeld,
     })
-    expect(unlisted(queue, pending)).toEqual([{ kind: 'report', count: 11 }])
-    expect(pendingTotal(pending)).toBe(14)
+    expect(unlisted(queue, pending)).toEqual([
+      { kind: 'report', count: 11 },
+      { kind: 'comment', count: 2 },
+    ])
+    expect(pendingTotal(pending)).toBe(16)
   })
 })

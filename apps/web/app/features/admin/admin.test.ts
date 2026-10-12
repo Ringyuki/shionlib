@@ -21,6 +21,8 @@ describe('navigationOf', () => {
     expect(review?.entries.map(({ key, count }) => [key, count])).toEqual([
       ['reports', 2],
       ['checks', 4],
+      ['comments', 9],
+      ['walkthroughs', 0],
     ])
   })
 
@@ -57,6 +59,9 @@ describe('adminPaths', () => {
     expect(adminPaths.report(7)).toBe('/zh/admin/reports?id=7')
     expect(adminPaths.scanCase(3)).toBe('/zh/admin/checks?case=3')
     expect(adminPaths.user(12)).toBe('/zh/admin/users/12')
+    expect(adminPaths.comment(5)).toBe('/zh/admin/comments?id=5')
+    expect(adminPaths.commentsBy(12)).toBe('/zh/admin/comments?status=ALL&author=12')
+    expect(adminPaths.walkthrough(8)).toBe('/zh/admin/walkthroughs?status=HELD&id=8')
     expect(adminPaths.reportsBy(12)).toBe('/zh/admin/reports?status=ALL&reporter=12')
     expect(adminPaths.reportsAgainst(12)).toBe('/zh/admin/reports?status=ALL&uploader=12')
   })

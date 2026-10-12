@@ -12,6 +12,8 @@ const lists: Record<QueueKind, string> = {
   malware: adminPaths.checks,
   stalled: adminPaths.checks,
   report: adminPaths.reports,
+  comment: adminPaths.comments,
+  walkthrough: `${adminPaths.walkthroughs}?status=HELD`,
 }
 
 type PendingPanelProps = {

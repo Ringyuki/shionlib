@@ -23,6 +23,8 @@ type RecordTableProps<Row extends object> = {
   empty: string
   emptyIcon?: ReactNode
   footer?: ReactNode
+  selected?: (string | number)[]
+  onSelectedChange?: (selected: (string | number)[]) => void
 }
 
 function classesOf(columns: RecordColumn[]) {
@@ -64,6 +66,8 @@ export function RecordTable<Row extends object>({
   empty,
   emptyIcon,
   footer,
+  selected,
+  onSelectedChange,
 }: RecordTableProps<Row>) {
   const pages = usePageTurn()
   const classes = classesOf(columns)
@@ -87,6 +91,9 @@ export function RecordTable<Row extends object>({
           label={label}
           variant="secondary"
           tableClass="max-md:[&_thead]:hidden"
+          selectable={onSelectedChange !== undefined}
+          selected={selected}
+          onSelectedChange={onSelectedChange}
           rowClickable={onOpen !== undefined}
           onRowClick={onOpen}
           renderCell={({ row, column }) => renderCell(row, column.key)}

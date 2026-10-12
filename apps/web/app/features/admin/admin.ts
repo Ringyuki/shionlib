@@ -8,12 +8,17 @@ export const adminPaths = {
   overview: adminRoot,
   reports: `${adminRoot}/reports`,
   checks: `${adminRoot}/checks`,
+  comments: `${adminRoot}/comments`,
+  walkthroughs: `${adminRoot}/walkthroughs`,
   users: `${adminRoot}/users`,
   user: (id: number) => `${adminRoot}/users/${id}`,
   report: (id: number) => `${adminRoot}/reports?id=${id}`,
   reportsBy: (userId: number) => `${adminRoot}/reports?status=ALL&reporter=${userId}`,
   reportsAgainst: (userId: number) => `${adminRoot}/reports?status=ALL&uploader=${userId}`,
   scanCase: (id: number) => `${adminRoot}/checks?case=${id}`,
+  comment: (id: number) => `${adminRoot}/comments?id=${id}`,
+  commentsBy: (userId: number) => `${adminRoot}/comments?status=ALL&author=${userId}`,
+  walkthrough: (id: number) => `${adminRoot}/walkthroughs?status=HELD&id=${id}`,
 } as const
 
 export function adminAddress(pathname: string, search: string): string | undefined {
@@ -26,7 +31,7 @@ export function adminAddress(pathname: string, search: string): string | undefin
 
 export type Pending = Schema<'AdminPendingDTO'>
 
-export type NavKey = 'overview' | 'reports' | 'checks' | 'users'
+export type NavKey = 'overview' | 'reports' | 'checks' | 'comments' | 'walkthroughs' | 'users'
 
 export type NavEntry = {
   key: NavKey
@@ -58,6 +63,13 @@ export function navigationOf(pending: Pending): Navigation {
             to: adminPaths.checks,
             end: false,
             count: pending.malware_cases + pending.stalled_files,
+          },
+          { key: 'comments', to: adminPaths.comments, end: false, count: pending.comments },
+          {
+            key: 'walkthroughs',
+            to: adminPaths.walkthroughs,
+            end: false,
+            count: pending.walkthroughs,
           },
         ],
       },

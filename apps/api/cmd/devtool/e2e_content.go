@@ -53,7 +53,19 @@ const (
 	e2eAdminIndex   = 0
 	e2eMemberIndex  = 1
 	e2eMutableIndex = 2
+	e2eManagedIndex = 8
+	e2eHeldGame     = 3
 )
+
+const (
+	e2eHeldCommentText     = "Seeded comment awaiting review: join the group for save files."
+	e2eHeldWalkthroughText = "Seeded walkthrough awaiting review."
+	e2eHeldWalkthroughNote = "Read the common route first."
+	e2eReviewModel         = "e2e-review-model"
+	e2eScreeningModel      = "omni-moderation-latest"
+)
+
+var e2eHeldWalkthroughRoutes = json.RawMessage(`[{"key":"common","name":"Common route","characters":[],"requires":[],"condition":"","ending":"","steps":[{"kind":"choice","text":"Go to the library","remark":"","slot":""},{"kind":"save","text":"","remark":"","slot":"1"}]}]`)
 
 type e2eSeededResource struct {
 	Platform []string

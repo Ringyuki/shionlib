@@ -11,6 +11,8 @@ function overviewApi() {
     .on('get', '/admin/content/malware-scan-cases', { items: null, meta })
     .on('get', '/admin/content/stalled-checks', null)
     .on('get', '/admin/content/download-resource-reports', { items: null, meta })
+    .on('get', '/admin/comments', { items: null, meta })
+    .on('get', '/admin/walkthroughs', { items: null, meta })
     .on('get', '/admin/stats/overview', {
       totalGames: 1,
       totalUsers: 2,
@@ -59,6 +61,12 @@ describe('loadOverview', () => {
     expect(cases?.searchParams.get('sortOrder')).toBe('asc')
     const reports = asked.find(url => url.pathname === '/admin/content/download-resource-reports')
     expect(reports?.searchParams.get('status')).toBe('PENDING')
+    expect(asked.find(url => url.pathname === '/admin/comments')?.searchParams.get('status')).toBe(
+      '2',
+    )
+    expect(
+      asked.find(url => url.pathname === '/admin/walkthroughs')?.searchParams.get('held'),
+    ).toBe('true')
     const trends = asked.find(url => url.pathname === '/admin/stats/trends')
     expect(trends?.searchParams.get('days')).toBe('7')
   })
