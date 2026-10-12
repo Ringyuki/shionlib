@@ -10,6 +10,8 @@ export default [
   route('resources/admin/users', 'routes/resources.admin.users.ts'),
   route('resources/admin/comments', 'routes/resources.admin.comments.ts'),
   route('resources/admin/walkthroughs', 'routes/resources.admin.walkthroughs.ts'),
+  route('resources/admin/settings', 'routes/resources.admin.settings.ts'),
+  route('resources/admin/settings/history', 'routes/resources.admin.settings.history.ts'),
   route('resources/comments', 'routes/resources.comments.ts'),
   route('resources/comments/edit', 'routes/resources.comments.edit.ts'),
   route('resources/comments/remove', 'routes/resources.comments.remove.ts'),
@@ -107,6 +109,7 @@ export default [
           route('walkthroughs', 'routes/admin.walkthroughs.tsx'),
           route('users', 'routes/admin.users.tsx'),
           route('users/:id', 'routes/admin.user.tsx'),
+          route('settings', 'routes/admin.settings.tsx'),
         ]),
         route('game/:id/walkthrough/edit', 'routes/walkthrough.write.tsx'),
         route('game/:id/walkthrough/new', 'routes/walkthrough-legacy.ts', {

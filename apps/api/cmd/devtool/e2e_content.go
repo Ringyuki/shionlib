@@ -47,6 +47,7 @@ var e2eSeedUsers = []e2eSeedUser{
 	{Name: "e2e_list_all_user", Email: "e2e_list_all_user@shionlib.local", Role: 1, ContentLimit: 3, OnlyGamesWithResources: false},
 	{Name: "e2e_list_safe_user", Email: "e2e_list_safe_user@shionlib.local", Role: 1, ContentLimit: 1, OnlyGamesWithResources: false},
 	{Name: "e2e_managed_user", Email: "e2e_managed_user@shionlib.local", Role: 1, ContentLimit: 2, OnlyGamesWithResources: true},
+	{Name: "e2e_staff_user", Email: "e2e_staff_user@shionlib.local", Role: 2, ContentLimit: 2, OnlyGamesWithResources: true},
 }
 
 const (

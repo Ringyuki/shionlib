@@ -11,6 +11,7 @@ export const adminPaths = {
   comments: `${adminRoot}/comments`,
   walkthroughs: `${adminRoot}/walkthroughs`,
   users: `${adminRoot}/users`,
+  settings: `${adminRoot}/settings`,
   user: (id: number) => `${adminRoot}/users/${id}`,
   report: (id: number) => `${adminRoot}/reports?id=${id}`,
   reportsBy: (userId: number) => `${adminRoot}/reports?status=ALL&reporter=${userId}`,
@@ -31,7 +32,8 @@ export function adminAddress(pathname: string, search: string): string | undefin
 
 export type Pending = Schema<'AdminPendingDTO'>
 
-export type NavKey = 'overview' | 'reports' | 'checks' | 'comments' | 'walkthroughs' | 'users'
+export type NavKey =
+  'overview' | 'reports' | 'checks' | 'comments' | 'walkthroughs' | 'users' | 'settings'
 
 export type NavEntry = {
   key: NavKey
@@ -41,7 +43,7 @@ export type NavEntry = {
 }
 
 export type NavGroup = {
-  key: 'review' | 'manage'
+  key: 'review' | 'manage' | 'system'
   entries: NavEntry[]
 }
 
@@ -76,6 +78,10 @@ export function navigationOf(pending: Pending): Navigation {
       {
         key: 'manage',
         entries: [{ key: 'users', to: adminPaths.users, end: false, count: 0 }],
+      },
+      {
+        key: 'system',
+        entries: [{ key: 'settings', to: adminPaths.settings, end: false, count: 0 }],
       },
     ],
   }

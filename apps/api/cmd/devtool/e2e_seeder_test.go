@@ -46,7 +46,7 @@ func TestE2EPrepareReproducesTheLegacyDatasetIdempotently(t *testing.T) {
 	}
 
 	for _, result := range []e2eSeedResult{first, second} {
-		if !slices.Equal(result.UserIDs, []int{1, 2, 3, 4, 5, 6, 7, 8, 9}) || !slices.Equal(result.GameIDs, []int{1, 2, 3, 4, 5, 6}) {
+		if !slices.Equal(result.UserIDs, []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}) || !slices.Equal(result.GameIDs, []int{1, 2, 3, 4, 5, 6}) {
 			t.Fatalf("identities restart on every prepare: %+v", result)
 		}
 		if result.PrimaryGameID != 1 || result.MalwareGameID != 3 {
@@ -55,8 +55,8 @@ func TestE2EPrepareReproducesTheLegacyDatasetIdempotently(t *testing.T) {
 	}
 
 	counts := map[string]int{
-		"users":                          9,
-		"favorites":                      9,
+		"users":                          10,
+		"favorites":                      10,
 		"favorite_items":                 1,
 		"field_permission_mappings":      34,
 		"game_developers":                3,

@@ -7,11 +7,13 @@
     "checks": "文件检查",
     "users": "用户",
     "comments": "评论",
-    "walkthroughs": "攻略"
+    "walkthroughs": "攻略",
+    "settings": "设置"
   },
   "group": {
     "review": "审核",
-    "manage": "管理"
+    "manage": "管理",
+    "system": "系统"
   },
   "pendingCount": "{count, number} 项待处理",
   "total": "共 {count, number} 条",

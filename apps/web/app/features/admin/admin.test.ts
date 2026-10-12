@@ -30,7 +30,7 @@ describe('navigationOf', () => {
     const { lead, groups } = navigationOf(pending)
     expect(lead).toEqual([{ key: 'overview', to: adminPaths.overview, end: true, count: 0 }])
     expect(groups.flatMap(group => group.entries).every(entry => !entry.end)).toBe(true)
-    expect(groups.map(group => group.key)).toEqual(['review', 'manage'])
+    expect(groups.map(group => group.key)).toEqual(['review', 'manage', 'system'])
   })
 })
 

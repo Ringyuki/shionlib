@@ -35,11 +35,13 @@ Every user flow a phase ports gets Playwright specs in `apps/web/e2e` in the sam
   - Accounts are `e2e_user` (member), `e2e_mutable_user` (owner of resource 1) and `e2e_admin`. All use the password `ShionlibE2E123!` (`E2E_USER_PASSWORD`).
   - Other seeded accounts serve specs that sign in or out on their own.
   - Game 4 carries a comment held for review (with two moderation runs) and a draft walkthrough waiting for review, both written by `e2e_managed_user`, for `admin-content.spec.ts`. Its tests run in order: the first ones read what the last ones decide.
+  - `e2e_staff_user` is an administrator who is not a super administrator, for what such an account may see but not change (`admin-settings.spec.ts` signs in as it).
   - `e2e_managed_user` belongs to `admin-users.spec.ts`, which bans it, resets its password and changes its role; no other spec signs in as it or reads it.
 - **Sessions:**
   - `sessions.setup.ts` signs in member, owner and admin once.
   - Specs reuse them with `test.use({ storageState: sessionFile('member') })`.
   - A spec that signs out uses its own account, so it never revokes a shared session.
+- **Typing before the page is ready:** a field filled right after `page.goto` can lose its value when React takes over the server's HTML. Wait for `page.waitForLoadState('networkidle')` first, and commit a hina-ui `NumberInput` with `press('Tab')` (it takes its value on leaving the field, and `locator.blur()` does not make it).
 - **Isolation:**
   - Specs run in parallel on one dataset. Each mutation touches a game or account that no other spec reads: favorites on games 2, 4 and 5, reports by the member, edits by the owner, uploads by the owner on game 6. The member's lists are kept on 「我的收藏」 (`favorite.spec.ts`), which also checks that a private list stays off the member's profile. Profiles are read as they are seeded: user 3 has uploads and a page background (its picture, `user/e2e/background/seeded.webp`, exists nowhere, so a spec answers it itself), user 4 has nothing public, and the profile dialog is tried on `e2e_admin_ops_user`.
   - The member writes walkthroughs on game 2 only, in tests that run serially: an author has one walkthrough per game, and each test deletes what it wrote. The guest's tests read game 3, which has none.

@@ -6,6 +6,7 @@ import {
   Flag,
   House,
   MessageCircle,
+  Settings,
   Users,
   type LucideIcon,
 } from 'lucide-react'
@@ -21,6 +22,7 @@ const icons: Record<NavKey, LucideIcon> = {
   comments: MessageCircle,
   walkthroughs: BookOpen,
   users: Users,
+  settings: Settings,
 }
 
 type AdminNavigationProps = {
