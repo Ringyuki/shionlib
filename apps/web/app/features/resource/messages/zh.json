@@ -133,6 +133,13 @@
   "page": {
     "uploaded": "上传于 {date}",
     "published": "发布于 {date}",
+    "notice": {
+      "checking": "正在检查文件的完整性和安全性，{published, select, true {检查通过前这个文件} other {资源发布前}}仅{viewer, select, uploader {你} other {上传者}}可见",
+      "storing": "文件已通过检查，正在保存，{published, select, true {保存完成前这个文件} other {资源发布前}}仅{viewer, select, uploader {你} other {上传者}}可见",
+      "underReview": "病毒扫描发现可疑内容，正在等待管理员复核。复核结束前，整个资源仅{viewer, select, uploader {你} other {上传者}}可见。",
+      "stalled": "{viewer, select, uploader {系统未能完成对这个文件的检查，已转交管理员处理，暂时无需操作} other {系统未能完成对这个文件的检查，正在等待管理员处理}}",
+      "rejected": "{reason}。这个文件将被自动清除。"
+    },
     "tabs": {
       "label": "资源",
       "contents": "内容",

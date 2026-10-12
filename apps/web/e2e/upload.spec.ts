@@ -93,6 +93,22 @@ test.describe('as an uploader', () => {
     await expect(renamed).toHaveCount(0)
   })
 
+  test('tells on the page of a resource why it cannot be downloaded yet', async ({
+    page,
+  }, testInfo) => {
+    await uploadResource(page, [await sampleFile(testInfo, 'e2e-notice.7z', 2048)])
+    await showEveryStage(page)
+    const resource = resourceWith(page, 'e2e-notice.7z')
+    const game = resource.getByRole('link', { name: 'E2E 管理临时作品 6' })
+    await expect(game).toHaveAttribute('href', /#resource-\d+$/, { timeout: 60_000 })
+    const id = (await game.getAttribute('href'))?.split('#resource-')[1] ?? ''
+    await page.goto(`/zh/resource/${id}`)
+    await expect(page.getByRole('heading', { name: 'e2e-notice.7z' })).toBeVisible()
+    await expect(page.getByText('正在检查文件的完整性和安全性，资源发布前仅你可见')).toBeVisible()
+    await expect(page.getByRole('button', { name: '下载', exact: true })).toBeDisabled()
+    await expect(page.getByText('正在读取文件内容')).toBeVisible()
+  })
+
   test('resumes after a reload without sending finished chunks again', async ({
     page,
   }, testInfo) => {

@@ -5,8 +5,9 @@ import { useLocale } from 'use-intl'
 import { gamePath, gameTitle } from '~/features/game'
 import { BBCodeText } from '~/shared/ui/bbcode-text'
 import { rightsOver, type ResourceViewer } from '../resource'
-import { inspectionOf, type ResourcePage } from '../resource-page'
+import { inspectionOf, noticeOf, type ResourcePage } from '../resource-page'
 import { PageFile } from './page-file'
+import { PageNotice } from './page-notice'
 import { ResourceFacts } from './resource-facts'
 import { ResourceMenu } from './resource-menu'
 
@@ -21,6 +22,7 @@ export function ResourceHead({ page, viewer }: ResourceHeadProps) {
   const files = resource.files ?? []
   const note = resource.note?.trim() ?? ''
   const rights = rightsOver(resource, viewer)
+  const notice = noticeOf(files)
   return (
     <Stack as="header" gap="md">
       <Stack gap="sm">
@@ -50,6 +52,13 @@ export function ResourceHead({ page, viewer }: ResourceHeadProps) {
         <ResourceFacts resource={resource} />
         <ResourceMenu resource={resource} rights={rights} files={files} history={false} />
       </Inline>
+      {notice !== undefined && (
+        <PageNotice
+          notice={notice}
+          published={resource.published_at !== null}
+          own={viewer?.id === resource.creator.id}
+        />
+      )}
       {note !== '' && <BBCodeText source={note} />}
     </Stack>
   )

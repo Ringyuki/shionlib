@@ -133,6 +133,13 @@
   "page": {
     "uploaded": "Uploaded on {date}",
     "published": "Published on {date}",
+    "notice": {
+      "checking": "The file is being tested and scanned; until {published, select, true {it passes} other {the resource is published}}, only {viewer, select, uploader {you} other {its uploader}} can see it",
+      "storing": "The check passed and the file is being saved; until {published, select, true {that is done} other {the resource is published}}, only {viewer, select, uploader {you} other {its uploader}} can see it",
+      "underReview": "The malware scan found something suspicious and an administrator will review it. Until then only {viewer, select, uploader {you} other {the uploader}} can see the whole resource.",
+      "stalled": "{viewer, select, uploader {The check of this file could not be completed and an administrator has been told; nothing is needed from you for now} other {The check of this file could not be completed and is waiting for an administrator}}",
+      "rejected": "{reason}. This file will be removed automatically."
+    },
     "tabs": {
       "label": "Resource",
       "contents": "Contents",

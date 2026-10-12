@@ -13,11 +13,26 @@ const tags = {
   risky: { tone: 'danger', variant: 'solid' },
 } as const
 
-export function FileState({ file }: { file: ResourceFile }) {
+const explainedTags = {
+  ...tags,
+  checking: { tone: 'accent', variant: 'soft' },
+  storing: { tone: 'accent', variant: 'soft' },
+} as const
+
+type FileStateProps = { file: ResourceFile; explained?: boolean }
+
+export function FileState({ file, explained = false }: FileStateProps) {
   const t = useTranslations('resource')
   const state = fileState(file)
   if (state === 'passed') {
     return null
+  }
+  if (explained) {
+    return (
+      <Tag size="sm" className="shrink-0" {...explainedTags[state]}>
+        {t(`state.${state}`)}
+      </Tag>
+    )
   }
   const hint = t(`stateHint.${state}`, {
     names: detections(file).join(', '),

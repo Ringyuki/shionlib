@@ -133,6 +133,13 @@
   "page": {
     "uploaded": "{date} にアップロード",
     "published": "{date} に公開",
+    "notice": {
+      "checking": "ファイルが壊れていないか、安全かどうかを確認しています。{published, select, true {合格するまで、このファイルは} other {リソースが公開されるまで、}}{viewer, select, uploader {あなた} other {アップロードした人}}にだけ表示されます。",
+      "storing": "チェックに合格し、保存しています。{published, select, true {完了するまで、このファイルは} other {リソースが公開されるまで、}}{viewer, select, uploader {あなた} other {アップロードした人}}にだけ表示されます。",
+      "underReview": "ウイルススキャンで疑わしい内容が見つかり、管理者の審査を待っています。審査が終わるまで、このリソース全体は{viewer, select, uploader {あなた} other {アップロードした人}}にだけ表示されます。",
+      "stalled": "{viewer, select, uploader {このファイルのチェックを完了できなかったため、管理者に引き継ぎました。現時点で操作は不要です。} other {このファイルのチェックを完了できず、管理者の対応を待っています。}}",
+      "rejected": "{reason}。このファイルはまもなく自動で削除されます。"
+    },
     "tabs": {
       "label": "リソース",
       "contents": "内容",

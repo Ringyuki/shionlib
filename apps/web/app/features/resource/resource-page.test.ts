@@ -6,6 +6,8 @@ import {
   eventFiles,
   fileGroups,
   headlineOf,
+  noticeOf,
+  pendingState,
   resourcePath,
   resourceTabAt,
 } from './resource-page'
@@ -124,5 +126,35 @@ describe('fileGroups', () => {
       undefined,
       undefined,
     ])
+  })
+})
+
+describe('what the page tells about files that are not ready', () => {
+  const stored = {
+    stage: 'stored' as const,
+    malware_scan_cases: null,
+    is_virus_false_positive: false,
+    rejection: null,
+  }
+
+  it('has nothing to tell when every file is stored', () => {
+    expect(noticeOf([stored, stored])).toBeUndefined()
+    expect(pendingState(stored)).toBeUndefined()
+    const flagged = { ...stored, malware_scan_cases: [{ id: 1, detected_viruses: ['Trojan.X'] }] }
+    expect(pendingState(flagged)).toBeUndefined()
+  })
+
+  it('tells the state that needs the most attention', () => {
+    const checking = { ...stored, stage: 'checking' as const }
+    const stalled = { ...stored, stage: 'stalled' as const }
+    const rejected = { ...stored, stage: 'rejected' as const, rejection: 'encrypted' as const }
+    expect(noticeOf([stored, checking])).toEqual({ state: 'checking', rejection: null })
+    expect(noticeOf([checking, stalled])).toEqual({ state: 'stalled', rejection: null })
+    expect(noticeOf([checking, stalled, rejected])).toEqual({
+      state: 'rejected',
+      rejection: 'encrypted',
+    })
+    expect(pendingState({ ...stored, stage: 'under_review' })).toBe('underReview')
+    expect(pendingState({ ...stored, stage: 'storing' })).toBe('storing')
   })
 })
