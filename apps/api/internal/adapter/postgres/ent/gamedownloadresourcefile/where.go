@@ -110,6 +110,21 @@ func FileCheckStatus(v int) predicate.GameDownloadResourceFile {
 	return predicate.GameDownloadResourceFile(sql.FieldEQ(FieldFileCheckStatus, v))
 }
 
+// CheckFailures applies equality check predicate on the "check_failures" field. It's identical to CheckFailuresEQ.
+func CheckFailures(v int) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldEQ(FieldCheckFailures, v))
+}
+
+// CheckError applies equality check predicate on the "check_error" field. It's identical to CheckErrorEQ.
+func CheckError(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldEQ(FieldCheckError, v))
+}
+
+// CheckStalledAt applies equality check predicate on the "check_stalled_at" field. It's identical to CheckStalledAtEQ.
+func CheckStalledAt(v time.Time) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldEQ(FieldCheckStalledAt, v))
+}
+
 // IsVirusFalsePositive applies equality check predicate on the "is_virus_false_positive" field. It's identical to IsVirusFalsePositiveEQ.
 func IsVirusFalsePositive(v bool) predicate.GameDownloadResourceFile {
 	return predicate.GameDownloadResourceFile(sql.FieldEQ(FieldIsVirusFalsePositive, v))
@@ -783,6 +798,171 @@ func FileCheckStatusLT(v int) predicate.GameDownloadResourceFile {
 // FileCheckStatusLTE applies the LTE predicate on the "file_check_status" field.
 func FileCheckStatusLTE(v int) predicate.GameDownloadResourceFile {
 	return predicate.GameDownloadResourceFile(sql.FieldLTE(FieldFileCheckStatus, v))
+}
+
+// CheckFailuresEQ applies the EQ predicate on the "check_failures" field.
+func CheckFailuresEQ(v int) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldEQ(FieldCheckFailures, v))
+}
+
+// CheckFailuresNEQ applies the NEQ predicate on the "check_failures" field.
+func CheckFailuresNEQ(v int) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldNEQ(FieldCheckFailures, v))
+}
+
+// CheckFailuresIn applies the In predicate on the "check_failures" field.
+func CheckFailuresIn(vs ...int) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldIn(FieldCheckFailures, vs...))
+}
+
+// CheckFailuresNotIn applies the NotIn predicate on the "check_failures" field.
+func CheckFailuresNotIn(vs ...int) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldNotIn(FieldCheckFailures, vs...))
+}
+
+// CheckFailuresGT applies the GT predicate on the "check_failures" field.
+func CheckFailuresGT(v int) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldGT(FieldCheckFailures, v))
+}
+
+// CheckFailuresGTE applies the GTE predicate on the "check_failures" field.
+func CheckFailuresGTE(v int) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldGTE(FieldCheckFailures, v))
+}
+
+// CheckFailuresLT applies the LT predicate on the "check_failures" field.
+func CheckFailuresLT(v int) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldLT(FieldCheckFailures, v))
+}
+
+// CheckFailuresLTE applies the LTE predicate on the "check_failures" field.
+func CheckFailuresLTE(v int) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldLTE(FieldCheckFailures, v))
+}
+
+// CheckErrorEQ applies the EQ predicate on the "check_error" field.
+func CheckErrorEQ(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldEQ(FieldCheckError, v))
+}
+
+// CheckErrorNEQ applies the NEQ predicate on the "check_error" field.
+func CheckErrorNEQ(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldNEQ(FieldCheckError, v))
+}
+
+// CheckErrorIn applies the In predicate on the "check_error" field.
+func CheckErrorIn(vs ...string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldIn(FieldCheckError, vs...))
+}
+
+// CheckErrorNotIn applies the NotIn predicate on the "check_error" field.
+func CheckErrorNotIn(vs ...string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldNotIn(FieldCheckError, vs...))
+}
+
+// CheckErrorGT applies the GT predicate on the "check_error" field.
+func CheckErrorGT(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldGT(FieldCheckError, v))
+}
+
+// CheckErrorGTE applies the GTE predicate on the "check_error" field.
+func CheckErrorGTE(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldGTE(FieldCheckError, v))
+}
+
+// CheckErrorLT applies the LT predicate on the "check_error" field.
+func CheckErrorLT(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldLT(FieldCheckError, v))
+}
+
+// CheckErrorLTE applies the LTE predicate on the "check_error" field.
+func CheckErrorLTE(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldLTE(FieldCheckError, v))
+}
+
+// CheckErrorContains applies the Contains predicate on the "check_error" field.
+func CheckErrorContains(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldContains(FieldCheckError, v))
+}
+
+// CheckErrorHasPrefix applies the HasPrefix predicate on the "check_error" field.
+func CheckErrorHasPrefix(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldHasPrefix(FieldCheckError, v))
+}
+
+// CheckErrorHasSuffix applies the HasSuffix predicate on the "check_error" field.
+func CheckErrorHasSuffix(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldHasSuffix(FieldCheckError, v))
+}
+
+// CheckErrorIsNil applies the IsNil predicate on the "check_error" field.
+func CheckErrorIsNil() predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldIsNull(FieldCheckError))
+}
+
+// CheckErrorNotNil applies the NotNil predicate on the "check_error" field.
+func CheckErrorNotNil() predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldNotNull(FieldCheckError))
+}
+
+// CheckErrorEqualFold applies the EqualFold predicate on the "check_error" field.
+func CheckErrorEqualFold(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldEqualFold(FieldCheckError, v))
+}
+
+// CheckErrorContainsFold applies the ContainsFold predicate on the "check_error" field.
+func CheckErrorContainsFold(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldContainsFold(FieldCheckError, v))
+}
+
+// CheckStalledAtEQ applies the EQ predicate on the "check_stalled_at" field.
+func CheckStalledAtEQ(v time.Time) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldEQ(FieldCheckStalledAt, v))
+}
+
+// CheckStalledAtNEQ applies the NEQ predicate on the "check_stalled_at" field.
+func CheckStalledAtNEQ(v time.Time) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldNEQ(FieldCheckStalledAt, v))
+}
+
+// CheckStalledAtIn applies the In predicate on the "check_stalled_at" field.
+func CheckStalledAtIn(vs ...time.Time) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldIn(FieldCheckStalledAt, vs...))
+}
+
+// CheckStalledAtNotIn applies the NotIn predicate on the "check_stalled_at" field.
+func CheckStalledAtNotIn(vs ...time.Time) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldNotIn(FieldCheckStalledAt, vs...))
+}
+
+// CheckStalledAtGT applies the GT predicate on the "check_stalled_at" field.
+func CheckStalledAtGT(v time.Time) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldGT(FieldCheckStalledAt, v))
+}
+
+// CheckStalledAtGTE applies the GTE predicate on the "check_stalled_at" field.
+func CheckStalledAtGTE(v time.Time) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldGTE(FieldCheckStalledAt, v))
+}
+
+// CheckStalledAtLT applies the LT predicate on the "check_stalled_at" field.
+func CheckStalledAtLT(v time.Time) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldLT(FieldCheckStalledAt, v))
+}
+
+// CheckStalledAtLTE applies the LTE predicate on the "check_stalled_at" field.
+func CheckStalledAtLTE(v time.Time) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldLTE(FieldCheckStalledAt, v))
+}
+
+// CheckStalledAtIsNil applies the IsNil predicate on the "check_stalled_at" field.
+func CheckStalledAtIsNil() predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldIsNull(FieldCheckStalledAt))
+}
+
+// CheckStalledAtNotNil applies the NotNil predicate on the "check_stalled_at" field.
+func CheckStalledAtNotNil() predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldNotNull(FieldCheckStalledAt))
 }
 
 // IsVirusFalsePositiveEQ applies the EQ predicate on the "is_virus_false_positive" field.

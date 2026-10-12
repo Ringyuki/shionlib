@@ -1378,6 +1378,9 @@ var (
 		{Name: "file_hash", Type: field.TypeString, Size: 2147483647},
 		{Name: "file_status", Type: field.TypeInt, Default: 1, SchemaType: map[string]string{"postgres": "integer"}},
 		{Name: "file_check_status", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "check_failures", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "check_error", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "check_stalled_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
 		{Name: "is_virus_false_positive", Type: field.TypeBool, Default: false},
 		{Name: "file_sha256", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
@@ -1395,25 +1398,25 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "game_download_resource_files_game_download_resource_id_fkey",
-				Columns:    []*schema.Column{GameDownloadResourceFilesColumns[16]},
+				Columns:    []*schema.Column{GameDownloadResourceFilesColumns[19]},
 				RefColumns: []*schema.Column{GameDownloadResourcesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "game_download_resource_files_upload_session_id_fkey",
-				Columns:    []*schema.Column{GameDownloadResourceFilesColumns[17]},
+				Columns:    []*schema.Column{GameDownloadResourceFilesColumns[20]},
 				RefColumns: []*schema.Column{GameUploadSessionsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "game_download_resource_files_inspection_id_fkey",
-				Columns:    []*schema.Column{GameDownloadResourceFilesColumns[18]},
+				Columns:    []*schema.Column{GameDownloadResourceFilesColumns[21]},
 				RefColumns: []*schema.Column{FileInspectionsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "game_download_resource_files_creator_id_fkey",
-				Columns:    []*schema.Column{GameDownloadResourceFilesColumns[19]},
+				Columns:    []*schema.Column{GameDownloadResourceFilesColumns[22]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Restrict,
 			},
@@ -1422,7 +1425,7 @@ var (
 			{
 				Name:    "game_download_resource_files_upload_session_id_key",
 				Unique:  true,
-				Columns: []*schema.Column{GameDownloadResourceFilesColumns[17]},
+				Columns: []*schema.Column{GameDownloadResourceFilesColumns[20]},
 			},
 			{
 				Name:    "game_download_resource_files_file_path_key",
@@ -1432,7 +1435,7 @@ var (
 			{
 				Name:    "game_download_resource_files_resource_file_name_key",
 				Unique:  true,
-				Columns: []*schema.Column{GameDownloadResourceFilesColumns[16], GameDownloadResourceFilesColumns[2]},
+				Columns: []*schema.Column{GameDownloadResourceFilesColumns[19], GameDownloadResourceFilesColumns[2]},
 			},
 			{
 				Name:    "game_download_resource_files_file_path_idx",
@@ -1442,7 +1445,7 @@ var (
 			{
 				Name:    "game_download_resource_files_inspection_id_idx",
 				Unique:  false,
-				Columns: []*schema.Column{GameDownloadResourceFilesColumns[18]},
+				Columns: []*schema.Column{GameDownloadResourceFilesColumns[21]},
 			},
 		},
 	}

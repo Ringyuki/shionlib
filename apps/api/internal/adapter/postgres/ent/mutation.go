@@ -35420,6 +35420,10 @@ type GameDownloadResourceFileMutation struct {
 	addfile_status                *int
 	file_check_status             *int
 	addfile_check_status          *int
+	check_failures                *int
+	addcheck_failures             *int
+	check_error                   *string
+	check_stalled_at              *time.Time
 	is_virus_false_positive       *bool
 	file_sha256                   *string
 	created                       *time.Time
@@ -36128,6 +36132,160 @@ func (m *GameDownloadResourceFileMutation) ResetFileCheckStatus() {
 	m.addfile_check_status = nil
 }
 
+// SetCheckFailures sets the "check_failures" field.
+func (m *GameDownloadResourceFileMutation) SetCheckFailures(i int) {
+	m.check_failures = &i
+	m.addcheck_failures = nil
+}
+
+// CheckFailures returns the value of the "check_failures" field in the mutation.
+func (m *GameDownloadResourceFileMutation) CheckFailures() (r int, exists bool) {
+	v := m.check_failures
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCheckFailures returns the old "check_failures" field's value of the GameDownloadResourceFile entity.
+// If the GameDownloadResourceFile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceFileMutation) OldCheckFailures(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCheckFailures is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCheckFailures requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCheckFailures: %w", err)
+	}
+	return oldValue.CheckFailures, nil
+}
+
+// AddCheckFailures adds i to the "check_failures" field.
+func (m *GameDownloadResourceFileMutation) AddCheckFailures(i int) {
+	if m.addcheck_failures != nil {
+		*m.addcheck_failures += i
+	} else {
+		m.addcheck_failures = &i
+	}
+}
+
+// AddedCheckFailures returns the value that was added to the "check_failures" field in this mutation.
+func (m *GameDownloadResourceFileMutation) AddedCheckFailures() (r int, exists bool) {
+	v := m.addcheck_failures
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCheckFailures resets all changes to the "check_failures" field.
+func (m *GameDownloadResourceFileMutation) ResetCheckFailures() {
+	m.check_failures = nil
+	m.addcheck_failures = nil
+}
+
+// SetCheckError sets the "check_error" field.
+func (m *GameDownloadResourceFileMutation) SetCheckError(s string) {
+	m.check_error = &s
+}
+
+// CheckError returns the value of the "check_error" field in the mutation.
+func (m *GameDownloadResourceFileMutation) CheckError() (r string, exists bool) {
+	v := m.check_error
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCheckError returns the old "check_error" field's value of the GameDownloadResourceFile entity.
+// If the GameDownloadResourceFile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceFileMutation) OldCheckError(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCheckError is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCheckError requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCheckError: %w", err)
+	}
+	return oldValue.CheckError, nil
+}
+
+// ClearCheckError clears the value of the "check_error" field.
+func (m *GameDownloadResourceFileMutation) ClearCheckError() {
+	m.check_error = nil
+	m.clearedFields[gamedownloadresourcefile.FieldCheckError] = struct{}{}
+}
+
+// CheckErrorCleared returns if the "check_error" field was cleared in this mutation.
+func (m *GameDownloadResourceFileMutation) CheckErrorCleared() bool {
+	_, ok := m.clearedFields[gamedownloadresourcefile.FieldCheckError]
+	return ok
+}
+
+// ResetCheckError resets all changes to the "check_error" field.
+func (m *GameDownloadResourceFileMutation) ResetCheckError() {
+	m.check_error = nil
+	delete(m.clearedFields, gamedownloadresourcefile.FieldCheckError)
+}
+
+// SetCheckStalledAt sets the "check_stalled_at" field.
+func (m *GameDownloadResourceFileMutation) SetCheckStalledAt(t time.Time) {
+	m.check_stalled_at = &t
+}
+
+// CheckStalledAt returns the value of the "check_stalled_at" field in the mutation.
+func (m *GameDownloadResourceFileMutation) CheckStalledAt() (r time.Time, exists bool) {
+	v := m.check_stalled_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCheckStalledAt returns the old "check_stalled_at" field's value of the GameDownloadResourceFile entity.
+// If the GameDownloadResourceFile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceFileMutation) OldCheckStalledAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCheckStalledAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCheckStalledAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCheckStalledAt: %w", err)
+	}
+	return oldValue.CheckStalledAt, nil
+}
+
+// ClearCheckStalledAt clears the value of the "check_stalled_at" field.
+func (m *GameDownloadResourceFileMutation) ClearCheckStalledAt() {
+	m.check_stalled_at = nil
+	m.clearedFields[gamedownloadresourcefile.FieldCheckStalledAt] = struct{}{}
+}
+
+// CheckStalledAtCleared returns if the "check_stalled_at" field was cleared in this mutation.
+func (m *GameDownloadResourceFileMutation) CheckStalledAtCleared() bool {
+	_, ok := m.clearedFields[gamedownloadresourcefile.FieldCheckStalledAt]
+	return ok
+}
+
+// ResetCheckStalledAt resets all changes to the "check_stalled_at" field.
+func (m *GameDownloadResourceFileMutation) ResetCheckStalledAt() {
+	m.check_stalled_at = nil
+	delete(m.clearedFields, gamedownloadresourcefile.FieldCheckStalledAt)
+}
+
 // SetIsVirusFalsePositive sets the "is_virus_false_positive" field.
 func (m *GameDownloadResourceFileMutation) SetIsVirusFalsePositive(b bool) {
 	m.is_virus_false_positive = &b
@@ -36710,7 +36868,7 @@ func (m *GameDownloadResourceFileMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GameDownloadResourceFileMutation) Fields() []string {
-	fields := make([]string, 0, 19)
+	fields := make([]string, 0, 22)
 	if m._type != nil {
 		fields = append(fields, gamedownloadresourcefile.FieldType)
 	}
@@ -36746,6 +36904,15 @@ func (m *GameDownloadResourceFileMutation) Fields() []string {
 	}
 	if m.file_check_status != nil {
 		fields = append(fields, gamedownloadresourcefile.FieldFileCheckStatus)
+	}
+	if m.check_failures != nil {
+		fields = append(fields, gamedownloadresourcefile.FieldCheckFailures)
+	}
+	if m.check_error != nil {
+		fields = append(fields, gamedownloadresourcefile.FieldCheckError)
+	}
+	if m.check_stalled_at != nil {
+		fields = append(fields, gamedownloadresourcefile.FieldCheckStalledAt)
 	}
 	if m.is_virus_false_positive != nil {
 		fields = append(fields, gamedownloadresourcefile.FieldIsVirusFalsePositive)
@@ -36800,6 +36967,12 @@ func (m *GameDownloadResourceFileMutation) Field(name string) (ent.Value, bool) 
 		return m.FileStatus()
 	case gamedownloadresourcefile.FieldFileCheckStatus:
 		return m.FileCheckStatus()
+	case gamedownloadresourcefile.FieldCheckFailures:
+		return m.CheckFailures()
+	case gamedownloadresourcefile.FieldCheckError:
+		return m.CheckError()
+	case gamedownloadresourcefile.FieldCheckStalledAt:
+		return m.CheckStalledAt()
 	case gamedownloadresourcefile.FieldIsVirusFalsePositive:
 		return m.IsVirusFalsePositive()
 	case gamedownloadresourcefile.FieldFileSha256:
@@ -36847,6 +37020,12 @@ func (m *GameDownloadResourceFileMutation) OldField(ctx context.Context, name st
 		return m.OldFileStatus(ctx)
 	case gamedownloadresourcefile.FieldFileCheckStatus:
 		return m.OldFileCheckStatus(ctx)
+	case gamedownloadresourcefile.FieldCheckFailures:
+		return m.OldCheckFailures(ctx)
+	case gamedownloadresourcefile.FieldCheckError:
+		return m.OldCheckError(ctx)
+	case gamedownloadresourcefile.FieldCheckStalledAt:
+		return m.OldCheckStalledAt(ctx)
 	case gamedownloadresourcefile.FieldIsVirusFalsePositive:
 		return m.OldIsVirusFalsePositive(ctx)
 	case gamedownloadresourcefile.FieldFileSha256:
@@ -36954,6 +37133,27 @@ func (m *GameDownloadResourceFileMutation) SetField(name string, value ent.Value
 		}
 		m.SetFileCheckStatus(v)
 		return nil
+	case gamedownloadresourcefile.FieldCheckFailures:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCheckFailures(v)
+		return nil
+	case gamedownloadresourcefile.FieldCheckError:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCheckError(v)
+		return nil
+	case gamedownloadresourcefile.FieldCheckStalledAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCheckStalledAt(v)
+		return nil
 	case gamedownloadresourcefile.FieldIsVirusFalsePositive:
 		v, ok := value.(bool)
 		if !ok {
@@ -37023,6 +37223,9 @@ func (m *GameDownloadResourceFileMutation) AddedFields() []string {
 	if m.addfile_check_status != nil {
 		fields = append(fields, gamedownloadresourcefile.FieldFileCheckStatus)
 	}
+	if m.addcheck_failures != nil {
+		fields = append(fields, gamedownloadresourcefile.FieldCheckFailures)
+	}
 	return fields
 }
 
@@ -37039,6 +37242,8 @@ func (m *GameDownloadResourceFileMutation) AddedField(name string) (ent.Value, b
 		return m.AddedFileStatus()
 	case gamedownloadresourcefile.FieldFileCheckStatus:
 		return m.AddedFileCheckStatus()
+	case gamedownloadresourcefile.FieldCheckFailures:
+		return m.AddedCheckFailures()
 	}
 	return nil, false
 }
@@ -37076,6 +37281,13 @@ func (m *GameDownloadResourceFileMutation) AddField(name string, value ent.Value
 		}
 		m.AddFileCheckStatus(v)
 		return nil
+	case gamedownloadresourcefile.FieldCheckFailures:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCheckFailures(v)
+		return nil
 	}
 	return fmt.Errorf("unknown GameDownloadResourceFile numeric field %s", name)
 }
@@ -37098,6 +37310,12 @@ func (m *GameDownloadResourceFileMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(gamedownloadresourcefile.FieldUploadSessionID) {
 		fields = append(fields, gamedownloadresourcefile.FieldUploadSessionID)
+	}
+	if m.FieldCleared(gamedownloadresourcefile.FieldCheckError) {
+		fields = append(fields, gamedownloadresourcefile.FieldCheckError)
+	}
+	if m.FieldCleared(gamedownloadresourcefile.FieldCheckStalledAt) {
+		fields = append(fields, gamedownloadresourcefile.FieldCheckStalledAt)
 	}
 	if m.FieldCleared(gamedownloadresourcefile.FieldFileSha256) {
 		fields = append(fields, gamedownloadresourcefile.FieldFileSha256)
@@ -37133,6 +37351,12 @@ func (m *GameDownloadResourceFileMutation) ClearField(name string) error {
 		return nil
 	case gamedownloadresourcefile.FieldUploadSessionID:
 		m.ClearUploadSessionID()
+		return nil
+	case gamedownloadresourcefile.FieldCheckError:
+		m.ClearCheckError()
+		return nil
+	case gamedownloadresourcefile.FieldCheckStalledAt:
+		m.ClearCheckStalledAt()
 		return nil
 	case gamedownloadresourcefile.FieldFileSha256:
 		m.ClearFileSha256()
@@ -37183,6 +37407,15 @@ func (m *GameDownloadResourceFileMutation) ResetField(name string) error {
 		return nil
 	case gamedownloadresourcefile.FieldFileCheckStatus:
 		m.ResetFileCheckStatus()
+		return nil
+	case gamedownloadresourcefile.FieldCheckFailures:
+		m.ResetCheckFailures()
+		return nil
+	case gamedownloadresourcefile.FieldCheckError:
+		m.ResetCheckError()
+		return nil
+	case gamedownloadresourcefile.FieldCheckStalledAt:
+		m.ResetCheckStalledAt()
 		return nil
 	case gamedownloadresourcefile.FieldIsVirusFalsePositive:
 		m.ResetIsVirusFalsePositive()

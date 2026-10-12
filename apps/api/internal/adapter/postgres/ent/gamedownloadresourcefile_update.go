@@ -262,6 +262,67 @@ func (_u *GameDownloadResourceFileUpdate) AddFileCheckStatus(v int) *GameDownloa
 	return _u
 }
 
+// SetCheckFailures sets the "check_failures" field.
+func (_u *GameDownloadResourceFileUpdate) SetCheckFailures(v int) *GameDownloadResourceFileUpdate {
+	_u.mutation.ResetCheckFailures()
+	_u.mutation.SetCheckFailures(v)
+	return _u
+}
+
+// SetNillableCheckFailures sets the "check_failures" field if the given value is not nil.
+func (_u *GameDownloadResourceFileUpdate) SetNillableCheckFailures(v *int) *GameDownloadResourceFileUpdate {
+	if v != nil {
+		_u.SetCheckFailures(*v)
+	}
+	return _u
+}
+
+// AddCheckFailures adds value to the "check_failures" field.
+func (_u *GameDownloadResourceFileUpdate) AddCheckFailures(v int) *GameDownloadResourceFileUpdate {
+	_u.mutation.AddCheckFailures(v)
+	return _u
+}
+
+// SetCheckError sets the "check_error" field.
+func (_u *GameDownloadResourceFileUpdate) SetCheckError(v string) *GameDownloadResourceFileUpdate {
+	_u.mutation.SetCheckError(v)
+	return _u
+}
+
+// SetNillableCheckError sets the "check_error" field if the given value is not nil.
+func (_u *GameDownloadResourceFileUpdate) SetNillableCheckError(v *string) *GameDownloadResourceFileUpdate {
+	if v != nil {
+		_u.SetCheckError(*v)
+	}
+	return _u
+}
+
+// ClearCheckError clears the value of the "check_error" field.
+func (_u *GameDownloadResourceFileUpdate) ClearCheckError() *GameDownloadResourceFileUpdate {
+	_u.mutation.ClearCheckError()
+	return _u
+}
+
+// SetCheckStalledAt sets the "check_stalled_at" field.
+func (_u *GameDownloadResourceFileUpdate) SetCheckStalledAt(v time.Time) *GameDownloadResourceFileUpdate {
+	_u.mutation.SetCheckStalledAt(v)
+	return _u
+}
+
+// SetNillableCheckStalledAt sets the "check_stalled_at" field if the given value is not nil.
+func (_u *GameDownloadResourceFileUpdate) SetNillableCheckStalledAt(v *time.Time) *GameDownloadResourceFileUpdate {
+	if v != nil {
+		_u.SetCheckStalledAt(*v)
+	}
+	return _u
+}
+
+// ClearCheckStalledAt clears the value of the "check_stalled_at" field.
+func (_u *GameDownloadResourceFileUpdate) ClearCheckStalledAt() *GameDownloadResourceFileUpdate {
+	_u.mutation.ClearCheckStalledAt()
+	return _u
+}
+
 // SetIsVirusFalsePositive sets the "is_virus_false_positive" field.
 func (_u *GameDownloadResourceFileUpdate) SetIsVirusFalsePositive(v bool) *GameDownloadResourceFileUpdate {
 	_u.mutation.SetIsVirusFalsePositive(v)
@@ -633,6 +694,24 @@ func (_u *GameDownloadResourceFileUpdate) sqlSave(ctx context.Context) (_node in
 	}
 	if value, ok := _u.mutation.AddedFileCheckStatus(); ok {
 		_spec.AddField(gamedownloadresourcefile.FieldFileCheckStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.CheckFailures(); ok {
+		_spec.SetField(gamedownloadresourcefile.FieldCheckFailures, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCheckFailures(); ok {
+		_spec.AddField(gamedownloadresourcefile.FieldCheckFailures, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.CheckError(); ok {
+		_spec.SetField(gamedownloadresourcefile.FieldCheckError, field.TypeString, value)
+	}
+	if _u.mutation.CheckErrorCleared() {
+		_spec.ClearField(gamedownloadresourcefile.FieldCheckError, field.TypeString)
+	}
+	if value, ok := _u.mutation.CheckStalledAt(); ok {
+		_spec.SetField(gamedownloadresourcefile.FieldCheckStalledAt, field.TypeTime, value)
+	}
+	if _u.mutation.CheckStalledAtCleared() {
+		_spec.ClearField(gamedownloadresourcefile.FieldCheckStalledAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.IsVirusFalsePositive(); ok {
 		_spec.SetField(gamedownloadresourcefile.FieldIsVirusFalsePositive, field.TypeBool, value)
@@ -1145,6 +1224,67 @@ func (_u *GameDownloadResourceFileUpdateOne) AddFileCheckStatus(v int) *GameDown
 	return _u
 }
 
+// SetCheckFailures sets the "check_failures" field.
+func (_u *GameDownloadResourceFileUpdateOne) SetCheckFailures(v int) *GameDownloadResourceFileUpdateOne {
+	_u.mutation.ResetCheckFailures()
+	_u.mutation.SetCheckFailures(v)
+	return _u
+}
+
+// SetNillableCheckFailures sets the "check_failures" field if the given value is not nil.
+func (_u *GameDownloadResourceFileUpdateOne) SetNillableCheckFailures(v *int) *GameDownloadResourceFileUpdateOne {
+	if v != nil {
+		_u.SetCheckFailures(*v)
+	}
+	return _u
+}
+
+// AddCheckFailures adds value to the "check_failures" field.
+func (_u *GameDownloadResourceFileUpdateOne) AddCheckFailures(v int) *GameDownloadResourceFileUpdateOne {
+	_u.mutation.AddCheckFailures(v)
+	return _u
+}
+
+// SetCheckError sets the "check_error" field.
+func (_u *GameDownloadResourceFileUpdateOne) SetCheckError(v string) *GameDownloadResourceFileUpdateOne {
+	_u.mutation.SetCheckError(v)
+	return _u
+}
+
+// SetNillableCheckError sets the "check_error" field if the given value is not nil.
+func (_u *GameDownloadResourceFileUpdateOne) SetNillableCheckError(v *string) *GameDownloadResourceFileUpdateOne {
+	if v != nil {
+		_u.SetCheckError(*v)
+	}
+	return _u
+}
+
+// ClearCheckError clears the value of the "check_error" field.
+func (_u *GameDownloadResourceFileUpdateOne) ClearCheckError() *GameDownloadResourceFileUpdateOne {
+	_u.mutation.ClearCheckError()
+	return _u
+}
+
+// SetCheckStalledAt sets the "check_stalled_at" field.
+func (_u *GameDownloadResourceFileUpdateOne) SetCheckStalledAt(v time.Time) *GameDownloadResourceFileUpdateOne {
+	_u.mutation.SetCheckStalledAt(v)
+	return _u
+}
+
+// SetNillableCheckStalledAt sets the "check_stalled_at" field if the given value is not nil.
+func (_u *GameDownloadResourceFileUpdateOne) SetNillableCheckStalledAt(v *time.Time) *GameDownloadResourceFileUpdateOne {
+	if v != nil {
+		_u.SetCheckStalledAt(*v)
+	}
+	return _u
+}
+
+// ClearCheckStalledAt clears the value of the "check_stalled_at" field.
+func (_u *GameDownloadResourceFileUpdateOne) ClearCheckStalledAt() *GameDownloadResourceFileUpdateOne {
+	_u.mutation.ClearCheckStalledAt()
+	return _u
+}
+
 // SetIsVirusFalsePositive sets the "is_virus_false_positive" field.
 func (_u *GameDownloadResourceFileUpdateOne) SetIsVirusFalsePositive(v bool) *GameDownloadResourceFileUpdateOne {
 	_u.mutation.SetIsVirusFalsePositive(v)
@@ -1546,6 +1686,24 @@ func (_u *GameDownloadResourceFileUpdateOne) sqlSave(ctx context.Context) (_node
 	}
 	if value, ok := _u.mutation.AddedFileCheckStatus(); ok {
 		_spec.AddField(gamedownloadresourcefile.FieldFileCheckStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.CheckFailures(); ok {
+		_spec.SetField(gamedownloadresourcefile.FieldCheckFailures, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCheckFailures(); ok {
+		_spec.AddField(gamedownloadresourcefile.FieldCheckFailures, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.CheckError(); ok {
+		_spec.SetField(gamedownloadresourcefile.FieldCheckError, field.TypeString, value)
+	}
+	if _u.mutation.CheckErrorCleared() {
+		_spec.ClearField(gamedownloadresourcefile.FieldCheckError, field.TypeString)
+	}
+	if value, ok := _u.mutation.CheckStalledAt(); ok {
+		_spec.SetField(gamedownloadresourcefile.FieldCheckStalledAt, field.TypeTime, value)
+	}
+	if _u.mutation.CheckStalledAtCleared() {
+		_spec.ClearField(gamedownloadresourcefile.FieldCheckStalledAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.IsVirusFalsePositive(); ok {
 		_spec.SetField(gamedownloadresourcefile.FieldIsVirusFalsePositive, field.TypeBool, value)

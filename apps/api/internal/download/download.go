@@ -39,10 +39,12 @@ const (
 	CheckHarmful              CheckStatus = 5
 	CheckHarmfulPendingReview CheckStatus = 6
 	CheckIncompleteSet        CheckStatus = 7
+	CheckStalled              CheckStatus = 8
+	CheckAbandoned            CheckStatus = 9
 )
 
 func (c CheckStatus) Rejected() bool {
-	return (c >= CheckBrokenOrTruncated && c <= CheckHarmful) || c == CheckIncompleteSet
+	return (c >= CheckBrokenOrTruncated && c <= CheckHarmful) || c == CheckIncompleteSet || c == CheckAbandoned
 }
 
 var Platforms = []string{"win", "mac", "ios", "and", "lin", "ps3", "ps4", "psv", "psp", "swi", "dvd"}

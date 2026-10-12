@@ -23,6 +23,11 @@
         "ResourceLinkText": "查看资源",
         "FileUploadFailedTitle": "文件未通过检查",
         "FileCheckFailedContent": "你上传的文件 {file_name} 未通过检查：{reason}。{missing_volumes, select, none {} other {缺少的分卷：{missing_volumes}。}}请确认文件后重新上传。",
+        "FileCheckStalledTitle": "文件检查未能完成",
+        "FileCheckStalledContent": "你上传的文件 {file_name} 的检查多次失败，已转交管理员处理，暂时无需操作",
+        "FileCheckStalledAdminTitle": "有文件的检查已暂停",
+        "FileCheckStalledAdminContent": "{uploader_name} 上传的文件 {file_name} 连续 {failures} 次检查失败，已暂停重试。最近一次的错误：{last_error}。请在 {review_deadline} 前处理，逾期文件将被移除。",
+        "FileCheckStalledAdminLinkText": "查看资源",
         "FileVirusReviewPendingTitle": "文件等待人工复核",
         "FileVirusReviewPendingContent": "你上传的文件 {file_name} 在病毒扫描中被标记（{detected_viruses}），已转入人工复核（编号 #{malware_case_id}），将在 {review_deadline} 前完成",
         "FileVirusReviewRequiredTitle": "有文件等待报毒复核",
@@ -91,6 +96,7 @@
       "BROKEN_OR_UNSUPPORTED": "文件损坏或格式不受支持",
       "ENCRYPTED": "压缩包已加密，无法检查内容",
       "INCOMPLETE_SET": "分卷不完整",
+      "ABANDONED": "系统未能完成对文件的检查",
       "HARMFUL": "检测到有害内容"
     }
   }

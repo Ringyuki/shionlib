@@ -32,6 +32,18 @@ var (
 		Description: "分卷压缩包缺少分卷时，等待上传者补充上传的时长。超时后仍不完整的，整组文件将被移除。",
 		Default:     day, Min: time.Hour, Max: 30 * day,
 	})
+	CheckAttempts = setting.Int(setting.Spec[int]{
+		Name:        "scan.check_attempts",
+		Label:       "检查失败的次数上限",
+		Description: "一个文件的检查失败后会隔一段时间重试，间隔逐次加倍。连续失败达到该次数时暂停重试，通知上传者和管理员，等待管理员处理。",
+		Default:     6, Min: 1, Max: 50,
+	})
+	StalledCheckTimeout = setting.Duration(setting.Spec[time.Duration]{
+		Name:        "scan.stalled_check_timeout",
+		Label:       "暂停检查的文件保留时长",
+		Description: "检查暂停后，管理员需要在该时长内让文件重新检查；超时仍未处理的文件将被判为未通过并移除。",
+		Default:     7 * day, Min: time.Hour, Max: 90 * day,
+	})
 	AutoDeleteNote = setting.Text(setting.Spec[string]{
 		Name:        "scan.auto_delete_note",
 		Label:       "超时删除说明",

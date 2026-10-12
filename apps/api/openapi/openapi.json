@@ -7005,13 +7005,14 @@
             ]
           },
           "rejection": {
-            "description": "Why a rejected file was rejected; null otherwise",
+            "description": "Why a rejected file was rejected (abandoned: its check could never be completed); null otherwise",
             "enum": [
               "truncated",
               "unsupported",
               "encrypted",
               "harmful",
-              "incomplete_set"
+              "incomplete_set",
+              "abandoned"
             ],
             "type": [
               "string",
@@ -7032,12 +7033,13 @@
             ]
           },
           "stage": {
-            "description": "Where the file is on its way to being downloadable: checking (waiting for or under its check), storing (passed, moving to object storage), stored, under_review (held for a malware review) or rejected (about to be removed)",
+            "description": "Where the file is on its way to being downloadable: checking (waiting for or under its check), storing (passed, moving to object storage), stored, under_review (held for a malware review), stalled (its check kept failing and waits for an operator) or rejected (about to be removed)",
             "enum": [
               "checking",
               "storing",
               "stored",
               "under_review",
+              "stalled",
               "rejected"
             ],
             "type": "string"

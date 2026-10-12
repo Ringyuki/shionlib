@@ -23,6 +23,11 @@
         "ResourceLinkText": "View the resource",
         "FileUploadFailedTitle": "File did not pass the check",
         "FileCheckFailedContent": "Your file {file_name} did not pass the check: {reason}. {missing_volumes, select, none {} other {Missing volumes: {missing_volumes}. }}Check the file and upload it again.",
+        "FileCheckStalledTitle": "A file could not be checked",
+        "FileCheckStalledContent": "The check of your file {file_name} failed several times and has been handed to an administrator. No action is needed for now.",
+        "FileCheckStalledAdminTitle": "The check of a file has been paused",
+        "FileCheckStalledAdminContent": "The check of {file_name}, uploaded by {uploader_name}, failed {failures} times in a row and has been paused. The last error: {last_error}. Handle it before {review_deadline}; after that the file is removed.",
+        "FileCheckStalledAdminLinkText": "View the resource",
         "FileVirusReviewPendingTitle": "File is waiting for review",
         "FileVirusReviewPendingContent": "Your file {file_name} was flagged by the malware scan ({detected_viruses}) and sent to manual review (case #{malware_case_id}), to be finished by {review_deadline}",
         "FileVirusReviewRequiredTitle": "A file is waiting for malware review",
@@ -91,6 +96,7 @@
       "BROKEN_OR_UNSUPPORTED": "the file is damaged or its format is not supported",
       "ENCRYPTED": "the archive is encrypted and cannot be checked",
       "INCOMPLETE_SET": "the set of volumes is incomplete",
+      "ABANDONED": "the check of the file could not be completed",
       "HARMFUL": "harmful content was detected"
     }
   }

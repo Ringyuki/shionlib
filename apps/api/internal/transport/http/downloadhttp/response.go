@@ -37,8 +37,8 @@ type downloadFileDTO struct {
 	HashAlgorithm        upload.HashAlgorithm     `json:"hash_algorithm" enum:"sha256,blake3"`
 	FileHash             string                   `json:"file_hash"`
 	FileStatus           int                      `json:"file_status"`
-	Stage                download.Stage           `json:"stage" enum:"checking,storing,stored,under_review,rejected" doc:"Where the file is on its way to being downloadable: checking (waiting for or under its check), storing (passed, moving to object storage), stored, under_review (held for a malware review) or rejected (about to be removed)"`
-	Rejection            *download.Rejection      `json:"rejection" enum:"truncated,unsupported,encrypted,harmful,incomplete_set" doc:"Why a rejected file was rejected; null otherwise"`
+	Stage                download.Stage           `json:"stage" enum:"checking,storing,stored,under_review,stalled,rejected" doc:"Where the file is on its way to being downloadable: checking (waiting for or under its check), storing (passed, moving to object storage), stored, under_review (held for a malware review), stalled (its check kept failing and waits for an operator) or rejected (about to be removed)"`
+	Rejection            *download.Rejection      `json:"rejection" enum:"truncated,unsupported,encrypted,harmful,incomplete_set,abandoned" doc:"Why a rejected file was rejected (abandoned: its check could never be completed); null otherwise"`
 	IsVirusFalsePositive bool                     `json:"is_virus_false_positive"`
 	MalwareScanCases     []downloadMalwareCaseDTO `json:"malware_scan_cases"`
 	Creator              userhttp.UserSummaryDTO  `json:"creator"`

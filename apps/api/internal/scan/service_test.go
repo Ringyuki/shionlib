@@ -8,8 +8,10 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 	"testing"
 	"time"
+	"unicode/utf8"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
@@ -44,12 +46,16 @@ type fixture struct {
 	objects     *scantest.Objects
 	service     *scan.Service
 	backfill    *scan.BackfillService
+	stalled     *scan.StalledService
+	clock       *time.Time
 }
 
 func newFixture(enabled bool) fixture {
 	workspace := scantest.NewWorkspace()
+	clock := now
 	f := fixture{
-		repo:        scantest.NewMemoryRepository(func() time.Time { return now }),
+		clock:       &clock,
+		repo:        scantest.NewMemoryRepository(func() time.Time { return clock }),
 		workspace:   workspace,
 		tool:        &scantest.ArchiveTool{Listings: map[string]scan.ToolRun{}, Tests: map[string]scan.ToolRun{}, Contents: map[string][]string{}, Workspace: workspace},
 		names:       &scantest.NameReader{Names: map[string]scan.LegacyNames{}},
@@ -78,9 +84,10 @@ func newFixture(enabled bool) fixture {
 		Tx:          &txtest.Immediate{},
 		Settings:    settingtest.Set(settingtest.Source{}, scan.AutoBanThreshold, 2),
 		Options:     scan.Options{Enabled: enabled, SiteURL: "https://shionlib.example/"},
-		Now:         func() time.Time { return now },
+		Now:         func() time.Time { return clock },
 	})
 	f.backfill = scan.NewBackfillService(f.service, f.objects, f.room)
+	f.stalled = scan.NewStalledService(f.service)
 	return f
 }
 
@@ -680,6 +687,96 @@ func TestACheckWhoseRecordCannotBeSavedIsRetried(t *testing.T) {
 	waiting, _ := f.repo.File(1)
 	if waiting.CheckStatus != download.CheckPending || waiting.InspectionID != nil || len(f.events.Jobs()) != 0 || f.repo.RetryAt(10).IsZero() {
 		t.Fatalf("the file waits for another try: %+v", waiting)
+	}
+}
+
+func TestAFailingCheckIsRetriedLessOftenAndThenWaitsForAPerson(t *testing.T) {
+	f := newFixture(true)
+	f.repo.Admins = []scan.Admin{{ID: 50, Name: "root", Email: "root@example.test"}}
+	f.repo.Names[9] = "kotori"
+	f.repo.SeedFile(pending(1, "/spool/1.part"))
+	f.tool.Listings["/spool/1.part"] = listing("7z", "", file("game.exe", 4))
+	f.inspections.Err = errors.New("the record of \xb2\xdd cannot be saved")
+	ctx := context.Background()
+	for attempt, wait := range []time.Duration{30 * time.Minute, time.Hour, 2 * time.Hour, 4 * time.Hour, 8 * time.Hour} {
+		if err := f.service.ScanPending(ctx); err == nil {
+			t.Fatalf("attempt %d: expected a failure", attempt+1)
+		}
+		waiting, _ := f.repo.File(1)
+		if waiting.CheckStatus != download.CheckPending || waiting.CheckFailures != attempt+1 || !f.repo.RetryAt(10).Equal(f.clock.Add(wait)) {
+			t.Fatalf("attempt %d: %+v, next try at %s", attempt+1, waiting, f.repo.RetryAt(10))
+		}
+		tried := len(f.tool.Inspected)
+		*f.clock = f.clock.Add(wait - time.Minute)
+		if err := f.service.ScanPending(ctx); err != nil || len(f.tool.Inspected) != tried {
+			t.Fatalf("attempt %d: the file is left alone until its next try: %v", attempt+1, err)
+		}
+		*f.clock = f.clock.Add(time.Minute)
+	}
+	if len(f.events.Messages()) != 0 || len(f.mailer.Stalled) != 0 {
+		t.Fatalf("nobody is told while the check is still retried: %+v", f.events.Messages())
+	}
+	if err := f.service.ScanPending(ctx); err == nil {
+		t.Fatal("expected the last failure")
+	}
+	stalled, _ := f.repo.File(1)
+	if stalled.CheckStatus != download.CheckStalled || stalled.CheckFailures != 6 || stalled.StalledAt == nil || !stalled.StalledAt.Equal(*f.clock) {
+		t.Fatalf("after the last try the check waits for a person: %+v", stalled)
+	}
+	if reason := f.repo.CheckError(1); !strings.Contains(reason, "cannot be saved") || !utf8.ValidString(reason) {
+		t.Fatalf("the last error is kept as text: %q", reason)
+	}
+	messages := f.events.Messages()
+	if len(messages) != 2 || messages[0].ReceiverID != 9 || messages[0].Title != "Messages.System.File.Upload.FileCheckStalledTitle" || messages[1].ReceiverID != 50 || messages[1].Title != "Messages.System.File.Upload.FileCheckStalledAdminTitle" {
+		t.Fatalf("the uploader and the admins are told: %+v", messages)
+	}
+	told := decodeMeta(t, messages[1])
+	if told["failures"] != float64(6) || told["uploader_name"] != "kotori" || !strings.Contains(told["last_error"].(string), "cannot be saved") || *messages[1].LinkURL != "/resource/10" {
+		t.Fatalf("unexpected admin message %+v", told)
+	}
+	deadline := f.clock.Add(7 * 24 * time.Hour)
+	if len(f.mailer.Stalled) != 1 || f.mailer.Stalled[0].Failures != 6 || !f.mailer.Stalled[0].Deadline.Equal(deadline) || f.mailer.Stalled[0].ResourceURL != "https://shionlib.example/resource/10" || !slices.Equal(f.mailer.Recipients[0], []string{"root@example.test"}) {
+		t.Fatalf("unexpected mail %+v to %v", f.mailer.Stalled, f.mailer.Recipients)
+	}
+	tried := len(f.tool.Inspected)
+	*f.clock = f.clock.Add(48 * time.Hour)
+	if err := f.service.ScanPending(ctx); err != nil || len(f.tool.Inspected) != tried || len(f.events.Messages()) != 2 {
+		t.Fatalf("a stalled check is not tried again by itself: %v", err)
+	}
+}
+
+func TestAWorkerThatStopsDoesNotCountAgainstTheFile(t *testing.T) {
+	f := newFixture(true)
+	f.repo.SeedFile(pending(1, "/spool/1.part"))
+	f.tool.Listings["/spool/1.part"] = listing("7z", "", file("game.exe", 4))
+	ctx, stop := context.WithCancel(context.Background())
+	f.tool.OnList = stop
+	if err := f.service.ScanPending(ctx); !errors.Is(err, context.Canceled) {
+		t.Fatalf("unexpected result %v", err)
+	}
+	if waiting, _ := f.repo.File(1); waiting.CheckFailures != 0 || !f.repo.RetryAt(10).IsZero() {
+		t.Fatalf("a check cut short by a shutdown is simply tried again: %+v, next try at %s", waiting, f.repo.RetryAt(10))
+	}
+}
+
+func TestACheckThatRunsOutOfTimeCountsAsAFailure(t *testing.T) {
+	f := newFixture(true)
+	f.repo.SeedFile(pending(1, "/spool/1.part"))
+	f.repo.SeedFile(pending(2, "/spool/2.part"))
+	for _, path := range []string{"/spool/1.part", "/spool/2.part"} {
+		f.tool.Listings[path] = listing("7z", "", file("game.exe", 4))
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer cancel()
+	f.tool.OnList = func() { <-ctx.Done() }
+	if err := f.service.ScanPending(ctx); !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("unexpected result %v", err)
+	}
+	if slow, _ := f.repo.File(1); slow.CheckFailures != 1 || !f.repo.RetryAt(10).Equal(f.clock.Add(30*time.Minute)) {
+		t.Fatalf("a check that outlasts the run would otherwise be tried for ever: %+v", slow)
+	}
+	if next, _ := f.repo.File(2); next.CheckFailures != 0 || !f.repo.RetryAt(20).IsZero() {
+		t.Fatalf("the files the run never reached are not blamed: %+v", next)
 	}
 }
 

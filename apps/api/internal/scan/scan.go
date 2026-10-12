@@ -37,8 +37,12 @@ const (
 const (
 	Detector          = "clamscan"
 	expiredCaseBatch  = 20
+	stalledCheckBatch = 50
 	checkRetryDelay   = 30 * time.Minute
+	checkRetryLimit   = 8 * time.Hour
+	checkReasonLimit  = 2000
 	adminReviewPrefix = "/admin/malware-scans?id="
+	resourcePagePath  = "/resource/%d"
 )
 
 var SortFields = []string{"id", "created", "updated", "reviewed_at", "review_deadline"}
@@ -58,6 +62,8 @@ type PendingFile struct {
 	StorageKey      string
 	UploadSessionID *int
 	InspectionID    *int
+	CheckFailures   int
+	StalledAt       *time.Time
 	CreatorID       int
 	Created         time.Time
 }

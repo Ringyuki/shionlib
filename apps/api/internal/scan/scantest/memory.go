@@ -22,6 +22,7 @@ type MemoryRepository struct {
 	files     map[int]scan.PendingFile
 	resources map[int]bool
 	retryAt   map[int]time.Time
+	reasons   map[int]string
 	cases     map[int]scan.Case
 	nextCase  int
 	Strikes   map[int]int
@@ -34,6 +35,8 @@ type MemoryRepository struct {
 	Cleared   []ClearedReview
 	Digests   map[int]string
 	Downloads map[int]int
+
+	FailureErr error
 }
 
 type ClearedReview struct {
@@ -48,6 +51,7 @@ func NewMemoryRepository(now func() time.Time) *MemoryRepository {
 		files:     map[int]scan.PendingFile{},
 		resources: map[int]bool{},
 		retryAt:   map[int]time.Time{},
+		reasons:   map[int]string{},
 		cases:     map[int]scan.Case{},
 		Strikes:   map[int]int{},
 		Names:     map[int]string{},
@@ -140,6 +144,61 @@ func (r *MemoryRepository) DelayCheck(_ context.Context, resourceID int, until t
 	defer r.mu.Unlock()
 	r.retryAt[resourceID] = until
 	return nil
+}
+
+func (r *MemoryRepository) CheckError(fileID int) string {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.reasons[fileID]
+}
+
+func (r *MemoryRepository) RecordCheckFailure(_ context.Context, fileID int, failure scan.CheckFailure) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.FailureErr != nil {
+		return r.FailureErr
+	}
+	file := r.files[fileID]
+	file.CheckFailures = failure.Failures
+	if failure.StalledAt != nil {
+		file.CheckStatus = download.CheckStalled
+		file.StalledAt = failure.StalledAt
+	}
+	r.files[fileID] = file
+	r.reasons[fileID] = failure.Reason
+	return nil
+}
+
+func (r *MemoryRepository) ResumeCheck(_ context.Context, fileID int) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	file := r.files[fileID]
+	file.CheckStatus = download.CheckPending
+	file.CheckFailures = 0
+	file.StalledAt = nil
+	r.files[fileID] = file
+	delete(r.reasons, fileID)
+	return nil
+}
+
+func (r *MemoryRepository) StalledFiles(_ context.Context, since *time.Time, limit int) ([]scan.PendingFile, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var out []scan.PendingFile
+	for _, file := range r.files {
+		if file.Type != download.FileTypeObjectStore || file.Status != download.FileOnServer || file.CheckStatus != download.CheckStalled {
+			continue
+		}
+		if since != nil && (file.StalledAt == nil || file.StalledAt.After(*since)) {
+			continue
+		}
+		out = append(out, file)
+	}
+	slices.SortFunc(out, func(a, b scan.PendingFile) int { return a.ID - b.ID })
+	if limit > 0 && len(out) > limit {
+		out = out[:limit]
+	}
+	return out, nil
 }
 
 func (r *MemoryRepository) LockFile(_ context.Context, fileID int) (scan.PendingFile, bool, error) {
@@ -361,10 +420,17 @@ type ArchiveTool struct {
 	Inspected  []string
 	Extracted  []string
 	Selections []scan.Selection
+	OnList     func()
 }
 
-func (a *ArchiveTool) List(_ context.Context, path string) (scan.ToolRun, error) {
+func (a *ArchiveTool) List(ctx context.Context, path string) (scan.ToolRun, error) {
 	a.Inspected = append(a.Inspected, path)
+	if a.OnList != nil {
+		a.OnList()
+	}
+	if err := ctx.Err(); err != nil {
+		return scan.ToolRun{}, err
+	}
 	return a.Listings[path], nil
 }
 
@@ -533,6 +599,13 @@ func (b *Banner) Ban(_ context.Context, userID int, bannedBy *int, reason string
 type Mailer struct {
 	Recipients [][]string
 	Alerts     []scan.MalwareAlert
+	Stalled    []scan.StalledAlert
+}
+
+func (m *Mailer) CheckStalled(_ context.Context, recipients []string, alert scan.StalledAlert) error {
+	m.Recipients = append(m.Recipients, recipients)
+	m.Stalled = append(m.Stalled, alert)
+	return nil
 }
 
 func (m *Mailer) MalwareDetected(_ context.Context, recipients []string, alert scan.MalwareAlert) error {

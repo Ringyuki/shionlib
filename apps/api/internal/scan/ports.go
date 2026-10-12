@@ -15,6 +15,9 @@ type Repository interface {
 	PendingResources(ctx context.Context, now time.Time) ([]int, error)
 	NextUninspected(ctx context.Context, skip []int) (int, bool, error)
 	DelayCheck(ctx context.Context, resourceID int, until time.Time) error
+	RecordCheckFailure(ctx context.Context, fileID int, failure CheckFailure) error
+	ResumeCheck(ctx context.Context, fileID int) error
+	StalledFiles(ctx context.Context, since *time.Time, limit int) ([]PendingFile, error)
 	ResourceFiles(ctx context.Context, resourceID int) ([]PendingFile, error)
 	LockFile(ctx context.Context, fileID int) (PendingFile, bool, error)
 	SetCheckStatus(ctx context.Context, fileID int, status download.CheckStatus, falsePositive bool) error
@@ -95,6 +98,7 @@ type Banner interface {
 
 type AdminMailer interface {
 	MalwareDetected(ctx context.Context, recipients []string, alert MalwareAlert) error
+	CheckStalled(ctx context.Context, recipients []string, alert StalledAlert) error
 }
 
 type Queue interface {

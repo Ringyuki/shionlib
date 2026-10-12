@@ -45,6 +45,12 @@ type GameDownloadResourceFile struct {
 	FileStatus int `json:"file_status,omitempty"`
 	// FileCheckStatus holds the value of the "file_check_status" field.
 	FileCheckStatus int `json:"file_check_status,omitempty"`
+	// CheckFailures holds the value of the "check_failures" field.
+	CheckFailures int `json:"check_failures,omitempty"`
+	// CheckError holds the value of the "check_error" field.
+	CheckError *string `json:"check_error,omitempty"`
+	// CheckStalledAt holds the value of the "check_stalled_at" field.
+	CheckStalledAt *time.Time `json:"check_stalled_at,omitempty"`
 	// IsVirusFalsePositive holds the value of the "is_virus_false_positive" field.
 	IsVirusFalsePositive bool `json:"is_virus_false_positive,omitempty"`
 	// FileSha256 holds the value of the "file_sha256" field.
@@ -164,11 +170,11 @@ func (*GameDownloadResourceFile) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case gamedownloadresourcefile.FieldIsVirusFalsePositive:
 			values[i] = new(sql.NullBool)
-		case gamedownloadresourcefile.FieldID, gamedownloadresourcefile.FieldType, gamedownloadresourcefile.FieldFileSize, gamedownloadresourcefile.FieldUploadSessionID, gamedownloadresourcefile.FieldFileStatus, gamedownloadresourcefile.FieldFileCheckStatus, gamedownloadresourcefile.FieldInspectionID, gamedownloadresourcefile.FieldGameDownloadResourceID, gamedownloadresourcefile.FieldCreatorID:
+		case gamedownloadresourcefile.FieldID, gamedownloadresourcefile.FieldType, gamedownloadresourcefile.FieldFileSize, gamedownloadresourcefile.FieldUploadSessionID, gamedownloadresourcefile.FieldFileStatus, gamedownloadresourcefile.FieldFileCheckStatus, gamedownloadresourcefile.FieldCheckFailures, gamedownloadresourcefile.FieldInspectionID, gamedownloadresourcefile.FieldGameDownloadResourceID, gamedownloadresourcefile.FieldCreatorID:
 			values[i] = new(sql.NullInt64)
-		case gamedownloadresourcefile.FieldFileName, gamedownloadresourcefile.FieldFilePath, gamedownloadresourcefile.FieldFileURL, gamedownloadresourcefile.FieldS3FileKey, gamedownloadresourcefile.FieldFileContentType, gamedownloadresourcefile.FieldHashAlgorithm, gamedownloadresourcefile.FieldFileHash, gamedownloadresourcefile.FieldFileSha256:
+		case gamedownloadresourcefile.FieldFileName, gamedownloadresourcefile.FieldFilePath, gamedownloadresourcefile.FieldFileURL, gamedownloadresourcefile.FieldS3FileKey, gamedownloadresourcefile.FieldFileContentType, gamedownloadresourcefile.FieldHashAlgorithm, gamedownloadresourcefile.FieldFileHash, gamedownloadresourcefile.FieldCheckError, gamedownloadresourcefile.FieldFileSha256:
 			values[i] = new(sql.NullString)
-		case gamedownloadresourcefile.FieldCreated, gamedownloadresourcefile.FieldUpdated:
+		case gamedownloadresourcefile.FieldCheckStalledAt, gamedownloadresourcefile.FieldCreated, gamedownloadresourcefile.FieldUpdated:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -267,6 +273,26 @@ func (_m *GameDownloadResourceFile) assignValues(columns []string, values []any)
 				return fmt.Errorf("unexpected type %T for field file_check_status", values[i])
 			} else if value.Valid {
 				_m.FileCheckStatus = int(value.Int64)
+			}
+		case gamedownloadresourcefile.FieldCheckFailures:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field check_failures", values[i])
+			} else if value.Valid {
+				_m.CheckFailures = int(value.Int64)
+			}
+		case gamedownloadresourcefile.FieldCheckError:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field check_error", values[i])
+			} else if value.Valid {
+				_m.CheckError = new(string)
+				*_m.CheckError = value.String
+			}
+		case gamedownloadresourcefile.FieldCheckStalledAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field check_stalled_at", values[i])
+			} else if value.Valid {
+				_m.CheckStalledAt = new(time.Time)
+				*_m.CheckStalledAt = value.Time
 			}
 		case gamedownloadresourcefile.FieldIsVirusFalsePositive:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -428,6 +454,19 @@ func (_m *GameDownloadResourceFile) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("file_check_status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.FileCheckStatus))
+	builder.WriteString(", ")
+	builder.WriteString("check_failures=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CheckFailures))
+	builder.WriteString(", ")
+	if v := _m.CheckError; v != nil {
+		builder.WriteString("check_error=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.CheckStalledAt; v != nil {
+		builder.WriteString("check_stalled_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("is_virus_false_positive=")
 	builder.WriteString(fmt.Sprintf("%v", _m.IsVirusFalsePositive))

@@ -29,6 +29,12 @@
     "REVIEW_MALWARE_CASE": "Review Malware Case",
     "MALWARE_SCAN_NOTIFICATION_SUBJECT": "Shionlib Malware Scan Review Required",
     "MALWARE_SCAN_NOTIFICATION_INTRO": "A file was flagged by malware scan and is waiting for your review:",
+    "CHECK_STALLED_NOTIFICATION_SUBJECT": "Shionlib File Check Paused",
+    "CHECK_STALLED_NOTIFICATION_INTRO": "The check of a file kept failing and has been paused. It is waiting for you:",
+    "FAILED_CHECKS": "Failed Checks",
+    "LAST_ERROR": "Last Error",
+    "REMOVAL_DEADLINE": "Kept Until",
+    "VIEW_RESOURCE": "View Resource",
     "REPORT_NOTIFICATION_FOOTER": "This email was sent automatically by the system. Please do not reply directly."
   },
   "report": {

@@ -23,6 +23,11 @@
         "ResourceLinkText": "リソースを見る",
         "FileUploadFailedTitle": "ファイルが検査を通過しませんでした",
         "FileCheckFailedContent": "アップロードしたファイル {file_name} は検査を通過しませんでした：{reason}。{missing_volumes, select, none {} other {不足している分割ファイル：{missing_volumes}。}}ファイルを確認して、もう一度アップロードしてください。",
+        "FileCheckStalledTitle": "ファイルの検査を完了できませんでした",
+        "FileCheckStalledContent": "アップロードしたファイル {file_name} の検査が繰り返し失敗したため、管理者に引き継ぎました。現時点で操作は不要です。",
+        "FileCheckStalledAdminTitle": "検査が停止したファイルがあります",
+        "FileCheckStalledAdminContent": "{uploader_name} がアップロードしたファイル {file_name} の検査が {failures} 回連続で失敗したため、再試行を停止しました。直近のエラー：{last_error}。{review_deadline} までに対応してください。期限を過ぎるとファイルは削除されます。",
+        "FileCheckStalledAdminLinkText": "リソースを表示",
         "FileVirusReviewPendingTitle": "ファイルが審査待ちです",
         "FileVirusReviewPendingContent": "アップロードしたファイル {file_name} がウイルス検査で検出され（{detected_viruses}）、管理者による審査に回されました（ケース #{malware_case_id}）。{review_deadline} までに完了します。",
         "FileVirusReviewRequiredTitle": "ウイルス審査待ちのファイルがあります",
@@ -91,6 +96,7 @@
       "BROKEN_OR_UNSUPPORTED": "ファイルが破損しているか、対応していない形式です",
       "ENCRYPTED": "アーカイブが暗号化されていて検査できません",
       "INCOMPLETE_SET": "分割ファイルが揃っていません",
+      "ABANDONED": "ファイルの検査を完了できませんでした",
       "HARMFUL": "有害な内容が検出されました"
     }
   }

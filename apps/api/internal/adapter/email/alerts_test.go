@@ -68,3 +68,27 @@ func TestMalwareAlertMatchesTheLegacyTemplate(t *testing.T) {
 		t.Fatalf("an empty virus list renders a dash: %v", err)
 	}
 }
+
+func TestCheckStalledTellsAdminsWhatFailedAndUntilWhen(t *testing.T) {
+	catalog, err := i18n.Load(i18n.LocaleEN)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sent := &recorder{}
+	mailer := NewMailer(sent, catalog)
+	ctx := i18n.WithLocale(context.Background(), i18n.LocaleEN)
+	deadline := time.Date(2026, 10, 19, 1, 2, 3, 0, time.UTC)
+	alert := scan.StalledAlert{FileName: "a.7z", UploaderName: "carol", GameTitle: "Game", Failures: 6, Reason: "extract <b>executables</b>: exit status 2", Deadline: deadline, ResourceURL: "https://shionlib.com/resource/7"}
+	if err := mailer.CheckStalled(ctx, []string{"a@example.test", ""}, alert); err != nil {
+		t.Fatal(err)
+	}
+	mail := sent.messages[0]
+	if mail.Subject != "Shionlib File Check Paused" || len(mail.To) != 1 {
+		t.Fatalf("unexpected mail %+v", mail)
+	}
+	for _, want := range []string{"a.7z", "carol", "Game", ">6<", "extract &lt;b&gt;executables&lt;/b&gt;: exit status 2", "2026-10-19T01:02:03Z", "https://shionlib.com/resource/7", "View Resource"} {
+		if !strings.Contains(mail.HTML, want) {
+			t.Fatalf("stalled check mail misses %q:\n%s", want, mail.HTML)
+		}
+	}
+}

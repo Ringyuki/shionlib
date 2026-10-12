@@ -101,6 +101,64 @@ func (r *Repository) DelayCheck(ctx context.Context, resourceID int, until time.
 	return nil
 }
 
+func (r *Repository) RecordCheckFailure(ctx context.Context, fileID int, failure scan.CheckFailure) error {
+	update := r.db(ctx).GameDownloadResourceFile.UpdateOneID(fileID).
+		SetCheckFailures(failure.Failures).
+		SetCheckError(failure.Reason)
+	if failure.StalledAt != nil {
+		update.SetFileCheckStatus(int(download.CheckStalled)).SetCheckStalledAt(failure.StalledAt.UTC())
+	}
+	err := update.Exec(ctx)
+	if postgres.IsNotFound(err) {
+		return download.ErrFileNotFound
+	}
+	if err != nil {
+		return fmt.Errorf("record the failed check of file %d: %w", fileID, err)
+	}
+	return nil
+}
+
+func (r *Repository) ResumeCheck(ctx context.Context, fileID int) error {
+	err := r.db(ctx).GameDownloadResourceFile.UpdateOneID(fileID).
+		SetFileCheckStatus(int(download.CheckPending)).
+		SetCheckFailures(0).
+		ClearCheckError().
+		ClearCheckStalledAt().
+		Exec(ctx)
+	if postgres.IsNotFound(err) {
+		return download.ErrFileNotFound
+	}
+	if err != nil {
+		return fmt.Errorf("resume the check of file %d: %w", fileID, err)
+	}
+	return nil
+}
+
+func (r *Repository) StalledFiles(ctx context.Context, since *time.Time, limit int) ([]scan.PendingFile, error) {
+	query := r.pendingQuery(ctx).
+		Where(
+			gamedownloadresourcefile.Type(download.FileTypeObjectStore),
+			gamedownloadresourcefile.FileStatus(download.FileOnServer),
+			gamedownloadresourcefile.FileCheckStatus(int(download.CheckStalled)),
+		).
+		Order(ent.Asc(gamedownloadresourcefile.FieldID))
+	if since != nil {
+		query.Where(gamedownloadresourcefile.CheckStalledAtLTE(since.UTC()))
+	}
+	if limit > 0 {
+		query.Limit(limit)
+	}
+	rows, err := query.All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list files whose check stalled: %w", err)
+	}
+	files := make([]scan.PendingFile, len(rows))
+	for i, row := range rows {
+		files[i] = toPendingFile(row)
+	}
+	return files, nil
+}
+
 func (r *Repository) ResourceFiles(ctx context.Context, resourceID int) ([]scan.PendingFile, error) {
 	rows, err := r.pendingQuery(ctx).
 		Where(gamedownloadresourcefile.GameDownloadResourceID(resourceID)).

@@ -150,6 +150,8 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		Now: shared.Now,
 	})
 
+	stalled := scan.NewStalledService(scans)
+	modules.Stalled = stalled
 	modules.Backfill = scan.NewBackfillService(scans, objectstore.New(objectstore.Options{
 		Bucket:          cfg.Storage.Game.Bucket,
 		Region:          cfg.Storage.Game.Region,
@@ -185,6 +187,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 	modules.Jobs.Tasks = append(modules.Jobs.Tasks,
 		jobs.Task{Name: "file_scan_pending", Schedule: everyMinute, Timeout: scanTaskTimeout, Run: scans.ScanPending},
 		jobs.Task{Name: "malware_case_timeout", Schedule: everyMinute, Timeout: shortTaskTimeout, Run: scans.ExpireOverdue},
+		jobs.Task{Name: "file_check_abandon", Schedule: everyTenMinutes, Timeout: shortTaskTimeout, Run: stalled.Abandon},
 		jobs.Task{Name: "inspection_sweep", Schedule: everyTenMinutes, Timeout: shortTaskTimeout, Run: inspectionRecords.Sweep},
 		jobs.Task{Name: "upload_session_cleanup", Schedule: everyMinute, Timeout: shortTaskTimeout, Run: func(ctx context.Context) error {
 			if err := uploads.CleanStaleSessions(ctx); err != nil {

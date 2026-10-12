@@ -49,6 +49,7 @@ type Modules struct {
 	Handlers        []Registrar
 	Jobs            Jobs
 	Backfill        *scan.BackfillService
+	Stalled         *scan.StalledService
 }
 
 type Shared struct {

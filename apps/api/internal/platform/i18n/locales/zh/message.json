@@ -29,6 +29,12 @@
     "REVIEW_MALWARE_CASE": "审核报毒记录",
     "MALWARE_SCAN_NOTIFICATION_SUBJECT": "Shionlib 报毒审核通知",
     "MALWARE_SCAN_NOTIFICATION_INTRO": "有文件被病毒扫描标记，等待你审核：",
+    "CHECK_STALLED_NOTIFICATION_SUBJECT": "Shionlib 文件检查暂停通知",
+    "CHECK_STALLED_NOTIFICATION_INTRO": "有文件的检查连续失败，已暂停重试，等待你处理：",
+    "FAILED_CHECKS": "失败次数",
+    "LAST_ERROR": "最近一次的错误",
+    "REMOVAL_DEADLINE": "保留期限",
+    "VIEW_RESOURCE": "查看资源",
     "REPORT_NOTIFICATION_FOOTER": "此邮件由系统自动发送，请勿直接回复。"
   },
   "report": {

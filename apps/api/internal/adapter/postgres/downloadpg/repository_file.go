@@ -120,6 +120,9 @@ func (r *Repository) ReplaceFileContent(ctx context.Context, id int, content dow
 		SetHashAlgorithm(gamedownloadresourcefile.HashAlgorithm(content.HashAlgorithm)).
 		SetFileStatus(download.FileOnServer).
 		SetFileCheckStatus(int(download.CheckPending)).
+		SetCheckFailures(0).
+		ClearCheckError().
+		ClearCheckStalledAt().
 		SetIsVirusFalsePositive(false).
 		ClearS3FileKey().
 		ClearFileSha256().
@@ -240,6 +243,7 @@ func (r *Repository) ListRejected(ctx context.Context, limit int) ([]download.Fi
 				int(download.CheckEncrypted),
 				int(download.CheckHarmful),
 				int(download.CheckIncompleteSet),
+				int(download.CheckAbandoned),
 			),
 		).
 		Order(ent.Asc(gamedownloadresourcefile.FieldID)).

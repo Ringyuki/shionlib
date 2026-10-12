@@ -16,6 +16,11 @@ func TestUnknownCommandsFail(t *testing.T) {
 	if err := run(t.Context(), []string{"search", "drop"}); err == nil {
 		t.Fatal("search needs the reindex subcommand")
 	}
+	for _, id := range []string{"all", "0", "-3"} {
+		if err := run(t.Context(), []string{"recheck", "12", id}); err == nil || !strings.Contains(err.Error(), "ids of files") {
+			t.Fatalf("recheck %s: %v", id, err)
+		}
+	}
 	for _, limit := range []string{"all", "0", "-3"} {
 		if err := run(t.Context(), []string{"inspect", limit}); err == nil || !strings.Contains(err.Error(), "number of resources") {
 			t.Fatalf("inspect %s: %v", limit, err)

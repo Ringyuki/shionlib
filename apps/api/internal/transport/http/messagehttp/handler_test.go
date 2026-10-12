@@ -220,6 +220,8 @@ func TestMessagesAreWrittenInTheCallersLanguage(t *testing.T) {
 		{Title: "Messages.System.Report.Penalty.Title", Content: "Messages.System.Report.Penalty.Content", Meta: message.Meta{"reason": "MALWARE", "malicious_level": "HIGH", "ban_days": 7, "upload_tier_demoted": true, "process_note": "已核实"}},
 		{Title: "Messages.System.File.Reupload.FileReuploadedTitle", Content: "Messages.System.File.Reupload.FileReuploadedContent", Meta: message.Meta{"file_name": "a.7z", "game_title_jp": "サクラノ詩", "game_title_zh": "", "game_title_en": "Sakura no Uta"}},
 		{Title: "Messages.System.File.Upload.FileUploadFailedTitle", Content: "Messages.System.File.Upload.FileCheckFailedContent", Meta: message.Meta{"file_name": "a.part1.rar", "reason": "INCOMPLETE_SET", "missing_volumes": []string{"a.part2.rar", "a.part3.rar"}}},
+		{Title: "Messages.System.File.Upload.FileCheckStalledAdminTitle", Content: "Messages.System.File.Upload.FileCheckStalledAdminContent", Meta: message.Meta{"file_name": "a.7z", "uploader_name": "kotori", "failures": 6, "last_error": "extract executables: exit status 2", "review_deadline": deadline}},
+		{Title: "Messages.System.File.Upload.FileUploadFailedTitle", Content: "Messages.System.File.Upload.FileCheckFailedContent", Meta: message.Meta{"file_name": "a.7z", "reason": "ABANDONED"}},
 		{Title: "写好的标题", Content: "写好的正文"},
 	} {
 		in.Type, in.Tone, in.ReceiverID = message.TypeSystem, message.ToneInfo, 7
@@ -254,7 +256,9 @@ func TestMessagesAreWrittenInTheCallersLanguage(t *testing.T) {
 		"the game title of the page": {5, "zh", "你收藏的游戏有文件更新", "你收藏的游戏《サクラノ詩》的文件 a.7z 已更新。"},
 		"the title in English":       {5, "en", "A file of a game you favorited was updated", "The file a.7z of Sakura no Uta, a game you favorited, was updated."},
 		"a list of values":           {6, "zh", "文件未通过检查", "你上传的文件 a.part1.rar 未通过检查：分卷不完整。缺少的分卷：a.part2.rar, a.part3.rar。请确认文件后重新上传。"},
-		"text that is already text":  {7, "ja", "写好的标题", "写好的正文"},
+		"an error as it was written": {7, "zh", "有文件的检查已暂停", "kotori 上传的文件 a.7z 连续 6 次检查失败，已暂停重试。最近一次的错误：extract executables: exit status 2。请在 2026-10-09 12:30 前处理，逾期文件将被移除。"},
+		"a check nobody finished":    {8, "zh", "文件未通过检查", "你上传的文件 a.7z 未通过检查：系统未能完成对文件的检查。请确认文件后重新上传。"},
+		"text that is already text":  {9, "ja", "写好的标题", "写好的正文"},
 	} {
 		got := open(tc.id, tc.lang)
 		if got.Title != tc.title || got.Content != tc.content {
@@ -274,7 +278,7 @@ func TestMessagesAreWrittenInTheCallersLanguage(t *testing.T) {
 		} `json:"items"`
 	}
 	list.Decode(t, &page)
-	if len(page.Items) != 7 || page.Items[0].Title != "写好的标题" || page.Items[6].Title != "有新的资源举报" || page.Items[6].Excerpt != "kotori 举报了 mikan 上传的资源。举报原因：链接失效；严重程度：低。" {
+	if len(page.Items) != 9 || page.Items[0].Title != "写好的标题" || page.Items[8].Title != "有新的资源举报" || page.Items[8].Excerpt != "kotori 举报了 mikan 上传的资源。举报原因：链接失效；严重程度：低。" {
 		t.Fatalf("the list is written the same way: %+v", page.Items)
 	}
 }

@@ -517,7 +517,8 @@ func TestRemovedOrReplacedFilesRetireTheirSessions(t *testing.T) {
 	otherSession, _ := attached(other.ID, "other.7z")
 	next := f.session(t, creator, gameuploadsession.StatusCOMPLETED)
 	record := f.db.Ent.Inspection.Create().SetResourceID(resource.ID).SetStatus("ready").SaveX(ctx)
-	f.db.Ent.GameDownloadResourceFile.UpdateOneID(replacedFile).SetInspectionID(record.ID).SetFileSha256("old digest").ExecX(ctx)
+	f.db.Ent.GameDownloadResourceFile.UpdateOneID(replacedFile).SetInspectionID(record.ID).SetFileSha256("old digest").
+		SetCheckFailures(6).SetCheckError("clamd is down").SetCheckStalledAt(time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC)).ExecX(ctx)
 	if read, err := f.repo.GetGameResource(ctx, resource.ID, false); err != nil || read.Files[1].InspectionID == nil || *read.Files[1].InspectionID != record.ID || read.Files[1].SHA256 == nil || *read.Files[1].SHA256 != "old digest" || read.Files[0].InspectionID != nil || read.Files[0].SHA256 != nil {
 		t.Fatalf("a file carries its inspection and digest once it was checked: %+v %v", read.Files, err)
 	}
@@ -531,6 +532,8 @@ func TestRemovedOrReplacedFilesRetireTheirSessions(t *testing.T) {
 	}
 	if row := f.db.Ent.GameDownloadResourceFile.GetX(ctx, replacedFile); row.InspectionID != nil || row.FileSha256 != nil {
 		t.Fatalf("new content has not been inspected yet: %+v", row)
+	} else if row.CheckFailures != 0 || row.CheckError != nil || row.CheckStalledAt != nil {
+		t.Fatalf("new content starts its checks over: %+v", row)
 	}
 	if err := f.repo.DeleteResource(ctx, other.ID); err != nil {
 		t.Fatal(err)
@@ -562,6 +565,12 @@ func TestFileOperations(t *testing.T) {
 	f.file(t, resource.ID, creator, "review.7z", func(c *ent.GameDownloadResourceFileCreate) {
 		c.SetFileStatus(download.FileOnServer).SetFileCheckStatus(int(download.CheckHarmfulPendingReview)).SetFilePath("/spool/review.sltf")
 	})
+	f.file(t, resource.ID, creator, "stalled.7z", func(c *ent.GameDownloadResourceFileCreate) {
+		c.SetFileStatus(download.FileOnServer).SetFileCheckStatus(int(download.CheckStalled)).SetFilePath("/spool/stalled.sltf")
+	})
+	abandoned := f.file(t, resource.ID, creator, "abandoned.7z", func(c *ent.GameDownloadResourceFileCreate) {
+		c.SetFileStatus(download.FileOnServer).SetFileCheckStatus(int(download.CheckAbandoned)).SetFilePath("/spool/abandoned.sltf")
+	})
 	f.file(t, resource.ID, creator, "link", func(c *ent.GameDownloadResourceFileCreate) {
 		c.SetType(download.FileTypeDirectLink).SetFilePath("/spool/link.sltf")
 	})
@@ -575,8 +584,8 @@ func TestFileOperations(t *testing.T) {
 		t.Fatalf("local copies of stored files and of removed resources: %+v %v", withCopies, err)
 	}
 	rejectedFiles, err := f.repo.ListRejected(ctx, 10)
-	if err != nil || len(rejectedFiles) != 1 || rejectedFiles[0].ID != rejected.ID || rejectedFiles[0].GameID != gameID {
-		t.Fatalf("rejected files: %+v %v", rejectedFiles, err)
+	if err != nil || len(rejectedFiles) != 2 || rejectedFiles[0].ID != rejected.ID || rejectedFiles[0].GameID != gameID || rejectedFiles[1].ID != abandoned.ID {
+		t.Fatalf("rejected files, a stalled check not among them: %+v %v", rejectedFiles, err)
 	}
 	for _, id := range []int{stored.ID, takenDown.ID} {
 		if err := f.repo.ClearFilePath(ctx, id); err != nil {
@@ -631,7 +640,7 @@ func TestFileOperations(t *testing.T) {
 			t.Fatalf("%s on a missing file: %v", name, err)
 		}
 	}
-	if limited, _ := f.repo.ListFiles(ctx, resource.ID); len(limited) != 4 {
+	if limited, _ := f.repo.ListFiles(ctx, resource.ID); len(limited) != 6 {
 		t.Fatalf("remaining files: %+v", limited)
 	}
 }

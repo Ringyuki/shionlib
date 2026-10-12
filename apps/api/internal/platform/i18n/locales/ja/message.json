@@ -29,6 +29,12 @@
     "REVIEW_MALWARE_CASE": "マルウェア審査を確認",
     "MALWARE_SCAN_NOTIFICATION_SUBJECT": "Shionlib マルウェア審査通知",
     "MALWARE_SCAN_NOTIFICATION_INTRO": "ウイルススキャンで検出されたファイルが審査待ちです：",
+    "CHECK_STALLED_NOTIFICATION_SUBJECT": "Shionlib ファイル検査の停止通知",
+    "CHECK_STALLED_NOTIFICATION_INTRO": "ファイルの検査が繰り返し失敗したため、再試行を停止しました。対応をお願いします：",
+    "FAILED_CHECKS": "失敗回数",
+    "LAST_ERROR": "直近のエラー",
+    "REMOVAL_DEADLINE": "保管期限",
+    "VIEW_RESOURCE": "リソースを表示",
     "REPORT_NOTIFICATION_FOOTER": "このメールはシステムから自動送信されました。直接返信しないでください。"
   },
   "report": {

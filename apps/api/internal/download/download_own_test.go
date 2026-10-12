@@ -21,6 +21,8 @@ func TestFileStage(t *testing.T) {
 		{"held for review although stored", download.File{Type: download.FileTypeObjectStore, Status: download.FileInObjectStore, CheckStatus: download.CheckHarmfulPendingReview}, download.StageUnderReview},
 		{"encrypted", download.File{Type: download.FileTypeObjectStore, Status: download.FileOnServer, CheckStatus: download.CheckEncrypted}, download.StageRejected},
 		{"waited too long for its volumes", download.File{Type: download.FileTypeObjectStore, Status: download.FileOnServer, CheckStatus: download.CheckIncompleteSet}, download.StageRejected},
+		{"a check that kept failing and waits for a person", download.File{Type: download.FileTypeObjectStore, Status: download.FileOnServer, CheckStatus: download.CheckStalled}, download.StageStalled},
+		{"a check nobody got to finish", download.File{Type: download.FileTypeObjectStore, Status: download.FileOnServer, CheckStatus: download.CheckAbandoned}, download.StageRejected},
 		{"a link, which is never processed", download.File{Type: download.FileTypeDirectLink, Status: download.FilePending}, download.StageStored},
 	}
 	for _, c := range cases {
@@ -37,8 +39,9 @@ func TestRejectionNamesEveryRejectedCheck(t *testing.T) {
 		download.CheckEncrypted:           download.RejectionEncrypted,
 		download.CheckHarmful:             download.RejectionHarmful,
 		download.CheckIncompleteSet:       download.RejectionIncompleteSet,
+		download.CheckAbandoned:           download.RejectionAbandoned,
 	}
-	for status := download.CheckPending; status <= download.CheckIncompleteSet; status++ {
+	for status := download.CheckPending; status <= download.CheckAbandoned; status++ {
 		rejection, rejected := status.Rejection()
 		if rejected != status.Rejected() || rejection != want[status] {
 			t.Errorf("check %d: got %q %v, want %q %v", status, rejection, rejected, want[status], status.Rejected())

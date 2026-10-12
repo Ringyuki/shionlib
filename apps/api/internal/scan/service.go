@@ -38,6 +38,8 @@ func checkReason(status download.CheckStatus) string {
 		return "ENCRYPTED"
 	case download.CheckIncompleteSet:
 		return "INCOMPLETE_SET"
+	case download.CheckAbandoned:
+		return "ABANDONED"
 	default:
 		return "HARMFUL"
 	}
@@ -116,23 +118,151 @@ func (s *Service) ScanPending(ctx context.Context) error {
 			return errors.Join(append(errs, err)...)
 		}
 		if err := s.scanResource(ctx, resourceID); err != nil {
-			delayErr := s.repo.DelayCheck(context.WithoutCancel(ctx), resourceID, s.now().Add(checkRetryDelay))
-			errs = append(errs, fmt.Errorf("scan resource %d: %w", resourceID, errors.Join(err, delayErr)))
+			errs = append(errs, fmt.Errorf("scan resource %d: %w", resourceID, err))
 		}
 	}
 	return errors.Join(errs...)
 }
 
 func (s *Service) scanResource(ctx context.Context, resourceID int) error {
+	settled := context.WithoutCancel(ctx)
 	files, err := s.repo.ResourceFiles(ctx, resourceID)
 	if err != nil {
-		return err
+		return errors.Join(err, s.repo.DelayCheck(settled, resourceID, s.now().Add(checkRetryDelay)))
 	}
 	waiting := slices.DeleteFunc(files, func(file PendingFile) bool { return !file.awaitingCheck() })
 	var errs []error
+	var wait time.Duration
 	for _, unit := range Units(waiting) {
-		if err := s.check(ctx, unit); err != nil {
-			errs = append(errs, fmt.Errorf("check %s: %w", strings.Join(unit.Names(), ", "), err))
+		err := s.check(ctx, unit)
+		if err == nil {
+			continue
+		}
+		errs = append(errs, fmt.Errorf("check %s: %w", strings.Join(unit.Names(), ", "), err))
+		if errors.Is(ctx.Err(), context.Canceled) {
+			break
+		}
+		delay, err := s.failed(settled, unit, err)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("note the failed check of %s: %w", strings.Join(unit.Names(), ", "), err))
+		}
+		if delay > 0 && (wait == 0 || delay < wait) {
+			wait = delay
+		}
+		if ctx.Err() != nil {
+			break
+		}
+	}
+	if wait > 0 {
+		errs = append(errs, s.repo.DelayCheck(settled, resourceID, s.now().Add(wait)))
+	}
+	return errors.Join(errs...)
+}
+
+func (s *Service) failed(ctx context.Context, unit Unit, cause error) (time.Duration, error) {
+	reason := failureReason(cause)
+	attempts := CheckAttempts.Read(s.settings)
+	deadline := s.now().Add(StalledCheckTimeout.Read(s.settings))
+	failure := CheckFailure{Reason: reason}
+	err := s.withPending(ctx, unit, func(ctx context.Context, current []PendingFile) error {
+		for _, file := range current {
+			failure.Failures = max(failure.Failures, file.CheckFailures)
+		}
+		failure.Failures++
+		if failure.Failures >= attempts {
+			at := s.now()
+			failure.StalledAt = &at
+		}
+		for _, file := range current {
+			if err := s.repo.RecordCheckFailure(ctx, file.ID, failure); err != nil {
+				return err
+			}
+		}
+		if failure.StalledAt == nil {
+			return nil
+		}
+		entry := unit.Entry()
+		return s.messages.Send(ctx, message.NewMessage{
+			Type:       message.TypeSystem,
+			Tone:       message.ToneWarning,
+			Title:      "Messages.System.File.Upload.FileCheckStalledTitle",
+			Content:    "Messages.System.File.Upload.FileCheckStalledContent",
+			GameID:     &entry.GameID,
+			Meta:       message.Meta{"file_id": entry.ID, "file_name": strings.Join(unit.Names(), ", "), "file_names": unit.Names()},
+			ReceiverID: entry.CreatorID,
+		})
+	})
+	switch {
+	case err != nil:
+		return checkRetryDelay, err
+	case failure.Failures == 0:
+		return 0, nil
+	case failure.StalledAt == nil:
+		return retryDelay(failure.Failures), nil
+	default:
+		return 0, s.alertStalled(ctx, unit, failure, deadline)
+	}
+}
+
+func (s *Service) alertStalled(ctx context.Context, unit Unit, failure CheckFailure, deadline time.Time) error {
+	admins, err := s.repo.ActiveAdmins(ctx)
+	if err != nil || len(admins) == 0 {
+		return err
+	}
+	entry := unit.Entry()
+	uploaderName, found, err := s.repo.UserName(ctx, entry.CreatorID)
+	if err != nil {
+		return err
+	}
+	if !found {
+		uploaderName = "User#" + strconv.Itoa(entry.CreatorID)
+	}
+	name := strings.Join(unit.Names(), ", ")
+	resourcePath := fmt.Sprintf(resourcePagePath, entry.ResourceID)
+	linkText := "Messages.System.File.Upload.FileCheckStalledAdminLinkText"
+	meta := message.Meta{
+		"file_id":         entry.ID,
+		"file_name":       name,
+		"uploader_name":   uploaderName,
+		"failures":        failure.Failures,
+		"last_error":      failure.Reason,
+		"review_deadline": deadline,
+	}
+	var errs []error
+	var recipients []string
+	for _, admin := range admins {
+		if err := s.messages.Send(ctx, message.NewMessage{
+			Type:       message.TypeSystem,
+			Tone:       message.ToneWarning,
+			Title:      "Messages.System.File.Upload.FileCheckStalledAdminTitle",
+			Content:    "Messages.System.File.Upload.FileCheckStalledAdminContent",
+			LinkText:   &linkText,
+			LinkURL:    &resourcePath,
+			GameID:     &entry.GameID,
+			Meta:       meta,
+			ReceiverID: admin.ID,
+		}); err != nil {
+			errs = append(errs, err)
+		}
+		if admin.Email != "" {
+			recipients = append(recipients, admin.Email)
+		}
+	}
+	if s.mailer != nil && len(recipients) > 0 {
+		titles, _, err := s.repo.GameTitles(ctx, entry.GameID)
+		if err != nil {
+			errs = append(errs, err)
+		}
+		if err := s.mailer.CheckStalled(ctx, recipients, StalledAlert{
+			FileName:     name,
+			UploaderName: uploaderName,
+			GameTitle:    titles.Display(),
+			Failures:     failure.Failures,
+			Reason:       failure.Reason,
+			Deadline:     deadline,
+			ResourceURL:  strings.TrimSuffix(s.options.SiteURL, "/") + resourcePath,
+		}); err != nil {
+			errs = append(errs, err)
 		}
 	}
 	return errors.Join(errs...)
@@ -356,7 +486,11 @@ func (s *Service) withUnchanged(ctx context.Context, unit Unit, unchanged func(n
 }
 
 func (s *Service) reject(ctx context.Context, unit Unit, status download.CheckStatus) error {
-	return s.withPending(ctx, unit, func(ctx context.Context, current []PendingFile) error {
+	return s.rejectWhen(ctx, unit, status, awaitingSameUpload)
+}
+
+func (s *Service) rejectWhen(ctx context.Context, unit Unit, status download.CheckStatus, unchanged func(now, seen PendingFile) bool) error {
+	return s.withUnchanged(ctx, unit, unchanged, func(ctx context.Context, current []PendingFile) error {
 		var size int64
 		for _, file := range current {
 			if err := s.repo.SetCheckStatus(ctx, file.ID, status, false); err != nil {
@@ -395,7 +529,7 @@ func rejectionActivity(status download.CheckStatus) activity.Type {
 	switch status {
 	case download.CheckBrokenOrTruncated, download.CheckIncompleteSet:
 		return activity.TypeFileCheckBrokenOrTruncated
-	case download.CheckBrokenOrUnsupported:
+	case download.CheckBrokenOrUnsupported, download.CheckAbandoned:
 		return activity.TypeFileCheckBrokenOrUnsupported
 	default:
 		return activity.TypeFileCheckEncrypted

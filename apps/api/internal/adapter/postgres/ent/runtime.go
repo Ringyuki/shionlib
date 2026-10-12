@@ -854,16 +854,20 @@ func init() {
 	gamedownloadresourcefileDescFileCheckStatus := gamedownloadresourcefileFields[12].Descriptor()
 	// gamedownloadresourcefile.DefaultFileCheckStatus holds the default value on creation for the file_check_status field.
 	gamedownloadresourcefile.DefaultFileCheckStatus = gamedownloadresourcefileDescFileCheckStatus.Default.(int)
+	// gamedownloadresourcefileDescCheckFailures is the schema descriptor for check_failures field.
+	gamedownloadresourcefileDescCheckFailures := gamedownloadresourcefileFields[13].Descriptor()
+	// gamedownloadresourcefile.DefaultCheckFailures holds the default value on creation for the check_failures field.
+	gamedownloadresourcefile.DefaultCheckFailures = gamedownloadresourcefileDescCheckFailures.Default.(int)
 	// gamedownloadresourcefileDescIsVirusFalsePositive is the schema descriptor for is_virus_false_positive field.
-	gamedownloadresourcefileDescIsVirusFalsePositive := gamedownloadresourcefileFields[13].Descriptor()
+	gamedownloadresourcefileDescIsVirusFalsePositive := gamedownloadresourcefileFields[16].Descriptor()
 	// gamedownloadresourcefile.DefaultIsVirusFalsePositive holds the default value on creation for the is_virus_false_positive field.
 	gamedownloadresourcefile.DefaultIsVirusFalsePositive = gamedownloadresourcefileDescIsVirusFalsePositive.Default.(bool)
 	// gamedownloadresourcefileDescCreated is the schema descriptor for created field.
-	gamedownloadresourcefileDescCreated := gamedownloadresourcefileFields[18].Descriptor()
+	gamedownloadresourcefileDescCreated := gamedownloadresourcefileFields[21].Descriptor()
 	// gamedownloadresourcefile.DefaultCreated holds the default value on creation for the created field.
 	gamedownloadresourcefile.DefaultCreated = gamedownloadresourcefileDescCreated.Default.(func() time.Time)
 	// gamedownloadresourcefileDescUpdated is the schema descriptor for updated field.
-	gamedownloadresourcefileDescUpdated := gamedownloadresourcefileFields[19].Descriptor()
+	gamedownloadresourcefileDescUpdated := gamedownloadresourcefileFields[22].Descriptor()
 	// gamedownloadresourcefile.DefaultUpdated holds the default value on creation for the updated field.
 	gamedownloadresourcefile.DefaultUpdated = gamedownloadresourcefileDescUpdated.Default.(func() time.Time)
 	// gamedownloadresourcefile.UpdateDefaultUpdated holds the default value on update for the updated field.

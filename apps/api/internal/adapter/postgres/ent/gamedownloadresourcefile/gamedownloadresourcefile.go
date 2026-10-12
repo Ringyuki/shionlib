@@ -39,6 +39,12 @@ const (
 	FieldFileStatus = "file_status"
 	// FieldFileCheckStatus holds the string denoting the file_check_status field in the database.
 	FieldFileCheckStatus = "file_check_status"
+	// FieldCheckFailures holds the string denoting the check_failures field in the database.
+	FieldCheckFailures = "check_failures"
+	// FieldCheckError holds the string denoting the check_error field in the database.
+	FieldCheckError = "check_error"
+	// FieldCheckStalledAt holds the string denoting the check_stalled_at field in the database.
+	FieldCheckStalledAt = "check_stalled_at"
 	// FieldIsVirusFalsePositive holds the string denoting the is_virus_false_positive field in the database.
 	FieldIsVirusFalsePositive = "is_virus_false_positive"
 	// FieldFileSha256 holds the string denoting the file_sha256 field in the database.
@@ -135,6 +141,9 @@ var Columns = []string{
 	FieldUploadSessionID,
 	FieldFileStatus,
 	FieldFileCheckStatus,
+	FieldCheckFailures,
+	FieldCheckError,
+	FieldCheckStalledAt,
 	FieldIsVirusFalsePositive,
 	FieldFileSha256,
 	FieldInspectionID,
@@ -159,6 +168,8 @@ var (
 	DefaultFileStatus int
 	// DefaultFileCheckStatus holds the default value on creation for the "file_check_status" field.
 	DefaultFileCheckStatus int
+	// DefaultCheckFailures holds the default value on creation for the "check_failures" field.
+	DefaultCheckFailures int
 	// DefaultIsVirusFalsePositive holds the default value on creation for the "is_virus_false_positive" field.
 	DefaultIsVirusFalsePositive bool
 	// DefaultCreated holds the default value on creation for the "created" field.
@@ -261,6 +272,21 @@ func ByFileStatus(opts ...sql.OrderTermOption) OrderOption {
 // ByFileCheckStatus orders the results by the file_check_status field.
 func ByFileCheckStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldFileCheckStatus, opts...).ToFunc()
+}
+
+// ByCheckFailures orders the results by the check_failures field.
+func ByCheckFailures(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCheckFailures, opts...).ToFunc()
+}
+
+// ByCheckError orders the results by the check_error field.
+func ByCheckError(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCheckError, opts...).ToFunc()
+}
+
+// ByCheckStalledAt orders the results by the check_stalled_at field.
+func ByCheckStalledAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCheckStalledAt, opts...).ToFunc()
 }
 
 // ByIsVirusFalsePositive orders the results by the is_virus_false_positive field.

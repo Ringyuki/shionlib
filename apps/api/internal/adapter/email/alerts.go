@@ -105,6 +105,46 @@ var malwareTemplate = template.Must(template.New("malware").Parse(`
     </div>
 `))
 
+var stalledTemplate = template.Must(template.New("stalled").Parse(`
+    <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto;">
+      <h2 style="color: #d9534f;">{{.Subject}}</h2>
+      <p>{{.Intro}}</p>
+      <div style="background-color: #f5f5f5; padding: 20px; margin: 20px 0; border-radius: 8px;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; color: #666; width: 180px;">{{.FileLabel}}:</td>
+            <td style="padding: 8px 0; font-weight: bold;">{{.File}}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #666;">{{.UploaderLabel}}:</td>
+            <td style="padding: 8px 0;">{{.Uploader}}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #666;">{{.GameLabel}}:</td>
+            <td style="padding: 8px 0;">{{.Game}}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #666;">{{.FailuresLabel}}:</td>
+            <td style="padding: 8px 0;">{{.Failures}}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #666;">{{.DeadlineLabel}}:</td>
+            <td style="padding: 8px 0;">{{.Deadline}}</td>
+          </tr>
+        </table>
+        <p style="color: #666; margin: 16px 0 8px;">{{.ErrorLabel}}:</p>
+        <pre style="white-space: pre-wrap; word-break: break-all; margin: 0; font-size: 12px;">{{.Error}}</pre>
+      </div>
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="{{.ResourceURL}}"
+           style="background-color: #34a2d5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+          {{.View}}
+        </a>
+      </div>
+      <p style="color: #999; font-size: 12px;">{{.Footer}}</p>
+    </div>
+`))
+
 func (m *Mailer) ReportFiled(ctx context.Context, recipients []string, alert report.ReportAlert) error {
 	t := m.translator(ctx)
 	subject := t("REPORT_NOTIFICATION_SUBJECT", nil)
@@ -164,6 +204,34 @@ func (m *Mailer) MalwareDetected(ctx context.Context, recipients []string, alert
 		"Deadline":      alert.Deadline.UTC().Format(time.RFC3339Nano),
 		"ReviewURL":     alert.ReviewURL,
 		"Review":        t("REVIEW_MALWARE_CASE", nil),
+		"Footer":        t("REPORT_NOTIFICATION_FOOTER", nil),
+	})
+	if err != nil {
+		return err
+	}
+	return m.sendAll(ctx, recipients, subject, html)
+}
+
+func (m *Mailer) CheckStalled(ctx context.Context, recipients []string, alert scan.StalledAlert) error {
+	t := m.translator(ctx)
+	subject := t("CHECK_STALLED_NOTIFICATION_SUBJECT", nil)
+	html, err := render(stalledTemplate, map[string]any{
+		"Subject":       subject,
+		"Intro":         t("CHECK_STALLED_NOTIFICATION_INTRO", nil),
+		"FileLabel":     t("FILE_NAME", nil),
+		"File":          alert.FileName,
+		"UploaderLabel": t("UPLOADER", nil),
+		"Uploader":      alert.UploaderName,
+		"GameLabel":     t("GAME", nil),
+		"Game":          alert.GameTitle,
+		"FailuresLabel": t("FAILED_CHECKS", nil),
+		"Failures":      alert.Failures,
+		"ErrorLabel":    t("LAST_ERROR", nil),
+		"Error":         alert.Reason,
+		"DeadlineLabel": t("REMOVAL_DEADLINE", nil),
+		"Deadline":      alert.Deadline.UTC().Format(time.RFC3339Nano),
+		"ResourceURL":   alert.ResourceURL,
+		"View":          t("VIEW_RESOURCE", nil),
 		"Footer":        t("REPORT_NOTIFICATION_FOOTER", nil),
 	})
 	if err != nil {

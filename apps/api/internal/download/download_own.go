@@ -14,6 +14,7 @@ const (
 	StageStoring     Stage = "storing"
 	StageStored      Stage = "stored"
 	StageUnderReview Stage = "under_review"
+	StageStalled     Stage = "stalled"
 	StageRejected    Stage = "rejected"
 )
 
@@ -25,6 +26,7 @@ const (
 	RejectionEncrypted     Rejection = "encrypted"
 	RejectionHarmful       Rejection = "harmful"
 	RejectionIncompleteSet Rejection = "incomplete_set"
+	RejectionAbandoned     Rejection = "abandoned"
 )
 
 var rejections = map[CheckStatus]Rejection{
@@ -33,6 +35,7 @@ var rejections = map[CheckStatus]Rejection{
 	CheckEncrypted:           RejectionEncrypted,
 	CheckHarmful:             RejectionHarmful,
 	CheckIncompleteSet:       RejectionIncompleteSet,
+	CheckAbandoned:           RejectionAbandoned,
 }
 
 func (c CheckStatus) Rejection() (Rejection, bool) {
@@ -46,6 +49,8 @@ func (f File) Stage() Stage {
 		return StageStored
 	case f.CheckStatus == CheckHarmfulPendingReview:
 		return StageUnderReview
+	case f.CheckStatus == CheckStalled:
+		return StageStalled
 	case f.Status == FileInObjectStore:
 		return StageStored
 	case f.CheckStatus.Rejected():

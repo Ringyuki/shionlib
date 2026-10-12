@@ -165,6 +165,48 @@ func (_c *GameDownloadResourceFileCreate) SetNillableFileCheckStatus(v *int) *Ga
 	return _c
 }
 
+// SetCheckFailures sets the "check_failures" field.
+func (_c *GameDownloadResourceFileCreate) SetCheckFailures(v int) *GameDownloadResourceFileCreate {
+	_c.mutation.SetCheckFailures(v)
+	return _c
+}
+
+// SetNillableCheckFailures sets the "check_failures" field if the given value is not nil.
+func (_c *GameDownloadResourceFileCreate) SetNillableCheckFailures(v *int) *GameDownloadResourceFileCreate {
+	if v != nil {
+		_c.SetCheckFailures(*v)
+	}
+	return _c
+}
+
+// SetCheckError sets the "check_error" field.
+func (_c *GameDownloadResourceFileCreate) SetCheckError(v string) *GameDownloadResourceFileCreate {
+	_c.mutation.SetCheckError(v)
+	return _c
+}
+
+// SetNillableCheckError sets the "check_error" field if the given value is not nil.
+func (_c *GameDownloadResourceFileCreate) SetNillableCheckError(v *string) *GameDownloadResourceFileCreate {
+	if v != nil {
+		_c.SetCheckError(*v)
+	}
+	return _c
+}
+
+// SetCheckStalledAt sets the "check_stalled_at" field.
+func (_c *GameDownloadResourceFileCreate) SetCheckStalledAt(v time.Time) *GameDownloadResourceFileCreate {
+	_c.mutation.SetCheckStalledAt(v)
+	return _c
+}
+
+// SetNillableCheckStalledAt sets the "check_stalled_at" field if the given value is not nil.
+func (_c *GameDownloadResourceFileCreate) SetNillableCheckStalledAt(v *time.Time) *GameDownloadResourceFileCreate {
+	if v != nil {
+		_c.SetCheckStalledAt(*v)
+	}
+	return _c
+}
+
 // SetIsVirusFalsePositive sets the "is_virus_false_positive" field.
 func (_c *GameDownloadResourceFileCreate) SetIsVirusFalsePositive(v bool) *GameDownloadResourceFileCreate {
 	_c.mutation.SetIsVirusFalsePositive(v)
@@ -365,6 +407,10 @@ func (_c *GameDownloadResourceFileCreate) defaults() {
 		v := gamedownloadresourcefile.DefaultFileCheckStatus
 		_c.mutation.SetFileCheckStatus(v)
 	}
+	if _, ok := _c.mutation.CheckFailures(); !ok {
+		v := gamedownloadresourcefile.DefaultCheckFailures
+		_c.mutation.SetCheckFailures(v)
+	}
 	if _, ok := _c.mutation.IsVirusFalsePositive(); !ok {
 		v := gamedownloadresourcefile.DefaultIsVirusFalsePositive
 		_c.mutation.SetIsVirusFalsePositive(v)
@@ -406,6 +452,9 @@ func (_c *GameDownloadResourceFileCreate) check() error {
 	}
 	if _, ok := _c.mutation.FileCheckStatus(); !ok {
 		return &ValidationError{Name: "file_check_status", err: errors.New(`ent: missing required field "GameDownloadResourceFile.file_check_status"`)}
+	}
+	if _, ok := _c.mutation.CheckFailures(); !ok {
+		return &ValidationError{Name: "check_failures", err: errors.New(`ent: missing required field "GameDownloadResourceFile.check_failures"`)}
 	}
 	if _, ok := _c.mutation.IsVirusFalsePositive(); !ok {
 		return &ValidationError{Name: "is_virus_false_positive", err: errors.New(`ent: missing required field "GameDownloadResourceFile.is_virus_false_positive"`)}
@@ -501,6 +550,18 @@ func (_c *GameDownloadResourceFileCreate) createSpec() (*GameDownloadResourceFil
 	if value, ok := _c.mutation.FileCheckStatus(); ok {
 		_spec.SetField(gamedownloadresourcefile.FieldFileCheckStatus, field.TypeInt, value)
 		_node.FileCheckStatus = value
+	}
+	if value, ok := _c.mutation.CheckFailures(); ok {
+		_spec.SetField(gamedownloadresourcefile.FieldCheckFailures, field.TypeInt, value)
+		_node.CheckFailures = value
+	}
+	if value, ok := _c.mutation.CheckError(); ok {
+		_spec.SetField(gamedownloadresourcefile.FieldCheckError, field.TypeString, value)
+		_node.CheckError = &value
+	}
+	if value, ok := _c.mutation.CheckStalledAt(); ok {
+		_spec.SetField(gamedownloadresourcefile.FieldCheckStalledAt, field.TypeTime, value)
+		_node.CheckStalledAt = &value
 	}
 	if value, ok := _c.mutation.IsVirusFalsePositive(); ok {
 		_spec.SetField(gamedownloadresourcefile.FieldIsVirusFalsePositive, field.TypeBool, value)
@@ -884,6 +945,60 @@ func (u *GameDownloadResourceFileUpsert) AddFileCheckStatus(v int) *GameDownload
 	return u
 }
 
+// SetCheckFailures sets the "check_failures" field.
+func (u *GameDownloadResourceFileUpsert) SetCheckFailures(v int) *GameDownloadResourceFileUpsert {
+	u.Set(gamedownloadresourcefile.FieldCheckFailures, v)
+	return u
+}
+
+// UpdateCheckFailures sets the "check_failures" field to the value that was provided on create.
+func (u *GameDownloadResourceFileUpsert) UpdateCheckFailures() *GameDownloadResourceFileUpsert {
+	u.SetExcluded(gamedownloadresourcefile.FieldCheckFailures)
+	return u
+}
+
+// AddCheckFailures adds v to the "check_failures" field.
+func (u *GameDownloadResourceFileUpsert) AddCheckFailures(v int) *GameDownloadResourceFileUpsert {
+	u.Add(gamedownloadresourcefile.FieldCheckFailures, v)
+	return u
+}
+
+// SetCheckError sets the "check_error" field.
+func (u *GameDownloadResourceFileUpsert) SetCheckError(v string) *GameDownloadResourceFileUpsert {
+	u.Set(gamedownloadresourcefile.FieldCheckError, v)
+	return u
+}
+
+// UpdateCheckError sets the "check_error" field to the value that was provided on create.
+func (u *GameDownloadResourceFileUpsert) UpdateCheckError() *GameDownloadResourceFileUpsert {
+	u.SetExcluded(gamedownloadresourcefile.FieldCheckError)
+	return u
+}
+
+// ClearCheckError clears the value of the "check_error" field.
+func (u *GameDownloadResourceFileUpsert) ClearCheckError() *GameDownloadResourceFileUpsert {
+	u.SetNull(gamedownloadresourcefile.FieldCheckError)
+	return u
+}
+
+// SetCheckStalledAt sets the "check_stalled_at" field.
+func (u *GameDownloadResourceFileUpsert) SetCheckStalledAt(v time.Time) *GameDownloadResourceFileUpsert {
+	u.Set(gamedownloadresourcefile.FieldCheckStalledAt, v)
+	return u
+}
+
+// UpdateCheckStalledAt sets the "check_stalled_at" field to the value that was provided on create.
+func (u *GameDownloadResourceFileUpsert) UpdateCheckStalledAt() *GameDownloadResourceFileUpsert {
+	u.SetExcluded(gamedownloadresourcefile.FieldCheckStalledAt)
+	return u
+}
+
+// ClearCheckStalledAt clears the value of the "check_stalled_at" field.
+func (u *GameDownloadResourceFileUpsert) ClearCheckStalledAt() *GameDownloadResourceFileUpsert {
+	u.SetNull(gamedownloadresourcefile.FieldCheckStalledAt)
+	return u
+}
+
 // SetIsVirusFalsePositive sets the "is_virus_false_positive" field.
 func (u *GameDownloadResourceFileUpsert) SetIsVirusFalsePositive(v bool) *GameDownloadResourceFileUpsert {
 	u.Set(gamedownloadresourcefile.FieldIsVirusFalsePositive, v)
@@ -1247,6 +1362,69 @@ func (u *GameDownloadResourceFileUpsertOne) AddFileCheckStatus(v int) *GameDownl
 func (u *GameDownloadResourceFileUpsertOne) UpdateFileCheckStatus() *GameDownloadResourceFileUpsertOne {
 	return u.Update(func(s *GameDownloadResourceFileUpsert) {
 		s.UpdateFileCheckStatus()
+	})
+}
+
+// SetCheckFailures sets the "check_failures" field.
+func (u *GameDownloadResourceFileUpsertOne) SetCheckFailures(v int) *GameDownloadResourceFileUpsertOne {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.SetCheckFailures(v)
+	})
+}
+
+// AddCheckFailures adds v to the "check_failures" field.
+func (u *GameDownloadResourceFileUpsertOne) AddCheckFailures(v int) *GameDownloadResourceFileUpsertOne {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.AddCheckFailures(v)
+	})
+}
+
+// UpdateCheckFailures sets the "check_failures" field to the value that was provided on create.
+func (u *GameDownloadResourceFileUpsertOne) UpdateCheckFailures() *GameDownloadResourceFileUpsertOne {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.UpdateCheckFailures()
+	})
+}
+
+// SetCheckError sets the "check_error" field.
+func (u *GameDownloadResourceFileUpsertOne) SetCheckError(v string) *GameDownloadResourceFileUpsertOne {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.SetCheckError(v)
+	})
+}
+
+// UpdateCheckError sets the "check_error" field to the value that was provided on create.
+func (u *GameDownloadResourceFileUpsertOne) UpdateCheckError() *GameDownloadResourceFileUpsertOne {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.UpdateCheckError()
+	})
+}
+
+// ClearCheckError clears the value of the "check_error" field.
+func (u *GameDownloadResourceFileUpsertOne) ClearCheckError() *GameDownloadResourceFileUpsertOne {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.ClearCheckError()
+	})
+}
+
+// SetCheckStalledAt sets the "check_stalled_at" field.
+func (u *GameDownloadResourceFileUpsertOne) SetCheckStalledAt(v time.Time) *GameDownloadResourceFileUpsertOne {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.SetCheckStalledAt(v)
+	})
+}
+
+// UpdateCheckStalledAt sets the "check_stalled_at" field to the value that was provided on create.
+func (u *GameDownloadResourceFileUpsertOne) UpdateCheckStalledAt() *GameDownloadResourceFileUpsertOne {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.UpdateCheckStalledAt()
+	})
+}
+
+// ClearCheckStalledAt clears the value of the "check_stalled_at" field.
+func (u *GameDownloadResourceFileUpsertOne) ClearCheckStalledAt() *GameDownloadResourceFileUpsertOne {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.ClearCheckStalledAt()
 	})
 }
 
@@ -1793,6 +1971,69 @@ func (u *GameDownloadResourceFileUpsertBulk) AddFileCheckStatus(v int) *GameDown
 func (u *GameDownloadResourceFileUpsertBulk) UpdateFileCheckStatus() *GameDownloadResourceFileUpsertBulk {
 	return u.Update(func(s *GameDownloadResourceFileUpsert) {
 		s.UpdateFileCheckStatus()
+	})
+}
+
+// SetCheckFailures sets the "check_failures" field.
+func (u *GameDownloadResourceFileUpsertBulk) SetCheckFailures(v int) *GameDownloadResourceFileUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.SetCheckFailures(v)
+	})
+}
+
+// AddCheckFailures adds v to the "check_failures" field.
+func (u *GameDownloadResourceFileUpsertBulk) AddCheckFailures(v int) *GameDownloadResourceFileUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.AddCheckFailures(v)
+	})
+}
+
+// UpdateCheckFailures sets the "check_failures" field to the value that was provided on create.
+func (u *GameDownloadResourceFileUpsertBulk) UpdateCheckFailures() *GameDownloadResourceFileUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.UpdateCheckFailures()
+	})
+}
+
+// SetCheckError sets the "check_error" field.
+func (u *GameDownloadResourceFileUpsertBulk) SetCheckError(v string) *GameDownloadResourceFileUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.SetCheckError(v)
+	})
+}
+
+// UpdateCheckError sets the "check_error" field to the value that was provided on create.
+func (u *GameDownloadResourceFileUpsertBulk) UpdateCheckError() *GameDownloadResourceFileUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.UpdateCheckError()
+	})
+}
+
+// ClearCheckError clears the value of the "check_error" field.
+func (u *GameDownloadResourceFileUpsertBulk) ClearCheckError() *GameDownloadResourceFileUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.ClearCheckError()
+	})
+}
+
+// SetCheckStalledAt sets the "check_stalled_at" field.
+func (u *GameDownloadResourceFileUpsertBulk) SetCheckStalledAt(v time.Time) *GameDownloadResourceFileUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.SetCheckStalledAt(v)
+	})
+}
+
+// UpdateCheckStalledAt sets the "check_stalled_at" field to the value that was provided on create.
+func (u *GameDownloadResourceFileUpsertBulk) UpdateCheckStalledAt() *GameDownloadResourceFileUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.UpdateCheckStalledAt()
+	})
+}
+
+// ClearCheckStalledAt clears the value of the "check_stalled_at" field.
+func (u *GameDownloadResourceFileUpsertBulk) ClearCheckStalledAt() *GameDownloadResourceFileUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.ClearCheckStalledAt()
 	})
 }
 

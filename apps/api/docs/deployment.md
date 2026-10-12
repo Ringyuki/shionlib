@@ -13,7 +13,7 @@ The API and the web client each ship as one container image and run together as 
 
 The image runs as the unprivileged `shionlib` user. `/var/lib/shionlib/upload` and `/var/lib/shionlib/scan-logs` are the upload spool and scan log directories.
 
-Subcommands: `serve` (HTTP; also runs jobs when `WORKERS_ENABLED=true`), `worker` (jobs only), `migrate up|status`, `health` (liveness probe against `127.0.0.1:$PORT/health/live`), `openapi [file]`, `inspect [limit]` (see Inspecting files published before).
+Subcommands: `serve` (HTTP; also runs jobs when `WORKERS_ENABLED=true`), `worker` (jobs only), `migrate up|status`, `health` (liveness probe against `127.0.0.1:$PORT/health/live`), `openapi [file]`, `inspect [limit]` (see Inspecting files published before), `recheck [file id ...]` (see Checks that keep failing).
 
 `apps/web/Dockerfile` builds the web client into a `node:24` image that serves on port 3000 (see `apps/web/README.md`).
 
@@ -93,6 +93,22 @@ docker exec <worker container> shionlib-api inspect 50     # at most 50 resource
 - It can be stopped at any time (`Ctrl-C`, `docker stop`) and run again: what has an inspection is done. Each run goes through a resource once; one that failed (logged as `inspection failed` with its id) is tried again by the next run.
 - Every line it logs names the resource, its files and the outcome: `inspected`, `unreadable` (the archive can no longer be opened; recorded, the file stays published), `held` (the scan detected something: the file is put under review like an upload and the resource is hidden until an admin decides; unlike an upload, a published file is never removed when the review deadline passes) or `missing` (the bucket does not hold the object; nothing is recorded).
 - It downloads every file once: the whole catalogue is the size of the bucket. The spool needs room for the largest file and what is extracted from it.
+
+## Checks that keep failing
+
+The check of an upload can fail for a reason that has nothing to do with the file (clamd or the database is down, the spool is full) or for one that will never go away (the archive cannot be unpacked here, a defect in the check). The two cannot be told apart reliably, so a failing check is neither repeated for ever nor does it cost the uploader the file by itself:
+
+- After a failure the resource waits before its next try: 30 minutes, then twice as long each time, at most 8 hours. The failure count and the last error are kept on the file (`check_failures`, `check_error`).
+- After `scan.check_attempts` failures in a row (6, about 16 hours) the check stalls. The uploader sees 「检查未完成」 and gets a message; every admin gets a message and an email with the file, the uploader and the last error. Nothing is tried again by itself.
+- Once the cause is fixed, put the stalled checks back in the queue from the worker container. The next run of the check takes them, with their count at zero:
+
+```bash
+docker exec <worker container> shionlib-api recheck          # every stalled check
+docker exec <worker container> shionlib-api recheck 8817 8819  # the checks of these files
+```
+
+- A file nobody wants can be removed by its uploader or an admin at any time. A stalled check nobody resumed within `scan.stalled_check_timeout` (7 days) is given up: the file is rejected, its uploader is told and the file is removed with the other rejected files.
+- A check cut short because the worker stops (a deploy) is not counted. One that is still running when the run of the task ends (one hour for everything waiting) is.
 
 ## Cutover from the NestJS backend
 

@@ -205,6 +205,63 @@ func TestPendingResourcesSkipRemovedAndDelayedResources(t *testing.T) {
 	}
 }
 
+func TestAFailingCheckIsCountedStalledAndResumed(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture(t)
+	creator, gameID := f.db.User(t), f.db.Game(t)
+	resource := f.resource(t, gameID, creator)
+	first := f.file(t, resource.ID, creator, func(c *ent.GameDownloadResourceFileCreate) { c.SetFilePath("/spool/1.sltf") })
+	second := f.file(t, resource.ID, creator, func(c *ent.GameDownloadResourceFileCreate) {
+		c.SetFilePath("/spool/2.sltf").SetFileName("other.7z")
+	})
+	if err := f.repo.RecordCheckFailure(ctx, first.ID, scan.CheckFailure{Failures: 2, Reason: "clamd is down"}); err != nil {
+		t.Fatal(err)
+	}
+	counted, _, err := f.repo.LockFile(ctx, first.ID)
+	if err != nil || counted.CheckFailures != 2 || counted.CheckStatus != download.CheckPending || counted.StalledAt != nil {
+		t.Fatalf("a failure is counted and the file keeps waiting: %+v %v", counted, err)
+	}
+	if row := f.db.Ent.GameDownloadResourceFile.GetX(ctx, first.ID); row.CheckError == nil || *row.CheckError != "clamd is down" {
+		t.Fatalf("the reason is kept: %+v", row.CheckError)
+	}
+	early, late := time.Date(2026, 10, 1, 8, 0, 0, 0, time.UTC), time.Date(2026, 10, 5, 8, 0, 0, 0, time.UTC)
+	for file, at := range map[int]time.Time{first.ID: early, second.ID: late} {
+		if err := f.repo.RecordCheckFailure(ctx, file, scan.CheckFailure{Failures: 6, Reason: "still down", StalledAt: &at}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if ids, err := f.repo.PendingResources(ctx, time.Now()); err != nil || len(ids) != 0 {
+		t.Fatalf("a stalled check is not picked up by itself: %v %v", ids, err)
+	}
+	all, err := f.repo.StalledFiles(ctx, nil, 0)
+	if err != nil || len(all) != 2 || all[0].ID != first.ID || all[0].CheckFailures != 6 || all[0].StalledAt == nil || !all[0].StalledAt.Equal(early) || all[0].GameID != gameID {
+		t.Fatalf("unexpected stalled files %+v %v", all, err)
+	}
+	between := early.Add(24 * time.Hour)
+	if overdue, err := f.repo.StalledFiles(ctx, &between, 0); err != nil || len(overdue) != 1 || overdue[0].ID != first.ID {
+		t.Fatalf("only the checks stalled before the given time: %+v %v", overdue, err)
+	}
+	if one, err := f.repo.StalledFiles(ctx, nil, 1); err != nil || len(one) != 1 {
+		t.Fatalf("the limit applies: %+v %v", one, err)
+	}
+	if err := f.repo.ResumeCheck(ctx, first.ID); err != nil {
+		t.Fatal(err)
+	}
+	row := f.db.Ent.GameDownloadResourceFile.GetX(ctx, first.ID)
+	if row.FileCheckStatus != int(download.CheckPending) || row.CheckFailures != 0 || row.CheckError != nil || row.CheckStalledAt != nil {
+		t.Fatalf("a resumed check starts over: %+v", row)
+	}
+	if ids, _ := f.repo.PendingResources(ctx, time.Now()); !slices.Equal(ids, []int{resource.ID}) {
+		t.Fatalf("the resource is due again: %v", ids)
+	}
+	if err := f.repo.RecordCheckFailure(ctx, 0, scan.CheckFailure{Failures: 1}); !errors.Is(err, download.ErrFileNotFound) {
+		t.Fatalf("unexpected result for a missing file: %v", err)
+	}
+	if err := f.repo.ResumeCheck(ctx, 0); !errors.Is(err, download.ErrFileNotFound) {
+		t.Fatalf("unexpected result for a missing file: %v", err)
+	}
+}
+
 func TestCaseLifecycle(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(t)

@@ -53,8 +53,10 @@ func run(ctx context.Context, args []string) error {
 		return health(ctx)
 	case "inspect":
 		return inspect(ctx, args[1:])
+	case "recheck":
+		return recheck(ctx, args[1:])
 	default:
-		return fmt.Errorf("unknown command %q (expected serve, worker, migrate up|status, openapi, health, inspect [limit])", command)
+		return fmt.Errorf("unknown command %q (expected serve, worker, migrate up|status, openapi, health, inspect [limit], recheck [file id ...])", command)
 	}
 }
 
@@ -146,6 +148,37 @@ func inspect(ctx context.Context, args []string) error {
 	}
 	logger.Info("inspection finished", "resources", len(seen), "failed", failed, "stopped", ctx.Err() != nil)
 	return nil
+}
+
+func recheck(ctx context.Context, args []string) error {
+	ids := make([]int, len(args))
+	for i, arg := range args {
+		parsed, err := strconv.Atoi(arg)
+		if err != nil || parsed < 1 {
+			return fmt.Errorf("recheck takes the ids of files whose check stalled, got %q", arg)
+		}
+		ids[i] = parsed
+	}
+	cfg, err := config.Load()
+	if err != nil {
+		return err
+	}
+	logger := bootstrap.NewLogger(cfg)
+	infra, err := bootstrap.OpenInfra(ctx, cfg, logger)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = infra.Close(context.WithoutCancel(ctx)) }()
+	modules := bootstrap.BuildModules(infra)
+	if err := modules.Settings.Reload(ctx); err != nil {
+		return err
+	}
+	resumed, err := modules.Stalled.Resume(ctx, ids)
+	for _, unit := range resumed {
+		logger.Info("check resumed", "resource_id", unit.ResourceID, "files", unit.Files)
+	}
+	logger.Info("recheck finished", "resumed", len(resumed))
+	return err
 }
 
 func migrate(ctx context.Context, sub string) error {
