@@ -1,5 +1,7 @@
 export { adminPaths, pageSize, searchSet, titleOf, type Paging, type Pending } from './admin'
+export { barOption, type ChartBar, type ChartTone } from './admin-chart'
 export { usePending } from './use-admin-area'
+export { useChart } from './use-chart'
 export { useQueryDraft } from './use-query-draft'
 export { adminArea } from './ui/admin-area'
 export { AdminMessages } from './ui/admin-messages'

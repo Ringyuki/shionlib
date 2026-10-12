@@ -28,6 +28,8 @@ export function SidebarLink({
   also = [],
 }: SidebarLinkProps) {
   const { pathname } = useLocation()
+  const mark = alert === undefined ? count : <Indicator tone="danger" size="sm" />
+  const pinned = rail ? mark : 0
   return (
     <Tooltip content={label} side="right" disabled={!rail}>
       <NavLink
@@ -40,7 +42,12 @@ export function SidebarLink({
           alsoWithin({ also }, pathname) && 'bg-accent-soft text-accent-text font-medium',
         )}
       >
-        <Badge content={rail ? count : 0} tone="accent" label={countLabel}>
+        <Badge
+          content={pinned}
+          tone="accent"
+          bare={alert !== undefined}
+          label={alert ?? countLabel}
+        >
           <Icon aria-hidden />
         </Badge>
         <SidebarLabel collapsed={rail} className="flex-1">

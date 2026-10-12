@@ -8,6 +8,7 @@
     "users": "用户",
     "comments": "评论",
     "walkthroughs": "攻略",
+    "ai": "AI 网关",
     "settings": "设置"
   },
   "group": {
@@ -16,6 +17,7 @@
     "system": "系统"
   },
   "pendingCount": "{count, number} 项待处理",
+  "aiAlert": "有暂停的线路或没有可用模型的场景",
   "total": "共 {count, number} 条",
   "cancel": "取消",
   "submit": "提交",

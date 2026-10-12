@@ -1,0 +1,120 @@
+{
+  "title": "渠道",
+  "search": "搜索渠道",
+  "stateFilter": "按状态筛选",
+  "state": {
+    "all": "全部状态",
+    "fine": "正常",
+    "suspended": "有暂停的线路",
+    "off": "已停用"
+  },
+  "checkAll": "检测全部线路",
+  "checked": {
+    "fine": "已检测 {count, number} 条线路，全部正常",
+    "failed": "已检测 {count, number} 条线路，{failed, number} 条失败"
+  },
+  "empty": "{filtered, select, true {没有符合条件的渠道} other {尚未添加渠道}}",
+  "facts": "{kind} · {host}",
+  "separator": "、",
+  "enable": "启用 {name}",
+  "enabled": "已启用 {name}",
+  "disabled": "已停用 {name}",
+  "menu": "渠道操作",
+  "column": {
+    "provider": "渠道",
+    "enabled": "启用",
+    "routes": "线路",
+    "requests": "请求（24 小时）",
+    "failureRate": "失败率",
+    "firstToken": "首字耗时",
+    "cost": "费用",
+    "lastUsed": "上次使用"
+  },
+  "stat": {
+    "requests": "请求（24 小时）",
+    "cost": "费用（24 小时）"
+  },
+  "field": {
+    "preset": "预设",
+    "presetHint": "来自模型目录，价格按这个预设计算",
+    "presetPlaceholder": "不使用预设",
+    "name": "名称",
+    "kind": "类型",
+    "baseUrl": "API 地址",
+    "baseUrlExample": "https://example.com/v1",
+    "baseUrlNeeded": "这种类型需要填写 API 地址",
+    "official": "留空则使用 {host}",
+    "endpoint": "请求地址：{url}",
+    "apiKey": "API 密钥",
+    "apiKeyOnce": "保存后不再显示",
+    "apiKeyKept": "已设置 {hint}，留空则不修改",
+    "multiplier": "价格倍率",
+    "multiplierHint": "费用按模型价格乘以该倍率计算"
+  },
+  "create": {
+    "open": "新渠道",
+    "title": "新渠道",
+    "submit": "创建",
+    "done": "已创建渠道 {name}"
+  },
+  "settings": {
+    "title": "设置",
+    "save": "保存",
+    "saved": "渠道的设置已保存"
+  },
+  "remove": {
+    "open": "删除渠道",
+    "title": "确定要删除渠道 {name} 吗？",
+    "description": "它的 {count, number} 条线路会一并删除，已有的请求记录会保留",
+    "confirm": "删除",
+    "done": "已删除渠道 {name}"
+  },
+  "routes": {
+    "title": "线路",
+    "empty": "尚未添加线路",
+    "discover": "同步模型",
+    "add": "手动添加",
+    "note": "暂停的线路每 10 分钟自动检测一次，恢复后重新启用",
+    "column": {
+      "model": "模型",
+      "protocol": "协议",
+      "price": "每百万 token 价格",
+      "status": "状态",
+      "requests": "请求（24 小时）"
+    }
+  },
+  "discovery": {
+    "title": "同步模型",
+    "description": "{name} 提供的模型",
+    "loading": "正在读取渠道提供的模型",
+    "search": "搜索模型",
+    "noMatch": "没有符合条件的模型",
+    "found": "共 {count, number} 个模型",
+    "add": "添加 {count, number} 条线路",
+    "added": "已添加 {count, number} 条线路",
+    "column": {
+      "model": "模型",
+      "capabilities": "能力",
+      "price": "每百万 token 价格",
+      "placement": "添加后"
+    },
+    "placement": {
+      "added": "已添加",
+      "joins": "加入已有的模型",
+      "creates": "新建模型"
+    }
+  },
+  "manual": {
+    "title": "手动添加线路",
+    "description": "{name} 的线路",
+    "upstreamId": "上游模型标识",
+    "protocol": "协议",
+    "protocolHint": "审核模型固定使用 Moderations",
+    "joins": "将加入已有的模型 {name}",
+    "known": "模型目录中的 {name}，添加时新建模型",
+    "unknown": "模型目录中没有这个标识，添加时按标识新建模型",
+    "submit": "添加",
+    "done": "线路已添加",
+    "exists": "这条线路已经存在"
+  }
+}

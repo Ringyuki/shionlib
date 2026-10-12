@@ -35,7 +35,8 @@ Every user flow a phase ports gets Playwright specs in `apps/web/e2e` in the sam
   - Accounts are `e2e_user` (member), `e2e_mutable_user` (owner of resource 1) and `e2e_admin`. All use the password `ShionlibE2E123!` (`E2E_USER_PASSWORD`).
   - Other seeded accounts serve specs that sign in or out on their own.
   - Game 4 carries a comment held for review (with two moderation runs) and a draft walkthrough waiting for review, both written by `e2e_managed_user`, for `admin-content.spec.ts`. Its tests run in order: the first ones read what the last ones decide.
-  - `e2e_staff_user` is an administrator who is not a super administrator, for what such an account may see but not change (`admin-settings.spec.ts` signs in as it).
+  - `e2e_staff_user` is an administrator who is not a super administrator, for what such an account may see but not change (`admin-settings.spec.ts` and `admin-ai.spec.ts` sign in as it).
+  - The AI gateway has two providers that cannot be reached (`e2e-unreachable`, `e2e-backup`), the models `gpt-5-mini` (two routes: the first with an automatic JSON-mode adjustment, the second suspended for 「402 Insufficient credits」) and `omni-moderation-latest`, both scenes configured, six requests of the last three hours (one call with a failed and a successful attempt and its payload, a timeout, a check, a playground run) and a catalog of three providers and three models, of which `Claude Haiku 4.5` is offered by `e2e-unreachable` but not added. `admin-ai.spec.ts` changes all of it, in order; other specs add failed moderation requests to the log, so it asserts the seeded rows, never totals. Nothing answers upstream: a check and a playground run end in 「网络错误」.
   - `e2e_managed_user` belongs to `admin-users.spec.ts`, which bans it, resets its password and changes its role; no other spec signs in as it or reads it.
 - **Sessions:**
   - `sessions.setup.ts` signs in member, owner and admin once.

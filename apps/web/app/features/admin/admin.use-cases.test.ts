@@ -4,7 +4,14 @@ import { loadOverview, loadPending } from './admin.use-cases'
 
 const meta = { currentPage: 1, itemCount: 0, itemsPerPage: 10, totalItems: 0, totalPages: 0 }
 
-const pending = { reports: 1, malware_cases: 0, stalled_files: 0, comments: 0, walkthroughs: 0 }
+const pending = {
+  reports: 1,
+  malware_cases: 0,
+  stalled_files: 0,
+  comments: 0,
+  walkthroughs: 0,
+  ai_alerts: 0,
+}
 
 function overviewApi() {
   return fakeApi()

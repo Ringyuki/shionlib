@@ -1,7 +1,8 @@
 import { Flex, Indicator, Inline, Stack, Text } from '@hina-ui/react'
 import { useFormatter, useTranslations } from 'use-intl'
 import type { TrendPoint } from '../admin-stats'
-import { useLineChart } from '../use-line-chart'
+import { lineOption } from '../admin-chart'
+import { useChart } from '../use-chart'
 
 type TrendChartProps = {
   trends: TrendPoint[]
@@ -16,10 +17,10 @@ export function TrendChart({ trends }: TrendChartProps) {
     { name: t('series.downloads'), values: trends.map(point => point.downloads) },
     { name: t('series.views'), values: trends.map(point => point.views) },
   ]
-  const host = useLineChart(
-    trends.map(point => format.dateTime(new Date(point.date), { month: 'short', day: 'numeric' })),
-    lines,
+  const labels = trends.map(point =>
+    format.dateTime(new Date(point.date), { month: 'short', day: 'numeric' }),
   )
+  const host = useChart(palette => lineOption({ labels, lines, palette }))
   return (
     <Stack gap="sm" className="min-w-0 flex-1">
       <Inline gap="md" align="center">

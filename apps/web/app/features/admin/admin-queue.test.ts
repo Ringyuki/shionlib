@@ -66,7 +66,14 @@ const report = (id: number, created: string): Report => ({
   processor: null,
 })
 
-const pending = { reports: 12, malware_cases: 1, stalled_files: 1, comments: 2, walkthroughs: 0 }
+const pending = {
+  reports: 12,
+  malware_cases: 1,
+  stalled_files: 1,
+  comments: 2,
+  walkthroughs: 0,
+  ai_alerts: 0,
+}
 
 const nothingHeld = { comments: [], walkthroughs: [] }
 

@@ -14,7 +14,14 @@ describe('adminAddress', () => {
 })
 
 describe('navigationOf', () => {
-  const pending = { reports: 2, malware_cases: 1, stalled_files: 3, comments: 9, walkthroughs: 0 }
+  const pending = {
+    reports: 2,
+    malware_cases: 1,
+    stalled_files: 3,
+    comments: 9,
+    walkthroughs: 0,
+    ai_alerts: 0,
+  }
 
   it('counts both kinds of file checks under one entry', () => {
     const [review] = navigationOf(pending).groups
@@ -28,9 +35,21 @@ describe('navigationOf', () => {
 
   it('marks only the overview as an exact address', () => {
     const { lead, groups } = navigationOf(pending)
-    expect(lead).toEqual([{ key: 'overview', to: adminPaths.overview, end: true, count: 0 }])
+    expect(lead).toEqual([
+      { key: 'overview', to: adminPaths.overview, end: true, count: 0, alert: false },
+    ])
     expect(groups.flatMap(group => group.entries).every(entry => !entry.end)).toBe(true)
     expect(groups.map(group => group.key)).toEqual(['review', 'manage', 'system'])
+  })
+
+  it('raises an alert on the AI gateway while something there is broken', () => {
+    const alerts = (count: number) =>
+      navigationOf({ ...pending, ai_alerts: count })
+        .groups.flatMap(group => group.entries)
+        .filter(entry => entry.alert)
+        .map(entry => entry.key)
+    expect(alerts(0)).toEqual([])
+    expect(alerts(3)).toEqual(['ai'])
   })
 })
 

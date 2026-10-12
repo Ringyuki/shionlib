@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { parseOptional, firstIssueMessage } from './check'
-import { constraintOf, createFormKit, lengthOf, textIssue, type FieldConstraint } from './form-kit'
+import {
+  constraintOf,
+  createFormKit,
+  lengthOf,
+  rangeOf,
+  textIssue,
+  type FieldConstraint,
+} from './form-kit'
 
 const text = (constraint: Partial<FieldConstraint>): FieldConstraint => ({
   type: 'string',
@@ -34,6 +41,12 @@ describe('textIssue', () => {
       maxLength: 20,
     })
     expect(lengthOf('RegisterUserInputBody', 'password')).toEqual({ min: 8, max: 50 })
+  })
+
+  it('reads the bounds of a number, in the unit the form shows', () => {
+    expect(rangeOf('AiSceneUpdateInputBody', 'temperature')).toEqual({ min: 0, max: 2 })
+    expect(rangeOf('AiSceneUpdateInputBody', 'timeout_ms', 1000)).toEqual({ min: 1, max: 600 })
+    expect(rangeOf('AiSceneUpdateInputBody', 'model_id')).toEqual({ min: 1, max: undefined })
   })
 })
 

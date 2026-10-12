@@ -1,13 +1,14 @@
-import { Stack, Text } from '@hina-ui/react'
+import { cn, Stack, Text } from '@hina-ui/react'
 import type { ReactNode } from 'react'
 
 type TwoLinesProps = {
   first: ReactNode
   second?: ReactNode
   narrow?: ReactNode
+  mono?: boolean
 }
 
-export function TwoLines({ first, second, narrow }: TwoLinesProps) {
+export function TwoLines({ first, second, narrow, mono = false }: TwoLinesProps) {
   return (
     <Stack gap="none" className="min-w-0">
       <Text
@@ -19,7 +20,12 @@ export function TwoLines({ first, second, narrow }: TwoLinesProps) {
         {first}
       </Text>
       {second !== undefined && second !== '' && (
-        <Text as="span" size="sm" tone="muted" className="line-clamp-1 break-all">
+        <Text
+          as="span"
+          size="sm"
+          tone="muted"
+          className={cn('line-clamp-1 break-all', mono && 'font-mono')}
+        >
           {second}
         </Text>
       )}

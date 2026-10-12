@@ -16,6 +16,7 @@ type RecordTableProps<Row extends object> = {
   label: string
   rows: Row[]
   rowKey: (row: Row) => string | number
+  rowLabel?: (row: Row) => string
   columns: RecordColumn[]
   renderCell: (row: Row, column: string) => ReactNode
   onOpen?: (row: Row) => void
@@ -25,6 +26,8 @@ type RecordTableProps<Row extends object> = {
   footer?: ReactNode
   selected?: (string | number)[]
   onSelectedChange?: (selected: (string | number)[]) => void
+  onReorder?: (rows: Row[]) => void
+  current?: string | number
 }
 
 function classesOf(columns: RecordColumn[]) {
@@ -59,6 +62,7 @@ export function RecordTable<Row extends object>({
   label,
   rows,
   rowKey,
+  rowLabel,
   columns,
   renderCell,
   onOpen,
@@ -68,6 +72,8 @@ export function RecordTable<Row extends object>({
   footer,
   selected,
   onSelectedChange,
+  onReorder,
+  current,
 }: RecordTableProps<Row>) {
   const pages = usePageTurn()
   const classes = classesOf(columns)
@@ -88,12 +94,20 @@ export function RecordTable<Row extends object>({
           rows={rows}
           columns={shaped}
           rowKey={rowKey}
+          rowLabel={rowLabel}
           label={label}
           variant="secondary"
           tableClass="max-md:[&_thead]:hidden"
           selectable={onSelectedChange !== undefined}
           selected={selected}
           onSelectedChange={onSelectedChange}
+          reorderable={onReorder !== undefined}
+          onRowsChange={onReorder}
+          rowClass={
+            current === undefined
+              ? undefined
+              : row => (rowKey(row) === current ? 'bg-accent-soft' : undefined)
+          }
           rowClickable={onOpen !== undefined}
           onRowClick={onOpen}
           renderCell={({ row, column }) => renderCell(row, column.key)}

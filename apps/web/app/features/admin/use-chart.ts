@@ -1,8 +1,8 @@
 import { useEffect, useEffectEvent, useRef } from 'react'
-import { chartTokens, lineOption, type ChartLine } from './admin-chart'
+import { chartTokens, chartTones, type ChartOption, type ChartPalette } from './admin-chart'
 
 type Chart = {
-  setOption: (option: ReturnType<typeof lineOption>, replace: boolean) => void
+  setOption: (option: ChartOption, replace: boolean) => void
   resize: () => void
   dispose: () => void
 }
@@ -16,6 +16,7 @@ async function loadEngine(): Promise<(host: HTMLElement) => Chart> {
   ])
   core.use([
     charts.LineChart,
+    charts.BarChart,
     components.GridComponent,
     components.TooltipComponent,
     renderers.CanvasRenderer,
@@ -23,26 +24,33 @@ async function loadEngine(): Promise<(host: HTMLElement) => Chart> {
   return host => core.init(host)
 }
 
-function paletteOf(host: HTMLElement) {
+function paletteOf(host: HTMLElement): ChartPalette {
   const style = getComputedStyle(host)
   const read = (token: string) => style.getPropertyValue(token).trim()
+  const [accent, warning, danger, success, info, neutral] = chartTones.map(tone =>
+    read(chartTokens.tones[tone]),
+  )
   return {
     text: read(chartTokens.text),
     line: read(chartTokens.line),
     surface: read(chartTokens.surface),
-    lines: chartTokens.lines.map(read),
+    tones: {
+      accent: accent ?? '',
+      warning: warning ?? '',
+      danger: danger ?? '',
+      success: success ?? '',
+      info: info ?? '',
+      neutral: neutral ?? '',
+    },
   }
 }
 
-export function useLineChart(labels: string[], lines: ChartLine[]) {
+export function useChart(build: (palette: ChartPalette) => ChartOption) {
   const host = useRef<HTMLDivElement>(null)
   const chart = useRef<Chart | undefined>(undefined)
   const draw = useEffectEvent(() => {
     if (host.current !== null) {
-      chart.current?.setOption(
-        lineOption({ labels, lines, palette: paletteOf(host.current) }),
-        true,
-      )
+      chart.current?.setOption(build(paletteOf(host.current)), true)
     }
   })
 

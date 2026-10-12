@@ -7,6 +7,7 @@ import {
   House,
   MessageCircle,
   Settings,
+  Sparkles,
   Users,
   type LucideIcon,
 } from 'lucide-react'
@@ -22,6 +23,7 @@ const icons: Record<NavKey, LucideIcon> = {
   comments: MessageCircle,
   walkthroughs: BookOpen,
   users: Users,
+  ai: Sparkles,
   settings: Settings,
 }
 
@@ -43,6 +45,7 @@ export function AdminNavigation({ rail }: AdminNavigationProps) {
       end={entry.end}
       count={entry.count}
       countLabel={t('pendingCount', { count: entry.count })}
+      alert={entry.alert ? t('aiAlert') : undefined}
     />
   )
   return (

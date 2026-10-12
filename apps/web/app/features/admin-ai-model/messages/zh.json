@@ -1,0 +1,116 @@
+{
+  "title": "模型",
+  "search": "搜索模型",
+  "capabilityFilter": "按能力筛选",
+  "all": "全部",
+  "default": "默认",
+  "noRoutes": "没有线路",
+  "then": " → ",
+  "routeStatus": {
+    "active": "正常",
+    "suspended": "暂停",
+    "disabled": "已停用"
+  },
+  "empty": "{filtered, select, true {没有符合条件的模型} other {尚未添加模型}}",
+  "enable": "启用 {name}",
+  "enabled": "已启用 {name}",
+  "disabled": "已停用 {name}",
+  "menu": "模型操作",
+  "context": "上下文 {size}",
+  "output": "最大输出 {size}",
+  "separator": "、",
+  "fact": " · {fact}",
+  "syncCatalog": "同步模型目录",
+  "synced": {
+    "title": "模型目录已同步",
+    "counts": "新增 {added, number} 个，更新 {updated, number} 个，移除 {removed, number} 个，{repriced, number} 条线路的价格有变化"
+  },
+  "catalog": "{synced, select, true {模型目录来自 models.dev，上次同步于<time></time>，价格和能力随目录更新} other {模型目录来自 models.dev，尚未同步}}",
+  "column": {
+    "model": "模型",
+    "capabilities": "能力",
+    "routes": "线路",
+    "context": "上下文",
+    "requests": "请求（24 小时）",
+    "failureRate": "失败率",
+    "cost": "费用",
+    "enabled": "启用"
+  },
+  "add": {
+    "open": "添加模型",
+    "title": "添加模型",
+    "hint": "从模型目录中选择，价格和能力随目录更新",
+    "search": "搜索模型目录",
+    "loading": "正在读取模型目录",
+    "results": "模型目录中的模型",
+    "noOffers": "已添加的渠道尚未同步模型，输入名称搜索模型目录",
+    "noMatch": "模型目录中没有符合条件的模型",
+    "offered": "{count, plural, =0 {没有渠道提供} other {# 个渠道提供}}",
+    "added": "已添加",
+    "back": "重新选择",
+    "name": "名称",
+    "description": "说明",
+    "optional": "选填",
+    "routes": "线路",
+    "routesHint": "按列出的顺序作为备用顺序，创建后可以调整",
+    "offer": "{upstream} · {protocol} · {price}",
+    "noRoutes": "已添加的渠道都不提供这个模型，创建后可以在模型页面手动添加线路",
+    "submit": "添加",
+    "done": "已添加模型 {name}"
+  },
+  "routes": {
+    "title": "备用顺序",
+    "hint": "按顺序尝试，前一条失败时改用下一条；拖动可以调整顺序",
+    "add": "添加线路",
+    "empty": "尚未添加线路",
+    "column": {
+      "provider": "渠道",
+      "protocol": "协议",
+      "price": "每百万 token 价格",
+      "status": "状态",
+      "requests": "请求（24 小时）"
+    }
+  },
+  "addRoute": {
+    "title": "添加线路",
+    "description": "{name} 的线路",
+    "provider": "渠道",
+    "noProvider": "每个渠道只能有一条线路，所有渠道都已添加",
+    "upstreamId": "上游模型标识",
+    "upstreamIdHint": "渠道接口中这个模型的名称",
+    "protocol": "协议",
+    "submit": "添加",
+    "done": "线路已添加"
+  },
+  "settings": {
+    "title": "设置",
+    "name": "名称",
+    "description": "说明",
+    "optional": "选填",
+    "default": "设为默认模型",
+    "defaultHint": "没有指定模型的场景使用默认模型",
+    "defaultKept": "这是默认模型；把另一个模型设为默认后才会更换",
+    "save": "保存",
+    "saved": "模型的设置已保存"
+  },
+  "scenes": {
+    "title": "用于场景",
+    "empty": "没有场景使用这个模型",
+    "column": {
+      "scene": "场景",
+      "role": "方式",
+      "requests": "请求（24 小时）"
+    },
+    "role": {
+      "primary": "指定为这个模型",
+      "default": "作为默认模型"
+    }
+  },
+  "remove": {
+    "open": "删除模型",
+    "title": "确定要删除模型 {name} 吗？",
+    "description": "它的 {count, number} 条线路会一并删除，指定它的场景改为跟随默认模型",
+    "confirm": "删除",
+    "done": "已删除模型 {name}"
+  }
+}

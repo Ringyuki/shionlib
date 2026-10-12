@@ -11,6 +11,7 @@ export const adminPaths = {
   comments: `${adminRoot}/comments`,
   walkthroughs: `${adminRoot}/walkthroughs`,
   users: `${adminRoot}/users`,
+  ai: `${adminRoot}/ai`,
   settings: `${adminRoot}/settings`,
   user: (id: number) => `${adminRoot}/users/${id}`,
   report: (id: number) => `${adminRoot}/reports?id=${id}`,
@@ -33,13 +34,14 @@ export function adminAddress(pathname: string, search: string): string | undefin
 export type Pending = Schema<'AdminPendingDTO'>
 
 export type NavKey =
-  'overview' | 'reports' | 'checks' | 'comments' | 'walkthroughs' | 'users' | 'settings'
+  'overview' | 'reports' | 'checks' | 'comments' | 'walkthroughs' | 'users' | 'ai' | 'settings'
 
 export type NavEntry = {
   key: NavKey
   to: string
   end: boolean
   count: number
+  alert: boolean
 }
 
 export type NavGroup = {
@@ -52,36 +54,30 @@ export type Navigation = {
   groups: NavGroup[]
 }
 
+function entry(key: NavKey, to: string, count = 0): NavEntry {
+  return { key, to, end: key === 'overview', count, alert: false }
+}
+
 export function navigationOf(pending: Pending): Navigation {
   return {
-    lead: [{ key: 'overview', to: adminPaths.overview, end: true, count: 0 }],
+    lead: [entry('overview', adminPaths.overview)],
     groups: [
       {
         key: 'review',
         entries: [
-          { key: 'reports', to: adminPaths.reports, end: false, count: pending.reports },
-          {
-            key: 'checks',
-            to: adminPaths.checks,
-            end: false,
-            count: pending.malware_cases + pending.stalled_files,
-          },
-          { key: 'comments', to: adminPaths.comments, end: false, count: pending.comments },
-          {
-            key: 'walkthroughs',
-            to: adminPaths.walkthroughs,
-            end: false,
-            count: pending.walkthroughs,
-          },
+          entry('reports', adminPaths.reports, pending.reports),
+          entry('checks', adminPaths.checks, pending.malware_cases + pending.stalled_files),
+          entry('comments', adminPaths.comments, pending.comments),
+          entry('walkthroughs', adminPaths.walkthroughs, pending.walkthroughs),
         ],
       },
-      {
-        key: 'manage',
-        entries: [{ key: 'users', to: adminPaths.users, end: false, count: 0 }],
-      },
+      { key: 'manage', entries: [entry('users', adminPaths.users)] },
       {
         key: 'system',
-        entries: [{ key: 'settings', to: adminPaths.settings, end: false, count: 0 }],
+        entries: [
+          { ...entry('ai', adminPaths.ai), alert: pending.ai_alerts > 0 },
+          entry('settings', adminPaths.settings),
+        ],
       },
     ],
   }

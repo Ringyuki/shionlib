@@ -59,6 +59,18 @@ export function lengthOf<Body extends BodyName>(
   return { min: constraint.minLength ?? 0, max: constraint.maxLength ?? Number.POSITIVE_INFINITY }
 }
 
+export function rangeOf<Body extends BodyName>(
+  body: Body,
+  field: FieldName<Body>,
+  unit = 1,
+): { min: number | undefined; max: number | undefined } {
+  const { minimum, maximum } = constraintOf(body, field)
+  return {
+    min: minimum === undefined ? undefined : minimum / unit,
+    max: maximum === undefined ? undefined : maximum / unit,
+  }
+}
+
 export function textIssue(constraint: FieldConstraint, value: string): FieldIssue | undefined {
   if (value.trim() === '') {
     return constraint.required && constraint.minLength !== 0 ? { kind: 'required' } : undefined

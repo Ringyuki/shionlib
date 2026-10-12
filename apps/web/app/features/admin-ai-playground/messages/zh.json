@@ -1,0 +1,54 @@
+{
+  "readOnly": "只有超级管理员可以使用调试",
+  "nothing": "尚未添加模型，无法调试",
+  "setup": "目标与参数",
+  "issue": {
+    "schema": "请填写一个 JSON 对象"
+  },
+  "target": {
+    "label": "目标",
+    "hint": "最多 {max, number} 个，同一条消息会同时发给每个目标",
+    "kindOf": "第 {index, number} 个目标的类型",
+    "valueOf": "第 {index, number} 个目标",
+    "remove": "移除第 {index, number} 个目标",
+    "add": "添加目标",
+    "kind": {
+      "scene": "场景",
+      "model": "模型",
+      "route": "线路"
+    }
+  },
+  "param": {
+    "system": "系统提示词",
+    "temperature": "温度",
+    "maxTokens": "最大输出 token",
+    "default": "默认",
+    "shape": "输出结构",
+    "shapeHint": "审核模型只返回审核结果，不使用提示词和输出结构",
+    "shapes": {
+      "text": "文本",
+      "structured": "按 JSON Schema 输出对象"
+    },
+    "schema": "JSON Schema",
+    "schemaExample": "{ \"type\": \"object\", \"properties\": {} }"
+  },
+  "lane": {
+    "idle": "尚未发送",
+    "waiting": "正在等待回复",
+    "served": "{model}，经 {provider}",
+    "asked": "发送：{message}",
+    "dot": " · ",
+    "firstToken": "首字 {time}",
+    "total": "共 {time}",
+    "input": "输入 {count, number}",
+    "output": "输出 {count, number}",
+    "noCost": "没有产生费用"
+  },
+  "message": {
+    "label": "消息",
+    "placeholder": "输入要发送的内容",
+    "shortcut": "Ctrl + Enter 发送",
+    "restart": "新对话",
+    "send": "发送"
+  }
+}

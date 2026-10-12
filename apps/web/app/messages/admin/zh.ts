@@ -1,3 +1,9 @@
+import adminAiModel from '~/features/admin-ai-model/messages/zh.json'
+import adminAiPlayground from '~/features/admin-ai-playground/messages/zh.json'
+import adminAiProvider from '~/features/admin-ai-provider/messages/zh.json'
+import adminAiRequest from '~/features/admin-ai-request/messages/zh.json'
+import adminAiRoute from '~/features/admin-ai-route/messages/zh.json'
+import adminAi from '~/features/admin-ai/messages/zh.json'
 import adminCheck from '~/features/admin-check/messages/zh.json'
 import adminComment from '~/features/admin-comment/messages/zh.json'
 import adminReport from '~/features/admin-report/messages/zh.json'
@@ -8,6 +14,12 @@ import admin from '~/features/admin/messages/zh.json'
 
 export const adminMessages = {
   admin,
+  adminAi,
+  adminAiModel,
+  adminAiPlayground,
+  adminAiProvider,
+  adminAiRequest,
+  adminAiRoute,
   adminCheck,
   adminComment,
   adminReport,
