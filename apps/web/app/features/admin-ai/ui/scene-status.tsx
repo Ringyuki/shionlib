@@ -1,6 +1,6 @@
 import { useTranslations } from 'use-intl'
 import { sceneHealth, type Model, type Scene } from '../admin-ai-scene'
-import { StatusLine } from './status-line'
+import { StatusLine } from '~/features/admin'
 
 type SceneStatusProps = {
   scene: Scene

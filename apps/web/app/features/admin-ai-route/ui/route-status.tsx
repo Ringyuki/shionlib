@@ -1,6 +1,7 @@
 import { Time, Tooltip } from '@hina-ui/react'
 import { useTranslations } from 'use-intl'
-import { errorKindOf, StatusLine } from '~/features/admin-ai'
+import { StatusLine } from '~/features/admin'
+import { errorKindOf } from '~/features/admin-ai'
 import type { Route } from '../admin-ai-route'
 
 export function useRouteStatusText() {

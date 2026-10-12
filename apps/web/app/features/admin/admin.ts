@@ -10,7 +10,9 @@ export const adminPaths = {
   checks: `${adminRoot}/checks`,
   comments: `${adminRoot}/comments`,
   walkthroughs: `${adminRoot}/walkthroughs`,
+  games: `${adminRoot}/games`,
   users: `${adminRoot}/users`,
+  catalog: `${adminRoot}/catalog`,
   ai: `${adminRoot}/ai`,
   settings: `${adminRoot}/settings`,
   user: (id: number) => `${adminRoot}/users/${id}`,
@@ -34,7 +36,16 @@ export function adminAddress(pathname: string, search: string): string | undefin
 export type Pending = Schema<'AdminPendingDTO'>
 
 export type NavKey =
-  'overview' | 'reports' | 'checks' | 'comments' | 'walkthroughs' | 'users' | 'ai' | 'settings'
+  | 'overview'
+  | 'reports'
+  | 'checks'
+  | 'comments'
+  | 'walkthroughs'
+  | 'games'
+  | 'users'
+  | 'catalog'
+  | 'ai'
+  | 'settings'
 
 export type NavEntry = {
   key: NavKey
@@ -71,10 +82,14 @@ export function navigationOf(pending: Pending): Navigation {
           entry('walkthroughs', adminPaths.walkthroughs, pending.walkthroughs),
         ],
       },
-      { key: 'manage', entries: [entry('users', adminPaths.users)] },
+      {
+        key: 'manage',
+        entries: [entry('games', adminPaths.games), entry('users', adminPaths.users)],
+      },
       {
         key: 'system',
         entries: [
+          entry('catalog', adminPaths.catalog),
           { ...entry('ai', adminPaths.ai), alert: pending.ai_alerts > 0 },
           entry('settings', adminPaths.settings),
         ],

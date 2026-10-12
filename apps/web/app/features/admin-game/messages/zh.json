@@ -1,0 +1,48 @@
+{
+  "title": "游戏",
+  "search": "搜索游戏名称或编号",
+  "sortBy": "排序方式",
+  "sort": {
+    "views": "浏览最多",
+    "downloads": "下载最多",
+    "updated": "最近更新"
+  },
+  "everyStatus": "全部",
+  "status": {
+    "1": "显示",
+    "2": "隐藏"
+  },
+  "adult": "成人",
+  "empty": "{filtered, select, true {没有符合条件的游戏} other {暂无游戏}}",
+  "narrow": "#{id} · 浏览 {views, number}",
+  "column": {
+    "game": "游戏",
+    "rating": "分级",
+    "views": "浏览",
+    "downloads": "下载",
+    "resources": "资源",
+    "updated": "更新时间",
+    "status": "状态"
+  },
+  "menu": {
+    "label": "{name}的操作",
+    "view": "在站点中查看",
+    "refresh": "从 {source} 刷新",
+    "mark": "列入最近更新",
+    "unmark": "移出最近更新",
+    "hide": "隐藏",
+    "show": "显示",
+    "remove": "删除并不再收录"
+  },
+  "refreshed": "已刷新 {name}",
+  "marked": "已将 {name} 列入最近更新",
+  "unmarked": "已将 {name} 移出最近更新",
+  "hiddenNow": "已隐藏 {name}",
+  "shownNow": "已显示 {name}",
+  "remove": {
+    "title": "确定要删除 {name} 吗？",
+    "description": "游戏的资源、评论和攻略会一并删除，且不可恢复；之后同步时会跳过这个条目，可以在「条目同步」中恢复收录",
+    "confirm": "删除",
+    "done": "已删除 {name}"
+  }
+}

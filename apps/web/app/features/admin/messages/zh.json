@@ -5,11 +5,16 @@
     "overview": "概览",
     "reports": "举报",
     "checks": "文件检查",
+    "games": "游戏",
     "users": "用户",
+    "catalog": "条目同步",
     "comments": "评论",
     "walkthroughs": "攻略",
     "ai": "AI 网关",
     "settings": "设置"
+  },
+  "source": {
+    "hikarinagi": "Hikarinagi"
   },
   "group": {
     "review": "审核",

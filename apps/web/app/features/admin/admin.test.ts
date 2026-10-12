@@ -33,6 +33,15 @@ describe('navigationOf', () => {
     ])
   })
 
+  it('lists what is managed and what runs the site', () => {
+    const [, manage, system] = navigationOf(pending).groups
+    expect(manage?.entries.map(entry => [entry.key, entry.to])).toEqual([
+      ['games', adminPaths.games],
+      ['users', adminPaths.users],
+    ])
+    expect(system?.entries.map(entry => entry.key)).toEqual(['catalog', 'ai', 'settings'])
+  })
+
   it('marks only the overview as an exact address', () => {
     const { lead, groups } = navigationOf(pending)
     expect(lead).toEqual([
