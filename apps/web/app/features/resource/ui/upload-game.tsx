@@ -1,6 +1,6 @@
-import { Button, Image, Inline, Stack, Text } from '@hina-ui/react'
+import { Button, Inline, Stack, Text } from '@hina-ui/react'
 import { useLocale, useTranslations } from 'use-intl'
-import { gameTitle, originalTitle, primaryCover, type GameHeader } from '~/features/game'
+import { GameCover, gameTitle, originalTitle, type GameHeader } from '~/features/game'
 import { flushEnd } from '~/shared/ui/flush'
 
 export function UploadGame({ game, onChange }: { game: GameHeader; onChange: () => void }) {
@@ -10,13 +10,7 @@ export function UploadGame({ game, onChange }: { game: GameHeader; onChange: () 
   const original = originalTitle(game, locale)
   return (
     <Inline gap="md" align="center" wrap={false}>
-      <Image
-        src={primaryCover(game)?.url}
-        alt=""
-        ratio={3 / 4}
-        fit="cover"
-        className="w-12 shrink-0 rounded-md"
-      />
+      <GameCover game={game} className="w-12 shrink-0 rounded-md" />
       <Stack gap="none" className="min-w-0 flex-1">
         <Text weight="medium" truncate>
           {title}

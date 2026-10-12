@@ -1,38 +1,25 @@
-import { Image, ImageGroup, Masonry, Section, Spoiler } from '@hina-ui/react'
+import { ImageGroup, Masonry, Section } from '@hina-ui/react'
 import { useTranslations } from 'use-intl'
-import { imageSize, masked, type GameImage } from '../game'
+import { imageSize, type GameImage } from '../game'
+import { GamePicture } from './game-picture'
 
-export function GameScreenshots({
-  images,
-  contentLimit,
-}: {
-  images: GameImage[]
-  contentLimit: number
-}) {
-  const t = useTranslations('game')
+export function GameScreenshots({ images }: { images: GameImage[] }) {
+  const t = useTranslations('game.info')
   const positions = images.map((image, index) => ({ image, index }))
   return (
-    <Section title={t('info.screenshots')}>
+    <Section title={t('screenshots')}>
       <ImageGroup>
         <Masonry items={positions} getKey={entry => entry.index} minColumnWidth={240} gap="sm">
           {({ item }) => {
             const size = imageSize(item.image)
-            const screenshot = (
-              <Image
-                src={item.image.url}
-                alt={t('info.screenshot')}
+            return (
+              <GamePicture
+                picture={item.image}
+                alt={t('screenshot')}
                 ratio={size === undefined ? 16 / 9 : size.width / size.height}
                 preview
-                previewSize={size}
                 className="rounded-lg"
               />
-            )
-            return masked(item.image, contentLimit) ? (
-              <Spoiler aria-label={t('cover.explicit')} className="block rounded-lg">
-                {screenshot}
-              </Spoiler>
-            ) : (
-              screenshot
             )
           }}
         </Masonry>

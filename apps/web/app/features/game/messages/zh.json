@@ -48,7 +48,8 @@
     "readMore": "阅读完整简介"
   },
   "cover": {
-    "explicit": "成人内容，点击显示"
+    "explicit": "成人内容，点击显示",
+    "reveal": "点击显示"
   },
   "info": {
     "intro": "简介",

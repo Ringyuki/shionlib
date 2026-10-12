@@ -1,4 +1,4 @@
-import type { ResourceRule } from '~/features/game'
+import type { GameImage, ResourceRule } from '~/features/game'
 import type { ApiData } from '~/shared/api/types'
 import { isoDate, siteMonthStart } from '~/shared/i18n/site-time'
 
@@ -36,9 +36,11 @@ export const searchDelayMs = 300
 
 export const maxQueryLength = 100
 
-export type PictureShape = 'cover' | 'portrait' | 'logo'
+export type Picture =
+  | { shape: 'cover'; cover: GameImage | undefined }
+  | { shape: 'portrait' | 'logo'; src: string | undefined }
 
-export type Picture = { src: string | undefined; shape: PictureShape }
+export type PictureShape = Picture['shape']
 
 export type ReleaseMonths<Game = GameHit> = { thisMonth: Game[]; lastMonth: Game[] }
 

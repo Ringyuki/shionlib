@@ -1,5 +1,7 @@
 export { contentLimits, type ContentLimit, type Viewer } from './viewer'
 export { contentLimitFrom } from './viewer.schema'
 export { loadViewer } from './viewer.use-cases'
+export { useShowsExplicit } from './use-explicit'
 export { useLanguage } from './use-language'
 export { usePreferences } from './use-preferences'
+export { ContentLimitProvider } from './ui/content-limit-provider'

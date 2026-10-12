@@ -1,7 +1,7 @@
-import { cn, Image, Inline, Stack, Text } from '@hina-ui/react'
+import { cn, Inline, Stack, Text } from '@hina-ui/react'
 import { Link } from 'react-router'
 import { useLocale, useMessages, useTranslations } from 'use-intl'
-import { gameTitle, primaryCover } from '~/features/game'
+import { GameCover, gameTitle } from '~/features/game'
 import { labelOf } from '~/shared/i18n/labels'
 import { entryLink } from '~/shared/ui/entry-link'
 import { stateOf, walkthroughPath, writingPath, type UserWalkthrough } from '../walkthrough'
@@ -20,13 +20,7 @@ export function UserWalkthroughRow({ walkthrough, own }: UserWalkthroughRowProps
       : walkthroughPath(locale, game.id, walkthrough.id)
   return (
     <Link to={target} prefetch="intent" className={cn(entryLink, 'flex gap-4 p-3')}>
-      <Image
-        src={primaryCover(game)?.url}
-        alt=""
-        ratio={3 / 4}
-        fit="cover"
-        className="w-13.5 shrink-0 rounded-md md:w-15"
-      />
+      <GameCover game={game} className="w-13.5 shrink-0 rounded-md md:w-15" />
       <Stack gap="xs" justify="center" className="min-w-0 flex-1">
         <Inline gap="sm" align="center">
           <Text weight="medium" className="break-words">

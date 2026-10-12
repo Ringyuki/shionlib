@@ -107,6 +107,15 @@ const mountedFeedback = {
     'Feedback stays mounted: show and hide an Alert with `open`; a Callout is static content and is never toggled.',
 }
 
+const ratedPicture = {
+  selector:
+    "JSXOpeningElement[name.name='Image'] > JSXAttribute[name.name='src'] MemberExpression[property.name='url'], MemberExpression[property.name='url'][object.callee.name='primaryCover']",
+  message:
+    "A game's cover or screenshot is shown by GameCover or GamePicture (~/features/game), which keep it masked for a viewer who has adult pictures masked; its address is never given to Image by hand.",
+}
+
+const ratedPictureHome = ['app/features/game/ui/game-picture.tsx']
+
 const directFetcher = {
   selector:
     ":not(CallExpression[callee.name=/^use(Command|LazyLoad)$/]) > CallExpression[callee.name='useFetcher']",
@@ -150,6 +159,7 @@ const appSyntax = [
   ghostOnEdge,
   ownWidth,
   rawSticky,
+  ratedPicture,
   directFetcher,
   rawAddress,
   pagedListStart,
@@ -553,6 +563,12 @@ export default defineConfig([
     files: shellGeometry,
     rules: {
       'no-restricted-syntax': ['error', ...appSyntax.filter(rule => rule !== rawSticky)],
+    },
+  },
+  {
+    files: ratedPictureHome,
+    rules: {
+      'no-restricted-syntax': ['error', ...appSyntax.filter(rule => rule !== ratedPicture)],
     },
   },
 ])

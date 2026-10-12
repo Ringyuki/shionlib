@@ -1,16 +1,10 @@
-import { Card, Image, Inline, Stack, Tag, Text } from '@hina-ui/react'
+import { Card, Inline, Stack, Tag, Text } from '@hina-ui/react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { useFormatter, useLocale, useMessages, useTranslations } from 'use-intl'
 import { labelOf } from '~/shared/i18n/labels'
-import {
-  developerNames,
-  gamePath,
-  gameTitle,
-  primaryCover,
-  releaseDate,
-  type GameSummary,
-} from '../game'
+import { developerNames, gamePath, gameTitle, releaseDate, type GameSummary } from '../game'
+import { GameCover } from './game-cover'
 
 type GameTileProps = {
   game: GameSummary
@@ -37,7 +31,7 @@ export function GameTile({ game, dated, note }: GameTileProps) {
   return (
     <Card padded={false} className="hn-interactive h-full overflow-hidden">
       <Link to={gamePath(locale, game.id)} prefetch="intent" className="block h-full">
-        <Image src={primaryCover(game)?.url} alt="" ratio={3 / 4} fit="cover" />
+        <GameCover game={game} />
         <Stack gap="xs" className="p-2">
           <Text size="sm" weight="medium" className="line-clamp-2 min-h-[2lh]">
             {gameTitle(game, locale)}

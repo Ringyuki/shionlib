@@ -1,22 +1,24 @@
 import { Lightbox } from '@hina-ui/react'
 import { useTranslations } from 'use-intl'
-import type { GameImage } from '../game'
+import { useShowsExplicit } from '~/features/viewer'
+import { bannerIndex, plainPictures, type GameImage } from '../game'
 import { useGallery } from '../use-gallery'
 import { GalleryThumb } from './gallery-thumb'
 
 type GameBannerProps = {
   images: readonly GameImage[]
-  index: number
   className?: string
 }
 
-export function GameBanner({ images, index, className }: GameBannerProps) {
+export function GameBanner({ images, className }: GameBannerProps) {
   const t = useTranslations('game.info')
-  const { thumb, show, lightbox } = useGallery(images, position =>
+  const gallery = plainPictures(images, useShowsExplicit())
+  const index = bannerIndex(gallery)
+  const { thumb, show, lightbox } = useGallery(gallery, position =>
     t('viewScreenshot', { index: position + 1 }),
   )
-  const image = images[index]
-  if (image === undefined) {
+  const image = index === undefined ? undefined : gallery[index]
+  if (index === undefined || image === undefined) {
     return null
   }
   return (
@@ -24,7 +26,6 @@ export function GameBanner({ images, index, className }: GameBannerProps) {
       <GalleryThumb
         src={image.url}
         label={t('viewScreenshot', { index: index + 1 })}
-        masked={false}
         data={thumb(index)}
         onOpen={() => show(index)}
         eager

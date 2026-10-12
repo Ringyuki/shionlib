@@ -77,7 +77,7 @@ export function usePaletteEntries(palette: ReturnType<typeof useSearchPalette>):
           value: `game:${game.id}`,
           label: gameTitle(game, locale),
           description: format.list(developerNames(game)),
-          picture: { src: primaryCover(game)?.url, shape: 'cover' },
+          picture: { shape: 'cover', cover: primaryCover(game) },
           action: () => go(`/${locale}/game/${game.id}`, true),
         })),
         ...(games.length === 0

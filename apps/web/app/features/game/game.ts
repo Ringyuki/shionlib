@@ -35,8 +35,10 @@ export function primaryCover(game: Covered): Cover | undefined {
   return covers.find(cover => cover.type === 'pkgfront') ?? covers[0]
 }
 
-export function isExplicit(cover: Pick<Cover, 'sexual' | 'violence'>): boolean {
-  return cover.sexual > 0 || cover.violence > 0
+type Rated = Pick<Cover, 'sexual' | 'violence'>
+
+export function isExplicit(picture: Rated): boolean {
+  return picture.sexual > 0 || picture.violence > 0
 }
 
 export function originalTitle(game: Titled, locale: Locale): string | undefined {
@@ -73,8 +75,6 @@ export type GameTab = (typeof gameTabs)[number]
 export const introLanguages = ['zh', 'jp', 'en'] as const
 
 export type IntroLanguage = (typeof introLanguages)[number]
-
-export const contentLimitShowSpoiler = 2
 
 type Introduced = Pick<GameDetails, 'intro_zh' | 'intro_jp' | 'intro_en'>
 
@@ -135,10 +135,6 @@ export function preferredIntro(game: Introduced, locale: Locale): string {
   return first === undefined ? '' : introIn(game, first)
 }
 
-export function masked(image: Pick<Cover, 'sexual' | 'violence'>, contentLimit: number): boolean {
-  return contentLimit === contentLimitShowSpoiler && isExplicit(image)
-}
-
 export function groupStaff(
   staffs: readonly Schema<'GameStaffDTO'>[],
 ): { role: string; names: string[] }[] {
@@ -177,10 +173,14 @@ export function gameDescription(game: Introduced, locale: Locale): string {
   return intro.length <= descriptionLength ? intro : `${intro.slice(0, descriptionLength - 1)}…`
 }
 
-export function bannerIndex(
-  images: readonly GameImage[],
-  contentLimit: number,
-): number | undefined {
-  const index = images.findIndex(image => !masked(image, contentLimit) && !isExplicit(image))
+export function plainPictures<Picture extends Rated>(
+  pictures: readonly Picture[],
+  showsExplicit: boolean,
+): Picture[] {
+  return showsExplicit ? [...pictures] : pictures.filter(picture => !isExplicit(picture))
+}
+
+export function bannerIndex(images: readonly GameImage[]): number | undefined {
+  const index = images.findIndex(image => !isExplicit(image))
   return index === -1 ? undefined : index
 }

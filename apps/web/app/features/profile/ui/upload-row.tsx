@@ -1,7 +1,7 @@
-import { cn, Image, Inline, Stack, Tag, Text } from '@hina-ui/react'
+import { cn, Inline, Stack, Tag, Text } from '@hina-ui/react'
 import { Link } from 'react-router'
 import { useFormatter, useLocale, useMessages, useTranslations } from 'use-intl'
-import { gameTitle, PlatformTag, primaryCover } from '~/features/game'
+import { GameCover, gameTitle, PlatformTag } from '~/features/game'
 import { labelOf } from '~/shared/i18n/labels'
 import { entryLink } from '~/shared/ui/entry-link'
 import { otherFiles, uploadPath, type Upload } from '../profile'
@@ -18,13 +18,7 @@ export function UploadRow({ upload }: { upload: Upload }) {
       prefetch="intent"
       className={cn(entryLink, 'flex gap-4 p-3')}
     >
-      <Image
-        src={primaryCover(upload.game)?.url}
-        alt=""
-        ratio={3 / 4}
-        fit="cover"
-        className="w-13.5 shrink-0 rounded-md md:w-15"
-      />
+      <GameCover game={upload.game} className="w-13.5 shrink-0 rounded-md md:w-15" />
       <Stack gap="xs" className="min-w-0 flex-1">
         <Text weight="medium" className="break-words">
           {gameTitle(upload.game, locale)}

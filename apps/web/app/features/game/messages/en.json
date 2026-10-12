@@ -48,7 +48,8 @@
     "readMore": "Read the full description"
   },
   "cover": {
-    "explicit": "Adult content, click to show"
+    "explicit": "Adult content, click to show",
+    "reveal": "Click to show"
   },
   "info": {
     "intro": "Description",

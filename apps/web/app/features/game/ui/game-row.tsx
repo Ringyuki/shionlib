@@ -1,10 +1,11 @@
-import { Card, Image, Inline, Stack, Tag, Text } from '@hina-ui/react'
+import { Card, Inline, Stack, Tag, Text } from '@hina-ui/react'
 import { Link } from 'react-router'
 import { useFormatter, useLocale, useMessages, useTranslations } from 'use-intl'
 import type { Schema } from '~/shared/api/types'
 import { labelOf } from '~/shared/i18n/labels'
+import { developerNames, gameTitle, originalTitle, releaseDate } from '../game'
+import { GameCover } from './game-cover'
 import { PlatformTag } from './platform-tag'
-import { developerNames, gameTitle, originalTitle, primaryCover, releaseDate } from '../game'
 
 type GameRowProps = {
   game: Schema<'GameCardDTO'>
@@ -26,13 +27,7 @@ export function GameRow({ game }: GameRowProps) {
     <Card padded={false} className="hn-interactive overflow-hidden">
       <Link to={`/${locale}/game/${game.id}`} prefetch="intent">
         <Inline gap="md" align="stretch" wrap={false} className="p-3">
-          <Image
-            src={primaryCover(game)?.url}
-            alt=""
-            ratio={3 / 4}
-            fit="cover"
-            className="w-22 shrink-0 rounded-md"
-          />
+          <GameCover game={game} className="w-22 shrink-0 rounded-md" />
           <Stack justify="between" className="min-w-0 flex-1">
             <Stack gap="xs">
               <Text weight="medium" truncate>

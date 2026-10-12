@@ -1,6 +1,6 @@
 import { Combobox, type SelectItems } from '@hina-ui/react'
 import { useFormatter, useLocale, useTranslations } from 'use-intl'
-import { developerNames, gameTitle, primaryCover } from '~/features/game'
+import { developerNames, gameTitle, primaryCover, type GameImage } from '~/features/game'
 import type { GameHit } from '../search'
 import { useGameOptions } from '../use-game-options'
 import { PictureOption } from './picture-option'
@@ -13,7 +13,7 @@ type GamePickerProps = {
 type GameChoice = {
   value: number
   label: string
-  cover: string | undefined
+  cover: GameImage | undefined
   developers: string
 }
 
@@ -25,7 +25,7 @@ export function GamePicker({ onPick, invalid }: GamePickerProps) {
   const choice = (game: GameHit): GameChoice => ({
     value: game.id,
     label: gameTitle(game, locale),
-    cover: primaryCover(game)?.url,
+    cover: primaryCover(game),
     developers: format.list(developerNames(game)),
   })
   const released = [
@@ -52,7 +52,7 @@ export function GamePicker({ onPick, invalid }: GamePickerProps) {
         <PictureOption
           name={option.label}
           detail={option.developers}
-          picture={{ src: option.cover, shape: 'cover' }}
+          picture={{ shape: 'cover', cover: option.cover }}
         />
       )}
       loading={loading}

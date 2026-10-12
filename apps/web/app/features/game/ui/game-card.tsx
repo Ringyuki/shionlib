@@ -1,4 +1,4 @@
-import { Card, Image, Inline, Stack, Tag, Text, Time } from '@hina-ui/react'
+import { Card, Inline, Stack, Tag, Text, Time } from '@hina-ui/react'
 import { Hash } from 'lucide-react'
 import { Link } from 'react-router'
 import { useFormatter, useLocale, useMessages, useTranslations } from 'use-intl'
@@ -9,10 +9,10 @@ import {
   gamePath,
   gameTitle,
   originalTitle,
-  primaryCover,
   releaseDate,
   type GameSummary,
 } from '../game'
+import { GameCover } from './game-cover'
 import { PlatformTag } from './platform-tag'
 
 export function GameCard({ game }: { game: GameSummary }) {
@@ -29,13 +29,7 @@ export function GameCard({ game }: { game: GameSummary }) {
       <Link to={gamePath(locale, game.id)} prefetch="intent" className="block h-full">
         <Stack gap="sm" justify="between" className="h-full p-3">
           <Inline gap="md" align="start" wrap={false}>
-            <Image
-              src={primaryCover(game)?.url}
-              alt=""
-              ratio={3 / 4}
-              fit="cover"
-              className="w-18.75 shrink-0 rounded-md"
-            />
+            <GameCover game={game} className="w-18.75 shrink-0 rounded-md" />
             <Stack gap="xs" className="min-w-0">
               <Text weight="medium" className="line-clamp-2">
                 {gameTitle(game, locale)}

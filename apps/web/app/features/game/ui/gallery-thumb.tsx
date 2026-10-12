@@ -1,11 +1,9 @@
-import { Card, cn, Image, Ripple, Spoiler } from '@hina-ui/react'
-import { useTranslations } from 'use-intl'
+import { Card, cn, Image, Ripple } from '@hina-ui/react'
 
 type GalleryThumbProps = {
   src: string
   label: string
   ratio?: number
-  masked: boolean
   data: Record<`data-${string}`, string>
   onOpen: () => void
   eager?: boolean
@@ -17,15 +15,13 @@ export function GalleryThumb({
   src,
   label,
   ratio,
-  masked,
   data,
   onOpen,
   eager = false,
   className,
   imageClass,
 }: GalleryThumbProps) {
-  const t = useTranslations('game.cover')
-  const thumb = (
+  return (
     <Card
       as="button"
       padded={false}
@@ -48,12 +44,5 @@ export function GalleryThumb({
         {...data}
       />
     </Card>
-  )
-  return masked ? (
-    <Spoiler aria-label={t('explicit')} className={cn('block w-full overflow-hidden', className)}>
-      {thumb}
-    </Spoiler>
-  ) : (
-    thumb
   )
 }

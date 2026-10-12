@@ -28,9 +28,7 @@ export function GameInfo({ details, entry }: { details: GameDetails; entry: numb
     <Stack gap="xl">
       <GameIntro details={details} />
       {tags.length > 0 && <GameTags tags={tags} />}
-      {images.length > 0 && (
-        <GameScreenshots images={images} contentLimit={details.content_limit} />
-      )}
+      {images.length > 0 && <GameScreenshots images={images} />}
       {staff.length > 0 && (
         <Section title={t('staff')}>
           <DescriptionList orientation="horizontal">

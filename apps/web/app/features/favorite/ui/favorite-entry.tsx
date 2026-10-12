@@ -1,8 +1,8 @@
-import { cn, DropdownMenu, DropdownMenuItem, Image, Inline, Stack, Text } from '@hina-ui/react'
+import { cn, DropdownMenu, DropdownMenuItem, Inline, Stack, Text } from '@hina-ui/react'
 import { BookmarkMinus, Ellipsis, NotebookPen } from 'lucide-react'
 import { Link } from 'react-router'
 import { useFormatter, useLocale, useTranslations } from 'use-intl'
-import { developerNames, gamePath, gameTitle, primaryCover } from '~/features/game'
+import { developerNames, GameCover, gamePath, gameTitle } from '~/features/game'
 import { Button } from '~/shared/ui/button'
 import { entryLink } from '~/shared/ui/entry-link'
 import type { FavoriteItem } from '../favorite'
@@ -27,13 +27,7 @@ export function FavoriteEntry({ item, onEditNote, onRemove }: FavoriteEntryProps
         prefetch="intent"
         className={cn(entryLink, 'flex min-w-0 flex-1 gap-4 p-3')}
       >
-        <Image
-          src={primaryCover(item.game)?.url}
-          alt=""
-          ratio={3 / 4}
-          fit="cover"
-          className="w-13.5 shrink-0 rounded-md md:w-15"
-        />
+        <GameCover game={item.game} className="w-13.5 shrink-0 rounded-md md:w-15" />
         <Stack gap="xs" justify="center" className="min-w-0 flex-1">
           <Text weight="medium" className="break-words">
             {title}

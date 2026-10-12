@@ -5,6 +5,7 @@ import zh from './messages/zh.json'
 import type { Schema } from '~/shared/api/types'
 import {
   bannerIndex,
+  plainPictures,
   type Platform,
   type ResourceLanguage,
   developerNames,
@@ -101,9 +102,23 @@ describe('bannerIndex', () => {
   const image = (sexual: number) => ({ url: `${sexual}`, dims: null, sexual, violence: 0 })
 
   it('picks the first image that is safe to show large', () => {
-    expect(bannerIndex([image(1), image(0)], 3)).toBe(1)
-    expect(bannerIndex([image(1)], 2)).toBeUndefined()
-    expect(bannerIndex([], 0)).toBeUndefined()
+    expect(bannerIndex([image(1), image(0)])).toBe(1)
+    expect(bannerIndex([image(1)])).toBeUndefined()
+    expect(bannerIndex([])).toBeUndefined()
+  })
+})
+
+describe('plainPictures', () => {
+  const image = (sexual: number, violence = 0) => ({
+    url: `${sexual}${violence}`,
+    sexual,
+    violence,
+  })
+
+  it('leaves out what a viewer sees behind a mask', () => {
+    const pictures = [image(0), image(1), image(0, 2), image(0)]
+    expect(plainPictures(pictures, false).map(picture => picture.url)).toEqual(['00', '00'])
+    expect(plainPictures(pictures, true)).toEqual(pictures)
   })
 })
 

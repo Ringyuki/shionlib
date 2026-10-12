@@ -4,14 +4,22 @@ import { useLocale } from 'use-intl'
 import type { ResourceSummary } from '~/features/resource'
 import { BBCodeText } from '~/shared/ui/bbcode-text'
 import { CatalogAttribution } from '~/shared/ui/catalog-attribution'
-import { bannerIndex, gameTitle, originalTitle, type GameHeader, type GameImage } from '../game'
+import {
+  bannerIndex,
+  coverRatio,
+  gameTitle,
+  originalTitle,
+  primaryCover,
+  type GameHeader,
+  type GameImage,
+} from '../game'
 import { scoreSites, type Scores } from '../game-score'
 import { GameActions } from './game-actions'
 import { GameAliases } from './game-aliases'
 import { GameBanner } from './game-banner'
 import { GameByline } from './game-byline'
 import { GameChips } from './game-chips'
-import { GameCover } from './game-covers'
+import { GamePicture } from './game-picture'
 import { GameScores } from './game-scores'
 
 type GameHeroProps = {
@@ -27,13 +35,11 @@ export function GameHero({ game, images, intro, scores, resources, favorite }: G
   const locale = useLocale()
   const title = gameTitle(game, locale)
   const original = originalTitle(game, locale)
-  const banner = bannerIndex(images, game.content_limit)
-  const staged = banner !== undefined
+  const cover = primaryCover(game)
+  const staged = bannerIndex(images) !== undefined
   return (
     <Stack as="header" gap="none">
-      {staged && (
-        <GameBanner images={images} index={banner} className="h-44 rounded-2xl sm:h-64 lg:h-80" />
-      )}
+      {staged && <GameBanner images={images} className="h-44 rounded-2xl sm:h-64 lg:h-80" />}
       <Grid
         className={cn(
           'grid-cols-[6.5rem_minmax(0,1fr)] gap-x-4 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-x-6 lg:grid-cols-[12rem_minmax(0,1fr)] lg:gap-x-8',
@@ -46,9 +52,12 @@ export function GameHero({ game, images, intro, scores, resources, favorite }: G
             staged && '-mt-12 sm:-mt-20 lg:-mt-24',
           )}
         >
-          <GameCover
-            game={game}
+          <GamePicture
+            picture={cover}
             alt={title}
+            ratio={coverRatio(cover)}
+            preview={cover !== undefined}
+            eager
             className={cn('rounded-xl', staged && 'ring-4 ring-canvas')}
           />
         </Stack>
