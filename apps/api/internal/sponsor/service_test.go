@@ -35,7 +35,7 @@ func newFixture(enabled bool) fixture {
 	repo.AddUser(user.Summary{ID: member.UserID, Name: "member"})
 	provider := sponsortest.NewProvider()
 	cache := sponsortest.NewCache()
-	options := sponsor.Options{Provider: "idatariver", CallbackURL: "https://shionlib.test/api/sponsor/webhook/idatariver"}
+	options := sponsor.Options{Provider: "idatariver", CallbackURL: "https://shionlib.test/api/sponsor/webhook/idatariver", ClockOffset: 8 * time.Hour}
 	settings := settingtest.Set(settingtest.Source{}, sponsor.Enabled, enabled)
 	service := sponsor.NewService(repo, provider, cache, &txtest.Immediate{}, sponsortest.Signer{}, settings, options, func() time.Time { return now })
 	return fixture{repo: repo, provider: provider, cache: cache, service: service}
@@ -315,6 +315,31 @@ func TestAdminStatusAndDelete(t *testing.T) {
 	}
 	if err := f.service.AdminDelete(ctx, order.ID); !errors.Is(err, sponsor.ErrOrderNotFound) {
 		t.Fatalf("double delete: %v", err)
+	}
+}
+
+func TestOverviewCountsTheMonthOnTheSiteClock(t *testing.T) {
+	f := newFixture(false)
+	monthBegins := time.Date(2026, 9, 30, 16, 0, 0, 0, time.UTC)
+	for i, order := range []sponsor.Order{
+		{AmountCents: 300, Status: sponsor.StatusDone, PaidAt: ptr(monthBegins.Add(-time.Minute))},
+		{AmountCents: 500, Status: sponsor.StatusDone, PaidAt: ptr(monthBegins)},
+		{AmountCents: 700, Status: sponsor.StatusDone, PaidAt: ptr(now)},
+		{AmountCents: 900, Status: sponsor.StatusNew},
+		{AmountCents: 1100, Status: sponsor.StatusRefund, PaidAt: ptr(now)},
+	} {
+		order.ProviderOrderID = "idr-" + strconv.Itoa(i)
+		f.repo.Seed(order)
+	}
+	overview, err := f.service.Overview(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if overview.Totals != (sponsor.Stats{TotalSponsors: 3, TotalAmountCents: 1500}) || overview.MonthAmountCents != 1200 || overview.Enabled {
+		t.Fatalf("overview %+v", overview)
+	}
+	if open, err := newFixture(true).service.Overview(context.Background()); err != nil || !open.Enabled || open.MonthAmountCents != 0 {
+		t.Fatalf("an open module without orders: %+v %v", open, err)
 	}
 }
 

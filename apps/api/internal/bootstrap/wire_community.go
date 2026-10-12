@@ -18,6 +18,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/sponsorpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/pvnapi"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/s3store"
+	"github.com/Ringyuki/shionlib/apps/api/internal/admin"
 	"github.com/Ringyuki/shionlib/apps/api/internal/analysis"
 	"github.com/Ringyuki/shionlib/apps/api/internal/backup"
 	"github.com/Ringyuki/shionlib/apps/api/internal/moyu"
@@ -52,6 +53,7 @@ func wireCommunity(_ *Infra, shared *Shared, modules *Modules) {
 		sponsor.Options{
 			Provider:    cfg.Sponsor.Provider,
 			CallbackURL: strings.TrimSuffix(cfg.App.SiteURL, "/") + "/api/sponsor/webhook/idatariver",
+			ClockOffset: admin.StatsDayOffset,
 		},
 		shared.Now,
 	)

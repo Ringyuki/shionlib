@@ -210,7 +210,7 @@ func TestAdminRoutes(t *testing.T) {
 
 	stats := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/admin/sponsor/stats", As: &admin})
 	e.server.Expect(stats, http.StatusOK, 0)
-	if string(stats.Data) != `{"totalSponsors":1,"totalAmount":2}` {
+	if string(stats.Data) != `{"totalSponsors":1,"totalAmount":2,"monthAmount":2,"enabled":true}` {
 		t.Fatalf("unexpected admin stats %s", stats.Data)
 	}
 

@@ -189,6 +189,17 @@ type Stats struct {
 	TotalAmountCents int64
 }
 
+type Overview struct {
+	Totals           Stats
+	MonthAmountCents int64
+	Enabled          bool
+}
+
+func monthStart(now time.Time, clockOffset time.Duration) time.Time {
+	local := now.UTC().Add(clockOffset)
+	return time.Date(local.Year(), local.Month(), 1, 0, 0, 0, 0, time.UTC).Add(-clockOffset)
+}
+
 type ListFilter struct {
 	Status *Status
 }

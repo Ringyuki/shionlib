@@ -1338,6 +1338,36 @@
         ],
         "type": "object"
       },
+      "AdminSponsorStatsDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "description": "Whether new sponsor orders are accepted",
+            "type": "boolean"
+          },
+          "monthAmount": {
+            "description": "Paid since the month began on the site's clock",
+            "format": "double",
+            "type": "number"
+          },
+          "totalAmount": {
+            "format": "double",
+            "type": "number"
+          },
+          "totalSponsors": {
+            "description": "Completed orders",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "totalSponsors",
+          "totalAmount",
+          "monthAmount",
+          "enabled"
+        ],
+        "type": "object"
+      },
       "AdminStatsOverviewDTO": {
         "additionalProperties": false,
         "properties": {
@@ -8873,6 +8903,39 @@
           },
           "data": {
             "$ref": "#/components/schemas/AdminPendingDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeAdminSponsorStatsDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdminSponsorStatsDTO"
           },
           "message": {
             "type": "string"
@@ -26719,7 +26782,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopeSponsorStatsDTO"
+                  "$ref": "#/components/schemas/EnvelopeAdminSponsorStatsDTO"
                 }
               }
             },
@@ -26751,7 +26814,7 @@
             "accessCookie": []
           }
         ],
-        "summary": "Sponsorship totals",
+        "summary": "Sponsorship totals, what was paid this month and whether orders are accepted",
         "tags": [
           "sponsor",
           "admin"

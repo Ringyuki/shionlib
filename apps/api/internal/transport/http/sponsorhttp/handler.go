@@ -38,7 +38,7 @@ func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "sponsor.admin.order", Method: http.MethodGet, Path: "/admin/sponsor/orders/{id}", Summary: "Get a sponsor order", Tags: adminTags, Access: httpapi.AccessAdmin}, h.adminOrder)
 	httpapi.Register(api, httpapi.Route{ID: "sponsor.admin.updateStatus", Method: http.MethodPatch, Path: "/admin/sponsor/orders/{id}/status", Summary: "Override a sponsor order status", Tags: adminTags, Access: httpapi.AccessAdmin}, h.adminUpdateStatus)
 	httpapi.Register(api, httpapi.Route{ID: "sponsor.admin.delete", Method: http.MethodDelete, Path: "/admin/sponsor/orders/{id}", Summary: "Delete a sponsor order", Tags: adminTags, Access: httpapi.AccessAdmin}, h.adminDelete)
-	httpapi.Register(api, httpapi.Route{ID: "sponsor.admin.stats", Method: http.MethodGet, Path: "/admin/sponsor/stats", Summary: "Sponsorship totals", Tags: adminTags, Access: httpapi.AccessAdmin}, h.stats)
+	httpapi.Register(api, httpapi.Route{ID: "sponsor.admin.stats", Method: http.MethodGet, Path: "/admin/sponsor/stats", Summary: "Sponsorship totals, what was paid this month and whether orders are accepted", Tags: adminTags, Access: httpapi.AccessAdmin}, h.adminStats)
 }
 
 func (h *Handler) create(ctx context.Context, in *createSponsorOrderInput) (*response.Output[sponsorOrderCreatedDTO], error) {
@@ -102,6 +102,14 @@ func (h *Handler) webhook(ctx context.Context, in *sponsorWebhookInput) (*respon
 		}
 	}
 	return response.OK(ctx, h.resp, sponsorWebhookDTO{Received: true}), nil
+}
+
+func (h *Handler) adminStats(ctx context.Context, _ *struct{}) (*response.Output[adminSponsorStatsDTO], error) {
+	overview, err := h.service.Overview(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return response.OK(ctx, h.resp, toAdminStatsDTO(overview)), nil
 }
 
 func (h *Handler) adminList(ctx context.Context, in *listSponsorOrdersInput) (*response.Output[response.Page[sponsorOrderDTO]], error) {

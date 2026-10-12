@@ -16,6 +16,7 @@ type Repository interface {
 	List(ctx context.Context, filter ListFilter, page Page) ([]Order, int, error)
 	Wall(ctx context.Context, page Page) ([]WallEntry, int, error)
 	Stats(ctx context.Context) (Stats, error)
+	PaidSince(ctx context.Context, since time.Time) (int64, error)
 	ExpireStale(ctx context.Context, now time.Time) (int, error)
 	ExtendSponsorship(ctx context.Context, userID int, by time.Duration, now time.Time) error
 }

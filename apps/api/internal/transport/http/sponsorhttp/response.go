@@ -58,6 +58,22 @@ type sponsorStatsDTO struct {
 	TotalAmount   float64 `json:"totalAmount"`
 }
 
+type adminSponsorStatsDTO struct {
+	TotalSponsors int     `json:"totalSponsors" doc:"Completed orders"`
+	TotalAmount   float64 `json:"totalAmount"`
+	MonthAmount   float64 `json:"monthAmount" doc:"Paid since the month began on the site's clock"`
+	Enabled       bool    `json:"enabled" doc:"Whether new sponsor orders are accepted"`
+}
+
+func toAdminStatsDTO(overview sponsor.Overview) adminSponsorStatsDTO {
+	return adminSponsorStatsDTO{
+		TotalSponsors: overview.Totals.TotalSponsors,
+		TotalAmount:   sponsor.Amount(overview.Totals.TotalAmountCents),
+		MonthAmount:   sponsor.Amount(overview.MonthAmountCents),
+		Enabled:       overview.Enabled,
+	}
+}
+
 type sponsorWebhookDTO struct {
 	Received bool `json:"received"`
 }

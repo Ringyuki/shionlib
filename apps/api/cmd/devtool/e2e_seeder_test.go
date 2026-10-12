@@ -80,6 +80,7 @@ func TestE2EPrepareReproducesTheLegacyDatasetIdempotently(t *testing.T) {
 		"malware_scan_cases":             1,
 		"catalog_source_links":           9,
 		"catalog_sync_cursors":           1,
+		"sponsor_orders":                 5,
 		"settings":                       3,
 		"setting_changes":                3,
 		"ai_providers":                   2,

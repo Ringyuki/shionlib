@@ -171,6 +171,13 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if stats.TotalSponsors != 3 || stats.TotalAmountCents != 2734 {
 			t.Fatalf("unexpected stats %+v", stats)
 		}
+		since, err := env.Repo.PaidSince(ctx, at.Add(time.Hour))
+		if err != nil || since != 1734 {
+			t.Fatalf("paid from the second payment on: %d %v", since, err)
+		}
+		if later, err := env.Repo.PaidSince(ctx, at.Add(3*time.Hour)); err != nil || later != 0 {
+			t.Fatalf("nothing was paid later: %d %v", later, err)
+		}
 	})
 
 	t.Run("expire stale only touches new orders past their expiry", func(t *testing.T) {

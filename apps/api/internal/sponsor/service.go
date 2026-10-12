@@ -185,6 +185,18 @@ func (s *Service) Stats(ctx context.Context) (Stats, error) {
 	return s.repo.Stats(ctx)
 }
 
+func (s *Service) Overview(ctx context.Context) (Overview, error) {
+	totals, err := s.repo.Stats(ctx)
+	if err != nil {
+		return Overview{}, err
+	}
+	month, err := s.repo.PaidSince(ctx, monthStart(s.now(), s.options.ClockOffset))
+	if err != nil {
+		return Overview{}, err
+	}
+	return Overview{Totals: totals, MonthAmountCents: month, Enabled: Enabled.Read(s.settings)}, nil
+}
+
 func (s *Service) ExpireStaleOrders(ctx context.Context) error {
 	_, err := s.repo.ExpireStale(ctx, s.now())
 	return err
@@ -274,4 +286,5 @@ func sponsorshipFor(amountCents int64) time.Duration {
 type Options struct {
 	Provider    string
 	CallbackURL string
+	ClockOffset time.Duration
 }

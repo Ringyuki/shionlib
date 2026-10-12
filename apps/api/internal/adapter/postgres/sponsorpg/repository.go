@@ -214,6 +214,29 @@ func (r *Repository) Stats(ctx context.Context) (sponsor.Stats, error) {
 	return sponsor.Stats{TotalSponsors: count, TotalAmountCents: cents}, nil
 }
 
+func (r *Repository) PaidSince(ctx context.Context, since time.Time) (int64, error) {
+	rows, err := r.db(ctx).QueryContext(ctx, `SELECT COALESCE(SUM(amount), 0)::text FROM sponsor_orders WHERE status = 'DONE' AND paid_at >= $1`, since)
+	if err != nil {
+		return 0, fmt.Errorf("sum paid sponsor orders: %w", err)
+	}
+	defer func() {
+		_ = rows.Close()
+	}()
+	var sum string
+	if rows.Next() {
+		if err := rows.Scan(&sum); err != nil {
+			return 0, fmt.Errorf("scan paid sponsor orders: %w", err)
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return 0, fmt.Errorf("read paid sponsor orders: %w", err)
+	}
+	if sum == "" {
+		return 0, nil
+	}
+	return parseCents(sum)
+}
+
 func (r *Repository) ExpireStale(ctx context.Context, now time.Time) (int, error) {
 	count, err := r.db(ctx).SponsorOrder.Update().
 		Where(sponsororder.StatusEQ(sponsororder.StatusNEW), sponsororder.ExpiresAtLT(now)).

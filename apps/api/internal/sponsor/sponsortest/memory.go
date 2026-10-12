@@ -194,6 +194,18 @@ func (r *MemoryRepository) Stats(_ context.Context) (sponsor.Stats, error) {
 	return stats, nil
 }
 
+func (r *MemoryRepository) PaidSince(_ context.Context, since time.Time) (int64, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var cents int64
+	for _, order := range r.orders {
+		if order.Status == sponsor.StatusDone && order.PaidAt != nil && !order.PaidAt.Before(since) {
+			cents += order.AmountCents
+		}
+	}
+	return cents, nil
+}
+
 func (r *MemoryRepository) ExpireStale(_ context.Context, now time.Time) (int, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()

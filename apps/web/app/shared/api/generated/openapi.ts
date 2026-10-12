@@ -1179,7 +1179,7 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** Sponsorship totals */
+        /** Sponsorship totals, what was paid this month and whether orders are accepted */
         get: operations["sponsor.admin.stats"];
         put?: never;
         post?: never;
@@ -4098,6 +4098,22 @@ export type components = {
              */
             walkthroughs: number;
         };
+        AdminSponsorStatsDTO: {
+            /** @description Whether new sponsor orders are accepted */
+            enabled: boolean;
+            /**
+             * Format: double
+             * @description Paid since the month began on the site's clock
+             */
+            monthAmount: number;
+            /** Format: double */
+            totalAmount: number;
+            /**
+             * Format: int64
+             * @description Completed orders
+             */
+            totalSponsors: number;
+        };
         AdminStatsOverviewDTO: {
             /** Format: int64 */
             downloadsToday: number;
@@ -6055,6 +6071,16 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["AdminPendingDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeAdminSponsorStatsDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["AdminSponsorStatsDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -12272,7 +12298,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["EnvelopeSponsorStatsDTO"];
+                    "application/json": components["schemas"]["EnvelopeAdminSponsorStatsDTO"];
                 };
             };
             /** @description Error */
