@@ -1,7 +1,7 @@
 ---
 title: Downloading with LunaBox
 banner: 'https://images.yurari.moe/galgame/10568/hak8bxrz_2.png'
-description: 'Learn how to enable LunaBox in the Shionlib push menu and send game downloads directly to the LunaBox desktop app.'
+description: 'Learn how to enable LunaBox in the Shionlib download menu and send game downloads directly to the LunaBox desktop app.'
 date: 2026-03-11
 author_uid: 1
 author_name: 'ringyuki'
@@ -45,22 +45,26 @@ You can also refer to the [LunaBox documentation](https://box.lunarain.site/feat
 
 ## Disabling or Enabling LunaBox in Shionlib
 
-LunaBox appears in the push menu by default. To disable it:
+LunaBox appears in the download menu by default. To disable it:
 
-1. Open **Settings** → **Download** (or go to `/user/settings/download`)
-2. Find the **LunaBox** section
-3. Turn off **Show LunaBox in the push menu**
+1. Open **Settings** → **Downloads** (or go to `/user/settings/download`)
+2. Find **LunaBox** under **Game managers**
+3. Turn off its switch
 
-Once disabled, the LunaBox entry no longer appears in the push menu of the download panel.
+Once disabled, the LunaBox entry no longer appears in the download menu. On the same page, you can also set **Send to LunaBox** as the default download method, after which clicking the **Download** button pushes directly.
+
+![The game managers in the download settings](/assets/images/account-settings/en/download@2x.webp)
 
 ## Using LunaBox to Download
 
-1. On any game page, click **Download** to open the download panel
-2. Find the resource and file you want
-3. Click the **paper plane icon** button on the right of the file row to open the push menu
-4. Choose **LunaBox** to push the download to it
-5. If a Turnstile verification is required, complete it in the popup — LunaBox will receive the task automatically once verified
+1. Open any game page and find the resource and file you want in the **Downloads** tab
+2. Click the arrow beside the **Download** button on the right of the file to open the **Other ways to download** menu
+3. Choose **Send to LunaBox** in the menu to push the download to it
+4. The page completes the human verification by itself — LunaBox will receive the task automatically once verified
+5. When the browser asks whether to open LunaBox, choose to allow it
 6. Switch to LunaBox — the download will have started
+
+![Sending a download to LunaBox from the menu](/assets/images/download-games/en/download-menu@2x.webp)
 
 LunaBox receives the following information with each push:
 
@@ -72,11 +76,11 @@ LunaBox receives the following information with each push:
 | File size       | Exact byte count for validation            |
 | Checksum        | SHA-256 or BLAKE3 hash for integrity check |
 | Game title      | Japanese title of the game                 |
-| Metadata source | Bangumi (for library matching)             |
+| Metadata source | Hikarinagi (for library matching)          |
 
 ## Troubleshooting
 
-**Nothing happens after choosing LunaBox in the push menu**
+**Nothing happens after choosing LunaBox in the download menu**
 
 First check whether the `lunabox://` protocol is registered correctly:
 
@@ -92,8 +96,8 @@ After running the command, restart LunaBox and try again.
 
 **Can it download if LunaBox was not opened in advance**
 
-Yes. As long as the protocol is registered, choosing LunaBox in the Shionlib push menu will launch LunaBox automatically and pass the current download request to it.
+Yes. As long as the protocol is registered, choosing LunaBox in the Shionlib download menu will launch LunaBox automatically and pass the current download request to it.
 
-**Turnstile verification does not complete**
+**The download does not start after the human verification**
 
-The Turnstile popup closes automatically after you solve it. If the download still does not start, open the push menu and choose LunaBox again — the signed link is cached for your session so you will not need to verify again.
+Once the human verification passes, the page hands the task to LunaBox automatically. If the download still does not start, open the download menu and choose **Send to LunaBox** again.

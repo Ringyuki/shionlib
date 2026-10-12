@@ -1,5 +1,5 @@
 import * as v from 'valibot'
-import { categories, type Category, type Doc, type DocRef } from './docs'
+import { categories, type Category, type Doc, type DocRef, type PictureSize } from './docs'
 
 const category = v.picklist(categories)
 
@@ -41,4 +41,17 @@ export function docFrom(ref: DocRef, value: unknown): Doc | undefined {
         ? undefined
         : { id: output.author_uid, name: output.author_name, avatar: output.author_avatar },
   }
+}
+
+const extent = v.pipe(
+  v.union([v.number(), v.pipe(v.string(), v.digits(), v.toNumber())]),
+  v.finite(),
+  v.minValue(1),
+)
+
+const pictureSize = v.object({ width: extent, height: extent })
+
+export function pictureSizeFrom(value: unknown): PictureSize | undefined {
+  const parsed = v.safeParse(pictureSize, value)
+  return parsed.success ? parsed.output : undefined
 }

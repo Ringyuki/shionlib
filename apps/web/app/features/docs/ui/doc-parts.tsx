@@ -15,6 +15,7 @@ import { isValidElement, type ComponentProps } from 'react'
 import { Link as RouterLink } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 import { isSitePath, sitePath } from '../docs'
+import { pictureSizeFrom } from '../docs.schema'
 
 function DocLink({ href = '', children }: ComponentProps<'a'>) {
   const locale = useLocale()
@@ -51,8 +52,17 @@ function DocTable({ children }: ComponentProps<'table'>) {
   )
 }
 
-function DocImage({ src, alt = '' }: ComponentProps<'img'>) {
-  return <Image src={src} alt={alt} preview />
+function DocImage({ src, alt = '', width, height }: ComponentProps<'img'>) {
+  const size = pictureSizeFrom({ width, height })
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      ratio={size === undefined ? undefined : size.width / size.height}
+      style={size === undefined ? undefined : { maxWidth: size.width }}
+      preview
+    />
+  )
 }
 
 function MenuMark() {

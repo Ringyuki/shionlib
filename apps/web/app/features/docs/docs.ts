@@ -27,6 +27,11 @@ export type DocLink = DocRef & {
   title: string
 }
 
+export type PictureSize = {
+  width: number
+  height: number
+}
+
 export function docsPath(locale: Locale): string {
   return `/${locale}/docs`
 }
@@ -37,6 +42,16 @@ export function docPath(locale: Locale, doc: DocRef): string {
 
 export function sameDoc(a: DocRef, b: DocRef): boolean {
   return a.category === b.category && a.name === b.name
+}
+
+const retired: readonly DocRef[] = [
+  { category: 'guides', name: 'edit-history-and-undo' },
+  { category: 'guides', name: 'edit-info' },
+  { category: 'guides', name: 'potatovn-sync' },
+]
+
+export function isRetired(doc: DocRef): boolean {
+  return retired.some(entry => sameDoc(entry, doc))
 }
 
 export function inOrder<Entry extends DocRef & { date: string }>(docs: readonly Entry[]): Entry[] {

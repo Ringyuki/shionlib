@@ -15,7 +15,7 @@ test('lists the documents by category and opens one from its card', async ({ pag
   await expect(page).toHaveURL(/\/zh\/docs$/)
   await expect(page).toHaveTitle('文档 | Shionlib')
   await expect(page.getByRole('heading', { level: 2 })).toHaveText(['指南', '关于', '开发'])
-  await expect(page.locator('section a')).toHaveCount(17)
+  await expect(page.locator('section a')).toHaveCount(14)
 
   await page.getByRole('link', { name: /如何下载游戏/ }).click()
   await expect(page).toHaveURL(/\/zh\/docs\/guides\/download-games$/)
@@ -71,6 +71,7 @@ test('follows a link from one document to another and walks to its neighbours', 
   await page.waitForLoadState('networkidle')
   await page.getByRole('article').getByRole('link', { name: '常见引擎与模拟器对照' }).click()
   await expect(page).toHaveURL(/\/zh\/docs\/guides\/common-vn-engines-and-emulators$/)
+  await expect(title(page)).toHaveText('常见引擎与模拟器对照')
   const walk = page.getByRole('article').locator('a[rel="prev"], a[rel="next"]')
   await expect(walk).toHaveCount(2)
   const next = page.getByRole('article').locator('a[rel="next"]')
@@ -95,6 +96,18 @@ test.describe('on a phone', () => {
     await expect(page).toHaveURL(/\/zh\/docs\/about\/about-shionlib$/)
     await expect(title(page)).toHaveText('关于 Shionlib')
   })
+})
+
+test('leads from the address of a document that was taken down to the list of documents', async ({
+  page,
+  request,
+}) => {
+  const answer = await request.get('/ja/docs/guides/edit-history-and-undo', { maxRedirects: 0 })
+  expect(answer.status()).toBe(301)
+  expect(answer.headers().location).toBe('/ja/docs')
+  await page.goto('/zh/docs/guides/edit-info')
+  await expect(page).toHaveURL(/\/zh\/docs$/)
+  await expect(title(page)).toHaveText('文档')
 })
 
 test('answers an address no document has with the not found page', async ({ page }) => {

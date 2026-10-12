@@ -71,6 +71,7 @@
     "estree-util-value-to-estree": "^3.5.0",
     "happy-dom": "^20.14.5",
     "hast-util-to-string": "^3.0.1",
+    "image-size": "^2.0.4",
     "mdast-util-mdxjs-esm": "^2.0.1",
     "openapi-typescript": "^7.13.0",
     "openapi-typescript-helpers": "^0.1.0",
@@ -82,6 +83,7 @@
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.0",
     "unist-util-visit": "^5.1.0",
+    "vfile": "^6.0.3",
     "vite": "^8.3.2",
     "vite-plugin-svgr": "^5.2.0",
     "vitest": "^5.0.3"

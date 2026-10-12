@@ -4,6 +4,7 @@ import {
   docsPath,
   grouped,
   inOrder,
+  isRetired,
   isSitePath,
   neighboursOf,
   sameDoc,
@@ -29,6 +30,14 @@ describe('addresses', () => {
     expect(docPath('ja', { category: 'guides', name: 'download-games' })).toBe(
       '/ja/docs/guides/download-games',
     )
+  })
+
+  it('remembers the documents that were taken down', () => {
+    expect(isRetired({ category: 'guides', name: 'edit-history-and-undo' })).toBe(true)
+    expect(isRetired({ category: 'guides', name: 'edit-info' })).toBe(true)
+    expect(isRetired({ category: 'guides', name: 'potatovn-sync' })).toBe(true)
+    expect(isRetired({ category: 'about', name: 'edit-info' })).toBe(false)
+    expect(isRetired({ category: 'guides', name: 'download-games' })).toBe(false)
   })
 
   it('points at the source of a document in the repository', () => {
@@ -98,7 +107,9 @@ describe('links written in a document', () => {
     expect(sitePath('ja', '/zh/docs/guides/upload-game-files')).toBe(
       '/zh/docs/guides/upload-game-files',
     )
-    expect(sitePath('ja', '/docs/guides/potatovn-sync')).toBe('/ja/docs/guides/potatovn-sync')
+    expect(sitePath('ja', '/docs/guides/potatovn-download')).toBe(
+      '/ja/docs/guides/potatovn-download',
+    )
     expect(sitePath('en', '/user/settings/download')).toBe('/en/user/settings/download')
     expect(sitePath('zh', '/')).toBe('/zh')
   })

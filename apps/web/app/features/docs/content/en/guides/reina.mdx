@@ -1,7 +1,7 @@
 ---
 title: Downloading with ReinaManager
 banner: 'https://images.yurari.moe/images/c28ffd9d-7e19-4f2f-a2c5-462d47914f78.webp'
-description: 'Learn how to enable ReinaManager in the Shionlib push menu and send game download tasks directly to ReinaManager for one-click library importing.'
+description: 'Learn how to enable ReinaManager in the Shionlib download menu and send game download tasks directly to ReinaManager for one-click library importing.'
 date: 2026-08-04
 author_uid: 9060
 author_name: 'huoshen80'
@@ -35,27 +35,32 @@ You can download ReinaManager from the following page:
 
 ## Disabling or Enabling ReinaManager in Shionlib
 
-ReinaManager appears in the file push menu by default.
+ReinaManager appears in the download menu by default.
 
 To disable it:
 
 1. Open **Settings** in Shionlib
-2. Go to **Download** settings
-3. Locate **ReinaManager**
-4. Turn off **Show ReinaManager in push menu**
+2. Go to **Downloads** settings
+3. Locate **ReinaManager** under **Game managers**
+4. Turn off its switch
 
-Once turned off, ReinaManager will no longer be displayed in the file push menu.
+Once turned off, ReinaManager will no longer be displayed in the download menu. On the same page, you can also set **Send to ReinaManager** as the default download method, after which clicking the **Download** button pushes directly.
+
+![The game managers in the download settings](/assets/images/account-settings/en/download@2x.webp)
+
+> ReinaManager can only receive games that have a Bangumi ID. When a game has no Bangumi ID, this entry in the menu cannot be selected; please use another download method.
 
 ## Downloading with ReinaManager
 
-1. Click **Download** on the game page to open the download panel
-2. Find the resource and file you wish to download
-3. Click the **paper plane icon** on the right side of the file row
-4. Select **ReinaManager** from the push menu
-5. Complete the Turnstile verification as prompted
-6. The browser will request to open ReinaManager
-7. Confirm the game information and installation location in ReinaManager
-8. Confirm to create the download task
+1. Open the game page and find the resource and file you wish to download in the **Downloads** tab
+2. Click the arrow beside the **Download** button on the right side of the file to open the **Other ways to download** menu
+3. Select **Send to ReinaManager** from the menu
+4. The page completes the human verification automatically
+5. The browser will request to open ReinaManager
+6. Confirm the game information and installation location in ReinaManager
+7. Confirm to create the download task
+
+![Sending a download to ReinaManager from the menu](/assets/images/download-games/en/download-menu@2x.webp)
 
 After receiving the task, ReinaManager will:
 
@@ -87,7 +92,7 @@ ReinaManager receives the following information with each push:
 
 ## Troubleshooting
 
-### Nothing happens after selecting ReinaManager in the push menu
+### Nothing happens after selecting ReinaManager in the download menu
 
 Check the application logs first for entries related to the `reinamanager protocol`:
 
@@ -109,11 +114,9 @@ Yes.
 
 After selecting ReinaManager, the system will automatically launch the application and transfer the download task.
 
-### Download does not start after Turnstile verification
+### Download does not start after the human verification
 
-Reopen the push menu and select ReinaManager again.
-
-If the signed link is still within its validity period, you usually do not need to solve the verification again.
+Reopen the download menu and select **Send to ReinaManager** again.
 
 ### Prompted that the link has expired during download
 

@@ -1,7 +1,16 @@
-import { data, type LoaderFunctionArgs } from 'react-router'
+import { data, redirect, type LoaderFunctionArgs } from 'react-router'
 import { defaultLocale, locales, type Locale } from '~/shared/i18n/locale'
 import { isLocale } from '~/shared/i18n/locale.schema'
-import { inOrder, neighboursOf, sameDoc, type Doc, type DocLink } from './docs'
+import {
+  docsPath,
+  inOrder,
+  isRetired,
+  neighboursOf,
+  sameDoc,
+  type Doc,
+  type DocLink,
+  type DocRef,
+} from './docs'
 import { categoryFrom, docFrom } from './docs.schema'
 
 const heads = import.meta.glob('./content/*/*/*.mdx', { eager: true, import: 'frontmatter' })
@@ -44,14 +53,20 @@ export function docsLoader(args: LoaderFunctionArgs) {
   return { docs: docsIn(localeOf(args)) }
 }
 
+function askedFor({ params }: LoaderFunctionArgs): DocRef | undefined {
+  const category = categoryFrom(params.category)
+  return category === undefined ? undefined : { category, name: params.name ?? '' }
+}
+
 export function docLoader(args: LoaderFunctionArgs) {
-  const docs = docsIn(localeOf(args))
-  const category = categoryFrom(args.params.category)
-  const doc =
-    category === undefined
-      ? undefined
-      : docs.find(entry => sameDoc(entry, { category, name: args.params.name ?? '' }))
+  const locale = localeOf(args)
+  const docs = docsIn(locale)
+  const asked = askedFor(args)
+  const doc = asked === undefined ? undefined : docs.find(entry => sameDoc(entry, asked))
   if (doc === undefined) {
+    if (asked !== undefined && isRetired(asked)) {
+      throw redirect(docsPath(locale), 301)
+    }
     throw data(null, { status: 404 })
   }
   const { previous, next } = neighboursOf(docs, doc)

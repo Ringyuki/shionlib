@@ -1,7 +1,7 @@
 ---
 title: Downloading with PotatoVN
 banner: 'https://images.yurari.moe/galgame/11196/bvwn0x03_2.webp'
-description: 'Learn how to install the PotatoDownload plugin for PotatoVN, enable PotatoVN in the Shionlib push menu, and send game download tasks straight to PotatoVN for automatic download, verification, extraction and library importing.'
+description: 'Learn how to install the PotatoDownload plugin for PotatoVN, enable PotatoVN in the Shionlib download menu, and send game download tasks straight to PotatoVN for automatic download, verification, extraction and library importing.'
 date: 2026-09-13
 author_uid: 8395
 author_name: 'luoyuxiaoxiao'
@@ -33,26 +33,31 @@ Plugin source: [luoyuxiaoxiao/PotatoDownload](https://github.com/luoyuxiaoxiao/P
 
 ## Disabling or Enabling PotatoVN in Shionlib
 
-PotatoVN appears in the file push menu by default.
+PotatoVN appears in the download menu by default.
 
 To disable it:
 
 1. Open **Settings** in Shionlib
-2. Go to **Download** settings
-3. Locate **PotatoVN**
-4. Turn off **Show PotatoVN in the push menu**
+2. Go to **Downloads** settings
+3. Locate **PotatoVN** under **Game managers**
+4. Turn off its switch
 
-Once turned off, PotatoVN will no longer be displayed in the file push menu.
+Once turned off, PotatoVN will no longer be displayed in the download menu. On the same page, you can also set **Send to PotatoVN** as the default download method, after which clicking the **Download** button pushes directly.
+
+![The game managers in the download settings](/assets/images/account-settings/en/download@2x.webp)
+
+> PotatoVN can only receive games that have a Bangumi ID. When a game has no Bangumi ID, this entry in the menu cannot be selected; please use another download method.
 
 ## Downloading with PotatoVN
 
-1. Click **Download** on the game page to open the download panel
-2. Find the resource and file you wish to download
-3. Click the **paper plane icon** on the right side of the file row
-4. Select **PotatoVN** from the push menu
-5. Complete the Turnstile verification as prompted
-6. The browser will request to open PotatoVN
-7. If auto download is disabled in the plugin, confirm the download in PotatoVN
+1. Open the game page and find the resource and file you wish to download in the **Downloads** tab
+2. Click the arrow beside the **Download** button on the right side of the file to open the **Other ways to download** menu
+3. Select **Send to PotatoVN** from the menu
+4. The page completes the human verification automatically
+5. The browser will request to open PotatoVN
+6. If auto download is disabled in the plugin, confirm the download in PotatoVN
+
+![Sending a download to PotatoVN from the menu](/assets/images/download-games/en/download-menu@2x.webp)
 
 After receiving the task, PotatoDownload will:
 
@@ -83,7 +88,7 @@ PotatoVN receives the following information with each push:
 
 ## Troubleshooting
 
-### Nothing happens after selecting PotatoVN in the push menu
+### Nothing happens after selecting PotatoVN in the download menu
 
 Check, in order:
 
@@ -108,8 +113,6 @@ Yes.
 
 After selecting PotatoVN, the system will automatically launch the application and transfer the download task.
 
-### Download does not start after Turnstile verification
+### Download does not start after the human verification
 
-Reopen the push menu and select PotatoVN again.
-
-If the signed link is still within its validity period, you usually do not need to solve the verification again.
+Reopen the download menu and select **Send to PotatoVN** again.

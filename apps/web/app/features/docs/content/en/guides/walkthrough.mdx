@@ -1,68 +1,77 @@
 ---
 title: How to Contribute & Use Walkthroughs
 banner: 'https://images.yurari.moe/galgame/11216/6ypefvcm_2.webp'
-description: "Learn about Shionlib's walkthrough system: creating and editing walkthroughs, the difference between draft and published states, and the review and management process."
+description: "Learn about Shionlib's walkthrough system: writing and editing walkthroughs route by route, the difference between draft and published states, and the review and management process."
 date: 2026-02-27
 author_uid: 1
 author_name: 'ringyuki'
 author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
 ---
 
-## Viewing Walkthroughs
+## Viewing walkthroughs
 
-On a game entry page, click the **Walkthrough** tab at the top to see all published walkthroughs for that game.
+On a game entry page, click the **Walkthroughs** tab at the top to see all published walkthroughs for that game.
 
-Each walkthrough in the list shows the title, author, creation time, and the walkthrough's language label (if applicable). Click any entry to read the full content.
+Each walkthrough shows its author, language, number of routes and update time. After choosing a walkthrough, you can read its notes and switch between its routes; every step of a route, and the points at which to save and load, are listed in order.
 
-## Creating a Walkthrough
+## Writing a walkthrough
 
-On the walkthrough list page, click the **Create Walkthrough** button in the top-right corner (login required) to open the editor.
+On the walkthroughs tab, click the **Write a walkthrough** button (sign-in required) to open the writing page. Each user can write one walkthrough for each game; if you have already written one, the button becomes **Edit my walkthrough**.
 
-The editor has two parts:
+A walkthrough has two parts:
 
-- **Title** — Required, max 50 characters
-- **Body** — Write content using the rich-text editor, which supports headings, lists, bold, links, images, and other common formats
+- **Notes** — optional; used to introduce the recommended route order, points to note and so on; supports bold, spoilers and links
+- **Routes** — a walkthrough can contain multiple routes, and each route has the following:
+  - **Route name** — required
+  - **Characters** — optional; choose the characters this route corresponds to from the characters of the game
+  - **Condition** — optional; you can specify the routes that must be finished first, or enter another condition
+  - **Steps** — one step per line; enter at least one step
+  - **Ending** — optional
 
-When finished, you can choose to **Save as Draft** or **Publish**.
+The following notations can be used in the steps:
 
-## Draft vs. Published
+| Notation                                                           | Meaning                                             |
+| ------------------------------------------------------------------ | --------------------------------------------------- |
+| `SAVE 1`                                                           | Save to slot 1 here                                 |
+| `LOAD 1`                                                           | Load the save in slot 1                             |
+| A line that starts with `#` or `※`, or a line that ends with `END` | A note                                              |
+| `Choice text \| remark`                                            | The text after `\|` becomes the remark of this step |
 
-| Action        | Status    | Visibility               |
-| ------------- | --------- | ------------------------ |
-| Save as Draft | Draft     | Visible only to yourself |
-| Publish       | Published | Visible to everyone      |
+The **Preview** beside the steps shows, as you type, how the walkthrough will actually look; on a narrow screen, switch between **Edit** and **Preview** instead. Drag the routes to change their order.
 
-Walkthrough entries in draft status show a **Draft** badge in both the list and detail view, along with a notice saying "This walkthrough is a draft and is only visible to you." You can return to edit and publish at any time.
+![Writing a walkthrough: the steps on the left, the preview on the right](/assets/images/walkthrough/en/write@2x.webp)
 
-## Editing a Walkthrough
+When you have finished writing, you can choose **Save draft** or **Publish**.
 
-The walkthrough creator or an administrator can edit existing walkthroughs:
+## Draft and published
 
-- **From the list** — Click the **<Ellipsis />** menu in the top-right corner of the walkthrough card and select **Edit**
-- **From the detail page** — Click the **Edit** button in the top-right corner of the walkthrough detail page
+| Action     | Status    | Visibility               |
+| ---------- | --------- | ------------------------ |
+| Save draft | Draft     | Visible only to yourself |
+| Publish    | Published | Visible to everyone      |
 
-After editing, you can save as draft or re-publish. Once a walkthrough has been edited, a "last edited" timestamp will appear in both the list and detail view.
+A walkthrough in draft status shows a **Draft** mark and is visible only to you. You can come back at any time to continue editing and publish it; a published walkthrough can also be withdrawn through **Back to draft**.
 
-## Under Review Status
+## Editing a walkthrough
 
-After clicking **Publish**, the walkthrough does not become visible immediately. It first enters **Under Review** status (shown with an orange "Under Review" badge), where it undergoes automated content moderation.
+The author of a walkthrough can edit it at any time: click **Edit my walkthrough** on the walkthroughs tab of the game, or open it from the walkthrough list on your profile.
 
-Once approved, the walkthrough's status automatically changes to published and becomes visible to everyone. If the review does not pass, the walkthrough remains hidden, and the author receives a system message explaining the reason.
+After editing, you can likewise choose to save it as a draft or publish it again, and the update time of the walkthrough changes accordingly.
 
-> In normal circumstances, review completes within a short time after publishing. If a walkthrough remains "Under Review" for an extended period, contact an administrator.
+## Review
 
-## Deleting a Walkthrough
+After you click **Publish**, the walkthrough does not become publicly visible at once. It first enters the **Under review** status, in which the system reviews the content automatically.
 
-In the walkthrough list or on the walkthrough management page in your profile, click the **<Ellipsis />** menu, select **Delete**, and confirm to permanently delete the walkthrough. This action cannot be undone.
+Once the review passes, the walkthrough's status changes to published automatically and it becomes visible to everyone. If the review does not pass, the walkthrough shows **Not approved** and stays hidden, and the author receives a system message explaining why it did not pass.
 
-Deletion is also restricted to the walkthrough creator or an administrator.
+> Normally, the review completes within a short time after publishing. If a walkthrough stays in the "Under review" status for a long time, you can contact an administrator.
 
-## Managing Walkthroughs in Your Profile
+## Deleting a walkthrough
 
-Visit your profile and switch to the **Walkthroughs** tab to manage all walkthroughs you have created.
+Choose **Delete walkthrough** in the **<Ellipsis />** menu on the writing page and confirm to delete the walkthrough permanently. This action cannot be undone.
 
-Unlike the walkthrough list on a game page, this page provides a status filter navigation at the top, allowing you to view walkthroughs by **All / Published / Draft / Under Review**.
+## Viewing walkthroughs on a profile
 
-Each entry shows a game card associated with the walkthrough for quick navigation. You can also edit or delete via the **<Ellipsis />** menu from here.
+Visit your profile and switch to the **Walkthroughs** tab to see all the walkthroughs you have written. Each entry shows the game it belongs to, the number of routes and the update time, and walkthroughs that are drafts or under review carry a status mark.
 
-> The status filter navigation is only visible when you are viewing your own profile. When visiting someone else's profile, only their published walkthroughs are shown.
+When you visit the walkthroughs page of someone else's profile, you can see only the walkthroughs they have published.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { categoryFrom, docFrom } from './docs.schema'
+import { categoryFrom, docFrom, pictureSizeFrom } from './docs.schema'
 
 const ref = { category: 'guides', name: 'download-games' } as const
 
@@ -50,5 +50,18 @@ describe('categoryFrom', () => {
     expect(categoryFrom('guides')).toBe('guides')
     expect(categoryFrom('faq')).toBeUndefined()
     expect(categoryFrom(undefined)).toBeUndefined()
+  })
+})
+
+describe('pictureSizeFrom', () => {
+  it('reads the size a picture was measured at', () => {
+    expect(pictureSizeFrom({ width: 672, height: 908 })).toEqual({ width: 672, height: 908 })
+    expect(pictureSizeFrom({ width: '672', height: '908' })).toEqual({ width: 672, height: 908 })
+  })
+
+  it('knows no size for a picture that was not measured', () => {
+    expect(pictureSizeFrom({ width: undefined, height: undefined })).toBeUndefined()
+    expect(pictureSizeFrom({ width: '672px', height: 'auto' })).toBeUndefined()
+    expect(pictureSizeFrom({ width: 672, height: 0 })).toBeUndefined()
   })
 })

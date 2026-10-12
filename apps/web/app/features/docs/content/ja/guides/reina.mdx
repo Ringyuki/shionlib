@@ -1,7 +1,7 @@
 ---
 title: ReinaManager でダウンロードする
 banner: 'https://images.yurari.moe/images/c28ffd9d-7e19-4f2f-a2c5-462d47914f78.webp'
-description: 'Shionlib のプッシュメニューで ReinaManager を有効にし、ゲームのダウンロードタスクを ReinaManager に直接送信してワンクリックでライブラリ追加する方法を解説します。'
+description: 'Shionlib のダウンロードメニューで ReinaManager を有効にし、ゲームのダウンロードタスクを ReinaManager に直接送信してワンクリックでライブラリ追加する方法を解説します。'
 date: 2026-08-04
 author_uid: 9060
 author_name: 'huoshen80'
@@ -35,27 +35,32 @@ author_avatar: 'https://t.shionlib.com/user/9060/avatar/de38cad8-927a-4194-a072-
 
 ## Shionlib で ReinaManager を無効または有効にする
 
-ReinaManager はデフォルトでダウンロードファイルのプッシュメニューに表示されます。
+ReinaManager はデフォルトでダウンロードメニューに表示されます。
 
 無効にする手順：
 
 1. Shionlib の**設定**を開く
 2. **ダウンロード**設定に入る
-3. **ReinaManager** を探す
-4. **プッシュメニューに ReinaManager を表示**をオフにする
+3. **ゲーム管理ツール** で **ReinaManager** を探す
+4. そのスイッチをオフにする
 
-オフにすると、ファイルプッシュメニューに ReinaManager が表示されなくなります。
+オフにすると、ダウンロードメニューに ReinaManager が表示されなくなります。同じページで、**ReinaManager に送る** を既定のダウンロード方法に設定することもできます。設定後は、**ダウンロード** ボタンをクリックすると直接送信されます。
+
+![ダウンロード設定のゲーム管理ツール](/assets/images/account-settings/ja/download@2x.webp)
+
+> ReinaManager が受け取れるのは Bangumi ID のあるゲームのみです。ゲームに Bangumi ID がない場合、メニューのこの項目は選択できないため、ほかのダウンロード方法を使用してください。
 
 ## ReinaManager でダウンロードする
 
-1. ゲームページで**ダウンロード**をクリックし、ダウンロードパネルを開く
-2. ダウンロードしたいリソースとファイルを見つける
-3. ファイル行の右側にある**紙飛行機アイコン**をクリックする
-4. プッシュメニューから **ReinaManager** を選択する
-5. 提示に従って Turnstile 認証を完了する
-6. ブラウザが ReinaManager を開く許可を要求します
-7. ReinaManager 内でゲーム情報とインストール先を確認する
-8. 確認後、ダウンロードタスクを作成する
+1. ゲームページを開き、**ダウンロード** タブでダウンロードしたいリソースとファイルを見つける
+2. ファイルの右側にある **ダウンロード** ボタンの横の矢印をクリックして、**ほかのダウンロード方法** メニューを開く
+3. メニューから **ReinaManager に送る** を選択する
+4. ページがロボットでないことの確認を自動で行います
+5. ブラウザが ReinaManager を開く許可を要求します
+6. ReinaManager 内でゲーム情報とインストール先を確認する
+7. 確認後、ダウンロードタスクを作成する
+
+![メニューから ReinaManager に送る](/assets/images/download-games/ja/download-menu@2x.webp)
 
 タスクを受信すると、ReinaManager は以下を行います：
 
@@ -87,7 +92,7 @@ ReinaManager はデフォルトでダウンロードファイルのプッシュ�
 
 ## トラブルシューティング
 
-### プッシュメニューで ReinaManager を選んでも何も起きない
+### ダウンロードメニューで ReinaManager を選んでも何も起きない
 
 まず、アプリのログで `reinamanager プロトコル` に関連する内容を確認してください：
 
@@ -109,11 +114,9 @@ ReinaManager はデフォルトでダウンロードファイルのプッシュ�
 
 ReinaManager を選択すると、システムが自動的にアプリを起動してダウンロードタスクを渡します。
 
-### Turnstile 認証後にダウンロードが始まらない
+### ロボットでないことの確認後にダウンロードが始まらない
 
-プッシュメニューを再度開き、ReinaManager をもう一度選択してください。
-
-署名付きリンクがまだ有効期間内であれば、通常は再認証の必要はありません。
+ダウンロードメニューを再度開き、**ReinaManager に送る** を選択してください。
 
 ### ダウンロード途中に「リンクの期限が切れました」と表示される
 

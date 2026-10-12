@@ -1,7 +1,7 @@
 ---
 title: 使用 LunaBox 下载
 banner: 'https://images.yurari.moe/galgame/10568/hak8bxrz_2.png'
-description: '了解如何在 Shionlib 的推送菜单中启用 LunaBox，并将游戏下载任务直接推送到 LunaBox 桌面应用。'
+description: '了解如何在 Shionlib 的下载菜单中启用 LunaBox，并将游戏下载任务直接推送到 LunaBox 桌面应用。'
 date: 2026-03-11
 author_uid: 1
 author_name: 'ringyuki'
@@ -45,22 +45,26 @@ lunacli --register-protocol
 
 ## 在 Shionlib 中禁用或启用 LunaBox
 
-LunaBox 默认出现在推送菜单中。禁用方式：
+LunaBox 默认出现在下载菜单中。禁用方式：
 
 1. 打开**设置** → **下载**（或前往 `/user/settings/download`）
-2. 找到 **LunaBox** 设置项
-3. 关闭**在推送菜单中显示 LunaBox**
+2. 在 **游戏管理器** 中找到 **LunaBox**
+3. 关闭它的开关
 
-禁用后，下载面板的推送菜单中将不再出现 LunaBox 一项。
+禁用后，下载菜单中将不再出现 LunaBox 一项。在同一页面，也可以把 **推送到 LunaBox** 设为默认的下载方式，此后点击 **下载** 按钮就会直接推送。
+
+![下载设置中的游戏管理器](/assets/images/account-settings/zh/download@2x.webp)
 
 ## 使用 LunaBox 下载
 
-1. 在任意游戏页面点击**下载**，打开下载面板
-2. 找到你想要的资源和文件
-3. 点击文件行右侧的**纸飞机图标**按钮，打开推送菜单
-4. 在菜单中选择 **LunaBox**，将下载任务推送过去
-5. 如果需要 Turnstile 验证，在弹出窗口中完成验证——验证通过后任务会自动发送给 LunaBox
+1. 打开任意游戏页面，在 **资源** 标签中找到你想要的资源和文件
+2. 点击文件右侧 **下载** 按钮旁的箭头，打开 **其他下载方式** 菜单
+3. 在菜单中选择 **推送到 LunaBox**，将下载任务推送过去
+4. 页面会自动完成人机验证，验证通过后任务会自动发送给 LunaBox
+5. 浏览器询问是否打开 LunaBox 时，选择允许
 6. 切换到 LunaBox，下载即已开始
+
+![「其他下载方式」菜单中的「推送到 LunaBox」](/assets/images/download-games/zh/download-menu@2x.webp)
 
 每次推送时，LunaBox 会收到以下信息：
 
@@ -72,11 +76,11 @@ LunaBox 默认出现在推送菜单中。禁用方式：
 | 文件大小   | 精确字节数，用于校验                   |
 | 校验值     | SHA-256 或 BLAKE3 哈希，用于完整性校验 |
 | 游戏标题   | 游戏的日语标题                         |
-| 元数据来源 | Bangumi（用于游戏库匹配）              |
+| 元数据来源 | Hikarinagi（用于游戏库匹配）           |
 
 ## 常见问题
 
-**在推送菜单中选择 LunaBox 后没有反应**
+**在下载菜单中选择 LunaBox 后没有反应**
 
 优先检查是否已正确注册 `lunabox://` 协议：
 
@@ -92,8 +96,8 @@ LunaBox 默认出现在推送菜单中。禁用方式：
 
 **LunaBox 没有提前打开，能直接下载吗**
 
-可以。只要协议已注册，在 Shionlib 的推送菜单中选择 LunaBox 后，协议会自动启动 LunaBox，并把当前下载请求带过去。
+可以。只要协议已注册，在 Shionlib 的下载菜单中选择 LunaBox 后，协议会自动启动 LunaBox，并把当前下载请求带过去。
 
-**Turnstile 验证后下载没有开始**
+**人机验证后下载没有开始**
 
-Turnstile 弹窗在验证通过后会自动关闭。如果下载仍未开始，再次打开推送菜单选择 LunaBox 即可——本次会话中签名链接已缓存，无需再次验证。
+人机验证通过后，页面会自动把任务交给 LunaBox。如果下载仍未开始，再次打开下载菜单选择 **推送到 LunaBox** 即可。

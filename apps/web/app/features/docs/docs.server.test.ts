@@ -2,14 +2,16 @@ import { createElement, type ReactNode } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { locales, type Locale } from '~/shared/i18n/locale'
-import { isSitePath, sitePath, type Doc } from './docs'
+import { isRetired, isSitePath, sitePath, type Doc } from './docs'
 import { docsIn } from './docs.server'
 import { readPage } from './docs-content'
+import { pictureSizeFrom } from './docs.schema'
 
 type Read = {
   links: string[]
   anchors: string[]
   listed: string[]
+  pictures: unknown[]
 }
 
 const reads = new Map<string, Read>()
@@ -19,6 +21,7 @@ const keyOf = (locale: Locale, doc: Doc) => `/${locale}/docs/${doc.category}/${d
 async function read(locale: Locale, doc: Doc): Promise<Read> {
   const page = await readPage(locale, doc)
   const links: string[] = []
+  const pictures: unknown[] = []
   const html = renderToStaticMarkup(
     createElement(page.default, {
       components: {
@@ -26,12 +29,17 @@ async function read(locale: Locale, doc: Doc): Promise<Read> {
           links.push(href)
           return children
         },
+        img: (picture: { width?: unknown; height?: unknown }) => {
+          pictures.push(pictureSizeFrom(picture))
+          return null
+        },
         Ellipsis: () => null,
       },
     }),
   )
   return {
     links,
+    pictures,
     anchors: [...html.matchAll(/<h[1-6] id="([^"]+)"/g)].map(([, id = '']) => id),
     listed: page.sections.flatMap(section => [section.id, ...section.children.map(sub => sub.id)]),
   }
@@ -48,7 +56,7 @@ beforeAll(async () => {
 describe('the documents in the repository', () => {
   it('are the same ones in every language, in the same order', () => {
     const names = (locale: Locale) => docsIn(locale).map(doc => `${doc.category}/${doc.name}`)
-    expect(names('zh')).toHaveLength(17)
+    expect(names('zh')).toHaveLength(14)
     expect(names('en')).toEqual(names('zh'))
     expect(names('ja')).toEqual(names('zh'))
   })
@@ -61,6 +69,22 @@ describe('the documents in the repository', () => {
         address,
       ).toEqual([])
       expect(new Set(page.anchors).size, address).toBe(page.anchors.length)
+    }
+  })
+
+  it('know the size of every picture they show, and show the same number in every language', () => {
+    for (const [address, page] of reads) {
+      expect(page.pictures, address).not.toContain(undefined)
+    }
+    const shown = (locale: Locale) =>
+      docsIn(locale).map(doc => reads.get(keyOf(locale, doc))?.pictures.length)
+    expect(shown('en')).toEqual(shown('zh'))
+    expect(shown('ja')).toEqual(shown('zh'))
+  })
+
+  it('hold none of the documents that were taken down', () => {
+    for (const locale of locales) {
+      expect(docsIn(locale).filter(isRetired), locale).toEqual([])
     }
   })
 
