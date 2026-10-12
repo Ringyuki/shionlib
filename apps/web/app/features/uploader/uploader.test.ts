@@ -64,7 +64,7 @@ describe('stageOf', () => {
   it('keeps it processing while it is not public or a file has not settled', () => {
     expect(stageOf({ published_at: null, files: [{ stage: 'stored' }] })).toBe('processing')
     expect(stageOf({ published_at: null, files: null })).toBe('processing')
-    for (const stage of ['checking', 'storing', 'under_review', 'rejected'] as const) {
+    for (const stage of ['checking', 'storing', 'under_review', 'stalled', 'rejected'] as const) {
       expect(stageOf({ published_at: published, files: [{ stage: 'stored' }, { stage }] })).toBe(
         'processing',
       )

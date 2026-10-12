@@ -17,7 +17,14 @@ type EditFields = Schema<'EditDownloadSourceBodyInput'>
 export type Platform = NonNullable<EditFields['platform']>[number]
 
 export type FileState =
-  'passed' | 'checking' | 'storing' | 'underReview' | 'rejected' | 'falsePositive' | 'risky'
+  | 'passed'
+  | 'checking'
+  | 'storing'
+  | 'underReview'
+  | 'stalled'
+  | 'rejected'
+  | 'falsePositive'
+  | 'risky'
 
 export type Language = NonNullable<EditFields['language']>[number]
 
@@ -73,6 +80,7 @@ export function fileState(
   switch (file.stage) {
     case 'checking':
     case 'storing':
+    case 'stalled':
     case 'rejected':
       return file.stage
     case 'under_review':

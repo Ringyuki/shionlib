@@ -12,6 +12,7 @@
     "checking": "Checking",
     "storing": "Saving",
     "underReview": "Awaiting review",
+    "stalled": "Check not finished",
     "rejected": "Failed the check",
     "falsePositive": "May contain malware",
     "risky": "Blocked"
@@ -20,6 +21,7 @@
     "checking": "The file is being tested and scanned; a split archive is checked once all its volumes are uploaded. Only you can see this file for now.",
     "storing": "The check passed and the file is being saved; it can be downloaded afterwards. Only you can see this file for now.",
     "underReview": "The malware scan found something suspicious and an administrator will review it. Until then only you can see the whole resource.",
+    "stalled": "The check of this file could not be completed and an administrator has been told. Only you can see this file for now.",
     "rejected": "{reason}. This file will be removed automatically.",
     "falsePositive": "The malware scan flagged this file, but an administrator released it. Detected: {names}.",
     "risky": "The malware scan detected {names}; the file is blocked and cannot be downloaded"
@@ -29,7 +31,8 @@
     "unsupported": "The archive cannot be read; the file may be damaged",
     "encrypted": "The archive is protected by a password",
     "harmful": "The malware scan confirmed harmful content",
-    "incomplete_set": "Some volumes were never uploaded"
+    "incomplete_set": "Some volumes were never uploaded",
+    "abandoned": "The check of this file could not be completed"
   },
   "history": "History",
   "report": "Report",

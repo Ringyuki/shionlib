@@ -42,6 +42,7 @@ describe('fileState', () => {
     expect(fileState({ ...file, stage: 'checking' })).toBe('checking')
     expect(fileState({ ...file, stage: 'storing' })).toBe('storing')
     expect(fileState({ ...file, stage: 'under_review' })).toBe('underReview')
+    expect(fileState({ ...file, stage: 'stalled' })).toBe('stalled')
     expect(fileState({ ...file, stage: 'rejected' })).toBe('rejected')
   })
 

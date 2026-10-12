@@ -182,5 +182,6 @@ export function unreadState(files: readonly Pick<InspectedFile, 'stage'>[]): Unr
   if (files.some(file => file.stage === 'checking')) {
     return 'reading'
   }
-  return files.length > 0 && files.every(file => file.stage === 'rejected') ? 'failed' : 'unread'
+  const unreadable = files.every(file => file.stage === 'rejected' || file.stage === 'stalled')
+  return files.length > 0 && unreadable ? 'failed' : 'unread'
 }

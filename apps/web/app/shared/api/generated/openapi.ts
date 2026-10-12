@@ -5265,18 +5265,18 @@ export type components = {
             latest_history: components["schemas"]["DownloadHistoryRefDTO"] | null;
             malware_scan_cases: components["schemas"]["DownloadMalwareCaseDTO"][] | null;
             /**
-             * @description Why a rejected file was rejected; null otherwise
+             * @description Why a rejected file was rejected (abandoned: its check could never be completed); null otherwise
              * @enum {string|null}
              */
-            rejection: "truncated" | "unsupported" | "encrypted" | "harmful" | "incomplete_set" | null;
+            rejection: "truncated" | "unsupported" | "encrypted" | "harmful" | "incomplete_set" | "abandoned" | null;
             s3_file_key: string | null;
             /** @description SHA-256 of the file, computed while it is checked; null until then */
             sha256: string | null;
             /**
-             * @description Where the file is on its way to being downloadable: checking (waiting for or under its check), storing (passed, moving to object storage), stored, under_review (held for a malware review) or rejected (about to be removed)
+             * @description Where the file is on its way to being downloadable: checking (waiting for or under its check), storing (passed, moving to object storage), stored, under_review (held for a malware review), stalled (its check kept failing and waits for an operator) or rejected (about to be removed)
              * @enum {string}
              */
-            stage: "checking" | "storing" | "stored" | "under_review" | "rejected";
+            stage: "checking" | "storing" | "stored" | "under_review" | "stalled" | "rejected";
             /** Format: int64 */
             type: number;
             /**

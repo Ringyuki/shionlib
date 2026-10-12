@@ -7,6 +7,7 @@ const tags = {
   checking: { tone: 'neutral', variant: 'outline' },
   storing: { tone: 'neutral', variant: 'outline' },
   underReview: { tone: 'warning', variant: 'soft' },
+  stalled: { tone: 'warning', variant: 'soft' },
   rejected: { tone: 'danger', variant: 'soft' },
   falsePositive: { tone: 'danger', variant: 'solid' },
   risky: { tone: 'danger', variant: 'solid' },
