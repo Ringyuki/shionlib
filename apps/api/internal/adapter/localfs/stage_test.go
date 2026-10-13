@@ -47,6 +47,15 @@ func asSevenZipWrites(t *testing.T, name string) string {
 	return shown
 }
 
+func asStored(t *testing.T, name string) string {
+	t.Helper()
+	raw, err := japanese.ShiftJIS.NewEncoder().String(name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return raw
+}
+
 func asSevenZipEscapes(t *testing.T, name string) string {
 	t.Helper()
 	raw, err := japanese.ShiftJIS.NewEncoder().String(name)
@@ -216,5 +225,27 @@ func TestSweepLeavesOnlyFilesAndFoldersUnderTheirRealNames(t *testing.T) {
 	}
 	if err := stage.Sweep(ctx, plain, "shift_jis"); err != nil || read(t, filepath.Join(plain, "日本語.txt")) != "kept" {
 		t.Fatalf("a name outside the legacy table is left as it is: %v", err)
+	}
+}
+
+func TestSweepReadsNamesKeptAsTheArchiveStoredThem(t *testing.T) {
+	ctx := t.Context()
+	stage := localfs.NewStage(filepath.Join(t.TempDir(), ".compose"))
+	dir, err := stage.Open(ctx, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tree := filepath.Join(dir, "tree")
+	game := filepath.Join(tree, asStored(t, "ゲーム"))
+	if err := os.MkdirAll(game, 0o750); err != nil {
+		t.Skip("this file system takes only Unicode names")
+	}
+	put(t, filepath.Join(game, asStored(t, "セーブ.dat")), "save")
+	put(t, filepath.Join(game, asStored(t, "ソフト"), asStored(t, "表.txt")), "backslash bytes")
+	if err := stage.Sweep(ctx, tree, "shift_jis"); err != nil {
+		t.Fatal(err)
+	}
+	if read(t, filepath.Join(tree, "ゲーム", "セーブ.dat")) != "save" || read(t, filepath.Join(tree, "ゲーム", "ソフト", "表.txt")) != "backslash bytes" {
+		t.Fatal("names whose bytes are not Unicode are read in the archive's encoding, backslash bytes included")
 	}
 }
