@@ -20,6 +20,7 @@ type Deps struct {
 	Games       GameCards
 	Comments    Discussions
 	Translators Translators
+	Names       *NameService
 	Sessions    Sessions
 	Activities  Activities
 	Messages    Messenger
@@ -36,6 +37,7 @@ type Service struct {
 	games       GameCards
 	comments    Discussions
 	translators Translators
+	names       *NameService
 	sessions    Sessions
 	activities  Activities
 	messages    Messenger
@@ -53,6 +55,7 @@ func NewService(deps Deps) *Service {
 		games:       deps.Games,
 		comments:    deps.Comments,
 		translators: deps.Translators,
+		names:       deps.Names,
 		sessions:    deps.Sessions,
 		activities:  deps.Activities,
 		messages:    deps.Messages,
@@ -196,6 +199,7 @@ func (s *Service) Create(ctx context.Context, who actor.Actor, gameID int, in Cr
 			Simulator: in.Simulator,
 			Note:      in.Note,
 			Info:      info.with(credited),
+			Canonical: in.Canonical,
 			CreatorID: who.UserID,
 		})
 		if err != nil {
@@ -251,6 +255,7 @@ func (s *Service) attach(ctx context.Context, who actor.Actor, resource Resource
 			ResourceID:      resource.ID,
 			Type:            FileTypeObjectStore,
 			Name:            name,
+			OriginalName:    &name,
 			Path:            &session.StoragePath,
 			Size:            session.TotalSize,
 			ContentType:     session.MimeType,
@@ -304,6 +309,13 @@ func (s *Service) RenameFile(ctx context.Context, who actor.Actor, fileID int, n
 		if err != nil {
 			return err
 		}
+		canonical, err := s.names.Names(ctx, file)
+		if err != nil {
+			return err
+		}
+		if canonical {
+			return ErrFileNameCanonical
+		}
 		if err := s.repo.RenameFile(ctx, file.ID, name); err != nil {
 			return err
 		}
@@ -346,7 +358,7 @@ func (s *Service) DeleteFile(ctx context.Context, who actor.Actor, fileID int) e
 				return err
 			}
 		}
-		return publishResource(ctx, s.repo, s.messages, file.ResourceID, s.now())
+		return publishResource(ctx, s.repo, s.messages, s.names, file.ResourceID, s.now())
 	})
 	if err != nil {
 		return err
@@ -373,8 +385,16 @@ func (s *Service) Edit(ctx context.Context, who actor.Actor, id int, in EditInpu
 		if err != nil {
 			return err
 		}
-		changes := ResourceChanges{Platforms: in.Platforms, Languages: in.Languages, Simulator: in.Simulator, Note: in.Note, Info: info.with(credited)}
+		changes := ResourceChanges{Platforms: in.Platforms, Languages: in.Languages, Simulator: in.Simulator, Note: in.Note, Info: info.with(credited), Canonical: in.Canonical}
 		if err := s.repo.UpdateResource(ctx, id, changes); err != nil {
+			return err
+		}
+		if resource.Canonical && in.Canonical != nil && !*in.Canonical {
+			if err := s.names.Restore(ctx, id); err != nil {
+				return err
+			}
+		}
+		if err := s.names.Apply(ctx, id); err != nil {
 			return err
 		}
 		changed := resource.ChangesTo(changes)
@@ -392,7 +412,7 @@ func (s *Service) DiscFound(ctx context.Context, resourceID int) error {
 			return err
 		}
 		if resource.Info.Form != nil && *resource.Info.Form == FormDisc {
-			return nil
+			return s.names.Apply(ctx, resourceID)
 		}
 		if err := s.repo.SetForm(ctx, resourceID, FormDisc); err != nil {
 			return err
@@ -401,7 +421,10 @@ func (s *Service) DiscFound(ctx context.Context, resourceID int) error {
 			return nil
 		}
 		change := FieldChange{Field: FieldForm, Old: optional((*string)(resource.Info.Form)), New: []string{string(FormDisc)}}
-		return s.repo.CreateEvent(ctx, NewEvent{ResourceID: resourceID, Kind: EventDiscFound, Data: EventData{Changes: []FieldChange{change}}})
+		if err := s.repo.CreateEvent(ctx, NewEvent{ResourceID: resourceID, Kind: EventDiscFound, Data: EventData{Changes: []FieldChange{change}}}); err != nil {
+			return err
+		}
+		return s.names.Apply(ctx, resourceID)
 	})
 }
 

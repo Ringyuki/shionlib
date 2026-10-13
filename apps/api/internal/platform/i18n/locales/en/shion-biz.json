@@ -159,6 +159,7 @@
   "GAME_DOWNLOAD_RESOURCE_TOO_MANY_FILES": "A resource can hold at most {max} files",
   "GAME_DOWNLOAD_RESOURCE_LAST_FILE": "A resource must keep at least one file",
   "GAME_DOWNLOAD_RESOURCE_FILE_UNDER_REVIEW": "The file is under review and cannot be deleted",
+  "GAME_DOWNLOAD_RESOURCE_FILE_NAME_CANONICAL": "This file takes the canonical name and cannot be renamed on its own",
   "GAME_DOWNLOAD_RESOURCE_DUPLICATE_FILE_NAME": "This resource already has a file with the same name",
   "INSPECTION_NOT_FOUND": "the record of the file contents was not found",
   "INSPECTION_ENTRY_NOT_FOUND": "the entry was not found in the file",

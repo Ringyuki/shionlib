@@ -71,7 +71,7 @@ func wireAdmin(infra *Infra, shared *Shared, modules *Modules) {
 		gamehttp.NewAdminHandler(games, shared.Builder),
 		characterhttp.NewAdminHandler(character.NewAdminService(characterpg.NewRepository(infra.Ent)), shared.Builder),
 		developerhttp.NewAdminHandler(developer.NewAdminService(developerpg.NewRepository(infra.Ent)), shared.Builder),
-		translatorhttp.NewAdminHandler(translator.NewAdminService(translatorpg.NewRepository(infra.Ent), translatorpg.NewAdminStore(infra.Ent), shared.Transactor), shared.Builder),
+		translatorhttp.NewAdminHandler(translator.NewAdminService(translatorpg.NewRepository(infra.Ent), translatorpg.NewAdminStore(infra.Ent), fileRenames{queue: shared.Queue}, shared.Transactor), shared.Builder),
 		adminhttp.NewStatsHandler(admin.NewStatsService(admin.StatsDeps{
 			Store:    adminpg.NewStatsStore(infra.Ent),
 			Cache:    shared.Cache,

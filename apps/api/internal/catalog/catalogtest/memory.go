@@ -461,3 +461,12 @@ func (q *Queue) Refs() []catalog.Ref {
 	}
 	return refs
 }
+
+type Followers struct {
+	Games []int
+}
+
+func (f *Followers) GameImported(_ context.Context, gameID int) error {
+	f.Games = append(f.Games, gameID)
+	return nil
+}

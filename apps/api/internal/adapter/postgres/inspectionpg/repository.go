@@ -12,6 +12,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
 	entinspection "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspection"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/inspectionentry"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/predicate"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/pgvalue"
 	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
 )
@@ -179,6 +180,28 @@ func (r *Repository) Discs(ctx context.Context, inspectionIDs []int) ([]inspecti
 		return nil, fmt.Errorf("load the disc images of inspections: %w", err)
 	}
 	return toEntries(rows)
+}
+
+func (r *Repository) MediumNames(ctx context.Context, inspectionID int) ([]string, error) {
+	sheets := make([]predicate.InspectionEntry, len(inspection.SheetExtensions))
+	for i, extension := range inspection.SheetExtensions {
+		sheets[i] = predicate.InspectionEntry(sql.FieldHasSuffixFold(inspectionentry.FieldName, "."+extension))
+	}
+	names, err := r.db(ctx).InspectionEntry.Query().
+		Where(
+			inspectionentry.InspectionID(inspectionID),
+			inspectionentry.Or(
+				inspectionentry.Kind(string(inspection.KindDisc)),
+				inspectionentry.And(inspectionentry.Kind(string(inspection.KindFile)), inspectionentry.Or(sheets...)),
+			),
+		).
+		Order(ent.Asc(inspectionentry.FieldID)).
+		Select(inspectionentry.FieldName).
+		Strings(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list the disc files of inspection %d: %w", inspectionID, err)
+	}
+	return names, nil
 }
 
 func (r *Repository) Children(ctx context.Context, inspectionID int, parentID *int, page inspection.Page) ([]inspection.Entry, int, error) {

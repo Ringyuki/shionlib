@@ -19,6 +19,15 @@ type credit struct {
 	at           time.Time
 }
 
+type Followers struct {
+	Changed []int
+}
+
+func (f *Followers) TranslatorChanged(_ context.Context, id int) error {
+	f.Changed = append(f.Changed, id)
+	return nil
+}
+
 type MemoryRepository struct {
 	mu           sync.Mutex
 	nextID       int

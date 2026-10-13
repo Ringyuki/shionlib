@@ -18,12 +18,13 @@ type TransferService struct {
 	local      LocalFiles
 	activities Activities
 	messages   Messenger
+	names      *NameService
 	tx         Transactor
 	now        func() time.Time
 }
 
-func NewTransferService(repo Repository, store ObjectStore, local LocalFiles, activities Activities, messages Messenger, tx Transactor, now func() time.Time) *TransferService {
-	return &TransferService{repo: repo, store: store, local: local, activities: activities, messages: messages, tx: tx, now: now}
+func NewTransferService(repo Repository, store ObjectStore, local LocalFiles, activities Activities, messages Messenger, names *NameService, tx Transactor, now func() time.Time) *TransferService {
+	return &TransferService{repo: repo, store: store, local: local, activities: activities, messages: messages, names: names, tx: tx, now: now}
 }
 
 func (t *TransferService) Store(ctx context.Context, fileID int) error {
@@ -99,6 +100,12 @@ func (t *TransferService) announce(ctx context.Context, file File) error {
 		return err
 	}
 	if resource.Published() {
+		if err := t.names.Apply(ctx, resource.ID); err != nil {
+			return err
+		}
+		if file, err = t.repo.GetFile(ctx, file.ID); err != nil {
+			return err
+		}
 		if file.Created.After(*resource.PublishedAt) {
 			if err := t.repo.CreateEvent(ctx, NewEvent{ResourceID: resource.ID, Kind: EventFileAdded, ActorID: &file.CreatorID, Data: EventData{Files: []EventFile{{Name: file.Name, Size: file.Size}}}}); err != nil {
 				return err
@@ -106,12 +113,15 @@ func (t *TransferService) announce(ctx context.Context, file File) error {
 		}
 		return t.messages.Send(ctx, uploadMessage(file.CreatorID, file.GameID, file.ResourceID, "FileUploadSuccess", message.Meta{"file_id": file.ID, "file_name": file.Name, "file_size": file.Size}))
 	}
-	return publishResource(ctx, t.repo, t.messages, file.ResourceID, t.now())
+	return publishResource(ctx, t.repo, t.messages, t.names, file.ResourceID, t.now())
 }
 
-func publishResource(ctx context.Context, repo Repository, messages Messenger, resourceID int, at time.Time) error {
+func publishResource(ctx context.Context, repo Repository, messages Messenger, names *NameService, resourceID int, at time.Time) error {
 	published, err := repo.PublishIfReady(ctx, resourceID, at)
-	if err != nil || !published {
+	if err != nil {
+		return err
+	}
+	if err := names.Apply(ctx, resourceID); err != nil || !published {
 		return err
 	}
 	resource, err := repo.GetResource(ctx, resourceID)
@@ -122,18 +132,18 @@ func publishResource(ctx context.Context, repo Repository, messages Messenger, r
 	if err != nil {
 		return err
 	}
-	names := make([]string, len(files))
+	fileNames := make([]string, len(files))
 	listed := make([]EventFile, len(files))
 	var size int64
 	for i, stored := range files {
-		names[i] = stored.Name
+		fileNames[i] = stored.Name
 		listed[i] = EventFile{Name: stored.Name, Size: stored.Size}
 		size += stored.Size
 	}
 	if err := repo.CreateEvent(ctx, NewEvent{ResourceID: resource.ID, Kind: EventPublished, ActorID: &resource.CreatorID, Data: EventData{Files: listed}}); err != nil {
 		return err
 	}
-	return messages.Send(ctx, uploadMessage(resource.CreatorID, resource.GameID, resource.ID, "ResourcePublished", message.Meta{"resource_id": resource.ID, "file_names": names, "file_count": len(files), "file_size": size}))
+	return messages.Send(ctx, uploadMessage(resource.CreatorID, resource.GameID, resource.ID, "ResourcePublished", message.Meta{"resource_id": resource.ID, "file_names": fileNames, "file_count": len(files), "file_size": size}))
 }
 
 func uploadMessage(receiverID, gameID, resourceID int, key string, meta message.Meta) message.NewMessage {
@@ -245,7 +255,7 @@ func (t *TransferService) discardRejected(ctx context.Context, fileID int) error
 		if err := removeEmptyResource(ctx, t.repo, file.ResourceID); err != nil {
 			return err
 		}
-		return publishResource(ctx, t.repo, t.messages, file.ResourceID, t.now())
+		return publishResource(ctx, t.repo, t.messages, t.names, file.ResourceID, t.now())
 	})
 	if err != nil {
 		return err

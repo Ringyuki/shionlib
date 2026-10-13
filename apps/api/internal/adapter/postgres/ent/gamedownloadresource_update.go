@@ -270,6 +270,20 @@ func (_u *GameDownloadResourceUpdate) ClearExtras() *GameDownloadResourceUpdate 
 	return _u
 }
 
+// SetCanonicalName sets the "canonical_name" field.
+func (_u *GameDownloadResourceUpdate) SetCanonicalName(v bool) *GameDownloadResourceUpdate {
+	_u.mutation.SetCanonicalName(v)
+	return _u
+}
+
+// SetNillableCanonicalName sets the "canonical_name" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdate) SetNillableCanonicalName(v *bool) *GameDownloadResourceUpdate {
+	if v != nil {
+		_u.SetCanonicalName(*v)
+	}
+	return _u
+}
+
 // SetDownloads sets the "downloads" field.
 func (_u *GameDownloadResourceUpdate) SetDownloads(v int) *GameDownloadResourceUpdate {
 	_u.mutation.ResetDownloads()
@@ -806,6 +820,9 @@ func (_u *GameDownloadResourceUpdate) sqlSave(ctx context.Context) (_node int, e
 	}
 	if _u.mutation.ExtrasCleared() {
 		_spec.ClearField(gamedownloadresource.FieldExtras, field.TypeOther)
+	}
+	if value, ok := _u.mutation.CanonicalName(); ok {
+		_spec.SetField(gamedownloadresource.FieldCanonicalName, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Downloads(); ok {
 		_spec.SetField(gamedownloadresource.FieldDownloads, field.TypeInt, value)
@@ -1454,6 +1471,20 @@ func (_u *GameDownloadResourceUpdateOne) ClearExtras() *GameDownloadResourceUpda
 	return _u
 }
 
+// SetCanonicalName sets the "canonical_name" field.
+func (_u *GameDownloadResourceUpdateOne) SetCanonicalName(v bool) *GameDownloadResourceUpdateOne {
+	_u.mutation.SetCanonicalName(v)
+	return _u
+}
+
+// SetNillableCanonicalName sets the "canonical_name" field if the given value is not nil.
+func (_u *GameDownloadResourceUpdateOne) SetNillableCanonicalName(v *bool) *GameDownloadResourceUpdateOne {
+	if v != nil {
+		_u.SetCanonicalName(*v)
+	}
+	return _u
+}
+
 // SetDownloads sets the "downloads" field.
 func (_u *GameDownloadResourceUpdateOne) SetDownloads(v int) *GameDownloadResourceUpdateOne {
 	_u.mutation.ResetDownloads()
@@ -2020,6 +2051,9 @@ func (_u *GameDownloadResourceUpdateOne) sqlSave(ctx context.Context) (_node *Ga
 	}
 	if _u.mutation.ExtrasCleared() {
 		_spec.ClearField(gamedownloadresource.FieldExtras, field.TypeOther)
+	}
+	if value, ok := _u.mutation.CanonicalName(); ok {
+		_spec.SetField(gamedownloadresource.FieldCanonicalName, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Downloads(); ok {
 		_spec.SetField(gamedownloadresource.FieldDownloads, field.TypeInt, value)

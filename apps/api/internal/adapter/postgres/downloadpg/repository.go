@@ -228,6 +228,7 @@ func (r *Repository) CreateResource(ctx context.Context, in download.NewResource
 		SetNillableEditionName(in.Info.EditionName).
 		SetNillableForm((*string)(in.Info.Form)).
 		SetExtras(textArray(in.Info.Extras)).
+		SetCanonicalName(in.Canonical).
 		SetCreatorID(in.CreatorID)
 	if in.Simulator != nil {
 		create.SetSimulator(gamedownloadresource.Simulator(*in.Simulator))
@@ -245,6 +246,18 @@ func (r *Repository) CreateResource(ctx context.Context, in download.NewResource
 	resource := toResource(row)
 	resource.Info.Translators = append(resource.Info.Translators, in.Info.Translators...)
 	return resource, nil
+}
+
+func (r *Repository) ListCreditedResources(ctx context.Context, translatorID int) ([]int, error) {
+	ids, err := r.db(ctx).GameDownloadResourceTranslator.Query().
+		Where(gamedownloadresourcetranslator.TranslatorID(translatorID)).
+		Order(ent.Asc(gamedownloadresourcetranslator.FieldResourceID)).
+		Select(gamedownloadresourcetranslator.FieldResourceID).
+		Ints(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("list download resources crediting translator %d: %w", translatorID, err)
+	}
+	return ids, nil
 }
 
 func (r *Repository) credit(ctx context.Context, resourceID int, translators []translator.Ref) error {
@@ -320,6 +333,9 @@ func (r *Repository) UpdateResource(ctx context.Context, id int, changes downloa
 	setOrClear(info.EditionName != nil, func() { update.SetEditionName(*info.EditionName) }, func() { update.ClearEditionName() })
 	setOrClear(info.Form != nil, func() { update.SetForm(string(*info.Form)) }, func() { update.ClearForm() })
 	update.SetExtras(textArray(info.Extras))
+	if changes.Canonical != nil {
+		update.SetCanonicalName(*changes.Canonical)
+	}
 	if err := update.Exec(ctx); err != nil {
 		return fmt.Errorf("update download resource %d: %w", id, err)
 	}

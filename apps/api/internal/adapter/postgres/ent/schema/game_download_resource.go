@@ -33,6 +33,7 @@ func (GameDownloadResource) Fields() []ent.Field {
 		field.String("edition_name").MaxRuneLen(64).SchemaType(varchar(64)).Optional().Nillable(),
 		field.String("form").MaxRuneLen(16).SchemaType(varchar(16)).Optional().Nillable(),
 		field.Other("extras", stringsType).SchemaType(textArray).Optional().Annotations(emptyArray("text[]")),
+		field.Bool("canonical_name").Default(false),
 		field.Int("downloads").SchemaType(pg("integer")).Default(0),
 		field.Time("published_at").SchemaType(timestamp3).Optional().Nillable(),
 		field.Time("check_retry_at").SchemaType(timestamp3).Optional().Nillable(),

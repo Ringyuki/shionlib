@@ -16,23 +16,25 @@ type Options struct {
 }
 
 type Deps struct {
-	Sources  []Source
-	Store    Store
-	Tx       Transactor
-	Queue    Queue
-	Settings setting.Source
-	Now      func() time.Time
-	Options  Options
+	Sources   []Source
+	Store     Store
+	Tx        Transactor
+	Queue     Queue
+	Followers Followers
+	Settings  setting.Source
+	Now       func() time.Time
+	Options   Options
 }
 
 type Service struct {
-	sources  map[string]Source
-	store    Store
-	tx       Transactor
-	queue    Queue
-	settings setting.Source
-	now      func() time.Time
-	opts     Options
+	sources   map[string]Source
+	store     Store
+	tx        Transactor
+	queue     Queue
+	followers Followers
+	settings  setting.Source
+	now       func() time.Time
+	opts      Options
 }
 
 func NewService(deps Deps) *Service {
@@ -40,7 +42,7 @@ func NewService(deps Deps) *Service {
 	for _, source := range deps.Sources {
 		byName[source.Name()] = source
 	}
-	return &Service{sources: byName, store: deps.Store, tx: deps.Tx, queue: deps.Queue, settings: deps.Settings, now: deps.Now, opts: deps.Options}
+	return &Service{sources: byName, store: deps.Store, tx: deps.Tx, queue: deps.Queue, followers: deps.Followers, settings: deps.Settings, now: deps.Now, opts: deps.Options}
 }
 
 func (s *Service) source(name string) (Source, error) {
@@ -106,6 +108,9 @@ func (s *Service) importEntry(ctx context.Context, ref Ref, include bool) (int, 
 		if err := s.queue.Enqueue(ctx, ImportJob(next)); err != nil {
 			return localID, err
 		}
+	}
+	if ref.Entity == EntityGame {
+		return localID, s.followers.GameImported(ctx, localID)
 	}
 	return localID, nil
 }

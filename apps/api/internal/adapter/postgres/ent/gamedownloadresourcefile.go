@@ -25,6 +25,8 @@ type GameDownloadResourceFile struct {
 	Type int `json:"type,omitempty"`
 	// FileName holds the value of the "file_name" field.
 	FileName string `json:"file_name,omitempty"`
+	// OriginalName holds the value of the "original_name" field.
+	OriginalName *string `json:"original_name,omitempty"`
 	// FilePath holds the value of the "file_path" field.
 	FilePath *string `json:"file_path,omitempty"`
 	// FileSize holds the value of the "file_size" field.
@@ -172,7 +174,7 @@ func (*GameDownloadResourceFile) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case gamedownloadresourcefile.FieldID, gamedownloadresourcefile.FieldType, gamedownloadresourcefile.FieldFileSize, gamedownloadresourcefile.FieldUploadSessionID, gamedownloadresourcefile.FieldFileStatus, gamedownloadresourcefile.FieldFileCheckStatus, gamedownloadresourcefile.FieldCheckFailures, gamedownloadresourcefile.FieldInspectionID, gamedownloadresourcefile.FieldGameDownloadResourceID, gamedownloadresourcefile.FieldCreatorID:
 			values[i] = new(sql.NullInt64)
-		case gamedownloadresourcefile.FieldFileName, gamedownloadresourcefile.FieldFilePath, gamedownloadresourcefile.FieldFileURL, gamedownloadresourcefile.FieldS3FileKey, gamedownloadresourcefile.FieldFileContentType, gamedownloadresourcefile.FieldHashAlgorithm, gamedownloadresourcefile.FieldFileHash, gamedownloadresourcefile.FieldCheckError, gamedownloadresourcefile.FieldFileSha256:
+		case gamedownloadresourcefile.FieldFileName, gamedownloadresourcefile.FieldOriginalName, gamedownloadresourcefile.FieldFilePath, gamedownloadresourcefile.FieldFileURL, gamedownloadresourcefile.FieldS3FileKey, gamedownloadresourcefile.FieldFileContentType, gamedownloadresourcefile.FieldHashAlgorithm, gamedownloadresourcefile.FieldFileHash, gamedownloadresourcefile.FieldCheckError, gamedownloadresourcefile.FieldFileSha256:
 			values[i] = new(sql.NullString)
 		case gamedownloadresourcefile.FieldCheckStalledAt, gamedownloadresourcefile.FieldCreated, gamedownloadresourcefile.FieldUpdated:
 			values[i] = new(sql.NullTime)
@@ -208,6 +210,13 @@ func (_m *GameDownloadResourceFile) assignValues(columns []string, values []any)
 				return fmt.Errorf("unexpected type %T for field file_name", values[i])
 			} else if value.Valid {
 				_m.FileName = value.String
+			}
+		case gamedownloadresourcefile.FieldOriginalName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field original_name", values[i])
+			} else if value.Valid {
+				_m.OriginalName = new(string)
+				*_m.OriginalName = value.String
 			}
 		case gamedownloadresourcefile.FieldFilePath:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -414,6 +423,11 @@ func (_m *GameDownloadResourceFile) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("file_name=")
 	builder.WriteString(_m.FileName)
+	builder.WriteString(", ")
+	if v := _m.OriginalName; v != nil {
+		builder.WriteString("original_name=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	if v := _m.FilePath; v != nil {
 		builder.WriteString("file_path=")

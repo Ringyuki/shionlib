@@ -3,6 +3,7 @@ package download_test
 import (
 	"slices"
 	"testing"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 )
@@ -15,7 +16,7 @@ type legacyWant struct {
 }
 
 func readNote(note string, files ...string) download.LegacyReading {
-	return download.ReadLegacy(download.LegacyResource{Languages: []string{"zh"}, Note: &note, FileNames: files})
+	return download.ReadLegacy(download.LegacyResource{Languages: []string{"zh"}, Note: &note, FileNames: files}, download.LegacyEntry{})
 }
 
 func TestReadLegacyNotes(t *testing.T) {
@@ -123,7 +124,7 @@ func TestReadLegacyEditionAndForm(t *testing.T) {
 		"[920101][elf] 同級生 (PC98).zip":                                     {"", false},
 		"[HDL版] nothing.zip":                                               {"", false},
 	} {
-		got := download.ReadLegacy(download.LegacyResource{Languages: []string{"jp"}, FileNames: []string{name}})
+		got := download.ReadLegacy(download.LegacyResource{Languages: []string{"jp"}, FileNames: []string{name}}, download.LegacyEntry{})
 		edition := download.Edition("")
 		if got.Edition != nil {
 			edition = *got.Edition
@@ -135,7 +136,7 @@ func TestReadLegacyEditionAndForm(t *testing.T) {
 			t.Errorf("a resource in Japanese only has no translation: %+v", got)
 		}
 	}
-	inspected := download.ReadLegacy(download.LegacyResource{Languages: []string{"jp"}, FileNames: []string{"game.7z"}, Discs: true})
+	inspected := download.ReadLegacy(download.LegacyResource{Languages: []string{"jp"}, FileNames: []string{"game.7z"}, Discs: true}, download.LegacyEntry{})
 	if inspected.Form == nil || *inspected.Form != download.FormDisc {
 		t.Fatalf("a disc image found by the check makes the form a disc: %+v", inspected)
 	}
@@ -148,13 +149,90 @@ func TestReadLegacyKeepsWhatIsAlreadySaid(t *testing.T) {
 		Languages: []string{"zh"}, Note: &note, FileNames: []string{"[BABEL] 妹嫁 DL版 (iso).7z"}, Discs: true,
 		Info: download.Info{Translation: &machine, Edition: &steam, Form: &portable},
 	}
-	if got := download.ReadLegacy(described); !got.Empty() {
+	if got := download.ReadLegacy(described, download.LegacyEntry{}); !got.Empty() {
 		t.Fatalf("nothing is read over what a resource already says: %+v", got)
 	}
 	half := described
 	half.Info = download.Info{Translation: &machine}
-	got := download.ReadLegacy(half)
+	got := download.ReadLegacy(half, download.LegacyEntry{})
 	if got.Translation != nil || got.ClearNote || got.Edition == nil || got.Form == nil || got.Empty() {
 		t.Fatalf("only what is missing is read: %+v", got)
+	}
+}
+
+func namedResource(name string, mutate ...func(*download.LegacyResource)) download.LegacyResource {
+	resource := download.LegacyResource{Languages: []string{"jp"}, FileNames: []string{name}, Files: []download.LegacyFile{{ID: 7, Name: name}}, Published: true, Info: download.Info{Translation: ptr(download.TranslationNone)}}
+	for _, change := range mutate {
+		change(&resource)
+	}
+	return resource
+}
+
+func TestReadLegacyTakesTheCanonicalNameWhenEverySegmentIsRead(t *testing.T) {
+	released := time.Date(2014, 12, 19, 0, 0, 0, 0, time.UTC)
+	titles := download.LegacyEntry{Titles: []string{"アマカノ", "甜蜜女友", "Amakano"}, Released: &released, Brands: []string{"あざらしそふと", "Azarashi Soft"}}
+	for name, edition := range map[string]string{
+		"[141219][あざらしそふと] アマカノ (iso+mds+rr3).7z":                   "",
+		"[あざらしそふと] アマカノ  甜蜜女友.zip":                                  "",
+		"[あざらしそふと] アマカノ 甜蜜女友 汉化硬盘版[绿茶汉化组].zip":                      "",
+		"[141219][あざらしそふと] アマカノ DL版 (files).rar":                    "",
+		"[141219][あざらしそふと] ＡＭＡＫＡＮＯ Steam edition (files).part1.rar": "",
+		"[141219][あざらしそふと] アマカノ 初回限定版 (mdf+mds rr3%).rar":           "初回限定版",
+		"[141219][あざらしそふと] アマカノ Windows10対応版 [官方中文][v1.02].zip":     "Windows10対応版",
+		"[141219] アマカノ パッケージ版 初回版 (bin+cue).rar":                    "初回版",
+	} {
+		got := download.ReadLegacy(namedResource(name), titles)
+		named := ""
+		if got.EditionName != nil {
+			named = *got.EditionName
+		}
+		if !slices.Equal(got.Canonical, []int{7}) || named != edition {
+			t.Errorf("%q: canonical %v, edition name %q, want %q", name, got.Canonical, named, edition)
+		}
+	}
+}
+
+func TestReadLegacyKeepsANameItCannotReadWhole(t *testing.T) {
+	released := time.Date(2014, 12, 19, 0, 0, 0, 0, time.UTC)
+	titles := download.LegacyEntry{Titles: []string{"アマカノ", "甜蜜女友", ""}, Released: &released, Brands: []string{"あざらしそふと"}}
+	for _, name := range []string{
+		"甜蜜女友1Perfect Edition（GPT4.0）-PC.zip",
+		"アマカノ.zip",
+		"[あざらしそふと] アマカノ 修正パッチ同梱 (iso).rar",
+		"[あざらしそふと] アマカノ2 (iso).rar",
+		"[あざらしそふと] アマカノ (PlayDRM) (iso+mds+rr3).rar",
+		"[あざらしそふと] アマカノ (PC98).zip",
+		"[あざらしそふと] アマカノ [部分汉化].7z",
+		"[あざらしそふと] アマカノ [AlphaROM Cracker同梱] (mdf+mds).rar",
+		"[あざらしそふと] アマカノ 初回版 + OST.7z",
+		"[141220][あざらしそふと] アマカノ (iso).rar",
+		"[190204][あざらしそふと] アマカノ steam版 (files).rar",
+		"[あざらしそふと & Other] アマカノ (iso).rar",
+		"[Shiravune] アマカノ steam edition (files).rar",
+	} {
+		if got := download.ReadLegacy(namedResource(name), titles); len(got.Canonical) != 0 || got.EditionName != nil {
+			t.Errorf("%q: %+v", name, got)
+		}
+	}
+	read := "[あざらしそふと] アマカノ (iso).rar"
+	for reason, mutate := range map[string]func(*download.LegacyResource){
+		"already canonical":       func(r *download.LegacyResource) { r.Canonical = true },
+		"not published":           func(r *download.LegacyResource) { r.Published = false },
+		"uploaded under its name": func(r *download.LegacyResource) { r.Files[0].OriginalName = ptr("upload.rar") },
+		"without files":           func(r *download.LegacyResource) { r.Files = nil },
+	} {
+		if got := download.ReadLegacy(namedResource(read, mutate), titles); len(got.Canonical) != 0 {
+			t.Errorf("%s: %+v", reason, got)
+		}
+	}
+	kept := namedResource("[あざらしそふと] アマカノ 初回版 (iso).rar", func(r *download.LegacyResource) { r.Info.EditionName = ptr("通常版") })
+	if got := download.ReadLegacy(kept, titles); got.EditionName != nil || len(got.Canonical) != 1 {
+		t.Fatalf("an edition name that is already said is kept: %+v", got)
+	}
+	set := namedResource("game.part1.rar", func(r *download.LegacyResource) {
+		r.Files = []download.LegacyFile{{ID: 1, Name: "[あざらしそふと] アマカノ.part1.rar"}, {ID: 2, Name: "[あざらしそふと] アマカノ.part2.rar"}, {ID: 3, Name: "bonus.zip"}}
+	})
+	if got := download.ReadLegacy(set, titles); !slices.Equal(got.Canonical, []int{1, 2}) {
+		t.Fatalf("every volume of the first set: %+v", got)
 	}
 }

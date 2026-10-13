@@ -78,6 +78,7 @@ func (h *Handler) create(ctx context.Context, in *createDownloadSourceInput) (*r
 		Simulator: in.Body.Simulator,
 		Note:      in.Body.Note,
 		Info:      in.Body.info(),
+		Canonical: in.Body.Canonical == nil || *in.Body.Canonical,
 		Files:     fileUploads(in.Body.Files),
 	})
 	if err != nil {
@@ -138,6 +139,7 @@ func (h *Handler) edit(ctx context.Context, in *editDownloadSourceInput) (*respo
 		Simulator: in.Body.Simulator,
 		Note:      in.Body.Note,
 		Info:      in.Body.info(),
+		Canonical: in.Body.Canonical,
 	})
 	if err != nil {
 		return nil, err

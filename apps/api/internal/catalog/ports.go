@@ -38,6 +38,10 @@ type Store interface {
 	LinkCounts(ctx context.Context, source string) (LinkCounts, error)
 }
 
+type Followers interface {
+	GameImported(ctx context.Context, gameID int) error
+}
+
 type Queue interface {
 	Enqueue(ctx context.Context, job interface{ Kind() string }) error
 }

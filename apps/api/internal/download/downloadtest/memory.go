@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
+	"github.com/Ringyuki/shionlib/apps/api/internal/translator"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload"
 	"github.com/Ringyuki/shionlib/apps/api/internal/user"
 )
@@ -365,6 +366,7 @@ func (r *MemoryRepository) CreateResource(_ context.Context, in download.NewReso
 		Simulator: in.Simulator,
 		Note:      in.Note,
 		Info:      cloneInfo(in.Info),
+		Canonical: in.Canonical,
 		CreatorID: in.CreatorID,
 		Created:   r.now(),
 		Updated:   r.now(),
@@ -393,6 +395,7 @@ func (r *MemoryRepository) CreateFile(_ context.Context, in download.NewFile) (d
 		ResourceID:      in.ResourceID,
 		Type:            in.Type,
 		Name:            in.Name,
+		OriginalName:    in.OriginalName,
 		Path:            in.Path,
 		Size:            in.Size,
 		StorageKey:      in.StorageKey,
@@ -437,6 +440,9 @@ func (r *MemoryRepository) UpdateResource(_ context.Context, id int, changes dow
 		resource.Note = changes.Note
 	}
 	resource.Info = cloneInfo(changes.Info)
+	if changes.Canonical != nil {
+		resource.Canonical = *changes.Canonical
+	}
 	r.resources[id] = resource
 	return nil
 }
@@ -458,6 +464,18 @@ func (r *MemoryRepository) SetForm(_ context.Context, id int, form download.Form
 	return r.mutateResource(id, func(res *download.Resource) { res.Info.Form = &form })
 }
 
+func (r *MemoryRepository) ListCreditedResources(_ context.Context, translatorID int) ([]int, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var ids []int
+	for _, resource := range r.sortedResources() {
+		if slices.ContainsFunc(resource.Info.Translators, func(credited translator.Ref) bool { return credited.ID == translatorID }) {
+			ids = append(ids, resource.ID)
+		}
+	}
+	return ids, nil
+}
+
 func (r *MemoryRepository) ListLegacy(_ context.Context, afterID, limit int) ([]download.LegacyResource, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -466,21 +484,44 @@ func (r *MemoryRepository) ListLegacy(_ context.Context, afterID, limit int) ([]
 		if resource.ID <= afterID || len(out) == limit {
 			continue
 		}
-		out = append(out, download.LegacyResource{
+		legacy := download.LegacyResource{
 			ID:        resource.ID,
+			GameID:    resource.GameID,
 			CreatorID: resource.CreatorID,
 			Languages: slices.Clone(resource.Languages),
 			Note:      resource.Note,
 			FileNames: r.names(resource.ID),
 			Discs:     r.Discs[resource.ID],
+			Published: resource.Published() && resource.Status == download.ResourceActive,
+			Canonical: resource.Canonical,
 			Info:      cloneInfo(resource.Info),
-		})
+		}
+		for _, file := range r.filesOf(resource.ID) {
+			legacy.Files = append(legacy.Files, download.LegacyFile{ID: file.ID, Name: file.Name, OriginalName: file.OriginalName})
+		}
+		out = append(out, legacy)
 	}
 	return out, nil
 }
 
 func (r *MemoryRepository) Describe(_ context.Context, id int, description download.LegacyDescription) error {
+	for _, fileID := range description.Canonical {
+		if err := r.mutateFile(fileID, func(file *download.File) {
+			if file.OriginalName == nil {
+				name := file.Name
+				file.OriginalName = &name
+			}
+		}); err != nil {
+			return err
+		}
+	}
 	return r.mutateResource(id, func(res *download.Resource) {
+		if len(description.Canonical) > 0 {
+			res.Canonical = true
+		}
+		if description.EditionName != nil {
+			res.Info.EditionName = description.EditionName
+		}
 		if description.Translation != nil {
 			res.Info.Translation = description.Translation
 			res.Info.Translators = slices.Clone(description.Translators)

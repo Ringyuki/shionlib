@@ -3,7 +3,9 @@ package inspectiontest
 import (
 	"context"
 	"errors"
+	"path"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -184,6 +186,15 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		discs, err := env.Repo.Discs(ctx, []int{id})
 		if err != nil || len(discs) != 1 || discs[0].ID != top[0] {
 			t.Fatalf("discs: %+v %v", discs, err)
+		}
+		media, err := env.Repo.MediumNames(ctx, id)
+		if err != nil || !slices.Contains(media, discs[0].Name) {
+			t.Fatalf("the names a medium is read from: %v %v", media, err)
+		}
+		for _, name := range media {
+			if name != discs[0].Name && !slices.Contains(inspection.SheetExtensions, strings.ToLower(strings.TrimPrefix(path.Ext(name), "."))) {
+				t.Fatalf("only disc images and their sheets name a medium: %v", media)
+			}
 		}
 
 		found, total, err := env.Repo.Search(ctx, id, "EXE", firstPage)

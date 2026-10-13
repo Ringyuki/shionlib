@@ -71,6 +71,26 @@ func (_u *GameDownloadResourceFileUpdate) SetNillableFileName(v *string) *GameDo
 	return _u
 }
 
+// SetOriginalName sets the "original_name" field.
+func (_u *GameDownloadResourceFileUpdate) SetOriginalName(v string) *GameDownloadResourceFileUpdate {
+	_u.mutation.SetOriginalName(v)
+	return _u
+}
+
+// SetNillableOriginalName sets the "original_name" field if the given value is not nil.
+func (_u *GameDownloadResourceFileUpdate) SetNillableOriginalName(v *string) *GameDownloadResourceFileUpdate {
+	if v != nil {
+		_u.SetOriginalName(*v)
+	}
+	return _u
+}
+
+// ClearOriginalName clears the value of the "original_name" field.
+func (_u *GameDownloadResourceFileUpdate) ClearOriginalName() *GameDownloadResourceFileUpdate {
+	_u.mutation.ClearOriginalName()
+	return _u
+}
+
 // SetFilePath sets the "file_path" field.
 func (_u *GameDownloadResourceFileUpdate) SetFilePath(v string) *GameDownloadResourceFileUpdate {
 	_u.mutation.SetFilePath(v)
@@ -647,6 +667,12 @@ func (_u *GameDownloadResourceFileUpdate) sqlSave(ctx context.Context) (_node in
 	if value, ok := _u.mutation.FileName(); ok {
 		_spec.SetField(gamedownloadresourcefile.FieldFileName, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.OriginalName(); ok {
+		_spec.SetField(gamedownloadresourcefile.FieldOriginalName, field.TypeString, value)
+	}
+	if _u.mutation.OriginalNameCleared() {
+		_spec.ClearField(gamedownloadresourcefile.FieldOriginalName, field.TypeString)
+	}
 	if value, ok := _u.mutation.FilePath(); ok {
 		_spec.SetField(gamedownloadresourcefile.FieldFilePath, field.TypeString, value)
 	}
@@ -1030,6 +1056,26 @@ func (_u *GameDownloadResourceFileUpdateOne) SetNillableFileName(v *string) *Gam
 	if v != nil {
 		_u.SetFileName(*v)
 	}
+	return _u
+}
+
+// SetOriginalName sets the "original_name" field.
+func (_u *GameDownloadResourceFileUpdateOne) SetOriginalName(v string) *GameDownloadResourceFileUpdateOne {
+	_u.mutation.SetOriginalName(v)
+	return _u
+}
+
+// SetNillableOriginalName sets the "original_name" field if the given value is not nil.
+func (_u *GameDownloadResourceFileUpdateOne) SetNillableOriginalName(v *string) *GameDownloadResourceFileUpdateOne {
+	if v != nil {
+		_u.SetOriginalName(*v)
+	}
+	return _u
+}
+
+// ClearOriginalName clears the value of the "original_name" field.
+func (_u *GameDownloadResourceFileUpdateOne) ClearOriginalName() *GameDownloadResourceFileUpdateOne {
+	_u.mutation.ClearOriginalName()
 	return _u
 }
 
@@ -1638,6 +1684,12 @@ func (_u *GameDownloadResourceFileUpdateOne) sqlSave(ctx context.Context) (_node
 	}
 	if value, ok := _u.mutation.FileName(); ok {
 		_spec.SetField(gamedownloadresourcefile.FieldFileName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.OriginalName(); ok {
+		_spec.SetField(gamedownloadresourcefile.FieldOriginalName, field.TypeString, value)
+	}
+	if _u.mutation.OriginalNameCleared() {
+		_spec.ClearField(gamedownloadresourcefile.FieldOriginalName, field.TypeString)
 	}
 	if value, ok := _u.mutation.FilePath(); ok {
 		_spec.SetField(gamedownloadresourcefile.FieldFilePath, field.TypeString, value)

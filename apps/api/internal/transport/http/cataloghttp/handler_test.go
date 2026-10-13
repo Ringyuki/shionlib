@@ -34,13 +34,14 @@ func setupWithStore(t *testing.T) (*apitest.Server, *catalogtest.Source, *catalo
 	queue := &catalogtest.Queue{}
 	store := catalogtest.NewStore()
 	service := catalog.NewService(catalog.Deps{
-		Sources:  []catalog.Source{source},
-		Store:    store,
-		Tx:       &txtest.Immediate{},
-		Queue:    queue,
-		Now:      func() time.Time { return apitest.Now },
-		Settings: settingtest.Source{},
-		Options:  catalog.Options{CreatorID: 1},
+		Sources:   []catalog.Source{source},
+		Store:     store,
+		Tx:        &txtest.Immediate{},
+		Queue:     queue,
+		Followers: &catalogtest.Followers{},
+		Now:       func() time.Time { return apitest.Now },
+		Settings:  settingtest.Source{},
+		Options:   catalog.Options{CreatorID: 1},
 	})
 	cataloghttp.NewHandler(service, server.Builder).Register(server.API)
 	return server, source, queue, store

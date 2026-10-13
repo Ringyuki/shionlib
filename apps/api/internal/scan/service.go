@@ -291,7 +291,7 @@ func (s *Service) check(ctx context.Context, unit Unit) error {
 	if err != nil {
 		return err
 	}
-	if slices.ContainsFunc(found.contents.Draft.Entries, func(entry inspection.DraftEntry) bool { return entry.Kind == inspection.KindDisc }) {
+	if holdsDisc(found.contents.Draft) {
 		if err := s.files.DiscFound(ctx, unit.Entry().ResourceID); err != nil {
 			return err
 		}
@@ -305,6 +305,10 @@ func (s *Service) check(ctx context.Context, unit Unit) error {
 		return err
 	}
 	return s.keepPreviews(ctx, result.recorded, found.contents.Previews)
+}
+
+func holdsDisc(draft inspection.Draft) bool {
+	return slices.ContainsFunc(draft.Entries, func(entry inspection.DraftEntry) bool { return entry.Kind == inspection.KindDisc })
 }
 
 func (s *Service) examine(ctx context.Context, unit Unit, workspace string) (examined, error) {

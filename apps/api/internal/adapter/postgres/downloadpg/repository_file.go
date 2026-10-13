@@ -19,6 +19,7 @@ func (r *Repository) CreateFile(ctx context.Context, in download.NewFile) (downl
 		SetGameDownloadResourceID(in.ResourceID).
 		SetType(in.Type).
 		SetFileName(in.Name).
+		SetNillableOriginalName(in.OriginalName).
 		SetNillableFilePath(in.Path).
 		SetFileSize(in.Size).
 		SetNillableS3FileKey(in.StorageKey).

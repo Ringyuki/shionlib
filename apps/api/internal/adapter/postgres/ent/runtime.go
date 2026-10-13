@@ -860,16 +860,20 @@ func init() {
 	gamedownloadresourceDescForm := gamedownloadresourceFields[12].Descriptor()
 	// gamedownloadresource.FormValidator is a validator for the "form" field. It is called by the builders before save.
 	gamedownloadresource.FormValidator = gamedownloadresourceDescForm.Validators[0].(func(string) error)
+	// gamedownloadresourceDescCanonicalName is the schema descriptor for canonical_name field.
+	gamedownloadresourceDescCanonicalName := gamedownloadresourceFields[14].Descriptor()
+	// gamedownloadresource.DefaultCanonicalName holds the default value on creation for the canonical_name field.
+	gamedownloadresource.DefaultCanonicalName = gamedownloadresourceDescCanonicalName.Default.(bool)
 	// gamedownloadresourceDescDownloads is the schema descriptor for downloads field.
-	gamedownloadresourceDescDownloads := gamedownloadresourceFields[14].Descriptor()
+	gamedownloadresourceDescDownloads := gamedownloadresourceFields[15].Descriptor()
 	// gamedownloadresource.DefaultDownloads holds the default value on creation for the downloads field.
 	gamedownloadresource.DefaultDownloads = gamedownloadresourceDescDownloads.Default.(int)
 	// gamedownloadresourceDescCreated is the schema descriptor for created field.
-	gamedownloadresourceDescCreated := gamedownloadresourceFields[18].Descriptor()
+	gamedownloadresourceDescCreated := gamedownloadresourceFields[19].Descriptor()
 	// gamedownloadresource.DefaultCreated holds the default value on creation for the created field.
 	gamedownloadresource.DefaultCreated = gamedownloadresourceDescCreated.Default.(func() time.Time)
 	// gamedownloadresourceDescUpdated is the schema descriptor for updated field.
-	gamedownloadresourceDescUpdated := gamedownloadresourceFields[19].Descriptor()
+	gamedownloadresourceDescUpdated := gamedownloadresourceFields[20].Descriptor()
 	// gamedownloadresource.DefaultUpdated holds the default value on creation for the updated field.
 	gamedownloadresource.DefaultUpdated = gamedownloadresourceDescUpdated.Default.(func() time.Time)
 	// gamedownloadresource.UpdateDefaultUpdated holds the default value on update for the updated field.
@@ -887,27 +891,27 @@ func init() {
 	gamedownloadresourcefileFields := schema.GameDownloadResourceFile{}.Fields()
 	_ = gamedownloadresourcefileFields
 	// gamedownloadresourcefileDescFileStatus is the schema descriptor for file_status field.
-	gamedownloadresourcefileDescFileStatus := gamedownloadresourcefileFields[11].Descriptor()
+	gamedownloadresourcefileDescFileStatus := gamedownloadresourcefileFields[12].Descriptor()
 	// gamedownloadresourcefile.DefaultFileStatus holds the default value on creation for the file_status field.
 	gamedownloadresourcefile.DefaultFileStatus = gamedownloadresourcefileDescFileStatus.Default.(int)
 	// gamedownloadresourcefileDescFileCheckStatus is the schema descriptor for file_check_status field.
-	gamedownloadresourcefileDescFileCheckStatus := gamedownloadresourcefileFields[12].Descriptor()
+	gamedownloadresourcefileDescFileCheckStatus := gamedownloadresourcefileFields[13].Descriptor()
 	// gamedownloadresourcefile.DefaultFileCheckStatus holds the default value on creation for the file_check_status field.
 	gamedownloadresourcefile.DefaultFileCheckStatus = gamedownloadresourcefileDescFileCheckStatus.Default.(int)
 	// gamedownloadresourcefileDescCheckFailures is the schema descriptor for check_failures field.
-	gamedownloadresourcefileDescCheckFailures := gamedownloadresourcefileFields[13].Descriptor()
+	gamedownloadresourcefileDescCheckFailures := gamedownloadresourcefileFields[14].Descriptor()
 	// gamedownloadresourcefile.DefaultCheckFailures holds the default value on creation for the check_failures field.
 	gamedownloadresourcefile.DefaultCheckFailures = gamedownloadresourcefileDescCheckFailures.Default.(int)
 	// gamedownloadresourcefileDescIsVirusFalsePositive is the schema descriptor for is_virus_false_positive field.
-	gamedownloadresourcefileDescIsVirusFalsePositive := gamedownloadresourcefileFields[16].Descriptor()
+	gamedownloadresourcefileDescIsVirusFalsePositive := gamedownloadresourcefileFields[17].Descriptor()
 	// gamedownloadresourcefile.DefaultIsVirusFalsePositive holds the default value on creation for the is_virus_false_positive field.
 	gamedownloadresourcefile.DefaultIsVirusFalsePositive = gamedownloadresourcefileDescIsVirusFalsePositive.Default.(bool)
 	// gamedownloadresourcefileDescCreated is the schema descriptor for created field.
-	gamedownloadresourcefileDescCreated := gamedownloadresourcefileFields[21].Descriptor()
+	gamedownloadresourcefileDescCreated := gamedownloadresourcefileFields[22].Descriptor()
 	// gamedownloadresourcefile.DefaultCreated holds the default value on creation for the created field.
 	gamedownloadresourcefile.DefaultCreated = gamedownloadresourcefileDescCreated.Default.(func() time.Time)
 	// gamedownloadresourcefileDescUpdated is the schema descriptor for updated field.
-	gamedownloadresourcefileDescUpdated := gamedownloadresourcefileFields[22].Descriptor()
+	gamedownloadresourcefileDescUpdated := gamedownloadresourcefileFields[23].Descriptor()
 	// gamedownloadresourcefile.DefaultUpdated holds the default value on creation for the updated field.
 	gamedownloadresourcefile.DefaultUpdated = gamedownloadresourcefileDescUpdated.Default.(func() time.Time)
 	// gamedownloadresourcefile.UpdateDefaultUpdated holds the default value on update for the updated field.

@@ -1,6 +1,7 @@
 package downloadhttp
 
 import (
+	"slices"
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
@@ -31,6 +32,8 @@ type downloadFileDTO struct {
 	ID                   int                      `json:"id"`
 	Type                 int                      `json:"type"`
 	FileName             string                   `json:"file_name"`
+	OriginalName         *string                  `json:"original_name" doc:"The name the file was uploaded with; null for files stored before names were kept"`
+	CanonicalName        bool                     `json:"canonical_name" doc:"Whether the file carries the canonical name of the resource, which cannot be changed by hand"`
 	FileSize             int64                    `json:"file_size"`
 	FileURL              *string                  `json:"file_url"`
 	S3FileKey            *string                  `json:"s3_file_key"`
@@ -67,6 +70,7 @@ type downloadResourceDTO struct {
 	EditionName     *string                 `json:"edition_name"`
 	Form            *download.Form          `json:"form" enum:"disc,installer,portable" doc:"How the game is packed; null when nobody has said"`
 	Extras          []string                `json:"extras" enum:"save,bonus"`
+	CanonicalName   bool                    `json:"canonical_name" doc:"Whether the first file of the resource takes the canonical name"`
 	Downloads       int                     `json:"downloads"`
 	Creator         userhttp.UserSummaryDTO `json:"creator"`
 	PublishedAt     *time.Time              `json:"published_at" doc:"Null while the resource is still being checked; only its uploader sees it then"`
@@ -270,6 +274,7 @@ func toResourceDTO(r download.GameResource, now time.Time) downloadResourceDTO {
 		EditionName:    r.Info.EditionName,
 		Form:           r.Info.Form,
 		Extras:         nonNil(r.Info.Extras),
+		CanonicalName:  r.Canonical,
 		Downloads:      r.Downloads,
 		Creator:        userhttp.ToUserSummary(r.Creator, now),
 		PublishedAt:    r.PublishedAt,
@@ -285,6 +290,7 @@ func toResourceDTO(r download.GameResource, now time.Time) downloadResourceDTO {
 	if r.Awaited != nil {
 		out.MissingVolumes, out.VolumesDeadline = r.Awaited.Names, &r.Awaited.Deadline
 	}
+	canonical := r.CanonicalFiles()
 	for i, file := range r.Files {
 		cases := make([]downloadMalwareCaseDTO, len(file.MalwareCases))
 		for j, scanCase := range file.MalwareCases {
@@ -294,6 +300,8 @@ func toResourceDTO(r download.GameResource, now time.Time) downloadResourceDTO {
 			ID:                   file.ID,
 			Type:                 file.Type,
 			FileName:             file.Name,
+			OriginalName:         file.OriginalName,
+			CanonicalName:        slices.Contains(canonical, file.ID),
 			FileSize:             file.Size,
 			FileURL:              file.URL,
 			S3FileKey:            file.StorageKey,

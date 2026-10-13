@@ -17,11 +17,12 @@ import (
 var now = time.Date(2026, 10, 3, 9, 0, 0, 0, time.UTC)
 
 type fixture struct {
-	source  *catalogtest.Source
-	store   *catalogtest.Store
-	queue   *catalogtest.Queue
-	tx      *txtest.Immediate
-	service *catalog.Service
+	source    *catalogtest.Source
+	store     *catalogtest.Store
+	queue     *catalogtest.Queue
+	followers *catalogtest.Followers
+	tx        *txtest.Immediate
+	service   *catalog.Service
 }
 
 func setup() fixture {
@@ -31,14 +32,16 @@ func setup() fixture {
 		queue:  &catalogtest.Queue{},
 		tx:     &txtest.Immediate{},
 	}
+	f.followers = &catalogtest.Followers{}
 	f.service = catalog.NewService(catalog.Deps{
-		Sources:  []catalog.Source{f.source},
-		Store:    f.store,
-		Tx:       f.tx,
-		Queue:    f.queue,
-		Now:      func() time.Time { return now },
-		Settings: catalogSettings(),
-		Options:  catalog.Options{CreatorID: 1},
+		Sources:   []catalog.Source{f.source},
+		Store:     f.store,
+		Tx:        f.tx,
+		Queue:     f.queue,
+		Followers: f.followers,
+		Now:       func() time.Time { return now },
+		Settings:  catalogSettings(),
+		Options:   catalog.Options{CreatorID: 1},
 	})
 	return f
 }
@@ -78,6 +81,9 @@ func TestImportAppliesInsideATransactionAndQueuesUnsyncedCredits(t *testing.T) {
 	if link.SyncedAt == nil || !link.SyncedAt.Equal(now) {
 		t.Fatalf("link not synced %+v", link)
 	}
+	if !slices.Equal(f.followers.Games, []int{id}) {
+		t.Fatalf("an imported game is told to the followers: %v", f.followers.Games)
+	}
 }
 
 func TestImportDeveloperAndCharacter(t *testing.T) {
@@ -98,8 +104,8 @@ func TestImportDeveloperAndCharacter(t *testing.T) {
 	if character := f.store.Characters[characterID]; character.NameJP != "御桜稟" || !slices.Equal(character.Gender, []string{"f"}) || *character.BloodType != "a" {
 		t.Fatalf("character %+v", character)
 	}
-	if len(f.queue.Jobs) != 0 {
-		t.Fatalf("developer and character imports queue nothing: %v", f.queue.Jobs)
+	if len(f.queue.Jobs) != 0 || len(f.followers.Games) != 0 {
+		t.Fatalf("developer and character imports queue nothing: %v %v", f.queue.Jobs, f.followers.Games)
 	}
 }
 
@@ -498,12 +504,13 @@ func TestASourceWithoutAChangeFeedCannotBePulled(t *testing.T) {
 	f := setup()
 	plain := plainSource{name: "plain"}
 	service := catalog.NewService(catalog.Deps{
-		Sources:  []catalog.Source{plain},
-		Store:    f.store,
-		Tx:       f.tx,
-		Queue:    f.queue,
-		Now:      func() time.Time { return now },
-		Settings: catalogSettings(),
+		Sources:   []catalog.Source{plain},
+		Store:     f.store,
+		Tx:        f.tx,
+		Queue:     f.queue,
+		Followers: f.followers,
+		Now:       func() time.Time { return now },
+		Settings:  catalogSettings(),
 	})
 	if _, err := service.Sync(context.Background(), "plain"); !errors.Is(err, catalog.ErrNoChangeFeed) {
 		t.Fatalf("expected no change feed, got %v", err)

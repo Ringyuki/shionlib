@@ -98,6 +98,11 @@ func (s *BackfillService) inspect(ctx context.Context, unit Unit) (BackfillOutco
 	if err != nil {
 		return "", err
 	}
+	if outcome == BackfillInspected && holdsDisc(found.contents.Draft) {
+		if err := checks.files.DiscFound(ctx, unit.Entry().ResourceID); err != nil {
+			return "", err
+		}
+	}
 	return outcome, checks.keepPreviews(ctx, result.recorded, found.contents.Previews)
 }
 

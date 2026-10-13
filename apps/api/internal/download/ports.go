@@ -14,6 +14,7 @@ import (
 
 type Repository interface {
 	ListGameResources(ctx context.Context, gameID int) ([]GameResource, error)
+	ListCreditedResources(ctx context.Context, translatorID int) ([]int, error)
 	GetGameResource(ctx context.Context, id int, excludeRated bool) (GameResource, error)
 	ListReleases(ctx context.Context, excludeRated bool, page Page) ([]Release, int, error)
 	ListUserResources(ctx context.Context, creatorID int, filter UserResourceFilter, page Page) ([]UserResource, int, error)
@@ -65,6 +66,10 @@ type LegacyStore interface {
 type GameCards interface {
 	Exists(ctx context.Context, id int) (bool, error)
 	ByIDs(ctx context.Context, ids []int, viewer actor.Actor) (map[int]game.Card, error)
+}
+
+type Media interface {
+	Medium(ctx context.Context, inspectionID int) (string, error)
 }
 
 type Translators interface {

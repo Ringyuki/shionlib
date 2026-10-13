@@ -41,6 +41,8 @@ const (
 	FieldForm = "form"
 	// FieldExtras holds the string denoting the extras field in the database.
 	FieldExtras = "extras"
+	// FieldCanonicalName holds the string denoting the canonical_name field in the database.
+	FieldCanonicalName = "canonical_name"
 	// FieldDownloads holds the string denoting the downloads field in the database.
 	FieldDownloads = "downloads"
 	// FieldPublishedAt holds the string denoting the published_at field in the database.
@@ -154,6 +156,7 @@ var Columns = []string{
 	FieldEditionName,
 	FieldForm,
 	FieldExtras,
+	FieldCanonicalName,
 	FieldDownloads,
 	FieldPublishedAt,
 	FieldCheckRetryAt,
@@ -189,6 +192,8 @@ var (
 	EditionNameValidator func(string) error
 	// FormValidator is a validator for the "form" field. It is called by the builders before save.
 	FormValidator func(string) error
+	// DefaultCanonicalName holds the default value on creation for the "canonical_name" field.
+	DefaultCanonicalName bool
 	// DefaultDownloads holds the default value on creation for the "downloads" field.
 	DefaultDownloads int
 	// DefaultCreated holds the default value on creation for the "created" field.
@@ -295,6 +300,11 @@ func ByForm(opts ...sql.OrderTermOption) OrderOption {
 // ByExtras orders the results by the extras field.
 func ByExtras(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExtras, opts...).ToFunc()
+}
+
+// ByCanonicalName orders the results by the canonical_name field.
+func ByCanonicalName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCanonicalName, opts...).ToFunc()
 }
 
 // ByDownloads orders the results by the downloads field.

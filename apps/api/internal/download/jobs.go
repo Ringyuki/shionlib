@@ -36,3 +36,20 @@ func (PurgeObjects) Kind() string {
 func (PurgeObjects) MaxAttempts() int {
 	return purgeAttempts
 }
+
+type RenameFiles struct {
+	GameID       int `json:"game_id,omitempty"`
+	TranslatorID int `json:"translator_id,omitempty"`
+}
+
+func (RenameFiles) Kind() string {
+	return "download_rename_files"
+}
+
+func (RenameFiles) MaxAttempts() int {
+	return renameAttempts
+}
+
+func (RenameFiles) UniqueByArgs() bool {
+	return true
+}

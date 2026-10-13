@@ -4,21 +4,33 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
 
 	"golang.org/x/text/unicode/norm"
 
+	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/translator"
 )
 
+type LegacyFile struct {
+	ID           int
+	Name         string
+	OriginalName *string
+}
+
 type LegacyResource struct {
 	ID        int
+	GameID    int
 	CreatorID int
 	Languages []string
 	Note      *string
 	FileNames []string
+	Files     []LegacyFile
 	Discs     bool
+	Published bool
+	Canonical bool
 	Info      Info
 }
 
@@ -27,8 +39,10 @@ type LegacyReading struct {
 	Translators []string
 	ReleaseURL  *string
 	Edition     *Edition
+	EditionName *string
 	Form        *Form
 	ClearNote   bool
+	Canonical   []int
 }
 
 type LegacyDescription struct {
@@ -36,8 +50,21 @@ type LegacyDescription struct {
 	Translators []translator.Ref
 	ReleaseURL  *string
 	Edition     *Edition
+	EditionName *string
 	Form        *Form
 	ClearNote   bool
+	Canonical   []int
+}
+
+type LegacyEntry struct {
+	Titles   []string
+	Released *time.Time
+	Brands   []string
+}
+
+type LegacyRename struct {
+	From string
+	To   string
 }
 
 type LegacyTally struct {
@@ -47,10 +74,14 @@ type LegacyTally struct {
 	Translators  map[string]int
 	Discs        int
 	NotesCleared int
+	Canonical    int
+	Renames      []LegacyRename
 }
 
 const (
 	legacyBatch          = 200
+	legacyRenameSample   = 300
+	legacyTranslated     = "汉化硬盘版"
 	legacyOfficialPhrase = `(?:官方[简繁簡中日英]+文?版?|official\s+en\w+\s+version\.?)`
 	legacyGroupSuffix    = `(?:汉化组|漢化組|汉化小组|个人汉化|個人漢化|中文化小组|中文化委员会|中文化委員會|汉化委员会|汉化联合会|汉化工作室|汉化小番队)`
 	legacyBreaks         = "，,。；;：:!！?？\n[]【】()（）+"
@@ -84,14 +115,38 @@ var (
 	legacyMedium        = regexp.MustCompile(`\(([^()]+)\)\s*(?:\.part\d+)?\.[A-Za-z0-9]+$`)
 	legacyMediumSplit   = regexp.MustCompile(`[+\s%]+`)
 	legacyWebAddress    = regexp.MustCompile(`^https?://\S+$`)
+	legacyLead          = regexp.MustCompile(`^\s*(?:\[(\d{6})\]\s*)?(?:\[([^\]]*)\]\s*)?`)
+	legacyMediumTail    = regexp.MustCompile(`\s*\(([^()]*)\)\s*$`)
+	legacyRecovery      = regexp.MustCompile(`^rr\d*$`)
+	legacyEditionKind   = regexp.MustCompile(`(?i)パッケージ版|package版|(?:^|[^A-Za-z])DL版|steam\s*(?:版|edition)`)
 )
 
 var legacyDescriptors = []string{"部分汉化", "测试汉化", "不完全汉化", "完整汉化", "汉化", "个人汉化", "机翻"}
 
 var legacyDiscFormats = []string{"iso", "mds", "mdf", "bin", "cue", "ccd", "cdi", "img", "nrg", "mdx", "isz", "bwt", "b5t", "b6t"}
 
+func (r LegacyReading) over(info Info) Info {
+	if r.Translation != nil {
+		info.Translation = r.Translation
+		info.Translators = make([]translator.Ref, len(r.Translators))
+		for i, name := range r.Translators {
+			info.Translators[i] = translator.Ref{Name: name}
+		}
+	}
+	if r.Edition != nil {
+		info.Edition = r.Edition
+	}
+	if r.EditionName != nil {
+		info.EditionName = r.EditionName
+	}
+	if r.Form != nil {
+		info.Form = r.Form
+	}
+	return info
+}
+
 func (r LegacyReading) Empty() bool {
-	return r.Translation == nil && r.Edition == nil && r.Form == nil && !r.ClearNote
+	return r.Translation == nil && r.Edition == nil && r.EditionName == nil && r.Form == nil && !r.ClearNote && len(r.Canonical) == 0
 }
 
 func (t *LegacyTally) count(reading LegacyReading) {
@@ -111,9 +166,21 @@ func (t *LegacyTally) count(reading LegacyReading) {
 	if reading.ClearNote {
 		t.NotesCleared++
 	}
+	if len(reading.Canonical) > 0 {
+		t.Canonical++
+	}
 }
 
-func ReadLegacy(resource LegacyResource) LegacyReading {
+func LegacyEntryOf(card game.Card) LegacyEntry {
+	entry := LegacyEntry{Titles: []string{card.TitleJP, card.TitleZH, card.TitleEN}, Released: card.ReleaseDate}
+	if len(card.Developers) > 0 {
+		first := card.Developers[0].Developer
+		entry.Brands = append([]string{first.Name}, first.Aliases...)
+	}
+	return entry
+}
+
+func ReadLegacy(resource LegacyResource, entry LegacyEntry) LegacyReading {
 	var out LegacyReading
 	if resource.Info.Translation == nil {
 		out = legacyTranslation(resource)
@@ -125,7 +192,138 @@ func ReadLegacy(resource LegacyResource) LegacyReading {
 		disc := FormDisc
 		out.Form = &disc
 	}
+	main := legacyMain(resource)
+	if len(main) == 0 || resource.Canonical || !resource.Published {
+		return out
+	}
+	edition, read := legacyNameRead(main[0].Name, entry)
+	if !read {
+		return out
+	}
+	if resource.Info.EditionName == nil {
+		out.EditionName = edition
+	}
+	out.Canonical = make([]int, len(main))
+	for i, file := range main {
+		out.Canonical[i] = file.ID
+	}
 	return out
+}
+
+func legacyMain(resource LegacyResource) []LegacyFile {
+	files := make([]File, len(resource.Files))
+	for i, file := range resource.Files {
+		if file.OriginalName != nil {
+			return nil
+		}
+		files[i] = File{ID: file.ID, Name: file.Name}
+	}
+	main := mainFiles(files)
+	out := make([]LegacyFile, len(main))
+	for i, file := range main {
+		out[i] = LegacyFile{ID: file.ID, Name: file.Name}
+	}
+	return out
+}
+
+func legacyNameRead(name string, entry LegacyEntry) (*string, bool) {
+	stem := strings.TrimSuffix(name, NameSuffix(name))
+	lead := legacyLead.FindStringSubmatch(stem)
+	if lead == nil || !legacyLeadMatches(lead[1], lead[2], entry) {
+		return nil, false
+	}
+	titles := entry.Titles
+	body := stem[len(lead[0]):]
+	if medium := legacyMediumTail.FindStringSubmatchIndex(body); medium != nil {
+		if !legacyMediumKnown(body[medium[2]:medium[3]]) {
+			return nil, false
+		}
+		body = body[:medium[0]]
+	}
+	for _, bracket := range legacyBracket.FindAllStringSubmatch(body, -1) {
+		inner := strings.TrimSpace(bracket[1])
+		if !legacyFileOfficial.MatchString(inner) && !legacyFileGroup.MatchString(inner) && !namePatchVersion.MatchString(inner) {
+			return nil, false
+		}
+		if slices.Contains(legacyDescriptors, inner) {
+			return nil, false
+		}
+	}
+	body = strings.ReplaceAll(legacyBracket.ReplaceAllString(body, " "), legacyTranslated, " ")
+	wanted := legacyTitleKeys(titles)
+	if slices.Contains(wanted, legacyKey(body)) {
+		return nil, true
+	}
+	plain := legacyEditionKind.ReplaceAllString(body, " ")
+	if slices.Contains(wanted, legacyKey(plain)) {
+		return nil, true
+	}
+	tokens := strings.Fields(plain)
+	for i := len(tokens) - 1; i >= 0; i-- {
+		token := tokens[i]
+		if !strings.HasSuffix(token, "版") || utf8.RuneCountInString(token) > MaxEditionNameLength {
+			continue
+		}
+		rest := strings.Join(slices.Concat(tokens[:i], tokens[i+1:]), " ")
+		if slices.Contains(wanted, legacyKey(rest)) {
+			return &token, true
+		}
+	}
+	return nil, false
+}
+
+func legacyLeadMatches(date, brand string, entry LegacyEntry) bool {
+	if date == "" && brand == "" {
+		return false
+	}
+	if date != "" && (entry.Released == nil || entry.Released.UTC().Format(nameDateLayout) != date) {
+		return false
+	}
+	if brand == "" {
+		return true
+	}
+	wanted := legacyKey(brand)
+	return wanted != "" && slices.ContainsFunc(entry.Brands, func(known string) bool { return legacyKey(known) == wanted })
+}
+
+func legacyMediumKnown(medium string) bool {
+	tokens := slices.DeleteFunc(legacyMediumSplit.Split(strings.ToLower(medium), -1), func(token string) bool { return token == "" })
+	if len(tokens) == 0 {
+		return false
+	}
+	for _, token := range tokens {
+		if token != nameLoose && !slices.Contains(legacyDiscFormats, token) && !legacyRecovery.MatchString(token) {
+			return false
+		}
+	}
+	return true
+}
+
+func legacyTitleKeys(titles []string) []string {
+	var keys []string
+	for _, title := range titles {
+		if key := legacyKey(title); key != "" && !slices.Contains(keys, key) {
+			keys = append(keys, key)
+		}
+	}
+	single := slices.Clone(keys)
+	for _, first := range single {
+		for _, second := range single {
+			if first != second {
+				keys = append(keys, first+second)
+			}
+		}
+	}
+	return keys
+}
+
+func legacyKey(text string) string {
+	return strings.Map(func(r rune) rune {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			return unicode.ToLower(r)
+		}
+		return -1
+	}, norm.NFKC.String(text))
 }
 
 func legacyTranslation(resource LegacyResource) LegacyReading {

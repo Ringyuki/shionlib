@@ -3,6 +3,7 @@ package inspectiontest
 import (
 	"cmp"
 	"context"
+	"path"
 	"slices"
 	"strings"
 	"sync"
@@ -168,6 +169,26 @@ func (r *MemoryRepository) Discs(_ context.Context, inspectionIDs []int) ([]insp
 		discs[i] = entry.Entry
 	}
 	return discs, nil
+}
+
+func (r *MemoryRepository) MediumNames(_ context.Context, inspectionID int) ([]string, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	kept := r.selectEntries(
+		func(entry storedEntry) bool {
+			if entry.InspectionID != inspectionID {
+				return false
+			}
+			extension := strings.ToLower(strings.TrimPrefix(path.Ext(entry.Name), "."))
+			return entry.Kind == inspection.KindDisc || (entry.Kind == inspection.KindFile && slices.Contains(inspection.SheetExtensions, extension))
+		},
+		func(a, b storedEntry) int { return 0 },
+	)
+	names := make([]string, len(kept))
+	for i, entry := range kept {
+		names[i] = entry.Name
+	}
+	return names, nil
 }
 
 func sameParent(a, b *int) bool {

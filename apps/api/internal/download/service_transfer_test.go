@@ -11,6 +11,8 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/activity"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download/downloadtest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/game"
+	"github.com/Ringyuki/shionlib/apps/api/internal/game/gametest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload/uploadtest"
 )
@@ -20,6 +22,8 @@ type transferFixture struct {
 	store     *downloadtest.ObjectStore
 	spool     *uploadtest.MemorySpool
 	events    *downloadtest.Recorder
+	cards     *gametest.Cards
+	media     downloadtest.Media
 	transfers *download.TransferService
 }
 
@@ -30,7 +34,9 @@ func newTransferFixture() transferFixture {
 		spool:  uploadtest.NewMemorySpool(),
 		events: &downloadtest.Recorder{},
 	}
-	f.transfers = download.NewTransferService(f.repo, f.store, f.spool, f.events, f.events, &txtest.Immediate{}, func() time.Time { return now })
+	f.cards = gametest.NewCards(game.Card{ID: 10, TitleJP: "ゲーム"})
+	f.media = downloadtest.Media{Formats: map[int]string{}}
+	f.transfers = download.NewTransferService(f.repo, f.store, f.spool, f.events, f.events, downloadtest.Names(f.repo, f.cards, f.media), &txtest.Immediate{}, func() time.Time { return now })
 	return f
 }
 
@@ -289,5 +295,42 @@ func TestCleaningARejectedFilePublishesTheRest(t *testing.T) {
 	}
 	if messages := f.events.Messages(); len(messages) != 1 || messages[0].Title != "Messages.System.File.Upload.ResourcePublishedTitle" || messages[0].ReceiverID != 1 {
 		t.Fatalf("the uploader hears about the publication: %+v", messages)
+	}
+}
+
+func TestStoringTheLastFilePublishesItUnderItsCanonicalName(t *testing.T) {
+	ctx := context.Background()
+	f := newTransferFixture()
+	portable := download.FormPortable
+	resource := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: 1, Languages: []string{"jp"}, Canonical: true, Info: download.Info{Form: &portable}})
+	path := f.spool.Path("5")
+	f.spool.Put(path, []byte("archive"), now)
+	uploaded := "upload.7z"
+	file := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: uploaded, OriginalName: &uploaded, Size: 7, Hash: "b3", Path: &path, Status: download.FileOnServer, CheckStatus: download.CheckOK, CreatorID: 1})
+	if err := f.transfers.Store(ctx, file.ID); err != nil {
+		t.Fatal(err)
+	}
+	stored, _ := f.repo.GetFile(ctx, file.ID)
+	if stored.Name != "ゲーム (files).7z" || *stored.OriginalName != uploaded {
+		t.Fatalf("the published file takes the canonical name: %+v", stored)
+	}
+	events, _ := f.repo.ListEvents(ctx, resource.ID, 10)
+	if len(events) != 1 || events[0].Kind != download.EventPublished || events[0].Data.Files[0].Name != "ゲーム (files).7z" {
+		t.Fatalf("the history shows the name people download: %+v", events)
+	}
+	messages := f.events.Messages()
+	if names, _ := messages[0].Meta["file_names"].([]string); len(names) != 1 || names[0] != "ゲーム (files).7z" {
+		t.Fatalf("the notice names the published file: %+v", messages[0].Meta)
+	}
+
+	added := "bonus.zip"
+	extraPath := f.spool.Path("6")
+	f.spool.Put(extraPath, []byte("bonus"), now)
+	extra := f.repo.SeedFile(download.File{ResourceID: resource.ID, Name: added, OriginalName: &added, Size: 5, Hash: "b3", Path: &extraPath, Status: download.FileOnServer, CheckStatus: download.CheckOK, CreatorID: 1})
+	if err := f.transfers.Store(ctx, extra.ID); err != nil {
+		t.Fatal(err)
+	}
+	if kept, _ := f.repo.GetFile(ctx, extra.ID); kept.Name != added {
+		t.Fatalf("a file added later keeps its own name: %+v", kept)
 	}
 }

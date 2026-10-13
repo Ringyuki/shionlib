@@ -65,6 +65,7 @@ type downloadSourceBodyInput struct {
 	EditionName  *string                   `json:"edition_name,omitempty" minLength:"0" maxLength:"64" doc:"The name of the edition, such as 初回限定版"`
 	Form         string                    `json:"form" enum:"disc,installer,portable" doc:"How the game is packed: a disc image, an installer, or a folder that runs as it is"`
 	Extras       []string                  `json:"extras,omitempty" maxItems:"2" enum:"save,bonus"`
+	Canonical    *bool                     `json:"canonical_name,omitempty" doc:"Whether the first file (every volume of its set) takes the canonical name once the resource is published; true when left out"`
 	Files        []downloadFileUploadInput `json:"files" minItems:"1" maxItems:"1000" doc:"Completed upload sessions to attach, one per file"`
 }
 
@@ -112,6 +113,7 @@ type editDownloadSourceBodyInput struct {
 	EditionName  *string  `json:"edition_name,omitempty" minLength:"0" maxLength:"64" doc:"The name of the edition, such as 初回限定版"`
 	Form         *string  `json:"form,omitempty" enum:"disc,installer,portable" doc:"Left out for a resource whose form is not known"`
 	Extras       []string `json:"extras,omitempty" maxItems:"2" enum:"save,bonus"`
+	Canonical    *bool    `json:"canonical_name,omitempty" doc:"Turns the canonical name of the first file on or off; left out, the choice stays as it is. Turning it off gives the file back the name it was uploaded with"`
 }
 
 func (b *editDownloadSourceBodyInput) info() download.InfoInput {

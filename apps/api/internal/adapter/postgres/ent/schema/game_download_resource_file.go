@@ -22,6 +22,7 @@ func (GameDownloadResourceFile) Fields() []ent.Field {
 		serialID(),
 		field.Int("type").SchemaType(pg("integer")),
 		field.Text("file_name"),
+		field.Text("original_name").Optional().Nillable(),
 		field.Text("file_path").Optional().Nillable(),
 		field.Int64("file_size"),
 		field.Text("file_url").Optional().Nillable(),

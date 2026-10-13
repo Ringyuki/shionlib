@@ -22,6 +22,10 @@ type AdminStore interface {
 	AddDistinctions(ctx context.Context, pairs []Distinction) error
 }
 
+type Followers interface {
+	TranslatorChanged(ctx context.Context, id int) error
+}
+
 type Transactor interface {
 	WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error
 }

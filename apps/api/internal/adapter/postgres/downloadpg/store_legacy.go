@@ -42,16 +42,22 @@ func (s *LegacyStore) ListLegacy(ctx context.Context, afterID, limit int) ([]dow
 	resources := make([]download.LegacyResource, len(rows))
 	for i, row := range rows {
 		names := make([]string, len(row.Edges.Files))
+		files := make([]download.LegacyFile, len(row.Edges.Files))
 		for j, file := range row.Edges.Files {
 			names[j] = file.FileName
+			files[j] = download.LegacyFile{ID: file.ID, Name: file.FileName, OriginalName: file.OriginalName}
 		}
 		resources[i] = download.LegacyResource{
 			ID:        row.ID,
+			GameID:    row.GameID,
 			CreatorID: row.CreatorID,
 			Languages: nonNilStrings(row.Language),
 			Note:      row.Note,
 			FileNames: names,
+			Files:     files,
 			Discs:     len(row.Edges.Inspections) > 0,
+			Published: row.PublishedAt != nil && row.Status == download.ResourceActive,
+			Canonical: row.CanonicalName,
 			Info:      toInfo(row),
 		}
 	}
@@ -76,14 +82,41 @@ func (s *LegacyStore) Describe(ctx context.Context, id int, description download
 	if description.Edition != nil {
 		update.SetEdition(string(*description.Edition))
 	}
+	if description.EditionName != nil {
+		update.SetEditionName(*description.EditionName)
+	}
 	if description.Form != nil {
 		update.SetForm(string(*description.Form))
 	}
 	if description.ClearNote {
 		update.ClearNote()
 	}
+	if len(description.Canonical) > 0 {
+		update.SetCanonicalName(true)
+	}
 	if err := update.Exec(ctx); err != nil {
 		return fmt.Errorf("describe download resource %d: %w", id, err)
 	}
+	if err := s.keepNames(ctx, id, description.Canonical); err != nil {
+		return err
+	}
 	return credit(ctx, s.db(ctx), id, description.Translators)
+}
+
+func (s *LegacyStore) keepNames(ctx context.Context, resourceID int, fileIDs []int) error {
+	if len(fileIDs) == 0 {
+		return nil
+	}
+	files, err := s.db(ctx).GameDownloadResourceFile.Query().
+		Where(gamedownloadresourcefile.GameDownloadResourceID(resourceID), gamedownloadresourcefile.IDIn(fileIDs...), gamedownloadresourcefile.OriginalNameIsNil()).
+		All(ctx)
+	if err != nil {
+		return fmt.Errorf("read the files of download resource %d: %w", resourceID, err)
+	}
+	for _, file := range files {
+		if err := s.db(ctx).GameDownloadResourceFile.UpdateOneID(file.ID).SetOriginalName(file.FileName).SetUpdated(file.Updated).Exec(ctx); err != nil {
+			return fmt.Errorf("keep the name of download file %d: %w", file.ID, err)
+		}
+	}
+	return nil
 }

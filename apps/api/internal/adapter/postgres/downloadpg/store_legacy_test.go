@@ -5,6 +5,7 @@ import (
 	"errors"
 	"slices"
 	"testing"
+	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/downloadpg"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
@@ -39,6 +40,9 @@ func TestLegacyStoreListsResourcesWithTheirNamesAndDiscs(t *testing.T) {
 	if got := listed[0]; got.CreatorID != creator || !slices.Equal(got.Languages, []string{"zh"}) || *got.Note != "绿茶汉化组" ||
 		!slices.Equal(got.FileNames, []string{"game.part1.rar", "game.part2.rar"}) || !got.Discs || got.Info.Translation != nil {
 		t.Fatalf("first %+v", got)
+	}
+	if got := listed[0]; got.GameID != gameID || got.Published || got.Canonical || len(got.Files) != 2 || got.Files[0].Name != "game.part1.rar" || got.Files[0].OriginalName != nil {
+		t.Fatalf("the files of the first %+v", got)
 	}
 	if got := listed[1]; got.Discs || got.Note != nil || len(got.FileNames) != 0 || *got.Info.Translation != download.TranslationNone || *got.Info.Form != download.FormPortable {
 		t.Fatalf("second %+v", got)
@@ -94,5 +98,27 @@ func TestLegacyStoreDescribesWithoutTouchingTheUpdateTime(t *testing.T) {
 	}
 	if err := store.Describe(ctx, 987654, description); !errors.Is(err, download.ErrResourceNotFound) {
 		t.Fatalf("missing resource: %v", err)
+	}
+
+	first := f.file(t, resource.ID, creator, "[BABEL] 妹嫁.part1.rar")
+	second := f.file(t, resource.ID, creator, "bonus.zip")
+	f.db.Ent.GameDownloadResource.UpdateOneID(resource.ID).SetPublishedAt(time.Now()).ExecX(ctx)
+	settled, _ := f.repo.GetResource(ctx, resource.ID)
+	if err := store.Describe(ctx, resource.ID, download.LegacyDescription{EditionName: ptr("初回版"), Canonical: []int{first.ID}}); err != nil {
+		t.Fatal(err)
+	}
+	named, _ := f.repo.GetResource(ctx, resource.ID)
+	if !named.Canonical || *named.Info.EditionName != "初回版" || !named.Updated.Equal(settled.Updated) {
+		t.Fatalf("the resource takes canonical names: %+v", named)
+	}
+	if kept, _ := f.repo.GetFile(ctx, first.ID); kept.OriginalName == nil || *kept.OriginalName != "[BABEL] 妹嫁.part1.rar" {
+		t.Fatalf("the name the file had is kept: %+v", kept)
+	}
+	if other, _ := f.repo.GetFile(ctx, second.ID); other.OriginalName != nil {
+		t.Fatalf("another file is left alone: %+v", other)
+	}
+	listed, _ := store.ListLegacy(ctx, resource.ID-1, 1)
+	if len(listed) != 1 || !listed[0].Published || !listed[0].Canonical || listed[0].Files[0].OriginalName == nil {
+		t.Fatalf("listed again %+v", listed)
 	}
 }

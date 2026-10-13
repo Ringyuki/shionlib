@@ -28,6 +28,8 @@ var ErrFileNotOwner = apperror.Define(450104, "GAME_DOWNLOAD_RESOURCE_FILE_NOT_O
 
 var ErrFileUnderReview = apperror.Define(450105, "GAME_DOWNLOAD_RESOURCE_FILE_UNDER_REVIEW", apperror.KindConflict)
 
+var ErrFileNameCanonical = apperror.Define(450106, "GAME_DOWNLOAD_RESOURCE_FILE_NAME_CANONICAL", apperror.KindConflict)
+
 var ErrLocalFileMissing = errors.New("local upload file is missing")
 
 var ErrFileNotReadyForStore = errors.New("file is not approved for object storage yet")

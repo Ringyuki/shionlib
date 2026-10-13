@@ -46,6 +46,8 @@ type GameDownloadResource struct {
 	Form *string `json:"form,omitempty"`
 	// Extras holds the value of the "extras" field.
 	Extras pgvalue.Strings `json:"extras,omitempty"`
+	// CanonicalName holds the value of the "canonical_name" field.
+	CanonicalName bool `json:"canonical_name,omitempty"`
 	// Downloads holds the value of the "downloads" field.
 	Downloads int `json:"downloads,omitempty"`
 	// PublishedAt holds the value of the "published_at" field.
@@ -181,6 +183,8 @@ func (*GameDownloadResource) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case gamedownloadresource.FieldPlatform, gamedownloadresource.FieldLanguage, gamedownloadresource.FieldExtras:
 			values[i] = new(pgvalue.Strings)
+		case gamedownloadresource.FieldCanonicalName:
+			values[i] = new(sql.NullBool)
 		case gamedownloadresource.FieldID, gamedownloadresource.FieldStatus, gamedownloadresource.FieldGameID, gamedownloadresource.FieldDownloads, gamedownloadresource.FieldCreatorID:
 			values[i] = new(sql.NullInt64)
 		case gamedownloadresource.FieldSimulator, gamedownloadresource.FieldNote, gamedownloadresource.FieldTranslation, gamedownloadresource.FieldPatchVersion, gamedownloadresource.FieldReleaseURL, gamedownloadresource.FieldEdition, gamedownloadresource.FieldEditionName, gamedownloadresource.FieldForm:
@@ -293,6 +297,12 @@ func (_m *GameDownloadResource) assignValues(columns []string, values []any) err
 				return fmt.Errorf("unexpected type %T for field extras", values[i])
 			} else if value != nil {
 				_m.Extras = *value
+			}
+		case gamedownloadresource.FieldCanonicalName:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field canonical_name", values[i])
+			} else if value.Valid {
+				_m.CanonicalName = value.Bool
 			}
 		case gamedownloadresource.FieldDownloads:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -467,6 +477,9 @@ func (_m *GameDownloadResource) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("extras=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Extras))
+	builder.WriteString(", ")
+	builder.WriteString("canonical_name=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CanonicalName))
 	builder.WriteString(", ")
 	builder.WriteString("downloads=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Downloads))

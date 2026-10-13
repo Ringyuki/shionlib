@@ -64,6 +64,21 @@ func TestBackfillInspectsTheMostDownloadedResourceFirst(t *testing.T) {
 	}
 }
 
+func TestBackfillTellsTheResourceAboutADiscImageItFinds(t *testing.T) {
+	f := newFixture(true)
+	f.repo.SeedFile(published(1, 10, "disc.7z"))
+	f.tool.Listings[fetched(1)] = listing("7z", "Method = 04F71101\nSolid = +\n", file("disc.iso", 5000), file("disc.mds", 90))
+	f.tool.Tests[fetched(1)] = scan.ToolRun{Failed: true, ExitCode: 2, Stderr: "ERROR: Unsupported Method : disc.iso"}
+	f.tool.Extracts = map[string]scan.ToolRun{fetched(1): {Failed: true, ExitCode: 2, Stderr: "ERROR: Unsupported Method : disc.iso"}}
+	done, found, err := f.backfill.Next(context.Background(), nil)
+	if err != nil || !found || done.Units[0].Outcome != scan.BackfillInspected {
+		t.Fatalf("next: %+v %v %v", done, found, err)
+	}
+	if inspected, _ := f.repo.File(1); inspected.InspectionID == nil || !slices.Equal(f.repo.Discs, []int{10}) {
+		t.Fatalf("the resource is told once the record is attached: %+v %v", inspected, f.repo.Discs)
+	}
+}
+
 func TestBackfillLeavesOutWhatItWasToldToSkipAndWhatIsNotPublished(t *testing.T) {
 	f := newFixture(true)
 	f.repo.SeedFile(published(1, 10, "a.7z"))

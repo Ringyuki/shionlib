@@ -65,6 +65,18 @@ func (q fileJobQueue) Enqueue(ctx context.Context, job download.Job) error {
 	return q.queue.Enqueue(ctx, job)
 }
 
+type fileRenames struct {
+	queue *queue.Queue
+}
+
+func (r fileRenames) GameImported(ctx context.Context, gameID int) error {
+	return r.queue.Enqueue(ctx, download.RenameFiles{GameID: gameID})
+}
+
+func (r fileRenames) TranslatorChanged(ctx context.Context, translatorID int) error {
+	return r.queue.Enqueue(ctx, download.RenameFiles{TranslatorID: translatorID})
+}
+
 func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 	cfg := shared.Config
 	jobQueue := fileJobQueue{queue: shared.Queue}
@@ -84,13 +96,16 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 	uploads := upload.NewService(uploadpg.NewRepository(infra.Ent), quota, spool, uploadredis.NewHolds(infra.Redis), shared.Transactor, shared.Settings, shared.Now)
 
 	downloadRepo := downloadpg.NewRepository(infra.Ent)
+	inspectionRepo := inspectionpg.NewRepository(infra.Ent)
 	translators := translator.NewService(translatorpg.NewRepository(infra.Ent))
-	modules.Legacy = download.NewLegacyService(downloadpg.NewLegacyStore(infra.Ent), translators, shared.Transactor)
+	names := download.NewNameService(downloadRepo, shared.GameCards, inspection.NewMediumService(inspectionRepo), shared.Transactor)
+	modules.Legacy = download.NewLegacyService(downloadpg.NewLegacyStore(infra.Ent), shared.GameCards, translators, names, shared.Transactor)
 	downloads := download.NewService(download.Deps{
 		Repo:        downloadRepo,
 		Games:       shared.GameCards,
 		Comments:    commentpg.NewRepository(infra.Ent),
 		Translators: translators,
+		Names:       names,
 		Sessions:    uploads,
 		Activities:  shared.Activities,
 		Messages:    shared.Messages,
@@ -118,9 +133,8 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 		},
 		shared.Now,
 	)
-	transfers := download.NewTransferService(downloadRepo, store, spool, shared.Activities, shared.Messages, shared.Transactor, shared.Now)
+	transfers := download.NewTransferService(downloadRepo, store, spool, shared.Activities, shared.Messages, names, shared.Transactor, shared.Now)
 
-	inspectionRepo := inspectionpg.NewRepository(infra.Ent)
 	previews := objectstore.NewPreviewStore(store)
 	inspections := inspection.NewService(inspectionRepo, resourceDetails)
 	inspectionRecords := inspection.NewRecordService(inspectionRepo, previews, imaging.NewTranscoder(), shared.Transactor, shared.Now)
@@ -183,13 +197,14 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 	modules.Handlers = append(modules.Handlers,
 		uploadhttp.NewHandler(uploads, quota, shared.Builder),
 		downloadhttp.NewHandler(downloads, resourceDetails, links, shared.Builder),
+		downloadhttp.NewNameHandler(names, shared.Builder),
 		reporthttp.NewHandler(reports, shared.Builder),
 		scanhttp.NewHandler(scans, shared.Builder),
 		scanhttp.NewStalledHandler(stalled, shared.Builder),
 		inspectionhttp.NewHandler(inspections, inspectionPreviews, shared.Builder),
 	)
 
-	modules.Jobs.Register = append(modules.Jobs.Register, downloadjobs.Register(transfers), reportjobs.Register(reports))
+	modules.Jobs.Register = append(modules.Jobs.Register, downloadjobs.Register(transfers, names), reportjobs.Register(reports))
 	modules.Jobs.Queues[download.TransferQueue] = transferQueueBudget
 	modules.Jobs.Tasks = append(modules.Jobs.Tasks,
 		jobs.Task{Name: "file_scan_pending", Schedule: everyMinute, Timeout: scanTaskTimeout, Run: scans.ScanPending},

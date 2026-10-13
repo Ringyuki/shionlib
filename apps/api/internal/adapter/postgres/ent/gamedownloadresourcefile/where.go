@@ -65,6 +65,11 @@ func FileName(v string) predicate.GameDownloadResourceFile {
 	return predicate.GameDownloadResourceFile(sql.FieldEQ(FieldFileName, v))
 }
 
+// OriginalName applies equality check predicate on the "original_name" field. It's identical to OriginalNameEQ.
+func OriginalName(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldEQ(FieldOriginalName, v))
+}
+
 // FilePath applies equality check predicate on the "file_path" field. It's identical to FilePathEQ.
 func FilePath(v string) predicate.GameDownloadResourceFile {
 	return predicate.GameDownloadResourceFile(sql.FieldEQ(FieldFilePath, v))
@@ -263,6 +268,81 @@ func FileNameEqualFold(v string) predicate.GameDownloadResourceFile {
 // FileNameContainsFold applies the ContainsFold predicate on the "file_name" field.
 func FileNameContainsFold(v string) predicate.GameDownloadResourceFile {
 	return predicate.GameDownloadResourceFile(sql.FieldContainsFold(FieldFileName, v))
+}
+
+// OriginalNameEQ applies the EQ predicate on the "original_name" field.
+func OriginalNameEQ(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldEQ(FieldOriginalName, v))
+}
+
+// OriginalNameNEQ applies the NEQ predicate on the "original_name" field.
+func OriginalNameNEQ(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldNEQ(FieldOriginalName, v))
+}
+
+// OriginalNameIn applies the In predicate on the "original_name" field.
+func OriginalNameIn(vs ...string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldIn(FieldOriginalName, vs...))
+}
+
+// OriginalNameNotIn applies the NotIn predicate on the "original_name" field.
+func OriginalNameNotIn(vs ...string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldNotIn(FieldOriginalName, vs...))
+}
+
+// OriginalNameGT applies the GT predicate on the "original_name" field.
+func OriginalNameGT(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldGT(FieldOriginalName, v))
+}
+
+// OriginalNameGTE applies the GTE predicate on the "original_name" field.
+func OriginalNameGTE(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldGTE(FieldOriginalName, v))
+}
+
+// OriginalNameLT applies the LT predicate on the "original_name" field.
+func OriginalNameLT(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldLT(FieldOriginalName, v))
+}
+
+// OriginalNameLTE applies the LTE predicate on the "original_name" field.
+func OriginalNameLTE(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldLTE(FieldOriginalName, v))
+}
+
+// OriginalNameContains applies the Contains predicate on the "original_name" field.
+func OriginalNameContains(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldContains(FieldOriginalName, v))
+}
+
+// OriginalNameHasPrefix applies the HasPrefix predicate on the "original_name" field.
+func OriginalNameHasPrefix(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldHasPrefix(FieldOriginalName, v))
+}
+
+// OriginalNameHasSuffix applies the HasSuffix predicate on the "original_name" field.
+func OriginalNameHasSuffix(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldHasSuffix(FieldOriginalName, v))
+}
+
+// OriginalNameIsNil applies the IsNil predicate on the "original_name" field.
+func OriginalNameIsNil() predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldIsNull(FieldOriginalName))
+}
+
+// OriginalNameNotNil applies the NotNil predicate on the "original_name" field.
+func OriginalNameNotNil() predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldNotNull(FieldOriginalName))
+}
+
+// OriginalNameEqualFold applies the EqualFold predicate on the "original_name" field.
+func OriginalNameEqualFold(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldEqualFold(FieldOriginalName, v))
+}
+
+// OriginalNameContainsFold applies the ContainsFold predicate on the "original_name" field.
+func OriginalNameContainsFold(v string) predicate.GameDownloadResourceFile {
+	return predicate.GameDownloadResourceFile(sql.FieldContainsFold(FieldOriginalName, v))
 }
 
 // FilePathEQ applies the EQ predicate on the "file_path" field.

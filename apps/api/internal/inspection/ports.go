@@ -14,6 +14,7 @@ type Repository interface {
 	Get(ctx context.Context, id int) (Inspection, error)
 	ByIDs(ctx context.Context, ids []int) ([]Inspection, error)
 	Discs(ctx context.Context, inspectionIDs []int) ([]Entry, error)
+	MediumNames(ctx context.Context, inspectionID int) ([]string, error)
 	Children(ctx context.Context, inspectionID int, parentID *int, page Page) ([]Entry, int, error)
 	Search(ctx context.Context, inspectionID int, query string, page Page) ([]Found, int, error)
 	GetEntry(ctx context.Context, id int) (Entry, error)

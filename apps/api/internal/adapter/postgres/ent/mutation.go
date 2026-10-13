@@ -33497,6 +33497,7 @@ type GameDownloadResourceMutation struct {
 	edition_name              *string
 	form                      *string
 	extras                    *pgvalue.Strings
+	canonical_name            *bool
 	downloads                 *int
 	adddownloads              *int
 	published_at              *time.Time
@@ -34269,6 +34270,42 @@ func (m *GameDownloadResourceMutation) ResetExtras() {
 	delete(m.clearedFields, gamedownloadresource.FieldExtras)
 }
 
+// SetCanonicalName sets the "canonical_name" field.
+func (m *GameDownloadResourceMutation) SetCanonicalName(b bool) {
+	m.canonical_name = &b
+}
+
+// CanonicalName returns the value of the "canonical_name" field in the mutation.
+func (m *GameDownloadResourceMutation) CanonicalName() (r bool, exists bool) {
+	v := m.canonical_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCanonicalName returns the old "canonical_name" field's value of the GameDownloadResource entity.
+// If the GameDownloadResource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceMutation) OldCanonicalName(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCanonicalName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCanonicalName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCanonicalName: %w", err)
+	}
+	return oldValue.CanonicalName, nil
+}
+
+// ResetCanonicalName resets all changes to the "canonical_name" field.
+func (m *GameDownloadResourceMutation) ResetCanonicalName() {
+	m.canonical_name = nil
+}
+
 // SetDownloads sets the "downloads" field.
 func (m *GameDownloadResourceMutation) SetDownloads(i int) {
 	m.downloads = &i
@@ -34997,7 +35034,7 @@ func (m *GameDownloadResourceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GameDownloadResourceMutation) Fields() []string {
-	fields := make([]string, 0, 19)
+	fields := make([]string, 0, 20)
 	if m.status != nil {
 		fields = append(fields, gamedownloadresource.FieldStatus)
 	}
@@ -35036,6 +35073,9 @@ func (m *GameDownloadResourceMutation) Fields() []string {
 	}
 	if m.extras != nil {
 		fields = append(fields, gamedownloadresource.FieldExtras)
+	}
+	if m.canonical_name != nil {
+		fields = append(fields, gamedownloadresource.FieldCanonicalName)
 	}
 	if m.downloads != nil {
 		fields = append(fields, gamedownloadresource.FieldDownloads)
@@ -35089,6 +35129,8 @@ func (m *GameDownloadResourceMutation) Field(name string) (ent.Value, bool) {
 		return m.Form()
 	case gamedownloadresource.FieldExtras:
 		return m.Extras()
+	case gamedownloadresource.FieldCanonicalName:
+		return m.CanonicalName()
 	case gamedownloadresource.FieldDownloads:
 		return m.Downloads()
 	case gamedownloadresource.FieldPublishedAt:
@@ -35136,6 +35178,8 @@ func (m *GameDownloadResourceMutation) OldField(ctx context.Context, name string
 		return m.OldForm(ctx)
 	case gamedownloadresource.FieldExtras:
 		return m.OldExtras(ctx)
+	case gamedownloadresource.FieldCanonicalName:
+		return m.OldCanonicalName(ctx)
 	case gamedownloadresource.FieldDownloads:
 		return m.OldDownloads(ctx)
 	case gamedownloadresource.FieldPublishedAt:
@@ -35247,6 +35291,13 @@ func (m *GameDownloadResourceMutation) SetField(name string, value ent.Value) er
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetExtras(v)
+		return nil
+	case gamedownloadresource.FieldCanonicalName:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCanonicalName(v)
 		return nil
 	case gamedownloadresource.FieldDownloads:
 		v, ok := value.(int)
@@ -35485,6 +35536,9 @@ func (m *GameDownloadResourceMutation) ResetField(name string) error {
 		return nil
 	case gamedownloadresource.FieldExtras:
 		m.ResetExtras()
+		return nil
+	case gamedownloadresource.FieldCanonicalName:
+		m.ResetCanonicalName()
 		return nil
 	case gamedownloadresource.FieldDownloads:
 		m.ResetDownloads()
@@ -36502,6 +36556,7 @@ type GameDownloadResourceFileMutation struct {
 	_type                         *int
 	add_type                      *int
 	file_name                     *string
+	original_name                 *string
 	file_path                     *string
 	file_size                     *int64
 	addfile_size                  *int64
@@ -36739,6 +36794,55 @@ func (m *GameDownloadResourceFileMutation) OldFileName(ctx context.Context) (v s
 // ResetFileName resets all changes to the "file_name" field.
 func (m *GameDownloadResourceFileMutation) ResetFileName() {
 	m.file_name = nil
+}
+
+// SetOriginalName sets the "original_name" field.
+func (m *GameDownloadResourceFileMutation) SetOriginalName(s string) {
+	m.original_name = &s
+}
+
+// OriginalName returns the value of the "original_name" field in the mutation.
+func (m *GameDownloadResourceFileMutation) OriginalName() (r string, exists bool) {
+	v := m.original_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOriginalName returns the old "original_name" field's value of the GameDownloadResourceFile entity.
+// If the GameDownloadResourceFile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GameDownloadResourceFileMutation) OldOriginalName(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOriginalName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOriginalName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOriginalName: %w", err)
+	}
+	return oldValue.OriginalName, nil
+}
+
+// ClearOriginalName clears the value of the "original_name" field.
+func (m *GameDownloadResourceFileMutation) ClearOriginalName() {
+	m.original_name = nil
+	m.clearedFields[gamedownloadresourcefile.FieldOriginalName] = struct{}{}
+}
+
+// OriginalNameCleared returns if the "original_name" field was cleared in this mutation.
+func (m *GameDownloadResourceFileMutation) OriginalNameCleared() bool {
+	_, ok := m.clearedFields[gamedownloadresourcefile.FieldOriginalName]
+	return ok
+}
+
+// ResetOriginalName resets all changes to the "original_name" field.
+func (m *GameDownloadResourceFileMutation) ResetOriginalName() {
+	m.original_name = nil
+	delete(m.clearedFields, gamedownloadresourcefile.FieldOriginalName)
 }
 
 // SetFilePath sets the "file_path" field.
@@ -37962,12 +38066,15 @@ func (m *GameDownloadResourceFileMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GameDownloadResourceFileMutation) Fields() []string {
-	fields := make([]string, 0, 22)
+	fields := make([]string, 0, 23)
 	if m._type != nil {
 		fields = append(fields, gamedownloadresourcefile.FieldType)
 	}
 	if m.file_name != nil {
 		fields = append(fields, gamedownloadresourcefile.FieldFileName)
+	}
+	if m.original_name != nil {
+		fields = append(fields, gamedownloadresourcefile.FieldOriginalName)
 	}
 	if m.file_path != nil {
 		fields = append(fields, gamedownloadresourcefile.FieldFilePath)
@@ -38041,6 +38148,8 @@ func (m *GameDownloadResourceFileMutation) Field(name string) (ent.Value, bool) 
 		return m.GetType()
 	case gamedownloadresourcefile.FieldFileName:
 		return m.FileName()
+	case gamedownloadresourcefile.FieldOriginalName:
+		return m.OriginalName()
 	case gamedownloadresourcefile.FieldFilePath:
 		return m.FilePath()
 	case gamedownloadresourcefile.FieldFileSize:
@@ -38094,6 +38203,8 @@ func (m *GameDownloadResourceFileMutation) OldField(ctx context.Context, name st
 		return m.OldType(ctx)
 	case gamedownloadresourcefile.FieldFileName:
 		return m.OldFileName(ctx)
+	case gamedownloadresourcefile.FieldOriginalName:
+		return m.OldOriginalName(ctx)
 	case gamedownloadresourcefile.FieldFilePath:
 		return m.OldFilePath(ctx)
 	case gamedownloadresourcefile.FieldFileSize:
@@ -38156,6 +38267,13 @@ func (m *GameDownloadResourceFileMutation) SetField(name string, value ent.Value
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetFileName(v)
+		return nil
+	case gamedownloadresourcefile.FieldOriginalName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOriginalName(v)
 		return nil
 	case gamedownloadresourcefile.FieldFilePath:
 		v, ok := value.(string)
@@ -38390,6 +38508,9 @@ func (m *GameDownloadResourceFileMutation) AddField(name string, value ent.Value
 // mutation.
 func (m *GameDownloadResourceFileMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(gamedownloadresourcefile.FieldOriginalName) {
+		fields = append(fields, gamedownloadresourcefile.FieldOriginalName)
+	}
 	if m.FieldCleared(gamedownloadresourcefile.FieldFilePath) {
 		fields = append(fields, gamedownloadresourcefile.FieldFilePath)
 	}
@@ -38431,6 +38552,9 @@ func (m *GameDownloadResourceFileMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *GameDownloadResourceFileMutation) ClearField(name string) error {
 	switch name {
+	case gamedownloadresourcefile.FieldOriginalName:
+		m.ClearOriginalName()
+		return nil
 	case gamedownloadresourcefile.FieldFilePath:
 		m.ClearFilePath()
 		return nil
@@ -38471,6 +38595,9 @@ func (m *GameDownloadResourceFileMutation) ResetField(name string) error {
 		return nil
 	case gamedownloadresourcefile.FieldFileName:
 		m.ResetFileName()
+		return nil
+	case gamedownloadresourcefile.FieldOriginalName:
+		m.ResetOriginalName()
 		return nil
 	case gamedownloadresourcefile.FieldFilePath:
 		m.ResetFilePath()

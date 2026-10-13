@@ -66,6 +66,7 @@ type Resource struct {
 	Simulator   *string
 	Note        *string
 	Info        Info
+	Canonical   bool
 	Downloads   int
 	CreatorID   int
 	PublishedAt *time.Time
@@ -84,6 +85,7 @@ type File struct {
 	ResourceStatus  int
 	Type            int
 	Name            string
+	OriginalName    *string
 	Path            *string
 	Size            int64
 	URL             *string
@@ -205,6 +207,7 @@ type NewResource struct {
 	Simulator *string
 	Note      *string
 	Info      Info
+	Canonical bool
 	CreatorID int
 }
 
@@ -212,6 +215,7 @@ type NewFile struct {
 	ResourceID      int
 	Type            int
 	Name            string
+	OriginalName    *string
 	Path            *string
 	Size            int64
 	StorageKey      *string
@@ -249,6 +253,7 @@ type ResourceChanges struct {
 	Simulator *string
 	Note      *string
 	Info      Info
+	Canonical *bool
 }
 
 type EditInput struct {
@@ -257,6 +262,7 @@ type EditInput struct {
 	Simulator *string
 	Note      *string
 	Info      InfoInput
+	Canonical *bool
 }
 
 type FileUpload struct {
@@ -270,6 +276,7 @@ type CreateInput struct {
 	Simulator *string
 	Note      *string
 	Info      InfoInput
+	Canonical bool
 	Files     []FileUpload
 }
 
@@ -300,6 +307,7 @@ const (
 	TransferConcurrency = 2
 	transferAttempts    = 5
 	purgeAttempts       = 10
+	renameAttempts      = 5
 )
 
 const requeueBatch = 200

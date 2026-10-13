@@ -116,6 +116,11 @@ func Extras(v pgvalue.Strings) predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(sql.FieldEQ(FieldExtras, v))
 }
 
+// CanonicalName applies equality check predicate on the "canonical_name" field. It's identical to CanonicalNameEQ.
+func CanonicalName(v bool) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldCanonicalName, v))
+}
+
 // Downloads applies equality check predicate on the "downloads" field. It's identical to DownloadsEQ.
 func Downloads(v int) predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(sql.FieldEQ(FieldDownloads, v))
@@ -909,6 +914,16 @@ func ExtrasIsNil() predicate.GameDownloadResource {
 // ExtrasNotNil applies the NotNil predicate on the "extras" field.
 func ExtrasNotNil() predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(sql.FieldNotNull(FieldExtras))
+}
+
+// CanonicalNameEQ applies the EQ predicate on the "canonical_name" field.
+func CanonicalNameEQ(v bool) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldEQ(FieldCanonicalName, v))
+}
+
+// CanonicalNameNEQ applies the NEQ predicate on the "canonical_name" field.
+func CanonicalNameNEQ(v bool) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(sql.FieldNEQ(FieldCanonicalName, v))
 }
 
 // DownloadsEQ applies the EQ predicate on the "downloads" field.

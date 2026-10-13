@@ -49,6 +49,7 @@ One word per concept. `internal/archtest` rejects the banned words below; review
 | Content limit | The viewer's NSFW preference: 0 guest, 1 never show, 2 show with spoiler, 3 just show. "Includes rated" means 2 or 3. |
 | Standing | What a user is right now: role and content limit (`auth.Standing`). It is read for every authenticated request and never taken from a token, so a change applies to the next request. |
 | Catalog source | A pluggable provider of game, developer and character metadata (Hikarinagi Open API by default). |
+| Canonical name | The file name the site writes for the first file of a resource from the game and the resource information (`download.CanonicalName`): `[发售日][品牌] 原名 译名 发行版本 [翻译][补丁版本] (形态).扩展名`. The medium in the last brackets is `inspection.Medium` for a disc image. The name a file was uploaded with stays in `original_name`. |
 | Translator | Who made a fan translation: a group or a single person (汉化组 in the web client), `translator.Translator`. A resource credits its translators in order; names are matched by `translator.Key` (width, case and spacing ignored), so one translator is stored once however its name is typed. |
 | Resource information | What a download resource says about itself besides platform and language: translation, translators, patch version, release page, edition, form and extras (`download.Info`). |
 | AI provider | An upstream AI account configured in the admin panel: kind, base URL, API key, price multiplier (`ai.Provider`). |

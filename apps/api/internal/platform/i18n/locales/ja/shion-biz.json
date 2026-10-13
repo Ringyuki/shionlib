@@ -159,6 +159,7 @@
   "GAME_DOWNLOAD_RESOURCE_TOO_MANY_FILES": "リソースに含められるファイルは最大 {max} 個です",
   "GAME_DOWNLOAD_RESOURCE_LAST_FILE": "リソースには少なくとも 1 つのファイルが必要です",
   "GAME_DOWNLOAD_RESOURCE_FILE_UNDER_REVIEW": "このファイルは審査中のため削除できません",
+  "GAME_DOWNLOAD_RESOURCE_FILE_NAME_CANONICAL": "このファイルは規定のファイル名を使用しているため、個別に名前を変更できません",
   "GAME_DOWNLOAD_RESOURCE_DUPLICATE_FILE_NAME": "このリソースには同じ名前のファイルがすでにあります",
   "INSPECTION_NOT_FOUND": "ファイルの内容の記録が見つかりません",
   "INSPECTION_ENTRY_NOT_FOUND": "ファイル内にこの項目は見つかりません",

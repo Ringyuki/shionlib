@@ -209,8 +209,11 @@ func describe(ctx context.Context, args []string) error {
 	for _, name := range slices.Sorted(maps.Keys(tally.Translators)) {
 		logger.Info("translator read", "name", name, "resources", tally.Translators[name])
 	}
+	for _, renamed := range tally.Renames {
+		logger.Info("file name read", "from", renamed.From, "to", renamed.To)
+	}
 	logger.Info("description finished", "applied", apply, "resources", tally.Resources, "translations", tally.Translations,
-		"translators", len(tally.Translators), "editions", tally.Editions, "discs", tally.Discs, "notes_cleared", tally.NotesCleared)
+		"translators", len(tally.Translators), "editions", tally.Editions, "discs", tally.Discs, "notes_cleared", tally.NotesCleared, "canonical_names", tally.Canonical)
 	return err
 }
 

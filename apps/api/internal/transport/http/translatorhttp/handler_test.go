@@ -29,7 +29,7 @@ func setup(t *testing.T) (*apitest.Server, *translatortest.MemoryRepository) {
 	server := apitest.New(t)
 	repo := translatortest.NewMemoryRepository()
 	translatorhttp.NewHandler(translator.NewService(repo), server.Builder).Register(server.API)
-	translatorhttp.NewAdminHandler(translator.NewAdminService(repo, repo, &txtest.Immediate{}), server.Builder).Register(server.API)
+	translatorhttp.NewAdminHandler(translator.NewAdminService(repo, repo, &translatortest.Followers{}, &txtest.Immediate{}), server.Builder).Register(server.API)
 	return server, repo
 }
 

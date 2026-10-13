@@ -888,3 +888,56 @@ func TestResourceInformationAndCredits(t *testing.T) {
 		t.Fatalf("missing resource: %v", err)
 	}
 }
+
+func TestCanonicalNamesAndUploadedNamesAreStored(t *testing.T) {
+	f := newFixture(t)
+	ctx := context.Background()
+	creator, gameID := f.db.User(t), f.db.Game(t)
+	tea := f.db.Ent.Translator.Create().SetName("绿茶汉化组").SetNameKey(translator.Key("绿茶汉化组")).SaveX(ctx)
+	info := download.Info{Translation: ptr(download.TranslationGroup), Translators: []translator.Ref{{ID: tea.ID, Name: tea.Name}}, Form: ptr(download.FormPortable)}
+	created, err := f.repo.CreateResource(ctx, download.NewResource{GameID: gameID, Platforms: []string{"win"}, Languages: []string{"zh"}, Info: info, Canonical: true, CreatorID: creator})
+	if err != nil || !created.Canonical {
+		t.Fatalf("created %+v %v", created, err)
+	}
+	file, err := f.repo.CreateFile(ctx, download.NewFile{ResourceID: created.ID, Type: download.FileTypeObjectStore, Name: "upload.7z", OriginalName: ptr("upload.7z"), Size: 7, HashAlgorithm: upload.HashBLAKE3, Hash: "b3", Status: download.FileOnServer, CreatorID: creator})
+	if err != nil || file.OriginalName == nil || *file.OriginalName != "upload.7z" {
+		t.Fatalf("file %+v %v", file, err)
+	}
+	if err := f.repo.RenameFile(ctx, file.ID, "规范.7z"); err != nil {
+		t.Fatal(err)
+	}
+	if renamed, _ := f.repo.GetFile(ctx, file.ID); renamed.Name != "规范.7z" || *renamed.OriginalName != "upload.7z" {
+		t.Fatalf("a rename keeps the uploaded name: %+v", renamed)
+	}
+
+	changes := download.ResourceChanges{Platforms: []string{"win"}, Languages: []string{"zh"}, Info: info}
+	if err := f.repo.UpdateResource(ctx, created.ID, changes); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := f.repo.GetResource(ctx, created.ID); !got.Canonical {
+		t.Fatalf("an update that says nothing keeps the choice: %+v", got)
+	}
+	changes.Canonical = ptr(false)
+	if err := f.repo.UpdateResource(ctx, created.ID, changes); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := f.repo.GetResource(ctx, created.ID); got.Canonical {
+		t.Fatalf("the choice is stored: %+v", got)
+	}
+
+	legacy := f.resource(t, gameID, creator)
+	old := f.file(t, legacy.ID, creator, "old.7z")
+	if got, _ := f.repo.GetFile(ctx, old.ID); got.OriginalName != nil {
+		t.Fatalf("an older file has no uploaded name: %+v", got)
+	}
+	if got, _ := f.repo.GetResource(ctx, legacy.ID); got.Canonical {
+		t.Fatalf("an older resource keeps its names: %+v", got)
+	}
+
+	if ids, err := f.repo.ListCreditedResources(ctx, tea.ID); err != nil || !slices.Equal(ids, []int{created.ID}) {
+		t.Fatalf("credited resources %v %v", ids, err)
+	}
+	if ids, err := f.repo.ListCreditedResources(ctx, 987654); err != nil || len(ids) != 0 {
+		t.Fatalf("nobody credits a translator that does not exist: %v %v", ids, err)
+	}
+}

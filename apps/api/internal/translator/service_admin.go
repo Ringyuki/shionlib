@@ -10,13 +10,14 @@ import (
 )
 
 type AdminService struct {
-	repo  Repository
-	store AdminStore
-	tx    Transactor
+	repo      Repository
+	store     AdminStore
+	followers Followers
+	tx        Transactor
 }
 
-func NewAdminService(repo Repository, store AdminStore, tx Transactor) *AdminService {
-	return &AdminService{repo: repo, store: store, tx: tx}
+func NewAdminService(repo Repository, store AdminStore, followers Followers, tx Transactor) *AdminService {
+	return &AdminService{repo: repo, store: store, followers: followers, tx: tx}
 }
 
 func (s *AdminService) Search(ctx context.Context, filter AdminFilter, page Page) ([]AdminEntry, int, error) {
@@ -25,7 +26,8 @@ func (s *AdminService) Search(ctx context.Context, filter AdminFilter, page Page
 }
 
 func (s *AdminService) Edit(ctx context.Context, id int, changes Changes) error {
-	return s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
+	renamed := false
+	err := s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
 		current, err := s.repo.Lock(ctx, id)
 		if err != nil {
 			return err
@@ -58,8 +60,13 @@ func (s *AdminService) Edit(ctx context.Context, id int, changes Changes) error 
 				changes.Homepage.Value = nil
 			}
 		}
+		renamed = name != current.Name
 		return s.repo.Update(ctx, id, changes)
 	})
+	if err != nil || !renamed {
+		return err
+	}
+	return s.followers.TranslatorChanged(ctx, id)
 }
 
 func (s *AdminService) free(ctx context.Context, id int, names []string) error {
@@ -78,7 +85,7 @@ func (s *AdminService) Merge(ctx context.Context, keepID int, mergeIDs []int) er
 	if len(mergeIDs) == 0 {
 		return ErrMergeNeedsOthers
 	}
-	return s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
+	err := s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
 		kept, err := s.repo.Lock(ctx, keepID)
 		if err != nil {
 			return err
@@ -103,6 +110,10 @@ func (s *AdminService) Merge(ctx context.Context, keepID int, mergeIDs []int) er
 		}
 		return s.repo.Update(ctx, keepID, Changes{Aliases: &aliases})
 	})
+	if err != nil {
+		return err
+	}
+	return s.followers.TranslatorChanged(ctx, keepID)
 }
 
 func (s *AdminService) Duplicates(ctx context.Context) ([][]AdminEntry, error) {

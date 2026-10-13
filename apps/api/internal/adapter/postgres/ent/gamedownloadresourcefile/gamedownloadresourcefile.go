@@ -19,6 +19,8 @@ const (
 	FieldType = "type"
 	// FieldFileName holds the string denoting the file_name field in the database.
 	FieldFileName = "file_name"
+	// FieldOriginalName holds the string denoting the original_name field in the database.
+	FieldOriginalName = "original_name"
 	// FieldFilePath holds the string denoting the file_path field in the database.
 	FieldFilePath = "file_path"
 	// FieldFileSize holds the string denoting the file_size field in the database.
@@ -131,6 +133,7 @@ var Columns = []string{
 	FieldID,
 	FieldType,
 	FieldFileName,
+	FieldOriginalName,
 	FieldFilePath,
 	FieldFileSize,
 	FieldFileURL,
@@ -222,6 +225,11 @@ func ByType(opts ...sql.OrderTermOption) OrderOption {
 // ByFileName orders the results by the file_name field.
 func ByFileName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldFileName, opts...).ToFunc()
+}
+
+// ByOriginalName orders the results by the original_name field.
+func ByOriginalName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOriginalName, opts...).ToFunc()
 }
 
 // ByFilePath orders the results by the file_path field.

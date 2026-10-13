@@ -11,6 +11,7 @@ import (
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download/downloadtest"
+	"github.com/Ringyuki/shionlib/apps/api/internal/game/gametest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/transport/jobs/downloadjobs"
 	"github.com/Ringyuki/shionlib/apps/api/internal/txtest"
 	"github.com/Ringyuki/shionlib/apps/api/internal/upload/uploadtest"
@@ -32,8 +33,9 @@ func TestStoreWorkerCancelsWhenTheLocalFileIsGone(t *testing.T) {
 	path := "/spool/missing.part"
 	file := repo.SeedFile(download.File{ResourceID: resource.ID, Path: &path, Status: download.FileOnServer, CheckStatus: download.CheckOK})
 	events := &downloadtest.Recorder{}
-	transfers := download.NewTransferService(repo, downloadtest.NewObjectStore(), uploadtest.NewMemorySpool(), events, events, &txtest.Immediate{}, func() time.Time { return now })
-	downloadjobs.Register(transfers)(river.NewWorkers())
+	names := downloadtest.Names(repo, gametest.NewCards(), downloadtest.Media{})
+	transfers := download.NewTransferService(repo, downloadtest.NewObjectStore(), uploadtest.NewMemorySpool(), events, events, names, &txtest.Immediate{}, func() time.Time { return now })
+	downloadjobs.Register(transfers, names)(river.NewWorkers())
 	worker := downloadjobs.NewStoreWorker(transfers)
 	job := &river.Job[download.StoreFile]{JobRow: &rivertype.JobRow{Attempt: 1}, Args: download.StoreFile{FileID: file.ID}}
 	if worker.Timeout(job) < time.Hour {

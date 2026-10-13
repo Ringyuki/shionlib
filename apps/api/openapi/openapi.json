@@ -5735,6 +5735,7 @@
           450103,
           450104,
           450105,
+          450106,
           460101,
           460102,
           460103,
@@ -5900,6 +5901,7 @@
           "GAME_DOWNLOAD_RESOURCE_FILE_INVALID_TOKEN",
           "GAME_DOWNLOAD_RESOURCE_FILE_NOT_OWNER",
           "GAME_DOWNLOAD_RESOURCE_FILE_UNDER_REVIEW",
+          "GAME_DOWNLOAD_RESOURCE_FILE_NAME_CANONICAL",
           "FAVORITE_ALREADY_EXISTS",
           "FAVORITE_ITEM_ALREADY_EXISTS",
           "FAVORITE_NOT_FOUND",
@@ -7762,6 +7764,10 @@
       "DownloadFileDTO": {
         "additionalProperties": false,
         "properties": {
+          "canonical_name": {
+            "description": "Whether the file carries the canonical name of the resource, which cannot be changed by hand",
+            "type": "boolean"
+          },
           "creator": {
             "$ref": "#/components/schemas/UserSummaryDTO"
           },
@@ -7826,6 +7832,13 @@
               "null"
             ]
           },
+          "original_name": {
+            "description": "The name the file was uploaded with; null for files stored before names were kept",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "rejection": {
             "description": "Why a rejected file was rejected (abandoned: its check could never be completed); null otherwise",
             "enum": [
@@ -7881,6 +7894,8 @@
           "id",
           "type",
           "file_name",
+          "original_name",
+          "canonical_name",
           "file_size",
           "file_url",
           "s3_file_key",
@@ -8370,6 +8385,10 @@
       "DownloadResourceDTO": {
         "additionalProperties": false,
         "properties": {
+          "canonical_name": {
+            "description": "Whether the first file of the resource takes the canonical name",
+            "type": "boolean"
+          },
           "comments": {
             "description": "Visible comments made on the resource, replies included",
             "format": "int64",
@@ -8553,6 +8572,7 @@
           "edition_name",
           "form",
           "extras",
+          "canonical_name",
           "downloads",
           "creator",
           "published_at",
@@ -8613,6 +8633,10 @@
       "DownloadSourceBodyInput": {
         "additionalProperties": false,
         "properties": {
+          "canonical_name": {
+            "description": "Whether the first file (every volume of its set) takes the canonical name once the resource is published; true when left out",
+            "type": "boolean"
+          },
           "edition": {
             "enum": [
               "download",
@@ -8939,6 +8963,10 @@
       "EditDownloadSourceBodyInput": {
         "additionalProperties": false,
         "properties": {
+          "canonical_name": {
+            "description": "Turns the canonical name of the first file on or off; left out, the choice stays as it is. Turning it off gives the file back the name it was uploaded with",
+            "type": "boolean"
+          },
           "edition": {
             "enum": [
               "download",
@@ -11062,6 +11090,72 @@
           },
           "data": {
             "$ref": "#/components/schemas/FavoriteItemPageDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeFileNameDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/FileNameDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeFileNameReadingDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/FileNameReadingDTO"
           },
           "message": {
             "type": "string"
@@ -14937,6 +15031,98 @@
         ],
         "type": "object"
       },
+      "FileNameDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "after": {
+            "description": "What follows: the extension, preceded by the closing bracket of a pending disc format",
+            "type": "string"
+          },
+          "before": {
+            "description": "The name up to the disc format; the whole name without its extension when nothing is pending",
+            "type": "string"
+          },
+          "pending": {
+            "description": "True for a disc image whose format is not known until the file has been checked; the format goes between before and after",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "before",
+          "after",
+          "pending"
+        ],
+        "type": "object"
+      },
+      "FileNameReadingDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "edition": {
+            "enum": [
+              "download",
+              "package",
+              "steam"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "edition_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "form": {
+            "enum": [
+              "disc",
+              "installer",
+              "portable"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "patch_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "translation": {
+            "enum": [
+              "none",
+              "official",
+              "group",
+              "machine"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "translators": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "translation",
+          "translators",
+          "patch_version",
+          "edition",
+          "edition_name",
+          "form"
+        ],
+        "type": "object"
+      },
       "ForgotPasswordInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -18543,6 +18729,87 @@
         ],
         "type": "object"
       },
+      "PreviewNameInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "edition": {
+            "enum": [
+              "download",
+              "package",
+              "steam"
+            ],
+            "type": "string"
+          },
+          "edition_name": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "file_name": {
+            "description": "The name of the file being uploaded, which gives the extension and, for an old name, the disc format",
+            "maxLength": 255,
+            "type": "string"
+          },
+          "form": {
+            "enum": [
+              "disc",
+              "installer",
+              "portable"
+            ],
+            "type": "string"
+          },
+          "language": {
+            "items": {
+              "enum": [
+                "en",
+                "zh",
+                "zh-hant",
+                "jp"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "patch_version": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "resource_id": {
+            "description": "A resource of the game whose first file is named; left out for an upload that has not been made yet",
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "translation": {
+            "enum": [
+              "none",
+              "official",
+              "group",
+              "machine"
+            ],
+            "type": "string"
+          },
+          "translators": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 6,
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "language"
+        ],
+        "type": "object"
+      },
       "PublicSettingsDTO": {
         "additionalProperties": false,
         "properties": {
@@ -18556,6 +18823,20 @@
         "required": [
           "allow_register",
           "sponsor_enabled"
+        ],
+        "type": "object"
+      },
+      "ReadNameInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "file_name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_name"
         ],
         "type": "object"
       },
@@ -33001,6 +33282,62 @@
         ]
       }
     },
+    "/game/download-source/name/read": {
+      "post": {
+        "operationId": "download.readName",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadNameInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeFileNameReadingDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Read what the name of a file says about a resource",
+        "tags": [
+          "download"
+        ]
+      }
+    },
     "/game/download-source/{id}": {
       "delete": {
         "operationId": "download.delete",
@@ -34127,6 +34464,74 @@
           }
         ],
         "summary": "Create a download resource from completed uploads",
+        "tags": [
+          "download"
+        ]
+      }
+    },
+    "/game/{id}/download-source/name": {
+      "post": {
+        "operationId": "download.previewName",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewNameInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeFileNameDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Show the canonical name a file of the game would take",
         "tags": [
           "download"
         ]

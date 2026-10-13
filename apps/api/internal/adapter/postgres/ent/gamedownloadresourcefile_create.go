@@ -41,6 +41,20 @@ func (_c *GameDownloadResourceFileCreate) SetFileName(v string) *GameDownloadRes
 	return _c
 }
 
+// SetOriginalName sets the "original_name" field.
+func (_c *GameDownloadResourceFileCreate) SetOriginalName(v string) *GameDownloadResourceFileCreate {
+	_c.mutation.SetOriginalName(v)
+	return _c
+}
+
+// SetNillableOriginalName sets the "original_name" field if the given value is not nil.
+func (_c *GameDownloadResourceFileCreate) SetNillableOriginalName(v *string) *GameDownloadResourceFileCreate {
+	if v != nil {
+		_c.SetOriginalName(*v)
+	}
+	return _c
+}
+
 // SetFilePath sets the "file_path" field.
 func (_c *GameDownloadResourceFileCreate) SetFilePath(v string) *GameDownloadResourceFileCreate {
 	_c.mutation.SetFilePath(v)
@@ -515,6 +529,10 @@ func (_c *GameDownloadResourceFileCreate) createSpec() (*GameDownloadResourceFil
 		_spec.SetField(gamedownloadresourcefile.FieldFileName, field.TypeString, value)
 		_node.FileName = value
 	}
+	if value, ok := _c.mutation.OriginalName(); ok {
+		_spec.SetField(gamedownloadresourcefile.FieldOriginalName, field.TypeString, value)
+		_node.OriginalName = &value
+	}
 	if value, ok := _c.mutation.FilePath(); ok {
 		_spec.SetField(gamedownloadresourcefile.FieldFilePath, field.TypeString, value)
 		_node.FilePath = &value
@@ -774,6 +792,24 @@ func (u *GameDownloadResourceFileUpsert) SetFileName(v string) *GameDownloadReso
 // UpdateFileName sets the "file_name" field to the value that was provided on create.
 func (u *GameDownloadResourceFileUpsert) UpdateFileName() *GameDownloadResourceFileUpsert {
 	u.SetExcluded(gamedownloadresourcefile.FieldFileName)
+	return u
+}
+
+// SetOriginalName sets the "original_name" field.
+func (u *GameDownloadResourceFileUpsert) SetOriginalName(v string) *GameDownloadResourceFileUpsert {
+	u.Set(gamedownloadresourcefile.FieldOriginalName, v)
+	return u
+}
+
+// UpdateOriginalName sets the "original_name" field to the value that was provided on create.
+func (u *GameDownloadResourceFileUpsert) UpdateOriginalName() *GameDownloadResourceFileUpsert {
+	u.SetExcluded(gamedownloadresourcefile.FieldOriginalName)
+	return u
+}
+
+// ClearOriginalName clears the value of the "original_name" field.
+func (u *GameDownloadResourceFileUpsert) ClearOriginalName() *GameDownloadResourceFileUpsert {
+	u.SetNull(gamedownloadresourcefile.FieldOriginalName)
 	return u
 }
 
@@ -1166,6 +1202,27 @@ func (u *GameDownloadResourceFileUpsertOne) SetFileName(v string) *GameDownloadR
 func (u *GameDownloadResourceFileUpsertOne) UpdateFileName() *GameDownloadResourceFileUpsertOne {
 	return u.Update(func(s *GameDownloadResourceFileUpsert) {
 		s.UpdateFileName()
+	})
+}
+
+// SetOriginalName sets the "original_name" field.
+func (u *GameDownloadResourceFileUpsertOne) SetOriginalName(v string) *GameDownloadResourceFileUpsertOne {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.SetOriginalName(v)
+	})
+}
+
+// UpdateOriginalName sets the "original_name" field to the value that was provided on create.
+func (u *GameDownloadResourceFileUpsertOne) UpdateOriginalName() *GameDownloadResourceFileUpsertOne {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.UpdateOriginalName()
+	})
+}
+
+// ClearOriginalName clears the value of the "original_name" field.
+func (u *GameDownloadResourceFileUpsertOne) ClearOriginalName() *GameDownloadResourceFileUpsertOne {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.ClearOriginalName()
 	})
 }
 
@@ -1775,6 +1832,27 @@ func (u *GameDownloadResourceFileUpsertBulk) SetFileName(v string) *GameDownload
 func (u *GameDownloadResourceFileUpsertBulk) UpdateFileName() *GameDownloadResourceFileUpsertBulk {
 	return u.Update(func(s *GameDownloadResourceFileUpsert) {
 		s.UpdateFileName()
+	})
+}
+
+// SetOriginalName sets the "original_name" field.
+func (u *GameDownloadResourceFileUpsertBulk) SetOriginalName(v string) *GameDownloadResourceFileUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.SetOriginalName(v)
+	})
+}
+
+// UpdateOriginalName sets the "original_name" field to the value that was provided on create.
+func (u *GameDownloadResourceFileUpsertBulk) UpdateOriginalName() *GameDownloadResourceFileUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.UpdateOriginalName()
+	})
+}
+
+// ClearOriginalName clears the value of the "original_name" field.
+func (u *GameDownloadResourceFileUpsertBulk) ClearOriginalName() *GameDownloadResourceFileUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceFileUpsert) {
+		s.ClearOriginalName()
 	})
 }
 

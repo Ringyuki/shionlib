@@ -182,6 +182,20 @@ func (_c *GameDownloadResourceCreate) SetExtras(v pgvalue.Strings) *GameDownload
 	return _c
 }
 
+// SetCanonicalName sets the "canonical_name" field.
+func (_c *GameDownloadResourceCreate) SetCanonicalName(v bool) *GameDownloadResourceCreate {
+	_c.mutation.SetCanonicalName(v)
+	return _c
+}
+
+// SetNillableCanonicalName sets the "canonical_name" field if the given value is not nil.
+func (_c *GameDownloadResourceCreate) SetNillableCanonicalName(v *bool) *GameDownloadResourceCreate {
+	if v != nil {
+		_c.SetCanonicalName(*v)
+	}
+	return _c
+}
+
 // SetDownloads sets the "downloads" field.
 func (_c *GameDownloadResourceCreate) SetDownloads(v int) *GameDownloadResourceCreate {
 	_c.mutation.SetDownloads(v)
@@ -418,6 +432,10 @@ func (_c *GameDownloadResourceCreate) defaults() {
 		v := gamedownloadresource.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
+	if _, ok := _c.mutation.CanonicalName(); !ok {
+		v := gamedownloadresource.DefaultCanonicalName
+		_c.mutation.SetCanonicalName(v)
+	}
 	if _, ok := _c.mutation.Downloads(); !ok {
 		v := gamedownloadresource.DefaultDownloads
 		_c.mutation.SetDownloads(v)
@@ -479,6 +497,9 @@ func (_c *GameDownloadResourceCreate) check() error {
 		if err := gamedownloadresource.FormValidator(v); err != nil {
 			return &ValidationError{Name: "form", err: fmt.Errorf(`ent: validator failed for field "GameDownloadResource.form": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.CanonicalName(); !ok {
+		return &ValidationError{Name: "canonical_name", err: errors.New(`ent: missing required field "GameDownloadResource.canonical_name"`)}
 	}
 	if _, ok := _c.mutation.Downloads(); !ok {
 		return &ValidationError{Name: "downloads", err: errors.New(`ent: missing required field "GameDownloadResource.downloads"`)}
@@ -575,6 +596,10 @@ func (_c *GameDownloadResourceCreate) createSpec() (*GameDownloadResource, *sqlg
 	if value, ok := _c.mutation.Extras(); ok {
 		_spec.SetField(gamedownloadresource.FieldExtras, field.TypeOther, value)
 		_node.Extras = value
+	}
+	if value, ok := _c.mutation.CanonicalName(); ok {
+		_spec.SetField(gamedownloadresource.FieldCanonicalName, field.TypeBool, value)
+		_node.CanonicalName = value
 	}
 	if value, ok := _c.mutation.Downloads(); ok {
 		_spec.SetField(gamedownloadresource.FieldDownloads, field.TypeInt, value)
@@ -1022,6 +1047,18 @@ func (u *GameDownloadResourceUpsert) ClearExtras() *GameDownloadResourceUpsert {
 	return u
 }
 
+// SetCanonicalName sets the "canonical_name" field.
+func (u *GameDownloadResourceUpsert) SetCanonicalName(v bool) *GameDownloadResourceUpsert {
+	u.Set(gamedownloadresource.FieldCanonicalName, v)
+	return u
+}
+
+// UpdateCanonicalName sets the "canonical_name" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsert) UpdateCanonicalName() *GameDownloadResourceUpsert {
+	u.SetExcluded(gamedownloadresource.FieldCanonicalName)
+	return u
+}
+
 // SetDownloads sets the "downloads" field.
 func (u *GameDownloadResourceUpsert) SetDownloads(v int) *GameDownloadResourceUpsert {
 	u.Set(gamedownloadresource.FieldDownloads, v)
@@ -1414,6 +1451,20 @@ func (u *GameDownloadResourceUpsertOne) UpdateExtras() *GameDownloadResourceUpse
 func (u *GameDownloadResourceUpsertOne) ClearExtras() *GameDownloadResourceUpsertOne {
 	return u.Update(func(s *GameDownloadResourceUpsert) {
 		s.ClearExtras()
+	})
+}
+
+// SetCanonicalName sets the "canonical_name" field.
+func (u *GameDownloadResourceUpsertOne) SetCanonicalName(v bool) *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetCanonicalName(v)
+	})
+}
+
+// UpdateCanonicalName sets the "canonical_name" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertOne) UpdateCanonicalName() *GameDownloadResourceUpsertOne {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateCanonicalName()
 	})
 }
 
@@ -1988,6 +2039,20 @@ func (u *GameDownloadResourceUpsertBulk) UpdateExtras() *GameDownloadResourceUps
 func (u *GameDownloadResourceUpsertBulk) ClearExtras() *GameDownloadResourceUpsertBulk {
 	return u.Update(func(s *GameDownloadResourceUpsert) {
 		s.ClearExtras()
+	})
+}
+
+// SetCanonicalName sets the "canonical_name" field.
+func (u *GameDownloadResourceUpsertBulk) SetCanonicalName(v bool) *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.SetCanonicalName(v)
+	})
+}
+
+// UpdateCanonicalName sets the "canonical_name" field to the value that was provided on create.
+func (u *GameDownloadResourceUpsertBulk) UpdateCanonicalName() *GameDownloadResourceUpsertBulk {
+	return u.Update(func(s *GameDownloadResourceUpsert) {
+		s.UpdateCanonicalName()
 	})
 }
 

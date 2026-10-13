@@ -18,8 +18,14 @@ func ptr[T any](v T) *T {
 }
 
 func newAdmin() (*translator.AdminService, *translatortest.MemoryRepository) {
+	service, repo, _ := followedAdmin()
+	return service, repo
+}
+
+func followedAdmin() (*translator.AdminService, *translatortest.MemoryRepository, *translatortest.Followers) {
 	repo := translatortest.NewMemoryRepository()
-	return translator.NewAdminService(repo, repo, &txtest.Immediate{}), repo
+	followers := &translatortest.Followers{}
+	return translator.NewAdminService(repo, repo, followers, &txtest.Immediate{}), repo, followers
 }
 
 func TestAdminSearchTrimsTheQuery(t *testing.T) {
@@ -132,5 +138,26 @@ func TestDuplicatesGroupNamesThatDifferInWritingUntilDismissed(t *testing.T) {
 	}
 	if err := service.Dismiss(t.Context(), []int{pipa.ID}); !errors.Is(err, translator.ErrMergeNeedsOthers) {
 		t.Fatalf("dismissing one translator: %v", err)
+	}
+}
+
+func TestANewNameAndAMergeAreToldToTheFollowers(t *testing.T) {
+	service, repo, followers := followedAdmin()
+	tea := repo.Seed(translator.Translator{Name: "绿茶汉化组"})
+	other := repo.Seed(translator.Translator{Name: "绿茶汉化"})
+	if err := service.Edit(t.Context(), tea.ID, translator.Changes{Aliases: &[]string{"Green Tea"}}); err != nil || len(followers.Changed) != 0 {
+		t.Fatalf("an edit that keeps the name tells nobody: %v %v", followers.Changed, err)
+	}
+	if err := service.Edit(t.Context(), tea.ID, translator.Changes{Name: ptr("绿茶汉化组 ")}); err != nil || len(followers.Changed) != 0 {
+		t.Fatalf("the same name tells nobody: %v %v", followers.Changed, err)
+	}
+	if err := service.Edit(t.Context(), tea.ID, translator.Changes{Name: ptr("绿茶组")}); err != nil || !slices.Equal(followers.Changed, []int{tea.ID}) {
+		t.Fatalf("a new name: %v %v", followers.Changed, err)
+	}
+	if err := service.Edit(t.Context(), other.ID, translator.Changes{Name: ptr("绿茶组")}); !errors.Is(err, translator.ErrNameTaken) || len(followers.Changed) != 1 {
+		t.Fatalf("a refused edit tells nobody: %v %v", followers.Changed, err)
+	}
+	if err := service.Merge(t.Context(), tea.ID, []int{other.ID}); err != nil || !slices.Equal(followers.Changed, []int{tea.ID, tea.ID}) {
+		t.Fatalf("a merge: %v %v", followers.Changed, err)
 	}
 }

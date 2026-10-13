@@ -56,6 +56,8 @@ type fixture struct {
 	sessions    *sessions
 	events      *downloadtest.Recorder
 	store       *downloadtest.ObjectStore
+	media       downloadtest.Media
+	names       *download.NameService
 	service     *download.Service
 	details     *download.DetailService
 }
@@ -69,14 +71,18 @@ func newFixture() fixture {
 		sessions:    &sessions{byID: map[int]upload.Session{}},
 		events:      &downloadtest.Recorder{},
 		store:       downloadtest.NewObjectStore(),
+		media:       downloadtest.Media{Formats: map[int]string{}},
 	}
 	discussions := downloadtest.Discussions{Counts: map[int]int{1: 4}}
-	cards := gametest.NewCards(game.Card{ID: 10, TitleJP: "ゲーム", TitleZH: "游戏", TitleEN: "Game"}, game.Card{ID: 11})
+	released := time.Date(2025, 9, 26, 0, 0, 0, 0, time.UTC)
+	cards := gametest.NewCards(game.Card{ID: 10, TitleJP: "ゲーム", TitleZH: "游戏", TitleEN: "Game", ReleaseDate: &released, Developers: []game.Credit{{Developer: game.DeveloperRef{Name: "ブランド"}}}}, game.Card{ID: 11})
+	f.names = downloadtest.Names(repo, cards, f.media)
 	f.service = download.NewService(download.Deps{
 		Repo:        repo,
 		Games:       cards,
 		Comments:    discussions,
 		Translators: translator.NewService(f.translators),
+		Names:       f.names,
 		Sessions:    f.sessions,
 		Activities:  f.events,
 		Messages:    f.events,
