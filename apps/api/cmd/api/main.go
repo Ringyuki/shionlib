@@ -168,10 +168,10 @@ func inspect(ctx context.Context, args []string) error {
 					return err
 				}
 				result, err := modules.Backfill.Inspect(groupCtx, resourceID)
-				if groupCtx.Err() != nil {
-					return nil
-				}
-				if err != nil {
+				switch {
+				case groupCtx.Err() != nil:
+					continue
+				case err != nil:
 					mu.Lock()
 					failed++
 					mu.Unlock()
