@@ -19,29 +19,35 @@ import (
 )
 
 const (
-	defaultRegion      = "auto"
-	defaultPartSize    = 32 << 20
-	defaultConcurrency = 4
-	deleteBatch        = 1000
+	defaultRegion              = "auto"
+	defaultPartSize            = 32 << 20
+	defaultConcurrency         = 4
+	defaultDownloadPartSize    = 64 << 20
+	defaultDownloadConcurrency = 16
+	deleteBatch                = 1000
 )
 
 type Options struct {
-	Bucket          string
-	Region          string
-	Endpoint        string
-	AccessKeyID     string
-	SecretAccessKey string
-	PathStyle       bool
-	HTTPClient      *http.Client
-	PartSize        int64
-	Concurrency     int
+	Bucket              string
+	Region              string
+	Endpoint            string
+	AccessKeyID         string
+	SecretAccessKey     string
+	PathStyle           bool
+	HTTPClient          *http.Client
+	PartSize            int64
+	Concurrency         int
+	DownloadPartSize    int64
+	DownloadConcurrency int
 }
 
 type Store struct {
-	client      *s3.Client
-	bucket      string
-	partSize    int64
-	concurrency int
+	client              *s3.Client
+	bucket              string
+	partSize            int64
+	concurrency         int
+	downloadPart        int64
+	downloadConcurrency int
 }
 
 func New(opts Options) *Store {
@@ -53,6 +59,12 @@ func New(opts Options) *Store {
 	}
 	if opts.Concurrency <= 0 {
 		opts.Concurrency = defaultConcurrency
+	}
+	if opts.DownloadPartSize <= 0 {
+		opts.DownloadPartSize = defaultDownloadPartSize
+	}
+	if opts.DownloadConcurrency <= 0 {
+		opts.DownloadConcurrency = defaultDownloadConcurrency
 	}
 	s3Options := s3.Options{
 		Region:                     opts.Region,
@@ -67,7 +79,14 @@ func New(opts Options) *Store {
 	if opts.HTTPClient != nil {
 		s3Options.HTTPClient = opts.HTTPClient
 	}
-	return &Store{client: s3.New(s3Options), bucket: opts.Bucket, partSize: opts.PartSize, concurrency: opts.Concurrency}
+	return &Store{
+		client:              s3.New(s3Options),
+		bucket:              opts.Bucket,
+		partSize:            opts.PartSize,
+		concurrency:         opts.Concurrency,
+		downloadPart:        opts.DownloadPartSize,
+		downloadConcurrency: opts.DownloadConcurrency,
+	}
 }
 
 func (s *Store) Put(ctx context.Context, object download.Object) error {
