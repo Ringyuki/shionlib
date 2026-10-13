@@ -32,6 +32,7 @@ type LegacyResource struct {
 	Published bool
 	Canonical bool
 	Info      Info
+	Awaiting  bool
 }
 
 type LegacyReading struct {

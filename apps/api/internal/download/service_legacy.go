@@ -41,6 +41,9 @@ func (s *LegacyService) Describe(ctx context.Context) error {
 			if err := ctx.Err(); err != nil {
 				return errors.Join(append(errs, err)...)
 			}
+			if resource.Awaiting {
+				continue
+			}
 			if err := s.describe(ctx, resource, ReadLegacy(resource, LegacyEntryOf(cards[resource.GameID]))); err != nil {
 				errs = append(errs, fmt.Errorf("describe resource %d: %w", resource.ID, err))
 			}

@@ -52,7 +52,19 @@ func TestLegacyStoreListsResourcesWithTheirNamesAndDiscs(t *testing.T) {
 	if err != nil || len(rest) != 1 || rest[0].ID != third.ID {
 		t.Fatalf("rest %+v %v", rest, err)
 	}
-	if none, err := store.ListUndescribed(ctx, third.ID, 2); err != nil || len(none) != 0 {
+	fetched, waiting := f.db.Game(t), f.db.Game(t)
+	f.db.Ent.CatalogSourceLink.Create().SetSource("hikarinagi").SetEntity("game").SetExternalID("901").SetLocalID(fetched).SetSyncedAt(time.Now()).ExecX(ctx)
+	f.db.Ent.CatalogSourceLink.Create().SetSource("hikarinagi").SetEntity("game").SetExternalID("902").SetLocalID(waiting).ExecX(ctx)
+	ready := f.resource(t, fetched, creator, func(c *ent.GameDownloadResourceCreate) { c.SetUndescribed(true) })
+	early := f.resource(t, waiting, creator, func(c *ent.GameDownloadResourceCreate) { c.SetUndescribed(true) })
+	linked, err := store.ListUndescribed(ctx, third.ID, 5)
+	if err != nil || len(linked) != 2 || linked[0].ID != ready.ID || linked[0].Awaiting || linked[1].ID != early.ID || !linked[1].Awaiting {
+		t.Fatalf("a resource tells whether its game still waits for its catalog entry: %+v %v", linked, err)
+	}
+	if listed[0].Awaiting || rest[0].Awaiting {
+		t.Fatalf("a game without a catalog entry waits for nothing: %+v %+v", listed[0], rest[0])
+	}
+	if none, err := store.ListUndescribed(ctx, early.ID, 2); err != nil || len(none) != 0 {
 		t.Fatalf("nothing after the last: %+v %v", none, err)
 	}
 }

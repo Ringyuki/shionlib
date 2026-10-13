@@ -54,7 +54,7 @@ One word per concept. `internal/archtest` rejects the banned words below; review
 | Resource information | What a download resource says about itself besides platform and language: translation, translators, patch version, release page, edition, form and extras (`download.Info`). |
 | Composition | Making a new resource from a stored one and an uploaded patch on the server (`composition.Composition`): a draft, then queued, running, done or failed. The resource it was made from is never changed. |
 | Form reading | Telling from an inspection whether a resource is a disc image, an installer or a folder that runs as it is (`scan.ReadForm`). It fills a form nobody gave and records `form_read` in the history. |
-| Undescribed | A resource published before structured information whose note and file names the worker has not read yet (`game_download_resources.undescribed`). |
+| Undescribed | A resource published before structured information whose note and file names the worker has not read yet (`game_download_resources.undescribed`); it is read once its game has been fetched from the catalog. |
 | Base | The stored resource a composition reads (`composition.Base`, 原版 in the web client): a published, checked, portable resource of the same game whose contents are known from its inspection. |
 | Plan | What a patch does to a base, drawn from their listings before anything is unpacked (`composition.Plan`): the game folder, the patch folder, the files added and replaced and the conflicts. |
 | AI provider | An upstream AI account configured in the admin panel: kind, base URL, API key, price multiplier (`ai.Provider`). |

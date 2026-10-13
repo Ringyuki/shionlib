@@ -85,7 +85,7 @@ Resources published before the rewrite said their translation, translators, edit
 
 ### Description (`resource_description`, every ten minutes)
 
-The migration `20261013165200_backfill_undescribed_resources` marks every resource that exists when it runs as `undescribed`; a resource created later is described by its uploader and never carries the mark. The task reads each marked resource once, writes what it can tell and clears the mark, so it finishes in its first run (seconds for the whole catalogue) and finds nothing afterwards.
+The migration `20261013165200_backfill_undescribed_resources` marks every resource that exists when it runs as `undescribed`; a resource created later is described by its uploader and never carries the mark. The task reads each marked resource once, writes what it can tell and clears the mark. A resource whose game is linked to a catalog entry that has not been fetched yet is left marked and read in a later run, because file names are read against the game's titles, brand and release date; after a cutover the description therefore follows the catalog sync.
 
 - A resource in Japanese only gets the translation `none`. For the others the note is read first: an official translation (`官方中文`, `Official English Version`), a machine translation (`机翻`) or the names of translators (`绿茶汉化组×熊喵守护协会`); when the note says nothing, a trailing bracket of the file name (`[官方中文]`, `[守夜人汉化组]`) is. A note that mixes them, or that cannot be told from a remark, is left alone and the translation stays unset for the uploader to fill in.
 - A note that was only the translation is cleared, and a single address in it becomes the release page; a note that says more is kept as it is.
