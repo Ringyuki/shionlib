@@ -29,6 +29,9 @@ func TestUnknownCommandsFail(t *testing.T) {
 			t.Fatalf("inspect %s: %v", limit, err)
 		}
 	}
+	if err := run(t.Context(), []string{"inspect", "-workers", "0", "10"}); err == nil || !strings.Contains(err.Error(), "at least one worker") {
+		t.Fatalf("inspect without workers: %v", err)
+	}
 }
 
 func TestOpenAPIIsWrittenOfflineAndMarkedGenerated(t *testing.T) {

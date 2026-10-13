@@ -23,24 +23,33 @@ func NewBackfillService(checks *Service, objects Objects, spool Spool) *Backfill
 }
 
 func (s *BackfillService) Next(ctx context.Context, skip []int) (Backfilled, bool, error) {
-	resourceID, found, err := s.checks.repo.NextUninspected(ctx, skip)
+	resourceID, found, err := s.Pick(ctx, skip)
 	if err != nil || !found {
 		return Backfilled{}, false, err
 	}
+	done, err := s.Inspect(ctx, resourceID)
+	return done, true, err
+}
+
+func (s *BackfillService) Pick(ctx context.Context, skip []int) (int, bool, error) {
+	return s.checks.repo.NextUninspected(ctx, skip)
+}
+
+func (s *BackfillService) Inspect(ctx context.Context, resourceID int) (Backfilled, error) {
 	done := Backfilled{ResourceID: resourceID}
 	files, err := s.checks.repo.ResourceFiles(ctx, resourceID)
 	if err != nil {
-		return done, true, err
+		return done, err
 	}
 	stored := slices.DeleteFunc(files, func(file PendingFile) bool { return !file.awaitingInspection() })
 	for _, unit := range Units(stored) {
 		outcome, err := s.inspect(ctx, unit)
 		if err != nil {
-			return done, true, fmt.Errorf("inspect %v of resource %d: %w", unit.Names(), resourceID, err)
+			return done, fmt.Errorf("inspect %v of resource %d: %w", unit.Names(), resourceID, err)
 		}
 		done.Units = append(done.Units, BackfilledUnit{Files: unit.Names(), Outcome: outcome})
 	}
-	return done, true, nil
+	return done, nil
 }
 
 func (s *BackfillService) inspect(ctx context.Context, unit Unit) (BackfillOutcome, error) {

@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
+	"io"
 	"maps"
 	"net/http"
 	"os"
@@ -13,8 +15,11 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/bootstrap"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/config"
@@ -61,7 +66,7 @@ func run(ctx context.Context, args []string) error {
 	case "describe":
 		return describe(ctx, args[1:])
 	default:
-		return fmt.Errorf("unknown command %q (expected serve, worker, migrate up|status, openapi, health, inspect [limit], recheck [file id ...], describe [apply])", command)
+		return fmt.Errorf("unknown command %q (expected serve, worker, migrate up|status, openapi, health, inspect [-workers N] [limit], recheck [file id ...], describe [apply])", command)
 	}
 }
 
@@ -104,11 +109,20 @@ func serve(ctx context.Context, withHTTP bool) error {
 }
 
 func inspect(ctx context.Context, args []string) error {
+	flags := flag.NewFlagSet("inspect", flag.ContinueOnError)
+	flags.SetOutput(io.Discard)
+	workers := flags.Int("workers", 1, "how many resources are inspected at once")
+	if err := flags.Parse(args); err != nil {
+		return fmt.Errorf("inspect takes -workers and the number of resources to go through: %w", err)
+	}
+	if *workers < 1 {
+		return fmt.Errorf("inspect takes at least one worker, got %d", *workers)
+	}
 	limit := 0
-	if len(args) > 0 {
-		parsed, err := strconv.Atoi(args[0])
+	if rest := flags.Args(); len(rest) > 0 {
+		parsed, err := strconv.Atoi(rest[0])
 		if err != nil || parsed < 1 {
-			return fmt.Errorf("inspect takes the number of resources to go through, got %q", args[0])
+			return fmt.Errorf("inspect takes the number of resources to go through, got %q", rest[0])
 		}
 		limit = parsed
 	}
@@ -128,31 +142,52 @@ func inspect(ctx context.Context, args []string) error {
 	}
 	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer stop()
+	var mu sync.Mutex
 	var seen []int
 	failed := 0
-	for limit == 0 || len(seen) < limit {
-		result, found, err := modules.Backfill.Next(ctx, seen)
-		if ctx.Err() != nil {
-			break
+	pick := func() (int, bool, error) {
+		mu.Lock()
+		defer mu.Unlock()
+		if limit > 0 && len(seen) >= limit {
+			return 0, false, nil
 		}
-		if !found {
-			if err != nil {
-				return err
-			}
-			break
+		resourceID, found, err := modules.Backfill.Pick(ctx, seen)
+		if err != nil || !found {
+			return 0, false, err
 		}
-		seen = append(seen, result.ResourceID)
-		if err != nil {
-			failed++
-			logger.Error("inspection failed", "resource_id", result.ResourceID, "error", err)
-			continue
-		}
-		for _, unit := range result.Units {
-			logger.Info("inspected", "resource_id", result.ResourceID, "files", unit.Files, "outcome", string(unit.Outcome))
-		}
+		seen = append(seen, resourceID)
+		return resourceID, true, nil
 	}
-	logger.Info("inspection finished", "resources", len(seen), "failed", failed, "stopped", ctx.Err() != nil)
-	return nil
+	group, groupCtx := errgroup.WithContext(ctx)
+	group.SetLimit(*workers)
+	for range *workers {
+		group.Go(func() error {
+			for groupCtx.Err() == nil {
+				resourceID, found, err := pick()
+				if err != nil || !found {
+					return err
+				}
+				result, err := modules.Backfill.Inspect(groupCtx, resourceID)
+				if groupCtx.Err() != nil {
+					return nil
+				}
+				if err != nil {
+					mu.Lock()
+					failed++
+					mu.Unlock()
+					logger.Error("inspection failed", "resource_id", resourceID, "error", err)
+					continue
+				}
+				for _, unit := range result.Units {
+					logger.Info("inspected", "resource_id", resourceID, "files", unit.Files, "outcome", string(unit.Outcome))
+				}
+			}
+			return nil
+		})
+	}
+	err = group.Wait()
+	logger.Info("inspection finished", "resources", len(seen), "failed", failed, "workers", *workers, "stopped", ctx.Err() != nil)
+	return err
 }
 
 func recheck(ctx context.Context, args []string) error {

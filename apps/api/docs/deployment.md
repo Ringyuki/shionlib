@@ -86,13 +86,14 @@ A file gets its inspection (what it holds, its checks, its previews, its SHA-256
 ```bash
 docker exec <worker container> shionlib-api inspect        # until nothing is left
 docker exec <worker container> shionlib-api inspect 50     # at most 50 resources
+docker exec <worker container> shionlib-api inspect -workers 3   # three resources at once
 ```
 
 - Run it in the worker container: it needs `7zz`, clamd, the spool volume and the bucket credentials, all of which the worker already has.
-- It takes the resources with uninspected files, most downloaded first, one at a time: it fetches the file (or every volume of a set) from the bucket into the scan workspace on the spool, runs the steps of a check (test, listing, nested archives and disc images, scan, previews) and attaches the result. Nothing changes for a clean file besides that.
+- It takes the resources with uninspected files, most downloaded first, one at a time per worker (`-workers`, 1 by default; the workers share the list of what they took, so no resource is inspected twice): it fetches the file (or every volume of a set) from the bucket into the scan workspace on the spool, runs the steps of a check (test, listing, nested archives and disc images, scan, previews) and attaches the result. Nothing changes for a clean file besides that.
 - It can be stopped at any time (`Ctrl-C`, `docker stop`) and run again: what has an inspection is done. Each run goes through a resource once; one that failed (logged as `inspection failed` with its id) is tried again by the next run.
 - Every line it logs names the resource, its files and the outcome: `inspected`, `unreadable` (the archive can no longer be opened; recorded, the file stays published), `held` (the scan detected something: the file is put under review like an upload and the resource is hidden until an admin decides; unlike an upload, a published file is never removed when the review deadline passes) or `missing` (the bucket does not hold the object; nothing is recorded).
-- It downloads every file once: the whole catalogue is the size of the bucket. The spool needs room for the largest file and what is extracted from it.
+- It downloads every file once, in 64 MiB ranges sixteen at a time: the whole catalogue is the size of the bucket. The spool needs room for the largest file and what is extracted from it, once per worker. A check takes about as long as the download of the same file (a 9 GB archive on staging: 20 seconds to download, a minute and a half to test, list and scan), and each worker runs a 7-Zip test that uses every core, so more workers than cores gain nothing; on the 4-core staging host three run well together.
 
 ## Describing resources published before
 

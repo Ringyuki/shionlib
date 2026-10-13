@@ -64,6 +64,29 @@ func TestBackfillInspectsTheMostDownloadedResourceFirst(t *testing.T) {
 	}
 }
 
+func TestBackfillPicksResourcesApartFromInspectingThem(t *testing.T) {
+	f := newFixture(true)
+	f.repo.SeedFile(published(1, 10, "quiet.7z"))
+	f.repo.SeedFile(published(2, 20, "popular.7z"))
+	f.repo.Downloads[20] = 571
+	ctx := context.Background()
+	first, found, err := f.backfill.Pick(ctx, nil)
+	if err != nil || !found || first != 20 {
+		t.Fatalf("the most downloaded resource comes first: %d %v %v", first, found, err)
+	}
+	second, found, err := f.backfill.Pick(ctx, []int{first})
+	if err != nil || !found || second != 10 {
+		t.Fatalf("a resource another worker took is left out: %d %v %v", second, found, err)
+	}
+	if len(f.objects.Fetched) != 0 {
+		t.Fatalf("picking fetches nothing: %v", f.objects.Fetched)
+	}
+	done, err := f.backfill.Inspect(ctx, second)
+	if err != nil || done.ResourceID != 10 || len(done.Units) != 1 {
+		t.Fatalf("the picked resource is inspected: %+v %v", done, err)
+	}
+}
+
 func TestBackfillTellsTheResourceAboutADiscImageItFinds(t *testing.T) {
 	f := newFixture(true)
 	f.repo.SeedFile(published(1, 10, "disc.7z"))
