@@ -1,10 +1,15 @@
 import { UiLocaleProvider, enUS, jaJP, zhCN } from '@hina-ui/react'
 import type { ReactNode } from 'react'
-import { data, Outlet, useRouteLoaderData, type ShouldRevalidateFunctionArgs } from 'react-router'
+import {
+  Outlet,
+  redirect,
+  useRouteLoaderData,
+  type ShouldRevalidateFunctionArgs,
+} from 'react-router'
 import { IntlProvider } from 'use-intl'
 import { loadMessages } from '~/messages'
 import type { Locale } from '~/shared/i18n/locale'
-import { isLocale } from '~/shared/i18n/locale.schema'
+import { isLocale, localizedLocation } from '~/shared/i18n/locale.schema'
 import { siteTimeZone } from '~/shared/i18n/site-time'
 import { KeptData } from '~/shared/route/kept-data'
 import { ErrorPage } from '~/shared/ui/error-page'
@@ -12,9 +17,9 @@ import type { Route } from './+types/lang'
 
 const uiMessages = { zh: zhCN, en: enUS, ja: jaJP } satisfies Record<Locale, typeof zhCN>
 
-export async function loader({ params }: Route.LoaderArgs) {
+export async function loader({ params, request, url }: Route.LoaderArgs) {
   if (!isLocale(params.lang)) {
-    throw data(null, { status: 404 })
+    throw redirect(localizedLocation(request.headers.get('cookie') ?? '', url))
   }
   return { locale: params.lang, messages: await loadMessages(params.lang) }
 }
