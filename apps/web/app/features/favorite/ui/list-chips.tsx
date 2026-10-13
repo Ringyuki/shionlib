@@ -20,16 +20,17 @@ export function ListChips({ owner, lists, selected }: ListChipsProps) {
         return (
           <Chip
             key={list.id}
-            as={InPageLink}
-            href={showcasePath(locale, owner, list.id)}
+            asChild
             variant={current ? 'soft' : 'outline'}
             tone={current ? 'accent' : 'neutral'}
             aria-current={current ? 'page' : undefined}
           >
-            {listLabel(list, t('defaultList'))}
-            <Text as="span" size="sm" className="ms-2 font-normal tabular-nums opacity-80">
-              {format.number(list.game_count)}
-            </Text>
+            <InPageLink href={showcasePath(locale, owner, list.id)}>
+              {listLabel(list, t('defaultList'))}
+              <Text as="span" size="sm" className="ms-2 font-normal tabular-nums opacity-80">
+                {format.number(list.game_count)}
+              </Text>
+            </InPageLink>
           </Chip>
         )
       })}
