@@ -3047,6 +3047,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/sponsor/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Whether sponsor orders are accepted and what a dollar gives */
+        get: operations["sponsor.state"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/sponsor/stats": {
         parameters: {
             query?: never;
@@ -3071,7 +3088,7 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** List public sponsors */
+        /** List the sponsors who chose to be shown, each once, the latest first */
         get: operations["sponsor.wall"];
         put?: never;
         post?: never;
@@ -7218,10 +7235,10 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
-        EnvelopePageSponsorWallItemDTO: {
+        EnvelopePageSponsorWallEntryDTO: {
             /** Format: int64 */
             code: number;
-            data: components["schemas"]["PageSponsorWallItemDTO"];
+            data: components["schemas"]["PageSponsorWallEntryDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -7379,10 +7396,30 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeSponsorOrderViewDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["SponsorOrderViewDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeSponsorPaymentDTO: {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["SponsorPaymentDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeSponsorStateDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["SponsorStateDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -8469,8 +8506,8 @@ export type components = {
             items: components["schemas"]["SponsorOrderDTO"][] | null;
             meta: components["schemas"]["PageMeta"];
         };
-        PageSponsorWallItemDTO: {
-            items: components["schemas"]["SponsorWallItemDTO"][] | null;
+        PageSponsorWallEntryDTO: {
+            items: components["schemas"]["SponsorWallEntryDTO"][] | null;
             meta: components["schemas"]["PageMeta"];
         };
         PasskeyCreatedDTO: {
@@ -8922,6 +8959,11 @@ export type components = {
             amount: number;
             /** Format: date-time */
             created: string;
+            /**
+             * Format: date-time
+             * @description Until when the order can be paid
+             */
+            expiresAt: string | null;
             /** Format: int64 */
             id: number;
             isPrivate: boolean;
@@ -8934,6 +8976,16 @@ export type components = {
             /** @enum {string} */
             status: "NEW" | "DONE" | "EXPIRED" | "REFUND";
             user: components["schemas"]["UserSummaryDTO"] | null;
+        };
+        SponsorOrderViewDTO: {
+            /**
+             * Format: date-time
+             * @description Until when the sponsor badge is shown once the order is paid, or is shown now when it is paid already; null without an account
+             */
+            badge_until: string | null;
+            order: components["schemas"]["SponsorOrderDTO"];
+            /** @description What an order that waits for payment can be paid with; empty otherwise and for anyone but its owner */
+            payment_methods: components["schemas"]["SponsorPaymentMethodDTO"][] | null;
         };
         SponsorPaymentDTO: {
             /** Format: double */
@@ -8949,22 +9001,44 @@ export type components = {
             name: string;
             ratioRange?: string;
         };
+        SponsorStateDTO: {
+            /**
+             * Format: int64
+             * @description Days the sponsor badge is shown for each dollar
+             */
+            badge_days_per_dollar: number;
+            /** @description Whether new sponsor orders are accepted */
+            enabled: boolean;
+        };
         SponsorStatsDTO: {
             /** Format: double */
             totalAmount: number;
             /** Format: int64 */
             totalSponsors: number;
         };
-        SponsorWallItemDTO: {
-            /** Format: double */
-            amount: number;
+        SponsorWallEntryDTO: {
             /** Format: int64 */
             id: number;
             message: string | null;
-            /** Format: date-time */
-            paidAt: string;
-            sponsorName: string | null;
-            user: components["schemas"]["UserSummaryDTO"] | null;
+            /** @description The name a sponsor without an account gave */
+            name: string | null;
+            /**
+             * Format: date-time
+             * @description When the sponsor last paid
+             */
+            sponsored_at: string;
+            /** @description The sponsor's account with what its profile shows; null when the payment was made without one */
+            user: components["schemas"]["SponsorWallUserDTO"] | null;
+        };
+        SponsorWallUserDTO: {
+            avatar: string | null;
+            bio: string | null;
+            cover: string | null;
+            /** Format: int64 */
+            id: number;
+            /** @description Whether the sponsor badge is still shown */
+            is_sponsor: boolean;
+            name: string;
         };
         SponsorWebhookDTO: {
             received: boolean;
@@ -16573,7 +16647,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["EnvelopeSponsorOrderDTO"];
+                    "application/json": components["schemas"]["EnvelopeSponsorOrderViewDTO"];
                 };
             };
             /** @description Error */
@@ -16610,6 +16684,36 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeSponsorPaymentDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "sponsor.state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeSponsorStateDTO"];
                 };
             };
             /** @description Error */
@@ -16674,7 +16778,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["EnvelopePageSponsorWallItemDTO"];
+                    "application/json": components["schemas"]["EnvelopePageSponsorWallEntryDTO"];
                 };
             };
             /** @description Error */

@@ -3,6 +3,7 @@ package sponsortest
 import (
 	"cmp"
 	"context"
+	"fmt"
 	"slices"
 	"sync"
 	"time"
@@ -12,21 +13,28 @@ import (
 )
 
 type MemoryRepository struct {
-	mu     sync.Mutex
-	now    func() time.Time
-	nextID int
-	orders map[int]sponsor.Order
-	users  map[int]user.Summary
+	mu       sync.Mutex
+	now      func() time.Time
+	nextID   int
+	orders   map[int]sponsor.Order
+	users    map[int]user.Summary
+	profiles map[int]sponsor.WallSponsor
 }
 
 func NewMemoryRepository(now func() time.Time) *MemoryRepository {
-	return &MemoryRepository{now: now, orders: map[int]sponsor.Order{}, users: map[int]user.Summary{}}
+	return &MemoryRepository{now: now, orders: map[int]sponsor.Order{}, users: map[int]user.Summary{}, profiles: map[int]sponsor.WallSponsor{}}
 }
 
 func (r *MemoryRepository) AddUser(summary user.Summary) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.users[summary.ID] = summary
+}
+
+func (r *MemoryRepository) Describe(id int, cover, bio string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.profiles[id] = sponsor.WallSponsor{Cover: &cover, Bio: &bio}
 }
 
 func (r *MemoryRepository) User(id int) (user.Summary, bool) {
@@ -161,24 +169,49 @@ func (r *MemoryRepository) List(_ context.Context, filter sponsor.ListFilter, pa
 func (r *MemoryRepository) Wall(_ context.Context, page sponsor.Page) ([]sponsor.WallEntry, int, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	var matched []sponsor.Order
+	latest := map[string]sponsor.Order{}
 	for _, order := range r.orders {
-		if order.Status == sponsor.StatusDone && !order.IsPrivate && order.PaidAt != nil {
-			matched = append(matched, r.withUser(order))
+		if order.Status != sponsor.StatusDone || order.IsPrivate || order.PaidAt == nil {
+			continue
+		}
+		key := fmt.Sprintf("o%d", order.ID)
+		if order.UserID != nil {
+			key = fmt.Sprintf("u%d", *order.UserID)
+		}
+		if shown, ok := latest[key]; !ok || later(order, shown) {
+			latest[key] = order
 		}
 	}
+	matched := make([]sponsor.Order, 0, len(latest))
+	for _, order := range latest {
+		matched = append(matched, order)
+	}
 	slices.SortFunc(matched, func(a, b sponsor.Order) int {
-		if c := b.PaidAt.Compare(*a.PaidAt); c != 0 {
-			return c
+		if later(a, b) {
+			return -1
 		}
-		return cmp.Compare(b.ID, a.ID)
+		return 1
 	})
 	window := paginate(matched, page)
 	entries := make([]sponsor.WallEntry, len(window))
 	for i, order := range window {
-		entries[i] = sponsor.WallEntry{ID: order.ID, SponsorName: order.SponsorName, Message: order.Message, User: order.User, AmountCents: order.AmountCents, PaidAt: *order.PaidAt}
+		entry := sponsor.WallEntry{OrderID: order.ID, Message: order.Message, PaidAt: *order.PaidAt}
+		if order.UserID == nil {
+			entry.Name = order.SponsorName
+		} else if summary, ok := r.users[*order.UserID]; ok {
+			profile := r.profiles[*order.UserID]
+			entry.Sponsor = &sponsor.WallSponsor{Summary: summary, Cover: profile.Cover, Bio: profile.Bio}
+		}
+		entries[i] = entry
 	}
 	return entries, len(matched), nil
+}
+
+func later(a, b sponsor.Order) bool {
+	if c := a.PaidAt.Compare(*b.PaidAt); c != 0 {
+		return c > 0
+	}
+	return a.ID > b.ID
 }
 
 func (r *MemoryRepository) Stats(_ context.Context) (sponsor.Stats, error) {

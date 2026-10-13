@@ -27,15 +27,8 @@ type Provider interface {
 	PayOrder(ctx context.Context, in PaymentRequest) (Payment, error)
 }
 
-type Cache interface {
-	Get(ctx context.Context, key string, dst any) (bool, error)
-	Set(ctx context.Context, key string, value any, ttl time.Duration) error
-	DeletePrefix(ctx context.Context, prefix string) error
-}
-
 type Transactor interface {
 	WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error
-	AfterCommit(ctx context.Context, fn func(ctx context.Context))
 }
 
 type Signer interface {

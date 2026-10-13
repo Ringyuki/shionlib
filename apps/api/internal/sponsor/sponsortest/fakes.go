@@ -2,9 +2,7 @@ package sponsortest
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 
@@ -89,55 +87,4 @@ func (Signer) Sign(message string) string {
 
 func (Signer) Verify(message, signature string) bool {
 	return signature == "signed:"+message
-}
-
-type Cache struct {
-	mu      sync.Mutex
-	entries map[string][]byte
-}
-
-func NewCache() *Cache {
-	return &Cache{entries: map[string][]byte{}}
-}
-
-func (c *Cache) Get(_ context.Context, key string, dst any) (bool, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	raw, ok := c.entries[key]
-	if !ok {
-		return false, nil
-	}
-	return true, json.Unmarshal(raw, dst)
-}
-
-func (c *Cache) Set(_ context.Context, key string, value any, _ time.Duration) error {
-	raw, err := json.Marshal(value)
-	if err != nil {
-		return err
-	}
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.entries[key] = raw
-	return nil
-}
-
-func (c *Cache) DeletePrefix(_ context.Context, prefix string) error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	for key := range c.entries {
-		if strings.HasPrefix(key, prefix) {
-			delete(c.entries, key)
-		}
-	}
-	return nil
-}
-
-func (c *Cache) Keys() []string {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	keys := make([]string, 0, len(c.entries))
-	for key := range c.entries {
-		keys = append(keys, key)
-	}
-	return keys
 }

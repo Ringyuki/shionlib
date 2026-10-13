@@ -41,7 +41,7 @@ func setup(t *testing.T, enabled bool) env {
 	provider.Methods = []sponsor.PaymentMethod{{Method: "alipay", Name: "Alipay", Enabled: true, RatioRange: &ratio}}
 	options := sponsor.Options{Provider: "idatariver", CallbackURL: "https://shionlib.test/api/sponsor/webhook/idatariver"}
 	settings := settingtest.Set(settingtest.Source{}, sponsor.Enabled, enabled)
-	service := sponsor.NewService(repo, provider, sponsortest.NewCache(), &txtest.Immediate{}, sponsortest.Signer{}, settings, options, func() time.Time { return apitest.Now })
+	service := sponsor.NewService(repo, provider, &txtest.Immediate{}, sponsortest.Signer{}, settings, options, func() time.Time { return apitest.Now })
 	sponsorhttp.NewHandler(service, server.Builder).Register(server.API)
 	return env{server: server, repo: repo, provider: provider}
 }
@@ -102,12 +102,12 @@ func TestOrderStatusAccess(t *testing.T) {
 
 	redacted := e.server.Do(apitest.Request{Method: http.MethodGet, Path: path, As: &stranger})
 	e.server.Expect(redacted, http.StatusOK, 0)
-	if string(redacted.Data) != `{"id":1,"providerOrderId":"","amount":10,"status":"NEW","sponsorName":null,"user":null,"message":null,"isPrivate":true,"paymentMethod":null,"paidAt":null,"created":"2026-10-03T01:02:03.000Z"}` {
+	if string(redacted.Data) != `{"order":{"id":1,"providerOrderId":"","amount":10,"status":"NEW","sponsorName":null,"user":null,"message":null,"isPrivate":true,"paymentMethod":null,"paidAt":null,"expiresAt":null,"created":"2026-10-03T01:02:03.000Z"},"badge_until":null,"payment_methods":[]}` {
 		t.Fatalf("strangers get a redacted order without a sync: %s", redacted.Data)
 	}
 	full := e.server.Do(apitest.Request{Method: http.MethodGet, Path: path, As: &owner})
 	e.server.Expect(full, http.StatusOK, 0)
-	if string(full.Data) != `{"id":1,"providerOrderId":"idr-5","amount":10,"status":"DONE","sponsorName":"Alice","user":{"id":1,"name":"owner","avatar":null,"is_sponsor":true},"message":"hi","isPrivate":true,"paymentMethod":null,"paidAt":"2026-10-03T01:02:03.000Z","created":"2026-10-03T01:02:03.000Z"}` {
+	if string(full.Data) != `{"order":{"id":1,"providerOrderId":"idr-5","amount":10,"status":"DONE","sponsorName":"Alice","user":{"id":1,"name":"owner","avatar":null,"is_sponsor":true},"message":"hi","isPrivate":true,"paymentMethod":null,"paidAt":"2026-10-03T01:02:03.000Z","expiresAt":null,"created":"2026-10-03T01:02:03.000Z"},"badge_until":"2026-12-02T01:02:03.000Z","payment_methods":[]}` {
 		t.Fatalf("owner syncs and sees the full order: %s", full.Data)
 	}
 
@@ -115,9 +115,11 @@ func TestOrderStatusAccess(t *testing.T) {
 	e.provider.Put(sponsor.ProviderOrder{ID: "idr-6", Status: sponsor.StatusDone, AmountCents: 100})
 	withToken := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/sponsor/order/" + strconv.Itoa(anonymous.ID) + "?token=signed:sponsor-order:2:idr-6"})
 	e.server.Expect(withToken, http.StatusOK, 0)
-	var view map[string]any
+	var view struct {
+		Order map[string]any `json:"order"`
+	}
 	withToken.Decode(t, &view)
-	if view["status"] != "DONE" || view["providerOrderId"] != "idr-6" {
+	if view.Order["status"] != "DONE" || view.Order["providerOrderId"] != "idr-6" {
 		t.Fatalf("token holder syncs the anonymous order: %s", withToken.Data)
 	}
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/sponsor/order/999"}), http.StatusNotFound, 570101)
@@ -128,14 +130,21 @@ func TestWallAndStats(t *testing.T) {
 	paid := time.Date(2026, 9, 1, 0, 0, 0, 0, time.UTC)
 	e.repo.Seed(sponsor.Order{ProviderOrderID: "a", AmountCents: 1050, Status: sponsor.StatusDone, PaidAt: &paid, SponsorName: ptr("Alice"), Message: ptr("Thanks!"), UserID: ptr(owner.UserID)})
 	e.repo.Seed(sponsor.Order{ProviderOrderID: "b", AmountCents: 50, Status: sponsor.StatusDone, PaidAt: &paid, IsPrivate: true})
+	e.repo.Seed(sponsor.Order{ProviderOrderID: "c", AmountCents: 300, Status: sponsor.StatusDone, PaidAt: ptr(paid.Add(-time.Hour)), SponsorName: ptr("A passer-by")})
+	e.repo.Describe(owner.UserID, "user/1/cover.webp", "plays old games")
 	wall := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/sponsor/wall?page=1&pageSize=10"})
 	e.server.Expect(wall, http.StatusOK, 0)
-	if string(wall.Data) != `{"items":[{"id":1,"sponsorName":"Alice","message":"Thanks!","user":{"id":1,"name":"owner","avatar":null,"is_sponsor":false},"amount":10.5,"paidAt":"2026-09-01T00:00:00.000Z"}],"meta":{"totalItems":1,"itemCount":1,"itemsPerPage":10,"totalPages":1,"currentPage":1}}` {
+	if string(wall.Data) != `{"items":[{"id":1,"user":{"id":1,"name":"owner","avatar":null,"cover":"user/1/cover.webp","bio":"plays old games","is_sponsor":false},"name":null,"message":"Thanks!","sponsored_at":"2026-09-01T00:00:00.000Z"},{"id":3,"user":null,"name":"A passer-by","message":null,"sponsored_at":"2026-08-31T23:00:00.000Z"}],"meta":{"totalItems":2,"itemCount":2,"itemsPerPage":10,"totalPages":1,"currentPage":1}}` {
 		t.Fatalf("unexpected wall %s", wall.Data)
+	}
+	state := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/sponsor/state"})
+	e.server.Expect(state, http.StatusOK, 0)
+	if string(state.Data) != `{"enabled":true,"badge_days_per_dollar":6}` {
+		t.Fatalf("unexpected state %s", state.Data)
 	}
 	stats := e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/sponsor/stats"})
 	e.server.Expect(stats, http.StatusOK, 0)
-	if string(stats.Data) != `{"totalSponsors":2,"totalAmount":11}` {
+	if string(stats.Data) != `{"totalSponsors":3,"totalAmount":14}` {
 		t.Fatalf("unexpected stats %s", stats.Data)
 	}
 	e.server.Expect(e.server.Do(apitest.Request{Method: http.MethodGet, Path: "/sponsor/wall?pageSize=51"}), http.StatusUnprocessableEntity, 100101)

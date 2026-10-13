@@ -14,6 +14,7 @@ import (
 type Env struct {
 	Repo         sponsor.Repository
 	NewUser      func(t *testing.T) int
+	Describe     func(t *testing.T, userID int, cover, bio string)
 	SponsorUntil func(t *testing.T, userID int) *time.Time
 }
 
@@ -140,42 +141,65 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		}
 	})
 
-	t.Run("wall shows public paid orders by payment time and stats sum paid orders", func(t *testing.T) {
+	t.Run("the wall shows each sponsor once with the latest public payment and stats sum paid orders", func(t *testing.T) {
 		env := newEnv(t)
 		owner := env.NewUser(t)
-		early, _ := env.Repo.Create(ctx, newOrder(&owner, 1000, false))
-		late, _ := env.Repo.Create(ctx, newOrder(nil, 1234, false))
-		hidden, _ := env.Repo.Create(ctx, newOrder(nil, 500, true))
-		_, _ = env.Repo.Create(ctx, newOrder(nil, 700, false))
+		env.Describe(t, owner, "user/1/cover.webp", "plays old games")
+		quiet := env.NewUser(t)
 		at := time.Date(2026, 5, 1, 0, 0, 0, 0, time.UTC)
-		for i, id := range []int{early.ID, late.ID, hidden.ID} {
-			paid := at.Add(time.Duration(i) * time.Hour)
-			if err := env.Repo.ApplyStatus(ctx, id, sponsor.StatusChange{Status: sponsor.StatusDone, PaidAt: &paid}); err != nil {
+		pay := func(order sponsor.NewOrder, message string, after time.Duration) sponsor.Order {
+			order.Message = &message
+			created, err := env.Repo.Create(ctx, order)
+			if err != nil {
 				t.Fatal(err)
 			}
+			paid := at.Add(after)
+			if err := env.Repo.ApplyStatus(ctx, created.ID, sponsor.StatusChange{Status: sponsor.StatusDone, PaidAt: &paid}); err != nil {
+				t.Fatal(err)
+			}
+			return created
+		}
+		pay(newOrder(&owner, 1000, false), "first", 0)
+		guest := pay(newOrder(nil, 1234, false), "from a guest", time.Hour)
+		latest := pay(newOrder(&owner, 300, false), "latest", 2*time.Hour)
+		pay(newOrder(&owner, 500, true), "kept private", 3*time.Hour)
+		pay(newOrder(&quiet, 500, true), "never shown", 4*time.Hour)
+		if _, err := env.Repo.Create(ctx, newOrder(nil, 700, false)); err != nil {
+			t.Fatal(err)
 		}
 		entries, total, err := env.Repo.Wall(ctx, sponsor.Page{Number: 1, Size: 10})
 		if err != nil {
 			t.Fatal(err)
 		}
-		if total != 2 || len(entries) != 2 || entries[0].ID != late.ID || entries[1].ID != early.ID {
+		if total != 2 || len(entries) != 2 || entries[0].OrderID != latest.ID || entries[1].OrderID != guest.ID {
 			t.Fatalf("unexpected wall %d %+v", total, entries)
 		}
-		if entries[1].User == nil || entries[1].User.ID != owner || entries[1].AmountCents != 1000 || !entries[1].PaidAt.Equal(at) {
-			t.Fatalf("unexpected wall entry %+v", entries[1])
+		first := entries[0]
+		if first.Sponsor == nil || first.Sponsor.ID != owner || first.Name != nil || first.Message == nil || *first.Message != "latest" || !first.PaidAt.Equal(at.Add(2*time.Hour)) {
+			t.Fatalf("a sponsor shows the latest public payment: %+v", first)
+		}
+		if first.Sponsor.Cover == nil || *first.Sponsor.Cover != "user/1/cover.webp" || first.Sponsor.Bio == nil || *first.Sponsor.Bio != "plays old games" {
+			t.Fatalf("a sponsor carries the profile: %+v", first.Sponsor)
+		}
+		if second := entries[1]; second.Sponsor != nil || second.Name == nil || *second.Name != "Alice" || second.Message == nil || *second.Message != "from a guest" {
+			t.Fatalf("a payment without an account shows its name: %+v", second)
+		}
+		paged, total, err := env.Repo.Wall(ctx, sponsor.Page{Number: 2, Size: 1})
+		if err != nil || total != 2 || len(paged) != 1 || paged[0].OrderID != guest.ID {
+			t.Fatalf("second page %d %+v %v", total, paged, err)
 		}
 		stats, err := env.Repo.Stats(ctx)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if stats.TotalSponsors != 3 || stats.TotalAmountCents != 2734 {
+		if stats.TotalSponsors != 5 || stats.TotalAmountCents != 3534 {
 			t.Fatalf("unexpected stats %+v", stats)
 		}
 		since, err := env.Repo.PaidSince(ctx, at.Add(time.Hour))
-		if err != nil || since != 1734 {
+		if err != nil || since != 2534 {
 			t.Fatalf("paid from the second payment on: %d %v", since, err)
 		}
-		if later, err := env.Repo.PaidSince(ctx, at.Add(3*time.Hour)); err != nil || later != 0 {
+		if later, err := env.Repo.PaidSince(ctx, at.Add(5*time.Hour)); err != nil || later != 0 {
 			t.Fatalf("nothing was paid later: %d %v", later, err)
 		}
 	})

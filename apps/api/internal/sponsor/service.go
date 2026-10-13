@@ -12,7 +12,6 @@ import (
 type Service struct {
 	repo     Repository
 	provider Provider
-	cache    Cache
 	tx       Transactor
 	signer   Signer
 	settings setting.Source
@@ -20,8 +19,8 @@ type Service struct {
 	now      func() time.Time
 }
 
-func NewService(repo Repository, provider Provider, cache Cache, tx Transactor, signer Signer, settings setting.Source, options Options, now func() time.Time) *Service {
-	return &Service{repo: repo, provider: provider, cache: cache, tx: tx, signer: signer, settings: settings, options: options, now: now}
+func NewService(repo Repository, provider Provider, tx Transactor, signer Signer, settings setting.Source, options Options, now func() time.Time) *Service {
+	return &Service{repo: repo, provider: provider, tx: tx, signer: signer, settings: settings, options: options, now: now}
 }
 
 func (s *Service) CreateOrder(ctx context.Context, who actor.Actor, in CreateOrderInput) (CreatedOrder, error) {
@@ -104,11 +103,11 @@ func (s *Service) Order(ctx context.Context, viewer actor.Actor, id int, accessT
 	if !order.OwnedBy(viewer) && !s.validAccessToken(order, accessToken) {
 		return OrderView{Order: order.redacted()}, nil
 	}
-	synced, err := s.syncPending(ctx, order)
+	synced, methods, err := s.syncPending(ctx, order)
 	if err != nil {
 		return OrderView{}, err
 	}
-	return OrderView{Order: synced, Full: true}, nil
+	return OrderView{Order: synced, Full: true, PaymentMethods: methods}, nil
 }
 
 func (s *Service) AdminOrder(ctx context.Context, id int) (Order, error) {
@@ -116,7 +115,8 @@ func (s *Service) AdminOrder(ctx context.Context, id int) (Order, error) {
 	if err != nil {
 		return Order{}, err
 	}
-	return s.syncPending(ctx, order)
+	synced, _, err := s.syncPending(ctx, order)
+	return synced, err
 }
 
 func (s *Service) HandleCallback(ctx context.Context, providerOrderID string) error {
@@ -148,17 +148,10 @@ func (s *Service) AdminUpdateStatus(ctx context.Context, id int, status Status) 
 
 func (s *Service) AdminDelete(ctx context.Context, id int) error {
 	return s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
-		order, err := s.repo.Lock(ctx, id)
-		if err != nil {
+		if _, err := s.repo.Lock(ctx, id); err != nil {
 			return err
 		}
-		if err := s.repo.Delete(ctx, id); err != nil {
-			return err
-		}
-		if order.Status == StatusDone {
-			s.tx.AfterCommit(ctx, s.invalidateWall)
-		}
-		return nil
+		return s.repo.Delete(ctx, id)
 	})
 }
 
@@ -167,18 +160,15 @@ func (s *Service) List(ctx context.Context, filter ListFilter, page Page) ([]Ord
 }
 
 func (s *Service) Wall(ctx context.Context, page Page) (WallPage, error) {
-	key := fmt.Sprintf("%sp%d:ps%d", WallCachePrefix, page.Number, page.Size)
-	var cached WallPage
-	if found, err := s.cache.Get(ctx, key, &cached); err == nil && found {
-		return cached, nil
-	}
 	entries, total, err := s.repo.Wall(ctx, page)
 	if err != nil {
 		return WallPage{}, err
 	}
-	result := WallPage{Entries: entries, Total: total}
-	_ = s.cache.Set(ctx, key, result, WallCacheTTL)
-	return result, nil
+	return WallPage{Entries: entries, Total: total}, nil
+}
+
+func (s *Service) State() State {
+	return State{Enabled: Enabled.Read(s.settings), BadgeDaysPerDollar: DaysPerDollar}
 }
 
 func (s *Service) Stats(ctx context.Context) (Stats, error) {
@@ -227,31 +217,32 @@ func (s *Service) transition(ctx context.Context, id int, target Status, source 
 				}
 			}
 		}
-		if target == StatusDone || current.Status == StatusDone {
-			s.tx.AfterCommit(ctx, s.invalidateWall)
-		}
 		changed = true
 		return nil
 	})
 	return changed, err
 }
 
-func (s *Service) syncPending(ctx context.Context, order Order) (Order, error) {
+func (s *Service) syncPending(ctx context.Context, order Order) (Order, []PaymentMethod, error) {
 	if order.Status != StatusNew {
-		return order, nil
+		return order, nil, nil
 	}
 	info, ok := s.providerOrder(ctx, order.ProviderOrderID)
-	if !ok || info.Status == StatusNew || !info.Status.Valid() || !info.matches(order) {
-		return order, nil
+	if !ok {
+		return order, nil, nil
+	}
+	if info.Status == StatusNew || !info.Status.Valid() || !info.matches(order) {
+		return order, info.PaymentMethods, nil
 	}
 	changed, err := s.transition(ctx, order.ID, info.Status, fromPoll)
 	if err != nil {
-		return Order{}, err
+		return Order{}, nil, err
 	}
 	if !changed {
-		return order, nil
+		return order, info.PaymentMethods, nil
 	}
-	return s.repo.Get(ctx, order.ID)
+	synced, err := s.repo.Get(ctx, order.ID)
+	return synced, nil, err
 }
 
 func (s *Service) providerOrder(ctx context.Context, providerOrderID string) (ProviderOrder, bool) {
@@ -261,10 +252,6 @@ func (s *Service) providerOrder(ctx context.Context, providerOrderID string) (Pr
 
 func (s *Service) validAccessToken(order Order, token string) bool {
 	return token != "" && s.signer.Verify(accessMessage(order), token)
-}
-
-func (s *Service) invalidateWall(ctx context.Context) {
-	_ = s.cache.DeletePrefix(ctx, WallCachePrefix)
 }
 
 func accessMessage(order Order) string {

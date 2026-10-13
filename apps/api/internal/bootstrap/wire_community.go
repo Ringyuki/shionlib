@@ -46,7 +46,6 @@ func wireCommunity(_ *Infra, shared *Shared, modules *Modules) {
 			Secret:    cfg.Sponsor.IdatariverSecret,
 			ProjectID: cfg.Sponsor.IdatariverProjectID,
 		}),
-		shared.Cache,
 		shared.Transactor,
 		hmacsign.New(cfg.Token.Secret, sponsorOrderAccessPurpose),
 		shared.Settings,

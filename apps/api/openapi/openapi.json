@@ -12839,7 +12839,7 @@
         ],
         "type": "object"
       },
-      "EnvelopePageSponsorWallItemDTO": {
+      "EnvelopePageSponsorWallEntryDTO": {
         "additionalProperties": false,
         "properties": {
           "code": {
@@ -12847,7 +12847,7 @@
             "type": "integer"
           },
           "data": {
-            "$ref": "#/components/schemas/PageSponsorWallItemDTO"
+            "$ref": "#/components/schemas/PageSponsorWallEntryDTO"
           },
           "message": {
             "type": "string"
@@ -13371,6 +13371,39 @@
         ],
         "type": "object"
       },
+      "EnvelopeSponsorOrderViewDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SponsorOrderViewDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeSponsorPaymentDTO": {
         "additionalProperties": false,
         "properties": {
@@ -13380,6 +13413,39 @@
           },
           "data": {
             "$ref": "#/components/schemas/SponsorPaymentDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeSponsorStateDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SponsorStateDTO"
           },
           "message": {
             "type": "string"
@@ -17524,12 +17590,12 @@
         ],
         "type": "object"
       },
-      "PageSponsorWallItemDTO": {
+      "PageSponsorWallEntryDTO": {
         "additionalProperties": false,
         "properties": {
           "items": {
             "items": {
-              "$ref": "#/components/schemas/SponsorWallItemDTO"
+              "$ref": "#/components/schemas/SponsorWallEntryDTO"
             },
             "type": [
               "array",
@@ -19139,6 +19205,14 @@
             "format": "date-time",
             "type": "string"
           },
+          "expiresAt": {
+            "description": "Until when the order can be paid",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "id": {
             "format": "int64",
             "type": "integer"
@@ -19205,7 +19279,40 @@
           "isPrivate",
           "paymentMethod",
           "paidAt",
+          "expiresAt",
           "created"
+        ],
+        "type": "object"
+      },
+      "SponsorOrderViewDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "badge_until": {
+            "description": "Until when the sponsor badge is shown once the order is paid, or is shown now when it is paid already; null without an account",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "order": {
+            "$ref": "#/components/schemas/SponsorOrderDTO"
+          },
+          "payment_methods": {
+            "description": "What an order that waits for payment can be paid with; empty otherwise and for anyone but its owner",
+            "items": {
+              "$ref": "#/components/schemas/SponsorPaymentMethodDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "order",
+          "badge_until",
+          "payment_methods"
         ],
         "type": "object"
       },
@@ -19265,6 +19372,25 @@
         ],
         "type": "object"
       },
+      "SponsorStateDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "badge_days_per_dollar": {
+            "description": "Days the sponsor badge is shown for each dollar",
+            "format": "int64",
+            "type": "integer"
+          },
+          "enabled": {
+            "description": "Whether new sponsor orders are accepted",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled",
+          "badge_days_per_dollar"
+        ],
+        "type": "object"
+      },
       "SponsorStatsDTO": {
         "additionalProperties": false,
         "properties": {
@@ -19283,13 +19409,9 @@
         ],
         "type": "object"
       },
-      "SponsorWallItemDTO": {
+      "SponsorWallEntryDTO": {
         "additionalProperties": false,
         "properties": {
-          "amount": {
-            "format": "double",
-            "type": "number"
-          },
           "id": {
             "format": "int64",
             "type": "integer"
@@ -19300,20 +19422,23 @@
               "null"
             ]
           },
-          "paidAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "sponsorName": {
+          "name": {
+            "description": "The name a sponsor without an account gave",
             "type": [
               "string",
               "null"
             ]
           },
+          "sponsored_at": {
+            "description": "When the sponsor last paid",
+            "format": "date-time",
+            "type": "string"
+          },
           "user": {
+            "description": "The sponsor's account with what its profile shows; null when the payment was made without one",
             "oneOf": [
               {
-                "$ref": "#/components/schemas/UserSummaryDTO"
+                "$ref": "#/components/schemas/SponsorWallUserDTO"
               },
               {
                 "type": "null"
@@ -19323,11 +19448,53 @@
         },
         "required": [
           "id",
-          "sponsorName",
-          "message",
           "user",
-          "amount",
-          "paidAt"
+          "name",
+          "message",
+          "sponsored_at"
+        ],
+        "type": "object"
+      },
+      "SponsorWallUserDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "avatar": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "bio": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "cover": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "is_sponsor": {
+            "description": "Whether the sponsor badge is still shown",
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "avatar",
+          "cover",
+          "bio",
+          "is_sponsor"
         ],
         "type": "object"
       },
@@ -34677,7 +34844,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopeSponsorOrderDTO"
+                  "$ref": "#/components/schemas/EnvelopeSponsorOrderViewDTO"
                 }
               }
             },
@@ -34767,6 +34934,44 @@
         ]
       }
     },
+    "/sponsor/state": {
+      "get": {
+        "operationId": "sponsor.state",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeSponsorStateDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Whether sponsor orders are accepted and what a dollar gives",
+        "tags": [
+          "sponsor"
+        ]
+      }
+    },
     "/sponsor/stats": {
       "get": {
         "operationId": "sponsor.stats",
@@ -34842,7 +35047,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopePageSponsorWallItemDTO"
+                  "$ref": "#/components/schemas/EnvelopePageSponsorWallEntryDTO"
                 }
               }
             },
@@ -34866,7 +35071,7 @@
             "description": "Error"
           }
         },
-        "summary": "List public sponsors",
+        "summary": "List the sponsors who chose to be shown, each once, the latest first",
         "tags": [
           "sponsor"
         ]

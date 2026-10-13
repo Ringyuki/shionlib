@@ -3,6 +3,7 @@ package sponsorpg
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -148,43 +149,101 @@ func (r *Repository) List(ctx context.Context, filter sponsor.ListFilter, page s
 	return orders, total, nil
 }
 
+const wallKey = `COALESCE('u' || user_id::text, 'o' || id::text)`
+
+const wallShown = `SELECT DISTINCT ON (` + wallKey + `) id, user_id, sponsor_name, sponsor_message, paid_at
+	FROM sponsor_orders
+	WHERE status = 'DONE' AND is_private = false AND paid_at IS NOT NULL
+	ORDER BY ` + wallKey + `, paid_at DESC, id DESC`
+
+type wallRow struct {
+	id      int
+	userID  *int
+	name    *string
+	message *string
+	paidAt  time.Time
+}
+
 func (r *Repository) Wall(ctx context.Context, page sponsor.Page) ([]sponsor.WallEntry, int, error) {
-	query := r.db(ctx).SponsorOrder.Query().Where(
-		sponsororder.StatusEQ(sponsororder.StatusDONE),
-		sponsororder.IsPrivate(false),
-	)
-	total, err := query.Clone().Count(ctx)
+	var total int
+	counted, err := r.db(ctx).QueryContext(ctx, `SELECT COUNT(*) FROM (`+wallShown+`) AS shown`)
 	if err != nil {
 		return nil, 0, fmt.Errorf("count sponsor wall: %w", err)
 	}
-	rows, err := query.
-		WithUser(userpg.SelectSummary).
-		Order(ent.Desc(sponsororder.FieldPaidAt), ent.Desc(sponsororder.FieldID)).
-		Offset(page.Offset()).
-		Limit(page.Size).
-		All(ctx)
+	if counted.Next() {
+		if err := counted.Scan(&total); err != nil {
+			_ = counted.Close()
+			return nil, 0, fmt.Errorf("scan sponsor wall count: %w", err)
+		}
+	}
+	if err := counted.Close(); err != nil {
+		return nil, 0, fmt.Errorf("read sponsor wall count: %w", err)
+	}
+	rows, err := r.wallRows(ctx, page)
 	if err != nil {
-		return nil, 0, fmt.Errorf("list sponsor wall: %w", err)
+		return nil, 0, err
+	}
+	sponsors, err := r.wallSponsors(ctx, rows)
+	if err != nil {
+		return nil, 0, err
 	}
 	entries := make([]sponsor.WallEntry, len(rows))
 	for i, row := range rows {
-		cents, err := parseCents(row.Amount)
-		if err != nil {
-			return nil, 0, err
-		}
-		entry := sponsor.WallEntry{
-			ID:          row.ID,
-			SponsorName: row.SponsorName,
-			Message:     row.SponsorMessage,
-			User:        userpg.ToSummaryPtr(row.Edges.User),
-			AmountCents: cents,
-		}
-		if row.PaidAt != nil {
-			entry.PaidAt = *row.PaidAt
+		entry := sponsor.WallEntry{OrderID: row.id, Message: row.message, PaidAt: row.paidAt}
+		if row.userID == nil {
+			entry.Name = row.name
+		} else if found, ok := sponsors[*row.userID]; ok {
+			entry.Sponsor = &found
 		}
 		entries[i] = entry
 	}
 	return entries, total, nil
+}
+
+func (r *Repository) wallRows(ctx context.Context, page sponsor.Page) ([]wallRow, error) {
+	listed, err := r.db(ctx).QueryContext(ctx,
+		`SELECT id, user_id, sponsor_name, sponsor_message, paid_at FROM (`+wallShown+`) AS shown ORDER BY paid_at DESC, id DESC OFFSET $1 LIMIT $2`,
+		page.Offset(), page.Size)
+	if err != nil {
+		return nil, fmt.Errorf("list sponsor wall: %w", err)
+	}
+	defer func() {
+		_ = listed.Close()
+	}()
+	var rows []wallRow
+	for listed.Next() {
+		var row wallRow
+		if err := listed.Scan(&row.id, &row.userID, &row.name, &row.message, &row.paidAt); err != nil {
+			return nil, fmt.Errorf("scan sponsor wall: %w", err)
+		}
+		rows = append(rows, row)
+	}
+	if err := listed.Err(); err != nil {
+		return nil, fmt.Errorf("read sponsor wall: %w", err)
+	}
+	return rows, nil
+}
+
+func (r *Repository) wallSponsors(ctx context.Context, rows []wallRow) (map[int]sponsor.WallSponsor, error) {
+	var ids []int
+	for _, row := range rows {
+		if row.userID != nil {
+			ids = append(ids, *row.userID)
+		}
+	}
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	fields := append(slices.Clone(userpg.SummaryFields), entuser.FieldCover, entuser.FieldBio)
+	users, err := r.db(ctx).User.Query().Where(entuser.IDIn(ids...)).Select(fields...).All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("load sponsor wall users: %w", err)
+	}
+	sponsors := make(map[int]sponsor.WallSponsor, len(users))
+	for _, row := range users {
+		sponsors[row.ID] = sponsor.WallSponsor{Summary: userpg.ToSummary(row), Cover: row.Cover, Bio: row.Bio}
+	}
+	return sponsors, nil
 }
 
 func (r *Repository) Stats(ctx context.Context) (sponsor.Stats, error) {

@@ -31,7 +31,8 @@ func (h *Handler) Register(api *httpapi.API) {
 	httpapi.Register(api, httpapi.Route{ID: "sponsor.order.create", Method: http.MethodPost, Path: "/sponsor/order", Summary: "Create a sponsor order", Tags: tags}, h.create)
 	httpapi.Register(api, httpapi.Route{ID: "sponsor.order.pay", Method: http.MethodPost, Path: "/sponsor/order/{id}/pay", Summary: "Start paying a sponsor order", Tags: tags}, h.pay)
 	httpapi.Register(api, httpapi.Route{ID: "sponsor.order.get", Method: http.MethodGet, Path: "/sponsor/order/{id}", Summary: "Get a sponsor order and refresh its status for the owner", Tags: tags}, h.order)
-	httpapi.Register(api, httpapi.Route{ID: "sponsor.wall", Method: http.MethodGet, Path: "/sponsor/wall", Summary: "List public sponsors", Tags: tags}, h.wall)
+	httpapi.Register(api, httpapi.Route{ID: "sponsor.wall", Method: http.MethodGet, Path: "/sponsor/wall", Summary: "List the sponsors who chose to be shown, each once, the latest first", Tags: tags}, h.wall)
+	httpapi.Register(api, httpapi.Route{ID: "sponsor.state", Method: http.MethodGet, Path: "/sponsor/state", Summary: "Whether sponsor orders are accepted and what a dollar gives", Tags: tags}, h.state)
 	httpapi.Register(api, httpapi.Route{ID: "sponsor.stats", Method: http.MethodGet, Path: "/sponsor/stats", Summary: "Sponsorship totals", Tags: tags}, h.stats)
 	httpapi.Register(api, httpapi.Route{ID: "sponsor.webhook.idatariver", Method: http.MethodPost, Path: "/sponsor/webhook/idatariver", Summary: "iDataRiver payment callback", Tags: tags, Status: http.StatusOK}, h.webhook)
 	httpapi.Register(api, httpapi.Route{ID: "sponsor.admin.orders", Method: http.MethodGet, Path: "/admin/sponsor/orders", Summary: "List sponsor orders", Tags: adminTags, Access: httpapi.AccessAdmin}, h.adminList)
@@ -68,23 +69,28 @@ func (h *Handler) pay(ctx context.Context, in *paySponsorOrderInput) (*response.
 	return response.OK(ctx, h.resp, sponsorPaymentDTO{PayURL: payment.PayURL, PayCurrency: payment.PayCurrency, Amount: payment.Amount}), nil
 }
 
-func (h *Handler) order(ctx context.Context, in *getSponsorOrderInput) (*response.Output[sponsorOrderDTO], error) {
+func (h *Handler) order(ctx context.Context, in *getSponsorOrderInput) (*response.Output[sponsorOrderViewDTO], error) {
 	view, err := h.service.Order(ctx, actor.From(ctx), in.ID, in.Token)
 	if err != nil {
 		return nil, err
 	}
-	return response.OK(ctx, h.resp, toOrderDTO(view.Order, h.resp.Now())), nil
+	return response.OK(ctx, h.resp, toOrderViewDTO(view, h.resp.Now())), nil
 }
 
-func (h *Handler) wall(ctx context.Context, in *sponsorWallInput) (*response.Output[response.Page[sponsorWallItemDTO]], error) {
+func (h *Handler) wall(ctx context.Context, in *sponsorWallInput) (*response.Output[response.Page[sponsorWallEntryDTO]], error) {
 	page, err := h.service.Wall(ctx, sponsor.Page{Number: in.Page, Size: in.PageSize})
 	if err != nil {
 		return nil, err
 	}
 	now := h.resp.Now()
-	return response.OK(ctx, h.resp, response.MapPage(page.Entries, page.Total, in.PageSize, in.Page, func(entry sponsor.WallEntry) sponsorWallItemDTO {
-		return toWallItemDTO(entry, now)
+	return response.OK(ctx, h.resp, response.MapPage(page.Entries, page.Total, in.PageSize, in.Page, func(entry sponsor.WallEntry) sponsorWallEntryDTO {
+		return toWallEntryDTO(entry, now)
 	})), nil
+}
+
+func (h *Handler) state(ctx context.Context, _ *struct{}) (*response.Output[sponsorStateDTO], error) {
+	state := h.service.State()
+	return response.OK(ctx, h.resp, sponsorStateDTO{Enabled: state.Enabled, BadgeDaysPerDollar: state.BadgeDaysPerDollar}), nil
 }
 
 func (h *Handler) stats(ctx context.Context, _ *struct{}) (*response.Output[sponsorStatsDTO], error) {

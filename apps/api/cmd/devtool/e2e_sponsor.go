@@ -13,6 +13,9 @@ const (
 	e2eSponsorProvider = "idatariver"
 	e2eSponsorMessage  = "Seeded sponsor message."
 	e2eSponsorGuest    = "Seeded Guest"
+	e2eSponsorPasserby = "Seeded Passerby"
+	e2eSponsorEarlier  = "Earlier seeded message."
+	e2eSponsorGuestSay = "Seeded guest message."
 	e2eSponsorOpenFor  = 30 * 24 * time.Hour
 )
 
@@ -31,6 +34,8 @@ type e2eSponsorOrder struct {
 func (s *e2eSeeder) seedSponsorOrders(ctx context.Context, tx *ent.Client, memberID int) error {
 	now := s.now().UTC()
 	orders := []e2eSponsorOrder{
+		{number: "e2e-order-member-earlier", amount: "2.00", status: sponsororder.StatusDONE, method: "alipay", userID: memberID, message: e2eSponsorEarlier, paid: 80 * 24 * time.Hour},
+		{number: "e2e-order-passerby", amount: "4.00", status: sponsororder.StatusDONE, method: "wxpay", name: e2eSponsorPasserby, message: e2eSponsorGuestSay, paid: 45 * 24 * time.Hour},
 		{number: "e2e-order-refunded", amount: "8.00", status: sponsororder.StatusREFUND, method: "alipay", paid: 10 * 24 * time.Hour},
 		{number: "e2e-order-expired", amount: "3.00", status: sponsororder.StatusEXPIRED},
 		{number: "e2e-order-unpaid", amount: "10.00", status: sponsororder.StatusNEW, name: e2eSponsorGuest},

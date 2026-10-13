@@ -61,8 +61,6 @@ const (
 	MaxMessageLength      = 500
 	MaxPaymentMethod      = 50
 	FallbackOrderLifetime = time.Hour
-	WallCacheTTL          = 5 * time.Minute
-	WallCachePrefix       = "sponsor:wall:"
 	amountToleranceCents  = 1
 )
 
@@ -86,6 +84,29 @@ type Order struct {
 
 func (o Order) OwnedBy(who actor.Actor) bool {
 	return who.Authenticated() && o.UserID != nil && *o.UserID == who.UserID
+}
+
+func (o Order) BadgeUntil(now time.Time) *time.Time {
+	if o.User == nil {
+		return nil
+	}
+	current := o.User.SponsorExpiresAt
+	if current != nil && !current.After(now) {
+		current = nil
+	}
+	if o.Status == StatusDone {
+		return current
+	}
+	extension := sponsorshipFor(o.AmountCents)
+	if o.Status != StatusNew || extension <= 0 {
+		return nil
+	}
+	base := now
+	if current != nil {
+		base = *current
+	}
+	until := base.Add(extension)
+	return &until
 }
 
 func (o Order) redacted() Order {
@@ -166,17 +187,28 @@ type CreatedOrder struct {
 }
 
 type OrderView struct {
-	Order Order
-	Full  bool
+	Order          Order
+	Full           bool
+	PaymentMethods []PaymentMethod
+}
+
+type WallSponsor struct {
+	user.Summary
+	Cover *string
+	Bio   *string
 }
 
 type WallEntry struct {
-	ID          int
-	SponsorName *string
-	Message     *string
-	User        *user.Summary
-	AmountCents int64
-	PaidAt      time.Time
+	OrderID int
+	Sponsor *WallSponsor
+	Name    *string
+	Message *string
+	PaidAt  time.Time
+}
+
+type State struct {
+	Enabled            bool
+	BadgeDaysPerDollar int
 }
 
 type WallPage struct {

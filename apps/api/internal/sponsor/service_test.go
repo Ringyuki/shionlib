@@ -3,7 +3,6 @@ package sponsor_test
 import (
 	"context"
 	"errors"
-	"slices"
 	"strconv"
 	"testing"
 	"time"
@@ -26,7 +25,6 @@ var (
 type fixture struct {
 	repo     *sponsortest.MemoryRepository
 	provider *sponsortest.Provider
-	cache    *sponsortest.Cache
 	service  *sponsor.Service
 }
 
@@ -34,11 +32,10 @@ func newFixture(enabled bool) fixture {
 	repo := sponsortest.NewMemoryRepository(func() time.Time { return now })
 	repo.AddUser(user.Summary{ID: member.UserID, Name: "member"})
 	provider := sponsortest.NewProvider()
-	cache := sponsortest.NewCache()
 	options := sponsor.Options{Provider: "idatariver", CallbackURL: "https://shionlib.test/api/sponsor/webhook/idatariver", ClockOffset: 8 * time.Hour}
 	settings := settingtest.Set(settingtest.Source{}, sponsor.Enabled, enabled)
-	service := sponsor.NewService(repo, provider, cache, &txtest.Immediate{}, sponsortest.Signer{}, settings, options, func() time.Time { return now })
-	return fixture{repo: repo, provider: provider, cache: cache, service: service}
+	service := sponsor.NewService(repo, provider, &txtest.Immediate{}, sponsortest.Signer{}, settings, options, func() time.Time { return now })
+	return fixture{repo: repo, provider: provider, service: service}
 }
 
 func (f fixture) seed(order sponsor.Order) sponsor.Order {
@@ -225,8 +222,6 @@ func TestHandleCallback(t *testing.T) {
 	expires := now.Add(10 * 24 * time.Hour)
 	f.repo.AddUser(user.Summary{ID: member.UserID, Name: "member", SponsorExpiresAt: &expires})
 	order := f.seed(sponsor.Order{ProviderOrderID: "idr-cb", AmountCents: 500, UserID: ptr(member.UserID)})
-	_ = f.cache.Set(ctx, sponsor.WallCachePrefix+"p1:ps10", sponsor.WallPage{}, time.Minute)
-	_ = f.cache.Set(ctx, "ad:placement:home", []int{}, time.Minute)
 
 	if err := f.service.HandleCallback(ctx, "unknown"); !errors.Is(err, sponsor.ErrOrderNotFound) {
 		t.Fatalf("unknown orders are rejected: %v", err)
@@ -253,9 +248,6 @@ func TestHandleCallback(t *testing.T) {
 	summary, _ := f.repo.User(member.UserID)
 	if !summary.SponsorExpiresAt.Equal(expires.Add(30 * 24 * time.Hour)) {
 		t.Fatalf("$5 stacks 30 days on the unexpired badge: %v", summary.SponsorExpiresAt)
-	}
-	if keys := f.cache.Keys(); len(keys) != 1 || keys[0] != "ad:placement:home" {
-		t.Fatalf("only the wall cache is invalidated: %v", keys)
 	}
 	calls := f.provider.InfoCalls
 	if err := f.service.HandleCallback(ctx, "idr-cb"); err != nil || f.provider.InfoCalls != calls {
@@ -343,22 +335,49 @@ func TestOverviewCountsTheMonthOnTheSiteClock(t *testing.T) {
 	}
 }
 
-func TestWallIsCachedPerPage(t *testing.T) {
+func TestTheWallFollowsThePaymentsAtOnce(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture(true)
 	paid := now.Add(-time.Hour)
 	f.seed(sponsor.Order{ProviderOrderID: "idr-wall", AmountCents: 1000, Status: sponsor.StatusDone, PaidAt: &paid, SponsorName: ptr("Alice")})
 	first, err := f.service.Wall(ctx, sponsor.Page{Number: 1, Size: 10})
-	if err != nil || first.Total != 1 || len(first.Entries) != 1 {
+	if err != nil || first.Total != 1 || len(first.Entries) != 1 || first.Entries[0].Name == nil || *first.Entries[0].Name != "Alice" {
 		t.Fatalf("wall: %+v %v", first, err)
 	}
-	if keys := f.cache.Keys(); !slices.Contains(keys, "sponsor:wall:p1:ps10") {
-		t.Fatalf("wall cache key: %v", keys)
+	f.seed(sponsor.Order{ProviderOrderID: "idr-wall-2", AmountCents: 1000, Status: sponsor.StatusDone, PaidAt: &now, UserID: ptr(member.UserID)})
+	second, err := f.service.Wall(ctx, sponsor.Page{Number: 1, Size: 10})
+	if err != nil || second.Total != 2 || second.Entries[0].Sponsor == nil || second.Entries[0].Sponsor.ID != member.UserID {
+		t.Fatalf("a new payment shows on the next read: %+v %v", second, err)
 	}
-	f.seed(sponsor.Order{ProviderOrderID: "idr-wall-2", AmountCents: 1000, Status: sponsor.StatusDone, PaidAt: &paid})
-	cached, _ := f.service.Wall(ctx, sponsor.Page{Number: 1, Size: 10})
-	if cached.Total != 1 {
-		t.Fatalf("second read must come from the cache: %+v", cached)
+}
+
+func TestStateTellsWhetherOrdersAreAcceptedAndWhatADollarGives(t *testing.T) {
+	if state := newFixture(true).service.State(); !state.Enabled || state.BadgeDaysPerDollar != sponsor.DaysPerDollar {
+		t.Fatalf("open: %+v", state)
+	}
+	if state := newFixture(false).service.State(); state.Enabled {
+		t.Fatalf("closed: %+v", state)
+	}
+}
+
+func TestAnOrderThatWaitsNamesWhatItCanBePaidWith(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture(true)
+	f.provider.Methods = []sponsor.PaymentMethod{{Method: "alipay", Name: "Alipay", Enabled: true}}
+	created, err := f.service.CreateOrder(ctx, member, sponsor.CreateOrderInput{AmountCents: 500})
+	if err != nil {
+		t.Fatal(err)
+	}
+	view, err := f.service.Order(ctx, member, created.OrderID, "")
+	if err != nil || len(view.PaymentMethods) != 1 || view.PaymentMethods[0].Method != "alipay" {
+		t.Fatalf("the owner sees the methods of a waiting order: %+v %v", view, err)
+	}
+	if stranger, err := f.service.Order(ctx, stranger, created.OrderID, ""); err != nil || stranger.PaymentMethods != nil {
+		t.Fatalf("nobody else does: %+v %v", stranger, err)
+	}
+	f.provider.SetStatus(created.ProviderOrderID, sponsor.StatusDone)
+	if paid, err := f.service.Order(ctx, member, created.OrderID, ""); err != nil || paid.Order.Status != sponsor.StatusDone || paid.PaymentMethods != nil {
+		t.Fatalf("a paid order has nothing left to choose: %+v %v", paid, err)
 	}
 }
 

@@ -22,6 +22,9 @@ func TestMemoryRepositoryContract(t *testing.T) {
 				repo.AddUser(user.Summary{ID: users, Name: "member"})
 				return users
 			},
+			Describe: func(_ *testing.T, id int, cover, bio string) {
+				repo.Describe(id, cover, bio)
+			},
 			SponsorUntil: func(_ *testing.T, id int) *time.Time {
 				summary, _ := repo.User(id)
 				return summary.SponsorExpiresAt
