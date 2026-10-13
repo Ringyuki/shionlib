@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/composition"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourceevent"
@@ -42,6 +43,7 @@ type GameDownloadResourceQuery struct {
 	withInspections       *InspectionQuery
 	withEvents            *GameDownloadResourceEventQuery
 	withTranslatorCredits *GameDownloadResourceTranslatorQuery
+	withCompositions      *CompositionQuery
 	modifiers             []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -277,6 +279,28 @@ func (_q *GameDownloadResourceQuery) QueryTranslatorCredits() *GameDownloadResou
 	return query
 }
 
+// QueryCompositions chains the current query on the "compositions" edge.
+func (_q *GameDownloadResourceQuery) QueryCompositions() *CompositionQuery {
+	query := (&CompositionClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(gamedownloadresource.Table, gamedownloadresource.FieldID, selector),
+			sqlgraph.To(composition.Table, composition.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, gamedownloadresource.CompositionsTable, gamedownloadresource.CompositionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first GameDownloadResource entity from the query.
 // Returns a *NotFoundError when no GameDownloadResource was found.
 func (_q *GameDownloadResourceQuery) First(ctx context.Context) (*GameDownloadResource, error) {
@@ -478,6 +502,7 @@ func (_q *GameDownloadResourceQuery) Clone() *GameDownloadResourceQuery {
 		withInspections:       _q.withInspections.Clone(),
 		withEvents:            _q.withEvents.Clone(),
 		withTranslatorCredits: _q.withTranslatorCredits.Clone(),
+		withCompositions:      _q.withCompositions.Clone(),
 		// clone intermediate query.
 		sql:       _q.sql.Clone(),
 		path:      _q.path,
@@ -584,6 +609,17 @@ func (_q *GameDownloadResourceQuery) WithTranslatorCredits(opts ...func(*GameDow
 	return _q
 }
 
+// WithCompositions tells the query-builder to eager-load the nodes that are connected to
+// the "compositions" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *GameDownloadResourceQuery) WithCompositions(opts ...func(*CompositionQuery)) *GameDownloadResourceQuery {
+	query := (&CompositionClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withCompositions = query
+	return _q
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -662,7 +698,7 @@ func (_q *GameDownloadResourceQuery) sqlAll(ctx context.Context, hooks ...queryH
 	var (
 		nodes       = []*GameDownloadResource{}
 		_spec       = _q.querySpec()
-		loadedTypes = [9]bool{
+		loadedTypes = [10]bool{
 			_q.withGame != nil,
 			_q.withFiles != nil,
 			_q.withReports != nil,
@@ -672,6 +708,7 @@ func (_q *GameDownloadResourceQuery) sqlAll(ctx context.Context, hooks ...queryH
 			_q.withInspections != nil,
 			_q.withEvents != nil,
 			_q.withTranslatorCredits != nil,
+			_q.withCompositions != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -761,6 +798,13 @@ func (_q *GameDownloadResourceQuery) sqlAll(ctx context.Context, hooks ...queryH
 			func(n *GameDownloadResource, e *GameDownloadResourceTranslator) {
 				n.Edges.TranslatorCredits = append(n.Edges.TranslatorCredits, e)
 			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withCompositions; query != nil {
+		if err := _q.loadCompositions(ctx, query, nodes,
+			func(n *GameDownloadResource) { n.Edges.Compositions = []*Composition{} },
+			func(n *GameDownloadResource, e *Composition) { n.Edges.Compositions = append(n.Edges.Compositions, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -1036,6 +1080,39 @@ func (_q *GameDownloadResourceQuery) loadTranslatorCredits(ctx context.Context, 
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "resource_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *GameDownloadResourceQuery) loadCompositions(ctx context.Context, query *CompositionQuery, nodes []*GameDownloadResource, init func(*GameDownloadResource), assign func(*GameDownloadResource, *Composition)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*GameDownloadResource)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(composition.FieldResourceID)
+	}
+	query.Where(predicate.Composition(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(gamedownloadresource.CompositionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ResourceID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "resource_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "resource_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

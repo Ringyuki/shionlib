@@ -754,6 +754,70 @@ var (
 			},
 		},
 	}
+	// ResourceCompositionsColumns holds the columns for the "resource_compositions" table.
+	ResourceCompositionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
+		{Name: "game_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "creator_id", Type: field.TypeInt, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "target_file_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "base", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "patch", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "save", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "patch_entries", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "save_entries", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "details", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "game_dir", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "patch_dir", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "keep_patch", Type: field.TypeBool, Default: true},
+		{Name: "note", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "patch_match", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "plan", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "state", Type: field.TypeString, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "step", Type: field.TypeString, Nullable: true, Size: 16, SchemaType: map[string]string{"postgres": "character varying(16)"}},
+		{Name: "percent", Type: field.TypeInt, Default: 0, SchemaType: map[string]string{"postgres": "integer"}},
+		{Name: "runs", Type: field.TypeJSON, Nullable: true, SchemaType: map[string]string{"postgres": "jsonb"}},
+		{Name: "failure", Type: field.TypeString, Nullable: true, Size: 32, SchemaType: map[string]string{"postgres": "character varying(32)"}},
+		{Name: "failure_detail", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "output_name", Type: field.TypeString, Size: 2147483647, Default: ""},
+		{Name: "output_size", Type: field.TypeInt64, Nullable: true},
+		{Name: "queued_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "started_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "finished_at", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "created", Type: field.TypeTime, Default: schema.Expr("CURRENT_TIMESTAMP"), SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "updated", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamp(3) without time zone"}},
+		{Name: "resource_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"postgres": "serial"}},
+	}
+	// ResourceCompositionsTable holds the schema information for the "resource_compositions" table.
+	ResourceCompositionsTable = &schema.Table{
+		Name:       "resource_compositions",
+		Columns:    ResourceCompositionsColumns,
+		PrimaryKey: []*schema.Column{ResourceCompositionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "resource_compositions_resource_id_fkey",
+				Columns:    []*schema.Column{ResourceCompositionsColumns[29]},
+				RefColumns: []*schema.Column{GameDownloadResourcesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "resource_compositions_resource_id_idx",
+				Unique:  false,
+				Columns: []*schema.Column{ResourceCompositionsColumns[29]},
+			},
+			{
+				Name:    "resource_compositions_creator_id_state_idx",
+				Unique:  false,
+				Columns: []*schema.Column{ResourceCompositionsColumns[2], ResourceCompositionsColumns[16]},
+			},
+			{
+				Name:    "resource_compositions_state_queued_at_idx",
+				Unique:  false,
+				Columns: []*schema.Column{ResourceCompositionsColumns[16], ResourceCompositionsColumns[24]},
+			},
+		},
+	}
 	// EditRecordsColumns holds the columns for the "edit_records" table.
 	EditRecordsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"postgres": "serial"}},
@@ -2799,6 +2863,7 @@ var (
 		CatalogSyncCursorsTable,
 		CommentsTable,
 		CommentLikesTable,
+		ResourceCompositionsTable,
 		EditRecordsTable,
 		FavoritesTable,
 		FavoriteItemsTable,
@@ -2921,6 +2986,10 @@ func init() {
 	CommentLikesTable.ForeignKeys[1].RefTable = UsersTable
 	CommentLikesTable.Annotation = &entsql.Annotation{
 		Table: "comment_likes",
+	}
+	ResourceCompositionsTable.ForeignKeys[0].RefTable = GameDownloadResourcesTable
+	ResourceCompositionsTable.Annotation = &entsql.Annotation{
+		Table: "resource_compositions",
 	}
 	EditRecordsTable.ForeignKeys[0].RefTable = EditRecordsTable
 	EditRecordsTable.ForeignKeys[1].RefTable = UsersTable

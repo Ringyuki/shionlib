@@ -43,6 +43,7 @@ type Spool interface {
 	DigestRange(ctx context.Context, path string, offset, length int64) (string, error)
 	Digest(ctx context.Context, path string) (string, error)
 	Remove(ctx context.Context, path string) error
+	Move(ctx context.Context, source, target string) error
 	Stale(ctx context.Context, before time.Time) ([]string, error)
 	Available(ctx context.Context) (int64, error)
 }

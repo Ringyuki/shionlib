@@ -40,6 +40,8 @@ type Repository interface {
 	FindFileBySession(ctx context.Context, sessionID int) (File, bool, error)
 	ReplaceFileContent(ctx context.Context, id int, content FileContent) error
 	MarkFileStored(ctx context.Context, id int, key string) error
+	AdoptFile(ctx context.Context, id int, adoption Adoption) error
+	ReplaceStoredContent(ctx context.Context, id int, content StoredContent) error
 	RenameFile(ctx context.Context, id int, name string) error
 	ClearFilePath(ctx context.Context, id int) error
 	DeleteFile(ctx context.Context, id int) error

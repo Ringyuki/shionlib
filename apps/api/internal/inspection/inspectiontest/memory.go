@@ -191,6 +191,34 @@ func (r *MemoryRepository) MediumNames(_ context.Context, inspectionID int) ([]s
 	return names, nil
 }
 
+func (r *MemoryRepository) FilePaths(_ context.Context, inspectionID int) ([]inspection.FilePath, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	byID := map[int]storedEntry{}
+	for _, entry := range r.entries {
+		byID[entry.ID] = entry
+	}
+	kept := r.selectEntries(
+		func(entry storedEntry) bool {
+			return entry.InspectionID == inspectionID && entry.Kind != inspection.KindFolder && entry.Kind != inspection.KindTrack
+		},
+		func(a, b storedEntry) int { return 0 },
+	)
+	files := []inspection.FilePath{}
+	for _, entry := range kept {
+		name, plain := entry.Name, true
+		for parent := entry.ParentID; parent != nil; parent = byID[*parent].ParentID {
+			above := byID[*parent]
+			plain = plain && above.Kind == inspection.KindFolder
+			name = above.Name + "/" + name
+		}
+		if plain {
+			files = append(files, inspection.FilePath{Path: name, Size: entry.Size})
+		}
+	}
+	return files, nil
+}
+
 func sameParent(a, b *int) bool {
 	if a == nil || b == nil {
 		return a == b

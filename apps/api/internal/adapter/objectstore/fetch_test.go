@@ -12,11 +12,15 @@ import (
 	"time"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/objectstore"
+	"github.com/Ringyuki/shionlib/apps/api/internal/composition"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/httpclient"
 	"github.com/Ringyuki/shionlib/apps/api/internal/scan"
 )
 
-var _ scan.Objects = (*objectstore.Store)(nil)
+var (
+	_ scan.Objects        = (*objectstore.Store)(nil)
+	_ composition.Objects = (*objectstore.Store)(nil)
+)
 
 func fetchingStore(t *testing.T, handler http.HandlerFunc) *objectstore.Store {
 	t.Helper()
@@ -39,6 +43,27 @@ func TestFetchWritesTheObjectToTheGivenPath(t *testing.T) {
 	got, err := os.ReadFile(target)
 	if err != nil || !bytes.Equal(got, content) || asked != "GET /files/games/7/12/game.7z" {
 		t.Fatalf("fetched %d bytes with %q: %v", len(got), asked, err)
+	}
+}
+
+func TestDownloadTellsHowMuchHasArrived(t *testing.T) {
+	content := bytes.Repeat([]byte("archive"), 50_000)
+	store := fetchingStore(t, func(w http.ResponseWriter, _ *http.Request) { _, _ = w.Write(content) })
+	target := filepath.Join(t.TempDir(), "base", "game.7z")
+	var seen []int64
+	if err := store.Download(context.Background(), "games/7/12/game.7z", target, func(done int64) { seen = append(seen, done) }); err != nil {
+		t.Fatal(err)
+	}
+	if len(seen) == 0 || seen[len(seen)-1] != int64(len(content)) {
+		t.Fatalf("the last report is the whole object: %v", seen)
+	}
+	for i := 1; i < len(seen); i++ {
+		if seen[i] <= seen[i-1] {
+			t.Fatalf("reports only grow: %v", seen)
+		}
+	}
+	if got, err := os.ReadFile(target); err != nil || !bytes.Equal(got, content) {
+		t.Fatalf("downloaded %d bytes: %v", len(got), err)
 	}
 }
 

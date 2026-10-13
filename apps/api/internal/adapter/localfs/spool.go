@@ -123,6 +123,19 @@ func (s *Spool) Remove(_ context.Context, path string) error {
 	return nil
 }
 
+func (s *Spool) Move(_ context.Context, source, target string) error {
+	if !s.Owns(source) || !s.Owns(target) {
+		return fmt.Errorf("move upload file: %s or %s is outside the spool", source, target)
+	}
+	if err := os.MkdirAll(filepath.Dir(target), dirMode); err != nil {
+		return fmt.Errorf("move upload file: %w", err)
+	}
+	if err := os.Rename(source, target); err != nil {
+		return fmt.Errorf("move upload file: %w", err)
+	}
+	return nil
+}
+
 func (s *Spool) Exists(_ context.Context, path string) (bool, error) {
 	info, err := os.Stat(path)
 	if errors.Is(err, fs.ErrNotExist) {

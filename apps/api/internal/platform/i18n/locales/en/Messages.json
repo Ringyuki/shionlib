@@ -41,6 +41,14 @@
       "Reupload": {
         "FileReuploadedTitle": "A file of a game you favorited was updated",
         "FileReuploadedContent": "The file {file_name} of {game_title}, a game you favorited, was updated.{reason, select, none {} other { Note: {reason}}}"
+      },
+      "Compose": {
+        "DoneTitle": "Composition finished",
+        "DoneContent": "Your composition is finished and the resource is published: {file_name}",
+        "RebuiltTitle": "Recomposition finished",
+        "RebuiltContent": "The resource was composed again with the new patch: {file_name}",
+        "FailedTitle": "Composition failed",
+        "FailedContent": "The composition of {file_name} could not be completed: {reason}"
       }
     },
     "Moderation": {
@@ -97,7 +105,21 @@
       "ENCRYPTED": "the archive is encrypted and cannot be checked",
       "INCOMPLETE_SET": "the set of volumes is incomplete",
       "ABANDONED": "the check of the file could not be completed",
-      "HARMFUL": "harmful content was detected"
+      "HARMFUL": "harmful content was detected",
+      "COMPOSE_BASE_GONE": "the original resource no longer exists or can no longer be used",
+      "COMPOSE_BASE_UNREADABLE": "the archive of the original cannot be unpacked",
+      "COMPOSE_PATCH_UNREADABLE": "the archive of the patch cannot be used",
+      "COMPOSE_SAVE_UNREADABLE": "the archive of the save cannot be unpacked",
+      "COMPOSE_PLACE_MISSING": "the chosen folder is not among the unpacked files",
+      "COMPOSE_NO_ROOM": "the server is out of working space",
+      "COMPOSE_TOO_LARGE": "the unpacked size is over the limit",
+      "COMPOSE_HARMFUL": "harmful content was detected in the composed file",
+      "COMPOSE_BROKEN": "the composed archive did not pass the check",
+      "COMPOSE_NOTHING_TO_APPLY": "nothing in the patch folder goes into the game folder",
+      "COMPOSE_PATH_CONFLICT": "a file in the patch conflicts with a file or folder of the same name in the original",
+      "COMPOSE_QUEUE_FULL": "too many compositions are waiting",
+      "COMPOSE_QUOTA": "not enough storage space",
+      "COMPOSE_INTERNAL": "an error occurred during processing"
     }
   }
 }

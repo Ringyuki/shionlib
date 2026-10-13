@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os/exec"
 	"sync"
 	"time"
@@ -84,13 +85,21 @@ func (t *Tool) run(ctx context.Context, timeout time.Duration, args ...string) (
 }
 
 func execute(ctx context.Context, timeout time.Duration, binary string, args []string) (scan.ToolRun, error) {
+	return executeIn(ctx, timeout, binary, "", nil, args)
+}
+
+func executeIn(ctx context.Context, timeout time.Duration, binary, dir string, watch io.Writer, args []string) (scan.ToolRun, error) {
 	runCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	stdout := &cappedBuffer{limit: outputLimit, overflow: cancel}
 	stderr := &cappedBuffer{limit: outputLimit, overflow: cancel}
 	cmd := exec.CommandContext(runCtx, binary, args...)
 	cmd.Env = append(cmd.Environ(), utcTimes)
+	cmd.Dir = dir
 	cmd.Stdout = stdout
+	if watch != nil {
+		cmd.Stdout = watch
+	}
 	cmd.Stderr = stderr
 	if err := cmd.Start(); err != nil {
 		return scan.ToolRun{}, fmt.Errorf("start %s: %w", binary, err)

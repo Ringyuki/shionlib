@@ -65,6 +65,8 @@ func wireCommunity(_ *Infra, shared *Shared, modules *Modules) {
 		shared.Cache,
 	)
 
+	shared.Patches = moyuService
+
 	pvnRepository := potatovnpg.NewRepository(shared.Ent)
 	imageBucket := s3store.New(s3store.Options{Bucket: cfg.Storage.Image, HTTPClient: httpclient.New(httpclient.Options{Timeout: 30 * time.Second})})
 	pvnService := potatovn.NewService(

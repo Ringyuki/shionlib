@@ -201,6 +201,18 @@ func (f CommentLikeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CommentLikeMutation", m)
 }
 
+// The CompositionFunc type is an adapter to allow the use of ordinary
+// function as Composition mutator.
+type CompositionFunc func(context.Context, *ent.CompositionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CompositionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CompositionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CompositionMutation", m)
+}
+
 // The EditRecordFunc type is an adapter to allow the use of ordinary
 // function as EditRecord mutator.
 type EditRecordFunc func(context.Context, *ent.EditRecordMutation) (ent.Value, error)

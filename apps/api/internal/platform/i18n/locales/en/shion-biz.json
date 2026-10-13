@@ -166,5 +166,18 @@
   "CATALOG_SOURCE_UNAVAILABLE": "the catalog source is unavailable",
   "CATALOG_UNKNOWN_SOURCE": "unknown catalog source {source}",
   "CATALOG_ENTRY_NOT_FOUND": "the catalog source has no such entry",
-  "CATALOG_NO_CHANGE_FEED": "the catalog source {source} reports no changes to pull"
+  "CATALOG_NO_CHANGE_FEED": "the catalog source {source} reports no changes to pull",
+  "COMPOSITION_NOT_FOUND": "composition not found",
+  "COMPOSITION_NOT_OWNER": "this composition belongs to someone else",
+  "COMPOSITION_BASE_UNUSABLE": "this resource cannot be used as the original",
+  "COMPOSITION_NOT_DRAFT": "the composition has started and can no longer be changed",
+  "COMPOSITION_NOT_READY": "the patch and the save must be read before composing",
+  "COMPOSITION_NOTHING_TO_APPLY": "nothing in the patch folder goes into the game folder",
+  "COMPOSITION_PATH_CONFLICT": "{path} in the patch conflicts with a file or folder of the same name in the original",
+  "COMPOSITION_QUEUE_FULL": "too many compositions are waiting, try again later",
+  "COMPOSITION_NOT_FAILED": "only a failed composition can be retried",
+  "COMPOSITION_NOT_COMPOSED": "the patch of this resource cannot be updated",
+  "COMPOSITION_BUSY": "the composition is in progress",
+  "COMPOSITION_BASE_GONE": "the original resource no longer exists",
+  "COMPOSITION_CHECKS_OFF": "file checks are switched off, nothing can be composed for now"
 }

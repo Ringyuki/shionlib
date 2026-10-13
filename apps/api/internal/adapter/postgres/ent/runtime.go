@@ -20,6 +20,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsourcelink"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsynccursor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/composition"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/editrecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favorite"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favoriteitem"
@@ -564,6 +565,42 @@ func init() {
 	comment.DefaultUpdated = commentDescUpdated.Default.(func() time.Time)
 	// comment.UpdateDefaultUpdated holds the default value on update for the updated field.
 	comment.UpdateDefaultUpdated = commentDescUpdated.UpdateDefault.(func() time.Time)
+	compositionFields := schema.Composition{}.Fields()
+	_ = compositionFields
+	// compositionDescKeepPatch is the schema descriptor for keep_patch field.
+	compositionDescKeepPatch := compositionFields[13].Descriptor()
+	// composition.DefaultKeepPatch holds the default value on creation for the keep_patch field.
+	composition.DefaultKeepPatch = compositionDescKeepPatch.Default.(bool)
+	// compositionDescState is the schema descriptor for state field.
+	compositionDescState := compositionFields[17].Descriptor()
+	// composition.StateValidator is a validator for the "state" field. It is called by the builders before save.
+	composition.StateValidator = compositionDescState.Validators[0].(func(string) error)
+	// compositionDescStep is the schema descriptor for step field.
+	compositionDescStep := compositionFields[18].Descriptor()
+	// composition.StepValidator is a validator for the "step" field. It is called by the builders before save.
+	composition.StepValidator = compositionDescStep.Validators[0].(func(string) error)
+	// compositionDescPercent is the schema descriptor for percent field.
+	compositionDescPercent := compositionFields[19].Descriptor()
+	// composition.DefaultPercent holds the default value on creation for the percent field.
+	composition.DefaultPercent = compositionDescPercent.Default.(int)
+	// compositionDescFailure is the schema descriptor for failure field.
+	compositionDescFailure := compositionFields[21].Descriptor()
+	// composition.FailureValidator is a validator for the "failure" field. It is called by the builders before save.
+	composition.FailureValidator = compositionDescFailure.Validators[0].(func(string) error)
+	// compositionDescOutputName is the schema descriptor for output_name field.
+	compositionDescOutputName := compositionFields[23].Descriptor()
+	// composition.DefaultOutputName holds the default value on creation for the output_name field.
+	composition.DefaultOutputName = compositionDescOutputName.Default.(string)
+	// compositionDescCreated is the schema descriptor for created field.
+	compositionDescCreated := compositionFields[28].Descriptor()
+	// composition.DefaultCreated holds the default value on creation for the created field.
+	composition.DefaultCreated = compositionDescCreated.Default.(func() time.Time)
+	// compositionDescUpdated is the schema descriptor for updated field.
+	compositionDescUpdated := compositionFields[29].Descriptor()
+	// composition.DefaultUpdated holds the default value on creation for the updated field.
+	composition.DefaultUpdated = compositionDescUpdated.Default.(func() time.Time)
+	// composition.UpdateDefaultUpdated holds the default value on update for the updated field.
+	composition.UpdateDefaultUpdated = compositionDescUpdated.UpdateDefault.(func() time.Time)
 	editrecordFields := schema.EditRecord{}.Fields()
 	_ = editrecordFields
 	// editrecordDescFieldMask is the schema descriptor for field_mask field.

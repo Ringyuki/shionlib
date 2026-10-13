@@ -1373,6 +1373,29 @@ func HasTranslatorCreditsWith(preds ...predicate.GameDownloadResourceTranslator)
 	})
 }
 
+// HasCompositions applies the HasEdge predicate on the "compositions" edge.
+func HasCompositions() predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CompositionsTable, CompositionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCompositionsWith applies the HasEdge predicate on the "compositions" edge with a given conditions (other predicates).
+func HasCompositionsWith(preds ...predicate.Composition) predicate.GameDownloadResource {
+	return predicate.GameDownloadResource(func(s *sql.Selector) {
+		step := newCompositionsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.GameDownloadResource) predicate.GameDownloadResource {
 	return predicate.GameDownloadResource(sql.AndPredicates(predicates...))

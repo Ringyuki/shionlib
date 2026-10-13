@@ -166,5 +166,18 @@
   "CATALOG_SOURCE_UNAVAILABLE": "数据源暂时无法访问",
   "CATALOG_UNKNOWN_SOURCE": "未知的数据源 {source}",
   "CATALOG_ENTRY_NOT_FOUND": "数据源中没有这个条目",
-  "CATALOG_NO_CHANGE_FEED": "数据源 {source} 不提供变更记录，无法增量同步"
+  "CATALOG_NO_CHANGE_FEED": "数据源 {source} 不提供变更记录，无法增量同步",
+  "COMPOSITION_NOT_FOUND": "合成任务不存在",
+  "COMPOSITION_NOT_OWNER": "无权操作他人的合成任务",
+  "COMPOSITION_BASE_UNUSABLE": "这个资源不能用作原版",
+  "COMPOSITION_NOT_DRAFT": "合成已开始，无法修改",
+  "COMPOSITION_NOT_READY": "补丁和存档读取完成后才能开始合成",
+  "COMPOSITION_NOTHING_TO_APPLY": "补丁目录中没有可以放入游戏目录的文件",
+  "COMPOSITION_PATH_CONFLICT": "补丁中的 {path} 与原版中同名的文件或文件夹冲突",
+  "COMPOSITION_QUEUE_FULL": "排队的合成任务已满，请稍后再试",
+  "COMPOSITION_NOT_FAILED": "只有失败的合成可以重试",
+  "COMPOSITION_NOT_COMPOSED": "这个资源不能更新补丁",
+  "COMPOSITION_BUSY": "合成正在进行",
+  "COMPOSITION_BASE_GONE": "原版资源已不存在",
+  "COMPOSITION_CHECKS_OFF": "站点未开启文件检查，暂时无法合成"
 }

@@ -122,6 +122,11 @@ type Entry struct {
 	Detail       Detail
 }
 
+type FilePath struct {
+	Path string
+	Size int64
+}
+
 type Found struct {
 	Entry
 	Location string

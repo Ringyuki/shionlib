@@ -76,7 +76,7 @@ func (s *DetailService) visibleResource(ctx context.Context, viewer actor.Actor,
 	resource.Files = slices.DeleteFunc(resource.Files, func(f GameFile) bool {
 		return f.Status != FileInObjectStore && f.CreatorID != viewer.UserID && !oversees
 	})
-	if len(resource.Files) == 0 {
+	if len(resource.Files) == 0 && !oversees && resource.CreatorID != viewer.UserID {
 		return GameResource{}, ErrResourceNotFound
 	}
 	resource.Awaited = resource.awaiting(IncompleteSetTimeout.Read(s.settings))

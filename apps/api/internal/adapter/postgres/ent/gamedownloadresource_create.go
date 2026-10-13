@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/composition"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourceevent"
@@ -393,6 +394,21 @@ func (_c *GameDownloadResourceCreate) AddTranslatorCredits(v ...*GameDownloadRes
 	return _c.AddTranslatorCreditIDs(ids...)
 }
 
+// AddCompositionIDs adds the "compositions" edge to the Composition entity by IDs.
+func (_c *GameDownloadResourceCreate) AddCompositionIDs(ids ...int) *GameDownloadResourceCreate {
+	_c.mutation.AddCompositionIDs(ids...)
+	return _c
+}
+
+// AddCompositions adds the "compositions" edges to the Composition entity.
+func (_c *GameDownloadResourceCreate) AddCompositions(v ...*Composition) *GameDownloadResourceCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddCompositionIDs(ids...)
+}
+
 // Mutation returns the GameDownloadResourceMutation object of the builder.
 func (_c *GameDownloadResourceCreate) Mutation() *GameDownloadResourceMutation {
 	return _c.mutation
@@ -760,6 +776,22 @@ func (_c *GameDownloadResourceCreate) createSpec() (*GameDownloadResource, *sqlg
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourcetranslator.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.CompositionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.CompositionsTable,
+			Columns: []string{gamedownloadresource.CompositionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(composition.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

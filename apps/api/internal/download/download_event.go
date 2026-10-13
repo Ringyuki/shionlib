@@ -20,6 +20,8 @@ const (
 	EventEdited        EventKind = "edited"
 	EventReviewCleared EventKind = "review_cleared"
 	EventDiscFound     EventKind = "disc_found"
+	EventComposed      EventKind = "composed"
+	EventRecomposed    EventKind = "recomposed"
 )
 
 const (
@@ -49,6 +51,7 @@ const (
 	FieldEditionName  EventField = "edition_name"
 	FieldForm         EventField = "form"
 	FieldExtras       EventField = "extras"
+	FieldBase         EventField = "base"
 )
 
 type FieldChange struct {

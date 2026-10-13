@@ -115,6 +115,20 @@ func (s *MemorySpool) Remove(_ context.Context, path string) error {
 	return nil
 }
 
+func (s *MemorySpool) Move(_ context.Context, source, target string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	file, ok := s.files[source]
+	if !ok {
+		return errors.New("file not found")
+	}
+	s.files[target] = file
+	s.modified[target] = s.modified[source]
+	delete(s.files, source)
+	delete(s.modified, source)
+	return nil
+}
+
 func (s *MemorySpool) Exists(_ context.Context, path string) (bool, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()

@@ -219,6 +219,16 @@ func RepositoryContract(t *testing.T, newEnv func(t *testing.T) Env) {
 		if paged, total, err := env.Repo.Search(ctx, id, "e", inspection.Page{Number: 2, Size: 2}); err != nil || total != 4 || len(paged) != 2 {
 			t.Fatalf("search pages: %+v %d %v", paged, total, err)
 		}
+
+		files, err := env.Repo.FilePaths(ctx, id)
+		slices.SortFunc(files, func(a, b inspection.FilePath) int { return strings.Compare(a.Path, b.Path) })
+		want := []inspection.FilePath{{Path: "ANNA.iso", Size: 2_290_000_000}, {Path: "jpg/cover_100%.jpg", Size: 12}, {Path: "update.rar", Size: 9}}
+		if err != nil || !slices.Equal(files, want) {
+			t.Fatalf("the files of the archive itself, with their folders and without what its images and inner archives hold: %+v %v", files, err)
+		}
+		if none, err := env.Repo.FilePaths(ctx, id+987654); err != nil || len(none) != 0 {
+			t.Fatalf("an inspection that is not there has no files: %+v %v", none, err)
+		}
 	})
 
 	t.Run("previews are flagged per entry and listed for removal", func(t *testing.T) {

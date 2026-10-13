@@ -28,6 +28,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/zipnames"
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/inspection"
+	"github.com/Ringyuki/shionlib/apps/api/internal/platform/config"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/httpclient"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/jobs"
 	"github.com/Ringyuki/shionlib/apps/api/internal/report"
@@ -81,15 +82,7 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 	cfg := shared.Config
 	jobQueue := fileJobQueue{queue: shared.Queue}
 	spool := localfs.NewSpool(cfg.Upload.RootDir, cfg.Upload.TempFileSuffix)
-	store := objectstore.New(objectstore.Options{
-		Bucket:          cfg.Storage.Game.Bucket,
-		Region:          cfg.Storage.Game.Region,
-		Endpoint:        cfg.Storage.Game.Endpoint,
-		AccessKeyID:     cfg.Storage.Game.AccessKeyID,
-		SecretAccessKey: cfg.Storage.Game.SecretAccessKey,
-		PathStyle:       cfg.Storage.Game.ForcePathStyle,
-		HTTPClient:      httpclient.New(httpclient.Options{Timeout: objectStoreTimeout}),
-	})
+	store := newGameObjectStore(cfg, objectStoreTimeout)
 	banner := userPenalties{users: shared.Users}
 
 	quota := newQuotaService(infra, shared)
@@ -171,15 +164,18 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 
 	stalled := scan.NewStalledService(scans)
 	modules.Stalled = stalled
-	modules.Backfill = scan.NewBackfillService(scans, objectstore.New(objectstore.Options{
-		Bucket:          cfg.Storage.Game.Bucket,
-		Region:          cfg.Storage.Game.Region,
-		Endpoint:        cfg.Storage.Game.Endpoint,
-		AccessKeyID:     cfg.Storage.Game.AccessKeyID,
-		SecretAccessKey: cfg.Storage.Game.SecretAccessKey,
-		PathStyle:       cfg.Storage.Game.ForcePathStyle,
-		HTTPClient:      httpclient.New(httpclient.Options{Timeout: objectFetchTimeout}),
-	}), uploads)
+	modules.Backfill = scan.NewBackfillService(scans, newGameObjectStore(cfg, objectFetchTimeout), uploads)
+
+	shared.Files = &fileServices{
+		Uploads:     uploads,
+		Quota:       quota,
+		Names:       names,
+		Downloads:   downloads,
+		Transfers:   transfers,
+		Scans:       scans,
+		Archives:    archives,
+		Inspections: inspectionRepo,
+	}
 
 	reports := report.NewService(report.Deps{
 		Repo:      reportpg.NewRepository(infra.Ent),
@@ -222,6 +218,29 @@ func wireFiles(infra *Infra, shared *Shared, modules *Modules) {
 			return downloads.RequeueStores(ctx, shared.Now().Add(-storeRequeueAge))
 		}},
 	)
+}
+
+type fileServices struct {
+	Uploads     *upload.Service
+	Quota       *upload.QuotaService
+	Names       *download.NameService
+	Downloads   *download.Service
+	Transfers   *download.TransferService
+	Scans       *scan.Service
+	Archives    *sevenzip.Tool
+	Inspections *inspectionpg.Repository
+}
+
+func newGameObjectStore(cfg *config.Config, timeout time.Duration) *objectstore.Store {
+	return objectstore.New(objectstore.Options{
+		Bucket:          cfg.Storage.Game.Bucket,
+		Region:          cfg.Storage.Game.Region,
+		Endpoint:        cfg.Storage.Game.Endpoint,
+		AccessKeyID:     cfg.Storage.Game.AccessKeyID,
+		SecretAccessKey: cfg.Storage.Game.SecretAccessKey,
+		PathStyle:       cfg.Storage.Game.ForcePathStyle,
+		HTTPClient:      httpclient.New(httpclient.Options{Timeout: timeout}),
+	})
 }
 
 func newQuotaService(infra *Infra, shared *Shared) *upload.QuotaService {

@@ -2,6 +2,8 @@ package moyu
 
 import (
 	"context"
+	"errors"
+	"strings"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
 )
@@ -36,6 +38,26 @@ func (s *Service) Entries(ctx context.Context, viewer actor.Actor, gameID int) (
 	}
 	_ = s.cache.Set(ctx, key, listed(entries), CacheTTL)
 	return listed(entries), nil
+}
+
+func (s *Service) ByHash(ctx context.Context, viewer actor.Actor, gameID int, sha256 string) (Entry, bool, error) {
+	hash := strings.ToLower(strings.TrimSpace(sha256))
+	if hash == "" {
+		return Entry{}, false, nil
+	}
+	entries, err := s.Entries(ctx, viewer, gameID)
+	if errors.Is(err, ErrRequestFailed) {
+		return Entry{}, false, nil
+	}
+	if err != nil {
+		return Entry{}, false, err
+	}
+	for _, entry := range entries {
+		if entry.Hash == hash {
+			return entry, true, nil
+		}
+	}
+	return Entry{}, false, nil
 }
 
 func listed(entries []Entry) []Entry {

@@ -673,6 +673,9 @@ func (s *e2eSeeder) seedPostGameContent(ctx context.Context, tx *ent.Client, con
 	if err != nil {
 		return fmt.Errorf("mark the stalled check: %w", err)
 	}
+	if err := s.seedComposable(ctx, tx, content); err != nil {
+		return err
+	}
 	return s.seedHeldContent(ctx, tx, content)
 }
 

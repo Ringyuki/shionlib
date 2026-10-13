@@ -319,6 +319,45 @@ func TestClaimChecksStatusThenOwner(t *testing.T) {
 	}
 }
 
+func TestAFinishedUploadIsHandedOverOnceAndLeavesTheSpoolRoot(t *testing.T) {
+	ctx := context.Background()
+	f := newFixture()
+	content := []byte("0123456789")
+	finished := f.startUpload(t, content)
+	f.sendChunks(t, finished, content)
+	if err := f.service.Complete(ctx, uploader, "", finished.ID, uploadtest.Digest(content)); err != nil {
+		t.Fatal(err)
+	}
+	target := uploadtest.SpoolRoot + ".compose/7/inputs/patch.zip"
+
+	if _, err := f.service.Take(ctx, uploader, finished.ID, "/elsewhere/patch.zip"); err == nil {
+		t.Fatal("a file is never moved out of the spool")
+	}
+	_, err := f.service.Take(ctx, stranger, finished.ID, target)
+	expectCode(t, err, upload.ErrSessionNotOwner)
+
+	taken, err := f.service.Take(ctx, uploader, finished.ID, target)
+	if err != nil || taken.ID != finished.ID || taken.TotalSize != int64(len(content)) {
+		t.Fatalf("taken: %+v %v", taken, err)
+	}
+	if moved, ok := f.spool.Content(target); !ok || string(moved) != string(content) {
+		t.Fatalf("the file is at its new place: %q %v", moved, ok)
+	}
+	if _, still := f.spool.Content(finished.StoragePath); still {
+		t.Fatal("nothing is left at the old place")
+	}
+	if got, _ := f.repo.GetSession(ctx, finished.ID); got.Status != upload.StatusExpired {
+		t.Fatalf("a handed over upload is used up: %+v", got)
+	}
+	_, err = f.service.Take(ctx, uploader, finished.ID, target)
+	expectCode(t, err, upload.ErrInvalidSessionStatus)
+
+	attached := f.repo.Seed(upload.Session{Status: upload.StatusCompleted, CreatorID: uploader.UserID, StoragePath: uploadtest.SpoolRoot + "9.part"})
+	f.repo.AttachFile(attached.ID, attached.StoragePath)
+	_, err = f.service.Take(ctx, uploader, attached.ID, target)
+	expectCode(t, err, upload.ErrSessionAlreadyUsed)
+}
+
 func TestCleanStaleSessionsExpiresThem(t *testing.T) {
 	ctx := context.Background()
 	f := newFixture()

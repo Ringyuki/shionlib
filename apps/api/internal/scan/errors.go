@@ -13,3 +13,5 @@ var ErrCaseAlreadyProcessed = apperror.Define(440207, "GAME_DOWNLOAD_RESOURCE_MA
 var ErrCheckNotStalled = apperror.Define(440208, "GAME_DOWNLOAD_RESOURCE_CHECK_NOT_STALLED", apperror.KindNotFound)
 
 var ErrObjectMissing = errors.New("the stored object does not exist")
+
+var ErrChecksDisabled = errors.New("file checks are switched off")

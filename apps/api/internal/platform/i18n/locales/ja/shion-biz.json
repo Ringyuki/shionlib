@@ -166,5 +166,18 @@
   "CATALOG_SOURCE_UNAVAILABLE": "データソースに接続できません",
   "CATALOG_UNKNOWN_SOURCE": "不明なデータソース {source}",
   "CATALOG_ENTRY_NOT_FOUND": "データソースにこの項目はありません",
-  "CATALOG_NO_CHANGE_FEED": "データソース {source} は変更履歴を提供していないため、差分同期できません"
+  "CATALOG_NO_CHANGE_FEED": "データソース {source} は変更履歴を提供していないため、差分同期できません",
+  "COMPOSITION_NOT_FOUND": "合成タスクが見つかりません",
+  "COMPOSITION_NOT_OWNER": "他のユーザーの合成タスクは操作できません",
+  "COMPOSITION_BASE_UNUSABLE": "このリソースはオリジナル版として使用できません",
+  "COMPOSITION_NOT_DRAFT": "合成はすでに開始されているため、変更できません",
+  "COMPOSITION_NOT_READY": "パッチとセーブデータの読み取りが完了してから開始してください",
+  "COMPOSITION_NOTHING_TO_APPLY": "パッチフォルダーにゲームフォルダーへ配置できるファイルがありません",
+  "COMPOSITION_PATH_CONFLICT": "パッチの {path} が、オリジナル版にある同名のファイルまたはフォルダーと競合しています",
+  "COMPOSITION_QUEUE_FULL": "待機中の合成タスクが上限に達しています。しばらくしてから再度お試しください",
+  "COMPOSITION_NOT_FAILED": "再試行できるのは失敗した合成のみです",
+  "COMPOSITION_NOT_COMPOSED": "このリソースのパッチは更新できません",
+  "COMPOSITION_BUSY": "合成を処理しています",
+  "COMPOSITION_BASE_GONE": "オリジナル版のリソースは存在しません",
+  "COMPOSITION_CHECKS_OFF": "ファイル検査が無効のため、現在は合成できません"
 }

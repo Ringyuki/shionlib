@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/composition"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresource"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/gamedownloadresourceevent"
@@ -480,6 +481,21 @@ func (_u *GameDownloadResourceUpdate) AddTranslatorCredits(v ...*GameDownloadRes
 	return _u.AddTranslatorCreditIDs(ids...)
 }
 
+// AddCompositionIDs adds the "compositions" edge to the Composition entity by IDs.
+func (_u *GameDownloadResourceUpdate) AddCompositionIDs(ids ...int) *GameDownloadResourceUpdate {
+	_u.mutation.AddCompositionIDs(ids...)
+	return _u
+}
+
+// AddCompositions adds the "compositions" edges to the Composition entity.
+func (_u *GameDownloadResourceUpdate) AddCompositions(v ...*Composition) *GameDownloadResourceUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddCompositionIDs(ids...)
+}
+
 // Mutation returns the GameDownloadResourceMutation object of the builder.
 func (_u *GameDownloadResourceUpdate) Mutation() *GameDownloadResourceMutation {
 	return _u.mutation
@@ -642,6 +658,27 @@ func (_u *GameDownloadResourceUpdate) RemoveTranslatorCredits(v ...*GameDownload
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveTranslatorCreditIDs(ids...)
+}
+
+// ClearCompositions clears all "compositions" edges to the Composition entity.
+func (_u *GameDownloadResourceUpdate) ClearCompositions() *GameDownloadResourceUpdate {
+	_u.mutation.ClearCompositions()
+	return _u
+}
+
+// RemoveCompositionIDs removes the "compositions" edge to Composition entities by IDs.
+func (_u *GameDownloadResourceUpdate) RemoveCompositionIDs(ids ...int) *GameDownloadResourceUpdate {
+	_u.mutation.RemoveCompositionIDs(ids...)
+	return _u
+}
+
+// RemoveCompositions removes "compositions" edges to Composition entities.
+func (_u *GameDownloadResourceUpdate) RemoveCompositions(v ...*Composition) *GameDownloadResourceUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveCompositionIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -1218,6 +1255,51 @@ func (_u *GameDownloadResourceUpdate) sqlSave(ctx context.Context) (_node int, e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.CompositionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.CompositionsTable,
+			Columns: []string{gamedownloadresource.CompositionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(composition.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedCompositionsIDs(); len(nodes) > 0 && !_u.mutation.CompositionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.CompositionsTable,
+			Columns: []string{gamedownloadresource.CompositionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(composition.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CompositionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.CompositionsTable,
+			Columns: []string{gamedownloadresource.CompositionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(composition.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -1681,6 +1763,21 @@ func (_u *GameDownloadResourceUpdateOne) AddTranslatorCredits(v ...*GameDownload
 	return _u.AddTranslatorCreditIDs(ids...)
 }
 
+// AddCompositionIDs adds the "compositions" edge to the Composition entity by IDs.
+func (_u *GameDownloadResourceUpdateOne) AddCompositionIDs(ids ...int) *GameDownloadResourceUpdateOne {
+	_u.mutation.AddCompositionIDs(ids...)
+	return _u
+}
+
+// AddCompositions adds the "compositions" edges to the Composition entity.
+func (_u *GameDownloadResourceUpdateOne) AddCompositions(v ...*Composition) *GameDownloadResourceUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddCompositionIDs(ids...)
+}
+
 // Mutation returns the GameDownloadResourceMutation object of the builder.
 func (_u *GameDownloadResourceUpdateOne) Mutation() *GameDownloadResourceMutation {
 	return _u.mutation
@@ -1843,6 +1940,27 @@ func (_u *GameDownloadResourceUpdateOne) RemoveTranslatorCredits(v ...*GameDownl
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveTranslatorCreditIDs(ids...)
+}
+
+// ClearCompositions clears all "compositions" edges to the Composition entity.
+func (_u *GameDownloadResourceUpdateOne) ClearCompositions() *GameDownloadResourceUpdateOne {
+	_u.mutation.ClearCompositions()
+	return _u
+}
+
+// RemoveCompositionIDs removes the "compositions" edge to Composition entities by IDs.
+func (_u *GameDownloadResourceUpdateOne) RemoveCompositionIDs(ids ...int) *GameDownloadResourceUpdateOne {
+	_u.mutation.RemoveCompositionIDs(ids...)
+	return _u
+}
+
+// RemoveCompositions removes "compositions" edges to Composition entities.
+func (_u *GameDownloadResourceUpdateOne) RemoveCompositions(v ...*Composition) *GameDownloadResourceUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveCompositionIDs(ids...)
 }
 
 // Where appends a list predicates to the GameDownloadResourceUpdate builder.
@@ -2442,6 +2560,51 @@ func (_u *GameDownloadResourceUpdateOne) sqlSave(ctx context.Context) (_node *Ga
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(gamedownloadresourcetranslator.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.CompositionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.CompositionsTable,
+			Columns: []string{gamedownloadresource.CompositionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(composition.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedCompositionsIDs(); len(nodes) > 0 && !_u.mutation.CompositionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.CompositionsTable,
+			Columns: []string{gamedownloadresource.CompositionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(composition.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CompositionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   gamedownloadresource.CompositionsTable,
+			Columns: []string{gamedownloadresource.CompositionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(composition.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

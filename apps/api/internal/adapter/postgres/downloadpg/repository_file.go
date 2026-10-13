@@ -152,6 +152,36 @@ func (r *Repository) MarkFileStored(ctx context.Context, id int, key string) err
 	})
 }
 
+func (r *Repository) AdoptFile(ctx context.Context, id int, adoption download.Adoption) error {
+	return r.updateFile(ctx, id, "adopt", func(u *ent.GameDownloadResourceFileUpdateOne) {
+		u.SetFileCheckStatus(int(download.CheckOK)).SetInspectionID(adoption.InspectionID).SetFileSha256(adoption.SHA256)
+	})
+}
+
+func (r *Repository) ReplaceStoredContent(ctx context.Context, id int, content download.StoredContent) error {
+	if err := r.retireSessions(ctx, "id", id); err != nil {
+		return err
+	}
+	err := r.updateFile(ctx, id, "replace stored content of", func(u *ent.GameDownloadResourceFileUpdateOne) {
+		u.SetFileName(content.Name).
+			SetFileSize(content.Size).
+			SetFileHash(content.Hash).
+			SetHashAlgorithm(gamedownloadresourcefile.HashAlgorithm(content.HashAlgorithm)).
+			SetFileSha256(content.SHA256).
+			SetInspectionID(content.InspectionID).
+			SetS3FileKey(content.StorageKey).
+			SetFileStatus(download.FileInObjectStore).
+			SetFileCheckStatus(int(download.CheckOK)).
+			SetIsVirusFalsePositive(false).
+			ClearFilePath().
+			ClearUploadSessionID()
+	})
+	if postgres.IsUniqueViolation(err, uniqueFileName) {
+		return download.ErrDuplicateFileName
+	}
+	return err
+}
+
 func (r *Repository) RenameFile(ctx context.Context, id int, name string) error {
 	err := r.updateFile(ctx, id, "rename", func(u *ent.GameDownloadResourceFileUpdateOne) {
 		u.SetFileName(name)

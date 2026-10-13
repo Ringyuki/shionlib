@@ -23,6 +23,7 @@ func TestDetailFollowsWhatTheViewerMaySee(t *testing.T) {
 	rated := f.repo.SeedResource(download.Resource{GameID: 11, CreatorID: owner.UserID, PublishedAt: ptr(now)})
 	f.repo.SeedFile(download.File{ResourceID: rated.ID, Status: download.FileInObjectStore, CreatorID: owner.UserID})
 	f.repo.MarkRated(11)
+	composing := f.repo.SeedResource(download.Resource{GameID: 10, CreatorID: owner.UserID})
 	strict := actor.Actor{UserID: 9, Role: actor.RoleUser, ContentLimit: actor.ContentLimitNeverShow}
 
 	seen, err := f.details.Detail(ctx, other, published.ID)
@@ -35,12 +36,18 @@ func TestDetailFollowsWhatTheViewerMaySee(t *testing.T) {
 	if mine, _ := f.details.Detail(ctx, owner, published.ID); len(mine.Files) != 2 {
 		t.Fatalf("the uploader also sees the file still being processed: %+v", mine.Files)
 	}
-	for name, id := range map[string]int{"unknown": 999, "unpublished": pending.ID, "under review": held.ID, "removed": removed.ID} {
+	for name, id := range map[string]int{"unknown": 999, "unpublished": pending.ID, "under review": held.ID, "removed": removed.ID, "being composed": composing.ID} {
 		if _, err := f.details.Detail(ctx, other, id); err == nil {
 			t.Fatalf("%s resources are not found by others", name)
 		} else {
 			expectCode(t, err, download.ErrResourceNotFound)
 		}
+	}
+	if made, err := f.details.Detail(ctx, owner, composing.ID); err != nil || len(made.Files) != 0 {
+		t.Fatalf("whoever composes a resource opens it before it has a file: %+v %v", made.Files, err)
+	}
+	if _, err := f.details.Detail(ctx, admin, composing.ID); err != nil {
+		t.Fatalf("an admin opens a resource being composed: %v", err)
 	}
 	for _, id := range []int{pending.ID, held.ID} {
 		if _, err := f.details.Detail(ctx, owner, id); err != nil {

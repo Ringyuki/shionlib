@@ -28,6 +28,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsynccursor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/commentlike"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/composition"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/editrecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favorite"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favoriteitem"
@@ -101,6 +102,7 @@ const (
 	TypeCatalogSyncCursor               = "CatalogSyncCursor"
 	TypeComment                         = "Comment"
 	TypeCommentLike                     = "CommentLike"
+	TypeComposition                     = "Composition"
 	TypeEditRecord                      = "EditRecord"
 	TypeFavorite                        = "Favorite"
 	TypeFavoriteItem                    = "FavoriteItem"
@@ -20085,6 +20087,2589 @@ func (m *CommentLikeMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown CommentLike edge %s", name)
 }
 
+// CompositionMutation represents an operation that mutates the Composition nodes in the graph.
+type CompositionMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *int
+	game_id             *int
+	addgame_id          *int
+	creator_id          *int
+	addcreator_id       *int
+	target_file_id      *int
+	addtarget_file_id   *int
+	base                *jsontext.Value
+	appendbase          jsontext.Value
+	patch               *jsontext.Value
+	appendpatch         jsontext.Value
+	save                *jsontext.Value
+	appendsave          jsontext.Value
+	patch_entries       *jsontext.Value
+	appendpatch_entries jsontext.Value
+	save_entries        *jsontext.Value
+	appendsave_entries  jsontext.Value
+	details             *jsontext.Value
+	appenddetails       jsontext.Value
+	game_dir            *string
+	patch_dir           *string
+	keep_patch          *bool
+	note                *string
+	patch_match         *jsontext.Value
+	appendpatch_match   jsontext.Value
+	plan                *jsontext.Value
+	appendplan          jsontext.Value
+	state               *string
+	step                *string
+	percent             *int
+	addpercent          *int
+	runs                *jsontext.Value
+	appendruns          jsontext.Value
+	failure             *string
+	failure_detail      *string
+	output_name         *string
+	output_size         *int64
+	addoutput_size      *int64
+	queued_at           *time.Time
+	started_at          *time.Time
+	finished_at         *time.Time
+	created             *time.Time
+	updated             *time.Time
+	clearedFields       map[string]struct{}
+	resource            *int
+	clearedresource     bool
+	done                bool
+	oldValue            func(context.Context) (*Composition, error)
+	predicates          []predicate.Composition
+}
+
+var _ ent.Mutation = (*CompositionMutation)(nil)
+
+// compositionOption allows management of the mutation configuration using functional options.
+type compositionOption func(*CompositionMutation)
+
+// newCompositionMutation creates new mutation for the Composition entity.
+func newCompositionMutation(c config, op Op, opts ...compositionOption) *CompositionMutation {
+	m := &CompositionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeComposition,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCompositionID sets the ID field of the mutation.
+func withCompositionID(id int) compositionOption {
+	return func(m *CompositionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Composition
+		)
+		m.oldValue = func(ctx context.Context) (*Composition, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Composition.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withComposition sets the old Composition of the mutation.
+func withComposition(node *Composition) compositionOption {
+	return func(m *CompositionMutation) {
+		m.oldValue = func(context.Context) (*Composition, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CompositionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CompositionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Composition entities.
+func (m *CompositionMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CompositionMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CompositionMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Composition.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetGameID sets the "game_id" field.
+func (m *CompositionMutation) SetGameID(i int) {
+	m.game_id = &i
+	m.addgame_id = nil
+}
+
+// GameID returns the value of the "game_id" field in the mutation.
+func (m *CompositionMutation) GameID() (r int, exists bool) {
+	v := m.game_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGameID returns the old "game_id" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldGameID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGameID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGameID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGameID: %w", err)
+	}
+	return oldValue.GameID, nil
+}
+
+// AddGameID adds i to the "game_id" field.
+func (m *CompositionMutation) AddGameID(i int) {
+	if m.addgame_id != nil {
+		*m.addgame_id += i
+	} else {
+		m.addgame_id = &i
+	}
+}
+
+// AddedGameID returns the value that was added to the "game_id" field in this mutation.
+func (m *CompositionMutation) AddedGameID() (r int, exists bool) {
+	v := m.addgame_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetGameID resets all changes to the "game_id" field.
+func (m *CompositionMutation) ResetGameID() {
+	m.game_id = nil
+	m.addgame_id = nil
+}
+
+// SetCreatorID sets the "creator_id" field.
+func (m *CompositionMutation) SetCreatorID(i int) {
+	m.creator_id = &i
+	m.addcreator_id = nil
+}
+
+// CreatorID returns the value of the "creator_id" field in the mutation.
+func (m *CompositionMutation) CreatorID() (r int, exists bool) {
+	v := m.creator_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatorID returns the old "creator_id" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldCreatorID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatorID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatorID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatorID: %w", err)
+	}
+	return oldValue.CreatorID, nil
+}
+
+// AddCreatorID adds i to the "creator_id" field.
+func (m *CompositionMutation) AddCreatorID(i int) {
+	if m.addcreator_id != nil {
+		*m.addcreator_id += i
+	} else {
+		m.addcreator_id = &i
+	}
+}
+
+// AddedCreatorID returns the value that was added to the "creator_id" field in this mutation.
+func (m *CompositionMutation) AddedCreatorID() (r int, exists bool) {
+	v := m.addcreator_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCreatorID resets all changes to the "creator_id" field.
+func (m *CompositionMutation) ResetCreatorID() {
+	m.creator_id = nil
+	m.addcreator_id = nil
+}
+
+// SetResourceID sets the "resource_id" field.
+func (m *CompositionMutation) SetResourceID(i int) {
+	m.resource = &i
+}
+
+// ResourceID returns the value of the "resource_id" field in the mutation.
+func (m *CompositionMutation) ResourceID() (r int, exists bool) {
+	v := m.resource
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResourceID returns the old "resource_id" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldResourceID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResourceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResourceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResourceID: %w", err)
+	}
+	return oldValue.ResourceID, nil
+}
+
+// ClearResourceID clears the value of the "resource_id" field.
+func (m *CompositionMutation) ClearResourceID() {
+	m.resource = nil
+	m.clearedFields[composition.FieldResourceID] = struct{}{}
+}
+
+// ResourceIDCleared returns if the "resource_id" field was cleared in this mutation.
+func (m *CompositionMutation) ResourceIDCleared() bool {
+	_, ok := m.clearedFields[composition.FieldResourceID]
+	return ok
+}
+
+// ResetResourceID resets all changes to the "resource_id" field.
+func (m *CompositionMutation) ResetResourceID() {
+	m.resource = nil
+	delete(m.clearedFields, composition.FieldResourceID)
+}
+
+// SetTargetFileID sets the "target_file_id" field.
+func (m *CompositionMutation) SetTargetFileID(i int) {
+	m.target_file_id = &i
+	m.addtarget_file_id = nil
+}
+
+// TargetFileID returns the value of the "target_file_id" field in the mutation.
+func (m *CompositionMutation) TargetFileID() (r int, exists bool) {
+	v := m.target_file_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTargetFileID returns the old "target_file_id" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldTargetFileID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTargetFileID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTargetFileID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTargetFileID: %w", err)
+	}
+	return oldValue.TargetFileID, nil
+}
+
+// AddTargetFileID adds i to the "target_file_id" field.
+func (m *CompositionMutation) AddTargetFileID(i int) {
+	if m.addtarget_file_id != nil {
+		*m.addtarget_file_id += i
+	} else {
+		m.addtarget_file_id = &i
+	}
+}
+
+// AddedTargetFileID returns the value that was added to the "target_file_id" field in this mutation.
+func (m *CompositionMutation) AddedTargetFileID() (r int, exists bool) {
+	v := m.addtarget_file_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearTargetFileID clears the value of the "target_file_id" field.
+func (m *CompositionMutation) ClearTargetFileID() {
+	m.target_file_id = nil
+	m.addtarget_file_id = nil
+	m.clearedFields[composition.FieldTargetFileID] = struct{}{}
+}
+
+// TargetFileIDCleared returns if the "target_file_id" field was cleared in this mutation.
+func (m *CompositionMutation) TargetFileIDCleared() bool {
+	_, ok := m.clearedFields[composition.FieldTargetFileID]
+	return ok
+}
+
+// ResetTargetFileID resets all changes to the "target_file_id" field.
+func (m *CompositionMutation) ResetTargetFileID() {
+	m.target_file_id = nil
+	m.addtarget_file_id = nil
+	delete(m.clearedFields, composition.FieldTargetFileID)
+}
+
+// SetBase sets the "base" field.
+func (m *CompositionMutation) SetBase(j jsontext.Value) {
+	m.base = &j
+	m.appendbase = nil
+}
+
+// Base returns the value of the "base" field in the mutation.
+func (m *CompositionMutation) Base() (r jsontext.Value, exists bool) {
+	v := m.base
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBase returns the old "base" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldBase(ctx context.Context) (v jsontext.Value, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBase is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBase requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBase: %w", err)
+	}
+	return oldValue.Base, nil
+}
+
+// AppendBase adds j to the "base" field.
+func (m *CompositionMutation) AppendBase(j jsontext.Value) {
+	m.appendbase = append(m.appendbase, j...)
+}
+
+// AppendedBase returns the list of values that were appended to the "base" field in this mutation.
+func (m *CompositionMutation) AppendedBase() (jsontext.Value, bool) {
+	if len(m.appendbase) == 0 {
+		return nil, false
+	}
+	return m.appendbase, true
+}
+
+// ResetBase resets all changes to the "base" field.
+func (m *CompositionMutation) ResetBase() {
+	m.base = nil
+	m.appendbase = nil
+}
+
+// SetPatch sets the "patch" field.
+func (m *CompositionMutation) SetPatch(j jsontext.Value) {
+	m.patch = &j
+	m.appendpatch = nil
+}
+
+// Patch returns the value of the "patch" field in the mutation.
+func (m *CompositionMutation) Patch() (r jsontext.Value, exists bool) {
+	v := m.patch
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPatch returns the old "patch" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldPatch(ctx context.Context) (v jsontext.Value, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPatch is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPatch requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPatch: %w", err)
+	}
+	return oldValue.Patch, nil
+}
+
+// AppendPatch adds j to the "patch" field.
+func (m *CompositionMutation) AppendPatch(j jsontext.Value) {
+	m.appendpatch = append(m.appendpatch, j...)
+}
+
+// AppendedPatch returns the list of values that were appended to the "patch" field in this mutation.
+func (m *CompositionMutation) AppendedPatch() (jsontext.Value, bool) {
+	if len(m.appendpatch) == 0 {
+		return nil, false
+	}
+	return m.appendpatch, true
+}
+
+// ClearPatch clears the value of the "patch" field.
+func (m *CompositionMutation) ClearPatch() {
+	m.patch = nil
+	m.appendpatch = nil
+	m.clearedFields[composition.FieldPatch] = struct{}{}
+}
+
+// PatchCleared returns if the "patch" field was cleared in this mutation.
+func (m *CompositionMutation) PatchCleared() bool {
+	_, ok := m.clearedFields[composition.FieldPatch]
+	return ok
+}
+
+// ResetPatch resets all changes to the "patch" field.
+func (m *CompositionMutation) ResetPatch() {
+	m.patch = nil
+	m.appendpatch = nil
+	delete(m.clearedFields, composition.FieldPatch)
+}
+
+// SetSave sets the "save" field.
+func (m *CompositionMutation) SetSave(j jsontext.Value) {
+	m.save = &j
+	m.appendsave = nil
+}
+
+// Save returns the value of the "save" field in the mutation.
+func (m *CompositionMutation) Save() (r jsontext.Value, exists bool) {
+	v := m.save
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSave returns the old "save" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldSave(ctx context.Context) (v jsontext.Value, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSave is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSave requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSave: %w", err)
+	}
+	return oldValue.Save, nil
+}
+
+// AppendSave adds j to the "save" field.
+func (m *CompositionMutation) AppendSave(j jsontext.Value) {
+	m.appendsave = append(m.appendsave, j...)
+}
+
+// AppendedSave returns the list of values that were appended to the "save" field in this mutation.
+func (m *CompositionMutation) AppendedSave() (jsontext.Value, bool) {
+	if len(m.appendsave) == 0 {
+		return nil, false
+	}
+	return m.appendsave, true
+}
+
+// ClearSave clears the value of the "save" field.
+func (m *CompositionMutation) ClearSave() {
+	m.save = nil
+	m.appendsave = nil
+	m.clearedFields[composition.FieldSave] = struct{}{}
+}
+
+// SaveCleared returns if the "save" field was cleared in this mutation.
+func (m *CompositionMutation) SaveCleared() bool {
+	_, ok := m.clearedFields[composition.FieldSave]
+	return ok
+}
+
+// ResetSave resets all changes to the "save" field.
+func (m *CompositionMutation) ResetSave() {
+	m.save = nil
+	m.appendsave = nil
+	delete(m.clearedFields, composition.FieldSave)
+}
+
+// SetPatchEntries sets the "patch_entries" field.
+func (m *CompositionMutation) SetPatchEntries(j jsontext.Value) {
+	m.patch_entries = &j
+	m.appendpatch_entries = nil
+}
+
+// PatchEntries returns the value of the "patch_entries" field in the mutation.
+func (m *CompositionMutation) PatchEntries() (r jsontext.Value, exists bool) {
+	v := m.patch_entries
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPatchEntries returns the old "patch_entries" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldPatchEntries(ctx context.Context) (v jsontext.Value, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPatchEntries is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPatchEntries requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPatchEntries: %w", err)
+	}
+	return oldValue.PatchEntries, nil
+}
+
+// AppendPatchEntries adds j to the "patch_entries" field.
+func (m *CompositionMutation) AppendPatchEntries(j jsontext.Value) {
+	m.appendpatch_entries = append(m.appendpatch_entries, j...)
+}
+
+// AppendedPatchEntries returns the list of values that were appended to the "patch_entries" field in this mutation.
+func (m *CompositionMutation) AppendedPatchEntries() (jsontext.Value, bool) {
+	if len(m.appendpatch_entries) == 0 {
+		return nil, false
+	}
+	return m.appendpatch_entries, true
+}
+
+// ClearPatchEntries clears the value of the "patch_entries" field.
+func (m *CompositionMutation) ClearPatchEntries() {
+	m.patch_entries = nil
+	m.appendpatch_entries = nil
+	m.clearedFields[composition.FieldPatchEntries] = struct{}{}
+}
+
+// PatchEntriesCleared returns if the "patch_entries" field was cleared in this mutation.
+func (m *CompositionMutation) PatchEntriesCleared() bool {
+	_, ok := m.clearedFields[composition.FieldPatchEntries]
+	return ok
+}
+
+// ResetPatchEntries resets all changes to the "patch_entries" field.
+func (m *CompositionMutation) ResetPatchEntries() {
+	m.patch_entries = nil
+	m.appendpatch_entries = nil
+	delete(m.clearedFields, composition.FieldPatchEntries)
+}
+
+// SetSaveEntries sets the "save_entries" field.
+func (m *CompositionMutation) SetSaveEntries(j jsontext.Value) {
+	m.save_entries = &j
+	m.appendsave_entries = nil
+}
+
+// SaveEntries returns the value of the "save_entries" field in the mutation.
+func (m *CompositionMutation) SaveEntries() (r jsontext.Value, exists bool) {
+	v := m.save_entries
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSaveEntries returns the old "save_entries" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldSaveEntries(ctx context.Context) (v jsontext.Value, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSaveEntries is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSaveEntries requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSaveEntries: %w", err)
+	}
+	return oldValue.SaveEntries, nil
+}
+
+// AppendSaveEntries adds j to the "save_entries" field.
+func (m *CompositionMutation) AppendSaveEntries(j jsontext.Value) {
+	m.appendsave_entries = append(m.appendsave_entries, j...)
+}
+
+// AppendedSaveEntries returns the list of values that were appended to the "save_entries" field in this mutation.
+func (m *CompositionMutation) AppendedSaveEntries() (jsontext.Value, bool) {
+	if len(m.appendsave_entries) == 0 {
+		return nil, false
+	}
+	return m.appendsave_entries, true
+}
+
+// ClearSaveEntries clears the value of the "save_entries" field.
+func (m *CompositionMutation) ClearSaveEntries() {
+	m.save_entries = nil
+	m.appendsave_entries = nil
+	m.clearedFields[composition.FieldSaveEntries] = struct{}{}
+}
+
+// SaveEntriesCleared returns if the "save_entries" field was cleared in this mutation.
+func (m *CompositionMutation) SaveEntriesCleared() bool {
+	_, ok := m.clearedFields[composition.FieldSaveEntries]
+	return ok
+}
+
+// ResetSaveEntries resets all changes to the "save_entries" field.
+func (m *CompositionMutation) ResetSaveEntries() {
+	m.save_entries = nil
+	m.appendsave_entries = nil
+	delete(m.clearedFields, composition.FieldSaveEntries)
+}
+
+// SetDetails sets the "details" field.
+func (m *CompositionMutation) SetDetails(j jsontext.Value) {
+	m.details = &j
+	m.appenddetails = nil
+}
+
+// Details returns the value of the "details" field in the mutation.
+func (m *CompositionMutation) Details() (r jsontext.Value, exists bool) {
+	v := m.details
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDetails returns the old "details" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldDetails(ctx context.Context) (v jsontext.Value, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDetails is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDetails requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDetails: %w", err)
+	}
+	return oldValue.Details, nil
+}
+
+// AppendDetails adds j to the "details" field.
+func (m *CompositionMutation) AppendDetails(j jsontext.Value) {
+	m.appenddetails = append(m.appenddetails, j...)
+}
+
+// AppendedDetails returns the list of values that were appended to the "details" field in this mutation.
+func (m *CompositionMutation) AppendedDetails() (jsontext.Value, bool) {
+	if len(m.appenddetails) == 0 {
+		return nil, false
+	}
+	return m.appenddetails, true
+}
+
+// ResetDetails resets all changes to the "details" field.
+func (m *CompositionMutation) ResetDetails() {
+	m.details = nil
+	m.appenddetails = nil
+}
+
+// SetGameDir sets the "game_dir" field.
+func (m *CompositionMutation) SetGameDir(s string) {
+	m.game_dir = &s
+}
+
+// GameDir returns the value of the "game_dir" field in the mutation.
+func (m *CompositionMutation) GameDir() (r string, exists bool) {
+	v := m.game_dir
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGameDir returns the old "game_dir" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldGameDir(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGameDir is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGameDir requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGameDir: %w", err)
+	}
+	return oldValue.GameDir, nil
+}
+
+// ClearGameDir clears the value of the "game_dir" field.
+func (m *CompositionMutation) ClearGameDir() {
+	m.game_dir = nil
+	m.clearedFields[composition.FieldGameDir] = struct{}{}
+}
+
+// GameDirCleared returns if the "game_dir" field was cleared in this mutation.
+func (m *CompositionMutation) GameDirCleared() bool {
+	_, ok := m.clearedFields[composition.FieldGameDir]
+	return ok
+}
+
+// ResetGameDir resets all changes to the "game_dir" field.
+func (m *CompositionMutation) ResetGameDir() {
+	m.game_dir = nil
+	delete(m.clearedFields, composition.FieldGameDir)
+}
+
+// SetPatchDir sets the "patch_dir" field.
+func (m *CompositionMutation) SetPatchDir(s string) {
+	m.patch_dir = &s
+}
+
+// PatchDir returns the value of the "patch_dir" field in the mutation.
+func (m *CompositionMutation) PatchDir() (r string, exists bool) {
+	v := m.patch_dir
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPatchDir returns the old "patch_dir" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldPatchDir(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPatchDir is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPatchDir requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPatchDir: %w", err)
+	}
+	return oldValue.PatchDir, nil
+}
+
+// ClearPatchDir clears the value of the "patch_dir" field.
+func (m *CompositionMutation) ClearPatchDir() {
+	m.patch_dir = nil
+	m.clearedFields[composition.FieldPatchDir] = struct{}{}
+}
+
+// PatchDirCleared returns if the "patch_dir" field was cleared in this mutation.
+func (m *CompositionMutation) PatchDirCleared() bool {
+	_, ok := m.clearedFields[composition.FieldPatchDir]
+	return ok
+}
+
+// ResetPatchDir resets all changes to the "patch_dir" field.
+func (m *CompositionMutation) ResetPatchDir() {
+	m.patch_dir = nil
+	delete(m.clearedFields, composition.FieldPatchDir)
+}
+
+// SetKeepPatch sets the "keep_patch" field.
+func (m *CompositionMutation) SetKeepPatch(b bool) {
+	m.keep_patch = &b
+}
+
+// KeepPatch returns the value of the "keep_patch" field in the mutation.
+func (m *CompositionMutation) KeepPatch() (r bool, exists bool) {
+	v := m.keep_patch
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKeepPatch returns the old "keep_patch" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldKeepPatch(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKeepPatch is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKeepPatch requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKeepPatch: %w", err)
+	}
+	return oldValue.KeepPatch, nil
+}
+
+// ResetKeepPatch resets all changes to the "keep_patch" field.
+func (m *CompositionMutation) ResetKeepPatch() {
+	m.keep_patch = nil
+}
+
+// SetNote sets the "note" field.
+func (m *CompositionMutation) SetNote(s string) {
+	m.note = &s
+}
+
+// Note returns the value of the "note" field in the mutation.
+func (m *CompositionMutation) Note() (r string, exists bool) {
+	v := m.note
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNote returns the old "note" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldNote(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNote is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNote requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNote: %w", err)
+	}
+	return oldValue.Note, nil
+}
+
+// ClearNote clears the value of the "note" field.
+func (m *CompositionMutation) ClearNote() {
+	m.note = nil
+	m.clearedFields[composition.FieldNote] = struct{}{}
+}
+
+// NoteCleared returns if the "note" field was cleared in this mutation.
+func (m *CompositionMutation) NoteCleared() bool {
+	_, ok := m.clearedFields[composition.FieldNote]
+	return ok
+}
+
+// ResetNote resets all changes to the "note" field.
+func (m *CompositionMutation) ResetNote() {
+	m.note = nil
+	delete(m.clearedFields, composition.FieldNote)
+}
+
+// SetPatchMatch sets the "patch_match" field.
+func (m *CompositionMutation) SetPatchMatch(j jsontext.Value) {
+	m.patch_match = &j
+	m.appendpatch_match = nil
+}
+
+// PatchMatch returns the value of the "patch_match" field in the mutation.
+func (m *CompositionMutation) PatchMatch() (r jsontext.Value, exists bool) {
+	v := m.patch_match
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPatchMatch returns the old "patch_match" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldPatchMatch(ctx context.Context) (v jsontext.Value, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPatchMatch is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPatchMatch requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPatchMatch: %w", err)
+	}
+	return oldValue.PatchMatch, nil
+}
+
+// AppendPatchMatch adds j to the "patch_match" field.
+func (m *CompositionMutation) AppendPatchMatch(j jsontext.Value) {
+	m.appendpatch_match = append(m.appendpatch_match, j...)
+}
+
+// AppendedPatchMatch returns the list of values that were appended to the "patch_match" field in this mutation.
+func (m *CompositionMutation) AppendedPatchMatch() (jsontext.Value, bool) {
+	if len(m.appendpatch_match) == 0 {
+		return nil, false
+	}
+	return m.appendpatch_match, true
+}
+
+// ClearPatchMatch clears the value of the "patch_match" field.
+func (m *CompositionMutation) ClearPatchMatch() {
+	m.patch_match = nil
+	m.appendpatch_match = nil
+	m.clearedFields[composition.FieldPatchMatch] = struct{}{}
+}
+
+// PatchMatchCleared returns if the "patch_match" field was cleared in this mutation.
+func (m *CompositionMutation) PatchMatchCleared() bool {
+	_, ok := m.clearedFields[composition.FieldPatchMatch]
+	return ok
+}
+
+// ResetPatchMatch resets all changes to the "patch_match" field.
+func (m *CompositionMutation) ResetPatchMatch() {
+	m.patch_match = nil
+	m.appendpatch_match = nil
+	delete(m.clearedFields, composition.FieldPatchMatch)
+}
+
+// SetPlan sets the "plan" field.
+func (m *CompositionMutation) SetPlan(j jsontext.Value) {
+	m.plan = &j
+	m.appendplan = nil
+}
+
+// Plan returns the value of the "plan" field in the mutation.
+func (m *CompositionMutation) Plan() (r jsontext.Value, exists bool) {
+	v := m.plan
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPlan returns the old "plan" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldPlan(ctx context.Context) (v jsontext.Value, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPlan is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPlan requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPlan: %w", err)
+	}
+	return oldValue.Plan, nil
+}
+
+// AppendPlan adds j to the "plan" field.
+func (m *CompositionMutation) AppendPlan(j jsontext.Value) {
+	m.appendplan = append(m.appendplan, j...)
+}
+
+// AppendedPlan returns the list of values that were appended to the "plan" field in this mutation.
+func (m *CompositionMutation) AppendedPlan() (jsontext.Value, bool) {
+	if len(m.appendplan) == 0 {
+		return nil, false
+	}
+	return m.appendplan, true
+}
+
+// ClearPlan clears the value of the "plan" field.
+func (m *CompositionMutation) ClearPlan() {
+	m.plan = nil
+	m.appendplan = nil
+	m.clearedFields[composition.FieldPlan] = struct{}{}
+}
+
+// PlanCleared returns if the "plan" field was cleared in this mutation.
+func (m *CompositionMutation) PlanCleared() bool {
+	_, ok := m.clearedFields[composition.FieldPlan]
+	return ok
+}
+
+// ResetPlan resets all changes to the "plan" field.
+func (m *CompositionMutation) ResetPlan() {
+	m.plan = nil
+	m.appendplan = nil
+	delete(m.clearedFields, composition.FieldPlan)
+}
+
+// SetState sets the "state" field.
+func (m *CompositionMutation) SetState(s string) {
+	m.state = &s
+}
+
+// State returns the value of the "state" field in the mutation.
+func (m *CompositionMutation) State() (r string, exists bool) {
+	v := m.state
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldState returns the old "state" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldState(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldState is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldState requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldState: %w", err)
+	}
+	return oldValue.State, nil
+}
+
+// ResetState resets all changes to the "state" field.
+func (m *CompositionMutation) ResetState() {
+	m.state = nil
+}
+
+// SetStep sets the "step" field.
+func (m *CompositionMutation) SetStep(s string) {
+	m.step = &s
+}
+
+// Step returns the value of the "step" field in the mutation.
+func (m *CompositionMutation) Step() (r string, exists bool) {
+	v := m.step
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStep returns the old "step" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldStep(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStep is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStep requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStep: %w", err)
+	}
+	return oldValue.Step, nil
+}
+
+// ClearStep clears the value of the "step" field.
+func (m *CompositionMutation) ClearStep() {
+	m.step = nil
+	m.clearedFields[composition.FieldStep] = struct{}{}
+}
+
+// StepCleared returns if the "step" field was cleared in this mutation.
+func (m *CompositionMutation) StepCleared() bool {
+	_, ok := m.clearedFields[composition.FieldStep]
+	return ok
+}
+
+// ResetStep resets all changes to the "step" field.
+func (m *CompositionMutation) ResetStep() {
+	m.step = nil
+	delete(m.clearedFields, composition.FieldStep)
+}
+
+// SetPercent sets the "percent" field.
+func (m *CompositionMutation) SetPercent(i int) {
+	m.percent = &i
+	m.addpercent = nil
+}
+
+// Percent returns the value of the "percent" field in the mutation.
+func (m *CompositionMutation) Percent() (r int, exists bool) {
+	v := m.percent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPercent returns the old "percent" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldPercent(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPercent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPercent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPercent: %w", err)
+	}
+	return oldValue.Percent, nil
+}
+
+// AddPercent adds i to the "percent" field.
+func (m *CompositionMutation) AddPercent(i int) {
+	if m.addpercent != nil {
+		*m.addpercent += i
+	} else {
+		m.addpercent = &i
+	}
+}
+
+// AddedPercent returns the value that was added to the "percent" field in this mutation.
+func (m *CompositionMutation) AddedPercent() (r int, exists bool) {
+	v := m.addpercent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPercent resets all changes to the "percent" field.
+func (m *CompositionMutation) ResetPercent() {
+	m.percent = nil
+	m.addpercent = nil
+}
+
+// SetRuns sets the "runs" field.
+func (m *CompositionMutation) SetRuns(j jsontext.Value) {
+	m.runs = &j
+	m.appendruns = nil
+}
+
+// Runs returns the value of the "runs" field in the mutation.
+func (m *CompositionMutation) Runs() (r jsontext.Value, exists bool) {
+	v := m.runs
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRuns returns the old "runs" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldRuns(ctx context.Context) (v jsontext.Value, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRuns is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRuns requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRuns: %w", err)
+	}
+	return oldValue.Runs, nil
+}
+
+// AppendRuns adds j to the "runs" field.
+func (m *CompositionMutation) AppendRuns(j jsontext.Value) {
+	m.appendruns = append(m.appendruns, j...)
+}
+
+// AppendedRuns returns the list of values that were appended to the "runs" field in this mutation.
+func (m *CompositionMutation) AppendedRuns() (jsontext.Value, bool) {
+	if len(m.appendruns) == 0 {
+		return nil, false
+	}
+	return m.appendruns, true
+}
+
+// ClearRuns clears the value of the "runs" field.
+func (m *CompositionMutation) ClearRuns() {
+	m.runs = nil
+	m.appendruns = nil
+	m.clearedFields[composition.FieldRuns] = struct{}{}
+}
+
+// RunsCleared returns if the "runs" field was cleared in this mutation.
+func (m *CompositionMutation) RunsCleared() bool {
+	_, ok := m.clearedFields[composition.FieldRuns]
+	return ok
+}
+
+// ResetRuns resets all changes to the "runs" field.
+func (m *CompositionMutation) ResetRuns() {
+	m.runs = nil
+	m.appendruns = nil
+	delete(m.clearedFields, composition.FieldRuns)
+}
+
+// SetFailure sets the "failure" field.
+func (m *CompositionMutation) SetFailure(s string) {
+	m.failure = &s
+}
+
+// Failure returns the value of the "failure" field in the mutation.
+func (m *CompositionMutation) Failure() (r string, exists bool) {
+	v := m.failure
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFailure returns the old "failure" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldFailure(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFailure is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFailure requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFailure: %w", err)
+	}
+	return oldValue.Failure, nil
+}
+
+// ClearFailure clears the value of the "failure" field.
+func (m *CompositionMutation) ClearFailure() {
+	m.failure = nil
+	m.clearedFields[composition.FieldFailure] = struct{}{}
+}
+
+// FailureCleared returns if the "failure" field was cleared in this mutation.
+func (m *CompositionMutation) FailureCleared() bool {
+	_, ok := m.clearedFields[composition.FieldFailure]
+	return ok
+}
+
+// ResetFailure resets all changes to the "failure" field.
+func (m *CompositionMutation) ResetFailure() {
+	m.failure = nil
+	delete(m.clearedFields, composition.FieldFailure)
+}
+
+// SetFailureDetail sets the "failure_detail" field.
+func (m *CompositionMutation) SetFailureDetail(s string) {
+	m.failure_detail = &s
+}
+
+// FailureDetail returns the value of the "failure_detail" field in the mutation.
+func (m *CompositionMutation) FailureDetail() (r string, exists bool) {
+	v := m.failure_detail
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFailureDetail returns the old "failure_detail" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldFailureDetail(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFailureDetail is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFailureDetail requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFailureDetail: %w", err)
+	}
+	return oldValue.FailureDetail, nil
+}
+
+// ClearFailureDetail clears the value of the "failure_detail" field.
+func (m *CompositionMutation) ClearFailureDetail() {
+	m.failure_detail = nil
+	m.clearedFields[composition.FieldFailureDetail] = struct{}{}
+}
+
+// FailureDetailCleared returns if the "failure_detail" field was cleared in this mutation.
+func (m *CompositionMutation) FailureDetailCleared() bool {
+	_, ok := m.clearedFields[composition.FieldFailureDetail]
+	return ok
+}
+
+// ResetFailureDetail resets all changes to the "failure_detail" field.
+func (m *CompositionMutation) ResetFailureDetail() {
+	m.failure_detail = nil
+	delete(m.clearedFields, composition.FieldFailureDetail)
+}
+
+// SetOutputName sets the "output_name" field.
+func (m *CompositionMutation) SetOutputName(s string) {
+	m.output_name = &s
+}
+
+// OutputName returns the value of the "output_name" field in the mutation.
+func (m *CompositionMutation) OutputName() (r string, exists bool) {
+	v := m.output_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOutputName returns the old "output_name" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldOutputName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOutputName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOutputName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOutputName: %w", err)
+	}
+	return oldValue.OutputName, nil
+}
+
+// ResetOutputName resets all changes to the "output_name" field.
+func (m *CompositionMutation) ResetOutputName() {
+	m.output_name = nil
+}
+
+// SetOutputSize sets the "output_size" field.
+func (m *CompositionMutation) SetOutputSize(i int64) {
+	m.output_size = &i
+	m.addoutput_size = nil
+}
+
+// OutputSize returns the value of the "output_size" field in the mutation.
+func (m *CompositionMutation) OutputSize() (r int64, exists bool) {
+	v := m.output_size
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOutputSize returns the old "output_size" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldOutputSize(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOutputSize is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOutputSize requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOutputSize: %w", err)
+	}
+	return oldValue.OutputSize, nil
+}
+
+// AddOutputSize adds i to the "output_size" field.
+func (m *CompositionMutation) AddOutputSize(i int64) {
+	if m.addoutput_size != nil {
+		*m.addoutput_size += i
+	} else {
+		m.addoutput_size = &i
+	}
+}
+
+// AddedOutputSize returns the value that was added to the "output_size" field in this mutation.
+func (m *CompositionMutation) AddedOutputSize() (r int64, exists bool) {
+	v := m.addoutput_size
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearOutputSize clears the value of the "output_size" field.
+func (m *CompositionMutation) ClearOutputSize() {
+	m.output_size = nil
+	m.addoutput_size = nil
+	m.clearedFields[composition.FieldOutputSize] = struct{}{}
+}
+
+// OutputSizeCleared returns if the "output_size" field was cleared in this mutation.
+func (m *CompositionMutation) OutputSizeCleared() bool {
+	_, ok := m.clearedFields[composition.FieldOutputSize]
+	return ok
+}
+
+// ResetOutputSize resets all changes to the "output_size" field.
+func (m *CompositionMutation) ResetOutputSize() {
+	m.output_size = nil
+	m.addoutput_size = nil
+	delete(m.clearedFields, composition.FieldOutputSize)
+}
+
+// SetQueuedAt sets the "queued_at" field.
+func (m *CompositionMutation) SetQueuedAt(t time.Time) {
+	m.queued_at = &t
+}
+
+// QueuedAt returns the value of the "queued_at" field in the mutation.
+func (m *CompositionMutation) QueuedAt() (r time.Time, exists bool) {
+	v := m.queued_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldQueuedAt returns the old "queued_at" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldQueuedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldQueuedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldQueuedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldQueuedAt: %w", err)
+	}
+	return oldValue.QueuedAt, nil
+}
+
+// ClearQueuedAt clears the value of the "queued_at" field.
+func (m *CompositionMutation) ClearQueuedAt() {
+	m.queued_at = nil
+	m.clearedFields[composition.FieldQueuedAt] = struct{}{}
+}
+
+// QueuedAtCleared returns if the "queued_at" field was cleared in this mutation.
+func (m *CompositionMutation) QueuedAtCleared() bool {
+	_, ok := m.clearedFields[composition.FieldQueuedAt]
+	return ok
+}
+
+// ResetQueuedAt resets all changes to the "queued_at" field.
+func (m *CompositionMutation) ResetQueuedAt() {
+	m.queued_at = nil
+	delete(m.clearedFields, composition.FieldQueuedAt)
+}
+
+// SetStartedAt sets the "started_at" field.
+func (m *CompositionMutation) SetStartedAt(t time.Time) {
+	m.started_at = &t
+}
+
+// StartedAt returns the value of the "started_at" field in the mutation.
+func (m *CompositionMutation) StartedAt() (r time.Time, exists bool) {
+	v := m.started_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStartedAt returns the old "started_at" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldStartedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStartedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStartedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStartedAt: %w", err)
+	}
+	return oldValue.StartedAt, nil
+}
+
+// ClearStartedAt clears the value of the "started_at" field.
+func (m *CompositionMutation) ClearStartedAt() {
+	m.started_at = nil
+	m.clearedFields[composition.FieldStartedAt] = struct{}{}
+}
+
+// StartedAtCleared returns if the "started_at" field was cleared in this mutation.
+func (m *CompositionMutation) StartedAtCleared() bool {
+	_, ok := m.clearedFields[composition.FieldStartedAt]
+	return ok
+}
+
+// ResetStartedAt resets all changes to the "started_at" field.
+func (m *CompositionMutation) ResetStartedAt() {
+	m.started_at = nil
+	delete(m.clearedFields, composition.FieldStartedAt)
+}
+
+// SetFinishedAt sets the "finished_at" field.
+func (m *CompositionMutation) SetFinishedAt(t time.Time) {
+	m.finished_at = &t
+}
+
+// FinishedAt returns the value of the "finished_at" field in the mutation.
+func (m *CompositionMutation) FinishedAt() (r time.Time, exists bool) {
+	v := m.finished_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFinishedAt returns the old "finished_at" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldFinishedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFinishedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFinishedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFinishedAt: %w", err)
+	}
+	return oldValue.FinishedAt, nil
+}
+
+// ClearFinishedAt clears the value of the "finished_at" field.
+func (m *CompositionMutation) ClearFinishedAt() {
+	m.finished_at = nil
+	m.clearedFields[composition.FieldFinishedAt] = struct{}{}
+}
+
+// FinishedAtCleared returns if the "finished_at" field was cleared in this mutation.
+func (m *CompositionMutation) FinishedAtCleared() bool {
+	_, ok := m.clearedFields[composition.FieldFinishedAt]
+	return ok
+}
+
+// ResetFinishedAt resets all changes to the "finished_at" field.
+func (m *CompositionMutation) ResetFinishedAt() {
+	m.finished_at = nil
+	delete(m.clearedFields, composition.FieldFinishedAt)
+}
+
+// SetCreated sets the "created" field.
+func (m *CompositionMutation) SetCreated(t time.Time) {
+	m.created = &t
+}
+
+// Created returns the value of the "created" field in the mutation.
+func (m *CompositionMutation) Created() (r time.Time, exists bool) {
+	v := m.created
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreated returns the old "created" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldCreated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreated: %w", err)
+	}
+	return oldValue.Created, nil
+}
+
+// ResetCreated resets all changes to the "created" field.
+func (m *CompositionMutation) ResetCreated() {
+	m.created = nil
+}
+
+// SetUpdated sets the "updated" field.
+func (m *CompositionMutation) SetUpdated(t time.Time) {
+	m.updated = &t
+}
+
+// Updated returns the value of the "updated" field in the mutation.
+func (m *CompositionMutation) Updated() (r time.Time, exists bool) {
+	v := m.updated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdated returns the old "updated" field's value of the Composition entity.
+// If the Composition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CompositionMutation) OldUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdated: %w", err)
+	}
+	return oldValue.Updated, nil
+}
+
+// ResetUpdated resets all changes to the "updated" field.
+func (m *CompositionMutation) ResetUpdated() {
+	m.updated = nil
+}
+
+// ClearResource clears the "resource" edge to the GameDownloadResource entity.
+func (m *CompositionMutation) ClearResource() {
+	m.clearedresource = true
+	m.clearedFields[composition.FieldResourceID] = struct{}{}
+}
+
+// ResourceCleared reports if the "resource" edge to the GameDownloadResource entity was cleared.
+func (m *CompositionMutation) ResourceCleared() bool {
+	return m.ResourceIDCleared() || m.clearedresource
+}
+
+// ResourceIDs returns the "resource" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ResourceID instead. It exists only for internal usage by the builders.
+func (m *CompositionMutation) ResourceIDs() (ids []int) {
+	if id := m.resource; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetResource resets all changes to the "resource" edge.
+func (m *CompositionMutation) ResetResource() {
+	m.resource = nil
+	m.clearedresource = false
+}
+
+// Where appends a list predicates to the CompositionMutation builder.
+func (m *CompositionMutation) Where(ps ...predicate.Composition) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CompositionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CompositionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Composition, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CompositionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CompositionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Composition).
+func (m *CompositionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CompositionMutation) Fields() []string {
+	fields := make([]string, 0, 29)
+	if m.game_id != nil {
+		fields = append(fields, composition.FieldGameID)
+	}
+	if m.creator_id != nil {
+		fields = append(fields, composition.FieldCreatorID)
+	}
+	if m.resource != nil {
+		fields = append(fields, composition.FieldResourceID)
+	}
+	if m.target_file_id != nil {
+		fields = append(fields, composition.FieldTargetFileID)
+	}
+	if m.base != nil {
+		fields = append(fields, composition.FieldBase)
+	}
+	if m.patch != nil {
+		fields = append(fields, composition.FieldPatch)
+	}
+	if m.save != nil {
+		fields = append(fields, composition.FieldSave)
+	}
+	if m.patch_entries != nil {
+		fields = append(fields, composition.FieldPatchEntries)
+	}
+	if m.save_entries != nil {
+		fields = append(fields, composition.FieldSaveEntries)
+	}
+	if m.details != nil {
+		fields = append(fields, composition.FieldDetails)
+	}
+	if m.game_dir != nil {
+		fields = append(fields, composition.FieldGameDir)
+	}
+	if m.patch_dir != nil {
+		fields = append(fields, composition.FieldPatchDir)
+	}
+	if m.keep_patch != nil {
+		fields = append(fields, composition.FieldKeepPatch)
+	}
+	if m.note != nil {
+		fields = append(fields, composition.FieldNote)
+	}
+	if m.patch_match != nil {
+		fields = append(fields, composition.FieldPatchMatch)
+	}
+	if m.plan != nil {
+		fields = append(fields, composition.FieldPlan)
+	}
+	if m.state != nil {
+		fields = append(fields, composition.FieldState)
+	}
+	if m.step != nil {
+		fields = append(fields, composition.FieldStep)
+	}
+	if m.percent != nil {
+		fields = append(fields, composition.FieldPercent)
+	}
+	if m.runs != nil {
+		fields = append(fields, composition.FieldRuns)
+	}
+	if m.failure != nil {
+		fields = append(fields, composition.FieldFailure)
+	}
+	if m.failure_detail != nil {
+		fields = append(fields, composition.FieldFailureDetail)
+	}
+	if m.output_name != nil {
+		fields = append(fields, composition.FieldOutputName)
+	}
+	if m.output_size != nil {
+		fields = append(fields, composition.FieldOutputSize)
+	}
+	if m.queued_at != nil {
+		fields = append(fields, composition.FieldQueuedAt)
+	}
+	if m.started_at != nil {
+		fields = append(fields, composition.FieldStartedAt)
+	}
+	if m.finished_at != nil {
+		fields = append(fields, composition.FieldFinishedAt)
+	}
+	if m.created != nil {
+		fields = append(fields, composition.FieldCreated)
+	}
+	if m.updated != nil {
+		fields = append(fields, composition.FieldUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CompositionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case composition.FieldGameID:
+		return m.GameID()
+	case composition.FieldCreatorID:
+		return m.CreatorID()
+	case composition.FieldResourceID:
+		return m.ResourceID()
+	case composition.FieldTargetFileID:
+		return m.TargetFileID()
+	case composition.FieldBase:
+		return m.Base()
+	case composition.FieldPatch:
+		return m.Patch()
+	case composition.FieldSave:
+		return m.Save()
+	case composition.FieldPatchEntries:
+		return m.PatchEntries()
+	case composition.FieldSaveEntries:
+		return m.SaveEntries()
+	case composition.FieldDetails:
+		return m.Details()
+	case composition.FieldGameDir:
+		return m.GameDir()
+	case composition.FieldPatchDir:
+		return m.PatchDir()
+	case composition.FieldKeepPatch:
+		return m.KeepPatch()
+	case composition.FieldNote:
+		return m.Note()
+	case composition.FieldPatchMatch:
+		return m.PatchMatch()
+	case composition.FieldPlan:
+		return m.Plan()
+	case composition.FieldState:
+		return m.State()
+	case composition.FieldStep:
+		return m.Step()
+	case composition.FieldPercent:
+		return m.Percent()
+	case composition.FieldRuns:
+		return m.Runs()
+	case composition.FieldFailure:
+		return m.Failure()
+	case composition.FieldFailureDetail:
+		return m.FailureDetail()
+	case composition.FieldOutputName:
+		return m.OutputName()
+	case composition.FieldOutputSize:
+		return m.OutputSize()
+	case composition.FieldQueuedAt:
+		return m.QueuedAt()
+	case composition.FieldStartedAt:
+		return m.StartedAt()
+	case composition.FieldFinishedAt:
+		return m.FinishedAt()
+	case composition.FieldCreated:
+		return m.Created()
+	case composition.FieldUpdated:
+		return m.Updated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CompositionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case composition.FieldGameID:
+		return m.OldGameID(ctx)
+	case composition.FieldCreatorID:
+		return m.OldCreatorID(ctx)
+	case composition.FieldResourceID:
+		return m.OldResourceID(ctx)
+	case composition.FieldTargetFileID:
+		return m.OldTargetFileID(ctx)
+	case composition.FieldBase:
+		return m.OldBase(ctx)
+	case composition.FieldPatch:
+		return m.OldPatch(ctx)
+	case composition.FieldSave:
+		return m.OldSave(ctx)
+	case composition.FieldPatchEntries:
+		return m.OldPatchEntries(ctx)
+	case composition.FieldSaveEntries:
+		return m.OldSaveEntries(ctx)
+	case composition.FieldDetails:
+		return m.OldDetails(ctx)
+	case composition.FieldGameDir:
+		return m.OldGameDir(ctx)
+	case composition.FieldPatchDir:
+		return m.OldPatchDir(ctx)
+	case composition.FieldKeepPatch:
+		return m.OldKeepPatch(ctx)
+	case composition.FieldNote:
+		return m.OldNote(ctx)
+	case composition.FieldPatchMatch:
+		return m.OldPatchMatch(ctx)
+	case composition.FieldPlan:
+		return m.OldPlan(ctx)
+	case composition.FieldState:
+		return m.OldState(ctx)
+	case composition.FieldStep:
+		return m.OldStep(ctx)
+	case composition.FieldPercent:
+		return m.OldPercent(ctx)
+	case composition.FieldRuns:
+		return m.OldRuns(ctx)
+	case composition.FieldFailure:
+		return m.OldFailure(ctx)
+	case composition.FieldFailureDetail:
+		return m.OldFailureDetail(ctx)
+	case composition.FieldOutputName:
+		return m.OldOutputName(ctx)
+	case composition.FieldOutputSize:
+		return m.OldOutputSize(ctx)
+	case composition.FieldQueuedAt:
+		return m.OldQueuedAt(ctx)
+	case composition.FieldStartedAt:
+		return m.OldStartedAt(ctx)
+	case composition.FieldFinishedAt:
+		return m.OldFinishedAt(ctx)
+	case composition.FieldCreated:
+		return m.OldCreated(ctx)
+	case composition.FieldUpdated:
+		return m.OldUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown Composition field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CompositionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case composition.FieldGameID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGameID(v)
+		return nil
+	case composition.FieldCreatorID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatorID(v)
+		return nil
+	case composition.FieldResourceID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResourceID(v)
+		return nil
+	case composition.FieldTargetFileID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTargetFileID(v)
+		return nil
+	case composition.FieldBase:
+		v, ok := value.(jsontext.Value)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBase(v)
+		return nil
+	case composition.FieldPatch:
+		v, ok := value.(jsontext.Value)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPatch(v)
+		return nil
+	case composition.FieldSave:
+		v, ok := value.(jsontext.Value)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSave(v)
+		return nil
+	case composition.FieldPatchEntries:
+		v, ok := value.(jsontext.Value)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPatchEntries(v)
+		return nil
+	case composition.FieldSaveEntries:
+		v, ok := value.(jsontext.Value)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSaveEntries(v)
+		return nil
+	case composition.FieldDetails:
+		v, ok := value.(jsontext.Value)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDetails(v)
+		return nil
+	case composition.FieldGameDir:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGameDir(v)
+		return nil
+	case composition.FieldPatchDir:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPatchDir(v)
+		return nil
+	case composition.FieldKeepPatch:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKeepPatch(v)
+		return nil
+	case composition.FieldNote:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNote(v)
+		return nil
+	case composition.FieldPatchMatch:
+		v, ok := value.(jsontext.Value)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPatchMatch(v)
+		return nil
+	case composition.FieldPlan:
+		v, ok := value.(jsontext.Value)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPlan(v)
+		return nil
+	case composition.FieldState:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetState(v)
+		return nil
+	case composition.FieldStep:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStep(v)
+		return nil
+	case composition.FieldPercent:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPercent(v)
+		return nil
+	case composition.FieldRuns:
+		v, ok := value.(jsontext.Value)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRuns(v)
+		return nil
+	case composition.FieldFailure:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFailure(v)
+		return nil
+	case composition.FieldFailureDetail:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFailureDetail(v)
+		return nil
+	case composition.FieldOutputName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOutputName(v)
+		return nil
+	case composition.FieldOutputSize:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOutputSize(v)
+		return nil
+	case composition.FieldQueuedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetQueuedAt(v)
+		return nil
+	case composition.FieldStartedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStartedAt(v)
+		return nil
+	case composition.FieldFinishedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFinishedAt(v)
+		return nil
+	case composition.FieldCreated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreated(v)
+		return nil
+	case composition.FieldUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Composition field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CompositionMutation) AddedFields() []string {
+	var fields []string
+	if m.addgame_id != nil {
+		fields = append(fields, composition.FieldGameID)
+	}
+	if m.addcreator_id != nil {
+		fields = append(fields, composition.FieldCreatorID)
+	}
+	if m.addtarget_file_id != nil {
+		fields = append(fields, composition.FieldTargetFileID)
+	}
+	if m.addpercent != nil {
+		fields = append(fields, composition.FieldPercent)
+	}
+	if m.addoutput_size != nil {
+		fields = append(fields, composition.FieldOutputSize)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CompositionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case composition.FieldGameID:
+		return m.AddedGameID()
+	case composition.FieldCreatorID:
+		return m.AddedCreatorID()
+	case composition.FieldTargetFileID:
+		return m.AddedTargetFileID()
+	case composition.FieldPercent:
+		return m.AddedPercent()
+	case composition.FieldOutputSize:
+		return m.AddedOutputSize()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CompositionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case composition.FieldGameID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGameID(v)
+		return nil
+	case composition.FieldCreatorID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreatorID(v)
+		return nil
+	case composition.FieldTargetFileID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTargetFileID(v)
+		return nil
+	case composition.FieldPercent:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPercent(v)
+		return nil
+	case composition.FieldOutputSize:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOutputSize(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Composition numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CompositionMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(composition.FieldResourceID) {
+		fields = append(fields, composition.FieldResourceID)
+	}
+	if m.FieldCleared(composition.FieldTargetFileID) {
+		fields = append(fields, composition.FieldTargetFileID)
+	}
+	if m.FieldCleared(composition.FieldPatch) {
+		fields = append(fields, composition.FieldPatch)
+	}
+	if m.FieldCleared(composition.FieldSave) {
+		fields = append(fields, composition.FieldSave)
+	}
+	if m.FieldCleared(composition.FieldPatchEntries) {
+		fields = append(fields, composition.FieldPatchEntries)
+	}
+	if m.FieldCleared(composition.FieldSaveEntries) {
+		fields = append(fields, composition.FieldSaveEntries)
+	}
+	if m.FieldCleared(composition.FieldGameDir) {
+		fields = append(fields, composition.FieldGameDir)
+	}
+	if m.FieldCleared(composition.FieldPatchDir) {
+		fields = append(fields, composition.FieldPatchDir)
+	}
+	if m.FieldCleared(composition.FieldNote) {
+		fields = append(fields, composition.FieldNote)
+	}
+	if m.FieldCleared(composition.FieldPatchMatch) {
+		fields = append(fields, composition.FieldPatchMatch)
+	}
+	if m.FieldCleared(composition.FieldPlan) {
+		fields = append(fields, composition.FieldPlan)
+	}
+	if m.FieldCleared(composition.FieldStep) {
+		fields = append(fields, composition.FieldStep)
+	}
+	if m.FieldCleared(composition.FieldRuns) {
+		fields = append(fields, composition.FieldRuns)
+	}
+	if m.FieldCleared(composition.FieldFailure) {
+		fields = append(fields, composition.FieldFailure)
+	}
+	if m.FieldCleared(composition.FieldFailureDetail) {
+		fields = append(fields, composition.FieldFailureDetail)
+	}
+	if m.FieldCleared(composition.FieldOutputSize) {
+		fields = append(fields, composition.FieldOutputSize)
+	}
+	if m.FieldCleared(composition.FieldQueuedAt) {
+		fields = append(fields, composition.FieldQueuedAt)
+	}
+	if m.FieldCleared(composition.FieldStartedAt) {
+		fields = append(fields, composition.FieldStartedAt)
+	}
+	if m.FieldCleared(composition.FieldFinishedAt) {
+		fields = append(fields, composition.FieldFinishedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CompositionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CompositionMutation) ClearField(name string) error {
+	switch name {
+	case composition.FieldResourceID:
+		m.ClearResourceID()
+		return nil
+	case composition.FieldTargetFileID:
+		m.ClearTargetFileID()
+		return nil
+	case composition.FieldPatch:
+		m.ClearPatch()
+		return nil
+	case composition.FieldSave:
+		m.ClearSave()
+		return nil
+	case composition.FieldPatchEntries:
+		m.ClearPatchEntries()
+		return nil
+	case composition.FieldSaveEntries:
+		m.ClearSaveEntries()
+		return nil
+	case composition.FieldGameDir:
+		m.ClearGameDir()
+		return nil
+	case composition.FieldPatchDir:
+		m.ClearPatchDir()
+		return nil
+	case composition.FieldNote:
+		m.ClearNote()
+		return nil
+	case composition.FieldPatchMatch:
+		m.ClearPatchMatch()
+		return nil
+	case composition.FieldPlan:
+		m.ClearPlan()
+		return nil
+	case composition.FieldStep:
+		m.ClearStep()
+		return nil
+	case composition.FieldRuns:
+		m.ClearRuns()
+		return nil
+	case composition.FieldFailure:
+		m.ClearFailure()
+		return nil
+	case composition.FieldFailureDetail:
+		m.ClearFailureDetail()
+		return nil
+	case composition.FieldOutputSize:
+		m.ClearOutputSize()
+		return nil
+	case composition.FieldQueuedAt:
+		m.ClearQueuedAt()
+		return nil
+	case composition.FieldStartedAt:
+		m.ClearStartedAt()
+		return nil
+	case composition.FieldFinishedAt:
+		m.ClearFinishedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown Composition nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CompositionMutation) ResetField(name string) error {
+	switch name {
+	case composition.FieldGameID:
+		m.ResetGameID()
+		return nil
+	case composition.FieldCreatorID:
+		m.ResetCreatorID()
+		return nil
+	case composition.FieldResourceID:
+		m.ResetResourceID()
+		return nil
+	case composition.FieldTargetFileID:
+		m.ResetTargetFileID()
+		return nil
+	case composition.FieldBase:
+		m.ResetBase()
+		return nil
+	case composition.FieldPatch:
+		m.ResetPatch()
+		return nil
+	case composition.FieldSave:
+		m.ResetSave()
+		return nil
+	case composition.FieldPatchEntries:
+		m.ResetPatchEntries()
+		return nil
+	case composition.FieldSaveEntries:
+		m.ResetSaveEntries()
+		return nil
+	case composition.FieldDetails:
+		m.ResetDetails()
+		return nil
+	case composition.FieldGameDir:
+		m.ResetGameDir()
+		return nil
+	case composition.FieldPatchDir:
+		m.ResetPatchDir()
+		return nil
+	case composition.FieldKeepPatch:
+		m.ResetKeepPatch()
+		return nil
+	case composition.FieldNote:
+		m.ResetNote()
+		return nil
+	case composition.FieldPatchMatch:
+		m.ResetPatchMatch()
+		return nil
+	case composition.FieldPlan:
+		m.ResetPlan()
+		return nil
+	case composition.FieldState:
+		m.ResetState()
+		return nil
+	case composition.FieldStep:
+		m.ResetStep()
+		return nil
+	case composition.FieldPercent:
+		m.ResetPercent()
+		return nil
+	case composition.FieldRuns:
+		m.ResetRuns()
+		return nil
+	case composition.FieldFailure:
+		m.ResetFailure()
+		return nil
+	case composition.FieldFailureDetail:
+		m.ResetFailureDetail()
+		return nil
+	case composition.FieldOutputName:
+		m.ResetOutputName()
+		return nil
+	case composition.FieldOutputSize:
+		m.ResetOutputSize()
+		return nil
+	case composition.FieldQueuedAt:
+		m.ResetQueuedAt()
+		return nil
+	case composition.FieldStartedAt:
+		m.ResetStartedAt()
+		return nil
+	case composition.FieldFinishedAt:
+		m.ResetFinishedAt()
+		return nil
+	case composition.FieldCreated:
+		m.ResetCreated()
+		return nil
+	case composition.FieldUpdated:
+		m.ResetUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown Composition field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CompositionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.resource != nil {
+		edges = append(edges, composition.EdgeResource)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CompositionMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case composition.EdgeResource:
+		if id := m.resource; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CompositionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CompositionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CompositionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedresource {
+		edges = append(edges, composition.EdgeResource)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CompositionMutation) EdgeCleared(name string) bool {
+	switch name {
+	case composition.EdgeResource:
+		return m.clearedresource
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CompositionMutation) ClearEdge(name string) error {
+	switch name {
+	case composition.EdgeResource:
+		m.ClearResource()
+		return nil
+	}
+	return fmt.Errorf("unknown Composition unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CompositionMutation) ResetEdge(name string) error {
+	switch name {
+	case composition.EdgeResource:
+		m.ResetResource()
+		return nil
+	}
+	return fmt.Errorf("unknown Composition edge %s", name)
+}
+
 // EditRecordMutation represents an operation that mutates the EditRecord nodes in the graph.
 type EditRecordMutation struct {
 	config
@@ -33530,6 +36115,9 @@ type GameDownloadResourceMutation struct {
 	translator_credits        map[int]struct{}
 	removedtranslator_credits map[int]struct{}
 	clearedtranslator_credits bool
+	compositions              map[int]struct{}
+	removedcompositions       map[int]struct{}
+	clearedcompositions       bool
 	done                      bool
 	oldValue                  func(context.Context) (*GameDownloadResource, error)
 	predicates                []predicate.GameDownloadResource
@@ -35000,6 +37588,60 @@ func (m *GameDownloadResourceMutation) ResetTranslatorCredits() {
 	m.removedtranslator_credits = nil
 }
 
+// AddCompositionIDs adds the "compositions" edge to the Composition entity by ids.
+func (m *GameDownloadResourceMutation) AddCompositionIDs(ids ...int) {
+	if m.compositions == nil {
+		m.compositions = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.compositions[ids[i]] = struct{}{}
+	}
+}
+
+// ClearCompositions clears the "compositions" edge to the Composition entity.
+func (m *GameDownloadResourceMutation) ClearCompositions() {
+	m.clearedcompositions = true
+}
+
+// CompositionsCleared reports if the "compositions" edge to the Composition entity was cleared.
+func (m *GameDownloadResourceMutation) CompositionsCleared() bool {
+	return m.clearedcompositions
+}
+
+// RemoveCompositionIDs removes the "compositions" edge to the Composition entity by IDs.
+func (m *GameDownloadResourceMutation) RemoveCompositionIDs(ids ...int) {
+	if m.removedcompositions == nil {
+		m.removedcompositions = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.compositions, ids[i])
+		m.removedcompositions[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedCompositions returns the removed IDs of the "compositions" edge to the Composition entity.
+func (m *GameDownloadResourceMutation) RemovedCompositionsIDs() (ids []int) {
+	for id := range m.removedcompositions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// CompositionsIDs returns the "compositions" edge IDs in the mutation.
+func (m *GameDownloadResourceMutation) CompositionsIDs() (ids []int) {
+	for id := range m.compositions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetCompositions resets all changes to the "compositions" edge.
+func (m *GameDownloadResourceMutation) ResetCompositions() {
+	m.compositions = nil
+	m.clearedcompositions = false
+	m.removedcompositions = nil
+}
+
 // Where appends a list predicates to the GameDownloadResourceMutation builder.
 func (m *GameDownloadResourceMutation) Where(ps ...predicate.GameDownloadResource) {
 	m.predicates = append(m.predicates, ps...)
@@ -35564,7 +38206,7 @@ func (m *GameDownloadResourceMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *GameDownloadResourceMutation) AddedEdges() []string {
-	edges := make([]string, 0, 9)
+	edges := make([]string, 0, 10)
 	if m.game != nil {
 		edges = append(edges, gamedownloadresource.EdgeGame)
 	}
@@ -35591,6 +38233,9 @@ func (m *GameDownloadResourceMutation) AddedEdges() []string {
 	}
 	if m.translator_credits != nil {
 		edges = append(edges, gamedownloadresource.EdgeTranslatorCredits)
+	}
+	if m.compositions != nil {
+		edges = append(edges, gamedownloadresource.EdgeCompositions)
 	}
 	return edges
 }
@@ -35649,13 +38294,19 @@ func (m *GameDownloadResourceMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case gamedownloadresource.EdgeCompositions:
+		ids := make([]ent.Value, 0, len(m.compositions))
+		for id := range m.compositions {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *GameDownloadResourceMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 9)
+	edges := make([]string, 0, 10)
 	if m.removedfiles != nil {
 		edges = append(edges, gamedownloadresource.EdgeFiles)
 	}
@@ -35676,6 +38327,9 @@ func (m *GameDownloadResourceMutation) RemovedEdges() []string {
 	}
 	if m.removedtranslator_credits != nil {
 		edges = append(edges, gamedownloadresource.EdgeTranslatorCredits)
+	}
+	if m.removedcompositions != nil {
+		edges = append(edges, gamedownloadresource.EdgeCompositions)
 	}
 	return edges
 }
@@ -35726,13 +38380,19 @@ func (m *GameDownloadResourceMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case gamedownloadresource.EdgeCompositions:
+		ids := make([]ent.Value, 0, len(m.removedcompositions))
+		for id := range m.removedcompositions {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *GameDownloadResourceMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 9)
+	edges := make([]string, 0, 10)
 	if m.clearedgame {
 		edges = append(edges, gamedownloadresource.EdgeGame)
 	}
@@ -35760,6 +38420,9 @@ func (m *GameDownloadResourceMutation) ClearedEdges() []string {
 	if m.clearedtranslator_credits {
 		edges = append(edges, gamedownloadresource.EdgeTranslatorCredits)
 	}
+	if m.clearedcompositions {
+		edges = append(edges, gamedownloadresource.EdgeCompositions)
+	}
 	return edges
 }
 
@@ -35785,6 +38448,8 @@ func (m *GameDownloadResourceMutation) EdgeCleared(name string) bool {
 		return m.clearedevents
 	case gamedownloadresource.EdgeTranslatorCredits:
 		return m.clearedtranslator_credits
+	case gamedownloadresource.EdgeCompositions:
+		return m.clearedcompositions
 	}
 	return false
 }
@@ -35833,6 +38498,9 @@ func (m *GameDownloadResourceMutation) ResetEdge(name string) error {
 		return nil
 	case gamedownloadresource.EdgeTranslatorCredits:
 		m.ResetTranslatorCredits()
+		return nil
+	case gamedownloadresource.EdgeCompositions:
+		m.ResetCompositions()
 		return nil
 	}
 	return fmt.Errorf("unknown GameDownloadResource edge %s", name)

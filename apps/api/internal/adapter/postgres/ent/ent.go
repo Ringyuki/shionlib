@@ -28,6 +28,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsynccursor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/commentlike"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/composition"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/editrecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favorite"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favoriteitem"
@@ -148,6 +149,7 @@ func checkColumn(t, c string) error {
 			catalogsynccursor.Table:               catalogsynccursor.ValidColumn,
 			comment.Table:                         comment.ValidColumn,
 			commentlike.Table:                     commentlike.ValidColumn,
+			composition.Table:                     composition.ValidColumn,
 			editrecord.Table:                      editrecord.ValidColumn,
 			favorite.Table:                        favorite.ValidColumn,
 			favoriteitem.Table:                    favoriteitem.ValidColumn,

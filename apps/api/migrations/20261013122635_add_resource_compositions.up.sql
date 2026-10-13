@@ -1,0 +1,8 @@
+-- create "resource_compositions" table
+CREATE TABLE "resource_compositions" ("id" serial NOT NULL, "game_id" integer NOT NULL, "creator_id" integer NOT NULL, "target_file_id" integer NULL, "base" jsonb NOT NULL, "patch" jsonb NULL, "save" jsonb NULL, "patch_entries" jsonb NULL, "save_entries" jsonb NULL, "details" jsonb NOT NULL, "game_dir" text NULL, "patch_dir" text NULL, "keep_patch" boolean NOT NULL DEFAULT true, "note" text NULL, "patch_match" jsonb NULL, "plan" jsonb NULL, "state" character varying(16) NOT NULL, "step" character varying(16) NULL, "percent" integer NOT NULL DEFAULT 0, "runs" jsonb NULL, "failure" character varying(32) NULL, "failure_detail" text NULL, "output_name" text NOT NULL DEFAULT '', "output_size" bigint NULL, "queued_at" timestamp(3) NULL, "started_at" timestamp(3) NULL, "finished_at" timestamp(3) NULL, "created" timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updated" timestamp(3) NOT NULL, "resource_id" integer NULL, PRIMARY KEY ("id"), CONSTRAINT "resource_compositions_resource_id_fkey" FOREIGN KEY ("resource_id") REFERENCES "game_download_resources" ("id") ON UPDATE CASCADE ON DELETE CASCADE);
+-- create index "resource_compositions_creator_id_state_idx" to table: "resource_compositions"
+CREATE INDEX "resource_compositions_creator_id_state_idx" ON "resource_compositions" ("creator_id", "state");
+-- create index "resource_compositions_resource_id_idx" to table: "resource_compositions"
+CREATE INDEX "resource_compositions_resource_id_idx" ON "resource_compositions" ("resource_id");
+-- create index "resource_compositions_state_queued_at_idx" to table: "resource_compositions"
+CREATE INDEX "resource_compositions_state_queued_at_idx" ON "resource_compositions" ("state", "queued_at");

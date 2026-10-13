@@ -41,6 +41,14 @@
       "Reupload": {
         "FileReuploadedTitle": "你收藏的游戏有文件更新",
         "FileReuploadedContent": "你收藏的游戏《{game_title}》的文件 {file_name} 已更新。{reason, select, none {} other {更新说明：{reason}}}"
+      },
+      "Compose": {
+        "DoneTitle": "合成完成",
+        "DoneContent": "你的合成已完成，资源已发布：{file_name}",
+        "RebuiltTitle": "重新合成完成",
+        "RebuiltContent": "资源已按新的补丁重新合成：{file_name}",
+        "FailedTitle": "合成失败",
+        "FailedContent": "{file_name} 的合成未能完成：{reason}"
       }
     },
     "Moderation": {
@@ -97,7 +105,21 @@
       "ENCRYPTED": "压缩包已加密，无法检查内容",
       "INCOMPLETE_SET": "分卷不完整",
       "ABANDONED": "系统未能完成对文件的检查",
-      "HARMFUL": "检测到有害内容"
+      "HARMFUL": "检测到有害内容",
+      "COMPOSE_BASE_GONE": "原版资源已不存在或不再可用",
+      "COMPOSE_BASE_UNREADABLE": "原版的压缩包无法解包",
+      "COMPOSE_PATCH_UNREADABLE": "补丁的压缩包无法使用",
+      "COMPOSE_SAVE_UNREADABLE": "全CG存档的压缩包无法解包",
+      "COMPOSE_PLACE_MISSING": "选定的目录在解包后的文件中不存在",
+      "COMPOSE_NO_ROOM": "服务器暂存空间不足",
+      "COMPOSE_TOO_LARGE": "解包后的大小超过上限",
+      "COMPOSE_HARMFUL": "合成后的文件中检测到有害内容",
+      "COMPOSE_BROKEN": "合成后的压缩包未通过检查",
+      "COMPOSE_NOTHING_TO_APPLY": "补丁目录中没有可以放入游戏目录的文件",
+      "COMPOSE_PATH_CONFLICT": "补丁中的文件与原版中同名的文件或文件夹冲突",
+      "COMPOSE_QUEUE_FULL": "排队的合成任务已满",
+      "COMPOSE_QUOTA": "存储空间不足",
+      "COMPOSE_INTERNAL": "处理过程中出现错误"
     }
   }
 }

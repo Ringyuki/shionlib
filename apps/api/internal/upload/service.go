@@ -346,6 +346,32 @@ func (s *Service) Claim(ctx context.Context, who actor.Actor, id int) (Session, 
 	return session, nil
 }
 
+func (s *Service) Take(ctx context.Context, who actor.Actor, id int, target string) (Session, error) {
+	if !s.spool.Owns(target) {
+		return Session{}, fmt.Errorf("take upload %d: %s is outside the spool", id, target)
+	}
+	var taken Session
+	err := s.tx.WithinTransaction(ctx, func(ctx context.Context) error {
+		session, err := s.Claim(ctx, who, id)
+		if err != nil {
+			return err
+		}
+		used, err := s.repo.HasFile(ctx, id)
+		if err != nil {
+			return err
+		}
+		if used {
+			return ErrSessionAlreadyUsed
+		}
+		if _, err := s.repo.SetStatus(ctx, id, StatusCompleted, StatusExpired); err != nil {
+			return err
+		}
+		taken = session
+		return s.spool.Move(ctx, session.StoragePath, target)
+	})
+	return taken, err
+}
+
 func (s *Service) CleanStaleSessions(ctx context.Context) error {
 	now := s.now()
 	stale, err := s.repo.ListStale(ctx, now, now.Add(-staleSessionGrace), staleSessionBatch)

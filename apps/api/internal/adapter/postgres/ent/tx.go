@@ -46,6 +46,8 @@ type Tx struct {
 	Comment *CommentClient
 	// CommentLike is the client for interacting with the CommentLike builders.
 	CommentLike *CommentLikeClient
+	// Composition is the client for interacting with the Composition builders.
+	Composition *CompositionClient
 	// EditRecord is the client for interacting with the EditRecord builders.
 	EditRecord *EditRecordClient
 	// Favorite is the client for interacting with the Favorite builders.
@@ -281,6 +283,7 @@ func (tx *Tx) init() {
 	tx.CatalogSyncCursor = NewCatalogSyncCursorClient(tx.config)
 	tx.Comment = NewCommentClient(tx.config)
 	tx.CommentLike = NewCommentLikeClient(tx.config)
+	tx.Composition = NewCompositionClient(tx.config)
 	tx.EditRecord = NewEditRecordClient(tx.config)
 	tx.Favorite = NewFavoriteClient(tx.config)
 	tx.FavoriteItem = NewFavoriteItemClient(tx.config)

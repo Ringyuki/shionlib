@@ -31,6 +31,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/catalogsynccursor"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/comment"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/commentlike"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/composition"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/editrecord"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favorite"
 	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/favoriteitem"
@@ -116,6 +117,8 @@ type Client struct {
 	Comment *CommentClient
 	// CommentLike is the client for interacting with the CommentLike builders.
 	CommentLike *CommentLikeClient
+	// Composition is the client for interacting with the Composition builders.
+	Composition *CompositionClient
 	// EditRecord is the client for interacting with the EditRecord builders.
 	EditRecord *EditRecordClient
 	// Favorite is the client for interacting with the Favorite builders.
@@ -231,6 +234,7 @@ func (c *Client) init() {
 	c.CatalogSyncCursor = NewCatalogSyncCursorClient(c.config)
 	c.Comment = NewCommentClient(c.config)
 	c.CommentLike = NewCommentLikeClient(c.config)
+	c.Composition = NewCompositionClient(c.config)
 	c.EditRecord = NewEditRecordClient(c.config)
 	c.Favorite = NewFavoriteClient(c.config)
 	c.FavoriteItem = NewFavoriteItemClient(c.config)
@@ -383,6 +387,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		CatalogSyncCursor:               NewCatalogSyncCursorClient(cfg),
 		Comment:                         NewCommentClient(cfg),
 		CommentLike:                     NewCommentLikeClient(cfg),
+		Composition:                     NewCompositionClient(cfg),
 		EditRecord:                      NewEditRecordClient(cfg),
 		Favorite:                        NewFavoriteClient(cfg),
 		FavoriteItem:                    NewFavoriteItemClient(cfg),
@@ -462,6 +467,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		CatalogSyncCursor:               NewCatalogSyncCursorClient(cfg),
 		Comment:                         NewCommentClient(cfg),
 		CommentLike:                     NewCommentLikeClient(cfg),
+		Composition:                     NewCompositionClient(cfg),
 		EditRecord:                      NewEditRecordClient(cfg),
 		Favorite:                        NewFavoriteClient(cfg),
 		FavoriteItem:                    NewFavoriteItemClient(cfg),
@@ -538,8 +544,8 @@ func (c *Client) Use(hooks ...Hook) {
 		c.AICatalogModel, c.AICatalogProvider, c.AIModel, c.AIProvider,
 		c.AIProviderOffer, c.AIRequest, c.AIRequestPayload, c.AIRoute,
 		c.AIRouteAdjustment, c.AIScene, c.Activity, c.Ad, c.CatalogSourceLink,
-		c.CatalogSyncCursor, c.Comment, c.CommentLike, c.EditRecord, c.Favorite,
-		c.FavoriteItem, c.FieldPermissionMapping, c.Game, c.GameCharacter,
+		c.CatalogSyncCursor, c.Comment, c.CommentLike, c.Composition, c.EditRecord,
+		c.Favorite, c.FavoriteItem, c.FieldPermissionMapping, c.Game, c.GameCharacter,
 		c.GameCharacterRelation, c.GameCover, c.GameDeveloper, c.GameDeveloperRelation,
 		c.GameDownloadResource, c.GameDownloadResourceEvent,
 		c.GameDownloadResourceFile, c.GameDownloadResourceFileHistory,
@@ -563,8 +569,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 		c.AICatalogModel, c.AICatalogProvider, c.AIModel, c.AIProvider,
 		c.AIProviderOffer, c.AIRequest, c.AIRequestPayload, c.AIRoute,
 		c.AIRouteAdjustment, c.AIScene, c.Activity, c.Ad, c.CatalogSourceLink,
-		c.CatalogSyncCursor, c.Comment, c.CommentLike, c.EditRecord, c.Favorite,
-		c.FavoriteItem, c.FieldPermissionMapping, c.Game, c.GameCharacter,
+		c.CatalogSyncCursor, c.Comment, c.CommentLike, c.Composition, c.EditRecord,
+		c.Favorite, c.FavoriteItem, c.FieldPermissionMapping, c.Game, c.GameCharacter,
 		c.GameCharacterRelation, c.GameCover, c.GameDeveloper, c.GameDeveloperRelation,
 		c.GameDownloadResource, c.GameDownloadResourceEvent,
 		c.GameDownloadResourceFile, c.GameDownloadResourceFileHistory,
@@ -616,6 +622,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Comment.mutate(ctx, m)
 	case *CommentLikeMutation:
 		return c.CommentLike.mutate(ctx, m)
+	case *CompositionMutation:
+		return c.Composition.mutate(ctx, m)
 	case *EditRecordMutation:
 		return c.EditRecord.mutate(ctx, m)
 	case *FavoriteMutation:
@@ -3524,6 +3532,155 @@ func (c *CommentLikeClient) mutate(ctx context.Context, m *CommentLikeMutation) 
 	}
 }
 
+// CompositionClient is a client for the Composition schema.
+type CompositionClient struct {
+	config
+}
+
+// NewCompositionClient returns a client for the Composition from the given config.
+func NewCompositionClient(c config) *CompositionClient {
+	return &CompositionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `composition.Hooks(f(g(h())))`.
+func (c *CompositionClient) Use(hooks ...Hook) {
+	c.hooks.Composition = append(c.hooks.Composition, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `composition.Intercept(f(g(h())))`.
+func (c *CompositionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Composition = append(c.inters.Composition, interceptors...)
+}
+
+// Create returns a builder for creating a Composition entity.
+func (c *CompositionClient) Create() *CompositionCreate {
+	mutation := newCompositionMutation(c.config, OpCreate)
+	return &CompositionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Composition entities.
+func (c *CompositionClient) CreateBulk(builders ...*CompositionCreate) *CompositionCreateBulk {
+	return &CompositionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CompositionClient) MapCreateBulk(slice any, setFunc func(*CompositionCreate, int)) *CompositionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CompositionCreateBulk{err: fmt.Errorf("calling to CompositionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CompositionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CompositionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Composition.
+func (c *CompositionClient) Update() *CompositionUpdate {
+	mutation := newCompositionMutation(c.config, OpUpdate)
+	return &CompositionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CompositionClient) UpdateOne(_m *Composition) *CompositionUpdateOne {
+	mutation := newCompositionMutation(c.config, OpUpdateOne, withComposition(_m))
+	return &CompositionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CompositionClient) UpdateOneID(id int) *CompositionUpdateOne {
+	mutation := newCompositionMutation(c.config, OpUpdateOne, withCompositionID(id))
+	return &CompositionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Composition.
+func (c *CompositionClient) Delete() *CompositionDelete {
+	mutation := newCompositionMutation(c.config, OpDelete)
+	return &CompositionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CompositionClient) DeleteOne(_m *Composition) *CompositionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CompositionClient) DeleteOneID(id int) *CompositionDeleteOne {
+	builder := c.Delete().Where(composition.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CompositionDeleteOne{builder}
+}
+
+// Query returns a query builder for Composition.
+func (c *CompositionClient) Query() *CompositionQuery {
+	return &CompositionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeComposition},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Composition entity by its id.
+func (c *CompositionClient) Get(ctx context.Context, id int) (*Composition, error) {
+	return c.Query().Where(composition.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CompositionClient) GetX(ctx context.Context, id int) *Composition {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryResource queries the resource edge of a Composition.
+func (c *CompositionClient) QueryResource(_m *Composition) *GameDownloadResourceQuery {
+	query := (&GameDownloadResourceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(composition.Table, composition.FieldID, id),
+			sqlgraph.To(gamedownloadresource.Table, gamedownloadresource.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, composition.ResourceTable, composition.ResourceColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CompositionClient) Hooks() []Hook {
+	return c.hooks.Composition
+}
+
+// Interceptors returns the client interceptors.
+func (c *CompositionClient) Interceptors() []Interceptor {
+	return c.inters.Composition
+}
+
+func (c *CompositionClient) mutate(ctx context.Context, m *CompositionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CompositionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CompositionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CompositionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CompositionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Composition mutation op: %q", m.Op())
+	}
+}
+
 // EditRecordClient is a client for the EditRecord schema.
 type EditRecordClient struct {
 	config
@@ -5691,6 +5848,22 @@ func (c *GameDownloadResourceClient) QueryTranslatorCredits(_m *GameDownloadReso
 			sqlgraph.From(gamedownloadresource.Table, gamedownloadresource.FieldID, id),
 			sqlgraph.To(gamedownloadresourcetranslator.Table, gamedownloadresourcetranslator.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, gamedownloadresource.TranslatorCreditsTable, gamedownloadresource.TranslatorCreditsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCompositions queries the compositions edge of a GameDownloadResource.
+func (c *GameDownloadResourceClient) QueryCompositions(_m *GameDownloadResource) *CompositionQuery {
+	query := (&CompositionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(gamedownloadresource.Table, gamedownloadresource.FieldID, id),
+			sqlgraph.To(composition.Table, composition.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, gamedownloadresource.CompositionsTable, gamedownloadresource.CompositionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -11540,34 +11713,34 @@ type (
 	hooks struct {
 		AICatalogModel, AICatalogProvider, AIModel, AIProvider, AIProviderOffer,
 		AIRequest, AIRequestPayload, AIRoute, AIRouteAdjustment, AIScene, Activity, Ad,
-		CatalogSourceLink, CatalogSyncCursor, Comment, CommentLike, EditRecord,
-		Favorite, FavoriteItem, FieldPermissionMapping, Game, GameCharacter,
-		GameCharacterRelation, GameCover, GameDeveloper, GameDeveloperRelation,
-		GameDownloadResource, GameDownloadResourceEvent, GameDownloadResourceFile,
-		GameDownloadResourceFileHistory, GameDownloadResourceReport,
-		GameDownloadResourceTranslator, GameImage, GameLink, GameRelation,
-		GameTagRelation, GameUploadChunk, GameUploadSession, Inspection,
-		InspectionEntry, MalwareScanCase, Message, ModerationEvent, OidcIdentity,
-		RoleFieldPermission, Setting, SettingChange, SiteDailyStat, SponsorOrder, Tag,
-		Translator, TranslatorDistinction, User, UserBannedRecord, UserFieldPermission,
-		UserGamePvnMapping, UserLoginSession, UserPasskeyCredential, UserPvnBinding,
-		Walkthrough []ent.Hook
+		CatalogSourceLink, CatalogSyncCursor, Comment, CommentLike, Composition,
+		EditRecord, Favorite, FavoriteItem, FieldPermissionMapping, Game,
+		GameCharacter, GameCharacterRelation, GameCover, GameDeveloper,
+		GameDeveloperRelation, GameDownloadResource, GameDownloadResourceEvent,
+		GameDownloadResourceFile, GameDownloadResourceFileHistory,
+		GameDownloadResourceReport, GameDownloadResourceTranslator, GameImage,
+		GameLink, GameRelation, GameTagRelation, GameUploadChunk, GameUploadSession,
+		Inspection, InspectionEntry, MalwareScanCase, Message, ModerationEvent,
+		OidcIdentity, RoleFieldPermission, Setting, SettingChange, SiteDailyStat,
+		SponsorOrder, Tag, Translator, TranslatorDistinction, User, UserBannedRecord,
+		UserFieldPermission, UserGamePvnMapping, UserLoginSession,
+		UserPasskeyCredential, UserPvnBinding, Walkthrough []ent.Hook
 	}
 	inters struct {
 		AICatalogModel, AICatalogProvider, AIModel, AIProvider, AIProviderOffer,
 		AIRequest, AIRequestPayload, AIRoute, AIRouteAdjustment, AIScene, Activity, Ad,
-		CatalogSourceLink, CatalogSyncCursor, Comment, CommentLike, EditRecord,
-		Favorite, FavoriteItem, FieldPermissionMapping, Game, GameCharacter,
-		GameCharacterRelation, GameCover, GameDeveloper, GameDeveloperRelation,
-		GameDownloadResource, GameDownloadResourceEvent, GameDownloadResourceFile,
-		GameDownloadResourceFileHistory, GameDownloadResourceReport,
-		GameDownloadResourceTranslator, GameImage, GameLink, GameRelation,
-		GameTagRelation, GameUploadChunk, GameUploadSession, Inspection,
-		InspectionEntry, MalwareScanCase, Message, ModerationEvent, OidcIdentity,
-		RoleFieldPermission, Setting, SettingChange, SiteDailyStat, SponsorOrder, Tag,
-		Translator, TranslatorDistinction, User, UserBannedRecord, UserFieldPermission,
-		UserGamePvnMapping, UserLoginSession, UserPasskeyCredential, UserPvnBinding,
-		Walkthrough []ent.Interceptor
+		CatalogSourceLink, CatalogSyncCursor, Comment, CommentLike, Composition,
+		EditRecord, Favorite, FavoriteItem, FieldPermissionMapping, Game,
+		GameCharacter, GameCharacterRelation, GameCover, GameDeveloper,
+		GameDeveloperRelation, GameDownloadResource, GameDownloadResourceEvent,
+		GameDownloadResourceFile, GameDownloadResourceFileHistory,
+		GameDownloadResourceReport, GameDownloadResourceTranslator, GameImage,
+		GameLink, GameRelation, GameTagRelation, GameUploadChunk, GameUploadSession,
+		Inspection, InspectionEntry, MalwareScanCase, Message, ModerationEvent,
+		OidcIdentity, RoleFieldPermission, Setting, SettingChange, SiteDailyStat,
+		SponsorOrder, Tag, Translator, TranslatorDistinction, User, UserBannedRecord,
+		UserFieldPermission, UserGamePvnMapping, UserLoginSession,
+		UserPasskeyCredential, UserPvnBinding, Walkthrough []ent.Interceptor
 	}
 )
 

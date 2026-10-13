@@ -54,6 +54,7 @@ func (GameDownloadResource) Edges() []ent.Edge {
 		edge.To("inspections", Inspection.Type).StorageKey(edge.Symbol("file_inspections_resource_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("events", GameDownloadResourceEvent.Type).StorageKey(edge.Symbol("game_download_resource_events_resource_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("translator_credits", GameDownloadResourceTranslator.Type).StorageKey(edge.Symbol("game_download_resource_translators_resource_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("compositions", Composition.Type).StorageKey(edge.Symbol("resource_compositions_resource_id_fkey")).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
 

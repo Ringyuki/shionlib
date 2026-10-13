@@ -61,3 +61,28 @@ func TestAFailureIsReportedOnceAndThenLeavesTheListEmptyForAWhile(t *testing.T) 
 		t.Fatalf("while held back the list is empty and upstream is left alone: %v %v calls=%d", entries, err, patches.Calls)
 	}
 }
+
+func TestAnEntryIsFoundByTheDigestOfItsFile(t *testing.T) {
+	ctx := context.Background()
+	patches := &moyutest.Patches{Entries: map[string][]moyu.Entry{
+		"v4145": {{ID: "r1", Hash: "9f86d081"}, {ID: "r2"}},
+	}}
+	service := moyu.NewService(moyutest.Games{1: "v4145", 2: "v1"}, patches, moyutest.NewCache())
+	entry, found, err := service.ByHash(ctx, actor.Guest(), 1, " 9F86D081 ")
+	if err != nil || !found || entry.ID != "r1" {
+		t.Fatalf("found by digest: %+v %v %v", entry, found, err)
+	}
+	for _, digest := range []string{"", "ffff"} {
+		if _, found, err := service.ByHash(ctx, actor.Guest(), 1, digest); err != nil || found {
+			t.Fatalf("%q matches nothing, least of all the entries without a digest: %v %v", digest, found, err)
+		}
+	}
+	if _, found, err := service.ByHash(ctx, actor.Guest(), 2, "9f86d081"); err != nil || found {
+		t.Fatalf("a game the other site does not list: %v %v", found, err)
+	}
+	patches.Fail = moyu.ErrRequestFailed.Wrap(errors.New("down"))
+	failing := moyu.NewService(moyutest.Games{9: "v9"}, patches, moyutest.NewCache())
+	if _, found, err := failing.ByHash(ctx, actor.Guest(), 9, "9f86d081"); err != nil || found {
+		t.Fatalf("an outage of the other site matches nothing: %v %v", found, err)
+	}
+}

@@ -20,7 +20,24 @@ const (
 	fetchFileMode = 0o600
 )
 
+type observed struct {
+	target  io.Writer
+	done    int64
+	observe func(done int64)
+}
+
+func (o *observed) Write(chunk []byte) (int, error) {
+	written, err := o.target.Write(chunk)
+	o.done += int64(written)
+	o.observe(o.done)
+	return written, err
+}
+
 func (s *Store) Fetch(ctx context.Context, key, path string) error {
+	return s.Download(ctx, key, path, func(int64) {})
+}
+
+func (s *Store) Download(ctx context.Context, key, path string, observe func(done int64)) error {
 	if s.bucket == "" {
 		return errors.New("object store bucket is not configured")
 	}
@@ -40,7 +57,7 @@ func (s *Store) Fetch(ctx context.Context, key, path string) error {
 	if err != nil {
 		return fmt.Errorf("create the file for object %s: %w", key, err)
 	}
-	if _, err := io.Copy(file, out.Body); err != nil {
+	if _, err := io.Copy(&observed{target: file, observe: observe}, out.Body); err != nil {
 		_ = file.Close()
 		return fmt.Errorf("download object %s: %w", key, err)
 	}

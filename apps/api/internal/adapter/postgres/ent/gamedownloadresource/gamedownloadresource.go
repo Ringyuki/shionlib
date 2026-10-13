@@ -73,6 +73,8 @@ const (
 	EdgeEvents = "events"
 	// EdgeTranslatorCredits holds the string denoting the translator_credits edge name in mutations.
 	EdgeTranslatorCredits = "translator_credits"
+	// EdgeCompositions holds the string denoting the compositions edge name in mutations.
+	EdgeCompositions = "compositions"
 	// Table holds the table name of the gamedownloadresource in the database.
 	Table = "game_download_resources"
 	// GameTable is the table that holds the game relation/edge.
@@ -138,6 +140,13 @@ const (
 	TranslatorCreditsInverseTable = "game_download_resource_translators"
 	// TranslatorCreditsColumn is the table column denoting the translator_credits relation/edge.
 	TranslatorCreditsColumn = "resource_id"
+	// CompositionsTable is the table that holds the compositions relation/edge.
+	CompositionsTable = "resource_compositions"
+	// CompositionsInverseTable is the table name for the Composition entity.
+	// It exists in this package in order to avoid circular dependency with the "composition" package.
+	CompositionsInverseTable = "resource_compositions"
+	// CompositionsColumn is the table column denoting the compositions relation/edge.
+	CompositionsColumn = "resource_id"
 )
 
 // Columns holds all SQL columns for gamedownloadresource fields.
@@ -448,6 +457,20 @@ func ByTranslatorCredits(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption
 		sqlgraph.OrderByNeighborTerms(s, newTranslatorCreditsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByCompositionsCount orders the results by compositions count.
+func ByCompositionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCompositionsStep(), opts...)
+	}
+}
+
+// ByCompositions orders the results by compositions terms.
+func ByCompositions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCompositionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newGameStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -509,5 +532,12 @@ func newTranslatorCreditsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TranslatorCreditsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, TranslatorCreditsTable, TranslatorCreditsColumn),
+	)
+}
+func newCompositionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CompositionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, CompositionsTable, CompositionsColumn),
 	)
 }

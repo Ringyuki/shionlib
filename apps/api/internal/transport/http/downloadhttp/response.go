@@ -93,14 +93,14 @@ type downloadEventFileDTO struct {
 }
 
 type downloadEventChangeDTO struct {
-	Field download.EventField `json:"field" enum:"platforms,languages,simulator,note,translation,translators,patch_version,release_url,edition,edition_name,form,extras"`
+	Field download.EventField `json:"field" enum:"platforms,languages,simulator,note,translation,translators,patch_version,release_url,edition,edition_name,form,extras,base"`
 	Old   []string            `json:"old" doc:"Values before the edit; empty when the field was unset"`
 	New   []string            `json:"new" doc:"Values after the edit; empty when the field was cleared"`
 }
 
 type downloadEventDTO struct {
 	ID      int                      `json:"id"`
-	Kind    download.EventKind       `json:"kind" enum:"published,file_replaced,file_renamed,file_added,file_removed,edited,review_cleared,disc_found" doc:"What happened: the resource was published, a file was replaced, renamed, added or removed, the resource's fields were edited, an admin cleared a file flagged by the malware scan, or the check found a disc image and set the form to disc"`
+	Kind    download.EventKind       `json:"kind" enum:"published,file_replaced,file_renamed,file_added,file_removed,edited,review_cleared,disc_found,composed,recomposed" doc:"What happened: the resource was published, a file was replaced, renamed, added or removed, the resource's fields were edited, an admin cleared a file flagged by the malware scan, the check found a disc image and set the form to disc, the resource was composed from a base and a patch and published, or it was composed again with a new patch"`
 	Actor   *userhttp.UserSummaryDTO `json:"actor" doc:"Who did it; null when the account no longer exists"`
 	Created time.Time                `json:"created"`
 	Files   []downloadEventFileDTO   `json:"files" doc:"Files the resource was published with, or the file added or removed"`

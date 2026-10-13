@@ -86,9 +86,11 @@ type GameDownloadResourceEdges struct {
 	Events []*GameDownloadResourceEvent `json:"events,omitempty"`
 	// TranslatorCredits holds the value of the translator_credits edge.
 	TranslatorCredits []*GameDownloadResourceTranslator `json:"translator_credits,omitempty"`
+	// Compositions holds the value of the compositions edge.
+	Compositions []*Composition `json:"compositions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [9]bool
+	loadedTypes [10]bool
 }
 
 // GameOrErr returns the Game value or an error if the edge
@@ -174,6 +176,15 @@ func (e GameDownloadResourceEdges) TranslatorCreditsOrErr() ([]*GameDownloadReso
 		return e.TranslatorCredits, nil
 	}
 	return nil, &NotLoadedError{edge: "translator_credits"}
+}
+
+// CompositionsOrErr returns the Compositions value or an error if the edge
+// was not loaded in eager-loading.
+func (e GameDownloadResourceEdges) CompositionsOrErr() ([]*Composition, error) {
+	if e.loadedTypes[9] {
+		return e.Compositions, nil
+	}
+	return nil, &NotLoadedError{edge: "compositions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -398,6 +409,11 @@ func (_m *GameDownloadResource) QueryEvents() *GameDownloadResourceEventQuery {
 // QueryTranslatorCredits queries the "translator_credits" edge of the GameDownloadResource entity.
 func (_m *GameDownloadResource) QueryTranslatorCredits() *GameDownloadResourceTranslatorQuery {
 	return NewGameDownloadResourceClient(_m.config).QueryTranslatorCredits(_m)
+}
+
+// QueryCompositions queries the "compositions" edge of the GameDownloadResource entity.
+func (_m *GameDownloadResource) QueryCompositions() *CompositionQuery {
+	return NewGameDownloadResourceClient(_m.config).QueryCompositions(_m)
 }
 
 // Update returns a builder for updating this GameDownloadResource.

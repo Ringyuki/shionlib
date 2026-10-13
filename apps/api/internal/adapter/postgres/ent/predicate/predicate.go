@@ -54,6 +54,9 @@ type Comment func(*sql.Selector)
 // CommentLike is the predicate function for commentlike builders.
 type CommentLike func(*sql.Selector)
 
+// Composition is the predicate function for composition builders.
+type Composition func(*sql.Selector)
+
 // EditRecord is the predicate function for editrecord builders.
 type EditRecord func(*sql.Selector)
 

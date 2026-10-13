@@ -5651,6 +5651,21 @@
         ],
         "type": "object"
       },
+      "BeginCompositionInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "base_resource_id": {
+            "description": "A published resource of the same game that runs as it is, taken from the list of bases",
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "base_resource_id"
+        ],
+        "type": "object"
+      },
       "BindPotatoVNInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -5832,7 +5847,20 @@
           640102,
           650101,
           650102,
-          650103
+          650103,
+          660101,
+          660102,
+          660103,
+          660104,
+          660105,
+          660106,
+          660107,
+          660108,
+          660109,
+          660110,
+          660111,
+          660112,
+          660113
         ],
         "format": "int64",
         "type": "integer",
@@ -5997,7 +6025,20 @@
           "SETTING_INVALID_VALUE",
           "INSPECTION_NOT_FOUND",
           "INSPECTION_ENTRY_NOT_FOUND",
-          "INSPECTION_ENTRY_NO_PREVIEW"
+          "INSPECTION_ENTRY_NO_PREVIEW",
+          "COMPOSITION_NOT_FOUND",
+          "COMPOSITION_NOT_OWNER",
+          "COMPOSITION_BASE_UNUSABLE",
+          "COMPOSITION_NOT_DRAFT",
+          "COMPOSITION_NOT_READY",
+          "COMPOSITION_NOTHING_TO_APPLY",
+          "COMPOSITION_PATH_CONFLICT",
+          "COMPOSITION_QUEUE_FULL",
+          "COMPOSITION_NOT_FAILED",
+          "COMPOSITION_NOT_COMPOSED",
+          "COMPOSITION_BUSY",
+          "COMPOSITION_BASE_GONE",
+          "COMPOSITION_CHECKS_OFF"
         ]
       },
       "CatalogExcludedDTO": {
@@ -7102,6 +7143,858 @@
         ],
         "type": "object"
       },
+      "CompositionBaseDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "creator": {
+            "$ref": "#/components/schemas/UserSummaryDTO"
+          },
+          "downloads": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "edition": {
+            "enum": [
+              "download",
+              "package",
+              "steam"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "edition_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "form": {
+            "enum": [
+              "disc",
+              "installer",
+              "portable"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "language": {
+            "items": {
+              "enum": [
+                "en",
+                "zh",
+                "zh-hant",
+                "jp"
+              ],
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "name": {
+            "description": "The name of the file that would be unpacked, the first volume of a set",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Why the resource cannot be composed on; null when it can",
+            "enum": [
+              "disc",
+              "installer",
+              "form_unknown",
+              "unread",
+              "unreadable",
+              "too_large",
+              "pending",
+              "composed"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "resource_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "resource_id",
+          "name",
+          "size",
+          "language",
+          "edition",
+          "edition_name",
+          "form",
+          "creator",
+          "downloads",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "CompositionChangeDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "old_size": {
+            "description": "The size of the file that is replaced; null for a file that is added",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "path": {
+            "type": "string"
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "path",
+          "size",
+          "old_size"
+        ],
+        "type": "object"
+      },
+      "CompositionCountDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "files": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "files",
+          "size"
+        ],
+        "type": "object"
+      },
+      "CompositionDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "ahead": {
+            "description": "How many compositions run or wait before this one",
+            "format": "int64",
+            "type": "integer"
+          },
+          "base": {
+            "$ref": "#/components/schemas/CompositionSourceDTO"
+          },
+          "details": {
+            "$ref": "#/components/schemas/CompositionDetailsDTO"
+          },
+          "estimated_size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "failure": {
+            "enum": [
+              "base_gone",
+              "base_unreadable",
+              "patch_unreadable",
+              "save_unreadable",
+              "place_missing",
+              "no_room",
+              "too_large",
+              "harmful",
+              "broken",
+              "nothing_to_apply",
+              "path_conflict",
+              "queue_full",
+              "quota",
+              "internal"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "failure_detail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "file_name": {
+            "description": "The name the result takes; empty until the languages are chosen",
+            "type": "string"
+          },
+          "finished_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "folders": {
+            "description": "The folders at the root of the result",
+            "items": {
+              "$ref": "#/components/schemas/CompositionFolderDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "game_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "keep_patch": {
+            "type": "boolean"
+          },
+          "match": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CompositionMatchDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "patch": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CompositionInputDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "percent": {
+            "description": "Progress of the running step where it is known",
+            "format": "int64",
+            "type": "integer"
+          },
+          "plan": {
+            "description": "What the patch adds and replaces; null until the base and the patch are read",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CompositionPlanDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "queued_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rebuild": {
+            "description": "Whether this composition replaces the file of a resource composed before",
+            "type": "boolean"
+          },
+          "resource_id": {
+            "description": "The composed resource; null until the composition is started",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "save": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CompositionInputDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "size": {
+            "description": "The size of the result once packed",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "started_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "state": {
+            "enum": [
+              "draft",
+              "queued",
+              "running",
+              "done",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "step": {
+            "enum": [
+              "fetch",
+              "unpack",
+              "apply",
+              "pack",
+              "check",
+              "store"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/CompositionStepDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "game_id",
+          "resource_id",
+          "rebuild",
+          "state",
+          "base",
+          "patch",
+          "save",
+          "details",
+          "keep_patch",
+          "note",
+          "match",
+          "plan",
+          "folders",
+          "file_name",
+          "estimated_size",
+          "size",
+          "ahead",
+          "step",
+          "percent",
+          "steps",
+          "failure",
+          "failure_detail",
+          "queued_at",
+          "started_at",
+          "finished_at",
+          "updated"
+        ],
+        "type": "object"
+      },
+      "CompositionDetailsDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "language": {
+            "items": {
+              "enum": [
+                "en",
+                "zh",
+                "zh-hant",
+                "jp"
+              ],
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "patch_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "release_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "translation": {
+            "enum": [
+              "none",
+              "official",
+              "group",
+              "machine"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "translators": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "language",
+          "translation",
+          "translators",
+          "patch_version",
+          "release_url"
+        ],
+        "type": "object"
+      },
+      "CompositionDirDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "path": {
+            "description": "Empty for the root of the archive",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "items"
+        ],
+        "type": "object"
+      },
+      "CompositionFolderDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "game",
+              "save",
+              "patch"
+            ],
+            "type": "string"
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "role",
+          "name",
+          "items",
+          "size"
+        ],
+        "type": "object"
+      },
+      "CompositionInputDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "files": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "refusal": {
+            "enum": [
+              "encrypted",
+              "broken",
+              "not_archive",
+              "harmful",
+              "too_many_files"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "state": {
+            "enum": [
+              "reading",
+              "ready",
+              "refused"
+            ],
+            "type": "string"
+          },
+          "unpacked": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "viruses": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "size",
+          "state",
+          "refusal",
+          "viruses",
+          "files",
+          "unpacked"
+        ],
+        "type": "object"
+      },
+      "CompositionLineageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "current": {
+            "description": "The composition under way or failed, for its owner; null otherwise",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CompositionDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "latest": {
+            "description": "What the resource was last composed from; null for a resource that was uploaded",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CompositionOriginDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "current",
+          "latest"
+        ],
+        "type": "object"
+      },
+      "CompositionMatchDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "translators": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "url": {
+            "description": "The page of the same file on 鲲 Galgame 补丁",
+            "type": "string"
+          },
+          "version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "translators",
+          "version",
+          "url"
+        ],
+        "type": "object"
+      },
+      "CompositionOriginDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "base": {
+            "$ref": "#/components/schemas/CompositionSourceDTO"
+          },
+          "base_gone": {
+            "description": "Whether the base has been removed since; the resource then cannot be composed again",
+            "type": "boolean"
+          },
+          "finished_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "keep_patch": {
+            "type": "boolean"
+          },
+          "patch": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CompositionPartDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "patch_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "save": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CompositionPartDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "base",
+          "base_gone",
+          "patch",
+          "save",
+          "patch_version",
+          "keep_patch",
+          "finished_at"
+        ],
+        "type": "object"
+      },
+      "CompositionPartDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "size"
+        ],
+        "type": "object"
+      },
+      "CompositionPlanDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "added": {
+            "description": "The first files that are added; adds counts all of them",
+            "items": {
+              "$ref": "#/components/schemas/CompositionChangeDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "adds": {
+            "$ref": "#/components/schemas/CompositionCountDTO"
+          },
+          "conflicts": {
+            "description": "Patch files that would take the place of a folder, or lie below a file; a composition with any cannot start",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "game_dir": {
+            "type": "string"
+          },
+          "game_dirs": {
+            "items": {
+              "$ref": "#/components/schemas/CompositionDirDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "patch_dir": {
+            "type": "string"
+          },
+          "patch_dirs": {
+            "items": {
+              "$ref": "#/components/schemas/CompositionDirDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "replaced": {
+            "description": "The first files that are replaced; replaces counts all of them",
+            "items": {
+              "$ref": "#/components/schemas/CompositionChangeDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "replaces": {
+            "$ref": "#/components/schemas/CompositionCountDTO"
+          },
+          "total": {
+            "$ref": "#/components/schemas/CompositionCountDTO"
+          },
+          "unchanged": {
+            "$ref": "#/components/schemas/CompositionCountDTO"
+          }
+        },
+        "required": [
+          "game_dir",
+          "patch_dir",
+          "game_dirs",
+          "patch_dirs",
+          "added",
+          "replaced",
+          "conflicts",
+          "adds",
+          "replaces",
+          "unchanged",
+          "total"
+        ],
+        "type": "object"
+      },
+      "CompositionSourceDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "resource_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "resource_id",
+          "name",
+          "size"
+        ],
+        "type": "object"
+      },
+      "CompositionStepDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "seconds": {
+            "description": "How long the step took, or has been running; null for a step not reached",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "state": {
+            "enum": [
+              "waiting",
+              "running",
+              "done"
+            ],
+            "type": "string"
+          },
+          "step": {
+            "enum": [
+              "fetch",
+              "unpack",
+              "apply",
+              "pack",
+              "check",
+              "store"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "step",
+          "state",
+          "seconds"
+        ],
+        "type": "object"
+      },
+      "CompositionUploadInput": {
+        "additionalProperties": false,
+        "properties": {
+          "file_name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "upload_session_id": {
+            "description": "A completed upload of the caller that is not part of a resource",
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "upload_session_id",
+          "file_name"
+        ],
+        "type": "object"
+      },
       "CreateAdInputBody": {
         "additionalProperties": false,
         "properties": {
@@ -7601,7 +8494,8 @@
               "edition",
               "edition_name",
               "form",
-              "extras"
+              "extras",
+              "base"
             ],
             "type": "string"
           },
@@ -7676,7 +8570,7 @@
             "type": "integer"
           },
           "kind": {
-            "description": "What happened: the resource was published, a file was replaced, renamed, added or removed, the resource's fields were edited, an admin cleared a file flagged by the malware scan, or the check found a disc image and set the form to disc",
+            "description": "What happened: the resource was published, a file was replaced, renamed, added or removed, the resource's fields were edited, an admin cleared a file flagged by the malware scan, the check found a disc image and set the form to disc, the resource was composed from a base and a patch and published, or it was composed again with a new patch",
             "enum": [
               "published",
               "file_replaced",
@@ -7685,7 +8579,9 @@
               "file_removed",
               "edited",
               "review_cleared",
-              "disc_found"
+              "disc_found",
+              "composed",
+              "recomposed"
             ],
             "type": "string"
           },
@@ -8955,6 +9851,77 @@
         },
         "required": [
           "content"
+        ],
+        "type": "object"
+      },
+      "EditCompositionInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "game_dir": {
+            "description": "The folder of the base that receives the patch; empty for its root, left out to keep the one chosen before (the server's guess until one is chosen)",
+            "maxLength": 1024,
+            "type": "string"
+          },
+          "keep_patch": {
+            "description": "Whether the patch archive is put into the result beside the game",
+            "type": "boolean"
+          },
+          "language": {
+            "description": "The languages of the composed resource",
+            "items": {
+              "enum": [
+                "en",
+                "zh",
+                "zh-hant",
+                "jp"
+              ],
+              "type": "string"
+            },
+            "maxItems": 4,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "patch_dir": {
+            "description": "The folder of the patch whose files are laid over the game; empty for its root, left out to keep the one chosen before (the server's guess until one is chosen)",
+            "maxLength": 1024,
+            "type": "string"
+          },
+          "patch_version": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "release_url": {
+            "maxLength": 512,
+            "minLength": 0,
+            "type": "string"
+          },
+          "translation": {
+            "description": "Where the translation of the patch comes from",
+            "enum": [
+              "official",
+              "group",
+              "machine"
+            ],
+            "type": "string"
+          },
+          "translators": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 6,
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "language",
+          "translators",
+          "keep_patch"
         ],
         "type": "object"
       },
@@ -10683,6 +11650,72 @@
         ],
         "type": "object"
       },
+      "EnvelopeCompositionDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CompositionDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeCompositionLineageDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CompositionLineageDTO"
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeDeletedCharacterDTO": {
         "additionalProperties": false,
         "properties": {
@@ -11909,6 +12942,84 @@
           "data": {
             "items": {
               "$ref": "#/components/schemas/CatalogSourceDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeListCompositionBaseDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/CompositionBaseDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
+      "EnvelopeListCompositionDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/CompositionDTO"
             },
             "type": [
               "array",
@@ -18978,6 +20089,37 @@
           }
         },
         "required": [
+          "file_name"
+        ],
+        "type": "object"
+      },
+      "RebuildCompositionInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "file_name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "note": {
+            "description": "What the new patch changes; shown in the history of the resource",
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+          },
+          "patch_version": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "upload_session_id": {
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "upload_session_id",
           "file_name"
         ],
         "type": "object"
@@ -31921,6 +33063,596 @@
         ]
       }
     },
+    "/composition/mine": {
+      "get": {
+        "operationId": "composition.mine",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListCompositionDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List the caller's compositions that wait, run or failed",
+        "tags": [
+          "composition"
+        ]
+      }
+    },
+    "/composition/{id}": {
+      "delete": {
+        "operationId": "composition.discard",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyEnvelope"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Discard a composition that has not started or has failed",
+        "tags": [
+          "composition"
+        ]
+      },
+      "get": {
+        "operationId": "composition.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeCompositionDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Show a composition with its plan and progress",
+        "tags": [
+          "composition"
+        ]
+      },
+      "patch": {
+        "operationId": "composition.edit",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditCompositionInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeCompositionDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Describe the result of a composition and choose where the patch goes",
+        "tags": [
+          "composition"
+        ]
+      }
+    },
+    "/composition/{id}/patch": {
+      "delete": {
+        "operationId": "composition.detachPatch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeCompositionDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Take the patch out of a composition",
+        "tags": [
+          "composition"
+        ]
+      },
+      "put": {
+        "operationId": "composition.attachPatch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompositionUploadInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeCompositionDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Give a composition its patch from a completed upload",
+        "tags": [
+          "composition"
+        ]
+      }
+    },
+    "/composition/{id}/retry": {
+      "post": {
+        "operationId": "composition.retry",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeCompositionDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Queue a failed composition again",
+        "tags": [
+          "composition"
+        ]
+      }
+    },
+    "/composition/{id}/save": {
+      "delete": {
+        "operationId": "composition.detachSave",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeCompositionDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Take the saved games out of a composition",
+        "tags": [
+          "composition"
+        ]
+      },
+      "put": {
+        "operationId": "composition.attachSave",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompositionUploadInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeCompositionDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Give a composition saved games to pack beside the game",
+        "tags": [
+          "composition"
+        ]
+      }
+    },
+    "/composition/{id}/start": {
+      "post": {
+        "operationId": "composition.start",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeCompositionDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Create the resource of a composition and queue its work",
+        "tags": [
+          "composition"
+        ]
+      }
+    },
     "/developer/list": {
       "get": {
         "operationId": "developer.list",
@@ -33838,6 +35570,122 @@
         ]
       }
     },
+    "/game/download-source/{resourceId}/composition": {
+      "get": {
+        "operationId": "composition.lineage",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeCompositionLineageDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Show what a resource was composed from and, to its owner, the composition under way",
+        "tags": [
+          "composition"
+        ]
+      },
+      "post": {
+        "operationId": "composition.rebuild",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RebuildCompositionInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeCompositionDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Compose a resource again with a new patch",
+        "tags": [
+          "composition"
+        ]
+      }
+    },
     "/game/download/{id}/link": {
       "get": {
         "operationId": "download.link",
@@ -34345,6 +36193,132 @@
         "summary": "Get the VNDB rating of a game",
         "tags": [
           "game"
+        ]
+      }
+    },
+    "/game/{gameId}/composition": {
+      "post": {
+        "operationId": "composition.begin",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gameId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BeginCompositionInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeCompositionDTO"
+                }
+              }
+            },
+            "description": "Created",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "Begin composing a new resource from a base of the game",
+        "tags": [
+          "composition"
+        ]
+      }
+    },
+    "/game/{gameId}/composition/bases": {
+      "get": {
+        "operationId": "composition.bases",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gameId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvelopeListCompositionBaseDTO"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "shionlib-auth-stale": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          },
+          {
+            "accessCookie": []
+          }
+        ],
+        "summary": "List the resources of a game with whether a patch can be composed onto each",
+        "tags": [
+          "composition"
         ]
       }
     },

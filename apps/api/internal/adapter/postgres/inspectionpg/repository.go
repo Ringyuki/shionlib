@@ -31,6 +31,16 @@ WITH RECURSIVE chain AS (
 )
 SELECT origin, string_agg(name, '/' ORDER BY depth DESC) FROM chain GROUP BY origin`
 
+const filePathsQuery = `
+WITH RECURSIVE tree AS (
+	SELECT id, name::text AS path, kind, size FROM file_inspection_entries WHERE inspection_id = $1 AND parent_id IS NULL
+	UNION ALL
+	SELECT child.id, tree.path || '/' || child.name, child.kind, child.size
+	FROM file_inspection_entries child JOIN tree ON child.parent_id = tree.id
+	WHERE child.inspection_id = $1 AND tree.kind = 'folder'
+)
+SELECT path, size FROM tree WHERE kind NOT IN ('folder', 'track') ORDER BY id`
+
 type Repository struct {
 	client *ent.Client
 }
@@ -202,6 +212,26 @@ func (r *Repository) MediumNames(ctx context.Context, inspectionID int) ([]strin
 		return nil, fmt.Errorf("list the disc files of inspection %d: %w", inspectionID, err)
 	}
 	return names, nil
+}
+
+func (r *Repository) FilePaths(ctx context.Context, inspectionID int) ([]inspection.FilePath, error) {
+	rows, err := r.db(ctx).QueryContext(ctx, filePathsQuery, inspectionID)
+	if err != nil {
+		return nil, fmt.Errorf("list the files of inspection %d: %w", inspectionID, err)
+	}
+	defer func() { _ = rows.Close() }()
+	files := []inspection.FilePath{}
+	for rows.Next() {
+		var file inspection.FilePath
+		if err := rows.Scan(&file.Path, &file.Size); err != nil {
+			return nil, fmt.Errorf("read a file of inspection %d: %w", inspectionID, err)
+		}
+		files = append(files, file)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("list the files of inspection %d: %w", inspectionID, err)
+	}
+	return files, nil
 }
 
 func (r *Repository) Children(ctx context.Context, inspectionID int, parentID *int, page inspection.Page) ([]inspection.Entry, int, error) {

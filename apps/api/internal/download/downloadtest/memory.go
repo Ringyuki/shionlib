@@ -684,6 +684,33 @@ func (r *MemoryRepository) MarkFileStored(_ context.Context, id int, key string)
 	})
 }
 
+func (r *MemoryRepository) AdoptFile(_ context.Context, id int, adoption download.Adoption) error {
+	return r.mutateFile(id, func(f *download.File) {
+		inspection, sum := adoption.InspectionID, adoption.SHA256
+		f.CheckStatus = download.CheckOK
+		f.InspectionID = &inspection
+		f.SHA256 = &sum
+	})
+}
+
+func (r *MemoryRepository) ReplaceStoredContent(_ context.Context, id int, content download.StoredContent) error {
+	return r.mutateFile(id, func(f *download.File) {
+		inspection, sum, key := content.InspectionID, content.SHA256, content.StorageKey
+		f.Name = content.Name
+		f.Size = content.Size
+		f.Hash = content.Hash
+		f.HashAlgorithm = content.HashAlgorithm
+		f.SHA256 = &sum
+		f.InspectionID = &inspection
+		f.StorageKey = &key
+		f.Status = download.FileInObjectStore
+		f.CheckStatus = download.CheckOK
+		f.FalsePositive = false
+		f.Path = nil
+		f.UploadSessionID = nil
+	})
+}
+
 func (r *MemoryRepository) ClearFilePath(_ context.Context, id int) error {
 	return r.mutateFile(id, func(f *download.File) { f.Path = nil })
 }

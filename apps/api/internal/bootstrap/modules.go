@@ -22,6 +22,7 @@ import (
 	"github.com/Ringyuki/shionlib/apps/api/internal/download"
 	"github.com/Ringyuki/shionlib/apps/api/internal/game"
 	"github.com/Ringyuki/shionlib/apps/api/internal/message"
+	"github.com/Ringyuki/shionlib/apps/api/internal/moyu"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/cache"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/config"
 	"github.com/Ringyuki/shionlib/apps/api/internal/platform/httpclient"
@@ -79,6 +80,8 @@ type Shared struct {
 	AI         *ai.Service
 	AIScenes   *ai.SceneService
 	Resources  *download.DetailService
+	Files      *fileServices
+	Patches    *moyu.Service
 }
 
 type wiring func(infra *Infra, shared *Shared, modules *Modules)
@@ -95,6 +98,7 @@ var wirings = []wiring{
 	wireCatalog,
 	wireCatalogSync,
 	wireCommunity,
+	wireComposition,
 	wireAdmin,
 }
 
