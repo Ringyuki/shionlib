@@ -10,10 +10,8 @@ import {
   reportReasons,
   resourceDraft,
   rightsOver,
-  resourcePlatforms,
   shortHash,
   summarizeResources,
-  withPlatform,
   type ReportReason,
   type Resource,
 } from './resource'
@@ -107,19 +105,6 @@ describe('display helpers', () => {
   it('shortens hashes', () => {
     expect(shortHash('9f3a1c00112233445566e02b8c')).toBe('9f3a1c…e02b8c')
     expect(shortHash('abc')).toBe('abc')
-  })
-})
-
-describe('platform filter', () => {
-  const resources = [resource(1, ['win']), resource(2, ['swi', 'win']), resource(3, null)]
-
-  it('offers the platforms in order of appearance', () => {
-    expect(resourcePlatforms(resources)).toEqual(['win', 'swi'])
-  })
-
-  it('keeps every resource without a platform choice', () => {
-    expect(withPlatform(resources, 'swi').map(entry => entry.id)).toEqual([2])
-    expect(withPlatform(resources, undefined)).toHaveLength(3)
   })
 })
 

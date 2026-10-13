@@ -17,7 +17,12 @@ export {
   type ResourcePage as ResourcePageData,
   type ResourceTab,
 } from './resource-page'
-export { loadGameResources, loadResourceEvents, loadResourcePage } from './resource.use-cases'
+export {
+  loadGameResources,
+  loadMoyuEntries,
+  loadResourceEvents,
+  loadResourcePage,
+} from './resource.use-cases'
 export { FileState } from './ui/file-state'
 export { ResourceDetails } from './ui/resource-details'
 export { ResourceHistory } from './ui/resource-history'

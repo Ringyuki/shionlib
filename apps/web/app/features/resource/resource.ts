@@ -55,8 +55,6 @@ export const leastLanguages = editBody.language.minItems
 
 const mobilePlatforms: readonly Platform[] = ['and', 'ios']
 
-export const platformFilterFrom = 4
-
 const adminRole = 2
 
 const superAdminRole = 3
@@ -124,19 +122,6 @@ export function shortHash(hash: string): string {
   return hash.length <= hashEdge * 2 + 1
     ? hash
     : `${hash.slice(0, hashEdge)}…${hash.slice(-hashEdge)}`
-}
-
-export function resourcePlatforms(resources: readonly Resource[]): string[] {
-  return [...new Set(resources.flatMap(resource => resource.platform ?? []))]
-}
-
-export function withPlatform(
-  resources: readonly Resource[],
-  platform: string | undefined,
-): Resource[] {
-  return platform === undefined
-    ? [...resources]
-    : resources.filter(resource => (resource.platform ?? []).includes(platform))
 }
 
 export function rightsOver(

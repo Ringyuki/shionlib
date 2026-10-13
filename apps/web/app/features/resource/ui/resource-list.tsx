@@ -1,83 +1,113 @@
-import { Empty, SegmentedControl, Stack } from '@hina-ui/react'
-import { Upload } from 'lucide-react'
+import { Empty, Grid, Link, Stack, Text } from '@hina-ui/react'
+import { ExternalLink, Upload } from 'lucide-react'
 import { useState } from 'react'
-import { Link } from 'react-router'
-import { useLocale, useMessages, useTranslations } from 'use-intl'
+import { Link as RouterLink } from 'react-router'
+import { useLocale, useTranslations } from 'use-intl'
 import { DownloadArea } from '~/features/download'
 import { gameTitle, type GameHeader } from '~/features/game'
 import { sitePaths } from '~/features/shell'
-import { labelOf } from '~/shared/i18n/labels'
 import { Button } from '~/shared/ui/button'
-import {
-  platformFilterFrom,
-  resourcePlatforms,
-  withPlatform,
-  type Resource,
-  type ResourceViewer,
-} from '../resource'
+import type { Resource, ResourceViewer } from '../resource'
+import { moyuSite, type MoyuEntry } from '../resource-listing'
+import { useResourceListing } from '../use-resource-listing'
+import { listColumns } from './list-columns'
+import { ListFilterSheet } from './list-filter-sheet'
+import { ListToolbar } from './list-toolbar'
+import { MoyuCard } from './moyu-card'
 import { ResourceCard } from './resource-card'
-
-const allPlatforms = 'all'
 
 type ResourceListProps = {
   game: Pick<GameHeader, 'id' | 'title_zh' | 'title_jp' | 'title_en' | 'b_id' | 'v_id' | 'h_id'>
   resources: readonly Resource[]
+  entries: readonly MoyuEntry[]
   viewer: ResourceViewer | null
 }
 
-export function ResourceList({ game, resources, viewer }: ResourceListProps) {
+export function ResourceList({ game, resources, entries, viewer }: ResourceListProps) {
   const t = useTranslations('resource')
   const locale = useLocale()
-  const labels = useMessages().game.platform
-  const [platform, setPlatform] = useState<string>(allPlatforms)
-  if (resources.length === 0) {
+  const listing = useResourceListing(resources, entries)
+  const [filtering, setFiltering] = useState(false)
+  if (listing.total === 0) {
     return (
       <Empty
         title={t('empty')}
         actions={
           <Button asChild loginRequired>
-            <Link to={`${sitePaths(locale).upload}?game=${game.id}`}>
+            <RouterLink to={`${sitePaths(locale).upload}?game=${game.id}`}>
               <Upload aria-hidden />
               {t('uploadFirst')}
-            </Link>
+            </RouterLink>
           </Button>
         }
       />
     )
   }
-  const platforms = resourcePlatforms(resources)
-  const filtering = resources.length >= platformFilterFrom && platforms.length > 1
-  const shown = withPlatform(
-    resources,
-    filtering && platform !== allPlatforms ? platform : undefined,
-  )
   return (
     <DownloadArea
-      game={{
-        title: gameTitle(game, locale),
-        b_id: game.b_id,
-        v_id: game.v_id,
-        h_id: game.h_id,
-      }}
+      game={{ title: gameTitle(game, locale), b_id: game.b_id, v_id: game.v_id, h_id: game.h_id }}
     >
       <Stack gap="md">
-        {filtering && (
-          <SegmentedControl
-            size="sm"
-            aria-label={t('filter')}
-            value={platform}
-            onValueChange={value => setPlatform(String(value))}
-            options={[
-              { value: allPlatforms, label: t('all') },
-              ...platforms.map(value => ({ value, label: labelOf(labels, value) })),
-            ]}
-            className="self-start"
+        {listing.tools && (
+          <ListToolbar
+            groups={listing.groups}
+            filter={listing.filter}
+            sort={listing.sort}
+            onFilter={listing.setFilter}
+            onSort={listing.setSort}
+            onOpenFilters={() => setFiltering(true)}
           />
         )}
-        {shown.map(resource => (
-          <ResourceCard key={resource.id} resource={resource} gameId={game.id} viewer={viewer} />
-        ))}
+        {listing.shown.length === 0 && (
+          <Empty
+            title={t('list.none')}
+            actions={
+              <Button size="sm" variant="outline" tone="neutral" onClick={listing.reset}>
+                {t('list.resetAll')}
+              </Button>
+            }
+          />
+        )}
+        <Grid className={listColumns.list}>
+          {listing.shown.map(item =>
+            item.source === 'site' ? (
+              <ResourceCard
+                key={item.key}
+                resource={item.resource}
+                gameId={game.id}
+                viewer={viewer}
+              />
+            ) : (
+              <MoyuCard key={item.key} entry={item.entry} />
+            ),
+          )}
+        </Grid>
+        {listing.shown.some(item => item.source === 'moyu') && (
+          <Text size="sm" tone="muted">
+            {t.rich('moyu.credit', {
+              site: chunks => (
+                <Link
+                  href={moyuSite}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 [&_svg]:size-3.5"
+                >
+                  {chunks}
+                  <ExternalLink aria-hidden />
+                </Link>
+              ),
+            })}
+          </Text>
+        )}
       </Stack>
+      <ListFilterSheet
+        open={filtering}
+        onOpenChange={setFiltering}
+        groups={listing.groups}
+        filter={listing.filter}
+        total={listing.shown.length}
+        onChange={listing.setFilter}
+      />
     </DownloadArea>
   )
 }

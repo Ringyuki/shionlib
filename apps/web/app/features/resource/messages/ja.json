@@ -1,8 +1,36 @@
 {
   "empty": "このゲームにはまだダウンロードがありません",
   "uploadFirst": "アップロード",
-  "filter": "プラットフォームで絞り込む",
-  "all": "すべて",
+  "list": {
+    "filters": "絞り込み",
+    "group": {
+      "kind": "種類",
+      "language": "言語",
+      "translation": "翻訳",
+      "platform": "プラットフォーム"
+    },
+    "kind": {
+      "game": "ゲーム",
+      "patch": "パッチ",
+      "save": "フルコンプセーブ"
+    },
+    "sortBy": "並び順",
+    "sort": {
+      "updated": "更新が新しい順",
+      "downloads": "ダウンロードが多い順",
+      "smallest": "サイズが小さい順",
+      "largest": "サイズが大きい順"
+    },
+    "none": "条件に合うリソースはありません",
+    "resetAll": "絞り込みをリセット",
+    "reset": "リセット",
+    "done": "{total, number} 件を表示"
+  },
+  "moyu": {
+    "open": "KUN Visual Novel Patch で{name}を見る",
+    "go": "ダウンロードページへ",
+    "credit": "パッチとフルコンプセーブは <site>KUN Visual Novel Patch</site> のものです"
+  },
   "downloads": "{count, number} 回ダウンロード",
   "comments": "コメント {count, number} 件",
   "open": "{others, plural, =0 {{name} の詳細を見る} other {{name} ほか # 件の詳細を見る}}",

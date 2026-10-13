@@ -23,6 +23,7 @@ import {
   type ResourceViewer,
 } from '../resource'
 import { resourcePath } from '../resource-page'
+import { listColumns } from './list-columns'
 import { ResourceMenu } from './resource-menu'
 import { ResourceFiles } from './resource-files'
 import { ResourceTags } from './resource-tags'
@@ -47,7 +48,7 @@ export function ResourceCard({ resource, gameId, viewer }: ResourceCardProps) {
       as="article"
       padded={false}
       id={resourceAnchor(resource.id)}
-      className="relative scroll-mt-24 overflow-visible"
+      className={cn(listColumns.span, 'relative grid scroll-mt-24 overflow-visible')}
     >
       <Stack className="absolute inset-0 rounded-[inherit]">
         <RouterLink
@@ -57,8 +58,8 @@ export function ResourceCard({ resource, gameId, viewer }: ResourceCardProps) {
           className={cn(entryLink, 'size-full rounded-[inherit]')}
         />
       </Stack>
-      <Stack gap="sm" className="pointer-events-none relative p-4">
-        <Grid className="grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
+      <Grid className={cn(listColumns.span, 'pointer-events-none relative gap-y-2 p-4')}>
+        <Grid className="col-span-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
           <ResourceTags resource={resource} size="lg" />
           <Inline
             gap="md"
@@ -112,14 +113,16 @@ export function ResourceCard({ resource, gameId, viewer }: ResourceCardProps) {
             <ResourceMenu resource={resource} gameId={gameId} rights={rights} />
           </Stack>
         </Grid>
-        {note !== '' && <BBCodeText source={note} size="sm" className="pointer-events-auto" />}
+        {note !== '' && (
+          <BBCodeText source={note} size="sm" className="pointer-events-auto col-span-full" />
+        )}
         <ResourceFiles
           resourceId={resource.id}
           files={files}
           awaited={awaitedVolumes(resource)}
           manageable={rights.manage}
         />
-      </Stack>
+      </Grid>
     </Card>
   )
 }

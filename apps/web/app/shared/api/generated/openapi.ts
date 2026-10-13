@@ -2948,7 +2948,7 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        /** Community patch resources for a game, forwarded from NextMoe */
+        /** Patches and saved games for a game that 鲲 Galgame 补丁 lists; empty when it lists none */
         get: operations["moyu.patches"];
         put?: never;
         post?: never;
@@ -5465,7 +5465,7 @@ export type components = {
          * Format: int64
          * @enum {integer}
          */
-        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 400109 | 400110 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 450106 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 600101 | 600102 | 600103 | 600104 | 610101 | 610102 | 620101 | 620102 | 620103 | 620104 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103;
+        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 400109 | 400110 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 450106 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 600101 | 600102 | 600103 | 600104 | 610102 | 620101 | 620102 | 620103 | 620104 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103;
         CatalogExcludedDTO: {
             /** @enum {string} */
             entity: "game" | "developer" | "character";
@@ -7184,6 +7184,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeListMoyuEntryDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["MoyuEntryDTO"][] | null;
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeListOngoingUploadDTO: {
             /** Format: int64 */
             code: number;
@@ -7258,16 +7268,6 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["TranslatorListItemDTO"][] | null;
-            message: string;
-            meta?: components["schemas"]["Meta"];
-            requestId: string;
-            /** Format: date-time */
-            timestamp: string;
-        };
-        EnvelopeListValue: {
-            /** Format: int64 */
-            code: number;
-            data: unknown[] | null;
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -8736,6 +8736,44 @@ export type components = {
         };
         Meta: {
             auth?: components["schemas"]["AuthMeta"];
+        };
+        MoyuEntryDTO: {
+            /** Format: int64 */
+            downloads: number;
+            id: string;
+            /**
+             * @description save for a file of saved games with every picture unlocked, patch for everything else
+             * @enum {string}
+             */
+            kind: "patch" | "save";
+            language: ("en" | "zh" | "zh-hant" | "jp")[] | null;
+            /** @description The model a machine translation was made with; null when the other site names none */
+            model: string | null;
+            /** @description Empty when the entry has no name of its own */
+            name: string;
+            platform: ("win" | "mac" | "ios" | "and" | "lin")[] | null;
+            publisher: components["schemas"]["MoyuPublisherDTO"] | null;
+            /**
+             * Format: int64
+             * @description In bytes, read from the size the other site states; null when it cannot be read
+             */
+            size: number | null;
+            /**
+             * @description Where the text of a translation patch comes from; null for everything else
+             * @enum {string|null}
+             */
+            translation: "group" | "machine" | null;
+            /** @description The translators as the other site names them; null when it names none */
+            translator: string | null;
+            /** Format: date-time */
+            updated: string;
+            /** @description The page of the entry on the other site, where it is downloaded */
+            url: string;
+        };
+        MoyuPublisherDTO: {
+            /** @description Address of the publisher's avatar on the other site; null without one */
+            avatar: string | null;
+            name: string;
         };
         OidcIdentitiesDTO: {
             can_unlink: boolean;
@@ -16825,7 +16863,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["EnvelopeListValue"];
+                    "application/json": components["schemas"]["EnvelopeListMoyuEntryDTO"];
                 };
             };
             /** @description Error */

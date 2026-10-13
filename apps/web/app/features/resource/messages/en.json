@@ -1,8 +1,36 @@
 {
   "empty": "No downloads for this game yet",
   "uploadFirst": "Upload",
-  "filter": "Filter by platform",
-  "all": "All",
+  "list": {
+    "filters": "Filters",
+    "group": {
+      "kind": "Type",
+      "language": "Language",
+      "translation": "Translation",
+      "platform": "Platform"
+    },
+    "kind": {
+      "game": "Game",
+      "patch": "Patch",
+      "save": "Full CG save"
+    },
+    "sortBy": "Sort by",
+    "sort": {
+      "updated": "Recently updated",
+      "downloads": "Most downloaded",
+      "smallest": "Smallest file",
+      "largest": "Largest file"
+    },
+    "none": "No resources match the filters",
+    "resetAll": "Reset filters",
+    "reset": "Reset",
+    "done": "{total, plural, one {Show # item} other {Show # items}}"
+  },
+  "moyu": {
+    "open": "View {name} on KUN Visual Novel Patch",
+    "go": "Go to download",
+    "credit": "Patches and full CG saves come from <site>KUN Visual Novel Patch</site>"
+  },
   "downloads": "{count, plural, one {# download} other {# downloads}}",
   "comments": "{count, plural, one {# comment} other {# comments}}",
   "open": "{others, plural, =0 {Details of {name}} one {Details of {name} and # other file} other {Details of {name} and # other files}}",

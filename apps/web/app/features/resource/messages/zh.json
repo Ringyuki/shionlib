@@ -1,8 +1,36 @@
 {
   "empty": "这个游戏暂无资源",
   "uploadFirst": "上传资源",
-  "filter": "按平台筛选",
-  "all": "全部",
+  "list": {
+    "filters": "筛选",
+    "group": {
+      "kind": "类型",
+      "language": "语言",
+      "translation": "翻译",
+      "platform": "平台"
+    },
+    "kind": {
+      "game": "游戏",
+      "patch": "补丁",
+      "save": "全CG存档"
+    },
+    "sortBy": "排序方式",
+    "sort": {
+      "updated": "最近更新",
+      "downloads": "下载次数最多",
+      "smallest": "文件最小",
+      "largest": "文件最大"
+    },
+    "none": "没有符合条件的资源",
+    "resetAll": "重置筛选",
+    "reset": "重置",
+    "done": "查看 {total, number} 项"
+  },
+  "moyu": {
+    "open": "在鲲 Galgame 补丁查看 {name}",
+    "go": "前往下载",
+    "credit": "补丁和全CG存档来自 <site>鲲 Galgame 补丁</site>"
+  },
   "downloads": "{count, number} 次下载",
   "comments": "{count, number} 条评论",
   "open": "{others, plural, =0 {查看 {name} 的详情} other {查看 {name} 等 # 个文件的详情}}",

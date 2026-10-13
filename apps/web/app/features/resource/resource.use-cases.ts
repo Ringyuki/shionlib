@@ -20,6 +20,20 @@ export async function loadGameResources(api: ApiClient, gameId: number) {
   return resources ?? []
 }
 
+export async function loadMoyuEntries(api: ApiClient, gameId: number) {
+  try {
+    const entries = await api.get('/moyu/game/{gameId}/patches', {
+      params: { path: { gameId } },
+    })
+    return entries ?? []
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return []
+    }
+    throw error
+  }
+}
+
 export async function loadResourcePage(api: ApiClient, id: number): Promise<ResourcePage> {
   const { resource, game } = await api.get('/game/download-source/{id}', {
     params: { path: { id } },

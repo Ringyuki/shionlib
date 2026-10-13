@@ -5,6 +5,7 @@ import { blankInfo } from './resource-info'
 import {
   editResource,
   loadAllowance,
+  loadMoyuEntries,
   loadResourceEvents,
   loadResourcePage,
   previewName,
@@ -220,5 +221,38 @@ describe('names', () => {
     const fake = fakeApi().on('post', '/game/download-source/name/read', reading)
     await expect(readName(fake.api, 'upload.7z')).resolves.toEqual(reading)
     await expect(fake.requests[0]?.json()).resolves.toEqual({ file_name: 'upload.7z' })
+  })
+})
+
+describe('loadMoyuEntries', () => {
+  const path = '/moyu/game/{gameId}/patches'
+
+  it('asks for what the other site lists for a game', async () => {
+    const entries: ApiData<typeof path, 'get'> = [
+      {
+        id: 'r1',
+        kind: 'save',
+        name: '',
+        size: null,
+        language: ['jp'],
+        platform: ['win'],
+        translation: null,
+        translator: null,
+        model: null,
+        downloads: 3,
+        url: 'https://www.moyu.moe/resource/r1',
+        updated: '2026-07-09T08:00:00Z',
+        publisher: null,
+      },
+    ]
+    const fake = fakeApi().on('get', path, entries)
+    await expect(loadMoyuEntries(fake.api, 12)).resolves.toEqual(entries)
+    expect(new URL(fake.requests[0]?.url ?? '').pathname).toBe('/moyu/game/12/patches')
+  })
+
+  it('has none when the other site cannot be reached, without failing the page', async () => {
+    const fake = fakeApi().fail('get', path, 502, { code: 610102, message: 'failed' })
+    await expect(loadMoyuEntries(fake.api, 12)).resolves.toEqual([])
+    await expect(loadMoyuEntries(fakeApi().on('get', path, null).api, 12)).resolves.toEqual([])
   })
 })
