@@ -2,7 +2,7 @@ import { Avatar, Inline, Tag, Text, Time, useImageResolver } from '@hina-ui/reac
 import { useTranslations } from 'use-intl'
 import { RecordTable, TwoLines, type Paging, type RecordColumn } from '~/features/admin'
 import { sponsorOf, statusTones, type Order, type Settable } from '../admin-sponsor'
-import { useAmount, useMethodName } from '../use-sponsor-format'
+import { useAmount, useMethodName } from '~/features/sponsor'
 import { OrderMenu } from './order-menu'
 
 type OrderTableProps = {

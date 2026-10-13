@@ -17,14 +17,6 @@
     "closeIt": "在<settings>设置</settings>中关闭",
     "openIt": "在<settings>设置</settings>中开放"
   },
-  "method": {
-    "alipay": "支付宝",
-    "wxpay": "微信支付",
-    "crypto": "加密货币",
-    "onramp-google": "Google Pay",
-    "onramp-apple": "Apple Pay",
-    "onramp-paypal": "PayPal"
-  },
   "anonymous": "匿名",
   "order": "订单 {number}",
   "private": "订单 {number}，不公开展示",

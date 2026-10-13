@@ -22,7 +22,7 @@ import {
 } from '../admin-sponsor'
 import type { Listing } from '../admin-sponsor.use-cases'
 import { useOrderChange } from '../use-order-change'
-import { useAmount } from '../use-sponsor-format'
+import { useAmount } from '~/features/sponsor'
 import { OrderTable } from './order-table'
 import { SponsorFigures } from './sponsor-figures'
 

@@ -19,6 +19,7 @@ import resource from '~/features/resource/messages/zh.json'
 import search from '~/features/search/messages/zh.json'
 import settings from '~/features/settings/messages/zh.json'
 import shell from '~/features/shell/messages/zh.json'
+import sponsor from '~/features/sponsor/messages/zh.json'
 import upload from '~/features/upload/messages/zh.json'
 import uploader from '~/features/uploader/messages/zh.json'
 import walkthrough from '~/features/walkthrough/messages/zh.json'
@@ -55,6 +56,7 @@ export const messages = {
   settings,
   shell,
   site,
+  sponsor,
   upload,
   uploader,
   walkthrough,

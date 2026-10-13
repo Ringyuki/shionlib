@@ -40,21 +40,6 @@ export function grantsBadge(order: Pick<Order, 'user' | 'status'>): boolean {
   return order.user !== null && order.status !== 'DONE'
 }
 
-export const knownMethods = [
-  'alipay',
-  'wxpay',
-  'crypto',
-  'onramp-google',
-  'onramp-apple',
-  'onramp-paypal',
-] as const
-
-export type KnownMethod = (typeof knownMethods)[number]
-
-export function knownMethod(method: string): KnownMethod | undefined {
-  return knownMethods.find(known => known === method)
-}
-
 export const statusTones = {
   DONE: 'success',
   NEW: 'warning',

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { grantsBadge, knownMethod, offered, searchOf, sponsorOf } from './admin-sponsor'
+import { grantsBadge, offered, searchOf, sponsorOf } from './admin-sponsor'
 
 const member = { id: 2, name: 'e2e_user', avatar: 'user/2/avatar.webp', is_sponsor: false }
 
@@ -43,13 +43,5 @@ describe('grantsBadge', () => {
     expect(grantsBadge({ user: member, status: 'REFUND' })).toBe(true)
     expect(grantsBadge({ user: member, status: 'DONE' })).toBe(false)
     expect(grantsBadge({ user: null, status: 'NEW' })).toBe(false)
-  })
-})
-
-describe('knownMethod', () => {
-  it('knows the methods the provider offers', () => {
-    expect(knownMethod('alipay')).toBe('alipay')
-    expect(knownMethod('onramp-paypal')).toBe('onramp-paypal')
-    expect(knownMethod('bank')).toBeUndefined()
   })
 })

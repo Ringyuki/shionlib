@@ -30,16 +30,16 @@ test.describe('as an administrator', () => {
       .click()
     await expect(page).toHaveURL(/\/zh\/admin\/sponsors$/)
     await expect(page.getByRole('heading', { name: '赞助', level: 1 })).toBeVisible()
-    await expect(figure(page, '累计金额')).toContainText('$25.00')
-    await expect(figure(page, '已完成的订单')).toContainText('2')
+    await expect(figure(page, '累计金额')).toContainText('$31.00')
+    await expect(figure(page, '已完成的订单')).toContainText('4')
     await expect(figure(page, '本月金额')).toContainText('$20.00')
     await expect(figure(page, '赞助功能').getByRole('link', { name: '设置' })).toHaveAttribute(
       'href',
       '/zh/admin/settings',
     )
 
-    await expect(orders(page).getByRole('row')).toHaveCount(6)
-    const member = orders(page).getByRole('row', { name: /e2e-order-member/ })
+    await expect(orders(page).getByRole('row')).toHaveCount(8)
+    const member = orders(page).getByRole('row', { name: /e2e-order-member(?!-)/ })
     await expect(member).toContainText('e2e_user')
     await expect(member).toContainText('$20.00')
     await expect(member).toContainText('支付宝')
@@ -64,7 +64,7 @@ test.describe('as an administrator', () => {
     )
     await page.getByRole('button', { name: '全部', exact: true }).click()
     await expect(page).toHaveURL(/\/zh\/admin\/sponsors$/)
-    await expect(orders(page).getByRole('row')).toHaveCount(6)
+    await expect(orders(page).getByRole('row')).toHaveCount(8)
   })
 
   test('completes an order by hand, then marks it refunded', async ({ page }) => {
@@ -79,14 +79,14 @@ test.describe('as an administrator', () => {
     await confirm.getByRole('button', { name: '标为已完成' }).click()
     await expectNotice(page, '订单已标为已完成')
     await expect(row).toContainText('已完成')
-    await expect(figure(page, '累计金额')).toContainText('$35.00')
-    await expect(figure(page, '已完成的订单')).toContainText('3')
+    await expect(figure(page, '累计金额')).toContainText('$41.00')
+    await expect(figure(page, '已完成的订单')).toContainText('5')
     await expect(figure(page, '本月金额')).toContainText('$30.00')
 
     await choose(page, unpaid, '标为已退款')
     await expectNotice(page, '订单已标为已退款')
     await expect(row).toContainText('已退款')
-    await expect(figure(page, '累计金额')).toContainText('$25.00')
+    await expect(figure(page, '累计金额')).toContainText('$31.00')
   })
 
   test('deletes an order after asking', async ({ page }) => {

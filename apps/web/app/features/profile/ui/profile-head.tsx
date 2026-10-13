@@ -10,7 +10,9 @@ import {
   useImageResolver,
 } from '@hina-ui/react'
 import { CalendarDays, PencilLine } from 'lucide-react'
-import { useFormatter, useTranslations } from 'use-intl'
+import { Link } from 'react-router'
+import { useFormatter, useLocale, useTranslations } from 'use-intl'
+import { sitePaths } from '~/features/shell'
 import { Button } from '~/shared/ui/button'
 import type { Profile } from '../profile'
 
@@ -25,6 +27,7 @@ const avatarOnBanner =
 export function ProfileHead({ profile, onEdit }: ProfileHeadProps) {
   const t = useTranslations('profile')
   const format = useFormatter()
+  const locale = useLocale()
   const resolveImage = useImageResolver()
   const bio = (profile.bio ?? '').trim()
   return (
@@ -70,8 +73,10 @@ export function ProfileHead({ profile, onEdit }: ProfileHeadProps) {
           </Heading>
           {profile.is_admin && <Tag size="sm">{t('admin')}</Tag>}
           {profile.is_sponsor && (
-            <Tag size="sm" tone="accent">
-              {t('sponsor')}
+            <Tag asChild size="sm" tone="accent">
+              <Link to={sitePaths(locale).sponsor} prefetch="intent">
+                {t('sponsor')}
+              </Link>
             </Tag>
           )}
           {profile.is_banned && (

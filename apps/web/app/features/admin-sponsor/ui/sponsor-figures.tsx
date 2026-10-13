@@ -3,7 +3,7 @@ import { Link as RouterLink } from 'react-router'
 import { useFormatter, useTranslations } from 'use-intl'
 import { adminPaths, StatFigures } from '~/features/admin'
 import type { Stats } from '../admin-sponsor'
-import { useAmount } from '../use-sponsor-format'
+import { useAmount } from '~/features/sponsor'
 
 export function SponsorFigures({ stats }: { stats: Stats }) {
   const t = useTranslations('adminSponsor.figure')

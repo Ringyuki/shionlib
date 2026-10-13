@@ -61,6 +61,8 @@ export default [
   route('resources/upload/allowance', 'routes/resources.upload.allowance.ts'),
   route('resources/library/tags', 'routes/resources.library.tags.ts'),
   route('resources/message/read-all', 'routes/resources.message.read-all.ts'),
+  route('resources/sponsor/orders', 'routes/resources.sponsor.orders.ts'),
+  route('resources/sponsor/payments', 'routes/resources.sponsor.payments.ts'),
   route('resources/viewer/preferences', 'routes/resources.viewer.preferences.ts'),
   route('resources/profile/edit', 'routes/resources.profile.edit.ts'),
   route('resources/settings/name', 'routes/resources.settings.name.ts'),
@@ -113,6 +115,9 @@ export default [
         route('docs', 'routes/docs.tsx'),
         route('docs/:category/:name', 'routes/doc.tsx'),
         route('friend-link', 'routes/friend-link.tsx'),
+        route('sponsor', 'routes/sponsor.tsx'),
+        route('sponsor/new', 'routes/sponsor.new.tsx'),
+        route('sponsor/orders/:id', 'routes/sponsor.order.tsx'),
         route('admin', 'routes/admin.tsx', [
           index('routes/admin.overview.tsx'),
           route('reports', 'routes/admin.reports.tsx'),

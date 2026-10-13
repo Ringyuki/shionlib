@@ -1,0 +1,82 @@
+{
+  "title": "スポンサーウォール",
+  "become": "スポンサーになる",
+  "again": "もう一度支援する",
+  "badgeUntil": "スポンサーバッジの有効期限は {date} です",
+  "closed": "現在、支援の受付を停止しています",
+  "empty": "スポンサーはまだいません",
+  "sponsors": "スポンサー",
+  "tag": "スポンサー",
+  "anonymous": "匿名",
+  "today": "今日",
+  "coverOf": "{name}のカバー画像",
+  "avatarOf": "{name}のアイコン",
+  "checkout": {
+    "title": "Shionlib を支援する",
+    "back": "スポンサーウォール",
+    "step": {
+      "content": "支援内容",
+      "pay": "支払い",
+      "done": "完了"
+    },
+    "amount": "金額",
+    "badgeDays": "スポンサーバッジ {days} 日間",
+    "otherAmount": "その他の金額",
+    "name": "署名",
+    "message": "メッセージ",
+    "optional": "任意",
+    "shown": "スポンサーウォールに表示する",
+    "editProfile": "プロフィールを編集",
+    "guest": "ログインして支援すると、スポンサーバッジが付与され、スポンサーウォールにプロフィールが表示されます",
+    "signIn": "ログイン",
+    "continue": "次へ"
+  },
+  "summary": {
+    "title": "注文内容",
+    "number": "注文番号",
+    "badge": "スポンサーバッジ",
+    "until": "{date} まで有効",
+    "deadline": "支払い期限",
+    "todayAt": "今日 {time}",
+    "due": "お支払い金額"
+  },
+  "pay": {
+    "methods": "支払い方法",
+    "none": "利用できる支払い方法がありません",
+    "amount": "支払い金額",
+    "waiting": "支払いの完了を待っています",
+    "open": "支払いページを開く",
+    "reopen": "支払いページをもう一度開く",
+    "go": "支払いへ進む",
+    "change": "支払い方法を変更",
+    "code": "支払い用 QR コード"
+  },
+  "method": {
+    "alipay": "Alipay",
+    "wxpay": "WeChat Pay",
+    "crypto": "暗号資産",
+    "onramp-google": "Google Pay",
+    "onramp-apple": "Apple Pay",
+    "onramp-paypal": "PayPal"
+  },
+  "done": {
+    "title": "ご支援ありがとうございます",
+    "wall": "スポンサーウォールでの表示",
+    "receipt": "領収内容",
+    "amount": "支援金額",
+    "method": "支払い方法",
+    "paidAt": "支払い日時",
+    "copyNumber": "注文番号をコピー",
+    "viewWall": "スポンサーウォールを見る",
+    "home": "ホームに戻る"
+  },
+  "ended": {
+    "expired": "注文の有効期限が切れました",
+    "refunded": "注文は返金されました",
+    "retry": "もう一度支援する",
+    "back": "スポンサーウォールに戻る"
+  },
+  "issue": {
+    "amount": "金額を入力してください"
+  }
+}

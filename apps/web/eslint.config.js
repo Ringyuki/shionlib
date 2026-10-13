@@ -98,6 +98,7 @@ const ownWidthPages = [
   'app/features/resource/ui/upload-page.tsx',
   'app/features/profile/ui/profile-page.tsx',
   'app/features/auth/ui/password-reset-panel.tsx',
+  'app/features/sponsor/ui/checkout-frame.tsx',
 ]
 
 const mountedFeedback = {
