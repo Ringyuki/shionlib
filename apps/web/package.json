@@ -22,7 +22,7 @@
     "@dnd-kit/sortable": "10.0.0",
     "@dnd-kit/utilities": "3.2.2",
     "@floating-ui/dom": "^1.8.0",
-    "@hina-ui/react": "^1.7.11",
+    "@hina-ui/react": "^1.7.12",
     "@react-router/express": "^8.4.0",
     "@react-router/node": "^8.4.0",
     "@tiptap/core": "3.31.4",

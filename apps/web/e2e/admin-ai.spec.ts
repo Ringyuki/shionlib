@@ -136,8 +136,14 @@ test.describe('as a super administrator', () => {
     await expect(primary).not.toContainText('已自动改用 JSON 模式')
 
     await backup.getByRole('button', { name: '移动行' }).focus()
+    const saved = page.waitForResponse(
+      response =>
+        response.request().method() === 'POST' &&
+        response.url().includes('/resources/admin/ai/models'),
+    )
     await page.keyboard.press('ArrowUp')
     await expect(order.getByRole('row').nth(1)).toContainText('e2e-backup')
+    await saved
     await page.reload()
     await expect(order.getByRole('row').nth(1)).toContainText('e2e-backup')
   })

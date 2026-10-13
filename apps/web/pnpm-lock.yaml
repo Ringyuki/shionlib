@@ -24,8 +24,8 @@ importers:
         specifier: ^1.8.0
         version: 1.8.0
       '@hina-ui/react':
-        specifier: ^1.7.11
-        version: 1.7.11(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)
+        specifier: ^1.7.12
+        version: 1.7.12(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)
       '@react-router/express':
         specifier: ^8.4.0
         version: 8.4.0(express@5.2.1)(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(typescript@6.0.3)
@@ -400,8 +400,8 @@ packages:
   '@formatjs/icu-skeleton-parser@2.1.12':
     resolution: {integrity: sha512-ca7tZMLpfHX3sUD7hP6gE/qr6Iq89EDd3ZLeRhbsB7r0UD55DGJq+tmFLzrGrnx5StahUevQmQQVtbDRHsfDHA==}
 
-  '@hina-ui/react@1.7.11':
-    resolution: {integrity: sha512-YHj+64A3D8NjxJIAjcq6q09pbZGYfqfqIqwH/OOMzjOkNV/3vdETrv3sDyjtW35CHCipeWv7/PClUF+2HWrlsw==}
+  '@hina-ui/react@1.7.12':
+    resolution: {integrity: sha512-oXPkO+J5UZ18cDyAOKQKaUnMzSELQb4TKhzc5iNDTdLeGGpU7wv5Bc8uLAqqmXobikFkxUAaK3f7xQbIUU+Asw==}
     peerDependencies:
       react: ^19.0.0
       react-dom: ^19.0.0
@@ -3339,7 +3339,7 @@ snapshots:
 
   '@formatjs/icu-skeleton-parser@2.1.12': {}
 
-  '@hina-ui/react@1.7.11(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)':
+  '@hina-ui/react@1.7.12(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)':
     dependencies:
       '@floating-ui/react-dom': 2.1.8(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@internationalized/date': 3.12.4
