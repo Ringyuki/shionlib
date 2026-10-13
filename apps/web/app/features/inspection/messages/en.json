@@ -10,6 +10,7 @@
     "volumes": "{name} and {count, number} volumes in total",
     "unread": "The contents of this file have not been read yet",
     "unreadHint": "Files uploaded earlier are being processed in turn",
+    "noFiles": "No files yet",
     "reading": "Reading the contents of the file",
     "waiting": "The contents are read once the set is complete",
     "failed": "The contents of this file could not be read",

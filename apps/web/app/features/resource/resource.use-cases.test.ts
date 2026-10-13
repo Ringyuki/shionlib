@@ -83,15 +83,18 @@ describe('loadResourcePage', () => {
       .on('get', '/game/download-source/{id}', detail)
       .on('get', '/game/{id}/header', header)
       .on('get', '/inspection/resource/{resource_id}', null)
+      .on('get', '/game/download-source/{resourceId}/composition', { current: null, latest: null })
     await expect(loadResourcePage(fake.api, 31)).resolves.toEqual({
       resource: detail.resource,
       game: header,
       inspections: [],
+      lineage: { current: null, latest: null },
     })
     expect(fake.requests.map(request => new URL(request.url).pathname)).toEqual([
       '/game/download-source/31',
       '/game/7/header',
       '/inspection/resource/31',
+      '/game/download-source/31/composition',
     ])
   })
 

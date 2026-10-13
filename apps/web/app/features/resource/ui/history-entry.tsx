@@ -39,6 +39,7 @@ export function HistoryEntry({ event }: { event: ResourceEvent }) {
         case 'extras':
           return labelOf(labels.resource.extraName, value)
         case 'note':
+        case 'base':
         case 'translators':
         case 'patch_version':
         case 'release_url':
@@ -90,14 +91,22 @@ export function HistoryEntry({ event }: { event: ResourceEvent }) {
           </Text>
         </Inline>
       ))}
-      {eventChanges(event).map(change => (
-        <HistoryChange
-          key={change.field}
-          label={t(`field.${change.field}`)}
-          before={valuesOf(change, change.old)}
-          after={valuesOf(change, change.new)}
-        />
-      ))}
+      {event.kind === 'composed' ? (
+        <Text size="sm" tone="muted" className="break-all">
+          {eventChanges(event)
+            .map(change => `${t(`field.${change.field}`)} ${valuesOf(change, change.new)}`)
+            .join(t('separator'))}
+        </Text>
+      ) : (
+        eventChanges(event).map(change => (
+          <HistoryChange
+            key={change.field}
+            label={t(`field.${change.field}`)}
+            before={valuesOf(change, change.old)}
+            after={valuesOf(change, change.new)}
+          />
+        ))
+      )}
     </Stack>
   )
 }

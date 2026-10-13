@@ -33,6 +33,7 @@ const listed: ApiData<'/game/download-source/mine', 'get'> = {
 
 const signedIn = () =>
   fakeApi()
+    .on('get', '/composition/mine', null)
     .on('get', '/uploads/quota', allowance)
     .on('get', '/game/download-source/mine/summary', summary)
     .on('get', '/game/download-source/mine', listed)
@@ -52,6 +53,7 @@ describe('loadUploader', () => {
       summary,
       listing,
       resources: [],
+      compositions: [],
       total: 23,
     })
     expect(listQuery(fake.requests)).toEqual([
@@ -88,6 +90,7 @@ describe('loadUploader', () => {
       summary,
       listing,
       resources: [],
+      compositions: [],
       total: 0,
     })
     expect(listQuery(fake.requests)).toEqual([])

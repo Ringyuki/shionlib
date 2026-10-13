@@ -3,6 +3,6 @@ import type { Route } from './+types/resource.details'
 
 export default function ResourceDetailsRoute({ matches }: Route.ComponentProps) {
   const [, , , , resource] = matches
-  const { resource: shown, inspections } = resource.loaderData
-  return <ResourceDetails resource={shown} inspections={inspections} />
+  const { resource: shown, inspections, lineage } = resource.loaderData
+  return <ResourceDetails resource={shown} inspections={inspections} origin={lineage.latest} />
 }

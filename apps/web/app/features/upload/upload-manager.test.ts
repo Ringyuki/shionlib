@@ -51,6 +51,32 @@ describe('UploadManager', () => {
     expect(writes.at(-1)).toEqual({ submissions: [], uploads: [] })
   })
 
+  it('hands a finished upload to a composition or to the update of a composed resource', async () => {
+    const server = fakeServer()
+    const { manager } = setupManager(server)
+    manager.add({ kind: 'compose', compositionId: 6, role: 'save' }, 'save.zip', [
+      { file: new File(['save'], 'save.zip') },
+    ])
+    manager.add({ kind: 'rebuild', resourceId: 8, patchVersion: 'v1.2' }, 'patch.7z', [
+      { file: new File(['patch'], 'patch.7z') },
+    ])
+    await vi.waitFor(() =>
+      expect(manager.getSnapshot().submissions.map(submission => submission.phase.name)).toEqual([
+        'submitted',
+        'submitted',
+      ]),
+    )
+    expect(server.called('PUT', '/composition/6/save')?.body).toEqual({
+      upload_session_id: 1,
+      file_name: 'save.zip',
+    })
+    expect(server.called('POST', '/game/download-source/8/composition')?.body).toEqual({
+      upload_session_id: 2,
+      file_name: 'patch.7z',
+      patch_version: 'v1.2',
+    })
+  })
+
   it('resumes a restored upload once its file is chosen again', async () => {
     const server = fakeServer([ongoingSession(5, { uploaded_chunks: [0] })])
     const { manager, sent } = setupManager(server, {

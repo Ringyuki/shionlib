@@ -1,5 +1,5 @@
 import { Inline, Tag, Text } from '@hina-ui/react'
-import { FilePlus, FileUp, Gamepad2 } from 'lucide-react'
+import { Combine, FilePlus, FileUp, Gamepad2 } from 'lucide-react'
 import { useMessages, useTranslations } from 'use-intl'
 import { PlatformTag } from '~/features/game'
 import type { Submission } from '~/features/upload'
@@ -27,6 +27,10 @@ export function TransferSubject({ submission }: { submission: Submission }) {
       return <Fact icon={FilePlus}>{t('appendsTo', { name: label })}</Fact>
     case 'replace':
       return <Fact icon={FileUp}>{t('replaces', { name: label })}</Fact>
+    case 'compose':
+      return <Fact icon={Combine}>{t(`composes.${target.role}`)}</Fact>
+    case 'rebuild':
+      return <Fact icon={Combine}>{t('rebuilds')}</Fact>
     case 'create':
       return (
         <>

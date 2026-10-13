@@ -1,6 +1,8 @@
 import { loadInspections } from '~/features/inspection'
 import type { ApiClient } from '~/shared/api/client'
 import { ApiError } from '~/shared/api/error'
+import type { ComposeMode, WizardStep } from './resource-composition'
+import { loadComposer, loadLineage } from './resource-composition.use-cases'
 import { needsSimulator } from './resource'
 import { resourceInfo } from './resource-info'
 import { nameBody, type NameQuery } from './resource-name'
@@ -38,11 +40,12 @@ export async function loadResourcePage(api: ApiClient, id: number): Promise<Reso
   const { resource, game } = await api.get('/game/download-source/{id}', {
     params: { path: { id } },
   })
-  const [header, inspections] = await Promise.all([
+  const [header, inspections, lineage] = await Promise.all([
     api.get('/game/{id}/header', { params: { path: { id: game.id } } }),
     loadInspections(api, id),
+    loadLineage(api, id),
   ])
-  return { resource, game: header, inspections }
+  return { resource, game: header, inspections, lineage }
 }
 
 export async function loadResourceEvents(api: ApiClient, id: number) {
@@ -108,14 +111,23 @@ export async function removeFile(api: ApiClient, removal: FileRemoval) {
   })
 }
 
-export async function loadUploadPage(api: ApiClient, gameId: number | undefined) {
+type UploadQuery = {
+  gameId: number | undefined
+  mode: ComposeMode
+  compositionId: number | undefined
+  step: WizardStep | undefined
+}
+
+export async function loadUploadPage(api: ApiClient, query: UploadQuery) {
+  const composer = query.mode === 'compose' ? await loadComposer(api, query) : null
+  const gameId = composer?.composition?.game_id ?? query.gameId
   const [game, allowance] = await Promise.all([
     gameId === undefined
       ? null
       : api.get('/game/{id}/header', { params: { path: { id: gameId } } }),
     loadAllowance(api),
   ])
-  return { game, allowance }
+  return { game, allowance, mode: query.mode, composer }
 }
 
 export function loadAllowance(api: ApiClient) {

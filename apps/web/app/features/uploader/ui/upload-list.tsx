@@ -59,7 +59,13 @@ export function UploadList({ content, transfers, viewer }: UploadListProps) {
         item.kind === 'transfer' ? (
           <TransferEntry transfer={item.transfer} />
         ) : (
-          <ResourceEntry own={item.own} viewer={viewer} />
+          <ResourceEntry
+            own={item.own}
+            viewer={viewer}
+            composition={content.compositions.find(
+              composition => composition.resource_id === item.own.resource.id,
+            )}
+          />
         )
       }
     </DataList>

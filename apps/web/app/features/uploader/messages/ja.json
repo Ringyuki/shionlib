@@ -35,7 +35,8 @@
     "missing": {
       "translation": "翻訳が未記入",
       "form": "形態が未記入"
-    }
+    },
+    "estimate": "約 {size}"
   },
   "account": {
     "title": "ストレージとダウンロード数",
@@ -100,6 +101,11 @@
     },
     "speed": "{speed}/秒、残り {time}",
     "pause": "アップロードを一時停止",
-    "resume": "アップロードを再開"
+    "resume": "アップロードを再開",
+    "composes": {
+      "patch": "合成用のパッチ",
+      "save": "合成用のフルコンプセーブ"
+    },
+    "rebuilds": "合成リソースの新しいパッチ"
   }
 }

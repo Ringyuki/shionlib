@@ -10,6 +10,7 @@
     "volumes": "{name} 等 {count, number} 个分卷",
     "unread": "尚未读取这个文件的内容",
     "unreadHint": "较早上传的文件正在依次处理",
+    "noFiles": "暂无文件",
     "reading": "正在读取文件内容",
     "waiting": "分卷补齐后才会读取文件内容",
     "failed": "未能读取这个文件的内容",

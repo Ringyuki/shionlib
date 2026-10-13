@@ -1,5 +1,6 @@
 import * as v from 'valibot'
 import { constraints } from '~/shared/api/generated/constraints'
+import { inputRoles } from './upload'
 
 const createBody = constraints.DownloadSourceBodyInput
 
@@ -27,6 +28,13 @@ const target = v.variant('kind', [
   v.object({ kind: v.literal('create'), gameId: id, resource: resourceDraft }),
   v.object({ kind: v.literal('append'), resourceId: id }),
   v.object({ kind: v.literal('replace'), fileId: id, reason: v.optional(v.string()) }),
+  v.object({ kind: v.literal('compose'), compositionId: id, role: v.picklist(inputRoles) }),
+  v.object({
+    kind: v.literal('rebuild'),
+    resourceId: id,
+    patchVersion: v.optional(v.string()),
+    note: v.optional(v.string()),
+  }),
   v.object({ kind: v.literal('orphan') }),
   v.object({ kind: v.literal('heldElsewhere') }),
 ])

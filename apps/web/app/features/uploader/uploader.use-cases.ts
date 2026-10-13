@@ -1,3 +1,4 @@
+import { loadOwnCompositions } from '~/features/resource'
 import type { ApiClient } from '~/shared/api/client'
 import { ApiError } from '~/shared/api/error'
 import { pageSize, scopeOf, type Listing, type UploaderContent } from './uploader'
@@ -16,8 +17,9 @@ export async function loadUploader(
     return null
   }
   const { stage } = listing
-  const [summary, found] = await Promise.all([
+  const [summary, compositions, found] = await Promise.all([
     api.get('/game/download-source/mine/summary'),
+    loadOwnCompositions(api),
     stage === 'uploading'
       ? undefined
       : api.get('/game/download-source/mine', {
@@ -38,6 +40,7 @@ export async function loadUploader(
     summary,
     listing,
     resources: found?.items ?? [],
+    compositions,
     total: found?.meta.totalItems ?? 0,
   }
 }

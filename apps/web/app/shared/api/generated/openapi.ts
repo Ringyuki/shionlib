@@ -2096,6 +2096,112 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/composition/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the caller's compositions that wait, run or failed */
+        get: operations["composition.mine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/composition/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Show a composition with its plan and progress */
+        get: operations["composition.get"];
+        put?: never;
+        post?: never;
+        /** Discard a composition that has not started or has failed */
+        delete: operations["composition.discard"];
+        options?: never;
+        head?: never;
+        /** Describe the result of a composition and choose where the patch goes */
+        patch: operations["composition.edit"];
+        trace?: never;
+    };
+    "/composition/{id}/patch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Give a composition its patch from a completed upload */
+        put: operations["composition.attachPatch"];
+        post?: never;
+        /** Take the patch out of a composition */
+        delete: operations["composition.detachPatch"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/composition/{id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Queue a failed composition again */
+        post: operations["composition.retry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/composition/{id}/save": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Give a composition saved games to pack beside the game */
+        put: operations["composition.attachSave"];
+        post?: never;
+        /** Take the saved games out of a composition */
+        delete: operations["composition.detachSave"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/composition/{id}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create the resource of a composition and queue its work */
+        post: operations["composition.start"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/developer/list": {
         parameters: {
             query?: never;
@@ -2478,6 +2584,24 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/game/download-source/{resourceId}/composition": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Show what a resource was composed from and, to its owner, the composition under way */
+        get: operations["composition.lineage"];
+        put?: never;
+        /** Compose a resource again with a new patch */
+        post: operations["composition.rebuild"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/game/download/{id}/link": {
         parameters: {
             query?: never;
@@ -2572,6 +2696,40 @@ export type paths = {
         };
         /** Get the VNDB rating of a game */
         get: operations["game.vndbScore"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/game/{gameId}/composition": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Begin composing a new resource from a base of the game */
+        post: operations["composition.begin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/game/{gameId}/composition/bases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the resources of a game with whether a patch can be composed onto each */
+        get: operations["composition.bases"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5457,6 +5615,13 @@ export type components = {
             id: number;
             rating: components["schemas"]["BangumiRatingDTO"];
         };
+        BeginCompositionInputBody: {
+            /**
+             * Format: int64
+             * @description A published resource of the same game that runs as it is, taken from the list of bases
+             */
+            base_resource_id: number;
+        };
         BindPotatoVNInputBody: {
             pvn_password: string;
             pvn_user_name: string;
@@ -5465,7 +5630,7 @@ export type components = {
          * Format: int64
          * @enum {integer}
          */
-        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 400109 | 400110 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 450106 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 600101 | 600102 | 600103 | 600104 | 610102 | 620101 | 620102 | 620103 | 620104 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103;
+        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 400109 | 400110 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 450106 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 600101 | 600102 | 600103 | 600104 | 610102 | 620101 | 620102 | 620103 | 620104 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103 | 660101 | 660102 | 660103 | 660104 | 660105 | 660106 | 660107 | 660108 | 660109 | 660110 | 660111 | 660112 | 660113;
         CatalogExcludedDTO: {
             /** @enum {string} */
             entity: "game" | "developer" | "character";
@@ -5778,6 +5943,212 @@ export type components = {
             /** @description BLAKE3 hex digest of the whole file, computed while uploading */
             file_sha256: string;
         };
+        CompositionBaseDTO: {
+            creator: components["schemas"]["UserSummaryDTO"];
+            /** Format: int64 */
+            downloads: number;
+            /** @enum {string|null} */
+            edition: "download" | "package" | "steam" | null;
+            edition_name: string | null;
+            /** @enum {string|null} */
+            form: "disc" | "installer" | "portable" | null;
+            language: ("en" | "zh" | "zh-hant" | "jp")[] | null;
+            /** @description The name of the file that would be unpacked, the first volume of a set */
+            name: string;
+            /**
+             * @description Why the resource cannot be composed on; null when it can
+             * @enum {string|null}
+             */
+            reason: "disc" | "installer" | "form_unknown" | "unread" | "unreadable" | "too_large" | "pending" | "composed" | null;
+            /** Format: int64 */
+            resource_id: number;
+            /** Format: int64 */
+            size: number;
+        };
+        CompositionChangeDTO: {
+            /**
+             * Format: int64
+             * @description The size of the file that is replaced; null for a file that is added
+             */
+            old_size: number | null;
+            path: string;
+            /** Format: int64 */
+            size: number;
+        };
+        CompositionCountDTO: {
+            /** Format: int64 */
+            files: number;
+            /** Format: int64 */
+            size: number;
+        };
+        CompositionDTO: {
+            /**
+             * Format: int64
+             * @description How many compositions run or wait before this one
+             */
+            ahead: number;
+            base: components["schemas"]["CompositionSourceDTO"];
+            details: components["schemas"]["CompositionDetailsDTO"];
+            /** Format: int64 */
+            estimated_size: number;
+            /** @enum {string|null} */
+            failure: "base_gone" | "base_unreadable" | "patch_unreadable" | "save_unreadable" | "place_missing" | "no_room" | "too_large" | "harmful" | "broken" | "nothing_to_apply" | "path_conflict" | "queue_full" | "quota" | "internal" | null;
+            failure_detail: string | null;
+            /** @description The name the result takes; empty until the languages are chosen */
+            file_name: string;
+            /** Format: date-time */
+            finished_at: string | null;
+            /** @description The folders at the root of the result */
+            folders: components["schemas"]["CompositionFolderDTO"][] | null;
+            /** Format: int64 */
+            game_id: number;
+            /** Format: int64 */
+            id: number;
+            keep_patch: boolean;
+            match: components["schemas"]["CompositionMatchDTO"] | null;
+            note: string | null;
+            patch: components["schemas"]["CompositionInputDTO"] | null;
+            /**
+             * Format: int64
+             * @description Progress of the running step where it is known
+             */
+            percent: number;
+            /** @description What the patch adds and replaces; null until the base and the patch are read */
+            plan: components["schemas"]["CompositionPlanDTO"] | null;
+            /** Format: date-time */
+            queued_at: string | null;
+            /** @description Whether this composition replaces the file of a resource composed before */
+            rebuild: boolean;
+            /**
+             * Format: int64
+             * @description The composed resource; null until the composition is started
+             */
+            resource_id: number | null;
+            save: components["schemas"]["CompositionInputDTO"] | null;
+            /**
+             * Format: int64
+             * @description The size of the result once packed
+             */
+            size: number | null;
+            /** Format: date-time */
+            started_at: string | null;
+            /** @enum {string} */
+            state: "draft" | "queued" | "running" | "done" | "failed";
+            /** @enum {string|null} */
+            step: "fetch" | "unpack" | "apply" | "pack" | "check" | "store" | null;
+            steps: components["schemas"]["CompositionStepDTO"][] | null;
+            /** Format: date-time */
+            updated: string;
+        };
+        CompositionDetailsDTO: {
+            language: ("en" | "zh" | "zh-hant" | "jp")[] | null;
+            patch_version: string | null;
+            release_url: string | null;
+            /** @enum {string|null} */
+            translation: "none" | "official" | "group" | "machine" | null;
+            translators: string[] | null;
+        };
+        CompositionDirDTO: {
+            /** Format: int64 */
+            items: number;
+            /** @description Empty for the root of the archive */
+            path: string;
+        };
+        CompositionFolderDTO: {
+            /** Format: int64 */
+            items: number;
+            name: string;
+            /** @enum {string} */
+            role: "game" | "save" | "patch";
+            /** Format: int64 */
+            size: number;
+        };
+        CompositionInputDTO: {
+            /** Format: int64 */
+            files: number;
+            name: string;
+            /** @enum {string|null} */
+            refusal: "encrypted" | "broken" | "not_archive" | "harmful" | "too_many_files" | null;
+            /** Format: int64 */
+            size: number;
+            /** @enum {string} */
+            state: "reading" | "ready" | "refused";
+            /** Format: int64 */
+            unpacked: number;
+            viruses: string[] | null;
+        };
+        CompositionLineageDTO: {
+            /** @description The composition under way or failed, for its owner; null otherwise */
+            current: components["schemas"]["CompositionDTO"] | null;
+            /** @description What the resource was last composed from; null for a resource that was uploaded */
+            latest: components["schemas"]["CompositionOriginDTO"] | null;
+        };
+        CompositionMatchDTO: {
+            translators: string[] | null;
+            /** @description The page of the same file on 鲲 Galgame 补丁 */
+            url: string;
+            version: string | null;
+        };
+        CompositionOriginDTO: {
+            base: components["schemas"]["CompositionSourceDTO"];
+            /** @description Whether the base has been removed since; the resource then cannot be composed again */
+            base_gone: boolean;
+            /** Format: date-time */
+            finished_at: string | null;
+            /** Format: int64 */
+            id: number;
+            keep_patch: boolean;
+            patch: components["schemas"]["CompositionPartDTO"] | null;
+            patch_version: string | null;
+            save: components["schemas"]["CompositionPartDTO"] | null;
+        };
+        CompositionPartDTO: {
+            name: string;
+            /** Format: int64 */
+            size: number;
+        };
+        CompositionPlanDTO: {
+            /** @description The first files that are added; adds counts all of them */
+            added: components["schemas"]["CompositionChangeDTO"][] | null;
+            adds: components["schemas"]["CompositionCountDTO"];
+            /** @description Patch files that would take the place of a folder, or lie below a file; a composition with any cannot start */
+            conflicts: string[] | null;
+            game_dir: string;
+            game_dirs: components["schemas"]["CompositionDirDTO"][] | null;
+            patch_dir: string;
+            patch_dirs: components["schemas"]["CompositionDirDTO"][] | null;
+            /** @description The first files that are replaced; replaces counts all of them */
+            replaced: components["schemas"]["CompositionChangeDTO"][] | null;
+            replaces: components["schemas"]["CompositionCountDTO"];
+            total: components["schemas"]["CompositionCountDTO"];
+            unchanged: components["schemas"]["CompositionCountDTO"];
+        };
+        CompositionSourceDTO: {
+            name: string;
+            /** Format: int64 */
+            resource_id: number;
+            /** Format: int64 */
+            size: number;
+        };
+        CompositionStepDTO: {
+            /**
+             * Format: int64
+             * @description How long the step took, or has been running; null for a step not reached
+             */
+            seconds: number | null;
+            /** @enum {string} */
+            state: "waiting" | "running" | "done";
+            /** @enum {string} */
+            step: "fetch" | "unpack" | "apply" | "pack" | "check" | "store";
+        };
+        CompositionUploadInput: {
+            file_name: string;
+            /**
+             * Format: int64
+             * @description A completed upload of the caller that is not part of a resource
+             */
+            upload_session_id: number;
+        };
         CreateAdInputBody: {
             aspect: string;
             enabled?: boolean;
@@ -5891,7 +6262,7 @@ export type components = {
         };
         DownloadEventChangeDTO: {
             /** @enum {string} */
-            field: "platforms" | "languages" | "simulator" | "note" | "translation" | "translators" | "patch_version" | "release_url" | "edition" | "edition_name" | "form" | "extras";
+            field: "platforms" | "languages" | "simulator" | "note" | "translation" | "translators" | "patch_version" | "release_url" | "edition" | "edition_name" | "form" | "extras" | "base";
             /** @description Values after the edit; empty when the field was cleared */
             new: string[] | null;
             /** @description Values before the edit; empty when the field was unset */
@@ -5909,10 +6280,10 @@ export type components = {
             /** Format: int64 */
             id: number;
             /**
-             * @description What happened: the resource was published, a file was replaced, renamed, added or removed, the resource's fields were edited, an admin cleared a file flagged by the malware scan, or the check found a disc image and set the form to disc
+             * @description What happened: the resource was published, a file was replaced, renamed, added or removed, the resource's fields were edited, an admin cleared a file flagged by the malware scan, the check found a disc image and set the form to disc, the resource was composed from a base and a patch and published, or it was composed again with a new patch
              * @enum {string}
              */
-            kind: "published" | "file_replaced" | "file_renamed" | "file_added" | "file_removed" | "edited" | "review_cleared" | "disc_found";
+            kind: "published" | "file_replaced" | "file_renamed" | "file_added" | "file_removed" | "edited" | "review_cleared" | "disc_found" | "composed" | "recomposed";
             /** @description The file replaced or cleared, or the new name of a renamed file */
             name: string | null;
             /**
@@ -6265,6 +6636,24 @@ export type components = {
         };
         EditCommentInputBody: {
             content: components["schemas"]["RichTextDocument"];
+        };
+        EditCompositionInputBody: {
+            /** @description The folder of the base that receives the patch; empty for its root, left out to keep the one chosen before (the server's guess until one is chosen) */
+            game_dir?: string;
+            /** @description Whether the patch archive is put into the result beside the game */
+            keep_patch: boolean;
+            /** @description The languages of the composed resource */
+            language: ("en" | "zh" | "zh-hant" | "jp")[] | null;
+            /** @description The folder of the patch whose files are laid over the game; empty for its root, left out to keep the one chosen before (the server's guess until one is chosen) */
+            patch_dir?: string;
+            patch_version?: string;
+            release_url?: string;
+            /**
+             * @description Where the translation of the patch comes from
+             * @enum {string}
+             */
+            translation?: "official" | "group" | "machine";
+            translators: string[] | null;
         };
         EditDownloadSourceBodyInput: {
             /** @description Turns the canonical name of the first file on or off; left out, the choice stays as it is. Turning it off gives the file back the name it was uploaded with */
@@ -6773,6 +7162,26 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeCompositionDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["CompositionDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeCompositionLineageDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["CompositionLineageDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeDeletedCharacterDTO: {
             /** Format: int64 */
             code: number;
@@ -7128,6 +7537,26 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["CatalogSourceDTO"][] | null;
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeListCompositionBaseDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["CompositionBaseDTO"][] | null;
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeListCompositionDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["CompositionDTO"][] | null;
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -9035,6 +9464,14 @@ export type components = {
         };
         ReadNameInputBody: {
             file_name: string;
+        };
+        RebuildCompositionInputBody: {
+            file_name: string;
+            /** @description What the new patch changes; shown in the history of the resource */
+            note?: string;
+            patch_version?: string;
+            /** Format: int64 */
+            upload_session_id: number;
         };
         RegisterUserInputBody: {
             code: string;
@@ -14866,6 +15303,336 @@ export interface operations {
             };
         };
     };
+    "composition.mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeListCompositionDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "composition.get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeCompositionDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "composition.discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "composition.edit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditCompositionInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeCompositionDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "composition.attachPatch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompositionUploadInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeCompositionDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "composition.detachPatch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeCompositionDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "composition.retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeCompositionDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "composition.attachSave": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompositionUploadInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeCompositionDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "composition.detachSave": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeCompositionDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "composition.start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeCompositionDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     "developer.list": {
         parameters: {
             query?: {
@@ -15898,6 +16665,74 @@ export interface operations {
             };
         };
     };
+    "composition.lineage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                resourceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeCompositionLineageDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "composition.rebuild": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                resourceId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RebuildCompositionInputBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeCompositionDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     "download.link": {
         parameters: {
             query?: {
@@ -16110,6 +16945,74 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeVndbScoreDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "composition.begin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BeginCompositionInputBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeCompositionDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "composition.bases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gameId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeListCompositionBaseDTO"];
                 };
             };
             /** @description Error */

@@ -115,9 +115,30 @@ export async function submitUploads(
         body: { upload_session_id: files[0]?.upload_session_id ?? 0, reason: target.reason },
       })
       return
+    case 'compose':
+      await api.put(`/composition/{id}/${target.role}`, {
+        params: { path: { id: target.compositionId } },
+        body: inputOf(uploads),
+      })
+      return
+    case 'rebuild':
+      await api.post('/game/download-source/{resourceId}/composition', {
+        params: { path: { resourceId: target.resourceId } },
+        body: { ...inputOf(uploads), patch_version: target.patchVersion, note: target.note },
+      })
+      return
     case 'orphan':
     case 'heldElsewhere':
       return
+  }
+}
+
+function inputOf(uploads: readonly Upload[]) {
+  const [upload] = uploads
+  const name = upload?.name?.trim() ?? ''
+  return {
+    upload_session_id: upload?.session?.id ?? 0,
+    file_name: name === '' ? (upload?.file.name ?? '') : name,
   }
 }
 

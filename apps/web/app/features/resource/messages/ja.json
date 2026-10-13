@@ -245,7 +245,9 @@
         "file_removed": "<actor></actor> がファイルを削除しました",
         "edited": "<actor></actor> がリソース情報を編集しました",
         "review_cleared": "<actor></actor> が審査のうえファイルを公開しました",
-        "disc_found": "チェックでアーカイブ内にディスクイメージが見つかりました"
+        "disc_found": "チェックでアーカイブ内にディスクイメージが見つかりました",
+        "composed": "<actor></actor> がリソースを合成して公開しました",
+        "recomposed": "<actor></actor> がパッチを更新し、リソースを再合成しました"
       },
       "field": {
         "platforms": "プラットフォーム",
@@ -259,8 +261,170 @@
         "edition": "エディション",
         "edition_name": "エディション名",
         "form": "形態",
-        "extras": "同梱物"
-      }
+        "extras": "同梱物",
+        "base": "オリジナル版"
+      },
+      "separator": "、"
     }
+  },
+  "composition": {
+    "mode": {
+      "upload": "ファイルをアップロード",
+      "compose": "パッチで合成"
+    },
+    "stepper": "合成の手順",
+    "steps": {
+      "base": "オリジナル版",
+      "patch": "パッチ",
+      "files": "ファイルの確認",
+      "extras": "同梱物"
+    },
+    "game": "ゲーム",
+    "base": "オリジナル版",
+    "baseMeta": "{size} · {creator} · {downloads, plural, other {# 回ダウンロード}}",
+    "unusable": {
+      "disc": "ディスクイメージはオリジナル版として使用できません",
+      "installer": "インストーラーはオリジナル版として使用できません",
+      "form_unknown": "形態が記載されていません",
+      "unread": "まだ内容を読み取っていません",
+      "unreadable": "内容を読み取れません",
+      "too_large": "展開後のサイズが上限を超えています",
+      "pending": "ファイルが未公開か、まだ検査を通過していません",
+      "composed": "合成で作成したリソースはオリジナル版として使用できません"
+    },
+    "noBase": {
+      "discs": "合成にはインストール不要のオリジナル版が必要ですが、このゲームにはディスクイメージしかありません",
+      "other": "合成にはインストール不要のオリジナル版が必要ですが、このゲームにはオリジナル版として使用できるリソースがありません",
+      "upload": "インストール不要のオリジナル版をアップロード"
+    },
+    "file": "ファイル",
+    "patchDrop": "パッチのアーカイブをここにドロップするか、クリックして選択",
+    "saveDrop": "フルコンプセーブのアーカイブをここにドロップするか、クリックして選択",
+    "removeFile": "ファイルを削除",
+    "input": {
+      "uploading": "アップロード中 {percent}%",
+      "failed": "アップロードに失敗しました",
+      "reading": "読み取り中",
+      "refused": "使用できません"
+    },
+    "refusal": {
+      "encrypted": "アーカイブが暗号化されているため、ファイルを読み取れません",
+      "broken": "ファイルが破損しているか、対応していない形式です",
+      "not_archive": "このファイルはアーカイブではありません",
+      "harmful": "有害な内容が検出されました",
+      "too_many_files": "アーカイブ内のファイルが多すぎます"
+    },
+    "matched": "このファイルは KUN Visual Novel Patch に掲載されているパッチと同一のため、翻訳グループ、パッチのバージョン、配布ページを入力しました",
+    "gameDir": "ゲームフォルダー",
+    "patchDir": "パッチフォルダー",
+    "changeDir": "変更",
+    "chooseGameDir": "ゲームフォルダーを選択",
+    "gameDirHint": "パッチフォルダー内のファイルをこのフォルダーに配置します",
+    "choosePatchDir": "パッチフォルダーを選択",
+    "patchDirHint": "このフォルダー内のファイルをゲームフォルダーに配置します",
+    "root": "アーカイブのルート",
+    "items": "{count} 項目",
+    "added": "追加",
+    "replaced": "置換",
+    "changedFiles": "{count} 件",
+    "total": "合成後は {files} 件、{size}",
+    "changesLabel": "合成後のゲームフォルダー",
+    "unchanged": "変更のないファイル",
+    "unchangedCount": "{count} 件",
+    "unlisted": "ほか {count} 件",
+    "conflicts": "パッチの次のファイルが、オリジナル版にある同名のフォルダーまたはファイルと競合しています。フォルダーを変更してください。",
+    "nothing": "パッチフォルダーにゲームフォルダーへ配置できるファイルがありません。フォルダーを変更してください。",
+    "readingPatch": "パッチの内容を読み取っています",
+    "uploadingPatch": "パッチをアップロードしています",
+    "save": "フルコンプセーブ",
+    "saveChoice": {
+      "upload": "フルコンプセーブをアップロード",
+      "none": "同梱しない"
+    },
+    "keepPatch": "パッチの控え",
+    "contents": "アーカイブの内容",
+    "fileName": "ファイル名",
+    "next": "次へ",
+    "back": "戻る",
+    "cancel": "キャンセル",
+    "start": "合成を開始",
+    "signIn": "リソースを合成するにはログインしてください",
+    "summary": {
+      "label": "合成の概要",
+      "base": "オリジナル版",
+      "patch": "パッチ",
+      "save": "フルコンプセーブ",
+      "keepPatch": "パッチの控え",
+      "kept": "残す",
+      "dropped": "残さない",
+      "unchosen": "未選択",
+      "unsent": "未アップロード",
+      "size": "合成後のサイズ",
+      "estimate": "約 {size}"
+    },
+    "run": {
+      "queued": "待機中",
+      "running": "合成中",
+      "failed": "合成に失敗"
+    },
+    "ahead": "前に {count} 件のタスクがあります",
+    "progress": "{step}（{total} 段階中 {at} 段階目）",
+    "stepName": {
+      "fetch": "オリジナル版を取得",
+      "unpack": "展開",
+      "apply": "パッチと同梱物を配置",
+      "pack": "圧縮",
+      "check": "検査",
+      "store": "保存"
+    },
+    "duration": "{minutes, plural, =0 {} other {# 分 }}{seconds} 秒",
+    "failure": {
+      "base_gone": "オリジナル版のリソースが存在しないか、使用できなくなりました",
+      "base_unreadable": "オリジナル版のアーカイブを展開できません",
+      "patch_unreadable": "パッチのアーカイブを使用できません",
+      "save_unreadable": "フルコンプセーブのアーカイブを展開できません",
+      "place_missing": "選択したフォルダーが展開後のファイルにありません",
+      "no_room": "サーバーの作業用領域が不足しています",
+      "too_large": "展開後のサイズが上限を超えています",
+      "harmful": "合成後のファイルから有害な内容が検出されました",
+      "broken": "合成後のアーカイブが検査を通過しませんでした",
+      "nothing_to_apply": "パッチフォルダーにゲームフォルダーへ配置できるファイルがありません",
+      "path_conflict": "パッチのファイルが、オリジナル版にある同名のファイルまたはフォルダーと競合しています",
+      "queue_full": "待機中の合成タスクが上限に達しています",
+      "quota": "ストレージの空き容量が不足しています",
+      "internal": "処理中にエラーが発生しました"
+    },
+    "retry": "再試行",
+    "discard": "削除",
+    "discardConfirm": "この合成タスクを削除しますか？",
+    "discardRebuild": "リソースは現在のファイルのまま残ります",
+    "discardResource": "リソースは作成されません",
+    "notice": {
+      "running": "合成しています。公開されるまで、このリソースはあなたにだけ表示されます",
+      "queued": "合成の順番を待っています。公開されるまで、このリソースはあなたにだけ表示されます",
+      "failed": "合成に失敗しました：{reason}",
+      "rebuilding": "パッチ {version} で再合成しています。完了するまでは {previous} のファイルがダウンロードされます",
+      "rebuildingPlain": "新しいパッチで再合成しています。完了するまでは以前のファイルがダウンロードされます",
+      "rebuildFailed": "新しいパッチでの再合成に失敗しました：{reason}"
+    },
+    "lineage": "サイト内の<base>オリジナル版</base>と翻訳パッチ{version, select, none {} other { {version} }}から合成",
+    "lineageGone": "オリジナル版と翻訳パッチ{version, select, none {} other { {version} }}から合成。オリジナル版は削除されたため、再合成できません",
+    "details": {
+      "heading": "合成",
+      "base": "オリジナル版",
+      "patch": "パッチ",
+      "save": "フルコンプセーブ",
+      "finished": "合成日時"
+    },
+    "update": {
+      "menu": "パッチを更新",
+      "title": "パッチを更新",
+      "description": "アップロードが完了すると、新しいパッチでリソースを再合成します",
+      "patchVersion": "パッチのバージョン",
+      "note": "更新内容",
+      "start": "アップロード"
+    },
+    "confirm": "OK",
+    "stepsLabel": "合成の進行状況"
   }
 }

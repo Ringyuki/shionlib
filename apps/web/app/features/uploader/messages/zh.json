@@ -35,7 +35,8 @@
     "missing": {
       "translation": "未注明翻译",
       "form": "未注明形态"
-    }
+    },
+    "estimate": "约 {size}"
   },
   "account": {
     "title": "存储空间与下载统计",
@@ -100,6 +101,11 @@
     },
     "speed": "{speed}/秒，预计还需 {time}",
     "pause": "暂停上传",
-    "resume": "继续上传"
+    "resume": "继续上传",
+    "composes": {
+      "patch": "合成用的补丁",
+      "save": "合成用的全CG存档"
+    },
+    "rebuilds": "更新合成资源的补丁"
   }
 }

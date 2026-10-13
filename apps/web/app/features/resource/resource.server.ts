@@ -9,6 +9,8 @@ import {
   renameFileCommand,
   reportCommand,
 } from './resource.schema'
+import { composeQueryFrom, compositionCommand } from './resource-composition.schema'
+import { runCompositionCommand } from './resource-composition.use-cases'
 import {
   deleteResource,
   editResource,
@@ -31,8 +33,14 @@ export function fileHistoryLoader(args: LoaderFunctionArgs) {
 }
 
 export function uploadPageLoader(args: LoaderFunctionArgs) {
-  const gameId = queryId(args.url.searchParams.get('game'))
-  return routeLoader(args, api => loadUploadPage(api, gameId))
+  const { searchParams } = args.url
+  const query = { gameId: queryId(searchParams.get('game')), ...composeQueryFrom(searchParams) }
+  return routeLoader(args, api => loadUploadPage(api, query))
+}
+
+export async function compositionAction(args: ActionFunctionArgs) {
+  const command = await readCommand(args, compositionCommand)
+  return routeAction(args, api => runCompositionCommand(api, command))
 }
 
 export function namePreviewLoader(args: LoaderFunctionArgs) {

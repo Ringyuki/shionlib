@@ -1,5 +1,5 @@
 import { Empty, Stack } from '@hina-ui/react'
-import { Clock, File, LoaderCircle, TriangleAlert } from 'lucide-react'
+import { Clock, File, FileArchive, LoaderCircle, TriangleAlert } from 'lucide-react'
 import { useTranslations } from 'use-intl'
 import { unreadState, type Contents, type InspectedFile, type Inspection } from '../inspection'
 import { useContentsView } from '../use-contents-view'
@@ -17,6 +17,9 @@ export function ContentsTab({ inspections, files, contents }: ContentsTabProps) 
   const view = contents?.view
   const { draft, setDraft, searching, chooseFile } = useContentsView(view, inspections[0]?.id)
   const inspection = inspections.find(candidate => candidate.id === view?.inspectionId)
+  if (files.length === 0) {
+    return <Empty icon={<FileArchive />} title={t('noFiles')} />
+  }
   if (contents === null || inspection === undefined) {
     const state = unreadState(files)
     if (state === 'reading') {

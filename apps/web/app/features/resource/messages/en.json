@@ -245,7 +245,9 @@
         "file_removed": "<actor></actor> removed a file",
         "edited": "<actor></actor> edited the resource",
         "review_cleared": "<actor></actor> cleared a file after review",
-        "disc_found": "The check found a disc image in the archive"
+        "disc_found": "The check found a disc image in the archive",
+        "composed": "<actor></actor> composed and published the resource",
+        "recomposed": "<actor></actor> updated the patch and the resource was composed again"
       },
       "field": {
         "platforms": "Platforms",
@@ -259,8 +261,170 @@
         "edition": "Edition",
         "edition_name": "Edition name",
         "form": "Form",
-        "extras": "Extras"
-      }
+        "extras": "Extras",
+        "base": "Original"
+      },
+      "separator": ", "
     }
+  },
+  "composition": {
+    "mode": {
+      "upload": "Upload files",
+      "compose": "Compose with a patch"
+    },
+    "stepper": "Composition steps",
+    "steps": {
+      "base": "Original",
+      "patch": "Patch",
+      "files": "Files",
+      "extras": "Extras"
+    },
+    "game": "Game",
+    "base": "Original",
+    "baseMeta": "{size} · {creator} · {downloads, plural, one {# download} other {# downloads}}",
+    "unusable": {
+      "disc": "A disc image cannot be used as the original",
+      "installer": "An installer cannot be used as the original",
+      "form_unknown": "The form is not stated",
+      "unread": "The contents have not been read yet",
+      "unreadable": "The contents cannot be read",
+      "too_large": "Too large once unpacked",
+      "pending": "The file is not published or has not passed its check yet",
+      "composed": "A composed resource cannot be used as the original"
+    },
+    "noBase": {
+      "discs": "Composing needs a portable original, and this game only has disc images",
+      "other": "Composing needs a portable original, and this game has no resource that can be used as one",
+      "upload": "Upload a portable original"
+    },
+    "file": "File",
+    "patchDrop": "Drop the patch archive here or click to choose it",
+    "saveDrop": "Drop the archive of the full CG save here or click to choose it",
+    "removeFile": "Remove file",
+    "input": {
+      "uploading": "Uploading {percent}%",
+      "failed": "Upload failed",
+      "reading": "Reading",
+      "refused": "Cannot be used"
+    },
+    "refusal": {
+      "encrypted": "The archive is encrypted and its files cannot be read",
+      "broken": "The file is damaged or its format is not supported",
+      "not_archive": "This file is not an archive",
+      "harmful": "Harmful content was detected",
+      "too_many_files": "The archive holds too many files"
+    },
+    "matched": "This file is the same as a patch listed on KUN Visual Novel Patch; its group, patch version and release page have been filled in",
+    "gameDir": "Game folder",
+    "patchDir": "Patch folder",
+    "changeDir": "Change",
+    "chooseGameDir": "Choose the game folder",
+    "gameDirHint": "The files of the patch folder go into this folder",
+    "choosePatchDir": "Choose the patch folder",
+    "patchDirHint": "The files in this folder go into the game folder",
+    "root": "Root of the archive",
+    "items": "{count, plural, one {# item} other {# items}}",
+    "added": "Added",
+    "replaced": "Replaced",
+    "changedFiles": "{count, plural, one {# file} other {# files}}",
+    "total": "{files, plural, one {# file} other {# files}}, {size} after composing",
+    "changesLabel": "Game folder after composing",
+    "unchanged": "Unchanged files",
+    "unchangedCount": "{count}",
+    "unlisted": "{count, plural, one {# more file} other {# more files}}",
+    "conflicts": "These files of the patch conflict with a folder or file of the same name in the original. Choose other folders.",
+    "nothing": "Nothing in the patch folder goes into the game folder. Choose other folders.",
+    "readingPatch": "Reading the patch",
+    "uploadingPatch": "Uploading the patch",
+    "save": "Full CG save",
+    "saveChoice": {
+      "upload": "Upload a full CG save",
+      "none": "None"
+    },
+    "keepPatch": "Keep a copy of the patch",
+    "contents": "Archive contents",
+    "fileName": "File name",
+    "next": "Next",
+    "back": "Back",
+    "cancel": "Cancel",
+    "start": "Start composing",
+    "signIn": "Sign in to compose resources",
+    "summary": {
+      "label": "Composition summary",
+      "base": "Original",
+      "patch": "Patch",
+      "save": "Full CG save",
+      "keepPatch": "Patch copy",
+      "kept": "Kept",
+      "dropped": "Not kept",
+      "unchosen": "Not chosen",
+      "unsent": "Not uploaded",
+      "size": "Size after composing",
+      "estimate": "About {size}"
+    },
+    "run": {
+      "queued": "Queued",
+      "running": "Composing",
+      "failed": "Composing failed"
+    },
+    "ahead": "{count, plural, =0 {Next in line} one {# task ahead} other {# tasks ahead}}",
+    "progress": "{step}, step {at} of {total}",
+    "stepName": {
+      "fetch": "Getting the original",
+      "unpack": "Unpacking",
+      "apply": "Adding the patch and extras",
+      "pack": "Packing",
+      "check": "Checking",
+      "store": "Storing"
+    },
+    "duration": "{minutes, plural, =0 {} other {# min }}{seconds} s",
+    "failure": {
+      "base_gone": "The original no longer exists or can no longer be used",
+      "base_unreadable": "The archive of the original cannot be unpacked",
+      "patch_unreadable": "The archive of the patch cannot be used",
+      "save_unreadable": "The archive of the full CG save cannot be unpacked",
+      "place_missing": "The chosen folder is not among the unpacked files",
+      "no_room": "The server is out of working space",
+      "too_large": "The unpacked size is over the limit",
+      "harmful": "Harmful content was detected in the composed file",
+      "broken": "The composed archive did not pass its check",
+      "nothing_to_apply": "Nothing in the patch folder goes into the game folder",
+      "path_conflict": "A file of the patch conflicts with a file or folder of the same name in the original",
+      "queue_full": "Too many compositions are waiting",
+      "quota": "Not enough storage space",
+      "internal": "An error occurred during processing"
+    },
+    "retry": "Retry",
+    "discard": "Delete",
+    "discardConfirm": "Delete this composition?",
+    "discardRebuild": "The resource keeps its current file",
+    "discardResource": "No resource will be made",
+    "notice": {
+      "running": "Composing. Only you can see this resource until it is published.",
+      "queued": "Waiting to be composed. Only you can see this resource until it is published.",
+      "failed": "Composing failed: {reason}",
+      "rebuilding": "Composing again with patch {version}. Until it finishes, downloads still get the {previous} file.",
+      "rebuildingPlain": "Composing again with the new patch. Until it finishes, downloads still get the earlier file.",
+      "rebuildFailed": "Composing with the new patch failed: {reason}"
+    },
+    "lineage": "Composed from the <base>original</base> on this site and the translation patch{version, select, none {} other { {version}}}",
+    "lineageGone": "Composed from an original and the translation patch{version, select, none {} other { {version}}}. The original has been deleted, so it cannot be composed again.",
+    "details": {
+      "heading": "Composition",
+      "base": "Original",
+      "patch": "Patch",
+      "save": "Full CG save",
+      "finished": "Composed"
+    },
+    "update": {
+      "menu": "Update the patch",
+      "title": "Update the patch",
+      "description": "Once the upload finishes, the resource is composed again with the new patch",
+      "patchVersion": "Patch version",
+      "note": "What changed",
+      "start": "Upload"
+    },
+    "confirm": "OK",
+    "stepsLabel": "Composition progress"
   }
 }

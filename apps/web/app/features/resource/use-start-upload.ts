@@ -47,6 +47,17 @@ export function useStartUpload() {
         files,
       )
     },
+    rebuild(resource: Resource, patch: File, patchVersion: string, note: string) {
+      const version = patchVersion.trim()
+      const reason = note.trim()
+      const target = {
+        kind: 'rebuild',
+        resourceId: resource.id,
+        ...(version === '' ? {} : { patchVersion: version }),
+        ...(reason === '' ? {} : { note: reason }),
+      } as const
+      announce(target, patch.name, [patch])
+    },
     replace(file: ResourceFile, replacement: File, reason: string) {
       const trimmed = reason.trim()
       const target = {

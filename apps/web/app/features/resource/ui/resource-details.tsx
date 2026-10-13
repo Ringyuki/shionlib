@@ -10,23 +10,26 @@ import {
   type Inspection,
 } from '~/features/inspection'
 import type { Resource, ResourceFile } from '../resource'
+import type { CompositionOrigin } from '../resource-composition'
 import { fileGroups, type FileGroup } from '../resource-page'
+import { CompositionFacts } from './composition-facts'
 import { FileFacts } from './file-facts'
 import { InfoFacts } from './info-facts'
 
 type ResourceDetailsProps = {
   resource: Resource
   inspections: readonly Inspection[]
+  origin: CompositionOrigin | null
 }
 
-export function ResourceDetails({ resource, inspections }: ResourceDetailsProps) {
+export function ResourceDetails({ resource, inspections, origin }: ResourceDetailsProps) {
   const [lead = { files: [], inspection: undefined }, ...rest] = fileGroups(
     resource.files ?? [],
     inspections,
   )
   return (
     <Stack gap="xl">
-      <LeadFacts resource={resource} group={lead} />
+      <LeadFacts resource={resource} group={lead} origin={origin} />
       {rest.map(group => (
         <Fragment key={group.files[0]?.id}>
           <Divider />
@@ -54,11 +57,16 @@ function FilesPart({ files }: { files: readonly ResourceFile[] }) {
   )
 }
 
-function LeadFacts({ resource, group }: { resource: Resource; group: FileGroup }) {
+type LeadFactsProps = { resource: Resource; group: FileGroup; origin: CompositionOrigin | null }
+
+function LeadFacts({ resource, group, origin }: LeadFactsProps) {
   const { files, inspection } = group
   return (
     <Grid className="items-start gap-x-12 gap-y-8 md:grid-cols-2 md:grid-rows-[auto_1fr]">
-      <InfoFacts resource={resource} />
+      <Stack gap="xl">
+        <InfoFacts resource={resource} />
+        {origin !== null && <CompositionFacts origin={origin} />}
+      </Stack>
       <Stack gap="xl" className="md:row-span-2">
         {files.length > 0 && <FilesPart files={files} />}
         <ArchiveSection inspection={inspection} />

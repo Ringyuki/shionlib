@@ -245,7 +245,9 @@
         "file_removed": "<actor></actor> 移除了文件",
         "edited": "<actor></actor> 修改了资源信息",
         "review_cleared": "<actor></actor> 复核后放行了文件",
-        "disc_found": "检查发现压缩包内有光盘映像"
+        "disc_found": "检查发现压缩包内有光盘映像",
+        "composed": "<actor></actor> 合成并发布了资源",
+        "recomposed": "<actor></actor> 更新了补丁，资源已重新合成"
       },
       "field": {
         "platforms": "平台",
@@ -259,8 +261,170 @@
         "edition": "发行版本",
         "edition_name": "版本名称",
         "form": "形态",
-        "extras": "附带内容"
-      }
+        "extras": "附带内容",
+        "base": "原版"
+      },
+      "separator": "，"
     }
+  },
+  "composition": {
+    "mode": {
+      "upload": "上传文件",
+      "compose": "用补丁合成"
+    },
+    "stepper": "合成步骤",
+    "steps": {
+      "base": "选择原版",
+      "patch": "上传补丁",
+      "files": "确认文件",
+      "extras": "附带内容"
+    },
+    "game": "游戏",
+    "base": "原版",
+    "baseMeta": "{size} · {creator} · {downloads, plural, other {# 次下载}}",
+    "unusable": {
+      "disc": "光盘映像不能用作原版",
+      "installer": "安装程序不能用作原版",
+      "form_unknown": "未注明形态",
+      "unread": "尚未读取文件内容",
+      "unreadable": "文件内容无法读取",
+      "too_large": "解包后超过大小上限",
+      "pending": "文件尚未发布或尚未通过检查",
+      "composed": "由合成得到的资源不能用作原版"
+    },
+    "noBase": {
+      "discs": "合成需要免安装的原版，这个游戏只有光盘映像",
+      "other": "合成需要免安装的原版，这个游戏暂无可用作原版的资源",
+      "upload": "上传免安装的原版"
+    },
+    "file": "文件",
+    "patchDrop": "将补丁的压缩包拖到这里，或点击选择",
+    "saveDrop": "将全CG存档的压缩包拖到这里，或点击选择",
+    "removeFile": "移除文件",
+    "input": {
+      "uploading": "上传中 {percent}%",
+      "failed": "上传失败",
+      "reading": "正在读取",
+      "refused": "无法使用"
+    },
+    "refusal": {
+      "encrypted": "压缩包已加密，无法读取其中的文件",
+      "broken": "文件损坏或格式不受支持",
+      "not_archive": "这个文件不是压缩包",
+      "harmful": "检测到有害内容",
+      "too_many_files": "压缩包内的文件过多"
+    },
+    "matched": "这个文件与鲲 Galgame 补丁收录的补丁相同，已填入汉化组、补丁版本和发布页",
+    "gameDir": "游戏目录",
+    "patchDir": "补丁目录",
+    "changeDir": "更改",
+    "chooseGameDir": "选择游戏目录",
+    "gameDirHint": "补丁目录里的文件将放入这个目录",
+    "choosePatchDir": "选择补丁目录",
+    "patchDirHint": "这个目录里的文件将放入游戏目录",
+    "root": "压缩包根目录",
+    "items": "{count} 项",
+    "added": "新增",
+    "replaced": "替换",
+    "changedFiles": "{count} 个文件",
+    "total": "合成后共 {files} 个文件，{size}",
+    "changesLabel": "合成后的游戏目录",
+    "unchanged": "未变化的文件",
+    "unchangedCount": "{count} 个",
+    "unlisted": "另有 {count} 个文件",
+    "conflicts": "补丁中的以下文件与原版中同名的文件夹或文件冲突，请更改目录",
+    "nothing": "补丁目录中没有可以放入游戏目录的文件，请更改目录",
+    "readingPatch": "正在读取补丁内容",
+    "uploadingPatch": "正在上传补丁",
+    "save": "全CG存档",
+    "saveChoice": {
+      "upload": "上传全CG存档",
+      "none": "不附带"
+    },
+    "keepPatch": "补丁备份",
+    "contents": "压缩包内容",
+    "fileName": "文件名",
+    "next": "下一步",
+    "back": "上一步",
+    "cancel": "取消",
+    "start": "开始合成",
+    "signIn": "登录后才能合成资源",
+    "summary": {
+      "label": "合成摘要",
+      "base": "原版",
+      "patch": "补丁",
+      "save": "全CG存档",
+      "keepPatch": "补丁备份",
+      "kept": "保留",
+      "dropped": "不保留",
+      "unchosen": "未选择",
+      "unsent": "未上传",
+      "size": "合成后的大小",
+      "estimate": "约 {size}"
+    },
+    "run": {
+      "queued": "排队中",
+      "running": "合成中",
+      "failed": "合成失败"
+    },
+    "ahead": "前面还有 {count} 个任务",
+    "progress": "正在{step}，第 {at} 步，共 {total} 步",
+    "stepName": {
+      "fetch": "取得原版",
+      "unpack": "解包",
+      "apply": "放入补丁和附带内容",
+      "pack": "打包",
+      "check": "检查",
+      "store": "保存"
+    },
+    "duration": "{minutes, plural, =0 {} other {# 分 }}{seconds} 秒",
+    "failure": {
+      "base_gone": "原版资源已不存在或不再可用",
+      "base_unreadable": "原版的压缩包无法解包",
+      "patch_unreadable": "补丁的压缩包无法使用",
+      "save_unreadable": "全CG存档的压缩包无法解包",
+      "place_missing": "选定的目录在解包后的文件中不存在",
+      "no_room": "服务器暂存空间不足",
+      "too_large": "解包后的大小超过上限",
+      "harmful": "合成后的文件中检测到有害内容",
+      "broken": "合成后的压缩包未通过检查",
+      "nothing_to_apply": "补丁目录中没有可以放入游戏目录的文件",
+      "path_conflict": "补丁中的文件与原版中同名的文件或文件夹冲突",
+      "queue_full": "排队的合成任务已满",
+      "quota": "存储空间不足",
+      "internal": "处理过程中出现错误"
+    },
+    "retry": "重试",
+    "discard": "删除",
+    "discardConfirm": "确定要删除这个合成任务吗？",
+    "discardRebuild": "删除后资源保留当前的文件",
+    "discardResource": "删除后不会生成资源",
+    "notice": {
+      "running": "正在合成，资源发布前仅你可见",
+      "queued": "正在排队等待合成，资源发布前仅你可见",
+      "failed": "合成失败：{reason}",
+      "rebuilding": "正在按补丁 {version} 重新合成，完成前下载的仍是 {previous} 的文件",
+      "rebuildingPlain": "正在按新的补丁重新合成，完成前下载的仍是之前的文件",
+      "rebuildFailed": "按新的补丁重新合成失败：{reason}"
+    },
+    "lineage": "由站内的<base>原版</base>与汉化补丁{version, select, none {} other { {version} }}合成",
+    "lineageGone": "由原版与汉化补丁{version, select, none {} other { {version} }}合成，原版已删除，无法再重新合成",
+    "details": {
+      "heading": "合成",
+      "base": "原版",
+      "patch": "补丁",
+      "save": "全CG存档",
+      "finished": "合成时间"
+    },
+    "update": {
+      "menu": "更新补丁",
+      "title": "更新补丁",
+      "description": "上传完成后，资源将用新的补丁重新合成",
+      "patchVersion": "补丁版本",
+      "note": "更新说明",
+      "start": "开始上传"
+    },
+    "confirm": "确定",
+    "stepsLabel": "合成进度"
   }
 }

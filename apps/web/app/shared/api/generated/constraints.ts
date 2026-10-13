@@ -876,6 +876,15 @@ export const constraints = {
       "nullable": false
     }
   },
+  "BeginCompositionInputBody": {
+    "base_resource_id": {
+      "type": "integer",
+      "required": true,
+      "nullable": false,
+      "format": "int64",
+      "minimum": 1
+    }
+  },
   "BindPotatoVNInputBody": {
     "pvn_password": {
       "type": "string",
@@ -942,6 +951,22 @@ export const constraints = {
       "required": true,
       "nullable": false,
       "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "CompositionUploadInput": {
+    "file_name": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "upload_session_id": {
+      "type": "integer",
+      "required": true,
+      "nullable": false,
+      "format": "int64",
+      "minimum": 1
     }
   },
   "CreateAdInputBody": {
@@ -1367,6 +1392,67 @@ export const constraints = {
       "nullable": false
     }
   },
+  "EditCompositionInputBody": {
+    "game_dir": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "maxLength": 1024
+    },
+    "keep_patch": {
+      "type": "boolean",
+      "required": true,
+      "nullable": false
+    },
+    "language": {
+      "type": "array",
+      "required": true,
+      "nullable": true,
+      "maxItems": 4,
+      "itemEnum": [
+        "en",
+        "zh",
+        "zh-hant",
+        "jp"
+      ]
+    },
+    "patch_dir": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "maxLength": 1024
+    },
+    "patch_version": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "minLength": 0,
+      "maxLength": 32
+    },
+    "release_url": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "minLength": 0,
+      "maxLength": 512
+    },
+    "translation": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "enum": [
+        "official",
+        "group",
+        "machine"
+      ]
+    },
+    "translators": {
+      "type": "array",
+      "required": true,
+      "nullable": true,
+      "maxItems": 6
+    }
+  },
   "EditDownloadSourceBodyInput": {
     "canonical_name": {
       "type": "boolean",
@@ -1688,6 +1774,36 @@ export const constraints = {
       "nullable": false,
       "minLength": 1,
       "maxLength": 255
+    }
+  },
+  "RebuildCompositionInputBody": {
+    "file_name": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "note": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "minLength": 0,
+      "maxLength": 255
+    },
+    "patch_version": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "minLength": 0,
+      "maxLength": 32
+    },
+    "upload_session_id": {
+      "type": "integer",
+      "required": true,
+      "nullable": false,
+      "format": "int64",
+      "minimum": 1
     }
   },
   "RegisterUserInputBody": {

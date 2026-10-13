@@ -4,15 +4,27 @@ import { TranslatorField } from '~/features/translator'
 import { lengthOf } from '~/shared/form/form-kit'
 import { labelOf } from '~/shared/i18n/labels'
 import { SingleChoiceChips } from '~/shared/ui/choice-chips'
-import { credited, patched, translationOptions, type InfoValues } from '../resource-info'
+import {
+  credited,
+  patched,
+  translationOptions,
+  type InfoValues,
+  type Translation,
+} from '../resource-info'
 
 type TranslationFieldsProps = {
   values: InfoValues
   required: boolean
+  options?: readonly Translation[]
   onChange: (patch: Partial<InfoValues>) => void
 }
 
-export function TranslationFields({ values, required, onChange }: TranslationFieldsProps) {
+export function TranslationFields({
+  values,
+  required,
+  options = translationOptions,
+  onChange,
+}: TranslationFieldsProps) {
   const t = useTranslations('resource')
   const labels = useMessages().resource
   return (
@@ -20,7 +32,7 @@ export function TranslationFields({ values, required, onChange }: TranslationFie
       <FormField name="translation" label={t('translation')} required={required}>
         <SingleChoiceChips
           label={t('translation')}
-          options={translationOptions}
+          options={options}
           value={values.translation}
           onValueChange={translation => onChange({ translation })}
           labelOf={value => labelOf(labels.translationName, value)}

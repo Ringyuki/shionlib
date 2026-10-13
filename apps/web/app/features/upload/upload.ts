@@ -15,10 +15,16 @@ export type ResourceDraft = Omit<ResourceFields, 'files' | ListedFields> & {
   extras?: NonNullable<ResourceFields['extras']>
 }
 
+export const inputRoles = ['patch', 'save'] as const
+
+export type InputRole = (typeof inputRoles)[number]
+
 export type UploadTarget =
   | { kind: 'create'; gameId: number; resource: ResourceDraft }
   | { kind: 'append'; resourceId: number }
   | { kind: 'replace'; fileId: number; reason?: string }
+  | { kind: 'compose'; compositionId: number; role: InputRole }
+  | { kind: 'rebuild'; resourceId: number; patchVersion?: string; note?: string }
   | { kind: 'orphan' }
   | { kind: 'heldElsewhere' }
 

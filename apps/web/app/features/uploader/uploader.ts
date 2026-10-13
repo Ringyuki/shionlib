@@ -1,3 +1,4 @@
+import type { Composition } from '~/features/resource'
 import type { Allowance, Submission, Upload } from '~/features/upload'
 import type { ApiQuery, Schema } from '~/shared/api/types'
 
@@ -32,6 +33,7 @@ export type UploaderContent = {
   summary: Summary
   listing: Listing
   resources: OwnResource[]
+  compositions: Composition[]
   total: number
 }
 

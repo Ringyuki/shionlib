@@ -35,7 +35,8 @@
     "missing": {
       "translation": "Translation not stated",
       "form": "Form not stated"
-    }
+    },
+    "estimate": "About {size}"
   },
   "account": {
     "title": "Storage and downloads",
@@ -100,6 +101,11 @@
     },
     "speed": "{speed}/s, {time} left",
     "pause": "Pause the upload",
-    "resume": "Resume the upload"
+    "resume": "Resume the upload",
+    "composes": {
+      "patch": "Patch for a composition",
+      "save": "Full CG save for a composition"
+    },
+    "rebuilds": "New patch for a composed resource"
   }
 }

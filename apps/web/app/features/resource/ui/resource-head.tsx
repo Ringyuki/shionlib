@@ -6,6 +6,9 @@ import { gamePath, gameTitle } from '~/features/game'
 import { BBCodeText } from '~/shared/ui/bbcode-text'
 import { awaitedVolumes, rightsOver, type ResourceViewer } from '../resource'
 import { inspectionOf, noticeOf, type ResourcePage } from '../resource-page'
+import { ComposingFile } from './composing-file'
+import { CompositionLineage } from './composition-lineage'
+import { CompositionRun } from './composition-run'
 import { PageFile } from './page-file'
 import { PageNotice } from './page-notice'
 import { ResourceFacts } from './resource-facts'
@@ -23,6 +26,13 @@ export function ResourceHead({ page, viewer }: ResourceHeadProps) {
   const note = resource.note?.trim() ?? ''
   const rights = rightsOver(resource, viewer)
   const notice = noticeOf(files, awaitedVolumes(resource))
+  const { current, latest } = page.lineage
+  const rebuildable =
+    rights.manage &&
+    latest !== null &&
+    !latest.base_gone &&
+    current === null &&
+    resource.published_at !== null
   return (
     <Stack as="header" gap="md">
       <Stack gap="sm">
@@ -46,6 +56,7 @@ export function ResourceHead({ page, viewer }: ResourceHeadProps) {
               leading={index === 0}
             />
           ))}
+          {files.length === 0 && current !== null && <ComposingFile composition={current} />}
         </Stack>
       </Stack>
       <Inline gap="md" align="center" wrap={false}>
@@ -56,6 +67,8 @@ export function ResourceHead({ page, viewer }: ResourceHeadProps) {
           rights={rights}
           files={files}
           history={false}
+          rebuildable={rebuildable}
+          composing={current !== null && !current.rebuild}
         />
       </Inline>
       {notice !== undefined && (
@@ -64,6 +77,10 @@ export function ResourceHead({ page, viewer }: ResourceHeadProps) {
           published={resource.published_at !== null}
           own={viewer?.id === resource.creator.id}
         />
+      )}
+      {latest !== null && <CompositionLineage origin={latest} />}
+      {current !== null && (
+        <CompositionRun composition={current} previous={resource.patch_version} />
       )}
       {note !== '' && <BBCodeText source={note} />}
     </Stack>

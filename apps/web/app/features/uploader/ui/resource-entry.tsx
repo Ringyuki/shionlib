@@ -1,20 +1,26 @@
-import { Inline, Link, Tag, Time } from '@hina-ui/react'
+import { Inline, Link, Stack, Tag, Time } from '@hina-ui/react'
 import { Clock, Download, Gamepad2 } from 'lucide-react'
 import { Link as RouterLink } from 'react-router'
 import { useLocale, useTranslations } from 'use-intl'
 import { gamePath, gameTitle } from '~/features/game'
 import {
   awaitedVolumes,
+  CompositionProgress,
+  CompositionTag,
   missingInfo,
   ResourceMenu,
   ResourceTags,
   resourceAnchor,
   resourcePath,
   rightsOver,
+  runStatus,
+  type Composition,
   type ResourceViewer,
 } from '~/features/resource'
+import { useBytes } from '~/shared/i18n/use-bytes'
 import { stageOf, type OwnResource } from '../uploader'
 import { EntryShell } from './entry-shell'
+import { FileLine } from './file-line'
 import { Fact } from './fact'
 import { ResourceFileLine } from './resource-file'
 import { StageTag } from './stage-tag'
@@ -22,10 +28,12 @@ import { StageTag } from './stage-tag'
 type ResourceEntryProps = {
   own: OwnResource
   viewer: ResourceViewer | null
+  composition: Composition | undefined
 }
 
-export function ResourceEntry({ own, viewer }: ResourceEntryProps) {
+export function ResourceEntry({ own, viewer, composition }: ResourceEntryProps) {
   const t = useTranslations('uploader.list')
+  const bytes = useBytes()
   const locale = useLocale()
   const { game, resource } = own
   const files = resource.files ?? []
@@ -34,9 +42,26 @@ export function ResourceEntry({ own, viewer }: ResourceEntryProps) {
   return (
     <EntryShell
       as="article"
-      files={files.map(file => (
-        <ResourceFileLine key={file.id} file={file} awaited={awaited} to={page} />
-      ))}
+      files={
+        files.length === 0 && composition !== undefined ? (
+          <FileLine
+            name={composition.file_name}
+            size={t('estimate', { size: bytes(composition.estimated_size) })}
+            state={<CompositionTag status={runStatus(composition) ?? 'running'} />}
+          />
+        ) : (
+          files.map(file => (
+            <ResourceFileLine key={file.id} file={file} awaited={awaited} to={page} />
+          ))
+        )
+      }
+      notice={
+        composition !== undefined && (
+          <Stack className="col-span-2 ps-6">
+            <CompositionProgress composition={composition} />
+          </Stack>
+        )
+      }
       stage={<StageTag stage={stageOf(resource)} />}
       controlSlots={1}
       controls={

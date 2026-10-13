@@ -15,6 +15,7 @@ export {
   type Submission,
   type Upload,
   type UploadState,
+  type InputRole,
   type UploadTarget,
 } from './upload'
 export type { PickedFile } from './upload-manager'

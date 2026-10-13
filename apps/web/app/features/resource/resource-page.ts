@@ -2,6 +2,7 @@ import type { GameHeader } from '~/features/game'
 import type { Inspection } from '~/features/inspection'
 import type { Schema } from '~/shared/api/types'
 import type { Locale } from '~/shared/i18n/locale'
+import type { CompositionLineage } from './resource-composition'
 import {
   fileState,
   type AwaitedVolumes,
@@ -14,7 +15,12 @@ export type ResourceEvent = Schema<'DownloadEventDTO'>
 
 export type EventChange = NonNullable<ResourceEvent['changes']>[number]
 
-export type ResourcePage = { resource: Resource; game: GameHeader; inspections: Inspection[] }
+export type ResourcePage = {
+  resource: Resource
+  game: GameHeader
+  inspections: Inspection[]
+  lineage: CompositionLineage
+}
 
 export const resourceTabs = ['contents', 'details', 'history', 'comments'] as const
 

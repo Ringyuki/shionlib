@@ -1,19 +1,18 @@
 import { DropdownMenu, DropdownMenuItem, DropdownMenuSeparator } from '@hina-ui/react'
-import { Ellipsis, FilePlus, Flag, History, PencilLine, Trash2 } from 'lucide-react'
+import { Combine, Ellipsis, FilePlus, Flag, History, PencilLine, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslations } from 'use-intl'
 import { useAuthGate } from '~/shared/ui/auth-gate'
 import { Button } from '~/shared/ui/button'
 import type { Resource, ResourceFile, ResourceRights } from '../resource'
-import { AddFilesDialog } from './add-files-dialog'
 import { DeleteDialog } from './delete-dialog'
-import { EditDialog } from './edit-dialog'
 import { FileDialogs, type FileDialog } from './file-dialogs'
 import { FilesItems } from './file-items'
 import { HistoryDialog } from './history-dialog'
+import { ManageDialogs, type ManageDialog } from './manage-dialogs'
 import { ReportDialog } from './report-dialog'
 
-type Opened = 'history' | 'report' | 'edit' | 'add' | 'delete' | undefined
+type Opened = 'history' | 'report' | ManageDialog | 'delete' | undefined
 
 type ResourceMenuProps = {
   resource: Resource
@@ -21,6 +20,8 @@ type ResourceMenuProps = {
   rights: ResourceRights
   files?: readonly ResourceFile[]
   history?: boolean
+  rebuildable?: boolean
+  composing?: boolean
 }
 
 type Picked = { file: ResourceFile; dialog: FileDialog | undefined }
@@ -31,6 +32,8 @@ export function ResourceMenu({
   rights,
   files = [],
   history = true,
+  rebuildable = false,
+  composing = false,
 }: ResourceMenuProps) {
   const t = useTranslations('resource')
   const gate = useAuthGate()
@@ -67,9 +70,16 @@ export function ResourceMenu({
                   files={managed}
                   onPick={(file, dialog) => setPicked({ file, dialog })}
                 />
-                <DropdownMenuItem icon={<FilePlus />} onSelect={() => setOpened('add')}>
-                  {t('addFiles')}
-                </DropdownMenuItem>
+                {!composing && (
+                  <DropdownMenuItem icon={<FilePlus />} onSelect={() => setOpened('add')}>
+                    {t('addFiles')}
+                  </DropdownMenuItem>
+                )}
+                {rebuildable && (
+                  <DropdownMenuItem icon={<Combine />} onSelect={() => setOpened('update')}>
+                    {t('composition.update.menu')}
+                  </DropdownMenuItem>
+                )}
               </>
             ) : (
               <DropdownMenuItem icon={<Flag />} onSelect={report}>
@@ -106,19 +116,12 @@ export function ResourceMenu({
         onOpenChange={openWhen('history')}
       />
       {rights.manage ? (
-        <>
-          <EditDialog
-            resource={resource}
-            game={gameId}
-            open={opened === 'edit'}
-            onOpenChange={openWhen('edit')}
-          />
-          <AddFilesDialog
-            resource={resource}
-            open={opened === 'add'}
-            onOpenChange={openWhen('add')}
-          />
-        </>
+        <ManageDialogs
+          resource={resource}
+          gameId={gameId}
+          opened={opened}
+          onOpenedChange={setOpened}
+        />
       ) : (
         <ReportDialog
           resourceId={resource.id}

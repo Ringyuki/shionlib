@@ -39,6 +39,7 @@ export const sections = [
   { key: 'upload', groups: ['upload'] },
   { key: 'download', groups: ['download'] },
   { key: 'scan', groups: ['scan'] },
+  { key: 'composition', groups: ['composition'] },
   { key: 'throttle', groups: ['throttle'] },
   { key: 'hot_score', groups: ['hot_score'] },
   { key: 'catalog', groups: ['catalog'] },

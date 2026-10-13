@@ -57,6 +57,7 @@ export default [
   route('resources/resource/name', 'routes/resources.resource.name.ts'),
   route('resources/resource/name-read', 'routes/resources.resource.name-read.ts'),
   route('resources/resource/delete', 'routes/resources.resource.delete.ts'),
+  route('resources/composition', 'routes/resources.composition.ts'),
   route('resources/resource/file/rename', 'routes/resources.resource.file-rename.ts'),
   route('resources/resource/file/remove', 'routes/resources.resource.file-remove.ts'),
   route('resources/inspection/entries', 'routes/resources.inspection.entries.ts'),

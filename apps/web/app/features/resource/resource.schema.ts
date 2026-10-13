@@ -17,7 +17,7 @@ export type ResourceIssue = 'platforms' | 'languages' | 'simulator' | 'files' | 
 
 export type ResourceIssueMessage = (issue: ResourceIssue) => string
 
-const id = v.pipe(v.number(), v.safeInteger(), v.minValue(1))
+export const id = v.pipe(v.number(), v.safeInteger(), v.minValue(1))
 
 const platforms = v.array(v.picklist(platformOptions))
 
@@ -91,10 +91,10 @@ export type ReportValues = v.InferInput<ReturnType<typeof reportForm>>
 const platformField = (issue: ResourceIssueMessage) =>
   v.pipe(platforms, v.minLength(leastPlatforms, issue('platforms')))
 
-const languageField = (issue: ResourceIssueMessage) =>
+export const languageField = (issue: ResourceIssueMessage) =>
   v.pipe(languages, v.minLength(leastLanguages, issue('languages')))
 
-const filesField = (issue: ResourceIssueMessage) =>
+export const filesField = (issue: ResourceIssueMessage) =>
   v.pipe(v.array(v.instance(File)), v.minLength(1, issue('files')))
 
 export function editForm(kit: FormKit, issue: ResourceIssueMessage) {
