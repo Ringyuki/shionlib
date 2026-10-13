@@ -10,7 +10,7 @@
 - Does every goroutine have an owner, a stop condition and error handling?
 - Is the transaction boundary in the service, and do adapters use `postgres.Client(ctx, …)`?
 - Are config, logger, cache, HTTP clients and rate limits used through the platform packages?
-- Does a new dependency pass the dependency policy (`docs/adr/0001`)?
+- Is a new dependency needed: the standard library cannot reasonably do it, no existing dependency covers it, it is maintained and stable, and its dependency tree and runtime behavior are acceptable?
 - Are there tests for every business rule, error code and authorization path touched?
 - Does the change duplicate an existing abstraction or capability?
 - Are generated files (ent, business codes, OpenAPI, migrations) regenerated and committed?

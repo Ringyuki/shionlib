@@ -39,7 +39,7 @@ The reloader is built not to pile up work: `scripts/dev-build.sh` cancels the bu
 
 ## Deploy
 
-Container image and Dokploy compose: see [docs/deployment.md](docs/deployment.md). Traces: [docs/observability.md](docs/observability.md).
+The image is built from `apps/api/Dockerfile`; `infra/compose.app.yml` runs it as `migrate`, `api` and `worker` beside the web client, ClamAV and Cap, and passes every variable the API reads (`.env.example` lists them with their defaults). `infra/compose.data.yml` provides PostgreSQL 17 and Redis for an environment without its own. Traces: [docs/observability.md](docs/observability.md).
 
 ## Tests
 

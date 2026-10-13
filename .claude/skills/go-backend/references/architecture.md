@@ -5,7 +5,7 @@
 | Path | Role | May import |
 |---|---|---|
 | `internal/apperror`, `internal/actor` | Kernel: error definitions, caller identity | stdlib |
-| `internal/richtext`, `internal/paging`, `internal/patch`, `internal/txtest` | Libraries shared by capabilities: the rich text document format and its schemas (ADR 0013), `paging.Page` (capabilities alias it as `Page`), `patch.Clearable[T]` for set/clear/untouched updates, immediate transactor for tests; exempt from the capability file layout | kernel, business |
+| `internal/richtext`, `internal/paging`, `internal/patch`, `internal/txtest` | Libraries shared by capabilities: the rich text document format and its schemas, `paging.Page` (capabilities alias it as `Page`), `patch.Clearable[T]` for set/clear/untouched updates, immediate transactor for tests; exempt from the capability file layout | kernel, business |
 | `internal/<capability>` | Business capability: models, services, ports, errors, job args | kernel, other business packages, allow-listed modules (`golang.org/x/sync`, `golang.org/x/text`, `github.com/google/uuid`) |
 | `internal/<capability>/<capability>test` | Memory fakes and contract suites for that capability | same as business + `testing` |
 | `internal/platform/*` | Cross-cutting infrastructure (config, logger, telemetry, database, redis, jobs, cache, ratelimit, realtime, i18n, jsoncodec, httpclient, runtime, server) | kernel, platform, generated code |

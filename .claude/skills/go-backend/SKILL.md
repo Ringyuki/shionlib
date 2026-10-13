@@ -45,7 +45,7 @@ cmd/api ──► internal/bootstrap (composition root)
 - MUST start goroutines only inside `internal/platform` (as `runtime.Runner`s registered with `runtime.App`, or `errgroup` with a limit); everything else uses River jobs.
 - MUST change the schema only through `internal/adapter/postgres/ent/schema` plus a generated migration (see recipes/add-migration.md).
 - MUST add tests at the level of the change: service rules with fakes, repository contract against Postgres, black-box HTTP tests with `apitest`. `X_test.go` tests `X.go`; shared setup goes in `fixture_test.go`; every package has tests.
-- MUST declare every value an operator may tune (limits, sizes, quotas, lifetimes, weights, batch sizes, retention, feature switches) as a setting in the owning package's `settings.go` (`setting.Int/Bytes/Float/Duration/Flag/Text` with name, Chinese label, default and bounds) and read it where it is used with `Key.Read(source)`; never copy it into `Options`/`Policy` at startup (ADR 0011).
+- MUST declare every value an operator may tune (limits, sizes, quotas, lifetimes, weights, batch sizes, retention, feature switches) as a setting in the owning package's `settings.go` (`setting.Int/Bytes/Float/Duration/Flag/Text` with name, Chinese label, default and bounds) and read it where it is used with `Key.Read(source)`; never copy it into `Options`/`Policy` at startup.
 - MUST keep environment variables for what a process needs before it starts or what belongs to the deployment (addresses, secrets, paths, pools, client timeouts); a new numeric, duration or boolean variable needs an entry with its reason in `archtest` `deploymentKnobs`, and every new variable goes through `infra/compose.app.yml` (`devtool deploy env`).
 - MUST check the work before declaring it done, at the weight of the change: `scripts/check.sh` (gofmt, vet and the tests of the changed packages, seconds) for a small change; `scripts/verify.sh` (everything, minutes) when a phase ends or when the schema, the HTTP contract, business codes, dependencies or generated code changed.
 
@@ -85,13 +85,13 @@ cmd/api ──► internal/bootstrap (composition root)
 | Database access? | ent in `internal/adapter/postgres/<capability>pg`, behind a port |
 | Redis access? | `internal/adapter/redis/<capability>redis` or `platform/cache`/`ratelimit`, behind a port |
 | A value operators will want to change? | a setting in the package's `settings.go`, read with `Key.Read(s.settings)` from an injected `setting.Source`; tests use `settingtest.Source` and `settingtest.Set`; super admins change it at `/admin/settings` (references/runtime.md "Configuration") |
-| Calling an AI model? | declare an `ai.SceneDefinition` (key, label, output), register it in `wireAI`, and call `ai.Service.Object/Text/Moderate` through a port in the consuming capability or an adapter like `internal/adapter/aimoderation`; models and keys are configured in the admin panel (ADR 0010) |
+| Calling an AI model? | declare an `ai.SceneDefinition` (key, label, output), register it in `wireAI`, and call `ai.Service.Object/Text/Moderate` through a port in the consuming capability or an adapter like `internal/adapter/aimoderation`; models and keys are configured in the admin panel |
 | External services? | a port in the capability, an adapter in `internal/adapter/<vendor>` with a `platform/httpclient` client (recipes/add-external-client.md) |
 | Starting a goroutine? | don't: enqueue a River job, add a `jobs.Task`, or add a `runtime.Runner` in `internal/platform` |
 | Graceful shutdown? | `runtime.App` cancels runners, the HTTP server drains, closers run in reverse order under `SHUTDOWN_TIMEOUT` |
 | Writing tests? | references/testing.md; copy `internal/favorite` tests |
 | Verifying the architecture? | `go test ./internal/archtest/` and `golangci-lint run` (both in `scripts/verify.sh` and CI) |
-| Porting a legacy module? | recipes/migrate-module.md and `apps/api/docs/migration.md` |
+| Porting a legacy module? | recipes/migrate-module.md |
 
 ## Workflow for every change
 

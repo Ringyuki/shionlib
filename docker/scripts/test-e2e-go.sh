@@ -68,7 +68,7 @@ excluded=""
 for deviation in "${INTENTIONAL_DEVIATIONS[@]}"; do
   row="${deviation%%|*}"
   title="${deviation#*|}"
-  echo "[e2e-go-runner] Excluding intentional deviation (apps/api/docs/migration.md, \"${row}\"): ${title}"
+  echo "[e2e-go-runner] Excluding intentional deviation (\"${row}\"): ${title}"
   excluded="${excluded:+${excluded}|}${title}"
 done
 

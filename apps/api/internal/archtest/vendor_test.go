@@ -41,7 +41,7 @@ func TestPaymentVendorsAreNamedOnlyByTheirAdapters(t *testing.T) {
 			if !strings.Contains(source, vendor) || slices.ContainsFunc(homes, func(home string) bool { return strings.HasPrefix(rel, home) }) {
 				continue
 			}
-			t.Errorf("%s names the payment vendor %q; a payment provider is known by name only to its adapter, the composition root and the seeder, and everything else goes through sponsor.Provider (ADR 0015)", rel, vendor)
+			t.Errorf("%s names the payment vendor %q; a payment provider is known by name only to its adapter, the composition root and the seeder, and everything else goes through sponsor.Provider", rel, vendor)
 		}
 		return nil
 	})

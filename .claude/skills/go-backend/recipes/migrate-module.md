@@ -1,6 +1,6 @@
 # Port a module from the NestJS backend
 
-Source of truth for behavior: `apps/backend/src/modules/<module>` and the inventories in the rewrite plan. Keep the HTTP contract unless the deviation is listed in `apps/api/docs/migration.md`.
+Source of truth for behavior: `apps/backend/src/modules/<module>` and the inventories in the rewrite plan. Keep the HTTP contract; a deviation is made only on purpose, pinned by a test and stated with the change.
 
 For every route confirm: method/path, request schema and validation, response schema, status code (POST 201 by default, void responses omit `data`), business codes, authentication/authorization, side effects and DB writes, transaction behavior, cache behavior, jobs/messages emitted, timeouts and retries, idempotency.
 
@@ -18,4 +18,4 @@ Mapping:
 | Bull processor | River worker in `transport/jobs` |
 | `CacheService` | `Cache` port; prefer no cache unless the query is expensive |
 
-Write tests that pin the legacy-visible behavior first, then implement. Record intentional fixes in `apps/api/docs/migration.md`.
+Write tests that pin the legacy-visible behavior first, then implement. State each intentional fix in the commit message and pin it with a test.

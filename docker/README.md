@@ -59,7 +59,7 @@ pnpm e2e:go:data:prepare         # reset and reseed a running stack
 pnpm e2e:go:stack:down
 ```
 
-`docker/scripts/test-e2e-go.sh` excludes the specs that contradict an intentional deviation listed in `apps/api/docs/migration.md` and prints each exclusion. It runs Playwright with two workers like CI (`E2E_WORKERS` overrides it); several UI specs share users and race each other at higher worker counts against either backend.
+`docker/scripts/test-e2e-go.sh` excludes the specs that contradict an intentional deviation of the Go backend (`INTENTIONAL_DEVIATIONS` in the script) and prints each exclusion. It runs Playwright with two workers like CI (`E2E_WORKERS` overrides it); several UI specs share users and race each other at higher worker counts against either backend.
 
 ## E2E of the web client
 

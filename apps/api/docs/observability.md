@@ -24,9 +24,9 @@ OpenTelemetry traces are exported over OTLP/HTTP to `OTEL_EXPORTER_OTLP_ENDPOINT
 
 ## Metrics
 
-There is no metrics exporter yet; it waits for the choice of a monitoring backend (ADR 0008). Request, query and job rates and durations are derived from spans and from the access log (`duration_ms`, `status`, `route`).
+There is no metrics exporter yet; it waits for the choice of a monitoring backend. Request, query and job rates and durations are derived from spans and from the access log (`duration_ms`, `status`, `route`).
 
-When an exporter is added (future action, recorded in ADR 0008):
+When an exporter is added:
 
 - instruments are created only in `internal/platform/telemetry`, never in business code;
 - names follow the OpenTelemetry semantic conventions (`http.server.request.duration`, `db.client.operation.duration`, `messaging.process.duration`) or `shionlib.<capability>.<measure>` with the unit on the instrument;

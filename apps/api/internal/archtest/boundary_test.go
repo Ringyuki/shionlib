@@ -102,7 +102,7 @@ func TestRawSQLStaysInPostgresAdapters(t *testing.T) {
 			}
 			selector, ok := call.Fun.(*ast.SelectorExpr)
 			if ok && slices.Contains(rawSQLMethods, selector.Sel.Name) {
-				t.Errorf("%s calls %s; SQL is written only in internal/adapter/postgres (ADR 0003)", rel, selector.Sel.Name)
+				t.Errorf("%s calls %s; SQL is written only in internal/adapter/postgres", rel, selector.Sel.Name)
 			}
 			return true
 		})
