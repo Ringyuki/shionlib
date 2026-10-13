@@ -21,7 +21,9 @@ const view: OrderView = {
     created: '2026-10-13T06:02:00.000Z',
   },
   badge_until: null,
-  payment_methods: [{ method: 'alipay', name: 'Alipay', enabled: true }],
+  payment_methods: [
+    { id: 'alipay', name: 'Alipay', brand: 'alipay', fee_rate: '3.0%', fee_fixed: null },
+  ],
 }
 
 const created = {

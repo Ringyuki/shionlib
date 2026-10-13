@@ -43,6 +43,7 @@
   "pay": {
     "methods": "支払い方法",
     "none": "利用できる支払い方法がありません",
+    "fee": "手数料 {fee}",
     "amount": "支払い金額",
     "waiting": "支払いの完了を待っています",
     "open": "支払いページを開く",
@@ -53,11 +54,11 @@
   },
   "method": {
     "alipay": "Alipay",
-    "wxpay": "WeChat Pay",
-    "crypto": "暗号資産",
-    "onramp-google": "Google Pay",
-    "onramp-apple": "Apple Pay",
-    "onramp-paypal": "PayPal"
+    "wechat_pay": "WeChat Pay",
+    "paypal": "PayPal",
+    "google_pay": "Google Pay",
+    "apple_pay": "Apple Pay",
+    "usdt": "暗号資産"
   },
   "done": {
     "title": "ご支援ありがとうございます",

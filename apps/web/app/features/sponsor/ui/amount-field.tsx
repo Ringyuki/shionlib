@@ -22,14 +22,14 @@ export function AmountField({ amount, perDollar, onAmountChange }: AmountFieldPr
   const preset = presets.find(value => value === amount)
   const bounds = [range.min, range.max].flatMap(bound => (bound === undefined ? [] : [bound]))
   return (
-    <Stack as="section" gap="md" aria-labelledby="sponsor-amount">
+    <Stack as="section" gap="md" aria-labelledby="sponsor-amount" className="@container">
       <Heading id="sponsor-amount" level={2} size="md">
         {t('amount')}
       </Heading>
       <Grid
         role="group"
         aria-labelledby="sponsor-amount"
-        className="grid-cols-2 gap-3 sm:grid-cols-4"
+        className="grid-cols-2 gap-3 @xl:grid-cols-4"
       >
         {presets.map(value => (
           <ChoiceCard

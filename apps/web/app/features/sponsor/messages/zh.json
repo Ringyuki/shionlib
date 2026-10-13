@@ -43,6 +43,7 @@
   "pay": {
     "methods": "支付方式",
     "none": "暂无可用的支付方式",
+    "fee": "手续费 {fee}",
     "amount": "支付金额",
     "waiting": "等待支付完成",
     "open": "打开支付页面",
@@ -53,11 +54,11 @@
   },
   "method": {
     "alipay": "支付宝",
-    "wxpay": "微信支付",
-    "crypto": "加密货币",
-    "onramp-google": "Google Pay",
-    "onramp-apple": "Apple Pay",
-    "onramp-paypal": "PayPal"
+    "wechat_pay": "微信支付",
+    "paypal": "PayPal",
+    "google_pay": "Google Pay",
+    "apple_pay": "Apple Pay",
+    "usdt": "加密货币"
   },
   "done": {
     "title": "感谢你的赞助",

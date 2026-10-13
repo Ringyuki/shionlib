@@ -43,7 +43,7 @@ export const sections = [
   { key: 'hot_score', groups: ['hot_score'] },
   { key: 'catalog', groups: ['catalog'] },
   { key: 'ai', groups: ['ai'] },
-  { key: 'credentials', groups: ['oidc', 'bangumi'] },
+  { key: 'credentials', groups: ['oidc', 'bangumi', 'payment'] },
 ] as const
 
 export type SectionKey = (typeof sections)[number]['key'] | 'other'

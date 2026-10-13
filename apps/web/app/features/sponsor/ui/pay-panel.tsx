@@ -2,29 +2,29 @@ import { Card, Inline, QRCode, Spinner, Stack, Text } from '@hina-ui/react'
 import { ExternalLink } from 'lucide-react'
 import { useTranslations } from 'use-intl'
 import { Button } from '~/shared/ui/button'
-import type { Started } from '../sponsor'
+import type { Method, Started } from '../sponsor'
 import { useAmount, useMethodName, usePaidAmount } from '../use-sponsor-format'
 import { MethodMark } from './method-mark'
 
 type PayPanelProps = {
   started: Started
+  method: Method
   due: number
-  given: string | undefined
   onChange: () => void
 }
 
-export function PayPanel({ started, due, given, onChange }: PayPanelProps) {
+export function PayPanel({ started, method, due, onChange }: PayPanelProps) {
   const t = useTranslations('sponsor.pay')
   const nameOf = useMethodName()
   const money = useAmount()
   const paid = usePaidAmount()
-  const { amount, payCurrency, payUrl, method } = started
+  const { amount, payCurrency, payUrl } = started
   return (
     <Card>
       <Stack gap="lg" align="center" className="py-4 sm:py-6">
         <Inline gap="sm" align="center" wrap={false}>
           <MethodMark method={method} />
-          <Text weight="semibold">{nameOf(method, given)}</Text>
+          <Text weight="semibold">{nameOf(method)}</Text>
         </Inline>
         <Stack gap="none" align="center">
           <Text size="xs" tone="muted">

@@ -11,7 +11,13 @@ const meta = (totalItems: number) => ({
   totalPages: 1,
 })
 
-const stats: Stats = { totalSponsors: 214, totalAmount: 1248, monthAmount: 68, enabled: true }
+const stats: Stats = {
+  totalSponsors: 214,
+  totalAmount: 1248,
+  monthAmount: 68,
+  enabled: true,
+  providerReady: true,
+}
 
 const filter: Filter = { status: undefined, page: 1 }
 

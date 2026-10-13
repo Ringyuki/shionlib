@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { grantsBadge, offered, searchOf, sponsorOf } from './admin-sponsor'
+import { acceptance, grantsBadge, offered, searchOf, sponsorOf } from './admin-sponsor'
 
 const member = { id: 2, name: 'e2e_user', avatar: 'user/2/avatar.webp', is_sponsor: false }
 
@@ -43,5 +43,14 @@ describe('grantsBadge', () => {
     expect(grantsBadge({ user: member, status: 'REFUND' })).toBe(true)
     expect(grantsBadge({ user: member, status: 'DONE' })).toBe(false)
     expect(grantsBadge({ user: null, status: 'NEW' })).toBe(false)
+  })
+})
+
+describe('acceptance', () => {
+  it('tells a closed switch from a provider that is not set up', () => {
+    expect(acceptance({ enabled: false, providerReady: false })).toBe('closed')
+    expect(acceptance({ enabled: false, providerReady: true })).toBe('closed')
+    expect(acceptance({ enabled: true, providerReady: false })).toBe('unconfigured')
+    expect(acceptance({ enabled: true, providerReady: true })).toBe('open')
   })
 })

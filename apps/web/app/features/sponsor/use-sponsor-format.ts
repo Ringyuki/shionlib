@@ -1,5 +1,5 @@
 import { useFormatter, useTranslations } from 'use-intl'
-import { knownMethod } from './sponsor'
+import type { Method } from './sponsor'
 import { isCurrencyCode } from './sponsor.schema'
 
 const dollars = { style: 'currency', currency: 'USD', currencyDisplay: 'narrowSymbol' } as const
@@ -17,10 +17,7 @@ export function usePaidAmount(): (amount: number, currency: string) => string {
       : `${format.number(amount, { maximumFractionDigits: 8 })} ${currency}`
 }
 
-export function useMethodName(): (method: string, given?: string) => string {
+export function useMethodName(): (method: Pick<Method, 'name' | 'brand'>) => string {
   const t = useTranslations('sponsor.method')
-  return (method, given) => {
-    const known = knownMethod(method)
-    return known === undefined ? (given ?? method) : t(known)
-  }
+  return method => (method.brand === null ? method.name : t(method.brand))
 }

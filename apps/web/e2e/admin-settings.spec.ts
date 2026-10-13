@@ -40,6 +40,13 @@ test.describe('as a super administrator', () => {
     await page.getByRole('searchbox', { name: '搜索设置' }).fill('保留天数')
     await expect(row(page, retention)).toBeVisible()
     await expect(page.getByRole('heading', { name: '上传', level: 2 })).toHaveCount(0)
+    await page.getByRole('searchbox', { name: '搜索设置' }).fill('iDataRiver')
+    await expect(page.getByRole('heading', { name: '第三方服务', level: 2 })).toBeVisible()
+    await expect(page.getByRole('heading', { name: '其他', level: 2 })).toHaveCount(0)
+    await expect(page.getByRole('group', { name: 'iDataRiver 项目 ID', exact: true })).toBeVisible()
+    await expect(
+      page.getByRole('group', { name: 'iDataRiver 开发者密钥', exact: true }),
+    ).toBeVisible()
     await page.getByRole('searchbox', { name: '搜索设置' }).fill('no such setting')
     await expect(page.getByText('没有符合条件的设置')).toBeVisible()
   })

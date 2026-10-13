@@ -9,25 +9,24 @@ import {
   RiWechatPayFill,
 } from 'react-icons/ri'
 import { SiTether } from 'react-icons/si'
-import { knownMethod, type KnownMethod } from '../sponsor'
+import type { Brand, Method } from '../sponsor'
 
-const marks: Record<KnownMethod, ComponentType<{ className?: string }>> = {
+const marks: Record<Brand, ComponentType<{ className?: string }>> = {
   alipay: RiAlipayFill,
-  wxpay: RiWechatPayFill,
-  crypto: SiTether,
-  'onramp-google': RiGoogleFill,
-  'onramp-apple': RiAppleFill,
-  'onramp-paypal': RiPaypalFill,
+  wechat_pay: RiWechatPayFill,
+  paypal: RiPaypalFill,
+  google_pay: RiGoogleFill,
+  apple_pay: RiAppleFill,
+  usdt: SiTether,
 }
 
 type MethodMarkProps = {
-  method: string
+  method: Pick<Method, 'brand'>
   className?: string
 }
 
 export function MethodMark({ method, className }: MethodMarkProps) {
-  const known = knownMethod(method)
-  const Mark = known === undefined ? CreditCard : marks[known]
+  const Mark = method.brand === null ? CreditCard : marks[method.brand]
   return (
     <Flex
       as="span"

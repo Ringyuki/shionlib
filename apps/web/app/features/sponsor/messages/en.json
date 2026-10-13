@@ -43,6 +43,7 @@
   "pay": {
     "methods": "Payment method",
     "none": "No payment method is available",
+    "fee": "Fee {fee}",
     "amount": "Amount to pay",
     "waiting": "Waiting for the payment to complete",
     "open": "Open the payment page",
@@ -53,11 +54,11 @@
   },
   "method": {
     "alipay": "Alipay",
-    "wxpay": "WeChat Pay",
-    "crypto": "Cryptocurrency",
-    "onramp-google": "Google Pay",
-    "onramp-apple": "Apple Pay",
-    "onramp-paypal": "PayPal"
+    "wechat_pay": "WeChat Pay",
+    "paypal": "PayPal",
+    "google_pay": "Google Pay",
+    "apple_pay": "Apple Pay",
+    "usdt": "Cryptocurrency"
   },
   "done": {
     "title": "Thank you for your sponsorship",

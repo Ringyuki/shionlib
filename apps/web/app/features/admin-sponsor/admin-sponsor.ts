@@ -46,3 +46,12 @@ export const statusTones = {
   EXPIRED: 'neutral',
   REFUND: 'neutral',
 } as const
+
+export type Acceptance = 'open' | 'closed' | 'unconfigured'
+
+export function acceptance(stats: Pick<Stats, 'enabled' | 'providerReady'>): Acceptance {
+  if (!stats.enabled) {
+    return 'closed'
+  }
+  return stats.providerReady ? 'open' : 'unconfigured'
+}

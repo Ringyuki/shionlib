@@ -162,30 +162,29 @@ export function celebrates(order: Pick<Order, 'status' | 'paidAt'>, now: Date): 
   )
 }
 
-export const knownMethods = [
-  'alipay',
-  'wxpay',
-  'crypto',
-  'onramp-google',
-  'onramp-apple',
-  'onramp-paypal',
-] as const
+export type Brand = NonNullable<Method['brand']>
 
-export type KnownMethod = (typeof knownMethods)[number]
+const captions: Partial<Record<Brand, string>> = { usdt: 'USDT' }
 
-export function knownMethod(method: string): KnownMethod | undefined {
-  return knownMethods.find(known => known === method)
+export function captionOf(method: Pick<Method, 'brand'>): string | undefined {
+  return method.brand === null ? undefined : captions[method.brand]
 }
 
-const captions: Partial<Record<KnownMethod, string>> = { crypto: 'USDT' }
-
-export function captionOf(method: string): string | undefined {
-  const known = knownMethod(method)
-  return known === undefined ? undefined : captions[known]
+export function feeOf(method: Pick<Method, 'fee_rate' | 'fee_fixed'>): string | undefined {
+  const parts = [method.fee_rate, method.fee_fixed].flatMap(part => (part === null ? [] : [part]))
+  return parts.length === 0 ? undefined : parts.join(' + ')
 }
 
-export function payable(methods: readonly Method[] | null): Method[] {
-  return (methods ?? []).filter(method => method.enabled)
+export function methodOf(methods: readonly Method[], id: string): Method {
+  return (
+    methods.find(method => method.id === id) ?? {
+      id,
+      name: id,
+      brand: null,
+      fee_rate: null,
+      fee_fixed: null,
+    }
+  )
 }
 
 export function toCents(amount: number): number {

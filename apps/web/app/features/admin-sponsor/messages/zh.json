@@ -14,8 +14,10 @@
     "module": "赞助功能",
     "open": "已开放",
     "closed": "已关闭",
-    "closeIt": "在<settings>设置</settings>中关闭",
-    "openIt": "在<settings>设置</settings>中开放"
+    "unconfigured": "未配置",
+    "openNext": "在<settings>设置</settings>中关闭",
+    "closedNext": "在<settings>设置</settings>中开放",
+    "unconfiguredNext": "在<settings>设置</settings>中配置支付网关"
   },
   "anonymous": "匿名",
   "order": "订单 {number}",

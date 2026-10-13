@@ -5,7 +5,7 @@ import { useTranslations } from 'use-intl'
 import { Button } from '~/shared/ui/button'
 import { useHydrated } from '~/shared/ui/use-hydrated'
 import { useNarrow } from '~/shared/ui/use-media'
-import { payable, watchEvery } from '../sponsor'
+import { methodOf, watchEvery } from '../sponsor'
 import type { OrderPage } from '../sponsor.use-cases'
 import { useOrderRows } from '../use-order-rows'
 import { useOrderWatch } from '../use-order-watch'
@@ -28,10 +28,10 @@ export function PaymentStep({ page, now }: PaymentStepProps) {
   const hydrated = useHydrated()
   const narrow = useNarrow()
   const { order } = page.view
-  const methods = payable(page.view.payment_methods)
+  const methods = page.view.payment_methods ?? []
   const payment = usePayment(order)
   const [picked, setPicked] = useState<string>()
-  const method = methods.find(offered => offered.method === picked) ?? methods[0]
+  const method = methods.find(offered => offered.id === picked) ?? methods[0]
   const { started } = payment
   useOrderWatch(started === undefined ? undefined : watchEvery)
   const total = money(order.amount)
@@ -41,7 +41,7 @@ export function PaymentStep({ page, now }: PaymentStepProps) {
       block={block}
       disabled={method === undefined}
       loading={payment.pending}
-      onClick={() => method !== undefined && void payment.start(method.method, narrow)}
+      onClick={() => method !== undefined && void payment.start(method.id, narrow)}
       className="min-w-36"
     >
       <Text as="span" size="inherit" className="max-sm:hidden">
@@ -61,12 +61,12 @@ export function PaymentStep({ page, now }: PaymentStepProps) {
             <Spinner />
           </Flex>
         ) : started === undefined ? (
-          <MethodList methods={methods} value={method?.method} onValueChange={setPicked} />
+          <MethodList methods={methods} value={method?.id} onValueChange={setPicked} />
         ) : (
           <PayPanel
             started={started}
             due={order.amount}
-            given={methods.find(offered => offered.method === started.method)?.name}
+            method={methodOf(methods, started.method)}
             onChange={payment.change}
           />
         )}

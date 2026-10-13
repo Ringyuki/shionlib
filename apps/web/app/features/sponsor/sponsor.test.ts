@@ -5,9 +5,9 @@ import {
   captionOf,
   cardOf,
   celebrates,
-  knownMethod,
+  feeOf,
+  methodOf,
   owned,
-  payable,
   previewOf,
   remembered,
   shownCard,
@@ -41,7 +41,7 @@ const order: Order = {
   user: { id: 9, name: 'ringyuki', avatar: 'user/9/avatar/a.webp', is_sponsor: true },
   message: ' 加油 ',
   isPrivate: false,
-  paymentMethod: 'alipay',
+  paymentMethod: { id: 'alipay', name: 'Alipay', brand: 'alipay', fee_rate: null, fee_fixed: null },
   paidAt: '2026-10-13T06:06:00.000Z',
   expiresAt: null,
   created: '2026-10-13T06:00:00.000Z',
@@ -224,19 +224,34 @@ describe('payment', () => {
     expect(startedFor(undefined, { id: 4, status: 'NEW' })).toBeUndefined()
   })
 
-  it('offers the methods that are switched on', () => {
-    const methods = [
-      { method: 'alipay', name: 'Alipay', enabled: true },
-      { method: 'bank', name: 'Bank', enabled: false },
-    ]
-    expect(payable(methods)).toEqual([methods[0]])
-    expect(payable(null)).toEqual([])
+  it('finds the method a payment was started with, or keeps its id', () => {
+    const alipay = {
+      id: 'alipay',
+      name: 'Alipay',
+      brand: 'alipay',
+      fee_rate: '3.0%',
+      fee_fixed: null,
+    } as const
+    expect(methodOf([alipay], 'alipay')).toBe(alipay)
+    expect(methodOf([alipay], 'bank')).toEqual({
+      id: 'bank',
+      name: 'bank',
+      brand: null,
+      fee_rate: null,
+      fee_fixed: null,
+    })
   })
 
-  it('knows the methods the provider offers', () => {
-    expect(knownMethod('onramp-paypal')).toBe('onramp-paypal')
-    expect(knownMethod('bank')).toBeUndefined()
-    expect(captionOf('crypto')).toBe('USDT')
-    expect(captionOf('alipay')).toBeUndefined()
+  it('words the fee of a method from what the provider states', () => {
+    expect(feeOf({ fee_rate: '3.0%', fee_fixed: null })).toBe('3.0%')
+    expect(feeOf({ fee_rate: '4.4%', fee_fixed: '0.30' })).toBe('4.4% + 0.30')
+    expect(feeOf({ fee_rate: null, fee_fixed: '0.30' })).toBe('0.30')
+    expect(feeOf({ fee_rate: null, fee_fixed: null })).toBeUndefined()
+  })
+
+  it('adds what a brand settles in when its name does not say', () => {
+    expect(captionOf({ brand: 'usdt' })).toBe('USDT')
+    expect(captionOf({ brand: 'alipay' })).toBeUndefined()
+    expect(captionOf({ brand: null })).toBeUndefined()
   })
 })
