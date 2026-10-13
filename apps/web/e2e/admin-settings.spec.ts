@@ -78,6 +78,7 @@ test.describe('as a super administrator', () => {
     const leaving = page.getByRole('alertdialog')
     await expect(leaving).toContainText('要放弃尚未保存的修改吗？')
     await leaving.getByRole('button', { name: '继续修改' }).click()
+    await expect(leaving).toBeHidden()
     await expect(page).toHaveURL(/\/zh\/admin\/settings$/)
 
     await page.getByRole('button', { name: '放弃修改' }).click()
