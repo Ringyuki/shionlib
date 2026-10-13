@@ -1,0 +1,93 @@
+{
+  "title": "举报",
+  "status": {
+    "PENDING": "待处理",
+    "VALID": "成立",
+    "INVALID": "不成立",
+    "ALL": "全部"
+  },
+  "pendingOf": "待处理 {count, number}",
+  "statusFilter": "状态",
+  "reasonFilter": "原因",
+  "allReasons": "全部原因",
+  "column": {
+    "report": "举报",
+    "resource": "资源",
+    "reporter": "举报人",
+    "uploader": "上传者",
+    "time": "时间",
+    "status": "状态"
+  },
+  "level": {
+    "LOW": "低",
+    "MEDIUM": "中",
+    "HIGH": "高",
+    "CRITICAL": "严重"
+  },
+  "validAt": "成立 · {level}",
+  "processedBy": "{name}，{date}",
+  "narrow": "{file} · {reporter} · <time></time>",
+  "empty": "{filtered, select, true {没有符合条件的举报} other {没有待处理的举报}}",
+  "issue": {
+    "verdict": "请选择处理结论"
+  },
+  "review": {
+    "title": "处理举报",
+    "viewTitle": "举报详情",
+    "number": "举报 #{id}",
+    "report": "举报",
+    "reason": "原因",
+    "detail": "说明",
+    "noDetail": "未填写",
+    "reporter": "举报人",
+    "record": "{filed, plural, =1 {，这是第一次举报} other {，累计举报 # 次{invalid, plural, =0 {} other {，其中 # 次不成立}}}}",
+    "time": "时间",
+    "resource": "资源",
+    "fileFacts": "{size} · {game}",
+    "noFiles": "《{game}》的这个资源已经没有文件",
+    "check": {
+      "passed": "上传时已通过检查",
+      "held": "病毒扫描标记了这个文件，正在等待复核",
+      "pending": "检查尚未完成",
+      "failed": "未通过检查"
+    },
+    "openResource": "打开资源页",
+    "uploader": "上传者",
+    "user": "用户",
+    "tier": "{tier, select, new {，新上传者} trusted {，可信上传者} admin {，管理员} other {，普通上传者}}",
+    "uploads": "上传记录",
+    "uploadsValue": "已发布 {approved, number} 个资源，{violations, plural, =0 {没有违规记录} other {# 次违规}}",
+    "decision": "处理",
+    "verdict": {
+      "VALID": "成立",
+      "INVALID": "不成立"
+    },
+    "verdictHint": {
+      "VALID": "资源确实存在所举报的问题",
+      "INVALID": "记为举报人的一次无效举报"
+    },
+    "level": "严重程度",
+    "consequence": "{level}：{ban, plural, =0 {{violation, select, true {上传者记一次违规} other {不处罚上传者}}} other {上传者封禁 # 天{violation, select, true {，并记一次违规} other {}}}}{violation, select, true {。违规后 {freeze, number} 天内按低一级的档位计算存储空间。} other {}}",
+    "remove": "下架这个资源",
+    "removeHint": "资源和其中的文件将被删除，无法恢复",
+    "outlook": "这是 {name} 的第 {count, number} 次无效举报{ban, plural, =0 {} other {，将自动封禁 # 天}}{more, select, true {。{later}。} other {}}",
+    "outlookStep": "第 {count, number} 次将自动封禁 {days, number} 天",
+    "separator": "，",
+    "note": "处理说明",
+    "notePlaceholder": "选填，会写入发出的通知",
+    "notify": "{verdict, select, VALID {通知举报人和上传者} other {通知举报人}}",
+    "done": "举报已处理",
+    "conclusion": "结论",
+    "processor": "处理人",
+    "system": "系统",
+    "processed": "处理时间",
+    "penalties": "已执行的处罚",
+    "penalty": {
+      "uploader": "已按严重程度处罚上传者",
+      "reporter": "举报人因多次无效举报被封禁",
+      "none": "无"
+    }
+  },
+  "byReporter": "举报人：{name}",
+  "againstUploader": "上传者：{name}"
+}

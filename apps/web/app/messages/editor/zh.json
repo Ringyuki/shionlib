@@ -1,0 +1,16 @@
+{
+  "toolbar": "格式",
+  "tool": {
+    "bold": "粗体",
+    "spoiler": "剧透",
+    "link": "链接"
+  },
+  "confirm": "确定",
+  "linkAddress": "链接地址",
+  "linkAddressHint": "输入链接地址",
+  "linkOpen": "在新标签页中打开",
+  "linkRemove": "移除链接",
+  "issue": {
+    "address": "请输入以 http、https 或 mailto 开头的地址"
+  }
+}

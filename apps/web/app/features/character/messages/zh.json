@@ -1,0 +1,37 @@
+{
+  "intro": "简介",
+  "works": "登场作品（{count, number}）",
+  "worksLabel": "登场作品",
+  "noWorks": "暂未收录这个角色的登场作品",
+  "fact": {
+    "aliases": "别名",
+    "gender": "性别",
+    "age": "年龄",
+    "ageValue": "{age, number} 岁",
+    "birthday": "生日",
+    "bloodType": "血型",
+    "bloodTypeValue": "{type} 型",
+    "height": "身高",
+    "heightValue": "{value, number} cm",
+    "weight": "体重",
+    "weightValue": "{value, number} kg",
+    "measurements": "三围",
+    "cup": "罩杯"
+  },
+  "gender": {
+    "m": "男",
+    "f": "女",
+    "o": "其他",
+    "a": "无性别"
+  },
+  "cast": {
+    "empty": "这个游戏暂无角色信息",
+    "voice": "CV {name}",
+    "role": {
+      "main": "主角",
+      "primary": "主要角色",
+      "side": "配角",
+      "appears": "登场"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+# Review checklist
+
+- Does any package import against the dependency direction (archtest, depguard)?
+- Was an interface added without a consumer that needs substitution or a boundary?
+- Do framework, ORM, driver or vendor types leak into business code or DTOs?
+- Do responses use `response.*` and errors flow through `errmap`, with no ad-hoc envelopes?
+- Is any error logged and also returned, or logged twice?
+- Can internal error details reach the client?
+- Is `context.Context` propagated, with no `context.Background()` in request paths?
+- Does every goroutine have an owner, a stop condition and error handling?
+- Is the transaction boundary in the service, and do adapters use `postgres.Client(ctx, …)`?
+- Are config, logger, cache, HTTP clients and rate limits used through the platform packages?
+- Is a new dependency needed: the standard library cannot reasonably do it, no existing dependency covers it, it is maintained and stable, and its dependency tree and runtime behavior are acceptable?
+- Are there tests for every business rule, error code and authorization path touched?
+- Does the change duplicate an existing abstraction or capability?
+- Are generated files (ent, business codes, OpenAPI, migrations) regenerated and committed?
+- Is every new type in the file its role dictates and named with the project vocabulary (Service, Repository, Store, Handler, Input, DTO, Worker, Options)?
+- Do business types stay free of struct tags, with wire and storage shapes in DTOs and adapter records?
+- Is SQL confined to `internal/adapter/postgres`, parameterized, and only where ent cannot express it?
+- Are new list endpoints paginated, new outbound calls timed out, and new retries owned by exactly one layer?
+- Does every touched package keep a test that mirrors the changed file?

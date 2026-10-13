@@ -1,0 +1,91 @@
+{
+  "download": "Download",
+  "methods": "Other ways to download",
+  "via": {
+    "browser": "Download in the browser",
+    "aria2": "Send to aria2",
+    "lunabox": "Send to LunaBox",
+    "reina": "Send to ReinaManager",
+    "potatovn": "Send to PotatoVN"
+  },
+  "needsBangumi": "This game has no Bangumi ID",
+  "copyLink": "Copy download link",
+  "openSettings": "Download settings",
+  "verifying": "Checking that you are human",
+  "verifyingHint": "The download starts by itself once this passes",
+  "verification": {
+    "unavailable": "The verification is unavailable right now. Please try again later.",
+    "blocked": "This browser did not pass the verification",
+    "failed": "The verification failed. Please try again."
+  },
+  "problem": "Error code: {code}",
+  "aria2": {
+    "sent": "Sent to aria2",
+    "unreachable": "Cannot reach aria2 ({endpoint}). Check your settings",
+    "unauthorized": "aria2 rejected the secret. Check your settings",
+    "rejected": "aria2 did not accept the task: {message}"
+  },
+  "manager": {
+    "sent": "The download was handed to {name}",
+    "hint": "If {name} did not start, check that it is installed"
+  },
+  "useBrowser": "Use the browser instead",
+  "copied": "Link copied, valid for {minutes} min",
+  "copyReady": "Link ready, valid for {minutes} min",
+  "copy": "Copy",
+  "asDefault": "{label} (default)",
+  "preferences": {
+    "title": "Download settings",
+    "done": "Done",
+    "local": "Download settings are saved in this browser only and do not follow your account",
+    "method": "Default download method",
+    "methods": {
+      "browser": {
+        "label": "Browser",
+        "description": "The browser downloads the file itself"
+      },
+      "aria2": {
+        "label": "Send to aria2",
+        "description": "Sends the download to an aria2 on this computer or your local network"
+      },
+      "lunabox": {
+        "label": "Send to LunaBox",
+        "description": "Hands the download to LunaBox"
+      },
+      "reina": {
+        "label": "Send to ReinaManager",
+        "description": "Hands the download to ReinaManager. Games without a Bangumi ID are downloaded in the browser."
+      },
+      "potatovn": {
+        "label": "Send to PotatoVN",
+        "description": "Hands the download to PotatoVN. Games without a Bangumi ID are downloaded in the browser."
+      }
+    },
+    "managers": "Game managers",
+    "managersHint": "A manager that is on appears in the download menu. It has to be installed on your computer first.",
+    "manager": {
+      "lunabox": "A visual novel manager that downloads, verifies and unpacks files. Windows only.",
+      "reina": "A visual novel manager that takes downloads and adds them to its library. Only for games with a Bangumi ID.",
+      "potatovn": "A visual novel manager; needs its PotatoDownload plugin. Windows only, and only for games with a Bangumi ID."
+    },
+    "showManager": "Show {name} in the download menu",
+    "aria2": "aria2",
+    "aria2Hint": "Enable RPC in aria2 first and allow cross-origin requests from this site. Changes apply at once.",
+    "endpoint": "RPC address",
+    "endpointHint": "The JSON-RPC address of aria2",
+    "secret": "RPC secret",
+    "secretHint": "Leave empty when no secret is set",
+    "directory": "Save to",
+    "directoryHint": "Optional; aria2's default directory is used when empty",
+    "test": "Test connection",
+    "reachable": "Connected. aria2 version {version}.",
+    "unreachable": {
+      "unreachable": "Could not reach aria2. Check the address, and that aria2 is running and allows cross-origin requests.",
+      "unauthorized": "aria2 rejected the secret. Check the RPC secret.",
+      "rejected": "aria2 answered with an error: {message}"
+    },
+    "issue": {
+      "endpoint": "Enter a full address, such as http://127.0.0.1:6800/jsonrpc"
+    }
+  }
+}

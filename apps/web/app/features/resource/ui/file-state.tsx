@@ -1,0 +1,64 @@
+import { cn, Tag, Tooltip } from '@hina-ui/react'
+import { CircleHelp } from 'lucide-react'
+import { useFormatter, useTranslations } from 'use-intl'
+import { detections, fileState, type AwaitedVolumes, type ResourceFile } from '../resource'
+
+const tags = {
+  checking: { tone: 'neutral', variant: 'outline' },
+  awaitingVolumes: { tone: 'warning', variant: 'soft' },
+  storing: { tone: 'neutral', variant: 'outline' },
+  underReview: { tone: 'warning', variant: 'soft' },
+  stalled: { tone: 'warning', variant: 'soft' },
+  rejected: { tone: 'danger', variant: 'soft' },
+  falsePositive: { tone: 'danger', variant: 'solid' },
+  risky: { tone: 'danger', variant: 'solid' },
+} as const
+
+const explainedTags = {
+  ...tags,
+  checking: { tone: 'accent', variant: 'soft' },
+  storing: { tone: 'accent', variant: 'soft' },
+} as const
+
+type FileStateProps = {
+  file: ResourceFile
+  explained?: boolean
+  awaited?: AwaitedVolumes
+  className?: string
+}
+
+export function FileState({ file, explained = false, awaited, className }: FileStateProps) {
+  const t = useTranslations('resource')
+  const format = useFormatter()
+  const state = fileState(file)
+  if (state === 'passed') {
+    return null
+  }
+  if (explained) {
+    return (
+      <Tag size="sm" className={cn('shrink-0', className)} {...explainedTags[state]}>
+        {t(`state.${state}`)}
+      </Tag>
+    )
+  }
+  const hint = t(`stateHint.${state}`, {
+    names:
+      state === 'awaitingVolumes'
+        ? format.list(awaited?.names ?? [], { style: 'narrow' })
+        : detections(file).join(', '),
+    more: awaited?.more ?? 0,
+    deadline:
+      awaited === undefined
+        ? ''
+        : format.dateTime(awaited.deadline, { dateStyle: 'medium', timeStyle: 'short' }),
+    reason: file.rejection === null ? '' : t(`rejection.${file.rejection}`),
+  })
+  return (
+    <Tag size="sm" className={cn('shrink-0', className)} {...tags[state]}>
+      {t(`state.${state}`)}
+      <Tooltip content={hint}>
+        <CircleHelp role="img" aria-label={t('stateHelp')} tabIndex={0} className="cursor-help" />
+      </Tooltip>
+    </Tag>
+  )
+}

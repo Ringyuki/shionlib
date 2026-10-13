@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:17}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-shionlib}
+      POSTGRES_USER: ${POSTGRES_USER:-shionlib}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    ports:
+      - '${DATA_BIND_ADDRESS:?DATA_BIND_ADDRESS is required}:${POSTGRES_PORT:-5432}:5432'
+    shm_size: 256mb
+    stop_grace_period: 60s
+    volumes:
+      - ${POSTGRES_VOLUME:-postgres-data}:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: ${REDIS_IMAGE:-redis:7-alpine}
+    restart: unless-stopped
+    command: ['sh', '-c', 'exec redis-server --requirepass "$$REDIS_PASSWORD" --appendonly yes']
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+    ports:
+      - '${DATA_BIND_ADDRESS:?DATA_BIND_ADDRESS is required}:${REDIS_PORT:-6379}:6379'
+    volumes:
+      - ${REDIS_VOLUME:-redis-data}:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:
+  redis-data:

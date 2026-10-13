@@ -1,0 +1,21 @@
+.rich-editor {
+  outline: none;
+}
+
+.rich-editor .is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: var(--hn-fg-subtle);
+}
+
+.rich-editor [data-spoiler] {
+  background-color: var(--hn-bg-inset);
+  border-radius: var(--hn-radius-xs);
+  padding-inline: 0.125em;
+}
+
+.rich-editor .is-linking {
+  background: color-mix(in oklab, var(--hn-accent) 24%, transparent);
+}

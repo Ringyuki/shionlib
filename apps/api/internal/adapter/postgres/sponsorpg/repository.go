@@ -1,0 +1,357 @@
+package sponsorpg
+
+import (
+	"context"
+	"fmt"
+	"slices"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/sponsororder"
+	entuser "github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/ent/user"
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/postgres/userpg"
+	"github.com/Ringyuki/shionlib/apps/api/internal/sponsor"
+)
+
+type Repository struct {
+	client *ent.Client
+}
+
+func NewRepository(client *ent.Client) *Repository {
+	return &Repository{client: client}
+}
+
+func (r *Repository) db(ctx context.Context) *ent.Client {
+	return postgres.Client(ctx, r.client)
+}
+
+func (r *Repository) Create(ctx context.Context, in sponsor.NewOrder) (sponsor.Order, error) {
+	row, err := r.db(ctx).SponsorOrder.Create().
+		SetProviderOrderID(in.ProviderOrderID).
+		SetProvider(in.Provider).
+		SetAmount(formatCents(in.AmountCents)).
+		SetNillableSponsorName(in.SponsorName).
+		SetNillableSponsorMessage(in.Message).
+		SetIsPrivate(in.IsPrivate).
+		SetNillableUserID(in.UserID).
+		SetExpiresAt(in.ExpiresAt).
+		Save(ctx)
+	if err != nil {
+		return sponsor.Order{}, fmt.Errorf("create sponsor order: %w", err)
+	}
+	return toOrder(row)
+}
+
+func (r *Repository) Get(ctx context.Context, id int) (sponsor.Order, error) {
+	return r.one(ctx, r.db(ctx).SponsorOrder.Query().Where(sponsororder.ID(id)))
+}
+
+func (r *Repository) Lock(ctx context.Context, id int) (sponsor.Order, error) {
+	return r.one(ctx, r.db(ctx).SponsorOrder.Query().Where(sponsororder.ID(id)).ForUpdate())
+}
+
+func (r *Repository) FindByProviderOrderID(ctx context.Context, providerOrderID string) (sponsor.Order, error) {
+	return r.one(ctx, r.db(ctx).SponsorOrder.Query().Where(sponsororder.ProviderOrderID(providerOrderID)))
+}
+
+func (r *Repository) one(ctx context.Context, query *ent.SponsorOrderQuery) (sponsor.Order, error) {
+	row, err := query.Only(ctx)
+	if postgres.IsNotFound(err) {
+		return sponsor.Order{}, sponsor.ErrOrderNotFound
+	}
+	if err != nil {
+		return sponsor.Order{}, fmt.Errorf("get sponsor order: %w", err)
+	}
+	order, err := toOrder(row)
+	if err != nil {
+		return sponsor.Order{}, err
+	}
+	if row.UserID != nil {
+		owner, err := r.db(ctx).User.Query().Where(entuser.ID(*row.UserID)).Select(userpg.SummaryFields...).Only(ctx)
+		if err != nil && !postgres.IsNotFound(err) {
+			return sponsor.Order{}, fmt.Errorf("get sponsor order owner: %w", err)
+		}
+		order.User = userpg.ToSummaryPtr(owner)
+	}
+	return order, nil
+}
+
+func (r *Repository) SetPaymentMethod(ctx context.Context, id int, method string) error {
+	err := r.db(ctx).SponsorOrder.UpdateOneID(id).SetPaymentMethod(method).Exec(ctx)
+	if postgres.IsNotFound(err) {
+		return sponsor.ErrOrderNotFound
+	}
+	if err != nil {
+		return fmt.Errorf("set sponsor order %d payment method: %w", id, err)
+	}
+	return nil
+}
+
+func (r *Repository) ApplyStatus(ctx context.Context, id int, change sponsor.StatusChange) error {
+	update := r.db(ctx).SponsorOrder.UpdateOneID(id).SetStatus(sponsororder.Status(change.Status))
+	if change.PaidAt != nil {
+		update.SetPaidAt(*change.PaidAt)
+	}
+	if change.CallbackVerified {
+		update.SetCallbackVerified(true)
+	}
+	err := update.Exec(ctx)
+	if postgres.IsNotFound(err) {
+		return sponsor.ErrOrderNotFound
+	}
+	if err != nil {
+		return fmt.Errorf("update sponsor order %d status: %w", id, err)
+	}
+	return nil
+}
+
+func (r *Repository) Delete(ctx context.Context, id int) error {
+	err := r.db(ctx).SponsorOrder.DeleteOneID(id).Exec(ctx)
+	if postgres.IsNotFound(err) {
+		return sponsor.ErrOrderNotFound
+	}
+	if err != nil {
+		return fmt.Errorf("delete sponsor order %d: %w", id, err)
+	}
+	return nil
+}
+
+func (r *Repository) List(ctx context.Context, filter sponsor.ListFilter, page sponsor.Page) ([]sponsor.Order, int, error) {
+	query := r.db(ctx).SponsorOrder.Query()
+	if filter.Status != nil {
+		query.Where(sponsororder.StatusEQ(sponsororder.Status(*filter.Status)))
+	}
+	total, err := query.Clone().Count(ctx)
+	if err != nil {
+		return nil, 0, fmt.Errorf("count sponsor orders: %w", err)
+	}
+	rows, err := query.
+		WithUser(userpg.SelectSummary).
+		Order(ent.Desc(sponsororder.FieldCreated), ent.Desc(sponsororder.FieldID)).
+		Offset(page.Offset()).
+		Limit(page.Size).
+		All(ctx)
+	if err != nil {
+		return nil, 0, fmt.Errorf("list sponsor orders: %w", err)
+	}
+	orders := make([]sponsor.Order, len(rows))
+	for i, row := range rows {
+		order, err := toOrder(row)
+		if err != nil {
+			return nil, 0, err
+		}
+		order.User = userpg.ToSummaryPtr(row.Edges.User)
+		orders[i] = order
+	}
+	return orders, total, nil
+}
+
+const wallKey = `COALESCE('u' || user_id::text, 'o' || id::text)`
+
+const wallShown = `SELECT DISTINCT ON (` + wallKey + `) id, user_id, sponsor_name, sponsor_message, paid_at
+	FROM sponsor_orders
+	WHERE status = 'DONE' AND is_private = false AND paid_at IS NOT NULL
+	ORDER BY ` + wallKey + `, paid_at DESC, id DESC`
+
+type wallRow struct {
+	id      int
+	userID  *int
+	name    *string
+	message *string
+	paidAt  time.Time
+}
+
+func (r *Repository) Wall(ctx context.Context, page sponsor.Page) ([]sponsor.WallEntry, int, error) {
+	var total int
+	counted, err := r.db(ctx).QueryContext(ctx, `SELECT COUNT(*) FROM (`+wallShown+`) AS shown`)
+	if err != nil {
+		return nil, 0, fmt.Errorf("count sponsor wall: %w", err)
+	}
+	if counted.Next() {
+		if err := counted.Scan(&total); err != nil {
+			_ = counted.Close()
+			return nil, 0, fmt.Errorf("scan sponsor wall count: %w", err)
+		}
+	}
+	if err := counted.Close(); err != nil {
+		return nil, 0, fmt.Errorf("read sponsor wall count: %w", err)
+	}
+	rows, err := r.wallRows(ctx, page)
+	if err != nil {
+		return nil, 0, err
+	}
+	sponsors, err := r.wallSponsors(ctx, rows)
+	if err != nil {
+		return nil, 0, err
+	}
+	entries := make([]sponsor.WallEntry, len(rows))
+	for i, row := range rows {
+		entry := sponsor.WallEntry{OrderID: row.id, Message: row.message, PaidAt: row.paidAt}
+		if row.userID == nil {
+			entry.Name = row.name
+		} else if found, ok := sponsors[*row.userID]; ok {
+			entry.Sponsor = &found
+		}
+		entries[i] = entry
+	}
+	return entries, total, nil
+}
+
+func (r *Repository) wallRows(ctx context.Context, page sponsor.Page) ([]wallRow, error) {
+	listed, err := r.db(ctx).QueryContext(ctx,
+		`SELECT id, user_id, sponsor_name, sponsor_message, paid_at FROM (`+wallShown+`) AS shown ORDER BY paid_at DESC, id DESC OFFSET $1 LIMIT $2`,
+		page.Offset(), page.Size)
+	if err != nil {
+		return nil, fmt.Errorf("list sponsor wall: %w", err)
+	}
+	defer func() {
+		_ = listed.Close()
+	}()
+	var rows []wallRow
+	for listed.Next() {
+		var row wallRow
+		if err := listed.Scan(&row.id, &row.userID, &row.name, &row.message, &row.paidAt); err != nil {
+			return nil, fmt.Errorf("scan sponsor wall: %w", err)
+		}
+		rows = append(rows, row)
+	}
+	if err := listed.Err(); err != nil {
+		return nil, fmt.Errorf("read sponsor wall: %w", err)
+	}
+	return rows, nil
+}
+
+func (r *Repository) wallSponsors(ctx context.Context, rows []wallRow) (map[int]sponsor.WallSponsor, error) {
+	var ids []int
+	for _, row := range rows {
+		if row.userID != nil {
+			ids = append(ids, *row.userID)
+		}
+	}
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	fields := append(slices.Clone(userpg.SummaryFields), entuser.FieldCover, entuser.FieldBio)
+	users, err := r.db(ctx).User.Query().Where(entuser.IDIn(ids...)).Select(fields...).All(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("load sponsor wall users: %w", err)
+	}
+	sponsors := make(map[int]sponsor.WallSponsor, len(users))
+	for _, row := range users {
+		sponsors[row.ID] = sponsor.WallSponsor{Summary: userpg.ToSummary(row), Cover: row.Cover, Bio: row.Bio}
+	}
+	return sponsors, nil
+}
+
+func (r *Repository) Stats(ctx context.Context) (sponsor.Stats, error) {
+	rows, err := r.db(ctx).QueryContext(ctx, `SELECT COUNT(id), COALESCE(SUM(amount), 0)::text FROM sponsor_orders WHERE status = 'DONE'`)
+	if err != nil {
+		return sponsor.Stats{}, fmt.Errorf("aggregate sponsor orders: %w", err)
+	}
+	defer func() {
+		_ = rows.Close()
+	}()
+	var (
+		count int
+		sum   string
+	)
+	if rows.Next() {
+		if err := rows.Scan(&count, &sum); err != nil {
+			return sponsor.Stats{}, fmt.Errorf("scan sponsor stats: %w", err)
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return sponsor.Stats{}, fmt.Errorf("read sponsor stats: %w", err)
+	}
+	cents, err := parseCents(sum)
+	if err != nil {
+		return sponsor.Stats{}, err
+	}
+	return sponsor.Stats{TotalSponsors: count, TotalAmountCents: cents}, nil
+}
+
+func (r *Repository) PaidSince(ctx context.Context, since time.Time) (int64, error) {
+	rows, err := r.db(ctx).QueryContext(ctx, `SELECT COALESCE(SUM(amount), 0)::text FROM sponsor_orders WHERE status = 'DONE' AND paid_at >= $1`, since)
+	if err != nil {
+		return 0, fmt.Errorf("sum paid sponsor orders: %w", err)
+	}
+	defer func() {
+		_ = rows.Close()
+	}()
+	var sum string
+	if rows.Next() {
+		if err := rows.Scan(&sum); err != nil {
+			return 0, fmt.Errorf("scan paid sponsor orders: %w", err)
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return 0, fmt.Errorf("read paid sponsor orders: %w", err)
+	}
+	if sum == "" {
+		return 0, nil
+	}
+	return parseCents(sum)
+}
+
+func (r *Repository) ExpireStale(ctx context.Context, now time.Time) (int, error) {
+	count, err := r.db(ctx).SponsorOrder.Update().
+		Where(sponsororder.StatusEQ(sponsororder.StatusNEW), sponsororder.ExpiresAtLT(now)).
+		SetStatus(sponsororder.StatusEXPIRED).
+		Save(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("expire stale sponsor orders: %w", err)
+	}
+	return count, nil
+}
+
+func (r *Repository) ExtendSponsorship(ctx context.Context, userID int, by time.Duration, now time.Time) error {
+	row, err := r.db(ctx).User.Query().
+		Where(entuser.ID(userID)).
+		Select(entuser.FieldID, entuser.FieldSponsorExpiresAt).
+		ForUpdate().
+		Only(ctx)
+	if postgres.IsNotFound(err) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("lock sponsor user %d: %w", userID, err)
+	}
+	base := now
+	if row.SponsorExpiresAt != nil && row.SponsorExpiresAt.After(now) {
+		base = *row.SponsorExpiresAt
+	}
+	if err := r.db(ctx).User.UpdateOneID(userID).SetSponsorExpiresAt(base.Add(by)).Exec(ctx); err != nil {
+		return fmt.Errorf("extend sponsorship of user %d: %w", userID, err)
+	}
+	return nil
+}
+
+func formatCents(cents int64) string {
+	sign := ""
+	if cents < 0 {
+		sign, cents = "-", -cents
+	}
+	return fmt.Sprintf("%s%d.%02d", sign, cents/100, cents%100)
+}
+
+func parseCents(raw string) (int64, error) {
+	text := strings.TrimSpace(raw)
+	negative := strings.HasPrefix(text, "-")
+	text = strings.TrimPrefix(text, "-")
+	whole, fraction, _ := strings.Cut(text, ".")
+	fraction = (fraction + "00")[:2]
+	if whole == "" {
+		whole = "0"
+	}
+	cents, err := strconv.ParseInt(whole+fraction, 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("parse sponsor amount %q: %w", raw, err)
+	}
+	if negative {
+		cents = -cents
+	}
+	return cents, nil
+}

@@ -1,0 +1,202 @@
+package archtest
+
+import (
+	"go/ast"
+	"go/parser"
+	"go/token"
+	"os"
+	"path"
+	"path/filepath"
+	"slices"
+	"strings"
+	"testing"
+)
+
+var taggedBusinessFiles = map[string]string{
+	"internal/richtext/document.go": "richtext owns the stored form of rich text documents; the tags are that form",
+}
+
+var rawSQLMethods = []string{"ExecContext", "QueryContext", "QueryRowContext"}
+
+var rawSQLOwners = []string{"internal/adapter/postgres/", "internal/platform/database/"}
+
+func isBusinessFile(rel string) bool {
+	parts := strings.Split(rel, "/")
+	if len(parts) != 3 || parts[0] != "internal" {
+		return false
+	}
+	switch parts[1] {
+	case "adapter", "platform", "transport", "bootstrap", "archtest":
+		return false
+	}
+	return true
+}
+
+func TestBusinessTypesCarryNoTags(t *testing.T) {
+	walkProductionFiles(t, func(rel string, file *ast.File) {
+		if !isBusinessFile(rel) || path.Base(rel) == "jobs.go" {
+			return
+		}
+		if _, ok := taggedBusinessFiles[rel]; ok {
+			return
+		}
+		for _, decl := range file.Decls {
+			gen, ok := decl.(*ast.GenDecl)
+			if !ok {
+				continue
+			}
+			for _, spec := range gen.Specs {
+				typeSpec, ok := spec.(*ast.TypeSpec)
+				if !ok {
+					continue
+				}
+				tagged := false
+				ast.Inspect(typeSpec.Type, func(node ast.Node) bool {
+					if field, ok := node.(*ast.Field); ok && field.Tag != nil {
+						tagged = true
+					}
+					return !tagged
+				})
+				if tagged {
+					t.Errorf("%s: %s carries struct tags; wire and storage shapes belong to transport DTOs and adapter records, job args in jobs.go excepted", rel, typeSpec.Name.Name)
+				}
+			}
+		}
+	})
+}
+
+func TestResponseShapesEmbedOnlyExportedTypes(t *testing.T) {
+	walkProductionFiles(t, func(rel string, file *ast.File) {
+		if !strings.HasPrefix(rel, "internal/transport/http/") {
+			return
+		}
+		ast.Inspect(file, func(node ast.Node) bool {
+			typeSpec, ok := node.(*ast.TypeSpec)
+			if !ok || !strings.HasSuffix(typeSpec.Name.Name, "DTO") {
+				return true
+			}
+			structure, ok := typeSpec.Type.(*ast.StructType)
+			if !ok {
+				return true
+			}
+			for _, field := range structure.Fields.List {
+				embedded, local := field.Type.(*ast.Ident)
+				if len(field.Names) == 0 && local && !embedded.IsExported() {
+					t.Errorf("%s: %s embeds the unexported %s, whose fields the contract generator leaves out of the schema; list the fields", rel, typeSpec.Name.Name, embedded.Name)
+				}
+			}
+			return true
+		})
+	})
+}
+
+func TestRawSQLStaysInPostgresAdapters(t *testing.T) {
+	walkProductionFiles(t, func(rel string, file *ast.File) {
+		if slices.ContainsFunc(rawSQLOwners, func(prefix string) bool { return strings.HasPrefix(rel, prefix) }) {
+			return
+		}
+		ast.Inspect(file, func(node ast.Node) bool {
+			call, ok := node.(*ast.CallExpr)
+			if !ok {
+				return true
+			}
+			selector, ok := call.Fun.(*ast.SelectorExpr)
+			if ok && slices.Contains(rawSQLMethods, selector.Sel.Name) {
+				t.Errorf("%s calls %s; SQL is written only in internal/adapter/postgres", rel, selector.Sel.Name)
+			}
+			return true
+		})
+	})
+}
+
+func TestSchemaLengthsCountCharacters(t *testing.T) {
+	files, err := filepath.Glob(filepath.Join(moduleRoot(t), "internal", "adapter", "postgres", "ent", "schema", "*.go"))
+	if err != nil || len(files) == 0 {
+		t.Fatalf("schema files: %v %v", files, err)
+	}
+	for _, path := range files {
+		file, err := parser.ParseFile(token.NewFileSet(), path, nil, parser.SkipObjectResolution)
+		if err != nil {
+			t.Fatal(err)
+		}
+		ast.Inspect(file, func(node ast.Node) bool {
+			selector, ok := node.(*ast.SelectorExpr)
+			if ok && selector.Sel.Name == "MaxLen" {
+				t.Errorf("%s limits a string with MaxLen, which counts bytes; the column and the API count characters, so use MaxRuneLen", filepath.Base(path))
+			}
+			return true
+		})
+	}
+}
+
+var untestedPackages = map[string]string{
+	"cmd/entgen":     "verify.sh regenerates ent and fails on any diff, which is the generator's test",
+	"internal/patch": "declares the Clearable value type only; its semantics are tested where updates are applied (gamepg, adtest contract)",
+}
+
+func TestEveryPackageHasTests(t *testing.T) {
+	root := moduleRoot(t)
+	for _, base := range []string{"internal", "cmd"} {
+		err := filepath.WalkDir(filepath.Join(root, base), func(path string, entry os.DirEntry, err error) error {
+			if err != nil || !entry.IsDir() {
+				return err
+			}
+			if entry.Name() == "testdata" || strings.HasSuffix(filepath.ToSlash(path), "internal/adapter/postgres/ent") {
+				return filepath.SkipDir
+			}
+			rel, _ := filepath.Rel(root, path)
+			rel = filepath.ToSlash(rel)
+			if isTestSupport(rel+"/x.go") || strings.HasSuffix(rel, "/archtest") {
+				return nil
+			}
+			files, err := os.ReadDir(path)
+			if err != nil {
+				return err
+			}
+			production, tests := 0, 0
+			for _, file := range files {
+				switch {
+				case strings.HasSuffix(file.Name(), "_test.go"):
+					tests++
+				case filepath.Ext(file.Name()) == ".go":
+					production++
+				}
+			}
+			if _, allowed := untestedPackages[rel]; production > 0 && tests == 0 && !allowed {
+				t.Errorf("%s has no tests", rel)
+			}
+			return nil
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+func TestTestFilesMirrorSourceFiles(t *testing.T) {
+	root := moduleRoot(t)
+	err := filepath.WalkDir(filepath.Join(root, "internal"), func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			if entry.Name() == "testdata" || entry.Name() == "archtest" || strings.HasSuffix(filepath.ToSlash(path), "internal/adapter/postgres/ent") {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		name := entry.Name()
+		if !strings.HasSuffix(name, "_test.go") || name == "fixture_test.go" {
+			return nil
+		}
+		source := strings.TrimSuffix(strings.TrimSuffix(name, "_test.go"), "_internal") + ".go"
+		if _, err := os.Stat(filepath.Join(filepath.Dir(path), source)); err != nil {
+			rel, _ := filepath.Rel(root, path)
+			t.Errorf("%s does not mirror a source file (expected %s); shared setup goes in fixture_test.go", filepath.ToSlash(rel), source)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+}

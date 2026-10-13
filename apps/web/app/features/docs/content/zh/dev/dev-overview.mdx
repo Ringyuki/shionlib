@@ -1,0 +1,54 @@
+---
+title: 'Shionlib 开发概述'
+banner: 'https://images.yurari.moe/admin/6740325e87e2312f66fa3f58/ny9s2fu6_2.webp'
+description: 'Shionlib 的开发概述：前端 React Router/React，后端 Go/ent/PostgreSQL，配合 Redis、River 任务队列、S3 兼容存储与 i18n。'
+date: 2025-10-28
+author_uid: 1
+author_name: 'ringyuki'
+author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
+---
+
+## 仓库
+
+[Shionlib](https://github.com/Ringyuki/shionlib)
+
+仓库是一个 monorepo：`apps/web` 是网页客户端，`apps/api` 是后端，`apps/download-worker` 和 `apps/og` 是运行在边缘的下载代理与分享图服务。
+
+## 技术栈
+
+### 前端
+
+**核心技术栈** React Router 8, React 19, TypeScript, Vite, Tailwind CSS, hina-ui, use-intl, valibot, MDX, Tiptap, pnpm
+
+- 框架：`React Router 8`（框架模式，服务端渲染）
+- 语言与运行时：`React 19` + `TypeScript`
+- 样式与 UI：`Tailwind CSS 4`、`@hina-ui/react`、`Lucide`
+- 国际化：`use-intl`（基于路由的多语言与 locale 协商）
+- 接口类型：由后端的 OpenAPI 文档通过 `openapi-typescript` 生成
+- 表单与校验：`valibot`
+- 内容/文档：MDX（`@mdx-js/rollup`），Frontmatter 由 `remark-frontmatter` 解析
+- 富文本编辑：`Tiptap`
+- 测试：`Vitest`、`Playwright`
+- 部署：Docker 镜像，由 Dokploy 部署
+
+### 后端
+
+**核心技术栈** Go, chi, Huma, ent, PostgreSQL, Redis, River, AWS S3 SDK, Backblaze B2 (S3-compatible), ClamAV, 7-Zip, OpenTelemetry
+
+- 语言：`Go`
+- HTTP：`chi` 路由 + `Huma`（由代码生成 OpenAPI 文档）
+- 数据层：`ent`、`PostgreSQL`，迁移由 `Atlas` 生成、`golang-migrate` 执行
+- 缓存与限流：`Redis`
+- 任务队列：`River`（基于 PostgreSQL）
+- 存储与上传：`AWS S3 SDK`、`Backblaze B2`（游戏文件）、S3 兼容存储（图片）
+- 文件检查：`7-Zip`（完整性测试与内容读取）、`ClamAV`（病毒扫描）
+- 鉴权：`JWT`、通行密钥（WebAuthn）、Hikarinagi ID（OIDC）
+- 国际化：按 Cookie / Accept-Language 解析的多语言错误信息与通知
+- 可观测性：`OpenTelemetry`
+- 部署：Docker 镜像，由 Dokploy 部署
+
+## 贡献
+
+如果你有能力，欢迎和我们一起开发 Shionlib!👏
+
+请在阅读 [贡献指南](https://github.com/Ringyuki/shionlib/blob/main/CONTRIBUTING.md) 后，提交你的 Pull Request。如果有任何问题，请提Issue/Discussion，或者在PR中ping maintainers。

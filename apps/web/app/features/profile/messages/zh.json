@@ -1,0 +1,66 @@
+{
+  "sponsor": "赞助者",
+  "admin": "管理员",
+  "banned": "已封禁",
+  "joined": "加入于 {date}",
+  "coverOf": "{name} 的头图",
+  "avatarOf": "{name} 的头像",
+  "nothing": "暂无公开内容",
+  "tabs": {
+    "label": "用户内容",
+    "uploads": "上传",
+    "favorites": "收藏夹",
+    "comments": "评论",
+    "walkthroughs": "攻略",
+    "manageUploads": "管理我的上传",
+    "manageFavorites": "管理我的收藏"
+  },
+  "uploads": {
+    "label": "上传的资源",
+    "otherFiles": "等 {count, number} 个文件",
+    "downloads": "{count, number} 次下载",
+    "empty": "该用户尚未上传资源",
+    "emptyOwn": "你尚未上传资源",
+    "upload": "上传资源"
+  },
+  "edit": {
+    "open": "编辑资料",
+    "title": "编辑资料",
+    "cancel": "取消",
+    "save": "保存",
+    "saved": "资料已保存",
+    "cover": {
+      "current": "当前的头图",
+      "upload": "上传头图",
+      "change": "更换头图",
+      "remove": "移除头图"
+    },
+    "avatar": {
+      "current": "当前的头像",
+      "upload": "上传头像",
+      "change": "更换头像"
+    },
+    "bio": "简介",
+    "bioCount": "{count, number} / {max, number}",
+    "background": {
+      "label": "页面背景",
+      "hint": "显示在个人主页的内容之后，手机上不显示",
+      "current": "当前的页面背景",
+      "upload": "上传图片",
+      "change": "更换",
+      "remove": "移除"
+    },
+    "account": "用户名、邮箱和密码在<link>账号设置</link>中修改",
+    "crop": {
+      "avatar": "裁剪头像",
+      "cover": "裁剪头图",
+      "background": "裁剪页面背景"
+    },
+    "unsupported": "仅支持 JPEG、PNG、WebP 和 AVIF 格式的图片",
+    "discard": {
+      "title": "确定要放弃尚未保存的修改吗？",
+      "confirm": "放弃修改",
+      "cancel": "继续编辑"
+    }
+  }
+}

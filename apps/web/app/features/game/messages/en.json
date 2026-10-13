@@ -1,0 +1,102 @@
+{
+  "releaseTba": "Release date TBA",
+  "released": "Released {date, date, long}",
+  "tba": "TBA",
+  "noResources": "No resources yet",
+  "resources": "{count, plural, one {# resource} other {# resources}}",
+  "downloads": "{count, plural, one {# download} other {# downloads}}",
+  "updated": "Updated <time></time>",
+  "platform": {
+    "win": "Windows",
+    "mac": "macOS",
+    "ios": "iOS",
+    "and": "Android",
+    "lin": "Linux",
+    "ps3": "PS3",
+    "ps4": "PS4",
+    "psv": "PS Vita",
+    "psp": "PSP",
+    "swi": "Switch",
+    "dvd": "DVD"
+  },
+  "language": {
+    "en": "English",
+    "zh": "Simplified Chinese",
+    "zh-hant": "Traditional Chinese",
+    "jp": "Japanese"
+  },
+  "tabs": {
+    "label": "Game page",
+    "resources": "Downloads",
+    "info": "About",
+    "characters": "Characters",
+    "comments": "Comments",
+    "walkthrough": "Walkthroughs"
+  },
+  "facts": {
+    "aliases": "Also known as {names}"
+  },
+  "score": {
+    "bangumi": "Bangumi",
+    "vndb": "VNDB",
+    "votes": "{count, plural, one {# vote} other {# votes}}",
+    "none": "No rating"
+  },
+  "actions": {
+    "upload": "Upload",
+    "download": "Download ({count, plural, one {# resource} other {# resources}})",
+    "readMore": "Read the full description"
+  },
+  "cover": {
+    "explicit": "Adult content, click to show",
+    "reveal": "Click to show"
+  },
+  "info": {
+    "intro": "Description",
+    "noIntro": "This game has no description yet",
+    "introLanguage": "Description language",
+    "tags": "Tags",
+    "staff": "Staff",
+    "screenshots": "Screenshots",
+    "relations": "Related games",
+    "extra": "More details",
+    "links": "Links",
+    "screenshot": "Screenshot",
+    "viewScreenshot": "View screenshot {index}"
+  },
+  "introLanguage": {
+    "zh": "Chinese",
+    "jp": "Japanese",
+    "en": "English"
+  },
+  "relation": {
+    "PREQUEL": "Prequel",
+    "SEQUEL": "Sequel",
+    "MAIN_STORY": "Main story",
+    "SIDE_STORY": "Side story",
+    "EXPANSION": "Expansion",
+    "VARIANT": "Other version",
+    "MAIN_VERSION": "Original version",
+    "COLLECTION": "Collection",
+    "COLLECTED_WORK": "Included work",
+    "SAME_UNIVERSE": "Same setting",
+    "DIFFERENT_ADAPTATION": "Alternative adaptation",
+    "SHARED_CHARACTERS": "Shared characters",
+    "FAN_DISC": "Fan disc"
+  },
+  "meta": {
+    "developers": "Developer",
+    "released": "Release date",
+    "platforms": "Platforms",
+    "type": "Type"
+  },
+  "orderLabel": "Sort by",
+  "order": {
+    "newest": "Newest",
+    "oldest": "Oldest",
+    "updated": "Recently updated",
+    "hot": "Hottest",
+    "views": "Most viewed",
+    "downloads": "Most downloaded"
+  }
+}

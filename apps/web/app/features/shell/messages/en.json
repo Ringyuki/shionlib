@@ -1,0 +1,43 @@
+{
+  "navigation": "Main navigation",
+  "account": "Account",
+  "accountHint": "Account and preferences",
+  "profile": "Profile",
+  "admin": "Admin",
+  "language": "Language",
+  "upload": "Upload",
+  "signIn": "Sign in / Sign up",
+  "section": {
+    "discover": "Discover",
+    "mine": "Library"
+  },
+  "nav": {
+    "home": "Home",
+    "games": "Games",
+    "releases": "Releases",
+    "developers": "Developers",
+    "translators": "Translation groups",
+    "activity": "Activity",
+    "docs": "Docs",
+    "favorites": "Favorites",
+    "uploads": "My uploads",
+    "messages": "Messages",
+    "settings": "Settings"
+  },
+  "signOut": "Sign out",
+  "theme": {
+    "label": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "footer": {
+    "label": "Site information",
+    "friendLinks": "Friend Links",
+    "sponsor": "Sponsor",
+    "contact": "Contact"
+  },
+  "scrollTop": "Back to top",
+  "navigating": "Loading the page",
+  "unreadCount": "{count} unread"
+}

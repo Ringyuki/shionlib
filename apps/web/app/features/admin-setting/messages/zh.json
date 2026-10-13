@@ -1,0 +1,73 @@
+{
+  "title": "设置",
+  "search": "搜索设置",
+  "sections": "设置分组",
+  "noMatch": "没有符合条件的设置",
+  "readOnly": "只有超级管理员可以修改设置",
+  "section": {
+    "account": "注册与赞助",
+    "upload": "上传",
+    "download": "下载",
+    "scan": "文件检查",
+    "composition": "合成",
+    "throttle": "限流",
+    "hot_score": "热度",
+    "catalog": "条目同步",
+    "ai": "AI",
+    "other": "其他",
+    "credentials": "第三方服务"
+  },
+  "on": "开启",
+  "off": "关闭",
+  "blank": "空",
+  "amount": "{amount} {unit}",
+  "unit": {
+    "label": "{name}的单位",
+    "B": "B",
+    "KiB": "KiB",
+    "MiB": "MiB",
+    "GiB": "GiB",
+    "TiB": "TiB",
+    "second": "秒",
+    "minute": "分钟",
+    "hour": "小时",
+    "day": "天"
+  },
+  "fallback": "默认 {value}",
+  "unsaved": "未保存",
+  "overridden": "已修改",
+  "lastChange": "{editor}，{date}",
+  "system": "系统",
+  "restore": "恢复默认",
+  "problem": {
+    "number": "请输入数字",
+    "whole": "请输入整数",
+    "min": "不能小于 {bound}",
+    "max": "不能大于 {bound}",
+    "length": "不能超过 {bound} 个字符"
+  },
+  "unsavedCount": "有 {count, number} 项修改尚未保存",
+  "discard": "放弃修改",
+  "save": "保存",
+  "saved": "设置已保存",
+  "leaveConfirm": "要放弃尚未保存的修改吗？",
+  "stay": "继续修改",
+  "history": {
+    "open": "修改记录",
+    "of": "{name}的修改记录",
+    "title": "修改记录",
+    "subject": "{label} · {name}",
+    "loading": "正在加载",
+    "empty": "暂无修改记录"
+  },
+  "fallbackBlank": "默认为空",
+  "secret": {
+    "set": "已设置",
+    "unset": "未设置",
+    "clear": "清除",
+    "enter": "输入密钥",
+    "replace": "输入新的密钥以替换",
+    "replaced": "设置了新的密钥",
+    "cleared": "清除了密钥"
+  }
+}

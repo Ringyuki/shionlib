@@ -42,3 +42,30 @@ These files contain safe local defaults. Adjust them for your local test needs.
 - postgres/redis are intentionally not published to host ports in this compose setup.
 - Frontend build bakes in `INTERNAL_API_BASE_URL=http://backend:5000` and rewrites `/api/*` to backend.
 - For production deployment, use dedicated secrets/config management instead of these local env defaults.
+
+## E2E against the Go API
+
+`docker/compose.e2e-go.yml` (project `shionlib-e2e-go`) runs the legacy frontend and its Playwright suite against the Go backend in `apps/api`:
+
+- frontend on `http://localhost:3200`, Go API on `http://localhost:5201`, og on `http://localhost:4200`
+- `migrate` runs `shionlib-api migrate up` on an empty database, `seed` runs `devtool e2e prepare` (the Go port of `e2e-dataset.ts prepare`, image `docker/api-e2e/Dockerfile`), then `api` serves with workers enabled
+- `upstream` runs `devtool e2e upstream` from the same image: a stand-in for 鲲 Galgame 补丁 (`NEXTMOE_API_BASE_URL`) that lists five entries for the seeded game with VNDB id `v900005` (`apps/api/cmd/devtool/e2e_upstream.json`) and none for any other game, so no run reaches the real service
+- API settings live in `docker/env/api-e2e.env`; they mirror `docker/env/backend.env` (same secrets, token windows, Redis DB, scan and download settings) and additionally set `DEFAULT_LOCALE=en`; the dataset stores a high `throttle.auth_limit` and `download.max_conns` = 4 in the config center, and configures an AI provider at an unreachable address for both moderation scenes, so moderation fails and new content stays pending like it did with the empty legacy key
+
+```bash
+pnpm test:e2e:go                 # build, start, seed, run Playwright, tear down
+E2E_KEEP_STACK=1 pnpm test:e2e:go tests/e2e/smoke   # keep the stack, run a subset
+pnpm e2e:go:data:prepare         # reset and reseed a running stack
+pnpm e2e:go:stack:down
+```
+
+`docker/scripts/test-e2e-go.sh` excludes the specs that contradict an intentional deviation of the Go backend (`INTENTIONAL_DEVIATIONS` in the script) and prints each exclusion. It runs Playwright with two workers like CI (`E2E_WORKERS` overrides it); several UI specs share users and race each other at higher worker counts against either backend.
+
+## E2E of the web client
+
+`docker/scripts/test-e2e-web.sh` (`pnpm test:e2e:web`) uses the same compose file for `apps/web`: it starts `cap` ([Cap](https://github.com/tiagozip/cap) Standalone on port 5231, stored in the stack's Redis under `cap:`), creates a site key for the run with `docker/scripts/cap-site-key.sh` (without instrumentation and without the block on automated browsers, since Playwright is one), starts the API with that key's secret (`CAP_SITE_KEY`, `CAP_SECRET`; `CAP_URL` is `http://cap:3000`), and runs Playwright with `CAP_ENDPOINT` pointing at the key. The legacy frontend's runs leave `cap` off; without a key the API refuses every download link.
+
+```bash
+pnpm test:e2e:web                               # start, seed, run Playwright, tear down
+E2E_NO_BUILD=1 pnpm test:e2e:web e2e/download.spec.ts   # reuse the built API images, run one spec
+```

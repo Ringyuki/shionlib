@@ -1,0 +1,63 @@
+{
+  "close": "閉じる",
+  "artwork": "イラスト",
+  "sign-in": {
+    "title": "Shionlib にログイン",
+    "description": "ログインすると、リソースのアップロードやお気に入り、コメントができます",
+    "identifier": "ユーザー名またはメールアドレス",
+    "password": "パスワード",
+    "submit": "ログイン",
+    "noAccount": "アカウントをお持ちでない方",
+    "toSignUp": "新規登録",
+    "forgot": "パスワードを忘れた場合"
+  },
+  "sign-up": {
+    "title": "Shionlib に新規登録",
+    "description": "登録後、そのままログインします",
+    "name": "ユーザー名",
+    "nameHint": "{min}〜{max} 文字。登録後に変更できます",
+    "email": "メールアドレス",
+    "sendCode": "コードを送信",
+    "resendIn": "{seconds} 秒後に再送信",
+    "codeSent": "{email} に確認コードを送信しました",
+    "code": "確認コード",
+    "codeFirst": "先に確認コードを送信してください",
+    "password": "パスワード",
+    "passwordHint": "{min}〜{max} 文字",
+    "adult": "18 歳以上です",
+    "submit": "登録してログイン",
+    "hasAccount": "アカウントをお持ちの方",
+    "toSignIn": "ログイン"
+  },
+  "forgot-password": {
+    "title": "パスワードの再設定",
+    "description": "登録したメールアドレスを入力すると、再設定用のメールを送信します",
+    "email": "メールアドレス",
+    "submit": "再設定メールを送信",
+    "sent": "メールを送信しました。リンクの有効期限は短いので、早めにご確認ください。",
+    "back": "ログインに戻る"
+  },
+  "methods": {
+    "divider": "または",
+    "passkey": "パスキーでログイン",
+    "hikarinagi": "Hikarinagi ID でログイン",
+    "unsupported": "この端末またはブラウザはパスキーに対応していません",
+    "cancelled": "パスキーの確認が完了しませんでした",
+    "oidcFailed": "Hikarinagi ID でのログインに失敗しました。もう一度お試しください"
+  },
+  "issue": {
+    "adult": "18 歳以上の方のみ登録できます",
+    "mismatch": "パスワードが一致しません"
+  },
+  "reset": {
+    "title": "新しいパスワードを設定",
+    "description": "{email} の新しいパスワードを設定します。ログイン中のすべての端末で再ログインが必要になります。",
+    "password": "新しいパスワード",
+    "confirmation": "新しいパスワード（確認）",
+    "submit": "パスワードを再設定",
+    "done": "パスワードを再設定しました。新しいパスワードでログインしてください。",
+    "signIn": "ログイン",
+    "invalid": "この再設定リンクは無効か、有効期限が切れています",
+    "requestAgain": "再設定メールを再送信"
+  }
+}

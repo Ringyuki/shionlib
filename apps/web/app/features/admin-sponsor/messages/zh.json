@@ -1,0 +1,58 @@
+{
+  "title": "赞助",
+  "everyStatus": "全部",
+  "status": {
+    "DONE": "已完成",
+    "NEW": "未支付",
+    "EXPIRED": "已过期",
+    "REFUND": "已退款"
+  },
+  "figure": {
+    "total": "累计金额",
+    "orders": "已完成的订单",
+    "month": "本月金额",
+    "module": "赞助功能",
+    "open": "已开放",
+    "closed": "已关闭",
+    "unconfigured": "未配置",
+    "openNext": "在<settings>设置</settings>中关闭",
+    "closedNext": "在<settings>设置</settings>中开放",
+    "unconfiguredNext": "在<settings>设置</settings>中配置支付网关"
+  },
+  "anonymous": "匿名",
+  "order": "订单 {number}",
+  "private": "订单 {number}，不公开展示",
+  "narrow": "{amount} · <time></time>",
+  "narrowUnpaid": "{amount}",
+  "empty": "{filtered, select, true {没有这个状态的订单} other {暂无订单}}",
+  "column": {
+    "sponsor": "赞助者",
+    "amount": "金额",
+    "method": "支付方式",
+    "message": "留言",
+    "paid": "支付时间",
+    "status": "状态"
+  },
+  "menu": {
+    "label": "订单 {number} 的操作",
+    "DONE": "标为已完成",
+    "REFUND": "标为已退款",
+    "remove": "删除订单"
+  },
+  "marked": {
+    "DONE": "订单已标为已完成",
+    "REFUND": "订单已标为已退款"
+  },
+  "complete": {
+    "title": "确定要将订单标为已完成吗？",
+    "grants": "订单 {number}，{amount}。{name} 的赞助徽章会按金额延长，之后改为已退款不会收回。",
+    "plain": "订单 {number}，{amount}。这个订单没有关联账号，不会发放赞助徽章。",
+    "confirm": "标为已完成"
+  },
+  "remove": {
+    "title": "确定要删除这个订单吗？",
+    "description": "订单 {number}，{amount}。删除后不可恢复，已发放的赞助徽章不受影响。",
+    "confirm": "删除",
+    "done": "订单已删除"
+  }
+}

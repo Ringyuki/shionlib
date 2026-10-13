@@ -1,0 +1,16 @@
+{
+  "title": "汉化组",
+  "count": "共 {total, number} 个汉化组",
+  "found": "找到 {total, number} 个相符的汉化组",
+  "search": "搜索汉化组名称或别名",
+  "empty": "没有找到与「{query}」相符的汉化组",
+  "none": "暂未收录汉化组",
+  "works": "{count, number} 部作品",
+  "homepage": "主页",
+  "worksTitle": "作品（{count, number}）",
+  "worksLabel": "作品",
+  "noWorks": "暂未收录这个汉化组的作品",
+  "fieldLabel": "汉化组",
+  "fieldPlaceholder": "输入名称搜索或新建",
+  "create": "新建“{name}”"
+}

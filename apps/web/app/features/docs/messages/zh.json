@@ -1,0 +1,13 @@
+{
+  "title": "文档",
+  "contents": "本页目录",
+  "category": {
+    "guides": "指南",
+    "about": "关于",
+    "dev": "开发"
+  },
+  "source": "在 GitHub 上编辑此页",
+  "previous": "上一篇",
+  "next": "下一篇",
+  "menu": "更多操作"
+}

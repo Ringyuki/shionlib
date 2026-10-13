@@ -1,0 +1,15 @@
+{
+  "title": "ブランド",
+  "count": "全 {total, number} ブランド",
+  "found": "{total, number} 件のブランドが一致",
+  "search": "ブランド名または別名で検索",
+  "empty": "「{query}」に一致するブランドは見つかりませんでした",
+  "none": "ブランドはまだ登録されていません",
+  "works": "{count, number} 作品",
+  "website": "公式サイト",
+  "intro": "紹介",
+  "extra": "その他の情報",
+  "worksTitle": "作品（{count, number}）",
+  "worksLabel": "作品",
+  "noWorks": "このブランドの作品はまだ登録されていません"
+}

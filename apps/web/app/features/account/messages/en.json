@@ -1,0 +1,103 @@
+{
+  "change": "Change",
+  "issue": {
+    "mismatch": "The two passwords do not match",
+    "currentCodeFirst": "Send a code to your current email first",
+    "newCodeFirst": "Send a code to the new email first"
+  },
+  "email": {
+    "panel": "Email",
+    "title": "Change email",
+    "description": "Both your current email and the new one need to be verified",
+    "currentCode": "Code from your current email",
+    "currentCodeHint": "The code will be sent to {email}",
+    "codeSent": "A code was sent to {email}",
+    "newEmail": "New email",
+    "newCode": "Code from the new email",
+    "sendCode": "Send code",
+    "resendIn": "Resend in {seconds}s",
+    "cancel": "Cancel",
+    "submit": "Change email",
+    "changed": "Email changed"
+  },
+  "password": {
+    "panel": "Password",
+    "panelHint": "Changing it signs you out on your other devices",
+    "title": "Change password",
+    "old": "Current password",
+    "new": "New password",
+    "confirmation": "New password again",
+    "cancel": "Cancel",
+    "submit": "Change password",
+    "changed": "Password changed"
+  },
+  "passkey": {
+    "title": "Passkeys",
+    "hint": "Sign in with your fingerprint, face or device password instead of typing a password",
+    "add": "Add a passkey",
+    "addDescription": "Your browser will ask you to confirm it is you and save the passkey",
+    "name": "Name",
+    "nameHint": "Optional, to tell devices apart, up to {max} characters",
+    "namePlaceholder": "e.g. MacBook",
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "added": "Passkey added",
+    "unnamed": "Unnamed passkey",
+    "created": "Added {date}",
+    "lastUsed": "Used <time></time>",
+    "neverUsed": "Not used yet",
+    "empty": "No passkeys yet",
+    "remove": "Delete \"{name}\"",
+    "removeConfirm": "Delete the passkey \"{name}\"?",
+    "removeDescription": "You can no longer sign in with it. The passkey saved on the device has to be removed there.",
+    "removeAction": "Delete",
+    "removed": "Passkey deleted",
+    "problem": {
+      "unsupported": "This browser does not support passkeys",
+      "cancelled": "The passkey was not created. Try again."
+    }
+  },
+  "signOut": {
+    "title": "Sign out",
+    "hint": "Signs you out on this device",
+    "action": "Sign out"
+  },
+  "identity": {
+    "title": "Hikarinagi ID",
+    "hint": "Once linked, you can sign in with your Hikarinagi ID",
+    "link": "Link",
+    "linkedAccount": "Linked Hikarinagi ID",
+    "linkedAt": "Linked {date}",
+    "unlink": "Unlink",
+    "lastMethod": "This is your only way to sign in. Set a password or add a passkey before unlinking it.",
+    "unlinkConfirm": "Unlink your Hikarinagi ID?",
+    "unlinkDescription": "You can no longer sign in to this site with this Hikarinagi ID",
+    "cancel": "Cancel",
+    "unlinked": "Unlinked",
+    "linked": "Hikarinagi ID linked",
+    "linkFailed": "Could not link the Hikarinagi ID. Try again",
+    "linkReason": "Reason code: {reason}",
+    "linkError": {
+      "link_conflict": "This Hikarinagi ID is linked to another account",
+      "link_auth": "Your session has ended. Sign in again, then link",
+      "email_unverified": "The email of this Hikarinagi ID is not verified"
+    }
+  },
+  "potato": {
+    "title": "PotatoVN",
+    "hint": "Once linked, game pages show and sync your play records from PotatoVN",
+    "bind": "Link",
+    "unbind": "Unlink",
+    "boundAt": "Linked {date}",
+    "bindTitle": "Link a PotatoVN account",
+    "bindDescription": "Sign in with your PotatoVN user name and password. The password is only used to get an access token and is not stored.",
+    "name": "User name",
+    "password": "Password",
+    "passwordHint": "The password of your PotatoVN account",
+    "cancel": "Cancel",
+    "bound": "PotatoVN account linked",
+    "unbindConfirm": "Unlink PotatoVN?",
+    "unbindDescription": "Play records stop syncing. Your data in PotatoVN is not affected.",
+    "unbound": "Unlinked"
+  }
+}

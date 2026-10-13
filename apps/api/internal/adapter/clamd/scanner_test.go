@@ -1,0 +1,234 @@
+package clamd_test
+
+import (
+	"bufio"
+	"bytes"
+	"encoding/binary"
+	"encoding/json"
+	"io"
+	"net"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/Ringyuki/shionlib/apps/api/internal/adapter/clamd"
+	"github.com/Ringyuki/shionlib/apps/api/internal/scan"
+)
+
+var _ scan.VirusScanner = (*clamd.Scanner)(nil)
+
+type fakeClamd struct {
+	listener net.Listener
+	mu       sync.Mutex
+	received [][]byte
+	command  string
+}
+
+func startFake(t *testing.T, reply func(total int) string, limit int) *fakeClamd {
+	t.Helper()
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	fake := &fakeClamd{listener: listener}
+	t.Cleanup(func() { _ = listener.Close() })
+	go func() {
+		for {
+			conn, err := listener.Accept()
+			if err != nil {
+				return
+			}
+			fake.serve(conn, reply, limit)
+		}
+	}()
+	return fake
+}
+
+func (f *fakeClamd) serve(conn net.Conn, reply func(total int) string, limit int) {
+	defer func() { _ = conn.Close() }()
+	reader := bufio.NewReader(conn)
+	command, err := reader.ReadString(0)
+	if err != nil {
+		return
+	}
+	var data []byte
+	for {
+		var size [4]byte
+		if _, err := io.ReadFull(reader, size[:]); err != nil {
+			return
+		}
+		n := binary.BigEndian.Uint32(size[:])
+		if n == 0 {
+			break
+		}
+		chunk := make([]byte, n)
+		if _, err := io.ReadFull(reader, chunk); err != nil {
+			return
+		}
+		data = append(data, chunk...)
+		if limit > 0 && len(data) > limit {
+			break
+		}
+	}
+	f.mu.Lock()
+	f.command = command
+	f.received = append(f.received, data)
+	f.mu.Unlock()
+	_, _ = conn.Write([]byte(reply(len(data)) + "\x00"))
+}
+
+func (f *fakeClamd) last() (string, []byte) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if len(f.received) == 0 {
+		return f.command, nil
+	}
+	return f.command, f.received[len(f.received)-1]
+}
+
+func TestCleanStream(t *testing.T) {
+	fake := startFake(t, func(int) string { return "stream: OK" }, 0)
+	logDir := t.TempDir()
+	scanner := clamd.New(clamd.Options{Address: fake.listener.Addr().String(), Timeout: 5 * time.Second, LogDir: logDir, ChunkSize: 3})
+	path := "game/bin/setup.exe"
+	report, err := scanner.Scan(t.Context(), path, strings.NewReader("hello world"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	command, data := fake.last()
+	if command != "zINSTREAM\x00" || string(data) != "hello world" {
+		t.Fatalf("server saw %q %q", command, data)
+	}
+	if report.Infected || len(report.Viruses) != 0 || report.LogExcerpt != nil {
+		t.Fatalf("unexpected report %+v", report)
+	}
+	var result map[string]any
+	if err := json.Unmarshal(report.Result, &result); err != nil {
+		t.Fatal(err)
+	}
+	if result["file"] != path || result["isInfected"] != false || len(result["viruses"].([]any)) != 0 {
+		t.Fatalf("unexpected result %s", report.Result)
+	}
+	if report.LogPath == nil || *report.LogPath != filepath.Join(logDir, "clamav-scan.log") {
+		t.Fatalf("unexpected log path %v", report.LogPath)
+	}
+	logged, err := os.ReadFile(*report.LogPath)
+	if err != nil || !strings.Contains(string(logged), path+": stream: OK") {
+		t.Fatalf("log %q %v", logged, err)
+	}
+}
+
+func TestInfectedStream(t *testing.T) {
+	fake := startFake(t, func(int) string { return "stream: Eicar-Test-Signature FOUND" }, 0)
+	scanner := clamd.New(clamd.Options{Address: fake.listener.Addr().String(), Timeout: 5 * time.Second, LogDir: t.TempDir()})
+	path := "setup.exe"
+	report, err := scanner.Scan(t.Context(), path, strings.NewReader("X5O!P%@AP"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !report.Infected || len(report.Viruses) != 1 || report.Viruses[0] != "Eicar-Test-Signature" {
+		t.Fatalf("unexpected report %+v", report)
+	}
+	if string(report.Result) != `{"file":"`+path+`","isInfected":true,"viruses":["Eicar-Test-Signature"]}` {
+		t.Fatalf("unexpected result %s", report.Result)
+	}
+	if report.LogExcerpt == nil || !strings.Contains(*report.LogExcerpt, "Eicar-Test-Signature FOUND") {
+		t.Fatalf("unexpected excerpt %v", report.LogExcerpt)
+	}
+}
+
+func TestErrorReplies(t *testing.T) {
+	fake := startFake(t, func(int) string { return "INSTREAM size limit exceeded. ERROR" }, 4)
+	scanner := clamd.New(clamd.Options{Address: fake.listener.Addr().String(), Timeout: 5 * time.Second, LogDir: t.TempDir(), ChunkSize: 2})
+	_, err := scanner.Scan(t.Context(), "big.exe", strings.NewReader(strings.Repeat("a", 64)))
+	if err == nil || !strings.Contains(err.Error(), "size limit exceeded") {
+		t.Fatalf("expected a size limit error, got %v", err)
+	}
+	unreachable := clamd.New(clamd.Options{Address: "127.0.0.1:1", Timeout: time.Second})
+	if _, err := unreachable.Scan(t.Context(), "x.exe", strings.NewReader("x")); err == nil {
+		t.Fatal("dial failures must be errors")
+	}
+}
+
+func TestReplyWaitGrowsWithTheStreamedSize(t *testing.T) {
+	slow := func(int) string {
+		time.Sleep(400 * time.Millisecond)
+		return "stream: OK"
+	}
+	small := startFake(t, slow, 0)
+	scanner := clamd.New(clamd.Options{Address: small.listener.Addr().String(), Timeout: 200 * time.Millisecond, LogDir: t.TempDir()})
+	if _, err := scanner.Scan(t.Context(), "small.exe", strings.NewReader("x")); err == nil {
+		t.Fatal("a small stream waits only the base timeout")
+	}
+	large := startFake(t, slow, 0)
+	scanner = clamd.New(clamd.Options{Address: large.listener.Addr().String(), Timeout: 200 * time.Millisecond, LogDir: t.TempDir()})
+	if _, err := scanner.Scan(t.Context(), "data.cab", bytes.NewReader(make([]byte, 5<<20))); err != nil {
+		t.Fatalf("a larger stream waits longer for its reply: %v", err)
+	}
+	if scanner.MaxSize() != 4000<<20 {
+		t.Fatalf("the limit matches clamd.conf: %d", scanner.MaxSize())
+	}
+}
+
+func TestUnexpectedReply(t *testing.T) {
+	fake := startFake(t, func(int) string { return "stream: something odd" }, 0)
+	scanner := clamd.New(clamd.Options{Address: fake.listener.Addr().String(), Timeout: 5 * time.Second, LogDir: t.TempDir()})
+	if _, err := scanner.Scan(t.Context(), "x.exe", strings.NewReader("x")); err == nil {
+		t.Fatal("unexpected replies must fail")
+	}
+}
+
+func at(year int, month time.Month, day, hour, minute, second int) *time.Time {
+	value := time.Date(year, month, day, hour, minute, second, 0, time.UTC)
+	return &value
+}
+
+func TestEngineReportsTheVersionAndTheDateOfTheSignatures(t *testing.T) {
+	for reply, want := range map[string]scan.Engine{
+		"ClamAV 1.4.3/27800/Wed Nov 26 09:30:45 2025": {Name: "ClamAV 1.4.3", SignaturesAt: at(2025, 11, 26, 9, 30, 45)},
+		"ClamAV 1.4.3/27712/Sat Oct  4 08:25:01 2025": {Name: "ClamAV 1.4.3", SignaturesAt: at(2025, 10, 4, 8, 25, 1)},
+		"ClamAV 1.0.9": {Name: "ClamAV 1.0.9"},
+	} {
+		listener, err := net.Listen("tcp", "127.0.0.1:0")
+		if err != nil {
+			t.Fatal(err)
+		}
+		commands := make(chan string, 1)
+		go func() {
+			conn, err := listener.Accept()
+			if err != nil {
+				return
+			}
+			defer func() { _ = conn.Close() }()
+			command, _ := bufio.NewReader(conn).ReadString(0)
+			commands <- command
+			_, _ = conn.Write([]byte(reply + "\x00"))
+		}()
+		got, err := clamd.New(clamd.Options{Address: listener.Addr().String(), Timeout: 5 * time.Second}).Engine(t.Context())
+		_ = listener.Close()
+		if err != nil {
+			t.Fatalf("%s: %v", reply, err)
+		}
+		if command := <-commands; command != "zVERSION\x00" {
+			t.Fatalf("unexpected command %q", command)
+		}
+		if got.Name != want.Name || (got.SignaturesAt == nil) != (want.SignaturesAt == nil) || (want.SignaturesAt != nil && !got.SignaturesAt.Equal(*want.SignaturesAt)) {
+			t.Fatalf("%s: got %+v", reply, got)
+		}
+	}
+}
+
+func TestEngineReportsAScannerThatDoesNotAnswer(t *testing.T) {
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	address := listener.Addr().String()
+	_ = listener.Close()
+	if _, err := clamd.New(clamd.Options{Address: address, Timeout: time.Second}).Engine(t.Context()); err == nil {
+		t.Fatal("expected a failure")
+	}
+}

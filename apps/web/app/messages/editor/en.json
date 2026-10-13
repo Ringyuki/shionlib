@@ -1,0 +1,16 @@
+{
+  "toolbar": "Formatting",
+  "tool": {
+    "bold": "Bold",
+    "spoiler": "Spoiler",
+    "link": "Link"
+  },
+  "confirm": "Confirm",
+  "linkAddress": "Link address",
+  "linkAddressHint": "Enter the link address",
+  "linkOpen": "Open in a new tab",
+  "linkRemove": "Remove link",
+  "issue": {
+    "address": "Enter an address that starts with http, https or mailto"
+  }
+}

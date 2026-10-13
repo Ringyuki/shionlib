@@ -1,0 +1,58 @@
+{
+  "title": "设置",
+  "signIn": "登录后可以修改账号设置",
+  "signInAction": "登录",
+  "sectionsLabel": "设置分区",
+  "section": {
+    "personal": "个人资料",
+    "security": "账号安全",
+    "connections": "关联账号",
+    "download": "下载",
+    "site": "站点偏好"
+  },
+  "site": {
+    "language": "界面语言",
+    "languageHint": "同时用于发送给你的邮件",
+    "theme": "主题",
+    "themeHint": "仅保存在当前浏览器中",
+    "themes": {
+      "system": "跟随系统",
+      "light": "浅色",
+      "dark": "深色"
+    },
+    "contentLimit": "成人内容",
+    "contentLimitHint": "决定带有成人内容的游戏和图片如何显示",
+    "contentLimits": {
+      "1": {
+        "label": "隐藏",
+        "description": "不显示带有成人内容的游戏和图片"
+      },
+      "2": {
+        "label": "遮罩",
+        "description": "显示游戏，图片默认遮住，点击后查看"
+      },
+      "3": {
+        "label": "显示",
+        "description": "直接显示全部内容"
+      }
+    },
+    "games": "游戏列表",
+    "onlyWithResources": "仅显示有资源的游戏",
+    "onlyWithResourcesHint": "作为游戏库和搜索的默认设置，可以在每次浏览时临时更改",
+    "profiles": "个人主页",
+    "showBackgrounds": "显示其他用户的页面背景",
+    "showBackgroundsHint": "关闭后，其他用户的个人主页使用站点的默认背景"
+  },
+  "personal": {
+    "name": "用户名",
+    "nameHint": "用于登录，并显示在你上传的资源和发表的内容旁",
+    "nameLimit": "最多 {max} 字",
+    "nameAvailable": "该用户名可以使用",
+    "nameTaken": "该用户名已被使用",
+    "nameSaved": "用户名已修改",
+    "profile": "个人主页",
+    "profileHint": "头像、头图、简介和页面背景在个人主页上修改",
+    "openProfile": "前往个人主页",
+    "save": "保存"
+  }
+}

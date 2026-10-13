@@ -1,0 +1,144 @@
+---
+title: How to Download Games
+banner: 'https://images.yurari.moe/galgame/10702/8hxs6nc5_2.jpg'
+description: "Learn about Shionlib's download system: understanding platform/language/engine tags, passing the human verification to get download links, using browser download or aria2 push, verifying file hashes, and handling common issues."
+date: 2026-02-27
+order: 1
+author_uid: 1
+author_name: 'ringyuki'
+author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
+---
+
+## Finding resources
+
+Open the page of any game. The **Downloads** tab, which is shown by default, lists all available resources for that game. Clicking the **Download** button near the top of the page also takes you to this list.
+
+When there are many resources, the list can be filtered by platform above it.
+
+![The Downloads tab of a game page and its resource cards](/assets/images/download-games/en/resources@2x.webp)
+
+> All resources are uploaded by community members. Please verify file safety on your own.
+
+## Reading the tags on a resource card
+
+Each resource card displays a number of tags that describe what the resource applies to:
+
+### Platform
+
+Indicates the platforms the resource runs on, such as **Windows**, **Android**, **iOS** and **PS Vita**.
+
+A card may show several platforms at once, meaning that its files contain builds for multiple platforms or that the resource runs cross-platform.
+
+### Language
+
+Indicates the language of the game or patch:
+
+| Tag                 | Meaning                                |
+| ------------------- | -------------------------------------- |
+| Japanese            | Japanese (original or Japanese patch)  |
+| Simplified Chinese  | Simplified Chinese translation         |
+| Traditional Chinese | Traditional Chinese translation        |
+| English             | English version or English translation |
+
+### Engine (Android / iOS only)
+
+Shown only when the platform is Android or iOS. Indicates the game engine the resource uses, to help you choose a suitable emulator:
+
+| Tag             | Engine                                      |
+| --------------- | ------------------------------------------- |
+| KiriKiri (KRKR) | KiriKiri/KRKRZ engine                       |
+| ONScripter      | ONScripter engine                           |
+| Artemis         | Artemis Engine                              |
+| Other           | Other engines; refer to the resource's note |
+
+![A resource card that names its engine](/assets/images/download-games/en/engine@2x.webp)
+
+For the emulators that match each engine, see [Common Engines and Emulator Mapping](/en/docs/guides/common-vn-engines-and-emulators).
+
+### Note
+
+Some resources come with a note written by the uploader, describing the version, the contents or special points to be aware of. Reading it before downloading is recommended.
+
+## File entries
+
+Each resource card may contain one or more file entries. Each entry shows:
+
+- **File name and size** — confirm that you are downloading the correct file
+- **Checksum** — used to verify file integrity after download
+- **File status** — see below
+
+The volumes of a split archive are listed together in order, and all of them must be downloaded before the archive can be extracted.
+
+Clicking a resource card opens the resource page, where **Contents** lists the files inside the archive and **Details** lists the full checksums and check results of every file.
+
+![The page of a resource, listing the files inside the archive](/assets/images/download-games/en/resource-page@2x.webp)
+
+### File status
+
+Most files carry no mark and can be downloaded directly. Files with one of the following marks need attention:
+
+| Mark                | Meaning                                                                                              |
+| ------------------- | ---------------------------------------------------------------------------------------------------- |
+| May contain malware | The virus scan flagged the file, and an administrator released it after review; it can be downloaded |
+| Blocked             | The virus scan detected a virus; the file cannot be downloaded                                       |
+
+A newly uploaded resource is published only after it passes the checks. The states during the checks (Checking, Waiting for volumes, Saving, Awaiting review and so on) are visible only to the uploader; see [How to Upload Game Files](/en/docs/guides/upload-game-files).
+
+## Downloading a file
+
+Click the **Download** button on the right of a file entry to start downloading. Before the download, the page runs a human verification automatically; it usually takes only a few seconds and requires no action. The download link is generated only after the verification passes.
+
+> Download links are time-limited: the larger the file, the longer the link stays valid, and the exact duration is shown when you copy the link. Complete the download while the link is valid; after the link expires, simply click download again.
+
+### Browser download
+
+By default, the **Download** button downloads directly through the browser, which suits most users.
+
+### Push download
+
+Clicking the arrow to the right of the **Download** button opens the **Other ways to download** menu, which lists every method currently available. Choose one of them to hand the download over to the corresponding client.
+
+![The menu of other ways to download](/assets/images/download-games/en/download-menu@2x.webp)
+
+| Push target      | Description                                                                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **aria2**        | Pushes to an aria2 download manager running on this computer or on your local network                                                       |
+| **LunaBox**      | Hands the download to LunaBox through the `lunabox://` protocol, to be downloaded and managed there                                         |
+| **ReinaManager** | Hands the download to ReinaManager through the `reinamanager://` protocol, to be downloaded and managed there                               |
+| **PotatoVN**     | Hands the download to PotatoVN (requires the PotatoDownload plugin) through the `potato-vn://` protocol, to be downloaded and managed there |
+
+**Copy download link** in the menu lets you hand the link to another download tool.
+
+Before using aria2, fill in the connection details (RPC address, RPC secret, Save to) in **Settings → Downloads** and click **Test connection** to confirm that aria2 can be reached. When a push fails, the page shows the reason and lets you use the browser download instead; **Download settings** at the bottom of the menu also opens these settings directly.
+
+![The aria2 connection in the download settings](/assets/images/account-settings/en/aria2@2x.webp)
+
+LunaBox, ReinaManager and PotatoVN can each be switched on or off in **Settings → Downloads**; once switched off, they no longer appear in the menu. On the same page you can also set any of the methods as the default download method, after which clicking the **Download** button uses it directly.
+
+Download settings are saved in the current browser only and are not synced with your account.
+
+## Verifying the file hash
+
+After the download completes, comparing the hash of the file is recommended to confirm its integrity:
+
+1. Click the copy button beside the checksum in the file entry to copy the full hash value
+2. Calculate the hash of the downloaded file with a system tool or third-party software
+3. Compare the two values; if they are identical, the file is intact
+
+Shionlib currently supports two hash algorithms, **SHA-256** and **BLAKE3**. The algorithm used is stated before the checksum.
+
+## False-positive virus mark
+
+If a file entry shows the **"May contain malware"** mark, the automated scan once detected a suspected virus signature, but an administrator reviewed it, judged it a **false positive** and released the file manually.
+
+The explanation beside the mark shows the names of the viruses detected by the scan, for your reference.
+
+> Visual novel games (especially those using engines such as KiriKiri) are **highly prone to false positives from antivirus software** because of the way they are packaged. Once you have confirmed that the source is trustworthy, you can download them with confidence.
+
+## Change history
+
+Open the resource page and switch to the **History** tab to see every change made to the resource since it was published, including replaced files and the reasons, added or removed files, renames, and changes to information such as platforms and languages.
+
+## Reporting a resource
+
+If you find a problem with a resource (for example it contains a virus, its content does not match the game, or a file cannot be downloaded), click the **<Ellipsis />** menu on the resource card, choose **Report** and fill in the reason. Reporting requires signing in, and malicious reports will be dealt with accordingly.

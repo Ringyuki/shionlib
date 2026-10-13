@@ -1,0 +1,93 @@
+---
+title: Resource Maintenance Guide
+banner: 'https://images.yurari.moe/galgame/10703/oj9cfsty_2.jpg'
+description: 'Learn how to maintain game download resources on Shionlib: editing resource information, adding and replacing files, viewing the change history, and recommended conventions for the replacement reason.'
+date: 2026-02-27
+order: 9
+author_uid: 1
+author_name: 'ringyuki'
+author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
+---
+
+## Who can maintain resources
+
+A resource is maintained by its uploader and by administrators, from three places: the resource card on the game page, the resource page, and the **My uploads** page, which lists only the resources you uploaded.
+
+The **<Ellipsis />** menu in the top-right corner of a resource card applies to the whole resource. The actions visible to you depend on your permissions:
+
+- **History** — shows the replacement records of the files; visible to everyone
+- **Edit resource**, **Add files** — only the uploader or an administrator can use them
+- **Report** — visible to users other than the uploader
+
+![What the uploader sees in the menu of a resource card](/assets/images/resource-maintenance/en/resource-menu@2x.webp)
+
+**Replace file**, **Rename** and **Remove**, which apply to a single file, are in the **<Ellipsis />** menu at the end of each file's row on the resource card, and are likewise visible only to the uploader or an administrator.
+
+![The menu at the end of a file’s row](/assets/images/resource-maintenance/en/file-menu@2x.webp)
+
+On the resource page and the **My uploads** page, the file actions are also inside the resource's **<Ellipsis />** menu: when the resource has several files, click the name of the file first, then choose the action.
+
+## Editing resource information
+
+Click **<Ellipsis />** → **Edit resource** to change the descriptive information of the resource, without touching the files themselves:
+
+- **Platforms** — applicable platforms (choose at least one), multiple choices allowed
+- **Languages** — languages of the resource (choose at least one), multiple choices allowed
+- **Engine** — required when the platforms include Android or iOS; indicates which kind of emulator the resource needs to run
+- **Note** — a supplementary note on the resource (optional), such as the version number, the contents or special requirements
+
+![Editing the information of a resource](/assets/images/resource-maintenance/en/edit-resource@2x.webp)
+
+Save when you have finished; the changes take effect immediately.
+
+## Managing the files in a resource
+
+A resource can contain multiple files.
+
+- **Add files** — in the resource's **<Ellipsis />** menu; adds new files to the resource, for example a missing volume. Until the new files pass the checks, the files already in the resource are not affected.
+- **Rename** — in the file's **<Ellipsis />** menu; changes the name of the file.
+- **Remove** — in the file's **<Ellipsis />** menu; deletes the file from the resource, and a deleted file cannot be restored. When a resource has only one file, it cannot be removed.
+
+## Re-uploading (replacing a file)
+
+When the original file needs to be updated, use the replace feature to update the current file.
+
+Click the file's **<Ellipsis />** menu and choose **Replace file**. A file that is still being checked or saved cannot be replaced.
+
+> Replacing puts the new file in place of the current one. The old file will be deleted, and this action cannot be undone.
+
+**Steps:**
+
+1. Describe this update in the **Reason for replacing** field
+2. Select the new file and start the upload
+3. After the upload completes, the new file goes through the checks and takes the place of the original file once it passes
+
+![Replacing a file and giving the reason](/assets/images/resource-maintenance/en/replace-file@2x.webp)
+
+### Conventions for the replacement reason
+
+Write a concise description to help downloaders understand what this update contains. Recommended formats:
+
+- `Version update: v1.0 → v1.1`
+- `Localization patch update: fixed several translation issues`
+- `Merged localization patch, no separate installation needed`
+- `Fixed corrupted file, re-download recommended`
+
+The replacement reason ends up in the change history, so please fill it in carefully.
+
+## Change history
+
+Open the resource page and switch to the **History** tab to see all changes made to the resource since it was published.
+
+Each record contains:
+
+- The type of change: publishing the resource, replacing a file, renaming a file, adding a file, removing a file, or editing the resource information
+- The files involved, and the content before and after the change
+- The replacement reason (if one was given)
+- The operator and the time
+
+**History** in the **<Ellipsis />** menu of a resource card, by contrast, lists only the records of replaced files.
+
+## Deleting a resource
+
+Uploaders can remove files from a resource, but cannot delete the whole resource. When a whole resource needs to be deleted, contact an administrator.

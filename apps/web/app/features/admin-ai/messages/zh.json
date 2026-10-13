@@ -1,0 +1,176 @@
+{
+  "title": "AI 网关",
+  "tabs": {
+    "label": "AI 网关的页面",
+    "overview": "概览",
+    "providers": "渠道",
+    "models": "模型",
+    "scenes": "场景",
+    "requests": "日志",
+    "playground": "调试"
+  },
+  "readOnly": "只有超级管理员可以更改 AI 网关的配置",
+  "range": {
+    "label": "时间范围",
+    "1h": "1 小时",
+    "24h": "24 小时",
+    "7d": "7 天",
+    "30d": "30 天"
+  },
+  "unit": {
+    "ms": "{value} ms",
+    "s": "{value} s"
+  },
+  "stat": {
+    "requests": "请求",
+    "failureRate": "失败率",
+    "firstToken": "首字耗时",
+    "cost": "费用"
+  },
+  "health": {
+    "fine": "{active, number} 条正常",
+    "fineOf": "{active, number} 条正常，共 {total, number} 条",
+    "suspended": "{suspended, number} 条暂停，共 {total, number} 条",
+    "off": "已停用，共 {total, number} 条",
+    "empty": "没有线路"
+  },
+  "errorKind": {
+    "auth": "密钥无效",
+    "quota": "额度不足",
+    "not_found": "模型不存在",
+    "protocol": "协议不支持",
+    "param": "参数不支持",
+    "structured": "不支持结构化输出",
+    "rate_limit": "请求过于频繁",
+    "upstream": "上游出错",
+    "network": "网络错误",
+    "timeout": "超时",
+    "malformed": "输出无法解析",
+    "truncated": "输出被截断",
+    "other": "其他错误"
+  },
+  "source": {
+    "check": "线路检测",
+    "playground": "调试"
+  },
+  "kind": {
+    "compatible": "OpenAI 兼容",
+    "openai": "OpenAI",
+    "anthropic": "Anthropic",
+    "google": "Google"
+  },
+  "capability": {
+    "moderation": "审核",
+    "reasoning": "推理",
+    "vision": "图像"
+  },
+  "price": {
+    "free": "免费",
+    "perMillion": "输入 {input} · 输出 {output}"
+  },
+  "overview": {
+    "compare": {
+      "none": "前 {range}没有请求",
+      "more": "比前 {range}多 {share}",
+      "less": "比前 {range}少 {share}",
+      "same": "与前 {range}相同",
+      "was": "前 {range}为 {value}"
+    },
+    "requests": {
+      "title": "请求",
+      "ok": "成功",
+      "failed": "失败"
+    },
+    "costs": {
+      "title": "费用",
+      "others": "其他模型",
+      "empty": "这段时间内没有产生费用"
+    },
+    "scenes": {
+      "title": "场景",
+      "empty": "没有场景",
+      "column": {
+        "scene": "场景",
+        "model": "模型",
+        "requests": "请求",
+        "failureRate": "失败率",
+        "cost": "费用"
+      }
+    },
+    "providers": {
+      "title": "渠道",
+      "empty": "尚未添加渠道",
+      "column": {
+        "provider": "渠道",
+        "routes": "线路",
+        "requests": "请求",
+        "failureRate": "失败率",
+        "firstToken": "首字耗时"
+      }
+    },
+    "failures": {
+      "title": "最近的失败",
+      "all": "全部日志",
+      "empty": "这段时间内没有失败的请求",
+      "column": {
+        "time": "时间",
+        "scene": "场景",
+        "model": "模型与渠道",
+        "kind": "错误类型",
+        "message": "上游返回的内容"
+      }
+    }
+  },
+  "scenes": {
+    "label": "场景",
+    "empty": "没有场景",
+    "column": {
+      "scene": "场景",
+      "output": "输出",
+      "model": "模型",
+      "status": "状态",
+      "requests": "请求（24 小时）",
+      "failureRate": "失败率",
+      "cost": "费用"
+    },
+    "output": {
+      "object": "结构化对象",
+      "text": "文本",
+      "moderation": "审核结果"
+    },
+    "modelLabel": "{scene}使用的模型",
+    "followDefault": "跟随默认模型（{name}）",
+    "noDefault": "跟随默认模型（尚未设置）",
+    "status": {
+      "fine": "正常",
+      "thin": "只剩 {active, number} 条可用线路",
+      "thinNote": "{names} 的线路已暂停",
+      "separator": "、",
+      "no_model": "没有可用的模型",
+      "no_route": "没有可用的线路",
+      "wrong_output": "模型不支持这种输出"
+    },
+    "adjust": "调整{scene}的参数",
+    "changed": "「{scene}」已改用 {model}",
+    "follows": "「{scene}」已改为跟随默认模型",
+    "note": "场景由程序定义，不能新建或删除。没有可用模型的场景不调用 AI：内容审核会直接放行。",
+    "pane": {
+      "model": "模型",
+      "params": "参数",
+      "accepts": {
+        "object": "不能选择审核模型",
+        "text": "不能选择审核模型",
+        "moderation": "只能选择审核模型"
+      },
+      "temperature": "温度",
+      "maxTokens": "最大输出 token",
+      "modelDefault": "使用模型的默认值",
+      "timeout": "超时",
+      "siteDefault": "默认",
+      "seconds": "秒",
+      "timeoutHint": "在这段时间内没有收到任何内容即视为超时，改用下一条线路",
+      "save": "保存",
+      "saved": "已保存「{scene}」的参数"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "toolbar": "書式",
+  "tool": {
+    "bold": "太字",
+    "spoiler": "ネタバレ",
+    "link": "リンク"
+  },
+  "confirm": "確定",
+  "linkAddress": "リンク先",
+  "linkAddressHint": "リンク先を入力",
+  "linkOpen": "新しいタブで開く",
+  "linkRemove": "リンクを解除",
+  "issue": {
+    "address": "http、https または mailto で始まるアドレスを入力してください"
+  }
+}

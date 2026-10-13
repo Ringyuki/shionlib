@@ -1,0 +1,66 @@
+{
+  "sponsor": "スポンサー",
+  "admin": "管理者",
+  "banned": "利用停止中",
+  "joined": "{date}に登録",
+  "coverOf": "{name}のヘッダー画像",
+  "avatarOf": "{name}のアイコン",
+  "nothing": "公開されているコンテンツはありません",
+  "tabs": {
+    "label": "ユーザーのコンテンツ",
+    "uploads": "アップロード",
+    "favorites": "お気に入り",
+    "comments": "コメント",
+    "walkthroughs": "攻略",
+    "manageUploads": "アップロードを管理",
+    "manageFavorites": "お気に入りを管理"
+  },
+  "uploads": {
+    "label": "アップロードしたリソース",
+    "otherFiles": "ほか {count, number} 件",
+    "downloads": "{count, number} 回ダウンロード",
+    "empty": "このユーザーはまだリソースをアップロードしていません",
+    "emptyOwn": "まだリソースをアップロードしていません",
+    "upload": "リソースをアップロード"
+  },
+  "edit": {
+    "open": "プロフィールを編集",
+    "title": "プロフィールを編集",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "saved": "プロフィールを保存しました",
+    "cover": {
+      "current": "現在のヘッダー画像",
+      "upload": "ヘッダー画像をアップロード",
+      "change": "ヘッダー画像を変更",
+      "remove": "ヘッダー画像を削除"
+    },
+    "avatar": {
+      "current": "現在のアイコン",
+      "upload": "アイコンをアップロード",
+      "change": "アイコンを変更"
+    },
+    "bio": "自己紹介",
+    "bioCount": "{count, number} / {max, number}",
+    "background": {
+      "label": "ページの背景",
+      "hint": "プロフィールページのコンテンツの後ろに表示されます。スマートフォンでは表示されません",
+      "current": "現在のページの背景",
+      "upload": "画像をアップロード",
+      "change": "変更",
+      "remove": "削除"
+    },
+    "account": "ユーザー名、メールアドレス、パスワードは<link>アカウント設定</link>で変更します",
+    "crop": {
+      "avatar": "アイコンを切り抜く",
+      "cover": "ヘッダー画像を切り抜く",
+      "background": "ページの背景を切り抜く"
+    },
+    "unsupported": "JPEG、PNG、WebP、AVIF 形式の画像のみ対応しています",
+    "discard": {
+      "title": "保存していない変更を破棄しますか？",
+      "confirm": "変更を破棄",
+      "cancel": "編集を続ける"
+    }
+  }
+}

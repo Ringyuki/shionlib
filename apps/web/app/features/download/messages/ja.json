@@ -1,0 +1,91 @@
+{
+  "download": "ダウンロード",
+  "methods": "ほかのダウンロード方法",
+  "via": {
+    "browser": "ブラウザでダウンロード",
+    "aria2": "aria2 に送る",
+    "lunabox": "LunaBox に送る",
+    "reina": "ReinaManager に送る",
+    "potatovn": "PotatoVN に送る"
+  },
+  "needsBangumi": "このゲームには Bangumi ID がありません",
+  "copyLink": "ダウンロードリンクをコピー",
+  "openSettings": "ダウンロード設定",
+  "verifying": "ロボットでないことを確認しています",
+  "verifyingHint": "確認が済むと自動で始まります",
+  "verification": {
+    "unavailable": "現在、確認を行えません。しばらくしてから再試行してください。",
+    "blocked": "このブラウザ環境は確認を通過できませんでした",
+    "failed": "確認に失敗しました。再試行してください。"
+  },
+  "problem": "エラーコード：{code}",
+  "aria2": {
+    "sent": "aria2 に送りました",
+    "unreachable": "aria2（{endpoint}）に接続できません。設定を確認してください",
+    "unauthorized": "aria2 がシークレットを拒否しました。設定を確認してください",
+    "rejected": "aria2 がタスクを受け付けませんでした：{message}"
+  },
+  "manager": {
+    "sent": "ダウンロードを {name} に渡しました",
+    "hint": "{name} が起動しない場合は、インストールされているか確認してください"
+  },
+  "useBrowser": "ブラウザでダウンロード",
+  "copied": "リンクをコピーしました（{minutes} 分間有効）",
+  "copyReady": "リンクを発行しました（{minutes} 分間有効）",
+  "copy": "コピー",
+  "asDefault": "{label}（既定）",
+  "preferences": {
+    "title": "ダウンロード設定",
+    "done": "完了",
+    "local": "ダウンロード設定はこのブラウザにのみ保存され、アカウントには同期されません",
+    "method": "既定のダウンロード方法",
+    "methods": {
+      "browser": {
+        "label": "ブラウザ",
+        "description": "ブラウザがファイルを直接ダウンロードします"
+      },
+      "aria2": {
+        "label": "aria2 に送信",
+        "description": "このパソコンまたはローカルネットワーク上の aria2 にダウンロードを送ります"
+      },
+      "lunabox": {
+        "label": "LunaBox に送る",
+        "description": "ダウンロードを LunaBox に渡します"
+      },
+      "reina": {
+        "label": "ReinaManager に送る",
+        "description": "ダウンロードを ReinaManager に渡します。Bangumi ID のないゲームはブラウザでダウンロードします。"
+      },
+      "potatovn": {
+        "label": "PotatoVN に送る",
+        "description": "ダウンロードを PotatoVN に渡します。Bangumi ID のないゲームはブラウザでダウンロードします。"
+      }
+    },
+    "managers": "ゲーム管理ツール",
+    "managersHint": "オンにした管理ツールがダウンロードメニューに表示されます。あらかじめパソコンにインストールしておく必要があります。",
+    "manager": {
+      "lunabox": "ファイルのダウンロード、検証、展開ができるビジュアルノベル管理ツール。Windows のみ対応。",
+      "reina": "ダウンロードを受け取ってライブラリに追加するビジュアルノベル管理ツール。Bangumi ID のあるゲームのみ対応。",
+      "potatovn": "ビジュアルノベル管理ツール。PotatoDownload プラグインが必要です。Windows のみ、Bangumi ID のあるゲームのみ対応。"
+    },
+    "showManager": "ダウンロードメニューに {name} を表示",
+    "aria2": "aria2",
+    "aria2Hint": "あらかじめ aria2 の RPC を有効にし、このサイトからのクロスオリジン要求を許可してください。変更はすぐに反映されます。",
+    "endpoint": "RPC アドレス",
+    "endpointHint": "aria2 の JSON-RPC アドレスです",
+    "secret": "RPC シークレット",
+    "secretHint": "シークレットを設定していない場合は空欄にします",
+    "directory": "保存先",
+    "directoryHint": "任意。空欄の場合は aria2 の既定のディレクトリを使用します。",
+    "test": "接続をテスト",
+    "reachable": "接続できました。aria2 のバージョンは {version} です。",
+    "unreachable": {
+      "unreachable": "aria2 に接続できません。アドレスと、aria2 が起動していてクロスオリジン要求を許可しているかを確認してください。",
+      "unauthorized": "aria2 がシークレットを拒否しました。RPC シークレットを確認してください。",
+      "rejected": "aria2 がエラーを返しました：{message}"
+    },
+    "issue": {
+      "endpoint": "http://127.0.0.1:6800/jsonrpc のように完全なアドレスを入力してください"
+    }
+  }
+}

@@ -1,0 +1,118 @@
+---
+title: Account Settings Guide
+banner: 'https://images.yurari.moe/galgame/11139/sh894rq8_2.webp'
+description: 'Learn how to manage your Shionlib account: changing your user name and avatar, updating your password and email, setting up passkeys, linking accounts, and configuring download options and site preferences.'
+date: 2026-02-27
+order: 12
+author_uid: 1
+author_name: 'ringyuki'
+author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
+---
+
+The settings page is opened from **Settings** in the sidebar and is divided into five sections: Profile, Security, Connected accounts, Downloads and Preferences.
+
+## Profile
+
+### Changing your user name
+
+Change it in the user name field on the **Profile** page, up to 20 characters. While you type, the page tells you whether the user name is available. Click **Save** after changing it.
+
+![The profile section of the settings](/assets/images/account-settings/en/personal@2x.webp)
+
+### Changing your avatar, banner and bio
+
+Your avatar, banner, bio and page background are changed on your profile. Open your profile and click **Edit profile**; after you choose a picture, a crop tool appears, and once the cropping is done, click **Save** to apply the change.
+
+## Security
+
+![The security section of the settings](/assets/images/account-settings/en/security@2x.webp)
+
+### Changing your password
+
+On the **Security** page, click **Change** in the password row and enter your current password and a new password. Requirements for the new password:
+
+- At least 8 characters
+- Contains an uppercase letter, a lowercase letter, and a digit or symbol
+
+After a successful change, you are signed out on your other devices and need to sign in again there. If you have forgotten your current password, click **Forgot password?** in the sign-in dialog and reset your password through the link in the email.
+
+### Changing your email
+
+Changing your email requires verifying both your current email and the new one:
+
+1. Send a verification code to your current email and enter it
+2. Enter the new email address, send a verification code to the new email and enter it, then confirm the change
+
+### Passkeys
+
+A passkey is a way to sign in without a password, using your device's biometrics (fingerprint, facial recognition) or device password for verification.
+
+**Adding a passkey:**
+
+1. Click **Add a passkey** and optionally enter a name (up to 128 characters) to make it easy to identify
+2. Your browser shows a verification request; follow the prompts to complete the verification
+3. After successful verification, the passkey is saved automatically and appears in the list
+
+**Managing existing passkeys:**
+
+Each passkey in the list shows its name, the time it was added and the time it was last used. Click the delete button to remove a passkey; the removal takes effect after you confirm it.
+
+> If your browser or device does not support WebAuthn, this feature will not be available.
+
+## Connected accounts
+
+Manage the links between your account and other services:
+
+- **Hikarinagi ID** — once linked, you can sign in with your Hikarinagi ID. While it is your only way to sign in, it cannot be unlinked; set a password or add a passkey first.
+- **PotatoVN** — links your PotatoVN account. The password you enter is only used to request an access credential from PotatoVN and is not stored on this site; removing the link deletes none of your data on PotatoVN.
+
+![The connected accounts section of the settings](/assets/images/account-settings/en/connections@2x.webp)
+
+## Downloads
+
+Choose the default download method and configure the targets of push downloads.
+
+![The default download method and the game managers](/assets/images/account-settings/en/download@2x.webp)
+
+Under **Game managers**, LunaBox, ReinaManager and PotatoVN can each be switched on or off; once switched on, they appear in the download menu.
+
+The **aria2** part is for configuring the aria2 download client, so that game resources can be pushed to an aria2 running on this computer or on your local network:
+
+| Field       | Description                                                            |
+| ----------- | ---------------------------------------------------------------------- |
+| RPC address | The JSON-RPC address of aria2, such as `http://127.0.0.1:6800/jsonrpc` |
+| RPC secret  | The RPC secret of aria2 (if one is set)                                |
+| Save to     | Leave empty to use aria2's default directory                           |
+
+![The aria2 connection](/assets/images/account-settings/en/aria2@2x.webp)
+
+Before use, RPC must be enabled in aria2 and cross-origin requests from this site must be allowed. After filling in the fields, you can click **Test connection** to verify that the configuration is correct.
+
+Download settings are saved in your local browser only and are not synced to your account.
+
+## Preferences
+
+![The preferences section of the settings](/assets/images/account-settings/en/site@2x.webp)
+
+### Language
+
+Choose the interface language (简体中文, English, 日本語). The page switches to the chosen language immediately, and the emails sent to you also use this language.
+
+### Theme
+
+Choose Light, Dark or System. This setting is saved in your local browser only.
+
+### Adult content
+
+Controls how games and images with adult content are shown. There are three options:
+
+- **Hide** — games and images with adult content are not shown
+- **Mask** — games are shown; images are covered by default and can be viewed after you click them
+- **Show** — everything is shown directly
+
+Changes take effect immediately. When you are not signed in, games and images with adult content are not shown.
+
+### Other
+
+- **Only games with resources** — the default for the game library and search; it can be changed temporarily on each visit
+- **Show the page backgrounds of other users** — when off, the profiles of other users use the default background of the site

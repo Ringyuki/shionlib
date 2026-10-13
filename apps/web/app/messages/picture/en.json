@@ -1,0 +1,7 @@
+{
+  "reset": "Reset",
+  "apply": "Confirm",
+  "cancel": "Cancel",
+  "unreadable": "This picture cannot be cropped in the browser",
+  "failed": "The picture could not be processed"
+}

@@ -1,0 +1,58 @@
+{
+  "title": "設定",
+  "signIn": "ログインするとアカウント設定を変更できます",
+  "signInAction": "ログイン",
+  "sectionsLabel": "設定の項目",
+  "section": {
+    "personal": "プロフィール",
+    "security": "セキュリティ",
+    "connections": "連携アカウント",
+    "download": "ダウンロード",
+    "site": "サイトの設定"
+  },
+  "site": {
+    "language": "表示言語",
+    "languageHint": "お送りするメールにも使用されます",
+    "theme": "テーマ",
+    "themeHint": "このブラウザにのみ保存されます",
+    "themes": {
+      "system": "システムに合わせる",
+      "light": "ライト",
+      "dark": "ダーク"
+    },
+    "contentLimit": "成人向けコンテンツ",
+    "contentLimitHint": "成人向けコンテンツを含むゲームと画像の表示方法を選びます",
+    "contentLimits": {
+      "1": {
+        "label": "非表示",
+        "description": "成人向けコンテンツを含むゲームと画像を表示しません"
+      },
+      "2": {
+        "label": "マスク",
+        "description": "ゲームは表示し、画像はクリックするまで隠します"
+      },
+      "3": {
+        "label": "表示",
+        "description": "すべてそのまま表示します"
+      }
+    },
+    "games": "ゲーム一覧",
+    "onlyWithResources": "リソースのあるゲームのみ",
+    "onlyWithResourcesHint": "ライブラリと検索の既定値です。閲覧のたびに一時的に変更できます。",
+    "profiles": "プロフィール",
+    "showBackgrounds": "他のユーザーのページ背景を表示する",
+    "showBackgroundsHint": "オフにすると、他のユーザーのプロフィールページはサイトの標準の背景で表示されます"
+  },
+  "personal": {
+    "name": "ユーザー名",
+    "nameHint": "ログインに使用され、アップロードや投稿の横に表示されます",
+    "nameLimit": "{max} 文字まで",
+    "nameAvailable": "このユーザー名は使用できます",
+    "nameTaken": "このユーザー名はすでに使われています",
+    "nameSaved": "ユーザー名を変更しました",
+    "profile": "プロフィール",
+    "profileHint": "アイコン、ヘッダー画像、自己紹介、ページの背景はプロフィールページで変更します",
+    "openProfile": "プロフィールページへ",
+    "save": "保存"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "title": "攻略",
+  "status": {
+    "ALL": "全部",
+    "HELD": "待复核",
+    "PUBLISHED": "已发布",
+    "HIDDEN": "已隐藏",
+    "DRAFT": "草稿",
+    "DELETED": "已删除"
+  },
+  "heldOf": "待复核 {count, number}",
+  "statusFilter": "状态",
+  "search": "搜索游戏或攻略内容",
+  "byAuthor": "作者：{name}",
+  "sortBy": "排序",
+  "sort": {
+    "updated": "最近更新",
+    "created": "最新创建"
+  },
+  "column": {
+    "walkthrough": "攻略",
+    "author": "作者",
+    "language": "语言",
+    "verdict": "AI 判定",
+    "updated": "更新时间",
+    "status": "状态"
+  },
+  "language": {
+    "zh": "中文",
+    "en": "英文",
+    "ja": "日文",
+    "unknown": "未识别"
+  },
+  "noText": "没有文字内容",
+  "narrow": "{author} · <time></time>",
+  "empty": "{filtered, select, true {没有符合条件的攻略} other {暂无攻略}}",
+  "outcome": {
+    "PUBLISHED": "发布",
+    "HIDDEN": "隐藏",
+    "DELETED": "删除"
+  },
+  "outcomeHint": {
+    "PUBLISHED": "攻略对所有人显示",
+    "HIDDEN": "攻略只有作者本人可以看到",
+    "DELETED": "攻略对所有人隐藏，包括作者本人"
+  },
+  "changed": "{status, select, PUBLISHED {攻略已发布} HIDDEN {攻略已隐藏} other {攻略已删除}}",
+  "rescanned": "已重新提交审核",
+  "issue": {
+    "outcome": "请选择处理结果"
+  },
+  "pane": {
+    "title": "攻略",
+    "number": "攻略 #{id}",
+    "walkthrough": "攻略",
+    "game": "游戏",
+    "note": "说明",
+    "routes": "线路（{count, number}）",
+    "noRoutes": "没有线路",
+    "unnamed": "未命名",
+    "steps": "{count, number} 个步骤",
+    "history": "AI 审核记录",
+    "decision": "处理",
+    "rescan": "重新审核"
+  }
+}

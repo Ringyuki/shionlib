@@ -1,0 +1,100 @@
+{
+  "title": "条目同步",
+  "entity": {
+    "game": "游戏",
+    "developer": "开发商",
+    "character": "角色"
+  },
+  "sources": {
+    "title": "来源",
+    "hint": "按来源的变更记录增量同步，超过 {count, number} {unit, select, day {天} hour {小时} other {分钟}}没有同步的条目会重新获取",
+    "empty": "没有配置来源",
+    "games": "{count, number} 个游戏",
+    "narrow": "{games, number} 个游戏 · {state}",
+    "others": "{developers, number} 个开发商，{characters, number} 个角色",
+    "changes": "更新了 {count, number} 个条目",
+    "sync": "立即同步",
+    "synced": "同步完成，更新了 {count, number} 个条目",
+    "state": {
+      "fine": "正常",
+      "failed": "同步失败",
+      "never": "尚未同步",
+      "manual": "不支持增量同步"
+    },
+    "column": {
+      "source": "来源",
+      "kept": "已收录",
+      "cursor": "同步位置",
+      "pulled": "上次同步",
+      "status": "状态"
+    }
+  },
+  "import": {
+    "title": "导入条目",
+    "hint": "按名称或来源编号查找，导入尚未收录的条目",
+    "source": "来源",
+    "entity": "条目类型",
+    "search": "名称或来源编号",
+    "results": "查找结果",
+    "empty": {
+      "idle": "输入名称或来源编号后显示结果",
+      "searching": "正在查找",
+      "failed": "未能取得查找结果",
+      "done": "来源中没有符合条件的条目"
+    },
+    "more": "显示前 {shown, number} 条，共 {total, number} 条，可以输入更完整的名称",
+    "byNumber": "来源编号为 {id} 的条目",
+    "state": {
+      "here": "已收录",
+      "excluded": "不再收录"
+    },
+    "action": {
+      "absent": "导入",
+      "here": "刷新",
+      "excluded": "恢复收录"
+    },
+    "done": {
+      "absent": "条目已导入",
+      "here": "条目已刷新",
+      "excluded": "已恢复收录"
+    },
+    "column": {
+      "entry": "条目",
+      "developer": "开发商",
+      "number": "来源编号"
+    }
+  },
+  "excluded": {
+    "title": "不再收录的条目",
+    "hint": "在「游戏」中删除的条目，同步时会跳过",
+    "empty": "没有不再收录的条目",
+    "untitled": "未记录名称",
+    "restore": "恢复收录",
+    "restored": "已恢复收录",
+    "column": {
+      "entry": "条目",
+      "number": "来源编号",
+      "by": "删除者",
+      "at": "删除时间"
+    }
+  },
+  "bangumi": {
+    "title": "Bangumi 授权",
+    "hint": "游戏页面的 Bangumi 评分通过站点的 Bangumi 应用读取，需要授权一次",
+    "authorize": "前往授权",
+    "again": "重新授权",
+    "state": {
+      "authorized": "已授权",
+      "pending": "尚未授权",
+      "unset": "尚未设置应用的 ID 和密钥"
+    },
+    "callback": "回调地址",
+    "copyCallback": "复制回调地址",
+    "expires": "令牌到期",
+    "noToken": "尚未取得令牌",
+    "steps": "在 Bangumi 的开发者平台把回调地址填入应用，并在<settings>设置</settings>的「第三方服务」中填写应用的 ID 和密钥，然后授权。令牌到期前会自动续期。",
+    "readOnly": "只有超级管理员可以授权。应用的 ID 和密钥在<settings>设置</settings>的「第三方服务」中。",
+    "authorizedNow": "Bangumi 授权成功",
+    "failedNow": "Bangumi 授权没有完成，请重试"
+  }
+}

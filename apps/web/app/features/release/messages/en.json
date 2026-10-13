@@ -1,0 +1,11 @@
+{
+  "title": "Releases",
+  "description": "Release dates of games, month by month",
+  "previous": "Previous month",
+  "next": "Next month",
+  "thisMonth": "This month",
+  "count": "{total, plural, one {# game} other {# games}}",
+  "onlyWithResources": "Only games with resources",
+  "empty": "No releases are listed for this month yet",
+  "emptyNarrowed": "Games without resources are not shown. Turn off \"Only games with resources\" to see every release of this month."
+}

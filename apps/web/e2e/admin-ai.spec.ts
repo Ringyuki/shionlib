@@ -1,0 +1,253 @@
+import { expect, test, type Page } from '@playwright/test'
+import { openSignIn, sessionFile, signIn } from './support/accounts'
+import { expectNotice } from './support/notices'
+
+const tabs = (page: Page) => page.getByRole('tablist', { name: 'AI 网关的页面' })
+
+test('lets an administrator read the gateway without changing it', async ({ page }) => {
+  await openSignIn(page, '/zh/admin/ai/providers')
+  await signIn(page, 'e2e_staff_user')
+  await expect(page.getByRole('heading', { name: 'AI 网关', level: 1 })).toBeVisible()
+  await expect(page.getByText('只有超级管理员可以更改 AI 网关的配置')).toBeVisible()
+  await expect(page.getByRole('button', { name: '新渠道' })).toBeDisabled()
+  await expect(page.getByRole('switch', { name: '启用 e2e-backup' })).toBeDisabled()
+
+  await tabs(page).getByRole('tab', { name: '调试' }).click()
+  await expect(page).toHaveURL(/\/zh\/admin\/ai\/playground$/)
+  await expect(page.getByText('只有超级管理员可以使用调试')).toBeVisible()
+  await expect(page.getByRole('textbox', { name: '消息' })).toBeDisabled()
+})
+
+test.describe('as a super administrator', () => {
+  test.use({ storageState: sessionFile('admin') })
+  test.describe.configure({ mode: 'serial', retries: 0 })
+
+  test('marks the gateway in the sidebar and sums up its usage', async ({ page }) => {
+    await page.goto('/zh/admin')
+    const entry = page
+      .getByRole('navigation', { name: '主导航' })
+      .getByRole('link', { name: /AI 网关/ })
+    await expect(entry).toContainText('有暂停的线路或没有可用模型的场景')
+    await entry.click()
+    await expect(page).toHaveURL(/\/zh\/admin\/ai$/)
+    await expect(page.getByRole('heading', { name: 'AI 网关', level: 1 })).toBeVisible()
+
+    const scenes = page.getByRole('table', { name: '场景' })
+    await expect(scenes.getByRole('row', { name: /内容审核复审/ })).toContainText('gpt-5-mini')
+    const providers = page.getByRole('table', { name: '渠道' })
+    await expect(providers.getByRole('row', { name: /e2e-backup/ })).toContainText(
+      '1 条暂停，共 1 条',
+    )
+    const failures = page.getByRole('table', { name: '最近的失败' })
+    await expect(failures.getByRole('row', { name: /超时/ })).toContainText('no data for 30s')
+
+    await page.getByRole('button', { name: '7 天' }).click()
+    await expect(page).toHaveURL(/range=7d/)
+    await failures.getByRole('row', { name: /超时/ }).click()
+    await expect(page).toHaveURL(/\/ai\/requests\?range=7d&id=\d+$/)
+    await expect(page.getByRole('dialog', { name: '请求详情' })).toContainText('no data for 30s')
+  })
+
+  test('filters the request log and shows the attempts of one call', async ({ page }) => {
+    await page.goto('/zh/admin/ai/requests')
+    await page.getByRole('combobox', { name: '按来源筛选' }).click()
+    await page.getByRole('option', { name: '线路检测' }).click()
+    await expect(page).toHaveURL(/source=check/)
+    await expect(page.getByRole('row', { name: /线路检测/ }).first()).toBeVisible()
+    await expect(page.getByRole('row', { name: /内容审核复审/ })).toHaveCount(0)
+
+    await page.goto('/zh/admin/ai/requests?source=scene&scene=moderation_review&result=ok')
+    await page.getByRole('row', { name: /成功/ }).first().click()
+    const pane = page.getByRole('dialog', { name: '请求详情' })
+    await expect(pane).toContainText('调用 e2e0c411')
+    await expect(pane).toContainText('输入 1,480 · 输出 112 · 推理 64')
+    const attempts = pane.getByRole('table', { name: '尝试' })
+    await expect(attempts.getByRole('row', { name: /e2e-backup/ })).toContainText('额度不足')
+    await expect(attempts.getByRole('row', { name: /e2e-unreachable/ })).toContainText('成功')
+    await expect(pane).toContainText('"decision": "REVIEW"')
+    await attempts.getByRole('row', { name: /e2e-backup/ }).click()
+    await expect(pane).toContainText('402 Insufficient credits')
+    await expect(pane).toContainText('HTTP 402 from the upstream')
+  })
+
+  test('changes the model and the parameters of a scene', async ({ page }) => {
+    await page.goto('/zh/admin/ai/scenes')
+    await page.waitForLoadState('networkidle')
+    const row = page.getByRole('row', { name: /内容审核复审/ })
+    await expect(row).toContainText('只剩 1 条可用线路')
+    await expect(row).toContainText('e2e-backup 的线路已暂停')
+
+    await page.getByRole('combobox', { name: '内容审核复审使用的模型' }).click()
+    await expect(page.getByRole('option', { name: 'omni-moderation-latest' })).toHaveCount(0)
+    await page.getByRole('option', { name: /跟随默认模型/ }).click()
+    await expectNotice(page, '「内容审核复审」已改为跟随默认模型')
+    await expect(row).toContainText('没有可用的模型')
+    await page.getByRole('combobox', { name: '内容审核复审使用的模型' }).click()
+    await page.getByRole('option', { name: 'gpt-5-mini', exact: true }).click()
+    await expectNotice(page, '「内容审核复审」已改用 gpt-5-mini')
+
+    await page.getByRole('button', { name: '调整内容审核复审的参数' }).click()
+    await expect(page).toHaveURL(/scene=moderation_review/)
+    const pane = page.getByRole('dialog', { name: '内容审核复审' })
+    const timeout = pane.getByRole('spinbutton', { name: '超时' })
+    await timeout.fill('45')
+    await timeout.press('Tab')
+    await pane.getByRole('button', { name: '保存' }).click()
+    await expectNotice(page, '已保存「内容审核复审」的参数')
+    await expect(page).toHaveURL(/\/ai\/scenes$/)
+    await page.getByRole('button', { name: '调整内容审核复审的参数' }).click()
+    await expect(timeout).toHaveValue('45')
+    await timeout.fill('9999')
+    await timeout.press('Tab')
+    await expect(timeout).toHaveValue('600')
+  })
+
+  test('checks a route, edits it and undoes an automatic adjustment', async ({ page }) => {
+    await page.goto('/zh/admin/ai/models')
+    await page.waitForLoadState('networkidle')
+    const listed = page.getByRole('row', { name: /gpt-5-mini/ })
+    await expect(listed).toContainText('400K')
+    await listed.getByText('openai/gpt-5-mini').click()
+    await expect(page).toHaveURL(/\/ai\/models\/\d+$/)
+    await expect(page.getByRole('heading', { name: 'gpt-5-mini', level: 1 })).toBeVisible()
+    const order = page.getByRole('table', { name: '备用顺序' })
+    const primary = order.getByRole('row', { name: /e2e-unreachable/ })
+    const backup = order.getByRole('row', { name: /e2e-backup/ })
+    await expect(primary).toContainText('已自动改用 JSON 模式')
+    await expect(backup).toContainText('暂停')
+    await expect(backup).toContainText('额度不足')
+
+    await primary.getByRole('button', { name: '检测' }).click()
+    await expectNotice(page, 'gpt-5-mini · e2e-unreachable 检测失败：网络错误')
+
+    await primary.getByRole('button', { name: '编辑' }).click()
+    const dialog = page.getByRole('dialog', { name: '编辑线路' })
+    await dialog.getByRole('switch', { name: '手动设置价格' }).click()
+    await dialog.getByRole('spinbutton', { name: /输入价格/ }).fill('0.5')
+    await dialog.getByRole('spinbutton', { name: /输入价格/ }).press('Tab')
+    await dialog.getByRole('button', { name: '保存' }).click()
+    await expectNotice(page, '线路已更新')
+    await expect(primary).toContainText('输入 $0.50 · 输出 $2.00')
+    await expect(primary).toContainText('手动设置')
+
+    await primary.getByRole('button', { name: '编辑' }).click()
+    await dialog.getByRole('button', { name: '还原' }).click()
+    await expectNotice(page, '已还原这项调整')
+    await expect(primary).not.toContainText('已自动改用 JSON 模式')
+
+    await backup.getByRole('button', { name: '移动行' }).focus()
+    const saved = page.waitForResponse(
+      response =>
+        response.request().method() === 'POST' &&
+        response.url().includes('/resources/admin/ai/models'),
+    )
+    await page.keyboard.press('ArrowUp')
+    await expect(order.getByRole('row').nth(1)).toContainText('e2e-backup')
+    await saved
+    await page.reload()
+    await expect(order.getByRole('row').nth(1)).toContainText('e2e-backup')
+  })
+
+  test('adds a model from the catalog and removes it again', async ({ page }) => {
+    await page.goto('/zh/admin/ai/models')
+    await page.waitForLoadState('networkidle')
+    await page.getByRole('button', { name: '添加模型' }).click()
+    const dialog = page.getByRole('dialog', { name: '添加模型' })
+    await expect(dialog.getByRole('option', { name: /GPT-5 Mini/ })).toContainText('已添加')
+    await dialog.getByRole('searchbox', { name: '搜索模型目录' }).fill('haiku')
+    await dialog.getByRole('option', { name: /Claude Haiku 4\.5/ }).click()
+    await expect(dialog.getByRole('textbox', { name: '名称' })).toHaveValue('Claude Haiku 4.5')
+    await expect(dialog.getByRole('checkbox', { name: /e2e-unreachable/ })).toBeChecked()
+    await dialog.getByRole('button', { name: '添加', exact: true }).click()
+    await expectNotice(page, '已添加模型 Claude Haiku 4.5')
+    await expect(page).toHaveURL(/\/ai\/models\/\d+$/)
+    await expect(page.getByRole('table', { name: '备用顺序' })).toContainText('claude-haiku-4-5')
+
+    await page.getByRole('switch', { name: '设为默认模型' }).click()
+    await page.getByRole('button', { name: '保存' }).click()
+    await expectNotice(page, '模型的设置已保存')
+    await expect(page.getByRole('main').getByText('默认', { exact: true })).toBeVisible()
+    await page.getByRole('button', { name: '模型操作' }).click()
+    await expect(page.getByRole('menuitem', { name: '删除模型' })).toBeDisabled()
+  })
+
+  test('creates a provider, adds a route by hand and deletes the provider', async ({ page }) => {
+    await page.goto('/zh/admin/ai/providers')
+    await page.waitForLoadState('networkidle')
+    await expect(page.getByRole('row', { name: /e2e-backup/ })).toContainText('额度不足')
+    await page.getByRole('combobox', { name: '按状态筛选' }).click()
+    await page.getByRole('option', { name: '有暂停的线路' }).click()
+    await expect(page.getByRole('row', { name: /e2e-unreachable/ })).toHaveCount(0)
+    await page.goto('/zh/admin/ai/providers')
+    await page.waitForLoadState('networkidle')
+
+    await page.getByRole('button', { name: '新渠道' }).click()
+    const create = page.getByRole('dialog', { name: '新渠道' })
+    await create.getByRole('combobox', { name: '预设' }).fill('OpenR')
+    await page.getByRole('option', { name: 'OpenRouter' }).click()
+    await expect(create.getByRole('textbox', { name: 'API 地址' })).toHaveValue(
+      'https://openrouter.ai/api/v1',
+    )
+    await expect(create).toContainText('请求地址：https://openrouter.ai/api/v1/chat/completions')
+    await create.getByRole('textbox', { name: '名称' }).fill('e2e-created')
+    await create.getByRole('button', { name: '创建' }).click()
+    await expect(create).toContainText('必填')
+    await create.getByLabel('API 密钥').fill('sk-e2e-created-0000')
+    await create.getByRole('button', { name: '创建' }).click()
+    await expectNotice(page, '已创建渠道 e2e-created')
+    await expect(page).toHaveURL(/\/ai\/providers\/\d+$/)
+    await expect(page.getByRole('heading', { name: 'e2e-created', level: 1 })).toBeVisible()
+    await expect(page.getByText('尚未添加线路')).toBeVisible()
+
+    await page.getByRole('button', { name: '手动添加' }).click()
+    const manual = page.getByRole('dialog', { name: '手动添加线路' })
+    await manual.getByRole('textbox', { name: '上游模型标识' }).fill('openai/gpt-5-mini')
+    await expect(manual).toContainText('将加入已有的模型 gpt-5-mini')
+    await manual.getByRole('button', { name: '添加', exact: true }).click()
+    await expectNotice(page, '线路已添加')
+    const routes = page.getByRole('table', { name: '线路' })
+    await expect(routes.getByRole('row', { name: /gpt-5-mini/ })).toContainText('正常')
+
+    await routes
+      .getByRole('row', { name: /gpt-5-mini/ })
+      .getByRole('checkbox')
+      .check()
+    await page.getByRole('button', { name: '停用', exact: true }).click()
+    await expectNotice(page, '已停用 1 条线路')
+    await expect(routes.getByRole('row', { name: /gpt-5-mini/ })).toContainText('已停用')
+
+    await page.getByRole('textbox', { name: '名称' }).fill('e2e-renamed')
+    await page.getByRole('button', { name: '保存' }).click()
+    await expectNotice(page, '渠道的设置已保存')
+    await expect(page.getByRole('heading', { name: 'e2e-renamed', level: 1 })).toBeVisible()
+
+    await page.getByRole('button', { name: '渠道操作' }).click()
+    await page.getByRole('menuitem', { name: '删除渠道' }).click()
+    await page.getByRole('alertdialog').getByRole('button', { name: '删除' }).click()
+    await expectNotice(page, '已删除渠道 e2e-renamed')
+    await expect(page).toHaveURL(/\/ai\/providers$/)
+    await expect(page.getByRole('row', { name: /e2e-renamed/ })).toHaveCount(0)
+  })
+
+  test('sends a message to two targets and shows each reply', async ({ page }) => {
+    await page.goto('/zh/admin/ai/playground')
+    await page.waitForLoadState('networkidle')
+    await page.getByRole('button', { name: '添加目标' }).click()
+    await expect(page.getByRole('region', { name: '内容审核初筛' })).toBeVisible()
+    await expect(page.getByRole('region', { name: '内容审核复审' })).toBeVisible()
+    await page.getByRole('combobox', { name: '输出结构' }).click()
+    await page.getByRole('option', { name: '按 JSON Schema 输出对象' }).click()
+    await page.getByRole('textbox', { name: '消息' }).fill('你好')
+    await page.getByRole('button', { name: '发送' }).click()
+    await expect(page.getByText('请填写一个 JSON 对象')).toBeVisible()
+    await page.getByRole('textbox', { name: 'JSON Schema' }).fill('{"type":"object"}')
+    await page.getByRole('textbox', { name: '消息' }).press('Control+Enter')
+    for (const scene of ['内容审核初筛', '内容审核复审']) {
+      const lane = page.getByRole('region', { name: scene })
+      await expect(lane.getByRole('alert')).toContainText('网络错误')
+      await expect(lane).toContainText('没有产生费用')
+    }
+    await page.getByRole('button', { name: '新对话' }).click()
+    await expect(page.getByRole('region', { name: '内容审核复审' })).toContainText('尚未发送')
+  })
+})

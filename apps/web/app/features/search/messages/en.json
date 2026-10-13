@@ -1,0 +1,37 @@
+{
+  "label": "Search",
+  "placeholder": "Search games, developers, characters",
+  "list": "Suggestions and results",
+  "groups": {
+    "suggestions": "Suggestions",
+    "games": "Games",
+    "developers": "Developers",
+    "characters": "Characters",
+    "recent": "Recent searches",
+    "trending": "Trending"
+  },
+  "clear": "Clear",
+  "clearRecent": "Clear recent searches",
+  "seeAll": "See all {total, number} games for “{query}”",
+  "searching": "Searching…",
+  "empty": "Nothing found for “{query}”. Try the original Japanese title or an alias.",
+  "unavailable": "Search is unavailable right now. Please try again later.",
+  "works": "{count, plural, one {# work} other {# works}}",
+  "results": {
+    "title": "Search",
+    "heading": "Results for “{query}”",
+    "count": "{total, plural, one {# game} other {# games}}",
+    "placeholder": "Search games by title or alias",
+    "prompt": "Search by title or alias, or find a game by ID: vid:17 (VNDB), bid:42 (Bangumi), hid:9 (Hikarinagi)",
+    "trending": "Trending searches",
+    "onlyWithResources": "Only games with resources",
+    "empty": "Nothing found for “{query}”. Try the original Japanese title or an alias.",
+    "emptyFiltered": "Games without resources are hidden by default. Turn off “Only games with resources” to search all games.",
+    "unavailable": "Search is unavailable right now. Please try again later."
+  },
+  "pickGame": "Search for a game",
+  "released": {
+    "thisMonth": "Released this month",
+    "lastMonth": "Released last month"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "title": "Activity",
+  "description": "Resources, comments and walkthroughs that became public lately",
+  "kinds": "Kind of activity",
+  "kind": {
+    "all": "All",
+    "resources": "Resources",
+    "comments": "Comments",
+    "walkthroughs": "Walkthroughs"
+  },
+  "did": {
+    "resources": "<user></user> uploaded a resource for <game></game>",
+    "comments": "<user></user> commented on <game></game>",
+    "walkthroughs": "<user></user> published <guide>a walkthrough</guide> for <game></game>"
+  },
+  "empty": {
+    "all": "Nothing has happened yet",
+    "resources": "No new resources",
+    "comments": "No new comments",
+    "walkthroughs": "No new walkthroughs"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "title": "ホーム",
+  "recent": "最近更新されたリソース",
+  "more": "もっと見る",
+  "releases": "{month}の新作",
+  "allReleases": "すべて",
+  "previous": "前へ",
+  "next": "次へ",
+  "hot": "人気のゲーム",
+  "library": "ゲームライブラリ",
+  "failed": "この部分を読み込めませんでした",
+  "retry": "再試行",
+  "noResources": "リソースはまだありません",
+  "upload": "リソースをアップロード",
+  "noReleases": "今月の新作はまだ登録されていません"
+}

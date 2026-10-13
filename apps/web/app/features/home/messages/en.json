@@ -1,0 +1,16 @@
+{
+  "title": "Home",
+  "recent": "Recently updated resources",
+  "more": "More",
+  "releases": "New in {month}",
+  "allReleases": "All",
+  "previous": "Previous",
+  "next": "Next",
+  "hot": "Popular games",
+  "library": "Game library",
+  "failed": "This part could not be loaded",
+  "retry": "Try again",
+  "noResources": "No resources yet",
+  "upload": "Upload a resource",
+  "noReleases": "No releases listed for this month yet"
+}

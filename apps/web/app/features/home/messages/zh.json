@@ -1,0 +1,16 @@
+{
+  "title": "首页",
+  "recent": "最近更新的资源",
+  "more": "更多",
+  "releases": "{month}新作",
+  "allReleases": "全部",
+  "previous": "上一组",
+  "next": "下一组",
+  "hot": "热门游戏",
+  "library": "游戏库",
+  "failed": "这部分内容加载失败",
+  "retry": "重试",
+  "noResources": "暂无资源",
+  "upload": "上传资源",
+  "noReleases": "本月暂未收录新作"
+}

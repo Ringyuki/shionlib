@@ -1,0 +1,37 @@
+{
+  "label": "検索",
+  "placeholder": "ゲーム、ブランド、キャラクターを検索",
+  "list": "候補と検索結果",
+  "groups": {
+    "suggestions": "候補",
+    "games": "ゲーム",
+    "developers": "ブランド",
+    "characters": "キャラクター",
+    "recent": "最近の検索",
+    "trending": "人気の検索"
+  },
+  "clear": "消去",
+  "clearRecent": "最近の検索を消去",
+  "seeAll": "「{query}」のゲーム {total, number} 件をすべて表示",
+  "searching": "検索中…",
+  "empty": "「{query}」は見つかりませんでした。原題や別名で試してください。",
+  "unavailable": "現在検索を利用できません。しばらくしてからお試しください。",
+  "works": "{count} 作品",
+  "results": {
+    "title": "検索",
+    "heading": "「{query}」の検索結果",
+    "count": "{total, number} 件のゲーム",
+    "placeholder": "タイトルや別名でゲームを検索",
+    "prompt": "タイトルや別名で検索するか、ID で探せます：vid:17（VNDB）、bid:42（Bangumi）、hid:9（Hikarinagi）",
+    "trending": "人気の検索",
+    "onlyWithResources": "リソースのあるゲームのみ",
+    "empty": "「{query}」は見つかりませんでした。原題や別名で試してください。",
+    "emptyFiltered": "リソースのないゲームは既定で表示されません。「リソースのあるゲームのみ」をオフにすると、すべてのゲームから探せます。",
+    "unavailable": "現在検索を利用できません。しばらくしてからお試しください。"
+  },
+  "pickGame": "ゲーム名で検索",
+  "released": {
+    "thisMonth": "今月発売",
+    "lastMonth": "先月発売"
+  }
+}

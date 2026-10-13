@@ -1,0 +1,60 @@
+:root {
+  --platform-win: #0078d7;
+  --platform-win-fg: #ffffff;
+  --platform-mac: #111111;
+  --platform-mac-fg: #ffffff;
+  --platform-ios: #1d1d1f;
+  --platform-ios-fg: #ffffff;
+  --platform-and: #3ddc84;
+  --platform-and-fg: #0a1b12;
+  --platform-lin: #f5f5f5;
+  --platform-lin-fg: #111111;
+  --platform-ps3: #003791;
+  --platform-ps3-fg: #ffffff;
+  --platform-ps4: #00439c;
+  --platform-ps4-fg: #ffffff;
+  --platform-psv: #1e4aa8;
+  --platform-psv-fg: #ffffff;
+  --platform-psp: #111111;
+  --platform-psp-fg: #ffffff;
+  --platform-swi: #e60012;
+  --platform-swi-fg: #ffffff;
+  --platform-dvd: #737373;
+  --platform-dvd-fg: #ffffff;
+}
+
+.dark {
+  --platform-mac: #f5f5f5;
+  --platform-mac-fg: #111111;
+  --platform-ios: #f5f5f7;
+  --platform-ios-fg: #1d1d1f;
+  --platform-lin: #3a3a3a;
+  --platform-lin-fg: #f5f5f5;
+  --platform-psp: #f5f5f5;
+  --platform-psp-fg: #111111;
+}
+
+@theme inline {
+  --color-platform-win: var(--platform-win);
+  --color-platform-win-fg: var(--platform-win-fg);
+  --color-platform-mac: var(--platform-mac);
+  --color-platform-mac-fg: var(--platform-mac-fg);
+  --color-platform-ios: var(--platform-ios);
+  --color-platform-ios-fg: var(--platform-ios-fg);
+  --color-platform-and: var(--platform-and);
+  --color-platform-and-fg: var(--platform-and-fg);
+  --color-platform-lin: var(--platform-lin);
+  --color-platform-lin-fg: var(--platform-lin-fg);
+  --color-platform-ps3: var(--platform-ps3);
+  --color-platform-ps3-fg: var(--platform-ps3-fg);
+  --color-platform-ps4: var(--platform-ps4);
+  --color-platform-ps4-fg: var(--platform-ps4-fg);
+  --color-platform-psv: var(--platform-psv);
+  --color-platform-psv-fg: var(--platform-psv-fg);
+  --color-platform-psp: var(--platform-psp);
+  --color-platform-psp-fg: var(--platform-psp-fg);
+  --color-platform-swi: var(--platform-swi);
+  --color-platform-swi-fg: var(--platform-swi-fg);
+  --color-platform-dvd: var(--platform-dvd);
+  --color-platform-dvd-fg: var(--platform-dvd-fg);
+}

@@ -1,0 +1,43 @@
+{
+  "navigation": "主导航",
+  "account": "账号",
+  "accountHint": "账号与偏好",
+  "profile": "个人主页",
+  "admin": "管理后台",
+  "language": "语言",
+  "upload": "上传资源",
+  "signIn": "登录 / 注册",
+  "section": {
+    "discover": "发现",
+    "mine": "我的"
+  },
+  "nav": {
+    "home": "首页",
+    "games": "游戏库",
+    "releases": "新作",
+    "developers": "开发商",
+    "translators": "汉化组",
+    "activity": "动态",
+    "docs": "文档",
+    "favorites": "收藏",
+    "uploads": "我的上传",
+    "messages": "消息",
+    "settings": "设置"
+  },
+  "signOut": "退出登录",
+  "theme": {
+    "label": "主题",
+    "system": "跟随系统",
+    "light": "浅色",
+    "dark": "深色"
+  },
+  "footer": {
+    "label": "站点信息",
+    "friendLinks": "友情链接",
+    "sponsor": "赞助",
+    "contact": "联系我们"
+  },
+  "scrollTop": "回到顶部",
+  "navigating": "页面加载中",
+  "unreadCount": "{count} 条未读"
+}

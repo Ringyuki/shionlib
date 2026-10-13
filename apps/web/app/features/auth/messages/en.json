@@ -1,0 +1,63 @@
+{
+  "close": "Close",
+  "artwork": "Artwork",
+  "sign-in": {
+    "title": "Sign in to Shionlib",
+    "description": "Sign in to upload resources, keep favorites and join discussions",
+    "identifier": "Username or email",
+    "password": "Password",
+    "submit": "Sign in",
+    "noAccount": "No account yet?",
+    "toSignUp": "Sign up",
+    "forgot": "Forgot password?"
+  },
+  "sign-up": {
+    "title": "Sign up for Shionlib",
+    "description": "You are signed in right after signing up",
+    "name": "Username",
+    "nameHint": "{min}–{max} characters, can be changed later",
+    "email": "Email",
+    "sendCode": "Send code",
+    "resendIn": "Resend in {seconds}s",
+    "codeSent": "We sent a code to {email}",
+    "code": "Verification code",
+    "codeFirst": "Send a verification code first",
+    "password": "Password",
+    "passwordHint": "{min}–{max} characters",
+    "adult": "I am 18 or older",
+    "submit": "Sign up and sign in",
+    "hasAccount": "Already have an account?",
+    "toSignIn": "Sign in"
+  },
+  "forgot-password": {
+    "title": "Reset your password",
+    "description": "Enter the email you signed up with and we will send you a reset link",
+    "email": "Email",
+    "submit": "Send reset email",
+    "sent": "Email sent. Check your inbox soon; the link expires quickly.",
+    "back": "Back to sign in"
+  },
+  "methods": {
+    "divider": "or",
+    "passkey": "Sign in with a passkey",
+    "hikarinagi": "Sign in with Hikarinagi ID",
+    "unsupported": "This device or browser does not support passkeys",
+    "cancelled": "The passkey check was not completed",
+    "oidcFailed": "Signing in with Hikarinagi ID failed. Please try again"
+  },
+  "issue": {
+    "adult": "You must be 18 or older to sign up",
+    "mismatch": "The passwords do not match"
+  },
+  "reset": {
+    "title": "Set a new password",
+    "description": "Choose a new password for {email}. Every signed-in device will need to sign in again.",
+    "password": "New password",
+    "confirmation": "Repeat the new password",
+    "submit": "Reset password",
+    "done": "Your password was reset. Sign in with the new one.",
+    "signIn": "Sign in",
+    "invalid": "This reset link is invalid or has expired",
+    "requestAgain": "Send a new reset email"
+  }
+}

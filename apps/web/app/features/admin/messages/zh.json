@@ -1,0 +1,137 @@
+{
+  "title": "管理后台",
+  "back": "返回站点",
+  "nav": {
+    "overview": "概览",
+    "reports": "举报",
+    "checks": "文件检查",
+    "games": "游戏",
+    "translators": "汉化组",
+    "users": "用户",
+    "sponsors": "赞助",
+    "catalog": "条目同步",
+    "comments": "评论",
+    "walkthroughs": "攻略",
+    "ai": "AI 网关",
+    "settings": "设置"
+  },
+  "source": {
+    "hikarinagi": "Hikarinagi"
+  },
+  "group": {
+    "review": "审核",
+    "manage": "管理",
+    "system": "系统"
+  },
+  "pendingCount": "{count, number} 项待处理",
+  "aiAlert": "有暂停的线路或没有可用模型的场景",
+  "total": "共 {count, number} 条",
+  "cancel": "取消",
+  "submit": "提交",
+  "overview": {
+    "title": "概览",
+    "pending": {
+      "title": "待处理",
+      "empty": "没有待处理的事项",
+      "column": {
+        "kind": "类型",
+        "content": "内容",
+        "submitter": "提交者",
+        "submitted": "提交时间",
+        "deadline": "期限"
+      },
+      "kind": {
+        "malware": "病毒复核",
+        "stalled": "检查未完成",
+        "report": "举报",
+        "comment": "评论",
+        "walkthrough": "攻略"
+      },
+      "detected": "病毒扫描检出 {names}",
+      "stalled": "{reason}，已尝试 {count, number} 次",
+      "reported": "{reason}：{detail}",
+      "autoDelete": "<time></time>自动删除",
+      "autoRemove": "<time></time>清除",
+      "order": "按期限和提交时间排列",
+      "rest": "按期限和提交时间排列，另有 {items} 未列出",
+      "restOf": {
+        "malware": "{count, number} 个等待复核的文件",
+        "stalled": "{count, number} 个检查未完成的文件",
+        "report": "{count, number} 条举报",
+        "comment": "{count, number} 条评论",
+        "walkthrough": "{count, number} 篇攻略"
+      },
+      "separator": "、",
+      "all": {
+        "malware": "查看全部文件检查",
+        "stalled": "查看全部文件检查",
+        "report": "查看全部举报",
+        "comment": "查看全部评论",
+        "walkthrough": "查看全部攻略"
+      },
+      "judged": "{game} · AI 判定为{category}，把握 {score}",
+      "unjudged": "{game}"
+    },
+    "site": {
+      "title": "站点数据",
+      "range": "时间范围",
+      "days": "{count, number} 天",
+      "games": "游戏",
+      "resources": "资源",
+      "users": "用户",
+      "comments": "评论",
+      "downloads": "累计下载",
+      "views": "累计浏览",
+      "added": "今天新增 {count, number}",
+      "today": "今天 {count, number}",
+      "chart": "每日下载与浏览",
+      "series": {
+        "downloads": "下载",
+        "views": "浏览"
+      }
+    },
+    "storage": {
+      "title": "上传与存储",
+      "spool": "暂存盘",
+      "usage": "{used} / {total}",
+      "reserve": "可用空间低于 {size} 时不再接受新的上传",
+      "uploading": "正在上传",
+      "awaitingCheck": "等待检查",
+      "awaitingStore": "等待保存",
+      "stored": "已存储",
+      "files": "{count, number} 个文件",
+      "filesOf": "{count, number} 个文件，{size}",
+      "sizeOf": "{size}，{count, number} 个文件"
+    }
+  },
+  "decision": {
+    "ALLOW": "通过",
+    "REVIEW": "待复核",
+    "BLOCK": "屏蔽"
+  },
+  "moderation": {
+    "none": "尚未审核",
+    "highest": "最高 {score}",
+    "scored": "{category} · {score}",
+    "evidence": "依据：「{text}」"
+  },
+  "category": {
+    "HARASSMENT": "骚扰",
+    "HARASSMENT_THREATENING": "骚扰与威胁",
+    "SEXUAL": "色情内容",
+    "SEXUAL_MINORS": "涉及未成年人的色情内容",
+    "HATE": "仇恨言论",
+    "HATE_THREATENING": "仇恨与威胁",
+    "ILLICIT": "违法内容",
+    "ILLICIT_VIOLENT": "暴力违法内容",
+    "SELF_HARM": "自我伤害",
+    "SELF_HARM_INTENT": "自我伤害的意图",
+    "SELF_HARM_INSTRUCTIONS": "自我伤害的方法",
+    "VIOLENCE": "暴力",
+    "VIOLENCE_GRAPHIC": "血腥暴力",
+    "SPAM": "垃圾信息",
+    "MEANINGLESS": "无意义内容"
+  },
+  "selected": "已选 {count, number} 条",
+  "clearSelection": "取消选择"
+}

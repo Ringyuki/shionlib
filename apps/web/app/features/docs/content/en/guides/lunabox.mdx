@@ -1,0 +1,104 @@
+---
+title: Downloading with LunaBox
+banner: 'https://images.yurari.moe/galgame/10568/hak8bxrz_2.png'
+description: 'Learn how to enable LunaBox in the Shionlib download menu and send game downloads directly to the LunaBox desktop app.'
+date: 2026-03-11
+order: 5
+author_uid: 1
+author_name: 'ringyuki'
+author_avatar: 'https://t.shionlib.com/user/1/avatar/f4d8e6d0-3958-420b-bb86-b2c77be60c33.webp'
+---
+
+## What is LunaBox
+
+[LunaBox](https://box.lunarain.site) is a fast, beautiful, and feature-rich lightweight visual novel management tool. Beyond downloading, it helps you organize your game library, track playtime, and even analyse your habits with a built-in AI assistant.
+
+Key features:
+
+- **Game management** — Custom categorization and flexible metadata for your library
+- **Playtime tracking** — Automatic session recording with multi-dimensional statistics and charts
+- **AI analysis** — Built-in assistant that analyses your play habits and generates reports
+- **Cloud backup** — S3 and OneDrive support for secure data sync
+- **Download integration** — Handles archive downloads with automatic decompression, checksum verification, and resume support
+
+## Installing LunaBox
+
+Download and install LunaBox from the official site: **https://box.lunarain.site**
+
+Two Windows editions are currently available:
+
+- **Installer (setup)**: Recommended for most users. During installation, LunaBox will usually try to register the `lunabox://` protocol automatically, so pushing should work out of the box. Data is stored in `%APPDATA%\LunaBox` by default.
+- **Portable**: Ready to use after extraction, but you will usually need to register the `lunabox://` protocol manually before first use. Data is stored in the program directory by default.
+
+If you later move the portable folder, reinstall Windows, or find that the installer build can no longer launch LunaBox through the protocol, you can run the registration command again:
+
+```powershell
+# Switch to the directory that contains lunacli and register the protocol
+.\lunacli.exe --register-protocol
+
+# If lunacli is already available in PATH, you can run it directly. The installation version will automatically handle the registration of environment variables
+lunacli --register-protocol
+```
+
+You can also refer to the [LunaBox documentation](https://box.lunarain.site/features/cli.html).
+
+> LunaBox currently supports **Windows** only.
+
+## Disabling or Enabling LunaBox in Shionlib
+
+LunaBox appears in the download menu by default. To disable it:
+
+1. Open **Settings** → **Downloads** (or go to `/user/settings/download`)
+2. Find **LunaBox** under **Game managers**
+3. Turn off its switch
+
+Once disabled, the LunaBox entry no longer appears in the download menu. On the same page, you can also set **Send to LunaBox** as the default download method, after which clicking the **Download** button pushes directly.
+
+![The game managers in the download settings](/assets/images/account-settings/en/download@2x.webp)
+
+## Using LunaBox to Download
+
+1. Open any game page and find the resource and file you want in the **Downloads** tab
+2. Click the arrow beside the **Download** button on the right of the file to open the **Other ways to download** menu
+3. Choose **Send to LunaBox** in the menu to push the download to it
+4. The page completes the human verification by itself — LunaBox will receive the task automatically once verified
+5. When the browser asks whether to open LunaBox, choose to allow it
+6. Switch to LunaBox — the download will have started
+
+![Sending a download to LunaBox from the menu](/assets/images/download-games/en/download-menu@2x.webp)
+
+LunaBox receives the following information with each push:
+
+| Field           | Value                                      |
+| --------------- | ------------------------------------------ |
+| Download URL    | Signed, time-limited direct link           |
+| File name       | Original file name from Shionlib           |
+| Archive format  | Auto-detected from the file extension      |
+| File size       | Exact byte count for validation            |
+| Checksum        | SHA-256 or BLAKE3 hash for integrity check |
+| Game title      | Japanese title of the game                 |
+| Metadata source | Hikarinagi (for library matching)          |
+
+## Troubleshooting
+
+**Nothing happens after choosing LunaBox in the download menu**
+
+First check whether the `lunabox://` protocol is registered correctly:
+
+- Installer build: it is usually registered automatically; if it stops working, re-register the protocol as described above, or reinstall LunaBox
+- Portable build: launch LunaBox first, then run `.\lunacli.exe --register-protocol` in the directory that contains the file
+
+After running the command, restart LunaBox and try again.
+
+**The download does not appear in LunaBox**
+
+- Check whether your browser or OS is blocking the `lunabox://` protocol
+- Check whether a confirmation dialog asking to open LunaBox was ignored
+
+**Can it download if LunaBox was not opened in advance**
+
+Yes. As long as the protocol is registered, choosing LunaBox in the Shionlib download menu will launch LunaBox automatically and pass the current download request to it.
+
+**The download does not start after the human verification**
+
+Once the human verification passes, the page hands the task to LunaBox automatically. If the download still does not start, open the download menu and choose **Send to LunaBox** again.

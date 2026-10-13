@@ -1,0 +1,58 @@
+{
+  "title": "Settings",
+  "signIn": "Sign in to change your account settings",
+  "signInAction": "Sign in",
+  "sectionsLabel": "Settings sections",
+  "section": {
+    "personal": "Profile",
+    "security": "Security",
+    "connections": "Connected accounts",
+    "download": "Downloads",
+    "site": "Preferences"
+  },
+  "site": {
+    "language": "Language",
+    "languageHint": "Also used for the emails sent to you",
+    "theme": "Theme",
+    "themeHint": "Saved in this browser only",
+    "themes": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "contentLimit": "Adult content",
+    "contentLimitHint": "How games and images with adult content are shown",
+    "contentLimits": {
+      "1": {
+        "label": "Hide",
+        "description": "Games and images with adult content are not shown"
+      },
+      "2": {
+        "label": "Mask",
+        "description": "Games are shown; images stay covered until you click them"
+      },
+      "3": {
+        "label": "Show",
+        "description": "Everything is shown as it is"
+      }
+    },
+    "games": "Game lists",
+    "onlyWithResources": "Only games with resources",
+    "onlyWithResourcesHint": "The default for the library and search; you can change it for a single visit there",
+    "profiles": "Profiles",
+    "showBackgrounds": "Show the page backgrounds of other users",
+    "showBackgroundsHint": "When off, the profiles of other users use the default background of the site"
+  },
+  "personal": {
+    "name": "User name",
+    "nameHint": "Used to sign in, and shown beside what you upload and write",
+    "nameLimit": "Up to {max} characters",
+    "nameAvailable": "This user name is available",
+    "nameTaken": "This user name is taken",
+    "nameSaved": "User name changed",
+    "profile": "Profile",
+    "profileHint": "Your avatar, banner, bio and page background are changed on your profile",
+    "openProfile": "Go to your profile",
+    "save": "Save"
+  }
+}

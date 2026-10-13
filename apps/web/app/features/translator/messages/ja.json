@@ -1,0 +1,16 @@
+{
+  "title": "翻訳グループ",
+  "count": "全 {total, number} グループ",
+  "found": "{total, number} 件のグループが一致",
+  "search": "グループ名または別名で検索",
+  "empty": "「{query}」に一致する翻訳グループは見つかりませんでした",
+  "none": "翻訳グループはまだ登録されていません",
+  "works": "{count, number} 作品",
+  "homepage": "ホームページ",
+  "worksTitle": "作品（{count, number}）",
+  "worksLabel": "作品",
+  "noWorks": "このグループの作品はまだ登録されていません",
+  "fieldLabel": "翻訳グループ",
+  "fieldPlaceholder": "名前を入力して検索または追加",
+  "create": "「{name}」を追加"
+}

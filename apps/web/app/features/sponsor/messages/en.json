@@ -1,0 +1,83 @@
+{
+  "title": "Sponsor wall",
+  "become": "Become a sponsor",
+  "again": "Sponsor again",
+  "badgeUntil": "Your sponsor badge is valid until {date}",
+  "closed": "Sponsorship is not open at the moment",
+  "empty": "No sponsors yet",
+  "sponsors": "Sponsors",
+  "tag": "Sponsor",
+  "anonymous": "Anonymous",
+  "today": "Today",
+  "coverOf": "Cover of {name}",
+  "avatarOf": "Avatar of {name}",
+  "checkout": {
+    "title": "Sponsor Shionlib",
+    "back": "Sponsor wall",
+    "step": {
+      "content": "Sponsorship",
+      "pay": "Payment",
+      "done": "Done"
+    },
+    "amount": "Amount",
+    "badgeDays": "{days}-day sponsor badge",
+    "otherAmount": "Other amount",
+    "name": "Name",
+    "message": "Message",
+    "optional": "Optional",
+    "shown": "Show on the sponsor wall",
+    "editProfile": "Edit profile",
+    "guest": "Sign in before sponsoring to receive the sponsor badge and show your profile on the sponsor wall",
+    "signIn": "Sign in",
+    "continue": "Continue"
+  },
+  "summary": {
+    "title": "Order summary",
+    "number": "Order number",
+    "badge": "Sponsor badge",
+    "until": "Valid until {date}",
+    "deadline": "Pay by",
+    "todayAt": "Today {time}",
+    "due": "Amount due"
+  },
+  "pay": {
+    "methods": "Payment method",
+    "none": "No payment method is available",
+    "fee": "Fee {fee}",
+    "amount": "Amount to pay",
+    "waiting": "Waiting for the payment to complete",
+    "open": "Open the payment page",
+    "reopen": "Reopen the payment page",
+    "go": "Go to payment",
+    "change": "Change payment method",
+    "code": "Payment QR code"
+  },
+  "method": {
+    "alipay": "Alipay",
+    "wechat_pay": "WeChat Pay",
+    "paypal": "PayPal",
+    "google_pay": "Google Pay",
+    "apple_pay": "Apple Pay",
+    "usdt": "Cryptocurrency"
+  },
+  "done": {
+    "title": "Thank you for your sponsorship",
+    "wall": "On the sponsor wall",
+    "receipt": "Receipt",
+    "amount": "Amount",
+    "method": "Payment method",
+    "paidAt": "Paid at",
+    "copyNumber": "Copy the order number",
+    "viewWall": "View the sponsor wall",
+    "home": "Back to home"
+  },
+  "ended": {
+    "expired": "The order has expired",
+    "refunded": "The order has been refunded",
+    "retry": "Sponsor again",
+    "back": "Back to the sponsor wall"
+  },
+  "issue": {
+    "amount": "Enter an amount"
+  }
+}

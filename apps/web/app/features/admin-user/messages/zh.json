@@ -1,0 +1,157 @@
+{
+  "title": "用户",
+  "search": "搜索用户名、邮箱或编号",
+  "everyRole": "全部角色",
+  "everyStatus": "全部状态",
+  "sortBy": "排序",
+  "sort": {
+    "last_login_at": "最近登录",
+    "created": "注册时间",
+    "id": "编号",
+    "name": "用户名"
+  },
+  "role": {
+    "1": "用户",
+    "2": "管理员",
+    "3": "超级管理员"
+  },
+  "status": {
+    "1": "正常",
+    "2": "已封禁"
+  },
+  "column": {
+    "user": "用户",
+    "role": "角色",
+    "resources": "资源",
+    "comments": "评论",
+    "favorites": "收藏",
+    "seen": "最近登录",
+    "joined": "注册时间",
+    "status": "状态"
+  },
+  "neverSeen": "从未登录",
+  "narrow": "资源 {resources, number} · 评论 {comments, number}{seen, select, true { · <time></time>登录} other {}}",
+  "empty": "{filtered, select, true {没有符合条件的用户} other {暂无用户}}",
+  "issue": {
+    "days": "请输入 1 到 999 之间的天数",
+    "reason": "请填写封禁原因",
+    "until": "请选择到期时间"
+  },
+  "head": {
+    "facts": "编号 {id} · 注册于 <joined></joined>{seen, select, true { · 最近登录于<last></last>} other { · 从未登录}}",
+    "profile": "个人主页",
+    "ban": "封禁",
+    "unban": "解除封禁",
+    "unbanConfirm": "确定要解除对 {name} 的封禁吗？",
+    "unbanHint": "解除后该用户可以重新登录",
+    "unbanned": "已解除对 {name} 的封禁",
+    "bannedForever": "已永久封禁",
+    "bannedUntil": "已封禁，将于 {date} 解除",
+    "banFacts": "{by} 于 <time></time> {permanent, select, true {永久封禁} other {封禁 {days, number} 天}}{known, select, true {，原因：{reason}} other {}}",
+    "system": "系统"
+  },
+  "account": {
+    "title": "账号",
+    "name": "用户名",
+    "email": "邮箱",
+    "language": "界面语言",
+    "languages": {
+      "zh": "简体中文",
+      "en": "English",
+      "ja": "日本語"
+    },
+    "contentLimit": "成人内容",
+    "save": "保存",
+    "saved": "账号资料已保存",
+    "resetPassword": "重置密码",
+    "locked": "不能修改角色与你相同或更高的用户"
+  },
+  "password": {
+    "title": "重置密码",
+    "label": "新密码",
+    "hint": "{min, number} 到 {max, number} 个字符",
+    "consequence": "保存后该用户的全部设备都需要重新登录。新密码需要由你转交给用户。",
+    "save": "保存",
+    "done": "密码已重置"
+  },
+  "ban": {
+    "title": "封禁 {name}",
+    "description": "封禁期间无法登录，已登录的设备会立即下线",
+    "length": "时长",
+    "days": "{count, number} 天",
+    "lengths": {
+      "permanent": "永久",
+      "custom": "自定"
+    },
+    "customDays": "天数",
+    "reason": "原因",
+    "reasonHint": "会写入发给该用户的通知，最多 {max, number} 个字符",
+    "removeComments": "同时删除该用户的全部评论",
+    "submit": "封禁",
+    "done": "已封禁 {name}"
+  },
+  "upload": {
+    "title": "上传",
+    "tier": "档位",
+    "tierValue": "{tier, select, new {新上传者} trusted {可信上传者} admin {管理员} other {普通上传者}}",
+    "progress": "，已发布 {approved, number} 个资源{next, select, regular {，达到 {after, number} 个时升为普通上传者} trusted {，达到 {after, number} 个时升为可信上传者} other {}}",
+    "stored": "存储空间",
+    "storedUnlimited": "{used}，不设上限",
+    "usage": "{used} / {limit}",
+    "inFlight": "正在上传",
+    "violations": "违规",
+    "violationsValue": "{count, plural, =0 {没有违规记录} other {# 次}}",
+    "frozen": "，<time></time>前按低一级的档位计算存储空间",
+    "trusted": "可信上传者",
+    "trustedHint": "直接授予可信档位：存储空间 {stored}，{limited, select, true {单个文件不超过 {file}} other {单个文件不限大小}}",
+    "trustSaved": "{trusted, select, true {已授予可信上传者} other {已收回可信上传者}}",
+    "storedLimit": "{limited, select, true {{size}} other {不设上限}}"
+  },
+  "sessions": {
+    "title": "登录会话",
+    "device": "设备",
+    "ip": "IP 地址",
+    "used": "最近使用",
+    "created": "登录时间",
+    "unknownDevice": "未知设备",
+    "unknownIp": "未知",
+    "empty": "没有登录中的设备",
+    "more": "显示最近使用的 {shown, number} 个，共 {total, number} 个",
+    "endAll": "全部下线",
+    "endAllConfirm": "确定要让 {name} 的全部设备下线吗？",
+    "endAllHint": "该用户需要在每个设备上重新登录",
+    "ended": "全部设备已下线"
+  },
+  "records": {
+    "title": "相关记录",
+    "resources": "资源",
+    "resourcesValue": "{count, number} 个已发布的资源",
+    "comments": "评论",
+    "commentsValue": "{count, number} 条评论",
+    "reports": "举报",
+    "reportsFiled": "发起 {count, number} 次",
+    "reportsAgainst": "被举报 {count, number} 次",
+    "checks": "文件检查",
+    "heldFiles": "{count, number} 个文件正在等待复核",
+    "noHeldFiles": "没有等待复核的文件"
+  },
+  "badge": {
+    "title": "赞助徽章",
+    "until": "到期时间",
+    "none": "没有赞助徽章",
+    "edit": "设置",
+    "dialog": "设置赞助徽章",
+    "description": "徽章显示在该用户的名字旁，到期后自动消失",
+    "untilHint": "清空后保存即收回徽章",
+    "save": "保存",
+    "saved": "{cleared, select, true {赞助徽章已收回} other {赞助徽章已保存}}"
+  },
+  "roles": {
+    "title": "角色",
+    "hint": "只有超级管理员可以更改角色。管理员可以进入后台并处理审核事项，超级管理员还可以修改设置、AI 网关和其他人的角色。",
+    "confirm": "确定要把 {name} 的角色改为{role}吗？",
+    "confirmHint": "{role, select, 1 {该用户将不能再进入管理后台} 2 {该用户可以进入管理后台并处理审核事项} other {该用户将拥有全部权限，包括更改其他人的角色}}",
+    "change": "更改",
+    "changed": "角色已更改"
+  }
+}

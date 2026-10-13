@@ -1,0 +1,169 @@
+import { localeCookie, localeCookieValue, type Locale } from '~/shared/i18n/locale'
+import { asksForRefresh } from './session'
+import { tokenExpiry } from './token.schema'
+
+export const accessTokenCookie = 'shionlib_access_token'
+export const refreshTokenCookie = 'shionlib_refresh_token'
+
+const forwardedHeaders = ['user-agent', 'accept-language', 'x-forwarded-for', 'x-real-ip']
+const refreshLeewaySeconds = 30
+
+export type ApiSession = {
+  fetch: (request: Request) => Promise<Response>
+  prepare: () => Promise<void>
+  issuedCookies: () => readonly string[]
+}
+
+export type ApiSessionOptions = {
+  fetch?: (request: Request) => Promise<Response>
+  now?: () => number
+  locale?: Locale
+}
+
+export function createApiSession(
+  incoming: Request,
+  apiUrl: string,
+  { fetch = globalThis.fetch, now = Date.now, locale }: ApiSessionOptions = {},
+): ApiSession {
+  const cookies = new CookieJar(incoming.headers.get('cookie') ?? '')
+  const issued: string[] = []
+  let refreshing: Promise<boolean> | undefined
+
+  const decorate = (headers: Headers) => {
+    for (const name of forwardedHeaders) {
+      const value = incoming.headers.get(name)
+      if (value !== null && !headers.has(name)) {
+        headers.set(name, value)
+      }
+    }
+    const cookie = cookies.header()
+    if (cookie === '') {
+      headers.delete('cookie')
+    } else {
+      headers.set('cookie', cookie)
+    }
+    return headers
+  }
+
+  const keep = (setCookies: readonly string[]) => {
+    issued.push(...setCookies)
+    cookies.apply(setCookies)
+  }
+
+  if (locale !== undefined && cookies.get(localeCookie) !== locale) {
+    keep([localeCookieValue(locale)])
+  }
+
+  const send = async (request: Request) => {
+    const headers = decorate(new Headers(request.headers))
+    const response = await fetch(new Request(request, { headers }))
+    keep(response.headers.getSetCookie())
+    return response
+  }
+
+  const refresh = () => {
+    refreshing ??= (async () => {
+      if (!cookies.has(refreshTokenCookie)) {
+        return false
+      }
+      const response = await fetch(
+        new Request(`${apiUrl}/auth/token/refresh`, {
+          method: 'POST',
+          headers: decorate(new Headers()),
+        }),
+      )
+      if (response.ok) {
+        keep(response.headers.getSetCookie())
+        return true
+      }
+      if (response.status === 401 || response.status === 403) {
+        keep([accessTokenCookie, refreshTokenCookie].map(expiredCookie))
+      }
+      return false
+    })()
+    return refreshing
+  }
+
+  const needsRefresh = async (response: Response) => {
+    const body: unknown =
+      response.status === 401
+        ? await response
+            .clone()
+            .json()
+            .catch(() => undefined)
+        : undefined
+    return asksForRefresh(response.status, response.headers, body)
+  }
+
+  return {
+    async fetch(request) {
+      const retry = request.clone()
+      const response = await send(request)
+      if ((await needsRefresh(response)) && (await refresh())) {
+        return send(retry)
+      }
+      return response
+    },
+    async prepare() {
+      const access = cookies.get(accessTokenCookie)
+      if (
+        cookies.has(refreshTokenCookie) &&
+        !tokenOutlives(access, now() / 1000 + refreshLeewaySeconds)
+      ) {
+        await refresh()
+      }
+    },
+    issuedCookies: () => issued,
+  }
+}
+
+function expiredCookie(name: string): string {
+  return `${name}=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0`
+}
+
+function tokenOutlives(token: string | undefined, instant: number): boolean {
+  const expiry = tokenExpiry(token)
+  return expiry !== undefined && expiry > instant
+}
+
+class CookieJar {
+  private readonly values = new Map<string, string>()
+
+  constructor(header: string) {
+    for (const part of header.split(';')) {
+      const separator = part.indexOf('=')
+      if (separator > 0) {
+        this.values.set(part.slice(0, separator).trim(), part.slice(separator + 1).trim())
+      }
+    }
+  }
+
+  get(name: string): string | undefined {
+    return this.values.get(name)
+  }
+
+  has(name: string): boolean {
+    return (this.values.get(name) ?? '') !== ''
+  }
+
+  apply(setCookies: readonly string[]) {
+    for (const setCookie of setCookies) {
+      const [pair = '', ...attributes] = setCookie.split(';')
+      const separator = pair.indexOf('=')
+      if (separator <= 0) {
+        continue
+      }
+      const name = pair.slice(0, separator).trim()
+      const expired = attributes.some(attribute => /^\s*max-age\s*=\s*0\s*$/i.test(attribute))
+      if (expired) {
+        this.values.delete(name)
+      } else {
+        this.values.set(name, pair.slice(separator + 1).trim())
+      }
+    }
+  }
+
+  header(): string {
+    return [...this.values].map(([name, value]) => `${name}=${value}`).join('; ')
+  }
+}

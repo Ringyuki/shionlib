@@ -1,0 +1,46 @@
+name: staging download worker
+
+on:
+  push:
+    branches: ['dev']
+    paths:
+      - 'apps/download-worker/**'
+      - '.github/workflows/staging-download-worker.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging-download-worker
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Cloudflare
+    runs-on: ubuntu-latest
+    environment: staging-download-worker
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile --filter shionlib-download-worker...
+
+      - name: Type check
+        run: pnpm --filter shionlib-download-worker typecheck
+
+      - name: Unit tests
+        run: pnpm --filter shionlib-download-worker test
+
+      - name: Deploy
+        working-directory: apps/download-worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy --env staging

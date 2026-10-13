@@ -1,0 +1,51 @@
+name: web
+
+on:
+  pull_request:
+    branches: ['main', 'major/shionlib-next']
+    paths:
+      - 'apps/web/**'
+      - 'apps/api/openapi/openapi.json'
+      - 'apps/web/pnpm-lock.yaml'
+      - '.claude/skills/web-frontend/**'
+      - '.github/workflows/web.yml'
+  push:
+    branches: ['main', 'major/shionlib-next']
+    paths:
+      - 'apps/web/**'
+      - 'apps/api/openapi/openapi.json'
+      - 'apps/web/pnpm-lock.yaml'
+      - '.claude/skills/web-frontend/**'
+      - '.github/workflows/web.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: web-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: apps/web/package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
+
+      - name: Install
+        working-directory: apps/web
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify
+        run: .claude/skills/web-frontend/scripts/verify.sh

@@ -11,20 +11,4 @@ if ! ls /var/lib/clamav/*.cvd /var/lib/clamav/*.cld >/dev/null 2>&1; then
   fi
 fi
 
-cat >/etc/clamav/clamd.conf <<'EOF'
-LogFile /var/log/clamav/clamd.log
-LogTime yes
-Foreground yes
-TCPSocket 3310
-TCPAddr 0.0.0.0
-LocalSocket /run/clamav/clamd.sock
-FixStaleSocket true
-User clamav
-DatabaseDirectory /var/lib/clamav
-ReadTimeout 180
-CommandReadTimeout 180
-MaxFileSize 2048M
-MaxScanSize 2048M
-EOF
-
 exec clamd --foreground=true --config-file=/etc/clamav/clamd.conf

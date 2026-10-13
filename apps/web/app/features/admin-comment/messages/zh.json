@@ -1,0 +1,62 @@
+{
+  "title": "评论",
+  "status": {
+    "1": "已显示",
+    "2": "待复核",
+    "3": "已屏蔽",
+    "ALL": "全部"
+  },
+  "pendingOf": "待复核 {count, number}",
+  "statusFilter": "状态",
+  "search": "搜索评论内容",
+  "byAuthor": "作者：{name}",
+  "sortBy": "排序",
+  "sort": {
+    "newest": "最新在前",
+    "oldest": "最早在前"
+  },
+  "column": {
+    "comment": "评论",
+    "author": "作者",
+    "game": "所在游戏",
+    "verdict": "AI 判定",
+    "time": "时间"
+  },
+  "narrow": "{author} · {game} · <time></time>",
+  "empty": "{filtered, select, true {没有符合条件的评论} other {没有待复核的评论}}",
+  "verdict": {
+    "1": "通过",
+    "3": "屏蔽"
+  },
+  "verdictHint": {
+    "1": "评论对所有人显示",
+    "3": "评论对所有人隐藏，包括作者本人"
+  },
+  "reviewed": "{status, select, 1 {评论已通过} other {评论已屏蔽}}",
+  "rescanned": "已重新提交审核",
+  "issue": {
+    "verdict": "请选择复核结果"
+  },
+  "bulk": {
+    "blockTitle": "屏蔽 {count, number} 条评论",
+    "approved": "已通过 {count, number} 条评论",
+    "blocked": "已屏蔽 {count, number} 条评论"
+  },
+  "pane": {
+    "title": "复核评论",
+    "viewTitle": "评论详情",
+    "number": "评论 #{id}",
+    "comment": "评论",
+    "game": "所在游戏",
+    "author": "作者",
+    "authorFacts": "，注册于 <joined></joined>，发表过 {written, number} 条评论{blocked, plural, =0 {} other {，其中 # 条已被屏蔽}}",
+    "written": "发表时间",
+    "history": "AI 审核记录",
+    "review": "复核",
+    "category": "类别",
+    "reason": "说明",
+    "reasonPlaceholder": "选填，会写入发给作者的通知",
+    "notify": "通知作者",
+    "rescan": "重新审核"
+  }
+}

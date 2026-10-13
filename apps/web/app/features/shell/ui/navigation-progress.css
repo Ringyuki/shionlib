@@ -1,0 +1,30 @@
+@utility navigation-progress {
+  transform-origin: 0 50%;
+  scale: 0 1;
+  opacity: 0;
+
+  &[data-phase='loading'] {
+    scale: 0.9 1;
+    opacity: 1;
+    transition:
+      scale 15s var(--hn-ease-enter-strong),
+      opacity var(--hn-duration-fast) var(--hn-ease-enter);
+
+    @media (prefers-reduced-motion: reduce) {
+      transition-duration: var(--hn-duration-base), var(--hn-duration-fast);
+    }
+  }
+
+  &[data-phase='filling'] {
+    scale: 1 1;
+    opacity: 1;
+    transition:
+      scale var(--hn-duration-base) var(--hn-ease-move),
+      opacity var(--hn-duration-fast) var(--hn-ease-enter);
+  }
+
+  &[data-phase='fading'] {
+    scale: 1 1;
+    transition: opacity var(--hn-duration-exit) var(--hn-ease-exit);
+  }
+}

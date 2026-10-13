@@ -1,0 +1,16 @@
+{
+  "title": "Translation groups",
+  "count": "{total, plural, one {# translation group} other {# translation groups}}",
+  "found": "{total, plural, one {# translation group matches} other {# translation groups match}}",
+  "search": "Search translation groups by name or alias",
+  "empty": "No translation group matches \"{query}\"",
+  "none": "No translation groups are listed yet",
+  "works": "{count, plural, one {# work} other {# works}}",
+  "homepage": "Homepage",
+  "worksTitle": "Works ({count, number})",
+  "worksLabel": "Works",
+  "noWorks": "No works of this translation group are listed yet",
+  "fieldLabel": "Translation groups",
+  "fieldPlaceholder": "Type a name to search or add",
+  "create": "Add \"{name}\""
+}

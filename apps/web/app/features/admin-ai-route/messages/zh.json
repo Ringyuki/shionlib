@@ -1,0 +1,74 @@
+{
+  "status": {
+    "active": "正常",
+    "disabled": "已停用",
+    "suspended": "暂停",
+    "since": "{kind}，<time></time>",
+    "suspendedFor": "暂停（{kind}）"
+  },
+  "price": {
+    "catalog": "来自模型目录",
+    "manual": "手动设置"
+  },
+  "adjusted": {
+    "protocol": "已自动改用 {protocol}",
+    "param": "已自动去掉参数 {name}",
+    "json_mode": "已自动改用 JSON 模式"
+  },
+  "action": {
+    "check": "检测",
+    "edit": "编辑",
+    "remove": "移除"
+  },
+  "check": {
+    "ok": "{route} 可以正常调用",
+    "firstToken": "首字耗时 {time}",
+    "failed": "{route} 检测失败：{kind}"
+  },
+  "protocolOf": "{route} 的协议",
+  "protocolChanged": "协议已改为 {protocol}",
+  "column": {
+    "model": "模型",
+    "provider": "渠道",
+    "protocol": "协议",
+    "price": "每百万 token 价格",
+    "status": "状态",
+    "requests": "请求（24 小时）"
+  },
+  "edit": {
+    "title": "编辑线路",
+    "upstreamId": "上游模型标识",
+    "upstreamIdHint": "渠道接口中这个模型的名称",
+    "protocol": "协议",
+    "enabled": "启用",
+    "enabledHint": "停用后不再经这条线路调用",
+    "suspendedHint": "这条线路已暂停，检测通过后自动恢复",
+    "priceManual": "手动设置价格",
+    "priceManualHint": "关闭后价格随模型目录更新",
+    "inputPrice": "输入价格（美元/百万 token）",
+    "outputPrice": "输出价格（美元/百万 token）",
+    "adjustments": "自动调整",
+    "revert": "还原",
+    "reverted": "已还原这项调整",
+    "save": "保存",
+    "saved": "线路已更新"
+  },
+  "remove": {
+    "title": "确定要移除这条线路吗？",
+    "description": "{model} 将不再经 {provider} 调用，已有的请求记录会保留",
+    "confirm": "移除",
+    "done": "线路已移除"
+  },
+  "batch": {
+    "enable": "启用",
+    "disable": "停用",
+    "delete": "移除",
+    "deleteTitle": "确定要移除这 {count, number} 条线路吗？",
+    "deleteHint": "已有的请求记录会保留",
+    "done": {
+      "enable": "已启用 {count, number} 条线路",
+      "disable": "已停用 {count, number} 条线路",
+      "delete": "已移除 {count, number} 条线路"
+    }
+  }
+}

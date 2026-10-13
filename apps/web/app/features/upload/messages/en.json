@@ -1,0 +1,9 @@
+{
+  "status": {
+    "active": "My uploads: uploading",
+    "attention": "My uploads: an upload needs attention",
+    "finished": "My uploads: uploads finished"
+  },
+  "submittedToast": "{label} is uploaded and waiting for its check",
+  "failedToast": "{label} could not be submitted"
+}

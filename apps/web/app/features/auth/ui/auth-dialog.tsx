@@ -1,0 +1,117 @@
+import {
+  Alert,
+  CloseButton,
+  Dialog,
+  Heading,
+  Image,
+  Inline,
+  ScrollArea,
+  Stack,
+  Text,
+} from '@hina-ui/react'
+import type { ReactNode } from 'react'
+import { preload } from 'react-dom'
+import { useTranslations } from 'use-intl'
+import { AuthGateProvider, type AuthGate } from '~/shared/ui/auth-gate'
+import { BrandLogo, Wordmark } from '~/shared/ui/brand'
+import type { AuthView } from '../auth'
+import { useAuthDialog } from '../use-auth-dialog'
+import { ForgotPasswordForm } from './forgot-password-form'
+import { SignInForm } from './sign-in-form'
+import { SignUpFormView } from './sign-up-form'
+
+const artwork = '/auth/artwork.webp'
+
+export function AuthDialogProvider({
+  signedIn,
+  children,
+}: {
+  signedIn: boolean
+  children: ReactNode
+}) {
+  const dialog = useAuthDialog(signedIn)
+  if (!signedIn) {
+    preload(artwork, { as: 'image', fetchPriority: 'low' })
+  }
+  const gate: AuthGate = {
+    signedIn,
+    requireSignIn: resume => dialog.show('sign-in', resume),
+  }
+  return (
+    <AuthGateProvider gate={gate}>
+      {children}
+      <AuthDialog
+        open={dialog.open}
+        view={dialog.view}
+        oidcFailed={dialog.oidcFailed}
+        onSwitch={dialog.switchTo}
+        onClose={dialog.close}
+      />
+    </AuthGateProvider>
+  )
+}
+
+type AuthDialogProps = {
+  open: boolean
+  view: AuthView
+  oidcFailed: boolean
+  onSwitch: (view: AuthView) => void
+  onClose: () => void
+}
+
+function AuthDialog({ open, view, oidcFailed, onSwitch, onClose }: AuthDialogProps) {
+  const t = useTranslations('auth')
+  return (
+    <Dialog
+      title={t(`${view}.title`)}
+      description={t(`${view}.description`)}
+      open={open}
+      onOpenChange={next => {
+        if (!next) {
+          onClose()
+        }
+      }}
+      size="2xl"
+      className="max-w-[58rem] md:h-[42rem]"
+      renderBody={({ close }) => (
+        <Inline gap="none" align="stretch" wrap={false} className="relative h-full min-h-0">
+          <Image
+            src={artwork}
+            alt=""
+            aria-hidden
+            fit="cover"
+            imageClass="object-[28%_50%]"
+            className="bg-subtle hidden aspect-[2/3] h-full w-auto shrink-0 md:block"
+          />
+          <ScrollArea className="min-h-0 min-w-0 flex-1">
+            <Stack gap="lg" justify="center" className="min-h-full px-6 py-8 sm:px-8">
+              <Stack gap="md">
+                <Inline gap="sm" align="center" wrap={false}>
+                  <BrandLogo className="size-8" />
+                  <Wordmark />
+                </Inline>
+                <Stack gap="xs" aria-hidden>
+                  <Heading level={2} size="xl" weight="semibold">
+                    {t(`${view}.title`)}
+                  </Heading>
+                  <Text size="sm" tone="muted">
+                    {t(`${view}.description`)}
+                  </Text>
+                </Stack>
+              </Stack>
+              <Alert tone="danger" open={oidcFailed && view === 'sign-in'}>
+                {t('methods.oidcFailed')}
+              </Alert>
+              {view === 'sign-in' && <SignInForm key="sign-in" onSwitch={onSwitch} />}
+              {view === 'sign-up' && <SignUpFormView key="sign-up" onSwitch={onSwitch} />}
+              {view === 'forgot-password' && (
+                <ForgotPasswordForm key="forgot-password" onSwitch={onSwitch} />
+              )}
+            </Stack>
+          </ScrollArea>
+          <CloseButton label={t('close')} onClick={close} className="absolute end-3 top-3" />
+        </Inline>
+      )}
+    />
+  )
+}

@@ -10,6 +10,7 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 COPY docker/clamav/entrypoint.sh /usr/local/bin/clamav-entrypoint
+COPY infra/clamav/clamd.conf /etc/clamav/clamd.conf
 
 RUN chmod +x /usr/local/bin/clamav-entrypoint \
   && mkdir -p /var/lib/clamav /run/clamav /var/log/clamav \

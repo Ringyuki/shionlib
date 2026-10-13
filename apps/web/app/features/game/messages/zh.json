@@ -1,0 +1,102 @@
+{
+  "releaseTba": "发售日待定",
+  "released": "发售于 {date, date, long}",
+  "tba": "待定",
+  "noResources": "暂无资源",
+  "resources": "{count} 个资源",
+  "downloads": "{count, number} 次下载",
+  "updated": "<time></time>更新",
+  "platform": {
+    "win": "Windows",
+    "mac": "macOS",
+    "ios": "iOS",
+    "and": "Android",
+    "lin": "Linux",
+    "ps3": "PS3",
+    "ps4": "PS4",
+    "psv": "PS Vita",
+    "psp": "PSP",
+    "swi": "Switch",
+    "dvd": "DVD"
+  },
+  "language": {
+    "en": "英文",
+    "zh": "简中",
+    "zh-hant": "繁中",
+    "jp": "日文"
+  },
+  "tabs": {
+    "label": "游戏页面",
+    "resources": "资源",
+    "info": "简介",
+    "characters": "角色",
+    "comments": "评论",
+    "walkthrough": "攻略"
+  },
+  "facts": {
+    "aliases": "又名 {names}"
+  },
+  "score": {
+    "bangumi": "Bangumi",
+    "vndb": "VNDB",
+    "votes": "{count, number} 人评分",
+    "none": "暂无评分"
+  },
+  "actions": {
+    "upload": "上传资源",
+    "download": "下载（{count} 个资源）",
+    "readMore": "阅读完整简介"
+  },
+  "cover": {
+    "explicit": "成人内容，点击显示",
+    "reveal": "点击显示"
+  },
+  "info": {
+    "intro": "简介",
+    "noIntro": "这个游戏暂无简介",
+    "introLanguage": "简介语言",
+    "tags": "标签",
+    "staff": "Staff",
+    "screenshots": "截图",
+    "relations": "关联作品",
+    "extra": "其他信息",
+    "links": "相关链接",
+    "screenshot": "游戏截图",
+    "viewScreenshot": "查看截图 {index}"
+  },
+  "introLanguage": {
+    "zh": "中文",
+    "jp": "日文",
+    "en": "英文"
+  },
+  "relation": {
+    "PREQUEL": "前作",
+    "SEQUEL": "续作",
+    "MAIN_STORY": "本篇",
+    "SIDE_STORY": "外传",
+    "EXPANSION": "扩展",
+    "VARIANT": "其他版本",
+    "MAIN_VERSION": "原版",
+    "COLLECTION": "合集",
+    "COLLECTED_WORK": "收录作品",
+    "SAME_UNIVERSE": "同一世界观",
+    "DIFFERENT_ADAPTATION": "其他改编",
+    "SHARED_CHARACTERS": "共享角色",
+    "FAN_DISC": "Fan Disc"
+  },
+  "meta": {
+    "developers": "开发商",
+    "released": "发售日",
+    "platforms": "平台",
+    "type": "类型"
+  },
+  "orderLabel": "排序方式",
+  "order": {
+    "newest": "最新发售",
+    "oldest": "最早发售",
+    "updated": "最近更新资源",
+    "hot": "热度最高",
+    "views": "浏览最多",
+    "downloads": "下载最多"
+  }
+}

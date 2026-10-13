@@ -1,0 +1,87 @@
+name: web-e2e
+
+on:
+  pull_request:
+    branches: ['main', 'major/shionlib-next']
+    paths:
+      - 'apps/web/**'
+      - 'apps/api/**'
+      - 'docker/compose.e2e-go.yml'
+      - 'docker/env/api-e2e.env'
+      - 'docker/api-e2e/**'
+      - 'docker/clamav/**'
+      - 'docker/scripts/test-e2e-web.sh'
+      - 'docker/scripts/cap-site-key.sh'
+      - '.github/workflows/web-e2e.yml'
+  push:
+    branches: ['main', 'major/shionlib-next']
+    paths:
+      - 'apps/web/**'
+      - 'apps/api/**'
+      - 'docker/compose.e2e-go.yml'
+      - 'docker/env/api-e2e.env'
+      - 'docker/api-e2e/**'
+      - 'docker/clamav/**'
+      - 'docker/scripts/test-e2e-web.sh'
+      - 'docker/scripts/cap-site-key.sh'
+      - '.github/workflows/web-e2e.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: web-e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  playwright:
+    name: Playwright
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CI: true
+      E2E_KEEP_STACK: 1
+      E2E_COMPOSE_PROJECT_NAME: shionlib-e2e-web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: apps/web/package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
+
+      - name: Install
+        working-directory: apps/web
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium
+        working-directory: apps/web
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Playwright against the e2e stack
+        run: bash docker/scripts/test-e2e-web.sh
+
+      - name: Capture compose logs
+        if: failure()
+        run: docker compose -f docker/compose.e2e-go.yml logs --no-color > docker-compose.log
+
+      - name: Stop the e2e stack
+        if: always()
+        run: docker compose -f docker/compose.e2e-go.yml down --remove-orphans --volumes
+
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-playwright
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+            docker-compose.log
+          if-no-files-found: ignore

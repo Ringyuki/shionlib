@@ -1,0 +1,125 @@
+{
+  "Comment": {
+    "Reply": {
+      "Title": "コメントに返信がありました",
+      "Content": "あなたのコメントに返信がありました"
+    },
+    "Like": {
+      "Title": "コメントにいいねがつきました",
+      "Content": "あなたのコメントにいいねがつきました"
+    },
+    "Resource": {
+      "Title": "公開したリソースにコメントがありました",
+      "Content": "あなたが公開したリソースにコメントがありました"
+    }
+  },
+  "System": {
+    "File": {
+      "Upload": {
+        "FileUploadSuccessTitle": "ファイルのアップロードが完了しました",
+        "FileUploadSuccessContent": "アップロードしたファイル {file_name} を保存しました。共有ありがとうございます。",
+        "ResourcePublishedTitle": "リソースを公開しました",
+        "ResourcePublishedContent": "アップロードしたリソースを公開しました。ファイルは {file_count} 件です：{file_names}。",
+        "ResourceLinkText": "リソースを見る",
+        "FileUploadFailedTitle": "ファイルが検査を通過しませんでした",
+        "FileCheckFailedContent": "アップロードしたファイル {file_name} は検査を通過しませんでした：{reason}。{missing_volumes, select, none {} other {不足している分割ファイル：{missing_volumes}。}}ファイルを確認して、もう一度アップロードしてください。",
+        "FileCheckStalledTitle": "ファイルの検査を完了できませんでした",
+        "FileCheckStalledContent": "アップロードしたファイル {file_name} の検査が繰り返し失敗したため、管理者に引き継ぎました。現時点で操作は不要です。",
+        "FileCheckStalledAdminTitle": "検査が停止したファイルがあります",
+        "FileCheckStalledAdminContent": "{uploader_name} がアップロードしたファイル {file_name} の検査が {failures} 回連続で失敗したため、再試行を停止しました。直近のエラー：{last_error}。{review_deadline} までに対応してください。期限を過ぎるとファイルは削除されます。",
+        "FileCheckStalledAdminLinkText": "リソースを表示",
+        "FileVirusReviewPendingTitle": "ファイルが審査待ちです",
+        "FileVirusReviewPendingContent": "アップロードしたファイル {file_name} がウイルス検査で検出され（{detected_viruses}）、管理者による審査に回されました（ケース #{malware_case_id}）。{review_deadline} までに完了します。",
+        "FileVirusReviewRequiredTitle": "ウイルス審査待ちのファイルがあります",
+        "FileVirusReviewRequiredContent": "{uploader_name} がアップロードしたファイル {file_name} がウイルス検査で検出されました（{detected_viruses}）。ケース #{malware_case_id}、{review_deadline} までに対応してください。",
+        "FileVirusReviewRequiredLinkText": "審査する",
+        "FileVirusFalsePositiveReleasedTitle": "ファイルが審査を通過しました",
+        "FileVirusFalsePositiveReleasedContent": "あなたのファイル {file_name}（ケース #{malware_case_id}）は誤検知と判定され、利用できるようになりました。{review_note, select, none {} other {審査メモ：{review_note}}}",
+        "FileVirusConfirmedDeletedTitle": "審査の結果、ファイルを削除しました",
+        "FileVirusConfirmedDeletedContent": "あなたのファイル {file_name}（ケース #{malware_case_id}）は有害と判定され、削除されました。有害なファイルのアップロードは累計 {upload_injected_file_times} 回です。連続 {malware_auto_ban_threshold} 回に達するとアカウントが停止されます。{review_note, select, none {} other {審査メモ：{review_note}}}"
+      },
+      "Reupload": {
+        "FileReuploadedTitle": "お気に入りのゲームのファイルが更新されました",
+        "FileReuploadedContent": "お気に入りのゲーム「{game_title}」のファイル {file_name} が更新されました。{reason, select, none {} other {更新内容：{reason}}}"
+      },
+      "Compose": {
+        "DoneTitle": "合成が完了しました",
+        "DoneContent": "合成が完了し、リソースを公開しました：{file_name}",
+        "RebuiltTitle": "再合成が完了しました",
+        "RebuiltContent": "新しいパッチでリソースを再合成しました：{file_name}",
+        "FailedTitle": "合成に失敗しました",
+        "FailedContent": "{file_name} の合成を完了できませんでした：{reason}"
+      }
+    },
+    "Moderation": {
+      "Comment": {
+        "Block": {
+          "Title": "コメントが審査を通過しませんでした",
+          "Content": "投稿したコメントは審査を通過しませんでした。理由：{top_category}。内容を修正して、もう一度投稿してください。",
+          "ReviewContent": "投稿したコメントは審査を通過しませんでした。理由：{top_category}。{reason, select, none {} other {審査メモ：{reason}。}}{evidence, select, none {} other {該当箇所：{evidence}。}}内容を修正して、もう一度投稿してください。"
+        }
+      },
+      "Walkthrough": {
+        "Block": {
+          "Title": "攻略が審査を通過しませんでした",
+          "ReviewContent": "「{game_title}」に公開した攻略は審査を通過しませんでした。理由：{top_category}。{reason, select, none {} other {審査メモ：{reason}。}}{evidence, select, none {} other {該当箇所：{evidence}。}}内容を修正して、もう一度公開してください。",
+          "LinkText": "攻略を開く"
+        }
+      }
+    },
+    "Report": {
+      "Valid": {
+        "Title": "通報が認められました",
+        "Content": "あなたの通報は確認の結果、認められました。違反の種類：{reason}、深刻度：{malicious_level}。{process_note, select, none {} other {対応メモ：{process_note}}}"
+      },
+      "Invalid": {
+        "Title": "通報は認められませんでした",
+        "Content": "あなたの通報は確認の結果、認められませんでした。直近 30 日間の無効な通報は {false_report_count} 回です。無効な通報を繰り返すとペナルティの対象になります。{ban_days, select, none {} other {アカウントを {ban_days} 日間停止しました。}}{process_note, select, none {} other {対応メモ：{process_note}}}"
+      },
+      "Penalty": {
+        "Title": "リソース違反のお知らせ",
+        "Content": "アップロードしたリソースは確認の結果、違反と判定されました。違反の種類：{reason}、深刻度：{malicious_level}。{upload_tier_demoted, select, true {アップロードのランクを引き下げました。} other {}}{ban_days, select, none {} other {アカウントを {ban_days} 日間停止しました。}}{process_note, select, none {} other {対応メモ：{process_note}}}"
+      },
+      "NewReport": {
+        "Title": "新しいリソース通報があります",
+        "Content": "{reporter_name} が {reported_user_name} のアップロードしたリソースを通報しました。理由：{reason}、深刻度：{malicious_level}。",
+        "LinkText": "対応する"
+      }
+    },
+    "AI": {
+      "RouteSuspended": {
+        "Title": "AI ルートを停止しました",
+        "Content": "{provider} のモデル {model}（{upstream_id}）は呼び出しの失敗により停止されました。{error_kind, select, none {} other {エラーの種類：{error_kind}。}}{error_message, select, none {} other {エラー内容：{error_message}}}"
+      },
+      "RouteRecovered": {
+        "Title": "AI ルートが復旧しました",
+        "Content": "{provider} のモデル {model}（{upstream_id}）は再び利用できます"
+      }
+    }
+  },
+  "Value": {
+    "reason": {
+      "OK": "問題なし",
+      "BROKEN_OR_TRUNCATED": "ファイルが破損しているか不完全です",
+      "BROKEN_OR_UNSUPPORTED": "ファイルが破損しているか、対応していない形式です",
+      "ENCRYPTED": "アーカイブが暗号化されていて検査できません",
+      "INCOMPLETE_SET": "分割ファイルが揃っていません",
+      "ABANDONED": "ファイルの検査を完了できませんでした",
+      "HARMFUL": "有害な内容が検出されました",
+      "COMPOSE_BASE_GONE": "オリジナル版のリソースが存在しないか、使用できなくなりました",
+      "COMPOSE_BASE_UNREADABLE": "オリジナル版のアーカイブを展開できません",
+      "COMPOSE_PATCH_UNREADABLE": "パッチのアーカイブを使用できません",
+      "COMPOSE_SAVE_UNREADABLE": "セーブデータのアーカイブを展開できません",
+      "COMPOSE_PLACE_MISSING": "選択したフォルダーが展開後のファイルにありません",
+      "COMPOSE_NO_ROOM": "サーバーの作業用領域が不足しています",
+      "COMPOSE_TOO_LARGE": "展開後のサイズが上限を超えています",
+      "COMPOSE_HARMFUL": "合成後のファイルから有害な内容が検出されました",
+      "COMPOSE_BROKEN": "合成後のアーカイブが検査を通過しませんでした",
+      "COMPOSE_NOTHING_TO_APPLY": "パッチフォルダーにゲームフォルダーへ配置できるファイルがありません",
+      "COMPOSE_PATH_CONFLICT": "パッチのファイルが、オリジナル版にある同名のファイルまたはフォルダーと競合しています",
+      "COMPOSE_QUEUE_FULL": "待機中の合成タスクが上限に達しています",
+      "COMPOSE_QUOTA": "ストレージの空き容量が不足しています",
+      "COMPOSE_INTERNAL": "処理中にエラーが発生しました"
+    }
+  }
+}

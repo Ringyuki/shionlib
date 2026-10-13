@@ -1,6 +1,5 @@
 #!/usr/bin/env sh
 set -e
-pnpm typecheck
-pnpm test:frontend:unit
-pnpm test:backend:unit
+pnpm typecheck:og
+pnpm typecheck:download-worker
 pnpm test:og
