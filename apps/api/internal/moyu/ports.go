@@ -12,7 +12,7 @@ type Games interface {
 }
 
 type Patches interface {
-	ResourcesByVNDBID(ctx context.Context, vndbID string) (Lookup, error)
+	EntriesByVNDBID(ctx context.Context, vndbID string) ([]Entry, error)
 }
 
 type Cache interface {

@@ -51,7 +51,7 @@ func run(args []string) error {
 }
 
 func usage() error {
-	return fmt.Errorf("usage: devtool <migrate diff <name> | migrate check | bizcode check | bizcode docs | feature create <name> <range> | deploy env | deploy check | e2e reset|seed|prepare>")
+	return fmt.Errorf("usage: devtool <migrate diff <name> | migrate check | bizcode check | bizcode docs | feature create <name> <range> | deploy env | deploy check | e2e reset|seed|prepare|upstream>")
 }
 
 func moduleRoot() (string, error) {

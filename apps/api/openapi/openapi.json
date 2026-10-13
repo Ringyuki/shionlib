@@ -5800,7 +5800,6 @@
           600102,
           600103,
           600104,
-          610101,
           610102,
           620101,
           620102,
@@ -5966,7 +5965,6 @@
           "TRANSLATOR_NAME_TAKEN",
           "TRANSLATOR_TOO_MANY",
           "TRANSLATOR_MERGE_NEEDS_OTHERS",
-          "MOYU_PATCH_NOT_FOUND",
           "MOYU_REQUEST_FAILED",
           "CATALOG_SOURCE_UNAVAILABLE",
           "CATALOG_UNKNOWN_SOURCE",
@@ -12135,6 +12133,45 @@
         ],
         "type": "object"
       },
+      "EnvelopeListMoyuEntryDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/MoyuEntryDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "requestId",
+          "timestamp"
+        ],
+        "type": "object"
+      },
       "EnvelopeListOngoingUploadDTO": {
         "additionalProperties": false,
         "properties": {
@@ -12419,43 +12456,6 @@
             "items": {
               "$ref": "#/components/schemas/TranslatorListItemDTO"
             },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "message": {
-            "type": "string"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/Meta"
-          },
-          "requestId": {
-            "type": "string"
-          },
-          "timestamp": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "code",
-          "message",
-          "data",
-          "requestId",
-          "timestamp"
-        ],
-        "type": "object"
-      },
-      "EnvelopeListValue": {
-        "additionalProperties": false,
-        "properties": {
-          "code": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "data": {
-            "items": {},
             "type": [
               "array",
               "null"
@@ -17702,6 +17702,148 @@
             "$ref": "#/components/schemas/AuthMeta"
           }
         },
+        "type": "object"
+      },
+      "MoyuEntryDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "downloads": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "description": "save for a file of saved games with every picture unlocked, patch for everything else",
+            "enum": [
+              "patch",
+              "save"
+            ],
+            "type": "string"
+          },
+          "language": {
+            "items": {
+              "enum": [
+                "en",
+                "zh",
+                "zh-hant",
+                "jp"
+              ],
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "model": {
+            "description": "The model a machine translation was made with; null when the other site names none",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "description": "Empty when the entry has no name of its own",
+            "type": "string"
+          },
+          "platform": {
+            "items": {
+              "enum": [
+                "win",
+                "mac",
+                "ios",
+                "and",
+                "lin"
+              ],
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "publisher": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MoyuPublisherDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "size": {
+            "description": "In bytes, read from the size the other site states; null when it cannot be read",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "translation": {
+            "description": "Where the text of a translation patch comes from; null for everything else",
+            "enum": [
+              "group",
+              "machine"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "translator": {
+            "description": "The translators as the other site names them; null when it names none",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "description": "The page of the entry on the other site, where it is downloaded",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "name",
+          "size",
+          "language",
+          "platform",
+          "translation",
+          "translator",
+          "model",
+          "downloads",
+          "url",
+          "updated",
+          "publisher"
+        ],
+        "type": "object"
+      },
+      "MoyuPublisherDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "avatar": {
+            "description": "Address of the publisher's avatar on the other site; null without one",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "avatar"
+        ],
         "type": "object"
       },
       "OidcIdentitiesDTO": {
@@ -35479,7 +35621,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EnvelopeListValue"
+                  "$ref": "#/components/schemas/EnvelopeListMoyuEntryDTO"
                 }
               }
             },
@@ -35503,7 +35645,7 @@
             "description": "Error"
           }
         },
-        "summary": "Community patch resources for a game, forwarded from NextMoe",
+        "summary": "Patches and saved games for a game that 鲲 Galgame 补丁 lists; empty when it lists none",
         "tags": [
           "moyu"
         ]

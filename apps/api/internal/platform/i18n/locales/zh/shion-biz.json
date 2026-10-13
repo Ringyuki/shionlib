@@ -129,7 +129,6 @@
   "TRANSLATOR_NAME_TAKEN": "这个名称已被其他汉化组使用",
   "TRANSLATOR_TOO_MANY": "一个资源最多填写 {max} 个汉化组",
   "TRANSLATOR_MERGE_NEEDS_OTHERS": "请选择至少一个其他汉化组",
-  "MOYU_PATCH_NOT_FOUND": "鲲 Galgame 补丁暂无该游戏的补丁",
   "MOYU_REQUEST_FAILED": "获取补丁失败",
   "AI_PROVIDER_NOT_FOUND": "AI 渠道不存在",
   "AI_PROVIDER_NAME_TAKEN": "已存在同名的 AI 渠道",

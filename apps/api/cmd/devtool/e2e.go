@@ -14,8 +14,11 @@ import (
 )
 
 func runE2E(ctx context.Context, command string) (err error) {
+	if command == "upstream" {
+		return serveE2EUpstream()
+	}
 	if command != "reset" && command != "seed" && command != "prepare" {
-		return fmt.Errorf("usage: devtool e2e <reset | seed | prepare>")
+		return fmt.Errorf("usage: devtool e2e <reset | seed | prepare | upstream>")
 	}
 	cfg, err := config.Load()
 	if err != nil {

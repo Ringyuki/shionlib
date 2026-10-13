@@ -30,34 +30,35 @@ type patchList struct {
 	} `json:"items"`
 }
 
-func (c *Client) ResourcesByVNDBID(ctx context.Context, vndbID string) (moyu.Lookup, error) {
+func (c *Client) EntriesByVNDBID(ctx context.Context, vndbID string) ([]moyu.Entry, error) {
 	query := url.Values{"refs": {"vndb:" + vndbID}, "nsfw": {"true"}, "include": {"resources,publisher"}}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+"/v2/moyu/patches?"+query.Encode(), nil)
 	if err != nil {
-		return moyu.Lookup{}, fmt.Errorf("build nextmoe request: %w", err)
+		return nil, fmt.Errorf("build nextmoe request: %w", err)
 	}
 	req.Header.Set("Authorization", "Bearer "+c.apiKey)
 	req.Header.Set("Accept", "application/json")
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return moyu.Lookup{}, moyu.ErrRequestFailed.Wrap(fmt.Errorf("nextmoe patches for %s: %w", vndbID, err))
+		return nil, moyu.ErrRequestFailed.Wrap(fmt.Errorf("nextmoe patches for %s: %w", vndbID, err))
 	}
 	defer func() {
 		_ = resp.Body.Close()
 	}()
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return moyu.Lookup{}, moyu.ErrRequestFailed.Wrap(fmt.Errorf("nextmoe patches for %s returned %d", vndbID, resp.StatusCode))
+		return nil, moyu.ErrRequestFailed.Wrap(fmt.Errorf("nextmoe patches for %s returned %d", vndbID, resp.StatusCode))
 	}
 	var list patchList
 	if err := json.NewDecoder(io.LimitReader(resp.Body, maxResponseBytes)).Decode(&list); err != nil {
-		return moyu.Lookup{}, moyu.ErrRequestFailed.Wrap(fmt.Errorf("decode nextmoe patches for %s: %w", vndbID, err))
+		return nil, moyu.ErrRequestFailed.Wrap(fmt.Errorf("decode nextmoe patches for %s: %w", vndbID, err))
 	}
-	if len(list.Items) == 0 {
-		return moyu.Lookup{}, nil
+	entries := []moyu.Entry{}
+	for _, item := range list.Items {
+		for _, raw := range item.Resources {
+			if entry, ok := entryOf(raw); ok {
+				entries = append(entries, entry)
+			}
+		}
 	}
-	resources := list.Items[0].Resources
-	if resources == nil {
-		resources = []json.RawMessage{}
-	}
-	return moyu.Lookup{Found: true, Resources: resources}, nil
+	return entries, nil
 }

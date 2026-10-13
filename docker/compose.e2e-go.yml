@@ -109,6 +109,14 @@ services:
       redis:
         condition: service_healthy
 
+  upstream:
+    image: shionlib-e2e-go-seed:local
+    command: ['e2e', 'upstream']
+    restart: unless-stopped
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+
   api:
     image: shionlib-e2e-go-api:local
     command: ['serve']
@@ -118,6 +126,8 @@ services:
     depends_on:
       seed:
         condition: service_completed_successfully
+      upstream:
+        condition: service_started
       redis:
         condition: service_healthy
       clamav:

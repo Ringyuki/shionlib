@@ -129,7 +129,6 @@
   "TRANSLATOR_NAME_TAKEN": "この名称は他の翻訳グループが使用しています",
   "TRANSLATOR_TOO_MANY": "一つのリソースに記入できる翻訳グループは {max} 件までです",
   "TRANSLATOR_MERGE_NEEDS_OTHERS": "他の翻訳グループを一つ以上選択してください",
-  "MOYU_PATCH_NOT_FOUND": "鲲 Galgame 补丁 にこのゲームのパッチはありません",
   "MOYU_REQUEST_FAILED": "パッチを取得できませんでした",
   "AI_PROVIDER_NOT_FOUND": "AI プロバイダーが見つかりません",
   "AI_PROVIDER_NAME_TAKEN": "同じ名前の AI プロバイダーが既に存在します",

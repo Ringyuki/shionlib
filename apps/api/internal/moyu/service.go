@@ -16,37 +16,31 @@ func NewService(games Games, patches Patches, cache Cache) *Service {
 	return &Service{games: games, patches: patches, cache: cache}
 }
 
-func (s *Service) Resources(ctx context.Context, viewer actor.Actor, gameID int) ([]Resource, error) {
+func (s *Service) Entries(ctx context.Context, viewer actor.Actor, gameID int) ([]Entry, error) {
 	vndbID, ok, err := s.games.VNDBID(ctx, gameID, viewer)
 	if err != nil {
 		return nil, err
 	}
 	if !ok || vndbID == "" {
-		return nil, ErrPatchNotFound
+		return []Entry{}, nil
 	}
-	lookup, err := s.lookup(ctx, vndbID)
+	key := CacheKeyPrefix + vndbID
+	var cached []Entry
+	if found, err := s.cache.Get(ctx, key, &cached); err == nil && found {
+		return listed(cached), nil
+	}
+	entries, err := s.patches.EntriesByVNDBID(ctx, vndbID)
 	if err != nil {
+		_ = s.cache.Set(ctx, key, []Entry{}, FailureTTL)
 		return nil, err
 	}
-	if !lookup.Found {
-		return nil, ErrPatchNotFound
-	}
-	if lookup.Resources == nil {
-		return []Resource{}, nil
-	}
-	return lookup.Resources, nil
+	_ = s.cache.Set(ctx, key, listed(entries), CacheTTL)
+	return listed(entries), nil
 }
 
-func (s *Service) lookup(ctx context.Context, vndbID string) (Lookup, error) {
-	key := CacheKeyPrefix + vndbID
-	var cached Lookup
-	if found, err := s.cache.Get(ctx, key, &cached); err == nil && found {
-		return cached, nil
+func listed(entries []Entry) []Entry {
+	if entries == nil {
+		return []Entry{}
 	}
-	lookup, err := s.patches.ResourcesByVNDBID(ctx, vndbID)
-	if err != nil {
-		return Lookup{}, err
-	}
-	_ = s.cache.Set(ctx, key, lookup, CacheTTL)
-	return lookup, nil
+	return entries
 }

@@ -2,7 +2,6 @@ package moyuhttp
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 
 	"github.com/Ringyuki/shionlib/apps/api/internal/actor"
@@ -23,13 +22,17 @@ func NewHandler(service *moyu.Service, resp *response.Builder) *Handler {
 }
 
 func (h *Handler) Register(api *httpapi.API) {
-	httpapi.Register(api, httpapi.Route{ID: "moyu.patches", Method: http.MethodGet, Path: "/moyu/game/{gameId}/patches", Summary: "Community patch resources for a game, forwarded from NextMoe", Tags: tags}, h.patches)
+	httpapi.Register(api, httpapi.Route{ID: "moyu.patches", Method: http.MethodGet, Path: "/moyu/game/{gameId}/patches", Summary: "Patches and saved games for a game that 鲲 Galgame 补丁 lists; empty when it lists none", Tags: tags}, h.patches)
 }
 
-func (h *Handler) patches(ctx context.Context, in *moyuPatchesInput) (*response.Output[[]json.RawMessage], error) {
-	resources, err := h.service.Resources(ctx, actor.From(ctx), in.GameID)
+func (h *Handler) patches(ctx context.Context, in *moyuPatchesInput) (*response.Output[[]moyuEntryDTO], error) {
+	entries, err := h.service.Entries(ctx, actor.From(ctx), in.GameID)
 	if err != nil {
 		return nil, err
 	}
-	return response.OK(ctx, h.resp, resources), nil
+	dtos := make([]moyuEntryDTO, len(entries))
+	for i, entry := range entries {
+		dtos[i] = toEntryDTO(entry)
+	}
+	return response.OK(ctx, h.resp, dtos), nil
 }

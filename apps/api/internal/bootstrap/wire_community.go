@@ -61,7 +61,7 @@ func wireCommunity(_ *Infra, shared *Shared, modules *Modules) {
 
 	moyuService := moyu.NewService(
 		moyupg.NewGameStore(shared.Ent),
-		nextmoe.NewClient(httpclient.New(httpclient.Options{Timeout: 10 * time.Second}), cfg.NextMoe.BaseURL, cfg.NextMoe.APIKey),
+		nextmoe.NewClient(httpclient.New(httpclient.Options{Timeout: moyu.RequestTimeout}), cfg.NextMoe.BaseURL, cfg.NextMoe.APIKey),
 		shared.Cache,
 	)
 

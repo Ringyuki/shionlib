@@ -19,28 +19,29 @@ func (g Games) VNDBID(_ context.Context, gameID int, _ actor.Actor) (string, boo
 
 type Patches struct {
 	mu      sync.Mutex
-	Lookups map[string]moyu.Lookup
+	Entries map[string][]moyu.Entry
 	Fail    error
 	Calls   int
 }
 
-func (p *Patches) ResourcesByVNDBID(_ context.Context, vndbID string) (moyu.Lookup, error) {
+func (p *Patches) EntriesByVNDBID(_ context.Context, vndbID string) ([]moyu.Entry, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.Calls++
 	if p.Fail != nil {
-		return moyu.Lookup{}, p.Fail
+		return nil, p.Fail
 	}
-	return p.Lookups[vndbID], nil
+	return p.Entries[vndbID], nil
 }
 
 type Cache struct {
 	mu      sync.Mutex
 	entries map[string][]byte
+	ttls    map[string]time.Duration
 }
 
 func NewCache() *Cache {
-	return &Cache{entries: map[string][]byte{}}
+	return &Cache{entries: map[string][]byte{}, ttls: map[string]time.Duration{}}
 }
 
 func (c *Cache) Get(_ context.Context, key string, dst any) (bool, error) {
@@ -53,7 +54,7 @@ func (c *Cache) Get(_ context.Context, key string, dst any) (bool, error) {
 	return true, json.Unmarshal(raw, dst)
 }
 
-func (c *Cache) Set(_ context.Context, key string, value any, _ time.Duration) error {
+func (c *Cache) Set(_ context.Context, key string, value any, ttl time.Duration) error {
 	raw, err := json.Marshal(value)
 	if err != nil {
 		return err
@@ -61,6 +62,7 @@ func (c *Cache) Set(_ context.Context, key string, value any, _ time.Duration) e
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.entries[key] = raw
+	c.ttls[key] = ttl
 	return nil
 }
 
@@ -69,4 +71,10 @@ func (c *Cache) Has(key string) bool {
 	defer c.mu.Unlock()
 	_, ok := c.entries[key]
 	return ok
+}
+
+func (c *Cache) TTL(key string) time.Duration {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.ttls[key]
 }
