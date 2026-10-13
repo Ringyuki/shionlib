@@ -181,6 +181,9 @@ func named(name string, encoding inspection.Encoding) []string {
 }
 
 func writtenBytes(name string) ([]byte, bool) {
+	if !utf8.ValidString(name) {
+		return []byte(name), true
+	}
 	raw := make([]byte, 0, len(name))
 	escaped := false
 	for _, char := range name {
