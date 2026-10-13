@@ -1,6 +1,7 @@
 import { UiLocaleProvider, enUS, jaJP, zhCN } from '@hina-ui/react'
 import type { ReactNode } from 'react'
 import {
+  data,
   Outlet,
   redirect,
   useRouteLoaderData,
@@ -17,9 +18,17 @@ import type { Route } from './+types/lang'
 
 const uiMessages = { zh: zhCN, en: enUS, ja: jaJP } satisfies Record<Locale, typeof zhCN>
 
-export async function loader({ params, request, url }: Route.LoaderArgs) {
+export const middleware: Route.MiddlewareFunction[] = [
+  ({ params, request, url }) => {
+    if (!isLocale(params.lang)) {
+      throw redirect(localizedLocation(request.headers.get('cookie') ?? '', url))
+    }
+  },
+]
+
+export async function loader({ params }: Route.LoaderArgs) {
   if (!isLocale(params.lang)) {
-    throw redirect(localizedLocation(request.headers.get('cookie') ?? '', url))
+    throw data(null, { status: 404 })
   }
   return { locale: params.lang, messages: await loadMessages(params.lang) }
 }
