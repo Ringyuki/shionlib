@@ -5,6 +5,7 @@ export type NavKey =
   | 'games'
   | 'releases'
   | 'developers'
+  | 'translators'
   | 'activity'
   | 'docs'
   | 'favorites'
@@ -84,6 +85,7 @@ export function navSections(locale: Locale, viewerId: number | null, unread = 0)
       entry('games', paths.games, false, 0, [`/${locale}/resource`]),
       entry('releases', paths.releases),
       entry('developers', `/${locale}/developer`),
+      entry('translators', `/${locale}/translator`),
       entry('activity', `/${locale}/activity`),
       entry('docs', `/${locale}/docs`),
     ],

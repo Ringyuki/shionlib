@@ -1,5 +1,7 @@
 import * as v from 'valibot'
 import type { FormKit } from '~/shared/form/form-kit'
+import { infoValuesFrom } from './resource-info'
+import { infoCommand, infoFields, infoRules, type InfoIssue } from './resource-info.schema'
 import {
   languageOptions,
   leastLanguages,
@@ -11,7 +13,7 @@ import {
   type Resource,
 } from './resource'
 
-export type ResourceIssue = 'platforms' | 'languages' | 'simulator' | 'files'
+export type ResourceIssue = 'platforms' | 'languages' | 'simulator' | 'files' | InfoIssue
 
 export type ResourceIssueMessage = (issue: ResourceIssue) => string
 
@@ -37,6 +39,7 @@ export const editCommand = v.object({
   language: languages,
   simulator,
   note: v.string(),
+  ...infoCommand,
 })
 
 export type ResourceEdit = v.InferOutput<typeof editCommand>
@@ -84,7 +87,9 @@ export function editForm(kit: FormKit, issue: ResourceIssueMessage) {
       language: languageField(issue),
       simulator,
       note: kit.text('EditDownloadSourceBodyInput', 'note'),
+      ...infoFields(field => kit.text('EditDownloadSourceBodyInput', field)),
     }),
+    infoRules(issue, false),
     v.forward(
       v.partialCheck(
         [['platform'], ['simulator']],
@@ -103,8 +108,10 @@ export function uploadForm(kit: FormKit, issue: ResourceIssueMessage) {
       language: languageField(issue),
       simulator,
       note: kit.text('DownloadSourceBodyInput', 'note'),
+      ...infoFields(field => kit.text('DownloadSourceBodyInput', field)),
       files: filesField(issue),
     }),
+    infoRules(issue, true),
     v.forward(
       v.partialCheck(
         [['platform'], ['simulator']],
@@ -135,7 +142,10 @@ export type ReplaceValues = v.InferInput<ReturnType<typeof replaceForm>>
 
 export type EditValues = v.InferInput<ReturnType<typeof editForm>>
 
-export function editValuesFrom(resource: Resource): EditValues {
+type Editable = Pick<Resource, 'platform' | 'language' | 'simulator' | 'note'> &
+  Parameters<typeof infoValuesFrom>[0]
+
+export function editValuesFrom(resource: Editable): EditValues {
   const platform = resource.platform ?? []
   const language = resource.language ?? []
   return {
@@ -143,6 +153,7 @@ export function editValuesFrom(resource: Resource): EditValues {
     language: languageOptions.filter(option => language.includes(option)),
     simulator: simulatorOptions.find(option => option === resource.simulator) ?? '',
     note: resource.note ?? '',
+    ...infoValuesFrom(resource),
   }
 }
 

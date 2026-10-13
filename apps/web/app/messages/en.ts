@@ -20,6 +20,7 @@ import search from '~/features/search/messages/en.json'
 import settings from '~/features/settings/messages/en.json'
 import shell from '~/features/shell/messages/en.json'
 import sponsor from '~/features/sponsor/messages/en.json'
+import translator from '~/features/translator/messages/en.json'
 import upload from '~/features/upload/messages/en.json'
 import uploader from '~/features/uploader/messages/en.json'
 import walkthrough from '~/features/walkthrough/messages/en.json'
@@ -58,6 +59,7 @@ export const messages: Messages = {
   shell,
   site,
   sponsor,
+  translator,
   upload,
   uploader,
   walkthrough,

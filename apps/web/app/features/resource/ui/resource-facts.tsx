@@ -1,15 +1,13 @@
-import { Avatar, Inline, Link, Tag, Text, useImageResolver } from '@hina-ui/react'
+import { Avatar, Inline, Link, Text, useImageResolver } from '@hina-ui/react'
 import { Download } from 'lucide-react'
 import { Link as RouterLink } from 'react-router'
-import { useFormatter, useLocale, useMessages, useTranslations } from 'use-intl'
-import { PlatformTag } from '~/features/game'
+import { useFormatter, useLocale, useTranslations } from 'use-intl'
 import { profilePath } from '~/features/profile'
-import { labelOf } from '~/shared/i18n/labels'
 import type { Resource } from '../resource'
+import { ResourceTags } from './resource-tags'
 
 export function ResourceFacts({ resource }: { resource: Resource }) {
   const t = useTranslations('resource')
-  const labels = useMessages()
   const locale = useLocale()
   const format = useFormatter()
   const resolveImage = useImageResolver()
@@ -17,19 +15,7 @@ export function ResourceFacts({ resource }: { resource: Resource }) {
   const published = resource.published_at ?? resource.created
   return (
     <Inline gap="md" align="center" className="min-w-0 flex-1 gap-y-2">
-      <Inline gap="xs">
-        {(resource.platform ?? []).map(platform => (
-          <PlatformTag key={platform} platform={platform} />
-        ))}
-        {(resource.language ?? []).map(language => (
-          <Tag key={language} variant="outline">
-            {labelOf(labels.game.language, language)}
-          </Tag>
-        ))}
-        {resource.simulator !== null && (
-          <Tag variant="outline">{labelOf(labels.resource.simulatorName, resource.simulator)}</Tag>
-        )}
-      </Inline>
+      <ResourceTags resource={resource} />
       <Link asChild tone="neutral" className="inline-flex items-center gap-1.5">
         <RouterLink to={profilePath(locale, creator.id)} prefetch="intent">
           <Avatar

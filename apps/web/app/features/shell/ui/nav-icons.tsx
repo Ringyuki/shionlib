@@ -1,5 +1,6 @@
 import {
   Bell,
+  BookA,
   BookOpen,
   Bookmark,
   Building2,
@@ -18,6 +19,7 @@ export const navIcons: Record<NavKey, LucideIcon> = {
   games: Gamepad2,
   releases: CalendarDays,
   developers: Building2,
+  translators: BookA,
   activity: History,
   docs: BookOpen,
   favorites: Bookmark,

@@ -62,7 +62,7 @@ export type GameDetails = Schema<'GameDetailsDTO'>
 
 export type Works = { games: GameSummary[]; total: number; page: number; order: GameOrder }
 
-export type WorksOf = { developer: number } | { character: number }
+export type WorksOf = { developer: number } | { character: number } | { translator: number }
 
 export const worksPageSize = 36
 

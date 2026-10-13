@@ -22,6 +22,7 @@ async function uploadResource(page: Page, files: string[]) {
   await page.locator('input[type="file"]').setInputFiles(files)
   await page.getByRole('group', { name: '平台' }).getByRole('button', { name: 'Windows' }).click()
   await page.getByRole('group', { name: '语言' }).getByRole('button', { name: '日文' }).click()
+  await page.getByRole('group', { name: '形态' }).getByRole('button', { name: '免安装' }).click()
   await page.getByRole('button', { name: '开始上传' }).click()
   await expect(page).toHaveURL(/\/zh\/user\/uploads\?status=uploading$/)
 }
@@ -131,6 +132,61 @@ test.describe('as an uploader', () => {
       { timeout: 60_000 },
     )
     await expect(resource.getByText('等待分卷')).toHaveCount(0)
+  })
+
+  test('asks where a translation comes from and credits the translators that are named', async ({
+    page,
+  }, testInfo) => {
+    await page.goto('/zh/upload?game=6')
+    await page
+      .locator('input[type="file"]')
+      .setInputFiles([await sampleFile(testInfo, 'e2e-info.7z', 1024)])
+    await page.getByRole('group', { name: '平台' }).getByRole('button', { name: 'Windows' }).click()
+    await expect(page.getByRole('group', { name: '翻译' })).toHaveCount(0)
+    await page.getByRole('group', { name: '语言' }).getByRole('button', { name: '简中' }).click()
+    await page.getByRole('button', { name: '开始上传' }).click()
+    await expect(page.getByText('请选择翻译')).toBeVisible()
+    await expect(page.getByText('请选择形态')).toBeVisible()
+
+    await page.getByRole('group', { name: '翻译' }).getByRole('button', { name: '汉化组' }).click()
+    await page.getByRole('button', { name: '开始上传' }).click()
+    await expect(page.getByText('至少填写一个汉化组')).toBeVisible()
+    const translators = page.getByRole('combobox', { name: '汉化组' })
+    await translators.fill('green')
+    await page.getByRole('option', { name: /绿茶汉化组/ }).click()
+    await translators.fill('E2E 新汉化组')
+    await page.getByRole('option', { name: '新建“E2E 新汉化组”' }).click()
+    await page.getByLabel('补丁版本').fill('v1.1')
+    await page.getByLabel('发布页').fill('example.org/patch')
+    await page.getByRole('group', { name: '形态' }).getByRole('button', { name: '免安装' }).click()
+    await page
+      .getByRole('group', { name: '附带内容' })
+      .getByRole('button', { name: '全CG存档' })
+      .click()
+    await page.getByRole('button', { name: '开始上传' }).click()
+    await expect(page.getByText('请填写以 http:// 或 https:// 开头的地址')).toBeVisible()
+    await page.getByLabel('发布页').fill('https://example.org/patch')
+    await page.getByRole('button', { name: '开始上传' }).click()
+    await expect(page).toHaveURL(/\/zh\/user\/uploads\?status=uploading$/)
+    await showEveryStage(page)
+    await expect(resourceWith(page, 'e2e-info.7z')).toBeVisible({ timeout: 60_000 })
+
+    await page.goto('/zh/game/6')
+    const card = resourceWith(page, 'e2e-info.7z')
+    await expect(card.getByRole('link', { name: '绿茶汉化组' })).toHaveAttribute(
+      'href',
+      '/zh/translator/1',
+    )
+    await expect(card.getByRole('link', { name: 'E2E 新汉化组' })).toBeVisible()
+    for (const tag of ['v1.1', '免安装', '全CG存档']) {
+      await expect(card.getByText(tag, { exact: true })).toBeVisible()
+    }
+    await card.getByRole('link', { name: /查看 e2e-info\.7z/ }).click()
+    await page.getByRole('tab', { name: '详细信息' }).click()
+    await expect(page.getByRole('link', { name: 'https://example.org/patch' })).toHaveAttribute(
+      'target',
+      '_blank',
+    )
   })
 
   test('tells on the page of a resource why it cannot be downloaded yet', async ({

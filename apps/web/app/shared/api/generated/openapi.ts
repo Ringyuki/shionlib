@@ -1051,6 +1051,91 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/admin/content/translators": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List translators for administration */
+        get: operations["adminTranslator.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/content/translators/duplicates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List translators whose names differ only in writing */
+        get: operations["adminTranslator.duplicates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/content/translators/duplicates/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record that similar names are different translators */
+        post: operations["adminTranslator.dismiss"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/content/translators/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit a translator */
+        patch: operations["adminTranslator.edit"];
+        trace?: never;
+    };
+    "/admin/content/translators/{id}/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Merge other translators into this one */
+        post: operations["adminTranslator.merge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/pending": {
         parameters: {
             query?: never;
@@ -3132,6 +3217,57 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/translator/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List translators that have published works */
+        get: operations["translator.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/translator/suggest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Suggest translators for a name being typed */
+        get: operations["translator.suggest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/translator/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a translator */
+        get: operations["translator.get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/uploads/large/hold": {
         parameters: {
             query?: never;
@@ -4221,6 +4357,39 @@ export type components = {
             /** Format: int64 */
             files: number;
         };
+        AdminTranslatorClusterDTO: {
+            translators: components["schemas"]["AdminTranslatorItemDTO"][] | null;
+        };
+        AdminTranslatorDismissInputBody: {
+            /** @description Translators that are not the same despite their similar names */
+            ids: number[] | null;
+        };
+        AdminTranslatorEditInputBody: {
+            aliases?: string[];
+            /** @description An empty text clears the homepage */
+            homepage?: string;
+            name?: string;
+        };
+        AdminTranslatorItemDTO: {
+            aliases: string[] | null;
+            homepage: string | null;
+            /** Format: int64 */
+            id: number;
+            /**
+             * Format: date-time
+             * @description When the latest resource crediting the translator was published; null without credits
+             */
+            latest_credit: string | null;
+            name: string;
+            /** Format: int64 */
+            resources_count: number;
+            /** Format: int64 */
+            works_count: number;
+        };
+        AdminTranslatorMergeInputBody: {
+            /** @description Translators whose credits and names move to the one in the path */
+            merged_ids: number[] | null;
+        };
         AdminUserAllowMaskDTO: {
             /** @description Decimal string of the user's own grants */
             allowMask: string;
@@ -5262,7 +5431,7 @@ export type components = {
          * Format: int64
          * @enum {integer}
          */
-        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 400109 | 400110 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 610101 | 610102 | 620101 | 620102 | 620103 | 620104 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103;
+        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 400109 | 400110 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 600101 | 600102 | 600103 | 600104 | 610101 | 610102 | 620101 | 620102 | 620103 | 620104 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103;
         CatalogExcludedDTO: {
             /** @enum {string} */
             entity: "game" | "developer" | "character";
@@ -5688,7 +5857,7 @@ export type components = {
         };
         DownloadEventChangeDTO: {
             /** @enum {string} */
-            field: "platforms" | "languages" | "simulator" | "note";
+            field: "platforms" | "languages" | "simulator" | "note" | "translation" | "translators" | "patch_version" | "release_url" | "edition" | "edition_name" | "form" | "extras";
             /** @description Values after the edit; empty when the field was cleared */
             new: string[] | null;
             /** @description Values before the edit; empty when the field was unset */
@@ -5706,10 +5875,10 @@ export type components = {
             /** Format: int64 */
             id: number;
             /**
-             * @description What happened: the resource was published, a file was replaced, renamed, added or removed, the resource's fields were edited, or an admin cleared a file flagged by the malware scan
+             * @description What happened: the resource was published, a file was replaced, renamed, added or removed, the resource's fields were edited, an admin cleared a file flagged by the malware scan, or the check found a disc image and set the form to disc
              * @enum {string}
              */
-            kind: "published" | "file_replaced" | "file_renamed" | "file_added" | "file_removed" | "edited" | "review_cleared";
+            kind: "published" | "file_replaced" | "file_renamed" | "file_added" | "file_removed" | "edited" | "review_cleared" | "disc_found";
             /** @description The file replaced or cleared, or the new name of a renamed file */
             name: string | null;
             /**
@@ -5923,21 +6092,40 @@ export type components = {
             creator: components["schemas"]["UserSummaryDTO"];
             /** Format: int64 */
             downloads: number;
+            /** @enum {string|null} */
+            edition: "download" | "package" | "steam" | null;
+            edition_name: string | null;
+            extras: ("save" | "bonus")[] | null;
             /** @description The files in the order they are read: the volumes of a set together and in their own order, sets and single files by the first of their files that was added */
             files: components["schemas"]["DownloadFileDTO"][] | null;
+            /**
+             * @description How the game is packed; null when nobody has said
+             * @enum {string|null}
+             */
+            form: "disc" | "installer" | "portable" | null;
             /** Format: int64 */
             id: number;
             language: string[] | null;
             /** @description File names of the volumes that the sets still waiting for their check lack, as their siblings are named; empty when nothing is missing */
             missing_volumes: string[] | null;
             note: string | null;
+            patch_version: string | null;
             platform: string[] | null;
             /**
              * Format: date-time
              * @description Null while the resource is still being checked; only its uploader sees it then
              */
             published_at: string | null;
+            /** @description The page the translation was released on */
+            release_url: string | null;
             simulator: string | null;
+            /**
+             * @description Where the text in a language other than Japanese comes from; null when nobody has said
+             * @enum {string|null}
+             */
+            translation: "none" | "official" | "group" | "machine" | null;
+            /** @description The translators credited, in the order they were given; empty unless the translation is by a group */
+            translators: components["schemas"]["DownloadTranslatorDTO"][] | null;
             /** Format: date-time */
             updated: string;
             /**
@@ -5959,13 +6147,38 @@ export type components = {
             upload_session_id: number;
         };
         DownloadSourceBodyInput: {
+            /** @enum {string} */
+            edition?: "download" | "package" | "steam";
+            /** @description The name of the edition, such as 初回限定版 */
+            edition_name?: string;
+            extras?: ("save" | "bonus")[] | null;
             /** @description Completed upload sessions to attach, one per file */
             files: components["schemas"]["DownloadFileUploadInput"][] | null;
+            /**
+             * @description How the game is packed: a disc image, an installer, or a folder that runs as it is
+             * @enum {string}
+             */
+            form: "disc" | "installer" | "portable";
             language: ("en" | "zh" | "zh-hant" | "jp")[] | null;
             note?: string;
+            patch_version?: string;
             platform: ("win" | "mac" | "ios" | "and" | "lin" | "ps3" | "ps4" | "psv" | "psp" | "swi" | "dvd")[] | null;
+            /** @description The page the translation was released on */
+            release_url?: string;
             /** @enum {string} */
             simulator?: "KRKR" | "ONS" | "ARTEMIS" | "OTHER";
+            /**
+             * @description Where the text in a language other than Japanese comes from; required when the languages include one
+             * @enum {string}
+             */
+            translation?: "none" | "official" | "group" | "machine";
+            /** @description Names of the translators credited when the translation is by a group; a name that is not known yet creates the translator */
+            translators?: string[] | null;
+        };
+        DownloadTranslatorDTO: {
+            /** Format: int64 */
+            id: number;
+            name: string;
         };
         DownloadUserResourceDTO: {
             /** Format: date-time */
@@ -6012,11 +6225,31 @@ export type components = {
             content: components["schemas"]["RichTextDocument"];
         };
         EditDownloadSourceBodyInput: {
+            /** @enum {string} */
+            edition?: "download" | "package" | "steam";
+            /** @description The name of the edition, such as 初回限定版 */
+            edition_name?: string;
+            extras?: ("save" | "bonus")[] | null;
+            /**
+             * @description Left out for a resource whose form is not known
+             * @enum {string}
+             */
+            form?: "disc" | "installer" | "portable";
             language: ("en" | "zh" | "zh-hant" | "jp")[] | null;
             note?: string;
+            patch_version?: string;
             platform: ("win" | "mac" | "ios" | "and" | "lin" | "ps3" | "ps4" | "psv" | "psp" | "swi" | "dvd")[] | null;
+            /** @description The page the translation was released on */
+            release_url?: string;
             /** @enum {string} */
             simulator?: "KRKR" | "ONS" | "ARTEMIS" | "OTHER";
+            /**
+             * @description Where the text in a language other than Japanese comes from; required when the languages include one
+             * @enum {string}
+             */
+            translation?: "none" | "official" | "group" | "machine";
+            /** @description Names of the translators credited when the translation is by a group; a name that is not known yet creates the translator */
+            translators?: string[] | null;
         };
         EditRecordDTO: {
             action: string;
@@ -6747,6 +6980,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeListAdminTranslatorClusterDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["AdminTranslatorClusterDTO"][] | null;
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeListAiBreakdownRowDTO: {
             /** Format: int64 */
             code: number;
@@ -6947,6 +7190,16 @@ export type components = {
             /** Format: date-time */
             timestamp: string;
         };
+        EnvelopeListTranslatorListItemDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["TranslatorListItemDTO"][] | null;
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
         EnvelopeListValue: {
             /** Format: int64 */
             code: number;
@@ -7051,6 +7304,16 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["PageAdminGameItemDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopePageAdminTranslatorItemDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["PageAdminTranslatorItemDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -7241,6 +7504,16 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["PageSponsorWallEntryDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopePageTranslatorListItemDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["PageTranslatorListItemDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -7452,6 +7725,16 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["StorageListingDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeTranslatorDetailDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["TranslatorDetailDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -8424,6 +8707,10 @@ export type components = {
             items: components["schemas"]["AdminGameItemDTO"][] | null;
             meta: components["schemas"]["PageMeta"];
         };
+        PageAdminTranslatorItemDTO: {
+            items: components["schemas"]["AdminTranslatorItemDTO"][] | null;
+            meta: components["schemas"]["PageMeta"];
+        };
         PageAdminUserItemDTO: {
             items: components["schemas"]["AdminUserItemDTO"][] | null;
             meta: components["schemas"]["PageMeta"];
@@ -8510,6 +8797,10 @@ export type components = {
         };
         PageSponsorWallEntryDTO: {
             items: components["schemas"]["SponsorWallEntryDTO"][] | null;
+            meta: components["schemas"]["PageMeta"];
+        };
+        PageTranslatorListItemDTO: {
+            items: components["schemas"]["TranslatorListItemDTO"][] | null;
             meta: components["schemas"]["PageMeta"];
         };
         PasskeyCreatedDTO: {
@@ -9101,6 +9392,23 @@ export type components = {
             /** Format: int64 */
             Size: number;
             StorageClass?: string;
+        };
+        TranslatorDetailDTO: {
+            aliases: string[] | null;
+            homepage: string | null;
+            /** Format: int64 */
+            id: number;
+            name: string;
+            /** Format: int64 */
+            works_count: number;
+        };
+        TranslatorListItemDTO: {
+            aliases: string[] | null;
+            /** Format: int64 */
+            id: number;
+            name: string;
+            /** Format: int64 */
+            works_count: number;
         };
         UpdateAdInputBody: {
             aspect?: string;
@@ -12044,6 +12352,181 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminTranslator.list": {
+        parameters: {
+            query?: {
+                /** @description 1-based page number */
+                page?: number;
+                /** @description Items per page */
+                pageSize?: number;
+                /** @description Case-insensitive substring of the name or an alias */
+                search?: string;
+                sortBy?: "works" | "resources" | "latest" | "name";
+                sortOrder?: "asc" | "desc";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopePageAdminTranslatorItemDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminTranslator.duplicates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeListAdminTranslatorClusterDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminTranslator.dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminTranslatorDismissInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminTranslator.edit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminTranslatorEditInputBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyEnvelope"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "adminTranslator.merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminTranslatorMergeInputBody"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {
@@ -15284,6 +15767,8 @@ export interface operations {
                 developer_id?: number;
                 /** @description Only games featuring this character; the resource setting is ignored */
                 character_id?: number;
+                /** @description Only games with a published resource credited to this translator; the resource setting is ignored */
+                translator_id?: number;
                 /** @description Games carrying any of these tags */
                 "filter[tags][]"?: string[] | null;
                 /** @description Games carrying none of these tags */
@@ -16863,6 +17348,108 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeListSearchTagDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "translator.list": {
+        parameters: {
+            query?: {
+                /** @description 1-based page number */
+                page?: number;
+                /** @description Items per page */
+                pageSize?: number;
+                /** @description Matches names and aliases */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopePageTranslatorListItemDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "translator.suggest": {
+        parameters: {
+            query?: {
+                /** @description Matches names and aliases, including translators without published works; left empty, the translators with the most works are suggested */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeListTranslatorListItemDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "translator.get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeTranslatorDetailDTO"];
                 };
             };
             /** @description Error */

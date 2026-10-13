@@ -31,7 +31,11 @@
       "processing": "当前没有正在处理的资源",
       "published": "尚无已发布的资源"
     },
-    "emptyHint": "选择游戏并上传文件，文件通过检查后将自动发布"
+    "emptyHint": "选择游戏并上传文件，文件通过检查后将自动发布",
+    "missing": {
+      "translation": "未注明翻译",
+      "form": "未注明形态"
+    }
   },
   "account": {
     "title": "存储空间与下载统计",

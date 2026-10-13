@@ -7,17 +7,26 @@ import { GamePicker } from '~/features/search'
 import { admit, type Allowance } from '~/features/upload'
 import { useFormKit } from '~/shared/form/use-form-kit'
 import { Button } from '~/shared/ui/button'
+import { blankInfo } from '../resource-info'
 import { uploadForm, type UploadValues } from '../resource.schema'
+import { useResourceIssue } from '../use-resource-issue'
 import { useStartUpload } from '../use-start-upload'
 import { ResourceFields } from './resource-fields'
 import { UploadFilesField } from './upload-files-field'
 import { UploadGame } from './upload-game'
 
-const blank: UploadValues = { platform: [], language: [], simulator: '', note: '', files: [] }
+const blank: UploadValues = {
+  platform: [],
+  language: [],
+  simulator: '',
+  note: '',
+  files: [],
+  ...blankInfo,
+}
 
 export function UploadForm({ game, allowance }: { game: GameHeader | null; allowance: Allowance }) {
   const t = useTranslations('resource')
-  const issue = useTranslations('resource.issue')
+  const issue = useResourceIssue()
   const kit = useFormKit()
   const [values, setValues] = useState<UploadValues>(blank)
   const [, setSearchParams] = useSearchParams()
@@ -54,6 +63,7 @@ export function UploadForm({ game, allowance }: { game: GameHeader | null; allow
       />
       <ResourceFields
         values={values}
+        complete
         onValuesChange={fields => setValues({ ...values, ...fields })}
       />
       <Inline justify="end">

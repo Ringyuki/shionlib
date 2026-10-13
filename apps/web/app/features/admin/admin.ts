@@ -11,6 +11,7 @@ export const adminPaths = {
   comments: `${adminRoot}/comments`,
   walkthroughs: `${adminRoot}/walkthroughs`,
   games: `${adminRoot}/games`,
+  translators: `${adminRoot}/translators`,
   users: `${adminRoot}/users`,
   sponsors: `${adminRoot}/sponsors`,
   catalog: `${adminRoot}/catalog`,
@@ -43,6 +44,7 @@ export type NavKey =
   | 'comments'
   | 'walkthroughs'
   | 'games'
+  | 'translators'
   | 'users'
   | 'sponsors'
   | 'catalog'
@@ -88,6 +90,7 @@ export function navigationOf(pending: Pending): Navigation {
         key: 'manage',
         entries: [
           entry('games', adminPaths.games),
+          entry('translators', adminPaths.translators),
           entry('users', adminPaths.users),
           entry('sponsors', adminPaths.sponsors),
         ],

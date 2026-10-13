@@ -1,17 +1,18 @@
 import { Inline, Link, Tag, Time } from '@hina-ui/react'
 import { Clock, Download, Gamepad2 } from 'lucide-react'
 import { Link as RouterLink } from 'react-router'
-import { useLocale, useMessages, useTranslations } from 'use-intl'
-import { gamePath, gameTitle, PlatformTag } from '~/features/game'
+import { useLocale, useTranslations } from 'use-intl'
+import { gamePath, gameTitle } from '~/features/game'
 import {
   awaitedVolumes,
+  missingInfo,
   ResourceMenu,
+  ResourceTags,
   resourceAnchor,
   resourcePath,
   rightsOver,
   type ResourceViewer,
 } from '~/features/resource'
-import { labelOf } from '~/shared/i18n/labels'
 import { stageOf, type OwnResource } from '../uploader'
 import { EntryShell } from './entry-shell'
 import { Fact } from './fact'
@@ -26,7 +27,6 @@ type ResourceEntryProps = {
 export function ResourceEntry({ own, viewer }: ResourceEntryProps) {
   const t = useTranslations('uploader.list')
   const locale = useLocale()
-  const labels = useMessages()
   const { game, resource } = own
   const files = resource.files ?? []
   const page = resource.published_at === null ? undefined : resourcePath(locale, resource.id)
@@ -54,19 +54,12 @@ export function ResourceEntry({ own, viewer }: ResourceEntryProps) {
             </Link>
           </Fact>
           <Inline gap="xs" align="center" className="min-h-5.5">
-            {(resource.platform ?? []).map(platform => (
-              <PlatformTag key={platform} platform={platform} />
-            ))}
-            {(resource.language ?? []).map(language => (
-              <Tag key={language} size="sm" variant="outline">
-                {labelOf(labels.game.language, language)}
+            <ResourceTags resource={resource} />
+            {missingInfo(resource).map(missing => (
+              <Tag key={missing} size="sm" tone="warning">
+                {t(`missing.${missing}`)}
               </Tag>
             ))}
-            {resource.simulator !== null && (
-              <Tag size="sm" variant="outline">
-                {labelOf(labels.resource.simulatorName, resource.simulator)}
-              </Tag>
-            )}
           </Inline>
           {resource.published_at !== null && (
             <Fact icon={Download}>{t('downloads', { count: resource.downloads })}</Fact>

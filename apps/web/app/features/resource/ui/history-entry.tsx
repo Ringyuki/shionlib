@@ -30,7 +30,19 @@ export function HistoryEntry({ event }: { event: ResourceEvent }) {
           return labelOf(labels.game.language, value)
         case 'simulator':
           return labelOf(labels.resource.simulatorName, value)
+        case 'translation':
+          return labelOf(labels.resource.translationName, value)
+        case 'edition':
+          return labelOf(labels.resource.editionName, value)
+        case 'form':
+          return labelOf(labels.resource.formName, value)
+        case 'extras':
+          return labelOf(labels.resource.extraName, value)
         case 'note':
+        case 'translators':
+        case 'patch_version':
+        case 'release_url':
+        case 'edition_name':
           return value
       }
     })

@@ -8,6 +8,7 @@ import {
   downloadable,
   fileState,
   reportReasons,
+  resourceDraft,
   rightsOver,
   resourcePlatforms,
   shortHash,
@@ -16,6 +17,7 @@ import {
   type ReportReason,
   type Resource,
 } from './resource'
+import { blankInfo } from './resource-info'
 
 const file: Parameters<typeof fileState>[0] = {
   stage: 'stored',
@@ -38,6 +40,14 @@ const resource = (id: number, platform: Resource['platform']): Resource => ({
   files: [],
   missing_volumes: [],
   volumes_deadline: null,
+  translation: null,
+  translators: [],
+  patch_version: null,
+  release_url: null,
+  edition: null,
+  edition_name: null,
+  form: null,
+  extras: [],
 })
 
 describe('fileState', () => {
@@ -145,6 +155,34 @@ describe('report reasons', () => {
     expect(tables.every(table => reportReasons.every(reason => (table[reason] ?? '') !== ''))).toBe(
       true,
     )
+  })
+})
+
+describe('resourceDraft', () => {
+  const values: Parameters<typeof resourceDraft>[0] = {
+    platform: ['and'],
+    language: ['zh'],
+    simulator: 'KRKR',
+    note: ' 模拟器选择 data.xp3 ',
+    ...blankInfo,
+    translation: 'official',
+    form: 'portable',
+  }
+
+  it('is what creating the resource sends, without the files', () => {
+    expect(resourceDraft(values)).toEqual({
+      platform: ['and'],
+      language: ['zh'],
+      simulator: 'KRKR',
+      note: '模拟器选择 data.xp3',
+      translation: 'official',
+      form: 'portable',
+      extras: [],
+    })
+  })
+
+  it('cannot be made before the form is chosen', () => {
+    expect(resourceDraft({ ...values, form: '' })).toBeUndefined()
   })
 })
 

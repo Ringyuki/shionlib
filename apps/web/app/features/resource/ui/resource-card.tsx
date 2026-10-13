@@ -6,16 +6,13 @@ import {
   Inline,
   Link,
   Stack,
-  Tag,
   Text,
   Time,
   useImageResolver,
 } from '@hina-ui/react'
 import { Clock, Download, MessageCircle } from 'lucide-react'
 import { Link as RouterLink } from 'react-router'
-import { useFormatter, useLocale, useMessages, useTranslations } from 'use-intl'
-import { PlatformTag } from '~/features/game'
-import { labelOf } from '~/shared/i18n/labels'
+import { useFormatter, useLocale, useTranslations } from 'use-intl'
 import { BBCodeText } from '~/shared/ui/bbcode-text'
 import { entryLink } from '~/shared/ui/entry-link'
 import {
@@ -28,6 +25,7 @@ import {
 import { resourcePath } from '../resource-page'
 import { ResourceMenu } from './resource-menu'
 import { ResourceFiles } from './resource-files'
+import { ResourceTags } from './resource-tags'
 
 type ResourceCardProps = {
   resource: Resource
@@ -36,7 +34,6 @@ type ResourceCardProps = {
 
 export function ResourceCard({ resource, viewer }: ResourceCardProps) {
   const t = useTranslations('resource')
-  const labels = useMessages()
   const locale = useLocale()
   const format = useFormatter()
   const resolveImage = useImageResolver()
@@ -61,21 +58,7 @@ export function ResourceCard({ resource, viewer }: ResourceCardProps) {
       </Stack>
       <Stack gap="sm" className="pointer-events-none relative p-4">
         <Grid className="grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
-          <Inline gap="xs">
-            {(resource.platform ?? []).map(platform => (
-              <PlatformTag key={platform} platform={platform} size="lg" />
-            ))}
-            {(resource.language ?? []).map(language => (
-              <Tag key={language} size="lg" variant="outline">
-                {labelOf(labels.game.language, language)}
-              </Tag>
-            ))}
-            {resource.simulator !== null && (
-              <Tag size="lg" variant="outline">
-                {labelOf(labels.resource.simulatorName, resource.simulator)}
-              </Tag>
-            )}
-          </Inline>
+          <ResourceTags resource={resource} size="lg" />
           <Inline
             gap="md"
             align="center"

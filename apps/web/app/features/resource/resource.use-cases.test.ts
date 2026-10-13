@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { fakeApi } from '~/shared/api/testing'
 import type { ApiData } from '~/shared/api/types'
+import { blankInfo } from './resource-info'
 import {
+  editResource,
   loadAllowance,
   loadResourceEvents,
   loadResourcePage,
@@ -25,6 +27,14 @@ const detail: ApiData<'/game/download-source/{id}', 'get'> = {
     files: null,
     missing_volumes: [],
     volumes_deadline: null,
+    translation: null,
+    translators: [],
+    patch_version: null,
+    release_url: null,
+    edition: null,
+    edition_name: null,
+    form: null,
+    extras: [],
   },
   game: {
     id: 7,
@@ -96,6 +106,36 @@ describe('loadResourceEvents', () => {
     const fake = fakeApi().on('get', '/game/download-source/{id}/events', null)
     await expect(loadResourceEvents(fake.api, 31)).resolves.toEqual([])
     expect(new URL(fake.requests[0]?.url ?? '').pathname).toBe('/game/download-source/31/events')
+  })
+})
+
+describe('editResource', () => {
+  it('sends the fields of the resource with its information', async () => {
+    const fake = fakeApi().on('patch', '/game/download-source/{id}', undefined)
+    await editResource(fake.api, {
+      resourceId: 31,
+      platform: ['win'],
+      language: ['zh'],
+      simulator: 'KRKR',
+      note: ' 附带特典 ',
+      ...blankInfo,
+      translation: 'group',
+      translators: ['绿茶汉化组'],
+      patchVersion: 'v1.1',
+      form: 'portable',
+    })
+    const [request] = fake.requests
+    expect(new URL(request?.url ?? '').pathname).toBe('/game/download-source/31')
+    await expect(request?.json()).resolves.toEqual({
+      platform: ['win'],
+      language: ['zh'],
+      note: '附带特典',
+      translation: 'group',
+      translators: ['绿茶汉化组'],
+      patch_version: 'v1.1',
+      form: 'portable',
+      extras: [],
+    })
   })
 })
 

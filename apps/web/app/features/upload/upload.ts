@@ -6,11 +6,13 @@ export type OngoingUpload = Schema<'OngoingUploadDTO'>
 
 type ResourceFields = Schema<'DownloadSourceBodyInput'>
 
-export type ResourceDraft = {
+type ListedFields = 'platform' | 'language' | 'translators' | 'extras'
+
+export type ResourceDraft = Omit<ResourceFields, 'files' | ListedFields> & {
   platform: NonNullable<ResourceFields['platform']>
   language: NonNullable<ResourceFields['language']>
-  simulator?: ResourceFields['simulator']
-  note?: ResourceFields['note']
+  translators?: NonNullable<ResourceFields['translators']>
+  extras?: NonNullable<ResourceFields['extras']>
 }
 
 export type UploadTarget =

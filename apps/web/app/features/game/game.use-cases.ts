@@ -41,7 +41,7 @@ export async function loadWorks(
   const found = await api.get('/game/list', {
     params: {
       query: {
-        ...('developer' in of ? { developer_id: of.developer } : { character_id: of.character }),
+        ...worksQuery(of),
         page,
         pageSize: worksPageSize,
         ...orderQuery(order),
@@ -49,6 +49,13 @@ export async function loadWorks(
     },
   })
   return { games: found.items ?? [], total: found.meta.totalItems, page, order }
+}
+
+function worksQuery(of: WorksOf) {
+  if ('developer' in of) {
+    return { developer_id: of.developer }
+  }
+  return 'character' in of ? { character_id: of.character } : { translator_id: of.translator }
 }
 
 export async function countView(api: ApiClient, id: number) {

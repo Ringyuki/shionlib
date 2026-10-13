@@ -81,6 +81,36 @@
   "languages": "语言",
   "simulator": "引擎",
   "simulatorHint": "手机平台的资源需要注明运行所用的引擎",
+  "translation": "翻译",
+  "translationName": {
+    "none": "无",
+    "official": "官方翻译",
+    "group": "汉化组",
+    "machine": "机器翻译"
+  },
+  "translators": "汉化组",
+  "patchVersion": "补丁版本",
+  "patchVersionExample": "例如 v1.1",
+  "releaseUrl": "发布页",
+  "edition": "发行版本",
+  "editionName": {
+    "download": "下载版",
+    "package": "光盘版",
+    "steam": "Steam 版"
+  },
+  "editionNameLabel": "版本名称",
+  "editionNameExample": "版本名称，例如 初回限定版",
+  "form": "形态",
+  "formName": {
+    "disc": "光盘映像",
+    "installer": "安装程序",
+    "portable": "免安装"
+  },
+  "extras": "附带内容",
+  "extraName": {
+    "save": "全CG存档",
+    "bonus": "特典"
+  },
   "note": "说明",
   "noteHint": "选填，最多 {max} 字",
   "save": "保存",
@@ -95,7 +125,12 @@
     "platforms": "至少选择一个平台",
     "languages": "至少选择一种语言",
     "simulator": "请选择引擎",
-    "files": "请选择文件"
+    "files": "请选择文件",
+    "translation": "请选择翻译",
+    "translators": "至少填写一个汉化组",
+    "tooManyTranslators": "最多填写 {max} 个汉化组",
+    "releaseUrl": "请填写以 http:// 或 https:// 开头的地址",
+    "form": "请选择形态"
   },
   "stateHelp": "查看说明",
   "updated": "<time></time>更新",
@@ -152,6 +187,7 @@
       "comments": "评论"
     },
     "details": {
+      "resource": "资源",
       "file": "文件",
       "name": "文件名",
       "size": "大小",
@@ -170,13 +206,22 @@
         "file_added": "<actor></actor> 添加了文件",
         "file_removed": "<actor></actor> 移除了文件",
         "edited": "<actor></actor> 修改了资源信息",
-        "review_cleared": "<actor></actor> 复核后放行了文件"
+        "review_cleared": "<actor></actor> 复核后放行了文件",
+        "disc_found": "检查发现压缩包内有光盘映像"
       },
       "field": {
         "platforms": "平台",
         "languages": "语言",
         "simulator": "引擎",
-        "note": "说明"
+        "note": "说明",
+        "translation": "翻译",
+        "translators": "汉化组",
+        "patch_version": "补丁版本",
+        "release_url": "发布页",
+        "edition": "发行版本",
+        "edition_name": "版本名称",
+        "form": "形态",
+        "extras": "附带内容"
       }
     }
   }

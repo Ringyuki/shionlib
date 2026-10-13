@@ -10,6 +10,28 @@ type ChoiceChipsProps<T extends string> = {
   iconOf?: (option: T) => ReactNode
 }
 
+type SingleChoiceChipsProps<T extends string> = Omit<
+  ChoiceChipsProps<T>,
+  'value' | 'onValueChange'
+> & {
+  value: T | ''
+  onValueChange: (value: T | '') => void
+}
+
+export function SingleChoiceChips<T extends string>({
+  value,
+  onValueChange,
+  ...choices
+}: SingleChoiceChipsProps<T>) {
+  return (
+    <ChoiceChips
+      {...choices}
+      value={value === '' ? [] : [value]}
+      onValueChange={picked => onValueChange(picked.find(option => option !== value) ?? '')}
+    />
+  )
+}
+
 export function ChoiceChips<T extends string>({
   label,
   options,

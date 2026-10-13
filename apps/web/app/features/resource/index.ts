@@ -10,6 +10,7 @@ export {
   type ResourceSummary,
   type ResourceViewer,
 } from './resource'
+export { missingInfo } from './resource-info'
 export {
   headlineOf,
   resourcePath,
@@ -23,5 +24,6 @@ export { ResourceHistory } from './ui/resource-history'
 export { ResourceList } from './ui/resource-list'
 export { ResourceMenu } from './ui/resource-menu'
 export { ResourcePage } from './ui/resource-page'
+export { ResourceTags } from './ui/resource-tags'
 export { StorageMeter } from './ui/storage-meter'
 export { UploadPage } from './ui/upload-page'

@@ -1,0 +1,58 @@
+{
+  "title": "汉化组",
+  "view": {
+    "label": "范围",
+    "all": "全部",
+    "duplicates": "疑似重复"
+  },
+  "search": "搜索汉化组名称或别名",
+  "sortBy": "排序方式",
+  "sort": {
+    "works": "作品最多",
+    "resources": "资源最多",
+    "latest": "最近发布",
+    "name": "名称"
+  },
+  "empty": "{filtered, select, true {没有符合条件的汉化组} other {暂无汉化组}}",
+  "narrow": "{works, number} 部作品 · {resources, number} 个资源",
+  "column": {
+    "translator": "汉化组",
+    "works": "作品",
+    "resources": "资源",
+    "latest": "最近发布"
+  },
+  "menu": {
+    "label": "{name}的操作",
+    "view": "在站点中查看",
+    "edit": "编辑"
+  },
+  "edit": {
+    "title": "编辑汉化组",
+    "name": "名称",
+    "aliases": "别名",
+    "aliasesHint": "输入后按回车添加，上传时填写别名也会归入这个汉化组",
+    "homepage": "主页",
+    "save": "保存",
+    "saved": "汉化组已更新"
+  },
+  "duplicates": {
+    "label": "疑似重复的汉化组",
+    "empty": "没有疑似重复的汉化组",
+    "dismiss": "并非重复",
+    "dismissed": "已记为不同的汉化组",
+    "merge": "合并"
+  },
+  "merge": {
+    "title": "合并汉化组",
+    "description": "其余名称记为别名，资源归入保留的汉化组",
+    "keep": "保留的名称",
+    "resources": "{count, number} 个资源",
+    "confirm": "合并",
+    "done": "已合并到 {name}"
+  },
+  "issue": {
+    "name": "请填写名称",
+    "tooManyAliases": "最多填写 {max} 个别名",
+    "keep": "请选择保留的名称"
+  }
+}

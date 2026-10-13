@@ -81,6 +81,36 @@
   "languages": "Languages",
   "simulator": "Engine",
   "simulatorHint": "Mobile resources must name the engine that runs them",
+  "translation": "Translation",
+  "translationName": {
+    "none": "None",
+    "official": "Official translation",
+    "group": "Translation group",
+    "machine": "Machine translation"
+  },
+  "translators": "Translation groups",
+  "patchVersion": "Patch version",
+  "patchVersionExample": "e.g. v1.1",
+  "releaseUrl": "Release page",
+  "edition": "Edition",
+  "editionName": {
+    "download": "Download edition",
+    "package": "Package edition",
+    "steam": "Steam edition"
+  },
+  "editionNameLabel": "Edition name",
+  "editionNameExample": "Edition name, e.g. 初回限定版",
+  "form": "Form",
+  "formName": {
+    "disc": "Disc image",
+    "installer": "Installer",
+    "portable": "Portable"
+  },
+  "extras": "Extras",
+  "extraName": {
+    "save": "Full CG save",
+    "bonus": "Bonus content"
+  },
   "note": "Note",
   "noteHint": "Optional, up to {max} characters",
   "save": "Save",
@@ -95,7 +125,12 @@
     "platforms": "Choose at least one platform",
     "languages": "Choose at least one language",
     "simulator": "Choose an engine",
-    "files": "Choose a file"
+    "files": "Choose a file",
+    "translation": "Choose where the translation comes from",
+    "translators": "Name at least one translation group",
+    "tooManyTranslators": "Name at most {max} translation groups",
+    "releaseUrl": "Enter an address that starts with http:// or https://",
+    "form": "Choose a form"
   },
   "stateHelp": "What does this mean?",
   "updated": "Updated <time></time>",
@@ -152,6 +187,7 @@
       "comments": "Comments"
     },
     "details": {
+      "resource": "Resource",
       "file": "File",
       "name": "File name",
       "size": "Size",
@@ -170,13 +206,22 @@
         "file_added": "<actor></actor> added a file",
         "file_removed": "<actor></actor> removed a file",
         "edited": "<actor></actor> edited the resource",
-        "review_cleared": "<actor></actor> cleared a file after review"
+        "review_cleared": "<actor></actor> cleared a file after review",
+        "disc_found": "The check found a disc image in the archive"
       },
       "field": {
         "platforms": "Platforms",
         "languages": "Languages",
         "simulator": "Engine",
-        "note": "Note"
+        "note": "Note",
+        "translation": "Translation",
+        "translators": "Translation groups",
+        "patch_version": "Patch version",
+        "release_url": "Release page",
+        "edition": "Edition",
+        "edition_name": "Edition name",
+        "form": "Form",
+        "extras": "Extras"
       }
     }
   }

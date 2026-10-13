@@ -1,6 +1,7 @@
 import { Stack } from '@hina-ui/react'
 import {
   ArrowLeft,
+  BookA,
   BookOpen,
   FileCheck,
   Flag,
@@ -26,6 +27,7 @@ const icons: Record<NavKey, LucideIcon> = {
   comments: MessageCircle,
   walkthroughs: BookOpen,
   games: Gamepad2,
+  translators: BookA,
   users: Users,
   sponsors: Heart,
   catalog: RefreshCw,

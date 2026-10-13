@@ -31,7 +31,11 @@
       "processing": "Nothing is being processed at the moment",
       "published": "Nothing published yet"
     },
-    "emptyHint": "Pick a game and upload its files; they are published once they pass the check"
+    "emptyHint": "Pick a game and upload its files; they are published once they pass the check",
+    "missing": {
+      "translation": "Translation not stated",
+      "form": "Form not stated"
+    }
   },
   "account": {
     "title": "Storage and downloads",

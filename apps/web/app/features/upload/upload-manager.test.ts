@@ -28,7 +28,11 @@ describe('UploadManager', () => {
     const server = fakeServer()
     const { manager, writes } = setupManager(server)
     manager.add(
-      { kind: 'create', gameId: 3, resource: { platform: ['win'], language: ['jp'] } },
+      {
+        kind: 'create',
+        gameId: 3,
+        resource: { platform: ['win'], language: ['jp'], form: 'portable' },
+      },
       'ゲーム',
       [{ file: tenBytes() }, { file: new File(['abcd'], 'game.part2.rar'), name: '第二卷.rar' }],
     )
@@ -38,6 +42,7 @@ describe('UploadManager', () => {
     expect(server.called('POST', '/game/3/download-source')?.body).toEqual({
       platform: ['win'],
       language: ['jp'],
+      form: 'portable',
       files: [{ upload_session_id: 1 }, { upload_session_id: 2, file_name: '第二卷.rar' }],
     })
     expect(server.called('PATCH', '/uploads/large/1/complete')?.body).toMatchObject({

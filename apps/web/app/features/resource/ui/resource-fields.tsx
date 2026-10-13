@@ -6,14 +6,18 @@ import { labelOf } from '~/shared/i18n/labels'
 import { BBCodeEditor } from '~/shared/ui/bbcode-editor'
 import { ChoiceChips } from '~/shared/ui/choice-chips'
 import { languageOptions, needsSimulator, platformOptions, simulatorOptions } from '../resource'
+import { translated } from '../resource-info'
 import type { EditValues } from '../resource.schema'
+import { InfoFields } from './info-fields'
+import { TranslationFields } from './translation-fields'
 
 type ResourceFieldsProps = {
   values: EditValues
+  complete: boolean
   onValuesChange: (values: EditValues) => void
 }
 
-export function ResourceFields({ values, onValuesChange }: ResourceFieldsProps) {
+export function ResourceFields({ values, complete, onValuesChange }: ResourceFieldsProps) {
   const t = useTranslations('resource')
   const labels = useMessages()
   const change = (patch: Partial<EditValues>) => onValuesChange({ ...values, ...patch })
@@ -57,6 +61,10 @@ export function ResourceFields({ values, onValuesChange }: ResourceFieldsProps) 
           />
         </FormField>
       )}
+      {translated(values.language) && (
+        <TranslationFields values={values} required={complete} onChange={change} />
+      )}
+      <InfoFields values={values} complete={complete} onChange={change} />
       <FormField
         name="note"
         label={t('note')}

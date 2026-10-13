@@ -7,6 +7,7 @@ import { useOpenState } from '~/shared/ui/use-open-state'
 import type { Resource } from '../resource'
 import { editForm, editValuesFrom, type EditValues } from '../resource.schema'
 import { useEditResource } from '../use-edit-resource'
+import { useResourceIssue } from '../use-resource-issue'
 import { ResourceFields } from './resource-fields'
 
 type EditDialogProps = {
@@ -17,7 +18,7 @@ type EditDialogProps = {
 
 export function EditDialog({ resource, open, onOpenChange }: EditDialogProps) {
   const t = useTranslations('resource')
-  const issue = useTranslations('resource.issue')
+  const issue = useResourceIssue()
   const kit = useFormKit()
   const [values, setValues] = useOpenState<EditValues>(open, () => editValuesFrom(resource))
   const edit = useEditResource()
@@ -40,7 +41,7 @@ export function EditDialog({ resource, open, onOpenChange }: EditDialogProps) {
             }
           }}
         >
-          <ResourceFields values={values} onValuesChange={setValues} />
+          <ResourceFields values={values} complete={false} onValuesChange={setValues} />
         </Form>
       )}
       renderFooter={({ close, submitting }) => (

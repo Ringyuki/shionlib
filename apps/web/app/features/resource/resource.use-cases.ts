@@ -2,6 +2,7 @@ import { loadInspections } from '~/features/inspection'
 import type { ApiClient } from '~/shared/api/client'
 import { ApiError } from '~/shared/api/error'
 import { needsSimulator } from './resource'
+import { resourceInfo } from './resource-info'
 import type { ResourcePage } from './resource-page'
 import type {
   FileRemoval,
@@ -59,6 +60,7 @@ export async function editResource(api: ApiClient, edit: ResourceEdit) {
       language: edit.language,
       note: edit.note.trim(),
       ...(simulator === undefined ? {} : { simulator }),
+      ...resourceInfo(edit, edit.language),
     },
   })
 }

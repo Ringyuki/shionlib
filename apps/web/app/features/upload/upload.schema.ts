@@ -12,6 +12,14 @@ const resourceDraft = v.object({
   language: v.array(v.picklist(createBody.language.itemEnum)),
   simulator: v.optional(v.picklist(createBody.simulator.enum)),
   note: v.optional(v.string()),
+  translation: v.optional(v.picklist(createBody.translation.enum)),
+  translators: v.optional(v.array(v.string())),
+  patch_version: v.optional(v.string()),
+  release_url: v.optional(v.string()),
+  edition: v.optional(v.picklist(createBody.edition.enum)),
+  edition_name: v.optional(v.string()),
+  form: v.picklist(createBody.form.enum),
+  extras: v.optional(v.array(v.picklist(createBody.extras.itemEnum))),
 })
 
 const target = v.variant('kind', [

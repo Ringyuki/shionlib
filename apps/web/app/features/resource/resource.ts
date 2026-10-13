@@ -1,6 +1,7 @@
 import { constraints } from '~/shared/api/generated/constraints'
 import type { ResourceDraft } from '~/features/upload'
 import type { Schema } from '~/shared/api/types'
+import { resourceInfo, type InfoValues } from './resource-info'
 
 export type Resource = Schema<'DownloadResourceDTO'>
 
@@ -155,15 +156,19 @@ export function needsSimulator(platforms: readonly Platform[]): boolean {
   return platforms.some(platform => mobilePlatforms.includes(platform))
 }
 
-export type ResourceFieldValues = {
+export type ResourceFieldValues = InfoValues & {
   platform: Platform[]
   language: Language[]
   simulator: Simulator | ''
   note: string
 }
 
-export function resourceDraft(values: ResourceFieldValues): ResourceDraft {
+export function resourceDraft(values: ResourceFieldValues): ResourceDraft | undefined {
   const note = values.note.trim()
+  const { form, ...info } = resourceInfo(values, values.language)
+  if (form === undefined) {
+    return undefined
+  }
   return {
     platform: values.platform,
     language: values.language,
@@ -171,6 +176,8 @@ export function resourceDraft(values: ResourceFieldValues): ResourceDraft {
       ? { simulator: values.simulator }
       : {}),
     ...(note === '' ? {} : { note }),
+    ...info,
+    form,
   }
 }
 

@@ -33,8 +33,11 @@ export function useStartUpload() {
   return {
     leaving: navigation.state === 'loading' && navigation.location.pathname === uploads,
     create(game: GameHeader, values: UploadValues) {
-      const target = { kind: 'create', gameId: game.id, resource: resourceDraft(values) } as const
-      start(target, gameTitle(game, locale), values.files)
+      const resource = resourceDraft(values)
+      if (resource === undefined) {
+        return
+      }
+      start({ kind: 'create', gameId: game.id, resource }, gameTitle(game, locale), values.files)
       void navigate(uploading)
     },
     append(resource: Resource, files: readonly File[]) {

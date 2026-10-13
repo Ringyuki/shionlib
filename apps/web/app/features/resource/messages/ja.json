@@ -81,6 +81,36 @@
   "languages": "言語",
   "simulator": "エンジン",
   "simulatorHint": "モバイル向けリソースは動作エンジンを指定してください",
+  "translation": "翻訳",
+  "translationName": {
+    "none": "なし",
+    "official": "公式翻訳",
+    "group": "翻訳グループ",
+    "machine": "機械翻訳"
+  },
+  "translators": "翻訳グループ",
+  "patchVersion": "パッチのバージョン",
+  "patchVersionExample": "例：v1.1",
+  "releaseUrl": "公開ページ",
+  "edition": "エディション",
+  "editionName": {
+    "download": "DL版",
+    "package": "パッケージ版",
+    "steam": "Steam版"
+  },
+  "editionNameLabel": "エディション名",
+  "editionNameExample": "エディション名（例：初回限定版）",
+  "form": "形態",
+  "formName": {
+    "disc": "ディスクイメージ",
+    "installer": "インストーラー",
+    "portable": "インストール不要"
+  },
+  "extras": "同梱物",
+  "extraName": {
+    "save": "フルコンプセーブ",
+    "bonus": "特典"
+  },
   "note": "説明",
   "noteHint": "任意、{max} 文字まで",
   "save": "保存",
@@ -95,7 +125,12 @@
     "platforms": "プラットフォームを 1 つ以上選んでください",
     "languages": "言語を 1 つ以上選んでください",
     "simulator": "エンジンを選んでください",
-    "files": "ファイルを選んでください"
+    "files": "ファイルを選んでください",
+    "translation": "翻訳の種類を選んでください",
+    "translators": "翻訳グループを 1 つ以上入力してください",
+    "tooManyTranslators": "翻訳グループは {max} 個までです",
+    "releaseUrl": "http:// または https:// で始まるアドレスを入力してください",
+    "form": "形態を選んでください"
   },
   "stateHelp": "説明を見る",
   "updated": "<time></time>に更新",
@@ -152,6 +187,7 @@
       "comments": "コメント"
     },
     "details": {
+      "resource": "リソース",
       "file": "ファイル",
       "name": "ファイル名",
       "size": "サイズ",
@@ -170,13 +206,22 @@
         "file_added": "<actor></actor> がファイルを追加しました",
         "file_removed": "<actor></actor> がファイルを削除しました",
         "edited": "<actor></actor> がリソース情報を編集しました",
-        "review_cleared": "<actor></actor> が審査のうえファイルを公開しました"
+        "review_cleared": "<actor></actor> が審査のうえファイルを公開しました",
+        "disc_found": "チェックでアーカイブ内にディスクイメージが見つかりました"
       },
       "field": {
         "platforms": "プラットフォーム",
         "languages": "言語",
         "simulator": "エンジン",
-        "note": "説明"
+        "note": "説明",
+        "translation": "翻訳",
+        "translators": "翻訳グループ",
+        "patch_version": "パッチのバージョン",
+        "release_url": "公開ページ",
+        "edition": "エディション",
+        "edition_name": "エディション名",
+        "form": "形態",
+        "extras": "同梱物"
       }
     }
   }

@@ -37,6 +37,7 @@ describe('navigationOf', () => {
     const [, manage, system] = navigationOf(pending).groups
     expect(manage?.entries.map(entry => [entry.key, entry.to])).toEqual([
       ['games', adminPaths.games],
+      ['translators', adminPaths.translators],
       ['users', adminPaths.users],
       ['sponsors', adminPaths.sponsors],
     ])

@@ -211,6 +211,46 @@ export const constraints = {
       ]
     }
   },
+  "AdminTranslatorDismissInputBody": {
+    "ids": {
+      "type": "array",
+      "required": true,
+      "nullable": true,
+      "minItems": 2,
+      "maxItems": 50
+    }
+  },
+  "AdminTranslatorEditInputBody": {
+    "aliases": {
+      "type": "array",
+      "required": false,
+      "nullable": false,
+      "maxItems": 20
+    },
+    "homepage": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "minLength": 0,
+      "maxLength": 512
+    },
+    "name": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "minLength": 1,
+      "maxLength": 64
+    }
+  },
+  "AdminTranslatorMergeInputBody": {
+    "merged_ids": {
+      "type": "array",
+      "required": true,
+      "nullable": true,
+      "minItems": 1,
+      "maxItems": 50
+    }
+  },
   "AdminUserBanInputBody": {
     "banned_by": {
       "type": "integer",
@@ -1191,12 +1231,49 @@ export const constraints = {
     }
   },
   "DownloadSourceBodyInput": {
+    "edition": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "enum": [
+        "download",
+        "package",
+        "steam"
+      ]
+    },
+    "edition_name": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "minLength": 0,
+      "maxLength": 64
+    },
+    "extras": {
+      "type": "array",
+      "required": false,
+      "nullable": true,
+      "maxItems": 2,
+      "itemEnum": [
+        "save",
+        "bonus"
+      ]
+    },
     "files": {
       "type": "array",
       "required": true,
       "nullable": true,
       "minItems": 1,
       "maxItems": 1000
+    },
+    "form": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "enum": [
+        "disc",
+        "installer",
+        "portable"
+      ]
     },
     "language": {
       "type": "array",
@@ -1215,6 +1292,13 @@ export const constraints = {
       "required": false,
       "nullable": false,
       "maxLength": 255
+    },
+    "patch_version": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "minLength": 0,
+      "maxLength": 32
     },
     "platform": {
       "type": "array",
@@ -1235,6 +1319,13 @@ export const constraints = {
         "dvd"
       ]
     },
+    "release_url": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "minLength": 0,
+      "maxLength": 512
+    },
     "simulator": {
       "type": "string",
       "required": false,
@@ -1245,6 +1336,23 @@ export const constraints = {
         "ARTEMIS",
         "OTHER"
       ]
+    },
+    "translation": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "enum": [
+        "none",
+        "official",
+        "group",
+        "machine"
+      ]
+    },
+    "translators": {
+      "type": "array",
+      "required": false,
+      "nullable": true,
+      "maxItems": 6
     }
   },
   "EditCommentInputBody": {
@@ -1255,6 +1363,43 @@ export const constraints = {
     }
   },
   "EditDownloadSourceBodyInput": {
+    "edition": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "enum": [
+        "download",
+        "package",
+        "steam"
+      ]
+    },
+    "edition_name": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "minLength": 0,
+      "maxLength": 64
+    },
+    "extras": {
+      "type": "array",
+      "required": false,
+      "nullable": true,
+      "maxItems": 2,
+      "itemEnum": [
+        "save",
+        "bonus"
+      ]
+    },
+    "form": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "enum": [
+        "disc",
+        "installer",
+        "portable"
+      ]
+    },
     "language": {
       "type": "array",
       "required": true,
@@ -1272,6 +1417,13 @@ export const constraints = {
       "required": false,
       "nullable": false,
       "maxLength": 255
+    },
+    "patch_version": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "minLength": 0,
+      "maxLength": 32
     },
     "platform": {
       "type": "array",
@@ -1292,6 +1444,13 @@ export const constraints = {
         "dvd"
       ]
     },
+    "release_url": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "minLength": 0,
+      "maxLength": 512
+    },
     "simulator": {
       "type": "string",
       "required": false,
@@ -1302,6 +1461,23 @@ export const constraints = {
         "ARTEMIS",
         "OTHER"
       ]
+    },
+    "translation": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "enum": [
+        "none",
+        "official",
+        "group",
+        "machine"
+      ]
+    },
+    "translators": {
+      "type": "array",
+      "required": false,
+      "nullable": true,
+      "maxItems": 6
     }
   },
   "ForgotPasswordInputBody": {
