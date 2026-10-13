@@ -2391,6 +2391,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/game/download-source/name/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Read what the name of a file says about a resource */
+        post: operations["download.readName"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/game/download-source/{id}": {
         parameters: {
             query?: never;
@@ -2626,6 +2643,23 @@ export type paths = {
         put?: never;
         /** Create a download resource from completed uploads */
         post: operations["download.create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/game/{id}/download-source/name": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Show the canonical name a file of the game would take */
+        post: operations["download.previewName"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5431,7 +5465,7 @@ export type components = {
          * Format: int64
          * @enum {integer}
          */
-        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 400109 | 400110 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 600101 | 600102 | 600103 | 600104 | 610101 | 610102 | 620101 | 620102 | 620103 | 620104 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103;
+        BusinessCode: 100101 | 100102 | 200101 | 200102 | 200103 | 200104 | 200105 | 200106 | 200107 | 200108 | 200109 | 200110 | 200201 | 200202 | 300101 | 300102 | 300103 | 300104 | 300105 | 300106 | 300107 | 300108 | 300109 | 300110 | 300111 | 400101 | 400102 | 400103 | 400104 | 400105 | 400106 | 400107 | 400108 | 400109 | 400110 | 410101 | 410102 | 410103 | 410104 | 410105 | 420101 | 420102 | 420103 | 420104 | 440101 | 440102 | 440103 | 440104 | 440105 | 440106 | 440201 | 440202 | 440203 | 440204 | 440205 | 440206 | 440207 | 440208 | 450101 | 450102 | 450103 | 450104 | 450105 | 450106 | 460101 | 460102 | 460103 | 460104 | 460105 | 460106 | 460107 | 460108 | 460109 | 470101 | 470102 | 470103 | 470104 | 470105 | 470106 | 480101 | 480102 | 480103 | 480104 | 480105 | 480106 | 480107 | 480108 | 480109 | 480110 | 480111 | 480112 | 480113 | 480114 | 480115 | 480116 | 480117 | 490101 | 490102 | 490103 | 500102 | 500105 | 500106 | 530101 | 530102 | 540101 | 540102 | 540103 | 540104 | 550101 | 550102 | 560101 | 560102 | 560103 | 560104 | 560105 | 560106 | 570101 | 570102 | 570103 | 570104 | 570105 | 570106 | 580101 | 590101 | 600101 | 600102 | 600103 | 600104 | 610101 | 610102 | 620101 | 620102 | 620103 | 620104 | 630101 | 630102 | 630103 | 630104 | 630105 | 630106 | 630107 | 630108 | 630109 | 630110 | 630111 | 630112 | 630113 | 630114 | 630115 | 630116 | 630117 | 630118 | 630119 | 630120 | 630121 | 630122 | 630123 | 640101 | 640102 | 650101 | 650102 | 650103;
         CatalogExcludedDTO: {
             /** @enum {string} */
             entity: "game" | "developer" | "character";
@@ -5902,6 +5936,8 @@ export type components = {
             size: number;
         };
         DownloadFileDTO: {
+            /** @description Whether the file carries the canonical name of the resource, which cannot be changed by hand */
+            canonical_name: boolean;
             creator: components["schemas"]["UserSummaryDTO"];
             file_hash: string;
             file_name: string;
@@ -5922,6 +5958,8 @@ export type components = {
             is_virus_false_positive: boolean;
             latest_history: components["schemas"]["DownloadHistoryRefDTO"] | null;
             malware_scan_cases: components["schemas"]["DownloadMalwareCaseDTO"][] | null;
+            /** @description The name the file was uploaded with; null for files stored before names were kept */
+            original_name: string | null;
             /**
              * @description Why a rejected file was rejected (abandoned: its check could never be completed); null otherwise
              * @enum {string|null}
@@ -6082,6 +6120,8 @@ export type components = {
             id: number;
         };
         DownloadResourceDTO: {
+            /** @description Whether the first file of the resource takes the canonical name */
+            canonical_name: boolean;
             /**
              * Format: int64
              * @description Visible comments made on the resource, replies included
@@ -6147,6 +6187,8 @@ export type components = {
             upload_session_id: number;
         };
         DownloadSourceBodyInput: {
+            /** @description Whether the first file (every volume of its set) takes the canonical name once the resource is published; true when left out */
+            canonical_name?: boolean;
             /** @enum {string} */
             edition?: "download" | "package" | "steam";
             /** @description The name of the edition, such as 初回限定版 */
@@ -6225,6 +6267,8 @@ export type components = {
             content: components["schemas"]["RichTextDocument"];
         };
         EditDownloadSourceBodyInput: {
+            /** @description Turns the canonical name of the first file on or off; left out, the choice stays as it is. Turning it off gives the file back the name it was uploaded with */
+            canonical_name?: boolean;
             /** @enum {string} */
             edition?: "download" | "package" | "steam";
             /** @description The name of the edition, such as 初回限定版 */
@@ -6853,6 +6897,26 @@ export type components = {
             /** Format: int64 */
             code: number;
             data: components["schemas"]["FavoriteItemPageDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeFileNameDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["FileNameDTO"];
+            message: string;
+            meta?: components["schemas"]["Meta"];
+            requestId: string;
+            /** Format: date-time */
+            timestamp: string;
+        };
+        EnvelopeFileNameReadingDTO: {
+            /** Format: int64 */
+            code: number;
+            data: components["schemas"]["FileNameReadingDTO"];
             message: string;
             meta?: components["schemas"]["Meta"];
             requestId: string;
@@ -7967,6 +8031,25 @@ export type components = {
             field: string;
             messages: string[] | null;
         };
+        FileNameDTO: {
+            /** @description What follows: the extension, preceded by the closing bracket of a pending disc format */
+            after: string;
+            /** @description The name up to the disc format; the whole name without its extension when nothing is pending */
+            before: string;
+            /** @description True for a disc image whose format is not known until the file has been checked; the format goes between before and after */
+            pending: boolean;
+        };
+        FileNameReadingDTO: {
+            /** @enum {string|null} */
+            edition: "download" | "package" | "steam" | null;
+            edition_name: string | null;
+            /** @enum {string|null} */
+            form: "disc" | "installer" | "portable" | null;
+            patch_version: string | null;
+            /** @enum {string|null} */
+            translation: "none" | "official" | "group" | "machine" | null;
+            translators: string[] | null;
+        };
         ForgotPasswordInputBody: {
             /** Format: email */
             email: string;
@@ -8889,9 +8972,31 @@ export type components = {
             /** Format: int64 */
             total_play_time: number;
         };
+        PreviewNameInputBody: {
+            /** @enum {string} */
+            edition?: "download" | "package" | "steam";
+            edition_name?: string;
+            /** @description The name of the file being uploaded, which gives the extension and, for an old name, the disc format */
+            file_name?: string;
+            /** @enum {string} */
+            form?: "disc" | "installer" | "portable";
+            language: ("en" | "zh" | "zh-hant" | "jp")[] | null;
+            patch_version?: string;
+            /**
+             * Format: int64
+             * @description A resource of the game whose first file is named; left out for an upload that has not been made yet
+             */
+            resource_id?: number;
+            /** @enum {string} */
+            translation?: "none" | "official" | "group" | "machine";
+            translators?: string[] | null;
+        };
         PublicSettingsDTO: {
             allow_register: boolean;
             sponsor_enabled: boolean;
+        };
+        ReadNameInputBody: {
+            file_name: string;
         };
         RegisterUserInputBody: {
             code: string;
@@ -15517,6 +15622,40 @@ export interface operations {
             };
         };
     };
+    "download.readName": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReadNameInputBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeFileNameReadingDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     "download.detail": {
         parameters: {
             query?: never;
@@ -16097,6 +16236,42 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EnvelopeDownloadResourceCreatedDTO"];
+                };
+            };
+            /** @description Error */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    "download.previewName": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviewNameInputBody"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    "shionlib-auth-stale"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvelopeFileNameDTO"];
                 };
             };
             /** @description Error */

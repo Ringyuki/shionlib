@@ -29,10 +29,11 @@ import { ResourceTags } from './resource-tags'
 
 type ResourceCardProps = {
   resource: Resource
+  gameId: number
   viewer: ResourceViewer | null
 }
 
-export function ResourceCard({ resource, viewer }: ResourceCardProps) {
+export function ResourceCard({ resource, gameId, viewer }: ResourceCardProps) {
   const t = useTranslations('resource')
   const locale = useLocale()
   const format = useFormatter()
@@ -108,7 +109,7 @@ export function ResourceCard({ resource, viewer }: ResourceCardProps) {
             )}
           </Inline>
           <Stack className="pointer-events-auto col-start-2 row-start-1 sm:col-start-3">
-            <ResourceMenu resource={resource} rights={rights} />
+            <ResourceMenu resource={resource} gameId={gameId} rights={rights} />
           </Stack>
         </Grid>
         {note !== '' && <BBCodeText source={note} size="sm" className="pointer-events-auto" />}

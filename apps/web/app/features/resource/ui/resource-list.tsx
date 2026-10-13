@@ -75,7 +75,7 @@ export function ResourceList({ game, resources, viewer }: ResourceListProps) {
           />
         )}
         {shown.map(resource => (
-          <ResourceCard key={resource.id} resource={resource} viewer={viewer} />
+          <ResourceCard key={resource.id} resource={resource} gameId={game.id} viewer={viewer} />
         ))}
       </Stack>
     </DownloadArea>

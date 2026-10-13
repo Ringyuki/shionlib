@@ -7,6 +7,8 @@ import {
   loadAllowance,
   loadResourceEvents,
   loadResourcePage,
+  previewName,
+  readName,
   removeFile,
   renameFile,
 } from './resource.use-cases'
@@ -35,6 +37,7 @@ const detail: ApiData<'/game/download-source/{id}', 'get'> = {
     edition_name: null,
     form: null,
     extras: [],
+    canonical_name: false,
   },
   game: {
     id: 7,
@@ -135,6 +138,7 @@ describe('editResource', () => {
       patch_version: 'v1.1',
       form: 'portable',
       extras: [],
+      canonical_name: true,
     })
   })
 })
@@ -179,5 +183,42 @@ describe('loadAllowance', () => {
   it('lets other failures through', async () => {
     const fake = fakeApi().fail('get', '/uploads/quota', 500, { code: 500, message: 'failed' })
     await expect(loadAllowance(fake.api)).rejects.toMatchObject({ status: 500 })
+  })
+})
+
+describe('names', () => {
+  it('asks what the first file of an upload would be called', async () => {
+    const name = { before: 'ゲーム (files)', after: '.7z', pending: false }
+    const fake = fakeApi().on('post', '/game/{id}/download-source/name', name)
+    await expect(
+      previewName(fake.api, {
+        ...blankInfo,
+        gameId: 10,
+        fileName: 'upload.7z',
+        language: ['jp'],
+        form: 'portable',
+      }),
+    ).resolves.toEqual(name)
+    const [request] = fake.requests
+    expect(new URL(request?.url ?? '').pathname).toBe('/game/10/download-source/name')
+    await expect(request?.json()).resolves.toEqual({
+      language: ['jp'],
+      file_name: 'upload.7z',
+      form: 'portable',
+    })
+  })
+
+  it('asks what the name of a file says', async () => {
+    const reading = {
+      translation: null,
+      translators: [],
+      patch_version: null,
+      edition: null,
+      edition_name: null,
+      form: null,
+    }
+    const fake = fakeApi().on('post', '/game/download-source/name/read', reading)
+    await expect(readName(fake.api, 'upload.7z')).resolves.toEqual(reading)
+    await expect(fake.requests[0]?.json()).resolves.toEqual({ file_name: 'upload.7z' })
   })
 })

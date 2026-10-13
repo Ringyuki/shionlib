@@ -40,7 +40,12 @@ export function ResourceEntry({ own, viewer }: ResourceEntryProps) {
       stage={<StageTag stage={stageOf(resource)} />}
       controlSlots={1}
       controls={
-        <ResourceMenu resource={resource} rights={rightsOver(resource, viewer)} files={files} />
+        <ResourceMenu
+          resource={resource}
+          gameId={game.id}
+          rights={rightsOver(resource, viewer)}
+          files={files}
+        />
       }
       facts={
         <>

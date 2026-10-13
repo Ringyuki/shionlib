@@ -3,6 +3,7 @@ import { readCommand, routeAction, routeLazyLoader, routeLoader } from '~/shared
 import {
   deleteCommand,
   editCommand,
+  nameQueryFrom,
   queryId,
   removeFileCommand,
   renameFileCommand,
@@ -14,6 +15,8 @@ import {
   loadAllowance,
   loadFileHistory,
   loadUploadPage,
+  previewName,
+  readName,
   removeFile,
   renameFile,
   reportResource,
@@ -30,6 +33,22 @@ export function fileHistoryLoader(args: LoaderFunctionArgs) {
 export function uploadPageLoader(args: LoaderFunctionArgs) {
   const gameId = queryId(args.url.searchParams.get('game'))
   return routeLoader(args, api => loadUploadPage(api, gameId))
+}
+
+export function namePreviewLoader(args: LoaderFunctionArgs) {
+  const query = nameQueryFrom(args.url.searchParams.get('q'))
+  if (query === undefined) {
+    throw data(null, { status: 400 })
+  }
+  return routeLazyLoader(args, api => previewName(api, query))
+}
+
+export function nameReadingLoader(args: LoaderFunctionArgs) {
+  const fileName = (args.url.searchParams.get('name') ?? '').trim()
+  if (fileName === '') {
+    throw data(null, { status: 400 })
+  }
+  return routeLazyLoader(args, api => readName(api, fileName))
 }
 
 export function allowanceLoader(args: LoaderFunctionArgs) {

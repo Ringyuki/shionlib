@@ -48,6 +48,7 @@ const resource = (id: number, platform: Resource['platform']): Resource => ({
   edition_name: null,
   form: null,
   extras: [],
+  canonical_name: false,
 })
 
 describe('fileState', () => {
@@ -178,6 +179,7 @@ describe('resourceDraft', () => {
       translation: 'official',
       form: 'portable',
       extras: [],
+      canonical_name: true,
     })
   })
 

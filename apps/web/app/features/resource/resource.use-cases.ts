@@ -3,6 +3,7 @@ import type { ApiClient } from '~/shared/api/client'
 import { ApiError } from '~/shared/api/error'
 import { needsSimulator } from './resource'
 import { resourceInfo } from './resource-info'
+import { nameBody, type NameQuery } from './resource-name'
 import type { ResourcePage } from './resource-page'
 import type {
   FileRemoval,
@@ -63,6 +64,17 @@ export async function editResource(api: ApiClient, edit: ResourceEdit) {
       ...resourceInfo(edit, edit.language),
     },
   })
+}
+
+export function previewName(api: ApiClient, query: NameQuery) {
+  return api.post('/game/{id}/download-source/name', {
+    params: { path: { id: query.gameId } },
+    body: nameBody(query),
+  })
+}
+
+export function readName(api: ApiClient, fileName: string) {
+  return api.post('/game/download-source/name/read', { body: { file_name: fileName } })
 }
 
 export async function deleteResource(api: ApiClient, deletion: ResourceDeletion) {

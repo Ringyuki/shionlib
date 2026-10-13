@@ -8,7 +8,9 @@ import { admit, type Allowance } from '~/features/upload'
 import { useFormKit } from '~/shared/form/use-form-kit'
 import { Button } from '~/shared/ui/button'
 import { blankInfo } from '../resource-info'
+import { filledFrom } from '../resource-name'
 import { uploadForm, type UploadValues } from '../resource.schema'
+import { useNameReading } from '../use-name-reading'
 import { useResourceIssue } from '../use-resource-issue'
 import { useStartUpload } from '../use-start-upload'
 import { ResourceFields } from './resource-fields'
@@ -32,6 +34,10 @@ export function UploadForm({ game, allowance }: { game: GameHeader | null; allow
   const [, setSearchParams] = useSearchParams()
   const start = useStartUpload()
   const admission = admit(allowance, values.files)
+  const chosen = values.files[0]?.name
+  useNameReading(chosen, reading =>
+    setValues(current => ({ ...current, ...filledFrom(current, reading) })),
+  )
   return (
     <Form
       values={values}
@@ -64,6 +70,7 @@ export function UploadForm({ game, allowance }: { game: GameHeader | null; allow
       <ResourceFields
         values={values}
         complete
+        named={game === null ? undefined : { gameId: game.id, fileName: chosen ?? '' }}
         onValuesChange={fields => setValues({ ...values, ...fields })}
       />
       <Inline justify="end">

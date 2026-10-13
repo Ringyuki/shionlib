@@ -15,7 +15,13 @@ export type Extra = NonNullable<EditFields['extras']>[number]
 
 export type ResourceInfo = Pick<
   EditFields,
-  'translation' | 'patch_version' | 'release_url' | 'edition' | 'edition_name' | 'form'
+  | 'translation'
+  | 'patch_version'
+  | 'release_url'
+  | 'edition'
+  | 'edition_name'
+  | 'form'
+  | 'canonical_name'
 > & {
   translators?: string[]
   extras: Extra[]
@@ -30,6 +36,7 @@ export type InfoValues = {
   editionName: string
   form: PackageForm | ''
   extras: Extra[]
+  canonical: boolean
 }
 
 const editBody = constraints.EditDownloadSourceBodyInput
@@ -55,6 +62,7 @@ export const blankInfo: InfoValues = {
   editionName: '',
   form: '',
   extras: [],
+  canonical: true,
 }
 
 export function translated(languages: readonly string[]): boolean {
@@ -83,6 +91,7 @@ export function resourceInfo(values: InfoValues, languages: readonly string[]): 
     ...(editionName === '' ? {} : { edition_name: editionName }),
     ...(values.form === '' ? {} : { form: values.form }),
     extras: extraOptions.filter(extra => values.extras.includes(extra)),
+    canonical_name: values.canonical,
   }
 }
 
@@ -96,6 +105,7 @@ type Described = Pick<
   | 'edition_name'
   | 'form'
   | 'extras'
+  | 'canonical_name'
 >
 
 export function infoValuesFrom(resource: Described): InfoValues {
@@ -109,6 +119,7 @@ export function infoValuesFrom(resource: Described): InfoValues {
     editionName: resource.edition_name ?? '',
     form: resource.form ?? '',
     extras: extraOptions.filter(extra => extras.includes(extra)),
+    canonical: resource.canonical_name,
   }
 }
 

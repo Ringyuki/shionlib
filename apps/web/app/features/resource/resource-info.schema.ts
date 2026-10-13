@@ -30,6 +30,7 @@ export const infoCommand = {
   editionName: v.string(),
   form: v.union([v.picklist(formOptions), v.literal('')]),
   extras: v.array(v.picklist(extraOptions)),
+  canonical: v.boolean(),
 }
 
 export function infoFields(text: InfoText) {

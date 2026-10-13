@@ -189,6 +189,36 @@ test.describe('as an uploader', () => {
     )
   })
 
+  test('fills what the name of the chosen file says and shows the canonical name', async ({
+    page,
+  }, testInfo) => {
+    const uploaded = '[E2E] sample [绿茶汉化组][v1.2] (iso+mds).7z'
+    await page.goto('/zh/upload?game=6')
+    await page
+      .locator('input[type="file"]')
+      .setInputFiles([await sampleFile(testInfo, uploaded, 64)])
+    await page.getByRole('group', { name: '平台' }).getByRole('button', { name: 'Windows' }).click()
+    await page.getByRole('group', { name: '语言' }).getByRole('button', { name: '简中' }).click()
+    await expect(
+      page.getByRole('group', { name: '翻译' }).getByRole('button', { name: '汉化组' }),
+    ).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.getByLabel('补丁版本')).toHaveValue('v1.2')
+    await expect(
+      page.getByRole('group', { name: '形态' }).getByRole('button', { name: '光盘映像' }),
+    ).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.getByText(/ \[绿茶汉化组\]\[v1\.2\] \(iso\+mds\)\.7z$/)).toHaveCount(2)
+
+    await page.getByRole('group', { name: '形态' }).getByRole('button', { name: '免安装' }).click()
+    await expect(page.getByText(/ \[绿茶汉化组\]\[v1\.2\] \(files\)\.7z$/)).toBeVisible()
+    await page.getByRole('button', { name: '命名规则' }).click()
+    await expect(page.getByText('发售日、品牌和标题取自条目')).toBeVisible()
+    await page.keyboard.press('Escape')
+
+    await page.getByRole('switch', { name: '使用规范文件名' }).click()
+    await expect(page.getByText(/\(files\)\.7z$/)).toHaveCount(0)
+    await expect(page.getByText(uploaded)).toHaveCount(2)
+  })
+
   test('tells on the page of a resource why it cannot be downloaded yet', async ({
     page,
   }, testInfo) => {

@@ -111,6 +111,16 @@
     "save": "Full CG save",
     "bonus": "Bonus content"
   },
+  "name": {
+    "label": "File name",
+    "canonical": "Use the canonical file name",
+    "pending": "disc image format",
+    "pendingHint": "The format in brackets is filled in after the file is checked",
+    "help": "Naming rule",
+    "format": "[release date][brand] original title translated title edition [translation][patch version] (form).extension",
+    "rule": "The release date, brand and titles come from the entry and the rest from the resource; a part without content is left out",
+    "uploaded": "Uploaded as"
+  },
   "note": "Note",
   "noteHint": "Optional, up to {max} characters",
   "save": "Save",

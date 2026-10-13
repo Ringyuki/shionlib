@@ -50,7 +50,13 @@ export function ResourceHead({ page, viewer }: ResourceHeadProps) {
       </Stack>
       <Inline gap="md" align="center" wrap={false}>
         <ResourceFacts resource={resource} />
-        <ResourceMenu resource={resource} rights={rights} files={files} history={false} />
+        <ResourceMenu
+          resource={resource}
+          gameId={game.id}
+          rights={rights}
+          files={files}
+          history={false}
+        />
       </Inline>
       {notice !== undefined && (
         <PageNotice

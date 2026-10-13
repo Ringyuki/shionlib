@@ -53,6 +53,11 @@ test.describe('as the uploader', () => {
     await expect(
       dialog.getByRole('group', { name: '翻译' }).getByRole('button', { name: '汉化组' }),
     ).toHaveAttribute('aria-pressed', 'true')
+    await expect(dialog.getByRole('switch', { name: '使用规范文件名' })).toHaveAttribute(
+      'aria-checked',
+      'false',
+    )
+    await expect(dialog.getByText('seeded-reportable-sample.zip')).toBeVisible()
     await dialog.getByLabel('补丁版本').fill('v1.2')
     await dialog
       .getByRole('group', { name: '发行版本' })

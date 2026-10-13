@@ -12,16 +12,22 @@ import { ResourceFields } from './resource-fields'
 
 type EditDialogProps = {
   resource: Resource
+  game: number
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function EditDialog({ resource, open, onOpenChange }: EditDialogProps) {
+export function EditDialog({ resource, game, open, onOpenChange }: EditDialogProps) {
   const t = useTranslations('resource')
   const issue = useResourceIssue()
   const kit = useFormKit()
   const [values, setValues] = useOpenState<EditValues>(open, () => editValuesFrom(resource))
   const edit = useEditResource()
+  const [first] = resource.files ?? []
+  const named =
+    first === undefined
+      ? undefined
+      : { gameId: game, resourceId: resource.id, fileName: first.original_name ?? first.file_name }
   const form = useFormErrors(edit.failure)
   return (
     <Dialog
@@ -41,7 +47,12 @@ export function EditDialog({ resource, open, onOpenChange }: EditDialogProps) {
             }
           }}
         >
-          <ResourceFields values={values} complete={false} onValuesChange={setValues} />
+          <ResourceFields
+            values={values}
+            complete={false}
+            named={named}
+            onValuesChange={setValues}
+          />
         </Form>
       )}
       renderFooter={({ close, submitting }) => (

@@ -1231,6 +1231,11 @@ export const constraints = {
     }
   },
   "DownloadSourceBodyInput": {
+    "canonical_name": {
+      "type": "boolean",
+      "required": false,
+      "nullable": false
+    },
     "edition": {
       "type": "string",
       "required": false,
@@ -1363,6 +1368,11 @@ export const constraints = {
     }
   },
   "EditDownloadSourceBodyInput": {
+    "canonical_name": {
+      "type": "boolean",
+      "required": false,
+      "nullable": false
+    },
     "edition": {
       "type": "string",
       "required": false,
@@ -1591,6 +1601,93 @@ export const constraints = {
       "type": "string",
       "required": false,
       "nullable": false
+    }
+  },
+  "PreviewNameInputBody": {
+    "edition": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "enum": [
+        "download",
+        "package",
+        "steam"
+      ]
+    },
+    "edition_name": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "minLength": 0,
+      "maxLength": 64
+    },
+    "file_name": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "maxLength": 255
+    },
+    "form": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "enum": [
+        "disc",
+        "installer",
+        "portable"
+      ]
+    },
+    "language": {
+      "type": "array",
+      "required": true,
+      "nullable": true,
+      "minItems": 1,
+      "itemEnum": [
+        "en",
+        "zh",
+        "zh-hant",
+        "jp"
+      ]
+    },
+    "patch_version": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "minLength": 0,
+      "maxLength": 32
+    },
+    "resource_id": {
+      "type": "integer",
+      "required": false,
+      "nullable": false,
+      "format": "int64",
+      "minimum": 1
+    },
+    "translation": {
+      "type": "string",
+      "required": false,
+      "nullable": false,
+      "enum": [
+        "none",
+        "official",
+        "group",
+        "machine"
+      ]
+    },
+    "translators": {
+      "type": "array",
+      "required": false,
+      "nullable": true,
+      "maxItems": 6
+    }
+  },
+  "ReadNameInputBody": {
+    "file_name": {
+      "type": "string",
+      "required": true,
+      "nullable": false,
+      "minLength": 1,
+      "maxLength": 255
     }
   },
   "RegisterUserInputBody": {

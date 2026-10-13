@@ -54,6 +54,8 @@ export default [
   route('resources/resource/history', 'routes/resources.resource.history.ts'),
   route('resources/resource/report', 'routes/resources.resource.report.ts'),
   route('resources/resource/edit', 'routes/resources.resource.edit.ts'),
+  route('resources/resource/name', 'routes/resources.resource.name.ts'),
+  route('resources/resource/name-read', 'routes/resources.resource.name-read.ts'),
   route('resources/resource/delete', 'routes/resources.resource.delete.ts'),
   route('resources/resource/file/rename', 'routes/resources.resource.file-rename.ts'),
   route('resources/resource/file/remove', 'routes/resources.resource.file-remove.ts'),

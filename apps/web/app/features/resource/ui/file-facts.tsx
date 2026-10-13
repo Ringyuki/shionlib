@@ -10,16 +10,24 @@ import { Fragment } from 'react'
 import { useFormatter, useTranslations } from 'use-intl'
 import { useBytes } from '~/shared/i18n/use-bytes'
 import type { ResourceFile } from '../resource'
+import { uploadedName } from '../resource-name'
 import { digestsOf } from '../resource-page'
 
 export function FileFacts({ file }: { file: ResourceFile }) {
   const t = useTranslations('resource')
   const format = useFormatter()
   const bytes = useBytes()
+  const uploaded = uploadedName(file)
   return (
     <DescriptionList orientation="horizontal" className="[--hn-dl-term-width:8.25rem]">
       <DescriptionTerm>{t('page.details.name')}</DescriptionTerm>
       <DescriptionDetails className="break-all">{file.file_name}</DescriptionDetails>
+      {uploaded !== undefined && (
+        <>
+          <DescriptionTerm>{t('name.uploaded')}</DescriptionTerm>
+          <DescriptionDetails className="break-all">{uploaded}</DescriptionDetails>
+        </>
+      )}
       <DescriptionTerm>{t('page.details.size')}</DescriptionTerm>
       <DescriptionDetails className="tabular-nums">
         {t('page.details.bytes', { size: bytes(file.file_size), bytes: file.file_size })}

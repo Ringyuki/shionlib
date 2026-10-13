@@ -20,9 +20,11 @@ export function FileItems({ file, removable, named = false, onPick }: FileItemsP
           {t('replaceFile')}
         </DropdownMenuItem>
       )}
-      <DropdownMenuItem icon={<TextCursorInput />} onSelect={() => onPick('rename')}>
-        {t(named ? 'renameFileTitle' : 'renameFile')}
-      </DropdownMenuItem>
+      {!file.canonical_name && (
+        <DropdownMenuItem icon={<TextCursorInput />} onSelect={() => onPick('rename')}>
+          {t(named ? 'renameFileTitle' : 'renameFile')}
+        </DropdownMenuItem>
+      )}
       {removable && (
         <>
           <DropdownMenuSeparator />

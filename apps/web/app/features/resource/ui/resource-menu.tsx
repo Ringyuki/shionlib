@@ -17,6 +17,7 @@ type Opened = 'history' | 'report' | 'edit' | 'add' | 'delete' | undefined
 
 type ResourceMenuProps = {
   resource: Resource
+  gameId: number
   rights: ResourceRights
   files?: readonly ResourceFile[]
   history?: boolean
@@ -24,7 +25,13 @@ type ResourceMenuProps = {
 
 type Picked = { file: ResourceFile; dialog: FileDialog | undefined }
 
-export function ResourceMenu({ resource, rights, files = [], history = true }: ResourceMenuProps) {
+export function ResourceMenu({
+  resource,
+  gameId,
+  rights,
+  files = [],
+  history = true,
+}: ResourceMenuProps) {
   const t = useTranslations('resource')
   const gate = useAuthGate()
   const [opened, setOpened] = useState<Opened>(undefined)
@@ -102,6 +109,7 @@ export function ResourceMenu({ resource, rights, files = [], history = true }: R
         <>
           <EditDialog
             resource={resource}
+            game={gameId}
             open={opened === 'edit'}
             onOpenChange={openWhen('edit')}
           />

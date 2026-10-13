@@ -6,6 +6,7 @@ import {
   editCommand,
   editForm,
   editValuesFrom,
+  nameQueryFrom,
   uploadForm,
   type EditValues,
   type UploadValues,
@@ -89,6 +90,7 @@ describe('editValuesFrom', () => {
         edition_name: null,
         form: 'portable',
         extras: ['save'],
+        canonical_name: false,
       }),
     ).toEqual({
       ...edit,
@@ -96,6 +98,21 @@ describe('editValuesFrom', () => {
       patchVersion: 'v2.8',
       form: 'portable',
       extras: ['save'],
+      canonical: false,
     })
+  })
+})
+
+describe('nameQueryFrom', () => {
+  it('reads the query of a name preview and refuses anything else', () => {
+    const query = { gameId: 10, fileName: 'upload.7z', language: ['zh'], ...blankInfo }
+    expect(nameQueryFrom(JSON.stringify(query))).toEqual(query)
+    expect(nameQueryFrom(JSON.stringify({ ...query, resourceId: 7 }))).toMatchObject({
+      resourceId: 7,
+    })
+    expect(nameQueryFrom(JSON.stringify({ ...query, form: 'floppy' }))).toBeUndefined()
+    expect(nameQueryFrom(JSON.stringify({ ...query, gameId: 0 }))).toBeUndefined()
+    expect(nameQueryFrom('not json')).toBeUndefined()
+    expect(nameQueryFrom(null)).toBeUndefined()
   })
 })

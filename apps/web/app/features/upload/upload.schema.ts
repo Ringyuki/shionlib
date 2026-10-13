@@ -20,6 +20,7 @@ const resourceDraft = v.object({
   edition_name: v.optional(v.string()),
   form: v.picklist(createBody.form.enum),
   extras: v.optional(v.array(v.picklist(createBody.extras.itemEnum))),
+  canonical_name: v.optional(v.boolean()),
 })
 
 const target = v.variant('kind', [

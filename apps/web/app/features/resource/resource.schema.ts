@@ -44,6 +44,23 @@ export const editCommand = v.object({
 
 export type ResourceEdit = v.InferOutput<typeof editCommand>
 
+const nameQuery = v.pipe(
+  v.string(),
+  v.parseJson(),
+  v.object({
+    gameId: id,
+    resourceId: v.optional(id),
+    fileName: v.string(),
+    language: languages,
+    ...infoCommand,
+  }),
+)
+
+export function nameQueryFrom(raw: string | null) {
+  const parsed = v.safeParse(nameQuery, raw)
+  return parsed.success ? parsed.output : undefined
+}
+
 export const deleteCommand = v.object({ resourceId: id })
 
 export type ResourceDeletion = v.InferOutput<typeof deleteCommand>

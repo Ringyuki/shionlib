@@ -9,15 +9,19 @@ import { languageOptions, needsSimulator, platformOptions, simulatorOptions } fr
 import { translated } from '../resource-info'
 import type { EditValues } from '../resource.schema'
 import { InfoFields } from './info-fields'
+import { NameField } from './name-field'
 import { TranslationFields } from './translation-fields'
 
 type ResourceFieldsProps = {
   values: EditValues
   complete: boolean
+  named: Named | undefined
   onValuesChange: (values: EditValues) => void
 }
 
-export function ResourceFields({ values, complete, onValuesChange }: ResourceFieldsProps) {
+type Named = { gameId: number; resourceId?: number; fileName: string }
+
+export function ResourceFields({ values, complete, named, onValuesChange }: ResourceFieldsProps) {
   const t = useTranslations('resource')
   const labels = useMessages()
   const change = (patch: Partial<EditValues>) => onValuesChange({ ...values, ...patch })
@@ -72,6 +76,14 @@ export function ResourceFields({ values, complete, onValuesChange }: ResourceFie
       >
         <BBCodeEditor value={values.note} onValueChange={note => change({ note })} />
       </FormField>
+      {named !== undefined && (
+        <NameField
+          query={{ ...values, ...named }}
+          uploaded={named.fileName}
+          canonical={values.canonical}
+          onCanonicalChange={canonical => change({ canonical })}
+        />
+      )}
     </>
   )
 }

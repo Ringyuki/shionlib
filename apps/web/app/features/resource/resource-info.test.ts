@@ -38,11 +38,16 @@ describe('resourceInfo', () => {
       release_url: 'https://example.org/patch',
       form: 'portable',
       extras: ['save', 'bonus'],
+      canonical_name: true,
     })
   })
 
   it('leaves the translation out for a resource in Japanese only', () => {
-    expect(resourceInfo(group, ['jp'])).toEqual({ form: 'portable', extras: ['save', 'bonus'] })
+    expect(resourceInfo(group, ['jp'])).toEqual({
+      form: 'portable',
+      extras: ['save', 'bonus'],
+      canonical_name: true,
+    })
   })
 
   it('keeps the patch of a machine translation but no credits', () => {
@@ -69,11 +74,12 @@ describe('resourceInfo', () => {
       edition_name: '豪華版',
       form: 'portable',
       extras: ['save', 'bonus'],
+      canonical_name: true,
     })
   })
 
   it('leaves out what nobody has said', () => {
-    expect(resourceInfo(blankInfo, ['zh'])).toEqual({ extras: [] })
+    expect(resourceInfo(blankInfo, ['zh'])).toEqual({ extras: [], canonical_name: true })
   })
 })
 
@@ -102,6 +108,7 @@ describe('stored information', () => {
     edition_name: '初回限定版',
     form: 'disc',
     extras: ['save'],
+    canonical_name: true,
   } as const
 
   it('fills the form with what a resource says', () => {
@@ -116,6 +123,7 @@ describe('stored information', () => {
       editionName: '初回限定版',
       form: 'disc',
       extras: ['save'],
+      canonical: true,
     })
   })
 
@@ -130,6 +138,7 @@ describe('stored information', () => {
         edition_name: null,
         form: null,
         extras: null,
+        canonical_name: true,
       }),
     ).toEqual(blankInfo)
   })
